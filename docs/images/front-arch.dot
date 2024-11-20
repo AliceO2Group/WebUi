@@ -1,0 +1,96 @@
+# dot -Tpng front-arch.dot -O front-arch.png
+
+digraph g {
+  graph [fontsize=20 fontname="Verdana" clusterrank="local"];
+  node[shape=box fontsize=10 fontname="Verdana" style=filled];
+  edge[constraint=true];
+  labelloc="t";
+  label="Front-end overview";
+  // rankdir=LR;
+  // ratio="fill"
+  // size="8.3,11.7!"; # A4 fprmat
+
+  subgraph Acluster_app {
+    node[shape=box];
+    color=brown;
+    label="App";
+    labeljust="l"
+
+    "view" [color="salmon2"]
+    "Model" [color="salmon2"]
+    "Type1" [color="salmon2"]
+    "Type2" [color="salmon2"]
+    "Type3" [color="salmon2"]
+
+    { rank=same; Type1; Type2; Type3; }
+    { rank=same; Model; view; }
+
+    "Model" -> "Type1" [arrowtail="diamond",weight=100,dir=back]
+    "Model" -> "Type2" [arrowtail="diamond",weight=100,dir=back]
+    "Model" -> "Type3" [arrowtail="diamond",weight=100,dir=back]
+    "view" -> "Model" [arrowhead="none",style="dashed",weight=100,label="mount()"]
+  }
+
+  subgraph Acluster_framework {
+    node[shape=box];
+    color=blue;
+    label="Framework Model";
+
+    "Loader" [color="deepskyblue"]
+    "fetchClient" [color="deepskyblue"]
+    "QueryRouter" [color="deepskyblue"]
+    "WebSocketClient" [color="deepskyblue"]
+    "Observable" [color="deepskyblue"]
+    "EventEmitter" [color="deepskyblue"]
+    "RemoteData" [color="deepskyblue"]
+    "sessionService" [color="deepskyblue"]
+    "h" [color="deepskyblue"]
+    "switchCase" [color="deepskyblue"]
+    "icons" [color="deepskyblue"]
+
+    { rank=min; Observable }
+    { rank=same; fetchClient; WebSocketClient; Loader; QueryRouter; sessionService; RemoteData; h; switchCase; icons; }
+    { rank=same; Observable; EventEmitter; }
+
+    "fetchClient" -> "Loader" [arrowhead="none"]
+    "Loader" -> "Observable" [weight=100]
+    "QueryRouter" -> "Observable" [weight=100]
+    "WebSocketClient" -> "EventEmitter" [weight=100]
+    "icons" -> "h" [arrowhead="none"]
+  }
+
+  subgraph Acluster_native {
+    node[shape=box];
+    color=green;
+    label="Native";
+
+    "History API" [color="darkolivegreen3"]
+    "fetch" [color="darkolivegreen3"]
+    "WebSocket" [color="darkolivegreen3"]
+
+    { rank=max; WebSocket; fetch; "History API"; }
+  }
+
+  // App to Framework Model
+  "Model" -> "Loader" [arrowtail="diamond",dir=back]
+  "Model" -> "QueryRouter" [arrowtail="diamond",dir=back]
+  "Model" -> "WebSocketClient" [arrowtail="diamond",dir=back]
+  "Model" -> "sessionService" [arrowtail="diamond",dir=back]
+  "Model" -> "Observable"
+  "Type1" -> "Observable"
+  "Type2" -> "Observable"
+  "Type3" -> "Observable"
+  "Type1" -> "RemoteData" [arrowhead="none"]
+  "Type2" -> "RemoteData" [arrowhead="none"]
+  "Type3" -> "RemoteData" [arrowhead="none"]
+
+  // Framework Model to native
+  "fetch" -> "fetchClient" [arrowhead="none",weight=100]
+  "WebSocket" -> "WebSocketClient" [arrowhead="none",weight=100]
+  "History API" -> "QueryRouter" [arrowhead="none",weight=100]
+
+  // App to Framework view
+  "view" -> "h" [arrowhead="none",weight=100]
+  "view" -> "switchCase" [arrowhead="none",weight=100]
+  "view" -> "icons" [arrowhead="none",weight=100]
+}
