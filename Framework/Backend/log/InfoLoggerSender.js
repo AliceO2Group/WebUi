@@ -14,9 +14,9 @@
 
 const { access, constants: { X_OK } } = require('fs');
 const { execFile } = require('child_process');
-const InfoLoggerMessage = require('./InfoLoggerMessage.js');
-const { LogLevel } = require('./LogLevel.js');
-const { LogSeverity } = require('./LogSeverity.js');
+const InfoLoggerMessage = require('@aliceo2/web-ui/Framework/Backend/log/InfoLoggerMessage.js');
+const { LogLevel } = require('@aliceo2/web-ui/Framework/Backend/log/LogLevel.js');
+const { LogSeverity } = require('@aliceo2/web-ui/Framework/Backend/log/LogSeverity.js');
 
 /**
  * Sends logs as InfoLogger objects to InfoLoggerD over UNIX named socket

@@ -13,12 +13,20 @@
  */
 
 const assert = require('assert');
-const config = require('./../config-default.json');
-const OpenId = require('./../http/openid.js');
+const config = require('@aliceo2/web-ui/Framework/Backend/config-default.json');
+const OpenId = require('@aliceo2/web-ui/Framework/Backend/http/openid.js');
 
 describe('OpenID Connect client', () => {
   it('should fail to create instance', async () => {
     const openid = new OpenId(config.openId);
     await assert.rejects(async () => await openid.createIssuer());
+  }).timeout(5500);
+});
+
+describe('Logout', () => {
+  it('should successfully logout', async () => {
+    const openid = new OpenId(config.openId);
+    await openid.createIssuer();
+    await openid.logout();
   }).timeout(5500);
 });

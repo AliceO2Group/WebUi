@@ -18,9 +18,9 @@ const request = require('supertest');
 const assert = require('assert');
 const path = require('path');
 const url = require('url');
-const config = require('./../config-default.json');
-const O2TokenService = require('./../services/O2TokenService.js');
-const HttpServer = require('./../http/server');
+const config = require('@aliceo2/web-ui/Framework/Backend/config-default.json');
+const O2TokenService = require('@aliceo2/web-ui/Framework/Backend/services/O2TokenService.js');
+const HttpServer = require('@aliceo2/web-ui/Framework/Backend/http/server.js');
 
 // As CERN certificates are not signed by any CA
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';

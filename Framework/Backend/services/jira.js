@@ -13,7 +13,7 @@
  */
 
 const https = require('https');
-const { LogManager } = require('../log/LogManager');
+const { LogManager } = require('@aliceo2/web-ui/Framework/Backend/log/LogManager');
 
 /**
  * Handles creating JIRA issues

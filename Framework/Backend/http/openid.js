@@ -14,7 +14,7 @@
 
 const { Issuer, generators, custom } = require('openid-client');
 const assert = require('assert');
-const { LogManager } = require('../log/LogManager');
+const { LogManager } = require('@aliceo2/web-ui/Framework/Backend/log/LogManager');
 
 /**
  * Authenticates and authorizes users via OpenID Connect (new CERN SSO).
@@ -78,6 +78,13 @@ class OpenId {
       code_challenge_method: 'S256',
       state: state,
     });
+  }
+
+  /**
+   * @returns  {string} endSessionUrl - URL redirecting to the logout page
+   */
+  getLogoutUrl() {
+    return this.client.endSessionUrl() + `?client_id=${this.client.id}&post_logout_redirect_uri=http://info.cern.ch`
   }
 
   /**
