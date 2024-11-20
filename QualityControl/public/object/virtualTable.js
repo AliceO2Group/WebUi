@@ -21,7 +21,7 @@ let FONT = '';
  * A table which only displays the rows visible to the user
  * @param {Model} model - root model of the application
  * @param {string} location - location of where the virtual table is used: main(default) / side
- * @param {Array<JSON>} objects - list of objects to display
+ * @param {Array<{path: string, name: string, createdAt: number}>} objects - list of objects to display
  * @returns {vnode} - virtual node element
  */
 export default function virtualTable(model, location = 'main', objects = []) {
