@@ -31,16 +31,22 @@ export default (model) => h('.h-100.flex-column', { key: model.router.params.pag
       style: {
         width: model.object.selected ? '50%' : '100%',
       },
-    }, model.object.searchInput.trim() !== '' ?
-      virtualTable(model, 'main')
-      :
-      model.object.objectsRemote.match({
-        NotAsked: () => null,
-        Loading: () =>
-          h('.absolute-fill.flex-column.items-center.justify-center.f5', [spinner(5), h('', 'Loading Objects')]),
-        Success: () => tableShow(model),
-        Failure: () => null, // Notification is displayed
-      })),
+    }, model.object.objectsRemote.match({
+      NotAsked: () => null,
+      Loading: () =>
+        h('.absolute-fill.flex-column.items-center.justify-center.f5', [spinner(5), h('', 'Loading Objects')]),
+      Success: () => {
+        const searchInput = model.object?.searchInput?.trim() ?? '';
+        if (searchInput !== '') {
+          const objectsLoaded = model.object.list;
+          const objectsToDisplay = objectsLoaded.filter((qcObject) =>
+            qcObject.path.toLowerCase().includes(searchInput.toLowerCase()));
+          return virtualTable(model, 'main', objectsToDisplay);
+        }
+        return tableShow(model);
+      },
+      Failure: () => null, // Notification is displayed
+    })),
     h('.animate-width.scroll-y', {
       style: {
         width: model.object.selected ? '50%' : 0,

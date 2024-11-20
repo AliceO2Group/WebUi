@@ -29,14 +29,24 @@ export default (model) =>
   model.services.object.list.match({
     NotAsked: () => null,
     Loading: () => h('.flex-column.items-center', [spinner(2), h('.f6', 'Loading Objects')]),
-    Success: () => [
-      searchForm(model),
-      h(
-        '.scroll-y',
-        model.object.searchInput.trim() !== '' ? virtualTable(model, 'side') : treeTable(model),
-      ),
-      objectPreview(model),
-    ],
+    Success: (objects) => {
+      let objectsToDisplay = [];
+      const { searchInput = '' } = model.object;
+      if (searchInput.trim() !== '') {
+        objectsToDisplay = objects.filter((qcObject) =>
+          qcObject.path.toLowerCase().includes(searchInput.toLowerCase()));
+      }
+      return [
+        searchForm(model),
+        h(
+          '.scroll-y',
+          searchInput.trim() !== ''
+            ? virtualTable(model, 'side', objectsToDisplay)
+            : treeTable(model),
+        ),
+        objectPreview(model),
+      ];
+    },
     Failure: (error) => h('.f6.danger.flex-column.text-center', [
       h('', 'Unable to list objects due to:'),
       h('', error.message),
