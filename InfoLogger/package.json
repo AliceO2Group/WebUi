@@ -20,7 +20,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
-    "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
+    "dev": "nodemon --inspect --watch index.js --watch lib --watch config.js index.js",
     "simul": "node test/live-simulator/infoLoggerServer.js",
     "eslint": "./node_modules/.bin/eslint --config eslint.config.js lib/ public/",
     "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
