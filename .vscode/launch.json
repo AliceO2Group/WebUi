@@ -1,23 +1,23 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run dev",
+            "name": "[ilg] run dev",
             "request": "launch",
             "runtimeArgs": [
                 "run-script",
                 "dev"
             ],
-            "localRoot": "${workspaceFolder}\\InfoLogger\\",
+            "localRoot": "${workspaceFolder}/InfoLogger/",
             "runtimeExecutable": "npm",
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "outputCapture": "std",
-            "type": "node"
+            "type": "node",
+            "windows": {
+                "localRoot": "${workspaceFolder}\\InfoLogger\\"
+            }
         }
     ]
 }
