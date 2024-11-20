@@ -209,11 +209,33 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   await testParent.test(
     'should have filtered results on input search filled',
     { timeout },
-    async (t) => {
-      t.skip('Skip test execution for now');
-      // TODO: review
-      //await page.type('nav > div > div > div:nth-child(6) > input', '1');
-      //await page.waitForFunction('document.querySelectorAll(\'nav table tbody tr\').length === 1', { timeout: 5000 });
+    async () => {
+      const inputs = await page.$$('nav input');
+      await inputs[3].type('1');
+      await delay(50);
+      const { count, firstResult, secondResult } = await page.evaluate(() => {
+        const rows = document.querySelectorAll('nav table tbody tr');
+        return {
+          count: rows.length,
+          firstResult: rows[0].firstElementChild.textContent,
+          secondResult: rows[1].firstElementChild.textContent,
+        };
+      });
+      strictEqual(count, 2);
+      strictEqual(firstResult, ' qc/test/object/1');
+      strictEqual(secondResult, ' qc/test/object/11');
+    },
+  );
+
+  await testParent.test(
+    'should have no results if query does not match any objects',
+    { timeout },
+    async () => {
+      const inputs = await page.$$('nav input');
+      await inputs[3].type('123');
+      await delay(50);
+      const text = await page.evaluate(() => document.querySelector('nav p.text-center').textContent);
+      strictEqual(text, 'No objects found for this search');
     },
   );
 
