@@ -450,26 +450,17 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   async edit() {
-    try {
-      this.model.services.object.list = RemoteData.loading();
-      await this.model.services.object.listObjects();
-      await this.model.object.loadList();
-      if (!this.item) {
-        throw new Error('An item should be loaded before editing it');
-      }
-      this.setTabInterval(0);
-      this.editEnabled = true;
-      this.editOriginalClone = JSON.parse(JSON.stringify(this.item));
-      this.editingTabObject = null;
-      window.dispatchEvent(new Event('resize'));
-      this.model.services.object.list = RemoteData.success();
-      this.model.object.searchInput = '';
-      this.notify();
-    } catch (error) {
-      this.model.services.object.list = RemoteData.failure({
-        message: error.message,
-      });
+    this.model.services.object.listObjects();
+    if (!this.item) {
+      throw new Error('An item should be loaded before editing it');
     }
+    this.setTabInterval(0);
+    this.editEnabled = true;
+    this.editOriginalClone = JSON.parse(JSON.stringify(this.item));
+    this.editingTabObject = null;
+    window.dispatchEvent(new Event('resize'));
+    this.model.object.searchInput = '';
+    this.notify();
   }
 
   /**
