@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX } from '/js/src/index.js';
+import { h, iconBarChart, iconCaretRight, iconResizeBoth, iconCloudDownload, iconCaretBottom, iconCircleX } from '/js/src/index.js';
 import { spinner } from '../common/spinner.js';
 import { draw } from './objectDraw.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
@@ -93,6 +93,15 @@ const drawPlot = (model, object) => {
   const info = object;
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
     h('.resize-button.flex-row', [
+      h('.p1.text-left', { style: 'padding-bottom: 0;' }, h(
+          'a.btn',
+          {
+            title: 'Download object as file',
+            href,
+            onclick: (e) => model.router.handleLinkEvent(e), //TODO: Change to download handler request to backend.
+          },
+          iconCloudDownload(),
+      )),
       h('.p1.text-left', { style: 'padding-bottom: 0;' }, h(
         'a.btn',
         {
