@@ -86,7 +86,7 @@ function objectPanel(model) {
  * @returns {vnode} - virtual node element
  */
 const drawPlot = (model, object) => {
-  const { name, validFrom, id } = object;
+  const { name, validFrom, id, location } = object;
   const href = validFrom ?
     `?page=objectView&objectName=${name}&ts=${validFrom}&id=${id}`
     : `?page=objectView&objectName=${name}`;
@@ -97,7 +97,7 @@ const drawPlot = (model, object) => {
           'a.btn',
           {
             title: 'Download object as file',
-            href,
+            href: location,
             onclick: (e) => model.router.handleLinkEvent(e), //TODO: Change to download handler request to backend.
           },
           iconCloudDownload(),
