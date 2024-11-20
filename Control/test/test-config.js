@@ -21,6 +21,11 @@ module.exports = {
     // cert: './cert/cert.pem',
     tls: false,
   },
+  jwt: {
+    secret: 'test-secret',
+    issuer: 'test-gui',
+    expiration: '1d',
+  },
   grpc: {
     hostname: 'localhost',
     port: 9090,

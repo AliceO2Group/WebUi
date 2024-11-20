@@ -463,7 +463,6 @@ export default class Layout extends Observable {
    */
   edit() {
     this.model.services.object.listObjects();
-
     if (!this.item) {
       throw new Error('An item should be loaded before editing it');
     }
@@ -472,7 +471,7 @@ export default class Layout extends Observable {
     this.editOriginalClone = JSON.parse(JSON.stringify(this.item));
     this.editingTabObject = null;
     window.dispatchEvent(new Event('resize'));
-
+    this.model.object.searchInput = '';
     this.notify();
   }
 
@@ -498,6 +497,7 @@ export default class Layout extends Observable {
     this.editingTabObject = null;
     this.item = this.editOriginalClone;
     this.selectTab(this._tabIndex);
+    this.model.object.searchInput = '';
     this.notify();
   }
 
