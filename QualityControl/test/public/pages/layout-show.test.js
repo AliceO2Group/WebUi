@@ -166,8 +166,8 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const editButtonPath = 'header > div > div:nth-child(3) > div > div > button';
       await page.locator(editButtonPath).click();
       const titles = await page.evaluate(() => {
-        const firstLinkPath = 'header > div > div:nth-child(3) > div > div > div > p > a:nth-child(1)';
-        const secondLinkPath = 'header > div > div:nth-child(3) > div > div > div > p > a:nth-child(2)';
+        const firstLinkPath = 'header > div > div:nth-child(3) > div > div > div > div > a:nth-child(1)';
+        const secondLinkPath = 'header > div > div:nth-child(3) > div > div > div > div > a:nth-child(2)';
         const firstLinkTitle = document.querySelector(firstLinkPath).title;
         const secondLinkTitle = document.querySelector(secondLinkPath).title;
         return [firstLinkTitle, secondLinkTitle];
@@ -182,7 +182,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should click the edit button in the header and enter edit mode',
     { timeout },
     async () => {
-      const editViaGUIButtonPath = 'header > div > div:nth-child(3) > div > div > div > p > a:nth-child(1)';
+      const editViaGUIButtonPath = 'header > div > div:nth-child(3) > div > div > div > div > a:nth-child(1)';
       await page.locator(editViaGUIButtonPath).click();
     },
   );
@@ -264,7 +264,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     { timeout },
     async () => {
       const editDropdownButtonPath = 'header > div > div:nth-child(3) > div > div > button';
-      const editViaJSONButtonPath = 'header > div > div:nth-child(3) > div > div > div > p > a:nth-child(2)';
+      const editViaJSONButtonPath = 'header > div > div:nth-child(3) > div > div > div > div > a:nth-child(2)';
       await page.locator(editDropdownButtonPath).click();
       await delay(100);
       await page.locator(editViaJSONButtonPath).click();
@@ -350,7 +350,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const pencilButtonPath = 'header > div > div:nth-child(3) > div > div > button';
       await page.locator(pencilButtonPath).click();
       const editViaJSONButtonPath =
-        'header > div > div:nth-child(3) > div > div > div > p > a:nth-child(2)';
+        'header > div > div:nth-child(3) > div > div > div > div > a:nth-child(2)';
       page.locator(editViaJSONButtonPath).click();
 
       const textareaPath = 'body > div > div > div > div > textarea';
