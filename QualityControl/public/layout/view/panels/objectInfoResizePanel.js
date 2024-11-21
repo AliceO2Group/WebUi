@@ -13,7 +13,7 @@
  */
 
 import { qcObjectInfoPanel } from './../../../common/object/objectInfoCard.js';
-import { h, iconResizeBoth, info } from '/js/src/index.js';
+import { h, iconResizeBoth, info, iconCloudDownload } from '/js/src/index.js';
 
 /**
  * Builds 2 actionable buttons which are to be placed on top of a JSROOT plot
@@ -23,7 +23,8 @@ import { h, iconResizeBoth, info } from '/js/src/index.js';
  * @returns {vnode} - virtual node element
  */
 export const objectInfoResizePanel = (model, tabObject) => {
-  const { name } = tabObject;
+  const { name, id, location } = tabObject;
+  console.log(tabObject);
   const isSelectedOpen = model.object.selectedOpen;
   const objectRemoteData = model.services.object.objectsLoadedMap[name];
   let uri = `?page=objectView&objectId=${tabObject.id}&layoutId=${model.router.params.layoutId}`;
@@ -47,6 +48,17 @@ export const objectInfoResizePanel = (model, tabObject) => {
         objectRemoteData.isSuccess() && h('.p1', qcObjectInfoPanel(objectRemoteData.payload)),
       ),
     ])),
+    h(
+      'button.btn',
+      {
+        title: 'Download object as file',
+        style: 'right:0.1em;',
+        download: `${name.replaceAll('/', '_')}-${id}.root`,
+        onclick: () => model.downloadRootObject(location),
+        // onclick: (e) => model.router.handleLinkEvent(e), //TODO: Change to download handler request to backend.
+      },
+      iconCloudDownload(),
+    ),
     h('a.btn', {
       title: 'Open object plot in full screen',
       href: uri,
