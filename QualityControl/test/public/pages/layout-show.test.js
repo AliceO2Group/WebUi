@@ -263,9 +263,12 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should open JSON editor when clicking "Edit via JSON"',
     { timeout },
     async () => {
+      const editDropdownButtonPath = 'header > div > div:nth-child(3) > div > div > button';
       const editViaJSONButtonPath = 'header > div > div:nth-child(3) > div > div > div > p > a:nth-child(2)';
+      await page.locator(editDropdownButtonPath).click();
+      await delay(100);
       await page.locator(editViaJSONButtonPath).click();
-      await delay(50);
+      await delay(100);
       const result = await page.evaluate(() => {
         const titlePath = 'body > div > div > div > h4';
         const textareaPath = 'body > div > div > div > div > textarea';
@@ -280,7 +283,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
       strictEqual(result.title, 'Edit JSON file of a layout');
       strictEqual(result.textAreaId, 'layout-json-editor');
-      strictEqual(result.updateButtonTitle, 'Update template');
+      strictEqual(result.updateButtonTitle, 'Update layout');
       strictEqual(result.cancelButtonTitle, 'Cancel');
     },
   );
@@ -301,7 +304,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
-    'should disable the "Update template" button when JSON has an "id" key and display error message',
+    'should disable the "Update layout" button when JSON has an "id" key and display error message',
     { timeout },
     async () => {
       const mockJSONWithId = '{ "id" : "test" }';
@@ -313,7 +316,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
-    'should disable the "Update template" button when JSON is invalid and display error message',
+    'should disable the "Update layout" button when JSON is invalid and display error message',
     { timeout },
     async () => {
       const mockJSONInvalid = '{ "name" : "test" ';
@@ -341,7 +344,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
-    'should update template when clicking "Update template"',
+    'should update layout when clicking "Update layout"',
     { timeout },
     async () => {
       const pencilButtonPath = 'header > div > div:nth-child(3) > div > div > button';

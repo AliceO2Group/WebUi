@@ -23,12 +23,11 @@ export default (model) => h('.o2-modal', [
   h('.o2-modal-content', [
     h('.p2.text-center.flex-column', [
       h('h4.pv1', 'Edit JSON file of a layout'),
-      h('', h('textarea.form-control.w-100', {
+      h('', h('textarea.form-control.w-100.resize-vertical', {
         rows: 15,
         oninput: (e) => model.layout.checkLayoutToUpdate(e.target.value),
-        style: 'resize: vertical;',
         id: 'layout-json-editor',
-        value: model.layout.getLayoutInEditJSONStructure(),
+        value: model.layout.updatedJSON,
       })),
       model.services.layout.update.match({
         NotAsked: () => null,
@@ -42,7 +41,7 @@ export default (model) => h('.o2-modal', [
         h('button.btn.btn-primary', {
           disabled: model.services.layout.update.isFailure(),
           onclick: () => model.layout.updateLayout(),
-        }, 'Update template'),
+        }, 'Update layout'),
         h('button.btn', {
           onclick: () => {
             model.isUpdateVisible = false;
@@ -52,4 +51,3 @@ export default (model) => h('.o2-modal', [
     ]),
   ]),
 ]);
-;
