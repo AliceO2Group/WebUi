@@ -27,7 +27,7 @@ function processPreparedSQLStatement(requestRows, values, limit) {
     if (Array.isArray(value)) {
       sqlQuery = sqlQuery.replace('?', convertArrayToString(value));
     } else {
-      sqlQuery = sqlQuery.replace('?', value);
+      sqlQuery = sqlQuery.replace('?', `'${value}'`);
     }
   }
   sqlQuery = sqlQuery.replace('?', limit);
