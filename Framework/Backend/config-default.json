@@ -9,7 +9,9 @@
     "secret": "<secret>",
     "id": "<id>",
     "redirect_uri": "https://redirect.uri/callback",
-    "well_known": "http://localhost/.well-known/openid-configuration'"
+    "well_known": "http://localhost/.well-known/openid-configuration'",
+    "post_logout_redirect_uri:": "https://google.com",
+    "end_session_endpoint": "https://localhost/logout"
   },
   "http": {
     "port": 8181,
@@ -42,6 +44,8 @@
     "port": 8080
   },
   "notification": {
-    "brokers": ["localhost:9092"]
+    "brokers": [
+      "localhost:9092"
+    ]
   }
 }

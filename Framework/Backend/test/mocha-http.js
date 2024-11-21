@@ -15,6 +15,7 @@
 process.env.NODE_ENV = 'test';
 
 const request = require('supertest');
+const sinon = require('sinon');
 const assert = require('assert');
 const path = require('path');
 const url = require('url');
@@ -292,5 +293,23 @@ describe('HTTP constructor checks', () => {
     conf.limit = '10Mb';
     httpServer = new HttpServer(conf, config.jwt);
     assert.strictEqual(httpServer.limit, '10Mb', 'Provided limit was not set');
+  });
+});
+
+describe('HTTP server with logout functionality', () => {
+  it('should successfully redirect the user to the logout URL', () => {
+    const httpServer = new HttpServer(config.http, config.jwt);
+    const openidMock = {
+      getLogoutUrl: sinon.stub().returns('http://mock-end-session-url?client_id=mock-client-id&post_logout_redirect_uri=http://info.cern.ch'),
+    };
+    const res = {
+      redirect: sinon.stub(),
+    };
+
+    httpServer.openid = openidMock;
+    httpServer.logout({}, res);
+
+    assert.ok(res.redirect.calledOnce);
+    assert.ok(res.redirect.calledWith('http://mock-end-session-url?client_id=mock-client-id&post_logout_redirect_uri=http://info.cern.ch'));
   });
 });

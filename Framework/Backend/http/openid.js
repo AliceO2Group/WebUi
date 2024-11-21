@@ -30,7 +30,11 @@ class OpenId {
     assert(config.secret, 'Missing config value: secret');
     assert(config.well_known, 'Missing config value: well_known');
     assert(config.redirect_uri, 'Missing config value: redirect_uri');
+    assert(config.end_session_endpoint, 'Missing config value: end_session_endpoint');
+
+    config.postLogoutRedirectUri = config?.post_logout_redirect_uri ?? 'https://ali-flp.cern.ch/';
     config.timeout = config.timeout ?? 5000;
+
     this.config = config;
     this.code_verifier = generators.codeVerifier();
     custom.setHttpOptionsDefaults({
@@ -81,10 +85,11 @@ class OpenId {
   }
 
   /**
+   * Method that provides a logout redirect URL for the Single-SignIn service
    * @returns  {string} endSessionUrl - URL redirecting to the logout page
    */
   getLogoutUrl() {
-    return this.client.endSessionUrl() + `?client_id=${this.client.id}&post_logout_redirect_uri=https://ali-flp.cern.ch/`
+    return `${this.client.endSessionUrl()}?client_id=${this.client.id}&post_logout_redirect_uri=https://ali-flp.cern.ch/`;
   }
 
   /**

@@ -398,12 +398,12 @@ class HttpServer {
 
   /**
    * Redirects to the OpenID logout page
-   * @param {object} req - HTTP request
-   * @param {object} res - HTTP response 
+   * @param {object} _ - HTTP request
+   * @param {object} res - HTTP response
    */
-  logout(req, res) {
+  logout(_, res) {
     if (this.openid) {
-      return res.redirect(this.openid.getLogoutUrl());
+      res.redirect(this.openid.getLogoutUrl());
     }
   }
 
