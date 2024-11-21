@@ -64,3 +64,4 @@
 .o2-modal-content{margin:auto; background-color:#fff; position:relative; padding:0; outline:0; width:700px;  border-radius: 5px 20px 5px; }
 
 .right-menu {right:0; left:auto;}
+.resize-vertical { resize: vertical}
