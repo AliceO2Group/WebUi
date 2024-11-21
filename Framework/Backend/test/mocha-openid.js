@@ -13,8 +13,10 @@
  */
 
 const assert = require('assert');
+const sinon = require('sinon');
 const config = require('./../config-default.json');
 const OpenId = require('./../http/openid.js');
+const server = require('./../http/server.js');
 
 describe('OpenID Connect client', () => {
   it('should fail to create instance', async () => {
@@ -24,9 +26,36 @@ describe('OpenID Connect client', () => {
 });
 
 describe('Logout', () => {
-  it('should successfully logout', async () => {
+  it('should successfully call OpenId service for logout', async () => {
+    // Create a mock for the OpenId service
+    const openidMock = {
+      getLogoutUrl: sinon.stub().returns('http://mock-end-session-url?client_id=mock-client-id&post_logout_redirect_uri=http://info.cern.ch')
+    };
+
+    server.openid = openidMock;
+
+    const response = await server.logout(); 
+
+    sinon.assert.calledOnce(openidMock.getLogoutUrl);
+
+    assert.strictEqual(response.logoutUrl, 'http://mock-end-session-url?client_id=mock-client-id&post_logout_redirect_uri=http://info.cern.ch');
+  }).timeout(5500);
+  
+  it('should return the correct logout URL', async () => {
     const openid = new OpenId(config.openId);
-    await openid.createIssuer();
-    await openid.logout();
+
+    // Mock the client and its endSessionUrl method
+    const mockClient = {
+      endSessionUrl: sinon.stub().returns('http://mock-end-session-url'),
+      id: 'mock-client-id'
+    };
+    openid.client = mockClient;
+
+    const logoutUrl = openid.getLogoutUrl();
+    sinon.assert.calledOnce(mockClient.endSessionUrl);
+
+    // Assert that getLogoutUrl returns the expected string
+    const expectedUrl = 'http://mock-end-session-url?client_id=mock-client-id&post_logout_redirect_uri=http://info.cern.ch'
+    assert.strictEqual(logoutUrl, expectedUrl);
   }).timeout(5500);
 });
