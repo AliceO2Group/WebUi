@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import Observable from '@aliceo2/web-ui/Framework/Frontend/js/src/Observable.js';
-import fetchClient from '@aliceo2/web-ui/Framework/Frontend/js/src/fetchClient.js';
+import Observable from './Observable.js';
+import fetchClient from './fetchClient.js';
 
 /**
  * DTO representing result of an Ajax call

@@ -13,8 +13,8 @@
  */
 
 const assert = require('assert');
-const config = require('@aliceo2/web-ui/Framework/Backend/config-default.json');
-const OpenId = require('@aliceo2/web-ui/Framework/Backend/http/openid.js');
+const config = require('./../config-default.json');
+const OpenId = require('./../http/openid.js');
 
 describe('OpenID Connect client', () => {
   it('should fail to create instance', async () => {

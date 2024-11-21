@@ -18,11 +18,11 @@ const http = require('http');
 const https = require('https');
 const express = require('express');
 const helmet = require('helmet');
-const O2TokenService = require('@aliceo2/web-ui/Framework/Backend/services/O2TokenService.js');
-const OpenId = require('@aliceo2/web-ui/Framework/Backend/http/openid.js');
+const O2TokenService = require('./../services/O2TokenService.js');
+const OpenId = require('./openid.js');
 const path = require('path');
 const url = require('url');
-const { LogManager } = require('@aliceo2/web-ui/Framework/Backend/log/LogManager.js');
+const { LogManager } = require('../log/LogManager');
 
 /**
  * HTTPS server verifies identity using OpenID Connect and provides REST API.

@@ -14,7 +14,7 @@
 
 /* Global: window */
 
-import sessionService from '@aliceo2/web-ui/Framework/Frontend/js/src/sessionService.js';
+import sessionService from './sessionService.js';
 
 const { location } = window;
 

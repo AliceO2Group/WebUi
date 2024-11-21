@@ -12,9 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-const InfoLoggerMessage = require('@aliceo2/web-ui/Framework/Backend/log/InfoLoggerMessage.js');
-const { LogLevel } = require('@aliceo2/web-ui/Framework/Backend/log/LogLevel.js');
-const { LogSeverity } = require('@aliceo2/web-ui/Framework/Backend/log/LogSeverity.js');
+const InfoLoggerMessage = require('./InfoLoggerMessage.js');
+const { LogLevel } = require('./LogLevel.js');
+const { LogSeverity } = require('./LogSeverity.js');
 
 /**
  * Handles logging, prints out in console, saves to file or sends to central InfoLogger instance

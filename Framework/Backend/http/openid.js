@@ -14,7 +14,7 @@
 
 const { Issuer, generators, custom } = require('openid-client');
 const assert = require('assert');
-const { LogManager } = require('@aliceo2/web-ui/Framework/Backend/log/LogManager');
+const { LogManager } = require('../log/LogManager');
 
 /**
  * Authenticates and authorizes users via OpenID Connect (new CERN SSO).
