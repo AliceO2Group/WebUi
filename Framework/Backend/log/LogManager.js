@@ -1,6 +1,6 @@
-const WinstonWrapper = require('@aliceo2/web-ui/Framework/Backend/log/WinstonWrapper');
-const InfoLoggerSender = require('@aliceo2/web-ui/Framework/Backend/log/InfoLoggerSender');
-const { Logger } = require('@aliceo2/web-ui/Framework/Backend/log/Logger');
+const WinstonWrapper = require('./WinstonWrapper');
+const InfoLoggerSender = require('./InfoLoggerSender');
+const { Logger } = require('./Logger');
 
 /**
  * Utility class for logging

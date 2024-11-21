@@ -84,7 +84,7 @@ class OpenId {
    * @returns  {string} endSessionUrl - URL redirecting to the logout page
    */
   getLogoutUrl() {
-    return this.client.endSessionUrl() + `?client_id=${this.client.id}&post_logout_redirect_uri=http://info.cern.ch`
+    return this.client.endSessionUrl() + `?client_id=${this.client.id}&post_logout_redirect_uri=https://ali-flp.cern.ch/`
   }
 
   /**
