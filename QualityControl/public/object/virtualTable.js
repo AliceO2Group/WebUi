@@ -21,9 +21,10 @@ let FONT = '';
  * A table which only displays the rows visible to the user
  * @param {Model} model - root model of the application
  * @param {string} location - location of where the virtual table is used: main(default) / side
+ * @param {Array<{path: string, name: string, createdAt: number}>} objects - list of objects to display
  * @returns {vnode} - virtual node element
  */
-export default function virtualTable(model, location = 'main') {
+export default function virtualTable(model, location = 'main', objects = []) {
   ROW_HEIGHT = location === 'side' ? 29.4 : 33.6;
   FONT = location === 'side' ? '.f6' : '';
   return h('.flex-grow.flex-column', {
@@ -34,20 +35,22 @@ export default function virtualTable(model, location = 'main') {
       tableContainerHooks(model),
       h(
         '',
-        maximumTableSizeStyling(model.object.searchResult.length),
-        h(
-          `table.table-logs-content.text-no-select.table.table-sm${FONT}`,
-          scrollStyling(model),
-          [
-            h(
-              'tbody',
-              [
-                listLogsInViewportOnly(model, model.object.searchResult).map((item) =>
-                  objectFullRow(model, item, location)),
-              ],
-            ),
-          ],
-        ),
+        maximumTableSizeStyling(objects.length === 0 ? 1 : objects.length),
+        objects.length === 0
+          ? h('p.text-center', 'No objects found for this search')
+          : h(
+            `table.table-logs-content.text-no-select.table.table-sm${FONT}`,
+            scrollStyling(model),
+            [
+              h(
+                'tbody',
+                [
+                  listLogsInViewportOnly(model, objects)
+                    .map((item) => objectFullRow(model, item, location)),
+                ],
+              ),
+            ],
+          ),
       ),
     ),
   ]);

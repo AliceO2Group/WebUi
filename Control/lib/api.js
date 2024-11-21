@@ -117,15 +117,20 @@ module.exports.setup = (http, ws) => {
 
   let aliEcsSynchronizer = undefined;
   if (config.kafka && config.kafka?.enable) {
-    const kafkaClient = new Kafka({
-      clientId: 'control-gui',
-      brokers: config.kafka.brokers,
-      retry: { retries: 3 },
-      logLevel: logLevel.NOTHING,
-    });
-
-    aliEcsSynchronizer = new AliEcsSynchronizer(kafkaClient, cacheService);
-    aliEcsSynchronizer.start();
+    try {
+      const kafkaClient = new Kafka({
+        clientId: 'control-gui',
+        brokers: config.kafka.brokers,
+        retry: { retries: 3 },
+        logLevel: logLevel.NOTHING,
+      });
+      aliEcsSynchronizer = new AliEcsSynchronizer(kafkaClient, cacheService);
+      aliEcsSynchronizer.start();
+    
+    } catch (error) {
+      logger.errorMessage(`Kafka initialization failed: ${error.message}`);
+    }
+  
   }
 
   const statusService = new StatusService(
