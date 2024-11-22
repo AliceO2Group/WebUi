@@ -790,7 +790,7 @@ export default class Layout extends Observable {
       this.updatedJSON = undefined;
       this.model.isUpdateVisible = !this.model.isUpdateVisible;
     } catch (error) {
-      this.changeUpdateStatus(RemoteData.failure(error.message || error));
+      this.model.services.layout.update = RemoteData.failure(error.message || error);
     }
     this.notify();
   }
