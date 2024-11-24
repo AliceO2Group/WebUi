@@ -355,6 +355,15 @@ export default class Log extends Observable {
   }
 
   /**
+   * Log the Filter criteria to the backend.
+   * Fire and forget function.
+   * @param {LogFilter.criterias} criteria Criteria to log to the backend.
+   */
+  async logLiveCriteria(criteria) {
+    await this.model.loader.post('/api/logging/LiveFilterLog', criteria);
+  }
+
+  /**
    * Forward call to `this.filter.setCriteria`. If live mode is enabled,
    * alert user that filtering will be affected.
    * See LogFilter#setCriteria doc
@@ -373,6 +382,8 @@ export default class Log extends Observable {
       }
       value = copy.join(' ');
     }
+    this.logLiveCriteria(this.filter.toObject());
+
     if (this.filter.setCriteria(field, operator, value)) {
       if (this.isLiveModeRunning()) {
         this.model.ws.setFilter(this.model.log.filter.toStringifyFunction());
