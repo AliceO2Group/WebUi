@@ -5,5 +5,6 @@ build
 tobject2json.node
 */.nyc*
 */test/integration/test-config*
-.vscode
+.vscode/*
+!.vscode/launch.json
 .idea
