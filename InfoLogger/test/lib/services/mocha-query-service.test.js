@@ -17,8 +17,9 @@ const sinon = require('sinon');
 const config = require('../../../config-default.js');
 const { QueryService } = require('../../../lib/services/QueryService.js');
 const { UnauthorizedAccessError, TimeoutError } = require('@aliceo2/web-ui');
+const { processPreparedSQLStatement } = require('../../../lib/utils/preparedStatementParser.js');
 
-describe(`'QueryService' test suite`, () => {
+describe('\'QueryService\' test suite', () => {
   const filters = {
     timestamp: {
       since: -5,
@@ -73,7 +74,7 @@ describe(`'QueryService' test suite`, () => {
   };
   const emptySqlDataSource = new QueryService(undefined, {});
 
-  describe(`'checkConnection()' - test suite`, () => {
+  describe('\'checkConnection()\' - test suite', () => {
     it('should reject with error when simple query fails', async () => {
       const sqlDataSource = new QueryService(config.mysql);
       sqlDataSource._isAvailable = true;
@@ -205,6 +206,36 @@ describe(`'QueryService' test suite`, () => {
       );
     });
 
+    it('should be able to fill in a prepared statement and log it when executing a query', async () => {
+      const sqlDataSource = new QueryService(config.mysql);
+      sqlDataSource._logger = {
+        debugMessage: sinon.stub(),
+      };
+      await sqlDataSource.queryFromFilters(realFilters, { limit: 10 });
+      const completeSqlQuery = "SELECT * FROM `messages` WHERE `timestamp`>='1563794601.351' AND" +
+        " `timestamp`<='1563794661.354' AND `hostname` = 'test' AND NOT(`hostname` = 'testEx' AND" +
+        " `hostname` IS NOT NULL) AND `severity` IN ('D','W') ORDER BY `TIMESTAMP` LIMIT 10;";
+      assert.strictEqual(sqlDataSource._logger.debugMessage.calledWith(`SQL to execute: ${completeSqlQuery}`), true);
+      // Test the processPreparedSQLStatement() function individually.
+      const requestedRows = 'SELECT * FROM `messages` WHERE `timestamp`>=? AND `timestamp`<=? AND `hostname` = ? '
+        + 'AND NOT(`hostname` = ? AND `hostname` IS NOT NULL) AND `severity` IN (?) ORDER BY `TIMESTAMP` LIMIT 10';
+      const values = [
+        '1563794601.351',
+        '1563794661.354',
+        'test',
+        'testEx',
+        [
+          'D',
+          'W',
+        ],
+      ];
+      const sqlProcessedResult = processPreparedSQLStatement(requestedRows, values, 10);
+      const expectedSqlResult = "SELECT * FROM `messages` WHERE `timestamp`>='1563794601.351' AND `timestamp`" +
+        "<='1563794661.354' AND `hostname` = 'test' AND NOT(`hostname` = 'testEx' AND `hostname` IS NOT" +
+        " NULL) AND `severity` IN ('D','W') ORDER BY `TIMESTAMP` LIMIT 10";
+      assert.strictEqual(sqlProcessedResult, expectedSqlResult);
+    });
+
     it('should successfully return result when filters are provided for querying', async () => {
       const query = 'SELECT * FROM `messages` WHERE `timestamp`>=? AND `timestamp`<=? AND `hostname` = ? '
         + 'AND NOT(`hostname` = ? AND `hostname` IS NOT NULL) AND `severity` IN (?) ORDER BY `TIMESTAMP` LIMIT 10';
@@ -232,7 +263,7 @@ describe(`'QueryService' test suite`, () => {
     });
   });
 
-  describe('queryGroupCountLogsBySeverity() - test suite', ()=> {
+  describe('queryGroupCountLogsBySeverity() - test suite', () => {
     it(`should successfully return stats when queried for all known severities
       even if none is some are not returned by data service`, async () => {
       const dataService = new QueryService(config.mysql);
@@ -255,13 +286,13 @@ describe(`'QueryService' test suite`, () => {
     it('should throw error if data service throws SQL', async () => {
       const dataService = new QueryService(config.mysql);
       dataService._pool =
-        {
-          query: sinon.stub().rejects({
-            code: 'ER_ACCESS_DENIED_ERROR',
-            errno: 1045,
-            sqlMessage: 'Access denied',
-          }),
-        };
+      {
+        query: sinon.stub().rejects({
+          code: 'ER_ACCESS_DENIED_ERROR',
+          errno: 1045,
+          sqlMessage: 'Access denied',
+        }),
+      };
 
       await assert.rejects(
         dataService.queryGroupCountLogsBySeverity(51234),
