@@ -211,6 +211,9 @@ describe('\'QueryService\' test suite', () => {
       sqlDataSource._logger = {
         debugMessage: sinon.stub(),
       };
+      sqlDataSource._pool = {
+        query: sinon.stub().resolves([{ hostname: 'test', severity: 'W' }]),
+      };
       await sqlDataSource.queryFromFilters(realFilters, { limit: 10 });
       const completeSqlQuery = "SELECT * FROM `messages` WHERE `timestamp`>='1563794601.351' AND" +
         " `timestamp`<='1563794661.354' AND `hostname` = 'test' AND NOT(`hostname` = 'testEx' AND" +
