@@ -26,7 +26,6 @@ const { serviceAvailabilityCheck } = require('./middleware/serviceAvailabilityCh
 
 const projPackage = require('./../package.json');
 const config = require('./configProvider.js');
-const { LoggingController } = require('./controller/LoggingController.js');
 
 let liveService = null;
 let queryService = null;
@@ -43,7 +42,6 @@ module.exports.attachTo = async (http, ws) => {
     queryService.checkConnection(1, false);
   }
   const queryController = new QueryController(queryService);
-  const loggingController = new LoggingController();
 
   const statusController = new StatusController(config, projPackage, ws);
   statusController.querySource = queryService;
@@ -62,12 +60,6 @@ module.exports.attachTo = async (http, ws) => {
     '/query/stats',
     serviceAvailabilityCheck(queryService),
     queryController.getQueryStats.bind(queryController),
-    { public: true },
-  );
-
-  http.post(
-    '/logging/LiveFilterLog',
-    loggingController.postReceiveLogs.bind(loggingController),
     { public: true },
   );
 
