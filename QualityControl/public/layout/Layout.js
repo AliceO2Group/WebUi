@@ -37,7 +37,6 @@ export default class Layout extends Observable {
     this.model = model;
 
     this.item = null; // Current selected layout containing an array of tabs
-    this.itemBeforeEditing = null; // Contains a deep clone of item before editing
 
     this.tab = null; // Pointer to a tab from `item`
     this._tabIndex = 0; // Index of the cu displayed tab
@@ -52,7 +51,7 @@ export default class Layout extends Observable {
 
     this.editEnabled = false; // Activate UI for adding, dragging and deleting tabObjects inside the current tab
     this.editingTabObject = null; // Pointer to a tabObject being modified
-    this.editOriginalClone = null;
+    this.editOriginalClone = null; // Contains a deep clone of item before editing
 
     this.isEditLayoutDropdownOpen = false;
 
@@ -299,22 +298,10 @@ export default class Layout extends Observable {
     if (result.isSuccess()) {
       this.model.notification.show(`Layout "${this.item.name}" has been saved successfully.`, 'success');
     } else {
-      this.resetItem();
+      this.item = this.editOriginalClone;
       this.model.notification.show(result.payload, 'danger');
     }
     this.notify();
-  }
-
-  /**
-   * Revert any changes made to the layout and go back to the latest saved
-   * state. Used for canceling changes after editing.
-   * @returns {void}
-   */
-  resetItem() {
-    if (this.itemBeforeEditing) {
-      this.item = { ...this.itemBeforeEditing };
-      this.itemBeforeEditing = null;
-    }
   }
 
   /**
@@ -792,7 +779,6 @@ export default class Layout extends Observable {
    */
   updateLayout() {
     try {
-      this.itemBeforeEditing = { ...this.item };
       const updatedLayout = LayoutUtils.fromSkeleton({
         ...this.item,
         ...JSON.parse(this.updatedJSON),
@@ -820,6 +806,7 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   initializeEditViaJson() {
+    this.editOriginalClone = JSON.parse(JSON.stringify(this.item));
     this.model.services.layout.update = RemoteData.success();
     this.updatedJSON = LayoutUtils.toSkeleton(this.item);
     this.model.isUpdateVisible = true;
