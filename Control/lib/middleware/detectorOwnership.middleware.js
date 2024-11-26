@@ -6,16 +6,17 @@
    * @param {Response} res - Express Response object.
    * @param {Function} next - Next middleware to call.
    */
-const detectorLockMiddleware = (req, res, next) => {
+const detectorOwnershipMiddleware = (req, res, next) => {
   const { detectorId } = req.params;
   const { access } = req.session || {};
   
   if (!detectorId) {
-    return res.status(400).json({ message: 'Invalid request: missing user or detector information' });
+    return res.status(400).json({ message: 'Invalid request: missing detector information' });
   }
   
   try {
-
+    console.log(`Checking locks for detector ${detectorId}`);
+    console.log(access);
     // if (!hasLock) {
     //   return res
     //     .status(403)
@@ -29,5 +30,5 @@ const detectorLockMiddleware = (req, res, next) => {
   }
 };
   
-module.exports = { detectorLockMiddleware };
+exports.detectorOwnershipMiddleware = detectorOwnershipMiddleware;
   
