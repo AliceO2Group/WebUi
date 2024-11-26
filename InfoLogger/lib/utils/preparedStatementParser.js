@@ -14,9 +14,9 @@
 
 /**
  * Translate the SQL prepared statement to a regular SQL query.
- * @param {string} requestRows The prepared SQL statement.
- * @param {any} values Values for the prepared SQL statement.
- * @param {number} limit Configured limit of the sql query results.
+ * @param {string} requestRows - The prepared SQL statement.
+ * @param {object} values - Values for the prepared SQL statement.
+ * @param {number} limit - Configured limit of the sql query results.
  * @returns {string} the resulting SQL query as a string.
  */
 function processPreparedSQLStatement(requestRows, values, limit) {
@@ -38,7 +38,7 @@ function processPreparedSQLStatement(requestRows, values, limit) {
 /**
  * Helper function that converts arrays to strings with a single quote around the values.
  * This function can later be expanded to handle values other than strings in the array.
- * @param {Array} array Array to convert to string.
+ * @param {Array} array - Array to convert to string.
  * @returns {string} a string representation of the input array.
  */
 function convertArrayToString(array) {
