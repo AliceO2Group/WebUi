@@ -230,6 +230,21 @@ describe('\'QueryService\' test suite', () => {
       };
       assert.deepStrictEqual(result, expectedResult);
     });
+
+    it('should log every executed sql query as debug', async () => {
+      const sqlDataSource = new QueryService(config.mysql);
+      sqlDataSource._logger = {
+        debugMessage: sinon.stub(),
+      };
+      sqlDataSource._pool = {
+        query: sinon.stub().resolves([{ hostname: 'test', severity: 'W' }]),
+      };
+      await sqlDataSource.queryFromFilters(realFilters, { limit: 10 });
+      const completeSqlQuery = "SELECT * FROM `messages` WHERE `timestamp`>='1563794601.351' AND" +
+              " `timestamp`<='1563794661.354' AND `hostname` = 'test' AND NOT(`hostname` = 'testEx' AND" +
+              " `hostname` IS NOT NULL) AND `severity` IN ('D','W') ORDER BY `TIMESTAMP` LIMIT 10;";
+      assert.strictEqual(sqlDataSource._logger.debugMessage.calledWith(`SQL to execute: ${completeSqlQuery}`), true);
+    });
   });
 
   describe('queryGroupCountLogsBySeverity() - test suite', () => {
