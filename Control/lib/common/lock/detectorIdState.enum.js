@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2019-2024 CERN and copyright holders of ALICE O2.
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
  * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
  * All rights not expressly granted are reserved.
  *
@@ -13,17 +13,10 @@
 */
 
 /**
- * Middleware function to add detectorID to the request object
- * @param {Request} req - HTTP Request object
- * @param {Next} next - HTTP Next object to use if checks pass
- * @param {Response} res - HTTP Response object
- * @return {void}
+ * Available lock states
  */
-const addDetectorIdMiddleware = (detectorId) => {
-  return async (req, res, next) => {
-    req.params.detectorId = detectorId;
-    next();
-  };
-}
+const DetectorIdState = Object.freeze({
+  ALL: 'ALL',
+});
 
-exports.addDetectorIdMiddleware = addDetectorIdMiddleware
+exports.DetectorIdState = DetectorIdState;
