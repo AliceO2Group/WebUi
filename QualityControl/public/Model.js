@@ -57,6 +57,8 @@ export default class Model extends Observable {
     this.folder.addFolder({ title: 'All Layouts', isOpened: false, list: RemoteData.notAsked(), searchInput: '' });
     this.folder.bubbleTo(this);
 
+    this.isDownloading = false;
+
     this.layout = new Layout(this);
     this.layout.bubbleTo(this);
 

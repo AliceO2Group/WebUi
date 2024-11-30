@@ -160,6 +160,23 @@ export default class QCObjectService {
   }
 
   /**
+   * Requests the backend to send a request to the CCDB for the root object stored at ${location} and returns it.
+   * @param {string} id - is the id of the root object to download
+   * @returns {Promise<void>}
+   */
+  async downloadRootObject(id) {
+    // await this.model.loader.loader(`/api/${location}`)
+    this.model.isDownloading = true;
+    const { result, ok } = await this.model.loader.get(`/api/objects/download/${id}`);
+
+    //If request fails call RemoteData.failure(), else RemoteData.success()
+    this.requests = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
+
+    // this.model.isDownloading = false;
+    return result;
+  }
+
+  /**
    * Ask server for all available objects from CCDB
    * @returns {JSON} List of Objects
    * @deprecated

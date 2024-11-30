@@ -206,7 +206,7 @@ const drawComponent = (model, tabObject) => h('', { style: 'height:100%; display
       'flex-direction': 'column',
     },
   }, draw(model, tabObject, {})),
-  objectInfoResizePanel(model, tabObject),
+  objectInfoResizePanel(model, tabObject, model.isDownloading),
   !model.isOnlineModeEnabled && model.layout.item && model.layout.item.displayTimestamp
       && minimalObjectInfo(model, tabObject),
 ]);

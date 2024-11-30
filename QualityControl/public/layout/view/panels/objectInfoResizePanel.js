@@ -18,13 +18,14 @@ import { h, iconResizeBoth, info, iconCloudDownload } from '/js/src/index.js';
 /**
  * Builds 2 actionable buttons which are to be placed on top of a JSROOT plot
  * Buttons shall appear on hover of the plot
- * @param {Model} model - root model of the application
- * @param {object} tabObject - tab dto representation
- * @returns {vnode} - virtual node element
+ * @param   {Model}   model                 - root model of the application
+ * @param   {object}  tabObject             - tab dto representation
+ * @param   {boolean} isProcessingDownload  - represents the isDownloading state for root object download progress
+ * @returns {vnode}                         - virtual node element
  */
-export const objectInfoResizePanel = (model, tabObject) => {
-  const { name, id, location } = tabObject;
-  console.log(tabObject);
+export const objectInfoResizePanel = (model, tabObject, isProcessingDownload) => {
+  const { name, id } = tabObject;
+  console.log(id);
   const isSelectedOpen = model.object.selectedOpen;
   const objectRemoteData = model.services.object.objectsLoadedMap[name];
   let uri = `?page=objectView&objectId=${tabObject.id}&layoutId=${model.router.params.layoutId}`;
@@ -52,10 +53,19 @@ export const objectInfoResizePanel = (model, tabObject) => {
       'button.btn',
       {
         title: 'Download object as file',
-        style: 'right:0.1em;',
-        download: `${name.replaceAll('/', '_')}-${id}.root`,
-        onclick: () => model.downloadRootObject(location),
-        // onclick: (e) => model.router.handleLinkEvent(e), //TODO: Change to download handler request to backend.
+        // download: `${name.replaceAll('/', '_')}-${id}.root`,
+        disabled: isProcessingDownload,
+        onclick: async () => {
+          await model.services.object.downloadRootObject(id).then((res) => {
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `${name.replaceAll('/', '_')}-${id}.root`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+          });
+        },
       },
       iconCloudDownload(),
     ),
@@ -66,3 +76,12 @@ export const objectInfoResizePanel = (model, tabObject) => {
     }, iconResizeBoth()),
   ]);
 };
+
+/**
+ * Timeout fun
+ * @param ms time
+ * @returns {Promise<unknown>} a
+ */
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

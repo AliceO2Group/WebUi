@@ -142,4 +142,30 @@ export class ObjectController {
       }
     }
   }
+
+  /**
+   * Using `browse` option, request a list of `last-modified` and `valid-from` for a specified path for an object
+   * Use the first `validFrom` option to make a head request to CCDB; Request which will in turn return object
+   * information and download it locally on CCDB if it is not already done so;
+   * From the information retrieved above, use the location with JSROOT to get a JSON object
+   * Use JSROOT to decompress a ROOT object content and convert it to JSON to be sent back to the client for
+   * interpretation with JSROOT.draw
+   * @param {Request} req - HTTP request object with "query" information
+   * @param {Response} res - HTTP response object to provide information on request
+   * @returns {void}
+   */
+  async downloadObjectById(req, res) {
+    const qcgId = req.params?.id;
+    const { validFrom, filters, id } = req.query;
+    if (!qcgId) {
+      res.status(400).json({ message: 'Invalid URL parameters: missing object ID' });
+    } else {
+      try {
+        const object = await this._objService.retrieveQcObjectByQcgId(qcgId, id, validFrom, filters);
+        res.status(200).json(object); //TODO: Make this return a blob
+      } catch (error) {
+        errorHandler(error, 'Unable to identify object or read it by qcg id', res, 502, 'object');
+      }
+    }
+  }
 }

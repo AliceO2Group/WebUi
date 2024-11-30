@@ -30,6 +30,7 @@ export const setup = (http, ws) => {
   http.get('/object/:id', objectController.getObjectById.bind(objectController));
   http.get('/object', objectController.getObjectContent.bind(objectController));
   http.get('/objects', objectController.getObjects.bind(objectController), { public: true });
+  http.get('/objects/download/:id', objectController.downloadObjectById.bind(objectController), { public: true });
   http.get('/objects/online', objectController.getObjects.bind(objectController));
   http.get(
     '/isOnlineModeConnectionAlive',
