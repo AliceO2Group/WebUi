@@ -16,7 +16,6 @@ import { LogManager, HttpServer, WebSocket } from '@aliceo2/web-ui';
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/index`);
 import path from 'path';
 import { setup } from './lib/api.js';
-import { initializeNockForCcdb } from './test/setup/testSetupForCcdb.js';
 
 // Reading config file
 import { config } from './lib/config/configProvider.js';
@@ -55,6 +54,7 @@ const ws = new WebSocket(http);
 
 if (process.env.NODE_ENV === 'test') {
   // Initialize nock for CCDB if we are in test environment
+  const { initializeNockForCcdb } = await import('./test/setup/testSetupForCcdb.js');
   initializeNockForCcdb();
 }
 setup(http, ws);

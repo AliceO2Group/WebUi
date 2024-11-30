@@ -298,6 +298,7 @@ export default class Layout extends Observable {
     if (result.isSuccess()) {
       this.model.notification.show(`Layout "${this.item.name}" has been saved successfully.`, 'success');
     } else {
+      this.item = this.editOriginalClone;
       this.model.notification.show(result.payload, 'danger');
     }
     this.notify();
@@ -730,7 +731,9 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   setTabInterval(time) {
-    if (time >= 10) {
+    if (!this.tabs || this.tabs.length === 0) {
+      clearInterval(this.tabInterval);
+    } else if (time >= 10) {
       this.tabInterval = setInterval(() => {
         this._tabIndex = this._tabIndex + 1 >= this.item.tabs.length ? 0 : this._tabIndex + 1;
         this.selectTab(this._tabIndex);
@@ -803,6 +806,7 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   initializeEditViaJson() {
+    this.editOriginalClone = JSON.parse(JSON.stringify(this.item));
     this.model.services.layout.update = RemoteData.success();
     this.updatedJSON = LayoutUtils.toSkeleton(this.item);
     this.model.isUpdateVisible = true;
