@@ -152,11 +152,16 @@ export default class LogFilter extends Observable {
      * This function will be stringified then sent to server so it can filter logs
      * 'DATA_PLACEHOLDER' will be replaced by the stringified filters too so the function contains de data
      * @param {WebSocketMessage} message - message to be filtered
+     * @param {boolean} returnCriteriasOnly - Only return the filterlog criteria.
      * @returns {boolean} true if message passes criterias
      */
-    function filterFunction(message) {
+    function filterFunction(message, returnCriteriasOnly = false) {
       const log = message.payload;
       const criterias = 'DATA_PLACEHOLDER';
+
+      if (returnCriteriasOnly) {
+        return criterias;
+      }
 
       /**
        * Transform timestamp of infologger into javascript Date object
