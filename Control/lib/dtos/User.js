@@ -67,6 +67,15 @@ class User {
   }
 
   /**
+   * Checks if the given user can access the given detector
+   * @param {string} detectorId 
+   * @returns {Boolean}
+   */
+  belongsToDetector(detectorId) {
+    return Boolean(this._accessList.includes(`det-${detectorId}`));
+  }
+
+  /**
    * Check if provided details of a user are the same as the current instance one;
    * @param {User} user - to compare to
    * @return {Boolean}
