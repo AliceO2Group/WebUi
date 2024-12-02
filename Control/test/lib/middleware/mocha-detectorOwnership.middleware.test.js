@@ -40,7 +40,8 @@ describe('`DetectorOwnerShipmiddleware` test suite', () => {
     detectorOwnershipMiddleware(req, res, next);
 
     assert.ok(res.status.calledWith(403));
-    assert.ok(res.json.calledWith({ message: `User testUser does not have ownership of the lock for detector ${detectorId}` }));
+    assert.ok(res.
+      json.calledWith({ message: `User testUser does not have ownership of the lock for detector ${detectorId}` }));
     assert.ok(next.notCalled);
   });
 
