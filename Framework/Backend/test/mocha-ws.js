@@ -24,6 +24,108 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 let http, ws, tokenService, token; // eslint-disable-line
 
+const filters = {
+  timestamp: {
+    since: '13:02:30',
+    until: '13:02:40',
+    $since: '2024-12-02T12:02:30.000Z',
+    $until: '2024-12-02T12:02:40.000Z',
+  },
+  hostname: {
+    match: 'aldaqecs01-v1',
+    exclude: '',
+    $match: 'aldaqecs01-v1',
+    $exclude: null,
+  },
+  rolename: {
+    match: '',
+    exclude: '',
+    $match: null,
+    $exclude: null,
+  },
+  pid: {
+    match: '50990',
+    exclude: '',
+    $match: '50990',
+    $exclude: null,
+  },
+  username: {
+    match: 'alicedaq',
+    exclude: '',
+    $match: 'alicedaq',
+    $exclude: null,
+  },
+  system: {
+    match: 'DAQ',
+    exclude: '',
+    $match: 'DAQ',
+    $exclude: null,
+  },
+  facility: {
+    match: 'runControl',
+    exclude: '',
+    $match: 'runControl',
+    $exclude: null,
+  },
+  detector: {
+    match: 'TPC',
+    exclude: '',
+    $match: 'TPC',
+    $exclude: null,
+  },
+  partition: {
+    match: '',
+    exclude: '',
+    $match: null,
+    $exclude: null,
+  },
+  run: {
+    match: '248023',
+    exclude: '',
+    $match: '248023',
+    $exclude: null,
+  },
+  errcode: {
+    match: '',
+    exclude: '',
+    $match: null,
+    $exclude: null,
+  },
+  errline: {
+    match: '',
+    exclude: '',
+    $match: null,
+    $exclude: null,
+  },
+  errsource: {
+    match: '',
+    exclude: '',
+    $match: null,
+    $exclude: null,
+  },
+  message: {
+    match: '',
+    exclude: '',
+    $match: null,
+    $exclude: null,
+  },
+  severity: {
+    in: 'I F',
+    $in: [
+      'I',
+      'F',
+    ],
+  },
+  level: {
+    max: null,
+    $max: null,
+  },
+};
+
+const minifiedFilters = '{"timestamp":{"since":"13:02:30","until":"13:02:40"},"hostname":{"match":"aldaqecs01-v1"},' +
+'"pid":{"match":"50990"},"username":{"match":"alicedaq"},"system":{"match":"DAQ"},"facility":{"match":"runControl"},' +
+'"detector":{"match":"TPC"},"run":{"match":"248023"},"severity":{"in":"I F"}}';
+
 describe('websocket', () => {
   before(() => {
     tokenService = new O2TokenService(config.jwt);
@@ -125,6 +227,43 @@ describe('websocket', () => {
       }
       assert.strictEqual(parsed.code, 200);
       assert.strictEqual(parsed.command, 'filter');
+      connection.terminate();
+      done();
+    });
+  });
+
+  it('Accept filter and log criteria', (done) => {
+    const connection = new WebSocketClient(`ws://localhost:${config.http.port}/?token=${token}`);
+
+    connection.on('open', () => {
+      const message = { command: 'filter',
+        token: token,
+        filter: function (returnCriteriasOnly = false) {
+          if (returnCriteriasOnly) {
+            return filters;
+          }
+          return;
+        }.toString() };
+      connection.send(JSON.stringify(message));
+    });
+
+    connection.on('message', (message) => {
+      const parsed = JSON.parse(message);
+      if (parsed.command == 'authed') {
+        return;
+      }
+      new WebSocketMessage().parse(message)
+        .then((parsed) => {
+          if (parsed.getCommand() == 'filter' && parsed.getPayload()) {
+            connection.filter = new Function(`return ${parsed.getPayload()}`)();
+            const criterias = this.minifyCriteria(connection.filter(message, true));
+            if (criterias != false) {
+              this.logger.debugMessage(`New live filter applied: ${JSON.stringify(criterias)}`);
+              assert.strictEqual(criterias, minifiedFilters);
+            }
+          }
+        });
+
       connection.terminate();
       done();
     });
