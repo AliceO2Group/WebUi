@@ -282,6 +282,11 @@ export default class Model extends Observable {
     this.notify();
   }
 
+  toggleDownloadingState() {
+    this.isDownloading = !this.isDownloading;
+    this.notify();
+  }
+
   /**
    * Toggle account menu dropdown
    * @returns {undefined}

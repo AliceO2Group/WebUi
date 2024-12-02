@@ -60,6 +60,7 @@ export const objectInfoResizePanel = (model, tabObject, isProcessingDownload) =>
             const url = window.URL.createObjectURL(new Blob([res.data]));
             const link = document.createElement('a');
             link.href = url;
+            console.log(tabObject);
             link.setAttribute('download', `${name.replaceAll('/', '_')}-${id}.root`);
             document.body.appendChild(link);
             link.click();

@@ -166,13 +166,14 @@ export default class QCObjectService {
    */
   async downloadRootObject(id) {
     // await this.model.loader.loader(`/api/${location}`)
-    this.model.isDownloading = true;
-    const { result, ok } = await this.model.loader.get(`/api/objects/download/${id}`);
+    this.model.toggleDownloadingState();
+    const { result, ok } = await this.model.loader.get(`/api/objects/download/${id}`).finally(() => {
+      this.model.toggleDownloadingState();
+    });
 
-    //If request fails call RemoteData.failure(), else RemoteData.success()
-    this.requests = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
+    //If request succeeds call RemoteData.success(), else RemoteData.failure()
+    this.requests = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
 
-    // this.model.isDownloading = false;
     return result;
   }
 
