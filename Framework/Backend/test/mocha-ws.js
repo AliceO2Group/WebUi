@@ -232,41 +232,10 @@ describe('websocket', () => {
     });
   });
 
-  it('Accept filter and log criteria', (done) => {
-    const connection = new WebSocketClient(`ws://localhost:${config.http.port}/?token=${token}`);
-
-    connection.on('open', () => {
-      const message = { command: 'filter',
-        token: token,
-        filter: function (returnCriteriasOnly = false) {
-          if (returnCriteriasOnly) {
-            return filters;
-          }
-          return;
-        }.toString() };
-      connection.send(JSON.stringify(message));
-    });
-
-    connection.on('message', (message) => {
-      const parsed = JSON.parse(message);
-      if (parsed.command == 'authed') {
-        return;
-      }
-      new WebSocketMessage().parse(message)
-        .then((parsed) => {
-          if (parsed.getCommand() == 'filter' && parsed.getPayload()) {
-            connection.filter = new Function(`return ${parsed.getPayload()}`)();
-            const criterias = this.minifyCriteria(connection.filter(message, true));
-            if (criterias != false) {
-              this.logger.debugMessage(`New live filter applied: ${JSON.stringify(criterias)}`);
-              assert.strictEqual(criterias, minifiedFilters);
-            }
-          }
-        });
-
-      connection.terminate();
-      done();
-    });
+  it('minifyCriteria() works as expected', (done) => {
+    const criterias = ws.minifyCriteria(filters);
+    assert.strictEqual(JSON.stringify(criterias), minifiedFilters);
+    done();
   });
 
   it('Request message broadcast with 200', (done) => {

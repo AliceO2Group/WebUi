@@ -183,7 +183,9 @@ class WebSocket {
         if (parsed.getCommand() == 'filter' && parsed.getPayload()) {
           client.filter = new Function(`return ${parsed.getPayload()}`)();
           const criterias = this.minifyCriteria(client.filter(message, true));
-          this.logger.debugMessage(JSON.stringify(criterias));
+          if (criterias != false) {
+            this.logger.debugMessage(`New live filter applied: ${JSON.stringify(criterias)}`);
+          }
         }
         // 3. Get reply if callback exists
         this.processRequest(parsed)
