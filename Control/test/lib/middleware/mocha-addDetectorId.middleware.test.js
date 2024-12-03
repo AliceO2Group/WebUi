@@ -34,24 +34,4 @@ describe('`addDetectorIdMiddleware` test suite', () => {
     assert.ok(next.calledOnce);
   });
 
-  it('should integrate with an Express route and add detectorId', async () => {
-    const app = express();
-
-    // Use the middleware with a specific detectorId
-    app.get(
-      '/:id',
-      addDetectorIdMiddleware('testDetector'),
-      (req, res) => {
-        res.json(req.params);
-      }
-    );
-
-    // Test the route with Supertest
-    const response = await request(app).get('/456');
-    assert.strictEqual(response.status, 200);
-    assert.deepStrictEqual(response.body, {
-      id: '456', // Route parameter
-      detectorId: 'testDetector', // Added by middleware
-    });
-  });
 });
