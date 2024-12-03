@@ -1,7 +1,5 @@
 const assert = require('assert');
 const sinon = require('sinon');
-const express = require('express');
-const request = require('supertest');
 const { User } = require('../../../lib/dtos/User');
 const { detectorOwnershipMiddleware } = require('../../../lib/middleware/detectorOwnership.middleware');
 
