@@ -43,6 +43,7 @@ export default class Layout extends Observable {
     this.tabInterval = undefined; // JS Interval to change currently displayed tab
 
     this.newJSON = undefined;
+    this.updatedJSON = undefined;
 
     this.requestedLayout = RemoteData.notAsked();
 
@@ -51,6 +52,8 @@ export default class Layout extends Observable {
     this.editEnabled = false; // Activate UI for adding, dragging and deleting tabObjects inside the current tab
     this.editingTabObject = null; // Pointer to a tabObject being modified
     this.editOriginalClone = null; // Contains a deep clone of item before editing
+
+    this.isEditLayoutDropdownOpen = false;
 
     // https://github.com/hootsuite/grid
     this.gridListSize = 3;
@@ -295,6 +298,7 @@ export default class Layout extends Observable {
     if (result.isSuccess()) {
       this.model.notification.show(`Layout "${this.item.name}" has been saved successfully.`, 'success');
     } else {
+      this.item = this.editOriginalClone;
       this.model.notification.show(result.payload, 'danger');
     }
     this.notify();
@@ -311,6 +315,15 @@ export default class Layout extends Observable {
     await this.model.services.layout.getLayouts(this);
     await this.model.services.layout.getLayoutsByUserId(this.model.session.personid, this);
     this.model.notify();
+  }
+
+  /**
+   * Toggle edit menu dropdown
+   * @returns {undefined}
+   */
+  async toggleEditMenu() {
+    this.isEditLayoutDropdownOpen = !this.isEditLayoutDropdownOpen;
+    this.notify();
   }
 
   /**
@@ -450,6 +463,7 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   edit() {
+    this.toggleEditMenu();
     this.model.services.object.listObjects();
     if (!this.item) {
       throw new Error('An item should be loaded before editing it');
@@ -717,7 +731,9 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   setTabInterval(time) {
-    if (time >= 10) {
+    if (!this.tabs || this.tabs.length === 0) {
+      clearInterval(this.tabInterval);
+    } else if (time >= 10) {
       this.tabInterval = setInterval(() => {
         this._tabIndex = this._tabIndex + 1 >= this.item.tabs.length ? 0 : this._tabIndex + 1;
         this.selectTab(this._tabIndex);
@@ -726,5 +742,74 @@ export default class Layout extends Observable {
       clearInterval(this.tabInterval);
       this.selectTab(this._tabIndex);
     }
+  }
+
+  /**
+   * Validates the provided layout and updates the layout state accordingly.
+   * Used by the textarea input to check the JSON structure on each input change.
+   * @param {string} newLayout - The layout to check.
+   * @returns {undefined}
+   */
+  checkLayoutToUpdate(newLayout) {
+    try {
+      const newJSON = JSON.parse(newLayout);
+      this.checkForManualIdEntry(newJSON);
+      this.model.services.layout.update = RemoteData.success();
+    } catch (error) {
+      this.model.services.layout.update = RemoteData.failure(error.message || error);
+    }
+    this.updatedJSON = newLayout;
+    this.notify();
+  }
+
+  /**
+   * Checks that user doesn't enter the ID
+   * @param {object} layoutJSON - layout entered by the user in the box
+   * @returns {undefined}
+   */
+  checkForManualIdEntry(layoutJSON) {
+    if (Object.keys(layoutJSON).includes('id')) {
+      throw new Error('Error: Manual entry of an ID is not allowed, as it is automatically assigned by the system.');
+    }
+  }
+
+  /**
+   * Updates the layout by parsing the updated JSON and saving the layout state.
+   * @returns {undefined}
+   */
+  updateLayout() {
+    try {
+      const updatedLayout = LayoutUtils.fromSkeleton({
+        ...this.item,
+        ...JSON.parse(this.updatedJSON),
+      });
+
+      this.item = {
+        ...updatedLayout,
+        id: this.item.id,
+      };
+
+      this.save();
+      this.updatedJSON = undefined;
+      this.model.isUpdateVisible = !this.model.isUpdateVisible;
+    } catch (error) {
+      this.model.services.layout.update = RemoteData.failure(error.message || error);
+    }
+    this.notify();
+  }
+
+  /**
+   * Method to initialize the status of the EDIT as JSON modal
+   * Sets the layout skeleton to the current layout
+   * Sets the error message to null
+   * Sets the visibility of the model to true
+   * @returns {undefined}
+   */
+  initializeEditViaJson() {
+    this.editOriginalClone = JSON.parse(JSON.stringify(this.item));
+    this.model.services.layout.update = RemoteData.success();
+    this.updatedJSON = LayoutUtils.toSkeleton(this.item);
+    this.model.isUpdateVisible = true;
+    this.toggleEditMenu();
   }
 }
