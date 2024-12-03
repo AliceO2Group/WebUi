@@ -15,6 +15,7 @@
 const mariadb = require('mariadb');
 const { LogManager } = require('@aliceo2/web-ui');
 const { fromSqlToNativeError } = require('../utils/fromSqlToNativeError');
+const { processPreparedSQLStatement } = require('../utils/preparedStatementParser');
 
 class QueryService {
   /**
@@ -81,6 +82,8 @@ class QueryService {
 
     const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` LIMIT ?;`;
     const startTime = Date.now(); // ms
+
+    this._logger.debugMessage(`SQL to execute: ${processPreparedSQLStatement(requestRows, values, limit)}`);
 
     let rows = [];
     try {
