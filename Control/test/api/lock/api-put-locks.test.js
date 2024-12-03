@@ -166,7 +166,6 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
   });
 
   it('should successfully Take ALL locks when >=global ', async () => {
-    // first we retake a lock to ensure we have a lock to release from different types of users
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.TAKE}/ALL?token=${GLOBAL_TEST_TOKEN}`)
       .expect(200, {
@@ -185,7 +184,7 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
   });
 
   it('should fail taking  ALL locks when <=global ', async () => {
-    // first we retake a lock to ensure we have a lock to release from different types of users
+
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.TAKE}/ALL?token=${GUEST_TEST_TOKEN}`)
       .expect(403);
