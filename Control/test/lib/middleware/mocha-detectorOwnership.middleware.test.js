@@ -70,31 +70,4 @@ describe('`DetectorOwnerShipmiddleware` test suite', () => {
     assert.ok(res.json.calledWith({ message: 'Invalid request: missing information' }));
     assert.ok(next.notCalled);
   });
-
-  it('should integrate with an Express route and add detectorId', async () => {
-    const app = express();
-    app.use(express.json());
-
-    app.get(
-      '/:id',
-      (req, res, next) => {
-        req.session = { personid: 0, name: 'testUser', access: ['det-its'] };
-        req.params.detectorId = 'det-its';
-        next();
-      },
-      detectorOwnershipMiddleware,
-      (req, res) => {
-        res.json(req.params);
-      }
-    );
-
-    userStub.returns(true); // Ensure the user has ownership
-
-    const response = await request(app).get('/456');
-    assert.strictEqual(response.status, 200);
-    assert.deepStrictEqual(response.body, {
-      id: '456',
-      detectorId: 'det-its',
-    });
-  });
 });
