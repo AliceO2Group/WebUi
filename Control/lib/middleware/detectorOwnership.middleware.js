@@ -1,5 +1,5 @@
 const {User} = require('../dtos/User');
-
+const {isRoleSufficient,Role} = require('../common/role.enum.js');
 const {UnauthorizedAccessError} = require('./../errors/UnauthorizedAccessError.js');
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 /**
@@ -18,6 +18,11 @@ const detectorOwnershipMiddleware = (req, res, next) => {
   }
   
   try {
+    
+    // Check if the user's role is sufficient to bypass the ownership check
+    if (access.some(role => isRoleSufficient(role, Role.GLOBAL))) {
+      return next();
+    }
     const user = new User(username, name, personid, access);
     if (!user.belongsToDetector(detectorId)) {
       updateExpressResponseFromNativeError(res, 
