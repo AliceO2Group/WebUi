@@ -14,10 +14,11 @@
 
 /**
  * Translate the SQL prepared statement to a regular SQL query.
+ * This function is to be used for logging purposes ONLY.
  * @param {string} requestRows - The prepared SQL statement.
  * @param {object} values - Values for the prepared SQL statement.
  * @param {number} limit - Configured limit of the sql query results.
- * @returns {string} the resulting SQL query as a string.
+ * @returns {string} The resulting SQL query as a string.
  */
 function processPreparedSQLStatement(requestRows, values, limit) {
   let sqlQuery = requestRows;
