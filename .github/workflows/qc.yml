@@ -46,7 +46,7 @@ jobs:
       - run: (cd QualityControl; npm ci )
       - run: (cd QualityControl; npm run coverage-lcov )
       - name: Send codecov report for QualityControl
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: qualitycontrol
