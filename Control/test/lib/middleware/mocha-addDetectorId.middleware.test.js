@@ -1,7 +1,5 @@
 const assert = require('assert');
 const sinon = require('sinon');
-const express = require('express');
-const request = require('supertest');
 
 // Import the middleware
 const { addDetectorIdMiddleware } = require('../../../lib/middleware/addDetectorId.middleware');
