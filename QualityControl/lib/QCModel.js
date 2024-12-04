@@ -25,10 +25,12 @@ import { StatusService } from './services/Status.service.js';
 import { JsonFileService } from './services/JsonFileService.js';
 import { QcObjectService } from './services/QcObject.service.js';
 import { UserService } from './services/UserService.js';
+import { BookkeepingService } from './services/BookkeepingService.js';
 
 import { LayoutController } from './controllers/LayoutController.js';
 import { StatusController } from './controllers/StatusController.js';
 import { ObjectController } from './controllers/ObjectController.js';
+import { FilterController } from './controllers/FilterController.js';
 
 import { config } from './config/configProvider.js';
 
@@ -76,6 +78,17 @@ export const setupQcModel = () => {
     qcObjectService.refreshCache.bind(qcObjectService),
     qcObjectService.getCacheRefreshRate(),
   );
+
+  const bookkeepingService = new BookkeepingService(config.bookkeeping);
+  bookkeepingService.retrieveRunTypes();
+
+  const filterController = new FilterController(bookkeepingService);
+
+  intervalsService.register(
+    bookkeepingService.retrieveRunTypes.bind(bookkeepingService),
+    bookkeepingService.getRefreshInterval(),
+  );
+
   return {
     userService,
     layoutService,
@@ -83,5 +96,6 @@ export const setupQcModel = () => {
     statusController,
     objectController,
     intervalsService,
+    filterController,
   };
 };
