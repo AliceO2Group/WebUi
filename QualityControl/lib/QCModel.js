@@ -107,6 +107,6 @@ function initializeIntervals(intervalsService, qcObjectService, bkpService) {
 
   intervalsService.register(
     bkpService.retrieveRunTypes.bind(bkpService),
-    bkpService.refreshInterval(),
+    bkpService.refreshInterval,
   );
 }

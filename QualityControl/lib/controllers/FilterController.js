@@ -31,7 +31,7 @@ export class FilterController {
    */
   async getRunTypesHandler(req, res) {
     try {
-      res.status(200).json(this._bkpService.getRunTypes());
+      res.status(200).json(this._bkpService.runTypes);
     } catch (error) {
       res.status(503).json({ message: error.message || error });
     }
