@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import { FILTER_TYPE } from './filterTypes.js';
 import { h } from '/js/src/index.js';
 
 /**
@@ -20,7 +21,8 @@ import { h } from '/js/src/index.js';
  * @param {string} queryLabel - value that is to be used in querying storage with this parameter
  * @param {string} placeholder - value to be placed as holder for input
  * @param {string} key - string to be used as unique id
- * @param {string} type - type of the filter
+ * @param {string} type - type of the filter,
+ * @param {FILTER_TYPE} filterType - type of the filter
  * @param {string} value - value of the input text field
  * @param {RemoteData} options - list of available options to be shown
  * @param {Function} onChangeCallback - callback for onchange event
@@ -36,13 +38,27 @@ const autoSelector = (
   options,
   onChangeCallback,
   onInputCallback,
-  type,
   onEnterCallback,
-  width,
-) => options.match({
-  Success: (options) => filterSelector(queryLabel, placeholder, key, value, options, onChangeCallback, width),
-  Other: () => filterInput(queryLabel, placeholder, key, value, onInputCallback, onEnterCallback, type, width),
-});
+  filterType = 'basicSelector',
+  type = 'text',
+  width = 'w-20',
+) => {
+  const renderFilterInput = () =>
+    filterInput(queryLabel, placeholder, key, value, onInputCallback, onEnterCallback, type, width);
+
+  return options.match({
+    Success: (optionsList) => {
+      if (optionsList.length === 0) {
+        return renderFilterInput();
+      }
+
+      if (filterType === FILTER_TYPE.BASIC_SELECTOR) {
+        return basicSelector(queryLabel, placeholder, key, value, optionsList, onChangeCallback, width);
+      }
+    },
+    Other: renderFilterInput,
+  });
+};
 
 /**
  * Builds a filter element that will allow the user to specify a parameter that should be applied when querying objects
@@ -87,7 +103,7 @@ const filterInput =
  * @param {Function} onChangeCallback - callback for oninput event
  * @returns {vnode} - virtual node element
  */
-const filterSelector =
+const basicSelector =
     (queryLabel, placeholder, key, value, options, onChangeCallback, width = 'w-20') =>
       h(`${width}`, [
         h('select.form-control', {
@@ -95,7 +111,7 @@ const filterSelector =
           id: key,
           name: key,
           value: options.map(String).includes(String(value[queryLabel])) ? String(value[queryLabel]) : '',
-          onchange: (event) => onChangeCallback(event, queryLabel),
+          onchange: (event) => onChangeCallback(event.target.value, queryLabel),
         }, [
           h('option', { value: '' }, placeholder),
           h('hr'),
