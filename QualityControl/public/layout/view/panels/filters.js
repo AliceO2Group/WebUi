@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import { filters } from '../../../common/filter.js';
 import { h } from '/js/src/index.js';
 
 /**
@@ -19,53 +20,30 @@ import { h } from '/js/src/index.js';
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const layoutFiltersPanel = ({ layout: layoutModel }) => h('.p2.flex-row.g2', {
-  onremove: () => {
-    layoutModel.filter = {};
-  },
-}, [ // PeriodName, PassName, RunNumber, RunType
-  updateFiltersButton(layoutModel),
-  filter(layoutModel, 'RunNumber', 'RunNumber (e.g. 546783)', 'runNumberLayoutFilter', 'number', '.w-20'),
-  filter(layoutModel, 'RunType', 'RunType (e.g. 2)', 'runTypeLayoutFilter', 'text', '.w-20'),
-  filter(layoutModel, 'PeriodName', 'PeriodName (e.g. LHC23c)', 'periodNameLayoutFilter', 'text', '.w-20'),
-  filter(layoutModel, 'PassName', 'PassName (e.g. apass2)', 'passNameLayoutFilter', 'text', '.w-20'),
-]);
-
-/**
- * Builds a filter element that will allow the user to specify a field that should be applied when querying objects
- * @param {LayoutModel} layoutModel - root model of the application
- * @param {string} queryLabel - label to be used when querying storage service
- * @param {string} placeholder - value to be placed as holder for input
- * @param {string} key - string to be used as unique id
- * @param {string} type - type of the filter
- * @param {string} width - size of the filter
- * @returns {vnode} - virtual node element
- */
-const filter = (layoutModel, queryLabel, placeholder, key, type = 'text', width = '.w-10') =>
-  h(`${width}`, [
-    h('input.form-control', {
-      type,
-      placeholder,
-      id: key,
-      name: key,
-      min: 0,
-      value: layoutModel.filter[queryLabel],
-      oninput: (e) => {
-        if (e.target.value) {
-          layoutModel.filter[queryLabel] = e.target.value;
-        } else {
-          delete layoutModel.filter[queryLabel];
-        }
-        layoutModel.notify();
-      },
-      onkeydown: ({ keyCode }) => {
-        if (keyCode === 13) {
-          layoutModel.setFilterToURL();
-          layoutModel.selectTab(layoutModel.tabIndex);
-        }
-      },
-    }),
-  ]);
+const layoutFiltersPanel = ({ layout: layoutModel }) => {
+  const { filter, setFilterValue, applyLayoutChanges, selectOption } = layoutModel;
+  const { filterInput, autoSelector } = filters;
+  const onClick = setFilterValue.bind(layoutModel);
+  const onEnter = applyLayoutChanges.bind(layoutModel);
+  const onChange = selectOption.bind(layoutModel);
+  //TODO:  not sure if this is the proper way to access the filter service
+  const filterService = model.services.filter;
+  const { runTypes } = filterService;
+  return h(
+    '.w-100.flex-row.p2.g2',
+    {
+      onremove: () => {
+        layoutModel.filter = {};
+      } },
+    [
+      updateFiltersButton(layoutModel),
+      filterInput('RunNumber', 'RunNumber (e.g. 546783)', 'runNumberLayoutFilter', filter, onClick, onEnter, 'number'),
+      autoSelector('RunType', 'RunType (e.g. 2)', 'runTypeLayoutFilter', filter, runTypes, onChange, onClick, onEnter),
+      filterInput('PeriodName', 'PeriodName (e.g. LHC23c)', 'periodNameLayoutFilter', filter, onClick, onEnter),
+      filterInput('PassName', 'PassName (e.g. apass2)', 'passNameLayoutFilter', filter, onClick, onEnter),
+    ],
+  );
+};
 
 /**
  * Button which will allow the user to update filter parameters after the input
@@ -73,10 +51,7 @@ const filter = (layoutModel, queryLabel, placeholder, key, type = 'text', width 
  * @returns {vnode} - virtual node element
  */
 const updateFiltersButton = (layoutModel) => h('', h('button.btn.btn-primary', {
-  onclick: () => {
-    layoutModel.setFilterToURL();
-    layoutModel.selectTab(layoutModel.tabIndex);
-  },
+  onclick: () => layoutModel.applyLayoutChanges(),
 }, 'Update'));
 
 export { layoutFiltersPanel };

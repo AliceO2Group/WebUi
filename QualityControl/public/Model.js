@@ -21,6 +21,7 @@ import {
 import Layout from './layout/Layout.js';
 import QCObject from './object/QCObject.js';
 import LayoutService from './services/Layout.service.js';
+import FilterService from './services/Filter.service.js';
 import Folder from './folder/Folder.js';
 import FrameworkInfo from './frameworkInfo/FrameworkInfo.js';
 import QCObjectService from './services/QCObject.service.js';
@@ -100,6 +101,7 @@ export default class Model extends Observable {
     this.services = {
       object: new QCObjectService(this),
       layout: new LayoutService(this),
+      filter: new FilterService(this),
     };
 
     if (QCG.CONSUL_SERVICE) {
@@ -177,6 +179,9 @@ export default class Model extends Observable {
     clearInterval(this.layout.tabInterval);
 
     this.services.layout.getLayoutsByUserId(this.session.personid);
+
+    //TODO: move to constructor
+    this.services.filter.initFilterService();
 
     const { params } = this.router;
     switch (params.page) {
