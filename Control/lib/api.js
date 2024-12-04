@@ -19,6 +19,8 @@ const config = require('./config/configProvider.js');
 
 // middleware
 const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
+const {addDetectorIdMiddleware} = require('./middleware/addDetectorId.middleware.js');
+const {DetectorId} = require('./common/detectorId.enum.js');
 const {lockOwnershipMiddleware} = require('./middleware/lockOwnership.middleware.js');
 const { detectorOwnershipMiddleware } = require('./middleware/detectorOwnership.middleware.js');
 // controllers
@@ -189,6 +191,13 @@ module.exports.setup = (http, ws) => {
 
   // Lock Service
   http.get('/locks', lockController.getLocksStateHandler.bind(lockController));
+
+  http.put(`/locks/:action/${DetectorId.ALL}`,
+    minimumRoleMiddleware(Role.GLOBAL),
+    addDetectorIdMiddleware(DetectorId.ALL),
+    lockController.actionLockHandler.bind(lockController)
+  );
+
   http.put('/locks/:action/:detectorId',
     minimumRoleMiddleware(Role.DETECTOR),
     detectorOwnershipMiddleware,
