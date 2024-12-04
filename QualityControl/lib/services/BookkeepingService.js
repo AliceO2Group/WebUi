@@ -24,19 +24,12 @@ export class BookkeepingService {
     this._hostname = hostname;
     this._port = port;
     this._protocol = protocol;
-
     this._token = token;
-    this.refresh_interval = refreshRate ?? 24 * 60 * 60 * 1000;
 
+    this._refresh_interval = refreshRate ?? 24 * 60 * 60 * 1000;
+
+    this._getRunTypesPath = `/api/runTypes?token=${this._token}`;
     this._runTypes = [];
-  }
-
-  /**
-   * Get the list of run types that is currently known to the bookkeeping service.
-   * @returns {Array<string>} - list of run types
-   */
-  getRunTypes() {
-    return this._runTypes;
   }
 
   /**
@@ -48,7 +41,7 @@ export class BookkeepingService {
       const { data } = await httpGetJson(
         this._hostname,
         this._port,
-        'api/runTypes',
+        this._getRunTypesPath,
         {
           protocol: this._protocol,
           rejectUnauthorized: false,
@@ -58,14 +51,16 @@ export class BookkeepingService {
         this._runTypes.push(type.id);
       }
     } catch {
-      this._runTypes = [
-        'COSMICS',
-        'PHYS_HI',
-        'PHYS_pp',
-        'SYNTHETIC',
-        'TECHNICAL',
-      ];
+      this._runTypes = [];
     }
+  }
+
+  /**
+   * Get the list of run types that is currently known to the bookkeeping service.
+   * @returns {Array<string>} - list of run types
+   */
+  get runTypes() {
+    return this._runTypes;
   }
 
   /**
@@ -73,6 +68,6 @@ export class BookkeepingService {
    * @returns {number} - interval in milliseconds
    */
   get refreshInterval() {
-    return this.refresh_interval;
+    return this._refresh_interval;
   }
 }
