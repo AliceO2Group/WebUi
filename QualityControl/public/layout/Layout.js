@@ -361,6 +361,9 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   selectTab(index) {
+    if (index >= this.item.tabs.length) {
+      return;
+    }
     const tabName = this.item.tabs[index].name;
     const parameters = this.model.router.params;
 
@@ -752,7 +755,6 @@ export default class Layout extends Observable {
    */
   selectOption = (value, key) => {
     this.setFilterValue(key, value);
-    this.notify();
     this.applyLayoutChanges();
   };
 

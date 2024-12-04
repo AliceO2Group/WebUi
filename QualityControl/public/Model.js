@@ -91,6 +91,8 @@ export default class Model extends Observable {
     this.ws.addListener('close', this.handleWSClose.bind(this));
 
     this.initModel();
+
+    this.services.filter.initFilterService();
   }
 
   /**
@@ -180,9 +182,6 @@ export default class Model extends Observable {
     clearInterval(this.layout.tabInterval);
 
     this.services.layout.getLayoutsByUserId(this.session.personid);
-
-    //TODO: move to constructor
-    this.services.filter.initFilterService();
 
     const { params } = this.router;
     switch (params.page) {
