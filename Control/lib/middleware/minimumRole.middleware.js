@@ -15,7 +15,7 @@
 const {isRoleSufficient} = require('../common/role.enum.js');
 const {UnauthorizedAccessError} = require('../errors/UnauthorizedAccessError.js');
 const {updateExpressResponseFromNativeError} = require('../errors/updateExpressResponseFromNativeError.js');
-
+const {stringToArray} = require('../common/StringToArray.js');
 /**
  * Method to receive a minimum role that needs to be met by owner of request and to return a middleware function
  * @param {Role} minimumRole - minimum role that should be fulfilled by the requestor
@@ -33,12 +33,7 @@ const minimumRoleMiddleware = (minimumRole) => {
     try {
       const { access } = req?.session ?? '';
 
-      let accessList = [];
-      if (typeof access === 'string') {
-        accessList = access.split(',');
-      } else if (Array.isArray(access)) {
-        accessList = access;
-      }
+      let accessList = stringToArray(access);
       const isAllowed = accessList.some((role) => isRoleSufficient(role, minimumRole));
       if (!isAllowed) {
         updateExpressResponseFromNativeError(res,

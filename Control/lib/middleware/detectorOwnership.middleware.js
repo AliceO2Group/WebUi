@@ -1,7 +1,7 @@
 const {User} = require('../dtos/User');
 const {isRoleSufficient,Role} = require('../common/role.enum.js');
 const {UnauthorizedAccessError} = require('./../errors/UnauthorizedAccessError.js');
-
+const {stringToArray} = require('../common/StringToArray.js');
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 /**
    * Middleware function to check detector ownership.
@@ -20,14 +20,8 @@ const detectorOwnershipMiddleware = (req, res, next) => {
   }
   
   try {
-    
-
-    let accessList = [];
-    if (typeof access === 'string') {
-      accessList = access.split(',');
-    } else if (Array.isArray(access)) {
-      accessList = access;
-    }
+    // Convert access string to Array
+    let accessList = stringToArray(access);
     // Check if the user's role is sufficient to bypass the ownership check
     if (accessList?.some((role) => {
       return isRoleSufficient(role, Role.GLOBAL)
