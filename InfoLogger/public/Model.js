@@ -15,13 +15,14 @@
 // Import frontend framework
 import {
   Observable, WebSocketClient, QueryRouter,
-  Loader, RemoteData, sessionService, Notification,
+  Loader, RemoteData, sessionService, Notification, iconMediaPlay, iconMediaStop,
 } from '/js/src/index.js';
 import Log from './log/Log.js';
 import Timezone from './common/Timezone.js';
 import { callRateLimiter, setBrowserTabTitle } from './common/utils.js';
 import Table from './table/Table.js';
 import { MODE } from './constants/mode.const.js';
+import { BUTTON } from './constants/button-states.const.js';
 
 /**
  * Main model of InfoLoggerGui, contains sub-models modules
@@ -47,6 +48,10 @@ export default class Model extends Observable {
 
     this.timezone = new Timezone();
     this.timezone.bubbleTo(this);
+
+    this.queryButtonType = BUTTON.PRIMARY;
+    this.liveButtonType = BUTTON.DEFAULT;
+    this.liveButtonIcon = iconMediaPlay();
 
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
@@ -319,7 +324,7 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending if location is filters or profile
    * @param {object} params - URL parameters
    */
-  parseLocation(params) {
+  async parseLocation(params) {
     if (params.profile && params.q) {
       this.log.filter.resetCriteria();
       this.notification.show('URL can contain only filters or profile, not both', 'warning');
@@ -330,9 +335,45 @@ export default class Model extends Observable {
     } else if (params.q) {
       this.getUserProfile();
       this.log.filter.fromObject(JSON.parse(params.q.replaceAll('\n', '\\n')));
+      if (params.live == 'true') {
+        await this.waitUntil(() => {
+          if (this.ws.authed == true) {
+            return true;
+          }
+          return false;
+        }, 250);
+        try {
+          this.log.liveStart();
+          this.setLiveButton(BUTTON.SUCCESS_ACTIVE, iconMediaStop());
+          this.setQueryButton(BUTTON.DEFAULT);
+          this.log.enableAutoScroll();
+          setBrowserTabTitle(`${window.ILG.name} LIVE`);
+          this.notify();
+        } catch (error) {
+          this.notification.show(error.toString(), 'danger', 3000);
+        }
+      }
     } else {
       this.getUserProfile();
     }
+  }
+
+  /**
+   * Wait untill a condition is met.
+   * When the condition is met the promise is resolved.
+   * @param {boolean} condition - Condition to check every interval.
+   * @param {*} intervalMS - Interval in miliseconds at which to check whether the condition is met.
+   * @returns {Promise} promise - To be resolved when condition is met.
+   */
+  async waitUntil(condition, intervalMS) {
+    return await new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if (condition) {
+          resolve(true);
+          clearInterval(interval);
+        };
+      }, intervalMS);
+    });
   }
 
   /**
@@ -340,7 +381,32 @@ export default class Model extends Observable {
    * do it silently to avoid infinite loop
    */
   updateRouteOnModelChange() {
-    this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);
+    if (this.log.isLiveModeEnabled()) {
+      this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}` +
+      `&live=${this.log.isLiveModeEnabled()}`, true, true);
+    } else {
+      this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);
+    }
+  }
+
+  /**
+   * Method to change the icon and type of the liveButton
+   * @param {string} liveType - Type of the Live Button
+   * @param {Icon} liveIcon - Icon of the Live Button
+   */
+  setLiveButton(liveType, liveIcon) {
+    this.liveButtonType = liveType;
+    this.liveButtonIcon = liveIcon;
+    this.notify();
+  }
+
+  /**
+   * Method to change the type of the queryButton
+   * @param {string} queryType - Type of the queryButton
+   */
+  setQueryButton(queryType) {
+    this.queryButtonType = queryType;
+    this.notify();
   }
 
   /**
