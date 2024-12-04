@@ -3,7 +3,6 @@ const sinon = require('sinon');
 const { User } = require('../../../lib/dtos/User');
 const { detectorOwnershipMiddleware } = require('../../../lib/middleware/detectorOwnership.middleware');
 
-const {Role} = require('../../../lib/common/role.enum.js');
 describe('`DetectorOwnerShipmiddleware` test suite', () => {
   let userStub;
 
