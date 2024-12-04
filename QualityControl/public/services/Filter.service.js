@@ -36,19 +36,13 @@ export default class FilterService {
   async getRunTypes() {
     this.runTypes = RemoteData.loading();
     this.model.notify();
-    try {
-      const { result, ok } = await this.loader.get('/api/runTypes');
-      if (ok) {
-        result.sort();
-        this.runTypes = RemoteData.success(result);
-      } else {
-        this.runTypes = RemoteData.failure('Error retrieving runTypes');
-      }
-    } catch (error) {
-      this.runTypes = RemoteData.failure(error.message);
-    } finally {
-      this.model.notify();
+    const { result, ok } = await this.loader.get('/api/runTypes');
+    if (ok) {
+      this.runTypes = RemoteData.success(result);
+    } else {
+      this.runTypes = RemoteData.failure('Error retrieving runTypes');
     }
+    this.model.notify();
   }
 
   /**

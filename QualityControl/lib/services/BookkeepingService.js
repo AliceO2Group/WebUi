@@ -13,6 +13,9 @@
  */
 
 import { httpGetJson } from '../utils/utils.js';
+import { LogManager } from '@aliceo2/web-ui';
+
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'bkp'}/service`);
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
@@ -47,10 +50,13 @@ export class BookkeepingService {
           rejectUnauthorized: false,
         },
       );
+      this._runTypes = [];
       for (const type of data) {
-        this._runTypes.push(type.id);
+        this._runTypes.push(type.name);
       }
-    } catch {
+      this._runTypes.sort();
+    } catch (err) {
+      logger.errorMessage(err);
       this._runTypes = [];
     }
   }
