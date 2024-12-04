@@ -9,7 +9,7 @@ export class BookkeepingService {
     this._protocol = protocol;
 
     this._token = token;
-    this.REFRESH_INTERVAL = refreshRate ?? 24 * 60 * 60 * 1000;
+    this.refresh_interval = refreshRate ?? 24 * 60 * 60 * 1000;
 
     this._runTypes = [];
   }
@@ -55,7 +55,7 @@ export class BookkeepingService {
    * Returns the interval in milliseconds for how often the list of run types should be refreshed.
    * @returns {number} - interval in milliseconds
    */
-  getRefreshInterval() {
-    return this.REFRESH_INTERVAL;
+  get refreshInterval() {
+    return this.refresh_interval;
   }
 }
