@@ -24,7 +24,7 @@ import { UserRole } from './../common/library/userRole.enum.js';
  */
 export const setup = (http, ws) => {
   const {
-    layoutService, objectController, statusController, statusService, userService,
+    layoutService, objectController, statusController, statusService, userService, filterController,
   } = setupQcModel();
   statusService.ws = ws;
   http.get('/object/:id', objectController.getObjectById.bind(objectController));
@@ -52,4 +52,6 @@ export const setup = (http, ws) => {
   http.get('/status/framework', statusController.getFrameworkInfo.bind(statusController), { public: true });
 
   http.get('/checkUser', userService.addUser.bind(userService));
+
+  http.get('/runTypes', filterController.getRunTypesHandler.bind(filterController));
 };
