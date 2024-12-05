@@ -35,6 +35,62 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
+    'should have an input to filter by run type if there are no run types loaded',
+    { timeout },
+    async () => {
+      const inputTypeInfo = await page.evaluate(() => {
+        const input = document.querySelector('#runTypeLayoutFilter');
+        return {
+          localName: input.localName,
+          placeholder: input.placeholder,
+        };
+      });
+      strictEqual(inputTypeInfo.localName, 'input');
+      strictEqual(inputTypeInfo.placeholder, 'RunType (e.g. PHYSICS)');
+      await delay(3000);
+    },
+  );
+
+  await testParent.test(
+    'should have a selector with sorted options to filter by run type if there are run types loaded',
+    { timeout },
+    async () => {
+      const MAX_DELAY = 5000;
+      const INTERVAL = 500;
+      const selectorId = '#runTypeLayoutFilter';
+
+      const getOptionsWithRetry = async () => {
+        let options = [];
+        let addedDelay = 0;
+
+        while (!options.length && addedDelay < MAX_DELAY) {
+          await page.reload();
+          await delay(INTERVAL);
+          addedDelay += INTERVAL;
+
+          options = await page.evaluate((selectorId) => {
+            const select = document.querySelector(selectorId);
+            if (!select || !select.options) {
+              return [];
+            }
+            return Array.from(select.options).map((option) => option.value);
+          }, selectorId);
+        }
+        return options;
+      };
+
+      const options = await getOptionsWithRetry();
+      if (!options.length) {
+        throw new Error('El elemento #runTypeLayoutFilter no se encontró después de 5 segundos');
+      }
+
+      strictEqual(options[0], '');
+      strictEqual(options[1], 'runType1');
+      strictEqual(options[2], 'runType2');
+    },
+  );
+
+  await testParent.test(
     'should have tabs in the header',
     { timeout },
     async () => {
