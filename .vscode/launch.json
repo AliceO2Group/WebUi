@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "[ilg] run dev",
+            "request": "launch",
+            "runtimeArgs": [
+                "run-script",
+                "dev"
+            ],
+            "localRoot": "${workspaceFolder}/InfoLogger/",
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outputCapture": "std",
+            "type": "node",
+            "windows": {
+                "localRoot": "${workspaceFolder}\\InfoLogger\\"
+            }
+        }
+    ]
+}
