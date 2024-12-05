@@ -28,23 +28,23 @@ export const bookkeepingServiceTestSuite = async () => {
 
     suite('Create a new instance of BookkeepingService', () => {
       test('should successfully initialize Bookkeeping Service', () => {
-        const bookkeepingService = new BookkeepingService(config.bkp);
+        const bookkeepingService = new BookkeepingService(config.bookkeeping);
         strictEqual(bookkeepingService._hostname, 'alio2-cr1-hv-mvs00.cern.ch');
         strictEqual(bookkeepingService._port, '4000');
         strictEqual(bookkeepingService._protocol, 'http:');
-        strictEqual(bookkeepingService._getRunTypesPath, `/api/runTypes?token=${config.bkp.token}`);
+        strictEqual(bookkeepingService._getRunTypesPath, `/api/runTypes?token=${config.bookkeeping.token}`);
       });
     });
 
     suite('Retrieve run types', () => {
       let bkpService = undefined;
       before(() => {
-        bkpService = new BookkeepingService(config.bkp);
+        bkpService = new BookkeepingService(config.bookkeeping);
       });
 
       test('should successfully retrieve run types from Bookkeeping', async () => {
         nock('http://alio2-cr1-hv-mvs00.cern.ch:4000')
-          .get(`/api/runTypes?token=${config.bkp.token}`)
+          .get(`/api/runTypes?token=${config.bookkeeping.token}`)
           .reply(200, {
             data: [
               { name: 'test1' },
@@ -57,7 +57,7 @@ export const bookkeepingServiceTestSuite = async () => {
 
       test('should fail to retrieve run types from Bookkeeping', async () => {
         nock('http://alio2-cr1-hv-mvs00.cern.ch:4000')
-          .get(`/api/runTypes?token=${config.bkp.token}`)
+          .get(`/api/runTypes?token=${config.bookkeeping.token}`)
           .reply(400, {});
         await bkpService.retrieveRunTypes();
         strictEqual(bkpService.runTypes.length, 0);
