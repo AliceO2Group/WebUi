@@ -38,6 +38,6 @@ export const config = {
   bookkeeping: {
     url: 'http://alio2-cr1-hv-mvs00.cern.ch:4000',
     token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijg3OTM3OSIsInVzZXJuYW1lIjoiYWxtYXJpc2MiLCJuYW1lIjoiQWxlamFuZHJvIE1hcmlzY2FsIFJvbWVybyIsImFjY2VzcyI6ImRlZmF1bHQtcm9sZSIsImlhdCI6MTczMzMyNzI1NywiZXhwIjoxNzMzOTMyMDU3LCJpc3MiOiJvMi11aSJ9.tvfVW9fuVMlYZ0BnduAXQhaaYnFYxbONZofa0B9E2n4',
-    refreshRate: 10,
+    refreshRate: 15000,
   },
 };

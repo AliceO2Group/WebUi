@@ -17,6 +17,7 @@ const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'
 import path from 'path';
 import { setup } from './lib/api.js';
 import { initializeNockForCcdb } from './test/setup/testSetupForCcdb.js';
+import { initializeNockForBkp } from './test/setup/testSetupForBkp.js';
 
 // Reading config file
 import { config } from './lib/config/configProvider.js';
@@ -54,7 +55,7 @@ http.addStaticPath(path.join(pathName, '../..'), 'jsroot');
 const ws = new WebSocket(http);
 
 if (process.env.NODE_ENV === 'test') {
-  // Initialize nock for CCDB if we are in test environment
   initializeNockForCcdb();
+  initializeNockForBkp();
 }
 setup(http, ws);
