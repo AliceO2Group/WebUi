@@ -54,10 +54,10 @@ import { filtersControllerTestSuite } from './lib/controllers/FiltersController.
  */
 import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
 import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
+import { bookkeepingServiceTestSuite } from './lib/services/BookeepingService.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
-import { bookkeepingServiceTestSuite } from './lib/services/BookeepingService.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
