@@ -37,7 +37,16 @@ const layoutFiltersPanel = ({ layout: layoutModel }) => {
     [
       updateFiltersButton(layoutModel),
       filterInput('RunNumber', 'RunNumber (e.g. 546783)', 'runNumberLayoutFilter', filter, onClick, onEnter, 'number'),
-      autoSelector('RunType', 'RunType (e.g. PHYSICS)', 'runTypeLayoutFilter', filter, runTypes, onChange, onClick, onEnter),
+      autoSelector(
+        'RunType',
+        'RunType (e.g. PHYSICS)',
+        'runTypeLayoutFilter',
+        filter,
+        runTypes,
+        onChange,
+        onClick,
+        onEnter,
+      ),
       filterInput('PeriodName', 'PeriodName (e.g. LHC23c)', 'periodNameLayoutFilter', filter, onClick, onEnter),
       filterInput('PassName', 'PassName (e.g. apass2)', 'passNameLayoutFilter', filter, onClick, onEnter),
     ],

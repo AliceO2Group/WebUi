@@ -17,17 +17,17 @@ import { h } from '/js/src/index.js';
 
 /**
  * Builds a filter element. If there options to show, it builds a selector filter element, otherwise an input element.
- * @param {string} width - size of the filter
  * @param {string} queryLabel - value that is to be used in querying storage with this parameter
  * @param {string} placeholder - value to be placed as holder for input
  * @param {string} key - string to be used as unique id
- * @param {string} type - type of the filter,
- * @param {FILTER_TYPE} filterType - type of the filter
  * @param {string} value - value of the input text field
+ * @param {string} type - type of the filter,
  * @param {RemoteData} options - list of available options to be shown
  * @param {Function} onChangeCallback - callback for onchange event
  * @param {Function} onInputCallback - callback for oninput event
  * @param {Function} onEnterCallback - callback for pressing enter on filter input
+ * @param {string} filterType - type of the filter
+ * @param {string} width - size of the filter
  * @returns {vnode} - virtual node element
  */
 const autoSelector = (
@@ -62,14 +62,14 @@ const autoSelector = (
 
 /**
  * Builds a filter element that will allow the user to specify a parameter that should be applied when querying objects
- * @param width - size of the filter
  * @param {string} queryLabel - value that is to be used in querying storage with this parameter
  * @param {string} placeholder - value to be placed as holder for input
  * @param {string} key - string to be used as unique id
- * @param {string} type - type of the filter
  * @param {string} value - value of the input text field
  * @param {Function} onInputCallback - callback for oninput event
  * @param {Function} onEnterCallback - callback for pressing enter on filter input
+ * @param {string} type - type of the filter
+ * @param {string} width - size of the filter
  * @returns {vnode} - virtual node element
  */
 const filterInput =
@@ -94,13 +94,13 @@ const filterInput =
 /**
  *
  * Builds a filter selector element that will allow to select a parameter that should be applied when querying objects
- * @param {string} width - size of the filter
- * @param {string} queryLabel - label to be used when querying storage service
+ * @param {string} queryLabel - value that is to be used in querying storage with this parameter
  * @param {string} placeholder - value to be placed as holder for input
  * @param {string} key - string to be used as unique id
  * @param {string} value - value of the input text field
- * @param {Array<string>} options - list of available options to be shown
- * @param {Function} onChangeCallback - callback for oninput event
+ * @param {string[]} options - list of available options to be shown
+ * @param {Function} onChangeCallback - callback for onchange event
+ * @param {string} width - size of the filter
  * @returns {vnode} - virtual node element
  */
 const basicSelector =
