@@ -9,6 +9,7 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
     - [HTTP](#http)
     - [CCDB](#ccdb)
     - [QC](#qc)
+    - [BOOKKEEPING](#bookkeeping)
 - [Run QCG locally](#run-qcg-locally)
 - [Enable HTTPS](#enable-https)
 - [Features](#features)
@@ -65,6 +66,13 @@ Edit the `ccdb` section to define a custom:
 #### QC
 Attribute to define if QCG is to be started as part of a QC integrated environment.
 - `enabled = false`
+
+#### BOOKKEEPING
+Attribute to define the `Bookkeeping` endpoint.
+
+- `url` - URL for accessing Bookkeeping API
+- `token` - Authentication token required to interact with the API securely.
+- `refreshRate` - Frequency (in miliseconds) at which the bookkeeping data is refreshed or synchronized.
 
 ## Run QCG locally 
 
