@@ -72,6 +72,10 @@ class User {
    * @returns {Boolean}
    */
   belongsToDetector(detectorId) {
+    //Convert detectorId to lowercase if it is uppercase
+    if (detectorId === detectorId.toUpperCase()) {
+      detectorId = detectorId.toLowerCase();
+    }
     return Boolean(this._accessList.includes(`det-${detectorId}`));
   }
 
