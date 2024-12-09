@@ -6,7 +6,7 @@
 const stringToArray = (data) => {
 
   let list = [];
-  if (typeof data === 'string') {
+  if (typeof data === 'string' && data.length > 0) {
     list = data.split(',');
   } else if (Array.isArray(data)) {
     list = data;
