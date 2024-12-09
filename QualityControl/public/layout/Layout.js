@@ -809,6 +809,7 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   initializeEditViaJson() {
+    this.editOriginalClone = JSON.parse(JSON.stringify(this.item));
     this.model.services.layout.update = RemoteData.success();
     this.updatedJSON = LayoutUtils.toSkeleton(this.item);
     this.model.isUpdateVisible = true;
