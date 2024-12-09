@@ -48,13 +48,11 @@ const autoSelector = (
 
   return options.match({
     Success: (optionsList) => {
-      if (optionsList.length === 0) {
-        return renderFilterInput();
-      }
-
-      if (filterType === FILTER_TYPE.BASIC_SELECTOR) {
+      if (filterType === FILTER_TYPE.BASIC_SELECTOR && optionsList.length > 0) {
         return basicSelector(queryLabel, placeholder, key, value, optionsList, onChangeCallback, width);
       }
+
+      return renderFilterInput();
     },
     Other: renderFilterInput,
   });

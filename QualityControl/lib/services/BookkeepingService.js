@@ -29,7 +29,7 @@ export class BookkeepingService {
     this._protocol = protocol;
     this._token = token;
 
-    this._refresh_interval = refreshRate ?? 24 * 60 * 60 * 1000;
+    this._refreshInterval = refreshRate ?? 24 * 60 * 60 * 1000;
 
     this._getRunTypesPath = `/api/runTypes?token=${this._token}`;
     this._runTypes = [];
@@ -74,6 +74,6 @@ export class BookkeepingService {
    * @returns {number} - interval in milliseconds
    */
   get refreshInterval() {
-    return this._refresh_interval;
+    return this._refreshInterval;
   }
 }

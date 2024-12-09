@@ -31,12 +31,11 @@ export class FilterController {
   async getRunTypesHandler(req, res) {
     try {
       if (!this._bkpService) {
-        res.status(503).json({ error: 'Bookkeeping service is not available' });
-        return;
+        throw new Error('Bookkeeping service is not available');
       }
       res.status(200).json(this._bkpService.runTypes);
     } catch (error) {
-      res.status(503).json({ error });
+      res.status(503).json({ error: error.message || error });
     }
   }
 }
