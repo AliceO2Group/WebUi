@@ -1,3 +1,4 @@
+/* eslint-disable @stylistic/js/max-len */
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -105,6 +106,31 @@ describe('Live Mode test-suite', async () => {
     assert.ok(isUserNameMatching);
   });
 
+  it('should successfully enable LIVE mode from url parameter', async () => {
+    // await page.waitForNavigation().goto(`${baseUrl}?live=true`, { waitUntil: 'networkidle0' });
+
+    await Promise.all([page.goto(`${baseUrl}?live=true`, { waitUntil: 'networkidle0' })]);
+
+    await waitUntil(async () => await page.$eval('.btn-success', (el) => {
+      el.outerHTML;
+    }));
+
+    // const htmlsl = await page.$eval('.btn-success', (el) => {
+    //   console.log(el);
+    //   el.outerHTML;
+    // });
+    console.log(htmlsl);
+
+    // await waitUntil(, 100);
+    const location = await page.evaluate(() => window.location);
+    console.log(location.search);
+
+    const search = decodeURIComponent(location.search);
+
+    // for now, check if redirected to default page
+    assert.strictEqual(search, '?q={"severity":{"in":"I W E F"}}&live=true');
+  });
+
   it('should successfully go to mode LIVE in paused state', async () => {
     const activeMode = await page.evaluate(() => {
       window.model.log.liveStop('Paused');
@@ -160,4 +186,47 @@ describe('Live Mode test-suite', async () => {
 
     assert.deepStrictEqual(activeMode, 'Query');
   });
+});
+const waitTillHTMLRendered = async (page, timeout = 30000) => {
+  const checkDurationMsecs = 1000;
+  const maxChecks = timeout / checkDurationMsecs;
+  let lastHTMLSize = 0;
+  let checkCounts = 1;
+  let countStableSizeIterations = 0;
+  const minStableSizeIterations = 3;
+
+  while (checkCounts++ <= maxChecks) {
+    const html = await page.content();
+    const currentHTMLSize = html.length;
+
+    const bodyHTMLSize = await page.evaluate(() => document.body.innerHTML.length);
+
+    console.log('last: ', lastHTMLSize, ' <> curr: ', currentHTMLSize, ' body html size: ', bodyHTMLSize);
+
+    if (lastHTMLSize != 0 && currentHTMLSize == lastHTMLSize) {
+      countStableSizeIterations++;
+    } else {
+      countStableSizeIterations = 0;
+    } //reset the counter
+
+    if (countStableSizeIterations >= minStableSizeIterations) {
+      console.log('Page rendered fully..');
+      break;
+    }
+
+    lastHTMLSize = currentHTMLSize;
+    await page.waitForTimeout(checkDurationMsecs);
+  }
+};
+
+const waitUntil = async (condition, intervalMS) => await new Promise((resolve) => {
+  const interval = setInterval(() => {
+    try {
+      console.log(condition);
+      if (condition) {
+        resolve(true);
+        clearInterval(interval);
+      };
+    } catch (error) { /* empty */ }
+  }, intervalMS);
 });
