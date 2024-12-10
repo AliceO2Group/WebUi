@@ -154,7 +154,7 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
         MID: { name: 'MID', state: 'FREE' },
         DCS: { name: 'DCS', state: 'TAKEN', owner: { username: 'global', fullName: 'Global User', personid: 1 } },
         ODC: { name: 'ODC', state: 'TAKEN', owner: { username: 'admin', fullName: 'Admin User', personid: 0 } },
-    });
+      });
 
     await request(`${TEST_URL}/api/locks`)
       .put(`/force/${DetectorLockAction.RELEASE}/ALL?token=${GLOBAL_TEST_TOKEN}`)
@@ -164,4 +164,34 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
         ODC: { name: 'ODC', state: 'FREE' },
       });
   });
+
+  it('should successfully Take ALL locks when >=global ', async () => {
+    await request(`${TEST_URL}/api/locks`)
+      .put(`/${DetectorLockAction.TAKE}/ALL?token=${GLOBAL_TEST_TOKEN}`)
+      .expect(200, {
+        DCS: { name: 'DCS', state: 'TAKEN', owner: { username: 'global', fullName: 'Global User', personid: 1 } },
+        MID: { name: 'MID', state: 'TAKEN', owner: { username: 'global', fullName: 'Global User', personid: 1 } },
+        ODC: { name: 'ODC', state: 'TAKEN', owner: { username: 'global', fullName: 'Global User', personid: 1 } },
+      });
+
+    await request(`${TEST_URL}/api/locks`)
+      .put(`/${DetectorLockAction.RELEASE}/ALL?token=${GLOBAL_TEST_TOKEN}`)
+      .expect(200, {
+        MID: { name: 'MID', state: 'FREE' },
+        DCS: { name: 'DCS', state: 'FREE' },
+        ODC: { name: 'ODC', state: 'FREE' },
+      });
+  });
+
+  it('should fail taking  ALL locks when <=global ', async () => {
+
+    await request(`${TEST_URL}/api/locks`)
+      .put(`/${DetectorLockAction.TAKE}/ALL?token=${GUEST_TEST_TOKEN}`)
+      .expect(403);
+
+    await request(`${TEST_URL}/api/locks`)
+      .put(`/${DetectorLockAction.RELEASE}/ALL?token=${GUEST_TEST_TOKEN}`)
+      .expect(403);
+  });
 });
+

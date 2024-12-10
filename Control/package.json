@@ -46,11 +46,17 @@
   ],
   "devDependencies": {
     "eslint": "^8.56.0",
-    "mocha": "^10.8.2",
+    "jsonwebtoken": "^9.0.2",
+    "mocha": "^11.0.1",
     "nock": "^13.5.0",
     "nyc": "^17.1.0",
     "puppeteer": "^23.9.0",
     "sinon": "19.0.2",
     "supertest": "7.0.0"
-  }
+  },
+  "bundleDependencies": [
+    "@aliceo2/web-ui",
+    "@grpc/grpc-js",
+    "@grpc/proto-loader"
+  ]
 }
