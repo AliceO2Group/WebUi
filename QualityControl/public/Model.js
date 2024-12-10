@@ -275,13 +275,17 @@ export default class Model extends Observable {
 
   /**
    * Show or hide sidebar
-   * @returns {undefined}
+   * @returns {void}
    */
   toggleSidebar() {
     this.sidebar = !this.sidebar;
     this.notify();
   }
 
+  /**
+   * Toggles disabled state of the download button on the layout view
+   * @returns {void}
+   */
   toggleDownloadingState() {
     this.isDownloading = !this.isDownloading;
     this.notify();

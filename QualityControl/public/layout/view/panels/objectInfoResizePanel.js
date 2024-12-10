@@ -53,7 +53,6 @@ export const objectInfoResizePanel = (model, tabObject, isProcessingDownload) =>
       'button.btn',
       {
         title: 'Download object as file',
-        // download: `${name.replaceAll('/', '_')}-${id}.root`,
         disabled: isProcessingDownload,
         onclick: async () => {
           await model.services.object.downloadRootObject(id).then((res) => {
@@ -77,12 +76,3 @@ export const objectInfoResizePanel = (model, tabObject, isProcessingDownload) =>
     }, iconResizeBoth()),
   ]);
 };
-
-/**
- * Timeout fun
- * @param ms time
- * @returns {Promise<unknown>} a
- */
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
