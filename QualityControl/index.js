@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager, HttpServer, WebSocket } from '@aliceo2/web-ui';
+import { LogManager, HttpServer, WebSocket, SimpleTmp } from '@aliceo2/web-ui';
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/index`);
 import path from 'path';
 import { setup } from './lib/api.js';
@@ -51,6 +51,8 @@ const pathName = require.resolve('jsroot');
 http.addStaticPath(path.join(pathName, '../..'), 'jsroot');
 
 const ws = new WebSocket(http);
+
+const simpleTmp = new SimpleTmp(config.simpleTmp)
 
 if (process.env.NODE_ENV === 'test') {
   // Initialize nock for CCDB if we are in test environment
