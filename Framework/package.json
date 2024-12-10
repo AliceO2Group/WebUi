@@ -43,14 +43,14 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",
-    "@stylistic/eslint-plugin-js": "^2.11.0",
+    "@stylistic/eslint-plugin-js": "^2.12.0",
     "eslint": "^9.16.0",
     "eslint-plugin-jsdoc": "^50.6.0",
     "globals": "^15.13.0",
     "mocha": "^11.0.1",
     "nock": "13.5.0",
     "nyc": "^17.1.0",
-    "puppeteer": "^23.9.0",
+    "puppeteer": "^23.10.2",
     "sinon": "19.0.2",
     "supertest": "^7.0.0"
   },
