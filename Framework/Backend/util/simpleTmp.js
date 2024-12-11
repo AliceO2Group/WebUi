@@ -17,19 +17,26 @@ const DIR_PERMS = {
 };
 const TMP_DIR = `${os.homedir()}/.${os.tmpdir().replace('/', '')}/root_obj`; // Format on Linux is `/home/$USER/.tmp/root_obj`
 
+/**
+ * Class to generate a /tmp directory in the home directory, to allow users to download root objects
+ */
 class SimpleTmp {
+  /**
+   * Allows the CCDB url to be altered, together with the generated tar file names and the event at which /tmp is cleared.
+   * @param {Object} config The configuration used for this class.
+   */
   constructor(config) {
     if (!config) {
       throw new Error('Configuration object cannot be empty');
     }
     if (!config.ccdb_server_url) {
-      throw new Error('Configuration object cannot be empty');
+      throw new Error('Configuration object must include the CCDB server url for downloads');
     }
     if (!config.tarFileName) {
-      throw new Error('Configuration object cannot be empty');
+      throw new Error('Configuration object must include the downloadable tar file name');
     }
     if (!config.cleanUpEvent) {
-      throw new Error('Configuration object cannot be empty');
+      throw new Error('Configuration object must include the clean up event for the /tmp directory');
     }
 
     this.ccdb_server_url = config.ccdb_server_url;
@@ -115,8 +122,8 @@ class SimpleTmp {
 
   /**
    * Retrieves all files stored under the requester's temporary subdirectory and requests them to be packed up in a tarball.
-   * @param request_id            The id of the requester
-   * @param callback              Returns a value that can be handled by the place this function gets called at.
+   * @param {string} request_id   The id of the requester
+   * @param {function} callback   Returns a value that can be handled by the place this function gets called at.
    * @returns {Promise<Pack|*>}   Returns the tarball
    */
   async retrieveFilesFromSubDir(request_id, callback) {
@@ -140,11 +147,11 @@ class SimpleTmp {
     console.log('Generating Tarball...');
     const baseDir = files[0].substring(0, files[0].lastIndexOf('/'));
     return tar.c(
-        {
-          file: path,
-          cwd: baseDir,
-        },
-        files.map((file) => file.replace(`${baseDir}/`, '')),
+      {
+        file: path,
+        cwd: baseDir,
+      },
+      files.map((file) => file.replace(`${baseDir}/`, '')),
     );
   }
 
@@ -196,7 +203,7 @@ class SimpleTmp {
 
   /**
    * Returns the tarball generated previously.
-   * @param request_id        The requester's id used for the subdirectory the file is stored in.
+   * @param {string} request_id The requester's id used for the subdirectory the file is stored in.
    * @returns {Promise<null>}
    */
   async returnTarballInRequestersSubDir(request_id) {
