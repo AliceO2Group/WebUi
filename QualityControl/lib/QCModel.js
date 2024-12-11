@@ -31,6 +31,7 @@ import { StatusController } from './controllers/StatusController.js';
 import { ObjectController } from './controllers/ObjectController.js';
 
 import { config } from './config/configProvider.js';
+import { QcDownloadService } from '../../Framework/Backend/index.js';
 
 /**
  * Model initialization for the QCG application
@@ -38,6 +39,7 @@ import { config } from './config/configProvider.js';
  */
 export const setupQcModel = () => {
   const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
+  const qcDownloadService = new QcDownloadService(config.qcDownloadService, config.ccdb);
 
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
@@ -66,7 +68,7 @@ export const setupQcModel = () => {
   statusService.dataService = ccdbService;
   statusService.onlineService = consulService;
 
-  const qcObjectService = new QcObjectService(ccdbService, jsonDb, { openFile, toJSON });
+  const qcObjectService = new QcObjectService(ccdbService, jsonDb, { openFile, toJSON }); //TODO: Add simpleTmp here?
   qcObjectService.refreshCache();
 
   const objectController = new ObjectController(qcObjectService, consulService);

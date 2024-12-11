@@ -18,20 +18,20 @@ const DIR_PERMS = {
   OWNER_RW: 0o600, //Octal notation of 600 in Linux, used to give read and write permissions, no execution rights though.
 };
 const TMP_DIR = `${os.homedir()}/.${os.tmpdir().replace('/', '')}/root_obj`; // Format on Linux is `/home/$USER/.tmp/root_obj`
-const logger = LogManager.getLogger('simpleTmp');
+const logger = LogManager.getLogger('QcDownloadService');
 
 /**
  * Class to generate a /tmp directory in the home directory with subdirectories that can be used to download root objects.
  * @author Colin Laan <colin.laan@gmail.com>
  */
-class SimpleTmp {
+class QcDownloadService {
   /**
    * Allows the CCDB url to be altered, together with the generated tar file names and the event at which /tmp is cleared.
-   * @param {Object} simpleTmp_config       The configuration used for this class.
+   * @param {Object} qcDownloadService_config       The configuration used for this class.
    * @param {Object} ccdb_config  The configuration used for the download functionality of this class.
    */
-  constructor(simpleTmp_config, ccdb_config) {
-    if (!simpleTmp_config) {
+  constructor(qcDownloadService_config, ccdb_config) {
+    if (!qcDownloadService_config) {
       throw new Error('Configuration object cannot be empty');
     }
     if (!ccdb_config) {
@@ -46,17 +46,17 @@ class SimpleTmp {
     if (!ccdb_config.port) {
       throw new Error('Configuration object must include the CCDB server port for downloads');
     }
-    if (!simpleTmp_config.tarFileName) {
+    if (!qcDownloadService_config.tarFileName) {
       throw new Error('Configuration object must include the downloadable tar file name');
     }
-    if (!simpleTmp_config.cleanUpEvent) {
+    if (!qcDownloadService_config.cleanUpEvent) {
       throw new Error('Configuration object must include the clean up event for the /tmp directory');
     }
 
     this.ccdb_server_url = `${ccdb_config.protocol}://${ccdb_config.domain}:${ccdb_config.port}`;
-    this.tarFileName = simpleTmp_config.tarFileName;
-    this.cleanUpEvent = simpleTmp_config.cleanUpEvent;
-    logger.infoMessage('Initialed SimpleTmp config!', LogLevel.DEVELOPER);
+    this.tarFileName = qcDownloadService_config.tarFileName;
+    this.cleanUpEvent = qcDownloadService_config.cleanUpEvent;
+    logger.infoMessage('Initialed QcDownloadService config!', LogLevel.DEVELOPER);
   }
 
   /**
@@ -64,7 +64,7 @@ class SimpleTmp {
    * @param {string} path                     Path in which the temporary directory should be made.
    * @param {function} callback               Function that is returned to caller.
    * @callback prepareRootTmpRemovalOnSysExit Exit function to remove /tmp dir recursively.
-   * @return {void}
+   * @returns {void}
    */
   initTmpDir(path, callback) {
     logger.infoMessage('Initializing...');
@@ -76,7 +76,7 @@ class SimpleTmp {
       if (err) {
         return err;
       }
-      logger.infoMessage('Made dir `~/.tmp/root_obj/`');
+      logger.infoMessage(`Made dir '${TMP_DIR}'`);
       this.prepareRootTmpRemovalOnSysExit(TMP_DIR, callback);
     });
   }
@@ -102,6 +102,7 @@ class SimpleTmp {
   /**
    * Schedules a requester's subdirectory to be removed after 15 minutes
    * @param {string} dir The path of the directory that is scheduled for removal
+   * @returns {void}
    */
   scheduleRequestDirRemoval(dir) {
     logger.infoMessage('Scheduled request directory deletion');
@@ -225,7 +226,7 @@ class SimpleTmp {
     const path = `${TMP_DIR}/${request_id}`;
     const file = `${path}/${this.tarFileName}.tar`;
     let dataHolder = null;
-    if (fs.existsSync(path)) {
+    if (fs.existsSync(file)) {
       fs.readFile(file, (err, data) => {
         if (err) {
           logger.errorMessage(err, LogLevel.DEVELOPER);
@@ -240,4 +241,4 @@ class SimpleTmp {
   }
 }
 
-module.exports = SimpleTmp;
+module.exports = QcDownloadService;

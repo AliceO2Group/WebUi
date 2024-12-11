@@ -26,7 +26,7 @@ const MySQL = require('./db/mysql.js');
 const NotificationService = require('./services/notification.js');
 const WebSocket = require('./websocket/server.js');
 const WebSocketMessage = require('./websocket/message.js');
-const SimpleTmp = require('./util/simpleTmp.js');
+const QcDownloadService = require('./util/QcDownload.service.js');
 
 const { InvalidInputError } = require('./errors/InvalidInputError.js');
 const { NotFoundError } = require('./errors/NotFoundError.js');
@@ -70,7 +70,7 @@ exports.WebSocket = WebSocket;
 
 exports.WebSocketMessage = WebSocketMessage;
 
-exports.SimpleTmp = SimpleTmp;
+exports.QcDownloadService = QcDownloadService;
 
 exports.InvalidInputError = InvalidInputError;
 
