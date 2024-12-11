@@ -5,17 +5,20 @@ const fs = require('fs');
 const os = require('os');
 const tar = require('tar');
 const http = require('http');
+const { LogManager } = require('../log/LogManager.js');
+const { LogLevel } = require('../log/LogLevel');
 
 /**
  * The variables used in the program
  * @var DIR_PERMS {KEY: number,...} Octal notation of permissions in linux for reading, writing and execution
- * @var TMP_DIR {string}            The path used for storing all temporary directory paths used in root object download requests.
+ * @var TMP_DIR   {string}          The path used for storing all temporary directory paths used in root object download requests.
  */
 const DIR_PERMS = {
   OWNER_RWX: 0o700, //Octal notation of 700 in Linux, used to give read, write and execution permissions.
   OWNER_RW: 0o600, //Octal notation of 600 in Linux, used to give read and write permissions, no execution rights though.
 };
 const TMP_DIR = `${os.homedir()}/.${os.tmpdir().replace('/', '')}/root_obj`; // Format on Linux is `/home/$USER/.tmp/root_obj`
+const logger = LogManager.getLogger('simpleTmp');
 
 /**
  * Class to generate a /tmp directory in the home directory with subdirectories that can be used to download root objects.
@@ -43,6 +46,7 @@ class SimpleTmp {
     this.ccdb_server_url = config.ccdb_server_url;
     this.tarFileName = config.tarFileName;
     this.cleanUpEvent = config.cleanUpEvent;
+    logger.infoMessage('Initialed SimpleTmp config!', LogLevel.DEVELOPER);
   }
 
   /**
@@ -53,16 +57,16 @@ class SimpleTmp {
    * @return {void}
    */
   initTmpDir(path, callback) {
-    console.log('Initializing...');
+    logger.infoMessage('Initializing...');
     if (fs.existsSync(TMP_DIR)) {
       return null;
     }
-    console.log('Directory does not exist, proceeding...');
+    logger.infoMessage('Directory does not exist, proceeding...');
     fs.mkdir(TMP_DIR, DIR_PERMS.OWNER_RW && { recursive: true }, (err) => {
       if (err) {
         return err;
       }
-      console.log('Made dir `~/.tmp/root_obj/`');
+      logger.infoMessage('Made dir `~/.tmp/root_obj/`');
       this.prepareRootTmpRemovalOnSysExit(TMP_DIR, callback);
     });
   }
@@ -73,14 +77,14 @@ class SimpleTmp {
    * @returns {void}
    */
   initNewRequestDir(request_id) {
-    console.log('Creating request directory');
+    logger.infoMessage('Creating request directory');
     const dir = `${TMP_DIR}/${request_id}`;
 
     fs.mkdir(dir, DIR_PERMS.OWNER_RW && { recursive: true }, (err) => {
       if (err) {
-        console.log(err);
+        logger.errorMessage(err, LogLevel.DEVELOPER);
       }
-      console.log('Created request directory');
+      logger.infoMessage('Created request directory');
       this.scheduleRequestDirRemoval(dir);
     });
   }
@@ -90,11 +94,11 @@ class SimpleTmp {
    * @param {string} dir The path of the directory that is scheduled for removal
    */
   scheduleRequestDirRemoval(dir) {
-    console.log('Scheduled request directory deletion');
+    logger.infoMessage('Scheduled request directory deletion');
     setTimeout(() => {
-      console.log('Deleting request directory...');
+      logger.infoMessage('Deleting request directory...');
       this.deleteRequestDir(dir);
-      console.log('Done deleting request directory!');
+      logger.infoMessage('Done deleting request directory!');
     }, 15 * 60 * 1000);
   }
 
@@ -128,7 +132,7 @@ class SimpleTmp {
    * @returns {Promise<Pack|*>}   Returns the tarball
    */
   async retrieveFilesFromSubDir(request_id, callback) {
-    console.log('Retrieving files from requester sub-directory...');
+    logger.infoMessage('Retrieving files from requester sub-directory...');
     const path = `${TMP_DIR}/${request_id}`;
     const matches_found = fs.globSync(`${path}/*.root`);
     if (matches_found != null && matches_found.length > 0) {
@@ -145,7 +149,7 @@ class SimpleTmp {
    * @returns {Pack}      The tarball generated.
    */
   generateTarball(files, path) {
-    console.log('Generating Tarball...');
+    logger.infoMessage('Generating Tarball...');
     const baseDir = files[0].substring(0, files[0].lastIndexOf('/'));
     return tar.c(
       {
@@ -168,14 +172,14 @@ class SimpleTmp {
 
     try {
       const file = fs.createWriteStream(destination);
-      console.log('Downloading Files...');
+      logger.infoMessage('Downloading Files...');
 
       await new Promise((resolve, reject) => {
         http.get(url, { method: 'GET' }, (response) => {
           response.pipe(file);
           file.on('finish', () => {
             file.close();
-            console.log('Downloaded file!');
+            logger.infoMessage('Downloaded file!');
             resolve(true);
           });
         }).on('error', () => {
@@ -186,7 +190,7 @@ class SimpleTmp {
         });
       });
     } catch (err) {
-      console.error(err);
+      logger.errorMessage(err, LogLevel.DEVELOPER);
     }
   }
 
@@ -214,7 +218,7 @@ class SimpleTmp {
     if (fs.existsSync(path)) {
       fs.readFile(file, (err, data) => {
         if (err) {
-          console.error(err);
+          logger.errorMessage(err, LogLevel.DEVELOPER);
         }
         if (data != null) {
           dataHolder = data;
