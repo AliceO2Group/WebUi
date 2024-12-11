@@ -19,6 +19,7 @@ const TMP_DIR = `${os.homedir()}/.${os.tmpdir().replace('/', '')}/root_obj`; // 
 
 /**
  * Class to generate a /tmp directory in the home directory, to allow users to download root objects
+ * @author Colin Laan <colin.laan@gmail.com>
  */
 class SimpleTmp {
   /**
