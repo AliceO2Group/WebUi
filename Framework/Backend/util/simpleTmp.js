@@ -27,25 +27,35 @@ const logger = LogManager.getLogger('simpleTmp');
 class SimpleTmp {
   /**
    * Allows the CCDB url to be altered, together with the generated tar file names and the event at which /tmp is cleared.
-   * @param {Object} config The configuration used for this class.
+   * @param {Object} simpleTmp_config       The configuration used for this class.
+   * @param {Object} ccdb_config  The configuration used for the download functionality of this class.
    */
-  constructor(config) {
-    if (!config) {
+  constructor(simpleTmp_config, ccdb_config) {
+    if (!simpleTmp_config) {
       throw new Error('Configuration object cannot be empty');
     }
-    if (!config.ccdb_server_url) {
-      throw new Error('Configuration object must include the CCDB server url for downloads');
+    if (!ccdb_config) {
+      throw new Error('Configuration object must include a CCDB config for downloads');
     }
-    if (!config.tarFileName) {
+    if (!ccdb_config.protocol) {
+      throw new Error('Configuration object must include the CCDB server protocol for downloads');
+    }
+    if (!ccdb_config.hostname) {
+      throw new Error('Configuration object must include the CCDB server domain for downloads');
+    }
+    if (!ccdb_config.port) {
+      throw new Error('Configuration object must include the CCDB server port for downloads');
+    }
+    if (!simpleTmp_config.tarFileName) {
       throw new Error('Configuration object must include the downloadable tar file name');
     }
-    if (!config.cleanUpEvent) {
+    if (!simpleTmp_config.cleanUpEvent) {
       throw new Error('Configuration object must include the clean up event for the /tmp directory');
     }
 
-    this.ccdb_server_url = config.ccdb_server_url;
-    this.tarFileName = config.tarFileName;
-    this.cleanUpEvent = config.cleanUpEvent;
+    this.ccdb_server_url = `${ccdb_config.protocol}://${ccdb_config.domain}:${ccdb_config.port}`;
+    this.tarFileName = simpleTmp_config.tarFileName;
+    this.cleanUpEvent = simpleTmp_config.cleanUpEvent;
     logger.infoMessage('Initialed SimpleTmp config!', LogLevel.DEVELOPER);
   }
 

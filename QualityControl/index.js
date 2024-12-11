@@ -53,7 +53,7 @@ http.addStaticPath(path.join(pathName, '../..'), 'jsroot');
 
 const ws = new WebSocket(http);
 
-const simpleTmp = new SimpleTmp(config.simpleTmp);
+const simpleTmp = new SimpleTmp(config.simpleTmp, config.ccdb);
 
 if (process.env.NODE_ENV === 'test') {
   // Initialize nock for CCDB if we are in test environment
