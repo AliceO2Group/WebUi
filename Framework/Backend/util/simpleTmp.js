@@ -18,7 +18,7 @@ const DIR_PERMS = {
 const TMP_DIR = `${os.homedir()}/.${os.tmpdir().replace('/', '')}/root_obj`; // Format on Linux is `/home/$USER/.tmp/root_obj`
 
 /**
- * Class to generate a /tmp directory in the home directory, to allow users to download root objects
+ * Class to generate a /tmp directory in the home directory with subdirectories that can be used to download root objects.
  * @author Colin Laan <colin.laan@gmail.com>
  */
 class SimpleTmp {
@@ -211,15 +211,19 @@ class SimpleTmp {
     const path = `${TMP_DIR}/${request_id}`;
     const file = `${path}/${this.tarFileName}.tar`;
     let dataHolder = null;
-    fs.readFile(file, (err, data) => {
-      if (err) {
-        console.error(err);
-      }
-      if (data != null) {
-        dataHolder = data;
-      }
-    });
+    if (fs.existsSync(path)) {
+      fs.readFile(file, (err, data) => {
+        if (err) {
+          console.error(err);
+        }
+        if (data != null) {
+          dataHolder = data;
+        }
+      });
+    }
     this.deleteRequestDir(path);
     return dataHolder;
   }
 }
+
+module.exports = SimpleTmp;
