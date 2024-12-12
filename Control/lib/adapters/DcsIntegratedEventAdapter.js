@@ -11,7 +11,12 @@
  * or submit itself to any jurisdiction.
  */
 
-const { EcsOperationAndStepStatus: {DONE_ERROR, DONE_TIMEOUT} } = require('../common/ecsOperationAndStepStatus.enum.js');
+const {
+  EcsOperationAndStepStatus: {
+    DONE_ERROR,
+    DONE_TIMEOUT
+  }
+} = require('../common/ecsOperationAndStepStatus.enum.js');
 
 /**
  * @class DcsIntegratedEventAdapter - Given an AliECS Integrated Service Event for DCS.SOR, build a DCS Integrated Event

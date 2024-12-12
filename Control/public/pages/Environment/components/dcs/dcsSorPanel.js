@@ -90,7 +90,11 @@ const groupOperationsByDetector = (operations) => {
         if (eventCopy.state) {
           // If there is a state, it means it is still an event from DCS
           groupedOperations[detector].push(eventCopy);
-        } else if (lastOperation?.state !== 'RUN_OK' && lastOperation?.state !== 'DONE_TIMEOUT' && lastOperation?.state !== 'DONE_ERROR') {
+        } else if (
+          lastOperation?.state !== 'RUN_OK'
+          && lastOperation?.state !== 'DONE_TIMEOUT'
+          && lastOperation?.state !== 'DONE_ERROR'
+        ) {
           // we only add event or step with status DONE_TIMEOUT or DONE_ERROR if the last event state of that detector is SOR_PROGRESSING
           const operationStatus = eventCopy.operationStatus;
           const operationStepStatus = eventCopy.operationStepStatus;
