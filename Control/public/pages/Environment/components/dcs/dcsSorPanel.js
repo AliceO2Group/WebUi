@@ -23,7 +23,7 @@ import { infoLoggerButtonLink } from './../../../../common/buttons/infoLoggerRed
 /**
  * Panel that will display DCS last states during the SOR activity at the start of run
  * @param {string} id - environment id
- * @param {array<string>} detectors - list of detectors
+ * @param {array<string>} detectors - list of detectors as received by the environment currently displayed in variable `includedDetectors`
  * @return {vnode}
  */
 export const dcsSorPanel = (id, detectors) => {
@@ -67,18 +67,42 @@ export const dcsSorPanel = (id, detectors) => {
 }
 
 /**
- * Group operations by detector
+ * Group events by detector and filter out events that are arriving after a final event such as
+ * some detectors might end the SOR sequence and arrive in RUN_OK, DONE_TIMEOUT, DONE_ERROR state but still recieve from ECS event that if failed.
+ * This is incorrect form ECS and should be filtered out.
  * @param {array<object>} operations - list of operations
  * @return {object}
  */
 const groupOperationsByDetector = (operations) => {
   const groupedOperations = {};
-  operations.forEach((operation) => {
-    operation.detectors.forEach((detector) => {
+  operations.forEach((event) => {
+    const eventCopy = JSON.parse(JSON.stringify(event));
+    eventCopy.detectors.forEach((detector) => {
       if (!groupedOperations[detector]) {
         groupedOperations[detector] = [];
+        if (!eventCopy?.state) {
+          // first operation might be an error or timeout which comes without a state
+          eventCopy.state = eventCopy.operationStepStatus ?? eventCopy.operationStatus;
+        }
+        groupedOperations[detector].push(eventCopy);
+      } else {
+        const lastOperation = groupedOperations[detector][groupedOperations[detector].length - 1];
+        if (eventCopy.state) {
+          // If there is a state, it means it is still an event from DCS
+          groupedOperations[detector].push(eventCopy);
+        } else if (lastOperation?.state !== 'RUN_OK' && lastOperation?.state !== 'DONE_TIMEOUT' && lastOperation?.state !== 'DONE_ERROR') {
+          // we only add event or step with status DONE_TIMEOUT or DONE_ERROR if the last event state of that detector is SOR_PROGRESSING
+          const operationStatus = eventCopy.operationStatus;
+          const operationStepStatus = eventCopy.operationStepStatus;
+          // priority is given to operationStep as it offers more granularity
+          if (operationStepStatus === 'DONE_TIMEOUT' || operationStepStatus === 'DONE_ERROR') {
+            eventCopy.state = operationStepStatus;
+          } else if (operationStatus === 'DONE_TIMEOUT' || operationStatus === 'DONE_ERROR') {
+            eventCopy.state = operationStatus;
+          }
+          groupedOperations[detector].push(eventCopy);
+        }
       }
-      groupedOperations[detector].push(operation);
     });
   });
   return groupedOperations;
