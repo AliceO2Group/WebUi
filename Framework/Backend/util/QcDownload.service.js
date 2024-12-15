@@ -27,8 +27,8 @@ const logger = LogManager.getLogger('QcDownloadService');
 class QcDownloadService {
   /**
    * Allows the CCDB url to be altered, together with the generated tar file names and the event at which /tmp is cleared.
-   * @param {Object} qcDownloadService_config       The configuration used for this class.
-   * @param {Object} ccdb_config  The configuration used for the download functionality of this class.
+   * @param {Object} qcDownloadService_config The configuration used for this class.
+   * @param {Object} ccdb_config              The configuration used for the download functionality of this class.
    */
   constructor(qcDownloadService_config, ccdb_config) {
     if (!qcDownloadService_config) {
@@ -52,10 +52,14 @@ class QcDownloadService {
     if (!qcDownloadService_config.cleanUpEvent) {
       throw new Error('Configuration object must include the clean up event for the /tmp directory');
     }
+    if (!qcDownloadService_config.dirLifespan) {
+      throw new Error('Configuration object must include the lifespan for the /tmp directory');
+    }
 
     this.ccdb_server_url = `${ccdb_config.protocol}://${ccdb_config.hostname}:${ccdb_config.port}`;
     this.tarFileName = qcDownloadService_config.tarFileName;
     this.cleanUpEvent = qcDownloadService_config.cleanUpEvent;
+    this.dirLifespan = qcDownloadService_config.dirLifespan;
     logger.infoMessage('Initialed QcDownloadService config!', LogLevel.DEVELOPER);
   }
 
@@ -109,7 +113,7 @@ class QcDownloadService {
       logger.infoMessage('Deleting request directory...');
       this.deleteRequestDir(dir);
       logger.infoMessage('Done deleting request directory!');
-    }, 15 * 60 * 1000);
+    }, this.dirLifespan);
   }
 
   /**
