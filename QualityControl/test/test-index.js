@@ -52,6 +52,7 @@ import { statusControllerTestSuite } from './lib/controllers/StatusController.te
  * Services
  */
 import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
+import { qcDownloadServiceTestSuite } from './lib/services/QcDownloadService.test.js';
 import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
@@ -149,6 +150,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
 
     suite('Services - Test Suite', async () => {
       suite('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
+      suite('QcDownloadService - Test Suite', async () => await qcDownloadServiceTestSuite());
       suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
       suite('JsonServiceTest test suite', async () => {
         // TODO - bring inline with current tests

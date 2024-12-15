@@ -53,7 +53,7 @@ class QcDownloadService {
       throw new Error('Configuration object must include the clean up event for the /tmp directory');
     }
 
-    this.ccdb_server_url = `${ccdb_config.protocol}://${ccdb_config.domain}:${ccdb_config.port}`;
+    this.ccdb_server_url = `${ccdb_config.protocol}://${ccdb_config.hostname}:${ccdb_config.port}`;
     this.tarFileName = qcDownloadService_config.tarFileName;
     this.cleanUpEvent = qcDownloadService_config.cleanUpEvent;
     logger.infoMessage('Initialed QcDownloadService config!', LogLevel.DEVELOPER);
@@ -61,12 +61,11 @@ class QcDownloadService {
 
   /**
    * Creates a temporary directory located at /tmp by default.
-   * @param {string} path                     Path in which the temporary directory should be made.
    * @param {function} callback               Function that is returned to caller.
    * @callback prepareRootTmpRemovalOnSysExit Exit function to remove /tmp dir recursively.
    * @returns {void}
    */
-  initTmpDir(path, callback) {
+  initTmpDir(callback) {
     logger.infoMessage('Initializing...');
     if (fs.existsSync(TMP_DIR)) {
       return null;
