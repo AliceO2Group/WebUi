@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/control",
-  "version": "1.74.1",
+  "version": "1.75.0",
   "description": "ALICE O2 Control GUI",
   "author": "George Raduta",
   "contributors": [
@@ -50,7 +50,7 @@
     "mocha": "^11.0.1",
     "nock": "^13.5.0",
     "nyc": "^17.1.0",
-    "puppeteer": "^23.9.0",
+    "puppeteer": "^23.10.2",
     "sinon": "19.0.2",
     "supertest": "7.0.0"
   },

@@ -62,5 +62,9 @@ export const DetectorStateStyle = Object.freeze({
   EOR_AVAILABLE: '',
   PFR_AVAILABLE: '',
   PFR_UNAVAILABLE: '',
-  TIMEOUT: '',
+  TIMEOUT: 'bg-danger white',
+  // Custom states for the SOR/EOR operations covered by ECS when DCS does not reply
+  DONE_TIMEOUT: 'bg-danger white',
+  DONE_ERROR: 'bg-danger white',
+  DONE_OK: 'bg-primary white',
 });
