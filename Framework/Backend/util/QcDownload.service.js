@@ -60,7 +60,7 @@ class QcDownloadService {
     this.tarFileName = qcDownloadService_config.tarFileName;
     this.cleanUpEvent = qcDownloadService_config.cleanUpEvent;
     this.dirLifespan = qcDownloadService_config.dirLifespan;
-    logger.infoMessage('Initialed QcDownloadService config!', LogLevel.DEVELOPER);
+    logger.infoMessage('Initialized QcDownloadService config!', LogLevel.DEVELOPER);
   }
 
   /**
