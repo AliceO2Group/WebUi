@@ -57,7 +57,7 @@ const showEnvironmentPage = (model, environmentInfo) => {
   const { id, state, currentTransition = undefined, includedDetectors, userVars } = environmentInfo;
   const isDcsEnabled = userVars?.['dcs_enabled'] === 'true';
   const isRunningStable = !currentTransition && state === EnvironmentState.RUNNING;
-  const { services: { detectors: { availability = {} } = {} } } = model;
+  const { services: { detectors: { availability = {} } = {} } } = model;  
 
   /**
    * Given a component and a state, navigate silently to the environment page with the component as the panel
@@ -66,8 +66,22 @@ const showEnvironmentPage = (model, environmentInfo) => {
    * @return {Promise<void>} - promise to navigate to the page
    */
   const onRowClick = async (component, state) => {
-    model.router.go(`?page=environment&id=${environmentInfo.id}&panel=${component}`, true, true);
-    model.environment.taskTableModel.setFilterState(state);
+  
+    //Read the current state from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const states = urlParams.get('state') ? JSON.parse(urlParams.get('state')) : [];
+    states.splice(0,states.length); //Clear the array
+
+    if (!states.includes(state)) {
+      // Add state to the list of states to filter by
+      states.push(state);
+    }
+    urlParams.set('state', JSON.stringify(states));
+    const stateParam = urlParams.get('state') ? `&state=${decodeURIComponent(urlParams.get('state'))}` : '';
+    
+    model.router.go(`
+      ?page=environment&id=${environmentInfo.id}&panel=${component}${stateParam}`,true, true);
+    model.environment.taskTableModel.setFilterState(stateParam);
     
     document.getElementById('environment-tabs-navigation-header').scrollIntoView({ behavior: 'auto', block: 'center' });
     await model.environment.getEnvironment({ id: environmentInfo.id }, false, component);
