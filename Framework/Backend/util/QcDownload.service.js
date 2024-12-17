@@ -11,11 +11,17 @@ const { LogLevel } = require('../log/LogLevel');
 /**
  * The variables used in the program
  * @var DIR_PERMS {KEY: number,...} Octal notation of permissions in linux for reading, writing and execution
+ * @var CODES     {KEY: string,...} The codes this class uses for callbacks that can inform about certain actions such as directory removal.
  * @var TMP_DIR   {string}          The path used for storing all temporary directory paths used in root object download requests.
+ * @var logger    {Logger}          The logger used for this class.
  */
 const DIR_PERMS = {
   OWNER_RWX: 0o700, //Octal notation of 700 in Linux, used to give read, write and execution permissions.
   OWNER_RW: 0o600, //Octal notation of 600 in Linux, used to give read and write permissions, no execution rights though.
+};
+const CODES = {
+  CLEARED_CORPSES: 'Cleared file corpses from previous run',
+  NO_MATCHES: 'No matches for file',
 };
 const TMP_DIR = `${os.homedir()}/.${os.tmpdir().replace('/', '')}/root_obj`; // Format on Linux is `/home/$USER/.tmp/root_obj`
 const logger = LogManager.getLogger('QcDownloadService');
@@ -55,7 +61,7 @@ class QcDownloadService {
     if (!qcDownloadService_config.dirLifespan) {
       throw new Error('Configuration object must include the lifespan for the /tmp directory');
     }
-
+    this.codes = CODES; // Added to constructor to make sure tests can easily access the codes used.
     this.ccdb_server_url = `${ccdb_config.protocol}://${ccdb_config.hostname}:${ccdb_config.port}`;
     this.tarFileName = qcDownloadService_config.tarFileName;
     this.cleanUpEvent = qcDownloadService_config.cleanUpEvent;
@@ -73,6 +79,7 @@ class QcDownloadService {
     logger.infoMessage('Initializing...');
     if (fs.existsSync(TMP_DIR)) {
       fs.rm(TMP_DIR, { recursive: true }, callback);
+      callback(CODES.CLEARED_CORPSES);
       logger.infoMessage('Deleted previous tmp directory');
     }
     logger.infoMessage('Directory no longer exists, proceeding...');
@@ -153,7 +160,7 @@ class QcDownloadService {
     if (matches_found != null && matches_found.length > 0) {
       return this.generateTarball(matches_found, `${path}/${this.tarFileName}.tar`);
     } else {
-      return callback('no matches');
+      return callback(CODES.NO_MATCHES);
     }
   }
 

@@ -68,7 +68,7 @@ export const setupQcModel = () => {
   statusService.dataService = ccdbService;
   statusService.onlineService = consulService;
 
-  const qcObjectService = new QcObjectService(ccdbService, jsonDb, { openFile, toJSON }); //TODO: Add simpleTmp here?
+  const qcObjectService = new QcObjectService(ccdbService, jsonDb, { openFile, toJSON }); //TODO: Add QcDownloadService here?
   qcObjectService.refreshCache();
 
   const objectController = new ObjectController(qcObjectService, consulService);
