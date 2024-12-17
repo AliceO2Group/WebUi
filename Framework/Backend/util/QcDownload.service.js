@@ -72,9 +72,10 @@ class QcDownloadService {
   initTmpDir(callback) {
     logger.infoMessage('Initializing...');
     if (fs.existsSync(TMP_DIR)) {
-      return null;
+      fs.rm(TMP_DIR, { recursive: true }, callback);
+      logger.infoMessage('Deleted previous tmp directory');
     }
-    logger.infoMessage('Directory does not exist, proceeding...');
+    logger.infoMessage('Directory no longer exists, proceeding...');
     fs.mkdir(TMP_DIR, DIR_PERMS.OWNER_RW && { recursive: true }, (err) => {
       if (err) {
         return err;
