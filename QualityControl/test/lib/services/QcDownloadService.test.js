@@ -24,6 +24,7 @@ import { CCDB_MONITOR, CCDB_VERSION_KEY } from '../../../lib/services/ccdb/CcdbC
 import { QcDownloadService } from '../../../../Framework/Backend/index.js';
 
 import fs from 'fs';
+const fsp = fs.promises;
 import os from 'os';
 
 const ccdbConfig = {
@@ -49,13 +50,16 @@ const TMP_REQ_DIR = `${TMP_DIR}/${REQ_ID}`;
 
 export const qcDownloadServiceTestSuite = async () => {
   await suite('QC Download Test Suite - ', () => {
-    before(() => nock.cleanAll());
+    before(() => {
+      nock.cleanAll();
+      fsp.rm(TMP_DIR);
+    });
 
     suite('Creating a new QcDownloadService instance', () => {
       test('Should successfully initialize QcDownloadService', () => {
         const qcDlService = new QcDownloadService(qcDlServiceConfig, ccdbConfig);
 
-        strictEqual(qcDlService.ccdb_server_url, 'https://ccdb-local:8083');
+        strictEqual(qcDlService._ccdbServerUrl, 'https://ccdb-local:8083');
         strictEqual(qcDlService.tarFileName, 'download');
         strictEqual(qcDlService.cleanUpEvent, 'exit');
       });
@@ -67,7 +71,7 @@ export const qcDownloadServiceTestSuite = async () => {
 
         qcDlService.initTmpDir((err) => {
           if (err) {
-            strictEqual(err, qcDlService.codes.CLEARED_CORPSES);
+            strictEqual(err, qcDlService._codes.CLEARED_CORPSES);
           } else {
             strictEqual(err, null);
           }
@@ -82,20 +86,20 @@ export const qcDownloadServiceTestSuite = async () => {
       //   qcDlService.initTmpDir((err) => {
       //     strictEqual(err, null);
       //   });
-      //   //TODO: Simulate system exit
+      //   //TODO: Simulate system exit or restart
       // });
       test('Should successfully initialize child directory for QcDownloadService requests', () => {
         const qcDlService = new QcDownloadService(qcDlServiceConfig, ccdbConfig);
 
         qcDlService.initTmpDir((err) => {
           if (err) {
-            strictEqual(err, qcDlService.codes.CLEARED_CORPSES);
+            strictEqual(err, qcDlService._codes.CLEARED_CORPSES);
           } else {
             strictEqual(err, null);
           }
         });
 
-        qcDlService.initNewRequestDir(REQ_ID);
+        qcDlService.createNewRequestDir(REQ_ID);
         // strictEqual(fs.existsSync(TMP_REQ_DIR), true);
         setTimeout(() => {
           strictEqual(fs.existsSync(`${TMP_REQ_DIR}`), true);
@@ -110,13 +114,13 @@ export const qcDownloadServiceTestSuite = async () => {
 
         qcDlService.initTmpDir((err) => {
           if (err) {
-            strictEqual(err, qcDlService.codes.CLEARED_CORPSES);
+            strictEqual(err, qcDlService._codes.CLEARED_CORPSES);
           } else {
             strictEqual(err, null);
           }
         });
 
-        qcDlService.initNewRequestDir(REQ_ID);
+        qcDlService.createNewRequestDir(REQ_ID);
 
         setTimeout(() => {
           qcDlService.sendDownloadRequest(CCDB_ETAG_TEST_PRIMARY, REQ_ID);
@@ -130,13 +134,13 @@ export const qcDownloadServiceTestSuite = async () => {
 
         qcDlService.initTmpDir((err) => {
           if (err) {
-            strictEqual(err, qcDlService.codes.CLEARED_CORPSES);
+            strictEqual(err, qcDlService._codes.CLEARED_CORPSES);
           } else {
             strictEqual(err, null);
           }
         });
 
-        qcDlService.initNewRequestDir(REQ_ID);
+        qcDlService.createNewRequestDir(REQ_ID);
 
         setTimeout(() => {
           qcDlService.sendDownloadRequests(CCDB_ETAG_TEST_ARRAY, REQ_ID);
@@ -153,13 +157,13 @@ export const qcDownloadServiceTestSuite = async () => {
 
         qcDlService.initTmpDir((err) => {
           if (err) {
-            strictEqual(err, qcDlService.codes.CLEARED_CORPSES);
+            strictEqual(err, qcDlService._codes.CLEARED_CORPSES);
           } else {
             strictEqual(err, null);
           }
         });
 
-        qcDlService.initNewRequestDir(REQ_ID);
+        qcDlService.createNewRequestDir(REQ_ID);
 
         setTimeout(() => {
           qcDlService.sendDownloadRequests(CCDB_ETAG_TEST_ARRAY, REQ_ID);
@@ -173,7 +177,7 @@ export const qcDownloadServiceTestSuite = async () => {
 
         await qcDlService.retrieveFilesFromSubDir(REQ_ID, (err) => {
           if (err) {
-            strictEqual(err, qcDlService.codes.NO_MATCHES);
+            strictEqual(err, qcDlService._codes.NO_MATCHES);
           } else {
             strictEqual(err, null);
           }

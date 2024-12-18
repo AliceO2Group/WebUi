@@ -15,16 +15,17 @@ const { LogLevel } = require('../log/LogLevel');
  * @var TMP_DIR   {string}          The path used for storing all temporary directory paths used in root object download requests.
  * @var logger    {Logger}          The logger used for this class.
  */
-const DIR_PERMS = {
+const DIR_PERMS = Object.freeze({
   OWNER_RWX: 0o700, //Octal notation of 700 in Linux, used to give read, write and execution permissions.
   OWNER_RW: 0o600, //Octal notation of 600 in Linux, used to give read and write permissions, no execution rights though.
-};
-const CODES = {
-  CLEARED_CORPSES: 'Cleared file corpses from previous run',
+});
+const CODES = Object.freeze({
+  CLEARED_CORPSES: 'Cleared file corpses from previous process',
   NO_MATCHES: 'No matches for file',
-};
+});
 const TMP_DIR = `${os.homedir()}/.${os.tmpdir().replace('/', '')}/root_obj`; // Format on Linux is `/home/$USER/.tmp/root_obj`
 const logger = LogManager.getLogger('QcDownloadService');
+const fsp = fs.promises;
 
 /**
  * Class to generate a /tmp directory in the home directory with subdirectories that can be used to download root objects.
@@ -61,8 +62,8 @@ class QcDownloadService {
     if (!qcDownloadService_config.dirLifespan) {
       throw new Error('Configuration object must include the lifespan for the /tmp directory');
     }
-    this.codes = CODES; // Added to constructor to make sure tests can easily access the codes used.
-    this.ccdb_server_url = `${ccdb_config.protocol}://${ccdb_config.hostname}:${ccdb_config.port}`;
+    this._codes = CODES; // Added to constructor to make sure tests can easily access the codes used.
+    this._ccdbServerUrl = `${ccdb_config.protocol}://${ccdb_config.hostname}:${ccdb_config.port}`;
     this.tarFileName = qcDownloadService_config.tarFileName;
     this.cleanUpEvent = qcDownloadService_config.cleanUpEvent;
     this.dirLifespan = qcDownloadService_config.dirLifespan;
@@ -75,7 +76,7 @@ class QcDownloadService {
    * @callback prepareRootTmpRemovalOnSysExit Exit function to remove /tmp dir recursively.
    * @returns {void}
    */
-  initTmpDir(callback) {
+  async initTmpDir(callback) {
     logger.infoMessage('Initializing...');
     if (fs.existsSync(TMP_DIR)) {
       fs.rm(TMP_DIR, { recursive: true }, callback);
@@ -83,7 +84,7 @@ class QcDownloadService {
       logger.infoMessage('Deleted previous tmp directory');
     }
     logger.infoMessage('Directory no longer exists, proceeding...');
-    fs.mkdir(TMP_DIR, DIR_PERMS.OWNER_RW && { recursive: true }, (err) => {
+    await fsp.mkdir(TMP_DIR, DIR_PERMS.OWNER_RW && { recursive: true }).then((err) => {
       if (err) {
         return err;
       }
@@ -97,11 +98,11 @@ class QcDownloadService {
    * @param {string} request_id The requester's id used for the subdirectory under which the files are stored temporarily.
    * @returns {void}
    */
-  initNewRequestDir(request_id) {
+  createNewRequestDir(request_id) {
     logger.infoMessage('Creating request directory');
     const dir = `${TMP_DIR}/${request_id}`;
 
-    fs.mkdir(dir, DIR_PERMS.OWNER_RW && { recursive: true }, (err) => {
+    fsp.mkdir(dir, DIR_PERMS.OWNER_RW && { recursive: true }).then((err) => {
       if (err) {
         logger.errorMessage(err, LogLevel.DEVELOPER);
       }
@@ -129,9 +130,9 @@ class QcDownloadService {
    * @param {string} dir  The path of the requester's subdirectory
    * @returns {void}
    */
-  deleteRequestDir(dir) {
+  async deleteRequestDir(dir) {
     if (fs.existsSync(TMP_DIR)) {
-      fs.rmSync(dir, { recursive: true });
+      await fsp.rm(dir, { recursive: true });
     }
   }
 
@@ -141,9 +142,13 @@ class QcDownloadService {
    * @param {function} callback   Returns a value to the place where this function is called
    * @returns {NodeJS.Process}    Returns the listener for the exit stored in the this.cleanUpEvent variable
    */
-  prepareRootTmpRemovalOnSysExit(path, callback) {
-    return process.addListener(this.cleanUpEvent, () => {
-      fs.rm(path, { recursive: true }, callback);
+  async prepareRootTmpRemovalOnSysExit(path, callback) {
+    return process.addListener(this.cleanUpEvent, async () => {
+      await fsp.rm(path, { recursive: true }).then((err) => {
+        if (err) {
+          callback(err);
+        }
+      });
     });
   }
 
@@ -153,12 +158,18 @@ class QcDownloadService {
    * @param {function} callback   Returns a value that can be handled by the place this function gets called at.
    * @returns {Promise<Pack|*>}   Returns the tarball
    */
-  async retrieveFilesFromSubDir(request_id, callback) {
+  async retrieveFilesFromSubDir(request_id, callback) { //TODO: Fix glob instead of globSync no longer working
     logger.infoMessage('Retrieving files from requester sub-directory...');
     const path = `${TMP_DIR}/${request_id}`;
-    const matches_found = fs.globSync(`${path}/*.root`);
-    if (matches_found != null && matches_found.length > 0) {
-      return this.generateTarball(matches_found, `${path}/${this.tarFileName}.tar`);
+    const matches_found = [];
+    await (async () => {
+      for await (const entry of fsp.glob(`${path}/*.root`)) {
+        matches_found.push(entry);
+      }
+    })();
+    if (matches_found.length > 0) {
+      this.generateTarball(matches_found, `${path}/${this.tarFileName}.tar`);
+      //Should return fs.findFile or something;
     } else {
       return callback(CODES.NO_MATCHES);
     }
@@ -189,30 +200,30 @@ class QcDownloadService {
    * @returns {Promise<void>}     The download request
    */
   async sendDownloadRequest(object_id, request_id) {
-    const url = `${this.ccdb_server_url}/download/${object_id}`;
+    const url = `${this._ccdbServerUrl}/download/${object_id}`;
     const destination = `${TMP_DIR}/${request_id}/${object_id}.root`;
 
     try {
       const file = fs.createWriteStream(destination);
-      logger.infoMessage('Downloading Files...');
+      logger.infoMessage('Downloading Files...'); //TODO: Include ID or something more descriptive
 
       await new Promise((resolve, reject) => {
         http.get(url, { method: 'GET' }, (response) => {
           response.pipe(file);
           file.on('finish', () => {
             file.close();
-            logger.infoMessage('Downloaded file!');
+            logger.infoMessage('Downloaded file!'); //TODO: Include ID or something more descriptive
             resolve(true);
           });
-        }).on('error', () => {
+        }).on('error', async () => {
           // Delete the file asynchronously. No response handler, just need to hook into that it failed somehow to stop the process.
-          fs.unlink(destination, (err) => {
-            reject(err);
+          await fsp.unlink(destination).then((err) => {
+            reject(err); //TODO: Include ID or something more descriptive
           });
         });
       });
     } catch (err) {
-      logger.errorMessage(err, LogLevel.DEVELOPER);
+      logger.errorMessage(err, LogLevel.DEVELOPER); //TODO: Include ID or something more descriptive
     }
   }
 
@@ -223,7 +234,7 @@ class QcDownloadService {
    * @returns {void}
    */
   async sendDownloadRequests(object_ids, request_id) {
-    for (const obj_id in object_ids) {
+    for (const obj_id in object_ids) { //TODO: Have a look at promises.all
       await this.sendDownloadRequest(obj_id, request_id);
     }
   }

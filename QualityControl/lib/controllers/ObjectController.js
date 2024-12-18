@@ -162,8 +162,9 @@ export class ObjectController {
     } else {
       try {
         //TODO: Fix ID not being recognized
-        const object = await this._objService.retrieveQcObjectByQcgId(qcgId, id, validFrom, filters);
-        res.status(200).json(object); //TODO: Make this return a blob
+        // const object = await this._objService.retrieveQcObjectByQcgId(qcgId, id, validFrom, filters);
+        // res.status(200).json(object); //TODO: Make this return a blob
+        res.download('LOCAL OBJECT');
       } catch (error) {
         errorHandler(error, 'Unable to identify object or read it by qcg id', res, 502, 'object');
       }
