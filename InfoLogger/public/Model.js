@@ -68,6 +68,9 @@ export default class Model extends Observable {
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
     this.router.bubbleTo(this);
+    this.log.filter.observe(() => {
+      this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);
+    });
     this.handleLocationChange(); // Init first page
 
     // Setup keyboard dispatcher
@@ -78,10 +81,6 @@ export default class Model extends Observable {
     this.ws.addListener('command', this.handleWSCommand.bind(this));
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
     this.ws.addListener('close', this.handleWSClose.bind(this));
-
-    this.log.filter.observe(() => {
-      this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);
-    });
   }
 
   /**
@@ -356,6 +355,9 @@ export default class Model extends Observable {
           this.notification.show(error.toString(), 'danger', 3000);
         }
       }
+    } else if (!params.q) {
+      this.getUserProfile();
+      this.log.filter.resetCriteria();
     } else {
       this.getUserProfile();
     }
