@@ -111,18 +111,38 @@ describe('Live Mode test-suite', async () => {
 
     await Promise.all([page.goto(`${baseUrl}?live=true`, { waitUntil: 'networkidle0' })]);
 
-    await waitUntil(async () => await page.$eval('.btn-success', (el) => {
-      el.outerHTML;
-    }));
+    // await waitUntil(async () => await page.$eval('.btn-success', (el) => {
+    //   el.outerHTML;
+    // }));
+
+    // await waitUntil(, 100);
+    const location = await page.evaluate(() => window.model.guiReadyToUse);
+    console.log('JH HIER!');
 
     // const htmlsl = await page.$eval('.btn-success', (el) => {
     //   console.log(el);
     //   el.outerHTML;
     // });
-    console.log(htmlsl);
 
-    // await waitUntil(, 100);
-    const location = await page.evaluate(() => window.location);
+    const foo = async () => new Promise((resolve) => {
+      setTimeout(resolve, 3000);
+    });
+    (async () => {
+      await foo();
+    })();
+
+    const elements = await page.$$('.btn-success');
+    // const elements = await page.$$('.active');
+
+    if (elements.length > 0) {
+      console.log('Element exists');
+    } else {
+      console.log('Element does not exist');
+    }
+
+    console.log('Check success button');
+    // console.log(htmlsl);
+    console.log(location);
     console.log(location.search);
 
     const search = decodeURIComponent(location.search);

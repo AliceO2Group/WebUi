@@ -34,6 +34,7 @@ export default class Model extends Observable {
   constructor() {
     super();
 
+    this.guiReadyToUse = RemoteData.loading();
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
 
@@ -81,7 +82,7 @@ export default class Model extends Observable {
     // update router on model change
     // Model can change very often we protect router with callRateLimiter
     // Router limit: 100 calls per 30 seconds max = 30ms, 2 FPS is enough (500ms)
-    this.observe(callRateLimiter(this.updateRouteOnModelChange.bind(this), 500));
+    this.observe(callRateLimiter(this.updateRouteOnModelChange.bind(this), 10));
   }
 
   /**
@@ -89,7 +90,9 @@ export default class Model extends Observable {
    */
   handleWSAuthed() {
     // Tell server not to stream by default
+    this.guiReadyToUse = RemoteData.success();
     this.ws.setFilter(() => false);
+    this.notify();
   }
 
   /**
@@ -105,6 +108,10 @@ export default class Model extends Observable {
   async getFrameworkInfo() {
     this.frameworkInfo = RemoteData.loading();
     this.notify();
+
+    if (this.isSecureContext) {
+      this.getFrameworkInfo();
+    }
 
     const { result, ok } = await this.loader.get('/api/getFrameworkInfo');
     if (!ok) {
@@ -336,12 +343,13 @@ export default class Model extends Observable {
       this.getUserProfile();
       this.log.filter.fromObject(JSON.parse(params.q.replaceAll('\n', '\\n')));
       if (params.live == 'true') {
-        await this.waitUntil(() => {
-          if (this.ws.authed == true) {
-            return true;
-          }
-          return false;
-        }, 250);
+        while (
+          this.guiReadyToUse.isLoading()
+          || !this.frameworkInfo.isSuccess()
+          || !this.frameworkInfo.payload.infoLoggerServer.status.ok
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
         try {
           this.log.liveStart();
           this.setLiveButton(BUTTON.SUCCESS_ACTIVE, iconMediaStop());
@@ -356,24 +364,6 @@ export default class Model extends Observable {
     } else {
       this.getUserProfile();
     }
-  }
-
-  /**
-   * Wait untill a condition is met.
-   * When the condition is met the promise is resolved.
-   * @param {boolean} condition - Condition to check every interval.
-   * @param {*} intervalMS - Interval in miliseconds at which to check whether the condition is met.
-   * @returns {Promise} promise - To be resolved when condition is met.
-   */
-  async waitUntil(condition, intervalMS) {
-    return await new Promise((resolve) => {
-      const interval = setInterval(() => {
-        if (condition) {
-          resolve(true);
-          clearInterval(interval);
-        };
-      }, intervalMS);
-    });
   }
 
   /**

@@ -161,7 +161,7 @@ const liveButton = (model) => h('button.btn', model.frameworkInfo.match({
   Success: (frameworkInfo) => ({
     title: frameworkInfo.infoLoggerServer.status.ok ? 'Stream logs with filtering' : 'Live service not configured',
     disabled: !frameworkInfo.infoLoggerServer.status.ok || model.log.queryResult.isLoading(),
-    className: !model.ws.authed ? 'loading' : model.liveButtonType,
+    className: model.guiReadyToUse.isLoading() ? 'loading' : model.liveButtonType,
     style: 'font-weight: bold',
     onclick: () => toggleButtonStates(model, true),
   }),
