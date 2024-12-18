@@ -41,7 +41,9 @@ export default class LogFilter extends Observable {
     super();
 
     this.model = model;
-
+    this.observe(() => {
+      this.model.router.go(`?q=${JSON.stringify(this.toObject())}`, true, true);
+    });
     this.resetCriteria();
   }
 
