@@ -10,9 +10,8 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-/* eslint-disable max-len */
 const assert = require('assert');
 const test = require('../mocha-index');
 
@@ -25,8 +24,8 @@ describe('Filter actions test-suite', async () => {
     page = test.page;
   });
 
-  it('should succesfully load a page with profile in the URI', async function() {
-    await page.goto(baseUrl + "?profile=physicist", {waitUntil: 'networkidle0'});
+  it('should succesfully load a page with profile in the URI', async () => {
+    await page.goto(`${baseUrl}?profile=physicist`, { waitUntil: 'networkidle0' });
     const location = await page.evaluate(() => window.location);
     const search = decodeURIComponent(location.search);
 
@@ -36,70 +35,66 @@ describe('Filter actions test-suite', async () => {
 
   it('should update column headers based on profile when passed in the URI', async () => {
     const expectedColumns = {
-      date: {size: 'cell-m', visible: false},
-      time: {size: 'cell-m', visible: true},
-      hostname: {size: 'cell-m', visible: true},
-      rolename: {size: 'cell-m', visible: false},
-      pid: {size: 'cell-s', visible: false},
-      username: {size: 'cell-m', visible: false},
-      system: {size: 'cell-s', visible: true},
-      facility: {size: 'cell-m', visible: true},
-      detector: {size: 'cell-s', visible: true},
-      partition: {size: 'cell-m', visible: true},
-      run: {size: 'cell-s', visible: true},
-      errcode: {size: 'cell-s', visible: false},
-      errline: {size: 'cell-s', visible: false},
-      errsource: {size: 'cell-m', visible: false},
-      message: {size: 'cell-xl', visible: true}
+      date: { size: 'cell-m', visible: false },
+      time: { size: 'cell-m', visible: true },
+      hostname: { size: 'cell-m', visible: true },
+      rolename: { size: 'cell-m', visible: false },
+      pid: { size: 'cell-s', visible: false },
+      username: { size: 'cell-m', visible: false },
+      system: { size: 'cell-s', visible: true },
+      facility: { size: 'cell-m', visible: true },
+      detector: { size: 'cell-s', visible: true },
+      partition: { size: 'cell-m', visible: true },
+      run: { size: 'cell-s', visible: true },
+      errcode: { size: 'cell-s', visible: false },
+      errline: { size: 'cell-s', visible: false },
+      errsource: { size: 'cell-m', visible: false },
+      message: { size: 'cell-xl', visible: true },
     };
 
-    const columns = await page.evaluate(() => {
-      return window.model.table.colsHeader;
-    });
+    const columns = await page.evaluate(() => window.model.table.colsHeader);
 
     assert.deepStrictEqual(columns, expectedColumns);
   });
 
   it('should update filters based on profile when passed in the URI', async () => {
-    // for now check if the filters are reset once the profile is passed 
+    // for now check if the filters are reset once the profile is passed
     const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
 
     const searchParams = await page.evaluate(() => {
-      const params = {profile: 'physicist'};
+      const params = { profile: 'physicist' };
       window.model.parseLocation(params);
       return window.location.search;
     });
 
-    await page.waitForFunction(`window.model.notification.state === 'shown'`);
-    await page.waitForFunction(`window.model.notification.type === 'success'`);
-    await page.waitForFunction(`window.model.notification.message === "The profile PHYSICIST was loaded successfully"`);
+    await page.waitForFunction('window.model.notification.state === \'shown\'');
+    await page.waitForFunction('window.model.notification.type === \'success\'');
+    await page.waitForFunction('window.model.notification.message === "The profile PHYSICIST was loaded successfully"');
 
     assert.strictEqual(searchParams, expectedParams);
   });
 
   it('should reset filters and show warning message when profile and filters are passed', async () => {
     // wait until the previous notification is hidden
-    await page.waitForFunction(`window.model.notification.state === 'hidden'`);
+    await page.waitForFunction('window.model.notification.state === \'hidden\'');
     const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
     const searchParams = await page.evaluate(() => {
-      const params = {profile: "physicist", q: '"severity":{"in":"I W E F"}}'};
+      const params = { profile: 'physicist', q: '"severity":{"in":"I W E F"}}' };
       window.model.parseLocation(params);
       return window.location.search;
     });
 
-    await page.waitForFunction(`window.model.notification.state === 'shown'`);
-    await page.waitForFunction(`window.model.notification.type === 'warning'`);
-    await page.waitForFunction(`window.model.notification.message === "URL can contain only filters or profile, not both"`);
+    await page.waitForFunction('window.model.notification.state === \'shown\'');
+    await page.waitForFunction('window.model.notification.type === \'warning\'');
+    await page.waitForFunction('window.model.notification.message === "URL can contain only filters or profile, not both"');
     assert.strictEqual(searchParams, expectedParams);
   });
 
   it('should update URI with new encoded "match" criteria', async () => {
-    /* eslint-disable max-len */
     const decodedParams = '?q={"hostname":{"match":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
     const expectedParams = '?q={%22hostname%22:{%22match%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
     const searchParams = await page.evaluate(() => {
       window.model.log.filter.setCriteria('hostname', 'match', '"%ald_qdip01%');
-      window.model.updateRouteOnModelChange();
       return window.location.search;
     });
 
@@ -108,13 +103,11 @@ describe('Filter actions test-suite', async () => {
   });
 
   it('should update URI with new encoded "exclude" criteria', async () => {
-    /* eslint-disable max-len */
     const decodedParams = '?q={"hostname":{"exclude":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
     const expectedParams = '?q={%22hostname%22:{%22exclude%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
     const searchParams = await page.evaluate(() => {
       window.model.log.filter.resetCriteria();
       window.model.log.filter.setCriteria('hostname', 'exclude', '"%ald_qdip01%');
-      window.model.updateRouteOnModelChange();
       return window.location.search;
     });
 
@@ -204,5 +197,4 @@ describe('Filter actions test-suite', async () => {
     assert.strictEqual(criterias.severity.in, 'I W E F');
     assert.deepStrictEqual(criterias.severity.$in, ['W', 'I', 'E', 'F']);
   });
-
 });

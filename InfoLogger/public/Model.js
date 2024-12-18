@@ -363,19 +363,6 @@ export default class Model extends Observable {
   }
 
   /**
-   * When model change (filters), update address bar with the filter
-   * do it silently to avoid infinite loop
-   */
-  updateRouteOnModelChange() {
-    if (this.log.isLiveModeEnabled()) {
-      this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}` +
-      `&live=${this.log.isLiveModeEnabled()}`, true, true);
-    } else {
-      this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);
-    }
-  }
-
-  /**
    * Method to change the icon and type of the liveButton
    * @param {string} liveType - Type of the Live Button
    * @param {Icon} liveIcon - Icon of the Live Button
