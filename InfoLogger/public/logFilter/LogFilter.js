@@ -44,10 +44,6 @@ export default class LogFilter extends Observable {
     this.resetCriteria();
   }
 
-  initializeFilter() {
-    this.observe(this.model.router.go(`?q=${JSON.stringify(this.toObject())}`, true, true));
-  }
-
   /**
    * Set a filter criteria to a field with an operator and value only if the new value is different than the current.
    * For each field+operator a parsed property in criterias is made with associated cast (Date, number, Array).

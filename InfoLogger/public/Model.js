@@ -19,7 +19,7 @@ import {
 } from '/js/src/index.js';
 import Log from './log/Log.js';
 import Timezone from './common/Timezone.js';
-import { callRateLimiter, setBrowserTabTitle } from './common/utils.js';
+import { setBrowserTabTitle } from './common/utils.js';
 import Table from './table/Table.js';
 import { MODE } from './constants/mode.const.js';
 import { BUTTON } from './constants/button-states.const.js';
@@ -68,7 +68,6 @@ export default class Model extends Observable {
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
     this.router.bubbleTo(this);
-    this.log.filter.initializeFilter();
     this.handleLocationChange(); // Init first page
 
     // Setup keyboard dispatcher
@@ -80,10 +79,9 @@ export default class Model extends Observable {
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
     this.ws.addListener('close', this.handleWSClose.bind(this));
 
-    // // update router on model change
-    // // Model can change very often we protect router with callRateLimiter
-    // // Router limit: 100 calls per 30 seconds max = 30ms, 2 FPS is enough (500ms)
-    // this.observe(callRateLimiter(this.updateRouteOnModelChange.bind(this), 10));
+    this.log.filter.observe(() => {
+      this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);
+    });
   }
 
   /**
