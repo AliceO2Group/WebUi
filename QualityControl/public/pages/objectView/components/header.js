@@ -94,6 +94,6 @@ function getCopyURLToClipboardButton(model) {
  * @returns {string} - name of the tab where the object is placed or empty string if not applicable
  */
 function getTabFromObject(selected) {
-  const tab = selected?._payload?.tab ?? '';
-  return tab ? `&tab=${tab}` : '';
+  const tabName = selected?.payload?.tabName ?? '';
+  return tabName ? `&tab=${tabName}` : '';
 }
