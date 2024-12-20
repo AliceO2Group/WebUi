@@ -35,12 +35,12 @@ export const header = (model, title) => h('.flex-row.items-center.p2.g2', [
  */
 function getBackToQCGButton(model) {
   const { layoutId = undefined } = model.router.params;
-  const { objectViewModel: { filter } } = model;
+  const { objectViewModel: { filter, selected: { _payload: { tab } } } } = model;
   let title = 'Back';
   let href = '?page=objectTree';
   if (layoutId) {
     title = 'Back to layout';
-    href = `?page=layoutShow&layoutId=${layoutId}${getUrlPathFromObject(filter)}`;
+    href = `?page=layoutShow&layoutId=${layoutId}${getUrlPathFromObject(filter)}&tab=${tab}`;
   }
 
   return h(
