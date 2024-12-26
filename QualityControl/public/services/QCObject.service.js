@@ -174,6 +174,7 @@ export default class QCObjectService {
     //If request succeeds call RemoteData.success(), else RemoteData.failure()
     this.requests = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
 
+    console.log(`Found ${id}, downloaded ${ok}, ${result.length} downloaded.`);
     return result;
   }
 

@@ -155,7 +155,7 @@ export const qcDownloadServiceTestSuite = async () => {
       test('Should successfully create tarball of multiple QCG objects', async () => {
         const qcDlService = new QcDownloadService(qcDlServiceConfig, ccdbConfig);
 
-        qcDlService.initTmpDir((err) => {
+        await qcDlService.initTmpDir((err) => {
           if (err) {
             strictEqual(err, qcDlService._codes.CLEARED_CORPSES);
           } else {

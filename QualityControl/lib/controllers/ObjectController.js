@@ -156,15 +156,20 @@ export class ObjectController {
    */
   async downloadObjectById(req, res) {
     const qcgId = req.params?.id;
-    const { validFrom, filters, id } = req.query;
+    // const { validFrom, filters, id } = req.query;
     if (!qcgId) {
       res.status(400).json({ message: 'Invalid URL parameters: missing object ID' });
     } else {
       try {
         //TODO: Fix ID not being recognized
         // const object = await this._objService.retrieveQcObjectByQcgId(qcgId, id, validFrom, filters);
-        // res.status(200).json(object); //TODO: Make this return a blob
-        res.download('LOCAL OBJECT');
+        // res.status(200).json(object); //TODO: Make this return a blob where first the path is retrieved of the object
+        return await res
+          .status(200)
+          .download('./test/demoData/layout/TObject_1728916584672.root', 'TObject_1728916584672.root', (err) => {
+            if (err)
+              console.log(`err ${err}`);
+          });
       } catch (error) {
         errorHandler(error, 'Unable to identify object or read it by qcg id', res, 502, 'object');
       }

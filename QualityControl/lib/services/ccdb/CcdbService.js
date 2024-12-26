@@ -12,15 +12,21 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from '@aliceo2/web-ui';
+import { LogLevel, LogManager } from '@aliceo2/web-ui';
 import { httpHeadJson, httpGetJson } from '../../utils/utils.js';
 import {
   CCDB_MONITOR, CCDB_VERSION_KEY, CCDB_RESPONSE_BODY_KEYS, CCDB_FILTER_FIELDS, CCDB_RESPONSE_HEADER_KEYS,
 } from './CcdbConstants.js';
+import os from 'os';
+import fs from 'fs';
+import http from 'http';
 
 const {
   LAST_MODIFIED, VALID_FROM, VALID_UNTIL, CREATED, PATH, SIZE, FILE_NAME, METADATA, ID,
 } = CCDB_FILTER_FIELDS;
+const TMP_DIR = `${os.homedir()}/.${os.tmpdir().replace('/', '')}/root_obj`; // Format on Linux is `/home/$USER/.tmp/root_obj`
+const logger = LogManager.getLogger('QcDownloadService');
+const fsp = fs.promises;
 
 /**
  * Service customized for usage of QCDB - Quality Control Data Base & CCDB - Calibration and Conditions Database
@@ -47,6 +53,7 @@ export class CcdbService {
     this._CACHE_PREFIX = this._parsePrefix(config.cachePrefix ?? 'qc');
     this._CACHE_REFRESH_RATE = config.cacheRefreshRate ?? 2 * 60 * 1000;
     this._PREFIX = this._parsePrefix(config.prefix ?? 'qc');
+    this._ccdbServerUrl = `${this._protocol}://${this._hostname}:${this._port}`;
   }
 
   /**
@@ -93,6 +100,52 @@ export class CcdbService {
       return { version };
     } catch (error) {
       throw new Error(`Unable to read version of CCDB due to: ${error}`);
+    }
+  }
+
+  /**
+   * Requests a root object download from the CCDB and stores it in the requester's subdirectory
+   * @param {string} object_id    The root object etag of the object that should be downloaded.
+   * @param {string} request_id   The requester's id used for the subdirectory.
+   * @returns {Promise<void>}     The download request
+   */
+  async sendDownloadRequest(object_id, request_id) {
+    const url = `${this._ccdbServerUrl}/download/${object_id}`;
+    const destination = `${TMP_DIR}/${request_id}/${object_id}.root`;
+
+    try {
+      const file = fs.createWriteStream(destination);
+      logger.infoMessage('Downloading Files...'); //TODO: Include ID or something more descriptive
+
+      await new Promise((resolve, reject) => {
+        http.get(url, { method: 'GET' }, (response) => {
+          response.pipe(file);
+          file.on('finish', () => {
+            file.close();
+            logger.infoMessage(`Downloaded file! ${file.path}`); //TODO: Include ID or something more descriptive
+            resolve(true);
+          });
+        }).on('error', async () => {
+          // Delete file asynchronously. No response handler, just need to hook into it to show that the process failed.
+          await fsp.unlink(destination).then((err) => {
+            reject(err); //TODO: Include ID or something more descriptive
+          });
+        });
+      });
+    } catch (err) {
+      logger.errorMessage(err, LogLevel.DEVELOPER); //TODO: Include ID or something more descriptive
+    }
+  }
+
+  /**
+   * Sends multiple file download requests for root objects and stores them under the requester's subdirectory
+   * @param {Array<string>} object_ids  The identifiers for the root objects to be downloaded.
+   * @param {string} request_id         The requester's id used for the subdirectory of the root one.
+   * @returns {void}
+   */
+  async sendDownloadRequests(object_ids, request_id) {
+    for (const obj_id in object_ids) { //TODO: Have a look at promises.all
+      await this.sendDownloadRequest(obj_id, request_id);
     }
   }
 

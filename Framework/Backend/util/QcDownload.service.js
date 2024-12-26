@@ -4,7 +4,7 @@
 const fs = require('fs');
 const os = require('os');
 const tar = require('tar');
-const http = require('http');
+// const http = require('http');
 const { LogManager } = require('../log/LogManager.js');
 const { LogLevel } = require('../log/LogLevel');
 
@@ -193,51 +193,7 @@ class QcDownloadService {
     );
   }
 
-  /**
-   * Requests a root object download from the CCDB and stores it in the requester's subdirectory
-   * @param {string} object_id    The root object etag of the object that should be downloaded.
-   * @param {string} request_id   The requester's id used for the subdirectory.
-   * @returns {Promise<void>}     The download request
-   */
-  async sendDownloadRequest(object_id, request_id) {
-    const url = `${this._ccdbServerUrl}/download/${object_id}`;
-    const destination = `${TMP_DIR}/${request_id}/${object_id}.root`;
 
-    try {
-      const file = fs.createWriteStream(destination);
-      logger.infoMessage('Downloading Files...'); //TODO: Include ID or something more descriptive
-
-      await new Promise((resolve, reject) => {
-        http.get(url, { method: 'GET' }, (response) => {
-          response.pipe(file);
-          file.on('finish', () => {
-            file.close();
-            logger.infoMessage('Downloaded file!'); //TODO: Include ID or something more descriptive
-            resolve(true);
-          });
-        }).on('error', async () => {
-          // Delete the file asynchronously. No response handler, just need to hook into that it failed somehow to stop the process.
-          await fsp.unlink(destination).then((err) => {
-            reject(err); //TODO: Include ID or something more descriptive
-          });
-        });
-      });
-    } catch (err) {
-      logger.errorMessage(err, LogLevel.DEVELOPER); //TODO: Include ID or something more descriptive
-    }
-  }
-
-  /**
-   * Sends multiple file download requests for root objects and stores them under the requester's subdirectory
-   * @param {Array<string>} object_ids  The identifiers for the root objects to be downloaded.
-   * @param {string} request_id         The requester's id used for the subdirectory of the root one.
-   * @returns {void}
-   */
-  async sendDownloadRequests(object_ids, request_id) {
-    for (const obj_id in object_ids) { //TODO: Have a look at promises.all
-      await this.sendDownloadRequest(obj_id, request_id);
-    }
-  }
 
   /**
    * Returns the tarball generated previously.
