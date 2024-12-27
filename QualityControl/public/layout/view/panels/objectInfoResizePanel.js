@@ -55,16 +55,20 @@ export const objectInfoResizePanel = (model, tabObject, isProcessingDownload) =>
         title: 'Download object as file',
         disabled: isProcessingDownload,
         onclick: async () => {
-          await model.services.object.downloadRootObject(id).then((res) => {
-            const url = window.URL.createObjectURL(new Blob([res.data]));
+          try {
+            const l = await model.services.object.downloadRootObject(id);
+            console.log(l);
+            const blob = new Blob([l], { type: 'application/octet-stream' });
+            const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            console.log(tabObject);
             link.setAttribute('download', `${name.replaceAll('/', '_')}-${id}.root`);
             document.body.appendChild(link);
             link.click();
             link.remove();
-          });
+          } catch (error) {
+            console.error('Error downloading file:', error);
+          }
         },
       },
       iconCloudDownload(),

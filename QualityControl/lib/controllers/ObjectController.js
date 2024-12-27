@@ -161,9 +161,7 @@ export class ObjectController {
       res.status(400).json({ message: 'Invalid URL parameters: missing object ID' });
     } else {
       try {
-        //TODO: Fix ID not being recognized
-        // const object = await this._objService.retrieveQcObjectByQcgId(qcgId, id, validFrom, filters);
-        // res.status(200).json(object); //TODO: Make this return a blob where first the path is retrieved of the object
+        //TODO: Make this return a blob where first the path is retrieved of the object
         return await res
           .status(200)
           .download('./test/demoData/layout/TObject_1728916584672.root', 'TObject_1728916584672.root', (err) => {

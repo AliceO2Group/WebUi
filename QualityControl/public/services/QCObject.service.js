@@ -167,15 +167,21 @@ export default class QCObjectService {
   async downloadRootObject(id) {
     // await this.model.loader.loader(`/api/${location}`)
     this.model.toggleDownloadingState();
-    const { result, ok } = await this.model.loader.get(`/api/objects/download/${id}`).finally(() => {
+    // const { result, ok } = await this.model.loader.get(`/api/objects/download/${id}`).finally(() => {
+    //   this.model.toggleDownloadingState();
+    // });
+    const response = await fetch(`/api/objects/download/${id}`, {
+      method: 'GET',
+    }).finally(() => {
       this.model.toggleDownloadingState();
     });
 
     //If request succeeds call RemoteData.success(), else RemoteData.failure()
-    this.requests = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
+    // this.requests = response.ok ? RemoteData.success(response.result) : RemoteData.failure(response.result.message);
 
-    console.log(`Found ${id}, downloaded ${ok}, ${result.length} downloaded.`);
-    return result;
+    // console.log(response.blob());
+    // console.log(`Found ${id}, downloaded ${response.ok}, ${response.blob().size} downloaded.`);
+    return response.blob();
   }
 
   /**
