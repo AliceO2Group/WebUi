@@ -107,9 +107,13 @@ describe('Live Mode test-suite', async () => {
   });
 
   it('should successfully enable LIVE mode from url parameter', async () => {
-    // await page.waitForNavigation().goto(`${baseUrl}?live=true`, { waitUntil: 'networkidle0' });
+    await page.waitForNavigation().goto(`${baseUrl}?live=true`, { waitUntil: 'networkidle0' });
+    // timeout 1 sec
 
-    await Promise.all([page.goto(`${baseUrl}?live=true`, { waitUntil: 'networkidle0' })]);
+    // await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
+
+    //
+    // await Promise.all([page.goto(`${baseUrl}?live=true`, { waitUntil: 'networkidle0' })]);
 
     // await waitUntil(async () => await page.$eval('.btn-success', (el) => {
     //   el.outerHTML;
