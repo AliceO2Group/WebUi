@@ -71,6 +71,13 @@ ILG is a Node.js API Gateway and Single-Page Application built on top of the `@a
 - **Profiles** - [ProfileService](lib/ProfileService.js) persists per-user column visibility/width to a JSON file ([JSONFileConnector](lib/JSONFileConnector.js)) via `getUserProfile` / `saveUserProfile`. The named-profile endpoint (`getProfile`) is a stub - it returns the hard-coded defaults regardless of the profile requested.
 - **Utilities** - [utils/](lib/utils/) contains the InfoLogger message-command parser, SQL to native error mapping, prepared-statement parsing, and query cancellation.
 
+## Docker development
+
+docker compose -f docker-compose.yaml -f docker-compose.dev.yml down -v
+docker compose -f docker-compose.yaml -f docker-compose.dev.yml up -d --build
+
+process.env.mariadb_host ?? '127.0.0.1'
+
 ## Frontend
 
 Static files served from [public/](public/); no build step. A lightweight MVC app on top of `@aliceo2/web-ui`.

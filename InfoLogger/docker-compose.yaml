@@ -1,0 +1,11 @@
+services:
+  application:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+  database:
+    image: mariadb:latest
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: root
