@@ -1,0 +1,63 @@
+services:
+  application:
+    build:
+      target: development
+    environment:
+      NODE_ENV: development
+      mariadb_host: database
+    ports:
+      - "8080:8080"
+    command: "npm run dev"
+    restart: "no"
+    volumes:
+      - type: bind
+        read_only: true
+        source: ./lib
+        target: /home/node/app/lib
+      - type: bind
+        read_only: true
+        source: ./public
+        target: /home/node/app/public
+      - type: bind
+        read_only: true
+        source: ./test
+        target: /home/node/app/test
+      - type: bind
+        read_only: true
+        source: ./config.js
+        target: /home/node/app/config.js
+      - type: bind
+        read_only: true
+        source: ./index.js
+        target: /home/node/app/index.js
+      
+  database:
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: 
+    ports:
+      - "3306:3306"
+    volumes: 
+      - type: bind
+        read_only: true
+        source: ./INFOLOGGER.sql
+        target: /docker-entrypoint-initdb.d/INFOLOGGER.sql
+  phpmyadmin:
+    image: phpmyadmin
+    restart: unless-stopped
+    ports:
+      - 9090:80
+    environment:
+      - PMA_HOST=database
+  simulator: 
+    build:
+      target: simul
+    environment:
+      NODE_ENV: development
+    ports:
+      - "6102:6102"
+    # command: "npm run dev"
+    restart: "unless-stopped"
+    
+volumes:
+  database-data:
