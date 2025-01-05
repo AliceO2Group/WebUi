@@ -5,6 +5,7 @@ services:
     environment:
       NODE_ENV: development
       mariadb_host: database
+      infologger_host: simulator
     ports:
       - "8080:8080"
     command: "npm run dev"
@@ -56,7 +57,7 @@ services:
       NODE_ENV: development
     ports:
       - "6102:6102"
-    # command: "npm run dev"
+    command: "npm run simul"
     restart: "unless-stopped"
     
 volumes:
