@@ -28,7 +28,7 @@ module.exports = {
   // optional data source, comment object if not used
   // all options: https://github.com/mysqljs/mysql#connection-options
   mysql: {
-    host: '127.0.0.1',
+    host: process.env.mariadb_host ?? '127.0.0.1',
     user: 'root',
     password: 'root',
     database: 'INFOLOGGER',

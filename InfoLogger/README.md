@@ -90,6 +90,13 @@ mysql: {
 ```
 8. Run the InfoLogger and check for the following message in the console: `info: Connection to DB successfully established: 127.0.0.1:3306`
 
+## Docker development
+
+docker compose -f docker-compose.yaml -f docker-compose.dev.yml down -v
+docker compose -f docker-compose.yaml -f docker-compose.dev.yml up -d --build
+
+process.env.mariadb_host ?? '127.0.0.1'
+
 ## Dummy InfoLogger test server
 InfoLoggerServer can be simulated by running `npm run simul`. The dummy server binds `localhost:6102` endpoint.
 ## InfoLogger insights

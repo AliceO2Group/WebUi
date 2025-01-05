@@ -10,10 +10,10 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /* eslint-disable no-console */
-/* eslint-disable require-jsdoc */
+/* eslint-disable jsdoc/require-jsdoc */
 
 // Documentation:
 // https://nodejs.org/api/net.html#net_net_createserver_options_connectionlistener
@@ -36,12 +36,12 @@ const createServer = () => {
 
     function sendNextLog() {
       const log = fakeData[currentLogIndex % fakeData.length];
-      const timestamp = (new Date()).getTime() / 1000; // seconds
-      const nextLogTimeout = 100 - (Math.random() * 100); // [0 ; 500]ms
+      const timestamp = new Date().getTime() / 1000; // seconds
+      const nextLogTimeout = 100 - Math.random() * 100; // [0 ; 500]ms
 
       // switch protocol after each log sent to try both protocols
       if (currentLogIndex % 2 === 1) {
-        client.write(`*1.4#` +
+        client.write('*1.4#' +
           `${log.severity || ''}#` +
           `${log.level || ''}#` +
           `${timestamp || ''}#` +
@@ -59,7 +59,7 @@ const createServer = () => {
           `${log.errsource || ''}#` +
           `${log.message || ''}\r\n`);
       } else {
-        client.write(`*1.3#` +
+        client.write('*1.3#' +
           `${log.severity || ''}#` +
           `${log.level || ''}#` +
           `${timestamp || ''}#` +
@@ -71,7 +71,7 @@ const createServer = () => {
           `${log.facility || ''}#` +
           `${log.detector || ''}#` +
           `${log.partition || ''}#` +
-          `#` + // dest field
+          '#' + // dest field
           `${log.run || ''}#` +
           `${log.errcode || ''}#` +
           `${log.errline || ''}#` +
@@ -97,8 +97,8 @@ const createServer = () => {
   server.listen(port, () => {
     console.log(`InfoLoggerServer is running on port ${port}`);
   });
-  return server
-}
+  return server;
+};
 
 const closeServer = (server) => {
   try {
@@ -106,6 +106,6 @@ const closeServer = (server) => {
   } catch (err) {
     console.error(err);
   }
-}
+};
 
-module.exports = {createServer, closeServer};
+module.exports = { createServer, closeServer };
