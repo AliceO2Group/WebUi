@@ -92,10 +92,13 @@ mysql: {
 
 ## Docker development
 
-docker compose -f docker-compose.yaml -f docker-compose.dev.yml down -v
-docker compose -f docker-compose.yaml -f docker-compose.dev.yml up -d --build
+The development, test and simul docker image will take up about 1.35 GB, About 50% of that is due to puppeteers chromium requirement, the same reason why Electron apps are so big.
+Should you want to run the ILG with the status quo (your changes applied) you can use the following command:
+npm run docker:dev  (will run the ILG with Nodemon, a dummy database, the ILG simulator and phpMyAdmin).
+npm run docker:test (will run the ILG npm run test command inside a Docker container, use "docker logs --follow infologger-application-1" to see the results live).
+npm run docker:simul (will run an ILG simulator with the port open so that whenever you run the ILG it will have live mode available).
+npm run docker:cleanup (REMOVES all containers created with the above commands and their data).
 
-process.env.mariadb_host ?? '127.0.0.1'
 
 ## Dummy InfoLogger test server
 InfoLoggerServer can be simulated by running `npm run simul`. The dummy server binds `localhost:6102` endpoint.
