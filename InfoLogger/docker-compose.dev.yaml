@@ -35,14 +35,15 @@ services:
         read_only: true
         source: ./index.js
         target: /home/node/app/index.js
-      
   database:
+    image: mariadb:latest
+    restart: unless-stopped
     environment:
       MARIADB_ROOT_PASSWORD: root
-      MARIADB_DATABASE: 
-    ports:
-      - "3306:3306"
-    volumes: 
+      # uncomment the code below should you want to access the DB using a external program.
+    # ports:
+    # - "3306:3306"
+    volumes:
       - type: bind
         read_only: true
         source: ./INFOLOGGER.sql
@@ -63,15 +64,12 @@ services:
       - 9090:80
     environment:
       - PMA_HOST=database
-  simulator: 
+  simulator:
     build:
       target: simul
     environment:
       NODE_ENV: development
-    ports:
-      - "6102:6102"
-    command: "npm run simul"
     restart: "unless-stopped"
-    
+
 volumes:
   database-data:
