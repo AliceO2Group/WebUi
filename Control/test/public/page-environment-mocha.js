@@ -216,4 +216,64 @@ describe('`pageEnvironment` test-suite', async () => {
       assert.ok(calls['destroyEnvironment']);
     });
   });
+
+  describe('Tasks Per Host Panel', function() {
+    
+    describe('Check URL updates with state parameter', function() {
+      it('should update URL with state=["ERROR"] when clicking on ERROR column', async function() {
+        await page.goto(url + '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220&panel=flp', {waitUntil: 'networkidle0'}); // Adjust URL as needed
+
+        // Simulate clicking on a number in the ERROR column
+        await page.click('.flex-row.g1.flex-wrap.flex-grow-3 .btn.danger:nth-child(2)'); 
+        await page.waitForNavigation();
+
+        // Verify URL contains state=["ERROR"]
+        const url = page.url();
+        assert.ok(url.includes('state=%5B%22ERROR%22%5D')); // Encoded value for ["ERROR"]
+      });
+
+      it('should update URL with state=["CONFIGURED","ERROR"] when clicking on state buttons', async function() {
+        await page.goto(url + '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220&panel=flp', { waitUntil: 'networkidle0' }); 
+
+        // Simulate clicking on Configured and Error state buttons
+        await page.click('.flex-row.g1.flex-wrap.flex-grow-3 .btn.primary');
+        await page.click('.flex-row.g1.flex-wrap.flex-grow-3 .btn.danger:nth-child(2)'); 
+    
+        await page.waitForNavigation();
+
+        // Verify URL contains state=["CONFIGURED","ERROR"]
+        const url = page.url();
+        assert.ok(url.includes('state=%5B%22CONFIGURED%22%2C%22ERROR%22%5D')); // Encoded value for ["CONFIGURED","ERROR"]
+      });
+
+      it('should remove state parameter when all states are selected', async function() {
+        await page.goto(url + '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220&panel=flp', { waitUntil: 'networkidle0' }); 
+
+        // Simulate clicking on all state buttons to select all states
+        await page.click('.flex-row.g1.flex-wrap.flex-grow-3 .btn');
+        await page.waitForNavigation();
+
+        // Verify URL does not contain state parameter
+        const url = page.url();
+        assert.ok(!url.includes('state='));
+      });
+
+      it('should only display state parameter in task panels', async function() {
+        await page.goto(url + '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220&panel=flp', { waitUntil: 'networkidle0' });  
+        await page.waitForNavigation();
+
+        // Verify URL does not contain state parameter
+        const url = page.url();
+        assert.ok(!url.includes('state='));
+
+        // Simulate navigating to a task panel (e.g., FLP)
+        await page.click('#flp-pane');
+        await page.waitForNavigation();
+
+        // Verify URL contains state parameter
+        const urlWithState = page.url();
+        assert.ok(urlWithState.includes('state='));
+      });
+    });
+  });
 });
