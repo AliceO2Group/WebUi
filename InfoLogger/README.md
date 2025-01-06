@@ -92,11 +92,11 @@ mysql: {
 
 ## Docker development
 
-The development, test and simul docker image will take up about 1.35 GB, About 50% of that is due to puppeteers chromium requirement, the same reason why Electron apps are so big.
+The development, test and simul docker image will take up about 1.35 GB, about 50% of that is due to puppeteer's chromium requirement, the same reason why Electron apps are so big.
 
 Should you want to run the ILG with the status quo (your changes applied) you can use the following commands:
 
-1. npm run docker:dev  (will run the ILG with Nodemon, a dummy database, the ILG simulator and phpMyAdmin).
+1. npm run docker:dev  (will run the ILG with Nodemon, a development database, the ILG simulator and phpMyAdmin).
 2. npm run docker:test (will run the ILG npm run test command inside a Docker container and print the live log output).
 3. npm run docker:simul (will run an ILG simulator with the port open so that whenever you run the ILG it will have live mode available).
 4. npm run docker:cleanup (REMOVES all containers created with the above commands and their data).
