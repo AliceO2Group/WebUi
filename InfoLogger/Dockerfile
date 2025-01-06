@@ -1,6 +1,6 @@
 #
 # ---- Base ----
-FROM node:22-alpine3.21 AS base
+FROM node:22-alpine AS base
 
 RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 
@@ -49,26 +49,6 @@ FROM developmentdependencies AS test
     
 # Run start script as specified in package.json
 CMD [ "npm", "run", "test" ]
-    
-    # #
-    # # ---- Test parallel for CI ----
-    # FROM developmentdependencies AS test_parallel_ci
-    
-    # CMD [ "sh", "-c", "/opt/wait-for-it.sh -t 0 test_db:3306 -- npm run test:subset" ]
-    
-    # #
-    # # ---- Test parallel local ----
-    # FROM developmentdependencies AS test_parallel_local
-    
-    # CMD [ "sh", "-c", "/opt/wait-for-it.sh -t 0 test_db:3306 -- npm run test:subset-local" ]
-    
-    # #
-    # # ---- Coverage ----
-    # FROM developmentdependencies AS coverage
-    
-    # # Run start script as specified in package.json
-    # CMD [ "/opt/wait-for-it.sh", "-t", "0", "database:3306", "--", "npm", "run", "coverage" ]
-    
 
 # ---- Production Dependencies ----
 FROM base AS productiondependencies
@@ -79,12 +59,10 @@ COPY package*.json ./
 # Installs modules from package-lock.json, this ensures reproducible build.
 RUN npm --silent ci --production    
 
-# Install nodemon (for development only)
-RUN npm i nodemon
-
  # Copy all files, filtered by .dockerignore, to the container with added dev dependancies.
 COPY . .
 RUN rm -r ./test
+RUN rm eslint.config.js
 
 
 # ---- Simul ----
@@ -94,7 +72,7 @@ FROM developmentdependencies AS simul
 EXPOSE 6102
 
 # Run simul script as specified in package.json
-CMD [ "node", "run", "simul" ]
+CMD [ "npm", "run", "simul" ]
 
 # ---- Production ----
 FROM productiondependencies AS production
