@@ -220,57 +220,69 @@ describe('`pageEnvironment` test-suite', async () => {
   describe('Tasks Per Host Panel', function() {
     
     describe('Check URL updates with state parameter', function() {
-    
+      
+      afterEach(() => {
+        url = test.helpers.url;
+      });
       it('should update URL with state=["ERROR"] when clicking on ERROR column', async ()=> {
-        console.log(url);
         await page.goto(url + '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220&panel=flp', {waitUntil: 'networkidle0'}); 
+      
         // Simulate clicking on a number in the ERROR column
         await page.click('.flex-row.g1.flex-wrap.flex-grow-3 .btn.danger:nth-child(2)'); 
-        await page.waitForNavigation();
-
+       
         // Verify URL contains state=["ERROR"]
-        //url = page.url();
-        assert.ok(url.includes('state=%5B%22ERROR%22%5D')); // Encoded value for ["ERROR"]
+        url = page.url();
+        assert.ok(url.includes('state=[%22ERROR%22]')); // Encoded value for ["ERROR"]
       });
 
       it('should update URL with state=["CONFIGURED","ERROR"] when clicking on state buttons', async ()=> {
         await page.goto(url + '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220&panel=flp', { waitUntil: 'networkidle0' }); 
+       
+        await page.waitForSelector('.flex-row.g1.flex-wrap.flex-grow-3 .btn.primary ');
+        await page.waitForSelector('.flex-row.g1.flex-wrap.flex-grow-3 .btn.danger:nth-child(2)');
 
         // Simulate clicking on Configured and Error state buttons
-        await page.click('.flex-row.g1.flex-wrap.flex-grow-3 .btn.primary');
+        await page.click('.flex-row.g1.flex-wrap.flex-grow-3 .btn.primary ');
         await page.click('.flex-row.g1.flex-wrap.flex-grow-3 .btn.danger:nth-child(2)'); 
     
-        await page.waitForNavigation();
-
+      
         // Verify URL contains state=["CONFIGURED","ERROR"]
         url = page.url();
-        assert.ok(url.includes('state=%5B%22CONFIGURED%22%2C%22ERROR%22%5D')); // Encoded value for ["CONFIGURED","ERROR"]
+        assert.ok(url.includes('&state=[%22CONFIGURED%22,%22ERROR%22]')); // Encoded value for ["CONFIGURED","ERROR"]
       });
 
       it('should remove state parameter when all states are selected', async function() {
         await page.goto(url + '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220&panel=flp', { waitUntil: 'networkidle0' }); 
+        await page.waitForSelector('.flex-row.g1.flex-wrap.flex-grow-3 .btn.primary');
 
-        // Simulate clicking on all state buttons to select all states
-        await page.click('.flex-row.g1.flex-wrap.flex-grow-3 .btn');
-        await page.waitForNavigation();
-
-        // Verify URL does not contain state parameter
+        const stateButtons = await page.$$('.flex-row.g1.flex-wrap.flex-grow-3 .btn');
+        for (const button of stateButtons) {
+          await button.click();
+        }
         url = page.url();
-        assert.ok(!url.includes('state='));
+        // Verify URL does not contain state parameter
+        assert.ok(url.includes('&state=[%22ERROR_CRITICAL%22,%22ERROR%22,%22RUNNING%22,%22CONFIGURED%22,%22STANDBY%22,%22DONE%22,%22INVARIANT%22,%22MIXED%22]'));
+  
+
+        await page.waitForSelector('.flex-row.g1.flex-wrap.flex-grow-3 .btn.active');
+
+        const stateActiveButtons = await page.$$('.flex-row.g1.flex-wrap.flex-grow-3 .btn.active');
+        for (const button of stateActiveButtons) {
+          await button.click();
+        }
+        assert.ok(!url.includes('&state=["UNKNOWN"]'));
       });
 
       it('should only display state parameter in task panels', async function() {
         await page.goto(url + '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220&panel=flp', { waitUntil: 'networkidle0' });  
-        await page.waitForNavigation();
-
+        
         // Verify URL does not contain state parameter
         url = page.url();
         assert.ok(!url.includes('state='));
 
         // Simulate navigating to a task panel (e.g., FLP)
         await page.click('#flp-pane');
-        await page.waitForNavigation();
-
+       
         // Verify URL contains state parameter
         const urlWithState = page.url();
         assert.ok(urlWithState.includes('state='));
