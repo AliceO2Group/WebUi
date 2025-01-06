@@ -337,29 +337,37 @@ export default class Model extends Observable {
       this.getUserProfile();
       this.log.filter.fromObject(JSON.parse(params.q.replaceAll('\n', '\\n')));
       if (params.live == 'true') {
-        while (
-          this.guiReadyToUse.isLoading()
-          || !this.frameworkInfo.isSuccess()
-          || !this.frameworkInfo.payload.infoLoggerServer.status.ok
-        ) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-        try {
-          this.log.liveStart();
-          this.setLiveButton(BUTTON.SUCCESS_ACTIVE, iconMediaStop());
-          this.setQueryButton(BUTTON.DEFAULT);
-          this.log.enableAutoScroll();
-          setBrowserTabTitle(`${window.ILG.name} LIVE`);
-          this.notify();
-        } catch (error) {
-          this.notification.show(error.toString(), 'danger', 3000);
-        }
+        await this.loadLiveMode();
       }
     } else if (!params.q) {
       this.getUserProfile();
       this.log.filter.resetCriteria();
+      if (params.live == 'true') {
+        await this.loadLiveMode();
+      }
     } else {
       this.getUserProfile();
+    }
+  }
+
+  /**
+   * Attempt to load into the live mode of the ILG
+   */
+  async loadLiveMode() {
+    while (this.guiReadyToUse.isLoading()
+      || !this.frameworkInfo.isSuccess()
+      || !this.frameworkInfo.payload.infoLoggerServer.status.ok) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    try {
+      this.log.liveStart();
+      this.setLiveButton(BUTTON.SUCCESS_ACTIVE, iconMediaStop());
+      this.setQueryButton(BUTTON.DEFAULT);
+      this.log.enableAutoScroll();
+      setBrowserTabTitle(`${window.ILG.name} LIVE`);
+      this.notify();
+    } catch (error) {
+      this.notification.show(error.toString(), 'danger', 3000);
     }
   }
 

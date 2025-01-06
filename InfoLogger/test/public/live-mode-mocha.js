@@ -106,15 +106,25 @@ describe('Live Mode test-suite', async () => {
     assert.ok(isUserNameMatching);
   });
 
-  it('should successfully enable LIVE mode from url parameter', async () => {
-    await page.goto(`${baseUrl}?live=true`, { waitUntil: 'networkidle0' });
-
-    const guiReady = await page.evaluate(() => window.model.guiReadyToUse);
+  it('should successfully enable LIVE mode from url parameter with defined filter', async () => {
+    await page.goto(`${baseUrl}?q={"severity":{"in":"I W E F"}}&live=true`, { waitUntil: 'networkidle0' });
+    const liveButtonClasses = await page.evaluate(() => window.model.liveButtonType);
     const search = decodeURIComponent(await page.evaluate(() => window.location.search));
 
-    // for now, check if GuiReadyToUse is defined, later check if it is of the type SuccessRemoteData
-    assert.ok(guiReady !== undefined);
-    // for now, check if redirected to default page
+    // Check if live mode is active.
+    assert.strictEqual(liveButtonClasses, 'btn-success active');
+    // Check if filter is applied
+    assert.strictEqual(search, '?q={"severity":{"in":"I W E F"}}');
+  });
+
+  it('should successfully enable LIVE mode from url parameter with default filter', async () => {
+    await page.goto(`${baseUrl}?live=true`, { waitUntil: 'networkidle0' });
+    const liveButtonClasses = await page.evaluate(() => window.model.liveButtonType);
+    const search = decodeURIComponent(await page.evaluate(() => window.location.search));
+
+    // Check if live mode is active.
+    assert.strictEqual(liveButtonClasses, 'btn-success active');
+    // Check if redirected to default page
     assert.strictEqual(search, '?q={"severity":{"in":"I W E F"}}');
   });
 
