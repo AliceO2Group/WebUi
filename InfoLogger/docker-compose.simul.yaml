@@ -1,0 +1,9 @@
+services:
+  simulator:
+    build:
+      target: simul
+    environment:
+      NODE_ENV: development
+    ports:
+      - "6102:6102"
+    restart: "unless-stopped"
