@@ -15,7 +15,7 @@
 /* global JSROOT */
 
 import { RemoteData } from '/js/src/index.js';
-import {jsonFetch} from "./utils/jsonFetch.js";
+import { jsonFetch } from './utils/jsonFetch.js';
 
 /**
  * Quality Control Object service to get/send data
@@ -182,7 +182,6 @@ export default class QCObjectService {
     //If request succeeds call RemoteData.success(), else RemoteData.failure()
     // this.requests = response.ok ? RemoteData.success(response.result) : RemoteData.failure(response.result.message);
 
-    // console.log(response.blob());
     // console.log(`Found ${id}, downloaded ${response.ok}, ${response.blob().size} downloaded.`);
     return response.blob();
   }
