@@ -36,7 +36,7 @@ services:
         source: ./index.js
         target: /home/node/app/index.js
   database:
-    image: mariadb:latest
+    image: mariadb:11.6.2
     restart: unless-stopped
     environment:
       MARIADB_ROOT_PASSWORD: root
@@ -54,7 +54,7 @@ services:
       timeout: 20s
       retries: 20
   phpmyadmin:
-    image: phpmyadmin
+    image: phpmyadmin:5.2.1
     restart: unless-stopped
     depends_on:
       database:
