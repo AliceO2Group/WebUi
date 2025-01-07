@@ -35,12 +35,12 @@ export const header = (model, title) => h('.flex-row.items-center.p2.g2', [
  */
 function getBackToQCGButton(model) {
   const { layoutId = undefined } = model.router.params;
-  const { objectViewModel: { filter } } = model;
+  const { objectViewModel: { filter, selected } } = model;
   let title = 'Back';
   let href = '?page=objectTree';
   if (layoutId) {
     title = 'Back to layout';
-    href = `?page=layoutShow&layoutId=${layoutId}${getUrlPathFromObject(filter)}`;
+    href = `?page=layoutShow&layoutId=${layoutId}${getUrlPathFromObject(filter)}${getTabFromObject(selected)}`;
   }
 
   return h(
@@ -86,4 +86,14 @@ function getCopyURLToClipboardButton(model) {
     },
     [iconBook(), ' ', 'Copy URL'],
   ));
+}
+
+/**
+ * Extract tab name from the selected object
+ * @param {RemoteData} selected - contains the selected object
+ * @returns {string} - name of the tab where the object is placed or empty string if not applicable
+ */
+function getTabFromObject(selected) {
+  const tabName = selected?.payload?.tabName ?? '';
+  return tabName ? `&tab=${tabName}` : '';
 }
