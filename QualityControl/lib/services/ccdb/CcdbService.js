@@ -24,7 +24,8 @@ import http from 'http';
 const {
   LAST_MODIFIED, VALID_FROM, VALID_UNTIL, CREATED, PATH, SIZE, FILE_NAME, METADATA, ID,
 } = CCDB_FILTER_FIELDS;
-const TMP_DIR = `${os.homedir()}/.${os.tmpdir().replace('/', '')}/root_obj`; // Format on Linux is `/home/$USER/.tmp/root_obj`
+// Format on Linux is `/home/$USER/.tmp/root_obj`
+const TMP_DIR = `${os.homedir()}/.${os.tmpdir().replace('/', '')}/root_obj`;
 const logger = LogManager.getLogger('QcDownloadService');
 const fsp = fs.promises;
 
@@ -114,24 +115,26 @@ export class CcdbService {
     const destination = `${TMP_DIR}/${request_id}/${object_id}.root`;
 
     try {
-      const file = fs.createWriteStream(destination);
-      logger.infoMessage('Downloading Files...'); //TODO: Include ID or something more descriptive
+      if (fs.existsSync(`${TMP_DIR}/${request_id}`)) {
+        const file = fs.createWriteStream(destination);
+        logger.infoMessage('Downloading Files...'); //TODO: Include ID or something more descriptive
 
-      await new Promise((resolve, reject) => {
-        http.get(url, { method: 'GET' }, (response) => {
-          response.pipe(file);
-          file.on('finish', () => {
-            file.close();
-            logger.infoMessage(`Downloaded file! ${file.path}`); //TODO: Include ID or something more descriptive
-            resolve(true);
-          });
-        }).on('error', async () => {
-          // Delete file asynchronously. No response handler, just need to hook into it to show that the process failed.
-          await fsp.unlink(destination).then((err) => {
-            reject(err); //TODO: Include ID or something more descriptive
+        await new Promise((resolve, reject) => {
+          http.get(url, { method: 'GET' }, (response) => {
+            response.pipe(file);
+            file.on('finish', () => {
+              file.close();
+              logger.infoMessage(`Downloaded file! ${file.path}`); //TODO: Include ID or something more descriptive
+              resolve(true);
+            });
+          }).on('error', async () => {
+            // Delete file asynchronously. No response handler, just need to hook into it to show that process failed.
+            await fsp.unlink(destination).then((err) => {
+              reject(err); //TODO: Include ID or something more descriptive
+            });
           });
         });
-      });
+      }
     } catch (err) {
       logger.errorMessage(err, LogLevel.DEVELOPER); //TODO: Include ID or something more descriptive
     }

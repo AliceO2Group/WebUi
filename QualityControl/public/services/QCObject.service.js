@@ -15,6 +15,7 @@
 /* global JSROOT */
 
 import { RemoteData } from '/js/src/index.js';
+import {jsonFetch} from "./utils/jsonFetch.js";
 
 /**
  * Quality Control Object service to get/send data
@@ -161,16 +162,18 @@ export default class QCObjectService {
 
   /**
    * Requests the backend to send a request to the CCDB for the root object stored at ${location} and returns it.
-   * @param {string} id - is the id of the root object to download
-   * @returns {Promise<void>}
+   * @param {string} id - The id of the root object to download
+   * @returns {Blob}    - The file data being downloaded
    */
   async downloadRootObject(id) {
     // await this.model.loader.loader(`/api/${location}`)
     this.model.toggleDownloadingState();
+
+    const uuid = crypto.randomUUID();
     // const { result, ok } = await this.model.loader.get(`/api/objects/download/${id}`).finally(() => {
     //   this.model.toggleDownloadingState();
     // });
-    const response = await fetch(`/api/objects/download/${id}`, {
+    const response = await jsonFetch(`/api/objects/download/${id}/${uuid}`, {
       method: 'GET',
     }).finally(() => {
       this.model.toggleDownloadingState();

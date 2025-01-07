@@ -67,11 +67,11 @@ export const setupQcModel = () => {
   const ccdbService = CcdbService.setup(config.ccdb);
   statusService.dataService = ccdbService;
   statusService.onlineService = consulService;
-
-  const qcObjectService = new QcObjectService(ccdbService, jsonDb, { openFile, toJSON }); //TODO: Add QcDownloadService here?
+  //TODO: Add QcDownloadService here?
+  const qcObjectService = new QcObjectService(ccdbService, jsonDb, { openFile, toJSON });
   qcObjectService.refreshCache();
 
-  const objectController = new ObjectController(qcObjectService, consulService);
+  const objectController = new ObjectController(qcObjectService, qcDownloadService, ccdbService, consulService);
   const intervalsService = new IntervalsService();
 
   intervalsService.register(

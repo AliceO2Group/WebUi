@@ -15,6 +15,9 @@
 import { getObjectsNameFromConsulMap } from '../../common/library/qcObject/utils.js';
 import { errorHandler } from './../utils/utils.js';
 
+const CCDB_ETAG_TEST_PRIMARY = '8cd8dfca-02fd-11ef-97e1-c0a80209250c';
+const REQ_ID = '31hI8934a981438y';
+
 /**
  * Gateway for all QC Objects requests
  * @class
@@ -23,14 +26,26 @@ export class ObjectController {
   /**
    * Setup Object Controller:
    * - CcdbService - retrieve data about objects
-   * @param {QCObjectService} objService - objService to be used for retrieval of information
-   * @param {ConsulService} onlineService - retrieve information on which objects are currently generated
+   * @param {QCObjectService}   objService    - objService to be used for retrieval of information
+   * @param {QcDownloadService} qcDlService   - qcDlService to be used for retrieval of QcObjects
+   * @param {CcdbService}       ccdbService   - ccdbService to be used for retrieval of QcObjects
+   * @param {ConsulService}     onlineService - retrieve information on which objects are currently generated
    */
-  constructor(objService, onlineService) {
+  constructor(objService, qcDlService, ccdbService, onlineService) {
     /**
      * @type {QCObjectService}
      */
     this._objService = objService;
+
+    /**
+     * @type {QcDownloadService}
+     */
+    this._qcDlService = qcDlService;
+
+    /**
+     * @type {CcdbService}
+     */
+    this._ccdbService = ccdbService;
 
     /**
      * @type {ConsulService}
@@ -156,18 +171,35 @@ export class ObjectController {
    */
   async downloadObjectById(req, res) {
     const qcgId = req.params?.id;
-    // const { validFrom, filters, id } = req.query;
+    const uuid = req.params?.uuid;
+
     if (!qcgId) {
       res.status(400).json({ message: 'Invalid URL parameters: missing object ID' });
     } else {
       try {
         //TODO: Make this return a blob where first the path is retrieved of the object
-        return await res
-          .status(200)
-          .download('./test/demoData/layout/TObject_1728916584672.root', 'TObject_1728916584672.root', (err) => {
-            if (err)
-              console.log(`err ${err}`);
-          });
+        await this._qcDlService.initTmpDir((err) => {
+          if (err) {
+            console.log(`err1 ${err}`);
+          }
+        });
+        await this._qcDlService.createNewRequestDir(`${uuid}_${qcgId}`);
+        await this._ccdbService.sendDownloadRequest(CCDB_ETAG_TEST_PRIMARY, `${uuid}_${qcgId}`);
+        await this._qcDlService.retrieveFilesFromSubDir(`${uuid}_${qcgId}`, (err) => {
+          if (err) {
+            console.log(`err2 ${err}`);
+          }
+        });
+        return await res.status(200).download(`../../.tmp/root_obj/${uuid}_${qcgId}/tarball.tar`, (err) => {
+          if (err)
+            console.log(`err3: ${err}`);
+        });
+        // return await res
+        //   .status(200)
+        //   .download('./test/demoData/layout/TObject_1728916584672.root', 'TObject_1728916584672.root', (err) => {
+        //     if (err)
+        //       console.log(`err ${err}`);
+        //   });
       } catch (error) {
         errorHandler(error, 'Unable to identify object or read it by qcg id', res, 502, 'object');
       }

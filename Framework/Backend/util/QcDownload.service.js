@@ -21,6 +21,7 @@ const DIR_PERMS = Object.freeze({
 });
 const CODES = Object.freeze({
   CLEARED_CORPSES: 'Cleared file corpses from previous process',
+  UNNECESSARY_ARCHIVE: 'Singular file found, skipping generation of tarball...',
   NO_MATCHES: 'No matches for file',
 });
 const TMP_DIR = `${os.homedir()}/.${os.tmpdir().replace('/', '')}/root_obj`; // Format on Linux is `/home/$USER/.tmp/root_obj`
@@ -87,8 +88,9 @@ class QcDownloadService {
     await fsp.mkdir(TMP_DIR, DIR_PERMS.OWNER_RW && { recursive: true }).then((err) => {
       if (err) {
         return err;
+      } else {
+        logger.infoMessage(`Made dir '${TMP_DIR}'`);
       }
-      logger.infoMessage(`Made dir '${TMP_DIR}'`);
       this.prepareRootTmpRemovalOnSysExit(TMP_DIR, callback);
     });
   }
@@ -98,16 +100,20 @@ class QcDownloadService {
    * @param {string} request_id The requester's id used for the subdirectory under which the files are stored temporarily.
    * @returns {void}
    */
-  createNewRequestDir(request_id) {
+  async createNewRequestDir(request_id) {
     logger.infoMessage('Creating request directory');
     const dir = `${TMP_DIR}/${request_id}`;
 
-    fsp.mkdir(dir, DIR_PERMS.OWNER_RW && { recursive: true }).then((err) => {
+    if (fs.existsSync(dir)) {
+      console.log(`DIR ${dir} found.`);
+    }
+    await fsp.mkdir(dir, DIR_PERMS.OWNER_RW && { recursive: true }).then((err) => {
       if (err) {
-        logger.errorMessage(err, LogLevel.DEVELOPER);
+        logger.errorMessage(`Unable to make request directory; ${err}`, LogLevel.DEVELOPER);
+      } else {
+        logger.infoMessage('Created request directory');
+        this.scheduleRequestDirRemoval(dir);
       }
-      logger.infoMessage('Created request directory');
-      this.scheduleRequestDirRemoval(dir);
     });
   }
 
@@ -167,9 +173,11 @@ class QcDownloadService {
         matches_found.push(entry);
       }
     })();
-    if (matches_found.length > 0) {
+    if (matches_found.length > 1) {
       this.generateTarball(matches_found, `${path}/${this.tarFileName}.tar`);
       //Should return fs.findFile or something;
+    } else if (matches_found.length === 1) {
+      return callback(CODES.UNNECESSARY_ARCHIVE);
     } else {
       return callback(CODES.NO_MATCHES);
     }
@@ -193,8 +201,6 @@ class QcDownloadService {
     );
   }
 
-
-
   /**
    * Returns the tarball generated previously.
    * @param {string} request_id The requester's id used for the subdirectory the file is stored in.
@@ -207,7 +213,7 @@ class QcDownloadService {
     if (fs.existsSync(file)) {
       fs.readFile(file, (err, data) => {
         if (err) {
-          logger.errorMessage(err, LogLevel.DEVELOPER);
+          logger.errorMessage(`Couldn't return tarball; ${err}`, LogLevel.DEVELOPER);
         }
         if (data != null) {
           dataHolder = data;
