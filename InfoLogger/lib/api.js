@@ -16,6 +16,7 @@ const { InfoLoggerReceiver } = require('@aliceo2/web-ui');
 
 const { StatusController } = require('./controller/StatusController.js');
 const { QueryController } = require('./controller/QueryController.js');
+const { ConfigController } = require('./controller/ConfigController.js');
 const { LiveService } = require('./services/LiveService.js');
 const { QueryService } = require('./services/QueryService.js');
 
@@ -42,6 +43,7 @@ module.exports.attachTo = async (http, ws) => {
     queryService.checkConnection(1, false);
   }
   const queryController = new QueryController(queryService);
+  const configController = new ConfigController();
 
   const statusController = new StatusController(config, projPackage, ws);
   statusController.querySource = queryService;
@@ -65,6 +67,8 @@ module.exports.attachTo = async (http, ws) => {
 
   http.get('/status/gui', statusController.getILGStatus.bind(statusController), { public: true });
   http.get('/getFrameworkInfo', statusController.frameworkInfo.bind(statusController));
+
+  http.get('/getBKPUrl', configController.getBKPUrl.bind(configController));
 
   http.get('/getUserProfile', (req, res) => profileService.getUserProfile(req, res));
   http.get('/getProfile', (req, res) => profileService.getProfile(req, res));
