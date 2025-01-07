@@ -16,6 +16,52 @@ import { h, iconX } from '/js/src/index.js';
 
 import { severityClass, severityLabel } from './severityUtils.js';
 
+/**
+ * Button element that will link to a pre-filled Bookkeeping entry.
+ * @param logItem
+ * @param model
+ * @returns {h} button with the link.
+ */
+function BKPButton(model) {
+  const BKPPreparedUrl = GenerateBKPUrl(model.BKPUrl, model.log.item);
+  console.log(BKPPreparedUrl);
+  const button = h('button', model.BKPUrl);
+  return button;
+}
+
+/**
+ * Generates a Bookkeeping url pre-filled with the required search parameters
+ * to prepare an entry in the Bookkeeping WebUI.
+ * @param model model
+ * @param BKPUrl Bookkeeping server URL
+ * @param logItem Individual log item.
+ * @returns {string} pre-filled URL.
+ */
+function GenerateBKPUrl(BKPUrl, logItem) {
+  let BKPPreparedUrl = BKPUrl;
+  const BKPUrlParameters = {
+    runNumbers: logItem.run !== undefined ? [logItem.run] : null,
+    // lhcFillNumbers: logItem.run !== undefined ? [logItem.run] : null,
+    templateKey: 'ILG-keepthebook',
+    issueDescription: logItem.message ?? null,
+    detectorOrSubsystem: logItem.system ?? null,
+  };
+
+  let parametercount = 1;
+  for (const [key, value] of Object.entries(BKPUrlParameters)) {
+    if (value != null) {
+      if (parametercount == 1) {
+        BKPPreparedUrl += `/?${key}=${value}`;
+        parametercount ++;
+      } else {
+        const paramValue = new URLSearchParams(value).toString();
+        BKPPreparedUrl += `&${key}=${paramValue}`;
+      }
+    }
+  }
+  return BKPPreparedUrl;
+}
+
 export default (model) => model.log.item ? h('', [
   h(
     'table.table.f7.table-sm',
@@ -55,6 +101,7 @@ export default (model) => model.log.item ? h('', [
       h('tr', h('td', 'ErrCode'), h('td', model.log.item.errcode)),
       h('tr', h('td', 'ErrLine'), h('td', model.log.item.errline)),
       h('tr', h('td', 'ErrSource'), h('td', model.log.item.errsource)),
+      h('tr', h('td', 'Create BKP entry'), h('td', BKPButton(model))),
     ]),
   ),
   h('.p2.f7', { style: 'word-break: break-word' }, model.log.item.message),
