@@ -19,10 +19,11 @@ const { UnauthorizedAccessError } = require('./UnauthorizedAccessError.js');
 
 /**
  * @typedef GrpcError
- * also known as gRPC Status Object
+ * also known as gRPC Status Object https://grpc.github.io/grpc/node/grpc.html#~StatusObject
  *
  * @property {number} code - code of the gRPC Status object
- * @property {string} message - message of the gRPC Status object
+ * @property {string} message - message of the gRPC Status object / includes code as well in the string
+ * @property {string} details - details of the gRPC Status object
  */
 
 /**
@@ -33,21 +34,21 @@ const { UnauthorizedAccessError } = require('./UnauthorizedAccessError.js');
  * @returns {Error}
  */
 const grpcErrorToNativeError = (error) => {
-  const { code, message } = error;
+  const { code, details } = error;
 
   switch (code) {
     case 3:
-      return new InvalidInputError(message);
+      return new InvalidInputError(details);
     case 4:
-      return new TimeoutError(message);
+      return new TimeoutError(details);
     case 5:
-      return new NotFoundError(message);
+      return new NotFoundError(details);
     case 7:
-      return new UnauthorizedAccessError(message);
+      return new UnauthorizedAccessError(details);
     case 14:
-      return new ServiceUnavailableError(message);
+      return new ServiceUnavailableError(details);
     default:
-      return new Error(message);
+      return new Error(details);
   }
 };
 
