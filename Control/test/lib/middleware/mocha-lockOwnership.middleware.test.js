@@ -14,6 +14,8 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
+const { NotFoundError, TimeoutError } = require('@aliceo2/web-ui');
+
 const {lockOwnershipMiddleware} = require('../../../lib/middleware/lockOwnership.middleware');
 const {LockService} = require('../../../lib/services/Lock.service.js');
 const {EnvironmentService} = require('../../../lib/services/Environment.service.js');
@@ -42,10 +44,7 @@ describe('`LockOwnership` middleware test suite', () => {
     };
 
     const environmentServiceStub = sinon.createStubInstance(EnvironmentService, {
-      getEnvironment: sinon.stub().rejects({
-        code: 5,
-        details: 'Environment not found',
-      })
+      getEnvironment: sinon.stub().rejects(new NotFoundError('Environment not found'))
     });
 
     await lockOwnershipMiddleware(null, environmentServiceStub)(req, res);
@@ -63,10 +62,7 @@ describe('`LockOwnership` middleware test suite', () => {
     };
 
     const environmentServiceStub = sinon.createStubInstance(EnvironmentService, {
-      getEnvironment: sinon.stub().rejects({
-        code: 5,
-        details: 'Environment not found',
-      })
+      getEnvironment: sinon.stub().rejects(new NotFoundError('Environment not found'))
     });
 
     await lockOwnershipMiddleware(null, environmentServiceStub)(req, res);
@@ -84,10 +80,7 @@ describe('`LockOwnership` middleware test suite', () => {
     };
 
     const environmentServiceStub = sinon.createStubInstance(EnvironmentService, {
-      getEnvironment: sinon.stub().rejects({
-        code: 4,
-        details: 'Operation timeout',
-      })
+      getEnvironment: sinon.stub().rejects(new TimeoutError('Operation timeout'))
     });
 
     await lockOwnershipMiddleware(null, environmentServiceStub)(req, res);

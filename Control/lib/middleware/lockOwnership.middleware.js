@@ -11,8 +11,8 @@
  *  or submit itself to any jurisdiction.
  */
 
+const {LogManager} = require('@aliceo2/web-ui');
 const {User} = require('../dtos/User');
-const {grpcErrorToNativeError} = require('../errors/grpcErrorToNativeError');
 const {updateExpressResponseFromNativeError} = require('../errors/updateExpressResponseFromNativeError');
 
 /**
@@ -37,10 +37,11 @@ const lockOwnershipMiddleware = (lockService, environmentService) => {
     let detectors = [];
     try {
       const environment = await environmentService.getEnvironment(id);
-      detectors = environment.includedDetectors;
+      detectors = environment?.includedDetectors ?? [];
     } catch (error) {
-      console.error(error);
-      updateExpressResponseFromNativeError(res, grpcErrorToNativeError(error));
+      const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/lock-ownership-middleware`);
+      logger.errorMessage(error);
+      updateExpressResponseFromNativeError(res, error);
       return;
     }
     try {
@@ -50,7 +51,8 @@ const lockOwnershipMiddleware = (lockService, environmentService) => {
         next();
       }
     } catch (error) {
-      console.error(error);
+      const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/lock-ownership-middleware`);
+      logger.errorMessage(error);
       updateExpressResponseFromNativeError(res, error);
     }
   };
