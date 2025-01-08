@@ -13,7 +13,7 @@
 */
 
 const {isRoleSufficient} = require('../common/role.enum.js');
-const {UnauthorizedAccessError} = require('../errors/UnauthorizedAccessError.js');
+const {UnauthorizedAccessError} = require('@aliceo2/web-ui');
 const {updateExpressResponseFromNativeError} = require('../errors/updateExpressResponseFromNativeError.js');
 
 /**

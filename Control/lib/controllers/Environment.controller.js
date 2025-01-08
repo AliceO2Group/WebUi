@@ -11,12 +11,10 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-const {LogManager, LogLevel} = require('@aliceo2/web-ui');
+const {LogManager, LogLevel, InvalidInputError, UnauthorizedAccessError} = require('@aliceo2/web-ui');
 const LOG_FACILITY = 'cog/env-ctrl';
 const {EnvironmentTransitionType} = require('./../common/environmentTransitionType.enum.js');
 const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
-const {InvalidInputError} = require('./../errors/InvalidInputError.js');
-const {UnauthorizedAccessError} = require('./../errors/UnauthorizedAccessError.js');
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 const {User} = require('./../dtos/User.js');
 

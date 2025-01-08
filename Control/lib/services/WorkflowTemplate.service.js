@@ -12,8 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
+const {NotFoundError} = require('@aliceo2/web-ui');
+
 const {grpcErrorToNativeError} = require('../errors/grpcErrorToNativeError.js');
-const {NotFoundError} = require('./../errors/NotFoundError.js');
 const RUNTIME_COMPONENT = 'COG';
 const RUNTIME_CONFIGURATION = 'COG-v1';
 const RUNTIME_KEY = 'workflow-mappings';

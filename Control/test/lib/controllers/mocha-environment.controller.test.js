@@ -15,9 +15,9 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
+const {NotFoundError} = require('@aliceo2/web-ui');
 
 const {EnvironmentController} = require('../../../lib/controllers/Environment.controller.js');
-const {NotFoundError} = require('../../../lib/errors/NotFoundError.js');
 
 describe('EnvironmentController test suite', () => {
   const ENVIRONMENT_NOT_FOUND_ID = '2432ENV404';

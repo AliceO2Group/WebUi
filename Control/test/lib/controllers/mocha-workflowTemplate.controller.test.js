@@ -15,9 +15,9 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
+const {NotFoundError} = require('@aliceo2/web-ui');
 
 const {WorkflowTemplateController} = require('../../../lib/controllers/WorkflowTemplate.controller.js');
-const {NotFoundError} = require('../../../lib/errors/NotFoundError.js');
 
 describe('WorkflowController test suite', () => {
   const res = {

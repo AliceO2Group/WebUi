@@ -11,10 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-const {UnauthorizedAccessError} = require('./UnauthorizedAccessError.js');
-const {InvalidInputError} = require('./InvalidInputError.js');
-const {NotFoundError} = require('./NotFoundError.js');
-const {TimeoutError} = require('./TimeoutError.js');
+const {UnauthorizedAccessError, InvalidInputError, NotFoundError, TimeoutError} = require('@aliceo2/web-ui');
 
 /**
  * Update (in place) the given Express response considering a given error

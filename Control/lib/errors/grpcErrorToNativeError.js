@@ -11,9 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-const {NotFoundError} = require('./NotFoundError.js');
-const {InvalidInputError} = require('./InvalidInputError.js');
-const {TimeoutError} = require('./TimeoutError.js');
+const {NotFoundError, InvalidInputError, TimeoutError} = require('@aliceo2/web-ui');
 
 /**
  * Convert a gRPC error to native error

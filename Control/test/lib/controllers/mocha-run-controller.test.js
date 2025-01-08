@@ -17,7 +17,7 @@ const assert = require('assert');
 const sinon = require('sinon');
 
 const {RunController} = require('../../../lib/controllers/Run.controller.js');
-const {TimeoutError} = require('../../../lib/errors/TimeoutError.js');
+const {TimeoutError} = require('@aliceo2/web-ui');
 
 describe(`'RunController' test suite`, () => {
   const res = {

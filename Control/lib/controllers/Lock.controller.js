@@ -12,9 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
-const {InvalidInputError} = require('./../errors/InvalidInputError.js');
-const {DetectorLockAction} = require('./../common/lock/detectorLockAction.enum.js');
-const {LogManager, LogLevel} = require('@aliceo2/web-ui');
+const {LogManager, LogLevel, InvalidInputError} = require('@aliceo2/web-ui');
+
+const { DetectorLockAction } = require('./../common/lock/detectorLockAction.enum.js');
 const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 const {User} = require('./../dtos/User.js');
 
