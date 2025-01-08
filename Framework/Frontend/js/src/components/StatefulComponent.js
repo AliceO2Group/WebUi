@@ -35,7 +35,6 @@ export class StatefulComponent extends Observable {
     _renderer = renderer;
   }
 
-  // eslint-disable-next-line valid-jsdoc
   /**
    * @inheritDoc
    */

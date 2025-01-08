@@ -37,8 +37,8 @@ export { default as Loader } from './Loader.js';
 export { default as BrowserStorage } from './BrowserStorage.js';
 
 // Reusable components
-export {StatefulComponent} from './components/StatefulComponent.js';
-export {CopyToClipboardComponent} from './components/CopyToClipboardComponent.js';
+export { StatefulComponent } from './components/StatefulComponent.js';
+export { CopyToClipboardComponent } from './components/CopyToClipboardComponent.js';
 
 // All icons helpers, namespaced with prefix 'icon*'
 export * from './icons.js';

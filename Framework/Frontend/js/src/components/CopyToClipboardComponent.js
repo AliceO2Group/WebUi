@@ -11,9 +11,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import {StatefulComponent} from './StatefulComponent.js';
-import {iconCheck, iconLinkIntact} from '../icons.js';
-import {h} from '../renderer.js';
+import { StatefulComponent } from './StatefulComponent.js';
+import { iconCheck, iconLinkIntact } from '../icons.js';
+import { h } from '../renderer.js';
 
 /**
  * Represents a component that allows copying text to the clipboard.
@@ -96,14 +96,14 @@ export class CopyToClipboardComponent extends StatefulComponent {
    * @returns {vnode} The copyToClipboard button component
    */
   view(vnode) {
-    const {attrs, children} = vnode;
-    const {value: clipboardTargetValue = '', id} = attrs;
+    const { attrs, children } = vnode;
+    const { value: clipboardTargetValue = '', id } = attrs;
     let available = true;
     let message = '';
 
     try {
       this.checkClipboardAvailability();
-    } catch ({message: errorMessage}) {
+    } catch ({ message: errorMessage }) {
       available = false;
       message = errorMessage;
     }
