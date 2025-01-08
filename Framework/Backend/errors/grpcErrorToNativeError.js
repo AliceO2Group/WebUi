@@ -31,24 +31,25 @@ const { UnauthorizedAccessError } = require('./UnauthorizedAccessError.js');
  * Code List source: https://grpc.github.io/grpc/core/md_doc_statuscodes.html
  *
  * @param {GrpcError} error - error object from gRPC Client library
+ * @param {Boolean} includeStatusCode - whether to error message field or details field
  * @returns {Error}
  */
-const grpcErrorToNativeError = (error) => {
-  const { code, details } = error;
+const grpcErrorToNativeError = (error, includeStatusCode = false) => {
+  const { code, details, message } = error;
 
   switch (code) {
     case 3:
-      return new InvalidInputError(details);
+      return new InvalidInputError(includeStatusCode ? message : details);
     case 4:
-      return new TimeoutError(details);
+      return new TimeoutError(includeStatusCode ? message : details);
     case 5:
-      return new NotFoundError(details);
+      return new NotFoundError(includeStatusCode ? message : details);
     case 7:
-      return new UnauthorizedAccessError(details);
+      return new UnauthorizedAccessError(includeStatusCode ? message : details);
     case 14:
-      return new ServiceUnavailableError(details);
+      return new ServiceUnavailableError(includeStatusCode ? message : details);
     default:
-      return new Error(details);
+      return new Error(includeStatusCode ? message : details);
   }
 };
 
