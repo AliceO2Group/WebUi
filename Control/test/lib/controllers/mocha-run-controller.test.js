@@ -79,7 +79,11 @@ describe(`'RunController' test suite`, () => {
       );
       await runController.getCalibrationRunsHandler({}, res);
       assert.ok(res.status.calledWith(500));
-      assert.ok(res.json.calledWith({message: 'Unable to retrieve such runs'}));
+      assert.ok(res.json.calledWith({
+        message: 'Unable to retrieve such runs',
+        status: 500,
+        title: 'Unknown Error'
+      }));
     });
   });
 
@@ -102,7 +106,11 @@ describe(`'RunController' test suite`, () => {
       );
       await runController.refreshCalibrationRunsConfigurationHandler({session: {username: 'test'}}, res);
       assert.ok(res.status.calledWith(408));
-      assert.ok(res.json.calledWith({message: 'Request Expired'}));
+      assert.ok(res.json.calledWith({
+        message: 'Request Expired',
+        status: 408,
+        title: 'Timeout'
+      }));
     });
   });
 });

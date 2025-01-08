@@ -49,8 +49,11 @@ describe('`LockOwnership` middleware test suite', () => {
 
     await lockOwnershipMiddleware(null, environmentServiceStub)(req, res);
     assert.ok(res.status.calledWith(404));
-    assert.ok(res.json.calledWith(
-      {message: 'Environment not found'}
+    assert.ok(res.json.calledWith({
+      message: 'Environment not found',
+      status: 404,
+      title: 'Not Found'
+    }
     ));
   });
 
@@ -67,8 +70,11 @@ describe('`LockOwnership` middleware test suite', () => {
 
     await lockOwnershipMiddleware(null, environmentServiceStub)(req, res);
     assert.ok(res.status.calledWith(404));
-    assert.ok(res.json.calledWith(
-      {message: 'Environment not found'}
+    assert.ok(res.json.calledWith({
+      message: 'Environment not found',
+      status: 404,
+      title: 'Not Found',
+    }
     ));
   });
 
@@ -86,7 +92,11 @@ describe('`LockOwnership` middleware test suite', () => {
     await lockOwnershipMiddleware(null, environmentServiceStub)(req, res);
     assert.ok(res.status.calledWith(408));
     assert.ok(res.json.calledWith(
-      {message: 'Operation timeout'}
+      {
+        message: 'Operation timeout',
+        status: 408,
+        title: 'Timeout'
+      }
     ));
   });
 

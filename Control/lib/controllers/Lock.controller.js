@@ -12,10 +12,10 @@
  * or submit itself to any jurisdiction.
 */
 
-const {LogManager, LogLevel, InvalidInputError} = require('@aliceo2/web-ui');
+const { LogManager, LogLevel } = require('@aliceo2/web-ui');
+const { updateAndSendExpressResponseFromNativeError, InvalidInputError } = require('@aliceo2/web-ui');
 
 const { DetectorLockAction } = require('./../common/lock/detectorLockAction.enum.js');
-const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 const {User} = require('./../dtos/User.js');
 
 const LOG_FACILITY = 'cog/log-ctrl';
@@ -48,7 +48,7 @@ class LockController {
     try {
       res.status(200).json(this._lockService.locksByDetectorToJSON());
     } catch (error) {
-      updateExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
@@ -98,7 +98,7 @@ class LockController {
       }
     } catch (error) {
       this._logger.errorMessage(error, {level: LogLevel.DEVELOPER, facility: LOG_FACILITY});
-      updateExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 

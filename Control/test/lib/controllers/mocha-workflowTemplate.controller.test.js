@@ -41,7 +41,11 @@ describe('WorkflowController test suite', () => {
       });
       await workflowCtrl.getDefaultTemplateSource({}, res);
       assert.ok(res.status.calledWith(404));
-      assert.ok(res.json.calledWith({message: 'No default revision identified'}));
+      assert.ok(res.json.calledWith({
+        message: 'No default revision identified',
+        status: 404,
+        title: 'Not Found'
+      }));
     });
   });
 
@@ -70,7 +74,11 @@ describe('WorkflowController test suite', () => {
       });
       await workflowCtrl.getWorkflowMapping({}, res);
       assert.ok(res.status.calledWith(404));
-      assert.ok(res.json.calledWith({message: 'No mappings found'}));
+      assert.ok(res.json.calledWith({
+        message: 'No mappings found',
+        status: 404,
+        title: 'Not Found'
+      }));
     });
 
     it('should return 502 response as there was specific error provided', async () => {
@@ -79,7 +87,11 @@ describe('WorkflowController test suite', () => {
       });
       await workflowCtrl.getWorkflowMapping({}, res);
       assert.ok(res.status.calledWith(500));
-      assert.ok(res.json.calledWith({message: 'No mappings found'}));
+      assert.ok(res.json.calledWith({
+        message: 'No mappings found',
+        status: 500,
+        title: 'Unknown Error'
+      }));
     });
   });
 
@@ -97,7 +109,11 @@ describe('WorkflowController test suite', () => {
       const workflowCtrl = new WorkflowTemplateController({});
       await workflowCtrl.getWorkflowConfiguration({query:{}}, res);
       assert.ok(res.status.calledWith(400));
-      assert.ok(res.json.calledWith({message: 'No name for the configuration provided'}));
+      assert.ok(res.json.calledWith({
+        message: 'No name for the configuration provided',
+        status: 400,
+        title: 'Invalid Input'
+      }));
     });
 
     it('should return 404 response as there was no default revision found', async () => {
@@ -106,7 +122,11 @@ describe('WorkflowController test suite', () => {
       });
       await workflowCtrl.getWorkflowConfiguration({query: {name: 'test'}}, res);
       assert.ok(res.status.calledWith(404));
-      assert.ok(res.json.calledWith({message: 'No configuration found'}));
+      assert.ok(res.json.calledWith({
+        message: 'No configuration found',
+        status: 404,
+        title: 'Not Found'
+      }));
     });
   });
 });
