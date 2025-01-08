@@ -80,9 +80,12 @@ class QcDownloadService {
   async initTmpDir(callback) {
     logger.infoMessage('Initializing...');
     if (fs.existsSync(TMP_DIR)) {
-      fs.rm(TMP_DIR, { recursive: true }, callback);
-      callback(CODES.CLEARED_CORPSES);
-      logger.infoMessage('Deleted previous tmp directory');
+      await fsp.rmdir(TMP_DIR, { recursive: true }).then(() => {
+        callback(CODES.CLEARED_CORPSES);
+        logger.infoMessage('Deleted previous tmp directory');
+      }).catch((err) => {
+        logger.errorMessage(err);
+      });
     }
     logger.infoMessage('Directory no longer exists, proceeding...');
     await fsp.mkdir(TMP_DIR, DIR_PERMS.OWNER_RW && { recursive: true }).then((err) => {
@@ -98,7 +101,7 @@ class QcDownloadService {
   /**
    * Creates a new temporary directory for the requested id
    * @param {string} request_id The requester's id used for the subdirectory under which the files are stored temporarily.
-   * @returns {void}
+   * @returns {Promise}
    */
   async createNewRequestDir(request_id) {
     logger.infoMessage('Creating request directory');
@@ -107,10 +110,12 @@ class QcDownloadService {
     if (fs.existsSync(dir)) {
       console.log(`DIR ${dir} found.`);
     }
-    await fsp.mkdir(dir, DIR_PERMS.OWNER_RW && { recursive: true }).then((err) => {
+    return await fsp.mkdir(dir, DIR_PERMS.OWNER_RW && { recursive: true }).catch((err) => {
       if (err) {
         logger.errorMessage(`Unable to make request directory; ${err}`, LogLevel.DEVELOPER);
-      } else {
+      }
+    }).then(() => {
+      if (fs.existsSync(dir)) {
         logger.infoMessage('Created request directory');
         this.scheduleRequestDirRemoval(dir);
       }
@@ -138,7 +143,7 @@ class QcDownloadService {
    */
   async deleteRequestDir(dir) {
     if (fs.existsSync(TMP_DIR)) {
-      await fsp.rm(dir, { recursive: true });
+      await fsp.rmdir(dir, { recursive: true });
     }
   }
 
@@ -211,7 +216,7 @@ class QcDownloadService {
     const file = `${path}/${this.tarFileName}.tar`;
     let dataHolder = null;
     if (fs.existsSync(file)) {
-      fs.readFile(file, (err, data) => {
+      await fsp.readFile(file, (err, data) => {
         if (err) {
           logger.errorMessage(`Couldn't return tarball; ${err}`, LogLevel.DEVELOPER);
         }

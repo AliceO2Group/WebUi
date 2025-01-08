@@ -117,39 +117,45 @@ export class CcdbService {
     try {
       if (fs.existsSync(`${TMP_DIR}/${request_id}`)) {
         const file = fs.createWriteStream(destination);
-        logger.infoMessage('Downloading Files...'); //TODO: Include ID or something more descriptive
+        logger.infoMessage(`Downloading object ${object_id} for requester ${request_id}...`);
 
-        await new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
           http.get(url, { method: 'GET' }, (response) => {
             response.pipe(file);
             file.on('finish', () => {
               file.close();
-              logger.infoMessage(`Downloaded file! ${file.path}`); //TODO: Include ID or something more descriptive
+              logger.infoMessage(`Downloaded object ${object_id} for requester ${request_id}! Located at: ${file.path}`);
               resolve(true);
             });
           }).on('error', async () => {
-            // Delete file asynchronously. No response handler, just need to hook into it to show that process failed.
-            await fsp.unlink(destination).then((err) => {
-              reject(err); //TODO: Include ID or something more descriptive
-            });
+            // Delete file asynchronously.
+            if (fs.existsSync(destination)) {
+              await fsp.unlink(destination).catch((err) => {
+                reject(`${request_id}: Unable to unlink file ${destination} used for download of object id: ${object_id}, for reason: ${err}`);
+              });
+            } else {
+              reject(`${request_id}: Error, unable to find file ${destination} used for download of object id: ${object_id}`);
+            }
           });
         });
       }
     } catch (err) {
-      logger.errorMessage(err, LogLevel.DEVELOPER); //TODO: Include ID or something more descriptive
+      logger.errorMessage(`Download ${object_id}, for requester id ${request_id} failed with error: ${err}`, LogLevel.DEVELOPER); //TODO: Include ID or something more descriptive
     }
   }
 
   /**
    * Sends multiple file download requests for root objects and stores them under the requester's subdirectory
-   * @param {Array<string>} object_ids  The identifiers for the root objects to be downloaded.
-   * @param {string} request_id         The requester's id used for the subdirectory of the root one.
-   * @returns {void}
+   * @param {Array<string>} object_ids      The identifiers for the root objects to be downloaded.
+   * @param {string} request_id             The requester's id used for the subdirectory of the root one.
+   * @returns {Promise<Awaited<unknown>[]>} All file download requests bundled together.
    */
   async sendDownloadRequests(object_ids, request_id) {
-    for (const obj_id in object_ids) { //TODO: Have a look at promises.all
-      await this.sendDownloadRequest(obj_id, request_id);
+    const promises = [];
+    for (const obj_id in object_ids) {
+      promises.push(await this.sendDownloadRequest(obj_id, request_id));
     }
+    return Promise.all(promises);
   }
 
   /**
