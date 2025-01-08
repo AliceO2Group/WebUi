@@ -16,14 +16,15 @@ const { NotFoundError } = require('./NotFoundError.js');
 const { ServiceUnavailableError } = require('./ServiceUnavailableError.js');
 const { TimeoutError } = require('./TimeoutError.js');
 const { UnauthorizedAccessError } = require('./UnauthorizedAccessError.js');
+const { GrpcErrorCodes } = require('./grpcErrorCodes.enum.js');
 
 /**
  * @typedef GrpcError
  * also known as gRPC Status Object https://grpc.github.io/grpc/node/grpc.html#~StatusObject
  *
- * @property {number} code - code of the gRPC Status object
- * @property {string} message - message of the gRPC Status object / includes code as well in the string
+ * @property {GrpcErrorCodes} code - code of the gRPC Status object
  * @property {string} details - details of the gRPC Status object
+ * @property {string} message - message of the gRPC Status object
  */
 
 /**
@@ -38,15 +39,15 @@ const grpcErrorToNativeError = (error, includeStatusCode = false) => {
   const { code, details, message } = error;
 
   switch (code) {
-    case 3:
+    case GrpcErrorCodes.INVALID_INPUT:
       return new InvalidInputError(includeStatusCode ? message : details);
-    case 4:
+    case GrpcErrorCodes.TIMEOUT:
       return new TimeoutError(includeStatusCode ? message : details);
-    case 5:
+    case GrpcErrorCodes.NOT_FOUND:
       return new NotFoundError(includeStatusCode ? message : details);
-    case 7:
+    case GrpcErrorCodes.UNAUTHORIZED_ACCESS:
       return new UnauthorizedAccessError(includeStatusCode ? message : details);
-    case 14:
+    case GrpcErrorCodes.SERVICE_UNAVAILABLE:
       return new ServiceUnavailableError(includeStatusCode ? message : details);
     default:
       return new Error(includeStatusCode ? message : details);

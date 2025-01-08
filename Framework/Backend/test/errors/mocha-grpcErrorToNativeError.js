@@ -12,75 +12,81 @@
  * or submit itself to any jurisdiction.
  */
 
+const assert = require('assert');
+
 const { grpcErrorToNativeError } = require('../../errors/grpcErrorToNativeError.js');
+const { GrpcErrorCodes: {
+  INVALID_INPUT, TIMEOUT, NOT_FOUND, UNAUTHORIZED_ACCESS, SERVICE_UNAVAILABLE, UNKNOWN,
+} } = require('../../errors/grpcErrorCodes.enum.js');
 const { InvalidInputError } = require('../../errors/InvalidInputError.js');
 const { NotFoundError } = require('../../errors/NotFoundError.js');
 const { ServiceUnavailableError } = require('../../errors/ServiceUnavailableError.js');
 const { TimeoutError } = require('../../errors/TimeoutError.js');
 const { UnauthorizedAccessError } = require('../../errors/UnauthorizedAccessError.js');
 
-const assert = require('assert');
-
 describe('\'grpcErrorToNativeError\' test suite', () => {
-  it('should successfully convert gRPC errors to native errors', () => {
-    assert.deepStrictEqual(
-      grpcErrorToNativeError({ code: 3, message: '3: invalid', details: 'invalid' }),
-      new InvalidInputError('invalid'),
-    );
-    assert.deepStrictEqual(
-      grpcErrorToNativeError({ code: 4, message: '4: timeout', details: 'timeout' }),
-      new TimeoutError('timeout'),
-    );
-    assert.deepStrictEqual(
-      grpcErrorToNativeError({ code: 5, message: '5: not-found', details: 'not-found' }),
-      new NotFoundError('not-found'),
-    );
-    assert.deepStrictEqual(
-      grpcErrorToNativeError({ code: 7, message: 'unauthorized', details: 'unauthorized' }),
-      new UnauthorizedAccessError('unauthorized'),
-    );
-    assert.deepStrictEqual(
-      grpcErrorToNativeError({ code: 14, message: 'service-unavailable', details: 'service-unavailable' }),
-      new ServiceUnavailableError('service-unavailable'),
-    );
-    assert.deepStrictEqual(
-      grpcErrorToNativeError({ code: 100, message: 'standard-error', details: 'standard-error' }),
-      new Error('standard-error'),
-    );
-    assert.deepStrictEqual(
-      grpcErrorToNativeError({ message: 'standard-error', details: 'standard-error' }),
-      new Error('standard-error'),
-    );
+  const testCases = [
+    {
+      grpcError: { code: UNKNOWN, message: `${UNKNOWN}: Error is unknown`, details: 'Error is unknown' },
+      expectedError: Error,
+      expectedMessage: `${UNKNOWN}: Error is unknown`,
+      expectedDetails: 'Error is unknown',
+    },
+    {
+      grpcError: { code: INVALID_INPUT, message: `${INVALID_INPUT}: Invalid input details`, details: 'Invalid input details' },
+      expectedError: InvalidInputError,
+      expectedMessage: `${INVALID_INPUT}: Invalid input details`,
+      expectedDetails: 'Invalid input details',
+    },
+    {
+      grpcError: { code: TIMEOUT, message: `${TIMEOUT}: Timeout occurred`, details: 'Timeout occurred' },
+      expectedError: TimeoutError,
+      expectedMessage: `${TIMEOUT}: Timeout occurred`,
+      expectedDetails: 'Timeout occurred',
+    },
+    {
+      grpcError: { code: NOT_FOUND, message: `${NOT_FOUND}: Not found`, details: 'Not found' },
+      expectedError: NotFoundError,
+      expectedMessage: `${NOT_FOUND}: Not found`,
+      expectedDetails: 'Not found',
+    },
+    {
+      grpcError: { code: UNAUTHORIZED_ACCESS, message: `${UNAUTHORIZED_ACCESS}: Unauthorized access`, details: 'Unauthorized access details' },
+      expectedError: UnauthorizedAccessError,
+      expectedMessage: `${UNAUTHORIZED_ACCESS}: Unauthorized access`,
+      expectedDetails: 'Unauthorized access details',
+    },
+    {
+      grpcError: { code: SERVICE_UNAVAILABLE, message: `${SERVICE_UNAVAILABLE}: Service unavailable`, details: 'Service unavailable details' },
+      expectedError: ServiceUnavailableError,
+      expectedMessage: `${SERVICE_UNAVAILABLE}: Service unavailable`,
+      expectedDetails: 'Service unavailable details',
+    },
+    {
+      grpcError: { code: 100, message: '100: Unknown Code and Error', details: 'Unknown Code and Error' },
+      expectedError: Error,
+      expectedMessage: '100: Unknown Code and Error',
+      expectedDetails: 'Unknown Code and Error',
+    },
+  ];
+
+  testCases.forEach(({ grpcError: { code, details }, expectedError, expectedDetails }) => {
+    it(`should convert gRPC error with code ${code} and pass DETAILS in error of type ${expectedError}`, () => {
+      assert.deepStrictEqual(grpcErrorToNativeError({ code, details }), new expectedError(expectedDetails));
+    });
   });
 
-  it('should successfully convert gRPC errors to native errors', () => {
-    assert.deepStrictEqual(
-      grpcErrorToNativeError({ code: 3, message: '3: invalid', details: 'invalid' }, true),
-      new InvalidInputError('3: invalid'),
-    );
-    assert.deepStrictEqual(
-      grpcErrorToNativeError({ code: 4, message: '4: timeout', details: 'timeout' }, true),
-      new TimeoutError('4: timeout'),
-    );
-    assert.deepStrictEqual(
-      grpcErrorToNativeError({ code: 5, message: '5: not-found', details: 'not-found' }, true),
-      new NotFoundError('5: not-found'),
-    );
-    assert.deepStrictEqual(
-      grpcErrorToNativeError({ code: 7, message: '7: unauthorized', details: 'unauthorized' }, true),
-      new UnauthorizedAccessError('7: unauthorized'),
-    );
-    assert.deepStrictEqual(
-      grpcErrorToNativeError({ code: 14, message: '14: service-unavailable', details: 'service-unavailable' }, true),
-      new ServiceUnavailableError('14: service-unavailable'),
-    );
-    assert.deepStrictEqual(
-      grpcErrorToNativeError({ code: 100, message: '100: standard-error', details: 'standard-error' }, true),
-      new Error('100: standard-error'),
-    );
-    assert.deepStrictEqual(
-      grpcErrorToNativeError({ message: 'code: standard-error', details: 'standard-error' }, true),
-      new Error('code: standard-error'),
-    );
+  testCases.forEach(({ grpcError: { code, message }, expectedError, expectedMessage }) => {
+    it(`should convert gRPC error with code ${code} and pass MESSAGE in error of type ${expectedError.name}`, () => {
+      assert.deepStrictEqual(grpcErrorToNativeError({ code, message }, true), new expectedError(expectedMessage));
+    });
+  });
+
+  it('should handle gRPC error with unknown code gracefully', () => {
+    assert.deepStrictEqual(grpcErrorToNativeError({ code: 999, details: 'unknown-error' }), new Error('unknown-error'));
+  });
+
+  it('should handle gRPC error without message gracefully', () => {
+    assert.deepStrictEqual(grpcErrorToNativeError({ code: 3 }), new InvalidInputError(''));
   });
 });
