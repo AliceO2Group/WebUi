@@ -142,7 +142,7 @@ class QcDownloadService {
    * @returns {void}
    */
   async deleteRequestDir(dir) {
-    if (fs.existsSync(TMP_DIR)) {
+    if (fs.existsSync(dir)) {
       await fsp.rmdir(dir, { recursive: true });
     }
   }
