@@ -80,7 +80,7 @@ class QcDownloadService {
   async initTmpDir(callback) {
     logger.infoMessage('Initializing...');
     if (fs.existsSync(TMP_DIR)) {
-      await fsp.rmdir(TMP_DIR, { recursive: true }).then(() => {
+      await fsp.rm(TMP_DIR, { recursive: true }).then(() => {
         callback(CODES.CLEARED_CORPSES);
         logger.infoMessage('Deleted previous tmp directory');
       }).catch((err) => {
