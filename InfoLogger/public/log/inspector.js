@@ -24,8 +24,7 @@ import { severityClass, severityLabel } from './severityUtils.js';
  */
 function BKPButton(model) {
   const BKPPreparedUrl = GenerateBKPUrl(model.BKPUrl, model.log.item);
-  console.log(BKPPreparedUrl);
-  const button = h('button', model.BKPUrl);
+  const button = h(`a[href=${BKPPreparedUrl}]`, 'Bookkeeping entry');
   return button;
 }
 
@@ -40,6 +39,7 @@ function BKPButton(model) {
 function GenerateBKPUrl(BKPUrl, logItem) {
   let BKPPreparedUrl = BKPUrl;
   const BKPUrlParameters = {
+    page: 'log-create',
     runNumbers: logItem.run !== undefined ? [logItem.run] : null,
     // lhcFillNumbers: logItem.run !== undefined ? [logItem.run] : null,
     templateKey: 'ILG-keepthebook',
@@ -47,15 +47,15 @@ function GenerateBKPUrl(BKPUrl, logItem) {
     detectorOrSubsystem: logItem.system ?? null,
   };
 
-  let parametercount = 1;
+  // This parametercount is only to identify the first parameter from all the rest.
+  let parameterCount = 1;
   for (const [key, value] of Object.entries(BKPUrlParameters)) {
     if (value != null) {
-      if (parametercount == 1) {
-        BKPPreparedUrl += `/?${key}=${value}`;
-        parametercount ++;
+      if (parameterCount == 1) {
+        BKPPreparedUrl += `/?${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+        parameterCount ++;
       } else {
-        const paramValue = new URLSearchParams(value).toString();
-        BKPPreparedUrl += `&${key}=${paramValue}`;
+        BKPPreparedUrl += `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
       }
     }
   }
