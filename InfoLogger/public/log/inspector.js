@@ -41,9 +41,10 @@ function GenerateBKPUrl(BKPUrl, logItem) {
   const BKPUrlParameters = {
     page: 'log-create',
     runNumbers: logItem.run !== undefined ? [logItem.run] : null,
-    // lhcFillNumbers: logItem.run !== undefined ? [logItem.run] : null,
-    templateKey: 'ILG-keepthebook',
+    lhcFillNumbers: logItem.run !== undefined ? [logItem.run] : null,
+    templateKey: 'on-call',
     issueDescription: logItem.message ?? null,
+    // NO dummy data detectors are actually known to the BKP???
     detectorOrSubsystem: logItem.system ?? null,
   };
 
