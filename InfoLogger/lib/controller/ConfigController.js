@@ -13,8 +13,13 @@
  */
 
 const config = require('../configProvider.js');
+const { LogManager } = require('@aliceo2/web-ui');
 
 class ConfigController {
+  constructor() {
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/query-ctrl`);
+  }
+
   /**
    * Return Bookkeeping URL to frontend.
    * @param {*} req incoming request.
