@@ -46,7 +46,7 @@ export const environmentStateSummary = (environment) => {
   );
 
   return h(`.flex-row.g2.p2.white.bg-${ALIECS_STATE_COLOR[state]}`, [
-    DropdownCopyValue('Copy', 'h3', options),
+    DropdownCopyValue('Copy', 'p', options),
     h('h3', title),
     // state === EnvironmentState.RUNNING && textWithCopyClipboard(currentRunNumber, 'h3'),
     h('.ph1.flex-grow.flex-column.flex-center.text-right', transitionLabel + transitionTime)
