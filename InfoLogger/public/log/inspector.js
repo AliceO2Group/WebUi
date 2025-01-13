@@ -26,6 +26,10 @@ function BKPButton(model) {
   const button = h('a', {
     href: BKPPreparedUrl,
     target: '_blank',
+    class: 'btn',
+    style: {
+      'text-decoration': 'none',
+    },
   }, 'New BKP log');
   return button;
 }
