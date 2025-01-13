@@ -18,22 +18,23 @@ import { severityClass, severityLabel } from './severityUtils.js';
 
 /**
  * Button element that will link to a pre-filled Bookkeeping entry.
- * @param logItem
- * @param model
+ * @param {model} model model.
  * @returns {h} button with the link.
  */
 function BKPButton(model) {
   const BKPPreparedUrl = GenerateBKPUrl(model.BKPUrl, model.log.item);
-  const button = h(`a[href=${BKPPreparedUrl}]`, 'Bookkeeping entry');
+  const button = h('a', {
+    href: BKPPreparedUrl,
+    target: '_blank',
+  }, 'New BKP log');
   return button;
 }
 
 /**
  * Generates a Bookkeeping url pre-filled with the required search parameters
  * to prepare an entry in the Bookkeeping WebUI.
- * @param model model
- * @param BKPUrl Bookkeeping server URL
- * @param logItem Individual log item.
+ * @param  {string} BKPUrl Bookkeeping server URL.
+ * @param {logItem} logItem Individual log item.
  * @returns {string} pre-filled URL.
  */
 function GenerateBKPUrl(BKPUrl, logItem) {
@@ -44,17 +45,16 @@ function GenerateBKPUrl(BKPUrl, logItem) {
     lhcFillNumbers: logItem.run !== undefined ? [logItem.run] : null,
     templateKey: 'on-call',
     issueDescription: logItem.message ?? null,
-    // NO dummy data detectors are actually known to the BKP???
+    // Most data detectors are not actually known to the BKP???
     detectorOrSubsystem: logItem.system ?? null,
   };
 
-  // This parametercount is only to identify the first parameter from all the rest.
-  let parameterCount = 1;
+  let firstParameter = true;
   for (const [key, value] of Object.entries(BKPUrlParameters)) {
     if (value != null) {
-      if (parameterCount == 1) {
+      if (firstParameter) {
         BKPPreparedUrl += `/?${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-        parameterCount ++;
+        firstParameter = false;
       } else {
         BKPPreparedUrl += `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
       }
