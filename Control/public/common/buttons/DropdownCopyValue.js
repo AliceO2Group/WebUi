@@ -13,7 +13,7 @@
 */
 
 import {h} from '/js/src/index.js';
-import { CopyToClipboardComponent,dropdown } from '/js/src/components/index.js';
+import { CopyToClipboardComponent,dropdown } from '/js/src/index.js';
 import { iconCaretBottom } from '/js/src/icons.js';
 /**
  * Build a component which a dropdown with values and provides a copy to clipboard actionable icon
