@@ -12,8 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h} from '/js/src/index.js';
-import { CopyToClipboardComponent,dropdown } from '/js/src/index.js';
+import {h,CopyToClipboardComponent,DropdownComponent } from '/js/src/index.js';
 import { iconCaretBottom } from '/js/src/icons.js';
 /**
  * Build a component which a dropdown with values and provides a copy to clipboard actionable icon
@@ -25,7 +24,7 @@ import { iconCaretBottom } from '/js/src/icons.js';
 export const DropdownCopyValue = (text, type,options) =>
   h('.flex-row.gc2', [
     h(`${type}`, text),
-    dropdown(
+    DropdownComponent(
       h('.btn.btn-group-item.last-item', iconCaretBottom()),
       h(
         '.flex-column.p2.g3',

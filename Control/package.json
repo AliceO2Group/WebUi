@@ -39,11 +39,6 @@
     "google-protobuf": "3.21.0",
     "kafkajs": "2.2.4"
   },
-  "bundledDependencies": [
-    "@aliceo2/web-ui",
-    "@grpc/grpc-js",
-    "@grpc/proto-loader"
-  ],
   "devDependencies": {
     "eslint": "^8.56.0",
     "jsonwebtoken": "^9.0.2",
