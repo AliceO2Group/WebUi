@@ -47,7 +47,8 @@
     "nyc": "^17.1.0",
     "puppeteer": "^23.11.1",
     "sinon": "19.0.2",
-    "supertest": "7.0.0"
+    "supertest": "7.0.0",
+    "@aliceo2/web-ui": "file:../Framework"
   },
   "bundleDependencies": [
     "@aliceo2/web-ui",
