@@ -22,19 +22,19 @@ import { iconCaretBottom } from '/js/src/icons.js';
  * @return {vnode}
  */
 export const DropdownCopyValue = (text, type,options) =>
-  h('.flex-row.gc2', [
+  h('.flex-row.items-center.btn-group', [
     h(`${type}`, text),
     DropdownComponent(
       h('.btn.btn-group-item.last-item', iconCaretBottom()),
-      h(
-        '.flex-column.p2.g3',
+      h('.flex-column.p2.g3',
         [
           options.map((option) =>
-            h(CopyToClipboardComponent, { value: option.value, id: option.value }, option.label)
+            h(CopyToClipboardComponent, { value: option.value, id: option.value }, option.label)      
           )
-        
         ],
       ),
+      {
+        alignment: 'right',
+      }
     ),
-    // h(CopyToClipboardComponent, { value: url, id: log.id }, 'Copy Link')
   ]);

@@ -14,7 +14,6 @@
 
 import {h} from '/js/src/index.js';
 import {ALIECS_STATE_COLOR} from '../../../common/constants/stateColors.js';
-import {textWithCopyClipboard} from '../../../common/buttons/textWithCopyClipboard.js';
 import {parseObject} from '../../../common/utils.js';
 import {EnvironmentState} from '../../../common/enums/EnvironmentState.enum.js';
 import {DropdownCopyValue} from '../../../common/buttons/DropdownCopyValue.js';
