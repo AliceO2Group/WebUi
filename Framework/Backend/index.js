@@ -26,7 +26,7 @@ const MySQL = require('./db/mysql.js');
 const NotificationService = require('./services/notification.js');
 const WebSocket = require('./websocket/server.js');
 const WebSocketMessage = require('./websocket/message.js');
-const QcDownloadService = require('./util/QcDownload.service.js');
+const QcDownloadService = require('../../QualityControl/lib/services/QcDownload.service.js');
 
 const { InvalidInputError } = require('./errors/InvalidInputError.js');
 const { NotFoundError } = require('./errors/NotFoundError.js');

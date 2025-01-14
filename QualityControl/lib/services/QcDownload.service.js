@@ -1,12 +1,18 @@
 /**
  * Module dependencies.
  */
-const fs = require('fs');
-const os = require('os');
-const tar = require('tar');
+import fs from 'fs';
+import os from 'os';
+import * as tar from 'tar';
+// const fs = require('fs');
+// const os = require('os');
+// const tar = require('tar');
 // const http = require('http');
-const { LogManager } = require('../log/LogManager.js');
-const { LogLevel } = require('../log/LogLevel');
+
+import { LogManager } from '@aliceo2/web-ui';
+import { LogLevel } from '@aliceo2/web-ui';
+// const { LogManager } = require('../../../Framework/Backend/log/LogManager.js');
+// const { LogLevel } = require('../../../Framework/Backend/log/LogLevel.js');
 
 /**
  * The variables used in the program
@@ -32,7 +38,7 @@ const fsp = fs.promises;
  * Class to generate a /tmp directory in the home directory with subdirectories that can be used to download root objects.
  * @author Colin Laan <colin.laan@gmail.com>
  */
-class QcDownloadService {
+export class QcDownloadService {
   /**
    * Allows the CCDB url to be altered, together with the generated tar file names and the event at which /tmp is cleared.
    * @param {Object} qcDownloadService_config The configuration used for this class.
@@ -217,5 +223,3 @@ class QcDownloadService {
     return dataHolder;
   }
 }
-
-module.exports = QcDownloadService;
