@@ -213,7 +213,7 @@ class QcDownloadService {
         }
       });
     }
-    this.deleteRequestDir(path);
+    await this.deleteRequestDir(path);
     return dataHolder;
   }
 }

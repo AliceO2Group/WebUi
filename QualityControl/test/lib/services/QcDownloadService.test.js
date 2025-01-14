@@ -128,32 +128,30 @@ export const qcDownloadServiceTestSuite = async () => {
             strictEqual(msg, qcDlService._codes.CLEARED_CORPSES);
           }
         }).then(() => {
-          qcDlService.deleteRequestDir(TMP_REQ_DIR).finally(() => {
-            setTimeout(() => { //TODO:A FIX DIR NOT BEING DELETED
-              qcDlService.createNewRequestDir(REQ_ID).then(() => {
-                ccdbService.sendDownloadRequest(CCDB_ETAG_TEST_PRIMARY, REQ_ID).finally(() => {
-                  setTimeout(() => {
-                    strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_ETAG_TEST_PRIMARY}.root`), true);
-                  }, 1000);
+          setTimeout(() => { //TODO:A FIX DIR NOT BEING DELETED
+            qcDlService.createNewRequestDir(REQ_ID).then(() => {
+              ccdbService.sendDownloadRequest(CCDB_ETAG_TEST_PRIMARY, REQ_ID).finally(() => {
+                setTimeout(() => {
+                  strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_ETAG_TEST_PRIMARY}.root`), true);
+                }, 1000);
 
-                  qcDlService.retrieveFilesFromSubDir(REQ_ID, (msg) => {
-                    if (msg) {
-                      console.log(`Test ${qcDlService._codes.UNNECESSARY_ARCHIVE}: ${msg}`);
-                      strictEqual(msg, qcDlService._codes.UNNECESSARY_ARCHIVE);
+                qcDlService.retrieveFilesFromSubDir(REQ_ID, (msg) => {
+                  if (msg) {
+                    console.log(`Test ${qcDlService._codes.UNNECESSARY_ARCHIVE}: ${msg}`);
+                    strictEqual(msg, qcDlService._codes.UNNECESSARY_ARCHIVE);
+                  }
+                }).then(() => {
+                  setTimeout(() => {
+                    if (fs.readdirSync(TMP_REQ_DIR).length > 0) {
+                      console.log(fs.readdirSync(TMP_REQ_DIR));
                     }
-                  }).then(() => {
-                    setTimeout(() => {
-                      if (fs.readdirSync(TMP_REQ_DIR).length > 0) {
-                        console.log(fs.readdirSync(TMP_REQ_DIR));
-                      }
-                      console.log(`Test ${TMP_REQ_DIR}/${qcDlService.tarFileName}.tar exists: ${fs.existsSync(`${TMP_REQ_DIR}/${qcDlService.tarFileName}.tar`)}`)
-                      strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${qcDlService.tarFileName}.tar`), false);
-                    }, 1000);
-                  });
+                    console.log(`Test ${TMP_REQ_DIR}/${qcDlService.tarFileName}.tar exists: ${fs.existsSync(`${TMP_REQ_DIR}/${qcDlService.tarFileName}.tar`)}`)
+                    strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${qcDlService.tarFileName}.tar`), false);
+                  }, 1000);
                 });
               });
-            }, 1000);
-          });
+            });
+          }, 1000);
         });
       });
 
