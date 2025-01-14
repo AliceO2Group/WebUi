@@ -39,7 +39,7 @@ import { QcDownloadService } from '../../Framework/Backend/index.js';
  */
 export const setupQcModel = () => {
   const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
-  const qcDownloadService = new QcDownloadService(config.qcDownloadService, config.ccdb);
+  const qcDownloadService = new QcDownloadService(config.qcDownloadService);
 
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);

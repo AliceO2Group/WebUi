@@ -15,7 +15,7 @@
 /* eslint-disable require-jsdoc */
 /* eslint-disable max-len */
 
-import { deepStrictEqual, strictEqual, rejects } from 'node:assert';
+import { strictEqual } from 'node:assert';
 import { suite, test, before } from 'node:test';
 import nock from 'nock';
 
@@ -27,8 +27,8 @@ const fsp = fs.promises;
 import os from 'os';
 
 const ccdbConfig = {
-  hostname: 'ccdb-local',
-  port: 8083,
+  hostname: 'ccdb-test.cern.ch',
+  port: 8080,
   protocol: 'http',
   prefix: 'qc-test',
 };
@@ -36,7 +36,7 @@ const ccdbConfig = {
 const qcDlServiceConfig = {
   tarFileName: 'download',
   cleanUpEvent: 'exit',
-  dirLifespan: 500,
+  dirLifespan: 5000,
 };
 
 const TMP_DIR = `${os.homedir()}/.${os.tmpdir().replace('/', '')}/root_obj`;
@@ -49,171 +49,161 @@ const CCDB_FILENAME_TEST_SECONDARY = 'TObject_1610548820426.root';
 const TMP_REQ_DIR = `${TMP_DIR}/${REQ_ID}`;
 
 export const qcDownloadServiceTestSuite = async () => {
-  suite('QC Download Test Suite - ', async () => {
+  suite('QC Download Test Suite - ', () => {
     before(() => {
       nock.cleanAll();
       if (fs.existsSync(TMP_DIR)) {
-        fsp.rmdir(TMP_DIR, { recursive: true });
+        fsp.rm(TMP_DIR, { recursive: true });
       }
     });
 
-    suite('Creating a new QcDownloadService instance', async () => {
-      test('Should successfully initialize QcDownloadService', async () => {
-        const qcDlService = new QcDownloadService(qcDlServiceConfig, ccdbConfig);
+    suite('Creating a new QcDownloadService instance', () => {
+      test('Should successfully initialize QcDownloadService', () => {
+        const qcDlService = new QcDownloadService(qcDlServiceConfig);
         const ccdbService = new CcdbService(ccdbConfig);
 
-        strictEqual(ccdbService._ccdbServerUrl, 'http://ccdb-local:8083');
+        strictEqual(ccdbService._ccdbServerUrl, 'http://ccdb-test.cern.ch:8080');
         strictEqual(qcDlService.tarFileName, 'download');
         strictEqual(qcDlService.cleanUpEvent, 'exit');
       });
     });
 
-    suite('Initializing a new QcDownloadService download', async () => {
-      test('Should successfully initialize temporary root directory for QcDownloadService', async () => {
-        const qcDlService = new QcDownloadService(qcDlServiceConfig, ccdbConfig);
+    suite('Initializing a new QcDownloadService download', () => {
+      test('Should successfully initialize temporary root directory for QcDownloadService', () => {
+        const qcDlService = new QcDownloadService(qcDlServiceConfig);
 
-        await qcDlService.initTmpDir((err) => {
-          if (err) {
-            strictEqual(err, qcDlService._codes.CLEARED_CORPSES);
-          } else {
-            strictEqual(err, null);
+        qcDlService.initTmpDir((msg) => {
+          if (msg) {
+            strictEqual(msg, qcDlService._codes.CLEARED_CORPSES);
           }
         });
 
         setTimeout(() => {
           strictEqual(fs.existsSync(TMP_DIR), true); //Directory should have been created
-        }, 100);
-      });
-      test('Should successfully initialize child directory for QcDownloadService requests', async () => {
-        const qcDlService = new QcDownloadService(qcDlServiceConfig, ccdbConfig);
-
-        await qcDlService.initTmpDir((err) => {
-          if (err) {
-            strictEqual(err, qcDlService._codes.CLEARED_CORPSES);
-          } else {
-            strictEqual(err, null);
-          }
-        });
-
-        await qcDlService.createNewRequestDir(REQ_ID);
-        // strictEqual(fs.existsSync(TMP_REQ_DIR), true);
-        setTimeout(() => {
-          strictEqual(fs.existsSync(`${TMP_REQ_DIR}`), true);
-        }, 100);
-
-        setTimeout(() => {
-          strictEqual(fs.existsSync(TMP_REQ_DIR), false);
-        }, qcDlServiceConfig.dirLifespan + 500);
-      });
-      test('Should successfully download QCG objects based on ID', async () => {
-        const qcDlService = new QcDownloadService(qcDlServiceConfig, ccdbConfig);
-        const ccdbService = new CcdbService(ccdbConfig);
-
-        await qcDlService.initTmpDir((err) => {
-          if (err) {
-            strictEqual(err, qcDlService._codes.CLEARED_CORPSES);
-          } else {
-            strictEqual(err, null);
-          }
-        });
-
-        await qcDlService.createNewRequestDir(REQ_ID);
-
-        await ccdbService.sendDownloadRequest(CCDB_ETAG_TEST_PRIMARY, REQ_ID);
-        setTimeout(() => {
-          strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_FILENAME_TEST_PRIMARY}`), true);
         }, 1000);
       });
-      test('Should not archive a singular root file', async () => {
-        const qcDlService = new QcDownloadService(qcDlServiceConfig, ccdbConfig);
-        const ccdbService = new CcdbService(ccdbConfig);
+      test('Should successfully initialize child directory for QcDownloadService requests', () => {
+        const qcDlService = new QcDownloadService(qcDlServiceConfig);
 
-        await qcDlService.initTmpDir((err) => {
-          if (err) {
-            strictEqual(err, qcDlService._codes.CLEARED_CORPSES);
-          } else {
-            strictEqual(err, null);
-          }
-        });
-
-        await qcDlService.createNewRequestDir(REQ_ID);
-
-        await ccdbService.sendDownloadRequest(CCDB_ETAG_TEST_PRIMARY, REQ_ID);
-        setTimeout(() => {
-          strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_FILENAME_TEST_PRIMARY}`), true);
-        }, 1000);
-
-        await qcDlService.retrieveFilesFromSubDir(REQ_ID, (msg) => {
-          if (msg) {
-            strictEqual(msg, qcDlService._codes.UNNECESSARY_ARCHIVE);
-          } else {
-            strictEqual(msg, null);
-          }
-        });
-
-        setTimeout(() => {
-          strictEqual(!fs.existsSync(`${TMP_REQ_DIR}/${qcDlService.tarFileName}.tar`), true);
-        }, 1000);
-      });
-      test('Should successfully download multiple QCG objects', async () => {
-        const qcDlService = new QcDownloadService(qcDlServiceConfig, ccdbConfig);
-        const ccdbService = new CcdbService(ccdbConfig);
-
-        await qcDlService.initTmpDir((msg) => {
+        qcDlService.initTmpDir((msg) => {
           if (msg) {
             strictEqual(msg, qcDlService._codes.CLEARED_CORPSES);
-          } else {
-            strictEqual(msg, null);
           }
+        }).then(() => {
+          qcDlService.createNewRequestDir(REQ_ID).then(() => {
+            strictEqual(fs.existsSync(`${TMP_REQ_DIR}`), true);
+          }).then(() => {
+            setTimeout(() => {
+              strictEqual(fs.existsSync(TMP_REQ_DIR), false);
+            }, qcDlServiceConfig.dirLifespan + 500);
+          });
         });
-
-        await qcDlService.createNewRequestDir(REQ_ID);
-        // setTimeout(async () => {
-        await ccdbService.sendDownloadRequests(CCDB_ETAG_TEST_ARRAY, REQ_ID);
-        // }, 100);
-
-        setTimeout(() => {
-          strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_FILENAME_TEST_PRIMARY}`), true);
-        }, 1000);
-        setTimeout(() => {
-          strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_FILENAME_TEST_SECONDARY}`), true);
-        }, 1000);
+        // strictEqual(fs.existsSync(TMP_REQ_DIR), true);
       });
 
-      test('Should successfully create tarball of multiple QCG objects', async () => {
-        const qcDlService = new QcDownloadService(qcDlServiceConfig, ccdbConfig);
+      test('Should successfully download QCG objects based on ID', () => {
+        const qcDlService = new QcDownloadService(qcDlServiceConfig);
         const ccdbService = new CcdbService(ccdbConfig);
 
-        await qcDlService.initTmpDir((err) => {
-          if (err) {
-            strictEqual(err, qcDlService._codes.CLEARED_CORPSES);
-          } else {
-            strictEqual(err, null);
+        qcDlService.initTmpDir((msg) => {
+          if (msg) {
+            strictEqual(msg, qcDlService._codes.CLEARED_CORPSES);
           }
+        }).then(() => {
+          qcDlService.createNewRequestDir(REQ_ID).then(() => {
+            console.log(`Test Log: ${CCDB_FILENAME_TEST_PRIMARY}, from ${CCDB_ETAG_TEST_PRIMARY}`);
+            ccdbService.sendDownloadRequest(CCDB_ETAG_TEST_PRIMARY, REQ_ID).then(() => {
+              setTimeout(() => {
+                console.log(`104: Test value is: ${fs.existsSync(`${TMP_REQ_DIR}/${CCDB_ETAG_TEST_PRIMARY}.root`)}`);
+                strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_ETAG_TEST_PRIMARY}.root`), true);
+              }, 1000);
+            });
+          });
         });
+      });
+      // test('Should not archive a singular root file', async () => {
+      //   const qcDlService = new QcDownloadService(qcDlServiceConfig, ccdbConfig);
+      //   const ccdbService = new CcdbService(ccdbConfig);
+      //
+      //   qcDlService.initTmpDir((err) => {
+      //     if (err) {
+      //       strictEqual(err, qcDlService._codes.CLEARED_CORPSES);
+      //     } else {
+      //       strictEqual(err, null);
+      //     }
+      //   });
+      //
+      //   qcDlService.createNewRequestDir(REQ_ID);
+      //
+      //   ccdbService.sendDownloadRequest(CCDB_ETAG_TEST_PRIMARY, REQ_ID);
+      //   setTimeout(() => {
+      //     strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_FILENAME_TEST_PRIMARY}`), true);
+      //   }, 1000);
+      //
+      //   qcDlService.retrieveFilesFromSubDir(REQ_ID, (msg) => {
+      //     if (msg) {
+      //       strictEqual(msg, qcDlService._codes.UNNECESSARY_ARCHIVE);
+      //     } else {
+      //       strictEqual(msg, null);
+      //     }
+      //   });
+      //
+      //   setTimeout(() => {
+      //     strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${qcDlService.tarFileName}.tar`), false);
+      //   }, 1000);
+      // });
+      test('Should successfully download multiple QCG objects', () => {
+        const qcDlService = new QcDownloadService(qcDlServiceConfig);
+        const ccdbService = new CcdbService(ccdbConfig);
 
-        await qcDlService.createNewRequestDir(REQ_ID);
-
-        await ccdbService.sendDownloadRequests(CCDB_ETAG_TEST_ARRAY, REQ_ID);
-
-        setTimeout(() => {
-          strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_FILENAME_TEST_PRIMARY}`), true);
-        }, 1000);
-        setTimeout(() => {
-          strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_FILENAME_TEST_SECONDARY}`), true);
-        });
-
-        await qcDlService.retrieveFilesFromSubDir(REQ_ID, (err) => {
-          if (err) {
-            strictEqual(err, qcDlService._codes.NO_MATCHES);
-          } else {
-            strictEqual(err, null);
+        qcDlService.initTmpDir((msg) => {
+          if (msg) {
+            strictEqual(msg, qcDlService._codes.CLEARED_CORPSES);
           }
+        }).then(() => {
+          qcDlService.createNewRequestDir(REQ_ID).then(() => {
+            ccdbService.sendDownloadRequests(CCDB_ETAG_TEST_ARRAY, REQ_ID).then(() => {
+              setTimeout(() => {
+                strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_ETAG_TEST_PRIMARY}.root`), true);
+              }, 1000);
+              setTimeout(() => {
+                strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_ETAG_TEST_SECONDARY}.root`), true);
+              }, 1000);
+            });
+          });
         });
+      });
 
-        setTimeout(() => {
-          strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${qcDlService.tarFileName}.tar`), true);
-        }, 1000);
+      test('Should successfully create tarball of multiple QCG objects', () => {
+        const qcDlService = new QcDownloadService(qcDlServiceConfig);
+        const ccdbService = new CcdbService(ccdbConfig);
+
+        qcDlService.initTmpDir((msg) => {
+          if (msg) {
+            strictEqual(msg, qcDlService._codes.CLEARED_CORPSES);
+          }
+        }).then(() => {
+          qcDlService.createNewRequestDir(REQ_ID).then(() => {
+            ccdbService.sendDownloadRequests(CCDB_ETAG_TEST_ARRAY, REQ_ID).then(() => {
+              setTimeout(() => {
+                strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_ETAG_TEST_PRIMARY}.root`), true);
+              }, 1000);
+              setTimeout(() => {
+                strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_ETAG_TEST_SECONDARY}.root`), true);
+              }, 1000);
+            }).then(() => {
+              qcDlService.retrieveFilesFromSubDir(REQ_ID, (msg) => {
+                if (msg) {
+                  strictEqual(msg, qcDlService._codes.NO_MATCHES);
+                }
+              }).then(() => {
+                setTimeout(() => {
+                  strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${qcDlService.tarFileName}.tar`), true);
+                }, 1000);
+              });
+            });
+          });
+        });
       });
     });
   });

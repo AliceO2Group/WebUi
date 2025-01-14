@@ -36,23 +36,10 @@ class QcDownloadService {
   /**
    * Allows the CCDB url to be altered, together with the generated tar file names and the event at which /tmp is cleared.
    * @param {Object} qcDownloadService_config The configuration used for this class.
-   * @param {Object} ccdb_config              The configuration used for the download functionality of this class.
    */
-  constructor(qcDownloadService_config, ccdb_config) {
+  constructor(qcDownloadService_config) {
     if (!qcDownloadService_config) {
       throw new Error('Configuration object cannot be empty');
-    }
-    if (!ccdb_config) {
-      throw new Error('Configuration object must include a CCDB config for downloads');
-    }
-    if (!ccdb_config.protocol) {
-      throw new Error('Configuration object must include the CCDB server protocol for downloads');
-    }
-    if (!ccdb_config.hostname) {
-      throw new Error('Configuration object must include the CCDB server domain for downloads');
-    }
-    if (!ccdb_config.port) {
-      throw new Error('Configuration object must include the CCDB server port for downloads');
     }
     if (!qcDownloadService_config.tarFileName) {
       throw new Error('Configuration object must include the downloadable tar file name');
@@ -64,7 +51,6 @@ class QcDownloadService {
       throw new Error('Configuration object must include the lifespan for the /tmp directory');
     }
     this._codes = CODES; // Added to constructor to make sure tests can easily access the codes used.
-    this._ccdbServerUrl = `${ccdb_config.protocol}://${ccdb_config.hostname}:${ccdb_config.port}`;
     this.tarFileName = qcDownloadService_config.tarFileName;
     this.cleanUpEvent = qcDownloadService_config.cleanUpEvent;
     this.dirLifespan = qcDownloadService_config.dirLifespan;
@@ -78,7 +64,7 @@ class QcDownloadService {
    * @returns {void}
    */
   async initTmpDir(callback) {
-    logger.infoMessage('Initializing...');
+    logger.infoMessage('Initializing tmp directory...');
     if (fs.existsSync(TMP_DIR)) {
       await fsp.rm(TMP_DIR, { recursive: true }).then(() => {
         callback(CODES.CLEARED_CORPSES);
@@ -87,14 +73,14 @@ class QcDownloadService {
         logger.errorMessage(err);
       });
     }
-    logger.infoMessage('Directory no longer exists, proceeding...');
-    await fsp.mkdir(TMP_DIR, DIR_PERMS.OWNER_RW && { recursive: true }).then((err) => {
+    logger.infoMessage('Directory ~/.tmp/root_obj/ no longer exists, proceeding...');
+    await fsp.mkdir(TMP_DIR, DIR_PERMS.OWNER_RW && { recursive: true }).then(() => {
+      logger.infoMessage(`Made dir '${TMP_DIR}'`);
+      this.prepareRootTmpRemovalOnSysExit(TMP_DIR, callback);
+    }).catch((err) => {
       if (err) {
         return err;
-      } else {
-        logger.infoMessage(`Made dir '${TMP_DIR}'`);
       }
-      this.prepareRootTmpRemovalOnSysExit(TMP_DIR, callback);
     });
   }
 
@@ -112,11 +98,11 @@ class QcDownloadService {
     }
     return await fsp.mkdir(dir, DIR_PERMS.OWNER_RW && { recursive: true }).catch((err) => {
       if (err) {
-        logger.errorMessage(`Unable to make request directory; ${err}`, LogLevel.DEVELOPER);
+        logger.errorMessage(`Unable to make request directory ${dir} for requester id ${request_id}; ${err}`, LogLevel.DEVELOPER);
       }
     }).then(() => {
       if (fs.existsSync(dir)) {
-        logger.infoMessage('Created request directory');
+        logger.infoMessage(`Created request directory ${dir}, for requester id ${request_id}`);
         this.scheduleRequestDirRemoval(dir);
       }
     });
@@ -128,11 +114,11 @@ class QcDownloadService {
    * @returns {void}
    */
   scheduleRequestDirRemoval(dir) {
-    logger.infoMessage('Scheduled request directory deletion');
+    logger.infoMessage(`Scheduled request directory deletion for directory: ${dir}`);
     setTimeout(() => {
-      logger.infoMessage('Deleting request directory...');
+      logger.infoMessage(`Deleting request directory ${dir}...`);
       this.deleteRequestDir(dir);
-      logger.infoMessage('Done deleting request directory!');
+      logger.infoMessage(`Done deleting request directory ${dir}!`);
     }, this.dirLifespan);
   }
 
@@ -143,7 +129,7 @@ class QcDownloadService {
    */
   async deleteRequestDir(dir) {
     if (fs.existsSync(dir)) {
-      await fsp.rmdir(dir, { recursive: true });
+      await fsp.rm(dir, { recursive: true });
     }
   }
 
@@ -155,7 +141,7 @@ class QcDownloadService {
    */
   async prepareRootTmpRemovalOnSysExit(path, callback) {
     return process.addListener(this.cleanUpEvent, async () => {
-      await fsp.rm(path, { recursive: true }).then((err) => {
+      await fsp.rm(path, { recursive: true }).catch((err) => {
         if (err) {
           callback(err);
         }
@@ -169,23 +155,24 @@ class QcDownloadService {
    * @param {function} callback   Returns a value that can be handled by the place this function gets called at.
    * @returns {Promise<Pack|*>}   Returns the tarball
    */
-  async retrieveFilesFromSubDir(request_id, callback) { //TODO: Fix glob instead of globSync no longer working
-    logger.infoMessage('Retrieving files from requester sub-directory...');
+  async retrieveFilesFromSubDir(request_id, callback) {
+    logger.infoMessage(`Retrieving files from requester ${request_id}'s sub-directory...`);
     const path = `${TMP_DIR}/${request_id}`;
     const matches_found = [];
     await (async () => {
       for await (const entry of fsp.glob(`${path}/*.root`)) {
         matches_found.push(entry);
       }
-    })();
-    if (matches_found.length > 1) {
-      this.generateTarball(matches_found, `${path}/${this.tarFileName}.tar`);
-      //Should return fs.findFile or something;
-    } else if (matches_found.length === 1) {
-      return callback(CODES.UNNECESSARY_ARCHIVE);
-    } else {
-      return callback(CODES.NO_MATCHES);
-    }
+    })().then(() => {
+      if (matches_found.length > 1) {
+        this.generateTarball(matches_found, `${path}/${this.tarFileName}.tar`);
+        //Should return fs.findFile or something;
+      } else if (matches_found.length === 1) {
+        return callback(CODES.UNNECESSARY_ARCHIVE);
+      } else {
+        return callback(CODES.NO_MATCHES);
+      }
+    });
   }
 
   /**
@@ -195,7 +182,7 @@ class QcDownloadService {
    * @returns {Pack}      The tarball generated.
    */
   generateTarball(files, path) {
-    logger.infoMessage('Generating Tarball...');
+    logger.infoMessage(`Generating tarball in path: ${path}...`);
     const baseDir = files[0].substring(0, files[0].lastIndexOf('/'));
     return tar.c(
       {
@@ -218,7 +205,7 @@ class QcDownloadService {
     if (fs.existsSync(file)) {
       await fsp.readFile(file, (err, data) => {
         if (err) {
-          logger.errorMessage(`Couldn't return tarball; ${err}`, LogLevel.DEVELOPER);
+          logger.errorMessage(`Couldn't return tarball for ${request_id}; ${err}`, LogLevel.DEVELOPER);
         }
         if (data != null) {
           dataHolder = data;
