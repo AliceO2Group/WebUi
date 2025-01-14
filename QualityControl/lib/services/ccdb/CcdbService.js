@@ -157,10 +157,11 @@ export class CcdbService {
    */
   async sendDownloadRequests(object_ids, request_id) {
     const promises = [];
-    for (const obj_id in object_ids) {
-      promises.push(await this.sendDownloadRequest(request_id, obj_id));
+    for (const obj_id of object_ids) {
+      promises.push(this.sendDownloadRequest(obj_id, request_id));
     }
-    return Promise.all(promises);
+    console.log(`Promise length is equal to: ${promises.length}, contains: ${JSON.stringify(promises)}`);
+    return await Promise.all(promises); //Fix promise.all not downloading all, instead only downloading one.
   }
 
   /**

@@ -111,10 +111,8 @@ export const qcDownloadServiceTestSuite = async () => {
           }
         }).then(() => {
           qcDlService.createNewRequestDir(REQ_ID).then(() => {
-            console.log(`Test Log: ${CCDB_FILENAME_TEST_PRIMARY}, from ${CCDB_ETAG_TEST_PRIMARY}`);
             ccdbService.sendDownloadRequest(CCDB_ETAG_TEST_PRIMARY, REQ_ID).then(() => {
               setTimeout(() => {
-                console.log(`104: Test value is: ${fs.existsSync(`${TMP_REQ_DIR}/${CCDB_ETAG_TEST_PRIMARY}.root`)}`);
                 strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_ETAG_TEST_PRIMARY}.root`), true);
               }, 1000);
             });
@@ -162,11 +160,10 @@ export const qcDownloadServiceTestSuite = async () => {
           }
         }).then(() => {
           qcDlService.createNewRequestDir(REQ_ID).then(() => {
-            ccdbService.sendDownloadRequests(CCDB_ETAG_TEST_ARRAY, REQ_ID).then(() => {
+            ccdbService.sendDownloadRequests(CCDB_ETAG_TEST_ARRAY, REQ_ID).finally(() => {
               setTimeout(() => {
+                console.log(`Test data for ${TMP_REQ_DIR}/${CCDB_ETAG_TEST_PRIMARY}.root: ${fs.existsSync(`${TMP_REQ_DIR}/${CCDB_ETAG_TEST_PRIMARY}.root`)}, ${TMP_REQ_DIR}/${CCDB_ETAG_TEST_SECONDARY}.root: ${fs.existsSync(`${TMP_REQ_DIR}/${CCDB_ETAG_TEST_SECONDARY}.root`)}`);
                 strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_ETAG_TEST_PRIMARY}.root`), true);
-              }, 1000);
-              setTimeout(() => {
                 strictEqual(fs.existsSync(`${TMP_REQ_DIR}/${CCDB_ETAG_TEST_SECONDARY}.root`), true);
               }, 1000);
             });
@@ -194,7 +191,7 @@ export const qcDownloadServiceTestSuite = async () => {
             }).then(() => {
               qcDlService.retrieveFilesFromSubDir(REQ_ID, (msg) => {
                 if (msg) {
-                  strictEqual(msg, qcDlService._codes.NO_MATCHES);
+                  strictEqual(msg, qcDlService._codes.NO_MATCHES); //Gives error Singular match
                 }
               }).then(() => {
                 setTimeout(() => {
