@@ -28,9 +28,9 @@ export const config = {
   },
 
   qcDownloadService: {
-    tarFileName: 'download',
-    cleanUpEvent: 'beforeExit',
-    dirLifespan: 15 * 60 * 1000,
+    tarFileName: 'download',      //What should the name of the archive be when a download request is archived
+    cleanUpEvent: 'beforeExit',   //With what Node event should the root_obj/ directory made for Qc downloads be removed
+    dirLifespan: 15 * 60 * 1000,  //For how long should a requester's subdirectory be kept in the filesystem
   },
   ccdb: {
     protocol: 'http',
