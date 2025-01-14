@@ -31,7 +31,7 @@ import { StatusController } from './controllers/StatusController.js';
 import { ObjectController } from './controllers/ObjectController.js';
 
 import { config } from './config/configProvider.js';
-import { QcDownloadService } from '../../Framework/Backend/index.js';
+import { QcDownloadService } from './services/QcDownload.service.js';
 
 /**
  * Model initialization for the QCG application

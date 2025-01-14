@@ -13,7 +13,7 @@
  */
 
 import { LogManager, HttpServer, WebSocket } from '@aliceo2/web-ui';
-import { QcDownloadService } from '../Framework/Backend/index.js';
+import { QcDownloadService } from './lib/services/QcDownload.service.js';
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/index`);
 import path from 'path';
 import { setup } from './lib/api.js';
