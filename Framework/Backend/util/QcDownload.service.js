@@ -115,9 +115,9 @@ class QcDownloadService {
    */
   scheduleRequestDirRemoval(dir) {
     logger.infoMessage(`Scheduled request directory deletion for directory: ${dir}`);
-    setTimeout(() => {
+    setTimeout(async () => {
       logger.infoMessage(`Deleting request directory ${dir}...`);
-      this.deleteRequestDir(dir);
+      await this.deleteRequestDir(dir);
       logger.infoMessage(`Done deleting request directory ${dir}!`);
     }, this.dirLifespan);
   }
@@ -125,12 +125,13 @@ class QcDownloadService {
   /**
    * Requests a requester's subdirectory to be removed
    * @param {string} dir  The path of the requester's subdirectory
-   * @returns {void}
+   * @returns {Promise<void | undefined>}
    */
   async deleteRequestDir(dir) {
     if (fs.existsSync(dir)) {
-      await fsp.rm(dir, { recursive: true });
+      return await fsp.rm(dir, { recursive: true });
     }
+    return null;
   }
 
   /**
