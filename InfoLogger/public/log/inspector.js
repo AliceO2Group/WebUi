@@ -45,12 +45,11 @@ function GenerateBKPUrl(BKPUrl, logItem) {
   let BKPPreparedUrl = BKPUrl;
   const BKPUrlParameters = {
     page: 'log-create',
-    runNumbers: logItem.run !== undefined ? [logItem.run] : null,
-    lhcFillNumbers: logItem.run !== undefined ? [logItem.run] : null,
+    runNumbers: logItem.run !== null ? [logItem.run] : null,
     templateKey: 'on-call',
     issueDescription: logItem.message ?? null,
-    // Most data detectors are not actually known to the BKP???
-    detectorOrSubsystem: logItem.system ?? null,
+    environmentIds: logItem.partition ?? null,
+    detectorOrSubsystem: logItem.detector ?? logItem.system ?? null,
   };
 
   let firstParameter = true;
