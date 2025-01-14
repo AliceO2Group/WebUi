@@ -166,24 +166,30 @@ export default class QCObjectService {
    * @returns {Blob}    - The file data being downloaded
    */
   async downloadRootObject(id) {
-    // await this.model.loader.loader(`/api/${location}`)
-    this.model.toggleDownloadingState();
-
-    const uuid = crypto.randomUUID();
-    // const { result, ok } = await this.model.loader.get(`/api/objects/download/${id}`).finally(() => {
-    //   this.model.toggleDownloadingState();
-    // });
-    const response = await jsonFetch(`/api/objects/download/${id}/${uuid}`, {
-      method: 'GET',
-    }).finally(() => {
+    try {
+      // await this.model.loader.loader(`/api/${location}`)
       this.model.toggleDownloadingState();
-    });
 
-    //If request succeeds call RemoteData.success(), else RemoteData.failure()
-    // this.requests = response.ok ? RemoteData.success(response.result) : RemoteData.failure(response.result.message);
+      const uuid = crypto.randomUUID();
+      // const { result, ok } = await this.model.loader.get(`/api/objects/download/${id}`).finally(() => {
+      //   this.model.toggleDownloadingState();
+      // });
+      const response = await fetch(`/api/objects/download/${id}/${uuid}`, {
+        method: 'GET',
+      }).finally(() => {
+        this.model.toggleDownloadingState();
+      });
 
-    // console.log(`Found ${id}, downloaded ${response.ok}, ${response.blob().size} downloaded.`);
-    return response.blob();
+      const blob = response.blob();
+
+      //If request succeeds call RemoteData.success(), else RemoteData.failure()
+      // this.requests = response.ok ? RemoteData.success(response.result) : RemoteData.failure(response.result.message);
+
+      // console.log(`Found ${id}, downloaded ${response.ok}, ${response.blob().size} downloaded.`);
+      return blob;
+    } catch (err) {
+      console.log(`error: ${err}`);
+    }
   }
 
   /**

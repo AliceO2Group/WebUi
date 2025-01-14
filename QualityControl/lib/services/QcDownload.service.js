@@ -181,6 +181,7 @@ export class QcDownloadService {
         return callback(CODES.NO_MATCHES);
       }
     });
+    logger.debugMessage("Done with download");
   }
 
   /**

@@ -185,15 +185,26 @@ export class ObjectController {
         });
         await this._qcDlService.createNewRequestDir(`${uuid}_${qcgId}`);
         await this._ccdbService.sendDownloadRequest(CCDB_ETAG_TEST_PRIMARY, `${uuid}_${qcgId}`);
-        await this._qcDlService.retrieveFilesFromSubDir(`${uuid}_${qcgId}`, (err) => {
-          if (err) {
-            console.log(`err2 ${err}`);
-          }
+        let response = '';
+        await this._qcDlService.retrieveFilesFromSubDir(`${uuid}_${qcgId}`, (msg) => {
+          response = msg;
         });
-        return await res.status(200).download(`../../.tmp/root_obj/${uuid}_${qcgId}/tarball.tar`, (err) => {
-          if (err)
-            console.log(`err3: ${err}`);
-        });
+        console.log('Done in controller');
+        if (response === this._qcDlService._codes.UNNECESSARY_ARCHIVE) {
+          console.log(`File is: ../../.tmp/root_obj/${uuid}_${qcgId}/${CCDB_ETAG_TEST_PRIMARY}.root`);
+          res.download(`../../.tmp/root_obj/${uuid}_${qcgId}/${CCDB_ETAG_TEST_PRIMARY}.root`, (err) => {
+            if (err)
+              console.log(`err3: ${err}`);
+          });
+        } else if (response === this._qcDlService._codes.NO_MATCHES) {
+          res.status(404).json({ message: 'No file matches' });
+        } else {
+          res.download(`../../.tmp/root_obj/${uuid}_${qcgId}/${this._qcDlService.tarFileName}.tar`, (err) => {
+            if (err)
+              console.log(`err3: ${err}`);
+          });
+        }
+        return;
         // return await res
         //   .status(200)
         //   .download('./test/demoData/layout/TObject_1728916584672.root', 'TObject_1728916584672.root', (err) => {

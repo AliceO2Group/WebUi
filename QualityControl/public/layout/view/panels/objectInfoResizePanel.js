@@ -57,7 +57,7 @@ export const objectInfoResizePanel = (model, tabObject, isProcessingDownload) =>
         onclick: async () => {
           try {
             const l = await model.services.object.downloadRootObject(id);
-            console.log(l);
+            console.log(`Awaited response: ${l}`);
             const blob = new Blob([l], { type: 'application/octet-stream' });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
