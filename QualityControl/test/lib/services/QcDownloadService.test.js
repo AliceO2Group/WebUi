@@ -20,7 +20,7 @@ import { suite, test, before } from 'node:test';
 import nock from 'nock';
 
 import { CcdbService } from '../../../lib/services/ccdb/CcdbService.js';
-import { QcDownloadService } from '../../../../Framework/Backend/index.js';
+import { QcDownloadService } from '../../../lib/services/QcDownload.service.js';
 
 import fs from 'fs';
 const fsp = fs.promises;

@@ -37,6 +37,7 @@ const fsp = fs.promises;
 /**
  * Class to generate a /tmp directory in the home directory with subdirectories that can be used to download root objects.
  * @author Colin Laan <colin.laan@gmail.com>
+ * @class
  */
 export class QcDownloadService {
   /**
