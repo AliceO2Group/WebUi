@@ -27,6 +27,11 @@ export const config = {
     tls: false,
   },
 
+  qcDownloadService: {
+    tarFileName: 'download',
+    cleanUpEvent: 'beforeExit',
+    dirLifespan: 15 * 60 * 1000,
+  },
   ccdb: {
     protocol: 'http',
     hostname: 'localhost',
