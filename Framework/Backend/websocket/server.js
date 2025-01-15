@@ -240,7 +240,7 @@ class WebSocket {
    * @param {object} client - disconnected client
    */
   onclose(client) {
-    this.logger.info(`ID ${client.id} Client disconnected`);
+    this.logger.debugMessage(`ID ${client.id} Client disconnected`);
   }
 
   /**
