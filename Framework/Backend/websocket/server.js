@@ -16,6 +16,7 @@ const WebSocketServer = require('ws').Server;
 const url = require('url');
 const WebSocketMessage = require('./message.js');
 const { LogManager } = require('../log/LogManager');
+const { minifyCriteria } = require('../utils/minifyCriteria.js');
 
 /**
  * It represents WebSocket server (RFC 6455).
@@ -134,42 +135,6 @@ class WebSocket {
   }
 
   /**
-   * Make criteria more readable.
-   * This code is a close copy of InfoLogger/public/logFilter/LogFilter.js LN 101 toObject()
-   * @param {object} criteria - criteria to be minified
-   * @returns {object} minimal filter object
-   */
-  minifyCriteria(criteria) {
-    // Copy everything
-    const criterias = JSON.parse(JSON.stringify(criteria));
-
-    // Clean-up the whole structure
-
-    for (const field in criterias) {
-      for (const operator in criterias[field]) {
-        // Remote parsed properties (generated with fromJSON)
-        if (operator.includes('$')) {
-          delete criterias[field][operator];
-        }
-
-        // Remote empty inputs
-        if (!criterias[field][operator]) {
-          delete criterias[field][operator];
-        } else if (operator === 'match' || operator === 'exclude') {
-          // Encode potential breaking characters and escape double quotes as are used by browser by default
-          criterias[field][operator] = encodeURI(criterias[field][operator].replace(/["]+/g, '\\"'));
-        }
-
-        // Remove empty fields
-        if (!Object.keys(criterias[field]).length) {
-          delete criterias[field];
-        }
-      }
-    }
-    return criterias;
-  }
-
-  /**
    * Called when a new message arrives
    * Handles connection with a client
    * @param {object} message received message
@@ -182,7 +147,7 @@ class WebSocket {
         // 2. Check if its message filter (no auth required)
         if (parsed.getCommand() == 'filter' && parsed.getPayload()) {
           client.filter = new Function(`return ${parsed.getPayload()}`)();
-          const criterias = this.minifyCriteria(client.filter(message, true));
+          const criterias = minifyCriteria(client.filter(message, true));
           if (criterias != false) {
             this.logger.debugMessage(`New live filter applied: ${JSON.stringify(criterias)}`);
           }

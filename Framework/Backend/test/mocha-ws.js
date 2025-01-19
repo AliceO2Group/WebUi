@@ -20,6 +20,7 @@ const HttpServer = require('./../http/server');
 const O2TokenService = require('./../services/O2TokenService.js');
 const sinon = require('sinon');
 const WebSocketMessage = require('./../websocket/message.js');
+const { minifyCriteria } = require('../utils/minifyCriteria.js');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
@@ -265,7 +266,7 @@ describe('websocket', () => {
   });
 
   it('minifyCriteria() works as expected', (done) => {
-    const criterias = wss.minifyCriteria(filters);
+    const criterias = minifyCriteria(filters);
     assert.strictEqual(JSON.stringify(criterias), minifiedFilters);
     done();
   });
