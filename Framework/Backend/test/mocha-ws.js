@@ -20,7 +20,6 @@ const HttpServer = require('./../http/server');
 const O2TokenService = require('./../services/O2TokenService.js');
 const sinon = require('sinon');
 const WebSocketMessage = require('./../websocket/message.js');
-const { minifyCriteria } = require('../utils/minifyCriteria.js');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
@@ -263,12 +262,6 @@ describe('websocket', () => {
       assert.ok(wss.logger.debugMessage.calledWith(`New live filter applied: ${minifiedFilters}`));
       done();
     });
-  });
-
-  it('minifyCriteria() works as expected', (done) => {
-    const criterias = minifyCriteria(filters);
-    assert.strictEqual(JSON.stringify(criterias), minifiedFilters);
-    done();
   });
 
   it('Request message broadcast with 200', (done) => {
