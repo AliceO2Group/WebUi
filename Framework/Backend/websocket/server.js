@@ -147,7 +147,12 @@ class WebSocket {
         // 2. Check if its message filter (no auth required)
         if (parsed.getCommand() == 'filter' && parsed.getPayload()) {
           client.filter = new Function(`return ${parsed.getPayload()}`)();
-          const criterias = minifyCriteria(client.filter(message, true));
+          let criterias;
+          try {
+            criterias = minifyCriteria(client.filter(message, true));
+          } catch {
+            this.logger.errorMessage('Invalid payload criteria received at onmessage()');
+          }
           if (criterias != false) {
             this.logger.debugMessage(`New live filter applied: ${JSON.stringify(criterias)}`);
           }
