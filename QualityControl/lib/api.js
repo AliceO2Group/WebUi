@@ -15,6 +15,7 @@
 import { setupQcModel } from './QCModel.js';
 import { minimumRoleMiddleware } from './middleware/minimumRole.middleware.js';
 import { UserRole } from './../common/library/userRole.enum.js';
+import { layoutOwnerMiddleware } from './middleware/layouts/layoutOwner.middleware.js';
 
 /**
  * Adds paths and binds websocket to instance of HttpServer passed
@@ -41,7 +42,11 @@ export const setup = (http, ws) => {
   http.get('/layout', layoutService.getLayoutByNameHandler.bind(layoutService));
   http.post('/layout', layoutService.postLayoutHandler.bind(layoutService));
   http.put('/layout/:id', layoutService.putLayoutHandler.bind(layoutService));
-  http.delete('/layout/:id', layoutService.deleteLayoutHandler.bind(layoutService));
+  http.delete(
+    '/layout/:id',
+    layoutOwnerMiddleware(layoutService),
+    layoutService.deleteLayoutHandler.bind(layoutService),
+  );
   http.patch(
     '/layout/:id',
     minimumRoleMiddleware(UserRole.GLOBAL),
