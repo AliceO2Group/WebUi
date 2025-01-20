@@ -176,12 +176,8 @@ export class LayoutController {
   async deleteLayoutHandler(req, res) {
     const { id } = req.params;
     try {
-      if (!id) {
-        updateExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout to delete'));
-      } else {
-        const result = await this._dataService.deleteLayout(id);
-        res.status(200).json(result);
-      }
+      const result = await this._dataService.deleteLayout(id);
+      res.status(200).json(result);
     } catch {
       updateExpressResponseFromNativeError(res, new Error(`Unable to delete layout with id: ${id}`));
     }
