@@ -37,10 +37,10 @@ export const environmentStateSummary = (environment) => {
   var SlashSeparated =  [currentRunNumber, id].join('/').toString();
 
   var options = [  
-    {label: 'Environment Id: ', value:id},
+    {label: 'Environment Id: ' + id, value:id},
   ];
 
-  state === EnvironmentState.RUNNING && options.push({label: 'Run Number: ', value:currentRunNumber},
+  state === EnvironmentState.RUNNING && options.push({label: 'Run Number: ' + currentRunNumber, value:currentRunNumber},
     {label: 'RunNumber, environmentId ', value:commaSeparated},
     {label: 'RunNumber / environmentId ', value:SlashSeparated},
   );
