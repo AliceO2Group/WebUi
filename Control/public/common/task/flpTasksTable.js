@@ -18,6 +18,8 @@ import {
 import pageLoading from '../pageLoading.js';
 import showTableItem from '../showTableItem.js';
 import { getTaskStateClassAssociation } from '../enums/TaskState.js';
+import { infoLoggerButtonLink } from '../buttons/infoLoggerRedirectButton.js';
+
 /**
  * For a given list of FLP tasks, build a table with tasks details and buttons to allow for retrieving more details per task
  * @param {Array<Task>} [tasks = []] - list of tasks to build table for
@@ -46,11 +48,21 @@ export const flpTasksTable = (tasks, taskTableModel,loggerObject) => {
             h('td.w-10', task.status),
             h(`td.w-10${getTaskStateClassAssociation(task.state)}`, task.state),
             h('td.w-20', task?.deploymentInfo?.hostname),
-            h('td.w-10',
+            h('td.w-100.btn-group',
               h('boutton.btn-sm.btn-default', {
                 title: 'More Details',
                 onclick: () => taskTableModel.toggleTaskView(task.taskId),
-              }, taskTableModel.openedTaskViews[task.taskId] ? iconChevronTop() : iconChevronBottom())
+              }, taskTableModel.openedTaskViews[task.taskId] ? iconChevronTop() : iconChevronBottom()),
+              infoLoggerButtonLink(
+                { 
+                  run: loggerObject.run, 
+                  hostname:loggerObject.hostname, 
+                  partition:loggerObject.partition,
+                  pid: loggerObject.pid
+                },
+                'ILG',
+                loggerObject.url
+              ),
             ),
           ]),
           taskTableModel.openedTaskViews[task.taskId] && taskTableModel.tasksAsRemoteDataById[task.taskId]

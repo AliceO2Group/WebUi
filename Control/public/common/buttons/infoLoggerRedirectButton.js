@@ -31,7 +31,8 @@ import { redirectButtonLink } from './redirectButtonLink.js';
 export const infoLoggerButtonLink = (
   { partition, run, hostname, system, facility, pid },
   label = 'InfoLogger',
-  source = ''
+  source = '',
+  className = ['ph2', 'btn', 'primary', 'w-100']
 ) => {
   if (source) {
     let href = `${source}?q={`;
@@ -58,7 +59,7 @@ export const infoLoggerButtonLink = (
     }
     href += '}';
     let title = `Open InfoLogger GUI`;
-    return redirectButtonLink(href, label, title, true, ['ph2', 'btn', 'primary', 'w-100']);
+    return redirectButtonLink(href, label, title, true, className);
   }
   return;
 };

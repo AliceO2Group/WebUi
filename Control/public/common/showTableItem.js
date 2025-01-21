@@ -15,15 +15,13 @@
 import {h} from '/js/src/index.js';
 import {parseObject} from './utils.js';
 
-import { infoLoggerButtonLink } from './buttons/infoLoggerRedirectButton.js';
-
 /**
  * Generic table to show properties of an object
  * This can be forked to show more specific data (format date, colors, more buttons...)
  * @param {Object} item - object to be shown
  * @return {vnode} table view
  */
-export default (item,loggerObject) => 
+export default (item) => 
   h('table.table.shadow-level2', {style: 'white-space: pre-wrap;'}, [
     h('tbody', Object.keys(item).map((columnName) => 
       h('tr', [
@@ -33,26 +31,4 @@ export default (item,loggerObject) =>
           h('td', item[columnName]),
      
       ]))),
-    h('tr', [
-      h('th', 'InfoLogger'),
-      h('td.p2.flex-row.bg-primary.white', [
-        h('.p2.flex-row.bg-primary.white', [
-          h('.flex-row.flex-grow-1.g2', [
-            
-            infoLoggerButtonLink(
-              { 
-                run: loggerObject.run, 
-                hostname:loggerObject.hostname, 
-                partition:loggerObject.partition,
-                pid: loggerObject.pid
-              },
-              'InfoLogger GUI' + ' PID ' + loggerObject.pid,
-              loggerObject.url
-            ),
-           
-          ]),
-        ]),
-        
-      ])
-    ])
   ]);
