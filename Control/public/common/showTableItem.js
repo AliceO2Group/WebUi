@@ -15,17 +15,43 @@
 import {h} from '/js/src/index.js';
 import {parseObject} from './utils.js';
 
+import { infoLoggerButtonLink } from './buttons/infoLoggerRedirectButton.js';
+
 /**
  * Generic table to show properties of an object
  * This can be forked to show more specific data (format date, colors, more buttons...)
  * @param {Object} item - object to be shown
  * @return {vnode} table view
  */
-export default (item) => h('table.table.shadow-level2', {style: 'white-space: pre-wrap;'}, [
-  h('tbody', Object.keys(item).map((columnName) => h('tr', [
-    h('th', columnName),
-    typeof item[columnName] === 'object' ?
-      h('td', parseObject(item[columnName], columnName)) :
-      h('td', item[columnName])
-  ]))),
+export default (item,loggerObject) => h('table.table.shadow-level2', {style: 'white-space: pre-wrap;'}, [
+  h('tbody', Object.keys(item).map((columnName) => 
+    h('tr', [
+      h('th', columnName),
+      typeof item[columnName] === 'object' ?
+        h('td', parseObject(item[columnName], columnName)) :
+        h('td', item[columnName]),
+   
+    ]))),
+  h('tr', [
+    h('th', 'InfoLogger'),
+    h('td.p2.flex-row.bg-primary.white', [
+      h('.p2.flex-row.bg-primary.white', [
+        h('.flex-row.flex-grow-1.g2', [
+          
+          infoLoggerButtonLink(
+            { 
+              run: loggerObject.run, 
+              hostname:loggerObject.hostname, 
+              partition:loggerObject.partition,
+              pid: item.pid
+            },
+            'InfoLogger GUI' + ' ' + item.pid,
+            loggerObject.url
+          ),
+         
+        ]),
+      ]),
+      
+    ])
+  ])
 ]);

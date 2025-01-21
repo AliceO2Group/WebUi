@@ -29,7 +29,7 @@ import { redirectButtonLink } from './redirectButtonLink.js';
  * @returns {vnode} - button as link allowing user to open InfoLogger in a new tab
  */
 export const infoLoggerButtonLink = (
-  { partition, run, hostname, system, facility },
+  { partition, run, hostname, system, facility, pid },
   label = 'InfoLogger',
   source = ''
 ) => {
@@ -49,6 +49,9 @@ export const infoLoggerButtonLink = (
     }
     if (facility) {
       href += `"facility":{"match":"${facility}"},`;
+    }
+    if(pid){
+      href += `"pid":{"match":"${pid}"},`;
     }
     if (href.slice(-1) === ',') { // remove trailing comma
       href = href.slice(0, -1);
