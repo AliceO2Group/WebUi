@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { InvalidInputError } from '@aliceo2/web-ui';
+import { InvalidInputError } from '../../errors/InvalidInputError.js';
 import { updateExpressResponseFromNativeError } from '../../errors/updateExpressResponseFromNativeError.js';
 
 /**
