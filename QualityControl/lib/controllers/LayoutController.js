@@ -20,9 +20,7 @@ import { LayoutPatchDto } from './../dtos/LayoutPatchDto.js';
 import {
   updateExpressResponseFromNativeError,
 } from './../errors/updateExpressResponseFromNativeError.js';
-import { InvalidInputError } from './../errors/InvalidInputError.js';
-import { UnauthorizedAccessError } from './../errors/UnauthorizedAccessError.js';
-import { NotFoundError } from './../errors/NotFoundError.js';
+import { InvalidInputError, NotFoundError, UnauthorizedAccessError } from '@aliceo2/web-ui';
 
 /**
  * Gateway for all HTTP requests with regards to QCG Layouts
