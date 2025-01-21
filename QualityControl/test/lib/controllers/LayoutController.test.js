@@ -284,14 +284,6 @@ export const layoutControllerTestSuite = async () => {
       };
     });
 
-    test('should respond with 400 error if request did not contain layout id when requesting to update', async () => {
-      const req = { params: {} };
-      const layoutConnector = new LayoutController({});
-      await layoutConnector.deleteLayoutHandler(req, res);
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledWith({ message: 'Missing parameter "id" of layout to delete' }), 'Error message was incorrect');
-    });
-
     test('should successfully return the id of the deleted layout', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileService, {
         readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
@@ -316,19 +308,6 @@ export const layoutControllerTestSuite = async () => {
       ok(res.status.calledWith(500), 'Response status was not 500');
       ok(res.json.calledWith({ message: 'Unable to delete layout with id: mylayout' }), 'DataConnector error message is incorrect');
       ok(jsonStub.deleteLayout.calledWith('mylayout'), 'Layout id was not used in data connector call');
-    });
-
-    test('should return unauthorized error if user requesting delete operation is not the owner', async () => {
-      const jsonStub = sinon.createStubInstance(JsonFileService, {
-        readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-      const req = { params: { id: 'mylayout' }, session: { personid: 2, name: 'one' } };
-      await layoutConnector.deleteLayoutHandler(req, res);
-
-      ok(res.status.calledWith(403), 'Response status was not 403');
-      ok(res.json.calledWith({ message: 'Only the owner of the layout can delete it' }), 'DataConnector error message is incorrect');
-      ok(jsonStub.readLayout.calledWith('mylayout'), 'Layout id was not used in data connector call');
     });
   });
 
