@@ -27,6 +27,7 @@ import { getTaskStateClassAssociation } from '../enums/TaskState.js';
 export const flpTasksTable = (tasks, taskTableModel,loggerObject) => {
   const tableColumns = ['Name', 'PID', 'Locked', 'Status', 'State', 'Host Name', 'More'];
 
+ 
   return h('.scroll-auto.panel', [
     h('table.table.table-sm', {style: 'margin-bottom: 0'}, [
       h('thead',
@@ -53,7 +54,10 @@ export const flpTasksTable = (tasks, taskTableModel,loggerObject) => {
             ),
           ]),
           taskTableModel.openedTaskViews[task.taskId] && taskTableModel.tasksAsRemoteDataById[task.taskId]
-          && showTaskDetailsTable(taskTableModel.tasksAsRemoteDataById[task.taskId],loggerObject),
+          && showTaskDetailsTable(taskTableModel.tasksAsRemoteDataById[task.taskId],{
+            ...loggerObject,
+            pid: task.pid
+          }),
         ]),
       ])
     ])
@@ -74,7 +78,6 @@ const showTaskDetailsTable = (taskRemoteData,loggerObject) => h('tr',
       style: 'font-size: 0.25em; text-align: center;', colspan: 7
     }, pageLoading()),
     Success: (data) => h('td', {colspan: 7}, 
-
       showTableItem(data, loggerObject),
     ),
     Failure: (_error) => h('td.shadow-level3.m5',

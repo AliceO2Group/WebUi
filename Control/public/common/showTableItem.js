@@ -23,35 +23,36 @@ import { infoLoggerButtonLink } from './buttons/infoLoggerRedirectButton.js';
  * @param {Object} item - object to be shown
  * @return {vnode} table view
  */
-export default (item,loggerObject) => h('table.table.shadow-level2', {style: 'white-space: pre-wrap;'}, [
-  h('tbody', Object.keys(item).map((columnName) => 
+export default (item,loggerObject) => 
+  h('table.table.shadow-level2', {style: 'white-space: pre-wrap;'}, [
+    h('tbody', Object.keys(item).map((columnName) => 
+      h('tr', [
+        h('th', columnName),
+        typeof item[columnName] === 'object' ?
+          h('td', parseObject(item[columnName], columnName)) :
+          h('td', item[columnName]),
+     
+      ]))),
     h('tr', [
-      h('th', columnName),
-      typeof item[columnName] === 'object' ?
-        h('td', parseObject(item[columnName], columnName)) :
-        h('td', item[columnName]),
-   
-    ]))),
-  h('tr', [
-    h('th', 'InfoLogger'),
-    h('td.p2.flex-row.bg-primary.white', [
-      h('.p2.flex-row.bg-primary.white', [
-        h('.flex-row.flex-grow-1.g2', [
-          
-          infoLoggerButtonLink(
-            { 
-              run: loggerObject.run, 
-              hostname:loggerObject.hostname, 
-              partition:loggerObject.partition,
-              pid: item.pid
-            },
-            'InfoLogger GUI' + ' ' + item.pid,
-            loggerObject.url
-          ),
-         
+      h('th', 'InfoLogger'),
+      h('td.p2.flex-row.bg-primary.white', [
+        h('.p2.flex-row.bg-primary.white', [
+          h('.flex-row.flex-grow-1.g2', [
+            
+            infoLoggerButtonLink(
+              { 
+                run: loggerObject.run, 
+                hostname:loggerObject.hostname, 
+                partition:loggerObject.partition,
+                pid: loggerObject.pid
+              },
+              'InfoLogger GUI' + ' PID ' + loggerObject.pid,
+              loggerObject.url
+            ),
+           
+          ]),
         ]),
-      ]),
-      
+        
+      ])
     ])
-  ])
-]);
+  ]);
