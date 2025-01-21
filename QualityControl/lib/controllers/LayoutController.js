@@ -129,7 +129,10 @@ export class LayoutController {
       if (!id) {
         updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout'));
       } else if (!req.body) {
-        updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing body content to update layout with'));
+        updateAndSendExpressResponseFromNativeError(
+          res,
+          new InvalidInputError('Missing body content to update layout with'),
+        );
       } else {
         const { personid } = req.session;
         const { owner_id } = await this._dataService.readLayout(id);
@@ -179,7 +182,10 @@ export class LayoutController {
     const { id } = req.params;
     try {
       if (!id) {
-        updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout to delete'));
+        updateAndSendExpressResponseFromNativeError(
+          res,
+          new InvalidInputError('Missing parameter "id" of layout to delete'),
+        );
       } else {
         const { personid, name } = req.session;
         const { owner_name, owner_id } = await this._dataService.readLayout(id);
@@ -246,7 +252,10 @@ export class LayoutController {
       try {
         layout = await LayoutPatchDto.validateAsync(req.body);
       } catch {
-        updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Invalid request body to update layout'));
+        updateAndSendExpressResponseFromNativeError(
+          res,
+          new InvalidInputError('Invalid request body to update layout'),
+        );
         return;
       }
 
