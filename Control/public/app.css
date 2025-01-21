@@ -91,20 +91,6 @@
 .nav-tabs .nav-item.show .nav-link { color: #495057; background-color: #fff; border-color: #dee2e6 #dee2e6 #fff; }
 .nav-tabs .dropdown-menu { margin-top: -1px; border-top-left-radius: 0; border-top-right-radius: 0;}
 
-
-/* Popover system */
-
-.popover {
-  flex-shrink: 0;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1002;
-  max-width: var(--ui-component-large);
-}
-
 .tab-content > .tab-pane { display: none; }
 .tab-content > .active { display: block; }
 
