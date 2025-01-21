@@ -13,13 +13,14 @@
  */
 
 import { InvalidInputError } from '@aliceo2/web-ui';
-import { updateExpressResponseFromNativeError } from '../../errors/updateExpressResponseFromNativeError';
+import { updateExpressResponseFromNativeError } from '../../errors/updateExpressResponseFromNativeError.js';
 
 /**
  * Middleware that checks if the layout id is present in the request
+ * @param {JSONFileConnector} dataService - service for getting/setting layout data
  * @returns  {function(req, res, next): Function} - middleware function
  */
-export const layoutIdMiddleware = () =>
+export const layoutIdMiddleware = (dataService) =>
 
 /**
  * Returned middleware method
@@ -27,15 +28,20 @@ export const layoutIdMiddleware = () =>
  * @param {Express.Response} res - HTTP Response
  * @param {Express.Next} next - HTTP Next (check pass)
  */
-  (req, res, next) => {
+  async (req, res, next) => {
+    const { id = '' } = req.params ?? {};
+    if (!id) {
+      updateExpressResponseFromNativeError(
+        res,
+        new InvalidInputError('The "id" parameter is missing from the request'),
+      );
+      return;
+    }
     try {
-      const { id } = req.params;
-      if (!id) {
-        updateExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout'));
-      }
+      await dataService.readLayout(id);
+      next();
     } catch (error) {
       updateExpressResponseFromNativeError(res, error);
       return;
     }
-    next();
   };
