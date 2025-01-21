@@ -13,14 +13,14 @@
  */
 
 import { UnauthorizedAccessError } from '@aliceo2/web-ui';
-import { updateExpressResponseFromNativeError } from '../../errors/updateExpressResponseFromNativeError';
+import { updateExpressResponseFromNativeError } from '../../errors/updateExpressResponseFromNativeError.js';
 
 /**
  * Middleware that checks if the requestor is the owner of the layout
  * @param {JSONFileConnector} dataService - service for getting/setting layout data
  * @returns  {function(req, res, next): Function} - middleware function
  */
-export const layoutOwnerMiddleware = async (dataService) =>
+export const layoutOwnerMiddleware = (dataService) =>
 
 /**
  * Returned middleware method
@@ -31,18 +31,30 @@ export const layoutOwnerMiddleware = async (dataService) =>
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { personid, name } = req.session ?? {};
-      const { ownerName, ownerId } = await dataService.readLayout(id);
-      if (ownerName !== name || ownerId !== personid) {
+      const { personid = '', name = '' } = req.session ?? {};
+      const { ownerName = '', ownerId = '' } = await dataService.readLayout(id) ?? {};
+      if (!ownerName || !ownerId) {
+        updateExpressResponseFromNativeError(
+          res,
+          new UnauthorizedAccessError('Unable to retrieve layout owner information'),
+        );
+        return;
+      } else if (!personid || !name) {
+        updateExpressResponseFromNativeError(
+          res,
+          new UnauthorizedAccessError('Unable to retrieve session information'),
+        );
+        return;
+      } else if (ownerName !== name || ownerId !== personid) {
         updateExpressResponseFromNativeError(
           res,
           new UnauthorizedAccessError('Only the owner of the layout can delete it'),
         );
         return;
       }
+      next();
     } catch (error) {
       updateExpressResponseFromNativeError(res, error);
       return;
     }
-    next();
   };
