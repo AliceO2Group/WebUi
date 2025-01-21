@@ -41,7 +41,7 @@
     "globals": "^15.14.0",
     "mocha": "^11.0.1",
     "nyc": "^17.1.0",
-    "puppeteer": "^24.0.0",
+    "puppeteer": "^24.1.0",
     "sinon": "^19.0.2"
   },
   "bundleDependencies": [
