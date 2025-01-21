@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { UnauthorizedAccessError } from '@aliceo2/web-ui';
+import { UnauthorizedAccessError } from '../../errors/UnauthorizedAccessError.js';
 import { updateExpressResponseFromNativeError } from '../../errors/updateExpressResponseFromNativeError.js';
 
 /**
