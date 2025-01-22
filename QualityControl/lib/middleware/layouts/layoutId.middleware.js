@@ -30,6 +30,13 @@ export const layoutIdMiddleware = (dataService) =>
  */
   async (req, res, next) => {
     const { id = '' } = req.params ?? {};
+    if (!dataService) {
+      updateExpressResponseFromNativeError(
+        res,
+        new InvalidInputError('The "dataService" parameter is missing from the request'),
+      );
+      return;
+    }
     if (!id) {
       updateExpressResponseFromNativeError(
         res,

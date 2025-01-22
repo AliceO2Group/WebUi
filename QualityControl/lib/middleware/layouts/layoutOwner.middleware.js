@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import { InvalidInputError } from '../../errors/InvalidInputError.js';
 import { UnauthorizedAccessError } from '../../errors/UnauthorizedAccessError.js';
 import { updateExpressResponseFromNativeError } from '../../errors/updateExpressResponseFromNativeError.js';
 
@@ -32,6 +33,15 @@ export const layoutOwnerMiddleware = (dataService) =>
     try {
       const { id } = req.params;
       const { personid = '', name = '' } = req.session ?? {};
+
+      if (!dataService) {
+        updateExpressResponseFromNativeError(
+          res,
+          new InvalidInputError('The "dataService" parameter is missing from the request'),
+        );
+        return;
+      }
+
       const { ownerName = '', ownerId = '' } = await dataService.readLayout(id) ?? {};
       if (!ownerName || !ownerId) {
         updateExpressResponseFromNativeError(

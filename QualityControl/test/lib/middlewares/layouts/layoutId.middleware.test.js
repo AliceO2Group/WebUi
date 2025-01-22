@@ -24,6 +24,22 @@ import { NotFoundError } from '../../../../lib/errors/NotFoundError.js';
  */
 export const layoutIdMiddlewareTest = () => {
   suite('Layout id middlewares', () => {
+    test('should return an "Invalid input" error if the data service is not provided', () => {
+      const req = {
+        params: {
+          id: 'testId',
+        },
+      };
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub().returns(),
+      };
+      const next = sinon.stub().returns();
+      layoutIdMiddleware(null)(req, res, next);
+      ok(res.status.calledWith(400), 'The status code should be 400');
+      ok(res.json.calledWith({ message: 'The "dataService" parameter is missing from the request' }));
+    });
+
     test('should return an "Invalid input" error if the layout id is not provided', () => {
       const req = {
         params: {
@@ -35,7 +51,8 @@ export const layoutIdMiddlewareTest = () => {
         json: sinon.stub().returns(),
       };
       const next = sinon.stub().returns();
-      layoutIdMiddleware()(req, res, next);
+      const dataServiceStub = sinon.createStubInstance(JsonFileService);
+      layoutIdMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(400), 'The status code should be 400');
       ok(res.json.calledWith({ message: 'The "id" parameter is missing from the request' }));
     });
