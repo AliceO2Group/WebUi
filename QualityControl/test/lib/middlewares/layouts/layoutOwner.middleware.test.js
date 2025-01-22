@@ -23,7 +23,7 @@ import { layoutOwnerMiddleware } from '../../../../lib/middleware/layouts/layout
  */
 export const layoutOwnerMiddlewareTest = () => {
   suite('Layout owner middleware', () => {
-    test('should return an "UnauthorizedAccessError" if the layout does not belong to the user', () => {
+    test('should return an "UnauthorizedAccessError" if the layout does not belong to the user', async () => {
       const req = {
         params: {
           id: 'layoutId',
@@ -39,12 +39,12 @@ export const layoutOwnerMiddlewareTest = () => {
       };
       const next = sinon.stub().returns();
       const dataServiceStub = sinon.createStubInstance(JsonFileService, {
-        readLayout: sinon.stub().returns({ ownerName: 'ownerName', ownerId: 'ownerId' }),
+        readLayout: sinon.stub().resolves({ ownerName: 'ownerName', ownerId: 'ownerId' }),
       });
-      layoutOwnerMiddleware(dataServiceStub)(req, res, next);
+      await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(403));
     });
-    test('should return an "UnauthorizedAccessError" error if the owner of the layout is not accesible', () => {
+    test('should return an "UnauthorizedAccessError" error if the owner of the layout is not accesible', async () => {
       const req = {
         params: {
           id: 'layoutId',
@@ -60,13 +60,13 @@ export const layoutOwnerMiddlewareTest = () => {
       };
       const next = sinon.stub().returns();
       const dataServiceStub = sinon.createStubInstance(JsonFileService, {
-        readLayout: sinon.stub().returns({}),
+        readLayout: sinon.stub().returns(),
       });
-      layoutOwnerMiddleware(dataServiceStub)(req, res, next);
+      await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(403));
       ok(res.json.calledWith({ message: 'Unable to retrieve layout owner information' }));
     });
-    test('should return an "UnauthorizedAccessError" error if the session information is not accesible', () => {
+    test('should return an "UnauthorizedAccessError" error if the session information is not accesible', async () => {
       const req = {
         params: {
           id: 'layoutId',
@@ -84,7 +84,7 @@ export const layoutOwnerMiddlewareTest = () => {
       const dataServiceStub = sinon.createStubInstance(JsonFileService, {
         readLayout: sinon.stub().returns({ ownerName: 'ownerName', ownerId: 'ownerId' }),
       });
-      layoutOwnerMiddleware(dataServiceStub)(req, res, next);
+      await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(403));
       ok(res.json.calledWith({ message: 'Unable to retrieve session information' }));
     });
