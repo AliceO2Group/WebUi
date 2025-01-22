@@ -30,21 +30,12 @@ export const layoutIdMiddleware = (dataService) =>
  */
   async (req, res, next) => {
     const { id = '' } = req.params ?? {};
-    if (!dataService) {
-      updateExpressResponseFromNativeError(
-        res,
-        new InvalidInputError('The "dataService" parameter is missing from the request'),
-      );
-      return;
-    }
-    if (!id) {
-      updateExpressResponseFromNativeError(
-        res,
-        new InvalidInputError('The "id" parameter is missing from the request'),
-      );
-      return;
-    }
     try {
+      if (!dataService) {
+        throw new InvalidInputError('The "dataService" parameter is missing from the request');
+      } else if (!id) {
+        throw new InvalidInputError('The "id" parameter is missing from the request');
+      }
       await dataService.readLayout(id);
       next();
     } catch (error) {

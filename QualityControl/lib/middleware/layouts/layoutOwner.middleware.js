@@ -35,32 +35,15 @@ export const layoutOwnerMiddleware = (dataService) =>
       const { personid = '', name = '' } = req.session ?? {};
 
       if (!dataService) {
-        updateExpressResponseFromNativeError(
-          res,
-          new InvalidInputError('The "dataService" parameter is missing from the request'),
-        );
-        return;
+        throw new InvalidInputError('The "dataService" parameter is missing from the request');
       }
-
       const { ownerName = '', ownerId = '' } = await dataService.readLayout(id) ?? {};
       if (!ownerName || !ownerId) {
-        updateExpressResponseFromNativeError(
-          res,
-          new UnauthorizedAccessError('Unable to retrieve layout owner information'),
-        );
-        return;
+        throw new UnauthorizedAccessError('Unable to retrieve layout owner information');
       } else if (!personid || !name) {
-        updateExpressResponseFromNativeError(
-          res,
-          new UnauthorizedAccessError('Unable to retrieve session information'),
-        );
-        return;
+        throw new UnauthorizedAccessError('Unable to retrieve session information');
       } else if (ownerName !== name || ownerId !== personid) {
-        updateExpressResponseFromNativeError(
-          res,
-          new UnauthorizedAccessError('Only the owner of the layout can delete it'),
-        );
-        return;
+        throw new UnauthorizedAccessError('Only the owner of the layout can delete it');
       }
       next();
     } catch (error) {
