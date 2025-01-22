@@ -46,7 +46,7 @@ export const setup = (http, ws) => {
   http.delete(
     '/layout/:id',
     [
-      layoutIdMiddleware(),
+      layoutIdMiddleware(layoutService),
       layoutOwnerMiddleware(layoutService),
     ],
     layoutService.deleteLayoutHandler.bind(layoutService),
