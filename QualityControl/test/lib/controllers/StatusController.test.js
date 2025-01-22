@@ -16,7 +16,7 @@ import { stub } from 'sinon';
 import { ok } from 'node:assert';
 import { suite, test } from 'node:test';
 
-import {  StatusController } from './../../../lib/controllers/StatusController.js';
+import { StatusController } from './../../../lib/controllers/StatusController.js';
 
 export const statusControllerTestSuite = async () => {
   suite('`getFrameworkInfo()` tests', () => {
@@ -58,7 +58,11 @@ export const statusControllerTestSuite = async () => {
       await statusController.getFrameworkInfo({}, res);
 
       ok(res.status.calledWith(503));
-      ok(res.json.calledWith({ message: 'Service could not retrieve status' }));
+      ok(res.json.calledWith({
+        message: 'Service could not retrieve status',
+        status: 503,
+        title: 'Service Unavailable',
+      }));
     });
   });
 
