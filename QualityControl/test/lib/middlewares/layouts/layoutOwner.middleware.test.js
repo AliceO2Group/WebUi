@@ -39,7 +39,7 @@ export const layoutOwnerMiddlewareTest = () => {
       };
       const next = sinon.stub().returns();
       const dataServiceStub = sinon.createStubInstance(JsonFileService, {
-        readLayout: sinon.stub().resolves({ ownerName: 'ownerName', ownerId: 'ownerId' }),
+        readLayout: sinon.stub().resolves({ owner_name: 'ownerName', owner_id: 'ownerId' }),
       });
       await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(403));
@@ -91,7 +91,7 @@ export const layoutOwnerMiddlewareTest = () => {
       };
       const next = sinon.stub().returns();
       const dataServiceStub = sinon.createStubInstance(JsonFileService, {
-        readLayout: sinon.stub().returns({ ownerName: 'ownerName', ownerId: 'ownerId' }),
+        readLayout: sinon.stub().returns({ owner_name: 'ownerName', owner_id: 'ownerId' }),
       });
       await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(404));
