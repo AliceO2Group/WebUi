@@ -43,8 +43,13 @@ export const layoutOwnerMiddlewareTest = () => {
       });
       await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(403));
+      ok(res.json.calledWith({
+        message: 'Only the owner of the layout can delete it',
+        status: 403,
+        title: 'Unauthorized Access',
+      }));
     });
-    test('should return an "UnauthorizedAccessError" error if the owner of the layout is not accesible', async () => {
+    test('should return an "NotFound" error if the owner data of the layout is not accesible', async () => {
       const req = {
         params: {
           id: 'layoutId',
@@ -63,10 +68,14 @@ export const layoutOwnerMiddlewareTest = () => {
         readLayout: sinon.stub().returns(),
       });
       await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
-      ok(res.status.calledWith(403));
-      ok(res.json.calledWith({ message: 'Unable to retrieve layout owner information' }));
+      ok(res.status.calledWith(404));
+      ok(res.json.calledWith({
+        message: 'Unable to retrieve layout owner information',
+        status: 404,
+        title: 'Not Found',
+      }));
     });
-    test('should return an "UnauthorizedAccessError" error if the session information is not accesible', async () => {
+    test('should return an "NotFound" error if the session information is not accesible', async () => {
       const req = {
         params: {
           id: 'layoutId',
@@ -85,8 +94,12 @@ export const layoutOwnerMiddlewareTest = () => {
         readLayout: sinon.stub().returns({ ownerName: 'ownerName', ownerId: 'ownerId' }),
       });
       await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
-      ok(res.status.calledWith(403));
-      ok(res.json.calledWith({ message: 'Unable to retrieve session information' }));
+      ok(res.status.calledWith(404));
+      ok(res.json.calledWith({
+        message: 'Unable to retrieve session information',
+        status: 404,
+        title: 'Not Found',
+      }));
     });
   });
 };

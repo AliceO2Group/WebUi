@@ -12,8 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { InvalidInputError } from '../../errors/InvalidInputError.js';
-import { updateExpressResponseFromNativeError } from '../../errors/updateExpressResponseFromNativeError.js';
+import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
 /**
  * Middleware that checks if the layout id is present in the request
@@ -37,7 +36,7 @@ export const layoutIdMiddleware = (dataService) =>
       await dataService.readLayout(id);
       next();
     } catch (error) {
-      updateExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, error);
       return;
     }
   };

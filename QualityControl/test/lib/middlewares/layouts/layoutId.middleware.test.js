@@ -17,7 +17,7 @@ import { ok } from 'node:assert';
 import sinon from 'sinon';
 import { layoutIdMiddleware } from '../../../../lib/middleware/layouts/layoutId.middleware.js';
 import { JsonFileService } from '../../../../lib/services/JsonFileService.js';
-import { NotFoundError } from '../../../../lib/errors/NotFoundError.js';
+import { NotFoundError } from '@aliceo2/web-ui';
 
 /**
  * Test suite for the middlewares involved in the ID check of the layout requests
@@ -38,7 +38,11 @@ export const layoutIdMiddlewareTest = () => {
       const dataServiceStub = sinon.createStubInstance(JsonFileService);
       layoutIdMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(400), 'The status code should be 400');
-      ok(res.json.calledWith({ message: 'The "id" parameter is missing from the request' }));
+      ok(res.json.calledWith({
+        message: 'The "id" parameter is missing from the request',
+        status: 400,
+        title: 'Invalid Input',
+      }));
     });
 
     test('should return a "Not found" error if the layout id does not exist', () => {
@@ -57,7 +61,11 @@ export const layoutIdMiddlewareTest = () => {
       const next = sinon.stub().returns();
       layoutIdMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(404));
-      ok(res.json.calledWith({ message: 'Layout not found' }));
+      ok(res.json.calledWith({
+        message: 'Layout not found',
+        status: 404,
+        title: 'Not Found',
+      }));
     });
   });
 };

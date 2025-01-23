@@ -12,8 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { UnauthorizedAccessError } from '../../errors/UnauthorizedAccessError.js';
-import { updateExpressResponseFromNativeError } from '../../errors/updateExpressResponseFromNativeError.js';
+import { NotFoundError, UnauthorizedAccessError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
 /**
  * Middleware that checks if the requestor is the owner of the layout
@@ -34,15 +33,15 @@ export const layoutOwnerMiddleware = (dataService) =>
       const { personid = '', name = '' } = req.session ?? {};
       const { ownerName = '', ownerId = '' } = await dataService.readLayout(id) ?? {};
       if (!ownerName || !ownerId) {
-        throw new UnauthorizedAccessError('Unable to retrieve layout owner information');
+        throw new NotFoundError('Unable to retrieve layout owner information');
       } else if (!personid || !name) {
-        throw new UnauthorizedAccessError('Unable to retrieve session information');
+        throw new NotFoundError('Unable to retrieve session information');
       } else if (ownerName !== name || ownerId !== personid) {
         throw new UnauthorizedAccessError('Only the owner of the layout can delete it');
       }
       next();
     } catch (error) {
-      updateExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, error);
       return;
     }
   };
