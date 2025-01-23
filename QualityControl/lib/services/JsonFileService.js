@@ -12,11 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from '@aliceo2/web-ui';
+import { LogManager, NotFoundError } from '@aliceo2/web-ui';
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/json`);
 import fs from 'fs';
 import path from 'path';
-import { NotFoundError } from './../errors/NotFoundError.js';
 
 /**
  * Store layouts inside JSON based file with atomic write
