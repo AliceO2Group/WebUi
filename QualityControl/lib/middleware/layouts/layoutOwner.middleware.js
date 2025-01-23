@@ -31,12 +31,12 @@ export const layoutOwnerMiddleware = (dataService) =>
     try {
       const { id } = req.params;
       const { personid = '', name = '' } = req.session ?? {};
-      const { ownerName = '', ownerId = '' } = await dataService.readLayout(id) ?? {};
-      if (!ownerName || !ownerId) {
+      const { owner_name = '', owner_id = '' } = await dataService.readLayout(id) ?? {};
+      if (owner_id === '' || owner_name === '') {
         throw new NotFoundError('Unable to retrieve layout owner information');
-      } else if (!personid || !name) {
+      } else if (personid === '' || name === '') {
         throw new NotFoundError('Unable to retrieve session information');
-      } else if (ownerName !== name || ownerId !== personid) {
+      } else if (owner_name !== name || owner_id !== personid) {
         throw new UnauthorizedAccessError('Only the owner of the layout can delete it');
       }
       next();
