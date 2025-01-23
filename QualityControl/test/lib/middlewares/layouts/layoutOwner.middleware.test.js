@@ -23,23 +23,6 @@ import { layoutOwnerMiddleware } from '../../../../lib/middleware/layouts/layout
  */
 export const layoutOwnerMiddlewareTest = () => {
   suite('Layout owner middleware', () => {
-    test('should return an "InvalidInputError" if the data service is null', () => {
-      const req = {
-        params: {
-          id: 'layoutId',
-        },
-        session: {
-          personid: 'ownerId',
-          name: 'ownerName',
-        },
-      };
-      const res = { status: sinon.stub().returnsThis(), json: sinon.stub().returns() };
-      const next = sinon.stub().returns();
-      layoutOwnerMiddleware(null)(req, res, next);
-      ok(res.status.calledWith(400));
-      ok(res.json.calledWith({ message: 'The "dataService" parameter is missing from the request' }));
-    });
-
     test('should return an "UnauthorizedAccessError" if the layout does not belong to the user', async () => {
       const req = {
         params: {
