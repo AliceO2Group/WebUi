@@ -59,6 +59,7 @@ import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/date
 import { layoutIdMiddlewareTest } from './lib/middlewares/layouts/layoutId.middleware.test.js';
 import { layoutOwnerMiddlewareTest } from './lib/middlewares/layouts/layoutOwner.middleware.test.js';
 import { layoutServiceMiddlewareTest } from './lib/middlewares/layouts/layoutService.middleware.test.js';
+import { requestBodyMiddlewareTest } from './lib/middlewares/requestBody.middleware.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -165,6 +166,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('LayoutServiceMiddleware test suite', async () => layoutServiceMiddlewareTest());
       suite('LayoutIdMiddleware test suite', async () => layoutIdMiddlewareTest());
       suite('LayoutOwnerMiddleware test suite', async () => layoutOwnerMiddlewareTest());
+      suite('RequestBodyMiddleware test suite', async () => requestBodyMiddlewareTest());
     });
 
     suite('Controllers - Test Suite', async () => {
