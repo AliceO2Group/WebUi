@@ -32,7 +32,7 @@ export const infoLoggerButtonLink = (
   { partition, run, hostname, system, facility, pid },
   label = 'InfoLogger',
   source = '',
-  className = ['ph2', 'btn', 'primary', 'w-100']
+  className = []
 ) => {
   if (source) {
     let href = `${source}?q={`;
@@ -51,7 +51,7 @@ export const infoLoggerButtonLink = (
     if (facility) {
       href += `"facility":{"match":"${facility}"},`;
     }
-    if(pid){
+    if (pid){
       href += `"pid":{"match":"${pid}"},`;
     }
     if (href.slice(-1) === ',') { // remove trailing comma
@@ -59,7 +59,8 @@ export const infoLoggerButtonLink = (
     }
     href += '}';
     let title = `Open InfoLogger GUI`;
-    return redirectButtonLink(href, label, title, true, className);
+    const classList = ['ph2', 'btn', 'primary', 'w-100', ...className]
+    return redirectButtonLink(href, label, title, true, classList);
   }
   return;
 };
