@@ -48,7 +48,7 @@ export const setup = (http, ws) => {
     '/layout/:id',
     layoutServiceMiddleware(jsonDb),
     layoutIdMiddleware(jsonDb),
-    requestBodyMiddleware(),
+    requestBodyMiddleware,
     layoutOwnerMiddleware(jsonDb),
     layoutService.putLayoutHandler.bind(layoutService),
   );
