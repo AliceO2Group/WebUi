@@ -126,11 +126,18 @@ export class LayoutController {
     try {
       let layoutProposed = {};
       try {
+        if (!req.body) {
+          updateAndSendExpressResponseFromNativeError(
+            res,
+            new InvalidInputError('Missing request body to update layout'),
+          );
+          return;
+        }
         layoutProposed = await LayoutDto.validateAsync(req.body);
       } catch (error) {
         updateAndSendExpressResponseFromNativeError(
           res,
-          new Error(`Failed to update layout ${error?.details?.[0]?.message || ''}`),
+          new InvalidInputError(`Failed to update layout ${error?.details?.[0]?.message || ''}`),
         );
         return;
       }

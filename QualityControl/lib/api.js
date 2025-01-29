@@ -18,7 +18,6 @@ import { UserRole } from './../common/library/userRole.enum.js';
 import { layoutOwnerMiddleware } from './middleware/layouts/layoutOwner.middleware.js';
 import { layoutIdMiddleware } from './middleware/layouts/layoutId.middleware.js';
 import { layoutServiceMiddleware } from './middleware/layouts/layoutService.middleware.js';
-import { requestBodyMiddleware } from './middleware/requestBody.middleware.js';
 
 /**
  * Adds paths and binds websocket to instance of HttpServer passed
@@ -48,7 +47,6 @@ export const setup = (http, ws) => {
     '/layout/:id',
     layoutServiceMiddleware(jsonDb),
     layoutIdMiddleware(jsonDb),
-    requestBodyMiddleware,
     layoutOwnerMiddleware(jsonDb),
     layoutService.putLayoutHandler.bind(layoutService),
   );
