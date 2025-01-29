@@ -201,18 +201,6 @@ export const layoutControllerTestSuite = async () => {
       };
     });
 
-    test('should respond with 400 error if request did not contain body id', async () => {
-      const req = { params: { id: 'someid' } };
-      const layoutConnector = new LayoutController({});
-      await layoutConnector.putLayoutHandler(req, res);
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledWith({
-        message: 'Missing body content to update layout with',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Error message was incorrect');
-    });
-
     test('should successfully return the id of the updated layout', async () => {
       const expectedMockWithDefaults = {
         id: 'mylayout',

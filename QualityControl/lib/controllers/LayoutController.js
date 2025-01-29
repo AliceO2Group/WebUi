@@ -125,35 +125,28 @@ export class LayoutController {
   async putLayoutHandler(req, res) {
     const { id } = req.params;
     try {
-      if (!req.body) {
+      let layoutProposed = {};
+      try {
+        layoutProposed = await LayoutDto.validateAsync(req.body);
+      } catch (error) {
         updateAndSendExpressResponseFromNativeError(
           res,
-          new InvalidInputError('Missing body content to update layout with'),
+          new Error(`Failed to update layout ${error?.details?.[0]?.message || ''}`),
         );
-      } else {
-        let layoutProposed = {};
-        try {
-          layoutProposed = await LayoutDto.validateAsync(req.body);
-        } catch (error) {
-          updateAndSendExpressResponseFromNativeError(
-            res,
-            new Error(`Failed to update layout ${error?.details?.[0]?.message || ''}`),
-          );
-          return;
-        }
-
-        const layouts = await this._dataService.listLayouts({ name: layoutProposed.name });
-        const layoutExistsWithName = layouts.every((layout) => layout.id !== layoutProposed.id);
-        if (layouts.length > 0 && layoutExistsWithName) {
-          updateAndSendExpressResponseFromNativeError(
-            res,
-            new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`),
-          );
-          return;
-        }
-        const layout = await this._dataService.updateLayout(id, layoutProposed);
-        res.status(201).json({ id: layout });
+        return;
       }
+
+      const layouts = await this._dataService.listLayouts({ name: layoutProposed.name });
+      const layoutExistsWithName = layouts.every((layout) => layout.id !== layoutProposed.id);
+      if (layouts.length > 0 && layoutExistsWithName) {
+        updateAndSendExpressResponseFromNativeError(
+          res,
+          new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`),
+        );
+        return;
+      }
+      const layout = await this._dataService.updateLayout(id, layoutProposed);
+      res.status(201).json({ id: layout });
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);
     }
