@@ -20,7 +20,6 @@ import { LayoutPatchDto } from './../dtos/LayoutPatchDto.js';
 
 import {
   InvalidInputError,
-  UnauthorizedAccessError,
   updateAndSendExpressResponseFromNativeError,
 }
   from '@aliceo2/web-ui';
