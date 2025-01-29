@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { suite, test, beforeEach } from 'node:test';
+import { suite, test } from 'node:test';
 import { ok } from 'node:assert';
 import sinon from 'sinon';
 import { layoutServiceMiddleware } from '../../../../lib/middleware/layouts/layoutService.middleware.js';
@@ -22,13 +22,6 @@ import { JsonFileService } from '../../../../lib/services/JsonFileService.js';
  * Test suite for the middlewares that check the layout service is correctly initialized
  */
 export const layoutServiceMiddlewareTest = () => {
-  let res = {};
-  beforeEach(() => {
-    res = {
-      status: sinon.stub().returnsThis(),
-      json: sinon.stub(),
-    };
-  });
   suite('Layout service middlewares', () => {
     test('should return a "Service Unavailable" error if the JSON File Service is not provided', () => {
       const res = {
@@ -36,7 +29,7 @@ export const layoutServiceMiddlewareTest = () => {
         json: sinon.stub().returns(),
       };
       const next = sinon.stub().returns();
-      layoutServiceMiddleware(null)(null, res, next);
+      layoutServiceMiddleware(null)({}, res, next);
       ok(res.status.calledWith(503), 'The status code should be 503');
       ok(res.json.calledWith({
         message: 'JSON File service is not available',
@@ -48,9 +41,13 @@ export const layoutServiceMiddlewareTest = () => {
     test(
       'should return a "Service Unavailable" error if the JSON File Service is not an instance of JSONFileService',
       () => {
+        const res = {
+          status: sinon.stub().returnsThis(),
+          json: sinon.stub().returns(),
+        };
         const next = sinon.stub().returns();
         const dataService = 'notAJsonFileService';
-        layoutServiceMiddleware(dataService)(null, res, next);
+        layoutServiceMiddleware(dataService)({}, res, next);
         ok(res.status.calledWith(503), 'The status code should be 503');
         ok(res.json.calledWith({
           message: 'JSON File service is not available',
@@ -63,10 +60,9 @@ export const layoutServiceMiddlewareTest = () => {
     test(
       'should successfully pass the middleware if the JSON File Service is provided'
       , () => {
-        const req = {};
         const next = sinon.stub().returns();
         const dataServiceStub = sinon.createStubInstance(JsonFileService);
-        layoutServiceMiddleware(dataServiceStub)(req, res, next);
+        layoutServiceMiddleware(dataServiceStub)({}, {}, next);
         ok(next.calledOnce, 'The next middleware should be called');
       },
     );

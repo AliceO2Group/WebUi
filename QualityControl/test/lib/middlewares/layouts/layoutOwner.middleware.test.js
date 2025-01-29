@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { suite, test, beforeEach } from 'node:test';
+import { suite, test } from 'node:test';
 import { ok } from 'node:assert';
 import sinon from 'sinon';
 import { JsonFileService } from '../../../../lib/services/JsonFileService.js';
@@ -23,13 +23,6 @@ import { layoutOwnerMiddleware } from '../../../../lib/middleware/layouts/layout
  */
 export const layoutOwnerMiddlewareTest = () => {
   suite('Layout owner middleware', () => {
-    let res = {};
-    beforeEach(() => {
-      res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
-      };
-    });
     test('should return an "UnauthorizedAccessError" if the layout does not belong to the user', async () => {
       const req = {
         params: {
@@ -39,6 +32,10 @@ export const layoutOwnerMiddlewareTest = () => {
           personid: 'notTheOwnerId',
           name: 'notTheOwnerName',
         },
+      };
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub().returns(),
       };
       const next = sinon.stub().returns();
       const dataServiceStub = sinon.createStubInstance(JsonFileService, {
@@ -62,6 +59,10 @@ export const layoutOwnerMiddlewareTest = () => {
           name: 'ownerName',
         },
       };
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub().returns(),
+      };
       const next = sinon.stub().returns();
       const dataServiceStub = sinon.createStubInstance(JsonFileService, {
         readLayout: sinon.stub().returns(),
@@ -83,6 +84,10 @@ export const layoutOwnerMiddlewareTest = () => {
           personid: '',
           name: '',
         },
+      };
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub().returns(),
       };
       const next = sinon.stub().returns();
       const dataServiceStub = sinon.createStubInstance(JsonFileService, {
@@ -111,7 +116,7 @@ export const layoutOwnerMiddlewareTest = () => {
       const dataServiceStub = sinon.createStubInstance(JsonFileService, {
         readLayout: sinon.stub().resolves({ owner_name: 'ownerName', owner_id: 'ownerId' }),
       });
-      await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
+      await layoutOwnerMiddleware(dataServiceStub)(req, {}, next);
       ok(next.called, 'The next() callback should be called');
     });
   });
