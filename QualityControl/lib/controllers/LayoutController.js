@@ -20,7 +20,6 @@ import { LayoutPatchDto } from './../dtos/LayoutPatchDto.js';
 
 import {
   InvalidInputError,
-  NotFoundError,
   UnauthorizedAccessError,
   updateAndSendExpressResponseFromNativeError,
 }
@@ -126,9 +125,7 @@ export class LayoutController {
   async putLayoutHandler(req, res) {
     const { id } = req.params;
     try {
-      if (!id) {
-        updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout'));
-      } else if (!req.body) {
+      if (!req.body) {
         updateAndSendExpressResponseFromNativeError(
           res,
           new InvalidInputError('Missing body content to update layout with'),
@@ -245,33 +242,22 @@ export class LayoutController {
    */
   async patchLayoutHandler(req, res) {
     const { id } = req.params;
-    if (!id) {
-      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing ID'));
-    } else {
-      let layout = {};
-      try {
-        layout = await LayoutPatchDto.validateAsync(req.body);
-      } catch {
-        updateAndSendExpressResponseFromNativeError(
-          res,
-          new InvalidInputError('Invalid request body to update layout'),
-        );
-        return;
-      }
-
-      try {
-        await this._dataService.readLayout(id);
-      } catch {
-        updateAndSendExpressResponseFromNativeError(res, new NotFoundError(`Unable to find layout with id: ${id}`));
-        return;
-      }
-      try {
-        const layoutUpdated = await this._dataService.updateLayout(id, layout);
-        res.status(201).json(layoutUpdated);
-      } catch {
-        updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to update layout with id: ${id}`));
-        return;
-      }
+    let layout = {};
+    try {
+      layout = await LayoutPatchDto.validateAsync(req.body);
+    } catch {
+      updateAndSendExpressResponseFromNativeError(
+        res,
+        new InvalidInputError('Invalid request body to update layout'),
+      );
+      return;
+    }
+    try {
+      const layoutUpdated = await this._dataService.updateLayout(id, layout);
+      res.status(201).json(layoutUpdated);
+    } catch {
+      updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to update layout with id: ${id}`));
+      return;
     }
   }
 }

@@ -43,7 +43,11 @@ export const setup = (http, ws) => {
   http.get('/layout/:id', layoutService.getLayoutHandler.bind(layoutService));
   http.get('/layout', layoutService.getLayoutByNameHandler.bind(layoutService));
   http.post('/layout', layoutService.postLayoutHandler.bind(layoutService));
-  http.put('/layout/:id', layoutService.putLayoutHandler.bind(layoutService));
+  http.put(
+    '/layout/:id',
+    layoutIdMiddleware(jsonDb),
+    layoutService.putLayoutHandler.bind(layoutService),
+  );
   http.delete(
     '/layout/:id',
     layoutServiceMiddleware(jsonDb),
@@ -53,6 +57,7 @@ export const setup = (http, ws) => {
   );
   http.patch(
     '/layout/:id',
+    layoutIdMiddleware(jsonDb),
     minimumRoleMiddleware(UserRole.GLOBAL),
     layoutService.patchLayoutHandler.bind(layoutService),
   );

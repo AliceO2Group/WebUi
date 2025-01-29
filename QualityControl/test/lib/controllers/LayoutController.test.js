@@ -201,18 +201,6 @@ export const layoutControllerTestSuite = async () => {
       };
     });
 
-    test('should respond with 400 error if request did not contain layout id when requesting to update', async () => {
-      const req = { params: {} };
-      const layoutConnector = new LayoutController({});
-      await layoutConnector.putLayoutHandler(req, res);
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledWith({
-        message: 'Missing parameter "id" of layout',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Error message was incorrect');
-    });
-
     test('should respond with 400 error if request did not contain body id', async () => {
       const req = { params: { id: 'someid' } };
       const layoutConnector = new LayoutController({});
@@ -554,19 +542,6 @@ export const layoutControllerTestSuite = async () => {
         status: 400,
         title: 'Invalid Input',
       }));
-    });
-
-    test('should return error due to layout not found to patch', async () => {
-      const jsonStub = sinon.createStubInstance(JsonFileService, {
-        readLayout: sinon.stub().rejects(new Error('Unable to find layout')),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-
-      const req = { params: { id: 'mylayout' }, session: { personid: 2 }, body: { isOfficial: true } };
-      await layoutConnector.patchLayoutHandler(req, res);
-
-      ok(res.status.calledWith(404), 'Response status was not 403');
-      ok(res.json.calledWith({ message: 'Unable to find layout with id: mylayout', status: 404, title: 'Not Found' }));
     });
 
     test('should return error due to layout update operation failing', async () => {
