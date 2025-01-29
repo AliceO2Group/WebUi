@@ -59,7 +59,7 @@ export const infoLoggerButtonLink = (
     }
     href += '}';
     let title = `Open InfoLogger GUI`;
-    const classList = ['ph2', 'btn', 'primary', 'w-100', ...className]
+    const classList = ['ph2', 'btn', 'primary', 'w-100', ...className];
     return redirectButtonLink(href, label, title, true, classList);
   }
   return;
