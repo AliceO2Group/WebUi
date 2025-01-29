@@ -15,7 +15,6 @@
 import { suite, test } from 'node:test';
 import { ok } from 'node:assert';
 import sinon from 'sinon';
-import { layoutIdMiddleware } from '../../../../lib/middleware/layouts/layoutId.middleware.js';
 import { requestBodyMiddleware } from '../../../lib/middleware/requestBody.middleware.js';
 
 /**
@@ -30,7 +29,7 @@ export const requestBodyMiddlewareTest = () => {
         json: sinon.stub().returns(),
       };
       const next = sinon.stub().returns();
-      requestBodyMiddleware()(req, res, next);
+      requestBodyMiddleware(req, res, next);
       ok(res.status.calledWith(400), 'The status code should be 400');
       ok(res.json.calledWith({
         message: 'Missing body content in request',
@@ -46,7 +45,7 @@ export const requestBodyMiddlewareTest = () => {
         },
       };
       const next = sinon.stub().returns();
-      await layoutIdMiddleware()(req, {}, next);
+      await requestBodyMiddleware(req, {}, next);
       ok(next.called, 'It should call the next middleware');
     });
   });
