@@ -57,10 +57,7 @@ export const tasksPerHostPanel = (
   
   const infoLoggerButtonTitle = source === FLP ? 'InfoLogger FLP' : 'InfoLogger EPN';
   const infoLoggerButtonUrl = source === FLP ? COG.ILG_URL : COG.ILG_EPN_URL;
-  const loggerObject = { run, 
-    partition, 
-    title: infoLoggerButtonTitle, url: infoLoggerButtonUrl, 
-  }
+
   return h('.flex-column.g2', [
     h('.flex-row.g1', [
       h('.flex-row.g1', [
@@ -91,7 +88,14 @@ export const tasksPerHostPanel = (
           if (source === EPN) {
             [hostnameToIlg] = hostname.split('.');
           }
-          loggerObject.hostname = hostnameToIlg;
+          const infoLoggerConfig = {
+            fields: {
+              run,
+              partition,
+              hostname: hostnameToIlg,
+            },
+            url: infoLoggerButtonUrl,
+          };
           return h('', [
             h('.p2.flex-row.bg-primary.white', [
               h('h5.flex-grow-3', hostname),
@@ -110,11 +114,8 @@ export const tasksPerHostPanel = (
               ]),
             ]),
             source === FLP
-              ? flpTasksTable(tasksByHosts[hostname].list, 
-                taskTableModel, 
-                loggerObject)
-              : epnTasksTable(tasksByHosts[hostname].list,
-                loggerObject),
+              ? flpTasksTable(tasksByHosts[hostname].list, taskTableModel, infoLoggerConfig)
+              : epnTasksTable(tasksByHosts[hostname].list),
           ]);
         })
   ]);

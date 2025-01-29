@@ -24,12 +24,17 @@ import { infoLoggerButtonLink } from '../buttons/infoLoggerRedirectButton.js';
  * For a given list of FLP tasks, build a table with tasks details and buttons to allow for retrieving more details per task
  * @param {Array<Task>} [tasks = []] - list of tasks to build table for
  * @param {TaskTableModel} taskTableModel - task table model to use for features such as filtering and retrieving more details of task
+ * @param {loggerObject} loggerObject - object with information that will help building the InfoLogger link
+ * @param {object} loggerObject.fields - fields to be used in the InfoLogger query
+ * @param {string} loggerObject.url - URL to redirect to Info
  * @return {vnode} - table of the FLP tasks
  */
-export const flpTasksTable = (tasks, taskTableModel,loggerObject) => {
+export const flpTasksTable = (
+  tasks,
+  taskTableModel,
+  { fields: logFilterFields, url: infoLoggerUrl }
+) => {
   const tableColumns = ['Name', 'PID', 'Locked', 'Status', 'State', 'Host Name', 'More'];
-
- 
   return h('.scroll-auto.panel', [
     h('table.table.table-sm', {style: 'margin-bottom: 0'}, [
       h('thead',
@@ -48,28 +53,25 @@ export const flpTasksTable = (tasks, taskTableModel,loggerObject) => {
             h('td.w-10', task.status),
             h(`td.w-10${getTaskStateClassAssociation(task.state)}`, task.state),
             h('td.w-20', task?.deploymentInfo?.hostname),
-            h('td.w-100.btn-group',
-              h('boutton.btn-sm.btn-default', {
-                title: 'More Details',
-                onclick: () => taskTableModel.toggleTaskView(task.taskId),
-              }, taskTableModel.openedTaskViews[task.taskId] ? iconChevronTop() : iconChevronBottom()),
-              infoLoggerButtonLink(
-                { 
-                  run: loggerObject.run, 
-                  hostname:loggerObject.hostname, 
-                  partition:loggerObject.partition,
-                  pid: loggerObject.pid
+            h('td',
+              h('.flex-row', [
+                h('button.btn-sm.btn-default', {
+                  title: 'More Details',
+                  onclick: () => taskTableModel.toggleTaskView(task.taskId),
+                }, taskTableModel.openedTaskViews[task.taskId] ? iconChevronTop() : iconChevronBottom()),
+                infoLoggerButtonLink({
+                  pid: task.pid,
+                  ...logFilterFields
                 },
-                'ILG',
-                loggerObject.url
-              ),
+                  'ILG',
+                  infoLoggerUrl,
+                  ['btn-sm'],
+                ),
+              ]),
             ),
           ]),
           taskTableModel.openedTaskViews[task.taskId] && taskTableModel.tasksAsRemoteDataById[task.taskId]
-          && showTaskDetailsTable(taskTableModel.tasksAsRemoteDataById[task.taskId],{
-            ...loggerObject,
-            pid: task.pid
-          }),
+          && showTaskDetailsTable(taskTableModel.tasksAsRemoteDataById[task.taskId]),
         ]),
       ])
     ])
@@ -82,16 +84,13 @@ export const flpTasksTable = (tasks, taskTableModel,loggerObject) => {
  * @param {RemoteData} taskRemoteData - remote data object with task details
  * @return {vnode} - table with task details
  */
-const showTaskDetailsTable = (taskRemoteData,loggerObject) => h('tr',
-    
+const showTaskDetailsTable = (taskRemoteData) => h('tr',
   taskRemoteData.match({
     NotAsked: () => null,
     Loading: () => h('td.shadow-level3.m5', {
       style: 'font-size: 0.25em; text-align: center;', colspan: 7
     }, pageLoading()),
-    Success: (data) => h('td', {colspan: 7}, 
-      showTableItem(data, loggerObject),
-    ),
+    Success: (data) => h('td', {colspan: 7}, showTableItem(data)),
     Failure: (_error) => h('td.shadow-level3.m5',
       {style: 'text-align: center;', colspan: 7, title: 'Could not load arguments'},
       [iconCircleX(), ' ', _error]),
