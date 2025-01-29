@@ -21,14 +21,11 @@ import {parseObject} from './utils.js';
  * @param {Object} item - object to be shown
  * @return {vnode} table view
  */
-export default (item) => 
-  h('table.table.shadow-level2', {style: 'white-space: pre-wrap;'}, [
-    h('tbody', Object.keys(item).map((columnName) => 
-      h('tr', [
-        h('th', columnName),
-        typeof item[columnName] === 'object' ?
-          h('td', parseObject(item[columnName], columnName)) :
-          h('td', item[columnName]),
-     
-      ]))),
-  ]);
+export default (item) => h('table.table.shadow-level2', {style: 'white-space: pre-wrap;'}, [
+  h('tbody', Object.keys(item).map((columnName) => h('tr', [
+    h('th', columnName),
+    typeof item[columnName] === 'object' ?
+      h('td', parseObject(item[columnName], columnName)) :
+      h('td', item[columnName])
+  ]))),
+]);
