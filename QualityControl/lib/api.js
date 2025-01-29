@@ -47,6 +47,7 @@ export const setup = (http, ws) => {
     '/layout/:id',
     layoutServiceMiddleware(jsonDb),
     layoutIdMiddleware(jsonDb),
+    layoutOwnerMiddleware(jsonDb),
     layoutService.putLayoutHandler.bind(layoutService),
   );
   http.delete(

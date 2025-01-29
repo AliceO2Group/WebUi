@@ -289,23 +289,6 @@ export const layoutControllerTestSuite = async () => {
         'Layout id was not used in data connector call',
       );
     });
-
-    test('should return unauthorized error if user requesting update operation is not the owner', async () => {
-      const jsonStub = sinon.createStubInstance(JsonFileService, {
-        readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-      const req = { params: { id: LAYOUT_MOCK_1.id }, session: { personid: 2, name: 'one' }, body: {} };
-      await layoutConnector.putLayoutHandler(req, res);
-
-      ok(res.status.calledWith(403), 'Response status was not 403');
-      ok(res.json.calledWith({
-        message: 'Only the owner of the layout can update it',
-        status: 403,
-        title: 'Unauthorized Access',
-      }), 'DataConnector error message is incorrect');
-      ok(jsonStub.readLayout.calledWith(LAYOUT_MOCK_1.id), 'Layout id was not used in data connector call');
-    });
   });
 
   suite('`deleteLayoutHandler()` tests', () => {

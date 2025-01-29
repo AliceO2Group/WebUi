@@ -131,38 +131,28 @@ export class LayoutController {
           new InvalidInputError('Missing body content to update layout with'),
         );
       } else {
-        const { personid } = req.session;
-        const { owner_id } = await this._dataService.readLayout(id);
-
-        if (Number(owner_id) !== Number(personid)) {
+        let layoutProposed = {};
+        try {
+          layoutProposed = await LayoutDto.validateAsync(req.body);
+        } catch (error) {
           updateAndSendExpressResponseFromNativeError(
             res,
-            new UnauthorizedAccessError('Only the owner of the layout can update it'),
+            new Error(`Failed to update layout ${error?.details?.[0]?.message || ''}`),
           );
-        } else {
-          let layoutProposed = {};
-          try {
-            layoutProposed = await LayoutDto.validateAsync(req.body);
-          } catch (error) {
-            updateAndSendExpressResponseFromNativeError(
-              res,
-              new Error(`Failed to update layout ${error?.details?.[0]?.message || ''}`),
-            );
-            return;
-          }
-
-          const layouts = await this._dataService.listLayouts({ name: layoutProposed.name });
-          const layoutExistsWithName = layouts.every((layout) => layout.id !== layoutProposed.id);
-          if (layouts.length > 0 && layoutExistsWithName) {
-            updateAndSendExpressResponseFromNativeError(
-              res,
-              new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`),
-            );
-            return;
-          }
-          const layout = await this._dataService.updateLayout(id, layoutProposed);
-          res.status(201).json({ id: layout });
+          return;
         }
+
+        const layouts = await this._dataService.listLayouts({ name: layoutProposed.name });
+        const layoutExistsWithName = layouts.every((layout) => layout.id !== layoutProposed.id);
+        if (layouts.length > 0 && layoutExistsWithName) {
+          updateAndSendExpressResponseFromNativeError(
+            res,
+            new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`),
+          );
+          return;
+        }
+        const layout = await this._dataService.updateLayout(id, layoutProposed);
+        res.status(201).json({ id: layout });
       }
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);
