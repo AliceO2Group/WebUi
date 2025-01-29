@@ -45,6 +45,7 @@ export const setup = (http, ws) => {
   http.post('/layout', layoutService.postLayoutHandler.bind(layoutService));
   http.put(
     '/layout/:id',
+    layoutServiceMiddleware(jsonDb),
     layoutIdMiddleware(jsonDb),
     layoutService.putLayoutHandler.bind(layoutService),
   );
@@ -57,6 +58,7 @@ export const setup = (http, ws) => {
   );
   http.patch(
     '/layout/:id',
+    layoutServiceMiddleware(jsonDb),
     layoutIdMiddleware(jsonDb),
     minimumRoleMiddleware(UserRole.GLOBAL),
     layoutService.patchLayoutHandler.bind(layoutService),
