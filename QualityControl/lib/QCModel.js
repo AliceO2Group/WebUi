@@ -83,5 +83,6 @@ export const setupQcModel = () => {
     statusController,
     objectController,
     intervalsService,
+    jsonDb,
   };
 };

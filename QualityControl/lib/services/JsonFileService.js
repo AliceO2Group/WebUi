@@ -147,7 +147,7 @@ export class JsonFileService {
   async readLayout(layoutId) {
     const layout = this.data.layouts.find((layout) => layout.id === layoutId);
     if (!layout) {
-      throw new Error(`layout (${layoutId}) not found`);
+      throw new NotFoundError(`layout (${layoutId}) not found`);
     }
     return layout;
   }
