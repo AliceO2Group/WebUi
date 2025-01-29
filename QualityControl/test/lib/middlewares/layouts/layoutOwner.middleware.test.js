@@ -101,5 +101,27 @@ export const layoutOwnerMiddlewareTest = () => {
         title: 'Not Found',
       }));
     });
+
+    test('should successfully pass the check if the layout belongs to the user', async () => {
+      const req = {
+        params: {
+          id: 'layoutId',
+        },
+        session: {
+          personid: 'ownerId',
+          name: 'ownerName',
+        },
+      };
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub().returns(),
+      };
+      const next = sinon.stub().returns();
+      const dataServiceStub = sinon.createStubInstance(JsonFileService, {
+        readLayout: sinon.stub().resolves({ owner_name: 'ownerName', owner_id: 'ownerId' }),
+      });
+      await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
+      ok(next.called, 'The next() callback should be called');
+    });
   });
 };

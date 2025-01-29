@@ -67,5 +67,23 @@ export const layoutIdMiddlewareTest = () => {
         title: 'Not Found',
       }));
     });
+
+    test('should successfully pass the check if the layout id is provided and exists', async () => {
+      const req = {
+        params: {
+          id: 'layoutId',
+        },
+      };
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub().returns(),
+      };
+      const next = sinon.stub().returns();
+      const dataServiceStub = sinon.createStubInstance(JsonFileService, {
+        readLayout: sinon.stub().resolves({}),
+      });
+      await layoutIdMiddleware(dataServiceStub)(req, res, next);
+      ok(next.called, 'It should call the next middleware');
+    });
   });
 };
