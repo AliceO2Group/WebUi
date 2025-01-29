@@ -51,7 +51,7 @@ export const infoLoggerButtonLink = (
     if (facility) {
       href += `"facility":{"match":"${facility}"},`;
     }
-    if (pid){
+    if (pid) {
       href += `"pid":{"match":"${pid}"},`;
     }
     if (href.slice(-1) === ',') { // remove trailing comma

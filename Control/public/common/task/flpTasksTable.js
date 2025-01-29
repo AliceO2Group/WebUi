@@ -59,10 +59,11 @@ export const flpTasksTable = (
                   title: 'More Details',
                   onclick: () => taskTableModel.toggleTaskView(task.taskId),
                 }, taskTableModel.openedTaskViews[task.taskId] ? iconChevronTop() : iconChevronBottom()),
-                infoLoggerButtonLink({
-                  pid: task.pid,
-                  ...logFilterFields
-                },
+                infoLoggerButtonLink(
+                  {
+                    pid: task.pid,
+                    ...logFilterFields
+                  },
                   'ILG',
                   infoLoggerUrl,
                   ['btn-sm'],
