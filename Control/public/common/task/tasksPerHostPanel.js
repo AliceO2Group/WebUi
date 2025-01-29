@@ -88,6 +88,14 @@ export const tasksPerHostPanel = (
           if (source === EPN) {
             [hostnameToIlg] = hostname.split('.');
           }
+          const infoLoggerConfig = {
+            fields: {
+              run,
+              partition,
+              hostname: hostnameToIlg,
+            },
+            url: infoLoggerButtonUrl,
+          };
           return h('', [
             h('.p2.flex-row.bg-primary.white', [
               h('h5.flex-grow-3', hostname),
@@ -106,7 +114,7 @@ export const tasksPerHostPanel = (
               ]),
             ]),
             source === FLP
-              ? flpTasksTable(tasksByHosts[hostname].list, taskTableModel)
+              ? flpTasksTable(tasksByHosts[hostname].list, taskTableModel, infoLoggerConfig)
               : epnTasksTable(tasksByHosts[hostname].list),
           ]);
         })
