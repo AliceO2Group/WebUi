@@ -181,24 +181,8 @@ export class LayoutController {
   async deleteLayoutHandler(req, res) {
     const { id } = req.params;
     try {
-      if (!id) {
-        updateAndSendExpressResponseFromNativeError(
-          res,
-          new InvalidInputError('Missing parameter "id" of layout to delete'),
-        );
-      } else {
-        const { personid, name } = req.session;
-        const { owner_name, owner_id } = await this._dataService.readLayout(id);
-        if (owner_name !== name || owner_id !== personid) {
-          updateAndSendExpressResponseFromNativeError(
-            res,
-            new UnauthorizedAccessError('Only the owner of the layout can delete it'),
-          );
-        } else {
-          const result = await this._dataService.deleteLayout(id);
-          res.status(200).json(result);
-        }
-      }
+      const result = await this._dataService.deleteLayout(id);
+      res.status(200).json(result);
     } catch {
       updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to delete layout with id: ${id}`));
     }
