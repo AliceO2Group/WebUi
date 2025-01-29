@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { suite, test } from 'node:test';
+import { suite, test, beforeEach } from 'node:test';
 import { ok } from 'node:assert';
 import sinon from 'sinon';
 import { layoutIdMiddleware } from '../../../../lib/middleware/layouts/layoutId.middleware.js';
@@ -24,15 +24,18 @@ import { NotFoundError } from '@aliceo2/web-ui';
  */
 export const layoutIdMiddlewareTest = () => {
   suite('Layout id middlewares', () => {
+    let res = {};
+    beforeEach(() => {
+      res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      };
+    });
     test('should return an "Invalid input" error if the layout id is not provided', () => {
       const req = {
         params: {
           id: null,
         },
-      };
-      const res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub().returns(),
       };
       const next = sinon.stub().returns();
       const dataServiceStub = sinon.createStubInstance(JsonFileService);
@@ -54,10 +57,6 @@ export const layoutIdMiddlewareTest = () => {
           id: 'nonExistingId',
         },
       };
-      const res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub().returns(),
-      };
       const next = sinon.stub().returns();
       layoutIdMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(404));
@@ -73,10 +72,6 @@ export const layoutIdMiddlewareTest = () => {
         params: {
           id: 'layoutId',
         },
-      };
-      const res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub().returns(),
       };
       const next = sinon.stub().returns();
       const dataServiceStub = sinon.createStubInstance(JsonFileService, {
