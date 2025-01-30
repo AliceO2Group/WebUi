@@ -44,7 +44,8 @@
     "globals": "^15.14.0",
     "nock": "^13.5.0",
     "puppeteer": "^24.0.0",
-    "sinon": "^19.0.2"
+    "sinon": "^19.0.2",
+    "supertest": "^7.0.0"
   },
   "bundleDependencies": [
     "@aliceo2/web-ui",

@@ -17,6 +17,7 @@ import { config } from '../config.js';
 import { spawn } from 'child_process';
 import fs from 'fs/promises';
 import path from 'path';
+import jwt from 'jsonwebtoken';
 
 /* eslint-disable no-console */
 
@@ -102,3 +103,16 @@ const copyMockDataFileToUse = async () => {
 
   await fs.copyFile(sourceFile, destinationFile);
 };
+
+export const generateToken = (personid, username, name, access = '', secret) => jwt.sign({
+  id: personid,
+  username,
+  name,
+  access,
+}, secret, {
+  expiresIn: '1d',
+  issuer: 'test-gui',
+});
+
+export const ADMIN_TEST_TOKEN = generateToken(0, 'anonymous', 'Anonymous', 'admin', config.jwt.secret);
+export const GUEST_TEST_TOKEN = generateToken(1, 'guest', 'Guest User', 'guest', config.jwt.secret);

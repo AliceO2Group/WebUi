@@ -34,4 +34,9 @@ export const config = {
     enabled: false,
   },
   dbFile: './test/setup/seeders/qcg-mock-data.json',
+  jwt: {
+    secret: 'test-secret',
+    issuer: 'test-gui',
+    expiration: '1d',
+  },
 };
