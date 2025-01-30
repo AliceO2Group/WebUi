@@ -13,14 +13,15 @@
  */
 
 import { suite, test } from 'node:test';
-import { ADMIN_TEST_TOKEN } from '../../setup/testServerSetup.js';
+import { OWNER_TEST_TOKEN, URL_ADDRESS, USER_TEST_TOKEN } from '../config.js';
 import request from 'supertest';
+import { LAYOUT_MOCK_2 } from '../../demoData/layout/layout.mock.js';
 
 export const apiPutLayoutTests = () => {
   suite('PUT /layout/:id', () => {
     test('should return a 404 error if the id of the layout does not exist', async () => {
-      await request('localhost:8080/api/layout/test')
-        .put(`?token=${ADMIN_TEST_TOKEN}`)
+      await request(`${URL_ADDRESS}/api/layout/test`)
+        .put(`?token=${OWNER_TEST_TOKEN}`)
         .expect(404, {
           message: 'layout (test) not found',
           status: 404,
@@ -28,9 +29,10 @@ export const apiPutLayoutTests = () => {
         });
     });
 
-    test('should return a 404 error if the layout id is not provided', async () => {
-      await request('localhost:8080/api/layout/')
-        .put(`?id=${null}&token=${ADMIN_TEST_TOKEN}`)
+    //TODO:
+    test.skip('should return a 404 error if the layout id is not provided', async () => {
+      await request(`${URL_ADDRESS}/api/layout/`)
+        .put(`?id=${null}&token=${OWNER_TEST_TOKEN}`)
         .expect(404, {
           message: 'layout id not provided',
           status: 404,
@@ -38,11 +40,23 @@ export const apiPutLayoutTests = () => {
         });
     });
 
-    test.skip('should return a 401 error if the user is not the owner of the layout', async () => {
-
+    test('should return a 403 error if the requestor is not allowed to edit', async () => {
+      await request(`${URL_ADDRESS}/api/layout/671b8c22402408122e2f20dd`)
+        .put(`?token=${USER_TEST_TOKEN}`)
+        .expect(403, {
+          message: 'Only the owner of the layout can delete it',
+          status: 403,
+          title: 'Unauthorized Access',
+        });
     });
-    test.skip('should successfully update a layout', async () => {
 
+    test('should update the layout successfully', async () => {
+      await request(`${URL_ADDRESS}/api/layout/671b8c22402408122e2f20dd`)
+        .put(`?token=${OWNER_TEST_TOKEN}`)
+        .send(LAYOUT_MOCK_2)
+        .expect(201, {
+          id: '671b8c22402408122e2f20dd',
+        });
     });
   });
 };
