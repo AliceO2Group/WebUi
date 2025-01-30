@@ -70,7 +70,6 @@ const buildPage = (model, cruMapByHost) => {
         h('h4.pv2.w-20', 'CRUs by detector:'),
         savingConfigurationMessagePanel(model),
         h('.btn-group.w-20', {style: 'justify-content: flex-end;'}, [
-          saveConfigurationButton(model),
           runRocConfigButton(model)
         ])
       ]),
@@ -401,17 +400,6 @@ const savingConfigurationMessagePanel = (model) =>
  * @param {Object} model
  * @return {vnode}
  */
-const saveConfigurationButton = (model) =>
-  h('button.btn.btn-default', {
-    onclick: () => model.configuration.saveConfiguration(),
-    disabled: model.configuration.configurationRequest.isLoading(),
-  }, model.configuration.configurationRequest.isLoading() ? loading(1.5) : 'Save');
-
-/**
- * Button to save the updated configuration
- * @param {Object} model
- * @return {vnode}
- */
 const runRocConfigButton = (model) =>
   h('button.btn.btn-primary', {
     onclick: () => {
@@ -422,4 +410,4 @@ Are you sure you would like to continue?`)
     },
     disabled: model.configuration.configurationRequest.isLoading()
     || (model.workflow.model.detectors.isSingleView() && !model.lock.isLockedByCurrentUser(model.detectors.selected)),
-  }, model.configuration.configurationRequest.isLoading() ? loading(1.5) : 'Save & Configure');
+  }, model.configuration.configurationRequest.isLoading() ? loading(1.5) : 'Configure');
