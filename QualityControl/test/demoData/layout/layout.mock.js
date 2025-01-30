@@ -13,11 +13,28 @@
  */
 
 export const LAYOUT_MOCK_1 = {
-  id: 'mylayout', 
-  name: 'something', 
+  id: 'mylayout',
+  name: 'something',
+  tabs: [{ name: 'tab', id: '1' }],
+  owner_id: 1,
+  owner_name: 'one',
+};
+
+export const LAYOUT_MOCK_2 = {
+  autoTabChange: 0,
+  collaborators: [],
+  description: '',
+  displayTimestamp: false,
+  id: '671b8c22402408122e2f20dd',
+  name: 'test',
+  owner_id: 0,
+  owner_name: 'Anonymous',
   tabs: [
-    {name: 'tab', id: '1'}
-  ], 
-  owner_id: 1, 
-  owner_name: 'one'
+    {
+      columns: 2,
+      id: 'test',
+      name: 'test',
+      objects: [],
+    },
+  ],
 };
