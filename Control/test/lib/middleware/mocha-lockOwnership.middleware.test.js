@@ -14,6 +14,8 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
+const { NotFoundError, TimeoutError } = require('@aliceo2/web-ui');
+
 const {lockOwnershipMiddleware} = require('../../../lib/middleware/lockOwnership.middleware');
 const {LockService} = require('../../../lib/services/Lock.service.js');
 const {EnvironmentService} = require('../../../lib/services/Environment.service.js');
@@ -42,16 +44,16 @@ describe('`LockOwnership` middleware test suite', () => {
     };
 
     const environmentServiceStub = sinon.createStubInstance(EnvironmentService, {
-      getEnvironment: sinon.stub().rejects({
-        code: 5,
-        details: 'Environment not found',
-      })
+      getEnvironment: sinon.stub().rejects(new NotFoundError('Environment not found'))
     });
 
     await lockOwnershipMiddleware(null, environmentServiceStub)(req, res);
     assert.ok(res.status.calledWith(404));
-    assert.ok(res.json.calledWith(
-      {message: 'Environment not found'}
+    assert.ok(res.json.calledWith({
+      message: 'Environment not found',
+      status: 404,
+      title: 'Not Found'
+    }
     ));
   });
 
@@ -63,16 +65,16 @@ describe('`LockOwnership` middleware test suite', () => {
     };
 
     const environmentServiceStub = sinon.createStubInstance(EnvironmentService, {
-      getEnvironment: sinon.stub().rejects({
-        code: 5,
-        details: 'Environment not found',
-      })
+      getEnvironment: sinon.stub().rejects(new NotFoundError('Environment not found'))
     });
 
     await lockOwnershipMiddleware(null, environmentServiceStub)(req, res);
     assert.ok(res.status.calledWith(404));
-    assert.ok(res.json.calledWith(
-      {message: 'Environment not found'}
+    assert.ok(res.json.calledWith({
+      message: 'Environment not found',
+      status: 404,
+      title: 'Not Found',
+    }
     ));
   });
 
@@ -84,16 +86,17 @@ describe('`LockOwnership` middleware test suite', () => {
     };
 
     const environmentServiceStub = sinon.createStubInstance(EnvironmentService, {
-      getEnvironment: sinon.stub().rejects({
-        code: 4,
-        details: 'Operation timeout',
-      })
+      getEnvironment: sinon.stub().rejects(new TimeoutError('Operation timeout'))
     });
 
     await lockOwnershipMiddleware(null, environmentServiceStub)(req, res);
     assert.ok(res.status.calledWith(408));
     assert.ok(res.json.calledWith(
-      {message: 'Operation timeout'}
+      {
+        message: 'Operation timeout',
+        status: 408,
+        title: 'Timeout'
+      }
     ));
   });
 

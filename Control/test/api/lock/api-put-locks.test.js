@@ -38,7 +38,9 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.TAKE}/MID?token=${ADMIN_TEST_TOKEN}`)
       .expect(403, {
-        message: 'Unauthorized TAKE action for lock of detector MID by user Admin User'
+        message: 'Unauthorized TAKE action for lock of detector MID by user Admin User',
+        title: 'Unauthorized Access',
+        status: 403,
       });
   });
 
@@ -46,7 +48,9 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.TAKE}/DCS?token=${GUEST_TEST_TOKEN}`)
       .expect(403, {
-        message: 'Not enough permissions for this operation'
+        message: 'Not enough permissions for this operation',
+        title: 'Unauthorized Access',
+        status: 403,
       });
   });
 
@@ -114,7 +118,9 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.RELEASE}/MID?token=${GUEST_TEST_TOKEN}`)
       .expect(403, {
-        message: 'Not enough permissions for this operation'
+        message: 'Not enough permissions for this operation',
+        status: 403,
+        title: 'Unauthorized Access',
       });
   });
 
@@ -122,7 +128,9 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.RELEASE}/MID?token=${DET_MID_TEST_TOKEN}`)
       .expect(403, {
-        message: 'Unauthorized RELEASE action for lock of detector MID by user Detector User'
+        message: 'Unauthorized RELEASE action for lock of detector MID by user Detector User',
+        status: 403,
+        title: 'Unauthorized Access',
       });
   });
 

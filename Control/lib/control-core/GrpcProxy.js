@@ -16,7 +16,7 @@
 const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
 const path = require('path');
-const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
+const {grpcErrorToNativeError} = require('@aliceo2/web-ui');
 const {Status} = require(path.join(__dirname, './../../protobuf/status_pb.js'));
 const {EnvironmentInfo} = require(path.join(__dirname, './../../protobuf/environmentinfo_pb.js'));
 const logger = (require('@aliceo2/web-ui').LogManager)
