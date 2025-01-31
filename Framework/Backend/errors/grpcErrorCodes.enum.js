@@ -11,7 +11,13 @@
  * or submit itself to any jurisdiction.
  */
 
-/**
- * Specific error to throw when an user provided input is not valid
- */
-export class InvalidInputError extends Error {}
+const GrpcErrorCodes = Object.freeze({
+  UNKNOWN: 2,
+  INVALID_INPUT: 3,
+  TIMEOUT: 4,
+  NOT_FOUND: 5,
+  UNAUTHORIZED_ACCESS: 7,
+  SERVICE_UNAVAILABLE: 14,
+});
+
+exports.GrpcErrorCodes = GrpcErrorCodes;

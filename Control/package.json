@@ -33,28 +33,23 @@
     "protobuf/"
   ],
   "dependencies": {
-    "@aliceo2/web-ui": "2.7.3",
+    "@aliceo2/web-ui": "2.7.4",
     "@grpc/grpc-js": "1.12.0",
     "@grpc/proto-loader": "0.7.0",
     "google-protobuf": "3.21.0",
     "kafkajs": "2.2.4"
   },
-  "bundledDependencies": [
-    "@aliceo2/web-ui",
-    "@grpc/grpc-js",
-    "@grpc/proto-loader"
-  ],
   "devDependencies": {
     "eslint": "^8.56.0",
     "jsonwebtoken": "^9.0.2",
-    "mocha": "^11.0.1",
-    "nock": "^13.5.0",
+    "mocha": "^11.1.0",
+    "nock": "^14.0.0",
     "nyc": "^17.1.0",
-    "puppeteer": "^23.11.1",
+    "puppeteer": "^24.1.1",
     "sinon": "19.0.2",
     "supertest": "7.0.0"
   },
-  "bundleDependencies": [
+  "bundledDependencies": [
     "@aliceo2/web-ui",
     "@grpc/grpc-js",
     "@grpc/proto-loader"

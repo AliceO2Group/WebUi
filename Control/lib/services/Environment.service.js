@@ -12,11 +12,10 @@
  * or submit itself to any jurisdiction.
 */
 
-const {NotFoundError} = require('@aliceo2/web-ui');
+const {grpcErrorToNativeError, NotFoundError} = require('@aliceo2/web-ui');
 const {CacheKeys} = require('./../common/cacheKeys.enum.js');
 const EnvironmentInfoAdapter = require('./../adapters/EnvironmentInfoAdapter.js');
 const {EnvironmentTransitionResultAdapter} = require('./../adapters/EnvironmentTransitionResultAdapter.js');
-const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 
 /**
  * EnvironmentService class to be used to retrieve data from AliEcs Core via the gRPC Control client

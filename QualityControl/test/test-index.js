@@ -56,6 +56,9 @@ import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
+import { layoutIdMiddlewareTest } from './lib/middlewares/layouts/layoutId.middleware.test.js';
+import { layoutOwnerMiddlewareTest } from './lib/middlewares/layouts/layoutOwner.middleware.test.js';
+import { layoutServiceMiddlewareTest } from './lib/middlewares/layouts/layoutService.middleware.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -156,6 +159,12 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('UserServiceTest test suite', async () => {
         // TODO - bring inline with current tests
       });
+    });
+
+    suite('Middleware - Test Suite', async () => {
+      suite('LayoutServiceMiddleware test suite', async () => layoutServiceMiddlewareTest());
+      suite('LayoutIdMiddleware test suite', async () => layoutIdMiddlewareTest());
+      suite('LayoutOwnerMiddleware test suite', async () => layoutOwnerMiddlewareTest());
     });
 
     suite('Controllers - Test Suite', async () => {

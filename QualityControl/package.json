@@ -32,18 +32,18 @@
     "index.js"
   ],
   "dependencies": {
-    "@aliceo2/web-ui": "2.7.3",
+    "@aliceo2/web-ui": "2.7.4",
     "joi": "17.13.3",
-    "jsroot": "7.8.0"
+    "jsroot": "7.8.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.17.0",
-    "@stylistic/eslint-plugin-js": "^2.12.0",
-    "eslint": "^9.17.0",
+    "@eslint/js": "^9.18.0",
+    "@stylistic/eslint-plugin-js": "^2.13.0",
+    "eslint": "^9.18.0",
     "eslint-plugin-jsdoc": "^50.6.0",
     "globals": "^15.14.0",
     "nock": "^13.5.0",
-    "puppeteer": "^23.11.1",
+    "puppeteer": "^24.0.0",
     "sinon": "^19.0.2"
   },
   "bundleDependencies": [
