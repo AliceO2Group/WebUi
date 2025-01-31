@@ -18,7 +18,7 @@ import request from 'supertest';
 
 export const apiPatchLayoutTests = () => {
   suite('PATCH /layout/:id', () => {
-    test('should return a 404 error if the id of the layout does not exist', async () => {
+    test('should return a 404 error if the id of the layout is not provided', async () => {
       await request(`${URL_ADDRESS}/api/layout/`)
         .patch(`?token=${OWNER_TEST_TOKEN}`)
         .expect(404, {
@@ -27,7 +27,7 @@ export const apiPatchLayoutTests = () => {
         });
     });
 
-    test('should return a 404 error if the id is not provided', async () => {
+    test('should return a 404 error if the id of the layout does not exist', async () => {
       await request(`${URL_ADDRESS}/api/layout/test`)
         .patch(`?token=${OWNER_TEST_TOKEN}`)
         .expect(404, {
