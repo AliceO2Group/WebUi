@@ -12,62 +12,59 @@
  */
 import { documentClickTaggedEventRegistry } from '../utilities/documentClickTaggedEventRegistry.js';
 
+/**
+ * @type {Readonly<{click: Readonly<Partial<PopoverConfiguration>>, hover: Readonly<Partial<PopoverConfiguration>>}>}
+ */
 export const PopoverTriggerPreConfiguration = Object.freeze({
-    click: Object.freeze({
-        // eslint-disable-next-line require-jsdoc
-        onTriggerNodeChange: function (previousTriggerNode, newTriggerNode) {
-            // eslint-disable-next-line require-jsdoc
-            const hideDropdownOnEscape = (e) => e.key === 'Escape' && this.hidePopover();
-            // eslint-disable-next-line require-jsdoc
-            const handleClick = (e) => {
-                documentClickTaggedEventRegistry.tagEvent(e, this.key);
-                this.togglePopover();
-            };
+  click: Object.freeze({
+    onTriggerNodeChange: (previousTriggerNode, newTriggerNode, popoverComponent) => {
+      const hideDropdownOnEscape = (e) => e.key === 'Escape' && popoverComponent.hidePopover();
+      const handleClick = (e) => {
+        documentClickTaggedEventRegistry.tagEvent(e, popoverComponent.key);
+        popoverComponent.togglePopover();
+      };
 
-            if (previousTriggerNode) {
-                documentClickTaggedEventRegistry.removeListener(this.hidePopover);
-                window.removeEventListener('keyup', hideDropdownOnEscape);
-                previousTriggerNode.removeEventListener('click', handleClick);
-            }
+      if (previousTriggerNode) {
+        documentClickTaggedEventRegistry.removeListener(popoverComponent.hidePopover);
+        window.removeEventListener('keyup', hideDropdownOnEscape);
+        previousTriggerNode.removeEventListener('click', handleClick);
+      }
 
-            if (newTriggerNode) {
-                newTriggerNode.addEventListener('click', handleClick);
-                documentClickTaggedEventRegistry.addListenerForAnyExceptTagged(this.hidePopover, this.key);
-                window.addEventListener('keyup', hideDropdownOnEscape);
-            }
-        },
-        // eslint-disable-next-line require-jsdoc
-        onPopoverNodeChange: function (previousPopoverNode, newPopoverNode) {
-            // eslint-disable-next-line require-jsdoc
-            const handleClick = (e) => documentClickTaggedEventRegistry.tagEvent(e, this.key);
+      if (newTriggerNode) {
+        newTriggerNode.addEventListener('click', handleClick);
+        documentClickTaggedEventRegistry.addListenerForAnyExceptTagged(popoverComponent.hidePopover, popoverComponent.key);
+        window.addEventListener('keyup', hideDropdownOnEscape);
+      }
+    },
+    onPopoverNodeChange: (previousPopoverNode, newPopoverNode, popoverComponent) => {
+      const handleClick = (e) => documentClickTaggedEventRegistry.tagEvent(e, popoverComponent.key);
 
-            if (previousPopoverNode) {
-                previousPopoverNode.removeEventListener('click', handleClick);
-            }
+      if (previousPopoverNode) {
+        previousPopoverNode.removeEventListener('click', handleClick);
+      }
 
-            if (newPopoverNode) {
-                newPopoverNode.addEventListener('click', handleClick);
-            }
-        },
-    }),
+      if (newPopoverNode) {
+        newPopoverNode.addEventListener('click', handleClick);
+      }
+    },
+  }),
 
-    /**
-     * Partial popover configuration for hover-based popover
-     *
-     * @type {Readonly<Partial<PopoverConfiguration>>}
-     */
-    hover: Object.freeze({
-        // eslint-disable-next-line require-jsdoc
-        onTriggerNodeChange: function (previousTriggerNode, newTriggerNode) {
-            if (previousTriggerNode) {
-                previousTriggerNode.removeEventListener('mouseenter', this.showPopover);
-                previousTriggerNode.removeEventListener('mouseleave', this.hidePopover);
-            }
+  /**
+   * Partial popover configuration for hover-based popover
+   *
+   * @type {Readonly<Partial<PopoverConfiguration>>}
+   */
+  hover: Object.freeze({
+    onTriggerNodeChange: (previousTriggerNode, newTriggerNode, popoverComponent) => {
+      if (previousTriggerNode) {
+        previousTriggerNode.removeEventListener('mouseenter', popoverComponent.showPopover);
+        previousTriggerNode.removeEventListener('mouseleave', popoverComponent.hidePopover);
+      }
 
-            if (newTriggerNode) {
-                newTriggerNode.addEventListener('mouseenter', this.showPopover);
-                newTriggerNode.addEventListener('mouseleave', this.hidePopover);
-            }
-        },
-    }),
+      if (newTriggerNode) {
+        newTriggerNode.addEventListener('mouseenter', popoverComponent.showPopover);
+        newTriggerNode.addEventListener('mouseleave', popoverComponent.hidePopover);
+      }
+    },
+  }),
 });

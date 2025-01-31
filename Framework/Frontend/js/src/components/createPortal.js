@@ -12,8 +12,8 @@
  */
 
 import Observable from '../Observable.js';
-import {documentClickTaggedEventRegistry} from '../utilities/documentClickTaggedEventRegistry.js';
-import {h, mount} from '../renderer.js';
+import { documentClickTaggedEventRegistry } from '../utilities/documentClickTaggedEventRegistry.js';
+import { h, mount } from '../renderer.js';
 
 /**
  * Mithril component that displays its content as child of custom dom elements (document's root by default) that can be out of the current
@@ -24,7 +24,7 @@ class Portal {
    * Component's constructor
    * @param {{attrs: {container: (HTMLElement|undefined)}}} props the component's properties
    */
-  constructor({attrs: {container}}) {
+  constructor({ attrs: { container } }) {
     // Container is the actual element that will be the parent of the portal's target
     this.container = container || document.body;
     // Because portal's target will be mounted on its own dom tree, it has its own model to trigger re-render when the portal is re-rendered
@@ -38,8 +38,13 @@ class Portal {
     this._propagateClick = this._propagateClick.bind(this);
   }
 
-  // eslint-disable-next-line require-jsdoc
-  oncreate({dom, children, text}) {
+  /**
+   * Lifecycle event
+   *
+   * @param {vnode} vnode the vnode of the component
+   * @return {void}
+   */
+  oncreate({ dom, children, text }) {
     /*
      * For simplicity, create a div that will serve as root for portal's target.
      * Doing so, it will be easier to clean it when portal is removed
@@ -59,8 +64,13 @@ class Portal {
     mount(this.rootNode, this.content, this.model, false);
   }
 
-  // eslint-disable-next-line require-jsdoc
-  onupdate({dom, children, text}) {
+  /**
+   * Lifecycle event
+   *
+   * @param {vnode} vnode the vnode of the component
+   * @return {void}
+   */
+  onupdate({ dom, children, text }) {
     if (!this.content) {
       return;
     }
@@ -72,7 +82,11 @@ class Portal {
     this.model.notify();
   }
 
-  // eslint-disable-next-line require-jsdoc
+  /**
+   * Lifecycle event
+   *
+   * @return {void}
+   */
   onremove() {
     this._portalSource = null;
     if (this.container.contains(this.rootNode)) {
@@ -83,7 +97,11 @@ class Portal {
     }
   }
 
-  // eslint-disable-next-line require-jsdoc
+  /**
+   * Lifecycle event
+   *
+   * @return {Component} the component view
+   */
   view() {
     return h('.d-none');
   }
@@ -97,7 +115,7 @@ class Portal {
    */
   _propagateClick(event) {
     if (this._portalSource) {
-      const eventToPropagate = new Event('click', {bubbles: true});
+      const eventToPropagate = new Event('click', { bubbles: true });
       const tags = documentClickTaggedEventRegistry.getEventTags(event);
       documentClickTaggedEventRegistry.tagEvent(eventToPropagate, tags);
       event.stopPropagation();
@@ -113,4 +131,4 @@ class Portal {
  * @param {Element} [container] the container in which component should be rendered (document's body by default)
  * @return {Component} the created portal that proxy the component
  */
-export const createPortal = (component, container) => h(Portal, {container}, component);
+export const createPortal = (component, container) => h(Portal, { container }, component);

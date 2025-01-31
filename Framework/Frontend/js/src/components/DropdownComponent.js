@@ -11,10 +11,10 @@
  * or submit itself to any jurisdiction.
  */
 
-import {h} from '../renderer.js';
-import {PopoverTriggerPreConfiguration} from './PopoverPreConfigurations.js';
-import {PopoverAnchors} from './PopoverEngine.js';
-import {popover} from './popover.js';
+import { h } from '../renderer.js';
+import { PopoverTriggerPreConfiguration } from './PopoverPreConfigurations.js';
+import { PopoverAnchors } from './PopoverEngine.js';
+import { popover } from './popover.js';
 
 /**
  * Renders a dropdown component
@@ -32,7 +32,7 @@ export const DropdownComponent = (
   configuration,
 ) => {
   configuration = configuration || {};
-  const {alignment = 'left'} = configuration;
+  const { alignment = 'left' } = configuration;
   return popover(
     trigger,
     h('.dropdown', content),

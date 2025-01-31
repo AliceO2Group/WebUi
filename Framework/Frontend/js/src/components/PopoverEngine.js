@@ -26,53 +26,53 @@
  */
 
 /**
- * @type BoundingBoxProjector
+ * @type {BoundingBoxProjector}
  */
 const verticalProjector = Object.freeze({
-    getPosition: (subject) => 'top' in subject ? subject.top : subject.y,
+  getPosition: (subject) => 'top' in subject ? subject.top : subject.y,
 
-    setPosition: (subject, position) => {
-        if ('top' in subject) {
-            subject.top = position;
-        } else {
-            subject.y = position;
-        }
-    },
+  setPosition: (subject, position) => {
+    if ('top' in subject) {
+      subject.top = position;
+    } else {
+      subject.y = position;
+    }
+  },
 
-    getSize: (subject) => subject.height,
+  getSize: (subject) => subject.height,
 
-    setSize: (subject, size) => {
-        subject.height = size;
-    },
+  setSize: (subject, size) => {
+    subject.height = size;
+  },
 
-    setMaxSize: (subject, size) => {
-        subject.maxHeight = size;
-    },
+  setMaxSize: (subject, size) => {
+    subject.maxHeight = size;
+  },
 });
 
 /**
- * @type BoundingBoxProjector
+ * @type {BoundingBoxProjector}
  */
 const horizontalProjector = Object.freeze({
-    getPosition: (subject) => 'left' in subject ? subject.left : subject.x,
+  getPosition: (subject) => 'left' in subject ? subject.left : subject.x,
 
-    setPosition: (subject, position) => {
-        if ('left' in subject) {
-            subject.left = position;
-        } else {
-            subject.y = position;
-        }
-    },
+  setPosition: (subject, position) => {
+    if ('left' in subject) {
+      subject.left = position;
+    } else {
+      subject.y = position;
+    }
+  },
 
-    getSize: (subject) => subject.width,
+  getSize: (subject) => subject.width,
 
-    setSize: (subject, size) => {
-        subject.width = size;
-    },
+  setSize: (subject, size) => {
+    subject.width = size;
+  },
 
-    setMaxSize: (subject, size) => {
-        subject.maxWidth = size;
-    },
+  setMaxSize: (subject, size) => {
+    subject.maxWidth = size;
+  },
 });
 
 /**
@@ -93,8 +93,8 @@ const horizontalProjector = Object.freeze({
  * @type {{BEFORE: MainAxisPopoverPosition, AFTER: MainAxisPopoverPosition}}
  */
 const MainAxisPositions = {
-    BEFORE: 0, // Popover will be before the trigger on the main axis
-    AFTER: 1, // Popover will be after the trigger on the main axis
+  BEFORE: 0, // Popover will be before the trigger on the main axis
+  AFTER: 1, // Popover will be after the trigger on the main axis
 };
 
 /**
@@ -103,9 +103,9 @@ const MainAxisPositions = {
  * @type {{START: CrossAxisPopoverPosition, END: CrossAxisPopoverPosition, MIDDLE: CrossAxisPopoverPosition}}
  */
 const CrossAxisPositions = {
-    START: 0, // The start of the popover will be aligned with the start of the trigger on the cross axis
-    MIDDLE: 1, // The popover will be centered against the trigger on the cross axis
-    END: 2, // The end of the popover will be aligned with the end of the trigger on the cross axis
+  START: 0, // The start of the popover will be aligned with the start of the trigger on the cross axis
+  MIDDLE: 1, // The popover will be centered against the trigger on the cross axis
+  END: 2, // The end of the popover will be aligned with the end of the trigger on the cross axis
 };
 
 /**
@@ -114,23 +114,23 @@ const CrossAxisPositions = {
  * Defines the position of the popover related to the trigger
  */
 export const PopoverAnchors = {
-    // Main axis vertical
-    TOP_START: 0,
-    TOP_MIDDLE: 1,
-    TOP_END: 2,
+  // Main axis vertical
+  TOP_START: 0,
+  TOP_MIDDLE: 1,
+  TOP_END: 2,
 
-    BOTTOM_START: 3,
-    BOTTOM_MIDDLE: 4,
-    BOTTOM_END: 5,
+  BOTTOM_START: 3,
+  BOTTOM_MIDDLE: 4,
+  BOTTOM_END: 5,
 
-    // Main axis horizontal
-    LEFT_START: 6,
-    LEFT_MIDDLE: 7,
-    LEFT_END: 8,
+  // Main axis horizontal
+  LEFT_START: 6,
+  LEFT_MIDDLE: 7,
+  LEFT_END: 8,
 
-    RIGHT_START: 9,
-    RIGHT_MIDDLE: 10,
-    RIGHT_END: 11,
+  RIGHT_START: 9,
+  RIGHT_MIDDLE: 10,
+  RIGHT_END: 11,
 };
 
 /**
@@ -142,315 +142,315 @@ export const PopoverAnchors = {
  *    - Cross axis, which is the other axis
  */
 class PopoverEngine {
-    /**
-     * Constructor
-     *
-     * @param {HTMLElement} trigger the bounding box of the trigger
-     * @param {HTMLElement} popover the bounding box of the popover
-     * @param {BoundingBox} displayBoundingBox the bounding box of the display zone, representing the limits where the popover may be drawn
-     * @param {{x: number, y: number}} displayZoneMargins the margins to apply at the edge of the display zone
-     * @param {{main: MainAxisPopoverPosition, cross: CrossAxisPopoverPosition}} position the position of the popover relative to the trigger
-     * @param {{main: BoundingBoxProjector, cross: BoundingBoxProjector}} projectors the axis projectors
-     * @param {object} [configuration] additional configuration
-     * @param {boolean} [configuration.imperativeSize=false] if true, size of the popover will be removed before re-computing size and position.
-     *     This is useful when the popover content size is based on the popover size (displaying an image for example) but this should not be
-     *     used with scrollable content, because it will reset scroll on every render
-     */
-    constructor(
-        trigger,
-        popover,
-        displayBoundingBox,
-        displayZoneMargins,
-        position,
-        projectors,
-        configuration,
+  /**
+   * Constructor
+   *
+   * @param {HTMLElement} trigger the bounding box of the trigger
+   * @param {HTMLElement} popover the bounding box of the popover
+   * @param {BoundingBox} displayBoundingBox the bounding box of the display zone, representing the limits where the popover may be drawn
+   * @param {{x: number, y: number}} displayZoneMargins the margins to apply at the edge of the display zone
+   * @param {{main: MainAxisPopoverPosition, cross: CrossAxisPopoverPosition}} position the position of the popover relative to the trigger
+   * @param {{main: BoundingBoxProjector, cross: BoundingBoxProjector}} projectors the axis projectors
+   * @param {object} [configuration] additional configuration
+   * @param {boolean} [configuration.imperativeSize=false] if true, size of the popover will be removed before re-computing size and position.
+   *     This is useful when the popover content size is based on the popover size (displaying an image for example) but this should not be
+   *     used with scrollable content, because it will reset scroll on every render
+   */
+  constructor(
+    trigger,
+    popover,
+    displayBoundingBox,
+    displayZoneMargins,
+    position,
+    projectors,
+    configuration,
+  ) {
+    this._popover = popover;
+
+    this._triggerBoundingBox = trigger.getBoundingClientRect();
+
+    this._mainAxisPosition = position.main;
+    this._crossAxisPosition = position.cross;
+
+    this._mainAxisProjector = projectors.main;
+    this._crossAxisProjector = projectors.cross;
+
+    this._displayBoundingBox = displayBoundingBox;
+    this._displayZoneMargins = displayZoneMargins;
+
+    const { imperativeSize = false } = configuration ?? {};
+    this._imperativeSize = imperativeSize;
+  }
+
+  /**
+   * Fit the popover to the drawing zone then position it
+   *
+   * @return {void}
+   */
+  fitAndPosition() {
+    this.resizeAlongMainAxis();
+    this.resizeAlongCrossAxis();
+    this.positionAlongMainAxis();
+    this.positionAlongCrossAxis();
+  }
+
+  /**
+   * Reset the popover to its default size and position
+   *
+   * @return {void}
+   */
+  reset() {
+    this._popover.style.removeProperty('left');
+    this._popover.style.removeProperty('top');
+    if (this._imperativeSize) {
+      this._popover.style.removeProperty('width');
+      this._popover.style.removeProperty('height');
+    }
+  }
+
+  /**
+   * Resize the popover along the main axis to not overflow of the display bounding box
+   *
+   * @return {void}
+   */
+  resizeAlongMainAxis() {
+    // Round pessimistically the space available because bounding client rect might return float-values
+    const availableSpaceBefore = Math.floor(this._triggerStartMainAxis);
+    const availableSpaceAfter = Math.floor(this._availableSpaceInMainAxis - this._triggerEndMainAxis);
+
+    let sizeToSet = null;
+    if (
+      availableSpaceBefore <= this._popoverContentSizeMainAxis
+      && availableSpaceAfter <= this._popoverContentSizeMainAxis
     ) {
-        this._popover = popover;
+      let mainAxisSize;
 
-        this._triggerBoundingBox = trigger.getBoundingClientRect();
+      // Put where there is the most space
+      if (availableSpaceBefore > availableSpaceAfter) {
+        // More space before
+        this._mainAxisPosition = MainAxisPositions.BEFORE;
+        mainAxisSize = availableSpaceBefore;
+      } else if (availableSpaceBefore < availableSpaceAfter) {
+        // More space after
+        this._mainAxisPosition = MainAxisPositions.AFTER;
+        mainAxisSize = availableSpaceAfter;
+      } else {
+        // Same space
+        mainAxisSize = availableSpaceBefore;
+      }
 
-        this._mainAxisPosition = position.main;
-        this._crossAxisPosition = position.cross;
-
-        this._mainAxisProjector = projectors.main;
-        this._crossAxisProjector = projectors.cross;
-
-        this._displayBoundingBox = displayBoundingBox;
-        this._displayZoneMargins = displayZoneMargins;
-
-        const { imperativeSize = false } = configuration ?? {};
-        this._imperativeSize = imperativeSize;
+      sizeToSet = `${mainAxisSize}px`;
     }
+    (this._imperativeSize ? this._mainAxisProjector.setSize : this._mainAxisProjector.setMaxSize)(this._popover.style, sizeToSet);
+  }
 
-    /**
-     * Fit the popover to the drawing zone then position it
-     *
-     * @return {void}
+  /**
+   * Resize the popover along the cross axis to not overflow of the display bounding box
+   *
+   * @return {void}
+   */
+  resizeAlongCrossAxis() {
+    const availableSpaceInCrossAxis = Math.floor(this._availableSpaceInCrossAxis);
+
+    let sizeToSet = null;
+    if (this._popoverContentSizeCrossAxis >= availableSpaceInCrossAxis) {
+      sizeToSet = `${availableSpaceInCrossAxis}px`;
+    }
+    (this._imperativeSize ? this._crossAxisProjector.setSize : this._crossAxisProjector.setMaxSize)(this._popover.style, sizeToSet);
+  }
+
+  /**
+   * Position the popover along the main axis
+   *
+   * @return {void}
+   */
+  positionAlongMainAxis() {
+    let mainAxisPosition;
+
+    /*
+     * Round optimistically, to avoid the popover being resized to be put before/after not fitting because size imprecision make it
+     * bigger than newly computed available space
      */
-    fitAndPosition() {
-        this.resizeAlongMainAxis();
-        this.resizeAlongCrossAxis();
-        this.positionAlongMainAxis();
-        this.positionAlongCrossAxis();
+    const doesFitBeforeAlongMainAxis = Math.ceil(this._triggerStartMainAxis) >= Math.floor(this._popoverSizeMainAxis);
+    const doesFitAfterAlongMainAxis = Math.ceil(this._availableSpaceInMainAxis - this._triggerEndMainAxis)
+      >= Math.floor(this._popoverSizeMainAxis);
+
+    if (this._mainAxisPosition === MainAxisPositions.BEFORE && doesFitBeforeAlongMainAxis || !doesFitAfterAlongMainAxis) {
+      mainAxisPosition = this._triggerStartMainAxis - this._popoverSizeMainAxis;
+    } else {
+      mainAxisPosition = this._triggerEndMainAxis;
     }
 
-    /**
-     * Reset the popover to its default size and position
-     *
-     * @return {void}
-     */
-    reset() {
-        this._popover.style.removeProperty('left');
-        this._popover.style.removeProperty('top');
-        if (this._imperativeSize) {
-            this._popover.style.removeProperty('width');
-            this._popover.style.removeProperty('height');
-        }
+    // Popover is placed absolutely relatively to the document, and its position should be offset by the window scroll
+    mainAxisPosition += this._mainAxisProjector.getPosition(this._offsets);
+
+    this._mainAxisProjector.setPosition(this._popover.style, `${mainAxisPosition}px`);
+  }
+
+  /**
+   * Position the popover along the cross axis
+   *
+   * @return {void}
+   */
+  positionAlongCrossAxis() {
+    let targetStartCrossAxis;
+
+    if (this._crossAxisPosition === CrossAxisPositions.START) {
+      targetStartCrossAxis = this._triggerStartCrossAxis;
+    } else if (this._crossAxisPosition === CrossAxisPositions.END) {
+      targetStartCrossAxis = this._triggerStartCrossAxis + this._triggerSizeCrossAxis - this._popoverSizeCrossAxis;
+    } else {
+      targetStartCrossAxis = this._triggerStartCrossAxis + (this._triggerSizeCrossAxis - this._popoverSizeCrossAxis) / 2;
     }
 
-    /**
-     * Resize the popover along the main axis to not overflow of the display bounding box
-     *
-     * @return {void}
-     */
-    resizeAlongMainAxis() {
-        // Round pessimistically the space available because bounding client rect might return float-values
-        const availableSpaceBefore = Math.floor(this._triggerStartMainAxis);
-        const availableSpaceAfter = Math.floor(this._availableSpaceInMainAxis - this._triggerEndMainAxis);
+    targetStartCrossAxis += this._crossAxisProjector.getPosition(this._offsets);
 
-        let sizeToSet = null;
-        if (
-            availableSpaceBefore <= this._popoverContentSizeMainAxis
-            && availableSpaceAfter <= this._popoverContentSizeMainAxis
-        ) {
-            let mainAxisSize;
+    const crossMargin = this._crossAxisProjector.getPosition(this._displayZoneMargins);
+    const crossAxisMinPosition = this._crossAxisProjector.getPosition(this._displayBoundingBox) + crossMargin;
 
-            // Put where there is the most space
-            if (availableSpaceBefore > availableSpaceAfter) {
-                // More space before
-                this._mainAxisPosition = MainAxisPositions.BEFORE;
-                mainAxisSize = availableSpaceBefore;
-            } else if (availableSpaceBefore < availableSpaceAfter) {
-                // More space after
-                this._mainAxisPosition = MainAxisPositions.AFTER;
-                mainAxisSize = availableSpaceAfter;
-            } else {
-                // Same space
-                mainAxisSize = availableSpaceBefore;
-            }
+    // Add the start margin that is deduced when computing the available space
+    const crossAxisMaxPosition = crossMargin + this._availableSpaceInCrossAxis - this._popoverSizeCrossAxis;
 
-            sizeToSet = `${mainAxisSize}px`;
-        }
-        (this._imperativeSize ? this._mainAxisProjector.setSize : this._mainAxisProjector.setMaxSize)(this._popover.style, sizeToSet);
-    }
+    const crossAxisPosition = Math.max(
+      crossAxisMinPosition,
+      Math.min(
+        crossAxisMaxPosition,
+        targetStartCrossAxis,
+      ),
+    );
+    this._crossAxisProjector.setPosition(this._popover.style, `${crossAxisPosition}px`);
+  }
 
-    /**
-     * Resize the popover along the cross axis to not overflow of the display bounding box
-     *
-     * @return {void}
-     */
-    resizeAlongCrossAxis() {
-        const availableSpaceInCrossAxis = Math.floor(this._availableSpaceInCrossAxis);
+  /**
+   * Returns the total available space along the main axis
+   *
+   * @return {number} the available space
+   * @private
+   */
+  get _availableSpaceInMainAxis() {
+    return this._mainAxisProjector.getSize(this._displayBoundingBox)
+      - this._mainAxisProjector.getPosition(this._displayZoneMargins);
+  }
 
-        let sizeToSet = null;
-        if (this._popoverContentSizeCrossAxis >= availableSpaceInCrossAxis) {
-            sizeToSet = `${availableSpaceInCrossAxis}px`;
-        }
-        (this._imperativeSize ? this._crossAxisProjector.setSize : this._crossAxisProjector.setMaxSize)(this._popover.style, sizeToSet);
-    }
+  /**
+   * Returns the total available space along the cross axis
+   *
+   * @return {number} the available space
+   * @private
+   */
+  get _availableSpaceInCrossAxis() {
+    return this._crossAxisProjector.getSize(this._displayBoundingBox)
+      - this._crossAxisProjector.getPosition(this._displayZoneMargins) * 2;
+  }
 
-    /**
-     * Position the popover along the main axis
-     *
-     * @return {void}
-     */
-    positionAlongMainAxis() {
-        let mainAxisPosition;
+  /**
+   * Return the position of the start of the trigger along the main axis
+   *
+   * @return {number} the start position
+   * @private
+   */
+  get _triggerStartMainAxis() {
+    return this._mainAxisProjector.getPosition(this._triggerBoundingBox);
+  }
 
-        /*
-         * Round optimistically, to avoid the popover being resized to be put before/after not fitting because size imprecision make it
-         * bigger than newly computed available space
-         */
-        const doesFitBeforeAlongMainAxis = Math.ceil(this._triggerStartMainAxis) >= Math.floor(this._popoverSizeMainAxis);
-        const doesFitAfterAlongMainAxis = Math.ceil(this._availableSpaceInMainAxis - this._triggerEndMainAxis)
-            >= Math.floor(this._popoverSizeMainAxis);
+  /**
+   * Return the position of the end of the trigger along the main axis
+   *
+   * @return {number} the end position
+   * @private
+   */
+  get _triggerEndMainAxis() {
+    return this._triggerStartMainAxis + this._mainAxisProjector.getSize(this._triggerBoundingBox);
+  }
 
-        if (this._mainAxisPosition === MainAxisPositions.BEFORE && doesFitBeforeAlongMainAxis || !doesFitAfterAlongMainAxis) {
-            mainAxisPosition = this._triggerStartMainAxis - this._popoverSizeMainAxis;
-        } else {
-            mainAxisPosition = this._triggerEndMainAxis;
-        }
+  /**
+   * Return the position of the trigger along the cross axis
+   *
+   * @return {number} the start position
+   * @private
+   */
+  get _triggerStartCrossAxis() {
+    return this._crossAxisProjector.getPosition(this._triggerBoundingBox);
+  }
 
-        // Popover is placed absolutely relatively to the document, and its position should be offset by the window scroll
-        mainAxisPosition += this._mainAxisProjector.getPosition(this._offsets);
+  /**
+   * Return the size of the trigger along the cross axis
+   *
+   * @return {number} the size
+   * @private
+   */
+  get _triggerSizeCrossAxis() {
+    return this._crossAxisProjector.getSize(this._triggerBoundingBox);
+  }
 
-        this._mainAxisProjector.setPosition(this._popover.style, `${mainAxisPosition}px`);
-    }
+  /**
+   * Return the current bounding box of the popover
+   *
+   * @return {DOMRect} The bounding box
+   */
+  get popoverBoundingBox() {
+    return this._popover.getBoundingClientRect();
+  }
 
-    /**
-     * Position the popover along the cross axis
-     *
-     * @return {void}
-     */
-    positionAlongCrossAxis() {
-        let targetStartCrossAxis;
+  /**
+   * Return the size of the popover along the main axis
+   *
+   * @return {number} the size
+   * @private
+   */
+  get _popoverSizeMainAxis() {
+    return this._mainAxisProjector.getSize(this.popoverBoundingBox);
+  }
 
-        if (this._crossAxisPosition === CrossAxisPositions.START) {
-            targetStartCrossAxis = this._triggerStartCrossAxis;
-        } else if (this._crossAxisPosition === CrossAxisPositions.END) {
-            targetStartCrossAxis = this._triggerStartCrossAxis + this._triggerSizeCrossAxis - this._popoverSizeCrossAxis;
-        } else {
-            targetStartCrossAxis = this._triggerStartCrossAxis + (this._triggerSizeCrossAxis - this._popoverSizeCrossAxis) / 2;
-        }
+  /**
+   * Return the content size of the popover along the main axis
+   *
+   * @return {number} the size
+   * @private
+   */
+  get _popoverContentSizeMainAxis() {
+    return this._mainAxisProjector.getSize(this._popoverContentSize);
+  }
 
-        targetStartCrossAxis += this._crossAxisProjector.getPosition(this._offsets);
+  /**
+   * Return the size of the popover along the cross axis
+   *
+   * @return {number} the size
+   * @private
+   */
+  get _popoverSizeCrossAxis() {
+    return this._crossAxisProjector.getSize(this.popoverBoundingBox);
+  }
 
-        const crossMargin = this._crossAxisProjector.getPosition(this._displayZoneMargins);
-        const crossAxisMinPosition = this._crossAxisProjector.getPosition(this._displayBoundingBox) + crossMargin;
+  /**
+   * Return the content size of the popover along the cross axis
+   *
+   * @return {number} the size
+   * @private
+   */
+  get _popoverContentSizeCrossAxis() {
+    return this._crossAxisProjector.getSize(this._popoverContentSize);
+  }
 
-        // Add the start margin that is deduced when computing the available space
-        const crossAxisMaxPosition = crossMargin + this._availableSpaceInCrossAxis - this._popoverSizeCrossAxis;
+  /**
+   * The popover is placed absolutely relatively to the document, and it should be offset by the window's scroll
+   *
+   * @return {{top: number, left: number}} the offsets
+   * @private
+   */
+  get _offsets() {
+    return { top: window.scrollY, left: window.scrollX };
+  }
 
-        const crossAxisPosition = Math.max(
-            crossAxisMinPosition,
-            Math.min(
-                crossAxisMaxPosition,
-                targetStartCrossAxis,
-            ),
-        );
-        this._crossAxisProjector.setPosition(this._popover.style, `${crossAxisPosition}px`);
-    }
-
-    /**
-     * Returns the total available space along the main axis
-     *
-     * @return {number} the available space
-     * @private
-     */
-    get _availableSpaceInMainAxis() {
-        return this._mainAxisProjector.getSize(this._displayBoundingBox)
-            - this._mainAxisProjector.getPosition(this._displayZoneMargins);
-    }
-
-    /**
-     * Returns the total available space along the cross axis
-     *
-     * @return {number} the available space
-     * @private
-     */
-    get _availableSpaceInCrossAxis() {
-        return this._crossAxisProjector.getSize(this._displayBoundingBox)
-            - this._crossAxisProjector.getPosition(this._displayZoneMargins) * 2;
-    }
-
-    /**
-     * Return the position of the start of the trigger along the main axis
-     *
-     * @return {number} the start position
-     * @private
-     */
-    get _triggerStartMainAxis() {
-        return this._mainAxisProjector.getPosition(this._triggerBoundingBox);
-    }
-
-    /**
-     * Return the position of the end of the trigger along the main axis
-     *
-     * @return {number} the end position
-     * @private
-     */
-    get _triggerEndMainAxis() {
-        return this._triggerStartMainAxis + this._mainAxisProjector.getSize(this._triggerBoundingBox);
-    }
-
-    /**
-     * Return the position of the trigger along the cross axis
-     *
-     * @return {number} the start position
-     * @private
-     */
-    get _triggerStartCrossAxis() {
-        return this._crossAxisProjector.getPosition(this._triggerBoundingBox);
-    }
-
-    /**
-     * Return the size of the trigger along the cross axis
-     *
-     * @return {number} the size
-     * @private
-     */
-    get _triggerSizeCrossAxis() {
-        return this._crossAxisProjector.getSize(this._triggerBoundingBox);
-    }
-
-    /**
-     * Return the current bounding box of the popover
-     *
-     * @return {DOMRect} The bounding box
-     */
-    get popoverBoundingBox() {
-        return this._popover.getBoundingClientRect();
-    }
-
-    /**
-     * Return the size of the popover along the main axis
-     *
-     * @return {number} the size
-     * @private
-     */
-    get _popoverSizeMainAxis() {
-        return this._mainAxisProjector.getSize(this.popoverBoundingBox);
-    }
-
-    /**
-     * Return the content size of the popover along the main axis
-     *
-     * @return {number} the size
-     * @private
-     */
-    get _popoverContentSizeMainAxis() {
-        return this._mainAxisProjector.getSize(this._popoverContentSize);
-    }
-
-    /**
-     * Return the size of the popover along the cross axis
-     *
-     * @return {number} the size
-     * @private
-     */
-    get _popoverSizeCrossAxis() {
-        return this._crossAxisProjector.getSize(this.popoverBoundingBox);
-    }
-
-    /**
-     * Return the content size of the popover along the cross axis
-     *
-     * @return {number} the size
-     * @private
-     */
-    get _popoverContentSizeCrossAxis() {
-        return this._crossAxisProjector.getSize(this._popoverContentSize);
-    }
-
-    /**
-     * The popover is placed absolutely relatively to the document, and it should be offset by the window's scroll
-     *
-     * @return {{top: number, left: number}} the offsets
-     * @private
-     */
-    get _offsets() {
-        return { top: window.scrollY, left: window.scrollX };
-    }
-
-    /**
-     * Return the content size of the popover
-     *
-     * @return {{width: number, height: number}} the size
-     * @private
-     */
-    get _popoverContentSize() {
-        return { width: this._popover.scrollWidth, height: this._popover.scrollHeight };
-    }
+  /**
+   * Return the content size of the popover
+   *
+   * @return {{width: number, height: number}} the size
+   * @private
+   */
+  get _popoverContentSize() {
+    return { width: this._popover.scrollWidth, height: this._popover.scrollHeight };
+  }
 }
 
 /**
@@ -469,23 +469,23 @@ class PopoverEngine {
  * @return {PopoverEngine} the created popover engine
  */
 export const createPopoverEngine = (trigger, popover, displayBoundingBox, displayZoneMargins, anchor, configuration) => {
-    // Top and Bottom are the 6 first anchors
-    const mainAxisProjector = anchor / 6 < 1 ? verticalProjector : horizontalProjector;
-    const crossAxisProjector = anchor / 6 < 1 ? horizontalProjector : verticalProjector;
+  // Top and Bottom are the 6 first anchors
+  const mainAxisProjector = anchor / 6 < 1 ? verticalProjector : horizontalProjector;
+  const crossAxisProjector = anchor / 6 < 1 ? horizontalProjector : verticalProjector;
 
-    // Top goes from 0 to 2 and Left goes from 6 to 8
-    const mainAxisPosition = Math.floor(anchor / 3) % 2 === 0 ? MainAxisPositions.BEFORE : MainAxisPositions.AFTER;
+  // Top goes from 0 to 2 and Left goes from 6 to 8
+  const mainAxisPosition = Math.floor(anchor / 3) % 2 === 0 ? MainAxisPositions.BEFORE : MainAxisPositions.AFTER;
 
-    // Anchors are always START, MIDDLE, END, START, MIDDLE, END and so on
-    const crossAxisPosition = [CrossAxisPositions.START, CrossAxisPositions.MIDDLE, CrossAxisPositions.END][anchor % 3];
+  // Anchors are always START, MIDDLE, END, START, MIDDLE, END and so on
+  const crossAxisPosition = [CrossAxisPositions.START, CrossAxisPositions.MIDDLE, CrossAxisPositions.END][anchor % 3];
 
-    return new PopoverEngine(
-        trigger,
-        popover,
-        displayBoundingBox,
-        displayZoneMargins,
-        { main: mainAxisPosition, cross: crossAxisPosition },
-        { main: mainAxisProjector, cross: crossAxisProjector },
-        configuration,
-    );
+  return new PopoverEngine(
+    trigger,
+    popover,
+    displayBoundingBox,
+    displayZoneMargins,
+    { main: mainAxisPosition, cross: crossAxisPosition },
+    { main: mainAxisProjector, cross: crossAxisProjector },
+    configuration,
+  );
 };

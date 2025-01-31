@@ -20,84 +20,84 @@
  * In order to work, an event listener must flush the registry in the last handler of the bubbling list
  */
 class TaggedEventRegistry {
-    /**
-     * Constructor
-     */
-    constructor() {
-        this._listenersExceptTagged = new Map();
-        this._eventTagsMap = new Map();
-    }
+  /**
+   * Constructor
+   */
+  constructor() {
+    this._listenersExceptTagged = new Map();
+    this._eventTagsMap = new Map();
+  }
 
-    /**
-     * Add a listener that will be triggered when registry is flushed with an event that contains NONE of the given tags
-     * To avoid memory leaks, do not forget to unregister the listener when needed
-     *
-     * @param {function} listener the listener to call if none of the tags is applied to the event
-     * @param {...string[]} tags the list of tags that the event must NOT have to trigger listener
-     *
-     * @return {void}
-     */
-    addListenerForAnyExceptTagged(listener, ...tags) {
-        const unifiedTags = [
-            ...tags,
-            ...this._listenersExceptTagged.get(listener) || [],
-        ];
-        this._listenersExceptTagged.set(listener, unifiedTags);
-    }
+  /**
+   * Add a listener that will be triggered when registry is flushed with an event that contains NONE of the given tags
+   * To avoid memory leaks, do not forget to unregister the listener when needed
+   *
+   * @param {function} listener the listener to call if none of the tags is applied to the event
+   * @param {...string[]} tags the list of tags that the event must NOT have to trigger listener
+   *
+   * @return {void}
+   */
+  addListenerForAnyExceptTagged(listener, ...tags) {
+    const unifiedTags = [
+      ...tags,
+      ...this._listenersExceptTagged.get(listener) || [],
+    ];
+    this._listenersExceptTagged.set(listener, unifiedTags);
+  }
 
-    /**
-     * Remove the given listener from the notification list (it will NEVER be called anymore)
-     * The given function must be the same reference that the one passed to {@see addListenerForAnyExceptTagged}
-     *
-     * @param {function} listener the listener for which restriction must be edited
-     *
-     * @return {void}
-     */
-    removeListener(listener) {
-        this._listenersExceptTagged.delete(listener);
-    }
+  /**
+   * Remove the given listener from the notification list (it will NEVER be called anymore)
+   * The given function must be the same reference that the one passed to {@see addListenerForAnyExceptTagged}
+   *
+   * @param {function} listener the listener for which restriction must be edited
+   *
+   * @return {void}
+   */
+  removeListener(listener) {
+    this._listenersExceptTagged.delete(listener);
+  }
 
-    /**
-     * Add a tag to a given event
-     *
-     * @param {Event} e the event to tag
-     * @param {string|string[]} tag the tag to add
-     *
-     * @return {void}
-     */
-    tagEvent(e, tag) {
-        if (!this._eventTagsMap.has(e)) {
-            this._eventTagsMap.set(e, []);
-        }
-        this._eventTagsMap.get(e).push(...Array.isArray(tag) ? tag : [tag]);
+  /**
+   * Add a tag to a given event
+   *
+   * @param {Event} e the event to tag
+   * @param {string|string[]} tag the tag to add
+   *
+   * @return {void}
+   */
+  tagEvent(e, tag) {
+    if (!this._eventTagsMap.has(e)) {
+      this._eventTagsMap.set(e, []);
     }
+    this._eventTagsMap.get(e).push(...Array.isArray(tag) ? tag : [tag]);
+  }
 
-    /**
-     * Call all the registered listeners for which the given event's tags match the restrictions
-     *
-     * @param {Event} e the event to listen to
-     *
-     * @return {void}
-     */
-    flush(e) {
-        const eventTags = this._eventTagsMap.get(e) || [];
-        this._listenersExceptTagged.forEach((tags, listener) => {
-            if (!tags.some((tag) => eventTags.includes(tag))) {
-                listener(e);
-            }
-        });
-        this._eventTagsMap = new Map();
-    }
+  /**
+   * Call all the registered listeners for which the given event's tags match the restrictions
+   *
+   * @param {Event} e the event to listen to
+   *
+   * @return {void}
+   */
+  flush(e) {
+    const eventTags = this._eventTagsMap.get(e) || [];
+    this._listenersExceptTagged.forEach((tags, listener) => {
+      if (!tags.some((tag) => eventTags.includes(tag))) {
+        listener(e);
+      }
+    });
+    this._eventTagsMap = new Map();
+  }
 
-    /**
-     * Returns the tags related to a given event
-     *
-     * @param {Event} e the event
-     * @return {string[]} the tags attached to the event
-     */
-    getEventTags(e) {
-        return this._eventTagsMap.get(e);
-    }
+  /**
+   * Returns the tags related to a given event
+   *
+   * @param {Event} e the event
+   * @return {string[]} the tags attached to the event
+   */
+  getEventTags(e) {
+    return this._eventTagsMap.get(e);
+  }
 }
 
 export const documentClickTaggedEventRegistry = new TaggedEventRegistry();

@@ -11,49 +11,46 @@
  * or submit itself to any jurisdiction.
  */
 
-import {h} from '../renderer.js';
-import {createPortal} from './createPortal.js';
-import {createPopoverEngine} from './PopoverEngine.js';
-import {StatefulComponent} from './StatefulComponent.js';
-import {getUniqueId} from './getUniqueId.js';
+import { h } from '../renderer.js';
+import { createPortal } from './createPortal.js';
+import { createPopoverEngine } from './PopoverEngine.js';
+import { StatefulComponent } from './StatefulComponent.js';
+import { getUniqueId } from './getUniqueId.js';
 
 /**
  * Default margin to apply at the edge of the display zone
  *
  * @type {{left: number, top: number}}
  */
-const DEFAULT_DISPLAY_ZONE_MARGIN = {left: 15, top: 15};
+const DEFAULT_DISPLAY_ZONE_MARGIN = { left: 15, top: 15 };
 
 /**
- * @callback onTriggerNodeChange Function called when the trigger node change (this bound to the popover component instance)
- *
- * @this PopoverComponent
+ * @callback onTriggerNodeChangeCallback Function called when the trigger node change
  *
  * @param {HTMLElement|null} previousTriggerNode the previous trigger node if it exists (null if the node is created)
  * @param {HTMLElement|null} newTriggerNode the new trigger node if it exists (null if the node is removed)
+ * @param {PopoverComponent} popoverComponent the popover component instance
  * @return {void}
  */
 
 /**
- * @callback onPopoverNodeChange Function called when the popover node change (this bound to the popover component instance)
- *
- * @this PopoverComponent
+ * @callback onPopoverNodeChangeCallback Function called when the popover node change
  *
  * @param {HTMLElement|null} previousPopoverNode the previous popover node if it exists (null if the node is created)
  * @param {HTMLElement|null} newPopoverNode the new popover node if it exists (null if the node is removed)
+ * @param {PopoverComponent} popoverComponent the popover component instance
  * @return {void}
  */
 
 /**
  * @callback popoverShowConditionCallback Function called before displaying the popover to eventually prevent the display
  *
- * @this PopoverComponent
- *
+ * @param {PopoverComponent} popoverComponent the popover component instance
  * @return {boolean} if false, popover will not be displayed
  */
 
 /**
- * @callback popoverVisibilityChangeCallback function called when the visibility of the popover changes
+ * @callback onPopoverVisibilityChangeCallback function called when the visibility of the popover changes
  *
  * @param {boolean} visibility the new visibility
  * @return {void}
@@ -63,10 +60,10 @@ const DEFAULT_DISPLAY_ZONE_MARGIN = {left: 15, top: 15};
  * @typedef PopoverConfiguration the configuration of the popover
  *
  * @property {PopoverAnchor} anchor the anchor of the popover
- * @property {onTriggerNodeChange} onTriggerNodeChange function called when the trigger DOM node changes
+ * @property {onTriggerNodeChangeCallback} onTriggerNodeChange function called when the trigger DOM node changes
  * @property {{x: number, y: number}} displayZoneMargins the margins to apply at the edges to display zone
- * @property {onPopoverNodeChange} [onPopoverNodeChange] function called when the popover DOM node changes
- * @property {popoverVisibilityChangeCallback} [onVisibilityChange] function called when the visibility changes
+ * @property {onPopoverNodeChangeCallback} [onPopoverNodeChange] function called when the popover DOM node changes
+ * @property {onPopoverVisibilityChangeCallback} [onVisibilityChange] function called when the visibility changes
  * @property {popoverShowConditionCallback} [showCondition] function called before showing the popover
  * @property {string[]|string} [popoverClass] css classes to apply to the popover (in addition to the default ones)
  * @property {boolean} [scroll=true] if true, popover overflow will be set to scroll
@@ -79,11 +76,12 @@ class PopoverComponent extends StatefulComponent {
   /**
    * Constructor
    *
-   * @param {Component} trigger the trigger component
-   * @param {Component} content the popover component
-   * @param {PopoverConfiguration} configuration the popover options
+   * @param {vnode} vnode the vnode of the component
+   * @param {Component} vnode.attrs.trigger the trigger component
+   * @param {Component} vnode.attrs.content the popover component
+   * @param {PopoverConfiguration} vnode.attrs.configuration the popover options
    */
-  constructor({attrs: {trigger, content, configuration}}) {
+  constructor({ attrs: { trigger, content, configuration } }) {
     super();
 
     this._triggerComponent = trigger;
@@ -106,8 +104,13 @@ class PopoverComponent extends StatefulComponent {
     this.togglePopover = this.togglePopover.bind(this);
   }
 
-  // eslint-disable-next-line require-jsdoc
-  onbeforeupdate({attrs: {trigger, content, configuration}}) {
+  /**
+   * Lifecycle event
+   *
+   * @param {vnode} vnode the vnode of the component
+   * @return {void}
+   */
+  onbeforeupdate({ attrs: { trigger, content, configuration } }) {
     this._triggerComponent = trigger;
     this._contentComponent = content;
     this.configuration = configuration;
@@ -139,7 +142,7 @@ class PopoverComponent extends StatefulComponent {
         },
         this._displayZoneMargins,
         this._anchor,
-        {imperativeSize: !this._scroll},
+        { imperativeSize: !this._scroll },
       );
       engine.reset();
       engine.fitAndPosition();
@@ -178,7 +181,7 @@ class PopoverComponent extends StatefulComponent {
    * @return {void}
    */
   showPopover() {
-    this.setVisibility(this._showCondition());
+    this.setVisibility(this._showCondition(this));
   }
 
   /**
@@ -206,7 +209,7 @@ class PopoverComponent extends StatefulComponent {
    */
   set triggerNode(node) {
     if (this._triggerNode !== node) {
-      this._onTriggerNodeChange(this._triggerNode, node);
+      this._onTriggerNodeChange(this._triggerNode, node, this);
       this._triggerNode = node;
     }
   }
@@ -218,7 +221,7 @@ class PopoverComponent extends StatefulComponent {
    */
   set popoverNode(node) {
     if (this._popoverNode !== node) {
-      this._onPopoverNodeChange(this._popoverNode, node);
+      this._onPopoverNodeChange(this._popoverNode, node, this);
       this._popoverNode = node;
       this.updatePopover();
     }
@@ -233,10 +236,10 @@ class PopoverComponent extends StatefulComponent {
     return [
       h('.popover-trigger', {
         ['data-popover-key']: this._popoverKey,
-        oncreate: ({dom}) => {
+        oncreate: ({ dom }) => {
           this.triggerNode = dom;
         },
-        onupdate: ({dom}) => {
+        onupdate: ({ dom }) => {
           this.triggerNode = dom;
         },
         onremove: () => {
@@ -253,10 +256,10 @@ class PopoverComponent extends StatefulComponent {
           ...this._popoverClasses,
         ].join(' '),
         ['data-popover-key']: this._popoverKey,
-        oncreate: ({dom}) => {
+        oncreate: ({ dom }) => {
           this.popoverNode = dom;
         },
-        onupdate: ({dom}) => {
+        onupdate: ({ dom }) => {
           this.popoverNode = dom;
         },
         onremove: () => {
@@ -288,16 +291,25 @@ class PopoverComponent extends StatefulComponent {
       },
       onVisibilityChange = () => {
       },
-      showCondition,
+      showCondition = () => true,
       popoverClass = [],
       displayZoneMargins = {},
       scroll = true,
     } = configuration;
     this._anchor = anchor;
-    this._onTriggerNodeChange = onTriggerNodeChange.bind(this);
-    this._onPopoverNodeChange = onPopoverNodeChange.bind(this);
-    this._onVisibilityChange = onVisibilityChange.bind(this);
-    this._showCondition = showCondition ? showCondition.bind(this) : () => true;
+
+    /** @type {onTriggerNodeChangeCallback} */
+    this._onTriggerNodeChange = onTriggerNodeChange;
+
+    /** @type {onPopoverNodeChangeCallback} */
+    this._onPopoverNodeChange = onPopoverNodeChange;
+
+    /** @type {onPopoverVisibilityChangeCallback} */
+    this._onVisibilityChange = onVisibilityChange;
+
+    /** @type {popoverShowConditionCallback} */
+    this._showCondition = showCondition;
+
     this._popoverClasses = Array.isArray(popoverClass) ? popoverClass : [popoverClass];
     this._displayZoneMargins = {
       ...DEFAULT_DISPLAY_ZONE_MARGIN,
@@ -315,4 +327,4 @@ class PopoverComponent extends StatefulComponent {
  * @param {PopoverConfiguration} configuration the popover configuration
  * @returns {Component} the resulting trigger and popover
  */
-export const popover = (trigger, content, configuration) => h(PopoverComponent, {trigger, content, configuration});
+export const popover = (trigger, content, configuration) => h(PopoverComponent, { trigger, content, configuration });

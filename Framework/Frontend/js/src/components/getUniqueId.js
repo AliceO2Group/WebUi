@@ -12,8 +12,8 @@
  */
 
 const generator = window.crypto && window.crypto.randomUUID
-    ? () => window.crypto.randomUUID()
-    : () => `${Math.random()}-${Date.now()}`.replace('.', '');
+  ? () => window.crypto.randomUUID()
+  : () => `${Math.random()}-${Date.now()}`.replace('.', '');
 
 /**
  * Returns a probably unique identifier
