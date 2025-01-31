@@ -38,3 +38,22 @@ export const LAYOUT_MOCK_2 = {
     },
   ],
 };
+
+export const LAYOUT_MOCK_3 = {
+  autoTabChange: 0,
+  collaborators: [],
+  description: '',
+  displayTimestamp: false,
+  id: '671b8c22402408122e2f20dd',
+  name: 'a-test',
+  owner_id: 0,
+  owner_name: 'Anonymous',
+  tabs: [
+    {
+      columns: 2,
+      id: 'test',
+      name: 'test',
+      objects: [],
+    },
+  ],
+};

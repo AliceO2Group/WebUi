@@ -15,7 +15,7 @@
 import { suite, test } from 'node:test';
 import { OWNER_TEST_TOKEN, URL_ADDRESS, USER_TEST_TOKEN } from '../config.js';
 import request from 'supertest';
-import { LAYOUT_MOCK_2 } from '../../demoData/layout/layout.mock.js';
+import { LAYOUT_MOCK_2, LAYOUT_MOCK_3 } from '../../demoData/layout/layout.mock.js';
 
 export const apiPutLayoutTests = () => {
   suite('PUT /layout/:id', () => {
@@ -47,6 +47,27 @@ export const apiPutLayoutTests = () => {
           message: 'Only the owner of the layout can delete it',
           status: 403,
           title: 'Unauthorized Access',
+        });
+    });
+
+    test('should return a 400 error if the body is not provided', async () => {
+      await request(`${URL_ADDRESS}/api/layout/671b8c22402408122e2f20dd`)
+        .put(`?token=${OWNER_TEST_TOKEN}`)
+        .expect(400, {
+          message: 'Failed to update layout: "id" is required',
+          status: 400,
+          title: 'Invalid Input',
+        });
+    });
+
+    test('should return a 400 error if the name of the layout already exists', async () => {
+      await request(`${URL_ADDRESS}/api/layout/671b8c22402408122e2f20dd`)
+        .put(`?token=${OWNER_TEST_TOKEN}`)
+        .send(LAYOUT_MOCK_3)
+        .expect(400, {
+          message: 'Proposed layout name: a-test already exists',
+          status: 400,
+          title: 'Invalid Input',
         });
     });
 
