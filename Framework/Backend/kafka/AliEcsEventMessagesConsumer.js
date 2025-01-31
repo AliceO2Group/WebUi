@@ -10,6 +10,7 @@
  *  granted to it by virtue of its status as an Intergovernmental Organization
  *  or submit itself to any jurisdiction.
  */
+
 const protobuf = require('protobufjs');
 const path = require('node:path');
 const { KafkaMessagesConsumer } = require('./KafkaMessagesConsumer.js');
