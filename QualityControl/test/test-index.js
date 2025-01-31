@@ -99,11 +99,6 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       await terminateSessionAndLog(browser, subprocessOutput, subprocess);
     });
 
-    suite('API - Test Suite', async () => {
-      suite('Layout PUT request test suite', async () => apiPutLayoutTests());
-      suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
-    });
-
     test(
       'should successfully import and run the tests for page setup',
       async (testParent) => await initialPageSetupTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
@@ -142,6 +137,11 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       { timeout: LAYOUT_SHOW_PAGE_TIMEOUT },
       async (testParent) => await layoutShowTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
+
+    suite('API - Test Suite', async () => {
+      suite('Layout PUT request test suite', async () => apiPutLayoutTests());
+      suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
+    });
 
     // require('./about-page.test');
   });
