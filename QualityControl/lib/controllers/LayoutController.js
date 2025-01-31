@@ -144,8 +144,8 @@ export class LayoutController {
         );
         return;
       }
-      const layout = await this._dataService.updateLayout(id, layoutProposed);
-      res.status(201).json({ id: layout });
+      const layoutId = await this._dataService.updateLayout(id, layoutProposed);
+      res.status(201).json({ id: layoutId });
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);
     }
@@ -211,16 +211,16 @@ export class LayoutController {
     let layout = {};
     try {
       layout = await LayoutPatchDto.validateAsync(req.body);
-    } catch {
+    } catch (error) {
       updateAndSendExpressResponseFromNativeError(
         res,
-        new InvalidInputError('Invalid request body to update layout'),
+        new InvalidInputError(`Failed to validate layout: ${error?.details[0]?.message || ''}`),
       );
       return;
     }
     try {
-      const layoutUpdated = await this._dataService.updateLayout(id, layout);
-      res.status(201).json(layoutUpdated);
+      const layoutId = await this._dataService.updateLayout(id, layout);
+      res.status(201).json(layoutId);
     } catch {
       updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to update layout with id: ${id}`));
       return;
