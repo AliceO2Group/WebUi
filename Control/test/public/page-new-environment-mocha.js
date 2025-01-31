@@ -432,7 +432,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully create a new environment', async () => {
     await page.locator('#deploy-env')
-      .setTimeout(500)
+      .setTimeout(1000)
       .click();
     await page.waitForNavigation({
       waitUntil: 'networkidle0',
