@@ -29,14 +29,12 @@ export const apiPutLayoutTests = () => {
         });
     });
 
-    //TODO:
-    test.skip('should return a 404 error if the layout id is not provided', async () => {
+    test('should return a 404 error if the layout id is not provided', async () => {
       await request(`${URL_ADDRESS}/api/layout/`)
         .put(`?id=${null}&token=${OWNER_TEST_TOKEN}`)
         .expect(404, {
-          message: 'layout id not provided',
-          status: 404,
-          title: 'Not Found',
+          message: 'The requested URL was not found on this server.',
+          error: '404 - Page not found',
         });
     });
 
