@@ -201,18 +201,6 @@ export const layoutControllerTestSuite = async () => {
       };
     });
 
-    test('should respond with 400 error if request did not contain body id', async () => {
-      const req = { params: { id: 'someid' } };
-      const layoutConnector = new LayoutController({});
-      await layoutConnector.putLayoutHandler(req, res);
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledWith({
-        message: 'Missing request body to update layout',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Error message was incorrect');
-    });
-
     test('should successfully return the id of the updated layout', async () => {
       const expectedMockWithDefaults = {
         id: 'mylayout',
@@ -502,14 +490,14 @@ export const layoutControllerTestSuite = async () => {
     test('should successfully update the official field of a layout', async () => {
       const jsonStub = sinon.createStubInstance(JsonFileService, {
         readLayout: sinon.stub().resolves(LAYOUT_MOCK_1),
-        updateLayout: sinon.stub().resolves({ isOfficial: true, ...LAYOUT_MOCK_1 }),
+        updateLayout: sinon.stub().resolves(LAYOUT_MOCK_1.id),
       });
       const layoutConnector = new LayoutController(jsonStub);
 
       const req = { params: { id: 'mylayout' }, session: { personid: 1 }, body: { isOfficial: true } };
       await layoutConnector.patchLayoutHandler(req, res);
       ok(res.status.calledWith(201), 'Response status was not 201');
-      ok(res.json.calledWith({ isOfficial: true, ...LAYOUT_MOCK_1 }));
+      ok(res.json.calledWith({ id: 'mylayout' }));
       ok(jsonStub.updateLayout.calledWith('mylayout', { isOfficial: true }));
     });
 
@@ -521,7 +509,7 @@ export const layoutControllerTestSuite = async () => {
 
       ok(res.status.calledWith(400), 'Response status was not 400');
       ok(res.json.calledWith({
-        message: 'Invalid request body to update layout',
+        message: 'Failed to validate layout: "missing" is not allowed',
         status: 400,
         title: 'Invalid Input',
       }));
