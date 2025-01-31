@@ -220,7 +220,7 @@ export class LayoutController {
     }
     try {
       const layoutId = await this._dataService.updateLayout(id, layout);
-      res.status(201).json(layoutId);
+      res.status(201).json({ id: layoutId });
     } catch {
       updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to update layout with id: ${id}`));
       return;
