@@ -60,6 +60,7 @@ import { layoutIdMiddlewareTest } from './lib/middlewares/layouts/layoutId.middl
 import { layoutOwnerMiddlewareTest } from './lib/middlewares/layouts/layoutOwner.middleware.test.js';
 import { layoutServiceMiddlewareTest } from './lib/middlewares/layouts/layoutService.middleware.test.js';
 import { apiPutLayoutTests } from './api/layouts/api-put-layout.test.js';
+import { apiPatchLayoutTests } from './api/layouts/api-patch-layout.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -100,6 +101,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
 
     suite('API - Test Suite', async () => {
       suite('Layout PUT request test suite', async () => apiPutLayoutTests());
+      suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
     });
 
     test(

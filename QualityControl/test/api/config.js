@@ -44,6 +44,11 @@ export const OWNER_TEST_TOKEN = generateToken(0, 'anonymous', 'Anonymous', 'owne
 export const USER_TEST_TOKEN = generateToken(1, 'user', 'User', 'user', config.jwt.secret);
 
 /**
+ * This token is used to authenticate a user with Global role in test scenarios.
+ */
+export const GLOBAL_TEST_TOKEN = generateToken(2, 'global', 'Global User', 'global', config.jwt.secret);
+
+/**
  * URL address constructed from the hostname and port
  */
 export const URL_ADDRESS = `${config.http.hostname}:${config.http.port}`;
