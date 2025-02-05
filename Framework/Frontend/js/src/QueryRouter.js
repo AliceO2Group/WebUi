@@ -15,6 +15,7 @@
 /* Global: window */
 
 import Observable from './Observable.js';
+import { parseUrlParameters } from './utilities/parseUrlParameters.js';
 
 /**
  * Router handle query history for Single Page Application (SPA)
@@ -115,14 +116,12 @@ class QueryRouter extends Observable {
    * Notify observers that the location has changed
    */
   _handleLocationChange() {
-    const url = new URL(this.location);
-    const entries = url.searchParams.entries();
-    this.params = {};
-    for (const pair of entries) {
-      const [, secondPair] = pair;
-      this.params[pair[0]] = secondPair;
+    const [, queryParameters] = this.location.href.split('?');
+    if (queryParameters) {
+      // Browser replaces ` ` by `+`, replace it back in order for parameters to be properly parsed
+      this.params = parseUrlParameters(decodeURIComponent(queryParameters.replaceAll('+', ' ')));
+      this.notify();
     }
-    this.notify();
   }
 
   /**

@@ -24,6 +24,8 @@ export { default as QueryRouter } from './QueryRouter.js';
 // Utils
 export { default as switchCase } from './switchCase.js';
 export { documentClickTaggedEventRegistry } from './utilities/documentClickTaggedEventRegistry.js';
+export { buildUrl } from './utilities/buildUrl.js';
+export { parseUrlParameters } from './utilities/parseUrlParameters.js';
 
 // Formatters
 export { formatTimeDuration } from './formatter/formatTimeDuration.js';
