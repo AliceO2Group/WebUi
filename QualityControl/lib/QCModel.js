@@ -32,47 +32,57 @@ import { ObjectController } from './controllers/ObjectController.js';
 
 import { config } from './config/configProvider.js';
 
-const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
-
-/*
- * --------------------------------------------------------
- * Initialization of model according to config file
+/**
+ * Model initialization for the QCG application
+ * @returns {Promise<object>} Multiple services and controllers that are to be used by the QCG application
  */
+export const setupQcModel = () => {
+  const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+  const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
 
-const jsonDb = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
-export const userService = new UserService(jsonDb);
-export const layoutService = new LayoutController(jsonDb);
+  const jsonDb = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
+  const userService = new UserService(jsonDb);
+  const layoutService = new LayoutController(jsonDb);
 
-export const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
-export const statusController = new StatusController(statusService);
+  const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
+  const statusController = new StatusController(statusService);
 
-export let consulService = undefined;
-if (config.consul) {
-  consulService = new ConsulService(config.consul);
-  consulService.getConsulLeaderStatus()
-    .then(() => logger.info('Consul Service connection was successfully tested.'))
-    .catch((error) => logger.error('Consul Service connection could not be established. '
-      + `Please try restarting the service due to: ${error}`));
-  statusController.setLiveModeConnector(consulService);
-} else {
-  logger.warn('Consul Service: No Configuration Found');
-}
+  let consulService = undefined;
+  if (config.consul) {
+    consulService = new ConsulService(config.consul);
+    consulService.getConsulLeaderStatus()
+      .then(() => logger.info('Consul Service connection was successfully tested.'))
+      .catch((error) => logger.error('Consul Service connection could not be established. '
+        + `Please try restarting the service due to: ${error}`));
+    statusController.setLiveModeConnector(consulService);
+  } else {
+    logger.warn('Consul Service: No Configuration Found');
+  }
 
-const ccdbService = CcdbService.setup(config.ccdb);
-statusService.dataService = ccdbService;
-statusService.onlineService = consulService;
+  const ccdbService = CcdbService.setup(config.ccdb);
+  statusService.dataService = ccdbService;
+  statusService.onlineService = consulService;
 
-const qcObjectService = new QcObjectService(ccdbService, jsonDb, { openFile, toJSON });
-qcObjectService.refreshCache();
+  const qcObjectService = new QcObjectService(ccdbService, jsonDb, { openFile, toJSON });
+  qcObjectService.refreshCache();
 
-export const objectController = new ObjectController(qcObjectService, consulService);
-export const intervalsService = new IntervalsService();
+  const objectController = new ObjectController(qcObjectService, consulService);
+  const intervalsService = new IntervalsService();
 
-intervalsService.register(
-  qcObjectService.refreshCache.bind(qcObjectService),
-  qcObjectService.getCacheRefreshRate(),
-);
+  intervalsService.register(
+    qcObjectService.refreshCache.bind(qcObjectService),
+    qcObjectService.getCacheRefreshRate(),
+  );
+  return {
+    userService,
+    layoutService,
+    statusService,
+    statusController,
+    objectController,
+    intervalsService,
+    jsonDb,
+  };
+};

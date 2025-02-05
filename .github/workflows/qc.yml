@@ -10,8 +10,8 @@ on:
       - 'dev'
 
 jobs:
-  test:
-    name: Tests on ubuntu-latest
+  lint-check:
+    name: Check eslint rules on ubuntu-latest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,22 +20,34 @@ jobs:
         with:
           node-version: '20.x'
       - run: (cd QualityControl; npm ci )
-      - run: (cd QualityControl; npm run coverage )
-      - run: (cd QualityControl; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
+      - run: (cd QualityControl; npm run lint )
+  test:
+    name: Tests on ubuntu-latest only if lint-check passes
+    runs-on: ubuntu-latest
+    needs: lint-check
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - run: (cd QualityControl; npm ci )
+      - run: (cd QualityControl; npm run test )
+  coverage:
+    name: Tests and generate lcov reoprt coverage on ubuntu-latest
+    runs-on: ubuntu-latest
+    needs: lint-check
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - run: (cd QualityControl; npm ci )
+      - run: (cd QualityControl; npm run coverage-lcov )
       - name: Send codecov report for QualityControl
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: qualitycontrol
           fail_ci_if_error: true
-  #coverage:  Job is currently disabled due to known issue with node-gyp on GH runners
-  #  name: Tests & coverage on macOS-latest
-  #  runs-on: macOS-latest
-  #  steps:
-  #    - uses: actions/checkout@v4
-  #    - name: Setup node
-  #      uses: actions/setup-node@v4
-  #      with:
-  #        node-version: '20.x'
-  #    - run: (cd QualityControl; npm ci )
-  #    - run: (cd QualityControl; npm run test)

@@ -50,7 +50,7 @@ export class QcObjectService {
      * @constant
      * @type {string}
      */
-    this._DB_URL = `${this._dbService._protocol}://${this._dbService._hostname}:${this._dbService._port}/`;
+    this._DB_URL = `${this._dbService._protocol}://${this._dbService._hostname}:${this._dbService._port}`;
 
     this._cache = {
       objects: undefined,
@@ -158,7 +158,7 @@ export class QcObjectService {
    * @throws
    */
   async retrieveQcObjectByQcgId(qcgId, id, validFrom = undefined, filters = {}) {
-    const { object, layoutName } = this._dataService.getObjectById(qcgId);
+    const { object, layoutName, tabName } = this._dataService.getObjectById(qcgId);
     const { name, options = {}, ignoreDefaults = false } = object;
     const qcObject = await this.retrieveQcObject(name, validFrom, id, filters);
 
@@ -166,6 +166,7 @@ export class QcObjectService {
       ...qcObject,
       layoutDisplayOptions: options,
       layoutName,
+      tabName,
       ignoreDefaults,
     };
   }

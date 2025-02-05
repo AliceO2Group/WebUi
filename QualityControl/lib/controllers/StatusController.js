@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
+import { ServiceUnavailableError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+
 /**
  * Gateway for all calls with regards to the status of the framework and its dependencies
  */
@@ -48,7 +50,10 @@ export class StatusController {
       const info = await this._statusService.retrieveFrameworkInfo();
       res.status(200).json(info);
     } catch (error) {
-      res.status(503).json({ message: error.message || error });
+      updateAndSendExpressResponseFromNativeError(
+        res,
+        new ServiceUnavailableError(error.message || error),
+      );
     }
   }
 }

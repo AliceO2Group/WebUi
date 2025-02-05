@@ -103,7 +103,11 @@ describe(`'LockController' test suite`, () => {
         }
       }, res);
       assert.ok(res.status.calledWith(403));
-      assert.ok(res.json.calledWith({message: `Unauthorized TAKE action for lock of detector ABC by user NotAnonymous`}));
+      assert.ok(res.json.calledWith({
+        message: 'Unauthorized TAKE action for lock of detector ABC by user NotAnonymous',
+        status: 403,
+        title: 'Unauthorized Access',
+      }));
     });
 
     it('should reply with error when an already held lock is requested to be released by another user without force', () => {
@@ -118,7 +122,11 @@ describe(`'LockController' test suite`, () => {
         }
       }, res);
       assert.ok(res.status.calledWith(403));
-      assert.ok(res.json.calledWith({message: `Unauthorized RELEASE action for lock of detector ABC by user NotAnonymous`}));
+      assert.ok(res.json.calledWith({
+        message: 'Unauthorized RELEASE action for lock of detector ABC by user NotAnonymous',
+        title: 'Unauthorized Access',
+        status: 403,
+      }));
     });
 
     it('should successfully reply to a request to release lock held by correct owner', () => {
@@ -158,7 +166,11 @@ describe(`'LockController' test suite`, () => {
         }
       }, res);
       assert.ok(res.status.calledWith(400));
-      assert.ok(res.json.calledWith({message: 'Missing detectorId'}));
+      assert.ok(res.json.calledWith({
+        message: 'Missing detectorId',
+        status: 400,
+        title: 'Invalid Input',
+      }));
 
       lockController.actionLockHandler({
         params: {
@@ -171,7 +183,11 @@ describe(`'LockController' test suite`, () => {
         }
       }, res);
       assert.ok(res.status.calledWith(400));
-      assert.ok(res.json.calledWith({message: 'Invalid action to apply on lock for detector: ABC'}));
+      assert.ok(res.json.calledWith({
+        message: 'Invalid action to apply on lock for detector: ABC',
+        status: 400,
+        title: 'Invalid Input',
+      }));
     });
 
     it('should return 404 and not found error message for a detector that does not exist', () => {
@@ -186,7 +202,11 @@ describe(`'LockController' test suite`, () => {
         }
       }, res);
       assert.ok(res.status.calledWith(404));
-      assert.ok(res.json.calledWith({message: 'Detector NONEXISTENT not found in the list of detectors'}));
+      assert.ok(res.json.calledWith({
+        message: 'Detector NONEXISTENT not found in the list of detectors',
+        status: 404,
+        title: 'Not Found',
+      }));
     });
 
     it('should successfully lock all detectors available to lock', () => {

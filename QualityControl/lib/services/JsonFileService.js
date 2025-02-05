@@ -12,11 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from '@aliceo2/web-ui';
+import { LogManager, NotFoundError } from '@aliceo2/web-ui';
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/json`);
 import fs from 'fs';
 import path from 'path';
-import { NotFoundError } from './../errors/NotFoundError.js';
 
 /**
  * Store layouts inside JSON based file with atomic write
@@ -148,7 +147,7 @@ export class JsonFileService {
   async readLayout(layoutId) {
     const layout = this.data.layouts.find((layout) => layout.id === layoutId);
     if (!layout) {
-      throw new Error(`layout (${layoutId}) not found`);
+      throw new NotFoundError(`layout (${layoutId}) not found`);
     }
     return layout;
   }
@@ -217,7 +216,7 @@ export class JsonFileService {
       for (const tab of layout.tabs) {
         for (const object of tab.objects) {
           if (object.id === id) {
-            return { object, layoutName: layout.name };
+            return { object, layoutName: layout.name, tabName: tab.name };
           }
         }
       }

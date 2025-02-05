@@ -14,15 +14,14 @@
 
 import { stub } from 'sinon';
 import nock from 'nock';
-import { ok, strictEqual, deepStrictEqual, rejects } from 'assert';
+import { ok, strictEqual, deepStrictEqual, rejects } from 'node:assert';
+import { suite, test, beforeEach, before } from 'node:test';
 import { errorHandler, httpHeadJson } from './../../../lib/utils/utils.js';
 
-export default async () => {
-  before(() => nock.cleanAll());
+export const utilsTestSuite = async () => {
 
-  describe('Check errors are handled and sent successfully', () => {
+  suite('Check errors are handled and sent successfully', () => {
     let res;
-
     beforeEach(() => {
       res = {
         status: stub().returnsThis(),
@@ -30,22 +29,22 @@ export default async () => {
       };
     });
 
-    it('should successfully respond with built error message when there is a message and no status', () => {
+    test('should successfully respond with built error message when there is a message and no status', () => {
       errorHandler('Error', 'Error', res);
       ok(res.status.calledOnce);
     });
 
-    it('should successfully respond with built error message and status > 500', () => {
+    test('should successfully respond with built error message and status > 500', () => {
       errorHandler('Error', 'Error', res, 502);
       ok(res.status.calledWith(502));
     });
 
-    it('should successfully respond with built error message and status < 500', () => {
+    test('should successfully respond with built error message and status < 500', () => {
       errorHandler('Error', 'Error', res, 404);
       ok(res.status.calledWith(404));
     });
 
-    it('should successfully respond with built error.message and status', () => {
+    test('should successfully respond with built error.message and status', () => {
       const err = {
         message: 'Test Error',
         stack: 'Some Stack',
@@ -55,7 +54,7 @@ export default async () => {
       ok(res.send.calledWith({ message: 'Error To Send' }));
     });
 
-    it('should successfully respond with built error.message, no stack and status', () => {
+    test('should successfully respond with built error.message, no stack and status', () => {
       const err = 'Test Error';
       errorHandler(err, 'Error To Send', res, 404);
       ok(res.status.calledWith(404));
@@ -63,8 +62,10 @@ export default async () => {
     });
   });
 
-  describe('"httpHeadJson" test suite ', () => {
-    it('should successfully return status and headers with host, port and path provided', async () => {
+  suite('"httpHeadJson" test suite ', () => {
+    before(() => nock.cleanAll());
+
+    test('should successfully return status and headers with host, port and path provided', async () => {
       nock('http://ccdb:8500')
         .defaultReplyHeaders({ lastModified: 123132132, location: '/download/some-id' })
         .head('/qc/some/test/123455432')
@@ -75,7 +76,7 @@ export default async () => {
       deepStrictEqual(headers, { lastmodified: '123132132', location: '/download/some-id' });
     });
 
-    it('should successfully return status and headers with host, port, path and headers provided', async () => {
+    test('should successfully return status and headers with host, port, path and headers provided', async () => {
       nock('http://ccdb:8500', {
         reqHeaders: { Accept: 'text' },
       })
@@ -87,7 +88,8 @@ export default async () => {
       strictEqual(status, 200);
       deepStrictEqual(headers, { lastmodified: '123132132', location: '/download/some-id' });
     });
-    it('should reject if call was not successful', async () => {
+
+    test('should reject if call was not successful', async () => {
       nock('http://ccdb:8500')
         .defaultReplyHeaders({ lastModified: 123132132, location: '/download/some-id' })
         .head('/qc/some/test/123455432')

@@ -19,6 +19,8 @@ const config = require('./config/configProvider.js');
 
 // middleware
 const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
+const {addDetectorIdMiddleware} = require('./middleware/addDetectorId.middleware.js');
+const {DetectorId} = require('./common/detectorId.enum.js');
 const {lockOwnershipMiddleware} = require('./middleware/lockOwnership.middleware.js');
 
 // controllers
@@ -117,15 +119,20 @@ module.exports.setup = (http, ws) => {
 
   let aliEcsSynchronizer = undefined;
   if (config.kafka && config.kafka?.enable) {
-    const kafkaClient = new Kafka({
-      clientId: 'control-gui',
-      brokers: config.kafka.brokers,
-      retry: { retries: 3 },
-      logLevel: logLevel.NOTHING,
-    });
-
-    aliEcsSynchronizer = new AliEcsSynchronizer(kafkaClient, cacheService);
-    aliEcsSynchronizer.start();
+    try {
+      const kafkaClient = new Kafka({
+        clientId: 'control-gui',
+        brokers: config.kafka.brokers,
+        retry: { retries: 3 },
+        logLevel: logLevel.NOTHING,
+      });
+      aliEcsSynchronizer = new AliEcsSynchronizer(kafkaClient, cacheService);
+      aliEcsSynchronizer.start();
+    
+    } catch (error) {
+      logger.errorMessage(`Kafka initialization failed: ${error.message}`);
+    }
+  
   }
 
   const statusService = new StatusService(
@@ -184,7 +191,17 @@ module.exports.setup = (http, ws) => {
 
   // Lock Service
   http.get('/locks', lockController.getLocksStateHandler.bind(lockController));
-  http.put('/locks/:action/:detectorId', lockController.actionLockHandler.bind(lockController));
+
+  http.put(`/locks/:action/${DetectorId.ALL}`,
+    minimumRoleMiddleware(Role.GLOBAL),
+    addDetectorIdMiddleware(DetectorId.ALL),
+    lockController.actionLockHandler.bind(lockController)
+  );
+
+  http.put('/locks/:action/:detectorId',
+    minimumRoleMiddleware(Role.DETECTOR),
+    lockController.actionLockHandler.bind(lockController)
+  );
   http.put('/locks/force/:action/:detectorId',
     minimumRoleMiddleware(Role.GLOBAL),
     lockController.actionForceLockHandler.bind(lockController));

@@ -15,9 +15,9 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
+const { NotFoundError } = require('@aliceo2/web-ui');
 
 const {EnvironmentService} = require('./../../../lib/services/Environment.service.js');
-const { NotFoundError } = require('./../../../lib/errors/NotFoundError.js');
 const { User } = require('./../../../lib/dtos/User.js');
 
 describe('EnvironmentService test suite', () => {

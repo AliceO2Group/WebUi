@@ -51,4 +51,10 @@ const pathName = require.resolve('jsroot');
 http.addStaticPath(path.join(pathName, '../..'), 'jsroot');
 
 const ws = new WebSocket(http);
+
+if (process.env.NODE_ENV === 'test') {
+  // Initialize nock for CCDB if we are in test environment
+  const { initializeNockForCcdb } = await import('./test/setup/testSetupForCcdb.js');
+  initializeNockForCcdb();
+}
 setup(http, ws);

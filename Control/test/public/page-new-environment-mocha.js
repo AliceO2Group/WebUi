@@ -68,11 +68,11 @@ describe('`pageNewEnvironment` test-suite', async () => {
       window.model.notify();
     });
 
-    const text = await page.locator('.m4')
+    const text = await page.locator('h3.m4')
       .setTimeout(500)
       .map((div) => div.innerText)
       .wait();
-    assert.strictEqual(text, 'You are not allowed to create environments.');
+    assert.strictEqual(text, 'You do not own the permissions to use this page.');
 
     await page.evaluate(() => {
       window.model.session.role = 1;
@@ -432,7 +432,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully create a new environment', async () => {
     await page.locator('#deploy-env')
-      .setTimeout(500)
+      .setTimeout(1000)
       .click();
     await page.waitForNavigation({
       waitUntil: 'networkidle0',

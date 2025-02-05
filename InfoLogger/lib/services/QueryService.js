@@ -15,6 +15,7 @@
 const mariadb = require('mariadb');
 const { LogManager } = require('@aliceo2/web-ui');
 const { fromSqlToNativeError } = require('../utils/fromSqlToNativeError');
+const { processPreparedSQLStatement } = require('../utils/preparedStatementParser');
 
 class QueryService {
   /**
@@ -82,6 +83,8 @@ class QueryService {
     const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` LIMIT ?;`;
     const startTime = Date.now(); // ms
 
+    this._logger.debugMessage(`SQL to execute: ${processPreparedSQLStatement(requestRows, values, limit)}`);
+
     let rows = [];
     try {
       rows = await this._pool.query(
@@ -113,7 +116,7 @@ class QueryService {
   async queryGroupCountLogsBySeverity(runNumber) {
     const groupByStatement =
       'SELECT severity, COUNT(*) FROM messages WHERE run=? and severity '
-      + `in ('D', 'I', 'W', 'E', 'F') GROUP BY severity;`;
+      + 'in (\'D\', \'I\', \'W\', \'E\', \'F\') GROUP BY severity;';
     let data = [];
     try {
       data = await this._pool.query({
