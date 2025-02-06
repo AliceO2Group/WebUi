@@ -18,7 +18,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.x'
       - run: (cd QualityControl; npm ci )
       - run: (cd QualityControl; npm run lint )
   test:
@@ -30,7 +30,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.x'
       - run: (cd QualityControl; npm ci )
       - run: (cd QualityControl; npm run test )
   coverage:
@@ -42,7 +42,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.x'
       - run: (cd QualityControl; npm ci )
       - run: (cd QualityControl; npm run coverage-lcov )
       - name: Send codecov report for QualityControl
