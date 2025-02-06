@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const assert = require('assert');
 const WebSocketMessage = require('./../websocket/message.js');
@@ -19,9 +19,9 @@ describe('WebSocket message', () => {
   it('Create and verify message instance', () => {
     const command = 'test-cmd';
     const code = 200;
-    const payload = {message: 'test message'};
+    const payload = { message: 'test message' };
     const response = new WebSocketMessage(code).setCommand(command).setPayload(payload);
-    const json = response.json;
+    const { json } = response;
 
     assert.equal(json.command, command);
     assert.equal(json.code, code);
@@ -31,8 +31,8 @@ describe('WebSocket message', () => {
   it('Parse message', () => {
     const message = {
       command: 'test',
-      payload: {test: 'value'},
-      token: 'token'
+      payload: { test: 'value' },
+      token: 'token',
     };
     new WebSocketMessage().parse(JSON.stringify(message))
       .then((res) => {
@@ -47,7 +47,7 @@ describe('WebSocket message', () => {
   it('Parse invalid message without token', (done) => {
     const message = {
       command: 'test',
-      test: 'value'
+      test: 'value',
     };
     new WebSocketMessage().parse(JSON.stringify(message))
       .then(() => {

@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const NotificationService = require('./../services/notification.js');
 const config = require('./../config-default.json');
@@ -44,17 +44,17 @@ describe('Kafka Connector test suite', () => {
   describe('Check notification params', function() {
     this.timeout(5000);
 
-    it('Notification without tag should fail', async () => {
+    it('should reject sending notification without proper valid message', async () => {
       const notification = new NotificationService(config.notification);
-      await assert.rejects(() => notification.send());
-      await assert.rejects(() => notification.send('tag'));
+      await assert.rejects(() => notification.send(), new Error('Message to send is missing or invalid'));
+      await assert.rejects(() => notification.send('tag'), new Error('Message to send is missing or invalid'));
     });
   });
 
   /// Remove .skip to actually run tests
   describe.skip('Check integration with Kafka', () => {
-    let WebSocket, HttpServer, JwtToken, wsClient;
-    let wsServer, http, notification, jwt, token
+    let WebSocket; let HttpServer; let JwtToken; let wsClient;
+    let wsServer; let http; let notification; let jwt; let token;
 
     before(() => {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -76,7 +76,7 @@ describe('Kafka Connector test suite', () => {
     });
 
     it('should send and receive a notification', async () => {
-      const client = new wsClient('ws://localhost:' + config.http.port + '/?token=' + token);
+      const client = new wsClient(`ws://localhost:${config.http.port}/?token=${token}`);
       client.on('message', (message) => {
         const parsed = JSON.parse(message);
         if (parsed.command == 'authed') {

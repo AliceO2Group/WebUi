@@ -12,13 +12,12 @@
  * or submit itself to any jurisdiction.
 */
 
-const {InvalidInputError} = require('./../errors/InvalidInputError.js');
-const {DetectorLockAction} = require('./../common/lock/detectorLockAction.enum.js');
-const {Log} = require('@aliceo2/web-ui');
-const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
+const { LogManager, LogLevel } = require('@aliceo2/web-ui');
+const { updateAndSendExpressResponseFromNativeError, InvalidInputError } = require('@aliceo2/web-ui');
+
+const { DetectorLockAction } = require('./../common/lock/detectorLockAction.enum.js');
 const {User} = require('./../dtos/User.js');
 
-const ERROR_LOG_LEVEL = 99;
 const LOG_FACILITY = 'cog/log-ctrl';
 const DETECTOR_ALL = 'ALL';
 
@@ -31,7 +30,7 @@ class LockController {
    * @param {LockService} lockService - service to use to build information on runs
    */
   constructor(lockService) {
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/${LOG_FACILITY}`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/${LOG_FACILITY}`);
 
     /**
      * @type {LockService}
@@ -49,7 +48,7 @@ class LockController {
     try {
       res.status(200).json(this._lockService.locksByDetectorToJSON());
     } catch (error) {
-      updateExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
@@ -98,8 +97,8 @@ class LockController {
         res.status(200).json(this._lockService.locksByDetectorToJSON());
       }
     } catch (error) {
-      this._logger.errorMessage(error, {level: ERROR_LOG_LEVEL, facility: LOG_FACILITY});
-      updateExpressResponseFromNativeError(res, error);
+      this._logger.errorMessage(error, {level: LogLevel.DEVELOPER, facility: LOG_FACILITY});
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 

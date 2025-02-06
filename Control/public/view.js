@@ -18,6 +18,8 @@ import {h, switchCase, notification} from '/js/src/index.js';
 // Common app helpers
 import appHeader from './common/appHeader.js';
 import sidebar from './common/sidebar.js';
+import { ROLES } from './workflow/constants.js';
+import { isUserAllowedRole } from './common/userRole.js';
 
 // Page specific views (contents and headers)
 import {
@@ -29,6 +31,10 @@ import {
   EnvironmentCreationPage
 } from './pages/EnvironmentCreation/EnvironmentCreation.page.js';
 import {
+  EnvironmentPageHeader,
+  EnvironmentPageContent,
+} from './pages/Environment/Environment.page.js';
+import {
   CalibrationRunsHeader,
   CalibrationRunsContent
 } from './pages/CalibrationRuns/CalibrationRuns.page.js';
@@ -36,10 +42,6 @@ import {
   content as environmentsContent,
   header as environmentsHeader
 } from './environment/environmentsPage.js';
-import {
-  content as environmentContent,
-  header as environmentHeader
-} from './environment/environmentPage.js';
 import {header as statusHeader} from './about/header.js';
 import {content as statusContent} from './about/content.js';
 import {
@@ -93,7 +95,7 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
     newEnvironment: EnvironmentCreationHeader,
     calibrationRuns: CalibrationRunsHeader,
     environments: environmentsHeader,
-    environment: environmentHeader,
+    environment: EnvironmentPageHeader,
     about: statusHeader,
     configuration: configurationHeader,
     taskList: taskHeader,
@@ -108,17 +110,28 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
  * @param {object} model
  * @return {vnode}
  */
-const content = (model) => [
-  switchCase(model.router.params.page, {
-    newEnvironmentAdvanced: workflowsContent,
-    newEnvironment: EnvironmentCreationPage,
-    calibrationRuns: CalibrationRunsContent,
-    environments: environmentsContent,
-    environment: environmentContent,
-    about: statusContent,
-    configuration: configurationContent,
-    taskList: taskContent,
-    hardware: hardwareContent,
-    locks: lockContent
-  })(model)
-];
+const content = (model) => {
+  const page = model?.router?.params?.page ?? 'environments' // Default page;
+  // Permissions check pages
+  const minimumDetectorRolePages = [
+    'about', 'calibrationRuns', 'configuration', 'environment', 'locks', 'newEnvironment', 'newEnvironmentAdvanced',
+    'taskList'
+  ];
+  if (minimumDetectorRolePages.includes(page) && !isUserAllowedRole(ROLES.Detector)) {
+    return h('h3.m4.warning.text-center', ['You do not own the permissions to use this page.'])
+  }
+  return [
+    switchCase(model.router.params.page, {
+      newEnvironmentAdvanced: workflowsContent,
+      newEnvironment: EnvironmentCreationPage,
+      calibrationRuns: CalibrationRunsContent,
+      environments: environmentsContent,
+      environment: EnvironmentPageContent,
+      about: statusContent,
+      configuration: configurationContent,
+      taskList: taskContent,
+      hardware: hardwareContent,
+      locks: lockContent
+    })(model)
+  ]
+};

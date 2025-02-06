@@ -32,7 +32,7 @@ class CoreEnvConfig {
    * @returns {boolean} - whether the user is allowed the action
    */
   isUpdatableBy(user) {
-    return User.isAdmin(user) || user.personid == this.personId;
+    return User.isAdmin(user) || user.personid == this.personid;
   }
 
   /**
@@ -157,7 +157,7 @@ class CoreEnvConfig {
    * Return the person id that has created the configuration
    * @returns {String}
    */
-  get personId() {
+  get personid() {
     return this._user.personid;
   }
 }

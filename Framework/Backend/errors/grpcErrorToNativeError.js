@@ -11,17 +11,19 @@
  * or submit itself to any jurisdiction.
  */
 
-const {InvalidInputError} = require('./InvalidInputError.js');
-const {NotFoundError} = require('./NotFoundError.js');
-const {ServiceUnavailableError} = require('./ServiceUnavailableError.js');
-const {TimeoutError} = require('./TimeoutError.js');
-const {UnauthorizedAccessError} = require('./UnauthorizedAccessError.js');
+const { InvalidInputError } = require('./InvalidInputError.js');
+const { NotFoundError } = require('./NotFoundError.js');
+const { ServiceUnavailableError } = require('./ServiceUnavailableError.js');
+const { TimeoutError } = require('./TimeoutError.js');
+const { UnauthorizedAccessError } = require('./UnauthorizedAccessError.js');
+const { GrpcErrorCodes } = require('./grpcErrorCodes.enum.js');
 
 /**
  * @typedef GrpcError
- * also known as gRPC Status Object
- * 
- * @property {number} code - code of the gRPC Status object
+ * also known as gRPC Status Object https://grpc.github.io/grpc/node/grpc.html#~StatusObject
+ *
+ * @property {GrpcErrorCodes} code - code of the gRPC Status object
+ * @property {string} details - details of the gRPC Status object
  * @property {string} message - message of the gRPC Status object
  */
 
@@ -30,24 +32,25 @@ const {UnauthorizedAccessError} = require('./UnauthorizedAccessError.js');
  * Code List source: https://grpc.github.io/grpc/core/md_doc_statuscodes.html
  *
  * @param {GrpcError} error - error object from gRPC Client library
+ * @param {Boolean} includeStatusCode - whether to error message field or details field
  * @returns {Error}
  */
-const grpcErrorToNativeError = (error) => {
-  const { code, message } = error;
+const grpcErrorToNativeError = (error, includeStatusCode = false) => {
+  const { code, details, message } = error;
 
   switch (code) {
-    case 3:
-      return new InvalidInputError(message);
-    case 4:
-      return new TimeoutError(message);
-    case 5:
-      return new NotFoundError(message);
-    case 7:
-      return new UnauthorizedAccessError(message);
-    case 14:
-      return new ServiceUnavailableError(message);
+    case GrpcErrorCodes.INVALID_INPUT:
+      return new InvalidInputError(includeStatusCode ? message : details);
+    case GrpcErrorCodes.TIMEOUT:
+      return new TimeoutError(includeStatusCode ? message : details);
+    case GrpcErrorCodes.NOT_FOUND:
+      return new NotFoundError(includeStatusCode ? message : details);
+    case GrpcErrorCodes.UNAUTHORIZED_ACCESS:
+      return new UnauthorizedAccessError(includeStatusCode ? message : details);
+    case GrpcErrorCodes.SERVICE_UNAVAILABLE:
+      return new ServiceUnavailableError(includeStatusCode ? message : details);
     default:
-      return new Error(message);
+      return new Error(includeStatusCode ? message : details);
   }
 };
 

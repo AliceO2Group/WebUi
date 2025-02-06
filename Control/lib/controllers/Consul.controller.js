@@ -12,10 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/consul`);
+const { LogManager, LogLevel } = require('@aliceo2/web-ui');
 const {errorHandler, errorLogger} = require('../utils.js');
 const {getConsulConfig} = require('../config/publicConfigProvider.js');
-const {LOG_LEVEL} = require('../common/logLevel.enum.js');
 
 /**
  * Gateway for all Consul Consumer calls
@@ -36,6 +35,8 @@ class ConsulController {
     this.qcPath = this.config.qcPath;
     this.readoutPath = this.config.readoutPath;
     this.kVPrefix = this.config.kVPrefix;
+
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/consul`);
   }
 
   /**
@@ -43,8 +44,8 @@ class ConsulController {
    * * If yes, allow request to continue
    * * If not, send response accordingly
    * @param {Request} req
-   * @param {Response} res 
-   * @param {Next} next 
+   * @param {Response} res
+   * @param {Next} next
    */
   validateService(req, res, next) {
     if (this.consulService) {
@@ -59,12 +60,12 @@ class ConsulController {
    */
   async testConsulStatus() {
     this.consulService.getConsulLeaderStatus()
-      .then((data) => log.info(`Service is up and running on: ${data}`))
-      .catch((error) => log.error(`Connection failed due to ${error}`));
+      .then((data) => this._logger.info(`Service is up and running on: ${data}`))
+      .catch((error) => this._logger.error(`Connection failed due to ${error}`));
   }
 
   /**
-  * Method to request all CRUs available in consul KV store under the 
+  * Method to request all CRUs available in consul KV store under the
   * hardware key
   * @param {Request} req
   * @param {Response} res
@@ -85,8 +86,8 @@ class ConsulController {
       res.json(crusByHost);
     }).catch((error) => {
       if (error.message.includes('404')) {
-        log.trace(error);
-        log.error(`Could not find any Readout Cards by key ${this.flpHardwarePath}`);
+        this._logger.trace(error);
+        this._logger.error(`Could not find any Readout Cards by key ${this.flpHardwarePath}`);
         errorHandler(`Could not find any Readout Cards by key ${this.flpHardwarePath}`, res, 404);
       } else {
         errorHandler(error, res, 502);
@@ -111,8 +112,8 @@ class ConsulController {
       })
       .catch((error) => {
         if (error.message.includes('404')) {
-          log.trace(error);
-          log.error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
+          this._logger.trace(error);
+          this._logger.error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
           errorHandler(`Could not find any FLPs by key ${this.flpHardwarePath}`, res, 404);
         } else {
           errorHandler(error, res, 502);
@@ -210,8 +211,8 @@ class ConsulController {
     const crusByHost = req.body;
     const keyValues = this._mapToKVPairs(crusByHost, latestCrusWithConfigByHost);
     try {
-      log.infoMessage(`Request of user: ${req.session.username} to update CRU configuration`, {
-        level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: 'cog/consul'
+      this._logger.infoMessage(`Request of user: ${req.session.username} to update CRU configuration`, {
+        level: LogLevel.OPERATIONS, system: 'GUI', facility: 'cog/consul'
       });
       await this.consulService.putListOfKeyValues(keyValues);
       res.status(200).json({info: {message: 'CRUs Configuration saved'}});
@@ -234,8 +235,8 @@ class ConsulController {
         return [...new Set(flpList)];
       } catch (error) {
         if (error.message.includes('404')) {
-          log.trace(error);
-          log.error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
+          this._logger.trace(error);
+          this._logger.error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
           throw new Error(`Could not find any FLPs by key ${this.flpHardwarePath}`);
         }
       }
@@ -274,7 +275,7 @@ class ConsulController {
   /**
    * Get a JSON of cards grouped by their host by querying Consul through the flpHardwarePath
    * @example
-   * { 
+   * {
    *  "host_one": {
    *    "0": {
    *      "key": "value"

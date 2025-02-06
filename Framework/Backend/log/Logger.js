@@ -13,8 +13,8 @@
  */
 
 const InfoLoggerMessage = require('./InfoLoggerMessage.js');
-const {LogLevel} = require('./LogLevel.js');
-const {LogSeverity} = require('./LogSeverity.js');
+const { LogLevel } = require('./LogLevel.js');
+const { LogSeverity } = require('./LogSeverity.js');
 
 /**
  * Handles logging, prints out in console, saves to file or sends to central InfoLogger instance
@@ -28,7 +28,7 @@ class Logger {
   static maximumInfoLoggerLevel = LogLevel.DEVELOPER;
 
   /**
-   * @constructor
+   * Constructor for the logger class
    * @param {string} [label=''] - the logger's label
    * @param {object} [delegates] - delegates logger
    * @param {WinstonWrapper} [delegates.winston] - winston wrapper
@@ -37,7 +37,7 @@ class Logger {
   constructor(label, delegates) {
     this.label = label ?? '';
 
-    const {winston, infologger} = delegates ?? {};
+    const { winston, infologger } = delegates ?? {};
     this._winston = winston;
     this._infologger = infologger;
   }
@@ -49,9 +49,9 @@ class Logger {
    * @param {Partial<InfoLoggerMessageOptions>} [options] - log options. If omitted, log will be sent to local file only
    */
   debugMessage(message, options) {
-    this._winston.instance.debug({message, label: this.label});
+    this._winston.instance.debug({ message, label: this.label });
 
-    this._sendToInfoLogger(message, {...options, severity: LogSeverity.DEBUG});
+    this._sendToInfoLogger(message, { ...options, severity: LogSeverity.DEBUG });
   }
 
   /**
@@ -71,9 +71,9 @@ class Logger {
    * @param {Partial<InfoLoggerMessageOptions>} [options] - log options. If omitted, log will be sent to local file only
    */
   infoMessage(message, options) {
-    this._winston.instance.info({message, label: this.label});
+    this._winston.instance.info({ message, label: this.label });
 
-    this._sendToInfoLogger(message, {...options, severity: LogSeverity.INFO});
+    this._sendToInfoLogger(message, { ...options, severity: LogSeverity.INFO });
   }
 
   /**
@@ -84,7 +84,7 @@ class Logger {
    * @deprecated use {@link Logger.infoMessage}
    */
   info(log, level = LogLevel.DEVELOPER) {
-    this.infoMessage(log, {level});
+    this.infoMessage(log, { level });
   }
 
   /**
@@ -93,9 +93,9 @@ class Logger {
    * @param {Partial<InfoLoggerMessageOptions>} [options] - log options. If omitted, log will be sent to local file only
    */
   warnMessage(message, options) {
-    this._winston.instance.warn({message, label: this.label});
+    this._winston.instance.warn({ message, label: this.label });
 
-    this._sendToInfoLogger(message, {...options, severity: LogSeverity.WARNING});
+    this._sendToInfoLogger(message, { ...options, severity: LogSeverity.WARNING });
   }
 
   /**
@@ -106,7 +106,7 @@ class Logger {
    * @deprecated use {@link Logger.warnMessage}
    */
   warn(log, level = LogLevel.DEVELOPER) {
-    this.warnMessage(log, {level});
+    this.warnMessage(log, { level });
   }
 
   /**
@@ -115,9 +115,9 @@ class Logger {
    * @param {Partial<InfoLoggerMessageOptions>} [options] - log options. If omitted, log will be sent to local file only
    */
   errorMessage(message, options) {
-    this._winston.instance.error({message, label: this.label});
+    this._winston.instance.error({ message, label: this.label });
 
-    this._sendToInfoLogger(message, {...options, severity: LogSeverity.ERROR});
+    this._sendToInfoLogger(message, { ...options, severity: LogSeverity.ERROR });
   }
 
   /**
@@ -128,7 +128,7 @@ class Logger {
    * @deprecated use {@link Logger.errorMessage}
    */
   error(log, level = LogLevel.DEVELOPER) {
-    this.errorMessage(log, {level});
+    this.errorMessage(log, { level });
   }
 
   /**
@@ -136,7 +136,7 @@ class Logger {
    * @param {Error} error - error with stack field
    */
   trace(error) {
-    this._winston.instance.verbose({message: error.stack, label: this.label});
+    this._winston.instance.verbose({ message: error.stack, label: this.label });
   }
 
   /**

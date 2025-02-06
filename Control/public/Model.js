@@ -65,6 +65,13 @@ export default class Model extends Observable {
       detectors: this.detectors
     };
 
+    this.cache = {
+      dcs: {
+        sor: {}
+      }
+    };
+    di.cache = this.cache;
+
     this.configuration = new Config(this);
     this.configuration.bubbleTo(this);
 
@@ -197,6 +204,9 @@ export default class Model extends Observable {
           this.calibrationRunsModel.notify();
         }
         break;
+      case 'DCS.SOR':
+        this.cache.dcs.sor = message.payload;
+        this.notify();
     }
   }
 

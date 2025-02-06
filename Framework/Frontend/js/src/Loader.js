@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import Observable from './Observable.js';
 import fetchClient from './fetchClient.js';
@@ -54,7 +54,7 @@ class Loader extends Observable {
   /**
    * Register a promise and increase `activePromises` by 1,
    * on promise ends, decrease by 1.
-   * @param {Promise} promise
+   * @param {Promise} promise - promise that is to be watched
    */
   watchPromise(promise) {
     this.activePromises++;
@@ -105,9 +105,9 @@ class Loader extends Observable {
       method: 'POST',
       headers: {
         Accept: 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     };
 
     return await this._request(url, options, originalMessage);
@@ -156,34 +156,33 @@ class Loader extends Observable {
     let response;
     try {
       response = await request;
-    } catch (error) {
-      // handle connection error
-      const message = `Connection to server failed, please try again`;
-      return new AjaxResult(false, 0, {message});
+    } catch {
+      // Handle connection error
+      const message = 'Connection to server failed, please try again';
+      return new AjaxResult(false, 0, { message });
     }
 
-    // handle server error-
+    // Handle server error-
     if (!response.ok) {
       let upstreamMessage = {};
       try {
         upstreamMessage = await response.json();
-      } catch (e) {
+      } catch {
         upstreamMessage.message = 'Server provided no deatils';
       }
 
-      // eslint-disable-next-line
       const message = originalMessage ? upstreamMessage.message :
         `Request to server failed (${response.status} ${response.statusText}): ${upstreamMessage.message}`;
-      return new AjaxResult(false, response.status, {message});
+      return new AjaxResult(false, response.status, { message });
     }
 
     let result;
     try {
       result = await response.json();
-    } catch (error) {
-      // handle JSON error
-      const message = `Parsing result from server failed`;
-      return new AjaxResult(false, response.status, {message});
+    } catch {
+      // Handle JSON error
+      const message = 'Parsing result from server failed';
+      return new AjaxResult(false, response.status, { message });
     }
 
     // OK!

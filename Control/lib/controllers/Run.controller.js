@@ -11,11 +11,9 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-const {Log} = require('@aliceo2/web-ui');
+const {LogManager, LogLevel, updateAndSendExpressResponseFromNativeError} = require('@aliceo2/web-ui');
 const LOG_FACILITY = 'run-ctrl';
-const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 const {CacheKeys} = require('./../common/cacheKeys.enum.js');
-const {LOG_LEVEL} = require('./../common/logLevel.enum.js');
 
 /**
  * Controller for dealing with all API requests on retrieving information on runs
@@ -27,7 +25,7 @@ class RunController {
    * @param {CacheService} cacheService - service to use for retrieving information stored in-memory
    */
   constructor(runService, cacheService) {
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/run-ctrl`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/run-ctrl`);
 
     /**
      * @type {RunService}
@@ -60,7 +58,7 @@ class RunController {
       res.status(200).json(calibrationRuns);
     } catch (error) {
       this._logger.debug(error);
-      updateExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
@@ -74,15 +72,15 @@ class RunController {
   async refreshCalibrationRunsConfigurationHandler(req, res) {
     try {
       let logMessage = `Refresh calibration configuration requested by user(${req.session.username})`;
-      this._logger.infoMessage(logMessage, {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: LOG_FACILITY});
+      this._logger.infoMessage(logMessage, {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY});
 
       await this._runService.retrieveStaticConfigurations();
       res.status(200).json({ok: true});
     } catch (error) {
       const logMessage = `Error refreshing calibration configuration by ${req.session.username} due to: ${error}`;
-      this._logger.errorMessage(logMessage, {level: LOG_LEVEL.OPERATIONS, facility: LOG_FACILITY})
+      this._logger.errorMessage(logMessage, {level: LogLevel.OPERATIONS, facility: LOG_FACILITY})
 
-      updateExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 }

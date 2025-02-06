@@ -10,64 +10,64 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-/* global: window */
+/* Global: window */
 
 import sessionService from './sessionService.js';
 import EventEmitter from './EventEmitter.js';
 
-const location = window.location;
+const { location } = window;
 
 /**
-  * `open` event.
-  *
-  * @event WebSocketClient#open
-  */
+ * `open` event.
+ *
+ * @event WebSocketClient#open
+ */
 
 /**
-  * `error` event.
-  * See `close` event for more details on why.
-  *
-  * @event WebSocketClient#error
-  * @type {WebSocketMessage}
-  * @property {number} code
-  * @property {string} message
-  * @property {object} payload
-  */
+ * `error` event.
+ * See `close` event for more details on why.
+ *
+ * @event WebSocketClient#error
+ * @type {WebSocketMessage}
+ * @property {number} code
+ * @property {string} message
+ * @property {object} payload
+ */
 
 /**
-  * `close` event.
-  * https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
-  *
-  * @event WebSocketClient#close
-  * @type {CloseEvent}
-  * @property {string} reason
-  * @property {number} code
-  */
+ * `close` event.
+ * https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
+ *
+ * @event WebSocketClient#close
+ * @type {CloseEvent}
+ * @property {string} reason
+ * @property {number} code
+ */
 
 /**
-  * `authed` event when WSClient is authentificated by server
-  * and can process incoming requests.
-  *
-  * @event WebSocketClient#authed
-  */
+ * `authed` event when WSClient is authentificated by server
+ * and can process incoming requests.
+ *
+ * @event WebSocketClient#authed
+ */
 
 /**
-  * `token` event when new auth token has been made
-  * sessionService is also refreshed.
-  *
-  * @event WebSocketClient#token
-  */
+ * `token` event when new auth token has been made
+ * sessionService is also refreshed.
+ *
+ * @event WebSocketClient#token
+ */
 
 /**
-  * `command` event when a custom command is received.
-  *
-  * @event WebSocketClient#command
-  * @type {WebSocketMessage}
-  * @property {string} command
-  * @property {object} payload
-  */
+ * `command` event when a custom command is received.
+ *
+ * @event WebSocketClient#command
+ * @type {WebSocketMessage}
+ * @property {string} command
+ * @property {object} payload
+ */
 
 /**
  * Encapsulate WebSocket and provides the endpoint, filtering stream and authentification status.
@@ -139,18 +139,18 @@ class WebSocketClient extends EventEmitter {
 
     try {
       parsed = JSON.parse(e.data);
-    } catch (e) {
-      throw new Error(`unable to parse ws data`);
+    } catch {
+      throw new Error('unable to parse ws data');
     }
 
-    // handling authentification success
+    // Handling authentification success
     if (parsed.command == 'authed') {
       this.authed = true;
       this.emit('authed');
       return;
     }
 
-    // handling token refresh error
+    // Handling token refresh error
     if (parsed.code == 440) {
       const session = sessionService.get();
       session.token = parsed.payload.newtoken;
@@ -158,20 +158,20 @@ class WebSocketClient extends EventEmitter {
       return;
     }
 
-    // handling request error
+    // Handling request error
     if (parsed.code >= 400) {
       this.emit('error', parsed);
       return;
     }
 
-    // fire parsed and valid message to be used by clients
+    // Fire parsed and valid message to be used by clients
     this.emit('command', parsed);
   }
 
   /**
    * Send plain object to server, it must implement the Message interface (command field),
    * you must also wait the connection to be authentificated (authed property and event).
-   * @param {object} message
+   * @param {object} message - Message to be sent to server
    */
   sendMessage(message) {
     if (!this.authed) {
@@ -188,12 +188,12 @@ class WebSocketClient extends EventEmitter {
 
   /**
    * Send the stream filter to server
-   * @param {function} filter
+   * @param {function} filter - Filter function to be sent to server
    */
   setFilter(filter) {
     const message = {
       command: 'filter',
-      payload: filter.toString()
+      payload: filter.toString(),
     };
     this.sendMessage(message);
   }

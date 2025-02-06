@@ -23,6 +23,7 @@ import tableLogsHeader from './log/tableLogsHeader.js';
 import tableLogsContent from './log/tableLogsContent.js';
 import tableLogsScrollMap from './log/tableLogsScrollMap.js';
 import aboutComponent from './about/about.component.js';
+import errorComponent from './common/errorComponent.js';
 
 /**
  * Main view of the application
@@ -66,10 +67,12 @@ const logsTable = (model) =>
     // table fixed header
     tableLogsHeader(model),
     // table scrollable content
-    h('.flex-row.flex-grow.logs-content', [
-      tableLogsContent(model),
-      tableLogsScrollMap(model),
-    ]),
+    model.log.queryResult.isFailure()
+      ? errorComponent(model.log.queryResult.payload)
+      : h('.flex-row.flex-grow.logs-content', [
+        tableLogsContent(model),
+        tableLogsScrollMap(model),
+      ]),
   ]);
 
 /**

@@ -10,15 +10,19 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /**
  * Template engine functions using vnode and DOM diff algo
  * @module renderer
  */
 
-// mithril function 'm' will be injected into window
-// it is used by renderer as an abstracted engine
+/* eslint-disable @stylistic/js/max-len */
+
+/*
+ * Mithril function 'm' will be injected into window
+ * it is used by renderer as an abstracted engine
+ */
 import '/mithril/mithril.min.js';
 
 if (!window.m) {
@@ -36,11 +40,11 @@ if (!window.requestAnimationFrame) {
  */
 function frameDebouncer(fn) {
   let requestFrame;
-  return function(...args) {
+  return function (...args) {
     if (requestFrame) {
       window.cancelAnimationFrame(requestFrame);
     }
-    requestFrame = window.requestAnimationFrame(function() {
+    requestFrame = window.requestAnimationFrame(() => {
       fn(...args);
     });
   };
@@ -56,7 +60,7 @@ function frameDebouncer(fn) {
  * render(document.body, virtualNode);
  */
 function render(element, vnode) {
-  // encapsulate mithril engine so we can change if needed
+  // Encapsulate mithril engine so we can change if needed
   window.m.render(element, vnode);
 }
 
@@ -77,19 +81,20 @@ function render(element, vnode) {
  * Hyperscript function to represente a DOM element
  * it produces a vnode usable by render function.
  *
- * @param {String} selector - Tag name (div, p, h1...) and optional classes as CSS selector (.foo.bar.baz), empty string =~ 'div'
- * @param {Object} attributes - (optional) Properties and attributes of DOM elements and hooks (see description). Here is a non-exhaustive list of common uses:
- * @param {string} attributes.className - Additional class names
- * @param {function} attributes.onclick - On mouse click [DOM handler onclick](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/onclick)
- * @param {function} attributes.oninput - On content typed inside input tag [DOM handler oninput](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/oninput)
- * @param {string|Object} attributes.style - `style: "background:red;"` or `style: {background: "red"}`
- * @param {string} attributes.href - Destination for links [DOM href property](https://developer.mozilla.org/en-US/docs/Web/API/HTMLHyperlinkElementUtils/href)
- * @param {string} attributes.placeholder - Placeholder for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
- * @param {string} attributes.value - Value for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
- * @param {Hook} attributes.oncreate - Hook called after a DOM element is created and attached to the document
- * @param {Hook} attributes.onupdate - Hook is called after each render, while DOM element is attached to the document
- * @param {Hook} attributes.onremove - Hook is called before a DOM element is removed from the document
- * @param {Array.<vnode|string>|string} children - Children inside this tag
+ * @param {...any} args - arguments to be passes as below
+ * @param {String} args.selector - Tag name (div, p, h1...) and optional classes as CSS selector (.foo.bar.baz), empty string =~ 'div'
+ * @param {Object} args.attributes - (optional) Properties and attributes of DOM elements and hooks (see description). Here is a non-exhaustive list of common uses:
+ * @param {string} args.attributes.className - Additional class names
+ * @param {function} args.attributes.onclick - On mouse click [DOM handler onclick](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/onclick)
+ * @param {function} args.attributes.oninput - On content typed inside input tag [DOM handler oninput](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/oninput)
+ * @param {string|Object} args.attributes.style - `style: "background:red;"` or `style: {background: "red"}`
+ * @param {string} args.attributes.href - Destination for links [DOM href property](https://developer.mozilla.org/en-US/docs/Web/API/HTMLHyperlinkElementUtils/href)
+ * @param {string} args.attributes.placeholder - Placeholder for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
+ * @param {string} args.attributes.value - Value for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
+ * @param {Hook} args.attributes.oncreate - Hook called after a DOM element is created and attached to the document
+ * @param {Hook} args.attributes.onupdate - Hook is called after each render, while DOM element is attached to the document
+ * @param {Hook} args.attributes.onremove - Hook is called before a DOM element is removed from the document
+ * @param {Array.<vnode|string>|string} args.children - Children inside this tag
  * @return {vnode} the vnode representation
  * @example <caption>Simple tag declaration</caption>
  * import {h, render} from '/js/src/index.js';
@@ -113,7 +118,7 @@ function render(element, vnode) {
  * render(document.body, containerNode);
  */
 function h(...args) {
-  // encapsulate mithril engine so we can change if needed
+  // Encapsulate mithril engine so we can change if needed
   return window.m(...args);
 }
 
@@ -139,7 +144,7 @@ function mount(element, view, model, debug) {
       console.time('render');
     }
     try {
-      render(element, (typeof view === "function" ? view : view.view)(model));
+      render(element, (typeof view === 'function' ? view : view.view)(model));
     } finally {
       if (debug) {
         // eslint-disable-next-line no-console
@@ -149,9 +154,9 @@ function mount(element, view, model, debug) {
   });
 
   if (model.observe) {
-    model.observe(smartRender); // redraw on changes
+    model.observe(smartRender); // Redraw on changes
   }
-  render(element, (typeof view === "function" ? view : view.view)(model)); // first draw
+  render(element, (typeof view === 'function' ? view : view.view)(model)); // First draw
 }
 
-export {h, render, frameDebouncer, mount};
+export { h, render, frameDebouncer, mount };

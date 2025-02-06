@@ -15,7 +15,7 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 import {jsonDelete} from './../utilities/jsonDelete.js';
 import {jsonPut} from './../utilities/jsonPut.js';
-import Task from './Task.js';
+import { TaskTableModel } from './../common/task/TaskTableModel.js';
 
 /**
  * Model representing Environment CRUD
@@ -28,8 +28,8 @@ export default class Environment extends Observable {
   constructor(model) {
     super();
 
-    this.task = new Task(model);
-    this.task.bubbleTo(model);
+    this.taskTableModel = new TaskTableModel(model);
+    this.taskTableModel.bubbleTo(model);
 
     this.model = model;
     this.requests = RemoteData.notAsked();
@@ -43,51 +43,6 @@ export default class Environment extends Observable {
       vars: false,
       defaults: false,
     };
-  }
-
-  /**
-   * Check if variable is known and if yes return a user readable name for that variable
-   * Otherwise return the variable itself;
-   * @param {String} variable 
-   * @returns {string}
-   */
-  getVariableDescription(variable) {
-    switch (variable) {
-      case 'dcs_enabled':
-        return 'DCS'
-      case 'odc_enabled':
-        return 'EPN';
-      case 'qcdd_enabled':
-        return 'General QC (FLP)';
-      case 'dd_enabled':
-        return 'Data Distribution';
-      case 'ddsched_enabled':
-        return 'Data Distribution Scheduler'
-      case 'minimal_dpl_enabled':
-        return 'Minimal DPL workflow';
-      case 'readout_cfg_uri':
-        return 'Readout URI';
-      case 'qc_config_uri':
-        return 'QC URI';
-      default:
-        return variable;
-    }
-  }
-
-  /**
-   * Check if the passed variable is known to belong to radio button group
-   */
-  isVariableInRadioGroup(variable) {
-    return [
-      'odc_enabled', 'qcdd_enabled', 'dd_enabled', 'ddsched_enabled', 'minimal_dpl_enabled', 'dcs_enabled'
-    ].includes(variable);
-  }
-
-  /**
-   * Check if the passed variable is known to belong to radio button group
-   */
-  isKVPairInConsulUriGroup(key, value) {
-    return ['qc_config_uri', 'readout_cfg_uri'].includes(key) && value.includes('consul');
   }
 
   /**
@@ -133,10 +88,19 @@ export default class Environment extends Observable {
   async getEnvironment(body, itShouldLoad = true, panel = '') {
     if (itShouldLoad) {
       this.item = RemoteData.loading();
-      this.notify();
+    } else if (this.item.isSuccess()) {
+      // Clear tasks to avoid flickering or bad display when switching from EPN to FLP
+      this.item.payload.tasks = RemoteData.loading();
     }
-    const {result, ok} = await this.model.loader.get(`/api/environment/${body.id}/${panel}`);
-    this.item = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
+    this.notify();
+
+    const { result, ok } = await this.model.loader.get(`/api/environment/${body.id}/${panel}`);
+    if (!ok) {
+      this.item = RemoteData.failure(result.message);
+    } else {
+      result.tasks = RemoteData.success(result.tasks);
+      this.item = RemoteData.success(result);
+    }
     this.itemControl = RemoteData.notAsked();
     this.notify();
   }

@@ -1,6 +1,6 @@
 const WinstonWrapper = require('./WinstonWrapper');
 const InfoLoggerSender = require('./InfoLoggerSender');
-const {Logger} = require('./Logger');
+const { Logger } = require('./Logger');
 
 /**
  * Utility class for logging
@@ -40,7 +40,7 @@ class LogManager {
    * @return {Logger} the logger instance
    */
   static getLogger(label) {
-    return new Logger(label, {winston: LogManager.winston, infologger: LogManager.infologger});
+    return new Logger(label, { winston: LogManager.winston, infologger: LogManager.infologger });
   }
 
   /**
@@ -51,7 +51,7 @@ class LogManager {
   static get winston() {
     if (!LogManager._winston) {
       LogManager._winston = new WinstonWrapper();
-      LogManager._winston.instance.info({message: 'Default console logger instantiated', label: ''});
+      LogManager._winston.instance.info({ message: 'Default console logger instantiated', label: '' });
     }
     return LogManager._winston;
   }
@@ -72,9 +72,10 @@ class LogManager {
 exports.LogManager = LogManager;
 
 /**
- * @deprecated use {@link LogManager.getLogger}
- * @param label the logger's label
+ * Deprecated constructor for Log class
+ * @param {string} label - the logger's label
  * @constructor
+ * @deprecated use {@link LogManager.getLogger}
  */
 function Log(label) {
   this.label = label;

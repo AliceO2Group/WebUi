@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Log } from '@aliceo2/web-ui';
+import { LogManager } from '@aliceo2/web-ui';
 import { isObjectOfTypeChecker } from '../../common/library/qcObject/utils.js';
 import QCObjectDto from '../dtos/QCObjectDto.js';
 import QcObjectIdentificationDto from '../dtos/QcObjectIdentificationDto.js';
@@ -50,13 +50,13 @@ export class QcObjectService {
      * @constant
      * @type {string}
      */
-    this._DB_URL = `${this._dbService._protocol}://${this._dbService._hostname}:${this._dbService._port}/`;
+    this._DB_URL = `${this._dbService._protocol}://${this._dbService._hostname}:${this._dbService._port}`;
 
     this._cache = {
       objects: undefined,
       lastUpdate: undefined,
     };
-    this._logger = new Log(LOG_FACILITY);
+    this._logger = LogManager.getLogger(LOG_FACILITY);
   }
 
   /**
@@ -158,7 +158,7 @@ export class QcObjectService {
    * @throws
    */
   async retrieveQcObjectByQcgId(qcgId, id, validFrom = undefined, filters = {}) {
-    const { object, layoutName } = this._dataService.getObjectById(qcgId);
+    const { object, layoutName, tabName } = this._dataService.getObjectById(qcgId);
     const { name, options = {}, ignoreDefaults = false } = object;
     const qcObject = await this.retrieveQcObject(name, validFrom, id, filters);
 
@@ -166,6 +166,7 @@ export class QcObjectService {
       ...qcObject,
       layoutDisplayOptions: options,
       layoutName,
+      tabName,
       ignoreDefaults,
     };
   }
@@ -178,7 +179,7 @@ export class QcObjectService {
    * @returns {Promise<JSON.Error>} - JSON version of the object
    */
   async _getJsRootFormat(url) {
-    const file = await this._rootService.openFile(url);
+    const file = await this._rootService.openFile(`${url}+`);
     const root = await file.readObject('ccdb_object');
     root['_typename'] = root['mTreatMeAs'] || root['_typename'];
 

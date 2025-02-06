@@ -15,9 +15,9 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
+const {NotFoundError} = require('@aliceo2/web-ui');
 
 const {WorkflowTemplateService} = require('../../../lib/services/WorkflowTemplate.service.js');
-const {NotFoundError} = require('../../../lib/errors/NotFoundError.js');
 
 const mockRepoList = [
   {

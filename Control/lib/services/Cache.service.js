@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const {Log} = require('@aliceo2/web-ui');
+const {LogManager} = require('@aliceo2/web-ui');
 const {deepStrictEqual, AssertionError} = require('assert');
 
 /**
@@ -39,11 +39,11 @@ class CacheService {
      */
     this._broadcastService = broadcastService;
 
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/cache-service`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/cache-service`);
   }
 
   /**
-   * Method to receive a function for retrieval of information and a key under which the information should be updated 
+   * Method to receive a function for retrieval of information and a key under which the information should be updated
    * @param {String} key - key under which the information should be stored
    * @param {String} value - command to be used for broadcasting message
    * @param {Object} broadcastConfig - object containing broadcast information; if present information will be broadcasted

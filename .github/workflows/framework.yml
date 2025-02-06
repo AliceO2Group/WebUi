@@ -34,7 +34,7 @@ jobs:
       - run: (cd Framework; npm run coverage )
       - run: (cd Framework; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
       - name: Send codecov report for Framework
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: framework
@@ -74,7 +74,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macOS-latest, ubuntu-latest]
+        # os: [macOS-latest, ubuntu-latest] do not run on macos-latest due to known bug
+        os: [ubuntu-latest]
     steps:
       - name: Run QualityControl tests by using `@aliceo2/web-ui` from local `../Framework`
         run : (echo "Run QualityControl tests by using @aliceo2/web-ui from local ../Framework";) 

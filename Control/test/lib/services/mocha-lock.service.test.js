@@ -13,10 +13,10 @@
 */
 
 const assert = require('assert');
+const {NotFoundError, UnauthorizedAccessError} = require('@aliceo2/web-ui');
+
 const {DetectorLock} = require('./../../../lib/dtos/DetectorLock.js');
 const {LockService} = require('./../../../lib/services/Lock.service.js');
-const {NotFoundError} = require('../../../lib/errors/NotFoundError.js');
-const {UnauthorizedAccessError} = require('../../../lib/errors/UnauthorizedAccessError.js');
 const {User} = require('./../../../lib/dtos/User.js');
 
 describe(`'LockService' test suite`, () => {

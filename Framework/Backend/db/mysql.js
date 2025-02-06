@@ -14,7 +14,7 @@
 
 const mysql = require('mysql');
 const assert = require('assert');
-const {LogManager} = require('../log/LogManager');
+const { LogManager } = require('../log/LogManager');
 
 /**
  * MySQL pool wrapper
@@ -32,20 +32,20 @@ class MySQL {
     assert(config.host, 'Missing config value: mysql.host');
     assert(config.user, 'Missing config value: mysql.user');
     assert(config.database, 'Missing config value: mysql.database');
-    config.port = (!config.port) ? 3306 : config.port;
-    config.connectionLimit = (!config.connectionLimit) ? 25 : config.connectionLimit;
-    config.queueLimit = (!config.queueLimit) ? 50 : config.queueLimit;
-    config.password = (!config.password) ? '' : config.password;
-    config.timeout = (!config.timeout) ? 30000 : config.timeout;
+    config.port = !config.port ? 3306 : config.port;
+    config.connectionLimit = config.connectionLimit ?? 25;
+    config.queueLimit = config.queueLimit ?? 50;
+    config.password = !config.password ? '' : config.password;
+    config.timeout = config.timeout ?? 30000;
 
     this.config = config;
-    this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
+    this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
     this.pool = mysql.createPool(config);
   }
 
   /**
    * Method to test connection of mysql connector once initialized
-   * @return {Promise}
+   * @return {Promise} - a promise that resolves if connection is successful
    */
   testConnection() {
     return new Promise((resolve, reject) => {
@@ -77,7 +77,7 @@ class MySQL {
         if (error) {
           reject(new Error(this.errorHandler(error)));
         }
-        this.log.debug(mysql.format(query, parameters));
+        this.logger.debug(mysql.format(query, parameters));
         resolve(results);
       });
     });
@@ -109,8 +109,9 @@ class MySQL {
     } else {
       message = `MySQL error: ${err.code}, ${err.message}`;
     }
-    this.log.error(message);
+    this.logger.error(message);
     return message;
   }
 }
+
 module.exports = MySQL;

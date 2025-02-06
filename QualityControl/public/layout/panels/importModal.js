@@ -25,12 +25,11 @@ export default (model) =>
     h('.o2-modal-content', [
       h('.p2.text-center.flex-column', [
         h('h4.pv1', 'Import a layout in JSON format'),
-        h('', h('textarea.form-control.w-100', {
+        h('', h('textarea.form-control.w-100.resize-vertical', {
           rows: 15,
           placeholder: 'e.g.\n{\n\t"name": "my layout",\n\t"displayTimestamp": "false",' +
             '\n\t"displayTimestamp": "autoTabChange": "10", \n\t"tabs": "[]"\n}',
           oninput: (e) => model.layout.setImportValue(e.target.value),
-          style: 'resize: vertical;',
         })),
         model.services.layout.new.match({
           NotAsked: () => null,

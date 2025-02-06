@@ -15,7 +15,7 @@
 const WebSocketServer = require('ws').Server;
 const url = require('url');
 const WebSocketMessage = require('./message.js');
-const {LogManager} = require('../log/LogManager');
+const { LogManager } = require('../log/LogManager');
 
 /**
  * It represents WebSocket server (RFC 6455).
@@ -30,16 +30,14 @@ class WebSocket {
    */
   constructor(httpsServer) {
     this.http = httpsServer;
-    this.server = new WebSocketServer({server: httpsServer.getServer, clientTracking: true});
+    this.server = new WebSocketServer({ server: httpsServer.getServer, clientTracking: true });
     this.server.on('connection', (client, request) => this.onconnection(client, request));
 
-    this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
-    this.log.info('Server started');
+    this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
+    this.logger.info('Server started');
 
     this.callbackArray = [];
-    this.bind('filter', (message) => {
-      return new WebSocketMessage(200).setCommand(message.getCommand());
-    });
+    this.bind('filter', (message) => new WebSocketMessage(200).setCommand(message.getCommand()));
     this.ping();
   }
 
@@ -59,7 +57,7 @@ class WebSocket {
    *                              it can send a response back to client by returning WebSocketMessage instance
    */
   bind(name, callback) {
-    if (this.callbackArray.hasOwnProperty(name)) {
+    if (Object.prototype.hasOwnProperty.call(this.callbackArray, name)) {
       throw Error('Callback already exists.');
     }
     this.callbackArray[name] = callback;
@@ -67,7 +65,7 @@ class WebSocket {
 
   /**
    * Handles incoming text messages: verifies token and processes request/command.
-   * @param {object} req
+   * @param {object} req - HTTP Req object
    * @return {object} message to be send back to the user
    */
   processRequest(req) {
@@ -76,15 +74,16 @@ class WebSocket {
       try {
         data = this.http.o2TokenService.verify(req.getToken());
       } catch (error) {
-        reject(error);
+        const message = new WebSocketMessage(401);
+        message.payload = error.message;
+        reject(message);
         return;
       }
 
       // Transfer decoded JWT data to request
       Object.assign(req, data);
-      this.log.debug(`ID ${data.id} Processing "${req.getCommand()}"`);
       // Check whether callback exists
-      if (this.callbackArray.hasOwnProperty(req.getCommand())) {
+      if (Object.prototype.hasOwnProperty.call(this.callbackArray, req.getCommand())) {
         const res = this.callbackArray[req.getCommand()](req);
         // Verify that response is type of WebSocketMessage
         if (res && res.constructor.name === 'WebSocketMessage') {
@@ -94,11 +93,17 @@ class WebSocket {
           resolve(res);
         } else {
           // 500 when callback does not return WebSocketMessage
-          resolve(new WebSocketMessage(500));
+          const message = new WebSocketMessage(500);
+          message.payload = 'Internal server error - no websocket message returned';
+          this.logger.errorMessage(`ID (${req?.id ?? 'unknown'}) ${message.payload}`);
+          resolve(message);
         }
       } else {
         // When callback does not exist return 404
-        resolve(new WebSocketMessage(404));
+        const message = new WebSocketMessage(404);
+        message.payload = 'Callback does not exist';
+        this.logger.errorMessage(`ID (${req?.id ?? 'unknown'}) ${message.payload}`);
+        resolve(message);
       }
     });
   }
@@ -109,21 +114,23 @@ class WebSocket {
    * @param {object} request - connection request
    */
   onconnection(client, request) {
-    const token = url.parse(request.url, true).query.token;
+    const { token } = url.parse(request.url, true).query;
     let decoded;
     try {
       decoded = this.http.o2TokenService.verify(token);
     } catch (error) {
-      this.log.debug(`${error.name} : ${error.message}`);
+      this.logger.debug(`${error.name} : ${error.message}`);
       client.close(1008);
       return;
     }
     client.id = decoded.id;
-    client.send(JSON.stringify({command: 'authed', id: client.id}));
+    client.send(JSON.stringify({ command: 'authed', id: client.id }));
     client.on('message', (message) => this.onmessage(message, client));
     client.on('close', () => this.onclose(client));
-    client.on('pong', () => client.isAlive = true);
-    client.on('error', (err) => this.log.error(`Connection ${err.code}`));
+    client.on('pong', () => {
+      client.isAlive = true;
+    });
+    client.on('error', (err) => this.logger.error(`Connection ${err.code}`));
   }
 
   /**
@@ -138,7 +145,7 @@ class WebSocket {
       .then((parsed) => {
         // 2. Check if its message filter (no auth required)
         if (parsed.getCommand() == 'filter' && parsed.getPayload()) {
-          client.filter = new Function('return ' + parsed.getPayload())();
+          client.filter = new Function(`return ${parsed.getPayload()}`)();
         }
         // 3. Get reply if callback exists
         this.processRequest(parsed)
@@ -147,20 +154,21 @@ class WebSocket {
             if (response.getBroadcast()) {
               this.broadcast(response);
             } else {
-              this.log.debug(`ID ${client.id} Sent ${response.getCommand()}/${response.getCode()}`);
               // 5. Send back to a client
               client.send(JSON.stringify(response.json));
             }
           }, (response) => {
             // 6. If generating response fails
-            throw new Error(`ID ${client.id} Processing request failed: ${response.message}`);
+            client.send(JSON.stringify(response.json));
+            this.logger.errorMessage(`ID ${client.id} Processing request failed: ${response.message}`);
+            client.close(1008);
           });
       }, (failed) => {
         // 7. If parsing message fails
         client.send(JSON.stringify(failed.json));
       })
       .catch((error) => {
-        this.log.warn(`ID ${client.id} ${error.name} : ${error.message}`);
+        this.logger.warn(`ID ${client.id} ${error.name} : ${error.message}`);
         client.close(1008);
       });
   }
@@ -177,9 +185,9 @@ class WebSocket {
         client.isAlive = false;
         client.ping('', false, (err) => {
           if (err) {
-            this.log.error(err);
+            this.logger.error(err);
             if (err.stack) {
-              this.log.trace(err);
+              this.logger.trace(err);
             }
           }
         });
@@ -192,13 +200,13 @@ class WebSocket {
    * @param {object} client - disconnected client
    */
   onclose(client) {
-    this.log.info(`ID ${client.id} Client disconnected`);
+    this.logger.info(`ID ${client.id} Client disconnected`);
   }
 
   /**
    * Broadcasts the message to all connected clients
    * The message must match client's filter (if filter is set)
-   * @param {WebSocketMessage} message
+   * @param {WebSocketMessage} message - message to be broadcasted
    */
   broadcast(message) {
     this.server.clients.forEach((client) => {
@@ -206,25 +214,23 @@ class WebSocket {
         // Handle function execution error, filter comes from WS
         try {
           if (!client.filter(message)) {
-            return; // don't send
+            return; // Don't send
           }
         } catch (error) {
-          this.log.error(`Client's filter corrupted, skipping broadcast: ${error}`);
-          return; // don't send
+          this.logger.error(`Client's filter corrupted, skipping broadcast: ${error}`);
+          return; // Don't send
         }
       }
       client.send(JSON.stringify(message.json));
-      this.log.debug(`ID ${client.id} Broadcast ${message.getCommand()}/${message.getCode()}`);
     });
   }
 
   /**
    * Broadcasts messages to all connected clients.
-   * @param {WebSocketMessage} message
+   * @param {WebSocketMessage} message - message to be broadcasted
    */
   unfilteredBroadcast(message) {
     this.server.clients.forEach((client) => client.send(JSON.stringify(message.json)));
-    this.log.debug(`Unfiltered broadcast ${message.getCommand()}/${message.getCode()}`);
   }
 }
 

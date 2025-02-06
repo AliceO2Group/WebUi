@@ -12,11 +12,10 @@
  * or submit itself to any jurisdiction.
 */
 
-const {NotFoundError} = require('@aliceo2/web-ui');
+const {grpcErrorToNativeError, NotFoundError} = require('@aliceo2/web-ui');
 const {CacheKeys} = require('./../common/cacheKeys.enum.js');
 const EnvironmentInfoAdapter = require('./../adapters/EnvironmentInfoAdapter.js');
 const {EnvironmentTransitionResultAdapter} = require('./../adapters/EnvironmentTransitionResultAdapter.js');
-const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 
 /**
  * EnvironmentService class to be used to retrieve data from AliEcs Core via the gRPC Control client
@@ -79,13 +78,11 @@ class EnvironmentService {
    * @param {User} requestUser - user that requested the transition
    * @return {EnvironmentTransitionResult} - result of the environment transition
    */
-  async transitionEnvironment(id, transitionType, user = {}) {
+  async transitionEnvironment(id, transitionType, user) {
     try {
-      const requestUser = {
-        name: user.username ?? 'unknown',
-        externalId: user.personId ?? 0,
-      };
-      const transitionedEnvironment = await this._coreGrpc.ControlEnvironment({id, type: transitionType, requestUser});
+      const transitionedEnvironment = await this._coreGrpc.ControlEnvironment({
+        id, type: transitionType, requestUser: user.toEcsFormat()
+      });
       return EnvironmentTransitionResultAdapter.toEntity(transitionedEnvironment);
     } catch (error) {
       throw grpcErrorToNativeError(error);
@@ -98,9 +95,11 @@ class EnvironmentService {
    * @param {{keepTasks: Boolean, allowInRunningState: Boolean, force: Boolean}} - options for destroying the environment
    * @return {Promise.<{String}, Error>} - if operation was a success or not
    */
-  async destroyEnvironment(id, {keepTasks = false, allowInRunningState = false, force = false} = {}) {
+  async destroyEnvironment(id, {keepTasks = false, allowInRunningState = false, force = false} = {}, user) {
     try {
-      await this._coreGrpc.DestroyEnvironment({id, keepTasks, allowInRunningState, force});
+      await this._coreGrpc.DestroyEnvironment({
+        id, keepTasks, allowInRunningState, force, requestUser: user.toEcsFormat()
+      });
       return {id};
     } catch (grpcError) {
       throw grpcErrorToNativeError(grpcError);
@@ -116,7 +115,7 @@ class EnvironmentService {
    * @param {String} runType - for which the environment is deployed
    * @return {AutoEnvironmentDeployment} - if environment request was successfully sent
    */
-  async newAutoEnvironment(workflowTemplate, vars, detector, runType) {
+  async newAutoEnvironment(workflowTemplate, vars, detector, runType, user) {
     const channelIdString = (Math.floor(Math.random() * (999999 - 100000) + 100000)).toString();
     const autoEnvironment = {
       channelIdString,
@@ -157,7 +156,8 @@ class EnvironmentService {
     this._coreGrpc.NewAutoEnvironment({
       vars,
       workflowTemplate,
-      id: channelIdString
+      id: channelIdString,
+      requestUser: user.toEcsFormat()
     });
 
     return autoEnvironment;

@@ -40,8 +40,7 @@ function buildPublicConfig(config) {
     CONSUL_SERVICE: config.consul ? true : false,
   };
 
-  const codeStr = '/* eslint-disable quote-props */\n'
-    + `const publicConfig = ${JSON.stringify(publicConfig, null, 2)};\nexport { publicConfig as QCG };\n`;
+  const codeStr = `const publicConfig = ${JSON.stringify(publicConfig, null, 2)};\nexport { publicConfig as QCG };\n`;
 
   writeFileSync(publicConfigPath, codeStr);
 }

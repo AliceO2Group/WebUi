@@ -18,6 +18,9 @@
 const CacheKeys =  Object.freeze({
   CALIBRATION_RUNS_BY_DETECTOR: 'CALIBRATION_RUNS_BY_DETECTOR',
   CALIBRATION_RUNS_REQUESTS: 'CALIBRATION_RUNS_REQUESTS',
+  DCS: {
+    SOR: 'DCS.SOR',
+  }
 });
 
 exports.CacheKeys = CacheKeys;

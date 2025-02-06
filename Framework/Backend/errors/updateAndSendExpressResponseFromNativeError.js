@@ -11,11 +11,11 @@
  * or submit itself to any jurisdiction.
  */
 
-const {InvalidInputError} = require('./InvalidInputError.js');
-const {NotFoundError} = require('./NotFoundError.js');
-const {ServiceUnavailableError} = require('./ServiceUnavailableError.js');
-const {TimeoutError} = require('./TimeoutError.js');
-const {UnauthorizedAccessError} = require('./UnauthorizedAccessError.js');
+const { InvalidInputError } = require('./InvalidInputError.js');
+const { NotFoundError } = require('./NotFoundError.js');
+const { ServiceUnavailableError } = require('./ServiceUnavailableError.js');
+const { TimeoutError } = require('./TimeoutError.js');
+const { UnauthorizedAccessError } = require('./UnauthorizedAccessError.js');
 
 /**
  * Given an Express response object and an error, use the response object to set a custom status code and send the message
@@ -27,7 +27,7 @@ const {UnauthorizedAccessError} = require('./UnauthorizedAccessError.js');
 const updateAndSendExpressResponseFromNativeError = (response, error) => {
   let status = 500;
   let title = 'Unknown Error';
-  const {message, constructor} = error;
+  const { message, constructor } = error;
   switch (constructor) {
     case InvalidInputError:
       status = 400;
@@ -51,7 +51,7 @@ const updateAndSendExpressResponseFromNativeError = (response, error) => {
       break;
   }
 
-  response.status(status).json({message, status, title});
+  response.status(status).json({ message, status, title });
 };
 
 exports.updateAndSendExpressResponseFromNativeError = updateAndSendExpressResponseFromNativeError;

@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /**
  * Simple Observable class to notify others listening for changes
@@ -40,9 +40,7 @@ class Observable {
    * @param {function} callback - the callback to remove
    */
   unobserve(callback) {
-    this.observers = this.observers.filter((observer) => {
-      return observer !== callback;
-    });
+    this.observers = this.observers.filter((observer) => observer !== callback);
   }
 
   /**

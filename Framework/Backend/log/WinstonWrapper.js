@@ -10,9 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {createLogger, format, transports: {Console, File}} = require('winston');
+const { createLogger, format, transports: { Console, File } } = require('winston');
 
 /**
  * Creates AliceO2 Winston Wrapper
@@ -27,7 +27,7 @@ class WinstonWrapper {
     this._instance = createLogger({
       transports: [
         this._consoleTransport(config?.console),
-        ...(config?.file?.name ? [this._fileTransport(config.file)] : []),
+        ...config?.file?.name ? [this._fileTransport(config.file)] : [],
       ],
       exitOnError: true,
     });
@@ -37,11 +37,13 @@ class WinstonWrapper {
    * Configures the console formatter and returns a new instance of it
    * Messages will be prefixed with a timestamp and a label
    * @example
+   * @param {object} [console] - configuration for console transport
+   * @param {boolean} [console.systemd] - if true, log will be formatted for systemd
+   * @param {string} [console.level] - log level for console transport default to debug
    * // 2022-10-22T10:27:53.903Z [test/service] debug: Created default instance of console logger
-   * @param {{systemd: string, level: string}} - object which may contain console transport configuration fields
    * @returns {winston.transports.ConsoleTransportInstance}
    */
-  _consoleTransport(console = {systemd: undefined, level: 'debug'}) {
+  _consoleTransport(console = { systemd: undefined, level: 'debug' }) {
     // Mapping between winston levels and journalctl priorities
     const systemdPr = {
       debug: '<7>',
@@ -64,31 +66,33 @@ class WinstonWrapper {
       format: format.combine(
         format.timestamp(),
         format.colorize(),
-        formatter
-      )
+        formatter,
+      ),
     });
   }
 
   /**
    * Configures the file transporter and returns a new instance of it
    * Messages will be prefixed with a timestamp and printed using the winston formatter
-   * @param {{name: string, level: string}} - object which may contain file transport configuration fields
+   * @param {object} [configuration] - object which may contain file transport configuration fields
+   * @param {string} [configuration.name] - name of the file whwre logs will be stored
+   * @param {string} [configuration.level] - log level for file transport default to info
    * @returns {winston.transports.FileTransportInstance}
    */
-  _fileTransport({name, level = 'info'}) {
+  _fileTransport({ name, level = 'info' }) {
     return new File({
       level,
       filename: name,
       format: format.combine(
         format.timestamp(),
-        format.prettyPrint()
-      )
+        format.prettyPrint(),
+      ),
     });
   }
 
   /**
    * Returns an instance of AliceO2 Winston Wrapper
-   * @return {import('winston').Logger}
+   * @return {import('winston').Logger} - instance of the O2 Winston Wrapper
    */
   get instance() {
     return this._instance;

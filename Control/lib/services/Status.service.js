@@ -16,7 +16,7 @@ const projPackage = require('./../../package.json');
 const {httpGetJson} = require('./../utils.js');
 const {Service} = require('./../dtos/Service.js');
 const {SERVICES: {STATUS}} = require('./../common/constants.js');
-const {Log} = require('@aliceo2/web-ui');
+const {LogManager} = require('@aliceo2/web-ui');
 const {STATUS_COMPONENTS_KEYS} = require('./../common/statusComponents.enum.js');
 const {RUNTIME_COMPONENT, RUNTIME_KEY} = require('./../common/kvStore/runtime.enum.js');
 
@@ -62,12 +62,12 @@ class StatusService {
     this._wsService = wsService;
 
     this._statusMap = new Map();
-    this._logger = new Log('cog/status');
+    this._logger = LogManager.getLogger('cog/status');
   }
 
   /**
    * Retrieve status of the ServiceDiscovery system (Consul)
-   * @returns {Promise<JSON>} - return of JSON with requested information 
+   * @returns {Promise<JSON>} - return of JSON with requested information
    */
   async retrieveConsulStatus() {
     let status = {ok: false, configured: false, message: NOT_CONFIGURED_MESSAGE, isCritical: true};
@@ -172,7 +172,7 @@ class StatusService {
 
   /**
    * Retrieve status of Apricot Service
-   * @returns {Promise<JSON>} - return of JSON with requested information 
+   * @returns {Promise<JSON>} - return of JSON with requested information
    */
   async retrieveApricotStatus() {
     let status = {ok: false, configured: false, message: NOT_CONFIGURED_MESSAGE, isCritical: true};
@@ -203,7 +203,7 @@ class StatusService {
 
   /**
   * Retrieve status of Monitoring System (Grafana)
-   * @returns {Promise<JSON>} - return of JSON with requested information 
+   * @returns {Promise<JSON>} - return of JSON with requested information
    */
   async retrieveGrafanaStatus() {
     let status = {ok: false, configured: false, message: NOT_CONFIGURED_MESSAGE, isCritical: false};
@@ -286,7 +286,7 @@ class StatusService {
 
   /**
    * Method to retrieve versions of FLP & PDP and check their compatibility
-   * @returns {object<FLP: <string>, PDP: string>} - 
+   * @returns {object<FLP: <string>, PDP: string>} -
    */
   async getCompatibilityStateAsComponent() {
     const {status, extras} = await this.retrieveSystemCompatibility();
@@ -339,7 +339,7 @@ class StatusService {
    * Update the maps with relation to statuses:
    * - statusMap should always save the new status;
    * - statusMapUpdate should only save it if the value has changed and delete the pair if it exists and is the same value
-   * @param {string} key - 
+   * @param {string} key -
    * @param {object} value - JSON component with status
    */
   _updateStatusMaps(key, value) {

@@ -12,12 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
-const {Issuer, generators, custom} = require('openid-client');
+const { Issuer, generators, custom } = require('openid-client');
 const assert = require('assert');
-const {LogManager} = require('../log/LogManager');
+const { LogManager } = require('../log/LogManager');
 
 /**
- * Authenticates and authorises users via OpenID Connect (new CERN SSO).
+ * Authenticates and authorizes users via OpenID Connect (new CERN SSO).
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  */
 class OpenId {
@@ -30,14 +30,14 @@ class OpenId {
     assert(config.secret, 'Missing config value: secret');
     assert(config.well_known, 'Missing config value: well_known');
     assert(config.redirect_uri, 'Missing config value: redirect_uri');
-    config.timeout = (!config.timeout) ? 5000 : config.timeout;
+    config.timeout = config.timeout ?? 5000;
     this.config = config;
     this.code_verifier = generators.codeVerifier();
     custom.setHttpOptionsDefaults({
       timeout: config.timeout,
     });
 
-    this.log = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/openid`);
+    this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/openid`);
   }
 
   /**
@@ -56,10 +56,10 @@ class OpenId {
             id_token_signed_response_alg: 'RS256',
             token_endpoint_auth_method: 'client_secret_basic',
           });
-          this.log.info('Client initialised');
+          this.logger.info('Client initialised');
           resolve();
         }).catch((error) => {
-          this.log.error('Initialisation failed: ' + error);
+          this.logger.error(`Initialisation failed: ${error}`);
           reject(error);
         });
     });

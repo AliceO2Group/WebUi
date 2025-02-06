@@ -12,11 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
-const {Log} = require('@aliceo2/web-ui');
+const {LogManager, LogLevel, grpcErrorToNativeError} = require('@aliceo2/web-ui');
 
 const {CacheKeys} = require('../common/cacheKeys.enum.js');
-const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
-const {LOG_LEVEL} = require('./../common/logLevel.enum.js');
 const {RunCalibrationStatus} = require('./../common/runCalibrationStatus.enum.js');
 const {RunDefinitions} = require('./../common/runDefinition.enum.js')
 const {RUNTIME_COMPONENT: {COG}, RUNTIME_KEY: {CALIBRATION_MAPPING}} = require('./../common/kvStore/runtime.enum.js');
@@ -63,7 +61,7 @@ class RunService {
      */
     this._calibrationConfigurationPerDetectorMap = {};
 
-    this._logger = new Log(`${process.env.npm_config_log_label ?? 'cog'}/run-service`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/run-service`);
   }
 
   /**
@@ -129,8 +127,8 @@ class RunService {
   /**
    * Load calibration mapping for each detector as per the KV store
    * @return {Promise<Object<String, CalibrationConfiguration.Error>} - map of calibration configurations
-   *  
-   * @example 
+   *
+   * @example
    * { "XYZ": [ { "runType": "PEDESTAL", "configuration": "cpv-pedestal-20220412", "label": "CPV PEDESTAL", description: "To be ran second for CPV" }]}
    */
   async _retrieveCalibrationConfigurationsForDetectors() {
@@ -140,7 +138,7 @@ class RunService {
     } catch (error) {
       const err = grpcErrorToNativeError(error);
       this._logger.errorMessage(`Unable to load calibration mapping due to: ${err}`,
-        {level: LOG_LEVEL.OPERATIONS, system: 'GUI', facility: 'calibration-service'}
+        {level: LogLevel.OPERATIONS, system: 'GUI', facility: 'calibration-service'}
       )
     }
     return {};

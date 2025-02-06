@@ -62,7 +62,6 @@ export class RemoteData {
    * @template T return type of the callbacks
    *
    * @param {MatchClauses} clauses the match clauses to apply
-   * @return {T} result of the function associated to clause
    * @example
    * import {RemoteData} from '/js/src/index.js';
    * var item = RemoteData.NotAsked();
@@ -141,7 +140,7 @@ export class RemoteData {
 
   /**
    * Test if current kind is a `NotAsked`
-   * @return {boolean}
+   * @return {boolean} - true if current kind is a `NotAsked`
    * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
    */
   isNotAsked() {
@@ -150,7 +149,7 @@ export class RemoteData {
 
   /**
    * Test is current kind is a `Loading`
-   * @return {boolean}
+   * @return {boolean} - true if current kind is a `Loading`
    * @example
    * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
    */
@@ -161,7 +160,7 @@ export class RemoteData {
   /**
    * Test is current kind is a `Success`
    * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
-   * @return {boolean}
+   * @return {boolean} - true if current kind is a `Success`
    */
   isSuccess() {
     return false;
@@ -170,7 +169,7 @@ export class RemoteData {
   /**
    * States if current kind is a `Failure`
    * @deprecated use {@see RemoteData#match} or {@see RemoteData#apply} instead
-   * @return {boolean}
+   * @return {boolean} - true if current kind is a `Failure`
    */
   isFailure() {
     return false;
@@ -182,7 +181,7 @@ export class RemoteData {
    * @template P
    * @template E
    *
-   * @return {RemoteData<P, E>}
+   * @return {RemoteData<P, E>} - not asked remote data object
    * @static
    */
   static notAsked() {
@@ -190,6 +189,7 @@ export class RemoteData {
   }
 
   /**
+   * RemoteData for NotAsked
    * @deprecated use {@see RemoteData#notAsked}
    */
   static NotAsked() {
@@ -202,7 +202,7 @@ export class RemoteData {
    * @template P
    * @template E
    *
-   * @return {RemoteData<P, E>}
+   * @return {RemoteData<P, E>} - loading remote data object
    * @static
    */
   static loading() {
@@ -210,6 +210,7 @@ export class RemoteData {
   }
 
   /**
+   * RemoteData for Loading
    * @deprecated use {@see RemoteData#loading}
    * @static
    */
@@ -223,8 +224,8 @@ export class RemoteData {
    * @template P
    * @template E
    *
-   * @param {P} payload
-   * @return {RemoteData<P, E>}
+   * @param {P} payload - to be set as payload
+   * @return {RemoteData<P, E>} - success remote data with payload
    * @static
    */
   static success(payload) {
@@ -232,6 +233,8 @@ export class RemoteData {
   }
 
   /**
+   * RemoteData for Success
+   * @param {object} payload - to be set as payload
    * @deprecated use {@see RemoteData#success}
    * @static
    */
@@ -245,8 +248,8 @@ export class RemoteData {
    * @template P
    * @template E
    *
-   * @param {E} error
-   * @return {RemoteData<P, E>}
+   * @param {E} error - to be set
+   * @return {RemoteData<P, E>} - remote data with error
    * @static
    */
   static failure(error) {
@@ -254,7 +257,9 @@ export class RemoteData {
   }
 
   /**
-   * @deprecated use {@see RemoteData#failure}
+   * Remote data for Failure cases
+   * @param {object} payload - to be set
+   * @deprecated use @see RemoteData#failure
    * @static
    */
   static Failure(payload) {
@@ -267,10 +272,9 @@ export class RemoteData {
  *
  * @template P
  * @template E
- * @extends RemoteData<P, E>
+ * @extends RemoteData<P,E>
  */
 export class NotAskedRemoteData extends RemoteData {
-  // eslint-disable-next-line require-jsdoc
   /**
    * @inheritDoc
    */
@@ -290,7 +294,7 @@ export class NotAskedRemoteData extends RemoteData {
    * @inheritDoc
    */
   get kind() {
-    return "NotAsked";
+    return 'NotAsked';
   }
 }
 
@@ -299,10 +303,9 @@ export class NotAskedRemoteData extends RemoteData {
  *
  * @template P
  * @template E
- * @extends RemoteData<P, E>
+ * @extends RemoteData<P,E>
  */
 export class LoadingRemoteData extends RemoteData {
-  // eslint-disable-next-line require-jsdoc
   /**
    * @inheritDoc
    */
@@ -322,7 +325,7 @@ export class LoadingRemoteData extends RemoteData {
    * @inheritDoc
    */
   get kind() {
-    return "Loading";
+    return 'Loading';
   }
 }
 
@@ -331,7 +334,7 @@ export class LoadingRemoteData extends RemoteData {
  *
  * @template P
  * @template E
- * @extends RemoteData<P, E>
+ * @extends RemoteData<P,E>
  */
 export class SuccessRemoteData extends RemoteData {
   /**
@@ -343,7 +346,6 @@ export class SuccessRemoteData extends RemoteData {
     this._payload = payload;
   }
 
-  // eslint-disable-next-line require-jsdoc
   /**
    * @inheritDoc
    */
@@ -371,7 +373,7 @@ export class SuccessRemoteData extends RemoteData {
    * @inheritDoc
    */
   get kind() {
-    return "Success";
+    return 'Success';
   }
 }
 
@@ -380,7 +382,7 @@ export class SuccessRemoteData extends RemoteData {
  *
  * @template P
  * @template E
- * @extends RemoteData<P, E>
+ * @extends RemoteData<P,E>
  */
 export class FailureRemoteData extends RemoteData {
   /**
@@ -392,7 +394,6 @@ export class FailureRemoteData extends RemoteData {
     this._error = error;
   }
 
-  // eslint-disable-next-line require-jsdoc
   /**
    * @inheritDoc
    */
@@ -420,6 +421,6 @@ export class FailureRemoteData extends RemoteData {
    * @inheritDoc
    */
   get kind() {
-    return "Failure";
+    return 'Failure';
   }
 }

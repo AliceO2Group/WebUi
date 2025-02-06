@@ -29,5 +29,5 @@ export const splitDuration = (duration) => {
   const minutes = Math.floor(duration % MILLISECONDS_IN_ONE_HOUR / MILLISECONDS_IN_ONE_MINUTE);
   const seconds = Math.floor(duration % MILLISECONDS_IN_ONE_MINUTE / MILLISECONDS_IN_ONE_SECOND);
 
-  return {hours, minutes, seconds};
+  return { hours, minutes, seconds };
 };

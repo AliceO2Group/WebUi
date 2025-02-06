@@ -12,9 +12,10 @@
  * or submit itself to any jurisdiction.
 */
 
-const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
-const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/envcache`);
+const {WebSocketMessage, LogManager} = require('@aliceo2/web-ui');
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/envcache`);
 const assert = require('assert');
+const { CacheKeys } = require('../common/cacheKeys.enum.js');
 
 /**
  * Caches AliECS core GetEnvironments response
@@ -24,9 +25,11 @@ class EnvCache {
   /**
    * @param {object} ctrlService - Handle to Control service
    * @param {EnvironmentService} environmentService - service to be used to retrieve information on environments
+   * @param {CacheService} cacheService - service to be used to retrieve information from cache
    */
-  constructor(ctrlService, environmentService) {
+  constructor(ctrlService, environmentService, cacheService) {
     this.ctrlService = ctrlService;
+    this._cacheService = cacheService;
     this.cache = {};
     this.timeout = 9000;
     this.cacheEvictionTimeout = 5 * 60 * 1000;
@@ -43,7 +46,7 @@ class EnvCache {
     if (new Date() - this.cacheEvictionLast > this.cacheEvictionTimeout) {
       this.cache = {};
       this.cacheEvictionLast = new Date();
-      log.info('Cache evicted');
+      logger.info('Cache evicted');
     }
   }
 
@@ -88,6 +91,14 @@ class EnvCache {
       for (let [index, currentEnv] of envs.environments.entries()) {
         try {
           const environment = await this._environmentService.getEnvironment(currentEnv.id);
+          if (environment.state === 'RUNNING' && !environment.currentTransition) {
+            // if environment reached a stable running state, hide the display cache SOR information from future ERROR states
+            const dcsCache = this._cacheService.getByKey(CacheKeys.DCS.SOR);
+            if (dcsCache?.[environment.id]) {
+              dcsCache[environment.id].displayCache = false;
+            }
+            this._cacheService.updateByKeyAndBroadcast(CacheKeys.DCS.SOR, dcsCache,{command: CacheKeys.DCS.SOR});
+          }
           envs.environments[index] = environment;
           this._updateCache(envs);
         } catch (error) {
@@ -96,7 +107,7 @@ class EnvCache {
       }
       this._updateCache(envs);
     } catch (error) {
-      log.debug(error);
+      logger.debug(error);
     }
     this.evictCache();
   }
@@ -110,7 +121,7 @@ class EnvCache {
     if (!this._cacheInSync(envs)) {
       this.cache = envs;
       this.webSocket?.broadcast(new WebSocketMessage().setCommand('environments').setPayload(this.cache));
-      log.debug('Updated cache');
+      logger.debug('Updated cache');
     }
     this.cacheEvictionLast = new Date();
   }

@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /**
  * WebSocket module that allows to create response to user request.
@@ -33,18 +33,18 @@ class WebSocketMessage {
 
   /**
    * Parses JSON-encoded websocket string into WebSocketMessage object
-   * @param {string} json
+   * @param {string} json - JSON-encoded message
    * @return {object} promise to parsed message
    */
   parse(json) {
     return new Promise((resolve, reject) => {
       const parsed = JSON.parse(json);
-      if ((typeof parsed.command !== 'string')
-        || (typeof parsed.token !== 'string')
-        || (parsed.command == '')) {
+      if (typeof parsed.command !== 'string'
+        || typeof parsed.token !== 'string'
+        || parsed.command == '') {
         this._code = 400;
         this._command = 'error';
-        // eslint-disable-next-line prefer-promise-reject-errors
+
         reject(this);
         return;
       }
@@ -56,13 +56,16 @@ class WebSocketMessage {
   }
 
   /**
-   * @return {number} code
+   * Getter to return the code of the message
+   * @deprecated
+   * @return {number} - code
    */
   getCode() {
     return this._code;
   }
 
   /**
+   * Getter to return the code of the message
    * @return {number} code
    */
   get code() {
@@ -70,6 +73,7 @@ class WebSocketMessage {
   }
 
   /**
+   * Getter to retrieve token
    * @return {string} JWT token
    */
   getToken() {
@@ -95,16 +99,20 @@ class WebSocketMessage {
   }
 
   /**
-   * @param {string} name property name
+   * Getter to retrieve property by name
+   * @param {string} name - property name
    * @return {string} Object property
    */
   getProperty(name) {
-    if (this._payload.hasOwnProperty(name)) {
+    if (Object.prototype.hasOwnProperty.call(this._payload, name)) {
       return this._payload[name];
     }
+    return;
   }
 
   /**
+   * Getter to retrieve command
+   * @deprecated
    * @return {string} command
    */
   getCommand() {
@@ -112,6 +120,7 @@ class WebSocketMessage {
   }
 
   /**
+   * Getter to retrieve command
    * @return {string} command
    */
   get command() {
@@ -128,6 +137,7 @@ class WebSocketMessage {
   }
 
   /**
+   * Getter to retrieve broadcast flag
    * @return {bool} broadcast flag
    */
   getBroadcast() {
@@ -136,8 +146,9 @@ class WebSocketMessage {
 
   /**
    * Payload setter.
-   * @param {object} payload
+   * @param {object} payload - to be sent to user
    * @return {object} 'this' to allow function call chaining
+   * @deprecated
    */
   setPayload(payload) {
     this._payload = payload;
@@ -146,33 +157,36 @@ class WebSocketMessage {
 
   /**
    * Payload setter.
-   * @param {object} payload
+   * @param {object} payload - to be sent to user
    */
   set payload(payload) {
     this._payload = payload;
   }
 
   /**
-  * @return {object} payload
-  */
+   * Getter to retrieve payload
+   * @return {object} payload
+   * @deprecated
+   */
   getPayload() {
     return this._payload;
   }
 
   /**
-  * @return {object} payload
-  */
+   * Getter to retrieve payload of message
+   * @return {object} payload
+   */
   get payload() {
     return this._payload;
   }
 
   /**
-   * Formats the reponse to object that is ready to be formatted into JSON.
+   * Formats the response to object that is ready to be formatted into JSON.
    * @return {object} response
    */
   get json() {
     const jsonResponse = {
-      code: this._code
+      code: this._code,
     };
     if (this._message != '') {
       jsonResponse.message = this._message;
@@ -186,4 +200,5 @@ class WebSocketMessage {
     return jsonResponse;
   }
 }
+
 module.exports = WebSocketMessage;

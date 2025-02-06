@@ -10,15 +10,14 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {jwt} = require('../config-default.json');
+const { jwt } = require('../config-default.json');
 const O2TokenService = require('./../services/O2TokenService.js');
-const {JsonWebTokenError} = require('jsonwebtoken');
+const { JsonWebTokenError } = require('jsonwebtoken');
 const assert = require('assert');
 
 describe('JSON Web Token', () => {
-
   describe('O2TokenService Initialization', () => {
     it('should successfully initialize constructor with provided configuration', () => {
       const o2Token = new O2TokenService(jwt);
@@ -32,8 +31,8 @@ describe('JSON Web Token', () => {
       const jwtConfig = {
         maxAge: '2m',
         issuer: 'alice-o2-gui',
-        secret: null
-      }
+        secret: null,
+      };
       const o2Token = new O2TokenService(jwtConfig);
       assert.strictEqual(o2Token._expiration, '1d');
       assert.strictEqual(o2Token._maxAge, jwtConfig.maxAge);
@@ -46,7 +45,7 @@ describe('JSON Web Token', () => {
     it('should successfully generate token based on provided configuration', () => {
       const o2Token = new O2TokenService(jwt);
       const token = o2Token.generateToken(100, 'bob', 'John Bob', 'admin');
-      const {id, username, name, access} = o2Token.verify(token);
+      const { id, username, name, access } = o2Token.verify(token);
       assert.strictEqual(id, 100);
       assert.strictEqual(username, 'bob');
       assert.strictEqual(name, 'John Bob');
@@ -56,7 +55,7 @@ describe('JSON Web Token', () => {
     it('should successfully generate token based on provided configuration and default parameters', () => {
       const o2Token = new O2TokenService(jwt);
       const token = o2Token.generateToken(101, 'alice', 'Alice O2');
-      const {id, username, name, access} = o2Token.verify(token);
+      const { id, username, name, access } = o2Token.verify(token);
       assert.strictEqual(id, 101);
       assert.strictEqual(username, 'alice');
       assert.strictEqual(name, 'Alice O2');
@@ -70,7 +69,7 @@ describe('JSON Web Token', () => {
       const token = o2Token.generateToken(100, 'bob', 'John Bob', 'admin');
       assert.doesNotThrow(() => o2Token.verify(token));
 
-      const {id, username, name, access} = o2Token.verify(token);
+      const { id, username, name, access } = o2Token.verify(token);
       assert.strictEqual(id, 100);
       assert.strictEqual(username, 'bob');
       assert.strictEqual(name, 'John Bob');

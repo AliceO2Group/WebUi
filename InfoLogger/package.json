@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/infologger",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "description": "Infologger GUI to query and stream log events",
   "author": "Vladimir Kosmala",
   "contributors": [
@@ -20,9 +20,9 @@
   "scripts": {
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
-    "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
-    "simul": "node test/live-simulator/infoLoggerServer.js",
-    "eslint": "./node_modules/.bin/eslint --config eslint.config.js lib/ public/ --fix",
+    "dev": "nodemon --inspect --watch index.js --watch lib --watch config.js index.js",
+    "simul": "node test/live-simulator/runInfoLoggerServer.js",
+    "eslint": "./node_modules/.bin/eslint --config eslint.config.js lib/ public/",
     "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha",
@@ -30,18 +30,19 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@aliceo2/web-ui": "2.6.0"
+    "@aliceo2/web-ui": "2.7.4",
+    "mariadb": "3.4.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.7.0",
-    "@stylistic/eslint-plugin-js": "^2.3.0",
-    "eslint": "^9.7.0",
-    "eslint-plugin-jsdoc": "^48.7.0",
-    "globals": "^15.8.0",
-    "mocha": "^10.6.0",
-    "nyc": "^17.0.0",
-    "puppeteer": "^22.13.0",
-    "sinon": "^18.0.0"
+    "@eslint/js": "^9.19.0",
+    "@stylistic/eslint-plugin-js": "^3.0.0",
+    "eslint": "^9.19.0",
+    "eslint-plugin-jsdoc": "^50.6.0",
+    "globals": "^15.14.0",
+    "mocha": "^11.1.0",
+    "nyc": "^17.1.0",
+    "puppeteer": "^24.1.1",
+    "sinon": "^19.0.2"
   },
   "bundleDependencies": [
     "@aliceo2/web-ui"
