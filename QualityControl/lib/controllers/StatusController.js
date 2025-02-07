@@ -46,7 +46,7 @@ export class StatusController {
    * @returns {undefined}
    */
   async getFrameworkInfo(req, res) {
-    const { component } = Object.freeze(req.params);
+    const { component } = req.params;
     try {
       const info = await this._statusService.retrieveFrameworkInfo(component);
       res.status(200).json(info);
