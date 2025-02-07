@@ -15,9 +15,9 @@
 import { Observable, RemoteData } from '/js/src/index.js';
 
 /**
- * Model representing FrameworkInfo
+ * Model representing About View
  */
-export default class FrameworkInfo extends Observable {
+export default class AboutViewModel extends Observable {
   /**
    * Initialize `item` to NotAsked
    * @param {Model} model - root model of the application
@@ -30,10 +30,10 @@ export default class FrameworkInfo extends Observable {
   }
 
   /**
-   * Load FrameworkInfo into `item`
+   * Load About Model into `item`
    * @returns {undefined}
    */
-  async getFrameworkInfo() {
+  async getAboutViewModel() {
     this.item = RemoteData.loading();
     this.notify();
 
