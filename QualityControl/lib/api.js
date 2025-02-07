@@ -18,6 +18,7 @@ import { UserRole } from './../common/library/userRole.enum.js';
 import { layoutOwnerMiddleware } from './middleware/layouts/layoutOwner.middleware.js';
 import { layoutIdMiddleware } from './middleware/layouts/layoutId.middleware.js';
 import { layoutServiceMiddleware } from './middleware/layouts/layoutService.middleware.js';
+import { statusComponentMiddleware } from './middleware/status/statusComponent.middleware.js';
 
 /**
  * Adds paths and binds websocket to instance of HttpServer passed
@@ -58,7 +59,12 @@ export const setup = (http, ws) => {
   );
 
   http.get('/status/gui', statusController.getQCGStatus.bind(statusController), { public: true });
-  http.get('/status/:component', statusController.getFrameworkInfo.bind(statusController), { public: true });
+  http.get(
+    '/status/:component',
+    statusComponentMiddleware,
+    statusController.getFrameworkInfo.bind(statusController),
+    { public: true },
+  );
 
   http.get('/checkUser', userService.addUser.bind(userService));
 };

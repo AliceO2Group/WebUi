@@ -31,8 +31,7 @@ export const statusComponentMiddleware = (req, res, next) => {
       throw new InvalidInputError('Invalid component parameter');
     }
   } catch (error) {
-    return updateAndSendExpressResponseFromNativeError(error, res);
+    return updateAndSendExpressResponseFromNativeError(res, error);
   }
-
   next();
 };
