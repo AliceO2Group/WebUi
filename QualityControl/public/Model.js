@@ -262,7 +262,7 @@ export default class Model extends Observable {
       case 'about':
         this.page = 'about';
         setBrowserTabTitle('QCG-About');
-        this.frameworkInfo.getFrameworkInfo(QCG.ABOUT_COMPONENTES);
+        this.frameworkInfo.getFrameworkInfo(QCG.ABOUT_COMPONENTS);
         this.notify();
         break;
       default:
