@@ -27,6 +27,7 @@ import QCObjectService from './services/QCObject.service.js';
 import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
 import { setBrowserTabTitle } from './common/utils.js';
 import { buildQueryParametersString } from './common/buildQueryParametersString.js';
+import { QCG } from './config.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -261,7 +262,7 @@ export default class Model extends Observable {
       case 'about':
         this.page = 'about';
         setBrowserTabTitle('QCG-About');
-        this.frameworkInfo.getFrameworkInfo();
+        this.frameworkInfo.getFrameworkInfo(QCG.ABOUT_COMPONENTES);
         this.notify();
         break;
       default:
