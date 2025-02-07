@@ -30,10 +30,10 @@ export default class AboutViewModel extends Observable {
   }
 
   /**
-   * Load About Model into `item`
+   * Load info about the framework into `item`
    * @returns {undefined}
    */
-  async getAboutViewModel() {
+  async getFrameworkInfo() {
     this.item = RemoteData.loading();
     this.notify();
 
