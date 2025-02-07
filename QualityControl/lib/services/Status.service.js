@@ -72,6 +72,9 @@ export class StatusService {
   async retrieveFrameworkInfo(component) {
     let result = undefined;
     switch (component) {
+      case Components.QCG:
+        result = this.retrieveOwnStatus();
+        break;
       case Components.QC:
         result = await this.retrieveQcVersion();
         break;

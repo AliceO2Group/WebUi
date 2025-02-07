@@ -18,6 +18,7 @@
  * @enum {string}
  */
 export const Components = Object.freeze({
+  QCG: 'qcg',
   QC: 'qc',
   CCDB: 'ccdb',
 });
