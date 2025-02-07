@@ -12,6 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
+/**
+ * Enum of available system components
+ * @readonly
+ * @enum {string}
+ */
 export const Components = Object.freeze({
   QC: 'qc',
   CCDB: 'ccdb',
