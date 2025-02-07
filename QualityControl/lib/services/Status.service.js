@@ -16,6 +16,7 @@ import { promisify } from 'node:util';
 import { exec } from 'node:child_process';
 
 import { LogManager } from '@aliceo2/web-ui';
+import { Components } from './../../common/library/enums/Status/components.enum.js';
 
 const QC_VERSION_EXEC_COMMAND = 'yum info o2-QualityControl | awk \'/Version/ {print $3}\'';
 const execPromise = promisify(exec);
@@ -65,20 +66,20 @@ export class StatusService {
 
   /**
    * Send back info about the framework
+   * @param {Components} component - the component to retrieve information for
    * @returns {object} - object containing status and framework information
    */
-  async retrieveFrameworkInfo() {
-    const [qc, data_service_ccdb, online_service_consul] = await Promise.all([
-      this.retrieveQcVersion(),
-      this.retrieveDataServiceStatus(),
-      this.retrieveOnlineServiceStatus(),
-    ]);
-    return {
-      qcg: this.retrieveOwnStatus(),
-      qc,
-      data_service_ccdb,
-      online_service_consul,
-    };
+  async retrieveFrameworkInfo(component) {
+    let result = undefined;
+    switch (component) {
+      case Components.QC:
+        result = await this.retrieveQcVersion();
+        break;
+      case Components.CCDB:
+        result = await this.retrieveDataServiceStatus();
+        break;
+    }
+    return result;
   }
 
   /**
@@ -89,22 +90,6 @@ export class StatusService {
     try {
       const { version } = await this._dataService.getVersion();
       return { status: { ok: true }, version };
-    } catch (err) {
-      return { status: { ok: false, message: err.message || err } };
-    }
-  }
-
-  /**
-   * Retrieve status of the online service (Consul) if it was configured and issue if any
-   * @returns {Promise<Resolve, Reject>} - status of the online service
-   */
-  async retrieveOnlineServiceStatus() {
-    if (!this._onlineService) {
-      return { status: { ok: true }, version: 'Live Mode was not configured' };
-    }
-    try {
-      await this._onlineService.getConsulLeaderStatus();
-      return { status: { ok: true } };
     } catch (err) {
       return { status: { ok: false, message: err.message || err } };
     }
