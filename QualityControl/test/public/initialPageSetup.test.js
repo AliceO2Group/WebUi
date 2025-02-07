@@ -50,6 +50,7 @@ export const initialPageSetupTests = async (url, page, timeout = 1000, testParen
       REFRESH_MIN_INTERVAL: 10,
       REFRESH_MAX_INTERVAL: 120,
       CONSUL_SERVICE: false,
+      ABOUT_COMPONENTS: ['qcg', 'qc', 'ccdb'],
     };
     assert.deepStrictEqual(
       qcg,

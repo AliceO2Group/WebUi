@@ -23,25 +23,24 @@ export const statusControllerTestSuite = async () => {
     test('should successfully respond with framework information', async () => {
       const statusService = {
         retrieveFrameworkInfo: stub().resolves({
-          qcg: {
-            status: { ok: true },
-            version: '0.0.1',
-          },
-          ccdb: {
-            status: { ok: false, message: 'Something went wrong here' },
-          },
+          status: { ok: true },
+          version: '0.0.1',
         }),
       };
       const statusController = new StatusController(statusService);
+      const req = {
+        params: {
+          component: 'qcg',
+        },
+      };
       const res = {
         status: stub().returnsThis(),
         json: stub(),
       };
-      await statusController.getFrameworkInfo({}, res);
+      await statusController.getFrameworkInfo(req, res);
 
       const result = {
-        qcg: { status: { ok: true }, version: '0.0.1' },
-        ccdb: { status: { ok: false, message: 'Something went wrong here' } },
+        status: { ok: true }, version: '0.0.1',
       };
       ok(res.status.calledWith(200));
       ok(res.json.calledWith(result));
@@ -51,11 +50,16 @@ export const statusControllerTestSuite = async () => {
         retrieveFrameworkInfo: stub().throws(new Error('Service could not retrieve status')),
       };
       const statusController = new StatusController(statusService);
+      const req = {
+        params: {
+          component: 'qc',
+        },
+      };
       const res = {
         status: stub().returnsThis(),
         json: stub(),
       };
-      await statusController.getFrameworkInfo({}, res);
+      await statusController.getFrameworkInfo(req, res);
 
       ok(res.status.calledWith(503));
       ok(res.json.calledWith({

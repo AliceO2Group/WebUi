@@ -13,7 +13,6 @@
  */
 
 /* eslint-disable require-jsdoc */
-/* eslint-disable max-len */
 
 import { stub } from 'sinon';
 import { deepStrictEqual } from 'node:assert';
@@ -43,45 +42,24 @@ export const statusServiceTestSuite = async () => {
     });
   });
 
-  suite('`retrieveOnlineServiceStatus()` tests', () => {
-    let statusService;
-    before(() => {
-      statusService = new StatusService();
-    });
-    test('should successfully return status if no online service was configured with customized version', async () => {
-      const response = await statusService.retrieveOnlineServiceStatus();
-      deepStrictEqual(response, { status: { ok: true }, version: 'Live Mode was not configured' });
-    });
-    test('should return status in error if online service threw an error', async () => {
-      statusService.onlineService = {
-        getConsulLeaderStatus: stub().rejects(new Error('Unable to retrieve status of live mode')),
-      };
-      const response = await statusService.retrieveOnlineServiceStatus();
-      deepStrictEqual(response, { status: { ok: false, message: 'Unable to retrieve status of live mode' } });
-    });
-    test('should successfully return status ok if online service passed checks', async () => {
-      statusService.onlineService = {
-        getConsulLeaderStatus: stub().resolves(),
-      };
-      const response = await statusService.retrieveOnlineServiceStatus();
-      deepStrictEqual(response, { status: { ok: true } });
-    });
-  });
-
   suite('`retrieveFrameworkInfo()` tests', () => {
     test('should successfully build an object with framework information from all used sources', async () => {
       const statusService = new StatusService();
       statusService.dataService = { getVersion: stub().resolves({ version: '0.0.1-beta' }) };
-      statusService.onlineService = { getConsulLeaderStatus: stub().rejects(new Error('Online mode failed to retrieve')) };
 
-      const response = await statusService.retrieveFrameworkInfo();
-      const result = {
-        qcg: { version: '-', status: { ok: true }, clients: -1 },
-        qc: { status: { ok: true }, version: 'Not part of an FLP deployment' },
-        data_service_ccdb: { status: { ok: true }, version: '0.0.1-beta' },
-        online_service_consul: { status: { ok: false, message: 'Online mode failed to retrieve' } },
-      };
-      deepStrictEqual(response, result);
+      const frameworkInfo = await Promise.all([
+        statusService.retrieveFrameworkInfo('qcg'),
+        statusService.retrieveFrameworkInfo('qc'),
+        statusService.retrieveFrameworkInfo('ccdb'),
+      ]);
+
+      const expectedResults = [
+        { version: '-', status: { ok: true }, clients: -1 },
+        { status: { ok: true }, version: 'Not part of an FLP deployment' },
+        { status: { ok: true }, version: '0.0.1-beta' },
+      ];
+
+      deepStrictEqual(frameworkInfo, expectedResults);
     });
 
     suite('`retrieveQcVersion()` tests', () => {
