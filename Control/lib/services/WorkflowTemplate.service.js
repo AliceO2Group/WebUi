@@ -80,7 +80,7 @@ class WorkflowTemplateService {
     }
     const mappings = JSON.parse(mappingsString);
     if (Array.isArray(mappings)) {
-      return mappings.sort(({ label: labelA }, { label: labelB }) => labelA < labelB ? -1 : 1);
+      return mappings.sort(({ label: labelA }, { label: labelB }) => labelA.localCompare(labelB));
     }
     return [];
   }
