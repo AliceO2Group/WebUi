@@ -84,13 +84,20 @@ describe('WorkflowTemplateService test suite', () => {
       assert.deepStrictEqual(mappings, [{label: 'Aconfig1', component: 'Config_1'}, {label: 'config1', component: 'Config_1'}]);
     });
 
-    it('should successfully return empty array if Apricot returned empty object', async () => {
+    it('should throw an error if Apricot returned an empty object', async () => {
       const getRuntimeEntryByComponent = sinon.stub().resolves(
         JSON.stringify('{}')
       );
       const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
-      const mappings = await workflowTemplate.retrieveWorkflowMappings();
-      assert.deepStrictEqual(mappings, []);
+      await assert.rejects(() => workflowTemplate.retrieveWorkflowMappings(), new Error('WorkflowMappings returned from data store are not an array'));
+    });
+
+    it('should throw an error if Apricot returned object that is not array for mappings', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().resolves(
+        JSON.stringify('{mappings: {someMapping: {}}}')
+      );
+      const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
+      await assert.rejects(() => workflowTemplate.retrieveWorkflowMappings(), new Error('WorkflowMappings returned from data store are not an array'));
     });
 
     it('should throw NotFoundError due to apricot service throwing gRPC code 5', async () => {

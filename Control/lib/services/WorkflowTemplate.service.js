@@ -79,10 +79,10 @@ class WorkflowTemplateService {
       throw grpcErrorToNativeError(error);
     }
     const mappings = JSON.parse(mappingsString);
-    if (Array.isArray(mappings)) {
-      return mappings.sort(({ label: labelA }, { label: labelB }) => labelA.localCompare(labelB));
+    if (!Array.isArray(mappings)) {
+      throw new Error('WorkflowMappings returned from data store are not an array');
     }
-    return [];
+    return mappings.sort(({ label: labelA }, { label: labelB }) => labelA.localeCompare(labelB));
   }
 
   /**
