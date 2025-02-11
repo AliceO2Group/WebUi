@@ -197,7 +197,15 @@ describe('Logging: InfoLogger protocol', () => {
   it('should successfully send to winston only logs with level starting from Developer', () => {
     const fakeIfologgerSendMessage = sinon.fake();
 
+    /**
+     * Dummy implementation of infologger sender
+     */
     class DummyInfologgerSender extends InfoLoggerSender {
+      /**
+       * Fake the sending of a message
+       * @param {InfoLoggerMessage} log the log to send
+       * @return {void}
+       */
       sendMessage(log) {
         fakeIfologgerSendMessage(log);
       }
@@ -209,8 +217,8 @@ describe('Logging: InfoLogger protocol', () => {
       infologger: new DummyInfologgerSender(winston),
     });
 
-    logger._sendToInfoLogger('will be sent ', {level: LogLevel.OPERATIONS});
-    logger._sendToInfoLogger('will not be sent', {level: LogLevel.DEVELOPER});
+    logger._sendToInfoLogger('will be sent ', { level: LogLevel.OPERATIONS });
+    logger._sendToInfoLogger('will not be sent', { level: LogLevel.DEVELOPER });
     assert.equal(fakeIfologgerSendMessage.calledOnce, true);
   });
 });
