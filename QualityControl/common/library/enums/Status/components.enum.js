@@ -13,11 +13,11 @@
  */
 
 /**
- * Enum of available system components
+ * Enum of available integrated services
  * @readonly
  * @enum {string}
  */
-export const Components = Object.freeze({
+export const IntegratedServices = Object.freeze({
   QCG: 'qcg',
   QC: 'qc',
   CCDB: 'ccdb',

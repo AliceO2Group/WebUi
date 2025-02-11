@@ -13,7 +13,7 @@
  */
 
 import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
-import { Components } from './../../../common/library/enums/Status/components.enum.js';
+import { IntegratedServices } from './../../../common/library/enums/Status/components.enum.js';
 
 /**
  * Middleware to validate the component parameter in the request.
@@ -27,7 +27,7 @@ export const statusComponentMiddleware = (req, res, next) => {
   try {
     if (!req.params.component) {
       throw new InvalidInputError('Component parameter is missing');
-    } else if (!Object.values(Components).includes(req.params.component)) {
+    } else if (!Object.values(IntegratedServices).includes(req.params.component)) {
       throw new InvalidInputError('Invalid component parameter');
     }
   } catch (error) {

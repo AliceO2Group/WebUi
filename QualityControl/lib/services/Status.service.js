@@ -16,7 +16,7 @@ import { promisify } from 'node:util';
 import { exec } from 'node:child_process';
 
 import { LogManager } from '@aliceo2/web-ui';
-import { Components } from './../../common/library/enums/Status/components.enum.js';
+import { IntegratedServices } from './../../common/library/enums/Status/components.enum.js';
 
 const QC_VERSION_EXEC_COMMAND = 'yum info o2-QualityControl | awk \'/Version/ {print $3}\'';
 const execPromise = promisify(exec);
@@ -66,19 +66,19 @@ export class StatusService {
 
   /**
    * Send back info about the framework
-   * @param {Components} component - the component to retrieve information for
+   * @param {IntegratedServices} component - the component to retrieve information for
    * @returns {object} - object containing status and framework information
    */
   async retrieveFrameworkInfo(component) {
     let result = undefined;
     switch (component) {
-      case Components.QCG:
+      case IntegratedServices.QCG:
         result = this.retrieveOwnStatus();
         break;
-      case Components.QC:
+      case IntegratedServices.QC:
         result = await this.retrieveQcVersion();
         break;
-      case Components.CCDB:
+      case IntegratedServices.CCDB:
         result = await this.retrieveDataServiceStatus();
         break;
     }

@@ -38,8 +38,6 @@ function buildPublicConfig(config) {
     REFRESH_MIN_INTERVAL: config?.consul?.refreshRate?.min || 10,
     REFRESH_MAX_INTERVAL: config?.consul?.refreshRate?.max || 120,
     CONSUL_SERVICE: config.consul ? true : false,
-    ABOUT_COMPONENTS: ['qcg', 'qc', 'ccdb'],
-
   };
 
   const codeStr = `const publicConfig = ${JSON.stringify(publicConfig, null, 2)};\nexport { publicConfig as QCG };\n`;
