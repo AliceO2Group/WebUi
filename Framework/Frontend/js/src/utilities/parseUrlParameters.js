@@ -75,6 +75,14 @@ class ParameterBuildingError extends Error {
 const buildParameterFromNestedKeys = (parentParameter, nestedKeys, value) => {
   const currentKey = nestedKeys.shift();
 
+  /*
+   * Protect against prototype polluting assignment
+   * https://codeql.github.com/codeql-query-help/javascript/js-prototype-polluting-assignment/
+   */
+  if (currentKey === '__proto__' || currentKey === 'constructor' || currentKey === 'prototype') {
+    throw new Error(`Unauthorized parameters key ${currentKey}`);
+  }
+
   if (currentKey === '') {
     // Parameter must be an array and the value is a new item in that array
     if (!Array.isArray(parentParameter)) {

@@ -362,6 +362,21 @@ describe('URL parameters extraction checks', () => {
       new Error('Expected node in parameters tree to be an object - key[nested]'),
     );
   });
+
+  it('should protect against prototype polluting assignment', () => {
+    assert.throws(
+      () => parseUrlParameters('__proto__="{wrong: 12}"', {}),
+      new Error('Unauthorized parameters key __proto__'),
+    );
+    assert.throws(
+      () => parseUrlParameters('constructor=12', {}),
+      new Error('Unauthorized parameters key constructor'),
+    );
+    assert.throws(
+      () => parseUrlParameters('prototype=fake-prototype', {}),
+      new Error('Unauthorized parameters key prototype'),
+    );
+  });
 });
 
 describe('URL building checks', () => {

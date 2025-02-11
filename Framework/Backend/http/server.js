@@ -476,7 +476,6 @@ class HttpServer {
       // Concatenates with user query
       Object.assign(query, userQuery);
 
-      // Res.redirect(url.format({ pathname: '/', query: query }));
       res.redirect(buildUrl('/', query));
     }).catch((reason) => {
       this.logger.errorMessage(`OpenId failed: ${reason}`);
