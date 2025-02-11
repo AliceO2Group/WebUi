@@ -116,10 +116,9 @@ class QueryRouter extends Observable {
    * Notify observers that the location has changed
    */
   _handleLocationChange() {
-    const [, queryParameters] = this.location.href.split('?');
-    if (queryParameters) {
-      // Browser replaces ` ` by `+`, replace it back in order for parameters to be properly parsed
-      this.params = parseUrlParameters(decodeURIComponent(queryParameters.replaceAll('+', ' ')));
+    const urlSearchParams = new URLSearchParams(this.location.search);
+    if (urlSearchParams) {
+      this.params = parseUrlParameters(urlSearchParams);
       this.notify();
     }
   }

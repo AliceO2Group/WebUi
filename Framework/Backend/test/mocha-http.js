@@ -299,81 +299,80 @@ describe('HTTP constructor checks', () => {
 
 describe('URL parameters extraction checks', () => {
   it('should successfully extract single parameters', () => {
-    assert.deepEqual(parseUrlParameters('param=12'), { param: '12' });
-    assert.deepEqual(parseUrlParameters('param=random-param'), { param: 'random-param' });
-    assert.deepEqual(parseUrlParameters('param='), { param: '' });
+    assert.deepEqual(parseUrlParameters(new URLSearchParams('param=12')), { param: '12' });
+    assert.deepEqual(parseUrlParameters(new URLSearchParams('param=random-param')), { param: 'random-param' });
+    assert.deepEqual(parseUrlParameters(new URLSearchParams('param=')), { param: '' });
   });
-
   it('should successfully extract object parameters', () => {
-    assert.deepEqual(parseUrlParameters('param[prop1]=12'), { param: { prop1: '12' } });
+    assert.deepEqual(parseUrlParameters(new URLSearchParams('param[prop1]=12')), { param: { prop1: '12' } });
     assert.deepEqual(
-      parseUrlParameters('param[prop1]=first&param[prop2]=second&param[prop3]=348'),
+      parseUrlParameters(new URLSearchParams('param[prop1]=first&param[prop2]=second&param[prop3]=348')),
       { param: { prop1: 'first', prop2: 'second', prop3: '348' } },
     );
   });
 
   it('should successfully extract array parameters', () => {
-    assert.deepEqual(parseUrlParameters('param[]=12&param[]=83'), { param: ['12', '83'] });
-    assert.deepEqual(parseUrlParameters('param[]=first&param[]=second'), { param: ['first', 'second'] });
+    assert.deepEqual(parseUrlParameters(new URLSearchParams('param[]=12&param[]=83')), { param: ['12', '83'] });
+    assert.deepEqual(parseUrlParameters(new URLSearchParams('param[]=first&param[]=second')), { param: ['first', 'second'] });
   });
 
   it('should successfully extract complex nested parameters', () => {
     assert.deepEqual(
-      parseUrlParameters('param[prop1][]=29&param[prop2][]=92'),
+      parseUrlParameters(new URLSearchParams('param[prop1][]=29&param[prop2][]=92')),
       { param: { prop1: ['29'], prop2: ['92'] } },
     );
   });
 
   it('should successfully combine parameter within an existing parameter tree', () => {
     assert.deepEqual(
-      parseUrlParameters('param=12', { existing: '45' }),
+      parseUrlParameters(new URLSearchParams('param=12'), { existing: '45' }),
       { existing: '45', param: '12' },
     );
 
     assert.deepEqual(
-      parseUrlParameters('prop1[]=12&prop2[]=hello', { existing: ['45'], prop1: ['93'] }),
+      parseUrlParameters(new URLSearchParams('prop1[]=12&prop2[]=hello'), { existing: ['45'], prop1: ['93'] }),
       { existing: ['45'], prop1: ['93', '12'], prop2: ['hello'] },
     );
 
     assert.deepEqual(
-      parseUrlParameters('param[prop1]=value&param[prop2]=48', { existing: { nested: '73' }, param: { prop1: 'other' } }),
+      parseUrlParameters(new URLSearchParams('param[prop1]=value&param[prop2]=48'), { existing: { nested: '73' }, param: { prop1: 'other' } }),
       { existing: { nested: '73' }, param: { prop1: 'value', prop2: '48' } },
     );
   });
 
   it('should throw when combining parameters with incoherent values', () => {
     assert.throws(
-      () => parseUrlParameters('key=12', { key: ['1', '3'] }),
+      () => parseUrlParameters(new URLSearchParams('key=12'), { key: ['1', '3'] }),
       new Error('Node in parameters tree is an array but no more nested keys - key'),
     );
 
     assert.throws(
-      () => parseUrlParameters('key[]=12', { key: 'value' }),
+      () => parseUrlParameters(new URLSearchParams('key[]=12'), { key: 'value' }),
       new Error('Expected node in parameters tree to be an array - key[]'),
     );
 
     assert.throws(
-      () => parseUrlParameters('key=12', { key: { nested: '1' } }),
+      () => parseUrlParameters(new URLSearchParams('key=12'), { key: { nested: '1' } }),
       new Error('Node in parameters tree is an object but no more nested keys - key'),
     );
 
     assert.throws(
-      () => parseUrlParameters('key[nested]=12', { key: 'value' }),
+      () => parseUrlParameters(new URLSearchParams('key[nested]=12'), { key: 'value' }),
       new Error('Expected node in parameters tree to be an object - key[nested]'),
     );
   });
 
   it('should protect against prototype polluting assignment', () => {
     assert.throws(
-      () => parseUrlParameters('__proto__="{wrong: 12}"', {}),
+      () => parseUrlParameters(new URLSearchParams('__proto__="{wrong: 12}"'), {}),
       new Error('Unauthorized parameters key __proto__'),
     );
     assert.throws(
-      () => parseUrlParameters('constructor=12', {}),
+      () => parseUrlParameters(new URLSearchParams('constructor=12'), {}),
       new Error('Unauthorized parameters key constructor'),
     );
     assert.throws(
-      () => parseUrlParameters('prototype=fake-prototype', {}),
+      () => parseUrlParameters(new URLSearchParams('prototype=fake-prototype'), {}),
       new Error('Unauthorized parameters key prototype'),
     );
   });

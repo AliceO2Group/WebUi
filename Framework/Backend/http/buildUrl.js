@@ -28,9 +28,10 @@ exports.buildUrl = (baseURL, parameters) => {
   if (!parameters) {
     parameters = {};
   }
+
   const [url, existingParameters] = baseURL.split('?');
 
-  parseUrlParameters(existingParameters, parameters);
+  parseUrlParameters(new URLSearchParams(existingParameters), parameters);
 
   const serializedQueryParameters = [];
 

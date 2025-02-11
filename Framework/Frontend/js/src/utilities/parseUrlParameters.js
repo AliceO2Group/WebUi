@@ -124,12 +124,12 @@ const buildParameterFromNestedKeys = (parentParameter, nestedKeys, value) => {
 /**
  * Extract the parameters tree from the given URL parameters (any value after the "&" in a URL)
  *
- * @param {string} queryParameters the URL parameters string
+ * @param {URLSearchParams} urlSearchParams the URL search parameters string
  * @param {object} [parameters] the existing parameters tree object (will be modified in place)
  * @return {object} the parameter tree
  */
-export const parseUrlParameters = (queryParameters, parameters) => {
-  if (!queryParameters) {
+export const parseUrlParameters = (urlSearchParams, parameters) => {
+  if (urlSearchParams.size === 0) {
     return {};
   }
 
@@ -137,8 +137,7 @@ export const parseUrlParameters = (queryParameters, parameters) => {
     parameters = {};
   }
 
-  for (const formattedParameter of queryParameters.split('&')) {
-    const [key, value] = formattedParameter.split('=');
+  for (const [key, value] of urlSearchParams.entries()) {
     const [firstKey, ...dirtyKeys] = key.split('[');
     const nestedKeys = [firstKey, ...dirtyKeys.map((key) => key.slice(0, -1))];
 
