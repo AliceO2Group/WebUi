@@ -42,15 +42,15 @@ export const statusServiceTestSuite = async () => {
     });
   });
 
-  suite('`retrieveFrameworkInfo()` tests', () => {
+  suite('`retrieveServiceStatus()` tests', () => {
     test('should successfully build an object with framework information from all used sources', async () => {
       const statusService = new StatusService();
       statusService.dataService = { getVersion: stub().resolves({ version: '0.0.1-beta' }) };
 
-      const frameworkInfo = await Promise.all([
-        statusService.retrieveFrameworkInfo('qcg'),
-        statusService.retrieveFrameworkInfo('qc'),
-        statusService.retrieveFrameworkInfo('ccdb'),
+      const statusInfo = await Promise.all([
+        statusService.retrieveServiceStatus('qcg'),
+        statusService.retrieveServiceStatus('qc'),
+        statusService.retrieveServiceStatus('ccdb'),
       ]);
 
       const expectedResults = [
@@ -59,7 +59,7 @@ export const statusServiceTestSuite = async () => {
         { status: { ok: true }, version: '0.0.1-beta' },
       ];
 
-      deepStrictEqual(frameworkInfo, expectedResults);
+      deepStrictEqual(statusInfo, expectedResults);
     });
 
     suite('`retrieveQcVersion()` tests', () => {

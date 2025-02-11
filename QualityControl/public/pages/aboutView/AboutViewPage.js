@@ -21,32 +21,27 @@ import { h } from '/js/src/index.js';
  */
 export default (model) => h(
   '.p2.absolute-fill.text-center',
-  model.aboutViewModel.item.match({
+  Object.entries(model.aboutViewModel.items).map(([serviceName, state]) => state.match({
     NotAsked: () => null,
     Loading: () => null,
-    Success: (data) => showContent(data),
-    Failure: (error) => showContent({ error: { message: error } }),
-  }),
+    Success: (data) => showContent(data, serviceName),
+    Failure: (error) => showContent({ error: { message: error } }, serviceName),
+  })),
 );
 
 /**
  * Display a table with QC GUI and its dependencies status
  * @param {Map<string, object>} componentMap - JSON representation of the components used by QCG
+ * @param service
+ * @param serviceName
  * @returns {vnode} - virtual node element
  */
-const showContent = (componentMap) =>
-  Object.keys(componentMap).map((component) => [
-    h('.shadow-level1', [
-      h('table.table', {
-        style: 'white-space: pre-wrap;',
-      }, [
-        h('tbody', [
-          h(
-            'tr',
-            h('th.flex-row', componentHeader(componentMap[component].status, component)),
-          ),
-          Object.keys(componentMap[component]).map((name) => componentInfoRow(name, componentMap[component])),
-        ]),
+const showContent = (service, serviceName) =>
+  h('.shadow-level1', [
+    h('table.table', { style: 'white-space: pre-wrap;' }, [
+      h('tbody', [
+        h('tr', h('th.flex-row', componentHeader(service.status, serviceName))),
+        ...Object.keys(service).map((name) => componentInfoRow(name, service)),
       ]),
     ]),
   ]);

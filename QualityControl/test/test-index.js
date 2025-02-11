@@ -83,7 +83,7 @@ const FRONT_END_TIMEOUT = INITIAL_PAGE_SETUP_TIMEOUT
 const BACK_END_TIMEOUT = 10000; // back-end test suite timeout
 
 suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, async () => {
-  suite.skip('Front-end test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
+  suite('Front-end test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
     let url = undefined;
     let page = undefined;
     let browser = undefined;

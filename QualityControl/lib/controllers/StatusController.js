@@ -48,7 +48,7 @@ export class StatusController {
   async serviceStatusHandler(req, res) {
     const { service } = req.params;
     try {
-      const info = await this._statusService.retrieveFrameworkInfo(service);
+      const info = await this._statusService.retrieveServiceStatus(service);
       res.status(200).json(info);
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(

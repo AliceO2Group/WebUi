@@ -13,7 +13,7 @@
  */
 
 import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
-import { IntegratedServices } from './../../../common/library/enums/Status/components.enum.js';
+import { IntegratedServices } from './../../../common/library/enums/Status/integratedServices.enum.js';
 
 /**
  * Middleware to validate the component parameter in the request.

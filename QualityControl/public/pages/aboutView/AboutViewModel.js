@@ -19,31 +19,37 @@ import { Observable, RemoteData } from '/js/src/index.js';
  */
 export default class AboutViewModel extends Observable {
   /**
-   * Initialize `item` to NotAsked
+   * Initialize `items` to an empty object
    * @param {Model} model - root model of the application
    */
   constructor(model) {
     super();
 
     this.model = model;
-    this.item = RemoteData.notAsked();
+    this.items = {};
   }
 
   /**
-   * Load info about the framework into `item`
+   * Load info about the framework into `items` for each service
+   * @param {Array} services - Array of services from which to retrieve the status
    * @returns {undefined}
    */
-  async getFrameworkInfo() {
-    this.item = RemoteData.loading();
+  async getServiceStatus(services) {
+    services.forEach((service) => {
+      this.items[service] = RemoteData.loading();
+    });
     this.notify();
 
-    const { result, ok } = await this.model.loader.get('/api/status/framework');
-    if (!ok) {
-      this.item = RemoteData.failure(result.message);
-      this.model.notification.show('Unable to retrieve framework information', 'danger', 2000);
-    } else {
-      this.item = RemoteData.success(result);
+    for (const service of services) {
+      const { result, ok } = await this.model.loader.get(`/api/status/${service}`);
+      if (!ok) {
+        this.items[service] = RemoteData.failure(result.message);
+        this.model.notification.show(`Unable to retrieve information for ${service}`, 'danger', 2000);
+      } else {
+        this.items[service] = RemoteData.success(result);
+      }
     }
+    console.log(this.items);
     this.notify();
   }
 }
