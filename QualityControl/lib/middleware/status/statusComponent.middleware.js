@@ -24,10 +24,11 @@ import { IntegratedServices } from './../../../common/library/enums/Status/compo
  * @returns {void}
  */
 export const statusComponentMiddleware = (req, res, next) => {
+  const { service = '' } = req.params ?? {};
   try {
-    if (!req.params.component) {
+    if (!service) {
       throw new InvalidInputError('Component parameter is missing');
-    } else if (!Object.values(IntegratedServices).includes(req.params.component)) {
+    } else if (!Object.values(IntegratedServices).includes(req.params.service)) {
       throw new InvalidInputError('Invalid component parameter');
     }
   } catch (error) {

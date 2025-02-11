@@ -30,14 +30,14 @@ export const statusControllerTestSuite = async () => {
       const statusController = new StatusController(statusService);
       const req = {
         params: {
-          component: 'qcg',
+          service: 'qcg',
         },
       };
       const res = {
         status: stub().returnsThis(),
         json: stub(),
       };
-      await statusController.getFrameworkInfo(req, res);
+      await statusController.serviceStatusHandler(req, res);
 
       const result = {
         status: { ok: true }, version: '0.0.1',
@@ -52,14 +52,14 @@ export const statusControllerTestSuite = async () => {
       const statusController = new StatusController(statusService);
       const req = {
         params: {
-          component: 'qc',
+          service: 'qc',
         },
       };
       const res = {
         status: stub().returnsThis(),
         json: stub(),
       };
-      await statusController.getFrameworkInfo(req, res);
+      await statusController.serviceStatusHandler(req, res);
 
       ok(res.status.calledWith(503));
       ok(res.json.calledWith({

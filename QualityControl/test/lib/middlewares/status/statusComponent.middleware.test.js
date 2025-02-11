@@ -43,7 +43,7 @@ export const statusComponentMiddlewareTest = () => {
     test('should return an "Invalid input" error if the component provided is not valid', () => {
       const req = {
         params: {
-          component: 'test',
+          service: 'test',
         },
       };
       const res = {
@@ -63,7 +63,7 @@ export const statusComponentMiddlewareTest = () => {
     test('should successfully pass the check if the component provided is valid', () => {
       const req = {
         params: {
-          component: 'qcg',
+          service: 'qcg',
         },
       };
       const res = {

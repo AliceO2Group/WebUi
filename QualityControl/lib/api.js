@@ -60,9 +60,9 @@ export const setup = (http, ws) => {
 
   http.get('/status/gui', statusController.getQCGStatus.bind(statusController), { public: true });
   http.get(
-    '/status/:component',
+    '/status/:service',
     statusComponentMiddleware,
-    statusController.getFrameworkInfo.bind(statusController),
+    statusController.serviceStatusHandler.bind(statusController),
     { public: true },
   );
 
