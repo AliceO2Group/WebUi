@@ -15,9 +15,9 @@
 import { Observable, RemoteData } from '/js/src/index.js';
 
 /**
- * Model representing FrameworkInfo
+ * Model representing About View
  */
-export default class FrameworkInfo extends Observable {
+export default class AboutViewModel extends Observable {
   /**
    * Initialize `item` to NotAsked
    * @param {Model} model - root model of the application
@@ -30,29 +30,20 @@ export default class FrameworkInfo extends Observable {
   }
 
   /**
-   * Load FrameworkInfo into `item`
-   * @param {Components} components Array of components from which retrieve information
+   * Load info about the framework into `item`
    * @returns {undefined}
    */
-  async getFrameworkInfo(components) {
+  async getFrameworkInfo() {
     this.item = RemoteData.loading();
     this.notify();
 
-    try {
-      const results = {};
-      await Promise.all(components.map(async (component) => {
-        const { result, ok } = await this.model.loader.get(`/api/status/${component}`);
-        if (!ok) {
-          throw new Error(result.message);
-        }
-        results[component] = result;
-      }));
-      this.item = RemoteData.success(results);
-    } catch (error) {
-      this.item = RemoteData.failure(error.message);
+    const { result, ok } = await this.model.loader.get('/api/status/framework');
+    if (!ok) {
+      this.item = RemoteData.failure(result.message);
       this.model.notification.show('Unable to retrieve framework information', 'danger', 2000);
+    } else {
+      this.item = RemoteData.success(result);
     }
-
     this.notify();
   }
 }

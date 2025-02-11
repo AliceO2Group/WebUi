@@ -93,7 +93,7 @@ export class CopyToClipboardComponent extends StatefulComponent {
    * Renders the button that allows copying text to the clipboard.
    *
    * @param {vnode} vnode The virtual DOM node containing the attrs and children.
-   * @returns {vnode} The copyToClipboard button component
+   * @returns {Component} The copyToClipboard button component
    */
   view(vnode) {
     const { attrs, children } = vnode;

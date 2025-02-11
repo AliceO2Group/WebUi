@@ -39,6 +39,9 @@ const {
 } = require('./errors/updateAndSendExpressResponseFromNativeError.js');
 const { Logger } = require('./log/Logger');
 
+const { getWebUiProtoIncludeDir } = require('./protobuf/getWebUiProtoIncludeDir');
+const { AliEcsEventMessagesConsumer } = require('./kafka/AliEcsEventMessagesConsumer.js');
+
 exports.ConsulService = ConsulService;
 
 exports.HttpServer = HttpServer;
@@ -85,3 +88,7 @@ exports.GrpcErrorCodes = GrpcErrorCodes;
 exports.grpcErrorToNativeError = grpcErrorToNativeError;
 
 exports.updateAndSendExpressResponseFromNativeError = updateAndSendExpressResponseFromNativeError;
+
+exports.getWebUiProtoIncludeDir = getWebUiProtoIncludeDir;
+
+exports.AliEcsEventMessagesConsumer = AliEcsEventMessagesConsumer;

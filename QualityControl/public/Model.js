@@ -22,13 +22,11 @@ import Layout from './layout/Layout.js';
 import QCObject from './object/QCObject.js';
 import LayoutService from './services/Layout.service.js';
 import Folder from './folder/Folder.js';
-import FrameworkInfo from './frameworkInfo/FrameworkInfo.js';
 import QCObjectService from './services/QCObject.service.js';
 import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
 import { setBrowserTabTitle } from './common/utils.js';
 import { buildQueryParametersString } from './common/buildQueryParametersString.js';
-import { QCG } from './config.js';
-import { IntegratedServices } from '../common/library/enums/Status/components.enum.js';
+import AboutViewModel from './pages/aboutView/AboutViewModel.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -65,8 +63,8 @@ export default class Model extends Observable {
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
 
-    this.frameworkInfo = new FrameworkInfo(this);
-    this.frameworkInfo.bubbleTo(this);
+    this.aboutViewModel = new AboutViewModel(this);
+    this.aboutViewModel.bubbleTo(this);
 
     this.isOnlineModeConnectionAlive = false;
     this.isOnlineModeEnabled = false; // Show only online objects or all (offline)
@@ -263,7 +261,7 @@ export default class Model extends Observable {
       case 'about':
         this.page = 'about';
         setBrowserTabTitle('QCG-About');
-        this.frameworkInfo.getFrameworkInfo(Object.values(IntegratedServices));
+        this.aboutViewModel.getFrameworkInfo();
         this.notify();
         break;
       default:
