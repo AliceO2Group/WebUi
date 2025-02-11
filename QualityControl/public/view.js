@@ -24,7 +24,7 @@ import layoutEditModal from './layout/panels/editModal.js';
 
 import objectTreePage from './object/objectTreePage.js';
 import ObjectViewPage from './pages/objectView/ObjectViewPage.js';
-import frameworkInfoPage from './frameworkInfo/frameworkInfoPage.js';
+import AboutViewPage from './pages/aboutView/AboutViewPage.js';
 
 /**
  * Entry point to generate view of QCG as a tree of function calls
@@ -56,7 +56,7 @@ function page(model) {
     case 'layoutShow': return layoutViewPage(model);
     case 'objectTree': return objectTreePage(model);
     case 'objectView': return ObjectViewPage(model);
-    case 'about': return frameworkInfoPage(model);
+    case 'about': return AboutViewPage(model);
 
     // Should be seen only at the first start when the view is not yet really to be shown (data loading)
     default: return null;

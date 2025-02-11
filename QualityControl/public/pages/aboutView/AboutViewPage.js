@@ -21,7 +21,7 @@ import { h } from '/js/src/index.js';
  */
 export default (model) => h(
   '.p2.absolute-fill.text-center',
-  model.frameworkInfo.item.match({
+  model.aboutViewModel.item.match({
     NotAsked: () => null,
     Loading: () => null,
     Success: (data) => showContent(data),
