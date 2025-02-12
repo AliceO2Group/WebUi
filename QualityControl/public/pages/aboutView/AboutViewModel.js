@@ -49,7 +49,6 @@ export default class AboutViewModel extends Observable {
         this.items[service] = RemoteData.success(result);
       }
     }
-    console.log(this.items);
     this.notify();
   }
 }
