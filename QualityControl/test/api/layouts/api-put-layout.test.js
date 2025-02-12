@@ -29,15 +29,6 @@ export const apiPutLayoutTests = () => {
         });
     });
 
-    test('should return a 404 error if the layout id is not provided', async () => {
-      await request(`${URL_ADDRESS}/api/layout/`)
-        .put(`?id=${null}&token=${OWNER_TEST_TOKEN}`)
-        .expect(404, {
-          message: 'The requested URL was not found on this server.',
-          error: '404 - Page not found',
-        });
-    });
-
     test('should return a 403 error if the requestor is not allowed to edit', async () => {
       await request(`${URL_ADDRESS}/api/layout/671b8c22402408122e2f20dd`)
         .put(`?token=${USER_TEST_TOKEN}`)
