@@ -13,7 +13,7 @@
     "url": "https://github.com/AliceO2Group/WebUi.git"
   },
   "engines": {
-    "node": ">= 20.x"
+    "node": ">= 22.x"
   },
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
@@ -39,20 +39,22 @@
     "mysql": "^2.18.1",
     "openid-client": "^5.6.0",
     "winston": "3.17.0",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "protobufjs": "^7.4.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.19.0",
-    "@stylistic/eslint-plugin-js": "^3.0.0",
-    "eslint": "^9.19.0",
+    "@eslint/js": "^9.20.0",
+    "@stylistic/eslint-plugin-js": "^3.1.0",
+    "eslint": "^9.20.0",
     "eslint-plugin-jsdoc": "^50.6.0",
     "globals": "^15.14.0",
     "mocha": "^11.1.0",
     "nock": "14.0.0",
     "nyc": "^17.1.0",
-    "puppeteer": "^24.1.1",
+    "puppeteer": "^24.2.0",
     "sinon": "19.0.2",
-    "supertest": "^7.0.0"
+    "supertest": "^7.0.0",
+    "long": "^5.2.3"
   },
   "main": "Backend/index.js"
 }

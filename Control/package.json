@@ -13,7 +13,7 @@
     "url": "https://github.com/AliceO2Group/WebUi.git"
   },
   "engines": {
-    "node": ">= 20.x"
+    "node": ">= 22.x"
   },
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "main": "index.js",
@@ -45,7 +45,7 @@
     "mocha": "^11.1.0",
     "nock": "^14.0.0",
     "nyc": "^17.1.0",
-    "puppeteer": "^24.1.1",
+    "puppeteer": "^24.2.0",
     "sinon": "19.0.2",
     "supertest": "7.0.0"
   },
