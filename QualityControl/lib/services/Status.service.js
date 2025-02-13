@@ -53,18 +53,6 @@ export class StatusService {
   }
 
   /**
-   * Method that builds an object with some information about the server itself
-   * @returns {object} - info on version, host and port where application is deployed
-   */
-  retrieveOwnStatus() {
-    return {
-      status: { ok: true },
-      version: this._packageInfo?.version ?? '-',
-      clients: this._ws?.server?.clients?.size ?? -1,
-    };
-  }
-
-  /**
    * Send back info about the framework
    * @param {IntegratedServices} service - the integrated service to retrieve information for
    * @returns {object} - object containing status and framework information
@@ -86,16 +74,18 @@ export class StatusService {
   }
 
   /**
-   * Retrieve data service (CCDB) status and issue if any
-   * @returns {Promise<{object}>} - status of the data service
+   * Method that builds an object with some information about the server itself
+   * @returns {object} - info on version, host and port where application is deployed
    */
-  async retrieveDataServiceStatus() {
-    try {
-      const { version } = await this._dataService.getVersion();
-      return { status: { ok: true }, version };
-    } catch (err) {
-      return { status: { ok: false, message: err.message || err } };
-    }
+  retrieveOwnStatus() {
+    return {
+      name: 'QCG',
+      status: { ok: true },
+      version: this._packageInfo?.version ?? '',
+      extras: {
+        clients: this._ws?.server?.clients?.size ?? -1,
+      },
+    };
   }
 
   /**
@@ -103,16 +93,36 @@ export class StatusService {
    * @returns {string} - version of QC deployed on the system
    */
   async retrieveQcVersion() {
+    let status = { ok: true };
     let version = 'Not part of an FLP deployment';
+
     if (this._config.qc?.enabled) {
       try {
         const { stdout } = await execPromise(QC_VERSION_EXEC_COMMAND, { timeout: 6000 });
         version = stdout.trim();
       } catch (error) {
+        status = { ok: false, message: error.message || error };
         this._logger.errorMessage(error, { level: 99, system: 'GUI', facility: 'qcg/status-service' });
       }
     }
-    return { status: { ok: true }, version };
+
+    return { name: 'QC', status, version, extras: {} };
+  }
+
+  /**
+   * Retrieve data service (CCDB) status and issue if any
+   * @returns {Promise<{object}>} - status of the data service
+   */
+  async retrieveDataServiceStatus() {
+    let status = { ok: true };
+    let version = '';
+    try {
+      const { version: dataServiceVersion } = await this._dataService.getVersion();
+      version = dataServiceVersion;
+    } catch (err) {
+      status = { ok: false, message: err.message || err };
+    }
+    return { name: 'CCDB', status, version, extras: {} };
   }
 
   /*
