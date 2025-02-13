@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
+import { ServiceStatus } from '../../../library/enums/Status/serviceStatus.enum.js';
+import { IntegratedServices } from '../../../library/enums/Status/integratedServices.enum.js';
 import { Observable, RemoteData } from '/js/src/index.js';
 
 /**
@@ -26,29 +28,45 @@ export default class AboutViewModel extends Observable {
     super();
 
     this.model = model;
-    this.items = {};
+    this.services = {};
+    for (const state of Object.values(ServiceStatus)) {
+      this.services[state] = {};
+    }
   }
 
   /**
    * Load info about the framework into `items` for each service
    * @param {Array} services - Array of services from which to retrieve the status
-   * @returns {undefined}
+   * @returns {Promise<void>}
    */
-  async getServiceStatus(services) {
-    services.forEach((service) => {
-      this.items[service] = RemoteData.loading();
-    });
-    this.notify();
+  async retrieveAllServicesStatus() {
+    for (const service of Object.values(IntegratedServices)) {
+      this.retrieveIndividualServiceStatus(service);
+    }
+  }
 
-    for (const service of services) {
+  async retrieveIndividualServiceStatus(service) {
+    try {
+      this.services[ServiceStatus.LOADING][service] = RemoteData.loading();
+      this.notify();
+
       const { result, ok } = await this.model.loader.get(`/api/status/${service}`);
+      delete this.services[ServiceStatus.LOADING][service];
+
       if (!ok) {
-        this.items[service] = RemoteData.failure(result.message);
+        this.services[ServiceStatus.ERROR][service] = RemoteData.failure({
+          name: service,
+          status: { ok: false, message: result.message },
+        });
         this.model.notification.show(`Unable to retrieve information for ${service}`, 'danger', 2000);
       } else {
-        this.items[service] = RemoteData.success(result);
+        const { status: { ok } } = result;
+        const category = ok ? ServiceStatus.SUCCESS : ServiceStatus.ERROR;
+        this.services[category][service] = RemoteData.success(result);
+        this.notify();
       }
+    } catch (error) {
+      this.model.notification.show(`Error fetching data for ${service}: ${error.message}`, 'danger', 2000);
     }
-    this.notify();
   }
 }

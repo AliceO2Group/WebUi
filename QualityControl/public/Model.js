@@ -27,7 +27,6 @@ import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
 import { setBrowserTabTitle } from './common/utils.js';
 import { buildQueryParametersString } from './common/buildQueryParametersString.js';
 import AboutViewModel from './pages/aboutView/AboutViewModel.js';
-import { IntegratedServices } from './../library/enums/Status/integratedServices.enum.js';
 import { QCG } from './config.js';
 
 /**
@@ -263,7 +262,7 @@ export default class Model extends Observable {
       case 'about':
         this.page = 'about';
         setBrowserTabTitle('QCG-About');
-        this.aboutViewModel.getServiceStatus(Object.values(IntegratedServices));
+        this.aboutViewModel.retrieveAllServicesStatus();
         this.notify();
         break;
       default:

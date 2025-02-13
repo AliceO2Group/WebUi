@@ -65,3 +65,8 @@
 
 .right-menu {right:0; left:auto;}
 .resize-vertical { resize: vertical}
+
+.panel-title {
+  border: 1px solid #ddd;
+  background: var(--color-gray-light);
+}
