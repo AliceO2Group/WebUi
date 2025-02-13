@@ -35,6 +35,7 @@ import { objectTreePageTests } from './public/pages/object-tree.test.js';
 import { objectViewFromObjectTreeTests } from './public/pages/object-view-from-object-tree.test.js';
 import { objectViewFromLayoutShowTests } from './public/pages/object-view-from-layout-show.test.js';
 import { layoutShowTests } from './public/pages/layout-show.test.js';
+import { aboutPageTests } from './public/pages/about-page.test.js';
 
 /**
  * Backend tests imports
@@ -71,6 +72,7 @@ const OBJECT_TREE_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
 const OBJECT_VIEW_FROM_OBJECT_TREE_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 5;
 const OBJECT_VIEW_FROM_LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 4;
 const LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 23;
+const ABOUT_VIEW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 4;
 
 const FRONT_END_TIMEOUT = INITIAL_PAGE_SETUP_TIMEOUT
   + QC_DRAWING_OPTIONS_TIMEOUT
@@ -137,7 +139,11 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       async (testParent) => await layoutShowTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
 
-    // require('./about-page.test');
+    test(
+      'should successfully run about page tests',
+      { timeout: ABOUT_VIEW_PAGE_TIMEOUT },
+      async (testParent) => await aboutPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
+    );
   });
 
   suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
