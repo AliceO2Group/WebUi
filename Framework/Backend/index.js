@@ -42,6 +42,9 @@ const { Logger } = require('./log/Logger');
 const { getWebUiProtoIncludeDir } = require('./protobuf/getWebUiProtoIncludeDir');
 const { AliEcsEventMessagesConsumer } = require('./kafka/AliEcsEventMessagesConsumer.js');
 
+const { parseUrlParameters } = require('./http/parseUrlParameters.js');
+const { buildUrl } = require('./http/buildUrl.js');
+
 exports.ConsulService = ConsulService;
 
 exports.HttpServer = HttpServer;
@@ -92,3 +95,7 @@ exports.updateAndSendExpressResponseFromNativeError = updateAndSendExpressRespon
 exports.getWebUiProtoIncludeDir = getWebUiProtoIncludeDir;
 
 exports.AliEcsEventMessagesConsumer = AliEcsEventMessagesConsumer;
+
+exports.buildUrl = buildUrl;
+
+exports.parseUrlParameters = parseUrlParameters;
