@@ -26,7 +26,7 @@ export const servicesLoadingPanel = (services) => {
     const namesAsString = Object.keys(services).join(', ');
     return h('.w-100.flex-row.items-center.p2.shadow-level1', [
       spinner(2),
-      h('.ph2', `Loading status for: ${namesAsString}`),
+      h('.ph2', `Loading status for: ${namesAsString.toUpperCase()}`),
     ]);
   }
 };
