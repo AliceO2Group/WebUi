@@ -43,15 +43,15 @@
     "protobufjs": "^7.4.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.20.0",
-    "@stylistic/eslint-plugin-js": "^3.1.0",
-    "eslint": "^9.20.0",
+    "@eslint/js": "^9.21.0",
+    "@stylistic/eslint-plugin-js": "^4.0.1",
+    "eslint": "^9.21.0",
     "eslint-plugin-jsdoc": "^50.6.0",
-    "globals": "^15.15.0",
+    "globals": "^16.0.0",
     "mocha": "^11.1.0",
     "nock": "14.0.0",
     "nyc": "^17.1.0",
-    "puppeteer": "^24.2.0",
+    "puppeteer": "^24.3.0",
     "sinon": "19.0.2",
     "supertest": "^7.0.0",
     "long": "^5.3.1"
