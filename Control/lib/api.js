@@ -48,7 +48,7 @@ const {WorkflowTemplateService} = require('./services/WorkflowTemplate.service.j
 const {NotificationService, ConsulService} = require('@aliceo2/web-ui');
 
 // AliECS Core
-const { AliEcsSynchronizer } = require('./control-core/AliEcsSynchronizer.js');
+const { AliEcsSynchronizer } = require('./kafka/AliEcsSynchronizer.js');
 const AliecsRequestHandler = require('./control-core/RequestHandler.js');
 const ApricotService = require('./control-core/ApricotService.js');
 const ControlService = require('./control-core/ControlService.js');
@@ -123,7 +123,7 @@ module.exports.setup = (http, ws) => {
       const kafkaClient = new Kafka({
         clientId: 'control-gui',
         brokers: config.kafka.brokers,
-        retry: { retries: 3 },
+        retry: { retries: Infinity },
         logLevel: logLevel.NOTHING,
       });
       aliEcsSynchronizer = new AliEcsSynchronizer(kafkaClient, cacheService);
