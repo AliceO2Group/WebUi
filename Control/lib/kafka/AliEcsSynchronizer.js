@@ -184,6 +184,21 @@ class AliEcsSynchronizer {
       this._logger.errorMessage(`Error when parsing environment event message: ${error.message}\n${error.trace}`);
     }
   }
+
+  /**
+   * Callback for when a message is received on the run topic
+   * @param {Object} eventMessage - message received on run topic
+   * @return {void}
+   */
+  async _onRunMessage(eventMessage) {
+    try {
+      const run = runEventAdapter(eventMessage);
+      const { timestamp, runNumber } = run;
+      this._logger.debugMessage(`Received at ${timestamp} run event message for ${runNumber}`);
+    } catch (error) {
+      this._logger.errorMessage(`Error when parsing run event message: ${error.message}\n${error.trace}`);
+    }
+  }
 }
 
 exports.AliEcsSynchronizer = AliEcsSynchronizer;
