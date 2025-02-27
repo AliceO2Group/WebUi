@@ -90,32 +90,28 @@ class AliEcsSynchronizer {
    * @return {void}
    */
   async _onIntegratedServiceDcsMessage(eventMessage) {
-    const { timestamp, integratedServiceEvent } = eventMessage;
-    try {
-      const SOR_EVENT_NAME = 'readout-dataflow.dcs.sor';
-      if (integratedServiceEvent.name === SOR_EVENT_NAME) {
-        const dcsSorEvent = DcsIntegratedEventAdapter.buildDcsIntegratedEvent(integratedServiceEvent, timestamp);
-        if (!dcsSorEvent) {
-          return;
-        }
-        const { environmentId } = dcsSorEvent;
-        let cachedDcsSteps = this._cacheService.getByKey(CacheKeys.DCS.SOR);
-        if (!cachedDcsSteps) {
-          cachedDcsSteps = {};
-        }
-        if (!cachedDcsSteps?.[environmentId]) {
-          cachedDcsSteps[environmentId] = {
-            displayCache: true,
-            dcsOperations: [dcsSorEvent]
-          };
-        } else {
-          cachedDcsSteps[environmentId].dcsOperations.push(dcsSorEvent);
-        }
-        cachedDcsSteps[environmentId].dcsOperations.sort((a, b) => a.timestamp - b.timestamp);
-        this._cacheService.updateByKeyAndBroadcast(CacheKeys.DCS.SOR, cachedDcsSteps, {command: CacheKeys.DCS.SOR});
+  const { timestamp, integratedServiceEvent } = eventMessage;
+    const SOR_EVENT_NAME = 'readout-dataflow.dcs.sor';
+    if (integratedServiceEvent.name === SOR_EVENT_NAME) {
+      const dcsSorEvent = DcsIntegratedEventAdapter.buildDcsIntegratedEvent(integratedServiceEvent, timestamp);
+      if (!dcsSorEvent) {
+        return;
       }
-    } catch (error) {
-      this._logger.errorMessage(`Error when parsing event message: ${error.message}\n${error.stack}`);
+      const { environmentId } = dcsSorEvent;
+      let cachedDcsSteps = this._cacheService.getByKey(CacheKeys.DCS.SOR);
+      if (!cachedDcsSteps) {
+        cachedDcsSteps = {};
+      }
+      if (!cachedDcsSteps?.[environmentId]) {
+        cachedDcsSteps[environmentId] = {
+          displayCache: true,
+          dcsOperations: [dcsSorEvent]
+        };
+      } else {
+        cachedDcsSteps[environmentId].dcsOperations.push(dcsSorEvent);
+      }
+      cachedDcsSteps[environmentId].dcsOperations.sort((a, b) => a.timestamp - b.timestamp);
+      this._cacheService.updateByKeyAndBroadcast(CacheKeys.DCS.SOR, cachedDcsSteps, {command: CacheKeys.DCS.SOR});
     }
   }
 
@@ -124,14 +120,10 @@ class AliEcsSynchronizer {
    * @param {Object} eventMessage - message received on environment topic
    * @return {void}
    */
-  async _onEnvironmentMessage(eventMessage) {
-    try {
-      const environment = environmentEventAdapter(eventMessage);
-      const { timestamp, id } = environment;
-      this._logger.debugMessage(`Received at ${timestamp} environment event message for ${id}`);
-    } catch (error) {
-      this._logger.errorMessage(`Error when parsing environment event message: ${error.message}\n${error.stack}`);
-    }
+  _onEnvironmentMessage(eventMessage) {
+    const environment = environmentEventAdapter(eventMessage);
+    const { timestamp, id } = environment;
+    this._logger.debugMessage(`Received at ${timestamp} environment event message for ${id}`);
   }
 
   /**
@@ -139,14 +131,10 @@ class AliEcsSynchronizer {
    * @param {Object} eventMessage - message received on run topic
    * @return {void}
    */
-  async _onRunMessage(eventMessage) {
-    try {
-      const run = runEventAdapter(eventMessage);
-      const { timestamp, runNumber } = run;
-      this._logger.debugMessage(`Received at ${timestamp} run event message for ${runNumber}`);
-    } catch (error) {
-      this._logger.errorMessage(`Error when parsing run event message: ${error.message}\n${error.stack}`);
-    }
+  _onRunMessage(eventMessage) {
+    const run = runEventAdapter(eventMessage);
+    const { timestamp, runNumber } = run;
+    this._logger.debugMessage(`Received at ${timestamp} run event message for ${runNumber}`);
   }
 }
 
