@@ -11,6 +11,10 @@
  *  or submit itself to any jurisdiction.
  */
 
+/**
+ * Frozen object that contains the topics used in the Kafka communication grouped by their purpose
+ * @returns {Object} - the object containing the topics
+ */
 exports.Topics = Object.freeze({
   ENVIRONMENT: ['aliecs.environment'],
   INTEGRATED_SERVICE: {

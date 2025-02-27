@@ -11,6 +11,10 @@
  *  or submit itself to any jurisdiction.
  */
 
+/**
+ * Frozen object that contains the consumer groups used in the Kafka communication
+ * @returns {Object} - the object containing the consumer groups
+ */
 exports.ConsumerGroups = Object.freeze({
   ENVIRONMENT: 'cog-environment',
   INTEGRATED_SERVICE: {
