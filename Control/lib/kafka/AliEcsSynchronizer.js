@@ -16,8 +16,8 @@ const { CacheKeys } = require('../common/cacheKeys.enum.js');
 const { ConsumerGroups } = require('./enums/consumerGroups.enum.js');
 const { DcsIntegratedEventAdapter } = require('../adapters/DcsIntegratedEventAdapter.js');
 const { environmentEventAdapter } = require('./adapters/environmentEventAdapter.js');
+const { runEventAdapter } = require('./adapters/runEventAdapter.js');
 const { Topics } = require('./enums/topics.enum.js');
-
 
 /**
  * Utility synchronizing AliECS data into control-gui, listening to kafka
@@ -46,6 +46,13 @@ class AliEcsSynchronizer {
       Topics.ENVIRONMENT
     );
     this._ecsEnvironmentConsumer.onMessageReceived(this._onEnvironmentMessage.bind(this));
+
+    this._ecsRunConsumer = new AliEcsEventMessagesConsumer(
+      kafkaClient,
+      ConsumerGroups.RUN,
+      Topics.RUN
+    );
+    this._ecsRunConsumer.onMessageReceived(this._onRunMessage.bind(this));
   }
 
   /**
@@ -58,14 +65,21 @@ class AliEcsSynchronizer {
       .start()
       .catch((error) =>
         this._logger.errorMessage(
-          `Error when starting ECS integrated services consumer: ${error.message}\n${error.trace}`
+          `Error when starting ECS integrated services consumer: ${error.message}\n${error.stack}`
         )
       );
     this._ecsEnvironmentConsumer
       .start()
       .catch((error) =>
         this._logger.errorMessage(
-          `Error when starting ECS integrated services consumer: ${error.message}\n${error.trace}`
+          `Error when starting ECS environment consumer: ${error.message}\n${error.stack}`
+        )
+      );
+    this._ecsRunConsumer
+      .start()
+      .catch((error) =>
+        this._logger.errorMessage(
+          `Error when starting ECS run consumer: ${error.message}\n${error.stack}`
         )
       );
   }
@@ -77,31 +91,27 @@ class AliEcsSynchronizer {
    */
   async _onIntegratedServiceDcsMessage(eventMessage) {
     const { timestamp, integratedServiceEvent } = eventMessage;
-    try {
-      const SOR_EVENT_NAME = 'readout-dataflow.dcs.sor';
-      if (integratedServiceEvent.name === SOR_EVENT_NAME) {
-        const dcsSorEvent = DcsIntegratedEventAdapter.buildDcsIntegratedEvent(integratedServiceEvent, timestamp);
-        if (!dcsSorEvent) {
-          return;
-        }
-        const { environmentId } = dcsSorEvent;
-        let cachedDcsSteps = this._cacheService.getByKey(CacheKeys.DCS.SOR);
-        if (!cachedDcsSteps) {
-          cachedDcsSteps = {};
-        }
-        if (!cachedDcsSteps?.[environmentId]) {
-          cachedDcsSteps[environmentId] = {
-            displayCache: true,
-            dcsOperations: [dcsSorEvent]
-          };
-        } else {
-          cachedDcsSteps[environmentId].dcsOperations.push(dcsSorEvent);
-        }
-        cachedDcsSteps[environmentId].dcsOperations.sort((a, b) => a.timestamp - b.timestamp);
-        this._cacheService.updateByKeyAndBroadcast(CacheKeys.DCS.SOR, cachedDcsSteps, {command: CacheKeys.DCS.SOR});
+    const SOR_EVENT_NAME = 'readout-dataflow.dcs.sor';
+    if (integratedServiceEvent.name === SOR_EVENT_NAME) {
+      const dcsSorEvent = DcsIntegratedEventAdapter.buildDcsIntegratedEvent(integratedServiceEvent, timestamp);
+      if (!dcsSorEvent) {
+        return;
       }
-    } catch (error) {
-      this._logger.errorMessage(`Error when parsing event message: ${error.message}\n${error.trace}`);
+      const { environmentId } = dcsSorEvent;
+      let cachedDcsSteps = this._cacheService.getByKey(CacheKeys.DCS.SOR);
+      if (!cachedDcsSteps) {
+        cachedDcsSteps = {};
+      }
+      if (!cachedDcsSteps?.[environmentId]) {
+        cachedDcsSteps[environmentId] = {
+          displayCache: true,
+          dcsOperations: [dcsSorEvent]
+        };
+      } else {
+        cachedDcsSteps[environmentId].dcsOperations.push(dcsSorEvent);
+      }
+      cachedDcsSteps[environmentId].dcsOperations.sort((a, b) => a.timestamp - b.timestamp);
+      this._cacheService.updateByKeyAndBroadcast(CacheKeys.DCS.SOR, cachedDcsSteps, {command: CacheKeys.DCS.SOR});
     }
   }
 
@@ -110,14 +120,21 @@ class AliEcsSynchronizer {
    * @param {Object} eventMessage - message received on environment topic
    * @return {void}
    */
-  async _onEnvironmentMessage(eventMessage) {
-    try {
-      const environment = environmentEventAdapter(eventMessage);
-      const { timestamp, id } = environment;
-      this._logger.debugMessage(`Received at ${timestamp} environment event message for ${id}`);
-    } catch (error) {
-      this._logger.errorMessage(`Error when parsing environment event message: ${error.message}\n${error.trace}`);
-    }
+  _onEnvironmentMessage(eventMessage) {
+    const environment = environmentEventAdapter(eventMessage);
+    const { timestamp, id } = environment;
+    this._logger.debugMessage(`Received at ${timestamp} environment event message for ${id}`);
+  }
+
+  /**
+   * Callback for when a message is received on the run topic
+   * @param {Object} eventMessage - message received on run topic
+   * @return {void}
+   */
+  _onRunMessage(eventMessage) {
+    const run = runEventAdapter(eventMessage);
+    const { timestamp, runNumber } = run;
+    this._logger.debugMessage(`Received at ${timestamp} run event message for ${runNumber}`);
   }
 }
 
