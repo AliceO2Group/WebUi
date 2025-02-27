@@ -28,7 +28,7 @@ exports.runEventAdapter = ({ timestamp, runEvent }) => {
     transitionStatus,
   } = runEvent;
   return {
-    timestamp: timestamp.toNumber(),
+    timestamp: timestamp ? timestamp.toNumber() : undefined,
     environmentId,
     runNumber,
     state,

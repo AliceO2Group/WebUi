@@ -12,28 +12,34 @@
  */
 
 /**
- * Adapter for event messages received on environment topic
+ * Adapter for event messages received on run topic
  * @param {Event.proto} eventMessage - the event message to adapt
  * @param {int64.proto} eventMessage.timestamp - the timestamp of the event
- * @param {Ev_EnvironmentEvent.proto} eventMessage.environmentEvent - the environment event to adapt
- * @return {EnvironmentEvent} - the adapted event message without the timestampNano field
+ * @param {Ev_TaskEvent.proto} eventMessage.taskEvent - the object describing the task event
+ * @return {TaskEvent} - the adapted event message without the timestampNano field
  */
-exports.environmentEventAdapter = ({ timestamp, environmentEvent }) => {
-  const {
-    environmentId: id,
-    state, runNumber, error, message, transition, transitionStep, transitionStatus, vars, lastRequestUser
-  } = environmentEvent;
-  return {
-    id,
+exports.taskEventAdapter = ({ timestamp, taskEvent }) => {
+  const { 
+    name,
+    taskid: taskId,
     state,
-    runNumber,
-    error,
-    message,
-    transition,
-    transitionStep,
-    transitionStatus,
-    vars,
-    lastRequestUser,
+    status,
+    hostname,
+    className,
+    traits,
+    environmentId,
+    path
+  } = taskEvent;
+  return {
     timestamp: timestamp ? timestamp.toNumber() : undefined,
-  };
+    name,
+    taskId,
+    state,
+    status,
+    hostname,
+    className,
+    traits,
+    environmentId,
+    path
+  }
 };
