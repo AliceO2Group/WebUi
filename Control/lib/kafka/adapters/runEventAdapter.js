@@ -26,8 +26,6 @@ exports.runEventAdapter = ({ timestamp, runEvent }) => {
     error,
     transition,
     transitionStatus,
-    vars,
-    lastRequestUser
   } = runEvent;
   return {
     timestamp: timestamp.toNumber(),
@@ -37,7 +35,5 @@ exports.runEventAdapter = ({ timestamp, runEvent }) => {
     error,
     transition,
     transitionStatus,
-    vars,
-    lastRequestUser,
   }
 };

@@ -23,6 +23,18 @@
  * @property {Error} error - any error that occurred during the transition
  * @property {String} transition - DEPLOY, CONFIGURE, RESET, START_ACTIVITY, STOP_ACTIVITY, EXIT, GO_ERROR, RECOVER AS PER https://github.com/AliceO2Group/Control/blob/master/core/environment/environment.go#L143 
  * @property {String} transitionStatus - the status of the transition as defined in ControlWorkflows
- * @property {Map<String, String>} vars - map of all variables that are set and their values
- * @property {User.proto} lastRequestUser - the user that requested the last transition
+ * 
+ * @example
+ * 
+ *  "runEvent": {
+ *    "environmentId": "2t3azvnUe8Q",
+ *    "runNumber": 5,
+ *    "state": "CONFIGURED",
+ *    "transition": "START_ACTIVITY",
+ *    "transitionStatus": "STARTED",
+ *    "lastRequestUser": {
+ *      "externalId": 0,
+ *      "name": "anonymous"
+ *    }
+ *  }
  */
