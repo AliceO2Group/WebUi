@@ -15,7 +15,7 @@
  * Adapter for event messages received on run topic
  * @param {Event.proto} eventMessage - the event message to adapt
  * @param {int64.proto} eventMessage.timestamp - the timestamp of the event
- * @param {Ev_RunEvent.proto} eventMessage.runEvent - the timestamp of the event
+ * @param {Ev_RunEvent.proto} eventMessage.runEvent - the object describing the run event
  * @return {RunEvent} - the adapted event message without the timestampNano field
  */
 exports.runEventAdapter = ({ timestamp, runEvent }) => {
