@@ -65,21 +65,21 @@ class AliEcsSynchronizer {
       .start()
       .catch((error) =>
         this._logger.errorMessage(
-          `Error when starting ECS integrated services consumer: ${error.message}\n${error.trace}`
+          `Error when starting ECS integrated services consumer: ${error.message}\n${error.stack}`
         )
       );
     this._ecsEnvironmentConsumer
       .start()
       .catch((error) =>
         this._logger.errorMessage(
-          `Error when starting ECS environment consumer: ${error.message}\n${error.trace}`
+          `Error when starting ECS environment consumer: ${error.message}\n${error.stack}`
         )
       );
     this._ecsRunConsumer
       .start()
       .catch((error) =>
         this._logger.errorMessage(
-          `Error when starting ECS run consumer: ${error.message}\n${error.trace}`
+          `Error when starting ECS run consumer: ${error.message}\n${error.stack}`
         )
       );
   }
@@ -115,7 +115,7 @@ class AliEcsSynchronizer {
         this._cacheService.updateByKeyAndBroadcast(CacheKeys.DCS.SOR, cachedDcsSteps, {command: CacheKeys.DCS.SOR});
       }
     } catch (error) {
-      this._logger.errorMessage(`Error when parsing event message: ${error.message}\n${error.trace}`);
+      this._logger.errorMessage(`Error when parsing event message: ${error.message}\n${error.stack}`);
     }
   }
 
@@ -130,7 +130,7 @@ class AliEcsSynchronizer {
       const { timestamp, id } = environment;
       this._logger.debugMessage(`Received at ${timestamp} environment event message for ${id}`);
     } catch (error) {
-      this._logger.errorMessage(`Error when parsing environment event message: ${error.message}\n${error.trace}`);
+      this._logger.errorMessage(`Error when parsing environment event message: ${error.message}\n${error.stack}`);
     }
   }
 
@@ -145,7 +145,7 @@ class AliEcsSynchronizer {
       const { timestamp, runNumber } = run;
       this._logger.debugMessage(`Received at ${timestamp} run event message for ${runNumber}`);
     } catch (error) {
-      this._logger.errorMessage(`Error when parsing run event message: ${error.message}\n${error.trace}`);
+      this._logger.errorMessage(`Error when parsing run event message: ${error.message}\n${error.stack}`);
     }
   }
 }
