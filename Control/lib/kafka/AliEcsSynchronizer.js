@@ -11,14 +11,13 @@
  *  or submit itself to any jurisdiction.
  */
 
-const { AliEcsEventMessagesConsumer } = require('./AliEcsEventMessagesConsumer.js');
-const { DcsIntegratedEventAdapter } = require('../adapters/DcsIntegratedEventAdapter.js');
+const { AliEcsEventMessagesConsumer, LogManager } = require('@aliceo2/web-ui');
 const { CacheKeys } = require('../common/cacheKeys.enum.js'); 
-const { LogManager } = require('@aliceo2/web-ui');
+const { ConsumerGroups } = require('./enums/consumerGroups.enum.js');
+const { DcsIntegratedEventAdapter } = require('../adapters/DcsIntegratedEventAdapter.js');
+const { environmentEventAdapter } = require('./adapters/environmentEventAdapter.js');
+const { Topics } = require('./enums/topics.enum.js');
 
-const INTEGRATED_SERVICES_CONSUMER_GROUP = 'cog-integrated-services';
-const INTEGRATED_SERVICES_TOPICS = ['aliecs.integrated_service.dcs'];
-const SOR_EVENT_NAME = 'readout-dataflow.dcs.sor';
 
 /**
  * Utility synchronizing AliECS data into control-gui, listening to kafka
@@ -34,55 +33,91 @@ class AliEcsSynchronizer {
     this._cacheService = cacheService;  
     this._logger = LogManager.getLogger('cog/ali-ecs-synchronizer');
 
-    this._ecsIntegratedServiceConsumer = new AliEcsEventMessagesConsumer(
+    this._ecsIntegratedServiceDcsConsumer = new AliEcsEventMessagesConsumer(
       kafkaClient,
-      INTEGRATED_SERVICES_CONSUMER_GROUP,
-      INTEGRATED_SERVICES_TOPICS
+      ConsumerGroups.INTEGRATED_SERVICE.DCS,
+      Topics.INTEGRATED_SERVICE.DCS
     );
-    this._ecsIntegratedServiceConsumer.onMessageReceived(async (eventMessage) => {
-      const { timestamp, integratedServiceEvent } = eventMessage;
-      try {
-        if (integratedServiceEvent.name === SOR_EVENT_NAME) {
-          const dcsSorEvent = DcsIntegratedEventAdapter.buildDcsIntegratedEvent(integratedServiceEvent, timestamp);
-          if (!dcsSorEvent) {
-            return;
-          }
-          const { environmentId } = dcsSorEvent;
-          let cachedDcsSteps = this._cacheService.getByKey(CacheKeys.DCS.SOR);
-          if (!cachedDcsSteps) {
-            cachedDcsSteps = {};
-          }
-          if (!cachedDcsSteps?.[environmentId]) {
-            cachedDcsSteps[environmentId] = {
-              displayCache: true,
-              dcsOperations: [dcsSorEvent]
-            };
-          } else {
-            cachedDcsSteps[environmentId].dcsOperations.push(dcsSorEvent);
-          }
-          cachedDcsSteps[environmentId].dcsOperations.sort((a, b) => a.timestamp - b.timestamp);
-          this._cacheService.updateByKeyAndBroadcast(CacheKeys.DCS.SOR, cachedDcsSteps, {command: CacheKeys.DCS.SOR});
-        }
-      } catch (error) {
-        this._logger.errorMessage(`Error when parsing event message: ${error.message}\n${error.trace}`);
-      }
-    });
+    this._ecsIntegratedServiceDcsConsumer.onMessageReceived(this._onIntegratedServiceDcsMessage.bind(this));
+
+    this._ecsEnvironmentConsumer = new AliEcsEventMessagesConsumer(
+      kafkaClient,
+      ConsumerGroups.ENVIRONMENT,
+      Topics.ENVIRONMENT
+    );
+    this._ecsEnvironmentConsumer.onMessageReceived(this._onEnvironmentMessage.bind(this));
   }
 
   /**
-   * Start the synchronization process
-   *
+   * Start the synchronization process and listen to events from various topics via their consumers
    * @return {void}
    */
   start() {
-    this._logger.infoMessage('Starting to consume AliECS messages for integrated services');
-    this._ecsIntegratedServiceConsumer
+    this._logger.infoMessage('Starting to consume AliECS messages for topics:');
+    this._ecsIntegratedServiceDcsConsumer
       .start()
       .catch((error) =>
         this._logger.errorMessage(
           `Error when starting ECS integrated services consumer: ${error.message}\n${error.trace}`
         )
-      );
+    );
+    this._ecsEnvironmentConsumer
+    .start()
+    .catch((error) =>
+      this._logger.errorMessage(
+        `Error when starting ECS integrated services consumer: ${error.message}\n${error.trace}`
+      )
+    );
+  }
+
+  /**
+   * Callback for when a message is received on the integrated service DCS topic
+   * @param {Object} eventMessage - message received from integrated service
+   * @return {void}
+   */
+  async _onIntegratedServiceDcsMessage(eventMessage) {
+    const { timestamp, integratedServiceEvent } = eventMessage;
+    try {
+      const SOR_EVENT_NAME = 'readout-dataflow.dcs.sor';
+      if (integratedServiceEvent.name === SOR_EVENT_NAME) {
+        const dcsSorEvent = DcsIntegratedEventAdapter.buildDcsIntegratedEvent(integratedServiceEvent, timestamp);
+        if (!dcsSorEvent) {
+          return;
+        }
+        const { environmentId } = dcsSorEvent;
+        let cachedDcsSteps = this._cacheService.getByKey(CacheKeys.DCS.SOR);
+        if (!cachedDcsSteps) {
+          cachedDcsSteps = {};
+        }
+        if (!cachedDcsSteps?.[environmentId]) {
+          cachedDcsSteps[environmentId] = {
+            displayCache: true,
+            dcsOperations: [dcsSorEvent]
+          };
+        } else {
+          cachedDcsSteps[environmentId].dcsOperations.push(dcsSorEvent);
+        }
+        cachedDcsSteps[environmentId].dcsOperations.sort((a, b) => a.timestamp - b.timestamp);
+        this._cacheService.updateByKeyAndBroadcast(CacheKeys.DCS.SOR, cachedDcsSteps, {command: CacheKeys.DCS.SOR});
+      }
+    } catch (error) {
+      this._logger.errorMessage(`Error when parsing event message: ${error.message}\n${error.trace}`);
+    }
+  }
+
+  /**
+   * Callback for when a message is received on the environment topic
+   * @param {Object} eventMessage - message received on environment topic
+   * @return {void}
+   */
+  async _onEnvironmentMessage(eventMessage) {
+    try {
+      const environment = environmentEventAdapter(eventMessage);
+      const { timestamp, id } = environment;
+      this._logger.debugMessage(`Received at ${timestamp} environment event message for ${id}`);
+    } catch (error) {
+      this._logger.errorMessage(`Error when parsing environment event message: ${error.message}\n${error.trace}`);
+    }
   }
 }
 
