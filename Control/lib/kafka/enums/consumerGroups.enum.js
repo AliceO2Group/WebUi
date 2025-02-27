@@ -17,4 +17,5 @@ exports.ConsumerGroups = Object.freeze({
     DCS: 'cog-integrated-service'
   },
   RUN: 'cog-run',
+  TASK: 'cog-task',
 });

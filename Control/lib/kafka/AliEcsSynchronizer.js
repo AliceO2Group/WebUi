@@ -17,8 +17,8 @@ const { ConsumerGroups } = require('./enums/consumerGroups.enum.js');
 const { DcsIntegratedEventAdapter } = require('../adapters/DcsIntegratedEventAdapter.js');
 const { environmentEventAdapter } = require('./adapters/environmentEventAdapter.js');
 const { runEventAdapter } = require('./adapters/runEventAdapter.js');
+const { taskEventAdapter } = require('./adapters/taskEventAdapter.js');
 const { Topics } = require('./enums/topics.enum.js');
-
 
 /**
  * Utility synchronizing AliECS data into control-gui, listening to kafka
@@ -54,6 +54,13 @@ class AliEcsSynchronizer {
       Topics.RUN
     );
     this._ecsRunConsumer.onMessageReceived(this._onRunMessage.bind(this));
+
+    this._ecsTaskConsumer = new AliEcsEventMessagesConsumer(
+      kafkaClient,
+      ConsumerGroups.TASK,
+      Topics.TASK
+    );
+    this._ecsTaskConsumer.onMessageReceived(this._onTaskMessage.bind(this));
   }
 
   /**
@@ -81,6 +88,14 @@ class AliEcsSynchronizer {
       .catch((error) =>
         this._logger.errorMessage(
           `Error when starting ECS run consumer: ${error.message}\n${error.trace}`
+        )
+      );
+    
+    this._ecsTaskConsumer
+      .start()
+      .catch((error) =>
+        this._logger.errorMessage(
+          `Error when starting ECS task consumer: ${error.message}\n${error.trace}`
         )
       );
   }
@@ -147,6 +162,21 @@ class AliEcsSynchronizer {
       this._logger.debugMessage(`Received at ${timestamp} run event message for ${runNumber}`);
     } catch (error) {
       this._logger.errorMessage(`Error when parsing run event message: ${error.message}\n${error.trace}`);
+    }
+  }
+
+  /**
+   * Callback for when a message is received on the task topic
+   * @param {Object} eventMessage - message received on task topic
+   * @return {void}
+   */
+  async _onTaskMessage(eventMessage) {
+    try {
+      const task = taskEventAdapter(eventMessage)
+      const { timestamp, taskId, environmentId } = task;
+      this._logger.debugMessage(`Received at ${timestamp} task event message for ${taskId} in environment ${environmentId}`);
+    } catch (error) {
+      this._logger.errorMessage(`Error when parsing task event message: ${error.message}\n${error.trace}`);
     }
   }
 }
