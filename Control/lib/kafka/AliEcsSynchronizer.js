@@ -90,7 +90,7 @@ class AliEcsSynchronizer {
    * @return {void}
    */
   async _onIntegratedServiceDcsMessage(eventMessage) {
-  const { timestamp, integratedServiceEvent } = eventMessage;
+    const { timestamp, integratedServiceEvent } = eventMessage;
     const SOR_EVENT_NAME = 'readout-dataflow.dcs.sor';
     if (integratedServiceEvent.name === SOR_EVENT_NAME) {
       const dcsSorEvent = DcsIntegratedEventAdapter.buildDcsIntegratedEvent(integratedServiceEvent, timestamp);
