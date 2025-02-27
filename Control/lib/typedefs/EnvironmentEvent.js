@@ -12,10 +12,10 @@
  */
 
 /**
- * @typedef EnvironmentInfo
+ * @typedef EnvironmentEvent
  *
- * EnvironmentInfo type definition as parsed and sent to the client by the GUI server
- * The parsing is done based on the object received from ECS in `o2control.proto` definition
+ * EnvironmentEvent type definition as parsed following the received message from the ECS Kafka environment topic
+ * The parsing is done based on the object received from ECS in `events.proto` definition
  *
  * @property {String} id
  * @property {String} state - STANDBY, DEPLOYED, CONFIGURED, RUNNING, ERROR, MIXED, SHUTDOWN
