@@ -19,7 +19,6 @@ const { environmentEventAdapter } = require('./adapters/environmentEventAdapter.
 const { runEventAdapter } = require('./adapters/runEventAdapter.js');
 const { Topics } = require('./enums/topics.enum.js');
 
-
 /**
  * Utility synchronizing AliECS data into control-gui, listening to kafka
  */
@@ -83,56 +82,6 @@ class AliEcsSynchronizer {
           `Error when starting ECS run consumer: ${error.message}\n${error.trace}`
         )
       );
-  }
-
-  /**
-   * Callback for when a message is received on the integrated service DCS topic
-   * @param {Object} eventMessage - message received from integrated service
-   * @return {void}
-   */
-  async _onIntegratedServiceDcsMessage(eventMessage) {
-    const { timestamp, integratedServiceEvent } = eventMessage;
-    try {
-      const SOR_EVENT_NAME = 'readout-dataflow.dcs.sor';
-      if (integratedServiceEvent.name === SOR_EVENT_NAME) {
-        const dcsSorEvent = DcsIntegratedEventAdapter.buildDcsIntegratedEvent(integratedServiceEvent, timestamp);
-        if (!dcsSorEvent) {
-          return;
-        }
-        const { environmentId } = dcsSorEvent;
-        let cachedDcsSteps = this._cacheService.getByKey(CacheKeys.DCS.SOR);
-        if (!cachedDcsSteps) {
-          cachedDcsSteps = {};
-        }
-        if (!cachedDcsSteps?.[environmentId]) {
-          cachedDcsSteps[environmentId] = {
-            displayCache: true,
-            dcsOperations: [dcsSorEvent]
-          };
-        } else {
-          cachedDcsSteps[environmentId].dcsOperations.push(dcsSorEvent);
-        }
-        cachedDcsSteps[environmentId].dcsOperations.sort((a, b) => a.timestamp - b.timestamp);
-        this._cacheService.updateByKeyAndBroadcast(CacheKeys.DCS.SOR, cachedDcsSteps, {command: CacheKeys.DCS.SOR});
-      }
-    } catch (error) {
-      this._logger.errorMessage(`Error when parsing event message: ${error.message}\n${error.trace}`);
-    }
-  }
-
-  /**
-   * Callback for when a message is received on the environment topic
-   * @param {Object} eventMessage - message received on environment topic
-   * @return {void}
-   */
-  async _onEnvironmentMessage(eventMessage) {
-    try {
-      const environment = environmentEventAdapter(eventMessage);
-      const { timestamp, id } = environment;
-      this._logger.debugMessage(`Received at ${timestamp} environment event message for ${id}`);
-    } catch (error) {
-      this._logger.errorMessage(`Error when parsing environment event message: ${error.message}\n${error.trace}`);
-    }
   }
 
   /**
