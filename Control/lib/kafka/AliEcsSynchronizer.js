@@ -60,14 +60,14 @@ class AliEcsSynchronizer {
         this._logger.errorMessage(
           `Error when starting ECS integrated services consumer: ${error.message}\n${error.trace}`
         )
-    );
+      );
     this._ecsEnvironmentConsumer
-    .start()
-    .catch((error) =>
-      this._logger.errorMessage(
-        `Error when starting ECS integrated services consumer: ${error.message}\n${error.trace}`
-      )
-    );
+      .start()
+      .catch((error) =>
+        this._logger.errorMessage(
+          `Error when starting ECS integrated services consumer: ${error.message}\n${error.trace}`
+        )
+      );
   }
 
   /**

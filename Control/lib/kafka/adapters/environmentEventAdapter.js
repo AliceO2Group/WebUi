@@ -18,7 +18,10 @@
  */
 exports.environmentEventAdapter = (eventMessage) => {
   const { timestamp, environmentEvent } = eventMessage;
-  const { environmentId: id, state, runNumber, error, message, transition, transitionStep, transitionStatus, vars, lastRequestUser } = environmentEvent;
+  const {
+    environmentId: id,
+    state, runNumber, error, message, transition, transitionStep, transitionStatus, vars, lastRequestUser
+  } = environmentEvent;
   return {
     id,
     state,
