@@ -15,5 +15,6 @@ exports.Topics = Object.freeze({
   ENVIRONMENT: ['aliecs.environment'],
   INTEGRATED_SERVICE: {
     DCS: ['aliecs.integrated_service.dcs'],
-  }
+  },
+  RUN: ['aliecs.run'],
 });
