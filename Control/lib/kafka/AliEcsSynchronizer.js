@@ -90,6 +90,13 @@ class AliEcsSynchronizer {
           `Error when starting ECS run consumer: ${error.message}\n${error.stack}`
         )
       );
+    this._ecsTaskConsumer
+      .start()
+      .catch((error) =>
+        this._logger.errorMessage(
+          `Error when starting ECS task consumer: ${error.message}\n${error.stack}`
+        )
+      );
   }
 
   /**
@@ -128,7 +135,7 @@ class AliEcsSynchronizer {
    * @param {Object} eventMessage - message received on environment topic
    * @return {void}
    */
-  _onEnvironmentMessage(eventMessage) {
+  async _onEnvironmentMessage(eventMessage) {
     const environment = environmentEventAdapter(eventMessage);
     const { timestamp, id } = environment;
     this._logger.debugMessage(`Received at ${timestamp} environment event message for ${id}`);
@@ -139,10 +146,21 @@ class AliEcsSynchronizer {
    * @param {Object} eventMessage - message received on run topic
    * @return {void}
    */
-  _onRunMessage(eventMessage) {
+  async _onRunMessage(eventMessage) {
     const run = runEventAdapter(eventMessage);
     const { timestamp, runNumber } = run;
     this._logger.debugMessage(`Received at ${timestamp} run event message for ${runNumber}`);
+  }
+
+  /**
+   * Callback for when a message is received on the task topic
+   * @param {Object} eventMessage - message received on task topic
+   * @return {void}
+   */
+  async _onTaskMessage(eventMessage) {
+    const task = taskEventAdapter(eventMessage);
+    const { timestamp, taskId, environmentId } = task;
+    this._logger.debugMessage(`Received at ${timestamp} task event message for ${taskId} of environment ${environmentId}`);
   }
 }
 
