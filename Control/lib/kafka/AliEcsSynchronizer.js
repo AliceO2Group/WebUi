@@ -160,7 +160,9 @@ class AliEcsSynchronizer {
   async _onTaskMessage(eventMessage) {
     const task = taskEventAdapter(eventMessage);
     const { timestamp, taskId, environmentId } = task;
-    this._logger.debugMessage(`Received at ${timestamp} task event message for ${taskId} of environment ${environmentId}`);
+    this._logger.debugMessage(
+      `Received at ${timestamp} task event message for ${taskId} of environment ${environmentId}`
+    );
   }
 }
 
