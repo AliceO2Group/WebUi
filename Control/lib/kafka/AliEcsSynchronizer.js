@@ -73,7 +73,14 @@ class AliEcsSynchronizer {
       .start()
       .catch((error) =>
         this._logger.errorMessage(
-          `Error when starting ECS integrated services consumer: ${error.message}\n${error.trace}`
+          `Error when starting ECS environment consumer: ${error.message}\n${error.trace}`
+        )
+    );
+    this._ecsRunConsumer
+      .start()
+      .catch((error) =>
+        this._logger.errorMessage(
+          `Error when starting ECS run consumer: ${error.message}\n${error.trace}`
         )
       );
   }
