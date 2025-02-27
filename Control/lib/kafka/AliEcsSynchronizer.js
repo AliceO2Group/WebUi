@@ -16,6 +16,7 @@ const { CacheKeys } = require('../common/cacheKeys.enum.js');
 const { ConsumerGroups } = require('./enums/consumerGroups.enum.js');
 const { DcsIntegratedEventAdapter } = require('../adapters/DcsIntegratedEventAdapter.js');
 const { environmentEventAdapter } = require('./adapters/environmentEventAdapter.js');
+const { runEventAdapter } = require('./adapters/runEventAdapter.js');
 const { Topics } = require('./enums/topics.enum.js');
 
 
@@ -46,6 +47,13 @@ class AliEcsSynchronizer {
       Topics.ENVIRONMENT
     );
     this._ecsEnvironmentConsumer.onMessageReceived(this._onEnvironmentMessage.bind(this));
+
+    this._ecsRunConsumer = new AliEcsEventMessagesConsumer(
+      kafkaClient,
+      ConsumerGroups.RUN,
+      Topics.RUN
+    );
+    this._ecsRunConsumer.onMessageReceived(this._onRunMessage.bind(this));
   }
 
   /**
