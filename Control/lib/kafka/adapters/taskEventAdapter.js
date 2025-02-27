@@ -31,7 +31,7 @@ exports.taskEventAdapter = ({ timestamp, taskEvent }) => {
     path
   } = taskEvent;
   return {
-    timestamp: timestamp.toNumber(),
+    timestamp: timestamp ? timestamp.toNumber() : undefined,
     name,
     taskId,
     state,

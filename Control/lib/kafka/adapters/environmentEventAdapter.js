@@ -34,6 +34,6 @@ exports.environmentEventAdapter = ({ timestamp, environmentEvent }) => {
     transitionStatus,
     vars,
     lastRequestUser,
-    timestamp: timestamp.toNumber(),
+    timestamp: timestamp ? timestamp.toNumber() : undefined,
   };
 };
