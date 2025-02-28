@@ -11,20 +11,9 @@
  * or submit itself to any jurisdiction.
  */
 
-const {TaskState} = require('./../common/taskState.enum.js');
-const QC_NODES_NAME_REGEX = /alio2-cr1-q(c|me|ts)[0-9]{2}/;
-
-/**
- * Enum with potential sources of tasks for AliECS environment
- * @readonly
- * @enum {String}
- */
-const TASKS_SOURCE = {
-  EPN: 'EPN',
-  FLP: 'FLP',
-  TRG: 'TRG',
-  QC: 'QC',
-}
+const { TaskState } = require('./../common/taskState.enum.js');
+const { getTasksFromGrpcEnvironment } = require('./task/getTasksFromGrpcEnvironment.js');
+const { QC_NODES_NAME_REGEX } = require('./task/QcNodeNameRegex.js');
 
 /**
  * EnvironmentInfoAdapter - Given an AliECS Environment, construct an EnvironmentInfo object for GUI purposes
@@ -101,50 +90,7 @@ class EnvironmentInfoAdapter {
     taskSource = taskSource.toLocaleUpperCase();
 
     const environmentInfo = EnvironmentInfoAdapter.toOverviewEntity(environment, detectorsAll, hostsByDetectors);
-    if (taskSource === TASKS_SOURCE.EPN) {
-      const {integratedServicesData: {odc = '{}'}} = environment;
-      const {devices = []} = JSON.parse(odc);
-
-      environmentInfo.tasks = Array.from(
-        Object.values(devices).map((device) => {
-          device.epnState = device.state;
-          device.state = device.ecsState;
-          delete device.ecsState;
-          return device;
-        })
-      );
-    } else if (taskSource === TASKS_SOURCE.FLP) {
-      const {tasks = [], includedDetectors} = environment;
-      environmentInfo.tasks = [];
-      for (const task of tasks) {
-        const {deploymentInfo: {hostname = ''} = {}} = task;
-        const keyDetector = Object.keys(Object.fromEntries(hostsByDetectors))
-          .filter((detector) => hostsByDetectors.get(detector).includes(hostname))[0];
-        if (!hostname.match(QC_NODES_NAME_REGEX) && includedDetectors.includes(keyDetector)) {
-          environmentInfo.tasks.push(task);
-        }
-      }
-    } else if (taskSource === TASKS_SOURCE.QC) {
-      const {tasks = []} = environment;
-      environmentInfo.tasks = [];
-      for (const task of tasks) {
-        const {deploymentInfo: {hostname = ''} = {}} = task;
-        if (hostname.match(QC_NODES_NAME_REGEX)) {
-          environmentInfo.tasks.push(task);
-        }
-      }
-    } else if (taskSource === TASKS_SOURCE.TRG) {
-      const {tasks = [], includedDetectors} = environment;
-      environmentInfo.tasks = [];
-      for (const task of tasks) {
-        const {deploymentInfo: {hostname = ''} = {}} = task;
-        const keyDetector = Object.keys(Object.fromEntries(hostsByDetectors))
-          .filter((detector) => hostsByDetectors.get(detector).includes(hostname))[0];
-        if (!hostname.match(QC_NODES_NAME_REGEX) && !includedDetectors.includes(keyDetector)) {
-          environmentInfo.tasks.push(task);
-        }
-      }
-    }
+    environmentInfo.tasks = getTasksFromGrpcEnvironment(environment, taskSource, hostsByDetectors);
     return environmentInfo;
   }
 
