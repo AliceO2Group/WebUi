@@ -77,22 +77,6 @@ export class ObjectController {
   }
 
   /**
-   * Check the state of OnlineMode by checking the status of Consul Leading Agent
-   * @param {Request} req - HTTP request object with information on owner_id
-   * @param {Response} res - HTTP response object to provide layouts information
-   * @returns {undefined}
-   */
-  async isOnlineModeConnectionAlive(req, res) {
-    try {
-      await this._onlineService.getConsulLeaderStatus();
-      res.status(200).json({ running: true });
-    } catch (error) {
-      const message = 'Unable to retrieve Consul Status';
-      errorHandler(error, message, res, 503, 'consul');
-    }
-  }
-
-  /**
    * Using `browse` option, request a list of `last-modified` and `valid-from` for a specified path for an object
    * Use the first `validFrom` option to make a head request to CCDB; Request which will in turn return object
    * information and download it locally on CCDB if it is not already done so;

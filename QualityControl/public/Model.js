@@ -66,7 +66,6 @@ export default class Model extends Observable {
     this.aboutViewModel = new AboutViewModel(this);
     this.aboutViewModel.bubbleTo(this);
 
-    this.isOnlineModeConnectionAlive = false;
     this.isOnlineModeEnabled = false; // Show only online objects or all (offline)
 
     this.refreshTimer = 0;
@@ -309,19 +308,6 @@ export default class Model extends Observable {
    */
   isContextSecure() {
     return window.isSecureContext;
-  }
-
-  /**
-   * Method to check if Online Mode is available
-   * @returns {undefined}
-   */
-  async checkOnlineModeAvailability() {
-    const result = await this.services.object.isOnlineModeConnectionAlive();
-    if (result.isSuccess()) {
-      this.isOnlineModeConnectionAlive = true;
-    } else {
-      this.isOnlineModeConnectionAlive = false;
-    }
   }
 
   /**

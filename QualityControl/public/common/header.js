@@ -95,7 +95,7 @@ const onlineButton = (model) => h(
     onclick: () => toggleOnlineButton(model),
     disabled: model.object.queryingObjects ? true : false,
     title: model.object.queryingObjects ? 'Toggling disabled while querying' : 'Toggle Mode (Online/Offline)',
-    style: model.isOnlineModeConnectionAlive ? '' : 'display: none',
+    style: 'display: none',
   },
   'Online',
   ' ',
