@@ -103,10 +103,6 @@ export default class Model extends Observable {
       layout: new LayoutService(this),
     };
 
-    if (QCG.CONSUL_SERVICE) {
-      this.checkOnlineModeAvailability();
-    }
-
     this.loader.get('/api/checkUser');
 
     // JSROOT.settings.ContextMenu = true;
