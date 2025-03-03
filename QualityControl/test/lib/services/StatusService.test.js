@@ -22,7 +22,7 @@ import { StatusService } from './../../../lib/services/Status.service.js';
 
 export const statusServiceTestSuite = async () => {
   suite('`retrieveDataServiceStatus()` tests', () => {
-    let statusService;
+    let statusService = undefined;
     before(() => {
       statusService = new StatusService({ version: '0.1.1' });
     });

@@ -39,11 +39,6 @@ export class StatusService {
     this._dataService = undefined;
 
     /**
-     * @type {ConsulService}
-     */
-    this._onlineService = undefined;
-
-    /**
      * @type {WebSocket}
      */
     this._ws = undefined;
@@ -136,15 +131,6 @@ export class StatusService {
    */
   set dataService(dataService) {
     this._dataService = dataService;
-  }
-
-  /**
-   * Set service to be used for querying status of online mode provider (Consul)
-   * @param {ConsulService} onlineService - service used for retrieving list of objects currently being produced
-   * @returns {void}
-   */
-  set onlineService(onlineService) {
-    this._onlineService = onlineService;
   }
 
   /**

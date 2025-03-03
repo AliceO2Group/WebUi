@@ -41,7 +41,6 @@ import { aboutPageTests } from './public/pages/about-page.test.js';
  * Backend tests imports
  */
 import { utilsTestSuite } from './lib/utils/utils.test.js';
-import { publicConfigProviderTest } from './lib/config/publicConfig.test.js';
 
 /**
  * Controllers
@@ -149,7 +148,6 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
   suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
     suite('Lib - Test Suite', async () => {
       suite('Utility methods test suite', async () => await utilsTestSuite());
-      suite('Configuration File Parser test suite', async () => await publicConfigProviderTest());
     });
 
     suite('Common Library - Test Suite', () => {

@@ -67,9 +67,6 @@ export default class Model extends Observable {
     this.aboutViewModel = new AboutViewModel(this);
     this.aboutViewModel.bubbleTo(this);
 
-    this.isOnlineModeConnectionAlive = false;
-    this.isOnlineModeEnabled = false; // Show only online objects or all (offline)
-
     this.refreshTimer = 0;
     this.refreshInterval = 0; // Seconds
     this.sidebar = true;
@@ -103,10 +100,6 @@ export default class Model extends Observable {
       object: new QCObjectService(this),
       layout: new LayoutService(this),
     };
-
-    if (QCG.CONSUL_SERVICE) {
-      this.checkOnlineModeAvailability();
-    }
 
     this.loader.get('/api/checkUser');
 
@@ -291,42 +284,12 @@ export default class Model extends Observable {
   }
 
   /**
-   * Toggle mode (Online/Offline)
-   * @returns {undefined}
-   */
-  toggleMode() {
-    this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
-    if (this.isOnlineModeEnabled) {
-      this.setRefreshInterval(60);
-    } else {
-      this.object.loadList();
-      clearTimeout(this.refreshTimer);
-    }
-    this.object.selected = null;
-    this.object.searchInput = '';
-    this.notify();
-  }
-
-  /**
    * Method to check if connection is secure to enable certain improvements
    * e.g navigator.clipboard, notifications, service workers
    * @returns {boolean} - whether window is in secure context
    */
   isContextSecure() {
     return window.isSecureContext;
-  }
-
-  /**
-   * Method to check if Online Mode is available
-   * @returns {undefined}
-   */
-  async checkOnlineModeAvailability() {
-    const result = await this.services.object.isOnlineModeConnectionAlive();
-    if (result.isSuccess()) {
-      this.isOnlineModeConnectionAlive = true;
-    } else {
-      this.isOnlineModeConnectionAlive = false;
-    }
   }
 
   /**
