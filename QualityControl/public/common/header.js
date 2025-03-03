@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconPerson, iconMediaPlay, iconMediaStop } from '/js/src/index.js';
+import { h, iconPerson } from '/js/src/index.js';
 
 import { spinner } from './spinner.js';
 import layoutViewHeader from '../layout/view/header.js';

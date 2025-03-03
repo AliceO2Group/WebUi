@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-/* global QCG, JSROOT */
+/* global JSROOT */
 
 import {
   sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification, RemoteData,
