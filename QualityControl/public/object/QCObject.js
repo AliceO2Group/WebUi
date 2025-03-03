@@ -341,15 +341,6 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Method to check if an object is in online mode
-   * @param {string} objectName format: QcTask/example
-   * @returns {boolean} - whether the object is in the online list
-   */
-  isObjectInOnlineList(objectName) {
-    return false;
-  }
-
-  /**
    * Method to generate drawing options based on where in the application the plot is displayed
    * @param {TabObject} tabObject - tab dto representation
    * @param {RemoteData<{king: string, payload: QcObject}>} objectRemoteData - QC object within RemoteData type

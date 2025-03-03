@@ -125,12 +125,11 @@ function rows(model, layouts, searchBy) {
           const key = `key${layout.name}`;
           const { isOfficial } = layout;
           const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
-          const isOnline = model.layout.doesLayoutContainOnlineObjects(layout) ? 'success' : '';
           return h('tr', { key: key }, [
             h('td', {
             }, isOfficial ? h('.primary.f4.text-center', [iconBadge(), ' ']) : ' '),
             h('td.w-20', [
-              h('.flex-row.items-center', { class: isOnline }, [
+              h('.flex-row.items-center', [
                 h('a', {
                   href: `?page=layoutShow&layoutId=${layout.id}`,
                   onclick: (e) => model.router.handleLinkEvent(e),

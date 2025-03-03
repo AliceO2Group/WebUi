@@ -173,7 +173,6 @@ function chartView(model, tabObject) {
   };
 
   let className = '';
-  className += model.object.isObjectInOnlineList(tabObject.name) ? 'object-online ' : '';
   className += model.layout.editingTabObject && model.layout.editingTabObject.id === tabObject.id
     ? 'layout-selected layout-selectable '
     : 'layout-selectable ';
