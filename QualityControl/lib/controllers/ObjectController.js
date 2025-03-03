@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 'use strict';
-import { getObjectsNameFromConsulMap } from '../../common/library/qcObject/utils.js';
 import { errorHandler } from './../utils/utils.js';
 
 /**
@@ -24,18 +23,12 @@ export class ObjectController {
    * Setup Object Controller:
    * - CcdbService - retrieve data about objects
    * @param {QCObjectService} objService - objService to be used for retrieval of information
-   * @param {ConsulService} onlineService - retrieve information on which objects are currently generated
    */
-  constructor(objService, onlineService) {
+  constructor(objService) {
     /**
      * @type {QCObjectService}
      */
     this._objService = objService;
-
-    /**
-     * @type {ConsulService}
-     */
-    this._onlineService = onlineService;
   }
 
   /**
@@ -57,38 +50,6 @@ export class ObjectController {
       } catch (error) {
         errorHandler(error, 'Failed to retrieve list of objects latest version', res, 502, 'object');
       }
-    }
-  }
-
-  /**
-   * List all Online objects' name if online mode is enabled
-   * @param {Request} req - HTTP request object with "query" information on object
-   * @param {Response} res - HTTP response object to provide information on request
-   * @returns {void}
-   */
-  async getOnlineObjects(req, res) {
-    try {
-      const services = await this._onlineService.getServices();
-      const tags = getObjectsNameFromConsulMap(this._db.prefix, services);
-      res.status(200).json(tags);
-    } catch (error) {
-      errorHandler(error, 'Unable to retrieve list of Online Objects', res, 503, 'online');
-    }
-  }
-
-  /**
-   * Check the state of OnlineMode by checking the status of Consul Leading Agent
-   * @param {Request} req - HTTP request object with information on owner_id
-   * @param {Response} res - HTTP response object to provide layouts information
-   * @returns {undefined}
-   */
-  async isOnlineModeConnectionAlive(req, res) {
-    try {
-      await this._onlineService.getConsulLeaderStatus();
-      res.status(200).json({ running: true });
-    } catch (error) {
-      const message = 'Unable to retrieve Consul Status';
-      errorHandler(error, message, res, 503, 'consul');
     }
   }
 

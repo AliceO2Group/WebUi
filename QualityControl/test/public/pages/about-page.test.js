@@ -29,7 +29,6 @@ describe('about page test suite', async () => {
   it('should have an About View Model item with config fields', async () => {
     const expConfig = {
       qcg: { port: 8181, hostname: 'localhost', status: { ok: true } },
-      consul: { hostname: 'localhost', port: 8500, status: { ok: false, message: 'Live Mode was not configured' } },
       ccdb: {
         hostname: 'ccdb',
         port: 8500,

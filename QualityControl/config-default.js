@@ -40,18 +40,6 @@ export const config = {
   },
 
   /*
-   * Consul configuration object
-   * consul: {
-   *   hostname: 'localhost',
-   *   port: 8500,
-   *   refreshRate: {
-   *     min: 10,
-   *     max: 120
-   *   }
-   * }
-   */
-
-  /*
    * Absolute path where to save layouts, default = root of this app
    * dbFile: '/var/db/qcg-db.json'
    */
