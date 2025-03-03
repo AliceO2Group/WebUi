@@ -283,19 +283,6 @@ export default class Model extends Observable {
   }
 
   /**
-   * Toggle mode (Online/Offline)
-   * @returns {undefined}
-   */
-  toggleMode() {
-    this.object.loadList();
-    clearTimeout(this.refreshTimer);
-
-    this.object.selected = null;
-    this.object.searchInput = '';
-    this.notify();
-  }
-
-  /**
    * Method to check if connection is secure to enable certain improvements
    * e.g navigator.clipboard, notifications, service workers
    * @returns {boolean} - whether window is in secure context

@@ -16,8 +16,7 @@ import { h } from '/js/src/index.js';
 import { iconCollapseUp, iconArrowBottom, iconArrowTop } from '/js/src/icons.js';
 
 /**
- * Shows header for the objects tree page, buttons allow to open/close the entire tree,
- * filter only 'online' objects thanks to information service and a search input allow to filter
+ * Shows header for the objects tree page, buttons allow to open/close the entire tree, a search input allow to filter
  * by name.
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element

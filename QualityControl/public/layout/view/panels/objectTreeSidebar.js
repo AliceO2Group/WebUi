@@ -55,7 +55,6 @@ export default (model) =>
 
 /**
  * An input which allows users to search though objects;
- * A checkbox to switch to displaying only objects in Online Mode (displayed only if online mode is available)
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */

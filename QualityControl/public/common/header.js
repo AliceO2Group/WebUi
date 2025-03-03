@@ -33,9 +33,6 @@ export default (model) => h('.flex-row.p2', [
   headerSpecific(model),
 ]);
 
-let onlineButtonIcon = iconMediaPlay();
-let onlineButtonStyle = 'btn-default';
-
 /**
  * Shows the page specific header (center and right side)
  * @param {Model} model - root model of the application
@@ -59,8 +56,6 @@ const headerSpecific = (model) => {
 const commonHeader = (model) => h('.flex-grow.flex-row.items-center', [
   loginButton(model),
   ' ',
-  onlineButton(model),
-  ' ',
   h('span.f4.gray', 'Quality Control'),
   model.loader.active && h('span.f4.mh1.gray', spinner()),
 ]);
@@ -82,40 +77,3 @@ const loginButton = (model) =>
         : h('a.menu-item', { onclick: () => alert('Not implemented') }, 'Logout'),
     ]),
   ]);
-
-/**
- * Create button which will allow user to enable/disable online mode
- * @param {Model} model - root model of the application
- * @returns {vnode} - virtual node element
- */
-const onlineButton = (model) => h(
-  'button.btn',
-  {
-    className: onlineButtonStyle,
-    onclick: () => toggleOnlineButton(model),
-    disabled: model.object.queryingObjects ? true : false,
-    title: model.object.queryingObjects ? 'Toggling disabled while querying' : 'Toggle Mode (Online/Offline)',
-    style: 'display: none',
-  },
-  'Online',
-  ' ',
-  onlineButtonIcon,
-);
-
-/**
- * Action to disable/enable online mode
- * @param {Model} model - root model of the application
- * @returns {undefined}
- */
-function toggleOnlineButton(model) {
-  model.toggleMode();
-  switch (false) {
-    case true:
-      onlineButtonStyle = 'btn-success';
-      onlineButtonIcon = iconMediaStop();
-      break;
-    default:
-      onlineButtonStyle = 'btn-default';
-      onlineButtonIcon = iconMediaPlay();
-  }
-}

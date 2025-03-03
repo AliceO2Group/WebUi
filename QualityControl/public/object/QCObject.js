@@ -38,8 +38,6 @@ export default class QCObject extends Observable {
     this.selectedOpen = false;
     this.objects = {}; // ObjectName -> RemoteData.payload -> plot
 
-    this.listOnline = []; // List of online objects name
-
     this.searchInput = ''; // String - content of input search
     this.searchResult = []; // Array<object> - result list of search
     this.sortBy = {
@@ -53,7 +51,7 @@ export default class QCObject extends Observable {
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
 
-    this.sideTree = new ObjectTree('online');
+    this.sideTree = new ObjectTree('database');
     this.sideTree.bubbleTo(this);
     this.queryingObjects = false;
     this.scrollTop = 0;
@@ -94,23 +92,6 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Method to display sideTree(edit layout mode) based on onlineList / offlineList
-   * @param {boolean} isOnlineListRequested - whether user would like to view only online list
-   * @returns {undefined}
-   */
-  toggleSideTree(isOnlineListRequested) {
-    this.sideTree.bubbleTo(this);
-    if (isOnlineListRequested) {
-      this.sideTree.initTree('online');
-      this.sideTree.addChildren(this.listOnline);
-    } else {
-      this.sideTree.initTree('database');
-      this.sideTree.addChildren(this.list);
-    }
-    this.notify();
-  }
-
-  /**
    * Toggle the display of the sort by dropdown
    * @returns {undefined}
    */
@@ -120,10 +101,7 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Computes the final list of objects to be seen by user depending on those factors:
-   * - online filter enabled
-   * - online objects according to information service
-   * - search input from user
+   * Computes the final list of objects to be seen by user depending on search input from user
    * If any of those changes, this method should be called to update the outputs.
    * @returns {undefined}
    */
@@ -308,7 +286,6 @@ export default class QCObject extends Observable {
   /**
    * Set the current selected object by user
    * Search within `currentList`;
-   * If user is in online mode, `list` will be used instead
    * @param {QCObject} object - object to be selected and loaded
    * @returns {undefined}
    */

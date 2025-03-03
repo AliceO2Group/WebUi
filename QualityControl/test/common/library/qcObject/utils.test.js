@@ -20,7 +20,6 @@ import {
   OBJECT_TYPE_KEY,
   generateDrawingOptionList,
 } from './../../../../common/library/qcObject/utils.js';
-import { ONLINE_SERVICES } from './../../../demoData/online-services.mock.js';
 
 /**
  * Test Suite for the common library of qcg - utils module
