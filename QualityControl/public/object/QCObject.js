@@ -288,8 +288,7 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Refreshes currently displayed objects and requests an updated list
-   * of online objects from Consul
+   * Refreshes currently displayed objects
    * @returns {undefined}
    */
   refreshObjects() {

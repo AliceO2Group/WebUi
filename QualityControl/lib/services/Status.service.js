@@ -38,11 +38,6 @@ export class StatusService {
     this._dataService = undefined;
 
     /**
-     * @type {ConsulService}
-     */
-    this._onlineService = undefined;
-
-    /**
      * @type {WebSocket}
      */
     this._ws = undefined;
@@ -68,16 +63,14 @@ export class StatusService {
    * @returns {object} - object containing status and framework information
    */
   async retrieveFrameworkInfo() {
-    const [qc, data_service_ccdb, online_service_consul] = await Promise.all([
+    const [qc, data_service_ccdb] = await Promise.all([
       this.retrieveQcVersion(),
       this.retrieveDataServiceStatus(),
-      this.retrieveOnlineServiceStatus(),
     ]);
     return {
       qcg: this.retrieveOwnStatus(),
       qc,
       data_service_ccdb,
-      online_service_consul,
     };
   }
 
@@ -89,22 +82,6 @@ export class StatusService {
     try {
       const { version } = await this._dataService.getVersion();
       return { status: { ok: true }, version };
-    } catch (err) {
-      return { status: { ok: false, message: err.message || err } };
-    }
-  }
-
-  /**
-   * Retrieve status of the online service (Consul) if it was configured and issue if any
-   * @returns {Promise<Resolve, Reject>} - status of the online service
-   */
-  async retrieveOnlineServiceStatus() {
-    if (!this._onlineService) {
-      return { status: { ok: true }, version: 'Live Mode was not configured' };
-    }
-    try {
-      await this._onlineService.getConsulLeaderStatus();
-      return { status: { ok: true } };
     } catch (err) {
       return { status: { ok: false, message: err.message || err } };
     }
@@ -138,15 +115,6 @@ export class StatusService {
    */
   set dataService(dataService) {
     this._dataService = dataService;
-  }
-
-  /**
-   * Set service to be used for querying status of online mode provider (Consul)
-   * @param {ConsulService} onlineService - service used for retrieving list of objects currently being produced
-   * @returns {void}
-   */
-  set onlineService(onlineService) {
-    this._onlineService = onlineService;
   }
 
   /**

@@ -23,18 +23,12 @@ export class ObjectController {
    * Setup Object Controller:
    * - CcdbService - retrieve data about objects
    * @param {QCObjectService} objService - objService to be used for retrieval of information
-   * @param {ConsulService} onlineService - retrieve information on which objects are currently generated
    */
-  constructor(objService, onlineService) {
+  constructor(objService) {
     /**
      * @type {QCObjectService}
      */
     this._objService = objService;
-
-    /**
-     * @type {ConsulService}
-     */
-    this._onlineService = onlineService;
   }
 
   /**
