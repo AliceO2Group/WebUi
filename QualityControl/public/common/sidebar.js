@@ -53,7 +53,7 @@ export default function sidebar(model) {
 const sidebarMenu = (model) => [
   exploreMenu(model),
   myLayoutsMenu(model),
-  model.isOnlineModeEnabled ? refreshOptions(model) : h('.menu-title', { style: 'flex-grow:1' }, ''),
+  h('.menu-title', { style: 'flex-grow:1' }, ''),
   statusMenu(model),
   collapseSidebarMenuItem(model),
 ];

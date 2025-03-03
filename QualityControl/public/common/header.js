@@ -109,7 +109,7 @@ const onlineButton = (model) => h(
  */
 function toggleOnlineButton(model) {
   model.toggleMode();
-  switch (model.isOnlineModeEnabled) {
+  switch (false) {
     case true:
       onlineButtonStyle = 'btn-success';
       onlineButtonIcon = iconMediaStop();

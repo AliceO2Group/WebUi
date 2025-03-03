@@ -66,8 +66,6 @@ export default class Model extends Observable {
     this.aboutViewModel = new AboutViewModel(this);
     this.aboutViewModel.bubbleTo(this);
 
-    this.isOnlineModeEnabled = false; // Show only online objects or all (offline)
-
     this.refreshTimer = 0;
     this.refreshInterval = 0; // Seconds
     this.sidebar = true;
@@ -289,13 +287,9 @@ export default class Model extends Observable {
    * @returns {undefined}
    */
   toggleMode() {
-    this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
-    if (this.isOnlineModeEnabled) {
-      this.setRefreshInterval(60);
-    } else {
-      this.object.loadList();
-      clearTimeout(this.refreshTimer);
-    }
+    this.object.loadList();
+    clearTimeout(this.refreshTimer);
+
     this.object.selected = null;
     this.object.searchInput = '';
     this.notify();

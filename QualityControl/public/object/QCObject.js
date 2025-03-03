@@ -129,7 +129,7 @@ export default class QCObject extends Observable {
    */
   _computeFilters() {
     if (this.searchInput) {
-      const listSource = (this.model.isOnlineModeEnabled ? this.listOnline : this.list) || []; // With fallback
+      const listSource = this.list || []; // With fallback
       const fuzzyRegex = new RegExp(this.searchInput, 'i');
       this.searchResult = listSource.filter((item) => fuzzyRegex.test(item.name));
     } else {
@@ -172,13 +172,8 @@ export default class QCObject extends Observable {
    */
   sortTree(title, field, order, icon) {
     this.sortListByField(this.currentList, field, order);
-    if (!this.model.isOnlineModeEnabled) {
-      this.tree.initTree('database');
-      this.tree.addChildren(this.currentList);
-    } else {
-      this.tree.initTree('online');
-      this.tree.addChildren(this.currentList);
-    }
+    this.tree.initTree('database');
+    this.tree.addChildren(this.currentList);
 
     this._computeFilters();
 
@@ -197,43 +192,39 @@ export default class QCObject extends Observable {
    * @returns {undefined}
    */
   async loadList() {
-    if (!this.model.isOnlineModeEnabled) {
-      this.objectsRemote = RemoteData.loading();
-      this.notify();
-      this.queryingObjects = true;
-      let offlineObjects = [];
-      const result = await this.model.services.object.getObjects();
-      if (result.isSuccess()) {
-        offlineObjects = result.payload;
-      } else {
-        const failureMessage = 'Failed to retrieve list of objects. Please contact an administrator';
-        this.model.notification.show(failureMessage, 'danger', Infinity);
-      }
-      this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
-      this.list = offlineObjects;
-
-      this.tree.initTree('database');
-      this.tree.addChildren(offlineObjects);
-
-      this.currentList = offlineObjects;
-      this.sortBy = {
-        field: 'name',
-        title: 'Name',
-        order: 1,
-        icon: iconArrowTop(),
-        open: false,
-      };
-      this._computeFilters();
-
-      if (this.selected && !this.selected.lastModified) {
-        this.selected = this.list.find((object) => object.name === this.selected.name);
-      }
-      this.queryingObjects = false;
-      this.objectsRemote = RemoteData.success();
-      this.notify();
+    this.objectsRemote = RemoteData.loading();
+    this.notify();
+    this.queryingObjects = true;
+    let offlineObjects = [];
+    const result = await this.model.services.object.getObjects();
+    if (result.isSuccess()) {
+      offlineObjects = result.payload;
     } else {
-      this.loadOnlineList();
+      const failureMessage = 'Failed to retrieve list of objects. Please contact an administrator';
+      this.model.notification.show(failureMessage, 'danger', Infinity);
     }
+    this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
+    this.list = offlineObjects;
+
+    this.tree.initTree('database');
+    this.tree.addChildren(offlineObjects);
+
+    this.currentList = offlineObjects;
+    this.sortBy = {
+      field: 'name',
+      title: 'Name',
+      order: 1,
+      icon: iconArrowTop(),
+      open: false,
+    };
+    this._computeFilters();
+
+    if (this.selected && !this.selected.lastModified) {
+      this.selected = this.list.find((object) => object.name === this.selected.name);
+    }
+    this.queryingObjects = false;
+    this.objectsRemote = RemoteData.success();
+    this.notify();
   }
 
   /**
@@ -393,8 +384,7 @@ export default class QCObject extends Observable {
    * @returns {boolean} - whether the object is in the online list
    */
   isObjectInOnlineList(objectName) {
-    return this.model.isOnlineModeEnabled && this.listOnline
-      && this.listOnline.map((item) => item.name).includes(objectName);
+    return false;
   }
 
   /**
