@@ -17,7 +17,6 @@ import { dirname } from 'path';
 import { readFileSync } from 'fs';
 
 import { openFile, toJSON } from 'jsroot';
-import { LogManager, ConsulService } from '@aliceo2/web-ui';
 
 import { CcdbService } from './services/ccdb/CcdbService.js';
 import { IntervalsService } from './services/Intervals.service.js';
@@ -37,8 +36,6 @@ import { config } from './config/configProvider.js';
  * @returns {Promise<object>} Multiple services and controllers that are to be used by the QCG application
  */
 export const setupQcModel = () => {
-  const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
-
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
   const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
@@ -50,26 +47,13 @@ export const setupQcModel = () => {
   const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
   const statusController = new StatusController(statusService);
 
-  let consulService = undefined;
-  if (config.consul) {
-    consulService = new ConsulService(config.consul);
-    consulService.getConsulLeaderStatus()
-      .then(() => logger.info('Consul Service connection was successfully tested.'))
-      .catch((error) => logger.error('Consul Service connection could not be established. '
-        + `Please try restarting the service due to: ${error}`));
-    statusController.setLiveModeConnector(consulService);
-  } else {
-    logger.warn('Consul Service: No Configuration Found');
-  }
-
   const ccdbService = CcdbService.setup(config.ccdb);
   statusService.dataService = ccdbService;
-  statusService.onlineService = consulService;
 
   const qcObjectService = new QcObjectService(ccdbService, jsonDb, { openFile, toJSON });
   qcObjectService.refreshCache();
 
-  const objectController = new ObjectController(qcObjectService, consulService);
+  const objectController = new ObjectController(qcObjectService);
   const intervalsService = new IntervalsService();
 
   intervalsService.register(

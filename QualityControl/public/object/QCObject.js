@@ -38,8 +38,6 @@ export default class QCObject extends Observable {
     this.selectedOpen = false;
     this.objects = {}; // ObjectName -> RemoteData.payload -> plot
 
-    this.listOnline = []; // List of online objects name
-
     this.searchInput = ''; // String - content of input search
     this.searchResult = []; // Array<object> - result list of search
     this.sortBy = {
@@ -53,7 +51,7 @@ export default class QCObject extends Observable {
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
 
-    this.sideTree = new ObjectTree('online');
+    this.sideTree = new ObjectTree('database');
     this.sideTree.bubbleTo(this);
     this.queryingObjects = false;
     this.scrollTop = 0;
@@ -94,23 +92,6 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Method to display sideTree(edit layout mode) based on onlineList / offlineList
-   * @param {boolean} isOnlineListRequested - whether user would like to view only online list
-   * @returns {undefined}
-   */
-  toggleSideTree(isOnlineListRequested) {
-    this.sideTree.bubbleTo(this);
-    if (isOnlineListRequested) {
-      this.sideTree.initTree('online');
-      this.sideTree.addChildren(this.listOnline);
-    } else {
-      this.sideTree.initTree('database');
-      this.sideTree.addChildren(this.list);
-    }
-    this.notify();
-  }
-
-  /**
    * Toggle the display of the sort by dropdown
    * @returns {undefined}
    */
@@ -120,16 +101,13 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Computes the final list of objects to be seen by user depending on those factors:
-   * - online filter enabled
-   * - online objects according to information service
-   * - search input from user
+   * Computes the final list of objects to be seen by user depending on search input from user
    * If any of those changes, this method should be called to update the outputs.
    * @returns {undefined}
    */
   _computeFilters() {
     if (this.searchInput) {
-      const listSource = (this.model.isOnlineModeEnabled ? this.listOnline : this.list) || []; // With fallback
+      const listSource = this.list || []; // With fallback
       const fuzzyRegex = new RegExp(this.searchInput, 'i');
       this.searchResult = listSource.filter((item) => fuzzyRegex.test(item.name));
     } else {
@@ -172,13 +150,8 @@ export default class QCObject extends Observable {
    */
   sortTree(title, field, order, icon) {
     this.sortListByField(this.currentList, field, order);
-    if (!this.model.isOnlineModeEnabled) {
-      this.tree.initTree('database');
-      this.tree.addChildren(this.currentList);
-    } else {
-      this.tree.initTree('online');
-      this.tree.addChildren(this.currentList);
-    }
+    this.tree.initTree('database');
+    this.tree.addChildren(this.currentList);
 
     this._computeFilters();
 
@@ -197,79 +170,38 @@ export default class QCObject extends Observable {
    * @returns {undefined}
    */
   async loadList() {
-    if (!this.model.isOnlineModeEnabled) {
-      this.objectsRemote = RemoteData.loading();
-      this.notify();
-      this.queryingObjects = true;
-      let offlineObjects = [];
-      const result = await this.model.services.object.getObjects();
-      if (result.isSuccess()) {
-        offlineObjects = result.payload;
-      } else {
-        const failureMessage = 'Failed to retrieve list of objects. Please contact an administrator';
-        this.model.notification.show(failureMessage, 'danger', Infinity);
-      }
-      this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
-      this.list = offlineObjects;
-
-      this.tree.initTree('database');
-      this.tree.addChildren(offlineObjects);
-
-      this.currentList = offlineObjects;
-      this.sortBy = {
-        field: 'name',
-        title: 'Name',
-        order: 1,
-        icon: iconArrowTop(),
-        open: false,
-      };
-      this._computeFilters();
-
-      if (this.selected && !this.selected.lastModified) {
-        this.selected = this.list.find((object) => object.name === this.selected.name);
-      }
-      this.queryingObjects = false;
-      this.objectsRemote = RemoteData.success();
-      this.notify();
-    } else {
-      this.loadOnlineList();
-    }
-  }
-
-  /**
-   * Ask server for online objects and fills tree with them
-   * @returns {undefined}
-   */
-  async loadOnlineList() {
     this.objectsRemote = RemoteData.loading();
-    this.queryingObjects = true;
     this.notify();
-    let onlineObjects = [];
-    const result = await this.model.services.object.getOnlineObjects();
+    this.queryingObjects = true;
+    let offlineObjects = [];
+    const result = await this.model.services.object.getObjects();
     if (result.isSuccess()) {
-      onlineObjects = result.payload;
-      this.sortListByField(onlineObjects, 'name', 1);
-      this.sortBy = {
-        field: 'name',
-        title: 'Name',
-        order: 1,
-        icon: iconArrowTop(),
-        open: false,
-      };
+      offlineObjects = result.payload;
     } else {
-      const failureMessage = 'Failed to retrieve list of online objects. Please contact an administrator';
+      const failureMessage = 'Failed to retrieve list of objects. Please contact an administrator';
       this.model.notification.show(failureMessage, 'danger', Infinity);
     }
+    this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
+    this.list = offlineObjects;
 
-    this.tree.initTree('online');
-    this.tree.addChildren(onlineObjects);
+    this.tree.initTree('database');
+    this.tree.addChildren(offlineObjects);
 
-    this.listOnline = onlineObjects;
-    this.currentList = onlineObjects;
-    this.search('');
-    this.objectsRemote = RemoteData.success();
+    this.currentList = offlineObjects;
+    this.sortBy = {
+      field: 'name',
+      title: 'Name',
+      order: 1,
+      icon: iconArrowTop(),
+      open: false,
+    };
+    this._computeFilters();
+
+    if (this.selected && !this.selected.lastModified) {
+      this.selected = this.list.find((object) => object.name === this.selected.name);
+    }
     this.queryingObjects = false;
-
+    this.objectsRemote = RemoteData.success();
     this.notify();
   }
 
@@ -334,13 +266,11 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Refreshes currently displayed objects and requests an updated list
-   * of online objects from Consul
+   * Refreshes currently displayed objects
    * @returns {undefined}
    */
   refreshObjects() {
     this.loadObjects(Object.keys(this.objects));
-    this.loadOnlineList();
   }
 
   /**
@@ -356,7 +286,6 @@ export default class QCObject extends Observable {
   /**
    * Set the current selected object by user
    * Search within `currentList`;
-   * If user is in online mode, `list` will be used instead
    * @param {QCObject} object - object to be selected and loaded
    * @returns {undefined}
    */
@@ -385,16 +314,6 @@ export default class QCObject extends Observable {
     this._computeFilters();
     this.sortListByField(this.searchResult, this.sortBy.field, this.sortBy.order);
     this.notify();
-  }
-
-  /**
-   * Method to check if an object is in online mode
-   * @param {string} objectName format: QcTask/example
-   * @returns {boolean} - whether the object is in the online list
-   */
-  isObjectInOnlineList(objectName) {
-    return this.model.isOnlineModeEnabled && this.listOnline
-      && this.listOnline.map((item) => item.name).includes(objectName);
   }
 
   /**
