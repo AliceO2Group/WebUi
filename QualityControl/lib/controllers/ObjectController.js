@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 'use strict';
-import { getObjectsNameFromConsulMap } from '../../common/library/qcObject/utils.js';
 import { errorHandler } from './../utils/utils.js';
 
 /**
@@ -57,22 +56,6 @@ export class ObjectController {
       } catch (error) {
         errorHandler(error, 'Failed to retrieve list of objects latest version', res, 502, 'object');
       }
-    }
-  }
-
-  /**
-   * List all Online objects' name if online mode is enabled
-   * @param {Request} req - HTTP request object with "query" information on object
-   * @param {Response} res - HTTP response object to provide information on request
-   * @returns {void}
-   */
-  async getOnlineObjects(req, res) {
-    try {
-      const services = await this._onlineService.getServices();
-      const tags = getObjectsNameFromConsulMap(this._db.prefix, services);
-      res.status(200).json(tags);
-    } catch (error) {
-      errorHandler(error, 'Unable to retrieve list of Online Objects', res, 503, 'online');
     }
   }
 

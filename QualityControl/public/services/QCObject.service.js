@@ -168,13 +168,4 @@ export default class QCObjectService {
     const { result, ok } = await this.model.loader.get('/api/objects');
     return ok ? RemoteData.success(result) : RemoteData.failure(result);
   }
-
-  /**
-   * Ask server for all available objects
-   * @returns {JSON} List of Objects
-   */
-  async getOnlineObjects() {
-    const { result, ok } = await this.model.loader.get('/api/objects/online');
-    return ok ? RemoteData.success(result) : RemoteData.failure(result);
-  }
 }

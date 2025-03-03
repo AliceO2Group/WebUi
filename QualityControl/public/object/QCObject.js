@@ -228,43 +228,6 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Ask server for online objects and fills tree with them
-   * @returns {undefined}
-   */
-  async loadOnlineList() {
-    this.objectsRemote = RemoteData.loading();
-    this.queryingObjects = true;
-    this.notify();
-    let onlineObjects = [];
-    const result = await this.model.services.object.getOnlineObjects();
-    if (result.isSuccess()) {
-      onlineObjects = result.payload;
-      this.sortListByField(onlineObjects, 'name', 1);
-      this.sortBy = {
-        field: 'name',
-        title: 'Name',
-        order: 1,
-        icon: iconArrowTop(),
-        open: false,
-      };
-    } else {
-      const failureMessage = 'Failed to retrieve list of online objects. Please contact an administrator';
-      this.model.notification.show(failureMessage, 'danger', Infinity);
-    }
-
-    this.tree.initTree('online');
-    this.tree.addChildren(onlineObjects);
-
-    this.listOnline = onlineObjects;
-    this.currentList = onlineObjects;
-    this.search('');
-    this.objectsRemote = RemoteData.success();
-    this.queryingObjects = false;
-
-    this.notify();
-  }
-
-  /**
    * Load full content of an object in-memory
    * @param {string} objectName - e.g. /FULL/OBJECT/PATH
    * @param {number} timestamp - timestamp in ms
@@ -331,7 +294,6 @@ export default class QCObject extends Observable {
    */
   refreshObjects() {
     this.loadObjects(Object.keys(this.objects));
-    this.loadOnlineList();
   }
 
   /**

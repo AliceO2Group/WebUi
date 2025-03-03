@@ -19,7 +19,6 @@ import {
   isObjectOfTypeChecker,
   OBJECT_TYPE_KEY,
   generateDrawingOptionList,
-  getObjectsNameFromConsulMap,
 } from './../../../../common/library/qcObject/utils.js';
 import { ONLINE_SERVICES } from './../../../demoData/online-services.mock.js';
 
@@ -76,38 +75,6 @@ export const commonLibraryQcObjectUtilsTestSuite = () => {
         generateDrawingOptionList({ _typename: 'TGraph' }, ['gridx', 'stat']),
         ['gridx', 'optstat=1111'],
       );
-    });
-  });
-
-  suite('getObjectsNameFromConsulMap - test suite', () => {
-    test('should successfully return a list of mapped tags prefix is provided', () => {
-      const expectedTags = [
-        { name: 'QcTask/example' },
-        { name: 'QcTask/other' },
-        { name: 'QcTask/p2' },
-      ];
-      deepStrictEqual(getObjectsNameFromConsulMap(ONLINE_SERVICES, 'Qc'), expectedTags);
-    });
-
-    test('should successfully return all tags when no prefix is provided', () => {
-      const expectedTags = [
-        { name: 'QcTask/example' },
-        { name: 'ITSRAWDS/example' },
-        { name: 'QcTask/other' },
-        { name: 'TOF_RAWS/example' },
-        { name: 'QcTask/p2' },
-        { name: 'ABC/p2' },
-      ];
-      deepStrictEqual(getObjectsNameFromConsulMap(ONLINE_SERVICES), expectedTags);
-    });
-
-    test('should successfully return an empty list if tags are missing', () => {
-      const services = {
-        task: {},
-        task2: { tag: [] },
-        task3: undefined,
-      };
-      deepStrictEqual(getObjectsNameFromConsulMap(services), []);
     });
   });
 };
