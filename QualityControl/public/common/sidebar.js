@@ -155,14 +155,6 @@ const refreshOptions = (model) => [
         key: `timer${model.refreshTimer}`,
         title: `timer${model.refreshTimer}`,
       }, `Refresh period (${model.refreshInterval} seconds)`),
-      h('input.form-control.text-center', {
-        type: 'range',
-        step: 1,
-        min: QCG.REFRESH_MIN_INTERVAL,
-        max: QCG.REFRESH_MAX_INTERVAL,
-        value: model.refreshInterval,
-        oninput: (e) => model.setRefreshInterval(e.target.value),
-      }),
     ],
     h('button.btn.btn-success', {
       type: 'button',

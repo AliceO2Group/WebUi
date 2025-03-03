@@ -13,9 +13,6 @@ RUN npm ci
 COPY . .
 COPY ./config-default.js ./config.js
 
-USER root
-RUN chmod 777 ./public/config.js
-
 # Export port
 EXPOSE 8080
 
