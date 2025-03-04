@@ -27,7 +27,6 @@ import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
 import { setBrowserTabTitle } from './common/utils.js';
 import { buildQueryParametersString } from './common/buildQueryParametersString.js';
 import AboutViewModel from './pages/aboutView/AboutViewModel.js';
-import { QCG } from './config.js';
 
 /**
  * Represents the application's state and actions as a class

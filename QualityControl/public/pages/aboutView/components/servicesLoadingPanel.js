@@ -17,9 +17,8 @@ import { h } from '/js/src/index.js';
 
 /**
  * Build a reusable panel which displays a list of names of service that are currently waiting for their status
- * @param {Array<Service>} names
- * @param services
- * @returns {vnode}
+ * @param {object} services - Object containing service names as keys and their status
+ * @returns {vnode} - A virtual node representing the loading panel
  */
 export const servicesLoadingPanel = (services) => {
   if (Object.keys(services).length > 0) {
@@ -29,4 +28,5 @@ export const servicesLoadingPanel = (services) => {
       h('.ph2', `Loading status for: ${namesAsString.toUpperCase()}`),
     ]);
   }
+  return null;
 };

@@ -17,10 +17,9 @@ import { h } from '/js/src/index.js';
 
 /**
  * Build a reusable panel to display a wrapped list of service panels with their respective information
- * @param {Map<Service>} services
- * @param servicesMap
- * @param {'success'|'error'|undefined} category - 'success', 'error'
- * @returns {vnode}
+ * @param {Map<object>} servicesMap - Map of services with their respective information
+ * @param {string} category - Category of the services to be displayed
+ * @returns {vnode} - A virtual node representing the resolved panel
  */
 export const servicesResolvedPanel = (servicesMap, category) => {
   const services = Object.values(servicesMap);
@@ -37,4 +36,5 @@ export const servicesResolvedPanel = (servicesMap, category) => {
       ]),
     );
   }
+  return null;
 };

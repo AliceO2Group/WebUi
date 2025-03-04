@@ -16,8 +16,8 @@ import { h } from '/js/src/index.js';
 
 /**
  * Builds a card for an integrated service
- * @param serviceData - JSON with information about the service such as name, status, etc.
- * @returns {vnode}
+ * @param {object} serviceData - JSON with information about the service such as name, status, etc.
+ * @returns {vnode} - virtual node element
  */
 export const serviceCard = (serviceData) => {
   const { name, status, version, extras = {} } = serviceData || {};

@@ -36,7 +36,6 @@ export default class AboutViewModel extends Observable {
 
   /**
    * Load info about the framework into `items` for each service
-   * @param {Array} services - Array of services from which to retrieve the status
    * @returns {Promise<void>}
    */
   async retrieveAllServicesStatus() {
