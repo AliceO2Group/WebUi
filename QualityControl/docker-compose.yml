@@ -3,9 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: development
-    environment:
-      NODE_ENV: development
     links:
       - database
     ports:
