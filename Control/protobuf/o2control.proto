@@ -386,6 +386,7 @@ message VarSpecMessage {
     int32 index = 8;
     string visibleIf = 9;   // JS expression that evaluates to bool
     string enabledIf = 10;  // JS expression that evaluates to bool
+    uint32 rows = 11; // this field is used only if widget == editBox
 }
 
 message WorkflowTemplateInfo {
