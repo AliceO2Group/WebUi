@@ -18,7 +18,7 @@ services:
     tty: true
 
   database:
-    image: "mariadb:11.1"
+    image: "mariadb:10.5.9"
     container_name: qcg-database
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -33,4 +33,4 @@ services:
 
 volumes:
   mariadb_volume:
-   
+
