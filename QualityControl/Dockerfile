@@ -1,5 +1,5 @@
 # Base image
-FROM registry.access.redhat.com/ubi9/nodejs-20 as base
+FROM registry.access.redhat.com/ubi9/nodejs-22 as base
 
 # Working directory
 WORKDIR /usr/src/app
