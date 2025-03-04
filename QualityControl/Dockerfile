@@ -9,10 +9,11 @@ COPY package*.json ./
 RUN npm ci
 
 
-# Copy configuration file
+# Copy project files
 COPY . .
 
 # Export port
 EXPOSE 8080
 
+# Start the application
 CMD ["npm", "start"]
