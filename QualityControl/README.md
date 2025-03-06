@@ -41,7 +41,7 @@ npm ci
 ```
 cp config-default.js config.js
 ```
-5. Create a `.env` file with the necessary environment variables. Example:
+5. (Only for development) Create a `.env` file with the necessary environment variables. Example:
 ```
 cp .env.dev .env.prod
 ```
@@ -79,6 +79,11 @@ Attribute to define if QCG is to be started as part of a QC integrated environme
 
 
 1. Run QCG server
+```
+npm run start
+```
+
+For development:
 ```
 npm run docker-compose-up
 ```
