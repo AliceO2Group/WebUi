@@ -22,6 +22,7 @@ WORKDIR /usr/src/app
 # Install dependencies
 COPY package*.json ./
 RUN npm ci
+RUN npm i -g nodemon --save-dev
 
 
 # Copy project files
@@ -31,4 +32,4 @@ COPY . .
 EXPOSE 8080
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]
