@@ -4,25 +4,16 @@ QCG is a **Web-based graphical user interface (GUI)** designed for [**O<sup>2</s
 
 ### Badges
 
-- **Build Status**:  
-  ![Actions Status](https://github.com/AliceO2Group/WebUi/workflows/QualityControl/badge.svg)  
-  [View Actions Workflow](https://github.com/AliceO2Group/WebUi/actions)
-  
-- **Code Coverage**:  
-  ![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/dev/graph/badge.svg?flag=qualitycontrol)  
-  [View Code Coverage](https://codecov.io/gh/AliceO2Group/WebUi)
-  
-- **JIRA Issues**:  
-  ![JIRA](https://img.shields.io/badge/JIRA-issues-blue.svg)  
-  [View JIRA Project](https://alice.its.cern.ch/jira/projects/OGUI)
+![Actions Status](https://github.com/AliceO2Group/WebUi/workflows/QualityControl/badge.svg) 
+![codecov](https://codecov.io/gh/AliceO2Group/WebUi/branch/dev/graph/badge.svg?flag=qualitycontrol) 
+![JIRA](https://img.shields.io/badge/JIRA-issues-blue.svg)
 
 
 
 ## Table of Contents
 - [Installation](docs/Installation.md)
 - [Architecture]
-- [Testing]
-- [Changelog]
+- [Testing](docs/Testing.md)
 - [Features](docs/Features.md)
 - [CI Workflows](docs/CI_Workflows)
 
