@@ -14,6 +14,10 @@ MYSQL_PASSWORD=123456
 MYSQL_ROOT_PASSWORD=123456
 ```
 
-### Running
+### Run QCG
 
-Execute `docker-compose-up` to launch the application. Once it is running, go to [localhost:8080](localhost:8080).
+Execute this command to launch the application
+```bash
+docker-compose-up
+``` 
+Once it is running, go to [localhost:8080](localhost:8080).

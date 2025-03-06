@@ -1,0 +1,33 @@
+# Features
+
+## Canvas Options via MetaData
+`QCG` is using CCDB as storage service. When storing an object, the user can also store information on how an object should be plotted via the `metadata` field in CCDB. QualityControl documentation on how this can be achieved can be found [here](https://github.com/AliceO2Group/QualityControl/blob/master/doc/Advanced.md#canvas-options)
+* `drawOptions`: semi-colon separated drawing options; e.g. `lcolz;colz`
+* `displayHints`: semi-colon separated hints; e.g. `AP;APB`
+
+## Display a QC non-standard ROOT object in QCG
+
+`QCG` is able to display non-standard ROOT objects with the help of QC. More information can be found [here](https://github.com/AliceO2Group/QualityControl/blob/master/doc/Advanced.md#display-a-non-standard-root-object-in-qcg) 
+
+## Export a layout as JSON
+In order to facilitate the transition from one environment (e.g. TST) to another (e.g. PROD) while at the same time updating it, an export feature is provided.
+1. Open the layout that you wish to export
+2. Click on the top right second (from left to right) button which on hover shall display: `Export layout skeleton as JSON file`
+3. Following that, QCG will automatically generate a JSON file and store it in your default download location.
+
+## Import a layout from JSON
+Once a layout is exported and modified as needed or created from scratch, one can import it into QCG as such:
+1. On the left sidebar, click on the small button (icon represented as cloud with arrow up) which is in line with `MY LAYOUTS` label.
+2. A pop-up will open which will allow you to paste your JSON structure.
+3. The pop-up will validate that the pasted value is a valid JSON.
+4. Click on `Import` button.
+   1. If successful, a new page will be opened with your imported layout in edit mode
+   2. If there is an issue, a red line with an error message will be displayed above the Import button
+5. Click `Save` Layout from the top right corner button.
+
+## AutoTransitioning Tabs within Layouts
+To easily follow the progress of a RUN, layouts can automatically transition through the displayed tabs every few seconds. To configure:
+1. Open desired layout
+2. Click on the `pencil icon` button to start editing the layout
+3. On the left sidebar, configure the field `Tab Auto-Change(sec): 0 (OFF), 10-600 (ON)` with the desired numerical value
+4. Save 
