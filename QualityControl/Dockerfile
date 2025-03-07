@@ -20,13 +20,10 @@ RUN apk add --no-cache \
 WORKDIR /usr/src/app
 
 # Install dependencies
-COPY package*.json ./
-RUN npm ci
+COPY . .
+RUN npm ci --silent
 RUN npm i -g nodemon --save-dev
 
-
-# Copy project files
-COPY . .
 
 # Export port
 EXPOSE 8080
