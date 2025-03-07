@@ -12,8 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
+import { LogManager } from '@aliceo2/web-ui';
 import { NotFoundError } from '@aliceo2/web-ui';
-import LayoutRepository from '../database/repositories/LayoutRepository';
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/json`);
+import fs from 'fs';
+import path from 'path';
+import LayoutRepository from '../database/repositories/LayoutRepository.js';
 
 /**
  * Store layouts inside JSON based file with atomic write
@@ -24,7 +28,87 @@ export class JsonFileService {
    * @param {string} pathname - path to JSON DB file
    */
   constructor(pathname) {
-    this.layoutRepository = new LayoutRepository(pathname);
+    // Path of the file to store data
+    this.pathname = path.join(pathname);
+    this.pathnameTmp = `${this.pathname}~tmp`;
+    this.data = { layouts: [], users: [] };
+    this.lock = new Lock();
+    this.layoutRepository = new LayoutRepository();
+    this._syncFileAndInternalState();
+  }
+
+  /**
+   * Synchronize DB file content and `this.data` property
+   * @returns {undefined}
+   */
+  async _syncFileAndInternalState() {
+    await this._readFromFile();
+    await this._writeToFile();
+    logger.info(`Preferences will be saved in ${this.pathname}`);
+  }
+
+  /**
+   * Method to read from file and update the data variable
+   * @returns {Promise<undefined.Error>} - rejects if unable to read file
+   */
+  async _readFromFile() {
+    return new Promise((resolve, reject) => {
+      fs.readFile(this.pathname, (err, data) => {
+        if (err) {
+          // File does not exist, it's ok, we will create it
+          if (err.code === 'ENOENT') {
+            logger.info('DB file does not exist, will create one');
+            return resolve();
+          }
+
+          // Other errors reading
+          return reject(err);
+        }
+
+        try {
+          const dataFromFile = JSON.parse(data);
+
+          // Check data we just read
+          if (!dataFromFile || !dataFromFile.layouts || !Array.isArray(dataFromFile.layouts)) {
+            return reject(new Error(`DB file should have an array of layouts ${this.pathname}`));
+          }
+          // Check if users exists and if not declare and initialize with an empty array
+          if (!dataFromFile.users || !Array.isArray(dataFromFile.users)) {
+            dataFromFile.users = [];
+          }
+          this.data = dataFromFile;
+          resolve();
+        } catch {
+          return reject(new Error(`Unable to parse DB file ${this.pathname}`));
+        }
+      });
+    });
+  }
+
+  /**
+   * Write data to disk, atomically, with lock
+   * @returns {undefined}
+   */
+  async _writeToFile() {
+    await this.lock.acquire();
+    await new Promise((resolve, reject) => {
+      const dataToFile = JSON.stringify(this.data, null, 1);
+
+      fs.writeFile(this.pathnameTmp, dataToFile, (err) => {
+        if (err) {
+          return reject(err);
+        }
+        fs.rename(this.pathnameTmp, this.pathname, (err) => {
+          if (err) {
+            return reject(err);
+          }
+          logger.info('DB file updated');
+          resolve();
+        });
+      });
+    });
+
+    this.lock.release();
   }
 
   /**
@@ -40,11 +124,12 @@ export class JsonFileService {
       throw new Error('layout name is mandatory');
     }
 
-    const layout = this.layoutRepository.findLayoutById(newLayout.id);
+    const layout = this.layoutRepository.findLayoutById(this.data, newLayout.id);
     if (layout) {
       throw new Error(`layout with this id (${layout.id}) already exists`);
     }
-    this.layoutRepository.createLayout(newLayout);
+    this.layoutRepository.createLayout(this.data, newLayout);
+    this._writeToFile();
     return newLayout;
   }
 
@@ -55,7 +140,7 @@ export class JsonFileService {
    * @throws {Error}
    */
   readLayout(layoutId) {
-    const layout = this.layoutRepository.findLayoutById(layoutId);
+    const layout = this.layoutRepository.findLayoutById(this.data, layoutId);
     if (!layout) {
       throw new NotFoundError(`layout (${layoutId}) not found`);
     }
@@ -69,7 +154,7 @@ export class JsonFileService {
    * @throws
    */
   readLayoutByName(layoutName) {
-    const layout = this.layoutRepository.findLayoutByName(layoutName);
+    const layout = this.layoutRepository.findLayoutByName(this.data, layoutName);
     if (!layout) {
       throw new NotFoundError(`Layout (${layoutName}) not found`);
     }
@@ -85,6 +170,7 @@ export class JsonFileService {
   updateLayout(layoutId, data) {
     const layout = this.readLayout(layoutId);
     this.layoutRepository.updateLayout(layout, data);
+    this._writeToFile();
     return layoutId;
   }
 
@@ -95,7 +181,8 @@ export class JsonFileService {
    */
   deleteLayout(layoutId) {
     const layout = this.readLayout(layoutId);
-    this.layoutRepository.deleteLayout(layout);
+    this.layoutRepository.deleteLayout(this.data, layout);
+    this._writeToFile();
     return layoutId;
   }
 
@@ -105,7 +192,7 @@ export class JsonFileService {
    * @returns {Array<Layout>} - list of layouts as per the filter
    */
   async listLayouts(filter = {}) {
-    return this.layoutRepository.listLayouts(filter);
+    return this.layoutRepository.listLayouts(this.data, filter);
   }
 
   /**
@@ -169,5 +256,50 @@ export class JsonFileService {
     if (isNaN(user.id)) {
       throw new Error('Field id must be a number');
     }
+  }
+}
+
+class Lock {
+  /**
+   * Initialize lock to released
+   */
+  constructor() {
+    this._locked = false;
+    this._queue = []; // Callbacks of next owners of the lock
+  }
+
+  /**
+   * Acquires lock if available and returns immediately
+   * otherwise wait for lock to be released
+   * @returns {Promise} - result of the lock
+   */
+  acquire() {
+    return new Promise((resolve) => {
+      // If nobody has the lock, take it and resolve immediately
+      if (!this._locked) {
+        this._locked = true;
+        return resolve();
+      }
+
+      // Otherwise, push as next owner
+      this._queue.push(resolve);
+    });
+  }
+
+  /**
+   * Releases lock and give it to next in queue if any
+   * @returns {object|undefined} - next owner of the lock
+   */
+  release() {
+    // Release the lock immediately
+    setImmediate(() => {
+      const nextOwner = this._queue.shift();
+      if (nextOwner) {
+        this._locked = true;
+        return nextOwner();
+      }
+
+      this._locked = false;
+    });
   }
 }
