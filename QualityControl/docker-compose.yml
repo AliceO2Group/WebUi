@@ -10,10 +10,7 @@ services:
     container_name: qcg-application
     restart: no
     volumes:
-      - type: bind
-        read_only: true
-        source: ./lib
-        target: /usr/src/app/lib
+      - .:/usr/src/app    
     stdin_open: true
     tty: true
 
