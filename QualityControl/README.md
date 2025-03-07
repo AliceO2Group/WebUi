@@ -41,10 +41,6 @@ npm ci
 cp config-default.js config.js
 ```
 
-
-### Development
-If you want to proceed with the installation for development, please refer to the chapter [Development](../docs/development).
-
 ## Local Configuration
 In order to customize QCG, you can edit the following configuration file: `WebUi/QualityControl/config.js`
 
