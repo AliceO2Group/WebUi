@@ -27,12 +27,11 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
   * Mac: `brew install node@16 ;  echo 'export PATH="/usr/local/opt/node@16/bin:$PATH"' >> $HOME/.bash_profile`
   * Other: https://nodejs.org/en/download/package-manager
 
-2. Install docker.
-3. Clone the `WebUi` repository 
+2. Clone the `WebUi` repository 
 ```
 git clone https://github.com/AliceO2Group/WebUi.git
 ```
-5. Install QCG
+3. Install QCG
 ```
 cd WebUi/QualityControl
 npm ci
@@ -41,14 +40,6 @@ npm ci
 ```
 cp config-default.js config.js
 ```
-5. (Only for development) Create a `.env` file with the necessary environment variables. Example:
-```
-cp .env.dev .env.prod
-```
-Update the file with your specific configuration:
-- `MYSQL_DATABASE` Allows you to specify the name of a database to be created on image startup.
-- `MYSQL_USER`, `MYSQL_PASSWORD` These variables are optional, used in conjunction to create a new user and to set that user's password
-- `MYSQL_ROOT_PASSWORD` This variable is **mandatory** and specifies the password that will be set for the MySQL root superuser account 
 
 ## Local Configuration
 In order to customize QCG, you can edit the following configuration file: `WebUi/QualityControl/config.js`
@@ -82,12 +73,6 @@ Attribute to define if QCG is to be started as part of a QC integrated environme
 ```
 npm run start
 ```
-
-For development:
-```
-npm run docker-compose-up
-```
-
 
 2. Open a browser and navigate to [http://localhost:8080](http://localhost:8080). 
 
