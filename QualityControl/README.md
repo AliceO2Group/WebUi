@@ -12,9 +12,9 @@ QCG is a **Web-based graphical user interface (GUI)** designed for [**O<sup>2</s
 
 ## Table of Contents
 - [Installation](docs/Installation.md)
-- [Architecture]
+- [Architecture](docs/Architecture.md)
 - [Testing](docs/Testing.md)
 - [Features](docs/Features.md)
-- [CI Workflows](docs/CI_Workflows)
+- [CI Workflows](docs/CI_Workflows.md)
 
 
