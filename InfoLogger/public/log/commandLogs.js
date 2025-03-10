@@ -17,10 +17,6 @@ import { BUTTON } from '../constants/button-states.const.js';
 import { MODE } from '../constants/mode.const.js';
 import { setBrowserTabTitle } from '../common/utils.js';
 
-let queryButtonType = BUTTON.PRIMARY;
-let liveButtonType = BUTTON.DEFAULT;
-let liveButtonIcon = iconMediaPlay();
-
 export default (model) => [
   userActionsDropdown(model),
   h('div.btn-group.mh3', [
@@ -111,7 +107,7 @@ const queryButton = (model) => h('button.btn', model.frameworkInfo.match({
     title: frameworkInfo.mysql && frameworkInfo.mysql.status.ok
       ? 'Query database with filters (Enter)' : 'Query service not configured',
     disabled: !frameworkInfo.mysql || !frameworkInfo.mysql.status.ok || model.log.queryResult.isLoading(),
-    className: model.log.queryResult.isLoading() ? 'loading' : queryButtonType,
+    className: model.log.queryResult.isLoading() ? 'loading' : model.queryButtonType,
     style: 'font-weight: bold',
     onclick: () => toggleButtonStates(model, false),
   }),
@@ -165,12 +161,12 @@ const liveButton = (model) => h('button.btn', model.frameworkInfo.match({
   Success: (frameworkInfo) => ({
     title: frameworkInfo.infoLoggerServer.status.ok ? 'Stream logs with filtering' : 'Live service not configured',
     disabled: !frameworkInfo.infoLoggerServer.status.ok || model.log.queryResult.isLoading(),
-    className: !model.ws.authed ? 'loading' : liveButtonType,
+    className: model.guiReadyToUse.isLoading() ? 'loading' : model.liveButtonType,
     style: 'font-weight: bold',
     onclick: () => toggleButtonStates(model, true),
   }),
   Failure: () => ({ disabled: true, className: 'danger' }),
-}), 'Live', ' ', liveButtonIcon);
+}), 'Live', ' ', model.liveButtonIcon);
 
 /**
  * Method to toggle states of the buttons(Query/Live) depending on the mode the tool is running on
@@ -185,7 +181,7 @@ function toggleButtonStates(model, wasLivePressed) {
       case MODE.LIVE.PAUSED:
         try {
           model.log.liveStart();
-          setButtonsType(BUTTON.DEFAULT, BUTTON.SUCCESS_ACTIVE, iconMediaStop());
+          setButtonsType(BUTTON.DEFAULT, BUTTON.SUCCESS_ACTIVE, iconMediaStop(), model);
           model.log.enableAutoScroll();
           setBrowserTabTitle(`${window.ILG.name} LIVE`);
         } catch (error) {
@@ -195,13 +191,13 @@ function toggleButtonStates(model, wasLivePressed) {
       default: // MODE.LIVE.RUNNING
         model.log.liveStop(MODE.LIVE.PAUSED);
         setBrowserTabTitle(`${window.ILG.name} LIVE PAUSED`);
-        setButtonsType(BUTTON.DEFAULT, BUTTON.PRIMARY, iconMediaPlay());
+        setButtonsType(BUTTON.DEFAULT, BUTTON.PRIMARY, iconMediaPlay(), model);
         model.log.disableAutoScroll();
     }
   } else {
     model.log.query();
     setBrowserTabTitle(`${window.ILG.name} QUERY`);
-    setButtonsType(BUTTON.PRIMARY, BUTTON.DEFAULT, iconMediaPlay());
+    setButtonsType(BUTTON.PRIMARY, BUTTON.DEFAULT, iconMediaPlay(), model);
   }
 
   /**
@@ -209,10 +205,10 @@ function toggleButtonStates(model, wasLivePressed) {
    * @param {string} queryType Type of the Query Button
    * @param {string} liveType Type of the Live Button
    * @param {Icon} liveIcon Icon of the Live Button
+   * @param {Model} model - Model, stores liveButton type and icon state
    */
-  function setButtonsType(queryType, liveType, liveIcon) {
-    queryButtonType = queryType;
-    liveButtonType = liveType;
-    liveButtonIcon = liveIcon;
+  function setButtonsType(queryType, liveType, liveIcon, model) {
+    model.setQueryButton(queryType);
+    model.setLiveButton(liveType, liveIcon);
   }
 }

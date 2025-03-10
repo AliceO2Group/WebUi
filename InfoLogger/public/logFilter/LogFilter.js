@@ -41,7 +41,6 @@ export default class LogFilter extends Observable {
     super();
 
     this.model = model;
-
     this.resetCriteria();
   }
 

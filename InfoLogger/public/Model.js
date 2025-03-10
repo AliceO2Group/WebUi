@@ -15,13 +15,14 @@
 // Import frontend framework
 import {
   Observable, WebSocketClient, QueryRouter,
-  Loader, RemoteData, sessionService, Notification,
+  Loader, RemoteData, sessionService, Notification, iconMediaPlay, iconMediaStop,
 } from '/js/src/index.js';
 import Log from './log/Log.js';
 import Timezone from './common/Timezone.js';
-import { callRateLimiter, setBrowserTabTitle } from './common/utils.js';
+import { setBrowserTabTitle } from './common/utils.js';
 import Table from './table/Table.js';
 import { MODE } from './constants/mode.const.js';
+import { BUTTON } from './constants/button-states.const.js';
 
 /**
  * Main model of InfoLoggerGui, contains sub-models modules
@@ -33,6 +34,7 @@ export default class Model extends Observable {
   constructor() {
     super();
 
+    this.guiReadyToUse = RemoteData.loading();
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
 
@@ -48,6 +50,10 @@ export default class Model extends Observable {
     this.timezone = new Timezone();
     this.timezone.bubbleTo(this);
 
+    this.queryButtonType = BUTTON.PRIMARY;
+    this.liveButtonType = BUTTON.DEFAULT;
+    this.liveButtonIcon = iconMediaPlay();
+
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
 
@@ -62,6 +68,9 @@ export default class Model extends Observable {
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
     this.router.bubbleTo(this);
+    this.log.filter.observe(() => {
+      this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);
+    });
     this.handleLocationChange(); // Init first page
 
     // Setup keyboard dispatcher
@@ -72,11 +81,6 @@ export default class Model extends Observable {
     this.ws.addListener('command', this.handleWSCommand.bind(this));
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
     this.ws.addListener('close', this.handleWSClose.bind(this));
-
-    // update router on model change
-    // Model can change very often we protect router with callRateLimiter
-    // Router limit: 100 calls per 30 seconds max = 30ms, 2 FPS is enough (500ms)
-    this.observe(callRateLimiter(this.updateRouteOnModelChange.bind(this), 500));
   }
 
   /**
@@ -84,7 +88,9 @@ export default class Model extends Observable {
    */
   handleWSAuthed() {
     // Tell server not to stream by default
+    this.guiReadyToUse = RemoteData.success();
     this.ws.setFilter(() => false);
+    this.notify();
   }
 
   /**
@@ -319,7 +325,7 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending if location is filters or profile
    * @param {object} params - URL parameters
    */
-  parseLocation(params) {
+  async parseLocation(params) {
     if (params.profile && params.q) {
       this.log.filter.resetCriteria();
       this.notification.show('URL can contain only filters or profile, not both', 'warning');
@@ -330,17 +336,59 @@ export default class Model extends Observable {
     } else if (params.q) {
       this.getUserProfile();
       this.log.filter.fromObject(JSON.parse(params.q.replaceAll('\n', '\\n')));
+      if (params.live == 'true') {
+        await this.loadLiveMode();
+      }
+    } else if (!params.q) {
+      this.getUserProfile();
+      this.log.filter.resetCriteria();
+      if (params.live == 'true') {
+        await this.loadLiveMode();
+      }
     } else {
       this.getUserProfile();
     }
   }
 
   /**
-   * When model change (filters), update address bar with the filter
-   * do it silently to avoid infinite loop
+   * Attempt to load into the live mode of the ILG
    */
-  updateRouteOnModelChange() {
-    this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);
+  async loadLiveMode() {
+    while (this.guiReadyToUse.isLoading()
+      || !this.frameworkInfo.isSuccess()
+      || !this.frameworkInfo.payload.infoLoggerServer.status.ok) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    try {
+      this.log.liveStart();
+      this.setLiveButton(BUTTON.SUCCESS_ACTIVE, iconMediaStop());
+      this.setQueryButton(BUTTON.DEFAULT);
+      this.log.enableAutoScroll();
+      setBrowserTabTitle(`${window.ILG.name} LIVE`);
+      this.notify();
+    } catch (error) {
+      this.notification.show(error.toString(), 'danger', 3000);
+    }
+  }
+
+  /**
+   * Method to change the icon and type of the liveButton
+   * @param {string} liveType - Type of the Live Button
+   * @param {Icon} liveIcon - Icon of the Live Button
+   */
+  setLiveButton(liveType, liveIcon) {
+    this.liveButtonType = liveType;
+    this.liveButtonIcon = liveIcon;
+    this.notify();
+  }
+
+  /**
+   * Method to change the type of the queryButton
+   * @param {string} queryType - Type of the queryButton
+   */
+  setQueryButton(queryType) {
+    this.queryButtonType = queryType;
+    this.notify();
   }
 
   /**

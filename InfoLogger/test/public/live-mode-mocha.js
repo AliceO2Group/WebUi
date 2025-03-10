@@ -1,3 +1,4 @@
+/* eslint-disable @stylistic/js/max-len */
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -10,9 +11,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-
-/* eslint-disable max-len */
+ */
 
 const assert = require('assert');
 const test = require('../mocha-index');
@@ -23,11 +22,10 @@ describe('Live Mode test-suite', async () => {
   before(async () => {
     baseUrl = test.helpers.baseUrl;
     page = test.page;
-
   });
 
-  it('should successfully go to homepage with predefined filters', async function() {
-    await page.goto(baseUrl, {waitUntil: 'networkidle0'});
+  it('should successfully go to homepage with predefined filters', async () => {
+    await page.goto(baseUrl, { waitUntil: 'networkidle0' });
     const location = await page.evaluate(() => window.location);
     const search = decodeURIComponent(location.search);
 
@@ -55,9 +53,9 @@ describe('Live Mode test-suite', async () => {
     assert.strictEqual(criterias.level.$max, 21);
 
     // Wait for logs and count them (2-3 maybe, it's random)
-    await page.waitForFunction(`window.model.log.list.length > 0`, {timeout: 5000});
+    await page.waitForFunction('window.model.log.list.length > 0', { timeout: 5000 });
     const list = await page.evaluate(() => window.model.log.list);
-    assert.ok(!!list.length);
+    assert.ok(Boolean(list.length));
   });
 
   it('should filter messages based on `hostname` matching `aldaqecs01-v1` from live -> paused -> live', async () => {
@@ -67,7 +65,7 @@ describe('Live Mode test-suite', async () => {
       window.model.log.filter.setCriteria('hostname', 'match', 'aldaqecs01-v1');
     });
     await page.evaluate(() => window.model.log.liveStart());
-    await page.waitForFunction(`window.model.log.list.length > 5`, {timeout: 5000});
+    await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
     const list = await page.evaluate(() => window.model.log.list);
     const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname === 'aldaqecs01-v1');
     assert.ok(list.length > 0);
@@ -81,7 +79,7 @@ describe('Live Mode test-suite', async () => {
       window.model.log.filter.setCriteria('hostname', 'exclude', 'aldaqdip01');
     });
     await page.evaluate(() => window.model.log.liveStart());
-    await page.waitForFunction(`window.model.log.list.length > 5`, {timeout: 5000});
+    await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
 
     const list = await page.evaluate(() => window.model.log.list);
     const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => hostname !== 'aldaqdip01');
@@ -97,7 +95,7 @@ describe('Live Mode test-suite', async () => {
       window.model.log.setCriteria('username', 'match', 'a_iceda_');
       window.model.log.empty();
     });
-    await page.waitForFunction(`window.model.log.list.length > 5`, {timeout: 5000});
+    await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
 
     const list = await page.evaluate(() => window.model.log.list);
     const isHostNameMatching = list.map((element) => element.hostname).every((hostname) => !new RegExp('.*ldaqdip.*').test(hostname));
@@ -106,6 +104,28 @@ describe('Live Mode test-suite', async () => {
     assert.ok(list.length > 0);
     assert.ok(isHostNameMatching);
     assert.ok(isUserNameMatching);
+  });
+
+  it('should successfully enable LIVE mode from url parameter with defined filter', async () => {
+    await page.goto(`${baseUrl}?q={"severity":{"in":"I W E F"}}&live=true`, { waitUntil: 'networkidle0' });
+    const liveButtonClasses = await page.evaluate(() => window.model.liveButtonType);
+    const search = decodeURIComponent(await page.evaluate(() => window.location.search));
+
+    // Check if live mode is active.
+    assert.strictEqual(liveButtonClasses, 'btn-success active');
+    // Check if filter is applied
+    assert.strictEqual(search, '?q={"severity":{"in":"I W E F"}}');
+  });
+
+  it('should successfully enable LIVE mode from url parameter with default filter', async () => {
+    await page.goto(`${baseUrl}?live=true`, { waitUntil: 'networkidle0' });
+    const liveButtonClasses = await page.evaluate(() => window.model.liveButtonType);
+    const search = decodeURIComponent(await page.evaluate(() => window.location.search));
+
+    // Check if live mode is active.
+    assert.strictEqual(liveButtonClasses, 'btn-success active');
+    // Check if redirected to default page
+    assert.strictEqual(search, '?q={"severity":{"in":"I W E F"}}');
   });
 
   it('should successfully go to mode LIVE in paused state', async () => {
@@ -118,10 +138,10 @@ describe('Live Mode test-suite', async () => {
   });
 
   it('successfully show indicator when user double pressed the log row', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr', {timeout: 5000});
+    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr', { timeout: 5000 });
     const tableRow = await page.$('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr');
-    await tableRow.click({clickCount: 2});
-    await page.waitForSelector('#inspector-sidebar', {timeout: 1000})
+    await tableRow.click({ clickCount: 2 });
+    await page.waitForSelector('#inspector-sidebar', { timeout: 1000 });
 
     const indicatorOpen = await page.evaluate(() => window.model.inspectorEnabled);
     assert.ok(indicatorOpen);
@@ -147,8 +167,3 @@ describe('Live Mode test-suite', async () => {
     assert.deepStrictEqual(activeMode, 'Query');
   });
 });
-
-
-
-
-
