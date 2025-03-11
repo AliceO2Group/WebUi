@@ -13,11 +13,9 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
-import { NotFoundError } from '@aliceo2/web-ui';
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/json`);
 import fs from 'fs';
 import path from 'path';
-import LayoutRepository from '../database/repositories/LayoutRepository.js';
 
 /**
  * Store layouts inside JSON based file with atomic write
@@ -33,7 +31,6 @@ export class JsonFileService {
     this.pathnameTmp = `${this.pathname}~tmp`;
     this.data = { layouts: [], users: [] };
     this.lock = new Lock();
-    this.layoutRepository = new LayoutRepository();
     this._syncFileAndInternalState();
   }
 
@@ -43,8 +40,8 @@ export class JsonFileService {
    */
   async _syncFileAndInternalState() {
     await this._readFromFile();
-    await this._writeToFile();
-    logger.info(`Preferences will be saved in ${this.pathname}`);
+    this.writeToFile();
+    logger.infoMessage(`Preferences will be saved in ${this.pathname}`);
   }
 
   /**
@@ -86,113 +83,23 @@ export class JsonFileService {
   }
 
   /**
-   * Write data to disk, atomically, with lock
-   * @returns {undefined}
+   * Write data to disk, atomically, with lock.
+   * @returns {Promise<void>}
    */
-  async _writeToFile() {
-    await this.lock.acquire();
-    await new Promise((resolve, reject) => {
+  async writeToFile() {
+    await this.lock.acquire(); // Acquire the lock
+
+    try {
       const dataToFile = JSON.stringify(this.data, null, 1);
-
-      fs.writeFile(this.pathnameTmp, dataToFile, (err) => {
-        if (err) {
-          return reject(err);
-        }
-        fs.rename(this.pathnameTmp, this.pathname, (err) => {
-          if (err) {
-            return reject(err);
-          }
-          logger.info('DB file updated');
-          resolve();
-        });
-      });
-    });
-
-    this.lock.release();
-  }
-
-  /**
-   * Create a layout
-   * @param {Layout} newLayout - layout object to be saved
-   * @returns {object} Empty details
-   */
-  async createLayout(newLayout) {
-    if (!newLayout.id) {
-      throw new Error('layout id is mandatory');
+      await fs.promises.writeFile(this.pathnameTmp, dataToFile);
+      await fs.promises.rename(this.pathnameTmp, this.pathname);
+      logger.infoMessage('DB file updated');
+    } catch (err) {
+      logger.errorMessage('Error writing to DB file:', err);
+      throw err;
+    } finally {
+      this.lock.release();
     }
-    if (!newLayout.name) {
-      throw new Error('layout name is mandatory');
-    }
-
-    const layout = this.layoutRepository.findLayoutById(this.data, newLayout.id);
-    if (layout) {
-      throw new Error(`layout with this id (${layout.id}) already exists`);
-    }
-    this.layoutRepository.createLayout(this.data, newLayout);
-    this._writeToFile();
-    return newLayout;
-  }
-
-  /**
-   * Retrieve a layout or undefined
-   * @param {string} layoutId - layout id
-   * @returns {Layout} - layout object
-   * @throws {Error}
-   */
-  readLayout(layoutId) {
-    const layout = this.layoutRepository.findLayoutById(this.data, layoutId);
-    if (!layout) {
-      throw new NotFoundError(`layout (${layoutId}) not found`);
-    }
-    return layout;
-  }
-
-  /**
-   * Given a string, representing layout name, retrieve the layout if it exists
-   * @param {string} layoutName - name of the layout to retrieve
-   * @returns {Layout} - object with layout information
-   * @throws
-   */
-  readLayoutByName(layoutName) {
-    const layout = this.layoutRepository.findLayoutByName(this.data, layoutName);
-    if (!layout) {
-      throw new NotFoundError(`Layout (${layoutName}) not found`);
-    }
-    return layout;
-  }
-
-  /**
-   * Update a single layout by its id
-   * @param {string} layoutId - id of the layout to be updated
-   * @param {Layout} data - layout new data
-   * @returns {object} Empty details
-   */
-  updateLayout(layoutId, data) {
-    const layout = this.readLayout(layoutId);
-    this.layoutRepository.updateLayout(layout, data);
-    this._writeToFile();
-    return layoutId;
-  }
-
-  /**
-   * Delete a single layout by its id
-   * @param {string} layoutId - id of the layout to be removed
-   * @returns {object} Empty details
-   */
-  deleteLayout(layoutId) {
-    const layout = this.readLayout(layoutId);
-    this.layoutRepository.deleteLayout(this.data, layout);
-    this._writeToFile();
-    return layoutId;
-  }
-
-  /**
-   * List layouts, can be filtered
-   * @param {object} filter - accepted keys [owner_id, name]
-   * @returns {Array<Layout>} - list of layouts as per the filter
-   */
-  async listLayouts(filter = {}) {
-    return this.layoutRepository.listLayouts(this.data, filter);
   }
 
   /**
@@ -214,48 +121,6 @@ export class JsonFileService {
       }
     }
     throw new Error(`Object with ${id} could not be found`);
-  }
-
-  /* User helpers */
-
-  /**
-   * Check if a user is saved and if not, add it to the in-memory list and db
-   * @param {JSON} user - data of the user to be added
-   * @returns {undefined}
-   */
-  addUser(user) {
-    this._validateUser(user);
-    const isUserPresent = this.data.users
-      .findIndex((userEl) => user.id === userEl.id && user.name === userEl.name) !== -1;
-
-    if (!isUserPresent) {
-      this.data.users.push(user);
-      this._writeToFile();
-    }
-  }
-
-  /**
-   * Validate that a user JSON contains all the mandatory fields
-   * @param {JSON} user - data of the user to be added
-   * @returns {undefined}
-   * @throws {Error}
-   */
-  _validateUser(user) {
-    if (!user) {
-      throw new Error('User Object is mandatory');
-    }
-    if (!user.username) {
-      throw new Error('Field username is mandatory');
-    }
-    if (!user.name) {
-      throw new Error('Field name is mandatory');
-    }
-    if (user.id === null || user.id === undefined || user.id === '') {
-      throw new Error('Field id is mandatory');
-    }
-    if (isNaN(user.id)) {
-      throw new Error('Field id must be a number');
-    }
   }
 }
 

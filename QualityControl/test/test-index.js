@@ -52,6 +52,7 @@ import { statusControllerTestSuite } from './lib/controllers/StatusController.te
  */
 import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
 import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
+import { jsonFileServiceTestSuite } from './lib/services/json-service.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
@@ -151,12 +152,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     suite('Services - Test Suite', async () => {
       suite('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
       suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
-      suite('JsonServiceTest test suite', async () => {
-        // TODO - bring inline with current tests
-      });
-      suite('UserServiceTest test suite', async () => {
-        // TODO - bring inline with current tests
-      });
+      suite('JsonServiceTest test suite', async () => await jsonFileServiceTestSuite());
     });
 
     suite('Middleware - Test Suite', async () => {
@@ -167,6 +163,9 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
 
     suite('Controllers - Test Suite', async () => {
       suite('LayoutController test suite', async () => await layoutControllerTestSuite());
+      suite('UserController test suite', async () => {
+        // TODO - bring inline with current tests
+      });
       suite('StatusController test suite', async () => await statusControllerTestSuite());
 
       suite('ObjectController test suite', async () => {

@@ -13,13 +13,15 @@
  */
 
 import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+// eslint-disable-next-line no-unused-vars
+import LayoutRepository from '../../repositories/LayoutRepository.js';
 
 /**
  * Middleware that checks if the layout id is present in the request
- * @param {JSONFileConnector} dataService - service for getting/setting layout data
+ * @param {LayoutRepository} layoutRepository - repository for getting/setting layout data
  * @returns  {function(req, res, next): Function} - middleware function
  */
-export const layoutIdMiddleware = (dataService) =>
+export const layoutIdMiddleware = (layoutRepository) =>
 
 /**
  * Returned middleware method
@@ -33,7 +35,7 @@ export const layoutIdMiddleware = (dataService) =>
       if (!id) {
         throw new InvalidInputError('The "id" parameter is missing from the request');
       }
-      await dataService.readLayout(id);
+      await layoutRepository.readLayoutById(id);
       next();
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);

@@ -15,8 +15,8 @@
 import { suite, test } from 'node:test';
 import { ok } from 'node:assert';
 import sinon from 'sinon';
-import { JsonFileService } from '../../../../lib/services/JsonFileService.js';
 import { layoutOwnerMiddleware } from '../../../../lib/middleware/layouts/layoutOwner.middleware.js';
+import LayoutRepository from '../../../../lib/repositories/LayoutRepository.js';
 
 /**
  * Test suite for the middleware that checks the owner of the layout
@@ -25,30 +25,29 @@ export const layoutOwnerMiddlewareTest = () => {
   suite('Layout owner middleware', () => {
     test('should return an "UnauthorizedAccessError" if the layout does not belong to the user', async () => {
       const req = {
-        params: {
-          id: 'layoutId',
-        },
-        session: {
-          personid: 'notTheOwnerId',
-          name: 'notTheOwnerName',
-        },
+        params: { id: 'layoutId' },
+        session: { personid: 'notTheOwnerId', name: 'notTheOwnerName' },
       };
       const res = {
         status: sinon.stub().returnsThis(),
         json: sinon.stub().returns(),
       };
-      const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(JsonFileService, {
-        readLayout: sinon.stub().resolves({ owner_name: 'ownerName', owner_id: 'ownerId' }),
+      const next = sinon.stub(); // Do not call fake to catch unexpected execution
+
+      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
+        readLayoutById: sinon.stub().resolves({ owner_name: 'ownerName', owner_id: 'ownerId' }),
       });
+
       await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
-      ok(res.status.calledWith(403));
-      ok(res.json.calledWith({
+
+      sinon.assert.calledWith(res.status, 403);
+      sinon.assert.calledWith(res.json, sinon.match({
         message: 'Only the owner of the layout can delete it',
         status: 403,
         title: 'Unauthorized Access',
       }));
     });
+
     test('should return an "NotFound" error if the owner data of the layout is not accesible', async () => {
       const req = {
         params: {
@@ -64,8 +63,8 @@ export const layoutOwnerMiddlewareTest = () => {
         json: sinon.stub().returns(),
       };
       const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(JsonFileService, {
-        readLayout: sinon.stub().returns(),
+      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
+        readLayoutById: sinon.stub().returns(),
       });
       await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(404));
@@ -90,8 +89,8 @@ export const layoutOwnerMiddlewareTest = () => {
         json: sinon.stub().returns(),
       };
       const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(JsonFileService, {
-        readLayout: sinon.stub().returns({ owner_name: 'ownerName', owner_id: 'ownerId' }),
+      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
+        readLayoutById: sinon.stub().returns({ owner_name: 'ownerName', owner_id: 'ownerId' }),
       });
       await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(404));
@@ -113,8 +112,8 @@ export const layoutOwnerMiddlewareTest = () => {
         },
       };
       const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(JsonFileService, {
-        readLayout: sinon.stub().resolves({ owner_name: 'ownerName', owner_id: 'ownerId' }),
+      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
+        readLayoutById: sinon.stub().resolves({ owner_name: 'ownerName', owner_id: 'ownerId' }),
       });
       await layoutOwnerMiddleware(dataServiceStub)(req, {}, next);
       ok(next.called, 'The next() callback should be called');

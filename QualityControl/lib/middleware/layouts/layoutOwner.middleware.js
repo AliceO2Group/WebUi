@@ -13,13 +13,15 @@
  */
 
 import { NotFoundError, UnauthorizedAccessError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+// eslint-disable-next-line no-unused-vars
+import LayoutRepository from '../../repositories/LayoutRepository.js';
 
 /**
  * Middleware that checks if the requestor is the owner of the layout
- * @param {JSONFileConnector} dataService - service for getting/setting layout data
+ * @param {LayoutRepository} layoutRepository - Repository for getting/setting layout data
  * @returns  {function(req, res, next): Function} - middleware function
  */
-export const layoutOwnerMiddleware = (dataService) =>
+export const layoutOwnerMiddleware = (layoutRepository) =>
 
 /**
  * Returned middleware method
@@ -31,7 +33,7 @@ export const layoutOwnerMiddleware = (dataService) =>
     try {
       const { id } = req.params;
       const { personid = '', name = '' } = req.session ?? {};
-      const { owner_name = '', owner_id = '' } = await dataService.readLayout(id) ?? {};
+      const { owner_name = '', owner_id = '' } = await layoutRepository.readLayoutById(id) ?? {};
       if (owner_id === '' || owner_name === '') {
         throw new NotFoundError('Unable to retrieve layout owner information');
       } else if (personid === '' || name === '') {
