@@ -36,8 +36,9 @@ import {
 export class LayoutController {
   /**
    * Setup Layout Controller:
-   * @param layoutRepository
+   * @param {LayoutRepository} layoutRepository - The repository for layout data
    */
+
   constructor(layoutRepository) {
     assert(layoutRepository, 'Missing layout repository');
 

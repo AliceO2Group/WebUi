@@ -103,9 +103,8 @@ export class LayoutRepository {
   /**
    * Update a single layout by its id
    * @param {string} layoutId - id of the layout to be updated
-   * @param {Layout} data - layout new data
-   * @param newData
-   * @returns {object} Empty details
+   * @param {LayoutDto} newData - layout new data
+   * @returns {string} id of the layout updated
    */
   async updateLayout(layoutId, newData) {
     const layout = this.readLayoutById(layoutId);
@@ -117,7 +116,7 @@ export class LayoutRepository {
   /**
    * Delete a single layout by its id
    * @param {string} layoutId - id of the layout to be removed
-   * @returns {object} Empty details
+   * @returns {string} id of the layout deleted
    */
   async deleteLayout(layoutId) {
     const layout = this.readLayoutById(layoutId);
