@@ -56,7 +56,7 @@ export const setupQcModel = () => {
   const ccdbService = CcdbService.setup(config.ccdb);
   statusService.dataService = ccdbService;
 
-  const qcObjectService = new QcObjectService(ccdbService, jsonFileService, { openFile, toJSON });
+  const qcObjectService = new QcObjectService(ccdbService, layoutRepository, { openFile, toJSON });
   qcObjectService.refreshCache();
 
   const objectController = new ObjectController(qcObjectService);

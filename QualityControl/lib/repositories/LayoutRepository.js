@@ -125,4 +125,25 @@ export class LayoutRepository {
     await this._jsonFileService.writeToFile();
     return layoutId;
   }
+
+  /**
+   * Return an object by its id that is saved within a layout
+   * @param {string} id - id of the object to retrieve
+   * @returns {{object: object, layoutName: string}} - object configuration stored
+   */
+  getObjectById(id) {
+    if (!id) {
+      throw new Error('Missing mandatory parameter: id');
+    }
+    for (const layout of this._jsonFileService.data.layouts) {
+      for (const tab of layout.tabs) {
+        for (const object of tab.objects) {
+          if (object.id === id) {
+            return { object, layoutName: layout.name, tabName: tab.name };
+          }
+        }
+      }
+    }
+    throw new Error(`Object with ${id} could not be found`);
+  }
 }

@@ -34,8 +34,24 @@ export const layoutRepositoryTest = async () => {
     let layoutRepository = null;
 
     const mockedLayouts = [
-      { id: '1', name: 'Test Layout', owner_id: 'user1' },
-      { id: '2', name: 'Another Layout', owner_id: 'user2' },
+      { id: '1',
+        name: 'Test Layout',
+        owner_id: 'user1',
+        tabs: [
+          {
+            name: 'Tab1',
+            objects: [{ id: '1', name: 'Object1' }],
+          },
+        ] },
+      { id: '2',
+        name: 'Another Layout',
+        owner_id: 'user2',
+        tabs: [
+          {
+            name: 'Tab2',
+            objects: [{ id: '2', name: 'Object2' }],
+          },
+        ] },
     ];
 
     before(async () => {
@@ -66,7 +82,7 @@ export const layoutRepositoryTest = async () => {
       test('should filter layouts by owner_id', () => {
         const result = layoutRepository.listLayouts({ owner_id: 'user1' });
         equal(result.length, 1);
-        deepEqual(result[0], { id: '1', name: 'Test Layout', owner_id: 'user1' });
+        deepEqual(result[0], mockedLayouts[0]);
       });
     });
 
@@ -80,7 +96,7 @@ export const layoutRepositoryTest = async () => {
 
       test('should return a layout if it is found', () => {
         const layout = layoutRepository.readLayoutById('2');
-        deepEqual(layout, { id: '2', name: 'Another Layout', owner_id: 'user2' });
+        deepEqual(layout, mockedLayouts[1]);
       });
     });
 
@@ -125,10 +141,18 @@ export const layoutRepositoryTest = async () => {
 
     suite('update layouts', () => {
       test('should update a single layout by its id', async () => {
-        const newLayout = { id: '1', name: 'Test Layout Updated', owner_id: 'user1' };
+        const newLayout = { id: '1',
+          name: 'Test Layout Updated',
+          owner_id: 'user1',
+          tabs: [
+            {
+              name: 'Tab1',
+              objects: [{ id: '1', name: 'Object1' }],
+            },
+          ] };
         const idOfLayoutUpdated = await layoutRepository.updateLayout('1', newLayout);
         equal(idOfLayoutUpdated, '1');
-        deepEqual(jsonFileServiceMock.data.layouts[0], { id: '1', name: 'Test Layout Updated', owner_id: 'user1' });
+        deepEqual(jsonFileServiceMock.data.layouts[0], newLayout);
         sinon.assert.calledOnce(jsonFileServiceMock.writeToFile);
       });
     });
@@ -159,6 +183,23 @@ export const layoutRepositoryTest = async () => {
         );
         strictEqual(deletedLayoutId, layoutIdToDelete);
         sinon.assert.calledOnce(jsonFileServiceMock.writeToFile);
+      });
+    });
+
+    suite('getObjectById', async () => {
+      test('should return the correct object and layout name when the id exists', () => {
+        const result = layoutRepository.getObjectById('1');
+        assert.deepStrictEqual(result, {
+          object: { id: '1', name: 'Object1' }, layoutName: 'Test Layout Updated', tabName: 'Tab1',
+        });
+      });
+
+      test('should throw an error when the id does not exist', () => {
+        assert.throws(() => layoutRepository.getObjectById('3'), new Error('Object with 3 could not be found'));
+      });
+
+      test('should throw an error when the id is missing', () => {
+        assert.throws(() => layoutRepository.getObjectById(), new Error('Missing mandatory parameter: id'));
       });
     });
   });
