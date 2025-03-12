@@ -13,8 +13,10 @@
  */
 
 import { NotFoundError, UnauthorizedAccessError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
-// eslint-disable-next-line no-unused-vars
-import LayoutRepository from '../../repositories/LayoutRepository.js';
+
+/**
+ * @typedef {import('../../repositories/LayoutRepository').default} LayoutRepository
+ */
 
 /**
  * Middleware that checks if the requestor is the owner of the layout

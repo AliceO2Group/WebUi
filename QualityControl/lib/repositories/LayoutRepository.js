@@ -12,8 +12,11 @@
  */
 
 import assert from 'assert';
-// eslint-disable-next-line no-unused-vars
-import { JsonFileService } from '../services/JsonFileService.js';
+
+/**
+ * @typedef {import('../services/JsonFileService.js').JsonFileService} JsonFileService
+ */
+
 import { NotFoundError } from '@aliceo2/web-ui';
 
 /**

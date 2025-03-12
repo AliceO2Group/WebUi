@@ -14,8 +14,10 @@
 
 import assert from 'assert';
 import { LogManager } from '@aliceo2/web-ui';
-// eslint-disable-next-line no-unused-vars
-import UserRepository from '../repositories/UserRepository.js';
+
+/**
+ * @typedef {import('../repositories/UserRepository.js').default} UserRepository
+ */
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
 

@@ -25,8 +25,10 @@ import {
   updateAndSendExpressResponseFromNativeError,
 }
   from '@aliceo2/web-ui';
-// eslint-disable-next-line no-unused-vars
-import LayoutRepository from '../repositories/LayoutRepository.js';
+
+/**
+ * @typedef {import('../repositories/LayoutRepository.js').default} LayoutRepository
+ */
 
 /**
  * Gateway for all HTTP requests with regards to QCG Layouts

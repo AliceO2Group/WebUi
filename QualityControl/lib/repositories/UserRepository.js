@@ -12,8 +12,10 @@
  */
 
 import assert from 'assert';
-// eslint-disable-next-line no-unused-vars
-import { JsonFileService } from '../services/JsonFileService.js';
+
+/**
+ * @typedef {import('../services/JsonFileService.js').JsonFileService} JsonFileService
+ */
 
 /**
  * UserRepository class to handle CRUD operations for Users.
