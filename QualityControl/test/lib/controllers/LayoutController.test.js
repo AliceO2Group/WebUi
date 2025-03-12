@@ -18,7 +18,7 @@ import sinon from 'sinon';
 
 import { LAYOUT_MOCK_1 } from './../../demoData/layout/layout.mock.js';
 import { LayoutController } from './../../../lib/controllers/LayoutController.js';
-import LayoutRepository from '../../../lib/repositories/LayoutRepository.js';
+import { LayoutRepository } from '../../../lib/repositories/LayoutRepository.js';
 
 export const layoutControllerTestSuite = async () => {
   suite('Creating a new LayoutController instance', () => {

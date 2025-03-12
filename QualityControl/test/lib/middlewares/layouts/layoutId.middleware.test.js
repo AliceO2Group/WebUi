@@ -17,7 +17,7 @@ import { ok } from 'node:assert';
 import sinon from 'sinon';
 import { layoutIdMiddleware } from '../../../../lib/middleware/layouts/layoutId.middleware.js';
 import { NotFoundError } from '@aliceo2/web-ui';
-import LayoutRepository from '../../../../lib/repositories/LayoutRepository.js';
+import { LayoutRepository } from '../../../../lib/repositories/LayoutRepository.js';
 
 /**
  * Test suite for the middlewares involved in the ID check of the layout requests

@@ -16,7 +16,7 @@ import { suite, test } from 'node:test';
 import { ok } from 'node:assert';
 import sinon from 'sinon';
 import { layoutOwnerMiddleware } from '../../../../lib/middleware/layouts/layoutOwner.middleware.js';
-import LayoutRepository from '../../../../lib/repositories/LayoutRepository.js';
+import { LayoutRepository } from '../../../../lib/repositories/LayoutRepository.js';
 
 /**
  * Test suite for the middleware that checks the owner of the layout
