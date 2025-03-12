@@ -16,7 +16,7 @@ import assert from 'assert';
 import { LogManager } from '@aliceo2/web-ui';
 
 /**
- * @typedef {import('../repositories/UserRepository.js').default} UserRepository
+ * @typedef {import('../repositories/UserRepository.js').UserRepository} UserRepository
  */
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/user`);

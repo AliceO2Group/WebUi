@@ -40,7 +40,7 @@ export class JsonFileService {
    */
   async _syncFileAndInternalState() {
     await this._readFromFile();
-    this.writeToFile();
+    await this.writeToFile();
     logger.infoMessage(`Preferences will be saved in ${this.pathname}`);
   }
 

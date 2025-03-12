@@ -27,7 +27,7 @@ import {
   from '@aliceo2/web-ui';
 
 /**
- * @typedef {import('../repositories/LayoutRepository.js').default} LayoutRepository
+ * @typedef {import('../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
  */
 
 /**

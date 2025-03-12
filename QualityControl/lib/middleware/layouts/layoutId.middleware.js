@@ -13,8 +13,10 @@
  */
 
 import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
-// eslint-disable-next-line no-unused-vars
-import LayoutRepository from '../../repositories/LayoutRepository.js';
+
+/**
+ * @typedef {import('../../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
+ */
 
 /**
  * Middleware that checks if the layout id is present in the request

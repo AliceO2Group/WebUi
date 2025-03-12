@@ -15,7 +15,7 @@
 import { NotFoundError, UnauthorizedAccessError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
 /**
- * @typedef {import('../../repositories/LayoutRepository').default} LayoutRepository
+ * @typedef {import('../../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
  */
 
 /**

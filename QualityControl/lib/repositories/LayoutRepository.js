@@ -22,7 +22,7 @@ import { NotFoundError } from '@aliceo2/web-ui';
 /**
  * LayoutRepository class to handle CRUD operations for Layouts.
  */
-export default class LayoutRepository {
+export class LayoutRepository {
   /**
    * Initializes the LayoutRepository.
    * @param {JsonFileService} jsonFileService - Service to interact with the JSON database.
@@ -51,10 +51,10 @@ export default class LayoutRepository {
   }
 
   /**
-   * Retrieve a layout or undefined
+   * Retrieve a layout by its id or throws an error
    * @param {string} layoutId - layout id
    * @returns {Layout} - layout object
-   * @throws {Error}
+   * @throws {NotFoundError} - if the layout is not found
    */
   readLayoutById(layoutId) {
     const foundLayout = this._jsonFileService.data.layouts.find((layout) => layout.id === layoutId);

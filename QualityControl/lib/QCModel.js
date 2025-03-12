@@ -30,8 +30,8 @@ import { ObjectController } from './controllers/ObjectController.js';
 import { UserController } from './controllers/UserController.js';
 
 import { config } from './config/configProvider.js';
-import LayoutRepository from './repositories/LayoutRepository.js';
-import UserRepository from './repositories/UserRepository.js';
+import { LayoutRepository } from './repositories/LayoutRepository.js';
+import { UserRepository } from './repositories/UserRepository.js';
 
 /**
  * Model initialization for the QCG application

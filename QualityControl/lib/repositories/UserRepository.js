@@ -20,7 +20,7 @@ import assert from 'assert';
 /**
  * UserRepository class to handle CRUD operations for Users.
  */
-export default class UserRepository {
+export class UserRepository {
   /**
    * Initializes the User Repository.
    * @param {JsonFileService} jsonFileService - Service to interact with the JSON database.
