@@ -52,13 +52,16 @@ import { statusControllerTestSuite } from './lib/controllers/StatusController.te
  */
 import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
 import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
-import { jsonFileServiceTestSuite } from './lib/services/json-service.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
 import { layoutIdMiddlewareTest } from './lib/middlewares/layouts/layoutId.middleware.test.js';
 import { layoutOwnerMiddlewareTest } from './lib/middlewares/layouts/layoutOwner.middleware.test.js';
 import { layoutServiceMiddlewareTest } from './lib/middlewares/layouts/layoutService.middleware.test.js';
+import { layoutRepositoryTest } from './lib/repositories/LayoutRepository.test.js';
+import { userRepositoryTest } from './lib/repositories/UserRepository.test.js';
+import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
+import { userControllerTestSuite } from './lib/controllers/UserController.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -149,6 +152,11 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('CL - DateTime Utility methods test suite', () => commonLibraryUtilsDateTimeTestSuite());
     });
 
+    suite('Repositories - Test Suite', async () => {
+      suite('Layout Repository - Test Suite', async () => await layoutRepositoryTest());
+      suite('User Repository - Test Suite', async () => await userRepositoryTest())
+    })
+
     suite('Services - Test Suite', async () => {
       suite('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
       suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
@@ -163,14 +171,12 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
 
     suite('Controllers - Test Suite', async () => {
       suite('LayoutController test suite', async () => await layoutControllerTestSuite());
-      suite('UserController test suite', async () => {
-        // TODO - bring inline with current tests
-      });
       suite('StatusController test suite', async () => await statusControllerTestSuite());
 
       suite('ObjectController test suite', async () => {
         // TODO - bring inline with current tests
       });
+      suite('UserController - Test Suite', async () => await userControllerTestSuite())
     });
   });
 });
