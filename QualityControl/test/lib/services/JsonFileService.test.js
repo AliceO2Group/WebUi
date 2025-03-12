@@ -12,6 +12,91 @@
  * or submit itself to any jurisdiction.
  */
 
-export const jsonFileServiceTestSuite = async () => {
+import { suite, test, afterEach } from 'node:test';
+import assert from 'assert';
+import fs from 'fs';
+import { JsonFileService } from '../../../lib/services/JsonFileService.js';
+import { config } from '../../config.js';
 
+
+export const jsonFileServiceTestSuite = async () => {
+  
+  suite('JSON File Service Test Suite', () => {
+    
+    afterEach(() => {
+      if (fs.existsSync(config.dbFile)) {
+        fs.unlinkSync(config.dbFile);
+      }
+    });
+
+    afterEach(() => {
+      fs.writeFileSync(config.dbFile, JSON.stringify({ layouts: [], users: [] }));
+  });
+
+    test('should reject when layouts are missing from data with error of bad data format', async () => {
+      fs.writeFileSync(config.dbFile, JSON.stringify({ users: [] }));
+      const service = new JsonFileService(config.dbFile);
+      await assert.rejects(
+        service.ready,
+        (err) => {
+            return err instanceof Error && err.message === `DB file should have an array of layouts ${config.dbFile.split('./')[1]}`;
+        }
+      );
+    });
+
+    test('should reject when there is no data with error of bad data format', async () => {
+      fs.writeFileSync(config.dbFile, '');
+      const service = new JsonFileService(config.dbFile);
+      await assert.rejects(
+        service.ready,
+        (err) => {
+          return err instanceof Error && err.message === `Unable to parse DB file ${config.dbFile.split('./')[1]}`;
+        }
+      );
+    });
+
+    test('should reject when data.layouts is not an Array with error of bad data format', async () => {
+      fs.writeFileSync(config.dbFile, JSON.stringify({ layouts: {}, users: [] }));
+      const service = new JsonFileService(config.dbFile);
+      await assert.rejects(
+        service.ready,
+        (err) => {
+          return err instanceof Error && err.message === `DB file should have an array of layouts ${config.dbFile.split('./')[1]}`;
+        }
+      );
+    });
+
+    test('should resolve and add an array of users if missing from data', async () => {
+      fs.writeFileSync(config.dbFile, JSON.stringify({ layouts: [] }));
+      const service = new JsonFileService(config.dbFile);
+      await service.ready;
+      assert.deepStrictEqual(service.data, { layouts: [], users: [] });
+    });
+
+    test('should successfully read layouts from data', async () => {
+      const layouts = [{ id: '1', name: 'Layout 1' }, { id: '2', name: 'Layout 2' }];
+      fs.writeFileSync(config.dbFile, JSON.stringify({ layouts, users: [] }));
+      const service = new JsonFileService(config.dbFile);
+      await service.ready;
+      assert.deepStrictEqual(service.data.layouts, layouts);
+    });
+
+    test('should reject when there is missing data with error of bad JSON format', async () => {
+      fs.writeFileSync(config.dbFile, '{layouts: [}');
+      const service = new JsonFileService(config.dbFile);
+      await assert.rejects(
+        service.ready,
+        (err) => {
+          return err instanceof Error && err.message === `Unable to parse DB file ${config.dbFile.split('./')[1]}`;
+        }
+      );
+    });
+
+
+
+
+
+
+
+  });
 };
