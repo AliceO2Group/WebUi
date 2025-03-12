@@ -31,7 +31,7 @@ export class JsonFileService {
     this.pathnameTmp = `${this.pathname}~tmp`;
     this.data = { layouts: [], users: [] };
     this.lock = new Lock();
-    this._syncFileAndInternalState();
+    this.ready = this._syncFileAndInternalState();
   }
 
   /**
