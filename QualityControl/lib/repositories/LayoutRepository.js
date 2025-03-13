@@ -18,10 +18,6 @@ import { BaseRepository } from './BaseRepository.js';
  * LayoutRepository class to handle CRUD operations for Layouts.
  */
 export class LayoutRepository extends BaseRepository {
-  constructor(jsonFileService) {
-    super(jsonFileService);
-  }
-
   /**
    * List layouts, can be filtered
    * @param {object} filter - accepted keys [owner_id, name]

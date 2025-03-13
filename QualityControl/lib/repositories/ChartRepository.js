@@ -17,10 +17,6 @@ import { BaseRepository } from './BaseRepository.js';
  * ChartRepository class to handle CRUD operations for Charts.
  */
 export class ChartRepository extends BaseRepository {
-  constructor(jsonFileService) {
-    super(jsonFileService);
-  }
-
   /**
    * Return an object by its id that is saved within a layout
    * @param {string} id - id of the object to retrieve

@@ -17,10 +17,6 @@ import { BaseRepository } from './BaseRepository.js';
  * UserRepository class to handle CRUD operations for Users.
  */
 export class UserRepository extends BaseRepository {
-  constructor(jsonFileService) {
-    super(jsonFileService);
-  }
-
   /**
    * Check if a user is saved and if not, add it to the in-memory list and db.
    * @param {object} user - Data of the user to be added.
