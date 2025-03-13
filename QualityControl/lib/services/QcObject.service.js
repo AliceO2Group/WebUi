@@ -18,7 +18,7 @@ import QCObjectDto from '../dtos/QCObjectDto.js';
 import QcObjectIdentificationDto from '../dtos/QcObjectIdentificationDto.js';
 
 /**
- * @typedef {import('../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
+ * @typedef {import('../repositories/ChartRepository.js').ChartRepository} ChartRepository
  */
 
 const LOG_FACILITY = 'qcg/obj-service';
@@ -31,19 +31,19 @@ export class QcObjectService {
   /**
    * Setup service constructor and initialize needed dependencies
    * @param {CcdbService} dbService - CCDB service to retrieve raw information about the QC objects
-   * @param {LayoutRepository} layoutRepository - service to be used for retrieving configurations on saved layouts
+   * @param {ChartRepository} chartRepository - service to be used for retrieving configurations on saved layouts
    * @param {RootService} rootService - root library to be used for interacting with ROOT Objects
    */
-  constructor(dbService, layoutRepository, rootService) {
+  constructor(dbService, chartRepository, rootService) {
     /**
      * @type {CcdbService}
      */
     this._dbService = dbService;
 
     /**
-     *  @type {LayoutRepository}
+     *  @type {ChartRepository}
      */
-    this._layoutRepository = layoutRepository;
+    this._chartRepository = chartRepository;
 
     /**
      * @type {RootService}
@@ -162,7 +162,7 @@ export class QcObjectService {
    * @throws
    */
   async retrieveQcObjectByQcgId(qcgId, id, validFrom = undefined, filters = {}) {
-    const { object, layoutName, tabName } = this._layoutRepository.getObjectById(qcgId);
+    const { object, layoutName, tabName } = this._chartRepository.getObjectById(qcgId);
     const { name, options = {}, ignoreDefaults = false } = object;
     const qcObject = await this.retrieveQcObject(name, validFrom, id, filters);
 

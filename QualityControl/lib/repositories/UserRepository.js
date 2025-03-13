@@ -11,30 +11,14 @@
  * or submit itself to any jurisdiction.
  */
 
-import assert from 'assert';
-
-/**
- * @typedef {import('../services/JsonFileService.js').JsonFileService} JsonFileService
- */
+import { BaseRepository } from './BaseRepository.js';
 
 /**
  * UserRepository class to handle CRUD operations for Users.
  */
-export class UserRepository {
-  /**
-   * Initializes the User Repository.
-   * @param {JsonFileService} jsonFileService - Service to interact with the JSON database.
-   * @throws {Error} Throws an error if jsonFileService is not provided.
-   */
+export class UserRepository extends BaseRepository {
   constructor(jsonFileService) {
-    assert(jsonFileService, 'Missing service for retrieving layout data');
-
-    /**
-     * JSON service to handle data storage.
-     * @type {JsonFileService}
-     * @private
-     */
-    this._jsonFileService = jsonFileService;
+    super(jsonFileService);
   }
 
   /**

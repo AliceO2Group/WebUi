@@ -32,6 +32,7 @@ import { UserController } from './controllers/UserController.js';
 import { config } from './config/configProvider.js';
 import { LayoutRepository } from './repositories/LayoutRepository.js';
 import { UserRepository } from './repositories/UserRepository.js';
+import { ChartRepository } from './repositories/ChartRepository.js';
 
 /**
  * Model initialization for the QCG application
@@ -46,6 +47,7 @@ export const setupQcModel = () => {
 
   const layoutRepository = new LayoutRepository(jsonFileService);
   const userRepository = new UserRepository(jsonFileService);
+  const chartRepository = new ChartRepository(jsonFileService);
 
   const userController = new UserController(userRepository);
   const layoutController = new LayoutController(layoutRepository);
@@ -56,7 +58,7 @@ export const setupQcModel = () => {
   const ccdbService = CcdbService.setup(config.ccdb);
   statusService.dataService = ccdbService;
 
-  const qcObjectService = new QcObjectService(ccdbService, layoutRepository, { openFile, toJSON });
+  const qcObjectService = new QcObjectService(ccdbService, chartRepository, { openFile, toJSON });
   qcObjectService.refreshCache();
 
   const objectController = new ObjectController(qcObjectService);
