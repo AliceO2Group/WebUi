@@ -18,11 +18,8 @@ import fs from 'fs';
 import { JsonFileService } from '../../../lib/services/JsonFileService.js';
 import { config } from '../../config.js';
 
-
 export const jsonFileServiceTestSuite = async () => {
-  
   suite('JSON File Service Test Suite', () => {
-    
     afterEach(() => {
       if (fs.existsSync(config.dbFile)) {
         fs.unlinkSync(config.dbFile);
@@ -30,17 +27,22 @@ export const jsonFileServiceTestSuite = async () => {
     });
 
     afterEach(() => {
-      fs.writeFileSync(config.dbFile, JSON.stringify({ layouts: [], users: [] }));
-  });
+      const templateFile = config.dbFile.replace('.js', '-template.js');
+      if (fs.existsSync(templateFile)) {
+        const templateContent = fs.readFileSync(templateFile, 'utf8');
+        fs.writeFileSync(config.dbFile, templateContent);
+      } else {
+        fs.writeFileSync(config.dbFile, JSON.stringify({ layouts: [], users: [] }));
+      }
+    });
 
     test('should reject when layouts are missing from data with error of bad data format', async () => {
       fs.writeFileSync(config.dbFile, JSON.stringify({ users: [] }));
       const service = new JsonFileService(config.dbFile);
       await assert.rejects(
         service.ready,
-        (err) => {
-            return err instanceof Error && err.message === `DB file should have an array of layouts ${config.dbFile.split('./')[1]}`;
-        }
+        (err) => err instanceof Error
+          && err.message === `DB file should have an array of layouts ${config.dbFile.split('./')[1]}`,
       );
     });
 
@@ -49,9 +51,8 @@ export const jsonFileServiceTestSuite = async () => {
       const service = new JsonFileService(config.dbFile);
       await assert.rejects(
         service.ready,
-        (err) => {
-          return err instanceof Error && err.message === `Unable to parse DB file ${config.dbFile.split('./')[1]}`;
-        }
+        (err) => err instanceof Error
+          && err.message === `Unable to parse DB file ${config.dbFile.split('./')[1]}`,
       );
     });
 
@@ -60,9 +61,8 @@ export const jsonFileServiceTestSuite = async () => {
       const service = new JsonFileService(config.dbFile);
       await assert.rejects(
         service.ready,
-        (err) => {
-          return err instanceof Error && err.message === `DB file should have an array of layouts ${config.dbFile.split('./')[1]}`;
-        }
+        (err) => err instanceof Error
+          && err.message === `DB file should have an array of layouts ${config.dbFile.split('./')[1]}`,
       );
     });
 
@@ -86,17 +86,9 @@ export const jsonFileServiceTestSuite = async () => {
       const service = new JsonFileService(config.dbFile);
       await assert.rejects(
         service.ready,
-        (err) => {
-          return err instanceof Error && err.message === `Unable to parse DB file ${config.dbFile.split('./')[1]}`;
-        }
+        (err) => err instanceof Error
+          && err.message === `Unable to parse DB file ${config.dbFile.split('./')[1]}`,
       );
     });
-
-
-
-
-
-
-
   });
 };
