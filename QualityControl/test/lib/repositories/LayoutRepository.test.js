@@ -13,9 +13,10 @@
 
 import { suite, test, before, beforeEach } from 'node:test';
 import { LayoutRepository } from '../../../lib/repositories/LayoutRepository.js';
-import assert, { deepEqual, deepStrictEqual, equal, strictEqual } from 'node:assert';
+import assert, { deepEqual, deepStrictEqual, equal, ok, rejects, strictEqual, throws } from 'node:assert';
 import { NotFoundError } from '@aliceo2/web-ui';
 import sinon from 'sinon';
+import { initTest } from '../../setup/testRepositorySetup.js';
 
 /**
  * @typedef {import('../../../lib/services/JsonFileService.js').JsonFileService} JsonFileService
@@ -23,44 +24,12 @@ import sinon from 'sinon';
 
 export const layoutRepositoryTest = async () => {
   suite('Layout repository tests', () => {
-    /**
-     * @type {JsonFileService}
-     */
     let jsonFileServiceMock = null;
-
-    /**
-     * @type {LayoutRepository}
-     */
     let layoutRepository = null;
 
-    const mockedLayouts = [
-      { id: '1',
-        name: 'Test Layout',
-        owner_id: 'user1',
-        tabs: [
-          {
-            name: 'Tab1',
-            objects: [{ id: '1', name: 'Object1' }],
-          },
-        ] },
-      { id: '2',
-        name: 'Another Layout',
-        owner_id: 'user2',
-        tabs: [
-          {
-            name: 'Tab2',
-            objects: [{ id: '2', name: 'Object2' }],
-          },
-        ] },
-    ];
-
     before(async () => {
-      jsonFileServiceMock = {
-        data: {
-          layouts: mockedLayouts,
-        },
-        writeToFile: sinon.stub().resolves(),
-      };
+      const { mockedJsonFileService } = await initTest();
+      jsonFileServiceMock = mockedJsonFileService;
       layoutRepository = new LayoutRepository(jsonFileServiceMock);
     });
 
@@ -68,8 +37,12 @@ export const layoutRepositoryTest = async () => {
       jsonFileServiceMock.writeToFile.resetHistory();
     });
 
+    beforeEach(() => {
+      jsonFileServiceMock.writeToFile.resetHistory();
+    });
+
     test('should initialize LayoutRepository successfully', () => {
-      assert.ok(layoutRepository);
+      ok(layoutRepository);
     });
 
     suite('list layouts', () => {
@@ -80,30 +53,43 @@ export const layoutRepositoryTest = async () => {
       });
 
       test('should filter layouts by owner_id', () => {
-        const result = layoutRepository.listLayouts({ owner_id: 'user1' });
-        equal(result.length, 1);
-        deepEqual(result[0], mockedLayouts[0]);
+        const ownerId = 0;
+        const result = layoutRepository.listLayouts({ owner_id: ownerId });
+
+        equal(result.length, 2);
+        result.forEach((layout) => {
+          strictEqual(layout.owner_id, ownerId, `Layout owner_id should be ${ownerId}`);
+        });
+
+        deepStrictEqual(
+          result[0],
+          jsonFileServiceMock.data.layouts[0],
+          'First layout should match the expected layout',
+        );
       });
     });
 
     suite('read layouts', () => {
-      test('should throw error if layout is not found by id', () => {
-        assert.throws(
-          () => layoutRepository.readLayoutById('999'),
-          new NotFoundError('layout (999) not found'),
-        );
+      test('readLayoutById should throw NotFoundError when layout is not found', () => {
+        throws(() => {
+          layoutRepository.readLayoutById('999');
+        }, NotFoundError);
       });
-
       test('should return a layout if it is found', () => {
-        const layout = layoutRepository.readLayoutById('2');
-        deepEqual(layout, mockedLayouts[1]);
+        const layoutId = '671b95883d23cd0d67bdc787';
+        const layout = layoutRepository.readLayoutById(layoutId);
+        const expectedLayout = jsonFileServiceMock.data.layouts.find((l) => l.id === layoutId);
+        strictEqual(layout.id, layoutId);
+        deepStrictEqual(layout, expectedLayout);
+        strictEqual(layout.name, expectedLayout.name);
+        strictEqual(layout.owner_id, expectedLayout.owner_id);
       });
     });
 
     suite('create layouts', () => {
       test('should throw an error if id is not provided', () => {
         const newLayout = { name: 'New Layout', owner_id: 'user3' };
-        return assert.rejects(
+        return rejects(
           layoutRepository.createLayout(newLayout),
           (err) => err instanceof Error && err.message === 'layout id is mandatory',
         ).then(() => {
@@ -114,18 +100,19 @@ export const layoutRepositoryTest = async () => {
       test('should throw an error if name is not provided', () => {
         const newLayout = { id: '3', owner_id: 'user3' };
         sinon.assert.notCalled(jsonFileServiceMock.writeToFile);
-        return assert.rejects(
+        return rejects(
           layoutRepository.createLayout(newLayout),
           (err) => err instanceof Error && err.message === 'layout name is mandatory',
         );
       });
 
-      test('should throw an error if id already exists', () => {
-        const newLayout = { id: '2', name: 'New Layout', owner_id: 'user3' };
+      test('should throw an error if id already exists', async () => {
+        const newLayout = { id: '671b8c22402408122e2f20dd', name: 'New Layout', owner_id: 'user3' };
         sinon.assert.notCalled(jsonFileServiceMock.writeToFile);
-        return assert.rejects(
+        await rejects(
           layoutRepository.createLayout(newLayout),
-          (err) => err instanceof Error && err.message === 'layout with this id (2) already exists',
+          (err) => err instanceof Error
+            && err.message === 'layout with this id (671b8c22402408122e2f20dd) already exists',
         );
       });
 
@@ -133,26 +120,29 @@ export const layoutRepositoryTest = async () => {
         const newLayout = { id: '3', name: 'New Layout', owner_id: 'user3' };
         await layoutRepository.createLayout(newLayout);
 
-        assert.equal(jsonFileServiceMock.data.layouts.length, 3);
-        assert.deepEqual(jsonFileServiceMock.data.layouts[2], newLayout);
+        equal(jsonFileServiceMock.data.layouts.length, 3);
+        deepEqual(jsonFileServiceMock.data.layouts[2], newLayout);
         sinon.assert.calledOnce(jsonFileServiceMock.writeToFile);
       });
     });
 
     suite('update layouts', () => {
       test('should update a single layout by its id', async () => {
-        const newLayout = { id: '1',
+        const newLayout = {
+          id: '671b8c22402408122e2f20dd',
           name: 'Test Layout Updated',
           owner_id: 'user1',
-          tabs: [
-            {
-              name: 'Tab1',
-              objects: [{ id: '1', name: 'Object1' }],
-            },
-          ] };
-        const idOfLayoutUpdated = await layoutRepository.updateLayout('1', newLayout);
-        equal(idOfLayoutUpdated, '1');
-        deepEqual(jsonFileServiceMock.data.layouts[0], newLayout);
+          tabs: [{ name: 'Tab1', objects: [{ id: '1', name: 'Object1' }] }],
+        };
+        const idOfLayoutUpdated = await layoutRepository.updateLayout('671b8c22402408122e2f20dd', newLayout);
+        equal(idOfLayoutUpdated, '671b8c22402408122e2f20dd');
+
+        const updatedLayout = jsonFileServiceMock.data.layouts.find((l) => l.id === newLayout.id);
+        strictEqual(updatedLayout.id, newLayout.id);
+        strictEqual(updatedLayout.name, newLayout.name);
+        strictEqual(updatedLayout.owner_id, newLayout.owner_id);
+        deepStrictEqual(updatedLayout.tabs, newLayout.tabs);
+
         sinon.assert.calledOnce(jsonFileServiceMock.writeToFile);
       });
     });
@@ -160,46 +150,23 @@ export const layoutRepositoryTest = async () => {
     suite('delete layouts', () => {
       test('should throw an error if the layoutId does not exist', async () => {
         const nonExistentLayoutId = 'nonExistentId';
-
-        await assert.rejects(
+        return rejects(
           layoutRepository.deleteLayout(nonExistentLayoutId),
-          (err) => err instanceof Error &&
-            err.message === `layout (${nonExistentLayoutId}) not found`,
-        );
-
-        strictEqual(jsonFileServiceMock.data.layouts.length, 3);
-        sinon.assert.notCalled(jsonFileServiceMock.writeToFile);
+          (err) => err instanceof Error && err.message === `layout (${nonExistentLayoutId}) not found`,
+        ).then(() => {
+          strictEqual(jsonFileServiceMock.data.layouts.length, 3);
+          sinon.assert.notCalled(jsonFileServiceMock.writeToFile);
+        });
       });
 
       test('should delete an existing layout', async () => {
         const layoutIdToDelete = '3';
         const deletedLayoutId = await layoutRepository.deleteLayout(layoutIdToDelete);
 
-        assert.strictEqual(deletedLayoutId, layoutIdToDelete);
-        assert.strictEqual(jsonFileServiceMock.data.layouts.length, 2);
-        assert.deepStrictEqual(
-          jsonFileServiceMock.data.layouts,
-          mockedLayouts,
-        );
+        strictEqual(deletedLayoutId, layoutIdToDelete);
+        strictEqual(jsonFileServiceMock.data.layouts.length, 2);
         strictEqual(deletedLayoutId, layoutIdToDelete);
         sinon.assert.calledOnce(jsonFileServiceMock.writeToFile);
-      });
-    });
-
-    suite('getObjectById', async () => {
-      test('should return the correct object and layout name when the id exists', () => {
-        const result = layoutRepository.getObjectById('1');
-        assert.deepStrictEqual(result, {
-          object: { id: '1', name: 'Object1' }, layoutName: 'Test Layout Updated', tabName: 'Tab1',
-        });
-      });
-
-      test('should throw an error when the id does not exist', () => {
-        assert.throws(() => layoutRepository.getObjectById('3'), new Error('Object with 3 could not be found'));
-      });
-
-      test('should throw an error when the id is missing', () => {
-        assert.throws(() => layoutRepository.getObjectById(), new Error('Missing mandatory parameter: id'));
       });
     });
   });

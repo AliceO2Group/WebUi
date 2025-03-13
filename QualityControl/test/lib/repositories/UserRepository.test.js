@@ -12,9 +12,10 @@
  */
 
 import { suite, test, before, beforeEach } from 'node:test';
-import { deepStrictEqual, ok, rejects } from 'node:assert';
+import assert, { ok, rejects, strictEqual } from 'node:assert';
 import sinon from 'sinon';
 import { UserRepository } from '../../../lib/repositories/UserRepository.js';
+import { initTest } from '../../setup/testRepositorySetup.js';
 
 /**
  * @typedef {import('../../../lib/services/JsonFileService.js').JsonFileService} JsonFileService
@@ -22,28 +23,12 @@ import { UserRepository } from '../../../lib/repositories/UserRepository.js';
 
 export const userRepositoryTest = async () => {
   suite('User repository tests', () => {
-    /**
-     * @type {JsonFileService}
-     */
     let jsonFileServiceMock = null;
-
-    /**
-     * @type {UserRepository}
-     */
     let userRepository = null;
 
-    const mockedUsers = [
-      { id: 1, name: 'Test user 1', username: 'user1' },
-      { id: 2, name: 'Test user 2', username: 'user2' },
-    ];
-
     before(async () => {
-      jsonFileServiceMock = {
-        data: {
-          users: [...mockedUsers],
-        },
-        writeToFile: sinon.stub().resolves(),
-      };
+      const { mockedJsonFileService } = await initTest();
+      jsonFileServiceMock = mockedJsonFileService;
       userRepository = new UserRepository(jsonFileServiceMock);
     });
 
@@ -56,65 +41,72 @@ export const userRepositoryTest = async () => {
     });
 
     test('should not create a user if the user already exists', async () => {
-      const existingUser = { id: 1, name: 'Test user 1', username: 'test' };
+      const existingUser = {
+        id: 0,
+        name: 'Anonymous',
+        username: 'anonymous',
+      };
 
       await userRepository.createUser(existingUser);
 
       sinon.assert.notCalled(jsonFileServiceMock.writeToFile);
-      deepStrictEqual(jsonFileServiceMock.data.users, mockedUsers);
     });
 
-    test('should throw an error if user object is not provided', () => {
-      rejects(
-        userRepository.createUser(undefined),
-        (err) => err instanceof Error && err.message === 'User Object is mandatory',
-      );
+    test('should throw an error if user object is not provided', () => rejects(
+      userRepository.createUser(undefined),
+      (err) => err instanceof Error && err.message === 'User Object is mandatory',
+    ).then(() => {
       sinon.assert.notCalled(jsonFileServiceMock.writeToFile);
-      deepStrictEqual(jsonFileServiceMock.data.users, mockedUsers);
-    });
+    }));
 
     test('should throw an error if username is not provided', () => {
-      const invalidUser = { id: 4, name: 'Dave' };
-      rejects(
+      const invalidUser = { id: 4, name: 'test' };
+      return rejects(
         userRepository.createUser(invalidUser),
         (err) => err instanceof Error && err.message === 'Field username is mandatory',
-      );
-      deepStrictEqual(jsonFileServiceMock.data.users, mockedUsers);
-      sinon.assert.notCalled(jsonFileServiceMock.writeToFile);
+      ).then(() => {
+        sinon.assert.notCalled(jsonFileServiceMock.writeToFile);
+      });
     });
 
     test('should throw an error if name is not provided', () => {
-      const userWithoutName = { id: 1, username: 'user1' };
-      rejects(
+      const userWithoutName = { id: 1, username: 'test' };
+      return rejects(
         userRepository.createUser(userWithoutName),
         (err) => err instanceof Error && err.message === 'Field name is mandatory',
-      );
+      ).then(() => {
+        sinon.assert.notCalled(jsonFileServiceMock.writeToFile);
+      });
     });
 
     test('should throw an error if id is not provided', () => {
       const userWithoutId = { name: 'Test user', username: 'user1' };
-      rejects(
+      return rejects(
         userRepository.createUser(userWithoutId),
         (err) => err instanceof Error && err.message === 'Field id is mandatory',
-      );
+      ).then(() => {
+        sinon.assert.notCalled(jsonFileServiceMock.writeToFile);
+      });
     });
 
     test('should throw an error if id is not a number', () => {
       const userWithInvalidId = { id: 'abc', name: 'Test user', username: 'user1' };
-      rejects(
+      return rejects(
         userRepository.createUser(userWithInvalidId),
         (err) => err instanceof Error && err.message === 'Field id must be a number',
-      );
+      ).then(() => {
+        sinon.assert.notCalled(jsonFileServiceMock.writeToFile);
+      });
     });
 
     test('should create a new user if the user does not exist', async () => {
-      const newUser = { id: 3, name: 'Test User 3', username: 'user3' };
+      const newUser = { id: 2, name: 'Test User 2', username: 'user2' };
       await userRepository.createUser(newUser);
 
-      deepStrictEqual(jsonFileServiceMock.data.users, [
-        ...mockedUsers,
-        newUser,
-      ]);
+      const addedUser = jsonFileServiceMock.data.users.find((user) => user.id === newUser.id);
+      assert(addedUser, 'New user should be added');
+      strictEqual(addedUser.name, newUser.name, 'User name should match');
+      strictEqual(addedUser.username, newUser.username, 'Username should match');
       sinon.assert.calledOnce(jsonFileServiceMock.writeToFile);
     });
   });

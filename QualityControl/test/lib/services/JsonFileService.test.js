@@ -36,10 +36,10 @@ export const jsonFileServiceTestSuite = async () => {
       }
     });
 
-    test('should reject when layouts are missing from data with error of bad data format', async () => {
+    test('should reject when layouts are missing from data with error of bad data format', () => {
       fs.writeFileSync(config.dbFile, JSON.stringify({ users: [] }));
       const service = new JsonFileService(config.dbFile);
-      await assert.rejects(
+      return assert.rejects(
         service.ready,
         (err) => err instanceof Error
           && err.message === `DB file should have an array of layouts ${config.dbFile.split('./')[1]}`,
@@ -49,7 +49,7 @@ export const jsonFileServiceTestSuite = async () => {
     test('should reject when there is no data with error of bad data format', async () => {
       fs.writeFileSync(config.dbFile, '');
       const service = new JsonFileService(config.dbFile);
-      await assert.rejects(
+      return assert.rejects(
         service.ready,
         (err) => err instanceof Error
           && err.message === `Unable to parse DB file ${config.dbFile.split('./')[1]}`,
@@ -59,7 +59,7 @@ export const jsonFileServiceTestSuite = async () => {
     test('should reject when data.layouts is not an Array with error of bad data format', async () => {
       fs.writeFileSync(config.dbFile, JSON.stringify({ layouts: {}, users: [] }));
       const service = new JsonFileService(config.dbFile);
-      await assert.rejects(
+      return assert.rejects(
         service.ready,
         (err) => err instanceof Error
           && err.message === `DB file should have an array of layouts ${config.dbFile.split('./')[1]}`,
