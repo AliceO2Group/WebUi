@@ -9,5 +9,5 @@
     "public/**/*.js",
     "lib/**/*.js",
     "test/**/*.js"
-  ]
+, "lib/database/migrations/20250313123608-create-users-table.mjs", "lib/database/migrations/20250313142147-create-layouts-table.mjs", "lib/database/migrations/20250313145640-create-tabs-table.mjs", "lib/database/migrations/20250313150749-create-charts-table.mjs", "lib/database/migrations/20250313151315-create-chart_options-table.mjs", "lib/database/migrations/20250313151205-create-options-table.mjs", "lib/database/migrations/20250313151012-create-grid_tab_cells-table.mjs"  ]
 }
