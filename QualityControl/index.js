@@ -12,38 +12,44 @@
  * or submit itself to any jurisdiction.
  */
 
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 import { LogManager, HttpServer, WebSocket } from '@aliceo2/web-ui';
-const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/index`);
-import path from 'path';
 import { setup } from './lib/api.js';
+import { config } from './lib/config/configProvider.js';
+import { SequelizeDatabase } from './lib/database/index.js';
+
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/index`);
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
 
 // Reading config file
-import { config } from './lib/config/configProvider.js';
-
 // Quick check config at start
-
 if (config.http.tls) {
   logger.info(`HTTPS endpoint: https://${config.http.hostname}:${config.http.portSecure}`);
 }
 logger.info(`HTTP endpoint: http://${config.http.hostname}:${config.http.port}`);
-if (typeof config.demoData != 'undefined' && config.demoData) {
+if (typeof config.demoData !== 'undefined' && config.demoData) {
   logger.info('Using demo data');
 } else {
   config.demoData = false;
 }
 
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
+// Connect to the database
+const database = new SequelizeDatabase();
+try {
+  await database.connect();
+  await database.migrate();
+} catch (error) {
+  logger.errorMessage(`Error while starting database: ${error}`);
+}
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 // Start servers
 const http = new HttpServer(config.http, config.jwt, config.openId);
 http.addStaticPath(path.join(__dirname, 'common'));
 http.addStaticPath(path.join(__dirname, 'public'));
 
-import { createRequire } from 'module';
-
-const require = createRequire(import.meta.url);
 const pathName = require.resolve('jsroot');
 http.addStaticPath(path.join(pathName, '../..'), 'jsroot');
 
@@ -54,4 +60,5 @@ if (process.env.NODE_ENV === 'test') {
   const { initializeNockForCcdb } = await import('./test/setup/testSetupForCcdb.js');
   initializeNockForCcdb();
 }
+
 setup(http, ws);
