@@ -42,6 +42,8 @@ service Apricot {
     rpc GetDetectorsForHosts(HostsRequest) returns (DetectorsResponse) {}
     rpc GetCRUCardsForHost(HostRequest) returns (CRUCardsResponse) {}
     rpc GetEndpointsForCRUCard(CardRequest) returns (CRUCardEndpointResponse) {}
+    rpc GetLinkIDsForCRUEndpoint(LinkIDsRequest) returns (LinkIDsResponse) {}
+    rpc GetAliasedLinkIDsForDetector(AliasedLinkIDsRequest) returns (AliasedLinkIDsResponse) {}
 
     // Runtime KV calls
     rpc GetRuntimeEntry(GetRuntimeEntryRequest) returns (ComponentResponse) {}
@@ -225,4 +227,24 @@ message CardRequest {
 
 message CRUCardEndpointResponse {
     string endpoints = 1;
+}
+
+message LinkIDsRequest {
+    string hostname = 1;
+    string cardSerial = 2;
+    string endpoint = 3;
+    bool onlyEnabled = 4;
+}
+
+message LinkIDsResponse {
+    repeated string linkIDs = 1;
+}
+
+message AliasedLinkIDsRequest {
+    string detector = 1;
+    bool onlyEnabled = 2;
+}
+
+message AliasedLinkIDsResponse {
+    repeated string aliasedLinkIDs = 1;
 }

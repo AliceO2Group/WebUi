@@ -26,11 +26,12 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
   * CC7: `yum install https://rpm.nodesource.com/pub_16.x/el/8/x86_64/nodejs-16.9.1-1nodesource.x86_64.rpm`
   * Mac: `brew install node@16 ;  echo 'export PATH="/usr/local/opt/node@16/bin:$PATH"' >> $HOME/.bash_profile`
   * Other: https://nodejs.org/en/download/package-manager
-3. Clone the `WebUi` repository 
+
+2. Clone the `WebUi` repository 
 ```
 git clone https://github.com/AliceO2Group/WebUi.git
 ```
-5. Install QCG
+3. Install QCG
 ```
 cd WebUi/QualityControl
 npm ci
@@ -70,7 +71,7 @@ Attribute to define if QCG is to be started as part of a QC integrated environme
 
 1. Run QCG server
 ```
-npm start
+npm run start
 ```
 
 2. Open a browser and navigate to [http://localhost:8080](http://localhost:8080). 

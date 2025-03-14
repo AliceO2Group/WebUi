@@ -1,0 +1,33 @@
+services:
+  qcg:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    links:
+      - database
+    ports:
+      - "8080:8080"
+    container_name: qcg-application
+    restart: no
+    volumes:
+      - .:/usr/src/app    
+    stdin_open: true
+    tty: true
+
+  database:
+    image: "mariadb:10.5.9"
+    container_name: qcg-database
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+    volumes:
+      - mariadb_volume:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+volumes:
+  mariadb_volume:
+
