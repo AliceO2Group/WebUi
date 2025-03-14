@@ -16,8 +16,8 @@ import { suite, test } from 'node:test';
 import { ok } from 'node:assert';
 import sinon from 'sinon';
 import { layoutIdMiddleware } from '../../../../lib/middleware/layouts/layoutId.middleware.js';
-import { JsonFileService } from '../../../../lib/services/JsonFileService.js';
 import { NotFoundError } from '@aliceo2/web-ui';
+import { LayoutRepository } from '../../../../lib/repositories/LayoutRepository.js';
 
 /**
  * Test suite for the middlewares involved in the ID check of the layout requests
@@ -35,7 +35,7 @@ export const layoutIdMiddlewareTest = () => {
         json: sinon.stub().returns(),
       };
       const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(JsonFileService);
+      const dataServiceStub = sinon.createStubInstance(LayoutRepository);
       layoutIdMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(400), 'The status code should be 400');
       ok(res.json.calledWith({
@@ -46,8 +46,8 @@ export const layoutIdMiddlewareTest = () => {
     });
 
     test('should return a "Not found" error if the layout id does not exist', () => {
-      const dataServiceStub = sinon.createStubInstance(JsonFileService, {
-        readLayout: sinon.stub().throwsException(new NotFoundError('Layout not found')),
+      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
+        readLayoutById: sinon.stub().throwsException(new NotFoundError('Layout not found')),
       });
       const req = {
         params: {
@@ -75,8 +75,8 @@ export const layoutIdMiddlewareTest = () => {
         },
       };
       const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(JsonFileService, {
-        readLayout: sinon.stub().resolves({}),
+      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
+        readLayoutById: sinon.stub().resolves({}),
       });
       await layoutIdMiddleware(dataServiceStub)(req, {}, next);
       ok(next.called, 'It should call the next middleware');
