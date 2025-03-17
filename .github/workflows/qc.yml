@@ -33,11 +33,11 @@ jobs:
 
       - name: Start the test container
         run: |
-          docker compose -f docker-compose.test.yml up --abort-on-container-exit
+          cd QualityControl && docker compose -f docker-compose.test.yml up --abort-on-container-exit
 
       - name: Stop the test container
         run: |
-          docker-compose -f docker-compose.test.yml down
+          cd QualityControl && docker compose -f docker-compose.test.yml down
 
   coverage:
     name: Tests and generate lcov reoprt coverage on ubuntu-latest
