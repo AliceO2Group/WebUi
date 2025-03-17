@@ -26,12 +26,10 @@ export class SequelizeDatabase {
     this._logger = LogManager.getLogger('qcg/database');
     const { database, username, password, host, port, dialect, dialectOptions, logging } = dbConfig;
 
-    // Obtener __dirname en entornos de ESM
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = dirname(__filename);
     this.__dirname = __dirname;
 
-    // Inicializar Sequelize
     this.sequelize = new Sequelize(database, username, password, {
       host,
       port,
@@ -76,18 +74,18 @@ export class SequelizeDatabase {
           sequelize: this.sequelize,
         }),
       );
-      await umzug.up(); // Ejecuta todas las migraciones pendientes
+      await umzug.up();
       this._logger.infoMessage('Migrations completed successfully.');
     } catch (error) {
       this._logger.errorMessage(`Error executing migrations: ${error}`);
-      throw error; // Lanza el error para depuración
+      throw error;
     }
   }
 
   getUmzug(migrationsDirectory, storage) {
     return new Umzug({
       migrations: {
-        glob: `${migrationsDirectory}/*.mjs`, // Asegúrate de usar .mjs si usas ESM
+        glob: `${migrationsDirectory}/*.mjs`,
         resolve: ({ name, path: migrationPath, context }) => {
           const loadMigration = async () => {
             const migration = await import(migrationPath);
