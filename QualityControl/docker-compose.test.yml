@@ -4,8 +4,18 @@ services:
       context: .
       dockerfile: Dockerfile
       target: test
-    env_file:
-      - .env.test
+    environment:
+      NODE_ENV: test
+      CHROME_BIN: /usr/bin/chromium-browser
+      DATABASE_HOST: qcg-test-database
+      DATABASE_PORT: 3306
+      DATABASE_USERNAME: qcg_test_user
+      DATABASE_PASSWORD: testpassword
+      DATABASE_NAME: qcg_test_db
+      DATABASE_CHARSET: utf8mb4
+      DATABASE_COLLATE: utf8mb4_unicode_ci
+      DATABASE_TIMEZONE: Etc/GMT+2
+      DATABASE_LOGGING: true
     links:
       - database-test
     ports:
