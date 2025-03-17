@@ -15,7 +15,7 @@ import { LogManager } from '@aliceo2/web-ui';
 import { Sequelize } from 'sequelize';
 import dbConfig from './config/config.js';
 import { SequelizeStorage, Umzug } from 'umzug';
-import path, { dirname } from 'path';
+import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 /**
@@ -71,7 +71,7 @@ export class SequelizeDatabase {
     this._logger.infoMessage('Executing pending migrations...');
     try {
       const umzug = this.getUmzug(
-        path.join(this.__dirname, 'migrations'),
+        join(this.__dirname, 'migrations'),
         new SequelizeStorage({
           sequelize: this.sequelize,
         }),

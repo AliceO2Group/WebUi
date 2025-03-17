@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import path, { dirname } from 'path';
+import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 import { LogManager, HttpServer, WebSocket } from '@aliceo2/web-ui';
@@ -47,11 +47,11 @@ try {
 
 // Start servers
 const http = new HttpServer(config.http, config.jwt, config.openId);
-http.addStaticPath(path.join(__dirname, 'common'));
-http.addStaticPath(path.join(__dirname, 'public'));
+http.addStaticPath(join(__dirname, 'common'));
+http.addStaticPath(join(__dirname, 'public'));
 
 const pathName = require.resolve('jsroot');
-http.addStaticPath(path.join(pathName, '../..'), 'jsroot');
+http.addStaticPath(join(pathName, '../..'), 'jsroot');
 
 const ws = new WebSocket(http);
 
