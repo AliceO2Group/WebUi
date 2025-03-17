@@ -12,7 +12,7 @@
  */
 
 import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '../';
+import { sequelize } from '../index.js';
 
 class Chart extends Model {}
 
