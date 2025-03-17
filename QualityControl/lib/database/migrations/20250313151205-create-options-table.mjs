@@ -52,7 +52,7 @@ export const up = async (queryInterface, Sequelize) => {
 };
 
 /**
- * Migration script to drop the 'users' table.
+ * Migration script to drop the 'options' table.
  * @param {object} queryInterface - The interface for database operations.
  * @param {Sequelize} Sequelize - The Sequelize library.
  * @returns {Promise<void>} A promise that resolves when the table is created.
