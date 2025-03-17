@@ -23,8 +23,9 @@
     "lint": "./node_modules/.bin/eslint --config eslint.config.js lib public",
     "coverage-lcov": "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage.lcov test/test-index.js",
     "coverage-local": "node --test --experimental-test-coverage --test-reporter=spec test/test-index.js",
-    "test": "node --test test/test-index.js",
-    "docker-compose-up": "docker compose up --build"
+    "test": "node test/test-index.js",
+    "docker-compose-up": "docker compose up --build",
+    "docker-compose-up-test": "docker-compose -f docker-compose.test.yml up --build"
   },
   "files": [
     "common/",
@@ -34,7 +35,6 @@
   ],
   "dependencies": {
     "@aliceo2/web-ui": "2.8.0",
-    "dotenv": "^16.4.7",
     "joi": "17.13.3",
     "jsroot": "7.8.1",
     "mariadb": "3.0.0",
@@ -45,12 +45,12 @@
     "@eslint/js": "^9.18.0",
     "@stylistic/eslint-plugin-js": "^2.13.0",
     "eslint": "^9.18.0",
-    "nodemon": "3.1.3",
     "eslint-plugin-jsdoc": "^50.6.0",
     "globals": "^15.14.0",
     "nock": "^13.5.0",
-    "sequelize-cli": "6.6.0",
+    "nodemon": "3.1.3",
     "puppeteer": "^24.0.0",
+    "sequelize-cli": "6.6.0",
     "sinon": "^19.0.2"
   },
   "bundleDependencies": [

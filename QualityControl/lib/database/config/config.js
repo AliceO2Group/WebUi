@@ -10,8 +10,6 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import dotenv from 'dotenv';
-dotenv.config();
 
 const host = process.env?.DATABASE_HOST || 'qcg-database';
 const port = process.env?.DATABASE_PORT || 3306;
