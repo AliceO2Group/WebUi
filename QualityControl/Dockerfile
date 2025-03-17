@@ -22,11 +22,43 @@ WORKDIR /usr/src/app
 # Install dependencies
 COPY . .
 RUN npm ci --silent
-RUN npm i -g nodemon --save-dev
 
 
 # Export port
 EXPOSE 8080
 
-# Start the application
+## Development stage
+FROM base AS dev
+RUN npm install -g nodemon
 CMD ["npm", "run", "dev"]
+
+## Test stage
+FROM base AS test
+
+# Needed for chromium:
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    libstdc++ \
+    libx11 \
+    libx11-dev \
+    libxcomposite \
+    libxdamage \
+    libxext \
+    libxfixes \
+    libxi \
+    libxtst \
+    libc6-compat \
+    alsa-lib \
+    at-spi2-core \
+    cairo \
+    pango \
+    dbus \
+    ttf-dejavu
+
+CMD ["npm", "run", "test"]

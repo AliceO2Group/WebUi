@@ -1,0 +1,35 @@
+services:
+  qcg-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test
+    env_file:
+      - .env.test
+    links:
+      - database-test
+    ports:
+      - "8080:8080"
+    container_name: qcg-test-application
+    restart: no
+    volumes:
+      - .:/usr/src/app    
+    stdin_open: true
+    tty: true
+    command: ["npm", "run", "test"]
+
+  database-test:
+    image: "mariadb:10.5.9"
+    container_name: qcg-test-database
+    environment:
+      MYSQL_ROOT_PASSWORD: testpassword
+      MYSQL_DATABASE: qcg_test_db
+      MYSQL_USER: qcg_test_user
+      MYSQL_PASSWORD: testpassword
+    volumes:
+      - mariadb_test_volume:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+volumes:
+  mariadb_test_volume:
