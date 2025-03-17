@@ -21,7 +21,7 @@ import { fileURLToPath } from 'url';
 /**
  * Sequelize implementation of the Database.
  */
-export class SequelizeDatabase {
+class SequelizeDatabase {
   constructor() {
     this._logger = LogManager.getLogger('qcg/database');
     const { database, username, password, host, port, dialect, dialectOptions, logging } = dbConfig;
@@ -113,3 +113,10 @@ export class SequelizeDatabase {
     });
   }
 }
+
+/**
+ * An instance of SequelizeDatabase
+ * @constant {SequelizeDatabase} sequelizeDatabase
+ */
+export const sequelizeDatabase = new SequelizeDatabase();
+export const { sequelize } = sequelizeDatabase;
