@@ -4,18 +4,11 @@ services:
       context: .
       dockerfile: Dockerfile
       target: test
+    env_file:
+      - .env.test
     environment:
       NODE_ENV: test
       CHROME_BIN: /usr/bin/chromium-browser
-      DATABASE_HOST: qcg-test-database
-      DATABASE_PORT: 3306
-      DATABASE_USERNAME: qcg_test_user
-      DATABASE_PASSWORD: testpassword
-      DATABASE_NAME: qcg_test_db
-      DATABASE_CHARSET: utf8mb4
-      DATABASE_COLLATE: utf8mb4_unicode_ci
-      DATABASE_TIMEZONE: Etc/GMT+2
-      DATABASE_LOGGING: true
     links:
       - database-test
     ports:
@@ -32,10 +25,10 @@ services:
     image: "mariadb:10.5.9"
     container_name: qcg-test-database
     environment:
-      MYSQL_ROOT_PASSWORD: testpassword
-      MYSQL_DATABASE: qcg_test_db
-      MYSQL_USER: qcg_test_user
-      MYSQL_PASSWORD: testpassword
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mariadb_test_volume:/var/lib/mysql
     ports:

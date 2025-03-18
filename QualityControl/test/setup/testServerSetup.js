@@ -31,7 +31,7 @@ export async function setupServerForIntegrationTests() {
   let subprocessOutput = undefined;
   const url = `http://${config.http.hostname}:${config.http.port}/`;
 
-  const subprocess = spawn('node', ['index.js', 'test/config.js'], {
+  const subprocess = spawn('node', ['db:seeders', 'index.js', 'test/config.js'], {
     stdio: 'pipe',
     env: {
       ...process.env,
@@ -44,12 +44,16 @@ export async function setupServerForIntegrationTests() {
     subprocessOutput += chunk.toString();
   });
 
-  // Start browser to test UI
-  const browser = await puppeteer.launch({
-    executablePath: process.env.CHROME_BIN,
+  const options = {
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     headless: true,
-  });
+  };
+
+  if (process.env.CHROME_BIN) {
+    options.executablePath = process.env.CHROME_BIN;
+  }
+
+  const browser = await puppeteer.launch(options);
   await new Promise((resolve) => setTimeout(resolve, 2000));
   const page = await browser.newPage();
   await page.setViewport({ width: 1366, height: 768 });
