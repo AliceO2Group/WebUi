@@ -23,7 +23,7 @@ import { getBkpLogEntryFormUrl } from '../services/externalRouting/getBkpLogEntr
  */
 export const bkpLogEntryRedirectButton = (logItem, model) => {
   const bkpUrl = getBkpLogEntryFormUrl(logItem, model);
-  
+
   return h(`a.btn.btn-sm${!bkpUrl ? '.disabled' : ''}`, {
     href: bkpUrl,
     disabled: Boolean(!bkpUrl),

@@ -16,10 +16,12 @@ import { Observable, RemoteData } from '/js/src/index.js';
 
 /**
  * Service providing global app configuration
+ * @class
  */
 class ConfigurationService extends Observable {
   /**
    * ConfigurationService constructor
+   * @param {Model} model - Root model of the application
    */
   constructor(model) {
     super();
@@ -29,8 +31,7 @@ class ConfigurationService extends Observable {
 
   /**
    * Load the app configuration
-   *
-   * @return {void}
+   * @returns {void}
    */
   async load() {
     this._configuration = RemoteData.loading();
@@ -44,12 +45,11 @@ class ConfigurationService extends Observable {
 
   /**
    * Return the configuration as RemoteData
-   *
-   * @return {RemoteData>} the configuration as RemoteData
+   * @returns {RemoteData} the configuration as RemoteData
    */
   get configuration() {
-      return this._configuration;
+    return this._configuration;
   }
-}; 
+};
 
 export { ConfigurationService };

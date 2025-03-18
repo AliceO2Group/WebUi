@@ -19,10 +19,10 @@ const BKP_TEMPLATE_KEY = 'on-call';
  * Create link to BKP page for loading a log-entry form with pre-filled values
  * @param {object} logItem - attributes needed to build the URL
  * @param {Model} model - Root model of the application
- * @return {Component} link
+ * @returns {Component} - built URL for redirecting the user to the BKP entry form
  */
 export const getBkpLogEntryFormUrl = (logItem, model) => {
-  let configuration = model.configurationService.configuration;
+  const { configuration } = model.configurationService;
   if (!configuration.isSuccess()) {
     return '';
   }
@@ -35,14 +35,13 @@ export const getBkpLogEntryFormUrl = (logItem, model) => {
   const bkpUrlParameters = {
     page: BKP_PAGE,
     templateKey: BKP_TEMPLATE_KEY,
-    ...(logItem.run !== null && { runNumbers: [logItem.run] }),
-    ...(logItem.message && { issueDescription: logItem.message }),
-    ...(logItem.partition && { environmentIds: logItem.partition }),
-    ...((logItem.detector || logItem.system) && { detectorOrSubsystem: logItem.detector ?? logItem.system }),
+    ...logItem.run !== null && { runNumbers: [logItem.run] },
+    ...logItem.message && { issueDescription: logItem.message },
+    ...logItem.partition && { environmentIds: logItem.partition },
+    ...(logItem.detector || logItem.system) && { detectorOrSubsystem: logItem.detector ?? logItem.system },
   };
 
   let firstParameter = true;
-  console.log(bkpUrlParameters);
   for (const [key, value] of Object.entries(bkpUrlParameters)) {
     if (value != null) {
       if (firstParameter) {
@@ -54,4 +53,4 @@ export const getBkpLogEntryFormUrl = (logItem, model) => {
     }
   }
   return bkpPreparedUrl;
-}
+};
