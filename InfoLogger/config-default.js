@@ -51,7 +51,6 @@ module.exports = {
   // responsible for the generated link to BKP in the details window.
   bookkeeping: {
     url: 'http://localhost:4000',
-    token: 'some-token',
   },
 
   // JWT manages user's session duration

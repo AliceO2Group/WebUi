@@ -12,27 +12,39 @@
  * or submit itself to any jurisdiction.
  */
 
-const config = require('../configProvider.js');
-const { LogManager } = require('@aliceo2/web-ui');
+const { LogManager, updateAndSendExpressResponseFromNativeError } = require('@aliceo2/web-ui');
 
+/**
+ * Controller class for providing configuration for the InfoLogger optional services
+ * @class
+ */
 class ConfigController {
-  constructor() {
-    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/query-ctrl`);
+  /**
+   * Constructor for the ConfigController
+   * @param {object} config - configuration object loaded at the start of the application.
+   */
+  constructor(config) {
+    this._config = config ?? {};
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/config-ctrl`);
   }
 
   /**
-   * Return Bookkeeping URL to frontend.
-   * @param {*} req incoming request.
-   * @param {*} res response with the Bookkeeping URl.
+   * Handler for providing configuration for the InfoLogger optional services
+   * @param {ExpressJS.Request} _ - object for the HTTP request.
+   * @param {ExpressJS.Response} res - response with the configuration object
    * @returns {*} response returned.
    */
-  async getBKPUrl(req, res) {
+  async getConfigurationHandler(_, res) {
     try {
-      const BKPUrl = config.bookkeeping.url ?? '';
-      return res.status(200).json(BKPUrl);
+      const bookkeepingUrl = this._config?.bookkeeping?.url ?? '';
+      return res.status(200).json({
+        bookkeeping: {
+          url: bookkeepingUrl,
+        },
+      });
     } catch (error) {
       this._logger.errorMessage(error.toString());
-      return res.status(400);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 };
