@@ -35,6 +35,7 @@ export async function setupServerForIntegrationTests() {
     stdio: 'pipe',
     env: {
       ...process.env,
+      NODE_ENV: 'test',
     },
   });
   subprocess.stdout.on('data', (chunk) => {

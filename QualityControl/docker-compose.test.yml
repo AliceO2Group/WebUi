@@ -7,7 +7,6 @@ services:
     env_file:
       - .env.test
     environment:
-      NODE_ENV: test
       CHROME_BIN: /usr/bin/chromium-browser
     links:
       - database-test
