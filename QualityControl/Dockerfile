@@ -20,8 +20,11 @@ RUN apk add --no-cache \
 WORKDIR /usr/src/app
 
 # Install dependencies
-COPY . .
+COPY package*.json ./
 RUN npm ci --silent
+
+# Copy the full application
+COPY . .
 
 
 # Export port
@@ -29,12 +32,11 @@ EXPOSE 8080
 
 ## Development stage
 FROM base AS dev
-RUN npm install -g nodemon@3.1.3
+RUN npm install -g nodemon
 CMD ["npm", "run", "dev"]
 
 ## Test stage
 FROM base AS test
-RUN npm install --silent nock@^13.5.4 puppeteer@^24.4.0 sinon@^19.0.2
 
 # Needed for chromium:
 RUN apk add --no-cache \
