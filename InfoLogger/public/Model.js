@@ -17,11 +17,12 @@ import {
   Observable, WebSocketClient, QueryRouter,
   Loader, RemoteData, sessionService, Notification,
 } from '/js/src/index.js';
-import Log from './log/Log.js';
-import Timezone from './common/Timezone.js';
 import { callRateLimiter, setBrowserTabTitle } from './common/utils.js';
-import Table from './table/Table.js';
+import { ConfigurationService } from './services/ConfigurationService.js';
 import { MODE } from './constants/mode.const.js';
+import Log from './log/Log.js';
+import Table from './table/Table.js';
+import Timezone from './common/Timezone.js';
 
 /**
  * Main model of InfoLoggerGui, contains sub-models modules
@@ -38,8 +39,9 @@ export default class Model extends Observable {
 
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
-
-    this.BKPUrl = '';
+    this.configurationService = new ConfigurationService(this);
+    this.configurationService.bubbleTo(this);
+    this.configurationService.load();
 
     this.log = new Log(this);
     this.log.bubbleTo(this);
@@ -56,8 +58,6 @@ export default class Model extends Observable {
     this.frameworkInfoEnabled = false;
     this.frameworkInfo = RemoteData.notAsked();
     this.getFrameworkInfo();
-
-    this.getBKPUrl();
 
     this.inspectorEnabled = false;
     this.accountMenuEnabled = false;
@@ -96,16 +96,6 @@ export default class Model extends Observable {
    */
   handleWSClose() {
     this.notification.show('Connection to server has been lost, please reload the page.', 'danger', Infinity);
-  }
-
-  async getBKPUrl() {
-    const { result, ok } = await this.loader.get('/api/getBKPUrl');
-    if (ok) {
-      this.BKPUrl = result;
-      return;
-    }
-    this.notification.show('An unknown error occured when tyring to receive the Bookkeeping URL, '
-      + 'you will be unable to log to Bookkeeping via the button', 'danger', 4000);
   }
 
   /**

@@ -13,58 +13,8 @@
  */
 
 import { h, iconX } from '/js/src/index.js';
-
 import { severityClass, severityLabel } from './severityUtils.js';
-
-/**
- * Button element that will link to a pre-filled Bookkeeping entry.
- * @param {model} model model.
- * @returns {h} button with the link.
- */
-function BKPButton(model) {
-  const BKPPreparedUrl = GenerateBKPUrl(model.BKPUrl, model.log.item);
-  const button = h('a', {
-    href: BKPPreparedUrl,
-    target: '_blank',
-    class: 'btn',
-    style: {
-      'text-decoration': 'none',
-    },
-  }, 'New BKP log');
-  return button;
-}
-
-/**
- * Generates a Bookkeeping url pre-filled with the required search parameters
- * to prepare an entry in the Bookkeeping WebUI.
- * @param  {string} BKPUrl Bookkeeping server URL.
- * @param {logItem} logItem Individual log item.
- * @returns {string} pre-filled URL.
- */
-function GenerateBKPUrl(BKPUrl, logItem) {
-  let BKPPreparedUrl = BKPUrl;
-  const BKPUrlParameters = {
-    page: 'log-create',
-    runNumbers: logItem.run !== null ? [logItem.run] : null,
-    templateKey: 'on-call',
-    issueDescription: logItem.message ?? null,
-    environmentIds: logItem.partition ?? null,
-    detectorOrSubsystem: logItem.detector ?? logItem.system ?? null,
-  };
-
-  let firstParameter = true;
-  for (const [key, value] of Object.entries(BKPUrlParameters)) {
-    if (value != null) {
-      if (firstParameter) {
-        BKPPreparedUrl += `/?${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-        firstParameter = false;
-      } else {
-        BKPPreparedUrl += `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-      }
-    }
-  }
-  return BKPPreparedUrl;
-}
+import { bkpLogEntryRedirectButton } from '../common/bkpLogEntryRedirectButton.js';
 
 export default (model) => model.log.item ? h('', [
   h(
@@ -105,7 +55,7 @@ export default (model) => model.log.item ? h('', [
       h('tr', h('td', 'ErrCode'), h('td', model.log.item.errcode)),
       h('tr', h('td', 'ErrLine'), h('td', model.log.item.errline)),
       h('tr', h('td', 'ErrSource'), h('td', model.log.item.errsource)),
-      h('tr', h('td', 'Create BKP entry'), h('td', BKPButton(model))),
+      h('tr', h('td', 'Create BKP entry'), h('td', bkpLogEntryRedirectButton(model.log.item, model))),
     ]),
   ),
   h('.p2.f7', { style: 'word-break: break-word' }, model.log.item.message),
