@@ -27,19 +27,11 @@ jobs:
     needs: lint-check
     steps:
       - uses: actions/checkout@v4
-      - name: Setup MariaDB
-        uses: getong/mariadb-action@v1.11
-        with:
-          mysql database: 'qcg_test_db' 
-          mysql root password: 'testpassword'
-          mysql user: 'qcg_test_user'
-          mysql password: 'testpassword'
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-      - run: (cd QualityControl; npm ci)
-      - run: (cd QualityControl; npm run test)
+      - run: (cd QualityControl; npm run docker-compose-up-test)
 
   coverage:
     name: Tests and generate lcov reoprt coverage on ubuntu-latest
