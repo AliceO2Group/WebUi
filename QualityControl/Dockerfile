@@ -29,11 +29,12 @@ EXPOSE 8080
 
 ## Development stage
 FROM base AS dev
-RUN npm install -g nodemon
+RUN npm install -g nodemon@3.1.3
 CMD ["npm", "run", "dev"]
 
 ## Test stage
 FROM base AS test
+RUN npm install --silent nock@^13.5.4 puppeteer@^24.4.0 sinon@^19.0.2
 
 # Needed for chromium:
 RUN apk add --no-cache \
