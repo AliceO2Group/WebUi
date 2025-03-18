@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-/* global QCG, JSROOT */
+/* global JSROOT */
 
 import {
   sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification, RemoteData,
@@ -22,11 +22,11 @@ import Layout from './layout/Layout.js';
 import QCObject from './object/QCObject.js';
 import LayoutService from './services/Layout.service.js';
 import Folder from './folder/Folder.js';
-import FrameworkInfo from './frameworkInfo/FrameworkInfo.js';
 import QCObjectService from './services/QCObject.service.js';
 import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
 import { setBrowserTabTitle } from './common/utils.js';
 import { buildQueryParametersString } from './common/buildQueryParametersString.js';
+import AboutViewModel from './pages/aboutView/AboutViewModel.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -63,11 +63,8 @@ export default class Model extends Observable {
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
 
-    this.frameworkInfo = new FrameworkInfo(this);
-    this.frameworkInfo.bubbleTo(this);
-
-    this.isOnlineModeConnectionAlive = false;
-    this.isOnlineModeEnabled = false; // Show only online objects or all (offline)
+    this.aboutViewModel = new AboutViewModel(this);
+    this.aboutViewModel.bubbleTo(this);
 
     this.refreshTimer = 0;
     this.refreshInterval = 0; // Seconds
@@ -102,10 +99,6 @@ export default class Model extends Observable {
       object: new QCObjectService(this),
       layout: new LayoutService(this),
     };
-
-    if (QCG.CONSUL_SERVICE) {
-      this.checkOnlineModeAvailability();
-    }
 
     this.loader.get('/api/checkUser');
 
@@ -261,7 +254,7 @@ export default class Model extends Observable {
       case 'about':
         this.page = 'about';
         setBrowserTabTitle('QCG-About');
-        this.frameworkInfo.getFrameworkInfo();
+        this.aboutViewModel.getFrameworkInfo();
         this.notify();
         break;
       default:
@@ -290,42 +283,12 @@ export default class Model extends Observable {
   }
 
   /**
-   * Toggle mode (Online/Offline)
-   * @returns {undefined}
-   */
-  toggleMode() {
-    this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
-    if (this.isOnlineModeEnabled) {
-      this.setRefreshInterval(60);
-    } else {
-      this.object.loadList();
-      clearTimeout(this.refreshTimer);
-    }
-    this.object.selected = null;
-    this.object.searchInput = '';
-    this.notify();
-  }
-
-  /**
    * Method to check if connection is secure to enable certain improvements
    * e.g navigator.clipboard, notifications, service workers
    * @returns {boolean} - whether window is in secure context
    */
   isContextSecure() {
     return window.isSecureContext;
-  }
-
-  /**
-   * Method to check if Online Mode is available
-   * @returns {undefined}
-   */
-  async checkOnlineModeAvailability() {
-    const result = await this.services.object.isOnlineModeConnectionAlive();
-    if (result.isSuccess()) {
-      this.isOnlineModeConnectionAlive = true;
-    } else {
-      this.isOnlineModeConnectionAlive = false;
-    }
   }
 
   /**

@@ -12,9 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+const {NotFoundError, UnauthorizedAccessError} = require('@aliceo2/web-ui');
 const {DetectorLock} = require('./../dtos/DetectorLock.js');
-const {NotFoundError} = require('../errors/NotFoundError.js');
-const {UnauthorizedAccessError} = require('./../errors/UnauthorizedAccessError');
 
 const PADLOCK_UPDATE = 'padlock-update';
 

@@ -16,8 +16,7 @@ import { h } from '/js/src/index.js';
 import { iconCollapseUp, iconArrowBottom, iconArrowTop } from '/js/src/icons.js';
 
 /**
- * Shows header for the objects tree page, buttons allow to open/close the entire tree,
- * filter only 'online' objects thanks to information service and a search input allow to filter
+ * Shows header for the objects tree page, buttons allow to open/close the entire tree, a search input allow to filter
  * by name.
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
@@ -46,10 +45,8 @@ export default function objectTreeHeader(model) {
           onclick: () => model.object.toggleSortDropdown(),
         }, [model.object.sortBy.title, ' ', model.object.sortBy.icon]),
         h('.dropdown-menu.text-left', [
-          !model.isOnlineModeEnabled
-          && sortMenuItem(model, 'Created Time', 'Sort by time of creation ASC', iconArrowTop(), 'createTime', 1),
-          !model.isOnlineModeEnabled
-          && sortMenuItem(model, 'Created Time', 'Sort by time of creation DESC', iconArrowBottom(), 'createTime', -1),
+          sortMenuItem(model, 'Created Time', 'Sort by time of creation ASC', iconArrowTop(), 'createTime', 1),
+          sortMenuItem(model, 'Created Time', 'Sort by time of creation DESC', iconArrowBottom(), 'createTime', -1),
           sortMenuItem(model, 'Name', 'Sort by name ASC', iconArrowTop(), 'name', 1),
           sortMenuItem(model, 'Name', 'Sort by name DESC', iconArrowBottom(), 'name', -1),
 

@@ -14,7 +14,6 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
 - [Features](#features)
   - [Canvas Options via MetaData](#canvas-options-via-metadata)
   - [Display a QC non-standard ROOT object in QCG](#display-a-qc-non-standard-root-object-in-qcg)
-  - [Online Mode](#online-mode)
   - [Export a layout as JSON](#export-a-layout-as-json)
   - [Import a layout from JSON](#import-a-layout-from-json)
   - [AutoTransitioning Tabs within Layouts](#autotransitioning-tabs-within-layouts)
@@ -27,11 +26,12 @@ QCG is a web graphical user interface for [O<sup>2</sup> Quality Control](https:
   * CC7: `yum install https://rpm.nodesource.com/pub_16.x/el/8/x86_64/nodejs-16.9.1-1nodesource.x86_64.rpm`
   * Mac: `brew install node@16 ;  echo 'export PATH="/usr/local/opt/node@16/bin:$PATH"' >> $HOME/.bash_profile`
   * Other: https://nodejs.org/en/download/package-manager
-3. Clone the `WebUi` repository 
+
+2. Clone the `WebUi` repository 
 ```
 git clone https://github.com/AliceO2Group/WebUi.git
 ```
-5. Install QCG
+3. Install QCG
 ```
 cd WebUi/QualityControl
 npm ci
@@ -68,14 +68,13 @@ Attribute to define if QCG is to be started as part of a QC integrated environme
 
 ## Run QCG locally 
 
-1. (Optional) Online Mode - If you need Online Mode read [this](#online-mode) section
 
-2. Run QCG server
+1. Run QCG server
 ```
-npm start
+npm run start
 ```
 
-3. Open a browser and navigate to [http://localhost:8080](http://localhost:8080). 
+2. Open a browser and navigate to [http://localhost:8080](http://localhost:8080). 
 
     Ensure that your [browser is supported](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support).
 
@@ -94,30 +93,6 @@ npm start
 ### Display a QC non-standard ROOT object in QCG
 
 `QCG` is able to display non-standard ROOT objects with the help of QC. More information can be found [here](https://github.com/AliceO2Group/QualityControl/blob/master/doc/Advanced.md#display-a-non-standard-root-object-in-qcg) 
-### Online Mode
-QCG is offering an optional `Online Mode` which allows the user to view only QC Objects that are being generated live. This will **only** see objects if an instance of [QualityControl](https://github.com/AliceO2Group/QualityControl/) is running and making use of the [ServiceDiscovery](https://github.com/AliceO2Group/QualityControl/blob/master/Framework/include/QualityControl/ServiceDiscovery.h) class. 
-
-For this, QCG is using Service Discovery capabilities of [Consul](https://www.consul.io/).
-Once `Consul` is [installed](https://learn.hashicorp.com/consul/getting-started/install) and running, update the `config.js` file of `QCG` with information regarding on what host and port Consul agent is now running.
-
-Moreover, a refresh rate interval can be set to limit the user number of requests. If no `refreshRate` is provided, defaults as shown below will be used:
-e.g.
-```javascript
-consul: {
-  hostname: 'localhost',
-  port: 8500,
-  refreshRate: {
-      min: 10,
-      max: 120
-    }
-}
-```
-Online mode will use an optional prefix for its queries specified in [ccdb.prefix](#ccdb). This is to ensure the same results are provided in both Offline & Online mode.
-
-As this functionality is optional, there will be no impact on QCG if a configuration for `Consul` is not provided. A simple warning message as below will be shown to the user that the configuration is missing
-```
-2020-02-28T10:19:26.110Z warn: [QualityControlModel] Consul Service: No Configuration Found
-```
 
 ### Export a layout as JSON
 In order to facilitate the transition from one environment (e.g. TST) to another (e.g. PROD) while at the same time updating it, an export feature is provided.

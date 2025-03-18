@@ -12,13 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconPerson, iconMediaPlay, iconMediaStop } from '/js/src/index.js';
+import { h, iconPerson } from '/js/src/index.js';
 
 import { spinner } from './spinner.js';
 import layoutViewHeader from '../layout/view/header.js';
 import layoutListHeader from '../layout/list/header.js';
 import objectTreeHeader from '../object/objectTreeHeader.js';
-import frameworkInfoHeader from '../frameworkInfo/frameworkInfoHeader.js';
+import aboutViewHeader from '../pages/aboutView/components/aboutViewHeader.js';
 
 /**
  * Shows header of the application, split with 3 parts:
@@ -33,9 +33,6 @@ export default (model) => h('.flex-row.p2', [
   headerSpecific(model),
 ]);
 
-let onlineButtonIcon = iconMediaPlay();
-let onlineButtonStyle = 'btn-default';
-
 /**
  * Shows the page specific header (center and right side)
  * @param {Model} model - root model of the application
@@ -46,7 +43,7 @@ const headerSpecific = (model) => {
     case 'layoutList': return layoutListHeader(model);
     case 'layoutShow': return layoutViewHeader(model);
     case 'objectTree': return objectTreeHeader(model);
-    case 'about': return frameworkInfoHeader();
+    case 'about': return aboutViewHeader();
     default: return null;
   }
 };
@@ -58,8 +55,6 @@ const headerSpecific = (model) => {
  */
 const commonHeader = (model) => h('.flex-grow.flex-row.items-center', [
   loginButton(model),
-  ' ',
-  onlineButton(model),
   ' ',
   h('span.f4.gray', 'Quality Control'),
   model.loader.active && h('span.f4.mh1.gray', spinner()),
@@ -82,40 +77,3 @@ const loginButton = (model) =>
         : h('a.menu-item', { onclick: () => alert('Not implemented') }, 'Logout'),
     ]),
   ]);
-
-/**
- * Create button which will allow user to enable/disable online mode
- * @param {Model} model - root model of the application
- * @returns {vnode} - virtual node element
- */
-const onlineButton = (model) => h(
-  'button.btn',
-  {
-    className: onlineButtonStyle,
-    onclick: () => toggleOnlineButton(model),
-    disabled: model.object.queryingObjects ? true : false,
-    title: model.object.queryingObjects ? 'Toggling disabled while querying' : 'Toggle Mode (Online/Offline)',
-    style: model.isOnlineModeConnectionAlive ? '' : 'display: none',
-  },
-  'Online',
-  ' ',
-  onlineButtonIcon,
-);
-
-/**
- * Action to disable/enable online mode
- * @param {Model} model - root model of the application
- * @returns {undefined}
- */
-function toggleOnlineButton(model) {
-  model.toggleMode();
-  switch (model.isOnlineModeEnabled) {
-    case true:
-      onlineButtonStyle = 'btn-success';
-      onlineButtonIcon = iconMediaStop();
-      break;
-    default:
-      onlineButtonStyle = 'btn-default';
-      onlineButtonIcon = iconMediaPlay();
-  }
-}

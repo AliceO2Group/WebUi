@@ -10,7 +10,6 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-/* eslint-disable max-len */
 
 import { strictEqual, deepStrictEqual } from 'assert';
 import test from '../index';
@@ -27,14 +26,18 @@ describe('about page test suite', async () => {
     strictEqual(location.search, '?page=about');
   });
 
-  it('should have a frameworkInfo item with config fields', async () => {
+  it('should have an About View Model item with config fields', async () => {
     const expConfig = {
       qcg: { port: 8181, hostname: 'localhost', status: { ok: true } },
-      consul: { hostname: 'localhost', port: 8500, status: { ok: false, message: 'Live Mode was not configured' } },
-      ccdb: { hostname: 'ccdb', port: 8500, prefix: 'test', status: { ok: false, message: 'Data connector was not configured' } },
+      ccdb: {
+        hostname: 'ccdb',
+        port: 8500,
+        prefix: 'test',
+        status: { ok: false, message: 'Data connector was not configured' },
+      },
       quality_control: { version: '0.19.5-1' },
     };
-    const config = await page.evaluate(() => window.model.frameworkInfo.item);
+    const config = await page.evaluate(() => window.model.aboutViewModel.item);
     delete config.payload.qcg.version;
     deepStrictEqual(config.payload, expConfig);
   });

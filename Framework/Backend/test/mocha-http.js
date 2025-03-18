@@ -21,6 +21,8 @@ const url = require('url');
 const config = require('./../config-default.json');
 const O2TokenService = require('./../services/O2TokenService.js');
 const HttpServer = require('./../http/server');
+const { parseUrlParameters } = require('../http/parseUrlParameters.js');
+const { buildUrl } = require('../http/buildUrl.js');
 
 // As CERN certificates are not signed by any CA
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -292,5 +294,186 @@ describe('HTTP constructor checks', () => {
     conf.limit = '10Mb';
     httpServer = new HttpServer(conf, config.jwt);
     assert.strictEqual(httpServer.limit, '10Mb', 'Provided limit was not set');
+  });
+});
+
+describe('URL parameters extraction checks', () => {
+  it('should successfully extract single parameters', () => {
+    assert.deepEqual(parseUrlParameters(new URLSearchParams('param=12')), { param: '12' });
+    assert.deepEqual(parseUrlParameters(new URLSearchParams('param=random-param')), { param: 'random-param' });
+    assert.deepEqual(parseUrlParameters(new URLSearchParams('param=')), { param: '' });
+  });
+  it('should successfully extract object parameters', () => {
+    assert.deepEqual(parseUrlParameters(new URLSearchParams('param[prop1]=12')), { param: { prop1: '12' } });
+    assert.deepEqual(
+      parseUrlParameters(new URLSearchParams('param[prop1]=first&param[prop2]=second&param[prop3]=348')),
+      { param: { prop1: 'first', prop2: 'second', prop3: '348' } },
+    );
+  });
+
+  it('should successfully extract array parameters', () => {
+    assert.deepEqual(parseUrlParameters(new URLSearchParams('param[]=12&param[]=83')), { param: ['12', '83'] });
+    assert.deepEqual(parseUrlParameters(new URLSearchParams('param[]=first&param[]=second')), { param: ['first', 'second'] });
+  });
+
+  it('should successfully extract complex nested parameters', () => {
+    assert.deepEqual(
+      parseUrlParameters(new URLSearchParams('param[prop1][]=29&param[prop2][]=92')),
+      { param: { prop1: ['29'], prop2: ['92'] } },
+    );
+  });
+
+  it('should successfully combine parameter within an existing parameter tree', () => {
+    assert.deepEqual(
+      parseUrlParameters(new URLSearchParams('param=12'), { existing: '45' }),
+      { existing: '45', param: '12' },
+    );
+
+    assert.deepEqual(
+      parseUrlParameters(new URLSearchParams('prop1[]=12&prop2[]=hello'), { existing: ['45'], prop1: ['93'] }),
+      { existing: ['45'], prop1: ['93', '12'], prop2: ['hello'] },
+    );
+
+    assert.deepEqual(
+      parseUrlParameters(new URLSearchParams('param[prop1]=value&param[prop2]=48'), { existing: { nested: '73' }, param: { prop1: 'other' } }),
+      { existing: { nested: '73' }, param: { prop1: 'value', prop2: '48' } },
+    );
+  });
+
+  it('should throw when combining parameters with incoherent values', () => {
+    assert.throws(
+      () => parseUrlParameters(new URLSearchParams('key=12'), { key: ['1', '3'] }),
+      new Error('Node in parameters tree is an array but no more nested keys - key'),
+    );
+
+    assert.throws(
+      () => parseUrlParameters(new URLSearchParams('key[]=12'), { key: 'value' }),
+      new Error('Expected node in parameters tree to be an array - key[]'),
+    );
+
+    assert.throws(
+      () => parseUrlParameters(new URLSearchParams('key=12'), { key: { nested: '1' } }),
+      new Error('Node in parameters tree is an object but no more nested keys - key'),
+    );
+
+    assert.throws(
+      () => parseUrlParameters(new URLSearchParams('key[nested]=12'), { key: 'value' }),
+      new Error('Expected node in parameters tree to be an object - key[nested]'),
+    );
+  });
+
+  it('should protect against prototype polluting assignment', () => {
+    assert.throws(
+      () => parseUrlParameters(new URLSearchParams('__proto__="{wrong: 12}"'), {}),
+      new Error('Unauthorized parameters key __proto__'),
+    );
+    assert.throws(
+      () => parseUrlParameters(new URLSearchParams('constructor=12'), {}),
+      new Error('Unauthorized parameters key constructor'),
+    );
+    assert.throws(
+      () => parseUrlParameters(new URLSearchParams('prototype=fake-prototype'), {}),
+      new Error('Unauthorized parameters key prototype'),
+    );
+  });
+});
+
+describe('URL building checks', () => {
+  it('should successfully build URL using only parameters object', () => {
+    const url = buildUrl('https://example.com', {
+      simple: 'hello',
+      key: {
+        nested: [1, 2],
+        '=': 12,
+      },
+    });
+
+    assert.match(url, /simple=hello/);
+    assert.match(url, /key\[nested]\[]=1/);
+    assert.match(url, /key\[nested]\[]=2/);
+    assert.match(url, /key\[%3D]=12/);
+  });
+  it('should successfully build URL by combining existing parameters', () => {
+    const url = buildUrl('https://example.com?simple=hello&key1[key2][]=13&key1[key2][]=35', {
+      key1: {
+        key2: [1, 2],
+      },
+      key3: null,
+    });
+
+    assert.match(url, /simple=hello/);
+    assert.match(url, /key1\[key2]\[]=13/);
+    assert.match(url, /key1\[key2]\[]=35/);
+    assert.match(url, /key1\[key2]\[]=1/);
+    assert.match(url, /key1\[key2]\[]=2/);
+    assert.match(url, /key3=null/);
+  });
+
+  it('should throw an error when trying to push value to not array parameter', () => {
+    assert.throws(
+      () => buildUrl(
+        'https://example.com?key=12',
+        {
+          key: [1, 3],
+        },
+      ),
+      new Error('Node in parameters tree is an array but no more nested keys - key'),
+    );
+
+    assert.throws(
+      () => buildUrl(
+        'https://example.com?key[nested]=12',
+        {
+          key: [1, 3],
+        },
+      ),
+      new Error('Expected node in parameters tree to be an object - key[nested]'),
+    );
+  });
+
+  it('should throw an error when trying to set nested value of a not nested parameter', () => {
+    assert.throws(
+      () => buildUrl(
+        'https://example.com?key=12',
+        {
+          key: { nested: 13 },
+        },
+      ),
+      new Error('Node in parameters tree is an object but no more nested keys - key'),
+    );
+
+    assert.throws(
+      () => buildUrl(
+        'https://example.com?key[]=12',
+        {
+          key: { nested: 13 },
+        },
+      ),
+      new Error('Expected node in parameters tree to be an array - key[]'),
+    );
+  });
+
+  it('should throw an error when trying to set value for array parameter', () => {
+    assert.throws(
+      () => buildUrl(
+        'https://example.com?key[]=12',
+        {
+          key: 1,
+        },
+      ),
+      new Error('Expected node in parameters tree to be an array - key[]'),
+    );
+  });
+
+  it('should throw an error when trying to set value for nested parameter', () => {
+    assert.throws(
+      () => buildUrl(
+        'https://example.com?key[nested]=12',
+        {
+          key: 1,
+        },
+      ),
+      new Error('Expected node in parameters tree to be an object - key[nested]'),
+    );
   });
 });

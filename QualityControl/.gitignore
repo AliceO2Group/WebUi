@@ -1,4 +1,3 @@
-public/config.js
 /config.js
 public/config.cjs
 test/setup/seeders/qcg-mock-data.json
@@ -9,3 +8,5 @@ node_modules
 db.json
 coverage
 .nyc_output
+.env*
+.vscode

@@ -13,7 +13,7 @@
     "url": "https://github.com/AliceO2Group/WebUi.git"
   },
   "engines": {
-    "node": ">= 20.x"
+    "node": ">= 22.x"
   },
   "type": "module",
   "homepage": "https://alice-o2-project.web.cern.ch/",
@@ -23,7 +23,8 @@
     "lint": "./node_modules/.bin/eslint --config eslint.config.js lib public",
     "coverage-lcov": "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage.lcov test/test-index.js",
     "coverage-local": "node --test --experimental-test-coverage --test-reporter=spec test/test-index.js",
-    "test": "node --test test/test-index.js"
+    "test": "node --test test/test-index.js",
+    "docker-compose-up": "docker compose up --build"
   },
   "files": [
     "common/",
@@ -32,18 +33,18 @@
     "index.js"
   ],
   "dependencies": {
-    "@aliceo2/web-ui": "2.7.3",
+    "@aliceo2/web-ui": "2.8.0",
     "joi": "17.13.3",
-    "jsroot": "7.8.0"
+    "jsroot": "7.8.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.17.0",
-    "@stylistic/eslint-plugin-js": "^2.12.0",
-    "eslint": "^9.17.0",
+    "@eslint/js": "^9.22.0",
+    "@stylistic/eslint-plugin-js": "^4.2.0",
+    "eslint": "^9.22.0",
     "eslint-plugin-jsdoc": "^50.6.0",
-    "globals": "^15.14.0",
-    "nock": "^13.5.0",
-    "puppeteer": "^23.11.1",
+    "globals": "^16.0.0",
+    "nock": "^13.5.4",
+    "puppeteer": "^24.4.0",
     "sinon": "^19.0.2"
   },
   "bundleDependencies": [

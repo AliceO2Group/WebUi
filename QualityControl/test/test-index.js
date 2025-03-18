@@ -40,7 +40,6 @@ import { layoutShowTests } from './public/pages/layout-show.test.js';
  * Backend tests imports
  */
 import { utilsTestSuite } from './lib/utils/utils.test.js';
-import { publicConfigProviderTest } from './lib/config/publicConfig.test.js';
 
 /**
  * Controllers
@@ -56,6 +55,14 @@ import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
+import { layoutIdMiddlewareTest } from './lib/middlewares/layouts/layoutId.middleware.test.js';
+import { layoutOwnerMiddlewareTest } from './lib/middlewares/layouts/layoutOwner.middleware.test.js';
+import { layoutServiceMiddlewareTest } from './lib/middlewares/layouts/layoutService.middleware.test.js';
+import { layoutRepositoryTest } from './lib/repositories/LayoutRepository.test.js';
+import { userRepositoryTest } from './lib/repositories/UserRepository.test.js';
+import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
+import { userControllerTestSuite } from './lib/controllers/UserController.test.js';
+import { chartRepositoryTest } from './lib/repositories/ChartRepository.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -139,7 +146,6 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
   suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
     suite('Lib - Test Suite', async () => {
       suite('Utility methods test suite', async () => await utilsTestSuite());
-      suite('Configuration File Parser test suite', async () => await publicConfigProviderTest());
     });
 
     suite('Common Library - Test Suite', () => {
@@ -147,15 +153,22 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('CL - DateTime Utility methods test suite', () => commonLibraryUtilsDateTimeTestSuite());
     });
 
+    suite('Repositories - Test Suite', async () => {
+      suite('Layout Repository - Test Suite', async () => await layoutRepositoryTest());
+      suite('User Repository - Test Suite', async () => await userRepositoryTest());
+      suite('Chart Repository - Test Suite', async () => await chartRepositoryTest());
+    });
+
     suite('Services - Test Suite', async () => {
       suite('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
       suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
-      suite('JsonServiceTest test suite', async () => {
-        // TODO - bring inline with current tests
-      });
-      suite('UserServiceTest test suite', async () => {
-        // TODO - bring inline with current tests
-      });
+      suite('JsonServiceTest test suite', async () => await jsonFileServiceTestSuite());
+    });
+
+    suite('Middleware - Test Suite', async () => {
+      suite('LayoutServiceMiddleware test suite', async () => layoutServiceMiddlewareTest());
+      suite('LayoutIdMiddleware test suite', async () => layoutIdMiddlewareTest());
+      suite('LayoutOwnerMiddleware test suite', async () => layoutOwnerMiddlewareTest());
     });
 
     suite('Controllers - Test Suite', async () => {
@@ -165,6 +178,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('ObjectController test suite', async () => {
         // TODO - bring inline with current tests
       });
+      suite('UserController - Test Suite', async () => await userControllerTestSuite());
     });
   });
 });

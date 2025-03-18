@@ -14,7 +14,7 @@
     "url": "https://github.com/AliceO2Group/WebUi.git"
   },
   "engines": {
-    "node": ">= 20.x"
+    "node": ">= 22.x"
   },
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
@@ -30,18 +30,18 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@aliceo2/web-ui": "2.7.3",
+    "@aliceo2/web-ui": "2.8.0",
     "mariadb": "3.4.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.17.0",
-    "@stylistic/eslint-plugin-js": "^2.12.0",
-    "eslint": "^9.17.0",
+    "@eslint/js": "^9.22.0",
+    "@stylistic/eslint-plugin-js": "^4.2.0",
+    "eslint": "^9.22.0",
     "eslint-plugin-jsdoc": "^50.6.0",
-    "globals": "^15.14.0",
-    "mocha": "^11.0.1",
+    "globals": "^16.0.0",
+    "mocha": "^11.1.0",
     "nyc": "^17.1.0",
-    "puppeteer": "^23.11.1",
+    "puppeteer": "^24.4.0",
     "sinon": "^19.0.2"
   },
   "bundleDependencies": [
