@@ -31,7 +31,7 @@ export async function setupServerForIntegrationTests() {
   let subprocessOutput = undefined;
   const url = `http://${config.http.hostname}:${config.http.port}/`;
 
-  const subprocess = spawn('node', ['db:seeders', 'index.js', 'test/config.js'], {
+  const subprocess = spawn('node', ['index.js', 'test/config.js'], {
     stdio: 'pipe',
     env: {
       ...process.env,

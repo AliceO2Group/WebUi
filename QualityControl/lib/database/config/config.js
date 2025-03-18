@@ -11,19 +11,23 @@
  * or submit itself to any jurisdiction.
  */
 
-const host = process.env?.DATABASE_HOST || 'qcg-database';
-const port = process.env?.DATABASE_PORT || 3306;
-const username = process.env?.DATABASE_USERNAME || 'qcg_dev_user';
-const password = process.env?.DATABASE_PASSWORD || '123456';
-const database = `${process.env?.DATABASE_NAME || 'qcg_dev_db'}`;
-const charset = process.env?.DATABASE_CHARSET || 'utf8mb4';
-const collate = process.env?.DATABASE_COLLATE || 'utf8mb4_unicode_ci';
-const timezone = process.env?.DATABASE_TIMEZONE || 'Etc/GMT+2';
-const logging = process.env?.DATABASE_LOGGING?.toLowerCase() === 'true';
-const dialect = 'mariadb';
+import { config } from "../../config/configProvider.js";
+
+
+const {
+  host,
+  port,
+  username,
+  password,
+  database,
+  charset,
+  collate,
+  timezone,
+  logging
+} = config.database;
 
 export default {
-  dialect,
+  dialect: 'mariadb',
   dialectOptions: {
     charset,
     collate,
