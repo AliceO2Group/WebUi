@@ -20,7 +20,7 @@
  * Migration script to create the database tables.
  * @param {object} queryInterface - The interface for database operations.
  * @param {import('sequelize').Sequelize} Sequelize - The Sequelize library.
- * @returns {Promise<void>} A promise that resolves when the table is created.
+ * @returns {Promise<void>} A promise that resolves when the tables are created.
  */
 export const up = async (queryInterface, Sequelize) => {
   await queryInterface.createTable('users', {
@@ -270,10 +270,9 @@ export const up = async (queryInterface, Sequelize) => {
 };
 
 /**
- * Migration script to drop the database tables.
- * @param {object} queryInterface - The interface for database operations.
- * @param {Sequelize} Sequelize - The Sequelize library.
- * @returns {Promise<void>} A promise that resolves when the table is created.
+ * Reverts the database schema by dropping specified tables.
+ * @param {object} queryInterface - The interface for querying the database.
+ * @returns {Promise<void>} A promise that resolves when the tables are dropped.
  */
 export const down = async (queryInterface) => {
   const tables = ['users', 'layouts', 'tabs', 'charts', 'grid_tab_cells', 'options', 'chart_options'];

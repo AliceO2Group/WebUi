@@ -11,8 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { config } from "../../config/configProvider.js";
-
+import { config } from '../../config/configProvider.js';
 
 const {
   host,
@@ -23,7 +22,7 @@ const {
   charset,
   collate,
   timezone,
-  logging
+  logging,
 } = config.database;
 
 export default {
