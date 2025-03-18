@@ -26,6 +26,9 @@ RUN npm ci --silent
 # Copy the full application
 COPY . .
 
+# Allow Docker to find dependencies
+ENV NODE_PATH=/usr/src/app/node_modules
+
 
 # Export port
 EXPOSE 8080
