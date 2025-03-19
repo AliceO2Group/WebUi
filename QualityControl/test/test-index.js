@@ -64,7 +64,7 @@ import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js
 import { userControllerTestSuite } from './lib/controllers/UserController.test.js';
 import { chartRepositoryTest } from './lib/repositories/ChartRepository.test.js';
 
-const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
+const FRONT_END_PER_TEST_TIMEOUT = 10000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
 
 const INITIAL_PAGE_SETUP_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 5;

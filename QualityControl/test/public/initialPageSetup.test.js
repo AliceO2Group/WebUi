@@ -21,7 +21,7 @@ import assert from 'node:assert';
  * @param {timeout} timeout - Timeout PER test; default 100
  * @param {object} testParent - Node.js test object which ensures sub-tests are being awaited
  */
-export const initialPageSetupTests = async (url, page, timeout = 5000, testParent) => {
+export const initialPageSetupTests = async (url, page, timeout = 1000, testParent) => {
   await testParent.test('should successfully load first page "/"', { timeout }, async () => {
     // Try multiple times until the backend server is ready
     for (let i = 0; i < 10; i++) {
