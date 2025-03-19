@@ -10,17 +10,26 @@ services:
       MYSQL_USER: qcg_test_user
       MYSQL_PASSWORD: testpassword
       MYSQL_ROOT_PASSWORD: testpassword
+    volumes:
+      - type: bind
+        read_only: true
+        source: ./lib
+        target: /usr/src/app/lib
+      - type: bind
+        read_only: true
+        source: ./public
+        target: /usr/src/app/public   
+      - type: bind
+        source: ./test
+        target: /usr/src/app/test
     links:
       - database-test
     ports:
       - "8080:8080"
     container_name: qcg-test-application
     restart: no
-    volumes:
-      - .:/usr/src/app    
     stdin_open: true
     tty: true
-    command: ["npm", "run", "test"]
 
   database-test:
     image: "mariadb:10.5.9"

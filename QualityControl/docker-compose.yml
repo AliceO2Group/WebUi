@@ -11,7 +11,14 @@ services:
     container_name: qcg-application
     restart: no
     volumes:
-      - .:/usr/src/app    
+      - type: bind
+        read_only: true
+        source: ./lib
+        target: /usr/src/app/lib
+      - type: bind
+        read_only: true
+        source: ./public
+        target: /usr/src/app/public   
     stdin_open: true
     tty: true
 

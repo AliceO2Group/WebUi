@@ -31,7 +31,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-      - run: (cd QualityControl; npm run docker-compose-up-test)
+      - run: (cd QualityControl; npm run docker-test)
 
   coverage:
     name: Tests and generate lcov reoprt coverage on ubuntu-latest

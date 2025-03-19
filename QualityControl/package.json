@@ -24,8 +24,8 @@
     "coverage-lcov": "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage.lcov test/test-index.js",
     "coverage-local": "node --test --experimental-test-coverage --test-reporter=spec test/test-index.js",
     "test": "node --test test/test-index.js",
-    "docker-compose-up": "docker compose up --build",
-    "docker-compose-up-test": "docker compose -f docker-compose.test.yml up --build --abort-on-container-exit"
+    "docker-dev": "docker compose -p qcg-dev up --build",
+    "docker-test": "docker compose -p qcg-test -f docker-compose.test.yml up --build --abort-on-container-exit"
   },
   "files": [
     "common/",
