@@ -16,12 +16,13 @@ const {User} = require('../dtos/User');
 
 /**
  * Middleware function to check that the user has ownership of the locks for the given detectors
+ * for existing active environment
  *
  * @param {LockService} lockService - service to be used to check ownership of locks
  * @param {EnvironmentService} environmentService - service to be used to retrieve environment information
  * @return {function(req, res, next): void} - middleware function
  */
-const lockOwnershipMiddleware = (lockService, environmentService) => {
+const verifyEnvironmentLockOwnershipMiddleware = (lockService, environmentService) => {
   /**
    * Middleware function to check that the user has ownership of the locks for the given detectors
    * @param {Request} req - HTTP Request object
@@ -57,4 +58,4 @@ const lockOwnershipMiddleware = (lockService, environmentService) => {
   };
 };
 
-exports.lockOwnershipMiddleware = lockOwnershipMiddleware
+exports.verifyEnvironmentLockOwnershipMiddleware = verifyEnvironmentLockOwnershipMiddleware
