@@ -1,2 +1,3 @@
 /data/*
 /storage/*
+!/storage/.gitkeep
