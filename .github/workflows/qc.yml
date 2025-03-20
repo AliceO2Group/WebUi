@@ -39,7 +39,7 @@ jobs:
     needs: lint-check
     steps:
       - name: Create Coverage Directory
-        run: mkdir -p ${{ github.workspace }}/coverage
+        run: (cd QualityControl; mkdir -p ${{ github.workspace }}/QualityControl/coverage)
       - uses: actions/checkout@v4
       - run: (cd QualityControl; npm ci )
       - run: (cd QualityControl; npm run docker-coverage )
