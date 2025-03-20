@@ -19,9 +19,10 @@ const { ConfigController } = require('./../../../lib/controller/ConfigController
 
 describe('ConfigController - test suite', () => {
   let configMock, loggerMock, resMock;
+  const BKP_URL = 'http://bookkeeping.com';
 
   beforeEach(() => {
-    configMock = { bookkeeping: { url: 'http://bookkeeping.com' } };
+    configMock = { bookkeeping: { url: BKP_URL } };
     loggerMock = { errorMessage: sinon.stub() };
     sinon.stub(LogManager, 'getLogger').returns(loggerMock);
     resMock = {
@@ -54,7 +55,7 @@ describe('ConfigController - test suite', () => {
 
       assert.ok(resMock.status.calledWith(200));
       assert.ok(resMock.json.calledWith({
-        bookkeeping: { url: 'http://bookkeeping.com' },
+        bookkeeping: { url: BKP_URL },
       }));
     });
   });

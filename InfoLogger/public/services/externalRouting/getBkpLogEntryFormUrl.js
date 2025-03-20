@@ -35,7 +35,7 @@ export const getBkpLogEntryFormUrl = (logItem, model) => {
   const bkpUrlParameters = {
     page: BKP_PAGE,
     templateKey: BKP_TEMPLATE_KEY,
-    ...logItem.run !== null && { runNumbers: [logItem.run] },
+    ...logItem.run && { runNumbers: [logItem.run] },
     ...logItem.message && { issueDescription: logItem.message },
     ...logItem.partition && { environmentIds: logItem.partition },
     ...(logItem.detector || logItem.system) && { detectorOrSubsystem: logItem.detector ?? logItem.system },
