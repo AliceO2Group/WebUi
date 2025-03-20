@@ -2,6 +2,8 @@ services:
   test_app:
     build:
       target: coverage
+    command: ["/opt/wait-for-it.sh", "-t", "0", "test_db:3306", "--", "npm", "run", "coverage-lcov" ]
+
     volumes:
       - type: bind
         source: ${GITHUB_WORKSPACE}/coverage

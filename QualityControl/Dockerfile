@@ -50,9 +50,8 @@ FROM developmentdependencies AS development
 CMD [ "/opt/wait-for-it.sh", "-t", "0", "database:3306", "--", "npm", "run", "dev" ]
 
 FROM developmentdependencies AS test
-# CMD ["npm", "run", "test"]
-CMD [ "/opt/wait-for-it.sh", "-t", "0", "database:3306", "--", "npm", "run", "test" ]
+CMD [ "/opt/wait-for-it.sh", "-t", "0", "test_db:3306", "--", "npm", "run", "test" ]
 
 FROM developmentdependencies AS coverage
-CMD [ "/opt/wait-for-it.sh", "-t", "0", "database:3306", "--", "npm", "run", "coverage-lcov" ]
+CMD [ "/opt/wait-for-it.sh", "-t", "0", "test_db:3306", "--", "npm", "run", "coverage-lcov" ]
 

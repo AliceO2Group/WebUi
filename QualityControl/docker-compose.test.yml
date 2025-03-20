@@ -1,20 +1,45 @@
 services:
   test_app:
     build:
-      target: test
+      context: .
+      dockerfile: Dockerfile
     environment:
       NODE_ENV: test
       DATABASE_LOGGING: "False"
+      DATABASE_HOST: test_db
+    links:
+      - test_db
     restart: "no"
+    depends_on:
+      - test_db
+    volumes:
+      - type: bind
+        read_only: true
+        source: ./scripts
+        target: /opt
+      - type: bind
+        source: ./database/storage
+        target: /var/storage
+        read_only: false
+    command: ["/opt/wait-for-it.sh", "-t", "0", "test_db:3306", "--", "npm", "run", "test"]
 
   test_db:
+    image: mariadb:10.5.9
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-root}"
-    restart: "no"
+    restart: unless-stopped
     volumes:
       - type: volume
-        read_only: false
         source: database-data
         target: /var/lib/mysql
+      - type: bind
+        read_only: true
+        source: ./database/configuration
+        target: /etc/mysql/conf.d
+      - type: bind
+        read_only: true
+        source: ./database/populate
+        target: /docker-entrypoint-initdb.d
+
 volumes:
   database-data:
