@@ -16,11 +16,11 @@ const assert = require('assert');
 const sinon = require('sinon');
 const { NotFoundError, TimeoutError } = require('@aliceo2/web-ui');
 
-const {lockOwnershipMiddleware} = require('../../../lib/middleware/lockOwnership.middleware');
+const {verifyEnvironmentLockOwnershipMiddleware} = require('../../../lib/middleware/verifyEnvironmentLockOwnership.middleware.js');
 const {LockService} = require('../../../lib/services/Lock.service.js');
 const {EnvironmentService} = require('../../../lib/services/Environment.service.js');
 
-describe('`LockOwnership` middleware test suite', () => {
+describe('`verifyEnvironmentLockOwnership` middleware test suite', () => {
   it('should successfully call next() when lock for detectors of specified environment are owned', async () => {
     const lockServiceStub = sinon.createStubInstance(LockService, {
       hasLocks: sinon.stub().returns(true)
@@ -32,7 +32,7 @@ describe('`LockOwnership` middleware test suite', () => {
     const req = {session: {personid: 0, name: 'testUser'}};
     const next = sinon.stub().returns();
 
-    await lockOwnershipMiddleware(lockServiceStub, environmentServiceStub)(req, null, next);
+    await verifyEnvironmentLockOwnershipMiddleware(lockServiceStub, environmentServiceStub)(req, null, next);
     assert.ok(next.calledOnce);
   });
 
@@ -47,7 +47,7 @@ describe('`LockOwnership` middleware test suite', () => {
       getEnvironment: sinon.stub().rejects(new NotFoundError('Environment not found'))
     });
 
-    await lockOwnershipMiddleware(null, environmentServiceStub)(req, res);
+    await verifyEnvironmentLockOwnershipMiddleware(null, environmentServiceStub)(req, res);
     assert.ok(res.status.calledWith(404));
     assert.ok(res.json.calledWith({
       message: 'Environment not found',
@@ -68,7 +68,7 @@ describe('`LockOwnership` middleware test suite', () => {
       getEnvironment: sinon.stub().rejects(new NotFoundError('Environment not found'))
     });
 
-    await lockOwnershipMiddleware(null, environmentServiceStub)(req, res);
+    await verifyEnvironmentLockOwnershipMiddleware(null, environmentServiceStub)(req, res);
     assert.ok(res.status.calledWith(404));
     assert.ok(res.json.calledWith({
       message: 'Environment not found',
@@ -89,7 +89,7 @@ describe('`LockOwnership` middleware test suite', () => {
       getEnvironment: sinon.stub().rejects(new TimeoutError('Operation timeout'))
     });
 
-    await lockOwnershipMiddleware(null, environmentServiceStub)(req, res);
+    await verifyEnvironmentLockOwnershipMiddleware(null, environmentServiceStub)(req, res);
     assert.ok(res.status.calledWith(408));
     assert.ok(res.json.calledWith(
       {
@@ -116,7 +116,7 @@ describe('`LockOwnership` middleware test suite', () => {
       getEnvironment: sinon.stub().resolves({includedDetectors: ['abc']})
     });
 
-    await lockOwnershipMiddleware(lockServiceStub, environmentServiceStub)(req, res);
+    await verifyEnvironmentLockOwnershipMiddleware(lockServiceStub, environmentServiceStub)(req, res);
 
     assert.ok(res.status.calledWith(403));
     assert.ok(res.json.calledWith(
