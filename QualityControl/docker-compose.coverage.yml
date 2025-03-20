@@ -6,6 +6,6 @@ services:
 
     volumes:
       - type: bind
-        source: ${GITHUB_WORKSPACE}/coverage
+        source: ${GITHUB_WORKSPACE}/QualityControl/coverage
         target: /usr/src/app/coverage
         read_only: false
