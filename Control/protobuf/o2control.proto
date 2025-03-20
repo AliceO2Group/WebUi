@@ -100,6 +100,7 @@ message GetFrameworkInfoReply {
     repeated string detectorsInInstance = 9;
     repeated string activeDetectors = 10;
     repeated string availableDetectors = 11;
+    int64 timestamp = 12; // timestamp of when this object was sent in unix milliseconds
 }
 
 // Not implemented yet
@@ -118,6 +119,7 @@ message GetEnvironmentsRequest {
 message GetEnvironmentsReply {
     string frameworkId = 1;
     repeated EnvironmentInfo environments = 2;
+    int64 timestamp = 3; // timestamp of when this object was sent in unix milliseconds
 }
 message EnvironmentInfo {
     string id = 1;
@@ -150,6 +152,7 @@ message NewEnvironmentRequest {
 message NewEnvironmentReply {
     EnvironmentInfo environment = 1;
     bool public = 2;
+    int64 timestamp = 3; // timestamp of when this object was sent in unix milliseconds
 }
 message NewAutoEnvironmentRequest {
     string workflowTemplate = 1;
@@ -158,7 +161,7 @@ message NewAutoEnvironmentRequest {
     common.User requestUser = 4;
 }
 message NewAutoEnvironmentReply {
-
+    int64 timestamp = 1; // timestamp of when this object was sent in unix milliseconds
 }
 
 message GetEnvironmentRequest {
@@ -169,6 +172,7 @@ message GetEnvironmentReply {
     EnvironmentInfo environment = 1;
     RoleInfo workflow = 2;
     bool public = 3;
+    int64 timestamp = 4; // timestamp of when this object was sent in unix milliseconds
 }
 
 message ControlEnvironmentRequest {
@@ -193,6 +197,7 @@ message ControlEnvironmentReply {
     int64 startOfTransition = 4;
     int64 endOfTransition = 5;
     int64 transitionDuration = 6;
+    int64 timestamp = 7; // timestamp of when this object was sent in unix milliseconds
 }
 
 message ModifyEnvironmentRequest {
@@ -224,14 +229,17 @@ message DestroyEnvironmentRequest {
 }
 message DestroyEnvironmentReply {
     CleanupTasksReply cleanupTasksReply = 1;
+    int64 timestamp = 2; // timestamp of when this object was sent in unix milliseconds
 }
 
 message GetActiveDetectorsReply {
     repeated string detectors = 1;
+    int64 timestamp = 2; // timestamp of when this object was sent in unix milliseconds
 }
 
 message GetAvailableDetectorsReply {
     repeated string detectors = 1;
+    int64 timestamp = 2; // timestamp of when this object was sent in unix milliseconds
 }
 
 ////////////////////////////////////////
@@ -284,12 +292,14 @@ message TaskDeploymentInfo {
 message GetTasksRequest {}
 message GetTasksReply {
     repeated ShortTaskInfo tasks = 1;
+    int64 timestamp = 2; // timestamp of when this object was sent in unix milliseconds
 }
 message GetTaskRequest {
     string taskId = 1;
 }
 message GetTaskReply {
     TaskInfo task = 1;
+    int64 timestamp = 2; // timestamp of when this object was sent in unix milliseconds
 }
 
 message CommandInfo {
@@ -321,6 +331,7 @@ message CleanupTasksRequest {
 message CleanupTasksReply {
     repeated ShortTaskInfo killedTasks = 1;
     repeated ShortTaskInfo runningTasks = 2;
+    int64 timestamp = 3; // timestamp of when this object was sent in unix milliseconds
 }
 
 ////////////////////////////////////////
@@ -347,6 +358,7 @@ message RoleInfo {
 
 message GetRolesReply {
     repeated RoleInfo roles = 1;
+    int64 timestamp = 2; // timestamp of when this object was sent in unix milliseconds
 }
 
 message GetWorkflowTemplatesRequest{
@@ -399,6 +411,7 @@ message WorkflowTemplateInfo {
 
 message GetWorkflowTemplatesReply{
     repeated WorkflowTemplateInfo workflowTemplates = 1;
+    int64 timestamp = 2; // timestamp of when this object was sent in unix milliseconds
 }
 
 ////////////////////////////////////////
@@ -419,6 +432,7 @@ message RepoInfo {
 message ListReposReply {
     repeated RepoInfo repos = 1;
     string globalDefaultRevision = 2;
+    int64 timestamp = 3; // timestamp of when this object was sent in unix milliseconds
 }
 
 message AddRepoRequest {
@@ -429,6 +443,7 @@ message AddRepoRequest {
 message AddRepoReply {
     string newDefaultRevision = 1;
     string info = 2;
+    int64 timestamp = 3; // timestamp of when this object was sent in unix milliseconds
 }
 
 message RemoveRepoRequest {
@@ -437,6 +452,7 @@ message RemoveRepoRequest {
 
 message RemoveRepoReply {
     string newDefaultRepo = 1;
+    int64 timestamp = 2; // timestamp of when this object was sent in unix milliseconds
 }
 
 message RefreshReposRequest {
@@ -458,6 +474,7 @@ message SetRepoDefaultRevisionRequest {
 
 message SetRepoDefaultRevisionReply {
     string info = 1;
+    int64 timestamp = 2; // timestamp of when this object was sent in unix milliseconds
 }
 
 message Empty {
@@ -466,6 +483,7 @@ message Empty {
 
 message ListIntegratedServicesReply {
     map<string, IntegratedServiceInfo> services = 1; // keys are IDs (e.g. "ddsched"), the service name should be displayed to users instead
+    int64 timestamp = 2; // timestamp of when this object was sent in unix milliseconds
 }
 
 message IntegratedServiceInfo {

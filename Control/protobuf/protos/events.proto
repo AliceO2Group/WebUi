@@ -78,7 +78,7 @@ message Ev_TaskEvent {
   string name = 1;         // task name, based on the name of the task class
   string taskid = 2;       // task id, unique
   string state = 3;        // state machine state for this task
-  string status = 4;       // active/inactive etc.
+  string status = 4;       // posible values: ACTIVE/INACTIVE/PARTIAL/UNDEFINED/UNDEPLOYABLE as defined in status.go.
   string hostname = 5;
   string className = 6;    // name of the task class from which this task was spawned
   Traits traits = 7;
@@ -99,7 +99,7 @@ message Ev_CallEvent {
 
 message Ev_RoleEvent {
   string name = 1;         // role name
-  string status = 2;       // active/inactive etc., derived from the state of child tasks, calls or other roles
+  string status = 2;       // posible values: ACTIVE/INACTIVE/PARTIAL/UNDEFINED/UNDEPLOYABLE as defined in status.go. Derived from the state of child tasks, calls or other roles
   string state = 3;        // state machine state for this role
   string rolePath = 4;     // path to this role within the environment
   string environmentId = 5;
@@ -123,7 +123,7 @@ message Ev_RunEvent {
   string error = 4;
   string transition = 5;
   OpStatus transitionStatus = 6;
-  map<string, string> vars = 7;
+  reserved 7;                     // 7 was used for `vars` field that was removed
   common.User lastRequestUser = 8;
 }
 
