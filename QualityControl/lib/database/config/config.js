@@ -14,19 +14,22 @@
 import { config } from '../../config/configProvider.js';
 
 const {
-  host,
-  port,
-  username,
-  password,
-  database,
-  charset,
-  collate,
-  timezone,
-  logging,
-} = config.database;
+  port = 3306,
+  username = 'cern',
+  password = 'cern',
+  database = `qcg${process.env.NODE_ENV === 'test' ? '_test' : ''}`,
+  charset = 'utf8mb4',
+  collate = 'utf8mb4_general_ci',
+  timezone = '+00:00',
+  logging = false,
+  maxRetries = 5,
+  retryThrottle = 5000,
+} = config?.database ?? {};
+
+const host = process?.env?.DATABASE_HOST ?? 'localhost';
 
 export default {
-  dialect: 'mariadb',
+
   dialectOptions: {
     charset,
     collate,
@@ -38,4 +41,6 @@ export default {
   password,
   database,
   logging,
+  maxRetries,
+  retryThrottle,
 };

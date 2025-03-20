@@ -19,20 +19,15 @@ RUN apk add --no-cache \
 # Working directory
 WORKDIR /usr/src/app
 
-
 # Export port
 EXPOSE 8080
 
-## Development stage
-FROM base AS dev
-COPY package*.json ./
-RUN npm --silent ci
-COPY . .
-RUN npm install -g nodemon
-CMD ["npm", "run", "dev"]
+RUN apk add --no-cache \
+    bash=5.2.26-r0
+
 
 ## Test stage
-FROM base AS test
+FROM base AS developmentdependencies
 
 # Needed for chromium:
 RUN apk add --no-cache \
@@ -50,4 +45,14 @@ COPY package*.json ./
 RUN npm ci --silent
 COPY . .
 
-CMD ["npm", "run", "test"]
+FROM developmentdependencies AS development
+# CMD ["npm", "run", "dev"]
+CMD [ "/opt/wait-for-it.sh", "-t", "0", "database:3306", "--", "npm", "run", "dev" ]
+
+FROM developmentdependencies AS test
+# CMD ["npm", "run", "test"]
+CMD [ "/opt/wait-for-it.sh", "-t", "0", "database:3306", "--", "npm", "run", "test" ]
+
+FROM developmentdependencies AS coverage
+CMD [ "/opt/wait-for-it.sh", "-t", "0", "database:3306", "--", "npm", "run", "coverage-lcov" ]
+

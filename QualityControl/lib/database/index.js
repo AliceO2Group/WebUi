@@ -24,7 +24,16 @@ import { fileURLToPath } from 'url';
 class SequelizeDatabase {
   constructor() {
     this._logger = LogManager.getLogger('qcg/database');
-    const { database, username, password, host, port, dialect, dialectOptions, logging } = dbConfig;
+    this.dbConfig = dbConfig;
+    const {
+      host,
+      database,
+      username,
+      password,
+      port,
+      dialectOptions,
+      logging,
+    } = this.dbConfig;
 
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = dirname(__filename);
@@ -33,7 +42,7 @@ class SequelizeDatabase {
     this.sequelize = new Sequelize(database, username, password, {
       host,
       port,
-      dialect,
+      dialect: 'mariadb',
       dialectOptions,
       logging,
       define: {
@@ -43,26 +52,31 @@ class SequelizeDatabase {
   }
 
   async connect() {
-    this._logger.debugMessage('Starting QCG database connection');
-    const retryThrottle = 5000;
+    const { database, host, port, maxRetries, retryThrottle } = this.dbConfig;
+    let attemptCount = 0;
 
-    let success = false;
-    let failedOnce = false;
-
-    while (!success) {
+    while (attemptCount < maxRetries) {
       try {
         await this.sequelize.authenticate();
-        success = true;
+        this._logger.debugMessage(`Connected to db "${database}" (${host}:${port})`);
+        return;
       } catch (error) {
-        if (!failedOnce) {
-          this._logger.errorMessage(`Error while starting QCG database connection: ${error}`);
-          failedOnce = true;
-        }
-        this._logger.debugMessage(`New QCG database connection attempt in ${retryThrottle} ms`);
-        await new Promise((resolve) => setTimeout(resolve, retryThrottle));
+        attemptCount++;
+        this._handleConnectionError(error, attemptCount, maxRetries, retryThrottle);
       }
     }
-    this._logger.debugMessage('QCG database connected');
+
+    this._logger.errorMessage(`Max retries (${maxRetries}) reached. Connection failed.`);
+  }
+
+  _handleConnectionError(error, attemptCount, maxRetries, retryThrottle) {
+    if (attemptCount === 1) {
+      this._logger.errorMessage(`Error while starting QCG database connection: ${error}`);
+    }
+    if (attemptCount < maxRetries) {
+      this._logger.debugMessage(`Retrying in ${retryThrottle} ms...`);
+      setTimeout(() => {}, retryThrottle);
+    }
   }
 
   async migrate() {

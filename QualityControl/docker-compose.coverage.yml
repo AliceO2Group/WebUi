@@ -1,0 +1,9 @@
+services:
+  test_app:
+    build:
+      target: coverage
+    volumes:
+      - type: bind
+        source: ${GITHUB_WORKSPACE}/coverage
+        target: /usr/src/app/coverage
+        read_only: false

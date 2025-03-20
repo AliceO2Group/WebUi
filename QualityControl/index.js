@@ -42,6 +42,7 @@ try {
   await sequelizeDatabase.migrate();
 } catch (error) {
   logger.errorMessage(`Error while starting database: ${error}`);
+  process.exit(1);
 }
 
 // Start servers

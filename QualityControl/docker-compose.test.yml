@@ -1,48 +1,20 @@
 services:
-  qcg-test:
+  test_app:
     build:
-      context: .
-      dockerfile: Dockerfile
       target: test
     environment:
-      CHROME_BIN: /usr/bin/chromium-browser
-      MYSQL_DATABASE: qcg_test_db
-      MYSQL_USER: qcg_test_user
-      MYSQL_PASSWORD: testpassword
-      MYSQL_ROOT_PASSWORD: testpassword
-    volumes:
-      - type: bind
-        read_only: true
-        source: ./lib
-        target: /usr/src/app/lib
-      - type: bind
-        read_only: true
-        source: ./public
-        target: /usr/src/app/public   
-      - type: bind
-        source: ./test
-        target: /usr/src/app/test
-    links:
-      - database-test
-    ports:
-      - "8080:8080"
-    container_name: qcg-test-application
-    restart: no
-    stdin_open: true
-    tty: true
+      NODE_ENV: test
+      DATABASE_LOGGING: "False"
+    restart: "no"
 
-  database-test:
-    image: "mariadb:10.5.9"
-    container_name: qcg-test-database
+  test_db:
     environment:
-      MYSQL_ROOT_PASSWORD: testpassword
-      MYSQL_DATABASE: qcg_test_user
-      MYSQL_USER: qcg_test_user
-      MYSQL_PASSWORD: testpassword
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-root}"
+    restart: "no"
     volumes:
-      - mariadb_test_volume:/var/lib/mysql
-    ports:
-      - "3306:3306"
-
+      - type: volume
+        read_only: false
+        source: database-data
+        target: /var/lib/mysql
 volumes:
-  mariadb_test_volume:
+  database-data:

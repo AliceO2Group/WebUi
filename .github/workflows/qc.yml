@@ -38,16 +38,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint-check
     steps:
+      - name: Create Coverage Directory
+        run: mkdir -p ${{ github.workspace }}/coverage
       - uses: actions/checkout@v4
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.x'
       - run: (cd QualityControl; npm ci )
-      - run: (cd QualityControl; npm run coverage-lcov )
-      - name: Send codecov report for QualityControl
+      - run: (cd QualityControl; npm run docker-coverage )
+      - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: qualitycontrol
-          fail_ci_if_error: true
+          files: ./coverage/lcov.info
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
