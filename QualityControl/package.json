@@ -26,7 +26,7 @@
     "test": "node --test test/test-index.js",
     "docker-dev": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
     "docker-test": "docker compose -p test -f docker-compose.test.yml up --build --abort-on-container-exit",
-    "docker-coverage": "docker compose -p test -f docker-compose.test.yml -f docker-compose.coverage.yml up --build"
+    "docker-coverage": "docker compose -p test -f docker-compose.test.yml -f docker-compose.coverage.yml up --build --abort-on-container-exit"
 
   },
   "files": [
