@@ -39,7 +39,7 @@ jobs:
     needs: lint-check
     steps:
       - name: Checkout Repository
-        uses: actions/@checkout@v4
+        uses: actions/checkout@v4
       - name: Create Coverage Directory
         run: mkdir -p QualityControl/coverage
       - run: (cd QualityControl; npm run docker-coverage )
