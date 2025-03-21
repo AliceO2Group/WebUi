@@ -14,7 +14,7 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const { LogManager, updateAndSendExpressResponseFromNativeError } = require('@aliceo2/web-ui');
+const { LogManager } = require('@aliceo2/web-ui');
 const { verifyLockOwnershipMiddleware } = require('../../../lib/middleware/verifyLockOwnership.middleware.js');
 
 describe('`verifyLockOwnershipMiddleware` test suite', () => {
