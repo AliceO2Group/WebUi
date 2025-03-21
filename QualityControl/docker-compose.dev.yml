@@ -17,7 +17,15 @@ services:
       - type: bind
         read_only: true
         source: ./public
-        target: /usr/src/app/public   
+        target: /usr/src/app/public
+      - type: bind
+        read_only: true
+        source: ./scripts
+        target: /opt
+      - type: bind
+        read_only: false
+        source: ./database/storage
+        target: /var/storage 
 
   database:
     image: "mariadb:10.5.9"
@@ -31,7 +39,14 @@ services:
         read_only: false
         source: database-data
         target: /var/lib/mysql
+      - type: bind
+        read_only: true
+        source: ./database/configuration
+        target: /etc/mysql/conf.d
+      - type: bind
+        read_only: true
+        source: ./database/populate
+        target: /docker-entrypoint-initdb.d
 
 volumes:
   database-data:
-

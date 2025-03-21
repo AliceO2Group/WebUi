@@ -65,8 +65,7 @@ class SequelizeDatabase {
         this._handleConnectionError(error, attemptCount, maxRetries, retryThrottle);
       }
     }
-
-    this._logger.errorMessage(`Max retries (${maxRetries}) reached. Connection failed.`);
+    throw new Error(`Max retries (${maxRetries}) reached. Connection failed.`);
   }
 
   _handleConnectionError(error, attemptCount, maxRetries, retryThrottle) {
