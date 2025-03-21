@@ -47,6 +47,12 @@ module.exports = {
     infologger: false,
   },
 
+  // optional connection to Bookkeeping, comment object if not used.
+  // responsible for the generated link to BKP in the details window.
+  bookkeeping: {
+    url: 'http://localhost:4000',
+  },
+
   // JWT manages user's session duration
   // https://github.com/AliceO2Group/WebUi/blob/dev/Framework/docs/guide/json-tokens.md
   // jwt: {
