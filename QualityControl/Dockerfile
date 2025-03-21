@@ -53,5 +53,6 @@ FROM developmentdependencies AS test
 CMD [ "/opt/wait-for-it.sh", "-t", "0", "test_db:3306", "--", "npm", "run", "test" ]
 
 FROM developmentdependencies AS coverage
+RUN mkdir -p /usr/src/app/coverage
 CMD [ "/opt/wait-for-it.sh", "-t", "0", "test_db:3306", "--", "npm", "run", "coverage-lcov" ]
 
