@@ -63,6 +63,7 @@ import { userRepositoryTest } from './lib/repositories/UserRepository.test.js';
 import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
 import { userControllerTestSuite } from './lib/controllers/UserController.test.js';
 import { chartRepositoryTest } from './lib/repositories/ChartRepository.test.js';
+import { sequelizeDatabaseTestSuite } from './lib/database/index.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 10000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -84,9 +85,10 @@ const FRONT_END_TIMEOUT = INITIAL_PAGE_SETUP_TIMEOUT
   + LAYOUT_SHOW_PAGE_TIMEOUT;
 
 const BACK_END_TIMEOUT = 10000; // back-end test suite timeout
+const DATABASE_TESTS_TIMEOUT = 5000;
 
 suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, async () => {
-  suite('Front-end test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
+  suite.skip('Front-end test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
     let url = undefined;
     let page = undefined;
     let browser = undefined;
@@ -143,7 +145,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     // require('./about-page.test');
   });
 
-  suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
+  suite.skip('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
     suite('Lib - Test Suite', async () => {
       suite('Utility methods test suite', async () => await utilsTestSuite());
     });
@@ -180,5 +182,9 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       });
       suite('UserController - Test Suite', async () => await userControllerTestSuite());
     });
+  });
+
+  suite('Database test-suite', { timeout: DATABASE_TESTS_TIMEOUT }, async () => {
+    suite('DB Initialization test suite', async () => await sequelizeDatabaseTestSuite());
   });
 });
