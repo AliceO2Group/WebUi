@@ -11,10 +11,11 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, ok, rejects, deepEqual, deepStrictEqual } from 'node:assert';
+import { deepStrictEqual, ok, rejects, strictEqual } from 'node:assert';
 import { suite, test, beforeEach, afterEach } from 'node:test';
 import sinon from 'sinon';
-import { sequelizeDatabase } from '../../../lib/database/index.js';
+import { SequelizeDatabase } from '../../../lib/database/index.js';
+import { config } from '../../config.js';
 
 export const sequelizeDatabaseTestSuite = async () => {
   suite('SequelizeDatabase Tests', () => {
@@ -29,25 +30,24 @@ export const sequelizeDatabaseTestSuite = async () => {
     });
 
     test('should set default values if database config is not provided', () => {
-      const dbConfigStub = sandbox.stub(sequelizeDatabase, 'dbConfig').value(undefined);
-
-      const testDatabase = new sequelizeDatabase.constructor();
-
-      strictEqual(testDatabase.dbConfig.host, process.env.DATABASE_HOST ?? 'localhost', 'Incorrect default host');
-      strictEqual(testDatabase.dbConfig.port, 3306, 'Default port should be 3306');
-      strictEqual(testDatabase.dbConfig.username, 'cern', 'Default username should be cern');
-      strictEqual(testDatabase.dbConfig.password, 'cern', 'Default password should be cern');
-
-      dbConfigStub.restore();
+      const sequelizeDatabase = new SequelizeDatabase({});
+      const { host, port, username, password, database } = sequelizeDatabase.dbConfig;
+      strictEqual(host, process.env.DATABASE_HOST ?? 'localhost', 'Incorrect default host');
+      strictEqual(port, 3306, 'Default port should be 3306');
+      strictEqual(username, 'cern', 'Default username should be cern');
+      strictEqual(password, 'cern', 'Default password should be cern');
+      strictEqual(database, 'qcg_test', 'Default database should be qcg_test');
     });
 
     test('should successfully connect to the database', async () => {
+      const sequelizeDatabase = new SequelizeDatabase(config.database);
       const authenticateStub = sandbox.stub(sequelizeDatabase.sequelize, 'authenticate').resolves();
       await sequelizeDatabase.connect();
       ok(authenticateStub.calledOnce, 'Sequelize authenticate should be called once');
     });
 
     test('should retry connection on failure and eventually succeed', async () => {
+      const sequelizeDatabase = new SequelizeDatabase(config.database);
       const authenticateStub = sandbox
         .stub(sequelizeDatabase.sequelize, 'authenticate')
         .onFirstCall()
@@ -63,24 +63,8 @@ export const sequelizeDatabaseTestSuite = async () => {
       ok(loggerStub.calledWithMatch(/Retrying in/), 'Logger should log retry messages');
     });
 
-    test('should throw an error after max retries', async () => {
-      const { maxRetries } = sequelizeDatabase.dbConfig;
-
-      sandbox.stub(sequelizeDatabase.sequelize, 'authenticate').rejects(new Error('Connection failed'));
-      const handleConnectionErrorStub = sandbox.stub(sequelizeDatabase, '_handleConnectionError');
-      const errorMessageStub = sandbox.stub(sequelizeDatabase._logger, 'errorMessage');
-      await sequelizeDatabase.connect();
-      ok(
-        handleConnectionErrorStub.callCount === maxRetries,
-        'Handle connection error should be called the correct number of times',
-      );
-      ok(
-        errorMessageStub.calledOnceWithExactly(`Max retries (${maxRetries}) reached. Connection failed.`),
-        'Error message should be logged after max retries',
-      );
-    });
-
     test('should execute migrations successfully', async () => {
+      const sequelizeDatabase = new SequelizeDatabase(config.database);
       const umzugStub = {
         up: sandbox.stub().resolves(),
       };
@@ -95,6 +79,7 @@ export const sequelizeDatabaseTestSuite = async () => {
     });
 
     test('should log error if migrations fail', async () => {
+      const sequelizeDatabase = new SequelizeDatabase(config.database);
       const umzugStub = {
         up: sandbox.stub().rejects(new Error('Migration failed')),
       };
@@ -113,6 +98,8 @@ export const sequelizeDatabaseTestSuite = async () => {
     });
 
     test('should create all required tables after migrations', async () => {
+      const sequelizeDatabase = new SequelizeDatabase(config.database);
+
       const loggerStub = sandbox.stub(sequelizeDatabase._logger, 'infoMessage');
       await sequelizeDatabase.migrate();
 

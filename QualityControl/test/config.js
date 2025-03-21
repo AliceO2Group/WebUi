@@ -33,15 +33,12 @@ export const config = {
   qc: {
     enabled: false,
   },
-  // database: {
-  //   host: 'qcg-test-database',
-  //   port: '3306',
-  //   username: 'qcg_test_user',
-  //   password: 'testpassword',
-  //   name: 'qcg_test_db',
-  //   charset: 'utf8mb4',
-  //   collate: 'utf8mb4_unicode_ci',
-  //   logging: true,
-  // },
+  database: {
+    port: '3306',
+    username: 'cern',
+    password: 'cern',
+    name: 'qcg_test',
+    charset: 'utf8mb4',
+    collate: 'utf8mb4_unicode_ci' },
   dbFile: './test/setup/seeders/qcg-mock-data.json',
 };

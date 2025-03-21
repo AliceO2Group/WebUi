@@ -13,18 +13,18 @@
 
 import { LogManager } from '@aliceo2/web-ui';
 import { Sequelize } from 'sequelize';
-import dbConfig from './config/config.js';
 import { SequelizeStorage, Umzug } from 'umzug';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import getDatabaseConfig from './config/config.js';
 
 /**
  * Sequelize implementation of the Database.
  */
-class SequelizeDatabase {
-  constructor() {
+export class SequelizeDatabase {
+  constructor(config) {
     this._logger = LogManager.getLogger('qcg/database');
-    this.dbConfig = dbConfig;
+    this.dbConfig = getDatabaseConfig(config);
     const {
       host,
       database,
@@ -126,10 +126,3 @@ class SequelizeDatabase {
     });
   }
 }
-
-/**
- * An instance of SequelizeDatabase
- * @constant {SequelizeDatabase} sequelizeDatabase
- */
-export const sequelizeDatabase = new SequelizeDatabase();
-export const { sequelize } = sequelizeDatabase;

@@ -11,36 +11,35 @@
  * or submit itself to any jurisdiction.
  */
 
-import { config } from '../../config/configProvider.js';
+export default function getDatabaseConfig(config) {
+  const {
+    port = 3306,
+    username = 'cern',
+    password = 'cern',
+    database = `qcg${process.env.NODE_ENV === 'test' ? '_test' : ''}`,
+    charset = 'utf8mb4',
+    collate = 'utf8mb4_general_ci',
+    timezone = '+00:00',
+    logging = false,
+    maxRetries = 5,
+    retryThrottle = 5000,
+  } = config?.database ?? {};
 
-const {
-  port = 3306,
-  username = 'cern',
-  password = 'cern',
-  database = `qcg${process.env.NODE_ENV === 'test' ? '_test' : ''}`,
-  charset = 'utf8mb4',
-  collate = 'utf8mb4_general_ci',
-  timezone = '+00:00',
-  logging = false,
-  maxRetries = 5,
-  retryThrottle = 5000,
-} = config?.database ?? {};
+  const host = process?.env?.DATABASE_HOST ?? 'localhost';
 
-const host = process?.env?.DATABASE_HOST ?? 'localhost';
-
-export default {
-
-  dialectOptions: {
-    charset,
-    collate,
-    timezone,
-  },
-  host,
-  port,
-  username,
-  password,
-  database,
-  logging,
-  maxRetries,
-  retryThrottle,
-};
+  return {
+    dialectOptions: {
+      charset,
+      collate,
+      timezone,
+    },
+    host,
+    port,
+    username,
+    password,
+    database,
+    logging,
+    maxRetries,
+    retryThrottle,
+  };
+}

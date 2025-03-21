@@ -88,7 +88,7 @@ const BACK_END_TIMEOUT = 10000; // back-end test suite timeout
 const DATABASE_TESTS_TIMEOUT = 5000;
 
 suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, async () => {
-  suite.skip('Front-end test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
+  suite('Front-end test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
     let url = undefined;
     let page = undefined;
     let browser = undefined;
@@ -145,7 +145,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     // require('./about-page.test');
   });
 
-  suite.skip('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
+  suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
     suite('Lib - Test Suite', async () => {
       suite('Utility methods test suite', async () => await utilsTestSuite());
     });
