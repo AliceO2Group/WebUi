@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/infologger",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "description": "Infologger GUI to query and stream log events",
   "author": "Vladimir Kosmala",
   "contributors": [
@@ -34,14 +34,14 @@
     "mariadb": "3.4.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.21.0",
+    "@eslint/js": "^9.22.0",
     "@stylistic/eslint-plugin-js": "^4.2.0",
-    "eslint": "^9.21.0",
+    "eslint": "^9.22.0",
     "eslint-plugin-jsdoc": "^50.6.0",
     "globals": "^16.0.0",
     "mocha": "^11.1.0",
     "nyc": "^17.1.0",
-    "puppeteer": "^24.3.1",
+    "puppeteer": "^24.4.0",
     "sinon": "^19.0.2"
   },
   "bundleDependencies": [
