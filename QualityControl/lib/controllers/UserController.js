@@ -13,11 +13,13 @@
  */
 
 import assert from 'assert';
-import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import { LogManager } from '@aliceo2/web-ui';
 
 /**
  * @typedef {import('../repositories/UserRepository.js').UserRepository} UserRepository
  */
+
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
 
 /**
  * Gateway for all User data calls
@@ -53,10 +55,11 @@ export class UserController {
       await this._userRepository.createUser({ id, name, username });
       res.status(200).json({ ok: true });
     } catch (err) {
-      updateAndSendExpressResponseFromNativeError(
-        res,
-        err,
-      );
+      if (err.stack) {
+        logger.trace(err);
+      }
+      logger.error('Unable to add user to memory');
+      res.status(502).json({ ok: false, message: 'Unable to add user to memory' });
     }
   }
 
@@ -70,16 +73,16 @@ export class UserController {
    */
   _validateUser(username, name, id) {
     if (!username) {
-      throw new InvalidInputError('username of the user is mandatory');
+      throw new Error('username of the user is mandatory');
     }
     if (!name) {
-      throw new InvalidInputError('name of the user is mandatory');
+      throw new Error('name of the user is mandatory');
     }
     if (id === null || id === undefined || id === '') {
-      throw new InvalidInputError('id of the user is mandatory');
+      throw new Error('id of the user is mandatory');
     }
     if (isNaN(id)) {
-      throw new InvalidInputError('id of the user must be a number');
+      throw new Error('id of the user must be a number');
     }
   }
 }

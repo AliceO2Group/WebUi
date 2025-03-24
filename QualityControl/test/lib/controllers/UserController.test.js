@@ -46,76 +46,6 @@ export const userControllerTestSuite = async () => {
   });
 
   suite('addUserHandler', () => {
-    test('should handle missing username', async () => {
-      reqMock.session.username = undefined;
-
-      await userController.addUserHandler(reqMock, resMock);
-
-      ok(userRepositoryMock.createUser.notCalled);
-      ok(resMock.status.calledWith(400));
-      ok(resMock.json.calledWith({
-        message: 'username of the user is mandatory',
-        status: 400,
-        title: 'Invalid Input',
-      }));
-    });
-
-    test('should handle missing name', async () => {
-      reqMock.session.name = undefined;
-
-      await userController.addUserHandler(reqMock, resMock);
-
-      ok(userRepositoryMock.createUser.notCalled);
-      ok(resMock.status.calledWith(400));
-      ok(resMock.json.calledWith({
-        message: 'name of the user is mandatory',
-        status: 400,
-        title: 'Invalid Input',
-      }));
-    });
-
-    test('should handle missing personid', async () => {
-      reqMock.session.personid = undefined;
-
-      await userController.addUserHandler(reqMock, resMock);
-
-      ok(userRepositoryMock.createUser.notCalled);
-      ok(resMock.status.calledWith(400));
-      ok(resMock.json.calledWith({
-        message: 'id of the user is mandatory',
-        status: 400,
-        title: 'Invalid Input',
-      }));
-    });
-
-    test('should handle personid that is not a number', async () => {
-      reqMock.session.personid = 'abc';
-
-      await userController.addUserHandler(reqMock, resMock);
-
-      ok(userRepositoryMock.createUser.notCalled);
-      ok(resMock.status.calledWith(400));
-      ok(resMock.json.calledWith({
-        message: 'id of the user must be a number',
-        status: 400,
-        title: 'Invalid Input',
-      }));
-    });
-
-    test('should handle errors during user creation', async () => {
-      const error = new Error('User creation failed');
-      userRepositoryMock.createUser.rejects(error);
-
-      await userController.addUserHandler(reqMock, resMock);
-
-      ok(resMock.status.calledWith(500));
-      ok(resMock.json.calledWith({
-        message: 'User creation failed',
-        status: 500,
-        title: 'Unknown Error',
-      }));
-    });
-
     test('should add a user successfully', async () => {
       await userController.addUserHandler(reqMock, resMock);
 
@@ -127,6 +57,71 @@ export const userControllerTestSuite = async () => {
       }));
       ok(resMock.status.calledWith(200));
       ok(resMock.json.calledWith({ ok: true }));
+    });
+
+    test('should handle errors during user creation', async () => {
+      const error = new Error('User creation failed');
+      userRepositoryMock.createUser.rejects(error);
+
+      await userController.addUserHandler(reqMock, resMock);
+
+      ok(resMock.status.calledWith(502));
+      ok(resMock.json.calledWith({
+        ok: false,
+        message: 'Unable to add user to memory',
+      }));
+    });
+
+    test('should handle missing username', async () => {
+      reqMock.session.username = undefined;
+
+      await userController.addUserHandler(reqMock, resMock);
+
+      ok(userRepositoryMock.createUser.notCalled);
+      ok(resMock.status.calledWith(502));
+      ok(resMock.json.calledWith({
+        ok: false,
+        message: 'Unable to add user to memory',
+      }));
+    });
+
+    test('should handle missing name', async () => {
+      reqMock.session.name = undefined;
+
+      await userController.addUserHandler(reqMock, resMock);
+
+      ok(userRepositoryMock.createUser.notCalled);
+      ok(resMock.status.calledWith(502));
+      ok(resMock.json.calledWith({
+        ok: false,
+        message: 'Unable to add user to memory',
+      }));
+    });
+
+    test('should handle missing personid', async () => {
+      reqMock.session.personid = undefined;
+
+      await userController.addUserHandler(reqMock, resMock);
+
+      ok(userRepositoryMock.createUser.notCalled);
+      ok(resMock.status.calledWith(502));
+      ok(resMock.json.calledWith({
+        ok: false,
+        message: 'Unable to add user to memory',
+      }));
+    });
+
+    test('should handle personid that is not a number', async () => {
+      reqMock.session.personid = 'abc';
+
+      await userController.addUserHandler(reqMock, resMock);
+
+      ok(userRepositoryMock.createUser.notCalled);
+      ok(resMock.status.calledWith(502));
+      ok(resMock.json.calledWith({
+        ok: false,
+        message: 'Unable to add user to memory',
+      }));
     });
   });
 };
