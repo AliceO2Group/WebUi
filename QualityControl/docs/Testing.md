@@ -4,7 +4,7 @@
 Before running the tests, ensure that all project dependencies are installed.
 Run the following command in the project root directory:
 ```bash
-npm install
+npm run --silent ci
 ```
 
 ## 2. Run all tests
@@ -27,5 +27,4 @@ To run tests with coverage reporting, use the following command:
 npm run coverage-local
 ```
 This command will run the tests with coverage reporting using the node:test module.
-
 

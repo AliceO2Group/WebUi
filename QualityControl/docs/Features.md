@@ -1,6 +1,18 @@
 # Features
+## Table of Contents
+- [ROOT Object drawing options via Metadata](#root-object-drawing-options-via-metadata)
+- [Display a QC non-standard ROOT object in QCG](#display-a-qc-non-standard-root-object-in-qcg)
+- [Export a layout as JSON](#export-a-layout-as-json)
+- [Import a layout from JSON](#import-a-layout-from-json)
+- [AutoTransitioning Tabs within Layouts](#autotransitioning-tabs-within-layouts)
+- [Filters](#filters)
+   - [Available Filters](#available-filters)
+- [Actions](#actions)
+- [Edit a Layout](#edit-a-layout)
+   - [Via GUI](#1-via-gui)
+   - [Via JSON](#2-via-json)
 
-## Canvas Options via MetaData
+## ROOT Object drawing options via Metadata
 `QCG` is using CCDB as storage service. When storing an object, the user can also store information on how an object should be plotted via the `metadata` field in CCDB. QualityControl documentation on how this can be achieved can be found [here](https://github.com/AliceO2Group/QualityControl/blob/master/doc/Advanced.md#canvas-options)
 * `drawOptions`: semi-colon separated drawing options; e.g. `lcolz;colz`
 * `displayHints`: semi-colon separated hints; e.g. `AP;APB`
@@ -31,3 +43,42 @@ To easily follow the progress of a RUN, layouts can automatically transition thr
 2. Click on the `pencil icon` button to start editing the layout
 3. On the left sidebar, configure the field `Tab Auto-Change(sec): 0 (OFF), 10-600 (ON)` with the desired numerical value
 4. Save 
+
+## Filters
+Filters allow users to refine the displayed objects within a layout, ensuring only relevant data is shown. If an object does not match the selected filters, a "Not Found" status is displayed for that object.
+
+### Available Filters
+- **Run Number**: Filter objects by their associated run number.
+- **Run Type**: Filter objects by the type of run.
+- **Period Name**: Filter objects by the period name.
+- **Pass Name**: Filter objects by the pass name.
+
+Only objects in the layout that match the selected filters will be displayed.
+
+## Actions
+Users can perform the following actions within the layout editor:
+
+- **Duplicate Layout**: Quickly create a copy of the layout for modifications without altering the original.
+- **Share Layout**: Download the layout skeleton as a JSON file for sharing or backup purposes.
+
+## Edit a Layout
+
+For advanced users, layouts can be edited directly by modifying the JSON code. This method provides greater flexibility and control over the layout configuration.
+### 1. Via GUI
+The GUI provides an intuitive and user-friendly way for layout creators to edit and customize their layouts without needing to write code.
+
+- **Change Layout Name**: Modify the name of the layout.
+- **Modify Tabs**: Rename tabs, change their order, and even delete or add tabs as needed.
+- **Adjust Number of Columns per Tab**: Customize the number of columns within each tab.
+- **Edit Layout Description**: Update the description of the layout.
+- **Auto-Switch Time for Tabs**: Set the auto-switch time between tabs (default is 0).
+- **Drag & Move Objects**: Rearrange objects within the layout.
+
+### 2. Via JSON
+1. Open the layout you wish to edit.
+2. Click on the `pencil icon` button to start editing the layout.
+3. Click the `Edit JSON` button.
+4. A popup will appear, displaying the layout’s current configuration in plain JSON text format.
+   - The system validates the JSON structure to ensure it is correctly formatted.
+   - Certain fields, such as the `ID`, cannot be set manually.
+5. Make the necessary changes and click `Save`.
