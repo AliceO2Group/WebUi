@@ -39,6 +39,7 @@ export const config = {
     password: 'cern',
     name: 'qcg_test',
     charset: 'utf8mb4',
-    collate: 'utf8mb4_unicode_ci' },
+    collate: 'utf8mb4_unicode_ci',
+  },
   dbFile: './test/setup/seeders/qcg-mock-data.json',
 };
