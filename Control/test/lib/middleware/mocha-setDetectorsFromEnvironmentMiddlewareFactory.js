@@ -17,7 +17,6 @@ const sinon = require('sinon');
 
 const { setDetectorsFromEnvironmentMiddlewareFactory } = require('../../../lib/middleware/setDetectorsFromEnvironmentMiddlewareFactory.js');
 const { EnvironmentService } = require('./../../../lib/services/Environment.service.js');
-const { InvalidInputError } = require('@aliceo2/web-ui');
 
 describe('`setDetectorsFromEnvironmentMiddlewareFactory` middleware test suite', () => {
   it('should successfully call next() and set the list of detecors in req.body', async () => {

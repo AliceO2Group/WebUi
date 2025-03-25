@@ -25,7 +25,7 @@ const setDetectorsFromEnvironmentMiddlewareFactory = (environmentService) => {
    * Middleware function to extract the environment included detectors and add them to the request body
    * @param {Request} req - HTTP Request object
    * @param {object} req.body - Body object from request
-   * @param {string} req.body.id - List of detectors to check ownership of
+   * @param {string} req.body.id - ID of the environment to retrieve detectors for
    * @param {Response} res - HTTP Response object
    * @param {Next} next - HTTP Next object to use if checks pass
    * @return {void} continue if checks pass, 400 if environment ID is missing
