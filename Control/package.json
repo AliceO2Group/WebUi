@@ -46,7 +46,7 @@
     "nock": "^14.0.0",
     "nyc": "^17.1.0",
     "puppeteer": "^24.4.0",
-    "sinon": "19.0.2",
+    "sinon": "20.0.0",
     "supertest": "7.1.0"
   },
   "bundledDependencies": [
