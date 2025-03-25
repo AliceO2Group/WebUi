@@ -21,8 +21,12 @@ const config = require('./config/configProvider.js');
 const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 const {addDetectorIdMiddleware} = require('./middleware/addDetectorId.middleware.js');
 const {DetectorId} = require('./common/detectorId.enum.js');
-const { setDetectorsFromEnvironmentMiddlewareFactory } = require('./middleware/setDetectorsFromEnvironmentMiddlewareFactory.js');
-const { getDetectorsLockOwnershipMiddlewareFactory } = require('./middleware/getDetectorsLockOwnershipMiddlewareFactory.js');
+const {
+  setDetectorsFromEnvironmentMiddlewareFactory
+} = require('./middleware/setDetectorsFromEnvironmentMiddlewareFactory.js');
+const {
+  getDetectorsLockOwnershipMiddlewareFactory
+} = require('./middleware/getDetectorsLockOwnershipMiddlewareFactory.js');
 
 // controllers
 const {ConsulController} = require('./controllers/Consul.controller.js');
