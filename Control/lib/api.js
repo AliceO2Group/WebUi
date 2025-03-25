@@ -21,7 +21,7 @@ const config = require('./config/configProvider.js');
 const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 const {addDetectorIdMiddleware} = require('./middleware/addDetectorId.middleware.js');
 const {DetectorId} = require('./common/detectorId.enum.js');
-const {lockOwnershipMiddleware} = require('./middleware/lockOwnership.middleware.js');
+const {verifyEnvironmentLockOwnershipMiddleware} = require('./middleware/verifyEnvironmentLockOwnership.middleware.js');
 
 // controllers
 const {ConsulController} = require('./controllers/Consul.controller.js');
@@ -172,7 +172,7 @@ module.exports.setup = (http, ws) => {
   http.delete('/environment/:id',
     coreMiddleware,
     minimumRoleMiddleware(Role.DETECTOR),
-    lockOwnershipMiddleware(lockService, envService),
+    verifyEnvironmentLockOwnershipMiddleware(lockService, envService),
     envCtrl.destroyEnvironmentHandler.bind(envCtrl),
   );
 
