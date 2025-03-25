@@ -13,7 +13,7 @@
 
 import { suite, test, before, beforeEach } from 'node:test';
 import { LayoutRepository } from '../../../lib/repositories/LayoutRepository.js';
-import assert, { deepEqual, deepStrictEqual, equal, ok, rejects, strictEqual, throws } from 'node:assert';
+import { deepEqual, deepStrictEqual, equal, ok, rejects, strictEqual, throws } from 'node:assert';
 import { NotFoundError } from '@aliceo2/web-ui';
 import sinon from 'sinon';
 import { initTest } from '../../setup/testRepositorySetup.js';
