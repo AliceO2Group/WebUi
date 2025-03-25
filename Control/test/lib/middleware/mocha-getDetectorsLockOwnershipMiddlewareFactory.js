@@ -15,9 +15,9 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const { LogManager } = require('@aliceo2/web-ui');
-const { verifyLockOwnershipMiddleware } = require('../../../lib/middleware/verifyLockOwnership.middleware.js');
+const { getDetectorsLockOwnershipMiddlewareFactory } = require('../../../lib/middleware/getDetectorsLockOwnershipMiddlewareFactory.js');
 
-describe('`verifyLockOwnershipMiddleware` test suite', () => {
+describe('`getDetectorsLockOwnershipMiddlewareFactory` test suite', () => {
   let lockServiceMock, reqMock, resMock, nextMock, loggerMock;
 
   beforeEach(() => {
@@ -33,7 +33,7 @@ describe('`verifyLockOwnershipMiddleware` test suite', () => {
         access: 'admin',
       },
       body: {
-        detector: ['ITS', 'TPC'],
+        detectors: ['ITS', 'TPC'],
       },
     };
 
@@ -58,7 +58,7 @@ describe('`verifyLockOwnershipMiddleware` test suite', () => {
   it('should call next() if the user has ownership of the locks for the requested detectors', async () => {
     lockServiceMock.hasLocks.resolves(true);
 
-    await verifyLockOwnershipMiddleware(lockServiceMock)(reqMock, resMock, nextMock);
+    await getDetectorsLockOwnershipMiddlewareFactory(lockServiceMock)(reqMock, resMock, nextMock);
 
     assert.ok(nextMock.calledOnce);
     assert.ok(resMock.status.notCalled);
@@ -68,7 +68,7 @@ describe('`verifyLockOwnershipMiddleware` test suite', () => {
   it('should return 403 if the user does not have ownership of the locks', async () => {
     lockServiceMock.hasLocks.returns(false);
 
-    await verifyLockOwnershipMiddleware(lockServiceMock)(reqMock, resMock, nextMock);
+    await getDetectorsLockOwnershipMiddlewareFactory(lockServiceMock)(reqMock, resMock, nextMock);
 
     assert.ok(resMock.status.calledOnceWith(403));
     assert.ok(resMock.json.calledOnceWith({
@@ -81,7 +81,7 @@ describe('`verifyLockOwnershipMiddleware` test suite', () => {
     const error = new Error('Service Unavailable error');
     lockServiceMock.hasLocks.throws(error);
 
-    await verifyLockOwnershipMiddleware(lockServiceMock)(reqMock, resMock, nextMock);
+    await getDetectorsLockOwnershipMiddlewareFactory(lockServiceMock)(reqMock, resMock, nextMock);
 
     assert.ok(loggerMock.errorMessage.calledOnceWith(error));
     assert.ok(nextMock.notCalled);

@@ -11,22 +11,24 @@
  *  or submit itself to any jurisdiction.
  */
 
-const {LogManager, updateAndSendExpressResponseFromNativeError} = require('@aliceo2/web-ui');
-const {User} = require('./../dtos/User.js');
+const { LogManager, updateAndSendExpressResponseFromNativeError, InvalidInputError } = require('@aliceo2/web-ui');
+const {User} = require('../dtos/User.js');
+
+const LOG_LABEL = `${process.env.npm_config_log_label ?? 'cog'}/get-det-lock-ownership`;
 
 /**
- * Middleware function to check that the user has ownership of the locks for the requested detectors
+ * Factory function to check that the user has ownership of the locks for the requested detectors
  *
  * @param {LockService} lockService - service to be used to check ownership of locks
  * @returns {function(req, res, next): void} - middleware function
  */
-const verifyLockOwnershipMiddleware = (lockService) => {
+const getDetectorsLockOwnershipMiddlewareFactory = (lockService) => {
   /**
    * Middleware function to check that the user has ownership of the locks for the given detectors
    * @param {Request} req - HTTP Request object
    * @param {@aliceo2/web-ui.Session} req.session - Session object from request
    * @param {object} req.body - Body object from request
-   * @param {string[]} req.body.detector - List of detectors to check ownership of
+   * @param {string[]} req.body.detectors - List of detectors to check ownership of
    * @param {Response} res - HTTP Response object
    * @param {Next} next - HTTP Next object to use if checks pass
    * @returns {void} continue if checks pass, uses response object to respond with error if checks fail
@@ -34,9 +36,16 @@ const verifyLockOwnershipMiddleware = (lockService) => {
   return async (req, res, next) => {
     const { name, username, personid, access } = req.session;
     const requestor = new User(username, name, personid, access);
+
     const { detectors = [] } = req.body;
 
     try {
+      if (!Array.isArray(detectors)) {
+        throw new InvalidInputError('Invalid input: detectors must be an array');
+      }
+      if (detectors.length === 0) {
+        throw new InvalidInputError('Invalid input: detectors array must not be empty');
+      }
       if (!lockService.hasLocks(requestor, detectors)) {
         res.status(403).json({message: `Action not allowed for user ${name} due to missing ownership of lock(s)`});
       } else {
@@ -44,11 +53,11 @@ const verifyLockOwnershipMiddleware = (lockService) => {
       }
     } catch (error) {
       LogManager
-        .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/verify-lock-ownership`)
+        .getLogger(LOG_LABEL)
         .errorMessage(error);
       updateAndSendExpressResponseFromNativeError(res, error);
     }
   };
 };
 
-exports.verifyLockOwnershipMiddleware = verifyLockOwnershipMiddleware
+exports.getDetectorsLockOwnershipMiddlewareFactory = getDetectorsLockOwnershipMiddlewareFactory;
