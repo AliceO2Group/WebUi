@@ -21,7 +21,12 @@ const config = require('./config/configProvider.js');
 const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 const {addDetectorIdMiddleware} = require('./middleware/addDetectorId.middleware.js');
 const {DetectorId} = require('./common/detectorId.enum.js');
-const {lockOwnershipMiddleware} = require('./middleware/lockOwnership.middleware.js');
+const {
+  setDetectorsFromEnvironmentMiddlewareFactory
+} = require('./middleware/setDetectorsFromEnvironmentMiddlewareFactory.js');
+const {
+  getDetectorsLockOwnershipMiddlewareFactory
+} = require('./middleware/getDetectorsLockOwnershipMiddlewareFactory.js');
 
 // controllers
 const {ConsulController} = require('./controllers/Consul.controller.js');
@@ -132,7 +137,6 @@ module.exports.setup = (http, ws) => {
     } catch (error) {
       logger.errorMessage(`Kafka initialization failed: ${error.message}`);
     }
-  
   }
 
   const statusService = new StatusService(
@@ -148,6 +152,8 @@ module.exports.setup = (http, ws) => {
   const coreMiddleware = [
     ctrlService.isConnectionReady.bind(ctrlService),
   ];
+  const setDetectorsFromEnvironmentMiddleware = setDetectorsFromEnvironmentMiddlewareFactory(envService);
+  const verifyLockOwnershipMiddleware = getDetectorsLockOwnershipMiddlewareFactory(lockService);
 
   ctrlProxy.methods.forEach(
     (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res)),
@@ -172,7 +178,8 @@ module.exports.setup = (http, ws) => {
   http.delete('/environment/:id',
     coreMiddleware,
     minimumRoleMiddleware(Role.DETECTOR),
-    lockOwnershipMiddleware(lockService, envService),
+    setDetectorsFromEnvironmentMiddleware,
+    verifyLockOwnershipMiddleware,
     envCtrl.destroyEnvironmentHandler.bind(envCtrl),
   );
 
