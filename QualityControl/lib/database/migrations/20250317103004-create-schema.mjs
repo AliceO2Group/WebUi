@@ -11,7 +11,6 @@
  * or submit itself to any jurisdiction.
  */
 
-// /usr/src/app/lib/database/migrations/20250313123608-create-users-table.mjs
 'use strict';
 
 /** @type {import('sequelize-cli').Migration} */
