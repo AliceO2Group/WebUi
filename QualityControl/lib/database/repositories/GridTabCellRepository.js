@@ -11,6 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import { Op } from 'sequelize';
 import { BaseRepository } from './BaseRepository.js';
 
 /**
@@ -34,7 +35,9 @@ export class GridTabCellRepository extends BaseRepository {
   async findByTabId(tabId) {
     try {
       const filters = { tab_id: tabId };
-      const gridTabCells = await this.findAllByFilters(filters);
+      const gridTabCells = await this._model.findAll({
+        where: { [Op.and]: [filters] },
+      });
       return gridTabCells;
     } catch (error) {
       this._logger.errorMessage(`Error finding grid tab cells by tab ID: ${error.message}`);
@@ -51,7 +54,9 @@ export class GridTabCellRepository extends BaseRepository {
   async findByChartId(chartId) {
     try {
       const filters = { chart_id: chartId };
-      const gridTabCells = await this.findAllByFilters(filters);
+      const gridTabCells = await this._model.findAll({
+        where: { [Op.and]: [filters] },
+      });
       return gridTabCells;
     } catch (error) {
       this._logger.errorMessage(`Error finding grid tab cells by chart ID: ${error.message}`);
@@ -67,8 +72,7 @@ export class GridTabCellRepository extends BaseRepository {
    */
   async createGridTabCell(newGridTabCell) {
     try {
-      const createdGridTabCell = await this.create(newGridTabCell);
-      return createdGridTabCell;
+      return await this._model.create(newGridTabCell);
     } catch (error) {
       this._logger.errorMessage(`Error creating grid tab cell: ${error.message}`);
       throw error;
@@ -105,7 +109,7 @@ export class GridTabCellRepository extends BaseRepository {
    */
   async updateGridTabCell(chartId, newGridTabCell) {
     try {
-      const affectedRows = await this.update({ chart_id: chartId, tab_id: newGridTabCell.tab_id }, newGridTabCell);
+      const affectedRows = await this._model.update(newGridTabCell);
       if (affectedRows === 0) {
         throw new Error('Grid tab cell not found or no changes made');
       }

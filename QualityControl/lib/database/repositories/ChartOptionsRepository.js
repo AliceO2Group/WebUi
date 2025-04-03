@@ -38,7 +38,7 @@ export class ChartOptionsRepository extends BaseRepository {
    */
   async createChartOption(chartOptionData) {
     try {
-      const newChartOption = await this.create(chartOptionData);
+      const newChartOption = await this._model.create(chartOptionData);
       return newChartOption;
     } catch (error) {
       this._logger.errorMessage(`Error creating chart option: ${error.message}`);

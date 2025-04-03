@@ -34,7 +34,7 @@ export class ChartRepository extends BaseRepository {
    */
   async findChartById(chartId) {
     try {
-      const chart = await this.findById(chartId);
+      const chart = await this._model.findByPk(chartId);
       if (!chart) {
         throw new Error('Chart not found');
       }
@@ -53,8 +53,7 @@ export class ChartRepository extends BaseRepository {
    */
   async createChart(chartData) {
     try {
-      const newChart = await this.create(chartData);
-      return newChart;
+      return await this._model.create(chartData);
     } catch (error) {
       this._logger.errorMessage(`Error creating chart: ${error.message}`);
       throw error;
@@ -63,14 +62,13 @@ export class ChartRepository extends BaseRepository {
 
   /**
    * Updates a chart.
-   * @param {number} chartId - The ID of the chart to update.
    * @param {object} updateData - The data to update the chart with.
    * @returns {Promise<number>} - A promise that resolves with 1 if chart has been updated successfully.
    * @throws {Error} - Throws an error if there is an issue during the update.
    */
-  async updateChart(chartId, updateData) {
+  async updateChart(updateData) {
     try {
-      const affectedRows = await this.update(chartId, updateData);
+      const affectedRows = await this._model.update(updateData);
       if (affectedRows === 0) {
         throw new Error('Chart not found or no changes made');
       }
@@ -89,7 +87,7 @@ export class ChartRepository extends BaseRepository {
    */
   async deleteChart(chartId) {
     try {
-      const deletedRows = await this.delete(chartId);
+      const deletedRows = await this._model.delete(chartId);
       if (deletedRows === 0) {
         throw new Error('Chart not found');
       }

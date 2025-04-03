@@ -11,6 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import { Op } from 'sequelize';
 import { BaseRepository } from './BaseRepository.js';
 
 /**
@@ -33,7 +34,7 @@ export class LayoutRepository extends BaseRepository {
    */
   async findLayoutById(layoutId) {
     try {
-      const layout = await this.findById(layoutId);
+      const layout = await this._model.findByPk(layoutId);
       if (!layout) {
         throw new Error('Layout not found');
       }
@@ -53,7 +54,9 @@ export class LayoutRepository extends BaseRepository {
    */
   async findAllLayouts(filters) {
     try {
-      const layoutsFound = await this.findAllByFilters(filters);
+      const layoutsFound = await this._model.findAll({
+        where: { [Op.and]: [filters] },
+      });
       return layoutsFound;
     } catch (error) {
       this._logger.errorMessage(`Error finding layouts: ${error.message}`);
@@ -87,8 +90,7 @@ export class LayoutRepository extends BaseRepository {
    */
   async saveLayout(layoutData) {
     try {
-      const createdLayout = await this.create(layoutData);
-      return createdLayout;
+      return await this._model.create(layoutData);
     } catch (error) {
       this._logger.errorMessage(`Error creating layout: ${error.message}`);
       throw error;
@@ -104,7 +106,7 @@ export class LayoutRepository extends BaseRepository {
    */
   async updateLayout(layoutId, updateData) {
     try {
-      const affectedRows = await this.update(layoutId, updateData);
+      const affectedRows = await this._model.update(layoutId, updateData);
       if (affectedRows === 0) {
         throw new Error('Layout not found or no changes made');
       }
@@ -123,7 +125,7 @@ export class LayoutRepository extends BaseRepository {
    */
   async deleteLayout(layoutId) {
     try {
-      const deletedRows = await this.delete(layoutId);
+      const deletedRows = await this._model.delete(layoutId);
       if (deletedRows === 0) {
         throw new Error('Layout not found');
       }

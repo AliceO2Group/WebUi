@@ -47,7 +47,7 @@ export class UserRepository extends BaseRepository {
    */
   async findUserById(userId) {
     try {
-      const user = await this.findById(userId);
+      const user = await this._model.findByPk(userId);
       return user || null;
     } catch (error) {
       this._logger.errorMessage(`Error retrieving user by ID: ${error.message}`);

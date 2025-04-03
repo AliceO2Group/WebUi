@@ -27,8 +27,9 @@ export class TabRepository extends BaseRepository {
    */
   async findTabsByLayoutId(layoutId) {
     try {
-      const tabs = await this.findAllByFilters({
-        layout_id: layoutId });
+      const tabs = await this._model.findAll({
+        where: { layout_id: layoutId },
+      });
       return tabs;
     } catch (error) {
       this._logger.errorMessage(`Error finding tabs by layout ID: ${error.message}`);
@@ -44,7 +45,7 @@ export class TabRepository extends BaseRepository {
    */
   async findTabById(tabId) {
     try {
-      return await this.findById(tabId);
+      return await this._model.findByPk(tabId);
     } catch (error) {
       this._logger.errorMessage(`Error finding tabs by ID: ${error.message}`);
       throw error;
@@ -80,7 +81,7 @@ export class TabRepository extends BaseRepository {
    */
   async saveTab(tab) {
     try {
-      return await this.create(tab);
+      return await this._model.create(tab);
     } catch (error) {
       this._logger.errorMessage(`Error saving tab: ${error.message}`);
       throw error;
@@ -96,7 +97,7 @@ export class TabRepository extends BaseRepository {
    */
   async updateTab(updatedTab, tabId) {
     try {
-      const affectedRows = await this.update(tabId, updatedTab);
+      const affectedRows = await this._model.update(tabId, updatedTab);
       if (affectedRows === 0) {
         throw new Error('Tab not found or no changes made');
       }
@@ -115,7 +116,7 @@ export class TabRepository extends BaseRepository {
    */
   async deleteTab(tabId) {
     try {
-      const deletedRows = await this.delete(tabId);
+      const deletedRows = await this._model.delete(tabId);
       if (deletedRows === 0) {
         throw new Error('Tab not found');
       }
