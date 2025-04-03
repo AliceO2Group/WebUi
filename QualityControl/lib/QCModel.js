@@ -33,6 +33,12 @@ import { config } from './config/configProvider.js';
 import { UserService } from './services/UserService.js';
 import { initDatabase, SequelizeDatabase } from './database/index.js';
 import { UserRepository } from './database/repositories/UserRepository.js';
+import { TabRepository } from './database/repositories/TabRepository.js';
+import { LayoutRepository } from './database/repositories/LayoutRepository.js';
+import { ChartRepository } from './database/repositories/ChartRepository.js';
+import { GridTabCellRepository } from './database/repositories/GridTabCellRepository.js';
+import { ChartOptionsRepository } from './database/repositories/ChartOptionsRepository.js';
+import { OptionRepository } from './database/repositories/OptionRepository.js';
 
 /**
  * Model initialization for the QCG application
@@ -46,12 +52,17 @@ export const setupQcModel = async () => {
   const sequelizeDatabase = new SequelizeDatabase(config.database);
   await initDatabase(sequelizeDatabase);
 
-  const layoutRepository = new LayoutRepository(jsonFileService);
-  const userRepository = new UserRepository(jsonFileService);
-  const chartRepository = new ChartRepository(jsonFileService);
+  //Database models initialization
+  const { User, Layout, Tab, GridTabCell, Chart, ChartOption, Option } = sequelizeDatabase.models;
 
-  const userController = new UserController(userRepository);
-  const layoutController = new LayoutController(layoutRepository);
+  // Repositories initialization
+  const userRepository = new UserRepository(User);
+  const layoutRepository = new LayoutRepository(Layout);
+  const tabRepository = new TabRepository(Tab);
+  const gridTabCellRepository = new GridTabCellRepository(GridTabCell);
+  const chartRepository = new ChartRepository(Chart);
+  const chartOptionRepository = new ChartOptionsRepository(ChartOption);
+  const optionRepository = new OptionRepository(Option);
 
   const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
   const statusController = new StatusController(statusService);
