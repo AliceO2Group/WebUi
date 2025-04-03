@@ -151,3 +151,16 @@ export class SequelizeDatabase {
     });
   }
 }
+
+/**
+ * Initializes the database by connecting, migrating, and seeding data in test and development environments.
+ * @param {SequelizeDatabase} sequelizeDatabase - The Sequelize database instance.
+ */
+export const initDatabase = async (sequelizeDatabase) => {
+  try {
+    await sequelizeDatabase.connect();
+    await sequelizeDatabase.migrate();
+  } catch {
+    process.exit(1);
+  }
+};

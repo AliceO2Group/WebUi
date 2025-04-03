@@ -18,7 +18,6 @@ import { createRequire } from 'module';
 import { LogManager, HttpServer, WebSocket } from '@aliceo2/web-ui';
 import { setup } from './lib/api.js';
 import { config } from './lib/config/configProvider.js';
-import { SequelizeDatabase } from './lib/database/index.js';
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/index`);
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -34,16 +33,6 @@ if (typeof config.demoData !== 'undefined' && config.demoData) {
   logger.info('Using demo data');
 } else {
   config.demoData = false;
-}
-
-// Connect to the database
-try {
-  const sequelizeDatabase = new SequelizeDatabase(config?.database);
-  await sequelizeDatabase.connect();
-  await sequelizeDatabase.migrate();
-} catch (error) {
-  logger.errorMessage(`Error while starting database: ${error}`);
-  process.exit(1);
 }
 
 // Start servers

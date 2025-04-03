@@ -30,20 +30,21 @@ import { ObjectController } from './controllers/ObjectController.js';
 import { UserController } from './controllers/UserController.js';
 
 import { config } from './config/configProvider.js';
-import { LayoutRepository } from './repositories/LayoutRepository.js';
-import { UserRepository } from './repositories/UserRepository.js';
-import { ChartRepository } from './repositories/ChartRepository.js';
+import { UserService } from './services/UserService.js';
+import { initDatabase, SequelizeDatabase } from './database/index.js';
+import { UserRepository } from './database/repositories/UserRepository.js';
 
 /**
  * Model initialization for the QCG application
  * @returns {Promise<object>} Multiple services and controllers that are to be used by the QCG application
  */
-export const setupQcModel = () => {
+export const setupQcModel = async () => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
   const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
 
-  const jsonFileService = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
+  const sequelizeDatabase = new SequelizeDatabase(config.database);
+  await initDatabase(sequelizeDatabase);
 
   const layoutRepository = new LayoutRepository(jsonFileService);
   const userRepository = new UserRepository(jsonFileService);
