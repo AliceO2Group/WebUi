@@ -11,44 +11,50 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '../index.js';
+import { INTEGER, DATE, NOW, STRING } from 'sequelize';
 
-/** Class representing a user. */
-class User extends Model {}
+export default (sequelize) => {
+  const UserModel = sequelize.define('User', {
+    id: {
+      type: INTEGER,
+      primaryKey: true,
+      allowNull: false,
+      autoIncrement: false,
+    },
+    username: {
+      type: STRING(250),
+      allowNull: false,
+      unique: true,
+      primaryKey: true,
+    },
+    name: {
+      type: STRING(250),
+      allowNull: true,
+    },
+    created_at: {
+      type: DATE,
+      allowNull: false,
+      defaultValue: NOW,
+    },
+    updated_at: {
+      type: DATE,
+      allowNull: false,
+      defaultValue: NOW,
+    },
+  }, {
+    tableName: 'users',
+    timestamps: true,
+    underscored: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  });
 
-/**
- * Initializes the User model.
- * @property {string} username - The unique username of the user.
- * @property {string} [name] - The full name of the user (optional).
- * @property {Date} createdAt - The timestamp when the user was created.
- * @property {Date} updatedAt - The timestamp when the user was last updated.
- */
-User.init({
-  username: {
-    type: DataTypes.STRING(250),
-    allowNull: false,
-    unique: true,
-  },
-  name: {
-    type: DataTypes.STRING(250),
-    allowNull: true,
-  },
-  createdAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  },
-  updatedAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  },
-}, {
-  sequelize,
-  modelName: 'User',
-  tableName: 'users',
-  timestamps: true,
-});
+  UserModel.associate = (models) => {
+    UserModel.hasMany(models.Layout, {
+      foreignKey: 'owner_username',
+      onDelete: 'CASCADE',
+    });
+  };
 
-export default User;
+  return UserModel;
+};

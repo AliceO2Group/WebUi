@@ -11,59 +11,77 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '../index.js';
+import { STRING, BOOLEAN, INTEGER, DATE, NOW } from 'sequelize';
 
-class Layout extends Model {}
-
-Layout.init({
-  id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    primaryKey: true,
-    autoIncrement: true,
-  },
-  name: {
-    type: DataTypes.STRING(40),
-    allowNull: false,
-  },
-  description: {
-    type: DataTypes.STRING(100),
-    allowNull: true,
-  },
-  display_timestamp: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  },
-  auto_tab_change_interval: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 0,
-  },
-  owner_username: {
-    type: DataTypes.STRING(250),
-    allowNull: false,
-    references: {
-      model: 'User',
-      key: 'username',
+export default (sequelize) => {
+  const LayoutModel = sequelize.define('Layout', {
+    id: {
+      type: STRING(250),
+      allowNull: false,
+      primaryKey: true,
     },
-  },
-  createdAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  },
-  updatedAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  },
-}, {
-  sequelize,
-  modelName: 'Layout',
-  tableName: 'layouts',
-  timestamps: true,
-});
+    name: {
+      type: STRING(40),
+      allowNull: false,
+    },
+    description: {
+      type: STRING(100),
+      allowNull: true,
+    },
+    display_timestamp: {
+      type: BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    auto_tab_change_interval: {
+      type: INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    owner_username: {
+      type: STRING(250),
+      allowNull: false,
+      references: {
+        model: 'User',
+        key: 'username',
+      },
+    },
+    is_official: {
+      type: BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    created_at: {
+      type: DATE,
+      allowNull: false,
+      defaultValue: NOW,
+    },
+    updated_at: {
+      type: DATE,
+      allowNull: false,
+      defaultValue: NOW,
+    },
+  }, {
+    tableName: 'layouts',
+    timestamps: true,
+    underscored: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  });
 
-export default Layout;
+  LayoutModel.associate = (models) => {
+    LayoutModel.belongsTo(models.User, {
+      foreignKey: 'owner_username',
+      targetKey: 'username',
+      as: 'owner',
+    });
+
+    LayoutModel.hasMany(models.Tab, {
+      foreignKey: 'layout_id',
+      as: 'tabs',
+      onDelete: 'CASCADE',
+    });
+  };
+
+  return LayoutModel;
+};

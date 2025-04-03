@@ -11,64 +11,74 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '../index.js';
+import { INTEGER, STRING, DATE, NOW } from 'sequelize';
 
-class GridTabCell extends Model {}
+export default (sequelize) => {
+  const GridTabCell = sequelize.define('GridTabCell', {
+    id: {
+      type: INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    chart_id: {
+      type: STRING(250),
+      allowNull: false,
+      references: {
+        model: 'Chart',
+        key: 'id',
+      },
+    },
+    row: {
+      type: INTEGER,
+      allowNull: false,
+    },
+    col: {
+      type: INTEGER,
+      allowNull: false,
+    },
+    tab_id: {
+      type: STRING(250),
+      allowNull: false,
+      references: {
+        model: 'Tab',
+        key: 'id',
+      },
+    },
+    row_span: {
+      type: INTEGER,
+      allowNull: true,
+    },
+    col_span: {
+      type: INTEGER,
+      allowNull: true,
+    },
+    created_at: {
+      type: DATE,
+      allowNull: false,
+      defaultValue: NOW,
+    },
+    updated_at: {
+      type: DATE,
+      allowNull: false,
+      defaultValue: NOW,
+    },
+  }, {
+    tableName: 'grid_tab_cells',
+    timestamps: true,
+    underscored: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    uniqueKeys: {
+      unique_grid_tab_cells: {
+        fields: ['chart_id', 'row', 'col', 'tab_id'],
+      },
+    },
+  });
 
-GridTabCell.init({
-  chart_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'Chart',
-      key: 'id',
-    },
-  },
-  row: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  col: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  tab_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'Tab',
-      key: 'id',
-    },
-  },
-  row_span: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  col_span: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  createdAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  },
-  updatedAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  },
-}, {
-  sequelize,
-  modelName: 'GridTabCell',
-  tableName: 'grid_tab_cells',
-  uniqueKeys: {
-    unique_grid_tab_cells: {
-      fields: ['chart_id', 'row', 'col', 'tab_id'],
-    },
-  },
-  timestamps: true,
-});
+  GridTabCell.associate = (models) => {
+    GridTabCell.belongsTo(models.Tab, { foreignKey: 'tab_id', as: 'tab' });
+    GridTabCell.belongsTo(models.Chart, { foreignKey: 'chart_id', as: 'chart' });
+  };
 
-export default GridTabCell;
+  return GridTabCell;
+};

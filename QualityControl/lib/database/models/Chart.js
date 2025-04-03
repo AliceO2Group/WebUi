@@ -1,4 +1,5 @@
 /**
+ * @param sequelize
  * @license
  * Copyright CERN and copyright holders of ALICE O2. This software is
  * distributed under the terms of the GNU General Public License v3 (GPL
@@ -11,45 +12,57 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '../index.js';
+import { DATE, NOW, STRING, BOOLEAN } from 'sequelize';
 
-class Chart extends Model {}
+export default (sequelize) => {
+  const Chart = sequelize.define(
+    'Chart',
+    {
+      id: {
+        type: STRING(250),
+        primaryKey: true,
+        allowNull: false,
+      },
+      object_name: {
+        type: STRING(255),
+        allowNull: true,
+      },
+      ignore_defaults: {
+        type: BOOLEAN,
+        allowNull: true,
+        defaultValue: false,
+      },
+      created_at: {
+        type: DATE,
+        allowNull: false,
+        defaultValue: NOW,
+      },
+      updated_at: {
+        type: DATE,
+        allowNull: false,
+        defaultValue: NOW,
+      },
+    },
+    {
+      tableName: 'charts',
+      timestamps: true,
+      underscored: true,
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+    },
+  );
 
-Chart.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      allowNull: false,
-      autoIncrement: true,
-    },
-    object_name: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-    },
-    ignore_defaults: {
-      type: DataTypes.BOOLEAN,
-      allowNull: true,
-      defaultValue: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
-    modelName: 'Chart',
-    tableName: 'charts',
-    timestamps: true,
-  },
-);
+  Chart.associate = (models) => {
+    Chart.hasOne(models.GridTabCell, {
+      foreignKey: 'chart_id',
+      onDelete: 'CASCADE',
+    });
+    Chart.hasMany(models.ChartOption, {
+      foreignKey: 'chart_id',
+      as: 'chartOptions',
+      onDelete: 'CASCADE',
+    });
+  };
 
-export default Chart;
+  return Chart;
+};

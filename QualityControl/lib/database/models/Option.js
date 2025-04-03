@@ -11,44 +11,45 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '../index.js';
+import { INTEGER, STRING, DATE, NOW } from 'sequelize';
 
-class Option extends Model {}
-
-Option.init(
-  {
+export default (sequelize) => {
+  const Option = sequelize.define('Option', {
     id: {
-      type: DataTypes.INTEGER,
+      type: INTEGER,
       allowNull: false,
       primaryKey: true,
       autoIncrement: true,
     },
     name: {
-      type: DataTypes.STRING(255),
+      type: STRING(255),
       allowNull: false,
     },
     type: {
-      type: DataTypes.STRING(255),
+      type: STRING(255),
       allowNull: false,
     },
-    createdAt: {
-      type: DataTypes.DATE,
+    created_at: {
+      type: DATE,
       allowNull: false,
-      defaultValue: DataTypes.NOW,
+      defaultValue: NOW,
     },
-    updatedAt: {
-      type: DataTypes.DATE,
+    updated_at: {
+      type: DATE,
       allowNull: false,
-      defaultValue: DataTypes.NOW,
+      defaultValue: NOW,
     },
-  },
-  {
-    sequelize,
-    modelName: 'Option',
+  }, {
     tableName: 'options',
     timestamps: true,
-  },
-);
+    underscored: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  });
 
-export default Option;
+  Option.associate = (models) => {
+    Option.hasMany(models.ChartOption, { foreignKey: 'option_id' });
+  };
+
+  return Option;
+};

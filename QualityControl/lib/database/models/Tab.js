@@ -11,52 +11,61 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '../index.js';
+import { STRING, INTEGER, DATE, NOW } from 'sequelize';
 
-class Tab extends Model {}
-
-Tab.init({
-  id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    primaryKey: true,
-    autoIncrement: true,
-  },
-  name: {
-    type: DataTypes.STRING(50),
-    allowNull: false,
-  },
-  layout_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'Layout',
-      key: 'id',
+export default (sequelize) => {
+  const TabModel = sequelize.define('Tab', {
+    id: {
+      type: STRING(250),
+      allowNull: false,
+      primaryKey: true,
     },
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
-  },
-  column_count: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 2,
-  },
-  createdAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  },
-  updatedAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  },
-}, {
-  sequelize,
-  modelName: 'Tab',
-  tableName: 'tabs',
-  timestamps: true,
-});
+    name: {
+      type: STRING(50),
+      allowNull: false,
+    },
+    layout_id: {
+      type: STRING(250),
+      allowNull: false,
+      references: {
+        model: 'Layout',
+        key: 'id',
+      },
+    },
+    column_count: {
+      type: INTEGER,
+      allowNull: false,
+      defaultValue: 2,
+    },
+    created_at: {
+      type: DATE,
+      allowNull: false,
+      defaultValue: NOW,
+    },
+    updated_at: {
+      type: DATE,
+      allowNull: false,
+      defaultValue: NOW,
+    },
+  }, {
+    tableName: 'tabs',
+    timestamps: true,
+    underscored: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  });
 
-export default Tab;
+  TabModel.associate = (models) => {
+    TabModel.belongsTo(models.Layout, {
+      foreignKey: 'layout_id', as: 'layout',
+    });
+
+    TabModel.hasMany(models.GridTabCell, {
+      foreignKey: 'tab_id',
+      as: 'gridTabCells',
+      onDelete: 'CASCADE', // Add onDelete: 'CASCADE'
+    });
+  };
+
+  return TabModel;
+};

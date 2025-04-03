@@ -11,6 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
+// /usr/src/app/lib/database/migrations/20250313123608-create-users-table.mjs
 'use strict';
 
 /** @type {import('sequelize-cli').Migration} */
@@ -23,6 +24,12 @@
  */
 export const up = async (queryInterface, Sequelize) => {
   await queryInterface.createTable('users', {
+    id: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: false,
+    },
     username: {
       type: Sequelize.STRING(250),
       allowNull: false,
@@ -33,23 +40,23 @@ export const up = async (queryInterface, Sequelize) => {
       type: Sequelize.STRING(250),
       allowNull: true,
     },
-    createdAt: {
+    created_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
-    updatedAt: {
+    updated_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
   });
+
   await queryInterface.createTable('layouts', {
     id: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING(250),
       allowNull: false,
       primaryKey: true,
-      autoIncrement: true,
     },
     name: {
       type: Sequelize.STRING(40),
@@ -76,61 +83,67 @@ export const up = async (queryInterface, Sequelize) => {
         model: 'users',
         key: 'username',
       },
+      onDelete: 'CASCADE', // Delete layouts when user is deleted
     },
-    createdAt: {
+    is_official: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    created_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
-    updatedAt: {
+    updated_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
   });
+
   await queryInterface.createTable('tabs', {
     id: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING(250),
       allowNull: false,
       primaryKey: true,
-      autoIncrement: true,
     },
     name: {
       type: Sequelize.STRING(50),
       allowNull: false,
     },
     layout_id: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING(250),
       allowNull: false,
       references: {
         model: 'layouts',
         key: 'id',
       },
       onUpdate: 'CASCADE',
-      onDelete: 'CASCADE',
+      onDelete: 'CASCADE', // Delete tabs when layout is deleted
     },
     column_count: {
       type: Sequelize.INTEGER,
       allowNull: false,
       defaultValue: 2,
     },
-    createdAt: {
+    created_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
-    updatedAt: {
+    updated_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
   });
+
   await queryInterface.createTable('charts', {
     id: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING(250),
       primaryKey: true,
       allowNull: false,
-      autoIncrement: true,
     },
     object_name: {
       type: Sequelize.STRING(255),
@@ -141,25 +154,34 @@ export const up = async (queryInterface, Sequelize) => {
       allowNull: true,
       defaultValue: false,
     },
-    createdAt: {
+    created_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
-    updatedAt: {
+    updated_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
   });
+
   await queryInterface.createTable('grid_tab_cells', {
-    chart_id: {
+    id: {
       type: Sequelize.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    chart_id: {
+      type: Sequelize.STRING(250),
       allowNull: false,
       references: {
         model: 'charts',
         key: 'id',
       },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE', // Delete grid_tab_cells when chart is deleted
     },
     row: {
       type: Sequelize.INTEGER,
@@ -170,12 +192,14 @@ export const up = async (queryInterface, Sequelize) => {
       allowNull: false,
     },
     tab_id: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING(250),
       allowNull: false,
       references: {
         model: 'tabs',
         key: 'id',
       },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE', // Delete grid_tab_cells when tab is deleted
     },
     row_span: {
       type: Sequelize.INTEGER,
@@ -185,15 +209,15 @@ export const up = async (queryInterface, Sequelize) => {
       type: Sequelize.INTEGER,
       allowNull: true,
     },
-    createdAt: {
+    created_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
-    updatedAt: {
+    updated_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
   }, {
     uniqueKeys: {
@@ -202,6 +226,7 @@ export const up = async (queryInterface, Sequelize) => {
       },
     },
   });
+
   await queryInterface.createTable('options', {
     id: {
       type: Sequelize.INTEGER,
@@ -217,20 +242,27 @@ export const up = async (queryInterface, Sequelize) => {
       type: Sequelize.STRING(255),
       allowNull: false,
     },
-    createdAt: {
+    created_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
-    updatedAt: {
+    updated_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
   });
+
   await queryInterface.createTable('chart_options', {
-    chart_id: {
+    id: {
       type: Sequelize.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    chart_id: {
+      type: Sequelize.STRING(250),
       allowNull: false,
       references: {
         model: 'charts',
@@ -249,15 +281,15 @@ export const up = async (queryInterface, Sequelize) => {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
-    createdAt: {
+    created_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
-    updatedAt: {
+    updated_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
   }, {
     uniqueKeys: {

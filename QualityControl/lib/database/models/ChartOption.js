@@ -11,54 +11,59 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '../index.js';
+import { INTEGER, STRING, DATE, NOW } from 'sequelize';
 
-class Option extends Model {}
-
-Option.init(
-  {
+export default (sequelize) => {
+  const ChartOption = sequelize.define('ChartOption', {
+    id: {
+      type: INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     chart_id: {
-      type: DataTypes.INTEGER,
+      type: STRING(250),
       allowNull: false,
       references: {
         model: 'Chart',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE',
     },
     option_id: {
-      type: DataTypes.INTEGER,
+      type: INTEGER,
       allowNull: false,
       references: {
         model: 'Option',
         key: 'id',
       },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE',
     },
-    createdAt: {
-      type: DataTypes.DATE,
+    created_at: {
+      type: DATE,
       allowNull: false,
-      defaultValue: DataTypes.NOW,
+      defaultValue: NOW,
     },
-    updatedAt: {
-      type: DataTypes.DATE,
+    updated_at: {
+      type: DATE,
       allowNull: false,
-      defaultValue: DataTypes.NOW,
+      defaultValue: NOW,
     },
-  },
-  {
-    sequelize,
-    modelName: 'ChartOption',
+  }, {
     tableName: 'chart_options',
+    timestamps: true,
+    underscored: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
     uniqueKeys: {
-      unique_grid_tab_cells: {
+      unique_chart_options: {
         fields: ['chart_id', 'option_id'],
       },
     },
-  },
-);
+  });
 
-export default Option;
+  ChartOption.associate = (models) => {
+    ChartOption.belongsTo(models.Chart, { foreignKey: 'chart_id', as: 'chart' });
+    ChartOption.belongsTo(models.Option, { foreignKey: 'option_id', as: 'option' });
+  };
+
+  return ChartOption;
+};
