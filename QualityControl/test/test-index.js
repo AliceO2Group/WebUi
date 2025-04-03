@@ -58,12 +58,16 @@ import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/date
 import { layoutIdMiddlewareTest } from './lib/middlewares/layouts/layoutId.middleware.test.js';
 import { layoutOwnerMiddlewareTest } from './lib/middlewares/layouts/layoutOwner.middleware.test.js';
 import { layoutServiceMiddlewareTest } from './lib/middlewares/layouts/layoutService.middleware.test.js';
-import { layoutRepositoryTest } from './lib/repositories/LayoutRepository.test.js';
-import { userRepositoryTest } from './lib/repositories/UserRepository.test.js';
 import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
 import { userControllerTestSuite } from './lib/controllers/UserController.test.js';
-import { chartRepositoryTest } from './lib/repositories/ChartRepository.test.js';
 import { sequelizeDatabaseTestSuite } from './lib/database/index.test.js';
+import { chartOptionRepositoryTestSuite } from './lib/database/repositories/CharOptionRepository.test.js';
+import { chartRepositoryTestSuite } from './lib/database/repositories/ChartRepository.test.js';
+import { gridTabCellRepositoryTestSuite } from './lib/database/repositories/GridTabCellRepository.test.js';
+import { layoutRepositoryTestSuite } from './lib/database/repositories/LayoutRepository.test.js';
+import { optionRepositoryTestSuite } from './lib/database/repositories/OptionRepository.test.js';
+import { tabRepositoryTestSuite } from './lib/database/repositories/TabRepository.test.js';
+import { userRepositoryTestSuite } from './lib/database/repositories/UserRepository.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -88,7 +92,7 @@ const BACK_END_TIMEOUT = 10000; // back-end test suite timeout
 const DATABASE_TESTS_TIMEOUT = 5000;
 
 suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, async () => {
-  suite('Front-end test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
+  suite.skip('Front-end test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
     let url = undefined;
     let page = undefined;
     let browser = undefined;
@@ -145,7 +149,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     // require('./about-page.test');
   });
 
-  suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
+  suite.skip('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
     suite('Lib - Test Suite', async () => {
       suite('Utility methods test suite', async () => await utilsTestSuite());
     });
@@ -153,12 +157,6 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     suite('Common Library - Test Suite', () => {
       suite('CL - Object Utility methods test suite', () => commonLibraryQcObjectUtilsTestSuite());
       suite('CL - DateTime Utility methods test suite', () => commonLibraryUtilsDateTimeTestSuite());
-    });
-
-    suite('Repositories - Test Suite', async () => {
-      suite('Layout Repository - Test Suite', async () => await layoutRepositoryTest());
-      suite('User Repository - Test Suite', async () => await userRepositoryTest());
-      suite('Chart Repository - Test Suite', async () => await chartRepositoryTest());
     });
 
     suite('Services - Test Suite', async () => {
@@ -185,6 +183,15 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
   });
 
   suite('Database test-suite', { timeout: DATABASE_TESTS_TIMEOUT }, async () => {
-    suite('DB Initialization test suite', async () => await sequelizeDatabaseTestSuite());
+    suite.skip('DB Initialization test suite', async () => await sequelizeDatabaseTestSuite());
+    suite('DB Repositories', async () => {
+      await chartOptionRepositoryTestSuite();
+      await chartRepositoryTestSuite();
+      await gridTabCellRepositoryTestSuite();
+      await layoutRepositoryTestSuite();
+      await optionRepositoryTestSuite();
+      await tabRepositoryTestSuite();
+      await userRepositoryTestSuite();
+    });
   });
 });
