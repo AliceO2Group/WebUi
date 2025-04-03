@@ -63,7 +63,7 @@ import { userRepositoryTest } from './lib/repositories/UserRepository.test.js';
 import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
 import { userControllerTestSuite } from './lib/controllers/UserController.test.js';
 import { chartRepositoryTest } from './lib/repositories/ChartRepository.test.js';
-import { sequelizeDatabaseTestSuite } from './lib/database/index.js';
+import { sequelizeDatabaseTestSuite } from './lib/database/index.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite

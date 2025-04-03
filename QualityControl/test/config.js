@@ -40,6 +40,10 @@ export const config = {
     name: 'qcg_test',
     charset: 'utf8mb4',
     collate: 'utf8mb4_unicode_ci',
+    timezone: '+00:00',
+    logging: false,
+    maxRetries: 5,
+    retryThrottle: 5000,
   },
   dbFile: './test/setup/seeders/qcg-mock-data.json',
 };
