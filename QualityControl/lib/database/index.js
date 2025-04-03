@@ -16,49 +16,74 @@ import { Sequelize } from 'sequelize';
 import { SequelizeStorage, Umzug } from 'umzug';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import getDatabaseConfig from './config/config.js';
 
 /**
  * Sequelize implementation of the Database.
  */
 export class SequelizeDatabase {
-  constructor(config) {
+  constructor(config = {}) {
     this._logger = LogManager.getLogger('qcg/database');
-    this.dbConfig = getDatabaseConfig(config);
-    const {
-      host,
-      database,
-      username,
-      password,
-      port,
-      dialectOptions,
-      logging,
-    } = this.dbConfig;
+
+    if (typeof config !== 'object' || config === null) {
+      this._logger.warnMessage('Invalid database configuration provided. Using default configuration.');
+      config = {}; // Evitar errores en la asignación de configuración
+    }
+
+    const env = process?.env ?? {};
+
+    this.dbconfig = {
+      host: env.DATABASE_HOST || 'localhost',
+      port: config.port || 3306,
+      username: config.username || 'cern',
+      password: config.password || 'cern',
+      database: `qcg${env.NODE_ENV === 'test' ? '_test' : ''}`,
+      charset: 'utf8mb4',
+      collate: 'utf8mb4_general_ci',
+      timezone: '+00:00',
+      logging: config.logging ?? false,
+      maxRetries: config.maxRetries ?? 5,
+      retryThrottle: config.retryThrottle ?? 5000,
+      ...config,
+    };
 
     const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname(__filename);
-    this.__dirname = __dirname;
+    this.__dirname = dirname(__filename);
 
-    this.sequelize = new Sequelize(database, username, password, {
-      host,
-      port,
-      dialect: 'mariadb',
-      dialectOptions,
-      logging,
-      define: {
-        underscored: true,
-      },
-    });
+    try {
+      this.sequelize = new Sequelize(
+        this.dbconfig.database,
+        this.dbconfig.username,
+        this.dbconfig.password,
+        {
+          host: this.dbconfig.host,
+          port: this.dbconfig.port,
+          dialect: 'mariadb',
+          dialectOptions: {
+            charset: this.dbconfig.charset,
+            collate: this.dbconfig.collate,
+            timezone: this.dbconfig.timezone,
+          },
+          logging: this.dbconfig.logging,
+          define: {
+            underscored: true,
+          },
+        },
+      );
+      this._logger.infoMessage('Database connection initialized successfully.');
+    } catch (error) {
+      this._logger.errorMessage('Error initializing database connection:', error);
+      throw new Error('Database connection failed');
+    }
   }
 
   async connect() {
-    const { database, host, port, maxRetries, retryThrottle } = this.dbConfig;
+    const { maxRetries, retryThrottle } = this.dbconfig;
     let attemptCount = 0;
 
     while (attemptCount < maxRetries) {
       try {
         await this.sequelize.authenticate();
-        this._logger.debugMessage(`Connected to db "${database}" (${host}:${port})`);
+        this._logger.debugMessage('Connected to db successfully)');
         return;
       } catch (error) {
         attemptCount++;

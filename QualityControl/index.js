@@ -38,7 +38,7 @@ if (typeof config.demoData !== 'undefined' && config.demoData) {
 
 // Connect to the database
 try {
-  const sequelizeDatabase = new SequelizeDatabase(config.database);
+  const sequelizeDatabase = new SequelizeDatabase(config?.database);
   await sequelizeDatabase.connect();
   await sequelizeDatabase.migrate();
 } catch (error) {

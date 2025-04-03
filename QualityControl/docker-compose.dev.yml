@@ -25,7 +25,10 @@ services:
       - type: bind
         read_only: false
         source: ./database/storage
-        target: /var/storage 
+        target: /var/storage
+      - type: bind
+        source: ./config.js
+        target: /app/config.js      
 
   database:
     image: "mariadb:10.5.9"
