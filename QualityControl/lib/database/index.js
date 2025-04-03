@@ -16,6 +16,7 @@ import { Sequelize } from 'sequelize';
 import { SequelizeStorage, Umzug } from 'umzug';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { initializeModels } from './models';
 
 /**
  * Sequelize implementation of the Database.
@@ -74,6 +75,8 @@ export class SequelizeDatabase {
       this._logger.errorMessage('Error initializing database connection:', error);
       throw new Error('Database connection failed');
     }
+
+    this._models = initializeModels(this.sequelize);
   }
 
   async connect() {
@@ -91,6 +94,10 @@ export class SequelizeDatabase {
       }
     }
     throw new Error(`Max retries (${maxRetries}) reached. Connection failed.`);
+  }
+
+  get models() {
+    return this._models;
   }
 
   _handleConnectionError(error, attemptCount, maxRetries, retryThrottle) {
