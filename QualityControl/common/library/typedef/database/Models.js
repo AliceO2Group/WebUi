@@ -27,6 +27,7 @@
  * @property {boolean} display_timestamp
  * @property {number} auto_tab_change_interval
  * @property {string} owner_username
+ * @property {boolean} is_official
  * @property {Date} createdAt
  * @property {Date} updatedAt
  */

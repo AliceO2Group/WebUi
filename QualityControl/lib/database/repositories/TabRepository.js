@@ -79,7 +79,7 @@ export class TabRepository extends BaseRepository {
    * @param {object} tab - The tab data to save.
    * @returns {Promise<object>} The saved tab object.
    */
-  async saveTab(tab) {
+  async createTab(tab) {
     try {
       return await this._model.create(tab);
     } catch (error) {
@@ -97,7 +97,13 @@ export class TabRepository extends BaseRepository {
    */
   async updateTab(updatedTab, tabId) {
     try {
-      const affectedRows = await this._model.update(tabId, updatedTab);
+      const [affectedRows] = await this._model.update(
+        updatedTab,
+        {
+          where: { id: tabId },
+          returning: true,
+        },
+      );
       if (affectedRows === 0) {
         throw new Error('Tab not found or no changes made');
       }

@@ -107,9 +107,15 @@ export class GridTabCellRepository extends BaseRepository {
    * @returns {Promise<number>} - A promise that resolves with 1 if cell has been updated successfully.
    * @throws {Error} - Throws an error if there is an issue during the update.
    */
-  async updateGridTabCell(chartId, newGridTabCell) {
+  async updateGridTabCell({ chart_id, tab_id }, newGridTabCell) {
     try {
-      const affectedRows = await this._model.update(newGridTabCell);
+      const [affectedRows] = await this._model.update(
+        newGridTabCell,
+        {
+          where: { chart_id, tab_id },
+          returning: true,
+        },
+      );
       if (affectedRows === 0) {
         throw new Error('Grid tab cell not found or no changes made');
       }
@@ -118,5 +124,40 @@ export class GridTabCellRepository extends BaseRepository {
       this._logger.errorMessage(`Error updating grid tab cell: ${error.message}`);
       throw error;
     }
+  }
+
+  async findObjectByChartId(chartId) {
+    const cellData = await this._model.findOne({
+      where: { chart_id: chartId },
+      include: [
+        {
+          association: 'tab',
+          include: [
+            {
+              association: 'layout',
+              attributes: ['name'],
+            },
+          ],
+          attributes: ['name'],
+        },
+        {
+          association: 'chart',
+          attributes: ['object_name', 'ignore_defaults'],
+          include: [
+            {
+              association: 'chartOptions',
+              include: [
+                {
+                  association: 'option',
+                  attributes: ['name'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      attributes: [],
+    });
+    return cellData;
   }
 }

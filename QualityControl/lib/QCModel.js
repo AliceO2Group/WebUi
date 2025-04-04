@@ -39,6 +39,7 @@ import { ChartRepository } from './database/repositories/ChartRepository.js';
 import { GridTabCellRepository } from './database/repositories/GridTabCellRepository.js';
 import { ChartOptionsRepository } from './database/repositories/ChartOptionsRepository.js';
 import { OptionRepository } from './database/repositories/OptionRepository.js';
+import { LayoutService } from './services/LayoutService.js';
 
 /**
  * Model initialization for the QCG application
@@ -64,17 +65,30 @@ export const setupQcModel = async () => {
   const chartOptionRepository = new ChartOptionsRepository(ChartOption);
   const optionRepository = new OptionRepository(Option);
 
+  // Services initialization
+  const userService = new UserService(userRepository);
+  const layoutService = new LayoutService(
+    userRepository,
+    layoutRepository,
+    tabRepository,
+    gridTabCellRepository,
+    chartRepository,
+    chartOptionRepository,
+    optionRepository,
+  );
   const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
-  const statusController = new StatusController(statusService);
-
   const ccdbService = CcdbService.setup(config.ccdb);
-  statusService.dataService = ccdbService;
-
-  const qcObjectService = new QcObjectService(ccdbService, chartRepository, { openFile, toJSON });
-  qcObjectService.refreshCache();
-
-  const objectController = new ObjectController(qcObjectService);
+  const qcObjectService = new QcObjectService(ccdbService, layoutService, { openFile, toJSON });
   const intervalsService = new IntervalsService();
+
+  // Controllers initialization
+  const userController = new UserController(userService);
+  const layoutController = new LayoutController(layoutService);
+  const statusController = new StatusController(statusService);
+  const objectController = new ObjectController(qcObjectService);
+
+  statusService.dataService = ccdbService;
+  qcObjectService.refreshCache();
 
   intervalsService.register(
     qcObjectService.refreshCache.bind(qcObjectService),

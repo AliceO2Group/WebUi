@@ -21,11 +21,9 @@ export class ChartOptionsRepository extends BaseRepository {
   /**
    * Creates an instance of ChartOptionsRepository.
    * @param {ChartOptionModel} chartOptionModel - The model for chart options.
-   * @param {OptionModel} optionModel - The model for options.
    */
-  constructor(chartOptionModel, optionModel) {
+  constructor(chartOptionModel) {
     super(chartOptionModel);
-    this._optionModel = optionModel;
   }
 
   /**
@@ -56,14 +54,11 @@ export class ChartOptionsRepository extends BaseRepository {
     try {
       const chartOptions = await this._model.findAll({
         where: { chart_id: chartId },
-        include: {
-          model: this._optionModel,
-        },
       });
-      if (!chartOptions.length) {
-        throw new Error('No options found for the given chart ID');
+      if (!chartOptions || chartOptions.length === 0) {
+        return [];
       }
-      return chartOptions.map((chartOption) => chartOption.Option);
+      return chartOptions;
     } catch (error) {
       this._logger.errorMessage(`Error finding chart option by ID: ${error}`);
       throw error;
@@ -85,6 +80,41 @@ export class ChartOptionsRepository extends BaseRepository {
       });
     } catch (error) {
       this._logger.errorMessage(`Failed to delete chart option: ${error.message}`);
+    }
+  }
+
+  /**
+   * Updates a chart option.
+   * @param {string} chartId - The ID of the chart.
+   * @param chartId - The ID of the chart.
+   * @param optionId - The ID of the option to update.
+   * @param updateData - The data to update the chart option with.
+   * @returns {Promise<void>} A promise that resolves when the update is complete.
+   * @throws {Error} If the update fails.
+   */
+  async updateChartOption({ chartId, optionId }) {
+    try {
+      const [affectedRows] = await this._model.update(
+        {
+          chart_id: chartId,
+          option_id: optionId,
+        },
+        {
+          where: { chart_id: chartId, option_id: optionId },
+          include: [
+            {
+              association: 'option',
+
+            },
+          ],
+        },
+      );
+      if (affectedRows === 0) {
+        throw new Error('Chart option not found or no changes made');
+      }
+    } catch (error) {
+      this._logger.errorMessage(`Error updating chart option: ${error.message}`);
+      throw error;
     }
   }
 }

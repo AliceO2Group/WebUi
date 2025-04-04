@@ -18,12 +18,44 @@ import { BaseRepository } from './BaseRepository.js';
  * LayoutRepository class to handle CRUD operations for Layouts.
  */
 export class LayoutRepository extends BaseRepository {
-  /**
-   * Creates an instance of LayoutRepository.
-   * @param {LayoutModel} layoutModel - The model for layout
-   */
+/**
+ * Creates an instance of LayoutRepository.
+ * @class
+ * @param {LayoutModel} layoutModel - The model for layout management.
+ * @param {TabModel} tabModel - The model for tab management.
+ * @param {UserModel} userModel - The model for user data management.
+ * @param {GridTabCellModel} gridTabCellModel - The model for grid tab cell management.
+ * @param {ChartModel} chartModel - The model for chart data management.
+ * @param {ChartOptionModel} chartOptionModel - The model for chart option management.
+ * @param {OptionModel} optionModel - The model for general option management.
+ */
   constructor(layoutModel) {
     super(layoutModel);
+    this._layoutInfoToInclude = [
+      {
+        association: 'tabs',
+        include: [
+          {
+            association: 'gridTabCells',
+            include: [
+              {
+                association: 'chart',
+                include: [
+                  {
+                    association: 'chartOptions',
+                    include: [{ association: 'option' }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        association: 'owner', // <- directamente en Layout
+        attributes: ['id', 'username', 'name'],
+      },
+    ];;
   }
 
   /**
@@ -34,7 +66,10 @@ export class LayoutRepository extends BaseRepository {
    */
   async findLayoutById(layoutId) {
     try {
-      const layout = await this._model.findByPk(layoutId);
+      const layout = await this._model.findOne({
+        where: { id: layoutId },
+        include: this._layoutInfoToInclude,
+      });
       if (!layout) {
         throw new Error('Layout not found');
       }
@@ -52,10 +87,16 @@ export class LayoutRepository extends BaseRepository {
    * @returns {Promise<Array>} A promise that resolves to an array of layout objects.
    * @throws {Error} Throws an error if no layouts matching the criteria are found or if a database error occurs.
    */
+
   async findAllLayouts(filters) {
     try {
-      const layoutsFound = await this._model.findAll({
+      if (!filters || Object.keys(filters).length === 0) {
+        return this._model.findAll({
+          include: this._layoutInfoToInclude,
+        });
+      } const layoutsFound = await this._model.findAll({
         where: { [Op.and]: [filters] },
+        include: this._layoutInfoToInclude,
       });
       return layoutsFound;
     } catch (error) {
@@ -72,7 +113,8 @@ export class LayoutRepository extends BaseRepository {
    */
   async findLayoutByName(layoutName) {
     try {
-      const layoutFound = await this._model.findOne({ where: { name: layoutName } });
+      const layoutFound =
+        await this._model.findOne({ where: { name: layoutName }, include: this._layoutInfoToInclude });
       if (!layoutFound) {
         throw new Error(`Layout with name ${layoutName} not found`);
       }
@@ -88,7 +130,7 @@ export class LayoutRepository extends BaseRepository {
    * @param {object} layoutData - The data of the layout to be saved.
    * @returns {Promise<Layout>} A promise that resolves to the created layout object.
    */
-  async saveLayout(layoutData) {
+  async createLayout(layoutData) {
     try {
       return await this._model.create(layoutData);
     } catch (error) {
@@ -106,7 +148,9 @@ export class LayoutRepository extends BaseRepository {
    */
   async updateLayout(layoutId, updateData) {
     try {
-      const affectedRows = await this._model.update(layoutId, updateData);
+      const [affectedRows] = await this._model.update(updateData, {
+        where: { id: layoutId },
+      });
       if (affectedRows === 0) {
         throw new Error('Layout not found or no changes made');
       }
@@ -125,7 +169,9 @@ export class LayoutRepository extends BaseRepository {
    */
   async deleteLayout(layoutId) {
     try {
-      const deletedRows = await this._model.delete(layoutId);
+      const deletedRows = await this._model.destroy({
+        where: { id: layoutId },
+      });
       if (deletedRows === 0) {
         throw new Error('Layout not found');
       }

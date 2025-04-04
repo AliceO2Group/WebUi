@@ -14,7 +14,6 @@
 
 'use strict';
 
-import assert from 'assert';
 import { LayoutDto } from './../dtos/LayoutDto.js';
 import { LayoutPatchDto } from './../dtos/LayoutPatchDto.js';
 
@@ -25,27 +24,21 @@ import {
   updateAndSendExpressResponseFromNativeError,
 }
   from '@aliceo2/web-ui';
+import { LayoutAdapter } from './adapters/layout-adapter.js';
 
 /**
- * @typedef {import('../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
+ * @typedef {import('../services/LayoutService.js').LayoutService} LayoutService
  */
 
 /**
  * Gateway for all HTTP requests with regards to QCG Layouts
  */
 export class LayoutController {
-  /**
-   * Setup Layout Controller:
-   * @param {LayoutRepository} layoutRepository - The repository for layout data
-   */
-
-  constructor(layoutRepository) {
-    assert(layoutRepository, 'Missing layout repository');
-
+  constructor(layoutService) {
     /**
-     * @type {LayoutRepository}
+     * @type {LayoutService}
      */
-    this._layoutRepository = layoutRepository;
+    this._layoutService = layoutService;
   }
 
   /**
@@ -58,12 +51,16 @@ export class LayoutController {
    */
   async getLayoutsHandler(req, res) {
     try {
-      const filter = {};
+      let layouts = [];
       if (req.query.owner_id !== undefined) {
-        filter.owner_id = parseInt(req.query.owner_id, 10);
+        const ownerId = parseInt(req.query.owner_id, 10);
+        layouts = await this._layoutService.getLayoutsByOwnerId(ownerId);
+      } else {
+        layouts = await this._layoutService.getAllLayouts();
       }
-      const layouts = await this._layoutRepository.listLayouts(filter);
-      res.status(200).json(layouts);
+      const adaptedLayouts = layouts.map((layout) => LayoutAdapter.adaptLayoutForExpressAPI(layout));
+
+      res.status(200).json(adaptedLayouts);
     } catch {
       updateAndSendExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
     }
@@ -82,8 +79,9 @@ export class LayoutController {
       if (!id) {
         updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout'));
       } else {
-        const layout = await this._layoutRepository.readLayoutById(id);
-        res.status(200).json(layout);
+        const layout = await this._layoutService.getLayoutById(id);
+        const adaptedLayout = LayoutAdapter.adaptLayoutForExpressAPI(layout);
+        res.status(200).json(adaptedLayout);
       }
     } catch {
       updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to retrieve layout with id: ${id}`));
@@ -112,8 +110,9 @@ export class LayoutController {
       return;
     }
     try {
-      const layout = await this._layoutRepository.readLayoutByName(layoutName);
-      res.status(200).json(layout);
+      const layout = await this._layoutService.getLayoutByName(layoutName);
+      const adaptedLayout = LayoutAdapter.adaptLayoutForExpressAPI(layout);
+      res.status(200).json(adaptedLayout);
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);
     }
@@ -139,7 +138,9 @@ export class LayoutController {
         );
       } else {
         const { personid } = req.session;
-        const { owner_id } = await this._layoutRepository.readLayoutById(id);
+        const layoutFound = await this._layoutService.getLayoutById(id);
+        const adaptedLayout = LayoutAdapter.adaptLayoutForExpressAPI(layoutFound);
+        const { owner_id } = adaptedLayout;
 
         if (Number(owner_id) !== Number(personid)) {
           updateAndSendExpressResponseFromNativeError(
@@ -158,7 +159,7 @@ export class LayoutController {
             return;
           }
 
-          const layouts = await this._layoutRepository.listLayouts({ name: layoutProposed.name });
+          const layouts = await this._layoutService.getAllLayouts({ name: layoutProposed.name });
           const layoutExistsWithName = layouts.every((layout) => layout.id !== layoutProposed.id);
           if (layouts.length > 0 && layoutExistsWithName) {
             updateAndSendExpressResponseFromNativeError(
@@ -167,7 +168,7 @@ export class LayoutController {
             );
             return;
           }
-          const layout = await this._layoutRepository.updateLayout(id, layoutProposed);
+          const layout = await this._layoutService.updateLayout(id, layoutProposed);
           res.status(201).json({ id: layout });
         }
       }
@@ -185,7 +186,7 @@ export class LayoutController {
   async deleteLayoutHandler(req, res) {
     const { id } = req.params;
     try {
-      const result = await this._layoutRepository.deleteLayout(id);
+      const result = await this._layoutService.deleteLayout(id);
       res.status(200).json(result);
     } catch {
       updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to delete layout with id: ${id}`));
@@ -210,7 +211,7 @@ export class LayoutController {
       return;
     }
     try {
-      const layouts = await this._layoutRepository.listLayouts({ name: layoutProposed.name });
+      const layouts = await this._layoutService.getAllLayouts({ name: layoutProposed.name });
       if (layouts.length > 0) {
         updateAndSendExpressResponseFromNativeError(
           res,
@@ -218,7 +219,7 @@ export class LayoutController {
         );
         return;
       }
-      const result = await this._layoutRepository.createLayout(layoutProposed);
+      const result = await this._layoutService.createLayout(layoutProposed);
       res.status(201).json(result);
     } catch {
       updateAndSendExpressResponseFromNativeError(res, new Error('Unable to create new layout'));
@@ -248,13 +249,13 @@ export class LayoutController {
       }
 
       try {
-        await this._layoutRepository.readLayoutById(id);
+        await this._layoutService.getLayoutById(id);
       } catch {
         updateAndSendExpressResponseFromNativeError(res, new NotFoundError(`Unable to find layout with id: ${id}`));
         return;
       }
       try {
-        const layoutUpdated = await this._layoutRepository.updateLayout(id, layout);
+        const layoutUpdated = await this._layoutService.updateLayout(id, layout);
         res.status(201).json(layoutUpdated);
       } catch {
         updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to update layout with id: ${id}`));

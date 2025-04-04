@@ -62,13 +62,20 @@ export class ChartRepository extends BaseRepository {
 
   /**
    * Updates a chart.
+   * @param chartID
    * @param {object} updateData - The data to update the chart with.
    * @returns {Promise<number>} - A promise that resolves with 1 if chart has been updated successfully.
    * @throws {Error} - Throws an error if there is an issue during the update.
    */
-  async updateChart(updateData) {
+  async updateChart(chartID, updateData) {
     try {
-      const affectedRows = await this._model.update(updateData);
+      const affectedRows = await this._model.update(
+        updateData,
+        {
+          where: { id: chartID },
+          returning: true,
+        },
+      );
       if (affectedRows === 0) {
         throw new Error('Chart not found or no changes made');
       }

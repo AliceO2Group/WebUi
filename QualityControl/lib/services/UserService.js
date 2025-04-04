@@ -53,7 +53,7 @@ export class UserService {
    * @async
    * @param {string|number} id - The ID of the user to retrieve.
    * @returns {Promise<object|null>} A promise that resolves to the user object as JSON, or null if not found.
-   * @throws {Error} Throws a ServiceError if an error occurs during retrieval.
+   * @throws {Error} Throws an Error if an error occurs during retrieval.
    */
   async getUserById(id) {
     try {
@@ -72,7 +72,7 @@ export class UserService {
    * @async
    * @param sessionInfo
    * @param {object} sessionInfo - The session information containing user data.
-   * @throws {ServiceError} If validation fails or the user already exists.
+   * @throws {Error} If validation fails or the user already exists.
    */
   async createUser(sessionInfo) {
     this._validateUser(sessionInfo);
@@ -83,6 +83,7 @@ export class UserService {
 
     if (!existingUser || existingUser.length === 0) {
       const newUser = {
+        id: sessionInfo.personid,
         username: sessionInfo.username,
         name: sessionInfo.name,
       };
@@ -93,7 +94,7 @@ export class UserService {
   /**
    * Validates user data before creation.
    * @param {object} sessionInfo - The session information containing user data.
-   * @throws {ServiceError} If validation fails.
+   * @throws {Error} If validation fails.
    */
   _validateUser(sessionInfo) {
     if (!sessionInfo) {

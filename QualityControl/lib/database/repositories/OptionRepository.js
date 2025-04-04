@@ -36,7 +36,24 @@ export class OptionRepository extends BaseRepository {
       return await this._model.findAll();
     } catch (error) {
       this._logger.errorMessage(`Error retrieving all options: ${error.message}`);
-      throw new Error('Failed to retrieve options');
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves option by name
+   * @param optionName
+   * @returns {Promise<Option>} A promise that resolves to a option.
+   * @throws {Error} If the retrieval fails.
+   */
+  async findOptionByName(optionName) {
+    try {
+      return await this._model.findOne({
+        where: { name: optionName },
+      });
+    } catch (error) {
+      this._logger.errorMessage(`Error finding option by name: ${error.message}`);
+      throw error;
     }
   }
 }
