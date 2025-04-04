@@ -251,13 +251,15 @@ export const ccdbServiceTestSuite = async () => {
         await rejects(async () => ccdb.getObjectDetails({ path: null, validFrom: 213 }, null), new Error('Missing mandatory parameters: path & validFrom'));
       });
 
-      test('should successfully return content-location field on status >=200 <= 399', async () => {
+      test('should successfully return content-location field on status >=200 <= 399 and add path if missing', async () => {
+        const path = 'qc/some/test/';
         nock('http://ccdb-local:8083')
           .defaultReplyHeaders({ 'content-location': '/download/123123-123123', location: '/download/some-id' })
-          .head('/qc/some/test/123455432/id1')
+          .head(`/${path}/123455432/id1`)
           .reply(303);
-        const content = await ccdb.getObjectDetails({ path: 'qc/some/test', validFrom: 123455432, id: 'id1' });
+        const content = await ccdb.getObjectDetails({ path, validFrom: 123455432, id: 'id1' });
         strictEqual(content.location, '/download/123123-123123');
+        strictEqual(content.path, path);
       });
 
       test('should successfully return content-location field if is string as array with "alien" second item on status >=200 <= 399', async () => {
