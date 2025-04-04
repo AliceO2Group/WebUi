@@ -13,11 +13,11 @@
  */
 
 import { ServiceUnavailableError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
-import { JsonFileService } from '../../services/JsonFileService.js';
+import { LayoutService } from '../../services/LayoutService.js';
 
 /**
  * Middleware that checks if the layout service is correctly initialized
- * @param {JSONFileConnector} dataService - service for getting/setting layout data
+ * @param {LayoutService} dataService - service for getting/setting layout data
  * @returns  {function(req, res, next): Function} - middleware function
  */
 export const layoutServiceMiddleware = (dataService) =>
@@ -30,8 +30,8 @@ export const layoutServiceMiddleware = (dataService) =>
  */
   async (req, res, next) => {
     try {
-      if (!dataService || !(dataService instanceof JsonFileService)) {
-        throw new ServiceUnavailableError('JSON File service is not available');
+      if (!dataService || !(dataService instanceof LayoutService)) {
+        throw new ServiceUnavailableError('Layout service is not available');
       }
       next();
     } catch (error) {

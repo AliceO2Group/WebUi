@@ -15,10 +15,6 @@
 import { NotFoundError, UnauthorizedAccessError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
 /**
- * @typedef {import('../../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
- */
-
-/**
  * Middleware that checks if the requestor is the owner of the layout
  * @param {LayoutRepository} layoutRepository - Repository for getting/setting layout data
  * @returns  {function(req, res, next): Function} - middleware function
@@ -35,7 +31,7 @@ export const layoutOwnerMiddleware = (layoutRepository) =>
     try {
       const { id } = req.params;
       const { personid = '', name = '' } = req.session ?? {};
-      const { owner_name = '', owner_id = '' } = await layoutRepository.readLayoutById(id) ?? {};
+      const { owner_name = '', owner_id = '' } = await layoutRepository.findLayoutById(id) ?? {};
       if (owner_id === '' || owner_name === '') {
         throw new NotFoundError('Unable to retrieve layout owner information');
       } else if (personid === '' || name === '') {

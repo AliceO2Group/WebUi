@@ -25,7 +25,7 @@ import { layoutServiceMiddleware } from './middleware/layouts/layoutService.midd
  * @param {WebSocket} ws - web-ui websocket server implementation
  * @returns {void}
  */
-export const setup = (http, ws) => {
+export const setup = async (http, ws) => {
   /**
    * @type {{
    *   layoutController: import('./controllers/LayoutController.js').LayoutController,
@@ -33,7 +33,6 @@ export const setup = (http, ws) => {
    *   statusController: import('./controllers/StatusController.js').StatusController,
    *   statusService: import('./services/statusService').StatusService,
    *   userController: import('./controllers/UserController.js').UserController,
-   *   jsonFileService: import('./services/JsonFileService.js').JsonFileService
    * }}
    */
   const {
@@ -43,8 +42,8 @@ export const setup = (http, ws) => {
     statusService,
     userController,
     layoutRepository,
-    jsonFileService,
-  } = setupQcModel();
+    layoutService,
+  } = await setupQcModel();
   statusService.ws = ws;
   http.get('/object/:id', objectController.getObjectById.bind(objectController));
   http.get('/object', objectController.getObjectContent.bind(objectController));
@@ -57,8 +56,8 @@ export const setup = (http, ws) => {
   http.put('/layout/:id', layoutController.putLayoutHandler.bind(layoutController));
   http.delete(
     '/layout/:id',
-    layoutServiceMiddleware(jsonFileService),
-    layoutIdMiddleware(layoutRepository),
+    layoutServiceMiddleware(layoutService),
+    layoutIdMiddleware,
     layoutOwnerMiddleware(layoutRepository),
     layoutController.deleteLayoutHandler.bind(layoutController),
   );

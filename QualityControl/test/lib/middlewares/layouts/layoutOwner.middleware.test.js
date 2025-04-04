@@ -16,7 +16,7 @@ import { suite, test } from 'node:test';
 import { ok } from 'node:assert';
 import sinon from 'sinon';
 import { layoutOwnerMiddleware } from '../../../../lib/middleware/layouts/layoutOwner.middleware.js';
-import { LayoutRepository } from '../../../../lib/repositories/LayoutRepository.js';
+import { LayoutRepository } from '../../../../lib/database/repositories/LayoutRepository.js';
 
 /**
  * Test suite for the middleware that checks the owner of the layout
@@ -32,10 +32,10 @@ export const layoutOwnerMiddlewareTest = () => {
         status: sinon.stub().returnsThis(),
         json: sinon.stub().returns(),
       };
-      const next = sinon.stub(); // Do not call fake to catch unexpected execution
+      const next = sinon.stub();
 
       const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().resolves({ owner_name: 'ownerName', owner_id: 'ownerId' }),
+        findLayoutById: sinon.stub().resolves({ owner_name: 'ownerName', owner_id: 'ownerId' }),
       });
 
       await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
@@ -64,7 +64,7 @@ export const layoutOwnerMiddlewareTest = () => {
       };
       const next = sinon.stub().returns();
       const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().returns(),
+        findLayoutById: sinon.stub().returns(),
       });
       await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(404));
@@ -90,7 +90,7 @@ export const layoutOwnerMiddlewareTest = () => {
       };
       const next = sinon.stub().returns();
       const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().returns({ owner_name: 'ownerName', owner_id: 'ownerId' }),
+        findLayoutById: sinon.stub().returns({ owner_name: 'ownerName', owner_id: 'ownerId' }),
       });
       await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(404));
@@ -113,7 +113,7 @@ export const layoutOwnerMiddlewareTest = () => {
       };
       const next = sinon.stub().returns();
       const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().resolves({ owner_name: 'ownerName', owner_id: 'ownerId' }),
+        findLayoutById: sinon.stub().resolves({ owner_name: 'ownerName', owner_id: 'ownerId' }),
       });
       await layoutOwnerMiddleware(dataServiceStub)(req, {}, next);
       ok(next.called, 'The next() callback should be called');

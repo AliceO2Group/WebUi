@@ -15,15 +15,15 @@
 import { suite, test } from 'node:test';
 import { ok } from 'node:assert';
 import sinon from 'sinon';
+import { LayoutService } from '../../../../lib/services/LayoutService.js';
 import { layoutServiceMiddleware } from '../../../../lib/middleware/layouts/layoutService.middleware.js';
-import { JsonFileService } from '../../../../lib/services/JsonFileService.js';
 
 /**
  * Test suite for the middlewares that check the layout service is correctly initialized
  */
 export const layoutServiceMiddlewareTest = () => {
   suite('Layout service middlewares', () => {
-    test('should return a "Service Unavailable" error if the JSON File Service is not provided', () => {
+    test('should return a "Service Unavailable" error if the Layout Service is not provided', () => {
       const res = {
         status: sinon.stub().returnsThis(),
         json: sinon.stub().returns(),
@@ -32,25 +32,25 @@ export const layoutServiceMiddlewareTest = () => {
       layoutServiceMiddleware(null)({}, res, next);
       ok(res.status.calledWith(503), 'The status code should be 503');
       ok(res.json.calledWith({
-        message: 'JSON File service is not available',
+        message: 'Layout service is not available',
         status: 503,
         title: 'Service Unavailable',
       }));
     });
 
     test(
-      'should return a "Service Unavailable" error if the JSON File Service is not an instance of JSONFileService',
+      'should return a "Service Unavailable" error if the Layout Service is not an instance of Layout service',
       () => {
         const res = {
           status: sinon.stub().returnsThis(),
           json: sinon.stub().returns(),
         };
         const next = sinon.stub().returns();
-        const dataService = 'notAJsonFileService';
+        const dataService = 'notAlayoutService';
         layoutServiceMiddleware(dataService)({}, res, next);
         ok(res.status.calledWith(503), 'The status code should be 503');
         ok(res.json.calledWith({
-          message: 'JSON File service is not available',
+          message: 'Layout service is not available',
           status: 503,
           title: 'Service Unavailable',
         }));
@@ -58,10 +58,10 @@ export const layoutServiceMiddlewareTest = () => {
     );
 
     test(
-      'should successfully pass the middleware if the JSON File Service is provided'
-      , () => {
+      'should successfully pass the middleware if the Layout Service is provided',
+      () => {
         const next = sinon.stub().returns();
-        const dataServiceStub = sinon.createStubInstance(JsonFileService);
+        const dataServiceStub = sinon.createStubInstance(LayoutService);
         layoutServiceMiddleware(dataServiceStub)({}, {}, next);
         ok(next.calledOnce, 'The next middleware should be called');
       },

@@ -21,7 +21,6 @@ import { openFile, toJSON } from 'jsroot';
 import { CcdbService } from './services/ccdb/CcdbService.js';
 import { IntervalsService } from './services/Intervals.service.js';
 import { StatusService } from './services/Status.service.js';
-import { JsonFileService } from './services/JsonFileService.js';
 import { QcObjectService } from './services/QcObject.service.js';
 
 import { LayoutController } from './controllers/LayoutController.js';
@@ -102,6 +101,6 @@ export const setupQcModel = async () => {
     objectController,
     intervalsService,
     layoutRepository,
-    jsonFileService,
+    layoutService,
   };
 };
