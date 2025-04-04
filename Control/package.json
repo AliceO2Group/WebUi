@@ -33,7 +33,7 @@
     "protobuf/"
   ],
   "dependencies": {
-    "@aliceo2/web-ui": "2.8.0",
+    "@aliceo2/web-ui": "^2.8.1",
     "@grpc/grpc-js": "1.13.0",
     "@grpc/proto-loader": "0.7.0",
     "google-protobuf": "3.21.0",
@@ -50,6 +50,11 @@
     "supertest": "7.1.0"
   },
   "bundledDependencies": [
+    "@aliceo2/web-ui",
+    "@grpc/grpc-js",
+    "@grpc/proto-loader"
+  ],
+  "bundleDependencies": [
     "@aliceo2/web-ui",
     "@grpc/grpc-js",
     "@grpc/proto-loader"
