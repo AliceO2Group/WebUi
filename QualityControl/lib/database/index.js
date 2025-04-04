@@ -13,10 +13,10 @@
 
 import { LogManager } from '@aliceo2/web-ui';
 import { Sequelize } from 'sequelize';
-import { SequelizeStorage, Umzug } from 'umzug';
+import { memoryStorage, SequelizeStorage, Umzug } from 'umzug';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { initializeModels } from './models';
+import { initializeModels } from './models/index.js';
 
 /**
  * Sequelize implementation of the Database.
@@ -127,6 +127,33 @@ export class SequelizeDatabase {
     }
   }
 
+  async seed() {
+    this._logger.infoMessage('Executing seeders...');
+    try {
+      const umzug = this.getUmzug(
+        join(this.__dirname, 'seeders'),
+        memoryStorage(),
+      );
+      await umzug.up();
+    } catch (error) {
+      this._logger.errorMessage(`Error while executing seeders: ${error}`);
+      return Promise.reject(error);
+    }
+  }
+
+  async dropAllTables() {
+    this._logger.warnMessage('Dropping all tables!');
+
+    try {
+      await this.sequelize.getQueryInterface().dropAllTables();
+    } catch (error) {
+      this._logger.errorMessage(`Error while dropping all tables: ${error}`);
+      return Promise.reject(error);
+    }
+
+    this._logger.infoMessage('Dropped all tables!');
+  }
+
   getUmzug(migrationsDirectory, storage) {
     return new Umzug({
       migrations: {
@@ -165,8 +192,16 @@ export class SequelizeDatabase {
  */
 export const initDatabase = async (sequelizeDatabase) => {
   try {
+    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'dev') {
+      await sequelizeDatabase.dropAllTables();
+    }
+
     await sequelizeDatabase.connect();
     await sequelizeDatabase.migrate();
+
+    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'dev') {
+      await sequelizeDatabase.seed();
+    }
   } catch {
     process.exit(1);
   }
