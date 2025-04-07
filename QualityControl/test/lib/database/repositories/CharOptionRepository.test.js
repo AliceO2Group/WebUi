@@ -19,113 +19,134 @@ import { ChartOptionsRepository } from '../../../../lib/database/repositories/Ch
 import { LogManager } from '@aliceo2/web-ui';
 
 export const chartOptionRepositoryTestSuite = async () => {
-  let chartOptionModelMock = null;
-  let optionModelMock = null;
-  let repository = null;
-  let loggerMock = null;
+  suite('ChartOptionsRepository', () => {
+    let chartOptionModelMock = null;
+    let repository = null;
+    let loggerMock = null;
 
-  beforeEach(() => {
-    loggerMock = {
-      errorMessage: sinon.stub(),
-    };
-    if (!LogManager.getLogger.restore) {
+    beforeEach(() => {
+    // Mock the logger
+      loggerMock = {
+        errorMessage: sinon.stub(),
+      };
       sinon.stub(LogManager, 'getLogger').returns(loggerMock);
-    }
-    chartOptionModelMock = { create: sinon.stub(), findAll: sinon.stub(), destroy: sinon.stub() };
-    optionModelMock = {};
-    repository = new ChartOptionsRepository(chartOptionModelMock, optionModelMock);
-  });
 
-  afterEach(() => {
-    sinon.restore();
-  });
+      // Mock the model methods
+      chartOptionModelMock = {
+        create: sinon.stub(),
+        findAll: sinon.stub(),
+        destroy: sinon.stub(),
+        update: sinon.stub(),
+      };
 
-  suite('constructor', () => {
-    test('should initialize with the correct models', () => {
-      ok(repository._model === chartOptionModelMock);
-      ok(repository._optionModel === optionModelMock);
-    });
-  });
-
-  suite('createChartOption', () => {
-    test('should create a new chart option', async () => {
-      const chartOptionData = { chart_id: 1, option_id: 2 };
-      const createdChartOption = { id: 1, ...chartOptionData };
-      chartOptionModelMock.create.resolves(createdChartOption);
-
-      const result = await repository.createChartOption(chartOptionData);
-      ok(result === createdChartOption);
-      ok(chartOptionModelMock.create.calledWith(chartOptionData));
+      // Initialize the repository
+      repository = new ChartOptionsRepository(chartOptionModelMock);
     });
 
-    test('should throw an error if creation fails', async () => {
-      const chartOptionData = { chart_id: 1, option_id: 2 };
-      const error = new Error('Creation failed');
-      chartOptionModelMock.create.rejects(error);
-
-      await rejects(
-        async () => await repository.createChartOption(chartOptionData),
-        error,
-      );
-    });
-  });
-
-  suite('findChartOptionsByChartId', () => {
-    test('should find options for a specific chart by its ID', async () => {
-      const chartId = 1;
-      const chartOptions = [{ Option: { id: 2, name: 'Option 1' } }];
-      chartOptionModelMock.findAll.resolves(chartOptions);
-
-      const result = await repository.findChartOptionsByChartId(chartId);
-      ok(result.length === 1);
-      ok(result[0].id === 2);
-      ok(result[0].name === 'Option 1');
-      ok(chartOptionModelMock.findAll
-        .calledWith({ where: { chart_id: chartId }, include: { model: optionModelMock } }));
+    afterEach(() => {
+      sinon.restore();
     });
 
-    test('should throw an error if no options are found', async () => {
-      const chartId = 1;
-      chartOptionModelMock.findAll.resolves([]);
+    suite('createChartOption', () => {
+      test('should create a new chart option', async () => {
+        const chartOptionData = { chart_id: 1, option_id: 2 };
+        const createdChartOption = { id: 1, ...chartOptionData };
+        chartOptionModelMock.create.resolves(createdChartOption);
 
-      await rejects(
-        async () => await repository.findChartOptionsByChartId(chartId),
-        new Error('No options found for the given chart ID'),
-      );
-    });
-
-    test('should throw an error if search fails', async () => {
-      const chartId = 1;
-      const error = new Error('Search failed');
-      chartOptionModelMock.findAll.rejects(error);
-
-      await rejects(
-        async () => await repository.findChartOptionsByChartId(chartId),
-        error,
-      );
-    });
-  });
-
-  suite('deleteChartOption', () => {
-    test('should delete a chart option', async () => {
-      const chartId = 1;
-      const optionId = 2;
-      chartOptionModelMock.destroy.resolves(1);
-
-      doesNotThrow(async () => {
-        await repository.deleteChartOption(chartId, optionId);
+        const result = await repository.createChartOption(chartOptionData);
+        ok(result === createdChartOption);
+        ok(chartOptionModelMock.create.calledWith(chartOptionData));
       });
-      ok(chartOptionModelMock.destroy.calledWith({ where: { chart_id: chartId, option_id: optionId } }));
+
+      test('should throw an error if creation fails', async () => {
+        const chartOptionData = { chart_id: 1, option_id: 2 };
+        const error = new Error('Creation failed');
+        chartOptionModelMock.create.rejects(error);
+
+        await rejects(
+          async () => await repository.createChartOption(chartOptionData),
+          error,
+        );
+      });
     });
 
-    test('should log an error if deletion fails', async () => {
-      const chartId = 1;
-      const optionId = 2;
-      const error = new Error('Deletion failed');
-      chartOptionModelMock.destroy.rejects(error);
+    suite('findChartOptionsByChartId', () => {
+      test('should find chart options for a given chartId', async () => {
+        const chartId = 1;
+        const chartOptions = [{ id: 1, chart_id: chartId, option_id: 2 }];
+        chartOptionModelMock.findAll.resolves(chartOptions);
 
-      doesNotThrow(async () => {
-        await repository.deleteChartOption(chartId, optionId);
+        const result = await repository.findChartOptionsByChartId(chartId);
+        ok(result.length === 1);
+        ok(result[0].chart_id === chartId);
+        ok(chartOptionModelMock.findAll.calledWith({ where: { chart_id: chartId } }));
+      });
+
+      test('should return an empty array if no options found', async () => {
+        const chartId = 1;
+        chartOptionModelMock.findAll.resolves([]);
+
+        const result = await repository.findChartOptionsByChartId(chartId);
+        ok(result.length === 0);
+      });
+
+      test('should throw an error if the search fails', async () => {
+        const chartId = 1;
+        const error = new Error('Search failed');
+        chartOptionModelMock.findAll.rejects(error);
+
+        await rejects(
+          async () => await repository.findChartOptionsByChartId(chartId),
+          error,
+        );
+      });
+    });
+
+    suite('deleteChartOption', () => {
+      test('should delete a chart option', async () => {
+        const chartId = 1;
+        const optionId = 2;
+        chartOptionModelMock.destroy.resolves(1); // Indicates successful deletion
+
+        doesNotThrow(async () => {
+          await repository.deleteChartOption(chartId, optionId);
+        });
+
+        ok(chartOptionModelMock.destroy.calledWith({ where: { chart_id: chartId, option_id: optionId } }));
+      });
+
+      test('should log an error if deletion fails', async () => {
+        const chartId = 1;
+        const optionId = 2;
+        const error = new Error('Deletion failed');
+        chartOptionModelMock.destroy.rejects(error);
+
+        doesNotThrow(async () => {
+          await repository.deleteChartOption(chartId, optionId);
+        });
+      });
+    });
+
+    suite('updateChartOption', () => {
+      test('should update an existing chart option', async () => {
+        const chartOption = { chartId: 1, optionId: 2 };
+        chartOptionModelMock.update.resolves([1]);
+
+        doesNotThrow(async () => {
+          await repository.updateChartOption(chartOption);
+        });
+
+        ok(chartOptionModelMock.update.called);
+      });
+
+      test('should throw an error if no rows are affected (no changes made)', async () => {
+        const chartOption = { chartId: 1, optionId: 2 };
+        chartOptionModelMock.update.resolves([0]);
+
+        await rejects(
+          async () => await repository.updateChartOption(chartOption),
+          new Error('Chart option not found or no changes made'),
+        );
       });
     });
   });

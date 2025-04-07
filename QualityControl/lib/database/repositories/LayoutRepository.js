@@ -49,7 +49,7 @@ export class LayoutRepository extends BaseRepository {
         association: 'owner', // <- directamente en Layout
         attributes: ['id', 'username', 'name'],
       },
-    ];;
+    ];
   }
 
   /**
@@ -123,6 +123,7 @@ export class LayoutRepository extends BaseRepository {
    * Saves a layout to the database.
    * @param {object} layoutData - The data of the layout to be saved.
    * @returns {Promise<Layout>} A promise that resolves to the created layout object.
+   * @throws {Error} if error during creation
    */
   async createLayout(layoutData) {
     try {

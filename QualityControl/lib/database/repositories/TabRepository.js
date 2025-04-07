@@ -76,7 +76,6 @@ export class TabRepository extends BaseRepository {
         updatedTab,
         {
           where: { id: tabId },
-          returning: true,
         },
       );
       if (affectedRows === 0) {
@@ -96,7 +95,7 @@ export class TabRepository extends BaseRepository {
    */
   async deleteTab(tabId) {
     try {
-      const deletedRows = await this._model.delete(tabId);
+      const deletedRows = await this._model.destroy({ where: { id: tabId } });
       if (deletedRows === 0) {
         throw new Error('Tab not found');
       }

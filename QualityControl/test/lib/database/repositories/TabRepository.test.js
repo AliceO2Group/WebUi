@@ -16,7 +16,6 @@ import { suite, test, beforeEach, afterEach } from 'node:test';
 import sinon from 'sinon';
 import { TabRepository } from '../../../../lib/database/repositories/TabRepository.js';
 import { LogManager } from '@aliceo2/web-ui';
-import { Op } from 'sequelize';
 
 export const tabRepositoryTestSuite = async () => {
   let tabModelMock = null;
@@ -56,7 +55,7 @@ export const tabRepositoryTestSuite = async () => {
 
       const result = await repository.findTabsByLayoutId(layoutId);
       ok(result === tabs);
-      ok(tabModelMock.findAll.calledWith({ where: { [Op.and]: [{ layout_id: layoutId }] } }));
+      ok(tabModelMock.findAll.calledWith({ where: { layout_id: layoutId } }));
     });
 
     test('should throw an error if search fails', async () => {
@@ -94,49 +93,13 @@ export const tabRepositoryTestSuite = async () => {
     });
   });
 
-  suite('findLayoutByTabId', () => {
-    test('should find layout by tab ID', async () => {
-      const tabId = 1;
-      const layout = { id: 1, name: 'Layout 1' };
-      const tab = { id: tabId, layout: layout };
-      tabModelMock.findOne.resolves(tab);
-
-      const result = await repository.findLayoutByTabId(tabId);
-      ok(result === layout);
-      ok(tabModelMock.findOne.calledWith({
-        where: { id: tabId },
-        include: [{ model: layoutModelMock, as: 'layout' }],
-        nest: true,
-      }));
-    });
-
-    test('should return null if no layout found', async () => {
-      const tabId = 1;
-      tabModelMock.findOne.resolves(null);
-
-      const result = await repository.findLayoutByTabId(tabId);
-      ok(result === null);
-    });
-
-    test('should throw an error if search fails', async () => {
-      const tabId = 1;
-      const error = new Error('Search failed');
-      tabModelMock.findOne.rejects(error);
-
-      await rejects(
-        async () => await repository.findLayoutByTabId(tabId),
-        error,
-      );
-    });
-  });
-
-  suite('saveTab', () => {
+  suite('createTab', () => {
     test('should save a new tab', async () => {
       const tabData = { name: 'New Tab' };
       const createdTab = { id: 1, ...tabData };
       tabModelMock.create.resolves(createdTab);
 
-      const result = await repository.saveTab(tabData);
+      const result = await repository.createTab(tabData);
       ok(result === createdTab);
       ok(tabModelMock.create.calledWith(tabData));
     });
@@ -147,7 +110,7 @@ export const tabRepositoryTestSuite = async () => {
       tabModelMock.create.rejects(error);
 
       await rejects(
-        async () => await repository.saveTab(tabData),
+        async () => await repository.createTab(tabData),
         error,
       );
     });

@@ -63,7 +63,7 @@ export const optionRepositoryTestSuite = async () => {
 
       await rejects(
         async () => await repository.findAll(),
-        new Error('Failed to retrieve options'),
+        error,
       );
     });
   });

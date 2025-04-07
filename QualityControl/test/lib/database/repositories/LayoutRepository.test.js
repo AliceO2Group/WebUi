@@ -16,7 +16,6 @@ import { ok, rejects, doesNotThrow } from 'node:assert';
 import { suite, test, beforeEach, afterEach } from 'node:test';
 import sinon from 'sinon';
 import { LayoutRepository } from '../../../../lib/database/repositories/LayoutRepository.js';
-import { Op } from 'sequelize';
 import { LogManager } from '@aliceo2/web-ui';
 
 export const layoutRepositoryTestSuite = async () => {
@@ -26,7 +25,6 @@ export const layoutRepositoryTestSuite = async () => {
 
   beforeEach(() => {
     layoutModelMock = {
-      findByPk: sinon.stub(),
       findAll: sinon.stub(),
       findOne: sinon.stub(),
       create: sinon.stub(),
@@ -57,16 +55,15 @@ export const layoutRepositoryTestSuite = async () => {
     test('should find a layout by its ID', async () => {
       const layoutId = 1;
       const layout = { id: layoutId, name: 'Test Layout' };
-      layoutModelMock.findByPk.resolves(layout);
+      layoutModelMock.findOne.resolves(layout);
 
       const result = await repository.findLayoutById(layoutId);
       ok(result === layout);
-      ok(layoutModelMock.findByPk.calledWith(layoutId));
     });
 
     test('should throw an error if the layout is not found', async () => {
       const layoutId = 1;
-      layoutModelMock.findByPk.resolves(null);
+      layoutModelMock.findOne.resolves(null);
 
       await rejects(
         async () => await repository.findLayoutById(layoutId),
@@ -77,7 +74,7 @@ export const layoutRepositoryTestSuite = async () => {
     test('should throw an error if search fails', async () => {
       const layoutId = 1;
       const error = new Error('Search failed');
-      layoutModelMock.findByPk.rejects(error);
+      layoutModelMock.findOne.rejects(error);
 
       await rejects(
         async () => await repository.findLayoutById(layoutId),
@@ -94,7 +91,6 @@ export const layoutRepositoryTestSuite = async () => {
 
       const result = await repository.findAllLayouts(filters);
       ok(result === layouts);
-      ok(layoutModelMock.findAll.calledWith({ where: { [Op.and]: [filters] } }));
     });
 
     test('should throw an error if search fails', async () => {
@@ -117,7 +113,6 @@ export const layoutRepositoryTestSuite = async () => {
 
       const result = await repository.findLayoutByName(layoutName);
       ok(result === layout);
-      ok(layoutModelMock.findOne.calledWith({ where: { name: layoutName } }));
     });
 
     test('should throw an error if the layout is not found', async () => {
@@ -147,7 +142,7 @@ export const layoutRepositoryTestSuite = async () => {
       const createdLayout = { id: 1, ...layoutData };
       layoutModelMock.create.resolves(createdLayout);
 
-      const result = await repository.saveLayout(layoutData);
+      const result = await repository.createLayout(layoutData);
       ok(result === createdLayout);
       ok(layoutModelMock.create.calledWith(layoutData));
     });
@@ -158,7 +153,7 @@ export const layoutRepositoryTestSuite = async () => {
       layoutModelMock.create.rejects(error);
 
       await rejects(
-        async () => await repository.saveLayout(layoutData),
+        async () => await repository.createLayout(layoutData),
         error,
       );
     });

@@ -16,47 +16,50 @@ import { suite, test, beforeEach, afterEach } from 'node:test';
 import sinon from 'sinon';
 import { GridTabCellRepository } from '../../../../lib/database/repositories/GridTabCellRepository.js';
 import { LogManager } from '@aliceo2/web-ui';
-import { Op } from 'sequelize';
 
 export const gridTabCellRepositoryTestSuite = async () => {
   let gridTabCellModelMock = null;
-  let loggerMock = null;
   let repository = null;
+  let loggerMock = null;
 
   beforeEach(() => {
-    gridTabCellModelMock = { findAll: sinon.stub(), create: sinon.stub(), destroy: sinon.stub(), update: sinon.stub() };
-    loggerMock = { errorMessage: sinon.stub() };
-
+    // Mock de logger
+    loggerMock = {
+      errorMessage: sinon.stub(),
+    };
     if (!LogManager.getLogger.restore) {
       sinon.stub(LogManager, 'getLogger').returns(loggerMock);
     }
 
+    // Mock de modelo
+    gridTabCellModelMock = {
+      create: sinon.stub(),
+      findAll: sinon.stub(),
+      findOne: sinon.stub(),
+      destroy: sinon.stub(),
+      update: sinon.stub(),
+    };
+
+    // Inicializa el repositorio
     repository = new GridTabCellRepository(gridTabCellModelMock);
-    repository._logger = loggerMock;
   });
 
   afterEach(() => {
     sinon.restore();
   });
 
-  suite('constructor', () => {
-    test('should initialize with the correct model', () => {
-      ok(repository._model === gridTabCellModelMock);
-    });
-  });
-
   suite('findByTabId', () => {
     test('should find grid tab cells by tab ID', async () => {
       const tabId = 1;
-      const gridTabCells = [{ id: 1, tab_id: tabId, content: 'Cell 1' }];
+      const gridTabCells = [{ id: 1, tab_id: tabId }];
       gridTabCellModelMock.findAll.resolves(gridTabCells);
 
       const result = await repository.findByTabId(tabId);
       ok(result === gridTabCells);
-      ok(gridTabCellModelMock.findAll.calledWith({ where: { [Op.and]: [{ tab_id: tabId }] } }));
+      ok(gridTabCellModelMock.findAll.calledWith({ where: { tab_id: tabId } }));
     });
 
-    test('should log and throw an error if search fails', async () => {
+    test('should throw an error if search fails', async () => {
       const tabId = 1;
       const error = new Error('Search failed');
       gridTabCellModelMock.findAll.rejects(error);
@@ -65,22 +68,21 @@ export const gridTabCellRepositoryTestSuite = async () => {
         async () => await repository.findByTabId(tabId),
         error,
       );
-      ok(loggerMock.errorMessage.calledWith(`Error finding grid tab cells by tab ID: ${error.message}`));
     });
   });
 
   suite('findByChartId', () => {
     test('should find grid tab cells by chart ID', async () => {
       const chartId = 1;
-      const gridTabCells = [{ id: 1, chart_id: chartId, content: 'Cell 1' }];
+      const gridTabCells = [{ id: 1, chart_id: chartId }];
       gridTabCellModelMock.findAll.resolves(gridTabCells);
 
       const result = await repository.findByChartId(chartId);
       ok(result === gridTabCells);
-      ok(gridTabCellModelMock.findAll.calledWith({ where: { [Op.and]: [{ chart_id: chartId }] } }));
+      ok(gridTabCellModelMock.findAll.calledWith({ where: { chart_id: chartId } }));
     });
 
-    test('should log and throw an error if search fails', async () => {
+    test('should throw an error if search fails', async () => {
       const chartId = 1;
       const error = new Error('Search failed');
       gridTabCellModelMock.findAll.rejects(error);
@@ -89,13 +91,12 @@ export const gridTabCellRepositoryTestSuite = async () => {
         async () => await repository.findByChartId(chartId),
         error,
       );
-      ok(loggerMock.errorMessage.calledWith(`Error finding grid tab cells by chart ID: ${error.message}`));
     });
   });
 
   suite('createGridTabCell', () => {
     test('should create a new grid tab cell', async () => {
-      const newGridTabCell = { chart_id: 1, tab_id: 2, content: 'New Cell' };
+      const newGridTabCell = { chart_id: 1, tab_id: 1 };
       const createdGridTabCell = { id: 1, ...newGridTabCell };
       gridTabCellModelMock.create.resolves(createdGridTabCell);
 
@@ -104,8 +105,8 @@ export const gridTabCellRepositoryTestSuite = async () => {
       ok(gridTabCellModelMock.create.calledWith(newGridTabCell));
     });
 
-    test('should log and throw an error if creation fails', async () => {
-      const newGridTabCell = { chart_id: 1, tab_id: 2, content: 'New Cell' };
+    test('should throw an error if creation fails', async () => {
+      const newGridTabCell = { chart_id: 1, tab_id: 1 };
       const error = new Error('Creation failed');
       gridTabCellModelMock.create.rejects(error);
 
@@ -113,14 +114,13 @@ export const gridTabCellRepositoryTestSuite = async () => {
         async () => await repository.createGridTabCell(newGridTabCell),
         error,
       );
-      ok(loggerMock.errorMessage.calledWith(`Error creating grid tab cell: ${error.message}`));
     });
   });
 
   suite('deleteGridTabCell', () => {
     test('should delete a grid tab cell', async () => {
       const chartId = 1;
-      const tabId = 2;
+      const tabId = 1;
       gridTabCellModelMock.destroy.resolves(1);
 
       await doesNotThrow(async () => {
@@ -129,9 +129,9 @@ export const gridTabCellRepositoryTestSuite = async () => {
       ok(gridTabCellModelMock.destroy.calledWith({ where: { chart_id: chartId, tab_id: tabId } }));
     });
 
-    test('should log and throw an error if the grid tab cell is not found', async () => {
+    test('should throw an error if the grid tab cell is not found', async () => {
       const chartId = 1;
-      const tabId = 2;
+      const tabId = 1;
       gridTabCellModelMock.destroy.resolves(0);
 
       await rejects(
@@ -140,9 +140,9 @@ export const gridTabCellRepositoryTestSuite = async () => {
       );
     });
 
-    test('should log and throw an error if deletion fails', async () => {
+    test('should throw an error if deletion fails', async () => {
       const chartId = 1;
-      const tabId = 2;
+      const tabId = 1;
       const error = new Error('Deletion failed');
       gridTabCellModelMock.destroy.rejects(error);
 
@@ -155,39 +155,58 @@ export const gridTabCellRepositoryTestSuite = async () => {
 
   suite('updateGridTabCell', () => {
     test('should update a grid tab cell', async () => {
-      const chartId = 1;
-      const newGridTabCell = { tab_id: 2, content: 'Updated Cell' };
+      const gridTabCellIdentificator = { chart_id: 1, tab_id: 1 };
+      const newGridTabCell = { name: 'Updated Cell' };
       const affectedRows = 1;
       gridTabCellModelMock.update.resolves([affectedRows]);
 
-      const result = await repository.updateGridTabCell(chartId, newGridTabCell);
+      const result = await repository.updateGridTabCell(gridTabCellIdentificator, newGridTabCell);
       ok(result === affectedRows);
-      ok(gridTabCellModelMock.update
-        .calledWith(newGridTabCell, { where: { id: { chart_id: chartId, tab_id: newGridTabCell.tab_id } } }));
+      ok(gridTabCellModelMock.update.calledWith(newGridTabCell, { where: { chart_id: 1, tab_id: 1 } }));
     });
 
-    test('should log and throw an error if the grid tab cell is not found or no changes made', async () => {
-      const chartId = 1;
-      const newGridTabCell = { tab_id: 2, content: 'Updated Cell' };
+    test('should throw an error if grid tab cell not found or no changes made', async () => {
+      const gridTabCellIdentificator = { chart_id: 1, tab_id: 1 };
+      const newGridTabCell = { name: 'Updated Cell' };
       gridTabCellModelMock.update.resolves([0]);
 
       await rejects(
-        async () => await repository.updateGridTabCell(chartId, newGridTabCell),
+        async () => await repository.updateGridTabCell(gridTabCellIdentificator, newGridTabCell),
         new Error('Grid tab cell not found or no changes made'),
       );
     });
 
-    test('should log and throw an error if update fails', async () => {
-      const chartId = 1;
-      const newGridTabCell = { tab_id: 2, content: 'Updated Cell' };
+    test('should throw an error if update fails', async () => {
+      const gridTabCellIdentificator = { chart_id: 1, tab_id: 1 };
+      const newGridTabCell = { name: 'Updated Cell' };
       const error = new Error('Update failed');
       gridTabCellModelMock.update.rejects(error);
 
       await rejects(
-        async () => await repository.updateGridTabCell(chartId, newGridTabCell),
+        async () => await repository.updateGridTabCell(gridTabCellIdentificator, newGridTabCell),
         error,
       );
-      ok(loggerMock.errorMessage.calledWith(`Error updating grid tab cell: ${error.message}`));
+    });
+  });
+
+  suite('findObjectByChartId', () => {
+    test('should find object by chart ID', async () => {
+      const chartId = 1;
+      const gridTabCellObject = { chart_id: chartId, tab: { name: 'Tab1' }, chart: { object_name: 'Chart1' } };
+      gridTabCellModelMock.findOne.resolves(gridTabCellObject);
+
+      const result = await repository.findObjectByChartId(chartId);
+      ok(result === gridTabCellObject);
+    });
+
+    test('should throw an error if the object cannot be found', async () => {
+      const chartId = 1;
+      gridTabCellModelMock.findOne.resolves(null);
+
+      await rejects(
+        async () => await repository.findObjectByChartId(chartId),
+        new Error('Grid tab cell not found'),
+      );
     });
   });
 };

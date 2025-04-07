@@ -69,11 +69,10 @@ export class ChartRepository extends BaseRepository {
    */
   async updateChart(chartID, updateData) {
     try {
-      const affectedRows = await this._model.update(
+      const [affectedRows] = await this._model.update(
         updateData,
         {
           where: { id: chartID },
-          returning: true,
         },
       );
       if (affectedRows === 0) {
@@ -94,7 +93,9 @@ export class ChartRepository extends BaseRepository {
    */
   async deleteChart(chartId) {
     try {
-      const deletedRows = await this._model.delete(chartId);
+      const deletedRows = await this._model.destroy({
+        where: { id: chartId },
+      });
       if (deletedRows === 0) {
         throw new Error('Chart not found');
       }

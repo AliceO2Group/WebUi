@@ -15,8 +15,8 @@
 import { ok, doesNotThrow, rejects } from 'node:assert';
 import { suite, test, beforeEach, afterEach } from 'node:test';
 import sinon from 'sinon';
-import { ChartRepository } from '../../../../lib/database/repositories/ChartRepository.js';
 import { LogManager } from '@aliceo2/web-ui';
+import { ChartRepository } from '../../../../lib/database/repositories/ChartRepository.js';
 
 export const chartRepositoryTestSuite = async () => {
   let chartModelMock = null;
@@ -24,13 +24,22 @@ export const chartRepositoryTestSuite = async () => {
   let loggerMock = null;
 
   beforeEach(() => {
+    // Mock the logger
     loggerMock = {
       errorMessage: sinon.stub(),
     };
+    // Ensure we mock the logger
     if (!LogManager.getLogger.restore) {
       sinon.stub(LogManager, 'getLogger').returns(loggerMock);
     }
-    chartModelMock = { create: sinon.stub(), findByPk: sinon.stub(), update: sinon.stub(), destroy: sinon.stub() };
+
+    chartModelMock = {
+      create: sinon.stub(),
+      findByPk: sinon.stub(),
+      update: sinon.stub(),
+      destroy: sinon.stub(),
+    };
+
     repository = new ChartRepository(chartModelMock);
   });
 
