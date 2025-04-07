@@ -23,13 +23,16 @@ import { IntervalsService } from './services/Intervals.service.js';
 import { StatusService } from './services/Status.service.js';
 import { JsonFileService } from './services/JsonFileService.js';
 import { QcObjectService } from './services/QcObject.service.js';
-import { UserService } from './services/UserService.js';
 
 import { LayoutController } from './controllers/LayoutController.js';
 import { StatusController } from './controllers/StatusController.js';
 import { ObjectController } from './controllers/ObjectController.js';
+import { UserController } from './controllers/UserController.js';
 
 import { config } from './config/configProvider.js';
+import { LayoutRepository } from './repositories/LayoutRepository.js';
+import { UserRepository } from './repositories/UserRepository.js';
+import { ChartRepository } from './repositories/ChartRepository.js';
 
 /**
  * Model initialization for the QCG application
@@ -40,9 +43,14 @@ export const setupQcModel = () => {
   const __dirname = dirname(__filename);
   const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
 
-  const jsonDb = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
-  const userService = new UserService(jsonDb);
-  const layoutService = new LayoutController(jsonDb);
+  const jsonFileService = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
+
+  const layoutRepository = new LayoutRepository(jsonFileService);
+  const userRepository = new UserRepository(jsonFileService);
+  const chartRepository = new ChartRepository(jsonFileService);
+
+  const userController = new UserController(userRepository);
+  const layoutController = new LayoutController(layoutRepository);
 
   const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
   const statusController = new StatusController(statusService);
@@ -50,7 +58,7 @@ export const setupQcModel = () => {
   const ccdbService = CcdbService.setup(config.ccdb);
   statusService.dataService = ccdbService;
 
-  const qcObjectService = new QcObjectService(ccdbService, jsonDb, { openFile, toJSON });
+  const qcObjectService = new QcObjectService(ccdbService, chartRepository, { openFile, toJSON });
   qcObjectService.refreshCache();
 
   const objectController = new ObjectController(qcObjectService);
@@ -61,12 +69,13 @@ export const setupQcModel = () => {
     qcObjectService.getCacheRefreshRate(),
   );
   return {
-    userService,
-    layoutService,
+    userController,
+    layoutController,
     statusService,
     statusController,
     objectController,
     intervalsService,
-    jsonDb,
+    layoutRepository,
+    jsonFileService,
   };
 };

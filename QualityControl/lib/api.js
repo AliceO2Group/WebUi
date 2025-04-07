@@ -27,30 +27,54 @@ import { statusComponentMiddleware } from './middleware/status/statusComponent.m
  * @returns {void}
  */
 export const setup = (http, ws) => {
+  /**
+   * @type {{
+   *   layoutController: import('./controllers/LayoutController.js').LayoutController,
+   *   objectController: import('./controllers/ObjectController.js').ObjectController,
+   *   statusController: import('./controllers/StatusController.js').StatusController,
+   *   statusService: import('./services/statusService').StatusService,
+   *   userController: import('./controllers/UserController.js').UserController,
+   *   jsonFileService: import('./services/JsonFileService.js').JsonFileService
+   * }}
+   */
   const {
-    layoutService, objectController, statusController, statusService, userService, jsonDb,
+    layoutController,
+    objectController,
+    statusController,
+    statusService,
+    userController,
+    layoutRepository,
+    jsonFileService,
   } = setupQcModel();
   statusService.ws = ws;
   http.get('/object/:id', objectController.getObjectById.bind(objectController));
   http.get('/object', objectController.getObjectContent.bind(objectController));
   http.get('/objects', objectController.getObjects.bind(objectController), { public: true });
 
-  http.get('/layouts', layoutService.getLayoutsHandler.bind(layoutService));
-  http.get('/layout/:id', layoutService.getLayoutHandler.bind(layoutService));
-  http.get('/layout', layoutService.getLayoutByNameHandler.bind(layoutService));
-  http.post('/layout', layoutService.postLayoutHandler.bind(layoutService));
-  http.put('/layout/:id', layoutService.putLayoutHandler.bind(layoutService));
-  http.delete(
+  http.get('/layouts', layoutController.getLayoutsHandler.bind(layoutController));
+  http.get('/layout/:id', layoutController.getLayoutHandler.bind(layoutController));
+  http.get('/layout', layoutController.getLayoutByNameHandler.bind(layoutController));
+  http.post('/layout', layoutController.postLayoutHandler.bind(layoutController));
+  http.put(
     '/layout/:id',
-    layoutServiceMiddleware(jsonDb),
-    layoutIdMiddleware(jsonDb),
-    layoutOwnerMiddleware(jsonDb),
-    layoutService.deleteLayoutHandler.bind(layoutService),
+    layoutServiceMiddleware(jsonFileService),
+    layoutIdMiddleware(layoutRepository),
+    layoutOwnerMiddleware(layoutRepository),
+    layoutController.putLayoutHandler.bind(layoutController),
   );
   http.patch(
     '/layout/:id',
+    layoutServiceMiddleware(jsonFileService),
+    layoutIdMiddleware(layoutRepository),
     minimumRoleMiddleware(UserRole.GLOBAL),
-    layoutService.patchLayoutHandler.bind(layoutService),
+    layoutController.patchLayoutHandler.bind(layoutController),
+  );
+  http.delete(
+    '/layout/:id',
+    layoutServiceMiddleware(jsonFileService),
+    layoutIdMiddleware(layoutRepository),
+    layoutOwnerMiddleware(layoutRepository),
+    layoutController.deleteLayoutHandler.bind(layoutController),
   );
 
   http.get('/status/gui', statusController.getQCGStatus.bind(statusController), { public: true });
@@ -61,5 +85,5 @@ export const setup = (http, ws) => {
     { public: true },
   );
 
-  http.get('/checkUser', userService.addUser.bind(userService));
+  http.get('/checkUser', userController.addUserHandler.bind(userController));
 };

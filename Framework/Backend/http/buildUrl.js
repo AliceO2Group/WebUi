@@ -31,7 +31,7 @@ exports.buildUrl = (baseURL, parameters) => {
 
   const [url, existingParameters] = baseURL.split('?');
 
-  parseUrlParameters(new URLSearchParams(existingParameters), parameters);
+  parseUrlParameters(new URLSearchParams(existingParameters ? decodeURIComponent(existingParameters) : null), parameters);
 
   const serializedQueryParameters = [];
 
@@ -45,7 +45,7 @@ exports.buildUrl = (baseURL, parameters) => {
    * @param {string} value the value to sanitize
    * @return {string} the sanitized value
    */
-  const sanitize = (value) => encodeURIComponent(decodeURIComponent(value));
+  const sanitize = (value) => encodeURIComponent(value);
 
   /**
    * Stringify a query parameter to be used in a URL and push it in the serialized query parameters list

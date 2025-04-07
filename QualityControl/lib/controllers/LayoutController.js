@@ -21,10 +21,13 @@ import { LayoutPatchDto } from './../dtos/LayoutPatchDto.js';
 import {
   InvalidInputError,
   NotFoundError,
-  UnauthorizedAccessError,
   updateAndSendExpressResponseFromNativeError,
 }
   from '@aliceo2/web-ui';
+
+/**
+ * @typedef {import('../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
+ */
 
 /**
  * Gateway for all HTTP requests with regards to QCG Layouts
@@ -32,16 +35,16 @@ import {
 export class LayoutController {
   /**
    * Setup Layout Controller:
-   * - JSONFileConnector - recommended for local development
-   * @param {JSONFileConnector} dataService - providing ways for retrieving/updating layouts information
+   * @param {LayoutRepository} layoutRepository - The repository for layout data
    */
-  constructor(dataService) {
-    assert(dataService, 'Missing service for retrieving layout data');
+
+  constructor(layoutRepository) {
+    assert(layoutRepository, 'Missing layout repository');
 
     /**
-     * @type {JSONFileConnector}
+     * @type {LayoutRepository}
      */
-    this._dataService = dataService;
+    this._layoutRepository = layoutRepository;
   }
 
   /**
@@ -58,7 +61,7 @@ export class LayoutController {
       if (req.query.owner_id !== undefined) {
         filter.owner_id = parseInt(req.query.owner_id, 10);
       }
-      const layouts = await this._dataService.listLayouts(filter);
+      const layouts = await this._layoutRepository.listLayouts(filter);
       res.status(200).json(layouts);
     } catch {
       updateAndSendExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
@@ -78,7 +81,7 @@ export class LayoutController {
       if (!id) {
         updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout'));
       } else {
-        const layout = await this._dataService.readLayout(id);
+        const layout = await this._layoutRepository.readLayoutById(id);
         res.status(200).json(layout);
       }
     } catch {
@@ -108,7 +111,7 @@ export class LayoutController {
       return;
     }
     try {
-      const layout = await this._dataService.readLayoutByName(layoutName);
+      const layout = await this._layoutRepository.readLayoutByName(layoutName);
       res.status(200).json(layout);
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);
@@ -125,48 +128,28 @@ export class LayoutController {
    */
   async putLayoutHandler(req, res) {
     const { id } = req.params;
+    let layoutProposed = {};
     try {
-      if (!id) {
-        updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout'));
-      } else if (!req.body) {
+      layoutProposed = await LayoutDto.validateAsync(req.body);
+    } catch (error) {
+      updateAndSendExpressResponseFromNativeError(
+        res,
+        new InvalidInputError(`Failed to update layout: ${error?.details?.[0]?.message || ''}`),
+      );
+      return;
+    }
+    try {
+      const layouts = await this._layoutRepository.listLayouts({ name: layoutProposed.name });
+      const layoutExistsWithName = layouts.every((layout) => layout.id !== layoutProposed.id);
+      if (layouts.length > 0 && layoutExistsWithName) {
         updateAndSendExpressResponseFromNativeError(
           res,
-          new InvalidInputError('Missing body content to update layout with'),
+          new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`),
         );
-      } else {
-        const { personid } = req.session;
-        const { owner_id } = await this._dataService.readLayout(id);
-
-        if (Number(owner_id) !== Number(personid)) {
-          updateAndSendExpressResponseFromNativeError(
-            res,
-            new UnauthorizedAccessError('Only the owner of the layout can update it'),
-          );
-        } else {
-          let layoutProposed = {};
-          try {
-            layoutProposed = await LayoutDto.validateAsync(req.body);
-          } catch (error) {
-            updateAndSendExpressResponseFromNativeError(
-              res,
-              new Error(`Failed to update layout ${error?.details?.[0]?.message || ''}`),
-            );
-            return;
-          }
-
-          const layouts = await this._dataService.listLayouts({ name: layoutProposed.name });
-          const layoutExistsWithName = layouts.every((layout) => layout.id !== layoutProposed.id);
-          if (layouts.length > 0 && layoutExistsWithName) {
-            updateAndSendExpressResponseFromNativeError(
-              res,
-              new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`),
-            );
-            return;
-          }
-          const layout = await this._dataService.updateLayout(id, layoutProposed);
-          res.status(201).json({ id: layout });
-        }
+        return;
       }
+      const layout = await this._layoutRepository.updateLayout(id, layoutProposed);
+      res.status(201).json({ id: layout });
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);
     }
@@ -181,7 +164,7 @@ export class LayoutController {
   async deleteLayoutHandler(req, res) {
     const { id } = req.params;
     try {
-      const result = await this._dataService.deleteLayout(id);
+      const result = await this._layoutRepository.deleteLayout(id);
       res.status(200).json(result);
     } catch {
       updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to delete layout with id: ${id}`));
@@ -206,7 +189,7 @@ export class LayoutController {
       return;
     }
     try {
-      const layouts = await this._dataService.listLayouts({ name: layoutProposed.name });
+      const layouts = await this._layoutRepository.listLayouts({ name: layoutProposed.name });
       if (layouts.length > 0) {
         updateAndSendExpressResponseFromNativeError(
           res,
@@ -214,7 +197,7 @@ export class LayoutController {
         );
         return;
       }
-      const result = await this._dataService.createLayout(layoutProposed);
+      const result = await this._layoutRepository.createLayout(layoutProposed);
       res.status(201).json(result);
     } catch {
       updateAndSendExpressResponseFromNativeError(res, new Error('Unable to create new layout'));
@@ -229,33 +212,28 @@ export class LayoutController {
    */
   async patchLayoutHandler(req, res) {
     const { id } = req.params;
-    if (!id) {
-      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing ID'));
-    } else {
-      let layout = {};
-      try {
-        layout = await LayoutPatchDto.validateAsync(req.body);
-      } catch {
-        updateAndSendExpressResponseFromNativeError(
-          res,
-          new InvalidInputError('Invalid request body to update layout'),
-        );
-        return;
-      }
-
-      try {
-        await this._dataService.readLayout(id);
-      } catch {
-        updateAndSendExpressResponseFromNativeError(res, new NotFoundError(`Unable to find layout with id: ${id}`));
-        return;
-      }
-      try {
-        const layoutUpdated = await this._dataService.updateLayout(id, layout);
-        res.status(201).json(layoutUpdated);
-      } catch {
-        updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to update layout with id: ${id}`));
-        return;
-      }
+    let layout = {};
+    try {
+      layout = await LayoutPatchDto.validateAsync(req.body);
+    } catch (error) {
+      updateAndSendExpressResponseFromNativeError(
+        res,
+        new InvalidInputError(`Failed to validate layout: ${error?.details[0]?.message || ''}`),
+      );
+      return;
+    }
+    try {
+      this._layoutRepository.readLayoutById(id);
+    } catch {
+      updateAndSendExpressResponseFromNativeError(res, new NotFoundError(`Unable to find layout with id: ${id}`));
+      return;
+    }
+    try {
+      const updatedLayoutId = await this._layoutRepository.updateLayout(id, layout);
+      res.status(201).json({ id: updatedLayoutId });
+    } catch {
+      updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to update layout with id: ${id}`));
+      return;
     }
   }
 }

@@ -17,11 +17,12 @@ import {
   Observable, WebSocketClient, QueryRouter,
   Loader, RemoteData, sessionService, Notification,
 } from '/js/src/index.js';
-import Log from './log/Log.js';
-import Timezone from './common/Timezone.js';
 import { callRateLimiter, setBrowserTabTitle } from './common/utils.js';
-import Table from './table/Table.js';
+import { ConfigurationService } from './services/ConfigurationService.js';
 import { MODE } from './constants/mode.const.js';
+import Log from './log/Log.js';
+import Table from './table/Table.js';
+import Timezone from './common/Timezone.js';
 
 /**
  * Main model of InfoLoggerGui, contains sub-models modules
@@ -38,6 +39,9 @@ export default class Model extends Observable {
 
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
+    this.configurationService = new ConfigurationService(this);
+    this.configurationService.bubbleTo(this);
+    this.configurationService.load();
 
     this.log = new Log(this);
     this.log.bubbleTo(this);

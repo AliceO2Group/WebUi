@@ -8,4 +8,5 @@ node_modules
 db.json
 coverage
 .nyc_output
+.env*
 .vscode
