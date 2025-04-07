@@ -102,14 +102,16 @@ export class GridTabCellRepository extends BaseRepository {
 
   /**
    * Updates a grid tab cell.
-   * @param {string} chartId - The ID of the chart.
-   * @param {string} tabId - The ID of the tab.
+   * @param {object} gridTabCellIdentificator - An object containing chartId and tabId.
+   * @param {string} gridTabCellIdentificator.chart_id - The ID of the chart.
+   * @param {string} gridTabCellIdentificator.tab_id - The ID of the tab.
    * @param {GridTabCell} newGridTabCell - The data to update the grid tab cell with.
    * @returns {Promise<number>} - A promise that resolves with 1 if cell has been updated successfully.
    * @throws {Error} - Throws an error if there is an issue during the update.
    */
-  async updateGridTabCell({ chart_id, tab_id }, newGridTabCell) {
+  async updateGridTabCell(gridTabCellIdentificator, newGridTabCell) {
     try {
+      const { chart_id, tab_id } = gridTabCellIdentificator;
       const [affectedRows] = await this._model.update(
         newGridTabCell,
         {

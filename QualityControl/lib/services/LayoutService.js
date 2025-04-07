@@ -134,7 +134,7 @@ export class LayoutService {
 
   /**
    * Updates the layout with the provided data.
-   * @param layoutId
+   * @param {string} layoutId - The ID of the layout
    * @param {object} patchedLayout - The layout data to update.
    * @throws {Error} If the layout is not found or if an error occurs during the update.
    * @returns {Promise<void>}
@@ -170,6 +170,12 @@ export class LayoutService {
     }
   }
 
+  /**
+   * Retrieves an object by its ID.
+   * @param {string} objectId - The ID of the object to retrieve.
+   * @returns {Promise<object>} The object found.
+   * @throws {Error} If the object is not found or retrieval process failed.
+   */
   async getObjectById(objectId) {
     try {
       const foundObject = await this._gridTabCellRepository.findObjectByChartId(objectId);
@@ -200,9 +206,7 @@ export class LayoutService {
    * @param {string} layoutId - The ID of the layout to update tabs for.
    * @param {Array<object>} tabs - The list of tabs to update.
    * @throws {Error} If an error occurs during the update process.
-   * @private
    * @returns {Promise<void>}
-   * @throws {Error} If an error occurs during the update process.
    */
   async _updateTabs(layoutId, tabs) {
     try {
@@ -241,8 +245,6 @@ export class LayoutService {
    * Updates the cells for a given tab.
    * @param {string} tabId - The ID of the tab to update cells for.
    * @param {Array<object>} objects - The list of objects to update.
-   * @throws {Error} If an error occurs during the update process.
-   * @private
    * @returns {Promise<void>}
    * @throws {Error} If an error occurs during the update process.
    */
@@ -293,8 +295,6 @@ export class LayoutService {
    * Updates the options for a given chart.
    * @param {string} chartId - The ID of the chart to update options for.
    * @param {Array<string>} options - The list of option names to set for the chart.
-   * @throws {Error} If an error occurs during the update process.
-   * @private
    * @returns {Promise<void>}
    * @throws {Error} If an error occurs during the update process.
    */
@@ -339,7 +339,7 @@ export class LayoutService {
       if (!foundLayoutOwner) {
         throw new Error('Layout owner not found');
       }
-      const layout = await this._layoutRepository.createLayout({
+      await this._layoutRepository.createLayout({
         id,
         name,
         description,

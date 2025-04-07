@@ -83,13 +83,13 @@ export class ChartOptionsRepository extends BaseRepository {
 
   /**
    * Updates a chart option.
-   * @param {string} chartId - The ID of the chart.
-   * @param {string} ptionId - The ID of the option to update.
+   * @param {ChartOption} chartOption Chart option to update including chartId and optionId
    * @returns {Promise<void>} A promise that resolves when the update is complete.
    * @throws {Error} If the update fails.
    */
-  async updateChartOption({ chartId, optionId }) {
+  async updateChartOption(chartOption) {
     try {
+      const { chartId, optionId } = chartOption;
       const [affectedRows] = await this._model.update(
         {
           chart_id: chartId,

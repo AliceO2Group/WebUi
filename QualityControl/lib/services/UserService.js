@@ -69,8 +69,6 @@ export class UserService {
 
   /**
    * Creates a new user after validating the data.
-   * @async
-   * @param sessionInfo
    * @param {object} sessionInfo - The session information containing user data.
    * @throws {Error} If validation fails or the user already exists.
    */
