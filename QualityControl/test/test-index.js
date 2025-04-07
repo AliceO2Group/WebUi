@@ -46,6 +46,7 @@ import { utilsTestSuite } from './lib/utils/utils.test.js';
  */
 import { layoutControllerTestSuite } from './lib/controllers/LayoutController.test.js';
 import { statusControllerTestSuite } from './lib/controllers/StatusController.test.js';
+import { userControllerTestSuite } from './lib/controllers/UserController.test.js';
 
 /**
  * Services
@@ -53,14 +54,16 @@ import { statusControllerTestSuite } from './lib/controllers/StatusController.te
 import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
 import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
 
-import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
-import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
+/**
+ * Middlewares
+ */
 import { layoutIdMiddlewareTest } from './lib/middlewares/layouts/layoutId.middleware.test.js';
 import { layoutOwnerMiddlewareTest } from './lib/middlewares/layouts/layoutOwner.middleware.test.js';
 import { layoutServiceMiddlewareTest } from './lib/middlewares/layouts/layoutService.middleware.test.js';
-import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
-import { userControllerTestSuite } from './lib/controllers/UserController.test.js';
-import { sequelizeDatabaseTestSuite } from './lib/database/index.test.js';
+
+/**
+ * Repositories
+ */
 import { chartOptionRepositoryTestSuite } from './lib/database/repositories/CharOptionRepository.test.js';
 import { chartRepositoryTestSuite } from './lib/database/repositories/ChartRepository.test.js';
 import { gridTabCellRepositoryTestSuite } from './lib/database/repositories/GridTabCellRepository.test.js';
@@ -68,6 +71,18 @@ import { layoutRepositoryTestSuite } from './lib/database/repositories/LayoutRep
 import { optionRepositoryTestSuite } from './lib/database/repositories/OptionRepository.test.js';
 import { tabRepositoryTestSuite } from './lib/database/repositories/TabRepository.test.js';
 import { userRepositoryTestSuite } from './lib/database/repositories/UserRepository.test.js';
+
+/**
+ * Database
+ */
+import { sequelizeDatabaseTestSuite } from './lib/database/index.test.js';
+
+/**
+ * Common Library
+ */
+import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
+import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
+import { layoutAdapterTestSuite } from './lib/controllers/adapters/layout-adapter.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -92,7 +107,7 @@ const BACK_END_TIMEOUT = 10000; // back-end test suite timeout
 const DATABASE_TESTS_TIMEOUT = 5000;
 
 suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, async () => {
-  suite.skip('Front-end test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
+  suite('Front-end test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
     let url = undefined;
     let page = undefined;
     let browser = undefined;
@@ -149,7 +164,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     // require('./about-page.test');
   });
 
-  suite.skip('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
+  suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
     suite('Lib - Test Suite', async () => {
       suite('Utility methods test suite', async () => await utilsTestSuite());
     });
@@ -162,7 +177,6 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     suite('Services - Test Suite', async () => {
       suite('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
       suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
-      suite('JsonServiceTest test suite', async () => await jsonFileServiceTestSuite());
     });
 
     suite('Middleware - Test Suite', async () => {
@@ -172,6 +186,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     });
 
     suite('Controllers - Test Suite', async () => {
+      suite('Adapters test suite', async () => await layoutAdapterTestSuite());
       suite('LayoutController test suite', async () => await layoutControllerTestSuite());
       suite('StatusController test suite', async () => await statusControllerTestSuite());
 
@@ -183,7 +198,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
   });
 
   suite('Database test-suite', { timeout: DATABASE_TESTS_TIMEOUT }, async () => {
-    suite.skip('DB Initialization test suite', async () => await sequelizeDatabaseTestSuite());
+    suite('DB Initialization test suite', async () => await sequelizeDatabaseTestSuite());
     suite('DB Repositories', async () => {
       await chartOptionRepositoryTestSuite();
       await chartRepositoryTestSuite();
