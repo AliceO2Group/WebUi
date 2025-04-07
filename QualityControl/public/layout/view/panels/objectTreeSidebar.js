@@ -55,26 +55,11 @@ export default (model) =>
 
 /**
  * An input which allows users to search though objects;
- * A checkbox to switch to displaying only objects in Online Mode (displayed only if online mode is available)
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
 const searchForm = (model) => h('.flex-column.w-100.mv1', [
-  h('.flex-row.w-100', [
-    h('.w-100', 'Select objects to display:'),
-    model.isOnlineModeEnabled &&
-    h('.w-50.f6.flex-row', { style: 'justify-content: end;' }, [
-      h('label.m0.ph1', {
-        for: 'inputOnlineOnlyTreeSidebar',
-        style: 'cursor: pointer',
-      }, 'Online only'),
-      h('input', {
-        type: 'checkbox',
-        id: 'inputOnlineOnlyTreeSidebar',
-        onchange: (e) => model.object.toggleSideTree(e.target.checked),
-      }),
-    ]),
-  ]),
+  h('.flex-row.w-100', [h('.w-100', 'Select objects to display:')]),
   h('input.form-control.w-100', {
     placeholder: 'Search',
     type: 'text',

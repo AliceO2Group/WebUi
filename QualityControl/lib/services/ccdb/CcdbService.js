@@ -206,8 +206,11 @@ export class CcdbService {
       if (!location) {
         throw new Error(`No location provided by CCDB for object with path: ${path}`);
       }
-      headers.location = location;
-      return headers;
+      return {
+        ...headers,
+        location,
+        path,
+      };
     } else {
       throw new Error(`Unable to retrieve object: ${path} due to status: ${status}`);
     }

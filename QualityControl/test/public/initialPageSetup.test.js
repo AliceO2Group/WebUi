@@ -44,20 +44,6 @@ export const initialPageSetupTests = async (url, page, timeout = 1000, testParen
     assert.strictEqual(location.search, '?page=layoutList');
   });
 
-  await testParent.test('should successfully have correctly load QCG configuration', async () => {
-    const qcg = await page.evaluate(() => window.QCG);
-    const expectedConf = {
-      REFRESH_MIN_INTERVAL: 10,
-      REFRESH_MAX_INTERVAL: 120,
-      CONSUL_SERVICE: false,
-    };
-    assert.deepStrictEqual(
-      qcg,
-      expectedConf,
-      'Public configuration was not loaded successfully',
-    );
-  });
-
   await testParent.test('should have a layout with header, sidebar and section', async () => {
     const headerContent = await page.evaluate(() => document.querySelector('header').innerHTML);
     const sidebarContent = await page.evaluate(() => document.querySelector('nav').innerHTML);

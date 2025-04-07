@@ -20,12 +20,12 @@ import { prettyFormatDate } from './utils.js';
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-export default ({ isOnlineModeEnabled, object: objectModel }) => {
+export default ({ object: objectModel }) => {
   const { objects, selected } = objectModel;
   const isObjectLoaded = selected && objects?.[selected.name]?.isSuccess();
   return h(
     '.w-100.flex-row',
-    !isOnlineModeEnabled && isObjectLoaded &&
+    isObjectLoaded &&
   h('select.form-control.gray-darker.text-center', {
     onchange: (e) => {
       const { value } = e.target;
