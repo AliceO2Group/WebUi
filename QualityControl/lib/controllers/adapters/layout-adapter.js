@@ -38,11 +38,7 @@ export class LayoutAdapter {
             h: cell.row_span,
             w: cell.col_span,
             name: cell.chart.object_name,
-            options: cell.chart.chartOptions.map((chartOption) => ({
-              id: chartOption.option.id,
-              name: chartOption.option.name,
-              type: chartOption.option.type,
-            })),
+            options: cell.chart.chartOptions.map((chartOption) => chartOption.option.name),
             autoSize: false,
             ignoreDefaults: cell.chart.ignore_defaults || false,
           })),
