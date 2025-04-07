@@ -12,6 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
+import { ServiceStatus } from '../../../library/enums/Status/serviceStatus.enum.js';
+import { servicesLoadingPanel } from './components/servicesLoadingPanel.js';
+import { servicesResolvedPanel } from './components/servicesResolvedPanel.js';
 import { h } from '/js/src/index.js';
 
 /**
@@ -21,65 +24,7 @@ import { h } from '/js/src/index.js';
  */
 export default (model) => h(
   '.p2.absolute-fill.text-center',
-  model.aboutViewModel.item.match({
-    NotAsked: () => null,
-    Loading: () => null,
-    Success: (data) => showContent(data),
-    Failure: (error) => showContent({ error: { message: error } }),
-  }),
+  servicesLoadingPanel(model.aboutViewModel.services[ServiceStatus.LOADING]),
+  servicesResolvedPanel(model.aboutViewModel.services[ServiceStatus.ERROR], 'error'),
+  servicesResolvedPanel(model.aboutViewModel.services[ServiceStatus.SUCCESS], 'success'),
 );
-
-/**
- * Display a table with QC GUI and its dependencies status
- * @param {Map<string, object>} componentMap - JSON representation of the components used by QCG
- * @returns {vnode} - virtual node element
- */
-const showContent = (componentMap) =>
-  Object.keys(componentMap).map((component) => [
-    h('.shadow-level1', [
-      h('table.table', {
-        style: 'white-space: pre-wrap;',
-      }, [
-        h('tbody', [
-          h(
-            'tr',
-            h('th.flex-row', componentHeader(componentMap[component].status, component)),
-          ),
-          Object.keys(componentMap[component]).map((name) => componentInfoRow(name, componentMap[component])),
-        ]),
-      ]),
-    ]),
-  ]);
-
-/**
- * Display the header of the component with a green check or
- * red x depending on the status
- * @param {JSON} status { <ok>: boolean, [message]: string}
- * @param {string} component - component dto representation
- * @returns {vnode} - virtual node element
- */
-const componentHeader = (status, component) => [
-  status && status.ok && h('.badge.bg-success.white.f6', '✓'),
-  status && !status.ok && h('.badge.bg-danger.white.f6', '✕'),
-  h('.mh2', { style: 'text-decoration: underline' }, component.toUpperCase()),
-];
-
-/**
- * Create a row with 2 columns: name and value
- * containing information about a sub-property of the component
- * @param {string} name - sub-property of component
- * @param {string} componentProps - component properties
- * @returns {vnode} - virtual node element
- */
-const componentInfoRow = (name, componentProps) =>
-  name === 'status' ?
-    !componentProps.status.ok &&
-    h('tr.danger', [
-      h('th.w-25', 'error'),
-      h('td', componentProps.status.message),
-    ])
-    :
-    h('tr', [
-      h('th.w-25', name),
-      h('td', JSON.stringify(componentProps[name])),
-    ]);
