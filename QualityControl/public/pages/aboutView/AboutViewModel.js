@@ -21,7 +21,7 @@ import { Observable, RemoteData } from '/js/src/index.js';
  */
 export default class AboutViewModel extends Observable {
   /**
-   * Initialize `items` to an empty object
+   * Initialize `services` to an empty object
    * @param {Model} model - root model of the application
    */
   constructor(model) {
@@ -35,7 +35,7 @@ export default class AboutViewModel extends Observable {
   }
 
   /**
-   * Load info about the framework into `items` for each service
+   * Load info about the framework into `services` for each service
    * @returns {Promise<void>}
    */
   async retrieveAllServicesStatus() {
@@ -44,6 +44,11 @@ export default class AboutViewModel extends Observable {
     }
   }
 
+  /**
+   * Retrieve status of a specific service
+   * @param {string} service - name of the service to retrieve status for
+   * @returns {Promise<void>}
+   */
   async retrieveIndividualServiceStatus(service) {
     try {
       this.services[ServiceStatus.LOADING][service] = RemoteData.loading();
@@ -51,19 +56,19 @@ export default class AboutViewModel extends Observable {
 
       const { result, ok } = await this.model.loader.get(`/api/status/${service}`);
       delete this.services[ServiceStatus.LOADING][service];
+      this.notify();
 
       if (!ok) {
         this.services[ServiceStatus.ERROR][service] = RemoteData.failure({
           name: service,
           status: { ok: false, message: result.message },
         });
-        this.model.notification.show(`Unable to retrieve information for ${service}`, 'danger', 2000);
       } else {
         const { status: { ok } } = result;
         const category = ok ? ServiceStatus.SUCCESS : ServiceStatus.ERROR;
         this.services[category][service] = RemoteData.success(result);
-        this.notify();
       }
+      this.notify();
     } catch (error) {
       this.model.notification.show(`Error fetching data for ${service}: ${error.message}`, 'danger', 2000);
     }

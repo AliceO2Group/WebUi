@@ -18,7 +18,7 @@ import sinon from 'sinon';
 import { statusComponentMiddleware } from '../../../../lib/middleware/status/statusComponent.middleware.js';
 
 /**
- * Test suite for the middlewares involved in the ID check of the layout requests
+ * Test suite for the middlewares involved in the check for queried service being valid or not
  */
 export const statusComponentMiddlewareTest = () => {
   suite('Status component middlewares', () => {
@@ -40,7 +40,7 @@ export const statusComponentMiddlewareTest = () => {
       }));
     });
 
-    test('should return an "Invalid input" error if the component provided is not valid', () => {
+    test('should return an "Invalid input" error if provided component is not valid', () => {
       const req = {
         params: {
           service: 'test',
