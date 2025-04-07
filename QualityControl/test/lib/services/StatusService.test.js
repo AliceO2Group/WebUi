@@ -12,8 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-/* eslint-disable require-jsdoc */
-
 import { stub } from 'sinon';
 import { deepStrictEqual } from 'node:assert';
 import { suite, test, before } from 'node:test';

@@ -150,11 +150,11 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       { timeout: ABOUT_VIEW_PAGE_TIMEOUT },
       async (testParent) => await aboutPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
-  });
 
-  suite('API - Test Suite', async () => {
-    suite('Layout PUT request test suite', async () => apiPutLayoutTests());
-    suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
+    suite('API - Test Suite', async () => {
+      suite('Layout PUT request test suite', async () => apiPutLayoutTests());
+      suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
+    });
   });
 
   suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
