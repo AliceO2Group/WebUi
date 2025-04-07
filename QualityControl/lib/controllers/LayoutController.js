@@ -139,7 +139,7 @@ export class LayoutController {
       return;
     }
     try {
-      const layouts = this._layoutRepository.listLayouts({ name: layoutProposed.name });
+      const layouts = await this._layoutRepository.listLayouts({ name: layoutProposed.name });
       const layoutExistsWithName = layouts.every((layout) => layout.id !== layoutProposed.id);
       if (layouts.length > 0 && layoutExistsWithName) {
         updateAndSendExpressResponseFromNativeError(
@@ -229,8 +229,8 @@ export class LayoutController {
       return;
     }
     try {
-      const layoutUpdated = await this._layoutRepository.updateLayout(id, layout);
-      res.status(201).json(layoutUpdated);
+      const updatedLayoutId = await this._layoutRepository.updateLayout(id, layout);
+      res.status(201).json({ id: updatedLayoutId });
     } catch {
       updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to update layout with id: ${id}`));
       return;
