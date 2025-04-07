@@ -11,7 +11,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Op } from 'sequelize';
 import { BaseRepository } from './BaseRepository.js';
 
 /**

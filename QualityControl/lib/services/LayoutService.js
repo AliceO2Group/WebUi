@@ -395,9 +395,9 @@ export class LayoutService {
 
   /**
    * Deletes a layout by its ID.
-   * @param {*} layoutId  - The ID of the layout to delete.
+   * @param {string} layoutId  - The ID of the layout to delete.
    * @throws {Error} If the layout is not found or if an error occurs during deletion.
-   * @returns LayoutId of deleted layout
+   * @returns {string} LayoutId of deleted layout
    */
   async deleteLayout(layoutId) {
     try {
