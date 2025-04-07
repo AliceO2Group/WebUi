@@ -23,7 +23,6 @@ export class UserRepository extends BaseRepository {
 
   /**
    * Retrieves a user by their username.
-   * @async
    * @param {string} username - The username of the user to retrieve.
    * @returns {Promise<User|null>} A promise that resolves to the user object if found, otherwise null.
    */
@@ -41,7 +40,6 @@ export class UserRepository extends BaseRepository {
 
   /**
    * Retrieves a user by their ID.
-   * @async
    * @param {string} userId - The ID of the user to retrieve.
    * @returns {Promise<User|null>} A promise that resolves to the user object if found, otherwise null.
    */
@@ -57,7 +55,6 @@ export class UserRepository extends BaseRepository {
 
   /**
    * Retrieves a user based on given filters.
-   * @async
    * @param {object} filters - An object containing the criteria to search for.
    * @returns {Promise<User|null>} A promise that resolves to the user object if found, otherwise null.
    */
@@ -76,7 +73,6 @@ export class UserRepository extends BaseRepository {
 
   /**
    * Creates a new user.
-   * @async
    * @param {object} userData - The data of the user to create.
    * @returns {Promise<object>} A promise that resolves to the created user object.
    */

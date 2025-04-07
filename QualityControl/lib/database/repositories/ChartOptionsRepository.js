@@ -29,8 +29,6 @@ export class ChartOptionsRepository extends BaseRepository {
   /**
    * Creates a new chart option.
    * @param {object} chartOptionData - The data for the new chart option.
-   * @param {number} chartOptionData.chart_id - The ID of the chart.
-   * @param {number} chartOptionData.option_id - The ID of the option.
    * @returns {Promise<ChartOption>} - A promise that resolves to the created chart option.
    * @throws {Error} - Throws an error if there is an issue during the creation.
    */
@@ -86,9 +84,7 @@ export class ChartOptionsRepository extends BaseRepository {
   /**
    * Updates a chart option.
    * @param {string} chartId - The ID of the chart.
-   * @param chartId - The ID of the chart.
-   * @param optionId - The ID of the option to update.
-   * @param updateData - The data to update the chart option with.
+   * @param {string} ptionId - The ID of the option to update.
    * @returns {Promise<void>} A promise that resolves when the update is complete.
    * @throws {Error} If the update fails.
    */

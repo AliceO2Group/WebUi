@@ -42,7 +42,7 @@ export class OptionRepository extends BaseRepository {
 
   /**
    * Retrieves option by name
-   * @param optionName
+   * @param {string} optionName - The name of the option
    * @returns {Promise<Option>} A promise that resolves to a option.
    * @throws {Error} If the retrieval fails.
    */

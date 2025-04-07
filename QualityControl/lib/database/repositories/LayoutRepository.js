@@ -22,12 +22,6 @@ export class LayoutRepository extends BaseRepository {
  * Creates an instance of LayoutRepository.
  * @class
  * @param {LayoutModel} layoutModel - The model for layout management.
- * @param {TabModel} tabModel - The model for tab management.
- * @param {UserModel} userModel - The model for user data management.
- * @param {GridTabCellModel} gridTabCellModel - The model for grid tab cell management.
- * @param {ChartModel} chartModel - The model for chart data management.
- * @param {ChartOptionModel} chartOptionModel - The model for chart option management.
- * @param {OptionModel} optionModel - The model for general option management.
  */
   constructor(layoutModel) {
     super(layoutModel);

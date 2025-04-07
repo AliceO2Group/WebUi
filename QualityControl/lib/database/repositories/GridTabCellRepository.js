@@ -102,7 +102,8 @@ export class GridTabCellRepository extends BaseRepository {
 
   /**
    * Updates a grid tab cell.
-   * @param {number} chartId - The ID of the chart.
+   * @param {string} chartId - The ID of the chart.
+   * @param {string} tabId - The ID of the tab.
    * @param {GridTabCell} newGridTabCell - The data to update the grid tab cell with.
    * @returns {Promise<number>} - A promise that resolves with 1 if cell has been updated successfully.
    * @throws {Error} - Throws an error if there is an issue during the update.
@@ -125,6 +126,13 @@ export class GridTabCellRepository extends BaseRepository {
       throw error;
     }
   }
+
+  /**
+   * Finds an object by the chart ID.
+   * @param {string} chartId - The ID of the chart.
+   * @returns {Promise<object>} - A promise that resolves with the found object.
+   * @throws {Error} - Throws an error if the object cannot be found.
+   */
 
   async findObjectByChartId(chartId) {
     const cellData = await this._model.findOne({
