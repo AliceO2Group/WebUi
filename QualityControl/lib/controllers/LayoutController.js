@@ -35,6 +35,10 @@ import { LayoutAdapter } from './adapters/layout-adapter.js';
  */
 export class LayoutController {
   constructor(layoutService) {
+    if (!layoutService) {
+      throw new TypeError('layoutService is required');
+    }
+
     /**
      * @type {LayoutService}
      */
@@ -139,8 +143,7 @@ export class LayoutController {
       } else {
         const { personid } = req.session;
         const layoutFound = await this._layoutService.getLayoutById(id);
-        const adaptedLayout = LayoutAdapter.adaptLayoutForExpressAPI(layoutFound);
-        const { owner_id } = adaptedLayout;
+        const owner_id = layoutFound.owner.id;
 
         if (Number(owner_id) !== Number(personid)) {
           updateAndSendExpressResponseFromNativeError(
