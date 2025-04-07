@@ -14,7 +14,7 @@ export const setupRepositories = (sequelizeDatabase) => {
   const layoutRepository = new LayoutRepository(Layout);
   const tabRepository = new TabRepository(Tab, Layout);
   const gridTabCellRepository = new GridTabCellRepository(GridTabCell);
-  const chartRepository = new ChartRepository(Chart, ChartOption, Option);
+  const chartRepository = new ChartRepository(Chart);
   const chartOptionRepository = new ChartOptionsRepository(ChartOption);
   const optionRepository = new OptionRepository(Option);
 
