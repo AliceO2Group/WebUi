@@ -29,7 +29,10 @@ export const chartOptionRepositoryTestSuite = async () => {
       loggerMock = {
         errorMessage: sinon.stub(),
       };
-      sinon.stub(LogManager, 'getLogger').returns(loggerMock);
+      // Ensure we mock the logger
+      if (!LogManager.getLogger.restore) {
+        sinon.stub(LogManager, 'getLogger').returns(loggerMock);
+      }
 
       // Mock the model methods
       chartOptionModelMock = {
