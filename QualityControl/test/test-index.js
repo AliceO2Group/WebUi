@@ -58,6 +58,8 @@ import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/date
 import { layoutIdMiddlewareTest } from './lib/middlewares/layouts/layoutId.middleware.test.js';
 import { layoutOwnerMiddlewareTest } from './lib/middlewares/layouts/layoutOwner.middleware.test.js';
 import { layoutServiceMiddlewareTest } from './lib/middlewares/layouts/layoutService.middleware.test.js';
+import { apiPutLayoutTests } from './api/layouts/api-put-layout.test.js';
+import { apiPatchLayoutTests } from './api/layouts/api-patch-layout.test.js';
 import { layoutRepositoryTest } from './lib/repositories/LayoutRepository.test.js';
 import { userRepositoryTest } from './lib/repositories/UserRepository.test.js';
 import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
@@ -139,6 +141,11 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       { timeout: LAYOUT_SHOW_PAGE_TIMEOUT },
       async (testParent) => await layoutShowTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
+
+    suite('API - Test Suite', async () => {
+      suite('Layout PUT request test suite', async () => apiPutLayoutTests());
+      suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
+    });
 
     // require('./about-page.test');
   });

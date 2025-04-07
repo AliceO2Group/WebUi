@@ -54,18 +54,26 @@ export const setup = (http, ws) => {
   http.get('/layout/:id', layoutController.getLayoutHandler.bind(layoutController));
   http.get('/layout', layoutController.getLayoutByNameHandler.bind(layoutController));
   http.post('/layout', layoutController.postLayoutHandler.bind(layoutController));
-  http.put('/layout/:id', layoutController.putLayoutHandler.bind(layoutController));
+  http.put(
+    '/layout/:id',
+    layoutServiceMiddleware(jsonFileService),
+    layoutIdMiddleware(layoutRepository),
+    layoutOwnerMiddleware(layoutRepository),
+    layoutController.putLayoutHandler.bind(layoutController),
+  );
+  http.patch(
+    '/layout/:id',
+    layoutServiceMiddleware(jsonFileService),
+    layoutIdMiddleware(layoutRepository),
+    minimumRoleMiddleware(UserRole.GLOBAL),
+    layoutController.patchLayoutHandler.bind(layoutController),
+  );
   http.delete(
     '/layout/:id',
     layoutServiceMiddleware(jsonFileService),
     layoutIdMiddleware(layoutRepository),
     layoutOwnerMiddleware(layoutRepository),
     layoutController.deleteLayoutHandler.bind(layoutController),
-  );
-  http.patch(
-    '/layout/:id',
-    minimumRoleMiddleware(UserRole.GLOBAL),
-    layoutController.patchLayoutHandler.bind(layoutController),
   );
 
   http.get('/status/gui', statusController.getQCGStatus.bind(statusController), { public: true });
