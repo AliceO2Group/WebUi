@@ -16,8 +16,10 @@ import fs from 'fs';
 import sinon from 'sinon';
 import { LogManager } from '@aliceo2/web-ui';
 import { config } from '../config.js';
+import { copyMockDataFileToUse } from './testServerSetup.js';
 
 export const initTest = async () => {
+  await copyMockDataFileToUse();
   const jsonFile = config.dbFile;
   const _logger = LogManager.getLogger('TESTS');
   let mockedLayouts = [];

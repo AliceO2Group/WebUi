@@ -91,7 +91,7 @@ export const terminateSessionAndLog = async (
  * it can be used by the test suite and suffer changes without impacting the original file.
  * If file does not exist, create it, first.
  */
-const copyMockDataFileToUse = async () => {
+export const copyMockDataFileToUse = async () => {
   const sourceFile = path.resolve('test/setup/seeders/qcg-mock-data-template.json');
   const destinationFile = path.resolve('test/setup/seeders/qcg-mock-data.json');
   try {
