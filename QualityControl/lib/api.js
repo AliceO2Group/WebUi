@@ -81,7 +81,7 @@ export const setup = (http, ws) => {
   http.get(
     '/status/:service',
     statusComponentMiddleware,
-    statusController.serviceStatusHandler.bind(statusController),
+    statusController.getServiceStatusHandler.bind(statusController),
     { public: true },
   );
 

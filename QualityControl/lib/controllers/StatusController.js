@@ -45,7 +45,7 @@ export class StatusController {
    * @param {Response} res - HTTP response object
    * @returns {undefined}
    */
-  async serviceStatusHandler(req, res) {
+  async getServiceStatusHandler(req, res) {
     const { service } = req.params;
     try {
       const info = await this._statusService.retrieveServiceStatus(service);

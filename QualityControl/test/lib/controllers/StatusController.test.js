@@ -19,7 +19,7 @@ import { suite, test } from 'node:test';
 import { StatusController } from './../../../lib/controllers/StatusController.js';
 
 export const statusControllerTestSuite = async () => {
-  suite('`serviceStatusHandler()` tests', () => {
+  suite('`getSetServiceStatusHandler()` tests', () => {
     test('should successfully respond with framework information', async () => {
       const statusService = {
         retrieveServiceStatus: stub().resolves({
@@ -37,7 +37,7 @@ export const statusControllerTestSuite = async () => {
         status: stub().returnsThis(),
         json: stub(),
       };
-      await statusController.serviceStatusHandler(req, res);
+      await statusController.getServiceStatusHandler(req, res);
 
       const result = {
         status: { ok: true }, version: '0.0.1',
@@ -45,6 +45,7 @@ export const statusControllerTestSuite = async () => {
       ok(res.status.calledWith(200));
       ok(res.json.calledWith(result));
     });
+
     test('should respond with error if service failed to retrieve information', async () => {
       const statusService = {
         retrieveServiceStatus: stub().throws(new Error('Service could not retrieve status')),
@@ -59,7 +60,7 @@ export const statusControllerTestSuite = async () => {
         status: stub().returnsThis(),
         json: stub(),
       };
-      await statusController.serviceStatusHandler(req, res);
+      await statusController.getServiceStatusHandler(req, res);
 
       ok(res.status.calledWith(503));
       ok(res.json.calledWith({
