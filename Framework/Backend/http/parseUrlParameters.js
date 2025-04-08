@@ -44,7 +44,7 @@ class ParameterBuildingError extends Error {
   }
 
   /**
-   * Return the orignal message of the error, without concatenated parameters key path
+   * Return the original message of the error, without concatenated parameters key path
    *
    * @return {string} the original message
    */

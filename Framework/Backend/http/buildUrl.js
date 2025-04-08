@@ -32,6 +32,12 @@ exports.buildUrl = (baseURL, parameters) => {
   const [url, existingParameters] = baseURL.split('?');
 
   parseUrlParameters(new URLSearchParams(existingParameters ? decodeURIComponent(existingParameters) : null), parameters);
+  // eslint-disable-next-line no-console
+  console.log(
+    existingParameters,
+    decodeURIComponent(existingParameters),
+    new URLSearchParams(existingParameters ? decodeURIComponent(existingParameters) : null),
+  );
 
   const serializedQueryParameters = [];
 

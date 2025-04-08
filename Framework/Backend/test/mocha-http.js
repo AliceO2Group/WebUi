@@ -387,6 +387,7 @@ describe('URL building checks', () => {
         nested: [1, 2],
         '=': 12,
       },
+      empty: {},
     });
 
     assert.match(url, /simple=hello/);
@@ -395,6 +396,12 @@ describe('URL building checks', () => {
     assert.match(url, /key\[nested]\[]=2/);
     assert.match(url, /key\[%3D]=12/);
   });
+
+  it('should successfully build URL with empty parameters', () => {
+    const url = buildUrl('', { filter: {} });
+    assert.equal(url, 'https://example.com');
+  });
+
   it('should successfully build URL by combining existing parameters', () => {
     const url = buildUrl('https://example.com?simple=hello&%25=%25&key1[key2][]=13&key1[key2][]=35', {
       key1: {
