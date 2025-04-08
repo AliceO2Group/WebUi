@@ -83,6 +83,7 @@ import { sequelizeDatabaseTestSuite } from './lib/database/index.test.js';
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
 import { layoutAdapterTestSuite } from './lib/controllers/adapters/layout-adapter.test.js';
+import { layoutServiceTestSuite } from './lib/services/LayoutService.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -177,6 +178,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     suite('Services - Test Suite', async () => {
       suite('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
       suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
+      suite('LayoutService - Test Suite', async () => await layoutServiceTestSuite());
     });
 
     suite('Middleware - Test Suite', async () => {

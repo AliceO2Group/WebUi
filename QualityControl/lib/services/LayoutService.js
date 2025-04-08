@@ -144,7 +144,7 @@ export class LayoutService {
       if (!patchedLayout || !patchedLayout.id) {
         throw new Error('Layout ID is required');
       }
-      const { id: layoutId, name, description, displayTimestamp, autoTabChange, isOfficial, tabs, owner_id }
+      const { name, description, displayTimestamp, autoTabChange, isOfficial, tabs, owner_id }
         = patchedLayout;
       const foundLayout = await this._layoutRepository.findLayoutById(layoutId);
       if (!foundLayout) {
@@ -161,7 +161,7 @@ export class LayoutService {
         is_official: isOfficial,
       });
       if (!rowsAffected || rowsAffected !== 1) {
-        throw new Error('Layout not found (or not changes made');
+        throw new Error('Layout not found (or not changes made)');
       }
       await this._updateTabs(layoutId, tabs);
     } catch (error) {
@@ -300,9 +300,7 @@ export class LayoutService {
    */
   async _updateOptions(chartId, options) {
     try {
-      // [{id,name,type}, {id,name,type}, ...]
       const optionResults = await Promise.all(options.map((option) => this._optionRepository.findOptionByName(option)));
-      // [7, 8, 9, ...]
       const validOptions = optionResults.filter(Boolean).map((opt) => opt.id);
 
       const existingChartOptions = await this._chartOptionsRepository.findChartOptionsByChartId(chartId);
@@ -348,7 +346,7 @@ export class LayoutService {
         owner_username: foundLayoutOwner.username,
         is_official: isOfficial,
       });
-      tabs.forEach(async (tab) => {
+      for (const tab of tabs) {
         const { name: tabName, columns, objects, id: tabId } = tab;
         await this._tabsRepository.createTab({
           id: tabId,
@@ -356,8 +354,10 @@ export class LayoutService {
           layout_id: newLayout.id,
           column_count: columns,
         });
-        objects.forEach(async (object) => {
+
+        for (const object of objects) {
           const { id: chartId, x, y, h, w, name: objectName, options, ignoreDefaults } = object;
+
           await this._gridTabCellRepository.createGridTabCell({
             chart_id: chartId,
             row: x,
@@ -366,11 +366,13 @@ export class LayoutService {
             col_span: h,
             tab_id: tabId,
           });
+
           await this._chartRepository.createChart({
             id: chartId,
             object_name: objectName,
             ignore_defaults: ignoreDefaults,
           });
+
           const optionIds = await Promise.all(options.map(async (option) => {
             const foundOption = await this._optionRepository.findOptionByName(option);
             if (!foundOption) {
@@ -378,14 +380,13 @@ export class LayoutService {
             }
             return foundOption.id;
           }));
-          await Promise.all(optionIds.map(async (optionId) => {
-            await this._chartOptionsRepository.createChartOption({
-              chart_id: chartId,
-              option_id: optionId,
-            });
-          }));
-        });
-      });
+
+          await Promise.all(optionIds.map((optionId) => this._chartOptionsRepository.createChartOption({
+            chart_id: chartId,
+            option_id: optionId,
+          })));
+        }
+      }
       return newLayout;
     } catch (error) {
       this._logger.errorMessage(`Error creating layout: ${error.message}`);
