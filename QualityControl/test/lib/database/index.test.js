@@ -32,7 +32,7 @@ export const sequelizeDatabaseTestSuite = async () => {
     test('should set default values if database config is not provided', () => {
       const sequelizeDatabase = new SequelizeDatabase({});
       const { host, port, username, password, database } = sequelizeDatabase.dbconfig;
-      strictEqual(host, process.env.DATABASE_HOST ?? 'localhost', 'Incorrect default host');
+      strictEqual(host, 'localhost', 'Incorrect default host');
       strictEqual(port, 3306, 'Default port should be 3306');
       strictEqual(username, 'cern', 'Default username should be cern');
       strictEqual(password, 'cern', 'Default password should be cern');

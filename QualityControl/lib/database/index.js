@@ -33,18 +33,17 @@ export class SequelizeDatabase {
     const env = process?.env ?? {};
 
     this.dbconfig = {
-      host: env.DATABASE_HOST || 'localhost',
+      host: config.host || 'localhost',
       port: config.port || 3306,
       username: config.username || 'cern',
       password: config.password || 'cern',
-      database: `qcg${env.NODE_ENV === 'test' ? '_test' : ''}`,
-      charset: 'utf8mb4',
-      collate: 'utf8mb4_general_ci',
-      timezone: '+00:00',
-      logging: config.logging ?? false,
-      maxRetries: config.maxRetries ?? 5,
-      retryThrottle: config.retryThrottle ?? 5000,
-      ...config,
+      database: config.database || `qcg${env.NODE_ENV === 'test' ? '_test' : ''}`,
+      charset: config.charset || 'utf8mb4',
+      collate: config.collate || 'utf8mb4_general_ci',
+      timezone: config.timezone || '+00:00',
+      logging: config.logging || false,
+      maxRetries: config.maxRetries || 5,
+      retryThrottle: config.retryThrottle || 5000,
     };
 
     const __filename = fileURLToPath(import.meta.url);
@@ -128,13 +127,13 @@ export class SequelizeDatabase {
   }
 
   async seed() {
-    this._logger.infoMessage('Executing seeders...');
     try {
       const umzug = this.getUmzug(
         join(this.__dirname, 'seeders'),
         memoryStorage(),
       );
       await umzug.up();
+      this._logger.infoMessage('Seeders executed successfully');
     } catch (error) {
       this._logger.errorMessage(`Error while executing seeders: ${error}`);
       return Promise.reject(error);

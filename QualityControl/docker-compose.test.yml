@@ -5,8 +5,6 @@ services:
       dockerfile: Dockerfile
     environment:
       NODE_ENV: test
-      DATABASE_LOGGING: "False"
-      DATABASE_HOST: test_db
     links:
       - test_db
     restart: "no"
@@ -25,8 +23,6 @@ services:
 
   test_db:
     image: mariadb:10.5.9
-    environment:
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-root}"
     restart: unless-stopped
     volumes:
       - type: volume

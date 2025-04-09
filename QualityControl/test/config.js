@@ -34,6 +34,7 @@ export const config = {
     enabled: false,
   },
   database: {
+    host: 'test_db',
     port: '3306',
     username: 'cern',
     password: 'cern',
