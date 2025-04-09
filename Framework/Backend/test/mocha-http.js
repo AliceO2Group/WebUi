@@ -335,7 +335,10 @@ describe('URL parameters extraction checks', () => {
     );
 
     assert.deepEqual(
-      parseUrlParameters(new URLSearchParams('param[prop1]=value&param[prop2]=48'), { existing: { nested: '73' }, param: { prop1: 'other' } }),
+      parseUrlParameters(new URLSearchParams('param[prop1]=value&param[prop2]=48'), {
+        existing: { nested: '73' },
+        param: { prop1: 'other' },
+      }),
       { existing: { nested: '73' }, param: { prop1: 'value', prop2: '48' } },
     );
   });
@@ -395,6 +398,12 @@ describe('URL building checks', () => {
     assert.match(url, /key\[nested]\[]=2/);
     assert.match(url, /key\[%3D]=12/);
   });
+
+  it('should successfully build URL with an empty parameters list', () => {
+    const url = buildUrl('https://example.com', { filter: {} });
+    assert.equal('https://example.com', url);
+  });
+
   it('should successfully build URL by combining existing parameters', () => {
     const url = buildUrl('https://example.com?simple=hello&%25=%25&key1[key2][]=13&key1[key2][]=35', {
       key1: {

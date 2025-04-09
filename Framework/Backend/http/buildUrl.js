@@ -31,7 +31,8 @@ exports.buildUrl = (baseURL, parameters) => {
 
   const [url, existingParameters] = baseURL.split('?');
 
-  parseUrlParameters(new URLSearchParams(existingParameters ? decodeURIComponent(existingParameters) : null), parameters);
+  // URLSearchParams(null) consider to have one parameter with key `null` and value `''`, hence the undefined
+  parseUrlParameters(new URLSearchParams(existingParameters ? decodeURIComponent(existingParameters) : undefined), parameters);
 
   const serializedQueryParameters = [];
 
@@ -80,5 +81,9 @@ exports.buildUrl = (baseURL, parameters) => {
     formatAndPushQueryParameter(sanitize(key), parameter);
   }
 
-  return `${url}?${serializedQueryParameters.join('&')}`;
+  if (serializedQueryParameters.length) {
+    return `${url}?${serializedQueryParameters.join('&')}`;
+  }
+
+  return url;
 };
