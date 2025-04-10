@@ -16,15 +16,15 @@
 const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
 const path = require('path');
-const {grpcErrorToNativeError} = require('@aliceo2/web-ui');
+const {LogManager, grpcErrorToNativeError} = require('@aliceo2/web-ui');
 const {Status} = require(path.join(__dirname, './../../protobuf/status_pb.js'));
 const {EnvironmentInfo} = require(path.join(__dirname, './../../protobuf/environmentinfo_pb.js'));
-const { LogManager } = require('@aliceo2/web-ui').LogManager;
 
 /**
  * Encapsulate gRPC calls
  */
 class GrpcProxy {
+
   /**
    * Create gRPC client and sets the methods identified in the provided path of protofile
    * https://grpc.io/grpc/node/grpc.Client.html
@@ -33,33 +33,40 @@ class GrpcProxy {
    */
   constructor(config, path) {
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/grpcproxy`);
+
+    this._isConnectionReady = false;
+    this._connectionError = null;
+
     if (this._isConfigurationValid(config, path)) {
-      const packageDefinition = protoLoader.loadSync(path, {longs: String, keepCase: false, arrays: true});
+      this._label = config.label;
+      this._package = config.package;
+      this._timeout = config.timeout ?? 30000;
+      this._connectionTimeout = config.connectionTimeout ?? 10000;
+      this._maxMessageLength = config.maxMessageLength ?? 50;
+      this._retryInterval = this._connectionTimeout < 5000 ? 5000 : this._connectionTimeout + 2000; 
+  
+      const address = `${config.hostname}:${config.port}`;
+      const packageDefinition = protoLoader.loadSync(path, {longs: String, keepCase: true, arrays: true});
       const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
       const protoService = octlProto[this._package][this._label];
-      const address = `${config.hostname}:${config.port}`;
+  
       const credentials = grpcLibrary.credentials.createInsecure();
       const options = {'grpc.max_receive_message_length': 1024 * 1024 * this._maxMessageLength}; // MB
 
       this.client = new protoService(address, credentials, options);
-      this.client.waitForReady(
-        Date.now() + this._connectionTimeout,
-        (error) => this._logConnectionResponse(error, address)
-      );
 
-      // set all the available gRPC methods in object and build a separate array with names only
-      this.methods = Object.keys(protoService.prototype)
-        .filter((item) => item.charAt(0) !== '$')
-        .map((method) => this._getAndSetPromisfiedMethod(method));
+      this._attemptConnection(address);
+      this._initializeMethods(protoService);
     }
   }
 
   /**
-   * Private. Bind an exposed gRPC service to the current object,
-   * promisify it and add default options like deadline.
+   * Bind an exposed gRPC service to the current object, promisify it and add default options like deadline.
+   * @private
    * @param {string} methodName - gRPC method to be added to `this`
+   * @returns {string} - The method name
    */
-  _getAndSetPromisfiedMethod(methodName) {
+  _getAndSetPromisifiedMethod(methodName) {
     /**
      * Definition of each call that can be made based on the proto file definition
      * @param {JSON} args - arguments to be passed to gRPC Server
@@ -122,15 +129,6 @@ class GrpcProxy {
       this._logger.error('Missing service label for gRPC API');
       isValid = false;
     }
-    this._label = config.label;
-    this._package = config.package;
-    this._timeout = config.timeout ?? 30000;
-    this._connectionTimeout = config.connectionTimeout ?? 10000;
-    this._maxMessageLength = config.maxMessageLength ?? 50;
-
-    this._isConnectionReady = false;
-    this._connectionError = null;
-
     return isValid;
   }
 
@@ -151,6 +149,45 @@ class GrpcProxy {
       this.connectionError = null;
       this.isConnectionReady = true;
     }
+  }
+
+  /**
+   * Initialize gRPC methods and bind them to the instance:
+   * - Filter out methods starting with $ (private)
+   * - Filter out methods starting with lowercase (not a method)
+   * - Bind the method to the instance
+   * - Promisify the method
+   * - Add default options (deadline)
+   * @private
+   * @param {Object} protoService - The gRPC service definition
+   * @returns {void}
+   */
+  _initializeMethods(protoService) {
+    this.methods = Object.keys(protoService.prototype)
+      .filter((method) => method.charAt(0) !== '$' && method.charAt(0) === method.charAt(0).toUpperCase())
+      .map((method) => this._getAndSetPromisifiedMethod(method));
+  }
+
+  /**
+   * Attempt to establish a connection to the gRPC server with retry logic in case of failure
+   * @private
+   * @param {string} address - Address of the gRPC server
+   * @returns {void}
+   */
+  _attemptConnection(address) {
+    const tryConnect = () => {
+      this.client.waitForReady(Date.now() + this._connectionTimeout, (error) => {
+        if (error) {
+          this._logConnectionResponse(error, address);
+          setTimeout(tryConnect, this._retryInterval);
+        } else {
+          this._logger.info(`Successfully connected to ${address}`);
+          this._logConnectionResponse(null, address);
+        }
+      });
+    };
+
+    tryConnect();
   }
 
   /*
