@@ -19,8 +19,7 @@ const path = require('path');
 const {grpcErrorToNativeError} = require('@aliceo2/web-ui');
 const {Status} = require(path.join(__dirname, './../../protobuf/status_pb.js'));
 const {EnvironmentInfo} = require(path.join(__dirname, './../../protobuf/environmentinfo_pb.js'));
-const logger = (require('@aliceo2/web-ui').LogManager)
-  .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/grpcproxy`);
+const { LogManager } = require('@aliceo2/web-ui').LogManager;
 
 /**
  * Encapsulate gRPC calls
@@ -33,6 +32,7 @@ class GrpcProxy {
    * @param {string} path - path to protofile location
    */
   constructor(config, path) {
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/grpcproxy`);
     if (this._isConfigurationValid(config, path)) {
       const packageDefinition = protoLoader.loadSync(path, {longs: String, keepCase: false, arrays: true});
       const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
@@ -82,7 +82,7 @@ class GrpcProxy {
               }
               reject(error);
             } catch (exception) {
-              logger.debug('Failed new env details error' + exception);
+              this._logger.debug('Failed new env details error' + exception);
               reject(exception);
             }
             reject(grpcErrorToNativeError(error));
@@ -103,23 +103,23 @@ class GrpcProxy {
   _isConfigurationValid(config, path) {
     let isValid = true;
     if (!config.hostname) {
-      logger.error('Missing configuration: hostname');
+      this._logger.error('Missing configuration: hostname');
       isValid = false;
     }
     if (!config.port) {
-      logger.error('Missing configuration: port');
+      this._logger.error('Missing configuration: port');
       isValid = false;
     }
     if (!path) {
-      logger.error('Missing path for gRPC API declaration');
+      this._logger.error('Missing path for gRPC API declaration');
       isValid = false;
     }
     if (!config.label) {
-      logger.error('Missing service label for gRPC API');
+      this._logger.error('Missing service label for gRPC API');
       isValid = false;
     }
     if (!config.package) {
-      logger.error('Missing service label for gRPC API');
+      this._logger.error('Missing service label for gRPC API');
       isValid = false;
     }
     this._label = config.label;
@@ -141,13 +141,13 @@ class GrpcProxy {
    */
   _logConnectionResponse(error, address) {
     if (error) {
-      logger.error(`Connection to ${this._label} server (${address}) timeout`);
-      logger.error(error.message);
+      this._logger.error(`Connection to ${this._label} server (${address}) timeout`);
+      this._logger.error(error.message);
 
       this.connectionError = error;
       this.isConnectionReady = false;
     } else {
-      logger.info(`${this._label} gRPC connected to ${address}`);
+      this._logger.info(`${this._label} gRPC connected to ${address}`);
       this.connectionError = null;
       this.isConnectionReady = true;
     }
