@@ -33,10 +33,17 @@ const { ServiceUnavailableError } = require('./errors/ServiceUnavailableError.js
 const { TimeoutError } = require('./errors/TimeoutError.js');
 const { UnauthorizedAccessError } = require('./errors/UnauthorizedAccessError.js');
 const { grpcErrorToNativeError } = require('./errors/grpcErrorToNativeError.js');
+const { GrpcErrorCodes } = require('./errors/grpcErrorCodes.enum.js');
 const {
   updateAndSendExpressResponseFromNativeError,
 } = require('./errors/updateAndSendExpressResponseFromNativeError.js');
 const { Logger } = require('./log/Logger');
+
+const { getWebUiProtoIncludeDir } = require('./protobuf/getWebUiProtoIncludeDir');
+const { AliEcsEventMessagesConsumer } = require('./kafka/AliEcsEventMessagesConsumer.js');
+
+const { parseUrlParameters } = require('./http/parseUrlParameters.js');
+const { buildUrl } = require('./http/buildUrl.js');
 
 exports.ConsulService = ConsulService;
 
@@ -79,6 +86,16 @@ exports.TimeoutError = TimeoutError;
 
 exports.UnauthorizedAccessError = UnauthorizedAccessError;
 
+exports.GrpcErrorCodes = GrpcErrorCodes;
+
 exports.grpcErrorToNativeError = grpcErrorToNativeError;
 
 exports.updateAndSendExpressResponseFromNativeError = updateAndSendExpressResponseFromNativeError;
+
+exports.getWebUiProtoIncludeDir = getWebUiProtoIncludeDir;
+
+exports.AliEcsEventMessagesConsumer = AliEcsEventMessagesConsumer;
+
+exports.buildUrl = buildUrl;
+
+exports.parseUrlParameters = parseUrlParameters;

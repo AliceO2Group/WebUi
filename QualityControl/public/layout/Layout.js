@@ -690,22 +690,6 @@ export default class Layout extends Observable {
   }
 
   /**
-   * Method to check if passed layout contains any objects in online mode
-   * @param {Layout} layout - layout dto representation
-   * @returns {boolean} - whether there are online objects
-   */
-  doesLayoutContainOnlineObjects(layout) {
-    if (layout && layout.tabs && layout.tabs.length > 0) {
-      return layout.tabs
-        .map((tab) => tab.objects)
-        .some((objects) =>
-          objects.map((object) => object.name)
-            .some((name) => this.model.object.isObjectInOnlineList(name)));
-    }
-    return false;
-  }
-
-  /**
    * Getters / Setters
    */
 

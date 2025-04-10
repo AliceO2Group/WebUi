@@ -34,6 +34,11 @@ export const config = {
     enabled: false,
   },
   dbFile: './test/setup/seeders/qcg-mock-data.json',
+  jwt: {
+    secret: 'test-secret',
+    issuer: 'test-gui',
+    expiration: '1d',
+  },
 
   bookkeeping: {
     url: 'http://alio2-cr1-hv-mvs00.cern.ch:4000',

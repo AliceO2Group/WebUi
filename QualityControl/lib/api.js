@@ -15,6 +15,10 @@
 import { setupQcModel } from './QCModel.js';
 import { minimumRoleMiddleware } from './middleware/minimumRole.middleware.js';
 import { UserRole } from './../common/library/userRole.enum.js';
+import { layoutOwnerMiddleware } from './middleware/layouts/layoutOwner.middleware.js';
+import { layoutIdMiddleware } from './middleware/layouts/layoutId.middleware.js';
+import { layoutServiceMiddleware } from './middleware/layouts/layoutService.middleware.js';
+import { statusComponentMiddleware } from './middleware/status/statusComponent.middleware.js';
 
 /**
  * Adds paths and binds websocket to instance of HttpServer passed
@@ -23,35 +27,65 @@ import { UserRole } from './../common/library/userRole.enum.js';
  * @returns {void}
  */
 export const setup = (http, ws) => {
+  /**
+   * @type {{
+   *   layoutController: import('./controllers/LayoutController.js').LayoutController,
+   *   objectController: import('./controllers/ObjectController.js').ObjectController,
+   *   statusController: import('./controllers/StatusController.js').StatusController,
+   *   statusService: import('./services/statusService').StatusService,
+   *   userController: import('./controllers/UserController.js').UserController,
+   *   jsonFileService: import('./services/JsonFileService.js').JsonFileService
+   * }}
+   */
   const {
-    layoutService, objectController, statusController, statusService, userService, filterController,
+    layoutController,
+    objectController,
+    statusController,
+    statusService,
+    userController,
+    layoutRepository,
+    jsonFileService, filterController,
   } = setupQcModel();
   statusService.ws = ws;
   http.get('/object/:id', objectController.getObjectById.bind(objectController));
   http.get('/object', objectController.getObjectContent.bind(objectController));
   http.get('/objects', objectController.getObjects.bind(objectController), { public: true });
-  http.get('/objects/online', objectController.getObjects.bind(objectController));
-  http.get(
-    '/isOnlineModeConnectionAlive',
-    objectController.isOnlineModeConnectionAlive.bind(objectController),
-  );
 
-  http.get('/layouts', layoutService.getLayoutsHandler.bind(layoutService));
-  http.get('/layout/:id', layoutService.getLayoutHandler.bind(layoutService));
-  http.get('/layout', layoutService.getLayoutByNameHandler.bind(layoutService));
-  http.post('/layout', layoutService.postLayoutHandler.bind(layoutService));
-  http.put('/layout/:id', layoutService.putLayoutHandler.bind(layoutService));
-  http.delete('/layout/:id', layoutService.deleteLayoutHandler.bind(layoutService));
+  http.get('/layouts', layoutController.getLayoutsHandler.bind(layoutController));
+  http.get('/layout/:id', layoutController.getLayoutHandler.bind(layoutController));
+  http.get('/layout', layoutController.getLayoutByNameHandler.bind(layoutController));
+  http.post('/layout', layoutController.postLayoutHandler.bind(layoutController));
+  http.put(
+    '/layout/:id',
+    layoutServiceMiddleware(jsonFileService),
+    layoutIdMiddleware(layoutRepository),
+    layoutOwnerMiddleware(layoutRepository),
+    layoutController.putLayoutHandler.bind(layoutController),
+  );
   http.patch(
     '/layout/:id',
+    layoutServiceMiddleware(jsonFileService),
+    layoutIdMiddleware(layoutRepository),
     minimumRoleMiddleware(UserRole.GLOBAL),
-    layoutService.patchLayoutHandler.bind(layoutService),
+    layoutController.patchLayoutHandler.bind(layoutController),
+  );
+  http.delete(
+    '/layout/:id',
+    layoutServiceMiddleware(jsonFileService),
+    layoutIdMiddleware(layoutRepository),
+    layoutOwnerMiddleware(layoutRepository),
+    layoutController.deleteLayoutHandler.bind(layoutController),
   );
 
   http.get('/status/gui', statusController.getQCGStatus.bind(statusController), { public: true });
-  http.get('/status/framework', statusController.getFrameworkInfo.bind(statusController), { public: true });
+  http.get(
+    '/status/:service',
+    statusComponentMiddleware,
+    statusController.getServiceStatusHandler.bind(statusController),
+    { public: true },
+  );
 
-  http.get('/checkUser', userService.addUser.bind(userService));
+  http.get('/checkUser', userController.addUserHandler.bind(userController));
 
   http.get('/runTypes', filterController.getRunTypesHandler.bind(filterController));
 };

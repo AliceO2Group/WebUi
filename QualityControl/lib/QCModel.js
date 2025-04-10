@@ -17,61 +17,53 @@ import { dirname } from 'path';
 import { readFileSync } from 'fs';
 
 import { openFile, toJSON } from 'jsroot';
-import { LogManager, ConsulService } from '@aliceo2/web-ui';
 
 import { CcdbService } from './services/ccdb/CcdbService.js';
 import { IntervalsService } from './services/Intervals.service.js';
 import { StatusService } from './services/Status.service.js';
 import { JsonFileService } from './services/JsonFileService.js';
 import { QcObjectService } from './services/QcObject.service.js';
-import { UserService } from './services/UserService.js';
 import { BookkeepingService } from './services/BookkeepingService.js';
 
 import { LayoutController } from './controllers/LayoutController.js';
 import { StatusController } from './controllers/StatusController.js';
 import { ObjectController } from './controllers/ObjectController.js';
 import { FilterController } from './controllers/FilterController.js';
+import { UserController } from './controllers/UserController.js';
 
 import { config } from './config/configProvider.js';
+import { LayoutRepository } from './repositories/LayoutRepository.js';
+import { UserRepository } from './repositories/UserRepository.js';
+import { ChartRepository } from './repositories/ChartRepository.js';
 
 /**
  * Model initialization for the QCG application
  * @returns {Promise<object>} Multiple services and controllers that are to be used by the QCG application
  */
 export const setupQcModel = () => {
-  const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/model`);
-
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
   const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
 
-  const jsonDb = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
-  const userService = new UserService(jsonDb);
-  const layoutService = new LayoutController(jsonDb);
+  const jsonFileService = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
+
+  const layoutRepository = new LayoutRepository(jsonFileService);
+  const userRepository = new UserRepository(jsonFileService);
+  const chartRepository = new ChartRepository(jsonFileService);
+
+  const userController = new UserController(userRepository);
+  const layoutController = new LayoutController(layoutRepository);
 
   const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
   const statusController = new StatusController(statusService);
 
-  let consulService = undefined;
-  if (config.consul) {
-    consulService = new ConsulService(config.consul);
-    consulService.getConsulLeaderStatus()
-      .then(() => logger.info('Consul Service connection was successfully tested.'))
-      .catch((error) => logger.error('Consul Service connection could not be established. '
-        + `Please try restarting the service due to: ${error}`));
-    statusController.setLiveModeConnector(consulService);
-  } else {
-    logger.warn('Consul Service: No Configuration Found');
-  }
-
   const ccdbService = CcdbService.setup(config.ccdb);
   statusService.dataService = ccdbService;
-  statusService.onlineService = consulService;
 
-  const qcObjectService = new QcObjectService(ccdbService, jsonDb, { openFile, toJSON });
+  const qcObjectService = new QcObjectService(ccdbService, chartRepository, { openFile, toJSON });
   qcObjectService.refreshCache();
 
-  const objectController = new ObjectController(qcObjectService, consulService);
+  const objectController = new ObjectController(qcObjectService);
   const intervalsService = new IntervalsService();
 
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
@@ -82,13 +74,15 @@ export const setupQcModel = () => {
   initializeIntervals(intervalsService, qcObjectService, bookkeepingService);
 
   return {
-    userService,
-    layoutService,
+    userController,
+    layoutController,
     statusService,
     statusController,
     objectController,
     intervalsService,
     filterController,
+    layoutRepository,
+    jsonFileService,
   };
 };
 

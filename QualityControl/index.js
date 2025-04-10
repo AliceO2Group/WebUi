@@ -21,7 +21,6 @@ import { initializeNockForCcdb } from './test/setup/testSetupForCcdb.js';
 
 // Reading config file
 import { config } from './lib/config/configProvider.js';
-import { buildPublicConfig } from './lib/config/publicConfigProvider.js';
 
 // Quick check config at start
 
@@ -34,8 +33,6 @@ if (typeof config.demoData != 'undefined' && config.demoData) {
 } else {
   config.demoData = false;
 }
-
-buildPublicConfig(config);
 
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
