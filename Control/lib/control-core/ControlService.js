@@ -24,20 +24,18 @@ const CoreUtils = require('./CoreUtils.js');
 class ControlService {
   /**
    * Constructor initializing dependencies
-   * @param {GrpcProxy} ctrlProx
+   * @param {GrpcServiceClient} grpcClient - gRPC client to be used for communication with AliECS Core
    * @param {WebSocket} webSocket
    * @param {ConsulController} consulController
    * * @param {JSON} coreConfig
    */
-  constructor(ctrlProx, consulController, coreConfig, O2_CONTROL_PROTO_PATH) {
-    assert(ctrlProx, 'Missing GrpcProxy dependency for AliECS');
-    this.ctrlProx = ctrlProx;
+  constructor(grpcClient, consulController, coreConfig, O2_CONTROL_PROTO_PATH) {
+    assert(grpcClient, 'Missing GrpcServiceClient dependency for AliECS');
+    this._grpcClient = grpcClient;
     this.consulController = consulController;
     this.coreConfig = coreConfig;
     this.O2_CONTROL_PROTO_PATH = O2_CONTROL_PROTO_PATH;
     this._logger =  LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/controlservice`);
-
-    this.intervalHeartBeat = this.initiateHeartBeat();
   }
 
   /**
@@ -46,26 +44,6 @@ class ControlService {
    */
   setWS(webSocket) {
     this.webSocket = webSocket;
-  }
-
-  /**
-   * Initiate a JS interval to check that proxy to AliECS Core is healthy
-   * Interval will be running every 10 seconds and in case of failure, a reconnection will be attempted
-   * @returns {Interval}
-   */
-  initiateHeartBeat() {
-    return setInterval(async () => {
-      try {
-        await this.ctrlProx['GetEnvironments']({}, {deadline: Date.now() + 9000});
-      } catch (err) {
-        const stateCode = this.ctrlProx.client.getChannel().getConnectivityState();
-        this._logger.errorMessage(`Unable to reach AliECS (state: ${stateCode}), attempting reconnection`, {
-          level: 20,
-          system: 'GUI',
-          facility: 'cog/controlservice'
-        });
-      }
-    }, 10000);
   }
 
   /**
@@ -106,14 +84,14 @@ class ControlService {
           vars.hosts = await this.consulController.getFLPsList();
         }
         vars.hosts = JSON.stringify(vars.hosts);
-        const {repos: repositories} = await this.ctrlProx['ListRepos']();
+        const {repos: repositories} = await this._grpcClient['ListRepos']();
         const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
         if (!defaultRevision) {
           throw new Error(`Unable to find a default revision for repository: ${repositoryName}`);
         }
 
         // Setup Stream Channel
-        const streamChannel = this.ctrlProx.client['Subscribe']({id: channelId});
+        const streamChannel = this._grpcClient.client['Subscribe']({id: channelId});
         streamChannel.on('data', (data) => this.onData(channelId, operation, data));
         streamChannel.on('error', (err) => this.onError(channelId, operation, err));
         // onEnd gets called no matter what
@@ -128,7 +106,7 @@ class ControlService {
         this._logger.infoMessage(`Request of user: ${req.session.username} to "${operation}" for ${channelId}`, {
           level: LogLevel.OPERATIONS, system: 'GUI', facility: 'cog/controlservice'
         });
-        await this.ctrlProx[method](coreConf);
+        await this._grpcClient[method](coreConf);
         res.status(200).json({
           ended: false, success: true, id: channelId,
           info: {message: `Request for "${operation}" was successfully sent and is now in progress`}
@@ -152,7 +130,7 @@ class ControlService {
    */
   executeCommand(req, res) {
     const method = CoreUtils.parseMethodNameString(req.path);
-    this.ctrlProx[method](req.body)
+    this._grpcClient[method](req.body)
       .then((response) => res.json(response))
       .catch((error) => errorHandler(error, res, 504));
   }
@@ -165,7 +143,7 @@ class ControlService {
    * @return {Promise}
    */
   executeCommandNoResponse(method, body = {}, options = undefined) {
-    return this.ctrlProx[method](body, options);
+    return this._grpcClient[method](body, options);
   }
 
   /**
@@ -174,7 +152,7 @@ class ControlService {
    */
   async getAliECSInfo() {
     const method = CoreUtils.parseMethodNameString('GetFrameworkInfo');
-    const response = CoreUtils.parseFrameworkInfo(await this.ctrlProx[method]());
+    const response = CoreUtils.parseFrameworkInfo(await this._grpcClient[method]());
     response.version = CoreUtils.parseAliEcsVersion(response.version);
     return response;
   }
@@ -185,7 +163,7 @@ class ControlService {
    */
   async getIntegratedServicesInfo() {
     const method = CoreUtils.parseMethodNameString('GetIntegratedServices');
-    const response = await this.ctrlProx[method]();
+    const response = await this._grpcClient[method]();
     return response;
   }
 
@@ -197,10 +175,10 @@ class ControlService {
    * @return {boolean}
    */
   isConnectionReady(_, res, next) {
-    if (!this.ctrlProx?.isConnectionReady) {
+    if (!this._grpcClient?.isConnectionReady) {
       let error = 'Could not establish connection to AliECS Core';
-      if (this.ctrlProx.connectionError?.message) {
-        error = this.ctrlProx.connectionError.message;
+      if (this._grpcClient.connectionError?.message) {
+        error = this._grpcClient.connectionError.message;
       }
       errorHandler(error, res, 503);
     } else {

@@ -23,13 +23,13 @@ const {EnvironmentTransitionResultAdapter} = require('./../adapters/EnvironmentT
 class EnvironmentService {
   /**
    * Constructor for inserting dependencies needed to retrieve environment data
-   * @param {GrpcProxy} coreGrpc 
+   * @param {GrpcServiceClient} coreGrpc 
    * @param {ApricotProxy} apricotGrpc 
    * @param {CacheService} cacheService - to use for updating information on environments
    */
   constructor(coreGrpc, apricotGrpc, cacheService, broadcastService) {
     /**
-     * @type {GrpcProxy}
+     * @type {GrpcServiceClient}
      */
     this._coreGrpc = coreGrpc;
 

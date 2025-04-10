@@ -54,7 +54,7 @@ class GrpcServiceClient {
    * @param {string} protoPath - Path to the proto file defining the gRPC service.
    */
   constructor(config, path) {
-    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/grpcproxy`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/GrpcServiceClient`);
 
     this._isConnectionReady = false;
     this._connectionError = null;
@@ -197,6 +197,11 @@ class GrpcServiceClient {
    * @returns {void}
    */
   _attemptConnection(address) {
+    /**
+     * Method to attempt to connect to the gRPC server
+     * @private
+     * @returns {void}
+     */
     const tryConnect = () => {
       this.client.waitForReady(Date.now() + this._connectionTimeout, (error) => {
         if (error) {
