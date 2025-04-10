@@ -16,7 +16,7 @@
 const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
 const path = require('path');
-const {LogManager, grpcErrorToNativeError, ServiceUnavailableError} = require('@aliceo2/web-ui');
+const {LogManager, grpcErrorToNativeError, ServiceUnavailableError, InvalidInputError} = require('@aliceo2/web-ui');
 const {Status} = require(path.join(__dirname, './../../protobuf/status_pb.js'));
 const {EnvironmentInfo} = require(path.join(__dirname, './../../protobuf/environmentinfo_pb.js'));
 
@@ -79,6 +79,8 @@ class GrpcServiceClient {
 
       this._establishConnectionWithRetry(address);
       this._initializeMethods(protoService);
+    } else {
+      this._connectionError = new InvalidInputError('Invalid configuration for gRPC client');
     }
   }
 
@@ -242,9 +244,9 @@ class GrpcServiceClient {
         ) {
           this._handleConnectionStatus(
             new ServiceUnavailableError(`Channel state changed to ${grpcLibrary.connectivityState[currentState]}`),
-            this.client.getChannel().getTarget()
+            channel.getTarget()
           );
-          this._establishConnectionWithRetry(this.client.getChannel().getTarget());
+          this._establishConnectionWithRetry(channel.getTarget());
           return;
         }
         channel.watchConnectivityState(currentState, Date.now() + 10000, checkState);
