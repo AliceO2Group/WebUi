@@ -235,7 +235,11 @@ class GrpcServiceClient {
     const checkState = () => {
       try {
         const currentState = channel.getConnectivityState(true);
-        if (currentState !== grpcLibrary.connectivityState.READY && currentState !== grpcLibrary.connectivityState.IDLE) {
+        if (
+          currentState !== grpcLibrary.connectivityState.READY
+          && currentState !== grpcLibrary.connectivityState.IDLE
+          && currentState !== grpcLibrary.connectivityState.CONNECTING
+        ) {
           this._handleConnectionStatus(
             new ServiceUnavailableError(`Channel state changed to ${grpcLibrary.connectivityState[currentState]}`),
             this.client.getChannel().getTarget()
