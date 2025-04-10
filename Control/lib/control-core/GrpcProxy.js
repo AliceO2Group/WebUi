@@ -21,15 +21,37 @@ const {Status} = require(path.join(__dirname, './../../protobuf/status_pb.js'));
 const {EnvironmentInfo} = require(path.join(__dirname, './../../protobuf/environmentinfo_pb.js'));
 
 /**
- * Encapsulate gRPC calls
+ * @class GrpcServiceClient
+ * @description
+ * A wrapper class which manages a gRPC client connection and its respective calls. This class provides:
+ * - Automatic connection handling with retry logic.
+ * - Dynamic method binding for gRPC service methods defined in the proto file.
+ * - Promisified gRPC calls for easier asynchronous handling.
+ * - Connection state monitoring and error logging.
+ *
+ * @example
+ * const client = new GrpcServiceClient(config, protoPath);
+ * try {
+ *    client.someMethod({ arg1: 'value' });
+ *    console.log(response);
+ * } catch(error){
+ *    console.error(error);
+ * } 
  */
-class GrpcProxy {
+class GrpcServiceClient {
 
   /**
    * Create gRPC client and sets the methods identified in the provided path of protofile
    * https://grpc.io/grpc/node/grpc.Client.html
-   * @param {Object} config - Contains configuration fields for gRPC client
-   * @param {string} path - path to protofile location
+   * @param {object} config - Configuration for the gRPC client.
+   * @param {string} config.hostname - The hostname of the gRPC server.
+   * @param {number} config.port - The port of the gRPC server.
+   * @param {string} config.label - The service label defined in the proto file.
+   * @param {string} config.package - The package name defined in the proto file.
+   * @param {number} [config.timeout=30000] - Timeout for gRPC calls in milliseconds.
+   * @param {number} [config.connectionTimeout=10000] - Timeout for establishing a connection in milliseconds.
+   * @param {number} [config.maxMessageLength=50] - Maximum message size allowed in MB.
+   * @param {string} protoPath - Path to the proto file defining the gRPC service.
    */
   constructor(config, path) {
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/grpcproxy`);
@@ -89,7 +111,7 @@ class GrpcProxy {
               }
               reject(error);
             } catch (exception) {
-              this._logger.debug('Failed new env details error' + exception);
+              this._logger.debugMessage('Failed new env details error' + exception);
               reject(exception);
             }
             reject(grpcErrorToNativeError(error));
@@ -110,42 +132,42 @@ class GrpcProxy {
   _isConfigurationValid(config, path) {
     let isValid = true;
     if (!config.hostname) {
-      this._logger.error('Missing configuration: hostname');
+      this._logger.errorMessage('Missing configuration: hostname');
       isValid = false;
     }
     if (!config.port) {
-      this._logger.error('Missing configuration: port');
+      this._logger.errorMessage('Missing configuration: port');
       isValid = false;
     }
     if (!path) {
-      this._logger.error('Missing path for gRPC API declaration');
+      this._logger.errorMessage('Missing path for gRPC API declaration');
       isValid = false;
     }
     if (!config.label) {
-      this._logger.error('Missing service label for gRPC API');
+      this._logger.errorMessage('Missing service label for gRPC API');
       isValid = false;
     }
     if (!config.package) {
-      this._logger.error('Missing service label for gRPC API');
+      this._logger.errorMessage('Missing service label for gRPC API');
       isValid = false;
     }
     return isValid;
   }
 
   /**
-   *
+   * Method to log an error or success message when attempting to connect to the gRPC server
+   * @private
    * @param {Error} error - error following attempt to connect to gRPC server
    * @param {string} address - address on which connection was attempted
    */
-  _logConnectionResponse(error, address) {
+  _handleConnectionStatus(error, address) {
     if (error) {
-      this._logger.error(`Connection to ${this._label} server (${address}) timeout`);
-      this._logger.error(error.message);
+      this._logger.errorMessage(`Connection to ${this._label} server (${address}) failed due to: ${error.message}`);
 
       this.connectionError = error;
       this.isConnectionReady = false;
     } else {
-      this._logger.info(`${this._label} gRPC connected to ${address}`);
+      this._logger.infoMessage(`${this._label} gRPC connected to ${address}`);
       this.connectionError = null;
       this.isConnectionReady = true;
     }
@@ -178,11 +200,10 @@ class GrpcProxy {
     const tryConnect = () => {
       this.client.waitForReady(Date.now() + this._connectionTimeout, (error) => {
         if (error) {
-          this._logConnectionResponse(error, address);
+          this._handleConnectionStatus(error, address);
           setTimeout(tryConnect, this._retryInterval);
         } else {
-          this._logger.info(`Successfully connected to ${address}`);
-          this._logConnectionResponse(null, address);
+          this._handleConnectionStatus(null, address);
         }
       });
     };
@@ -227,4 +248,4 @@ class GrpcProxy {
   }
 }
 
-module.exports = GrpcProxy;
+module.exports = GrpcServiceClient;
