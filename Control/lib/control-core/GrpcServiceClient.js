@@ -16,7 +16,7 @@
 const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
 const path = require('path');
-const {LogManager, grpcErrorToNativeError} = require('@aliceo2/web-ui');
+const {LogManager, grpcErrorToNativeError, ServiceUnavailableError} = require('@aliceo2/web-ui');
 const {Status} = require(path.join(__dirname, './../../protobuf/status_pb.js'));
 const {EnvironmentInfo} = require(path.join(__dirname, './../../protobuf/environmentinfo_pb.js'));
 
@@ -64,8 +64,8 @@ class GrpcServiceClient {
       this._package = config.package;
       this._timeout = config.timeout ?? 30000;
       this._connectionTimeout = config.connectionTimeout ?? 10000;
+      this._retryConnectionInterval = this._connectionTimeout + 1000; 
       this._maxMessageLength = config.maxMessageLength ?? 50;
-      this._retryInterval = this._connectionTimeout < 5000 ? 5000 : this._connectionTimeout + 2000; 
   
       const address = `${config.hostname}:${config.port}`;
       const packageDefinition = protoLoader.loadSync(path, {longs: String, keepCase: true, arrays: true});
@@ -77,7 +77,7 @@ class GrpcServiceClient {
 
       this.client = new protoService(address, credentials, options);
 
-      this._attemptConnection(address);
+      this._establishConnectionWithRetry(address);
       this._initializeMethods(protoService);
     }
   }
@@ -162,7 +162,7 @@ class GrpcServiceClient {
    */
   _handleConnectionStatus(error, address) {
     if (error) {
-      this._logger.errorMessage(`Connection to ${this._label} server (${address}) failed due to: ${error.message}`);
+      this._logger.errorMessage(`Connection to ${this._label} server (${address}) failed due to: ${error}`);
 
       this.connectionError = error;
       this.isConnectionReady = false;
@@ -186,17 +186,20 @@ class GrpcServiceClient {
    */
   _initializeMethods(protoService) {
     this.methods = Object.keys(protoService.prototype)
-      .filter((method) => method.charAt(0) !== '$' && method.charAt(0) === method.charAt(0).toUpperCase())
+      .filter((method) =>
+        method.charAt(0) !== '$'
+        && method.charAt(0) === method.charAt(0).toUpperCase()
+        && typeof protoService.prototype[method] === 'function')
       .map((method) => this._getAndSetPromisifiedMethod(method));
   }
 
   /**
-   * Attempt to establish a connection to the gRPC server with retry logic in case of failure
+   * Attempt to establish a first connection to the gRPC server with retry logic in case of failure
    * @private
    * @param {string} address - Address of the gRPC server
    * @returns {void}
    */
-  _attemptConnection(address) {
+  _establishConnectionWithRetry(address) {
     /**
      * Method to attempt to connect to the gRPC server
      * @private
@@ -206,14 +209,46 @@ class GrpcServiceClient {
       this.client.waitForReady(Date.now() + this._connectionTimeout, (error) => {
         if (error) {
           this._handleConnectionStatus(error, address);
-          setTimeout(tryConnect, this._retryInterval);
+          setTimeout(tryConnect, this._retryConnectionInterval);
         } else {
           this._handleConnectionStatus(null, address);
+          this._monitorChannelStateAndReconnect();
         }
       });
     };
 
     tryConnect();
+  }
+
+  /**
+   * Monitor the state of the gRPC channel and trigger the reconnection logic if necessary
+   * @private
+   * @returns {void}
+   */
+  _monitorChannelStateAndReconnect() {
+    const channel = this.client.getChannel();
+    /**
+     * Method to check the state of the gRPC channel and attempt to reconnect if necessary
+     * @private
+     * @returns {void}
+     */
+    const checkState = () => {
+      try {
+        const currentState = channel.getConnectivityState(true);
+        if (currentState !== grpcLibrary.connectivityState.READY && currentState !== grpcLibrary.connectivityState.IDLE) {
+          this._handleConnectionStatus(
+            new ServiceUnavailableError(`Channel state changed to ${grpcLibrary.connectivityState[currentState]}`),
+            this.client.getChannel().getTarget()
+          );
+          this._establishConnectionWithRetry(this.client.getChannel().getTarget());
+          return;
+        }
+        channel.watchConnectivityState(currentState, Date.now() + 10000, checkState);
+      } catch (error) {
+        this._logger.errorMessage(`Error while monitoring channel state: ${error.message}`);
+      }
+    };
+    checkState();
   }
 
   /*
