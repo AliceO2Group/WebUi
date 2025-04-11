@@ -5,6 +5,7 @@ on:
 jobs:
   deploy-npm-module:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       PROJECT: ${{ steps.set-project.outputs.project }}
       VERSION: ${{ steps.set-project.outputs.version }}
@@ -44,6 +45,7 @@ jobs:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY_TOKEN }}
   upload-asset:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: deploy-npm-module
     if: ${{ needs.deploy-npm-module.outputs.PROJECT != 'Framework' }}
     outputs:
