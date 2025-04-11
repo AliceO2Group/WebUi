@@ -24,10 +24,10 @@ const ControlService = require('./../../../lib/control-core/ControlService.js');
 
 describe('Control Service test suite', () => {
   describe('Check Constructor', () => {
-    it('should throw error due to null GrpcProxy dependency', () => {
+    it('should throw error due to null GrpcServiceClient dependency', () => {
       assert.throws(() => {
         new ControlService();
-      }, new AssertionError({message: 'Missing GrpcProxy dependency for AliECS', expected: true, operator: '=='}));
+      }, new AssertionError({message: 'Missing GrpcServiceClient dependency for AliECS', expected: true, operator: '=='}));
     });
 
     it('should successfully instantiate ControlService', () => {
@@ -35,7 +35,7 @@ describe('Control Service test suite', () => {
     });
   });
 
-  describe('Check Connection availability through `GrpcProxy`', () => {
+  describe('Check Connection availability through `GrpcServiceClient`', () => {
     it('should successfully call next true when controlProxy states connection is ready', () => {
       const next = sinon.fake.returns();
       const ctrl = new ControlService({isConnectionReady: true});
@@ -70,7 +70,7 @@ describe('Control Service test suite', () => {
     });
   });
 
-  describe('Check executing commands through `GrpcProxy`', () => {
+  describe('Check executing commands through `GrpcServiceClient`', () => {
     let ctrlService = null;
     const req = {
       session: {

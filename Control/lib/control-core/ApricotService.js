@@ -28,11 +28,11 @@ const LOG_FACILITY = 'cog/apricotservice';
 class ApricotService {
   /**
    * Constructor initializing dependencies
-   * @param {GrpcProxy} apricotProxy
+   * @param {GrpcServiceClient} grpcClient - instance of the grpc client to be used
    */
-  constructor(apricotProxy) {
-    assert(apricotProxy, 'Missing GrpcProxy dependency for Apricot');
-    this.apricotProxy = apricotProxy;
+  constructor(grpcClient) {
+    assert(grpcClient, 'Missing GrpcServiceClient dependency for Apricot');
+    this._grpcClient = grpcClient;
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/apricotservice`);
 
     this.detectors = [];
@@ -44,7 +44,7 @@ class ApricotService {
    */
   async init() {
     try {
-      this.detectors = (await this.apricotProxy['ListDetectors']()).detectors;
+      this.detectors = (await this._grpcClient['ListDetectors']()).detectors;
       this._logger.infoMessage(`Initial data retrieved from AliECS/Apricot: ${this.detectors} detectors`, {
         level: 99,
         system: 'GUI',
@@ -53,7 +53,7 @@ class ApricotService {
       await Promise.allSettled(
         this.detectors.map(async (detector) => {
           try {
-            const {hosts} = await this.apricotProxy['GetHostInventory']({detector});
+            const {hosts} = await this._grpcClient['GetHostInventory']({detector});
             this.hostsByDetector.set(detector, hosts);
           } catch (error) {
             this._logger.error(`Unable to retrieve list of hosts for detector: ${detector}`);
@@ -78,7 +78,7 @@ class ApricotService {
    */
   async getRuntimeEntryByComponent(component, key) {
     try {
-      const {payload = '{}'} = await this.apricotProxy[GetRuntimeEntry]({component, key});
+      const {payload = '{}'} = await this._grpcClient[GetRuntimeEntry]({component, key});
       return payload;
     } catch (error) {
       const {code, details = ''} = error;
@@ -98,7 +98,7 @@ class ApricotService {
   async getDetectorList(_, res) {
     if (this.detectors.length === 0) {
       try {
-        this.detectors = (await this.apricotProxy['ListDetectors']()).detectors;
+        this.detectors = (await this._grpcClient['ListDetectors']()).detectors;
       } catch (error) {
         errorHandler(error, res, 503, 'apricotservice');
         return;
@@ -116,12 +116,12 @@ class ApricotService {
   async getHostsByDetectorList(_, res) {
     if (this.hostsByDetector.size === 0) {
       try {
-        this.detectors = (await this.apricotProxy['ListDetectors']()).detectors;
+        this.detectors = (await this._grpcClient['ListDetectors']()).detectors;
 
         await Promise.allSettled(
           this.detectors.map(async (detector) => {
             try {
-              const {hosts} = await this.apricotProxy['GetHostInventory']({detector});
+              const {hosts} = await this._grpcClient['GetHostInventory']({detector});
               this.hostsByDetector.set(detector, hosts);
             } catch (error) {
               this._logger.error(`Unable to retrieve list of hosts for detector: ${detector}`);
@@ -144,8 +144,8 @@ class ApricotService {
    */
   async getStatus() {
     try {
-      if (this.apricotProxy?.isConnectionReady) {
-        await this.apricotProxy['ListDetectors']();
+      if (this._grpcClient?.isConnectionReady) {
+        await this._grpcClient['ListDetectors']();
       } else {
         throw new Error('Unable to check status of Apricot')
       }
@@ -162,12 +162,12 @@ class ApricotService {
    */
   executeCommand(req, res) {
     const method = CoreUtils.parseMethodNameString(req.path);
-    if (this.apricotProxy?.isConnectionReady && method) {
-      this.apricotProxy[method](req.body)
+    if (this._grpcClient?.isConnectionReady && method) {
+      this._grpcClient[method](req.body)
         .then((response) => res.json(response))
         .catch((error) => errorHandler(error, res, 504, 'apricotservice'));
     } else {
-      const error = this.apricotProxy?.connectionError?.message
+      const error = this._grpcClient?.connectionError?.message
         ?? 'Could not establish connection to O2Apricot due to potentially undefined method';
       errorHandler(error, res, 503, 'apricotservice');
     }
@@ -189,7 +189,7 @@ class ApricotService {
       data.user = {username, personid};
       const envConf = CoreEnvConfig.fromJSON(data);
 
-      const {payload: configurations} = await this.apricotProxy[ListRuntimeEntries]({component: COMPONENT});
+      const {payload: configurations} = await this._grpcClient[ListRuntimeEntries]({component: COMPONENT});
       if (configurations.includes(envConf.id)) {
         errorHandler(`A configuration with name '${envConf.id}' already exists. `
           + 'Please load existing configuration and use \'Update\'', res, 409, 'apricotservice');
@@ -198,7 +198,7 @@ class ApricotService {
           `${req.session.username} request to save new core environment configuration "${envConf.id}"`,
           {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
         );
-        await this.apricotProxy['SetRuntimeEntry']({component: COMPONENT, key: envConf.id, value: envConf.toString()});
+        await this._grpcClient['SetRuntimeEntry']({component: COMPONENT, key: envConf.id, value: envConf.toString()});
         res.status(201).json({message: `Configuration successfully saved as ${envConf.id}`});
       }
     } catch (error) {
@@ -228,7 +228,7 @@ class ApricotService {
         `${req.session.username} requested to update new core environment configuration "${envConf.id}"`,
         {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
       );
-      await this.apricotProxy['SetRuntimeEntry']({
+      await this._grpcClient['SetRuntimeEntry']({
         component: COMPONENT,
         key: envConfigToSave.id,
         value: envConfigToSave.toString()
@@ -256,7 +256,7 @@ class ApricotService {
   async _getUpdatedConfigIfExists(envConfig, user) {
     let existingConfig = '';
     try {
-      const {payload: envConfigAsString} = await this.apricotProxy['GetRuntimeEntry']({
+      const {payload: envConfigAsString} = await this._grpcClient['GetRuntimeEntry']({
         component: COMPONENT,
         key: envConfig.id,
       });
