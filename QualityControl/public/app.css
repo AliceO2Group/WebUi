@@ -33,9 +33,6 @@
 
 .status-bar { border-top: 1px solid var(--color-gray-dark); }
 
-/* Force jsroot's background to be transparent */
-.canvas_fillrect { fill: transparent !important; }
-
 /* Show plots gradually */
 .jsroot { animation-name: appearance; animation-duration: 0.2s; }
 
