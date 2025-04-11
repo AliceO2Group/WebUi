@@ -12,6 +12,7 @@ jobs:
   test:
     name: Tests on ubuntu-latest
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
       - name: Setup node
@@ -23,6 +24,7 @@ jobs:
   coverage:
     name: Tests & coverage on ubuntu-latest
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

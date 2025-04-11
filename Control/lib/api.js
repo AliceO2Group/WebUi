@@ -58,7 +58,7 @@ const AliecsRequestHandler = require('./control-core/RequestHandler.js');
 const ApricotService = require('./control-core/ApricotService.js');
 const ControlService = require('./control-core/ControlService.js');
 const EnvCache = require('./control-core/EnvCache.js');
-const GrpcProxy = require('./control-core/GrpcProxy.js');
+const GrpcServiceClient = require('./control-core/GrpcServiceClient.js');
 
 const path = require('path');
 const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.proto');
@@ -89,10 +89,10 @@ module.exports.setup = (http, ws) => {
   const consulController = new ConsulController(consulService, config.consul);
   consulController.testConsulStatus();
 
-  const ctrlProxy = new GrpcProxy(config.grpc, O2_CONTROL_PROTO_PATH);
+  const ctrlProxy = new GrpcServiceClient(config.grpc, O2_CONTROL_PROTO_PATH);
   const ctrlService = new ControlService(ctrlProxy, consulController, config.grpc, O2_CONTROL_PROTO_PATH);
   ctrlService.setWS(ws);
-  const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
+  const apricotProxy = new GrpcServiceClient(config.apricot, O2_APRICOT_PROTO_PATH);
   const apricotService = new ApricotService(apricotProxy);
 
   const lockService = new LockService(broadcastService);

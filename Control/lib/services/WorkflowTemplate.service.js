@@ -24,8 +24,8 @@ const RUNTIME_KEY = 'workflow-mappings';
 class WorkflowTemplateService {
   /**
    * Constructor for inserting dependencies needed to retrieve environment data
-   * @param {GrpcProxy} coreGrpc - service for retrieving information through AliECS Core gRPC connection
-   * @param {ApricotService} apricotGrpc - service for retrieving information through AliECS Apricot gRPC connection
+   * @param {GrpcServiceClient} coreGrpc - service for retrieving information through AliECS Core gRPC connection
+   * @param {GrpcServiceClient} apricotGrpc - service for retrieving information through AliECS Apricot gRPC connection
    */
   constructor(coreGrpc, apricotGrpc) {
     this._coreGrpc = coreGrpc;
