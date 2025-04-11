@@ -434,7 +434,7 @@ Are you sure you would like to continue?`)
  * Validation is done by checking if the configuration contains at least one link
  * @param {object<string, <string, {config: object, info: object}>} cruDataOfHost - Map of CRUs by host
  */
-export const isValidCruConfig = (cruDataOfHost) => 
+const isValidCruConfig = (cruDataOfHost) => 
   Object.keys(cruDataOfHost)
     .map((cruId) => Object.keys(cruDataOfHost[cruId].config))
     .every((configKeys) => configKeys.some((key) => key.match(/link[0-9]{1,2}/)));
