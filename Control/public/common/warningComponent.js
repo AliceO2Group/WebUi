@@ -17,11 +17,12 @@ import {h, iconMedicalCross} from '/js/src/index.js';
 /**
  * A component which displays a medical cross icon and a warning message given message
  * @param {string} warningMessage - The message to be displayed
+ * @param {Array} classes - An array of class names to be added to the component
  * @returns {vnode}
  */
-export const warningMessageOnMissingCruConfig = (warningMessage = '', classOptions = []) => {
+export const warningComponent = (warningMessage = '', classes = []) => {
   return h('.warning.flex-row', {
-    class: classOptions.join(' '),  
+    class: classes.join(' '),  
     title: warningMessage
   }, [
     h('span', iconMedicalCross()),

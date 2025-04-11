@@ -20,8 +20,7 @@ import {detectorHeader} from './../common/detectorHeader.js';
 import {userLogicCheckBox, userLogicCheckBoxForEndpoint} from './components/userLogicCheckBox.js';
 import {toggleAllLinksCheckBox, toggleAllLinksCRUCheckBox} from './components/allLinksCheckBox.js';
 import {cruLinkCheckBox} from './components/linkCheckBox.js';
-import {isValidCruConfig} from './utils/isValidCruConfig.js';
-import { warningMessageOnMissingCruConfig } from '../common/warningComponent.js';
+import { warningComponent } from '../common/warningComponent.js';
 
 const CRU_MISSING_CONFIG_WARNING_MESSAGE = 'Missing CRU configuration for some/all hosts';
 
@@ -187,8 +186,8 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
                 userLogicCheckBox(model, detector, 'detector', '.w-15'),
                 toggleAllLinksCheckBox(model, detector, 'detector', '.w-50'),
               ]
-              : warningMessageOnMissingCruConfig(CRU_MISSING_CONFIG_WARNING_MESSAGE, ['items-center', 'gc1']),
-            h('.left-align.ph2',
+              : warningComponent(CRU_MISSING_CONFIG_WARNING_MESSAGE, ['items-center', 'gc1']),
+            h('.right-align.ph2',
               h('button.btn.btn-sm', {
                 title: `Close panel for detector ${detector}`,
                 onclick: () => {
@@ -251,7 +250,7 @@ const cruByHostPanel = (model, host, cruData) => {
           userLogicCheckBox(model, host, 'host', '.w-15'),
           toggleAllLinksCheckBox(model, host, 'host', '.w-15'),
         ]
-        : warningMessageOnMissingCruConfig(CRU_MISSING_CONFIG_WARNING_MESSAGE, ['items-center', 'gc1']),
+        : warningComponent(CRU_MISSING_CONFIG_WARNING_MESSAGE, ['items-center', 'gc1']),
     ]),
     cruData && model.configuration.cruToggleByHost[host] && h('.panel', [
       Object.keys(cruData)
@@ -429,3 +428,13 @@ Are you sure you would like to continue?`)
     disabled: model.configuration.configurationRequest.isLoading()
     || (model.workflow.model.detectors.isSingleView() && !model.lock.isLockedByCurrentUser(model.detectors.selected)),
   }, model.configuration.configurationRequest.isLoading() ? loading(1.5) : 'Configure');
+
+/**
+ * Check if the configuration given host has a valid configuration for each of its CRUs
+ * Validation is done by checking if the configuration contains at least one link
+ * @param {object<string, <string, {config: object, info: object}>} cruDataOfHost - Map of CRUs by host
+ */
+export const isValidCruConfig = (cruDataOfHost) => 
+  Object.keys(cruDataOfHost)
+    .map((cruId) => Object.keys(cruDataOfHost[cruId].config))
+    .every((configKeys) => configKeys.some((key) => key.match(/link[0-9]{1,2}/)));
