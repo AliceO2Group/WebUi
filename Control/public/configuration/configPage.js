@@ -158,7 +158,6 @@ const toggleAliases = (configuration) => h('.flex-row.w-20.items-center', [
 const cruByDetectorPanel = (model, cruMapByHost) => {
   const detectors = model.configuration.detectorPanel;
   const hostsByDetector = model.detectors.hostsByDetectorRemote.payload;
-  console.log(cruMapByHost)
   return Object.keys(detectors)
     .filter((detector) => (detector === model.detectors.selected || model.detectors.selected === 'GLOBAL'))
     .map((detector) => {
