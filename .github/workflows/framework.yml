@@ -13,6 +13,7 @@ jobs:
   test:
     name: Tests on macos-latest    
     runs-on: macOS-latest
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
       - name: Setup node
@@ -25,6 +26,7 @@ jobs:
   coverage:
     name: Tests & coverage on ubuntu-latest
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -42,6 +44,7 @@ jobs:
   windows:
     name: Test on windows-latest
     runs-on: windows-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -52,6 +55,7 @@ jobs:
   control-compatibility:
     name: Control compatibility test 
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 6
     strategy:
       matrix:
         os: [macOS-latest, ubuntu-latest]
@@ -72,6 +76,7 @@ jobs:
   qualitycontrol-compatibility:
     name: QualityControl compatibility test 
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 6
     strategy:
       matrix:
         # os: [macOS-latest, ubuntu-latest] do not run on macos-latest due to known bug
@@ -93,6 +98,7 @@ jobs:
   infologger-compatibility:
     name: InfoLogger compatibility test 
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 6
     strategy:
       matrix:
         os: [macOS-latest, ubuntu-latest]

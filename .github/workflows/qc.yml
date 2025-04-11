@@ -13,6 +13,7 @@ jobs:
   lint-check:
     name: Check eslint rules on ubuntu-latest
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
       - name: Setup node
@@ -24,6 +25,7 @@ jobs:
   test:
     name: Tests on ubuntu-latest only if lint-check passes
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     needs: lint-check
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +38,7 @@ jobs:
   coverage:
     name: Tests and generate lcov reoprt coverage on ubuntu-latest
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     needs: lint-check
     steps:
       - uses: actions/checkout@v4
