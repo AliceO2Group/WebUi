@@ -19,6 +19,7 @@ const path = require('path');
 const {LogManager, grpcErrorToNativeError, ServiceUnavailableError, InvalidInputError} = require('@aliceo2/web-ui');
 const {Status} = require(path.join(__dirname, './../../protobuf/status_pb.js'));
 const {EnvironmentInfo} = require(path.join(__dirname, './../../protobuf/environmentinfo_pb.js'));
+const RECONNECT_DELTA_TIME = 1000; // 1 second
 
 /**
  * @class GrpcServiceClient
@@ -64,7 +65,7 @@ class GrpcServiceClient {
       this._package = config.package;
       this._timeout = config.timeout ?? 30000;
       this._connectionTimeout = config.connectionTimeout ?? 10000;
-      this._retryConnectionInterval = this._connectionTimeout + 1000; 
+      this._retryConnectionInterval = this._connectionTimeout + RECONNECT_DELTA_TIME; 
       this._maxMessageLength = config.maxMessageLength ?? 50;
   
       const address = `${config.hostname}:${config.port}`;
@@ -150,7 +151,7 @@ class GrpcServiceClient {
       isValid = false;
     }
     if (!config.package) {
-      this._logger.errorMessage('Missing service label for gRPC API');
+      this._logger.errorMessage('Missing service package for gRPC API');
       isValid = false;
     }
     return isValid;
@@ -249,7 +250,7 @@ class GrpcServiceClient {
           this._establishConnectionWithRetry(channel.getTarget());
           return;
         }
-        channel.watchConnectivityState(currentState, Date.now() + 10000, checkState);
+        channel.watchConnectivityState(currentState, Date.now() + this._connectionTimeout, checkState);
       } catch (error) {
         this._logger.errorMessage(`Error while monitoring channel state: ${error.message}`);
       }
