@@ -13,6 +13,8 @@
  */
 
 import { filters } from '../../../common/filters/filter.js';
+import { FILTER_TYPE } from '../../../common/filters/filterTypes.js';
+import { filtersConfig } from './filtersConfig.js';
 import { h } from '/js/src/index.js';
 
 /**
@@ -21,13 +23,39 @@ import { h } from '/js/src/index.js';
  * @returns {vnode} - virtual node element
  */
 const layoutFiltersPanel = ({ layout: layoutModel }) => {
-  const { filter, setFilterValue, applyLayoutChanges, selectOption } = layoutModel;
-  const { filterInput, autoSelector } = filters;
-  const onClick = setFilterValue.bind(layoutModel);
-  const onEnter = applyLayoutChanges.bind(layoutModel);
-  const onChange = selectOption.bind(layoutModel);
+  const { filter: filterMap, setFilterValue, applyLayoutChanges, selectOption } = layoutModel;
+  const { filterInput, dynamicSelector } = filters;
+  const onInputCallback = setFilterValue.bind(layoutModel);
+  const onEnterCallback = applyLayoutChanges.bind(layoutModel);
+  const onChangeCallback = selectOption.bind(layoutModel);
   const filterService = model.services.filter;
-  const { runTypes } = filterService;
+  const filtersList = filtersConfig(filterService) ?? [];
+  const createFilterElement = (config) => {
+    let filterElement = null;
+    const { type, queryLabel, placeholder, id, inputType = 'text', options } = config;
+    const commonConfig = {
+      queryLabel,
+      placeholder,
+      id,
+      filterMap,
+      onInputCallback,
+      onEnterCallback,
+    };
+
+    switch (type) {
+      case FILTER_TYPE.INPUT:
+        filterElement = filterInput({ ...commonConfig, type: inputType });
+        break;
+      case FILTER_TYPE.DROPDOWN:
+        filterElement = dynamicSelector({ ...commonConfig, options, onChangeCallback }); break;
+      default:
+        filterElement = null;
+        break;
+    }
+
+    return filterElement ?? null;
+  };
+
   return h(
     '.w-100.flex-row.p2.g2',
     {
@@ -36,19 +64,7 @@ const layoutFiltersPanel = ({ layout: layoutModel }) => {
       } },
     [
       updateFiltersButton(layoutModel),
-      filterInput('RunNumber', 'RunNumber (e.g. 546783)', 'runNumberLayoutFilter', filter, onClick, onEnter, 'number'),
-      autoSelector(
-        'RunType',
-        'RunType (e.g. PHYSICS)',
-        'runTypeLayoutFilter',
-        filter,
-        runTypes,
-        onChange,
-        onClick,
-        onEnter,
-      ),
-      filterInput('PeriodName', 'PeriodName (e.g. LHC23c)', 'periodNameLayoutFilter', filter, onClick, onEnter),
-      filterInput('PassName', 'PassName (e.g. apass2)', 'passNameLayoutFilter', filter, onClick, onEnter),
+      ...filtersList.map(createFilterElement),
     ],
   );
 };

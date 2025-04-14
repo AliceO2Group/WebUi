@@ -13,7 +13,8 @@
  */
 
 const FILTER_TYPE = {
-  BASIC_SELECTOR: 'basicSelector',
+  INPUT: 'input',
+  DROPDOWN: 'dropdownSelector',
 };
 
 export { FILTER_TYPE };
