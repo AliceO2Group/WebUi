@@ -13,7 +13,6 @@
  */
 
 /* eslint-disable require-jsdoc */
-/* eslint-disable max-len */
 
 import { deepStrictEqual, strictEqual, rejects } from 'node:assert';
 import { suite, test, before } from 'node:test';
@@ -27,12 +26,12 @@ const ccdbConfig = {
   port: 8083,
   protocol: 'https',
   prefix: 'qc-test',
-}
+};
 
 export const ccdbServiceTestSuite = async () => {
   suite('CCDB Test Suite - ', () => {
     before(() => nock.cleanAll());
-    
+
     suite('Creating a new CcdbService instance', () => {
       test('should successfully initialize CcdbService', () => {
         const ccdbService = new CcdbService({ hostname: 'ccdb-local', port: 8083, protocol: 'https', prefix: 'qc/' });
@@ -89,7 +88,31 @@ export const ccdbServiceTestSuite = async () => {
         nock('http://ccdb-local:8083')
           .get(CCDB_URL_HEALTH_POINT)
           .replyWithError('getaddrinfo ENOTFOUND ccdb ccdb-local:8083');
-        await rejects(async () => await ccdb.getVersion(), new Error('Unable to connect to CCDB due to: Error: getaddrinfo ENOTFOUND ccdb ccdb-local:8083'));
+        await rejects(
+          async () => await ccdb.getVersion(),
+          new Error('Unable to connect to CCDB due to: Error: getaddrinfo ENOTFOUND ccdb ccdb-local:8083'),
+        );
+      });
+      test('should return "unknown" version when CCDB version is missing', async () => {
+        const response = {};
+        response[CCDB_MONITOR] = {};
+        response[CCDB_MONITOR][CCDB_HOSTNAME] = [{}];
+
+        nock('http://ccdb-local:8083')
+          .get(CCDB_URL_HEALTH_POINT)
+          .reply(200, response);
+
+        const info = await ccdb.getVersion();
+        deepStrictEqual(info, { version: 'unknown version' });
+      });
+      test('should return "unknown" version when CCDB response is malformed', async () => {
+        const response = {}; // no CCDB_MONITOR key
+        nock('http://ccdb-local:8083')
+          .get(CCDB_URL_HEALTH_POINT)
+          .reply(200, response);
+
+        const info = await ccdb.getVersion();
+        deepStrictEqual(info, { version: 'unknown version' });
       });
     });
 
