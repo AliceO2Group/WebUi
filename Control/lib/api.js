@@ -27,6 +27,9 @@ const {
 const {
   getDetectorsLockOwnershipMiddlewareFactory
 } = require('./middleware/getDetectorsLockOwnershipMiddlewareFactory.js');
+const {
+  verifyDetectorsAvailabilityMiddlewareFactory
+} = require('./middleware/verifyDetectorsAvailabilityMiddlewareFactory.middleware.js');
 
 // controllers
 const {ConsulController} = require('./controllers/Consul.controller.js');
