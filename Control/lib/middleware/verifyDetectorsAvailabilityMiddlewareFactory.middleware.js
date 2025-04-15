@@ -31,7 +31,7 @@ const verifyDetectorsAvailabilityMiddlewareFactory = (detectorService) => {
    * @return {void} continue if checks pass, 400 if environment ID is missing
    */
   return async (req, res, next) => {
-    const {detectors = ''} = req.body ?? {};
+    const {detectors = []} = req.body ?? {};
 
     try {
       const areDetectorsAvailable = await detectorService.areDetectorsAvailable(detectors);
