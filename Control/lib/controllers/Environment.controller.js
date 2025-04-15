@@ -182,7 +182,7 @@ class EnvironmentController {
         return;
       }
     } catch (error) {
-      updateAndSendExpressResponseFromNativeError(res, grpcErrorToNativeError(error));
+      updateAndSendExpressResponseFromNativeError(res, error);
       return;
     }
 
