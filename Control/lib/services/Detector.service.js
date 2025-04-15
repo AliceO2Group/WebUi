@@ -42,7 +42,7 @@ class DetectorService {
       const areProvidedDetectorsInactive = detectorsToCheck.every((detector) => !detectors.includes(detector));
       return areProvidedDetectorsInactive;
     } catch (error) {
-        throw grpcErrorToNativeError(error);
+      throw grpcErrorToNativeError(error);
     }
   }
 }
