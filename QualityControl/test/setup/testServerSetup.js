@@ -45,14 +45,10 @@ export async function setupServerForIntegrationTests() {
   });
 
   // Start browser to test UI
-  const puppeteerLaunchOptions = {
+  const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     headless: true,
-  };
-  if (process.env.CHROME_BIN) {
-    puppeteerLaunchOptions.executablePath = process.env.CHROME_BIN;
-  }
-  const browser = await puppeteer.launch(puppeteerLaunchOptions);
+  });
   const page = await browser.newPage();
   await page.setViewport({ width: 1366, height: 768 });
   // Listen to browser
