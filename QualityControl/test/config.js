@@ -46,4 +46,9 @@ export const config = {
     retryThrottle: 5000,
   },
   dbFile: './test/setup/seeders/qcg-mock-data.json',
+  jwt: {
+    secret: 'test-secret',
+    issuer: 'test-gui',
+    expiration: '1d',
+  },
 };

@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/infologger",
-  "version": "1.15.0",
+  "version": "1.15.1",
   "description": "Infologger GUI to query and stream log events",
   "author": "Vladimir Kosmala",
   "contributors": [
@@ -30,7 +30,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@aliceo2/web-ui": "2.8.0",
+    "@aliceo2/web-ui": "^2.8.1",
     "mariadb": "3.4.0"
   },
   "devDependencies": {

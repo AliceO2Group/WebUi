@@ -67,7 +67,7 @@ class RequestHandler {
       logMessage += `and detectors: ${req.body.detectors}`;
     }
 
-    this._logger.infoMessage(logMessage, {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY});
+    this._logger.infoMessage(logMessage, {level: LogLevel.SUPPORT, system: 'GUI', facility: LOG_FACILITY});
 
     this.requestList[index] = {
       id: index,
@@ -166,7 +166,7 @@ class RequestHandler {
   remove(req, res) {
     const index = req.params.id;
     this._logger.infoMessage(`User ${req.session.username} acknowledged and removed failed request`, {
-      level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY
+      level: LogLevel.SUPPORT, system: 'GUI', facility: LOG_FACILITY
     });
     delete this.requestList[index];
     return this.getAll(req, res);
