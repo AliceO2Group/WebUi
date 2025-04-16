@@ -53,7 +53,7 @@ describe(`'DetectorService' test suite`, () => {
         GetActiveDetectors: sinon.stub().rejects({code: 4, details: 'Timeout'})
       });
       await assert.rejects(
-        async () => await detectorService.areDetectorsAvailable(['TPC']),
+        () => detectorService.areDetectorsAvailable(['TPC']),
         (err) => err instanceof TimeoutError && err.message === 'Timeout'
       );
     });
