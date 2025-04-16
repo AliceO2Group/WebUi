@@ -35,7 +35,6 @@ export async function setupServerForIntegrationTests() {
     stdio: 'pipe',
     env: {
       ...process.env,
-      NODE_ENV: 'test',
     },
   });
   subprocess.stdout.on('data', (chunk) => {
@@ -46,10 +45,14 @@ export async function setupServerForIntegrationTests() {
   });
 
   // Start browser to test UI
-  const browser = await puppeteer.launch({
+  const puppeteerLaunchOptions = {
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     headless: true,
-  });
+  };
+  if (process.env.CHROME_BIN) {
+    puppeteerLaunchOptions.executablePath = process.env.CHROME_BIN;
+  }
+  const browser = await puppeteer.launch(puppeteerLaunchOptions);
   const page = await browser.newPage();
   await page.setViewport({ width: 1366, height: 768 });
   // Listen to browser

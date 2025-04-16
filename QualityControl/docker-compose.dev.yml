@@ -1,0 +1,18 @@
+services:
+  application:
+    build:
+      context: .
+      target: base
+    environment:
+      NODE_ENV: development
+    command: ["npm", "run", "dev"]
+    ports:
+      - "8080:8080"
+    container_name: qcg-application-dev
+    volumes:
+      # Mount the project into the container
+      - .:/usr/src/app:cached
+      # Ignore local node_modules
+      - /usr/src/app/node_modules
+    
+

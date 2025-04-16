@@ -1,0 +1,11 @@
+services:
+  test_app:
+    build:
+      context: .
+      target: base
+    command: ["npm", "run", "coverage-lcov" ]
+    volumes:
+      - type: bind
+        source: ${GITHUB_WORKSPACE}/QualityControl/coverage
+        target: /usr/src/app/coverage
+        read_only: false
