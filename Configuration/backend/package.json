@@ -1,0 +1,11 @@
+{
+  "name": "@aliceo2/test-react-backend",
+  "type": "module",
+  "module": "index.js",
+  "scripts": {
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "@aliceo2/web-ui": "^2.7.4"
+  }
+}
