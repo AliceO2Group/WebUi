@@ -2,8 +2,7 @@ services:
   test_app:
     build:
       context: .
-      target: base
-    command: ["npm", "run", "coverage-lcov" ]
+      target: coverage
     volumes:
       - type: bind
         source: ${GITHUB_WORKSPACE}/QualityControl/coverage

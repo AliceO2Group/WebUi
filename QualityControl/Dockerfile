@@ -24,6 +24,16 @@ RUN apk add --no-cache \
 # Export port
 EXPOSE 8080
 
+FROM base AS dependencies
+
+# Install dependencies early for Docker layer caching
+COPY package*.json ./
+RUN npm ci --silent
+
+# Copy the rest of the application code
+COPY . .
+
+FROM dependencies AS chromiumdependencies
 # Required for Puppeteer
 RUN apk add --no-cache \
     chromium=131.0.6778.108-r0 \
@@ -35,11 +45,14 @@ RUN apk add --no-cache \
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-# Install dependencies early for Docker layer caching
-COPY package*.json ./
-RUN npm ci --silent
+FROM dependencies AS development
+CMD ["npm", "run", "dev"]
 
-# Copy the rest of the application code
-COPY . .
+FROM chromiumdependencies AS test
+CMD ["npm", "run", "test"]
+
+FROM chromiumdependencies AS coverage
+CMD ["npm", "run", "coverage-lcov"]
+
 
 

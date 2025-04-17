@@ -2,10 +2,9 @@ services:
   application:
     build:
       context: .
-      target: base
+      target: development
     environment:
       NODE_ENV: development
-    command: ["npm", "run", "dev"]
     ports:
       - "8080:8080"
     container_name: qcg-application-dev

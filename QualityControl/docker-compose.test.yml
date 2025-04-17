@@ -2,8 +2,7 @@ services:
   test_app:
     build:
       context: .
-      target: base
+      target: test
     environment:
       NODE_ENV: test
     container_name: qcg-application-test
-    command: ["npm", "run", "test"]
