@@ -26,8 +26,8 @@
     "test": "node --test test/test-index.js",
     "copy-config": "sh scripts/copy-config.sh",
     "docker-dev": "npm run copy-config && docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
-    "docker-test": "npm run copy-config && docker compose -f docker-compose.yml -f docker-compose.test.yml up --build --abort-on-container-exit",
-    "docker-coverage": "npm run copy-config && docker compose -f docker-compose.yml -f docker-compose.coverage.yml up --build --abort-on-container-exit"
+    "docker-test": "docker compose -f docker-compose.yml -f docker-compose.test.yml up --build --abort-on-container-exit",
+    "docker-coverage": "docker compose -f docker-compose.yml -f docker-compose.coverage.yml up --build --abort-on-container-exit"
   },
   "files": [
     "common/",

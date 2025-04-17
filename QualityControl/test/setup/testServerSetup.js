@@ -34,6 +34,7 @@ export async function setupServerForIntegrationTests() {
   const subprocess = spawn('node', ['index.js', 'test/config.js'], {
     stdio: 'pipe',
     env: {
+      NODE_ENV: 'test',
       ...process.env,
     },
   });
@@ -49,6 +50,7 @@ export async function setupServerForIntegrationTests() {
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     headless: true,
   });
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   const page = await browser.newPage();
   await page.setViewport({ width: 1366, height: 768 });
   // Listen to browser
