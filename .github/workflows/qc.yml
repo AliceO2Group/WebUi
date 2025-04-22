@@ -52,8 +52,6 @@ jobs:
         with:
           files: ./QualityControl/coverage/lcov.info
           flags: qualitycontrol
-          # fail_ci_if_error: true
+          fail_ci_if_error: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      - name: Debug coverage contents
-        run: ls -lR ./QualityControl/coverage
