@@ -46,6 +46,7 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 FROM dependencies AS development
+RUN npm i -g nodemon --save-dev
 CMD ["npm", "run", "dev"]
 
 FROM chromiumdependencies AS test
@@ -53,6 +54,4 @@ CMD ["npm", "run", "test"]
 
 FROM chromiumdependencies AS coverage
 CMD ["npm", "run", "coverage-lcov"]
-
-
 

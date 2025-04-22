@@ -34,8 +34,8 @@ export async function setupServerForIntegrationTests() {
   const subprocess = spawn('node', ['index.js', 'test/config.js'], {
     stdio: 'pipe',
     env: {
-      NODE_ENV: 'test',
       ...process.env,
+      NODE_ENV: 'test',
     },
   });
   subprocess.stdout.on('data', (chunk) => {
