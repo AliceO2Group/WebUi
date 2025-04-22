@@ -12,8 +12,7 @@
   "dependencies": {
     "@aliceo2/web-ui": "^2.7.4",
     "@react-router/node": "^7.5.0",
-    "@react-router/serve": "^7.5.0",
-    "isbot": "^5.1.17",
+    "isbot": "^5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router": "^7.5.0"
