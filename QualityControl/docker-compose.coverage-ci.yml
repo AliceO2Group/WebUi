@@ -2,7 +2,7 @@ services:
   test_app:
     build:
       context: .
-      target: coverage
+      target: coverage-ci
     volumes:
       - type: bind
         source: ${GITHUB_WORKSPACE}/QualityControl/coverage

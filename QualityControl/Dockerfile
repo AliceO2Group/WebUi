@@ -53,6 +53,9 @@ FROM chromiumdependencies AS test
 CMD ["npm", "run", "test"]
 
 # For GH Actions only
-FROM chromiumdependencies AS coverage
+FROM chromiumdependencies AS coverage-ci
 CMD ["npm", "run", "coverage-lcov"]
 
+# For local coverage
+FROM chromiumdependencies AS coverage-local
+CMD ["npm", "run", "coverage-local"]

@@ -1,0 +1,6 @@
+services:
+  test_app:
+    build:
+      context: .
+      target: coverage-local
+    container_name: qcg-application-coverage
