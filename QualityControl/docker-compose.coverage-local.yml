@@ -3,4 +3,4 @@ services:
     build:
       context: .
       target: coverage-local
-    container_name: qcg-application-coverage
+    container_name: qcg-application-coverage-local
