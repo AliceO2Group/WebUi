@@ -18,7 +18,7 @@
  * @param {Ev_EnvironmentEvent.proto} eventMessage.environmentEvent - the environment event to adapt
  * @return {EnvironmentEvent} - the adapted event message without the timestampNano field
  */
-exports.environmentEventAdapter = ({ timestamp, environmentEvent }) => {
+exports.fromEcsEventToEnvironmentEvent = ({ timestamp, environmentEvent }) => {
   const {
     environmentId: id,
     state, runNumber, error, message, transition, transitionStep, transitionStatus, vars, lastRequestUser
