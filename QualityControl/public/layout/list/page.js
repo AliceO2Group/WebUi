@@ -89,7 +89,10 @@ function layoutCards(model, layouts, searchBy) {
         return h('div', [h('.cardGroupRow', 'No layouts found')]);
       }
       return h('.cardGroupRow', list.filter((item) => item.name.match(searchBy))
-        .map((layout) => h('.p2.card', [cardHeader(model, layout)])));
+        .map((layout) => h('.p2.card', [
+          cardHeader(model, layout),
+          cardBody(model, layout),
+        ])));
     },
   });
 }
@@ -107,6 +110,29 @@ function cardHeader(model, layout) {
         href: `?page=layoutShow&layoutId=${layout.id}`,
         onclick: (e) => model.router.handleLinkEvent(e),
       }, layout.name),
+    ]),
+  ]);
+}
+
+/**
+ * Generates the body content for a layout card.
+ * @param {Model} _model - The root model of the application.
+ * @param {object} layout - The layout object containing the layout data.
+ * @returns {vnode} - A virtual DOM node for the layout's body content.
+ */
+function cardBody(_model, layout) {
+  return h('.cardBody.p2', [
+    h('span', [
+      h('strong', 'Owner: '),
+      layout.owner_name,
+    ]),
+    h('p', [
+      h('strong', 'Name: '),
+      layout.name || '-',
+    ]),
+    h('p', [
+      h('strong', 'Description: '),
+      layout.description || '-',
     ]),
   ]);
 }
