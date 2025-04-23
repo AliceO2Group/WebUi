@@ -24,10 +24,18 @@ const LAYOUT_LIST_PAGE_PARAM = '?page=layoutList';
  * @param {object} testParent - Node.js test object which ensures sub-tests are being awaited
  */
 export const layoutListPageTests = async (url, page, timeout = 5000, testParent) => {
+  const folderOpenedPath = 'section > div > div table';
+
   await testParent.test('should successfully load layoutList page "/"', { timeout }, async () => {
     await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
     const location = await page.evaluate(() => window.location);
     strictEqual(location.search, '?page=layoutList');
+  });
+
+  await testParent.test('should have folders closed upon page render', async () => {
+    const pagesFolded = await page.evaluate((path) => document.querySelectorAll(path).length, folderOpenedPath);
+
+    strictEqual(pagesFolded, 0, 'Layout cards should not exist initially');
   });
 
   await testParent.test('should have a table with rows for Official Layouts', async () => {
