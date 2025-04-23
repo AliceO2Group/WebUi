@@ -55,4 +55,3 @@ CMD ["npm", "run", "test"]
 # For GH Actions only
 FROM chromiumdependencies AS coverage
 CMD ["npm", "run", "coverage-lcov"]
-
