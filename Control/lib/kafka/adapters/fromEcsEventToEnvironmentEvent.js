@@ -24,16 +24,13 @@ exports.fromEcsEventToEnvironmentEvent = ({ timestamp, environmentEvent }) => {
     state, runNumber, error, message, transition, transitionStep, transitionStatus, vars, lastRequestUser
   } = environmentEvent;
   return {
-    id,
-    state,
-    runNumber,
-    error,
-    message,
-    transition,
-    transitionStep,
-    transitionStatus,
-    vars,
-    lastRequestUser,
-    timestamp: timestamp ? timestamp.toNumber() : undefined,
+    id: environment.id,
+    error: environment.error,
+    message: environment.message,
+    transition: {
+      name: environment.transition,
+      step: environment.transitionStep,
+      status: environment.transitionStatus,
+    }
   };
 };

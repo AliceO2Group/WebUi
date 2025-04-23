@@ -17,14 +17,11 @@
  * EnvironmentEvent type definition as parsed following the received message from the ECS Kafka environment topic
  * The parsing is done based on the object received from ECS in `events.proto` definition
  *
- * @property {String} id
- * @property {String} state - STANDBY, DEPLOYED, CONFIGURED, RUNNING, ERROR, MIXED, SHUTDOWN
- * @property {Number} runNumber - only when the environment is in the running state
+ * @property {string} id
  * @property {Error} error - any error that occurred during the transition
  * @property {String} message - any additional message concerning the current state or transition
- * @property {String} transition - DEPLOY, CONFIGURE, RESET, START_ACTIVITY, STOP_ACTIVITY, EXIT, GO_ERROR, RECOVER AS PER https://github.com/AliceO2Group/Control/blob/master/core/environment/environment.go#L143 
- * @property {String} transitionStep - the current step of the transition as defined in ControlWorkflows
- * @property {String} transitionStatus - the status of the transition as defined in ControlWorkflows
- * @property {Map<String, String>} vars - map of all variables that are set and their values
- * @property {User.proto} lastRequestUser - the user that requested the last transition
+ * @property {object} transition - DEPLOY, CONFIGURE, RESET, START_ACTIVITY, STOP_ACTIVITY, EXIT, GO_ERROR, RECOVER AS PER https://github.com/AliceO2Group/Control/blob/master/core/environment/environment.go#L143 
+ * @property {string} transition.name - the name of the transition as defined in ControlWorkflows
+ * @property {string} transition.step - the current step of the transition as defined in ControlWorkflows
+ * @property {string} transition.status - the status of the transition as defined in ControlWorkflows
  */
