@@ -46,7 +46,7 @@ jobs:
         with:
           node-version: '22.x'
       - run: mkdir -p QualityControl/coverage 
-      - run: (cd QualityControl; npm run docker-coverage )
+      - run: (cd QualityControl; npm run docker-coverage-ci )
       - name: Send codecov report for QualityControl
         uses: codecov/codecov-action@v5
         with:
