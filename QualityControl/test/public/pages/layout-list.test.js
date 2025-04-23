@@ -32,6 +32,8 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   const toggleFolderPath = (index) => `${basePath(index)} div > b`;
   const cardPath = (index, cardIndex) => `${basePath(index)} .card:nth-child(${cardIndex})`;
   const cardLayoutLinkPath = (cardPath) => `${cardPath} a`;
+  const cardOfficialButtonPath = (cardPath) => `${cardPath} button`;
+  const officialMarkerSymbol = (cardPath) => `${cardPath} .badge`;
 
   const folderOpenedPath = 'section > div > div .cardGroupRow';
 
@@ -82,5 +84,66 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     const location = await page.evaluate(() => window.location);
 
     strictEqual(location.search, '?page=layoutShow&layoutId=671b8c22402408122e2f20dd&tab=main');
+  });
+
+  await testParent.test('should add official logo the \'make Official\' button is pressed', async () => {
+    const buttonPath = cardOfficialButtonPath(cardPath(myLayoutIndex, 1));
+    const symbolPath = officialMarkerSymbol(cardPath(myLayoutIndex, 1));
+    const folderPath = toggleFolderPath(myLayoutIndex);
+
+    // Previous test relocated to layout detail page.
+    await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
+    await page.click(folderPath);
+    await delay(200);
+
+    let markedAsOfficial = await page.evaluate((path) => document.querySelector(path) === null, symbolPath);
+
+    strictEqual(markedAsOfficial, true, 'Unofficial layouts cards should not have an official symbol in their header');
+
+    await page.click(buttonPath);
+    await delay(1000); // Making a layout official takes a bit.
+
+    markedAsOfficial = await page.evaluate((path) => document.querySelector(path) === null, symbolPath);
+    strictEqual(markedAsOfficial, false, 'Official layouts cards should have an official symbol in their header');
+  });
+
+  await testParent.test('should remove official logo the \'make Unofficial\' button is pressed', async () => {
+    const buttonPath = cardOfficialButtonPath(cardPath(myLayoutIndex, 1));
+    const symbolPath = officialMarkerSymbol(cardPath(myLayoutIndex, 1));
+
+    await page.click(buttonPath);
+    await delay(1000);
+
+    const markedAsOfficial = await page.evaluate((path) => document.querySelector(path) === null, symbolPath);
+    strictEqual(markedAsOfficial, true, 'Official layouts cards should have an official symbol in their header');
+  });
+
+  await testParent.test(`
+    should add card to official layouts folder when marked as official in a different folder`, async () => {
+    const buttonPath = cardOfficialButtonPath(cardPath(myLayoutIndex, 1));
+    const officialLayoutCardPath = cardPath(officialLayoutIndex, 1);
+    const folderPath = toggleFolderPath(officialLayoutIndex); // The official folder is closed and needs to be opened.
+
+    await page.click(folderPath);
+    await delay(200);
+
+    await page.click(buttonPath);
+    await delay(1000);
+
+    const officialLayoutCard = await page.evaluate((path) =>
+      document.querySelector(path) === null, officialLayoutCardPath);
+    strictEqual(officialLayoutCard, false);
+  });
+
+  await testParent.test('should remove official layouts from official folder when made unofficial', async () => {
+    const buttonPath = cardOfficialButtonPath(cardPath(myLayoutIndex, 1));
+    const officialLayoutCardPath = cardPath(officialLayoutIndex, 1);
+
+    await page.click(buttonPath);
+    await delay(1000);
+
+    const officialLayoutCard = await page.evaluate((path) =>
+      document.querySelector(path) === null, officialLayoutCardPath);
+    strictEqual(officialLayoutCard, true, 'The official layout folder should have had a card added in previous test');
   });
 };

@@ -13,7 +13,8 @@
  */
 
 import { h } from '/js/src/index.js';
-import { iconChevronBottom, iconChevronTop } from '/js/src/icons.js';
+import { iconChevronBottom, iconChevronTop, iconBadge } from '/js/src/icons.js';
+import { UserRole, isUserRoleSufficient } from './../../../library/userRole.enum.js';
 
 /**
  * Shows a list of layouts grouped by user and more
@@ -104,6 +105,8 @@ function layoutCards(model, layouts, searchBy) {
  * @returns {vnode} - A virtual DOM node for the layout's header.
  */
 function cardHeader(model, layout) {
+  const { isOfficial } = layout;
+
   return h('.cardHeader.flex-row.justify-between.bg-primary', [
     h('h5', [
       h('a.white', {
@@ -111,16 +114,20 @@ function cardHeader(model, layout) {
         onclick: (e) => model.router.handleLinkEvent(e),
       }, layout.name),
     ]),
+    isOfficial && h('span.badge', [iconBadge(), ' Official']),
   ]);
 }
 
 /**
  * Generates the body content for a layout card.
- * @param {Model} _model - The root model of the application.
+ * @param {Model} model - The root model of the application.
  * @param {object} layout - The layout object containing the layout data.
  * @returns {vnode} - A virtual DOM node for the layout's body content.
  */
-function cardBody(_model, layout) {
+function cardBody(model, layout) {
+  const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
+  const { isOfficial } = layout;
+
   return h('.cardBody.p2', [
     h('span', [
       h('strong', 'Owner: '),
@@ -133,6 +140,13 @@ function cardBody(_model, layout) {
     h('p', [
       h('strong', 'Description: '),
       layout.description || '-',
+    ]),
+    h('.bg-transparent', [
+      h('.justify-content-end', [
+        isMinimumGlobal && h('button.btn.btn-sm', {
+          onclick: () => model.layout.toggleOfficial(layout.id, !layout.isOfficial),
+        }, isOfficial ? 'Make Unofficial' : 'Make Official'),
+      ]),
     ]),
   ]);
 }

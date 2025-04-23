@@ -38,6 +38,12 @@
   padding-right: var(--space-s);
   padding-left: var(--space-s);
 }
+.cardBody { 
+  border: solid 1px var(--color-primary); 
+  border-top: white;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
 
 .status-bar { border-top: 1px solid var(--color-gray-dark); }
 
