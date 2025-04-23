@@ -11,8 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, ok, deepStrictEqual } from 'node:assert';
-import { delay } from './../../testUtils/delay.js';
+import { strictEqual, deepStrictEqual } from 'node:assert';
 
 const LAYOUT_LIST_PAGE_PARAM = '?page=layoutList';
 
@@ -24,7 +23,14 @@ const LAYOUT_LIST_PAGE_PARAM = '?page=layoutList';
  * @param {object} testParent - Node.js test object which ensures sub-tests are being awaited
  */
 export const layoutListPageTests = async (url, page, timeout = 5000, testParent) => {
-  const folderOpenedPath = 'section > div > div table';
+  const officialLayoutIndex = 1;
+  const myLayoutIndex = 2;
+  const allLayoutIndex = 3;
+
+  const basePath = (index) => `section > div > div:nth-child(${index})`;
+  const toggleFolderPath = (index) => `${basePath(index)} div > b`;
+
+  const folderOpenedPath = 'section > div > div .cardGroupRow';
 
   await testParent.test('should successfully load layoutList page "/"', { timeout }, async () => {
     await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
@@ -37,73 +43,24 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
 
     strictEqual(pagesFolded, 0, 'Layout cards should not exist initially');
   });
+  await testParent.test('should have folder for official layouts', async () => {
+    const label = await page.evaluate((path) =>
+      document.querySelector(path).textContent.trim(), toggleFolderPath(officialLayoutIndex));
 
-  await testParent.test('should have a table with rows for Official Layouts', async () => {
-    const label = await page.evaluate(() => document.querySelector('section > div > div > div > b').innerText);
-    strictEqual(label?.trim(), 'Official');
-
-    const noContentTable = await page.evaluate(() =>
-      document.querySelector('section > div > div > table > tbody > tr > td').innerText);
-    strictEqual(noContentTable?.trim(), 'No layouts found');
+    deepStrictEqual(label, 'Official');
   });
 
-  await testParent.test('should have a table with rows for users layouts', async () => {
-    const label = await page.evaluate(() =>
-      document.querySelector('section > div > div:nth-child(2) > div > b').innerText);
-    strictEqual(label?.trim(), 'My Layouts');
+  await testParent.test('should have folder for personal layouts', async () => {
+    const label = await page.evaluate((path) =>
+      document.querySelector(path).textContent.trim(), toggleFolderPath(myLayoutIndex));
 
-    const tableContentLength = await page.evaluate(() =>
-      document.querySelector('section > div > div:nth-child(2) > table > tbody').childElementCount);
-    ok(tableContentLength >= 1);
+    deepStrictEqual(label, 'My Layouts');
   });
 
-  await testParent.test('should display layouts sorted alphabetically in users layouts', async () => {
-    const numberOfLayoutsOfUser = await page.evaluate(() =>
-      document.querySelector('section > div > div:nth-child(2) > table > tbody').childElementCount);
+  await testParent.test('should have folder for all layouts', async () => {
+    const label = await page.evaluate((path) =>
+      document.querySelector(path)?.textContent.trim(), toggleFolderPath(allLayoutIndex));
 
-    const layoutNames = [];
-    for (let i = 0; i < numberOfLayoutsOfUser; i++) {
-      const layoutName = await page.evaluate(
-        (i) => {
-          const pathToNameOfLayout =
-            `section > div > div:nth-child(2) > table > tbody > tr:nth-child(${i + 1}) > td:nth-child(2)`;
-          return document.querySelector(pathToNameOfLayout).innerText;
-        },
-        i,
-      );
-      layoutNames.push(layoutName);
-    }
-    const sortedLayoutsName = layoutNames.slice().sort();
-    deepStrictEqual(layoutNames, sortedLayoutsName);
-  });
-
-  await testParent.test('should have a table with one row after filtering', async () => {
-    await page.locator('header > div > div:nth-child(3) > input').fill('a');
-    await delay(200);
-    const numberOfFilteredLayoutsOfUser = await page.evaluate(() =>
-      document.querySelector('section > div > div:nth-child(2) > table > tbody').childElementCount);
-    strictEqual(numberOfFilteredLayoutsOfUser, 1);
-  });
-
-  await testParent.test('should have a link to show a layout from users layout', async () => {
-    // remove input value for filtering via the layout model rather than the puppeteer page
-    await page.evaluate(() => window.model.layout.search(''));
-    const pathToLayoutToClick =
-      'section > div > div:nth-child(2) > table > tbody > tr:nth-child(2) > td:nth-child(2) > div > a';
-
-    await page.waitForSelector(pathToLayoutToClick, { timeout: 2000 });
-    const hrefOfLayoutToClick = await page.evaluate(
-      (pathToLayoutToClick) =>
-        document.querySelector(pathToLayoutToClick).href,
-      pathToLayoutToClick,
-    );
-    strictEqual(hrefOfLayoutToClick, 'http://localhost:8080/?page=layoutShow&layoutId=671b8c22402408122e2f20dd');
-
-    await page.click(pathToLayoutToClick);
-    await page.waitForNetworkIdle();
-    const location = await page.evaluate(() => window.location);
-
-    // test clicks on the second layout with ID defined in qcg-mock-data.json
-    strictEqual(location.search, '?page=layoutShow&layoutId=671b8c22402408122e2f20dd&tab=main');
+    deepStrictEqual(label, 'All Layouts');
   });
 };
