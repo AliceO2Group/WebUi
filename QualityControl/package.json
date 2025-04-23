@@ -29,7 +29,6 @@
     "docker-test": "docker compose -f docker-compose.yml -f docker-compose.test.yml up --build --abort-on-container-exit",
     "docker-coverage-ci": "docker compose -f docker-compose.yml -f docker-compose.coverage-ci.yml up --build --abort-on-container-exit",
     "docker-coverage-local": "docker compose -f docker-compose.yml -f docker-compose.coverage-local.yml up --build --abort-on-container-exit"
-
   },
   "files": [
     "common/",
