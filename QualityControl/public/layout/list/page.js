@@ -36,11 +36,14 @@ export default function layouts(model) {
  * @returns {vnode} - virtual node element
  */
 function createFolder(model, folder) {
+  const layouts = folder.list;
+  const searchBy = folder.searchInput;
   return h(
     '.m2.shadow-level3.br3.flex-column',
     [
       createHeaderOfFolder(model, folder),
       ' ',
+      folder.isOpened ? layoutCards(model, layouts, searchBy) : null,
     ],
   );
 }
@@ -67,4 +70,26 @@ function createHeaderOfFolder(model, folder) {
       ]),
     ],
   );
+}
+
+/**
+ * Displays the layouts as a set of cards.
+ * @param {Model} _model - The root model of the application.
+ * @param {RemoteData} layouts - list of layouts as remoteData object.
+ * @param {string} searchBy - string to search by in the list of layouts.
+ * @returns {vnode} - A virtual DOM node representing the card group layout.
+ */
+function layoutCards(_model, layouts, searchBy) {
+  return layouts.match({
+    NotAsked: () => null,
+    Loading: () => h('div', 'Loading...'),
+    Failure: () => h('div', [h('div.alert.alert-danger', 'Unable to retrieve this list of layouts')]),
+    Success: (list) => {
+      if (!list || list.length <= 0) {
+        return h('div', [h('.cardGroupRow', 'No layouts found')]);
+      }
+      return h('.cardGroupRow', list.filter((item) => item.name.match(searchBy))
+        .map((_layout) => h('.p2.card', '')));
+    },
+  });
 }
