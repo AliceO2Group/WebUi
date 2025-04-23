@@ -9,4 +9,3 @@ services:
         target: /usr/src/app/coverage
         read_only: false
     container_name: qcg-application-coverage-ci
-        

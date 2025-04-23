@@ -9,9 +9,7 @@ services:
       - "8080:8080"
     container_name: qcg-application-dev
     volumes:
-      # Mount the project into the container
-      - .:/usr/src/app:cached
-      # Ignore local node_modules
+      # Mount the current directory to /usr/src/app cached to improve performance
+      - .:/usr/src/app:cached 
+      # Ignore local node_modules to avoid conflicts with the container's node_modules
       - /usr/src/app/node_modules
-    
-
