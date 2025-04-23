@@ -12,6 +12,7 @@
  */
 
 import { strictEqual, deepStrictEqual } from 'node:assert';
+import { delay } from './../../testUtils/delay.js';
 
 const LAYOUT_LIST_PAGE_PARAM = '?page=layoutList';
 
@@ -29,6 +30,8 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
 
   const basePath = (index) => `section > div > div:nth-child(${index})`;
   const toggleFolderPath = (index) => `${basePath(index)} div > b`;
+  const cardPath = (index, cardIndex) => `${basePath(index)} .card:nth-child(${cardIndex})`;
+  const cardLayoutLinkPath = (cardPath) => `${cardPath} a`;
 
   const folderOpenedPath = 'section > div > div .cardGroupRow';
 
@@ -62,5 +65,22 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
       document.querySelector(path)?.textContent.trim(), toggleFolderPath(allLayoutIndex));
 
     deepStrictEqual(label, 'All Layouts');
+  });
+
+  await testParent.test('should have a link to show a layout from users layout', async () => {
+    const folderPath = toggleFolderPath(myLayoutIndex);
+    await page.click(folderPath);
+    await delay(200);
+    const linkpath = cardLayoutLinkPath(cardPath(myLayoutIndex, 2));
+
+    const href = await page.evaluate((path) => document.querySelector(path).href, linkpath);
+
+    strictEqual(href, 'http://localhost:8080/?page=layoutShow&layoutId=671b8c22402408122e2f20dd');
+
+    await page.click(linkpath);
+    await page.waitForNetworkIdle();
+    const location = await page.evaluate(() => window.location);
+
+    strictEqual(location.search, '?page=layoutShow&layoutId=671b8c22402408122e2f20dd&tab=main');
   });
 };

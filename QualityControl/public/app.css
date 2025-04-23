@@ -32,6 +32,12 @@
 
 .cardGroupRow { display: flex; flex-direction: row; flex-wrap: wrap; gap: var(--space-s); }
 .cardGroupRow > * { width: 410px; }
+.cardHeader { 
+  border-top-right-radius: 0.5rem; 
+  border-top-left-radius: 0.5rem; 
+  padding-right: var(--space-s);
+  padding-left: var(--space-s);
+}
 
 .status-bar { border-top: 1px solid var(--color-gray-dark); }
 

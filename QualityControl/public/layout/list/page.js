@@ -74,12 +74,12 @@ function createHeaderOfFolder(model, folder) {
 
 /**
  * Displays the layouts as a set of cards.
- * @param {Model} _model - The root model of the application.
+ * @param {Model} model - The root model of the application.
  * @param {RemoteData} layouts - list of layouts as remoteData object.
  * @param {string} searchBy - string to search by in the list of layouts.
  * @returns {vnode} - A virtual DOM node representing the card group layout.
  */
-function layoutCards(_model, layouts, searchBy) {
+function layoutCards(model, layouts, searchBy) {
   return layouts.match({
     NotAsked: () => null,
     Loading: () => h('div', 'Loading...'),
@@ -89,7 +89,24 @@ function layoutCards(_model, layouts, searchBy) {
         return h('div', [h('.cardGroupRow', 'No layouts found')]);
       }
       return h('.cardGroupRow', list.filter((item) => item.name.match(searchBy))
-        .map((_layout) => h('.p2.card', '')));
+        .map((layout) => h('.p2.card', [cardHeader(model, layout)])));
     },
   });
+}
+
+/**
+ * Generates the card header for a layout.
+ * @param {Model} model - The root model of the application.
+ * @param {object} layout - The layout object containing the layout data.
+ * @returns {vnode} - A virtual DOM node for the layout's header.
+ */
+function cardHeader(model, layout) {
+  return h('.cardHeader.flex-row.justify-between.bg-primary', [
+    h('h5', [
+      h('a.white', {
+        href: `?page=layoutShow&layoutId=${layout.id}`,
+        onclick: (e) => model.router.handleLinkEvent(e),
+      }, layout.name),
+    ]),
+  ]);
 }
