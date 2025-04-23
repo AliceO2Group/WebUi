@@ -42,7 +42,7 @@ const {WorkflowTemplateController} = require('./controllers/WorkflowTemplate.con
 const {BookkeepingService} = require('./services/Bookkeeping.service.js');
 const {BroadcastService} = require('./services/Broadcast.service.js');
 const {CacheService} = require('./services/Cache.service.js');
-const {EnvironmentCacheService} = require('./services/EnvironmentCache.service.js');
+const {EnvironmentCacheService} = require('./services/environment/EnvironmentCache.service.js');
 const {DetectorService} = require('./services/Detector.service.js');
 const {EnvironmentService} = require('./services/Environment.service.js');
 const {Intervals} = require('./services/Intervals.service.js');
@@ -87,7 +87,7 @@ module.exports.setup = (http, ws) => {
   const wsService = new WebSocketService(ws);
   const broadcastService = new BroadcastService(ws);
   const cacheService = new CacheService(broadcastService);
-  const envCacheService = new EnvironmentCacheService(broadcastService, eventEmitter);
+  new EnvironmentCacheService(broadcastService, eventEmitter);
 
   const consulController = new ConsulController(consulService, config.consul);
   consulController.testConsulStatus();

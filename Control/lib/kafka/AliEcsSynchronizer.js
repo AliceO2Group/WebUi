@@ -14,7 +14,7 @@
 const { AliEcsEventMessagesConsumer, LogManager } = require('@aliceo2/web-ui');
 const { CacheKeys } = require('../common/cacheKeys.enum.js'); 
 const { ConsumerGroups } = require('./enums/consumerGroups.enum.js');
-const { EmitterKeys } = require('./../common/emitterKeys.enum.js');
+const { EmitterKeys: {ENVIRONMENTS_TRACK} } = require('./../common/emitterKeys.enum.js');
 const { DcsIntegratedEventAdapter } = require('../adapters/DcsIntegratedEventAdapter.js');
 const { runEventAdapter } = require('./adapters/runEventAdapter.js');
 const { taskEventAdapter } = require('./adapters/taskEventAdapter.js');
@@ -139,7 +139,7 @@ class AliEcsSynchronizer {
    * @return {void}
    */
   async _onEnvironmentMessage(eventMessage) {
-    this._eventEmitter.emit(EmitterKeys.ENVIRONMENT_TRACK, eventMessage);
+    this._eventEmitter.emit(ENVIRONMENTS_TRACK, eventMessage);
   }
 
   /**
