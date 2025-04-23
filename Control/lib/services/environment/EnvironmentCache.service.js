@@ -30,10 +30,8 @@ class EnvironmentCacheService {
    * @param {EventEmitter} eventEmitter - which is to be used for listening to events
    */
   constructor(broadcastService, eventEmitter) {
-    /**
-     * @type {BroadcastService}
-     */
     this._environments = new Map();
+
     this._broadcastService = broadcastService;
     this._eventEmitter = eventEmitter;
 
@@ -63,7 +61,7 @@ class EnvironmentCacheService {
         this._environments.set(id, cachedEnvironment);
         this._broadcastService.broadcast(ENVIRONMENTS, cachedEnvironment);
       } catch (error) {
-        this._logger.errorMessage(`Error while processing environment even: ${error}`);
+        this._logger.errorMessage(`Error while processing environment event: ${error}`);
       }
     });
   }
