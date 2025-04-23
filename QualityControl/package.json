@@ -21,10 +21,13 @@
     "start": "node index.js",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
     "lint": "./node_modules/.bin/eslint --config eslint.config.js lib public",
-    "coverage-lcov": "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage.lcov test/test-index.js",
+    "coverage-lcov": "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/lcov.info test/test-index.js",
     "coverage-local": "node --test --experimental-test-coverage --test-reporter=spec test/test-index.js",
     "test": "node --test test/test-index.js",
-    "docker-compose-up": "docker compose up --build"
+    "copy-config": "sh scripts/copy-config.sh",
+    "docker-dev": "npm run copy-config && docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
+    "docker-test": "docker compose -f docker-compose.yml -f docker-compose.test.yml up --build --abort-on-container-exit",
+    "docker-coverage": "docker compose -f docker-compose.yml -f docker-compose.coverage.yml up --build --abort-on-container-exit"
   },
   "files": [
     "common/",
