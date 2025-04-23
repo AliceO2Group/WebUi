@@ -14,8 +14,8 @@
 const { AliEcsEventMessagesConsumer, LogManager } = require('@aliceo2/web-ui');
 const { CacheKeys } = require('../common/cacheKeys.enum.js'); 
 const { ConsumerGroups } = require('./enums/consumerGroups.enum.js');
+const { EmitterKeys } = require('./../common/emitterKeys.enum.js');
 const { DcsIntegratedEventAdapter } = require('../adapters/DcsIntegratedEventAdapter.js');
-const { environmentEventAdapter } = require('./adapters/environmentEventAdapter.js');
 const { runEventAdapter } = require('./adapters/runEventAdapter.js');
 const { taskEventAdapter } = require('./adapters/taskEventAdapter.js');
 const { Topics } = require('./enums/topics.enum.js');
@@ -29,10 +29,13 @@ class AliEcsSynchronizer {
    *
    * @param {import('kafkajs').Kafka} kafkaClient - configured kafka client
    * @param {CacheService} cacheService - instance of CacheService
+   * @param {EventEmitter} eventEmitter - instance of own EventEmitter 
    */
-  constructor(kafkaClient, cacheService) {
-    this._cacheService = cacheService;  
+  constructor(kafkaClient, cacheService, eventEmitter) {
     this._logger = LogManager.getLogger('cog/ali-ecs-synchronizer');
+
+    this._cacheService = cacheService;  
+    this._eventEmitter = eventEmitter;
 
     this._ecsIntegratedServiceDcsConsumer = new AliEcsEventMessagesConsumer(
       kafkaClient,
@@ -136,9 +139,7 @@ class AliEcsSynchronizer {
    * @return {void}
    */
   async _onEnvironmentMessage(eventMessage) {
-    const environment = environmentEventAdapter(eventMessage);
-    const { timestamp, id } = environment;
-    this._logger.debugMessage(`Received at ${timestamp} environment event message for ${id}`);
+    this._eventEmitter.emit(EmitterKeys.ENVIRONMENT_TRACK, eventMessage);
   }
 
   /**
