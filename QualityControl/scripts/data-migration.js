@@ -1,8 +1,10 @@
 import fs from 'fs';
-import { User, Layout, Tab, Chart, GridTabCell } from './models';
+import { User, Layout, Tab, Chart, GridTabCell, ChartOption } from './../lib/database/models/index.js';
+import { LogManager } from '@aliceo2/web-ui';
 
 // IMPORTANT: Specify the path to the JSON file to be migrated here
 const JSON_FILE_PATH = '';
+const _logger = new LogManager.getLogger('data-migration');
 
 const rawData = fs.readFileSync(JSON_FILE_PATH, 'utf-8');
 const data = JSON.parse(rawData);
@@ -38,11 +40,23 @@ async function migrateJsonToDB() {
       });
 
       for (const obj of tab.objects) {
-        await Chart.create({
+        const newChart = await Chart.create({
           id: obj.id,
           object_name: obj.name,
           ignore_defaults: obj.ignoreDefaults,
         });
+
+        for (const optionName of obj.options) {
+          const option = await Option.findOne({ where: { name: optionName } });
+          if (option) {
+            await ChartOption.create({
+              chart_id: newChart.id,
+              option_id: option.id,
+              created_at: new Date(),
+              updated_at: new Date(),
+            });
+          }
+        }
 
         await GridTabCell.create({
           chart_id: obj.id,
@@ -59,7 +73,7 @@ async function migrateJsonToDB() {
 
 migrateJsonToDB()
   .then(() => {
-    console.log('✅ Successfully migrated data to the database');
+    _logger.infoMessage('Data migration completed successfully.');
   }).catch((error) => {
-    console.error('❌ Error migrating data:', error);
+    _logger.errorMessage(`Data migration failed: ${error.message}`);
   });
