@@ -36,6 +36,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   const officialMarkerSymbol = (cardPath) => `${cardPath} .badge`;
 
   const folderOpenedPath = 'section > div > div .cardGroupRow';
+  const filterPath = 'header > div > div:nth-child(3) > input';
 
   await testParent.test('should successfully load layoutList page "/"', { timeout }, async () => {
     await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
@@ -145,5 +146,16 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     const officialLayoutCard = await page.evaluate((path) =>
       document.querySelector(path) === null, officialLayoutCardPath);
     strictEqual(officialLayoutCard, true, 'The official layout folder should have had a card added in previous test');
+  });
+
+  await testParent.test('should have a folder with one card after filtering', async () => {
+    await delay(200);
+    const preFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
+    strictEqual(preFilterCardCount, 2);
+    await page.locator(filterPath).fill('a');
+
+    await delay(200);
+    const postFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
+    strictEqual(postFilterCardCount, 1);
   });
 };
