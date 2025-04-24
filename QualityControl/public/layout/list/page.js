@@ -90,10 +90,14 @@ function layoutCards(model, layouts, searchBy) {
         return h('div', [h('.cardGroupRow', 'No layouts found')]);
       }
       return h('.cardGroupRow', list.filter((item) => item.name.match(searchBy))
-        .map((layout) => h('.p2.card', [
-          cardHeader(model, layout),
-          cardBody(model, layout),
-        ])));
+        .map((layout) => {
+          const { description, owner_name } = layout;
+
+          return h('.p2.card', [
+            cardHeader(model, layout),
+            cardBody(owner_name, description),
+          ]);
+        }));
     },
   });
 }
@@ -119,18 +123,17 @@ function cardHeader(model, layout) {
       }, layout.name),
     ]),
     isMinimumGlobal ?
-      headerButton(model, layout) : isOfficial && h(`span.badge.${textColor}`, [iconBadge(), ' Official']),
+      headerButton(layout) : isOfficial && h(`span.badge.${textColor}`, [iconBadge(), ' Official']),
   ]);
 }
 
 /**
  * Generates a button to toggle a layout's official/unofficial status.
  * Only shown to users with sufficient privileges (GLOBAL access level).
- * @param {Model} model - The root model of the application.
  * @param {object} layout - The layout object containing the layout data.
  * @returns {vnode} - A virtual DOM node containing the toggle button.
  */
-function headerButton(model, layout) {
+function headerButton(layout) {
   const officialText = layout.isOfficial ? 'Make Unofficial' : 'Make Official';
 
   return h('button.btn.bg-gray-darker.white.cardHeaderButton', {
@@ -142,19 +145,19 @@ function headerButton(model, layout) {
 
 /**
  * Generates the body content for a layout card.
- * @param {Model} model - The root model of the application.
- * @param {object} layout - The layout object containing the layout data.
+ * @param {string} owner_name - The name of the layout owner.
+ * @param {string} description - The description of the layout.
  * @returns {vnode} - A virtual DOM node for the layout's body content.
  */
-function cardBody(model, layout) {
+function cardBody(owner_name, description) {
   return h('.cardBody.p2', [
     h('p', [
       h('strong', 'Owner: '),
-      layout.owner_name,
+      owner_name,
     ]),
     h('p', [
       h('strong', 'Description: '),
-      layout.description || '-',
+      description || '-',
     ]),
   ]);
 }
