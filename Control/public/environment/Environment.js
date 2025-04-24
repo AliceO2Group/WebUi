@@ -52,7 +52,7 @@ export default class Environment extends Observable {
     this.list = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.get(`/api/core/environments`);
+    const {result, ok} = await this.model.loader.get(`/api/environments`);
     this.list = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
     this.notify();
   }

@@ -59,7 +59,6 @@ const { AliEcsSynchronizer } = require('./kafka/AliEcsSynchronizer.js');
 const AliecsRequestHandler = require('./control-core/RequestHandler.js');
 const ApricotService = require('./control-core/ApricotService.js');
 const ControlService = require('./control-core/ControlService.js');
-const EnvCache = require('./control-core/EnvCache.js');
 const GrpcServiceClient = require('./control-core/GrpcServiceClient.js');
 
 const path = require('path');
@@ -87,7 +86,7 @@ module.exports.setup = (http, ws) => {
   const wsService = new WebSocketService(ws);
   const broadcastService = new BroadcastService(ws);
   const cacheService = new CacheService(broadcastService);
-  new EnvironmentCacheService(broadcastService, eventEmitter);
+  const environmentCacheService = new EnvironmentCacheService(broadcastService, eventEmitter);
 
   const consulController = new ConsulController(consulService, config.consul);
   consulController.testConsulStatus();
@@ -102,18 +101,15 @@ module.exports.setup = (http, ws) => {
   const lockController = new LockController(lockService);
 
   const detectorService = new DetectorService(ctrlProxy);
-  const envService = new EnvironmentService(ctrlProxy, apricotService, cacheService, broadcastService);
+  const environmentService = new EnvironmentService(ctrlProxy, apricotService, cacheService, broadcastService, environmentCacheService);
   const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
 
-  const envCtrl = new EnvironmentController(envService, workflowService, lockService, detectorService);
+  const envCtrl = new EnvironmentController(environmentService, workflowService, lockService, detectorService);
   const workflowController = new WorkflowTemplateController(workflowService);
 
   const aliecsReqHandler = new AliecsRequestHandler(ctrlService, apricotService);
   aliecsReqHandler.setWs(ws);
   aliecsReqHandler.workflowService = workflowService;
-
-  const envCache = new EnvCache(ctrlService, envService, cacheService);
-  envCache.setWs(ws);
 
   const bkpService = new BookkeepingService(config.bookkeeping ?? {});
   const runService = new RunService(bkpService, apricotService, cacheService);
@@ -150,12 +146,12 @@ module.exports.setup = (http, ws) => {
   const intervals = new Intervals();
 
   initializeData(apricotService, lockService);
-  initializeIntervals(intervals, statusService, runService, bkpService);
+  initializeIntervals(intervals, statusService, runService, bkpService, environmentService);
 
   const coreMiddleware = [
     ctrlService.isConnectionReady.bind(ctrlService),
   ];
-  const setDetectorsFromEnvironmentMiddleware = setDetectorsFromEnvironmentMiddlewareFactory(envService);
+  const setDetectorsFromEnvironmentMiddleware = setDetectorsFromEnvironmentMiddlewareFactory(environmentService);
   const verifyLockOwnershipMiddleware = getDetectorsLockOwnershipMiddlewareFactory(lockService);
 
   ctrlProxy.methods.forEach(
@@ -175,6 +171,7 @@ module.exports.setup = (http, ws) => {
 
   http.get('/runs/calibration', runController.getCalibrationRunsHandler.bind(runController));
 
+  http.get('/environments', coreMiddleware, envCtrl.getEnvironmentsHandler.bind(envCtrl), {public: true});
   http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironmentHandler.bind(envCtrl), {public: true});
   http.post('/environment/auto', coreMiddleware, envCtrl.newAutoEnvironmentHandler.bind(envCtrl));
   http.put('/environment/:id', coreMiddleware, envCtrl.transitionEnvironmentHandler.bind(envCtrl));
@@ -186,7 +183,6 @@ module.exports.setup = (http, ws) => {
     envCtrl.destroyEnvironmentHandler.bind(envCtrl),
   );
 
-  http.get('/core/environments', coreMiddleware, (req, res) => envCache.get(req, res), {public: true});
   http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));
   http.post('/core/environments/configuration/update', (req, res) => apricotService.updateCoreEnvConfig(req, res));
 
@@ -243,9 +239,10 @@ module.exports.setup = (http, ws) => {
  * @param {StatusService} statusService - service used for retrieving status on dependent services
  * @param {RunService} runService - service for retrieving and building information on runs
  * @param {BookkeepingService} bkpService - service for retrieving information on runs from Bookkeeping
+ * @param {EnvironmentService} environmentService - service for retrieving information on environments
  * @return {void}
  */
-function initializeIntervals(intervalsService, statusService, runService, bkpService) {
+function initializeIntervals(intervalsService, statusService, runService, bkpService, environmentService) {
   const SERVICES_REFRESH_RATE = 10000;
   const CALIBRATION_RUNS_REFRESH_RATE = bkpService.refreshRate;
 
@@ -256,6 +253,7 @@ function initializeIntervals(intervalsService, statusService, runService, bkpSer
   intervalsService.register(statusService.retrieveSystemCompatibility.bind(statusService), SERVICES_REFRESH_RATE);
   intervalsService.register(statusService.retrieveNotificationSystemStatus.bind(statusService), SERVICES_REFRESH_RATE);
   intervalsService.register(statusService.retrieveAliECSIntegratedInfo.bind(statusService), SERVICES_REFRESH_RATE);
+  intervalsService.register(() => environmentService.getEnvironments(true, true), SERVICES_REFRESH_RATE);
 
 
   if (config.bookkeeping) {

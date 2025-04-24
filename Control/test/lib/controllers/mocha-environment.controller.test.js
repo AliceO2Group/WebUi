@@ -40,7 +40,7 @@ describe('EnvironmentController test suite', () => {
 
 
   const envService = {
-    getEnvironments:getEnvironmentsStub,
+    getEnvironments: getEnvironmentsStub,
     getEnvironment: getEnvironmentStub,
     transitionEnvironment: transitionEnvironmentStub,
     destroyEnvironment: destroyEnvironmentStub 
