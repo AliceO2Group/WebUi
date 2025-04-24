@@ -47,20 +47,17 @@ class EnvironmentCacheService {
   set environments(environments) {
     environments.forEach((environment) => {
       const { id } = environment;
-      let cachedEnvironment = {};
+      let updatedEnvironment= {};
       if (this._environments.has(id)) {
-        cachedEnvironment = this._environments.get(id);
+        const cachedEnvironment = this._environments.get(id);
         const { events = [] } = cachedEnvironment;
-        Object.assign(cachedEnvironment, environment);
-        cachedEnvironment.events = events;  
+        updatedEnvironment = Object.assign({}, cachedEnvironment, environment);
+        updatedEnvironment.events = [...events];  
       } else {
-        cachedEnvironment = { ...environment };
-        if (!cachedEnvironment.events) {
-          cachedEnvironment.events = [];
-        }
+        updatedEnvironment = { ...environment, events: environment.events ?? [] };
       }
 
-      this._environments.set(id, cachedEnvironment);
+      this._environments.set(id, updatedEnvironment);
     });
     this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, environments);
     this._lastUpdate = Date.now();
