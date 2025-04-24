@@ -17,6 +17,7 @@
  */
 const BroadcastKeys =  Object.freeze({
   ENVIRONMENTS: 'ENVIRONMENTS',
+  ENVIRONMENTS_OVERVIEW: 'ENVIRONMENTS_OVERVIEW',
 });
 
 exports.BroadcastKeys = BroadcastKeys;

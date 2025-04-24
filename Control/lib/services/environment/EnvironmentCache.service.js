@@ -13,7 +13,7 @@
 */
 
 const { LogManager } = require('@aliceo2/web-ui');
-const { BroadcastKeys: { ENVIRONMENTS } } = require('./../../common/broadcastKeys.enum');
+const { BroadcastKeys: { ENVIRONMENTS, ENVIRONMENTS_OVERVIEW } } = require('./../../common/broadcastKeys.enum');
 const { EmitterKeys: { ENVIRONMENTS_TRACK } } = require('./../../common/emitterKeys.enum.js');
 const { fromEcsEventToEnvironmentEvent } = require('./../../kafka/adapters/fromEcsEventToEnvironmentEvent.js');
 
@@ -62,6 +62,7 @@ class EnvironmentCacheService {
 
       this._environments.set(id, cachedEnvironment);
     });
+    this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, environments);
     this._lastUpdate = Date.now();
   }
 

@@ -173,9 +173,9 @@ export default class Model extends Observable {
       case 'o2-roc-config':
         this.configuration.setConfigurationRequest(message.payload);
         break;
-      case 'environments':
-        this.environment.list = RemoteData.success(message.payload);
-        this.environment.updateItemEnvironment(message.payload.environments);
+      case 'ENVIRONMENTS_OVERVIEW':
+        this.environment.list = RemoteData.success({ environments: message.payload });
+        this.environment.updateItemEnvironment(message.payload);
         this.notify();
         break;
       case 'requests':
@@ -207,6 +207,7 @@ export default class Model extends Observable {
       case 'DCS.SOR':
         this.cache.dcs.sor = message.payload;
         this.notify();
+        break;
     }
   }
 

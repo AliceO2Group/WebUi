@@ -246,6 +246,7 @@ module.exports.setup = (http, ws) => {
  */
 function initializeIntervals(intervalsService, statusService, runService, bkpService, environmentService) {
   const SERVICES_REFRESH_RATE = 10000;
+  const ENVIRONMENT_REFRESH_RATE = 5000;
   const CALIBRATION_RUNS_REFRESH_RATE = bkpService.refreshRate;
 
   intervalsService.register(statusService.retrieveConsulStatus.bind(statusService), SERVICES_REFRESH_RATE);
@@ -255,8 +256,7 @@ function initializeIntervals(intervalsService, statusService, runService, bkpSer
   intervalsService.register(statusService.retrieveSystemCompatibility.bind(statusService), SERVICES_REFRESH_RATE);
   intervalsService.register(statusService.retrieveNotificationSystemStatus.bind(statusService), SERVICES_REFRESH_RATE);
   intervalsService.register(statusService.retrieveAliECSIntegratedInfo.bind(statusService), SERVICES_REFRESH_RATE);
-  intervalsService.register(() => environmentService.getEnvironments(true, true), SERVICES_REFRESH_RATE);
-
+  intervalsService.register(() => environmentService.getEnvironments(true, true), ENVIRONMENT_REFRESH_RATE);
 
   if (config.bookkeeping) {
     intervalsService.register(
