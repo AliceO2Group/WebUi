@@ -13,6 +13,7 @@ jobs:
   lint-check:
     name: Check eslint rules on ubuntu-latest
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
       - name: Setup node
@@ -24,6 +25,7 @@ jobs:
   test:
     name: Tests on ubuntu-latest only if lint-check passes
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     needs: lint-check
     steps:
       - uses: actions/checkout@v4
@@ -31,11 +33,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-      - run: (cd QualityControl; npm ci )
-      - run: (cd QualityControl; npm run test )
+      - run: (cd QualityControl; npm run docker-test )
   coverage:
     name: Tests and generate lcov reoprt coverage on ubuntu-latest
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     needs: lint-check
     steps:
       - uses: actions/checkout@v4
@@ -43,11 +45,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-      - run: (cd QualityControl; npm ci )
-      - run: (cd QualityControl; npm run coverage-lcov )
+      - run: mkdir -p QualityControl/coverage 
+      - run: (cd QualityControl; npm run docker-coverage-ci )
       - name: Send codecov report for QualityControl
         uses: codecov/codecov-action@v5
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./QualityControl/coverage/lcov.info
           flags: qualitycontrol
           fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

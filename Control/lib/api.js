@@ -21,7 +21,12 @@ const config = require('./config/configProvider.js');
 const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 const {addDetectorIdMiddleware} = require('./middleware/addDetectorId.middleware.js');
 const {DetectorId} = require('./common/detectorId.enum.js');
-const {lockOwnershipMiddleware} = require('./middleware/lockOwnership.middleware.js');
+const {
+  setDetectorsFromEnvironmentMiddlewareFactory
+} = require('./middleware/setDetectorsFromEnvironmentMiddlewareFactory.js');
+const {
+  getDetectorsLockOwnershipMiddlewareFactory
+} = require('./middleware/getDetectorsLockOwnershipMiddlewareFactory.js');
 
 // controllers
 const {ConsulController} = require('./controllers/Consul.controller.js');
@@ -53,7 +58,7 @@ const AliecsRequestHandler = require('./control-core/RequestHandler.js');
 const ApricotService = require('./control-core/ApricotService.js');
 const ControlService = require('./control-core/ControlService.js');
 const EnvCache = require('./control-core/EnvCache.js');
-const GrpcProxy = require('./control-core/GrpcProxy.js');
+const GrpcServiceClient = require('./control-core/GrpcServiceClient.js');
 
 const path = require('path');
 const O2_CONTROL_PROTO_PATH = path.join(__dirname, './../protobuf/o2control.proto');
@@ -84,10 +89,10 @@ module.exports.setup = (http, ws) => {
   const consulController = new ConsulController(consulService, config.consul);
   consulController.testConsulStatus();
 
-  const ctrlProxy = new GrpcProxy(config.grpc, O2_CONTROL_PROTO_PATH);
+  const ctrlProxy = new GrpcServiceClient(config.grpc, O2_CONTROL_PROTO_PATH);
   const ctrlService = new ControlService(ctrlProxy, consulController, config.grpc, O2_CONTROL_PROTO_PATH);
   ctrlService.setWS(ws);
-  const apricotProxy = new GrpcProxy(config.apricot, O2_APRICOT_PROTO_PATH);
+  const apricotProxy = new GrpcServiceClient(config.apricot, O2_APRICOT_PROTO_PATH);
   const apricotService = new ApricotService(apricotProxy);
 
   const lockService = new LockService(broadcastService);
@@ -132,7 +137,6 @@ module.exports.setup = (http, ws) => {
     } catch (error) {
       logger.errorMessage(`Kafka initialization failed: ${error.message}`);
     }
-  
   }
 
   const statusService = new StatusService(
@@ -148,6 +152,8 @@ module.exports.setup = (http, ws) => {
   const coreMiddleware = [
     ctrlService.isConnectionReady.bind(ctrlService),
   ];
+  const setDetectorsFromEnvironmentMiddleware = setDetectorsFromEnvironmentMiddlewareFactory(envService);
+  const verifyLockOwnershipMiddleware = getDetectorsLockOwnershipMiddlewareFactory(lockService);
 
   ctrlProxy.methods.forEach(
     (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res)),
@@ -172,7 +178,8 @@ module.exports.setup = (http, ws) => {
   http.delete('/environment/:id',
     coreMiddleware,
     minimumRoleMiddleware(Role.DETECTOR),
-    lockOwnershipMiddleware(lockService, envService),
+    setDetectorsFromEnvironmentMiddleware,
+    verifyLockOwnershipMiddleware,
     envCtrl.destroyEnvironmentHandler.bind(envCtrl),
   );
 

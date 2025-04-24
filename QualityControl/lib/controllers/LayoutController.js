@@ -21,7 +21,6 @@ import { LayoutPatchDto } from './../dtos/LayoutPatchDto.js';
 import {
   InvalidInputError,
   NotFoundError,
-  UnauthorizedAccessError,
   updateAndSendExpressResponseFromNativeError,
 }
   from '@aliceo2/web-ui';
@@ -129,48 +128,28 @@ export class LayoutController {
    */
   async putLayoutHandler(req, res) {
     const { id } = req.params;
+    let layoutProposed = {};
     try {
-      if (!id) {
-        updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout'));
-      } else if (!req.body) {
+      layoutProposed = await LayoutDto.validateAsync(req.body);
+    } catch (error) {
+      updateAndSendExpressResponseFromNativeError(
+        res,
+        new InvalidInputError(`Failed to update layout: ${error?.details?.[0]?.message || ''}`),
+      );
+      return;
+    }
+    try {
+      const layouts = await this._layoutRepository.listLayouts({ name: layoutProposed.name });
+      const layoutExistsWithName = layouts.every((layout) => layout.id !== layoutProposed.id);
+      if (layouts.length > 0 && layoutExistsWithName) {
         updateAndSendExpressResponseFromNativeError(
           res,
-          new InvalidInputError('Missing body content to update layout with'),
+          new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`),
         );
-      } else {
-        const { personid } = req.session;
-        const { owner_id } = await this._layoutRepository.readLayoutById(id);
-
-        if (Number(owner_id) !== Number(personid)) {
-          updateAndSendExpressResponseFromNativeError(
-            res,
-            new UnauthorizedAccessError('Only the owner of the layout can update it'),
-          );
-        } else {
-          let layoutProposed = {};
-          try {
-            layoutProposed = await LayoutDto.validateAsync(req.body);
-          } catch (error) {
-            updateAndSendExpressResponseFromNativeError(
-              res,
-              new Error(`Failed to update layout ${error?.details?.[0]?.message || ''}`),
-            );
-            return;
-          }
-
-          const layouts = await this._layoutRepository.listLayouts({ name: layoutProposed.name });
-          const layoutExistsWithName = layouts.every((layout) => layout.id !== layoutProposed.id);
-          if (layouts.length > 0 && layoutExistsWithName) {
-            updateAndSendExpressResponseFromNativeError(
-              res,
-              new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`),
-            );
-            return;
-          }
-          const layout = await this._layoutRepository.updateLayout(id, layoutProposed);
-          res.status(201).json({ id: layout });
-        }
+        return;
       }
+      const layout = await this._layoutRepository.updateLayout(id, layoutProposed);
+      res.status(201).json({ id: layout });
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);
     }
@@ -233,33 +212,28 @@ export class LayoutController {
    */
   async patchLayoutHandler(req, res) {
     const { id } = req.params;
-    if (!id) {
-      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing ID'));
-    } else {
-      let layout = {};
-      try {
-        layout = await LayoutPatchDto.validateAsync(req.body);
-      } catch {
-        updateAndSendExpressResponseFromNativeError(
-          res,
-          new InvalidInputError('Invalid request body to update layout'),
-        );
-        return;
-      }
-
-      try {
-        await this._layoutRepository.readLayoutById(id);
-      } catch {
-        updateAndSendExpressResponseFromNativeError(res, new NotFoundError(`Unable to find layout with id: ${id}`));
-        return;
-      }
-      try {
-        const layoutUpdated = await this._layoutRepository.updateLayout(id, layout);
-        res.status(201).json(layoutUpdated);
-      } catch {
-        updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to update layout with id: ${id}`));
-        return;
-      }
+    let layout = {};
+    try {
+      layout = await LayoutPatchDto.validateAsync(req.body);
+    } catch (error) {
+      updateAndSendExpressResponseFromNativeError(
+        res,
+        new InvalidInputError(`Failed to validate layout: ${error?.details[0]?.message || ''}`),
+      );
+      return;
+    }
+    try {
+      this._layoutRepository.readLayoutById(id);
+    } catch {
+      updateAndSendExpressResponseFromNativeError(res, new NotFoundError(`Unable to find layout with id: ${id}`));
+      return;
+    }
+    try {
+      const updatedLayoutId = await this._layoutRepository.updateLayout(id, layout);
+      res.status(201).json({ id: updatedLayoutId });
+    } catch {
+      updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to update layout with id: ${id}`));
+      return;
     }
   }
 }

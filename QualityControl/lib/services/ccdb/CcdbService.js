@@ -89,7 +89,8 @@ export class CcdbService {
       throw new Error(`Unable to connect to CCDB due to: ${error}`);
     }
     try {
-      const version = Object.values(serviceInfo[CCDB_MONITOR])[0][0]?.value ?? '-';
+      const monitorData = serviceInfo?.[CCDB_MONITOR]?.[this._hostname] ?? [];
+      const version = monitorData[0]?.value ?? 'unknown version';
       return { version };
     } catch (error) {
       throw new Error(`Unable to read version of CCDB due to: ${error}`);
@@ -206,8 +207,11 @@ export class CcdbService {
       if (!location) {
         throw new Error(`No location provided by CCDB for object with path: ${path}`);
       }
-      headers.location = location;
-      return headers;
+      return {
+        ...headers,
+        location,
+        path,
+      };
     } else {
       throw new Error(`Unable to retrieve object: ${path} due to status: ${status}`);
     }

@@ -18,6 +18,7 @@ import { UserRole } from './../common/library/userRole.enum.js';
 import { layoutOwnerMiddleware } from './middleware/layouts/layoutOwner.middleware.js';
 import { layoutIdMiddleware } from './middleware/layouts/layoutId.middleware.js';
 import { layoutServiceMiddleware } from './middleware/layouts/layoutService.middleware.js';
+import { statusComponentMiddleware } from './middleware/status/statusComponent.middleware.js';
 
 /**
  * Adds paths and binds websocket to instance of HttpServer passed
@@ -54,7 +55,20 @@ export const setup = (http, ws) => {
   http.get('/layout/:id', layoutController.getLayoutHandler.bind(layoutController));
   http.get('/layout', layoutController.getLayoutByNameHandler.bind(layoutController));
   http.post('/layout', layoutController.postLayoutHandler.bind(layoutController));
-  http.put('/layout/:id', layoutController.putLayoutHandler.bind(layoutController));
+  http.put(
+    '/layout/:id',
+    layoutServiceMiddleware(jsonFileService),
+    layoutIdMiddleware(layoutRepository),
+    layoutOwnerMiddleware(layoutRepository),
+    layoutController.putLayoutHandler.bind(layoutController),
+  );
+  http.patch(
+    '/layout/:id',
+    layoutServiceMiddleware(jsonFileService),
+    layoutIdMiddleware(layoutRepository),
+    minimumRoleMiddleware(UserRole.GLOBAL),
+    layoutController.patchLayoutHandler.bind(layoutController),
+  );
   http.delete(
     '/layout/:id',
     layoutServiceMiddleware(jsonFileService),
@@ -62,14 +76,14 @@ export const setup = (http, ws) => {
     layoutOwnerMiddleware(layoutRepository),
     layoutController.deleteLayoutHandler.bind(layoutController),
   );
-  http.patch(
-    '/layout/:id',
-    minimumRoleMiddleware(UserRole.GLOBAL),
-    layoutController.patchLayoutHandler.bind(layoutController),
-  );
 
   http.get('/status/gui', statusController.getQCGStatus.bind(statusController), { public: true });
-  http.get('/status/framework', statusController.getFrameworkInfo.bind(statusController), { public: true });
+  http.get(
+    '/status/:service',
+    statusComponentMiddleware,
+    statusController.getServiceStatusHandler.bind(statusController),
+    { public: true },
+  );
 
   http.get('/checkUser', userController.addUserHandler.bind(userController));
 };

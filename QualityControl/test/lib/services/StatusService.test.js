@@ -29,35 +29,45 @@ export const statusServiceTestSuite = async () => {
         getVersion: stub().throws(new Error('Service is currently unavailable')),
       };
       const result = await statusService.retrieveDataServiceStatus();
-      deepStrictEqual(result, { status: { ok: false, message: 'Service is currently unavailable' } });
+      deepStrictEqual(
+        result,
+        { extras: {}, name: 'CCDB', status: { ok: false, message: 'Service is currently unavailable' }, version: '' },
+      );
     });
     test('should successfully return status ok if data connector passed checks', async () => {
       statusService.dataService = {
         getVersion: stub().resolves({ version: '0.0.1' }),
       };
       const response = await statusService.retrieveDataServiceStatus();
-      deepStrictEqual(response, { status: { ok: true }, version: '0.0.1' });
+      deepStrictEqual(response, { name: 'CCDB', status: { ok: true }, version: '0.0.1', extras: {} });
     });
   });
 
-  suite('`retrieveFrameworkInfo()` tests', () => {
+  suite('`retrieveServiceStatus()` tests', () => {
     test('should successfully build an object with framework information from all used sources', async () => {
       const statusService = new StatusService();
       statusService.dataService = { getVersion: stub().resolves({ version: '0.0.1-beta' }) };
-      const response = await statusService.retrieveFrameworkInfo();
-      const result = {
-        qcg: { version: '-', status: { ok: true }, clients: -1 },
-        qc: { status: { ok: true }, version: 'Not part of an FLP deployment' },
-        data_service_ccdb: { status: { ok: true }, version: '0.0.1-beta' },
-      };
-      deepStrictEqual(response, result);
+
+      const statusInfo = await Promise.all([
+        statusService.retrieveServiceStatus('qcg'),
+        statusService.retrieveServiceStatus('qc'),
+        statusService.retrieveServiceStatus('ccdb'),
+      ]);
+
+      const expectedResults = [
+        { name: 'QCG', version: '', status: { ok: true }, extras: { clients: -1 } },
+        { name: 'QC', status: { ok: true }, version: 'Not part of an FLP deployment', extras: {} },
+        { name: 'CCDB', status: { ok: true }, version: '0.0.1-beta', extras: {} },
+      ];
+
+      deepStrictEqual(statusInfo, expectedResults);
     });
 
     suite('`retrieveQcVersion()` tests', () => {
       test('should return message that is not part of an FLP deployment', async () => {
         const statusService = new StatusService();
         const response = await statusService.retrieveQcVersion();
-        const result = { status: { ok: true }, version: 'Not part of an FLP deployment' };
+        const result = { name: 'QC', status: { ok: true }, version: 'Not part of an FLP deployment', extras: {} };
         deepStrictEqual(response, result);
       });
     });
@@ -69,9 +79,12 @@ export const statusServiceTestSuite = async () => {
       const result = statusService.retrieveOwnStatus();
 
       deepStrictEqual(result, {
+        name: 'QCG',
         status: { ok: true },
         version: '0.0.1',
-        clients: -1,
+        extras: {
+          clients: -1,
+        },
       });
     });
 
@@ -80,9 +93,10 @@ export const statusServiceTestSuite = async () => {
       const result = statusService.retrieveOwnStatus();
 
       deepStrictEqual(result, {
+        name: 'QCG',
         status: { ok: true },
-        version: '-',
-        clients: -1,
+        version: '',
+        extras: { clients: -1 },
       });
     });
   });

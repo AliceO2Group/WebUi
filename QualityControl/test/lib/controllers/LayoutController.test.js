@@ -198,30 +198,6 @@ export const layoutControllerTestSuite = async () => {
       };
     });
 
-    test('should respond with 400 error if request did not contain layout id when requesting to update', async () => {
-      const req = { params: {} };
-      const layoutConnector = new LayoutController({});
-      await layoutConnector.putLayoutHandler(req, res);
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledWith({
-        message: 'Missing parameter "id" of layout',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Error message was incorrect');
-    });
-
-    test('should respond with 400 error if request did not contain body id', async () => {
-      const req = { params: { id: 'someid' } };
-      const layoutConnector = new LayoutController({});
-      await layoutConnector.putLayoutHandler(req, res);
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledWith({
-        message: 'Missing body content to update layout with',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Error message was incorrect');
-    });
-
     test('should successfully return the id of the updated layout', async () => {
       const expectedMockWithDefaults = {
         id: 'mylayout',
@@ -297,23 +273,6 @@ export const layoutControllerTestSuite = async () => {
         jsonStub.updateLayout.calledWith('mylayout', expectedMockWithDefaults),
         'Layout id was not used in data connector call',
       );
-    });
-
-    test('should return unauthorized error if user requesting update operation is not the owner', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().resolves(LAYOUT_MOCK_1),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-      const req = { params: { id: LAYOUT_MOCK_1.id }, session: { personid: 2, name: 'one' }, body: {} };
-      await layoutConnector.putLayoutHandler(req, res);
-
-      ok(res.status.calledWith(403), 'Response status was not 403');
-      ok(res.json.calledWith({
-        message: 'Only the owner of the layout can update it',
-        status: 403,
-        title: 'Unauthorized Access',
-      }), 'DataConnector error message is incorrect');
-      ok(jsonStub.readLayoutById.calledWith(LAYOUT_MOCK_1.id), 'Layout id was not used in data connector call');
     });
   });
 
@@ -528,14 +487,14 @@ export const layoutControllerTestSuite = async () => {
     test('should successfully update the official field of a layout', async () => {
       const jsonStub = sinon.createStubInstance(LayoutRepository, {
         readLayoutById: sinon.stub().resolves(LAYOUT_MOCK_1),
-        updateLayout: sinon.stub().resolves({ isOfficial: true, ...LAYOUT_MOCK_1 }),
+        updateLayout: sinon.stub().resolves(LAYOUT_MOCK_1.id),
       });
       const layoutConnector = new LayoutController(jsonStub);
 
       const req = { params: { id: 'mylayout' }, session: { personid: 1 }, body: { isOfficial: true } };
       await layoutConnector.patchLayoutHandler(req, res);
       ok(res.status.calledWith(201), 'Response status was not 201');
-      ok(res.json.calledWith({ isOfficial: true, ...LAYOUT_MOCK_1 }));
+      ok(res.json.calledWith({ id: 'mylayout' }));
       ok(jsonStub.updateLayout.calledWith('mylayout', { isOfficial: true }));
     });
 
@@ -547,23 +506,10 @@ export const layoutControllerTestSuite = async () => {
 
       ok(res.status.calledWith(400), 'Response status was not 400');
       ok(res.json.calledWith({
-        message: 'Invalid request body to update layout',
+        message: 'Failed to validate layout: "missing" is not allowed',
         status: 400,
         title: 'Invalid Input',
       }));
-    });
-
-    test('should return error due to layout not found to patch', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().rejects(new Error('Unable to find layout')),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-
-      const req = { params: { id: 'mylayout' }, session: { personid: 2 }, body: { isOfficial: true } };
-      await layoutConnector.patchLayoutHandler(req, res);
-
-      ok(res.status.calledWith(404), 'Response status was not 403');
-      ok(res.json.calledWith({ message: 'Unable to find layout with id: mylayout', status: 404, title: 'Not Found' }));
     });
 
     test('should return error due to layout update operation failing', async () => {

@@ -20,6 +20,9 @@ import {detectorHeader} from './../common/detectorHeader.js';
 import {userLogicCheckBox, userLogicCheckBoxForEndpoint} from './components/userLogicCheckBox.js';
 import {toggleAllLinksCheckBox, toggleAllLinksCRUCheckBox} from './components/allLinksCheckBox.js';
 import {cruLinkCheckBox} from './components/linkCheckBox.js';
+import { warningComponent } from '../common/warningComponent.js';
+
+const CRU_MISSING_CONFIG_WARNING_MESSAGE = 'Missing CRU configuration for some/all hosts';
 
 /**
  * @file Page to show configuration components (content and header)
@@ -144,8 +147,11 @@ const toggleAliases = (configuration) => h('.flex-row.w-20.items-center', [
 );
 
 /**
- * Build a series of panels for each detector based on the current view of the user
- * @param {Object} model
+ * Build a series of panels for each detector based on the current view of the user.
+ * The panels are grouped by detector and each detector has a list of hosts accessed by a dropdown
+ * If the detector/host contains missing CRUs configuration, the panel should display a warning
+ * @param {Object} model - RootModel of the application
+ * @param {object<string, object<string, object>>} cruMapByHost - Map of CRUs by host which contains attributes 'config' and 'info' for each
  * @returns {vnode}
  */
 const cruByDetectorPanel = (model, cruMapByHost) => {
@@ -156,6 +162,9 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
     .map((detector) => {
       const hasCRUs = hostsByDetector[detector]
         && hostsByDetector[detector].filter((host) => cruMapByHost[host]).length > 0;
+      const hasConfigForAllCRUs = hostsByDetector[detector]
+        ?.filter((host) => cruMapByHost[host])
+        .every((host) => isValidCruConfig(cruMapByHost[host]));
       return h('.w-100.pv2', [
         h('.panel-title.flex-row.pv2', [
           h('.w-20.flex-row.ph2.items-center', [
@@ -172,10 +181,14 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
             }, detector),
           ]),
           hasCRUs && [
-            userLogicCheckBox(model, detector, 'detector', '.w-15'),
-            toggleAllLinksCheckBox(model, detector, 'detector', '.w-50'),
-            h('.w-15.text-right.ph2',
-              h('button.btn', {
+            hasConfigForAllCRUs
+              ? [
+                userLogicCheckBox(model, detector, 'detector', '.w-15'),
+                toggleAllLinksCheckBox(model, detector, 'detector', '.w-50'),
+              ]
+              : warningComponent(CRU_MISSING_CONFIG_WARNING_MESSAGE, ['items-center', 'gc1']),
+            h('.right-align.ph2',
+              h('button.btn.btn-sm', {
                 title: `Close panel for detector ${detector}`,
                 onclick: () => {
                   detectors[detector].isOpen = !detectors[detector].isOpen;
@@ -232,8 +245,12 @@ const cruByHostPanel = (model, host, cruData) => {
           style: `font-weight: bold; margin-bottom:0;cursor:pointer;`
         }, hostLabel)
       ]),
-      userLogicCheckBox(model, host, 'host', '.w-15'),
-      toggleAllLinksCheckBox(model, host, 'host', '.w-15')
+      isValidCruConfig(cruData)
+        ? [
+          userLogicCheckBox(model, host, 'host', '.w-15'),
+          toggleAllLinksCheckBox(model, host, 'host', '.w-15'),
+        ]
+        : warningComponent(CRU_MISSING_CONFIG_WARNING_MESSAGE, ['items-center', 'gc1']),
     ]),
     cruData && model.configuration.cruToggleByHost[host] && h('.panel', [
       Object.keys(cruData)
@@ -411,3 +428,13 @@ Are you sure you would like to continue?`)
     disabled: model.configuration.configurationRequest.isLoading()
     || (model.workflow.model.detectors.isSingleView() && !model.lock.isLockedByCurrentUser(model.detectors.selected)),
   }, model.configuration.configurationRequest.isLoading() ? loading(1.5) : 'Configure');
+
+/**
+ * Check if the configuration given host has a valid configuration for each of its CRUs
+ * Validation is done by checking if the configuration contains at least one link
+ * @param {object<string, <string, {config: object, info: object}>} cruDataOfHost - Map of CRUs by host
+ */
+const isValidCruConfig = (cruDataOfHost) => 
+  Object.keys(cruDataOfHost)
+    .map((cruId) => Object.keys(cruDataOfHost[cruId].config))
+    .every((configKeys) => configKeys.some((key) => key.match(/link[0-9]{1,2}/)));

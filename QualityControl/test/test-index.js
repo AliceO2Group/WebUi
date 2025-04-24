@@ -35,6 +35,7 @@ import { objectTreePageTests } from './public/pages/object-tree.test.js';
 import { objectViewFromObjectTreeTests } from './public/pages/object-view-from-object-tree.test.js';
 import { objectViewFromLayoutShowTests } from './public/pages/object-view-from-layout-show.test.js';
 import { layoutShowTests } from './public/pages/layout-show.test.js';
+import { aboutPageTests } from './public/pages/about-page.test.js';
 
 /**
  * Backend tests imports
@@ -58,6 +59,9 @@ import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/date
 import { layoutIdMiddlewareTest } from './lib/middlewares/layouts/layoutId.middleware.test.js';
 import { layoutOwnerMiddlewareTest } from './lib/middlewares/layouts/layoutOwner.middleware.test.js';
 import { layoutServiceMiddlewareTest } from './lib/middlewares/layouts/layoutService.middleware.test.js';
+import { statusComponentMiddlewareTest } from './lib/middlewares/status/statusComponent.middleware.test.js';
+import { apiPutLayoutTests } from './api/layouts/api-put-layout.test.js';
+import { apiPatchLayoutTests } from './api/layouts/api-patch-layout.test.js';
 import { layoutRepositoryTest } from './lib/repositories/LayoutRepository.test.js';
 import { userRepositoryTest } from './lib/repositories/UserRepository.test.js';
 import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
@@ -74,6 +78,7 @@ const OBJECT_TREE_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
 const OBJECT_VIEW_FROM_OBJECT_TREE_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 5;
 const OBJECT_VIEW_FROM_LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 4;
 const LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 23;
+const ABOUT_VIEW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 4;
 
 const FRONT_END_TIMEOUT = INITIAL_PAGE_SETUP_TIMEOUT
   + QC_DRAWING_OPTIONS_TIMEOUT
@@ -140,7 +145,16 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       async (testParent) => await layoutShowTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
 
-    // require('./about-page.test');
+    test(
+      'should successfully run about page tests',
+      { timeout: ABOUT_VIEW_PAGE_TIMEOUT },
+      async (testParent) => await aboutPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
+    );
+
+    suite('API - Test Suite', async () => {
+      suite('Layout PUT request test suite', async () => apiPutLayoutTests());
+      suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
+    });
   });
 
   suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
@@ -169,6 +183,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('LayoutServiceMiddleware test suite', async () => layoutServiceMiddlewareTest());
       suite('LayoutIdMiddleware test suite', async () => layoutIdMiddlewareTest());
       suite('LayoutOwnerMiddleware test suite', async () => layoutOwnerMiddlewareTest());
+      suite('StatusComponentMiddleware test suite', async () => statusComponentMiddlewareTest());
     });
 
     suite('Controllers - Test Suite', async () => {

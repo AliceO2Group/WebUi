@@ -25,7 +25,7 @@ describe('ApricotService test suite', () => {
     it('should throw error due to null ApricotProxy dependency', () => {
       assert.throws(() => {
         new ApricotService(null);
-      }, new AssertionError({message: 'Missing GrpcProxy dependency for Apricot', actual: null, expected: true, operator: '=='}));
+      }, new AssertionError({message: 'Missing GrpcServiceClient dependency for Apricot', actual: null, expected: true, operator: '=='}));
     });
 
     it('should successfully instantiate ApricotService', () => {
@@ -156,7 +156,7 @@ describe('ApricotService test suite', () => {
     });
   });
 
-  describe('Check executing commands through `GrpcProxy`', () => {
+  describe('Check executing commands through `GrpcServiceClient`', () => {
     let apricotService;
     let req, res;
     beforeEach(() => {

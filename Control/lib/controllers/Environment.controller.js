@@ -13,7 +13,7 @@
 */
 const {LogManager, LogLevel} = require('@aliceo2/web-ui');
 const {
-  updateAndSendExpressResponseFromNativeError, grpcErrorToNativeError, InvalidInputError, UnauthorizedAccessError
+  updateAndSendExpressResponseFromNativeError, InvalidInputError, UnauthorizedAccessError
 } = require('@aliceo2/web-ui');
 
 const LOG_FACILITY = 'cog/env-ctrl';
@@ -182,7 +182,7 @@ class EnvironmentController {
         return;
       }
     } catch (error) {
-      updateAndSendExpressResponseFromNativeError(res, grpcErrorToNativeError(error));
+      updateAndSendExpressResponseFromNativeError(res, error);
       return;
     }
 

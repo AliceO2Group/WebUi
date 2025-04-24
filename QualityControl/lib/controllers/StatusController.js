@@ -40,14 +40,15 @@ export class StatusController {
   }
 
   /**
-   * Send back information and status about the framework and its dependencies
-   * @param {Request} _ - HTTP request object
+   * Send back information and status about the component and its dependencies
+   * @param {Request} req - HTTP request object
    * @param {Response} res - HTTP response object
    * @returns {undefined}
    */
-  async getFrameworkInfo(_, res) {
+  async getServiceStatusHandler(req, res) {
+    const { service } = req.params;
     try {
-      const info = await this._statusService.retrieveFrameworkInfo();
+      const info = await this._statusService.retrieveServiceStatus(service);
       res.status(200).json(info);
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(
