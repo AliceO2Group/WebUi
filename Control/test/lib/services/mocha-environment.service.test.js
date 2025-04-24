@@ -15,9 +15,9 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const { NotFoundError } = require('@aliceo2/web-ui');
+const { NotFoundError, GrpcErrorCodes, UnauthorizedAccessError } = require('@aliceo2/web-ui');
 
-const {EnvironmentService} = require('./../../../lib/services/Environment.service.js');
+const { EnvironmentService } = require('./../../../lib/services/Environment.service.js');
 const { User } = require('./../../../lib/dtos/User.js');
 
 describe('EnvironmentService test suite', () => {
@@ -26,6 +26,8 @@ describe('EnvironmentService test suite', () => {
   const ENVIRONMENT_NOT_FOUND_ID_BUT_CALL_SUCCESS = '2432ENV404SUCCESS';
   const ENVIRONMENT_VALID = '1234ENV';
   const ENVIRONMENT_ID_FAILED_TO_RETRIEVE = '2432ENV502';
+
+  const GetEnvironmentsStub = sinon.stub();
 
   const GetEnvironmentStub = sinon.stub();
   GetEnvironmentStub.withArgs({id: ENVIRONMENT_NOT_FOUND_ID_BUT_CALL_SUCCESS}).resolves({});
@@ -60,14 +62,67 @@ describe('EnvironmentService test suite', () => {
   }).resolves({ id: ENVIRONMENT_VALID });
   DestroyEnvironmentStub.rejects({code: 1, details: 'Wrong arguments, using default stub reject'});
 
+  const environmentCacheServiceMock = {
+    environments: [],
+  };
   const envService = new EnvironmentService(
     {
+      GetEnvironments: GetEnvironmentsStub,
       GetEnvironment: GetEnvironmentStub,
       ControlEnvironment: ControlEnvironmentStub,
       DestroyEnvironment: DestroyEnvironmentStub,
-    }, {detectors: [], includedDetectors: []}
+    }, { detectors: [], includedDetectors: [] }, {}, {}, environmentCacheServiceMock,
   );
 
+  describe(`'getEnvironments' test suite`, async () => {
+    it('should handle errors and throw a native error when gRPC call fails', async () => {
+      const grpcError = { code: GrpcErrorCodes.UNAUTHORIZED_ACCESS, details: 'No access' };
+      GetEnvironmentsStub.rejects(grpcError);
+      await assert.rejects(
+        () => envService.getEnvironments(false, false),
+        new UnauthorizedAccessError('No access')
+      );
+    });
+  
+    it('should handle empty environments list gracefully', async () => {
+      GetEnvironmentsStub.resolves({ environments: [] });
+  
+      const result = await envService.getEnvironments(false, false);
+  
+      assert.strictEqual(result.length, 0);
+      assert.strictEqual(environmentCacheServiceMock.environments.length, 0); // Cache should not be updated
+    });
+
+    it('should retrieve environments and return them without updating the cache', async () => {
+      const mockEnvironments = [
+        { id: 'env1', state: 'active' },
+        { id: 'env2', state: 'inactive' },
+      ];
+      GetEnvironmentsStub.resolves({ environments: mockEnvironments });
+  
+      const result = await envService.getEnvironments(false, false);
+  
+      assert.strictEqual(result.length, 2);
+      assert.strictEqual(result[0].id, 'env1');
+      assert.strictEqual(result[1].id, 'env2');
+      assert.strictEqual(environmentCacheServiceMock.environments.length, 0); // Cache should not be updated
+    });
+
+    it('should retrieve environments and update the cache when `shouldUpdateCache` is true', async () => {
+      const mockEnvironments = [
+        { id: 'env1', state: 'active' },
+        { id: 'env2', state: 'inactive' },
+      ];
+      GetEnvironmentsStub.resolves({ environments: mockEnvironments });
+
+      const result = await envService.getEnvironments(false, true);
+
+      assert.strictEqual(result.length, 2);
+      assert.strictEqual(result[0].id, 'env1');
+      assert.strictEqual(result[1].id, 'env2');
+      assert.strictEqual(environmentCacheServiceMock.environments.length, 2); // Cache should be updated
+    });
+  });
   describe(`'getEnvironment' test suite`, async () => {
     it('should successfully build a response with environment details given an id', async () => {
       const env = await envService.getEnvironment(ENVIRONMENT_VALID);
