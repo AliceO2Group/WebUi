@@ -91,10 +91,13 @@ function layoutCards(model, layouts, searchBy) {
       }
       return h('.cardGroupRow', list.filter((item) => item.name.match(searchBy))
         .map((layout) => {
-          const { description, owner_name } = layout;
+          const { description, owner_name, name, id } = layout;
+          const { isOfficial } = layout;
+          const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
+          const toggleOfficialFunction = (id, isOfficial) => model.layout.toggleOfficial(id, isOfficial);
 
           return h('.p2.card', [
-            cardHeader(model, layout),
+            cardHeader(isOfficial, id, name, isMinimumGlobal, toggleOfficialFunction),
             cardBody(owner_name, description),
           ]);
         }));
@@ -103,43 +106,50 @@ function layoutCards(model, layouts, searchBy) {
 }
 
 /**
- * Generates the card header for a layout.
- * @param {Model} model - The root model of the application.
- * @param {object} layout - The layout object containing the layout data.
- * @returns {vnode} - A virtual DOM node for the layout's header.
+ * Generates the card header for a layout with interactive elements including official status toggle.
+ * @param {boolean} isOfficial - Indicates if the layout currently has official status
+ * @param {string} id - Unique identifier for the layout
+ * @param {string} name - Display name of the layout
+ * @param {boolean} isMinimumGlobal - Flag indicating if user has global minimum permissions
+ * @param {Function} toggleOfficialFunction - Callback function to handle official status toggle
+ * @returns {vnode} Virtual DOM node representing the layout card header
+ * @example
+ * // Returns a card header with official styling and toggle button
+ * cardHeader(true, '123', 'My Layout', true, toggleOfficial);
  */
-function cardHeader(model, layout) {
-  const { isOfficial } = layout;
-  // const isMinimumGlobal = false;
-  const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
-  const bgColor = layout.isOfficial ? 'bg-primary' : 'bg-gray';
-  const textColor = layout.isOfficial ? 'white' : 'black';
+function cardHeader(isOfficial, id, name, isMinimumGlobal, toggleOfficialFunction) {
+  const bgColor = isOfficial ? 'bg-primary' : 'bg-gray';
+  const textColor = isOfficial ? 'white' : 'black';
 
   return h(`.cardHeader.flex-row.justify-between.${bgColor}`, [
     h('h5', [
       h(`a.${textColor}`, {
-        href: `?page=layoutShow&layoutId=${layout.id}`,
+        href: `?page=layoutShow&layoutId=${id}`,
         onclick: (e) => model.router.handleLinkEvent(e),
-      }, layout.name),
+      }, name),
     ]),
     isMinimumGlobal ?
-      headerButton(layout) : isOfficial && h(`span.badge.${textColor}`, [iconBadge(), ' Official']),
+      headerButton(isOfficial, id, toggleOfficialFunction)
+      : isOfficial && h(`span.badge.${textColor}`, [iconBadge(), ' Official']),
   ]);
 }
 
 /**
- * Generates a button to toggle a layout's official/unofficial status.
- * Only shown to users with sufficient privileges (GLOBAL access level).
- * @param {object} layout - The layout object containing the layout data.
- * @returns {vnode} - A virtual DOM node containing the toggle button.
+ * Creates a toggle button for changing a layout's official status.
+ * @param {boolean} isOfficial - Current official status of the layout
+ * @param {string} id - Unique identifier of the layout to toggle
+ * @param {Function} toggleOfficialFunction - Callback to execute when button is clicked
+ * @returns {vnode} Button element with status-appropriate text and click handler
+ * @description
+ * - Button text changes between "Make Official" and "Make Unofficial"
+ * - Click handler invokes the provided toggle function with layout ID and new status
+ * - Includes a visual badge icon for consistency with other UI elements
  */
-function headerButton(layout) {
-  const officialText = layout.isOfficial ? 'Make Unofficial' : 'Make Official';
+function headerButton(isOfficial, id, toggleOfficialFunction) {
+  const officialText = isOfficial ? 'Make Unofficial' : 'Make Official';
 
   return h('button.btn.bg-gray-darker.white.cardHeaderButton', {
-    onclick: () => {
-      model.layout.toggleOfficial(layout.id, !layout.isOfficial);
-    },
+    onclick: () => toggleOfficialFunction(id, !isOfficial),
   }, [officialText, iconBadge()]);
 }
 
