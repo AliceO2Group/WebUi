@@ -24,6 +24,7 @@ describe('EnvironmentController test suite', () => {
   const ENVIRONMENT_VALID = '1234ENV';
   const ENVIRONMENT_ID_FAILED_TO_RETRIEVE = '2432ENV502';
 
+  const getEnvironmentsStub = sinon.stub(); // as there are no parameters to pass, stub is updated per test
   const getEnvironmentStub = sinon.stub();
   getEnvironmentStub.withArgs(ENVIRONMENT_NOT_FOUND_ID).rejects(new NotFoundError(`Environment with ID: ${ENVIRONMENT_NOT_FOUND_ID} could not be found`));
   getEnvironmentStub.withArgs(ENVIRONMENT_ID_FAILED_TO_RETRIEVE).rejects(new Error(`Data service failed`));
@@ -39,6 +40,7 @@ describe('EnvironmentController test suite', () => {
 
 
   const envService = {
+    getEnvironments:getEnvironmentsStub,
     getEnvironment: getEnvironmentStub,
     transitionEnvironment: transitionEnvironmentStub,
     destroyEnvironment: destroyEnvironmentStub 
@@ -194,6 +196,42 @@ describe('EnvironmentController test suite', () => {
       await envCtrl.destroyEnvironmentHandler({session: {username: 'test'}, params: {id: ENVIRONMENT_VALID}, body: {}}, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({id: ENVIRONMENT_VALID}));
+    });
+  });
+
+  describe(`'getEnvironmentsHandler' test suite`, async () => {
+    it('should successfully return all environments and the last update timestamp', async () => {
+      const mockEnvironments = [
+        { id: 'env1', state: 'active' },
+        { id: 'env2', state: 'inactive' },
+      ];
+      getEnvironmentsStub.resolves(mockEnvironments);
+  
+      await envCtrl.getEnvironmentsHandler({}, res);
+  
+      assert.ok(res.status.calledWith(200));
+      assert.ok(
+        res.json.calledWith({
+          environments: mockEnvironments,
+          lastUpdate: sinon.match.number,
+        })
+      );
+    });
+  
+    it('should handle errors when retrieving environments', async () => {
+      const errorMessage = 'Failed to retrieve environments';
+      getEnvironmentsStub.rejects(new Error(errorMessage));
+  
+      await envCtrl.getEnvironmentsHandler({}, res);
+  
+      assert.ok(res.status.calledWith(500));
+      assert.ok(
+        res.json.calledWith({
+          message: errorMessage,
+          status: 500,
+          title: 'Unknown Error',
+        })
+      );
     });
   });
 });

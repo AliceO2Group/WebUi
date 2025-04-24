@@ -56,6 +56,26 @@ class EnvironmentController {
   }
 
   /**
+   * API - GET endpoint for retrieving all environments and current static information about them
+   * It will retrieve environments without detailed information on the tasks running
+   * @param {Request} _ - HTTP Request object
+   * @param {Response} res - HTTP Response object with a list of all environments
+   * @returns {void}
+   */
+  async getEnvironmentsHandler(_, res) {
+    try {
+      const environments = await this._envService.getEnvironments(false, false);
+      res.status(200).json({environments, lastUpdate: Date.now()});
+    } catch (error) {
+      this._logger.errorMessage(
+        `Failed to retrieve all environments due to ${error}`,
+        { level: LogLevel.ERROR, system: 'GUI', facility: LOG_FACILITY }
+      );
+      updateAndSendExpressResponseFromNativeError(res, error);
+    }
+  }
+
+  /**
    * API - GET endpoint for retrieving data about an AliECS environment by its id
    * @param {Request} req - HTTP Request object
    * @param {Response} res - HTTP Response object with EnvironmentDetails
