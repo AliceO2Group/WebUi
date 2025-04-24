@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, deepStrictEqual } from 'node:assert';
+import { strictEqual } from 'node:assert';
 import { delay } from './../../testUtils/delay.js';
 
 const LAYOUT_LIST_PAGE_PARAM = '?page=layoutList';
@@ -52,21 +52,21 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     const label = await page.evaluate((path) =>
       document.querySelector(path).textContent.trim(), toggleFolderPath(officialLayoutIndex));
 
-    deepStrictEqual(label, 'Official');
+    strictEqual(label, 'Official');
   });
 
   await testParent.test('should have folder for personal layouts', async () => {
     const label = await page.evaluate((path) =>
       document.querySelector(path).textContent.trim(), toggleFolderPath(myLayoutIndex));
 
-    deepStrictEqual(label, 'My Layouts');
+    strictEqual(label, 'My Layouts');
   });
 
   await testParent.test('should have folder for all layouts', async () => {
     const label = await page.evaluate((path) =>
       document.querySelector(path)?.textContent.trim(), toggleFolderPath(allLayoutIndex));
 
-    deepStrictEqual(label, 'All Layouts');
+    strictEqual(label, 'All Layouts');
   });
 
   await testParent.test('should have a link to show a layout from users layout', async () => {
