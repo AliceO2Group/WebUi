@@ -128,7 +128,6 @@ function cardHeader(model, layout) {
  * Only shown to users with sufficient privileges (GLOBAL access level).
  * @param {Model} model - The root model of the application.
  * @param {object} layout - The layout object containing the layout data.
- * @param {boolean} isOfficial - Current official status of the layout.
  * @returns {vnode} - A virtual DOM node containing the toggle button.
  */
 function headerButton(model, layout) {
