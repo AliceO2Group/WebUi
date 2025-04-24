@@ -40,18 +40,18 @@
     "openid-client": "^5.6.0",
     "winston": "3.17.0",
     "ws": "^8.18.0",
-    "protobufjs": "^7.4.0"
+    "protobufjs": "^7.5.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.23.0",
+    "@eslint/js": "^9.25.1",
     "@stylistic/eslint-plugin-js": "^4.2.0",
-    "eslint": "^9.23.0",
+    "eslint": "^9.25.1",
     "eslint-plugin-jsdoc": "^50.6.0",
     "globals": "^16.0.0",
     "mocha": "^11.1.0",
     "nock": "14.0.0",
     "nyc": "^17.1.0",
-    "puppeteer": "^24.4.0",
+    "puppeteer": "^24.7.1",
     "sinon": "20.0.0",
     "supertest": "^7.1.0",
     "long": "^5.3.1"
