@@ -90,10 +90,13 @@ function layoutCards(model, layouts, searchBy) {
         return h('div', [h('.cardGroupRow', 'No layouts found')]);
       }
       return h('.cardGroupRow', list.filter((item) => item.name.match(searchBy))
-        .map((layout) => h('.p2.card', [
-          cardHeader(model, layout),
-          cardBody(model, layout),
-        ])));
+        .map((layout) => h(
+          '.p2.card', // card class does nothing, here to denode that the element is a card to make testing easier.
+          [
+            cardHeader(model, layout),
+            cardBody(model, layout),
+          ],
+        )));
     },
   });
 }
