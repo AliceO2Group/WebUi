@@ -14,26 +14,22 @@
 /**
  * Adapter for event messages received on environment topic
  * @param {Event.proto} eventMessage - the event message to adapt
- * @param {int64.proto} eventMessage.timestamp - the timestamp of the event
  * @param {Ev_EnvironmentEvent.proto} eventMessage.environmentEvent - the environment event to adapt
  * @return {EnvironmentEvent} - the adapted event message without the timestampNano field
  */
-exports.environmentEventAdapter = ({ timestamp, environmentEvent }) => {
+exports.fromEcsEventToEnvironmentEvent = ({ environmentEvent }) => {
   const {
     environmentId: id,
-    state, runNumber, error, message, transition, transitionStep, transitionStatus, vars, lastRequestUser
+    error, message, transition, transitionStep, transitionStatus,
   } = environmentEvent;
   return {
     id,
-    state,
-    runNumber,
     error,
     message,
-    transition,
-    transitionStep,
-    transitionStatus,
-    vars,
-    lastRequestUser,
-    timestamp: timestamp ? timestamp.toNumber() : undefined,
+    transition: {
+      name: transition,
+      step: transitionStep,
+      status: transitionStatus,
+    }
   };
 };

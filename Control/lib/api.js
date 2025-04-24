@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+const { EventEmitter } = require('events');
 const { Kafka, logLevel } = require('kafkajs');
 const logger = (require('@aliceo2/web-ui').LogManager)
   .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/api`);
@@ -41,6 +42,7 @@ const {WorkflowTemplateController} = require('./controllers/WorkflowTemplate.con
 const {BookkeepingService} = require('./services/Bookkeeping.service.js');
 const {BroadcastService} = require('./services/Broadcast.service.js');
 const {CacheService} = require('./services/Cache.service.js');
+const {EnvironmentCacheService} = require('./services/environment/EnvironmentCache.service.js');
 const {DetectorService} = require('./services/Detector.service.js');
 const {EnvironmentService} = require('./services/Environment.service.js');
 const {Intervals} = require('./services/Intervals.service.js');
@@ -77,7 +79,7 @@ if (!config.grafana) {
 }
 
 module.exports.setup = (http, ws) => {
-
+  const eventEmitter = new EventEmitter();
   let consulService;
   if (config.consul) {
     consulService = new ConsulService(config.consul);
@@ -85,6 +87,7 @@ module.exports.setup = (http, ws) => {
   const wsService = new WebSocketService(ws);
   const broadcastService = new BroadcastService(ws);
   const cacheService = new CacheService(broadcastService);
+  new EnvironmentCacheService(broadcastService, eventEmitter);
 
   const consulController = new ConsulController(consulService, config.consul);
   consulController.testConsulStatus();
@@ -131,7 +134,7 @@ module.exports.setup = (http, ws) => {
         retry: { retries: Infinity },
         logLevel: logLevel.NOTHING,
       });
-      aliEcsSynchronizer = new AliEcsSynchronizer(kafkaClient, cacheService);
+      aliEcsSynchronizer = new AliEcsSynchronizer(kafkaClient, cacheService, eventEmitter);
       aliEcsSynchronizer.start();
     
     } catch (error) {
