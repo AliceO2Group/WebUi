@@ -51,3 +51,19 @@ qc: {
 }
 ```
 
+### Database Configuration
+
+The application requires the following database configuration parameters:
+
+| **Field**       | **Description**                                                                 |
+|-----------------|---------------------------------------------------------------------------------|
+| `host`          | Hostname or IP address of the database server.                                 |
+| `port`          | Port number used to connect to the database server.                            |
+| `username`      | Username for authenticating with the database.                                 |
+| `password`      | Password for the specified database user.                                      |
+| `database`      | Name of the database to connect to.                                            |
+| `charset`       | Character encoding used for the connection.                                    |
+| `collate`       | Collation setting used for string comparison and sorting.                      |
+| `timezone`      | Time zone used for all date/time values in the database connection.            |
+| `logging`       | Enables or disables SQL query logging (useful for debugging).                  |
+| `retryThrottle` | Time in milliseconds to wait before retrying a failed database connection.     |

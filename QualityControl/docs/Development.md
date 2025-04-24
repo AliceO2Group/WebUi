@@ -6,31 +6,14 @@ Node.js: v22 (minimum)
 
 Docker: Ensure Docker is installed and running on your system.
 
-## Configuration
-
-A .env configuration file is required for development. It should be placed in the root directory of the project.
-
-Here is an example of the required environment variables:
-
-```bash
-MYSQL_DATABASE=qcg_dev_db
-MYSQL_USER=qcg_dev_user
-MYSQL_PASSWORD=123456
-MYSQL_ROOT_PASSWORD=123456
-```
-
-Ensure these credentials match your local development setup.
-
 ## Running the Application
 
 Follow these steps to start the QCG application:
 
 1. Ensure Docker is running on your machine.
-
 2. Execute the following command to launch the application:
-
 ```bash
-docker-compose up
+npm run docker-dev
 ```
 
 Once the application is running, access it in your browser at:
@@ -46,3 +29,5 @@ Once the application is running, access it in your browser at:
 docker --version
 docker-compose --version
 ```
+
+- You may occasionally encounter error messages indicating that the application is unable to connect to the database (e.g., `SequelizeConnectionRefusedError`). This can happen if the application tries to establish a connection before the database service is fully initialized. In such cases, these messages are expected during startup and should stop appearing once the database is ready. Simply wait a few moments and the application should recover automatically.
