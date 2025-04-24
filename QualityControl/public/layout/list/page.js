@@ -94,7 +94,7 @@ function layoutCards(model, layouts, searchBy) {
           const { description, owner_name, name, id } = layout;
           const { isOfficial } = layout;
           const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
-          const toggleOfficialFunction = (id, isOfficial) => model.layout.toggleOfficial(id, isOfficial);
+          const toggleOfficialFunction = (id) => model.layout.toggleOfficial(id);
 
           return h('.p2.card', [
             cardHeader(isOfficial, id, name, isMinimumGlobal, toggleOfficialFunction),
@@ -149,7 +149,7 @@ function headerButton(isOfficial, id, toggleOfficialFunction) {
   const officialText = isOfficial ? 'Make Unofficial' : 'Make Official';
 
   return h('button.btn.bg-gray-darker.white.cardHeaderButton', {
-    onclick: () => toggleOfficialFunction(id, !isOfficial),
+    onclick: () => toggleOfficialFunction(id),
   }, [officialText, iconBadge()]);
 }
 
