@@ -42,8 +42,10 @@
 .cardHeader { 
   border-top-right-radius: 0.5rem; 
   border-top-left-radius: 0.5rem; 
-  padding-right: var(--space-s);
   padding-left: var(--space-s);
+}
+.cardHeaderButton {
+  min-width: 145px; 
 }
 .cardBody { 
   border: solid 1px var(--color-primary); 

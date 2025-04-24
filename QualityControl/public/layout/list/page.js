@@ -90,13 +90,10 @@ function layoutCards(model, layouts, searchBy) {
         return h('div', [h('.cardGroupRow', 'No layouts found')]);
       }
       return h('.cardGroupRow', list.filter((item) => item.name.match(searchBy))
-        .map((layout) => h(
-          '.p2.card', // card class does nothing, here to denode that the element is a card to make testing easier.
-          [
-            cardHeader(model, layout),
-            cardBody(model, layout),
-          ],
-        )));
+        .map((layout) => h('.p2.card', [
+          cardHeader(model, layout),
+          cardBody(model, layout),
+        ])));
     },
   });
 }
@@ -109,16 +106,39 @@ function layoutCards(model, layouts, searchBy) {
  */
 function cardHeader(model, layout) {
   const { isOfficial } = layout;
+  // const isMinimumGlobal = false;
+  const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
+  const bgColor = layout.isOfficial ? 'bg-primary' : 'bg-gray';
+  const textColor = layout.isOfficial ? 'white' : 'black';
 
-  return h('.cardHeader.flex-row.justify-between.bg-primary', [
+  return h(`.cardHeader.flex-row.justify-between.${bgColor}`, [
     h('h5', [
-      h('a.white', {
+      h(`a.${textColor}`, {
         href: `?page=layoutShow&layoutId=${layout.id}`,
         onclick: (e) => model.router.handleLinkEvent(e),
       }, layout.name),
     ]),
-    isOfficial && h('span.badge', [iconBadge(), ' Official']),
+    isMinimumGlobal ?
+      headerButton(model, layout) : isOfficial && h(`span.badge.${textColor}`, [iconBadge(), ' Official']),
   ]);
+}
+
+/**
+ * Generates a button to toggle a layout's official/unofficial status.
+ * Only shown to users with sufficient privileges (GLOBAL access level).
+ * @param {Model} model - The root model of the application.
+ * @param {object} layout - The layout object containing the layout data.
+ * @param {boolean} isOfficial - Current official status of the layout.
+ * @returns {vnode} - A virtual DOM node containing the toggle button.
+ */
+function headerButton(model, layout) {
+  const officialText = layout.isOfficial ? 'Make Unofficial' : 'Make Official';
+
+  return h('button.btn.bg-gray-darker.white.cardHeaderButton', {
+    onclick: () => {
+      model.layout.toggleOfficial(layout.id, !layout.isOfficial);
+    },
+  }, [officialText, iconBadge()]);
 }
 
 /**
@@ -128,28 +148,14 @@ function cardHeader(model, layout) {
  * @returns {vnode} - A virtual DOM node for the layout's body content.
  */
 function cardBody(model, layout) {
-  const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
-  const { isOfficial } = layout;
-
   return h('.cardBody.p2', [
-    h('span', [
+    h('p', [
       h('strong', 'Owner: '),
       layout.owner_name,
     ]),
     h('p', [
-      h('strong', 'Name: '),
-      layout.name || '-',
-    ]),
-    h('p', [
       h('strong', 'Description: '),
       layout.description || '-',
-    ]),
-    h('.bg-transparent', [
-      h('.justify-content-end', [
-        isMinimumGlobal && h('button.btn.btn-sm', {
-          onclick: () => model.layout.toggleOfficial(layout.id, !layout.isOfficial),
-        }, isOfficial ? 'Make Unofficial' : 'Make Official'),
-      ]),
     ]),
   ]);
 }
