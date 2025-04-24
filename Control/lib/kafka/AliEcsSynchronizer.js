@@ -139,7 +139,11 @@ class AliEcsSynchronizer {
    * @return {void}
    */
   async _onEnvironmentMessage(eventMessage) {
-    this._eventEmitter.emit(ENVIRONMENTS_TRACK, eventMessage);
+    if (!eventMessage?.environmentEvent) {
+      this._logger.errorMessage(`Received environment event message without environmentEvent: ${JSON.stringify(eventMessage)}`);
+      return;
+    }
+    this._eventEmitter.emit(ENVIRONMENTS_TRACK, eventMessage );
   }
 
   /**

@@ -45,24 +45,19 @@ class EnvironmentCacheService {
    * @returns {void}
    */
   _listenToEventsAndBroadcast() {
-    this._eventEmitter.on(ENVIRONMENTS_TRACK, (environment) => {
-      try {
-        const { id, timestamp } = environment;
-        if (!id) {
-          throw new Error('Missing id');
-        }
-        const cachedEnvironment = this._environments.has(id)
-          ? this._environments.get(id)
-          : { id, events: [] };
+    this._eventEmitter.on(ENVIRONMENTS_TRACK, (event) => {
+      const environment = fromEcsEventToEnvironmentEvent(event);
+      const { id } = environment;
 
-        cachedEnvironment.events.push(fromEcsEventToEnvironmentEvent(environment));
-        cachedEnvironment.lastUpdate = timestamp;
+      const cachedEnvironment = this._environments.has(id)
+        ? this._environments.get(id)
+        : { id, events: [] };
 
-        this._environments.set(id, cachedEnvironment);
-        this._broadcastService.broadcast(ENVIRONMENTS, cachedEnvironment);
-      } catch (error) {
-        this._logger.errorMessage(`Error while processing environment event: ${error}`);
-      }
+      cachedEnvironment.events.push(environment);
+      cachedEnvironment.lastUpdate = Date.now();
+
+      this._environments.set(id, cachedEnvironment);
+      this._broadcastService.broadcast(ENVIRONMENTS, cachedEnvironment);
     });
   }
 }
