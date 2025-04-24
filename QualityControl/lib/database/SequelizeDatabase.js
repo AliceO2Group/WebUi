@@ -14,12 +14,13 @@
 
 import { LogManager } from '@aliceo2/web-ui';
 import { Sequelize } from 'sequelize';
-import { SequelizeStorage } from 'umzug';
+import pkg from 'umzug';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { createUmzug } from './umzug.js';
 import { getDbConfig } from '../config/database.js';
-import models from './index.js';
+import models from './models/index.js';
+const { SequelizeStorage } = pkg;
 
 /**
  * Sequelize implementation of the Database.
@@ -70,8 +71,8 @@ export class SequelizeDatabase {
       this._models = models(this.sequelize);
       this._logger.infoMessage('Database connection initialized successfully.');
     } catch (error) {
-      this._logger.errorMessage('Error initializing database connection:', error);
-      throw new Error('Database connection failed');
+      this._logger.errorMessage(`Error initializing database connection: ${error}`);
+      throw new Error('Error initializing database connection');
     }
   }
 
@@ -90,7 +91,7 @@ export class SequelizeDatabase {
         connected = true;
         this._logger.debugMessage('Connected to db successfully');
       } catch (error) {
-        this._logger.errorMessage('Unable to connect to the database:', error);
+        this._logger.errorMessage(`Unable to connect to db: ${error}`);
         this._logger.debugMessage(`Retrying in ${retryThrottle} ms...`);
         // Wait before trying again
         await new Promise((resolve) => setTimeout(resolve, retryThrottle));
@@ -106,6 +107,7 @@ export class SequelizeDatabase {
     this._logger.infoMessage('Executing pending migrations...');
     try {
       const umzug = createUmzug(
+        this.sequelize,
         join(this.__dirname, 'migrations'),
         new SequelizeStorage({
           sequelize: this.sequelize,

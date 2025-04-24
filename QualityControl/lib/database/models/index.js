@@ -14,7 +14,7 @@
 
 import ChartModel from './Chart.js';
 import ChartOptionModel from './ChartOption.js';
-import GridTabCellModel from './GridTabCell';
+import GridTabCellModel from './GridTabCell.js';
 import LayoutModel from './Layout.js';
 import OptionModel from './Option.js';
 import TabModel from './Tab.js';

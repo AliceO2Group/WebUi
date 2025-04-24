@@ -40,6 +40,7 @@
     "@aliceo2/web-ui": "^2.8.1",
     "joi": "17.13.3",
     "jsroot": "7.8.1",
+    "mariadb": "^3.4.1",
     "sequelize": "^6.37.7",
     "umzug": "^3.8.2"
   },

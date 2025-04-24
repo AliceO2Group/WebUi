@@ -12,8 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Umzug } from 'umzug';
+import pkg from 'umzug';
 import { Sequelize } from 'sequelize';
+
+const { Umzug } = pkg;
 
 /**
  * Creates a new Umzug instance for managing database migrations.
