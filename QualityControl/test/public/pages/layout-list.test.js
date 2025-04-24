@@ -100,7 +100,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(markedAsOfficial, 'Make Official', 'Unofficial layout cardbuttons should state: "Make Official"');
 
     await page.click(buttonPath);
-    await delay(1500); // Making a layout official takes a bit.
+    await delay(1000); // Making a layout official takes a bit.
 
     markedAsOfficial = await page.evaluate((path) => document.querySelector(path).textContent.trim(), buttonPath);
     strictEqual(markedAsOfficial, 'Make Unofficial', 'Official layout cardbuttons should state: "Make Unofficial"');
@@ -126,7 +126,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     await delay(200);
 
     await page.click(buttonPath);
-    await delay(1000);
+    await delay(1000); // Making a layout official takes a bit.
 
     const officialLayoutCard = await page.evaluate((path) =>
       document.querySelector(path) === null, officialLayoutCardPath);
@@ -138,7 +138,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     const officialLayoutCardPath = cardPath(officialLayoutIndex, 1);
 
     await page.click(buttonPath);
-    await delay(1000);
+    await delay(1000); // Making a layout official takes a bit.
 
     const officialLayoutCard = await page.evaluate((path) =>
       document.querySelector(path) === null, officialLayoutCardPath);
