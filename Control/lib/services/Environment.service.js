@@ -67,7 +67,9 @@ class EnvironmentService {
       const detectorsAll = this._apricotGrpc.detectors ?? [];
       const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
       
-      const environmentsInfoList = environments.map((environment) => EnvironmentInfoAdapter.toEntity(environment, '', detectorsAll, hostsByDetector));
+      const environmentsInfoList = environments.map(
+        (environment) => EnvironmentInfoAdapter.toEntity(environment, '', detectorsAll, hostsByDetector)
+      );
       if (shouldUpdateCache) {
         this._environmentCacheService.environments = environmentsInfoList;
       }

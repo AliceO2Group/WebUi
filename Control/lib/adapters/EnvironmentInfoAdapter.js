@@ -57,8 +57,6 @@ class EnvironmentInfoAdapter {
       numberOfHosts = 0,
       numberOfTasks = 0,
       includedDetectors = [],
-      defaults = {},
-      vars = {},
       userVars = {},
       integratedServicesData = {},
     } = environment;

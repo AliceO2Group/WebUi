@@ -101,7 +101,9 @@ module.exports.setup = (http, ws) => {
   const lockController = new LockController(lockService);
 
   const detectorService = new DetectorService(ctrlProxy);
-  const environmentService = new EnvironmentService(ctrlProxy, apricotService, cacheService, broadcastService, environmentCacheService);
+  const environmentService = new EnvironmentService(
+    ctrlProxy, apricotService, cacheService, broadcastService, environmentCacheService
+  );
   const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
 
   const envCtrl = new EnvironmentController(environmentService, workflowService, lockService, detectorService);
