@@ -31,12 +31,46 @@ class EnvironmentCacheService {
    */
   constructor(broadcastService, eventEmitter) {
     this._environments = new Map();
+    this._lastUpdate = undefined;
 
     this._broadcastService = broadcastService;
     this._eventEmitter = eventEmitter;
 
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/env-cache-service`);
     this._listenToEventsAndBroadcast();
+  }
+
+  /**
+   * Setter for updating existing environments in cache
+   * @param {EnvironmentInfo[]} environments - the environments to be updated
+   */
+  set environments(environments) {
+    environments.forEach((environment) => {
+      const { id } = environment;
+      let cachedEnvironment = {};
+      if (this._environments.has(id)) {
+        cachedEnvironment = this._environments.get(id);
+        const { events = [] } = cachedEnvironment;
+        Object.assign(cachedEnvironment, environment);
+        cachedEnvironment.events = events;  
+      } else {
+        cachedEnvironment = { ...environment };
+        if (!cachedEnvironment.events) {
+          cachedEnvironment.events = [];
+        }
+      }
+
+      this._environments.set(id, cachedEnvironment);
+    });
+    this._lastUpdate = Date.now();
+  }
+
+  /**
+   * Getter for retrieving the environments from cache
+   * @returns {Map<string, EnvironmentInfo>} - the environments stored in cache
+   */
+  get environments() {
+    return this._environments;
   }
 
   /**
@@ -59,6 +93,7 @@ class EnvironmentCacheService {
       cachedEnvironment.lastUpdate = this._adaptInt64ToNumber(timestamp);
       this._environments.set(id, cachedEnvironment);
       this._broadcastService.broadcast(ENVIRONMENTS, cachedEnvironment);
+      this._lastUpdate = Date.now();
     });
   }
 
