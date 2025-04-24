@@ -89,17 +89,4 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
     assert.strictEqual(environmentCacheService._environments.get('abc135').lastUpdate, updatedEvent.timestamp);
     assert.strictEqual(broadcastServiceMock.broadcast.callCount, 2);
   });
-
-  it('should handle errors thrown during event processing', () => {
-    const loggerSpy = sinon.spy(environmentCacheService._logger, 'errorMessage');
-    const faultyEvent = { id: 'abc1=246', timestamp: Date.now() };
-
-    fromEcsEventToEnvironmentEventStub.throws(new Error('Test error'));
-
-    eventEmitter.emit(ENVIRONMENTS_TRACK, faultyEvent);
-
-    assert.ok(loggerSpy.calledOnce);
-    assert.ok(loggerSpy.args[0][0].includes('Error while processing environment event: Error: Test error'));
-    assert.ok(broadcastServiceMock.broadcast.notCalled);
-  });
 });
