@@ -46,6 +46,8 @@ class EnvironmentCacheService {
    */
   _listenToEventsAndBroadcast() {
     this._eventEmitter.on(ENVIRONMENTS_TRACK, (event) => {
+      const { timestamp } = event;
+      
       const environment = fromEcsEventToEnvironmentEvent(event);
       const { id } = environment;
 
@@ -54,11 +56,21 @@ class EnvironmentCacheService {
         : { id, events: [] };
 
       cachedEnvironment.events.push(environment);
-      cachedEnvironment.lastUpdate = Date.now();
-
+      cachedEnvironment.lastUpdate = this._adaptInt64ToNumber(timestamp);
       this._environments.set(id, cachedEnvironment);
       this._broadcastService.broadcast(ENVIRONMENTS, cachedEnvironment);
     });
+  }
+
+  /**
+   * @private
+   * Method to adapt the int64 timestamp to a number
+   * @param {BigInt} int64 - the int64 timestamp to be adapted
+   * @return {number} - the adapted timestamp
+   */
+  _adaptInt64ToNumber(int64) {
+    const bigIntTimestamp = BigInt(int64.toString(10));
+    return Number(bigIntTimestamp);
   }
 }
 

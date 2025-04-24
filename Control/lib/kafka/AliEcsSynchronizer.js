@@ -140,7 +140,9 @@ class AliEcsSynchronizer {
    */
   async _onEnvironmentMessage(eventMessage) {
     if (!eventMessage?.environmentEvent) {
-      this._logger.errorMessage(`Received environment event message without environmentEvent: ${JSON.stringify(eventMessage)}`);
+      this._logger.errorMessage(
+        `Received environment event message without environmentEvent: ${JSON.stringify(eventMessage)}`
+      );
       return;
     }
     this._eventEmitter.emit(ENVIRONMENTS_TRACK, eventMessage );
@@ -152,9 +154,7 @@ class AliEcsSynchronizer {
    * @return {void}
    */
   async _onRunMessage(eventMessage) {
-    const run = runEventAdapter(eventMessage);
-    const { timestamp, runNumber } = run;
-    this._logger.debugMessage(`Received at ${timestamp} run event message for ${runNumber}`);
+    runEventAdapter(eventMessage);
   }
 
   /**
@@ -163,11 +163,7 @@ class AliEcsSynchronizer {
    * @return {void}
    */
   async _onTaskMessage(eventMessage) {
-    const task = taskEventAdapter(eventMessage);
-    const { timestamp, taskId, environmentId } = task;
-    this._logger.debugMessage(
-      `Received at ${timestamp} task event message for ${taskId} of environment ${environmentId}`
-    );
+    taskEventAdapter(eventMessage);
   }
 }
 

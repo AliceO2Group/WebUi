@@ -50,11 +50,6 @@
     "sinon": "20.0.0",
     "supertest": "7.1.0"
   },
-  "bundledDependencies": [
-    "@aliceo2/web-ui",
-    "@grpc/grpc-js",
-    "@grpc/proto-loader"
-  ],
   "bundleDependencies": [
     "@aliceo2/web-ui",
     "@grpc/grpc-js",

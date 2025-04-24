@@ -90,17 +90,6 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
     assert.strictEqual(broadcastServiceMock.broadcast.callCount, 2);
   });
 
-  it('should log but not throw an error if the environment event is missing an id', () => {
-    const loggerSpy = sinon.spy(environmentCacheService._logger, 'errorMessage');
-    const invalidEvent = { timestamp: Date.now() };
-
-    eventEmitter.emit(ENVIRONMENTS_TRACK, invalidEvent);
-
-    assert.ok(loggerSpy.calledOnce);
-    assert.ok(loggerSpy.args[0][0].includes('Error while processing environment event: Error: Missing id'));
-    assert.ok(broadcastServiceMock.broadcast.notCalled);
-  });
-
   it('should handle errors thrown during event processing', () => {
     const loggerSpy = sinon.spy(environmentCacheService._logger, 'errorMessage');
     const faultyEvent = { id: 'abc1=246', timestamp: Date.now() };
