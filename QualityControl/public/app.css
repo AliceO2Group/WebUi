@@ -30,7 +30,14 @@
 .layout-selected { border: 0.3em solid var(--color-primary); }
 .layout-edit-layer { cursor: move; opacity: 0; }
 
-.cardGroupRow { display: flex; flex-direction: row; flex-wrap: wrap; gap: var(--space-s); }
+.cardGroupRow { 
+  display: flex; 
+  flex-direction: row; 
+  flex-wrap: wrap; 
+  gap: var(--space-s); 
+  max-height: 410px; /* about 2 cards in height */
+  overflow: auto;
+}
 .cardGroupRow > * { width: 410px; }
 .cardHeader { 
   border-top-right-radius: 0.5rem; 
