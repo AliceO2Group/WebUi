@@ -29,8 +29,6 @@
  * @property {Number} numberOfTasks - number of tasks running on FLPs
  * @property {Map<[qc, epn, flp, trg], Object>} hardware - a map of counters per component of their tasks (FLP, EPN, QC, TRIGGER, ALL)
  * @property {Array<String>} includedDetectors - list of detectors part of the environment
- * @property {Map<String, String>} defaults - map of variables that are set as defaults and their values
- * @property {Map<String, String>} vars - map of all variables that are set and their values
  * @property {Map<String, String>} userVars - map of user set variables and their values
  * @property {Map<String, Object>} [integratedServicesData] - map of integrated services such as Bookkeeping, ODC, CCDB, etc.
  * @property {Array<ShortTaskInfo>} [tasks] - a list of minimum tasks information
