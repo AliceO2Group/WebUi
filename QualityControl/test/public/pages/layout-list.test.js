@@ -110,9 +110,6 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     should add card to official layouts folder when marked as official in a different folder`, async () => {
     const buttonPath = cardOfficialButtonPath(cardPath(myLayoutIndex, 1));
     const officialLayoutCardPath = cardPath(officialLayoutIndex, 1);
-    const folderPath = toggleFolderPath(officialLayoutIndex); // The official folder is closed and needs to be opened.
-
-    await page.click(folderPath);
     await delay(200);
 
     await page.click(buttonPath);

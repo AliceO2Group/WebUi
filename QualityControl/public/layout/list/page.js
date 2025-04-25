@@ -93,13 +93,12 @@ function layoutCards(model, layouts, searchBy) {
         '.cardGrid',
         list.filter((item) => item.name.match(searchBy))
           .map((layout) => {
-            const { description, owner_name, name, id } = layout;
-            const { isOfficial } = layout;
+            const { description, owner_name } = layout;
             const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
             const toggleOfficialFunction = (id) => model.layout.toggleOfficial(id);
 
             return h('.card', [
-              cardHeader(isOfficial, id, name, isMinimumGlobal, toggleOfficialFunction),
+              cardHeader({ ...layout, isMinimumGlobal, toggleOfficialFunction }),
               cardBody(owner_name, description),
             ]);
           }),
@@ -110,17 +109,15 @@ function layoutCards(model, layouts, searchBy) {
 
 /**
  * Generates the card header for a layout with interactive elements including official status toggle.
- * @param {boolean} isOfficial - Indicates if the layout currently has official status
- * @param {string} id - Unique identifier for the layout
- * @param {string} name - Display name of the layout
- * @param {boolean} isMinimumGlobal - Flag indicating if user has global minimum permissions
- * @param {Function} toggleOfficialFunction - Callback function to handle official status toggle
+ * @param {object} params - Configuration object containing:
+ * @param {boolean} params.isOfficial - Indicates if the layout has official status
+ * @param {string} params.id - Unique identifier for the layout
+ * @param {string} params.name - Display name of the layout
+ * @param {boolean} params.isMinimumGlobal - Flag for user's global permissions
+ * @param {Function} params.toggleOfficialFunction - Callback for official status toggle
  * @returns {vnode} Virtual DOM node representing the layout card header
- * @example
- * // Returns a card header with official styling and toggle button
- * cardHeader(true, '123', 'My Layout', true, toggleOfficial);
  */
-function cardHeader(isOfficial, id, name, isMinimumGlobal, toggleOfficialFunction) {
+function cardHeader({ isOfficial, id, name, isMinimumGlobal, toggleOfficialFunction }) {
   const bgColor = isOfficial ? 'bg-primary' : 'bg-gray';
   const textColor = isOfficial ? 'white' : 'black';
 
