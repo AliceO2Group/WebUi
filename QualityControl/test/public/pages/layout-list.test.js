@@ -34,7 +34,6 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   const cardLayoutLinkPath = (cardPath) => `${cardPath} a`;
   const cardOfficialButtonPath = (cardPath) => `${cardPath} > .cardHeader > button`;
 
-  const folderOpenedPath = 'section > div > div .cardGrid';
   const filterPath = 'header > div > div:nth-child(3) > input';
 
   await testParent.test('should successfully load layoutList page "/"', { timeout }, async () => {
@@ -43,11 +42,6 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(location.search, '?page=layoutList');
   });
 
-  await testParent.test('should have folders closed upon page render', async () => {
-    const pagesFolded = await page.evaluate((path) => document.querySelectorAll(path).length, folderOpenedPath);
-
-    strictEqual(pagesFolded, 0, 'Layout cards should not exist initially');
-  });
   await testParent.test('should have folder for official layouts', async () => {
     const label = await page.evaluate((path) =>
       document.querySelector(path).textContent.trim(), toggleFolderPath(officialLayoutIndex));
@@ -70,8 +64,6 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should have a link to show a layout from users layout', async () => {
-    const folderPath = toggleFolderPath(myLayoutIndex);
-    await page.click(folderPath);
     await delay(200);
     const linkpath = cardLayoutLinkPath(cardPath(myLayoutIndex, 2));
 
@@ -88,11 +80,9 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should add official logo the \'make Official\' button is pressed', async () => {
     const buttonPath = cardOfficialButtonPath(cardPath(myLayoutIndex, 1));
-    const folderPath = toggleFolderPath(myLayoutIndex);
 
     // Previous test relocated to layout detail page.
     await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
-    await page.click(folderPath);
     await delay(200);
 
     let markedAsOfficial = await page.evaluate((path) => document.querySelector(path).textContent.trim(), buttonPath);
