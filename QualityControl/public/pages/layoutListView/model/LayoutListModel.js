@@ -3,7 +3,9 @@ import { Observable, RemoteData } from '/js/src/index.js';
 
 export default class LayoutListModel extends Observable {
   constructor(model) {
-    super(model);
+    super();
+    this.model = model;
+
     this.folder = new Folder(this);
     this.folder.addFolder({
       title: 'Official', isOpened: true, list: RemoteData.notAsked(), searchInput: '', classList: 'bg-primary white',
