@@ -18,7 +18,7 @@ import { iconBadge } from '/js/src/icons.js';
 export default function (model, layout) {
   const { description, owner_name } = layout;
   const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
-  const toggleOfficialFunction = (id) => model.layout.toggleOfficial(id);
+  const toggleOfficialFunction = (id) => model.layoutListModel.toggleOfficial(id);
 
   return h('.card', [
     cardHeader({ ...layout, isMinimumGlobal, toggleOfficialFunction }),

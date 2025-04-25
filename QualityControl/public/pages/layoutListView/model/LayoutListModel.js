@@ -29,4 +29,19 @@ export default class LayoutListModel extends Observable {
     });
     this.notify();
   }
+
+  /**
+   * Given an ID and new value for official status, update it accordingly
+   * @param {string} id - of layout to modify
+   * @returns {void}
+   */
+  async toggleOfficial(id) {
+    const { payload } = this.folder.map.get('All Layouts').list;
+    const { isOfficial } = payload.find((item) => item.id === id);
+
+    await this.model.services.layout.patchLayout(id, { isOfficial: !isOfficial });
+    await this.model.services.layout.getLayouts(this);
+    await this.model.services.layout.getLayoutsByUserId(this.model.session.personid, this);
+    this.model.notify();
+  };
 }
