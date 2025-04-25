@@ -71,6 +71,6 @@ const eventRow = (event) => {
   return h('', [
     transition.step 
       ? h('.mh4', `[${new Date(timestamp).toISOString()}] At step: ${transition.step} and has ${event.message}`)
-      : h('', `[${new Date(timestamp).toISOString()}] Environment executed ${transition.name} with ${message} `),
+      : h('', `[${new Date(timestamp).toISOString()}] ${transition.name} ${message} `),
   ]);
 };
