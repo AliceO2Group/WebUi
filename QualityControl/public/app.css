@@ -35,8 +35,6 @@
   flex-direction: row; 
   flex-wrap: wrap; 
   gap: var(--space-s); 
-  max-height: 410px; /* about 2 cards in height */
-  overflow: auto;
 }
 .cardGroupRow > * { width: 410px; }
 .cardHeader { 
