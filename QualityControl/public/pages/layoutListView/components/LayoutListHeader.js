@@ -25,8 +25,8 @@ export default (model) => [
     h('input.form-control.form-inline.mh1.w-33', {
       placeholder: 'Search',
       type: 'text',
-      value: model.layout.searchInput,
-      oninput: (e) => model.layout.search(e.target.value),
+      value: model.layoutListModel.searchInput,
+      oninput: (e) => model.layoutListModel.search(e.target.value),
     }),
   ]),
 ];

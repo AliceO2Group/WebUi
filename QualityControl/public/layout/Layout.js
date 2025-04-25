@@ -47,8 +47,6 @@ export default class Layout extends Observable {
 
     this.requestedLayout = RemoteData.notAsked();
 
-    this.searchInput = '';
-
     this.editEnabled = false; // Activate UI for adding, dragging and deleting tabObjects inside the current tab
     this.editingTabObject = null; // Pointer to a tabObject being modified
     this.editOriginalClone = null; // Contains a deep clone of item before editing
@@ -441,20 +439,6 @@ export default class Layout extends Observable {
       id: objectId(),
       name: name,
       objects: [],
-    });
-    this.notify();
-  }
-
-  /**
-   * Set user's input for search and use a fuzzy algo to filter list of layouts.
-   * Fuzzy allows missing chars "aaa" can find "a/a/a" or "aa/a/bbbbb"
-   * @param {string} searchInput - string input from the user to search by
-   * @returns {undefined}
-   */
-  search(searchInput) {
-    this.searchInput = searchInput;
-    this.model.layoutListModel.folder.map.forEach((folder) => {
-      folder.searchInput = new RegExp(searchInput, 'i');
     });
     this.notify();
   }

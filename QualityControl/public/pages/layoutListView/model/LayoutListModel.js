@@ -5,6 +5,7 @@ export default class LayoutListModel extends Observable {
   constructor(model) {
     super();
     this.model = model;
+    this.searchInput = '';
 
     this.folder = new Folder(this);
     this.folder.addFolder({
@@ -13,5 +14,19 @@ export default class LayoutListModel extends Observable {
     this.folder.addFolder({ title: 'My Layouts', isOpened: true, list: RemoteData.notAsked(), searchInput: '' });
     this.folder.addFolder({ title: 'All Layouts', isOpened: false, list: RemoteData.notAsked(), searchInput: '' });
     this.folder.bubbleTo(this);
+  }
+
+  /**
+   * Set user's input for search and use a fuzzy algo to filter list of layouts.
+   * Fuzzy allows missing chars "aaa" can find "a/a/a" or "aa/a/bbbbb"
+   * @param {string} searchInput - string input from the user to search by
+   * @returns {undefined}
+   */
+  search(searchInput) {
+    this.searchInput = searchInput;
+    this.folder.map.forEach((folder) => {
+      folder.searchInput = new RegExp(searchInput, 'i');
+    });
+    this.notify();
   }
 }
