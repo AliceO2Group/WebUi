@@ -30,6 +30,40 @@
 .layout-selected { border: 0.3em solid var(--color-primary); }
 .layout-edit-layer { cursor: move; opacity: 0; }
 
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--space-xs);
+  width: 100%;
+  padding: var(--space-xs);
+}
+
+.card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardHeader { 
+  border-top-right-radius: 0.5rem; 
+  border-top-left-radius: 0.5rem; 
+  padding-left: var(--space-s);
+}
+.cardHeader > h5 { 
+  align-content: center;
+}
+
+.cardHeaderButton {
+  min-width: 145px; 
+}
+
+.cardBody { 
+  border: solid 1px var(--color-primary); 
+  border-top: white;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  height: 100%;
+}
 
 .status-bar { border-top: 1px solid var(--color-gray-dark); }
 

@@ -44,7 +44,7 @@ function createFolder(model, folder) {
     [
       createHeaderOfFolder(model, folder),
       ' ',
-      folder.isOpened ? table(model, layouts, searchBy) : null,
+      folder.isOpened ? layoutCards(model, layouts, searchBy) : null,
     ],
   );
 }
@@ -74,77 +74,100 @@ function createHeaderOfFolder(model, folder) {
 }
 
 /**
- * Shows a table containing layouts, one per line
- * @param {Model} model - root model of the application
- * @param {RemoteData} layouts - list of layouts as remoteData object
- * @param {string} searchBy - string to search by in the list of layouts
- * @returns {vnode} - virtual node element
+ * Displays the layouts as a set of cards in a 3-column grid.
+ * @param {Model} model - The root model of the application.
+ * @param {RemoteData} layouts - list of layouts as remoteData object.
+ * @param {string} searchBy - string to search by in the list of layouts.
+ * @returns {vnode} - A virtual DOM node representing the card group layout.
  */
-function table(model, layouts, searchBy) {
-  return [
-    h(
-      'table.table.table-sm',
-      [
-        h(
-          'thead',
-          h(
-            'tr',
-            [
-              h('th', h('.text-center', 'Official')),
-              h('th', 'Name'),
-              h('th', 'Owner'),
-              h('th', 'Description'),
-              h('th', h('.text-right', 'Actions')),
-            ],
-          ),
-        ),
-        h('tbody', rows(model, layouts, searchBy)),
-      ],
-    ),
-  ];
+function layoutCards(model, layouts, searchBy) {
+  return layouts.match({
+    NotAsked: () => null,
+    Loading: () => h('div', 'Loading...'),
+    Failure: () => h('div', [h('div.alert.alert-danger', 'Unable to retrieve this list of layouts')]),
+    Success: (list) => {
+      if (!list || list.length <= 0) {
+        return h('div', [h('.cardGrid', 'No layouts found')]);
+      }
+      return h(
+        '.cardGrid',
+        list.filter((item) => item.name.match(searchBy))
+          .map((layout) => {
+            const { description, owner_name } = layout;
+            const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
+            const toggleOfficialFunction = (id) => model.layout.toggleOfficial(id);
+
+            return h('.card', [
+              cardHeader({ ...layout, isMinimumGlobal, toggleOfficialFunction }),
+              cardBody(owner_name, description),
+            ]);
+          }),
+      );
+    },
+  });
 }
 
 /**
- * Shows layouts as table lines
- * @param {Model} model - root model of the application
- * @param {RemoteData} layouts - list of layouts as remoteData object
- * @param {string} searchBy - string to search by in the list of layouts
- * @returns {vnode} - virtual node element
+ * Generates the card header for a layout with interactive elements including official status toggle.
+ * @param {object} params - Configuration object containing:
+ * @param {boolean} params.isOfficial - Indicates if the layout has official status
+ * @param {string} params.id - Unique identifier for the layout
+ * @param {string} params.name - Display name of the layout
+ * @param {boolean} params.isMinimumGlobal - Flag for user's global permissions
+ * @param {Function} params.toggleOfficialFunction - Callback for official status toggle
+ * @returns {vnode} Virtual DOM node representing the layout card header
  */
-function rows(model, layouts, searchBy) {
-  return layouts.match({
-    NotAsked: () => null,
-    Loading: () => h('', 'Loading...'),
-    Failure: () => h('tr', [h('td', 'Unable to retrieve this list of layouts')]),
-    Success: (list) => {
-      if (!list || list.length <= 0) {
-        return h('tr', [h('td', 'No layouts found')]);
-      }
-      return list.filter((item) => item.name.match(searchBy))
-        .map((layout) => {
-          const key = `key${layout.name}`;
-          const { isOfficial } = layout;
-          const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
-          return h('tr', { key: key }, [
-            h('td', {
-            }, isOfficial ? h('.primary.f4.text-center', [iconBadge(), ' ']) : ' '),
-            h('td.w-20', [
-              h('.flex-row.items-center', [
-                h('a', {
-                  href: `?page=layoutShow&layoutId=${layout.id}`,
-                  onclick: (e) => model.router.handleLinkEvent(e),
-                }, layout.name),
-              ]),
-            ]),
-            h('td.w-30', layout.owner_name),
-            h('td.w-30', layout.description ?? '-'),
-            h('td', h('.text-right', [
-              isMinimumGlobal && h('button.btn.btn-sm', {
-                onclick: () => model.layout.toggleOfficial(layout.id, !layout.isOfficial),
-              }, layout.isOfficial ? 'Un-official' : 'Official'),
-            ])),
-          ]);
-        });
-    },
-  });
+function cardHeader({ isOfficial, id, name, isMinimumGlobal, toggleOfficialFunction }) {
+  const bgColor = isOfficial ? 'bg-primary' : 'bg-gray';
+  const textColor = isOfficial ? 'white' : 'black';
+
+  return h(`.cardHeader.flex-row.justify-between.${bgColor}`, [
+    h('h5', [
+      h(`a.${textColor}`, {
+        href: `?page=layoutShow&layoutId=${id}`,
+        onclick: (e) => model.router.handleLinkEvent(e),
+      }, name),
+    ]),
+    isMinimumGlobal ?
+      headerButton(isOfficial, id, toggleOfficialFunction)
+      : isOfficial && h(`span.badge.${textColor}`, [iconBadge(), ' Official']),
+  ]);
+}
+
+/**
+ * Creates a toggle button for changing a layout's official status.
+ * @param {boolean} isOfficial - Current official status of the layout
+ * @param {string} id - Unique identifier of the layout to toggle
+ * @param {Function} toggleOfficialFunction - Callback to execute when button is clicked
+ * @returns {vnode} Button element with status-appropriate text and click handler
+ * @description
+ * - Button text changes between "Make Official" and "Make Unofficial"
+ * - Click handler invokes the provided toggle function with layout ID and new status
+ * - Includes a visual badge icon for consistency with other UI elements
+ */
+function headerButton(isOfficial, id, toggleOfficialFunction) {
+  const officialText = isOfficial ? 'Make Unofficial' : 'Make Official';
+
+  return h('button.btn.bg-gray-darker.white.cardHeaderButton', {
+    onclick: () => toggleOfficialFunction(id),
+  }, [officialText, iconBadge()]);
+}
+
+/**
+ * Generates the body content for a layout card.
+ * @param {string} owner_name - The name of the layout owner.
+ * @param {string} description - The description of the layout.
+ * @returns {vnode} - A virtual DOM node for the layout's body content.
+ */
+function cardBody(owner_name, description) {
+  return h('.cardBody.p2', [
+    h('p', [
+      h('strong', 'Owner: '),
+      owner_name,
+    ]),
+    h('p', [
+      h('strong', 'Description: '),
+      description || '-',
+    ]),
+  ]);
 }
