@@ -208,6 +208,16 @@ export default class Model extends Observable {
         this.cache.dcs.sor = message.payload;
         this.notify();
         break;
+      case 'ENVIRONMENT_EVENTS':
+        if (this.environment.item.isSuccess()) {
+          const { id } = this.environment.item.payload;
+          const { id: eventsId, events } = message.payload;
+          if (id === eventsId) {
+            this.environment.item.payload.events = events;
+            this.environment.notify();
+          }
+        }
+        break;
     }
   }
 

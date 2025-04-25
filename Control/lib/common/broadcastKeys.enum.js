@@ -16,7 +16,7 @@
  * Keys that are used to broadcast information to the user
  */
 const BroadcastKeys =  Object.freeze({
-  ENVIRONMENTS: 'ENVIRONMENTS',
+  ENVIRONMENT_EVENTS: 'ENVIRONMENT_EVENTS',
   ENVIRONMENTS_OVERVIEW: 'ENVIRONMENTS_OVERVIEW',
 });
 
