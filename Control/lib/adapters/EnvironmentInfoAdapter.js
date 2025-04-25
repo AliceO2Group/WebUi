@@ -57,8 +57,6 @@ class EnvironmentInfoAdapter {
       numberOfHosts = 0,
       numberOfTasks = 0,
       includedDetectors = [],
-      defaults = {},
-      vars = {},
       userVars = {},
       integratedServicesData = {},
     } = environment;
@@ -83,8 +81,6 @@ class EnvironmentInfoAdapter {
       },
       tasks: [],
       includedDetectors: includedDetectors.sort(),
-      defaults: EnvironmentInfoAdapter._filterOutDetectorsVariables(defaults, includedDetectors, detectorsAll),
-      vars: EnvironmentInfoAdapter._filterOutDetectorsVariables(vars, includedDetectors, detectorsAll),
       userVars: EnvironmentInfoAdapter._filterOutDetectorsVariables(userVars, includedDetectors, detectorsAll),
     };
     return environmentInfo;

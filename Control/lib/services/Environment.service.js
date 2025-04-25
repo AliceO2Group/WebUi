@@ -26,8 +26,10 @@ class EnvironmentService {
    * @param {GrpcServiceClient} coreGrpc 
    * @param {ApricotProxy} apricotGrpc 
    * @param {CacheService} cacheService - to use for updating information on environments
+   * @param {BroadcastService} broadcastService - to use for broadcasting information
+   * @param {EnvironmentCacheService} environmentCacheService - to use for caching environments
    */
-  constructor(coreGrpc, apricotGrpc, cacheService, broadcastService) {
+  constructor(coreGrpc, apricotGrpc, cacheService, broadcastService, environmentCacheService) {
     /**
      * @type {GrpcServiceClient}
      */
@@ -46,6 +48,35 @@ class EnvironmentService {
      * @type {BroadcastService}
      */
     this._broadcastService = broadcastService;
+
+    /**
+     * @type {EnvironmentCacheService}
+     */
+    this._environmentCacheService = environmentCacheService;
+  }
+
+  /**
+   * Method to retrieve all environments from AliECS Core via the gRPC Client and update the Cache
+   * @param {boolean} showTaskInfos - if true, will retrieve task information for each environment
+   * @param {boolean} shouldUpdateCache - if true, will update the cache with the retrieved environments
+   * @return {Promise.<void, Error>} - if operation was a success or not
+   */
+  async getEnvironments(showTaskInfos = false, shouldUpdateCache = false) {
+    try {
+      const { environments } = await this._coreGrpc.GetEnvironments({ showTaskInfos });
+      const detectorsAll = this._apricotGrpc.detectors ?? [];
+      const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
+      
+      const environmentsInfoList = environments.map(
+        (environment) => EnvironmentInfoAdapter.toEntity(environment, '', detectorsAll, hostsByDetector)
+      );
+      if (shouldUpdateCache) {
+        this._environmentCacheService.environments = environmentsInfoList;
+      }
+      return environmentsInfoList
+    } catch (error) {
+      throw grpcErrorToNativeError(error);
+    }
   }
 
   /**
