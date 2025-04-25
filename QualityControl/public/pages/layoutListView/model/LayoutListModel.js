@@ -1,3 +1,5 @@
+import { UserRole, isUserRoleSufficient } from './../../../library/userRole.enum.js';
+
 import Folder from '../../../folder/Folder.js';
 import { Observable, RemoteData } from '/js/src/index.js';
 
@@ -44,4 +46,8 @@ export default class LayoutListModel extends Observable {
     await this.model.services.layout.getLayoutsByUserId(this.model.session.personid, this);
     this.model.notify();
   };
+
+  async sufficientAuthority() {
+    return this.model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
+  }
 }

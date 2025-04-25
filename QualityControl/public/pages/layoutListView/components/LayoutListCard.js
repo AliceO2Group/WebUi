@@ -1,24 +1,23 @@
 /**
  * Layout card component displaying layout information with interactive controls.
  * @module LayoutCard
- * @param {object} model - Application state model containing session and router information
+ * @param {object} model - LayoutListModel: respondible for managing the page's state.
  * @param {object} layout - Layout data object containing display properties
  * @returns {vnode} Virtual DOM node representing the layout card
  */
-import { UserRole, isUserRoleSufficient } from './../../../library/userRole.enum.js';
 import { h } from '/js/src/index.js';
 import { iconBadge } from '/js/src/icons.js';
 
 /**
  * Main layout card component
- * @param {object} model - - The root model of the application.
+ * @param {object} model - LayoutListModel: respondible for managing the page's state.
  * @param {object} layout - Layout data including description and owner information
  * @returns {vnode} Complete layout card virtual DOM node
  */
 export default function (model, layout) {
   const { description, owner_name } = layout;
-  const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
-  const toggleOfficialFunction = (id) => model.layoutListModel.toggleOfficial(id);
+  const isMinimumGlobal = model.sufficientAuthority();
+  const toggleOfficialFunction = (id) => model.toggleOfficial(id);
 
   return h('.card', [
     cardHeader({ ...layout, isMinimumGlobal, toggleOfficialFunction }),

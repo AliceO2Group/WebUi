@@ -18,21 +18,21 @@ import LayoutListCard from './LayoutListCard.js';
 
 /**
  * Shows a list of layouts grouped by user and more
- * @param {Model} model - root model of the application
+ * @param {object} model - LayoutListModel: respondible for managing the page's state.
  * @returns {vnode} - virtual node element
  */
 export default function (model) {
   return h('.scroll-y.absolute-fill', {
     style: 'display: flex; flex-direction: column',
   }, [
-    Array.from(model.layoutListModel.folder.map.values())
+    Array.from(model.folder.map.values())
       .map((folder) => createFolder(model, folder)),
   ]);
 }
 
 /**
  * Method to create a folder with various layouts
- * @param {Model} model - root model of the application
+ * @param {object} model - LayoutListModel: respondible for managing the page's state.
  * @param {Folder} folder - folder model
  * @returns {vnode} - virtual node element
  */
@@ -51,7 +51,7 @@ function createFolder(model, folder) {
 
 /**
  * Create the header of the folder
- * @param {Model} model - root model of the application
+ * @param {object} model - LayoutListModel: respondible for managing the page's state.
  * @param {Folder} folder - folder model
  * @returns {vnode} - virtual node element
  */
@@ -61,7 +61,7 @@ function createHeaderOfFolder(model, folder) {
     {
       style: 'border-radius: .5rem .5rem 0 0; display: flex; flex-direction: row',
       class: folder.classList,
-      onclick: () => model.layoutListModel.folder.toggleFolder(folder.title),
+      onclick: () => model.folder.toggleFolder(folder.title),
     },
     [
       h('b', { style: 'flex-grow:1;' }, [
@@ -75,7 +75,7 @@ function createHeaderOfFolder(model, folder) {
 
 /**
  * Displays the layouts as a set of cards in a 3-column grid.
- * @param {Model} model - The root model of the application.
+ * @param {object} model - LayoutListModel: respondible for managing the page's state.
  * @param {RemoteData} layouts - list of layouts as remoteData object.
  * @param {string} searchBy - string to search by in the list of layouts.
  * @returns {vnode} - A virtual DOM node representing the card group layout.
