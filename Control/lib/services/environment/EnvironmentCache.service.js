@@ -41,34 +41,32 @@ class EnvironmentCacheService {
   }
 
   /**
-   * Setter for updating existing environments in cache
-   * @param {EnvironmentInfo[]} environments - the environments to be updated
-   */
-  set environments(environments) {
-    environments.forEach((environment) => {
-      const { id } = environment;
-      let updatedEnvironment= {};
-      if (this._environments.has(id)) {
-        const cachedEnvironment = this._environments.get(id);
-        const { events = [] } = cachedEnvironment;
-        updatedEnvironment = Object.assign({}, cachedEnvironment, environment);
-        updatedEnvironment.events = [...events];  
-      } else {
-        updatedEnvironment = { ...environment, events: environment.events ?? [] };
-      }
-
-      this._environments.set(id, updatedEnvironment);
-    });
-    this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, environments);
-    this._lastUpdate = Date.now();
-  }
-
-  /**
    * Getter for retrieving the environments from cache
    * @returns {Map<string, EnvironmentInfo>} - the environments stored in cache
    */
   get environments() {
     return this._environments;
+  }
+
+  /**
+   * Update an environment in the cache by its id
+   * @param {string} id - the id of the environment to be updated
+   * @param {EnvironmentInfo} environment - the new environment information to be set
+   * @returns {void}
+   */
+  addOrUpdateEnvironment(environment) {
+    const { id } = environment;
+    if (this._environments.has(id)) {
+      const cachedEnvironment = this._environments.get(id);
+      const { events = [] } = cachedEnvironment;
+      const updatedEnvironment = Object.assign({}, cachedEnvironment, environment);
+      updatedEnvironment.events = [...events];
+      this._environments.set(id, updatedEnvironment);
+    } else {
+      this._environments.set(id, { ...environment, events: environment.events ?? [] });
+    }
+    this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environments.values()]);
+    this._lastUpdate = Date.now();
   }
 
   /**

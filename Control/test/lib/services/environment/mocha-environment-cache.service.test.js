@@ -51,45 +51,33 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
     sinon.restore();
   });
 
-  describe('`set environments` method', () => {
-    it('should successfully add new environments to the cache', () => {
+  describe('`addOrUpdateEnvironment` method', () => {
+    it('should successfully add new environment and update to the cache', () => {
       const environments = [
         { id: 'abc123', state: 'active' },
-        { id: 'abc267', state: 'inactive' },
       ];
 
-      environmentCacheService.environments = environments;
+      environmentCacheService.addOrUpdateEnvironment(environments[0]);
 
-      assert.strictEqual(environmentCacheService._environments.size, 2);
+      assert.strictEqual(environmentCacheService._environments.size, 1);
       assert.deepStrictEqual(environmentCacheService._environments.get('abc123'), {
         id: 'abc123',
         state: 'active',
         events: [],
       });
-      assert.deepStrictEqual(environmentCacheService._environments.get('abc267'), {
-        id: 'abc267',
-        state: 'inactive',
-        events: [],
-      });
-    });
+      assert.strictEqual(broadcastServiceMock.broadcast.callCount, 1);
 
-    it('should update existing environments in the cache without overwriting events', () => {
-      const initialEnvironments = [
-        { id: 'abc123', state: 'active', events: ['event1'] },
-      ];
-      const updatedEnvironments = [
-        { id: 'abc123', state: 'inactive' },
-      ];
+      const updatedEnvironments = { id: 'abc123', state: 'inactive' };
 
-      environmentCacheService.environments = initialEnvironments;
-      environmentCacheService.environments = updatedEnvironments;
+      environmentCacheService.addOrUpdateEnvironment(updatedEnvironments);
 
       assert.strictEqual(environmentCacheService._environments.size, 1);
       assert.deepStrictEqual(environmentCacheService._environments.get('abc123'), {
         id: 'abc123',
         state: 'inactive',
-        events: ['event1'],
+        events: []
       });
+      assert.strictEqual(broadcastServiceMock.broadcast.callCount, 2);
     });
 
     it('should handle an empty array of environments gracefully', () => {
@@ -99,10 +87,10 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
     });
 
     it('should update the `_lastUpdate` timestamp when environments are set', () => {
-      const environments = [{ id: 'abc123', state: 'active' }];
+      const environment = { id: 'abc123', state: 'active' };
       const beforeUpdate = Date.now();
 
-      environmentCacheService.environments = environments;
+      environmentCacheService.addOrUpdateEnvironment(environment);
 
       assert.ok(environmentCacheService._lastUpdate >= beforeUpdate);
     });
@@ -114,8 +102,7 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
         { id: 'abc123', state: 'active' },
         { id: 'abc267', state: 'inactive' },
       ];
-
-      environmentCacheService.environments = environments;
+      environments.forEach((env) => environmentCacheService.addOrUpdateEnvironment(env));
 
       const cachedEnvironments = environmentCacheService.environments;
       assert.strictEqual(cachedEnvironments.size, 2);
