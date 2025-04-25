@@ -13,7 +13,7 @@
 */
 
 const { LogManager } = require('@aliceo2/web-ui');
-const { BroadcastKeys: { ENVIRONMENTS, ENVIRONMENTS_OVERVIEW } } = require('./../../common/broadcastKeys.enum');
+const { BroadcastKeys: { ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW } } = require('./../../common/broadcastKeys.enum');
 const { EmitterKeys: { ENVIRONMENTS_TRACK } } = require('./../../common/emitterKeys.enum.js');
 const { fromEcsEventToEnvironmentEvent } = require('./../../kafka/adapters/fromEcsEventToEnvironmentEvent.js');
 
@@ -83,17 +83,18 @@ class EnvironmentCacheService {
     this._eventEmitter.on(ENVIRONMENTS_TRACK, (event) => {
       const { timestamp } = event;
       
-      const environment = fromEcsEventToEnvironmentEvent(event);
-      const { id } = environment;
+      const environmentEvent = fromEcsEventToEnvironmentEvent(event);
+      environmentEvent.timestamp = this._adaptInt64ToNumber(timestamp);
+      const { id } = environmentEvent;
 
       const cachedEnvironment = this._environments.has(id)
         ? this._environments.get(id)
         : { id, events: [] };
 
-      cachedEnvironment.events.push(environment);
+      cachedEnvironment.events.push(environmentEvent);
       cachedEnvironment.lastUpdate = this._adaptInt64ToNumber(timestamp);
       this._environments.set(id, cachedEnvironment);
-      this._broadcastService.broadcast(ENVIRONMENTS, cachedEnvironment);
+      this._broadcastService.broadcast(ENVIRONMENT_EVENTS, cachedEnvironment);
       this._lastUpdate = Date.now();
     });
   }
