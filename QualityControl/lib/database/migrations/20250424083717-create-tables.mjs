@@ -23,7 +23,7 @@ export const up = async (queryInterface, Sequelize) => {
       type: Sequelize.INTEGER,
       allowNull: false,
       primaryKey: true,
-      autoIncrement: false,
+      autoIncrement: true,
     },
     username: {
       type: Sequelize.STRING(250),
@@ -288,7 +288,7 @@ export const up = async (queryInterface, Sequelize) => {
     },
   }, {
     uniqueKeys: {
-      unique_grid_tab_cells: {
+      unique_chart_options: {
         fields: ['chart_id', 'option_id'],
       },
     },
