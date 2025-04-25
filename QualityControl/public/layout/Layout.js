@@ -453,7 +453,7 @@ export default class Layout extends Observable {
    */
   search(searchInput) {
     this.searchInput = searchInput;
-    this.model.folder.map.forEach((folder) => {
+    this.model.layoutListModel.folder.map.forEach((folder) => {
       folder.searchInput = new RegExp(searchInput, 'i');
     });
     this.notify();

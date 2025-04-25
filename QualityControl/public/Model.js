@@ -15,18 +15,18 @@
 /* global JSROOT */
 
 import {
-  sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification, RemoteData,
+  sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification,
 } from '/js/src/index.js';
 
 import Layout from './layout/Layout.js';
 import QCObject from './object/QCObject.js';
 import LayoutService from './services/Layout.service.js';
-import Folder from './folder/Folder.js';
 import QCObjectService from './services/QCObject.service.js';
 import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
 import { setBrowserTabTitle } from './common/utils.js';
 import { buildQueryParametersString } from './common/buildQueryParametersString.js';
 import AboutViewModel from './pages/aboutView/AboutViewModel.js';
+import LayoutListModel from './pages/layoutListView/model/LayoutListsModel.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -49,13 +49,8 @@ export default class Model extends Observable {
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
 
-    this.folder = new Folder(this);
-    this.folder.addFolder({
-      title: 'Official', isOpened: true, list: RemoteData.notAsked(), searchInput: '', classList: 'bg-primary white',
-    });
-    this.folder.addFolder({ title: 'My Layouts', isOpened: true, list: RemoteData.notAsked(), searchInput: '' });
-    this.folder.addFolder({ title: 'All Layouts', isOpened: false, list: RemoteData.notAsked(), searchInput: '' });
-    this.folder.bubbleTo(this);
+    this.layoutListModel = new LayoutListModel(this);
+    this.layoutListModel.bubbleTo(this);
 
     this.layout = new Layout(this);
     this.layout.bubbleTo(this);
