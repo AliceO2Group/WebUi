@@ -17,7 +17,6 @@ import { h, notification } from '/js/src/index.js';
 import sidebar from './common/sidebar.js';
 import header from './common/header.js';
 
-import layoutListPage from './layout/list/page.js';
 import layoutViewPage from './layout/view/page.js';
 import layoutImportModal from './layout/panels/importModal.js';
 import layoutEditModal from './layout/panels/editModal.js';
@@ -25,6 +24,7 @@ import layoutEditModal from './layout/panels/editModal.js';
 import objectTreePage from './object/objectTreePage.js';
 import ObjectViewPage from './pages/objectView/ObjectViewPage.js';
 import AboutViewPage from './pages/aboutView/AboutViewPage.js';
+import LayoutListPage from './pages/layoutListView/components/LayoutListPage.js';
 
 /**
  * Entry point to generate view of QCG as a tree of function calls
@@ -52,7 +52,7 @@ export default (model) => [
  */
 function page(model) {
   switch (model.page) {
-    case 'layoutList': return layoutListPage(model);
+    case 'layoutList': return LayoutListPage(model);
     case 'layoutShow': return layoutViewPage(model);
     case 'objectTree': return objectTreePage(model);
     case 'objectView': return ObjectViewPage(model);

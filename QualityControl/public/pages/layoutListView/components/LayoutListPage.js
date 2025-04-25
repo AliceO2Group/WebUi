@@ -21,7 +21,7 @@ import { UserRole, isUserRoleSufficient } from './../../../library/userRole.enum
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-export default function layouts(model) {
+export default function (model) {
   return h('.scroll-y.absolute-fill', {
     style: 'display: flex; flex-direction: column',
   }, [
