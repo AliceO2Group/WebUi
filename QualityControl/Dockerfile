@@ -4,8 +4,6 @@ FROM node:22-alpine3.20 AS base
 # Working directory
 WORKDIR /usr/src/app
 
-ENV DATABASE_HOST=database
-
 # Install Python 3, build tools, pkg-config, and necessary dependencies for canvas
 RUN apk add --no-cache \
     python3 \
