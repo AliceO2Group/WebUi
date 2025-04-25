@@ -13,7 +13,7 @@
 */
 
 const { LogManager } = require('@aliceo2/web-ui');
-const { BroadcastKeys: { ENVIRONMENTS } } = require('./../../common/broadcastKeys.enum');
+const { BroadcastKeys: { ENVIRONMENTS, ENVIRONMENTS_OVERVIEW } } = require('./../../common/broadcastKeys.enum');
 const { EmitterKeys: { ENVIRONMENTS_TRACK } } = require('./../../common/emitterKeys.enum.js');
 const { fromEcsEventToEnvironmentEvent } = require('./../../kafka/adapters/fromEcsEventToEnvironmentEvent.js');
 
@@ -31,12 +31,44 @@ class EnvironmentCacheService {
    */
   constructor(broadcastService, eventEmitter) {
     this._environments = new Map();
+    this._lastUpdate = undefined;
 
     this._broadcastService = broadcastService;
     this._eventEmitter = eventEmitter;
 
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/env-cache-service`);
     this._listenToEventsAndBroadcast();
+  }
+
+  /**
+   * Setter for updating existing environments in cache
+   * @param {EnvironmentInfo[]} environments - the environments to be updated
+   */
+  set environments(environments) {
+    environments.forEach((environment) => {
+      const { id } = environment;
+      let updatedEnvironment= {};
+      if (this._environments.has(id)) {
+        const cachedEnvironment = this._environments.get(id);
+        const { events = [] } = cachedEnvironment;
+        updatedEnvironment = Object.assign({}, cachedEnvironment, environment);
+        updatedEnvironment.events = [...events];  
+      } else {
+        updatedEnvironment = { ...environment, events: environment.events ?? [] };
+      }
+
+      this._environments.set(id, updatedEnvironment);
+    });
+    this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, environments);
+    this._lastUpdate = Date.now();
+  }
+
+  /**
+   * Getter for retrieving the environments from cache
+   * @returns {Map<string, EnvironmentInfo>} - the environments stored in cache
+   */
+  get environments() {
+    return this._environments;
   }
 
   /**
@@ -59,6 +91,7 @@ class EnvironmentCacheService {
       cachedEnvironment.lastUpdate = this._adaptInt64ToNumber(timestamp);
       this._environments.set(id, cachedEnvironment);
       this._broadcastService.broadcast(ENVIRONMENTS, cachedEnvironment);
+      this._lastUpdate = Date.now();
     });
   }
 
