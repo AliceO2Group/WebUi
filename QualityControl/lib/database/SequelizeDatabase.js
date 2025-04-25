@@ -14,13 +14,12 @@
 
 import { LogManager } from '@aliceo2/web-ui';
 import { Sequelize } from 'sequelize';
-import pkg from 'umzug';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { createUmzug } from './umzug.js';
 import { getDbConfig } from '../config/database.js';
 import models from './models/index.js';
-const { SequelizeStorage } = pkg;
+import { SequelizeStorage } from 'umzug';
 
 /**
  * Sequelize implementation of the Database.
@@ -32,7 +31,7 @@ export class SequelizeDatabase {
     if (!config) {
       this._logger.warnMessage('No configuration provided for SequelizeDatabase. Using default configuration.');
     }
-    this.dbConfig = getDbConfig(config);
+    this._dbConfig = getDbConfig(config);
     const {
       database,
       username,
@@ -43,53 +42,45 @@ export class SequelizeDatabase {
       collate,
       timezone,
       logging,
-    } = this.dbConfig;
+    } = this._dbConfig;
 
-    const __filename = fileURLToPath(import.meta.url);
-    this.__dirname = dirname(__filename);
-
-    try {
-      this.sequelize = new Sequelize(
-        database,
-        username,
-        password,
-        {
-          host,
-          port,
-          dialect: 'mariadb',
-          dialectOptions: {
-            charset,
-            collate,
-            timezone,
-          },
-          logging,
-          define: {
-            underscored: true,
-          },
+    this.sequelize = new Sequelize(
+      database,
+      username,
+      password,
+      {
+        host,
+        port,
+        dialect: 'mariadb',
+        dialectOptions: {
+          charset,
+          collate,
+          timezone,
         },
-      );
-      this._models = models(this.sequelize);
-      this._logger.infoMessage('Database connection initialized successfully.');
-    } catch (error) {
-      this._logger.errorMessage(`Error initializing database connection: ${error}`);
-      throw new Error('Error initializing database connection');
-    }
+        logging,
+        define: {
+          underscored: true,
+        },
+      },
+    );
+    this._models = models(this.sequelize);
+    this._logger.infoMessage('Database connection initialized successfully.');
   }
 
   /**
-   * Connects to the database.
-   * @returns {Promise<void>}
-   * @throws {Error} If the connection fails after max retries.
+   * Establishes a connection to the database using Sequelize.
+   * @returns {Promise<void>} Resolves once the connection is successfully established.
    */
   async connect() {
-    const { retryThrottle } = this.dbConfig;
+    const { retryThrottle } = this._dbConfig;
     let connected = false;
 
     while (!connected) {
       try {
         await this.sequelize.authenticate();
         connected = true;
-        this._logger.debugMessage('Connected to db successfully');
+        this._logger.infoMessage(`Successfully connected to database 
+          '${this._dbConfig.database}' on '${this._dbConfig.host}:${this._dbConfig.port}'`);
       } catch (error) {
         this._logger.errorMessage(`Unable to connect to db: ${error}`);
         this._logger.debugMessage(`Retrying in ${retryThrottle} ms...`);
@@ -104,11 +95,13 @@ export class SequelizeDatabase {
    * @returns {Promise<void>}
    */
   async migrate() {
-    this._logger.infoMessage('Executing pending migrations...');
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    this._logger.debugMessage('Executing pending migrations...');
     try {
       const umzug = createUmzug(
         this.sequelize,
-        join(this.__dirname, 'migrations'),
+        join(__dirname, 'migrations'),
         new SequelizeStorage({
           sequelize: this.sequelize,
         }),
