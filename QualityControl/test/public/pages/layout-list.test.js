@@ -56,6 +56,38 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(label, 'My Layouts');
   });
 
+  await testParent.test('should be able to close folders', async () => {
+    await page.click(toggleFolderPath(officialLayoutIndex)); // This will close a folder
+    await delay(200);
+
+    let nrOfOpenedFolders = await page.evaluate(() => document.querySelectorAll('.cardGrid').length);
+
+    strictEqual(nrOfOpenedFolders, 1, 'Official Layouts should have closed');
+
+    await page.click(toggleFolderPath(myLayoutIndex)); // This will close a folder
+    await delay(200);
+
+    nrOfOpenedFolders = await page.evaluate(() => document.querySelectorAll('.cardGrid').length);
+
+    strictEqual(nrOfOpenedFolders, 0, 'My Layouts should have closed');
+  });
+
+  await testParent.test('should be able to close folders', async () => {
+    await page.click(toggleFolderPath(officialLayoutIndex)); // This will open a folder
+    await delay(200);
+
+    let nrOfOpenedFolders = await page.evaluate(() => document.querySelectorAll('.cardGrid').length);
+
+    strictEqual(nrOfOpenedFolders, 1, 'Official Layouts should have opened');
+
+    await page.click(toggleFolderPath(myLayoutIndex)); // This will open a folder
+    await delay(200);
+
+    nrOfOpenedFolders = await page.evaluate(() => document.querySelectorAll('.cardGrid').length);
+
+    strictEqual(nrOfOpenedFolders, 2, 'My Layouts should have opened');
+  });
+
   await testParent.test('should have folder for all layouts', async () => {
     const label = await page.evaluate((path) =>
       document.querySelector(path)?.textContent.trim(), toggleFolderPath(allLayoutIndex));
