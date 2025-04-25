@@ -61,7 +61,7 @@ function createHeaderOfFolder(model, folder) {
     {
       style: 'border-radius: .5rem .5rem 0 0; display: flex; flex-direction: row',
       class: folder.classList,
-      onclick: () => model.folder.toggleFolder(folder.title),
+      onclick: () => model.layoutListModel.folder.toggleFolder(folder.title),
     },
     [
       h('b', { style: 'flex-grow:1;' }, [
