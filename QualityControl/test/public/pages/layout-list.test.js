@@ -34,7 +34,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   const cardLayoutLinkPath = (cardPath) => `${cardPath} a`;
   const cardOfficialButtonPath = (cardPath) => `${cardPath} > .cardHeader > button`;
 
-  const folderOpenedPath = 'section > div > div .cardGroupRow';
+  const folderOpenedPath = 'section > div > div .cardGrid';
   const filterPath = 'header > div > div:nth-child(3) > input';
 
   await testParent.test('should successfully load layoutList page "/"', { timeout }, async () => {

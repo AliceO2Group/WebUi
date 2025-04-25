@@ -74,7 +74,7 @@ function createHeaderOfFolder(model, folder) {
 }
 
 /**
- * Displays the layouts as a set of cards.
+ * Displays the layouts as a set of cards in a 3-column grid.
  * @param {Model} model - The root model of the application.
  * @param {RemoteData} layouts - list of layouts as remoteData object.
  * @param {string} searchBy - string to search by in the list of layouts.
@@ -87,20 +87,23 @@ function layoutCards(model, layouts, searchBy) {
     Failure: () => h('div', [h('div.alert.alert-danger', 'Unable to retrieve this list of layouts')]),
     Success: (list) => {
       if (!list || list.length <= 0) {
-        return h('div', [h('.cardGroupRow', 'No layouts found')]);
+        return h('div', [h('.cardGrid', 'No layouts found')]);
       }
-      return h('.cardGroupRow', list.filter((item) => item.name.match(searchBy))
-        .map((layout) => {
-          const { description, owner_name, name, id } = layout;
-          const { isOfficial } = layout;
-          const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
-          const toggleOfficialFunction = (id) => model.layout.toggleOfficial(id);
+      return h(
+        '.cardGrid',
+        list.filter((item) => item.name.match(searchBy))
+          .map((layout) => {
+            const { description, owner_name, name, id } = layout;
+            const { isOfficial } = layout;
+            const isMinimumGlobal = model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
+            const toggleOfficialFunction = (id) => model.layout.toggleOfficial(id);
 
-          return h('.p2.card', [
-            cardHeader(isOfficial, id, name, isMinimumGlobal, toggleOfficialFunction),
-            cardBody(owner_name, description),
-          ]);
-        }));
+            return h('.card', [
+              cardHeader(isOfficial, id, name, isMinimumGlobal, toggleOfficialFunction),
+              cardBody(owner_name, description),
+            ]);
+          }),
+      );
     },
   });
 }
