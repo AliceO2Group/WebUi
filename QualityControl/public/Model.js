@@ -26,7 +26,7 @@ import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
 import { setBrowserTabTitle } from './common/utils.js';
 import { buildQueryParametersString } from './common/buildQueryParametersString.js';
 import AboutViewModel from './pages/aboutView/AboutViewModel.js';
-import LayoutListModel from './pages/layoutListView/model/LayoutListsModel.js';
+import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
 
 /**
  * Represents the application's state and actions as a class
