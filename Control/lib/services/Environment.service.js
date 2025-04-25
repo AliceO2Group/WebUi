@@ -72,7 +72,6 @@ class EnvironmentService {
       );
       if (shouldUpdateCache) {
         this._environmentCacheService.environments = environmentsInfoList;
-
       }
       return environmentsInfoList
     } catch (error) {
