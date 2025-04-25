@@ -95,10 +95,10 @@ export class SequelizeDatabase {
    * @returns {Promise<void>}
    */
   async migrate() {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname(__filename);
     this._logger.debugMessage('Executing pending migrations...');
     try {
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = dirname(__filename);
       const umzug = createUmzug(
         this.sequelize,
         join(__dirname, 'migrations'),
