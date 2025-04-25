@@ -72,6 +72,7 @@ class EnvironmentService {
       );
       if (shouldUpdateCache) {
         this._environmentCacheService.environments = environmentsInfoList;
+
       }
       return environmentsInfoList
     } catch (error) {
@@ -99,7 +100,14 @@ class EnvironmentService {
     }
     const detectorsAll = this._apricotGrpc.detectors ?? [];
     const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
-    return EnvironmentInfoAdapter.toEntity(grpcPayload.environment, taskSource, detectorsAll, hostsByDetector);
+    const environmentInfo = EnvironmentInfoAdapter.toEntity(
+      grpcPayload.environment, taskSource, detectorsAll, hostsByDetector
+    );
+    if (this._environmentCacheService.environments.has(id)) {
+      const cachedEnvironment = this._environmentCacheService.environments.get(id);
+      environmentInfo.events = [...cachedEnvironment.events];
+    } 
+    return environmentInfo;
   }
 
   /**
