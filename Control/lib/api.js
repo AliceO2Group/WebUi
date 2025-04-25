@@ -258,7 +258,7 @@ function initializeIntervals(intervalsService, statusService, runService, bkpSer
   intervalsService.register(statusService.retrieveAliECSIntegratedInfo.bind(statusService), SERVICES_REFRESH_RATE);
   intervalsService.register(() => {
     try {
-      environmentService.getEnvironments(true, true)
+      environmentService.getEnvironments(false, true)
     } catch (error) {
       logger.errorMessage(`Error retrieving environments: ${error.message}`);   
     }
