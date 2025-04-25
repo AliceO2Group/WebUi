@@ -19,16 +19,15 @@
  */
 export function getDbConfig(config) {
   return {
-    host: process?.env.DATABASE_HOST || 'localhost',
-    port: 3306,
-    username: 'cern',
-    password: 'cern',
-    database: 'qcg',
-    charset: 'utf8mb4',
-    collate: 'utf8mb4_general_ci',
-    timezone: '+00:00',
-    logging: false,
-    retryThrottle: 5000,
-    ...config,
+    host: config.host || 'localhost',
+    port: config.port || 3306,
+    username: config.username || 'cern',
+    password: config.password || 'cern',
+    database: config.database || 'qcg',
+    charset: config.charset || 'utf8mb4',
+    collate: config.collate || 'utf8mb4_general_ci',
+    timezone: config.timezone || '+00:00',
+    logging: config.logging ?? false,
+    retryThrottle: config.retryThrottle || 5000,
   };
 };
