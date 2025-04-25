@@ -42,6 +42,10 @@
   border-top-left-radius: 0.5rem; 
   padding-left: var(--space-s);
 }
+.cardHeader > h5 { 
+  align-content: center;
+}
+
 .cardHeaderButton {
   min-width: 145px; 
 }
