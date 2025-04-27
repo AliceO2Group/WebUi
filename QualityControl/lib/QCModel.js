@@ -23,6 +23,7 @@ import { IntervalsService } from './services/Intervals.service.js';
 import { StatusService } from './services/Status.service.js';
 import { JsonFileService } from './services/JsonFileService.js';
 import { QcObjectService } from './services/QcObject.service.js';
+import { UserService } from './services/UserService.js';
 
 import { LayoutController } from './controllers/LayoutController.js';
 import { StatusController } from './controllers/StatusController.js';
@@ -31,10 +32,10 @@ import { UserController } from './controllers/UserController.js';
 
 import { config } from './config/configProvider.js';
 import { LayoutRepository } from './repositories/LayoutRepository.js';
-import { UserRepository } from './repositories/UserRepository.js';
 import { ChartRepository } from './repositories/ChartRepository.js';
 import { initDatabase } from './database/index.js';
 import { SequelizeDatabase } from './database/SequelizeDatabase.js';
+import { setupRepositories } from './database/repositories/index.js';
 
 /**
  * Model initialization for the QCG application
@@ -46,13 +47,17 @@ export const setupQcModel = () => {
   const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
 
   const jsonFileService = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
-  initDatabase(new SequelizeDatabase(config?.database || {}));
+  const sequelizeDatabase = new SequelizeDatabase(config?.database || {});
+  initDatabase(sequelizeDatabase);
 
+  const repositories = setupRepositories(sequelizeDatabase);
+  const { userRepository } = repositories;
+
+  const userService = new UserService(userRepository);
   const layoutRepository = new LayoutRepository(jsonFileService);
-  const userRepository = new UserRepository(jsonFileService);
   const chartRepository = new ChartRepository(jsonFileService);
 
-  const userController = new UserController(userRepository);
+  const userController = new UserController(userService);
   const layoutController = new LayoutController(layoutRepository);
 
   const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
