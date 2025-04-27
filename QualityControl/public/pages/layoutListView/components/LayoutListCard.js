@@ -10,17 +10,23 @@ import { iconBadge } from '/js/src/icons.js';
 
 /**
  * Main layout card component
- * @param {object} model - LayoutListModel: respondible for managing the page's state.
- * @param {object} layout - Layout data including description and owner information
+ * @param {object} model - LayoutCardModel: the model handeling the state of this singular view.
  * @returns {vnode} Complete layout card virtual DOM node
  */
-export default function (model, layout) {
-  const { description, owner_name } = layout;
+export default function (model) {
+  const { description, owner_name, id, name, isOfficial } = model;
   const isMinimumGlobal = model.sufficientAuthority();
-  const toggleOfficialFunction = (id) => model.toggleOfficial(id);
+  const toggleOfficialFunction = () => model.toggleOfficial();
 
   return h('.card', [
-    cardHeader({ ...layout, isMinimumGlobal, toggleOfficialFunction }),
+    cardHeader({
+      isOfficial,
+      id,
+      name,
+      isMinimumGlobal,
+      toggleOfficialFunction,
+      router: model.model.router,
+    }),
     cardBody(owner_name, description),
   ]);
 }
@@ -47,7 +53,7 @@ function cardHeader({ isOfficial, id, name, isMinimumGlobal, toggleOfficialFunct
       }, name),
     ]),
     isMinimumGlobal ?
-      headerButton(isOfficial, id, toggleOfficialFunction)
+      headerButton(isOfficial, toggleOfficialFunction)
       : isOfficial && h(`span.badge.${textColor}`, [iconBadge(), ' Official']),
   ]);
 }
@@ -55,7 +61,6 @@ function cardHeader({ isOfficial, id, name, isMinimumGlobal, toggleOfficialFunct
 /**
  * Creates a toggle button for changing a layout's official status.
  * @param {boolean} isOfficial - Current official status of the layout
- * @param {string} id - Unique identifier of the layout to toggle
  * @param {Function} toggleOfficialFunction - Callback to execute when button is clicked
  * @returns {vnode} Button element with status-appropriate text and click handler
  * @description
@@ -63,11 +68,11 @@ function cardHeader({ isOfficial, id, name, isMinimumGlobal, toggleOfficialFunct
  * - Click handler invokes the provided toggle function with layout ID and new status
  * - Includes a visual badge icon for consistency with other UI elements
  */
-function headerButton(isOfficial, id, toggleOfficialFunction) {
+function headerButton(isOfficial, toggleOfficialFunction) {
   const officialText = isOfficial ? 'Make Unofficial' : 'Make Official';
 
   return h('button.btn.bg-gray-darker.white.cardHeaderButton', {
-    onclick: () => toggleOfficialFunction(id),
+    onclick: () => toggleOfficialFunction(),
   }, [officialText, iconBadge()]);
 }
 

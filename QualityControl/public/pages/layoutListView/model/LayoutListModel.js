@@ -2,6 +2,7 @@ import { UserRole, isUserRoleSufficient } from './../../../library/userRole.enum
 
 import { Observable } from '/js/src/index.js';
 import FolderModel, { FolderType } from '../../../folder/model/FolderModel.js';
+import LayoutCardModel from './LayoutCardModel.js';
 
 export default class LayoutListModel extends Observable {
   constructor(model) {
@@ -14,9 +15,9 @@ export default class LayoutListModel extends Observable {
   }
 
   _initializeFolders() {
-    const official = new FolderModel(this, 'Official', FolderType.PRIMARY);
-    const myLayouts = new FolderModel(this, 'My Layouts', FolderType.SECONDARY);
-    const allLayouts = new FolderModel(this, 'All Layouts', FolderType.SECONDARY);
+    const official = new FolderModel(this, 'Official', FolderType.PRIMARY, LayoutCardModel);
+    const myLayouts = new FolderModel(this, 'My Layouts', FolderType.SECONDARY, LayoutCardModel);
+    const allLayouts = new FolderModel(this, 'All Layouts', FolderType.SECONDARY, LayoutCardModel);
 
     official.toggleFolder();
     myLayouts.toggleFolder();

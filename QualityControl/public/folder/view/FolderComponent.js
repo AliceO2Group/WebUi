@@ -4,19 +4,18 @@ import LayoutListCard from '../../pages/layoutListView/components/LayoutListCard
 
 /**
  * Method to create a folder with various layouts
- * @param {object} model - The model that is making use of the folder class
- * @param {Folder} folder - folder model
+ * @param {object} model - FolderModel: the object that is responsible for the state of the folder components.
  * @returns {vnode} - virtual node element
  */
-export default function (model, folder) {
-  const layouts = folder.list;
-  const searchBy = folder.searchInput;
+export default function (model) {
+  const layouts = model.list;
+  const searchBy = model.searchInput;
   return h(
     '.m2.shadow-level3.br3.flex-column',
     [
-      createHeaderOfFolder(folder),
+      createHeaderOfFolder(model),
       ' ',
-      folder.isOpened ? folderBody(model, layouts, searchBy) : null,
+      model.isOpened ? folderBody(layouts, searchBy) : null,
     ],
   );
 }
@@ -46,12 +45,11 @@ function createHeaderOfFolder(folder) {
 
 /**
  * Displays the layouts as a set of cards in a 3-column grid.
- * @param {object} model - The model that is making use of the folder class
  * @param {RemoteData} layouts - list of layouts as remoteData object.
  * @param {string} searchBy - string to search by in the list of layouts.
  * @returns {vnode} - A virtual DOM node representing the card group layout.
  */
-function folderBody(model, layouts, searchBy) {
+function folderBody(layouts, searchBy) {
   return layouts.match({
     NotAsked: () => null,
     Loading: () => h('div', 'Loading...'),
@@ -62,7 +60,7 @@ function folderBody(model, layouts, searchBy) {
       }
       return h(
         '.cardGrid',
-        list.filter((item) => item.name.match(searchBy)).map((layout) => LayoutListCard(model, layout)),
+        list.filter((item) => item.name.match(searchBy)).map((layoutCard) => LayoutListCard(layoutCard)),
       );
     },
   });

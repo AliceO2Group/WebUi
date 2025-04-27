@@ -23,5 +23,5 @@ import { h } from '/js/src/index.js';
 export default function (model) {
   return h('.scroll-y.absolute-fill', {
     style: 'display: flex; flex-direction: column',
-  }, Array.from(model.folders.values()).map((folder) => FolderComponent(model, folder)));
+  }, Array.from(model.folders.values()).map((folder) => FolderComponent(folder)));
 }
