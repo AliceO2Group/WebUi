@@ -16,7 +16,7 @@ export default function (model, folder) {
     [
       createHeaderOfFolder(folder),
       ' ',
-      folder.isOpened ? layoutCards(model, layouts, searchBy) : null,
+      folder.isOpened ? folderBody(model, layouts, searchBy) : null,
     ],
   );
 }
@@ -51,7 +51,7 @@ function createHeaderOfFolder(folder) {
  * @param {string} searchBy - string to search by in the list of layouts.
  * @returns {vnode} - A virtual DOM node representing the card group layout.
  */
-function layoutCards(model, layouts, searchBy) {
+function folderBody(model, layouts, searchBy) {
   return layouts.match({
     NotAsked: () => null,
     Loading: () => h('div', 'Loading...'),
