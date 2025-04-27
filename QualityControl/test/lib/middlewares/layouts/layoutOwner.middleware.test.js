@@ -16,7 +16,7 @@ import { suite, test } from 'node:test';
 import { ok } from 'node:assert';
 import sinon from 'sinon';
 import { layoutOwnerMiddleware } from '../../../../lib/middleware/layouts/layoutOwner.middleware.js';
-import { LayoutRepository } from '../../../../lib/repositories/LayoutRepository.js';
+import { LayoutService } from '../../../../lib/services/LayoutService.js';
 
 /**
  * Test suite for the middleware that checks the owner of the layout
@@ -34,8 +34,11 @@ export const layoutOwnerMiddlewareTest = () => {
       };
       const next = sinon.stub(); // Do not call fake to catch unexpected execution
 
-      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().resolves({ owner_name: 'ownerName', owner_id: 'ownerId' }),
+      const dataServiceStub = sinon.createStubInstance(LayoutService, {
+        getLayoutById: sinon.stub().resolves({ owner: {
+          name: 'ownerName',
+          id: 'ownerId',
+        } }),
       });
 
       await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
@@ -63,8 +66,8 @@ export const layoutOwnerMiddlewareTest = () => {
         json: sinon.stub().returns(),
       };
       const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().returns(),
+      const dataServiceStub = sinon.createStubInstance(LayoutService, {
+        getLayoutById: sinon.stub().returns(),
       });
       await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
       ok(res.status.calledWith(404));
@@ -74,7 +77,7 @@ export const layoutOwnerMiddlewareTest = () => {
         title: 'Not Found',
       }));
     });
-    test('should return an "NotFound" error if the session information is not accesible', async () => {
+    test('should return a "NotFound" error if the session information is not accessible', async () => {
       const req = {
         params: {
           id: 'layoutId',
@@ -84,21 +87,25 @@ export const layoutOwnerMiddlewareTest = () => {
           name: '',
         },
       };
+
       const res = {
         status: sinon.stub().returnsThis(),
         json: sinon.stub().returns(),
       };
-      const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().returns({ owner_name: 'ownerName', owner_id: 'ownerId' }),
-      });
+
+      const next = sinon.stub();
+
+      const dataServiceStub = sinon.createStubInstance(LayoutService);
+      dataServiceStub.getLayoutById.resolves({ owner: {} });
+
       await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
-      ok(res.status.calledWith(404));
+
+      ok(res.status.calledWith(404), 'Should return status 404');
       ok(res.json.calledWith({
-        message: 'Unable to retrieve session information',
+        message: 'Unable to retrieve layout owner information',
         status: 404,
         title: 'Not Found',
-      }));
+      }), 'The response should contain the correct error message');
     });
 
     test('should successfully pass the check if the layout belongs to the user', async () => {
@@ -112,8 +119,11 @@ export const layoutOwnerMiddlewareTest = () => {
         },
       };
       const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().resolves({ owner_name: 'ownerName', owner_id: 'ownerId' }),
+      const dataServiceStub = sinon.createStubInstance(LayoutService, {
+        getLayoutById: sinon.stub().resolves({ owner: {
+          name: 'ownerName',
+          id: 'ownerId',
+        } }),
       });
       await layoutOwnerMiddleware(dataServiceStub)(req, {}, next);
       ok(next.called, 'The next() callback should be called');

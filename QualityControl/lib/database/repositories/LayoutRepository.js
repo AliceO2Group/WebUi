@@ -46,7 +46,7 @@ export class LayoutRepository extends BaseRepository {
         ],
       },
       {
-        association: 'owner', // <- directamente en Layout
+        association: 'owner',
         attributes: ['id', 'username', 'name'],
       },
     ];

@@ -97,7 +97,7 @@ export const setupQcModel = () => {
     statusController,
     objectController,
     intervalsService,
-    layoutRepository,
+    layoutService,
     jsonFileService,
   };
 };

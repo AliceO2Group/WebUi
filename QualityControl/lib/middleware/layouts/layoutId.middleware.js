@@ -15,15 +15,10 @@
 import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
 /**
- * @typedef {import('../../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
- */
-
-/**
  * Middleware that checks if the layout id is present in the request
- * @param {LayoutRepository} layoutRepository - repository for getting/setting layout data
  * @returns  {function(req, res, next): Function} - middleware function
  */
-export const layoutIdMiddleware = (layoutRepository) =>
+export const layoutIdMiddleware = () =>
 
 /**
  * Returned middleware method
@@ -37,7 +32,6 @@ export const layoutIdMiddleware = (layoutRepository) =>
       if (!id) {
         throw new InvalidInputError('The "id" parameter is missing from the request');
       }
-      await layoutRepository.readLayoutById(id);
       next();
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);

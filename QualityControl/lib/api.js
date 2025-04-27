@@ -43,7 +43,7 @@ export const setup = (http, ws) => {
     statusController,
     statusService,
     userController,
-    layoutRepository,
+    layoutService,
     jsonFileService,
   } = setupQcModel();
   statusService.ws = ws;
@@ -58,22 +58,22 @@ export const setup = (http, ws) => {
   http.put(
     '/layout/:id',
     layoutServiceMiddleware(jsonFileService),
-    layoutIdMiddleware(layoutRepository),
-    layoutOwnerMiddleware(layoutRepository),
+    layoutIdMiddleware(),
+    layoutOwnerMiddleware(layoutService),
     layoutController.putLayoutHandler.bind(layoutController),
   );
   http.patch(
     '/layout/:id',
     layoutServiceMiddleware(jsonFileService),
-    layoutIdMiddleware(layoutRepository),
+    layoutIdMiddleware(),
     minimumRoleMiddleware(UserRole.GLOBAL),
     layoutController.patchLayoutHandler.bind(layoutController),
   );
   http.delete(
     '/layout/:id',
     layoutServiceMiddleware(jsonFileService),
-    layoutIdMiddleware(layoutRepository),
-    layoutOwnerMiddleware(layoutRepository),
+    layoutIdMiddleware(),
+    layoutOwnerMiddleware(layoutService),
     layoutController.deleteLayoutHandler.bind(layoutController),
   );
 

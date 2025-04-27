@@ -16,8 +16,6 @@ import { suite, test } from 'node:test';
 import { ok } from 'node:assert';
 import sinon from 'sinon';
 import { layoutIdMiddleware } from '../../../../lib/middleware/layouts/layoutId.middleware.js';
-import { NotFoundError } from '@aliceo2/web-ui';
-import { LayoutRepository } from '../../../../lib/repositories/LayoutRepository.js';
 
 /**
  * Test suite for the middlewares involved in the ID check of the layout requests
@@ -34,37 +32,13 @@ export const layoutIdMiddlewareTest = () => {
         status: sinon.stub().returnsThis(),
         json: sinon.stub().returns(),
       };
-      const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(LayoutRepository);
-      layoutIdMiddleware(dataServiceStub)(req, res, next);
+      const next = sinon.stub();
+      layoutIdMiddleware()(req, res, next);
       ok(res.status.calledWith(400), 'The status code should be 400');
       ok(res.json.calledWith({
         message: 'The "id" parameter is missing from the request',
         status: 400,
         title: 'Invalid Input',
-      }));
-    });
-
-    test('should return a "Not found" error if the layout id does not exist', () => {
-      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().throwsException(new NotFoundError('Layout not found')),
-      });
-      const req = {
-        params: {
-          id: 'nonExistingId',
-        },
-      };
-      const res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub().returns(),
-      };
-      const next = sinon.stub().returns();
-      layoutIdMiddleware(dataServiceStub)(req, res, next);
-      ok(res.status.calledWith(404));
-      ok(res.json.calledWith({
-        message: 'Layout not found',
-        status: 404,
-        title: 'Not Found',
       }));
     });
 
@@ -74,11 +48,8 @@ export const layoutIdMiddlewareTest = () => {
           id: 'layoutId',
         },
       };
-      const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().resolves({}),
-      });
-      await layoutIdMiddleware(dataServiceStub)(req, {}, next);
+      const next = sinon.stub();
+      await layoutIdMiddleware()(req, {}, next);
       ok(next.called, 'It should call the next middleware');
     });
   });

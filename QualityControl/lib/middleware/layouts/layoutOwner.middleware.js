@@ -15,15 +15,11 @@
 import { NotFoundError, UnauthorizedAccessError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
 /**
- * @typedef {import('../../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
- */
-
-/**
  * Middleware that checks if the requestor is the owner of the layout
- * @param {LayoutRepository} layoutRepository - Repository for getting/setting layout data
+ * @param {LayoutService} layoutService - Repository for getting/setting layout data
  * @returns  {function(req, res, next): Function} - middleware function
  */
-export const layoutOwnerMiddleware = (layoutRepository) =>
+export const layoutOwnerMiddleware = (layoutService) =>
 
 /**
  * Returned middleware method
@@ -35,12 +31,12 @@ export const layoutOwnerMiddleware = (layoutRepository) =>
     try {
       const { id } = req.params;
       const { personid = '', name = '' } = req.session ?? {};
-      const { owner_name = '', owner_id = '' } = await layoutRepository.readLayoutById(id) ?? {};
-      if (owner_id === '' || owner_name === '') {
+      const { owner = {} } = await layoutService.getLayoutById(id) ?? {};
+      if (Object.keys(owner).length === 0 || !owner.id || !owner.name) {
         throw new NotFoundError('Unable to retrieve layout owner information');
       } else if (personid === '' || name === '') {
         throw new NotFoundError('Unable to retrieve session information');
-      } else if (owner_name !== name || owner_id !== personid) {
+      } else if (owner.id !== personid || owner.name !== name) {
         throw new UnauthorizedAccessError('Only the owner of the layout can delete it');
       }
       next();
