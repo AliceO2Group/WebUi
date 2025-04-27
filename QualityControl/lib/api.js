@@ -34,7 +34,7 @@ export const setup = (http, ws) => {
    *   statusController: import('./controllers/StatusController.js').StatusController,
    *   statusService: import('./services/statusService').StatusService,
    *   userController: import('./controllers/UserController.js').UserController,
-   *   jsonFileService: import('./services/JsonFileService.js').JsonFileService
+   *  layoutService: import('./services/LayoutService.js').LayoutService,
    * }}
    */
   const {
@@ -44,7 +44,6 @@ export const setup = (http, ws) => {
     statusService,
     userController,
     layoutService,
-    jsonFileService,
   } = setupQcModel();
   statusService.ws = ws;
   http.get('/object/:id', objectController.getObjectById.bind(objectController));
@@ -57,21 +56,21 @@ export const setup = (http, ws) => {
   http.post('/layout', layoutController.postLayoutHandler.bind(layoutController));
   http.put(
     '/layout/:id',
-    layoutServiceMiddleware(jsonFileService),
+    layoutServiceMiddleware(layoutService),
     layoutIdMiddleware(),
     layoutOwnerMiddleware(layoutService),
     layoutController.putLayoutHandler.bind(layoutController),
   );
   http.patch(
     '/layout/:id',
-    layoutServiceMiddleware(jsonFileService),
+    layoutServiceMiddleware(layoutService),
     layoutIdMiddleware(),
     minimumRoleMiddleware(UserRole.GLOBAL),
     layoutController.patchLayoutHandler.bind(layoutController),
   );
   http.delete(
     '/layout/:id',
-    layoutServiceMiddleware(jsonFileService),
+    layoutServiceMiddleware(layoutService),
     layoutIdMiddleware(),
     layoutOwnerMiddleware(layoutService),
     layoutController.deleteLayoutHandler.bind(layoutController),
