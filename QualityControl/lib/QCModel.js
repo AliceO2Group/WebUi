@@ -31,11 +31,10 @@ import { ObjectController } from './controllers/ObjectController.js';
 import { UserController } from './controllers/UserController.js';
 
 import { config } from './config/configProvider.js';
-import { LayoutRepository } from './repositories/LayoutRepository.js';
-import { ChartRepository } from './repositories/ChartRepository.js';
 import { initDatabase } from './database/index.js';
 import { SequelizeDatabase } from './database/SequelizeDatabase.js';
 import { setupRepositories } from './database/repositories/index.js';
+import { LayoutService } from './services/LayoutService.js';
 
 /**
  * Model initialization for the QCG application
@@ -51,14 +50,29 @@ export const setupQcModel = () => {
   initDatabase(sequelizeDatabase);
 
   const repositories = setupRepositories(sequelizeDatabase);
-  const { userRepository } = repositories;
+  const {
+    userRepository,
+    layoutRepository,
+    tabRepository,
+    gridTabCellRepository,
+    chartRepository,
+    chartOptionRepository,
+    optionRepository,
+  } = repositories;
 
   const userService = new UserService(userRepository);
-  const layoutRepository = new LayoutRepository(jsonFileService);
-  const chartRepository = new ChartRepository(jsonFileService);
+  const layoutService = new LayoutService(
+    userRepository,
+    layoutRepository,
+    tabRepository,
+    gridTabCellRepository,
+    chartRepository,
+    chartOptionRepository,
+    optionRepository,
+  );
 
   const userController = new UserController(userService);
-  const layoutController = new LayoutController(layoutRepository);
+  const layoutController = new LayoutController(layoutService);
 
   const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
   const statusController = new StatusController(statusService);
@@ -66,7 +80,7 @@ export const setupQcModel = () => {
   const ccdbService = CcdbService.setup(config.ccdb);
   statusService.dataService = ccdbService;
 
-  const qcObjectService = new QcObjectService(ccdbService, chartRepository, { openFile, toJSON });
+  const qcObjectService = new QcObjectService(ccdbService, layoutService, { openFile, toJSON });
   qcObjectService.refreshCache();
 
   const objectController = new ObjectController(qcObjectService);

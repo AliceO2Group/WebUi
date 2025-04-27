@@ -69,6 +69,7 @@ import { userControllerTestSuite } from './lib/controllers/UserController.test.j
 import { chartRepositoryTest } from './lib/repositories/ChartRepository.test.js';
 import { layoutServiceTestSuite } from './lib/services/LayoutService.test.js';
 import { userServiceTestSuite } from './lib/services/UserService.test.js';
+import { layoutAdapterTestSuite } from './lib/controllers/adapters/layout-adapter.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -191,6 +192,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     });
 
     suite('Controllers - Test Suite', async () => {
+      suite('LayoutAdapter test suite', async () => await layoutAdapterTestSuite());
       suite('LayoutController test suite', async () => await layoutControllerTestSuite());
       suite('StatusController test suite', async () => await statusControllerTestSuite());
 
