@@ -1,21 +1,35 @@
 import { UserRole, isUserRoleSufficient } from './../../../library/userRole.enum.js';
 
-import Folder from '../../../folder/Folder.js';
-import { Observable, RemoteData } from '/js/src/index.js';
+import { Observable } from '/js/src/index.js';
+import FolderModel, { FolderType } from '../../../folder/model/FolderModel.js';
 
 export default class LayoutListModel extends Observable {
   constructor(model) {
     super();
     this.model = model;
     this.searchInput = '';
+    this.folders = new Map();
 
-    this.folder = new Folder(this);
-    this.folder.addFolder({
-      title: 'Official', isOpened: true, list: RemoteData.notAsked(), classList: 'bg-primary white',
-    });
-    this.folder.addFolder({ title: 'My Layouts', isOpened: true, list: RemoteData.notAsked() });
-    this.folder.addFolder({ title: 'All Layouts', isOpened: false, list: RemoteData.notAsked() });
-    this.folder.bubbleTo(this);
+    this._initializeFolders();
+  }
+
+  _initializeFolders() {
+    const official = new FolderModel(this, 'Official', FolderType.PRIMARY);
+    const myLayouts = new FolderModel(this, 'My Layouts', FolderType.SECONDARY);
+    const allLayouts = new FolderModel(this, 'All Layouts', FolderType.SECONDARY);
+
+    official.toggleFolder();
+    myLayouts.toggleFolder();
+
+    official.bubbleTo(this);
+    myLayouts.bubbleTo(this);
+    allLayouts.bubbleTo(this);
+
+    this.folders.set('Official', official);
+    this.folders.set('My Layouts', myLayouts);
+    this.folders.set('All Layouts', allLayouts);
+
+    this.notify();
   }
 
   /**
@@ -26,7 +40,7 @@ export default class LayoutListModel extends Observable {
    */
   search(searchInput) {
     this.searchInput = searchInput;
-    this.folder.map.forEach((folder) => {
+    this.folders.forEach((folder) => {
       folder.searchInput = new RegExp(searchInput, 'i');
     });
     this.notify();
@@ -38,7 +52,7 @@ export default class LayoutListModel extends Observable {
    * @returns {void}
    */
   async toggleOfficial(id) {
-    const { payload } = this.folder.map.get('All Layouts').list;
+    const { payload } = this.folders.get('All Layouts').list;
     const { isOfficial } = payload.find((item) => item.id === id);
 
     await this.model.services.layout.patchLayout(id, { isOfficial: !isOfficial });

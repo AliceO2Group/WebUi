@@ -24,10 +24,7 @@ import LayoutListCard from './LayoutListCard.js';
 export default function (model) {
   return h('.scroll-y.absolute-fill', {
     style: 'display: flex; flex-direction: column',
-  }, [
-    Array.from(model.folder.map.values())
-      .map((folder) => createFolder(model, folder)),
-  ]);
+  }, Array.from(model.folders.values()).map((folder) => createFolder(model, folder)));
 }
 
 /**
@@ -42,7 +39,7 @@ function createFolder(model, folder) {
   return h(
     '.m2.shadow-level3.br3.flex-column',
     [
-      createHeaderOfFolder(model, folder),
+      createHeaderOfFolder(folder),
       ' ',
       folder.isOpened ? layoutCards(model, layouts, searchBy) : null,
     ],
@@ -51,17 +48,16 @@ function createFolder(model, folder) {
 
 /**
  * Create the header of the folder
- * @param {object} model - LayoutListModel: respondible for managing the page's state.
  * @param {Folder} folder - folder model
  * @returns {vnode} - virtual node element
  */
-function createHeaderOfFolder(model, folder) {
+function createHeaderOfFolder(folder) {
   return h(
     '.p2.object-selectable',
     {
       style: 'border-radius: .5rem .5rem 0 0; display: flex; flex-direction: row',
-      class: folder.classList,
-      onclick: () => model.folder.toggleFolder(folder.title),
+      class: folder.folderType,
+      onclick: () => folder.toggleFolder(),
     },
     [
       h('b', { style: 'flex-grow:1;' }, [

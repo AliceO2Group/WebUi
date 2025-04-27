@@ -51,12 +51,12 @@ export default class LayoutService {
       const sortedLayouts = result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
       const officialLayouts = sortedLayouts.filter(({ isOfficial = false }) => isOfficial);
       this.list = RemoteData.success(sortedLayouts);
-      this.model.layoutListModel.folder.map.get('All Layouts').list = RemoteData.success(sortedLayouts);
-      this.model.layoutListModel.folder.map.get('Official').list = RemoteData.success(officialLayouts);
+
+      this.model.layoutListModel.folders.get('All Layouts').list = RemoteData.success(sortedLayouts);
+      this.model.layoutListModel.folders.get('Official').list = RemoteData.success(officialLayouts);
     } else {
       this.list = RemoteData.failure(result.error || result.message);
-      this.model.layoutListModel.folder.map
-        .get('All Layouts').list = RemoteData.failure(result.error || result.message);
+      this.model.layoutListModel.folders.get('All Layouts').list = RemoteData.failure(result.error || result.message);
     }
 
     that.notify();
@@ -79,10 +79,10 @@ export default class LayoutService {
       if (ok) {
         const sortedLayouts = result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
         this.userList = RemoteData.success(sortedLayouts);
-        this.model.layoutListModel.folder.map.get('My Layouts').list = RemoteData.success(sortedLayouts);
+        this.model.layoutListModel.folders.get('My Layouts').list = RemoteData.success(sortedLayouts);
       } else {
         this.userList = RemoteData.failure(result.error || result.message);
-        this.model.layoutListModel.folder.map.get('My Layouts').list =
+        this.model.layoutListModel.folders.get('My Layouts').list =
           RemoteData.failure(result.error || result.message);
       }
     }
