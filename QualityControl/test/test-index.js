@@ -67,6 +67,8 @@ import { userRepositoryTest } from './lib/repositories/UserRepository.test.js';
 import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
 import { userControllerTestSuite } from './lib/controllers/UserController.test.js';
 import { chartRepositoryTest } from './lib/repositories/ChartRepository.test.js';
+import { layoutServiceTestSuite } from './lib/services/LayoutService.test.js';
+import { userServiceTestSuite } from './lib/services/UserService.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -177,6 +179,8 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
       suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
       suite('JsonServiceTest test suite', async () => await jsonFileServiceTestSuite());
+      suite('LayoutService - Test Suite', async () => await layoutServiceTestSuite());
+      suite('UserService - Test Suite', async () => await userServiceTestSuite());
     });
 
     suite('Middleware - Test Suite', async () => {
