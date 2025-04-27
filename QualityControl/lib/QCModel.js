@@ -21,7 +21,6 @@ import { openFile, toJSON } from 'jsroot';
 import { CcdbService } from './services/ccdb/CcdbService.js';
 import { IntervalsService } from './services/Intervals.service.js';
 import { StatusService } from './services/Status.service.js';
-import { JsonFileService } from './services/JsonFileService.js';
 import { QcObjectService } from './services/QcObject.service.js';
 import { UserService } from './services/UserService.js';
 
@@ -45,7 +44,6 @@ export const setupQcModel = () => {
   const __dirname = dirname(__filename);
   const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
 
-  const jsonFileService = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
   const sequelizeDatabase = new SequelizeDatabase(config?.database || {});
   initDatabase(sequelizeDatabase);
 
@@ -98,6 +96,5 @@ export const setupQcModel = () => {
     objectController,
     intervalsService,
     layoutService,
-    jsonFileService,
   };
 };

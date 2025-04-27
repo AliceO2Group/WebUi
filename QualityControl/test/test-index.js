@@ -62,11 +62,7 @@ import { layoutServiceMiddlewareTest } from './lib/middlewares/layouts/layoutSer
 import { statusComponentMiddlewareTest } from './lib/middlewares/status/statusComponent.middleware.test.js';
 import { apiPutLayoutTests } from './api/layouts/api-put-layout.test.js';
 import { apiPatchLayoutTests } from './api/layouts/api-patch-layout.test.js';
-import { layoutRepositoryTest } from './lib/repositories/LayoutRepository.test.js';
-import { userRepositoryTest } from './lib/repositories/UserRepository.test.js';
-import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
 import { userControllerTestSuite } from './lib/controllers/UserController.test.js';
-import { chartRepositoryTest } from './lib/repositories/ChartRepository.test.js';
 import { layoutServiceTestSuite } from './lib/services/LayoutService.test.js';
 import { userServiceTestSuite } from './lib/services/UserService.test.js';
 import { layoutAdapterTestSuite } from './lib/controllers/adapters/layout-adapter.test.js';
@@ -94,7 +90,7 @@ const FRONT_END_TIMEOUT = INITIAL_PAGE_SETUP_TIMEOUT
 const BACK_END_TIMEOUT = 10000; // back-end test suite timeout
 
 suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, async () => {
-  suite.skip('Front-end test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
+  suite('Front-end test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
     let url = undefined;
     let page = undefined;
     let browser = undefined;
@@ -170,16 +166,9 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('CL - DateTime Utility methods test suite', () => commonLibraryUtilsDateTimeTestSuite());
     });
 
-    suite('Repositories - Test Suite', async () => {
-      suite('Layout Repository - Test Suite', async () => await layoutRepositoryTest());
-      suite('User Repository - Test Suite', async () => await userRepositoryTest());
-      suite('Chart Repository - Test Suite', async () => await chartRepositoryTest());
-    });
-
     suite('Services - Test Suite', async () => {
       suite('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
       suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
-      suite('JsonServiceTest test suite', async () => await jsonFileServiceTestSuite());
       suite('LayoutService - Test Suite', async () => await layoutServiceTestSuite());
       suite('UserService - Test Suite', async () => await userServiceTestSuite());
     });
