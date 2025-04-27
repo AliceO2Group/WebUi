@@ -11,10 +11,10 @@ export default class LayoutListModel extends Observable {
 
     this.folder = new Folder(this);
     this.folder.addFolder({
-      title: 'Official', isOpened: true, list: RemoteData.notAsked(), searchInput: '', classList: 'bg-primary white',
+      title: 'Official', isOpened: true, list: RemoteData.notAsked(), classList: 'bg-primary white',
     });
-    this.folder.addFolder({ title: 'My Layouts', isOpened: true, list: RemoteData.notAsked(), searchInput: '' });
-    this.folder.addFolder({ title: 'All Layouts', isOpened: false, list: RemoteData.notAsked(), searchInput: '' });
+    this.folder.addFolder({ title: 'My Layouts', isOpened: true, list: RemoteData.notAsked() });
+    this.folder.addFolder({ title: 'All Layouts', isOpened: false, list: RemoteData.notAsked() });
     this.folder.bubbleTo(this);
   }
 
