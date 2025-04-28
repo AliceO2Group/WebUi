@@ -14,7 +14,7 @@
 
 const { LogManager } = require('@aliceo2/web-ui');
 const { BroadcastKeys: { ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW } } = require('./../../common/broadcastKeys.enum');
-const { EmitterKeys: { ENVIRONMENTS_TRACK } } = require('./../../common/emitterKeys.enum.js');
+const { EmitterKeys: { ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK } } = require('./../../common/emitterKeys.enum.js');
 const { fromEcsEventToEnvironmentEvent } = require('./../../kafka/adapters/fromEcsEventToEnvironmentEvent.js');
 
 /**
@@ -70,6 +70,36 @@ class EnvironmentCacheService {
   }
 
   /**
+   * Method should receive an environment id and an attribute path and its value to be updated
+   * Given this information, the method should update the environment in the cache
+   * @param {string} id - the id of the environment to be updated
+   * @param {string} attributePath - the attribute path to be updated in the form of "key1.key2.key3"
+   * @param {string} value - the new value to be set
+   * @returns {void}
+   */
+  _updateAttributeOfEnvironment(id, attributePath, value) {
+    if (this._environments.has(id)) {
+      const cachedEnvironment = JSON.parse(JSON.stringify(this._environments.get(id)));
+      let current = cachedEnvironment;
+      const keys = attributePath.split('.');
+      for (let i = 0; i < keys.length - 1; i++) {
+        const key = keys[i];
+        if (!current[key]) {
+          current[key] = {};
+        }
+        current = current[key];
+      }
+      current[keys[keys.length - 1]] = value;
+
+      this._environments.set(id, cachedEnvironment);
+      return cachedEnvironment;
+    } else {
+      this._logger.warnMessage(`Environment with id ${id} not found in cache.`);
+      return null;
+    }
+  }
+
+  /**
    * @private
    * Method to listen to environment events, update the cache accordingly, and broadcast the information to the clients
    * @returns {void}
@@ -92,6 +122,28 @@ class EnvironmentCacheService {
       this._broadcastService.broadcast(ENVIRONMENT_EVENTS, cachedEnvironment);
       this._lastUpdate = Date.now();
     });
+
+    this._eventEmitter.on(INTEGRATED_SERVICES_TRACK.ODC.ENVIRONMENT_STATE_CHANGE,
+      /**
+       * @private
+       * Event object is as per type returned by fromEcsIntegratedServiceEventToEvent
+       * @param {object} event - the event object containing the payload and environmentId
+       */
+      (event) => {
+        const { payload, environmentId } = event;
+        const environmentUpdated = this._updateAttributeOfEnvironment(
+          environmentId,
+          'hardware.epn.info',
+          {
+            state: payload?.state,
+            ddsSessionId: payload?.ddsSessionId,
+            ddsSessionStatus: payload?.ddsSessionStatus,
+          }
+        );
+        if (environmentUpdated) {
+          this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, environmentUpdated);
+        }
+      });
   }
 
   /**

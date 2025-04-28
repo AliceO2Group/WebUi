@@ -29,6 +29,9 @@ const BroadcastKeys =  Object.freeze({
   },
   ENVIRONMENT_EVENTS: 'ENVIRONMENT_EVENTS',
   ENVIRONMENTS_OVERVIEW: 'ENVIRONMENTS_OVERVIEW',
+  ODC: {
+    ENVIRONMENT_STATE_CHANGE: 'ODC_ENVIRONMENT_STATE_CHANGE',
+  }
 });
 
 exports.BroadcastKeys = BroadcastKeys;

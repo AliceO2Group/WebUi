@@ -14,8 +14,9 @@
 const { AliEcsEventMessagesConsumer, LogManager } = require('@aliceo2/web-ui');
 const { CacheKeys } = require('../common/cacheKeys.enum.js'); 
 const { ConsumerGroups } = require('./enums/consumerGroups.enum.js');
-const { EmitterKeys: { ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK: { ODC } } } = require('./../common/emitterKeys.enum.js');
 const { DcsIntegratedEventAdapter } = require('../adapters/DcsIntegratedEventAdapter.js');
+const { EmitterKeys: { ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK: { ODC } } } = require('./../common/emitterKeys.enum.js');
+const { fromEcsIntegratedServiceEventToEvent } = require('./adapters/fromEcsIntegratedServiceEventToEvent.js');
 const { runEventAdapter } = require('./adapters/runEventAdapter.js');
 const { taskEventAdapter } = require('./adapters/taskEventAdapter.js');
 const { Topics } = require('./enums/topics.enum.js');
@@ -171,10 +172,9 @@ class AliEcsSynchronizer {
     const event = fromEcsIntegratedServiceEventToEvent(eventMessage);
     const integratedServiceEvent = {
       timestamp: event.timestamp,
-      ...event.integratedServiceEvent
+      ...event
     };
-      
-    if (event.name.startsWith(ODC_OPERATION_PREFIX)) {
+    if (integratedServiceEvent.name.startsWith(ODC_OPERATION_PREFIX)) {
     } else if (integratedServiceEvent.name.startsWith(ODC_DEVICE_STATE_CHANGED_PREFIX)) {
     } else if (integratedServiceEvent.name.startsWith(ODC_PARTITION_STATE_CHANGED_PREFIX)) {
       this._eventEmitter.emit(ODC.ENVIRONMENT_STATE_CHANGE, integratedServiceEvent);

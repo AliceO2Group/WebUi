@@ -16,8 +16,8 @@ const assert = require('assert');
 const sinon = require('sinon');
 const proxyquire = require('proxyquire');
 const EventEmitter = require('events');
-const { EmitterKeys: {ENVIRONMENTS_TRACK} } = require('../../../../lib/common/emitterKeys.enum.js');
-const { BroadcastKeys: {ENVIRONMENT_EVENTS} } = require('../../../../lib/common/broadcastKeys.enum.js');
+const { EmitterKeys: {ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK: { ODC }} } = require('../../../../lib/common/emitterKeys.enum.js');
+const { BroadcastKeys: {ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW} } = require('../../../../lib/common/broadcastKeys.enum.js');
 
 describe(`'EnvironmentCacheService' - test suite`, () => {
   let EnvironmentCacheService;
@@ -162,5 +162,103 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
     assert.ok(environmentCacheService._environments.has('abc135'));
     assert.strictEqual(environmentCacheService._environments.get('abc135').lastUpdate, updatedEvent.timestamp);
     assert.strictEqual(broadcastServiceMock.broadcast.callCount, 2);
+  });
+
+  describe('`_updateAttributeOfEnvironment` test suite', () => {
+    it('should successfully update a nested attribute in an existing environment', () => {
+      const environmentId = 'env1';
+      environmentCacheService.addOrUpdateEnvironment({
+        id: environmentId,
+        hardware: {
+          epn: {
+            info: {
+              state: 'INITIAL',
+              ddsSessionId: '123',
+              ddsSessionStatus: 'ACTIVE',
+            },
+          },
+        },
+      });
+      environmentCacheService._updateAttributeOfEnvironment(
+        environmentId,
+        'hardware.epn.info.state',
+        'UPDATED'
+      );
+  
+      const updatedEnvironment = environmentCacheService._environments.get(environmentId);
+      assert.strictEqual(updatedEnvironment.hardware.epn.info.state, 'UPDATED');
+    });
+  
+    it('should log a warning if the environment ID does not exist in the cache', () => {
+      const loggerStub = sinon.stub(environmentCacheService._logger, 'warnMessage');
+      const nonExistentEnvironmentId = 'non-existent-env';
+  
+      environmentCacheService._updateAttributeOfEnvironment(
+        nonExistentEnvironmentId,
+        'hardware.epn.info.state',
+        'UPDATED'
+      );
+  
+      assert.ok(loggerStub.calledOnce);
+      assert.ok(
+        loggerStub.calledWith(`Environment with id ${nonExistentEnvironmentId} not found in cache.`)
+      );
+  
+      loggerStub.restore();
+    });
+  });
+
+  describe('Test the listener on track `INTEGRATED_SERVICES_TRACK.ODC.ENVIRONMENT_STATE_CHANGE`', () => {
+    it('should update the environment and broadcast the updated environment', () => {
+      const environmentId = 'env1';
+      const payload = {
+        state: 'UPDATED_STATE',
+        ddsSessionId: '12345',
+        ddsSessionStatus: 'ACTIVE',
+      };
+      const event = { payload, environmentId };
+  
+      const initialEnvironment = {
+        id: environmentId,
+        hardware: {
+          epn: {
+            info: {
+              state: 'INITIAL_STATE',
+              ddsSessionId: '67890',
+              ddsSessionStatus: 'INACTIVE',
+            },
+          },
+        },
+      };
+  
+      environmentCacheService.addOrUpdateEnvironment(initialEnvironment);
+      eventEmitter.emit(ODC.ENVIRONMENT_STATE_CHANGE, event);
+  
+      const updatedEnvironment = environmentCacheService._environments.get(environmentId);
+      assert.strictEqual(updatedEnvironment.hardware.epn.info.state, 'UPDATED_STATE');
+      assert.strictEqual(updatedEnvironment.hardware.epn.info.ddsSessionId, '12345');
+      assert.strictEqual(updatedEnvironment.hardware.epn.info.ddsSessionStatus, 'ACTIVE');
+      assert.ok(broadcastServiceMock.broadcast.calledWith(ENVIRONMENTS_OVERVIEW, updatedEnvironment));
+    });
+  
+    it('should log a warning if the environment ID does not exist in the cache', () => {
+      const loggerStub = sinon.stub(environmentCacheService._logger, 'warnMessage');
+      const environmentId = 'non-existent-env-again';
+      const payload = {
+        state: 'UPDATED_STATE',
+        ddsSessionId: '12345',
+        ddsSessionStatus: 'ACTIVE',
+      };
+      const event = { payload, environmentId };
+  
+      eventEmitter.emit(ODC.ENVIRONMENT_STATE_CHANGE, event);
+      assert.ok(loggerStub.calledOnce);
+      assert.ok(
+        loggerStub.calledWith(`Environment with id ${environmentId} not found in cache.`)
+      );
+      assert.strictEqual(broadcastServiceMock.broadcast.callCount, 0);
+  
+      loggerStub.restore();
+    });
   });
 });

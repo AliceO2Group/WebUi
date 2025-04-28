@@ -23,7 +23,7 @@ const {LogManager} = require('@aliceo2/web-ui');
  */
 exports.fromEcsIntegratedServiceEventToEvent = ({ integratedServiceEvent, timestamp }) => {
   const { payload = '{}' } = integratedServiceEvent;
-  const timestamp = fromBigIntToNumber(timestamp);
+  const timestampNumber = fromBigIntToNumber(timestamp);
 
   let payloadData = {};
   try {
@@ -34,7 +34,7 @@ exports.fromEcsIntegratedServiceEventToEvent = ({ integratedServiceEvent, timest
   }
   return {
     ...integratedServiceEvent,
-    timestamp,
+    timestamp: timestampNumber,
     payload: payloadData,
   };
 };
