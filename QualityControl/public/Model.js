@@ -177,7 +177,7 @@ export default class Model extends Observable {
       case 'layoutList':
         this.page = 'layoutList';
         setBrowserTabTitle('QCG-Layouts');
-        this.services.layout.getLayouts();
+        this.services.layout.getLayoutCards();
         break;
       case 'layoutShow':
         setBrowserTabTitle('QCG-LayoutShow');

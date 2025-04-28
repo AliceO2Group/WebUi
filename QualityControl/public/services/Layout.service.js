@@ -37,18 +37,19 @@ export default class LayoutService {
   }
 
   /**
-   * Method to get all layouts shared between users
+   * Method to get all layout cards shared between users
    * @param {Class<Observable>} that - Observer requesting data that should be notified of changes
    * @returns {undefined}
    */
-  async getLayouts(that = this.model) {
+  async getLayoutCards(that = this.model) {
     this.list = RemoteData.loading();
     that.notify();
 
-    const { result, ok } = await this.loader.get('/api/layouts');
+    const { result, ok } = await this.loader.get('/api/layoutcards');
 
     if (ok) {
-      const sortedLayouts = result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
+      const comparitor = (layout1, layout2) => layout1.name > layout2.name ? 1 : -1;
+      const sortedLayouts = result.sort(comparitor);
       const officialLayouts = sortedLayouts.filter(({ isOfficial = false }) => isOfficial);
       this.list = RemoteData.success(sortedLayouts);
       this.model.folder.map.get('All Layouts').list = RemoteData.success(sortedLayouts);
