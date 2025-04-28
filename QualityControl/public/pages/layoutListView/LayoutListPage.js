@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import FolderComponent from '../../../folder/view/FolderComponent.js';
+import FolderComponent from '../../folder/view/FolderComponent.js';
 import { h } from '/js/src/index.js';
 
 /**
