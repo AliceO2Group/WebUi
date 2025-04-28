@@ -66,6 +66,7 @@ class EnvironmentService {
       const { environments } = await this._coreGrpc.GetEnvironments({ showTaskInfos });
       
       const environmentList = [];
+      const cachedEnvironmentIds = [...this._environmentCacheService.environments.keys()];
       for (const { id } of environments) {
         let environment;
         try {
@@ -82,6 +83,12 @@ class EnvironmentService {
           environmentList.push(environment);
         }
        
+      }
+      // Remove environments from cache that are not in the retrieved list
+      for (const cachedEnvironmentId of cachedEnvironmentIds) {
+        if (!environmentList.some(env => env.id === cachedEnvironmentId)) {
+          this._environmentCacheService.environments.delete(cachedEnvironmentId);
+        }
       }
       return environmentList;
     } catch (error) {

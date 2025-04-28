@@ -141,7 +141,7 @@ class EnvironmentCacheService {
           }
         );
         if (environmentUpdated) {
-          this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, environmentUpdated);
+          this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environments.values()]);
         }
       });
   }

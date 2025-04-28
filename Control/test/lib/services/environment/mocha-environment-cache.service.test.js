@@ -238,7 +238,7 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
       assert.strictEqual(updatedEnvironment.hardware.epn.info.state, 'UPDATED_STATE');
       assert.strictEqual(updatedEnvironment.hardware.epn.info.ddsSessionId, '12345');
       assert.strictEqual(updatedEnvironment.hardware.epn.info.ddsSessionStatus, 'ACTIVE');
-      assert.ok(broadcastServiceMock.broadcast.calledWith(ENVIRONMENTS_OVERVIEW, updatedEnvironment));
+      assert.ok(broadcastServiceMock.broadcast.calledWith(ENVIRONMENTS_OVERVIEW, [updatedEnvironment]));
     });
   
     it('should log a warning if the environment ID does not exist in the cache', () => {
