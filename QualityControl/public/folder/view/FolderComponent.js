@@ -27,18 +27,11 @@ export default function (model) {
  */
 function folderHeader(folder) {
   return h(
-    '.p2.object-selectable',
-    {
-      style: 'border-radius: .5rem .5rem 0 0; display: flex; flex-direction: row',
-      class: folder.folderType,
-      onclick: () => folder.toggleFolder(),
-    },
+    `.p2.object-selectable.folderHeader.${folder.folderType}`,
+    { onclick: () => folder.toggleFolder() },
     [
-      h('b', { style: 'flex-grow:1;' }, [
-        h('span', {
-          style: ' text-align: right',
-        }, folder.isOpened ? iconChevronTop() : iconChevronBottom()), ' ', folder.title,
-      ]),
+      h('b', { style: 'flex-grow:1;' }, h('span', folder.isOpened ?
+        iconChevronTop() : iconChevronBottom()), ' ', folder.title),
     ],
   );
 }
