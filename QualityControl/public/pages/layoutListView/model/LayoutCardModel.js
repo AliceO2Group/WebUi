@@ -35,11 +35,11 @@ export default class LayoutCardModel extends Observable {
    */
   async toggleOfficial() {
     this.isOfficial = !this.isOfficial;
-    const layoutService = this.model.model.model.services.layout;
+    const layoutService = this.model.services.layout;
 
     await layoutService.patchLayout(this.id, { isOfficial: this.isOfficial });
     await layoutService.getLayouts(this);
-    await layoutService.getLayoutsByUserId(this.model.model.model.session.personid, this);
+    await layoutService.getLayoutsByUserId(this.model.session.personid, this);
     this.notify();
   };
 
@@ -49,6 +49,6 @@ export default class LayoutCardModel extends Observable {
    * @returns {Promise<boolean>} True if user has sufficient authority
    */
   async sufficientAuthority() {
-    return this.model.model.model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
+    return this.model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
   }
 }

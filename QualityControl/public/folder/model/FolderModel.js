@@ -23,10 +23,10 @@ export default class FolderModel extends Observable {
    */
   constructor(model, title, folderType, itemConstructor) {
     super();
+    this.model = model;
     this._list = RemoteData.notAsked();
     this.title = title;
     this.isOpened = false;
-    this.model = model;
     this.folderType = folderType;
     this.itemConstructor = itemConstructor;
   }
@@ -53,7 +53,7 @@ export default class FolderModel extends Observable {
     }
 
     const transformedPayload = value.payload.map((item) => {
-      const card = new this.itemConstructor(this, item);
+      const card = new this.itemConstructor(this.model, item);
       card.bubbleTo(this);
       return card;
     });

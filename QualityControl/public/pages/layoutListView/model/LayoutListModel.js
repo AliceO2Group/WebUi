@@ -15,9 +15,9 @@ export default class LayoutListModel extends Observable {
   }
 
   _initializeFolders() {
-    const official = new FolderModel(this, 'Official', FolderType.PRIMARY, LayoutCardModel);
-    const myLayouts = new FolderModel(this, 'My Layouts', FolderType.SECONDARY, LayoutCardModel);
-    const allLayouts = new FolderModel(this, 'All Layouts', FolderType.SECONDARY, LayoutCardModel);
+    const official = new FolderModel(this.model, 'Official', FolderType.PRIMARY, LayoutCardModel);
+    const myLayouts = new FolderModel(this.model, 'My Layouts', FolderType.SECONDARY, LayoutCardModel);
+    const allLayouts = new FolderModel(this.model, 'All Layouts', FolderType.SECONDARY, LayoutCardModel);
 
     official.toggleFolder();
     myLayouts.toggleFolder();
