@@ -109,6 +109,9 @@ export class GridTabCellRepository extends BaseRepository {
   async updateGridTabCell(identifier, newGridTabCell) {
     try {
       const { chart_id, tab_id } = identifier;
+      if (!chart_id || !tab_id) {
+        throw new Error('chart_id and tab_id are required');
+      }
       const [affectedRows] = await this._model.update(
         newGridTabCell,
         {

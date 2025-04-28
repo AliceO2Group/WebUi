@@ -259,21 +259,16 @@ export class LayoutService {
       const cellOperations = objects.map(async (object) => {
         const { id: chartId, x, y, h, w, name, options, ignoreDefaults } = object;
         const cellExists = existingChartIds.has(chartId);
+        const updatedChart = { id: chartId, object_name: name, ignore_defaults: ignoreDefaults };
+        const updatedCell = { chart_id: chartId, row: x, col: y, row_span: w, col_span: h, tab_id: tabId };
+        const cellIdentifier = { chart_id: chartId, tab_id: tabId };
 
         if (cellExists) {
-          await this._chartRepository.updateChart({
-            id: chartId, object_name: name, ignore_defaults: ignoreDefaults,
-          }, chartId);
-          await this._gridTabCellRepository.updateGridTabCell({
-            chart_id: chartId, row: x, col: y, row_span: w, col_span: h, tab_id: tabId,
-          }, { chart_id: chartId, tab_id: tabId });
+          await this._chartRepository.updateChart(chartId, updatedChart);
+          await this._gridTabCellRepository.updateGridTabCell(cellIdentifier, updatedCell);
         } else {
-          await this._chartRepository.createChart({
-            id: chartId, object_name: name, ignore_defaults: ignoreDefaults,
-          });
-          await this._gridTabCellRepository.createGridTabCell({
-            chart_id: chartId, row: x, col: y, row_span: w, col_span: h, tab_id: tabId,
-          });
+          await this._chartRepository.createChart(updatedChart);
+          await this._gridTabCellRepository.createGridTabCell(updatedCell);
         }
         await this._updateOptions(chartId, options);
       });
