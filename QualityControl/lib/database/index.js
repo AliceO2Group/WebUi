@@ -16,7 +16,7 @@ import { LogManager } from '@aliceo2/web-ui';
 
 /**
  * Initializes the database connection and runs migrations.
- * @param {object} sequelizeDatabase - The Sequelize database instance.
+ * @param {SequelizeDatabase} sequelizeDatabase - The Sequelize database instance.
  * @returns {Promise<void>} A promise that resolves when the database is initialized.
  */
 export const initDatabase = async (sequelizeDatabase) => {
@@ -24,6 +24,9 @@ export const initDatabase = async (sequelizeDatabase) => {
   try {
     await sequelizeDatabase.connect();
     await sequelizeDatabase.migrate();
+    if (process.env.NODE_ENV === 'test') {
+      await sequelizeDatabase.seed();
+    }
   } catch (error) {
     _logger.errorMessage(`Failed to initialize database: ${error.message}`);
   }

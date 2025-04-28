@@ -19,7 +19,7 @@ import { fileURLToPath } from 'url';
 import { createUmzug } from './umzug.js';
 import { getDbConfig } from '../config/database.js';
 import models from './models/index.js';
-import { SequelizeStorage } from 'umzug';
+import { memoryStorage, SequelizeStorage } from 'umzug';
 
 /**
  * Sequelize implementation of the Database.
@@ -27,6 +27,8 @@ import { SequelizeStorage } from 'umzug';
 export class SequelizeDatabase {
   constructor(config) {
     this._logger = LogManager.getLogger('qcg/database');
+    const __filename = fileURLToPath(import.meta.url);
+    this.__dirname = dirname(__filename);
 
     if (!config) {
       this._logger.warnMessage('No configuration provided for SequelizeDatabase. Using default configuration.');
@@ -97,21 +99,58 @@ export class SequelizeDatabase {
   async migrate() {
     this._logger.debugMessage('Executing pending migrations...');
     try {
-      const __filename = fileURLToPath(import.meta.url);
-      const __dirname = dirname(__filename);
       const umzug = createUmzug(
         this.sequelize,
-        join(__dirname, 'migrations'),
+        join(this.__dirname, 'migrations'),
         new SequelizeStorage({
           sequelize: this.sequelize,
         }),
       );
+      const pendingMigrations = await umzug.pending();
       await umzug.up();
-      this._logger.infoMessage('Migrations completed successfully.');
+      this._logger.infoMessage(pendingMigrations.length > 0
+        ? `Executed ${pendingMigrations.length} pending migrations`
+        : 'No pending migrations to execute');
     } catch (error) {
       this._logger.errorMessage(`Error executing migrations: ${error}`);
       throw error;
     }
+  }
+
+  /**
+   * Executes seed files to populate the database with initial data.
+   * @returns {Promise<void>}
+   */
+  async seed() {
+    try {
+      const umzug = createUmzug(
+        this.sequelize,
+        join(this.__dirname, 'seeders'),
+        memoryStorage(),
+      );
+      await umzug.up();
+      this._logger.infoMessage('Seeders executed successfully');
+    } catch (error) {
+      this._logger.errorMessage(`Error while executing seeders: ${error}`);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Drops all tables in the database.
+   * @returns {Promise<void>}
+   */
+  async dropAllTables() {
+    this._logger.warnMessage('Dropping all tables!');
+
+    try {
+      await this.sequelize.getQueryInterface().dropAllTables();
+    } catch (error) {
+      this._logger.errorMessage(`Error while dropping all tables: ${error}`);
+      return Promise.reject(error);
+    }
+
+    this._logger.infoMessage('Dropped all tables!');
   }
 
   /**

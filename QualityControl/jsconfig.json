@@ -9,5 +9,7 @@
     "public/**/*.js",
     "lib/**/*.js",
     "test/**/*.js",
-    "lib/database/migrations/*.mjs"  ]
+    "lib/database/migrations/*.mjs", 
+    "lib/database/seeders/*.mjs"  
+  ]
 }
