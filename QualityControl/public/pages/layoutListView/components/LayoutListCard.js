@@ -1,7 +1,7 @@
 /**
  * Layout card component displaying layout information with interactive controls.
  * @module LayoutCard
- * @param {object} model - LayoutListModel: respondible for managing the page's state.
+ * @param {object} layoutCardModel - The model respondible for managing the page's state.
  * @param {object} layout - Layout data object containing display properties
  * @returns {vnode} Virtual DOM node representing the layout card
  */
@@ -10,13 +10,13 @@ import { iconBadge } from '/js/src/icons.js';
 
 /**
  * Main layout card component
- * @param {object} model - LayoutCardModel: the model handeling the state of this singular view.
+ * @param {object} layoutCardModel - The model handeling the state of this singular view
  * @returns {vnode} Complete layout card virtual DOM node
  */
-export default function (model) {
-  const { description, owner_name, id, name, isOfficial } = model;
-  const isMinimumGlobal = model.sufficientAuthority();
-  const toggleOfficialFunction = () => model.toggleOfficial();
+export default function (layoutCardModel) {
+  const { description, owner_name, id, name, isOfficial } = layoutCardModel;
+  const isMinimumGlobal = layoutCardModel.sufficientAuthority();
+  const toggleOfficialFunction = () => layoutCardModel.toggleOfficial();
 
   return h('.card', [
     cardHeader({
@@ -25,7 +25,7 @@ export default function (model) {
       name,
       isMinimumGlobal,
       toggleOfficialFunction,
-      router: model.model.router,
+      router: layoutCardModel.model.router,
     }),
     cardBody(owner_name, description),
   ]);
