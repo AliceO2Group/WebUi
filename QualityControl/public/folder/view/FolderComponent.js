@@ -13,7 +13,7 @@ export default function (model) {
   return h(
     '.m2.shadow-level3.br3.flex-column',
     [
-      createHeaderOfFolder(model),
+      folderHeader(model),
       ' ',
       model.isOpened ? folderBody(layouts, searchBy) : null,
     ],
@@ -25,7 +25,7 @@ export default function (model) {
  * @param {Folder} folder - folder model
  * @returns {vnode} - virtual node element
  */
-function createHeaderOfFolder(folder) {
+function folderHeader(folder) {
   return h(
     '.p2.object-selectable',
     {
