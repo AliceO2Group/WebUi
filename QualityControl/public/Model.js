@@ -170,7 +170,7 @@ export default class Model extends Observable {
     this.object.objects = {}; // Remove any in-memory loaded objects
     clearInterval(this.layout.tabInterval);
 
-    this.services.layout.getLayoutsByUserId(this.session.personid);
+    this.services.layout.getLayoutCardsByUserId(this.session.personid);
 
     const { params } = this.router;
     switch (params.page) {
