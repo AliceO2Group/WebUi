@@ -17,11 +17,11 @@ import { h } from '/js/src/index.js';
 
 /**
  * Shows a list of layouts grouped by user and more
- * @param {object} model - LayoutListModel: respondible for managing the page's state.
+ * @param {object} folderModels - LayoutListModel.folders: The Folders used by LayoutListModel
  * @returns {vnode} - virtual node element
  */
-export default function (model) {
+export default function (folderModels) {
   return h('.scroll-y.absolute-fill', {
     style: 'display: flex; flex-direction: column',
-  }, Array.from(model.folders.values()).map((folder) => FolderComponent(folder)));
+  }, Array.from(folderModels.values()).map((folder) => FolderComponent(folder)));
 }
