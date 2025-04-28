@@ -90,6 +90,33 @@ export default class LayoutService {
   }
 
   /**
+   * Method to get all layouts as layoutCards by the user's id
+   * @param {string} userId - user id for which to query layouts
+   * @param {Class<Observable>} that - Observer requesting data that should be notified of changes
+   * @returns {undefined}
+   */
+  async getLayoutCardsByUserId(userId, that = this.model) {
+    this.userList = RemoteData.loading();
+    that.notify();
+
+    if (isNaN(userId)) {
+      this.userList = RemoteData.failure('Provided userId is not a number');
+    } else {
+      const { result, ok } = await this.loader.get(`/api/layoutcards?owner_id=${userId}`);
+      if (ok) {
+        const sortedLayouts = result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
+        this.userList = RemoteData.success(sortedLayouts);
+        this.model.folder.map.get('My Layouts').list = RemoteData.success(sortedLayouts);
+      } else {
+        this.userList = RemoteData.failure(result.error || result.message);
+        this.model.folder.map.get('My Layouts').list = RemoteData.failure(result.error || result.message);
+      }
+    }
+
+    that.notify();
+  }
+
+  /**
    * Method to retrieve a layout by its Id
    * @param {string} layoutId - id of the layout
    * @returns {RemoteData} - result within a RemoteData object
