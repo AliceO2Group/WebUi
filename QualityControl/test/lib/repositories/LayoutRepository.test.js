@@ -69,6 +69,43 @@ export const layoutRepositoryTest = async () => {
       });
     });
 
+    suite('list layoutCards', () => {
+      const mockCards = (layout) =>({
+        id: layout.id,
+        name: layout.name,
+        owner_id: layout.owner_id,
+        owner_name: layout.owner_name,
+        description: layout.description,
+        isOfficial: layout.isOfficial,
+      });
+
+      test('should list all layouts without filter', async () => {
+        const result = layoutRepository.listLayoutCards({});
+        equal(result.length, 2, 'Length of list of layouts is not correct');
+        deepStrictEqual(
+          result,
+          jsonFileServiceMock.data.layouts.map((layout) => mockCards(layout)),
+          'List of layouts filtered do not match the filters',
+        );
+      });
+
+      test('should filter layouts by owner_id', () => {
+        const ownerId = 0;
+        const result = layoutRepository.listLayoutCards({ owner_id: ownerId });
+
+        equal(result.length, 2);
+        result.forEach((layout) => {
+          strictEqual(layout.owner_id, ownerId, `Layout owner_id should be ${ownerId}`);
+        });
+
+        deepStrictEqual(
+          result[0],
+          mockCards(jsonFileServiceMock.data.layouts[0]),
+          'First layout should match the expected layout',
+        );
+      });
+    });
+
     suite('read layouts', () => {
       test('readLayoutById should throw NotFoundError when layout is not found', () => {
         throws(() => {
