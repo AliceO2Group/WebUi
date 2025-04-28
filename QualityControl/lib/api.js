@@ -51,6 +51,7 @@ export const setup = (http, ws) => {
   http.get('/object', objectController.getObjectContent.bind(objectController));
   http.get('/objects', objectController.getObjects.bind(objectController), { public: true });
 
+  http.get('/layoutcards', layoutController.getLayoutCardsHandler.bind(layoutController));
   http.get('/layouts', layoutController.getLayoutsHandler.bind(layoutController));
   http.get('/layout/:id', layoutController.getLayoutHandler.bind(layoutController));
   http.get('/layout', layoutController.getLayoutByNameHandler.bind(layoutController));

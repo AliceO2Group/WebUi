@@ -69,6 +69,28 @@ export class LayoutController {
   }
 
   /**
+   * HTTP GET endpoint for retrieving a list of simplified layout card objects
+   * * Returns a lightweight version of layout data suitable for card displays
+   * * Can be filtered by "owner_id" query parameter
+   * * If no owner_id is provided, all layout cards will be fetched
+   * @param {Request} req - HTTP request object with optional owner_id query parameter
+   * @param {Response} res - HTTP response object that will return simplified layout card objects
+   * @returns {undefined}
+   */
+  async getLayoutCardsHandler(req, res) {
+    try {
+      const filter = {};
+      if (req.query.owner_id !== undefined) {
+        filter.owner_id = parseInt(req.query.owner_id, 10);
+      }
+      const layoutCards = await this._layoutRepository.listLayoutCards(filter);
+      res.status(200).json(layoutCards);
+    } catch {
+      updateAndSendExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
+    }
+  }
+
+  /**
    * HTTP GET endpoint for retrieving a single layout specified by layout "id";
    * @param {Request} req - HTTP request object with "params" information on layout ID
    * @param {Response} res - HTTP response object to provide layout information
