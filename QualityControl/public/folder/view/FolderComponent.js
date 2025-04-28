@@ -46,7 +46,7 @@ function folderBody(layouts, searchBy) {
   return layouts.match({
     NotAsked: () => null,
     Loading: () => h('div', 'Loading...'),
-    Failure: () => h('div', [h('div.alert.alert-danger', 'Unable to retrieve this list of layouts')]),
+    Failure: () => h('div', [h('.warning', 'Unable to retrieve this list of layouts')]),
     Success: (list) => {
       if (!list || list.length <= 0) {
         return h('div', [h('.cardGrid', 'No layouts found')]);
