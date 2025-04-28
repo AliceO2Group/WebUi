@@ -32,7 +32,7 @@ export const layoutOwnerMiddleware = (layoutService) =>
       const { id } = req.params;
       const { personid = '', name = '' } = req.session ?? {};
       const { owner = {} } = await layoutService.getLayoutById(id) ?? {};
-      if (Object.keys(owner).length === 0 || !owner.id || !owner.name) {
+      if (Object.keys(owner).length === 0 || owner.id === null || owner.name === null) {
         throw new NotFoundError('Unable to retrieve layout owner information');
       } else if (personid === '' || name === '') {
         throw new NotFoundError('Unable to retrieve session information');
