@@ -58,14 +58,14 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should be able to close folders', async () => {
     await page.click(toggleFolderPath(officialLayoutIndex)); // This will close a folder
-    await delay(200);
+    await delay(100);
 
     let nrOfOpenedFolders = await page.evaluate(() => document.querySelectorAll('.cardGrid').length);
 
     strictEqual(nrOfOpenedFolders, 1, 'Official Layouts should have closed');
 
     await page.click(toggleFolderPath(myLayoutIndex)); // This will close a folder
-    await delay(200);
+    await delay(100);
 
     nrOfOpenedFolders = await page.evaluate(() => document.querySelectorAll('.cardGrid').length);
 
@@ -74,14 +74,14 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should be able to close folders', async () => {
     await page.click(toggleFolderPath(officialLayoutIndex)); // This will open a folder
-    await delay(200);
+    await delay(100);
 
     let nrOfOpenedFolders = await page.evaluate(() => document.querySelectorAll('.cardGrid').length);
 
     strictEqual(nrOfOpenedFolders, 1, 'Official Layouts should have opened');
 
     await page.click(toggleFolderPath(myLayoutIndex)); // This will open a folder
-    await delay(200);
+    await delay(100);
 
     nrOfOpenedFolders = await page.evaluate(() => document.querySelectorAll('.cardGrid').length);
 
@@ -114,14 +114,14 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
 
     // Previous test relocated to layout detail page.
     await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
-    await delay(200);
+    await delay(100);
 
     let markedAsOfficial = await page.evaluate((path) => document.querySelector(path).textContent.trim(), buttonPath);
 
     strictEqual(markedAsOfficial, 'Make Official', 'Unofficial layout cardbuttons should state: "Make Official"');
 
     await page.click(buttonPath);
-    await delay(1000); // Making a layout official takes a bit.
+    await delay(100); // Making a layout official takes a bit.
 
     markedAsOfficial = await page.evaluate((path) => document.querySelector(path).textContent.trim(), buttonPath);
     strictEqual(markedAsOfficial, 'Make Unofficial', 'Official layout cardbuttons should state: "Make Unofficial"');
@@ -131,7 +131,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     const buttonPath = cardOfficialButtonPath(cardPath(myLayoutIndex, 1));
 
     await page.click(buttonPath);
-    await delay(1000);
+    await delay(100);
 
     const markedAsOfficial = await page.evaluate((path) => document.querySelector(path).textContent.trim(), buttonPath);
     strictEqual(markedAsOfficial, 'Make Official', 'Unofficial layout cardbuttons should state: "Make Official"');
@@ -141,10 +141,10 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     should add card to official layouts folder when marked as official in a different folder`, async () => {
     const buttonPath = cardOfficialButtonPath(cardPath(myLayoutIndex, 1));
     const officialLayoutCardPath = cardPath(officialLayoutIndex, 1);
-    await delay(200);
+    await delay(100);
 
     await page.click(buttonPath);
-    await delay(1000); // Making a layout official takes a bit.
+    await delay(100); // Making a layout official takes a bit.
 
     const officialLayoutCard = await page.evaluate((path) =>
       document.querySelector(path) === null, officialLayoutCardPath);
@@ -156,7 +156,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     const officialLayoutCardPath = cardPath(officialLayoutIndex, 1);
 
     await page.click(buttonPath);
-    await delay(1000); // Making a layout official takes a bit.
+    await delay(100); // Making a layout official takes a bit.
 
     const officialLayoutCard = await page.evaluate((path) =>
       document.querySelector(path) === null, officialLayoutCardPath);
@@ -168,7 +168,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(preFilterCardCount, 2);
     await page.locator(filterPath).fill('a');
 
-    await delay(200);
+    await delay(100);
     const postFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
     strictEqual(postFilterCardCount, 1);
   });
