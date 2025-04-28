@@ -18,6 +18,10 @@ import FolderModel, { FolderType } from '../../../folder/model/FolderModel.js';
 import LayoutCardModel from './LayoutCardModel.js';
 
 export default class LayoutListModel extends Observable {
+  /**
+   * Creates a new LayoutCardModel instance
+   * @param {Model} model - The the application model
+   */
   constructor(model) {
     super();
     this.model = model;
@@ -27,6 +31,12 @@ export default class LayoutListModel extends Observable {
     this._initializeFolders();
   }
 
+  /**
+   * Initializes the default folders for layouts
+   * Creates three default folders: Official, My Layouts, and All Layouts
+   * Sets Official and My Layouts folders to be expanded by default
+   * @private
+   */
   _initializeFolders() {
     const official = new FolderModel(this.model, 'Official', FolderType.PRIMARY, LayoutCardModel);
     const myLayouts = new FolderModel(this.model, 'My Layouts', FolderType.SECONDARY, LayoutCardModel);
@@ -63,7 +73,7 @@ export default class LayoutListModel extends Observable {
   /**
    * Given an ID and new value for official status, update it accordingly
    * @param {string} id - of layout to modify
-   * @returns {void}
+   * @returns {undefined}
    */
   async toggleOfficial(id) {
     const { payload } = this.folders.get('All Layouts').list;
