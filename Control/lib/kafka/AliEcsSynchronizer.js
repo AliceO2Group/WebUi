@@ -64,6 +64,13 @@ class AliEcsSynchronizer {
       Topics.TASK
     );
     this._ecsTaskConsumer.onMessageReceived(this._onTaskMessage.bind(this));
+
+    this._odcConsumer = new AliEcsEventMessagesConsumer(
+      kafkaClient,
+      ConsumerGroups.INTEGRATED_SERVICE.ODC,
+      Topics.INTEGRATED_SERVICE.ODC
+    );
+    this._odcConsumer.onMessageReceived(this._onIntegratedServiceOdcMessage.bind(this));
   }
 
   /**
@@ -100,6 +107,13 @@ class AliEcsSynchronizer {
           `Error when starting ECS task consumer: ${error.message}\n${error.stack}`
         )
       );
+    this._odcConsumer
+      .start()
+      .catch((error) =>
+        this._logger.errorMessage(
+          `Error when starting ECS ODC consumer: ${error.message}\n${error.stack}`
+        )
+      );
   }
 
   /**
@@ -134,6 +148,33 @@ class AliEcsSynchronizer {
   }
 
   /**
+   * ODC messages are based on multiple operations and steps, we need to adapt the message to the operation name and step
+   * * operation name is suffixed with `readout-dataflow.odc.` - that is an operation belonging to an ECS environment transition
+   * * * e.g. `readout-dataflow.odc.reset`, `readout-dataflow.odc.part-term`, `readout-dataflow.odc.cleanup`
+   * * operation name is suffixed with `odc.deviceStateChanged` - that is a task change that needs to be propagated to task-counters and epn-page if user has the page opened
+   * * operation name is suffixed with `odc.partitionStateChanged` - that is a change of ODC in general that needs to be propagated to environment-details page
+   * Depending on the operation name the message is propagated to the corresponding track
+   * @param {Object} eventMessage - message received on integrated service ODC topic
+   * @return {void}
+   */
+  async _onIntegratedServiceOdcMessage(eventMessage) {
+    if (!eventMessage?.integratedServiceEvent) {
+      this._logger.errorMessage(
+        `Received odc integrated service event message without integratedServiceEvent: ${JSON.stringify(eventMessage)}`
+      );
+      return;
+    }
+    const { integratedServiceEvent, timestamp } = eventMessage;
+    const event = fromEcsIntegratedServiceEventToEvent(eventMessage);
+    eventMessage.timestamp = this._adaptInt64ToNumber(timestamp);
+      
+    if (event.name.startsWith('readout-dataflow.odc')) { //hard string
+    } else if (integratedServiceEvent.name.startsWith('odc.deviceStateChanged')) {
+    } else if (integratedServiceEvent.name.startsWith('odc.partitionStateChanged')) {
+    }
+  }
+
+  /**
    * Callback for when a message is received on the environment topic
    * @param {Object} eventMessage - message received on environment topic
    * @return {void}
@@ -164,6 +205,17 @@ class AliEcsSynchronizer {
    */
   async _onTaskMessage(eventMessage) {
     taskEventAdapter(eventMessage);
+  }
+
+  /**
+   * @private
+   * Method to adapt the int64 timestamp to a number
+   * @param {BigInt} int64 - the int64 timestamp to be adapted
+   * @return {number} - the adapted timestamp
+   */
+  _adaptInt64ToNumber(int64) {
+    const bigIntTimestamp = BigInt(int64.toString(10));
+    return Number(bigIntTimestamp);
   }
 }
 
