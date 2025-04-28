@@ -39,4 +39,16 @@ export const config = {
     issuer: 'test-gui',
     expiration: '1d',
   },
+  database: {
+    host: 'database',
+    port: 3306,
+    username: 'cern',
+    password: 'cern',
+    database: 'qcg',
+    charset: 'utf8mb4',
+    collate: 'utf8mb4_general_ci',
+    timezone: '+00:00',
+    logging: false,
+    retryThrottle: 5000,
+  },
 };
