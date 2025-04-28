@@ -14,7 +14,7 @@
 const { AliEcsEventMessagesConsumer, LogManager } = require('@aliceo2/web-ui');
 const { CacheKeys } = require('../common/cacheKeys.enum.js'); 
 const { ConsumerGroups } = require('./enums/consumerGroups.enum.js');
-const { EmitterKeys: {ENVIRONMENTS_TRACK} } = require('./../common/emitterKeys.enum.js');
+const { EmitterKeys: { ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK: { ODC } } } = require('./../common/emitterKeys.enum.js');
 const { DcsIntegratedEventAdapter } = require('../adapters/DcsIntegratedEventAdapter.js');
 const { runEventAdapter } = require('./adapters/runEventAdapter.js');
 const { taskEventAdapter } = require('./adapters/taskEventAdapter.js');
@@ -154,23 +154,30 @@ class AliEcsSynchronizer {
    * * operation name is suffixed with `odc.deviceStateChanged` - that is a task change that needs to be propagated to task-counters and epn-page if user has the page opened
    * * operation name is suffixed with `odc.partitionStateChanged` - that is a change of ODC in general that needs to be propagated to environment-details page
    * Depending on the operation name the message is propagated to the corresponding track
-   * @param {Object} eventMessage - message received on integrated service ODC topic
+   * @param {Ev_IntegratedServiceEvent - Events.proto} eventMessage - message received on integrated service ODC topic
    * @return {void}
    */
   async _onIntegratedServiceOdcMessage(eventMessage) {
+    const ODC_OPERATION_PREFIX = 'readout-dataflow.odc.';
+    const ODC_DEVICE_STATE_CHANGED_PREFIX = 'odc.deviceStateChanged';
+    const ODC_PARTITION_STATE_CHANGED_PREFIX = 'odc.partitionStateChanged';
+
     if (!eventMessage?.integratedServiceEvent) {
       this._logger.errorMessage(
         `Received odc integrated service event message without integratedServiceEvent: ${JSON.stringify(eventMessage)}`
       );
       return;
     }
-    const { integratedServiceEvent, timestamp } = eventMessage;
     const event = fromEcsIntegratedServiceEventToEvent(eventMessage);
-    eventMessage.timestamp = this._adaptInt64ToNumber(timestamp);
+    const integratedServiceEvent = {
+      timestamp: event.timestamp,
+      ...event.integratedServiceEvent
+    };
       
-    if (event.name.startsWith('readout-dataflow.odc')) { //hard string
-    } else if (integratedServiceEvent.name.startsWith('odc.deviceStateChanged')) {
-    } else if (integratedServiceEvent.name.startsWith('odc.partitionStateChanged')) {
+    if (event.name.startsWith(ODC_OPERATION_PREFIX)) {
+    } else if (integratedServiceEvent.name.startsWith(ODC_DEVICE_STATE_CHANGED_PREFIX)) {
+    } else if (integratedServiceEvent.name.startsWith(ODC_PARTITION_STATE_CHANGED_PREFIX)) {
+      this._eventEmitter.emit(ODC.ENVIRONMENT_STATE_CHANGE, integratedServiceEvent);
     }
   }
 
@@ -205,17 +212,6 @@ class AliEcsSynchronizer {
    */
   async _onTaskMessage(eventMessage) {
     taskEventAdapter(eventMessage);
-  }
-
-  /**
-   * @private
-   * Method to adapt the int64 timestamp to a number
-   * @param {BigInt} int64 - the int64 timestamp to be adapted
-   * @return {number} - the adapted timestamp
-   */
-  _adaptInt64ToNumber(int64) {
-    const bigIntTimestamp = BigInt(int64.toString(10));
-    return Number(bigIntTimestamp);
   }
 }
 
