@@ -96,7 +96,6 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should have a link to show a layout from users layout', async () => {
-    await delay(200);
     const linkpath = cardLayoutLinkPath(cardPath(myLayoutIndex, 2));
 
     const href = await page.evaluate((path) => document.querySelector(path).href, linkpath);
@@ -165,7 +164,6 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should have a folder with one card after filtering', async () => {
-    await delay(200);
     const preFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
     strictEqual(preFilterCardCount, 2);
     await page.locator(filterPath).fill('a');
