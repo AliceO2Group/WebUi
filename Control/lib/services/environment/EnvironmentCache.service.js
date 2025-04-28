@@ -14,7 +14,11 @@
 
 const { LogManager } = require('@aliceo2/web-ui');
 const { BroadcastKeys: { ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW } } = require('./../../common/broadcastKeys.enum');
-const { EmitterKeys: { ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK } } = require('./../../common/emitterKeys.enum.js');
+const {
+  EmitterKeys: {
+    ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK
+  }
+} = require('./../../common/emitterKeys.enum.js');
 const { fromEcsEventToEnvironmentEvent } = require('./../../kafka/adapters/fromEcsEventToEnvironmentEvent.js');
 
 /**

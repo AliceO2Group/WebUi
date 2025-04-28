@@ -26,11 +26,11 @@ const UNKNOWN = 'UNKNOWN';
  * @returns {vnode} - panel with actions allowed for the user to apply on the environment
  */
 export const environmentComponentsSummary = (environmentInfo) => {
-  const odcState = environmentInfo?.hardware?.epn?.info?.state ?? 'UNKNOWN';
+  const odcState = environmentInfo?.hardware?.epn?.info?.state ?? UNKNOWN;
   const odcStateStyle = ODC_STATE_COLOR[odcState] ? `.${ODC_STATE_COLOR[odcState]}` : '';
   return miniCard('', [
     h('.flex-row', [
       h(`.flex-grow${odcStateStyle}`, 'ODC state: ', odcState),
-      ]),
-    ]);
+    ]),
+  ]);
 };
