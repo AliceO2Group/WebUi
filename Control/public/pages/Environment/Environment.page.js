@@ -21,7 +21,10 @@ import {monitoringRunningPlotsPanel} from './components/monitoringRunningPlotsPa
 import pageLoading from './../../common/pageLoading.js';
 import errorPage from './../../common/errorPage.js';
 import {environmentStateSummary} from './components/environmentStateSummary.js';
+import {environmentComponentsSummary} from './components/environmentComponentsSummary.js';
 import {EnvironmentState} from './../../common/enums/EnvironmentState.enum.js';
+import {ROLES} from './../../workflow/constants.js';
+import {isUserAllowedRole} from './../../common/userRole.js';
 
 /**
  * @file Page to show information about all information of one environment (header + content)
@@ -76,6 +79,7 @@ const showEnvironmentPage = (model, environmentInfo) => {
   return h('.w-100.p1.g2.flex-column', [
     environmentStateSummary(environmentInfo),
     environmentActionPanel(model, environmentInfo),
+    isUserAllowedRole(ROLES.Global) && environmentComponentsSummary(environmentInfo),
     isDcsEnabled && (currentTransition === 'START_ACTIVITY' || state === 'ERROR') && dcsSorPanel(id, includedDetectors),
     isRunningStable && monitoringRunningPlotsPanel(environmentInfo),
     h('.flex-row.g2.z-index-one', [
