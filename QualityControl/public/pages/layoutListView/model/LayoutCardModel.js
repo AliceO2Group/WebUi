@@ -60,9 +60,9 @@ export default class LayoutCardModel extends Observable {
   /**
    * Checks if current user has sufficient authority (GLOBAL role)
    * @async
-   * @returns {Promise<boolean>} True if user has sufficient authority
+   * @returns {boolean} True if user has sufficient authority
    */
-  async sufficientAuthority() {
+  sufficientAuthority() {
     return this.model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
   }
 }
