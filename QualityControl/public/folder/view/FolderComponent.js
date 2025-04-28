@@ -4,34 +4,34 @@ import LayoutListCard from '../../pages/layoutListView/components/LayoutListCard
 
 /**
  * Method to create a folder with various layouts
- * @param {object} model - FolderModel: the object that is responsible for the state of the folder components.
+ * @param {object} folderModel - FolderModel: the object that is responsible for the state of the folder components.
  * @returns {vnode} - virtual node element
  */
-export default function (model) {
-  const layouts = model.list;
-  const searchBy = model.searchInput;
+export default function (folderModel) {
+  const layouts = folderModel.list;
+  const searchBy = folderModel.searchInput;
   return h(
     '.m2.shadow-level3.br3.flex-column',
     [
-      folderHeader(model),
+      folderHeader(folderModel),
       ' ',
-      model.isOpened ? folderBody(layouts, searchBy) : null,
+      folderModel.isOpened ? folderBody(layouts, searchBy) : null,
     ],
   );
 }
 
 /**
  * Create the header of the folder
- * @param {Folder} folder - folder model
+ * @param {Folder} folderModel - folder model
  * @returns {vnode} - virtual node element
  */
-function folderHeader(folder) {
+function folderHeader(folderModel) {
   return h(
-    `.p2.object-selectable.folderHeader.${folder.folderType}`,
-    { onclick: () => folder.toggleFolder() },
+    `.p2.object-selectable.folderHeader.${folderModel.folderType}`,
+    { onclick: () => folderModel.toggleFolder() },
     [
-      h('b', { style: 'flex-grow:1;' }, h('span', folder.isOpened ?
-        iconChevronTop() : iconChevronBottom()), ' ', folder.title),
+      h('b', { style: 'flex-grow:1;' }, h('span', folderModel.isOpened ?
+        iconChevronTop() : iconChevronBottom()), ' ', folderModel.title),
     ],
   );
 }
