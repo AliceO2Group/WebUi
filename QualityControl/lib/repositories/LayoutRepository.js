@@ -62,38 +62,6 @@ export class LayoutRepository extends BaseRepository {
   }
 
   /**
-   * Retrieves simplified layout card objects containing only essential properties, optionally filtered
-   * @param {object} filter - Filter criteria with optional keys:
-   * @param {string} filter.name - Name of the layout that is to be filtered by
-   * @param {string} filter.owner_id - ID of the owner of the layout to filter by
-   * @returns {Array<LayoutCard>} - Simplified layout objects containing only:
-   *   * id {number} - Layout identifier
-   *   * name {string} - Layout name
-   *   * owner_id {number} - Owner identifier
-   *   * owner_name {string} - Owner name
-   *   * description {string} - Layout description
-   *   * isOfficial {boolean} - Official status flag
-   */
-  listLayoutCards({ name, owner_id } = {}) {
-    const { layouts } = this._jsonFileService.data;
-
-    const filter = (layout) =>
-      (owner_id === undefined || layout.owner_id === owner_id) &&
-      (name === undefined || layout.name === name);
-
-    const filteredLayouts = layouts.filter(filter);
-
-    return filteredLayouts.map((layout) => ({
-      id: layout.id,
-      name: layout.name,
-      owner_id: layout.owner_id,
-      owner_name: layout.owner_name,
-      description: layout.description,
-      isOfficial: layout.isOfficial,
-    }));
-  }
-
-  /**
    * Retrieve a layout by its id or throws an error
    * @param {string} layoutId - layout id
    * @returns {Layout} - layout object
