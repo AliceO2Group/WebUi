@@ -19,14 +19,46 @@ import { BaseRepository } from './BaseRepository.js';
  */
 export class LayoutRepository extends BaseRepository {
   /**
-   * List layouts, can be filtered
-   * @param {object} filter - accepted keys [owner_id, name]
-   * @returns {Array<Layout>} - list of layouts as per the filter
+   * Retrieves a filtered list of layouts with optional field selection
+   * @param {object} [options] - Filtering and field selection options
+   * @param {number} [options.owner_id] - Filter layouts by owner ID
+   * @param {string} [options.name] - Filter layouts by exact name match
+   * @param {Array<string>} [options.fields] - Array of field names to include in each returned layout object
+   * @returns {Array<object>} Array of layout objects matching the filters, containing only the specified fields
+   * @throws {TypeError} If fields parameter is provided but is not an array
+   * @throws {Error} If any specified field does not exist in the layout objects
    */
-  listLayouts(filter = {}) {
-    return this._jsonFileService.data.layouts.filter((layout) =>
-      (filter.owner_id === undefined || layout.owner_id === filter.owner_id)
-            && (filter.name === undefined || layout.name === filter.name));
+  listLayouts({ name, owner_id, fields } = {}) {
+    const { layouts } = this._jsonFileService.data;
+
+    const filter = (layout) =>
+      (owner_id === undefined || layout.owner_id === owner_id) &&
+      (name === undefined || layout.name === name);
+
+    const filteredLayouts = layouts.filter(filter);
+
+    if (fields && !Array.isArray(fields)) {
+      throw new TypeError('fields parameter must be an array');
+    }
+
+    if (!fields || fields.length === 0) {
+      return filteredLayouts;
+    }
+
+    filteredLayouts.forEach((layout) =>{
+      const missingField = fields.find((field) => !(field in layout));
+      if (missingField) {
+        throw new Error(`The following field does not exist for layouts: ${missingField}`);
+      }
+    });
+
+    return filteredLayouts.map((layout) => {
+      const layoutObj = {};
+      fields.forEach((field) => {
+        layoutObj[field] = layout[field];
+      });
+      return layoutObj;
+    });
   }
 
   /**

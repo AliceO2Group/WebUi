@@ -46,8 +46,31 @@ export const layoutRepositoryTest = async () => {
     });
 
     suite('list layouts', () => {
+      test('should throw TypeError when fields is not an array', () => {
+        throws(
+          () => layoutRepository.listLayouts({ fields: 'not an array' }),
+          {
+            name: 'TypeError',
+            message: 'fields parameter must be an array',
+          },
+          'Should throw TypeError when fields is not an array',
+        );
+      });
+
+      test('should throw Error when specified field does not exist', () => {
+        const nonExistentField = 'nonexistent_field';
+        throws(
+          () => layoutRepository.listLayouts({ fields: [nonExistentField] }),
+          {
+            name: 'Error',
+            message: `The following field does not exist for layouts: ${nonExistentField}`,
+          },
+          'Should throw Error when field does not exist',
+        );
+      });
+
       test('should list all layouts without filter', async () => {
-        const result = layoutRepository.listLayouts({});
+        const result = layoutRepository.listLayouts();
         equal(result.length, 2, 'Length of list of layouts is not correct');
         deepStrictEqual(result, jsonFileServiceMock.data.layouts, 'List of layouts filtered do not match the filters');
       });
@@ -66,6 +89,27 @@ export const layoutRepositoryTest = async () => {
           jsonFileServiceMock.data.layouts[0],
           'First layout should match the expected layout',
         );
+      });
+
+      test('should return empty array when no layouts match filters', () => {
+        const result = layoutRepository.listLayoutCards({
+          owner_id: 999,
+          name: 'Non-existent Layout',
+        });
+
+        equal(result.length, 0);
+      });
+
+      test('should return only specified fields when fields array is provided', () => {
+        const fields = ['id', 'name'];
+        const result = layoutRepository.listLayouts({ fields });
+
+        result.forEach((layout) => {
+          const actualKeys = Object.keys(layout);
+          deepStrictEqual(actualKeys.sort(), fields);
+        });
+
+        equal(result.length, jsonFileServiceMock.data.layouts.length);
       });
     });
 
