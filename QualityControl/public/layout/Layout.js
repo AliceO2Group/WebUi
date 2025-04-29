@@ -314,7 +314,7 @@ export default class Layout extends Observable {
 
     await this.model.services.layout.patchLayout(id, { isOfficial: !isOfficial });
     await this.model.services.layout.getLayoutCards(this);
-    await this.model.services.layout.getLayoutCardsByUserId(this.model.session.personid, this);
+
     this.model.notify();
   }
 

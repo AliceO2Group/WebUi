@@ -48,12 +48,17 @@ export default class LayoutService {
     const { result, ok } = await this.loader.get('/api/layoutcards');
 
     if (ok) {
+      const username = this.model.session.name;
       const comparitor = (layout1, layout2) => layout1.name > layout2.name ? 1 : -1;
+
       const sortedLayouts = result.sort(comparitor);
       const officialLayouts = sortedLayouts.filter(({ isOfficial = false }) => isOfficial);
+      const userLayouts = sortedLayouts.filter((card) => card.owner_name === username);
+
       this.list = RemoteData.success(sortedLayouts);
       this.model.folder.map.get('All Layouts').list = RemoteData.success(sortedLayouts);
       this.model.folder.map.get('Official').list = RemoteData.success(officialLayouts);
+      this.model.folder.map.get('My Layouts').list = RemoteData.success(userLayouts);
     } else {
       this.list = RemoteData.failure(result.error || result.message);
       this.model.folder.map.get('All Layouts').list = RemoteData.failure(result.error || result.message);
