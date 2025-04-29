@@ -79,7 +79,7 @@ const showEnvironmentPage = (model, environmentInfo) => {
   return h('.w-100.p1.g2.flex-column', [
     environmentStateSummary(environmentInfo),
     environmentActionPanel(model, environmentInfo),
-    isUserAllowedRole(ROLES.Global) && environmentComponentsSummary(environmentInfo),
+    environmentComponentsSummary(environmentInfo),
     isDcsEnabled && (currentTransition === 'START_ACTIVITY' || state === 'ERROR') && dcsSorPanel(id, includedDetectors),
     isRunningStable && monitoringRunningPlotsPanel(environmentInfo),
     h('.flex-row.g2.z-index-one', [
