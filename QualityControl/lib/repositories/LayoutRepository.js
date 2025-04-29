@@ -32,8 +32,8 @@ export class LayoutRepository extends BaseRepository {
   /**
    * Retrieves simplified layout card objects containing only essential properties, optionally filtered
    * @param {object} filter - Filter criteria with optional keys:
-   *   * owner_id {number} - Filter by owner ID
-   *   * name {string} - Filter by exact name match
+   * @param {string} filter.name - Name of the layout that is to be filtered by
+   * @param {string} filter.owner_id - ID of the owner of the layout to filter by
    * @returns {Array<LayoutCard>} - Simplified layout objects containing only:
    *   * id {number} - Layout identifier
    *   * name {string} - Layout name
@@ -42,12 +42,16 @@ export class LayoutRepository extends BaseRepository {
    *   * description {string} - Layout description
    *   * isOfficial {boolean} - Official status flag
    */
-  listLayoutCards(filter = {}) {
-    const full_layouts = this._jsonFileService.data.layouts.filter((layout) =>
-      (filter.owner_id === undefined || layout.owner_id === filter.owner_id)
-            && (filter.name === undefined || layout.name === filter.name));
+  listLayoutCards({ name, owner_id } = {}) {
+    const { layouts } = this._jsonFileService.data;
 
-    return full_layouts.map((layout) => ({
+    const filter = (layout) =>
+      (owner_id === undefined || layout.owner_id === owner_id) &&
+      (name === undefined || layout.name === name);
+
+    const filteredLayouts = layouts.filter(filter);
+
+    return filteredLayouts.map((layout) => ({
       id: layout.id,
       name: layout.name,
       owner_id: layout.owner_id,
