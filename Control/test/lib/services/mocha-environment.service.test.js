@@ -87,10 +87,13 @@ describe('EnvironmentService test suite', () => {
     it('should handle empty environments list gracefully', async () => {
       GetEnvironmentsStub.resolves({ environments: [] });
   
+      envService._broadcastService = {
+        broadcast: sinon.stub(),
+      }
       const result = await envService.getEnvironments(false, false);
-  
       assert.strictEqual(result.length, 0);
       assert.strictEqual(environmentCacheServiceMock.environments.size, 0); // Cache should not be updated
+      assert.ok(envService._broadcastService.broadcast.calledWith('ENVIRONMENTS_OVERVIEW', []));
     });
 
     it('should retrieve environments and return them without updating the cache', async () => {

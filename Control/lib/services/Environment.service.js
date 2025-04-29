@@ -12,8 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
-const {grpcErrorToNativeError, NotFoundError} = require('@aliceo2/web-ui');
-const {CacheKeys} = require('./../common/cacheKeys.enum.js');
+const {LogManager,grpcErrorToNativeError, NotFoundError} = require('@aliceo2/web-ui');
+const { CacheKeys } = require('./../common/cacheKeys.enum.js');
+const { BroadcastKeys: { ENVIRONMENTS_OVERVIEW } } = require('./../common/broadcastKeys.enum');
 const EnvironmentInfoAdapter = require('./../adapters/EnvironmentInfoAdapter.js');
 const {EnvironmentTransitionResultAdapter} = require('./../adapters/EnvironmentTransitionResultAdapter.js');
 
@@ -53,6 +54,7 @@ class EnvironmentService {
      * @type {EnvironmentCacheService}
      */
     this._environmentCacheService = environmentCacheService;
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/env-service`);
   }
 
   /**
@@ -62,9 +64,17 @@ class EnvironmentService {
    * @return {Promise.<EnvironmentInfo[], Error>} - if operation was a success or not
    */
   async getEnvironments(showTaskInfos = false, shouldUpdateCache = false) {
+    let environments = [];
     try {
-      const { environments } = await this._coreGrpc.GetEnvironments({ showTaskInfos });
-      
+      ({ environments } = await this._coreGrpc.GetEnvironments({ showTaskInfos }));
+    } catch (error) {
+      throw grpcErrorToNativeError(error);
+    }
+    try { 
+      if (!environments || environments.length === 0) {
+        this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, []);
+        return [];
+      }
       const environmentList = [];
       const cachedEnvironmentIds = [...this._environmentCacheService.environments.keys()];
       for (const { id } of environments) {
@@ -78,7 +88,7 @@ class EnvironmentService {
         }
         if (environment) {
           if (shouldUpdateCache) {
-            this._environmentCacheService.addOrUpdateEnvironment(environment);
+            this._environmentCacheService.addOrUpdateEnvironment(environment, false);
           }
           environmentList.push(environment);
         }
@@ -90,9 +100,11 @@ class EnvironmentService {
           this._environmentCacheService.environments.delete(cachedEnvironmentId);
         }
       }
+      this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environmentCacheService.environments.values()]);
       return environmentList;
     } catch (error) {
-      throw grpcErrorToNativeError(error);
+      console.log(error);
+      this._logger.errorMessage(error);
     }
   }
 

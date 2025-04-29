@@ -58,7 +58,7 @@ class EnvironmentCacheService {
    * @param {EnvironmentInfo} environment - the new environment information to be set
    * @returns {void}
    */
-  addOrUpdateEnvironment(environment) {
+  addOrUpdateEnvironment(environment, shouldBroadcast = false) {
     const { id } = environment;
     if (this._environments.has(id)) {
       const cachedEnvironment = this._environments.get(id);
@@ -69,7 +69,9 @@ class EnvironmentCacheService {
     } else {
       this._environments.set(id, { ...environment, events: environment.events ?? [] });
     }
-    this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environments.values()]);
+    if (shouldBroadcast) {
+      this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environments.values()]);
+    }
     this._lastUpdate = Date.now();
   }
 
