@@ -23,8 +23,6 @@ import errorPage from './../../common/errorPage.js';
 import {environmentStateSummary} from './components/environmentStateSummary.js';
 import {environmentComponentsSummary} from './components/environmentComponentsSummary.js';
 import {EnvironmentState} from './../../common/enums/EnvironmentState.enum.js';
-import {ROLES} from './../../workflow/constants.js';
-import {isUserAllowedRole} from './../../common/userRole.js';
 
 /**
  * @file Page to show information about all information of one environment (header + content)

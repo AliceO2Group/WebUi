@@ -114,7 +114,7 @@ class EnvironmentCacheService {
   _listenToEventsAndBroadcast() {
     this._eventEmitter.on(ENVIRONMENTS_TRACK, (event) => {
       const { timestamp } = event;
-      
+
       const environmentEvent = fromEcsEventToEnvironmentEvent(event);
       environmentEvent.timestamp = this._adaptInt64ToNumber(timestamp);
       const { id } = environmentEvent;
