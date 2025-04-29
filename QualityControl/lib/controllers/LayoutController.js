@@ -20,6 +20,7 @@ import { LayoutPatchDto } from './../dtos/LayoutPatchDto.js';
 
 import {
   InvalidInputError,
+  LogManager,
   NotFoundError,
   updateAndSendExpressResponseFromNativeError,
 }
@@ -28,6 +29,8 @@ import {
 /**
  * @typedef {import('../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
  */
+
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
 
 /**
  * Gateway for all HTTP requests with regards to QCG Layouts
@@ -63,7 +66,18 @@ export class LayoutController {
       }
       const layouts = await this._layoutRepository.listLayouts(filter);
       res.status(200).json(layouts);
-    } catch {
+    } catch (e) {
+      if (e instanceof TypeError && e.message === 'fields parameter must be an array') {
+        res.status(400).json({ error: e.message });
+        return;
+      }
+
+      if (e instanceof Error && e.message.startsWith('The following field does not exist for layouts:')) {
+        res.status(400).json({ error: e.message });
+        return;
+      }
+
+      logger.debugMessage(`Error retrieving layouts: ${e}`);
       updateAndSendExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
     }
   }
