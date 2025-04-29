@@ -20,6 +20,7 @@ const {
   }
 } = require('./../../common/emitterKeys.enum.js');
 const { fromEcsEventToEnvironmentEvent } = require('./../../kafka/adapters/fromEcsEventToEnvironmentEvent.js');
+const EPN_PATH_IN_ENVIRONMENT_INFO = 'hardware.epn.info';
 
 /**
  * @class
@@ -136,15 +137,11 @@ class EnvironmentCacheService {
        * @param {object} event - the event object containing the payload and environmentId
        */
       (event) => {
-        const { payload, environmentId } = event;
+        const { payload: {state, ddsSessionId, ddsSessionStatus}, environmentId } = event;
         const environmentUpdated = this._updateAttributeOfEnvironment(
           environmentId,
-          'hardware.epn.info',
-          {
-            state: payload?.state,
-            ddsSessionId: payload?.ddsSessionId,
-            ddsSessionStatus: payload?.ddsSessionStatus,
-          }
+          EPN_PATH_IN_ENVIRONMENT_INFO,
+          { state, ddsSessionId, ddsSessionStatus }
         );
         if (environmentUpdated) {
           this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environments.values()]);
