@@ -44,8 +44,9 @@ export default class LayoutService {
   async getLayoutCards(that = this.model) {
     this.list = RemoteData.loading();
     that.notify();
+    const cardfields = 'id,name,owner_id,owner_name,description,isOfficial';
 
-    const { result, ok } = await this.loader.get('/api/layoutcards');
+    const { result, ok } = await this.loader.get(`/api/layouts?fields=${cardfields}`);
 
     if (ok) {
       const username = this.model.session.name;
@@ -107,7 +108,9 @@ export default class LayoutService {
     if (isNaN(userId)) {
       this.userList = RemoteData.failure('Provided userId is not a number');
     } else {
-      const { result, ok } = await this.loader.get(`/api/layoutcards?owner_id=${userId}`);
+      const cardfields = 'id,name,owner_id,owner_name,description,isOfficial';
+
+      const { result, ok } = await this.loader.get(`/api/layouts?owner_id=${userId}&fields=${cardfields}`);
       if (ok) {
         const sortedLayouts = result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
         this.userList = RemoteData.success(sortedLayouts);
