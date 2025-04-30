@@ -22,6 +22,9 @@ import { LogManager } from '@aliceo2/web-ui';
 export const initDatabase = async (sequelizeDatabase) => {
   const _logger = LogManager.getLogger('qcg/database');
   try {
+    if (process.env.NODE_ENV === 'test') {
+      await sequelizeDatabase.dropAllTables();
+    }
     await sequelizeDatabase.connect();
     await sequelizeDatabase.migrate();
     if (process.env.NODE_ENV === 'test') {
