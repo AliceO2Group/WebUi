@@ -65,7 +65,6 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should have a link to show a layout from users layout', async () => {
     const linkpath = cardLayoutLinkPath(cardPath(myLayoutIndex, 2));
-    page.screenshot({ path: 'test/public/pages/link-show-layout.png' });
 
     const href = await page.evaluate((path) => document.querySelector(path).href, linkpath);
 
@@ -87,7 +86,6 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
 
     let markedAsOfficial = await page.evaluate((path) => document.querySelector(path).textContent.trim(), buttonPath);
 
-    page.screenshot({ path: 'test/public/pages/button-make-official.png' });
     strictEqual(markedAsOfficial, 'Make Official', 'Unofficial layout cardbuttons should state: "Make Official"');
 
     await page.click(buttonPath);
@@ -130,7 +128,6 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
 
     const officialLayoutCard = await page.evaluate((path) =>
       document.querySelector(path) === null, officialLayoutCardPath);
-    page.screenshot({ path: 'test/public/pages/button-make-official.png' });
     strictEqual(officialLayoutCard, true, 'The official layout folder should have had a card added in previous test');
   });
 
