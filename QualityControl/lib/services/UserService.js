@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { InvalidInputError } from '@aliceo2/web-ui';
+import { InvalidInputError, LogManager } from '@aliceo2/web-ui';
 
 /**
  * Service class for managing users.
@@ -27,6 +27,7 @@ export class UserService {
       throw new Error('Missing User Repository');
     }
     this._userRepository = userRepository;
+    this._logger = LogManager.getLogger('qcg/user-service');
   }
 
   /**
@@ -39,12 +40,10 @@ export class UserService {
   async getUserByUsername(username) {
     try {
       const user = await this._userRepository.findUserByUsername(username);
-      if (!user) {
-        return null;
-      }
-      return user.toJSON();
+      return user ? user.toJSON() : null;
     } catch (error) {
-      throw new Error(`Error getting user by username: ${error.message}`);
+      this._logger.errorMessage(`Error getting user by username: ${error.message}`);
+      throw error;
     }
   }
 
@@ -58,12 +57,10 @@ export class UserService {
   async getUserById(id) {
     try {
       const user = await this._userRepository.findUserById(id);
-      if (!user) {
-        return null;
-      }
-      return user.toJSON();
+      return user ? user.toJSON() : null;
     } catch (error) {
-      throw new Error(`Error getting user by ID: ${error.message}`);
+      this._logger.errorMessage(`Error getting user by ID: ${error.message}`);
+      throw error;
     }
   }
 
@@ -73,19 +70,24 @@ export class UserService {
    * @throws {Error} If validation fails or the user already exists.
    */
   async createUser(sessionInfo) {
-    this._validateUser(sessionInfo);
-    const existingUser = await this._userRepository.findUser({
-      username: sessionInfo.username,
-      name: sessionInfo.name,
-    });
-
-    if (!existingUser || existingUser.length === 0) {
-      const newUser = {
-        id: sessionInfo.personid,
+    try {
+      this._validateUser(sessionInfo);
+      const existingUser = await this._userRepository.findUser({
         username: sessionInfo.username,
         name: sessionInfo.name,
-      };
-      await this._userRepository.createUser(newUser);
+      });
+
+      if (!existingUser || existingUser.length === 0) {
+        const newUser = {
+          id: sessionInfo.personid,
+          username: sessionInfo.username,
+          name: sessionInfo.name,
+        };
+        await this._userRepository.createUser(newUser);
+      }
+    } catch (error) {
+      this._logger.errorMessage(`Error creating user: ${error.message}`);
+      throw error;
     }
   }
 
