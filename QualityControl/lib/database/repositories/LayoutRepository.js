@@ -56,47 +56,35 @@ export class LayoutRepository extends BaseRepository {
    * Retrieves a layout by its ID from the database.
    * @param {number|string} layoutId - The ID of the layout to retrieve.
    * @returns {Promise<Layout>} A promise that resolves to the layout object if found.
-   * @throws {Error} Throws an error if the layout is not found or if a database error occurs.
    */
   async findLayoutById(layoutId) {
-    try {
-      const layout = await this._model.findOne({
-        where: { id: layoutId },
-        include: this._layoutInfoToInclude,
-      });
-      if (!layout) {
-        throw new Error('Layout not found');
-      }
-      return layout;
-    } catch (error) {
-      this._logger.errorMessage(`Error finding layout by ID: ${error.message}`);
-      throw error;
-    }
+    const layout = await this._model.findOne({
+      where: { id: layoutId },
+      include: this._layoutInfoToInclude,
+    });
+    return layout;
+  }
+
+  /**
+   * Retrieves all layouts from the database
+   * @returns {Promise<Layout[]>} A promise that resolves to an array of layout objects.
+   */
+  async findAllLayouts() {
+    return this._model.findAll({
+      include: this._layoutInfoToInclude,
+    });
   }
 
   /**
    * Retrieves all layouts from the database that match the specified filters.
-   * @async
    * @param {object} filters - An object containing the filtering criteria for querying layouts.
-   * @returns {Promise<Array>} A promise that resolves to an array of layout objects.
-   * @throws {Error} Throws an error if no layouts matching the criteria are found or if a database error occurs.
+   * @returns {Promise<Layout[]>} A promise that resolves to an array of layout objects.
    */
-
-  async findAllLayouts(filters) {
-    try {
-      if (!filters || Object.keys(filters).length === 0) {
-        return this._model.findAll({
-          include: this._layoutInfoToInclude,
-        });
-      } const layoutsFound = await this._model.findAll({
-        where: { [Op.and]: [filters] },
-        include: this._layoutInfoToInclude,
-      });
-      return layoutsFound;
-    } catch (error) {
-      this._logger.errorMessage(`Error finding layouts: ${error.message}`);
-      throw error;
-    }
+  async findByFilters(filters) {
+    return await this._model.findAll({
+      where: { [Op.and]: [filters] },
+      include: this._layoutInfoToInclude,
+    });
   }
 
   /**
@@ -106,73 +94,51 @@ export class LayoutRepository extends BaseRepository {
    * @throws {Error} Throws an error if the layout is not found or if a database error occurs.
    */
   async findLayoutByName(layoutName) {
-    try {
-      const layoutFound =
-        await this._model.findOne({ where: { name: layoutName }, include: this._layoutInfoToInclude });
-      if (!layoutFound) {
-        throw new Error(`Layout with name ${layoutName} not found`);
-      }
-      return layoutFound;
-    } catch (error) {
-      this._logger.errorMessage(`Error getting layout by name: ${error.message}`);
-      throw error;
-    }
+    return await this._model.findOne({ where: {
+      name: layoutName,
+    },
+    include: this._layoutInfoToInclude,
+    });
   }
 
   /**
    * Saves a layout to the database.
    * @param {object} layoutData - The data of the layout to be saved.
-   * @returns {Promise<Layout>} A promise that resolves to the created layout object.
    * @throws {Error} if error during creation
    */
   async createLayout(layoutData) {
-    try {
-      return await this._model.create(layoutData);
-    } catch (error) {
-      this._logger.errorMessage(`Error creating layout: ${error.message}`);
-      throw error;
+    const [createdRows] = await this._model.create(layoutData);
+    if (createdRows === 0) {
+      throw new Error('Error creating layout');
     }
   }
 
   /**
    * Updates a layout.
    * @param {number} layoutId - The ID of the layout.
-   * @param {GridTabCell} updateData - The data to update the layout with.
-   * @returns {Promise<number>} - A promise that resolves with 1 if layout has been updated successfully.
-   * @throws {Error} - Throws an error if there is an issue during the update.
+   * @param {Layout} updateData - The data to update the layout with.
+   * @throws {Error} if error during update
    */
   async updateLayout(layoutId, updateData) {
-    try {
-      const [affectedRows] = await this._model.update(updateData, {
-        where: { id: layoutId },
-      });
-      if (affectedRows === 0) {
-        throw new Error('Layout not found or no changes made');
-      }
-      return affectedRows;
-    } catch (error) {
-      this._logger.errorMessage(`Error updating layout: ${error.message}`);
-      throw error;
+    const [updatedRows] = await this._model.update(updateData, {
+      where: { id: layoutId },
+    });
+    if (updatedRows === 0) {
+      throw new Error('Error updating layout');
     }
   }
 
   /**
    * Deletes a layout.
    * @param {number} layoutId - The ID of the layout.
-   * @returns {Promise<void>} - A promise that resolves when the deletion is complete.
-   * @throws {Error} - Throws an error if there is an issue during the deletion.
+   * @throws {Error} if error during deletion
    */
   async deleteLayout(layoutId) {
-    try {
-      const deletedRows = await this._model.destroy({
-        where: { id: layoutId },
-      });
-      if (deletedRows === 0) {
-        throw new Error('Layout not found');
-      }
-    } catch (error) {
-      this._logger.errorMessage(`Error deleting layout: ${error.message}`);
-      throw error;
+    const [deletedRows] = await this._model.destroy({
+      where: { id: layoutId },
+    });
+    if (deletedRows === 0) {
+      throw new Error('Error deleting layout');
     }
   }
 }

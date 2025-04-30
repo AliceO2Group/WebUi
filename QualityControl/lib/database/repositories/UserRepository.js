@@ -27,15 +27,9 @@ export class UserRepository extends BaseRepository {
    * @returns {Promise<User|null>} A promise that resolves to the user object if found, otherwise null.
    */
   async findUserByUsername(username) {
-    try {
-      const user = await this._model.findOne({
-        where: { username },
-      });
-      return user || null;
-    } catch (error) {
-      this._logger.errorMessage(`Error retrieving user by username: ${error.message}`);
-      throw error;
-    }
+    return await this._model.findOne({
+      where: { username },
+    });
   }
 
   /**
@@ -44,13 +38,7 @@ export class UserRepository extends BaseRepository {
    * @returns {Promise<User|null>} A promise that resolves to the user object if found, otherwise null.
    */
   async findUserById(userId) {
-    try {
-      const user = await this._model.findByPk(userId);
-      return user || null;
-    } catch (error) {
-      this._logger.errorMessage(`Error retrieving user by ID: ${error.message}`);
-      throw error;
-    }
+    return await this._model.findByPk(userId);
   }
 
   /**
@@ -59,16 +47,9 @@ export class UserRepository extends BaseRepository {
    * @returns {Promise<User|null>} A promise that resolves to the user object if found, otherwise null.
    */
   async findUser(filters) {
-    try {
-      const user = await this._model.findOne({
-        where: filters,
-      });
-
-      return user || null;
-    } catch (error) {
-      this._logger.errorMessage(`Error retrieving user: ${error.message}`);
-      throw error;
-    }
+    return await this._model.findOne({
+      where: filters,
+    });
   }
 
   /**
@@ -77,13 +58,6 @@ export class UserRepository extends BaseRepository {
    * @returns {Promise<object>} A promise that resolves to the created user object.
    */
   async createUser(userData) {
-    try {
-      const newUser = await this._model.create(userData);
-
-      return newUser;
-    } catch (error) {
-      this._logger.errorMessage(`Error creating user: ${error.message}`);
-      throw error;
-    }
+    return await this._model.create(userData);
   }
 }

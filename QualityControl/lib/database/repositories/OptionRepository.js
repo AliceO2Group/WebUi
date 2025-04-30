@@ -27,33 +27,14 @@ export class OptionRepository extends BaseRepository {
   }
 
   /**
-   * Retrieves all options from the database.
-   * @returns {Promise<Array>} A promise that resolves to an array of option objects.
-   * @throws {Error} If the retrieval fails.
-   */
-  async findAll() {
-    try {
-      return await this._model.findAll();
-    } catch (error) {
-      this._logger.errorMessage(`Error retrieving all options: ${error.message}`);
-      throw error;
-    }
-  }
-
-  /**
    * Retrieves option by name
    * @param {string} optionName - The name of the option
    * @returns {Promise<Option>} A promise that resolves to a option.
    * @throws {Error} If the retrieval fails.
    */
   async findOptionByName(optionName) {
-    try {
-      return await this._model.findOne({
-        where: { name: optionName },
-      });
-    } catch (error) {
-      this._logger.errorMessage(`Error finding option by name: ${error.message}`);
-      throw error;
-    }
+    return await this._model.findOne({
+      where: { name: optionName },
+    });
   }
 }

@@ -33,12 +33,9 @@ export class ChartOptionsRepository extends BaseRepository {
    * @throws {Error} - Throws an error if there is an issue during the creation.
    */
   async createChartOption(chartOptionData) {
-    try {
-      const newChartOption = await this._model.create(chartOptionData);
-      return newChartOption;
-    } catch (error) {
-      this._logger.errorMessage(`Error creating chart option: ${error.message}`);
-      throw error;
+    const [createdRows] = await this._model.create(chartOptionData);
+    if (createdRows === 0) {
+      throw new Error('Error creating chart option');
     }
   }
 
@@ -49,18 +46,9 @@ export class ChartOptionsRepository extends BaseRepository {
    * @throws {Error} - Throws an error if no options are found or if there is an issue during the search.
    */
   async findChartOptionsByChartId(chartId) {
-    try {
-      const chartOptions = await this._model.findAll({
-        where: { chart_id: chartId },
-      });
-      if (!chartOptions || chartOptions.length === 0) {
-        return [];
-      }
-      return chartOptions;
-    } catch (error) {
-      this._logger.errorMessage(`Error finding chart option by ID: ${error}`);
-      throw error;
-    }
+    return await this._model.findAll({
+      where: { chart_id: chartId },
+    });
   }
 
   /**
@@ -72,12 +60,11 @@ export class ChartOptionsRepository extends BaseRepository {
    */
 
   async deleteChartOption(chartId, optionId) {
-    try {
-      await this._model.destroy({
-        where: { chart_id: chartId, option_id: optionId },
-      });
-    } catch (error) {
-      this._logger.errorMessage(`Failed to delete chart option: ${error.message}`);
+    const deletedRows = await this._model.destroy({
+      where: { chart_id: chartId, option_id: optionId },
+    });
+    if (deletedRows === 0) {
+      throw new Error('Error deleting chart option');
     }
   }
 
@@ -88,29 +75,24 @@ export class ChartOptionsRepository extends BaseRepository {
    * @throws {Error} If the update fails.
    */
   async updateChartOption(chartOption) {
-    try {
-      const { chartId, optionId } = chartOption;
-      const [affectedRows] = await this._model.update(
-        {
-          chart_id: chartId,
-          option_id: optionId,
-        },
-        {
-          where: { chart_id: chartId, option_id: optionId },
-          include: [
-            {
-              association: 'option',
+    const { chartId, optionId } = chartOption;
+    const [updatedRows] = await this._model.update(
+      {
+        chart_id: chartId,
+        option_id: optionId,
+      },
+      {
+        where: { chart_id: chartId, option_id: optionId },
+        include: [
+          {
+            association: 'option',
 
-            },
-          ],
-        },
-      );
-      if (affectedRows === 0) {
-        throw new Error('Chart option not found or no changes made');
-      }
-    } catch (error) {
-      this._logger.errorMessage(`Error updating chart option: ${error.message}`);
-      throw error;
+          },
+        ],
+      },
+    );
+    if (updatedRows === 0) {
+      throw new Error('Error updating chart option');
     }
   }
 }

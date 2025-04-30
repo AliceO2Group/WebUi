@@ -29,36 +29,22 @@ export class GridTabCellRepository extends BaseRepository {
    * Finds grid tab cells by tab ID.
    * @param {number} tabId - The ID of the tab.
    * @returns {Promise<Array<GridTabCell>>} - A promise that resolves to an array of grid tab cells.
-   * @throws {Error} - Throws an error if there is an issue during the search.
    */
   async findByTabId(tabId) {
-    try {
-      const gridTabCells = await this._model.findAll({
-        where: { tab_id: tabId },
-      });
-      return gridTabCells;
-    } catch (error) {
-      this._logger.errorMessage(`Error finding grid tab cells by tab ID: ${error.message}`);
-      throw error;
-    }
+    return await this._model.findAll({
+      where: { tab_id: tabId },
+    });
   }
 
   /**
    * Finds grid tab cells by chart ID.
    * @param {number} chartId - The ID of the chart.
    * @returns {Promise<Array<GridTabCell>>} - A promise that resolves to an array of grid tab cells.
-   * @throws {Error} - Throws an error if there is an issue during the search.
    */
   async findByChartId(chartId) {
-    try {
-      const gridTabCells = await this._model.findAll({
-        where: { chart_id: chartId },
-      });
-      return gridTabCells;
-    } catch (error) {
-      this._logger.errorMessage(`Error finding grid tab cells by chart ID: ${error.message}`);
-      throw error;
-    }
+    return await this._model.findAll({
+      where: { chart_id: chartId },
+    });
   }
 
   /**
@@ -68,11 +54,9 @@ export class GridTabCellRepository extends BaseRepository {
    * @throws {Error} - Throws an error if there is an issue during the creation.
    */
   async createGridTabCell(newGridTabCell) {
-    try {
-      return await this._model.create(newGridTabCell);
-    } catch (error) {
-      this._logger.errorMessage(`Error creating grid tab cell: ${error.message}`);
-      throw error;
+    const [createdRows] = await this._model.create(newGridTabCell);
+    if (createdRows === 0) {
+      throw new Error('Grid tab cell creation failed');
     }
   }
 
@@ -84,16 +68,11 @@ export class GridTabCellRepository extends BaseRepository {
    * @throws {Error} - Throws an error if there is an issue during the deletion.
    */
   async deleteGridTabCell(chartId, tabId) {
-    try {
-      const deletedRows = await this._model.destroy({
-        where: { chart_id: chartId, tab_id: tabId },
-      });
-      if (deletedRows === 0) {
-        throw new Error('Grid tab cell not found');
-      }
-    } catch (error) {
-      this._logger.errorMessage(`Error deleting grid tab cell: ${error.message}`);
-      throw error;
+    const deletedRows = await this._model.destroy({
+      where: { chart_id: chartId, tab_id: tabId },
+    });
+    if (deletedRows === 0) {
+      throw new Error('Grid tab cell not found');
     }
   }
 
@@ -107,25 +86,17 @@ export class GridTabCellRepository extends BaseRepository {
    * @throws {Error} - Throws an error if there is an issue during the update.
    */
   async updateGridTabCell(identifier, newGridTabCell) {
-    try {
-      const { chart_id, tab_id } = identifier;
-      if (!chart_id || !tab_id) {
-        throw new Error('chart_id and tab_id are required');
-      }
-      const [affectedRows] = await this._model.update(
-        newGridTabCell,
-        {
-          where: { chart_id, tab_id },
-        },
-      );
-      if (affectedRows === 0) {
-        throw new Error('Grid tab cell not found or no changes made');
-      }
-      return affectedRows;
-    } catch (error) {
-      this._logger.errorMessage(`Error updating grid tab cell: ${error.message}`);
-      throw error;
+    const { chart_id, tab_id } = identifier;
+    const [updatedRows] = await this._model.update(
+      newGridTabCell,
+      {
+        where: { chart_id, tab_id },
+      },
+    );
+    if (updatedRows === 0) {
+      throw new Error('Grid tab cell not found or no changes made');
     }
+    return updatedRows;
   }
 
   /**
@@ -134,47 +105,37 @@ export class GridTabCellRepository extends BaseRepository {
    * @returns {Promise<object>} - A promise that resolves with the found object.
    * @throws {Error} - Throws an error if the object cannot be found.
    */
-
   async findObjectByChartId(chartId) {
-    try {
-      const cellData = await this._model.findOne({
-        where: { chart_id: chartId },
-        include: [
-          {
-            association: 'tab',
-            include: [
-              {
-                association: 'layout',
-                attributes: ['name'],
-              },
-            ],
-            attributes: ['name'],
-          },
-          {
-            association: 'chart',
-            attributes: ['object_name', 'ignore_defaults'],
-            include: [
-              {
-                association: 'chartOptions',
-                include: [
-                  {
-                    association: 'option',
-                    attributes: ['name'],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-        attributes: [],
-      });
-      if (!cellData) {
-        throw new Error('Grid tab cell not found');
-      }
-      return cellData;
-    } catch (error) {
-      this._logger.errorMessage(`Error finding object by chart id: ${error.message}`);
-      throw error;
-    }
+    return await this._model.findOne({
+      where: { chart_id: chartId },
+      include: [
+        {
+          association: 'tab',
+          include: [
+            {
+              association: 'layout',
+              attributes: ['name'],
+            },
+          ],
+          attributes: ['name'],
+        },
+        {
+          association: 'chart',
+          attributes: ['object_name', 'ignore_defaults'],
+          include: [
+            {
+              association: 'chartOptions',
+              include: [
+                {
+                  association: 'option',
+                  attributes: ['name'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      attributes: [],
+    });
   }
 }

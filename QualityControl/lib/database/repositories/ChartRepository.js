@@ -33,16 +33,7 @@ export class ChartRepository extends BaseRepository {
    * @throws {Error} - Throws an error if the chart is not found or if there is an issue during the search.
    */
   async findChartById(chartId) {
-    try {
-      const chart = await this._model.findByPk(chartId);
-      if (!chart) {
-        throw new Error('Chart not found');
-      }
-      return chart;
-    } catch (error) {
-      this._logger.errorMessage(`Error finding chart by ID: ${error.message}`);
-      throw error;
-    }
+    return await this._model.findByPk(chartId);
   }
 
   /**
@@ -52,11 +43,9 @@ export class ChartRepository extends BaseRepository {
    * @throws {Error} - Throws an error if there is an issue during the creation.
    */
   async createChart(chartData) {
-    try {
-      return await this._model.create(chartData);
-    } catch (error) {
-      this._logger.errorMessage(`Error creating chart: ${error.message}`);
-      throw error;
+    const [createdRows] = await this._model.create(chartData);
+    if (createdRows === 0) {
+      throw new Error('Error creating chart');
     }
   }
 
@@ -64,44 +53,31 @@ export class ChartRepository extends BaseRepository {
    * Updates a chart.
    * @param {string} chartID - The ID of the chart to update
    * @param {object} updateData - The data to update the chart with.
-   * @returns {Promise<number>} - A promise that resolves with 1 if chart has been updated successfully.
    * @throws {Error} - Throws an error if there is an issue during the update.
    */
   async updateChart(chartID, updateData) {
-    try {
-      const [affectedRows] = await this._model.update(
-        updateData,
-        {
-          where: { id: chartID },
-        },
-      );
-      if (affectedRows === 0) {
-        throw new Error('Chart not found or no changes made');
-      }
-      return affectedRows;
-    } catch (error) {
-      this._logger.errorMessage(`Error updating chart: ${error.message}`);
-      throw error;
+    const [affectedRows] = await this._model.update(
+      updateData,
+      {
+        where: { id: chartID },
+      },
+    );
+    if (affectedRows === 0) {
+      throw new Error('Error updating chart');
     }
   }
 
   /**
    * Deletes a chart.
    * @param {number} chartId - The ID of the chart to delete.
-   * @returns {Promise<void>} - A promise that resolves when the deletion is complete.
    * @throws {Error} - Throws an error if there is an issue during the deletion.
    */
   async deleteChart(chartId) {
-    try {
-      const deletedRows = await this._model.destroy({
-        where: { id: chartId },
-      });
-      if (deletedRows === 0) {
-        throw new Error('Chart not found');
-      }
-    } catch (error) {
-      this._logger.errorMessage(`Error deleting chart: ${error.message}`);
-      throw error;
+    const deletedRows = await this._model.destroy({
+      where: { id: chartId },
+    });
+    if (deletedRows === 0) {
+      throw new Error('Error deleting chart');
     }
   }
 }
