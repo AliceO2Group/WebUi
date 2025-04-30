@@ -15,8 +15,6 @@
 import puppeteer from 'puppeteer';
 import { config } from '../config.js';
 import { spawn } from 'child_process';
-import fs from 'fs/promises';
-import path from 'path';
 
 /* eslint-disable no-console */
 
@@ -26,8 +24,6 @@ import path from 'path';
  * An object containing the URL, Puppeteer page, browser, subprocess, and subprocess output.
  */
 export async function setupServerForIntegrationTests() {
-  await copyMockDataFileToUse();
-
   let subprocessOutput = undefined;
   const url = `http://${config.http.hostname}:${config.http.port}/`;
 
@@ -51,7 +47,7 @@ export async function setupServerForIntegrationTests() {
     headless: true,
   });
   // 2-second delay to ensure Chrome has fully initialized when running in a Docker container
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 3000));
   const page = await browser.newPage();
   await page.setViewport({ width: 1366, height: 768 });
   // Listen to browser
@@ -86,21 +82,4 @@ export const terminateSessionAndLog = async (
   console.log('Output of server logs for the previous tests:');
   console.log(subprocessOutput);
   subprocess.kill();
-};
-
-/**
- * Method to copy the mock data file to use 'qcg-mock-data-template.json' so that
- * it can be used by the test suite and suffer changes without impacting the original file.
- * If file does not exist, create it, first.
- */
-export const copyMockDataFileToUse = async () => {
-  const sourceFile = path.resolve('test/setup/seeders/qcg-mock-data-template.json');
-  const destinationFile = path.resolve('test/setup/seeders/qcg-mock-data.json');
-  try {
-    await fs.access(destinationFile);
-  } catch {
-    await fs.writeFile(destinationFile, '');
-  }
-
-  await fs.copyFile(sourceFile, destinationFile);
 };

@@ -31,7 +31,7 @@ export const apiPatchLayoutTests = () => {
       await request(`${URL_ADDRESS}/api/layout/test`)
         .patch(`?token=${OWNER_TEST_TOKEN}`)
         .expect(404, {
-          message: 'layout (test) not found',
+          message: 'Layout with id: test not found',
           status: 404,
           title: 'Not Found',
         });
@@ -54,7 +54,7 @@ export const apiPatchLayoutTests = () => {
           test: 'test',
         })
         .expect(400, {
-          message: 'Failed to validate layout: "test" is not allowed',
+          message: 'Invalid request body to update layout',
           status: 400,
           title: 'Invalid Input',
         });
@@ -66,7 +66,7 @@ export const apiPatchLayoutTests = () => {
         .send({
           isOfficial: false,
         })
-        .expect(201, {
+        .expect(200, {
           id: '671b8c22402408122e2f20dd',
         });
     });

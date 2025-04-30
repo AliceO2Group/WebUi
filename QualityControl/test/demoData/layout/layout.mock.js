@@ -68,6 +68,7 @@ export const LAYOUT_INPUT_MOCK = {
   description: 'layout-desc',
   display_timestamp: true,
   auto_tab_change_interval: 30,
+  is_official: true,
   tabs: [
     {
       id: 'tab-1',
