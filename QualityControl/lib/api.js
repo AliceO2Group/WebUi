@@ -26,7 +26,7 @@ import { statusComponentMiddleware } from './middleware/status/statusComponent.m
  * @param {WebSocket} ws - web-ui websocket server implementation
  * @returns {void}
  */
-export const setup = (http, ws) => {
+export const setup = async (http, ws) => {
   /**
    * @type {{
    *   layoutController: import('./controllers/LayoutController.js').LayoutController,
@@ -44,7 +44,7 @@ export const setup = (http, ws) => {
     statusService,
     userController,
     layoutService,
-  } = setupQcModel();
+  } = await setupQcModel();
   statusService.ws = ws;
   http.get('/object/:id', objectController.getObjectById.bind(objectController));
   http.get('/object', objectController.getObjectContent.bind(objectController));
@@ -57,21 +57,21 @@ export const setup = (http, ws) => {
   http.put(
     '/layout/:id',
     layoutServiceMiddleware(layoutService),
-    layoutIdMiddleware(),
+    layoutIdMiddleware(layoutService),
     layoutOwnerMiddleware(layoutService),
     layoutController.putLayoutHandler.bind(layoutController),
   );
   http.patch(
     '/layout/:id',
     layoutServiceMiddleware(layoutService),
-    layoutIdMiddleware(),
+    layoutIdMiddleware(layoutService),
     minimumRoleMiddleware(UserRole.GLOBAL),
     layoutController.patchLayoutHandler.bind(layoutController),
   );
   http.delete(
     '/layout/:id',
     layoutServiceMiddleware(layoutService),
-    layoutIdMiddleware(),
+    layoutIdMiddleware(layoutService),
     layoutOwnerMiddleware(layoutService),
     layoutController.deleteLayoutHandler.bind(layoutController),
   );

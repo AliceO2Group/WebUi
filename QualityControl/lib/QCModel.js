@@ -39,13 +39,13 @@ import { LayoutService } from './services/LayoutService.js';
  * Model initialization for the QCG application
  * @returns {Promise<object>} Multiple services and controllers that are to be used by the QCG application
  */
-export const setupQcModel = () => {
+export const setupQcModel = async () => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
   const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
 
   const sequelizeDatabase = new SequelizeDatabase(config?.database || {});
-  initDatabase(sequelizeDatabase);
+  await initDatabase(sequelizeDatabase);
 
   const repositories = setupRepositories(sequelizeDatabase);
   const {
