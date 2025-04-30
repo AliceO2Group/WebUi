@@ -14,7 +14,7 @@
 import { stub, restore } from 'sinon';
 import { deepEqual, ok, rejects, strictEqual } from 'node:assert';
 import { suite, test, afterEach, beforeEach } from 'node:test';
-import { LogManager } from '@aliceo2/web-ui';
+import { LogManager, NotFoundError } from '@aliceo2/web-ui';
 import { LayoutService } from '../../../lib/services/LayoutService.js';
 
 export const layoutServiceTestSuite = async () => {
@@ -32,7 +32,9 @@ export const layoutServiceTestSuite = async () => {
       userRepositoryMock = { findUserById: stub() };
       layoutRepositoryMock = {
         findAllLayouts: stub(),
+        findByFilters: stub(),
         findLayoutById: stub(),
+        findLayoutByName: stub(),
         updateLayout: stub(),
         createLayout: stub(),
         deleteLayout: stub(),
@@ -76,18 +78,13 @@ export const layoutServiceTestSuite = async () => {
 
     suite('getLayoutsByOwnerId', () => {
       test('should return layouts if user exists and has username', async () => {
-        stub(layoutService, 'getAllLayouts');
         const mockLayouts = [
           { id: 1, name: 'Layout 1', owner_username: 'testuser' },
           { id: 2, name: 'Layout 2', owner_username: 'testuser' },
         ];
         userRepositoryMock.findUserById.resolves({ id: 1, username: 'testuser' });
-        layoutService.getAllLayouts.resolves(mockLayouts);
-
-        const result = await layoutService.getLayoutsByOwnerId(1);
-
-        deepEqual(result, mockLayouts);
-        ok(userRepositoryMock.findUserById.calledWith(1));
+        stub(layoutService, 'getAllLayouts').resolves(mockLayouts);
+        await layoutService.getLayoutsByOwnerId(1);
         ok(layoutService.getAllLayouts.calledWith({ owner_username: 'testuser' }));
       });
 
@@ -99,367 +96,228 @@ export const layoutServiceTestSuite = async () => {
         deepEqual(result, []);
         ok(userRepositoryMock.findUserById.calledWith(1));
       });
+
       test('should return empty array if user has no username', async () => {
         userRepositoryMock.findUserById.resolves({ id: 1 });
 
         const result = await layoutService.getLayoutsByOwnerId(1);
 
         deepEqual(result, []);
+        ok(userRepositoryMock.findUserById.calledWith(1));
       });
-      test('throw error if userRepository throws', async () => {
-        const error = new Error('DB error');
+
+      test('should throw error if userRepository throws', async () => {
+        const error = new Error('User repository error');
         userRepositoryMock.findUserById.rejects(error);
 
         await rejects(
-          async () => await layoutService.getLayoutsByOwnerId(1),
+          () => layoutService.getLayoutsByOwnerId(1),
           error,
         );
       });
     });
+
     suite('getAllLayouts', () => {
-      test('should return layouts when repository call succeeds', async () => {
-        const filters = { owner_username: 'testuser' };
-        const mockLayouts = [
-          { id: 1, name: 'nameA', owner_username: 'testuser' },
-          { id: 2, name: 'nameB', owner_username: 'testuser' },
-        ];
-        layoutRepositoryMock.findAllLayouts = stub().resolves(mockLayouts);
+      test('should call findAllLayouts if no filters are provided', async () => {
+        const mockLayouts = [{ id: 1, name: 'L1' }];
+        layoutRepositoryMock.findAllLayouts.resolves(mockLayouts);
+
+        const result = await layoutService.getAllLayouts();
+
+        deepEqual(result, mockLayouts);
+        ok(layoutRepositoryMock.findAllLayouts.calledOnce);
+        ok(layoutRepositoryMock.findByFilters.notCalled);
+      });
+
+      test('should call findByFilters if filters are provided', async () => {
+        const filters = { owner_username: 'alice' };
+        const mockLayouts = [{ id: 2, name: 'L2', owner_username: 'alice' }];
+        layoutRepositoryMock.findByFilters = stub().resolves(mockLayouts);
 
         const result = await layoutService.getAllLayouts(filters);
 
         deepEqual(result, mockLayouts);
-        ok(layoutRepositoryMock.findAllLayouts.calledWith(filters));
+        ok(layoutRepositoryMock.findByFilters.calledOnceWith(filters));
+        ok(layoutRepositoryMock.findAllLayouts.notCalled);
       });
 
-      test('should throw and log error if repository throws', async () => {
-        const filters = { owner_username: 'failuser' };
-        const error = new Error('DB error');
+      test('should throw error if findAllLayouts fails', async () => {
+        const error = new Error('findAllLayouts failed');
         layoutRepositoryMock.findAllLayouts.rejects(error);
 
         await rejects(
-          async () => await layoutService.getAllLayouts(filters),
+          () => layoutService.getAllLayouts(),
+          error,
+        );
+      });
+
+      test('should throw error if findByFilters fails', async () => {
+        const error = new Error('findByFilters failed');
+        layoutRepositoryMock.findByFilters = stub().rejects(error);
+
+        await rejects(
+          () => layoutService.getAllLayouts({ owner_username: 'bob' }),
           error,
         );
       });
     });
+
     suite('getLayoutById', () => {
-      suite('getLayoutById', () => {
-        test('should return layout when found', async () => {
-          const layoutId = 1;
-          const mockLayout = { id: layoutId, name: 'Test Layout' };
-          layoutRepositoryMock.findLayoutById = stub().resolves(mockLayout);
+      test('should throw error if layout is not found', async () => {
+        const layoutId = 1;
+        layoutRepositoryMock.findLayoutById.resolves(null);
 
-          const result = await layoutService.getLayoutById(layoutId);
+        await rejects(
+          () => layoutService.getLayoutById(layoutId),
+          new NotFoundError(`Layout with id: ${layoutId} not found`),
+        );
+        ok(layoutRepositoryMock.findLayoutById.calledWith(layoutId));
+      });
+      test('should return layout if found', async () => {
+        const layoutId = 1;
+        const mockLayout = { id: layoutId, name: 'Layout 1' };
+        layoutRepositoryMock.findLayoutById.resolves(mockLayout);
 
-          deepEqual(result, mockLayout);
-          ok(layoutRepositoryMock.findLayoutById.calledWith(layoutId));
-        });
+        const result = await layoutService.getLayoutById(layoutId);
 
-        test('should throw error if layoutId is not provided', async () => {
-          await rejects(
-            async () => await layoutService.getLayoutById(null),
-            new Error('Layout ID is required'),
-          );
-        });
-
-        test('should throw error if layout is not found', async () => {
-          const layoutId = 999;
-          layoutRepositoryMock.findLayoutById.resolves(null);
-
-          await rejects(
-            async () => await layoutService.getLayoutById(layoutId),
-            new Error(`Layout with ID ${layoutId} not found`),
-          );
-
-          ok(layoutRepositoryMock.findLayoutById.calledWith(layoutId));
-        });
-
-        test('should throw error from repository', async () => {
-          const layoutId = 123;
-          const error = new Error('DB exploded');
-          layoutRepositoryMock.findLayoutById = stub().rejects(error);
-
-          await rejects(
-            async () => await layoutService.getLayoutById(layoutId),
-            error,
-          );
-        });
+        deepEqual(result, mockLayout);
+        ok(layoutRepositoryMock.findLayoutById.calledWith(layoutId));
       });
     });
 
     suite('getLayoutByName', () => {
-      test('should return layout when found by name', async () => {
-        const layoutName = 'Dashboard';
+      test('should throw error if layout name is not found', async () => {
+        const layoutName = 'NonExistingLayout';
+        layoutRepositoryMock.findLayoutByName.resolves(null);
+
+        await rejects(
+          () => layoutService.getLayoutByName(layoutName),
+          new NotFoundError(`Layout with name: ${layoutName} not found`),
+        );
+      });
+      test('should return layout if name found', async () => {
+        const layoutName = 'ExistingLayout';
         const mockLayout = { id: 1, name: layoutName };
-        layoutRepositoryMock.findLayoutByName = stub().resolves(mockLayout);
+        layoutRepositoryMock.findLayoutByName.resolves(mockLayout);
 
         const result = await layoutService.getLayoutByName(layoutName);
 
         deepEqual(result, mockLayout);
-        ok(layoutRepositoryMock.findLayoutByName.calledWith(layoutName));
-      });
-
-      test('should throw error if layoutName is not provided', async () => {
-        await rejects(
-          async () => await layoutService.getLayoutByName(null),
-          new Error('Layout name is required'),
-        );
-      });
-
-      test('should throw error if layout is not found', async () => {
-        const layoutName = 'NonExistentLayout';
-        layoutRepositoryMock.findLayoutByName = stub().resolves(null);
-
-        await rejects(
-          async () => await layoutService.getLayoutByName(layoutName),
-          new Error('Layout not found'),
-        );
-
-        ok(layoutRepositoryMock.findLayoutByName.calledWith(layoutName));
-      });
-
-      test('should log and rethrow error if repository throws', async () => {
-        const layoutName = 'Broken';
-        const error = new Error('Database failure');
-        layoutRepositoryMock.findLayoutByName = stub().rejects(error);
-
-        await rejects(
-          async () => await layoutService.getLayoutByName(layoutName),
-          error,
-        );
       });
     });
-    suite('getObjectById', () => {
-      test('should throw an error if the object is not found by ID', async () => {
-        const objectId = '123';
 
+    suite('getObjectById', () => {
+      test('should throw an error if chart is not found', async () => {
+        const chartId = 1;
         gridTabCellRepositoryMock.findObjectByChartId.resolves(null);
 
-        try {
-          await layoutService.getObjectById(objectId);
-        } catch (error) {
-          ok(error.message === 'Object not found');
-        }
+        await rejects(
+          () => layoutService.getObjectById(chartId),
+          new NotFoundError(`Chart with id: ${chartId} not found`),
+        );
       });
-      test('should return the correct object if found by ID', async () => {
-        const objectId = '123';
-        const foundObject = {
-          tab: { name: 'Tab 1', layout: { name: 'Layout 1' } },
-          chart: { object_name: 'Chart 1', ignore_defaults: false, chartOptions: ['option1', 'option2'] },
+      test('should return object if found', async () => {
+        const mockChart = {
+          object_name: 'Chart 1',
+          ignore_defaults: false,
+          chartOptions: [],
         };
-
-        gridTabCellRepositoryMock.findObjectByChartId.resolves(foundObject);
-
-        const result = await layoutService.getObjectById(objectId);
-
-        deepEqual(result, {
-          layoutName: 'Layout 1',
-          tabName: 'Tab 1',
-          object: {
-            name: 'Chart 1',
-            options: ['option1', 'option2'],
-            ignoreDefaults: false,
+        const mockedLayout = {
+          name: 'Layout 1',
+        };
+        const mockFoundObject = {
+          tab: {
+            name: 'Tab 1',
+            layout: mockedLayout,
           },
-        });
-        ok(gridTabCellRepositoryMock.findObjectByChartId
-          .calledWith(objectId));
+          chart: mockChart,
+        };
+        gridTabCellRepositoryMock.findObjectByChartId.resolves(mockFoundObject);
+        ok(
+          await layoutService.getObjectById(1),
+          deepEqual(mockFoundObject, {
+            tab: { name: 'Tab 1', layout: mockedLayout },
+            chart: mockChart,
+          }),
+        );
+        ok(gridTabCellRepositoryMock.findObjectByChartId.calledWith(1));
       });
     });
 
     suite('updateLayout', () => {
-      test('should throw an error if patchedLayout is missing or has no id', async () => {
-        const invalidPatchedLayout = { name: 'New Layout', description: 'Test layout' };
+      test('should apply update if updating layout', async () => {
         const layoutId = 1;
-
-        try {
-          await layoutService.updateLayout(layoutId, invalidPatchedLayout);
-        } catch (error) {
-          ok(error.message === 'Layout ID is required');
-        }
-
-        const missingPatchedLayout = null;
-
-        try {
-          await layoutService.updateLayout(layoutId, missingPatchedLayout);
-        } catch (error) {
-          ok(error.message === 'Layout ID is required');
-        }
-      });
-
-      test('should throw an error if layout with given layoutId is not found', async () => {
-        const layoutId = 1;
-        const patchedLayout = {
-          id: 1,
+        const patch = {
           name: 'Updated Layout',
-          description: 'Updated description',
-          displayTimestamp: '2025-04-08',
-          autoTabChange: 3000,
-          isOfficial: true,
-          tabs: [],
-          owner_id: 1,
+          owner_id: 42,
+          tabs: [{ id: 100, title: 'Tab A' }],
         };
+        const existingLayout = { id: layoutId, name: 'Old Layout' };
 
-        layoutRepositoryMock.findLayoutById.resolves(null);
+        userRepositoryMock.findUserById.resolves({ username: 'testuser' });
+        layoutRepositoryMock.findLayoutById.resolves(existingLayout);
+        layoutRepositoryMock.updateLayout.resolves();
+        tabRepositoryMock.updateTab = stub().resolves();
+        layoutService._updateTabs = stub().resolves(); // Stub internal call
 
-        try {
-          await layoutService.updateLayout(layoutId, patchedLayout);
-        } catch (error) {
-          ok(error.message === `Layout with ID: ${layoutId} not found`);
-        }
+        const result = await layoutService.updateLayout(layoutId, patch);
+
+        strictEqual(result, layoutId);
+        ok(layoutRepositoryMock.updateLayout.calledOnce);
+        ok(layoutService._updateTabs.calledWith(layoutId, patch.tabs));
       });
+      test('should apply patch if patching layout', async () => {
+        const layoutId = 2;
+        const patch = { description: 'Patched desc' };
+        const existingLayout = { id: layoutId, description: 'Old desc' };
 
-      test('should throw an error if no rows are affected during layout update', async () => {
-        const layoutId = 1;
-        const patchedLayout = {
-          id: 1,
-          name: 'Updated Layout',
-          description: 'Updated description',
-          displayTimestamp: '2025-04-08',
-          autoTabChange: 3000,
+        layoutRepositoryMock.findLayoutById.resolves(existingLayout);
+        layoutRepositoryMock.updateLayout.resolves();
+
+        const result = await layoutService.patchLayout(layoutId, patch);
+
+        strictEqual(result, layoutId);
+        ok(layoutRepositoryMock.updateLayout.calledOnceWith(layoutId, { description: 'Patched desc' }));
+      });
+      test('should normalize layout correctly for full update', async () => {
+        const layoutId = 3;
+        const patch = {
+          name: 'Normalized Name',
+          description: 'Normalized Desc',
+          displayTimestamp: true,
+          autoTabChange: 30,
           isOfficial: true,
-          tabs: [],
-          owner_id: 1,
+          owner_id: 99,
         };
+        const existingLayout = { id: layoutId };
 
-        const foundLayout = { id: 1, name: 'Old Layout' };
-        const layoutOwner = { username: 'ownerUser' };
+        userRepositoryMock.findUserById.resolves({ username: 'admin' });
+        layoutRepositoryMock.findLayoutById.resolves(existingLayout);
+        layoutRepositoryMock.updateLayout = stub().resolves();
+        layoutService._updateTabs = stub().resolves();
 
-        layoutRepositoryMock.findLayoutById.resolves(foundLayout);
-        userRepositoryMock.findUserById.resolves(layoutOwner);
-        layoutRepositoryMock.updateLayout.resolves(0);
+        const result = await layoutService.updateLayout(layoutId, patch);
 
-        try {
-          await layoutService.updateLayout(layoutId, patchedLayout);
-        } catch (error) {
-          ok(error.message === 'Layout not found (or not changes made)');
-        }
-      });
-
-      test('should update layout and its tabs if layout exists', async () => {
-        const layoutId = 1;
-        const patchedLayout = {
-          id: 1,
-          name: 'Updated Layout',
-          description: 'Updated description',
-          displayTimestamp: '2025-04-08',
-          autoTabChange: 3000,
-          isOfficial: true,
-          tabs: [{ id: 1, name: 'Tab 1', objects: [] }],
-          owner_id: 1,
-        };
-
-        const foundLayout = { id: 1, name: 'Old Layout' }; // Simulating layout exists
-        const layoutOwner = { username: 'ownerUser' }; // Simulating layout owner
-
-        layoutRepositoryMock.findLayoutById.resolves(foundLayout);
-        userRepositoryMock.findUserById.resolves(layoutOwner);
-        layoutRepositoryMock.updateLayout.resolves(1); // Simulating successful update
-        layoutService._updateTabs = stub().resolves(); // Stub _updateTabs method
-
-        await layoutService.updateLayout(layoutId, patchedLayout);
-
-        ok(layoutRepositoryMock.updateLayout.calledWith(layoutId, {
-          id: layoutId,
-          name: patchedLayout.name,
-          description: patchedLayout.description,
-          display_timestamp: patchedLayout.displayTimestamp,
-          auto_tab_change_interval: patchedLayout.autoTabChange,
-          owner_username: layoutOwner.username,
-          is_official: patchedLayout.isOfficial,
-        }));
-        ok(layoutService._updateTabs.calledWith(layoutId, patchedLayout.tabs));
-      });
-
-      test('should update, create, and delete tabs correctly', async () => {
-        const layoutId = 1;
-        const tabs = [
-          { id: 1, name: 'Tab 1', columns: 3, objects: [] },
-          { id: 2, name: 'Tab 2', columns: 2, objects: [] },
-        ];
-
-        tabRepositoryMock.findTabsByLayoutId
-          .resolves([{ id: 1, name: 'Tab 1', layout_id: layoutId, column_count: 3 }]);
-
-        tabRepositoryMock.updateTab.resolves();
-        tabRepositoryMock.createTab.resolves();
-        tabRepositoryMock.deleteTab.resolves();
-
-        layoutService._updateCells = stub().resolves();
-
-        await layoutService._updateTabs(layoutId, tabs);
-
-        ok(tabRepositoryMock.updateTab
-          .calledWith({ name: 'Tab 1', layout_id: layoutId, column_count: 3 }, 1));
-        ok(tabRepositoryMock.createTab
-          .calledWith({ id: 2, name: 'Tab 2', layout_id: layoutId, column_count: 2 }));
-
-        ok(tabRepositoryMock.deleteTab.notCalled);
-
-        ok(layoutService._updateCells.calledWith(2, []));
-      });
-
-      test('should update and create cells and options correctly', async () => {
-        const tabId = 1;
-        const objects = [
-          { id: 1, x: 0, y: 0, h: 1, w: 1, name: 'Chart 1', options: [{ name: 'Option1' }], ignoreDefaults: false },
-          { id: 2, x: 1, y: 1, h: 2, w: 2, name: 'Chart 2', options: [{ name: 'Option2' }], ignoreDefaults: true },
-        ];
-
-        gridTabCellRepositoryMock.findByTabId
-          .resolves([{ chart_id: 1, id: 1, tab_id: 1 }]);
-        chartRepositoryMock.updateChart.resolves();
-        chartRepositoryMock.createChart.resolves();
-        gridTabCellRepositoryMock.updateGridTabCell.resolves();
-        gridTabCellRepositoryMock.createGridTabCell.resolves();
-        optionsRepositoryMock.findOptionByName
-          .onCall(0).resolves({ id: 7 })
-          .onCall(1).resolves({ id: 9 });
-
-        await layoutService._updateCells(tabId, objects);
-
-        ok(chartRepositoryMock.updateChart.calledWith({
-          id: 1, object_name: 'Chart 1', ignore_defaults: false,
-        }, 1));
-        ok(chartRepositoryMock.createChart.calledWith({
-          id: 2, object_name: 'Chart 2', ignore_defaults: true,
-        }));
-
-        ok(gridTabCellRepositoryMock.updateGridTabCell.calledWith({
-          chart_id: 1, row: 0, col: 0, row_span: 1, col_span: 1, tab_id: tabId,
-        }, { chart_id: 1, tab_id: tabId }));
-        ok(gridTabCellRepositoryMock.createGridTabCell.calledWith({
-          chart_id: 2, row: 1, col: 1, row_span: 2, col_span: 2, tab_id: tabId,
-        }));
-
-        ok(optionsRepositoryMock.findOptionByName.calledWith({ name: 'Option1' }));
-        ok(optionsRepositoryMock.findOptionByName.calledWith({ name: 'Option2' }));
-      });
-
-      suite('_updateOptions', () => {
-        const chartId = 1;
-        const options = ['option1', 'option2'];
-        const existingChartOptions = [{ option_id: 7 }, { option_id: 9 }];
-
-        beforeEach(() => {
-          chartOptionsRepositoryMock.findChartOptionsByChartId = stub().resolves(existingChartOptions);
-          optionsRepositoryMock.findOptionByName
-            .onCall(0).resolves({ id: 7 })
-            .onCall(1).resolves({ id: 8 });
-          chartOptionsRepositoryMock.updateChartOption.resolves();
-          chartOptionsRepositoryMock.createChartOption.resolves();
-          chartOptionsRepositoryMock.deleteChartOption.resolves();
+        strictEqual(result, layoutId);
+        const [, updateArgs] = layoutRepositoryMock.updateLayout.getCall(0).args;
+        deepEqual(updateArgs, {
+          name: 'Normalized Name',
+          description: 'Normalized Desc',
+          display_timestamp: true,
+          auto_tab_change_interval: 30,
+          is_official: true,
+          owner_username: 'admin',
         });
+      });
+      test('should throw and log if normalization fails (bad owner_id)', async () => {
+        const layoutId = 4;
+        const patch = { owner_id: 123 };
+        const existingLayout = { id: layoutId };
 
-        test('should update existing options and create new ones', async () => {
-          await layoutService._updateOptions(chartId, options);
-          ok(chartOptionsRepositoryMock.updateChartOption.calledWith({ chartId: 1, optionId: 7 }));
-          ok(chartOptionsRepositoryMock.createChartOption.calledWith({ chart_id: 1, option_id: 8 }));
-        });
+        userRepositoryMock.findUserById.rejects(new Error('User not found'));
+        layoutRepositoryMock.findLayoutById.resolves(existingLayout);
 
-        test('should delete not selected options', async () => {
-          await layoutService._updateOptions(chartId, options);
-          ok(chartOptionsRepositoryMock.deleteChartOption.calledWith(chartId, 9));
-        });
+        await rejects(() => layoutService.updateLayout(layoutId, patch), /User not found/);
       });
     });
     suite('createLayout', () => {

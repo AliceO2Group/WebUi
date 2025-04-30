@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from '@aliceo2/web-ui';
+import { LogManager, NotFoundError } from '@aliceo2/web-ui';
 
 /**
  * Service class for managing layouts.
@@ -80,7 +80,10 @@ export class LayoutService {
    */
   async getAllLayouts(filters = {}) {
     try {
-      return await this._layoutRepository.findAllLayouts(filters);
+      if (!filters || Object.keys(filters).length === 0) {
+        return await this._layoutRepository.findAllLayouts();
+      }
+      return await this._layoutRepository.findByFilters(filters);
     } catch (error) {
       this._logger.errorMessage(`Error getting layouts with filters: ${error.message}`);
       throw error;
@@ -95,12 +98,10 @@ export class LayoutService {
    */
   async getLayoutById(layoutId) {
     try {
-      if (!layoutId) {
-        throw new Error('Layout ID is required');
-      }
       const foundLayout = await this._layoutRepository.findLayoutById(layoutId);
       if (!foundLayout) {
-        throw new Error(`Layout with ID ${layoutId} not found`);
+        this._logger.errorMessage(`Layout with id: ${layoutId} not found`);
+        throw new NotFoundError(`Layout with id: ${layoutId} not found`);
       }
       return foundLayout;
     } catch (error) {
@@ -112,17 +113,15 @@ export class LayoutService {
   /**
    * Retrieves a layout by its name.
    * @param {string} layoutName - The name of the layout to retrieve.
-   * @throws {Error} If the layout name is not provided or if the layout is not found.
+   * @throws {Error} If the layout is not found.
    * @returns {Promise<object>} The layout object.
    */
   async getLayoutByName(layoutName) {
     try {
-      if (!layoutName) {
-        throw new Error('Layout name is required');
-      }
       const foundLayout = await this._layoutRepository.findLayoutByName(layoutName);
       if (!foundLayout) {
-        throw new Error('Layout not found');
+        this._logger.errorMessage(`Layout with name: ${layoutName} not found`);
+        throw new NotFoundError(`Layout with name: ${layoutName} not found`);
       }
       return foundLayout;
     } catch (error) {
@@ -131,40 +130,72 @@ export class LayoutService {
     }
   }
 
-  /**
-   * Updates the layout with the provided data.
-   * @param {string} layoutId - The ID of the layout
-   * @param {object} patchedLayout - The layout data to update.
-   * @throws {Error} If the layout is not found or if an error occurs during the update.
-   * @returns {Promise<void>}
-   */
   async updateLayout(layoutId, patchedLayout) {
     try {
-      if (!patchedLayout || !patchedLayout.id) {
-        throw new Error('Layout ID is required');
-      }
-      const { name, description, displayTimestamp, autoTabChange, isOfficial, tabs, owner_id }
-        = patchedLayout;
-      const foundLayout = await this._layoutRepository.findLayoutById(layoutId);
-      if (!foundLayout) {
-        throw new Error(`Layout with ID: ${layoutId} not found`);
-      }
-      const layoutOwner = await this._userRepository.findUserById(owner_id);
-      const rowsAffected = await this._layoutRepository.updateLayout(layoutId, {
-        id: layoutId,
-        name,
-        description,
-        display_timestamp: displayTimestamp,
-        auto_tab_change_interval: autoTabChange,
-        owner_username: layoutOwner.username,
-        is_official: isOfficial,
-      });
-      if (!rowsAffected || rowsAffected !== 1) {
-        throw new Error('Layout not found (or not changes made)');
-      }
-      await this._updateTabs(layoutId, tabs);
+      return this._applyLayoutUpdate(layoutId, patchedLayout, true);
     } catch (error) {
       this._logger.errorMessage(`Error updating layout: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async patchLayout(layoutId, patchedLayout) {
+    try {
+      return this._applyLayoutUpdate(layoutId, patchedLayout, false);
+    } catch (error) {
+      this._logger.errorMessage(`Error patching layout: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async _applyLayoutUpdate(layoutId, patch, isFullUpdate = false) {
+    const layout = await this._layoutRepository.findLayoutById(layoutId);
+
+    const data = await this._normalizeLayout(patch, layout, isFullUpdate);
+
+    this._layoutRepository.updateLayout(layoutId, data);
+
+    if (isFullUpdate && patch.tabs) {
+      await this._updateTabs(layoutId, patch.tabs);
+    }
+
+    return layoutId;
+  }
+
+  /**
+   * Normalizes the layout to be used by the repository.
+   * @param {object} patch - The layout data to normalize.
+   * @param {object} layout - The existing layout data to merge with.
+   * @param {boolean} isFull - Whether to perform a full update or a partial update.
+   * @returns
+   */
+  async _normalizeLayout(patch, layout = {}, isFull = false) {
+    try {
+      const source = isFull ? { ...layout, ...patch } : patch;
+      const data = {};
+
+      if ('name' in source) {
+        data.name = source.name;
+      }
+      if ('description' in source) {
+        data.description = source.description;
+      }
+      if ('displayTimestamp' in source) {
+        data.display_timestamp = source.displayTimestamp;
+      }
+      if ('autoTabChange' in source) {
+        data.auto_tab_change_interval = source.autoTabChange;
+      }
+      if ('isOfficial' in source) {
+        data.is_official = source.isOfficial;
+      }
+      if ('owner_id' in source) {
+        const user = await this._userRepository.findUserById(source.owner_id);
+        data.owner_username = user.username;
+      }
+      return data;
+    } catch (error) {
+      this._logger.errorMessage(`Error normalizing layout: ${error.message}`);
       throw error;
     }
   }
@@ -179,7 +210,7 @@ export class LayoutService {
     try {
       const foundObject = await this._gridTabCellRepository.findObjectByChartId(objectId);
       if (!foundObject) {
-        throw new Error('Object not found');
+        throw new NotFoundError(`Chart with id: ${objectId} not found`);
       }
       const { tab, chart } = foundObject;
       const { name: tabName, layout } = tab;
@@ -211,7 +242,6 @@ export class LayoutService {
     try {
       const updatedTabIds = new Set(tabs.map((tab) => tab.id)); // Using Set for faster lookup
 
-      // Fetch existing tabs for comparison
       const existingTabs = await this._tabsRepository.findTabsByLayoutId(layoutId);
       const existingTabIds = new Set(existingTabs.map((tab) => tab.id));
 
@@ -294,10 +324,11 @@ export class LayoutService {
    */
   async _updateOptions(chartId, options) {
     try {
-      const optionResults = await Promise.all(options.map((option) => this._optionRepository.findOptionByName(option)));
+      const optionResults = await Promise.all(options.map((option) =>
+        this._optionRepository.findOptionByName(option))) || [];
       const validOptions = optionResults.filter(Boolean).map((opt) => opt.id);
 
-      const existingChartOptions = await this._chartOptionsRepository.findChartOptionsByChartId(chartId);
+      const existingChartOptions = await this._chartOptionsRepository.findChartOptionsByChartId(chartId) || [];
       const existingOptionIds = new Set(existingChartOptions.map((opt) => opt.option_id));
 
       await Promise.all(validOptions.map(async (optionId) => {
@@ -315,6 +346,7 @@ export class LayoutService {
         this._chartOptionsRepository.deleteChartOption(chartId, opt.option_id)));
     } catch (error) {
       this._logger.errorMessage(`Error updating options for chart ${chartId}: ${error.message}`);
+      throw error;
     }
   }
 
