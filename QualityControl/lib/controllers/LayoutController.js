@@ -21,7 +21,6 @@ import { LayoutPatchDto } from './../dtos/LayoutPatchDto.js';
 import {
   InvalidInputError,
   NotFoundError,
-  UnauthorizedAccessError,
   updateAndSendExpressResponseFromNativeError,
 }
   from '@aliceo2/web-ui';
@@ -130,50 +129,26 @@ export class LayoutController {
    * @returns {undefined}
    */
   async putLayoutHandler(req, res) {
-    const { id } = req.params;
     try {
-      if (!id) {
-        updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout'));
-      } else if (!req.body) {
-        updateAndSendExpressResponseFromNativeError(
-          res,
-          new InvalidInputError('Missing body content to update layout with'),
-        );
-      } else {
-        const { personid } = req.session;
-        const layoutFound = await this._layoutService.getLayoutById(id);
-        const owner_id = layoutFound.owner.id;
-
-        if (Number(owner_id) !== Number(personid)) {
-          updateAndSendExpressResponseFromNativeError(
-            res,
-            new UnauthorizedAccessError('Only the owner of the layout can update it'),
-          );
-        } else {
-          let layoutProposed = {};
-          try {
-            layoutProposed = await LayoutDto.validateAsync(req.body);
-          } catch (error) {
-            updateAndSendExpressResponseFromNativeError(
-              res,
-              new Error(`Failed to update layout ${error?.details?.[0]?.message || ''}`),
-            );
-            return;
-          }
-
-          const layouts = await this._layoutService.getAllLayouts({ name: layoutProposed.name });
-          const layoutExistsWithName = layouts.every((layout) => layout.id !== layoutProposed.id);
-          if (layouts.length > 0 && layoutExistsWithName) {
-            updateAndSendExpressResponseFromNativeError(
-              res,
-              new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`),
-            );
-            return;
-          }
-          const layout = await this._layoutService.updateLayout(id, layoutProposed);
-          res.status(201).json({ id: layout });
-        }
+      const { id } = req.params;
+      if (!req.body) {
+        throw new InvalidInputError('Missing body content to update layout with');
       }
+
+      let layoutProposed = {};
+      try {
+        layoutProposed = await LayoutDto.validateAsync(req.body);
+      } catch (error) {
+        throw new InvalidInputError(`Failed to update layout: ${error?.details?.[0]?.message || ''}`);
+      }
+
+      const layouts = await this._layoutService.getAllLayouts({ name: layoutProposed.name });
+      const layoutExistsWithName = layouts.every((layout) => layout.id !== layoutProposed.id);
+      if (layouts.length > 0 && layoutExistsWithName) {
+        throw new InvalidInputError(`Proposed layout name: ${layoutProposed.name} already exists`);
+      }
+      const layout = await this._layoutService.updateLayout(id, layoutProposed);
+      res.status(200).json({ id: layout });
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);
     }
@@ -235,14 +210,10 @@ export class LayoutController {
    * @returns {undefined}
    */
   async patchLayoutHandler(req, res) {
-    let layout = {};
     const { id } = req.params;
-    if (!id) {
-      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing ID'));
-      return;
-    }
+
     try {
-      layout = await LayoutPatchDto.validateAsync(req.body);
+      await LayoutPatchDto.validateAsync(req.body);
     } catch {
       updateAndSendExpressResponseFromNativeError(
         res,
@@ -258,8 +229,8 @@ export class LayoutController {
       return;
     }
     try {
-      const layoutUpdated = await this._layoutService.updateLayout(id, layout);
-      res.status(201).json(layoutUpdated);
+      await this._layoutService.patchLayout(id, req.body);
+      res.status(200).json({ id });
     } catch {
       updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to update layout with id: ${id}`));
       return;

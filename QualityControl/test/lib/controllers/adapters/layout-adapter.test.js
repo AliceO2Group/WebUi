@@ -21,7 +21,7 @@ export const layoutAdapterTestSuite = async () => {
   suite('LayoutAdapter.adaptLayoutForExpressAPI', () => {
     test('should correctly adapt a valid layout object', () => {
       const result = LayoutAdapter.adaptLayoutForExpressAPI(LAYOUT_INPUT_MOCK);
-      deepStrictEqual(result, LAYOUT_ADAPTED_MOCK);
+      deepStrictEqual(result, { ...LAYOUT_ADAPTED_MOCK, isOfficial: true });
     });
 
     test('should throw an when input is malformed', () => {

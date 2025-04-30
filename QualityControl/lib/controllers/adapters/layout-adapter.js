@@ -43,6 +43,7 @@ export class LayoutAdapter {
             ignoreDefaults: cell.chart.ignore_defaults || false,
           })),
         })),
+        isOfficial: layout.is_official,
         collaborators: [],
       };
 
