@@ -37,7 +37,7 @@ export const layoutOwnerMiddleware = (layoutService) =>
       } else if (personid === '' || name === '') {
         throw new NotFoundError('Unable to retrieve session information');
       } else if (owner.id !== personid || owner.name !== name) {
-        throw new UnauthorizedAccessError('Only the owner of the layout can delete it');
+        throw new UnauthorizedAccessError('Only the owner of the layout can make changes to it');
       }
       next();
     } catch (error) {

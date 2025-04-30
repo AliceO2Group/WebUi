@@ -45,7 +45,7 @@ export const layoutOwnerMiddlewareTest = () => {
 
       sinon.assert.calledWith(res.status, 403);
       sinon.assert.calledWith(res.json, sinon.match({
-        message: 'Only the owner of the layout can delete it',
+        message: 'Only the owner of the layout can make changes to it',
         status: 403,
         title: 'Unauthorized Access',
       }));

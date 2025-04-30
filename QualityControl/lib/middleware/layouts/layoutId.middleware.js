@@ -12,13 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
-import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import { InvalidInputError, NotFoundError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
 /**
  * Middleware that checks if the layout id is present in the request
+ * @param {LayoutService} layoutService - layout service
  * @returns  {function(req, res, next): Function} - middleware function
  */
-export const layoutIdMiddleware = () =>
+export const layoutIdMiddleware = (layoutService) =>
 
 /**
  * Returned middleware method
@@ -32,6 +33,11 @@ export const layoutIdMiddleware = () =>
       if (!id) {
         throw new InvalidInputError('The "id" parameter is missing from the request');
       }
+      const layout = await layoutService.getLayoutById(id);
+      if (!layout) {
+        throw new NotFoundError(`The layout with id "${id}" does not exist`);
+      }
+
       next();
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);

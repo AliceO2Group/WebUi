@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { suite, test } from 'node:test';
+import { afterEach, beforeEach, suite, test } from 'node:test';
 import { ok } from 'node:assert';
 import sinon from 'sinon';
 import { layoutIdMiddleware } from '../../../../lib/middleware/layouts/layoutId.middleware.js';
@@ -21,36 +21,61 @@ import { layoutIdMiddleware } from '../../../../lib/middleware/layouts/layoutId.
  * Test suite for the middlewares involved in the ID check of the layout requests
  */
 export const layoutIdMiddlewareTest = () => {
-  suite('Layout id middlewares', () => {
-    test('should return an "Invalid input" error if the layout id is not provided', () => {
-      const req = {
-        params: {
-          id: null,
-        },
-      };
-      const res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub().returns(),
-      };
-      const next = sinon.stub();
-      layoutIdMiddleware()(req, res, next);
-      ok(res.status.calledWith(400), 'The status code should be 400');
-      ok(res.json.calledWith({
-        message: 'The "id" parameter is missing from the request',
-        status: 400,
-        title: 'Invalid Input',
-      }));
+  suite('layoutIdMiddleware', () => {
+    let layoutServiceMock = null;
+    let req = null;
+    let res = null;
+    let next = null;
+
+    beforeEach(() => {
+      layoutServiceMock = { getLayoutById: sinon.stub() };
+      req = { params: {} };
+      res = { status: sinon.stub().returnsThis(), json: sinon.stub() };
+      next = sinon.stub();
     });
 
-    test('should successfully pass the check if the layout id is provided and exists', async () => {
-      const req = {
-        params: {
-          id: 'layoutId',
-        },
-      };
-      const next = sinon.stub();
-      await layoutIdMiddleware()(req, {}, next);
-      ok(next.called, 'It should call the next middleware');
+    afterEach(() => {
+      sinon.restore();
+    });
+
+    test('should call next if layout exists', async () => {
+      const id = '123';
+      req.params.id = id;
+      layoutServiceMock.getLayoutById.resolves({ id });
+
+      const middleware = layoutIdMiddleware(layoutServiceMock);
+      await middleware(req, res, next);
+
+      ok(next.calledOnce);
+      ok(layoutServiceMock.getLayoutById.calledWith(id));
+    });
+
+    test('should return 400 if id param is missing', async () => {
+      const middleware = layoutIdMiddleware(layoutServiceMock);
+      await middleware(req, res, next);
+
+      ok(next.notCalled);
+    });
+
+    test('should return 404 if layout not found', async () => {
+      req.params.id = 'non-existent-id';
+      layoutServiceMock.getLayoutById.resolves(null);
+
+      const middleware = layoutIdMiddleware(layoutServiceMock);
+      await middleware(req, res, next);
+
+      ok(next.notCalled);
+    });
+
+    test('should handle unexpected errors', async () => {
+      req.params.id = '123';
+      const internalError = new Error('Unexpected failure');
+      layoutServiceMock.getLayoutById.rejects(internalError);
+
+      const middleware = layoutIdMiddleware(layoutServiceMock);
+      await middleware(req, res, next);
+
+      ok(next.notCalled);
     });
   });
 };
