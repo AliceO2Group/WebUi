@@ -139,7 +139,7 @@ GridList.prototype = {
 
   resizeGrid: function(lanes) {
     var currentColumn = 0;
-    
+
     this._options.lanes = lanes;
     this._adjustSizeOfItems();
 
