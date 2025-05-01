@@ -122,6 +122,22 @@ export class CcdbService {
   }
 
   /**
+   * Returns a list of object paths using the /tree/ endpoint based on a given prefix
+   * @example Equivalent of URL request: `/tree/qc/TPC/object.*`
+   * @param {string} [prefix] - Prefix for which CCDB should search for objects
+   * @returns {Promise.<Array<{PATH}>>} - results of objects query or an empty array
+   * @rejects {Error}
+   */
+  async getObjectsTreeList(prefix = this._PREFIX) {
+    const { subfolders } = await httpGetJson(this._hostname, this._port, `/tree/${prefix}.*`);
+
+    if (!Array.isArray(subfolders)) {
+      throw new Error('Invalid response format from server - expected subfolders array');
+    }
+    return subfolders.map((folder) => ({ path: folder }));
+  }
+
+  /**
    * Retrieve a sorted list of identifications for a specified object which represent different versions of the object;
    * Number of versions defaults to a limit but it can be changed by passing a value
    * @example Equivalent of URL request: `/browse/qc/TPC/object/14324234234234234/id-id-id-id-id/RunNumber=554345`
