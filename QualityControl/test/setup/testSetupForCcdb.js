@@ -18,7 +18,7 @@ import path from 'path';
 
 import { CCDB_FILTER_FIELDS, CCDB_MONITOR, CCDB_VERSION_KEY } from './../../lib/services/ccdb/CcdbConstants.js';
 import { config } from './../config.js';
-import { objects } from './seeders/ccdbObjects.js';
+import { objects, subfolders } from './seeders/ccdbObjects.js';
 import { MOCK_OBJECT_DETAILS_RESPONSE, MOCK_OBJECT_IDENTIFICATION_RESPONSE, MOCK_OBJECT_VERSIONS_RESPONSE }
   from './seeders/object-view/mock-object-view.js';
 import { CCDB_MOCK_VERSION } from './seeders/ccdbVersion.js';
@@ -26,6 +26,8 @@ import { CCDB_MOCK_VERSION } from './seeders/ccdbVersion.js';
 const CCDB_URL = `${config.ccdb.protocol}://${config.ccdb.hostname}:${config.ccdb.port}`;
 const CCDB_API_PATH_LATEST = `/latest/${config.ccdb.prefix}`;
 const CCDB_API_PATH_OBJECT_IDENTIFICATION = '/latest/qc/test/object/1';
+const CCDB_API_PATH_TREE = `/tree/${config.ccdb.prefix}`;
+const CCDB_API_PATH_TREE_OBJECT_IDENTIFICATION = '/tree/qc/test/object/1';
 const CCDB_API_PATH_OBJECT_DETAILS =
 '/qc/test/object/1/1656072357492/016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
 const CCDB_API_DOWNLOAD_ROOT_OBJECT = {
@@ -65,6 +67,14 @@ export const initializeNockForCcdb = () => {
     });
 
   nock(CCDB_URL, {
+    reqheaders: { Accept: 'application/json' },
+  }).persist()
+    .get(`${CCDB_API_PATH_TREE}.*`)
+    .reply(200, {
+      subfolders,
+    });
+
+  nock(CCDB_URL, {
     reqheaders: {
       Accept: 'application/json',
       'X-Filter-Fields': `${PATH},${ID},${VALID_FROM},${VALID_UNTIL}`,
@@ -73,6 +83,17 @@ export const initializeNockForCcdb = () => {
     .get(CCDB_API_PATH_OBJECT_IDENTIFICATION)
     .reply(200, MOCK_OBJECT_IDENTIFICATION_RESPONSE)
     .get(`${CCDB_API_PATH_LATEST}/object/1`)
+    .reply(200, MOCK_OBJECT_IDENTIFICATION_RESPONSE);
+
+  nock(CCDB_URL, {
+    reqheaders: {
+      Accept: 'application/json',
+      'X-Filter-Fields': `${PATH},${ID},${VALID_FROM},${VALID_UNTIL}`,
+    },
+  }).persist()
+    .get(CCDB_API_PATH_TREE_OBJECT_IDENTIFICATION)
+    .reply(200, MOCK_OBJECT_IDENTIFICATION_RESPONSE)
+    .get(`${CCDB_API_PATH_TREE}/object/1`)
     .reply(200, MOCK_OBJECT_IDENTIFICATION_RESPONSE);
 
   nock(CCDB_URL, {
