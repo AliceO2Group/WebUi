@@ -153,7 +153,7 @@ GridList.prototype = {
           position = this._getItemPosition(item);
 
       this._updateItemPosition(
-        item, this.findPositionForItem(item, {x: position.x, y: 0}));
+        item, this.findPositionForItem(item, {x: currentColumn, y: 0}));
 
       // New items should never be placed to the left of previous items
       currentColumn = Math.max(currentColumn, position.x);
