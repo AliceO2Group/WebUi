@@ -19,7 +19,8 @@ import {isGlobalRun} from '../../../environment/environmentsPage.js';
 import {miniCard} from '../../../common/card/miniCard.js';
 import {parseObject, parseOdcStatusPerEnv} from '../../../common/utils.js';
 import {rowForCard} from '../../../common/card/rowForCard.js';
-import { tasksPerHostPanel } from '../../../common/task/tasksPerHostPanel.js';
+import {tasksPerHostPanel} from '../../../common/task/tasksPerHostPanel.js';
+import {environmentEventsPanel} from './environmentEventsPanel.js';
 
 /**
  * @file Builds the navigation tabs that are to be displayed on the environment details page which contains the following tabs:
@@ -37,7 +38,7 @@ import { tasksPerHostPanel } from '../../../common/task/tasksPerHostPanel.js';
  * @param {EnvironmentInfo} environment - the environment to display
  */
 export const environmentNavigationTabs = (model, item) => {
-  const {hardware: {flp, qc, epn, trg}} = item;
+  const { hardware: { flp, qc, epn, trg } } = item;
   const panels = {
     general: {
       name: 'General',
@@ -63,6 +64,10 @@ export const environmentNavigationTabs = (model, item) => {
       name: `TRG  (${trg?.tasks?.total ?? '?'})`,
       content: tasksPerHostPanel,
     },
+    events: {
+      name: `Events (${item?.events?.length ?? 0})`,
+      content: () => environmentEventsPanel(item.events),
+    }
   };
   const {parameters} = currentPageAndParameters();
   return [

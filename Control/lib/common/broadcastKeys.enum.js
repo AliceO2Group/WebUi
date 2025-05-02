@@ -16,8 +16,22 @@
  * Keys that are used to broadcast information to the user
  */
 const BroadcastKeys =  Object.freeze({
-  ENVIRONMENTS: 'ENVIRONMENTS',
+  PADLOCK_UPDATE: 'padlock-update',
+  NOTIFICATION: 'notification',
+  RESOURCES_CLEANUP: 'resources-cleanup',
+  O2_ROC_CONFIG: 'o2-roc-config',
+  REQUESTS: 'requests',
+  COMPONENT_STATUS: 'component-STATUS',
+  CALIBRATION_RUNS_BY_DETECTOR: 'CALIBRATION_RUNS_BY_DETECTOR',
+  CALIBRATION_RUNS_REQUESTS: 'CALIBRATION_RUNS_REQUESTS',
+  DCS: {
+    SOR: 'DCS.SOR',
+  },
+  ENVIRONMENT_EVENTS: 'ENVIRONMENT_EVENTS',
   ENVIRONMENTS_OVERVIEW: 'ENVIRONMENTS_OVERVIEW',
+  ODC: {
+    ENVIRONMENT_STATE_CHANGE: 'ODC_ENVIRONMENT_STATE_CHANGE',
+  }
 });
 
 exports.BroadcastKeys = BroadcastKeys;
