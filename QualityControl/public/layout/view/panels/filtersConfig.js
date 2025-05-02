@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { FILTER_TYPE } from '../../../common/filters/filterTypes';
+import { FILTER_TYPE } from '../../../common/filters/filterTypes.js';
 
 /**
  * Returns an array of filter configuration objects used to render dynamic filter inputs.

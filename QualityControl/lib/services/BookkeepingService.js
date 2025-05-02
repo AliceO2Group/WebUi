@@ -28,6 +28,12 @@ export class BookkeepingService {
     this._port = port;
     this._protocol = protocol;
     this._token = token;
+    if (!this._hostname || !this._port || !this._protocol) {
+      logger.errorMessage(`Invalid URL for bookkeeping service: ${this._url}`);
+    }
+    if (!this._token) {
+      logger.errorMessage('Token for bookkeeping service is not set');
+    }
 
     this._refreshInterval = refreshRate ?? 24 * 60 * 60 * 1000;
 
@@ -56,7 +62,7 @@ export class BookkeepingService {
       }
       this._runTypes.sort();
     } catch (err) {
-      logger.errorMessage(err);
+      logger.errorMessage(`Error retrieving run types from bkp service on ${this._hostname}:${this._port} - ${err}`);
       this._runTypes = [];
     }
   }
