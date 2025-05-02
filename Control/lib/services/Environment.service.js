@@ -12,8 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
-const {grpcErrorToNativeError, NotFoundError} = require('@aliceo2/web-ui');
-const {CacheKeys} = require('./../common/cacheKeys.enum.js');
+const {LogManager,grpcErrorToNativeError, NotFoundError} = require('@aliceo2/web-ui');
+const { CacheKeys } = require('./../common/cacheKeys.enum.js');
+const { BroadcastKeys: { ENVIRONMENTS_OVERVIEW } } = require('./../common/broadcastKeys.enum');
 const EnvironmentInfoAdapter = require('./../adapters/EnvironmentInfoAdapter.js');
 const {EnvironmentTransitionResultAdapter} = require('./../adapters/EnvironmentTransitionResultAdapter.js');
 
@@ -26,8 +27,10 @@ class EnvironmentService {
    * @param {GrpcServiceClient} coreGrpc 
    * @param {ApricotProxy} apricotGrpc 
    * @param {CacheService} cacheService - to use for updating information on environments
+   * @param {BroadcastService} broadcastService - to use for broadcasting information
+   * @param {EnvironmentCacheService} environmentCacheService - to use for caching environments
    */
-  constructor(coreGrpc, apricotGrpc, cacheService, broadcastService) {
+  constructor(coreGrpc, apricotGrpc, cacheService, broadcastService, environmentCacheService) {
     /**
      * @type {GrpcServiceClient}
      */
@@ -46,6 +49,63 @@ class EnvironmentService {
      * @type {BroadcastService}
      */
     this._broadcastService = broadcastService;
+
+    /**
+     * @type {EnvironmentCacheService}
+     */
+    this._environmentCacheService = environmentCacheService;
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/env-service`);
+  }
+
+  /**
+   * Method to retrieve all environments from AliECS Core via the gRPC Client and update the Cache
+   * @param {boolean} showTaskInfos - if true, will retrieve task information for each environment
+   * @param {boolean} shouldUpdateCache - if true, will update the cache with the retrieved environments
+   * @return {Promise.<EnvironmentInfo[], Error>} - if operation was a success or not
+   */
+  async getEnvironments(showTaskInfos = false, shouldUpdateCache = false) {
+    let environments = [];
+    try {
+      ({ environments } = await this._coreGrpc.GetEnvironments({ showTaskInfos }));
+    } catch (error) {
+      throw grpcErrorToNativeError(error);
+    }
+    try { 
+      if (!environments || environments.length === 0) {
+        this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, []);
+        return [];
+      }
+      const environmentList = [];
+      const cachedEnvironmentIds = [...this._environmentCacheService.environments.keys()];
+      for (const { id } of environments) {
+        let environment;
+        try {
+          // Retrieving environments one by one is needed so that ODC devices tasks info is part of the payload
+          // Issue reported: OCTRL-1012
+          environment = await this.getEnvironment(id, '', false);
+        } catch (error) {
+          this._logger.error(`Failed to retrieve environment ${id}: ${error}`);
+        }
+        if (environment) {
+          if (shouldUpdateCache) {
+            this._environmentCacheService.addOrUpdateEnvironment(environment, false);
+          }
+          environmentList.push(environment);
+        }
+       
+      }
+      // Remove environments from cache that are not in the retrieved list
+      for (const cachedEnvironmentId of cachedEnvironmentIds) {
+        if (!environmentList.some(env => env.id === cachedEnvironmentId)) {
+          this._environmentCacheService.environments.delete(cachedEnvironmentId);
+        }
+      }
+      this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environmentCacheService.environments.values()]);
+      return environmentList;
+    } catch (error) {
+      console.log(error);
+      this._logger.errorMessage(error);
+    }
   }
 
   /**
@@ -56,19 +116,27 @@ class EnvironmentService {
    * @return {EnvironmentInfo}
    * @throws {Error}
    */
-  async getEnvironment(id, taskSource) {
-    let grpcPayload = {};
+  async getEnvironment(id, taskSource, retrieveEvents = true) {
+    let environment = undefined;
     try {
-      grpcPayload = await this._coreGrpc.GetEnvironment({id});
+      const environmentResponse = await this._coreGrpc.GetEnvironment({ id });
+      environment = environmentResponse.environment ?? undefined;
     } catch (error) {
       throw grpcErrorToNativeError(error);
     }
-    if (!grpcPayload.environment) { 
+    if (!environment) { 
       throw new NotFoundError(`Environment (id: ${id}) not found`);
     }
     const detectorsAll = this._apricotGrpc.detectors ?? [];
     const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
-    return EnvironmentInfoAdapter.toEntity(grpcPayload.environment, taskSource, detectorsAll, hostsByDetector);
+    const environmentInfo = EnvironmentInfoAdapter.toEntity(
+      environment, taskSource, detectorsAll, hostsByDetector
+    );
+    if (retrieveEvents && this._environmentCacheService.environments.has(id)) {
+      const cachedEnvironment = this._environmentCacheService.environments.get(id);
+      environmentInfo.events = [...cachedEnvironment.events];
+    } 
+    return environmentInfo;
   }
 
   /**

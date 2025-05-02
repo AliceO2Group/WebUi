@@ -23,13 +23,14 @@ import Task from './task/Task.js';
 import Config from './configuration/ConfigByCru.js';
 import DetectorService from './services/DetectorService.js';
 import {PREFIX, ROLES} from './../workflow/constants.js';
-import {SERVICE_STATES} from './common/constants/serviceStates.js';
+import { SERVICE_STATES } from './common/constants/serviceStates.js';
+import {STATUS_COMPONENTS_KEYS} from './common/constants/statusComponents.enum.js';
+import { BroadcastKeys } from './common/enums/BroadcastKeys.enum.js';
 import {di} from './utilities/di.js';
 
 import {EnvironmentCreationModel} from './pages/EnvironmentCreation/EnvironmentCreation.model.js';
 import {CalibrationRunsModel} from './pages/CalibrationRuns/CalibrationRuns.model.js';
 
-import {STATUS_COMPONENTS_KEYS} from './common/constants/statusComponents.enum.js';
 
 /**
  * Root of model tree
@@ -161,28 +162,28 @@ export default class Model extends Observable {
    */
   handleWSCommand(message) {
     switch (message.command) {
-      case 'padlock-update':
+      case BroadcastKeys.PADLOCK_UPDATE:
         this.lock.padlockState = message.payload;
         break;
-      case 'notification':
+      case BroadcastKeys.NOTIFICATION:
         this.showNativeNotification(JSON.parse(message.payload));
         break;
-      case 'resources-cleanup':
+      case BroadcastKeys.RESOURCES_CLEANUP:
         this.task.setResourcesRequest(message.payload);
         break;
-      case 'o2-roc-config':
+      case BroadcastKeys.O2_ROC_CONFIG:
         this.configuration.setConfigurationRequest(message.payload);
         break;
-      case 'environments':
-        this.environment.list = RemoteData.success(message.payload);
-        this.environment.updateItemEnvironment(message.payload.environments);
+      case BroadcastKeys.ENVIRONMENTS_OVERVIEW:
+        this.environment.list = RemoteData.success({ environments: message.payload ?? [] });
+        this.environment.updateItemEnvironment(message.payload, this.router.params?.panel ?? '');
         this.notify();
         break;
-      case 'requests':
+      case BroadcastKeys.requests:
         this.environment.requests = RemoteData.success(message.payload);
         this.notify();
         break;
-      case 'components-STATUS':
+      case BroadcastKeys.COMPONENT_STATUS:
         if (message?.payload[STATUS_COMPONENTS_KEYS.GENERAL_SYSTEM_KEY]) {
           this.about.updateComponentStatus('system', message.payload[STATUS_COMPONENTS_KEYS.GENERAL_SYSTEM_KEY]);
         }
@@ -190,13 +191,13 @@ export default class Model extends Observable {
         this.notify();
 
         break;
-      case 'CALIBRATION_RUNS_BY_DETECTOR':
+      case BroadcastKeys.CALIBRATION_RUNS_BY_DETECTOR:
         if (message.payload) {
           this.calibrationRunsModel.calibrationRuns = RemoteData.success(message?.payload);
           this.notify();
         }
         break;
-      case 'CALIBRATION_RUNS_REQUESTS':
+      case BroadcastKeys.CALIBRATION_RUNS_REQUESTS:
         if (message.payload && this.calibrationRunsModel.calibrationRuns.isSuccess()) {
           const {detector, runType} = message.payload;
           this.calibrationRunsModel.calibrationRuns.payload[detector][runType].ongoingCalibrationRun =
@@ -204,9 +205,20 @@ export default class Model extends Observable {
           this.calibrationRunsModel.notify();
         }
         break;
-      case 'DCS.SOR':
+      case BroadcastKeys.DCS.SOR:
         this.cache.dcs.sor = message.payload;
         this.notify();
+        break;
+      case BroadcastKeys.ENVIRONMENT_EVENTS:
+        if (this.environment.item.isSuccess()) {
+          const { id } = this.environment.item.payload;
+          const { id: eventsId, events } = message.payload;
+          if (id === eventsId) {
+            this.environment.item.payload.events = events;
+            this.environment.notify();
+          }
+        }
+        break;
     }
   }
 

@@ -35,6 +35,8 @@ import { config } from './config/configProvider.js';
 import { LayoutRepository } from './repositories/LayoutRepository.js';
 import { UserRepository } from './repositories/UserRepository.js';
 import { ChartRepository } from './repositories/ChartRepository.js';
+import { initDatabase } from './database/index.js';
+import { SequelizeDatabase } from './database/SequelizeDatabase.js';
 
 /**
  * Model initialization for the QCG application
@@ -46,6 +48,7 @@ export const setupQcModel = () => {
   const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
 
   const jsonFileService = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
+  initDatabase(new SequelizeDatabase(config?.database || {}));
 
   const layoutRepository = new LayoutRepository(jsonFileService);
   const userRepository = new UserRepository(jsonFileService);

@@ -1,0 +1,8 @@
+services:
+  test_app:
+    build:
+      context: .
+      target: test
+    environment:
+      NODE_ENV: test
+    container_name: qcg-application-test

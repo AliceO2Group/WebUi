@@ -52,7 +52,7 @@ export default class Environment extends Observable {
     this.list = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.get(`/api/core/environments`);
+    const {result, ok} = await this.model.loader.get(`/api/environments`);
     this.list = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
     this.notify();
   }
@@ -186,7 +186,7 @@ export default class Environment extends Observable {
    * If the user has the environment page opened and there is an 
    * @param {EnvironmentInfo} environments - partial env info from AliECS via WebSocket message
    */
-  updateItemEnvironment(environments) {
+  updateItemEnvironment(environments = []) {
     if (this.item.isSuccess()) {
       const {id, currentTransition} = this.item.payload;
       let envExists = false;

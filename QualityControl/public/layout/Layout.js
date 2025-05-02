@@ -307,11 +307,12 @@ export default class Layout extends Observable {
   /**
    * Given an ID and new value for official status, update it accordingly
    * @param {string} id - of layout to modify
-   * @param {boolean} isOfficial - new value to set
    * @returns {void}
    */
-  async toggleOfficial(id, isOfficial) {
-    await this.model.services.layout.patchLayout(id, { isOfficial });
+  async toggleOfficial(id) {
+    const { isOfficial } = this.model.services.layout.list.payload.find((item) => item.id === id);
+
+    await this.model.services.layout.patchLayout(id, { isOfficial: !isOfficial });
     await this.model.services.layout.getLayouts(this);
     await this.model.services.layout.getLayoutsByUserId(this.model.session.personid, this);
     this.model.notify();
