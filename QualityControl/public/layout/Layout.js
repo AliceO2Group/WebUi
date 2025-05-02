@@ -336,7 +336,7 @@ export default class Layout extends Observable {
     this.gridListSize = parseInt(value, 10);
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
-    if (this.isEditLayoutDropdownOpen) {
+    if (this.editEnabled) {
       this.gridList.resizeGrid(this.gridListSize);
     }
     this.tab.columns = this.gridListSize;
@@ -355,7 +355,7 @@ export default class Layout extends Observable {
    */
   sortObjectsOfCurrentTab() {
     this.gridList.items = this.tab.objects;
-    if (this.isEditLayoutDropdownOpen) {
+    if (this.editEnabled) {
       this.gridList.resizeGrid(this.gridListSize);
     }
   }
