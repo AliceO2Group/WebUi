@@ -355,7 +355,9 @@ export default class Layout extends Observable {
    */
   sortObjectsOfCurrentTab() {
     this.gridList.items = this.tab.objects;
-    this.gridList.resizeGrid(this.gridListSize);
+    if (this.isEditLayoutDropdownOpen) {
+      this.gridList.resizeGrid(this.gridListSize);
+    }
   }
 
   /**
