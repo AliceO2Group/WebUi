@@ -15,7 +15,7 @@
 'use strict';
 
 import assert from 'assert';
-import { LayoutDto } from './../dtos/LayoutDto.js';
+import { LayoutDto, LayoutsGetDto } from './../dtos/LayoutDto.js';
 import { LayoutPatchDto } from './../dtos/LayoutPatchDto.js';
 
 import {
@@ -60,25 +60,29 @@ export class LayoutController {
    */
   async getLayoutsHandler(req, res) {
     try {
+      const { owner_id, fields } = await LayoutsGetDto.validateAsync(req.query);
+
       const filter = {};
-      if (req.query.owner_id !== undefined) {
-        filter.owner_id = parseInt(req.query.owner_id, 10);
+
+      if (owner_id !== undefined) {
+        filter.owner_id = owner_id;
       }
-      const layouts = await this._layoutRepository.listLayouts(filter);
+
+      const layouts = await this._layoutRepository.listLayouts(filter, fields);
+
       res.status(200).json(layouts);
-    } catch (e) {
-      if (e instanceof TypeError && e.message === 'fields parameter must be an array') {
-        res.status(400).json({ error: e.message });
-        return;
-      }
+    } catch (error) {
+      if (error.isJoi) {
+        const errorDetails = error.details[0].message;
 
-      if (e instanceof Error && e.message.startsWith('The following field does not exist for layouts:')) {
-        res.status(400).json({ error: e.message });
-        return;
+        updateAndSendExpressResponseFromNativeError(
+          res,
+          new InvalidInputError(`Invalid query parameters: ${errorDetails}`),
+        );
+      } else {
+        logger.debugMessage(`Error retrieving layouts: ${error}`);
+        updateAndSendExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
       }
-
-      logger.debugMessage(`Error retrieving layouts: ${e}`);
-      updateAndSendExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
     }
   }
 

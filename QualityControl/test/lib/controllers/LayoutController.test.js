@@ -58,28 +58,80 @@ export const layoutControllerTestSuite = async () => {
       }), 'Error message was incorrect');
     });
 
-    test('should successfully return a list of layouts', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        listLayouts: sinon.stub().resolves([{ name: 'somelayout' }]),
-      });
+    test('should successfully return a list of layouts with required fields', async () => {
+      const response = [{ id: 5, name: 'somelayout' }];
+      const fields = ['id', 'name'];
 
-      const req = { query: {} };
+      const jsonStub = sinon.createStubInstance(LayoutRepository, {
+        listLayouts: sinon.stub().resolves(response),
+      });
+      const req = { query: { fields: fields.join(','), token: 'fasdfsdfa' } };
       const layoutConnector = new LayoutController(jsonStub);
       await layoutConnector.getLayoutsHandler(req, res);
+
       ok(res.status.calledWith(200), 'Response status was not 200');
-      ok(res.json.calledWith([{ name: 'somelayout' }]), 'A list of layouts should have been sent back');
+      ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
+      ok(jsonStub.listLayouts.calledWith({}, fields), 'Fields were not passed correctly');
     });
 
     test('should successfully return a list of layouts based on owner_id', async () => {
+      const response = [
+        { user_id: 1, name: 'somelayout' },
+        { user_id: 2, name: 'somelayout2' },
+      ];
+      const fields = 'name';
+
       const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        listLayouts: sinon.stub().resolves([{ name: 'somelayout' }]),
+        listLayouts: sinon.stub().resolves(response),
       });
-      const req = { query: { owner_id: '1' } };
+      const req = { query: { owner_id: 1, token: 'fasdfsdfa', fields } };
       const layoutConnector = new LayoutController(jsonStub);
       await layoutConnector.getLayoutsHandler(req, res);
       ok(res.status.calledWith(200), 'Response status was not 200');
-      ok(res.json.calledWith([{ name: 'somelayout' }]), 'A list of layouts should have been sent back');
+      ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
       ok(jsonStub.listLayouts.calledWith({ owner_id: 1 }), 'Owner id was not used in data connector call');
+    });
+
+    test('should return 400 when token is missing', async () => {
+      const jsonStub = sinon.createStubInstance(LayoutRepository);
+      const req = {
+        query: {
+          fields: 'id,name',
+          // token not included
+        },
+      };
+      const layoutConnector = new LayoutController(jsonStub);
+
+      await layoutConnector.getLayoutsHandler(req, res);
+
+      ok(res.status.calledWith(400), 'Response status was not 400');
+      ok(res.json.calledOnce, 'Response was not sent');
+
+      const [[responseArg]] = res.json.args;
+
+      ok(responseArg.message === 'Invalid query parameters: "token" is required', 'Error message incorrect');
+    });
+
+    test('should return 400 when fields contain invalid values', async () => {
+      const jsonStub = sinon.createStubInstance(LayoutRepository);
+      const req = {
+        query: {
+          fields: 'id,invalid_field',
+          token: 'fasdfsdfa',
+        },
+      };
+      const layoutConnector = new LayoutController(jsonStub);
+
+      await layoutConnector.getLayoutsHandler(req, res);
+
+      ok(res.status.calledWith(400), 'Response status was not 400');
+      ok(res.json.calledOnce, 'Response was not sent');
+
+      const [[responseArg]] = res.json.args;
+      ok(
+        responseArg.message === 'Invalid query parameters: "fields" contains invalid field: invalid_field',
+        'Error message incorrect',
+      );
     });
   });
 
