@@ -111,6 +111,9 @@ export class SequelizeDatabase {
       this._logger.infoMessage(pendingMigrations.length > 0
         ? `Executed ${pendingMigrations.length} pending migrations`
         : 'No pending migrations to execute');
+      if (this._dbConfig.migrationSeed) {
+        await this.seed();
+      }
     } catch (error) {
       this._logger.errorMessage(`Error executing migrations: ${error}`);
       throw error;
