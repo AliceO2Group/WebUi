@@ -1,4 +1,7 @@
 services:
+  depends_on:
+    database:
+      condition: service_healthy
   test_app:
     build:
       context: .
