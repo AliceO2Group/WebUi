@@ -31,11 +31,11 @@ export class LayoutRepository extends BaseRepository {
   listLayouts({ name, owner_id, fields } = {}) {
     const { layouts } = this._jsonFileService.data;
 
-    const filter = (layout) =>
+    const layoutFilter = (layout) =>
       (owner_id === undefined || layout.owner_id === owner_id) &&
       (name === undefined || layout.name === name);
 
-    const filteredLayouts = layouts.filter(filter);
+    const filteredLayouts = layouts.filter(layoutFilter);
 
     if (fields && !Array.isArray(fields)) {
       throw new TypeError('fields parameter must be an array');
