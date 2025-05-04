@@ -37,10 +37,6 @@ export class LayoutRepository extends BaseRepository {
 
     const filteredLayouts = layouts.filter(layoutFilter);
 
-    if (fields && !Array.isArray(fields)) {
-      throw new TypeError('fields parameter must be an array');
-    }
-
     if (!fields || fields.length === 0) {
       return filteredLayouts;
     }

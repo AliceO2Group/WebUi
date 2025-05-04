@@ -46,17 +46,6 @@ export const layoutRepositoryTest = async () => {
     });
 
     suite('list layouts', () => {
-      test('should throw TypeError when fields is not an array', () => {
-        throws(
-          () => layoutRepository.listLayouts({ fields: 'not an array' }),
-          {
-            name: 'TypeError',
-            message: 'fields parameter must be an array',
-          },
-          'Should throw TypeError when fields is not an array',
-        );
-      });
-
       test('should throw Error when specified field does not exist', () => {
         const nonExistentField = 'nonexistent_field';
         throws(
