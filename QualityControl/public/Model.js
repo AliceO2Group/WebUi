@@ -169,15 +169,16 @@ export default class Model extends Observable {
   async handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
     clearInterval(this.layout.tabInterval);
+    const layoutFields = 'id,name,owner_id,owner_name,description,isOfficial';
 
-    this.services.layout.getLayoutCardsByUserId(this.session.personid);
+    this.services.layout.getLayoutsByUserId(this.session.personid, layoutFields);
 
     const { params } = this.router;
     switch (params.page) {
       case 'layoutList':
         this.page = 'layoutList';
         setBrowserTabTitle('QCG-Layouts');
-        this.services.layout.getLayoutCards();
+        this.services.layout.getLayouts(layoutFields);
         break;
       case 'layoutShow':
         setBrowserTabTitle('QCG-LayoutShow');

@@ -313,7 +313,9 @@ export default class Layout extends Observable {
     const { isOfficial } = this.model.services.layout.list.payload.find((item) => item.id === id);
 
     await this.model.services.layout.patchLayout(id, { isOfficial: !isOfficial });
-    await this.model.services.layout.getLayoutCards(this);
+    const layoutFields = 'id,name,owner_id,owner_name,description,isOfficial';
+
+    await this.model.services.layout.getLayouts(layoutFields, this);
 
     this.model.notify();
   }

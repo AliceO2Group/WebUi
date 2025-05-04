@@ -38,15 +38,17 @@ export default class LayoutService {
 
   /**
    * Method to get all layout cards shared between users
+   * @param {string|undefined} fields - comma seperated string values. Represent the fields that should be fetched.
+   * If left empty all available fields will be fetched
    * @param {Class<Observable>} that - Observer requesting data that should be notified of changes
    * @returns {undefined}
    */
-  async getLayoutCards(that = this.model) {
+  async getLayouts(fields = undefined, that = this.model) {
     this.list = RemoteData.loading();
     that.notify();
-    const cardfields = 'id,name,owner_id,owner_name,description,isOfficial';
 
-    const { result, ok } = await this.loader.get(`/api/layouts?fields=${cardfields}`);
+    const url = `/api/layouts${fields !== undefined ? `?fields=${fields}` : ''}`;
+    const { result, ok } = await this.loader.get(url);
 
     if (ok) {
       const username = this.model.session.name;
@@ -71,48 +73,25 @@ export default class LayoutService {
   /**
    * Method to get all layouts by the user's id
    * @param {string} userId - user id for which to query layouts
+   * @param {string|undefined} fields - comma seperated string values. Represent the fields that should be fetched.
+   * If left empty all available fields will be fetched
    * @param {Class<Observable>} that - Observer requesting data that should be notified of changes
    * @returns {undefined}
    */
-  async getLayoutsByUserId(userId, that = this.model) {
+  async getLayoutsByUserId(userId, fields = undefined, that = this.model) {
     this.userList = RemoteData.loading();
     that.notify();
 
     if (isNaN(userId)) {
       this.userList = RemoteData.failure('Provided userId is not a number');
     } else {
-      const { result, ok } = await this.loader.get(`/api/layouts?owner_id=${userId}`);
+      const url = `/api/layouts?owner_id=${userId}${fields !== undefined ? `&fields=${fields}` : ''}`;
+
+      const { result, ok } = await this.loader.get(url);
       if (ok) {
-        const sortedLayouts = result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
-        this.userList = RemoteData.success(sortedLayouts);
-        this.model.folder.map.get('My Layouts').list = RemoteData.success(sortedLayouts);
-      } else {
-        this.userList = RemoteData.failure(result.error || result.message);
-        this.model.folder.map.get('My Layouts').list = RemoteData.failure(result.error || result.message);
-      }
-    }
+        const layoutComparitor = (layout1, layout2) => layout1.name.localeCompare(layout2.name);
 
-    that.notify();
-  }
-
-  /**
-   * Method to get all layouts as layoutCards by the user's id
-   * @param {string} userId - user id for which to query layouts
-   * @param {Class<Observable>} that - Observer requesting data that should be notified of changes
-   * @returns {undefined}
-   */
-  async getLayoutCardsByUserId(userId, that = this.model) {
-    this.userList = RemoteData.loading();
-    that.notify();
-
-    if (isNaN(userId)) {
-      this.userList = RemoteData.failure('Provided userId is not a number');
-    } else {
-      const cardfields = 'id,name,owner_id,owner_name,description,isOfficial';
-
-      const { result, ok } = await this.loader.get(`/api/layouts?owner_id=${userId}&fields=${cardfields}`);
-      if (ok) {
-        const sortedLayouts = result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
+        const sortedLayouts = result.sort(layoutComparitor);
         this.userList = RemoteData.success(sortedLayouts);
         this.model.folder.map.get('My Layouts').list = RemoteData.success(sortedLayouts);
       } else {
