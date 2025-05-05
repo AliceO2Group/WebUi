@@ -336,7 +336,9 @@ export default class Layout extends Observable {
     this.gridListSize = parseInt(value, 10);
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
-    this.gridList.resizeGrid(this.gridListSize);
+    if (this.editEnabled) {
+      this.gridList.resizeGrid(this.gridListSize);
+    }
     this.tab.columns = this.gridListSize;
     this.tab.objects.forEach((object) => {
       if (object.w > this.tab.columns) {
@@ -353,7 +355,9 @@ export default class Layout extends Observable {
    */
   sortObjectsOfCurrentTab() {
     this.gridList.items = this.tab.objects;
-    this.gridList.resizeGrid(this.gridListSize);
+    if (this.editEnabled) {
+      this.gridList.resizeGrid(this.gridListSize);
+    }
   }
 
   /**
