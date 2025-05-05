@@ -46,18 +46,6 @@ export const layoutRepositoryTest = async () => {
     });
 
     suite('list layouts', () => {
-      test('should throw Error when specified field does not exist', () => {
-        const nonExistentField = 'nonexistent_field';
-        throws(
-          () => layoutRepository.listLayouts({ fields: [nonExistentField] }),
-          {
-            name: 'Error',
-            message: `The following field does not exist for layouts: ${nonExistentField}`,
-          },
-          'Should throw Error when field does not exist',
-        );
-      });
-
       test('should list all layouts without filter', async () => {
         const result = layoutRepository.listLayouts();
         equal(result.length, 2, 'Length of list of layouts is not correct');

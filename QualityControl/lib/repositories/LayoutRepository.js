@@ -11,8 +11,10 @@
  * or submit itself to any jurisdiction.
  */
 
-import { NotFoundError } from '@aliceo2/web-ui';
+import { LogManager, NotFoundError } from '@aliceo2/web-ui';
 import { BaseRepository } from './BaseRepository.js';
+
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/layout`);
 
 /**
  * LayoutRepository class to handle CRUD operations for Layouts.
@@ -44,7 +46,8 @@ export class LayoutRepository extends BaseRepository {
     filteredLayouts.forEach((layout) =>{
       const missingField = fields.find((field) => !(field in layout));
       if (missingField) {
-        throw new Error(`The following field does not exist for layouts: ${missingField}`);
+        logger.warnMessage(`The following field does not exist for layout 
+          ${layout.id ?? '<no id found>'}: ${missingField}`);
       }
     });
 
