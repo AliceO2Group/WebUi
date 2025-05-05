@@ -83,6 +83,7 @@ export const setup = async (http, ws) => {
     statusController.getServiceStatusHandler.bind(statusController),
     { public: true },
   );
+  http.get('/chartOptions', layoutController.getChartOptionsHandler.bind(layoutController));
 
   http.get('/checkUser', userController.addUserHandler.bind(userController));
 };

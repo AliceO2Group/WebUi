@@ -236,4 +236,19 @@ export class LayoutController {
       return;
     }
   }
+
+  /**
+   * HTTP GET endpoint for retrieving all chart options
+   * @param {Request} req - HTTP request object
+   * @param {Response} res - HTTP response object to provide chart options information
+   * @returns {undefined}
+   */
+  async getChartOptionsHandler(req, res) {
+    try {
+      const options = await this._layoutService.getAllChartOptions();
+      res.status(200).json(options);
+    } catch (error) {
+      updateAndSendExpressResponseFromNativeError(res, error);
+    }
+  }
 }

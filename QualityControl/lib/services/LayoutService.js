@@ -435,4 +435,25 @@ export class LayoutService {
       throw error;
     }
   }
+
+  /**
+   * Retrieves all chart options.
+   * @returns {Promise<Array>} A promise that resolves to an array of chart option objects.
+   * @throws {Error} If an error occurs during the retrieval process.
+   */
+  async getAllChartOptions() {
+    try {
+      const chartOptions = await this._optionRepository.findAllOptions();
+      if (!chartOptions || chartOptions.length === 0) {
+        throw new NotFoundError('No chart options found');
+      }
+      return chartOptions.map((option) => ({
+        name: option.name,
+        type: option.type,
+      }));
+    } catch (error) {
+      this._logger.errorMessage(`Error getting all chart options: ${error.message}`);
+      throw error;
+    }
+  }
 }

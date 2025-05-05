@@ -37,4 +37,12 @@ export class OptionRepository extends BaseRepository {
       where: { name: optionName },
     });
   }
+
+  /**
+   * Get all options
+   * @returns {Promise<Option[]>} A promise that resolves to an array of options.
+   */
+  async findAllOptions() {
+    return await this._model.findAll();
+  }
 }
