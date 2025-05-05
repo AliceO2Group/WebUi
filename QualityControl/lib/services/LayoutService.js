@@ -290,7 +290,7 @@ export class LayoutService {
         const { id: chartId, x, y, h, w, name, options, ignoreDefaults } = object;
         const cellExists = existingChartIds.has(chartId);
         const updatedChart = { id: chartId, object_name: name, ignore_defaults: ignoreDefaults };
-        const updatedCell = { chart_id: chartId, row: x, col: y, row_span: w, col_span: h, tab_id: tabId };
+        const updatedCell = { chart_id: chartId, row: x, col: y, row_span: h, col_span: w, tab_id: tabId };
         const cellIdentifier = { chart_id: chartId, tab_id: tabId };
 
         if (cellExists) {
@@ -388,8 +388,8 @@ export class LayoutService {
             chart_id: chartId,
             row: x,
             col: y,
-            row_span: w,
-            col_span: h,
+            row_span: h,
+            col_span: w,
             tab_id: tabId,
           });
 
