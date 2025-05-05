@@ -68,7 +68,7 @@ export class LayoutController {
         filter.owner_id = owner_id;
       }
 
-      const layouts = await this._layoutRepository.listLayouts(filter, fields);
+      const layouts = await this._layoutRepository.listLayouts({ filter, fields });
 
       res.status(200).json(layouts);
     } catch (error) {
