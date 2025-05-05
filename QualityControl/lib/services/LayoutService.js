@@ -428,10 +428,7 @@ export class LayoutService {
    */
   async deleteLayout(layoutId) {
     try {
-      const rowsAffected = await this._layoutRepository.deleteLayout(layoutId);
-      if (!rowsAffected || rowsAffected !== 1) {
-        throw new Error(`Layout with id: ${layoutId} not found`);
-      }
+      await this._layoutRepository.deleteLayout(layoutId);
       return layoutId;
     } catch (error) {
       this._logger.errorMessage(`Error deleting layout: ${error.message}`);

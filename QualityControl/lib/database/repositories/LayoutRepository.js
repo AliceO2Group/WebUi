@@ -134,7 +134,7 @@ export class LayoutRepository extends BaseRepository {
    * @throws {Error} if error during deletion
    */
   async deleteLayout(layoutId) {
-    const [deletedRows] = await this._model.destroy({
+    const deletedRows = await this._model.destroy({
       where: { id: layoutId },
     });
     if (deletedRows === 0) {

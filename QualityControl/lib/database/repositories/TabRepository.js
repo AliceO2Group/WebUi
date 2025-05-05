@@ -66,7 +66,7 @@ export class TabRepository extends BaseRepository {
    * @returns {Promise<void>} A promise that resolves when the deletion is complete.
    */
   async deleteTab(tabId) {
-    const [deletedRows] = await this._model.destroy({ where: { id: tabId } });
+    const deletedRows = await this._model.destroy({ where: { id: tabId } });
     if (deletedRows === 0) {
       throw new Error('Failed to delete tab');
     }
