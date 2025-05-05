@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import { spinner } from '../common/spinner.js';
 import { h } from '/js/src/index.js';
 
 /**
@@ -21,6 +22,7 @@ import { h } from '/js/src/index.js';
  */
 export default function objectPropertiesSidebar(model) {
   const tabObject = model.layout.editingTabObject;
+  const { objectOptions } = model.services.layout;
 
   return h('.p2', [
     h('div', 'Size'),
@@ -39,47 +41,8 @@ export default function objectPropertiesSidebar(model) {
       btnIgnoreOptions(model, tabObject),
     ]),
     h('.ph3', [
-      h(
-        '.flex-row',
-        h('.tooltip.mv2', [
-          h('label.m0', 'Drawing Options:'),
-          h('.tooltiptext', ' ROOT draw options'),
-        ]),
-      ),
-      h('.flex-row.flex-wrap', [
-        btnOption(model, tabObject, 'lego'),
-        ' ',
-        btnOption(model, tabObject, 'colz'),
-        ' ',
-        btnOption(model, tabObject, 'lcolz'),
-        ' ',
-        btnOption(model, tabObject, 'text'),
-        ' ',
-      ]),
-      h(
-        '.flex-row',
-        h('.tooltip.mv2', [
-          h('label.m0', 'Display Hints:'),
-          h('.tooltiptext', 'Canvas options'),
-        ]),
-      ),
-      h('.flex-row', [
-        btnOption(model, tabObject, 'logx'),
-        ' ',
-        btnOption(model, tabObject, 'logy'),
-        ' ',
-        btnOption(model, tabObject, 'logz'),
-        ' ',
-      ]),
-      h('.flex-row', [
-        btnOption(model, tabObject, 'gridx'),
-        ' ',
-        btnOption(model, tabObject, 'gridy'),
-        ' ',
-        btnOption(model, tabObject, 'gridz'),
-        ' ',
-      ]),
-      h('.flex-row', [btnOption(model, tabObject, 'stat'), ' ']),
+      ...renderOptionSection('Drawing Options', 'ROOT draw options', objectOptions, 'Drawing Option', tabObject),
+      ...renderOptionSection('Hints', 'Canvas options', objectOptions, 'Display Hint', tabObject),
     ]),
 
     h('hr'),
@@ -147,3 +110,50 @@ const btnIgnoreOptions = (model, tabObject) =>
     h('label.m0', { for: `${tabObject.id}defaults` }, 'Ignore defaults'),
     h('span.tooltiptext', 'Set on the histogram in ROOT - fOption and QC Metadata'),
   ]));
+
+/**
+ * Shows a section with a label and a tooltip
+ * @param {string} label - label to be shown
+ * @param {string} tooltip - tooltip to be shown
+ * @param {object} objectOptions - object options to be shown
+ * @param {string} typeFilter - type of object options to be shown
+ * @param {object} tabObject - the tabOject to be changed
+ * @returns {vnode} - virtual node element
+ */
+const renderOptionSection = (label, tooltip, objectOptions, typeFilter, tabObject) =>
+  [
+    h(
+      '.flex-row',
+      h('.tooltip.mv2', [
+        h('label.m0', `${label}:`),
+        h('.tooltiptext', tooltip),
+      ]),
+    ),
+    objectOptions.match({
+      NotAsked: () => h('p', `No ${label.toLowerCase()} available`),
+      Loading: () =>
+        h('.loading-container', [
+          spinner(2),
+          h('span.loading-text', `Loading ${label.toLowerCase()}...`),
+        ]),
+      Failure: () =>
+        h('span.danger', `Error loading ${label.toLowerCase()}`),
+      Success: (options) =>
+        groupIntoRows(options.filter((o) => o.type === typeFilter), tabObject),
+    }),
+  ];
+
+/**
+ * Groups the options into rows of 3
+ * @param {object} items - object options to be shown
+ * @param {object} tabObject - the tabOject to be changed
+ * @returns {vnode} - virtual node element
+ */
+const groupIntoRows = (items, tabObject) =>
+  items.reduce((rows, item, index) => {
+    if (index % 3 === 0) {
+      rows.push([]);
+    }
+    rows[rows.length - 1].push(btnOption(model, tabObject, item.name), ' ');
+    return rows;
+  }, []).map((row) => h('.flex-row', row));

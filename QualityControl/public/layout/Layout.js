@@ -466,6 +466,7 @@ export default class Layout extends Observable {
   edit() {
     this.toggleEditMenu();
     this.model.services.object.listObjects();
+    this.model.services.layout.listObjectOptions();
     if (!this.item) {
       throw new Error('An item should be loaded before editing it');
     }

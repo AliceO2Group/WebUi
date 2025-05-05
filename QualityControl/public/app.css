@@ -99,3 +99,17 @@
   border: 1px solid #ddd;
   background: var(--color-gray-light);
 }
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem 0;
+  gap: 0.5rem; /* espacio entre spinner y texto */
+}
+
+.loading-text {
+  font-weight: 500;
+  color: #666; /* tono gris sutil */
+  font-size: 1rem;
+}

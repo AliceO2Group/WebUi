@@ -34,6 +34,8 @@ export default class LayoutService {
 
     this.list = RemoteData.notAsked(); // List of all existing layouts in QCG;
     this.userList = RemoteData.notAsked(); // List of layouts owned by current user;
+
+    this.objectOptions = RemoteData.notAsked(); // List of all chart options
   }
 
   /**
@@ -172,6 +174,19 @@ export default class LayoutService {
     that.notify();
 
     return this.new;
+  }
+
+  /**
+   * Method to get all chart options
+   * @param {Class<Observable>} that - extends observer to notify on request end
+   * @returns {RemoteData} - result within a RemoteData object
+   */
+  async listObjectOptions(that = this.model) {
+    this.objectOptions = RemoteData.loading();
+    that.notify();
+    const { result, ok } = await this.loader.get('/api/chartOptions');
+    this.objectOptions = this.parseResult(result, ok);
+    that.notify();
   }
 
   /**
