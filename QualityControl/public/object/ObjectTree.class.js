@@ -51,6 +51,8 @@ export default class ObjectTree extends Observable {
    * @returns {undefined}
    */
   toggle() {
+    // TODO: fix 'parent tree' collapsing bug by adding:.
+    // setTimeout(() => this.notify(), 100);
     this.open = !this.open;
     this.notify();
   }
@@ -144,5 +146,6 @@ export default class ObjectTree extends Observable {
    */
   addChildren(objects) {
     objects.forEach((object) => this.addChild(object));
+    setTimeout(() => this.notify(), 100); // TODO: create more dynamic solution.
   }
 }
