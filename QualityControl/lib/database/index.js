@@ -17,17 +17,18 @@ import { LogManager } from '@aliceo2/web-ui';
 /**
  * Initializes the database connection and runs migrations.
  * @param {SequelizeDatabase} sequelizeDatabase - The Sequelize database instance.
+ * @param config
  * @returns {Promise<void>} A promise that resolves when the database is initialized.
  */
-export const initDatabase = async (sequelizeDatabase) => {
+export const initDatabase = async (sequelizeDatabase, config) => {
   const _logger = LogManager.getLogger('qcg/database');
   try {
-    if (process.env.NODE_ENV === 'test') {
+    if (process.env.NODE_ENV === 'test' || config?.migrationSeed) {
       await sequelizeDatabase.dropAllTables();
     }
     await sequelizeDatabase.connect();
     await sequelizeDatabase.migrate();
-    if (process.env.NODE_ENV === 'test') {
+    if (process.env.NODE_ENV === 'test' || config?.migrationSeed) {
       await sequelizeDatabase.seed();
     }
   } catch (error) {

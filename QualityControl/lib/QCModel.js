@@ -44,8 +44,9 @@ export const setupQcModel = async () => {
   const __dirname = dirname(__filename);
   const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
 
-  const sequelizeDatabase = new SequelizeDatabase(config?.database || {});
-  await initDatabase(sequelizeDatabase);
+  const dbConfig = config?.database || {};
+  const sequelizeDatabase = new SequelizeDatabase(dbConfig);
+  await initDatabase(sequelizeDatabase, dbConfig);
 
   const repositories = setupRepositories(sequelizeDatabase);
   const {
