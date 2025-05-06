@@ -50,7 +50,7 @@ export const environmentReadinessStatus = (item, model) => {
       const { includedDetectors } = item;
       const isSorAvailable = model.services.detectors.areDetectorsAvailable(includedDetectors, 'sorAvailability');
       if (!isSorAvailable) {
-        statusComponent = h('.g2', [iconX(), 'SOR']);;
+        statusComponent = h('.g2', [iconX(), 'SOR']);
         classes = 'danger';
       }
     }
