@@ -110,6 +110,8 @@ export class CcdbService {
     if (!Array.isArray(subfolders)) {
       throw new FailedDependencyError('Invalid response format from server - expected subfolders array');
     }
+    // console.log(await this.getObjectsLatestVersionList(prefix));
+
     return subfolders.map((folder) => ({ path: folder }));
   }
 
