@@ -75,4 +75,26 @@ export default class FolderModel extends Observable {
     this._list = RemoteData.success(transformedPayload);
     this.notify();
   }
+
+  push(item) {
+    this._list.match({
+      Success: (list) => {
+        list.push(item);
+        this.notify();
+        item.bubbleTo(this);
+      },
+      Other: () => {},
+    });
+  }
+
+  removeItem(item) {
+    this._list.match({
+      Success: (list) => {
+        const newList = list.filter((listItem) => !listItem.equals(item));
+        this._list = RemoteData.success(newList);
+        this.notify();
+      },
+      Other: () => {},
+    });
+  }
 }
