@@ -40,7 +40,7 @@ export const environmentReadinessStatus = (item, model) => {
     const isEpnEnabled = userVars?.['epn_enabled'] === 'true';
     if (isEpnEnabled) {
       const { state: odcState } = parseOdcStatusPerEnv(item);
-      if (odcState !== 'READY' && !currentTransition && state === 'CONFIGURED') {
+      if (odcState !== 'READY' && state === 'CONFIGURED') {
         statusComponent = 'ODC...';
       }
     }
