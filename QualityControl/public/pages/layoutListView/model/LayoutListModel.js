@@ -85,15 +85,32 @@ export default class LayoutListModel extends Observable {
     this.model.notify();
   };
 
+  /**
+   * Removes a layout from a specific folder
+   * @param {string} folderName - Name of the folder to remove the layout from
+   * @param {LayoutCardModel} layout - Layout instance to remove
+   * @returns {void}
+   */
   removeLayoutFrom(folderName, layout) {
     this.folders.get(folderName).removeItem(layout);
   }
 
+  /**
+   * Adds a layout to a specific folder
+   * @param {string} folderName - Name of the folder to add the layout to
+   * @param {LayoutCardModel} layout - Layout instance to add
+   * @returns {void}
+   */
   addLayoutTo(folderName, layout) {
     this.folders.get(folderName).push(layout);
   }
 
-  async sufficientAuthority() {
+  /**
+   * Checks if the current user has sufficient authority (GLOBAL role)
+   * @async
+   * @returns {boolean} True if user has sufficient authority
+   */
+  sufficientAuthority() {
     return this.model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
   }
 }
