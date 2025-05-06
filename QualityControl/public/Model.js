@@ -27,6 +27,7 @@ import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
 import { setBrowserTabTitle } from './common/utils.js';
 import { buildQueryParametersString } from './common/buildQueryParametersString.js';
 import AboutViewModel from './pages/aboutView/AboutViewModel.js';
+import { RequestFields } from './common/RequestFields.enum.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -169,16 +170,14 @@ export default class Model extends Observable {
   async handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
     clearInterval(this.layout.tabInterval);
-    const layoutFields = 'id,name,owner_id,owner_name,description,isOfficial';
-
-    this.services.layout.getLayoutsByUserId(this.session.personid, layoutFields);
+    this.services.layout.getLayoutsByUserId(this.session.personid, RequestFields.LAYOUT_CARD);
 
     const { params } = this.router;
     switch (params.page) {
       case 'layoutList':
         this.page = 'layoutList';
         setBrowserTabTitle('QCG-Layouts');
-        this.services.layout.getLayouts(layoutFields);
+        this.services.layout.getLayouts(RequestFields.LAYOUT_CARD);
         break;
       case 'layoutShow':
         setBrowserTabTitle('QCG-LayoutShow');

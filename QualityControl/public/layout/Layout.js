@@ -19,6 +19,7 @@ import LayoutUtils from './LayoutUtils.js';
 import { objectId, clone, setBrowserTabTitle } from '../common/utils.js';
 import { assertTabObject, assertLayout } from '../common/Types.js';
 import { buildQueryParametersString } from '../common/buildQueryParametersString.js';
+import { RequestFields } from '../common/RequestFields.enum.js';
 
 const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
 
@@ -313,9 +314,8 @@ export default class Layout extends Observable {
     const { isOfficial } = this.model.services.layout.list.payload.find((item) => item.id === id);
 
     await this.model.services.layout.patchLayout(id, { isOfficial: !isOfficial });
-    const layoutFields = 'id,name,owner_id,owner_name,description,isOfficial';
 
-    await this.model.services.layout.getLayouts(layoutFields, this);
+    await this.model.services.layout.getLayouts(RequestFields.LAYOUT_CARD, this);
 
     this.model.notify();
   }
