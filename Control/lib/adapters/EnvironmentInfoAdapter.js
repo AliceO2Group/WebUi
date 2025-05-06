@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-const {TaskState} = require('./../common/taskState.enum.js');
+const { ShortTaskInfoAdapter } = require('./ShortTaskInfoAdapter.js');
 const QC_NODES_NAME_REGEX = /alio2-cr1-q(c|me|ts)[0-9]{2}/;
 
 /**
@@ -97,12 +97,14 @@ class EnvironmentInfoAdapter {
     taskSource = taskSource.toLocaleUpperCase();
 
     const environmentInfo = EnvironmentInfoAdapter.toOverviewEntity(environment, detectorsAll, hostsByDetectors);
+
     if (taskSource === TASKS_SOURCE.EPN) {
       const {integratedServicesData: {odc = '{}'}} = environment;
       const {devices = []} = JSON.parse(odc);
 
       environmentInfo.tasks = Array.from(
         Object.values(devices).map((device) => {
+          // TODO EPN expendable
           device.epnState = device.state;
           device.state = device.ecsState;
           delete device.ecsState;
@@ -112,8 +114,9 @@ class EnvironmentInfoAdapter {
     } else if (taskSource === TASKS_SOURCE.FLP) {
       const {tasks = [], includedDetectors} = environment;
       environmentInfo.tasks = [];
-      for (const task of tasks) {
-        const {deploymentInfo: {hostname = ''} = {}} = task;
+      for (const shortTaskInfo of tasks) {
+        const task = ShortTaskInfoAdapter.toEntity(shortTaskInfo);
+        const { hostname } = task;
         const keyDetector = Object.keys(Object.fromEntries(hostsByDetectors))
           .filter((detector) => hostsByDetectors.get(detector).includes(hostname))[0];
         if (!hostname.match(QC_NODES_NAME_REGEX) && includedDetectors.includes(keyDetector)) {
@@ -123,17 +126,18 @@ class EnvironmentInfoAdapter {
     } else if (taskSource === TASKS_SOURCE.QC) {
       const {tasks = []} = environment;
       environmentInfo.tasks = [];
-      for (const task of tasks) {
-        const {deploymentInfo: {hostname = ''} = {}} = task;
-        if (hostname.match(QC_NODES_NAME_REGEX)) {
+      for (const shortTaskInfo of tasks) {
+        const task = ShortTaskInfoAdapter.toEntity(shortTaskInfo);
+        if (task.hostname.match(QC_NODES_NAME_REGEX)) {
           environmentInfo.tasks.push(task);
         }
       }
     } else if (taskSource === TASKS_SOURCE.TRG) {
       const {tasks = [], includedDetectors} = environment;
       environmentInfo.tasks = [];
-      for (const task of tasks) {
-        const {deploymentInfo: {hostname = ''} = {}} = task;
+      for (const shortTaskInfo of tasks) {
+        const task = ShortTaskInfoAdapter.toEntity(shortTaskInfo);
+        const { hostname } = task;
         const keyDetector = Object.keys(Object.fromEntries(hostsByDetectors))
           .filter((detector) => hostsByDetectors.get(detector).includes(hostname))[0];
         if (!hostname.match(QC_NODES_NAME_REGEX) && !includedDetectors.includes(keyDetector)) {
@@ -169,13 +173,9 @@ class EnvironmentInfoAdapter {
 
     const {tasks = [], includedDetectors = []} = environment;
 
-    for (const task of tasks) {
-      const {critical = false, status = 'NOT-KNOWN', deploymentInfo: {hostname = ''} = {}} = task;
-      let {state = TaskState.UNKNOWN} = task;
-
-      if (state === TaskState.ERROR && critical) {
-        state = TaskState.ERROR_CRITICAL;
-      }
+    for (const shortTaskInfo of tasks) {
+      const task = ShortTaskInfoAdapter.toEntity(shortTaskInfo);
+      const {state, status, hostname} = task;
 
       if (hostname.match(QC_NODES_NAME_REGEX)) {
         qcTasksTotal++;
@@ -244,6 +244,7 @@ class EnvironmentInfoAdapter {
   /**
    * Prepare an ODC object with hardware information based
    * @param {Map<String, Object>} integratedServicesData - object with details of the integrated services
+   * // TODO
    */
   static _getOdcCounters(odc = {}) {
     try {
