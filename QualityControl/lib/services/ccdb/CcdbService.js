@@ -114,6 +114,30 @@ export class CcdbService {
   }
 
   /**
+   * Returns a list of objects path (corresponding to their latest version) based on a given prefix
+   * (e.g. 'qc'; default to config file specified prefix);
+   *
+   * Due to CCDB returning sub-folders if regex is missing, service will add by default `.*` at the end to retrieve
+   * paths starting with client provided prefix.
+   *
+   * Attributes of objects wished to be requested for each object can be passed through the fields parameter;
+   * If attributes list is missing, a default minimal list will be used: PATH, CREATED, LAST_MODIFIED
+   * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
+   * @param {string} [prefix] - Prefix for which CCDB should search for objects
+   * @param {Array<string>} [fields] - List of fields that should be requested for each object
+   * @returns {Promise.<Array<{PATH, CREATED, LAST_MODIFIED}>>} - results of objects query or error
+   * @rejects {Error}
+   */
+  async getObjectsLatestVersionList(prefix = this._PREFIX, fields = []) {
+    const headers = {
+      accept: 'application/json',
+      'x-filter-fields': fields.length > 0 ? fields.join(',') : `${PATH},${CREATED},${LAST_MODIFIED}`,
+    };
+    const { objects } = await httpGetJson(this._hostname, this._port, `/latest/${prefix}.*`, headers);
+    return objects;
+  }
+
+  /**
    * Retrieve a sorted list of identifications for a specified object which represent different versions of the object;
    * Number of versions defaults to a limit but it can be changed by passing a value
    * @example Equivalent of URL request: `/browse/qc/TPC/object/14324234234234234/id-id-id-id-id/RunNumber=554345`
