@@ -25,11 +25,6 @@ const BKP_API_PATH_RUN_TYPES = '/api/runTypes';
  */
 export const initializeNockForBkp = () => {
   nock(BKP_URL)
-    .get(BKP_API_PATH_RUN_TYPES + TOKEN_PATH)
-    .reply(500, {
-      error: 'Internal Server Error',
-    });
-  nock(BKP_URL)
     .persist()
     .get(BKP_API_PATH_RUN_TYPES + TOKEN_PATH)
     .reply(200, {

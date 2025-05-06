@@ -81,7 +81,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
       const options = await getOptionsWithRetry();
       if (!options.length) {
-        throw new Error('El elemento #runTypeLayoutFilter no se encontró después de 5 segundos');
+        throw new Error('#runTypeLayoutFilter not found after 5 seconds');
       }
 
       strictEqual(options[0], '');
