@@ -14,7 +14,7 @@
 const { TaskState } = require('../common/taskState.enum.js');
 
 /**
- * ShortShortTaskInfoAdapter - Given an AliECS Task, construct a TaskInfo object for GUI purposes
+ * ShortTaskInfoAdapter - Given an AliECS Task, construct a TaskInfo object for GUI purposes
  */
 class ShortTaskInfoAdapter {
   /**
