@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from '@aliceo2/web-ui';
+import { FailedDependencyError, LogManager } from '@aliceo2/web-ui';
 import { httpHeadJson, httpGetJson } from '../../utils/utils.js';
 import {
   CCDB_MONITOR, CCDB_VERSION_KEY, CCDB_RESPONSE_BODY_KEYS, CCDB_FILTER_FIELDS, CCDB_RESPONSE_HEADER_KEYS,
@@ -108,7 +108,7 @@ export class CcdbService {
     const { subfolders } = await httpGetJson(this._hostname, this._port, `/tree/${prefix}.*`);
 
     if (!Array.isArray(subfolders)) {
-      throw new Error('Invalid response format from server - expected subfolders array');
+      throw new FailedDependencyError('Invalid response format from server - expected subfolders array');
     }
     return subfolders.map((folder) => ({ path: folder }));
   }
