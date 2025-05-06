@@ -85,6 +85,14 @@ export default class LayoutListModel extends Observable {
     this.model.notify();
   };
 
+  removeLayoutFrom(folderName, layout) {
+    this.folders.get(folderName).removeItem(layout);
+  }
+
+  addLayoutTo(folderName, layout) {
+    this.folders.get(folderName).push(layout);
+  }
+
   async sufficientAuthority() {
     return this.model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
   }
