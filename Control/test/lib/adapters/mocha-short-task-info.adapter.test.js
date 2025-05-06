@@ -14,23 +14,23 @@
 /* eslint-disable max-len */
 
 const assert = require('assert');
-const TaskInfoAdapter = require('../../../lib/adapters/TaskInfoAdapter');
+const { ShortTaskInfoAdapter } = require('../../../lib/adapters/ShortTaskInfoAdapter');
 
-describe('TaskInfoAdapter test suite', () => {
-  describe('getShortName() - tests', async () => {
+describe('ShortTaskInfoAdapter test suite', () => {
+  describe('_getShortName() - tests', async () => {
     it('should successfully replace task name if regex is matched', async () => {
-      const tagModified = TaskInfoAdapter.getShortName('github.com/AliceO2Group/ControlWorkflows/tasks/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
+      const tagModified = ShortTaskInfoAdapter._getShortName('github.com/AliceO2Group/ControlWorkflows/tasks/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
       assert.strictEqual(tagModified, 'readout');
     });
 
     it('should not replace task name due to regex not matching the name (missing tasks/ group)', async () => {
-      const nameNotModified = TaskInfoAdapter.getShortName('github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
+      const nameNotModified = ShortTaskInfoAdapter._getShortName('github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
       assert.strictEqual(nameNotModified, 'github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
     });
 
     it('should not replace task name due to regex not matching the name (missing @ character)', async () => {
       const taskFullName = 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a';
-      const nameNotModified = TaskInfoAdapter.getShortName(taskFullName);
+      const nameNotModified = ShortTaskInfoAdapter._getShortName(taskFullName);
       assert.strictEqual(nameNotModified, taskFullName);
     });
   });

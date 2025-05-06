@@ -11,31 +11,35 @@
  * or submit itself to any jurisdiction.
  */
 
+const { TaskState } = require('../common/taskState.enum.js');
+
 /**
- * TaskInfoAdapter - Given an AliECS Task, construct a TaskInfo object for GUI purposes
+ * ShortShortTaskInfoAdapter - Given an AliECS Task, construct a TaskInfo object for GUI purposes
  */
-class TaskInfoAdapter {
+class ShortTaskInfoAdapter {
   /**
-   * TaskInfoAdapter
+   * ShortTaskInfoAdapter
    */
   constructor() {}
 
   /**
-   * Converts the given proto object (o2control.proto) to an entity object.
+   * Converts the given proto object ShortTaskInfo (o2control.proto) to an entity object.
    *
-   * @param {TaskInfoProto} task - object to convert
+   * @param {ShortTaskInfo - o2control.prot} task - object to convert
    * @returns {TaskInfo} entity of a task with needed information
    */
   static toEntity(task) {
     const {
-      taskId,
       name,
       locked,
+      taskId,
       status,
-      state,
+      state = TaskState.UNKNOWN,
       className,
+      deploymentInfo,
       pid,
       sandboxStdout,
+      critical = true,
     } = task;
 
     /**
@@ -44,13 +48,15 @@ class TaskInfoAdapter {
     const taskInfo = {
       id: taskId,
       taskId,
-      name: TaskInfoAdapter.getShortName(name),
+      name: ShortTaskInfoAdapter._getShortName(name),
       locked,
-      status,
-      state,
+      hostname: deploymentInfo?.hostname ?? '',
+      status: status ?? 'UNKNOWN',
+      state: (state === TaskState.ERROR && critical) ? TaskState.ERROR_CRITICAL : state,
       className,
       pid,
       sandboxStdout,
+      isCritical: critical
     };
 
     return taskInfo;
@@ -61,7 +67,7 @@ class TaskInfoAdapter {
    * @param {string} taskName - full name of the task
    * @returns {string} short name of the task
    */
-  static getShortName(taskName) {
+  static _getShortName(taskName) {
     const regex = new RegExp(`tasks/.*@`);
     const matchedTaskName = taskName.match(regex);
     if (matchedTaskName) {
@@ -71,4 +77,4 @@ class TaskInfoAdapter {
   }
 }
 
-module.exports = TaskInfoAdapter;
+module.exports.ShortTaskInfoAdapter = ShortTaskInfoAdapter;
