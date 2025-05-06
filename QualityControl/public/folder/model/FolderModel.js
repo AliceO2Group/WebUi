@@ -45,6 +45,10 @@ export default class FolderModel extends Observable {
     this.itemConstructor = itemConstructor;
   }
 
+  /**
+   * Toggles the opened/closed state of the folder and notifies observers
+   * @returns {undefined}
+   */
   toggleFolder() {
     this.isOpened = !this.isOpened;
     this.notify();
@@ -57,7 +61,7 @@ export default class FolderModel extends Observable {
   /**
    * Sets the list of items in the folder and transforms each item using the itemConstructor
    * @param {RemoteData} value - The new list data to set
-   * @returns {void}
+   * @returns {undefined}
    */
   set list(value) {
     if (!value.isSuccess()) {
@@ -76,6 +80,11 @@ export default class FolderModel extends Observable {
     this.notify();
   }
 
+  /**
+   * Adds a new item to the folder's list if it's in a success state
+   * @param {object} item - The item to add to the folder
+   * @returns {undefined}
+   */
   push(item) {
     this._list.match({
       Success: (list) => {
@@ -87,6 +96,11 @@ export default class FolderModel extends Observable {
     });
   }
 
+  /**
+   * Removes an item from the folder's list if it's in a success state
+   * @param {object} item - The item to remove from the folder
+   * @returns {undefined}
+   */
   removeItem(item) {
     this._list.match({
       Success: (list) => {
