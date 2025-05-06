@@ -37,6 +37,7 @@ import { UserRepository } from './repositories/UserRepository.js';
 import { ChartRepository } from './repositories/ChartRepository.js';
 import { initDatabase } from './database/index.js';
 import { SequelizeDatabase } from './database/SequelizeDatabase.js';
+import { FilterService } from './services/FilterService.js';
 
 /**
  * Model initialization for the QCG application
@@ -70,9 +71,9 @@ export const setupQcModel = () => {
   const intervalsService = new IntervalsService();
 
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
-  bookkeepingService.retrieveRunTypes();
+  const filterService = new FilterService(bookkeepingService);
 
-  const filterController = new FilterController(bookkeepingService);
+  const filterController = new FilterController(filterService);
 
   initializeIntervals(intervalsService, qcObjectService, bookkeepingService);
 

@@ -46,33 +46,16 @@ export class BookkeepingService {
    * @returns {Promise<void,error>} - resolves when the list of run types is available
    */
   async retrieveRunTypes() {
-    try {
-      const { data } = await httpGetJson(
-        this._hostname,
-        this._port,
-        this._getRunTypesPath,
-        {
-          protocol: this._protocol,
-          rejectUnauthorized: false,
-        },
-      );
-      this._runTypes = [];
-      for (const type of data) {
-        this._runTypes.push(type.name);
-      }
-      this._runTypes.sort();
-    } catch (err) {
-      logger.errorMessage(`Error retrieving run types from bkp service on ${this._hostname}:${this._port} - ${err}`);
-      this._runTypes = [];
-    }
-  }
-
-  /**
-   * Get the list of run types that is currently known to the bookkeeping service.
-   * @returns {Array<string>} - list of run types
-   */
-  get runTypes() {
-    return this._runTypes;
+    const { data } = await httpGetJson(
+      this._hostname,
+      this._port,
+      this._getRunTypesPath,
+      {
+        protocol: this._protocol,
+        rejectUnauthorized: false,
+      },
+    );
+    return data;
   }
 
   /**

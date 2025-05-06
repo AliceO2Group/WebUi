@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual } from 'node:assert';
+import { strictEqual, deepStrictEqual } from 'node:assert';
 import { suite, test, before } from 'node:test';
 import nock from 'nock';
 
@@ -29,10 +29,12 @@ export const bookkeepingServiceTestSuite = async () => {
     suite('Create a new instance of BookkeepingService', () => {
       test('should successfully initialize Bookkeeping Service', () => {
         const bookkeepingService = new BookkeepingService(config.bookkeeping);
-        strictEqual(bookkeepingService._hostname, 'alio2-cr1-hv-mvs00.cern.ch');
-        strictEqual(bookkeepingService._port, '4000');
-        strictEqual(bookkeepingService._protocol, 'http:');
+        const bkpUrl = new URL(config.bookkeeping.url);
+        strictEqual(bookkeepingService._hostname, bkpUrl.hostname);
+        strictEqual(bookkeepingService._port, bkpUrl.port);
+        strictEqual(bookkeepingService._protocol, bkpUrl.protocol);
         strictEqual(bookkeepingService._getRunTypesPath, `/api/runTypes?token=${config.bookkeeping.token}`);
+        strictEqual(bookkeepingService._refreshInterval, config.bookkeeping.refreshRate);
       });
     });
 
@@ -43,24 +45,20 @@ export const bookkeepingServiceTestSuite = async () => {
       });
 
       test('should successfully retrieve run types from Bookkeeping', async () => {
+        const mockResponse = {
+          data: [
+            { name: 'test1' },
+            { name: 'test2' },
+          ],
+        };
         nock('http://alio2-cr1-hv-mvs00.cern.ch:4000')
           .get(`/api/runTypes?token=${config.bookkeeping.token}`)
-          .reply(200, {
-            data: [
-              { name: 'test1' },
-              { name: 'test2' },
-            ],
-          });
-        await bkpService.retrieveRunTypes();
-        strictEqual(bkpService.runTypes.length, 2);
-      });
-
-      test('should fail to retrieve run types from Bookkeeping', async () => {
-        nock('http://alio2-cr1-hv-mvs00.cern.ch:4000')
-          .get(`/api/runTypes?token=${config.bookkeeping.token}`)
-          .reply(400, {});
-        await bkpService.retrieveRunTypes();
-        strictEqual(bkpService.runTypes.length, 0);
+          .reply(200, mockResponse);
+        const result = await bkpService.retrieveRunTypes();
+        deepStrictEqual(result, mockResponse.data);
+        strictEqual(result.length, 2);
+        strictEqual(result[0].name, 'test1');
+        strictEqual(result[1].name, 'test2');
       });
     });
   });

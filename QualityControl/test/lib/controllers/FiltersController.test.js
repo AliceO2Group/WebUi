@@ -26,7 +26,7 @@ export const filtersControllerTestSuite = async () => {
     });
   });
 
-  suite('getRunTypesHandler', async () => {
+  suite('getFilterConfigurationHandler', async () => {
     test('should successfully retrieve run types from Bookkeeping service', async () => {
       const bkpService = {
         runTypes: ['runType1', 'runType2'],
@@ -37,11 +37,11 @@ export const filtersControllerTestSuite = async () => {
       };
       const req = {};
       const filterController = new FilterController(bkpService);
-      await filterController.getRunTypesHandler(req, res);
+      await filterController.getFilterConfigurationHandler(req, res);
       ok(res.status.calledWith(200), 'Response status was not 200');
-      ok(res.json.calledWith(bkpService.runTypes), 'Run types were not sent back');
+      ok(res.json.calledWith({ runTypes: bkpService.runTypes }), 'Run types were not sent back');
     });
-    test('should return a 503 error if Bookkeeping service is not defined', async () => {
+    test('should return an empty array if bookkeeping service is not defined', async () => {
       const bkpService = null;
       const res = {
         status: sinon.stub().returnsThis(),
@@ -49,11 +49,11 @@ export const filtersControllerTestSuite = async () => {
       };
       const req = {};
       const filterController = new FilterController(bkpService);
-      await filterController.getRunTypesHandler(req, res);
-      ok(res.status.calledWith(503), 'Response status was not 503');
+      await filterController.getFilterConfigurationHandler(req, res);
+      ok(res.status.calledWith(200), 'Response status was not 200');
       ok(
-        res.json.calledWith({ error: 'Bookkeeping service is not available' }),
-        'Error message was incorrect',
+        res.json.calledWith({ runTypes: [] }),
+        'Run types were not sent as an empty array',
       );
     });
   });
