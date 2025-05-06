@@ -22,18 +22,18 @@ const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'bkp'
  */
 export class BookkeepingService {
   constructor({ url, token, refreshRate }) {
-    this._url = url;
-    const { protocol, hostname, port } = url ? new URL(this._url) : {};
-    this._hostname = hostname;
-    this._port = port;
-    this._protocol = protocol;
-    this._token = token;
-    if (!this._hostname || !this._port || !this._protocol) {
-      logger.errorMessage(`Invalid URL for bookkeeping service: ${this._url}`);
+    const { protocol, hostname, port } = url ? new URL(url) : {};
+    if (!this._hostname || !this._protocol) {
+      logger.errorMessage(`Invalid URL for bookkeeping service: ${url}`);
     }
-    if (!this._token) {
+    this._hostname = hostname;
+    this._protocol = protocol;
+    //Default port if not specified in the URL
+    this._port = port || (protocol === 'https' ? '443' : '80');
+    if (!token) {
       logger.errorMessage('Token for bookkeeping service is not set');
     }
+    this._token = token;
 
     this._refreshInterval = refreshRate ?? 24 * 60 * 60 * 1000;
 
