@@ -34,7 +34,10 @@ export const environmentStateSummary = (environment) => {
 
   return h(`.flex-row.g2.p2.white.bg-${ALIECS_STATE_COLOR[state]}`, [
     textWithCopyClipboard(id, 'h3'),
-    state === EnvironmentState.RUNNING && textWithCopyClipboard(` - ${currentRunNumber}`, 'h3'),
+    state === EnvironmentState.RUNNING && [
+      h('h3', ' - '),
+      textWithCopyClipboard(`${currentRunNumber}`, 'h3'),
+    ],
     h('.ph1.flex-grow.flex-column.flex-center.text-right', transitionLabel + transitionTime)
   ]);
 };
