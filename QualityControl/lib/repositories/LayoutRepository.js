@@ -43,17 +43,15 @@ export class LayoutRepository extends BaseRepository {
       return filteredLayouts;
     }
 
-    filteredLayouts.forEach((layout) =>{
-      const missingField = fields.find((field) => !(field in layout));
-      if (missingField) {
-        logger.warnMessage(`The following field does not exist for layout 
-          ${layout.id ?? '<no id found>'}: ${missingField}`);
-      }
-    });
-
     return filteredLayouts.map((layout) => {
       const layoutObj = {};
       fields.forEach((field) => {
+        const value = layout[field];
+
+        if (value === undefined) {
+          logger.warnMessage(`The following field does not exist for layout ${layout.id ?? '<no id found>'}: ${field}`);
+        }
+
         layoutObj[field] = layout[field];
       });
       return layoutObj;
