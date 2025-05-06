@@ -48,13 +48,13 @@ export default class LayoutCardModel extends Observable {
    * @returns {Promise<void>}
    */
   async toggleOfficial() {
-    this.isOfficial = !this.isOfficial;
     const layoutService = this.model.services.layout;
 
-    await layoutService.patchLayout(this.id, { isOfficial: this.isOfficial });
-    await layoutService.getLayouts(this);
-    await layoutService.getLayoutsByUserId(this.model.session.personid, this);
-    this.notify();
+    const response = await layoutService.patchLayout(this.id, { isOfficial: !this.isOfficial });
+    response.match({
+      Success: () => this._handleOfficialToggle(),
+      Other: () => {},
+    });
   };
 
   /**
@@ -73,5 +73,24 @@ export default class LayoutCardModel extends Observable {
    */
   equals(other) {
     return other instanceof LayoutCardModel && this.id === other.id;
+  }
+
+  /**
+   * Private method to handle the toggling of the layout's official status.
+   * Updates the local state of the layout's official flag and notifies observers.
+   * Also updates the parent layout list model by moving this layout to/from the "Official" category.
+   * @private
+   */
+  _handleOfficialToggle() {
+    this.isOfficial = !this.isOfficial;
+
+    this.notify();
+    const { layoutListModel } = this.model;
+
+    if (this.isOfficial) {
+      layoutListModel.addLayoutTo('Official', this);
+    } else {
+      layoutListModel.removeLayoutFrom('Official', this);
+    }
   }
 }
