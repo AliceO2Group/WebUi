@@ -16,11 +16,11 @@
  * Gateaway class to be used to retrieve data with regard to filters
  */
 export class FilterController {
-  constructor(bkpService) {
+  constructor(filterService) {
     /**
      * @type {BookkeepingService}
      */
-    this._bkpService = bkpService;
+    this._filterService = filterService;
   }
 
   /**
@@ -31,8 +31,8 @@ export class FilterController {
   async getFilterConfigurationHandler(req, res) {
     try {
       let runTypes = [];
-      if (this._bkpService) {
-        runTypes = await this._bkpService.runTypes;
+      if (this._filterService) {
+        runTypes = await this._filterService.runTypes;
       }
       res.status(200).json({
         runTypes,

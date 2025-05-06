@@ -75,7 +75,7 @@ export const setupQcModel = () => {
 
   const filterController = new FilterController(filterService);
 
-  initializeIntervals(intervalsService, qcObjectService, bookkeepingService);
+  initializeIntervals(intervalsService, qcObjectService, filterService);
 
   return {
     userController,
@@ -94,17 +94,17 @@ export const setupQcModel = () => {
  * Method to register services at the start of the server
  * @param {Intervals} intervalsService - wrapper for storing intervals
  * @param {QcObjectService} qcObjectService - service for retrieving information on qc objects
- * @param {BookkeepingService} bkpService - service for retrieving information on runs from Bookkeeping
+ * @param {FilterService} filterService - service for retrieving run types information from Bookkeeping
  * @returns {void}
  */
-function initializeIntervals(intervalsService, qcObjectService, bkpService) {
+function initializeIntervals(intervalsService, qcObjectService, filterService) {
   intervalsService.register(
     qcObjectService.refreshCache.bind(qcObjectService),
     qcObjectService.getCacheRefreshRate(),
   );
 
   intervalsService.register(
-    bkpService.retrieveRunTypes.bind(bkpService),
-    bkpService.refreshInterval,
+    filterService.getRunTypes.bind(filterService),
+    filterService.refreshInterval,
   );
 }

@@ -36,6 +36,7 @@ export class FilterService {
    * @returns {Promise<void>} - resolves when the filter service is initialized
    */
   async initFilters() {
+    await this._bookkeepingService.connect();
     await this.getRunTypes();
   }
 
@@ -45,6 +46,9 @@ export class FilterService {
    */
   async getRunTypes() {
     try {
+      if (!this._bookkeepingService.active) {
+        return;
+      }
       const rawRunTypes = await this._bookkeepingService.retrieveRunTypes();
       this._runTypes = [];
       for (const type of rawRunTypes) {
@@ -59,9 +63,9 @@ export class FilterService {
 
   /**
    * This method is used to initialize the filter service
-   * @returns {Promise<void>} - resolves when the filter service is initialized
+   * @returns {string[]} - resolves when the filter service is initialized
    */
   get runTypes() {
-    return this._runTypes;
+    return [...this._runTypes];
   }
 }

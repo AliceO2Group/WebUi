@@ -12,36 +12,192 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, deepStrictEqual } from 'node:assert';
-import { suite, test, before } from 'node:test';
+import { strictEqual, deepStrictEqual, ok } from 'node:assert';
+import { suite, test, before, beforeEach, afterEach } from 'node:test';
 import nock from 'nock';
 
 import { BookkeepingService } from '../../../lib/services/BookkeepingService.js';
-import { config } from '../../config.js';
+import { stub, restore } from 'sinon';
 
 /**
  * Tests for the Bookkeeping service
  */
 export const bookkeepingServiceTestSuite = async () => {
   suite('Bookkeeping Test Suite', () => {
+    const VALID_CONFIG = {
+      url: 'http://alio2-cr1-hv-mvs00.cern.ch:4000',
+      token: 'valid-token',
+      refreshRate: 15000,
+    };
     before(() => nock.cleanAll());
-
     suite('Create a new instance of BookkeepingService', () => {
       test('should successfully initialize Bookkeeping Service', () => {
-        const bookkeepingService = new BookkeepingService(config.bookkeeping);
-        const bkpUrl = new URL(config.bookkeeping.url);
-        strictEqual(bookkeepingService._hostname, bkpUrl.hostname);
-        strictEqual(bookkeepingService._port, bkpUrl.port);
-        strictEqual(bookkeepingService._protocol, bkpUrl.protocol);
-        strictEqual(bookkeepingService._getRunTypesPath, `/api/runTypes?token=${config.bookkeeping.token}`);
-        strictEqual(bookkeepingService._refreshInterval, config.bookkeeping.refreshRate);
+        const bookkeepingService = new BookkeepingService(VALID_CONFIG);
+        strictEqual(bookkeepingService.config, VALID_CONFIG);
+        strictEqual(bookkeepingService.active, false);
+        strictEqual(bookkeepingService.error, null);
+        strictEqual(bookkeepingService._hostname, '');
+        strictEqual(bookkeepingService._port, null);
+        strictEqual(bookkeepingService._token, '');
+        strictEqual(bookkeepingService._protocol, '');
+        strictEqual(bookkeepingService._refreshInterval, VALID_CONFIG.refreshRate);
+      });
+    });
+
+    suite('validateConfig', () => {
+      test('should return false if no config provided', () => {
+        const service = new BookkeepingService();
+        const result = service.validateConfig();
+        strictEqual(result, false);
+        strictEqual(service.error, 'Configuration for bookkeeping not provided');
+      });
+
+      test('should return false if url provided is not valid', () => {
+        const invalidConfig = {
+          url: 'not-a-valid-url',
+          token: 'some-token',
+        };
+        const service = new BookkeepingService(invalidConfig);
+        const result = service.validateConfig();
+        strictEqual(result, false);
+        strictEqual(service.error, 'Invalid configuration. not-a-valid-url is not a valid URL');
+      });
+
+      test('should return false if token not valid', () => {
+        const invalidConfig = {
+          url: 'http://example.com',
+          token: '',
+        };
+        const service = new BookkeepingService(invalidConfig);
+        const result = service.validateConfig();
+        strictEqual(result, false);
+        strictEqual(service.error, 'Invalid configuration. Token not provided or empty');
+      });
+
+      test('should return true if configuration is correct', () => {
+        const validConfig = {
+          url: 'http://example.com',
+          token: 'my-token',
+        };
+        const service = new BookkeepingService(validConfig);
+        const result = service.validateConfig();
+        strictEqual(result, true);
+        strictEqual(service._hostname, 'example.com');
+        strictEqual(service._protocol, 'http:');
+        strictEqual(service._port, 80);
+        strictEqual(service._token, 'my-token');
+      });
+    });
+    suite('connect', () => {
+      let service = null;
+      let validConfig = null;
+      let simulateStub = null;
+
+      beforeEach(() => {
+        validConfig = {
+          url: 'http://example.com',
+          token: 'valid-token',
+        };
+        service = new BookkeepingService(validConfig);
+      });
+
+      afterEach(() => {
+        restore();
+      });
+
+      test('should return if config is not valid', async () => {
+        const svc = new BookkeepingService();
+        await svc.connect();
+        strictEqual(svc.active, false);
+        ok(svc.error.includes('Configuration for bookkeeping not provided'));
+      });
+
+      test('should call simulateConnection if config is valid and set active to true', async () => {
+        simulateStub = stub(service, 'simulateConnection').resolves(true);
+        await service.connect();
+        ok(simulateStub.calledOnce);
+        strictEqual(service.active, true);
+        strictEqual(service.error, null);
+      });
+
+      test('should set an error if simulateConnection fails', async () => {
+        const fakeError = new Error('simulated failure');
+        stub(service, 'simulateConnection').rejects(fakeError);
+        await service.connect();
+        strictEqual(service.active, false);
+        ok(service.error.includes('Failed to connect to bookkeeping service'));
+        ok(service.error.includes('simulated failure'));
+      });
+    });
+    suite('simulateConnection', () => {
+      let service = null;
+
+      beforeEach(() => {
+        service = new BookkeepingService(VALID_CONFIG);
+        service.validateConfig();
+      });
+
+      afterEach(() => {
+        nock.cleanAll();
+      });
+
+      test('should return true when service responds with ok and configured', async () => {
+        nock(VALID_CONFIG.url)
+          .get('/api/status/database')
+          .query({ token: VALID_CONFIG.token })
+          .reply(200, {
+            data: { status: {
+              ok: true,
+              configured: true,
+            } },
+          });
+
+        const result = await service.simulateConnection();
+        strictEqual(result, true);
+        strictEqual(service.error, null);
+      });
+
+      test('should return false when status is not ok or not configured', async () => {
+        nock(VALID_CONFIG.url)
+          .get('/api/status/database')
+          .query({ token: VALID_CONFIG.token })
+          .reply(200, {
+            data: { status: {
+              ok: false,
+              configured: false,
+            } },
+          });
+
+        const result = await service.simulateConnection();
+        strictEqual(result, false);
+      });
+
+      test('should return false and set error on request failure', async () => {
+        nock(VALID_CONFIG.url)
+          .get('/api/status/database')
+          .query({ token: VALID_CONFIG.token })
+          .replyWithError('connection failed');
+
+        const result = await service.simulateConnection();
+        strictEqual(result, false);
+        strictEqual(
+          service.error.includes('Error trying to connect to Bookkeeping'),
+          true,
+        );
+        strictEqual(service.error.includes('connection failed'), true);
       });
     });
 
     suite('Retrieve run types', () => {
-      let bkpService = undefined;
-      before(() => {
-        bkpService = new BookkeepingService(config.bookkeeping);
+      let bkpService = null;
+
+      beforeEach(() => {
+        bkpService = new BookkeepingService(VALID_CONFIG);
+        bkpService.validateConfig(); // ensures internal fields like _hostname/_port/_token are set
+      });
+
+      afterEach(() => {
+        nock.cleanAll();
       });
 
       test('should successfully retrieve run types from Bookkeeping', async () => {
@@ -51,10 +207,14 @@ export const bookkeepingServiceTestSuite = async () => {
             { name: 'test2' },
           ],
         };
-        nock('http://alio2-cr1-hv-mvs00.cern.ch:4000')
-          .get(`/api/runTypes?token=${config.bookkeeping.token}`)
+
+        nock(VALID_CONFIG.url)
+          .get('/api/runTypes')
+          .query({ token: VALID_CONFIG.token })
           .reply(200, mockResponse);
+
         const result = await bkpService.retrieveRunTypes();
+
         deepStrictEqual(result, mockResponse.data);
         strictEqual(result.length, 2);
         strictEqual(result[0].name, 'test1');

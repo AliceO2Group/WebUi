@@ -16,40 +16,105 @@ import { httpGetJson } from '../utils/utils.js';
 import { LogManager } from '@aliceo2/web-ui';
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'bkp'}/service`);
+const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
+const GET_RUN_TYPES_PATH = '/api/runTypes';
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
  */
 export class BookkeepingService {
-  constructor({ url, token, refreshRate }) {
-    const { protocol, hostname, port } = url ? new URL(url) : {};
-    if (!this._hostname || !this._protocol) {
-      logger.errorMessage(`Invalid URL for bookkeeping service: ${url}`);
-    }
-    this._hostname = hostname;
-    this._protocol = protocol;
-    //Default port if not specified in the URL
-    this._port = port || (protocol === 'https' ? '443' : '80');
-    if (!token) {
-      logger.errorMessage('Token for bookkeeping service is not set');
-    }
-    this._token = token;
+  constructor(config) {
+    this.config = config;
+    this.active = false;
+    this.error = null;
 
-    this._refreshInterval = refreshRate ?? 24 * 60 * 60 * 1000;
-
-    this._getRunTypesPath = `/api/runTypes?token=${this._token}`;
-    this._runTypes = [];
+    this._hostname = '';
+    this._port = null;
+    this._token = '';
+    this._protocol = '';
+    this._refreshInterval = config?.refreshRate ?? 24 * 60 * 60 * 1000;
   }
 
   /**
-   * Retrieve list of run types from the bookkeeping service
-   * @returns {Promise<void,error>} - resolves when the list of run types is available
+   * Validates the configuration for the bookkeeping service.
+   * @returns {boolean} Returns true if the configuration is valid, otherwise false.
+   */
+  validateConfig() {
+    if (!this.config) {
+      this.error = 'Configuration for bookkeeping not provided';
+      return false;
+    }
+    const { url, token } = this.config || {};
+    try {
+      const normalizedURL = new URL(url);
+      this._hostname = normalizedURL.hostname;
+      this._port = normalizedURL.port || (normalizedURL.protocol === 'https:' ? 443 : 80);
+      this._protocol = normalizedURL.protocol;
+    } catch {
+      this.error = `Invalid configuration. ${url} is not a valid URL`;
+      return false;
+    }
+    if (!token || typeof token !== 'string' || token.trim() === '') {
+      this.error = 'Invalid configuration. Token not provided or empty';
+      return false;
+    }
+    this._token = token;
+    return true;
+  }
+
+  /**
+   * Connects to the bookkeeping service after validating the configuration.
+   * @returns {Promise<void>} Resolves if the connection is successful or logs an error if the connection fails.
+   */
+  async connect() {
+    if (!this.validateConfig()) {
+      logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
+      return;
+    }
+    try {
+      await this.simulateConnection();
+      this.active = true;
+    } catch (e) {
+      this.error = `Failed to connect to bookkeeping service: ${e.message}`;
+      logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
+    }
+  }
+
+  /**
+   * Simulates a connection to the bookkeeping service and checks the status.
+   * @returns {Promise<boolean>} Resolves to true if the connection is successful, otherwise false.
+   */
+  async simulateConnection() {
+    try {
+      const { data } = await httpGetJson(
+        this._hostname,
+        this._port,
+        `${GET_BKP_DATABASE_STATUS_PATH}?token=${this._token}`,
+        {
+          protocol: this._protocol,
+          rejectUnauthorized: false,
+        },
+      );
+      if (data && data?.status?.ok && data?.status?.configured) {
+        logger.infoMessage('Successfully connected to Bookkeeping');
+        return true;
+      }
+      return false;
+    } catch (err) {
+      this.error = `Error trying to connect to Bookkeeping: ${err || err.message}`;
+      return false;
+    }
+  }
+
+  /**
+   * Retrieve the list of run types from the bookkeeping service.
+   * @returns {Promise<object>} Resolves with the data of available run types.
    */
   async retrieveRunTypes() {
     const { data } = await httpGetJson(
       this._hostname,
       this._port,
-      this._getRunTypesPath,
+      `${GET_RUN_TYPES_PATH}?token=${this._token}`,
       {
         protocol: this._protocol,
         rejectUnauthorized: false,
@@ -60,7 +125,7 @@ export class BookkeepingService {
 
   /**
    * Returns the interval in milliseconds for how often the list of run types should be refreshed.
-   * @returns {number} - interval in milliseconds
+   * @returns {number} Interval in milliseconds for refreshing the list of run types.
    */
   get refreshInterval() {
     return this._refreshInterval;
