@@ -65,4 +65,13 @@ export default class LayoutCardModel extends Observable {
   sufficientAuthority() {
     return this.model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
   }
+
+  /**
+   * Checks if this layout is equal to another layout based on ID
+   * @param {LayoutCardModel} other - The other layout to compare with
+   * @returns {boolean} True if layouts have the same ID
+   */
+  equals(other) {
+    return other instanceof LayoutCardModel && this.id === other.id;
+  }
 }
