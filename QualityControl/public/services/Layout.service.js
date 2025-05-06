@@ -48,7 +48,7 @@ export default class LayoutService {
     const { result, ok } = await this.loader.get('/api/layouts');
 
     if (ok) {
-      const sortedLayouts = result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
+      const sortedLayouts = result.sort(this._compareByName);
       const officialLayouts = sortedLayouts.filter(({ isOfficial = false }) => isOfficial);
       this.list = RemoteData.success(sortedLayouts);
       this.model.folder.map.get('All Layouts').list = RemoteData.success(sortedLayouts);
@@ -76,7 +76,7 @@ export default class LayoutService {
     } else {
       const { result, ok } = await this.loader.get(`/api/layouts?owner_id=${userId}`);
       if (ok) {
-        const sortedLayouts = result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
+        const sortedLayouts = result.sort(this._compareByName);
         this.userList = RemoteData.success(sortedLayouts);
         this.model.folder.map.get('My Layouts').list = RemoteData.success(sortedLayouts);
       } else {
@@ -86,6 +86,20 @@ export default class LayoutService {
     }
 
     that.notify();
+  }
+
+  /**
+   * Comparator function to sort layouts alphabetically by their name property
+   * @param {Layout} layout1 - First layout object to compare
+   * @param {Layout} layout2 - Second layout object to compare
+   * @returns {number} - Returns a number indicating the sort order:
+   *   - Negative if layout1.name comes before layout2.name
+   *   - Positive if layout1.name comes after layout2.name
+   *   - Zero if names are identical
+   * @private
+   */
+  _compareByName(layout1, layout2) {
+    return layout1.name.localeCompare(layout2.name);
   }
 
   /**
