@@ -27,6 +27,7 @@ const NotificationService = require('./services/notification.js');
 const WebSocket = require('./websocket/server.js');
 const WebSocketMessage = require('./websocket/message.js');
 
+const { FailedDependencyError } = require('./errors/FailedDependencyError.js');
 const { InvalidInputError } = require('./errors/InvalidInputError.js');
 const { NotFoundError } = require('./errors/NotFoundError.js');
 const { ServiceUnavailableError } = require('./errors/ServiceUnavailableError.js');
@@ -75,6 +76,8 @@ exports.NotificationService = NotificationService;
 exports.WebSocket = WebSocket;
 
 exports.WebSocketMessage = WebSocketMessage;
+
+exports.FailedDependencyError = FailedDependencyError;
 
 exports.InvalidInputError = InvalidInputError;
 
