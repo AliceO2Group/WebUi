@@ -28,12 +28,15 @@ export class FilterController {
    * @param {Request} req - HTTP request
    * @param {Response} res - HTTP response to provide run types information
    */
-  async getRunTypesHandler(req, res) {
+  async getFilterConfigurationHandler(req, res) {
     try {
-      if (!this._bkpService) {
-        throw new Error('Bookkeeping service is not available');
+      let runTypes = [];
+      if (this._bkpService) {
+        runTypes = await this._bkpService.runTypes;
       }
-      res.status(200).json(this._bkpService.runTypes);
+      res.status(200).json({
+        runTypes,
+      });
     } catch (error) {
       res.status(503).json({ error: error.message || error });
     }

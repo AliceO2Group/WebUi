@@ -44,7 +44,8 @@ export const setup = (http, ws) => {
     statusService,
     userController,
     layoutRepository,
-    jsonFileService, filterController,
+    jsonFileService,
+    filterController,
   } = setupQcModel();
   statusService.ws = ws;
   http.get('/object/:id', objectController.getObjectById.bind(objectController));
@@ -87,5 +88,5 @@ export const setup = (http, ws) => {
 
   http.get('/checkUser', userController.addUserHandler.bind(userController));
 
-  http.get('/runTypes', filterController.getRunTypesHandler.bind(filterController));
+  http.get('/filter/configuration', filterController.getFilterConfigurationHandler.bind(filterController));
 };
