@@ -37,6 +37,7 @@ export const controlEnvironmentPanel = (environmentModel, item, isAllowedToContr
   const isStable = !currentTransition;
   const isConfigured = state === 'CONFIGURED';
   return h('.flex-column.justify-center', {
+    key: 'controlEnvironmentPanel',
     style: 'flex-grow: 3;'
   }, [
     h('.flex-column', [

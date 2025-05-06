@@ -249,9 +249,9 @@ class EnvironmentInfoAdapter {
 
       Object.values(devices).forEach((odcDevice) => {
         const device = OdcDeviceInfoAdapter.toEntity(odcDevice);
-        const {ecsState, hostname} = device;
+        const {state, hostname} = device;
         hosts.add(hostname);
-        states[ecsState] = (states[ecsState] + 1) || 1;
+        states[state] = (states[state] + 1) || 1;
       });
       return {
         tasks: {
