@@ -16,12 +16,12 @@ import {h} from '/js/src/index.js';
 import { getTaskStateClassAssociation } from '../enums/TaskState.js';
 
 /**
- * For a given host, build a table with tasks details
+ * For a given hostname, build a table with tasks details
  * @param {Array<Task>} [tasks = []] - list of tasks to build table for
  * @return {vnode} table of the EPN tasks
  */
 export const epnTasksTable = (tasks = []) => {
-  const tableColumns = ['Path', 'ID', 'Ignored', 'State'];
+  const tableColumns = ['Path', 'ID', 'Ignored', 'State', 'Critical', 'rmsjobid' ];
 
   return h('table.table.table-sm', { style: 'margin-bottom: 0' }, [
     h('thead',
@@ -30,12 +30,14 @@ export const epnTasksTable = (tasks = []) => {
       ])
     ),
     h('tbody', [
-      tasks.map(({ taskId, path, ignored, state }) =>
+      tasks.map(({ taskId, path, isIgnored, state, isExpendable, rmsjobid }) =>
         h('tr', [
           h('td.w-50', path),
           h('td.w-30', taskId),
-          h('td.w-10', ignored + ''),
+          h('td.w-10', isIgnored + ''),
           h(`td.w-10${getTaskStateClassAssociation(state)}`, state),
+          h('td.w-10', !isExpendable ? 'CRITICAL' : ''),
+          h('td.w-10', rmsjobid),
         ])
       ),
     ])
