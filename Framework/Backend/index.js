@@ -78,10 +78,15 @@ exports.WebSocket = WebSocket;
 exports.WebSocketMessage = WebSocketMessage;
 
 exports.FailedDependencyError = FailedDependencyError;
+
 exports.InvalidInputError = InvalidInputError;
+
 exports.NotFoundError = NotFoundError;
+
 exports.ServiceUnavailableError = ServiceUnavailableError;
+
 exports.TimeoutError = TimeoutError;
+
 exports.UnauthorizedAccessError = UnauthorizedAccessError;
 
 exports.GrpcErrorCodes = GrpcErrorCodes;
