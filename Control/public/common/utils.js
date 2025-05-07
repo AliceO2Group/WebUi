@@ -56,7 +56,7 @@ const parseObject = (item, key) => {
 const getTasksByFlp = (tasks) => {
   var taskMap = {};
   tasks.forEach((task) => {
-    const hostname = task.deploymentInfo?.hostname ?? 'Unknown';
+    const hostname = task.hostname ?? 'Unknown';
     if (!taskMap.hasOwnProperty(hostname)) {
       taskMap[hostname] = {list: [], stdout: ''};
     }
@@ -68,14 +68,14 @@ const getTasksByFlp = (tasks) => {
 }
 
 /**
-  * Create a map of tasks grouped by their EPN host
+  * Create a map of tasks grouped by their EPN hostname
   * @param {object} tasks - raw data
   * @return {JSON} {<string>:{list: <array>, stdout: <string>}}
   */
 const getTasksByEpn = (tasks) => {
   var taskMap = {};
   tasks.forEach((task) => {
-    const hostname = task.host;
+    const { hostname } = task;
     if (!taskMap.hasOwnProperty(hostname)) {
       taskMap[hostname] = {list: []};
     }
