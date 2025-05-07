@@ -88,8 +88,6 @@ export default class Model extends Observable {
     this.ws.addListener('close', this.handleWSClose.bind(this));
 
     this.initModel();
-
-    this.services.filter.initFilterService();
   }
 
   /**
@@ -184,6 +182,7 @@ export default class Model extends Observable {
         this.services.layout.getLayouts();
         break;
       case 'layoutShow':
+        this.services.filter.initFilterService();
         setBrowserTabTitle('QCG-LayoutShow');
         if (!params.layoutId) {
           const { definition, pdpBeamType, detector, runType, runNumber } = params;

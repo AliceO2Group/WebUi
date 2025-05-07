@@ -12,9 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { FILTER_TYPE } from './filterTypes.js';
-import { h } from '/js/src/index.js';
-import { RemoteData } from '/js/src/index.js';
+import { FilterType } from './filterTypes.js';
+import { h, RemoteData } from '/js/src/index.js';
 
 /**
  * Builds a filter element. If options to show, selector filter element; otherwise, input element.
@@ -28,8 +27,8 @@ import { RemoteData } from '/js/src/index.js';
  * @param {Function} config.onChangeCallback - Callback to be triggered on the change event of the filter.
  * @param {Function} config.onInputCallback - Callback to be triggered on the input event.
  * @param {Function} config.onEnterCallback - Callback to be triggered when the Enter key is pressed.
- * @param {string} [config.filterType=FILTER_TYPE.DROPDOWN] - The type of filter to be used.
- * @param {string} [config.width='w-20'] - The CSS class that defines the width of the filter.
+ * @param {string} [config.filterType=FilterType.DROPDOWN] - The type of filter to be used.
+ * @param {string} [config.width='.'] - The CSS class that defines the width of the filter.
  * @returns {vnode} - A virtual node element representing the filter element (input or dropdown).
  */
 const dynamicSelector = (config) => {
@@ -41,9 +40,9 @@ const dynamicSelector = (config) => {
     onChangeCallback,
     onInputCallback,
     onEnterCallback,
-    filterType = FILTER_TYPE.DROPDOWN,
+    filterType = FilterType.DROPDOWN,
     type = 'text',
-    width = 'w-20',
+    width = '.w-20',
   } = config;
 
   const renderFilterInput = () =>
@@ -51,7 +50,7 @@ const dynamicSelector = (config) => {
 
   return options.match({
     Success: (optionsList) => {
-      if (filterType === FILTER_TYPE.DROPDOWN && optionsList.length > 0) {
+      if (filterType === FilterType.DROPDOWN && optionsList.length > 0) {
         return dropdownSelector({
           queryLabel, placeholder, id, filterMap, options: optionsList, onChangeCallback, width,
         });
@@ -73,11 +72,11 @@ const dynamicSelector = (config) => {
  * @param {Function} config.onInputCallback - Callback to be triggered on the input event.
  * @param {Function} config.onEnterCallback - Callback to be triggered when the Enter key is pressed.
  * @param {string} [config.type='text'] - The type of the filter element (e.g., 'text', 'number').
- * @param {string} [config.width='w-20'] - The CSS class that defines the width of the filter.
+ * @param {string} [config.width='.w-20'] - The CSS class that defines the width of the filter.
  * @returns {vnode} - A virtual node element representing the filter input.
  */
 const filterInput = (config) => {
-  const { queryLabel, placeholder, id, filterMap, onInputCallback, onEnterCallback, type, width = 'w-20' } = config;
+  const { queryLabel, placeholder, id, filterMap, onInputCallback, onEnterCallback, type, width = '.w-20' } = config;
 
   return h(`${width}`, [
     h('input.form-control', {
@@ -107,11 +106,11 @@ const filterInput = (config) => {
  * @param {object} config.filterMap - Map of the current filter values.
  * @param {Array<string>} config.options - List of available options to be shown in the dropdown.
  * @param {Function} config.onChangeCallback - Callback to be triggered on the change event of the selector.
- * @param {string} [config.width='w-20'] - The CSS class that defines the width of the dropdown.
+ * @param {string} [config.width='.w-20'] - The CSS class that defines the width of the dropdown.
  * @returns {vnode} - A virtual node element representing the dropdown selector.
  */
 const dropdownSelector = (config) => {
-  const { queryLabel, placeholder, id, filterMap, options, onChangeCallback, width = 'w-20' } = config;
+  const { queryLabel, placeholder, id, filterMap, options, onChangeCallback, width = '.w-20' } = config;
 
   return h(`${width}`, [
     h('select.form-control', {

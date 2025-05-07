@@ -811,7 +811,7 @@ export default class Layout extends Observable {
    * @param {string} key - label to be used when querying storage service
    * @returns {undefined}
    */
-  selectOption = (value, key) => {
+  selectOption(value, key) {
     this.setFilterValue(key, value);
     this.applyLayoutChanges();
   };
@@ -822,8 +822,8 @@ export default class Layout extends Observable {
    * @param {any} value - value to update for given key; if none, entry is removed from object
    * @returns {undefined}
    */
-  setFilterValue = (key, value) => {
-    if (value) {
+  setFilterValue(key, value) {
+    if (value !== null && value !== undefined) {
       this.filter[key] = value;
     } else {
       delete this.filter[key];

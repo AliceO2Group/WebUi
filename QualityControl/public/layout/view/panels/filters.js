@@ -13,7 +13,7 @@
  */
 
 import { filters } from '../../../common/filters/filter.js';
-import { FILTER_TYPE } from '../../../common/filters/filterTypes.js';
+import { FilterType } from '../../../common/filters/filterTypes.js';
 import { filtersConfig } from './filtersConfig.js';
 import { h } from '/js/src/index.js';
 
@@ -29,7 +29,7 @@ const layoutFiltersPanel = ({ layout: layoutModel }) => {
   const onEnterCallback = applyLayoutChanges.bind(layoutModel);
   const onChangeCallback = selectOption.bind(layoutModel);
   const filterService = model.services.filter;
-  const filtersList = filtersConfig(filterService) ?? [];
+  const filtersList = filtersConfig(filterService) || [];
   const createFilterElement = (config) => {
     let filterElement = null;
     const { type, queryLabel, placeholder, id, inputType = 'text', options } = config;
@@ -43,11 +43,12 @@ const layoutFiltersPanel = ({ layout: layoutModel }) => {
     };
 
     switch (type) {
-      case FILTER_TYPE.INPUT:
+      case FilterType.INPUT:
         filterElement = filterInput({ ...commonConfig, type: inputType });
         break;
-      case FILTER_TYPE.DROPDOWN:
-        filterElement = dynamicSelector({ ...commonConfig, options, onChangeCallback }); break;
+      case FilterType.DROPDOWN:
+        filterElement = dynamicSelector({ ...commonConfig, options, onChangeCallback });
+        break;
       default:
         filterElement = null;
         break;

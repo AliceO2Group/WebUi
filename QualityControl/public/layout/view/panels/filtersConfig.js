@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { FILTER_TYPE } from '../../../common/filters/filterTypes.js';
+import { FilterType } from '../../../common/filters/filterTypes.js';
 
 /**
  * Returns an array of filter configuration objects used to render dynamic filter inputs.
@@ -22,27 +22,27 @@ import { FILTER_TYPE } from '../../../common/filters/filterTypes.js';
  */
 export const filtersConfig = ({ runTypes }) => [
   {
-    type: FILTER_TYPE.INPUT,
+    type: FilterType.INPUT,
     queryLabel: 'RunNumber',
     placeholder: 'RunNumber (e.g. 546783)',
     id: 'runNumberLayoutFilter',
     inputType: 'number',
   },
   {
-    type: FILTER_TYPE.DROPDOWN,
+    type: FilterType.DROPDOWN,
     queryLabel: 'RunType',
-    placeholder: 'RunType (e.g. PHYSICS)',
+    placeholder: 'RunType (any)',
     id: 'runTypeLayoutFilter',
     options: runTypes,
   },
   {
-    type: FILTER_TYPE.INPUT,
+    type: FilterType.INPUT,
     queryLabel: 'PeriodName',
     placeholder: 'PeriodName (e.g. LHC23c)',
     id: 'periodNameLayoutFilter',
   },
   {
-    type: FILTER_TYPE.INPUT,
+    type: FilterType.INPUT,
     queryLabel: 'PassName',
     placeholder: 'PassName (e.g. apass2)',
     id: 'passNameLayoutFilter',

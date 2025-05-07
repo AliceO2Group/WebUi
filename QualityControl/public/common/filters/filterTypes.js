@@ -12,9 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-const FILTER_TYPE = {
+const FilterType = {
   INPUT: 'input',
   DROPDOWN: 'dropdownSelector',
 };
 
-export { FILTER_TYPE };
+export { FilterType };
