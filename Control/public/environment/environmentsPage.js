@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconX} from '/js/src/index.js';
+import {h} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {parseObject, parseOdcStatusPerEnv} from './../common/utils.js';
@@ -20,6 +20,7 @@ import {detectorHeader} from '../common/detectorHeader.js';
 import {ROLES} from './../workflow/constants.js';
 import {isUserAllowedRole} from './../common/userRole.js';
 import {informationRedirectActionPanel} from '../pages/Environment/components/informationRedirectActionPanel.js';
+import {environmentReadinessStatus} from '../common/environment/environmentReadinessStatus.js';
 
 /**
  * @file Page to show a list of environments (content and header)
@@ -186,40 +187,15 @@ const environmentsTable = (model, list) => {
 };
 
 /**
- * Build a cell for dispalying the state of a RUN based on conditions if:
- * * EPN is enabled:
- * * * a run is considered READY if ODC status is READY and such a text will be displayed
- * * * a run is considered "in progress (...)" if state is CONFIGURED but ODC is not ready yet
- * * EPN is NOT enabled, a run is considered READY if it is in state CONFIGURED otherwise a '-' will be displayed
- * 
- * @param {EnvironmentDTO} item 
+ * Build a cell for displaying the state of a RUN based on conditions environment readiness
+ * @param {EnvironmentDTO} item  - Environment object
+ * @param {Object} model - Model object
  * @returns {vnode}
  */
 const runColumn = (item, model) => {
-  let classes = '';
-  let text = '-';
-  const isDcsOn = item.userVars?.['dcs_enabled'] === 'true';
-  const {includedDetectors} = item;
-  const isSorAvailable = model.services.detectors.areDetectorsAvailable(includedDetectors, 'sorAvailability');
-  if (item.currentRunNumber) {
-    classes = 'bg-success white';
-    text = item.currentRunNumber;
-  } else if (
-    (!item.currentTransition && item.state === 'CONFIGURED' && isDcsOn && isSorAvailable)
-    ||
-    (!item.currentTransition && item.state === 'CONFIGURED' && !isDcsOn)
-  ) {
-    classes = 'bg-primary white';
-    text = 'READY';
-  } else if (!item.currentTransition && item.state === 'CONFIGURED' && isDcsOn && !isSorAvailable) {
-    classes = 'danger';
-    text = h('.g2', [iconX(), 'SOR']);
-  } else if (item.currentTransition && item.state === 'CONFIGURED') {
-    classes = 'bg-primary white';
-    text = '...';
-  }
+  const {statusComponent, styleClasses} = environmentReadinessStatus(item, model);
   return h('td', {style: 'text-align: center;'},
-    h('.badge.f4', {class: classes}, text)
+    h('.badge.f4', {class: styleClasses}, statusComponent)
   );
 }
 
