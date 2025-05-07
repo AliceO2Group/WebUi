@@ -119,25 +119,35 @@ export default class QCObject extends Observable {
    * Method to sort a list of JSON objects by one of its fields
    * @param {Array<JSON>} listSource - list of objects to be sorted
    * @param {string} field - filed by which the sort should be done
-   * @param {number} order - order by which it should be done
+   * @param {number} order - acending (1) or decending (-1)
    * @returns {undefined}
    */
   sortListByField(listSource, field, order) {
-    listSource.sort((a, b) => {
-      if (field === 'createTime') {
-        if (a[field] < b[field]) {
-          return -1 * order;
-        } else {
-          return Number(order);
-        }
-      } else if (field === 'name') {
-        if (a[field].toUpperCase() < b[field].toUpperCase()) {
-          return -1 * order;
-        } else {
-          return Number(order);
-        }
-      }
-    });
+    listSource.sort((a, b) => typeof a[field] === 'string' ?
+      this._compareStrings(a[field], b[field], order) :
+      this._compareNumbers(a[field], b[field], order));
+  }
+
+  /**
+   * Helper method for sortListByField for sorting strings
+   * @param {string} a - first string to be sorted
+   * @param {string} b - second string to be sorted
+   * @param {number} order - acending (1) or decending (-1)
+   * @returns {undefined}
+   */
+  _compareStrings(a, b, order) {
+    return a.toUpperCase().localeCompare(b.toUpperCase()) * order;
+  }
+
+  /**
+   * Helper method for sortListByField for sorting numbers
+   * @param {number} a - first number to be sorted
+   * @param {number} b - second number to be sorted
+   * @param {number} order - acending (1) or decending (-1)
+   * @returns {undefined}
+   */
+  _compareNumbers(a, b, order) {
+    return (a - b) * order;
   }
 
   /**
