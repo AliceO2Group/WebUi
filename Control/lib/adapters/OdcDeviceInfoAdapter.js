@@ -41,9 +41,21 @@ class OdcDeviceInfoAdapter {
       rmsjobid,
       className
     } = device;
+
+    if (state === TaskState.ERROR && ecsState !== TaskState.ERROR) {
+      // It may be that ECS did not have the change to handle the ERROR state
+      // and the task is still in the previous state (e.g. CONFIGURED, UNKNOWN, etc.)
+      // In this case, we set the ECS state to ERROR as well
+      ecsState = TaskState.ERROR;
+    }
+
+    if (!expendable && (ecsState === TaskState.ERROR)) {
+      ecsState = TaskState.ERROR_CRITICAL;
+    }
+
     return {
       taskId,
-      state: (!expendable && (ecsState === TaskState.ERROR || state === TaskState.ERROR)) ? TaskState.ERROR_CRITICAL : ecsState,
+      state: ecsState,
       epnState: state,
       path,
       isIgnored: ignored,
