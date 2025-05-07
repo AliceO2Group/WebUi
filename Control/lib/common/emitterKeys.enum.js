@@ -17,6 +17,11 @@
  */
 const EmitterKeys =  Object.freeze({
   ENVIRONMENTS_TRACK: 'ENVIRONMENTS_TRACK',
+  INTEGRATED_SERVICES_TRACK: {
+    ODC: {
+      ENVIRONMENT_STATE_CHANGE: 'ODC_ENVIRONMENT_STATE_CHANGE',
+    } 
+  },
 });
 
 exports.EmitterKeys = EmitterKeys;

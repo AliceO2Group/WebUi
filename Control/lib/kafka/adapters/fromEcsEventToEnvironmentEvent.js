@@ -13,8 +13,8 @@
 
 /**
  * Adapter for event messages received on environment topic
- * @param {Event.proto} eventMessage - the event message to adapt
- * @param {Ev_EnvironmentEvent.proto} eventMessage.environmentEvent - the environment event to adapt
+ * @param {Event - events.proto} eventMessage - the event message to adapt
+ * @param {Ev_EnvironmentEvent - events.proto} eventMessage.environmentEvent - the environment event to adapt
  * @return {EnvironmentEvent} - the adapted event message without the timestampNano field
  */
 exports.fromEcsEventToEnvironmentEvent = ({ environmentEvent }) => {
