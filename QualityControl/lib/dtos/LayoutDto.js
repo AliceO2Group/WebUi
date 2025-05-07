@@ -80,6 +80,7 @@ export const LayoutDto = Joi.object({
 
 export const LayoutsGetDto = Joi.object({
   owner_id: Joi.number().integer().optional(),
+  name: Joi.number().integer().optional(),
   token: Joi.string().required(),
   fields: Joi.string()
     .custom(parseAndValidateFields, 'Field validation')
