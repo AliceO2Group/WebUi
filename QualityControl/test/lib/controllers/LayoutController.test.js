@@ -180,7 +180,7 @@ export const layoutControllerTestSuite = async () => {
       };
     });
     test('should respond with 400 error if request did not contain layout id when requesting to read', async () => {
-      const req = { params: {} };
+      const req = { params: { id: ' ' } }; // empty token is the only way to realisticly cause this error
       const layoutConnector = new LayoutController({});
       await layoutConnector.getLayoutHandler(req, res);
 
@@ -215,7 +215,7 @@ export const layoutControllerTestSuite = async () => {
       await layoutConnector.getLayoutHandler(req, res);
       ok(res.status.calledWith(500), 'Response status was not 500');
       ok(res.json.calledWith({
-        message: 'Unable to retrieve layout with id: mylayout',
+        message: 'Unable to read layout',
         status: 500,
         title: 'Unknown Error',
       }), 'Error message was incorrect');
