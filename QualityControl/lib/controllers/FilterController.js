@@ -16,9 +16,13 @@
  * Gateaway class to be used to retrieve data with regard to filters
  */
 export class FilterController {
+  /**
+   * Creates an instance of FilterController class
+   * @param {FilterService} filterService To retrieve the information displayed in the filters
+   */
   constructor(filterService) {
     /**
-     * @type {BookkeepingService}
+     * @type {FilterService}
      */
     this._filterService = filterService;
   }

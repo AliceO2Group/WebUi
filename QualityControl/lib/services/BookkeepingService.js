@@ -15,7 +15,7 @@
 import { httpGetJson } from '../utils/utils.js';
 import { LogManager } from '@aliceo2/web-ui';
 
-const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'bkp'}/service`);
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'bkp-service'}`);
 const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
 

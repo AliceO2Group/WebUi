@@ -13,7 +13,6 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
-import assert from 'assert';
 const logger = LogManager.getLogger('filter/service');
 
 /**
@@ -25,7 +24,6 @@ export class FilterService {
    * @param {BookkeepingService} bookkeepingService - Low level data provider fetching raw data from the BKP source
    */
   constructor(bookkeepingService) {
-    assert(bookkeepingService, 'Bookkeeping Service is required');
     this._bookkeepingService = bookkeepingService;
     this._runTypes = [];
     this.initFilters();

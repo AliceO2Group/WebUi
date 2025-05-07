@@ -23,6 +23,7 @@ import { IntervalsService } from './services/Intervals.service.js';
 import { StatusService } from './services/Status.service.js';
 import { JsonFileService } from './services/JsonFileService.js';
 import { QcObjectService } from './services/QcObject.service.js';
+import { FilterService } from './services/FilterService.js';
 import { BookkeepingService } from './services/BookkeepingService.js';
 
 import { LayoutController } from './controllers/LayoutController.js';
@@ -37,7 +38,6 @@ import { UserRepository } from './repositories/UserRepository.js';
 import { ChartRepository } from './repositories/ChartRepository.js';
 import { initDatabase } from './database/index.js';
 import { SequelizeDatabase } from './database/SequelizeDatabase.js';
-import { FilterService } from './services/FilterService.js';
 
 /**
  * Model initialization for the QCG application
