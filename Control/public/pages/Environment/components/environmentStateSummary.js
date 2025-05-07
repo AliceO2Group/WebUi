@@ -27,7 +27,6 @@ export const environmentStateSummary = (environment) => {
   let transitionTime = parseObject(createdWhen, 'createdWhen');
 
   let transitionLabel = 'Created At: ';
-  let title = ` - ${state}`;
   if (state === EnvironmentState.RUNNING) {
     transitionTime = parseObject(userVars['run_start_time_ms'], 'run_start_time_ms');
     transitionLabel = 'Running since: ';
@@ -35,8 +34,10 @@ export const environmentStateSummary = (environment) => {
 
   return h(`.flex-row.g2.p2.white.bg-${ALIECS_STATE_COLOR[state]}`, [
     textWithCopyClipboard(id, 'h3'),
-    h('h3', title),
-    state === EnvironmentState.RUNNING && textWithCopyClipboard(currentRunNumber, 'h3'),
+    state === EnvironmentState.RUNNING && [
+      h('h3', ' - '),
+      textWithCopyClipboard(`${currentRunNumber}`, 'h3'),
+    ],
     h('.ph1.flex-grow.flex-column.flex-center.text-right', transitionLabel + transitionTime)
   ]);
 };

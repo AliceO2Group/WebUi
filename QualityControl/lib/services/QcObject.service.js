@@ -66,7 +66,7 @@ export class QcObjectService {
    */
   async refreshCache() {
     try {
-      const objects = await this._dbService.getObjectsLatestVersionList(this._dbService.CACHE_PREFIX);
+      const objects = await this._dbService.getObjectsTreeList(this._dbService.CACHE_PREFIX);
       this._cache.objects = this._parseObjects(objects);
       this._cache.lastUpdate = Date.now();
     } catch (error) {
@@ -91,11 +91,11 @@ export class QcObjectService {
    * @returns {Promise.<Array<QcObjectLeaf>>} - results of objects with required fields
    * @rejects {Error}
    */
-  async retrieveLatestVersionOfObjects(prefix = this._dbService.PREFIX, fields = [], useCache = true) {
+  async retrieveLatestVersionOfObjects(prefix = this._dbService.PREFIX, useCache = true) {
     if (useCache && this._cache?.objects) {
       return this._cache.objects.filter((object) => object.name.startsWith(prefix));
     } else {
-      const objects = await this._dbService.getObjectsLatestVersionList(prefix, fields);
+      const objects = await this._dbService.getObjectsTreeList(prefix); // TreeList links to the latest
       return this._parseObjects(objects);
     }
   }

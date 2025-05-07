@@ -69,7 +69,6 @@ class KafkaMessagesConsumer {
           this._logger.errorMessage(`Received an invalid message on "${topic}" ${error}`);
           return;
         }
-        this._logger.debugMessage(`Received message on ${topic}`);
 
         try {
           await this._handleEvent(this._protoType.toObject(

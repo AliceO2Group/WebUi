@@ -34,7 +34,7 @@ export const flpTasksTable = (
   taskTableModel,
   { fields: logFilterFields, url: infoLoggerUrl }
 ) => {
-  const tableColumns = ['Name', 'PID', 'Locked', 'Status', 'State', 'Host Name', 'More'];
+  const tableColumns = ['Name', 'PID', 'Locked', 'Status', 'Critical', 'State', 'Host Name', 'More'];
   return h('.scroll-auto.panel', [
     h('table.table.table-sm', {style: 'margin-bottom: 0'}, [
       h('thead',
@@ -51,8 +51,9 @@ export const flpTasksTable = (
               h('.flex-row.items-center.justify-center.w-33', task.locked ? iconLockLocked() : iconLockUnlocked())
             ),
             h('td.w-10', task.status),
+            h('td.w-10', task.isCritical ? 'CRITICAL' : ''),
             h(`td.w-10${getTaskStateClassAssociation(task.state)}`, task.state),
-            h('td.w-20', task?.deploymentInfo?.hostname),
+            h('td.w-20', task?.hostname),
             h('td',
               h('.flex-row', [
                 h('button.btn-sm.btn-default', {
