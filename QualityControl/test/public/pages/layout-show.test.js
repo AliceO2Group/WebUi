@@ -200,7 +200,16 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have number input field for allowing users to change auto-tab value',
     { timeout },
     async () => {
-      await page.waitForSelector('#inputDescription', { timeout: 5000 });
+      const inputSelector = '#inputChangeTabTimer';
+      await page.waitForSelector(inputSelector, { timeout: 5000 });
+      await page.locator(inputSelector).fill('9');
+      await page.keyboard.press('Tab');
+      const valueAfter9 = await page.evaluate((inputSelector) => document.querySelector(inputSelector), inputSelector);
+      ok(valueAfter9, 0);
+      await page.locator(inputSelector).fill('11');
+      await page.keyboard.press('Tab');
+      const valueAfter11 = await page.evaluate((inputSelector) => document.querySelector(inputSelector), inputSelector);
+      ok(valueAfter11, 11);
     },
   );
 
@@ -370,6 +379,14 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       strictEqual(result, true);
     },
   );
+
+  await testParent.test('should change tab after set tabInterval', { timeout: 15000 }, async () => {
+    const location = await page.evaluate(() => window.location);
+    strictEqual(location.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=a`);
+    await delay(11000);
+    const location2 = await page.evaluate(() => window.location);
+    strictEqual(location2.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=test`);
+  });
 };
 
 const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {

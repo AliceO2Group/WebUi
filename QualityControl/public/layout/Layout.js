@@ -720,7 +720,7 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   setTabInterval(time) {
-    if (!this.tabs || this.tabs.length === 0) {
+    if (!this.item.tabs || this.item.tabs.length === 0) {
       clearInterval(this.tabInterval);
     } else if (time >= 10) {
       this.tabInterval = setInterval(() => {
