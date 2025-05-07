@@ -28,7 +28,7 @@ import {environmentReadinessStatus} from '../../../common/environment/environmen
  * @returns {vnode} - panel with actions allowed for the user to apply on the environment
  */
 export const controlEnvironmentPanel = (environmentModel, item, isAllowedToControl = false) => {
-  const {currentTransition, includedDetectors, state} = item;
+  const {currentTransition} = item;
   const {model} = environmentModel;
   const {statusMessage} = environmentReadinessStatus(item, model);
   return h('.flex-column.justify-center', {
