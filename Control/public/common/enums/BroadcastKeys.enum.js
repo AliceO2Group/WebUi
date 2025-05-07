@@ -15,7 +15,7 @@
 /**
  * Keys that are used to broadcast information to the user
  */
-const BroadcastKeys =  Object.freeze({
+export const BroadcastKeys = Object.freeze({
   PADLOCK_UPDATE: 'padlock-update',
   NOTIFICATION: 'notification',
   RESOURCES_CLEANUP: 'resources-cleanup',
@@ -30,5 +30,3 @@ const BroadcastKeys =  Object.freeze({
   ENVIRONMENT_EVENTS: 'ENVIRONMENT_EVENTS',
   ENVIRONMENTS_OVERVIEW: 'ENVIRONMENTS_OVERVIEW',
 });
-
-exports.BroadcastKeys = BroadcastKeys;

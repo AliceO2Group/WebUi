@@ -256,7 +256,13 @@ function initializeIntervals(intervalsService, statusService, runService, bkpSer
   intervalsService.register(statusService.retrieveSystemCompatibility.bind(statusService), SERVICES_REFRESH_RATE);
   intervalsService.register(statusService.retrieveNotificationSystemStatus.bind(statusService), SERVICES_REFRESH_RATE);
   intervalsService.register(statusService.retrieveAliECSIntegratedInfo.bind(statusService), SERVICES_REFRESH_RATE);
-  intervalsService.register(() => environmentService.getEnvironments(true, true), ENVIRONMENT_REFRESH_RATE);
+  intervalsService.register(() => {
+    try {
+      environmentService.getEnvironments(true, true)
+    } catch (error) {
+      logger.errorMessage(`Error retrieving environments: ${error.message}`);   
+    }
+  }, ENVIRONMENT_REFRESH_RATE);
 
   if (config.bookkeeping) {
     intervalsService.register(

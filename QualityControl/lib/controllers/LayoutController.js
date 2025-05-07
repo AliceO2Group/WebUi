@@ -15,11 +15,12 @@
 'use strict';
 
 import assert from 'assert';
-import { LayoutDto } from './../dtos/LayoutDto.js';
+import { LayoutDto, LayoutsGetDto } from './../dtos/LayoutDto.js';
 import { LayoutPatchDto } from './../dtos/LayoutPatchDto.js';
 
 import {
   InvalidInputError,
+  LogManager,
   NotFoundError,
   updateAndSendExpressResponseFromNativeError,
 }
@@ -28,6 +29,8 @@ import {
 /**
  * @typedef {import('../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
  */
+
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/layout-ctrl`);
 
 /**
  * Gateway for all HTTP requests with regards to QCG Layouts
@@ -56,37 +59,32 @@ export class LayoutController {
    * @returns {undefined}
    */
   async getLayoutsHandler(req, res) {
-    try {
-      const filter = {};
-      if (req.query.owner_id !== undefined) {
-        filter.owner_id = parseInt(req.query.owner_id, 10);
-      }
-      const layouts = await this._layoutRepository.listLayouts(filter);
-      res.status(200).json(layouts);
-    } catch {
-      updateAndSendExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
-    }
-  }
+    const filter = {};
+    let fields = undefined;
+    let owner_id = undefined;
 
-  /**
-   * HTTP GET endpoint for retrieving a list of simplified layout card objects
-   * * Returns a lightweight version of layout data suitable for card displays
-   * * Can be filtered by "owner_id" query parameter
-   * * If no owner_id is provided, all layout cards will be fetched
-   * @param {Request} req - HTTP request object with optional owner_id query parameter
-   * @param {Response} res - HTTP response object that will return simplified layout card objects
-   * @returns {undefined}
-   */
-  async getLayoutCardsHandler(req, res) {
     try {
-      const filter = {};
-      if (req.query.owner_id !== undefined) {
-        filter.owner_id = parseInt(req.query.owner_id, 10);
+      const validated = await LayoutsGetDto.validateAsync(req.query);
+      ({ fields, owner_id } = validated);
+
+      if (owner_id !== undefined) {
+        filter.owner_id = owner_id;
       }
-      const layoutCards = await this._layoutRepository.listLayoutCards(filter);
-      res.status(200).json(layoutCards);
-    } catch {
-      updateAndSendExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
+    } catch (error) {
+      const responseError = error.isJoi ?
+        new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`) :
+        new Error('Unable to process request');
+
+      logger.debugMessage(`Error validating query parameters: ${error}`);
+      return updateAndSendExpressResponseFromNativeError(res, responseError);
+    }
+
+    try {
+      const layouts = await this._layoutRepository.listLayouts({ filter, fields });
+      return res.status(200).json(layouts);
+    } catch (error) {
+      logger.debugMessage(`Error retrieving layouts: ${error}`);
+      return updateAndSendExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
     }
   }
 

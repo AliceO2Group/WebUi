@@ -47,7 +47,7 @@ export const layoutRepositoryTest = async () => {
 
     suite('list layouts', () => {
       test('should list all layouts without filter', async () => {
-        const result = layoutRepository.listLayouts({});
+        const result = layoutRepository.listLayouts();
         equal(result.length, 2, 'Length of list of layouts is not correct');
         deepStrictEqual(result, jsonFileServiceMock.data.layouts, 'List of layouts filtered do not match the filters');
       });
@@ -67,21 +67,17 @@ export const layoutRepositoryTest = async () => {
           'First layout should match the expected layout',
         );
       });
-    });
-    suite('list layoutCards', () => {
-      test('should return only expected fields', () => {
-        const ownerId = 0;
-        const result = layoutRepository.listLayoutCards({ owner_id: ownerId });
-        const expectedCards = jsonFileServiceMock.data.layouts.map((layout) => ({
-          id: layout.id,
-          name: layout.name,
-          owner_id: layout.owner_id,
-          owner_name: layout.owner_name,
-          description: layout.description,
-          isOfficial: layout.isOfficial,
-        }));
 
-        deepStrictEqual(result, expectedCards, 'First layout should match the expected layout');
+      test('should return only specified fields when fields array is provided', () => {
+        const fields = ['id', 'name'];
+        const result = layoutRepository.listLayouts({ fields });
+
+        result.forEach((layout) => {
+          const actualKeys = Object.keys(layout);
+          deepStrictEqual(actualKeys.sort(), fields);
+        });
+
+        equal(result.length, jsonFileServiceMock.data.layouts.length);
       });
     });
 

@@ -17,7 +17,7 @@ const sinon = require('sinon');
 const proxyquire = require('proxyquire');
 const EventEmitter = require('events');
 const { EmitterKeys: {ENVIRONMENTS_TRACK} } = require('../../../../lib/common/emitterKeys.enum.js');
-const { BroadcastKeys: {ENVIRONMENTS} } = require('../../../../lib/common/broadcastKeys.enum.js');
+const { BroadcastKeys: {ENVIRONMENT_EVENTS} } = require('../../../../lib/common/broadcastKeys.enum.js');
 
 describe(`'EnvironmentCacheService' - test suite`, () => {
   let EnvironmentCacheService;
@@ -144,7 +144,7 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
 
   it('should add a new environment to the cache and broadcast it when receiving first event', () => {
     const environmentEvent = { id: 'abc123', timestamp: Date.now() };
-    const transformedEvent = { id: 'abc123', events: [], lastUpdate: environmentEvent.timestamp };
+    const transformedEvent = { id: 'abc123', lastUpdate: environmentEvent.timestamp };
 
     fromEcsEventToEnvironmentEventStub.returns(transformedEvent);
 
@@ -153,7 +153,7 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
     assert.ok(environmentCacheService._environments.has('abc123'));
     assert.strictEqual(environmentCacheService._environments.get('abc123').lastUpdate, environmentEvent.timestamp);
     assert.ok(broadcastServiceMock.broadcast.calledOnce);
-    assert.ok(broadcastServiceMock.broadcast.calledWith(ENVIRONMENTS, sinon.match.object));
+    assert.ok(broadcastServiceMock.broadcast.calledWith(ENVIRONMENT_EVENTS, sinon.match.object));
   });
 
   it('should update an existing environment in the cache and broadcast it', () => {
