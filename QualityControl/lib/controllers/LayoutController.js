@@ -59,30 +59,32 @@ export class LayoutController {
    * @returns {undefined}
    */
   async getLayoutsHandler(req, res) {
-    try {
-      const { owner_id, fields } = await LayoutsGetDto.validateAsync(req.query);
+    const filter = {};
+    let fields = undefined;
+    let owner_id = undefined;
 
-      const filter = {};
+    try {
+      const validated = await LayoutsGetDto.validateAsync(req.query);
+      ({ fields, owner_id } = validated);
 
       if (owner_id !== undefined) {
         filter.owner_id = owner_id;
       }
-
-      const layouts = await this._layoutRepository.listLayouts({ filter, fields });
-
-      res.status(200).json(layouts);
     } catch (error) {
-      if (error.isJoi) {
-        const errorDetails = error.details[0].message;
+      const responseError = error.isJoi ?
+        new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`) :
+        new Error('Unable to process request');
 
-        updateAndSendExpressResponseFromNativeError(
-          res,
-          new InvalidInputError(`Invalid query parameters: ${errorDetails}`),
-        );
-      } else {
-        logger.debugMessage(`Error retrieving layouts: ${error}`);
-        updateAndSendExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
-      }
+      logger.debugMessage(`Error validating query parameters: ${error}`);
+      return updateAndSendExpressResponseFromNativeError(res, responseError);
+    }
+
+    try {
+      const layouts = await this._layoutRepository.listLayouts({ filter, fields });
+      return res.status(200).json(layouts);
+    } catch (error) {
+      logger.debugMessage(`Error retrieving layouts: ${error}`);
+      return updateAndSendExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
     }
   }
 

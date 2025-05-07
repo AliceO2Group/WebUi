@@ -19,6 +19,7 @@ import sinon from 'sinon';
 import { LAYOUT_MOCK_1 } from './../../demoData/layout/layout.mock.js';
 import { LayoutController } from './../../../lib/controllers/LayoutController.js';
 import { LayoutRepository } from '../../../lib/repositories/LayoutRepository.js';
+import { LayoutsGetDto } from '../../../lib/dtos/LayoutDto.js';
 
 export const layoutControllerTestSuite = async () => {
   suite('Creating a new LayoutController instance', () => {
@@ -47,12 +48,40 @@ export const layoutControllerTestSuite = async () => {
       const jsonStub = sinon.createStubInstance(LayoutRepository, {
         listLayouts: sinon.stub().rejects(new Error('Unable to connect')),
       });
-      const req = { body: {} };
+      const fields = ['id', 'name'];
+
+      const req = { query: { fields: fields.join(','), token: 'fasdfsdfa' } };
       const layoutConnector = new LayoutController(jsonStub);
       await layoutConnector.getLayoutsHandler(req, res);
+
       ok(res.status.calledWith(500), 'Response status was not 500');
       ok(res.json.calledWith({
         message: 'Unable to retrieve layouts',
+        status: 500,
+        title: 'Unknown Error',
+      }), 'Error message was incorrect');
+    });
+    test('should log error when non-Joi validation error occurs', async () => {
+      const response = [{ id: 5, name: 'somelayout' }];
+      const jsonStub = sinon.createStubInstance(LayoutRepository, {
+        listLayouts: sinon.stub().resolves(response),
+      });
+
+      const req = { query: { fields: 'id,name', token: 'validtoken' } };
+
+      const error = new Error('Some unexpected error');
+
+      const originalValidate = LayoutsGetDto.validateAsync;
+      LayoutsGetDto.validateAsync = sinon.stub().rejects(error);
+
+      const layoutConnector = new LayoutController(jsonStub);
+
+      await layoutConnector.getLayoutsHandler(req, res);
+
+      LayoutsGetDto.validateAsync = originalValidate;
+      ok(res.status.calledWith(500), 'Response status was not 500');
+      ok(res.json.calledWith({
+        message: 'Unable to process request',
         status: 500,
         title: 'Unknown Error',
       }), 'Error message was incorrect');
