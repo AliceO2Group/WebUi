@@ -94,14 +94,14 @@ export class LayoutController {
     const { id } = req.params;
 
     try {
-      if (!id) {
+      if (!id.trim()) {
         updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout'));
       } else {
         const layout = await this._layoutRepository.readLayoutById(id);
         res.status(200).json(layout);
       }
-    } catch {
-      updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to retrieve layout with id: ${id}`));
+    } catch (error) {
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
