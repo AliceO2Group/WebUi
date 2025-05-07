@@ -177,7 +177,8 @@ export default class LayoutService {
    */
   async patchLayout(id, patch) {
     try {
-      return RemoteData.success(await jsonPatch(`/api/layout/${id}`, { body: { ...patch } }));
+      const response = await jsonPatch(`/api/layout/${id}`, { body: { ...patch } });
+      return RemoteData.success(response);
     } catch (error) {
       return RemoteData.failure(error.message);
     }
