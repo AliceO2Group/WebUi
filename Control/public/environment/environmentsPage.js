@@ -145,9 +145,8 @@ const environmentsTable = (model, list) => {
     h('tbody', [
       list.map((item) => {
         const {state: odcState, styleClass: odcStyle} = parseOdcStatusPerEnv(item);
-
         return h('tr', {
-          class: isGlobalRun(item.userVars) ? 'bg-global-run' : ''
+          class: isGlobalRun(item?.userVars ?? {}) ? 'bg-global-run' : ''
         }, [
           runColumn(item, model),
           h('td', {style: 'text-align: center;'},
@@ -230,5 +229,5 @@ const runColumn = (item, model) => {
  * @returns {boolean}
  */
 export const isGlobalRun = (vars) => {
-  return vars['trg_enabled'] === 'true' && vars['trg_global_run_enabled'] === 'true';
+  return vars?.trg_enabled === 'true' && vars?.trg_global_run_enabled === 'true';
 }

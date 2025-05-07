@@ -14,8 +14,14 @@
 const { AliEcsEventMessagesConsumer, LogManager } = require('@aliceo2/web-ui');
 const { CacheKeys } = require('../common/cacheKeys.enum.js'); 
 const { ConsumerGroups } = require('./enums/consumerGroups.enum.js');
-const { EmitterKeys: {ENVIRONMENTS_TRACK} } = require('./../common/emitterKeys.enum.js');
 const { DcsIntegratedEventAdapter } = require('../adapters/DcsIntegratedEventAdapter.js');
+const {
+  EmitterKeys: {
+    ENVIRONMENTS_TRACK, 
+    INTEGRATED_SERVICES_TRACK: { ODC }
+  }
+} = require('./../common/emitterKeys.enum.js');
+const { fromEcsIntegratedServiceEventToEvent } = require('./adapters/fromEcsIntegratedServiceEventToEvent.js');
 const { runEventAdapter } = require('./adapters/runEventAdapter.js');
 const { taskEventAdapter } = require('./adapters/taskEventAdapter.js');
 const { Topics } = require('./enums/topics.enum.js');
@@ -64,6 +70,13 @@ class AliEcsSynchronizer {
       Topics.TASK
     );
     this._ecsTaskConsumer.onMessageReceived(this._onTaskMessage.bind(this));
+
+    this._odcConsumer = new AliEcsEventMessagesConsumer(
+      kafkaClient,
+      ConsumerGroups.INTEGRATED_SERVICE.ODC,
+      Topics.INTEGRATED_SERVICE.ODC
+    );
+    this._odcConsumer.onMessageReceived(this._onIntegratedServiceOdcMessage.bind(this));
   }
 
   /**
@@ -100,6 +113,13 @@ class AliEcsSynchronizer {
           `Error when starting ECS task consumer: ${error.message}\n${error.stack}`
         )
       );
+    this._odcConsumer
+      .start()
+      .catch((error) =>
+        this._logger.errorMessage(
+          `Error when starting ECS ODC consumer: ${error.message}\n${error.stack}`
+        )
+      );
   }
 
   /**
@@ -130,6 +150,35 @@ class AliEcsSynchronizer {
       }
       cachedDcsSteps[environmentId].dcsOperations.sort((a, b) => a.timestamp - b.timestamp);
       this._cacheService.updateByKeyAndBroadcast(CacheKeys.DCS.SOR, cachedDcsSteps, {command: CacheKeys.DCS.SOR});
+    }
+  }
+
+  /**
+   * ODC messages are based on multiple operations and steps, we need to adapt the message to the operation name and step
+   * * operation name is suffixed with `readout-dataflow.odc.` - that is an operation belonging to an ECS environment transition
+   * * * e.g. `readout-dataflow.odc.reset`, `readout-dataflow.odc.part-term`, `readout-dataflow.odc.cleanup`
+   * * operation name is suffixed with `odc.deviceStateChanged` - that is a task change that needs to be propagated to task-counters and epn-page if user has the page opened
+   * * operation name is suffixed with `odc.partitionStateChanged` - that is a change of ODC in general that needs to be propagated to environment-details page
+   * Depending on the operation name the message is propagated to the corresponding track
+   * @param {Ev_IntegratedServiceEvent - Events.proto} eventMessage - message received on integrated service ODC topic
+   * @return {void}
+   */
+  async _onIntegratedServiceOdcMessage(eventMessage) {
+    const ODC_PARTITION_STATE_CHANGED_PREFIX = 'odc.partitionStateChanged';
+
+    if (!eventMessage?.integratedServiceEvent) {
+      this._logger.errorMessage(
+        `Received odc integrated service event message without integratedServiceEvent: ${JSON.stringify(eventMessage)}`
+      );
+      return;
+    }
+    const event = fromEcsIntegratedServiceEventToEvent(eventMessage);
+    const integratedServiceEvent = {
+      timestamp: event.timestamp,
+      ...event
+    };
+    if (integratedServiceEvent.name.startsWith(ODC_PARTITION_STATE_CHANGED_PREFIX)) {
+      this._eventEmitter.emit(ODC.ENVIRONMENT_STATE_CHANGE, integratedServiceEvent);
     }
   }
 

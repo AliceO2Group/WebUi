@@ -175,11 +175,11 @@ export default class Model extends Observable {
         this.configuration.setConfigurationRequest(message.payload);
         break;
       case BroadcastKeys.ENVIRONMENTS_OVERVIEW:
-        this.environment.list = RemoteData.success({ environments: message.payload });
-        this.environment.updateItemEnvironment(message.payload);
+        this.environment.list = RemoteData.success({ environments: message.payload ?? [] });
+        this.environment.updateItemEnvironment(message.payload, this.router.params?.panel ?? '');
         this.notify();
         break;
-      case BroadcastKeys.requests:
+      case BroadcastKeys.REQUESTS:
         this.environment.requests = RemoteData.success(message.payload);
         this.notify();
         break;

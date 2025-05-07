@@ -87,10 +87,13 @@ describe('EnvironmentService test suite', () => {
     it('should handle empty environments list gracefully', async () => {
       GetEnvironmentsStub.resolves({ environments: [] });
   
+      envService._broadcastService = {
+        broadcast: sinon.stub(),
+      }
       const result = await envService.getEnvironments(false, false);
-  
       assert.strictEqual(result.length, 0);
       assert.strictEqual(environmentCacheServiceMock.environments.size, 0); // Cache should not be updated
+      assert.ok(envService._broadcastService.broadcast.calledWith('ENVIRONMENTS_OVERVIEW', []));
     });
 
     it('should retrieve environments and return them without updating the cache', async () => {
@@ -99,7 +102,9 @@ describe('EnvironmentService test suite', () => {
         { id: 'env2', state: 'inactive' },
       ];
       GetEnvironmentsStub.resolves({ environments: mockEnvironments });
-  
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[0].id }).resolves({ environment: mockEnvironments[0] });
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[1].id }).resolves({ environment: mockEnvironments[1] });
+      
       const result = await envService.getEnvironments(false, false);
   
       assert.strictEqual(result.length, 2);
@@ -114,19 +119,16 @@ describe('EnvironmentService test suite', () => {
         { id: 'env2', state: 'inactive' },
       ];
       GetEnvironmentsStub.resolves({ environments: mockEnvironments });
-
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[0].id }).resolves({ environment: mockEnvironments[0] });
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[1].id }).resolves({ environment: mockEnvironments[1] });
+      
+      envService._environmentCacheService.addOrUpdateEnvironment = sinon.stub().returns();
       const result = await envService.getEnvironments(false, true);
 
       assert.strictEqual(result.length, 2);
       assert.strictEqual(result[0].id, 'env1');
       assert.strictEqual(result[1].id, 'env2');
-      /**
-       * The object stored in EnvCache is normally a map, but accepts a list which then parses in a map
-       * In this test because we are not using the real cache, we are just checking the length of the array, the
-       * transformation from list to map, never happens, thus we are checking the length of the array
-       * and not the size of the map
-       */
-      assert.strictEqual(environmentCacheServiceMock.environments.length, 2); // Cache should be updated
+      assert.ok(envService._environmentCacheService.addOrUpdateEnvironment.calledTwice);
     });
   });
 
