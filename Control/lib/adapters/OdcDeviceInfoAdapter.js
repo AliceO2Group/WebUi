@@ -32,8 +32,6 @@ class OdcDeviceInfoAdapter {
   static toEntity(device) {
     const {
       taskId,
-      state = TaskState.UNKNOWN,
-      ecsState = TaskState.UNKNOWN,
       path,
       ignored = false,
       host,
@@ -42,7 +40,10 @@ class OdcDeviceInfoAdapter {
       className
     } = device;
 
-    if (state === TaskState.ERROR && ecsState !== TaskState.ERROR) {
+    let epnState = device.state ?? TaskState.UNKNOWN;
+    let ecsState = device.ecsState ?? TaskState.UNKNOWN;
+
+    if (epnState === TaskState.ERROR && ecsState !== TaskState.ERROR) {
       // It may be that ECS did not have the change to handle the ERROR state
       // and the task is still in the previous state (e.g. CONFIGURED, UNKNOWN, etc.)
       // In this case, we set the ECS state to ERROR as well
@@ -56,7 +57,7 @@ class OdcDeviceInfoAdapter {
     return {
       taskId,
       state: ecsState,
-      epnState: state,
+      epnState,
       path,
       isIgnored: ignored,
       hostname: host,
