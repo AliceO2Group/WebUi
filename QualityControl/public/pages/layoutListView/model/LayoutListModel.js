@@ -75,21 +75,6 @@ export default class LayoutListModel extends Observable {
   }
 
   /**
-   * Given an ID and new value for official status, update it accordingly
-   * @param {string} id - of layout to modify
-   * @returns {undefined}
-   */
-  async toggleOfficial(id) {
-    const { payload } = this.folders.get('All Layouts').list;
-    const { isOfficial } = payload.find((item) => item.id === id);
-
-    await this.model.services.layout.patchLayout(id, { isOfficial: !isOfficial });
-    await this.model.services.layout.getLayouts(this);
-    await this.model.services.layout.getLayoutsByUserId(this.model.session.personid, this);
-    this.model.notify();
-  };
-
-  /**
    * Removes a layout from a specific folder
    * @param {string} folderName - Name of the folder to remove the layout from
    * @param {LayoutCardModel} layout - Layout instance to remove
