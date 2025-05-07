@@ -43,7 +43,7 @@ class OdcDeviceInfoAdapter {
     } = device;
     return {
       taskId,
-      state: (expendable && ecsState === TaskState.ERROR) ? TaskState.ERROR_CRITICAL : ecsState,
+      state: (!expendable && (ecsState === TaskState.ERROR || state === TaskState.ERROR)) ? TaskState.ERROR_CRITICAL : ecsState,
       epnState: state,
       path,
       isIgnored: ignored,
