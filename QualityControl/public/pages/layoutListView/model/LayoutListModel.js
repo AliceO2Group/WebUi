@@ -17,9 +17,13 @@ import { Observable } from '/js/src/index.js';
 import FolderModel, { FolderType } from '../../../folder/model/FolderModel.js';
 import LayoutCardModel from './LayoutCardModel.js';
 
+/**
+ * Model namespace with all requests to load or create layouts, compute their position on a grid,
+ * and search them.
+ */
 export default class LayoutListModel extends Observable {
   /**
-   * Creates a new LayoutCardModel instance
+   * Creates a new LayoutListModel instance
    * @param {Model} model - The the application model
    */
   constructor(model) {

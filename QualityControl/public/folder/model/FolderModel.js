@@ -24,7 +24,7 @@ export const FolderType = Object.freeze({
 });
 
 /**
- * Model namespace for ObjectViewPage
+ * Model namespace for FolderModel
  */
 export default class FolderModel extends Observable {
   /**
