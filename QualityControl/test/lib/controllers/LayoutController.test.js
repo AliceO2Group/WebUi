@@ -82,6 +82,55 @@ export const layoutControllerTestSuite = async () => {
       ok(jsonStub.listLayouts.calledWith({ owner_id: 1 }), 'Owner id was not used in data connector call');
     });
   });
+  suite('`getLayoutCardsHandler()` tests', () => {
+    let res = {};
+    beforeEach(() => {
+      res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      };
+    });
+
+    test('should respond with error if layout repository could not find layoutCardss', async () => {
+      const jsonStub = sinon.createStubInstance(LayoutRepository, {
+        listLayoutCards: sinon.stub().rejects(new Error('Unable to connect')),
+      });
+      const req = { body: {} };
+      const layoutConnector = new LayoutController(jsonStub);
+      await layoutConnector.getLayoutCardsHandler(req, res);
+      ok(res.status.calledWith(500), 'Response status was not 500');
+      ok(res.json.calledWith({
+        message: 'Unable to retrieve layouts',
+        status: 500,
+        title: 'Unknown Error',
+      }), 'Error message was incorrect');
+    });
+
+    test('should successfully return a list of layoutCards', async () => {
+      const jsonStub = sinon.createStubInstance(LayoutRepository, {
+        listLayoutCards: sinon.stub().resolves([{ name: 'somelayout' }]),
+      });
+
+      const req = { query: {} };
+      const layoutConnector = new LayoutController(jsonStub);
+      await layoutConnector.getLayoutCardsHandler(req, res);
+      ok(res.status.calledWith(200), 'Response status was not 200');
+      ok(res.json.calledWith([{ name: 'somelayout' }]), 'A list of layouts should have been sent back');
+    });
+
+    test('should successfully return a list of layouts based on owner_id', async () => {
+      const jsonStub = sinon.createStubInstance(LayoutRepository, {
+        listLayoutCards: sinon.stub().resolves([{ name: 'somelayout' }]),
+      });
+      const req = { query: { owner_id: '1' } };
+      const layoutConnector = new LayoutController(jsonStub);
+      await layoutConnector.getLayoutCardsHandler(req, res);
+      ok(res.status.calledWith(200), 'Response status was not 200');
+
+      ok(res.json.calledWith([{ name: 'somelayout' }]), 'A list of layouts should have been sent back');
+      ok(jsonStub.listLayoutCards.calledWith({ owner_id: 1 }), 'Owner id was not used in data connector call');
+    });
+  });
 
   suite('`getLayoutHandler()` tests', () => {
     let res = {};

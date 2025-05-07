@@ -68,6 +68,22 @@ export const layoutRepositoryTest = async () => {
         );
       });
     });
+    suite('list layoutCards', () => {
+      test('should return only expected fields', () => {
+        const ownerId = 0;
+        const result = layoutRepository.listLayoutCards({ owner_id: ownerId });
+        const expectedCards = jsonFileServiceMock.data.layouts.map((layout) => ({
+          id: layout.id,
+          name: layout.name,
+          owner_id: layout.owner_id,
+          owner_name: layout.owner_name,
+          description: layout.description,
+          isOfficial: layout.isOfficial,
+        }));
+
+        deepStrictEqual(result, expectedCards, 'First layout should match the expected layout');
+      });
+    });
 
     suite('read layouts', () => {
       test('readLayoutById should throw NotFoundError when layout is not found', () => {
