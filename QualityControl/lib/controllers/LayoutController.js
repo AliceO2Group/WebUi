@@ -71,7 +71,7 @@ export class LayoutController {
         new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`) :
         new Error('Unable to process request');
 
-      logger.debugMessage(`Error validating query parameters: ${error}`);
+      logger.errorMessage(`Error validating query parameters: ${error}`);
       return updateAndSendExpressResponseFromNativeError(res, responseError);
     }
 
@@ -79,7 +79,7 @@ export class LayoutController {
       const layouts = await this._layoutRepository.listLayouts({ owner_id, name, fields });
       return res.status(200).json(layouts);
     } catch (error) {
-      logger.debugMessage(`Error retrieving layouts: ${error}`);
+      logger.errorMessage(`Error retrieving layouts: ${error}`);
       return updateAndSendExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
     }
   }
