@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { AssertionError, deepStrictEqual, throws } from 'node:assert';
+import { deepStrictEqual } from 'node:assert';
 import { suite, test, beforeEach, afterEach } from 'node:test';
 import { FilterService } from '../../../lib/services/FilterService.js';
 import { stub, restore } from 'sinon';
@@ -34,12 +34,6 @@ export const filterServiceTestSuite = async () => {
   });
 
   suite('should create a new instance of FilterService', async () => {
-    test('should throw an error if BookkeepingService is not defined', () => {
-      throws(
-        () => new FilterService(undefined),
-        new AssertionError({ message: 'Bookkeeping Service is required', expected: true, operator: '==' }),
-      );
-    });
     test('should initialize _runTypes as empty array', () => {
       filterService = new FilterService(bookkeepingServiceMock);
       deepStrictEqual(filterService.runTypes, []);

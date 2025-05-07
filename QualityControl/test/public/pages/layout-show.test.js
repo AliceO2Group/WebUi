@@ -34,23 +34,6 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     },
   );
 
-  // await testParent.test(
-  //   'should have an input to filter by run type if there are no run types loaded',
-  //   { timeout },
-  //   async () => {
-  //     const inputTypeInfo = await page.evaluate(() => {
-  //       const input = document.querySelector('#runTypeLayoutFilter');
-  //       return {
-  //         localName: input.localName,
-  //         placeholder: input.placeholder,
-  //       };
-  //     });
-  //     strictEqual(inputTypeInfo.localName, 'input');
-  //     strictEqual(inputTypeInfo.placeholder, 'RunType (e.g. PHYSICS)');
-  //     await delay(3000);
-  //   },
-  // );
-
   await testParent.test(
     'should have a selector with sorted options to filter by run type if there are run types loaded',
     { timeout },
