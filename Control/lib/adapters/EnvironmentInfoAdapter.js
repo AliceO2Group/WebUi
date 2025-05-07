@@ -236,7 +236,6 @@ class EnvironmentInfoAdapter {
   /**
    * Prepare an ODC object with hardware information based
    * @param {Map<String, Object>} integratedServicesData - object with details of the integrated services
-   * // TODO
    */
   static _getOdcCounters(odc = {}) {
     try {

@@ -16,6 +16,7 @@ import {h} from '/js/src/index.js';
 
 import {ROLES} from '../../../workflow/constants.js';
 import {isUserAllowedRole} from '../../../common/userRole.js';
+import {environmentReadinessStatus} from '../../../common/environment/environmentReadinessStatus.js';
 
 /**
  * List of buttons for:
@@ -29,13 +30,7 @@ import {isUserAllowedRole} from '../../../common/userRole.js';
 export const controlEnvironmentPanel = (environmentModel, item, isAllowedToControl = false) => {
   const {currentTransition, includedDetectors, state} = item;
   const {model} = environmentModel;
-  const isSorAvailable =
-    item.userVars?.['dcs_enabled'] === 'true' ?
-      model.services.detectors.areDetectorsAvailable(includedDetectors, 'sorAvailability')
-      :
-      true;
-  const isStable = !currentTransition;
-  const isConfigured = state === 'CONFIGURED';
+  const {statusMessage} = environmentReadinessStatus(item, model);
   return h('.flex-column.justify-center', {
     key: 'controlEnvironmentPanel',
     style: 'flex-grow: 3;'
@@ -50,11 +45,9 @@ export const controlEnvironmentPanel = (environmentModel, item, isAllowedToContr
         }, 'locks'),
         ' to control this environment.'
       ]),
-      isStable && isConfigured && !isSorAvailable
-      && h('.danger.flex-end.flex-row', 'SOR is unavailable for one or more of the included detectors.'),
-
     ]),
-    isAllowedToControl && h('.flex-row.flex-end.g2', [
+    isAllowedToControl && h('.flex-row.flex-end.g2.items-center', [
+      statusMessage && h('.danger.flex-end.flex-row.flex-center', statusMessage),
       controlButton(
         '.btn-success.w-25', environmentModel, item, 'START', 'START_ACTIVITY', 'CONFIGURED',
         Boolean(currentTransition)

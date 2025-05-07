@@ -31,9 +31,11 @@ export const environmentReadinessStatus = (item, model) => {
   const {currentRunNumber, currentTransition, state, userVars} = item;
   let classes = '';
   let statusComponent = '-';
+  let statusMessage = undefined;
 
   if (state === 'CONFIGURED' && !currentTransition) {
     statusComponent = 'READY';
+    statusMessage = undefined;
     classes = 'bg-primary white';
 
     // If ECS is not performing any transitions, we check critical services to be also done (ODC, DCS)
@@ -42,6 +44,7 @@ export const environmentReadinessStatus = (item, model) => {
       const { state: odcState } = parseOdcStatusPerEnv(item);
       if (odcState !== 'READY' && state === 'CONFIGURED') {
         statusComponent = 'ODC...';
+        statusMessage = 'ODC is not in READY state';
       }
     }
 
@@ -50,7 +53,8 @@ export const environmentReadinessStatus = (item, model) => {
       const { includedDetectors } = item;
       const isSorAvailable = model.services.detectors.areDetectorsAvailable(includedDetectors, 'sorAvailability');
       if (!isSorAvailable) {
-        statusComponent = h('.g2', [iconX(), 'SOR']);
+        statusComponent = () => h('.g2', [iconX(), 'SOR']);
+        statusMessage = 'SOR is not available for one or more of the included detectors';
         classes = 'danger';
       }
     }
@@ -59,16 +63,19 @@ export const environmentReadinessStatus = (item, model) => {
   if (currentTransition) {
     classes = '';
     statusComponent = '...';
+    statusMessage = undefined;
   }
 
   // If a runNumber is available, it will be displayed
   if (currentRunNumber) {
     classes = 'bg-success white';
     statusComponent = currentRunNumber;
+    statusMessage = undefined;
   }
 
   return {
     statusComponent,
+    statusMessage,
     styleClasses: classes
   };
 }
