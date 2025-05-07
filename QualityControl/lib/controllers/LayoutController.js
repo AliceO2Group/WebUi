@@ -30,7 +30,7 @@ import {
  * @typedef {import('../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
  */
 
-const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/layout`);
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/layout-ctrl`);
 
 /**
  * Gateway for all HTTP requests with regards to QCG Layouts

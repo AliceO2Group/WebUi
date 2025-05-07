@@ -14,7 +14,7 @@
 import { LogManager, NotFoundError } from '@aliceo2/web-ui';
 import { BaseRepository } from './BaseRepository.js';
 
-const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/layout`);
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/layout-ctrl`);
 
 /**
  * LayoutRepository class to handle CRUD operations for Layouts.
