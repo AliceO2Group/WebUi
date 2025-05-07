@@ -25,7 +25,7 @@ import { stub, restore } from 'sinon';
 export const bookkeepingServiceTestSuite = async () => {
   suite('Bookkeeping Test Suite', () => {
     const VALID_CONFIG = {
-      url: 'http://alio2-cr1-hv-mvs00.cern.ch:4000',
+      url: 'http://localhost:4000',
       token: 'valid-token',
       refreshRate: 15000,
     };
