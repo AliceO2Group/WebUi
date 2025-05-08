@@ -249,10 +249,20 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
-    'should have number input field for allowing users to change auto-tab value',
+    'should not allow user to change the auto tab change value to a value if it is not bigger than 10',
     { timeout },
     async () => {
-      await page.waitForSelector('#inputDescription', { timeout: 5000 });
+      const result = await setAutoTabChangeValue(page, 9);
+      ok(result, 0);
+    },
+  );
+
+  await testParent.test(
+    'should allow user to change the auto tab change value to a value if bigger than 10',
+    { timeout },
+    async () => {
+      const result = await setAutoTabChangeValue(page, 11);
+      ok(result, 11);
     },
   );
 
@@ -422,6 +432,14 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       strictEqual(result, true);
     },
   );
+
+  await testParent.test('should change tab after set tabInterval', { timeout: 15000 }, async () => {
+    const location = await page.evaluate(() => window.location);
+    strictEqual(location.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=a`);
+    await delay(11000);
+    const location2 = await page.evaluate(() => window.location);
+    strictEqual(location2.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=test`);
+  });
 };
 
 const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {
@@ -440,3 +458,18 @@ const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {
   strictEqual(updateButtonIsDisabled, true);
   strictEqual(message, errorMessage);
 };
+
+/**
+ * Fills the input for tab change timer and returns the resulting value.
+ * @param page - The Playwright page instance.
+ * @param value - The value to fill into the input field.
+ * @returns The numeric value from the input after filling it.
+ */
+async function setAutoTabChangeValue(page, value) {
+  const inputSelector = '#inputChangeTabTimer';
+  await page.locator(inputSelector).fill(value.toString());
+  return await page.evaluate(
+    (selector) => parseInt(document.querySelector(selector).value, 10),
+    inputSelector,
+  );
+}
