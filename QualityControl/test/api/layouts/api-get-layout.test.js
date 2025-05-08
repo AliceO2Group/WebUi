@@ -44,7 +44,12 @@ export const apiGetLayoutsTests = () => {
             throw new Error('Expected array of layouts');
           }
 
-          deepStrictEqual(res.body, [LAYOUT_MOCK_4, LAYOUT_MOCK_5]);
+          deepStrictEqual(
+            res.body,
+            [LAYOUT_MOCK_4, LAYOUT_MOCK_5],
+            `Expected layouts with owner_id=0 to be ${JSON.stringify([LAYOUT_MOCK_4, LAYOUT_MOCK_5])} 
+            but got ${JSON.stringify(res.body)}`,
+          );
         });
     });
 
@@ -102,7 +107,12 @@ export const apiGetLayoutsTests = () => {
         .get(`?token=${OWNER_TEST_TOKEN}`)
         .expect(200)
         .expect((res) => {
-          deepStrictEqual(res.body, LAYOUT_MOCK_6);
+          deepStrictEqual(
+            res.body,
+            LAYOUT_MOCK_6,
+            `Expected layout with id '671b8c22402408122e2f20dd' to be ${JSON.stringify(LAYOUT_MOCK_6)} 
+            but got ${JSON.stringify(res.body)}`,
+          );
         });
     });
 
@@ -120,7 +130,11 @@ export const apiGetLayoutsTests = () => {
       const nonExistentId = 'nonexistent123';
       await request(`${URL_ADDRESS}/api/layout/${nonExistentId}`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
-        .expect(404, { message: 'layout (nonexistent123) not found', status: 404, title: 'Not Found' });
+        .expect(404, {
+          message: 'layout (nonexistent123) not found',
+          status: 404,
+          title: 'Not Found',
+        });
     });
   });
 
@@ -130,14 +144,29 @@ export const apiGetLayoutsTests = () => {
       await request(`${URL_ADDRESS}/api/layout`)
         .get(`?token=${OWNER_TEST_TOKEN}&name=${layoutName}`)
         .expect(200)
-        .expect((res) => deepStrictEqual(res.body, LAYOUT_MOCK_5));
+        .expect((res) => {
+          deepStrictEqual(
+            res.body,
+            LAYOUT_MOCK_5,
+            `Expected layout with name 'a-test' to be ${JSON.stringify(LAYOUT_MOCK_5)}
+            but got ${JSON.stringify(res.body)}`,
+          );
+        });
     });
+
     test('should return layout by runDefinition', async () => {
       const runDefinition = 'a-test';
       await request(`${URL_ADDRESS}/api/layout`)
         .get(`?token=${OWNER_TEST_TOKEN}&runDefinition=${runDefinition}`)
         .expect(200)
-        .expect((res) => deepStrictEqual(res.body, LAYOUT_MOCK_5));
+        .expect((res) => {
+          deepStrictEqual(
+            res.body,
+            LAYOUT_MOCK_5,
+            `Expected layout with runDefinition 'a-test' to be ${JSON.stringify(LAYOUT_MOCK_5)} 
+            but got ${JSON.stringify(res.body)}`,
+          );
+        });
     });
 
     test('should return 400 when no query parameters are provided', async () => {
