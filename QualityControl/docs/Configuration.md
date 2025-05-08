@@ -41,6 +41,21 @@ ccdb: {
 }
 ```
 
+### BOOKKEEPING
+Attribute to define the `Bookkeeping` endpoint. If this configuration is not provided, QCG will not proceed with the setup of Bookkeeping service and it will not fetch data from it. Same behavior if the configuration provided is not valid.
+
+- `url` - URL for accessing Bookkeeping API
+- `token` - Authentication token required to interact with the API securely.
+- `refreshRate` - Frequency (in miliseconds) at which the bookkeeping data is refreshed or synchronized.
+
+```javascript
+bookkeeping: {
+  url: 'http://localhost:4000',
+  token: 'example-token',
+  refreshRate: 15000000
+}
+
+
 ### QC Environment Configuration
 In the qc section, you can define whether QCG should be started as part of a Quality Control (QC) integrated environment.
 

@@ -34,6 +34,58 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     },
   );
 
+  await testParent.test('should remove query param only if option is invalid for any filter', { timeout }, async () => {
+    const baseParams = `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=main`;
+
+    await page.goto(`${url}${baseParams}&RunType=runType1`, { waitUntil: 'networkidle0' });
+    const location1 = await page.evaluate(() => window.location.search);
+    strictEqual(location1, `${baseParams}&RunType=runType1`);
+
+    await page.goto(`${url}${baseParams}&RunType=invalid-value`, { waitUntil: 'networkidle0' });
+    const location2 = await page.evaluate(() => window.location.search);
+    strictEqual(location2, baseParams);
+    await delay(100);
+  });
+
+  await testParent.test(
+    'should have a selector with sorted options to filter by run type if there are run types loaded',
+    { timeout },
+    async () => {
+      const MAX_DELAY = 5000;
+      const INTERVAL = 500;
+      const selectorId = '#runTypeLayoutFilter';
+
+      const getOptionsWithRetry = async () => {
+        let options = [];
+        let addedDelay = 0;
+
+        while (!options.length && addedDelay < MAX_DELAY) {
+          await page.reload();
+          await delay(INTERVAL);
+          addedDelay += INTERVAL;
+
+          options = await page.evaluate((selectorId) => {
+            const select = document.querySelector(selectorId);
+            if (!select || !select.options) {
+              return [];
+            }
+            return Array.from(select.options).map((option) => option.value);
+          }, selectorId);
+        }
+        return options;
+      };
+
+      const options = await getOptionsWithRetry();
+      if (!options.length) {
+        throw new Error('#runTypeLayoutFilter not found after 5 seconds');
+      }
+
+      strictEqual(options[0], '');
+      strictEqual(options[1], 'runType1');
+      strictEqual(options[2], 'runType2');
+    },
+  );
+
   await testParent.test(
     'should have tabs in the header',
     { timeout },
