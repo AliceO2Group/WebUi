@@ -143,6 +143,7 @@ export const LAYOUT_MOCK_4 = {
 export const LAYOUT_MOCK_5 = {
   id: '671b95883d23cd0d67bdc787',
   name: 'a-test',
+  isOfficial: false,
   owner_id: 0,
   owner_name: 'Anonymous',
   description: '',
