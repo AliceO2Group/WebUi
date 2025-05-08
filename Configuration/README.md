@@ -4,10 +4,6 @@
 
 The project is composed of:
 
-- ./backend:
-    - Contains the backend based on express using WebUI framework
-    - This directory should be removed if the applications uses an already existing backend or no backend at all
-
 - ./webapp:
     - Contains a SPA frontend based on react (using react-router as framework)
 
@@ -24,10 +20,6 @@ docker compose up
 
 This will launch the following containers:
 
-- install-backend
-    - Install the backend dependencies then stops
-- backend
-    - Runs the backend webserver once the `install-backend` exited successfully
 - install-webapp
     - Install the webapp dependencies then stops
 - webapp
