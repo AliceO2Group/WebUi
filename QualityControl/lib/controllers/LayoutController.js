@@ -71,7 +71,7 @@ export class LayoutController {
         new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`) :
         new Error('Unable to process request');
 
-      logger.debugMessage(`Error validating query parameters: ${error}`);
+      logger.errorMessage(`Error validating query parameters: ${error}`);
       return updateAndSendExpressResponseFromNativeError(res, responseError);
     }
 
@@ -79,7 +79,7 @@ export class LayoutController {
       const layouts = await this._layoutRepository.listLayouts({ owner_id, name, fields });
       return res.status(200).json(layouts);
     } catch (error) {
-      logger.debugMessage(`Error retrieving layouts: ${error}`);
+      logger.errorMessage(`Error retrieving layouts: ${error}`);
       return updateAndSendExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
     }
   }
@@ -92,16 +92,15 @@ export class LayoutController {
    */
   async getLayoutHandler(req, res) {
     const { id } = req.params;
-
-    try {
-      if (!id.trim()) {
-        updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout'));
-      } else {
+    if (!id.trim()) {
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout'));
+    } else {
+      try {
         const layout = await this._layoutRepository.readLayoutById(id);
         res.status(200).json(layout);
+      } catch (error) {
+        updateAndSendExpressResponseFromNativeError(res, error);
       }
-    } catch (error) {
-      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
