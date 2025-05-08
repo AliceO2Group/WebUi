@@ -110,7 +110,6 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have jsroot svg plots in the section',
     { timeout },
     async () => {
-      page.screenshot({ path: 'test2.png' });
       const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
       ok(plotsCount > 1);
     },
