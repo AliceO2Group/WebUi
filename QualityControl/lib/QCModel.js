@@ -22,11 +22,14 @@ import { CcdbService } from './services/ccdb/CcdbService.js';
 import { IntervalsService } from './services/Intervals.service.js';
 import { StatusService } from './services/Status.service.js';
 import { QcObjectService } from './services/QcObject.service.js';
+import { FilterService } from './services/FilterService.js';
+import { BookkeepingService } from './services/BookkeepingService.js';
 import { UserService } from './services/UserService.js';
 
 import { LayoutController } from './controllers/LayoutController.js';
 import { StatusController } from './controllers/StatusController.js';
 import { ObjectController } from './controllers/ObjectController.js';
+import { FilterController } from './controllers/FilterController.js';
 import { UserController } from './controllers/UserController.js';
 
 import { config } from './config/configProvider.js';
@@ -85,10 +88,13 @@ export const setupQcModel = async () => {
   const objectController = new ObjectController(qcObjectService);
   const intervalsService = new IntervalsService();
 
-  intervalsService.register(
-    qcObjectService.refreshCache.bind(qcObjectService),
-    qcObjectService.getCacheRefreshRate(),
-  );
+  const bookkeepingService = new BookkeepingService(config.bookkeeping);
+  const filterService = new FilterService(bookkeepingService);
+
+  const filterController = new FilterController(filterService);
+
+  initializeIntervals(intervalsService, qcObjectService, filterService);
+
   return {
     userController,
     layoutController,
@@ -96,6 +102,26 @@ export const setupQcModel = async () => {
     statusController,
     objectController,
     intervalsService,
+    filterController,
     layoutService,
   };
 };
+
+/**
+ * Method to register services at the start of the server
+ * @param {Intervals} intervalsService - wrapper for storing intervals
+ * @param {QcObjectService} qcObjectService - service for retrieving information on qc objects
+ * @param {FilterService} filterService - service for retrieving run types information from Bookkeeping
+ * @returns {void}
+ */
+function initializeIntervals(intervalsService, qcObjectService, filterService) {
+  intervalsService.register(
+    qcObjectService.refreshCache.bind(qcObjectService),
+    qcObjectService.getCacheRefreshRate(),
+  );
+
+  intervalsService.register(
+    filterService.getRunTypes.bind(filterService),
+    filterService.refreshInterval,
+  );
+}

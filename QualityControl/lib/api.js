@@ -44,6 +44,7 @@ export const setup = async (http, ws) => {
     statusService,
     userController,
     layoutService,
+    filterController,
   } = await setupQcModel();
   statusService.ws = ws;
   http.get('/object/:id', objectController.getObjectById.bind(objectController));
@@ -85,4 +86,6 @@ export const setup = async (http, ws) => {
   );
 
   http.get('/checkUser', userController.addUserHandler.bind(userController));
+
+  http.get('/filter/configuration', filterController.getFilterConfigurationHandler.bind(filterController));
 };

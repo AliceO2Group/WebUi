@@ -50,4 +50,9 @@ export const config = {
     logging: false,
     retryThrottle: 5000,
   },
+  bookkeeping: {
+    url: 'http://localhost:4000',
+    token: 'token-test',
+    refreshRate: 15000,
+  },
 };

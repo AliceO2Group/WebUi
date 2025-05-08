@@ -47,12 +47,14 @@ import { utilsTestSuite } from './lib/utils/utils.test.js';
  */
 import { layoutControllerTestSuite } from './lib/controllers/LayoutController.test.js';
 import { statusControllerTestSuite } from './lib/controllers/StatusController.test.js';
+import { filtersControllerTestSuite } from './lib/controllers/FiltersController.test.js';
 
 /**
  * Services
  */
 import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
 import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
+import { bookkeepingServiceTestSuite } from './lib/services/BookeepingService.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
@@ -66,6 +68,7 @@ import { userControllerTestSuite } from './lib/controllers/UserController.test.j
 import { layoutServiceTestSuite } from './lib/services/LayoutService.test.js';
 import { userServiceTestSuite } from './lib/services/UserService.test.js';
 import { layoutAdapterTestSuite } from './lib/controllers/adapters/layout-adapter.test.js';
+import { filterServiceTestSuite } from './lib/services/FilterService.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -171,6 +174,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
       suite('LayoutService - Test Suite', async () => await layoutServiceTestSuite());
       suite('UserService - Test Suite', async () => await userServiceTestSuite());
+      suite('FilterService', async () => await filterServiceTestSuite());
     });
 
     suite('Middleware - Test Suite', async () => {
@@ -178,17 +182,18 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('LayoutIdMiddleware test suite', async () => layoutIdMiddlewareTest());
       suite('LayoutOwnerMiddleware test suite', async () => layoutOwnerMiddlewareTest());
       suite('StatusComponentMiddleware test suite', async () => statusComponentMiddlewareTest());
+      suite('BookkeepingServiceTest test suite', async () => await bookkeepingServiceTestSuite());
     });
 
     suite('Controllers - Test Suite', async () => {
       suite('LayoutAdapter test suite', async () => await layoutAdapterTestSuite());
       suite('LayoutController test suite', async () => await layoutControllerTestSuite());
       suite('StatusController test suite', async () => await statusControllerTestSuite());
-
       suite('ObjectController test suite', async () => {
         // TODO - bring inline with current tests
       });
       suite('UserController - Test Suite', async () => await userControllerTestSuite());
+      suite('FiltersController test suite', async () => await filtersControllerTestSuite());
     });
   });
 });
