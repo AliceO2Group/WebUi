@@ -1,0 +1,25 @@
+services:
+  install-webapp:
+    image: node:22-alpine
+    working_dir: /var/workspace
+    volumes:
+      - ./webapp:/var/workspace
+    command: ["npm", "install", "--no-save", "--silent"]
+  webapp:
+    image: node:22-alpine
+    working_dir: /var/workspace
+    volumes:
+      - ./webapp:/var/workspace
+    command: ["npm", "run", "dev", "--", "--host", "webapp"]
+    healthcheck:
+      interval: 1s
+      test: ["CMD-SHELL",
+             "node", "-c",
+             "node --input-type=module -e \"process.exit((await fetch('http://webapp:5173')).ok === true ? 0 : 1)\""]
+
+  reverse-proxy:
+    image: nginx:1.27
+    volumes:
+      - ./docker/provisioning/nginx/conf.d/:/etc/nginx/conf.d/
+    ports:
+      - "8080:8080"
