@@ -130,22 +130,14 @@ export const apiGetLayoutsTests = () => {
       await request(`${URL_ADDRESS}/api/layout`)
         .get(`?token=${OWNER_TEST_TOKEN}&name=${layoutName}`)
         .expect(200)
-        .expect((res) => {
-          if (!res.body || res.body.name !== layoutName) {
-            throw new Error(`Expected layout with name ${layoutName}`);
-          }
-        });
+        .expect((res) => deepStrictEqual(res.body, LAYOUT_MOCK_5));
     });
     test('should return layout by runDefinition', async () => {
       const runDefinition = 'a-test';
       await request(`${URL_ADDRESS}/api/layout`)
         .get(`?token=${OWNER_TEST_TOKEN}&runDefinition=${runDefinition}`)
         .expect(200)
-        .expect((res) => {
-          if (!res.body || res.body.name !== runDefinition) {
-            throw new Error(`Expected layout with name ${runDefinition}`);
-          }
-        });
+        .expect((res) => deepStrictEqual(res.body, LAYOUT_MOCK_5));
     });
 
     test('should return 400 when no query parameters are provided', async () => {
