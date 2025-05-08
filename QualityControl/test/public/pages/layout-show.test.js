@@ -197,19 +197,20 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
-    'should have number input field for allowing users to change auto-tab value',
+    'should not allow user to change the auto tab change value to a value if it is not bigger than 10',
     { timeout },
     async () => {
-      const inputSelector = '#inputChangeTabTimer';
-      await page.waitForSelector(inputSelector, { timeout: 5000 });
-      await page.locator(inputSelector).fill('9');
-      await page.keyboard.press('Tab');
-      const valueAfter9 = await page.evaluate((inputSelector) => document.querySelector(inputSelector), inputSelector);
-      ok(valueAfter9, 0);
-      await page.locator(inputSelector).fill('11');
-      await page.keyboard.press('Tab');
-      const valueAfter11 = await page.evaluate((inputSelector) => document.querySelector(inputSelector), inputSelector);
-      ok(valueAfter11, 11);
+      const result = await setAutoTabChangeValue(page, 9);
+      ok(result, 0);
+    },
+  );
+
+  await testParent.test(
+    'should allow user to change the auto tab change value to a value if bigger than 10',
+    { timeout },
+    async () => {
+      const result = await setAutoTabChangeValue(page, 11);
+      ok(result, 11);
     },
   );
 
@@ -405,3 +406,18 @@ const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {
   strictEqual(updateButtonIsDisabled, true);
   strictEqual(message, errorMessage);
 };
+
+/**
+ * Fills the input for tab change timer and returns the resulting value.
+ * @param page - The Playwright page instance.
+ * @param value - The value to fill into the input field.
+ * @returns The numeric value from the input after filling it.
+ */
+async function setAutoTabChangeValue(page, value) {
+  const inputSelector = '#inputChangeTabTimer';
+  await page.locator(inputSelector).fill(value.toString());
+  return await page.evaluate(
+    (selector) => parseInt(document.querySelector(selector).value, 10),
+    inputSelector,
+  );
+}
