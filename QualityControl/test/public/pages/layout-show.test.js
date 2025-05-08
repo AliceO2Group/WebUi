@@ -34,6 +34,19 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     },
   );
 
+  await testParent.test('should remove query param only if option is invalid for any filter', { timeout }, async () => {
+    const baseParams = `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=main`;
+
+    await page.goto(`${url}${baseParams}&RunType=runType1`, { waitUntil: 'networkidle0' });
+    const location1 = await page.evaluate(() => window.location.search);
+    strictEqual(location1, `${baseParams}&RunType=runType1`);
+
+    await page.goto(`${url}${baseParams}&RunType=invalid-value`, { waitUntil: 'networkidle0' });
+    const location2 = await page.evaluate(() => window.location.search);
+    strictEqual(location2, baseParams);
+    await delay(100);
+  });
+
   await testParent.test(
     'should have a selector with sorted options to filter by run type if there are run types loaded',
     { timeout },
@@ -97,6 +110,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have jsroot svg plots in the section',
     { timeout },
     async () => {
+      page.screenshot({ path: 'test2.png' });
       const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
       ok(plotsCount > 1);
     },
