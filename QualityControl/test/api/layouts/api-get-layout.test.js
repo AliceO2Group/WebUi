@@ -15,6 +15,8 @@
 import { suite, test } from 'node:test';
 import { OWNER_TEST_TOKEN, URL_ADDRESS } from '../config.js';
 import request from 'supertest';
+import { deepStrictEqual } from 'node:assert';
+import { LAYOUT_MOCK_2, LAYOUT_MOCK_4, LAYOUT_MOCK_5, LAYOUT_MOCK_6 } from '../../demoData/layout/layout.mock.js';
 
 export const apiGetLayoutsTests = () => {
   suite('GET /layouts', () => {
@@ -41,11 +43,8 @@ export const apiGetLayoutsTests = () => {
           if (!Array.isArray(res.body)) {
             throw new Error('Expected array of layouts');
           }
-          res.body.forEach((layout) => {
-            if (layout.owner_id !== ownerId) {
-              throw new Error(`Expected only layouts with owner_id ${ownerId}`);
-            }
-          });
+
+          deepStrictEqual(res.body, [LAYOUT_MOCK_4, LAYOUT_MOCK_5]);
         });
     });
 
@@ -62,11 +61,8 @@ export const apiGetLayoutsTests = () => {
           if (res.body.length !== 1) {
             throw new Error(`Expected array of 1 layout to be returned, instead got${res.body.length}`);
           }
-          res.body.forEach((layout) => {
-            if (layout.name !== name) {
-              throw new Error(`Expected only layouts with name ${name} but got ${layout.name}`);
-            }
-          });
+          deepStrictEqual(res.body, [LAYOUT_MOCK_4], `Expected only layouts ${JSON.stringify(res.body)} 
+          but got ${JSON.stringify([LAYOUT_MOCK_4])}`);
         });
     });
 
@@ -100,15 +96,13 @@ export const apiGetLayoutsTests = () => {
   });
 
   suite('GET /layout/:id', () => {
-    test.skip('should return a single layout by id', async () => {
+    test('should return a single layout by id', async () => {
       const layoutId = '671b8c22402408122e2f20dd';
       await request(`${URL_ADDRESS}/api/layout/${layoutId}`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
         .expect(200)
         .expect((res) => {
-          if (!res.body || res.body.id !== layoutId) {
-            throw new Error(`Expected layout with id ${layoutId}`);
-          }
+          deepStrictEqual(res.body, LAYOUT_MOCK_6);
         });
     });
 
@@ -130,7 +124,7 @@ export const apiGetLayoutsTests = () => {
     });
   });
 
-  suite('GET /layout-by-name', () => {
+  suite('GET /layout?name=', () => {
     test('should return layout by name', async () => {
       const layoutName = 'a-test';
       await request(`${URL_ADDRESS}/api/layout`)
@@ -142,22 +136,7 @@ export const apiGetLayoutsTests = () => {
           }
         });
     });
-
-    test.skip('should return layout by runDefinition and pdpBeamType', async () => {
-      const runDefinition = 'PHYSICS';
-      const pdpBeamType = 'PbPb';
-      await request(`${URL_ADDRESS}/api/layout-by-name`)
-        .get(`?token=${OWNER_TEST_TOKEN}&runDefinition=${runDefinition}&pdpBeamType=${pdpBeamType}`)
-        .expect(200)
-        .expect((res) => {
-          const expectedName = `${runDefinition}_${pdpBeamType}`;
-          if (!res.body || res.body.name !== expectedName) {
-            throw new Error(`Expected layout with name ${expectedName}`);
-          }
-        });
-    });
-
-    test('should return layout by runDefinition only', async () => {
+    test('should return layout by runDefinition', async () => {
       const runDefinition = 'a-test';
       await request(`${URL_ADDRESS}/api/layout`)
         .get(`?token=${OWNER_TEST_TOKEN}&runDefinition=${runDefinition}`)
