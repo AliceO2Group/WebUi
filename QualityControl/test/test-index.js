@@ -166,7 +166,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       await terminateSessionAndLog(browser, subprocessOutput, subprocess);
     });
 
-    suite('Layout PUT request test suite', async () => apiGetLayoutsTests());
+    suite('Layout GET request test suite', async () => apiGetLayoutsTests());
     suite('Layout PUT request test suite', async () => apiPutLayoutTests());
     suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
   });
