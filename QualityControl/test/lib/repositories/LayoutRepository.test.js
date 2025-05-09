@@ -48,7 +48,7 @@ export const layoutRepositoryTest = async () => {
     suite('list layouts', () => {
       test('should list all layouts without filter', async () => {
         const result = layoutRepository.listLayouts();
-        equal(result.length, 2, 'Length of list of layouts is not correct');
+        strictEqual(result.length, 2, 'Length of list of layouts is not correct');
         deepStrictEqual(result, jsonFileServiceMock.data.layouts, 'List of layouts filtered do not match the filters');
       });
 
@@ -56,7 +56,7 @@ export const layoutRepositoryTest = async () => {
         const ownerId = 0;
         const result = layoutRepository.listLayouts({ owner_id: ownerId });
 
-        equal(result.length, 2);
+        strictEqual(result.length, 2, 'number of layouts is incorrect');
         result.forEach((layout) => {
           strictEqual(layout.owner_id, ownerId, `Layout owner_id should be ${ownerId}`);
         });
@@ -77,7 +77,7 @@ export const layoutRepositoryTest = async () => {
           deepStrictEqual(actualKeys.sort(), fields);
         });
 
-        equal(result.length, jsonFileServiceMock.data.layouts.length);
+        strictEqual(result.length, jsonFileServiceMock.data.layouts.length);
       });
     });
 
@@ -132,7 +132,7 @@ export const layoutRepositoryTest = async () => {
         const newLayout = { id: '3', name: 'New Layout', owner_id: 'user3' };
         await layoutRepository.createLayout(newLayout);
 
-        equal(jsonFileServiceMock.data.layouts.length, 3);
+        strictEqual(jsonFileServiceMock.data.layouts.length, 3);
         deepEqual(jsonFileServiceMock.data.layouts[2], newLayout);
         sinon.assert.calledOnce(jsonFileServiceMock.writeToFile);
       });
@@ -147,7 +147,7 @@ export const layoutRepositoryTest = async () => {
           tabs: [{ name: 'Tab1', objects: [{ id: '1', name: 'Object1' }] }],
         };
         const idOfLayoutUpdated = await layoutRepository.updateLayout('671b8c22402408122e2f20dd', newLayout);
-        equal(idOfLayoutUpdated, '671b8c22402408122e2f20dd');
+        strictEqual(idOfLayoutUpdated, '671b8c22402408122e2f20dd');
 
         const updatedLayout = jsonFileServiceMock.data.layouts.find((l) => l.id === newLayout.id);
         strictEqual(updatedLayout.id, newLayout.id);
