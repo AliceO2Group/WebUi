@@ -78,6 +78,9 @@ export const LayoutDto = Joi.object({
   autoTabChange: Joi.number().min(0).max(600).default(0),
 });
 
+/**
+ * Schema specifically meant to validate incomming getLayouts requests
+ */
 export const LayoutsGetDto = Joi.object({
   owner_id: Joi.number().integer().optional(),
   name: Joi.string().optional(),

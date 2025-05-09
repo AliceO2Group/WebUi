@@ -92,16 +92,15 @@ export class LayoutController {
    */
   async getLayoutHandler(req, res) {
     const { id } = req.params;
-
-    try {
-      if (!id.trim()) {
-        updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout'));
-      } else {
+    if (!id.trim()) {
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout'));
+    } else {
+      try {
         const layout = await this._layoutRepository.readLayoutById(id);
         res.status(200).json(layout);
+      } catch (error) {
+        updateAndSendExpressResponseFromNativeError(res, error);
       }
-    } catch (error) {
-      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 

@@ -58,13 +58,12 @@ export default class LayoutService {
       const userLayouts = sortedLayouts.filter((layout) => layout.owner_name === username);
 
       this.list = RemoteData.success(sortedLayouts);
-      this.model.layoutListModel.folders.get('All Layouts').list = RemoteData.success(sortedLayouts);
       this.model.layoutListModel.folders.get('Official').list = RemoteData.success(officialLayouts);
       this.model.layoutListModel.folders.get('My Layouts').list = RemoteData.success(userLayouts);
     } else {
       this.list = RemoteData.failure(result.error || result.message);
-      this.model.layoutListModel.folders.get('All Layouts').list = RemoteData.failure(result.error || result.message);
     }
+    this.model.layoutListModel.folders.get('All Layouts').list = this.list;
 
     that.notify();
   }
@@ -90,11 +89,10 @@ export default class LayoutService {
       if (ok) {
         const sortedLayouts = result.sort(this._compareByName);
         this.userList = RemoteData.success(sortedLayouts);
-        this.model.layoutListModel.folders.get('My Layouts').list = RemoteData.success(sortedLayouts);
+        this.model.layoutListModel.folders.get('My Layouts').list = this.userList;
       } else {
         this.userList = RemoteData.failure(result.error || result.message);
-        this.model.layoutListModel.folders.get('My Layouts').list =
-          RemoteData.failure(result.error || result.message);
+        this.model.layoutListModel.folders.get('My Layouts').list = this.userList;
       }
     }
 
