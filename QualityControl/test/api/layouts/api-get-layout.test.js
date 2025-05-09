@@ -17,6 +17,7 @@ import { OWNER_TEST_TOKEN, URL_ADDRESS } from '../config.js';
 import request from 'supertest';
 import { deepStrictEqual } from 'node:assert';
 import { LAYOUT_MOCK_4, LAYOUT_MOCK_5, LAYOUT_MOCK_6 } from '../../demoData/layout/layout.mock.js';
+import { NotFoundError } from '@aliceo2/web-ui';
 
 export const apiGetLayoutsTests = () => {
   suite('GET /layouts', () => {
@@ -44,12 +45,7 @@ export const apiGetLayoutsTests = () => {
             throw new Error('Expected array of layouts');
           }
 
-          deepStrictEqual(
-            res.body,
-            [LAYOUT_MOCK_4, LAYOUT_MOCK_5],
-            `Expected layouts with owner_id=0 to be ${JSON.stringify([LAYOUT_MOCK_4, LAYOUT_MOCK_5])} 
-            but got ${JSON.stringify(res.body)}`,
-          );
+          deepStrictEqual(res.body, [LAYOUT_MOCK_4, LAYOUT_MOCK_5], 'Unexpected Layout structure was returned');
         });
     });
 
@@ -66,8 +62,7 @@ export const apiGetLayoutsTests = () => {
           if (res.body.length !== 1) {
             throw new Error(`Expected array of 1 layout to be returned, instead got${res.body.length}`);
           }
-          deepStrictEqual(res.body, [LAYOUT_MOCK_4], `Expected only layouts ${JSON.stringify(res.body)} 
-          but got ${JSON.stringify([LAYOUT_MOCK_4])}`);
+          deepStrictEqual(res.body, [LAYOUT_MOCK_4], 'Unexpected Layout structure');
         });
     });
 
@@ -106,14 +101,7 @@ export const apiGetLayoutsTests = () => {
       await request(`${URL_ADDRESS}/api/layout/${layoutId}`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
         .expect(200)
-        .expect((res) => {
-          deepStrictEqual(
-            res.body,
-            LAYOUT_MOCK_6,
-            `Expected layout with id '671b8c22402408122e2f20dd' to be ${JSON.stringify(LAYOUT_MOCK_6)} 
-            but got ${JSON.stringify(res.body)}`,
-          );
-        });
+        .expect((res) => deepStrictEqual(res.body, LAYOUT_MOCK_6, 'Unexpected Layout structure was returned'));
     });
 
     test('should return 400 when id parameter is an empty string', async () => {
@@ -130,11 +118,7 @@ export const apiGetLayoutsTests = () => {
       const nonExistentId = 'nonexistent123';
       await request(`${URL_ADDRESS}/api/layout/${nonExistentId}`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
-        .expect(404, {
-          message: 'layout (nonexistent123) not found',
-          status: 404,
-          title: 'Not Found',
-        });
+        .expect(404, new NotFoundError('layout (nonexistent123) not found'));
     });
   });
 
@@ -145,12 +129,7 @@ export const apiGetLayoutsTests = () => {
         .get(`?token=${OWNER_TEST_TOKEN}&name=${layoutName}`)
         .expect(200)
         .expect((res) => {
-          deepStrictEqual(
-            res.body,
-            LAYOUT_MOCK_5,
-            `Expected layout with name 'a-test' to be ${JSON.stringify(LAYOUT_MOCK_5)}
-            but got ${JSON.stringify(res.body)}`,
-          );
+          deepStrictEqual(res.body, LAYOUT_MOCK_5, 'Unexpected Layout structure was returned');
         });
     });
 
@@ -160,12 +139,7 @@ export const apiGetLayoutsTests = () => {
         .get(`?token=${OWNER_TEST_TOKEN}&runDefinition=${runDefinition}`)
         .expect(200)
         .expect((res) => {
-          deepStrictEqual(
-            res.body,
-            LAYOUT_MOCK_5,
-            `Expected layout with runDefinition 'a-test' to be ${JSON.stringify(LAYOUT_MOCK_5)} 
-            but got ${JSON.stringify(res.body)}`,
-          );
+          deepStrictEqual(res.body, LAYOUT_MOCK_5, 'Unexpected Layout structure was returned');
         });
     });
 
