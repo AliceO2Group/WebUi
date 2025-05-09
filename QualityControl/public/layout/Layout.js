@@ -464,7 +464,6 @@ export default class Layout extends Observable {
     this.editEnabled = false;
     this.editingTabObject = null;
     this.saveItem();
-    this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     this.notify();
   }
 
