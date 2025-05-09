@@ -106,11 +106,7 @@ export const apiGetLayoutsTests = () => {
     test('should return 400 when id parameter is an empty string', async () => {
       await request(`${URL_ADDRESS}/api/layout/ `)
         .get(`?token=${OWNER_TEST_TOKEN}`)
-        .expect(400, {
-          message: 'Missing parameter "id" of layout',
-          status: 400,
-          title: 'Invalid Input',
-        });
+        .expect(400, { message: 'Missing parameter "id" of layout', status: 400, title: 'Invalid Input' });
     });
 
     test('should return 404 when layout is not found', async () => {
@@ -127,9 +123,7 @@ export const apiGetLayoutsTests = () => {
       await request(`${URL_ADDRESS}/api/layout`)
         .get(`?token=${OWNER_TEST_TOKEN}&name=${layoutName}`)
         .expect(200)
-        .expect((res) => {
-          deepStrictEqual(res.body, LAYOUT_MOCK_5, 'Unexpected Layout structure was returned');
-        });
+        .expect((res) => deepStrictEqual(res.body, LAYOUT_MOCK_5, 'Unexpected Layout structure was returned'));
     });
 
     test('should return layout by runDefinition', async () => {
@@ -137,30 +131,20 @@ export const apiGetLayoutsTests = () => {
       await request(`${URL_ADDRESS}/api/layout`)
         .get(`?token=${OWNER_TEST_TOKEN}&runDefinition=${runDefinition}`)
         .expect(200)
-        .expect((res) => {
-          deepStrictEqual(res.body, LAYOUT_MOCK_5, 'Unexpected Layout structure was returned');
-        });
+        .expect((res) => deepStrictEqual(res.body, LAYOUT_MOCK_5, 'Unexpected Layout structure was returned'));
     });
 
     test('should return 400 when no query parameters are provided', async () => {
       await request(`${URL_ADDRESS}/api/layout`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
-        .expect(400, {
-          message: 'Missing query parameters',
-          status: 400,
-          title: 'Invalid Input',
-        });
+        .expect(400, { message: 'Missing query parameters', status: 400, title: 'Invalid Input' });
     });
 
     test('should return 404 when layout is not found', async () => {
       const nonExistentName = 'nonexistent-layout';
       await request(`${URL_ADDRESS}/api/layout`)
         .get(`?token=${OWNER_TEST_TOKEN}&name=${nonExistentName}`)
-        .expect(404, {
-          message: `Layout (${nonExistentName}) not found`,
-          status: 404,
-          title: 'Not Found',
-        });
+        .expect(404, { message: `Layout (${nonExistentName}) not found`, status: 404, title: 'Not Found' });
     });
   });
 };
