@@ -11,22 +11,51 @@
  * or submit itself to any jurisdiction.
  */
 
-import { NotFoundError } from '@aliceo2/web-ui';
+import { LogManager, NotFoundError } from '@aliceo2/web-ui';
 import { BaseRepository } from './BaseRepository.js';
+
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/layout-ctrl`);
 
 /**
  * LayoutRepository class to handle CRUD operations for Layouts.
  */
 export class LayoutRepository extends BaseRepository {
   /**
-   * List layouts, can be filtered
-   * @param {object} filter - accepted keys [owner_id, name]
-   * @returns {Array<Layout>} - list of layouts as per the filter
+   * Retrieves a filtered list of layouts with optional field selection
+   * @param {object} [options] - Filtering and field selection options
+   * @param {number} [options.owner_id] - Filter layouts by owner ID
+   * @param {string} [options.name] - Filter layouts by exact name match
+   * @param {Array<string>} [options.fields] - Array of field names to include in each returned layout object
+   * @returns {Array<object>} Array of layout objects matching the filters, containing only the specified fields
+   * @throws {TypeError} If fields parameter is provided but is not an array
+   * @throws {Error} If any specified field does not exist in the layout objects
    */
-  listLayouts(filter = {}) {
-    return this._jsonFileService.data.layouts.filter((layout) =>
-      (filter.owner_id === undefined || layout.owner_id === filter.owner_id)
-            && (filter.name === undefined || layout.name === filter.name));
+  listLayouts({ name, owner_id, fields } = {}) {
+    const { layouts } = this._jsonFileService.data;
+
+    const layoutFilter = (layout) =>
+      (owner_id === undefined || layout.owner_id === owner_id) &&
+      (name === undefined || layout.name === name);
+
+    const filteredLayouts = layouts.filter(layoutFilter);
+
+    if (!fields || fields.length === 0) {
+      return filteredLayouts;
+    }
+
+    return filteredLayouts.map((layout) => {
+      const layoutObj = {};
+      fields.forEach((field) => {
+        const value = layout[field];
+
+        if (value === undefined) {
+          logger.warnMessage(`The following field does not exist for layout ${layout.id ?? '<no id found>'}: ${field}`);
+        }
+
+        layoutObj[field] = layout[field];
+      });
+      return layoutObj;
+    });
   }
 
   /**

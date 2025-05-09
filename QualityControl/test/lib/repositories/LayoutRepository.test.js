@@ -13,7 +13,7 @@
 
 import { suite, test, before, beforeEach } from 'node:test';
 import { LayoutRepository } from '../../../lib/repositories/LayoutRepository.js';
-import { deepEqual, deepStrictEqual, equal, ok, rejects, strictEqual, throws } from 'node:assert';
+import { deepEqual, deepStrictEqual, ok, rejects, strictEqual, throws } from 'node:assert';
 import { NotFoundError } from '@aliceo2/web-ui';
 import sinon from 'sinon';
 import { initTest } from '../../setup/testRepositorySetup.js';
@@ -47,8 +47,8 @@ export const layoutRepositoryTest = async () => {
 
     suite('list layouts', () => {
       test('should list all layouts without filter', async () => {
-        const result = layoutRepository.listLayouts({});
-        equal(result.length, 2, 'Length of list of layouts is not correct');
+        const result = layoutRepository.listLayouts();
+        strictEqual(result.length, 2, 'Length of list of layouts is not correct');
         deepStrictEqual(result, jsonFileServiceMock.data.layouts, 'List of layouts filtered do not match the filters');
       });
 
@@ -56,7 +56,7 @@ export const layoutRepositoryTest = async () => {
         const ownerId = 0;
         const result = layoutRepository.listLayouts({ owner_id: ownerId });
 
-        equal(result.length, 2);
+        strictEqual(result.length, 2, 'number of layouts is incorrect');
         result.forEach((layout) => {
           strictEqual(layout.owner_id, ownerId, `Layout owner_id should be ${ownerId}`);
         });
@@ -66,6 +66,18 @@ export const layoutRepositoryTest = async () => {
           jsonFileServiceMock.data.layouts[0],
           'First layout should match the expected layout',
         );
+      });
+
+      test('should return only specified fields when fields array is provided', () => {
+        const fields = ['id', 'name'];
+        const result = layoutRepository.listLayouts({ fields });
+
+        result.forEach((layout) => {
+          const actualKeys = Object.keys(layout);
+          deepStrictEqual(actualKeys.sort(), fields);
+        });
+
+        strictEqual(result.length, jsonFileServiceMock.data.layouts.length);
       });
     });
 
@@ -120,7 +132,7 @@ export const layoutRepositoryTest = async () => {
         const newLayout = { id: '3', name: 'New Layout', owner_id: 'user3' };
         await layoutRepository.createLayout(newLayout);
 
-        equal(jsonFileServiceMock.data.layouts.length, 3);
+        strictEqual(jsonFileServiceMock.data.layouts.length, 3);
         deepEqual(jsonFileServiceMock.data.layouts[2], newLayout);
         sinon.assert.calledOnce(jsonFileServiceMock.writeToFile);
       });
@@ -135,7 +147,7 @@ export const layoutRepositoryTest = async () => {
           tabs: [{ name: 'Tab1', objects: [{ id: '1', name: 'Object1' }] }],
         };
         const idOfLayoutUpdated = await layoutRepository.updateLayout('671b8c22402408122e2f20dd', newLayout);
-        equal(idOfLayoutUpdated, '671b8c22402408122e2f20dd');
+        strictEqual(idOfLayoutUpdated, '671b8c22402408122e2f20dd');
 
         const updatedLayout = jsonFileServiceMock.data.layouts.find((l) => l.id === newLayout.id);
         strictEqual(updatedLayout.id, newLayout.id);
