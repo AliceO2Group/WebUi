@@ -90,10 +90,10 @@ export default class LayoutService {
       if (ok) {
         const sortedLayouts = result.sort(this._compareByName);
         this.userList = RemoteData.success(sortedLayouts);
-        this.model.folder.map.get('My Layouts').list = RemoteData.success(sortedLayouts);
+        this.model.folder.map.get('My Layouts').list = this.userList;
       } else {
         this.userList = RemoteData.failure(result.error || result.message);
-        this.model.folder.map.get('My Layouts').list = RemoteData.failure(result.error || result.message);
+        this.model.folder.map.get('My Layouts').list = this.userList;
       }
     }
 
