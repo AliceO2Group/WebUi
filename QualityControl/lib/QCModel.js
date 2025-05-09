@@ -49,7 +49,9 @@ export const setupQcModel = () => {
   const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
 
   const jsonFileService = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
-  initDatabase(new SequelizeDatabase(config?.database || {}));
+  if (config.database) {
+    initDatabase(new SequelizeDatabase(config?.database || {}));
+  }
 
   const layoutRepository = new LayoutRepository(jsonFileService);
   const userRepository = new UserRepository(jsonFileService);
