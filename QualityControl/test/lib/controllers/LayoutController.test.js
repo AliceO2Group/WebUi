@@ -163,11 +163,11 @@ export const layoutControllerTestSuite = async () => {
       ok(res.status.calledWith(400), 'Response status was not 400');
       ok(res.json.calledOnce, 'Response was not sent');
 
-      const [[responseArg]] = res.json.args;
-      ok(
-        responseArg.message === 'Invalid query parameters: "fields" contains invalid field: invalid_field',
-        'Error message incorrect',
-      );
+      ok(res.json.calledWith({
+        message: 'Invalid query parameters: "fields" contains invalid field: invalid_field',
+        status: 400,
+        title: 'Invalid Input',
+      }), 'Error message was incorrect');
     });
   });
 
