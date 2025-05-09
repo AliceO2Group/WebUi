@@ -43,8 +43,8 @@ export class ChartRepository extends BaseRepository {
    * @throws {Error} - Throws an error if there is an issue during the creation.
    */
   async createChart(chartData) {
-    const [createdRows] = await this._model.create(chartData);
-    if (createdRows === 0) {
+    const createdChart = await this._model.create(chartData);
+    if (!createdChart) {
       throw new Error('Error creating chart');
     }
   }

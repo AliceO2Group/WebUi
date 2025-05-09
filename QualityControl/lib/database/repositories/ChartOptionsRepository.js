@@ -33,8 +33,8 @@ export class ChartOptionsRepository extends BaseRepository {
    * @throws {Error} - Throws an error if there is an issue during the creation.
    */
   async createChartOption(chartOptionData) {
-    const [createdRows] = await this._model.create(chartOptionData);
-    if (createdRows === 0) {
+    const createdChartOption = await this._model.create(chartOptionData);
+    if (!createdChartOption) {
       throw new Error('Error creating chart option');
     }
   }

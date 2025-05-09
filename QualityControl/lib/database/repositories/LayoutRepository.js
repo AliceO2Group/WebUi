@@ -107,8 +107,8 @@ export class LayoutRepository extends BaseRepository {
    * @throws {Error} if error during creation
    */
   async createLayout(layoutData) {
-    const [createdRows] = await this._model.create(layoutData);
-    if (createdRows === 0) {
+    const createdLayout = await this._model.create(layoutData);
+    if (!createdLayout) {
       throw new Error('Error creating layout');
     }
   }

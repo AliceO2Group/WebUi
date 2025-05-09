@@ -54,8 +54,8 @@ export class GridTabCellRepository extends BaseRepository {
    * @throws {Error} - Throws an error if there is an issue during the creation.
    */
   async createGridTabCell(newGridTabCell) {
-    const [createdRows] = await this._model.create(newGridTabCell);
-    if (createdRows === 0) {
+    const createdCell = await this._model.create(newGridTabCell);
+    if (!createdCell) {
       throw new Error('Grid tab cell creation failed');
     }
   }

@@ -36,8 +36,8 @@ export class TabRepository extends BaseRepository {
    * @throws Will throw an error if the creation fails.
    */
   async createTab(tab) {
-    const [createdRows] = await this._model.create(tab);
-    if (createdRows === 0) {
+    const createdTab = await this._model.create(tab);
+    if (!createdTab) {
       throw new Error('Failed to create tab');
     }
   }
