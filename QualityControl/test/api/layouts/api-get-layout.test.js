@@ -133,6 +133,20 @@ export const apiGetLayoutsTests = () => {
         .expect(200)
         .expect((res) => deepStrictEqual(res.body, LAYOUT_MOCK_5, 'Unexpected Layout structure was returned'));
     });
+    test('should return layout by runDefinition and pdpBeamType combination', async () => {
+      const runDefinition = 'rundefinition';
+      const pdpBeamType = 'pdpBeamType';
+      await request(`${URL_ADDRESS}/api/layout`)
+        .get(`?token=${OWNER_TEST_TOKEN}&runDefinition=${runDefinition}&pdpBeamType=${pdpBeamType}`)
+        .expect(200)
+        .expect((res) => {
+          deepStrictEqual(
+            res.body.name,
+            `${runDefinition}_${pdpBeamType}`,
+            'Expected layout name to be combination of runDefinition and pdpBeamType',
+          );
+        });
+    });
 
     test('should return 400 when no query parameters are provided', async () => {
       await request(`${URL_ADDRESS}/api/layout`)
