@@ -34,6 +34,58 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     },
   );
 
+  await testParent.test('should remove query param only if option is invalid for any filter', { timeout }, async () => {
+    const baseParams = `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=main`;
+
+    await page.goto(`${url}${baseParams}&RunType=runType1`, { waitUntil: 'networkidle0' });
+    const location1 = await page.evaluate(() => window.location.search);
+    strictEqual(location1, `${baseParams}&RunType=runType1`);
+
+    await page.goto(`${url}${baseParams}&RunType=invalid-value`, { waitUntil: 'networkidle0' });
+    const location2 = await page.evaluate(() => window.location.search);
+    strictEqual(location2, baseParams);
+    await delay(100);
+  });
+
+  await testParent.test(
+    'should have a selector with sorted options to filter by run type if there are run types loaded',
+    { timeout },
+    async () => {
+      const MAX_DELAY = 5000;
+      const INTERVAL = 500;
+      const selectorId = '#runTypeLayoutFilter';
+
+      const getOptionsWithRetry = async () => {
+        let options = [];
+        let addedDelay = 0;
+
+        while (!options.length && addedDelay < MAX_DELAY) {
+          await page.reload();
+          await delay(INTERVAL);
+          addedDelay += INTERVAL;
+
+          options = await page.evaluate((selectorId) => {
+            const select = document.querySelector(selectorId);
+            if (!select || !select.options) {
+              return [];
+            }
+            return Array.from(select.options).map((option) => option.value);
+          }, selectorId);
+        }
+        return options;
+      };
+
+      const options = await getOptionsWithRetry();
+      if (!options.length) {
+        throw new Error('#runTypeLayoutFilter not found after 5 seconds');
+      }
+
+      strictEqual(options[0], '');
+      strictEqual(options[1], 'runType1');
+      strictEqual(options[2], 'runType2');
+    },
+  );
+
   await testParent.test(
     'should have tabs in the header',
     { timeout },
@@ -197,10 +249,20 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
-    'should have number input field for allowing users to change auto-tab value',
+    'should not allow user to change the auto tab change value to a value if it is not bigger than 10',
     { timeout },
     async () => {
-      await page.waitForSelector('#inputDescription', { timeout: 5000 });
+      const result = await setAutoTabChangeValue(page, 9);
+      ok(result, 0);
+    },
+  );
+
+  await testParent.test(
+    'should allow user to change the auto tab change value to a value if bigger than 10',
+    { timeout },
+    async () => {
+      const result = await setAutoTabChangeValue(page, 11);
+      ok(result, 11);
     },
   );
 
@@ -370,6 +432,14 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       strictEqual(result, true);
     },
   );
+
+  await testParent.test('should change tab after set tabInterval', { timeout: 15000 }, async () => {
+    const location = await page.evaluate(() => window.location);
+    strictEqual(location.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=a`);
+    await delay(11000);
+    const location2 = await page.evaluate(() => window.location);
+    strictEqual(location2.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=test`);
+  });
 };
 
 const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {
@@ -388,3 +458,18 @@ const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {
   strictEqual(updateButtonIsDisabled, true);
   strictEqual(message, errorMessage);
 };
+
+/**
+ * Fills the input for tab change timer and returns the resulting value.
+ * @param page - The Playwright page instance.
+ * @param value - The value to fill into the input field.
+ * @returns The numeric value from the input after filling it.
+ */
+async function setAutoTabChangeValue(page, value) {
+  const inputSelector = '#inputChangeTabTimer';
+  await page.locator(inputSelector).fill(value.toString());
+  return await page.evaluate(
+    (selector) => parseInt(document.querySelector(selector).value, 10),
+    inputSelector,
+  );
+}

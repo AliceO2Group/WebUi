@@ -39,4 +39,10 @@ export const config = {
     issuer: 'test-gui',
     expiration: '1d',
   },
+
+  bookkeeping: {
+    url: 'http://localhost:4000',
+    token: 'token-test',
+    refreshRate: 15000,
+  },
 };

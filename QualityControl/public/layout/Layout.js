@@ -368,6 +368,9 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   selectTab(index) {
+    if (index >= this.item.tabs.length) {
+      return;
+    }
     const tabName = this.item.tabs[index].name;
     const parameters = this.model.router.params;
 
@@ -722,7 +725,7 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   setTabInterval(time) {
-    if (!this.tabs || this.tabs.length === 0) {
+    if (!this.item.tabs || this.item.tabs.length === 0) {
       clearInterval(this.tabInterval);
     } else if (time >= 10) {
       this.tabInterval = setInterval(() => {
@@ -802,5 +805,40 @@ export default class Layout extends Observable {
     this.updatedJSON = LayoutUtils.toSkeleton(this.item);
     this.model.isUpdateVisible = true;
     this.toggleEditMenu();
+  }
+
+  /**
+   * Sets the selector filter value for the passed key and applies the layout changes
+   * @param {object} value - event for which to set the value
+   * @param {string} key - label to be used when querying storage service
+   * @returns {undefined}
+   */
+  selectOption(value, key) {
+    this.setFilterValue(key, value);
+    this.applyLayoutChanges();
+  };
+
+  /**
+   * Method to allow the addition/update/removal of key;value pairs in filter object
+   * @param {string} key - key to look for in filter object
+   * @param {any} value - value to update for given key; if none, entry is removed from object
+   * @returns {undefined}
+   */
+  setFilterValue(key, value) {
+    if (value !== null && value !== undefined) {
+      this.filter[key] = value;
+    } else {
+      delete this.filter[key];
+    }
+    this.notify();
+  };
+
+  /**
+   * Applies the current filters to the current layout
+   * @returns {undefined}
+   */
+  applyLayoutChanges() {
+    this.setFilterToURL();
+    this.selectTab(this.tabIndex);
   }
 }

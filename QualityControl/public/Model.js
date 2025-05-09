@@ -21,6 +21,7 @@ import {
 import Layout from './layout/Layout.js';
 import QCObject from './object/QCObject.js';
 import LayoutService from './services/Layout.service.js';
+import FilterService from './services/Filter.service.js';
 import Folder from './folder/Folder.js';
 import QCObjectService from './services/QCObject.service.js';
 import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
@@ -99,6 +100,7 @@ export default class Model extends Observable {
     this.services = {
       object: new QCObjectService(this),
       layout: new LayoutService(this),
+      filter: new FilterService(this),
     };
 
     this.loader.get('/api/checkUser');
@@ -180,6 +182,7 @@ export default class Model extends Observable {
         this.services.layout.getLayouts(RequestFields.LAYOUT_CARD);
         break;
       case 'layoutShow':
+        this.services.filter.initFilterService();
         setBrowserTabTitle('QCG-LayoutShow');
         if (!params.layoutId) {
           const { definition, pdpBeamType, detector, runType, runNumber } = params;

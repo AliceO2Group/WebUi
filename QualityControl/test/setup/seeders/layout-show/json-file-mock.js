@@ -28,5 +28,5 @@ export const editedMockedLayout = {
     },
   ],
   displayTimestamp: false,
-  autoTabChange: 0,
+  autoTabChange: 11,
 };
