@@ -17,7 +17,6 @@ import { OWNER_TEST_TOKEN, URL_ADDRESS } from '../config.js';
 import request from 'supertest';
 import { deepStrictEqual } from 'node:assert';
 import { LAYOUT_MOCK_4, LAYOUT_MOCK_5, LAYOUT_MOCK_6 } from '../../demoData/layout/layout.mock.js';
-import { NotFoundError } from '@aliceo2/web-ui';
 
 export const apiGetLayoutsTests = () => {
   suite('GET /layouts', () => {
@@ -118,7 +117,7 @@ export const apiGetLayoutsTests = () => {
       const nonExistentId = 'nonexistent123';
       await request(`${URL_ADDRESS}/api/layout/${nonExistentId}`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
-        .expect(404, new NotFoundError('layout (nonexistent123) not found'));
+        .expect(404, { message: 'layout (nonexistent123) not found', status: 404, title: 'Not Found' });
     });
   });
 
