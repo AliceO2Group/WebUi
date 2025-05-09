@@ -472,13 +472,20 @@ export const layoutServiceTestSuite = async () => {
       });
 
       test('should throw an error if layout is not found', async () => {
-        layoutRepositoryMock.deleteLayout.resolves(0);
+        const layoutId = 456;
+        const expectedErrorMessage = 'Error from repository';
 
-        await rejects(() => layoutService.deleteLayout(456), {
-          message: 'Layout with id: 456 not found',
-        });
+        layoutRepositoryMock.deleteLayout.rejects(new Error(expectedErrorMessage));
 
-        ok(layoutRepositoryMock.deleteLayout.calledWith(456));
+        await rejects(
+          async () => await layoutService.deleteLayout(layoutId),
+          (err) =>
+            err instanceof Error &&
+            err.message === expectedErrorMessage,
+          'Expected deleteLayout to throw an Error with the correct message',
+        );
+
+        ok(layoutRepositoryMock.deleteLayout.calledWith(layoutId), 'Expected deleteLayout to be called with layoutId');
       });
     });
   });
