@@ -160,8 +160,7 @@ export default class QCObject extends Observable {
    */
   sortTree(title, field, order, icon) {
     this.sortListByField(this.currentList, field, order);
-    this.tree.initTree('database');
-    this.tree.addChildren(this.currentList);
+    this.tree.sortChildren(field, order);
 
     this._computeFilters();
 

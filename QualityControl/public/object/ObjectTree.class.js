@@ -44,6 +44,9 @@ export default class ObjectTree extends Observable {
     this.parent = parent || null; // <ObjectTree>
     this.path = []; // Like ['A', 'B'] for node at path 'A/B' called 'B'
     this.pathString = ''; // 'A/B'
+    if (parent) {
+      this.bubbleTo(parent);
+    }
   }
 
   /**
@@ -107,7 +110,6 @@ export default class ObjectTree extends Observable {
       }
       path = object.name.split('/');
       this.addChild(object, path, []);
-      this.notify();
       return;
     }
 
@@ -132,7 +134,6 @@ export default class ObjectTree extends Observable {
       subtree.path = fullPath;
       subtree.pathString = fullPath.join('/');
       this.children.push(subtree);
-      subtree.observe(() => this.notify());
     }
 
     // Pass to child
@@ -146,6 +147,29 @@ export default class ObjectTree extends Observable {
    */
   addChildren(objects) {
     objects.forEach((object) => this.addChild(object));
-    setTimeout(() => this.notify(), 100); // TODO: create more dynamic solution.
+    this.notify();
+  }
+
+  sortChildren(field, order) {
+    this.open = this.name === 'qc' ? true : false;
+    this.children = this.children.sort((child1, child2) => this._compareStrings(child1[field], child2[field], order));
+    this.children.forEach((child) => {
+      if (child.children.length > 1) {
+        child.sortChildren(field, order);
+      }
+    });
+
+    this.notify();
+  }
+
+  /**
+   * Helper method for sortListByField for sorting strings
+   * @param {string} a - first string to be sorted
+   * @param {string} b - second string to be sorted
+   * @param {number} order - acending (1) or decending (-1)
+   * @returns {undefined}
+   */
+  _compareStrings(a, b, order) {
+    return a.toUpperCase().localeCompare(b.toUpperCase()) * order;
   }
 }

@@ -1,17 +1,3 @@
-/**
- * @license
- * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
- * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
- * All rights not expressly granted are reserved.
- *
- * This software is distributed under the terms of the GNU General Public
- * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
- *
- * In applying this license CERN does not waive the privileges and immunities
- * granted to it by virtue of its status as an Intergovernmental Organization
- * or submit itself to any jurisdiction.
- */
-
 import { h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX } from '/js/src/index.js';
 import { spinner } from '../common/spinner.js';
 import { draw } from './objectDraw.js';
@@ -154,13 +140,15 @@ const tableShow = (model) =>
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const treeRows = (model) => !model.object.tree ?
-  null
-  :
-
-  model.object.tree.children.length === 0
-    ? h('.w-100.text-center', 'No objects found')
-    : model.object.tree.children.map((children) => treeRow(model, children, 0));
+const treeRows = (model) => {
+  const { order } = model.object.sortBy;
+  return !model.object.tree
+    ? null
+    : model.object.tree.children.length === 0
+      ? h('.w-100.text-center', 'No objects found')
+      : model.object.tree.children
+        .map((children) => treeRow(model, children, 0));
+};
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
@@ -181,21 +169,21 @@ function treeRow(model, tree, level) {
 
   if (model.object.searchInput) {
     return [];
-  } else {
-    if (tree.object && tree.children.length === 0) {
-      return [leafRow(path, () => model.object.select(tree.object), className, padding, tree.name)];
-    } else if (tree.object && tree.children.length > 0) {
-      return [
-        leafRow(path, () => model.object.select(tree.object), className, padding, tree.name),
-        branchRow(path, tree, padding),
-        children,
-      ];
-    }
+  }
+
+  if (tree.object && tree.children.length === 0) {
+    return [leafRow(path, () => model.object.select(tree.object), className, padding, tree.name)];
+  } else if (tree.object && tree.children.length > 0) {
     return [
+      leafRow(path, () => model.object.select(tree.object), className, padding, tree.name),
       branchRow(path, tree, padding),
-      children,
+      ...children,
     ];
   }
+  return [
+    branchRow(path, tree, padding),
+    ...children,
+  ];
 }
 
 /**
@@ -210,7 +198,11 @@ function treeRow(model, tree, level) {
  */
 const leafRow = (path, selectItem, className, padding, leafName) =>
   h('tr.object-selectable', {
-    key: path, title: path, onclick: selectItem, class: className, id: path,
+    key: path,
+    title: path,
+    onclick: selectItem,
+    class: className,
+    id: path,
   }, [
     h('td.highlight', [
       h('span', { style: { paddingLeft: padding } }, iconBarChart()),
@@ -228,7 +220,11 @@ const leafRow = (path, selectItem, className, padding, leafName) =>
  * @returns {vnode} - virtual node element
  */
 const branchRow = (path, tree, padding) =>
-  h('tr.object-selectable', { key: path, title: path, onclick: () => tree.toggle() }, [
+  h('tr.object-selectable', {
+    key: path,
+    title: path,
+    onclick: () => tree.toggle(),
+  }, [
     h('td.highlight', [
       h('span', { style: { paddingLeft: padding } }, tree.open ? iconCaretBottom() : iconCaretRight()),
       ' ',
