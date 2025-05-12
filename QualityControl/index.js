@@ -50,6 +50,7 @@ http.addStaticPath(path.join(pathName, '../..'), 'jsroot');
 const ws = new WebSocket(http);
 
 if (process.env.NODE_ENV === 'test') {
+  // Initialize nock for CCDB and Bookkeeping only if we are in test environment
   const { initializeNockForCcdb } = await import('./test/setup/testSetupForCcdb.js');
   const { initializeNockForBkp } = await import('./test/setup/testSetupForBkp.js');
 
