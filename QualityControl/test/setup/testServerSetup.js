@@ -28,7 +28,7 @@ import path from 'path';
 export async function setupServerForIntegrationTests() {
   await copyMockDataFileToUse();
 
-  let subprocessOutput = undefined;
+  let subprocessOutput = '';
   const url = `http://${config.http.hostname}:${config.http.port}/`;
 
   const subprocess = spawn('node', ['index.js', 'test/config.js'], {
@@ -40,9 +40,15 @@ export async function setupServerForIntegrationTests() {
   });
   subprocess.stdout.on('data', (chunk) => {
     subprocessOutput += chunk.toString();
+    if (process.argv.includes('--debug')) {
+      console.log('BACK-END', chunk.toString());
+    }
   });
   subprocess.stderr.on('data', (chunk) => {
     subprocessOutput += chunk.toString();
+    if (process.argv.includes('--debug')) {
+      console.error('BACK-END', chunk.toString());
+    }
   });
 
   // Start browser to test UI
