@@ -17,8 +17,6 @@ const protoLoader = require('@grpc/proto-loader');
 const grpcLibrary = require('@grpc/grpc-js');
 const path = require('path');
 const {LogManager, grpcErrorToNativeError, ServiceUnavailableError, InvalidInputError} = require('@aliceo2/web-ui');
-const {Status} = require(path.join(__dirname, './../../protobuf/status_pb.js'));
-const {EnvironmentInfo} = require(path.join(__dirname, './../../protobuf/environmentinfo_pb.js'));
 const RECONNECT_DELTA_TIME = 1000; // 1 second
 
 /**
@@ -102,22 +100,7 @@ class GrpcServiceClient {
       return new Promise((resolve, reject) => {
         this.client[methodName](args, options, (error, response) => {
           if (error) {
-            try {
-              if (methodName === 'NewEnvironment' && error.metadata?.internalRepr?.has('grpc-status-details-bin')) {
-                const buffer = error.metadata.get('grpc-status-details-bin')[0];
-                Status.deserializeBinary(buffer).getDetailsList().map((detail) => {
-                  if (detail.getTypeName() == 'o2control.EnvironmentInfo') {
-                    const deserialized = detail.unpack(EnvironmentInfo.deserializeBinary, detail.getTypeName());
-                    error.envId = deserialized.array[0];
-                  }
-                });
-              }
-              reject(error);
-            } catch (exception) {
-              this._logger.debugMessage('Failed new env details error' + exception);
-              reject(exception);
-            }
-            reject(grpcErrorToNativeError(error));
+            reject(error);
             return;
           }
           resolve(response);
