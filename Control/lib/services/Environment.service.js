@@ -175,6 +175,44 @@ class EnvironmentService {
   }
 
   /**
+   * @param {String} workflowTemplate - name in format `repository/revision/template`
+   * @param {Object<String, String>} userVars - KV string pairs to define environment configuration
+   * @param {boolean} autoTransition - if true, will automatically transition the environment to the requested state
+   * @param {User} user - user that requested the environment creation
+   * @return {Promise.<{PartialEnvironmentInfo}, Error>} - if operation was a success or not
+   */
+  async newEnvironmentAsync({
+    workflowTemplate,
+    userVars,
+    autoTransition = false,
+    user = undefined }
+  ) {
+    let environmentResponse = undefined;
+    try {
+      environmentResponse = await this._coreGrpc.NewEnvironmentAsync({
+        workflowTemplate,
+        vars: userVars,
+        autoTransition,
+        requestUser: user
+      });
+    } catch (error) {
+      throw grpcErrorToNativeError(error);
+    }
+
+    try {
+      const { environment } = environmentResponse;
+      const detectorsAll = this._apricotGrpc.detectors ?? [];
+      const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
+    
+      const environmentInfo = EnvironmentInfoAdapter.toEntity(environment, '', detectorsAll, hostsByDetector);
+      this._environmentCacheService.addOrUpdateEnvironment(environmentInfo, true);
+      return environmentInfo;
+    } catch (error) {
+      throw new Error(`Unable to process environment from NewEnvironmentAsync response from ECS ${error}`);
+    }
+  }
+
+  /**
    * Given the workflowTemplate and variables configuration, it will generate a unique string and send all to AliECS to create a
    * new auto transitioning environment
    * @param {String} workflowTemplate - name in format `repository/revision/template`

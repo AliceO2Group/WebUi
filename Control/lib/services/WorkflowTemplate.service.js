@@ -13,6 +13,10 @@
 */
 
 const {grpcErrorToNativeError, NotFoundError} = require('@aliceo2/web-ui');
+const {
+  RUNTIME_COMPONENT: { COG },
+  RUNTIME_KEY: { RUN_TYPE_TO_HOST_MAPPING }
+} = require('./../common/kvStore/runtime.enum.js');
 
 const RUNTIME_COMPONENT = 'COG';
 const RUNTIME_CONFIGURATION = 'COG-v1';
@@ -88,7 +92,7 @@ class WorkflowTemplateService {
   /**
    * Using apricot service, retrieve the content of a saved configuration by name
    * @param {String} name - configuration that needs to be retrieved
-   * @return {Object} - object with saved configuration
+   * @return {{variables: object}} - object with saved configuration
    * @throws
    */
   async retrieveWorkflowSavedConfiguration(name) {
@@ -99,6 +103,21 @@ class WorkflowTemplateService {
       throw grpcErrorToNativeError(error);
     }
     return JSON.parse(configurationString);
+  }
+
+  /**
+   * Using apricot service, retrieve the specified hosts that should be ignored during a deployment for a specific run type
+   * Information is stored in the KV store under the key defined in variable RUN_TYPE_TO_HOST_MAPPING
+   * @param {string} runType - run type for which the hosts should be ignored
+   * @return {Array<string>} - list of hosts to be ignored
+   * @throws
+   */
+  async retrieveHostsToIgnore(runType) {
+    const hostsToIgnoreString = await this._apricotGrpc.getRuntimeEntryByComponent(COG, RUN_TYPE_TO_HOST_MAPPING);
+    const hostsToIgnoreMap = JSON.parse(hostsToIgnoreString);
+    return Array.isArray(hostsToIgnoreMap[runType])
+      ? hostsToIgnoreMap[runType]
+      : [];
   }
 }
 

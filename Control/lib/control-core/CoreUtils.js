@@ -72,8 +72,8 @@ class CoreUtils {
    * @return {String} runType of the environment creation.
    */
   static getRunType(environmentPayload) {
-    const {vars} = environmentPayload;
-    return  vars['run_type'] ?? null;
+    const {userVars} = environmentPayload;
+    return  userVars['run_type'] ?? null;
   }
 
   /**
@@ -84,12 +84,12 @@ class CoreUtils {
    * @return {EnvironmentCreation} - validated and parsed configuration 
    */
   static parseEnvironmentCreationPayload(payload, hostsToIgnore = []) {
-    const {workflowTemplate, vars} = payload;
-    if (!workflowTemplate || !vars) {
-      throw new Error(`Missing mandatory parameter 'workflowTemplate' or 'vars'`)
+    const {workflowTemplate, userVars} = payload;
+    if (!workflowTemplate || !userVars) {
+      throw new Error(`Missing mandatory parameter 'workflowTemplate' or 'userVars'`)
     }
     payload = CoreUtils._removeHostsFromSelection(payload, hostsToIgnore);
-    Object.keys(vars).forEach((key) => vars[key] = vars[key].trim().replace(/\r?\n/g, ' '));
+    Object.keys(userVars).forEach((key) => userVars[key] = userVars[key].trim().replace(/\r?\n/g, ' '));
     return payload;
   }
 
@@ -100,7 +100,7 @@ class CoreUtils {
    */
   static _removeHostsFromSelection(payload, hostsToIgnore = []) {
     try {
-      const hostsAsString = payload?.vars?.hosts ?? '[]';
+      const hostsAsString = payload?.userVars?.hosts ?? '[]';
       const hostsList = JSON.parse(hostsAsString);
       hostsToIgnore.forEach((knownHost) => {
         try {
@@ -112,7 +112,7 @@ class CoreUtils {
           console.error(error);
         }
       });
-      payload.vars.hosts = JSON.stringify(hostsList);
+      payload.userVars.hosts = JSON.stringify(hostsList);
     } catch (error) {
       console.error(error)
     }
