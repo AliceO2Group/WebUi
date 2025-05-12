@@ -32,7 +32,6 @@ export default class Environment extends Observable {
     this.taskTableModel.bubbleTo(model);
 
     this.model = model;
-    this.requests = RemoteData.notAsked();
     this.list = RemoteData.notAsked();
     this.item = RemoteData.notAsked();
     this.itemControl = RemoteData.notAsked();
@@ -54,19 +53,6 @@ export default class Environment extends Observable {
 
     const {result, ok} = await this.model.loader.get(`/api/environments`);
     this.list = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
-    this.notify();
-  }
-
-
-  /**
-   * Remove environment request
-   */
-  async removeEnvironmentRequest(id) {
-    this.requests = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.model.loader.post(`/api/core/removeRequest/${id}`);
-    this.requests = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
     this.notify();
   }
 

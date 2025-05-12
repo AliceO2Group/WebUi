@@ -179,10 +179,6 @@ export default class Model extends Observable {
         this.environment.updateItemEnvironment(message.payload, this.router.params?.panel ?? '');
         this.notify();
         break;
-      case BroadcastKeys.REQUESTS:
-        this.environment.requests = RemoteData.success(message.payload);
-        this.notify();
-        break;
       case BroadcastKeys.COMPONENT_STATUS:
         if (message?.payload[STATUS_COMPONENTS_KEYS.GENERAL_SYSTEM_KEY]) {
           this.about.updateComponentStatus('system', message.payload[STATUS_COMPONENTS_KEYS.GENERAL_SYSTEM_KEY]);

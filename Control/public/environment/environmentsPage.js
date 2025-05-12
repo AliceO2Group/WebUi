@@ -51,12 +51,6 @@ export const content = (model) => h('.scroll-y.absolute-fill.text-center', [
     Success: (data) => showContent(model, data.environments),
     Failure: (error) => errorPage(error),
   }),
-  model.environment.requests.match({
-    NotAsked: () => null,
-    Loading: () => pageLoading(),
-    Success: (data) => showRequests(model, data.requests),
-    Failure: (error) => errorPage(error)
-  })
 ]);
 
 /**
