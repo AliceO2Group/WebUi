@@ -68,9 +68,10 @@ export async function setupServerForIntegrationTests() {
     console.error('        ', pageerror);
   });
   page.on('console', (msg) => {
-    for (let i = 0; i < msg.args().length; ++i) {
-      console.log(`        ${msg.args()[i]}`);
-    }
+    const filterRegex = /JSHandle:render: \d\.\d+ ms/;
+    const lines = msg.args().filter((arg)=> !filterRegex.test(arg.toString()));
+
+    lines.forEach((line) => console.log(`        ${line}`));
   });
 
   return { url, page, browser, subprocess, subprocessOutput };
