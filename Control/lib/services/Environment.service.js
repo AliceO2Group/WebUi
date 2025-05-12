@@ -118,13 +118,23 @@ class EnvironmentService {
    */
   async getEnvironment(id, taskSource, retrieveEvents = true) {
     let environment = undefined;
+   
     try {
       const environmentResponse = await this._coreGrpc.GetEnvironment({ id });
       environment = environmentResponse.environment ?? undefined;
-    } catch (error) {
-      throw grpcErrorToNativeError(error);
+    } catch (grpcError) {
+      const error = grpcErrorToNativeError(grpcError);
+      if (error instanceof NotFoundError) {
+        // if environment has just been deployed, ECS is not considering it active and not returning it
+        // Thus, it may be possible to retrieve it from the cache
+        if (this._environmentCacheService.environments.has(id)) {
+          const cachedEnvironment = this._environmentCacheService.environments.get(id);
+          return cachedEnvironment;
+        }
+      }
+      throw error;
     }
-    if (!environment) { 
+    if (!environment) {
       throw new NotFoundError(`Environment (id: ${id}) not found`);
     }
     const detectorsAll = this._apricotGrpc.detectors ?? [];
