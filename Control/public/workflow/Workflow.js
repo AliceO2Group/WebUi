@@ -253,7 +253,7 @@ export default class Workflow extends Observable {
         path = this.parseRepository(this.form.repository) + `/workflows/${this.form.template}@${this.form.revision}`;
 
         // Combine Readout URI if it was used
-        this.model.environment.newEnvironment({
+        this.model.environment.newEnvironment('ADVANCED', {
           workflowTemplate: path,
           vars: variables,
           detectors: this.flpSelection.selectedDetectors

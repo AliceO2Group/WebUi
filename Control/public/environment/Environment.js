@@ -71,17 +71,6 @@ export default class Environment extends Observable {
   }
 
   /**
-   * Get environments requests
-   */
-  async getEnvironmentRequests() {
-    this.requests = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.model.loader.get(`/api/core/requests`);
-    this.requests = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
-    this.notify();
-  }
-  /**
    * Load one environment into `item` as RemoteData
    * @param {Object} body - See protobuf definition for properties
    */
@@ -133,13 +122,17 @@ export default class Environment extends Observable {
    * See protobuf definition for properties of `itemForm` as body
    * @param {string} itemForm
    */
-  async newEnvironment(itemForm) {
+  async newEnvironment(type, itemForm) {
     this.itemNew = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/core/request`, itemForm);
-    this.itemNew = !ok ? RemoteData.failure(result.message) : RemoteData.notAsked();
-    this.model.router.go(`?page=environments`);
+    const {result, ok} = await this.model.loader.post(`/api/deploy/${type}`, itemForm);
+    if (!ok) {
+      this.itemNew = RemoteData.failure(result.message);
+    } else {
+      this.itemNew = RemoteData.notAsked();
+      this.model.router.go(`?page=environment&id=${result.id}`);
+    }
   }
 
   /**

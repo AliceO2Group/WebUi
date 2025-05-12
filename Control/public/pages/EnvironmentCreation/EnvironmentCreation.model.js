@@ -90,7 +90,7 @@ export class EnvironmentCreationModel extends Observable {
     const path = this.parseRepository(this._creationModel.repository)
       + `/workflows/${this._creationModel.template}@${this._creationModel.revision}`;
 
-    this._model.environment.newEnvironment({
+    this._model.environment.newEnvironment('GLOBAL',{
       workflowTemplate: path,
       selectedConfiguration: this._selectedConfigurationLabel,
       vars: this._creationModel.variables,

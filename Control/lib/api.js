@@ -28,9 +28,13 @@ const {
 const {
   getDetectorsLockOwnershipMiddlewareFactory
 } = require('./middleware/getDetectorsLockOwnershipMiddlewareFactory.js');
+const {
+  verifyDetectorsAvailabilityMiddlewareFactory
+} = require('./middleware/verifyDetectorsAvailabilityMiddlewareFactory.middleware.js');
 
 // controllers
 const {ConsulController} = require('./controllers/Consul.controller.js');
+const {DeploymentController} = require('./controllers/Deployment.controller.js');
 const {EnvironmentController} = require('./controllers/Environment.controller.js');
 const {LockController} = require('./controllers/Lock.controller.js');
 const {RunController} = require('./controllers/Run.controller.js');
@@ -42,6 +46,7 @@ const {WorkflowTemplateController} = require('./controllers/WorkflowTemplate.con
 const {BookkeepingService} = require('./services/Bookkeeping.service.js');
 const {BroadcastService} = require('./services/Broadcast.service.js');
 const {CacheService} = require('./services/Cache.service.js');
+const {DeploymentService} = require('./services/Deployment.service.js');
 const {EnvironmentCacheService} = require('./services/environment/EnvironmentCache.service.js');
 const {DetectorService} = require('./services/Detector.service.js');
 const {EnvironmentService} = require('./services/Environment.service.js');
@@ -56,7 +61,6 @@ const {NotificationService, ConsulService} = require('@aliceo2/web-ui');
 
 // AliECS Core
 const { AliEcsSynchronizer } = require('./kafka/AliEcsSynchronizer.js');
-const AliecsRequestHandler = require('./control-core/RequestHandler.js');
 const ApricotService = require('./control-core/ApricotService.js');
 const ControlService = require('./control-core/ControlService.js');
 const GrpcServiceClient = require('./control-core/GrpcServiceClient.js');
@@ -105,13 +109,11 @@ module.exports.setup = (http, ws) => {
     ctrlProxy, apricotService, cacheService, broadcastService, environmentCacheService
   );
   const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
+  const deploymentService = new DeploymentService(environmentService, workflowService);
 
   const envCtrl = new EnvironmentController(environmentService, workflowService, lockService, detectorService);
   const workflowController = new WorkflowTemplateController(workflowService);
-
-  const aliecsReqHandler = new AliecsRequestHandler(ctrlService, apricotService);
-  aliecsReqHandler.setWs(ws);
-  aliecsReqHandler.workflowService = workflowService;
+  const deploymentController = new DeploymentController(deploymentService);
 
   const bkpService = new BookkeepingService(config.bookkeeping ?? {});
   const runService = new RunService(bkpService, apricotService, cacheService);
@@ -155,13 +157,11 @@ module.exports.setup = (http, ws) => {
   ];
   const setDetectorsFromEnvironmentMiddleware = setDetectorsFromEnvironmentMiddlewareFactory(environmentService);
   const verifyLockOwnershipMiddleware = getDetectorsLockOwnershipMiddlewareFactory(lockService);
+  const verifyDetectorsAvailabilityMiddleware = verifyDetectorsAvailabilityMiddlewareFactory(detectorService);
 
   ctrlProxy.methods.forEach(
     (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res)),
   );
-  http.post('/core/request', coreMiddleware, (req, res) => aliecsReqHandler.add(req, res));
-  http.get('/core/requests', coreMiddleware, (req, res) => aliecsReqHandler.getAll(req, res));
-  http.post('/core/removeRequest/:id', coreMiddleware, (req, res) => aliecsReqHandler.remove(req, res));
 
   http.get('/workflow/template/default/source', workflowController.getDefaultTemplateSource.bind(workflowController));
   http.get('/workflow/template/mappings', workflowController.getWorkflowMapping.bind(workflowController));
@@ -183,6 +183,13 @@ module.exports.setup = (http, ws) => {
     setDetectorsFromEnvironmentMiddleware,
     verifyLockOwnershipMiddleware,
     envCtrl.destroyEnvironmentHandler.bind(envCtrl),
+  );
+
+  http.post('/deploy/:type',
+    coreMiddleware,
+    verifyLockOwnershipMiddleware,
+    verifyDetectorsAvailabilityMiddleware,
+    deploymentController.deploymentHandler.bind(deploymentController),
   );
 
   http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));
