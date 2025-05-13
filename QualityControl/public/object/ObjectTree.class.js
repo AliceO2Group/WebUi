@@ -40,7 +40,7 @@ export default class ObjectTree extends Observable {
     this.name = name || ''; // Like 'B'
     this.object = null;
     this.open = name === 'qc' ? true : false;
-    this.children = []; // <Array<ObjectTree>>
+    this.children = new Map(); // <Map<String, ObjectTree>>
     this.parent = parent || null; // <ObjectTree>
     this.path = []; // Like ['A', 'B'] for node at path 'A/B' called 'B'
     this.pathString = ''; // 'A/B'
@@ -120,10 +120,10 @@ export default class ObjectTree extends Observable {
     // Case we need to pass to subtree
     const name = path.shift();
     const fullPath = [...pathParent, name];
-    let subtree = this.children.find((children) => children.name === name);
+    let subtree = this.children.get(name);
 
     // Subtree does not exist yet
-    if (!subtree) {
+    if (subtree === undefined) {
       /*
        * Create it and push as child
        * Listen also for changes to bubble it until root
@@ -131,7 +131,7 @@ export default class ObjectTree extends Observable {
       subtree = new ObjectTree(name, this);
       subtree.path = fullPath;
       subtree.pathString = fullPath.join('/');
-      this.children.push(subtree);
+      this.children.set(name, subtree);
       subtree.observe(() => this.notify());
     }
 
@@ -145,7 +145,9 @@ export default class ObjectTree extends Observable {
    * @returns {undefined}
    */
   addChildren(objects) {
+    // let doubledObjects = [...objects, ...objects.map((obj) => ({ ...obj, name: `${obj.name}_copy` }))];
+    // doubledObjects.slice(0, 500).forEach((object) => this.addChild(object));
     objects.forEach((object) => this.addChild(object));
-    setTimeout(() => this.notify(), 100); // TODO: create more dynamic solution.
+    setTimeout(() => this.notify(), 4000); // TODO: create more dynamic solution.
   }
 }

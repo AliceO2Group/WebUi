@@ -95,7 +95,7 @@ function treeTable(model) {
  */
 const treeRows = (model) => !model.object.sideTree
   ? null
-  : model.object.sideTree.children.map((children) => treeRow(model, children, 0));
+  : [...generateTreeRows(model, model.object.sideTree, 0)];
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
@@ -132,7 +132,7 @@ function treeRow(model, sideTree, level) {
  */
 const branchRow = (model, sideTree, level) => {
   const levelDeeper = level + 1;
-  const subtree = sideTree.open ? sideTree.children.map((children) => treeRow(model, children, levelDeeper)) : [];
+  const subtree = sideTree.open ? [...generateTreeRows(model, sideTree, levelDeeper)] : [];
 
   const icon = sideTree.open ? iconCaretBottom() : iconCaretRight();
   const iconWrapper = h('span', { style: { paddingLeft: `${level}em` } }, icon);
@@ -197,3 +197,19 @@ const objectPreview = (model) => {
   }
   return;
 };
+
+/**
+ * Generates virtual DOM tree rows from a tree structure recursively
+ *
+ * This generator function yields virtual DOM rows (vnode) for each child in the tree,
+ * @generator
+ * @param {Model} model - The application model containing state and methods
+ * @param {ObjectTree} tree - The tree node to generate rows from, must have `children` Map
+ * @param {number} level - Current depth level in the tree (used for indentation)
+ * @yields {vnode} - Virtual DOM nodes representing tree rows
+ */
+function* generateTreeRows(model, tree, level) {
+  for (const child of tree.children.values()) {
+    yield treeRow(model, child, level);
+  }
+}

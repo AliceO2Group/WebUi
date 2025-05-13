@@ -157,10 +157,9 @@ const tableShow = (model) =>
 const treeRows = (model) => !model.object.tree ?
   null
   :
-
-  model.object.tree.children.length === 0
+  model.object.tree.children.size === 0
     ? h('.w-100.text-center', 'No objects found')
-    : model.object.tree.children.map((children) => treeRow(model, children, 0));
+    : [...generateTreeRows(model, model.object.tree, 0)];
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
@@ -175,16 +174,17 @@ const treeRows = (model) => !model.object.tree ?
 function treeRow(model, tree, level) {
   const padding = `${level}em`;
   const levelDeeper = level + 1;
-  const children = tree.open ? tree.children.map((children) => treeRow(model, children, levelDeeper)) : [];
+  const children = tree.open ? [...generateTreeRows(model, tree, levelDeeper)] : [];
+
   const path = tree.path.join('/');
   const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
 
   if (model.object.searchInput) {
     return [];
   } else {
-    if (tree.object && tree.children.length === 0) {
+    if (tree.object && tree.children.size === 0) {
       return [leafRow(path, () => model.object.select(tree.object), className, padding, tree.name)];
-    } else if (tree.object && tree.children.length > 0) {
+    } else if (tree.object && tree.children.size > 0) {
       return [
         leafRow(path, () => model.object.select(tree.object), className, padding, tree.name),
         branchRow(path, tree, padding),
@@ -235,3 +235,19 @@ const branchRow = (path, tree, padding) =>
       tree.name,
     ]),
   ]);
+
+/**
+ * Generates virtual DOM tree rows from a tree structure recursively
+ *
+ * This generator function yields virtual DOM rows (vnode) for each child in the tree,
+ * @generator
+ * @param {Model} model - The application model containing state and methods
+ * @param {ObjectTree} tree - The tree node to generate rows from, must have `children` Map
+ * @param {number} level - Current depth level in the tree (used for indentation)
+ * @yields {vnode} - Virtual DOM nodes representing tree rows
+ */
+function* generateTreeRows(model, tree, level) {
+  for (const child of tree.children.values()) {
+    yield treeRow(model, child, level);
+  }
+}
