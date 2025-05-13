@@ -23,7 +23,12 @@
   100% { opacity: 1; }
 }
 
-.object-selectable { cursor: pointer; text-decoration: none; }
+.object-selectable { 
+  cursor: pointer; 
+  text-decoration: none; 
+  display: block;
+  padding: 0.3em;
+}
 .object-selectable:hover { cursor: pointer; background-color: var(--color-gray-dark) !important; color: var(--color-gray-lighter); }
 
 .layout-selectable { border: 0.0em solid var(--color-primary); transition: border 0.1s; }
@@ -64,6 +69,30 @@
   border-bottom-right-radius: 0.5rem;
   height: 100%;
 }
+
+.heading {
+  font-weight: bold;
+  padding: 0.3em;
+  background-color: var(--color-gray-light);
+}
+
+.root-tree {
+  list-style-type: none;
+  margin: 0;
+  padding-left: 0.1em;
+}
+
+ul.object-tree-list { 
+  list-style-type: none;
+  margin: 0;
+  padding-left: 1em;
+}
+
+li.object-tree-branch, ul.object-tree-list {
+  display: flex;
+  flex-direction: column;
+}
+
 
 .status-bar { border-top: 1px solid var(--color-gray-dark); }
 
