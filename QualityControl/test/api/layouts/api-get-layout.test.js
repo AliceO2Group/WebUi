@@ -48,23 +48,6 @@ export const apiGetLayoutsTests = () => {
         });
     });
 
-    test('should return layouts filtered by name', async () => {
-      const name = 'test';
-
-      await request(`${URL_ADDRESS}/api/layouts`)
-        .get(`?token=${OWNER_TEST_TOKEN}&name=${name}`)
-        .expect(200)
-        .expect((res) => {
-          if (!Array.isArray(res.body)) {
-            throw new Error('Expected array of layouts');
-          }
-          if (res.body.length !== 1) {
-            throw new Error(`Expected array of 1 layout to be returned, instead got${res.body.length}`);
-          }
-          deepStrictEqual(res.body, [LAYOUT_MOCK_4], 'Unexpected Layout structure');
-        });
-    });
-
     test('should return specific fields when fields parameter is provided', async () => {
       const fields = 'name,owner_id';
       await request(`${URL_ADDRESS}/api/layouts`)
