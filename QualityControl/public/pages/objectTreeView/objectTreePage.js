@@ -1,0 +1,59 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
+import { spinner } from '../../common/spinner.js';
+import virtualTable from '../../object/virtualTable.js';
+import { objectPanel, statusBarLeft, statusBarRight } from './component/objectPanel.js';
+import ObjectTreeComponent from './component/ObjectTreeComponent.js';
+import { h } from '/js/src/index.js';
+
+/**
+ * Shows a page to explore though a tree of objects with a preview on the right if clicked
+ * and a status bar for selected object name and # of objects
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
+ */
+export default (model) => h('.h-100.flex-column', { key: model.router.params.page }, [
+  h('.flex-row.flex-grow', [
+    h('.scroll-y.flex-column', {
+      style: {
+        width: model.object.selected ? '50%' : '100%',
+      },
+    }, model.object.objectsRemote.match({
+      NotAsked: () => null,
+      Loading: () =>
+        h('.absolute-fill.flex-column.items-center.justify-center.f5', [spinner(5), h('', 'Loading Objects')]),
+      Success: () => {
+        const searchInput = model.object?.searchInput?.trim() ?? '';
+        if (searchInput !== '') {
+          const objectsLoaded = model.object.list;
+          const objectsToDisplay = objectsLoaded.filter((qcObject) =>
+            qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
+          return virtualTable(model, 'main', objectsToDisplay);
+        }
+        return ObjectTreeComponent(model.object.tree);
+      },
+      Failure: () => null, // Notification is displayed
+    })),
+    h('.animate-width.scroll-y', {
+      style: {
+        width: model.object.selected ? '50%' : 0,
+      },
+    }, model.object.selected ? objectPanel(model) : null),
+  ]),
+  h('.f6.status-bar.ph1.flex-row', [
+    statusBarLeft(model),
+    statusBarRight(model),
+  ]),
+]);
