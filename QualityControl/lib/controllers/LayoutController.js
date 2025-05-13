@@ -15,11 +15,12 @@
 'use strict';
 
 import assert from 'assert';
-import { LayoutDto } from './../dtos/LayoutDto.js';
+import { LayoutDto, LayoutsGetDto } from './../dtos/LayoutDto.js';
 import { LayoutPatchDto } from './../dtos/LayoutPatchDto.js';
 
 import {
   InvalidInputError,
+  LogManager,
   NotFoundError,
   updateAndSendExpressResponseFromNativeError,
 }
@@ -28,6 +29,8 @@ import {
 /**
  * @typedef {import('../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
  */
+
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/layout-ctrl`);
 
 /**
  * Gateway for all HTTP requests with regards to QCG Layouts
@@ -56,15 +59,28 @@ export class LayoutController {
    * @returns {undefined}
    */
   async getLayoutsHandler(req, res) {
+    let fields = undefined;
+    let owner_id = undefined;
+    let name = undefined;
+
     try {
-      const filter = {};
-      if (req.query.owner_id !== undefined) {
-        filter.owner_id = parseInt(req.query.owner_id, 10);
-      }
-      const layouts = await this._layoutRepository.listLayouts(filter);
-      res.status(200).json(layouts);
-    } catch {
-      updateAndSendExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
+      const validated = await LayoutsGetDto.validateAsync(req.query);
+      ({ fields, owner_id, name } = validated);
+    } catch (error) {
+      const responseError = error.isJoi ?
+        new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`) :
+        new Error('Unable to process request');
+
+      logger.errorMessage(`Error validating query parameters: ${error}`);
+      return updateAndSendExpressResponseFromNativeError(res, responseError);
+    }
+
+    try {
+      const layouts = await this._layoutRepository.listLayouts({ owner_id, name, fields });
+      return res.status(200).json(layouts);
+    } catch (error) {
+      logger.errorMessage(`Error retrieving layouts: ${error}`);
+      return updateAndSendExpressResponseFromNativeError(res, new Error('Unable to retrieve layouts'));
     }
   }
 
@@ -76,16 +92,15 @@ export class LayoutController {
    */
   async getLayoutHandler(req, res) {
     const { id } = req.params;
-
-    try {
-      if (!id) {
-        updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout'));
-      } else {
+    if (!id.trim()) {
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing parameter "id" of layout'));
+    } else {
+      try {
         const layout = await this._layoutRepository.readLayoutById(id);
         res.status(200).json(layout);
+      } catch (error) {
+        updateAndSendExpressResponseFromNativeError(res, error);
       }
-    } catch {
-      updateAndSendExpressResponseFromNativeError(res, new Error(`Unable to retrieve layout with id: ${id}`));
     }
   }
 

@@ -19,6 +19,7 @@ import sinon from 'sinon';
 import { LAYOUT_MOCK_1 } from './../../demoData/layout/layout.mock.js';
 import { LayoutController } from './../../../lib/controllers/LayoutController.js';
 import { LayoutRepository } from '../../../lib/repositories/LayoutRepository.js';
+import { LayoutsGetDto } from '../../../lib/dtos/LayoutDto.js';
 
 export const layoutControllerTestSuite = async () => {
   suite('Creating a new LayoutController instance', () => {
@@ -47,9 +48,12 @@ export const layoutControllerTestSuite = async () => {
       const jsonStub = sinon.createStubInstance(LayoutRepository, {
         listLayouts: sinon.stub().rejects(new Error('Unable to connect')),
       });
-      const req = { body: {} };
+      const fields = ['id', 'name'];
+
+      const req = { query: { fields: fields.join(','), token: 'fasdfsdfa' } };
       const layoutConnector = new LayoutController(jsonStub);
       await layoutConnector.getLayoutsHandler(req, res);
+
       ok(res.status.calledWith(500), 'Response status was not 500');
       ok(res.json.calledWith({
         message: 'Unable to retrieve layouts',
@@ -57,29 +61,113 @@ export const layoutControllerTestSuite = async () => {
         title: 'Unknown Error',
       }), 'Error message was incorrect');
     });
-
-    test('should successfully return a list of layouts', async () => {
+    test('should log error when non-Joi validation error occurs', async () => {
+      const response = [{ id: 5, name: 'somelayout' }];
       const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        listLayouts: sinon.stub().resolves([{ name: 'somelayout' }]),
+        listLayouts: sinon.stub().resolves(response),
       });
 
-      const req = { query: {} };
+      const req = { query: { fields: 'id,name', token: 'validtoken' } };
+
+      const error = new Error('Some unexpected error');
+
+      const originalValidate = LayoutsGetDto.validateAsync;
+      LayoutsGetDto.validateAsync = sinon.stub().rejects(error);
+
+      const layoutConnector = new LayoutController(jsonStub);
+
+      await layoutConnector.getLayoutsHandler(req, res);
+
+      LayoutsGetDto.validateAsync = originalValidate;
+      ok(res.status.calledWith(500), 'Response status was not 500');
+      ok(res.json.calledWith({
+        message: 'Unable to process request',
+        status: 500,
+        title: 'Unknown Error',
+      }), 'Error message was incorrect');
+    });
+
+    test('should successfully return a list of layouts with required fields', async () => {
+      const response = [{ id: 5, name: 'somelayout' }];
+      const fields = ['id', 'name'];
+
+      const jsonStub = sinon.createStubInstance(LayoutRepository, {
+        listLayouts: sinon.stub().resolves(response),
+      });
+      const req = { query: { fields: fields.join(','), token: 'fasdfsdfa' } };
       const layoutConnector = new LayoutController(jsonStub);
       await layoutConnector.getLayoutsHandler(req, res);
+
       ok(res.status.calledWith(200), 'Response status was not 200');
-      ok(res.json.calledWith([{ name: 'somelayout' }]), 'A list of layouts should have been sent back');
+      ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
+      ok(
+        jsonStub.listLayouts.calledWith({ owner_id: undefined, name: undefined, fields }),
+        'Fields were not passed correctly',
+      );
     });
 
     test('should successfully return a list of layouts based on owner_id', async () => {
+      const response = [
+        { user_id: 1, name: 'somelayout' },
+        { user_id: 2, name: 'somelayout2' },
+      ];
+      const fields = 'name';
+
       const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        listLayouts: sinon.stub().resolves([{ name: 'somelayout' }]),
+        listLayouts: sinon.stub().resolves(response),
       });
-      const req = { query: { owner_id: '1' } };
+      const req = { query: { owner_id: 1, token: 'fasdfsdfa', fields } };
       const layoutConnector = new LayoutController(jsonStub);
       await layoutConnector.getLayoutsHandler(req, res);
       ok(res.status.calledWith(200), 'Response status was not 200');
-      ok(res.json.calledWith([{ name: 'somelayout' }]), 'A list of layouts should have been sent back');
-      ok(jsonStub.listLayouts.calledWith({ owner_id: 1 }), 'Owner id was not used in data connector call');
+      ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
+
+      ok(
+        jsonStub.listLayouts.calledWith({ owner_id: 1, name: undefined, fields: [fields] }),
+        'Owner id was not used in data connector call',
+      );
+    });
+
+    test('should return 400 when token is missing', async () => {
+      const jsonStub = sinon.createStubInstance(LayoutRepository);
+      const req = {
+        query: {
+          fields: 'id,name',
+          // token not included
+        },
+      };
+      const layoutConnector = new LayoutController(jsonStub);
+
+      await layoutConnector.getLayoutsHandler(req, res);
+
+      ok(res.status.calledWith(400), 'Response status was not 400');
+      ok(res.json.calledOnce, 'Response was not sent');
+
+      const [[responseArg]] = res.json.args;
+
+      ok(responseArg.message === 'Invalid query parameters: "token" is required', 'Error message incorrect');
+    });
+
+    test('should return 400 when fields contain invalid values', async () => {
+      const jsonStub = sinon.createStubInstance(LayoutRepository);
+      const req = {
+        query: {
+          fields: 'id,invalid_field',
+          token: 'fasdfsdfa',
+        },
+      };
+      const layoutConnector = new LayoutController(jsonStub);
+
+      await layoutConnector.getLayoutsHandler(req, res);
+
+      ok(res.status.calledWith(400), 'Response status was not 400');
+      ok(res.json.calledOnce, 'Response was not sent');
+
+      ok(res.json.calledWith({
+        message: 'Invalid query parameters: "fields" contains invalid field: invalid_field',
+        status: 400,
+        title: 'Invalid Input',
+      }), 'Error message was incorrect');
     });
   });
 
@@ -92,7 +180,7 @@ export const layoutControllerTestSuite = async () => {
       };
     });
     test('should respond with 400 error if request did not contain layout id when requesting to read', async () => {
-      const req = { params: {} };
+      const req = { params: { id: ' ' } }; // empty token is the only way to realisticly cause this error
       const layoutConnector = new LayoutController({});
       await layoutConnector.getLayoutHandler(req, res);
 
@@ -127,7 +215,7 @@ export const layoutControllerTestSuite = async () => {
       await layoutConnector.getLayoutHandler(req, res);
       ok(res.status.calledWith(500), 'Response status was not 500');
       ok(res.json.calledWith({
-        message: 'Unable to retrieve layout with id: mylayout',
+        message: 'Unable to read layout',
         status: 500,
         title: 'Unknown Error',
       }), 'Error message was incorrect');

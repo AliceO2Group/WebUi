@@ -23,10 +23,13 @@ import { IntervalsService } from './services/Intervals.service.js';
 import { StatusService } from './services/Status.service.js';
 import { JsonFileService } from './services/JsonFileService.js';
 import { QcObjectService } from './services/QcObject.service.js';
+import { FilterService } from './services/FilterService.js';
+import { BookkeepingService } from './services/BookkeepingService.js';
 
 import { LayoutController } from './controllers/LayoutController.js';
 import { StatusController } from './controllers/StatusController.js';
 import { ObjectController } from './controllers/ObjectController.js';
+import { FilterController } from './controllers/FilterController.js';
 import { UserController } from './controllers/UserController.js';
 
 import { config } from './config/configProvider.js';
@@ -46,7 +49,9 @@ export const setupQcModel = () => {
   const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
 
   const jsonFileService = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
-  initDatabase(new SequelizeDatabase(config?.database || {}));
+  if (config.database) {
+    initDatabase(new SequelizeDatabase(config?.database || {}));
+  }
 
   const layoutRepository = new LayoutRepository(jsonFileService);
   const userRepository = new UserRepository(jsonFileService);
@@ -67,10 +72,13 @@ export const setupQcModel = () => {
   const objectController = new ObjectController(qcObjectService);
   const intervalsService = new IntervalsService();
 
-  intervalsService.register(
-    qcObjectService.refreshCache.bind(qcObjectService),
-    qcObjectService.getCacheRefreshRate(),
-  );
+  const bookkeepingService = new BookkeepingService(config.bookkeeping);
+  const filterService = new FilterService(bookkeepingService);
+
+  const filterController = new FilterController(filterService);
+
+  initializeIntervals(intervalsService, qcObjectService, filterService);
+
   return {
     userController,
     layoutController,
@@ -78,7 +86,27 @@ export const setupQcModel = () => {
     statusController,
     objectController,
     intervalsService,
+    filterController,
     layoutRepository,
     jsonFileService,
   };
 };
+
+/**
+ * Method to register services at the start of the server
+ * @param {Intervals} intervalsService - wrapper for storing intervals
+ * @param {QcObjectService} qcObjectService - service for retrieving information on qc objects
+ * @param {FilterService} filterService - service for retrieving run types information from Bookkeeping
+ * @returns {void}
+ */
+function initializeIntervals(intervalsService, qcObjectService, filterService) {
+  intervalsService.register(
+    qcObjectService.refreshCache.bind(qcObjectService),
+    qcObjectService.getCacheRefreshRate(),
+  );
+
+  intervalsService.register(
+    filterService.getRunTypes.bind(filterService),
+    filterService.refreshInterval,
+  );
+}

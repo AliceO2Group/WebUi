@@ -11,6 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
+const { FailedDependencyError } = require('./FailedDependencyError.js');
 const { InvalidInputError } = require('./InvalidInputError.js');
 const { NotFoundError } = require('./NotFoundError.js');
 const { ServiceUnavailableError } = require('./ServiceUnavailableError.js');
@@ -44,6 +45,10 @@ const updateAndSendExpressResponseFromNativeError = (response, error) => {
     case TimeoutError:
       status = 408;
       title = 'Timeout';
+      break;
+    case FailedDependencyError:
+      status = 424;
+      title = 'Failed Dependency';
       break;
     case ServiceUnavailableError:
       status = 503;

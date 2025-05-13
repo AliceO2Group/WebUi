@@ -40,7 +40,7 @@ export default (model) => h('.h-100.flex-column', { key: model.router.params.pag
         if (searchInput !== '') {
           const objectsLoaded = model.object.list;
           const objectsToDisplay = objectsLoaded.filter((qcObject) =>
-            qcObject.path.toLowerCase().includes(searchInput.toLowerCase()));
+            qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
           return virtualTable(model, 'main', objectsToDisplay);
         }
         return tableShow(model);
@@ -176,7 +176,7 @@ function treeRow(model, tree, level) {
   const padding = `${level}em`;
   const levelDeeper = level + 1;
   const children = tree.open ? tree.children.map((children) => treeRow(model, children, levelDeeper)) : [];
-  const path = tree.path.join('/');
+  const path = tree.name;
   const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
 
   if (model.object.searchInput) {

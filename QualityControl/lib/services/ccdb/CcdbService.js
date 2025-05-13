@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from '@aliceo2/web-ui';
+import { FailedDependencyError, LogManager } from '@aliceo2/web-ui';
 import { httpHeadJson, httpGetJson } from '../../utils/utils.js';
 import {
   CCDB_MONITOR, CCDB_VERSION_KEY, CCDB_RESPONSE_BODY_KEYS, CCDB_FILTER_FIELDS, CCDB_RESPONSE_HEADER_KEYS,
@@ -95,6 +95,24 @@ export class CcdbService {
     } catch (error) {
       throw new Error(`Unable to read version of CCDB due to: ${error}`);
     }
+  }
+
+  /**
+   * Returns a list of object paths using the /tree/ endpoint based on a given prefix
+   * @example Equivalent of URL request: `/tree/qc/TPC/object.*`
+   * @param {string} [prefix] - Prefix for which CCDB should search for objects
+   * @returns {Promise.<Array<{PATH}>>} - results of objects query or an empty array
+   * @rejects {Error}
+   */
+  async getObjectsTreeList(prefix = this._PREFIX) {
+    const { subfolders } = await httpGetJson(this._hostname, this._port, `/tree/${prefix}.*`);
+
+    if (!Array.isArray(subfolders)) {
+      throw new FailedDependencyError('Invalid response format from server - expected subfolders array');
+    }
+    // console.log(await this.getObjectsLatestVersionList(prefix));
+
+    return subfolders.map((folder) => ({ path: folder }));
   }
 
   /**

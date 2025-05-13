@@ -34,7 +34,7 @@ export default (model) =>
       const { searchInput = '' } = model.object;
       if (searchInput.trim() !== '') {
         objectsToDisplay = objects.filter((qcObject) =>
-          qcObject.path.toLowerCase().includes(searchInput.toLowerCase()));
+          qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
       }
       return [
         searchForm(model),
@@ -136,7 +136,7 @@ const branchRow = (model, sideTree, level) => {
 
   const icon = sideTree.open ? iconCaretBottom() : iconCaretRight();
   const iconWrapper = h('span', { style: { paddingLeft: `${level}em` } }, icon);
-  const path = sideTree.path.join('/');
+  const path = sideTree.name;
 
   const attr = {
     key: `key-sidebar-tree-${path}`,
@@ -163,7 +163,7 @@ const branchRow = (model, sideTree, level) => {
 const leafRow = (model, sideTree, level) => {
   // UI construction
   const iconWrapper = h('span', { style: { paddingLeft: `${level}em` } }, iconBarChart());
-  const path = sideTree.path.join('/');
+  const path = sideTree.name;
   const className = sideTree.object && sideTree.object === model.object.selected ? 'table-primary' : '';
   const draggable = Boolean(sideTree.object);
 

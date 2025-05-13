@@ -31,8 +31,6 @@ updates:
   ignore:
     - dependency-name: "*"
       update-types: ["version-update:semver-patch"]
-  reviewers:
-      - "graduta"
 - package-ecosystem: npm
   directory: "/QualityControl"
   schedule:
@@ -60,8 +58,6 @@ updates:
   ignore:
     - dependency-name: "*"
       update-types: ["version-update:semver-patch"]
-  reviewers:
-      - "graduta"
 - package-ecosystem: npm
   directory: "/InfoLogger"
   schedule:
@@ -89,8 +85,6 @@ updates:
   ignore:
     - dependency-name: "*"
       update-types: ["version-update:semver-patch"]
-  reviewers:
-      - "graduta"
 - package-ecosystem: npm
   directory: "/Framework"
   schedule:
@@ -119,5 +113,3 @@ updates:
   ignore:
     - dependency-name: "*"
       update-types: ["version-update:semver-patch"]
-  reviewers:
-      - "graduta"

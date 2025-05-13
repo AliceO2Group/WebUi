@@ -47,12 +47,14 @@ import { utilsTestSuite } from './lib/utils/utils.test.js';
  */
 import { layoutControllerTestSuite } from './lib/controllers/LayoutController.test.js';
 import { statusControllerTestSuite } from './lib/controllers/StatusController.test.js';
+import { filtersControllerTestSuite } from './lib/controllers/FiltersController.test.js';
 
 /**
  * Services
  */
 import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
 import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
+import { bookkeepingServiceTestSuite } from './lib/services/BookeepingService.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
@@ -67,6 +69,8 @@ import { userRepositoryTest } from './lib/repositories/UserRepository.test.js';
 import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
 import { userControllerTestSuite } from './lib/controllers/UserController.test.js';
 import { chartRepositoryTest } from './lib/repositories/ChartRepository.test.js';
+import { filterServiceTestSuite } from './lib/services/FilterService.test.js';
+import { apiGetLayoutsTests } from './api/layouts/api-get-layout.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -150,11 +154,24 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       { timeout: ABOUT_VIEW_PAGE_TIMEOUT },
       async (testParent) => await aboutPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
+  });
 
-    suite('API - Test Suite', async () => {
-      suite('Layout PUT request test suite', async () => apiPutLayoutTests());
-      suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
+  suite('API - test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
+    let browser = undefined;
+    let subprocess = undefined;
+    let subprocessOutput = undefined;
+
+    before(async () => {
+      ({ browser, subprocess, subprocessOutput } = await setupServerForIntegrationTests());
+    }, { timeout: 5000 });
+
+    after(async () => {
+      await terminateSessionAndLog(browser, subprocessOutput, subprocess);
     });
+
+    suite('Layout GET request test suite', async () => apiGetLayoutsTests());
+    suite('Layout PUT request test suite', async () => apiPutLayoutTests());
+    suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
   });
 
   suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
@@ -177,6 +194,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
       suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
       suite('JsonServiceTest test suite', async () => await jsonFileServiceTestSuite());
+      suite('FilterService', async () => await filterServiceTestSuite());
     });
 
     suite('Middleware - Test Suite', async () => {
@@ -184,16 +202,17 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('LayoutIdMiddleware test suite', async () => layoutIdMiddlewareTest());
       suite('LayoutOwnerMiddleware test suite', async () => layoutOwnerMiddlewareTest());
       suite('StatusComponentMiddleware test suite', async () => statusComponentMiddlewareTest());
+      suite('BookkeepingServiceTest test suite', async () => await bookkeepingServiceTestSuite());
     });
 
     suite('Controllers - Test Suite', async () => {
       suite('LayoutController test suite', async () => await layoutControllerTestSuite());
       suite('StatusController test suite', async () => await statusControllerTestSuite());
-
       suite('ObjectController test suite', async () => {
         // TODO - bring inline with current tests
       });
       suite('UserController - Test Suite', async () => await userControllerTestSuite());
+      suite('FiltersController test suite', async () => await filtersControllerTestSuite());
     });
   });
 });

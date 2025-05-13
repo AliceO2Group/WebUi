@@ -173,6 +173,56 @@ export const ccdbServiceTestSuite = async () => {
       });
     });
 
+    suite('`getObjectsTreeList()` tests', () => {
+      test('should successfully return a list of the object paths', async () => {
+        const ccdb = new CcdbService(ccdbConfig);
+        const subfolders = [
+          'object/one',
+          'object/two',
+          'object/three',
+        ];
+        const expectedObjects = [
+          { path: 'object/one' },
+          { path: 'object/two' },
+          { path: 'object/three' },
+        ];
+
+        nock('http://ccdb-local:8083', {
+          reqheaders: { Accept: 'application/json' },
+        })
+          .get(`/tree/${ccdbConfig.prefix}.*`)
+          .reply(200, { subfolders });
+        const objectsRetrieved = await ccdb.getObjectsTreeList(ccdbConfig.prefix);
+        deepStrictEqual(objectsRetrieved, expectedObjects, 'Received objects are not alike');
+      });
+
+      test('should throw error when response has invalid subfolders format', async () => {
+        const ccdb = new CcdbService(ccdbConfig);
+        const invalidResponse = { subfolders: 'not-an-array' };
+
+        nock('http://ccdb-local:8083', {
+          reqheaders: { Accept: 'application/json' },
+        })
+          .get(`/tree/${ccdbConfig.prefix}.*`)
+          .reply(200, invalidResponse);
+
+        await rejects(
+          async () => await ccdb.getObjectsTreeList(ccdbConfig.prefix),
+          new Error('Invalid response format from server - expected subfolders array'),
+          'Should throw error for invalid subfolders format',
+        );
+      });
+
+      test('should reject due to HTTP request error', async () => {
+        const ccdb = new CcdbService(ccdbConfig);
+        const error = new Error('Querying service is down');
+        nock('http://ccdb-local:8083')
+          .get(`/tree/${ccdbConfig.prefix}.*`)
+          .replyWithError(error);
+        await rejects(async () => await ccdb.getObjectsTreeList(), new Error(`${error.message || error}`));
+      });
+    });
+
     suite('`getObjectVersions()` tests', () => {
       test('should successfully return a list of versions for a specific object', async () => {
         const ccdb = new CcdbService(ccdbConfig);
