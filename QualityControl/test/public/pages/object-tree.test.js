@@ -14,6 +14,9 @@
 import { strictEqual, ok } from 'node:assert';
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
 const SORTING_BUTTON_PATH = 'header > div > div:nth-child(3) > div > button';
+const LIST_ITEM_PATH = 'ul > li';
+const sortOptionPath = (index) => `header > div > div:nth-child(3) > div > div > a:nth-child(${index})`;
+const [NAME_ASC_INDEX, NAME_DEC_INDEX] = [1, 2];
 
 /**
  * Initial page setup tests
@@ -29,12 +32,11 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(location.search, OBJECT_TREE_PAGE_PARAM);
   });
 
-  await testParent.test('should have a tree as a table', { timeout }, async () => {
-    const tableRowPath = 'section > div > div > div > table > tbody > tr';
-    await page.waitForSelector(tableRowPath, { timeout: 1000 });
+  await testParent.test('should have a tree as a list', { timeout }, async () => {
+    await page.waitForSelector(LIST_ITEM_PATH, { timeout: 1000 });
     const rowsCount = await page.evaluate(
-      (tableRowPath) => document.querySelectorAll(tableRowPath).length,
-      tableRowPath,
+      (LIST_ITEM_PATH) => document.querySelectorAll(LIST_ITEM_PATH).length,
+      LIST_ITEM_PATH,
     );
     ok(rowsCount > 1); // more than 1 object in the tree
   });
@@ -52,8 +54,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should sort list of histograms by name in descending order', async () => {
     await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByNameOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(2)';
-    await page.locator(sortingByNameOptionPath).click();
+    await page.locator(sortOptionPath(NAME_DEC_INDEX)).click();
 
     const sorted = await page.evaluate(() => ({
       list: window.model.object.currentList,
@@ -67,8 +68,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should sort list of histograms by name in ascending order', async () => {
     await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByNameOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(1)';
-    await page.locator(sortingByNameOptionPath).click();
+    await page.locator(sortOptionPath(NAME_ASC_INDEX)).click();
     const sorted = await page.evaluate(() => ({
       list: window.model.object.currentList,
       sort: window.model.object.sortBy,
