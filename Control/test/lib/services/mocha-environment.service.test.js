@@ -195,13 +195,6 @@ describe('EnvironmentService test suite', () => {
       );
     });
 
-    it('should throw error due to issue encountered during conversion to environment info of response', async () => {
-      await assert.rejects(
-        envService.newEnvironmentAsync({ workflowTemplate: 'MISSING_ID_CASE', user }),
-        new InvalidInputError(`Unable to process payload from NewEnvironmentAsync response from ECS TypeError: Cannot destructure property 'id' of 'environment' as it is undefined.`)
-      );
-    });
-
     it('should successfully return environment id if successfully created', async () => {
       const environmentTransitioned = await envService.newEnvironmentAsync({ workflowTemplate: 'github/template/1.1.0', userVars: {keyA: 'keyA'}, user });
       assert.strictEqual(environmentTransitioned.id, ENVIRONMENT_VALID);

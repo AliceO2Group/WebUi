@@ -84,7 +84,7 @@ class EnvironmentService {
           // Issue reported: OCTRL-1012
           environment = await this.getEnvironment(id, '', false);
         } catch (error) {
-          this._logger.error(`Failed to retrieve environment ${id}: ${error}`);
+          this._logger.errorMessage(`Failed to retrieve environment ${id}: ${error}`);
         }
         if (environment) {
           if (shouldUpdateCache) {
@@ -103,7 +103,6 @@ class EnvironmentService {
       this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environmentCacheService.environments.values()]);
       return environmentList;
     } catch (error) {
-      console.log(error);
       this._logger.errorMessage(error);
     }
   }
@@ -198,23 +197,19 @@ class EnvironmentService {
       throw grpcErrorToNativeError(grpcError);
     }
 
-    try {
-      const detectorsAll = this._apricotGrpc.detectors ?? [];
-      const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
-      const environmentInfo = EnvironmentInfoAdapter.toEntity(environment, '', detectorsAll, hostsByDetector);
-      /**
-       * Transition is not yet started as per ECS, but we set the state to DEPLOYING to ensure that the UI
-       * is updated accordingly. The state will be updated once the environment is created and the transition
-       * is finished.
-       * @type {EnvironmentInfo}
-       * @property {string} currentTransition - the current transition of the environment
-       */
-      environmentInfo.currentTransition = environmentInfo.currentTransition || 'DEPLOY';
-      this._environmentCacheService.addOrUpdateEnvironment(environmentInfo, true);
-      return environmentInfo;
-    } catch (error) {
-      throw new Error(`Unable to process payload from NewEnvironmentAsync response from ECS ${error}`);
-    }
+    const detectorsAll = this._apricotGrpc.detectors ?? [];
+    const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
+    const environmentInfo = EnvironmentInfoAdapter.toEntity(environment, '', detectorsAll, hostsByDetector);
+    /**
+     * Transition is not yet started as per ECS, but we set the state to DEPLOYING to ensure that the UI
+     * is updated accordingly. The state will be updated once the environment is created and the transition
+     * is finished.
+     * @type {EnvironmentInfo}
+     * @property {string} currentTransition - the current transition of the environment
+     */
+    environmentInfo.currentTransition = environmentInfo.currentTransition || 'DEPLOY';
+    this._environmentCacheService.addOrUpdateEnvironment(environmentInfo, true);
+    return environmentInfo;
   }
 
   /**
