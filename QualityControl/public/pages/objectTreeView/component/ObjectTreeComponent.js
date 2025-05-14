@@ -12,67 +12,30 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconBarChart, iconCaretRight, iconCaretBottom } from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 import ObjectTreeModel from '../model/ObjectTreeModel.js';
 
 /**
  * Shows a tree of objects using nested lists
  * @param {ObjectTreeModel} treeModel - the model that controls this tree's state
+ * @param {Function} branchItem - function that receives an ObjectTreeModel and returns a vnode
+ * @param {Function} leafItem - function that receives a object and returns a vnode
  * @returns {vnode} - virtual node element
  */
-export default function (treeModel) {
+export default function (treeModel, branchItem, leafItem) {
   return [
     h('.heading', 'Name'),
-    h('ul.root-tree', [treeItems(treeModel)]),
+    h('ul.root-tree', treeItems(treeModel, branchItem, leafItem)),
   ];
 }
 
 /**
  * Recursively renders tree items
  * @param {ObjectTreeModel} treeModel - the model that controls this tree's state
+ * @param {Function} branchItem - function that receives an ObjectTreeModel and returns a vnode
+ * @param {Function} leafItem - function that receives a object and returns a vnode
  * @returns {Array<vnode>} - array of virtual node elements
  */
-const treeItems = (treeModel) =>
-  treeModel.children.map((child) =>
-    child instanceof ObjectTreeModel
-      ? branchItem(child)
-      : leafItem(child));
-
-/**
- * Creates a list item for a branch (folder-like node that can be expanded/collapsed)
- * @param {ObjectTreeModel} treeModel - current tree branch
- * @returns {vnode} - virtual node element
- */
-const branchItem = (treeModel) => {
-  const { name, open } = treeModel;
-
-  return h('li.object-tree-branch', { title: name }, [
-    h('div.object-selectable', { onclick: () => treeModel.toggle() }, [
-      h('span', open ? iconCaretBottom() : iconCaretRight()),
-      ' ',
-      name,
-    ]),
-    open ? h('ul.object-tree-list', treeItems(treeModel)) : null,
-  ]);
-};
-
-/**
- * Creates a list item for a leaf (end node that represents an object)
- * @param {object} leaf - the leaf object
- * @returns {vnode} - virtual node element
- */
-const leafItem = (leaf) => {
-  const { name, path } = leaf;
-  const displayName = name.split('/').pop();
-
-  return h('li.object-tree-leaf', { key: path }, [
-    h('div.object-selectable', {
-      onclick: () => model.object.select(leaf),
-      title: path,
-    }, [
-      h('span', iconBarChart()),
-      ' ',
-      displayName,
-    ]),
-  ]);
-};
+const treeItems = (treeModel, branchItem, leafItem) =>
+  treeModel.children.map((child) => child instanceof ObjectTreeModel ?
+    branchItem(child, () => treeItems(child, branchItem, leafItem)) : leafItem(child));

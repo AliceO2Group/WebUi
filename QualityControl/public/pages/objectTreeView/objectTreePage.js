@@ -14,6 +14,7 @@
 
 import { spinner } from '../../common/spinner.js';
 import virtualTable from '../../object/virtualTable.js';
+import { branchItem, leafItem } from './component/objectTreeItem.js';
 import { objectPanel, statusBarLeft, statusBarRight } from './component/objectPanel.js';
 import ObjectTreeComponent from './component/ObjectTreeComponent.js';
 import { h } from '/js/src/index.js';
@@ -42,7 +43,7 @@ export default (model) => h('.h-100.flex-column', { key: model.router.params.pag
             qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
           return virtualTable(model, 'main', objectsToDisplay);
         }
-        return ObjectTreeComponent(model.object.tree);
+        return ObjectTreeComponent(model.object.tree, branchItem, leafItem);
       },
       Failure: () => null, // Notification is displayed
     })),
