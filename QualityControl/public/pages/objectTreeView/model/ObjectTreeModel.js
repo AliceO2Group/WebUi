@@ -154,7 +154,6 @@ export default class ObjectTreeModel extends Observable {
    * @returns {undefined}
    */
   sortChildren(field, order) {
-    this.open = this.name === 'qc' ? true : false;
     this.children = this.children.sort((child1, child2) => this._compareStrings(child1[field], child2[field], order));
     this.children.forEach((child) => {
       if (child instanceof ObjectTreeModel) {
