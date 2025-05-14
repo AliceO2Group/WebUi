@@ -12,11 +12,13 @@
  * or submit itself to any jurisdiction.
 */
 
-const {grpcErrorToNativeError, NotFoundError} = require('@aliceo2/web-ui');
+const {grpcErrorToNativeError, NotFoundError, LogManager} = require('@aliceo2/web-ui');
 const {
-  RUNTIME_COMPONENT: { COG },
+  RUNTIME_COMPONENT: { COG, COG_V1 },
   RUNTIME_KEY: { RUN_TYPE_TO_HOST_MAPPING, WORKFLOW_MAPPINGS },
 } = require('./../common/kvStore/runtime.enum.js');
+
+const LOG_FACILITY = 'cog/workflow-service';
 
 /**
  * WorkflowTemplateService class to be used to retrieve data from AliEcs Core about workflow templates to be used for environment creation
@@ -30,6 +32,8 @@ class WorkflowTemplateService {
   constructor(coreGrpc, apricotGrpc) {
     this._coreGrpc = coreGrpc;
     this._apricotGrpc = apricotGrpc;
+
+    this._logger =  LogManager.getLogger(LOG_FACILITY);
   }
 
   /**
@@ -74,7 +78,7 @@ class WorkflowTemplateService {
   async retrieveWorkflowMappings() {
     let mappingsString = '';
     try {
-      mappingsString = await this._apricotGrpc.getRuntimeEntryByComponent(RUNTIME_COMPONENT.COG, RUNTIME_KEY.WORKFLOW_MAPPINGS);
+      mappingsString = await this._apricotGrpc.getRuntimeEntryByComponent(COG, WORKFLOW_MAPPINGS);
     } catch (error) {
       throw grpcErrorToNativeError(error);
     }
@@ -94,7 +98,7 @@ class WorkflowTemplateService {
   async retrieveWorkflowSavedConfiguration(name) {
     let configurationString = '';
     try {
-      configurationString = await this._apricotGrpc.getRuntimeEntryByComponent(RUNTIME_COMPONENT.COG_V1, name);
+      configurationString = await this._apricotGrpc.getRuntimeEntryByComponent(COG_V1, name);
     } catch (error) {
       throw grpcErrorToNativeError(error);
     }
