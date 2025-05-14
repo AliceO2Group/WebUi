@@ -61,4 +61,4 @@ export default (model) => {
       statusBarRight(object),
     ]),
   ]);
-}
+};

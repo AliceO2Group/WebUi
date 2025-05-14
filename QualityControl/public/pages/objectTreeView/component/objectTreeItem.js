@@ -20,17 +20,17 @@ export const branchItem = (treeModel, treeItems) => {
 };
 
 /**
- * Creates a list item for a leaf (end node that represents an object)
- * @param {object} leaf - the leaf object
+ * Creates a list item for a leafObject (end node that represents an object)
+ * @param {object} leafObject - the leaf object
  * @returns {vnode} - virtual node element
  */
-export const leafItem = (leaf) => {
-  const { name, path } = leaf;
+export const leafItem = (leafObject) => {
+  const { name, path } = leafObject;
   const displayName = name.split('/').pop();
 
-  return h('li.object-tree-leaf', { key: path }, [
+  return h('li.object-tree-leafObject', { key: path }, [
     h('div.object-selectable', {
-      onclick: () => model.object.select(leaf),
+      onclick: () => model.object.select(leafObject),
       title: path,
     }, [
       h('span', iconBarChart()),
@@ -40,15 +40,34 @@ export const leafItem = (leaf) => {
   ]);
 };
 
-// /**
-//  * Recursively renders tree items
-//  * @param {ObjectTreeModel} treeModel - the model that controls this tree's state
-//  * @param {Function} branchItem - function that receives an ObjectTreeModel and returns a vnode
-//  * @param {Function} leafItem - function that receives a object and returns a vnode
-//  * @returns {Array<vnode>} - array of virtual node elements
-//  */
-// export const treeItems = (treeModel, branchItem, leafItem) =>
-//   treeModel.children.map((child) =>
-//     child instanceof ObjectTreeModel
-//       ? branchItem(child)
-//       : leafItem(child));
+/**
+ * Creates a list item for a leafObject (end node that represents an object)
+ * @param {object} leafObject - the leafObject object
+ * @returns {vnode} - virtual node element
+ */
+export const sideTreeLeafItem = (leafObject) => {
+  const { name, path } = leafObject;
+  const { object, layout } = model;
+  const displayName = name.split('/').pop();
+  const className = leafObject === object.selected ? 'primary' : '';
+
+  const attr = {
+    title: path,
+    className,
+    onclick: () => object.select(leafObject),
+    draggable: true,
+    ondragstart: () => {
+      const newItem = layout.addItem(leafObject.name);
+      layout.moveTabObjectStart(newItem);
+    },
+    ondblclick: () => layout.addItem(leafObject.name),
+  };
+
+  return h('li.object-tree-leaf', [
+    h('div.object-selectable', attr, [
+      h('span', iconBarChart()),
+      ' ',
+      displayName,
+    ]),
+  ]);
+};

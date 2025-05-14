@@ -270,11 +270,14 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have a tree sidebar in edit mode',
     { timeout },
     async () => {
-      const secondElementPath = 'nav table tbody tr:nth-child(2)';
+      const secondElementPath = '.scroll-y ul';
       await page.locator(secondElementPath).click();
       const rowsCount = await page.evaluate((secondElementPath) =>
         document.querySelectorAll(secondElementPath).length, secondElementPath);
-      strictEqual(rowsCount, 1);
+
+      // Each subtree will have its own nested list so qc/test/object/1
+      // will inititially have 1 ul, and two after you expand the first tree
+      strictEqual(rowsCount, 2);
     },
   );
 
