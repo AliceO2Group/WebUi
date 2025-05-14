@@ -99,23 +99,22 @@ class CoreUtils {
    * @returns {EnvironmentCreation} - validated and parsed configuration 
    */
   static _removeHostsFromSelection(payload, hostsToIgnore = []) {
-    try {
-      const hostsAsString = payload?.vars?.hosts ?? '[]';
-      const hostsList = JSON.parse(hostsAsString);
-      hostsToIgnore.forEach((knownHost) => {
-        try {
-          const index = hostsList.findIndex((host) => knownHost === host);
-          if (index >= 0) {
-            hostsList.splice(index, 1);
-          }
-        } catch (error) {
-          console.error(error);
+    const hostsAsString = payload?.vars?.hosts ?? '[]';
+    const hostsList = JSON.parse(hostsAsString);
+    hostsToIgnore.forEach((knownHost) => {
+      try {
+        const index = hostsList.findIndex((host) => knownHost === host);
+        if (index >= 0) {
+          hostsList.splice(index, 1);
         }
-      });
-      payload.vars.hosts = JSON.stringify(hostsList);
-    } catch (error) {
-      console.error(error)
+      } catch (error) {
+        console.error(error);
+      }
+    });
+    if (hostsList.length === 0) {
+      throw new Error(`No hosts remained after ignoring the ones in Consul`);
     }
+    payload.vars.hosts = JSON.stringify(hostsList);
 
     return payload;
   }
