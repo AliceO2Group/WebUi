@@ -49,7 +49,8 @@ export const sideTreeLeafItem = (leafObject) => {
   const { name, path } = leafObject;
   const { object, layout } = model;
   const displayName = name.split('/').pop();
-  const className = leafObject === object.selected ? 'primary' : '';
+  // const className = leafObject === object.selected ? 'primary' : '';
+  const className = leafObject === object.selected ? 'bg-primary white' : '';
 
   const attr = {
     title: path,
