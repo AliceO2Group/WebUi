@@ -15,8 +15,8 @@
 import { Observable } from '/js/src/index.js';
 
 /**
- * This class allows to transforms objectModels names (A/B/C) into a tree that can have
- * some behaviours like open/close nodes. It also allows to update all those objectModels without creating
+ * This class allows to transforms objects names (A/B/C) into a tree that can have
+ * some behaviours like open/close nodes. It also allows to update all those objects without creating
  * a new tree.
  */
 export default class ObjectTreeModel extends Observable {
@@ -39,7 +39,7 @@ export default class ObjectTreeModel extends Observable {
   initTree(name, parent) {
     this.name = name || ''; // Like 'B'
     this.open = name === 'qc' ? true : false;
-    this.children = []; // <Array<ObjectTreeModel|ObjectModel>>
+    this.children = []; // <Array<ObjectTreeModel|object>>
     this.parent = parent || null; // <ObjectTreeModel>
     this.path = []; // Like ['A', 'B'] for node at path 'A/B' called 'B'
     this.pathString = ''; // 'A/B'
@@ -84,7 +84,7 @@ export default class ObjectTreeModel extends Observable {
 
   /**
    * Add recursively an objectModel inside a tree
-   * @param {ObjectModel} objectModel - The objectModel to be inserted, property name must exist
+   * @param {object} objectModel - The objectModel to be inserted, property name must exist
    * @param {Array.<string>} path - Path of the objectModel to dig in before assigning to a tree node,
    * if null objectModel.name is used
    * @param {Array.<string>} pathParent - Path of the current tree node, if null objectModel.name is used
@@ -137,14 +137,22 @@ export default class ObjectTreeModel extends Observable {
   }
 
   /**
-   * Add a list of objectModels by calling `addChild`
-   * @param {Array<ObjectModel>} objectModels - children to be added
+   * Add a list of objects by calling `addChild`
+   * @param {Array<object>} objects - children to be added
    * @returns {undefined}
    */
-  addChildren(objectModels) {
-    objectModels.forEach((objectModel) => this.addChild(objectModel));
+  addChildren(objects) {
+    objects.forEach((object) => this.addChild(object));
   }
 
+  /**
+   * Recursively sorts the children of this tree node by a specified field and order,
+   * and maintains the sort throughout the entire subtree. Updates the tree state
+   * and triggers a notification after sorting.
+   * @param {string} field - The property name of child objects to sort by
+   * @param {number} order - acending (1) or decending (-1)
+   * @returns {undefined}
+   */
   sortChildren(field, order) {
     this.open = this.name === 'qc' ? true : false;
     this.children = this.children.sort((child1, child2) => this._compareStrings(child1[field], child2[field], order));
