@@ -139,4 +139,38 @@ describe('WorkflowTemplateService test suite', () => {
       await assert.rejects(() => workflowTemplate.retrieveWorkflowSavedConfiguration(), new SyntaxError(`Unexpected token 'e', "template: '"... is not valid JSON`));
     });
   });
+
+  describe(`'retrieveHostsToIgnore' test suite`, async () => {
+    it('should successfully return hosts to ignore for a given run type', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().resolves(
+        JSON.stringify({ runType1: ['host1', 'host2'], runType2: ['host3'] })
+      );
+      const workflowTemplate = new WorkflowTemplateService({}, { getRuntimeEntryByComponent });
+      const hostsToIgnore = await workflowTemplate.retrieveHostsToIgnore('runType1');
+      assert.deepStrictEqual(hostsToIgnore, ['host1', 'host2']);
+    });
+    it('should return an empty array if the run type is not found', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().resolves(
+        JSON.stringify({ runType1: ['host1', 'host2'], runType2: ['host3'] })
+      );
+      const workflowTemplate = new WorkflowTemplateService({}, { getRuntimeEntryByComponent });
+      const hostsToIgnore = await workflowTemplate.retrieveHostsToIgnore('nonExistentRunType');
+      assert.deepStrictEqual(hostsToIgnore, []);
+    });
+    it('should catch an error if the returned data is not a valid JSON and return empty array', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().resolves(
+        `template: 'some config', detectors: ['TPC', 'FSA']}`
+      );
+      const workflowTemplate = new WorkflowTemplateService({}, { getRuntimeEntryByComponent });
+      const result = await workflowTemplate.retrieveHostsToIgnore('runType1');
+      assert.deepStrictEqual(result, []);
+    });
+
+    it('should catch error due to apricot service throwing not found error due to missing key', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().rejects({code: 5, details: 'Could not be found'});
+      const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
+      const result = await workflowTemplate.retrieveHostsToIgnore('runType1');
+      assert.deepStrictEqual(result, []);
+    });
+  });
 });

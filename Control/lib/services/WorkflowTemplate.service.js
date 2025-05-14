@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const {grpcErrorToNativeError, NotFoundError, LogManager} = require('@aliceo2/web-ui');
+const {grpcErrorToNativeError, NotFoundError, LogManager, LogLevel} = require('@aliceo2/web-ui');
 const {
   RUNTIME_COMPONENT: { COG, COG_V1 },
   RUNTIME_KEY: { RUN_TYPE_TO_HOST_MAPPING, WORKFLOW_MAPPINGS },
@@ -103,6 +103,50 @@ class WorkflowTemplateService {
       throw grpcErrorToNativeError(error);
     }
     return JSON.parse(configurationString);
+  }
+
+  /**
+   * Using apricot service (gRPC client), retrieve a key-value pair that contains a JSON with information on hosts to ignore per run type
+   * Then, given the run type, return a list of hosts to be ignored. If the run type is not found, an empty array is returned.
+   * @example - stored KV pair
+   * {
+   *   "runType1": ["host1", "host2"],
+   *   "runType2": ["host3", "host4"]
+   * }
+   * returns ["host1", "host2"] for runType1 and [] for runType22
+   * 
+   * Information is stored in the KV store under the key defined in variable RUN_TYPE_TO_HOST_MAPPING
+   * 
+   * As this should not block data taking operations, the function should not throw an error if the gRPC call fails
+   * or if the JSON is not valid
+   * @param {string} runType - run type for which the hosts should be ignored
+   * @return {Array<string>} - list of hosts to be ignored
+   * @throws
+   */
+  async retrieveHostsToIgnore(runType) {
+    let hostsToIgnoreString = '{}';
+    try {
+      (hostsToIgnoreString = await this._apricotGrpc.getRuntimeEntryByComponent(COG, RUN_TYPE_TO_HOST_MAPPING));
+    } catch (grpcError) {
+      this._logger.warnMessage('Failed to retrieve hosts to ignore from Consul. Deployment will continue', {
+        level: LogLevel.SUPPORT, system: 'GUI', facility: LOG_FACILITY
+      });
+      this._logger.errorMessage(grpcErrorToNativeError(grpcError));
+      return [];
+    }
+
+    try {
+      const hostsToIgnoreMap = JSON.parse(hostsToIgnoreString);
+      return Array.isArray(hostsToIgnoreMap[runType])
+        ? hostsToIgnoreMap[runType]
+        : [];
+    } catch (error) {
+      this._logger.warnMessage('Failed to parse payload about hosts to ignore from Consul. Deployment will continue', {
+        level: LogLevel.SUPPORT, system: 'GUI', facility: LOG_FACILITY
+      });
+      this._logger.errorMessage(error);
+      return [];
+    }
   }
 }
 
