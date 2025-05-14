@@ -175,6 +175,49 @@ class EnvironmentService {
   }
 
   /**
+   * Method to create a NewEnvironmentAsync request using the gRPC client. 
+   * Service is considered low-level. It is assumed that the caller has already checked the validity of the parameters.
+   * @param {NewEnvironmentRequest - o2control.proto} request - partial request object with information needed to create the environment
+   * @param {string} request.workflowTemplate - name in format `repository/revision/template`
+   * @param {Object<string, string>} request.userVars - KV string pairs to define environment configuration
+   * @param {User} request.user - user that requested the environment creation
+   * @returns {Promise.<{EnvironmentInfo}, Error>} - if operation was a success ECS will return a partialEnvironmentInfo object
+   * @throws {Error} - if the operation failed
+   */
+  async newEnvironmentAsync({ workflowTemplate, userVars, user }) {
+    let environment = undefined;
+    try {
+      ({ environment } = await this._coreGrpc.NewEnvironmentAsync({
+        workflowTemplate,
+        vars: userVars,
+        autoTransition: false,
+        requestUser: user.toEcsFormat()
+      })
+      );
+    } catch (grpcError) {
+      throw grpcErrorToNativeError(grpcError);
+    }
+
+    try {
+      const detectorsAll = this._apricotGrpc.detectors ?? [];
+      const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
+      const environmentInfo = EnvironmentInfoAdapter.toEntity(environment, '', detectorsAll, hostsByDetector);
+      /**
+       * Transition is not yet started as per ECS, but we set the state to DEPLOYING to ensure that the UI
+       * is updated accordingly. The state will be updated once the environment is created and the transition
+       * is finished.
+       * @type {EnvironmentInfo}
+       * @property {string} currentTransition - the current transition of the environment
+       */
+      environmentInfo.currentTransition = environmentInfo.currentTransition || 'DEPLOY';
+      this._environmentCacheService.addOrUpdateEnvironment(environmentInfo, true);
+      return environmentInfo;
+    } catch (error) {
+      throw new Error(`Unable to process payload from NewEnvironmentAsync response from ECS ${error}`);
+    }
+  }
+
+  /**
    * Given the workflowTemplate and variables configuration, it will generate a unique string and send all to AliECS to create a
    * new auto transitioning environment
    * @param {String} workflowTemplate - name in format `repository/revision/template`
