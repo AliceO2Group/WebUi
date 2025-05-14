@@ -25,36 +25,40 @@ import { h } from '/js/src/index.js';
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-export default (model) => h('.h-100.flex-column', { key: model.router.params.page }, [
-  h('.flex-row.flex-grow', [
-    h('.scroll-y.flex-column', {
-      style: {
-        width: model.object.selected ? '50%' : '100%',
-      },
-    }, model.object.objectsRemote.match({
-      NotAsked: () => null,
-      Loading: () =>
-        h('.absolute-fill.flex-column.items-center.justify-center.f5', [spinner(5), h('', 'Loading Objects')]),
-      Success: () => {
-        const searchInput = model.object?.searchInput?.trim() ?? '';
-        if (searchInput !== '') {
-          const objectsLoaded = model.object.list;
-          const objectsToDisplay = objectsLoaded.filter((qcObject) =>
-            qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
-          return virtualTable(model, 'main', objectsToDisplay);
-        }
-        return ObjectTreeComponent(model.object.tree, branchItem, leafItem);
-      },
-      Failure: () => null, // Notification is displayed
-    })),
-    h('.animate-width.scroll-y', {
-      style: {
-        width: model.object.selected ? '50%' : 0,
-      },
-    }, model.object.selected ? objectPanel(model) : null),
-  ]),
-  h('.f6.status-bar.ph1.flex-row', [
-    statusBarLeft(model),
-    statusBarRight(model),
-  ]),
-]);
+export default (model) => {
+  const { object } = model;
+
+  return h('.h-100.flex-column', { key: model.router.params.page }, [
+    h('.flex-row.flex-grow', [
+      h('.scroll-y.flex-column', {
+        style: {
+          width: object.selected ? '50%' : '100%',
+        },
+      }, object.objectsRemote.match({
+        NotAsked: () => null,
+        Loading: () =>
+          h('.absolute-fill.flex-column.items-center.justify-center.f5', [spinner(5), h('', 'Loading Objects')]),
+        Success: () => {
+          const searchInput = object?.searchInput?.trim() ?? '';
+          if (searchInput !== '') {
+            const objectsLoaded = object.list;
+            const objectsToDisplay = objectsLoaded.filter((qcObject) =>
+              qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
+            return virtualTable(model, 'main', objectsToDisplay);
+          }
+          return ObjectTreeComponent(object.tree, branchItem, leafItem);
+        },
+        Failure: () => null, // Notification is displayed
+      })),
+      h('.animate-width.scroll-y', {
+        style: {
+          width: object.selected ? '50%' : 0,
+        },
+      }, object.selected ? objectPanel(model) : null),
+    ]),
+    h('.f6.status-bar.ph1.flex-row', [
+      statusBarLeft(object),
+      statusBarRight(object),
+    ]),
+  ]);
+}
