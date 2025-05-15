@@ -83,10 +83,9 @@ export default class LayoutCardModel extends Observable {
    */
   _handleOfficialToggle() {
     this.isOfficial = !this.isOfficial;
-
     this.notify();
-    const { layoutListModel } = this.model;
 
+    const { layoutListModel } = this.model;
     if (this.isOfficial) {
       layoutListModel.addLayoutTo('Official', this);
     } else {

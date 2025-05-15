@@ -29,43 +29,34 @@ import { iconBadge } from '/js/src/icons.js';
  */
 export default function (layoutCardModel) {
   const { description, owner_name, id, name, isOfficial } = layoutCardModel;
+  const { router } = layoutCardModel.model;
   const isMinimumGlobal = layoutCardModel.sufficientAuthority();
   const toggleOfficialFunction = () => layoutCardModel.toggleOfficial();
 
   return h('.card', [
-    cardHeader({
-      isOfficial,
-      id,
-      name,
-      isMinimumGlobal,
-      toggleOfficialFunction,
-      router: layoutCardModel.model.router,
-    }),
+    cardHeader(isOfficial, id, name, isMinimumGlobal, toggleOfficialFunction, router),
     cardBody(owner_name, description),
   ]);
 }
 
 /**
  * Generates the card header for a layout with interactive elements including official status toggle.
- * @param {object} params - Configuration object containing:
- * @param {boolean} params.isOfficial - Indicates if the layout has official status
- * @param {string} params.id - Unique identifier for the layout
- * @param {string} params.name - Display name of the layout
- * @param {boolean} params.isMinimumGlobal - Flag for user's global permissions
- * @param {Function} params.toggleOfficialFunction - Callback for official status toggle
+ * @param {boolean} isOfficial - Indicates if the layout has official status
+ * @param {string} id - Unique identifier for the layout
+ * @param {string} name - Display name of the layout
+ * @param {boolean} isMinimumGlobal - Flag for user's global permissions
+ * @param {Function} toggleOfficialFunction - Callback for official status toggle
+ * @param {Function} router - router from the rout model
  * @returns {vnode} Virtual DOM node representing the layout card header
  */
-function cardHeader({ isOfficial, id, name, isMinimumGlobal, toggleOfficialFunction }) {
+function cardHeader(isOfficial, id, name, isMinimumGlobal, toggleOfficialFunction, router) {
   const bgColor = isOfficial ? 'bg-primary' : 'bg-gray';
   const textColor = isOfficial ? 'white' : 'black';
+  const href = `?page=layoutShow&layoutId=${id}`;
+  const clickHandeler = (e) => router.handleLinkEvent(e);
 
   return h(`.cardHeader.flex-row.justify-between.${bgColor}`, [
-    h('h5', [
-      h(`a.${textColor}`, {
-        href: `?page=layoutShow&layoutId=${id}`,
-        onclick: (e) => model.router.handleLinkEvent(e),
-      }, name),
-    ]),
+    h('h5', [h(`a.${textColor}`, { href, onclick: clickHandeler }, name)]),
     isMinimumGlobal ?
       headerButton(isOfficial, toggleOfficialFunction)
       : isOfficial && h(`span.badge.${textColor}`, [iconBadge(), ' Official']),

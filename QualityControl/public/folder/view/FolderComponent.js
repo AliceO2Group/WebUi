@@ -4,16 +4,18 @@ import LayoutListCard from '../../pages/layoutListView/components/LayoutListCard
 
 /**
  * Method to create a folder with various layouts
- * @param {object} folderModel - FolderModel: the object that is responsible for the state of the folder components.
+ * @param {FolderModel} folderModel - the object that is responsible for the state of the folder components.
  * @returns {vnode} - virtual node element
  */
 export default function (folderModel) {
   const layouts = folderModel.list;
   const searchBy = folderModel.searchInput;
+  const clickFunction = () => folderModel.toggleFolder();
+
   return h(
     '.m2.shadow-level3.br3.flex-column',
     [
-      folderHeader(folderModel),
+      folderHeader(folderModel, clickFunction),
       ' ',
       folderModel.isOpened ? folderBody(layouts, searchBy) : null,
     ],
@@ -21,17 +23,21 @@ export default function (folderModel) {
 }
 
 /**
- * Create the header of the folder
- * @param {Folder} folderModel - folder model
- * @returns {vnode} - virtual node element
+ * Creates the header section of a folder component with a click handler
+ * @param {object} params - Destructured parameters object
+ * @param {string} params.folderType - CSS class for styling the folder header
+ * @param {boolean} params.isOpened - Flag indicating if folder is expanded
+ * @param {string} params.title - Display text for the folder header
+ * @param {Function} clickFunction - Callback to execute when header is clicked
+ * @returns {vnode} - Virtual DOM node representing the folder header
  */
-function folderHeader(folderModel) {
+function folderHeader({ folderType, isOpened, title }, clickFunction) {
   return h(
-    `.p2.object-selectable.folderHeader.${folderModel.folderType}`,
-    { onclick: () => folderModel.toggleFolder() },
+    `.p2.object-selectable.folderHeader.${folderType}`,
+    { onclick: clickFunction },
     [
-      h('b', { style: 'flex-grow:1;' }, h('span', folderModel.isOpened ?
-        iconChevronTop() : iconChevronBottom()), ' ', folderModel.title),
+      h('b', { style: 'flex-grow:1;' }, h('span', isOpened ?
+        iconChevronTop() : iconChevronBottom()), ' ', title),
     ],
   );
 }

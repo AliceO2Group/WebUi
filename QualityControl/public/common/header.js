@@ -40,7 +40,7 @@ export default (model) => h('.flex-row.p2', [
  */
 const headerSpecific = (model) => {
   switch (model.page) {
-    case 'layoutList': return LayoutListHeader(model);
+    case 'layoutList': return LayoutListHeader(model.layoutListModel);
     case 'layoutShow': return layoutViewHeader(model);
     case 'objectTree': return objectTreeHeader(model);
     case 'about': return aboutViewHeader();
