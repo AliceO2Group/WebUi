@@ -7,9 +7,9 @@ import { h, iconBarChart, iconCaretRight, iconCaretBottom } from '/js/src/index.
  * @returns {vnode} - virtual node element
  */
 export const branchItem = (treeModel, treeItems) => {
-  const { name, open } = treeModel;
+  const { name, open, pathString } = treeModel;
 
-  return h('li.object-tree-branch', { title: name }, [
+  return h('li.object-tree-branch', { key: pathString, title: pathString, id: pathString }, [
     h('div.object-selectable', { onclick: () => treeModel.toggle() }, [
       h('span', open ? iconCaretBottom() : iconCaretRight()),
       ' ',
@@ -25,13 +25,13 @@ export const branchItem = (treeModel, treeItems) => {
  * @returns {vnode} - virtual node element
  */
 export const leafItem = (leafObject) => {
-  const { name, path } = leafObject;
+  const { name } = leafObject;
   const displayName = name.split('/').pop();
 
-  return h('li.object-tree-leafObject', { key: path }, [
+  return h('li.object-tree-leafObject', { key: name, title: name, id: name }, [
     h('div.object-selectable', {
       onclick: () => model.object.select(leafObject),
-      title: path,
+      title: name,
     }, [
       h('span', iconBarChart()),
       ' ',
@@ -46,14 +46,15 @@ export const leafItem = (leafObject) => {
  * @returns {vnode} - virtual node element
  */
 export const sideTreeLeafItem = (leafObject) => {
-  const { name, path } = leafObject;
+  const { name } = leafObject;
   const { object, layout } = model;
   const displayName = name.split('/').pop();
-  // const className = leafObject === object.selected ? 'primary' : '';
   const className = leafObject === object.selected ? 'bg-primary white' : '';
 
   const attr = {
-    title: path,
+    key: name,
+    title: name,
+    id: name,
     className,
     onclick: () => object.select(leafObject),
     draggable: true,
