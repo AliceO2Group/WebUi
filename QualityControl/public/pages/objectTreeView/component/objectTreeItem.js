@@ -22,15 +22,16 @@ export const branchItem = (treeModel, treeItems) => {
 /**
  * Creates a list item for a leafObject (end node that represents an object)
  * @param {object} leafObject - the leaf object
+ * @param {QCObject} object - object managing model
  * @returns {vnode} - virtual node element
  */
-export const leafItem = (leafObject) => {
+export const leafItem = (leafObject, object) => {
   const { name } = leafObject;
   const displayName = name.split('/').pop();
 
   return h('li.object-tree-leafObject', { key: name, title: name, id: name }, [
     h('div.object-selectable', {
-      onclick: () => model.object.select(leafObject),
+      onclick: () => object.select(leafObject),
       title: name,
     }, [
       h('span', iconBarChart()),
@@ -43,11 +44,12 @@ export const leafItem = (leafObject) => {
 /**
  * Creates a list item for a leafObject (end node that represents an object)
  * @param {object} leafObject - the leafObject object
+ * @param {QCObject} object - object managing model
+ * @param {QCObject} layout - layout managing model
  * @returns {vnode} - virtual node element
  */
-export const sideTreeLeafItem = (leafObject) => {
+export const sideTreeLeafItem = (leafObject, object, layout) => {
   const { name } = leafObject;
-  const { object, layout } = model;
   const displayName = name.split('/').pop();
   const className = leafObject === object.selected ? 'bg-primary white' : '';
 

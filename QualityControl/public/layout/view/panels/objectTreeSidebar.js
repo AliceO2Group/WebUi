@@ -26,13 +26,15 @@ import { branchItem, sideTreeLeafItem } from '../../../pages/objectTreeView/comp
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-export default (model) =>
-  model.services.object.list.match({
+export default (model) =>{
+  const { object, layout } = model;
+  const { searchInput = '', sideTree } = object;
+
+  return model.services.object.list.match({
     NotAsked: () => null,
     Loading: () => h('.flex-column.items-center', [spinner(2), h('.f6', 'Loading Objects')]),
     Success: (objects) => {
       let objectsToDisplay = [];
-      const { searchInput = '' } = model.object;
       if (searchInput.trim() !== '') {
         objectsToDisplay = objects.filter((qcObject) =>
           qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
@@ -43,7 +45,7 @@ export default (model) =>
           '.scroll-y',
           searchInput.trim() !== ''
             ? virtualTable(model, 'side', objectsToDisplay)
-            : ObjectTreeComponent(model.object.sideTree, branchItem, sideTreeLeafItem),
+            : ObjectTreeComponent(sideTree, branchItem, (leafObject) => sideTreeLeafItem(leafObject, object, layout)),
         ),
         objectPreview(model),
       ];
@@ -53,6 +55,7 @@ export default (model) =>
       h('', error.message),
     ]),
   });
+};
 
 /**
  * An input which allows users to search though objects;

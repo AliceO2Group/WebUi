@@ -26,15 +26,12 @@ import { h } from '/js/src/index.js';
  * @returns {vnode} - virtual node element
  */
 export default (model) => {
-  const { object } = model;
+  const { object, router } = model;
+  const treeWidthClass = object.selected ? '.w-50' : '.w-100';
 
-  return h('.h-100.flex-column', { key: model.router.params.page }, [
+  return h('.h-100.flex-column', { key: router.params.page }, [
     h('.flex-row.flex-grow', [
-      h('.scroll-y.flex-column', {
-        style: {
-          width: object.selected ? '50%' : '100%',
-        },
-      }, object.objectsRemote.match({
+      h(`.scroll-y.flex-column${treeWidthClass}`, object.objectsRemote.match({
         NotAsked: () => null,
         Loading: () =>
           h('.absolute-fill.flex-column.items-center.justify-center.f5', [spinner(5), h('', 'Loading Objects')]),
@@ -46,15 +43,11 @@ export default (model) => {
               qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
             return virtualTable(model, 'main', objectsToDisplay);
           }
-          return ObjectTreeComponent(object.tree, branchItem, leafItem);
+          return ObjectTreeComponent(object.tree, branchItem, (leafObject) => leafItem(leafObject, object));
         },
         Failure: () => null, // Notification is displayed
       })),
-      h('.animate-width.scroll-y', {
-        style: {
-          width: object.selected ? '50%' : 0,
-        },
-      }, object.selected ? objectPanel(model) : null),
+      h(`.animate-width.scroll-y${treeWidthClass}`, object.selected ? objectPanel(model) : null),
     ]),
     h('.f6.status-bar.ph1.flex-row', [
       statusBarLeft(object),
