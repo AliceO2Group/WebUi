@@ -59,7 +59,7 @@ function folderBody(layouts, searchBy) {
       }
       return h(
         '.cardGrid',
-        list.filter((item) => item.name.match(searchBy)).map((layoutCard) => LayoutListCard(layoutCard)),
+        list.filter((item) => item.name.match(searchBy)).map(LayoutListCard),
       );
     },
   });

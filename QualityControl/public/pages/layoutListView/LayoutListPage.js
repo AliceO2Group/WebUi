@@ -23,5 +23,5 @@ import { h } from '/js/src/index.js';
 export default function (folderModels) {
   return h('.scroll-y.absolute-fill', {
     style: 'display: flex; flex-direction: column',
-  }, Array.from(folderModels.values()).map((folderModel) => FolderComponent(folderModel)));
+  }, Array.from(folderModels.values()).map(FolderComponent));
 }
