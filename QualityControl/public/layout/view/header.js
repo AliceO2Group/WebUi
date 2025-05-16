@@ -20,25 +20,26 @@ import {
 
 /**
  * Shows header of page showing one layout with edit button, and other buttons in edit mode. (center and right)
- * @param {Model} model - root model of the application
+ * @param {Layout} layout - the model that handles the object state.
  * @returns {vnode} - virtual node element
  */
-export default (model) => model.layout.item
-  ? model.layout.editEnabled ? toolbarEditMode(model) : toolbarViewMode(model)
+export default (layout) => layout.item
+  ? layout.editEnabled ? toolbarEditMode(layout) : toolbarViewMode(layout)
   : null;
 
 /**
  * This is the toolbar in view mode (center and right)
- * @param {Model} model - root model of the application
+ * @param {Layout} layout - the model that handles the object state.
  * @returns {vnode} - virtual node element
  */
-const toolbarViewMode = (model) => {
-  const layoutItem = model.layout.item;
-  const { isOfficial } = layoutItem;
+const toolbarViewMode = (layout) => {
+  const layoutItem = layout.item;
+  const { isOfficial, owner_id, name } = layoutItem;
+
   return [
     h(
       '.w-50.text-center',
-      h('div.header-layout', [layoutItem.tabs.map((tab, i) => toolbarViewModeTab(model, tab, i))]),
+      h('div.header-layout', [layoutItem.tabs.map((tab, i) => toolbarViewModeTab(layout, tab, i))]),
     ),
     h('.flex-grow.text-right', [
       h('b.f4.items-center', [
@@ -51,33 +52,33 @@ const toolbarViewMode = (model) => {
         h('button.btn.btn-default', {
           onclick: () => {
             const nameForNewLayout = prompt('Choose a name for the new layout:').trim();
-            model.layout.duplicate(nameForNewLayout);
+            layout.duplicate(nameForNewLayout);
           },
           title: 'Duplicate layout',
         }, iconLayers()),
         h('a.btn.btn-default', {
           title: 'Export layout skeleton as JSON file',
           href: `data:application/octet;,${encodeURIComponent(LayoutUtils.toSkeleton(layoutItem))}`,
-          download: `layout-${layoutItem.name}-skeleton.json`,
+          download: `layout-${name}-skeleton.json`,
         }, iconShareBoxed()),
-        model.session.personid == layoutItem.owner_id && [
+        layout.ownsLayout(owner_id) && [
           h('.dropdown', {
             title: 'Edit layout',
-            class: model.layout.isEditLayoutDropdownOpen ? 'dropdown-open' : '',
+            class: layout.isEditLayoutDropdownOpen ? 'dropdown-open' : '',
           }, [
-            h('button.btn.btn-primary', { onclick: () => model.layout.toggleEditMenu() }, iconPencil()),
+            h('button.btn.btn-primary', { onclick: () => layout.toggleEditMenu() }, iconPencil()),
             h('.dropdown-menu.right-menu', [
               h('.text-ellipsis', [
-                h('a.menu-item', { title: 'Edit via GUI', onclick: () => model.layout.edit() }, 'Edit via GUI'),
+                h('a.menu-item', { title: 'Edit via GUI', onclick: () => layout.edit() }, 'Edit via GUI'),
                 h('a.menu-item', {
                   title: 'Edit via JSON',
-                  onclick: () => model.layout.initializeEditViaJson(),
+                  onclick: () => layout.initializeEditViaJson(),
                 }, 'Edit via JSON'),
               ]),
             ]),
           ]),
           h('button.btn.btn-danger', {
-            onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem(),
+            onclick: () => confirm('Are you sure to delete this layout?') && layout.deleteItem(),
             title: 'Delete layout',
           }, iconTrash()),
         ],
@@ -88,19 +89,19 @@ const toolbarViewMode = (model) => {
 
 /**
  * Single tab button in view mode to change tab of current layout
- * @param {Model} model - root model of the application
+ * @param {Layout} layout - the model that handles the object state.
  * @param {object} tab - tab dto representation
  * @param {object} i - index of tab in the model array of tabs
  * @returns {vnode} - virtual node element
  */
-const toolbarViewModeTab = (model, tab, i) => {
-  const linkClass = model.layout.tab.name === tab.name ? 'selected' : '';
+const toolbarViewModeTab = (layout, tab, i) => {
+  const linkClass = layout.tab.name === tab.name ? 'selected' : '';
 
   /**
    * Handler when user click on a tab to select it
    * @returns {undefined}
    */
-  const selectTab = () => model.layout.selectTab(i);
+  const selectTab = () => layout.selectTab(i);
 
   return [
     h('button.br-pill.ph2.btn.btn-tab', { class: linkClass, onclick: selectTab }, tab.name),
@@ -110,13 +111,13 @@ const toolbarViewModeTab = (model, tab, i) => {
 
 /**
  * Toolbar in edit mode (center and right) with rename, trash, save buttons
- * @param {Model} model - root model of the application
+ * @param {Layout} layout - the model that handles the object state.
  * @returns {vnode} - virtual node element
  */
-const toolbarEditMode = (model) => [
+const toolbarEditMode = (layout) => [
   h('.w-50.text-center', [
     h('div', { class: 'header-layout' }, [
-      h('span', model.layout.item.tabs.map((tab, i) => toolbarEditModeTab(model, tab, i))),
+      h('span', layout.item.tabs.map((tab, i) => toolbarEditModeTab(layout, tab, i))),
       h('.btn-group', [
         tabBtn({
           title: 'Add new tab to this layout',
@@ -124,7 +125,7 @@ const toolbarEditMode = (model) => [
           onclick: () => {
             const name = prompt('Enter the name of the new tab:');
             if (name) {
-              model.layout.newTab(name);
+              layout.newTab(name);
             }
           },
         }, iconPlus()),
@@ -134,18 +135,18 @@ const toolbarEditMode = (model) => [
   h('.flex-grow.text-right', [
     h('input.form-control.form-inline', {
       type: 'text',
-      value: model.layout.item.name,
+      value: layout.item.name,
       oninput: (e) => {
-        model.layout.item.name = e.target.value.trim();
+        layout.item.name = e.target.value.trim();
       },
     }),
     h('.btn-group.m1', [
       h('button.btn.btn-primary', {
-        onclick: () => model.layout.save(),
+        onclick: () => layout.save(),
         title: 'Save layout',
       }, iconCheck()),
       h('button.btn', {
-        onclick: () => model.layout.cancelEdit(),
+        onclick: () => layout.cancelEdit(),
         title: 'Cancel',
       }, iconBan()),
     ]),
@@ -154,20 +155,20 @@ const toolbarEditMode = (model) => [
 
 /**
  * Single tab button in edit mode (with rename and trash buttons when selected)
- * @param {Model} model - root model of the application
+ * @param {Layout} layout - the model that handles the object state.
  * @param {object} tab - tab dto representation
  * @param {object} i - index of tab in array of model
  * @returns {vnode} - virtual node element
  */
-const toolbarEditModeTab = (model, tab, i) => {
-  const selected = model.layout.tab.name === tab.name;
+const toolbarEditModeTab = (layout, tab, i) => {
+  const selected = layout.tab.name === tab.name;
   const linkClass = selected ? 'selected' : '';
 
   /**
    * Handler when user click on a tab to select it
    * @returns {undefined}
    */
-  const selectTab = () => model.layout.selectTab(i);
+  const selectTab = () => layout.selectTab(i);
 
   /**
    * Handler when user click on rename icon
@@ -176,7 +177,7 @@ const toolbarEditModeTab = (model, tab, i) => {
   const renameTab = () => {
     const newName = prompt('Enter a new name for this tab:', tab.name);
     if (newName) {
-      model.layout.renameTab(i, newName);
+      layout.renameTab(i, newName);
     }
   };
 
@@ -189,10 +190,10 @@ const toolbarEditModeTab = (model, tab, i) => {
           onclick: renameTab,
           title: 'Rename tab',
         }, iconPencil()),
-        resizeGridTabDropDown(model, tab),
+        resizeGridTabDropDown(layout, tab),
         h('button.br-pill.ph2.btn.btn-tab', {
           class: linkClass,
-          onclick: () => model.layout.deleteTab(i),
+          onclick: () => layout.deleteTab(i),
           title: 'Delete tab',
         }, iconTrash()),
       ],
@@ -203,22 +204,17 @@ const toolbarEditModeTab = (model, tab, i) => {
 
 /**
  * Dropdown for resizing the tab of a layout
- * @param {Model} model - root model of the application
+ * @param {Layout} layout - the model that handles the object state.
  * @param {object} tab - tab dto representation
  * @returns {vnode} - virtual node element
  */
-const resizeGridTabDropDown = (model, tab) =>
+const resizeGridTabDropDown = (layout, tab) =>
   h('select.form-control.select-tab', {
     style: 'cursor: pointer',
     title: 'Resize grid of the tab',
-    onchange: (e) => model.layout.resizeGridByXY(e.target.value),
-  }, [
-    h('option', { selected: tab && tab.columns === 1, title: 'Resize layout to 1 columns', value: 1 }, '1 cols'),
-    h('option', { selected: tab && tab.columns === 2, title: 'Resize layout to 2 columns', value: 2 }, '2 cols'),
-    h('option', { selected: tab && tab.columns === 3, title: 'Resize layout to 3 columns', value: 3 }, '3 cols'),
-    h('option', { selected: tab && tab.columns === 4, title: 'Resize layout to 4 columns', value: 4 }, '4 cols'),
-    h('option', { selected: tab && tab.columns === 5, title: 'Resize layout to 5 columns', value: 5 }, '5 cols'),
-  ]);
+    onchange: (e) => layout.resizeGridByXY(e.target.value),
+  }, [1, 2, 3, 4, 5].map((i) =>
+    h('option', { selected: tab?.columns === i, title: `Resize layout to ${i} columns`, value: 1 }, `${i} cols`)));
 
 /**
  * Single tab button

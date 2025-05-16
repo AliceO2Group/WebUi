@@ -808,4 +808,14 @@ export default class Layout extends Observable {
     this.setFilterToURL();
     this.selectTab(this.tabIndex);
   }
+
+  /**
+   * Determines whether the current authenticated user owns the specified layout.
+   * Compares the current session user's person ID with the owner ID of the given layout item to verify ownership.
+   * @param {object} layoutOwnerId - The layout item to check ownership against. Must contain an `owner_id` property.
+   * @returns {boolean}  whether the current user's person ID matches the layout's owner ID
+   */
+  ownsLayout(layoutOwnerId) {
+    return this.model.session.personid == layoutOwnerId;
+  }
 }
