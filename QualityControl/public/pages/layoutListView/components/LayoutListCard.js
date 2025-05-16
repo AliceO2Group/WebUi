@@ -53,10 +53,10 @@ function cardHeader(isOfficial, id, name, isMinimumGlobal, toggleOfficialFunctio
   const bgColor = isOfficial ? 'bg-primary' : 'bg-gray';
   const textColor = isOfficial ? 'white' : 'black';
   const href = `?page=layoutShow&layoutId=${id}`;
-  const clickHandeler = (e) => router.handleLinkEvent(e);
+  const clickHandler = (e) => router.handleLinkEvent(e);
 
   return h(`.cardHeader.flex-row.justify-between.${bgColor}`, [
-    h('h5', [h(`a.${textColor}`, { href, onclick: clickHandeler }, name)]),
+    h('h5', [h(`a.${textColor}`, { href, onclick: clickHandler }, name)]),
     isMinimumGlobal ?
       headerButton(isOfficial, toggleOfficialFunction)
       : isOfficial && h(`span.badge.${textColor}`, [iconBadge(), ' Official']),

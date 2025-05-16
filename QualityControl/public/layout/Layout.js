@@ -812,7 +812,7 @@ export default class Layout extends Observable {
   /**
    * Determines whether the current authenticated user owns the specified layout.
    * Compares the current session user's person ID with the owner ID of the given layout item to verify ownership.
-   * @param {object} layoutOwnerId - The layout item to check ownership against. Must contain an `owner_id` property.
+   * @param {number} layoutOwnerId - The owner id to check ownership against.
    * @returns {boolean}  whether the current user's person ID matches the layout's owner ID
    */
   ownsLayout(layoutOwnerId) {
