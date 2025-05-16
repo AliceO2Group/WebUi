@@ -194,18 +194,15 @@ export const ccdbServiceTestSuite = async () => {
         deepStrictEqual(objectsRetrieved, expectedObjects, 'Received objects are not alike');
       });
 
-      test('should sanitise empty strings and whitespaces', async () => {
+      test('should remove objects whos name contains empty strings and whitespaces', async () => {
         const ccdb = new CcdbService(ccdbConfig);
         const subfolders = [
           'object/ one',
           'object /two',
           'object/three/',
+          'object/valid',
         ];
-        const expectedObjects = [
-          { path: 'object/<invalid-name>' },
-          { path: '<invalid-name>/two' },
-          { path: 'object/three/<invalid-name>' },
-        ];
+        const expectedObjects = [{ path: 'object/valid' }];
 
         nock('http://ccdb-local:8083', {
           reqheaders: { Accept: 'application/json' },
