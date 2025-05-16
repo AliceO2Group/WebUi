@@ -29,9 +29,10 @@ function isValidPath(path) {
   }
 
   let segmentStart = 0;
+  let char = '';
+  for (let i = 0; i <= path.length; i++) {
+    char = path[i];
 
-  for (let i = 0; i < path.length; i++) {
-    const char = path[i];
     if (i === path.length || char === '/') {
       const segment = path.slice(segmentStart, i);
       const hasWhitespace = /\s/.test(segment);
@@ -45,6 +46,11 @@ function isValidPath(path) {
       }
       segmentStart = i + 1;
     }
+  }
+
+  if (char === '/') {
+    logger.debugMessage(`Invalid path: Path ends with a slash (${path})`);
+    return false;
   }
 
   return true;
@@ -72,4 +78,5 @@ export const qcObjectNameArrayDto = Joi.array()
     }
 
     return filtered;
-  }, 'QC Object Array Validator');
+  }, 'QC Object Array Validator')
+  .options({ stripUnknown: { arrays: true } });

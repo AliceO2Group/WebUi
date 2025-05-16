@@ -199,7 +199,8 @@ export const ccdbServiceTestSuite = async () => {
         const subfolders = [
           'object/ one',
           'object /two',
-          'object/three/',
+          'object//three',
+          'object/four/',
           'object/valid',
         ];
         const expectedObjects = [{ path: 'object/valid' }];

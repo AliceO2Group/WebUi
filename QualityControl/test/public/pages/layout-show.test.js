@@ -272,12 +272,13 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     async () => {
       const secondElementPath = '.scroll-y ul';
       await page.locator(secondElementPath).click();
+      await delay(50); // to let the list unfold
       const rowsCount = await page.evaluate((secondElementPath) =>
         document.querySelectorAll(secondElementPath).length, secondElementPath);
 
+      strictEqual(rowsCount, 3);
       // Each subtree will have its own nested list so qc/test/object/1
-      // will inititially have 1 ul, and two after you expand the first tree
-      strictEqual(rowsCount, 2);
+      // will inititially have 1 ul, and two after you expand the first tree, three if you expand the one after.
     },
   );
 
