@@ -21,17 +21,18 @@ export const branchItem = (treeModel, treeItems) => {
 
 /**
  * Creates a list item for a leafObject (end node that represents an object)
- * @param {object} leafObject - the leaf object
- * @param {QCObject} object - object managing model
+ * @param {object} leafObject - a leaf object that has a name property in the path format
+ * eg. 'qc/test/object/1'
+ * @param {QCObject} qcObject - object managing model
  * @returns {vnode} - virtual node element
  */
-export const leafItem = (leafObject, object) => {
+export const leafItem = (leafObject, qcObject) => {
   const { name } = leafObject;
   const displayName = name.split('/').pop();
 
   return h('li.object-tree-leafObject', { key: name, title: name, id: name }, [
     h('div.object-selectable', {
-      onclick: () => object.select(leafObject),
+      onclick: () => qcObject.select(leafObject),
       title: name,
     }, [
       h('span', iconBarChart()),
@@ -44,21 +45,21 @@ export const leafItem = (leafObject, object) => {
 /**
  * Creates a list item for a leafObject (end node that represents an object)
  * @param {object} leafObject - the leafObject object
- * @param {QCObject} object - object managing model
+ * @param {QCObject} qcObject - object managing model
  * @param {QCObject} layout - layout managing model
  * @returns {vnode} - virtual node element
  */
-export const sideTreeLeafItem = (leafObject, object, layout) => {
+export const sideTreeLeafItem = (leafObject, qcObject, layout) => {
   const { name } = leafObject;
   const displayName = name.split('/').pop();
-  const className = leafObject === object.selected ? 'bg-primary white' : '';
+  const className = leafObject === qcObject.selected ? 'bg-primary white' : '';
 
   const attr = {
     key: name,
     title: name,
     id: name,
     className,
-    onclick: () => object.select(leafObject),
+    onclick: () => qcObject.select(leafObject),
     draggable: true,
     ondragstart: () => {
       const newItem = layout.addItem(name);
