@@ -30,7 +30,7 @@ function isValidPath(path) {
 
   let segmentStart = 0;
 
-  for (let i = 0; i <= path.length; i++) {
+  for (let i = 0; i < path.length; i++) {
     const char = path[i];
     if (i === path.length || char === '/') {
       const segment = path.slice(segmentStart, i);
