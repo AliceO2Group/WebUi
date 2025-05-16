@@ -26,8 +26,8 @@ import { h } from '/js/src/index.js';
  * @returns {vnode} - virtual node element
  */
 export default (model) => {
-  const { object, router } = model;
-  const treeWidthClass = object.selected ? '.w-50' : '.w-100';
+  const { object, router, selected } = model;
+  const treeWidthClass = selected ? '.w-50' : '.w-100';
 
   return h('.h-100.flex-column', { key: router.params.page }, [
     h('.flex-row.flex-grow', [
@@ -47,7 +47,7 @@ export default (model) => {
         },
         Failure: () => null, // Notification is displayed
       })),
-      h(`.animate-width.scroll-y${treeWidthClass}`, object.selected ? objectPanel(model) : null),
+      selected && h(`.animate-width.scroll-y${treeWidthClass}`, objectPanel(model)),
     ]),
     h('.f6.status-bar.ph1.flex-row', [
       statusBarLeft(object),
