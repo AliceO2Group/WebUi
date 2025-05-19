@@ -17,13 +17,20 @@ import { mount, sessionService } from '/js/src/index.js';
 import view from './view.js';
 import Model from './Model.js';
 
+const { host } = window.location;
+const envMap = {
+  'localhost:8090': 'dev',
+  'localhost:8081': 'test',
+};
+
 sessionService.loadAndHideParameters();
-window.sessionService = sessionService;
 
 // Start application
 const model = new Model();
 const debug = true; // Shows when redraw is done
 mount(document.body, view, model, debug);
 
-// Expose model to interact with it the browser's console
-window.model = model;
+if (envMap[host] === 'dev') {
+  window.sessionService = sessionService;
+  window.model = model;
+}
