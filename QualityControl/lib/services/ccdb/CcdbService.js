@@ -135,7 +135,7 @@ export class CcdbService {
       accept: 'application/json',
       'x-filter-fields': fields.length > 0 ? fields.join(',') : `${PATH},${CREATED},${LAST_MODIFIED}`,
     };
-    const { objects } = await httpGetJson(this._hostname, this._port, `/latest/${prefix}.*`, headers);
+    const { objects } = await httpGetJson(this._hostname, this._port, `/latest/${prefix}.*`, { headers });
     return objects;
   }
 
@@ -155,7 +155,7 @@ export class CcdbService {
       'Browse-Limit': `${limit}`,
     };
     const path = `/browse${this._buildCcdbUrlPath(identification)}`;
-    const { objects } = await httpGetJson(this._hostname, this._port, path, headers);
+    const { objects } = await httpGetJson(this._hostname, this._port, path, { headers });
     return objects.map((object) => (
       {
         [VALID_FROM]: parseInt(object[VALID_FROM], 10),
@@ -182,7 +182,7 @@ export class CcdbService {
     };
     const url = `/latest${this._buildCcdbUrlPath(partialIdentification)}`;
 
-    const result = await httpGetJson(this._hostname, this._port, url, headers);
+    const result = await httpGetJson(this._hostname, this._port, url, { headers });
     if (result?.objects?.length > 0) {
       const [qcObject] = result.objects;
       return {
@@ -252,7 +252,7 @@ export class CcdbService {
     };
     try {
       const url = `/latest${this._buildCcdbUrlPath(identification)}`;
-      const { objects } = await httpGetJson(this._hostname, this._port, url, timestampHeaders);
+      const { objects } = await httpGetJson(this._hostname, this._port, url, { headers: timestampHeaders });
       if (objects?.length <= 0) {
         throw new Error(`No object found for: ${path}`);
       }

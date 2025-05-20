@@ -60,6 +60,9 @@ export function httpGetJson(hostname, port, path, options) {
     rejectMessage: 'Non-2xx status code: ',
     protocol: 'http:',
     rejectUnauthorized: true,
+    headers: {
+      Accept: 'application/json',
+    },
     ...options ?? {},
   };
   return new Promise((resolve, reject) => {
@@ -69,9 +72,7 @@ export function httpGetJson(hostname, port, path, options) {
       path,
       method: 'GET',
       rejectUnauthorized: Boolean(options.rejectUnauthorized),
-      headers: {
-        Accept: 'application/json',
-      } };
+      headers: options.headers };
 
     /**
      * Generic handler for client http requests,
