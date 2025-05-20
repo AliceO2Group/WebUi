@@ -121,11 +121,9 @@ export const initializeNockForCcdb = () => {
   nock(CCDB_URL)
     .persist()
     .get(`${CCDB_API_DOWNLOAD_ROOT_OBJECT.path}/${CCDB_API_DOWNLOAD_ROOT_OBJECT.id}`)
-    .reply(200, async () => {
-      // Define the file path
+    .reply(async () => {
       const filePath = path.resolve(CCDB_API_DOWNLOAD_ROOT_OBJECT.objectPath);
-      // Read the content of the file
       const fileContent = await fs.readFile(filePath);
-      return fileContent;
+      return [200, fileContent, { 'Content-Length': fileContent.length.toString() }];
     });
 };
