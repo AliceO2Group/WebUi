@@ -45,12 +45,12 @@
     "umzug": "^3.8.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.26.0",
+    "@eslint/js": "^9.27.0",
     "@stylistic/eslint-plugin-js": "^4.2.0",
-    "eslint": "^9.26.0",
+    "eslint": "^9.27.0",
     "eslint-plugin-jsdoc": "^50.6.0",
     "globals": "^16.1.0",
-    "nock": "^13.5.4",
+    "nock": "^14.0.4",
     "puppeteer": "^24.8.1",
     "sequelize-cli": "^6.6.2",
     "sinon": "^20.0.0",
