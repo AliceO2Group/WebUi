@@ -71,11 +71,8 @@ export class BookkeepingService {
       logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
       return;
     }
-    try {
-      await this.simulateConnection();
-      this.active = true;
-    } catch (e) {
-      this.error = `Failed to connect to bookkeeping service: ${e.message}`;
+    this.active = await this.simulateConnection();
+    if (!this.active) {
       logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
     }
   }
@@ -98,8 +95,10 @@ export class BookkeepingService {
       if (data && data?.status?.ok && data?.status?.configured) {
         logger.infoMessage('Successfully connected to Bookkeeping');
         return true;
+      } else {
+        this.error = 'Bookkeeping service is not configured or status is not OK';
+        return false;
       }
-      return false;
     } catch (err) {
       this.error = `Error trying to connect to Bookkeeping: ${err || err.message}`;
       return false;
