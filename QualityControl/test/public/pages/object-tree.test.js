@@ -11,7 +11,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, ok } from 'node:assert';
+import { strictEqual, ok, deepStrictEqual } from 'node:assert';
+import { delay } from '../../testUtils/delay.js';
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
 const SORTING_BUTTON_PATH = 'header > div > div:nth-child(3) > div > button';
 const LIST_ITEM_PATH = 'ul > li';
@@ -48,35 +49,36 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should have first element in tree as "qc/test/object/1"', async () => {
-    const { name } = await page.evaluate(() => window.model.object.currentList[0]);
-    strictEqual(name, 'qc/test/object/1');
+    await page.locator('[title="qc/test"]>div').click();
+    await page.locator('[title="qc/test/object"]>div').click();
+    await delay(50); // Wait for expansion to finish
+
+    const objectIds = await page.evaluate(() =>
+      [...document.querySelectorAll('[title="qc/test/object"] li')].map((e)=> e.id));
+
+    deepStrictEqual(objectIds, ['qc/test/object/1', 'qc/test/object/11', 'qc/test/object/2']);
   });
 
-  await testParent.test('should sort list of histograms by name in descending order', async () => {
+  await testParent.test('should sort list of objects by name in descending order', async () => {
     await page.locator(SORTING_BUTTON_PATH).click();
     await page.locator(sortOptionPath(NAME_DEC_INDEX)).click();
+    await delay(50); // Wait for sort to finish
 
-    const sorted = await page.evaluate(() => ({
-      list: window.model.object.currentList,
-      sort: window.model.object.sortBy,
-    }));
-    strictEqual(sorted.sort.title, 'Name');
-    strictEqual(sorted.sort.order, -1);
-    strictEqual(sorted.sort.field, 'name');
-    strictEqual(sorted.list[0].name, 'qc/test/object/2');
+    const objectIds = await page.evaluate(() =>
+      [...document.querySelectorAll('[title="qc/test/object"] li')].map((e)=> e.id));
+
+    deepStrictEqual(objectIds, ['qc/test/object/2', 'qc/test/object/11', 'qc/test/object/1']);
   });
 
-  await testParent.test('should sort list of histograms by name in ascending order', async () => {
+  await testParent.test('should sort list of objects by name in ascending order', async () => {
     await page.locator(SORTING_BUTTON_PATH).click();
     await page.locator(sortOptionPath(NAME_ASC_INDEX)).click();
-    const sorted = await page.evaluate(() => ({
-      list: window.model.object.currentList,
-      sort: window.model.object.sortBy,
-    }));
-    strictEqual(sorted.sort.title, 'Name');
-    strictEqual(sorted.sort.order, 1);
-    strictEqual(sorted.sort.field, 'name');
-    strictEqual(sorted.list[0].name, 'qc/test/object/1');
+    await delay(50); // Wait for sort to finish
+
+    const objectIds = await page.evaluate(() =>
+      [...document.querySelectorAll('[title="qc/test/object"] li')].map((e)=> e.id));
+
+    deepStrictEqual(objectIds, ['qc/test/object/1', 'qc/test/object/11', 'qc/test/object/2']);
   });
 
   await testParent.test('should have filtered results on input search', async () => {
