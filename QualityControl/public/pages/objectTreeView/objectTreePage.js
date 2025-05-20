@@ -26,7 +26,8 @@ import { h } from '/js/src/index.js';
  * @returns {vnode} - virtual node element
  */
 export default (model) => {
-  const { object, router, selected } = model;
+  const { object, router } = model;
+  const { selected } = object;
   const treeWidthClass = selected ? '.w-50' : '.w-100';
 
   return h('.h-100.flex-column', { key: router.params.page }, [
