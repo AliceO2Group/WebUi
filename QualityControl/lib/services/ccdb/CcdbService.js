@@ -84,7 +84,7 @@ export class CcdbService {
     let serviceInfo = {};
     try {
       const path = `/monitor/${CCDB_MONITOR}/.*/${CCDB_VERSION_KEY}`;
-      serviceInfo = await httpGetJson(this._hostname, this._port, path, { Accept: 'application/json' });
+      serviceInfo = await httpGetJson(this._hostname, this._port, path, { headers: { Accept: 'application/json' } });
     } catch (error) {
       throw new Error(`Unable to connect to CCDB due to: ${error}`);
     }
