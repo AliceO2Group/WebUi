@@ -15,6 +15,7 @@
 import { LogManager } from '@aliceo2/web-ui';
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/utils`);
 import http from 'http';
+import https from 'https';
 
 /**
  * Global HTTP error handler, sends status 500
@@ -49,12 +50,28 @@ export function errorLogger(err, facility = 'utils') {
  * @param {string} hostname - hostname of the server to where request will be made
  * @param {number} port - port of the server to where request will be made
  * @param {string} path - path of the server request to where request will be made
- * @param {JSON} headers - configurable headers for the request
+ * @param {object} options - options for the request (e.g. protocol)
  * @returns {Promise.<object, Error>} JSON response
  */
-export function httpGetJson(hostname, port, path, headers = { Accept: 'application/json' }) {
+export function httpGetJson(hostname, port, path, options) {
+  options = {
+    statusCodeMin: 200,
+    statusCodeMax: 299,
+    rejectMessage: 'Non-2xx status code: ',
+    protocol: 'http:',
+    rejectUnauthorized: true,
+    ...options ?? {},
+  };
   return new Promise((resolve, reject) => {
-    const requestOptions = { hostname, port, path, method: 'GET', headers };
+    const requestOptions = {
+      hostname,
+      port,
+      path,
+      method: 'GET',
+      rejectUnauthorized: Boolean(options.rejectUnauthorized),
+      headers: {
+        Accept: 'application/json',
+      } };
 
     /**
      * Generic handler for client http requests,
@@ -63,7 +80,7 @@ export function httpGetJson(hostname, port, path, headers = { Accept: 'applicati
      * @returns {undefined}
      */
     const requestHandler = (response) => {
-      if (response.statusCode < 200 || response.statusCode > 299) {
+      if (response.statusCode < options.statusCodeMin || response.statusCode > options.statusCodeMax) {
         reject(new Error(`Non-2xx status code: ${response.statusCode}`));
         return;
       }
@@ -79,8 +96,13 @@ export function httpGetJson(hostname, port, path, headers = { Accept: 'applicati
         }
       });
     };
+    let request = null;
+    if (options.protocol === 'https:') {
+      request = https.request(requestOptions, requestHandler);
+    } else {
+      request = http.request(requestOptions, requestHandler);
+    }
 
-    const request = http.request(requestOptions, requestHandler);
     request.on('error', (err) => reject(err));
     request.end();
   });
