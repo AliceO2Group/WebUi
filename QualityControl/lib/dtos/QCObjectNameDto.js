@@ -28,10 +28,14 @@ function isValidPath(path) {
     return false;
   }
 
+  if (path.endsWith('/')) {
+    logger.debugMessage(`Invalid path: Path ends with a slash (${path})`);
+    return false;
+  }
+
   let segmentStart = 0;
-  let char = '';
   for (let i = 0; i <= path.length; i++) {
-    char = path[i];
+    const char = path[i];
 
     if (i === path.length || char === '/') {
       const segment = path.slice(segmentStart, i);
@@ -47,12 +51,6 @@ function isValidPath(path) {
       segmentStart = i + 1;
     }
   }
-
-  if (char === '/') {
-    logger.debugMessage(`Invalid path: Path ends with a slash (${path})`);
-    return false;
-  }
-
   return true;
 }
 
