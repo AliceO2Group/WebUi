@@ -13,9 +13,7 @@
  */
 
 import nock from 'nock';
-import fs from 'fs/promises';
-import path from 'path';
-
+import { readFileSync } from 'fs';
 import { CCDB_FILTER_FIELDS, CCDB_MONITOR, CCDB_VERSION_KEY } from './../../lib/services/ccdb/CcdbConstants.js';
 import { config } from './../config.js';
 import { objects, subfolders } from './seeders/ccdbObjects.js';
@@ -41,6 +39,7 @@ const { PATH, CREATED, LAST_MODIFIED, ID, VALID_FROM, VALID_UNTIL } = CCDB_FILTE
 const versionResponse = {};
 versionResponse[CCDB_MONITOR] = {};
 versionResponse[CCDB_MONITOR][config.ccdb.hostname] = [CCDB_MOCK_VERSION];
+const fileContent = readFileSync(CCDB_API_DOWNLOAD_ROOT_OBJECT.objectPath);
 
 /**
  * Setup nock environment for ccdb which is to intercept all CCDB requests used in the Frontend test suites
@@ -120,10 +119,7 @@ export const initializeNockForCcdb = () => {
 
   nock(CCDB_URL)
     .persist()
+    .replyContentLength()
     .get(`${CCDB_API_DOWNLOAD_ROOT_OBJECT.path}/${CCDB_API_DOWNLOAD_ROOT_OBJECT.id}`)
-    .reply(async () => {
-      const filePath = path.resolve(CCDB_API_DOWNLOAD_ROOT_OBJECT.objectPath);
-      const fileContent = await fs.readFile(filePath);
-      return [200, fileContent, { 'Content-Length': fileContent.length.toString() }];
-    });
+    .reply(200, fileContent);
 };
