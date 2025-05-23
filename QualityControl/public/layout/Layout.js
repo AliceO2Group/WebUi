@@ -592,6 +592,8 @@ export default class Layout extends Observable {
    */
   resizeTabObject(tabObject, w, h) {
     this.gridList.resizeItem(tabObject, { w, h });
+    this.sortObjectsOfCurrentTab();
+
     this.notify();
   }
 
