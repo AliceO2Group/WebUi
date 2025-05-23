@@ -356,8 +356,8 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   sortObjectsOfCurrentTab() {
-    this.gridList.items = this.tab.objects;
     if (this.editEnabled) {
+      this.gridList.items = this.tab.objects;
       this.gridList.resizeGrid(this.gridListSize);
     }
   }
@@ -473,13 +473,13 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   edit() {
+    this.editEnabled = true;
     this.toggleEditMenu();
     this.model.services.object.listObjects();
     if (!this.item) {
       throw new Error('An item should be loaded before editing it');
     }
     this.setTabInterval(0);
-    this.editEnabled = true;
     this.editOriginalClone = JSON.parse(JSON.stringify(this.item));
     this.editingTabObject = null;
     window.dispatchEvent(new Event('resize'));
@@ -492,8 +492,8 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   save() {
-    this.setTabInterval(this.item.autoTabChange);
     this.editEnabled = false;
+    this.setTabInterval(this.item.autoTabChange);
     this.editingTabObject = null;
     this.saveItem();
     this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
