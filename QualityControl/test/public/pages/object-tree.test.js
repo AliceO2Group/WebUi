@@ -15,9 +15,14 @@ import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
 const SORTING_BUTTON_PATH = 'header > div > div:nth-child(3) > div > button';
-const LIST_ITEM_PATH = 'ul > li';
+const LIST_ITEM_PATH = 'ul > li'; // General path for checking existence
+const LIST_OBJECT_PATH = '[title="qc/test/object"] li'; // Path specifically for finding objects
 const sortOptionPath = (index) => `header > div > div:nth-child(3) > div > div > a:nth-child(${index})`;
 const [NAME_ASC_INDEX, NAME_DEC_INDEX] = [1, 2];
+const VIRTUAL_TABLEROW_PATH = 'tbody > tr.object-selectable';
+const SEARCH_PATH = 'header > div > div:nth-child(3) > input';
+const OBJECTS_DESCENDING = ['qc/test/object/2', 'qc/test/object/11', 'qc/test/object/1'];
+const OBJECTS_ASCENDING = ['qc/test/object/1', 'qc/test/object/11', 'qc/test/object/2'];
 
 /**
  * Initial page setup tests
@@ -53,10 +58,10 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     await page.locator('[title="qc/test/object"]>div').click();
     await delay(50); // Wait for expansion to finish
 
-    const objectIds = await page.evaluate(() =>
-      [...document.querySelectorAll('[title="qc/test/object"] li')].map((e)=> e.id));
+    const objectIds = await page.evaluate((path) =>
+      [...document.querySelectorAll(path)].map((e)=> e.id), LIST_OBJECT_PATH);
 
-    deepStrictEqual(objectIds, ['qc/test/object/1', 'qc/test/object/11', 'qc/test/object/2']);
+    deepStrictEqual(objectIds, OBJECTS_ASCENDING);
   });
 
   await testParent.test('should sort list of objects by name in descending order', async () => {
@@ -64,21 +69,40 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     await page.locator(sortOptionPath(NAME_DEC_INDEX)).click();
     await delay(50); // Wait for sort to finish
 
-    const objectIds = await page.evaluate(() =>
-      [...document.querySelectorAll('[title="qc/test/object"] li')].map((e)=> e.id));
+    const objectIds = await page.evaluate((path) =>
+      [...document.querySelectorAll(path)].map((e)=> e.id), LIST_OBJECT_PATH);
 
-    deepStrictEqual(objectIds, ['qc/test/object/2', 'qc/test/object/11', 'qc/test/object/1']);
+    deepStrictEqual(objectIds, OBJECTS_DESCENDING);
   });
 
-  await testParent.test('should sort list of objects by name in ascending order', async () => {
+  await testParent.test('should sort virtual table of objects by name in descending order', async () => {
+    await page.locator(SEARCH_PATH).fill('qc');
+    await delay(50); // Wait for table to load
+
+    const objectIds = await page.evaluate((rowPath) =>
+      [...document.querySelectorAll(rowPath)].map((e)=> e.title), VIRTUAL_TABLEROW_PATH);
+
+    deepStrictEqual(objectIds, OBJECTS_DESCENDING);
+  });
+
+  await testParent.test('should sort virtual table of objects by name in ascending order', async () => {
     await page.locator(SORTING_BUTTON_PATH).click();
     await page.locator(sortOptionPath(NAME_ASC_INDEX)).click();
     await delay(50); // Wait for sort to finish
 
-    const objectIds = await page.evaluate(() =>
-      [...document.querySelectorAll('[title="qc/test/object"] li')].map((e)=> e.id));
+    const objectIds = await page.evaluate((rowPath) =>
+      [...document.querySelectorAll(rowPath)].map((e)=> e.title), VIRTUAL_TABLEROW_PATH);
 
-    deepStrictEqual(objectIds, ['qc/test/object/1', 'qc/test/object/11', 'qc/test/object/2']);
+    deepStrictEqual(objectIds, OBJECTS_ASCENDING);
+    await page.locator(SEARCH_PATH).fill(' '); // cleanup for the next test. Whitespace is required for some reason
+    await delay(50); // Wait object list to load
+  });
+
+  await testParent.test('should sort list of objects by name in ascending order', async () => {
+    const objectIds = await page.evaluate((path) =>
+      [...document.querySelectorAll(path)].map((e)=> e.id), LIST_OBJECT_PATH);
+
+    deepStrictEqual(objectIds, OBJECTS_ASCENDING);
   });
 
   await testParent.test('should have filtered results on input search', async () => {
