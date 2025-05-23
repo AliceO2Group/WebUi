@@ -734,7 +734,9 @@ export default class Layout extends Observable {
       }, time * 1000);
     } else {
       clearInterval(this.tabInterval);
-      this.selectTab(this._tabIndex);
+      if (!this.editEnabled) {
+        this.selectTab(this._tabIndex);
+      }
     }
   }
 
