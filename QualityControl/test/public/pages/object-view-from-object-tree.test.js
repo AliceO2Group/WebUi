@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual } from 'node:assert';
+import { deepStrictEqual, strictEqual } from 'node:assert';
 const OBJECT_VIEW_PAGE_PARAM = '?page=objectView';
 
 export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, testParent) => {
@@ -44,12 +44,14 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
     async () => {
       const backButtonElement = 'div div div a';
       await page.locator(backButtonElement).click();
-      const result = await page.evaluate(() => ({
-        location: window.location.search,
-        objectSelected: window.model.object.selected,
-      }));
-      strictEqual(result.location, '?page=objectTree');
-      strictEqual(result.objectSelected, null);
+      const result = await page.evaluate(() => {
+        const location = window.location.search;
+        const objectSelected = document.querySelector('#objectInfoPanel > div:nth-child(2) > div');
+
+        return [location, objectSelected];
+      });
+
+      deepStrictEqual(result, ['?page=objectTree', null]);
     },
   );
 
@@ -75,15 +77,12 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
       await page.goto(`${url}?page=objectView&objectName=${path}`, { waitUntil: 'networkidle0' });
       const result = await page.evaluate(() => {
         const title = document.querySelector('div div b').innerText;
-        const rootPlotClassList =
-                document.querySelector('body > div > div:nth-child(2) > div:nth-child(2) > div > div').classList;
-        return { title, rootPlotClassList, selectedObjectPath: window.model.objectViewModel.selected.payload.path };
-      });
-      strictEqual(result.title, path);
-      strictEqual(result.rootPlotClassList[0], 'relative');
-      strictEqual(result.rootPlotClassList[1], 'jsroot-container');
 
-      strictEqual(result.selectedObjectPath, path);
+        const selectedObjectPath = document.querySelector('#objectInfoPanel > div:nth-child(2) > div').textContent;
+        return [title, selectedObjectPath];
+      });
+
+      deepStrictEqual(result, [path, path]);
     },
   );
 

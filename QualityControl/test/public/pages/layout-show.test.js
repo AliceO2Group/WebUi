@@ -400,12 +400,8 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const cancelButtonPath = 'body > div > div > div > div > button:nth-child(2)';
       await page.locator(cancelButtonPath).click();
       await delay(50);
-      const childrenCount = await page.evaluate(() => {
-        const bodyPath = 'body';
-        const body = document.querySelector(bodyPath);
-        return body.children.length;
-      });
-      strictEqual(childrenCount, 2);
+      const jsonEditor = await page.evaluate(() => document.querySelector('#editModal'));
+      strictEqual(jsonEditor, null);
     },
   );
 
