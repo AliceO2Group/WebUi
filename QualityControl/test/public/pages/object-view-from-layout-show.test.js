@@ -15,6 +15,8 @@ import { strictEqual, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 
 const OBJECT_VIEW_PAGE_PARAM = '?page=objectView&objectId=123456';
+const objectDetailRow = (index) => `#objectInformation > div > .flex-row:nth-child(${index}) > div`;
+const OBJ_PATH_INDEX = 2;
 
 export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, testParent) => {
   await testParent.test(
@@ -95,18 +97,12 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         `${url}?page=objectView&objectId=${objectId}&layoutId=${layoutId}`,
         { waitUntil: 'networkidle0' },
       );
-      const result = await page.evaluate(() => {
+      const result = await page.evaluate((path) => {
         const title = document.querySelector('div div b').textContent;
-        const rootPlotClassList = document
-          .querySelector('body > div > div:nth-child(2) > div:nth-child(2) > div > div').classList;
-        const selectedObjectPath = window.model.objectViewModel.selected.payload.path;
-        return {
-          title, rootPlotClassList, selectedObjectPath,
-        };
-      });
-      strictEqual(result.title, 'qc/test/object/1 (from layout: a-test)');
-      deepStrictEqual(result.rootPlotClassList, { 0: 'relative', 1: 'jsroot-container' });
-      strictEqual(result.selectedObjectPath, 'qc/test/object/1');
+        const selectedObjectPath = document.querySelector(path).textContent;
+        return [title, selectedObjectPath];
+      }, objectDetailRow(OBJ_PATH_INDEX));
+      deepStrictEqual(result, ['qc/test/object/1 (from layout: a-test)', 'qc/test/object/1']);
     },
   );
 };

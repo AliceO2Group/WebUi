@@ -11,8 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual } from 'node:assert';
-import { ServiceStatus } from '../../../common/library/enums/Status/serviceStatus.enum.js';
+import { deepStrictEqual, strictEqual } from 'node:assert';
 
 const ABOUT_PAGE_PARAM = '?page=about';
 
@@ -22,25 +21,22 @@ export const aboutPageTests = async (url, page, timeout = 5000, testParent) => {
     const location = await page.evaluate(() => window.location);
     strictEqual(location.search, '?page=about');
   });
-  await testServiceStatus(testParent, page, 'qcg', timeout);
-  await testServiceStatus(testParent, page, 'qc', timeout);
-  await testServiceStatus(testParent, page, 'ccdb', timeout);
+
+  await testServiceStatus(testParent, page, timeout);
+  await testServiceStatus(testParent, page, timeout);
+  await testServiceStatus(testParent, page, timeout);
 };
 
-const testServiceStatus = async (testParent, page, serviceName, timeout = 5000) => {
+const testServiceStatus = async (testParent, page, timeout = 5000) => {
   await testParent
     .test(
-      `should request info about ${serviceName.toUpperCase()} and store in statuses as RemoteData`,
+      'should list successfull services below the Sucessfull header',
       { timeout },
       async () => {
-        const kind = await page.evaluate(
-          (service, serviceStatus) =>
-            window.model.aboutViewModel.services[serviceStatus.SUCCESS][service].kind,
-          serviceName,
-          ServiceStatus,
-        );
+        const serviceIds = await page.evaluate(() =>
+          [...document.querySelectorAll('.success + div > div')].map((e) => e.id));
 
-        strictEqual(kind, 'Success');
+        deepStrictEqual(serviceIds, ['CCDB', 'QC', 'QCG']);
       },
     );
 };
