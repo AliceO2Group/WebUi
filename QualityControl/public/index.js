@@ -27,10 +27,12 @@ sessionService.loadAndHideParameters();
 
 // Start application
 const model = new Model();
-const debug = true; // Shows when redraw is done
-mount(document.body, view, model, debug);
+let debug = false; // Shows when redraw is done
 
 if (envMap[host] === 'dev') {
   window.sessionService = sessionService;
   window.model = model;
+  debug = true;
 }
+
+mount(document.body, view, model, debug);
