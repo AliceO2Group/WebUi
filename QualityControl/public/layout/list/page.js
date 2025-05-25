@@ -81,6 +81,7 @@ function createHeaderOfFolder(model, folder) {
  * @returns {vnode} - A virtual DOM node representing the card group layout.
  */
 function layoutCards(model, layouts, searchBy) {
+  const { router } = model;
   return layouts.match({
     NotAsked: () => null,
     Loading: () => h('div', 'Loading...'),
@@ -98,7 +99,7 @@ function layoutCards(model, layouts, searchBy) {
             const toggleOfficialFunction = (id) => model.layout.toggleOfficial(id);
 
             return h('.card', [
-              cardHeader({ ...layout, isMinimumGlobal, toggleOfficialFunction }),
+              cardHeader({ ...layout, isMinimumGlobal, toggleOfficialFunction, router }),
               cardBody(owner_name, description),
             ]);
           }),
@@ -115,9 +116,10 @@ function layoutCards(model, layouts, searchBy) {
  * @param {string} params.name - Display name of the layout
  * @param {boolean} params.isMinimumGlobal - Flag for user's global permissions
  * @param {Function} params.toggleOfficialFunction - Callback for official status toggle
+ * @param {Function} params.router - Model router functionallity
  * @returns {vnode} Virtual DOM node representing the layout card header
  */
-function cardHeader({ isOfficial, id, name, isMinimumGlobal, toggleOfficialFunction }) {
+function cardHeader({ isOfficial, id, name, isMinimumGlobal, toggleOfficialFunction, router }) {
   const bgColor = isOfficial ? 'bg-primary' : 'bg-gray';
   const textColor = isOfficial ? 'white' : 'black';
 
@@ -125,7 +127,7 @@ function cardHeader({ isOfficial, id, name, isMinimumGlobal, toggleOfficialFunct
     h('h5', [
       h(`a.${textColor}`, {
         href: `?page=layoutShow&layoutId=${id}`,
-        onclick: (e) => model.router.handleLinkEvent(e),
+        onclick: (e) => router.handleLinkEvent(e),
       }, name),
     ]),
     isMinimumGlobal ?

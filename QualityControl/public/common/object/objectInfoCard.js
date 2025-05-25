@@ -25,7 +25,7 @@ const TO_REMOVE_FIELDS = ['qcObject', 'versions', 'name', 'location'];
  * @returns {vnode} - panel with information about the object
  */
 export const qcObjectInfoPanel = (qcObject, style = {}) =>
-  h('.flex-column.scroll-y', { style }, [
+  h('.flex-column.scroll-y#objectInfoPanel', { style }, [
     Object.keys(qcObject)
       .filter((key) => !TO_REMOVE_FIELDS.includes(key))
       .map((key) => infoRow(key, qcObject[key])),
