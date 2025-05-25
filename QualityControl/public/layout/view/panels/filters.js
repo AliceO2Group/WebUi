@@ -28,7 +28,7 @@ const layoutFiltersPanel = ({ layout: layoutModel }) => {
   const onInputCallback = setFilterValue.bind(layoutModel);
   const onEnterCallback = applyLayoutChanges.bind(layoutModel);
   const onChangeCallback = selectOption.bind(layoutModel);
-  const filterService = model.services.filter;
+  const filterService = layoutModel.model.services.filter;
   const filtersList = filtersConfig(filterService) || [];
   const createFilterElement = (config) => {
     let filterElement = null;
