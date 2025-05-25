@@ -12,4 +12,15 @@
  * or submit itself to any jurisdiction.
  */
 
-// This file will be overwritten at runtime
+// Import QCG Public Configuration
+import { mount, sessionService } from '/js/src/index.js';
+import view from './view.js';
+import Model from './Model.js';
+
+sessionService.loadAndHideParameters();
+
+// Start application
+const model = new Model();
+const debug = true; // Shows when redraw is done
+
+mount(document.body, view, model, debug);
