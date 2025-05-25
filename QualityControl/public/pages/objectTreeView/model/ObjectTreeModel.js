@@ -19,11 +19,11 @@ import { Observable } from '/js/src/index.js';
  * some behaviours like open/close nodes. It also allows to update all those objects without creating
  * a new tree.
  */
-export default class ObjectTree extends Observable {
+export default class ObjectTreeModel extends Observable {
   /**
    * Instantiate tree with a root node called `name`, empty by default
    * @param {string} name - root name
-   * @param {ObjectTree} parent - optional parent node
+   * @param {ObjectTreeModel} parent - optional parent node
    */
   constructor(name, parent) {
     super();
@@ -38,10 +38,9 @@ export default class ObjectTree extends Observable {
    */
   initTree(name, parent) {
     this.name = name || ''; // Like 'B'
-    this.object = null;
     this.open = name === 'qc' ? true : false;
-    this.children = []; // <Array<ObjectTree>>
-    this.parent = parent || null; // <ObjectTree>
+    this.children = []; // <Array<ObjectTreeModel|object>>
+    this.parent = parent || null; // <ObjectTreeModel>
     this.path = []; // Like ['A', 'B'] for node at path 'A/B' called 'B'
     this.pathString = ''; // 'A/B'
   }
@@ -84,11 +83,11 @@ export default class ObjectTree extends Observable {
   }
 
   /**
-   * Add recursively an object inside a tree
-   * @param {object} object - The object to be inserted, property name must exist
-   * @param {Array.<string>} path - Path of the object to dig in before assigning to a tree node,
-   * if null object.name is used
-   * @param {Array.<string>} pathParent - Path of the current tree node, if null object.name is used
+   * Add recursively an objectModel inside a tree
+   * @param {object} objectModel - The objectModel to be inserted, property name must exist
+   * @param {Array.<string>} path - Path of the objectModel to dig in before assigning to a tree node,
+   * if null objectModel.name is used
+   * @param {Array.<string>} pathParent - Path of the current tree node, if null objectModel.name is used
    *
    * Example of recursive call:
    *  addChild(o) // begin insert 'A/B'
@@ -97,21 +96,21 @@ export default class ObjectTree extends Observable {
    *  addChild(o, [], ['A', 'B']) // end inserting, affecting B
    * @returns {undefined}
    */
-  addChild(object, path, pathParent) {
+  addChild(objectModel, path, pathParent) {
     // Fill the path argument through recursive call
     if (!path) {
-      if (!object.name) {
+      if (!objectModel.name) {
         throw new Error('Object name must exist');
       }
-      path = object.name.split('/');
-      this.addChild(object, path, []);
+      path = objectModel.name.split('/');
+      path.length--; // The last one is the object name, which isn't needed for the path
+      this.addChild(objectModel, path, []);
       this.notify();
       return;
     }
 
-    // Case end of path, associate the object to 'this' node
     if (path.length === 0) {
-      this.object = object;
+      this.children.push(objectModel);
       return;
     }
 
@@ -126,7 +125,7 @@ export default class ObjectTree extends Observable {
        * Create it and push as child
        * Listen also for changes to bubble it until root
        */
-      subtree = new ObjectTree(name, this);
+      subtree = new ObjectTreeModel(name, this);
       subtree.path = fullPath;
       subtree.pathString = fullPath.join('/');
       this.children.push(subtree);
@@ -134,7 +133,7 @@ export default class ObjectTree extends Observable {
     }
 
     // Pass to child
-    subtree.addChild(object, path, fullPath);
+    subtree.addChild(objectModel, path, fullPath);
   }
 
   /**
@@ -144,5 +143,35 @@ export default class ObjectTree extends Observable {
    */
   addChildren(objects) {
     objects.forEach((object) => this.addChild(object));
+  }
+
+  /**
+   * Recursively sorts the children of this tree node by a specified field and order,
+   * and maintains the sort throughout the entire subtree. Updates the tree state
+   * and triggers a notification after sorting.
+   * @param {string} field - The property name of child objects to sort by
+   * @param {number} order - acending (1) or decending (-1)
+   * @returns {undefined}
+   */
+  sortChildren(field, order) {
+    this.children = this.children.sort((child1, child2) => this._compareStrings(child1[field], child2[field], order));
+    this.children.forEach((child) => {
+      if (child instanceof ObjectTreeModel) {
+        child.sortChildren(field, order);
+      }
+    });
+
+    this.notify();
+  }
+
+  /**
+   * Helper method for sortListByField for sorting strings
+   * @param {string} a - first string to be sorted
+   * @param {string} b - second string to be sorted
+   * @param {number} order - acending (1) or decending (-1)
+   * @returns {undefined}
+   */
+  _compareStrings(a, b, order) {
+    return a.toUpperCase().localeCompare(b.toUpperCase()) * order;
   }
 }
