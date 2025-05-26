@@ -89,8 +89,10 @@ export class CcdbService {
       throw new Error(`Unable to connect to CCDB due to: ${error}`);
     }
     try {
-      const monitorData = serviceInfo?.[CCDB_MONITOR]?.[this._hostname] ?? [];
-      const version = monitorData[0]?.value ?? 'unknown version';
+      const monitorData = serviceInfo?.[CCDB_MONITOR] ?? {};
+      const [firstKey] = monitorData ? Object.keys(monitorData) : [];
+
+      const version = monitorData[firstKey]?.[0]?.value ?? 'unknown version';
       return { version };
     } catch (error) {
       throw new Error(`Unable to read version of CCDB due to: ${error}`);
