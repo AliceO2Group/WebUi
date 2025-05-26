@@ -15,7 +15,7 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const { NotFoundError, GrpcErrorCodes, UnauthorizedAccessError } = require('@aliceo2/web-ui');
+const { NotFoundError, GrpcErrorCodes, UnauthorizedAccessError, InvalidInputError } = require('@aliceo2/web-ui');
 
 const { EnvironmentService } = require('./../../../lib/services/Environment.service.js');
 const { User } = require('./../../../lib/dtos/User.js');
@@ -62,6 +62,17 @@ describe('EnvironmentService test suite', () => {
   }).resolves({ id: ENVIRONMENT_VALID });
   DestroyEnvironmentStub.rejects({code: 1, details: 'Wrong arguments, using default stub reject'});
 
+  const NewEnvironmentAsyncStub = sinon.stub();
+  NewEnvironmentAsyncStub.withArgs(
+    { workflowTemplate: 'BAD', vars: undefined, autoTransition: false, requestUser: user.toEcsFormat() }
+  ).rejects({ code: 3, details: 'Cannot create environment with this template' });
+  NewEnvironmentAsyncStub.withArgs(
+    { workflowTemplate: 'MISSING_ID_CASE', vars: undefined, autoTransition: false, requestUser: user.toEcsFormat() }
+  ).resolves({ id: undefined, state: 'RUNNING', currentRunNumber: 1 });
+  NewEnvironmentAsyncStub.withArgs(
+    { workflowTemplate: 'github/template/1.1.0', vars: {keyA: 'keyA'}, autoTransition: false, requestUser: user.toEcsFormat() }
+  ).resolves({ environment: { id: ENVIRONMENT_VALID, state: 'RUNNING', currentRunNumber: 1 } });
+
   const environmentCacheServiceMock = {
     environments: new Map(),
   };
@@ -71,6 +82,7 @@ describe('EnvironmentService test suite', () => {
       GetEnvironment: GetEnvironmentStub,
       ControlEnvironment: ControlEnvironmentStub,
       DestroyEnvironment: DestroyEnvironmentStub,
+      NewEnvironmentAsync: NewEnvironmentAsyncStub,
     }, { detectors: [], includedDetectors: [] }, {}, {}, environmentCacheServiceMock,
   );
 
@@ -173,5 +185,27 @@ describe('EnvironmentService test suite', () => {
       const environmentTransitioned = await envService.destroyEnvironment(ENVIRONMENT_VALID, { keepTasks: true }, user);
       assert.deepStrictEqual(environmentTransitioned, {id: ENVIRONMENT_VALID})
     });
+  });
+
+  describe(`'newEnvironmentAsync' test suite`, async () => {
+    it('should catch gRPC error and throw native error due to issue encountered when trying to create environment', async () => {
+      await assert.rejects(
+        envService.newEnvironmentAsync({ workflowTemplate: 'BAD', user }, ),
+        new InvalidInputError('Cannot create environment with this template')
+      );
+    });
+
+    it('should successfully return environment id if successfully created', async () => {
+      const environmentTransitioned = await envService.newEnvironmentAsync({ workflowTemplate: 'github/template/1.1.0', userVars: {keyA: 'keyA'}, user });
+      assert.strictEqual(environmentTransitioned.id, ENVIRONMENT_VALID);
+      assert.strictEqual(environmentTransitioned.currentTransition, 'DEPLOY');
+    });
+
+    it('should add environment to cache when successfully deployed', async () => {
+      envService._environmentCacheService.addOrUpdateEnvironment = sinon.stub().returns();
+      const environmentTransitioned = await envService.newEnvironmentAsync({ workflowTemplate: 'github/template/1.1.0', userVars: { keyA: 'keyA' }, user });
+      assert.strictEqual(environmentTransitioned.id, ENVIRONMENT_VALID);
+      assert.ok(envService._environmentCacheService.addOrUpdateEnvironment.calledOnce);
+    })
   });
 });
