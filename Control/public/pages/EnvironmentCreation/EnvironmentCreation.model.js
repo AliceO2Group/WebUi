@@ -63,7 +63,9 @@ export class EnvironmentCreationModel extends Observable {
     this._workflowMappings = RemoteData.loading();
     this.notify();
 
-    const {result: mappingResult, ok: isMappingOk} = await this._model.loader.get('/api/workflow/template/mappings');
+    const { result: mappingResult, ok: isMappingOk } = await this._model.loader.get(
+      '/api/workflow/template/mappings', {}, true
+    );
     this._workflowMappings = isMappingOk
       ? RemoteData.success(mappingResult) : RemoteData.failure(mappingResult.message);
 

@@ -15,9 +15,9 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
+const {NotFoundError} = require('@aliceo2/web-ui');
 
 const {WorkflowTemplateService} = require('../../../lib/services/WorkflowTemplate.service.js');
-const {NotFoundError} = require('../../../lib/errors/NotFoundError.js');
 
 const mockRepoList = [
   {
@@ -48,7 +48,7 @@ describe('WorkflowTemplateService test suite', () => {
     });
 
     it('should throw error due to no default repository being identified', async () => {
-      const stub = sinon.stub().resolves({repos: [mockRepoList[0]]}); // first element has no default
+      const stub = sinon.stub().resolves({repos: [mockRepoList[0]]}); // first element has no default repository but a default revision
       const workflowTemplate = new WorkflowTemplateService({ListRepos: stub});
       await assert.rejects(() => workflowTemplate.getDefaultTemplateSource(), new NotFoundError('Unable to find a default repository'));
     });
@@ -59,8 +59,18 @@ describe('WorkflowTemplateService test suite', () => {
         name: 'optimal-workflow',
         default: true,
       }]});
-      const workflowTemplate = new WorkflowTemplateService({ListRepos: stub});
+      const workflowTemplate = new WorkflowTemplateService({ListRepos: stub}); // first element has no default repository and no default revision
       await assert.rejects(() => workflowTemplate.getDefaultTemplateSource(), new NotFoundError('Unable to find a default revision'));
+    });
+
+    it('should throw NotFoundError due to apricot service throwing gRPC code 5', async () => {
+      const stub = sinon.stub().rejects({
+        code: 5,
+        details: 'Could not be found',
+        message: 'Could not be found',
+      });
+      const workflowTemplate = new WorkflowTemplateService({ListRepos: stub}); // first element has no default repository and no default revision
+      await assert.rejects(() => workflowTemplate.getDefaultTemplateSource(), new NotFoundError('Could not be found'));
     });
   });
 
@@ -74,13 +84,20 @@ describe('WorkflowTemplateService test suite', () => {
       assert.deepStrictEqual(mappings, [{label: 'Aconfig1', component: 'Config_1'}, {label: 'config1', component: 'Config_1'}]);
     });
 
-    it('should successfully return empty array if Apricot returned empty object', async () => {
+    it('should throw an error if Apricot returned an empty object', async () => {
       const getRuntimeEntryByComponent = sinon.stub().resolves(
         JSON.stringify('{}')
       );
       const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
-      const mappings = await workflowTemplate.retrieveWorkflowMappings();
-      assert.deepStrictEqual(mappings, []);
+      await assert.rejects(() => workflowTemplate.retrieveWorkflowMappings(), new Error('WorkflowMappings returned from data store are not an array'));
+    });
+
+    it('should throw an error if Apricot returned object that is not array for mappings', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().resolves(
+        JSON.stringify('{mappings: {someMapping: {}}}')
+      );
+      const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
+      await assert.rejects(() => workflowTemplate.retrieveWorkflowMappings(), new Error('WorkflowMappings returned from data store are not an array'));
     });
 
     it('should throw NotFoundError due to apricot service throwing gRPC code 5', async () => {
@@ -94,6 +111,14 @@ describe('WorkflowTemplateService test suite', () => {
       const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
       await assert.rejects(() => workflowTemplate.retrieveWorkflowMappings(), new Error());
     });
+
+    it('should throw error due to incorrect JSON returned by apricot service', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().resolves(
+        `template: 'some config', detectors: ['TPC', 'FSA']}`
+      );
+      const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
+      await assert.rejects(() => workflowTemplate.retrieveWorkflowMappings(), new SyntaxError(`Unexpected token 'e', "template: '"... is not valid JSON`));
+    });
   });
 
   describe(`'retrieveWorkflowSavedConfiguration' test suite`, async () => {
@@ -104,6 +129,14 @@ describe('WorkflowTemplateService test suite', () => {
       const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
       const mappings = await workflowTemplate.retrieveWorkflowSavedConfiguration();
       assert.deepStrictEqual(mappings, {template: 'some config', detectors: ['TPC', 'FSA']});
+    });
+
+    it('should throw error due to incorrect JSON returned by apricot service', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().resolves(
+        `template: 'some config', detectors: ['TPC', 'FSA']}`
+      );
+      const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
+      await assert.rejects(() => workflowTemplate.retrieveWorkflowSavedConfiguration(), new SyntaxError(`Unexpected token 'e', "template: '"... is not valid JSON`));
     });
   });
 });

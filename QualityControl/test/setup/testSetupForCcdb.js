@@ -13,32 +13,47 @@
  */
 
 import nock from 'nock';
-import fs from 'fs/promises';
-import path from 'path';
-
-import { CCDB_FILTER_FIELDS } from './../../lib/services/ccdb/CcdbConstants.js';
+import { readFileSync } from 'fs';
+import { CCDB_FILTER_FIELDS, CCDB_MONITOR, CCDB_VERSION_KEY } from './../../lib/services/ccdb/CcdbConstants.js';
 import { config } from './../config.js';
-import { objects } from './seeders/ccdbObjects.js';
+import { objects, subfolders } from './seeders/ccdbObjects.js';
 import { MOCK_OBJECT_DETAILS_RESPONSE, MOCK_OBJECT_IDENTIFICATION_RESPONSE, MOCK_OBJECT_VERSIONS_RESPONSE }
   from './seeders/object-view/mock-object-view.js';
+import { CCDB_MOCK_VERSION } from './seeders/ccdbVersion.js';
 
 const CCDB_URL = `${config.ccdb.protocol}://${config.ccdb.hostname}:${config.ccdb.port}`;
 const CCDB_API_PATH_LATEST = `/latest/${config.ccdb.prefix}`;
 const CCDB_API_PATH_OBJECT_IDENTIFICATION = '/latest/qc/test/object/1';
+const CCDB_API_PATH_TREE = `/tree/${config.ccdb.prefix}`;
+const CCDB_API_PATH_TREE_OBJECT_IDENTIFICATION = '/tree/qc/test/object/1';
 const CCDB_API_PATH_OBJECT_DETAILS =
 '/qc/test/object/1/1656072357492/016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
 const CCDB_API_DOWNLOAD_ROOT_OBJECT = {
   id: '016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
   path: '/download',
   objectPath: 'test/setup/seeders/object-view/mock-object.root',
-}
+};
+const CCDB_API_MONITOR = `/monitor/${CCDB_MONITOR}/.*/${CCDB_VERSION_KEY}`;
 const { PATH, CREATED, LAST_MODIFIED, ID, VALID_FROM, VALID_UNTIL } = CCDB_FILTER_FIELDS;
+
+const versionResponse = {};
+versionResponse[CCDB_MONITOR] = {};
+versionResponse[CCDB_MONITOR][config.ccdb.hostname] = [CCDB_MOCK_VERSION];
+const fileContent = readFileSync(CCDB_API_DOWNLOAD_ROOT_OBJECT.objectPath);
 
 /**
  * Setup nock environment for ccdb which is to intercept all CCDB requests used in the Frontend test suites
  * Requests will have to persist as tests might run multiple times and we want to intercept all
  */
 export const initializeNockForCcdb = () => {
+  nock(CCDB_URL, {
+    reqheaders: {
+      Accept: 'application/json',
+    },
+  }).persist()
+    .get(CCDB_API_MONITOR)
+    .reply(200, versionResponse);
+
   nock(CCDB_URL, {
     reqheaders: {
       Accept: 'application/json',
@@ -51,6 +66,14 @@ export const initializeNockForCcdb = () => {
     });
 
   nock(CCDB_URL, {
+    reqheaders: { Accept: 'application/json' },
+  }).persist()
+    .get(`${CCDB_API_PATH_TREE}.*`)
+    .reply(200, {
+      subfolders,
+    });
+
+  nock(CCDB_URL, {
     reqheaders: {
       Accept: 'application/json',
       'X-Filter-Fields': `${PATH},${ID},${VALID_FROM},${VALID_UNTIL}`,
@@ -59,6 +82,17 @@ export const initializeNockForCcdb = () => {
     .get(CCDB_API_PATH_OBJECT_IDENTIFICATION)
     .reply(200, MOCK_OBJECT_IDENTIFICATION_RESPONSE)
     .get(`${CCDB_API_PATH_LATEST}/object/1`)
+    .reply(200, MOCK_OBJECT_IDENTIFICATION_RESPONSE);
+
+  nock(CCDB_URL, {
+    reqheaders: {
+      Accept: 'application/json',
+      'X-Filter-Fields': `${PATH},${ID},${VALID_FROM},${VALID_UNTIL}`,
+    },
+  }).persist()
+    .get(CCDB_API_PATH_TREE_OBJECT_IDENTIFICATION)
+    .reply(200, MOCK_OBJECT_IDENTIFICATION_RESPONSE)
+    .get(`${CCDB_API_PATH_TREE}/object/1`)
     .reply(200, MOCK_OBJECT_IDENTIFICATION_RESPONSE);
 
   nock(CCDB_URL, {
@@ -85,12 +119,7 @@ export const initializeNockForCcdb = () => {
 
   nock(CCDB_URL)
     .persist()
+    .replyContentLength()
     .get(`${CCDB_API_DOWNLOAD_ROOT_OBJECT.path}/${CCDB_API_DOWNLOAD_ROOT_OBJECT.id}`)
-    .reply(200, async () => {
-      // Define the file path
-      const filePath = path.resolve(CCDB_API_DOWNLOAD_ROOT_OBJECT.objectPath);
-      // Read the content of the file
-      const fileContent = await fs.readFile(filePath);
-      return fileContent;
-    });
+    .reply(200, fileContent);
 };

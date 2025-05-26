@@ -13,7 +13,6 @@
  */
 
 /* eslint-disable require-jsdoc */
-/* eslint-disable max-len */
 
 import { deepStrictEqual, strictEqual, rejects } from 'node:assert';
 import { suite, test, before } from 'node:test';
@@ -27,12 +26,12 @@ const ccdbConfig = {
   port: 8083,
   protocol: 'https',
   prefix: 'qc-test',
-}
+};
 
 export const ccdbServiceTestSuite = async () => {
   suite('CCDB Test Suite - ', () => {
     before(() => nock.cleanAll());
-    
+
     suite('Creating a new CcdbService instance', () => {
       test('should successfully initialize CcdbService', () => {
         const ccdbService = new CcdbService({ hostname: 'ccdb-local', port: 8083, protocol: 'https', prefix: 'qc/' });
@@ -89,7 +88,31 @@ export const ccdbServiceTestSuite = async () => {
         nock('http://ccdb-local:8083')
           .get(CCDB_URL_HEALTH_POINT)
           .replyWithError('getaddrinfo ENOTFOUND ccdb ccdb-local:8083');
-        await rejects(async () => await ccdb.getVersion(), new Error('Unable to connect to CCDB due to: Error: getaddrinfo ENOTFOUND ccdb ccdb-local:8083'));
+        await rejects(
+          async () => await ccdb.getVersion(),
+          new Error('Unable to connect to CCDB due to: Error: getaddrinfo ENOTFOUND ccdb ccdb-local:8083'),
+        );
+      });
+      test('should return "unknown" version when CCDB version is missing', async () => {
+        const response = {};
+        response[CCDB_MONITOR] = {};
+        response[CCDB_MONITOR][CCDB_HOSTNAME] = [{}];
+
+        nock('http://ccdb-local:8083')
+          .get(CCDB_URL_HEALTH_POINT)
+          .reply(200, response);
+
+        const info = await ccdb.getVersion();
+        deepStrictEqual(info, { version: 'unknown version' });
+      });
+      test('should return "unknown" version when CCDB response is malformed', async () => {
+        const response = {}; // no CCDB_MONITOR key
+        nock('http://ccdb-local:8083')
+          .get(CCDB_URL_HEALTH_POINT)
+          .reply(200, response);
+
+        const info = await ccdb.getVersion();
+        deepStrictEqual(info, { version: 'unknown version' });
       });
     });
 
@@ -147,6 +170,56 @@ export const ccdbServiceTestSuite = async () => {
           .get(`/latest/${ccdbConfig.prefix}.*`)
           .replyWithError(error);
         await rejects(async () => await ccdb.getObjectsLatestVersionList(), new Error(`${error.message || error}`));
+      });
+    });
+
+    suite('`getObjectsTreeList()` tests', () => {
+      test('should successfully return a list of the object paths', async () => {
+        const ccdb = new CcdbService(ccdbConfig);
+        const subfolders = [
+          'object/one',
+          'object/two',
+          'object/three',
+        ];
+        const expectedObjects = [
+          { path: 'object/one' },
+          { path: 'object/two' },
+          { path: 'object/three' },
+        ];
+
+        nock('http://ccdb-local:8083', {
+          reqheaders: { Accept: 'application/json' },
+        })
+          .get(`/tree/${ccdbConfig.prefix}.*`)
+          .reply(200, { subfolders });
+        const objectsRetrieved = await ccdb.getObjectsTreeList(ccdbConfig.prefix);
+        deepStrictEqual(objectsRetrieved, expectedObjects, 'Received objects are not alike');
+      });
+
+      test('should throw error when response has invalid subfolders format', async () => {
+        const ccdb = new CcdbService(ccdbConfig);
+        const invalidResponse = { subfolders: 'not-an-array' };
+
+        nock('http://ccdb-local:8083', {
+          reqheaders: { Accept: 'application/json' },
+        })
+          .get(`/tree/${ccdbConfig.prefix}.*`)
+          .reply(200, invalidResponse);
+
+        await rejects(
+          async () => await ccdb.getObjectsTreeList(ccdbConfig.prefix),
+          new Error('Invalid response format from server - expected subfolders array'),
+          'Should throw error for invalid subfolders format',
+        );
+      });
+
+      test('should reject due to HTTP request error', async () => {
+        const ccdb = new CcdbService(ccdbConfig);
+        const error = new Error('Querying service is down');
+        nock('http://ccdb-local:8083')
+          .get(`/tree/${ccdbConfig.prefix}.*`)
+          .replyWithError(error);
+        await rejects(async () => await ccdb.getObjectsTreeList(), new Error(`${error.message || error}`));
       });
     });
 
@@ -251,13 +324,15 @@ export const ccdbServiceTestSuite = async () => {
         await rejects(async () => ccdb.getObjectDetails({ path: null, validFrom: 213 }, null), new Error('Missing mandatory parameters: path & validFrom'));
       });
 
-      test('should successfully return content-location field on status >=200 <= 399', async () => {
+      test('should successfully return content-location field on status >=200 <= 399 and add path if missing', async () => {
+        const path = 'qc/some/test/';
         nock('http://ccdb-local:8083')
           .defaultReplyHeaders({ 'content-location': '/download/123123-123123', location: '/download/some-id' })
-          .head('/qc/some/test/123455432/id1')
+          .head(`/${path}/123455432/id1`)
           .reply(303);
-        const content = await ccdb.getObjectDetails({ path: 'qc/some/test', validFrom: 123455432, id: 'id1' });
+        const content = await ccdb.getObjectDetails({ path, validFrom: 123455432, id: 'id1' });
         strictEqual(content.location, '/download/123123-123123');
+        strictEqual(content.path, path);
       });
 
       test('should successfully return content-location field if is string as array with "alien" second item on status >=200 <= 399', async () => {

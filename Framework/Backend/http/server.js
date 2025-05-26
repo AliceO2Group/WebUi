@@ -23,6 +23,7 @@ const OpenId = require('./openid.js');
 const path = require('path');
 const url = require('url');
 const { LogManager } = require('../log/LogManager');
+const { buildUrl } = require('./buildUrl.js');
 
 /**
  * HTTPS server verifies identity using OpenID Connect and provides REST API.
@@ -260,8 +261,7 @@ class HttpServer {
       query.access = 'admin';
       query.token = this.o2TokenService.generateToken(query.personid, query.username, query.name, query.access);
 
-      const homeUrlAuthentified = url.format({ pathname: '/', query: query });
-      return res.redirect(homeUrlAuthentified);
+      return res.redirect(buildUrl('/', query));
     }
     return this.ident(req, res, next);
   }
@@ -476,7 +476,7 @@ class HttpServer {
       // Concatenates with user query
       Object.assign(query, userQuery);
 
-      res.redirect(url.format({ pathname: '/', query: query }));
+      res.redirect(buildUrl('/', query));
     }).catch((reason) => {
       this.logger.errorMessage(`OpenId failed: ${reason}`);
       res.status(401).send('OpenId failed');

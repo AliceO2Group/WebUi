@@ -12,21 +12,23 @@
  * or submit itself to any jurisdiction.
  */
 
-/* global QCG, JSROOT */
+/* global JSROOT */
 
 import {
-  sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification, RemoteData,
+  sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification,
 } from '/js/src/index.js';
 
 import Layout from './layout/Layout.js';
 import QCObject from './object/QCObject.js';
 import LayoutService from './services/Layout.service.js';
-import Folder from './folder/Folder.js';
-import FrameworkInfo from './frameworkInfo/FrameworkInfo.js';
+import FilterService from './services/Filter.service.js';
 import QCObjectService from './services/QCObject.service.js';
 import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
 import { setBrowserTabTitle } from './common/utils.js';
 import { buildQueryParametersString } from './common/buildQueryParametersString.js';
+import AboutViewModel from './pages/aboutView/AboutViewModel.js';
+import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
+import { RequestFields } from './common/RequestFields.enum.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -49,13 +51,8 @@ export default class Model extends Observable {
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
 
-    this.folder = new Folder(this);
-    this.folder.addFolder({
-      title: 'Official', isOpened: true, list: RemoteData.notAsked(), searchInput: '', classList: 'bg-primary white',
-    });
-    this.folder.addFolder({ title: 'My Layouts', isOpened: true, list: RemoteData.notAsked(), searchInput: '' });
-    this.folder.addFolder({ title: 'All Layouts', isOpened: false, list: RemoteData.notAsked(), searchInput: '' });
-    this.folder.bubbleTo(this);
+    this.layoutListModel = new LayoutListModel(this);
+    this.layoutListModel.bubbleTo(this);
 
     this.layout = new Layout(this);
     this.layout.bubbleTo(this);
@@ -63,11 +60,8 @@ export default class Model extends Observable {
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
 
-    this.frameworkInfo = new FrameworkInfo(this);
-    this.frameworkInfo.bubbleTo(this);
-
-    this.isOnlineModeConnectionAlive = false;
-    this.isOnlineModeEnabled = false; // Show only online objects or all (offline)
+    this.aboutViewModel = new AboutViewModel(this);
+    this.aboutViewModel.bubbleTo(this);
 
     this.refreshTimer = 0;
     this.refreshInterval = 0; // Seconds
@@ -101,11 +95,8 @@ export default class Model extends Observable {
     this.services = {
       object: new QCObjectService(this),
       layout: new LayoutService(this),
+      filter: new FilterService(this),
     };
-
-    if (QCG.CONSUL_SERVICE) {
-      this.checkOnlineModeAvailability();
-    }
 
     this.loader.get('/api/checkUser');
 
@@ -176,17 +167,17 @@ export default class Model extends Observable {
   async handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
     clearInterval(this.layout.tabInterval);
-
-    this.services.layout.getLayoutsByUserId(this.session.personid);
+    this.services.layout.getLayoutsByUserId(this.session.personid, RequestFields.LAYOUT_CARD);
 
     const { params } = this.router;
     switch (params.page) {
       case 'layoutList':
         this.page = 'layoutList';
         setBrowserTabTitle('QCG-Layouts');
-        this.services.layout.getLayouts();
+        this.services.layout.getLayouts(RequestFields.LAYOUT_CARD);
         break;
       case 'layoutShow':
+        this.services.filter.initFilterService();
         setBrowserTabTitle('QCG-LayoutShow');
         if (!params.layoutId) {
           const { definition, pdpBeamType, detector, runType, runNumber } = params;
@@ -261,7 +252,7 @@ export default class Model extends Observable {
       case 'about':
         this.page = 'about';
         setBrowserTabTitle('QCG-About');
-        this.frameworkInfo.getFrameworkInfo();
+        this.aboutViewModel.retrieveAllServicesStatus();
         this.notify();
         break;
       default:
@@ -290,42 +281,12 @@ export default class Model extends Observable {
   }
 
   /**
-   * Toggle mode (Online/Offline)
-   * @returns {undefined}
-   */
-  toggleMode() {
-    this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
-    if (this.isOnlineModeEnabled) {
-      this.setRefreshInterval(60);
-    } else {
-      this.object.loadList();
-      clearTimeout(this.refreshTimer);
-    }
-    this.object.selected = null;
-    this.object.searchInput = '';
-    this.notify();
-  }
-
-  /**
    * Method to check if connection is secure to enable certain improvements
    * e.g navigator.clipboard, notifications, service workers
    * @returns {boolean} - whether window is in secure context
    */
   isContextSecure() {
     return window.isSecureContext;
-  }
-
-  /**
-   * Method to check if Online Mode is available
-   * @returns {undefined}
-   */
-  async checkOnlineModeAvailability() {
-    const result = await this.services.object.isOnlineModeConnectionAlive();
-    if (result.isSuccess()) {
-      this.isOnlineModeConnectionAlive = true;
-    } else {
-      this.isOnlineModeConnectionAlive = false;
-    }
   }
 
   /**

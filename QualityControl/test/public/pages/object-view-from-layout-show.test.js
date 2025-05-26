@@ -74,6 +74,9 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
     async () => {
       const layoutId = '671b95883d23cd0d67bdc787';
       const backToLayoutButtonPath = 'div > div > div > div > a';
+      const href = await page.evaluate((backToLayoutButtonPath) =>
+        document.querySelector(backToLayoutButtonPath).href, backToLayoutButtonPath);
+      strictEqual(true, href.includes('&tab=main'));
       await page.locator(backToLayoutButtonPath).click();
 
       await delay(500);

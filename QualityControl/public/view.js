@@ -17,14 +17,14 @@ import { h, notification } from '/js/src/index.js';
 import sidebar from './common/sidebar.js';
 import header from './common/header.js';
 
-import layoutListPage from './layout/list/page.js';
 import layoutViewPage from './layout/view/page.js';
 import layoutImportModal from './layout/panels/importModal.js';
 import layoutEditModal from './layout/panels/editModal.js';
 
 import objectTreePage from './object/objectTreePage.js';
 import ObjectViewPage from './pages/objectView/ObjectViewPage.js';
-import frameworkInfoPage from './frameworkInfo/frameworkInfoPage.js';
+import AboutViewPage from './pages/aboutView/AboutViewPage.js';
+import LayoutListPage from './pages/layoutListView/LayoutListPage.js';
 
 /**
  * Entry point to generate view of QCG as a tree of function calls
@@ -52,11 +52,11 @@ export default (model) => [
  */
 function page(model) {
   switch (model.page) {
-    case 'layoutList': return layoutListPage(model);
+    case 'layoutList': return LayoutListPage(model.layoutListModel.folders);
     case 'layoutShow': return layoutViewPage(model);
     case 'objectTree': return objectTreePage(model);
     case 'objectView': return ObjectViewPage(model);
-    case 'about': return frameworkInfoPage(model);
+    case 'about': return AboutViewPage(model);
 
     // Should be seen only at the first start when the view is not yet really to be shown (data loading)
     default: return null;

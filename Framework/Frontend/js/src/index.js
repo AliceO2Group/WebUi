@@ -23,6 +23,9 @@ export { default as QueryRouter } from './QueryRouter.js';
 
 // Utils
 export { default as switchCase } from './switchCase.js';
+export { documentClickTaggedEventRegistry } from './utilities/documentClickTaggedEventRegistry.js';
+export { buildUrl } from './utilities/buildUrl.js';
+export { parseUrlParameters } from './utilities/parseUrlParameters.js';
 
 // Formatters
 export { formatTimeDuration } from './formatter/formatTimeDuration.js';
@@ -35,6 +38,16 @@ export { default as fetchClient } from './fetchClient.js';
 export { default as WebSocketClient } from './WebSocketClient.js';
 export { default as Loader } from './Loader.js';
 export { default as BrowserStorage } from './BrowserStorage.js';
+
+// Reusable components
+export { StatefulComponent } from './components/StatefulComponent.js';
+export { CopyToClipboardComponent } from './components/CopyToClipboardComponent.js';
+export { createPortal } from './components/createPortal.js';
+export { DropdownComponent } from './components/DropdownComponent.js';
+export { getUniqueId } from './components/getUniqueId.js';
+export { popover } from './components/popover.js';
+export { PopoverAnchors } from './components/PopoverEngine.js';
+export { PopoverTriggerPreConfiguration } from './components/PopoverPreConfigurations.js';
 
 // All icons helpers, namespaced with prefix 'icon*'
 export * from './icons.js';

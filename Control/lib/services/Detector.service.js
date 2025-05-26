@@ -12,33 +12,38 @@
  * or submit itself to any jurisdiction.
 */
 
+const { grpcErrorToNativeError } = require('@aliceo2/web-ui');
+
 /**
  * @class
  * DetectorService class is to be used for retrieving information from AliECS Core/Apricot about the currently used detectors
  */
 class DetectorService {
   /**
-   * @constructor
-   * Constructor for initializing the service with gRPC core service
-   * @param {CoreProxy} coreGrpc - interface to interact with gRPC AliECS core service
+   * Constructor for initializing the service with ECS gRPC service client
+   * @param {GrpcServiceClient} ecsGrpcClient - service to interact via gRPC client with AliECS core
    */
-  constructor(coreGrpc) {
+  constructor(ecsGrpcClient) {
     /**
-     * @type {CoreProxy}
+     * @type {GrpcServiceClient}
      */
-    this._coreGrpc = coreGrpc;
+    this._ecsGrpcClient = ecsGrpcClient;
   }
 
   /**
-   * Method to retrieve which detectors are currently active and compare to received input
-   * @param {Array<String>} detectors - list of strings with detector name
-   * @return {boolean}
-   * @throws {gRPCError}
+   * Method to return whether the provided detectors are inactive by querying the ECS grpc service
+   * @param {Array<string>} detectorsToCheck - list of strings with detector name that should be checked
+   * @returns {boolean} - true if the provided detectors are inactive
+   * @throws {Error}
    */
-  async areDetectorsAvailable(detectors) {
-    const {detectors: activeDetectors} = await this._coreGrpc['GetActiveDetectors']();
-    const areDetectorsNonActive = detectors.every((detector) => !activeDetectors.includes(detector));
-    return areDetectorsNonActive;
+  async areDetectorsAvailable(detectorsToCheck) {
+    try {
+      const { detectors } = await this._ecsGrpcClient.GetActiveDetectors();
+      const areProvidedDetectorsInactive = detectorsToCheck.every((detector) => !detectors.includes(detector));
+      return areProvidedDetectorsInactive;
+    } catch (error) {
+      throw grpcErrorToNativeError(error);
+    }
   }
 }
 

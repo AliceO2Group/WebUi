@@ -12,22 +12,24 @@ jobs:
   test:
     name: Tests on ubuntu-latest
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.x'
       - run: (cd InfoLogger; npm ci )
       - run: (cd InfoLogger; npm test )
   coverage:
     name: Tests & coverage on ubuntu-latest
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.x'
       - run: (cd InfoLogger; npm ci )
       - run: (cd InfoLogger; npm run coverage )
       - run: (cd InfoLogger; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
