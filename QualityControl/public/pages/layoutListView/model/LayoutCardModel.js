@@ -87,9 +87,9 @@ export default class LayoutCardModel extends Observable {
 
     const { layoutListModel } = this.model;
     if (this.isOfficial) {
-      layoutListModel.addLayoutTo('Official', this);
+      layoutListModel.addLayout(this).to('Official');
     } else {
-      layoutListModel.removeLayoutFrom('Official', this);
+      layoutListModel.removeLayout(this).from('Official');
     }
   }
 }

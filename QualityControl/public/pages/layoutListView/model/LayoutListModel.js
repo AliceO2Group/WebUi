@@ -82,23 +82,39 @@ export default class LayoutListModel extends Observable {
   }
 
   /**
-   * Removes a layout from a specific folder
-   * @param {string} folderName - Name of the folder to remove the layout from
-   * @param {LayoutCardModel} layout - Layout instance to remove
-   * @returns {void}
+   * Fluent interface for removing layouts
+   * @param {LayoutCardModel} layout - Layout to remove
+   * @returns {object} Object with .from() method
    */
-  removeLayoutFrom(folderName, layout) {
-    this.folders.get(folderName)?.removeItem(layout);
+  removeLayout(layout) {
+    return {
+
+      /**
+       * Specifies source folder for removal
+       * @param {string} folderName - Folder name
+       */
+      from: (folderName) => {
+        this.folders.get(folderName)?.removeItem(layout);
+      },
+    };
   }
 
   /**
-   * Adds a layout to a specific folder
-   * @param {string} folderName - Name of the folder to add the layout to
+   * Begins the process of adding a layout by returning an intermediate object with .to() method
    * @param {LayoutCardModel} layout - Layout instance to add
-   * @returns {void}
+   * @returns {object} Intermediate object with .to() method
    */
-  addLayoutTo(folderName, layout) {
-    this.folders.get(folderName)?.push(layout);
+  addLayout(layout) {
+    return {
+
+      /**
+       * Completes the add operation by specifying the target folder
+       * @param {string} folderName - Name of the folder to add to
+       */
+      to: (folderName) => {
+        this.folders.get(folderName)?.push(layout);
+      },
+    };
   }
 
   /**
