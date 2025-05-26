@@ -103,6 +103,14 @@ li.object-tree-branch, ul.object-tree-list {
 .jsroot-container {}
 .jsroot-container pre { background-color: initial; }
 .jsrootdiv:hover + .resize-element, .resize-element:hover{ display: flex !important; }
+.jsrootdiv {
+  z-index: 90;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+  
 
 .resize-button { position: absolute; right: 0%; z-index: 100 }
 
