@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import { UserRole, isUserRoleSufficient } from './../../../library/userRole.enum.js';
 import { Observable } from '/js/src/index.js';
 import FolderModel, { FolderType } from '../../../folder/model/FolderModel.js';
 import LayoutCardModel from './LayoutCardModel.js';
@@ -115,14 +114,5 @@ export default class LayoutListModel extends Observable {
         this.folders.get(folderName)?.push(layout);
       },
     };
-  }
-
-  /**
-   * Checks if the current user has sufficient authority (GLOBAL role)
-   * @async
-   * @returns {boolean} True if user has sufficient authority
-   */
-  sufficientAuthority() {
-    return this.model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
   }
 }
