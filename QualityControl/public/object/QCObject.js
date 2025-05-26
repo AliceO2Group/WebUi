@@ -165,13 +165,7 @@ export default class QCObject extends Observable {
 
     this._computeFilters();
 
-    this.sortBy = {
-      field: field,
-      title: title,
-      order: order,
-      icon: icon,
-      open: false,
-    };
+    this.sortBy = { field, title, order, icon, open: false };
     this.notify();
   }
 
@@ -300,17 +294,15 @@ export default class QCObject extends Observable {
    * @returns {undefined}
    */
   async select(object) {
-    if (this.currentList.length > 0) {
-      this.selected = this.currentList.find((obj) => obj.name === object.name);
+    let foundObject = this.currentList.find((obj) => obj.name === object.name);
+
+    if (foundObject && this.list && this.list.length > 0) {
+      foundObject = this.list.find((obj) => obj.name === object.name);
     }
-    if (!this.selected && this.list && this.list.length > 0) {
-      this.selected = this.list.find((obj) => obj.name === object.name);
-    }
-    if (!this.selected) {
-      this.selected = object;
-    }
-    setBrowserTabTitle(object.name);
-    await this.loadObjectByName(object.name);
+
+    this.selected = foundObject || object;
+    setBrowserTabTitle(this.selected.name);
+    await this.loadObjectByName(this.selected.name);
     this.notify();
   }
 
