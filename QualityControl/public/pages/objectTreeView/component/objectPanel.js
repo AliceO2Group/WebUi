@@ -98,4 +98,6 @@ export function statusBarLeft(object) {
  * @param {QCObject} object -  object model that handles state around object
  * @returns {vnode} - virtual node element
  */
-export const statusBarRight = (object) => object.selected && h('span.right', object.selected.name);
+export const statusBarRight = (object) => object.selected
+  ? h('span.right', object.selected.name)
+  : null;
