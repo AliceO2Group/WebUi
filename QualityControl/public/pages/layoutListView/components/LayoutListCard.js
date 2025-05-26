@@ -12,13 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-/**
- * Layout card component displaying layout information with interactive controls.
- * @module LayoutCard
- * @param {object} layoutCardModel - The model respondible for managing the page's state.
- * @param {object} layout - Layout data object containing display properties
- * @returns {vnode} Virtual DOM node representing the layout card
- */
 import { h } from '/js/src/index.js';
 import { iconBadge } from '/js/src/icons.js';
 
