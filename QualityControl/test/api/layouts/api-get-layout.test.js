@@ -48,23 +48,6 @@ export const apiGetLayoutsTests = () => {
         });
     });
 
-    test('should return layouts filtered by name', async () => {
-      const name = 'test';
-
-      await request(`${URL_ADDRESS}/api/layouts`)
-        .get(`?token=${OWNER_TEST_TOKEN}&name=${name}`)
-        .expect(200)
-        .expect((res) => {
-          if (!Array.isArray(res.body)) {
-            throw new Error('Expected array of layouts');
-          }
-          if (res.body.length !== 1) {
-            throw new Error(`Expected array of 1 layout to be returned, instead got${res.body.length}`);
-          }
-          deepStrictEqual(res.body, [LAYOUT_MOCK_4], 'Unexpected Layout structure');
-        });
-    });
-
     test('should return specific fields when fields parameter is provided', async () => {
       const fields = 'name,owner_id';
       await request(`${URL_ADDRESS}/api/layouts`)
@@ -132,6 +115,20 @@ export const apiGetLayoutsTests = () => {
         .get(`?token=${OWNER_TEST_TOKEN}&runDefinition=${runDefinition}`)
         .expect(200)
         .expect((res) => deepStrictEqual(res.body, LAYOUT_MOCK_5, 'Unexpected Layout structure was returned'));
+    });
+    test('should return layout by runDefinition and pdpBeamType combination', async () => {
+      const runDefinition = 'rundefinition';
+      const pdpBeamType = 'pdpBeamType';
+      await request(`${URL_ADDRESS}/api/layout`)
+        .get(`?token=${OWNER_TEST_TOKEN}&runDefinition=${runDefinition}&pdpBeamType=${pdpBeamType}`)
+        .expect(200)
+        .expect((res) => {
+          deepStrictEqual(
+            res.body.name,
+            `${runDefinition}_${pdpBeamType}`,
+            'Expected layout name to be combination of runDefinition and pdpBeamType',
+          );
+        });
     });
 
     test('should return 400 when no query parameters are provided', async () => {

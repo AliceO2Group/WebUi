@@ -16,9 +16,9 @@ import { h, iconPerson } from '/js/src/index.js';
 
 import { spinner } from './spinner.js';
 import layoutViewHeader from '../layout/view/header.js';
-import layoutListHeader from '../layout/list/header.js';
 import objectTreeHeader from '../object/objectTreeHeader.js';
 import aboutViewHeader from '../pages/aboutView/components/aboutViewHeader.js';
+import LayoutListHeader from '../pages/layoutListView/components/LayoutListHeader.js';
 
 /**
  * Shows header of the application, split with 3 parts:
@@ -40,8 +40,8 @@ export default (model) => h('.flex-row.p2', [
  */
 const headerSpecific = (model) => {
   switch (model.page) {
-    case 'layoutList': return layoutListHeader(model);
-    case 'layoutShow': return layoutViewHeader(model);
+    case 'layoutList': return LayoutListHeader(model.layoutListModel);
+    case 'layoutShow': return layoutViewHeader(model.layout);
     case 'objectTree': return objectTreeHeader(model);
     case 'about': return aboutViewHeader();
     default: return null;

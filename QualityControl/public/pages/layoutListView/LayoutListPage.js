@@ -12,21 +12,16 @@
  * or submit itself to any jurisdiction.
  */
 
+import FolderComponent from '../../folder/view/FolderComponent.js';
 import { h } from '/js/src/index.js';
 
 /**
- * Shows header of list of layouts with one search input to filter them
- * @param {Model} model - root model of the application
+ * Shows a list of layouts grouped by user and more
+ * @param {Array<FolderModel>} folderModels - LayoutListModel.folders: The Folders used by LayoutListModel
  * @returns {vnode} - virtual node element
  */
-export default (model) => [
-  h('.w-50.text-center', [h('b.f4', 'Layouts')]),
-  h('.flex-grow.text-right', [
-    h('input.form-control.form-inline.mh1.w-33', {
-      placeholder: 'Search',
-      type: 'text',
-      value: model.layout.searchInput,
-      oninput: (e) => model.layout.search(e.target.value),
-    }),
-  ]),
-];
+export default function (folderModels) {
+  return h('.scroll-y.absolute-fill', {
+    style: 'display: flex; flex-direction: column',
+  }, Array.from(folderModels.values()).map(FolderComponent));
+}
