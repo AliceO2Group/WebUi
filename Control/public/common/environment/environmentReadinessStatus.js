@@ -74,7 +74,7 @@ export const environmentReadinessStatus = (item, model) => {
   }
 
   return {
-    statusComponent: typeof statusComponent === 'string' ? () => h('', statusComponent) : statusComponent,
+    statusComponent: typeof statusComponent === 'function' ? statusComponent : () => h('', statusComponent),
     statusMessage,
     styleClasses: classes
   };
