@@ -87,9 +87,7 @@ export const drawPlot = (model, object) => {
  */
 export function statusBarLeft(object) {
   const { currentList, searchInput, searchResult } = object;
-  let itemsInfo = 'Loading objects...';
-
-  itemsInfo = searchInput ?
+  const itemsInfo = searchInput ?
     `${searchResult.length} found of ${currentList.length} items` : `${currentList.length} items`;
 
   return h('span.flex-grow', itemsInfo);
