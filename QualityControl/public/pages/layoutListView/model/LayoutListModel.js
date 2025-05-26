@@ -28,7 +28,7 @@ export default class LayoutListModel extends Observable {
   constructor(model) {
     super();
     this.model = model;
-    this.searchInput = '';
+    this._searchInput = '';
     this.folders = new Map();
 
     this._initializeFolders();
@@ -60,13 +60,21 @@ export default class LayoutListModel extends Observable {
   }
 
   /**
+   * Getter for search input that returns trimmed value
+   * @returns {string} The trimmed search input
+   */
+  get searchInput() {
+    return this._searchInput.trim();
+  }
+
+  /**
    * Set user's input for search and use a fuzzy algo to filter list of layouts.
    * Fuzzy allows missing chars "aaa" can find "a/a/a" or "aa/a/bbbbb"
    * @param {string} searchInput - string input from the user to search by
    * @returns {undefined}
    */
   search(searchInput) {
-    this.searchInput = searchInput;
+    this._searchInput = searchInput;
     this.folders.forEach((folder) => {
       folder.searchInput = new RegExp(searchInput, 'i');
     });
@@ -80,7 +88,7 @@ export default class LayoutListModel extends Observable {
    * @returns {void}
    */
   removeLayoutFrom(folderName, layout) {
-    this.folders.get(folderName).removeItem(layout);
+    this.folders.get(folderName)?.removeItem(layout);
   }
 
   /**
@@ -90,7 +98,7 @@ export default class LayoutListModel extends Observable {
    * @returns {void}
    */
   addLayoutTo(folderName, layout) {
-    this.folders.get(folderName).push(layout);
+    this.folders.get(folderName)?.push(layout);
   }
 
   /**
