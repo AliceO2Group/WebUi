@@ -65,7 +65,6 @@ export default class LayoutCardModel extends Observable {
    */
   sufficientAuthority() {
     return hasMinimumRoleAccess(this.model.session.access, UserRole.GLOBAL);
-    // return .some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
   }
 
   /**
