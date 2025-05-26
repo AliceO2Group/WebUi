@@ -129,7 +129,7 @@ function subcanvasView(model) {
   };
 
   return h('.flex-column.absolute-fill', [
-    !model.layout.editEnabled && layoutFiltersPanel(model),
+    !model.layout.editEnabled && layoutFiltersPanel(model.layout),
     h('.p2', subcanvasAttributes, tabObjects.map((tabObject) => chartView(model, tabObject))),
   ]);
 }

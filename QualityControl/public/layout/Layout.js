@@ -19,7 +19,6 @@ import LayoutUtils from './LayoutUtils.js';
 import { objectId, clone, setBrowserTabTitle } from '../common/utils.js';
 import { assertTabObject, assertLayout } from '../common/Types.js';
 import { buildQueryParametersString } from '../common/buildQueryParametersString.js';
-import { RequestFields } from '../common/RequestFields.enum.js';
 
 const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
 
@@ -47,8 +46,6 @@ export default class Layout extends Observable {
     this.updatedJSON = undefined;
 
     this.requestedLayout = RemoteData.notAsked();
-
-    this.searchInput = '';
 
     this.editEnabled = false; // Activate UI for adding, dragging and deleting tabObjects inside the current tab
     this.editingTabObject = null; // Pointer to a tabObject being modified
@@ -306,21 +303,6 @@ export default class Layout extends Observable {
   }
 
   /**
-   * Given an ID and new value for official status, update it accordingly
-   * @param {string} id - of layout to modify
-   * @returns {void}
-   */
-  async toggleOfficial(id) {
-    const { isOfficial } = this.model.services.layout.list.payload.find((item) => item.id === id);
-
-    await this.model.services.layout.patchLayout(id, { isOfficial: !isOfficial });
-
-    await this.model.services.layout.getLayouts(RequestFields.LAYOUT_CARD, this);
-
-    this.model.notify();
-  }
-
-  /**
    * Toggle edit menu dropdown
    * @returns {undefined}
    */
@@ -455,20 +437,6 @@ export default class Layout extends Observable {
   }
 
   /**
-   * Set user's input for search and use a fuzzy algo to filter list of layouts.
-   * Fuzzy allows missing chars "aaa" can find "a/a/a" or "aa/a/bbbbb"
-   * @param {string} searchInput - string input from the user to search by
-   * @returns {undefined}
-   */
-  search(searchInput) {
-    this.searchInput = searchInput;
-    this.model.folder.map.forEach((folder) => {
-      folder.searchInput = new RegExp(searchInput, 'i');
-    });
-    this.notify();
-  }
-
-  /**
    * Creates a deep clone of current layout `item` inside `editOriginalClone` to edit it without side effect.
    * @returns {undefined}
    */
@@ -496,7 +464,6 @@ export default class Layout extends Observable {
     this.editEnabled = false;
     this.editingTabObject = null;
     this.saveItem();
-    this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     this.notify();
   }
 
@@ -840,5 +807,15 @@ export default class Layout extends Observable {
   applyLayoutChanges() {
     this.setFilterToURL();
     this.selectTab(this.tabIndex);
+  }
+
+  /**
+   * Determines whether the current authenticated user owns the specified layout.
+   * Compares the current session user's person ID with the owner ID of the given layout item to verify ownership.
+   * @param {number} layoutOwnerId - The owner id to check ownership against.
+   * @returns {boolean}  whether the current user's person ID matches the layout's owner ID
+   */
+  ownsLayout(layoutOwnerId) {
+    return this.model.session.personid == layoutOwnerId;
   }
 }
