@@ -195,7 +195,7 @@ const environmentsTable = (model, list) => {
 const runColumn = (item, model) => {
   const {statusComponent, styleClasses} = environmentReadinessStatus(item, model);
   return h('td', {style: 'text-align: center;'},
-    h('.badge.f4', {class: styleClasses}, statusComponent)
+    h('.badge.f4', { class: styleClasses }, typeof statusComponent === 'function' ? statusComponent() : statusComponent)
   );
 }
 

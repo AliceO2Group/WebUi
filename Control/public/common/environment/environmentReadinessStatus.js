@@ -25,7 +25,7 @@ import { parseOdcStatusPerEnv } from './../utils.js';
  * * ECS finished transitioning and is CONFIGURED
  * @param {EnvironmentInfo} item - Environment to be checked
  * @param {Model} model - Model to be used
- * @returns {{status: {vnode, string}, style: string}}
+ * @returns {{statusComponent: {vnode, string}, styleClasses: string, statusMessage: string|undefined}}
  */
 export const environmentReadinessStatus = (item, model) => {
   const {currentRunNumber, currentTransition, state, userVars} = item;
