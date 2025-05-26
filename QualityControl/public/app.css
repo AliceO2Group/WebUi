@@ -136,3 +136,7 @@ li.object-tree-branch, ul.object-tree-list {
   border: 1px solid #ddd;
   background: var(--color-gray-light);
 }
+
+/* Standardised styles to potentially be moved to bootstrap */
+.ph0 { padding-left: 0; padding-right: 0; }
+.pv0 { padding-top: 0; padding-bottom: 0; }
