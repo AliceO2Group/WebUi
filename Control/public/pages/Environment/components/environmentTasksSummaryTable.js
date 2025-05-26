@@ -71,7 +71,10 @@ const detectorsTableHeaderRow = ({flp: {detectorCounters = {}} = {}}, availabili
     h('th', 'States'),
     Object.keys(detectorCounters).map((detector) => h('th.text-center', [
       detector,
-      shouldDisplaySorAvailability && h('.f6', dcsProperty(availability[detector].sorAvailability, 'SOR'))
+      shouldDisplaySorAvailability && h(
+        '.f6.flex-row.flex-center',
+        dcsProperty(availability[detector].sorAvailability, 'SOR')
+      ),
     ])),
     h('th.text-center', {colspan: HARDWARE_COMPONENTS.length - 1}, ''), // empty cell to align with the rest of the table
   ]);
