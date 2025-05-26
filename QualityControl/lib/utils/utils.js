@@ -54,25 +54,15 @@ export function errorLogger(err, facility = 'utils') {
  * @returns {Promise.<object, Error>} JSON response
  */
 export function httpGetJson(hostname, port, path, options) {
-  options = {
-    statusCodeMin: 200,
-    statusCodeMax: 299,
-    rejectMessage: 'Non-2xx status code: ',
-    protocol: 'http:',
-    rejectUnauthorized: true,
-    headers: {
-      Accept: 'application/json',
-    },
-    ...options ?? {},
-  };
+  const httpOptions = getHttpOptions(options);
   return new Promise((resolve, reject) => {
-    const requestOptions = {
-      hostname,
+    const requestOptions = { hostname,
       port,
       path,
       method: 'GET',
-      rejectUnauthorized: Boolean(options.rejectUnauthorized),
-      headers: options.headers };
+      rejectUnauthorized: Boolean(httpOptions.rejectUnauthorized),
+      headers: httpOptions.headers,
+    };
 
     /**
      * Generic handler for client http requests,
@@ -81,7 +71,7 @@ export function httpGetJson(hostname, port, path, options) {
      * @returns {undefined}
      */
     const requestHandler = (response) => {
-      if (response.statusCode < options.statusCodeMin || response.statusCode > options.statusCodeMax) {
+      if (response.statusCode < httpOptions.statusCodeMin || response.statusCode > httpOptions.statusCodeMax) {
         reject(new Error(`Non-2xx status code: ${response.statusCode}`));
         return;
       }
@@ -97,13 +87,8 @@ export function httpGetJson(hostname, port, path, options) {
         }
       });
     };
-    let request = null;
-    if (options.protocol === 'https:') {
-      request = https.request(requestOptions, requestHandler);
-    } else {
-      request = http.request(requestOptions, requestHandler);
-    }
-
+    const client = getClient(httpOptions.protocol);
+    const request = client.request(requestOptions, requestHandler);
     request.on('error', (err) => reject(err));
     request.end();
   });
@@ -115,13 +100,45 @@ export function httpGetJson(hostname, port, path, options) {
  * @param {number} port - port of the server to where request will be made
  * @param {string} path - path of the server request to where request will be made
  * @param {JSON} headers - configurable headers for the request
+ * @param {object} defaultOptions - options for the request (e.g. protocol)
+ * @param options
  * @returns {Promise.<{status, headers}, Error>} - JSON response
  */
-export function httpHeadJson(hostname, port, path, headers = { Accept: 'application/json' }) {
-  const requestOptions = { hostname, port, path, method: 'HEAD', headers };
+export function httpHeadJson(hostname, port, path, options) {
+  const httpOptions = getHttpOptions(options);
+  const requestOptions = { hostname, port, path, method: 'HEAD', options: httpOptions.headers };
+  const client = getClient(httpOptions.protocol);
   return new Promise((resolve, reject) => {
-    http.request(requestOptions, (res) => resolve({ status: res.statusCode, headers: res.headers }))
+    client.request(requestOptions, (res) => resolve({ status: res.statusCode, headers: res.headers }))
       .on('error', (err) => reject(err))
       .end();
   });
+}
+
+/**
+ * Merges default HTTP options with user-provided ones.
+ * @param {object} [options={}] - Custom options to override defaults.
+ * @returns {object} - Final options object with defaults applied.
+ */
+function getHttpOptions(options = {}) {
+  return {
+    statusCodeMin: 200,
+    statusCodeMax: 299,
+    rejectMessage: 'Non-2xx status code: ',
+    protocol: 'http:',
+    rejectUnauthorized: true,
+    headers: {
+      Accept: 'application/json',
+    },
+    ...options ?? {},
+  };
+}
+
+/**
+ * Returns the appropriate HTTP or HTTPS client module based on the protocol.
+ * @param {string} protocol - Either 'http:' or 'https:'.
+ * @returns {typeof http | typeof https} - The HTTP(S) client module.
+ */
+function getClient(protocol) {
+  return protocol === 'https:' ? https : http;
 }

@@ -217,7 +217,7 @@ export class CcdbService {
       throw new Error('Missing mandatory parameters: path & validFrom');
     }
     const url = this._buildCcdbUrlPath(identification);
-    const { status, headers } = await httpHeadJson(this._hostname, this._port, url, { Accept: 'application/json' });
+    const { status, headers } = await httpHeadJson(this._hostname, this._port, url);
     if (status >= 200 && status <= 399) {
       const [location = ''] = headers[CCDB_RESPONSE_HEADER_KEYS.CONTENT_LOCATION]
         .split(', ')

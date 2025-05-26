@@ -19,7 +19,6 @@ import { suite, test, beforeEach, before } from 'node:test';
 import { errorHandler, httpHeadJson } from './../../../lib/utils/utils.js';
 
 export const utilsTestSuite = async () => {
-
   suite('Check errors are handled and sent successfully', () => {
     let res;
     beforeEach(() => {
@@ -84,7 +83,8 @@ export const utilsTestSuite = async () => {
         .head('/qc/some/test/123455432')
         .reply(200);
 
-      const { status, headers } = await httpHeadJson('ccdb', '8500', '/qc/some/test/123455432', { Accept: 'text' });
+      const { status, headers } =
+        await httpHeadJson('ccdb', '8500', '/qc/some/test/123455432', { headers: { Accept: 'text' } });
       strictEqual(status, 200);
       deepStrictEqual(headers, { lastmodified: '123132132', location: '/download/some-id' });
     });
