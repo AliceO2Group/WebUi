@@ -23,11 +23,11 @@ export default class LayoutCardModel extends Observable {
    * Creates a new LayoutCardModel instance
    * @param {Model} model - The parent model utilizing this card
    * @param {object} layout - The layout data object containing:
-   * @param {string} id - Unique identifier for the layout
-   * @param {string} description - Description of the layout
-   * @param {string} owner_name - Name of the layout owner
-   * @param {boolean} isOfficial - Official status flag
-   * @param {string} name - Display name of the layout
+   * @param {string} layout.id - Unique identifier for the layout
+   * @param {string} layout.description - Description of the layout
+   * @param {string} layout.owner_name - Name of the layout owner
+   * @param {boolean} layout.isOfficial - Official status flag
+   * @param {string} layout.name - Display name of the layout
    */
   constructor(model, layout) {
     super();
