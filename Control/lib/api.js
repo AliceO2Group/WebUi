@@ -18,19 +18,19 @@ const logger = (require('@aliceo2/web-ui').LogManager)
   .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/api`);
 const config = require('./config/configProvider.js');
 
+const { DetectorId } = require('./common/detectorId.enum.js');
+
 // middleware
 const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 const {addDetectorIdMiddleware} = require('./middleware/addDetectorId.middleware.js');
-const {DetectorId} = require('./common/detectorId.enum.js');
+const {requireDetectorOrGlobalRoleMiddleware} = require('./middleware/requireDetectorOrGlobalRole.middleware.js');
+
 const {
   setDetectorsFromEnvironmentMiddlewareFactory
 } = require('./middleware/setDetectorsFromEnvironmentMiddlewareFactory.js');
 const {
   getDetectorsLockOwnershipMiddlewareFactory
 } = require('./middleware/getDetectorsLockOwnershipMiddlewareFactory.js');
-const {
-  detectorOwnershipMiddlewareFactory
-} = require('./middleware/detectorOwnership.middleware.js');
 
 // controllers
 const {ConsulController} = require('./controllers/Consul.controller.js');
@@ -211,7 +211,7 @@ module.exports.setup = (http, ws) => {
 
   http.put('/locks/:action/:detectorId',
     minimumRoleMiddleware(Role.DETECTOR),
-    detectorOwnershipMiddleware,
+    requireDetectorOrGlobalRoleMiddleware,
     lockController.actionLockHandler.bind(lockController)
   );
   http.put('/locks/force/:action/:detectorId',

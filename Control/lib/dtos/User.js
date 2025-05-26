@@ -13,6 +13,9 @@
 */
 'use strict';
 
+const { stringToArray } = require("../common/StringToArray");
+const { isRoleSufficient, Role } = require('./../common/role.enum.js');
+
 /**
  * User DTO
  */
@@ -43,12 +46,7 @@ class User {
     /**
      * @type {Array<String>}
      */
-    this._accessList = [];
-    if (typeof access === 'string') {
-      this._accessList = access.split(',');
-    } else if (Array.isArray(access)) {
-      this._accessList = access;
-    }
+    this._accessList = stringToArray(access);
   }
 
   /**
@@ -65,18 +63,24 @@ class User {
     }
     return Boolean(accessList.includes('admin'));
   }
-
+  
   /**
-   * Checks if the given user can access the given detector
-   * @param {string} detectorId 
+   * Checks if the current user has at least global access
    * @returns {Boolean}
    */
-  belongsToDetector(detectorId) {
-    //Convert detectorId to lowercase if it is uppercase
-    if (detectorId === detectorId.toUpperCase()) {
-      detectorId = detectorId.toLowerCase();
-    }
-    return Boolean(this._accessList.includes(`det-${detectorId}`));
+  isUserAtLeastGlobal() {
+    return this._accessList?.some((role) =>
+      isRoleSufficient(role, Role.GLOBAL) || isRoleSufficient(role, Role.ADMIN)
+    );
+  }
+
+  /**
+   * Checks if the current user has a certain detector access role
+   * @param {string} detectorId - id of the detector to check access for
+   * @returns {Boolean}
+   */
+  belongsToDetector(detectorId = '') {
+    return this._accessList.includes(`det-${detectorId}`);
   }
 
   /**
