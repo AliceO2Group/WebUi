@@ -17,11 +17,11 @@
 const { location } = window;
 const { history } = window;
 
-/*
+/**
  * These are the parameters coming from the server only and represent
  * the current session
  */
-const parametersNames = ['personid', 'name', 'token', 'username', 'access'];
+const authentificationParametersNames = ['personid', 'name', 'token', 'username', 'access'];
 
 /**
  * Class to store authenticated users's session and provide session-related services
@@ -39,37 +39,26 @@ export class SessionService {
    * and remove them from the query string.
    */
   loadAndHideParameters() {
-    this._loadParameters();
-    this._hideParameters();
-  }
-
-  /**
-   * Load the session parameters from query string into the session object
-   */
-  _loadParameters() {
     if (this.session) {
       throw new Error('the session is already loaded');
     }
     const url = new URL(location);
     this.session = {};
-    parametersNames.forEach((parameterName) => {
-      this.session[parameterName] = parameterName === 'access'
-        ? url.searchParams.get(parameterName).split(',')
-        : url.searchParams.get(parameterName);
 
-      if (!this.session[parameterName]) {
-        throw new Error(`query string should contain the parameter ${parameterName}`);
+    for (const authenticationParameterName of authentificationParametersNames) {
+      const authenticationParameter = url.searchParams.get(authenticationParameterName);
+
+      if (!authenticationParameter) {
+        throw new Error(`query string should contain the parameter ${authenticationParameterName}`);
       }
-    });
-  }
 
-  /**
-   * Replace the current URL without the session parameters
-   */
-  _hideParameters() {
-    const url = new URL(location);
-    parametersNames.forEach((parameterName) =>
-      url.searchParams.delete(parameterName));
+      this.session[authenticationParameterName] = authenticationParameterName === 'access'
+        ? authenticationParameter.split(',')
+        : authenticationParameter;
+
+      url.searchParams.delete(authenticationParameterName);
+    }
+
     history.replaceState({}, '', url);
   }
 

@@ -19,7 +19,6 @@ import { setup } from './lib/api.js';
 
 // Reading config file
 import { config } from './lib/config/configProvider.js';
-import { buildPublicConfig } from './lib/config/publicConfigProvider.js';
 
 // Quick check config at start
 
@@ -32,8 +31,6 @@ if (typeof config.demoData != 'undefined' && config.demoData) {
 } else {
   config.demoData = false;
 }
-
-buildPublicConfig(config);
 
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -53,8 +50,11 @@ http.addStaticPath(path.join(pathName, '../..'), 'jsroot');
 const ws = new WebSocket(http);
 
 if (process.env.NODE_ENV === 'test') {
-  // Initialize nock for CCDB if we are in test environment
+  // Initialize nock for CCDB and Bookkeeping only if we are in test environment
   const { initializeNockForCcdb } = await import('./test/setup/testSetupForCcdb.js');
+  const { initializeNockForBkp } = await import('./test/setup/testSetupForBkp.js');
+
   initializeNockForCcdb();
+  initializeNockForBkp();
 }
 setup(http, ws);

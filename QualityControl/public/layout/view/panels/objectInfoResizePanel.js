@@ -35,7 +35,7 @@ export const objectInfoResizePanel = (model, tabObject) => {
   return h('.text-right.resize-element.resize-button.flex-row', {
     style: 'display: none; padding: .25rem .25rem 0rem .25rem;',
   }, [
-    !model.isOnlineModeEnabled &&
+
     h('', { style: 'padding-bottom: 0;' }, h('.dropdown.mh1', { class: isSelectedOpen ? 'dropdown-open' : '' }, [
       h('button.btn', {
         title: 'View details about histogram',

@@ -5,6 +5,7 @@ on:
 jobs:
   deploy-npm-module:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       PROJECT: ${{ steps.set-project.outputs.project }}
       VERSION: ${{ steps.set-project.outputs.version }}
@@ -13,7 +14,7 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
-        node-version: '20.x'
+        node-version: '22.x'
         registry-url: 'https://registry.npmjs.org'
     - name: Check released tag matches ALICE O2 naming pattern
       run: |
@@ -44,6 +45,7 @@ jobs:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY_TOKEN }}
   upload-asset:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: deploy-npm-module
     if: ${{ needs.deploy-npm-module.outputs.PROJECT != 'Framework' }}
     outputs:
@@ -52,7 +54,7 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
-        node-version: '20.x'
+        node-version: '22.x'
         registry-url: 'https://registry.npmjs.org'
     - name: Install production deps
       run: npm install --only=production

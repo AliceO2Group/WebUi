@@ -10,32 +10,37 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-/* eslint-disable max-len */
 
-import { strictEqual, deepStrictEqual } from 'assert';
-import test from '../index';
+import { strictEqual } from 'node:assert';
+import { ServiceStatus } from '../../../common/library/enums/Status/serviceStatus.enum.js';
 
-describe('about page test suite', async () => {
-  let page;
-  let url;
+const ABOUT_PAGE_PARAM = '?page=about';
 
-  before(async () => ({ url, page } = test));
-
-  it('should load', async () => {
-    await page.goto(`${url}?page=about`, { waitUntil: 'networkidle0' });
+export const aboutPageTests = async (url, page, timeout = 5000, testParent) => {
+  await testParent.test('should successfully load about page', { timeout }, async () => {
+    await page.goto(`${url}${ABOUT_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
     const location = await page.evaluate(() => window.location);
     strictEqual(location.search, '?page=about');
   });
+  await testServiceStatus(testParent, page, 'qcg', timeout);
+  await testServiceStatus(testParent, page, 'qc', timeout);
+  await testServiceStatus(testParent, page, 'ccdb', timeout);
+};
 
-  it('should have a frameworkInfo item with config fields', async () => {
-    const expConfig = {
-      qcg: { port: 8181, hostname: 'localhost', status: { ok: true } },
-      consul: { hostname: 'localhost', port: 8500, status: { ok: false, message: 'Live Mode was not configured' } },
-      ccdb: { hostname: 'ccdb', port: 8500, prefix: 'test', status: { ok: false, message: 'Data connector was not configured' } },
-      quality_control: { version: '0.19.5-1' },
-    };
-    const config = await page.evaluate(() => window.model.frameworkInfo.item);
-    delete config.payload.qcg.version;
-    deepStrictEqual(config.payload, expConfig);
-  });
-});
+const testServiceStatus = async (testParent, page, serviceName, timeout = 5000) => {
+  await testParent
+    .test(
+      `should request info about ${serviceName.toUpperCase()} and store in statuses as RemoteData`,
+      { timeout },
+      async () => {
+        const kind = await page.evaluate(
+          (service, serviceStatus) =>
+            window.model.aboutViewModel.services[serviceStatus.SUCCESS][service].kind,
+          serviceName,
+          ServiceStatus,
+        );
+
+        strictEqual(kind, 'Success');
+      },
+    );
+};

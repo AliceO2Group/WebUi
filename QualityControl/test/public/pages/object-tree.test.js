@@ -52,7 +52,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should sort list of histograms by name in descending order', async () => {
     await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByNameOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(4)';
+    const sortingByNameOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(2)';
     await page.locator(sortingByNameOptionPath).click();
 
     const sorted = await page.evaluate(() => ({
@@ -67,7 +67,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should sort list of histograms by name in ascending order', async () => {
     await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByNameOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(3)';
+    const sortingByNameOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(1)';
     await page.locator(sortingByNameOptionPath).click();
     const sorted = await page.evaluate(() => ({
       list: window.model.object.currentList,
@@ -77,34 +77,6 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(sorted.sort.order, 1);
     strictEqual(sorted.sort.field, 'name');
     strictEqual(sorted.list[0].name, 'qc/test/object/1');
-  });
-
-  await testParent.test('should sort list of histograms by created time in descending order', async () => {
-    await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByCreatedTimeOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(2)';
-    await page.locator(sortingByCreatedTimeOptionPath).click();
-    const sorted = await page.evaluate(() => ({
-      list: window.model.object.currentList,
-      sort: window.model.object.sortBy,
-    }));
-    strictEqual(sorted.sort.title, 'Created Time');
-    strictEqual(sorted.sort.order, -1);
-    strictEqual(sorted.sort.field, 'createTime');
-    strictEqual(sorted.list[0].name, 'qc/test/object/2');
-  });
-
-  await testParent.test('should sort list of histograms by created time in ascending order', async () => {
-    await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByCreatedTimeOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(1)';
-    await page.locator(sortingByCreatedTimeOptionPath).click();
-    const sorted = await page.evaluate(() => ({
-      list: window.model.object.currentList,
-      sort: window.model.object.sortBy,
-    }));
-    strictEqual(sorted.sort.title, 'Created Time');
-    strictEqual(sorted.sort.order, 1);
-    strictEqual(sorted.sort.field, 'createTime');
-    strictEqual(sorted.list[0].name, 'qc/test/object/2');
   });
 
   await testParent.test('should have filtered results on input search', async () => {

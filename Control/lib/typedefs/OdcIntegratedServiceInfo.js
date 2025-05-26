@@ -29,6 +29,6 @@
  * @property {String} state
  * @property {String} ddsSessionId
  * @property {String} ddsSessionStatus
- * @property {Array<DeviceInfo>} devices
+ * @property {Array<Device - odc.proto>} devices
  * @property {Array<String>} hosts
  */

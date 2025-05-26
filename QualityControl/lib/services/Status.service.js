@@ -16,6 +16,7 @@ import { promisify } from 'node:util';
 import { exec } from 'node:child_process';
 
 import { LogManager } from '@aliceo2/web-ui';
+import { IntegratedServices } from './../../common/library/enums/Status/integratedServices.enum.js';
 
 const QC_VERSION_EXEC_COMMAND = 'yum info o2-QualityControl | awk \'/Version/ {print $3}\'';
 const execPromise = promisify(exec);
@@ -38,11 +39,6 @@ export class StatusService {
     this._dataService = undefined;
 
     /**
-     * @type {ConsulService}
-     */
-    this._onlineService = undefined;
-
-    /**
      * @type {WebSocket}
      */
     this._ws = undefined;
@@ -52,62 +48,39 @@ export class StatusService {
   }
 
   /**
+   * Send back info about the framework
+   * @param {IntegratedServices} service - the integrated service to retrieve information for
+   * @returns {object} - object containing status and framework information
+   */
+  async retrieveServiceStatus(service) {
+    let result = undefined;
+    switch (service) {
+      case IntegratedServices.QCG:
+        result = this.retrieveOwnStatus();
+        break;
+      case IntegratedServices.QC:
+        result = await this.retrieveQcVersion();
+        break;
+      case IntegratedServices.CCDB:
+        result = await this.retrieveDataServiceStatus();
+        break;
+    }
+    return result;
+  }
+
+  /**
    * Method that builds an object with some information about the server itself
    * @returns {object} - info on version, host and port where application is deployed
    */
   retrieveOwnStatus() {
     return {
+      name: 'QCG',
       status: { ok: true },
-      version: this._packageInfo?.version ?? '-',
-      clients: this._ws?.server?.clients?.size ?? -1,
+      version: this._packageInfo?.version ?? '',
+      extras: {
+        clients: this._ws?.server?.clients?.size ?? -1,
+      },
     };
-  }
-
-  /**
-   * Send back info about the framework
-   * @returns {object} - object containing status and framework information
-   */
-  async retrieveFrameworkInfo() {
-    const [qc, data_service_ccdb, online_service_consul] = await Promise.all([
-      this.retrieveQcVersion(),
-      this.retrieveDataServiceStatus(),
-      this.retrieveOnlineServiceStatus(),
-    ]);
-    return {
-      qcg: this.retrieveOwnStatus(),
-      qc,
-      data_service_ccdb,
-      online_service_consul,
-    };
-  }
-
-  /**
-   * Retrieve data service (CCDB) status and issue if any
-   * @returns {Promise<{object}>} - status of the data service
-   */
-  async retrieveDataServiceStatus() {
-    try {
-      const { version } = await this._dataService.getVersion();
-      return { status: { ok: true }, version };
-    } catch (err) {
-      return { status: { ok: false, message: err.message || err } };
-    }
-  }
-
-  /**
-   * Retrieve status of the online service (Consul) if it was configured and issue if any
-   * @returns {Promise<Resolve, Reject>} - status of the online service
-   */
-  async retrieveOnlineServiceStatus() {
-    if (!this._onlineService) {
-      return { status: { ok: true }, version: 'Live Mode was not configured' };
-    }
-    try {
-      await this._onlineService.getConsulLeaderStatus();
-      return { status: { ok: true } };
-    } catch (err) {
-      return { status: { ok: false, message: err.message || err } };
-    }
   }
 
   /**
@@ -115,16 +88,36 @@ export class StatusService {
    * @returns {string} - version of QC deployed on the system
    */
   async retrieveQcVersion() {
+    let status = { ok: true };
     let version = 'Not part of an FLP deployment';
+
     if (this._config.qc?.enabled) {
       try {
         const { stdout } = await execPromise(QC_VERSION_EXEC_COMMAND, { timeout: 6000 });
         version = stdout.trim();
       } catch (error) {
+        status = { ok: false, message: error.message || error };
         this._logger.errorMessage(error, { level: 99, system: 'GUI', facility: 'qcg/status-service' });
       }
     }
-    return { status: { ok: true }, version };
+
+    return { name: 'QC', status, version, extras: {} };
+  }
+
+  /**
+   * Retrieve data service (CCDB) status and issue if any
+   * @returns {Promise<{object}>} - status of the data service
+   */
+  async retrieveDataServiceStatus() {
+    let status = { ok: true };
+    let version = '';
+    try {
+      const { version: dataServiceVersion } = await this._dataService.getVersion();
+      version = dataServiceVersion;
+    } catch (err) {
+      status = { ok: false, message: err.message || err };
+    }
+    return { name: 'CCDB', status, version, extras: {} };
   }
 
   /*
@@ -138,15 +131,6 @@ export class StatusService {
    */
   set dataService(dataService) {
     this._dataService = dataService;
-  }
-
-  /**
-   * Set service to be used for querying status of online mode provider (Consul)
-   * @param {ConsulService} onlineService - service used for retrieving list of objects currently being produced
-   * @returns {void}
-   */
-  set onlineService(onlineService) {
-    this._onlineService = onlineService;
   }
 
   /**

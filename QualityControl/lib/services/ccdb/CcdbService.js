@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from '@aliceo2/web-ui';
+import { FailedDependencyError, LogManager } from '@aliceo2/web-ui';
 import { httpHeadJson, httpGetJson } from '../../utils/utils.js';
 import {
   CCDB_MONITOR, CCDB_VERSION_KEY, CCDB_RESPONSE_BODY_KEYS, CCDB_FILTER_FIELDS, CCDB_RESPONSE_HEADER_KEYS,
@@ -89,11 +89,32 @@ export class CcdbService {
       throw new Error(`Unable to connect to CCDB due to: ${error}`);
     }
     try {
-      const version = Object.values(serviceInfo[CCDB_MONITOR])[0][0]?.value ?? '-';
+      const monitorData = serviceInfo?.[CCDB_MONITOR] ?? {};
+      const [firstKey] = monitorData ? Object.keys(monitorData) : [];
+
+      const version = monitorData[firstKey]?.[0]?.value ?? 'unknown version';
       return { version };
     } catch (error) {
       throw new Error(`Unable to read version of CCDB due to: ${error}`);
     }
+  }
+
+  /**
+   * Returns a list of object paths using the /tree/ endpoint based on a given prefix
+   * @example Equivalent of URL request: `/tree/qc/TPC/object.*`
+   * @param {string} [prefix] - Prefix for which CCDB should search for objects
+   * @returns {Promise.<Array<{PATH}>>} - results of objects query or an empty array
+   * @rejects {Error}
+   */
+  async getObjectsTreeList(prefix = this._PREFIX) {
+    const { subfolders } = await httpGetJson(this._hostname, this._port, `/tree/${prefix}.*`);
+
+    if (!Array.isArray(subfolders)) {
+      throw new FailedDependencyError('Invalid response format from server - expected subfolders array');
+    }
+    // console.log(await this.getObjectsLatestVersionList(prefix));
+
+    return subfolders.map((folder) => ({ path: folder }));
   }
 
   /**
@@ -206,8 +227,11 @@ export class CcdbService {
       if (!location) {
         throw new Error(`No location provided by CCDB for object with path: ${path}`);
       }
-      headers.location = location;
-      return headers;
+      return {
+        ...headers,
+        location,
+        path,
+      };
     } else {
       throw new Error(`Unable to retrieve object: ${path} due to status: ${status}`);
     }

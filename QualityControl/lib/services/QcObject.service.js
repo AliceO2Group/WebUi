@@ -17,6 +17,10 @@ import { isObjectOfTypeChecker } from '../../common/library/qcObject/utils.js';
 import QCObjectDto from '../dtos/QCObjectDto.js';
 import QcObjectIdentificationDto from '../dtos/QcObjectIdentificationDto.js';
 
+/**
+ * @typedef {import('../repositories/ChartRepository.js').ChartRepository} ChartRepository
+ */
+
 const LOG_FACILITY = 'qcg/obj-service';
 
 /**
@@ -27,19 +31,19 @@ export class QcObjectService {
   /**
    * Setup service constructor and initialize needed dependencies
    * @param {CcdbService} dbService - CCDB service to retrieve raw information about the QC objects
-   * @param {JsonFileService} dataService - service to be used for retrieving configurations on saved layouts
+   * @param {ChartRepository} chartRepository - service to be used for retrieving configurations on saved layouts
    * @param {RootService} rootService - root library to be used for interacting with ROOT Objects
    */
-  constructor(dbService, dataService, rootService) {
+  constructor(dbService, chartRepository, rootService) {
     /**
      * @type {CcdbService}
      */
     this._dbService = dbService;
 
     /**
-     *  @type {JsonFileService}
+     *  @type {ChartRepository}
      */
-    this._dataService = dataService;
+    this._chartRepository = chartRepository;
 
     /**
      * @type {RootService}
@@ -66,7 +70,7 @@ export class QcObjectService {
    */
   async refreshCache() {
     try {
-      const objects = await this._dbService.getObjectsLatestVersionList(this._dbService.CACHE_PREFIX);
+      const objects = await this._dbService.getObjectsTreeList(this._dbService.CACHE_PREFIX);
       this._cache.objects = this._parseObjects(objects);
       this._cache.lastUpdate = Date.now();
     } catch (error) {
@@ -91,11 +95,11 @@ export class QcObjectService {
    * @returns {Promise.<Array<QcObjectLeaf>>} - results of objects with required fields
    * @rejects {Error}
    */
-  async retrieveLatestVersionOfObjects(prefix = this._dbService.PREFIX, fields = [], useCache = true) {
+  async retrieveLatestVersionOfObjects(prefix = this._dbService.PREFIX, useCache = true) {
     if (useCache && this._cache?.objects) {
       return this._cache.objects.filter((object) => object.name.startsWith(prefix));
     } else {
-      const objects = await this._dbService.getObjectsLatestVersionList(prefix, fields);
+      const objects = await this._dbService.getObjectsTreeList(prefix); // TreeList links to the latest
       return this._parseObjects(objects);
     }
   }
@@ -158,7 +162,7 @@ export class QcObjectService {
    * @throws
    */
   async retrieveQcObjectByQcgId(qcgId, id, validFrom = undefined, filters = {}) {
-    const { object, layoutName, tabName } = this._dataService.getObjectById(qcgId);
+    const { object, layoutName, tabName } = this._chartRepository.getObjectById(qcgId);
     const { name, options = {}, ignoreDefaults = false } = object;
     const qcObject = await this.retrieveQcObject(name, validFrom, id, filters);
 

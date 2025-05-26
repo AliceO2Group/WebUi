@@ -50,6 +50,8 @@ export async function setupServerForIntegrationTests() {
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     headless: true,
   });
+  // 2-second delay to ensure Chrome has fully initialized when running in a Docker container
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   const page = await browser.newPage();
   await page.setViewport({ width: 1366, height: 768 });
   // Listen to browser
@@ -91,7 +93,7 @@ export const terminateSessionAndLog = async (
  * it can be used by the test suite and suffer changes without impacting the original file.
  * If file does not exist, create it, first.
  */
-const copyMockDataFileToUse = async () => {
+export const copyMockDataFileToUse = async () => {
   const sourceFile = path.resolve('test/setup/seeders/qcg-mock-data-template.json');
   const destinationFile = path.resolve('test/setup/seeders/qcg-mock-data.json');
   try {

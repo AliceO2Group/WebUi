@@ -25,6 +25,15 @@ export const ALIECS_STATE_COLOR = {
   DONE: 'primary'
 };
 
+export const ALIECS_TRANSITION_COLOR = {
+  CREATE: 'gray-darker',
+  DEPLOY: 'gray-darker',
+  CONFIGURE: 'primary',
+  START_ACTIVITY: 'success',
+  STOP_ACTIVITY: 'primary',
+  GO_ERROR: 'danger',
+}
+
 export const ODC_STATE_COLOR = {
   RUNNING: 'success',
   READY: 'primary',

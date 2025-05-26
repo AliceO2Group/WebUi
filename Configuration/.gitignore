@@ -1,0 +1,5 @@
+.idea
+webapp/node_modules
+webapp/.react-router
+webapp/build
+backend/node_modules

@@ -24,7 +24,9 @@ import { infoLoggerButtonLink } from './../../../common/buttons/infoLoggerRedire
  */
 export const informationRedirectActionPanel = (environmentInfo, useShortLabel = true) => {
   const { currentRunNumber: run, id: partition } = environmentInfo;
-  return h('.btn-group.flex-row.flex-grow-1', [
+  return h('.btn-group.flex-row.flex-grow-1', {
+    key : 'informationRedirectActionPanel',
+  }, [
     infoLoggerButtonLink({partition, run}, useShortLabel ? 'FLP' : 'InfoLogger FLP', COG.ILG_URL),
     infoLoggerButtonLink({partition, run}, useShortLabel ? 'EPN' : 'InfoLogger EPN', COG.ILG_EPN_URL),
   ]);
