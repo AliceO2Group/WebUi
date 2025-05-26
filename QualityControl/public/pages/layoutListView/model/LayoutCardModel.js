@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { UserRole, isUserRoleSufficient } from './../../../library/userRole.enum.js';
+import { UserRole } from './../../../library/userRole.enum.js';
+import { hasMinimumRoleAccess } from '../../../common/utils.js';
 import { Observable } from '/js/src/index.js';
 
 /**
@@ -63,7 +64,8 @@ export default class LayoutCardModel extends Observable {
    * @returns {boolean} True if user has sufficient authority
    */
   sufficientAuthority() {
-    return this.model.session.access.some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
+    return hasMinimumRoleAccess(this.model.session.access, UserRole.GLOBAL);
+    // return .some((role) => isUserRoleSufficient(role, UserRole.GLOBAL));
   }
 
   /**
