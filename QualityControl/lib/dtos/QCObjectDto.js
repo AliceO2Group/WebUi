@@ -106,11 +106,19 @@ export default class QCObjectDto {
    * @returns {QcObjectLeaf} - parsed object
    */
   static toQcObjectLeaf(item) {
-    return {
-      path: item[PATH],
+    const objectLeaf = {
       name: item[PATH],
-      validFrom: getDateAsTimestamp(item[VALID_FROM]),
-      createdAt: getDateAsTimestamp(item[CREATED]),
     };
+
+    if (item[VALID_FROM] !== undefined) {
+      objectLeaf.validFrom = getDateAsTimestamp(item[VALID_FROM]);
+    }
+
+    if (item[CREATED] !== undefined) {
+      objectLeaf.createdAt = getDateAsTimestamp(item[CREATED]);
+      objectLeaf.path = item[PATH];
+    }
+
+    return objectLeaf;
   }
 }

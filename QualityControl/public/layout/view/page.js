@@ -129,7 +129,7 @@ function subcanvasView(model) {
   };
 
   return h('.flex-column.absolute-fill', [
-    !model.layout.editEnabled && layoutFiltersPanel(model),
+    !model.layout.editEnabled && layoutFiltersPanel(model.layout),
     h('.p2', subcanvasAttributes, tabObjects.map((tabObject) => chartView(model, tabObject))),
   ]);
 }
@@ -173,7 +173,6 @@ function chartView(model, tabObject) {
   };
 
   let className = '';
-  className += model.object.isObjectInOnlineList(tabObject.name) ? 'object-online ' : '';
   className += model.layout.editingTabObject && model.layout.editingTabObject.id === tabObject.id
     ? 'layout-selected layout-selectable '
     : 'layout-selectable ';
@@ -207,7 +206,7 @@ const drawComponent = (model, tabObject) => h('', { style: 'height:100%; display
     },
   }, draw(model, tabObject, {})),
   objectInfoResizePanel(model, tabObject),
-  !model.isOnlineModeEnabled && model.layout.item && model.layout.item.displayTimestamp
+  model.layout.item && model.layout.item.displayTimestamp
       && minimalObjectInfo(model, tabObject),
 ]);
 

@@ -38,25 +38,32 @@ export default class LayoutService {
 
   /**
    * Method to get all layouts shared between users
+   * @param {string|undefined} fields - comma seperated string values. Represent the fields that should be fetched.
+   * If left empty all available fields will be fetched
    * @param {Class<Observable>} that - Observer requesting data that should be notified of changes
    * @returns {undefined}
    */
-  async getLayouts(that = this.model) {
+  async getLayouts(fields = undefined, that = this.model) {
     this.list = RemoteData.loading();
     that.notify();
 
-    const { result, ok } = await this.loader.get('/api/layouts');
+    const url = `/api/layouts${fields !== undefined ? `?fields=${fields}` : ''}`;
+    const { result, ok } = await this.loader.get(url);
 
     if (ok) {
-      const sortedLayouts = result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
+      const username = this.model.session.name;
+
+      const sortedLayouts = result.sort(this._compareByName);
       const officialLayouts = sortedLayouts.filter(({ isOfficial = false }) => isOfficial);
+      const userLayouts = sortedLayouts.filter((layout) => layout.owner_name === username);
+
       this.list = RemoteData.success(sortedLayouts);
-      this.model.folder.map.get('All Layouts').list = RemoteData.success(sortedLayouts);
-      this.model.folder.map.get('Official').list = RemoteData.success(officialLayouts);
+      this.model.layoutListModel.folders.get('Official').list = RemoteData.success(officialLayouts);
+      this.model.layoutListModel.folders.get('My Layouts').list = RemoteData.success(userLayouts);
     } else {
       this.list = RemoteData.failure(result.error || result.message);
-      this.model.folder.map.get('All Layouts').list = RemoteData.failure(result.error || result.message);
     }
+    this.model.layoutListModel.folders.get('All Layouts').list = this.list;
 
     that.notify();
   }
@@ -64,28 +71,46 @@ export default class LayoutService {
   /**
    * Method to get all layouts by the user's id
    * @param {string} userId - user id for which to query layouts
+   * @param {string|undefined} fields - comma seperated string values. Represent the fields that should be fetched.
+   * If left empty all available fields will be fetched
    * @param {Class<Observable>} that - Observer requesting data that should be notified of changes
    * @returns {undefined}
    */
-  async getLayoutsByUserId(userId, that = this.model) {
+  async getLayoutsByUserId(userId, fields = undefined, that = this.model) {
     this.userList = RemoteData.loading();
     that.notify();
 
     if (isNaN(userId)) {
       this.userList = RemoteData.failure('Provided userId is not a number');
     } else {
-      const { result, ok } = await this.loader.get(`/api/layouts?owner_id=${userId}`);
+      const url = `/api/layouts?owner_id=${userId}${fields !== undefined ? `&fields=${fields}` : ''}`;
+
+      const { result, ok } = await this.loader.get(url);
       if (ok) {
-        const sortedLayouts = result.sort((lOne, lTwo) => lOne.name > lTwo.name ? 1 : -1);
+        const sortedLayouts = result.sort(this._compareByName);
         this.userList = RemoteData.success(sortedLayouts);
-        this.model.folder.map.get('My Layouts').list = RemoteData.success(sortedLayouts);
+        this.model.layoutListModel.folders.get('My Layouts').list = this.userList;
       } else {
         this.userList = RemoteData.failure(result.error || result.message);
-        this.model.folder.map.get('My Layouts').list = RemoteData.failure(result.error || result.message);
+        this.model.layoutListModel.folders.get('My Layouts').list = this.userList;
       }
     }
 
     that.notify();
+  }
+
+  /**
+   * Comparator function to sort layouts alphabetically by their name property
+   * @param {Layout} layout1 - First layout object to compare
+   * @param {Layout} layout2 - Second layout object to compare
+   * @returns {number} - Returns a number indicating the sort order:
+   *   - Negative if layout1.name comes before layout2.name
+   *   - Positive if layout1.name comes after layout2.name
+   *   - Zero if names are identical
+   * @private
+   */
+  _compareByName(layout1, layout2) {
+    return layout1.name.localeCompare(layout2.name);
   }
 
   /**
@@ -150,7 +175,8 @@ export default class LayoutService {
    */
   async patchLayout(id, patch) {
     try {
-      return RemoteData(await jsonPatch(`/api/layout/${id}`, { body: { ...patch } }));
+      const response = await jsonPatch(`/api/layout/${id}`, { body: { ...patch } });
+      return RemoteData.success(response);
     } catch (error) {
       return RemoteData.failure(error.message);
     }

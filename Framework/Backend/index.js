@@ -27,6 +27,7 @@ const NotificationService = require('./services/notification.js');
 const WebSocket = require('./websocket/server.js');
 const WebSocketMessage = require('./websocket/message.js');
 
+const { FailedDependencyError } = require('./errors/FailedDependencyError.js');
 const { InvalidInputError } = require('./errors/InvalidInputError.js');
 const { NotFoundError } = require('./errors/NotFoundError.js');
 const { ServiceUnavailableError } = require('./errors/ServiceUnavailableError.js');
@@ -38,6 +39,12 @@ const {
   updateAndSendExpressResponseFromNativeError,
 } = require('./errors/updateAndSendExpressResponseFromNativeError.js');
 const { Logger } = require('./log/Logger');
+
+const { getWebUiProtoIncludeDir } = require('./protobuf/getWebUiProtoIncludeDir');
+const { AliEcsEventMessagesConsumer } = require('./kafka/AliEcsEventMessagesConsumer.js');
+
+const { parseUrlParameters } = require('./http/parseUrlParameters.js');
+const { buildUrl } = require('./http/buildUrl.js');
 
 exports.ConsulService = ConsulService;
 
@@ -70,6 +77,8 @@ exports.WebSocket = WebSocket;
 
 exports.WebSocketMessage = WebSocketMessage;
 
+exports.FailedDependencyError = FailedDependencyError;
+
 exports.InvalidInputError = InvalidInputError;
 
 exports.NotFoundError = NotFoundError;
@@ -85,3 +94,11 @@ exports.GrpcErrorCodes = GrpcErrorCodes;
 exports.grpcErrorToNativeError = grpcErrorToNativeError;
 
 exports.updateAndSendExpressResponseFromNativeError = updateAndSendExpressResponseFromNativeError;
+
+exports.getWebUiProtoIncludeDir = getWebUiProtoIncludeDir;
+
+exports.AliEcsEventMessagesConsumer = AliEcsEventMessagesConsumer;
+
+exports.buildUrl = buildUrl;
+
+exports.parseUrlParameters = parseUrlParameters;

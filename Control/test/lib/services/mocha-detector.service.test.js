@@ -16,6 +16,7 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const {DetectorService} = require('../../../lib/services/Detector.service.js');
+const { TimeoutError } = require('@aliceo2/web-ui');
 
 describe(`'DetectorService' test suite`, () => {
     
@@ -28,6 +29,7 @@ describe(`'DetectorService' test suite`, () => {
       const areDetectorsAvailable = await detectorService.areDetectorsAvailable([]);
       assert.ok(areDetectorsAvailable);
     });
+
     it('should successfully respond with positive boolean for given detectors list', async () => {
       const detectorService = new DetectorService({
         GetActiveDetectors: sinon.stub().resolves({detectors: ['ABC']})
@@ -45,12 +47,15 @@ describe(`'DetectorService' test suite`, () => {
       const areDetectorsAvailable = await detectorService.areDetectorsAvailable(['ABC']);
       assert.ok(!areDetectorsAvailable);
     });
-    it('should reject with gRPC error from grpc core proxy service', async () => {
+
+    it('should reject with JS native error from grpc core proxy service', async () => {
       const detectorService = new DetectorService({
         GetActiveDetectors: sinon.stub().rejects({code: 4, details: 'Timeout'})
       });
-      assert.rejects(async () => await detectorService.areDetectorsAvailable(['TPC']), {code: 4, details: 'Timeo2ut'});
+      await assert.rejects(
+        () => detectorService.areDetectorsAvailable(['TPC']),
+        (err) => err instanceof TimeoutError && err.message === 'Timeout'
+      );
     });
-
   });
 });

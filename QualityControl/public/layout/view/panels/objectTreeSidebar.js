@@ -34,7 +34,7 @@ export default (model) =>
       const { searchInput = '' } = model.object;
       if (searchInput.trim() !== '') {
         objectsToDisplay = objects.filter((qcObject) =>
-          qcObject.path.toLowerCase().includes(searchInput.toLowerCase()));
+          qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
       }
       return [
         searchForm(model),
@@ -55,26 +55,11 @@ export default (model) =>
 
 /**
  * An input which allows users to search though objects;
- * A checkbox to switch to displaying only objects in Online Mode (displayed only if online mode is available)
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
 const searchForm = (model) => h('.flex-column.w-100.mv1', [
-  h('.flex-row.w-100', [
-    h('.w-100', 'Select objects to display:'),
-    model.isOnlineModeEnabled &&
-    h('.w-50.f6.flex-row', { style: 'justify-content: end;' }, [
-      h('label.m0.ph1', {
-        for: 'inputOnlineOnlyTreeSidebar',
-        style: 'cursor: pointer',
-      }, 'Online only'),
-      h('input', {
-        type: 'checkbox',
-        id: 'inputOnlineOnlyTreeSidebar',
-        onchange: (e) => model.object.toggleSideTree(e.target.checked),
-      }),
-    ]),
-  ]),
+  h('.flex-row.w-100', [h('.w-100', 'Select objects to display:')]),
   h('input.form-control.w-100', {
     placeholder: 'Search',
     type: 'text',
@@ -151,7 +136,7 @@ const branchRow = (model, sideTree, level) => {
 
   const icon = sideTree.open ? iconCaretBottom() : iconCaretRight();
   const iconWrapper = h('span', { style: { paddingLeft: `${level}em` } }, icon);
-  const path = sideTree.path.join('/');
+  const path = sideTree.name;
 
   const attr = {
     key: `key-sidebar-tree-${path}`,
@@ -178,7 +163,7 @@ const branchRow = (model, sideTree, level) => {
 const leafRow = (model, sideTree, level) => {
   // UI construction
   const iconWrapper = h('span', { style: { paddingLeft: `${level}em` } }, iconBarChart());
-  const path = sideTree.path.join('/');
+  const path = sideTree.name;
   const className = sideTree.object && sideTree.object === model.object.selected ? 'table-primary' : '';
   const draggable = Boolean(sideTree.object);
 
@@ -189,6 +174,7 @@ const leafRow = (model, sideTree, level) => {
     class: className,
     draggable,
     ondragstart: () => {
+      model.object.select(sideTree.object);
       const newItem = model.layout.addItem(sideTree.object.name);
       model.layout.moveTabObjectStart(newItem);
     },

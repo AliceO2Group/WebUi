@@ -27,6 +27,7 @@
       - [Enable/Disable CRU Links](#enabledisable-cru-links)
       - [Clean Resources/Tasks](#clean-resourcestasks)
     - [Roles](#roles)
+    - [Monitoring of gRPC channel and automatic reconnection](#monitoring-of-grpc-channel-and-automatic-reconnection)
     - [Integration with ControlWorkflows](#integration-with-controlworkflows)
       - [List of fixed variables used by AliECS GUI for user logic](#list-of-fixed-variables-used-by-aliecs-gui-for-user-logic)
       - [Dynamically built Workflow Panels](#dynamically-built-workflow-panels)
@@ -41,7 +42,7 @@ This is a prototype of Control GUI. It aims to replace current ECS HI and provid
 It communicates with [Control agent](https://github.com/AliceO2Group/Control) over gRPC.
 
 ## Requirements
-- `nodejs` >= `16.x`
+- `nodejs` >= `22.x`
 
 ## Installation
 1. `git clone https://github.com/AliceO2Group/WebUi.git`
@@ -162,6 +163,30 @@ The GUI adapts its view depending on SSO roles configured in Application Portal 
 - Global - access to global runs and standalone runs for all detectors
 - Admin - "Global" + admin actions such as "Force lock"
 
+### Monitoring of gRPC channel and automatic reconnection
+The GUI back-end includes a robust monitoring and reconnection mechanism for the gRPC channel between the gRPC client (GUI back-end, [GrpcServiceClient.js](./lib/control-core/GrpcServiceClient.js)) and the gRPC server. This ensures uninterrupted communication in the following scenarios:
+
+1. **Service Deployment Order Issues**: In O2 deployments, the order of service deployment is not guaranteed. This can result in the gRPC channel failing to establish due to a timeout. In such cases, the GUI will automatically retry the connection after the timeout plus a configurable reconnect delta time (`1000ms` by default).
+2. **Server Crashes or Connection Loss**: If the gRPC server crashes or the connection is lost, causing the channel to transition to states like `TRANSIENT_FAILURE`, the GUI will actively monitor the channel state and attempt to reconnect indefinitely until the connection is restored. This is critical as the AliECS GUI is a key component in controlling the experiment.
+
+The reconnection logic is implemented with the following features:
+- **Retry Logic**: The client continuously attempts to reconnect with a configurable retry interval (`connectionTimeout + reconnect delta time`).
+- **Channel State Monitoring**: The client monitors the gRPC channel's state and triggers reconnection if the state is not `READY` or `IDLE`.
+- **Promisified gRPC Calls**: All gRPC methods are promisified for easier asynchronous handling, with built-in support for deadlines.
+
+The following configuration parameters make this feature flexible:
+- `[timeout=30000]` (ms): Timeout for gRPC service calls.
+- `[connectionTimeout=10000]` (ms): Timeout for establishing a connection.
+- `[maxMessageLength=50]` (MB): Maximum allowed message size for gRPC calls.
+
+This mechanism ensures that the GUI remains resilient and operational even in challenging network or deployment conditions.
+```
+// Example of failure of gRPC server, monitoring and reconnection
+
+2025-04-14T11:31:52.521Z [cog/GrpcServiceClient] [error]: Connection to Control server (dns:server:32102) failed due to: Error: Channel state changed to TRANSIENT_FAILURE
+2025-04-14T11:31:55.672Z [cog/envcache] [error]: Error: 14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED server:32102
+2025-04-14T11:31:56.208Z [cog/GrpcServiceClient] [error]: Control gRPC connected to dns:server:32102
+```
 
 ### Integration with ControlWorkflows
 

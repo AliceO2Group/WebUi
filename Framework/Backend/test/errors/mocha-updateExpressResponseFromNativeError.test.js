@@ -17,6 +17,7 @@ const { NotFoundError } = require('../../errors/NotFoundError.js');
 const { ServiceUnavailableError } = require('../../errors/ServiceUnavailableError.js');
 const { TimeoutError } = require('../../errors/TimeoutError.js');
 const { UnauthorizedAccessError } = require('../../errors/UnauthorizedAccessError.js');
+const { FailedDependencyError } = require('../../errors/FailedDependencyError.js');
 const { updateAndSendExpressResponseFromNativeError } = require('../../errors/updateAndSendExpressResponseFromNativeError.js');
 
 const assert = require('assert');
@@ -50,6 +51,11 @@ describe('\'updateAndSendExpressResponseFromNativeError\' test suite', () => {
     updateAndSendExpressResponseFromNativeError(response, new TimeoutError('Ran out of time'));
     assert.ok(response.status.calledWith(408));
     assert.ok(response.json.calledWith({ status: 408, title: 'Timeout', message: 'Ran out of time' }));
+  });
+  it('should successfully update response based on FailedDependencyError', () => {
+    updateAndSendExpressResponseFromNativeError(response, new FailedDependencyError('Service did not respond with expected data'));
+    assert.ok(response.status.calledWith(424));
+    assert.ok(response.json.calledWith({ status: 424, title: 'Failed Dependency', message: 'Service did not respond with expected data' }));
   });
   it('should successfully update response based on ServiceUnavailableError', () => {
     updateAndSendExpressResponseFromNativeError(response, new ServiceUnavailableError('Service does not want to cooperate'));

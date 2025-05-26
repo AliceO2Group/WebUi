@@ -41,3 +41,9 @@ export const objects = [
     [VALID_UNTIL]: new Date('2023-12-04').valueOf(),
   },
 ];
+
+export const subfolders = [
+  'qc/test/object/1',
+  'qc/test/object/2',
+  'qc/test/object/11',
+];
