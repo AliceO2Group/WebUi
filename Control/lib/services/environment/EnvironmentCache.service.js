@@ -91,12 +91,21 @@ class EnvironmentCacheService {
       const keys = attributePath.split('.');
       for (let i = 0; i < keys.length - 1; i++) {
         const key = keys[i];
+        if (key === "__proto__" || key === "constructor") {
+          this._logger.warnMessage(`Attempt to modify restricted property '${key}' in environment with id ${id}.`);
+          return null;
+        }
         if (!current[key]) {
           current[key] = {};
-        }
-        current = current[key];
-      }
-      current[keys[keys.length - 1]] = value;
+       }
+       current = current[key];
+     }
+     const finalKey = keys[keys.length - 1];
+     if (finalKey === "__proto__" || finalKey === "constructor") {
+       this._logger.warnMessage(`Attempt to modify restricted property '${finalKey}' in environment with id ${id}.`);
+       return null;
+     }
+     current[finalKey] = value;
 
       this._environments.set(id, cachedEnvironment);
       return cachedEnvironment;
