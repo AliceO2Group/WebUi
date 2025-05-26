@@ -18,8 +18,7 @@ import FolderModel, { FolderType } from '../../../folder/model/FolderModel.js';
 import LayoutCardModel from './LayoutCardModel.js';
 
 /**
- * Model namespace with all requests to load or create layouts, compute their position on a grid,
- * and search them.
+ * LayoutListModel namespace to control the layoutCards spread between its folders
  */
 export default class LayoutListModel extends Observable {
   /**
