@@ -38,6 +38,7 @@
   ],
   "dependencies": {
     "@aliceo2/web-ui": "2.8.4",
+    "cross-env": "^7.0.3",
     "joi": "17.13.3",
     "jsroot": "7.9.0",
     "mariadb": "^3.4.1",
