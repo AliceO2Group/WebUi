@@ -17,11 +17,11 @@ import nock from 'nock';
 import { ok, strictEqual, deepStrictEqual, rejects } from 'node:assert';
 import { suite, test, beforeEach, before } from 'node:test';
 import { errorHandler } from '../../../lib/utils/errorHandler.js';
-import { httpHeadJson } from '../../../lib/utils/httpRequests.js';
+import { httpGetJson, httpHeadJson } from '../../../lib/utils/httpRequests.js';
 
 export const utilsTestSuite = async () => {
   suite('Check errors are handled and sent successfully', () => {
-    let res;
+    let res = null;
     beforeEach(() => {
       res = {
         status: stub().returnsThis(),
@@ -99,6 +99,61 @@ export const utilsTestSuite = async () => {
       await rejects(async () => {
         await httpHeadJson('ccdb', '8500', '/qc/some/test/123455432');
       }, new Error('Something went wrong'));
+    });
+  });
+
+  suite('"httpGetJson" test suite', () => {
+    before(() => nock.cleanAll());
+
+    test('should successfully return parsed JSON response', async () => {
+      const responseData = { message: 'Hello', code: 123 };
+
+      nock('http://ccdb:8500')
+        .get('/api/test')
+        .reply(200, responseData, { 'Content-Type': 'application/json' });
+
+      const result = await httpGetJson('ccdb', 8500, '/api/test');
+      deepStrictEqual(result, responseData);
+    });
+
+    test('should succeed with custom headers', async () => {
+      const responseData = { hello: 'world' };
+
+      nock('http://ccdb:8500', {
+        reqHeaders: { Accept: 'application/json', 'X-Custom': 'test' },
+      })
+        .get('/api/test')
+        .reply(200, responseData);
+
+      const result = await httpGetJson('ccdb', 8500, '/api/test', {
+        headers: { Accept: 'application/json', 'X-Custom': 'test' },
+      });
+
+      deepStrictEqual(result, responseData);
+    });
+
+    test('should reject on network error', async () => {
+      nock('http://ccdb:8500')
+        .get('/api/test')
+        .replyWithError('Request failed');
+
+      await rejects(() => httpGetJson('ccdb', 8500, '/api/test'), /Request failed/);
+    });
+
+    test('should reject on non-2xx status code', async () => {
+      nock('http://ccdb:8500')
+        .get('/api/test')
+        .reply(404, { error: 'Not found' });
+
+      await rejects(() => httpGetJson('ccdb', 8500, '/api/test'), /Non-2xx status code: 404/);
+    });
+
+    test('should reject on invalid JSON response', async () => {
+      nock('http://ccdb:8500')
+        .get('/api/test')
+        .reply(200, 'invalid json');
+
+      await rejects(() => httpGetJson('ccdb', 8500, '/api/test'), /Unable to parse JSON/);
     });
   });
 };
