@@ -13,7 +13,7 @@
 */
 'use strict';
 
-const { stringToArray } = require("../common/StringToArray");
+const { stringToArray } = require('../common/stringToArray.js');
 const { isRoleSufficient, Role } = require('./../common/role.enum.js');
 
 /**
