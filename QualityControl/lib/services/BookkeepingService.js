@@ -18,7 +18,6 @@ import { LogManager } from '@aliceo2/web-ui';
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'bkp-service'}`);
 const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
-const GET_RUN_TEST_PATH = '/api/runs/1';
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
@@ -142,5 +141,16 @@ export class BookkeepingService {
    */
   _createPath(path) {
     return `${path}?token=${this._token}`;
+  }
+
+  /**
+   * Helper method to construct a URL path with the required authentication token.
+   * Appends the service's token as a query parameter to the provided path.
+   * @private
+   * @param {number} id - The run id to be appended
+   * @returns {string} The constructed run path with the token query parameter
+   */
+  _createRunPath(id) {
+    return this._createPath(`${this.GET_RUN_TEST_PATH}/${id}`);
   }
 }
