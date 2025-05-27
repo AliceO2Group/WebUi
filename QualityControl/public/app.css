@@ -67,6 +67,30 @@
   height: 100%;
 }
 
+.heading {
+  font-weight: bold;
+  padding: 0.3em;
+  background-color: var(--color-gray-light);
+}
+
+.root-tree {
+  list-style-type: none;
+  margin: 0;
+  padding-left: 0.1em;
+}
+
+ul.object-tree-list { 
+  list-style-type: none;
+  margin: 0;
+  padding-left: 1em;
+}
+
+li.object-tree-branch, ul.object-tree-list {
+  display: flex;
+  flex-direction: column;
+}
+
+
 .folderHeader, .cardHeader {
   border-radius: .5rem .5rem 0 0;
 }
@@ -80,6 +104,14 @@
 .jsroot-container {}
 .jsroot-container pre { background-color: initial; }
 .jsrootdiv:hover + .resize-element, .resize-element:hover{ display: flex !important; }
+.jsrootdiv {
+  z-index: 90;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+  
 
 .resize-button { position: absolute; right: 0%; z-index: 100 }
 
@@ -105,3 +137,7 @@
   border: 1px solid #ddd;
   background: var(--color-gray-light);
 }
+
+/* Standardised styles to potentially be moved to bootstrap */
+.ph0 { padding-left: 0; padding-right: 0; }
+.pv0 { padding-top: 0; padding-bottom: 0; }

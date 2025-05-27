@@ -10,8 +10,10 @@ import { spinner } from '../../../common/spinner.js';
  * @returns {vnode} - virtual node element
  */
 export function objectPanel(model) {
-  const selectedObjectName = model.object.selected.name;
-  if (model.object.objects && model.object.objects[selectedObjectName]) {
+  const { objects, selected } = model.object;
+  const selectedObjectName = selected.name;
+
+  if (objects?.[selectedObjectName]) {
     return model.object.objects[selectedObjectName].match({
       NotAsked: () => null,
       Loading: () =>
@@ -25,34 +27,56 @@ export function objectPanel(model) {
 }
 
 /**
+ * Creates the resize button element
+ * @param {Model.router} router - the application router
+ * @param {string} href - link for the full screen view
+ * @returns {vnode} - virtual node element for resize button
+ */
+const resizeButton = (router, href) => h('.resize-button.flex-row', [
+  h('.p1.text-left.pv0', h(
+    'a.btn',
+    {
+      title: 'Open object plot in full screen',
+      href,
+      onclick: (e) => router.handleLinkEvent(e),
+    },
+    iconResizeBoth(),
+  )),
+]);
+
+/**
+ * Creates the main plot container
+ * @param {Model} model - root model of the application
+ * @param {string} name - name of the object
+ * @returns {vnode} - virtual node element for the plot
+ */
+const plotSelection = (model, name) => h('', { style: 'height:77%;' }, draw(model, name, { stat: true }));
+
+/**
+ * Creates the info panel container with timestamp selector
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element for the info panel
+ */
+const infoPanel = (model) => h('.scroll-y', {}, [
+  h('.w-100.flex-row.justify-center', h('.w-80', timestampSelectForm(model))),
+  qcObjectInfoPanel(model, { 'font-size': '.875rem;' }),
+]);
+
+/**
  * Draw the object including the info button and history dropdown
  * @param {Model} model - root model of the application
  * @param {JSON} object - {qcObject, info, timestamps}
  * @returns {vnode} - virtual node element
  */
 export const drawPlot = (model, object) => {
+  const { router } = model;
   const { name, validFrom, id } = object;
-  const href = validFrom ?
-    `?page=objectView&objectName=${name}&ts=${validFrom}&id=${id}`
-    : `?page=objectView&objectName=${name}`;
-  const info = object;
-  return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
-    h('.resize-button.flex-row', [
-      h('.p1.text-left', { style: 'padding-bottom: 0;' }, h(
-        'a.btn',
-        {
-          title: 'Open object plot in full screen',
-          href,
-          onclick: (e) => model.router.handleLinkEvent(e),
-        },
-        iconResizeBoth(),
-      )),
-    ]),
-    h('', { style: 'height:77%;' }, draw(model, name, { stat: true })),
-    h('.scroll-y', {}, [
-      h('.w-100.flex-row', { style: 'justify-content: center' }, h('.w-80', timestampSelectForm(model))),
-      qcObjectInfoPanel(info, { 'font-size': '.875rem;' }),
-    ]),
+  const href = `?page=objectView&objectName=${name}${validFrom ? `&ts=${validFrom}&id=${id}` : ''}`;
+
+  return h('.h100.flex-column', [
+    resizeButton(router, href),
+    plotSelection(model, name),
+    infoPanel(model),
   ]);
 };
 
@@ -62,14 +86,9 @@ export const drawPlot = (model, object) => {
  * @returns {vnode} - virtual node element
  */
 export function statusBarLeft(object) {
-  let itemsInfo = '';
-  if (!object.currentList) {
-    itemsInfo = 'Loading objects...';
-  } else if (object.searchInput) {
-    itemsInfo = `${object.searchResult.length} found of ${object.currentList.length} items`;
-  } else {
-    itemsInfo = `${object.currentList.length} items`;
-  }
+  const { currentList, searchInput, searchResult } = object;
+  const itemsInfo = searchInput ?
+    `${searchResult.length} found of ${currentList.length} items` : `${currentList.length} items`;
 
   return h('span.flex-grow', itemsInfo);
 }

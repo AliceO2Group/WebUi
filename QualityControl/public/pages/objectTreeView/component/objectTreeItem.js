@@ -62,6 +62,7 @@ export const sideTreeLeafItem = (leafObject, qcObject, layout) => {
     onclick: () => qcObject.select(leafObject),
     draggable: true,
     ondragstart: () => {
+      qcObject.select(leafObject);
       const newItem = layout.addItem(name);
       layout.moveTabObjectStart(newItem);
     },

@@ -79,10 +79,10 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     await page.locator(SEARCH_PATH).fill('qc');
     await delay(50); // Wait for table to load
 
-    const objectIds = await page.evaluate((rowPath) =>
+    const objectTitles = await page.evaluate((rowPath) =>
       [...document.querySelectorAll(rowPath)].map((e)=> e.title), VIRTUAL_TABLEROW_PATH);
 
-    deepStrictEqual(objectIds, OBJECTS_DESCENDING);
+    deepStrictEqual(objectTitles, OBJECTS_DESCENDING);
   });
 
   await testParent.test('should sort virtual table of objects by name in ascending order', async () => {
