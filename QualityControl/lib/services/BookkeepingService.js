@@ -18,6 +18,7 @@ import { LogManager } from '@aliceo2/web-ui';
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'bkp-service'}`);
 const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
+const GET_RUN_PATH = '/api/runs';
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
@@ -85,7 +86,6 @@ export class BookkeepingService {
    * @returns {Promise<boolean>} Resolves to true if the connection is successful, otherwise false.
    */
   async simulateConnection() {
-    console.log(GET_BKP_DATABASE_STATUS_PATH);
     try {
       const { data } = await httpGetJson(
         this._hostname,
@@ -124,6 +124,19 @@ export class BookkeepingService {
     return data;
   }
 
+  async retrieveRun(id) {
+    const { data } = await httpGetJson(
+      this._hostname,
+      this._port,
+      this._createRunPath(id),
+      {
+        protocol: this._protocol,
+        rejectUnauthorized: false,
+      },
+    );
+    return data;
+  }
+
   /**
    * Returns the interval in milliseconds for how often the list of run types should be refreshed.
    * @returns {number} Interval in milliseconds for refreshing the list of run types.
@@ -151,6 +164,6 @@ export class BookkeepingService {
    * @returns {string} The constructed run path with the token query parameter
    */
   _createRunPath(id) {
-    return this._createPath(`${this.GET_RUN_TEST_PATH}/${id}`);
+    return this._createPath(`${GET_RUN_PATH}/${id}`);
   }
 }
