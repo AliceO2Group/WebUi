@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { httpGetJson } from '../utils/utils.js';
+import { httpGetJson } from '../utils/httpRequests.js';
 import { LogManager } from '@aliceo2/web-ui';
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'bkp-service'}`);

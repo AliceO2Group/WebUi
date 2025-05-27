@@ -13,7 +13,7 @@
  */
 
 import { FailedDependencyError, LogManager } from '@aliceo2/web-ui';
-import { httpHeadJson, httpGetJson } from '../../utils/utils.js';
+import { httpHeadJson, httpGetJson } from '../../utils/httpRequests.js';
 import {
   CCDB_MONITOR, CCDB_VERSION_KEY, CCDB_RESPONSE_BODY_KEYS, CCDB_FILTER_FIELDS, CCDB_RESPONSE_HEADER_KEYS,
 } from './CcdbConstants.js';

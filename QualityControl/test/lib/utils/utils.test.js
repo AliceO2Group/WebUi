@@ -16,7 +16,8 @@ import { stub } from 'sinon';
 import nock from 'nock';
 import { ok, strictEqual, deepStrictEqual, rejects } from 'node:assert';
 import { suite, test, beforeEach, before } from 'node:test';
-import { errorHandler, httpHeadJson } from './../../../lib/utils/utils.js';
+import { errorHandler } from '../../../lib/utils/errorHandler.js';
+import { httpHeadJson } from '../../../lib/utils/httpRequests.js';
 
 export const utilsTestSuite = async () => {
   suite('Check errors are handled and sent successfully', () => {
