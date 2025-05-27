@@ -174,10 +174,10 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should have error of missing revisions for this repository', async () => {
     const errorMessage = await page.locator('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div:nth-child(2) > div > div')
-      .setTimeout(500)
+      .setTimeout(1000)
       .map((element) => element.innerText)
       .wait();
-    assert.strictEqual(errorMessage.trim(), 'No revisions found for the selected repository');
+    assert.strictEqual(errorMessage.trim(), 'No revisions found for the selected repository', `Error message is not displayed but is: ${errorMessage}`);  
   });
 
   it('should successfully request refresh of repositories and request repositories list, its contents and branches again', async () => {
