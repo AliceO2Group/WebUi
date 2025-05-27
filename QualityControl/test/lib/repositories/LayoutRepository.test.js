@@ -48,7 +48,7 @@ export const layoutRepositoryTest = async () => {
     suite('list layouts', () => {
       test('should list all layouts without filter', async () => {
         const result = layoutRepository.listLayouts();
-        strictEqual(result.length, 2, 'Length of list of layouts is not correct');
+        strictEqual(result.length, 3, 'Length of list of layouts is not correct');
         deepStrictEqual(result, jsonFileServiceMock.data.layouts, 'List of layouts filtered do not match the filters');
       });
 
@@ -132,8 +132,8 @@ export const layoutRepositoryTest = async () => {
         const newLayout = { id: '3', name: 'New Layout', owner_id: 'user3' };
         await layoutRepository.createLayout(newLayout);
 
-        strictEqual(jsonFileServiceMock.data.layouts.length, 3);
-        deepEqual(jsonFileServiceMock.data.layouts[2], newLayout);
+        strictEqual(jsonFileServiceMock.data.layouts.length, 4);
+        deepEqual(jsonFileServiceMock.data.layouts[3], newLayout);
         sinon.assert.calledOnce(jsonFileServiceMock.writeToFile);
       });
     });
@@ -166,7 +166,7 @@ export const layoutRepositoryTest = async () => {
           layoutRepository.deleteLayout(nonExistentLayoutId),
           (err) => err instanceof Error && err.message === `layout (${nonExistentLayoutId}) not found`,
         ).then(() => {
-          strictEqual(jsonFileServiceMock.data.layouts.length, 3);
+          strictEqual(jsonFileServiceMock.data.layouts.length, 4);
           sinon.assert.notCalled(jsonFileServiceMock.writeToFile);
         });
       });
@@ -176,7 +176,7 @@ export const layoutRepositoryTest = async () => {
         const deletedLayoutId = await layoutRepository.deleteLayout(layoutIdToDelete);
 
         strictEqual(deletedLayoutId, layoutIdToDelete);
-        strictEqual(jsonFileServiceMock.data.layouts.length, 2);
+        strictEqual(jsonFileServiceMock.data.layouts.length, 3);
         strictEqual(deletedLayoutId, layoutIdToDelete);
         sinon.assert.calledOnce(jsonFileServiceMock.writeToFile);
       });

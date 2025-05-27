@@ -174,6 +174,7 @@ const leafRow = (model, sideTree, level) => {
     class: className,
     draggable,
     ondragstart: () => {
+      model.object.select(sideTree.object);
       const newItem = model.layout.addItem(sideTree.object.name);
       model.layout.moveTabObjectStart(newItem);
     },

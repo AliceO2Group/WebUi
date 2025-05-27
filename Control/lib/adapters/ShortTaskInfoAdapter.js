@@ -39,7 +39,7 @@ class ShortTaskInfoAdapter {
       deploymentInfo,
       pid,
       sandboxStdout,
-      critical = true,
+      critical = false, // set to false by default to workaround the lack of optional usage in proto
     } = task;
 
     /**
