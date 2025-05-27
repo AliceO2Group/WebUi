@@ -19,10 +19,10 @@ import { h } from '/js/src/index.js';
 
 /**
  * Builds a panel containing multiple filters to allow user to apply for layout show/view
- * @param {Model} model - root model of the application
+ * @param {Layout} layoutModel - Model that manages layout state
  * @returns {vnode} - virtual node element
  */
-const layoutFiltersPanel = ({ layout: layoutModel }) => {
+const layoutFiltersPanel = (layoutModel) => {
   const { filter: filterMap, setFilterValue, applyLayoutChanges, selectOption } = layoutModel;
   const { filterInput, dynamicSelector } = filters;
   const onInputCallback = setFilterValue.bind(layoutModel);

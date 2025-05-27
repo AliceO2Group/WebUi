@@ -50,8 +50,6 @@
 }
 
 .cardHeader { 
-  border-top-right-radius: 0.5rem; 
-  border-top-left-radius: 0.5rem; 
   padding-left: var(--space-s);
 }
 .cardHeader > h5 { 
@@ -65,34 +63,13 @@
 .cardBody { 
   border: solid 1px var(--color-primary); 
   border-top: white;
-  border-bottom-left-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
+  border-radius: 0 0 .5rem .5rem;
   height: 100%;
 }
 
-.heading {
-  font-weight: bold;
-  padding: 0.3em;
-  background-color: var(--color-gray-light);
+.folderHeader, .cardHeader {
+  border-radius: .5rem .5rem 0 0;
 }
-
-.root-tree {
-  list-style-type: none;
-  margin: 0;
-  padding-left: 0.1em;
-}
-
-ul.object-tree-list { 
-  list-style-type: none;
-  margin: 0;
-  padding-left: 1em;
-}
-
-li.object-tree-branch, ul.object-tree-list {
-  display: flex;
-  flex-direction: column;
-}
-
 
 .status-bar { border-top: 1px solid var(--color-gray-dark); }
 

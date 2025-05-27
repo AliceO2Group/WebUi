@@ -37,7 +37,7 @@ export default class LayoutService {
   }
 
   /**
-   * Method to get all layout cards shared between users
+   * Method to get all layouts shared between users
    * @param {string|undefined} fields - comma seperated string values. Represent the fields that should be fetched.
    * If left empty all available fields will be fetched
    * @param {Class<Observable>} that - Observer requesting data that should be notified of changes
@@ -55,16 +55,15 @@ export default class LayoutService {
 
       const sortedLayouts = result.sort(this._compareByName);
       const officialLayouts = sortedLayouts.filter(({ isOfficial = false }) => isOfficial);
-      const userLayouts = sortedLayouts.filter((card) => card.owner_name === username);
+      const userLayouts = sortedLayouts.filter((layout) => layout.owner_name === username);
 
       this.list = RemoteData.success(sortedLayouts);
-      this.model.folder.map.get('All Layouts').list = RemoteData.success(sortedLayouts);
-      this.model.folder.map.get('Official').list = RemoteData.success(officialLayouts);
-      this.model.folder.map.get('My Layouts').list = RemoteData.success(userLayouts);
+      this.model.layoutListModel.folders.get('Official').list = RemoteData.success(officialLayouts);
+      this.model.layoutListModel.folders.get('My Layouts').list = RemoteData.success(userLayouts);
     } else {
       this.list = RemoteData.failure(result.error || result.message);
-      this.model.folder.map.get('All Layouts').list = RemoteData.failure(result.error || result.message);
     }
+    this.model.layoutListModel.folders.get('All Layouts').list = this.list;
 
     that.notify();
   }
@@ -90,10 +89,10 @@ export default class LayoutService {
       if (ok) {
         const sortedLayouts = result.sort(this._compareByName);
         this.userList = RemoteData.success(sortedLayouts);
-        this.model.folder.map.get('My Layouts').list = this.userList;
+        this.model.layoutListModel.folders.get('My Layouts').list = this.userList;
       } else {
         this.userList = RemoteData.failure(result.error || result.message);
-        this.model.folder.map.get('My Layouts').list = this.userList;
+        this.model.layoutListModel.folders.get('My Layouts').list = this.userList;
       }
     }
 
@@ -176,7 +175,8 @@ export default class LayoutService {
    */
   async patchLayout(id, patch) {
     try {
-      return RemoteData(await jsonPatch(`/api/layout/${id}`, { body: { ...patch } }));
+      const response = await jsonPatch(`/api/layout/${id}`, { body: { ...patch } });
+      return RemoteData.success(response);
     } catch (error) {
       return RemoteData.failure(error.message);
     }

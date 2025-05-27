@@ -28,7 +28,7 @@ export class LayoutRepository extends BaseRepository {
    * @throws {TypeError} If fields parameter is provided but is not an array
    * @throws {Error} If any specified field does not exist in the layout objects
    */
-  listLayouts({ name, owner_id, fields } = {}) {
+  listLayouts({ name, owner_id, fields = [] } = {}) {
     const { layouts } = this._jsonFileService.data;
 
     const layoutFilter = (layout) =>
@@ -37,7 +37,7 @@ export class LayoutRepository extends BaseRepository {
 
     const filteredLayouts = layouts.filter(layoutFilter);
 
-    if (!fields || fields.length === 0) {
+    if (fields.length === 0) {
       return filteredLayouts;
     }
 

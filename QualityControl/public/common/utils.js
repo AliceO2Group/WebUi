@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
+import { isUserRoleSufficient } from '../../../../library/userRole.enum.js';
+
 /**
  * Generates a new ObjectId
  * @returns {string} 16 random chars, base 16
@@ -108,4 +110,14 @@ export function setBrowserTabTitle(title = undefined) {
   if (document && title) {
     document.title = title;
   }
+}
+
+/**
+ * Checks if any role in the provided list meets or exceeds the required permission level
+ * @param {Array<UserRole>} userRoles - List of roles assigned to the user
+ * @param {UserRole} requiredRole - Minimum role level needed for authorization
+ * @returns {boolean} True if at least one user role meets or exceeds the required role level
+ */
+export function hasMinimumRoleAccess(userRoles, requiredRole) {
+  return userRoles.some((role) => isUserRoleSufficient(role, requiredRole));
 }
