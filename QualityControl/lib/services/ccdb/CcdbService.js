@@ -112,7 +112,6 @@ export class CcdbService {
     if (!Array.isArray(subfolders)) {
       throw new FailedDependencyError('Invalid response format from server - expected subfolders array');
     }
-    // console.log(await this.getObjectsLatestVersionList(prefix));
 
     return subfolders.map((folder) => ({ path: folder }));
   }
@@ -128,17 +127,27 @@ export class CcdbService {
    * If attributes list is missing, a default minimal list will be used: PATH, CREATED, LAST_MODIFIED
    * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
    * @param {string} [prefix] - Prefix for which CCDB should search for objects
+   * @param {number} [runNumber] - Run number by which the resulting array will be filtered.
    * @param {Array<string>} [fields] - List of fields that should be requested for each object
    * @returns {Promise.<Array<{PATH, CREATED, LAST_MODIFIED}>>} - results of objects query or error
-   * @rejects {Error}
+   * @rejects {Error}runNumber
    */
-  async getObjectsLatestVersionList(prefix = this._PREFIX, fields = []) {
-    const headers = {
-      accept: 'application/json',
-      'x-filter-fields': fields.length > 0 ? fields.join(',') : `${PATH},${CREATED},${LAST_MODIFIED}`,
-    };
+  async getObjectsLatestVersionList(
+    prefix = this._PREFIX,
+    runNumber = undefined,
+    fields = [],
+  ) {
+    fields = fields?.length ? fields : [PATH, CREATED, LAST_MODIFIED];
+
+    if (runNumber) {
+      fields.push('runNumber');
+    }
+
+    const headers = { accept: 'application/json', 'x-filter-fields': fields.join(',') };
+
     const { objects } = await httpGetJson(this._hostname, this._port, `/latest/${prefix}.*`, headers);
-    return objects;
+
+    return runNumber ? objects.filter((object) => object.runNumber === runNumber) : objects;
   }
 
   /**

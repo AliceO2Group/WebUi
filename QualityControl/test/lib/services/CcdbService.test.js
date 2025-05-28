@@ -120,7 +120,7 @@ export const ccdbServiceTestSuite = async () => {
       test('should reject with error for fields parameter not being a list', async () => {
         const ccdb = new CcdbService(ccdbConfig);
         await rejects(
-          async () => await ccdb.getObjectsLatestVersionList('/qc', 'bad-fields'),
+          async () => await ccdb.getObjectsLatestVersionList('/qc', undefined, 'bad-fields'),
           new TypeError('fields.join is not a function'),
         );
       });
@@ -159,8 +159,27 @@ export const ccdbServiceTestSuite = async () => {
         })
           .get('/latest/.*')
           .reply(200, { objects: objects, subfolders: [] });
-        const objectsRetrieved = await ccdb.getObjectsLatestVersionList('', ['Id']);
+        const objectsRetrieved = await ccdb.getObjectsLatestVersionList('', undefined, ['Id']);
         deepStrictEqual(objectsRetrieved, objects, 'Received objects are not alike');
+      });
+
+      test('should filter by runNumber when provided', async () => {
+        const ccdb = new CcdbService(ccdbConfig);
+        const objects = [
+          { runNumber: 2, Id: 10 },
+          { runNumber: 2, Id: 20 },
+          { runNumber: 3, Id: 30 },
+        ];
+        nock('http://ccdb-local:8083', {
+          reqheaders: {
+            Accept: 'application/json',
+            'X-Filter-Fields': 'Id,runNumber',
+          },
+        })
+          .get('/latest/.*')
+          .reply(200, { objects: objects, subfolders: [] });
+        const objectsRetrieved = await ccdb.getObjectsLatestVersionList('', 2, ['Id']); // Empty array
+        deepStrictEqual(objectsRetrieved, objects.slice(0, 2), 'Received objects are not alike');
       });
 
       test('should reject due to HTTP request error', async () => {
