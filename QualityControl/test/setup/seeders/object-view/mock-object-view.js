@@ -65,3 +65,13 @@ export const MOCK_OBJECT_VERSIONS_RESPONSE = {
     },
   ],
 };
+
+export const MOCK_OBJECT_VERSIONS_RESPONSE_RUN_NUMBER_FILTER = {
+  objects: [
+    {
+      [VALID_FROM]: 1656072357492,
+      [CREATED]: 1656072357533,
+      [ID]: '"016fa8ac-f3b6-11ec-b9a9-c0a80209250c"',
+    },
+  ],
+};

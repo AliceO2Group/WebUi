@@ -39,6 +39,7 @@ export async function setupServerForIntegrationTests() {
     },
   });
   subprocess.stdout.on('data', (chunk) => {
+    console.log(chunk.toString());
     subprocessOutput += chunk.toString();
   });
   subprocess.stderr.on('data', (chunk) => {
