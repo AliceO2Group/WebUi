@@ -67,7 +67,7 @@ export class ObjectController {
    */
   async getObjectContent(req, res) {
     const { path, validFrom, id, filters } = req.query;
-    if (!path) {
+    if (typeof path !== 'string') {
       res.status(400).json({ message: 'Invalid URL parameters: missing object path' });
     } else {
       try {
