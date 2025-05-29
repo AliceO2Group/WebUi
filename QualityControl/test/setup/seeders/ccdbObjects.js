@@ -95,3 +95,25 @@ export const OBJECT_VERSIONS_FILTERED_BY_RUN_NUMBER = [
     validFrom: 1656072357492,
   },
 ];
+
+export const OBJECT_BY_PATH_RESULT = {
+  id: '016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
+  path: 'qc/test/object/1',
+  name: 'qc/test/object/1',
+  validFrom: 1656072357492,
+  validUntil: 1971432357492,
+  createdAt: 1656072357533,
+  lastModified: 1656072357000,
+  drawOptions: [],
+  displayHints: [],
+  etag: '016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
+  runNumber: '0',
+  runType: '0',
+  partName: 'send',
+  qcCheckName: 'Pedestals/mPedestalChannelFECHG',
+  qcQuality: '3',
+  qcDetectorName: 'TPC',
+  qcVersion: '1.64.0',
+  objectType: 'o2::quality_control::core::QualityObject',
+  location: '/download/016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
+};
