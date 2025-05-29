@@ -38,14 +38,15 @@ export class ObjectController {
    * @returns {void}
    */
   async getObjects(req, res) {
-    const { prefix, fields = [] } = req.query;
+    const { prefix, fields = [], RunNumber } = req.query;
     if (prefix && typeof prefix !== 'string') {
       res.status(400).json({ message: 'Invalid parameters provided: prefix must be of type string' });
     } else if (!Array.isArray(fields)) {
       res.status(400).json({ message: 'Invalid parameters provided: fields must be of type Array' });
     } else {
       try {
-        const list = await this._objService.retrieveLatestVersionOfObjects(prefix, fields);
+        await this._objService.setRunNumber(RunNumber); // This will refresh the cache if needed.
+        const list = await this._objService.retrieveLatestVersionOfObjects(prefix, fields, true, RunNumber);
         res.status(200).json(list);
       } catch (error) {
         errorHandler(error, 'Failed to retrieve list of objects latest version', res, 502, 'object');

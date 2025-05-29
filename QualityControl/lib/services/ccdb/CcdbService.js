@@ -127,27 +127,26 @@ export class CcdbService {
    * If attributes list is missing, a default minimal list will be used: PATH, CREATED, LAST_MODIFIED
    * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
    * @param {string} [prefix] - Prefix for which CCDB should search for objects
-   * @param {number} [runNumber] - Run number by which the resulting array will be filtered.
+   * @param {number} [RunNumber] - Run number by which the resulting array will be filtered.
    * @param {Array<string>} [fields] - List of fields that should be requested for each object
    * @returns {Promise.<Array<{PATH, CREATED, LAST_MODIFIED}>>} - results of objects query or error
    * @rejects {Error}runNumber
    */
   async getObjectsLatestVersionList(
     prefix = this._PREFIX,
-    runNumber = undefined,
+    RunNumber = undefined,
     fields = [],
   ) {
     fields = fields?.length ? fields : [PATH, CREATED, LAST_MODIFIED];
 
-    if (runNumber) {
-      fields.push('runNumber');
+    if (RunNumber) {
+      fields.push('RunNumber');
     }
-
     const headers = { accept: 'application/json', 'x-filter-fields': fields.join(',') };
 
     const { objects } = await httpGetJson(this._hostname, this._port, `/latest/${prefix}.*`, headers);
 
-    return runNumber ? objects.filter((object) => object.runNumber === runNumber) : objects;
+    return RunNumber ? objects.filter((object) => object.RunNumber === RunNumber) : objects;
   }
 
   /**
