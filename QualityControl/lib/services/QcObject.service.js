@@ -96,14 +96,22 @@ export class QcObjectService {
    * @param {string|Regex} prefix - Prefix for which CCDB should search for objects.
    * @param {Array<string>} [fields = []] - List of fields that should be requested for each object
    * @param {boolean} [useCache = true] - if the list should be the cached version or not
+   * @param {number} [RunNumber = undefined] - Run number by which the objects are filtered.
    * @returns {Promise.<Array<QcObjectLeaf>>} - results of objects with required fields
    * @rejects {Error}
    */
-  async retrieveLatestVersionOfObjects(prefix = this._dbService.PREFIX, useCache = true) {
+  async retrieveLatestVersionOfObjects(
+    prefix = this._dbService.PREFIX,
+    fields = [],
+    useCache = true,
+    RunNumber = undefined,
+  ) {
     if (useCache && this._cache?.objects) {
       return this._cache.objects.filter((object) => object.name.startsWith(prefix));
     } else {
-      const objects = await this._dbService.getObjectsTreeList(prefix); // TreeList links to the latest
+      const objects = RunNumber === undefined
+        ? await this._dbService.getObjectsTreeList(prefix) // TreeList links to the latest too, but is more efficient.
+        : await this._dbService.getObjectsLatestVersionList(prefix, RunNumber, fields);
       return this._parseObjects(objects);
     }
   }
