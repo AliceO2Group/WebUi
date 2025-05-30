@@ -61,8 +61,6 @@ export class QcObjectService {
       lastUpdate: undefined,
     };
     this._logger = LogManager.getLogger(LOG_FACILITY);
-
-    this._runNumber = undefined;
   }
 
   /**
@@ -72,9 +70,7 @@ export class QcObjectService {
    */
   async refreshCache() {
     try {
-      const objects = this._runNumber
-        ? await this._dbService.getObjectsLatestVersionList(this._dbService.CACHE_PREFIX, this.runNumber)
-        : await this._dbService.getObjectsTreeList(this._dbService.CACHE_PREFIX);
+      const objects = await this._dbService.getObjectsTreeList(this._dbService.CACHE_PREFIX);
       this._cache.objects = this._parseObjects(objects);
       this._cache.lastUpdate = Date.now();
     } catch (error) {
@@ -232,26 +228,5 @@ export class QcObjectService {
    */
   getCacheRefreshRate() {
     return this._dbService.CACHE_REFRESH_RATE;
-  }
-
-  /**
-   * Getter for the current run number that is being used to filter objects
-   * @returns {number|undefined} - current run number or undefined if not set
-   */
-  get runNumber() {
-    return this._runNumber;
-  }
-
-  /**
-   * Setter for the run number that will be used to filter objects.
-   * If the new run number is different from the current one, it will trigger a cache refresh.
-   * @param {number} runNumber - new run number to be set
-   * @returns {Promise<void>} - resolves when the cache refresh is complete (if needed)
-   */
-  async setRunNumber(runNumber) {
-    if (runNumber !== this._runNumber) {
-      this._runNumber = runNumber;
-      await this.refreshCache();
-    }
   }
 }
