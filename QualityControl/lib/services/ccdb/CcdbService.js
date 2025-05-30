@@ -125,28 +125,25 @@ export class CcdbService {
    *
    * Attributes of objects wished to be requested for each object can be passed through the fields parameter;
    * If attributes list is missing, a default minimal list will be used: PATH, CREATED, LAST_MODIFIED
-   * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
+   * @example Equivalent of URL request: `/latest/qc/TPC/object.* /RunNumber=42`
    * @param {string} [prefix] - Prefix for which CCDB should search for objects
-   * @param {number} [RunNumber] - Run number by which the resulting array will be filtered.
+   * @param {object} [filters = {}] - Object metadata that will be used to construct a endpoint path.
    * @param {Array<string>} [fields] - List of fields that should be requested for each object
    * @returns {Promise.<Array<{PATH, CREATED, LAST_MODIFIED}>>} - results of objects query or error
-   * @rejects {Error}runNumber
    */
   async getObjectsLatestVersionList(
     prefix = this._PREFIX,
-    RunNumber = undefined,
+    filters = {},
     fields = [],
   ) {
     fields = fields?.length ? fields : [PATH, CREATED, LAST_MODIFIED];
+    const identification = { path: `${prefix}.*`, filters };
 
-    if (RunNumber) {
-      fields.push('RunNumber');
-    }
     const headers = { accept: 'application/json', 'x-filter-fields': fields.join(',') };
 
-    const { objects } = await httpGetJson(this._hostname, this._port, `/latest/${prefix}.*`, headers);
-
-    return RunNumber ? objects.filter((object) => object.RunNumber === RunNumber) : objects;
+    const path = `/latest${this._buildCcdbUrlPath(identification)}`;
+    const { objects } = await httpGetJson(this._hostname, this._port, path, headers);
+    return objects;
   }
 
   /**
