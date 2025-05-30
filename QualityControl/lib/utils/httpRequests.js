@@ -26,7 +26,7 @@ import https from 'https';
 export function httpGetJson(hostname, port, path, options) {
   const httpOptions = getHttpOptions(options);
   const requestOptions = buildRequestOptions('GET', hostname, port, path, httpOptions);
-  const client = getClient(httpOptions.protocol);
+  const client = getHttpModuleByProtocol(httpOptions.protocol);
 
   return new Promise((resolve, reject) => {
     const request = client.request(requestOptions, (res) => {
@@ -51,10 +51,10 @@ export function httpGetJson(hostname, port, path, options) {
 export function httpHeadJson(hostname, port, path, options) {
   const httpOptions = getHttpOptions(options);
   const requestOptions = buildRequestOptions('HEAD', hostname, port, path, httpOptions);
-  const client = getClient(httpOptions.protocol);
+  const httpModule = getHttpModuleByProtocol(httpOptions.protocol);
 
   return new Promise((resolve, reject) => {
-    const request = client.request(requestOptions, (res) => {
+    const request = httpModule.request(requestOptions, (res) => {
       resolve({ status: res.statusCode, headers: res.headers });
     });
 
@@ -91,13 +91,16 @@ function handleJsonResponse(response, options) {
 }
 
 /**
- * Builds the full HTTP request options object.
- * @param {string} method - HTTP method (GET, HEAD).
- * @param {string} hostname
- * @param {number} port
- * @param {string} path
+/**
+Builds the full HTTP request options object.
+ * @param {string} method - HTTP method (e.g., GET, HEAD).
+ * @param {string} hostname - The server hostname.
+ * @param {number} port - The server port.
+ * @param {string} path - The request path.
  * @param {object} options - Merged HTTP options.
- * @returns {object} - Request options compatible with http(s).request
+ * @param {boolean} [options.rejectUnauthorized] - Whether to reject unauthorized SSL certificates.
+ * @param {object} [options.headers] - Headers to include in the request.
+ * @returns {object} - Request options compatible with http(s).request.
  */
 function buildRequestOptions(method, hostname, port, path, options) {
   return {
@@ -134,6 +137,6 @@ function getHttpOptions(options = {}) {
  * @param {string} protocol - 'http:' or 'https:'
  * @returns {typeof http | typeof https}
  */
-function getClient(protocol) {
+function getHttpModuleByProtocol(protocol) {
   return protocol === 'https:' ? https : http;
 }

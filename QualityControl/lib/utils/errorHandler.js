@@ -30,7 +30,7 @@ export function errorHandler(errToLog, errToSend, res, status = 500, facility = 
 }
 
 /**
- * Global Error Logger for AliECS GUI
+ * Global Error Logger for QCG
  * @param {Error} err - error that should be logged
  * @param {string} facility - service that sends the log
  * @returns {void}
