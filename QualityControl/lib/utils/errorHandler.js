@@ -25,7 +25,7 @@ const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'
  * @returns {void}
  */
 export function errorHandler(errToLog, errToSend, res, status = 500, facility = 'utils') {
-  errorLogger(errToLog, facility);
+  _errorLogger(errToLog, facility);
   res.status(status).send({ message: errToSend.message || errToSend });
 }
 
@@ -35,7 +35,7 @@ export function errorHandler(errToLog, errToSend, res, status = 500, facility = 
  * @param {string} facility - service that sends the log
  * @returns {void}
  */
-export function errorLogger(err, facility = 'utils') {
+function _errorLogger(err, facility = 'utils') {
   logger.facility = `${process.env.npm_config_log_label ?? 'qcg'}/${facility}`;
   if (err.stack) {
     logger.trace(err);

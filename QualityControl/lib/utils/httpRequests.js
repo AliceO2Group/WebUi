@@ -24,13 +24,13 @@ import https from 'https';
  * @returns {Promise<object>} - Parsed JSON response.
  */
 export function httpGetJson(hostname, port, path, options) {
-  const httpOptions = getHttpOptions(options);
-  const requestOptions = buildRequestOptions('GET', hostname, port, path, httpOptions);
-  const client = getHttpModuleByProtocol(httpOptions.protocol);
+  const httpOptions = _getHttpOptions(options);
+  const requestOptions = _buildRequestOptions('GET', hostname, port, path, httpOptions);
+  const client = _getHttpModuleByProtocol(httpOptions.protocol);
 
   return new Promise((resolve, reject) => {
     const request = client.request(requestOptions, (res) => {
-      handleJsonResponse(res, httpOptions)
+      _handleJsonResponse(res, httpOptions)
         .then(resolve)
         .catch(reject);
     });
@@ -49,9 +49,9 @@ export function httpGetJson(hostname, port, path, options) {
  * @returns {Promise<{status: number, headers: object}>}
  */
 export function httpHeadJson(hostname, port, path, options) {
-  const httpOptions = getHttpOptions(options);
-  const requestOptions = buildRequestOptions('HEAD', hostname, port, path, httpOptions);
-  const httpModule = getHttpModuleByProtocol(httpOptions.protocol);
+  const httpOptions = _getHttpOptions(options);
+  const requestOptions = _buildRequestOptions('HEAD', hostname, port, path, httpOptions);
+  const httpModule = _getHttpModuleByProtocol(httpOptions.protocol);
 
   return new Promise((resolve, reject) => {
     const request = httpModule.request(requestOptions, (res) => {
@@ -69,7 +69,7 @@ export function httpHeadJson(hostname, port, path, options) {
  * @param {object} options - HTTP options including status code range.
  * @returns {Promise<object>} - Parsed JSON response.
  */
-function handleJsonResponse(response, options) {
+function _handleJsonResponse(response, options) {
   return new Promise((resolve, reject) => {
     const { statusCode } = response;
 
@@ -102,7 +102,7 @@ Builds the full HTTP request options object.
  * @param {object} [options.headers] - Headers to include in the request.
  * @returns {object} - Request options compatible with http(s).request.
  */
-function buildRequestOptions(method, hostname, port, path, options) {
+function _buildRequestOptions(method, hostname, port, path, options) {
   return {
     hostname,
     port,
@@ -118,7 +118,7 @@ function buildRequestOptions(method, hostname, port, path, options) {
  * @param {object} [options={}] - User-provided options.
  * @returns {object} - Final options.
  */
-function getHttpOptions(options = {}) {
+function _getHttpOptions(options = {}) {
   return {
     statusCodeMin: 200,
     statusCodeMax: 299,
@@ -137,6 +137,6 @@ function getHttpOptions(options = {}) {
  * @param {string} protocol - 'http:' or 'https:'
  * @returns {typeof http | typeof https}
  */
-function getHttpModuleByProtocol(protocol) {
+function _getHttpModuleByProtocol(protocol) {
   return protocol === 'https:' ? https : http;
 }
