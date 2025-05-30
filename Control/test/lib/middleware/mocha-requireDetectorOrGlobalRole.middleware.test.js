@@ -13,15 +13,8 @@
 */
 const assert = require('assert');
 const sinon = require('sinon');
-const { UnauthorizedAccessError, InvalidInputError } = require('@aliceo2/web-ui');
 
 const { requireDetectorOrGlobalRoleMiddleware } = require('../../../lib/middleware/requireDetectorOrGlobalRole.middleware.js');
-const { User } = require('../../../lib/dtos/User.js');
-const { Role } = require('../../../lib/common/role.enum.js');
-
-function mockReqResNext(session = {}, params = {}) {
-  return 
-}
 
 describe('requireDetectorOrGlobalRoleMiddleware - test suite', function () {
   afterEach(function () {
@@ -59,7 +52,7 @@ describe('requireDetectorOrGlobalRoleMiddleware - test suite', function () {
     let next = sinon.spy();
 
     requireDetectorOrGlobalRoleMiddleware(req, res, next);
-    assert.ok(next.calledOnce), 'Next should be called when user has GLOBAL role';
+    assert.ok(next.calledOnce, 'Next should be called when user has GLOBAL role');
 
     req = {
       params: { detectorId: 'ABC' },
