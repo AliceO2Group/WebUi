@@ -25,10 +25,10 @@ import {
  */
 export default (layout) => {
   const { item, editEnabled = false } = layout;
-  if (editEnabled && item) {
-    return toolbarEditMode(layout);
+  if (item) {
+    return editEnabled ? toolbarEditMode(layout) : toolbarViewMode(layout);
   }
-  return toolbarViewMode(layout);
+  return;
 };
 
 /**
