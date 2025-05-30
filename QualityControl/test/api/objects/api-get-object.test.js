@@ -34,7 +34,7 @@ export const apiGetObjectsTests = () => {
         });
     });
 
-    test('should return QCObject details with all versions', async () => {
+    test('should return QCObject versions if a filter is added', async () => {
       await request(`${URL_ADDRESS}/api/object`)
         .get(`?token=${OWNER_TEST_TOKEN}&path=qc/test/object/1&filters[RunNumber]=0`)
         .expect((res) => {
