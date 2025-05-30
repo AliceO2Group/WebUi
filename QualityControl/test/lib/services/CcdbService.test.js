@@ -166,19 +166,19 @@ export const ccdbServiceTestSuite = async () => {
       test('should filter by runNumber when provided', async () => {
         const ccdb = new CcdbService(ccdbConfig);
         const objects = [
-          { runNumber: 2, Id: 10 },
-          { runNumber: 2, Id: 20 },
-          { runNumber: 3, Id: 30 },
+          { RunNumber: '2', id: 10 },
+          { RunNumber: '2', id: 20 },
+          { RunNumber: '3', id: 30 },
         ];
         nock('http://ccdb-local:8083', {
           reqheaders: {
             Accept: 'application/json',
-            'X-Filter-Fields': 'Id,runNumber',
+            'X-Filter-Fields': 'id,RunNumber',
           },
         })
           .get('/latest/.*')
           .reply(200, { objects: objects, subfolders: [] });
-        const objectsRetrieved = await ccdb.getObjectsLatestVersionList('', 2, ['Id']); // Empty array
+        const objectsRetrieved = await ccdb.getObjectsLatestVersionList('', '2', ['id']);
         deepStrictEqual(objectsRetrieved, objects.slice(0, 2), 'Received objects are not alike');
       });
 

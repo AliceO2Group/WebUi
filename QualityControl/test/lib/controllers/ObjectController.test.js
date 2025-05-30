@@ -124,9 +124,13 @@ export const objectControllerTestSuite = async () => {
     test('should successfully respond with list of objects', async () => {
       const mockList = [{ path: 'qc/test', validFrom: 123456 }];
       const objService = {
-        runNumber: null,
+        _runNumber: undefined,
+        setRunNumber: function (RunNumber) {
+          this._runNumber = RunNumber;
+        },
         retrieveLatestVersionOfObjects: sinon.stub().resolves(mockList),
       };
+
       objectController = new ObjectController(objService);
       reqMock.query.fields = ['path', 'validFrom'];
       await objectController.getObjects(reqMock, resMock);
@@ -137,14 +141,20 @@ export const objectControllerTestSuite = async () => {
     test('should set runNumber on service if provided', async () => {
       const mockList = [];
       const objService = {
-        runNumber: undefined,
+        _runNumber: undefined,
+        setRunNumber: function (RunNumber) {
+          this._runNumber = RunNumber;
+        },
         retrieveLatestVersionOfObjects: sinon.stub().resolves(mockList),
       };
+
       objectController = new ObjectController(objService);
+
       reqMock.query.fields = [];
-      reqMock.query.runNumber = 123;
+      reqMock.query.RunNumber = 123;
       await objectController.getObjects(reqMock, resMock);
-      strictEqual(objService.runNumber, 123, 'Run number was not set on service');
+
+      strictEqual(objService._runNumber, 123, 'Run number was not set on service');
     });
   });
 };

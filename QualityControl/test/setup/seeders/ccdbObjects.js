@@ -117,3 +117,17 @@ export const OBJECT_BY_PATH_RESULT = {
   objectType: 'o2::quality_control::core::QualityObject',
   location: '/download/016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
 };
+
+export const TREE_API_OBJECTS = [
+  { name: 'qc/test/object/1' },
+  { name: 'qc/test/object/2' },
+  { name: 'qc/test/object/11' },
+];
+
+export const OBJECT_LATEST_FILTERED_BY_RUN_NUMBER = [
+  {
+    [PATH]: 'qc/test/object/1',
+    createdAt: 1656072357533,
+    name: 'qc/test/object/1',
+  },
+];

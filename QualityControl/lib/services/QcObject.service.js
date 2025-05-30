@@ -106,7 +106,7 @@ export class QcObjectService {
     useCache = true,
     RunNumber = undefined,
   ) {
-    if (useCache && this._cache?.objects) {
+    if (useCache && this._cache.objects?.length) {
       return this._cache.objects.filter((object) => object.name.startsWith(prefix));
     } else {
       const objects = RunNumber === undefined
@@ -234,10 +234,20 @@ export class QcObjectService {
     return this._dbService.CACHE_REFRESH_RATE;
   }
 
+  /**
+   * Getter for the current run number that is being used to filter objects
+   * @returns {number|undefined} - current run number or undefined if not set
+   */
   get runNumber() {
     return this._runNumber;
   }
 
+  /**
+   * Setter for the run number that will be used to filter objects.
+   * If the new run number is different from the current one, it will trigger a cache refresh.
+   * @param {number} runNumber - new run number to be set
+   * @returns {Promise<void>} - resolves when the cache refresh is complete (if needed)
+   */
   async setRunNumber(runNumber) {
     if (runNumber !== this._runNumber) {
       this._runNumber = runNumber;

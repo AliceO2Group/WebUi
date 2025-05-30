@@ -16,8 +16,8 @@ import { suite, test } from 'node:test';
 import { OWNER_TEST_TOKEN, URL_ADDRESS } from '../config.js';
 import request from 'supertest';
 import { deepStrictEqual } from 'node:assert';
-import { MOCK_OBJECT_BY_ID_RESULT, OBJECT_BY_PATH_RESULT, OBJECT_VERSIONS,
-  OBJECT_VERSIONS_FILTERED_BY_RUN_NUMBER } from '../../setup/seeders/ccdbObjects.js';
+import { MOCK_OBJECT_BY_ID_RESULT, OBJECT_BY_PATH_RESULT, OBJECT_LATEST_FILTERED_BY_RUN_NUMBER, OBJECT_VERSIONS,
+  OBJECT_VERSIONS_FILTERED_BY_RUN_NUMBER, TREE_API_OBJECTS } from '../../setup/seeders/ccdbObjects.js';
 
 export const apiGetObjectsTests = () => {
   suite('GET /object', () => {
@@ -77,6 +77,20 @@ export const apiGetObjectsTests = () => {
   });
 
   suite('GET /objects', () => {
+    test('should return object names when no filter is provided', async () => {
+      await request(`${URL_ADDRESS}/api/objects`)
+        .get(`?token=${OWNER_TEST_TOKEN}`)
+        .expect((res) => deepStrictEqual(res.body, TREE_API_OBJECTS, 'Unexpected response'));
+    });
 
+    test('should return detailed objects when runNumber is provided', async () => {
+      await request(`${URL_ADDRESS}/api/objects`)
+        .get(`?token=${OWNER_TEST_TOKEN}&RunNumber=0`)
+        .expect((res) => deepStrictEqual(
+          res.body,
+          OBJECT_LATEST_FILTERED_BY_RUN_NUMBER,
+          'Unexpected response',
+        ));
+    });
   });
 };

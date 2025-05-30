@@ -17,8 +17,10 @@ import { readFileSync } from 'fs';
 import { CCDB_FILTER_FIELDS, CCDB_MONITOR, CCDB_VERSION_KEY } from './../../lib/services/ccdb/CcdbConstants.js';
 import { config } from './../config.js';
 import { objects, subfolders } from './seeders/ccdbObjects.js';
-import { MOCK_OBJECT_DETAILS_RESPONSE, MOCK_OBJECT_IDENTIFICATION_RESPONSE, MOCK_OBJECT_VERSIONS_RESPONSE,
-  MOCK_OBJECT_VERSIONS_RESPONSE_RUN_NUMBER_FILTER } from './seeders/object-view/mock-object-view.js';
+import { MOCK_LATEST_OBJECT_RUN_NUMBER,
+  MOCK_OBJECT_DETAILS_RESPONSE, MOCK_OBJECT_IDENTIFICATION_RESPONSE,
+  MOCK_OBJECT_VERSIONS_RESPONSE, MOCK_OBJECT_VERSIONS_RESPONSE_RUN_NUMBER_FILTER }
+  from './seeders/object-view/mock-object-view.js';
 import { CCDB_MOCK_VERSION } from './seeders/ccdbVersion.js';
 
 const CCDB_URL = `${config.ccdb.protocol}://${config.ccdb.hostname}:${config.ccdb.port}`;
@@ -49,6 +51,9 @@ const xFieldHeader2 = {
 };
 const xFieldHeader3 = {
   reqheaders: { Accept: 'application/json', 'X-Filter-Fields': `${VALID_FROM},${ID},${CREATED}` },
+};
+const xFieldHeader4 = {
+  reqheaders: { Accept: 'application/json', 'X-Filter-Fields': `${PATH},${CREATED},${LAST_MODIFIED},RunNumber` },
 };
 
 /**
@@ -101,6 +106,10 @@ export const initializeNockForCcdb = () => {
     .get('/browse/qc/test/object/1/RunNumber=0')
     .reply(200, MOCK_OBJECT_VERSIONS_RESPONSE_RUN_NUMBER_FILTER);
 
+  nock(CCDB_URL, xFieldHeader4)
+    .persist()
+    .get(`${CCDB_API_PATH_LATEST}.*`)
+    .reply(200, MOCK_LATEST_OBJECT_RUN_NUMBER);
   nock(CCDB_URL)
     .persist()
     .replyContentLength()
