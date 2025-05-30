@@ -125,9 +125,9 @@ export const apiGetObjectsTests = () => {
         .expect((res) => deepStrictEqual(res.body, TREE_API_OBJECTS, 'Unexpected response'));
     });
 
-    test('should return detailed objects when runNumber is provided', async () => {
+    test('should return detailed objects when filter is provided', async () => {
       await request(`${URL_ADDRESS}/api/objects`)
-        .get(`?token=${OWNER_TEST_TOKEN}&RunNumber=0`)
+        .get(`?token=${OWNER_TEST_TOKEN}&filters[RunNumber]=0`)
         .expect((res) => deepStrictEqual(res.body, OBJECT_LATEST_FILTERED_BY_RUN_NUMBER, 'Unexpected response'));
     });
 

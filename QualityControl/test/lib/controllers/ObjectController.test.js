@@ -1,5 +1,5 @@
 import test, { afterEach, beforeEach, suite } from 'node:test';
-import { ok, strictEqual } from 'node:assert';
+import { ok } from 'node:assert';
 import sinon from 'sinon';
 import { ObjectController } from '../../../lib/controllers/ObjectController.js';
 import { QcObjectService } from '../../../lib/services/QcObject.service.js';
@@ -108,7 +108,6 @@ export const objectControllerTestSuite = async () => {
 
     test('should send generic error if service fails to retrieve objects', async () => {
       const objService = {
-        runNumber: null,
         retrieveLatestVersionOfObjects: sinon.stub().rejects(new Error('Failed to retrieve objects')),
       };
       objectController = new ObjectController(objService);
@@ -124,10 +123,6 @@ export const objectControllerTestSuite = async () => {
     test('should successfully respond with list of objects', async () => {
       const mockList = [{ path: 'qc/test', validFrom: 123456 }];
       const objService = {
-        _runNumber: undefined,
-        setRunNumber: function (RunNumber) {
-          this._runNumber = RunNumber;
-        },
         retrieveLatestVersionOfObjects: sinon.stub().resolves(mockList),
       };
 
@@ -136,25 +131,6 @@ export const objectControllerTestSuite = async () => {
       await objectController.getObjects(reqMock, resMock);
       ok(resMock.status.calledWith(200), 'Response status was not 200');
       ok(resMock.json.calledWith(mockList), 'Response list was incorrect');
-    });
-
-    test('should set runNumber on service if provided', async () => {
-      const mockList = [];
-      const objService = {
-        _runNumber: undefined,
-        setRunNumber: function (RunNumber) {
-          this._runNumber = RunNumber;
-        },
-        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockList),
-      };
-
-      objectController = new ObjectController(objService);
-
-      reqMock.query.fields = [];
-      reqMock.query.RunNumber = 123;
-      await objectController.getObjects(reqMock, resMock);
-
-      strictEqual(objService._runNumber, 123, 'Run number was not set on service');
     });
   });
 };

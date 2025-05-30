@@ -77,19 +77,12 @@ export const MOCK_OBJECT_VERSIONS_RESPONSE_RUN_NUMBER_FILTER = {
   ],
 };
 
-export const MOCK_LATEST_OBJECT_RUN_NUMBER = {
+export const MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER = {
   objects: [
     {
       [PATH]: 'qc/test/object/1',
       [CREATED]: 1656072357533,
       [LAST_MODIFIED]: 1656072357492,
-      RunNumber: '0',
-    },
-    {
-      [PATH]: 'qc/test/object/2',
-      [CREATED]: 1655916321276,
-      [LAST_MODIFIED]: 1655916321231,
-      RunNumber: '1',
     },
   ],
 };

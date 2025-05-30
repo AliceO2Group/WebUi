@@ -163,25 +163,6 @@ export const ccdbServiceTestSuite = async () => {
         deepStrictEqual(objectsRetrieved, objects, 'Received objects are not alike');
       });
 
-      test('should filter by runNumber when provided', async () => {
-        const ccdb = new CcdbService(ccdbConfig);
-        const objects = [
-          { RunNumber: '2', id: 10 },
-          { RunNumber: '2', id: 20 },
-          { RunNumber: '3', id: 30 },
-        ];
-        nock('http://ccdb-local:8083', {
-          reqheaders: {
-            Accept: 'application/json',
-            'X-Filter-Fields': 'id,RunNumber',
-          },
-        })
-          .get('/latest/.*')
-          .reply(200, { objects: objects, subfolders: [] });
-        const objectsRetrieved = await ccdb.getObjectsLatestVersionList('', '2', ['id']);
-        deepStrictEqual(objectsRetrieved, objects.slice(0, 2), 'Received objects are not alike');
-      });
-
       test('should reject due to HTTP request error', async () => {
         const ccdb = new CcdbService(ccdbConfig);
         const error = new Error('Querying service is down');

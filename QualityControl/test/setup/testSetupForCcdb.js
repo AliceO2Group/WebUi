@@ -17,7 +17,7 @@ import { readFileSync } from 'fs';
 import { CCDB_FILTER_FIELDS, CCDB_MONITOR, CCDB_VERSION_KEY } from './../../lib/services/ccdb/CcdbConstants.js';
 import { config } from './../config.js';
 import { objects, subfolders } from './seeders/ccdbObjects.js';
-import { MOCK_LATEST_OBJECT_RUN_NUMBER,
+import { MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER,
   MOCK_OBJECT_DETAILS_RESPONSE, MOCK_OBJECT_IDENTIFICATION_RESPONSE,
   MOCK_OBJECT_VERSIONS_RESPONSE, MOCK_OBJECT_VERSIONS_RESPONSE_RUN_NUMBER_FILTER }
   from './seeders/object-view/mock-object-view.js';
@@ -52,9 +52,6 @@ const xFieldHeader2 = {
 const xFieldHeader3 = {
   reqheaders: { Accept: 'application/json', 'X-Filter-Fields': `${VALID_FROM},${ID},${CREATED}` },
 };
-const xFieldHeader4 = {
-  reqheaders: { Accept: 'application/json', 'X-Filter-Fields': `${PATH},${CREATED},${LAST_MODIFIED},RunNumber` },
-};
 
 /**
  * Setup nock environment for ccdb which is to intercept all CCDB requests used in the Frontend test suites
@@ -67,7 +64,9 @@ export const initializeNockForCcdb = () => {
 
   nock(CCDB_URL, xFieldHeader1).persist()
     .get(`${CCDB_API_PATH_LATEST}.*`)
-    .reply(200, { objects });
+    .reply(200, { objects })
+    .get(`${CCDB_API_PATH_LATEST}.*/RunNumber=0`)
+    .reply(200, MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER);
 
   nock(CCDB_URL, acceptHeader).persist()
     .get(`${CCDB_API_PATH_TREE}.*`)
@@ -106,10 +105,6 @@ export const initializeNockForCcdb = () => {
     .get('/browse/qc/test/object/1/RunNumber=0')
     .reply(200, MOCK_OBJECT_VERSIONS_RESPONSE_RUN_NUMBER_FILTER);
 
-  nock(CCDB_URL, xFieldHeader4)
-    .persist()
-    .get(`${CCDB_API_PATH_LATEST}.*`)
-    .reply(200, MOCK_LATEST_OBJECT_RUN_NUMBER);
   nock(CCDB_URL)
     .persist()
     .replyContentLength()
