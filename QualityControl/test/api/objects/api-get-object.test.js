@@ -1,17 +1,3 @@
-/**
- * @license
- * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
- * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
- * All rights not expressly granted are reserved.
- *
- * This software is distributed under the terms of the GNU General Public
- * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
- *
- * In applying this license CERN does not waive the privileges and immunities
- * granted to it by virtue of its status as an Intergovernmental Organization
- * or submit itself to any jurisdiction.
- */
-
 import { suite, test } from 'node:test';
 import { OWNER_TEST_TOKEN, URL_ADDRESS } from '../config.js';
 import request from 'supertest';
@@ -46,6 +32,42 @@ export const apiGetObjectsTests = () => {
           deepStrictEqual(versions, OBJECT_VERSIONS_FILTERED_BY_RUN_NUMBER, 'Versions do not match up');
         });
     });
+
+    test('should return 400 if path parameter is missing', async () => {
+      await request(`${URL_ADDRESS}/api/object`)
+        .get(`?token=${OWNER_TEST_TOKEN}`)
+        .expect(400)
+        .expect((res) =>
+          deepStrictEqual(
+            res.body,
+            { message: 'Invalid URL parameters: missing object path' },
+            'Should complain about missing path',
+          ));
+    });
+
+    test('should return 400 if path parameter is not a string', async () => {
+      await request(`${URL_ADDRESS}/api/object`)
+        .get(`?token=${OWNER_TEST_TOKEN}&path[]=array`)
+        .expect(400)
+        .expect((res) =>
+          deepStrictEqual(
+            res.body,
+            { message: 'Invalid URL parameters: missing object path' },
+            'Should complain about invalid path type',
+          ));
+    });
+
+    test('should return 502 if service fails to retrieve object', async () => {
+      await request(`${URL_ADDRESS}/api/object`)
+        .get(`?token=${OWNER_TEST_TOKEN}&path=invalid/path`)
+        .expect(502)
+        .expect((res) =>
+          deepStrictEqual(
+            res.body,
+            { message: 'Unable to identify object or read it' },
+            'Should show service failure message',
+          ));
+    });
   });
 
   suite('GET /object/:id', () => {
@@ -74,6 +96,26 @@ export const apiGetObjectsTests = () => {
           deepStrictEqual(versions, OBJECT_VERSIONS_FILTERED_BY_RUN_NUMBER, 'Versions do not match up');
         });
     });
+
+    // Error tests
+    test('should return 400 if ID parameter is missing', async () => {
+      await request(`${URL_ADDRESS}/api/object/ `)
+        .get(`?token=${OWNER_TEST_TOKEN}`)
+        .expect(400)
+        .expect((res) => deepStrictEqual(res.body, { message: 'Invalid URL parameters: missing object ID' }));
+    });
+
+    test('should return 502 if service fails to retrieve object by ID', async () => {
+      await request(`${URL_ADDRESS}/api/object/invalid_id`)
+        .get(`?token=${OWNER_TEST_TOKEN}`)
+        .expect(502)
+        .expect((res) =>
+          deepStrictEqual(
+            res.body,
+            { message: 'Unable to identify object or read it by qcg id' },
+            'Should send service failure message',
+          ));
+    });
   });
 
   suite('GET /objects', () => {
@@ -86,11 +128,34 @@ export const apiGetObjectsTests = () => {
     test('should return detailed objects when runNumber is provided', async () => {
       await request(`${URL_ADDRESS}/api/objects`)
         .get(`?token=${OWNER_TEST_TOKEN}&RunNumber=0`)
-        .expect((res) => deepStrictEqual(
-          res.body,
-          OBJECT_LATEST_FILTERED_BY_RUN_NUMBER,
-          'Unexpected response',
-        ));
+        .expect((res) => deepStrictEqual(res.body, OBJECT_LATEST_FILTERED_BY_RUN_NUMBER, 'Unexpected response'));
+    });
+
+    // Error tests
+    test('should return 400 if prefix is not a string', async () => {
+      await request(`${URL_ADDRESS}/api/objects`)
+        .get(`?token=${OWNER_TEST_TOKEN}&prefix[]=array`)
+        .expect(400)
+        .expect((res) => {
+          deepStrictEqual(
+            res.body,
+            { message: 'Invalid parameters provided: prefix must be of type string' },
+            'Should send message about invalid prefix type',
+          );
+        });
+    });
+
+    test('should return 400 if fields is not an array', async () => {
+      await request(`${URL_ADDRESS}/api/objects`)
+        .get(`?token=${OWNER_TEST_TOKEN}&fields=not_an_array`)
+        .expect(400)
+        .expect((res) => {
+          deepStrictEqual(
+            res.body,
+            { message: 'Invalid parameters provided: fields must be of type Array' },
+            'Should send message about invalid fields type',
+          );
+        });
     });
   });
 };

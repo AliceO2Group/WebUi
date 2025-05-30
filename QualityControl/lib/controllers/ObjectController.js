@@ -93,7 +93,7 @@ export class ObjectController {
   async getObjectById(req, res) {
     const qcgId = req.params?.id;
     const { validFrom, filters, id } = req.query;
-    if (!qcgId) {
+    if (!qcgId.trim()) {
       res.status(400).json({ message: 'Invalid URL parameters: missing object ID' });
     } else {
       try {
