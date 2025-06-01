@@ -23,7 +23,13 @@ import {
  * @param {Layout} layout - the model that handles the object state.
  * @returns {vnode} - virtual node element
  */
-export default (layout) => layout.item && layout.editEnabled ? toolbarEditMode(layout) : toolbarViewMode(layout);
+export default (layout) => {
+  const { item, editEnabled = false } = layout;
+  if (item) {
+    return editEnabled ? toolbarEditMode(layout) : toolbarViewMode(layout);
+  }
+  return;
+};
 
 /**
  * This is the toolbar in view mode (center and right)
