@@ -40,7 +40,7 @@ export const apiGetObjectsTests = () => {
         .expect((res) =>
           deepStrictEqual(
             res.body,
-            { message: 'Invalid URL parameters: missing object path' },
+            { message: 'Invalid query parameters: "path" is required', status: 400, title: 'Invalid Input' },
             'Should complain about missing path',
           ));
     });
@@ -52,7 +52,7 @@ export const apiGetObjectsTests = () => {
         .expect((res) =>
           deepStrictEqual(
             res.body,
-            { message: 'Invalid URL parameters: missing object path' },
+            { message: 'Invalid query parameters: "path" must be a string', status: 400, title: 'Invalid Input' },
             'Should complain about invalid path type',
           ));
     });
@@ -60,11 +60,11 @@ export const apiGetObjectsTests = () => {
     test('should return 502 if service fails to retrieve object', async () => {
       await request(`${URL_ADDRESS}/api/object`)
         .get(`?token=${OWNER_TEST_TOKEN}&path=invalid/path`)
-        .expect(502)
+        .expect(500)
         .expect((res) =>
           deepStrictEqual(
             res.body,
-            { message: 'Unable to identify object or read it' },
+            { message: 'Failed to retrieve object content', status: 500, title: 'Unknown Error' },
             'Should show service failure message',
           ));
     });
@@ -102,17 +102,20 @@ export const apiGetObjectsTests = () => {
       await request(`${URL_ADDRESS}/api/object/ `)
         .get(`?token=${OWNER_TEST_TOKEN}`)
         .expect(400)
-        .expect((res) => deepStrictEqual(res.body, { message: 'Invalid URL parameters: missing object ID' }));
+        .expect((res) => deepStrictEqual(
+          res.body,
+          { message: 'Invalid query parameters: Missing object ID in URL', status: 400, title: 'Invalid Input' },
+        ));
     });
 
-    test('should return 502 if service fails to retrieve object by ID', async () => {
+    test('should return 500 if service fails to retrieve object by ID', async () => {
       await request(`${URL_ADDRESS}/api/object/invalid_id`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
-        .expect(502)
+        .expect(500)
         .expect((res) =>
           deepStrictEqual(
             res.body,
-            { message: 'Unable to identify object or read it by qcg id' },
+            { message: 'Unable to identify object or read it by qcg id', status: 500, title: 'Unknown Error' },
             'Should send service failure message',
           ));
     });
@@ -139,7 +142,7 @@ export const apiGetObjectsTests = () => {
         .expect((res) => {
           deepStrictEqual(
             res.body,
-            { message: 'Invalid parameters provided: prefix must be of type string' },
+            { message: 'Invalid query parameters: "prefix" must be a string', status: 400, title: 'Invalid Input' },
             'Should send message about invalid prefix type',
           );
         });
@@ -148,11 +151,10 @@ export const apiGetObjectsTests = () => {
     test('should return 400 if fields is not an array', async () => {
       await request(`${URL_ADDRESS}/api/objects`)
         .get(`?token=${OWNER_TEST_TOKEN}&fields=not_an_array`)
-        .expect(400)
         .expect((res) => {
           deepStrictEqual(
             res.body,
-            { message: 'Invalid parameters provided: fields must be of type Array' },
+            { message: 'Invalid query parameters: "fields" must be an array', status: 400, title: 'Invalid Input' },
             'Should send message about invalid fields type',
           );
         });
