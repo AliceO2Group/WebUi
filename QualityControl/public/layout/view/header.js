@@ -23,7 +23,13 @@ import {
  * @param {Layout} layout - the model that handles the object state.
  * @returns {vnode} - virtual node element
  */
-export default (layout) => layout.item && layout.editEnabled ? toolbarEditMode(layout) : toolbarViewMode(layout);
+export default (layout) => {
+  const { item, editEnabled = false } = layout;
+  if (item) {
+    return editEnabled ? toolbarEditMode(layout) : toolbarViewMode(layout);
+  }
+  return;
+};
 
 /**
  * This is the toolbar in view mode (center and right)
@@ -155,7 +161,7 @@ const resizeGridTabDropDown = (layout, tab) =>
     title: 'Resize grid of the tab',
     onchange: (e) => layout.resizeGridByXY(e.target.value),
   }, [1, 2, 3, 4, 5].map((i) =>
-    h('option', { selected: tab?.columns === i, title: `Resize layout to ${i} columns`, value: 1 }, `${i} cols`)));
+    h('option', { selected: tab?.columns === i, title: `Resize layout to ${i} columns`, value: i }, `${i} cols`)));
 
 /**
  * Single tab button
