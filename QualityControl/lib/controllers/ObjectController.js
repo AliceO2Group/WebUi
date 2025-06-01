@@ -14,7 +14,6 @@
 'use strict';
 import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 import { ObjectContentsGetDto, ObjectGetByIdDto, ObjectsGetDto, qcgIdDto } from '../dtos/ObjectGetDto.js';
-import { errorHandler } from './../utils/utils.js';
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/object-ctrl`);
 
