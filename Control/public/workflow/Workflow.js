@@ -74,7 +74,7 @@ export default class Workflow extends Observable {
       textArea: {
         value: '',
       }
-    }
+    };
     this.dom = {
       keyInput: '',
       keyValueArea: ''
