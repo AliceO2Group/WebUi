@@ -4,7 +4,7 @@ export const RUN_TYPES = ['PHYSICS', 'PROTON-PROTON', '0', '1', '2'];
 const periodNamePattern = /^LHC\d{1,2}[a-z]+$/i;
 
 const filterValidators = {
-  RunNumber: (number) => number >= 0 && number < 1000000, // Upper bound subject to change
+  RunNumber: (number) => Number.isInteger(number) && number >= 0 && number < 1000000, // Upper bound subject to change
   RunType: (type) => RUN_TYPES.includes(type),
   PeriodName: (periodName) => periodNamePattern.test(periodName),
   PassName: (name) => name, // I don't know what the pattern is of PassNames. They don't show up in 'latest' API calls.
