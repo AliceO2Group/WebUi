@@ -15,8 +15,8 @@
 import { beforeEach, suite, test } from 'node:test';
 import { ok } from 'node:assert';
 import sinon from 'sinon';
-import { objectsGetValidationMiddlewareFactory } from
-  '../../../../lib/middleware/objects/objectsGetValidationMiddlewareFactory.js';
+import { objectGetContentsValidationMiddlewareFactory }
+  from '../../../../lib/middleware/objects/objectGetContentsValidationMiddlewareFactory.js';
 
 /**
  * Test suite for the middleware that validates query parameters
@@ -47,118 +47,141 @@ export const objectGetContentsValidationMiddlewareTest = () => {
       };
       next = sinon.stub();
 
-      middleWare = objectsGetValidationMiddlewareFactory(mockFilterService);
+      middleWare = objectGetContentsValidationMiddlewareFactory(mockFilterService);
     });
+    suite('getObjectContent() tests', () => {
+      test('should successfully validate a request with token and path', async () => {
+        req.query.path = 'valid/path';
+        await middleWare(req, res, next);
+        ok(next.calledOnce, 'Should call next() on successful validation');
+        ok(res.status.notCalled, 'Should not set status on success');
+        ok(res.json.notCalled, 'Should not send response on success');
+      });
 
-    test('should pass validation with minimal required fields', async () => {
-      await middleWare(req, res, next);
-      ok(next.calledOnce, 'Next should be called');
-      ok(res.status.notCalled, 'Status should not be called');
-    });
+      test('should reject request without token', async () => {
+        delete req.query.token;
+        await middleWare(req, res, next);
+        ok(res.status.calledWith(400), 'Should return 400 status');
+        ok(res.json.calledWithMatch({
+          message: 'Invalid query parameters: "token" is required',
+          status: 400,
+          title: 'Invalid Input',
+        }), 'Should return validation error');
+      });
 
-    test('should reject request without token', async () => {
-      delete req.query.token;
-      await middleWare(req, res, next);
-      ok(res.status.calledWith(400), 'Should return 400 status');
+      test('should reject request with a non-string path', async () => {
+        req.query.path = 1;
+        await middleWare(req, res, next);
+        ok(res.status.calledWith(400), 'Should return 400 status');
+        ok(res.json.calledWithMatch({
+          message: 'Invalid query parameters: "path" must be a string',
+          status: 400,
+          title: 'Invalid Input',
+        }), 'Should return validation error');
+      });
 
-      ok(res.json.calledWithMatch({
-        message: 'Invalid query parameters: "token" is required',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Should return validation error');
-    });
+      test('should reject request with empty path', async () => {
+        req.query.path = '';
+        await middleWare(req, res, next);
+        ok(res.status.calledWith(400), 'Should return 400 status');
+        ok(res.json.calledWithMatch({
+          message: 'Invalid query parameters: "path" is not allowed to be empty',
+          status: 400,
+          title: 'Invalid Input',
+        }), 'Should return validation error');
+      });
 
-    test('should accept valid RunNumber filter', async () => {
-      req.query.filters = { RunNumber: 123456 };
-      await middleWare(req, res, next);
-      ok(next.calledOnce, 'Next should be called');
-    });
+      test('should successfully validate request with valid filters', async () => {
+        req.query.path = 'valid/path';
+        req.query.filters = {
+          RunNumber: '12345',
+          RunType: 'PHYSICS',
+          PeriodName: 'LHC22a',
+          PassName: 'pass1',
+        };
+        await middleWare(req, res, next);
+        ok(next.calledOnce, 'Should call next() when filters are valid');
+      });
 
-    test('should reject invalid RunNumber (too high)', async () => {
-      req.query.filters = { RunNumber: 1000000 };
-      await middleWare(req, res, next);
-      ok(res.status.calledWith(400), 'Should return 400 status');
-      ok(res.json.calledWithMatch({
-        message: 'Invalid query parameters: RunNumber must be a number between 0 and 999999',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Should return validation error');
-    });
+      test('should reject request with invalid RunNumber filter', async () => {
+        req.query.path = 'valid/path';
+        req.query.filters = { RunNumber: 'abc' };
+        await middleWare(req, res, next);
+        ok(res.status.calledWith(400), 'Should return 400 status');
+        ok(res.json.calledWithMatch({
+          message: 'Invalid query parameters: RunNumber must be a number between 0 and 999999',
+          status: 400,
+          title: 'Invalid Input',
+        }), 'Should return validation error');
+      });
 
-    test('should reject invalid RunNumber (negative)', async () => {
-      req.query.filters = { RunNumber: -1 };
-      await middleWare(req, res, next);
-      ok(res.status.calledWith(400), 'Should return 400 status');
-      ok(res.json.calledWithMatch({
-        message: 'Invalid query parameters: RunNumber must be a number between 0 and 999999',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Should return validation error');
-    });
+      test('should reject request with invalid RunType filter', async () => {
+        req.query.path = 'valid/path';
+        req.query.filters = { RunType: 'INVALID_TYPE' };
+        await middleWare(req, res, next);
+        ok(res.status.calledWith(400), 'Should return 400 status');
+        ok(res.json.calledWithMatch({
+          message: `Invalid query parameters: RunType must be one of: ${runTypes.join(', ')}`,
+          status: 400,
+          title: 'Invalid Input',
+        }), 'Should return validation error');
+      });
 
-    test('should accept valid RunType filter', async () => {
-      req.query.filters = { RunType: 'PHYSICS' };
-      await middleWare(req, res, next);
-      ok(next.calledOnce, 'Next should be called');
-    });
+      test('should reject request with invalid PeriodName filter', async () => {
+        req.query.path = 'valid/path';
+        req.query.filters = { PeriodName: 'invalid-period' };
+        await middleWare(req, res, next);
+        ok(res.status.calledWith(400), 'Should return 400 status');
+        ok(res.json.calledWithMatch({
+          message:
+      'Invalid query parameters: PeriodName must match pattern LHC followed by 1-2 digits and letters',
+          status: 400,
+          title: 'Invalid Input',
+        }), 'Should return validation error');
+      });
 
-    test('should reject invalid RunType filter', async () => {
-      req.query.filters = { RunType: 'INVALID_TYPE' };
-      await middleWare(req, res, next);
-      ok(res.status.calledWith(400), 'Should return 400 status');
-      ok(res.json.calledWithMatch({
-        message: `Invalid query parameters: RunType must be one of: ${runTypes.join(', ')}`,
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Should return validation error');
-    });
+      test('should reject request with unknown filter field', async () => {
+        req.query.path = 'valid/path';
+        req.query.filters = { UnknownField: 'value' };
+        await middleWare(req, res, next);
+        ok(res.status.calledWith(400), 'Should return 400 status');
+        ok(res.json.calledWithMatch({
+          message: 'Invalid query parameters: Unknown filter field: UnknownField',
+          status: 400,
+          title: 'Invalid Input',
+        }), 'Should return validation error');
+      });
 
-    test('should accept valid PeriodName filter', async () => {
-      req.query.filters = { PeriodName: 'LHC22a' };
-      await middleWare(req, res, next);
-      ok(next.calledOnce, 'Next should be called');
-    });
+      test('should successfully validate request with validFrom timestamp', async () => {
+        req.query.path = 'valid/path';
+        req.query.validFrom = '1234567890';
+        await middleWare(req, res, next);
+        ok(next.calledOnce, 'Should call next() when validFrom is valid');
+      });
 
-    test('should reject invalid PeriodName filter (wrong format)', async () => {
-      req.query.filters = { PeriodName: 'INVALID_PERIOD' };
-      await middleWare(req, res, next);
-      ok(res.status.calledWith(400), 'Should return 400 status');
+      test('should reject request with negative validFrom timestamp', async () => {
+        req.query.path = 'valid/path';
+        req.query.validFrom = '-1';
+        await middleWare(req, res, next);
+        ok(res.status.calledWith(400), 'Should return 400 status');
+        ok(res.json.calledWithMatch({
+          message: 'Invalid query parameters: "validFrom" must be greater than or equal to 0',
+          status: 400,
+          title: 'Invalid Input',
+        }), 'Should return validation error');
+      });
 
-      ok(res.json.calledWithMatch({
-        message: 'Invalid query parameters: PeriodName must match pattern LHC followed by 1-2 digits and letters',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Should return validation error');
-    });
-
-    test('should accept valid PassName filter', async () => {
-      req.query.filters = { PassName: 'apass1' };
-      await middleWare(req, res, next);
-      ok(next.calledOnce, 'Next should be called');
-    });
-
-    test('should reject empty PassName filter', async () => {
-      req.query.filters = { PassName: 100 }; // not a string
-      await middleWare(req, res, next);
-      ok(res.status.calledWith(400), 'Should return 400 status');
-
-      ok(res.json.calledWithMatch({
-        message: 'Invalid query parameters: PassName must be a string',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Should return validation error');
-    });
-
-    test('should reject unknown filter field', async () => {
-      req.query.filters = { UnknownField: 'value' };
-      await middleWare(req, res, next);
-      ok(res.status.calledWith(400), 'Should return 400 status');
-
-      ok(res.json.calledWithMatch({
-        message: 'Invalid query parameters: Unknown filter field: UnknownField',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Should return validation error');
+      test('should reject request with non-numeric validFrom', async () => {
+        req.query.path = 'valid/path';
+        req.query.validFrom = 'not-a-number';
+        await middleWare(req, res, next);
+        ok(res.status.calledWith(400), 'Should return 400 status');
+        ok(res.json.calledWithMatch({
+          message: 'Invalid query parameters: "validFrom" must be a number',
+          status: 400,
+          title: 'Invalid Input',
+        }), 'Should return validation error');
+      });
     });
   });
 };

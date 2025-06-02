@@ -42,7 +42,7 @@ import { objectGetByIdValidationMiddlewareFactory }
   from './middleware/objects/objectGetByIdValidationMiddlewareFactory.js';
 import { objectsGetValidationMiddlewareFactory } from './middleware/objects/objectsGetValidationMiddlewareFactory.js';
 import { objectGetContentsValidationMiddlewareFactory }
-  from './middleware/objects/objectGetContentValidationMiddlewareFactory.js';
+  from './middleware/objects/objectGetContentsValidationMiddlewareFactory.js';
 
 /**
  * Model initialization for the QCG application

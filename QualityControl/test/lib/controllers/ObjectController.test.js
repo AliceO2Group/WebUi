@@ -57,22 +57,6 @@ export const objectControllerTestSuite = async () => {
       }));
     });
 
-    test('should send error if path is not defined.', async () => {
-      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
-        retrieveQcObject: sinon.stub().rejects(new Error('Failed to load data for object')),
-      });
-      reqMock.query.path = 1; // not a string
-
-      objectController = new ObjectController(QcObjectServiceMock);
-      await objectController.getObjectContent(reqMock, resMock);
-      ok(resMock.status.calledWith(400), 'Response status was not 400');
-      ok(resMock.json.calledWith({
-        message: 'Invalid query parameters: "path" must be a string',
-        status: 400,
-        title: 'Invalid Input',
-      }));
-    });
-
     test('should successfully send object down.', async () => {
       reqMock.query.path = stubObject.path;
       QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {

@@ -28,7 +28,7 @@ export function objectGetByIdValidationMiddlewareFactory(filterService) {
 
   const getObjectByIdValidator = async (req, res, next) => {
     try {
-      req.params.id = await qcgIdDto.validateAsync(req.params.id);
+      req.params.id = await qcgIdDto.validateAsync(req.params?.id);
       req.query = await ObjectGetByIdDto.validateAsync(req.query);
       next();
     } catch (error) {
