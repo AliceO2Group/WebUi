@@ -103,6 +103,17 @@ export const objectGetContentsValidationMiddlewareTest = () => {
         ok(next.calledOnce, 'Should call next() when filters are valid');
       });
 
+      test('should reject non-object filters', async () => {
+        req.query.filters = 'PassName=100';
+        await middleWare(req, res, next);
+        ok(res.status.calledWith(400), 'Should return 400 status');
+        ok(res.json.calledWithMatch({
+          message: 'Invalid query parameters: "filters" must be of type object',
+          status: 400,
+          title: 'Invalid Input',
+        }), 'Should return validation error');
+      });
+
       test('should reject request with invalid RunNumber filter', async () => {
         req.query.path = 'valid/path';
         req.query.filters = { RunNumber: 'abc' };

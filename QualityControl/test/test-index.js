@@ -213,10 +213,10 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('LayoutOwnerMiddleware test suite', async () => layoutOwnerMiddlewareTest());
       suite('StatusComponentMiddleware test suite', async () => statusComponentMiddlewareTest());
       suite('BookkeepingServiceTest test suite', async () => await bookkeepingServiceTestSuite());
-      suite('ObjectsGetValidationMiddleware test suite', async () => await objectsGetValidationMiddlewareTest());
+      suite('ObjectsGetValidationMiddleware test suite', async () => objectsGetValidationMiddlewareTest());
       suite('ObjectGetContentsValidationMiddleware test suite', async () =>
-        await objectGetContentsValidationMiddlewareTest());
-      suite('ObjectGetByIdValidationMiddleware test suite', async () => await objectGetByIdValidationMiddlewareTest());
+        objectGetContentsValidationMiddlewareTest());
+      suite('ObjectGetByIdValidationMiddleware test suite', async () => objectGetByIdValidationMiddlewareTest());
     });
 
     suite('Controllers - Test Suite', async () => {
