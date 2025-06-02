@@ -78,7 +78,7 @@ export function createObjectGetDtos(runTypes) {
   return {
     ObjectsGetDto: baseObjectsGetDto.keys({ prefix: Joi.string() }),
     ObjectContentsGetDto: baseObjectGetDto.keys({ path: Joi.string().required() }),
-    ObjectGetByIdDto: baseObjectGetDto.keys({ id: Joi.string().optional() }),
+    ObjectGetByIdDto: baseObjectGetDto, // They are effectively identical;
     qcgIdDto: Joi.string().required().trim().min(1).messages({ 'string.empty': 'Missing object ID in URL' }),
   };
 }

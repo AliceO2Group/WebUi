@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
 import { suite, test } from 'node:test';
 import { OWNER_TEST_TOKEN, URL_ADDRESS } from '../config.js';
 import request from 'supertest';
@@ -6,7 +20,7 @@ import { MOCK_OBJECT_BY_ID_RESULT, OBJECT_BY_PATH_RESULT, OBJECT_LATEST_FILTERED
   OBJECT_VERSIONS_FILTERED_BY_RUN_NUMBER, TREE_API_OBJECTS } from '../../setup/seeders/ccdbObjects.js';
 
 export const apiGetObjectsTests = () => {
-  suite.skip('GET /object', () => {
+  suite('GET /object', () => {
     test('should return QCObject details with all versions', async () => {
       await request(`${URL_ADDRESS}/api/object`)
         .get(`?token=${OWNER_TEST_TOKEN}&path=qc/test/object/1`)
@@ -70,7 +84,7 @@ export const apiGetObjectsTests = () => {
     });
   });
 
-  suite.skip('GET /object/:id', () => {
+  suite('GET /object/:id', () => {
     test('should return QCObject details with all versions', async () => {
       await request(`${URL_ADDRESS}/api/object/6724a6bd1b2bad3d713cc4ee`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
@@ -94,6 +108,17 @@ export const apiGetObjectsTests = () => {
 
           deepStrictEqual(res.body, MOCK_OBJECT_BY_ID_RESULT, 'Unexpected response');
           deepStrictEqual(versions, OBJECT_VERSIONS_FILTERED_BY_RUN_NUMBER, 'Versions do not match up');
+        });
+    });
+
+    test('should return error versions if a filter is added as a string.', async () => {
+      await request(`${URL_ADDRESS}/api/object/6724a6bd1b2bad3d713cc4ee`)
+        .get(`?token=${OWNER_TEST_TOKEN}&filters=RunNumber=0`)
+        .expect((res) => {
+          deepStrictEqual(res.body, {
+            message: 'Invalid query parameters: "filters" must be of type object',
+            status: 400,
+            title: 'Invalid Input' }, 'Unexpected response');
         });
     });
 
@@ -149,15 +174,35 @@ export const apiGetObjectsTests = () => {
     });
 
     test('should return 400 if fields is not an array', async () => {
-      await request(`${URL_ADDRESS}/api/objects`)
-        .get(`?token=${OWNER_TEST_TOKEN}&fields=not_an_array`)
-        .expect((res) => {
-          deepStrictEqual(
-            res.body,
-            { message: 'Invalid query parameters: "fields" must be an array', status: 400, title: 'Invalid Input' },
-            'Should send message about invalid fields type',
-          );
-        });
+      const url = `${URL_ADDRESS}/api/objects?token=${OWNER_TEST_TOKEN}&fields=not_an_array`;
+
+      testResult(url, 400, {
+        message: 'Invalid query parameters: "fields" must be an array', status: 400, title: 'Invalid Input',
+      });
     });
   });
 };
+
+/**
+ *
+ * @param url
+ * @param status
+ * @param expectedBody
+ * @param checkVersions
+ * @param expectedVersions
+ */
+async function testResult(url, status, expectedBody, expectedVersions = undefined) {
+  await request(url)
+    .get('')
+    .expect(status)
+    .expect((response) => {
+      const { versions } = response.body;
+      delete response.body.versions;
+      delete response.body.root;
+
+      deepStrictEqual(response.body, expectedBody, 'Unexpected response');
+      if (expectedVersions) {
+        deepStrictEqual(versions, expectedVersions, 'Versions do not match up');
+      }
+    });
+}
