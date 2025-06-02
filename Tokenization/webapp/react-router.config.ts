@@ -10,23 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
- */
+*/
 
-import { h } from '/js/src/index.js';
+import type { Config } from '@react-router/dev/config';
 
-/**
- * Shows header of list of layouts with one search input to filter them
- * @param {Model} model - root model of the application
- * @returns {vnode} - virtual node element
- */
-export default (model) => [
-  h('.w-50.text-center', [h('b.f4', 'Layouts')]),
-  h('.flex-grow.text-right', [
-    h('input.form-control.form-inline.mh1.w-33', {
-      placeholder: 'Search',
-      type: 'text',
-      value: model.layout.searchInput,
-      oninput: (e) => model.layout.search(e.target.value),
-    }),
-  ]),
-];
+export default {
+  // Config options...
+  // Server-side render by default, to enable SPA mode set this to `false`
+  ssr: false,
+} satisfies Config;
