@@ -112,7 +112,7 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
     await request(`${TEST_URL}/api/locks`)
       .put(`/force/${DetectorLockAction.TAKE}/MID?token=${GLOBAL_TEST_TOKEN}`)
       .expect(200, {
-        MID: { name: 'MID', state: 'TAK2EN', owner: { username: 'global', fullName: 'Global User', personid: 1 } },
+        MID: { name: 'MID', state: 'TAKEN', owner: { username: 'global', fullName: 'Global User', personid: 1 } },
         DCS: { name: 'DCS', state: 'FREE' },
         ODC: { name: 'ODC', state: 'FREE' }
       });
