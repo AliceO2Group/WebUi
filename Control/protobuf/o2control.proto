@@ -30,11 +30,16 @@ option go_package = "github.com/AliceO2Group/Control/core/protos;pb";
 
 import public "protos/events.proto";
 
+// The Control service is the main interface to AliECS
 service Control {
     rpc GetFrameworkInfo (GetFrameworkInfoRequest) returns (GetFrameworkInfoReply) {}
 
     rpc GetEnvironments (GetEnvironmentsRequest) returns (GetEnvironmentsReply) {}
+    // Creates a new environment which automatically follows one STANDBY->RUNNING->DONE cycle in the state machine.
+    // It returns only once the environment reaches the CONFIGURED state or upon any earlier failure.
     rpc NewAutoEnvironment (NewAutoEnvironmentRequest) returns (NewAutoEnvironmentReply) {}
+    // Creates a new environment.
+    // It returns only once the environment reaches the CONFIGURED state or upon any earlier failure.
     rpc NewEnvironment (NewEnvironmentRequest) returns (NewEnvironmentReply) {}
     rpc GetEnvironment (GetEnvironmentRequest) returns (GetEnvironmentReply) {}
     rpc ControlEnvironment (ControlEnvironmentRequest) returns (ControlEnvironmentReply) {}
@@ -42,6 +47,9 @@ service Control {
     rpc GetActiveDetectors (Empty) returns (GetActiveDetectorsReply) {}
     rpc GetAvailableDetectors (Empty) returns (GetAvailableDetectorsReply) {}
 
+    // Creates a new environment.
+    // It returns once an environment ID is created and continues the creation asynchronously to the call.
+    // The environment will be listed in GetEnvironments() only once the workflow is loaded and deployment starts.
     rpc NewEnvironmentAsync (NewEnvironmentRequest) returns (NewEnvironmentReply) {}
 
 //    rpc SetEnvironmentProperties (SetEnvironmentPropertiesRequest) returns (SetEnvironmentPropertiesReply) {}
