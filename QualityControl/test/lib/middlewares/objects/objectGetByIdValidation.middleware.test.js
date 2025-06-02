@@ -19,11 +19,11 @@ import { objectsGetValidationMiddlewareFactory } from
   '../../../../lib/middleware/objects/objectsGetValidationMiddlewareFactory.js';
 
 /**
- * Test suite for the middleware that checks the owner of the layout
+ * Test suite for the middleware that validates query parameters
  */
 
 export const objectGetByIdValidationMiddlewareTest = () => {
-  suite('Objects get validation Middleware', () => {
+  suite('Object get by id validation Middleware', () => {
     let req = {};
     let res = {};
     let next = {};
