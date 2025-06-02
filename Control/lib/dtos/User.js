@@ -80,7 +80,9 @@ class User {
    * @returns {Boolean}
    */
   belongsToDetector(detectorId = '') {
-    return this._accessList.includes(`det-${detectorId}`);
+    return this._accessList
+      .map((accessItem) => accessItem.toLowerCase())  
+      .includes(`det-${detectorId.toLocaleLowerCase()}`);
   }
 
   /**

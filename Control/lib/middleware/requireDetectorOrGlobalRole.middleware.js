@@ -43,7 +43,7 @@ const requireDetectorOrGlobalRoleMiddleware = (req, res, next) => {
     }
     if (!user.belongsToDetector(detectorId)) {
       return updateAndSendExpressResponseFromNativeError(res, 
-        new UnauthorizedAccessError(`User ${name} is not part of role for detector ${detectorId}`));
+        new UnauthorizedAccessError(`User "${name}" is not part of role for detector "${detectorId}"`));
     }
   
     next();
