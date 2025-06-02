@@ -65,6 +65,7 @@ const addKVInputList = (workflow) =>
           type: 'text',
           value: workflow.form.variables[key],
           oninput: (e) => workflow.addVariable(key, e.target.value, true),
+          // the "onchange" trigger is used to update the variable same as the "oninput" but with the check that the value is not empty
           onchange: (e) => workflow.addVariable(key, e.target.value, false)
         })),
         h('.ph2.danger.actionable-icon', {
