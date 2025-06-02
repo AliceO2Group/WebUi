@@ -19,29 +19,12 @@ const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'
 
 /**
  * Factory function to create object validation middleware with dynamic RUN_TYPES
- * @param {FilterController} filterController - Service providing run types
- * @returns {function(req, res, next): void} - Express middleware function
+ * @param {FilterService} filterService - Service providing run types
+ * @returns {function(req, res, next): undefined} - Express middleware function
  */
-export function getObjectsValidationMiddleware(filterController) {
-  const runTypes = filterController.getFilterConfiguration();
-  const {
-    ObjectsGetDto,
-    ObjectContentsGetDto,
-    ObjectGetByIdDto,
-    qcgIdDto,
-  } = createObjectGetDtos(runTypes);
-
-  const getObjectsValidator = async (req, res, next) => {
-    try {
-      req.query = await ObjectsGetDto.validateAsync(req.query);
-      next();
-    } catch (error) {
-      const responseError = new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`);
-
-      logger.errorMessage(`Error validating query parameters: ${error}`);
-      updateAndSendExpressResponseFromNativeError(res, responseError);
-    }
-  };
+export function objectGetByIdValidationMiddlewareFactory(filterService) {
+  const { runTypes } = filterService;
+  const { ObjectGetByIdDto, qcgIdDto } = createObjectGetDtos(runTypes);
 
   const getObjectByIdValidator = async (req, res, next) => {
     try {
@@ -56,22 +39,5 @@ export function getObjectsValidationMiddleware(filterController) {
     }
   };
 
-  const getObjectContentValidator = async (req, res, next) => {
-    try {
-      req.query = ObjectContentsGetDto.validateAsync(req.query);
-      await ObjectsGetDto(req.query);
-      next();
-    } catch (error) {
-      const responseError = new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`);
-
-      logger.errorMessage(`Error validating query parameters: ${error}`);
-      updateAndSendExpressResponseFromNativeError(res, responseError);
-    }
-  };
-
-  return {
-    getObjectsValidator,
-    getObjectByIdValidator,
-    getObjectContentValidator,
-  };
+  return getObjectByIdValidator;
 }
