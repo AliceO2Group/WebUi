@@ -142,7 +142,7 @@ export class CcdbService {
     const headers = { accept: 'application/json', 'x-filter-fields': fields.join(',') };
 
     const path = `/latest${this._buildCcdbUrlPath(identification)}`;
-    const { objects } = await httpGetJson(this._hostname, this._port, path, headers);
+    const { objects } = await httpGetJson(this._hostname, this._port, path, { headers });
     return objects;
   }
 
