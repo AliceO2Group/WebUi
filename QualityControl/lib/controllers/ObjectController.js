@@ -12,8 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 'use strict';
-import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
-import { ObjectContentsGetDto, ObjectGetByIdDto, ObjectsGetDto, qcgIdDto } from '../dtos/ObjectGetDto.js';
+import { LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/object-ctrl`);
 
@@ -42,14 +41,12 @@ export class ObjectController {
    */
   async getObjects(req, res) {
     try {
-      const { prefix, fields, filters } = await ObjectsGetDto.validateAsync(req.query);
+      const { prefix, fields, filters } = req.query;
 
       const list = await this._objService.retrieveLatestVersionOfObjects(prefix, fields, true, filters);
       res.status(200).json(list);
     } catch (error) {
-      const responseError = error.isJoi ?
-        new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`) :
-        new Error('Failed to retrieve list of objects latest version');
+      const responseError = new Error('Failed to retrieve list of objects latest version');
 
       logger.errorMessage(`Error validating query parameters: ${error}`);
       updateAndSendExpressResponseFromNativeError(res, responseError);
@@ -69,14 +66,12 @@ export class ObjectController {
    */
   async getObjectContent(req, res) {
     try {
-      const { path, validFrom, filters, id } = await ObjectContentsGetDto.validateAsync(req.query);
+      const { path, validFrom, filters, id } = req.query;
 
       const object = await this._objService.retrieveQcObject(path, validFrom, id, filters);
       res.status(200).json(object);
     } catch (error) {
-      const responseError = error.isJoi ?
-        new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`) :
-        new Error('Failed to retrieve object content');
+      const responseError = new Error('Failed to retrieve object content');
 
       logger.errorMessage(`Error validating query parameters: ${error}`);
       updateAndSendExpressResponseFromNativeError(res, responseError);
@@ -85,16 +80,13 @@ export class ObjectController {
 
   async getObjectById(req, res) {
     try {
-      const qcgId = await qcgIdDto.validateAsync(req.params?.id);
-      const { validFrom, filters, id } = await ObjectGetByIdDto.validateAsync(req.query);
+      const qcgId = req.params?.id;
+      const { validFrom, filters, id } = req.query;
 
       const object = await this._objService.retrieveQcObjectByQcgId(qcgId, id, validFrom, filters);
       res.status(200).json(object);
     } catch (error) {
-      const responseError = error.isJoi ?
-        new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`) :
-        error instanceof InvalidInputError ? error :
-          new Error('Unable to identify object or read it by qcg id');
+      const responseError = new Error('Unable to identify object or read it by qcg id');
 
       logger.errorMessage(`Error validating query parameters: ${error}`);
       updateAndSendExpressResponseFromNativeError(res, responseError);

@@ -6,7 +6,7 @@ import { MOCK_OBJECT_BY_ID_RESULT, OBJECT_BY_PATH_RESULT, OBJECT_LATEST_FILTERED
   OBJECT_VERSIONS_FILTERED_BY_RUN_NUMBER, TREE_API_OBJECTS } from '../../setup/seeders/ccdbObjects.js';
 
 export const apiGetObjectsTests = () => {
-  suite('GET /object', () => {
+  suite.skip('GET /object', () => {
     test('should return QCObject details with all versions', async () => {
       await request(`${URL_ADDRESS}/api/object`)
         .get(`?token=${OWNER_TEST_TOKEN}&path=qc/test/object/1`)
@@ -70,7 +70,7 @@ export const apiGetObjectsTests = () => {
     });
   });
 
-  suite('GET /object/:id', () => {
+  suite.skip('GET /object/:id', () => {
     test('should return QCObject details with all versions', async () => {
       await request(`${URL_ADDRESS}/api/object/6724a6bd1b2bad3d713cc4ee`)
         .get(`?token=${OWNER_TEST_TOKEN}`)

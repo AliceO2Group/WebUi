@@ -28,6 +28,14 @@ export class FilterController {
   }
 
   /**
+   * Method for retrieving a list of run types from Bookkeeping
+   * @returns {Array<string>} An array containing run types as strings
+   */
+  getFilterConfiguration() {
+    return this._filterService ? this._filterService.runTypes : [];
+  }
+
+  /**
    * HTTP GET endpoint for retrieving a list of run types from Bookkeeping
    * @param {Request} req - HTTP request
    * @param {Response} res - HTTP response to provide run types information

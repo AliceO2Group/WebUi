@@ -74,6 +74,7 @@ import { filterServiceTestSuite } from './lib/services/FilterService.test.js';
 import { apiGetLayoutsTests } from './api/layouts/api-get-layout.test.js';
 import { objectControllerTestSuite } from './lib/controllers/ObjectController.test.js';
 import { apiGetObjectsTests } from './api/objects/api-get-object.test.js';
+import { ObjectValidationMiddlewareTest } from './lib/middlewares/objects/ObjectGet.middleware.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -208,6 +209,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('LayoutOwnerMiddleware test suite', async () => layoutOwnerMiddlewareTest());
       suite('StatusComponentMiddleware test suite', async () => statusComponentMiddlewareTest());
       suite('BookkeepingServiceTest test suite', async () => await bookkeepingServiceTestSuite());
+      suite('ObjectValidationMiddleware test suite', async () => await ObjectValidationMiddlewareTest());
     });
 
     suite('Controllers - Test Suite', async () => {
