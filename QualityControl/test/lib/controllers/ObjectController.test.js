@@ -16,14 +16,69 @@ export const objectControllerTestSuite = async () => {
       send: sinon.spy(),
       json: sinon.spy(),
     };
-    reqMock = { query: { token: 'someToken' } };
+    reqMock = {
+      query: { token: 'someToken' },
+      params: {},
+    };
   });
 
   afterEach(() => {
     sinon.restore();
   });
 
-  suite.skip('getObjectContent() tests', () => {
+  suite('getObjects() tests', () => {
+    const mockObjectsList = [
+      { objectName: 'object1', path: 'qc/path/object1' },
+      { objectName: 'object2', path: 'qc/path/object2' },
+    ];
+
+    test('should successfully retrieve objects list without prefix', async () => {
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockObjectsList),
+      });
+
+      objectController = new ObjectController(QcObjectServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      ok(resMock.status.calledWith(200));
+      ok(resMock.json.calledWith(mockObjectsList));
+      ok(QcObjectServiceMock.retrieveLatestVersionOfObjects.calledWith(undefined, undefined, true, undefined));
+    });
+
+    test('should successfully retrieve objects list with prefix and fields', async () => {
+      reqMock.query.prefix = 'qc/path';
+      reqMock.query.fields = ['objectName', 'path'];
+
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockObjectsList),
+      });
+
+      objectController = new ObjectController(QcObjectServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      ok(resMock.status.calledWith(200));
+      ok(QcObjectServiceMock.retrieveLatestVersionOfObjects
+        .calledWith('qc/path', ['objectName', 'path'], true, undefined));
+    });
+
+    test('should handle service errors when retrieving objects', async () => {
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        retrieveLatestVersionOfObjects: sinon.stub().rejects(new Error('DB error')),
+      });
+
+      objectController = new ObjectController(QcObjectServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      ok(resMock.status.calledWith(500));
+      ok(resMock.json.calledWithMatch({
+        message: 'Failed to retrieve list of objects latest version',
+        status: 500,
+        title: 'Unknown Error',
+      }));
+    });
+  });
+
+  suite('getObjectContent() tests', () => {
     const stubObject = {
       path: 'qc/path',
       versions: [
@@ -40,24 +95,7 @@ export const objectControllerTestSuite = async () => {
       ],
     };
 
-    test('should send generic error if QcObjectService fails.', async () => {
-      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
-        retrieveQcObject: sinon.stub().rejects(new Error('Failed to load data for object')),
-      });
-
-      objectController = new ObjectController(QcObjectServiceMock);
-      reqMock.query.path = 'qc/test';
-      await objectController.getObjectContent(reqMock, resMock);
-
-      ok(resMock.status.calledWith(500), 'Response status was not 500');
-      ok(resMock.json.calledWith({
-        message: 'Failed to retrieve object content',
-        status: 500,
-        title: 'Unknown Error',
-      }));
-    });
-
-    test('should successfully send object down.', async () => {
+    test('should successfully retrieve object content', async () => {
       reqMock.query.path = stubObject.path;
       QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
         retrieveQcObject: sinon.stub().resolves(stubObject),
@@ -65,8 +103,67 @@ export const objectControllerTestSuite = async () => {
 
       objectController = new ObjectController(QcObjectServiceMock);
       await objectController.getObjectContent(reqMock, resMock);
+
       ok(resMock.status.calledWith(200));
       ok(resMock.json.calledWith(stubObject));
+      ok(QcObjectServiceMock.retrieveQcObject.calledWith(stubObject.path, undefined, undefined, undefined));
+    });
+
+    test('should handle service errors when retrieving object content', async () => {
+      reqMock.query.path = 'qc/test';
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        retrieveQcObject: sinon.stub().rejects(new Error('Failed to load data for object')),
+      });
+
+      objectController = new ObjectController(QcObjectServiceMock);
+      await objectController.getObjectContent(reqMock, resMock);
+
+      ok(resMock.status.calledWith(500));
+      ok(resMock.json.calledWithMatch({
+        message: 'Failed to retrieve object content',
+        status: 500,
+        title: 'Unknown Error',
+      }));
+    });
+  });
+
+  suite('getObjectById() tests', () => {
+    const mockObject = {
+      id: '21a6de32-ce79-11ef-936b-c0a80209250c',
+      path: 'qc/path/object',
+      validFrom: 1736420279131,
+    };
+
+    test('should successfully retrieve object by QCG ID', async () => {
+      reqMock.params.id = mockObject.id;
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        retrieveQcObjectByQcgId: sinon.stub().resolves(mockObject),
+      });
+
+      objectController = new ObjectController(QcObjectServiceMock);
+      await objectController.getObjectById(reqMock, resMock);
+
+      ok(resMock.status.calledWith(200));
+      ok(resMock.json.calledWith(mockObject));
+      ok(QcObjectServiceMock.retrieveQcObjectByQcgId.calledWith(mockObject.id, undefined, undefined, undefined));
+    });
+
+    test('should handle service errors when retrieving object by ID', async () => {
+      reqMock.params.id = 'some-id';
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        retrieveQcObjectByQcgId: sinon.stub().rejects(new Error('Object not found')),
+      });
+
+      objectController = new ObjectController(QcObjectServiceMock);
+      await objectController.getObjectById(reqMock, resMock);
+
+      ok(resMock.status.calledWith(500));
+      ok(resMock.json.calledWithMatch({
+        message: 'Unable to identify object or read it by qcg id',
+        status: 500,
+        title: 'Unknown Error',
+      }));
+      ok(QcObjectServiceMock.retrieveQcObjectByQcgId.calledWith('some-id', undefined, undefined, undefined));
     });
   });
 };
