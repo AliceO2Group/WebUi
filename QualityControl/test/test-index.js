@@ -40,7 +40,8 @@ import { aboutPageTests } from './public/pages/about-page.test.js';
 /**
  * Backend tests imports
  */
-import { utilsTestSuite } from './lib/utils/utils.test.js';
+import { errorHandlerTestSuite } from './lib/utils/errorHandler.test.js';
+import { httpRequestsTestSuite } from './lib/utils/httpRequests.test.js';
 
 /**
  * Controllers
@@ -176,7 +177,8 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
 
   suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
     suite('Lib - Test Suite', async () => {
-      suite('Utility methods test suite', async () => await utilsTestSuite());
+      suite('Utility "errorHandler" methods test suite', async () => await errorHandlerTestSuite());
+      suite('Utility "httpRequests" methods test suite', async () => await httpRequestsTestSuite());
     });
 
     suite('Common Library - Test Suite', () => {

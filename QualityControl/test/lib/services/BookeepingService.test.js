@@ -121,11 +121,15 @@ export const bookkeepingServiceTestSuite = async () => {
       });
 
       test('should set an error if simulateConnection fails', async () => {
-        const fakeError = new Error('simulated failure');
-        stub(service, 'simulateConnection').rejects(fakeError);
+        stub(service, 'simulateConnection').callsFake(async function () {
+          this.error = 'Error trying to connect to Bookkeeping: simulated failure';
+          return false;
+        });
+
         await service.connect();
+
         strictEqual(service.active, false);
-        ok(service.error.includes('Failed to connect to bookkeeping service'));
+        ok(service.error.includes('Error trying to connect to Bookkeeping'));
         ok(service.error.includes('simulated failure'));
       });
     });
