@@ -15,6 +15,7 @@
 const {UnauthorizedAccessError, updateAndSendExpressResponseFromNativeError} = require('@aliceo2/web-ui');
 const {isRoleSufficient} = require('../common/role.enum.js');
 const {stringToArray} = require('../common/stringToArray.js');
+
 /**
  * Method to receive a minimum role that needs to be met by owner of request and to return a middleware function
  * @param {Role} minimumRole - minimum role that should be fulfilled by the requestor
