@@ -113,7 +113,7 @@ describe('requireDetectorOrGlobalRoleMiddleware - test suite', function () {
     assert.ok(res.status.calledWith(403), 'Response status should be 403 Forbidden');
     assert.ok(res.json.calledOnce, 'Response JSON should be called once');
     assert.ok(res.json.calledWith({
-      message: 'User Test User is not part of role for detector XYZ',
+      message: 'User "Test User" is not part of role for detector "XYZ"',
       status: 403,
       title: 'Unauthorized Access'
     }), 'Response JSON should contain the correct error message');
