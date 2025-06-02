@@ -13,7 +13,7 @@
  */
 
 import { FailedDependencyError, LogManager } from '@aliceo2/web-ui';
-import { httpHeadJson, httpGetJson } from '../../utils/utils.js';
+import { httpHeadJson, httpGetJson } from '../../utils/httpRequests.js';
 import {
   CCDB_MONITOR, CCDB_VERSION_KEY, CCDB_RESPONSE_BODY_KEYS, CCDB_FILTER_FIELDS, CCDB_RESPONSE_HEADER_KEYS,
 } from './CcdbConstants.js';
@@ -84,7 +84,7 @@ export class CcdbService {
     let serviceInfo = {};
     try {
       const path = `/monitor/${CCDB_MONITOR}/.*/${CCDB_VERSION_KEY}`;
-      serviceInfo = await httpGetJson(this._hostname, this._port, path, { Accept: 'application/json' });
+      serviceInfo = await httpGetJson(this._hostname, this._port, path, { headers: { Accept: 'application/json' } });
     } catch (error) {
       throw new Error(`Unable to connect to CCDB due to: ${error}`);
     }
@@ -137,7 +137,7 @@ export class CcdbService {
       accept: 'application/json',
       'x-filter-fields': fields.length > 0 ? fields.join(',') : `${PATH},${CREATED},${LAST_MODIFIED}`,
     };
-    const { objects } = await httpGetJson(this._hostname, this._port, `/latest/${prefix}.*`, headers);
+    const { objects } = await httpGetJson(this._hostname, this._port, `/latest/${prefix}.*`, { headers });
     return objects;
   }
 
@@ -157,7 +157,7 @@ export class CcdbService {
       'Browse-Limit': `${limit}`,
     };
     const path = `/browse${this._buildCcdbUrlPath(identification)}`;
-    const { objects } = await httpGetJson(this._hostname, this._port, path, headers);
+    const { objects } = await httpGetJson(this._hostname, this._port, path, { headers });
     return objects.map((object) => (
       {
         [VALID_FROM]: parseInt(object[VALID_FROM], 10),
@@ -184,7 +184,7 @@ export class CcdbService {
     };
     const url = `/latest${this._buildCcdbUrlPath(partialIdentification)}`;
 
-    const result = await httpGetJson(this._hostname, this._port, url, headers);
+    const result = await httpGetJson(this._hostname, this._port, url, { headers });
     if (result?.objects?.length > 0) {
       const [qcObject] = result.objects;
       return {
@@ -219,7 +219,7 @@ export class CcdbService {
       throw new Error('Missing mandatory parameters: path & validFrom');
     }
     const url = this._buildCcdbUrlPath(identification);
-    const { status, headers } = await httpHeadJson(this._hostname, this._port, url, { Accept: 'application/json' });
+    const { status, headers } = await httpHeadJson(this._hostname, this._port, url);
     if (status >= 200 && status <= 399) {
       const [location = ''] = headers[CCDB_RESPONSE_HEADER_KEYS.CONTENT_LOCATION]
         .split(', ')
@@ -254,7 +254,7 @@ export class CcdbService {
     };
     try {
       const url = `/latest${this._buildCcdbUrlPath(identification)}`;
-      const { objects } = await httpGetJson(this._hostname, this._port, url, timestampHeaders);
+      const { objects } = await httpGetJson(this._hostname, this._port, url, { headers: timestampHeaders });
       if (objects?.length <= 0) {
         throw new Error(`No object found for: ${path}`);
       }

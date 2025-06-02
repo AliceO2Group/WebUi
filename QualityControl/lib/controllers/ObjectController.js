@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 'use strict';
-import { errorHandler } from './../utils/utils.js';
+import { errorHandler } from '../utils/errorHandler.js';
 
 /**
  * Gateway for all QC Objects requests
