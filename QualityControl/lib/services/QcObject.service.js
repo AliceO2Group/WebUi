@@ -109,7 +109,7 @@ export class QcObjectService {
     }
 
     let objects = [];
-    if (filters === undefined) {
+    if (!hasFilters) {
       objects = await this._dbService.getObjectsTreeList(prefix);
     } else {
       objects = await this._dbService.getObjectsLatestVersionList(prefix, filters, fields);
