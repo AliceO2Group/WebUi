@@ -13,16 +13,14 @@
 */
 
 /**
- * Keys that are used define the tracks to follow events on the Node Emitter
+ * Method to adapt the int64 value timestamp to a number
+ * Value normally comes from a gRPC object and this is needed because the int64 value is not directly compatible with JavaScript's number type.
+ * @param {BigInt} int64 - the int64 timestamp to be adapted
+ * @return {number} - the adapted timestamp
  */
-const EmitterKeys =  Object.freeze({
-  ENVIRONMENTS_TRACK: 'ENVIRONMENTS_TRACK',
-  TASKS_TRACK: 'TASKS_TRACK',
-  INTEGRATED_SERVICES_TRACK: {
-    ODC: {
-      ENVIRONMENT_STATE_CHANGE: 'ODC_ENVIRONMENT_STATE_CHANGE',
-    } 
-  },
-});
+const adaptInt64ToNumber = (int64) => {
+  const bigIntTimestamp = BigInt(int64.toString(10));
+  return Number(bigIntTimestamp);
+}
 
-exports.EmitterKeys = EmitterKeys;
+exports.adaptInt64ToNumber = adaptInt64ToNumber;

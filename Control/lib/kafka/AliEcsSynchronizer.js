@@ -17,13 +17,16 @@ const { ConsumerGroups } = require('./enums/consumerGroups.enum.js');
 const { DcsIntegratedEventAdapter } = require('../adapters/DcsIntegratedEventAdapter.js');
 const {
   EmitterKeys: {
-    ENVIRONMENTS_TRACK, 
+    ENVIRONMENTS_TRACK,
+    TASKS_TRACK,
     INTEGRATED_SERVICES_TRACK: { ODC }
   }
 } = require('./../common/emitterKeys.enum.js');
 const { fromEcsIntegratedServiceEventToEvent } = require('./adapters/fromEcsIntegratedServiceEventToEvent.js');
 const { runEventAdapter } = require('./adapters/runEventAdapter.js');
 const { taskEventAdapter } = require('./adapters/taskEventAdapter.js');
+const { fromEcsEventToEnvironmentEvent } = require('./adapters/fromEcsEventToEnvironmentEvent.js');
+const { adaptInt64ToNumber } = require('../common/utils/adaptInt64ToNumber.js');
 const { Topics } = require('./enums/topics.enum.js');
 
 /**
@@ -194,7 +197,9 @@ class AliEcsSynchronizer {
       );
       return;
     }
-    this._eventEmitter.emit(ENVIRONMENTS_TRACK, eventMessage );
+    const environmentEvent = fromEcsEventToEnvironmentEvent(eventMessage);
+    environmentEvent.timestamp = adaptInt64ToNumber(eventMessage.timestamp);
+    this._eventEmitter.emit(ENVIRONMENTS_TRACK, environmentEvent);
   }
 
   /**
@@ -212,7 +217,16 @@ class AliEcsSynchronizer {
    * @return {void}
    */
   async _onTaskMessage(eventMessage) {
-    taskEventAdapter(eventMessage);
+    if (!eventMessage?.taskEvent) {
+      this._logger.errorMessage(
+        `Received task event message without taskEvent: ${JSON.stringify(eventMessage)}`
+      );
+      return;
+    }
+    const { timestamp: timestampInt64, taskEvent: taskEventProto } = eventMessage;
+    const timestamp = adaptInt64ToNumber(timestampInt64);
+    const taskEvent = taskEventAdapter(taskEventProto);
+    this._eventEmitter.emit(TASKS_TRACK, {timestamp, taskEvent});
   }
 }
 

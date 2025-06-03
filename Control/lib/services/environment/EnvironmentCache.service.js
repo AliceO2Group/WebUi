@@ -16,10 +16,10 @@ const { LogManager } = require('@aliceo2/web-ui');
 const { BroadcastKeys: { ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW } } = require('./../../common/broadcastKeys.enum');
 const {
   EmitterKeys: {
-    ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK
+    ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK, TASKS_TRACK
   }
 } = require('./../../common/emitterKeys.enum.js');
-const { fromEcsEventToEnvironmentEvent } = require('./../../kafka/adapters/fromEcsEventToEnvironmentEvent.js');
+const { TaskState } = require('../../common/taskState.enum.js');
 const EPN_PATH_IN_ENVIRONMENT_INFO = 'hardware.epn.info';
 
 /**
@@ -112,11 +112,10 @@ class EnvironmentCacheService {
    * @returns {void}
    */
   _listenToEventsAndBroadcast() {
-    this._eventEmitter.on(ENVIRONMENTS_TRACK, (event) => {
-      const { timestamp } = event;
-
-      const environmentEvent = fromEcsEventToEnvironmentEvent(event);
-      environmentEvent.timestamp = this._adaptInt64ToNumber(timestamp);
+    /**
+     * @param {EnvironmentEvent} environmentEvent - the event object containing the payload and environmentId
+     */
+    this._eventEmitter.on(ENVIRONMENTS_TRACK, (environmentEvent) => {
       const { id } = environmentEvent;
 
       const cachedEnvironment = this._environments.has(id)
@@ -124,7 +123,7 @@ class EnvironmentCacheService {
         : { id, events: [] };
 
       cachedEnvironment.events.push(environmentEvent);
-      cachedEnvironment.lastUpdate = this._adaptInt64ToNumber(timestamp);
+      cachedEnvironment.lastUpdate = environmentEvent.timestamp;
       this._environments.set(id, cachedEnvironment);
       this._broadcastService.broadcast(ENVIRONMENT_EVENTS, cachedEnvironment);
       this._lastUpdate = Date.now();
@@ -147,17 +146,29 @@ class EnvironmentCacheService {
           this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environments.values()]);
         }
       });
-  }
-
-  /**
-   * @private
-   * Method to adapt the int64 timestamp to a number
-   * @param {BigInt} int64 - the int64 timestamp to be adapted
-   * @return {number} - the adapted timestamp
-   */
-  _adaptInt64ToNumber(int64) {
-    const bigIntTimestamp = BigInt(int64.toString(10));
-    return Number(bigIntTimestamp);
+    
+    this._eventEmitter.on(TASKS_TRACK,
+      /**
+       * @private
+       * An event handler for receiving a task event update, parse it as per GUI expectations and broadcast it to NodeJS EventEmitter listeners
+       * @param {object} event - the event object containing the payload and environmentId
+       * @param {TaskEvent} event.taskEvent - the task event object containing the task information
+       * @param {number} event.timestamp - the timestamp of the event
+       * @returns {void}
+       */
+      ({ taskEvent }) => {
+        const { environmentId, state } = taskEvent;
+        if (
+          (state === TaskState.ERROR || state === TaskState.ERROR_CRITICAL)
+          && this._environments.has(environmentId)
+          && !this._environments.get(environmentId).firstTaskInError
+        ) {
+          const environment = JSON.parse(JSON.stringify(this._environments.get(environmentId)));
+          environment.firstTaskInError = taskEvent;
+          this._environments.set(environmentId, environment);
+          this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environments.values()]);
+        }
+      });
   }
 }
 
