@@ -20,7 +20,7 @@ const { TaskState } = require("../common/taskState.enum");
  */
 class OdcDeviceInfoAdapter {
   /**
-   * ShortTaskInfoAdapter
+   * OdcDeviceInfoAdapter
    */
   constructor() { }
 
