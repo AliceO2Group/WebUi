@@ -19,7 +19,7 @@ import { suite, test, before } from 'node:test';
 import nock from 'nock';
 
 import { CcdbService } from '../../../lib/services/ccdb/CcdbService.js';
-import { CCDB_MONITOR, CCDB_VERSION_KEY } from '../../../lib/services/ccdb/CcdbConstants.js';
+import { CCDB_FILTER_FIELDS, CCDB_MONITOR, CCDB_VERSION_KEY } from '../../../lib/services/ccdb/CcdbConstants.js';
 
 const ccdbConfig = {
   hostname: 'ccdb-local',
@@ -27,6 +27,7 @@ const ccdbConfig = {
   protocol: 'https',
   prefix: 'qc-test',
 };
+const { ID, CREATED, PATH } = CCDB_FILTER_FIELDS;
 
 export const ccdbServiceTestSuite = async () => {
   suite('CCDB Test Suite - ', () => {
@@ -147,19 +148,19 @@ export const ccdbServiceTestSuite = async () => {
       test('should successfully return a list of the objects with specified headers', async () => {
         const ccdb = new CcdbService(ccdbConfig);
         const objects = [
-          { path: 'object/one', Created: '101', Id: 1 },
-          { path: 'object/two', Created: '101', Id: 2 },
-          { path: 'object/three', Created: '101', Id: 3 },
+          { [PATH]: 'object/one', [CREATED]: '101', [ID]: 1 },
+          { [PATH]: 'object/two', [CREATED]: '101', [ID]: 2 },
+          { [PATH]: 'object/three', [CREATED]: '101', [ID]: 3 },
         ];
         nock('http://ccdb-local:8083', {
           reqheaders: {
             Accept: 'application/json',
-            'X-Filter-Fields': 'Id,path,Created',
+            'X-Filter-Fields': [ID, CREATED, PATH].join(','),
           },
         })
           .get('/latest/.*')
           .reply(200, { objects: objects, subfolders: [] });
-        const objectsRetrieved = await ccdb.getObjectsLatestVersionList('', undefined, ['Id', 'path', 'Created']);
+        const objectsRetrieved = await ccdb.getObjectsLatestVersionList('', undefined, [ID, CREATED, PATH]);
         deepStrictEqual(objectsRetrieved, objects, 'Received objects are not alike');
       });
 
@@ -174,18 +175,18 @@ export const ccdbServiceTestSuite = async () => {
 
       test('should send HTTP request with filters', async () => {
         const ccdb = new CcdbService(ccdbConfig);
-        const objects = [{ Id: 1 }, { Id: 2 }, { Id: 3 }];
+        const objects = [{ [ID]: 1 }, { [ID]: 2 }, { [ID]: 3 }];
         nock('http://ccdb-local:8083', {
           reqheaders: {
             Accept: 'application/json',
-            'X-Filter-Fields': 'Id',
+            'X-Filter-Fields': ID,
           },
         })
           .get('/latest/.*/RunNumber=535/RunType=PHYSICS')
           .reply(200, { objects: objects, subfolders: [] });
 
         const objectsRetrieved =
-          await ccdb.getObjectsLatestVersionList('', { RunNumber: 535, RunType: 'PHYSICS' }, ['Id']);
+          await ccdb.getObjectsLatestVersionList('', { RunNumber: 535, RunType: 'PHYSICS' }, [ID]);
 
         deepStrictEqual(objectsRetrieved, objects, 'Received objects are not alike');
       });
