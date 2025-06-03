@@ -104,12 +104,12 @@ export class QcObjectService {
   ) {
     if (!filters && useCache && this._cache.objects?.length) {
       return this._cache.objects.filter((object) => object.name.startsWith(prefix));
-    } else {
-      const objects = filters === undefined
-        ? await this._dbService.getObjectsTreeList(prefix) // TreeList links to the latest too, but is more efficient.
-        : await this._dbService.getObjectsLatestVersionList(prefix, filters, fields);
-      return this._parseObjects(objects);
     }
+    const objects = filters === undefined
+      ? await this._dbService.getObjectsTreeList(prefix) // TreeList links to the latest too, but is more efficient.
+      : await this._dbService.getObjectsLatestVersionList(prefix, filters, fields);
+
+    return this._parseObjects(objects);
   }
 
   /**
