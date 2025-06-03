@@ -18,7 +18,7 @@ const periodNamePattern = /^LHC\d{1,2}[a-z]+$/i;
 
 /**
  * Creates and returns a filters schema for object DTOs
- * @param {string[]} runTypes - Array of valid run types
+ * @param {Array<string>} runTypes - Array of valid run types
  * @returns {Joi.ObjectSchema} Joi validation schema for filters
  */
 function createFiltersSchema(runTypes) {
@@ -34,7 +34,7 @@ function createFiltersSchema(runTypes) {
 
 /**
  * Creates and returns the base object get schema
- * @param {string[]} runTypes - Array of valid run types
+ * @param {Array<string>} runTypes - Array of valid run types
  * @returns {Joi.ObjectSchema} Joi validation schema for base object get
  */
 function createBaseObjectGetDto({ runTypes }) {
@@ -48,7 +48,7 @@ function createBaseObjectGetDto({ runTypes }) {
 
 /**
  * Creates and returns the base objects get schema
- * @param {string[]} runTypes - Array of valid run types
+ * @param {Array<string>} runTypes - Array of valid run types
  * @returns {Joi.ObjectSchema} Joi validation schema for base objects get
  */
 function createBaseObjectsGetDto({ runTypes }) {
@@ -61,7 +61,7 @@ function createBaseObjectsGetDto({ runTypes }) {
 
 /**
  * Creates and returns the ObjectsGetDto schema
- * @param {string[]} runTypes - Array of valid run types
+ * @param {Array<string>} runTypes - Array of valid run types
  * @returns {Joi.ObjectSchema} Joi validation schema for getting multiple objects
  */
 export function createObjectsGetDto({ runTypes }) {
@@ -72,7 +72,7 @@ export function createObjectsGetDto({ runTypes }) {
 
 /**
  * Creates and returns the ObjectContentsGetDto schema
- * @param {string[]} runTypes - Array of valid run types
+ * @param {Array<string>} runTypes - Array of valid run types
  * @returns {Joi.ObjectSchema} Joi validation schema for getting object contents
  */
 export function createObjectContentsGetDto({ runTypes }) {
@@ -83,7 +83,7 @@ export function createObjectContentsGetDto({ runTypes }) {
 
 /**
  * Creates and returns the ObjectGetByIdDto schema
- * @param {string[]} runTypes - Array of valid run types
+ * @param {Array<string>} runTypes - Array of valid run types
  * @returns {Joi.ObjectSchema} Joi validation schema for getting an object by ID
  */
 export function createObjectGetByIdDto({ runTypes }) {
