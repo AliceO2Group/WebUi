@@ -26,7 +26,7 @@ const { fromEcsIntegratedServiceEventToEvent } = require('./adapters/fromEcsInte
 const { runEventAdapter } = require('./adapters/runEventAdapter.js');
 const { taskEventAdapter } = require('./adapters/taskEventAdapter.js');
 const { fromEcsEventToEnvironmentEvent } = require('./adapters/fromEcsEventToEnvironmentEvent.js');
-const { adaptInt64ToNumber } = require('./../common/utils/int64ToNumber.js');
+const { adaptInt64ToNumber } = require('../common/utils/adaptInt64ToNumber.js');
 const { Topics } = require('./enums/topics.enum.js');
 
 /**
