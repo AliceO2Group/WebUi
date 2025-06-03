@@ -13,7 +13,9 @@
 */
 
 const { LogManager } = require('@aliceo2/web-ui');
-const { BroadcastKeys: { ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW, NOTIFICATION } } = require('./../../common/broadcastKeys.enum');
+const { BroadcastKeys: {
+  ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW, NOTIFICATION
+} } = require('./../../common/broadcastKeys.enum');
 const {
   EmitterKeys: {
     ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK, TASKS_TRACK

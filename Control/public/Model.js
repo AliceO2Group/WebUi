@@ -166,7 +166,7 @@ export default class Model extends Observable {
       case BroadcastKeys.PADLOCK_UPDATE:
         this.lock.padlockState = message.payload;
         break;
-      case BroadcastKeys.NOTIFICATION:
+      case BroadcastKeys.NOTIFICATION: {
         const { payload: task } = message;
         if (task?.taskId) {
           // Notification is for the first task in error from an environment
@@ -176,8 +176,8 @@ export default class Model extends Observable {
             url: `?page=environment&id=${task.environmentId}`
           });
         }
-        
         break;
+      }
       case BroadcastKeys.RESOURCES_CLEANUP:
         this.task.setResourcesRequest(message.payload);
         break;
