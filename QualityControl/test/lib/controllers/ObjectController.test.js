@@ -17,6 +17,7 @@ import { ok } from 'node:assert';
 import sinon from 'sinon';
 import { ObjectController } from '../../../lib/controllers/ObjectController.js';
 import { QcObjectService } from '../../../lib/services/QcObject.service.js';
+import { NotFoundError } from '@aliceo2/web-ui';
 
 export const objectControllerTestSuite = async () => {
   let QcObjectServiceMock = null;
@@ -77,7 +78,7 @@ export const objectControllerTestSuite = async () => {
 
     test('should handle service errors when retrieving objects', async () => {
       QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
-        retrieveLatestVersionOfObjects: sinon.stub().rejects(new Error('DB error')),
+        retrieveLatestVersionOfObjects: sinon.stub().rejects(new NotFoundError('Object not found')),
       });
 
       objectController = new ObjectController(QcObjectServiceMock);
@@ -126,7 +127,7 @@ export const objectControllerTestSuite = async () => {
     test('should handle service errors when retrieving object content', async () => {
       reqMock.query.path = 'qc/test';
       QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
-        retrieveQcObject: sinon.stub().rejects(new Error('Failed to load data for object')),
+        retrieveQcObject: sinon.stub().rejects(new NotFoundError('Object not found')),
       });
 
       objectController = new ObjectController(QcObjectServiceMock);
@@ -165,7 +166,7 @@ export const objectControllerTestSuite = async () => {
     test('should handle service errors when retrieving object by ID', async () => {
       reqMock.params.id = 'some-id';
       QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
-        retrieveQcObjectByQcgId: sinon.stub().rejects(new Error('Object not found')),
+        retrieveQcObjectByQcgId: sinon.stub().rejects(new NotFoundError('Object not found')),
       });
 
       objectController = new ObjectController(QcObjectServiceMock);
