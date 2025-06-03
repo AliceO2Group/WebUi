@@ -17,68 +17,80 @@ import Joi from 'joi';
 const periodNamePattern = /^LHC\d{1,2}[a-z]+$/i;
 
 /**
- * Creates a set of Joi validation schemas for object-related DTOs (Data Transfer Objects)
- * @param {string[]} runTypes - Array of valid run types to be used for validation
- * @returns {object} An object containing multiple Joi validation schemas:
- *   - ObjectsGetDto: Schema for getting multiple objects
- *   - ObjectContentsGetDto: Schema for getting object contents
- *   - ObjectGetByIdDto: Schema for getting an object by ID
- *   - qcgIdDto: Schema for validating object ID in URL
+ * Creates and returns a filters schema for object DTOs
+ * @param {string[]} runTypes - Array of valid run types
+ * @returns {Joi.ObjectSchema} Joi validation schema for filters
  */
-export function createObjectGetDtos(runTypes) {
-  const filterValidators = {
-    RunNumber: (number) => {
-      const parsed = parseInt(number, 10);
-      return !isNaN(parsed) && parsed >= 0 && parsed < 1000000;
-    },
-    RunType: (type) => runTypes.length === 0 || runTypes.includes(type), // If there are no RunTypes, anything goes
-    PeriodName: (periodName) => periodNamePattern.test(periodName),
-    PassName: (name) => typeof name === 'string',
-  };
+function createFiltersSchema(runTypes) {
+  return Joi.object({
+    RunNumber: Joi.number().integer().min(0).max(999999).optional(),
+    RunType: runTypes.length > 0
+      ? Joi.string().valid(...runTypes).optional()
+      : Joi.string().optional(),
+    PeriodName: Joi.string().pattern(periodNamePattern).optional(),
+    PassName: Joi.string().optional(),
+  }).optional();
+}
 
-  const validateFilters = (value, helpers) => {
-    for (const [key, val] of Object.entries(value)) {
-      const validator = filterValidators[key];
-
-      if (!validator) {
-        return helpers.error('filters.unknownField', { field: key });
-      }
-
-      if (!validator(val)) {
-        return helpers.error(`filters.${key}.invalid`);
-      }
-    }
-    return value;
-  };
-
-  const filters = Joi.object()
-    .optional()
-    .custom(validateFilters)
-    .messages({
-      'filters.RunNumber.invalid': 'RunNumber must be a number between 0 and 999999',
-      'filters.RunType.invalid': `RunType must be one of: ${runTypes.join(', ')}`,
-      'filters.PeriodName.invalid': 'PeriodName must match pattern LHC followed by 1-2 digits and letters',
-      'filters.PassName.invalid': 'PassName must be a string',
-      'filters.unknownField': 'Unknown filter field: {{#field}}',
-    });
-
-  const baseObjectGetDto = Joi.object({ // Singular
+/**
+ * Creates and returns the base object get schema
+ * @param {string[]} runTypes - Array of valid run types
+ * @returns {Joi.ObjectSchema} Joi validation schema for base object get
+ */
+function createBaseObjectGetDto({ runTypes }) {
+  return Joi.object({
     token: Joi.string().required(),
     id: Joi.string().optional(),
     validFrom: Joi.number().optional().min(0),
-    filters,
+    filters: createFiltersSchema(runTypes),
   }).options({ allowUnknown: false });
+}
 
-  const baseObjectsGetDto = Joi.object({ // Plural
+/**
+ * Creates and returns the base objects get schema
+ * @param {string[]} runTypes - Array of valid run types
+ * @returns {Joi.ObjectSchema} Joi validation schema for base objects get
+ */
+function createBaseObjectsGetDto({ runTypes }) {
+  return Joi.object({
     token: Joi.string().required(),
     fields: Joi.array().default([]).items(Joi.string()),
-    filters,
+    filters: createFiltersSchema(runTypes),
   }).options({ allowUnknown: false });
-
-  return {
-    ObjectsGetDto: baseObjectsGetDto.keys({ prefix: Joi.string() }),
-    ObjectContentsGetDto: baseObjectGetDto.keys({ path: Joi.string().required() }),
-    ObjectGetByIdDto: baseObjectGetDto, // They are effectively identical;
-    qcgIdDto: Joi.string().required().trim().min(1).messages({ 'string.empty': 'Missing object ID in URL' }),
-  };
 }
+
+/**
+ * Creates and returns the ObjectsGetDto schema
+ * @param {string[]} runTypes - Array of valid run types
+ * @returns {Joi.ObjectSchema} Joi validation schema for getting multiple objects
+ */
+export function createObjectsGetDto({ runTypes }) {
+  return createBaseObjectsGetDto({ runTypes }).keys({
+    prefix: Joi.string(),
+  });
+}
+
+/**
+ * Creates and returns the ObjectContentsGetDto schema
+ * @param {string[]} runTypes - Array of valid run types
+ * @returns {Joi.ObjectSchema} Joi validation schema for getting object contents
+ */
+export function createObjectContentsGetDto({ runTypes }) {
+  return createBaseObjectGetDto({ runTypes }).keys({
+    path: Joi.string().required(),
+  });
+}
+
+/**
+ * Creates and returns the ObjectGetByIdDto schema
+ * @param {string[]} runTypes - Array of valid run types
+ * @returns {Joi.ObjectSchema} Joi validation schema for getting an object by ID
+ */
+export function createObjectGetByIdDto({ runTypes }) {
+  return createBaseObjectGetDto({ runTypes }); // doesn't require any alterations.
+}
+
+/**
+ * Joi validation schema for object ID in URL
+ */
+export const qcgIdDto = Joi.string().required().trim().min(1).messages({ 'string.empty': 'Missing object ID in URL' });

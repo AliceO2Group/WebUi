@@ -13,7 +13,7 @@
  */
 
 import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
-import { createObjectGetDtos } from '../../dtos/ObjectGetDto.js';
+import { createObjectGetByIdDto, qcgIdDto } from '../../dtos/ObjectGetDto.js';
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/object-middleware`);
 
@@ -24,7 +24,7 @@ const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'
  */
 export function objectGetByIdValidationMiddlewareFactory(filterService) {
   const { runTypes } = filterService;
-  const { ObjectGetByIdDto, qcgIdDto } = createObjectGetDtos(runTypes);
+  const ObjectGetByIdDto = createObjectGetByIdDto({ runTypes });
 
   const getObjectByIdValidator = async (req, res, next) => {
     try {

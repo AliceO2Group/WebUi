@@ -96,7 +96,7 @@ export const objectGetByIdValidationMiddlewareTest = () => {
       await middleWare(req, res, next);
       ok(res.status.calledWith(400), 'Should return 400 status');
       ok(res.json.calledWithMatch({
-        message: 'Invalid query parameters: RunNumber must be a number between 0 and 999999',
+        message: 'Invalid query parameters: "filters.RunNumber" must be a number',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error');
@@ -108,7 +108,7 @@ export const objectGetByIdValidationMiddlewareTest = () => {
       await middleWare(req, res, next);
       ok(res.status.calledWith(400), 'Should return 400 status');
       ok(res.json.calledWithMatch({
-        message: `Invalid query parameters: RunType must be one of: ${runTypes.join(', ')}`,
+        message: 'Invalid query parameters: "filters.RunType" must be one of [PHYSICS, PROTON-PROTON, 0, 1, 2]',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error');
@@ -120,8 +120,8 @@ export const objectGetByIdValidationMiddlewareTest = () => {
       await middleWare(req, res, next);
       ok(res.status.calledWith(400), 'Should return 400 status');
       ok(res.json.calledWithMatch({
-        message:
-      'Invalid query parameters: PeriodName must match pattern LHC followed by 1-2 digits and letters',
+        message: 'Invalid query parameters: "filters.PeriodName" with value "invalid-period"' +
+        ' fails to match the required pattern: /^LHC\\d{1,2}[a-z]+$/i',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error');
@@ -133,7 +133,7 @@ export const objectGetByIdValidationMiddlewareTest = () => {
       await middleWare(req, res, next);
       ok(res.status.calledWith(400), 'Should return 400 status');
       ok(res.json.calledWithMatch({
-        message: 'Invalid query parameters: Unknown filter field: UnknownField',
+        message: 'Invalid query parameters: "filters.UnknownField" is not allowed',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error');

@@ -13,7 +13,7 @@
  */
 
 import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
-import { createObjectGetDtos } from '../../dtos/ObjectGetDto.js';
+import { createObjectContentsGetDto } from '../../dtos/ObjectGetDto.js';
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/object-middleware`);
 
@@ -24,7 +24,7 @@ const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'
  */
 export function objectGetContentsValidationMiddlewareFactory(filterService) {
   const { runTypes } = filterService;
-  const { ObjectContentsGetDto } = createObjectGetDtos(runTypes);
+  const ObjectContentsGetDto = createObjectContentsGetDto({ runTypes });
 
   const getObjectContentValidator = async (req, res, next) => {
     try {

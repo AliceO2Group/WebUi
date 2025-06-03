@@ -78,8 +78,9 @@ export const objectsGetValidationMiddlewareTest = () => {
       req.query.filters = { RunNumber: 1000000 };
       await middleWare(req, res, next);
       ok(res.status.calledWith(400), 'Should return 400 status');
+
       ok(res.json.calledWithMatch({
-        message: 'Invalid query parameters: RunNumber must be a number between 0 and 999999',
+        message: 'Invalid query parameters: "filters.RunNumber" must be less than or equal to 999999',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error');
@@ -89,8 +90,9 @@ export const objectsGetValidationMiddlewareTest = () => {
       req.query.filters = { RunNumber: -1 };
       await middleWare(req, res, next);
       ok(res.status.calledWith(400), 'Should return 400 status');
+
       ok(res.json.calledWithMatch({
-        message: 'Invalid query parameters: RunNumber must be a number between 0 and 999999',
+        message: 'Invalid query parameters: "filters.RunNumber" must be greater than or equal to 0',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error');
@@ -107,7 +109,7 @@ export const objectsGetValidationMiddlewareTest = () => {
       await middleWare(req, res, next);
       ok(res.status.calledWith(400), 'Should return 400 status');
       ok(res.json.calledWithMatch({
-        message: `Invalid query parameters: RunType must be one of: ${runTypes.join(', ')}`,
+        message: 'Invalid query parameters: "filters.RunType" must be one of [PHYSICS, PROTON-PROTON, 0, 1, 2]',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error');
@@ -123,9 +125,9 @@ export const objectsGetValidationMiddlewareTest = () => {
       req.query.filters = { PeriodName: 'INVALID_PERIOD' };
       await middleWare(req, res, next);
       ok(res.status.calledWith(400), 'Should return 400 status');
-
       ok(res.json.calledWithMatch({
-        message: 'Invalid query parameters: PeriodName must match pattern LHC followed by 1-2 digits and letters',
+        message: 'Invalid query parameters: "filters.PeriodName" with value "INVALID_PERIOD"' +
+        ' fails to match the required pattern: /^LHC\\d{1,2}[a-z]+$/i',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error');
@@ -152,9 +154,8 @@ export const objectsGetValidationMiddlewareTest = () => {
       req.query.filters = { PassName: 100 }; // not a string
       await middleWare(req, res, next);
       ok(res.status.calledWith(400), 'Should return 400 status');
-
       ok(res.json.calledWithMatch({
-        message: 'Invalid query parameters: PassName must be a string',
+        message: 'Invalid query parameters: "filters.PassName" must be a string',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error');
@@ -166,7 +167,7 @@ export const objectsGetValidationMiddlewareTest = () => {
       ok(res.status.calledWith(400), 'Should return 400 status');
 
       ok(res.json.calledWithMatch({
-        message: 'Invalid query parameters: Unknown filter field: UnknownField',
+        message: 'Invalid query parameters: "filters.UnknownField" is not allowed',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error');
