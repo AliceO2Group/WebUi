@@ -29,7 +29,7 @@ export function objectGetContentsValidationMiddlewareFactory(filterService) {
   return async (req, res, next) => {
     try {
       req.query = await ObjectContentsGetDto.validateAsync(req.query);
-      next();
+      return next();
     } catch (error) {
       const responseError = new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`);
 

@@ -30,7 +30,7 @@ export function objectGetByIdValidationMiddlewareFactory(filterService) {
     try {
       req.params.id = await qcgIdDto.validateAsync(req.params?.id);
       req.query = await ObjectGetByIdDto.validateAsync(req.query);
-      next();
+      return next();
     } catch (error) {
       const responseError = new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`);
 
