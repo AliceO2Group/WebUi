@@ -147,19 +147,19 @@ export const ccdbServiceTestSuite = async () => {
       test('should successfully return a list of the objects with specified headers', async () => {
         const ccdb = new CcdbService(ccdbConfig);
         const objects = [
-          { path: 'object/one', Created: '101', 'Last-Modified': '102', Id: 1 },
-          { path: 'object/two', Created: '101', 'Last-Modified': '102', Id: 2 },
-          { path: 'object/three', Created: '101', 'Last-Modified': '102', Id: 3 },
+          { path: 'object/one', Created: '101', Id: 1 },
+          { path: 'object/two', Created: '101', Id: 2 },
+          { path: 'object/three', Created: '101', Id: 3 },
         ];
         nock('http://ccdb-local:8083', {
           reqheaders: {
             Accept: 'application/json',
-            'X-Filter-Fields': 'Id',
+            'X-Filter-Fields': 'Id,path,Created',
           },
         })
           .get('/latest/.*')
           .reply(200, { objects: objects, subfolders: [] });
-        const objectsRetrieved = await ccdb.getObjectsLatestVersionList('', undefined, ['Id']);
+        const objectsRetrieved = await ccdb.getObjectsLatestVersionList('', undefined, ['Id', 'path', 'Created']);
         deepStrictEqual(objectsRetrieved, objects, 'Received objects are not alike');
       });
 
@@ -170,6 +170,24 @@ export const ccdbServiceTestSuite = async () => {
           .get(`/latest/${ccdbConfig.prefix}.*`)
           .replyWithError(error);
         await rejects(async () => await ccdb.getObjectsLatestVersionList(), new Error(`${error.message || error}`));
+      });
+
+      test('should send HTTP request with filters', async () => {
+        const ccdb = new CcdbService(ccdbConfig);
+        const objects = [{ Id: 1 }, { Id: 2 }, { Id: 3 }];
+        nock('http://ccdb-local:8083', {
+          reqheaders: {
+            Accept: 'application/json',
+            'X-Filter-Fields': 'Id',
+          },
+        })
+          .get('/latest/.*/RunNumber=535/RunType=PHYSICS')
+          .reply(200, { objects: objects, subfolders: [] });
+
+        const objectsRetrieved =
+          await ccdb.getObjectsLatestVersionList('', { RunNumber: 535, RunType: 'PHYSICS' }, ['Id']);
+
+        deepStrictEqual(objectsRetrieved, objects, 'Received objects are not alike');
       });
     });
 
