@@ -127,14 +127,14 @@ export class CcdbService {
    * If attributes list is missing, a default minimal list will be used: PATH, CREATED, LAST_MODIFIED
    * @example Equivalent of URL request: `/latest/qc/TPC/object.* /RunNumber=42`
    * @param {string} [prefix] - Prefix for which CCDB should search for objects
-   * @param {object} [filters = {}] - Object metadata that will be used to construct a endpoint path.
+   * @param {object} [filters] - Object metadata that will be used to construct a endpoint path.
    * @param {Array<string>} [fields] - List of fields that should be requested for each object
    * @returns {Promise.<Array<{PATH, CREATED, LAST_MODIFIED}>>} - results of objects query or error
    */
   async getObjectsLatestVersionList(
     prefix = this._PREFIX,
-    filters = {},
-    fields = [],
+    filters,
+    fields,
   ) {
     fields = fields?.length ? fields : [PATH, CREATED, LAST_MODIFIED];
     const identification = { path: `${prefix}.*`, filters };

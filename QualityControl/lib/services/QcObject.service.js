@@ -104,7 +104,7 @@ export class QcObjectService {
   ) {
     const hasFilters = filters !== undefined;
 
-    if (hasFilters && useCache && this._cache.objects?.length) {
+    if (!hasFilters && useCache && this._cache.objects?.length) {
       return this._cache.objects.filter((object) => object.name.startsWith(prefix));
     }
 
