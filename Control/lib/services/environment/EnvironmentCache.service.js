@@ -13,7 +13,7 @@
 */
 
 const { LogManager } = require('@aliceo2/web-ui');
-const { BroadcastKeys: { ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW } } = require('./../../common/broadcastKeys.enum');
+const { BroadcastKeys: { ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW, NOTIFICATION } } = require('./../../common/broadcastKeys.enum');
 const {
   EmitterKeys: {
     ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK, TASKS_TRACK
@@ -166,7 +166,7 @@ class EnvironmentCacheService {
           const environment = JSON.parse(JSON.stringify(this._environments.get(environmentId)));
           environment.firstTaskInError = taskEvent;
           this._environments.set(environmentId, environment);
-          this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environments.values()]);
+          this._broadcastService.broadcast(NOTIFICATION, taskEvent);
         }
       });
   }

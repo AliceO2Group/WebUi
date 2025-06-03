@@ -223,9 +223,9 @@ class AliEcsSynchronizer {
       );
       return;
     }
-    const { timestamp: timestampInt64, taskEvent: taskEventProto } = eventMessage;
+    const { timestamp: timestampInt64 } = eventMessage;
     const timestamp = adaptInt64ToNumber(timestampInt64);
-    const taskEvent = taskEventAdapter(taskEventProto);
+    const taskEvent = taskEventAdapter(eventMessage);
     this._eventEmitter.emit(TASKS_TRACK, {timestamp, taskEvent});
   }
 }
