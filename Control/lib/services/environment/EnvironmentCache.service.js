@@ -16,11 +16,10 @@ const { LogManager } = require('@aliceo2/web-ui');
 const { BroadcastKeys: { ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW } } = require('./../../common/broadcastKeys.enum');
 const {
   EmitterKeys: {
-    ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK
+    ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK, TASKS_TRACK
   }
 } = require('./../../common/emitterKeys.enum.js');
-const { adaptInt64ToNumber } = require('./../../common/utils/int64ToNumber.js');
-const { fromEcsEventToEnvironmentEvent } = require('./../../kafka/adapters/fromEcsEventToEnvironmentEvent.js');
+const { TaskState } = require('../../common/taskState.enum.js');
 const EPN_PATH_IN_ENVIRONMENT_INFO = 'hardware.epn.info';
 
 /**
@@ -144,6 +143,29 @@ class EnvironmentCacheService {
           { state, ddsSessionId, ddsSessionStatus }
         );
         if (environmentUpdated) {
+          this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environments.values()]);
+        }
+      });
+    
+    this._eventEmitter.on(TASKS_TRACK,
+      /**
+       * @private
+       * An event handler for receiving a task event update, parse it as per GUI expectations and broadcast it to NodeJS EventEmitter listeners
+       * @param {object} event - the event object containing the payload and environmentId
+       * @param {TaskEvent} event.taskEvent - the task event object containing the task information
+       * @param {number} event.timestamp - the timestamp of the event
+       * @returns {void}
+       */
+      ({ taskEvent }) => {
+        const { environmentId, state } = taskEvent;
+        if (
+          (state === TaskState.ERROR || state === TaskState.ERROR_CRITICAL)
+          && this._environments.has(environmentId)
+          && !this._environments.get(environmentId).firstTaskInError
+        ) {
+          const environment = JSON.parse(JSON.stringify(this._environments.get(environmentId)));
+          environment.firstTaskInError = taskEvent;
+          this._environments.set(environmentId, environment);
           this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environments.values()]);
         }
       });
