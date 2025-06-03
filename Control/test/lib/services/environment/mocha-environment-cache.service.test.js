@@ -131,9 +131,6 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
 
   it('should add a new environment to the cache and broadcast it when receiving first event', () => {
     const environmentEvent = { id: 'abc123', timestamp: Date.now() };
-    const transformedEvent = { id: 'abc123', lastUpdate: environmentEvent.timestamp };
-
-    fromEcsEventToEnvironmentEventStub.returns(transformedEvent);
 
     eventEmitter.emit(ENVIRONMENTS_TRACK, environmentEvent);
 

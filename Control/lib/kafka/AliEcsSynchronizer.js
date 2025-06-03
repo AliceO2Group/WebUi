@@ -24,6 +24,7 @@ const {
 const { fromEcsIntegratedServiceEventToEvent } = require('./adapters/fromEcsIntegratedServiceEventToEvent.js');
 const { runEventAdapter } = require('./adapters/runEventAdapter.js');
 const { taskEventAdapter } = require('./adapters/taskEventAdapter.js');
+const { adaptInt64ToNumber } = require('./../common/utils/int64ToNumber.js');
 const { Topics } = require('./enums/topics.enum.js');
 
 /**
@@ -194,7 +195,9 @@ class AliEcsSynchronizer {
       );
       return;
     }
-    this._eventEmitter.emit(ENVIRONMENTS_TRACK, eventMessage );
+    const environmentEvent = fromEcsEventToEnvironmentEvent(eventMessage);
+    environmentEvent.timestamp = adaptInt64ToNumber(timestamp);
+    this._eventEmitter.emit(ENVIRONMENTS_TRACK, environmentEvent);
   }
 
   /**

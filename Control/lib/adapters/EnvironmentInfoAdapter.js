@@ -12,7 +12,7 @@
  */
 
 const { OdcDeviceInfoAdapter } = require('./OdcDeviceInfoAdapter.js');
-const { ShortTaskInfoAdapter } = require('./ShortTaskInfoAdapter.js');
+const { ShortTaskInfoAdapter } = require('./task/ShortTaskInfoAdapter.js');
 const QC_NODES_NAME_REGEX = /alio2-cr1-q(c|me|ts)[0-9]{2}/;
 
 /**

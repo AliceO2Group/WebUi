@@ -19,6 +19,7 @@ const {
     ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK
   }
 } = require('./../../common/emitterKeys.enum.js');
+const { adaptInt64ToNumber } = require('./../../common/utils/int64ToNumber.js');
 const { fromEcsEventToEnvironmentEvent } = require('./../../kafka/adapters/fromEcsEventToEnvironmentEvent.js');
 const EPN_PATH_IN_ENVIRONMENT_INFO = 'hardware.epn.info';
 
@@ -112,11 +113,10 @@ class EnvironmentCacheService {
    * @returns {void}
    */
   _listenToEventsAndBroadcast() {
-    this._eventEmitter.on(ENVIRONMENTS_TRACK, (event) => {
-      const { timestamp } = event;
-
-      const environmentEvent = fromEcsEventToEnvironmentEvent(event);
-      environmentEvent.timestamp = this._adaptInt64ToNumber(timestamp);
+    /**
+     * @param {EnvironmentEvent} environmentEvent - the event object containing the payload and environmentId
+     */
+    this._eventEmitter.on(ENVIRONMENTS_TRACK, (environmentEvent) => {
       const { id } = environmentEvent;
 
       const cachedEnvironment = this._environments.has(id)
@@ -124,7 +124,7 @@ class EnvironmentCacheService {
         : { id, events: [] };
 
       cachedEnvironment.events.push(environmentEvent);
-      cachedEnvironment.lastUpdate = this._adaptInt64ToNumber(timestamp);
+      cachedEnvironment.lastUpdate = environmentEvent.timestamp;
       this._environments.set(id, cachedEnvironment);
       this._broadcastService.broadcast(ENVIRONMENT_EVENTS, cachedEnvironment);
       this._lastUpdate = Date.now();
@@ -147,17 +147,6 @@ class EnvironmentCacheService {
           this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environments.values()]);
         }
       });
-  }
-
-  /**
-   * @private
-   * Method to adapt the int64 timestamp to a number
-   * @param {BigInt} int64 - the int64 timestamp to be adapted
-   * @return {number} - the adapted timestamp
-   */
-  _adaptInt64ToNumber(int64) {
-    const bigIntTimestamp = BigInt(int64.toString(10));
-    return Number(bigIntTimestamp);
   }
 }
 

@@ -16,6 +16,7 @@
 const { strictEqual } = require('assert');
 const { ShortTaskInfoAdapter } = require('../../../lib/adapters/task/ShortTaskInfoAdapter.js');
 const { TaskState } = require('../../../lib/common/taskState.enum.js');
+const { TaskStatus } = require('../../../lib/common/taskStatus.enum.js');
 
 describe('ShortTaskInfoAdapter test suite', () => {
   describe('toEntity() - tests', () => {
@@ -56,7 +57,7 @@ describe('ShortTaskInfoAdapter test suite', () => {
         sandboxStdout: undefined
       };
       const entity = ShortTaskInfoAdapter.toEntity(task);
-      strictEqual(entity.status, 'UNKNOWN');
+      strictEqual(entity.status, TaskStatus.UNDEFINED);
       strictEqual(entity.state, TaskState.UNKNOWN);
       strictEqual(entity.hostname, '');
       strictEqual(entity.isCritical, false);
