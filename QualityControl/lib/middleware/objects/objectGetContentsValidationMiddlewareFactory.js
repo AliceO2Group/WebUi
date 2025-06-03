@@ -26,7 +26,7 @@ export function objectGetContentsValidationMiddlewareFactory(filterService) {
   const { runTypes } = filterService;
   const ObjectContentsGetDto = createObjectContentsGetDto({ runTypes });
 
-  const getObjectContentValidator = async (req, res, next) => {
+  return async (req, res, next) => {
     try {
       req.query = await ObjectContentsGetDto.validateAsync(req.query);
       next();
@@ -37,6 +37,4 @@ export function objectGetContentsValidationMiddlewareFactory(filterService) {
       updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   };
-
-  return getObjectContentValidator;
 }

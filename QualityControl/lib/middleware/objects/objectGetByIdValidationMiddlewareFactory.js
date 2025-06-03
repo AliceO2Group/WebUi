@@ -26,7 +26,7 @@ export function objectGetByIdValidationMiddlewareFactory(filterService) {
   const { runTypes } = filterService;
   const ObjectGetByIdDto = createObjectGetByIdDto({ runTypes });
 
-  const getObjectByIdValidator = async (req, res, next) => {
+  return async (req, res, next) => {
     try {
       req.params.id = await qcgIdDto.validateAsync(req.params?.id);
       req.query = await ObjectGetByIdDto.validateAsync(req.query);
@@ -38,6 +38,4 @@ export function objectGetByIdValidationMiddlewareFactory(filterService) {
       updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   };
-
-  return getObjectByIdValidator;
 }
