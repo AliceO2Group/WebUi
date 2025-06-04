@@ -33,6 +33,7 @@ const {
 } = require('./middleware/getDetectorsLockOwnershipMiddlewareFactory.js');
 
 // controllers
+const {ConfigurationController} = require('./controllers/Configuration.controller.js');
 const {ConsulController} = require('./controllers/Consul.controller.js');
 const {EnvironmentController} = require('./controllers/Environment.controller.js');
 const {LockController} = require('./controllers/Lock.controller.js');
@@ -90,6 +91,9 @@ module.exports.setup = (http, ws) => {
   const broadcastService = new BroadcastService(ws);
   const cacheService = new CacheService(broadcastService);
   const environmentCacheService = new EnvironmentCacheService(broadcastService, eventEmitter);
+  
+  const configurationController = new ConfigurationController(consulService, config.consul);
+  configurationController.testConsulStatus();
 
   const consulController = new ConsulController(consulService, config.consul);
   consulController.testConsulStatus();
@@ -229,6 +233,9 @@ module.exports.setup = (http, ws) => {
   http.get('/status/core/services', coreMiddleware[0],
     statusController.getAliECSIntegratedServicesStatus.bind(statusController),
   );
+
+  // Configuration
+  http.get('/configurations', configurationController.getConfigurations.bind(configurationController), {public: true});
 
   // Consul
   const validateService = consulController.validateService.bind(consulController);
