@@ -30,7 +30,6 @@ export default class FilterModel extends Observable {
 
     this.model = model;
     this.filterService = new FilterService(this);
-
     this.filterMap = {};
   }
 
@@ -45,6 +44,7 @@ export default class FilterModel extends Observable {
         this.filterMap[filterKey] = decodeURI(parameters[filterKey]);
       }
     });
+
     this.notify();
   }
 
@@ -57,7 +57,7 @@ export default class FilterModel extends Observable {
     const parameters = this.model.router.params;
 
     CCDB_QUERY_PARAMS.forEach((filterKey) => {
-      if (!this.filterMap[filterKey] && this.filterMap[filterKey] !== 0) {
+      if (!this.filterMap[filterKey]) {
         delete parameters[filterKey];
       } else {
         parameters[filterKey] = encodeURI(this.filterMap[filterKey]);
@@ -70,14 +70,20 @@ export default class FilterModel extends Observable {
    * Method to allow the addition/update/removal of key;value pairs in filter object
    * @param {string} key - key to look for in filter object
    * @param {any} value - value to update for given key; if none, entry is removed from object
+   * @param {boolean} setUrl - Whether to imediately persist the value in the url ()
    * @returns {undefined}
    */
-  setFilterValue(key, value) {
-    if (value !== null && value !== undefined) {
+  setFilterValue(key, value, setUrl = false) {
+    if (value) {
       this.filterMap[key] = value;
     } else {
       delete this.filterMap[key];
     }
+
+    if (setUrl) {
+      this.setFilterToURL();
+    }
+
     this.notify();
   };
 

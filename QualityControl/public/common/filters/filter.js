@@ -112,9 +112,12 @@ const filterInput = (config) => {
 const dropdownSelector = (config) => {
   const { queryLabel, placeholder, id, filterMap, options, onChangeCallback, width = '.w-20' } = config;
   const optionSelected = filterMap[queryLabel];
+  const setUrl = true;
+
   const validValue = options.map(String).includes(String(optionSelected));
+
   if (optionSelected && !validValue) {
-    onChangeCallback('', queryLabel);
+    onChangeCallback(queryLabel, '', setUrl);
   }
   return h(`${width}`, [
     h('select.form-control', {
@@ -122,7 +125,7 @@ const dropdownSelector = (config) => {
       id,
       name: id,
       value: validValue ? optionSelected : '',
-      onchange: (event) => onChangeCallback(event.target.value, queryLabel),
+      onchange: (event) => onChangeCallback(queryLabel, event.target.value, setUrl),
     }, [
       h('option', { value: '' }, placeholder),
       h('hr'),

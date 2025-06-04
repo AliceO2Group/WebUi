@@ -15,7 +15,7 @@
 import { h } from '/js/src/index.js';
 import { draw } from '../../object/objectDraw.js';
 import { iconArrowLeft, iconArrowTop } from '/js/src/icons.js';
-import { layoutFiltersPanel } from '../../common/filters/filterViews.js';
+import { filtersPanel } from '../../common/filters/filterViews.js';
 import { minimalObjectInfo } from './panels/minimalObjectInfo.js';
 import { objectInfoResizePanel } from './panels/objectInfoResizePanel.js';
 
@@ -55,12 +55,13 @@ const emptyListEditMode = () => h('.m4', [
  * @returns {undefined} - virtual node element
  */
 function subcanvasView(model) {
-  if (!model.layout.tab) {
+  const { layout, filterModel } = model;
+  if (!layout.tab) {
     return;
   }
 
-  if (!model.layout.tab.objects.length) {
-    if (model.layout.editEnabled) {
+  if (!layout.tab.objects.length) {
+    if (layout.editEnabled) {
       return emptyListEditMode();
     } else {
       return emptyListViewMode();
@@ -72,7 +73,7 @@ function subcanvasView(model) {
    * which could force recreate some charts and then have an unfriendly blink. The source array can be shuffle
    * because of the GridList algo, the sort below avoid this.
    */
-  const tabObjects = cloneSortById(model.layout.tab.objects);
+  const tabObjects = cloneSortById(layout.tab.objects);
 
   const subcanvasAttributes = {
     style: {
@@ -91,9 +92,8 @@ function subcanvasView(model) {
        * Warning CPU heavy function: getBoundingClientRect and offsetHeight re-compute layout
        * it is ok to use them on user interactions like clicks or drags
        */
-
       // Avoid events from other draggings things (files, etc.)
-      if (!model.layout.tabObjectMoving) {
+      if (!layout.tabObjectMoving) {
         return;
       }
 
@@ -110,13 +110,13 @@ function subcanvasView(model) {
       const canvasX = pageX - canvasDimensions.x;
       const canvasY = pageY - canvasDimensions.y;
 
-      const cellWidth2 = canvasDimensions.width / model.layout.gridListSize;
+      const cellWidth2 = canvasDimensions.width / layout.gridListSize;
 
       // Position in the gridList
       const x = Math.floor(canvasX / cellWidth2);
-      const y = Math.floor(canvasY / (canvas.offsetHeight * 0.95 / model.layout.gridListSize));
+      const y = Math.floor(canvasY / (canvas.offsetHeight * 0.95 / layout.gridListSize));
 
-      model.layout.moveTabObjectToPosition(x, y);
+      layout.moveTabObjectToPosition(x, y);
     },
 
     /**
@@ -124,12 +124,12 @@ function subcanvasView(model) {
      * @returns {undefined}
      */
     ondragend() {
-      model.layout.moveTabObjectStop();
+      layout.moveTabObjectStop();
     },
   };
 
   return h('.flex-column.absolute-fill', [
-    !model.layout.editEnabled && layoutFiltersPanel(model.layout),
+    !layout.editEnabled && filtersPanel(filterModel, layout),
     h('.p2', subcanvasAttributes, tabObjects.map((tabObject) => chartView(model, tabObject))),
   ]);
 }

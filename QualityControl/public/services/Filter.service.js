@@ -20,11 +20,11 @@ import { RemoteData } from '/js/src/index.js';
 export default class FilterService {
   /**
    * Initialize filterModel
-   * @param {FilterModel} filterModel - The model that manages the filter state
+   * @param {FilterModel} filterModel - The root filterModel that manages filter state
    */
   constructor(filterModel) {
     this.filterModel = filterModel;
-    this.loader = filterModel.loader;
+    this.loader = filterModel.model.loader;
 
     this.runTypes = RemoteData.notAsked();
   }
@@ -49,7 +49,7 @@ export default class FilterService {
    * Method to initialize the filter service
    * @returns {void}
    */
-  initFilterService() {
-    this.getRunTypes();
+  async initFilterService() {
+    await this.getRunTypes();
   }
 }
