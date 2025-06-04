@@ -161,11 +161,14 @@ export default class QCObjectService {
 
   /**
    * Ask server for all available objects from CCDB
+   * @param {object} filters - an object with filters that is used to fetch only the required objects
    * @returns {JSON} List of Objects
    * @deprecated
    */
-  async getObjects() {
-    const { result, ok } = await this.model.loader.get('/api/objects');
+  async getObjects(filters = {}) {
+    const url = this._buildURL('/api/objects?', undefined, undefined, filters);
+
+    const { result, ok } = await this.model.loader.get(url);
     return ok ? RemoteData.success(result) : RemoteData.failure(result);
   }
 }

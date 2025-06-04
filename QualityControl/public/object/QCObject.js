@@ -16,6 +16,8 @@ import { Observable, RemoteData, iconArrowTop } from '/js/src/index.js';
 import ObjectTree from './ObjectTree.class.js';
 import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
+import { buildQueryParametersString } from '../common/buildQueryParametersString.js';
+const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
@@ -37,6 +39,7 @@ export default class QCObject extends Observable {
     this.selected = null; // Object - { name; createTime; lastModified; }
     this.selectedOpen = false;
     this.objects = {}; // ObjectName -> RemoteData.payload -> plot
+    this.filter = {};
 
     this.searchInput = ''; // String - content of input search
     this.searchResult = []; // Array<object> - result list of search
@@ -174,11 +177,12 @@ export default class QCObject extends Observable {
    * @returns {undefined}
    */
   async loadList() {
+    this.setFilterFromURL();
     this.objectsRemote = RemoteData.loading();
     this.notify();
     this.queryingObjects = true;
     let offlineObjects = [];
-    const result = await this.model.services.object.getObjects();
+    const result = await this.model.services.object.getObjects(this.filter);
     if (result.isSuccess()) {
       offlineObjects = result.payload;
     } else {
@@ -461,5 +465,74 @@ export default class QCObject extends Observable {
     } else {
       return [];
     }
+  }
+
+  /**
+   * Method to allow the addition/update/removal of key;value pairs in filter object
+   * @param {string} key - key to look for in filter object
+   * @param {any} value - value to update for given key; if none, entry is removed from object
+   * @returns {undefined}
+   */
+  setFilterValue(key, value) {
+    if (value !== null && value !== undefined) {
+      this.filter[key] = value;
+    } else {
+      delete this.filter[key];
+    }
+    this.notify();
+  };
+
+  /**
+   * Sets the filter to the URL to persist the filter
+   * and reloads the list with filtered data
+   * @returns {undefined}
+   */
+  async applyFilters() {
+    this.setFilterToURL();
+    await this.loadList(this.filter);
+    this.notify();
+  }
+
+  /**
+   * Sets the filters in the URL so that they persist.
+   * @param {boolean} isSilent - whether the route should be silent or not
+   * @returns {undefined}
+   */
+  setFilterToURL(isSilent = true) {
+    const parameters = this.model.router.params;
+
+    CCDB_QUERY_PARAMS.forEach((filterKey) => {
+      if (!this.filter[filterKey] && this.filter[filterKey] !== 0) {
+        delete parameters[filterKey];
+      } else {
+        parameters[filterKey] = encodeURI(this.filter[filterKey]);
+      }
+    });
+    this.model.router.go(buildQueryParametersString(parameters, { }), true, isSilent);
+  }
+
+  /**
+   * Sets the selector filter value for the passed key and puts it in the URL
+   * @param {object} value - event for which to set the value
+   * @param {string} key - label to be used when querying storage service
+   * @returns {undefined}
+   */
+  selectOption(value, key) {
+    this.setFilterValue(key, value);
+    this.setFilterToURL();
+  };
+
+  /**
+   * Look for parameters used for filtering in URL and apply them in the layout if it exists
+   * @returns {undefined}
+   */
+  setFilterFromURL() {
+    const parameters = this.model.router.params;
+    CCDB_QUERY_PARAMS.forEach((filterKey) => {
+      if (parameters[filterKey]) {
+        this.filter[filterKey] = decodeURI(parameters[filterKey]);
+      }
+    });
+    this.notify();
   }
 }
