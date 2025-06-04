@@ -84,23 +84,22 @@ const layoutFiltersPanel = (layoutModel) => {
 
 /**
  * Builds a panel containing multiple filters to allow user to apply for objectTree show/view
- * @param {QCObject} qcObject - Model that manages object state
+ * @param {FilterModel} filterModel - Model that manages filter state
+ * @param {PageModel} pageModel - Model that manages the state of the page that the filter is on.
  * @returns {vnode} - virtual node element
  */
-const objectFiltersPanel = (qcObject) => {
-  const { filter: filterMap, setFilterValue, selectOption, applyFilters } = qcObject;
-  const onInputCallback = setFilterValue.bind(qcObject);
-  const onEnterCallback = applyFilters.bind(qcObject);
-  const onChangeCallback = selectOption.bind(qcObject);
-  const filterService = qcObject.model.services.filter;
-  const filtersList = filtersConfig(filterService) || [];
+const filtersPanel = (filterModel, pageModel) => {
+  const { filterMap, setFilterValue, filterService } = filterModel;
+  const onInputCallback = setFilterValue.bind(filterModel);
+  const onChangeCallback = setFilterValue.bind(filterModel);
+  const onEnterCallback = () => filterModel.triggerFilter(pageModel);
+  const filtersList = filtersConfig(filterService);
 
   return h(
     '.w-100.flex-row.p2.g2',
-    {
-      onremove: () => {
-        qcObject.filter = {};
-      } },
+    { onremove: () => {
+      filterModel.filterMap = {};
+    } },
     [
       triggerFiltersButton(onEnterCallback),
       ...filtersList.map((filter) =>
@@ -108,6 +107,33 @@ const objectFiltersPanel = (qcObject) => {
     ],
   );
 };
+
+// /**
+//  * Builds a panel containing multiple filters to allow user to apply for objectTree show/view
+//  * @param {QCObject} qcObject - Model that manages object state
+//  * @returns {vnode} - virtual node element
+//  */
+// const objectFiltersPanel = (qcObject) => {
+//   const { filter: filterMap, setFilterValue, selectOption, applyFilters } = qcObject;
+//   const onInputCallback = setFilterValue.bind(qcObject);
+//   const onEnterCallback = applyFilters.bind(qcObject);
+//   const onChangeCallback = selectOption.bind(qcObject);
+//   const filterService = qcObject.model.services.filter;
+//   const filtersList = filtersConfig(filterService) || [];
+
+//   return h(
+//     '.w-100.flex-row.p2.g2',
+//     {
+//       onremove: () => {
+//         qcObject.filter = {};
+//       } },
+//     [
+//       triggerFiltersButton(onEnterCallback),
+//       ...filtersList.map((filter) =>
+//         createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
+//     ],
+//   );
+// };
 
 /**
  * Button which will allow the user to update filter parameters after the input
@@ -118,4 +144,4 @@ const triggerFiltersButton = (triggerFilter) => h('', h('button.btn.btn-primary'
   onclick: triggerFilter,
 }, 'Update'));
 
-export { layoutFiltersPanel, objectFiltersPanel };
+export { layoutFiltersPanel, filtersPanel };
