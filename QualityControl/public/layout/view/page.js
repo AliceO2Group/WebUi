@@ -15,7 +15,7 @@
 import { h } from '/js/src/index.js';
 import { draw } from '../../object/objectDraw.js';
 import { iconArrowLeft, iconArrowTop } from '/js/src/icons.js';
-import { layoutFiltersPanel } from './panels/filters.js';
+import { layoutFiltersPanel } from '../../common/filters/filterViews.js';
 import { minimalObjectInfo } from './panels/minimalObjectInfo.js';
 import { objectInfoResizePanel } from './panels/objectInfoResizePanel.js';
 

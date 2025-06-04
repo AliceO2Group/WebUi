@@ -474,7 +474,7 @@ export default class QCObject extends Observable {
    * @returns {undefined}
    */
   setFilterValue(key, value) {
-    if (value !== null && value !== undefined) {
+    if (value) {
       this.filter[key] = value;
     } else {
       delete this.filter[key];

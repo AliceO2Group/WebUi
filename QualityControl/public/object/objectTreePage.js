@@ -18,7 +18,7 @@ import { draw } from './objectDraw.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
 import virtualTable from './virtualTable.js';
 import { qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
-import { objectFiltersPanel } from '../layout/view/panels/filters.js';
+import { objectFiltersPanel } from '../common/filters/filterViews.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
