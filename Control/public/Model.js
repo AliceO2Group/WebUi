@@ -110,7 +110,7 @@ export default class Model extends Observable {
     // General visuals
     this.accountMenuEnabled = false;
     this.sideBarMenu = true;
-
+    
     this.init();
   }
 
@@ -153,6 +153,7 @@ export default class Model extends Observable {
     if (this.detectors.selected || this.session.role == ROLES.Guest) {
       this.handleLocationChange();
     }
+    this.requestBrowserNotificationPermissions()
     this.notify();
   }
 
@@ -165,9 +166,18 @@ export default class Model extends Observable {
       case BroadcastKeys.PADLOCK_UPDATE:
         this.lock.padlockState = message.payload;
         break;
-      case BroadcastKeys.NOTIFICATION:
-        this.showNativeNotification(JSON.parse(message.payload));
+      case BroadcastKeys.NOTIFICATION: {
+        const { payload: task } = message;
+        if (task?.taskId) {
+          // Notification is for the first task in error from an environment
+          this.showNativeNotification({
+            title: `TASK in ${task.state ?? 'unknown'} state`,
+            body: `Task ${task.id} in environment ${task.environmentId} is in ${task.state ?? 'unknown'} state`,
+            url: `?page=environment&id=${task.environmentId}`
+          });
+        }
         break;
+      }
       case BroadcastKeys.RESOURCES_CLEANUP:
         this.task.setResourcesRequest(message.payload);
         break;
@@ -357,9 +367,9 @@ export default class Model extends Observable {
    */
   showNativeNotification(message) {
     const notification = new Notification(message.title, {body: message.body, icon: '/o2_icon.png'});
-    notification.onclick = function(event) {
+    notification.onclick = (event) => {
       event.preventDefault();
-      window.open(message.url, '_blank');
+      this.router.go(message.url, '_blank');
     }
   }
 
