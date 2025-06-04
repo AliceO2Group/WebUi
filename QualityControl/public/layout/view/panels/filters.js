@@ -71,6 +71,70 @@ const layoutFiltersPanel = (layoutModel) => {
 };
 
 /**
+ * Builds a panel containing multiple filters to allow user to apply for objectTree show/view
+ * @param {QCObject} qcObject - Model that manages object state
+ * @returns {vnode} - virtual node element
+ */
+const objectFiltersPanel = (qcObject) => {
+  const { filter: filterMap, setFilterValue, setFilterToURL, selectOption } = qcObject;
+  const { filterInput, dynamicSelector } = filters;
+  const onInputCallback = setFilterValue.bind(qcObject);
+  const onEnterCallback = setFilterToURL.bind(qcObject);
+  const onChangeCallback = selectOption.bind(qcObject);
+  const filterService = qcObject.model.services.filter;
+  const filtersList = filtersConfig(filterService) || [];
+  const createFilterElement = (config) => {
+    let filterElement = null;
+    const { type, queryLabel, placeholder, id, inputType = 'text', options } = config;
+    const commonConfig = {
+      queryLabel,
+      placeholder,
+      id,
+      filterMap,
+      onInputCallback,
+      onEnterCallback,
+    };
+
+    switch (type) {
+      case FilterType.INPUT:
+        filterElement = filterInput({ ...commonConfig, type: inputType });
+        break;
+      case FilterType.DROPDOWN:
+        filterElement = dynamicSelector({ ...commonConfig, options, onChangeCallback });
+        break;
+      default:
+        filterElement = null;
+        break;
+    }
+
+    return filterElement ?? null;
+  };
+
+  return h(
+    '.w-100.flex-row.p2.g2',
+    {
+      onremove: () => {
+        qcObject.filter = {};
+      } },
+    [
+      updateObjectFiltersButton(qcObject),
+      ...filtersList.map(createFilterElement),
+    ],
+  );
+};
+
+/**
+ * Button which will allow the user to update filter parameters after the input
+ * @param {LayoutModel} qcObject - root model of the application
+ * @returns {vnode} - virtual node element
+ */
+const updateObjectFiltersButton = (qcObject) => h('', h('button.btn.btn-primary', {
+  onclick: () => qcObject.applyFilters(),
+}, 'Update'));
+
+export { objectFiltersPanel };
+
+/**
  * Button which will allow the user to update filter parameters after the input
  * @param {LayoutModel} layoutModel - root model of the application
  * @returns {vnode} - virtual node element

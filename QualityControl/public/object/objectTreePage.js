@@ -18,6 +18,7 @@ import { draw } from './objectDraw.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
 import virtualTable from './virtualTable.js';
 import { qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
+import { objectFiltersPanel } from '../layout/view/panels/filters.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -26,6 +27,7 @@ import { qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
  * @returns {vnode} - virtual node element
  */
 export default (model) => h('.h-100.flex-column', { key: model.router.params.page }, [
+  objectFiltersPanel(model.object),
   h('.flex-row.flex-grow', [
     h('.scroll-y.flex-column', {
       style: {
