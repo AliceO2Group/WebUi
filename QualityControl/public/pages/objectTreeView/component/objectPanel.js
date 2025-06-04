@@ -55,11 +55,12 @@ const plotSelection = (model, name) => h('', { style: 'height:77%;' }, draw(mode
 /**
  * Creates the info panel container with timestamp selector
  * @param {Model} model - root model of the application
+ * @param {object} qcObject - js object with relevant object data
  * @returns {vnode} - virtual node element for the info panel
  */
-const infoPanel = (model) => h('.scroll-y', {}, [
+const infoPanel = (model, qcObject) => h('.scroll-y', {}, [
   h('.w-100.flex-row.justify-center', h('.w-80', timestampSelectForm(model))),
-  qcObjectInfoPanel(model, { 'font-size': '.875rem;' }),
+  qcObjectInfoPanel(qcObject, { 'font-size': '.875rem;' }),
 ]);
 
 /**
@@ -76,7 +77,7 @@ export const drawPlot = (model, object) => {
   return h('.h100.flex-column', [
     resizeButton(router, href),
     plotSelection(model, name),
-    infoPanel(model),
+    infoPanel(model, object),
   ]);
 };
 
