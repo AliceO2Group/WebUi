@@ -143,9 +143,10 @@ export default class QCObjectService {
    * @param {string} id - id of the object
    * @param {number} validFrom - timestamps in ms
    * @param {Map<string, string>} filters - Metadata attributes for retrieving specific object
+   * @param {Array<string>} fields - The fields that are to be send from the backend.
    * @returns {string} - url with appended parameters
    */
-  _buildURL(url, id, validFrom = undefined, filters = undefined) {
+  _buildURL(url, id, validFrom = undefined, filters = undefined, fields = undefined) {
     if (filters && Object.keys(filters).length > 0) {
       const filterAsString = Object.entries(filters).map(([key, value]) => `filters[${key}]=${value}`).join('&');
       url += `&${filterAsString}`;
@@ -155,6 +156,9 @@ export default class QCObjectService {
     }
     if (id) {
       url += `&id=${id}`;
+    }
+    if (Array.isArray(fields)) {
+      url += `&fields[]=${fields.join('fields[]=')}`;
     }
     return url;
   }
@@ -166,8 +170,10 @@ export default class QCObjectService {
    * @deprecated
    */
   async getObjects(filters = {}) {
-    const url = this._buildURL('/api/objects?', undefined, undefined, filters);
+    const hasFilters = Object.values(filters).some(Boolean);
+    const fields = hasFilters ? ['path'] : undefined; // If there are filters more unneeded fields are sent down.
 
+    const url = this._buildURL('/api/objects?', undefined, undefined, filters, fields);
     const { result, ok } = await this.model.loader.get(url);
     return ok ? RemoteData.success(result) : RemoteData.failure(result);
   }

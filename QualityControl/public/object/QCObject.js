@@ -223,7 +223,7 @@ export default class QCObject extends Observable {
   async loadObjectByName(objectName, timestamp = undefined, id = undefined) {
     this.objects[objectName] = RemoteData.loading();
     this.notify();
-    const obj = await this.model.services.object.getObjectByName(objectName, id, timestamp, undefined, this);
+    const obj = await this.model.services.object.getObjectByName(objectName, id, timestamp, this.filter, this);
 
     // TODO Is it a TTree?
     if (obj.isSuccess()) {
