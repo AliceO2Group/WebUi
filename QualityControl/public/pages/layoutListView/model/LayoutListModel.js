@@ -111,7 +111,7 @@ export default class LayoutListModel extends Observable {
        * @param {string} folderName - Name of the folder to add to
        */
       in: (folderName) => {
-        this.folders.get(folderName)?.push(layout);
+        this.folders.get(folderName)?.set(layout);
       },
     };
   }
