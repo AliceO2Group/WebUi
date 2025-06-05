@@ -112,6 +112,11 @@ export class ObjectController {
     }
   }
 
+  /**
+   * Parses a JSON string or object representing filters and removes any entries with empty, null, or undefined values.
+   * @param {string | object} filters - The filters to parse and clean. Can be a JSON string or an object.
+   * @returns {object | undefined} A cleaned object with only valid filter entries, or undefined if parsing fails.
+   */
   _parseAndCleanFilters(filters) {
     try {
       const parsedFilters = typeof filters === 'string' ? JSON.parse(filters) : filters;
