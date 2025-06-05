@@ -147,8 +147,12 @@ export default class QCObjectService {
    */
   _buildURL(url, id, validFrom = undefined, filters = undefined) {
     if (filters && Object.keys(filters).length > 0) {
-      const filterAsString = Object.entries(filters).map(([key, value]) => `filters[${key}]=${value}`).join('&');
-      url += `&${filterAsString}`;
+      const cleanedFilters = Object.entries(filters)
+        .filter(([_, value]) => value !== '' && value !== null && value !== undefined);
+
+      if (cleanedFilters.length > 0) {
+        const filterAsString = Object.entries(cleanedFilters).map(([key, value]) => `filters[${key}]=${value}`).join('&');
+        url += `&${filterAsString}`;
     }
     if (validFrom) {
       url += `&validFrom=${validFrom}`;
