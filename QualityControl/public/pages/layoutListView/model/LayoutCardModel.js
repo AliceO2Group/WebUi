@@ -15,7 +15,6 @@
 import { UserRole } from './../../../library/userRole.enum.js';
 import { hasMinimumRoleAccess } from '../../../common/utils.js';
 import { Observable } from '/js/src/index.js';
-import { RequestFields } from '../../../common/RequestFields.enum.js';
 
 /**
  * Model namespace for LayoutCardModel
@@ -51,8 +50,12 @@ export default class LayoutCardModel extends Observable {
    */
   async toggleOfficial() {
     const layoutService = this.model.services.layout;
-    await layoutService.patchLayout(this.id, { isOfficial: !this.isOfficial });
-    await this.model.services.layout.getLayouts(RequestFields.LAYOUT_CARD);
+
+    const response = await layoutService.patchLayout(this.id, { isOfficial: !this.isOfficial });
+    response.match({
+      Success: () => this._handleOfficialToggle(),
+      Other: () => {},
+    });
   };
 
   /**
@@ -71,5 +74,24 @@ export default class LayoutCardModel extends Observable {
    */
   equals(other) {
     return other instanceof LayoutCardModel && this.id === other.id;
+  }
+
+  /**
+   * Private method to handle the toggling of the layout's official status.
+   * Updates the local state of the layout's official flag and notifies observers.
+   * Also updates the parent layout list model by moving this layout to/from the "Official" category.
+   * @private
+   */
+  _handleOfficialToggle() {
+    this.isOfficial = !this.isOfficial;
+    this.notify();
+
+    const { layoutListModel } = this.model;
+    if (this.isOfficial) {
+      layoutListModel.setLayout(this).in('Official');
+    } else {
+      layoutListModel.removeLayout(this).from('Official');
+    }
+    layoutListModel.setLayout(this).in('All Layouts');
   }
 }
