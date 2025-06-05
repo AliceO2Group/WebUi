@@ -68,13 +68,14 @@ export default class FilterModel extends Observable {
 
   /**
    * Method to allow the addition/update/removal of key;value pairs in filter object
-   * @param {string} key - key to look for in filter object
-   * @param {any} value - value to update for given key; if none, entry is removed from object
-   * @param {boolean} setUrl - Whether to imediately persist the value in the url ()
+   * Method should exlusively be used for input values
+   * @param {string} key - key to look for in filterMap
+   * @param {string} value - value to update for given key; if none, entry is removed from object
+   * @param {boolean} setUrl - Whether to immediately persist the value in the url
    * @returns {undefined}
    */
   setFilterValue(key, value, setUrl = false) {
-    if (value) {
+    if (value?.trim()) {
       this.filterMap[key] = value;
     } else {
       delete this.filterMap[key];
