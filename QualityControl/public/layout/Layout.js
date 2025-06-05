@@ -792,7 +792,7 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   setFilterValue(key, value) {
-    const stringValue = value != null ? String(value) : '';
+    const stringValue = String(value ?? '');
     if (stringValue.trim() !== '') {
       this.filter[key] = stringValue;
     } else {
