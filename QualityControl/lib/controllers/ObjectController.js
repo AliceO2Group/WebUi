@@ -82,7 +82,7 @@ export class ObjectController {
     const { path, validFrom, id } = req.query;
     let { filters } = req.query;
     if (filters) {
-      filters = this._parseAndCleanFilters(filters);;
+      filters = this._parseAndCleanFilters(filters);
     }
     if (!path) {
       updateAndSendExpressResponseFromNativeError(
@@ -119,7 +119,7 @@ export class ObjectController {
     const { validFrom, id } = req.query;
     let { filters } = req.query;
     if (filters) {
-      filters = this._parseAndCleanFilters(filters);;
+      filters = this._parseAndCleanFilters(filters);
     }
     if (!qcgId) {
       updateAndSendExpressResponseFromNativeError(
