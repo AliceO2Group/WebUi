@@ -79,10 +79,10 @@ export class ObjectController {
    * @returns {void}
    */
   async getObjectContent(req, res) {
-    const { path, validFrom, id, filters } = req.query;
+    const { path, validFrom, id } = req.query;
+    let { filters } = req.query;
     if (filters) {
-      const cleanedFilters = this._parseAndCleanFilters(filters);
-      req.query.filters = cleanedFilters;
+      filters = this._parseAndCleanFilters(filters);;
     }
     if (!path) {
       updateAndSendExpressResponseFromNativeError(
@@ -116,10 +116,10 @@ export class ObjectController {
    */
   async getObjectById(req, res) {
     const qcgId = req.params?.id;
-    const { validFrom, filters, id } = req.query;
+    const { validFrom, id } = req.query;
+    let { filters } = req.query;
     if (filters) {
-      const cleanedFilters = this._parseAndCleanFilters(filters);
-      req.query.filters = cleanedFilters;
+      filters = this._parseAndCleanFilters(filters);;
     }
     if (!qcgId) {
       updateAndSendExpressResponseFromNativeError(
@@ -154,7 +154,7 @@ export class ObjectController {
         .filter(([_, value]) => value !== '' && value !== null && value !== undefined);
       return Object.fromEntries(filteredEntries);
     } catch {
-      return undefined;
+      return {};
     }
   }
 }
