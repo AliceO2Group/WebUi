@@ -79,11 +79,7 @@ export class ObjectController {
    * @returns {void}
    */
   async getObjectContent(req, res) {
-    const { path, validFrom, id } = req.query;
-    let { filters } = req.query;
-    if (filters) {
-      filters = this._parseAndCleanFilters(filters);
-    }
+    const { path, validFrom, id, filters } = req.query;
     if (!path) {
       updateAndSendExpressResponseFromNativeError(
         res,
@@ -116,11 +112,7 @@ export class ObjectController {
    */
   async getObjectById(req, res) {
     const qcgId = req.params?.id;
-    const { validFrom, id } = req.query;
-    let { filters } = req.query;
-    if (filters) {
-      filters = this._parseAndCleanFilters(filters);
-    }
+    const { validFrom, filters, id } = req.query;
     if (!qcgId) {
       updateAndSendExpressResponseFromNativeError(
         res,
@@ -138,23 +130,6 @@ export class ObjectController {
         );
         this._logger.errorMessage(error);
       }
-    }
-  }
-
-  /**
-   * Parses a JSON string or object representing filters and removes any entries with empty, null, or undefined values.
-   * @param {string | object} filters - The filters to parse and clean. Can be a JSON string or an object.
-   * @returns {object | undefined} A cleaned object with only valid filter entries, or undefined if parsing fails.
-   */
-  _parseAndCleanFilters(filters) {
-    try {
-      const parsedFilters = typeof filters === 'string' ? JSON.parse(filters) : filters;
-      const filteredEntries = Object
-        .entries(parsedFilters)
-        .filter(([_, value]) => value !== '' && value !== null && value !== undefined);
-      return Object.fromEntries(filteredEntries);
-    } catch {
-      return {};
     }
   }
 }
