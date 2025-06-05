@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 'use strict';
-import { errorHandler } from '../utils/errorHandler.js';
+import { InvalidInputError, NotFoundError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import { LogManager } from '@aliceo2/web-ui';
 
 /**
  * Gateway for all QC Objects requests
@@ -29,6 +30,7 @@ export class ObjectController {
      * @type {QCObjectService}
      */
     this._objService = objService;
+    this._logger = LogManager.getLogger('object/controller');
   }
 
   /**
@@ -40,15 +42,27 @@ export class ObjectController {
   async getObjects(req, res) {
     const { prefix, fields = [] } = req.query;
     if (prefix && typeof prefix !== 'string') {
-      res.status(400).json({ message: 'Invalid parameters provided: prefix must be of type string' });
+      updateAndSendExpressResponseFromNativeError(
+        res,
+        new InvalidInputError('Invalid parameters provided: prefix must be of type string'),
+      );
+      return;
     } else if (!Array.isArray(fields)) {
-      res.status(400).json({ message: 'Invalid parameters provided: fields must be of type Array' });
+      updateAndSendExpressResponseFromNativeError(
+        res,
+        new InvalidInputError('Invalid parameters provided: fields must be of type Array'),
+      );
+      return;
     } else {
       try {
         const list = await this._objService.retrieveLatestVersionOfObjects(prefix, fields);
         res.status(200).json(list);
       } catch (error) {
-        errorHandler(error, 'Failed to retrieve list of objects latest version', res, 502, 'object');
+        updateAndSendExpressResponseFromNativeError(
+          res,
+          new Error('Failed to retrieve list of objects latest version'),
+        );
+        this._logger.errorMessage(error);
       }
     }
   }
@@ -71,13 +85,20 @@ export class ObjectController {
       req.query.filters = cleanedFilters;
     }
     if (!path) {
-      res.status(400).json({ message: 'Invalid URL parameters: missing object path' });
+      updateAndSendExpressResponseFromNativeError(
+        res,
+        new InvalidInputError('Invalid URL parameters: missing object path'),
+      );
     } else {
       try {
         const object = await this._objService.retrieveQcObject(path, Number(validFrom), id, filters);
         res.status(200).json(object);
       } catch (error) {
-        errorHandler(error, 'Unable to identify object or read it', res, 502, 'object');
+        updateAndSendExpressResponseFromNativeError(
+          res,
+          new Error('Unable to identify object or read it'),
+        );
+        this._logger.errorMessage(error);
       }
     }
   }
@@ -101,13 +122,21 @@ export class ObjectController {
       req.query.filters = cleanedFilters;
     }
     if (!qcgId) {
-      res.status(400).json({ message: 'Invalid URL parameters: missing object ID' });
+      updateAndSendExpressResponseFromNativeError(
+        res,
+        new InvalidInputError('Invalid URL parameters: missing object ID'),
+      );
+      return;
     } else {
       try {
         const object = await this._objService.retrieveQcObjectByQcgId(qcgId, id, validFrom, filters);
         res.status(200).json(object);
       } catch (error) {
-        errorHandler(error, 'Unable to identify object or read it by qcg id', res, 502, 'object');
+        updateAndSendExpressResponseFromNativeError(
+          res,
+          new NotFoundError('Unable to identify object or read it by qcg id'),
+        );
+        this._logger.errorMessage(error);
       }
     }
   }
