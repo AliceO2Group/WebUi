@@ -66,6 +66,10 @@ export class ObjectController {
    */
   async getObjectContent(req, res) {
     const { path, validFrom, id, filters } = req.query;
+    if (filters) {
+      const cleanedFilters = this._parseAndCleanFilters(filters);
+      req.query.filters = cleanedFilters;
+    }
     if (!path) {
       res.status(400).json({ message: 'Invalid URL parameters: missing object path' });
     } else {
@@ -92,6 +96,10 @@ export class ObjectController {
   async getObjectById(req, res) {
     const qcgId = req.params?.id;
     const { validFrom, filters, id } = req.query;
+    if (filters) {
+      const cleanedFilters = this._parseAndCleanFilters(filters);
+      req.query.filters = cleanedFilters;
+    }
     if (!qcgId) {
       res.status(400).json({ message: 'Invalid URL parameters: missing object ID' });
     } else {
@@ -101,6 +109,18 @@ export class ObjectController {
       } catch (error) {
         errorHandler(error, 'Unable to identify object or read it by qcg id', res, 502, 'object');
       }
+    }
+  }
+
+  _parseAndCleanFilters(filters) {
+    try {
+      const parsedFilters = typeof filters === 'string' ? JSON.parse(filters) : filters;
+      const filteredEntries = Object
+        .entries(parsedFilters)
+        .filter(([_, value]) => value !== '' && value !== null && value !== undefined);
+      return Object.fromEntries(filteredEntries);
+    } catch {
+      return undefined;
     }
   }
 }
