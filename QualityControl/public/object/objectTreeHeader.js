@@ -54,7 +54,7 @@ export default function objectTreeHeader(model) {
       h('button.btn', {
         title: 'Close whole tree',
         onclick: () => model.object.tree.closeAll(),
-        disabled: Boolean(model.object.searchInput),
+        disabled: Boolean(model.object.searchInput.trim()),
       }, iconCollapseUp()),
       ' ',
       h('input.form-control.form-inline.mh1.w-33', {

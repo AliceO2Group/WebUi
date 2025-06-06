@@ -119,5 +119,16 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       'Not all rows contain the searched term.'
       + `Identified filtered: ${filteredRows.length} and displayed: ${rowsDisplayed.length}`,
     );
+
+    await page.locator(SEARCH_PATH).fill(' '); // cleanup for the next test. Whitespace is required for some reason
+    await delay(50); // Wait object list to load
+  });
+
+  await testParent.test('should collapse whole tree when the "Collapse whole tree" button is clicked', async () => {
+    page.locator('button[title="Close whole tree"]').click();
+    await delay(150); // Wait object list collapse
+
+    const treeBranchNr = await page.evaluate((path) => document.querySelectorAll(path).length, LIST_ITEM_PATH);
+    strictEqual(treeBranchNr, 1, 'ObjectTree did not fully collapse');
   });
 };

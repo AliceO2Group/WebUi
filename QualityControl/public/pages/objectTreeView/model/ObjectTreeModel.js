@@ -68,7 +68,7 @@ export default class ObjectTreeModel extends Observable {
    */
   openAll() {
     this.open = true;
-    this.children.forEach((child) => child.openAll());
+    this.children.forEach((child) => child instanceof ObjectTreeModel && child.openAll());
     this.notify();
   }
 
@@ -78,7 +78,7 @@ export default class ObjectTreeModel extends Observable {
    */
   closeAll() {
     this.open = false;
-    this.children.forEach((child) => child.closeAll());
+    this.children.forEach((child) => child instanceof ObjectTreeModel && child.closeAll());
     this.notify();
   }
 
