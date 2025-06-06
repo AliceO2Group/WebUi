@@ -57,7 +57,7 @@ export const leafItem = (leafObject, qcObject) => {
 };
 
 /**
- * Creates a list item for a leafObject (end node that represents an object)
+ * Creates an interactive leaf node with layout support and drag behavior.
  * @param {object} leafObject - the leafObject object
  * @param {QCObject} qcObject - object managing model
  * @param {QCObject} layout - layout managing model
