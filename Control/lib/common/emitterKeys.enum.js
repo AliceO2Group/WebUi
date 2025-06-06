@@ -21,6 +21,7 @@ const EmitterKeys =  Object.freeze({
   INTEGRATED_SERVICES_TRACK: {
     ODC: {
       ENVIRONMENT_STATE_CHANGE: 'ODC_ENVIRONMENT_STATE_CHANGE',
+      DEVICE_STATE_CHANGE: 'ODC_DEVICE_STATE_CHANGE',
     } 
   },
 });

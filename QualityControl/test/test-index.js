@@ -49,6 +49,7 @@ import { httpRequestsTestSuite } from './lib/utils/httpRequests.test.js';
 import { layoutControllerTestSuite } from './lib/controllers/LayoutController.test.js';
 import { statusControllerTestSuite } from './lib/controllers/StatusController.test.js';
 import { filtersControllerTestSuite } from './lib/controllers/FiltersController.test.js';
+import { objectControllerTestSuite } from './lib/controllers/ObjectController.test.js';
 
 /**
  * Services
