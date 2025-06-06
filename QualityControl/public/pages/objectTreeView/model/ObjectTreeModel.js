@@ -33,7 +33,7 @@ export default class ObjectTreeModel extends Observable {
   /**
    * Method to instantiate/reset the tree
    * @param {string} name - name of the tree to be initialized
-   * @param {string} parent - parent of the tree
+   * @param {ObjectTreeModel} parent - parent of the tree
    * @returns {undefined}
    */
   initTree(name, parent) {
