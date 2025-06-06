@@ -12,9 +12,10 @@ import { spinner } from '../../../common/spinner.js';
 export function objectPanel(model) {
   const { objects, selected } = model.object;
   const selectedObjectName = selected.name;
+  const selectedObject = objects?.[selectedObjectName];
 
-  if (objects?.[selectedObjectName]) {
-    return model.object.objects[selectedObjectName].match({
+  if (selectedObject) {
+    return selectedObject.match({
       NotAsked: () => null,
       Loading: () =>
         h('.h-100.w-100.flex-column.items-center.justify-center.f5', [spinner(3), h('', 'Loading Object')]),
@@ -23,6 +24,7 @@ export function objectPanel(model) {
         h('.h-100.w-100.flex-column.items-center.justify-center.f5', [h('.f1', iconCircleX()), error]),
     });
   }
+
   return null;
 }
 
