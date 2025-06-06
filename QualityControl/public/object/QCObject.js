@@ -13,9 +13,9 @@
  */
 
 import { Observable, RemoteData, iconArrowTop } from '/js/src/index.js';
-import ObjectTree from './ObjectTree.class.js';
 import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
+import ObjectTreeModel from '../pages/objectTreeView/model/ObjectTreeModel.js';
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
@@ -48,10 +48,10 @@ export default class QCObject extends Observable {
       open: false,
     };
 
-    this.tree = new ObjectTree('database');
+    this.tree = new ObjectTreeModel('database');
     this.tree.bubbleTo(this);
 
-    this.sideTree = new ObjectTree('database');
+    this.sideTree = new ObjectTreeModel('database');
     this.sideTree.bubbleTo(this);
     this.queryingObjects = false;
     this.scrollTop = 0;
@@ -160,8 +160,7 @@ export default class QCObject extends Observable {
    */
   sortTree(title, field, order, icon) {
     this.sortListByField(this.currentList, field, order);
-    this.tree.initTree('database');
-    this.tree.addChildren(this.currentList);
+    this.tree.sortChildren(field, order);
 
     this._computeFilters();
 
