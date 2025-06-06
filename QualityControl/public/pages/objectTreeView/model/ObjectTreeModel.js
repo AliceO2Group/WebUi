@@ -150,7 +150,7 @@ export default class ObjectTreeModel extends Observable {
    * and maintains the sort throughout the entire subtree. Updates the tree state
    * and triggers a notification after sorting.
    * @param {string} field - The property name of child objects to sort by
-   * @param {number} order - acending (1) or decending (-1)
+   * @param {number} order - ascending (1) or descending (-1)
    * @returns {undefined}
    */
   sortChildren(field, order) {
@@ -165,7 +165,7 @@ export default class ObjectTreeModel extends Observable {
    * Helper method for sortListByField for sorting strings
    * @param {string} a - first string to be sorted
    * @param {string} b - second string to be sorted
-   * @param {number} order - acending (1) or decending (-1)
+   * @param {number} order - ascending (1) or descending (-1)
    * @returns {undefined}
    */
   _compareStrings(a, b, order) {
