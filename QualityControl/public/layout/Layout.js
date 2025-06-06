@@ -738,10 +738,9 @@ export default class Layout extends Observable {
 
   /**
    * Function that fetches the object versions in accordance with the provided filters
-   * @param {Map<FilterType, string>} _filterMap - The map containing the values by which the objects will be filtered
    * @returns {undefined}
    */
-  triggerFilter(_filterMap) { // TODO - find a more elegant project architecture to handle filter
+  triggerFilter() {
     this.selectTab(this.tabIndex);
   }
 

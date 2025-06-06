@@ -73,7 +73,6 @@ import { userControllerTestSuite } from './lib/controllers/UserController.test.j
 import { chartRepositoryTest } from './lib/repositories/ChartRepository.test.js';
 import { filterServiceTestSuite } from './lib/services/FilterService.test.js';
 import { apiGetLayoutsTests } from './api/layouts/api-get-layout.test.js';
-import { objectControllerTestSuite } from './lib/controllers/ObjectController.test.js';
 import { apiGetObjectsTests } from './api/objects/api-get-object.test.js';
 import { objectsGetValidationMiddlewareTest } from './lib/middlewares/objects/objectsGetValidation.middleware.test.js';
 import { objectGetContentsValidationMiddlewareTest }

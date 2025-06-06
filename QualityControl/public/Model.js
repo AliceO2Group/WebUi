@@ -42,19 +42,20 @@ export default class Model extends Observable {
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // Cast, sessionService has only strings
 
+    this.loader = new Loader(this);
+    this.loader.bubbleTo(this);
+
+    this.filterModel = new FilterModel(this);
+
     this.object = new QCObject(this);
     this.object.bubbleTo(this);
 
     this.objectViewModel = new ObjectViewModel(this);
     this.objectViewModel.bubbleTo(this);
 
-    this.loader = new Loader(this);
-    this.loader.bubbleTo(this);
-
     this.layoutListModel = new LayoutListModel(this);
     this.layoutListModel.bubbleTo(this);
 
-    this.filterModel = new FilterModel(this);
     this.layout = new Layout(this);
     this.layout.bubbleTo(this);
 
@@ -169,6 +170,8 @@ export default class Model extends Observable {
     clearInterval(this.layout.tabInterval);
     await this.filterModel.filterService.initFilterService();
     this.filterModel.setFilterFromURL();
+    this.filterModel.setFilterToURL();
+
     this.services.layout.getLayoutsByUserId(this.session.personid, RequestFields.LAYOUT_CARD);
 
     const { params } = this.router;
@@ -237,7 +240,7 @@ export default class Model extends Observable {
       case 'objectTree':
         this.page = 'objectTree';
         setBrowserTabTitle('QCG-Tree');
-        this.object.loadList();
+        await this.object.loadList();
         // Data is already loaded at beginning
         if (this.object.selected) {
           this.object.loadObjectByName(this.object.selected.name);
