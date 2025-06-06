@@ -20,8 +20,6 @@ import { objectId, clone, setBrowserTabTitle } from '../common/utils.js';
 import { assertTabObject, assertLayout } from '../common/Types.js';
 import { buildQueryParametersString } from '../common/buildQueryParametersString.js';
 
-const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
-
 /**
  * Model namespace with all requests to load or create layouts, compute their position on a grid,
  * and search them.
@@ -63,8 +61,7 @@ export default class Layout extends Observable {
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
     // GridList.grid.length: integer, number of rows
-
-    this.filter = {};
+    this.filterModel = model.filterModel;
   }
 
   /**
@@ -107,11 +104,9 @@ export default class Layout extends Observable {
       this.model.router.go('?page=layouts');
     } else {
       const result = await this.model.services.layout.getLayoutById(layoutId);
-
       if (result.isSuccess()) {
         this.item = assertLayout(result.payload);
         this.item.autoTabChange = this.item.autoTabChange || 0;
-        this.setFilterFromURL();
         let tabIndex = this.item.tabs
           .findIndex((tab) => tab.name?.toLocaleUpperCase() === tabName?.toLocaleUpperCase());
         if (tabIndex < 0) {
@@ -126,38 +121,6 @@ export default class Layout extends Observable {
         this.model.router.go('?page=layouts');
       }
     }
-  }
-
-  /**
-   * Look for parameters used for filtering in URL and apply them in the layout if it exists
-   * @returns {undefined}
-   */
-  setFilterFromURL() {
-    const parameters = this.model.router.params;
-    CCDB_QUERY_PARAMS.forEach((filterKey) => {
-      if (parameters[filterKey]) {
-        this.filter[filterKey] = decodeURI(parameters[filterKey]);
-      }
-    });
-    this.notify();
-  }
-
-  /**
-   * When the user updates the displayed Objects, the filters should be placed in the URL as well
-   * @param {boolean} isSilent - whether the route should be silent or not
-   * @returns {undefined}
-   */
-  setFilterToURL(isSilent = true) {
-    const parameters = this.model.router.params;
-
-    CCDB_QUERY_PARAMS.forEach((filterKey) => {
-      if (!this.filter[filterKey] && this.filter[filterKey] !== 0) {
-        delete parameters[filterKey];
-      } else {
-        parameters[filterKey] = encodeURI(this.filter[filterKey]);
-      }
-    });
-    this.model.router.go(buildQueryParametersString(parameters, { }), true, isSilent);
   }
 
   /**
@@ -359,13 +322,12 @@ export default class Layout extends Observable {
     setBrowserTabTitle(`${this.item.name}/${tabName}`);
     this.model.router.go(buildQueryParametersString(parameters, { tab: tabName }), true, true);
 
-    this.setFilterFromURL();
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
     }
     this.tab = this.item.tabs[index];
     this._tabIndex = index;
-    this.model.object.loadObjects(this.tab.objects.map((object) => object.name), this.filter);
+    this.model.object.loadObjects(this.tab.objects.map((object) => object.name), this.filterModel.filterMap);
     const { columns } = this.item.tabs[index];
     if (columns > 0) {
       this.resizeGridByXY(columns);
@@ -775,38 +737,11 @@ export default class Layout extends Observable {
   }
 
   /**
-   * Sets the selector filter value for the passed key and applies the layout changes
-   * @param {object} value - event for which to set the value
-   * @param {string} key - label to be used when querying storage service
+   * Function that fetches the object versions in accordance with the provided filters
+   * @param {Map<FilterType, string>} _filterMap - The map containing the values by which the objects will be filtered
    * @returns {undefined}
    */
-  selectOption(value, key) {
-    this.setFilterValue(key, value);
-    this.applyLayoutChanges();
-  };
-
-  /**
-   * Method to allow the addition/update/removal of key;value pairs in filter object
-   * @param {string} key - key to look for in filter object
-   * @param {any} value - value to update for given key; if none, entry is removed from object
-   * @returns {undefined}
-   */
-  setFilterValue(key, value) {
-    const stringValue = String(value ?? '');
-    if (stringValue.trim() !== '') {
-      this.filter[key] = stringValue;
-    } else {
-      delete this.filter[key];
-    }
-    this.notify();
-  };
-
-  /**
-   * Applies the current filters to the current layout
-   * @returns {undefined}
-   */
-  applyLayoutChanges() {
-    this.setFilterToURL();
+  triggerFilter(_filterMap) { // TODO - find a more elegant project architecture to handle filter
     this.selectTab(this.tabIndex);
   }
 

@@ -37,6 +37,7 @@ export default class QCObject extends Observable {
     this.selected = null; // Object - { name; createTime; lastModified; }
     this.selectedOpen = false;
     this.objects = {}; // ObjectName -> RemoteData.payload -> plot
+    this.filter = {};
 
     this.searchInput = ''; // String - content of input search
     this.searchResult = []; // Array<object> - result list of search
@@ -171,14 +172,15 @@ export default class QCObject extends Observable {
 
   /**
    * Ask server for all available objects, fills `tree` of objects
+   * @param {Map<FilterType, string>} filterMap - The map containing the values by which the objects will be filtered
    * @returns {undefined}
    */
-  async loadList() {
+  async loadList(filterMap = {}) {
     this.objectsRemote = RemoteData.loading();
     this.notify();
     this.queryingObjects = true;
     let offlineObjects = [];
-    const result = await this.model.services.object.getObjects();
+    const result = await this.model.services.object.getObjects(filterMap);
     if (result.isSuccess()) {
       offlineObjects = result.payload;
     } else {
@@ -219,7 +221,7 @@ export default class QCObject extends Observable {
   async loadObjectByName(objectName, timestamp = undefined, id = undefined) {
     this.objects[objectName] = RemoteData.loading();
     this.notify();
-    const obj = await this.model.services.object.getObjectByName(objectName, id, timestamp, undefined, this);
+    const obj = await this.model.services.object.getObjectByName(objectName, id, timestamp, this.filter, this);
 
     // TODO Is it a TTree?
     if (obj.isSuccess()) {
@@ -461,5 +463,14 @@ export default class QCObject extends Observable {
     } else {
       return [];
     }
+  }
+
+  /**
+   * Function that reloads the object list with filters applied
+   * @param {Map<FilterType, string>} filterMap - The map containing the values by which the objects will be filtered
+   * @returns {undefined}
+   */
+  async triggerFilter(filterMap) {
+    await this.loadList(filterMap);
   }
 }

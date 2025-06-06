@@ -90,18 +90,31 @@ export class QcObjectService {
    * * make a new request and get data directly from data service
    * * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
    * @param {string|Regex} prefix - Prefix for which CCDB should search for objects.
-   * @param {Array<string>} [fields = []] - List of fields that should be requested for each object
+   * @param {Array<string>} [fields] - List of fields that should be requested for each object
    * @param {boolean} [useCache = true] - if the list should be the cached version or not
+   * @param {Array<string>} [filters = undefined] - Run number by which the objects are filtered.
    * @returns {Promise.<Array<QcObjectLeaf>>} - results of objects with required fields
    * @rejects {Error}
    */
-  async retrieveLatestVersionOfObjects(prefix = this._dbService.PREFIX, useCache = true) {
-    if (useCache && this._cache?.objects) {
+  async retrieveLatestVersionOfObjects(
+    prefix = this._dbService.PREFIX,
+    fields,
+    useCache = true,
+    filters = undefined,
+  ) {
+    const hasFilters = filters !== undefined;
+
+    if (!hasFilters && useCache && this._cache.objects?.length) {
       return this._cache.objects.filter((object) => object.name.startsWith(prefix));
-    } else {
-      const objects = await this._dbService.getObjectsTreeList(prefix); // TreeList links to the latest
-      return this._parseObjects(objects);
     }
+
+    let objects = [];
+    if (!hasFilters) {
+      objects = await this._dbService.getObjectsTreeList(prefix);
+    } else {
+      objects = await this._dbService.getObjectsLatestVersionList(prefix, filters, fields);
+    }
+    return this._parseObjects(objects);
   }
 
   /**
