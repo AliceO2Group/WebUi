@@ -42,7 +42,7 @@ export const branchItem = (treeModel, treeItems) => {
  */
 export const leafItem = (leafObject, qcObject) => {
   const { name } = leafObject;
-  const displayName = name.split('/').pop();
+  const displayName = getDisplayName(name);
 
   return h('li.object-tree-leafObject', { key: name, title: name, id: name }, [
     h('div.object-selectable', {
@@ -65,7 +65,7 @@ export const leafItem = (leafObject, qcObject) => {
  */
 export const sideTreeLeafItem = (leafObject, qcObject, layout) => {
   const { name } = leafObject;
-  const displayName = name.split('/').pop();
+  const displayName = getDisplayName(name);
   const className = leafObject === qcObject.selected ? 'bg-primary white' : '';
 
   const attr = {
@@ -91,3 +91,12 @@ export const sideTreeLeafItem = (leafObject, qcObject, layout) => {
     ]),
   ]);
 };
+
+/**
+ * Extracts the last segment of a string separated by slashes.
+ * @param {string} name - The input string containing segments separated by slashes.
+ * @returns {string} The last segment of the input string after splitting by slashes.
+ */
+function getDisplayName(name) {
+  return name.split('/').pop();
+}
