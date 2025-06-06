@@ -16,7 +16,7 @@ import { h, iconPerson } from '/js/src/index.js';
 
 import { spinner } from './spinner.js';
 import layoutViewHeader from '../layout/view/header.js';
-import objectTreeHeader from '../object/objectTreeHeader.js';
+import objectTreeHeader from '../pages/objectTreeView/component/objectTreeHeader.js';
 import aboutViewHeader from '../pages/aboutView/components/aboutViewHeader.js';
 import LayoutListHeader from '../pages/layoutListView/components/LayoutListHeader.js';
 
