@@ -46,7 +46,7 @@ export default class ObjectViewModel extends Observable {
     /**
      * @type {object} TODO add it as FilterModel
      */
-    this.filter = {};
+    this.filterMap = model.filterModel.filterMap;
 
     this._filterVisibility = true;
   }
@@ -81,10 +81,9 @@ export default class ObjectViewModel extends Observable {
    * @param {object} object - object with name or id to be used for content retrieval
    * @param {number} validFrom - timestamp in ms for a specific object
    * @param {string} id - id as per the CCDB storage
-   * @param {object} filters - specific fields that should be applied
    * @returns {undefined}
    */
-  async updateObjectSelection(object, validFrom = undefined, id = '', filters = this.filter) {
+  async updateObjectSelection(object, validFrom = undefined, id = '') {
     let { objectName = undefined, objectId = undefined } = object;
     const { objectName: objectNameUrl, objectId: objectIdUrl, layoutId } = this.model.router.params;
 
@@ -102,23 +101,20 @@ export default class ObjectViewModel extends Observable {
     this.selected = RemoteData.loading();
     this.notify();
 
-    this.filter = filters;
     let currentParams = '?page=objectView';
     if (objectId) {
       currentParams += `&objectId=${encodeURI(objectId)}&layoutId=${encodeURI(layoutId)}`;
-      this.selected = await this.model.services.object.getObjectById(objectId, id, validFrom, filters, this);
+      this.selected = await this.model.services.object.getObjectById(objectId, id, validFrom, this.filterMap, this);
     } else if (objectName) {
       currentParams += `&objectName=${encodeURI(objectName)}`;
-      this.selected = await this.model.services.object.getObjectByName(objectName, id, validFrom, filters, this);
+      this.selected = await this.model.services.object.getObjectByName(objectName, id, validFrom, this.filterMap, this);
     }
     setBrowserTabTitle(this.selected.payload.name);
 
-    if (filters && Object.keys(filters).length > 0) {
-      Object.entries(filters)
-        .forEach(([key, value]) => {
-          currentParams += `&${key}=${encodeURI(value)}`;
-        });
-    }
+    Object.entries(this.filterMap).forEach(([key, value]) => {
+      currentParams += `&${key}=${encodeURI(value)}`;
+    });
+
     if (validFrom) {
       let path = `${currentParams}&ts=${validFrom}`;
       if (id) {
@@ -133,6 +129,13 @@ export default class ObjectViewModel extends Observable {
   }
 
   /**
+   * Wrapper function for updateObjectSelection that will be triggered by filterModel;
+   */
+  async triggerFilter() {
+    await this.updateObjectSelection({});
+  }
+
+  /**
    * Method to allow the addition/update/removal of key;value pairs in filter object
    * @param {string} key - key to look for in filter object
    * @param {string} value - value to update for given key; if none, entry is removed from object
@@ -140,9 +143,9 @@ export default class ObjectViewModel extends Observable {
    */
   updateFilterKeyValue(key, value) {
     if (value) {
-      this.filter[key] = value;
+      this.filterMap[key] = value;
     } else {
-      delete this.filter[key];
+      delete this.filterMap[key];
     }
   }
 
