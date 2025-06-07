@@ -117,7 +117,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
   await testParent
     .test('should have an info button with full path and last modified when clicked (plot success)', async () => {
-      const commonSelectorPath = 'section > div > div > div:nth-child(2) > div > div > div';
+      const commonSelectorPath = 'section > div > div > div > div:nth-child(2) > div > div';
       const plot1Path = `${commonSelectorPath} > div:nth-child(1)`;
       await page.locator(plot1Path).click();
 
@@ -139,7 +139,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have an info button with full path and last modified when clicked on a second plot(plot success)',
     { timeout },
     async () => {
-      const commonSelectorPath = 'section > div > div > div:nth-child(2) > div:nth-child(2) > div > div';
+      const commonSelectorPath = '#subcanvas > div:nth-child(2) > div > div';
       const plot2Path = `${commonSelectorPath} > div:nth-child(1)`;
       await page.locator(plot2Path).click();
       const result = await page.evaluate((commonSelectorPath) => {
@@ -157,17 +157,12 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     },
   );
 
-  await testParent.test(
-    'should have second tab to be empty (according to demo data)',
-    { timeout },
-    async () => {
-      await page.locator('header > div > div:nth-child(2) > div > button:nth-child(2)').click();
-      const plotPath = 'section svg.jsroot';
-      await delay(1000);
-      const plotsCount = await page.evaluate((plotPath) => document.querySelectorAll(plotPath).length, plotPath);
-      strictEqual(plotsCount, 0);
-    },
-  );
+  await testParent.test('should have second tab to be empty (according to demo data)', { timeout }, async () => {
+    await page.locator('header > div > div > div:nth-child(2) > div > button:nth-child(2)').click();
+    const plotPath = 'section svg.jsroot';
+    const plotsCount = await page.evaluate((plotPath) => document.querySelectorAll(plotPath).length, plotPath);
+    strictEqual(plotsCount, 0);
+  });
 
   await testParent.test(
     'should have a button group containing four buttons in the header',
@@ -185,7 +180,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have one duplicate button in the header to create a new duplicated layout',
     { timeout },
     async () => {
-      const buttonPath = 'header > div > div:nth-child(3) > div > button:nth-child(1)';
+      const buttonPath = 'header > div > div > div:nth-child(3) > div > button:nth-child(1)';
       const duplicateButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
       strictEqual(duplicateButton, 'Duplicate layout');
     },
@@ -195,7 +190,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have one delete button in the header to delete layout',
     { timeout },
     async () => {
-      const buttonPath = 'header > div > div:nth-child(3) > div > button:nth-child(4)';
+      const buttonPath = 'header > div > div > div:nth-child(3) > div > button:nth-child(4)';
       const deleteButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
       strictEqual(deleteButton, 'Delete layout');
     },
@@ -205,7 +200,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have one link button in the header to download layout skeleton',
     { timeout },
     async () => {
-      const buttonPath = 'header > div > div:nth-child(3) > div > a';
+      const buttonPath = 'header > div > div > div:nth-child(3) > div > a';
       const editButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
       strictEqual(editButton, 'Export layout skeleton as JSON file');
     },
@@ -215,11 +210,11 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have two options for editing the layout',
     { timeout },
     async () => {
-      const editButtonPath = 'header > div > div:nth-child(3) > div > div > button';
+      const editButtonPath = 'header > div > div > div:nth-child(3) > div > div > button';
       await page.locator(editButtonPath).click();
       const titles = await page.evaluate(() => {
-        const firstLinkPath = 'header > div > div:nth-child(3) > div > div > div > div > a:nth-child(1)';
-        const secondLinkPath = 'header > div > div:nth-child(3) > div > div > div > div > a:nth-child(2)';
+        const firstLinkPath = 'header > div > div > div:nth-child(3) > div > div > div > div > a:nth-child(1)';
+        const secondLinkPath = 'header > div > div > div:nth-child(3) > div > div > div > div > a:nth-child(2)';
         const firstLinkTitle = document.querySelector(firstLinkPath).title;
         const secondLinkTitle = document.querySelector(secondLinkPath).title;
         return [firstLinkTitle, secondLinkTitle];
@@ -234,7 +229,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should click the edit button in the header and enter edit mode',
     { timeout },
     async () => {
-      const editViaGUIButtonPath = 'header > div > div:nth-child(3) > div > div > div > div > a:nth-child(1)';
+      const editViaGUIButtonPath = 'header > div > div > div:nth-child(3) > div > div > div > div > a:nth-child(1)';
       await page.locator(editViaGUIButtonPath).click();
     },
   );
@@ -243,7 +238,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have input field for changing layout name in edit mode',
     { timeout },
     async () => {
-      const inputPath = 'header > div > div:nth-child(3) > input';
+      const inputPath = 'header > div > div > div:nth-child(3) > input';
       await page.evaluate((inputPath) => document.querySelector(inputPath), inputPath);
     },
   );
@@ -315,7 +310,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should show normal sidebar after Cancel click',
     { timeout },
     async () => {
-      const cancelButtonPath = 'header > div > div:nth-child(3) > div > button:nth-child(2)';
+      const cancelButtonPath = 'header > div > div:nth-child(1) > div:nth-of-type(3) > div > button:nth-of-type(2)';
       await page.locator(cancelButtonPath).click();
       await page.waitForSelector('nav .menu-title', { timeout: 5000 });
     },
@@ -325,8 +320,9 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should open JSON editor when clicking "Edit via JSON"',
     { timeout },
     async () => {
-      const editDropdownButtonPath = 'header > div > div:nth-child(3) > div > div > button';
-      const editViaJSONButtonPath = 'header > div > div:nth-child(3) > div > div > div > div > a:nth-child(2)';
+      const editDropdownButtonPath = 'header > div > div:nth-child(1) > div:nth-of-type(3) > div > div > button';
+      const editViaJSONButtonPath =
+        'header > div > div:nth-child(1) > div:nth-of-type(3) > div > div > div > div > a:nth-child(2)';
       await page.locator(editDropdownButtonPath).click();
       await delay(100);
       await page.locator(editViaJSONButtonPath).click();
@@ -409,10 +405,10 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should update layout when clicking "Update layout"',
     { timeout },
     async () => {
-      const pencilButtonPath = 'header > div > div:nth-child(3) > div > div > button';
+      const pencilButtonPath = 'header > div > div > div:nth-child(3) > div > div > button';
       await page.locator(pencilButtonPath).click();
       const editViaJSONButtonPath =
-        'header > div > div:nth-child(3) > div > div > div > div > a:nth-child(2)';
+        'header > div > div > div:nth-child(3) > div > div > div > div > a:nth-child(2)';
       page.locator(editViaJSONButtonPath).click();
 
       const textareaPath = 'body > div > div > div > div > textarea';
@@ -423,7 +419,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       await page.locator(updateButtonPath).click();
       await delay(50);
 
-      const buttonsPath = 'header > div > div:nth-child(2) > div > button';
+      const buttonsPath = 'header > div > div > div:nth-child(2) > div > button';
       const result = await page.evaluate((buttonsPath) => {
         const tabs = document.querySelectorAll(buttonsPath);
         return tabs.length === 3 && tabs[2].textContent === 'test';
