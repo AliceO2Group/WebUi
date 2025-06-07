@@ -52,8 +52,6 @@ export default class QCObject extends Observable {
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
 
-    this.sideTree = new ObjectTree('database');
-    this.sideTree.bubbleTo(this);
     this.queryingObjects = false;
     this.scrollTop = 0;
     this.scrollHeight = 0;
@@ -179,7 +177,7 @@ export default class QCObject extends Observable {
     this.notify();
     this.queryingObjects = true;
     let offlineObjects = [];
-    const result = await this.model.services.object.getObjects(this.filterMap);
+    const result = await this.model.services.object.getObjects();
     if (result.isSuccess()) {
       offlineObjects = result.payload;
     } else {
@@ -220,7 +218,7 @@ export default class QCObject extends Observable {
   async loadObjectByName(objectName, timestamp = undefined, id = undefined) {
     this.objects[objectName] = RemoteData.loading();
     this.notify();
-    const obj = await this.model.services.object.getObjectByName(objectName, id, timestamp, this.filterMap, this);
+    const obj = await this.model.services.object.getObjectByName(objectName, id, timestamp, this);
 
     // TODO Is it a TTree?
     if (obj.isSuccess()) {
@@ -246,10 +244,9 @@ export default class QCObject extends Observable {
   /**
    * Load objects provided by a list of paths
    * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
-   * @param {object} filter - to be applied on quering objects
    * @returns {undefined}
    */
-  async loadObjects(objectsName, filter = {}) {
+  async loadObjects(objectsName) {
     this.objectsRemote = RemoteData.loading();
     this.objects = {}; // Remove any in-memory loaded objects
     this.model.services.object.objectsLoadedMap = {}; // TODO not here
@@ -263,7 +260,7 @@ export default class QCObject extends Observable {
       this.objects[objectName] = RemoteData.Loading();
       this.notify();
       this.objects[objectName] = await this
-        .model.services.object.getObjectByName(objectName, undefined, undefined, filter, this);
+        .model.services.object.getObjectByName(objectName, undefined, undefined, this);
       this.notify();
     }));
     this.objectsRemote = RemoteData.success();

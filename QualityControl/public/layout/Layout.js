@@ -61,7 +61,6 @@ export default class Layout extends Observable {
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
     // GridList.grid.length: integer, number of rows
-    this.filterModel = model.filterModel;
   }
 
   /**
@@ -327,7 +326,7 @@ export default class Layout extends Observable {
     }
     this.tab = this.item.tabs[index];
     this._tabIndex = index;
-    this.model.object.loadObjects(this.tab.objects.map((object) => object.name), this.filterModel.filterMap);
+    this.model.object.loadObjects(this.tab.objects.map((object) => object.name));
     const { columns } = this.item.tabs[index];
     if (columns > 0) {
       this.resizeGridByXY(columns);
@@ -404,7 +403,7 @@ export default class Layout extends Observable {
    */
   edit() {
     this.toggleEditMenu();
-    this.model.services.object.listObjects();
+    this.model.services.object.listObjects(undefined);
     if (!this.item) {
       throw new Error('An item should be loaded before editing it');
     }
