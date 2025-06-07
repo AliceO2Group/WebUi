@@ -128,10 +128,8 @@ function subcanvasView(model) {
     },
   };
 
-  return h('.flex-column.absolute-fill', [
-    !layout.editEnabled && filtersPanel(filterModel, layout),
-    h('.p2', subcanvasAttributes, tabObjects.map((tabObject) => chartView(model, tabObject))),
-  ]);
+  return h('.flex-column.absolute-fill', h('.p2', subcanvasAttributes, tabObjects.map((tabObject) =>
+    chartView(model, tabObject))));
 }
 
 /**
@@ -207,7 +205,7 @@ const drawComponent = (model, tabObject) => h('', { style: 'height:100%; display
   }, draw(model, tabObject, {})),
   objectInfoResizePanel(model, tabObject),
   model.layout.item && model.layout.item.displayTimestamp
-      && minimalObjectInfo(model, tabObject),
+  && minimalObjectInfo(model, tabObject),
 ]);
 
 /**

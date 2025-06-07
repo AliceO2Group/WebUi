@@ -172,7 +172,6 @@ export default class QCObjectService {
   async getObjects(filters = {}) {
     const hasFilters = Object.values(filters).some(Boolean);
     const fields = hasFilters ? ['path'] : undefined; // If there are filters more unneeded fields are sent down.
-
     const url = this._buildURL('/api/objects?', undefined, undefined, filters, fields);
     const { result, ok } = await this.model.loader.get(url);
     return ok ? RemoteData.success(result) : RemoteData.failure(result);

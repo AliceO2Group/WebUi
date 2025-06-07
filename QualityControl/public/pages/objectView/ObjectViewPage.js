@@ -18,28 +18,20 @@ import { spinner } from './../../common/spinner.js';
 import { errorDiv } from '../../common/errorDiv.js';
 import { dateSelector } from '../../common/object/dateSelector.js';
 import { qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
-import { filtersPanel } from '../../common/filters/filterViews.js';
 
 /**
  * Shows a page to view an object on the whole page
- * @param {Model} model - root model of the application
+ * @param {ObjectViewModel} objectViewModel - model that manages the objectView state
  * @returns {vnode} - virtual node element
  */
-export default (model) => {
-  const { objectViewModel, filterModel } = model;
-  return h(
-    '.absolute-fill.flex-column',
-    objectPlotAndInfo(objectViewModel, filterModel),
-  );
-};
+export default (objectViewModel) => h('.absolute-fill.flex-column', objectPlotAndInfo(objectViewModel));
 
 /**
  * Build an element which plots the object and displays metadata information
  * @param {ObjectViewModel} objectViewModel - model for object view page
- * @param {FilterModel} filterModel - model that manages the filter state.
  * @returns {vnode} - virtual node element
  */
-const objectPlotAndInfo = (objectViewModel, filterModel) =>
+const objectPlotAndInfo = (objectViewModel) =>
   objectViewModel.selected.match({
     NotAsked: () => null,
     Loading: () => spinner(10, 'Loading object...'),
@@ -52,7 +44,6 @@ const objectPlotAndInfo = (objectViewModel, filterModel) =>
         layoutDisplayOptions
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
       return h('.w-100.h-100.flex-column.scroll-off', [
-        objectViewModel.isFilterVisible() && filtersPanel(filterModel, objectViewModel),
         h('.flex-row.justify-center.h-10', h('.w-40.p2.f6', dateSelector(
           { validFrom, id },
           versions,
