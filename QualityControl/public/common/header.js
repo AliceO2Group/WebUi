@@ -19,6 +19,7 @@ import layoutViewHeader from '../layout/view/header.js';
 import objectTreeHeader from '../object/objectTreeHeader.js';
 import aboutViewHeader from '../pages/aboutView/components/aboutViewHeader.js';
 import LayoutListHeader from '../pages/layoutListView/components/LayoutListHeader.js';
+import { objectViewHeader } from '../pages/objectView/components/header.js';
 
 /**
  * Shows header of the application, split with 3 parts:
@@ -43,6 +44,7 @@ const headerSpecific = (model) => {
     case 'layoutList': return LayoutListHeader(model.layoutListModel);
     case 'layoutShow': return layoutViewHeader(model.layout);
     case 'objectTree': return objectTreeHeader(model);
+    case 'objectView': return objectViewHeader(model);
     case 'about': return aboutViewHeader();
     default: return null;
   }

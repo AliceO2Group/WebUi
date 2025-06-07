@@ -31,6 +31,7 @@ export default class FilterModel extends Observable {
     this.model = model;
     this.filterService = new FilterService(this);
     this.filterMap = {};
+    this.visible = true;
   }
 
   /**
@@ -90,5 +91,10 @@ export default class FilterModel extends Observable {
   triggerFilter(filterAbleModel) {
     this.setFilterToURL();
     filterAbleModel.triggerFilter(this.filterMap);
+  }
+
+  toggleFilterVisibility() {
+    this.visible = !this.visible;
+    this.notify();
   }
 }

@@ -14,7 +14,6 @@
 
 import { h } from '/js/src/index.js';
 import { draw } from './../../common/object/draw.js';
-import { header } from './components/header.js';
 import { spinner } from './../../common/spinner.js';
 import { errorDiv } from '../../common/errorDiv.js';
 import { dateSelector } from '../../common/object/dateSelector.js';
@@ -28,32 +27,19 @@ import { filtersPanel } from '../../common/filters/filterViews.js';
  */
 export default (model) => {
   const { objectViewModel, filterModel } = model;
-  const { objectName, objectId } = model.router.params;
-
-  let title = objectName;
-  if (objectId) {
-    if (objectViewModel.selected.isSuccess()) {
-      const { path, layoutName } = objectViewModel.selected.payload;
-      title = `${path} (from layout: ${layoutName})`;
-    } else {
-      title = objectId;
-    }
-  }
-  return h('.absolute-fill.flex-column', [
-    h('.shadow-level1', [
-      header(model, title),
-      objectViewModel.isFilterVisible() && filtersPanel(filterModel, objectViewModel),
-    ]),
-    objectPlotAndInfo(objectViewModel),
-  ]);
+  return h(
+    '.absolute-fill.flex-column',
+    objectPlotAndInfo(objectViewModel, filterModel),
+  );
 };
 
 /**
  * Build an element which plots the object and displays metadata information
  * @param {ObjectViewModel} objectViewModel - model for object view page
+ * @param {FilterModel} filterModel - model that manages the filter state.
  * @returns {vnode} - virtual node element
  */
-const objectPlotAndInfo = (objectViewModel) =>
+const objectPlotAndInfo = (objectViewModel, filterModel) =>
   objectViewModel.selected.match({
     NotAsked: () => null,
     Loading: () => spinner(10, 'Loading object...'),
@@ -66,6 +52,7 @@ const objectPlotAndInfo = (objectViewModel) =>
         layoutDisplayOptions
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
       return h('.w-100.h-100.flex-column.scroll-off', [
+        objectViewModel.isFilterVisible() && filtersPanel(filterModel, objectViewModel),
         h('.flex-row.justify-center.h-10', h('.w-40.p2.f6', dateSelector(
           { validFrom, id },
           versions,

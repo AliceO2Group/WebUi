@@ -30,6 +30,9 @@
 .layout-selected { border: 0.3em solid var(--color-primary); }
 .layout-edit-layer { cursor: move; opacity: 0; }
 
+.flex-grow { flex-grow: 1; }
+.justify-end { justify-content: end; }
+
 .cardGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -47,6 +50,7 @@
 .cardHeader { 
   padding-left: var(--space-s);
 }
+
 .cardHeader > h5 { 
   align-content: center;
 }

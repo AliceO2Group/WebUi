@@ -15,7 +15,7 @@
 import { filters } from '../../../common/filters/filter.js';
 import { FilterType } from '../../../common/filters/filterTypes.js';
 import { filtersConfig } from './filtersConfig.js';
-import { h } from '/js/src/index.js';
+import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
 
 /**
  * Creates an input element for a specific metadata field;
@@ -61,21 +61,22 @@ const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback
  * @param {PageModel} pageModel - Model that manages the state of the page that the filter is on.
  * @returns {vnode} - virtual node element
  */
-const filtersPanel = (filterModel, pageModel) => {
+export function filtersPanel(filterModel, pageModel) {
   const { filterMap, setFilterValue, filterService } = filterModel;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onEnterCallback = () => filterModel.triggerFilter(pageModel);
   const filtersList = filtersConfig(filterService);
-
-  return h(
-    '.w-100.flex-row.p2.g2',
-    [
-      triggerFiltersButton(onEnterCallback),
-      ...filtersList.map((filter) =>
-        createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
-    ],
-  );
+  return filterModel.visible
+    ? h(
+      '.w-100.flex-row.p2.g2',
+      [
+        triggerFiltersButton(onEnterCallback),
+        ...filtersList.map((filter) =>
+          createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
+      ],
+    )
+    : null;
 };
 
 /**
@@ -87,4 +88,14 @@ const triggerFiltersButton = (triggerFilter) => h('', h('button.btn.btn-primary'
   onclick: triggerFilter,
 }, 'Update'));
 
-export { filtersPanel };
+/**
+ * Button for toggling visibility of the filter by parameters panel
+ * @param {FilterModel} filterModel - model that manages filter state
+ * @returns {vnode} - virtual node element
+ */
+export function filterPanelToggleButton(filterModel) {
+  return h('button.btn.btn-default', {
+    class: filterModel.visible ? 'active' : '',
+    onclick: () => filterModel.toggleFilterVisibility(),
+  }, ['Filters ', filterModel.visible ? iconChevronTop() : iconChevronBottom()]);
+}

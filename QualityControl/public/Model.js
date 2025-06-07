@@ -46,6 +46,7 @@ export default class Model extends Observable {
     this.loader.bubbleTo(this);
 
     this.filterModel = new FilterModel(this);
+    this.filterModel.bubbleTo(this);
 
     this.object = new QCObject(this);
     this.object.bubbleTo(this);
@@ -249,6 +250,7 @@ export default class Model extends Observable {
         break;
       case 'objectView': {
         this.page = 'objectView';
+        this.sidebar = false;
         setBrowserTabTitle('QCG-View');
         const { params } = this.router;
         this.objectViewModel.init(params);

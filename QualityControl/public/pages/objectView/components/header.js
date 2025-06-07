@@ -12,21 +12,45 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconBook, iconArrowThickLeft, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
+import { h, iconBook, iconArrowThickLeft } from '/js/src/index.js';
 import { getUrlPathFromObject } from '../../../common/filterToFromUrlParams.js';
+import { filterPanelToggleButton } from '../../../common/filters/filterViews.js';
 
 /**
  * Builds header which contains information on plotted object and actions that can be applied
  * @param {Model} model - root model of the application
- * @param {string} title - title of the page depending on the object loading location (tree or layout)
  * @returns {vnode} - virtual node element
  */
-export const header = (model, title) => h('.flex-row.items-center.p2.g2', [
-  getBackToQCGButton(model),
-  h('.flex-column.text-center', { style: 'flex-grow:1' }, h('b', title)),
-  filterByParametersButton(model.objectViewModel),
-  model.isContextSecure() && h('.flex-row', getCopyURLToClipboardButton(model)),
-]);
+export const objectViewHeader = (model) => {
+  const { filterModel, router } = model;
+  const title = computeTitle(filterModel, router);
+
+  return [
+    h('.flex-column.text-center.justify-center.w-33', h('b', title)),
+    h('.flex-row.items-center.p2.g2.w-33.justify-end', [
+      getBackToQCGButton(model),
+      filterPanelToggleButton(filterModel),
+      model.isContextSecure() && h('.flex-row', getCopyURLToClipboardButton(model)),
+    ]),
+  ];
+};
+
+const computeTitle = (objectViewModel, router) => {
+  const { selected } = objectViewModel;
+  const { objectName, objectId } = router.params;
+  let title = objectName;
+
+  if (objectId) {
+    if (selected.isSuccess()) {
+      const { path, layoutName } = selected.payload;
+      title = `${path} (from layout: ${layoutName})`;
+    } else {
+      title = objectId;
+    }
+  }
+
+  return title;
+};
 
 /**
  * Button for redirecting the user back to QCG object tree page
@@ -34,8 +58,9 @@ export const header = (model, title) => h('.flex-row.items-center.p2.g2', [
  * @returns {vnode} - virtual node element
  */
 function getBackToQCGButton(model) {
-  const { layoutId = undefined } = model.router.params;
-  const { objectViewModel: { filter, selected } } = model;
+  const { router, objectViewModel: { filter, selected } } = model;
+  const { layoutId = undefined } = router.params;
+
   let title = 'Back';
   let href = '?page=objectTree';
   if (layoutId) {
@@ -48,25 +73,13 @@ function getBackToQCGButton(model) {
     h('a.btn', {
       title,
       href,
-      onclick: (e) => model.router.handleLinkEvent(e),
+      onclick: (e) => router.handleLinkEvent(e),
     }, [
       iconArrowThickLeft(),
       ' ',
       title,
     ]),
   );
-}
-
-/**
- * Button for toggling visibility of the filter by parameters panel
- * @param {ObjectViewModel} objectViewModel - model of the current page
- * @returns {vnode} - virtual node element
- */
-function filterByParametersButton(objectViewModel) {
-  return h('button.btn.btn-default', {
-    class: objectViewModel.isFilterVisible() ? 'active' : '',
-    onclick: () => objectViewModel.toggleFilterVisibility(),
-  }, ['Filters ', objectViewModel.isFilterVisible() ? iconChevronTop() : iconChevronBottom()]);
 }
 
 /**
