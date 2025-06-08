@@ -43,7 +43,7 @@ const objectPlotAndInfo = (objectViewModel) =>
       const drawingOptions = ignoreDefaults ?
         layoutDisplayOptions
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
-      return h('.w-100.h-100.flex-column.scroll-off', [
+      return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.h-10', h('.w-40.p2.f6', dateSelector(
           { validFrom, id },
           versions,
