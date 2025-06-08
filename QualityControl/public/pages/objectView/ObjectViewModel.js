@@ -42,13 +42,6 @@ export default class ObjectViewModel extends Observable {
     this.drawingOptions = [];
     this.displayHints = [];
     this.ignoreDefaults = false;
-
-    /**
-     * @type {object} TODO add it as FilterModel
-     */
-    this.filterMap = model.filterModel.filterMap;
-
-    this._filterVisibility = true;
   }
 
   /**
@@ -61,16 +54,10 @@ export default class ObjectViewModel extends Observable {
     this.notify();
 
     const { objectName, layoutId, objectId, id, ts = undefined } = urlParams;
-    const filter = {};
-    Object.keys(urlParams)
-      .filter((key) => !['page', 'objectName', 'layoutId', 'objectId', 'ts', 'id'].includes(key))
-      .forEach((key) => {
-        filter[key] = urlParams[key];
-      });
     if (objectName) {
-      this.updateObjectSelection({ objectName }, ts, id, filter);
+      this.updateObjectSelection({ objectName }, ts, id);
     } else if (layoutId && objectId) {
-      this.updateObjectSelection({ objectId }, ts, id, filter);
+      this.updateObjectSelection({ objectId }, ts, id);
     } else {
       this.selected = RemoteData.failure('Invalid URL parameters provided');
     }
@@ -84,34 +71,24 @@ export default class ObjectViewModel extends Observable {
    * @returns {undefined}
    */
   async updateObjectSelection(object, validFrom = undefined, id = '') {
-    let { objectName = undefined, objectId = undefined } = object;
-    const { objectName: objectNameUrl, objectId: objectIdUrl, layoutId } = this.model.router.params;
+    const { objectName = undefined, objectId = undefined } = object;
+    const { params } = this.model.router;
 
-    if (!objectName && !objectId && !objectIdUrl && !objectNameUrl && !this.selected.isSuccess()) {
-      return;
-    } else if (!objectName && !objectId) {
-      if (objectIdUrl && layoutId) {
-        objectId = objectIdUrl;
-      } else if (objectNameUrl) {
-        objectName = objectNameUrl;
-      } else if (this.selected.isSuccess()) {
-        objectName = this.selected.payload.path;
-      }
+    if (!objectName && !objectId && !params.objectId && !params.objectName && !this.selected.isSuccess()) {
+      return; // This will permanently put the page in loading mode.
     }
+    this._setParameters(objectName, objectId, params);
     this.selected = RemoteData.loading();
     this.notify();
 
     let currentParams = '?page=objectView';
-    if (objectId) {
-      currentParams += `&objectId=${encodeURI(objectId)}&layoutId=${encodeURI(layoutId)}`;
-      this.selected = await this.model.services.object.getObjectById(objectId, id, validFrom, this);
-    } else if (objectName) {
-      currentParams += `&objectName=${encodeURI(objectName)}`;
-      this.selected = await this.model.services.object.getObjectByName(objectName, id, validFrom, this);
-    }
+    this.selected = params.objectName
+      ? await this.model.services.object.getObjectByName(params.objectName, id, validFrom, this)
+      : await this.model.services.object.getObjectById(params.objectId, id, validFrom, this);
+
     setBrowserTabTitle(this.selected.payload.name);
 
-    Object.entries(this.filterMap).forEach(([key, value]) => {
+    Object.entries(params).forEach(([key, value]) => {
       currentParams += `&${key}=${encodeURI(value)}`;
     });
 
@@ -129,44 +106,49 @@ export default class ObjectViewModel extends Observable {
   }
 
   /**
-   * Wrapper function for updateObjectSelection that will be triggered by filterModel;
-   */
-  async triggerFilter() {
-    await this.updateObjectSelection({});
-  }
-
-  /**
-   * Method to allow the addition/update/removal of key;value pairs in filter object
-   * @param {string} key - key to look for in filter object
-   * @param {string} value - value to update for given key; if none, entry is removed from object
+   * Sets routing parameters for object retrieval based on the available information.
+   * Ensures only one of objectName or objectId is set, and removes irrelevant keys.
+   * @param {string|undefined} objectName - Name of the object, if available.
+   * @param {string|undefined} objectId - ID of the object, if available.
+   * @param {object} params - The router parameters object to be updated in-place.
    * @returns {void}
    */
-  updateFilterKeyValue(key, value) {
-    if (value) {
-      this.filterMap[key] = value;
-    } else {
-      delete this.filterMap[key];
+  _setParameters(objectName, objectId, params) {
+    delete params.page; // page, ts and id are set manually
+    delete params.ts;
+    delete params.id;
+
+    if (objectName) {
+      this._setObjectName(params, objectName);
+    } else if (this.selected.isSuccess()) {
+      this._setObjectName(params, this.selected.payload.path);
+    } else if (objectId) {
+      delete params.objectName;
+      params.objectId = objectId;
+    } else if (params.objectName) {
+      delete params.objectId;
+      delete params.layoutId;
+    } else if (params.objectId) {
+      delete params.objectName;
     }
   }
 
   /**
-   * Helpers
-   */
-
-  /**
-   * Return the current state of the filter panel
-   * @returns {boolean} - true/false depending on filter being opened/closed
-   */
-  isFilterVisible() {
-    return this._filterVisibility;
-  }
-
-  /**
-   * Change the state of the visibility of the filter panel
+   * Sets the objectName in parameters and removes conflicting keys.
+   * @param {object} params - The router parameters object to be updated in-place.
+   * @param {string} name - The object name to set in the parameters.
    * @returns {void}
    */
-  toggleFilterVisibility() {
-    this._filterVisibility = !this._filterVisibility;
-    this.notify();
+  _setObjectName(params, name) {
+    delete params.objectId;
+    delete params.layoutId;
+    params.objectName = name;
+  };
+
+  /**
+   * Wrapper function for updateObjectSelection that will be triggered by filterModel;
+   */
+  async triggerFilter() {
+    await this.updateObjectSelection({});
   }
 }
