@@ -27,7 +27,7 @@ export const objectViewHeader = (model) => {
   return [
     h('.flex-column.text-center.justify-center.w-33', h('b', title)),
     h('.flex-row.items-center.p2.g2.w-33.justify-end', [
-      getBackToQCGButton(model),
+      getBackToQCGButton(objectViewModel, router),
       filterPanelToggleButton(filterModel),
       model.isContextSecure() && h('.flex-row', getCopyURLToClipboardButton(model)),
     ]),
@@ -53,11 +53,12 @@ const computeTitle = (objectViewModel, router) => {
 
 /**
  * Button for redirecting the user back to QCG object tree page
- * @param {Model} model - root model of the application
+ * @param {ObjectViewModel} objectViewModel - model that manages the state of the objectViewPage
+ * @param {QueryRouter} router - root model of the application
  * @returns {vnode} - virtual node element
  */
-function getBackToQCGButton(model) {
-  const { router, objectViewModel: { selected } } = model;
+function getBackToQCGButton(objectViewModel, router) {
+  const { selected } = objectViewModel;
   const { layoutId = undefined } = router.params;
 
   let title = 'Back';

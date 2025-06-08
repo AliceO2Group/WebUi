@@ -17,32 +17,36 @@ import LayoutUtils from './../LayoutUtils.js';
 import {
   iconPencil, iconTrash, iconPlus, iconBadge, iconLayers, iconCheck, iconBan, iconShareBoxed,
 } from '/js/src/icons.js';
+import { filterPanelToggleButton } from '../../common/filters/filterViews.js';
 
 /**
  * Shows header of page showing one layout with edit button, and other buttons in edit mode. (center and right)
  * @param {Layout} layout - the model that handles the object state.
+ * @param {FilterModel} filterModel - The model handeling the filter state
  * @returns {vnode} - virtual node element
  */
-export default (layout) => {
+export default (layout, filterModel) => {
   const { item, editEnabled = false } = layout;
   if (item) {
-    return editEnabled ? toolbarEditMode(layout) : toolbarViewMode(layout);
+    return editEnabled ? toolbarEditMode(layout, filterModel) : toolbarViewMode(layout, filterModel);
   }
   return;
 };
 
 /**
  * This is the toolbar in view mode (center and right)
- * @param {Layout} layout - the model that handles the object state.
+ * @param {Layout} layout - the model that handles the object state
+ * @param {FilterModel} filterModel - The model handeling the filter state
  * @returns {vnode} - virtual node element
  */
-const toolbarViewMode = (layout) => {
+const toolbarViewMode = (layout, filterModel) => {
   const layoutItem = layout.item;
   const { isOfficial, owner_id, name } = layoutItem;
 
   return [
-    h('.w-50.text-center', h('div.header-layout', [tabViewLinks(layoutItem, layout)])),
+    h('.flex-grow.text-center', h('div.header-layout', [tabViewLinks(layoutItem, layout)])),
     h('.flex-grow.text-right', [
+      filterPanelToggleButton(filterModel),
       h('b.f4.items-center', [isOfficial ? iconBadge() : '', layoutItem.name]),
       ' ',
       // Show group button edit/duplicate only for owner of the layout shown
@@ -79,10 +83,11 @@ const toolbarViewModeTab = (layout, tab, i) => {
 
 /**
  * Toolbar in edit mode (center and right) with rename, trash, save buttons
- * @param {Layout} layout - the model that handles the object state.
+ * @param {Layout} layout - the model that handles the object state
+ * @param {FilterModel} filterModel - The model handeling the filter state
  * @returns {vnode} - virtual node element
  */
-const toolbarEditMode = (layout) => {
+const toolbarEditMode = (layout, filterModel) => {
   const inputHandler = (e) => {
     layout.item.name = e.target.value.trim();
   };
@@ -105,6 +110,7 @@ const toolbarEditMode = (layout) => {
         ]),
       ]),
     ]),
+    filterPanelToggleButton(filterModel),
     h('.flex-grow.text-right', [
       h('input.form-control.form-inline', {
         type: 'text',
