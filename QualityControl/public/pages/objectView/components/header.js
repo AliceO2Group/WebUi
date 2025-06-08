@@ -13,7 +13,6 @@
  */
 
 import { h, iconBook, iconArrowThickLeft } from '/js/src/index.js';
-import { getUrlPathFromObject } from '../../../common/filterToFromUrlParams.js';
 import { filterPanelToggleButton } from '../../../common/filters/filterViews.js';
 
 /**
@@ -22,8 +21,8 @@ import { filterPanelToggleButton } from '../../../common/filters/filterViews.js'
  * @returns {vnode} - virtual node element
  */
 export const objectViewHeader = (model) => {
-  const { filterModel, router } = model;
-  const title = computeTitle(filterModel, router);
+  const { objectViewModel, filterModel, router } = model;
+  const title = computeTitle(objectViewModel, router);
 
   return [
     h('.flex-column.text-center.justify-center.w-33', h('b', title)),
@@ -58,14 +57,14 @@ const computeTitle = (objectViewModel, router) => {
  * @returns {vnode} - virtual node element
  */
 function getBackToQCGButton(model) {
-  const { router, objectViewModel: { filter, selected } } = model;
+  const { router, objectViewModel: { selected } } = model;
   const { layoutId = undefined } = router.params;
 
   let title = 'Back';
   let href = '?page=objectTree';
   if (layoutId) {
     title = 'Back to layout';
-    href = `?page=layoutShow&layoutId=${layoutId}${getUrlPathFromObject(filter)}${getTabFromObject(selected)}`;
+    href = `?page=layoutShow&layoutId=${layoutId}${getTabFromObject(selected)}`;
   }
 
   return h(
