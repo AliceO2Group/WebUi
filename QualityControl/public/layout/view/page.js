@@ -15,7 +15,6 @@
 import { h } from '/js/src/index.js';
 import { draw } from '../../object/objectDraw.js';
 import { iconArrowLeft, iconArrowTop } from '/js/src/icons.js';
-import { filtersPanel } from '../../common/filters/filterViews.js';
 import { minimalObjectInfo } from './panels/minimalObjectInfo.js';
 import { objectInfoResizePanel } from './panels/objectInfoResizePanel.js';
 
@@ -55,7 +54,7 @@ const emptyListEditMode = () => h('.m4', [
  * @returns {undefined} - virtual node element
  */
 function subcanvasView(model) {
-  const { layout, filterModel } = model;
+  const { layout } = model;
   if (!layout.tab) {
     return;
   }
