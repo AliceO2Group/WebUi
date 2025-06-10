@@ -1,0 +1,27 @@
+syntax = "proto3";
+package wrapper;
+
+// ======================================
+//                MESSAGES
+// ======================================
+// Simulates an empty message because protobuffer doesn't support void
+message EmptyMessage {}
+
+// Message with newly generated token and target address binded to it
+message NewToken {
+    string token = 1;
+    string targetAddress = 2;
+}
+
+
+// ======================================
+//                SERVICES
+// ======================================
+
+service ClientService {
+    // Sends newly generated token to the client for specific Connection
+    rpc sendNewToken(NewToken) returns(EmptyMessage) {}
+
+    // Informs the client about token revocation
+    rpc revokeToken(NewToken) returns(EmptyMessage) {}
+}
