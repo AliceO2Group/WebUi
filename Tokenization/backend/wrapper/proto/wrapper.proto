@@ -31,7 +31,7 @@ message Token {
 // Stream message that can contain one of specific messages
 message Payload {
     MessageEvent event = 1;
-    oneof {
+    oneof data {
         EmptyMessage emptyMessage = 2;
         Token newToken = 3;
         Token revokeToken = 4;
