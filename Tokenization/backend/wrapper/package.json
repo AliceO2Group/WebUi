@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "test": "mocha --loader ts-node/esm \"./**/*.test.ts\""
+    "test": "mocha --loader ts-node/esm \"./**/*.test.ts\"",
+    "start": "node --loader ts-node/esm ./central/CentralSystem.ts"
   },
   "author": "",
   "license": "ISC",
@@ -14,6 +15,8 @@
     "ts-jest": "^29.3.4"
   },
   "dependencies": {
+    "@grpc/grpc-js": "^1.13.4",
+    "@grpc/proto-loader": "^0.7.15",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }
