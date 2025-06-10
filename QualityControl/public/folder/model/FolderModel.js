@@ -81,16 +81,22 @@ export default class FolderModel extends Observable {
   }
 
   /**
-   * Adds a new item to the folder's list if it's in a success state
-   * @param {object} item - The item to add to the folder
+   * Adds or updates an item in the folder's list if it's in a success state.
+   * If an equivalent item exists (based on equals() method), it will be replaced.
+   * @param {object} item - The item to add/update in the folder
    * @returns {undefined}
    */
-  push(item) {
+  set(item) {
     this._list.match({
       Success: (list) => {
-        list.push(item);
-        this.notify();
+        const index = list.findIndex((listItem) => listItem.equals(item)); // equals based on id
+        if (index >= 0) {
+          list[index] = item;
+        } else {
+          list.push(item);
+        }
         item.bubbleTo(this);
+        this.notify();
       },
       Other: () => {},
     });
