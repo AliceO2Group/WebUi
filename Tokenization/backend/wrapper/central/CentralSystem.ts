@@ -51,7 +51,7 @@ export class CentralSystem {
   }
 
   private start() {
-    const addr = `0.0.0.0:${this.port}`;
+    const addr = `localhost:${this.port}`;
     this.server.bindAsync(
       addr,
       grpc.ServerCredentials.createInsecure(),
@@ -66,4 +66,4 @@ export class CentralSystem {
   }
 }
 
-const cs = new CentralSystem(50051);
+const centralSystem = new CentralSystem(50051);
