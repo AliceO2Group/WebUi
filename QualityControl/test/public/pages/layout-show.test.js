@@ -159,6 +159,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
   await testParent.test('should have second tab to be empty (according to demo data)', { timeout }, async () => {
     await page.locator('header > div > div > div:nth-child(2) > div > button:nth-child(2)').click();
+    await delay(50);
     const plotPath = 'section svg.jsroot';
     const plotsCount = await page.evaluate((plotPath) => document.querySelectorAll(plotPath).length, plotPath);
     strictEqual(plotsCount, 0);
