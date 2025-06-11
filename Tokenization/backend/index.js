@@ -50,7 +50,7 @@ http.get(
   "/tokens",
   (req, res) => {
     // Fake long page load
-    setTimeout(() => res.status(200).json([...fakeTokens.values()]), 1000);
+    setTimeout(CentralSystem.getTokens, 1000);
   },
   { public: true }
 );

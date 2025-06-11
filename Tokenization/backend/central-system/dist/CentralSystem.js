@@ -1,5 +1,17 @@
 class CentralSystem {
-    static async getTokens(req, res) { }
+    static async getTokens(req, res) {
+        try {
+            const tokens = Array.from(this.fakeTokens.values()).map((token) => ({
+                tokenId: token.tokenId,
+                validity: token.validity,
+                payload: token.payload.slice(-5),
+            }));
+            res.status(200).json(tokens);
+        }
+        catch (error) {
+            res.status(500).json({ error: "Failed to retrieve tokens" });
+        }
+    }
     static async createToken(req, res) { }
     static async provideTokenReceiver(client, token) { }
     static async provideToken(client, tokenEncypted) { }
