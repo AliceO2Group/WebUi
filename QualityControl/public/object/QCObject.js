@@ -37,7 +37,6 @@ export default class QCObject extends Observable {
     this.selected = null; // Object - { name; createTime; lastModified; }
     this.selectedOpen = false;
     this.objects = {}; // ObjectName -> RemoteData.payload -> plot
-    this.filter = {};
 
     this.searchInput = ''; // String - content of input search
     this.searchResult = []; // Array<object> - result list of search
@@ -57,6 +56,7 @@ export default class QCObject extends Observable {
     this.queryingObjects = false;
     this.scrollTop = 0;
     this.scrollHeight = 0;
+    this.filterMap = model.filterModel.filterMap;
   }
 
   /**
@@ -172,15 +172,14 @@ export default class QCObject extends Observable {
 
   /**
    * Ask server for all available objects, fills `tree` of objects
-   * @param {Map<FilterType, string>} filterMap - The map containing the values by which the objects will be filtered
    * @returns {undefined}
    */
-  async loadList(filterMap = {}) {
+  async loadList() {
     this.objectsRemote = RemoteData.loading();
     this.notify();
     this.queryingObjects = true;
     let offlineObjects = [];
-    const result = await this.model.services.object.getObjects(filterMap);
+    const result = await this.model.services.object.getObjects(this.filterMap);
     if (result.isSuccess()) {
       offlineObjects = result.payload;
     } else {
@@ -221,7 +220,8 @@ export default class QCObject extends Observable {
   async loadObjectByName(objectName, timestamp = undefined, id = undefined) {
     this.objects[objectName] = RemoteData.loading();
     this.notify();
-    const obj = await this.model.services.object.getObjectByName(objectName, id, timestamp, this.filter, this);
+
+    const obj = await this.model.services.object.getObjectByName(objectName, id, timestamp, this.filterMap, this);
 
     // TODO Is it a TTree?
     if (obj.isSuccess()) {
@@ -247,10 +247,9 @@ export default class QCObject extends Observable {
   /**
    * Load objects provided by a list of paths
    * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
-   * @param {object} filter - to be applied on quering objects
    * @returns {undefined}
    */
-  async loadObjects(objectsName, filter = {}) {
+  async loadObjects(objectsName) {
     this.objectsRemote = RemoteData.loading();
     this.objects = {}; // Remove any in-memory loaded objects
     this.model.services.object.objectsLoadedMap = {}; // TODO not here
@@ -264,7 +263,7 @@ export default class QCObject extends Observable {
       this.objects[objectName] = RemoteData.Loading();
       this.notify();
       this.objects[objectName] = await this
-        .model.services.object.getObjectByName(objectName, undefined, undefined, filter, this);
+        .model.services.object.getObjectByName(objectName, undefined, undefined, this.filterMap, this);
       this.notify();
     }));
     this.objectsRemote = RemoteData.success();
@@ -467,10 +466,9 @@ export default class QCObject extends Observable {
 
   /**
    * Function that reloads the object list with filters applied
-   * @param {Map<FilterType, string>} filterMap - The map containing the values by which the objects will be filtered
    * @returns {undefined}
    */
-  async triggerFilter(filterMap) {
-    await this.loadList(filterMap);
+  async triggerFilter() {
+    await this.loadList();
   }
 }

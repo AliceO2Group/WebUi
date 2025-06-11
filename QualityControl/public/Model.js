@@ -42,19 +42,21 @@ export default class Model extends Observable {
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // Cast, sessionService has only strings
 
+    this.loader = new Loader(this);
+    this.loader.bubbleTo(this);
+
+    this.filterModel = new FilterModel(this);
+    this.filterModel.bubbleTo(this);
+
     this.object = new QCObject(this);
     this.object.bubbleTo(this);
 
     this.objectViewModel = new ObjectViewModel(this);
     this.objectViewModel.bubbleTo(this);
 
-    this.loader = new Loader(this);
-    this.loader.bubbleTo(this);
-
     this.layoutListModel = new LayoutListModel(this);
     this.layoutListModel.bubbleTo(this);
 
-    this.filterModel = new FilterModel(this);
     this.layout = new Layout(this);
     this.layout.bubbleTo(this);
 

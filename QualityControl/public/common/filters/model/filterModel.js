@@ -90,6 +90,12 @@ export default class FilterModel extends Observable {
 
   triggerFilter(filterAbleModel) {
     this.setFilterToURL();
-    filterAbleModel.triggerFilter(this.filterMap);
+    filterAbleModel.triggerFilter();
+  }
+
+  clearFilter() {
+    this.filterMap = {};
+    this.setFilterToURL();
+    this.notify();
   }
 }

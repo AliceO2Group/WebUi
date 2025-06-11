@@ -70,6 +70,7 @@ const filtersPanel = (filterModel, pageModel) => {
 
   return h(
     '.w-100.flex-row.p2.g2',
+    { onremove: () => filterModel.clearFilter() },
     [
       triggerFiltersButton(onEnterCallback),
       ...filtersList.map((filter) =>
