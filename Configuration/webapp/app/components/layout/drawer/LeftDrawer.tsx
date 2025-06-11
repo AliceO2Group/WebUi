@@ -8,6 +8,7 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material';
+import LeftDrawerFooter from './LeftDrawerFooter';
 
 const DRAWER_WIDTH = 250;
 
@@ -39,9 +40,7 @@ const LeftDrawer = () => {
           ))}
         </List>
       </Box>
-      <Box sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
-        <Typography variant="caption">Footer Content Here</Typography>
-      </Box>
+      <LeftDrawerFooter/>
     </Drawer>
   );
 };

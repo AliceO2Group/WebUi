@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  Box,
-  Toolbar,
-  Typography,
-  IconButton,
-  Menu,
-  MenuItem,
-  Avatar,
-} from '@mui/material';
+import { Box, IconButton, Menu, MenuItem, Avatar } from '@mui/material';
 
 interface UserSectionProps {
   userName: string;
@@ -32,7 +24,7 @@ const UserSection: React.FC<UserSectionProps> = ({ userName }) => {
       <Menu
         anchorEl={anchorEl}
         anchorOrigin={{
-          vertical: 'top',
+          vertical: 'bottom',
           horizontal: 'right',
         }}
         keepMounted
