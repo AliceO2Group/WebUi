@@ -93,6 +93,7 @@ module.exports.setup = (http, ws) => {
   const cacheService = new CacheService(broadcastService);
   const environmentCacheService = new EnvironmentCacheService(broadcastService, eventEmitter);
   const qcConfigurationService = new QCConfigurationService(consulService);
+  qcConfigurationService.testConsulStatus();
 
   const qcConfigurationController = new QCConfigurationController(qcConfigurationService, config.consul);
 
@@ -236,12 +237,17 @@ module.exports.setup = (http, ws) => {
   );
 
   // Configuration
-  http.get('/configurations', qcConfigurationController.getConfigurationsKeys.bind(qcConfigurationController), {
-    public: true
-  });
-  http.get('/configuration', qcConfigurationController.getConfigurationByKey.bind(qcConfigurationController), {
-    public: true
-  });
+  const qcValidateService = qcConfigurationService.validateService.bind(qcConfigurationService);
+  http.get(
+    "/configurations", qcValidateService,
+    qcConfigurationController.getConfigurationsKeys.bind(qcConfigurationController),
+    { public: true }
+  );
+  http.get(
+    '/configuration', qcValidateService,
+    qcConfigurationController.getConfigurationByKey.bind(qcConfigurationController),
+    { public: true }
+  );
 
   // Consul
   const validateService = consulController.validateService.bind(consulController);
