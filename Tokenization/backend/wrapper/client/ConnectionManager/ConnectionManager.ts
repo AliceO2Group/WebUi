@@ -62,10 +62,8 @@ export class ConnectionManager {
         switch (payload.event) {
           // Central system replacing a new token for existing connection
           case DuplexMessageEvent.EMPTY_EVENT:
-            console.log("Empty event: ", payload?.data);
             break;
           case DuplexMessageEvent.NEW_TOKEN:
-            console.log(payload);
             this.handleNewToken(
               payload.newToken.token,
               payload.newToken.targetAddress
