@@ -50,7 +50,7 @@ const headerSpecific = (model) => {
     case 'layoutShow': return layoutViewHeader(layout, filterModel);
     case 'objectTree': return objectTreeHeader(object, filterModel);
     case 'objectView': return objectViewHeader(model);
-    case 'about': return aboutViewHeader();
+    case 'about': return aboutViewHeader(filterModel);
     default: return null;
   }
 };
@@ -61,14 +61,14 @@ const headerSpecific = (model) => {
  * @returns {vnode} - virtual node element
  */
 const filterSpecific = (model) => {
-  const { page, filterModel, layout, object, objectViewModel } = model;
+  const { page, filterModel, layout, object, objectViewModel, aboutViewModel } = model;
 
   switch (page) {
     case 'layoutList': return filtersPanel(filterModel, layout);
     case 'layoutShow': return filtersPanel(filterModel, layout);
     case 'objectTree': return filtersPanel(filterModel, object);
     case 'objectView': return filtersPanel(filterModel, objectViewModel);
-    case 'about': return aboutViewHeader();
+    case 'about': return filtersPanel(filterModel, aboutViewModel);
     default: return null;
   }
 };

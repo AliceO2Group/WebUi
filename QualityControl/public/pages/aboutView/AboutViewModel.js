@@ -73,4 +73,9 @@ export default class AboutViewModel extends Observable {
       this.model.notification.show(`Error fetching data for ${service}: ${error.message}`, 'danger', 2000);
     }
   }
+
+  /**
+   * This function is required for all pages that have the filter element in their header
+   */
+  triggerFilter() {}
 }
