@@ -4,17 +4,24 @@ import {
   Meta,
   Outlet,
   Scripts,
-  ScrollRestoration, useNavigation,
+  ScrollRestoration,
+  useNavigation,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import "@aliceo2/web-ui/Frontend/css/src/bootstrap.css"
-import {Navbar} from "~/ui/navbar";
-import {Spinner} from "~/ui/spinner";
+import "@aliceo2/web-ui/Frontend/css/src/bootstrap.css";
+import { Navbar } from "~/ui/navbar";
+import { Spinner } from "~/ui/spinner";
+import { useEffect } from "react";
+import { fetchSessionData } from "./services/session";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { state } = useNavigation();
+
+  useEffect(() => {
+    fetchSessionData();
+  }, []);
 
   return (
     <html lang="en">
@@ -26,7 +33,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <Navbar />
-        <div className={'p2'}>
+        <div className={"p2"}>
           {state === "loading" ? <Spinner /> : children}
         </div>
         <ScrollRestoration />
@@ -41,7 +48,7 @@ export default function App() {
 }
 
 export function HydrateFallback() {
-  return <Spinner />
+  return <Spinner />;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
