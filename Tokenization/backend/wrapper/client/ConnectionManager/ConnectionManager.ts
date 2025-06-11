@@ -2,6 +2,7 @@ import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
 import { fileURLToPath } from "url";
+import { Connection } from "../Connection/Connection.ts";
 
 /**
  * @description Manages all the connection between clients and central system.
@@ -11,6 +12,12 @@ export class ConnectionManager {
   private stream?: grpc.ClientDuplexStream<any, any>;
   private readonly address: string;
   private reconnectAttempts = 0;
+
+  // Map to store sending connections by target address
+  private sendingConnections: Map<string, Connection> = new Map();
+
+  // Map to store receiving connections by target address
+  private receivingConnections: Map<string, Connection> = new Map();
 
   constructor(centralAddress = "localhost:50051") {
     this.address = centralAddress;
@@ -38,6 +45,9 @@ export class ConnectionManager {
     // Initial connection
     this.connect();
     console.log(`ConnectionManager: connected to ${this.address}`);
+
+    this.sendingConnections.set("a", new Connection("1", "a"));
+    this.sendingConnections.set("b", new Connection("2", "b"));
   }
 
   /**
@@ -48,7 +58,12 @@ export class ConnectionManager {
 
     if (this.stream) {
       this.stream.on("data", (payload) => {
-        // handle data received from the stream
+        switch (payload.event) {
+          // Central system replacing a new token for existing connection
+          case "EMPTY_EVENT":
+            console.log("Empty event: ", payload?.data);
+            break;
+        }
       });
 
       this.stream.on("end", () => {

@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "test": "mocha --loader ts-node/esm \"./**/*.test.ts\"",
-    "start": "node --loader ts-node/esm ./central/CentralSystem.ts"
+    "test": "jest",
+    "start-central": "node --loader ts-node/esm ./central/CentralSystem.ts",
+    "start-client": "node --loader ts-node/esm ./client/gRPCWrapper.ts"
   },
   "author": "",
   "license": "ISC",
