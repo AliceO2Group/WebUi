@@ -33,7 +33,7 @@ const {
 } = require('./middleware/getDetectorsLockOwnershipMiddlewareFactory.js');
 
 // controllers
-const {ConfigurationController} = require('./controllers/Configuration.controller.js');
+const {QCConfigurationController} = require('./controllers/QCConfiguration.controller.js');
 const {ConsulController} = require('./controllers/Consul.controller.js');
 const {EnvironmentController} = require('./controllers/Environment.controller.js');
 const {LockController} = require('./controllers/Lock.controller.js');
@@ -54,6 +54,7 @@ const {LockService} = require('./services/Lock.service.js');
 const {RunService} = require('./services/Run.service.js');
 const {StatusService} = require('./services/Status.service.js');
 const {WorkflowTemplateService} = require('./services/WorkflowTemplate.service.js');
+const {QCConfigurationService} = require('./services/QCConfiguration.service.js');
 
 // web-ui services
 const {NotificationService, ConsulService} = require('@aliceo2/web-ui');
@@ -91,9 +92,10 @@ module.exports.setup = (http, ws) => {
   const broadcastService = new BroadcastService(ws);
   const cacheService = new CacheService(broadcastService);
   const environmentCacheService = new EnvironmentCacheService(broadcastService, eventEmitter);
-  
-  const configurationController = new ConfigurationController(consulService, config.consul);
-  configurationController.testConsulStatus();
+  const qcConfigurationService = new QCConfigurationService(consulService);
+  qcConfigurationService.testConsulStatus();
+
+  const qcConfigurationController = new QCConfigurationController(qcConfigurationService, config.consul);
 
   const consulController = new ConsulController(consulService, config.consul);
   consulController.testConsulStatus();
@@ -235,7 +237,17 @@ module.exports.setup = (http, ws) => {
   );
 
   // Configuration
-  http.get('/configurations', configurationController.getConfigurations.bind(configurationController), {public: true});
+  const qcValidateService = qcConfigurationService.validateService.bind(qcConfigurationService);
+  http.get(
+    "/configurations", qcValidateService,
+    qcConfigurationController.getConfigurationsKeys.bind(qcConfigurationController),
+    { public: true }
+  );
+  http.get(
+    '/configuration', qcValidateService,
+    qcConfigurationController.getConfigurationByKey.bind(qcConfigurationController),
+    { public: true }
+  );
 
   // Consul
   const validateService = consulController.validateService.bind(consulController);
