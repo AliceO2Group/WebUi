@@ -13,4 +13,8 @@ export class Connection {
   public handleNewToken(token: string): void {
     this.token = token;
   }
+
+  public getToken(): string {
+    return this.token;
+  }
 }

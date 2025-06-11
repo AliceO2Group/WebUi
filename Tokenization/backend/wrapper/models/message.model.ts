@@ -1,15 +1,16 @@
-enum DuplexMessageEvent {
-  EMPTY_EVENT,
-  NEW_TOKEN,
-  REVOKE_TOKEN,
+export enum DuplexMessageEvent {
+  EMPTY_EVENT = "EMPTY_EVENT",
+  NEW_TOKEN = "NEW_TOKEN",
+  REVOKE_TOKEN = "REVOKE_TOKEN",
 }
 
-interface TokenMessage {
+export interface TokenMessage {
   token: string;
   targetAddress: string;
 }
 
-interface DuplexMessageModel {
+export interface DuplexMessageModel {
   event: DuplexMessageEvent;
-  data?: TokenMessage;
+  newToken?: TokenMessage;
+  revokeToken?: TokenMessage;
 }

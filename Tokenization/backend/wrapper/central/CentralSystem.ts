@@ -2,12 +2,17 @@ import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
 import { fileURLToPath } from "url";
+import {
+  DuplexMessageEvent,
+  DuplexMessageModel,
+} from "../models/message.model.ts";
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
  */
 export class CentralSystemWrapper {
   private server: grpc.Server;
+  private clientStreams = new Map<string, grpc.ServerDuplexStream<any, any>>();
 
   constructor(private port: number) {
     this.server = new grpc.Server();
@@ -38,19 +43,28 @@ export class CentralSystemWrapper {
   private clientStreamHandler(call: grpc.ServerDuplexStream<any, any>) {
     console.log("Client connected to duplex stream");
 
+    const clientAddress = call.getPeer();
+
+    this.clientStreams.set(clientAddress, call);
+    console.log(`Registered client stream for: ${clientAddress}`);
+
     // hartbeat message
-    call.write({ event: "EMPTY_EVENT", emptyMessage: {} });
+    call.write({ event: "EMPTY_EVENT", data: "registered in central system." });
 
     call.on("data", (payload: any) => {
-      // TODO: Implement data handling logic
+      console.log(`Received from ${clientAddress}:`, payload);
     });
 
     call.on("end", () => {
-      console.log("Client ended stream");
+      console.log(`Client ${clientAddress} ended stream`);
+      this.clientStreams.delete(clientAddress);
       call.end();
     });
 
-    call.on("error", (err) => console.error("Stream error:", err));
+    call.on("error", (err) => {
+      console.error(`Stream error for ${clientAddress}:`, err);
+      this.clientStreams.delete(clientAddress);
+    });
   }
 
   private start() {
@@ -67,6 +81,37 @@ export class CentralSystemWrapper {
       }
     );
   }
+
+  /**
+   * @description Returns all client addresses
+   */
+  public getClients() {
+    return this.clientStreams.keys();
+  }
+
+  /**
+   * @description Sends message event to specific client
+   */
+  public clientSend(clientAddress: string, message: DuplexMessageModel) {
+    const stream = this.clientStreams.get(clientAddress);
+    if (!stream) {
+      console.warn(`No active stream for client ${clientAddress}`);
+      return;
+    }
+    stream.write(message);
+  }
 }
 
+// tests
 const centralSystem = new CentralSystemWrapper(50051);
+setTimeout(() => {
+  const client = Array.from(centralSystem.getClients())[0];
+  console.log(client);
+  centralSystem.clientSend(client, {
+    event: DuplexMessageEvent.NEW_TOKEN,
+    newToken: {
+      token: "new token",
+      targetAddress: "a",
+    },
+  });
+}, 5000);
