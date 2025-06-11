@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 
 class CentralSystem {
   private static fakeTokens = new Map([
-    [1, { tokenId: 1, validity: "bad", payload: "payload1" }],
+    [1, { tokenId: 1, validity: "good", payload: "payload1" }],
     [2, { tokenId: 2, validity: "bad", payload: "payload2" }],
   ]);
 
@@ -21,14 +21,16 @@ class CentralSystem {
     }
   }
 
-  public static async createToken(req: Request, res: Response): Promise<void> {}
+  public static async createToken(req: Request, res: Response): Promise<void> {
+    
+  }
 
-  public static async provideTokenReceiver(
-    client: string,
+  public static async provideTokeToClient(
+    clientID: number,
     token: string
   ): Promise<void> {}
 
-  public static async provideToken(
+  public static async revokeToken(
     client: string,
     tokenEncypted: string
   ): Promise<void> {}
