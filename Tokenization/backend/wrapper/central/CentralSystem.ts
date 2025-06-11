@@ -6,7 +6,7 @@ import { fileURLToPath } from "url";
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
  */
-export class CentralSystem {
+export class CentralSystemWrapper {
   private server: grpc.Server;
 
   constructor(private port: number) {
@@ -69,4 +69,4 @@ export class CentralSystem {
   }
 }
 
-const centralSystem = new CentralSystem(50051);
+const centralSystem = new CentralSystemWrapper(50051);
