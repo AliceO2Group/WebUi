@@ -65,10 +65,15 @@ export class ConnectionManager {
             console.log("Empty event: ", payload?.data);
             break;
           case DuplexMessageEvent.NEW_TOKEN:
-            console.log(payload);
             this.handleNewToken(
               payload.newToken.token,
               payload.newToken.targetAddress
+            );
+            break;
+          case DuplexMessageEvent.REVOKE_TOKEN:
+            this.handleRevokeToken(
+              payload.revokeToken.token,
+              payload.revokeToken.targetAddress
             );
             break;
           default:
@@ -103,6 +108,20 @@ export class ConnectionManager {
       console.log(sendingConnection.getToken());
     } else {
       console.warn(`No sending connection found for ${targetAddress}`);
+    }
+  }
+
+  private handleRevokeToken(newToken: string, targetAddress: string) {
+    console.log(`Revoke token for ${targetAddress}`);
+
+    const sendingConnection = this.sendingConnections.get(targetAddress);
+    if (sendingConnection) {
+      sendingConnection.handleRevokeToken();
+    }
+
+    const receivingConnection = this.receivingConnections.get(targetAddress);
+    if (receivingConnection) {
+      receivingConnection.handleRevokeToken();
     }
   }
 

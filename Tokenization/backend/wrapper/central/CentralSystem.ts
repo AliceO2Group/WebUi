@@ -107,9 +107,20 @@ const centralSystem = new CentralSystemWrapper(50051);
 setTimeout(() => {
   const client = Array.from(centralSystem.getClients())[0];
   console.log(client);
+
+  // send new token
   centralSystem.clientSend(client, {
     event: DuplexMessageEvent.NEW_TOKEN,
     newToken: {
+      token: "new token",
+      targetAddress: "a",
+    },
+  });
+
+  // revoke token
+  centralSystem.clientSend(client, {
+    event: DuplexMessageEvent.REVOKE_TOKEN,
+    revokeToken: {
       token: "new token",
       targetAddress: "a",
     },
