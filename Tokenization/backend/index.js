@@ -14,7 +14,7 @@
 
 import { HttpServer } from "@aliceo2/web-ui";
 
-//import { CentralSsytem } from "./central-system/dist/CentralSystem.js";
+import CentralSystem from "./central-system/dist/CentralSystem.js";
 
 const http = new HttpServer({ port: 8080, allow: "*" });
 
