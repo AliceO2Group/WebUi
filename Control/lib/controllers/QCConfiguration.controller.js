@@ -21,29 +21,29 @@ const { getConsulConfig } = require("../config/publicConfigProvider.js");
  */
 class QCConfigurationController {
   /**
-     * Setup ConfigurationController
+     * Setup QCConfigurationController
      * @param {QCConfigurationService} qcConfigurationService
      * @param {JSON} config
      */
   constructor(qcConfigurationService, config) {
-    this.qcConfigurationService = qcConfigurationService;
-    this.config = getConsulConfig({ consul: config });
-    this.configurationsPath = `${this.config.qcPath}/ANY/any`;
+    this._qcConfigurationService = qcConfigurationService;
+    this._config = getConsulConfig({ consul: config });
+    this._qcConfigurationsPath = `${this._config.qcPath}/ANY/any`;
 
-    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? "cog"}/consul`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? "cnf"}/qc-configuration-controller`);
   }
 
   /**
-     * Get configurations from Consul
-     * @param {Request} req
-     * @param {Response} res
-     */
+   * Method to get configurations names
+   * @param {Request} req
+   * @param {Response} res
+   */
   async getConfigurationsKeys(req, res) {
     const { prefix = "", recurse = false } = req.query;
-    const prefixPath = prefix ? `${this.configurationsPath}/${prefix}` : this.configurationsPath;
+    const prefixPath = prefix ? `${this._qcConfigurationsPath}/${prefix}` : this._qcConfigurationsPath;
 
     try {
-      const parsedData = await this.qcConfigurationService.getKeysOfValidConfigurations(prefixPath, recurse);
+      const parsedData = await this._qcConfigurationService.getKeysOfValidConfigurations(prefixPath, recurse);
       if (!parsedData || parsedData.length === 0) {
         return errorHandler("No configurations found", res, 404);
       }
@@ -56,16 +56,18 @@ class QCConfigurationController {
   }
 
   /**
-     * Get configurations from Consul
-     * @param {Request} req
-     * @param {Response} res
-     */
+   * Method to get configuration value by key
+   * @param {Request} req
+   * @param {Response} res
+   */
   async getConfigurationByKey(req, res) {
     const { key } = req.query;
+    if (!key) {
+      return errorHandler("Missing configuration key", res, 400);
+    }
 
     try {
-      const value = await this.qcConfigurationService.getConfigurationByKey(key);
-      console.log("Retrieved configuration:", value);
+      const value = await this._qcConfigurationService.getConfigurationByKey(key);
       if (!value) {
         return errorHandler("Configuration not found", res, 404);
       }

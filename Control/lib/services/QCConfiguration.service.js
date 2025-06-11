@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-const { NotFoundError, ServiceUnavailableError } = require("@aliceo2/web-ui");
+const { NotFoundError, ServiceUnavailableError, LogManager } = require("@aliceo2/web-ui");
 const { errorHandler } = require("../utils.js");
 
 /**
@@ -30,6 +30,8 @@ class QCConfigurationService {
      * @type {ConsulService}
      */
     this._consulService = consulService;
+    
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? "cnf"}/qc-configuration-service`);
   }
 
   /**
@@ -52,7 +54,7 @@ class QCConfigurationService {
    * @param {Next} next
    */
   validateService(req, res, next) {
-    if (this.consulService) {
+    if (this._consulService) {
       next();
     } else {
       errorHandler("Unable to retrieve configuration of consul service", res, 502);
@@ -63,7 +65,7 @@ class QCConfigurationService {
    * Method to check if consul service can be used
    */
   async testConsulStatus() {
-    this.consulService
+    this._consulService
       .getConsulLeaderStatus()
       .then((data) => this._logger.info(`Service is up and running on: ${data}`))
       .catch((error) => this._logger.error(`Connection failed due to ${error}`));
@@ -75,9 +77,6 @@ class QCConfigurationService {
    * @param {boolean} [recurse=false] - whether to recurse into subdirectories
    */
   async getKeysOfValidConfigurations(prefix, recurse = false) {
-    if (!this._consulService) {
-      throw new ServiceUnavailableError("Consul service is not available");
-    }
     try {
       const data = await this._consulService.getOnlyRawValuesByKeyPrefix(prefix);
       const parsedData = [];
@@ -111,9 +110,6 @@ class QCConfigurationService {
    * @param {String} key - the key of the configuration
    */
   async getConfigurationByKey(key) {
-    if (!this._consulService) {
-      throw new ServiceUnavailableError("Consul service is not available");
-    }
     try {
       const value = await this._consulService.getOnlyRawValueByKey(key);
       if (!value) {
