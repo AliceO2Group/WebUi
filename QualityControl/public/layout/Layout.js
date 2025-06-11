@@ -739,8 +739,11 @@ export default class Layout extends Observable {
    * Function that fetches the object versions in accordance with the provided filters
    * @returns {undefined}
    */
-  triggerFilter() {
+  async triggerFilter() {
     this.selectTab(this.tabIndex);
+    if (this.editEnabled) { // To re-render the objectTree in edit mode
+      await this.model.services.object.listObjects();
+    }
   }
 
   /**
