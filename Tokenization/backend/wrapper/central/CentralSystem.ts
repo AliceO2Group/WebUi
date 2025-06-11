@@ -3,6 +3,9 @@ import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
 import { fileURLToPath } from "url";
 
+/**
+ * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
+ */
 export class CentralSystem {
   private server: grpc.Server;
 

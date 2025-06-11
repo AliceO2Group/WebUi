@@ -87,8 +87,3 @@ export class ConnectionManager {
     console.log("Disconnected from central");
   }
 }
-
-// Usage example:
-// const mgr = new ConnectionManager();
-// mgr.on('message', payload => console.log('Received:', payload));
-// mgr.disconnect();
