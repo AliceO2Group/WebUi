@@ -18,7 +18,7 @@ import { CCDB_FILTER_FIELDS, CCDB_MONITOR, CCDB_VERSION_KEY } from './../../lib/
 import { config } from './../config.js';
 import { objects, subfolders } from './seeders/ccdbObjects.js';
 import { MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER,
-  MOCK_OBJECT_DETAILS_RESPONSE, MOCK_OBJECT_IDENTIFICATION_RESPONSE,
+  MOCK_OBJECT_1_DETAILS_RESPONSE, MOCK_OBJECT_IDENTIFICATION_RESPONSE,
   MOCK_OBJECT_VERSIONS_RESPONSE, MOCK_OBJECT_VERSIONS_RESPONSE_RUN_NUMBER_FILTER }
   from './seeders/object-view/mock-object-view.js';
 import { CCDB_MOCK_VERSION } from './seeders/ccdbVersion.js';
@@ -73,13 +73,13 @@ export const initializeNockForCcdb = () => {
     .reply(200, { subfolders })
 
     .head('/qc/test/object/1/1656072357492/1971432357492/016fa8ac-f3b6-11ec-b9a9-c0a80209250c')
-    .reply(200, null, MOCK_OBJECT_DETAILS_RESPONSE.headers)
+    .reply(200, null, MOCK_OBJECT_1_DETAILS_RESPONSE)
 
     .head(CCDB_API_PATH_OBJECT_DETAILS)
-    .reply(200, null, MOCK_OBJECT_DETAILS_RESPONSE.headers)
+    .reply(200, null, MOCK_OBJECT_1_DETAILS_RESPONSE)
 
     .head('/qc/test/object/1/1656072357492/1971432357492/016fa8ac-f3b6-11ec-b9a9-c0a80209250c/RunNumber=0')
-    .reply(200, null, MOCK_OBJECT_DETAILS_RESPONSE.headers);
+    .reply(200, null, MOCK_OBJECT_1_DETAILS_RESPONSE);
 
   nock(CCDB_URL, xFieldHeader2).persist()
     .get(CCDB_API_PATH_OBJECT_IDENTIFICATION)
