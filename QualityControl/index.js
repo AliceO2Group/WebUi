@@ -12,49 +12,36 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager, HttpServer, WebSocket } from '@aliceo2/web-ui';
-const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/index`);
-import path from 'path';
+import { HttpServer, WebSocket } from '@aliceo2/web-ui';
+import { join, dirname } from 'path';
 import { setup } from './lib/api.js';
-
-// Reading config file
+import { fileURLToPath } from 'url';
 import { config } from './lib/config/configProvider.js';
+import { createRequire } from 'module';
+import environmentSetup from './environmentSetup.js';
 
-// Quick check config at start
-
+const logger = await environmentSetup();
+// Reading config file
 if (config.http.tls) {
-  logger.info(`HTTPS endpoint: https://${config.http.hostname}:${config.http.portSecure}`);
+  logger.infoMessage(`HTTPS endpoint: https://${config.http.hostname}:${config.http.portSecure}`);
 }
-logger.info(`HTTP endpoint: http://${config.http.hostname}:${config.http.port}`);
+logger.infoMessage(`HTTP endpoint: http://${config.http.hostname}:${config.http.port}`);
 if (typeof config.demoData != 'undefined' && config.demoData) {
-  logger.info('Using demo data');
+  logger.infoMessage('Using demo data');
 } else {
   config.demoData = false;
 }
 
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
-// Start servers
-const http = new HttpServer(config.http, config.jwt, config.openId);
-http.addStaticPath(path.join(__dirname, 'common'));
-http.addStaticPath(path.join(__dirname, 'public'));
-
-import { createRequire } from 'module';
-
 const require = createRequire(import.meta.url);
 const pathName = require.resolve('jsroot');
-http.addStaticPath(path.join(pathName, '../..'), 'jsroot');
+
+// Start servers
+const http = new HttpServer(config.http, config.jwt, config.openId);
+http.addStaticPath(join(__dirname, 'common'));
+http.addStaticPath(join(__dirname, 'public'));
+http.addStaticPath(join(pathName, '../..'), 'jsroot');
 
 const ws = new WebSocket(http);
 
-if (process.env.NODE_ENV === 'test') {
-  // Initialize nock for CCDB and Bookkeeping only if we are in test environment
-  const { initializeNockForCcdb } = await import('./test/setup/testSetupForCcdb.js');
-  const { initializeNockForBkp } = await import('./test/setup/testSetupForBkp.js');
-
-  initializeNockForCcdb();
-  initializeNockForBkp();
-}
 setup(http, ws);

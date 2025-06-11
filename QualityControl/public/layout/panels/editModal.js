@@ -22,7 +22,7 @@ import { h } from '/js/src/index.js';
 export default (model) => h('.o2-modal', [
   h('.o2-modal-content', [
     h('.p2.text-center.flex-column', [
-      h('h4.pv1', 'Edit JSON file of a layout'),
+      h('h4.pv1#editModal', 'Edit JSON file of a layout'),
       h('', h('textarea.form-control.w-100.resize-vertical', {
         rows: 15,
         oninput: (e) => model.layout.checkLayoutToUpdate(e.target.value),

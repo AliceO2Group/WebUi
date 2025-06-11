@@ -18,8 +18,8 @@
   "type": "module",
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon --watch index.js --watch lib --watch config.js index.js",
     "lint": "./node_modules/.bin/eslint --config eslint.config.js lib public",
     "coverage-lcov": "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/lcov.info test/test-index.js",
     "coverage-local": "node --test --experimental-test-coverage --test-reporter=spec test/test-index.js",
@@ -38,6 +38,7 @@
   ],
   "dependencies": {
     "@aliceo2/web-ui": "2.8.4",
+    "cross-env": "^7.0.3",
     "joi": "17.13.3",
     "jsroot": "7.9.0",
     "mariadb": "^3.4.1",

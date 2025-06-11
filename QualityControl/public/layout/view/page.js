@@ -195,16 +195,8 @@ function chartView(model, tabObject) {
  * @param {object} tabObject - to be drawn with jsroot
  * @returns {vnode} - virtual node element
  */
-const drawComponent = (model, tabObject) => h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
-  h('.jsrootdiv', {
-    style: {
-      'z-index': 90,
-      overflow: 'hidden',
-      height: '100%',
-      display: 'flex',
-      'flex-direction': 'column',
-    },
-  }, draw(model, tabObject, {})),
+const drawComponent = (model, tabObject) => h('.h-100.flex-column', [
+  h('.jsrootdiv', draw(model, tabObject, {})),
   objectInfoResizePanel(model, tabObject),
   model.layout.item && model.layout.item.displayTimestamp
       && minimalObjectInfo(model, tabObject),

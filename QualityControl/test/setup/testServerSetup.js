@@ -27,6 +27,9 @@ import path from 'path';
  */
 export async function setupServerForIntegrationTests() {
   await copyMockDataFileToUse();
+  const isDebug = process.argv.includes('--debug');
+  const alwaysFilter = ['JSHandle:render', 'JSHandle:Usage of JSRoot.core.js', 'JSHandle:Set jsroot source_dir'];
+  const backendFilters = ['ID 0 Client disconnected', 'DB file updated'];
 
   let subprocessOutput = undefined;
   const url = `http://${config.http.hostname}:${config.http.port}/`;
@@ -39,10 +42,22 @@ export async function setupServerForIntegrationTests() {
     },
   });
   subprocess.stdout.on('data', (chunk) => {
-    subprocessOutput += chunk.toString();
+    const text = chunk.toString();
+    subprocessOutput += text;
+    if (isDebug) {
+      if (!backendFilters.some((filter)=> text.includes(filter))) {
+        console.log('BACK-END', text);
+      }
+    }
   });
   subprocess.stderr.on('data', (chunk) => {
-    subprocessOutput += chunk.toString();
+    const text = chunk.toString();
+    subprocessOutput += text;
+    if (isDebug) {
+      if (!backendFilters.some((filter)=> text.includes(filter))) {
+        console.log('BACK-END', text);
+      }
+    }
   });
 
   // Start browser to test UI
@@ -62,9 +77,10 @@ export async function setupServerForIntegrationTests() {
     console.error('        ', pageerror);
   });
   page.on('console', (msg) => {
-    for (let i = 0; i < msg.args().length; ++i) {
-      console.log(`        ${msg.args()[i]}`);
-    }
+    let lines = msg.args();
+    lines = lines.filter((arg)=> !alwaysFilter.some((filter) => arg.toString().includes(filter)));
+
+    lines.forEach((line) => console.log(`        ${line}`));
   });
 
   return { url, page, browser, subprocess, subprocessOutput };

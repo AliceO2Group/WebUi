@@ -1,5 +1,6 @@
 /config.js
 public/config.cjs
+public/index.js
 test/setup/seeders/qcg-mock-data.json
 *~
 .DS_Store

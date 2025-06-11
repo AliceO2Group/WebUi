@@ -17,6 +17,7 @@ import { httpHeadJson, httpGetJson } from '../../utils/httpRequests.js';
 import {
   CCDB_MONITOR, CCDB_VERSION_KEY, CCDB_RESPONSE_BODY_KEYS, CCDB_FILTER_FIELDS, CCDB_RESPONSE_HEADER_KEYS,
 } from './CcdbConstants.js';
+import { qcObjectNameArrayDto } from '../../dtos/QCObjectNameDto.js';
 
 const {
   LAST_MODIFIED, VALID_FROM, VALID_UNTIL, CREATED, PATH, SIZE, FILE_NAME, METADATA, ID,
@@ -107,12 +108,13 @@ export class CcdbService {
    * @rejects {Error}
    */
   async getObjectsTreeList(prefix = this._PREFIX) {
-    const { subfolders } = await httpGetJson(this._hostname, this._port, `/tree/${prefix}.*`);
+    let { subfolders } = await httpGetJson(this._hostname, this._port, `/tree/${prefix}.*`);
 
     if (!Array.isArray(subfolders)) {
       throw new FailedDependencyError('Invalid response format from server - expected subfolders array');
     }
-    // console.log(await this.getObjectsLatestVersionList(prefix));
+
+    subfolders = await qcObjectNameArrayDto.validateAsync(subfolders);
 
     return subfolders.map((folder) => ({ path: folder }));
   }

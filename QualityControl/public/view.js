@@ -21,10 +21,10 @@ import layoutViewPage from './layout/view/page.js';
 import layoutImportModal from './layout/panels/importModal.js';
 import layoutEditModal from './layout/panels/editModal.js';
 
-import objectTreePage from './object/objectTreePage.js';
 import ObjectViewPage from './pages/objectView/ObjectViewPage.js';
 import AboutViewPage from './pages/aboutView/AboutViewPage.js';
 import LayoutListPage from './pages/layoutListView/LayoutListPage.js';
+import objectTreePage from './pages/objectTreeView/objectTreePage.js';
 
 /**
  * Entry point to generate view of QCG as a tree of function calls

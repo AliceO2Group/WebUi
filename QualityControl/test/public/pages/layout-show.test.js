@@ -270,11 +270,15 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have a tree sidebar in edit mode',
     { timeout },
     async () => {
-      const secondElementPath = 'nav table tbody tr:nth-child(2)';
+      const secondElementPath = '.scroll-y ul';
       await page.locator(secondElementPath).click();
+      await delay(50); // to let the list unfold
       const rowsCount = await page.evaluate((secondElementPath) =>
         document.querySelectorAll(secondElementPath).length, secondElementPath);
-      strictEqual(rowsCount, 1);
+
+      strictEqual(rowsCount, 3);
+      // Each subtree will have its own nested list so qc/test/object/1
+      // will inititially have 1 ul, and two after you expand the first tree, three if you expand the one after.
     },
   );
 
@@ -396,12 +400,8 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const cancelButtonPath = 'body > div > div > div > div > button:nth-child(2)';
       await page.locator(cancelButtonPath).click();
       await delay(50);
-      const childrenCount = await page.evaluate(() => {
-        const bodyPath = 'body';
-        const body = document.querySelector(bodyPath);
-        return body.children.length;
-      });
-      strictEqual(childrenCount, 2);
+      const jsonEditor = await page.evaluate(() => document.querySelector('#editModal'));
+      strictEqual(jsonEditor, null);
     },
   );
 

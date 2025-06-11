@@ -11,9 +11,18 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, ok } from 'node:assert';
+import { strictEqual, ok, deepStrictEqual } from 'node:assert';
+import { delay } from '../../testUtils/delay.js';
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
 const SORTING_BUTTON_PATH = 'header > div > div:nth-child(3) > div > button';
+const LIST_ITEM_PATH = 'ul > li'; // General path for checking existence
+const LIST_OBJECT_PATH = '[title="qc/test/object"] li'; // Path specifically for finding objects
+const sortOptionPath = (index) => `header > div > div:nth-child(3) > div > div > a:nth-child(${index})`;
+const [NAME_ASC_INDEX, NAME_DEC_INDEX] = [1, 2];
+const VIRTUAL_TABLEROW_PATH = 'tbody > tr.object-selectable';
+const SEARCH_PATH = 'header > div > div:nth-child(3) > input';
+const OBJECTS_DESCENDING = ['qc/test/object/2', 'qc/test/object/11', 'qc/test/object/1'];
+const OBJECTS_ASCENDING = ['qc/test/object/1', 'qc/test/object/11', 'qc/test/object/2'];
 
 /**
  * Initial page setup tests
@@ -29,12 +38,11 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(location.search, OBJECT_TREE_PAGE_PARAM);
   });
 
-  await testParent.test('should have a tree as a table', { timeout }, async () => {
-    const tableRowPath = 'section > div > div > div > table > tbody > tr';
-    await page.waitForSelector(tableRowPath, { timeout: 1000 });
+  await testParent.test('should have a tree as a list', { timeout }, async () => {
+    await page.waitForSelector(LIST_ITEM_PATH, { timeout: 1000 });
     const rowsCount = await page.evaluate(
-      (tableRowPath) => document.querySelectorAll(tableRowPath).length,
-      tableRowPath,
+      (LIST_ITEM_PATH) => document.querySelectorAll(LIST_ITEM_PATH).length,
+      LIST_ITEM_PATH,
     );
     ok(rowsCount > 1); // more than 1 object in the tree
   });
@@ -46,37 +54,55 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should have first element in tree as "qc/test/object/1"', async () => {
-    const { name } = await page.evaluate(() => window.model.object.currentList[0]);
-    strictEqual(name, 'qc/test/object/1');
+    await page.locator('[title="qc/test"]>div').click();
+    await page.locator('[title="qc/test/object"]>div').click();
+    await delay(50); // Wait for expansion to finish
+
+    const objectIds = await page.evaluate((path) =>
+      [...document.querySelectorAll(path)].map((e)=> e.id), LIST_OBJECT_PATH);
+
+    deepStrictEqual(objectIds, OBJECTS_ASCENDING);
   });
 
-  await testParent.test('should sort list of histograms by name in descending order', async () => {
+  await testParent.test('should sort list of objects by name in descending order', async () => {
     await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByNameOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(2)';
-    await page.locator(sortingByNameOptionPath).click();
+    await page.locator(sortOptionPath(NAME_DEC_INDEX)).click();
+    await delay(50); // Wait for sort to finish
 
-    const sorted = await page.evaluate(() => ({
-      list: window.model.object.currentList,
-      sort: window.model.object.sortBy,
-    }));
-    strictEqual(sorted.sort.title, 'Name');
-    strictEqual(sorted.sort.order, -1);
-    strictEqual(sorted.sort.field, 'name');
-    strictEqual(sorted.list[0].name, 'qc/test/object/2');
+    const objectIds = await page.evaluate((path) =>
+      [...document.querySelectorAll(path)].map((e)=> e.id), LIST_OBJECT_PATH);
+
+    deepStrictEqual(objectIds, OBJECTS_DESCENDING);
   });
 
-  await testParent.test('should sort list of histograms by name in ascending order', async () => {
+  await testParent.test('should sort virtual table of objects by name in descending order', async () => {
+    await page.locator(SEARCH_PATH).fill('qc');
+    await delay(50); // Wait for table to load
+
+    const objectTitles = await page.evaluate((rowPath) =>
+      [...document.querySelectorAll(rowPath)].map((e)=> e.title), VIRTUAL_TABLEROW_PATH);
+
+    deepStrictEqual(objectTitles, OBJECTS_DESCENDING);
+  });
+
+  await testParent.test('should sort virtual table of objects by name in ascending order', async () => {
     await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByNameOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(1)';
-    await page.locator(sortingByNameOptionPath).click();
-    const sorted = await page.evaluate(() => ({
-      list: window.model.object.currentList,
-      sort: window.model.object.sortBy,
-    }));
-    strictEqual(sorted.sort.title, 'Name');
-    strictEqual(sorted.sort.order, 1);
-    strictEqual(sorted.sort.field, 'name');
-    strictEqual(sorted.list[0].name, 'qc/test/object/1');
+    await page.locator(sortOptionPath(NAME_ASC_INDEX)).click();
+    await delay(50); // Wait for sort to finish
+
+    const objectIds = await page.evaluate((rowPath) =>
+      [...document.querySelectorAll(rowPath)].map((e)=> e.title), VIRTUAL_TABLEROW_PATH);
+
+    deepStrictEqual(objectIds, OBJECTS_ASCENDING);
+    await page.locator(SEARCH_PATH).fill(' '); // cleanup for the next test. Whitespace is required for some reason
+    await delay(50); // Wait object list to load
+  });
+
+  await testParent.test('should sort list of objects by name in ascending order', async () => {
+    const objectIds = await page.evaluate((path) =>
+      [...document.querySelectorAll(path)].map((e)=> e.id), LIST_OBJECT_PATH);
+
+    deepStrictEqual(objectIds, OBJECTS_ASCENDING);
   });
 
   await testParent.test('should have filtered results on input search', async () => {
