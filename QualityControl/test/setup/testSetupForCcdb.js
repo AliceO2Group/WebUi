@@ -43,15 +43,13 @@ versionResponse[CCDB_MONITOR] = {};
 versionResponse[CCDB_MONITOR][config.ccdb.hostname] = [CCDB_MOCK_VERSION];
 const fileContent = readFileSync(CCDB_API_DOWNLOAD_ROOT_OBJECT.objectPath);
 const acceptHeader = { reqheaders: { Accept: 'application/json' } };
-const xFieldHeader1 = {
-  reqheaders: { Accept: 'application/json', 'X-Filter-Fields': `${PATH},${CREATED},${LAST_MODIFIED}` },
-};
-const xFieldHeader2 = {
-  reqheaders: { Accept: 'application/json', 'X-Filter-Fields': `${PATH},${ID},${VALID_FROM},${VALID_UNTIL}` },
-};
-const xFieldHeader3 = {
-  reqheaders: { Accept: 'application/json', 'X-Filter-Fields': `${VALID_FROM},${ID},${CREATED}` },
-};
+const xFieldHeader1 =
+  { reqheaders: { Accept: 'application/json', 'X-Filter-Fields': `${PATH},${CREATED},${LAST_MODIFIED}` } };
+const xFieldHeader2 =
+  { reqheaders: { Accept: 'application/json', 'X-Filter-Fields': `${PATH},${ID},${VALID_FROM},${VALID_UNTIL}` } };
+const xFieldHeader3 =
+  { reqheaders: { Accept: 'application/json', 'X-Filter-Fields': `${VALID_FROM},${ID},${CREATED}` } };
+const xFieldHeader4 = { reqheaders: { Accept: 'application/json', 'X-Filter-Fields': PATH } };
 
 /**
  * Setup nock environment for ccdb which is to intercept all CCDB requests used in the Frontend test suites
@@ -65,6 +63,10 @@ export const initializeNockForCcdb = () => {
   nock(CCDB_URL, xFieldHeader1).persist()
     .get(`${CCDB_API_PATH_LATEST}.*`)
     .reply(200, { objects })
+    .get(`${CCDB_API_PATH_LATEST}.*/RunNumber=0`)
+    .reply(200, MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER);
+
+  nock(CCDB_URL, xFieldHeader4).persist()
     .get(`${CCDB_API_PATH_LATEST}.*/RunNumber=0`)
     .reply(200, MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER);
 
