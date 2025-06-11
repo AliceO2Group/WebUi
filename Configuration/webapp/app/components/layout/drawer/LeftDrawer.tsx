@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@mui/material';
 
-const DRAWER_WIDTH = 200;
+const DRAWER_WIDTH = 250;
 
 const LeftDrawer = () => {
   return (
@@ -27,7 +27,9 @@ const LeftDrawer = () => {
       variant="permanent"
       anchor="left"
     >
-      <Toolbar />
+      <Toolbar style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}>
+        <Typography variant="h5">Configuration GUI</Typography>
+      </Toolbar>
       <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
         <List>
           {['Item 1', 'Item 2', 'Item 3', 'Item 4'].map((text) => (
