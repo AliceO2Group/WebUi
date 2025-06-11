@@ -88,11 +88,20 @@ export default class FilterModel extends Observable {
     this.notify();
   };
 
+  /**
+   * Triggers the filter update by persisting to URL and notifying the filterable model
+   * @param {object} filterAbleModel - The model that should be notified to apply the filters
+   * @returns {undefined}
+   */
   triggerFilter(filterAbleModel) {
     this.setFilterToURL();
     filterAbleModel.triggerFilter();
   }
 
+  /**
+   * Clears all currently set filters and updates the URL accordingly
+   * @returns {undefined}
+   */
   clearFilter() {
     this.filterMap = {};
     this.setFilterToURL();
