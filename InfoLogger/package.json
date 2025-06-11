@@ -39,7 +39,7 @@
     "eslint": "^9.28.0",
     "eslint-plugin-jsdoc": "^50.7.1",
     "globals": "^16.2.0",
-    "mocha": "^11.5.0",
+    "mocha": "^11.6.0",
     "nyc": "^17.1.0",
     "puppeteer": "^24.10.0",
     "sinon": "^20.0.0"
