@@ -71,10 +71,7 @@ export class ConnectionManager {
             );
             break;
           case DuplexMessageEvent.REVOKE_TOKEN:
-            this.handleRevokeToken(
-              payload.revokeToken.token,
-              payload.revokeToken.targetAddress
-            );
+            this.handleRevokeToken(payload.revokeToken.token);
             break;
           default:
             console.warn(`Unhandled event: ${payload.event}`);
@@ -111,7 +108,7 @@ export class ConnectionManager {
     }
   }
 
-  private handleRevokeToken(newToken: string, targetAddress: string) {
+  private handleRevokeToken(targetAddress: string) {
     console.log(`Revoke token for ${targetAddress}`);
 
     const sendingConnection = this.sendingConnections.get(targetAddress);
