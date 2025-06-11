@@ -3,7 +3,7 @@ import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
 import { fileURLToPath } from "url";
 
-export class CentralSystem {
+export class CentralSystemWrapper {
   private server: grpc.Server;
 
   constructor(private port: number) {
@@ -66,4 +66,4 @@ export class CentralSystem {
   }
 }
 
-const centralSystem = new CentralSystem(50051);
+//const centralSystem = new CentralSystem(50051);
