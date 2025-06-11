@@ -10,12 +10,12 @@ class CentralSystem {
 
   public static async createToken(req: Request, res: Response): Promise<void> {}
 
-  public static async provideTokenReceiver(
-    client: string,
+  public static async provideTokeToClient(
+    clientID: number,
     token: string
   ): Promise<void> {}
 
-  public static async provideToken(
+  public static async revokeToken(
     client: string,
     tokenEncypted: string
   ): Promise<void> {}
