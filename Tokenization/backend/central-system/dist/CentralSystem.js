@@ -1,8 +1,8 @@
 class CentralSystem {
     static async getTokens(req, res) { }
     static async createToken(req, res) { }
-    static async provideTokenReceiver(client, token) { }
-    static async provideToken(client, tokenEncypted) { }
+    static async provideTokeToClient(clientID, token) { }
+    static async revokeToken(client, tokenEncypted) { }
 }
 CentralSystem.fakeTokens = new Map([
     [1, { tokenId: 1, validity: "good", payload: "payload1" }],
