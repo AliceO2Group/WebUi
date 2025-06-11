@@ -77,7 +77,7 @@ export async function setupServerForIntegrationTests() {
     console.error('        ', pageerror);
   });
   page.on('console', (msg) => {
-    let lines = msg.args();
+    let lines = msg.args() || [];
     lines = lines.filter((arg)=> !alwaysFilter.some((filter) => arg.toString().includes(filter)));
 
     lines.forEach((line) => console.log(`        ${line}`));
