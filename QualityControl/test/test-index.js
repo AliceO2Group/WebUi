@@ -49,6 +49,7 @@ import { httpRequestsTestSuite } from './lib/utils/httpRequests.test.js';
 import { layoutControllerTestSuite } from './lib/controllers/LayoutController.test.js';
 import { statusControllerTestSuite } from './lib/controllers/StatusController.test.js';
 import { filtersControllerTestSuite } from './lib/controllers/FiltersController.test.js';
+import { objectControllerTestSuite } from './lib/controllers/ObjectController.test.js';
 
 /**
  * Services
@@ -210,9 +211,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     suite('Controllers - Test Suite', async () => {
       suite('LayoutController test suite', async () => await layoutControllerTestSuite());
       suite('StatusController test suite', async () => await statusControllerTestSuite());
-      suite('ObjectController test suite', async () => {
-        // TODO - bring inline with current tests
-      });
+      suite('ObjectController test suite', async () => await objectControllerTestSuite());
       suite('UserController - Test Suite', async () => await userControllerTestSuite());
       suite('FiltersController test suite', async () => await filtersControllerTestSuite());
     });

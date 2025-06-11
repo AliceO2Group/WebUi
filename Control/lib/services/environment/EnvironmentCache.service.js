@@ -138,7 +138,7 @@ class EnvironmentCacheService {
        * @param {object} event - the event object containing the payload and environmentId
        */
       (event) => {
-        const { payload: {state, ddsSessionId, ddsSessionStatus}, environmentId } = event;
+        const { payload: { state, ddsSessionId, ddsSessionStatus }, environmentId } = event;
         const environmentUpdated = this._updateAttributeOfEnvironment(
           environmentId,
           EPN_PATH_IN_ENVIRONMENT_INFO,
@@ -158,19 +158,40 @@ class EnvironmentCacheService {
        * @param {number} event.timestamp - the timestamp of the event
        * @returns {void}
        */
-      ({ taskEvent }) => {
-        const { environmentId, state } = taskEvent;
-        if (
-          (state === TaskState.ERROR || state === TaskState.ERROR_CRITICAL)
-          && this._environments.has(environmentId)
-          && !this._environments.get(environmentId).firstTaskInError
-        ) {
-          const environment = JSON.parse(JSON.stringify(this._environments.get(environmentId)));
-          environment.firstTaskInError = taskEvent;
-          this._environments.set(environmentId, environment);
-          this._broadcastService.broadcast(NOTIFICATION, taskEvent);
-        }
-      });
+      ({ taskEvent }) => this._handleFirstTaskInError(taskEvent.environmentId, taskEvent)
+    );
+    
+    this._eventEmitter.on(INTEGRATED_SERVICES_TRACK.ODC.DEVICE_STATE_CHANGE,
+      /**
+       * @private
+       * An event handler for receiving an integrated service task state change, parse it as per GUI expectations and broadcast it to NodeJS EventEmitter listeners
+       * @param {OdcDeviceInfoEvent} odcDeviceInfoEvent - the task event object containing the task information
+       * @returns {void}
+       */
+      (odcDeviceEvent) => this._handleFirstTaskInError(odcDeviceEvent.environmentId, odcDeviceEvent)
+    );
+  }
+  
+  /**
+   * Handles the events emitted to tracks TASKS_TRACKS and INTEGRATED_SERVICES_TRACK.ODC.DEVICE_STATE_CHANGE, that is
+   * FLP tasks or ODC device state changes.
+   * This method checks if the event is in an error state and if it is the first task in error for the environment. 
+   * @private
+   * @param {string} environmentId - the id of the environment to check if it already has a first task in error
+   * @param {TaskEvent|OdcDeviceInfoEvent} event - the task event object containing the task information
+   * @return {void}
+   */
+  _handleFirstTaskInError(environmentId, event) {
+    if (
+      (event.state === TaskState.ERROR || event.state === TaskState.ERROR_CRITICAL)
+      && this._environments.has(environmentId)
+      && !this._environments.get(environmentId).firstTaskInError
+    ) {
+      const environment = JSON.parse(JSON.stringify(this._environments.get(environmentId)));
+      environment.firstTaskInError = event;
+      this._environments.set(environmentId, environment);
+      this._broadcastService.broadcast(NOTIFICATION, event);
+    }
   }
 }
 
