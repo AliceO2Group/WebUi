@@ -469,6 +469,7 @@ export default class QCObject extends Observable {
    * @returns {undefined}
    */
   async triggerFilter() {
+    this.selected = null;
     await this.loadList();
   }
 }
