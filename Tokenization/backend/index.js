@@ -45,12 +45,12 @@ http.get(
   },
   { public: true }
 );
-
+//CentralSystem.getTokens
 http.get(
   "/tokens",
   (req, res) => {
     // Fake long page load
-    setTimeout(CentralSystem.getTokens, 1000);
+    setTimeout(() => CentralSystem.getTokens(req, res), 1000);
   },
   { public: true }
 );
