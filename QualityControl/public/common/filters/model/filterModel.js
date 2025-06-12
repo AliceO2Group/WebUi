@@ -97,4 +97,9 @@ export default class FilterModel extends Observable {
     this.visible = !this.visible;
     this.notify();
   }
+
+  clearFilter() {
+    Object.keys(this.filterMap).forEach((key) => delete this.filterMap[key]); // The reference needs to be preserved.
+    this.notify();
+  }
 }

@@ -85,7 +85,7 @@ const filterInput = (config) => {
       id,
       name: id,
       min: 0,
-      value: filterMap[queryLabel],
+      value: filterMap[queryLabel] || '',
       oninput: (event) => onInputCallback(queryLabel, event.target.value),
       onkeydown: ({ keyCode }) => {
         if (keyCode === 13) {

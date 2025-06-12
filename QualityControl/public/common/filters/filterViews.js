@@ -24,36 +24,38 @@ import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
  * @param {Function} onInputCallback - A callback function that triggers upon Input
  * @param {Function} onEnterCallback - A callback function that triggers upon Enter
  * @param {Function} onChangeCallback - A callback function that triggers upon Change
+ * @param {Function} clearFilterCallback
  * @returns {undefined}
  */
-const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback, onChangeCallback) => {
-  const { filterInput, dynamicSelector } = filters;
+const createFilterElement =
+  (config, filterMap, onInputCallback, onEnterCallback, onChangeCallback) => {
+    const { filterInput, dynamicSelector } = filters;
 
-  let filterElement = null;
-  const { type, queryLabel, placeholder, id, inputType = 'text', options } = config;
-  const commonConfig = {
-    queryLabel,
-    placeholder,
-    id,
-    filterMap,
-    onInputCallback,
-    onEnterCallback,
+    let filterElement = null;
+    const { type, queryLabel, placeholder, id, inputType = 'text', options } = config;
+    const commonConfig = {
+      queryLabel,
+      placeholder,
+      id,
+      filterMap,
+      onInputCallback,
+      onEnterCallback,
+    };
+
+    switch (type) {
+      case FilterType.INPUT:
+        filterElement = filterInput({ ...commonConfig, type: inputType });
+        break;
+      case FilterType.DROPDOWN:
+        filterElement = dynamicSelector({ ...commonConfig, options, onChangeCallback });
+        break;
+      default:
+        filterElement = null;
+        break;
+    }
+
+    return filterElement ?? null;
   };
-
-  switch (type) {
-    case FilterType.INPUT:
-      filterElement = filterInput({ ...commonConfig, type: inputType });
-      break;
-    case FilterType.DROPDOWN:
-      filterElement = dynamicSelector({ ...commonConfig, options, onChangeCallback });
-      break;
-    default:
-      filterElement = null;
-      break;
-  }
-
-  return filterElement ?? null;
-};
 
 /**
  * Builds a panel containing multiple filters to allow user to apply for objectTree show/view
@@ -62,18 +64,20 @@ const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback
  * @returns {vnode} - virtual node element
  */
 export function filtersPanel(filterModel, pageModel) {
-  const { filterMap, setFilterValue, filterService } = filterModel;
+  const { filterMap, setFilterValue, filterService, clearFilter } = filterModel;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onEnterCallback = () => filterModel.triggerFilter(pageModel);
+  const clearFilterCallback = clearFilter.bind(filterModel);
   const filtersList = filtersConfig(filterService);
   return filterModel.visible
     ? h(
       '.w-100.flex-row.p2.g2#filterElement',
       [
         triggerFiltersButton(onEnterCallback),
+        clearFiltersButton(clearFilterCallback),
         ...filtersList.map((filter) =>
-          createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
+          createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback, clearFilter)),
       ],
     )
     : null;
@@ -84,9 +88,18 @@ export function filtersPanel(filterModel, pageModel) {
  * @param {Function} triggerFilter - Function to trigger the filter mechanism
  * @returns {vnode} - virtual node element
  */
-const triggerFiltersButton = (triggerFilter) => h('', h('button.btn.btn-primary', {
+const triggerFiltersButton = (triggerFilter) => h('', h('button.btn.btn-primary#triggerFilterButton', {
   onclick: triggerFilter,
 }, 'Update'));
+
+/**
+ * Button which will allow the user to clear the filter element
+ * @param {Function} clearFilterCallback - Function that clears the filter state.
+ * @returns {vnode} - virtual node element
+ */
+const clearFiltersButton = (clearFilterCallback) => h('', h('button.btn.btn-secondary#clearFilterButton', {
+  onclick: clearFilterCallback,
+}, 'Clear'));
 
 /**
  * Button for toggling visibility of the filter by parameters panel
