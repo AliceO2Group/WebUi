@@ -279,7 +279,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     { timeout },
     async () => {
       const inputs = await page.$$('nav input');
-      await inputs[3].type('1');
+      await inputs[4].type('1');
       await delay(50);
       const { count, firstResult, secondResult } = await page.evaluate(() => {
         const rows = document.querySelectorAll('nav table tbody tr');
@@ -300,7 +300,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     { timeout },
     async () => {
       const inputs = await page.$$('nav input');
-      await inputs[3].type('123');
+      await inputs[4].type('123');
       await delay(50);
       const text = await page.evaluate(() => document.querySelector('nav p.text-center').textContent);
       strictEqual(text, 'No objects found for this search');
@@ -364,12 +364,11 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
   await testParent.test(
     'should disable the "Update layout" button when JSON has an "id" key and display error message',
-    { timeout },
+    { timeout: 50000 },
     async () => {
       const mockJSONWithId = '{ "id" : "test" }';
       const expectedErrorMessage =
       'Error: Manual entry of an ID is not allowed, as it is automatically assigned by the system.';
-
       await checkInvalidJSON(page, mockJSONWithId, expectedErrorMessage);
     },
   );

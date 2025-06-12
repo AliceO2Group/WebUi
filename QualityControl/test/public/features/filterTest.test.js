@@ -11,9 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { deepEqual, ok, strictEqual } from 'node:assert';
-import { delay } from '../../testUtils/delay.js';
-import { log } from 'node:console';
+import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 
 const LAYOUT_LIST_PAGE_PARAM = '?page=layoutList';
 const FILTER_SELECTOR = 'header #filterElement';
@@ -27,26 +25,26 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     ok(element !== null, 'Filter element does not exist, or is not inside the header');
 
     const location = await page.evaluate(() => window.location);
-    strictEqual(location.search, '?page=layoutList');
+    deepStrictEqual(location.search, '?page=layoutList');
   });
 
   await testParent.test('filter should persist between pages', { timeout }, async () => {
     const runNumber = '0';
-    await page.locator('#runNumberFilter').fill('0');
+    await page.locator('#runNumberFilter').fill(runNumber);
     await page.locator('#filterElement #triggerFilterButton').click();
 
     let value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
-    deepEqual(value, runNumber, 'RunNumber is no longer set');
+    strictEqual(value, runNumber, 'RunNumber is no longer set');
 
     await page.locator('.sidebar > a:nth-of-type(3)').click(); // navigate to aboutPage.
 
     value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
-    deepEqual(value, runNumber, 'RunNumber is no longer set');
+    strictEqual(value, runNumber, 'RunNumber is no longer set');
 
     await page.locator('.sidebar > a:nth-of-type(2)').click(); // navigate to ObjectTreePage.
 
     value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
-    deepEqual(value, runNumber, 'RunNumber is no longer set');
+    strictEqual(value, runNumber, 'RunNumber is no longer set');
     await page.waitForSelector('tr:last-of-type td');
 
     await extendTree(3, 5);
@@ -55,13 +53,13 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     await page.locator('.resize-button a').click(); // This would navigate to the objectViewPage
 
     value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
-    deepEqual(value, runNumber, 'RunNumber is no longer set');
+    strictEqual(value, runNumber, 'RunNumber is no longer set');
 
     await page.waitForSelector('.sidebar > div:nth-of-type(3) a:nth-child(1)', { visible: true, stable: true });
     await page.locator('.sidebar > div:nth-of-type(3) a:nth-child(1)').click(); // navigate to layout show
 
     value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
-    deepEqual(value, runNumber, 'RunNumber is no longer set');
+    strictEqual(value, runNumber, 'RunNumber is no longer set');
   });
 
   await testParent.test('should list all objects when disabling objectFilters', { timeout }, async () => {
@@ -76,14 +74,14 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     await extendTree(2, 4);
     let rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
 
-    deepEqual(rowCount, 4); // Due to the filter there are two objects fewer.
+    strictEqual(rowCount, 4); // Due to the filter there are two objects fewer.
 
     await page.locator('#inputApplyFilters').click(); // Will prevent filter from affecting it.
 
     await extendTree(2, 4);
     rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
 
-    deepEqual(rowCount, 6); // Due to the filter being removed, there are now 6 rows.
+    strictEqual(rowCount, 6); // Due to the filter being removed, there are now 6 rows.
   });
 
   await testParent.test('ObjectShow should only list versions based on the filter', { timeout }, async () => {
@@ -92,15 +90,52 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     await page.waitForSelector('#ObjectPlot select option');
 
     let versionCount = await page.evaluate(() => document.querySelectorAll('#ObjectPlot select option').length);
-    deepEqual(versionCount, 1);
+    strictEqual(versionCount, 1);
 
     await page.locator('#filterElement #clearFilterButton').click();
     await page.locator('#filterElement #triggerFilterButton').click();
 
-    await page.waitForSelector('#ObjectPlot select option');
+    await page.waitForSelector('#ObjectPlot select option:nth-child(2)');
 
     versionCount = await page.evaluate(() => document.querySelectorAll('#ObjectPlot select option').length);
-    deepEqual(versionCount, 2);
+    strictEqual(versionCount, 2);
+  });
+
+  await testParent.test('ObjectTreePage should apply filters for the objects', { timeout }, async () => {
+    await page.locator('.sidebar > a:nth-of-type(2)').click(); // navigate to ObjectTreePage.
+
+    await extendTree(3, 5);
+    let rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
+    strictEqual(rowCount, 7); // Due to the filter there are two objects fewer.
+
+    const runNumber = '0';
+    await page.locator('#runNumberFilter').fill(runNumber);
+    await page.locator('#filterElement #triggerFilterButton').click();
+
+    await extendTree(3, 5);
+
+    rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
+    strictEqual(rowCount, 5); // Due to the filter there are two objects fewer.
+  });
+
+  await testParent.test('ObjectTree infoPanel should show filtered object versions', { timeout }, async () => {
+    const versionsPath = '.outline-gray.flex-grow.relative select option';
+    await page.locator('tr:last-of-type td').click();
+    await page.waitForSelector(versionsPath);
+
+    let versionCount = await page.evaluate((path) => document.querySelectorAll(path).length, versionsPath);
+    strictEqual(versionCount, 1);
+
+    await page.locator('#filterElement #clearFilterButton').click();
+    await page.locator('#filterElement #triggerFilterButton').click();
+
+    await extendTree(3, 5);
+
+    await page.locator('tr:nth-of-type(4)').click(); // object/1 is now in the 4th row.
+    await page.waitForSelector(versionsPath);
+
+    versionCount = await page.evaluate((path) => document.querySelectorAll(path).length, versionsPath);
+    strictEqual(versionCount, 2);
   });
 
   /**
