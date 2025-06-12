@@ -744,6 +744,7 @@ export default class Layout extends Observable {
   triggerFilter() {
     this.selectTab(this.tabIndex);
     if (this.editEnabled) { // To re-render the objectTree in edit mode
+      this.listObjects();
     }
   }
 
