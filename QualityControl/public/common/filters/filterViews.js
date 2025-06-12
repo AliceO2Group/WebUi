@@ -24,7 +24,6 @@ import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
  * @param {Function} onInputCallback - A callback function that triggers upon Input
  * @param {Function} onEnterCallback - A callback function that triggers upon Enter
  * @param {Function} onChangeCallback - A callback function that triggers upon Change
- * @param {Function} clearFilterCallback
  * @returns {undefined}
  */
 const createFilterElement =
@@ -77,7 +76,7 @@ export function filtersPanel(filterModel, pageModel) {
         triggerFiltersButton(onEnterCallback),
         clearFiltersButton(clearFilterCallback),
         ...filtersList.map((filter) =>
-          createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback, clearFilter)),
+          createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
       ],
     )
     : null;
