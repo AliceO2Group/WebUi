@@ -37,18 +37,17 @@ export const objectViewHeader = (model) => {
 const computeTitle = (objectViewModel, router) => {
   const { selected } = objectViewModel;
   const { objectName, objectId } = router.params;
-  let title = objectName;
 
   if (objectId) {
-    if (selected.isSuccess()) {
-      const { path, layoutName } = selected.payload;
-      title = `${path} (from layout: ${layoutName})`;
-    } else {
-      title = objectId;
-    }
+    return objectName;
   }
 
-  return title;
+  if (selected.isSuccess()) {
+    const { path, layoutName } = selected.payload;
+    return `${path} (from layout: ${layoutName})`;
+  }
+
+  return objectId;
 };
 
 /**
