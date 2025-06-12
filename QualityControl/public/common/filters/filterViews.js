@@ -71,7 +71,7 @@ export function filtersPanel(filterModel, pageModel) {
   const filtersList = filtersConfig(filterService);
   return filterModel.visible
     ? h(
-      '.w-100.flex-row.p2.g2#filterElement',
+      '.w-100.flex-row.p2.g2.justify-center#filterElement',
       [
         triggerFiltersButton(onEnterCallback),
         clearFiltersButton(clearFilterCallback),
