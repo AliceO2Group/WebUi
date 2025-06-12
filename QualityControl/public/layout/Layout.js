@@ -61,6 +61,7 @@ export default class Layout extends Observable {
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
     // GridList.grid.length: integer, number of rows
+    this.filterObjectTree = true;
   }
 
   /**
@@ -403,7 +404,8 @@ export default class Layout extends Observable {
    */
   edit() {
     this.toggleEditMenu();
-    this.model.services.object.listObjects(undefined);
+    this.listObjects();
+
     if (!this.item) {
       throw new Error('An item should be loaded before editing it');
     }
@@ -739,10 +741,9 @@ export default class Layout extends Observable {
    * Function that fetches the object versions in accordance with the provided filters
    * @returns {undefined}
    */
-  async triggerFilter() {
+  triggerFilter() {
     this.selectTab(this.tabIndex);
     if (this.editEnabled) { // To re-render the objectTree in edit mode
-      await this.model.services.object.listObjects();
     }
   }
 
@@ -754,5 +755,19 @@ export default class Layout extends Observable {
    */
   ownsLayout(layoutOwnerId) {
     return this.model.session.personid == layoutOwnerId;
+  }
+
+  toggleFilterObjectTree() {
+    this.filterObjectTree = !this.filterObjectTree;
+    this.listObjects();
+  }
+
+  /**
+   * Wrapper function for qcObjectServices. If filterObjectTree is false,
+   * the objectTree will be loaded without applying the filters.
+   */
+  listObjects() {
+    const filterMap = this.filterObjectTree ? undefined : {};
+    this.model.services.object.listObjects(undefined, filterMap);
   }
 }
