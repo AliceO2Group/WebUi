@@ -100,3 +100,26 @@
   border: 1px solid #ddd;
   background: var(--color-gray-light);
 }
+
+.error-box {
+  background-color: #f8d7da;
+  color: #842029;
+  height: 100%;
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  border-radius: 5px;
+  border: 1px solid #842029;
+}
+
+.error-icon {
+  font-size: 2em;
+  margin-bottom: 0.5em;
+  color: #842029;
+}
+
+.error-text {
+  max-width: 100%;
+}
+
+
