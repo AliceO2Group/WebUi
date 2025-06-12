@@ -33,32 +33,32 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
   await testParent.test('filter should persist between pages', { timeout }, async () => {
     const runNumber = '0';
     await page.locator('#runNumberFilter').fill('0');
-    await page.click('#filterElement button');
+    await page.locator('#filterElement #triggerFilterButton').click();
 
     let value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
     deepEqual(value, runNumber, 'RunNumber is no longer set');
 
-    await page.click('.sidebar > a:nth-of-type(3)'); // navigate to aboutPage.
+    await page.locator('.sidebar > a:nth-of-type(3)').click(); // navigate to aboutPage.
 
     value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
     deepEqual(value, runNumber, 'RunNumber is no longer set');
 
-    await page.click('.sidebar > a:nth-of-type(2)'); // navigate to ObjectTreePage.
+    await page.locator('.sidebar > a:nth-of-type(2)').click(); // navigate to ObjectTreePage.
 
     value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
     deepEqual(value, runNumber, 'RunNumber is no longer set');
     await page.waitForSelector('tr:last-of-type td');
 
     await extendTree(3, 5);
-    await page.click('tr:last-of-type td'); // This will select an object
+    await page.locator('tr:last-of-type td').click(); // This will select an object
     await page.waitForSelector('.resize-button a');
-    await page.click('.resize-button a'); // This would navigate to the objectViewPage
+    await page.locator('.resize-button a').click(); // This would navigate to the objectViewPage
 
     value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
     deepEqual(value, runNumber, 'RunNumber is no longer set');
 
     await page.waitForSelector('.sidebar > div:nth-of-type(3) a:nth-child(1)', { visible: true, stable: true });
-    await page.click('.sidebar > div:nth-of-type(3) a:nth-child(1)'); // navigate to layout show
+    await page.locator('.sidebar > div:nth-of-type(3) a:nth-child(1)').click(); // navigate to layout show
 
     value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
     deepEqual(value, runNumber, 'RunNumber is no longer set');
@@ -84,6 +84,23 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
 
     deepEqual(rowCount, 6); // Due to the filter being removed, there are now 6 rows.
+  });
+
+  await testParent.test('ObjectShow should only list versions based on the filter', { timeout }, async () => {
+    // For whatever reason, click and locator.click cannot be used for this. Hence why evalutate is used.
+    await page.evaluate(() => document.querySelector('#subcanvas > div:nth-child(1) a.btn').click());
+    await page.waitForSelector('#ObjectPlot select option');
+
+    let versionCount = await page.evaluate(() => document.querySelectorAll('#ObjectPlot select option').length);
+    deepEqual(versionCount, 1);
+
+    await page.locator('#filterElement #clearFilterButton').click();
+    await page.locator('#filterElement #triggerFilterButton').click();
+
+    await page.waitForSelector('#ObjectPlot select option');
+
+    versionCount = await page.evaluate(() => document.querySelectorAll('#ObjectPlot select option').length);
+    deepEqual(versionCount, 2);
   });
 
   /**
