@@ -88,18 +88,40 @@ export default class FilterModel extends Observable {
     this.notify();
   };
 
+  /**
+   * Apply the current filters to a filterable model and update the URL
+   * @param {object} filterAbleModel - The model that should be filtered
+   * @returns {undefined}
+   */
   triggerFilter(filterAbleModel) {
     this.setFilterToURL();
     filterAbleModel.triggerFilter(this.filterMap);
   }
 
+  /**
+   * Toggle the visibility state of the filter component
+   * @returns {undefined}
+   */
   toggleFilterVisibility() {
     this.visible = !this.visible;
     this.notify();
   }
 
+  /**
+   * Clear all currently set filters
+   * @returns {undefined}
+   */
   clearFilter() {
     Object.keys(this.filterMap).forEach((key) => delete this.filterMap[key]); // The reference needs to be preserved.
     this.notify();
+  }
+
+  /**
+   * Check if any filters are currently active in the URL parameters
+   * @returns {boolean} True if any filter parameters are present in the URL
+   */
+  activeFilter() {
+    const { params } = this.model.router;
+    return CCDB_QUERY_PARAMS.some((filterKey) => params[filterKey]?.trim());
   }
 }

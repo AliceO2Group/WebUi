@@ -627,6 +627,14 @@ export default class Layout extends Observable {
   }
 
   /**
+   * Wrapper function for the filterModel::activeFilter function.
+   * @returns {boolean} if there is a currently active filter.
+   */
+  activeFilter() {
+    return this.model.filterModel.activeFilter();
+  }
+
+  /**
    * Getters / Setters
    */
 
@@ -762,8 +770,10 @@ export default class Layout extends Observable {
    * Activates/deactivates the effects of the filter on the objectTree inside layout edit mode.
    */
   toggleObjectTreeFilter() {
-    this.filterObjectTree = !this.filterObjectTree;
-    this.listObjects();
+    if (this.activeFilter()) {
+      this.filterObjectTree = !this.filterObjectTree;
+      this.listObjects();
+    }
   }
 
   /**
