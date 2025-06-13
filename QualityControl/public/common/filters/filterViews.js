@@ -29,7 +29,6 @@ import { h } from '/js/src/index.js';
 const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback, onChangeCallback) => {
   const { filterInput, dynamicSelector } = filters;
 
-  let filterElement = null;
   const { type, queryLabel, placeholder, id, inputType = 'text', options } = config;
   const commonConfig = {
     queryLabel,
@@ -41,18 +40,10 @@ const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback
   };
 
   switch (type) {
-    case FilterType.INPUT:
-      filterElement = filterInput({ ...commonConfig, type: inputType });
-      break;
-    case FilterType.DROPDOWN:
-      filterElement = dynamicSelector({ ...commonConfig, options, onChangeCallback });
-      break;
-    default:
-      filterElement = null;
-      break;
+    case FilterType.INPUT: return filterInput({ ...commonConfig, type: inputType });
+    case FilterType.DROPDOWN: return dynamicSelector({ ...commonConfig, options, onChangeCallback });
+    default: return null;
   }
-
-  return filterElement ?? null;
 };
 
 /**
