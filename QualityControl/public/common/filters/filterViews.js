@@ -54,23 +54,21 @@ const createFilterElement =
  * @returns {vnode} - virtual node element
  */
 export function filtersPanel(filterModel, pageModel) {
-  const { filterMap, setFilterValue, filterService, clearFilter } = filterModel;
+  const { filterMap, setFilterValue, filterService, clearFilter, visible } = filterModel;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onEnterCallback = () => filterModel.triggerFilter(pageModel);
   const clearFilterCallback = clearFilter.bind(filterModel);
   const filtersList = filtersConfig(filterService);
-  return filterModel.visible
-    ? h(
-      '.w-100.flex-row.p2.g2.justify-center#filterElement',
-      [
-        triggerFiltersButton(onEnterCallback),
-        clearFiltersButton(clearFilterCallback),
-        ...filtersList.map((filter) =>
-          createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
-      ],
-    )
-    : null;
+  return visible && h(
+    '.w-100.flex-row.p2.g2.justify-center#filterElement',
+    [
+      triggerFiltersButton(onEnterCallback),
+      clearFiltersButton(clearFilterCallback),
+      ...filtersList.map((filter) =>
+        createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
+    ],
+  );
 };
 
 /**
@@ -78,18 +76,18 @@ export function filtersPanel(filterModel, pageModel) {
  * @param {Function} triggerFilter - Function to trigger the filter mechanism
  * @returns {vnode} - virtual node element
  */
-const triggerFiltersButton = (triggerFilter) => h('', h('button.btn.btn-primary#triggerFilterButton', {
+const triggerFiltersButton = (triggerFilter) => h('button.btn.btn-primary#triggerFilterButton', {
   onclick: triggerFilter,
-}, 'Update'));
+}, 'Update');
 
 /**
  * Button which will allow the user to clear the filter element
  * @param {Function} clearFilterCallback - Function that clears the filter state.
  * @returns {vnode} - virtual node element
  */
-const clearFiltersButton = (clearFilterCallback) => h('', h('button.btn.btn-secondary#clearFilterButton', {
+const clearFiltersButton = (clearFilterCallback) => h('button.btn.btn-secondary#clearFilterButton', {
   onclick: clearFilterCallback,
-}, 'Clear'));
+}, 'Clear');
 
 /**
  * Button for toggling visibility of the filter by parameters panel
