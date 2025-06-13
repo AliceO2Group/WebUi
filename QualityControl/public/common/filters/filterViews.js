@@ -95,8 +95,8 @@ const clearFiltersButton = (clearFilterCallback) => h('button.btn.btn-secondary#
  * @returns {vnode} - virtual node element
  */
 export function filterPanelToggleButton(filterModel) {
-  return h('button.btn.btn-default', {
-    class: filterModel.visible ? 'active' : '',
+  const { visible } = filterModel;
+  return h(`button.btn.btn-default${visible ? '.active' : ''}`, {
     onclick: () => filterModel.toggleFilterVisibility(),
-  }, ['Filters ', filterModel.visible ? iconChevronTop() : iconChevronBottom()]);
+  }, ['Filters ', visible ? iconChevronTop() : iconChevronBottom()]);
 }
