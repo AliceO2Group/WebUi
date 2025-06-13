@@ -55,12 +55,17 @@ const createFilterElement =
  */
 export function filtersPanel(filterModel, pageModel) {
   const { filterMap, setFilterValue, filterService, clearFilter, visible } = filterModel;
+
+  if (!visible) {
+    return null;
+  }
+
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onEnterCallback = () => filterModel.triggerFilter(pageModel);
   const clearFilterCallback = clearFilter.bind(filterModel);
   const filtersList = filtersConfig(filterService);
-  return visible && h(
+  return h(
     '.w-100.flex-row.p2.g2.justify-center#filterElement',
     [
       triggerFiltersButton(onEnterCallback),
