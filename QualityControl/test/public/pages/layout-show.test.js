@@ -173,7 +173,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
         const container = document.querySelector('.btn-group');
         return container ? container.children.length : 0;
       });
-      strictEqual(count, 4);
+      strictEqual(count, 5);
     },
   );
 
@@ -181,7 +181,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have one duplicate button in the header to create a new duplicated layout',
     { timeout },
     async () => {
-      const buttonPath = 'header > div > div > div:nth-child(3) > div > button:nth-child(1)';
+      const buttonPath = 'header > div > div > div:nth-child(3) > div > button:nth-child(2)';
       const duplicateButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
       strictEqual(duplicateButton, 'Duplicate layout');
     },
@@ -191,7 +191,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have one delete button in the header to delete layout',
     { timeout },
     async () => {
-      const buttonPath = 'header > div > div > div:nth-child(3) > div > button:nth-child(4)';
+      const buttonPath = 'header > div > div > div:nth-child(3) > div > button:nth-child(5)';
       const deleteButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
       strictEqual(deleteButton, 'Delete layout');
     },

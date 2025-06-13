@@ -46,11 +46,11 @@ const toolbarViewMode = (layout, filterModel) => {
   return [
     h('.flex-grow.text-center', h('div.header-layout', [tabViewLinks(layoutItem, layout)])),
     h('.flex-grow.text-right', [
-      filterPanelToggleButton(filterModel),
       h('b.f4.items-center', [isOfficial ? iconBadge() : '', layoutItem.name]),
       ' ',
       // Show group button edit/duplicate only for owner of the layout shown
       h('.btn-group', [
+        filterPanelToggleButton(filterModel),
         newLayoutButton(layout),
         jsonExportButton(layoutItem, name),
         layout.ownsLayout(owner_id) && [editDropdown(layout), deleteButton(layout)],
@@ -110,16 +110,16 @@ const toolbarEditMode = (layout, filterModel) => {
         ]),
       ]),
     ]),
-    filterPanelToggleButton(filterModel),
-    h('.flex-grow.text-right', [
+    h('.text-right', [
       h('input.form-control.form-inline', {
         type: 'text',
         value: layout.item.name,
         oninput: inputHandler,
       }),
       h('.btn-group.m1', [
+        filterPanelToggleButton(filterModel),
         saveButton(layout),
-        editButton(layout),
+        cancelButton(layout),
       ]),
     ]),
   ];
@@ -243,6 +243,7 @@ const deleteButton = (layout) =>
  */
 const saveButton = (layout) =>
   h('button.btn.btn-primary', {
+    key: 'save-button',
     onclick: () => layout.save(),
     title: 'Save layout',
   }, iconCheck());
@@ -252,8 +253,9 @@ const saveButton = (layout) =>
  * @param {Layout} layout - the model that handles the object state
  * @returns {vnode} - virtual node element representing the cancel button
  */
-const editButton = (layout) =>
+const cancelButton = (layout) =>
   h('button.btn', {
+    key: 'cancel-button',
     onclick: () => layout.cancelEdit(),
     title: 'Cancel',
   }, iconBan());

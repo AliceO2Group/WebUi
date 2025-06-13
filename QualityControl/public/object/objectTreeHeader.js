@@ -40,6 +40,7 @@ export default function objectTreeHeader(qcObject, filterModel) {
     ]),
     h('.flex-grow.text-right', [
       filterPanelToggleButton(filterModel),
+      ' ',
       h('.dropdown', {
         title: 'Sort by', class: qcObject.sortBy.open ? 'dropdown-open' : '',
       }, [
