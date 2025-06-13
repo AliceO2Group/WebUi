@@ -38,7 +38,7 @@ const computeTitle = (objectViewModel, router) => {
   const { selected } = objectViewModel;
   const { objectName, objectId } = router.params;
 
-  if (objectId) {
+  if (!objectId) {
     return objectName;
   }
 
