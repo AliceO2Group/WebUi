@@ -24,8 +24,11 @@ import { h } from '/js/src/index.js';
  */
 export const minimalObjectInfo = (model, tabObject) => {
   const { name } = tabObject;
-  const lastModified = model.object.getLastModifiedByName(name);
   const runNumber = model.object.getRunNumberByName(name);
+  const lastModified = model.layout.item?.displayTimestamp
+    ? model.object.getLastModifiedByName(name)
+    : '';
+
   return h('.gray-darker.text-center.f6.flex-row.w-100.ph2', {
     style: 'height:3em;justify-content:center;',
   }, [

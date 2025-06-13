@@ -206,8 +206,7 @@ const drawComponent = (model, tabObject) => h('', { style: 'height:100%; display
     },
   }, draw(model, tabObject, {})),
   objectInfoResizePanel(model, tabObject),
-  model.layout.item && model.layout.item.displayTimestamp
-      && minimalObjectInfo(model, tabObject),
+  minimalObjectInfo(model, tabObject),
 ]);
 
 /**
