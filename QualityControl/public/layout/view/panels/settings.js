@@ -102,7 +102,7 @@ const applyFilters = (layout) =>
         type: 'checkbox',
         id: 'inputApplyFilters',
         checked: layout.filterObjectTree,
-        onchange: (e) => layout.toggleFilterObjectTree('displayTimestamp', e.target.checked),
+        onchange: (e) => layout.toggleObjectTreeFilter('displayTimestamp', e.target.checked),
       }),
     ),
   ]);

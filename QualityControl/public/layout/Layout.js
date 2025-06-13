@@ -758,7 +758,10 @@ export default class Layout extends Observable {
     return this.model.session.personid == layoutOwnerId;
   }
 
-  toggleFilterObjectTree() {
+  /**
+   * Activates/deactivates the effects of the filter on the objectTree inside layout edit mode.
+   */
+  toggleObjectTreeFilter() {
     this.filterObjectTree = !this.filterObjectTree;
     this.listObjects();
   }
