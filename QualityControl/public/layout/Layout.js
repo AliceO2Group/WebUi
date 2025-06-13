@@ -666,6 +666,10 @@ export default class Layout extends Observable {
     if (!this.item.tabs || this.item.tabs.length === 0) {
       clearInterval(this.tabInterval);
     } else if (time >= 10) {
+      if (this.tabInterval) {
+        clearInterval(this.tabInterval);
+      }
+
       this.tabInterval = setInterval(() => {
         this._tabIndex = this._tabIndex + 1 >= this.item.tabs.length ? 0 : this._tabIndex + 1;
         this.selectTab(this._tabIndex);
