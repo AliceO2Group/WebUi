@@ -52,16 +52,17 @@ const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback
  * @param {PageModel} pageModel - Model that manages the state of the page that the filter is on.
  * @returns {vnode} - virtual node element
  */
-const filtersPanel = (filterModel, pageModel) => {
-  const { filterMap, setFilterValue, filterService } = filterModel;
+export function filtersPanel(filterModel, pageModel) {
+  const { filterMap, setFilterValue, filterService, clearFilter } = filterModel;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onEnterCallback = () => filterModel.triggerFilter(pageModel);
+  const clearFilterCallback = clearFilter.bind(filterModel);
   const filtersList = filtersConfig(filterService);
 
   return h(
     '.w-100.flex-row.p2.g2',
-    { onremove: () => filterModel.clearFilter() },
+    { onremove: clearFilterCallback },
     [
       triggerFiltersButton(onEnterCallback),
       ...filtersList.map((filter) =>
@@ -75,8 +76,6 @@ const filtersPanel = (filterModel, pageModel) => {
  * @param {Function} triggerFilter - Function to trigger the filter mechanism
  * @returns {vnode} - virtual node element
  */
-const triggerFiltersButton = (triggerFilter) => h('', h('button.btn.btn-primary', {
+const triggerFiltersButton = (triggerFilter) => h('button.btn.btn-primary#triggerFilterButton', {
   onclick: triggerFilter,
-}, 'Update'));
-
-export { filtersPanel };
+}, 'Update');
