@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, ok } from 'node:assert';
+import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
 const SORTING_BUTTON_PATH = 'header > div > div:nth-child(3) > div > button';
 
@@ -94,4 +94,19 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       + `Identified filtered: ${filteredRows.length} and displayed: ${rowsDisplayed.length}`,
     );
   });
+
+  await testParent.test(
+    'should have a selector with sorted options to filter by run type if there are run types loaded',
+    { timeout },
+    async () => {
+      const selectorId = '#runTypeFilter > option';
+
+      const options = await page.evaluate((selectorId) => {
+        const optionElements = document.querySelectorAll(selectorId);
+        return Array.from(optionElements).map((option) => option.value);
+      }, selectorId);
+
+      deepStrictEqual(options, ['', 'runType1', 'runType2']);
+    },
+  );
 };
