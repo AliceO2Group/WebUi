@@ -38,6 +38,11 @@ import { UserRepository } from './repositories/UserRepository.js';
 import { ChartRepository } from './repositories/ChartRepository.js';
 import { initDatabase } from './database/index.js';
 import { SequelizeDatabase } from './database/SequelizeDatabase.js';
+import { objectGetByIdValidationMiddlewareFactory }
+  from './middleware/objects/objectGetByIdValidationMiddlewareFactory.js';
+import { objectsGetValidationMiddlewareFactory } from './middleware/objects/objectsGetValidationMiddlewareFactory.js';
+import { objectGetContentsValidationMiddlewareFactory }
+  from './middleware/objects/objectGetContentsValidationMiddlewareFactory.js';
 
 /**
  * Model initialization for the QCG application
@@ -77,6 +82,10 @@ export const setupQcModel = () => {
 
   const filterController = new FilterController(filterService);
 
+  const objectGetByIdValidation = objectGetByIdValidationMiddlewareFactory(filterService);
+  const objectsGetValidation = objectsGetValidationMiddlewareFactory(filterService);
+  const objectGetContentsValidation = objectGetContentsValidationMiddlewareFactory(filterService);
+
   initializeIntervals(intervalsService, qcObjectService, filterService);
 
   return {
@@ -89,6 +98,9 @@ export const setupQcModel = () => {
     filterController,
     layoutRepository,
     jsonFileService,
+    objectGetByIdValidation,
+    objectsGetValidation,
+    objectGetContentsValidation,
   };
 };
 

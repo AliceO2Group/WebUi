@@ -24,10 +24,11 @@ import { h, iconResizeBoth, info } from '/js/src/index.js';
  */
 export const objectInfoResizePanel = (model, tabObject) => {
   const { name } = tabObject;
-  const isSelectedOpen = model.object.selectedOpen;
-  const objectRemoteData = model.services.object.objectsLoadedMap[name];
-  let uri = `?page=objectView&objectId=${tabObject.id}&layoutId=${model.router.params.layoutId}`;
-  Object.entries(model.layout.filter)
+  const { filterModel, router, object, services } = model;
+  const isSelectedOpen = object.selectedOpen;
+  const objectRemoteData = services.object.objectsLoadedMap[name];
+  let uri = `?page=objectView&objectId=${tabObject.id}&layoutId=${router.params.layoutId}`;
+  Object.entries(filterModel.filterMap)
     .filter(([_, value]) => value)
     .forEach(([key, value]) => {
       uri += `&${key}=${encodeURI(value)}`;
@@ -39,7 +40,7 @@ export const objectInfoResizePanel = (model, tabObject) => {
     h('', { style: 'padding-bottom: 0;' }, h('.dropdown.mh1', { class: isSelectedOpen ? 'dropdown-open' : '' }, [
       h('button.btn', {
         title: 'View details about histogram',
-        onclick: () => model.object.toggleInfoArea(name),
+        onclick: () => object.toggleInfoArea(name),
       }, info()),
       h(
         '.dropdown-menu',
@@ -50,7 +51,7 @@ export const objectInfoResizePanel = (model, tabObject) => {
     h('a.btn', {
       title: 'Open object plot in full screen',
       href: uri,
-      onclick: (e) => model.router.handleLinkEvent(e),
+      onclick: (e) => router.handleLinkEvent(e),
     }, iconResizeBoth()),
   ]);
 };

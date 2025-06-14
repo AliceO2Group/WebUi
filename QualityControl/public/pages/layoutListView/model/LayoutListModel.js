@@ -12,14 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Observable } from '/js/src/index.js';
 import FolderModel, { FolderType } from '../../../folder/model/FolderModel.js';
 import LayoutCardModel from './LayoutCardModel.js';
+import { BaseViewModel } from '../../../common/abstracts/BaseViewModel.js';
 
 /**
  * LayoutListModel namespace to control the layoutCards spread between its folders
  */
-export default class LayoutListModel extends Observable {
+export default class LayoutListModel extends BaseViewModel {
   /**
    * Creates a new LayoutListModel instance
    * @param {Model} model - The the application model
@@ -115,4 +115,9 @@ export default class LayoutListModel extends Observable {
       },
     };
   }
+
+  /**
+   * This function is required for all pages that have the filter element in their header
+   */
+  triggerFilter() {}
 }
