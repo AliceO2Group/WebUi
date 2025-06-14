@@ -19,6 +19,7 @@ import { layoutOwnerMiddleware } from './middleware/layouts/layoutOwner.middlewa
 import { layoutIdMiddleware } from './middleware/layouts/layoutId.middleware.js';
 import { layoutServiceMiddleware } from './middleware/layouts/layoutService.middleware.js';
 import { statusComponentMiddleware } from './middleware/status/statusComponent.middleware.js';
+// import { getObjectsValidationMiddleware } from './middleware/objects/ObjectGet.middleWare.js';
 
 /**
  * Adds paths and binds websocket to instance of HttpServer passed
@@ -46,11 +47,16 @@ export const setup = (http, ws) => {
     layoutRepository,
     jsonFileService,
     filterController,
+    objectGetByIdValidation,
+    objectsGetValidation,
+    objectGetContentsValidation,
   } = setupQcModel();
   statusService.ws = ws;
-  http.get('/object/:id', objectController.getObjectById.bind(objectController));
-  http.get('/object', objectController.getObjectContent.bind(objectController));
-  http.get('/objects', objectController.getObjects.bind(objectController), { public: true });
+
+  http.get('/object/:id', objectGetByIdValidation, objectController.getObjectById.bind(objectController));
+  http.get('/object', objectGetContentsValidation, objectController.getObjectContent.bind(objectController));
+
+  http.get('/objects', objectsGetValidation, objectController.getObjects.bind(objectController), { public: true });
 
   http.get('/layouts', layoutController.getLayoutsHandler.bind(layoutController));
   http.get('/layout/:id', layoutController.getLayoutHandler.bind(layoutController));
