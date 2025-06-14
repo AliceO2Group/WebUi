@@ -18,6 +18,8 @@ import { draw } from './objectDraw.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
 import virtualTable from './virtualTable.js';
 import { qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
+import { filtersPanel } from '../common/filters/filterViews.js';
+// import { objectFiltersPanel } from '../common/filters/filterViews.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -25,39 +27,43 @@ import { qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-export default (model) => h('.h-100.flex-column', { key: model.router.params.page }, [
-  h('.flex-row.flex-grow', [
-    h('.scroll-y.flex-column', {
-      style: {
-        width: model.object.selected ? '50%' : '100%',
-      },
-    }, model.object.objectsRemote.match({
-      NotAsked: () => null,
-      Loading: () =>
-        h('.absolute-fill.flex-column.items-center.justify-center.f5', [spinner(5), h('', 'Loading Objects')]),
-      Success: () => {
-        const searchInput = model.object?.searchInput?.trim() ?? '';
-        if (searchInput !== '') {
-          const objectsLoaded = model.object.list;
-          const objectsToDisplay = objectsLoaded.filter((qcObject) =>
-            qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
-          return virtualTable(model, 'main', objectsToDisplay);
-        }
-        return tableShow(model);
-      },
-      Failure: () => null, // Notification is displayed
-    })),
-    h('.animate-width.scroll-y', {
-      style: {
-        width: model.object.selected ? '50%' : 0,
-      },
-    }, model.object.selected ? objectPanel(model) : null),
-  ]),
-  h('.f6.status-bar.ph1.flex-row', [
-    statusBarLeft(model),
-    statusBarRight(model),
-  ]),
-]);
+export default (model) => {
+  const { object, filterModel, router } = model;
+  return h('.h-100.flex-column', { key: router.params.page }, [
+    filtersPanel(filterModel, object),
+    h('.flex-row.flex-grow', [
+      h('.scroll-y.flex-column', {
+        style: {
+          width: object.selected ? '50%' : '100%',
+        },
+      }, object.objectsRemote.match({
+        NotAsked: () => null,
+        Loading: () =>
+          h('.absolute-fill.flex-column.items-center.justify-center.f5', [spinner(5), h('', 'Loading Objects')]),
+        Success: () => {
+          const searchInput = object?.searchInput?.trim() ?? '';
+          if (searchInput !== '') {
+            const objectsLoaded = object.list;
+            const objectsToDisplay = objectsLoaded.filter((qcObject) =>
+              qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
+            return virtualTable(model, 'main', objectsToDisplay);
+          }
+          return tableShow(model);
+        },
+        Failure: () => null, // Notification is displayed
+      })),
+      h('.animate-width.scroll-y', {
+        style: {
+          width: object.selected ? '50%' : 0,
+        },
+      }, object.selected ? objectPanel(model) : null),
+    ]),
+    h('.f6.status-bar.ph1.flex-row', [
+      statusBarLeft(model),
+      statusBarRight(model),
+    ]),
+  ]);
+};
 
 /**
  * Method to tackle various states for the selected objects
