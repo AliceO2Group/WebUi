@@ -1,4 +1,4 @@
-import { isRouteErrorResponse, Outlet } from 'react-router';
+import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router';
 
 import type { Route } from './+types/root';
 import './app.css';
@@ -6,9 +6,31 @@ import '@aliceo2/web-ui/Frontend/css/src/bootstrap.css';
 import { Spinner } from '~/ui/spinner';
 
 import MainLayout from './components/layout/MainLayout';
+import LeftDrawer from './components/layout/drawer/LeftDrawer';
+import Content from './components/layout/content/Content';
+import ConfigNavigator from './components/config-navigator/ConfigNavigator';
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  return <MainLayout>{children}</MainLayout>;
+  return (
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        <MainLayout>
+          <LeftDrawer>
+            <ConfigNavigator />
+          </LeftDrawer>
+          <Content>{children}</Content>
+        </MainLayout>
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  );
 }
 
 export default function App() {

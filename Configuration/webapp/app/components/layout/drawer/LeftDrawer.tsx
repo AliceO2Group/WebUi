@@ -1,18 +1,12 @@
-import React from 'react';
-import {
-  Box,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  Toolbar,
-  Typography,
-} from '@mui/material';
+import React, { type FC, type PropsWithChildren } from 'react';
+import { Box, Drawer, Toolbar, Typography } from '@mui/material';
 import LeftDrawerFooter from './LeftDrawerFooter';
 
-const DRAWER_WIDTH = 250;
+const DRAWER_WIDTH = 300;
 
-const LeftDrawer = () => {
+interface LeftDrawerProps extends PropsWithChildren {}
+
+const LeftDrawer: FC<LeftDrawerProps> = ({ children }) => {
   return (
     <Drawer
       sx={{
@@ -31,16 +25,8 @@ const LeftDrawer = () => {
       <Toolbar style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}>
         <Typography variant="h5">Configuration GUI</Typography>
       </Toolbar>
-      <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
-        <List>
-          {['Item 1', 'Item 2', 'Item 3', 'Item 4'].map((text) => (
-            <ListItem key={text}>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
-        </List>
-      </Box>
-      <LeftDrawerFooter/>
+      <Box sx={{ overflow: 'auto', flexGrow: 1 }}>{children}</Box>
+      <LeftDrawerFooter />
     </Drawer>
   );
 };
