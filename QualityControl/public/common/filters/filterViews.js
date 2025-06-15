@@ -51,10 +51,11 @@ const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback
  * @returns {vnode} - virtual node element
  */
 export function filtersPanel(filterModel, pageModel) {
-  const { filterMap, setFilterValue, filterService, visible } = filterModel;
+  const { filterMap, setFilterValue, filterService, visible, clearFilter } = filterModel;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onEnterCallback = () => filterModel.triggerFilter(pageModel);
+  const clearFilterCallback = clearFilter.bind(filterModel);
   const filtersList = filtersConfig(filterService);
 
   if (!visible) {
@@ -65,6 +66,7 @@ export function filtersPanel(filterModel, pageModel) {
     '.w-100.flex-row.p2.g2.justify-center#filterElement',
     [
       triggerFiltersButton(onEnterCallback),
+      clearFiltersButton(clearFilterCallback),
       ...filtersList.map((filter) =>
         createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
     ],
@@ -78,6 +80,14 @@ export function filtersPanel(filterModel, pageModel) {
  */
 const triggerFiltersButton = (onClickCallback) =>
   h('button.btn.btn-primary#triggerFilterButton', { onclick: onClickCallback, title: 'Update filters' }, 'Update');
+
+/**
+ * Button which will allow the user to clear the filter element
+ * @param {Function} clearFilterCallback - Function that clears the filter state.
+ * @returns {vnode} - virtual node element
+ */
+const clearFiltersButton = (clearFilterCallback) =>
+  h('button.btn.btn-secondary#clearFilterButton', { onclick: clearFilterCallback, title: 'Clear filters' }, 'Clear');
 
 /**
  * Button for toggling visibility of the filter by parameters panel
