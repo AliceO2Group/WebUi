@@ -45,8 +45,8 @@ export default class QCObjectService {
 
     if (ok) {
       this.list = RemoteData.success(result);
-      this.model.object.sideTree.initTree('database');
-      this.model.object.sideTree.addChildren(result);
+      this.model.object.tree.initTree('database');
+      this.model.object.tree.addChildren(result);
     } else {
       this.list = RemoteData.failure({ message: result.message });
     }

@@ -51,8 +51,6 @@ export default class QCObject extends Observable {
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
 
-    this.sideTree = new ObjectTree('database');
-    this.sideTree.bubbleTo(this);
     this.queryingObjects = false;
     this.scrollTop = 0;
     this.scrollHeight = 0;
