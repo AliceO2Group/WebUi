@@ -159,11 +159,9 @@ export default class ObjectViewModel extends Observable {
   }
 
   /**
-   * Change the state of the visibility of the filter panel
-   * @returns {void}
+   * Wrapper function for updateObjectSelection that will be triggered by filterModel;
    */
-  toggleFilterVisibility() {
-    this._filterVisibility = !this._filterVisibility;
-    this.notify();
+  async triggerFilter() {
+    await this.updateObjectSelection({});
   }
 }
