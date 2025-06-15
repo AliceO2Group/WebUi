@@ -57,7 +57,7 @@ export function filtersPanel(filterModel, pageModel) {
   const onEnterCallback = () => filterModel.triggerFilter(pageModel);
   const filtersList = filtersConfig(filterService);
   return h(
-    '.w-100.flex-row.p2.g2.justify-center',
+    '.w-100.flex-row.p2.g2.justify-center#filterElement',
     [
       triggerFiltersButton(onEnterCallback),
       ...filtersList.map((filter) =>
