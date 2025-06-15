@@ -61,6 +61,7 @@ export default class Layout extends Observable {
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
     // GridList.grid.length: integer, number of rows
+    this.applyTreeFilter = true;
   }
 
   /**

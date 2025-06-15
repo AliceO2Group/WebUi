@@ -90,13 +90,13 @@ export default class FilterModel extends Observable {
   };
 
   /**
-   * Triggers the filter update by persisting to URL and notifying the filterable model
-   * @param {object} filterableModel - The model that should be notified to apply the filters
+   * Apply the current filters to a filterable model and update the URL
+   * @param {object} filterAbleModel - The model that should be filtered
    * @returns {undefined}
    */
-  triggerFilter(filterableModel) {
+  triggerFilter(filterAbleModel) {
     this.setFilterToURL();
-    filterableModel.triggerFilter();
+    filterAbleModel.triggerFilter();
   }
 
   /**
@@ -118,5 +118,14 @@ export default class FilterModel extends Observable {
 
   get filterMap() {
     return this._filterMap;
+  }
+
+  /**
+   * Check if any filters are currently active in the URL parameters
+   * @returns {boolean} True if any filter parameters are present in the URL
+   */
+  activeFilter() {
+    const { params } = this.model.router;
+    return CCDB_QUERY_PARAMS.some((filterKey) => params[filterKey]?.trim());
   }
 }
