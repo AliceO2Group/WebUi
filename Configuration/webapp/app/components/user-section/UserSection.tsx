@@ -17,7 +17,7 @@ const UserSection: React.FC<UserSectionProps> = ({ userName }) => {
   };
 
   return (
-    <Box sx={{ flexGrow: 0 }}>
+    <Box sx={{ flexGrow: 0 }} className="user-section">
       <IconButton sx={{ p: 0 }} onClick={handleClick}>
         <Avatar>{userName[0]}</Avatar>
       </IconButton>
@@ -27,13 +27,13 @@ const UserSection: React.FC<UserSectionProps> = ({ userName }) => {
           vertical: 'bottom',
           horizontal: 'right',
         }}
-        keepMounted
         transformOrigin={{
           vertical: 'top',
           horizontal: 'right',
         }}
         open={Boolean(anchorEl)}
         onClose={handleClose}
+        className="user-section__menu"
       >
         <MenuItem onClick={handleClose}>Profile</MenuItem>
         <MenuItem onClick={handleClose}>My account</MenuItem>

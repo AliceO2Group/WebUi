@@ -9,6 +9,7 @@ import {
   Typography,
 } from '@mui/material';
 import LeftDrawerFooter from './LeftDrawerFooter';
+import LeftDrawerHeader from './LeftDrawerHeader';
 
 const DRAWER_WIDTH = 250;
 
@@ -27,10 +28,9 @@ const LeftDrawer = () => {
       }}
       variant="permanent"
       anchor="left"
+      className='left-drawer'
     >
-      <Toolbar style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}>
-        <Typography variant="h5">Configuration GUI</Typography>
-      </Toolbar>
+      <LeftDrawerHeader/>
       <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
         <List>
           {['Item 1', 'Item 2', 'Item 3', 'Item 4'].map((text) => (
