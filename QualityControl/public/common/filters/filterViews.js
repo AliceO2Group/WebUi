@@ -15,7 +15,7 @@
 import { filterInput, dynamicSelector } from './filter.js';
 import { FilterType } from './filterTypes.js';
 import { filtersConfig } from './filtersConfig.js';
-import { h } from '/js/src/index.js';
+import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
 
 /**
  * Creates an input element for a specific metadata field;
@@ -51,11 +51,16 @@ const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback
  * @returns {vnode} - virtual node element
  */
 export function filtersPanel(filterModel, pageModel) {
-  const { filterMap, setFilterValue, filterService } = filterModel;
+  const { filterMap, setFilterValue, filterService, visible } = filterModel;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onEnterCallback = () => filterModel.triggerFilter(pageModel);
   const filtersList = filtersConfig(filterService);
+
+  if (!visible) {
+    return null;
+  }
+
   return h(
     '.w-100.flex-row.p2.g2.justify-center#filterElement',
     [
@@ -72,4 +77,16 @@ export function filtersPanel(filterModel, pageModel) {
  * @returns {vnode} - virtual node element
  */
 const triggerFiltersButton = (onClickCallback) =>
-  h('button.btn.btn-primary#triggerFilterButton', { onclick: onClickCallback }, 'Update');
+  h('button.btn.btn-primary#triggerFilterButton', { onclick: onClickCallback, title: 'Update filters' }, 'Update');
+
+/**
+ * Button for toggling visibility of the filter by parameters panel
+ * @param {FilterModel} filterModel - model that manages filter state
+ * @returns {vnode} - virtual node element
+ */
+export function filterPanelToggleButton(filterModel) {
+  const { visible } = filterModel;
+  return h(`button.btn.btn-default${visible ? '.active' : ''}`, {
+    onclick: () => filterModel.toggleFilterVisibility(),
+  }, ['Filters ', visible ? iconChevronTop() : iconChevronBottom()]);
+}
