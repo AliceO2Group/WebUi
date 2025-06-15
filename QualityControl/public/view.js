@@ -34,14 +34,13 @@ import LayoutListPage from './pages/layoutListView/LayoutListPage.js';
 export default (model) => [
   model.isUpdateVisible && layoutEditModal(model),
   model.isImportVisible && layoutImportModal(model),
-  model.page === 'objectView' ? ObjectViewPage(model) :
-    h('.absolute-fill.flex-column', [
-      h('header.shadow-level2.level2', [header(model)]),
-      h('.flex-grow.flex-row.outline-gray', [
-        sidebar(model),
-        h('section.outline-gray.flex-grow.relative', page(model)),
-      ]),
+  h('.absolute-fill.flex-column', [
+    h('header.shadow-level2.level2', [header(model)]),
+    h('.flex-grow.flex-row.outline-gray', [
+      sidebar(model),
+      h('section.outline-gray.flex-grow.relative', page(model)),
     ]),
+  ]),
   notification(model.notification),
 ];
 

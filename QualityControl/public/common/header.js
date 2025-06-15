@@ -19,6 +19,7 @@ import layoutViewHeader from '../layout/view/header.js';
 import objectTreeHeader from '../object/objectTreeHeader.js';
 import aboutViewHeader from '../pages/aboutView/components/aboutViewHeader.js';
 import LayoutListHeader from '../pages/layoutListView/components/LayoutListHeader.js';
+import { objectViewHeader } from '../pages/objectView/components/header.js';
 
 /**
  * Shows header of the application, split with 3 parts:
@@ -28,9 +29,11 @@ import LayoutListHeader from '../pages/layoutListView/components/LayoutListHeade
  * @param {Model} model - root model of the application
  * @returns {vnode} - header element
  */
-export default (model) => h('.flex-row.p2', [
-  commonHeader(model),
-  headerSpecific(model),
+export default (model) => h('.flex-col', [
+  h('.flex-row.p2', [
+    commonHeader(model),
+    headerSpecific(model),
+  ]),
 ]);
 
 /**
@@ -39,11 +42,13 @@ export default (model) => h('.flex-row.p2', [
  * @returns {vnode} - virtual node element
  */
 const headerSpecific = (model) => {
-  switch (model.page) {
-    case 'layoutList': return LayoutListHeader(model.layoutListModel);
-    case 'layoutShow': return layoutViewHeader(model.layout);
-    case 'objectTree': return objectTreeHeader(model);
-    case 'about': return aboutViewHeader();
+  const { layoutListModel, filterModel, layout, object, page } = model;
+  switch (page) {
+    case 'layoutList': return LayoutListHeader(layoutListModel, filterModel);
+    case 'layoutShow': return layoutViewHeader(layout, filterModel);
+    case 'objectTree': return objectTreeHeader(object, filterModel);
+    case 'objectView': return objectViewHeader(model);
+    case 'about': return aboutViewHeader(filterModel);
     default: return null;
   }
 };

@@ -14,55 +14,59 @@
 
 import { h } from '/js/src/index.js';
 import { iconCollapseUp, iconArrowBottom, iconArrowTop } from '/js/src/icons.js';
+import { filterPanelToggleButton } from '../common/filters/filterViews.js';
 
 /**
  * Shows header for the objects tree page, buttons allow to open/close the entire tree, a search input allow to filter
  * by name.
- * @param {Model} model - root model of the application
+ * @param {QcObject} qcObject - Model that manages the QCObject state.
+ * @param {FilterModel} filterModel - The model handeling the filter state
  * @returns {vnode} - virtual node element
  */
-export default function objectTreeHeader(model) {
-  if (!model.object.currentList) {
+export default function objectTreeHeader(qcObject, filterModel) {
+  if (!qcObject.currentList) {
     return null;
   }
 
-  const howMany = model.object.searchInput
-    ? `${model.object.searchResult.length} found of ${model.object.currentList.length}`
-    : `${model.object.currentList.length} items`;
+  const howMany = qcObject.searchInput
+    ? `${qcObject.searchResult.length} found of ${qcObject.currentList.length}`
+    : `${qcObject.currentList.length} items`;
 
   return [
     h('.w-33.text-center', [
       h('b.f4', 'Objects'),
       ' ',
-      model.object.objectsRemote.isSuccess() && h('span', `(${howMany})`),
+      qcObject.objectsRemote.isSuccess() && h('span', `(${howMany})`),
     ]),
     h('.flex-grow.text-right', [
+      filterPanelToggleButton(filterModel),
+      ' ',
       h('.dropdown', {
-        title: 'Sort by', class: model.object.sortBy.open ? 'dropdown-open' : '',
+        title: 'Sort by', class: qcObject.sortBy.open ? 'dropdown-open' : '',
       }, [
         h('button.btn', {
           title: 'Sort by',
-          onclick: () => model.object.toggleSortDropdown(),
-        }, [model.object.sortBy.title, ' ', model.object.sortBy.icon]),
+          onclick: () => qcObject.toggleSortDropdown(),
+        }, [qcObject.sortBy.title, ' ', qcObject.sortBy.icon]),
         h('.dropdown-menu.text-left', [
-          sortMenuItem(model, 'Name', 'Sort by name ASC', iconArrowTop(), 'name', 1),
-          sortMenuItem(model, 'Name', 'Sort by name DESC', iconArrowBottom(), 'name', -1),
+          sortMenuItem(qcObject, 'Name', 'Sort by name ASC', iconArrowTop(), 'name', 1),
+          sortMenuItem(qcObject, 'Name', 'Sort by name DESC', iconArrowBottom(), 'name', -1),
 
         ]),
       ]),
       ' ',
       h('button.btn', {
         title: 'Close whole tree',
-        onclick: () => model.object.tree.closeAll(),
-        disabled: Boolean(model.object.searchInput),
+        onclick: () => qcObject.tree.closeAll(),
+        disabled: Boolean(qcObject.searchInput),
       }, iconCollapseUp()),
       ' ',
       h('input.form-control.form-inline.mh1.w-33', {
         placeholder: 'Search',
         type: 'text',
-        value: model.object.searchInput,
-        disabled: model.object.queryingObjects ? true : false,
-        oninput: (e) => model.object.search(e.target.value),
+        value: qcObject.searchInput,
+        disabled: qcObject.queryingObjects ? true : false,
+        oninput: (e) => qcObject.search(e.target.value),
       }),
     ]),
   ];
@@ -70,7 +74,7 @@ export default function objectTreeHeader(model) {
 
 /**
  * Create a menu-item for sort-by dropdown
- * @param {Model} model - root model of the application
+ * @param {QcObject} qcObject - Model that manages the QCObject state.
  * @param {string} shortTitle - title that gets displayed to the user
  * @param {string} title - title that gets displayed to the user on hover
  * @param {Icon} icon - svg icon to be used
@@ -78,6 +82,6 @@ export default function objectTreeHeader(model) {
  * @param {number} order - {-1/1}/{DESC/ASC}
  * @returns {vnode} - virtual node element
  */
-const sortMenuItem = (model, shortTitle, title, icon, field, order) => h('a.menu-item', {
-  title: title, style: 'white-space: nowrap;', onclick: () => model.object.sortTree(shortTitle, field, order, icon),
+const sortMenuItem = (qcObject, shortTitle, title, icon, field, order) => h('a.menu-item', {
+  title: title, style: 'white-space: nowrap;', onclick: () => qcObject.sortTree(shortTitle, field, order, icon),
 }, [shortTitle, ' ', icon]);
