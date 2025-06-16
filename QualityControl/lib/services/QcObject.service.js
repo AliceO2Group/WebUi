@@ -98,7 +98,7 @@ export class QcObjectService {
    * @rejects {Error}
    */
   async retrieveLatestVersionOfObjects({ prefix = this._dbService.PREFIX, fields, useCache = true, filters }) {
-    const hasFilters = filters !== undefined;
+    const hasFilters = typeof filters === 'object' && Object.keys(filters).length;
 
     if (!hasFilters && useCache && this._cache.objects?.length) {
       return this._cache.objects.filter((object) => object.name.startsWith(prefix));
