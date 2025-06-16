@@ -31,7 +31,6 @@ export class ObjectController {
      * @type {QCObjectService}
      */
     this._objService = objService;
-    this._logger = LogManager.getLogger('object/controller');
   }
 
   /**
