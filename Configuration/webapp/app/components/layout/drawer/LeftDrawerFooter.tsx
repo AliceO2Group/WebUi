@@ -3,7 +3,10 @@ import React from 'react';
 
 const LeftDrawerFooter = () => {
   return (
-    <Box sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
+    <Box
+      sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}
+      className="left-drawer__footer"
+    >
       <Typography variant="caption">Left Drawer Footer</Typography>
     </Box>
   );

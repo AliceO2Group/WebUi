@@ -1,10 +1,13 @@
 import React, { type FC, type PropsWithChildren } from 'react';
-import { Box, Drawer, Toolbar, Typography } from '@mui/material';
+import { Box, Drawer, List, ListItem, ListItemText } from '@mui/material';
 import LeftDrawerFooter from './LeftDrawerFooter';
+import LeftDrawerHeader from './LeftDrawerHeader';
+
 
 const DRAWER_WIDTH = 300;
 
 interface LeftDrawerProps extends PropsWithChildren {}
+
 
 const LeftDrawer: FC<LeftDrawerProps> = ({ children }) => {
   return (
@@ -21,12 +24,19 @@ const LeftDrawer: FC<LeftDrawerProps> = ({ children }) => {
       }}
       variant="permanent"
       anchor="left"
+      className='left-drawer'
     >
-      <Toolbar style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}>
-        <Typography variant="h5">Configuration GUI</Typography>
-      </Toolbar>
-      <Box sx={{ overflow: 'auto', flexGrow: 1 }}>{children}</Box>
-      <LeftDrawerFooter />
+      <LeftDrawerHeader/>
+      <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
+        <List>
+          {['Item 1', 'Item 2', 'Item 3', 'Item 4'].map((text) => (
+            <ListItem key={text}>
+              <ListItemText primary={text} />
+            </ListItem>
+          ))}
+        </List>
+      </Box>
+      <LeftDrawerFooter/>
     </Drawer>
   );
 };

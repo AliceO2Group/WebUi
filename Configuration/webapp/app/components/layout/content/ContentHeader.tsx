@@ -14,6 +14,7 @@ const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => {
         display: 'flex',
         justifyContent: 'space-between',
       }}
+      className="content-section__header"
     >
       <Typography variant="h5">{currentPath}</Typography>
       <UserSection userName="John D." />
