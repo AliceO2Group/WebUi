@@ -20,10 +20,17 @@ const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = ({
   onClick,
 }) => {
   return (
-    <ListItem className='config_navigator__item'>
-      <ListItemButton onClick={onClick} color="red" sx={{ borderRadius: 2 }}>
+    <ListItem
+      style={{ paddingTop: 5, paddingBottom: 5 }}
+      className="config_navigator__item"
+    >
+      <ListItemButton
+        onClick={onClick}
+        color="red"
+        sx={{ borderRadius: 2, padding: 0 }}
+      >
         <ListItemIcon>
-          <FontAwesomeIcon icon={faFile} />
+          <FontAwesomeIcon icon={faFile} style={{ margin: 'auto' }} />
         </ListItemIcon>
         <ListItemText primary={title} />
       </ListItemButton>
