@@ -21,11 +21,12 @@ import {
   ScrollRestoration, useNavigation,
 } from 'react-router';
 
+import {useState} from 'react';
 import type { Route } from './+types/root';
 import './app.css';
 import '@aliceo2/web-ui/Frontend/css/src/bootstrap.css'
-import {Navbar} from '~/ui/navbar';
 import {Spinner} from '~/ui/spinner';
+import AppLayout from '~/ui/layout'
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { state } = useNavigation();
@@ -39,10 +40,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <Navbar />
-        <div className={'p2'}>
-          {state === 'loading' ? <Spinner /> : children}
-        </div>
+        <AppLayout state={state}>
+          {children}  
+        </AppLayout>
         <ScrollRestoration />
         <Scripts />
       </body>

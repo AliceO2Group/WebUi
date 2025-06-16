@@ -12,24 +12,34 @@
  * or submit itself to any jurisdiction.
 */
 
-import { NavLink } from 'react-router';
-import type {NavLinkProps} from 'react-router';
+import { Box, Tabs } from '@mui/material';
+import React from 'react';
 
-const StyledNavLink = ({children, className: _, ...props}: NavLinkProps) => {
-    return <NavLink
-        {...props}
-        className={({isActive}) => `btn btn-tab ${isActive ? 'selected' : ''}`}
-    >{children}</NavLink>
-}
-
-export const Navbar = () => {
-    return <nav className={'flex-row justify-between items-center p2 shadow-level2 level2 bg-gray-light'}>
-        <span className={'f4 gray-darker'}>Tokenization light</span>
-        <div className={'btn-group'}>
-            <StyledNavLink to={'/'}>Home</StyledNavLink>
-            <StyledNavLink className={'btnStyledNav btn-tab'} to={'/tokens'}>Tokens</StyledNavLink>
-        </div>
-        <div>
-        </div>
-    </nav>
+/**
+ * TabsNavbar
+ *
+ * A reusable component that renders a Material-UI Tabs navigation bar.
+ * Allows switching between different sections using tab buttons.
+ *
+ * @param tabIndex The currently selected tab index.
+ * @param setTabIndex Function to update the selected tab index.
+ * @param children Tab (@mui/material) components (usually <Tab />) to be rendered inside the navigation bar.
+ */
+export function TabsNavbar({tabIndex, setTabIndex, children}: {tabIndex: number, setTabIndex: (index: number) => void, children?: React.ReactNode}) {
+    
+    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+        setTabIndex(newValue)
+    }
+    
+    return  <Box>
+                <Tabs
+                    value={tabIndex}
+                    onChange={handleTabChange}
+                    variant="fullWidth"
+                    textColor="secondary"
+                    indicatorColor="secondary"
+                >
+                    {children}
+                </Tabs>
+            </Box>
 }

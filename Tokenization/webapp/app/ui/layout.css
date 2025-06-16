@@ -12,17 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
-import { Link } from 'react-router';
-import { useSetHeader } from '~/ui/header/headerContext';
-
-export default function Home() {
-
-  const { setHeaderContent } = useSetHeader();
-  setHeaderContent('Tokenization Admin Interface');
-  
-  return <>
-      <h1>Welcome to (dummy) Tokenization GUI!</h1>
-      <Link to={'/tokens'}>Tokens overview</Link>
-
-  </>;
+.container {
+    display: grid;
+    grid-template-rows: 1fr 3fr 1.3fr;
+    grid-template-columns: 0.575fr 3fr; 
 }

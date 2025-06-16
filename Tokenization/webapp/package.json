@@ -23,6 +23,9 @@
   "homepage": "https://github.com/AliceO2Group/WebUi#readme",
   "dependencies": {
     "@aliceo2/web-ui": "^2.8.4",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^7.1.1",
     "@react-router/node": "^7.5.0",
     "isbot": "^5",
     "react": "^19.0.0",

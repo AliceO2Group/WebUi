@@ -11,3 +11,12 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
+
+.justify-end {
+    justify-content: flex-end;
+}
+
+.ml1 { margin-left: var(--space-xs);  }
+.ml2 { margin-left: var(--space-s); }
+.ml3 { margin-left: var(--space-m); }
+.ml4 { margin-left: var(--space-l); }
