@@ -44,7 +44,7 @@ export class ObjectController {
     try {
       const { prefix, fields, filters } = req.query;
 
-      const list = await this._objService.retrieveLatestVersionOfObjects(prefix, fields, true, filters);
+      const list = await this._objService.retrieveLatestVersionOfObjects({ prefix, fields, filters });
       res.status(200).json(list);
     } catch (error) {
       const responseError = new Error('Failed to retrieve list of objects latest version');

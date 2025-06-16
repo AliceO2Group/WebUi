@@ -57,7 +57,9 @@ export const objectControllerTestSuite = async () => {
 
       ok(resMock.status.calledWith(200));
       ok(resMock.json.calledWith(mockObjectsList));
-      ok(QcObjectServiceMock.retrieveLatestVersionOfObjects.calledWith(undefined, undefined, true, undefined));
+
+      ok(QcObjectServiceMock.retrieveLatestVersionOfObjects.calledWith({
+        prefix: undefined, fields: undefined, filters: undefined }));
     });
 
     test('should successfully retrieve objects list with prefix and fields', async () => {
@@ -73,7 +75,7 @@ export const objectControllerTestSuite = async () => {
 
       ok(resMock.status.calledWith(200));
       ok(QcObjectServiceMock.retrieveLatestVersionOfObjects
-        .calledWith('qc/path', ['objectName', 'path'], true, undefined));
+        .calledWith({ prefix: 'qc/path', fields: ['objectName', 'path'], filters: undefined }));
     });
 
     test('should handle service errors when retrieving objects', async () => {

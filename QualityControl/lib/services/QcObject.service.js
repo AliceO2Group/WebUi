@@ -89,19 +89,15 @@ export class QcObjectService {
    * * from cache if it is requested by the client and the system is configured to use a cache;
    * * make a new request and get data directly from data service
    * * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
-   * @param {string|Regex} prefix - Prefix for which CCDB should search for objects.
-   * @param {Array<string>} [fields] - List of fields that should be requested for each object
-   * @param {boolean} [useCache = true] - if the list should be the cached version or not
-   * @param {Array<string>} [filters = undefined] - Run number by which the objects are filtered.
+   * @param {object} options - An object that contains query parameters among other arguments
+   * @param {string|Regex} options.prefix - Prefix for which CCDB should search for objects.
+   * @param {Array<string>} options.fields - List of fields that should be requested for each object
+   * @param {boolean} options.useCache - if the list should be the cached version or not
+   * @param {Array<string>} options.filters - Run number by which the objects are filtered.
    * @returns {Promise.<Array<QcObjectLeaf>>} - results of objects with required fields
    * @rejects {Error}
    */
-  async retrieveLatestVersionOfObjects(
-    prefix = this._dbService.PREFIX,
-    fields,
-    useCache = true,
-    filters = undefined,
-  ) {
+  async retrieveLatestVersionOfObjects({ prefix = this._dbService.PREFIX, fields, useCache = true, filters }) {
     const hasFilters = filters !== undefined;
 
     if (!hasFilters && useCache && this._cache.objects?.length) {
