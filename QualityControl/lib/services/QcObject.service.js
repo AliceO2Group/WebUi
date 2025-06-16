@@ -108,7 +108,7 @@ export class QcObjectService {
     if (!hasFilters) {
       objects = await this._dbService.getObjectsTreeList(prefix);
     } else {
-      objects = await this._dbService.getObjectsLatestVersionList(prefix, filters, fields);
+      objects = await this._dbService.getObjectsLatestVersionList({ prefix, filters, fields });
     }
     return this._parseObjects(objects);
   }

@@ -121,7 +121,7 @@ export const ccdbServiceTestSuite = async () => {
       test('should reject with error for fields parameter not being a list', async () => {
         const ccdb = new CcdbService(ccdbConfig);
         await rejects(
-          async () => await ccdb.getObjectsLatestVersionList('/qc', undefined, 'bad-fields'),
+          async () => ccdb.getObjectsLatestVersionList({ prefix: '/qc', fields: 'bad-fields' }),
           new TypeError('fields.join is not a function'),
         );
       });
@@ -160,7 +160,8 @@ export const ccdbServiceTestSuite = async () => {
         })
           .get('/latest/.*')
           .reply(200, { objects: objects, subfolders: [] });
-        const objectsRetrieved = await ccdb.getObjectsLatestVersionList('', undefined, [ID, CREATED, PATH]);
+        const objectsRetrieved = await ccdb.getObjectsLatestVersionList({
+          prefix: '', filters: undefined, fields: [ID, CREATED, PATH] });
         deepStrictEqual(objectsRetrieved, objects, 'Received objects are not alike');
       });
 
@@ -186,7 +187,8 @@ export const ccdbServiceTestSuite = async () => {
           .reply(200, { objects: objects, subfolders: [] });
 
         const objectsRetrieved =
-          await ccdb.getObjectsLatestVersionList('', { RunNumber: 535, RunType: 'PHYSICS' }, [ID]);
+          await ccdb.getObjectsLatestVersionList({
+            prefix: '', filters: { RunNumber: 535, RunType: 'PHYSICS' }, fields: [ID] });
 
         deepStrictEqual(objectsRetrieved, objects, 'Received objects are not alike');
       });
