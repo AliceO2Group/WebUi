@@ -1,0 +1,15 @@
+services:
+  ui-tests:
+    build:
+      context: ./tests/ui
+      dockerfile: Dockerfile
+    working_dir: /tests/ui
+    volumes:
+      - ./tests/ui:/tests/ui
+    depends_on:
+      reverse-proxy:
+        condition: service_started
+      backend:
+        condition: service_healthy
+      webapp:
+        condition: service_healthy

@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "test": "mocha test/**/*.js"
+  },
+  
+  "devDependencies": {
+    "mocha": "^11.6.0",
+    "puppeteer": "^24.10.1"
+  }
+}
