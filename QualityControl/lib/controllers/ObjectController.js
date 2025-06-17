@@ -64,17 +64,12 @@ export class ObjectController {
    * @returns {void}
    */
   async getObjectContent(req, res) {
-    try {
-      const { path, validFrom, filters, id } = req.query;
+    const { path, validFrom, filters, id } = req.query;
+    const callbackParams = { path, validFrom, filters, id };
 
-      const object = await this._objService.retrieveQcObject(path, validFrom, id, filters);
-      res.status(200).json(object);
-    } catch (error) {
-      const responseError = new Error('Failed to retrieve object content');
+    const callback = this._objService.retrieveQcObject.bind(this._objService);
 
-      logger.errorMessage(`Error whilst retrieving object content: ${error}`);
-      updateAndSendExpressResponseFromNativeError(res, responseError);
-    }
+    await this._handleDataRetrieval(callbackParams, callback, res, 'Failed to retrieve object content');
   }
 
   async getObjectById(req, res) {

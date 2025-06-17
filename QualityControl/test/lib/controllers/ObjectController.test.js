@@ -123,7 +123,12 @@ export const objectControllerTestSuite = async () => {
 
       ok(resMock.status.calledWith(200));
       ok(resMock.json.calledWith(stubObject));
-      ok(QcObjectServiceMock.retrieveQcObject.calledWith(stubObject.path, undefined, undefined, undefined));
+      ok(QcObjectServiceMock.retrieveQcObject.calledWith({
+        path: stubObject.path,
+        validFrom: undefined,
+        filters: undefined,
+        id: undefined,
+      }));
     });
 
     test('should handle service errors when retrieving object content', async () => {

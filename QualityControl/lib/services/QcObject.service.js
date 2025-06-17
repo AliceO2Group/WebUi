@@ -120,14 +120,15 @@ export class QcObjectService {
    * Use the first version to retrieve details about the exact object.
    * From the information retrieved above, use the location attribute and pass it to JSROOT to get a JSON
    * decompressed version of the ROOT object which will be plotted/drawn with JSROOT.draw on the client side.
-   * @param {string} path - name(known as path) of the object to retrieve information
-   * @param {number|null} [validFrom = undefined] - timestamp in ms
-   * @param {string} [id = ''] - id with respect to CCDB storage
-   * @param {string} [filters = {}] - filter attributes for specific objects
+   * @param {object} options - An object that contains query parameters among other arguments
+   * @param {string} options.path - name(known as path) of the object to retrieve information
+   * @param {number|null} options.validFrom - timestamp in ms
+   * @param {string} options.id - id with respect to CCDB storage
+   * @param {string} options.filters - filter attributes for specific objects
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
    * @throws {Error}
    */
-  async retrieveQcObject(path, validFrom = undefined, id = undefined, filters = {}) {
+  async retrieveQcObject({ path, validFrom = undefined, id = undefined, filters = {} }) {
     /**
      * @type {CcdbObjectIdentification}
      */
