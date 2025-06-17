@@ -173,10 +173,10 @@ export class QcObjectService {
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
    * @throws
    */
-  async retrieveQcObjectByQcgId({ qcgId, id, validFrom = undefined, filters = {} }) {
-    const { object, layoutName, tabName } = this._chartRepository.getObjectById(qcgId);
+  async retrieveQcObjectByQcgId({ qcObjectId, id, validFrom = undefined, filters = {} }) {
+    const { object, layoutName, tabName } = this._chartRepository.getObjectById(qcObjectId);
     const { name, options = {}, ignoreDefaults = false } = object;
-    const qcObject = await this.retrieveQcObject(name, validFrom, id, filters);
+    const qcObject = await this.retrieveQcObject({ path: name, validFrom, id, filters });
 
     return {
       ...qcObject,

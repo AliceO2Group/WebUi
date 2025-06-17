@@ -78,18 +78,12 @@ export class ObjectController {
   }
 
   async getObjectById(req, res) {
-    try {
-      const qcObjectId = req.params.id;
-      const { validFrom, filters, id } = req.query;
+    const qcObjectId = req.params.id;
+    const { validFrom, filters, id } = req.query;
+    const callbackParams = { validFrom, filters, id, qcObjectId };
+    const callback = this._objService.retrieveQcObjectByQcgId.bind(this._objService);
 
-      const object = await this._objService.retrieveQcObjectByQcgId(qcObjectId, id, validFrom, filters);
-      res.status(200).json(object);
-    } catch (error) {
-      const responseError = new Error('Unable to identify object or read it by qcg id');
-
-      logger.errorMessage(`Error whilst retrieving object: ${error}`);
-      updateAndSendExpressResponseFromNativeError(res, responseError);
-    }
+    await this._handleDataRetrieval(callbackParams, callback, res, 'Unable to identify object or read it by qcg id');
   }
 
   /**

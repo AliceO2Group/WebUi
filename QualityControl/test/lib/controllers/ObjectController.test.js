@@ -162,7 +162,12 @@ export const objectControllerTestSuite = async () => {
 
       ok(resMock.status.calledWith(200));
       ok(resMock.json.calledWith(mockObject));
-      ok(QcObjectServiceMock.retrieveQcObjectByQcgId.calledWith(mockObject.id, undefined, undefined, undefined));
+      ok(QcObjectServiceMock.retrieveQcObjectByQcgId.calledWith({
+        validFrom: undefined,
+        filters: undefined,
+        id: undefined,
+        qcgId: mockObject.id,
+      }));
     });
 
     test('should handle service errors when retrieving object by ID', async () => {
@@ -180,7 +185,12 @@ export const objectControllerTestSuite = async () => {
         status: 500,
         title: 'Unknown Error',
       }));
-      ok(QcObjectServiceMock.retrieveQcObjectByQcgId.calledWith('some-id', undefined, undefined, undefined));
+      ok(QcObjectServiceMock.retrieveQcObjectByQcgId.calledWith({
+        validFrom: undefined,
+        filters: undefined,
+        id: undefined,
+        qcgId: 'some-id',
+      }));
     });
   });
 };
