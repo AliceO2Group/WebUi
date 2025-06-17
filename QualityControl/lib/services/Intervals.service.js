@@ -30,8 +30,11 @@ export class IntervalsService {
    * @param {number} intervalRate = 60 * 1000 - (ms) on how often the callback should be called
    * @returns {symbol} - unique key for registered callback
    */
-  register(callback, intervalRate = 60 * 1000) {
-    const key = Symbol(Math.random());
+  register(callback, intervalRate = 60 * 1000, key = Symbol(Math.random())) {
+    if (this._intervals[key]) {
+      this.deregister(key);
+    }
+
     this._intervals[key] = setInterval(callback, intervalRate);
     return key;
   }
@@ -44,5 +47,9 @@ export class IntervalsService {
   deregister(key) {
     const intervalToDeregister = this._intervals[key];
     clearInterval(intervalToDeregister);
+  }
+
+  activeInterval(key) {
+    return this._intervals[key];
   }
 }

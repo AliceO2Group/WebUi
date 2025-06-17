@@ -74,11 +74,11 @@ export const setupQcModel = () => {
   const qcObjectService = new QcObjectService(ccdbService, chartRepository, { openFile, toJSON });
   qcObjectService.refreshCache();
 
-  const objectController = new ObjectController(qcObjectService);
   const intervalsService = new IntervalsService();
 
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
   const filterService = new FilterService(bookkeepingService);
+  const objectController = new ObjectController(qcObjectService, filterService, intervalsService);
 
   const filterController = new FilterController(filterService);
 
