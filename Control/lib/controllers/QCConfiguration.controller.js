@@ -12,7 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
-const { LogManager, updateAndSendExpressResponseFromNativeError, InvalidInputError, NotFoundError } = require("@aliceo2/web-ui");
+const {
+  LogManager,
+  updateAndSendExpressResponseFromNativeError,
+  InvalidInputError,
+  NotFoundError,
+} = require("@aliceo2/web-ui");
 const { errorLogger } = require("../utils.js");
 const { getConsulConfig } = require("../config/publicConfigProvider.js");
 
@@ -21,10 +26,10 @@ const { getConsulConfig } = require("../config/publicConfigProvider.js");
  */
 class QCConfigurationController {
   /**
-     * Setup QCConfigurationController
-     * @param {QCConfigurationService} qcConfigurationService
-     * @param {JSON} config
-     */
+   * Setup QCConfigurationController
+   * @param {QCConfigurationService} qcConfigurationService
+   * @param {JSON} config
+   */
   constructor(qcConfigurationService, config) {
     this._qcConfigurationService = qcConfigurationService;
     this._config = getConsulConfig({ consul: config });
@@ -62,15 +67,12 @@ class QCConfigurationController {
    */
   async getConfigurationByKey(req, res) {
     const { key } = req.query;
-    console.log(`getConfigurationByKey: ${key}`);
     if (!key) {
       updateAndSendExpressResponseFromNativeError(res, new InvalidInputError("Missing configuration key"));
     }
 
     try {
       const value = await this._qcConfigurationService.getConfigurationByKey(key);
-      console.log("value")
-      console.log(value)
       if (!value) {
         updateAndSendExpressResponseFromNativeError(res, new NotFoundError("Configuration not found"));
       }
