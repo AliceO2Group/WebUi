@@ -1,24 +1,20 @@
 syntax = "proto3";
-package wrapper;
+
+package webui.tokenization;
 
 // ======================================
-//                 ENUMS
+//                SERVICES
 // ======================================
-enum MessageEvent {
-    // Default value, represents an empty event
-    EMPTY_EVENT = 0;
 
-    // New token message type, contains a new token and target address
-    NEW_TOKEN = 1;
-
-    // Revoke token message type, contains a token to be revoked
-    REVOKE_TOKEN = 2;
+// Central System service handling duplex communication with wrapper client
+service CentralSystem {
+    rpc ClientStream(stream Payload) returns (stream Payload);
 }
-
 
 // ======================================
 //                MESSAGES
 // ======================================
+
 // Simulates an empty message because protobuffer doesn't support void
 message EmptyMessage {}
 
@@ -30,19 +26,27 @@ message Token {
 
 // Stream message that can contain one of specific messages
 message Payload {
+    // Message event type
     MessageEvent event = 1;
-    oneof {
+    // Data related to specific event type
+    oneof data {
         EmptyMessage emptyMessage = 2;
         Token newToken = 3;
         Token revokeToken = 4;
     }
 }
 
-
 // ======================================
-//                SERVICES
+//                 ENUMS
 // ======================================
 
-service CentralSystem {
-    rpc ClientStream(stream Payload) returns (stream Payload);
+enum MessageEvent {
+    // Default value, represents an empty event
+    MESSAGE_EVENT_EMPTY = 0;
+
+    // New token message type, contains a new token and target address
+    MESSAGE_EVENT_NEW_TOKEN = 1;
+
+    // Revoke token message type, contains a token to be revoked
+    MESSAGE_EVENT_REVOKE_TOKEN = 2;
 }
