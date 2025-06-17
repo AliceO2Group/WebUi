@@ -60,6 +60,8 @@ export class QcObjectService {
       objects: undefined,
       lastUpdate: undefined,
     };
+    this._activeRunCache = new Map();
+
     this._logger = LogManager.getLogger(LOG_FACILITY);
   }
 
@@ -163,14 +165,15 @@ export class QcObjectService {
 
   /**
    * Retrieve an object by its id (stored in the customized data service) with its information
-   * @param {string} qcgId - id of the object configuration stored in QCG database (different than CCDB)
-   * @param {string} id - id of the object to be retrieved as per CCDB etag
-   * @param {number|null} [validFrom] - timestamp in ms
-   * @param {string} [filters = {}] - filter as string to be sent to CCDB
+   * @param {object} options - An object that contains query parameters among other arguments
+   * @param {string} options.qcgId - id of the object configuration stored in QCG database (different than CCDB)
+   * @param {string} options.id - id of the object to be retrieved as per CCDB etag
+   * @param {number|null} options.validFrom - timestamp in ms
+   * @param {string} options.filters = {}] - filter as string to be sent to CCDB
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
    * @throws
    */
-  async retrieveQcObjectByQcgId(qcgId, id, validFrom = undefined, filters = {}) {
+  async retrieveQcObjectByQcgId({ qcgId, id, validFrom = undefined, filters = {} }) {
     const { object, layoutName, tabName } = this._chartRepository.getObjectById(qcgId);
     const { name, options = {}, ignoreDefaults = false } = object;
     const qcObject = await this.retrieveQcObject(name, validFrom, id, filters);
@@ -229,5 +232,33 @@ export class QcObjectService {
    */
   getCacheRefreshRate() {
     return this._dbService.CACHE_REFRESH_RATE;
+  }
+
+  /**
+   * Remove a specific query entry from the run cache
+   * @param {string} queryKey - Identifier for the cached entry
+   * @returns {boolean} - Whether the entry existed and was removed
+   */
+  removeRunCache(queryKey) {
+    return this._activeRunCache.delete(queryKey);
+  }
+
+  /**
+   * Retrieve cached data associated with a given query key
+   * @param {string} queryKey - Identifier for the cached entry
+   * @returns {object|Array<object>} - Cached data object or undefined if not found
+   */
+  getRunCache(queryKey) {
+    return this._activeRunCache.get(queryKey);
+  }
+
+  /**
+   * Store a data object in the run cache under a given key
+   * @param {string} queryKey - Identifier for the cached entry
+   * @param {object|Array<object>} dataObject - Data object to be cached
+   * @returns {undefined}
+   */
+  setRunCache(queryKey, dataObject) {
+    this._activeRunCache.set(queryKey, dataObject);
   }
 }
