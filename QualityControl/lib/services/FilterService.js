@@ -73,7 +73,7 @@ export class FilterService {
 
       return await this._bookkeepingService.retrieveRunStatus(runNumber);
     } catch (error) {
-      logger.errorMessage(`Error while retrieving run status: ${error.message || error}`);
+      logger.errorMessage(`Error while retrieving run status for run number ${runNumber}: ${error.message || error}`);
       return RunStatus.INVALID;
     }
   }
