@@ -50,5 +50,6 @@ interface TokenMessage {
  */
 interface DuplexMessageModel {
   event: DuplexMessageEvent;
-  data?: TokenMessage;
+  newToken?: TokenMessage;
+  revokeToken?: TokenMessage;
 }

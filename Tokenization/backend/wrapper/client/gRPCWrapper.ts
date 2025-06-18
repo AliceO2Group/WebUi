@@ -8,4 +8,5 @@ export class gRPCWrapper {
   }
 }
 
+// tests
 const grpc = new gRPCWrapper();
