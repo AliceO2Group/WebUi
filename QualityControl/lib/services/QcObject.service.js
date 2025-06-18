@@ -93,7 +93,7 @@ export class QcObjectService {
    * @param {string|Regex} options.prefix - Prefix for which CCDB should search for objects.
    * @param {Array<string>} options.fields - List of fields that should be requested for each object
    * @param {boolean} options.useCache - if the list should be the cached version or not
-   * @param {Array<string>} options.filters - Run number by which the objects are filtered.
+   * @param {Array<string>} options.filters - Filter object by which the objects from ccdb are filtered.
    * @returns {Promise.<Array<QcObjectLeaf>>} - results of objects with required fields
    * @rejects {Error}
    */
