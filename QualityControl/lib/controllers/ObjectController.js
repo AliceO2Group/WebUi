@@ -48,7 +48,7 @@ export class ObjectController {
     } catch (error) {
       const responseError = new Error('Failed to retrieve list of objects latest version');
 
-      logger.errorMessage(`Error validating query parameters: ${error}`);
+      logger.errorMessage(`Error whilst retrieving objects: ${error}`);
       updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   }
@@ -73,7 +73,7 @@ export class ObjectController {
     } catch (error) {
       const responseError = new Error('Failed to retrieve object content');
 
-      logger.errorMessage(`Error validating query parameters: ${error}`);
+      logger.errorMessage(`Error whilst retrieving object content: ${error}`);
       updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   }
@@ -99,7 +99,7 @@ export class ObjectController {
     } catch (error) {
       const responseError = new Error('Unable to identify object or read it by qcg id');
 
-      logger.errorMessage(`Error validating query parameters: ${error}`);
+      logger.errorMessage(`Error whilst retrieving object: ${error}`);
       updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   }
