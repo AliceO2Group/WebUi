@@ -53,16 +53,14 @@ const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback
  * @returns {vnode} - virtual node element
  */
 export function filtersPanel(filterModel, pageModel) {
-  const { filterMap, setFilterValue, filterService, clearFilter } = filterModel;
+  const { filterMap, setFilterValue, filterService } = filterModel;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onEnterCallback = () => filterModel.triggerFilter(pageModel);
-  const clearFilterCallback = clearFilter.bind(filterModel);
   const filtersList = filtersConfig(filterService);
 
   return h(
     '.w-100.flex-row.p2.g2',
-    { onremove: clearFilterCallback },
     [
       triggerFiltersButton(onEnterCallback),
       ...filtersList.map((filter) =>

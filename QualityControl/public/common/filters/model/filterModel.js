@@ -103,10 +103,8 @@ export default class FilterModel extends Observable {
    * @returns {undefined}
    */
   clearFilter() {
-    Object.keys(this.filterMap).forEach((key)=> {
-      this.filterMap[key] = '';
-    });
-    this.setFilterToURL();
+    Object.keys(this.filterMap).forEach((key) =>
+      delete this.filterMap[key]); // Manual deletion to preserve the reference
     this.notify();
   }
 }
