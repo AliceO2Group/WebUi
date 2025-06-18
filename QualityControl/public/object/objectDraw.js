@@ -124,9 +124,9 @@ export function draw(model, tabObject, options) {
     // Not asked yet or loading
     return h('.flex-column.items-center.justify-center', [h('.animate-slow-appearance', 'Loading')]);
   } else if (objectRemoteData.isFailure()) {
-    return h('.error-box.flex.flex-column.items-center.justify-center.p2.f6.text-center', {}, [
-      h('p.error-icon', { title: 'Error' }, iconWarning()),
-      h('div.error-text', objectRemoteData.payload),
+    return h('.error-box.danger.flex.flex-column.justify-center.f6.text-center', {}, [
+      h('p.error-icon', { title: 'Error' }, [h('span', iconWarning())]),
+      h('span', objectRemoteData.payload),
     ]);
   } else {
     if (isObjectOfTypeChecker(objectRemoteData.payload.qcObject.root)) {

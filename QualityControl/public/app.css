@@ -103,23 +103,18 @@
 
 .error-box {
   background-color: #f8d7da;
-  color: #842029;
   height: 100%;
   max-width: 100%;
   word-break: break-word;
   overflow-wrap: break-word;
   border-radius: 5px;
-  border: 1px solid #842029;
+  border: 1px solid var(--color-danger);
 }
 
 .error-icon {
   font-size: 2em;
-  margin-bottom: 0.5em;
-  color: #842029;
+  margin-bottom: .5em;
 }
 
-.error-text {
-  max-width: 100%;
-}
 
 
