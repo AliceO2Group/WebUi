@@ -46,54 +46,82 @@ http.get(
   { public: true }
 );
 
+// http.get(
+//   "/tokens/:tokenId/logs",
+//   (req, res) => {
+//     const tokenId = parseInt(req.params.tokenId, 10);
+
+//     // Artificially add an error
+//     if (tokenId === 3) {
+//       res.status(500).json({
+//         error: `An error occurred when trying to load logs for token ${tokenId}`,
+//       });
+//       return;
+//     }
+
+//     const logs = fakeLogs.get(tokenId) ?? [];
+
+//     if (!logs) {
+//       res
+//         .status(404)
+//         .json({ error: `No logs found found for token ${tokenId}` });
+//       return;
+//     }
+
+//     setTimeout(() => res.status(200).json(logs), 1000);
+//   },
+//   { public: true }
+// );
+
+// http.get(
+//   "/tokens/:tokenId",
+//   (req, res) => {
+//     const tokenId = parseInt(req.params.tokenId, 10);
+//     const token = fakeTokens.get(tokenId) ?? null;
+
+//     if (!token) {
+//       res.status(404).json({ error: `No token found with id ${tokenId}` });
+//       return;
+//     }
+
+//     res.status(200).json(token);
+//   },
+//   { public: true }
+// );
+
+// http.get(
+//   "/tokens",
+//   (req, res) => {
+//     // Fake long page load
+//     setTimeout(() => res.status(200).json([...fakeTokens.values()]), 1000);
+//   },
+//   { public: true }
+// );
+
+const centralSystemModel = new CentralSystem();
+
 http.get(
   "/tokens",
-  (req, res) => {
-    // Fake long page load
-    setTimeout(() => res.status(200).json([...fakeTokens.values()]), 1000);
-  },
+  centralSystemModel.tokenController.getTokensHandler.bind(
+    centralSystemModel.tokenController
+  ),
+  {
+    public: true,
+  }
+);
+
+http.post(
+  "/tokens/create",
+  centralSystemModel.tokenController.createTokenHandler.bind(
+    centralSystemModel.tokenController
+  ),
   { public: true }
 );
 
-http.get(
-  "/tokens/:tokenId",
-  (req, res) => {
-    const tokenId = parseInt(req.params.tokenId, 10);
-    const token = fakeTokens.get(tokenId) ?? null;
-
-    if (!token) {
-      res.status(404).json({ error: `No token found with id ${tokenId}` });
-      return;
-    }
-
-    res.status(200).json(token);
-  },
-  { public: true }
-);
-
-http.get(
-  "/tokens/:tokenId/logs",
-  (req, res) => {
-    const tokenId = parseInt(req.params.tokenId, 10);
-
-    // Artificially add an error
-    if (tokenId === 3) {
-      res.status(500).json({
-        error: `An error occurred when trying to load logs for token ${tokenId}`,
-      });
-      return;
-    }
-
-    const logs = fakeLogs.get(tokenId) ?? [];
-
-    if (!logs) {
-      res
-        .status(404)
-        .json({ error: `No logs found found for token ${tokenId}` });
-      return;
-    }
-
-    setTimeout(() => res.status(200).json(logs), 1000);
-  },
+http.post(
+  "/tokens/revoke",
+  centralSystemModel.tokenController.revokeTokenHandler.bind(
+    centralSystemModel.tokenController
+  ),
   { public: true }
 );
