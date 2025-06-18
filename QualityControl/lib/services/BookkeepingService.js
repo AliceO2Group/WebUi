@@ -124,6 +124,14 @@ export class BookkeepingService {
     return data;
   }
 
+  /**
+   * Retrieves the status of a specific run from the Bookkeeping service
+   * @param {number} runNumber - The run number to check the status for
+   * @returns {Promise<RunStatus>} - Returns a promise that resolves to the run status:
+   *                                 - RunStatus.ACTIVE if the run is ongoing
+   *                                 - RunStatus.FINISHED if the run has completed (has timeO2End)
+   *                                 - RunStatus.INVALID if there was an error or data is not available
+   */
   async retrieveRunStatus(runNumber) {
     try {
       const { data } = await httpGetJson(this._hostname, this._port, this._createRunPath(runNumber), {

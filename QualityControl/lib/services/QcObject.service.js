@@ -167,7 +167,7 @@ export class QcObjectService {
   /**
    * Retrieve an object by its id (stored in the customized data service) with its information
    * @param {object} options - An object that contains query parameters among other arguments
-   * @param {string} options.qcgId - id of the object configuration stored in QCG database (different than CCDB)
+   * @param {string} options.qcObjectId - id of the object configuration stored in QCG database (different than CCDB)
    * @param {string} options.id - id of the object to be retrieved as per CCDB etag
    * @param {number|null} options.validFrom - timestamp in ms
    * @param {string} options.filters = {}] - filter as string to be sent to CCDB
