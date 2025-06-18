@@ -10,15 +10,8 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-// @ts-check
-
-const config = {
-  printWidth: 100,
-  trailingComma: "es5",
-  semi: true,
-  singleQuote: true,
-};
-
-export default config;
+import copyrightLicense from "./copyright-license.js";
+const plugin = { rules: { "copyright-license": copyrightLicense } };
+export default plugin;

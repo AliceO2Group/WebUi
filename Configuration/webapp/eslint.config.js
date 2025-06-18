@@ -18,6 +18,7 @@ import jsdoc from 'eslint-plugin-jsdoc';
 import stylistic from '@stylistic/eslint-plugin';
 import react from 'eslint-plugin-react';
 import tseslint from 'typescript-eslint';
+import customRules from './custom_eslint_rules/index.js';
 
 export default tseslint.config(
   jsdoc.configs['flat/recommended'],
@@ -41,6 +42,7 @@ export default tseslint.config(
     plugins: {
       jsdoc,
       '@stylistic': stylistic,
+      'custom-rules': customRules
     },
     languageOptions: {
       parserOptions: {
@@ -61,6 +63,7 @@ export default tseslint.config(
     rules: {
       "@typescript-eslint/only-throw-error": "off",
       'react/react-in-jsx-scope': 'off',
+      'custom-rules/copyright-license': 'error',
       'arrow-body-style': ['error', 'as-needed'],
       curly: 'error',
       indent: [
