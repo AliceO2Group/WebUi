@@ -1,0 +1,70 @@
+name: Configuration
+on:
+  pull_request:
+    paths:
+      - 'Configuration/**/*'
+      - '.github/workflows/configuration.yml'
+  push:
+    branches:
+      - 'main'
+      - 'dev'
+
+jobs:
+  formatting-check:
+    name: Check prettier formatting rules on ubuntu-latest
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - run: (cd Configuration/webapp; npm ci )
+      - run: (cd Configuration/webapp; npm run prettier-check )
+  lint-check:
+    name: Check eslint rules on ubuntu-latest
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - run: (cd Configuration/webapp; npm ci )
+      - run: (cd Configuration/webapp; npm run eslint )
+  # uncomment and configure when testing will be available in the dev branch
+  # test:
+  #   name: Tests on ubuntu-latest only if lint-check passes
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 6
+  #   needs: [formatting-check, lint-check]
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Setup node
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '22.x'
+  #     - run: (cd Configuration; npm run docker-test )
+  # coverage:
+  #   name: Tests and generate lcov reoprt coverage on ubuntu-latest
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 6
+  #   needs: lint-check
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Setup node
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '22.x'
+  #     - run: mkdir -p Configuration/coverage 
+  #     - run: (cd Configuration; npm run docker-coverage-ci )
+  #     - name: Send codecov report for Configuration
+  #       uses: codecov/codecov-action@v5
+  #       with:
+  #         files: ./Configuration/coverage/lcov.info
+  #         flags: configuration
+  #         fail_ci_if_error: true
+  #       env:
+  #         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
