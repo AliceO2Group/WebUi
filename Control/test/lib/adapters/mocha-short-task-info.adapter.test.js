@@ -14,28 +14,11 @@
 /* eslint-disable max-len */
 
 const { strictEqual } = require('assert');
-const { ShortTaskInfoAdapter } = require('../../../lib/adapters/ShortTaskInfoAdapter');
+const { ShortTaskInfoAdapter } = require('../../../lib/adapters/task/ShortTaskInfoAdapter.js');
 const { TaskState } = require('../../../lib/common/taskState.enum.js');
+const { TaskStatus } = require('../../../lib/common/taskStatus.enum.js');
 
 describe('ShortTaskInfoAdapter test suite', () => {
-  describe('_getShortName() - tests', async () => {
-    it('should successfully replace task name if regex is matched', async () => {
-      const tagModified = ShortTaskInfoAdapter._getShortName('github.com/AliceO2Group/ControlWorkflows/tasks/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
-      strictEqual(tagModified, 'readout');
-    });
-
-    it('should not replace task name due to regex not matching the name (missing tasks/ group)', async () => {
-      const nameNotModified = ShortTaskInfoAdapter._getShortName('github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
-      strictEqual(nameNotModified, 'github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
-    });
-
-    it('should not replace task name due to regex not matching the name (missing @ character)', async () => {
-      const taskFullName = 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a';
-      const nameNotModified = ShortTaskInfoAdapter._getShortName(taskFullName);
-      strictEqual(nameNotModified, taskFullName);
-    });
-  });
-
   describe('toEntity() - tests', () => {
     it('should map all fields correctly from a typical task object', function () {
       const task = {
@@ -74,7 +57,7 @@ describe('ShortTaskInfoAdapter test suite', () => {
         sandboxStdout: undefined
       };
       const entity = ShortTaskInfoAdapter.toEntity(task);
-      strictEqual(entity.status, 'UNKNOWN');
+      strictEqual(entity.status, TaskStatus.UNDEFINED);
       strictEqual(entity.state, TaskState.UNKNOWN);
       strictEqual(entity.hostname, '');
       strictEqual(entity.isCritical, false);

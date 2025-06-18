@@ -14,7 +14,7 @@
 
 /* global JSROOT */
 
-import { h } from '/js/src/index.js';
+import { h, iconWarning } from '/js/src/index.js';
 import { timerDebouncer, pointerId } from '../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 import checkersPanel from './../common/object/checkersPanel.js';
@@ -123,9 +123,10 @@ export function draw(model, tabObject, options) {
     // Not asked yet or loading
     return h('.flex-column.items-center.justify-center', [h('.animate-slow-appearance', 'Loading')]);
   } else if (objectRemoteData.isFailure()) {
-    return h('.scroll-y.p1.f6.text-center', {
-      style: 'word-break: break-all;',
-    }, objectRemoteData.payload);
+    return h('.error-box.danger.flex-column.justify-center.f6.text-center', {}, [
+      h('span.error-icon', { title: 'Error' }, iconWarning()),
+      h('span', objectRemoteData.payload),
+    ]);
   } else {
     if (isObjectOfTypeChecker(objectRemoteData.payload.qcObject.root)) {
       return checkersPanel(objectRemoteData.payload.qcObject.root);

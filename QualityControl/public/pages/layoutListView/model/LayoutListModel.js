@@ -103,15 +103,15 @@ export default class LayoutListModel extends Observable {
    * @param {LayoutCardModel} layout - Layout instance to add
    * @returns {object} Intermediate object with .to() method
    */
-  addLayout(layout) {
+  setLayout(layout) {
     return {
 
       /**
        * Completes the add operation by specifying the target folder
        * @param {string} folderName - Name of the folder to add to
        */
-      to: (folderName) => {
-        this.folders.get(folderName)?.push(layout);
+      in: (folderName) => {
+        this.folders.get(folderName)?.set(layout);
       },
     };
   }
