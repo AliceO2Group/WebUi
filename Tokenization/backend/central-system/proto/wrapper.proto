@@ -1,0 +1,48 @@
+syntax = "proto3";
+package wrapper;
+
+// ======================================
+//                 ENUMS
+// ======================================
+enum MessageEvent {
+    // Default value, represents an empty event
+    EMPTY_EVENT = 0;
+
+    // New token message type, contains a new token and target address
+    NEW_TOKEN = 1;
+
+    // Revoke token message type, contains a token to be revoked
+    REVOKE_TOKEN = 2;
+}
+
+
+// ======================================
+//                MESSAGES
+// ======================================
+// Simulates an empty message because protobuffer doesn't support void
+message EmptyMessage {}
+
+// Message with token and target address binded to it
+message Token {
+    string token = 1;
+    string targetAddress = 2;
+}
+
+// Stream message that can contain one of specific messages
+message Payload {
+    MessageEvent event = 1;
+    oneof data {
+        EmptyMessage emptyMessage = 2;
+        Token newToken = 3;
+        Token revokeToken = 4;
+    }
+}
+
+
+// ======================================
+//                SERVICES
+// ======================================
+
+service CentralSystem {
+    rpc ClientStream(stream Payload) returns (stream Payload);
+}

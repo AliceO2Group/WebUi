@@ -1,4 +1,19 @@
-import type { Request, Response } from "express";
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
+import { CentralSystemWrapper } from "./services/CentralSystemWrapper.js";
+import { TokensController } from "./controllers/TokensController.js";
 
 /*
  * CentralSystem class to handle token management.
@@ -7,47 +22,25 @@ import type { Request, Response } from "express";
  * The tokens are stored with a tokenId, validity status, and payload.
  */
 class CentralSystem {
-  private static fakeTokens = new Map([
-    [1, { tokenId: 1, validity: "good", payload: "payload1" }],
-    [2, { tokenId: 2, validity: "bad", payload: "payload2" }],
-  ]);
+  private centralSystemWrapper: CentralSystemWrapper;
+  private fakeTokens: Map<
+    number,
+    { tokenId: number; validity: string; payload: string }
+  >;
+  public tokenController: TokensController;
 
-  /**
-   * @description Retrieves all tokens from the Central System. Returns a serialized binary payload of the tokens.
-   * @param req - The request object.
-   * @param res - The response object.
-   * @return {Promise<void>}
-   */
-  public static async getTokens(req: Request, res: Response): Promise<void> {}
-
-  /**
-   * @description Creates a new token with the provided payload.
-   * @param req - The request object containing the payload.
-   * @param res - The response object.
-   * @return {Promise<void>}
-   */
-  public static async createToken(req: Request, res: Response): Promise<void> {}
-  /**
-   * @description Provides a token to a client based on the client ID.
-   * @param clientID - The ID of the client to whom the token is provided.
-   * @param token - The token to be provided.
-   * @return {Promise<void>}
-   */
-  public static async provideTokeToClient(
-    clientID: number,
-    token: string
-  ): Promise<void> {}
-
-  /**
-   * @description Revokes a token for a specific client.
-   * @param client - The client ID for which the token is revoked.
-   * @param tokenEncypted - The encrypted token to be revoked.
-   * @return {Promise<void>}
-   */
-  public static async revokeToken(
-    client: string,
-    tokenEncypted: string
-  ): Promise<void> {}
+  public constructor() {
+    // You can add any initialization logic here if needed
+    this.centralSystemWrapper = new CentralSystemWrapper(50049);
+    this.fakeTokens = new Map([
+      [1, { tokenId: 1, validity: "good", payload: "payload1" }],
+      [2, { tokenId: 2, validity: "bad", payload: "payload2" }],
+    ]);
+    this.tokenController = new TokensController(
+      this.fakeTokens,
+      this.centralSystemWrapper
+    );
+  }
 }
 
 export default CentralSystem;

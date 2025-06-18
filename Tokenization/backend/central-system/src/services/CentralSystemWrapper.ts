@@ -1,3 +1,17 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
@@ -5,8 +19,7 @@ import { fileURLToPath } from "url";
 import {
   DuplexMessageEvent,
   DuplexMessageModel,
-} from "../models/message.model.ts";
-
+} from "./models/message.model.js";
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
@@ -24,7 +37,7 @@ export class CentralSystemWrapper {
   private setupService() {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
-    const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
+    const PROTO_PATH = path.join(__dirname, "../../proto/wrapper.proto");
     const packageDef = protoLoader.loadSync(PROTO_PATH, {
       keepCase: true,
       longs: String,
@@ -104,15 +117,15 @@ export class CentralSystemWrapper {
 }
 
 // tests
-const centralSystem = new CentralSystemWrapper(50051);
-setTimeout(() => {
-  const client = Array.from(centralSystem.getClients())[0];
-  console.log(client);
-  centralSystem.clientSend(client, {
-    event: DuplexMessageEvent.NEW_TOKEN,
-    newToken: {
-      token: "new token",
-      targetAddress: "a",
-    },
-  });
-}, 5000);
+// const centralSystem = new CentralSystemWrapper(50051);
+// setTimeout(() => {
+//   const client = Array.from(centralSystem.getClients())[0];
+//   console.log(client);
+//   centralSystem.clientSend(client, {
+//     event: DuplexMessageEvent.NEW_TOKEN,
+//     newToken: {
+//       token: "new token",
+//       targetAddress: "a",
+//     },
+//   });
+// }, 5000);

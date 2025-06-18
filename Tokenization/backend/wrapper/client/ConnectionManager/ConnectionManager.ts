@@ -2,6 +2,8 @@ import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
 import { fileURLToPath } from "url";
+import { Connection } from "../Connection/Connection.ts";
+import { DuplexMessageEvent } from "../../models/message.model.ts";
 
 /**
  * @description Manages all the connection between clients and central system.
@@ -12,7 +14,13 @@ export class ConnectionManager {
   private readonly address: string;
   private reconnectAttempts = 0;
 
-  constructor(centralAddress = "localhost:50051") {
+  // Map to store sending connections by target address
+  private sendingConnections: Map<string, Connection> = new Map();
+
+  // Map to store receiving connections by target address
+  private receivingConnections: Map<string, Connection> = new Map();
+
+  constructor(centralAddress = "localhost:50049") {
     this.address = centralAddress;
 
     const __filename = fileURLToPath(import.meta.url);
@@ -38,6 +46,9 @@ export class ConnectionManager {
     // Initial connection
     this.connect();
     console.log(`ConnectionManager: connected to ${this.address}`);
+
+    this.sendingConnections.set("a", new Connection("1", "a"));
+    this.sendingConnections.set("b", new Connection("2", "b"));
   }
 
   /**
@@ -48,7 +59,19 @@ export class ConnectionManager {
 
     if (this.stream) {
       this.stream.on("data", (payload) => {
-        // handle data received from the stream
+        switch (payload.event) {
+          // Central system replacing a new token for existing connection
+          case DuplexMessageEvent.EMPTY_EVENT:
+            break;
+          case DuplexMessageEvent.NEW_TOKEN:
+            this.handleNewToken(
+              payload.newToken.token,
+              payload.newToken.targetAddress
+            );
+            break;
+          default:
+            console.warn(`Unhandled event: ${payload.event}`);
+        }
       });
 
       this.stream.on("end", () => {
@@ -60,6 +83,24 @@ export class ConnectionManager {
         console.error("Wrapper stream error:", err);
         this.scheduleReconnect();
       });
+    }
+  }
+
+  /**
+   * @description Handles a new token received from the central system and replaces it in proper Connection object.
+   * @param newToken
+   */
+  private handleNewToken(newToken: string, targetAddress: string) {
+    console.log(`Received new token for ${targetAddress}: ${newToken}`);
+
+    // Check if we have a sending connection for this target address
+    const sendingConnection = this.sendingConnections.get(targetAddress);
+    if (sendingConnection) {
+      sendingConnection.handleNewToken(newToken);
+      console.log(`Updated sending connection for ${targetAddress}`);
+      console.log(sendingConnection.getToken());
+    } else {
+      console.warn(`No sending connection found for ${targetAddress}`);
     }
   }
 
@@ -87,8 +128,3 @@ export class ConnectionManager {
     console.log("Disconnected from central");
   }
 }
-
-// Usage example:
-// const mgr = new ConnectionManager();
-// mgr.on('message', payload => console.log('Received:', payload));
-// mgr.disconnect();
