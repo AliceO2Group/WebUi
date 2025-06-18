@@ -83,11 +83,11 @@ export class ObjectController {
 
   /**
    * Check the status of a run based on provided filters
-   * @param {number} RunNumber - Identifier of the run whose status is being checked
+   * @param {number} runNumber - Identifier of the run whose status is being checked
    * @returns {Promise<RunStatus|null>} - Promise resolving to run status or null if no RunNumber in filters
    */
-  async checkRunStatus(RunNumber) {
-    return await this._filterService.getRunStatus(RunNumber);
+  async checkRunStatus(runNumber) {
+    return await this._filterService.getRunStatus(runNumber);
   }
 
   /**
