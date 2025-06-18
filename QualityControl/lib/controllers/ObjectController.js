@@ -91,10 +91,10 @@ export class ObjectController {
    */
   async getObjectById(req, res) {
     try {
-      const qcgId = req.params?.id;
+      const qcObjectId = req.params.id;
       const { validFrom, filters, id } = req.query;
 
-      const object = await this._objService.retrieveQcObjectByQcgId(qcgId, id, validFrom, filters);
+      const object = await this._objService.retrieveQcObjectByQcgId(qcObjectId, id, validFrom, filters);
       res.status(200).json(object);
     } catch (error) {
       const responseError = new Error('Unable to identify object or read it by qcg id');

@@ -93,4 +93,5 @@ export function createObjectGetByIdDto({ runTypes }) {
 /**
  * Joi validation schema for object ID in URL
  */
-export const qcgIdDto = Joi.string().required().trim().min(1).messages({ 'string.empty': 'Missing object ID in URL' });
+export const qcObjectIdDto =
+  Joi.string().required().trim().min(1).messages({ 'string.empty': 'Missing object ID in URL' });
