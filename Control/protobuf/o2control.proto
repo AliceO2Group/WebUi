@@ -123,6 +123,7 @@ message TeardownReply {}
 message GetEnvironmentsRequest {
     bool showAll = 1;
     bool showTaskInfos = 2;
+    bool showDetailedIntegratedServices = 3; // integratedServices are returned everytime, setting this flag gives detailed report
 }
 message GetEnvironmentsReply {
     string frameworkId = 1;
