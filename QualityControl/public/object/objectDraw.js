@@ -124,7 +124,7 @@ export function draw(model, tabObject, options) {
     return h('.flex-column.items-center.justify-center', [h('.animate-slow-appearance', 'Loading')]);
   } else if (objectRemoteData.isFailure()) {
     return h('.error-box.danger.flex-column.justify-center.f6.text-center', {}, [
-      h('p.error-icon', { title: 'Error' }, [h('span', iconWarning())]),
+      h('span.error-icon', { title: 'Error' }, iconWarning()),
       h('span', objectRemoteData.payload),
     ]);
   } else {
