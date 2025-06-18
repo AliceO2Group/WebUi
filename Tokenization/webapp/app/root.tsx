@@ -21,16 +21,21 @@ import {
   ScrollRestoration, useNavigation,
 } from 'react-router';
 
-import {useState} from 'react';
+import {useState, useEffect, use} from 'react';
 import type { Route } from './+types/root';
 import './app.css';
 import '@aliceo2/web-ui/Frontend/css/src/bootstrap.css'
 import {Spinner} from '~/ui/spinner';
 import AppLayout from '~/ui/layout'
+import sessionService from '@aliceo2/web-ui/Frontend/js/src/sessionService';
+import { useAuth } from './hooks/useAuth';
+
+
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { state } = useNavigation();
 
+ 
   return (
     <html lang='en'>
       <head>
@@ -44,14 +49,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
           {children}  
         </AppLayout>
         <ScrollRestoration />
-        <Scripts />
+        <Scripts /> 
       </body>
     </html>
   );
 }
 
 export default function App() {
-  return <Outlet />;
+  useEffect(() => {
+    try{
+      sessionService.loadAndHideParameters()
+      console.log(sessionService.session)
+    }catch(e) {
+      console.error(e)
+    }
+  }, [])
+
+  const hasAccess = useAuth('admin')
+
+  return hasAccess ? <Outlet /> : <Spinner />;
 }
 
 export function HydrateFallback() {
