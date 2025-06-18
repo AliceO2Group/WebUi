@@ -13,11 +13,12 @@
  */
 
 import test, { afterEach, beforeEach, suite } from 'node:test';
-import { ok } from 'node:assert';
+import { deepStrictEqual, ok, strictEqual } from 'node:assert';
 import sinon from 'sinon';
 import { ObjectController } from '../../../lib/controllers/ObjectController.js';
 import { QcObjectService } from '../../../lib/services/QcObject.service.js';
 import { NotFoundError } from '@aliceo2/web-ui';
+import { RunStatus } from '../../../common/library/runStatus.enum.js';
 
 export const objectControllerTestSuite = async () => {
   let QcObjectServiceMock = null;
@@ -171,7 +172,7 @@ export const objectControllerTestSuite = async () => {
         validFrom: undefined,
         filters: undefined,
         id: undefined,
-        qcgId: mockObject.id,
+        qcObjectId: mockObject.id,
       }));
     });
 
@@ -194,8 +195,194 @@ export const objectControllerTestSuite = async () => {
         validFrom: undefined,
         filters: undefined,
         id: undefined,
-        qcgId: 'some-id',
+        qcObjectId: 'some-id',
       }));
+    });
+  });
+
+  suite('Interval Checkup Tests', () => {
+    let FilterServiceMock = undefined;
+    let IntervalsServiceMock = undefined;
+    const mockRunNumber = 123456;
+    const mockQueryKey = JSON.stringify({ filters: { RunNumber: mockRunNumber } });
+    const mockData = [{ path: 'somePath' }];
+
+    beforeEach(() => {
+      FilterServiceMock = {
+        getRunStatus: sinon.stub(),
+      };
+      IntervalsServiceMock = {
+        activeInterval: sinon.stub(),
+        register: sinon.spy(),
+        deregister: sinon.spy(),
+      };
+    });
+
+    test('should setup monitoring for active run when not cached', async () => {
+      reqMock.query.filters = { RunNumber: mockRunNumber };
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        getRunCache: sinon.stub().returns(undefined),
+        setRunCache: sinon.spy(),
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockData),
+      });
+      FilterServiceMock.getRunStatus.withArgs(mockRunNumber).resolves(RunStatus.ACTIVE);
+      IntervalsServiceMock.activeInterval.returns(false);
+
+      objectController = new ObjectController(QcObjectServiceMock, FilterServiceMock, IntervalsServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      ok(resMock.status.calledWith(200));
+      ok(resMock.json.calledWith(mockData));
+      ok(IntervalsServiceMock.register.calledOnce);
+
+      const [[intervalKey, cacheData]] = QcObjectServiceMock.setRunCache.args;
+      const correctTimestamp = Date.now() - cacheData.timestamp < 100;
+
+      strictEqual(intervalKey, mockQueryKey);
+      deepStrictEqual(cacheData.data, mockData);
+
+      ok(correctTimestamp, 'The timestamp for the cache is incorrect.');
+    });
+
+    test('should not setup monitoring if run is not active', async () => {
+      reqMock.query.filters = { RunNumber: mockRunNumber };
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        getRunCache: sinon.stub().returns(null),
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockData),
+      });
+      FilterServiceMock.getRunStatus.withArgs(mockRunNumber).resolves(RunStatus.COMPLETED);
+
+      objectController = new ObjectController(QcObjectServiceMock, FilterServiceMock, IntervalsServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      ok(resMock.status.calledWith(200));
+      ok(IntervalsServiceMock.register.notCalled);
+    });
+
+    test('should use cached data if available and not setup monitoring', async () => {
+      reqMock.query.filters = { RunNumber: mockRunNumber };
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        getRunCache: sinon.stub().returns(mockData),
+      });
+
+      objectController = new ObjectController(QcObjectServiceMock, FilterServiceMock, IntervalsServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      ok(resMock.status.calledWith(200));
+      ok(resMock.json.calledWith(mockData.data));
+      ok(FilterServiceMock.getRunStatus.notCalled);
+      ok(IntervalsServiceMock.register.notCalled);
+    });
+
+    test('should stop monitoring in interval callback when run status changes from active', async () => {
+      reqMock.query.filters = { RunNumber: mockRunNumber };
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        getRunCache: sinon.stub().returns(null),
+        setRunCache: sinon.spy(),
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockData),
+      });
+      FilterServiceMock.getRunStatus.onFirstCall().resolves(RunStatus.ACTIVE);
+      IntervalsServiceMock.activeInterval.returns(false);
+
+      objectController = new ObjectController(QcObjectServiceMock, FilterServiceMock, IntervalsServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      // Simulate interval callback with run status changed to completed
+      FilterServiceMock.getRunStatus.reset();
+      FilterServiceMock.getRunStatus.resolves(RunStatus.COMPLETED);
+      await objectController._updateAndCheckStatus(
+        mockQueryKey,
+        reqMock.query,
+        QcObjectServiceMock.retrieveLatestVersionOfObjects,
+      );
+
+      ok(IntervalsServiceMock.deregister.calledWith(mockQueryKey));
+      ok(QcObjectServiceMock.removeRunCache.calledWith(mockQueryKey));
+    });
+
+    test('should continue monitoring in interval callback if run is still active', async () => {
+      // First call - active run
+      reqMock.query.filters = { RunNumber: mockRunNumber };
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        getRunCache: sinon.stub().returns(null),
+        setRunCache: sinon.spy(),
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockData),
+      });
+      FilterServiceMock.getRunStatus.resolves(RunStatus.ACTIVE);
+      IntervalsServiceMock.activeInterval.returns(false);
+
+      objectController = new ObjectController(QcObjectServiceMock, FilterServiceMock, IntervalsServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      // Simulate interval callback with run still active
+      await objectController._updateAndCheckStatus(
+        mockQueryKey,
+        reqMock.query,
+        QcObjectServiceMock.retrieveLatestVersionOfObjects,
+      );
+
+      ok(IntervalsServiceMock.deregister.notCalled);
+      ok(QcObjectServiceMock.removeRunCache.notCalled);
+      ok(QcObjectServiceMock.setRunCache.calledTwice);
+    });
+
+    test('should handle errors during interval checkup', async () => {
+      reqMock.query.filters = { RunNumber: mockRunNumber };
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        getRunCache: sinon.stub().returns(null),
+        setRunCache: sinon.spy(),
+        retrieveLatestVersionOfObjects: sinon.stub().rejects(new Error('Test error')),
+      });
+      FilterServiceMock.getRunStatus.resolves(RunStatus.ACTIVE);
+      IntervalsServiceMock.activeInterval.returns(false);
+
+      objectController = new ObjectController(QcObjectServiceMock, FilterServiceMock, IntervalsServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      // Simulate interval callback with error
+      await objectController._updateAndCheckStatus(
+        mockQueryKey,
+        reqMock.query,
+        QcObjectServiceMock.retrieveLatestVersionOfObjects,
+      );
+
+      // Should continue monitoring despite the error
+      ok(IntervalsServiceMock.deregister.notCalled);
+    });
+
+    test('should not setup duplicate monitoring for same query', async () => {
+      reqMock.query.filters = { RunNumber: mockRunNumber };
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        getRunCache: sinon.stub().returns(null),
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockData),
+      });
+      FilterServiceMock.getRunStatus.resolves(RunStatus.ACTIVE);
+      IntervalsServiceMock.activeInterval.returns(true); // Simulate existing interval
+
+      objectController = new ObjectController(QcObjectServiceMock, FilterServiceMock, IntervalsServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      ok(IntervalsServiceMock.register.notCalled);
+    });
+
+    test('should handle requests without RunNumber in filters', async () => {
+      reqMock.query = {};
+
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockData),
+        getRunCache: sinon.stub().returns(undefined),
+      });
+
+      objectController = new ObjectController(QcObjectServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      ok(resMock.status.calledWith(200));
+      ok(resMock.json.calledWith(mockData));
+      ok(QcObjectServiceMock.retrieveLatestVersionOfObjects.calledWith({
+        prefix: undefined, fields: undefined, filters: undefined,
+      }));
+      ok(FilterServiceMock.getRunStatus.notCalled);
+      ok(IntervalsServiceMock.register.notCalled);
     });
   });
 };
