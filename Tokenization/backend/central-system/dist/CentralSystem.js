@@ -20,9 +20,9 @@ import { TokensController } from "./controllers/TokensController.js";
  * The tokens are stored with a tokenId, validity status, and payload.
  */
 class CentralSystem {
-    constructor() {
+    constructor(wrapperPort) {
         // You can add any initialization logic here if needed
-        this.centralSystemWrapper = new CentralSystemWrapper(50049);
+        this.centralSystemWrapper = new CentralSystemWrapper(wrapperPort);
         this.fakeTokens = new Map([
             [1, { tokenId: 1, validity: "good", payload: "payload1" }],
             [2, { tokenId: 2, validity: "bad", payload: "payload2" }],

@@ -13,9 +13,13 @@ services:
     command: ["npm", "run", "dev"]
     healthcheck:
       interval: 1s
-      test: ["CMD-SHELL",
-             "node", "-c",
-             "node --input-type=module -e \"process.exit((await fetch('http://backend:8080/api/healthcheck')).ok === true ? 0 : 1)\""]
+      test:
+        [
+          "CMD-SHELL",
+          "node",
+          "-c",
+          'node --input-type=module -e "process.exit((await fetch(''http://backend:8080/api/healthcheck'')).ok === true ? 0 : 1)"',
+        ]
     depends_on:
       install-backend:
         condition: service_completed_successfully
@@ -34,9 +38,13 @@ services:
     command: ["npm", "run", "dev", "--", "--host", "webapp"]
     healthcheck:
       interval: 1s
-      test: ["CMD-SHELL",
-             "node", "-c",
-             "node --input-type=module -e \"process.exit((await fetch('http://webapp:5173')).ok === true ? 0 : 1)\""]
+      test:
+        [
+          "CMD-SHELL",
+          "node",
+          "-c",
+          'node --input-type=module -e "process.exit((await fetch(''http://webapp:5173'')).ok === true ? 0 : 1)"',
+        ]
     depends_on:
       backend:
         condition: service_healthy
@@ -48,6 +56,7 @@ services:
       target: reverse-proxy
     ports:
       - "8080:8080"
+      - "50049:50049"
     depends_on:
       backend:
         condition: service_healthy
