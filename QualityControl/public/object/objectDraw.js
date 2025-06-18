@@ -14,12 +14,11 @@
 
 /* global JSROOT */
 
-import { h } from '/js/src/index.js';
+import { h, iconWarning } from '/js/src/index.js';
 import { timerDebouncer, pointerId } from '../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 import checkersPanel from './../common/object/checkersPanel.js';
 import { generateDrawingOptionList } from '../../library/qcObject/utils.js';
-import { iconWarning } from '/js/src/icons.js';
 
 /**
  * Draw an object using JSROOT.
@@ -124,7 +123,7 @@ export function draw(model, tabObject, options) {
     // Not asked yet or loading
     return h('.flex-column.items-center.justify-center', [h('.animate-slow-appearance', 'Loading')]);
   } else if (objectRemoteData.isFailure()) {
-    return h('.error-box.danger.flex.flex-column.justify-center.f6.text-center', {}, [
+    return h('.error-box.danger.flex-column.justify-center.f6.text-center', {}, [
       h('p.error-icon', { title: 'Error' }, [h('span', iconWarning())]),
       h('span', objectRemoteData.payload),
     ]);
