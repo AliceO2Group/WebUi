@@ -29,9 +29,9 @@ class CentralSystem {
   >;
   public tokenController: TokensController;
 
-  public constructor() {
+  public constructor(wrapperPort: number) {
     // You can add any initialization logic here if needed
-    this.centralSystemWrapper = new CentralSystemWrapper(50049);
+    this.centralSystemWrapper = new CentralSystemWrapper(wrapperPort);
     this.fakeTokens = new Map([
       [1, { tokenId: 1, validity: "good", payload: "payload1" }],
       [2, { tokenId: 2, validity: "bad", payload: "payload2" }],

@@ -98,7 +98,7 @@ http.get(
 //   { public: true }
 // );
 
-const centralSystemModel = new CentralSystem();
+const centralSystemModel = new CentralSystem(50049);
 
 http.get(
   "/tokens",
