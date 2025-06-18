@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  Box,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  Toolbar,
-  Typography,
-} from '@mui/material';
+import { Box, Drawer, List, ListItem, ListItemText } from '@mui/material';
 import LeftDrawerFooter from './LeftDrawerFooter';
 import LeftDrawerHeader from './LeftDrawerHeader';
 
@@ -28,9 +20,9 @@ const LeftDrawer = () => {
       }}
       variant="permanent"
       anchor="left"
-      className='left-drawer'
+      className="left-drawer"
     >
-      <LeftDrawerHeader/>
+      <LeftDrawerHeader />
       <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
         <List>
           {['Item 1', 'Item 2', 'Item 3', 'Item 4'].map((text) => (
@@ -40,7 +32,7 @@ const LeftDrawer = () => {
           ))}
         </List>
       </Box>
-      <LeftDrawerFooter/>
+      <LeftDrawerFooter />
     </Drawer>
   );
 };
