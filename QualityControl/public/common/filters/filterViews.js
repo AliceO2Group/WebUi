@@ -73,4 +73,4 @@ export function filtersPanel(filterModel, pageModel) {
  * @returns {vnode} - virtual node element
  */
 const triggerFiltersButton = (onClickCallback) =>
-  h('button.btn.btn-primary#triggerFilterButton', { onclick: onClickCallback }, 'Update');
+  h('button.btn.btn-primary#triggerFilterButton', { onclick: onClickCallback, title: 'Update filters' }, 'Update');
