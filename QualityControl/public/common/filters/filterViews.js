@@ -55,7 +55,7 @@ export function filtersPanel(filterModel, pageModel) {
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onEnterCallback = () => filterModel.triggerFilter(pageModel);
-  const clearFilterCallback = clearFilter.bind(filterModel);
+  const clearFilterCallback = clearFilter.bind(filterModel, pageModel);
   const filtersList = filtersConfig(filterService);
 
   if (!isVisible) {
