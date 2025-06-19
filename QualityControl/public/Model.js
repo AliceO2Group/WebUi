@@ -28,7 +28,7 @@ import { buildQueryParametersString } from './common/buildQueryParametersString.
 import AboutViewModel from './pages/aboutView/AboutViewModel.js';
 import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
 import { RequestFields } from './common/RequestFields.enum.js';
-import FilterModel from './common/filters/model/filterModel.js';
+import FilterModel from './common/filters/model/FilterModel.js';
 
 /**
  * Represents the application's state and actions as a class
