@@ -150,6 +150,6 @@ export default class ObjectViewModel extends BaseViewModel {
    * Wrapper function for updateObjectSelection that will be triggered by filterModel;
    */
   async triggerFilter() {
-    await this.updateObjectSelection({});
+    await this.init(this.model.router.params);
   }
 }
