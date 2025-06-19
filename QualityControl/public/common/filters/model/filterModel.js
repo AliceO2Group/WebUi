@@ -30,7 +30,7 @@ export default class FilterModel extends Observable {
 
     this.model = model;
     this.filterService = new FilterService(this);
-    this.filterMap = {};
+    this._filterMap = {};
   }
 
   /**
@@ -41,7 +41,7 @@ export default class FilterModel extends Observable {
     const parameters = this.model.router.params;
     CCDB_QUERY_PARAMS.forEach((filterKey) => {
       if (parameters[filterKey]) {
-        this.filterMap[filterKey] = decodeURI(parameters[filterKey]);
+        this._filterMap[filterKey] = decodeURI(parameters[filterKey]);
       }
     });
 
@@ -57,10 +57,10 @@ export default class FilterModel extends Observable {
     const parameters = this.model.router.params;
 
     CCDB_QUERY_PARAMS.forEach((filterKey) => {
-      if (!this.filterMap[filterKey]) {
+      if (!this._filterMap[filterKey]) {
         delete parameters[filterKey];
       } else {
-        parameters[filterKey] = encodeURI(this.filterMap[filterKey]);
+        parameters[filterKey] = encodeURI(this._filterMap[filterKey]);
       }
     });
     this.model.router.go(buildQueryParametersString(parameters, { }), true, isSilent);
@@ -76,9 +76,9 @@ export default class FilterModel extends Observable {
    */
   setFilterValue(key, value, setUrl = false) {
     if (value?.trim()) {
-      this.filterMap[key] = value;
+      this._filterMap[key] = value;
     } else {
-      delete this.filterMap[key];
+      delete this._filterMap[key];
     }
 
     if (setUrl) {
@@ -103,8 +103,10 @@ export default class FilterModel extends Observable {
    * @returns {undefined}
    */
   clearFilter() {
-    Object.keys(this.filterMap).forEach((key) =>
-      delete this.filterMap[key]); // Manual deletion to preserve the reference
-    this.notify();
+    this._filterMap = {};
+  }
+
+  get filterMap() {
+    return this._filterMap;
   }
 }

@@ -56,7 +56,7 @@ export default class QCObject extends Observable {
     this.queryingObjects = false;
     this.scrollTop = 0;
     this.scrollHeight = 0;
-    this.filterMap = model.filterModel.filterMap;
+    this.filterModel = model.filterModel;
   }
 
   /**
@@ -179,7 +179,7 @@ export default class QCObject extends Observable {
     this.notify();
     this.queryingObjects = true;
     let offlineObjects = [];
-    const result = await this.model.services.object.getObjects(this.filterMap);
+    const result = await this.model.services.object.getObjects(this.filterModel.filterMap);
     if (result.isSuccess()) {
       offlineObjects = result.payload;
     } else {
@@ -221,7 +221,8 @@ export default class QCObject extends Observable {
     this.objects[objectName] = RemoteData.loading();
     this.notify();
 
-    const obj = await this.model.services.object.getObjectByName(objectName, id, timestamp, this.filterMap, this);
+    const obj =
+      await this.model.services.object.getObjectByName(objectName, id, timestamp, this.filterModel.filterMap, this);
 
     // TODO Is it a TTree?
     if (obj.isSuccess()) {
@@ -263,7 +264,7 @@ export default class QCObject extends Observable {
       this.objects[objectName] = RemoteData.Loading();
       this.notify();
       this.objects[objectName] = await this
-        .model.services.object.getObjectByName(objectName, undefined, undefined, this.filterMap, this);
+        .model.services.object.getObjectByName(objectName, undefined, undefined, this.filterModel.filterMap, this);
       this.notify();
     }));
     this.objectsRemote = RemoteData.success();
