@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { filters } from '../../../common/filters/filter.js';
-import { FilterType } from '../../../common/filters/filterTypes.js';
+import { filters } from './filter.js';
+import { FilterType } from './filterTypes.js';
 import { filtersConfig } from './filtersConfig.js';
 import { h } from '/js/src/index.js';
 
