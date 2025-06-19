@@ -150,7 +150,6 @@ export default class QCObjectService {
    * @param {Array<string>} fields - The fields that are to be send from the backend.
    * @returns {string} - url with appended parameters
    */
-  // url, id, timestamp, undefined, this.filterModel.filterMap
   _buildURL(url, id, validFrom = undefined, filterMap = this.filterModel.filterMap, fields = undefined) {
     const filterAsString = Object.entries(filterMap).map(([key, value]) => `filters[${key}]=${value}`).join('&');
     url += `&${filterAsString}`;
