@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { filters } from './filter.js';
+import { filterInput, dynamicSelector } from './filter.js';
 import { FilterType } from './filterTypes.js';
 import { filtersConfig } from './filtersConfig.js';
 import { h } from '/js/src/index.js';
@@ -27,8 +27,6 @@ import { h } from '/js/src/index.js';
  * @returns {undefined}
  */
 const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback, onChangeCallback) => {
-  const { filterInput, dynamicSelector } = filters;
-
   const { type, queryLabel, placeholder, id, inputType = 'text', options } = config;
   const commonConfig = {
     queryLabel,
