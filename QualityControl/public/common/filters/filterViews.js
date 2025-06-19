@@ -71,9 +71,8 @@ export function filtersPanel(filterModel, pageModel) {
 
 /**
  * Button which will allow the user to update filter parameters after the input
- * @param {Function} triggerFilter - Function to trigger the filter mechanism
+ * @param {Function} onClickCallback - Function to trigger the filter mechanism
  * @returns {vnode} - virtual node element
  */
-const triggerFiltersButton = (triggerFilter) => h('button.btn.btn-primary#triggerFilterButton', {
-  onclick: triggerFilter,
-}, 'Update');
+const triggerFiltersButton = (onClickCallback) =>
+  h('button.btn.btn-primary#triggerFilterButton', { onclick: onClickCallback }, 'Update');
