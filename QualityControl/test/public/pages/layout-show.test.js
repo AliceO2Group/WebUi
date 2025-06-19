@@ -53,7 +53,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     async () => {
       const MAX_DELAY = 5000;
       const INTERVAL = 500;
-      const selectorId = '#runTypeLayoutFilter';
+      const selectorId = '#runTypeFilter';
 
       const getOptionsWithRetry = async () => {
         let options = [];
@@ -77,7 +77,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
       const options = await getOptionsWithRetry();
       if (!options.length) {
-        throw new Error('#runTypeLayoutFilter not found after 5 seconds');
+        throw new Error('#runTypeFilter not found after 5 seconds');
       }
 
       strictEqual(options[0], '');
