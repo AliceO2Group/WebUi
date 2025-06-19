@@ -101,7 +101,7 @@ const applyFilters = (layout) =>
       h('input', {
         type: 'checkbox',
         id: 'inputApplyFilters',
-        checked: layout.activeFilter() && layout.applyTreeFilter,
+        checked: layout.activeFilter() && layout.shouldApplyTreeFilter,
         disabled: !layout.activeFilter(),
         onchange: (e) => layout.toggleObjectTreeFilter('displayTimestamp', e.target.checked),
       }),

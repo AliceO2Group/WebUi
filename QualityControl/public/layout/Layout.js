@@ -62,7 +62,7 @@ export default class Layout extends BaseViewModel {
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
     // GridList.grid.length: integer, number of rows
-    this.applyTreeFilter = true;
+    this.shouldApplyTreeFilter = true;
   }
 
   /**
@@ -776,17 +776,17 @@ export default class Layout extends BaseViewModel {
    */
   toggleObjectTreeFilter() {
     if (this.activeFilter()) {
-      this.applyTreeFilter = !this.applyTreeFilter;
+      this.shouldApplyTreeFilter = !this.shouldApplyTreeFilter;
       this.listObjects();
     }
   }
 
   /**
-   * Wrapper function for qcObjectServices. If applyTreeFilter is false,
+   * Wrapper function for qcObjectServices. If shouldApplyTreeFilter is false,
    * the objectTree will be loaded without applying the filters.
    */
   listObjects() {
-    const filterMap = this.applyTreeFilter ? undefined : {};
+    const filterMap = this.shouldApplyTreeFilter ? undefined : {};
     this.model.services.object.listObjects(undefined, filterMap);
   }
 }
