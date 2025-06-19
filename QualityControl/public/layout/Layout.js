@@ -12,19 +12,20 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Observable, RemoteData } from '/js/src/index.js';
+import { RemoteData } from '/js/src/index.js';
 
 import GridList from './Grid.js';
 import LayoutUtils from './LayoutUtils.js';
 import { objectId, clone, setBrowserTabTitle } from '../common/utils.js';
 import { assertTabObject, assertLayout } from '../common/Types.js';
 import { buildQueryParametersString } from '../common/buildQueryParametersString.js';
+import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 
 /**
  * Model namespace with all requests to load or create layouts, compute their position on a grid,
  * and search them.
  */
-export default class Layout extends Observable {
+export default class Layout extends BaseViewModel {
   /**
    * Initialize with empty values
    * @param {Model} model - root model of the application

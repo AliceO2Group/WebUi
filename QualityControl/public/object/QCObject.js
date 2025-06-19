@@ -12,15 +12,16 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Observable, RemoteData, iconArrowTop } from '/js/src/index.js';
+import { RemoteData, iconArrowTop } from '/js/src/index.js';
 import ObjectTree from './ObjectTree.class.js';
 import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
+import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
  */
-export default class QCObject extends Observable {
+export default class QCObject extends BaseViewModel {
   /**
    * Initialize model with empty values
    * @param {Model} model - root model of the application

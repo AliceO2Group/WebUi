@@ -12,13 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
+import { BaseViewModel } from '../../common/abstracts/BaseViewModel.js';
 import { setBrowserTabTitle } from '../../common/utils.js';
-import { Observable, RemoteData } from '/js/src/index.js';
+import { RemoteData } from '/js/src/index.js';
 
 /**
  * Model namespace for ObjectViewPage
  */
-export default class ObjectViewModel extends Observable {
+export default class ObjectViewModel extends BaseViewModel {
   /**
    * Initialize model with empty values
    * @param {Model} model - root model of the application

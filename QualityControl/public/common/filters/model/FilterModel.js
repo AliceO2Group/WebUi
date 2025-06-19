@@ -91,12 +91,12 @@ export default class FilterModel extends Observable {
 
   /**
    * Apply the current filters to a filterable model and update the URL
-   * @param {object} filterAbleModel - The model that should be filtered
+   * @param {BaseViewModel} baseViewModel - The view model that should be filtered
    * @returns {undefined}
    */
-  triggerFilter(filterAbleModel) {
+  triggerFilter(baseViewModel) {
     this.setFilterToURL();
-    filterAbleModel.triggerFilter();
+    baseViewModel.triggerFilter();
   }
 
   /**
