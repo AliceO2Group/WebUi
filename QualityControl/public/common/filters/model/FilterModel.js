@@ -114,6 +114,7 @@ export default class FilterModel extends Observable {
    */
   clearFilter() {
     this._filterMap = {};
+    this.notify();
   }
 
   get filterMap() {
