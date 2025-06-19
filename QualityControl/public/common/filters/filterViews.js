@@ -51,14 +51,14 @@ const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback
  * @returns {vnode} - virtual node element
  */
 export function filtersPanel(filterModel, pageModel) {
-  const { filterMap, setFilterValue, filterService, visible, clearFilter } = filterModel;
+  const { filterMap, setFilterValue, filterService, isVisible, clearFilter } = filterModel;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onEnterCallback = () => filterModel.triggerFilter(pageModel);
   const clearFilterCallback = clearFilter.bind(filterModel);
   const filtersList = filtersConfig(filterService);
 
-  if (!visible) {
+  if (!isVisible) {
     return null;
   }
 
@@ -95,8 +95,8 @@ const clearFiltersButton = (clearFilterCallback) =>
  * @returns {vnode} - virtual node element
  */
 export function filterPanelToggleButton(filterModel) {
-  const { visible } = filterModel;
-  return h(`button.btn.btn-default${visible ? '.active' : ''}`, {
+  const { isVisible } = filterModel;
+  return h(`button.btn.btn-default${isVisible ? '.active' : ''}`, {
     onclick: () => filterModel.toggleFilterVisibility(),
-  }, ['Filters ', visible ? iconChevronTop() : iconChevronBottom()]);
+  }, ['Filters ', isVisible ? iconChevronTop() : iconChevronBottom()]);
 }

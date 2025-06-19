@@ -31,7 +31,7 @@ export default class FilterModel extends Observable {
     this.model = model;
     this.filterService = new FilterService(this);
     this._filterMap = {};
-    this.visible = true;
+    this.isVisible = true;
   }
 
   /**
@@ -104,7 +104,7 @@ export default class FilterModel extends Observable {
    * @returns {undefined}
    */
   toggleFilterVisibility() {
-    this.visible = !this.visible;
+    this.isVisible = !this.isVisible;
     this.notify();
   }
 
