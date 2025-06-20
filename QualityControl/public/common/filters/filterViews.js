@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { filters } from '../../../common/filters/filter.js';
-import { FilterType } from '../../../common/filters/filterTypes.js';
+import { filterInput, dynamicSelector } from './filter.js';
+import { FilterType } from './filterTypes.js';
 import { filtersConfig } from './filtersConfig.js';
 import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
 
@@ -27,8 +27,6 @@ import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
  * @returns {undefined}
  */
 const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback, onChangeCallback) => {
-  const { filterInput, dynamicSelector } = filters;
-
   const { type, queryLabel, placeholder, id, inputType = 'text', options } = config;
   const commonConfig = {
     queryLabel,
@@ -76,16 +74,10 @@ export function filtersPanel(filterModel, pageModel) {
 };
 
 /**
- * Button for toggling visibility of the filter by parameters panel
- * @param {FilterModel} filterModel - model that manages filter state
+ * Button which will allow the user to update filter parameters after the input
+ * @param {Function} onClickCallback - Function to trigger the filter mechanism
  * @returns {vnode} - virtual node element
  */
-export function filterPanelToggleButton(filterModel) {
-  const { visible } = filterModel;
-  return h(`button.btn.btn-default${visible ? '.active' : ''}`, {
-    onclick: () => filterModel.toggleFilterVisibility(),
-  }, ['Filters ', visible ? iconChevronTop() : iconChevronBottom()]);
-}
 const triggerFiltersButton = (onClickCallback) =>
   h('button.btn.btn-primary#triggerFilterButton', { onclick: onClickCallback, title: 'Update filters' }, 'Update');
 
@@ -96,3 +88,15 @@ const triggerFiltersButton = (onClickCallback) =>
  */
 const clearFiltersButton = (clearFilterCallback) =>
   h('button.btn.btn-secondary#clearFilterButton', { onclick: clearFilterCallback, title: 'Clear filters' }, 'Clear');
+
+/**
+ * Button for toggling visibility of the filter by parameters panel
+ * @param {FilterModel} filterModel - model that manages filter state
+ * @returns {vnode} - virtual node element
+ */
+export function filterPanelToggleButton(filterModel) {
+  const { isVisible } = filterModel;
+  return h(`button.btn.btn-default${isVisible ? '.active' : ''}`, {
+    onclick: () => filterModel.toggleFilterVisibility(),
+  }, ['Filters ', isVisible ? iconChevronTop() : iconChevronBottom()]);
+}

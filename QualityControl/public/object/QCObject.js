@@ -55,6 +55,7 @@ export default class QCObject extends BaseViewModel {
     this.queryingObjects = false;
     this.scrollTop = 0;
     this.scrollHeight = 0;
+    this.filterModel = model.filterModel;
   }
 
   /**
@@ -177,7 +178,7 @@ export default class QCObject extends BaseViewModel {
     this.notify();
     this.queryingObjects = true;
     let offlineObjects = [];
-    const result = await this.model.services.object.getObjects();
+    const result = await this.model.services.object.getObjects(this.filterModel.filterMap);
     if (result.isSuccess()) {
       offlineObjects = result.payload;
     } else {

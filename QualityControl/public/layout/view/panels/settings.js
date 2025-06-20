@@ -92,7 +92,7 @@ const applyFilters = (layout) =>
     h(
       '.w-80',
       h('label.form-check-label', {
-        for: 'inputShowTimestamp',
+        for: 'applyFilters',
         style: 'cursor: pointer',
       }, 'Apply filters'),
     ),
@@ -103,7 +103,7 @@ const applyFilters = (layout) =>
         id: 'inputApplyFilters',
         checked: layout.activeFilter() && layout.shouldApplyTreeFilter,
         disabled: !layout.activeFilter(),
-        onchange: (e) => layout.toggleObjectTreeFilter('displayTimestamp', e.target.checked),
+        onchange: () => layout.toggleObjectTreeFilter(),
       }),
     ),
   ]);

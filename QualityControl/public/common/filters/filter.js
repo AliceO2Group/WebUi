@@ -31,7 +31,7 @@ import { h, RemoteData } from '/js/src/index.js';
  * @param {string} [config.width='.'] - The CSS class that defines the width of the filter.
  * @returns {vnode} - A virtual node element representing the filter element (input or dropdown).
  */
-const dynamicSelector = (config) => {
+export const dynamicSelector = (config) => {
   const {
     queryLabel,
     placeholder,
@@ -75,7 +75,7 @@ const dynamicSelector = (config) => {
  * @param {string} [config.width='.w-20'] - The CSS class that defines the width of the filter.
  * @returns {vnode} - A virtual node element representing the filter input.
  */
-const filterInput = (config) => {
+export const filterInput = (config) => {
   const { queryLabel, placeholder, id, filterMap, onInputCallback, onEnterCallback, type, width = '.w-20' } = config;
 
   return h(`${width}`, [
@@ -132,9 +132,4 @@ const dropdownSelector = (config) => {
       ...options.map((option) => h('option', { value: option }, option)),
     ]),
   ]);
-};
-
-export const filters = {
-  filterInput,
-  dynamicSelector,
 };
