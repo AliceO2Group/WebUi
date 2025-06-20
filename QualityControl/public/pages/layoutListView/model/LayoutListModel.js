@@ -115,9 +115,4 @@ export default class LayoutListModel extends BaseViewModel {
       },
     };
   }
-
-  /**
-   * This function is required for all pages that have the filter element in their header
-   */
-  triggerFilter() {}
 }

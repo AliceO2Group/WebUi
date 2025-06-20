@@ -440,6 +440,7 @@ export default class Layout extends BaseViewModel {
     this.editingTabObject = null;
     this.item = this.editOriginalClone;
     this.selectTab(this._tabIndex);
+    this.model.object.selected = null;
     this.model.object.searchInput = '';
     this.notify();
   }

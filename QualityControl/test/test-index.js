@@ -56,7 +56,7 @@ import { objectControllerTestSuite } from './lib/controllers/ObjectController.te
  */
 import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
 import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
-import { bookkeepingServiceTestSuite } from './lib/services/BookeepingService.test.js';
+import { bookkeepingServiceTestSuite } from './lib/services/BookkeepingService.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';

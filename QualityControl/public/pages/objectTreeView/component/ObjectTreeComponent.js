@@ -23,9 +23,11 @@ import ObjectTreeModel from '../model/ObjectTreeModel.js';
  * @returns {vnode} - virtual node element
  */
 export default function (treeModel, branchItem, leafItem) {
+  const { children } = treeModel;
   return [
     h('.heading', 'Name'),
-    h('ul.root-tree', treeItems(treeModel, branchItem, leafItem)),
+    h('ul.root-tree', children.length ?
+      treeItems(treeModel, branchItem, leafItem) : h('.w-100.text-center', 'No objects found')),
   ];
 }
 

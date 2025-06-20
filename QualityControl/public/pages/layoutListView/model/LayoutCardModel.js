@@ -45,7 +45,6 @@ export default class LayoutCardModel extends Observable {
 
   /**
    * Toggles the official status of the layout and updates backend services
-   * @async
    * @returns {Promise<void>}
    */
   async toggleOfficial() {
@@ -93,5 +92,9 @@ export default class LayoutCardModel extends Observable {
       layoutListModel.removeLayout(this).from('Official');
     }
     layoutListModel.setLayout(this).in('All Layouts');
+
+    if (this.owner_name === this.model.session.name) {
+      layoutListModel.setLayout(this).in('My Layouts');
+    }
   }
 }

@@ -34,7 +34,6 @@ export class BookkeepingService {
     this._port = null;
     this._token = '';
     this._protocol = '';
-    this._refreshInterval = config?.refreshRate ?? 24 * 60 * 60 * 1000;
   }
 
   /**
@@ -133,6 +132,11 @@ export class BookkeepingService {
    *                                 - RunStatus.INVALID if there was an error or data is not available
    */
   async retrieveRunStatus(runNumber) {
+    if (!this.active) {
+      logger.warnMessage('Could not connect to bookkeeping');
+      return RunStatus.INVALID;
+    }
+
     try {
       const { data } = await httpGetJson(this._hostname, this._port, this._createRunPath(runNumber), {
         protocol: this._protocol,
@@ -140,6 +144,7 @@ export class BookkeepingService {
       });
 
       if (!data) {
+        logger.warnMessage(`The runstatus was invalid for run number ${runNumber}`);
         return RunStatus.INVALID; // an error occured in bookkeeping
       }
 
@@ -152,14 +157,6 @@ export class BookkeepingService {
       logger.errorMessage(`An error occured whilst fetching run status: ${error.message || error}`);
       return RunStatus.INVALID;
     }
-  }
-
-  /**
-   * Returns the interval in milliseconds for how often the list of run types should be refreshed.
-   * @returns {number} Interval in milliseconds for refreshing the list of run types.
-   */
-  get refreshInterval() {
-    return this._refreshInterval;
   }
 
   /**

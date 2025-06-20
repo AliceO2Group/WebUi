@@ -17,7 +17,7 @@ import { iconBadge } from '/js/src/icons.js';
 
 /**
  * Main layout card component
- * @param {object} layoutCardModel - The model handeling the state of this singular view
+ * @param {LayoutCardModel} layoutCardModel - The model handeling the state of this singular view
  * @returns {vnode} Complete layout card virtual DOM node
  */
 export default function (layoutCardModel) {

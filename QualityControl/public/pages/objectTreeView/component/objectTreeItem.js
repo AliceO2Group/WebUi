@@ -80,6 +80,7 @@ export const sideTreeLeafItem = (leafObject, qcObject, layout) => {
       const newItem = layout.addItem(name);
       layout.moveTabObjectStart(newItem);
     },
+    ondragend: () => layout.moveTabObjectStop(),
     ondblclick: () => layout.addItem(name),
   };
 
