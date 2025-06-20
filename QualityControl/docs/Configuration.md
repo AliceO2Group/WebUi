@@ -46,14 +46,18 @@ Attribute to define the `Bookkeeping` endpoint. If this configuration is not pro
 
 - `url` - URL for accessing Bookkeeping API
 - `token` - Authentication token required to interact with the API securely.
-- `refreshRate` - Frequency (in miliseconds) at which the bookkeeping data is refreshed or synchronized.
+- `runTypesRefreshInterval` - Frequency (in miliseconds) at which the runtypes from bookkeeping are refreshed or synchronized.
+- `runStatusRefreshInterval` - Frequency (in miliseconds) at which the the status of ongoing runs from bookkeeping are refreshed or synchronized.
 
 ```javascript
 bookkeeping: {
-  url: 'http://localhost:4000',
-  token: 'example-token',
-  refreshRate: 15000000
-}
+  url: 'http://localhost:4000', 
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MCwidXNlcm5hbWUiOiJhbm9ueW1vdXMiLCJuYW1lIjoiQW5vbnltb3VzIiwiYWNjZXNzIjoiYWRtaW4iLCJpYXQiOjE3NTAxNjcxNjgsImV4cCI6MTc1MDc3MTk2OCwiaXNzIjoibzItdWkifQ.d6_TMy9APR27QAU-AQCuRuCDyMmriWgDAsL43j99yBA',
+  runTypesRefreshInterval: 15000,
+  runStatusRefreshInterval: 30000,
+},
+```
+
 
 
 ### QC Environment Configuration
