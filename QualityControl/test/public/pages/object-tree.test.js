@@ -13,16 +13,16 @@
 
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
-const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
-const SORTING_BUTTON_PATH = 'header > div > div:nth-child(3) > div > button';
 const LIST_ITEM_PATH = 'ul > li'; // General path for checking existence
 const LIST_OBJECT_PATH = '[title="qc/test/object"] li'; // Path specifically for finding objects
-const sortOptionPath = (index) => `header > div > div:nth-child(3) > div > div > a:nth-child(${index})`;
+const sortOptionPath = (index) => `header > div > div > div:nth-child(3) > div > div > a:nth-child(${index})`;
 const [NAME_ASC_INDEX, NAME_DEC_INDEX] = [1, 2];
 const VIRTUAL_TABLEROW_PATH = 'tbody > tr.object-selectable';
-const SEARCH_PATH = 'header > div > div:nth-child(3) > input';
+const SEARCH_PATH = 'header > div > div:nth-child(1) > div:nth-child(3) > input';
 const OBJECTS_DESCENDING = ['qc/test/object/2', 'qc/test/object/11', 'qc/test/object/1'];
 const OBJECTS_ASCENDING = ['qc/test/object/1', 'qc/test/object/11', 'qc/test/object/2'];
+const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
+const SORTING_BUTTON_PATH = 'header > div > div > div:nth-child(3) > div > button';
 
 /**
  * Initial page setup tests
@@ -48,8 +48,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should have a button to sort by (default "Name" ASC)', async () => {
-    const sortByButtonTitle = await page.evaluate(() =>
-      document.querySelector('header > div > div:nth-child(3) > div > button').title);
+    const sortByButtonTitle = await page.evaluate((path) => document.querySelector(path).title, SORTING_BUTTON_PATH);
     strictEqual(sortByButtonTitle, 'Sort by');
   });
 
@@ -71,7 +70,6 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
     const objectIds = await page.evaluate((path) =>
       [...document.querySelectorAll(path)].map((e)=> e.id), LIST_OBJECT_PATH);
-
     deepStrictEqual(objectIds, OBJECTS_DESCENDING);
   });
 
@@ -101,19 +99,29 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   await testParent.test('should sort list of objects by name in ascending order', async () => {
     const objectIds = await page.evaluate((path) =>
       [...document.querySelectorAll(path)].map((e)=> e.id), LIST_OBJECT_PATH);
-
     deepStrictEqual(objectIds, OBJECTS_ASCENDING);
+    await page.locator(SORTING_BUTTON_PATH).click();
+    await page.locator(sortOptionPath(NAME_ASC_INDEX)).click();
+    const sorted = await page.evaluate(() => ({
+      list: window.model.object.currentList,
+      sort: window.model.object.sortBy,
+    }));
+    strictEqual(sorted.sort.title, 'Name');
+    strictEqual(sorted.sort.order, 1);
+    strictEqual(sorted.sort.field, 'name');
+    strictEqual(sorted.list[0].name, 'qc/test/object/1');
   });
 
   await testParent.test('should have filtered results on input search', async () => {
-    await page.type('header > div > div:nth-child(3) > input', 'qc/test/object/1');
+    await page.type(SEARCH_PATH, 'qc/test/object/1');
     const rowsDisplayed = await page.evaluate(() => {
       const rows = [];
       document.querySelectorAll('section > div > div > div > table > tbody > tr')
         .forEach((item) => rows.push(item.innerText));
       return rows;
-    }, { timeout: 5000 });
+    });
     const filteredRows = rowsDisplayed.filter((name) => name.includes('qc/test/object/1'));
+
     ok(
       filteredRows.length === rowsDisplayed.length,
       'Not all rows contain the searched term.'
@@ -131,4 +139,19 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     const treeBranchNr = await page.evaluate((path) => document.querySelectorAll(path).length, LIST_ITEM_PATH);
     strictEqual(treeBranchNr, 1, 'ObjectTree did not fully collapse');
   });
+
+  await testParent.test(
+    'should have a selector with sorted options to filter by run type if there are run types loaded',
+    { timeout },
+    async () => {
+      const selectorId = '#runTypeFilter > option';
+
+      const options = await page.evaluate((selectorId) => {
+        const optionElements = document.querySelectorAll(selectorId);
+        return Array.from(optionElements).map((option) => option.value);
+      }, selectorId);
+
+      deepStrictEqual(options, ['', 'runType1', 'runType2']);
+    },
+  );
 };

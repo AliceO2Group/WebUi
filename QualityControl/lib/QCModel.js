@@ -38,6 +38,11 @@ import { UserRepository } from './repositories/UserRepository.js';
 import { ChartRepository } from './repositories/ChartRepository.js';
 import { initDatabase } from './database/index.js';
 import { SequelizeDatabase } from './database/SequelizeDatabase.js';
+import { objectGetByIdValidationMiddlewareFactory }
+  from './middleware/objects/objectGetByIdValidationMiddlewareFactory.js';
+import { objectsGetValidationMiddlewareFactory } from './middleware/objects/objectsGetValidationMiddlewareFactory.js';
+import { objectGetContentsValidationMiddlewareFactory }
+  from './middleware/objects/objectGetContentsValidationMiddlewareFactory.js';
 
 /**
  * Model initialization for the QCG application
@@ -69,13 +74,17 @@ export const setupQcModel = () => {
   const qcObjectService = new QcObjectService(ccdbService, chartRepository, { openFile, toJSON });
   qcObjectService.refreshCache();
 
-  const objectController = new ObjectController(qcObjectService);
   const intervalsService = new IntervalsService();
 
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
   const filterService = new FilterService(bookkeepingService);
+  const objectController = new ObjectController(qcObjectService, filterService, intervalsService);
 
   const filterController = new FilterController(filterService);
+
+  const objectGetByIdValidation = objectGetByIdValidationMiddlewareFactory(filterService);
+  const objectsGetValidation = objectsGetValidationMiddlewareFactory(filterService);
+  const objectGetContentsValidation = objectGetContentsValidationMiddlewareFactory(filterService);
 
   initializeIntervals(intervalsService, qcObjectService, filterService);
 
@@ -89,6 +98,9 @@ export const setupQcModel = () => {
     filterController,
     layoutRepository,
     jsonFileService,
+    objectGetByIdValidation,
+    objectsGetValidation,
+    objectGetContentsValidation,
   };
 };
 

@@ -28,7 +28,7 @@ import { branchItem, sideTreeLeafItem } from '../../../pages/objectTreeView/comp
  */
 export default (model) =>{
   const { object, layout } = model;
-  const { searchInput = '', sideTree } = object;
+  const { searchInput = '', tree } = object;
 
   return model.services.object.list.match({
     NotAsked: () => null,
@@ -45,7 +45,7 @@ export default (model) =>{
           '.scroll-y',
           searchInput.trim() !== ''
             ? virtualTable(model, 'side', objectsToDisplay)
-            : ObjectTreeComponent(sideTree, branchItem, (leafObject) => sideTreeLeafItem(leafObject, object, layout)),
+            : ObjectTreeComponent(tree, branchItem, (leafObject) => sideTreeLeafItem(leafObject, object, layout)),
         ),
         objectPreview(model),
       ];

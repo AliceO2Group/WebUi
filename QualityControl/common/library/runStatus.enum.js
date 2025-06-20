@@ -12,19 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-/**
- * Given an object with K;V pairs, build a URL component and return it as string
- * @example
- * { RunNumber: 42, PassName: 1 } -> '&RunUmber=42&PassName=1'
- * @param {object} filter - filters as KV pairs
- * @returns {string} - partial URL
- */
-export const getUrlPathFromObject = (filter) => {
-  let urlPath = '';
-  if (Object.keys(filter).length > 0) {
-    urlPath = Object.entries(filter)
-      .map(([key, value]) => `&${key}=${value}`)
-      .join('');
-  }
-  return urlPath;
-};
+export const RunStatus = Object.freeze({
+  FINISHED: 'FINISHED',
+  ACTIVE: 'ACTIVE',
+  INVALID: 'INVALID', // Covers: not found, negative runnumber, non-numeric runnumber, etc
+});

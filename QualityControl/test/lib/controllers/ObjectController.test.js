@@ -1,194 +1,388 @@
-import { strict as assert } from 'assert';
-import { suite, test, beforeEach } from 'node:test';
-import { ObjectController } from '../../../lib/controllers/ObjectController.js';
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
+import test, { afterEach, beforeEach, suite } from 'node:test';
+import { deepStrictEqual, ok, strictEqual } from 'node:assert';
 import sinon from 'sinon';
+import { ObjectController } from '../../../lib/controllers/ObjectController.js';
+import { QcObjectService } from '../../../lib/services/QcObject.service.js';
+import { NotFoundError } from '@aliceo2/web-ui';
+import { RunStatus } from '../../../common/library/runStatus.enum.js';
 
 export const objectControllerTestSuite = async () => {
-  suite('ObjectController test suite', () => {
-    let res = null;
-    let req = null;
-    let qcObjectServiceStub = null;
-    let objectController = null;
+  let QcObjectServiceMock = null;
+  let reqMock = null;
+  let resMock = null;
+  let objectController = null;
+
+  beforeEach(() => {
+    resMock = {
+      status: sinon.stub().returnsThis(),
+      send: sinon.spy(),
+      json: sinon.spy(),
+    };
+    reqMock = {
+      query: { token: 'someToken' },
+      params: {},
+    };
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  suite('getObjects() tests', () => {
+    const mockObjectsList = [
+      { objectName: 'object1', path: 'qc/path/object1' },
+      { objectName: 'object2', path: 'qc/path/object2' },
+    ];
+
+    test('should successfully retrieve objects list without prefix', async () => {
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockObjectsList),
+      });
+
+      objectController = new ObjectController(QcObjectServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      ok(resMock.status.calledWith(200));
+      ok(resMock.json.calledWith(mockObjectsList));
+
+      ok(QcObjectServiceMock.retrieveLatestVersionOfObjects.calledWith({
+        prefix: undefined, fields: undefined, filters: undefined }));
+    });
+
+    test('should successfully retrieve objects list with prefix and fields', async () => {
+      reqMock.query.prefix = 'qc/path';
+      reqMock.query.fields = ['objectName', 'path'];
+
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockObjectsList),
+      });
+
+      objectController = new ObjectController(QcObjectServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      ok(resMock.status.calledWith(200));
+      ok(QcObjectServiceMock.retrieveLatestVersionOfObjects
+        .calledWith({ prefix: 'qc/path', fields: ['objectName', 'path'], filters: undefined }));
+    });
+
+    test('should handle service errors when retrieving objects', async () => {
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        retrieveLatestVersionOfObjects: sinon.stub().rejects(new NotFoundError('Object not found')),
+      });
+
+      objectController = new ObjectController(QcObjectServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      ok(resMock.status.calledWith(500));
+      ok(resMock.json.calledWithMatch({
+        message: 'Failed to retrieve list of objects latest version',
+        status: 500,
+        title: 'Unknown Error',
+      }));
+    });
+  });
+
+  suite('getObjectContent() tests', () => {
+    const stubObject = {
+      path: 'qc/path',
+      versions: [
+        {
+          validFrom: 1736424299423,
+          id: '4f9917a2-ce82-11ef-936c-c0a80209250c',
+          createdAt: 1736424454827,
+        },
+        {
+          validFrom: 1736420279131,
+          id: '21a6de32-ce79-11ef-936b-c0a80209250c',
+          createdAt: 1736420512272,
+        },
+      ],
+    };
+
+    test('should successfully retrieve object content', async () => {
+      reqMock.query.path = stubObject.path;
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        retrieveQcObject: sinon.stub().resolves(stubObject),
+      });
+
+      objectController = new ObjectController(QcObjectServiceMock);
+      await objectController.getObjectContent(reqMock, resMock);
+
+      ok(resMock.status.calledWith(200));
+      ok(resMock.json.calledWith(stubObject));
+      ok(QcObjectServiceMock.retrieveQcObject.calledWith({
+        path: stubObject.path,
+        validFrom: undefined,
+        filters: undefined,
+        id: undefined,
+      }));
+    });
+
+    test('should handle service errors when retrieving object content', async () => {
+      reqMock.query.path = 'qc/test';
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        retrieveQcObject: sinon.stub().rejects(new NotFoundError('Object not found')),
+      });
+
+      objectController = new ObjectController(QcObjectServiceMock);
+      await objectController.getObjectContent(reqMock, resMock);
+
+      ok(resMock.status.calledWith(500));
+      ok(resMock.json.calledWithMatch({
+        message: 'Failed to retrieve object content',
+        status: 500,
+        title: 'Unknown Error',
+      }));
+    });
+  });
+
+  suite('getObjectById() tests', () => {
+    const mockObject = {
+      id: '21a6de32-ce79-11ef-936b-c0a80209250c',
+      path: 'qc/path/object',
+      validFrom: 1736420279131,
+    };
+
+    test('should successfully retrieve object by QCG ID', async () => {
+      reqMock.params.id = mockObject.id;
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        retrieveQcObjectByQcgId: sinon.stub().resolves(mockObject),
+      });
+
+      objectController = new ObjectController(QcObjectServiceMock);
+      await objectController.getObjectById(reqMock, resMock);
+
+      ok(resMock.status.calledWith(200));
+      ok(resMock.json.calledWith(mockObject));
+      ok(QcObjectServiceMock.retrieveQcObjectByQcgId.calledWith({
+        validFrom: undefined,
+        filters: undefined,
+        id: undefined,
+        qcObjectId: mockObject.id,
+      }));
+    });
+
+    test('should handle service errors when retrieving object by ID', async () => {
+      reqMock.params.id = 'some-id';
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        retrieveQcObjectByQcgId: sinon.stub().rejects(new NotFoundError('Object not found')),
+      });
+
+      objectController = new ObjectController(QcObjectServiceMock);
+      await objectController.getObjectById(reqMock, resMock);
+
+      ok(resMock.status.calledWith(500));
+      ok(resMock.json.calledWithMatch({
+        message: 'Unable to identify object or read it by qcg id',
+        status: 500,
+        title: 'Unknown Error',
+      }));
+      ok(QcObjectServiceMock.retrieveQcObjectByQcgId.calledWith({
+        validFrom: undefined,
+        filters: undefined,
+        id: undefined,
+        qcObjectId: 'some-id',
+      }));
+    });
+  });
+
+  suite('Interval Checkup Tests', () => {
+    let FilterServiceMock = undefined;
+    let IntervalsServiceMock = undefined;
+    const mockRunNumber = 123456;
+    const mockQueryKey = JSON.stringify({ filters: { RunNumber: mockRunNumber } });
+    const mockData = [{ path: 'somePath' }];
 
     beforeEach(() => {
-      res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
+      FilterServiceMock = {
+        getRunStatus: sinon.stub(),
       };
-      req = {
-        params: {},
-        query: {},
+      IntervalsServiceMock = {
+        activeInterval: sinon.stub(),
+        register: sinon.spy(),
+        deregister: sinon.spy(),
       };
-      qcObjectServiceStub = {
-        retrieveLatestVersionOfObjects: sinon.stub(),
-        retrieveQcObjectByQcgId: sinon.stub(),
-        retrieveQcObject: sinon.stub(),
-      };
-      objectController = new ObjectController(qcObjectServiceStub);
     });
 
-    suite('`getObjects()` tests', () => {
-      test('should return 400 if prefix is not a string', async () => {
-        const req = {
-          query: { prefix: 123, fields: [] },
-        };
-
-        await objectController.getObjects(req, res);
-
-        assert.ok(res.status.calledWith(400));
-        assert.ok(res.json.calledWith({
-          message: 'Invalid parameters provided: prefix must be of type string',
-          title: 'Invalid Input',
-          status: 400,
-        }));
+    test('should setup monitoring for active run when not cached', async () => {
+      reqMock.query.filters = { RunNumber: mockRunNumber };
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        getRunCache: sinon.stub().returns(undefined),
+        setRunCache: sinon.spy(),
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockData),
       });
+      FilterServiceMock.getRunStatus.withArgs(mockRunNumber).resolves(RunStatus.ACTIVE);
+      IntervalsServiceMock.activeInterval.returns(false);
 
-      test('should return 400 if fields is not an array', async () => {
-        const req = {
-          query: { prefix: 'some/path', fields: 'not-an-array' },
-        };
+      objectController = new ObjectController(QcObjectServiceMock, FilterServiceMock, IntervalsServiceMock);
+      await objectController.getObjects(reqMock, resMock);
 
-        await objectController.getObjects(req, res);
+      ok(resMock.status.calledWith(200));
+      ok(resMock.json.calledWith(mockData));
+      ok(IntervalsServiceMock.register.calledOnce);
 
-        assert.ok(res.status.calledWith(400));
-        assert.ok(res.json.calledWith({
-          message: 'Invalid parameters provided: fields must be of type Array',
-          title: 'Invalid Input',
-          status: 400,
-        }));
-      });
+      const [[intervalKey, cacheData]] = QcObjectServiceMock.setRunCache.args;
+      const correctTimestamp = Date.now() - cacheData.timestamp < 100;
 
-      test('should return 200 and list of objects if parameters are valid', async () => {
-        const mockList = [{ name: 'object1' }, { name: 'object2' }];
-        qcObjectServiceStub.retrieveLatestVersionOfObjects.resolves(mockList);
+      strictEqual(intervalKey, mockQueryKey);
+      deepStrictEqual(cacheData.data, mockData);
 
-        const req = {
-          query: { prefix: 'valid/path', fields: ['field1', 'field2'] },
-        };
-
-        await objectController.getObjects(req, res);
-
-        assert.ok(res.status.calledWith(200));
-        assert.ok(res.json.calledWith(mockList));
-      });
-
-      test('should return 500 if service throws error', async () => {
-        qcObjectServiceStub.retrieveLatestVersionOfObjects.rejects(new Error('Service failed'));
-
-        const req = {
-          query: { prefix: 'valid/path', fields: ['f'] },
-        };
-
-        await objectController.getObjects(req, res);
-
-        assert.ok(res.status.calledWith(500));
-        assert.ok(res.json.calledWith({
-          message: 'Failed to retrieve list of objects latest version',
-          title: 'Unknown Error',
-          status: 500,
-        }));
-      });
+      ok(correctTimestamp, 'The timestamp for the cache is incorrect.');
     });
 
-    suite('`getObjectsContent()` test suite', () => {
-      test('should return a 400 error if URL is invalid', async () => {
-        await objectController.getObjectContent(req, res);
-        assert.ok(res.json.calledWith({
-          message: 'Invalid URL parameters: missing object path',
-          title: 'Invalid Input',
-          status: 400,
-        }));
+    test('should not setup monitoring if run is not active', async () => {
+      reqMock.query.filters = { RunNumber: mockRunNumber };
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        getRunCache: sinon.stub().returns(null),
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockData),
       });
-      test('should return 200 with the QcObject', async () => {
-        const mockObject = { id: 'obj1', name: 'Test Object' };
+      FilterServiceMock.getRunStatus.withArgs(mockRunNumber).resolves(RunStatus.COMPLETED);
 
-        req.query = {
-          path: 'valid/path.json',
-          validFrom: '1700000000',
-          id: 'id123',
-          filters: JSON.stringify({ a: 'b', empty: '' }),
-        };
+      objectController = new ObjectController(QcObjectServiceMock, FilterServiceMock, IntervalsServiceMock);
+      await objectController.getObjects(reqMock, resMock);
 
-        qcObjectServiceStub.retrieveQcObject.resolves(mockObject);
-
-        await objectController.getObjectContent(req, res);
-
-        assert.ok(res.status.calledWith(200));
-        assert.ok(res.json.calledWith(mockObject));
-      });
-      test('should return a 500 error if service fails', async () => {
-        const error = new Error('Service failure');
-
-        req.query = {
-          path: 'valid/path.json',
-          validFrom: '1700000000',
-          id: 'id123',
-          filters: JSON.stringify({ key: 'value' }),
-        };
-
-        qcObjectServiceStub.retrieveQcObject.rejects(error);
-
-        objectController.updateAndSendExpressResponseFromNativeError = (res, err) => {
-          res.status(500).json({
-            message: err.message,
-            title: 'Unknown error',
-            status: 500,
-          });
-        };
-
-        await objectController.getObjectContent(req, res);
-
-        assert.ok(res.status.calledWith(500));
-        assert.ok(res.json.calledWith({
-          message: 'Unable to identify object or read it',
-          title: 'Unknown Error',
-          status: 500,
-        }));
-      });
+      ok(resMock.status.calledWith(200));
+      ok(IntervalsServiceMock.register.notCalled);
     });
 
-    suite('`getObjectById()` tests', () => {
-      test('should return 400 if ID param is missing', async () => {
-        await objectController.getObjectById(req, res);
-
-        assert.ok(res.status.calledWith(400));
-        assert.ok(res.json.calledWith({
-          message: 'Invalid URL parameters: missing object ID',
-          title: 'Invalid Input',
-          status: 400,
-        }));
+    test('should use cached data if available and not setup monitoring', async () => {
+      reqMock.query.filters = { RunNumber: mockRunNumber };
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        getRunCache: sinon.stub().returns(mockData),
       });
 
-      test('should return 200 and the object if retrieval is successful', async () => {
-        const mockObject = { name: 'ObjectName' };
-        req.params.id = 'abc123';
-        req.query = { id: 'sub-id', validFrom: '2024-01-01', filters: { foo: 'bar' } };
+      objectController = new ObjectController(QcObjectServiceMock, FilterServiceMock, IntervalsServiceMock);
+      await objectController.getObjects(reqMock, resMock);
 
-        qcObjectServiceStub.retrieveQcObjectByQcgId.resolves(mockObject);
+      ok(resMock.status.calledWith(200));
+      ok(resMock.json.calledWith(mockData.data));
+      ok(FilterServiceMock.getRunStatus.notCalled);
+      ok(IntervalsServiceMock.register.notCalled);
+    });
 
-        await objectController.getObjectById(req, res);
+    test('should stop monitoring in interval callback when run status changes from active', async () => {
+      reqMock.query.filters = { RunNumber: mockRunNumber };
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        getRunCache: sinon.stub().returns(null),
+        setRunCache: sinon.spy(),
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockData),
+      });
+      FilterServiceMock.getRunStatus.onFirstCall().resolves(RunStatus.ACTIVE);
+      IntervalsServiceMock.activeInterval.returns(false);
 
-        assert.ok(qcObjectServiceStub.retrieveQcObjectByQcgId
-          .calledWith('abc123', 'sub-id', '2024-01-01', { foo: 'bar' }));
-        assert.ok(res.status.calledWith(200));
-        assert.ok(res.json.calledWith(mockObject));
+      objectController = new ObjectController(QcObjectServiceMock, FilterServiceMock, IntervalsServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      // Simulate interval callback with run status changed to completed
+      FilterServiceMock.getRunStatus.reset();
+      FilterServiceMock.getRunStatus.resolves(RunStatus.COMPLETED);
+      await objectController._updateAndCheckStatus(
+        mockQueryKey,
+        reqMock.query,
+        QcObjectServiceMock.retrieveLatestVersionOfObjects,
+      );
+
+      ok(IntervalsServiceMock.deregister.calledWith(mockQueryKey));
+      ok(QcObjectServiceMock.removeRunCache.calledWith(mockQueryKey));
+    });
+
+    test('should continue monitoring in interval callback if run is still active', async () => {
+      // First call - active run
+      reqMock.query.filters = { RunNumber: mockRunNumber };
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        getRunCache: sinon.stub().returns(null),
+        setRunCache: sinon.spy(),
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockData),
+      });
+      FilterServiceMock.getRunStatus.resolves(RunStatus.ACTIVE);
+      IntervalsServiceMock.activeInterval.returns(false);
+
+      objectController = new ObjectController(QcObjectServiceMock, FilterServiceMock, IntervalsServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      // Simulate interval callback with run still active
+      await objectController._updateAndCheckStatus(
+        mockQueryKey,
+        reqMock.query,
+        QcObjectServiceMock.retrieveLatestVersionOfObjects,
+      );
+
+      ok(IntervalsServiceMock.deregister.notCalled);
+      ok(QcObjectServiceMock.removeRunCache.notCalled);
+      ok(QcObjectServiceMock.setRunCache.calledTwice);
+    });
+
+    test('should handle errors during interval checkup', async () => {
+      reqMock.query.filters = { RunNumber: mockRunNumber };
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        getRunCache: sinon.stub().returns(null),
+        setRunCache: sinon.spy(),
+        retrieveLatestVersionOfObjects: sinon.stub().rejects(new Error('Test error')),
+      });
+      FilterServiceMock.getRunStatus.resolves(RunStatus.ACTIVE);
+      IntervalsServiceMock.activeInterval.returns(false);
+
+      objectController = new ObjectController(QcObjectServiceMock, FilterServiceMock, IntervalsServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      // Simulate interval callback with error
+      await objectController._updateAndCheckStatus(
+        mockQueryKey,
+        reqMock.query,
+        QcObjectServiceMock.retrieveLatestVersionOfObjects,
+      );
+
+      // Should continue monitoring despite the error
+      ok(IntervalsServiceMock.deregister.notCalled);
+    });
+
+    test('should not setup duplicate monitoring for same query', async () => {
+      reqMock.query.filters = { RunNumber: mockRunNumber };
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        getRunCache: sinon.stub().returns(null),
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockData),
+      });
+      FilterServiceMock.getRunStatus.resolves(RunStatus.ACTIVE);
+      IntervalsServiceMock.activeInterval.returns(true); // Simulate existing interval
+
+      objectController = new ObjectController(QcObjectServiceMock, FilterServiceMock, IntervalsServiceMock);
+      await objectController.getObjects(reqMock, resMock);
+
+      ok(IntervalsServiceMock.register.notCalled);
+    });
+
+    test('should handle requests without RunNumber in filters', async () => {
+      reqMock.query = {};
+
+      QcObjectServiceMock = sinon.createStubInstance(QcObjectService, {
+        retrieveLatestVersionOfObjects: sinon.stub().resolves(mockData),
+        getRunCache: sinon.stub().returns(undefined),
       });
 
-      test('should call errorHandler with 404 if service throws error', async () => {
-        req.params.id = 'abc123';
-        req.query = { id: 'some-id' };
+      objectController = new ObjectController(QcObjectServiceMock);
+      await objectController.getObjects(reqMock, resMock);
 
-        const error = new Error('Service failure');
-        qcObjectServiceStub.retrieveQcObjectByQcgId.rejects(error);
-
-        await objectController.getObjectById(req, res);
-        assert.ok(res.json.calledWith({
-          message: 'Unable to identify object or read it by qcg id',
-          title: 'Not Found',
-          status: 404,
-        }));
-        assert.ok(res.status.calledWith(404));
-      });
+      ok(resMock.status.calledWith(200));
+      ok(resMock.json.calledWith(mockData));
+      ok(QcObjectServiceMock.retrieveLatestVersionOfObjects.calledWith({
+        prefix: undefined, fields: undefined, filters: undefined,
+      }));
+      ok(FilterServiceMock.getRunStatus.notCalled);
+      ok(IntervalsServiceMock.register.notCalled);
     });
   });
 };

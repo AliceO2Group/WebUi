@@ -12,12 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
+import { RunStatus } from '../../common/library/runStatus.enum.js';
 import { httpGetJson } from '../utils/httpRequests.js';
 import { LogManager } from '@aliceo2/web-ui';
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'bkp-service'}`);
 const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
+const GET_RUN_PATH = '/api/runs';
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
@@ -48,8 +50,8 @@ export class BookkeepingService {
     try {
       const normalizedURL = new URL(url);
       this._hostname = normalizedURL.hostname;
-      this._port = normalizedURL.port || (normalizedURL.protocol === 'https:' ? 443 : 80);
       this._protocol = normalizedURL.protocol;
+      this._port = normalizedURL.port || (normalizedURL.protocol === 'https:' ? 443 : 80);
     } catch {
       this.error = `Invalid configuration. ${url} is not a valid URL`;
       return false;
@@ -113,7 +115,7 @@ export class BookkeepingService {
     const { data } = await httpGetJson(
       this._hostname,
       this._port,
-      `${GET_RUN_TYPES_PATH}?token=${this._token}`,
+      this._createPath(GET_RUN_TYPES_PATH),
       {
         protocol: this._protocol,
         rejectUnauthorized: false,
@@ -123,10 +125,62 @@ export class BookkeepingService {
   }
 
   /**
+   * Retrieves the status of a specific run from the Bookkeeping service
+   * @param {number} runNumber - The run number to check the status for
+   * @returns {Promise<RunStatus>} - Returns a promise that resolves to the run status:
+   *                                 - RunStatus.ACTIVE if the run is ongoing
+   *                                 - RunStatus.FINISHED if the run has completed (has timeO2End)
+   *                                 - RunStatus.INVALID if there was an error or data is not available
+   */
+  async retrieveRunStatus(runNumber) {
+    try {
+      const { data } = await httpGetJson(this._hostname, this._port, this._createRunPath(runNumber), {
+        protocol: this._protocol,
+        rejectUnauthorized: false,
+      });
+
+      if (!data) {
+        return RunStatus.INVALID; // an error occured in bookkeeping
+      }
+
+      if (data.timeO2End) {
+        return RunStatus.FINISHED;
+      }
+
+      return RunStatus.ACTIVE;
+    } catch (error) {
+      logger.errorMessage(`An error occured whilst fetching run status: ${error.message || error}`);
+      return RunStatus.INVALID;
+    }
+  }
+
+  /**
    * Returns the interval in milliseconds for how often the list of run types should be refreshed.
    * @returns {number} Interval in milliseconds for refreshing the list of run types.
    */
   get refreshInterval() {
     return this._refreshInterval;
+  }
+
+  /**
+   * Helper method to construct a URL path with the required authentication token.
+   * Appends the service's token as a query parameter to the provided path.
+   * @private
+   * @param {string} path - The base path (e.g., `/api/endpoint`) to which the token will be appended.
+   * @returns {string} The constructed path with the token query parameter (e.g., `/api/endpoint?token=ABC123`).
+   */
+  _createPath(path) {
+    return `${path}?token=${this._token}`;
+  }
+
+  /**
+   * Helper method to construct a URL path with the required authentication token.
+   * Appends the service's token as a query parameter to the provided path.
+   * @private
+   * @param {number} RunNumber - The run number to be appended
+   * @returns {string} The constructed run path with the token query parameter
+   */
+  _createRunPath(RunNumber) {
+    return this._createPath(`${GET_RUN_PATH}/${RunNumber}`);
   }
 }

@@ -12,16 +12,19 @@
  * or submit itself to any jurisdiction.
  */
 
+import { filterPanelToggleButton } from '../../../common/filters/filterViews.js';
 import { h } from '/js/src/index.js';
 
 /**
  * Shows header of Framework Information
+ * @param {FilterModel} filterModel - model that controlls the filter state
  * @returns {vnode} - virtual node element
  */
-export default () => [
+export default (filterModel) => [
   h(
     '.w-50.flex-row.justify-center',
     h('b.f4.ph2', 'About'),
   ),
   h('.flex-grow'),
+  filterPanelToggleButton(filterModel),
 ];

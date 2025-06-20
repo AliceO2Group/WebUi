@@ -60,6 +60,8 @@ export class QcObjectService {
       objects: undefined,
       lastUpdate: undefined,
     };
+    this._activeRunCache = new Map();
+
     this._logger = LogManager.getLogger(LOG_FACILITY);
   }
 
@@ -89,19 +91,28 @@ export class QcObjectService {
    * * from cache if it is requested by the client and the system is configured to use a cache;
    * * make a new request and get data directly from data service
    * * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
-   * @param {string|Regex} prefix - Prefix for which CCDB should search for objects.
-   * @param {Array<string>} [fields = []] - List of fields that should be requested for each object
-   * @param {boolean} [useCache = true] - if the list should be the cached version or not
+   * @param {object} options - An object that contains query parameters among other arguments
+   * @param {string|Regex} options.prefix - Prefix for which CCDB should search for objects.
+   * @param {Array<string>} options.fields - List of fields that should be requested for each object
+   * @param {boolean} options.useCache - if the list should be the cached version or not
+   * @param {Array<string>} options.filters - Filter object by which the objects from ccdb are filtered.
    * @returns {Promise.<Array<QcObjectLeaf>>} - results of objects with required fields
    * @rejects {Error}
    */
-  async retrieveLatestVersionOfObjects(prefix = this._dbService.PREFIX, useCache = true) {
-    if (useCache && this._cache?.objects) {
+  async retrieveLatestVersionOfObjects({ prefix = this._dbService.PREFIX, fields, useCache = true, filters }) {
+    const hasFilters = typeof filters === 'object' && Object.keys(filters).length;
+
+    if (!hasFilters && useCache && this._cache.objects?.length) {
       return this._cache.objects.filter((object) => object.name.startsWith(prefix));
-    } else {
-      const objects = await this._dbService.getObjectsTreeList(prefix); // TreeList links to the latest
-      return this._parseObjects(objects);
     }
+
+    let objects = [];
+    if (!hasFilters) {
+      objects = await this._dbService.getObjectsTreeList(prefix);
+    } else {
+      objects = await this._dbService.getObjectsLatestVersionList({ prefix, filters, fields });
+    }
+    return this._parseObjects(objects);
   }
 
   /**
@@ -109,14 +120,15 @@ export class QcObjectService {
    * Use the first version to retrieve details about the exact object.
    * From the information retrieved above, use the location attribute and pass it to JSROOT to get a JSON
    * decompressed version of the ROOT object which will be plotted/drawn with JSROOT.draw on the client side.
-   * @param {string} path - name(known as path) of the object to retrieve information
-   * @param {number|null} [validFrom = undefined] - timestamp in ms
-   * @param {string} [id = ''] - id with respect to CCDB storage
-   * @param {string} [filters = {}] - filter attributes for specific objects
+   * @param {object} options - An object that contains query parameters among other arguments
+   * @param {string} options.path - name(known as path) of the object to retrieve information
+   * @param {number|null} options.validFrom - timestamp in ms
+   * @param {string} options.id - id with respect to CCDB storage
+   * @param {string} options.filters - filter attributes for specific objects
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
    * @throws {Error}
    */
-  async retrieveQcObject(path, validFrom = undefined, id = undefined, filters = {}) {
+  async retrieveQcObject({ path, validFrom = undefined, id = undefined, filters = {} }) {
     /**
      * @type {CcdbObjectIdentification}
      */
@@ -154,17 +166,18 @@ export class QcObjectService {
 
   /**
    * Retrieve an object by its id (stored in the customized data service) with its information
-   * @param {string} qcgId - id of the object configuration stored in QCG database (different than CCDB)
-   * @param {string} id - id of the object to be retrieved as per CCDB etag
-   * @param {number|null} [validFrom] - timestamp in ms
-   * @param {string} [filters = {}] - filter as string to be sent to CCDB
+   * @param {object} options - An object that contains query parameters among other arguments
+   * @param {string} options.qcObjectId - id of the object configuration stored in QCG database (different than CCDB)
+   * @param {string} options.id - id of the object to be retrieved as per CCDB etag
+   * @param {number|null} options.validFrom - timestamp in ms
+   * @param {string} options.filters = {}] - filter as string to be sent to CCDB
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
    * @throws
    */
-  async retrieveQcObjectByQcgId(qcgId, id, validFrom = undefined, filters = {}) {
-    const { object, layoutName, tabName } = this._chartRepository.getObjectById(qcgId);
+  async retrieveQcObjectByQcgId({ qcObjectId, id, validFrom = undefined, filters = {} }) {
+    const { object, layoutName, tabName } = this._chartRepository.getObjectById(qcObjectId);
     const { name, options = {}, ignoreDefaults = false } = object;
-    const qcObject = await this.retrieveQcObject(name, validFrom, id, filters);
+    const qcObject = await this.retrieveQcObject({ path: name, validFrom, id, filters });
 
     return {
       ...qcObject,
@@ -220,5 +233,33 @@ export class QcObjectService {
    */
   getCacheRefreshRate() {
     return this._dbService.CACHE_REFRESH_RATE;
+  }
+
+  /**
+   * Remove a specific query entry from the run cache
+   * @param {string} queryKey - Identifier for the cached entry
+   * @returns {boolean} - Whether the entry existed and was removed
+   */
+  removeRunCache(queryKey) {
+    return this._activeRunCache.delete(queryKey);
+  }
+
+  /**
+   * Retrieve cached data associated with a given query key
+   * @param {string} queryKey - Identifier for the cached entry
+   * @returns {object|Array<object>} - Cached data object or undefined if not found
+   */
+  getRunCache(queryKey) {
+    return this._activeRunCache.get(queryKey);
+  }
+
+  /**
+   * Store a data object in the run cache under a given key
+   * @param {string} queryKey - Identifier for the cached entry
+   * @param {object|Array<object>} dataObject - Data object to be cached
+   * @returns {undefined}
+   */
+  setRunCache(queryKey, dataObject) {
+    this._activeRunCache.set(queryKey, dataObject);
   }
 }

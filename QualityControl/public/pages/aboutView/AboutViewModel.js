@@ -14,12 +14,13 @@
 
 import { ServiceStatus } from '../../../library/enums/Status/serviceStatus.enum.js';
 import { IntegratedServices } from '../../../library/enums/Status/integratedServices.enum.js';
-import { Observable, RemoteData } from '/js/src/index.js';
+import { RemoteData } from '/js/src/index.js';
+import { BaseViewModel } from '../../common/abstracts/BaseViewModel.js';
 
 /**
  * Model representing About View
  */
-export default class AboutViewModel extends Observable {
+export default class AboutViewModel extends BaseViewModel {
   /**
    * Initialize `services` to an empty object
    * @param {Model} model - root model of the application
@@ -73,4 +74,9 @@ export default class AboutViewModel extends Observable {
       this.model.notification.show(`Error fetching data for ${service}: ${error.message}`, 'danger', 2000);
     }
   }
+
+  /**
+   * This function is required for all pages that have the filter element in their header
+   */
+  triggerFilter() {}
 }
