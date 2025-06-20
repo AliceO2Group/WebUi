@@ -119,18 +119,18 @@ export default class ObjectViewModel extends BaseViewModel {
     delete params.ts;
     delete params.id;
 
-    if (objectName) {
-      this._setObjectName(params, objectName);
-    } else if (this.selected.isSuccess()) {
-      this._setObjectName(params, this.selected.payload.path);
-    } else if (objectId) {
+    // The priority is as follows: provided name/id, name/id already in params, name from the selected object
+    if (objectId) {
       delete params.objectName;
       params.objectId = objectId;
-    } else if (params.objectName) {
-      delete params.objectId;
-      delete params.layoutId;
+    } else if (objectName) {
+      this._setObjectName(params, objectName);
     } else if (params.objectId) {
       delete params.objectName;
+    } else if (params.objectName) {
+      this._setObjectName(params, params.objectName /* only removes layoutId and ObjectId from params */);
+    } else if (this.selected.isSuccess()) {
+      this._setObjectName(params, this.selected.payload.path);
     }
   }
 
