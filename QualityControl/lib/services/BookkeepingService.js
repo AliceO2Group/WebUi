@@ -34,7 +34,8 @@ export class BookkeepingService {
     this._port = null;
     this._token = '';
     this._protocol = '';
-    this._refreshInterval = config?.refreshRate ?? 24 * 60 * 60 * 1000;
+    this._runTypesRefreshInterval = config?.runTypesRefreshInterval ?? 24 * 60 * 60 * 1000;
+    this._runStatusRefreshInterval = config?.runStatusRefreshInterval;
   }
 
   /**
@@ -158,8 +159,16 @@ export class BookkeepingService {
    * Returns the interval in milliseconds for how often the list of run types should be refreshed.
    * @returns {number} Interval in milliseconds for refreshing the list of run types.
    */
-  get refreshInterval() {
-    return this._refreshInterval;
+  get runTypesRefreshRate() {
+    return this._runTypesRefreshInterval;
+  }
+
+  /**
+   * Returns the runStatusInterval in milliseconds
+   * @returns {number} Interval in milliseconds for refreshing the status of a run.
+   */
+  get runStatusRefreshRate() {
+    return this._runStatusRefreshInterval;
   }
 
   /**

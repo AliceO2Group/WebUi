@@ -79,6 +79,23 @@ export class FilterService {
   }
 
   /**
+   * Returns the interval in milliseconds for how often the list of run types should be refreshed.
+   * @returns {number} Interval in milliseconds for refreshing the list of run types.
+   */
+  get runTypesRefreshInterval() {
+    return this._bookkeepingService.runTypesRefreshInterval;
+  }
+
+  /**
+   * Returns the runStatusInterval in milliseconds from BookkeepingService 
+   * @returns {number} Interval in milliseconds for refreshing the status of a run.
+   */
+
+  get runStatusRefreshInterval() {
+    return this._bookkeepingService.runStatusRefreshInterval;
+  }
+
+  /**
    * This method is used to initialize the filter service
    * @returns {string[]} - resolves when the filter service is initialized
    */

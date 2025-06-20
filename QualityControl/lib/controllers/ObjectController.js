@@ -144,7 +144,7 @@ export class ObjectController {
 
     this._intervalsService.register(
       this._updateAndCheckStatus.bind(this, queryKey, callbackParams, callback),
-      this._UPDATE_INTERVAL,
+      this._filterService.runStatusRefreshInterval,
       queryKey,
     );
   }

@@ -231,6 +231,9 @@ export const objectControllerTestSuite = async () => {
       objectController = new ObjectController(QcObjectServiceMock, FilterServiceMock, IntervalsServiceMock);
       await objectController.getObjects(reqMock, resMock);
 
+      console.log(resMock.status.args);
+      console.log(resMock.json.args);
+      
       ok(resMock.status.calledWith(200));
       ok(resMock.json.calledWith(mockData));
       ok(IntervalsServiceMock.register.calledOnce);

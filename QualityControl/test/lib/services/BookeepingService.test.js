@@ -28,7 +28,8 @@ export const bookkeepingServiceTestSuite = async () => {
     const VALID_CONFIG = {
       url: 'http://localhost:4000',
       token: 'valid-token',
-      refreshRate: 15000,
+      runTypesRefreshInterval: 15000,
+      runStatusRefreshInterval: 15000,
     };
     before(() => nock.cleanAll());
     suite('Create a new instance of BookkeepingService', () => {
@@ -41,7 +42,8 @@ export const bookkeepingServiceTestSuite = async () => {
         strictEqual(bookkeepingService._port, null);
         strictEqual(bookkeepingService._token, '');
         strictEqual(bookkeepingService._protocol, '');
-        strictEqual(bookkeepingService._refreshInterval, VALID_CONFIG.refreshRate);
+        strictEqual(bookkeepingService._runTypesRefreshInterval, VALID_CONFIG.runTypesRefreshInterval);
+        strictEqual(bookkeepingService._runStatusRefreshInterval, VALID_CONFIG.runStatusRefreshInterval);
       });
     });
 
