@@ -23,10 +23,13 @@ export class FilterService {
   /**
    * Creates an instance of FilterService to map and expose data from the bookkeeping service.
    * @param {BookkeepingService} bookkeepingService - Low level data provider fetching raw data from the BKP source
+   * @param {object} config - Config object file that defines the refresh intervals for checking run status and runtypes
    */
-  constructor(bookkeepingService) {
+  constructor(bookkeepingService, config) {
     this._bookkeepingService = bookkeepingService;
     this._runTypes = [];
+    this._runTypesRefreshInterval = config?.bookkeeping?.runTypesRefreshInterval ?? 24 * 60 * 60 * 1000;
+    this._runStatusRefreshInterval = config?.bookkeeping?.runStatusRefreshInterval;
     this.initFilters();
   }
 
@@ -83,10 +86,9 @@ export class FilterService {
   }
 
   /**
-   * Returns the runStatusInterval in milliseconds from BookkeepingService
+   * Returns the runStatusInterval in milliseconds
    * @returns {number} Interval in milliseconds for refreshing the status of a run.
    */
-
   get runStatusRefreshInterval() {
     return this._bookkeepingService.runStatusRefreshInterval;
   }

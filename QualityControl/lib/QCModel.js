@@ -77,7 +77,7 @@ export const setupQcModel = () => {
   const intervalsService = new IntervalsService();
 
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
-  const filterService = new FilterService(bookkeepingService);
+  const filterService = new FilterService(bookkeepingService, config);
   const objectController = new ObjectController(qcObjectService, filterService, intervalsService);
 
   const filterController = new FilterController(filterService);
