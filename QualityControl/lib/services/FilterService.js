@@ -87,7 +87,7 @@ export class FilterService {
   }
 
   /**
-   * Returns the runStatusInterval in milliseconds from BookkeepingService 
+   * Returns the runStatusInterval in milliseconds from BookkeepingService
    * @returns {number} Interval in milliseconds for refreshing the status of a run.
    */
 
