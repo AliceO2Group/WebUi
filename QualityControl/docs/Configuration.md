@@ -52,7 +52,7 @@ Attribute to define the `Bookkeeping` endpoint. If this configuration is not pro
 ```javascript
 bookkeeping: {
   url: 'http://localhost:4000', 
-  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MCwidXNlcm5hbWUiOiJhbm9ueW1vdXMiLCJuYW1lIjoiQW5vbnltb3VzIiwiYWNjZXNzIjoiYWRtaW4iLCJpYXQiOjE3NTAxNjcxNjgsImV4cCI6MTc1MDc3MTk2OCwiaXNzIjoibzItdWkifQ.d6_TMy9APR27QAU-AQCuRuCDyMmriWgDAsL43j99yBA',
+  token: 'example-token',
   runTypesRefreshInterval: 15000,
   runStatusRefreshInterval: 30000,
 },
