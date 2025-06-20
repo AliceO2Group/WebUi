@@ -153,6 +153,7 @@ export class ObjectController {
    * Update cache and check run status for active run monitoring
    * @param {string} queryKey - The unique key for the query parameters
    * @param {object} callbackParams - The parameter object to be used for the calback function parameters
+   * the calbackParams object should at least have filters.RunNumber. The other entries are callback specific
    * @param {Function} callback - The function that will be used to update the cache.
    * @returns {Promise<void>}
    */
