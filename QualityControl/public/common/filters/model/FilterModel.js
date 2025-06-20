@@ -46,6 +46,15 @@ export default class FilterModel extends Observable {
       }
     });
 
+    this.filterService.runTypes.match({
+      Success: (runTypes) => {
+        if (runTypes.length > 0 && !runTypes.includes(this._filterMap.RunType)) {
+          delete this._filterMap.RunType;
+        }
+      },
+      Other: () => null,
+    });
+
     this.notify();
   }
 
