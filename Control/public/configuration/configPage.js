@@ -209,10 +209,10 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
 
 /**
  * Build a panel with CRU panels grouped by their respective host
- * @param {Object} model 
- * @param {JSON} cruMapByHost 
+ * @param {Model} model - root model of the application
+ * @param {object<string, object<string, {config: object, info: object}>>} cruData - Map of CRUs by host
  * @param {string} host - Host to which the CRUs belong
- * @param {string} cruData - Data of the CRUs for the given host
+ * @param {object<string, {config: object, info: object}>}} cruData - Data of the CRUs for the given host
  * @param {string} detector - Name of the detector
  * @returns 
  */
@@ -265,10 +265,10 @@ const cruByHostPanel = (model, host, cruData, detector) => {
 
 /**
  * Panel for each CRU endpoint to allow the user to enable/disable endpoints
- * @param {Object} model
- * @param {string} cruId
- * @param {JSON} cru
- * @param {string} host
+ * @param {Model} model - root model of the application
+ * @param {string} cruId - Identifier of the CRU endpoint
+ * @param {{config: object, info: object}} cru - Configuration of the CRU endpoint
+ * @param {string} host - Host to which the CRU belongs
  * @return {vnode}
  */
 const cruPanelByEndpoint = (model, cruId, cru, host) => {
@@ -311,8 +311,8 @@ const cruPanelByEndpoint = (model, cruId, cru, host) => {
 /**
  * A panel which iterate through all links in the configuration and creates a checkbox for each;
  * It also adds UserLogic and All Links toggles
- * @param {Object} model
- * @param {JSON} cru
+ * @param {Model} model - root model of the application
+ * @param {{config: object, info: object}} cru - configuration of the CRU
  * @param {String} host - host to which the links belong to
  * @return {vnode}
  */
@@ -356,7 +356,7 @@ const linksPanel = (model, cru, host) => {
 /**
  * Builds a panel under the command buttons to display failed tasks information
  * This panel only appears if there are any failed tasks
- * @param {Object} model
+ * @param {Model} model - root model of the application
  * @returns {vnode}
  */
 const tasksMessagePanel = (model) =>
@@ -396,7 +396,7 @@ const tasksMessagePanel = (model) =>
 /**
  * A panel to which a successful or error message is shown,
  * informing the user about the state of the action Save
- * @param {Object} model
+ * @param {Model} model - root model of the application
  * @return {vnode}
  */
 const savingConfigurationMessagePanel = (model) =>
@@ -437,7 +437,7 @@ Are you sure you would like to continue?`)
  * Check if the configuration given host has a valid configuration for each of its CRUs
  * Validation is done by checking if the configuration contains at least one link for all detectors except TRD
  * For TRD, it only needs to check presence of attribute `cru` in the configuration
- * @param {object<string, <string, {config: object, info: object}>} cruDataOfHost - Map of CRUs by host
+ * @param {object<string, {config: object, info: object}>} cruDataOfHost - Map of CRUs of a host
  * @param {string} detector - Name of the detector
  */
 const isValidCruConfig = (cruDataOfHost, detector) => {
