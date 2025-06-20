@@ -61,7 +61,7 @@ export class ObjectController {
    * interpretation with JSROOT.draw
    * @param {Request} req - HTTP request object with "query" information
    * @param {Response} res - HTTP response object to provide information on request
-   * @returns {void}
+   * @returns {Promise<void>}
    */
   async getObjectContent(req, res) {
     const { path, validFrom, filters, id } = req.query;
@@ -72,6 +72,17 @@ export class ObjectController {
     await this._handleDataRetrieval(callbackParams, callback, res, 'Failed to retrieve object content');
   }
 
+  /**
+   * Using `browse` option, request a list of `last-modified` and `valid-from` for a specified path for an object
+   * Use the first `validFrom` option to make a head request to CCDB; Request which will in turn return object
+   * information and download it locally on CCDB if it is not already done so;
+   * From the information retrieved above, use the location with JSROOT to get a JSON object
+   * Use JSROOT to decompress a ROOT object content and convert it to JSON to be sent back to the client for
+   * interpretation with JSROOT.draw
+   * @param {Request} req - HTTP request object with "query" information
+   * @param {Response} res - HTTP response object to provide information on request
+   * @returns {Promise<void>}
+   */
   async getObjectById(req, res) {
     const qcObjectId = req.params.id;
     const { validFrom, filters, id } = req.query;
