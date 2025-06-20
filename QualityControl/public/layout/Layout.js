@@ -12,19 +12,20 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Observable, RemoteData } from '/js/src/index.js';
+import { RemoteData } from '/js/src/index.js';
 
 import GridList from './Grid.js';
 import LayoutUtils from './LayoutUtils.js';
 import { objectId, clone, setBrowserTabTitle } from '../common/utils.js';
 import { assertTabObject, assertLayout } from '../common/Types.js';
 import { buildQueryParametersString } from '../common/buildQueryParametersString.js';
+import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 
 /**
  * Model namespace with all requests to load or create layouts, compute their position on a grid,
  * and search them.
  */
-export default class Layout extends Observable {
+export default class Layout extends BaseViewModel {
   /**
    * Initialize with empty values
    * @param {Model} model - root model of the application
@@ -61,7 +62,7 @@ export default class Layout extends Observable {
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
     // GridList.grid.length: integer, number of rows
-    this.filterModel = model.filterModel;
+    this.shouldApplyTreeFilter = true;
   }
 
   /**
@@ -327,7 +328,7 @@ export default class Layout extends Observable {
     }
     this.tab = this.item.tabs[index];
     this._tabIndex = index;
-    this.model.object.loadObjects(this.tab.objects.map((object) => object.name), this.filterModel.filterMap);
+    this.model.object.loadObjects(this.tab.objects.map((object) => object.name));
     const { columns } = this.item.tabs[index];
     if (columns > 0) {
       this.resizeGridByXY(columns);
@@ -404,7 +405,8 @@ export default class Layout extends Observable {
    */
   edit() {
     this.toggleEditMenu();
-    this.model.services.object.listObjects();
+    this.listObjects();
+
     if (!this.item) {
       throw new Error('An item should be loaded before editing it');
     }
@@ -626,6 +628,14 @@ export default class Layout extends Observable {
   }
 
   /**
+   * Wrapper function for the filterModel::activeFilter function.
+   * @returns {boolean} if there is a currently active filter.
+   */
+  activeFilter() {
+    return this.model.filterModel.activeFilter();
+  }
+
+  /**
    * Getters / Setters
    */
 
@@ -657,6 +667,10 @@ export default class Layout extends Observable {
     if (!this.item.tabs || this.item.tabs.length === 0) {
       clearInterval(this.tabInterval);
     } else if (time >= 10) {
+      if (this.tabInterval) {
+        clearInterval(this.tabInterval);
+      }
+
       this.tabInterval = setInterval(() => {
         this._tabIndex = this._tabIndex + 1 >= this.item.tabs.length ? 0 : this._tabIndex + 1;
         this.selectTab(this._tabIndex);
@@ -738,11 +752,13 @@ export default class Layout extends Observable {
 
   /**
    * Function that fetches the object versions in accordance with the provided filters
-   * @param {Map<FilterType, string>} _filterMap - The map containing the values by which the objects will be filtered
    * @returns {undefined}
    */
-  triggerFilter(_filterMap) { // TODO - find a more elegant project architecture to handle filter
+  triggerFilter() {
     this.selectTab(this.tabIndex);
+    if (this.editEnabled) { // To re-render the objectTree in edit mode
+      this.listObjects();
+    }
   }
 
   /**
@@ -753,5 +769,24 @@ export default class Layout extends Observable {
    */
   ownsLayout(layoutOwnerId) {
     return this.model.session.personid == layoutOwnerId;
+  }
+
+  /**
+   * Activates/deactivates the effects of the filter on the objectTree inside layout edit mode.
+   */
+  toggleObjectTreeFilter() {
+    if (this.activeFilter()) {
+      this.shouldApplyTreeFilter = !this.shouldApplyTreeFilter;
+      this.listObjects();
+    }
+  }
+
+  /**
+   * Wrapper function for qcObjectServices. If shouldApplyTreeFilter is false,
+   * the objectTree will be loaded without applying the filters.
+   */
+  listObjects() {
+    const filterMap = this.shouldApplyTreeFilter ? undefined : {};
+    this.model.services.object.listObjects(undefined, filterMap);
   }
 }

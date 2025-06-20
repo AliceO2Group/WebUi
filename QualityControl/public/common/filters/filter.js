@@ -112,7 +112,7 @@ export const filterInput = (config) => {
 const dropdownSelector = (config) => {
   const { queryLabel, placeholder, id, filterMap, options, onChangeCallback, width = '.w-20' } = config;
   const optionSelected = filterMap[queryLabel];
-  const setUrl = true;
+  const setUrl = false;
 
   const validValue = options.map(String).includes(String(optionSelected));
 

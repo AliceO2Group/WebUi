@@ -31,6 +31,7 @@ export default class FilterModel extends Observable {
     this.model = model;
     this.filterService = new FilterService(this);
     this._filterMap = {};
+    this.isVisible = true;
   }
 
   /**
@@ -43,6 +44,15 @@ export default class FilterModel extends Observable {
       if (parameters[filterKey]) {
         this._filterMap[filterKey] = decodeURI(parameters[filterKey]);
       }
+    });
+
+    this.filterService.runTypes.match({
+      Success: (runTypes) => {
+        if (runTypes.length > 0 && !runTypes.includes(this._filterMap.RunType)) {
+          delete this._filterMap.RunType;
+        }
+      },
+      Other: () => null,
     });
 
     this.notify();
@@ -89,24 +99,46 @@ export default class FilterModel extends Observable {
   };
 
   /**
-   * Triggers the filter update by persisting to URL and notifying the filterable model
-   * @param {object} filterableModel - The model that should be notified to apply the filters
+   * Apply the current filters to a filterable model and update the URL
+   * @param {BaseViewModel} baseViewModel - The view model that should be filtered
    * @returns {undefined}
    */
-  triggerFilter(filterableModel) {
+  triggerFilter(baseViewModel) {
     this.setFilterToURL();
-    filterableModel.triggerFilter();
+    baseViewModel.triggerFilter();
+  }
+
+  /**
+   * Toggle the visibility state of the filter component
+   * @returns {undefined}
+   */
+  toggleFilterVisibility() {
+    this.isVisible = !this.isVisible;
+    this.notify();
   }
 
   /**
    * Clears all currently set filters and updates the URL accordingly
+   * @param {BaseViewModel} baseViewModel - The view model that should be filtered
    * @returns {undefined}
    */
-  clearFilter() {
+  clearFilter(baseViewModel) {
     this._filterMap = {};
+
+    this.triggerFilter(baseViewModel);
+    this.notify();
   }
 
   get filterMap() {
     return this._filterMap;
+  }
+
+  /**
+   * Check if any filters are currently active in the URL parameters
+   * @returns {boolean} True if any filter parameters are present in the URL
+   */
+  activeFilter() {
+    const { params } = this.model.router;
+    return CCDB_QUERY_PARAMS.some((filterKey) => params[filterKey]?.trim());
   }
 }

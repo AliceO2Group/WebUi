@@ -12,15 +12,16 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Observable, RemoteData, iconArrowTop } from '/js/src/index.js';
+import { RemoteData, iconArrowTop } from '/js/src/index.js';
 import ObjectTree from './ObjectTree.class.js';
 import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
+import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
  */
-export default class QCObject extends Observable {
+export default class QCObject extends BaseViewModel {
   /**
    * Initialize model with empty values
    * @param {Model} model - root model of the application
@@ -51,8 +52,6 @@ export default class QCObject extends Observable {
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
 
-    this.sideTree = new ObjectTree('database');
-    this.sideTree.bubbleTo(this);
     this.queryingObjects = false;
     this.scrollTop = 0;
     this.scrollHeight = 0;
@@ -222,7 +221,7 @@ export default class QCObject extends Observable {
     this.notify();
 
     const obj =
-      await this.model.services.object.getObjectByName(objectName, id, timestamp, this.filterModel.filterMap, this);
+      await this.model.services.object.getObjectByName(objectName, id, timestamp, this);
 
     // TODO Is it a TTree?
     if (obj.isSuccess()) {
@@ -263,8 +262,8 @@ export default class QCObject extends Observable {
     await Promise.allSettled(objectsName.map(async (objectName) => {
       this.objects[objectName] = RemoteData.Loading();
       this.notify();
-      this.objects[objectName] = await this
-        .model.services.object.getObjectByName(objectName, undefined, undefined, this.filterModel.filterMap, this);
+      this.objects[objectName] =
+        await this.model.services.object.getObjectByName(objectName, undefined, undefined, this);
       this.notify();
     }));
     this.objectsRemote = RemoteData.success();

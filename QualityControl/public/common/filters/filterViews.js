@@ -15,7 +15,7 @@
 import { filterInput, dynamicSelector } from './filter.js';
 import { FilterType } from './filterTypes.js';
 import { filtersConfig } from './filtersConfig.js';
-import { h } from '/js/src/index.js';
+import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
 
 /**
  * Creates an input element for a specific metadata field;
@@ -51,16 +51,22 @@ const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback
  * @returns {vnode} - virtual node element
  */
 export function filtersPanel(filterModel, pageModel) {
-  const { filterMap, setFilterValue, filterService } = filterModel;
+  const { filterMap, setFilterValue, filterService, isVisible, clearFilter } = filterModel;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onEnterCallback = () => filterModel.triggerFilter(pageModel);
+  const clearFilterCallback = clearFilter.bind(filterModel, pageModel);
   const filtersList = filtersConfig(filterService);
 
+  if (!isVisible) {
+    return null;
+  }
+
   return h(
-    '.w-100.flex-row.p2.g2',
+    '.w-100.flex-row.p2.g2.justify-center#filterElement',
     [
       triggerFiltersButton(onEnterCallback),
+      clearFiltersButton(clearFilterCallback),
       ...filtersList.map((filter) =>
         createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
     ],
@@ -74,3 +80,23 @@ export function filtersPanel(filterModel, pageModel) {
  */
 const triggerFiltersButton = (onClickCallback) =>
   h('button.btn.btn-primary#triggerFilterButton', { onclick: onClickCallback, title: 'Update filters' }, 'Update');
+
+/**
+ * Button which will allow the user to clear the filter element
+ * @param {Function} clearFilterCallback - Function that clears the filter state.
+ * @returns {vnode} - virtual node element
+ */
+const clearFiltersButton = (clearFilterCallback) =>
+  h('button.btn.btn-secondary#clearFilterButton', { onclick: clearFilterCallback, title: 'Clear filters' }, 'Clear');
+
+/**
+ * Button for toggling visibility of the filter by parameters panel
+ * @param {FilterModel} filterModel - model that manages filter state
+ * @returns {vnode} - virtual node element
+ */
+export function filterPanelToggleButton(filterModel) {
+  const { isVisible } = filterModel;
+  return h(`button.btn.btn-default${isVisible ? '.active' : ''}`, {
+    onclick: () => filterModel.toggleFilterVisibility(),
+  }, ['Filters ', isVisible ? iconChevronTop() : iconChevronBottom()]);
+}
