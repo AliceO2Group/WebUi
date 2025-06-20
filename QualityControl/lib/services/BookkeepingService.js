@@ -134,6 +134,11 @@ export class BookkeepingService {
    *                                 - RunStatus.INVALID if there was an error or data is not available
    */
   async retrieveRunStatus(runNumber) {
+    if (!this.active) {
+      logger.warnMessage('Could not connect to bookkeeping');
+      return RunStatus.INVALID;
+    }
+
     try {
       const { data } = await httpGetJson(this._hostname, this._port, this._createRunPath(runNumber), {
         protocol: this._protocol,

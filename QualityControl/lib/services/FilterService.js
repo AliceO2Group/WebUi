@@ -67,10 +67,6 @@ export class FilterService {
    */
   async getRunStatus(runNumber) {
     try {
-      if (!this._bookkeepingService.active) {
-        return RunStatus.INVALID;
-      }
-
       return await this._bookkeepingService.retrieveRunStatus(runNumber);
     } catch (error) {
       logger.errorMessage(`Error while retrieving run status for run number ${runNumber}: ${error.message || error}`);
