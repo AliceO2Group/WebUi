@@ -141,6 +141,7 @@ export class BookkeepingService {
       });
 
       if (!data) {
+        logger.warnMessage(`The runstatus was invalid for run number ${runNumber}`);
         return RunStatus.INVALID; // an error occured in bookkeeping
       }
 
