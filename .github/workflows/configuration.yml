@@ -33,6 +33,7 @@ jobs:
         with:
           node-version: '22.x'
       - run: (cd Configuration/webapp; npm ci )
+      - run: (cd Configuration/webapp; npm run typecheck ) # generate .react-router directory
       - run: (cd Configuration/webapp; npm run eslint )
   # uncomment and configure when testing will be available in the dev branch
   # test:

@@ -34,7 +34,7 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['./*.config.js', 'eslint_rules/*', 'custom_eslint_rules/*']
+    ignores: ['./*.config.js', 'custom_eslint_rules/*']
   },
   {
     files: ["**/*.ts", "**/*.tsx", "**/*.cts", "**.*.mts"],
