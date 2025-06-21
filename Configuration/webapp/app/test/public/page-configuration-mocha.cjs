@@ -18,7 +18,6 @@ const test = require('../mocha-index.cjs');
 describe('`pageConfiguration` test-suite', async () => {
   let url;
   let page;
-  const BASE_CONFIGURATION_PATH = 'configuration/o2/components/qc/ANY/any';
 
   before(async () => {
     url = test.helpers.url;
