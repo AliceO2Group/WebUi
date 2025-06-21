@@ -17,7 +17,6 @@ import LeftDrawer from './components/layout/drawer/LeftDrawer';
 import Content from './components/layout/content/Content';
 import ConfigNavigator from './components/config-navigator/ConfigNavigator';
 import queryClient, { persister } from './api/queryClient';
-import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 
 export function Layout({ children }: { children: React.ReactNode }) {
