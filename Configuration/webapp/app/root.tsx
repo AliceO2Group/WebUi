@@ -1,4 +1,11 @@
-import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router';
+import {
+  isRouteErrorResponse,
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+} from 'react-router';
 
 import type { Route } from './+types/root';
 import './app.css';
@@ -9,6 +16,9 @@ import MainLayout from './components/layout/MainLayout';
 import LeftDrawer from './components/layout/drawer/LeftDrawer';
 import Content from './components/layout/content/Content';
 import ConfigNavigator from './components/config-navigator/ConfigNavigator';
+import queryClient, { persister } from './api/queryClient';
+import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -20,14 +30,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <MainLayout>
-          <LeftDrawer>
-            <ConfigNavigator />
-          </LeftDrawer>
-          <Content>{children}</Content>
-        </MainLayout>
-        <ScrollRestoration />
-        <Scripts />
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={{ persister }}
+        >
+          <MainLayout>
+            <LeftDrawer>
+              <ConfigNavigator />
+            </LeftDrawer>
+            <Content>{children}</Content>
+          </MainLayout>
+          <ScrollRestoration />
+          <Scripts />
+        </PersistQueryClientProvider>
       </body>
     </html>
   );

@@ -10,25 +10,28 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import { List } from '@mui/material';
-import { useEffect, useState } from 'react';
+// import { useEffect, useState } from 'react';
 import ConfigNavigatorItem from './ConfigNavigatorItem';
+import { useConfigurationKeysQuery } from '~/api/query/useConfigurationKeysQuery';
 
 const ConfigNavigator = () => {
-  const [configKeys, setConfigKeys] = useState<string[]>([]);
+  // const [configKeys, setConfigKeys] = useState<string[]>([]);
 
-  const fetchConfigurationKeys = async () => {
-    const res = await fetch('http://localhost:8080/api/api/configurations');
-    const data = await res.json();
+  // const fetchConfigurationKeys = async () => {
+  //   const res = await fetch('http://localhost:8080/api/api/configurations');
+  //   const data = await res.json();
 
-    setConfigKeys(data?.map((key) => key.split('/').pop()));
-  };
+  //   setConfigKeys(data?.map((key) => key.split('/').pop()));
+  // };
 
-  useEffect(() => {
-    fetchConfigurationKeys();
-  }, []);
+  // useEffect(() => {
+  //   fetchConfigurationKeys();
+  // }, []);
+
+  const { data: configKeys } = useConfigurationKeysQuery();
 
   return (
     <List>
