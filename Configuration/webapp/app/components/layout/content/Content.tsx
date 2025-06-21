@@ -10,18 +10,25 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import { Box } from '@mui/material';
 import { type FC, type PropsWithChildren } from 'react';
 import ContentHeader from './ContentHeader';
+import { useParams } from 'react-router';
 
 interface ContentProps extends PropsWithChildren {}
 
 const Content: FC<ContentProps> = ({ children }) => {
+  const params = useParams<{ '*': string }>();
+  const configPath = params['*'];
   return (
-    <Box component="main" sx={{ flexGrow: 1, bgcolor: 'background.default' }} className='content-section'>
-      <ContentHeader currentPath="o2/components/qc/ANY/any/TPC/tpc-general_config" />
+    <Box
+      component="main"
+      sx={{ flexGrow: 1, bgcolor: 'background.default' }}
+      className="content-section"
+    >
+      <ContentHeader currentPath={configPath ?? ''} />
       <Box sx={{ p: 3 }}>{children}</Box>
     </Box>
   );

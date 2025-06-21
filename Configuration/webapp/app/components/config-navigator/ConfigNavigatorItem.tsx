@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import { type FC } from 'react';
 import {
@@ -22,6 +22,9 @@ import {
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFile } from '@fortawesome/free-solid-svg-icons';
+import { Link } from 'react-router';
+
+const BASE_CONFIGURATION_PATH = 'configuration/o2/components/qc/ANY/any/';
 
 interface ConfigNavigatorItemProps {
   title: string;
@@ -37,16 +40,18 @@ const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = ({
       style={{ paddingTop: 5, paddingBottom: 5 }}
       className="config_navigator__item"
     >
-      <ListItemButton
-        onClick={onClick}
-        color="red"
-        sx={{ borderRadius: 2, padding: 0 }}
-      >
-        <ListItemIcon>
-          <FontAwesomeIcon icon={faFile} style={{ margin: 'auto' }} />
-        </ListItemIcon>
-        <ListItemText primary={title} />
-      </ListItemButton>
+      <Link to={BASE_CONFIGURATION_PATH + title}>
+        <ListItemButton
+          onClick={onClick}
+          color="red"
+          sx={{ borderRadius: 2, padding: 0 }}
+        >
+          <ListItemIcon>
+            <FontAwesomeIcon icon={faFile} style={{ margin: 'auto' }} />
+          </ListItemIcon>
+          <ListItemText primary={title} />
+        </ListItemButton>
+      </Link>
     </ListItem>
   );
 };
