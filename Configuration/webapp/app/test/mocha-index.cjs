@@ -50,6 +50,7 @@ describe('Configuration', function () {
   });
 
   require('./public/page-root-mocha.cjs');
+  require('./public/page-configuration-mocha.cjs');
 
   beforeEach(() => (this.ok = true));
 

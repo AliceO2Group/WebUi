@@ -30,7 +30,7 @@ const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => {
       }}
       className="content-section__header"
     >
-      <Typography variant="h5">{currentPath}</Typography>
+      <Typography variant="h5" className='config-page__header__text'>{currentPath}</Typography>
       <UserSection userName="John D." />
     </Toolbar>
   );
