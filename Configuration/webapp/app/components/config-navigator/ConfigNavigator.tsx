@@ -15,14 +15,37 @@
 import { List } from '@mui/material';
 import ConfigNavigatorItem from './ConfigNavigatorItem';
 import { useConfigurationKeysQuery } from '~/api/query/useConfigurationKeysQuery';
+import { useEffect, useState } from 'react';
+import { useConfigurationNavigate } from '~/hooks/useConfigurationNavigate';
 
 const ConfigNavigator = () => {
-  const { data: configKeys } = useConfigurationKeysQuery();
+  const { data: configKeys, isLoading: areConfigKeysLoading } =
+    useConfigurationKeysQuery();
+
+  const navigate = useConfigurationNavigate();
+
+  const [selectedConfigurationPath, setSelectedConfigurationPath] = useState<
+    string | undefined
+  >();
+
+  useEffect(() => {
+    if (configKeys) {
+      setSelectedConfigurationPath(configKeys[0]);
+      navigate(configKeys[0]);
+    }
+  }, [configKeys, areConfigKeysLoading]);
 
   return (
     <List>
-      {configKeys?.map((text: string) => (
-        <ConfigNavigatorItem key={text} title={text} />
+      {configKeys?.map((configKey: string) => (
+        <ConfigNavigatorItem
+          key={configKey}
+          title={configKey}
+          isSelected={configKey === selectedConfigurationPath}
+          onClick={() => {
+            setSelectedConfigurationPath(configKey);
+          }}
+        />
       ))}
     </List>
   );

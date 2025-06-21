@@ -23,28 +23,35 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFile } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router';
-
-const BASE_CONFIGURATION_PATH = 'configuration/o2/components/qc/ANY/any/';
+import { BASE_CONFIGURATION_PATH } from '~/config';
 
 interface ConfigNavigatorItemProps {
   title: string;
   onClick?: () => void;
+  isSelected: boolean;
 }
 
 const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = ({
   title,
   onClick,
+  isSelected,
 }) => {
   return (
     <ListItem
-      style={{ paddingTop: 5, paddingBottom: 5 }}
+      style={{ paddingTop: 5, paddingBottom: 5, width: '100%' }}
       className="config_navigator__item"
     >
-      <Link to={BASE_CONFIGURATION_PATH + title}>
+      <Link
+        to={`${BASE_CONFIGURATION_PATH}/${title}`}
+        style={{ width: '100%' }}
+      >
         <ListItemButton
           onClick={onClick}
-          color="red"
-          sx={{ borderRadius: 2, padding: 0 }}
+          sx={{
+            borderRadius: 2,
+            padding: 0,
+          }}
+          selected={isSelected}
         >
           <ListItemIcon>
             <FontAwesomeIcon icon={faFile} style={{ margin: 'auto' }} />
