@@ -133,7 +133,7 @@ export class ObjectController {
       res.status(200).json(data);
     } catch (error) {
       const responseError = new Error(errorMessage);
-      logger.errorMessage(`Error fetching retrieving data: ${error}`);
+      logger.errorMessage(`Error retrieving data: ${error}`);
       updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   }
