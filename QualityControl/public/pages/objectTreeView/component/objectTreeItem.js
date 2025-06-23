@@ -21,8 +21,9 @@ let oddItem = true;
 
 /**
  * Returns a classname based on if the oddItem variable is true;
+ * @returns {string}
  */
-const bgColorClass = () => oddItem ? '.oddItem' : '.evenItem'
+const bgColorClass = () => oddItem ? '.oddItem' : '.evenItem';
 
 /**
  * Creates a list item for a branch (folder-like node that can be expanded/collapsed)
@@ -56,7 +57,6 @@ export const leafItem = (leafObject, qcObject) => {
   const displayName = getDisplayName(name);
   oddItem = !oddItem;
 
-
   return h('li.object-tree-leafObject', { key: name, title: name, id: name }, [
     h(`div.object-selectable${bgColorClass()}`, {
       onclick: () => qcObject.select(leafObject),
@@ -81,7 +81,6 @@ export const sideTreeLeafItem = (leafObject, qcObject, layout) => {
   const displayName = getDisplayName(name);
   const className = leafObject === qcObject.selected ? 'bg-primary white' : '';
   oddItem = !oddItem;
-
 
   const attr = {
     key: name,
