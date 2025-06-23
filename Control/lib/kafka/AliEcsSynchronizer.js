@@ -23,9 +23,10 @@ const {
   }
 } = require('./../common/emitterKeys.enum.js');
 const { fromEcsIntegratedServiceEventToEvent } = require('./adapters/fromEcsIntegratedServiceEventToEvent.js');
+const { fromEcsEventToEnvironmentEvent } = require('./adapters/fromEcsEventToEnvironmentEvent.js');
+const { odcDeviceEventAdapter } = require('./adapters/odc/odcDeviceEventAdapter.js');
 const { runEventAdapter } = require('./adapters/runEventAdapter.js');
 const { taskEventAdapter } = require('./adapters/taskEventAdapter.js');
-const { fromEcsEventToEnvironmentEvent } = require('./adapters/fromEcsEventToEnvironmentEvent.js');
 const { adaptInt64ToNumber } = require('../common/utils/adaptInt64ToNumber.js');
 const { Topics } = require('./enums/topics.enum.js');
 
@@ -168,6 +169,7 @@ class AliEcsSynchronizer {
    */
   async _onIntegratedServiceOdcMessage(eventMessage) {
     const ODC_PARTITION_STATE_CHANGED_PREFIX = 'odc.partitionStateChanged';
+    const ODC_DEVICE_STATE_CHANGED_PREFIX = 'odc.deviceStateChanged';
 
     if (!eventMessage?.integratedServiceEvent) {
       this._logger.errorMessage(
@@ -182,6 +184,9 @@ class AliEcsSynchronizer {
     };
     if (integratedServiceEvent.name.startsWith(ODC_PARTITION_STATE_CHANGED_PREFIX)) {
       this._eventEmitter.emit(ODC.ENVIRONMENT_STATE_CHANGE, integratedServiceEvent);
+    } else if (integratedServiceEvent.name.startsWith(ODC_DEVICE_STATE_CHANGED_PREFIX)) {
+      const odcTaskEvent = odcDeviceEventAdapter(integratedServiceEvent);
+      this._eventEmitter.emit(ODC.DEVICE_STATE_CHANGE, odcTaskEvent);
     }
   }
 

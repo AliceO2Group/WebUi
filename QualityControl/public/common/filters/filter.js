@@ -31,7 +31,7 @@ import { h, RemoteData } from '/js/src/index.js';
  * @param {string} [config.width='.'] - The CSS class that defines the width of the filter.
  * @returns {vnode} - A virtual node element representing the filter element (input or dropdown).
  */
-const dynamicSelector = (config) => {
+export const dynamicSelector = (config) => {
   const {
     queryLabel,
     placeholder,
@@ -75,7 +75,7 @@ const dynamicSelector = (config) => {
  * @param {string} [config.width='.w-20'] - The CSS class that defines the width of the filter.
  * @returns {vnode} - A virtual node element representing the filter input.
  */
-const filterInput = (config) => {
+export const filterInput = (config) => {
   const { queryLabel, placeholder, id, filterMap, onInputCallback, onEnterCallback, type, width = '.w-20' } = config;
 
   return h(`${width}`, [
@@ -85,7 +85,7 @@ const filterInput = (config) => {
       id,
       name: id,
       min: 0,
-      value: filterMap[queryLabel],
+      value: filterMap[queryLabel] || '',
       oninput: (event) => onInputCallback(queryLabel, event.target.value),
       onkeydown: ({ keyCode }) => {
         if (keyCode === 13) {
@@ -112,9 +112,12 @@ const filterInput = (config) => {
 const dropdownSelector = (config) => {
   const { queryLabel, placeholder, id, filterMap, options, onChangeCallback, width = '.w-20' } = config;
   const optionSelected = filterMap[queryLabel];
+  const setUrl = false;
+
   const validValue = options.map(String).includes(String(optionSelected));
+
   if (optionSelected && !validValue) {
-    onChangeCallback('', queryLabel);
+    onChangeCallback(queryLabel, '', setUrl);
   }
   return h(`${width}`, [
     h('select.form-control', {
@@ -122,16 +125,11 @@ const dropdownSelector = (config) => {
       id,
       name: id,
       value: validValue ? optionSelected : '',
-      onchange: (event) => onChangeCallback(event.target.value, queryLabel),
+      onchange: (event) => onChangeCallback(queryLabel, event.target.value, setUrl),
     }, [
       h('option', { value: '' }, placeholder),
       h('hr'),
       ...options.map((option) => h('option', { value: option }, option)),
     ]),
   ]);
-};
-
-export const filters = {
-  filterInput,
-  dynamicSelector,
 };
