@@ -66,4 +66,46 @@ describe(`'QCConfigurationService' test suite`, () => {
       assert.deepStrictEqual(configuration, {"key1": "value1", "key2": "value2"});
     });
   });
+
+  describe(`'getConfigurationRestrictionsByKey' test suite`, () => {
+    let qcConfigurationService;
+    before(() => {
+      qcConfigurationService = new QCConfigurationService({
+        getOnlyRawValueByKey: sinon.stub().resolves({
+          qc: {
+            bool: "true",
+            numeric: "-90",
+            text: "description",
+            list: [
+              "item 1",
+              "item 2"
+            ],
+            nested: {
+              moreText: "details",
+              nextBool: "false",
+              lastNumeric: "1.2e-3"
+            }
+          }
+        }),
+      });
+    });
+
+    it("should return configuration restrictions for a valid key", async () => {
+      const key = "any/prefix1";
+      const configurationRestrictions = await qcConfigurationService.getConfigurationRestrictionsByKey(key);
+      assert.deepStrictEqual(configurationRestrictions, {
+        qc: {
+          bool: "boolean",
+          numeric: "number",
+          text: "string",
+          list: "array",
+          nested: {
+            moreText: "string",
+            nextBool: "boolean",
+            lastNumeric: "number"
+          }
+        }
+      });
+    });
+  });
 });

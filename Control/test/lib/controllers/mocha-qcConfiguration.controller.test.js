@@ -90,4 +90,62 @@ describe(`'QCConfigurationController' test suite`, () => {
       });
     });
   });
+
+  describe(`'getConfigurationRestrictionsByKey' test suite`, () => {
+    let qcConfigurationService, qcConfigurationController;
+    before(() => {
+      qcConfigurationService = new QCConfigurationService({
+        getOnlyRawValueByKey: sinon.stub().resolves({
+          qc: {
+            bool: "true",
+            numeric: "-90",
+            text: "description",
+            list: [
+              "item 1",
+              "item 2"
+            ],
+            nested: {
+              moreText: "details",
+              nextBool: "false",
+              lastNumeric: "1.2e-3"
+            }
+          }
+        }),
+      });
+
+      qcConfigurationController = new QCConfigurationController(qcConfigurationService, {consul: {qcPath: 'o2/components/qc'}});
+    });
+    
+    it('should return configuration restrictions for a valid key', async () => {
+      const req = { query: { key: 'o2/components/qc/ANY/any/prefix1' } };
+      const res = { status: sinon.stub().returnsThis(), json: sinon.stub() };
+      await qcConfigurationController.getConfigurationRestrictionsByKey(req, res);
+      assert.ok(res.status.calledWith(200));
+      assert.deepStrictEqual(res.json.firstCall.args[0], {
+        qc: {
+          bool: "boolean",
+          numeric: "number",
+          text: "string",
+          list: "array",
+          nested: {
+            moreText: "string",
+            nextBool: "boolean",
+            lastNumeric: "number"
+          }
+        }
+      });
+    });
+
+    it('should return 400 for missing configuration key', async () => {
+      const req = { query: {} };
+      const res = { status: sinon.stub().returnsThis(), json: sinon.stub() };
+      await qcConfigurationController.getConfigurationRestrictionsByKey(req, res);
+      assert.ok(res.status.calledWith(400));
+      assert.deepStrictEqual(res.json.firstCall.args[0], {
+        message: 'Missing configuration key',
+        status: 400,
+        title: 'Invalid Input',
+      });
+    });
+  });
 });
