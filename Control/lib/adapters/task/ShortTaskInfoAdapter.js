@@ -11,7 +11,9 @@
  * or submit itself to any jurisdiction.
  */
 
-const { TaskState } = require('../common/taskState.enum.js');
+const { TaskState } = require('../../common/taskState.enum.js');
+const { TaskStatus } = require('../../common/taskStatus.enum.js');
+const { getTaskShortName } = require('./getTaskShortName.js')
 
 /**
  * ShortTaskInfoAdapter - Given an AliECS Task, construct a TaskInfo object for GUI purposes
@@ -48,10 +50,10 @@ class ShortTaskInfoAdapter {
     const taskInfo = {
       id: taskId,
       taskId,
-      name: ShortTaskInfoAdapter._getShortName(name),
+      name: getTaskShortName(name),
       locked,
       hostname: deploymentInfo?.hostname ?? '',
-      status: status ?? 'UNKNOWN',
+      status: status ?? TaskStatus.UNDEFINED,
       state: (state === TaskState.ERROR && critical) ? TaskState.ERROR_CRITICAL : state,
       className,
       pid,
@@ -62,19 +64,6 @@ class ShortTaskInfoAdapter {
     return taskInfo;
   }
 
-  /**
-   * Method to parse a given full task name and return the small version of it
-   * @param {string} taskName - full name of the task
-   * @returns {string} short name of the task
-   */
-  static _getShortName(taskName) {
-    const regex = new RegExp(`tasks/.*@`);
-    const matchedTaskName = taskName.match(regex);
-    if (matchedTaskName) {
-      taskName = matchedTaskName[0].replace('tasks/', '').replace('@', '');
-    }
-    return taskName;
-  }
 }
 
 module.exports.ShortTaskInfoAdapter = ShortTaskInfoAdapter;

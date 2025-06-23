@@ -13,15 +13,13 @@
  */
 
 import { stub } from 'sinon';
-import nock from 'nock';
-import { ok, strictEqual, deepStrictEqual, rejects } from 'node:assert';
-import { suite, test, beforeEach, before } from 'node:test';
-import { errorHandler, httpHeadJson } from './../../../lib/utils/utils.js';
+import { ok } from 'node:assert';
+import { suite, test, beforeEach } from 'node:test';
+import { errorHandler } from '../../../lib/utils/errorHandler.js';
 
-export const utilsTestSuite = async () => {
-
+export const errorHandlerTestSuite = async () => {
   suite('Check errors are handled and sent successfully', () => {
-    let res;
+    let res = null;
     beforeEach(() => {
       res = {
         status: stub().returnsThis(),
@@ -59,45 +57,6 @@ export const utilsTestSuite = async () => {
       errorHandler(err, 'Error To Send', res, 404);
       ok(res.status.calledWith(404));
       ok(res.send.calledWith({ message: 'Error To Send' }));
-    });
-  });
-
-  suite('"httpHeadJson" test suite ', () => {
-    before(() => nock.cleanAll());
-
-    test('should successfully return status and headers with host, port and path provided', async () => {
-      nock('http://ccdb:8500')
-        .defaultReplyHeaders({ lastModified: 123132132, location: '/download/some-id' })
-        .head('/qc/some/test/123455432')
-        .reply(200);
-
-      const { status, headers } = await httpHeadJson('ccdb', '8500', '/qc/some/test/123455432');
-      strictEqual(status, 200);
-      deepStrictEqual(headers, { lastmodified: '123132132', location: '/download/some-id' });
-    });
-
-    test('should successfully return status and headers with host, port, path and headers provided', async () => {
-      nock('http://ccdb:8500', {
-        reqHeaders: { Accept: 'text' },
-      })
-        .defaultReplyHeaders({ lastModified: 123132132, location: '/download/some-id' })
-        .head('/qc/some/test/123455432')
-        .reply(200);
-
-      const { status, headers } = await httpHeadJson('ccdb', '8500', '/qc/some/test/123455432', { Accept: 'text' });
-      strictEqual(status, 200);
-      deepStrictEqual(headers, { lastmodified: '123132132', location: '/download/some-id' });
-    });
-
-    test('should reject if call was not successful', async () => {
-      nock('http://ccdb:8500')
-        .defaultReplyHeaders({ lastModified: 123132132, location: '/download/some-id' })
-        .head('/qc/some/test/123455432')
-        .replyWithError('Something went wrong');
-
-      await rejects(async () => {
-        await httpHeadJson('ccdb', '8500', '/qc/some/test/123455432');
-      }, new Error('Something went wrong'));
     });
   });
 };

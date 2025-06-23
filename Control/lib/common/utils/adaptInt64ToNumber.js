@@ -10,21 +10,17 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
- */
+*/
 
 /**
- * Given an object with K;V pairs, build a URL component and return it as string
- * @example
- * { RunNumber: 42, PassName: 1 } -> '&RunUmber=42&PassName=1'
- * @param {object} filter - filters as KV pairs
- * @returns {string} - partial URL
+ * Method to adapt the int64 value timestamp to a number
+ * Value normally comes from a gRPC object and this is needed because the int64 value is not directly compatible with JavaScript's number type.
+ * @param {BigInt} int64 - the int64 timestamp to be adapted
+ * @return {number} - the adapted timestamp
  */
-export const getUrlPathFromObject = (filter) => {
-  let urlPath = '';
-  if (Object.keys(filter).length > 0) {
-    urlPath = Object.entries(filter)
-      .map(([key, value]) => `&${key}=${value}`)
-      .join('');
-  }
-  return urlPath;
-};
+const adaptInt64ToNumber = (int64) => {
+  const bigIntTimestamp = BigInt(int64.toString(10));
+  return Number(bigIntTimestamp);
+}
+
+exports.adaptInt64ToNumber = adaptInt64ToNumber;
