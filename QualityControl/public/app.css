@@ -160,3 +160,39 @@ li.object-tree-branch, ul.object-tree-list {
 /* Standardised styles to potentially be moved to bootstrap */
 .ph0 { padding-left: 0; padding-right: 0; }
 .pv0 { padding-top: 0; padding-bottom: 0; }
+
+
+ul > li { position: relative; }
+
+.oddItem {
+    background-color: var(--color-white);
+    color: var(--color-black);
+}
+.evenItem {
+    background-color: var(--color-gray-lighter);
+    color: var(--color-black);
+}
+
+.oddItem::before, .evenItem::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    right: -100%;
+    bottom: 0;
+    z-index: -1;
+}
+
+.oddItem::before { background-color: var(--color-white) }
+.evenItem::before { background-color: var(--color-gray-lighter) }
+
+.evenItem:hover::before, 
+.oddItem:hover::before,
+.evenItem:hover, 
+.oddItem:hover {
+    cursor: pointer; 
+    background-color: var(--color-gray-dark) !important;
+    color: var(--color-gray-lighter);
+}
+
+

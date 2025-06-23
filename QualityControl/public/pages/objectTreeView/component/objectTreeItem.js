@@ -15,6 +15,16 @@
 import { h, iconBarChart, iconCaretRight, iconCaretBottom } from '/js/src/index.js';
 
 /**
+ * Tracks if the current item is odd or even in the list. Which is used for background colloration.
+ */
+let oddItem = true;
+
+/**
+ * Returns a classname based on if the oddItem variable is true;
+ */
+const bgColorClass = () => oddItem ? '.oddItem' : '.evenItem'
+
+/**
  * Creates a list item for a branch (folder-like node that can be expanded/collapsed)
  * @param {ObjectTreeModel} treeModel - current tree branch
  * @param {Function} treeItems - function that receives an ObjectTreeModel and returns a vnode
@@ -22,9 +32,10 @@ import { h, iconBarChart, iconCaretRight, iconCaretBottom } from '/js/src/index.
  */
 export const branchItem = (treeModel, treeItems) => {
   const { name, open, pathString } = treeModel;
+  oddItem = !oddItem;
 
   return h('li.object-tree-branch', { key: pathString, title: pathString, id: pathString }, [
-    h('div.object-selectable', { onclick: () => treeModel.toggle() }, [
+    h(`div.object-selectable${bgColorClass()}`, { onclick: () => treeModel.toggle() }, [
       h('span', open ? iconCaretBottom() : iconCaretRight()),
       ' ',
       name,
@@ -43,9 +54,11 @@ export const branchItem = (treeModel, treeItems) => {
 export const leafItem = (leafObject, qcObject) => {
   const { name } = leafObject;
   const displayName = getDisplayName(name);
+  oddItem = !oddItem;
+
 
   return h('li.object-tree-leafObject', { key: name, title: name, id: name }, [
-    h('div.object-selectable', {
+    h(`div.object-selectable${bgColorClass()}`, {
       onclick: () => qcObject.select(leafObject),
       title: name,
     }, [
@@ -67,6 +80,8 @@ export const sideTreeLeafItem = (leafObject, qcObject, layout) => {
   const { name } = leafObject;
   const displayName = getDisplayName(name);
   const className = leafObject === qcObject.selected ? 'bg-primary white' : '';
+  oddItem = !oddItem;
+
 
   const attr = {
     key: name,
@@ -85,7 +100,7 @@ export const sideTreeLeafItem = (leafObject, qcObject, layout) => {
   };
 
   return h('li.object-tree-leaf', [
-    h('div.object-selectable', attr, [
+    h(`div.object-selectable${bgColorClass()}`, attr, [
       h('span', iconBarChart()),
       ' ',
       displayName,
