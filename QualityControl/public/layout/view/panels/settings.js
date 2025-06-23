@@ -69,7 +69,7 @@ const displayObjectTime = (model) =>
       h('label.form-check-label', {
         for: 'inputShowTimestamp',
         style: 'cursor: pointer',
-      }, 'Display timestamp on each plot'),
+      }, 'Display timestamp and run number on each plot'),
     ),
     h(
       '.w-20.text-right',

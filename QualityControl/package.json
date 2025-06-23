@@ -24,6 +24,7 @@
     "coverage-lcov": "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/lcov.info test/test-index.js",
     "coverage-local": "node --test --experimental-test-coverage --test-reporter=spec test/test-index.js",
     "test": "node --test test/test-index.js",
+    "test-debug": "node --inspect test/test-index.js --debug",
     "copy-config": "sh scripts/copy-config.sh",
     "docker-dev": "npm run copy-config && docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
     "docker-test": "docker compose -f docker-compose.yml -f docker-compose.test.yml up --build --abort-on-container-exit",
