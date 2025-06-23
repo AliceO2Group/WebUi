@@ -83,6 +83,30 @@ class QCConfigurationController {
       updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
+
+  /**
+   * Method to get configuration restrictions by key
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async getConfigurationRestrictionsByKey(req, res) {
+    const { key } = req.query;
+    if (!key) {
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError("Missing configuration key"));
+    }
+
+    try {
+      const restrictions = await this._qcConfigurationService.getConfigurationRestrictionsByKey(key);
+      if (!restrictions) {
+        updateAndSendExpressResponseFromNativeError(res, new NotFoundError("Configuration not found"));
+      }
+
+      res.status(200).json(restrictions);
+    } catch (error) {
+      errorLogger(error, this._logger);
+      updateAndSendExpressResponseFromNativeError(res, error);
+    }
+  }
 }
 
 exports.QCConfigurationController = QCConfigurationController;
