@@ -23,6 +23,7 @@ import {cruLinkCheckBox} from './components/linkCheckBox.js';
 import { warningComponent } from '../common/warningComponent.js';
 
 const CRU_MISSING_CONFIG_WARNING_MESSAGE = 'Missing CRU configuration for some/all hosts';
+const DETECTOR_KEY_WITH_NO_LINKS_EXPECTED = 'TRD'; // Detector which does not require links to be configured
 
 /**
  * @file Page to show configuration components (content and header)
@@ -164,7 +165,7 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
         && hostsByDetector[detector].filter((host) => cruMapByHost[host]).length > 0;
       const hasConfigForAllCRUs = hostsByDetector[detector]
         ?.filter((host) => cruMapByHost[host])
-        .every((host) => isValidCruConfig(cruMapByHost[host]));
+        .every((host) => isValidCruConfig(cruMapByHost[host], detector));
       return h('.w-100.pv2', [
         h('.panel-title.flex-row.pv2', [
           h('.w-20.flex-row.ph2.items-center', [
@@ -201,18 +202,21 @@ const cruByDetectorPanel = (model, cruMapByHost) => {
         hasCRUs && detectors[detector].isOpen
         && hostsByDetector[detector]
           .filter((host) => cruMapByHost[host])
-          .map((host) => cruByHostPanel(model, host, cruMapByHost[host]))
+          .map((host) => cruByHostPanel(model, host, cruMapByHost[host], detector))
       ])
     });
 };
 
 /**
  * Build a panel with CRU panels grouped by their respective host
- * @param {Object} model 
- * @param {JSON} cruMapByHost 
+ * @param {Model} model - root model of the application
+ * @param {object<string, object<string, {config: object, info: object}>>} cruData - Map of CRUs by host
+ * @param {string} host - Host to which the CRUs belong
+ * @param {object<string, {config: object, info: object}>}} cruData - Data of the CRUs for the given host
+ * @param {string} detector - Name of the detector
  * @returns 
  */
-const cruByHostPanel = (model, host, cruData) => {
+const cruByHostPanel = (model, host, cruData, detector) => {
   let hostLabel = host;
   let title = host;
   if (model.configuration.crusAliases.isSuccess() && model.configuration.areAliasesOn) {
@@ -245,7 +249,7 @@ const cruByHostPanel = (model, host, cruData) => {
           style: `font-weight: bold; margin-bottom:0;cursor:pointer;`
         }, hostLabel)
       ]),
-      isValidCruConfig(cruData)
+      isValidCruConfig(cruData, detector)
         ? [
           userLogicCheckBox(model, host, 'host', '.w-15'),
           toggleAllLinksCheckBox(model, host, 'host', '.w-15'),
@@ -261,10 +265,10 @@ const cruByHostPanel = (model, host, cruData) => {
 
 /**
  * Panel for each CRU endpoint to allow the user to enable/disable endpoints
- * @param {Object} model
- * @param {string} cruId
- * @param {JSON} cru
- * @param {string} host
+ * @param {Model} model - root model of the application
+ * @param {string} cruId - Identifier of the CRU endpoint
+ * @param {{config: object, info: object}} cru - Configuration of the CRU endpoint
+ * @param {string} host - Host to which the CRU belongs
  * @return {vnode}
  */
 const cruPanelByEndpoint = (model, cruId, cru, host) => {
@@ -307,8 +311,8 @@ const cruPanelByEndpoint = (model, cruId, cru, host) => {
 /**
  * A panel which iterate through all links in the configuration and creates a checkbox for each;
  * It also adds UserLogic and All Links toggles
- * @param {Object} model
- * @param {JSON} cru
+ * @param {Model} model - root model of the application
+ * @param {{config: object, info: object}} cru - configuration of the CRU
  * @param {String} host - host to which the links belong to
  * @return {vnode}
  */
@@ -352,7 +356,7 @@ const linksPanel = (model, cru, host) => {
 /**
  * Builds a panel under the command buttons to display failed tasks information
  * This panel only appears if there are any failed tasks
- * @param {Object} model
+ * @param {Model} model - root model of the application
  * @returns {vnode}
  */
 const tasksMessagePanel = (model) =>
@@ -392,7 +396,7 @@ const tasksMessagePanel = (model) =>
 /**
  * A panel to which a successful or error message is shown,
  * informing the user about the state of the action Save
- * @param {Object} model
+ * @param {Model} model - root model of the application
  * @return {vnode}
  */
 const savingConfigurationMessagePanel = (model) =>
@@ -431,10 +435,18 @@ Are you sure you would like to continue?`)
 
 /**
  * Check if the configuration given host has a valid configuration for each of its CRUs
- * Validation is done by checking if the configuration contains at least one link
- * @param {object<string, <string, {config: object, info: object}>} cruDataOfHost - Map of CRUs by host
+ * Validation is done by checking if the configuration contains at least one link for all detectors except TRD
+ * For TRD, it only needs to check presence of attribute `cru` in the configuration
+ * @param {object<string, {config: object, info: object}>} cruDataOfHost - Map of CRUs of a host
+ * @param {string} detector - Name of the detector
  */
-const isValidCruConfig = (cruDataOfHost) => 
-  Object.keys(cruDataOfHost)
+const isValidCruConfig = (cruDataOfHost, detector) => {
+  if (detector === DETECTOR_KEY_WITH_NO_LINKS_EXPECTED) {
+    return Object.keys(cruDataOfHost)
+      .map((cruId) => Object.keys(cruDataOfHost[cruId].config))
+      .every((configKeys) => configKeys.includes('cru'));
+  }
+  return Object.keys(cruDataOfHost)
     .map((cruId) => Object.keys(cruDataOfHost[cruId].config))
     .every((configKeys) => configKeys.some((key) => key.match(/link[0-9]{1,2}/)));
+};
