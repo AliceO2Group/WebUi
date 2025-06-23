@@ -60,4 +60,5 @@ ignore:
   - docs/*
   - node_modules/*
   - Control/protobuf/*
+  - QualityControl/test/setup/testServerSetup.js
 comment: false
