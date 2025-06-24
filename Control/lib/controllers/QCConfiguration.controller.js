@@ -12,8 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-const { LogManager } = require("@aliceo2/web-ui");
-const { errorHandler, errorLogger } = require("../utils.js");
+const {
+  LogManager,
+  updateAndSendExpressResponseFromNativeError,
+  InvalidInputError,
+  NotFoundError,
+} = require("@aliceo2/web-ui");
+const { errorLogger } = require("../utils.js");
 const { getConsulConfig } = require("../config/publicConfigProvider.js");
 
 /**
@@ -21,10 +26,10 @@ const { getConsulConfig } = require("../config/publicConfigProvider.js");
  */
 class QCConfigurationController {
   /**
-     * Setup QCConfigurationController
-     * @param {QCConfigurationService} qcConfigurationService
-     * @param {JSON} config
-     */
+   * Setup QCConfigurationController
+   * @param {QCConfigurationService} qcConfigurationService
+   * @param {JSON} config
+   */
   constructor(qcConfigurationService, config) {
     this._qcConfigurationService = qcConfigurationService;
     this._config = getConsulConfig({ consul: config });
@@ -45,13 +50,13 @@ class QCConfigurationController {
     try {
       const parsedData = await this._qcConfigurationService.getKeysOfValidConfigurations(prefixPath, recurse);
       if (!parsedData || parsedData.length === 0) {
-        return errorHandler("No configurations found", res, 404);
+        updateAndSendExpressResponseFromNativeError(res, new NotFoundError("No configurations found"));
       }
 
       res.status(200).json(parsedData);
     } catch (error) {
       errorLogger(error, this._logger);
-      errorHandler("Error retrieving configurations", res, 500);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
@@ -63,19 +68,43 @@ class QCConfigurationController {
   async getConfigurationByKey(req, res) {
     const { key } = req.query;
     if (!key) {
-      return errorHandler("Missing configuration key", res, 400);
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError("Missing configuration key"));
     }
 
     try {
       const value = await this._qcConfigurationService.getConfigurationByKey(key);
       if (!value) {
-        return errorHandler("Configuration not found", res, 404);
+        updateAndSendExpressResponseFromNativeError(res, new NotFoundError("Configuration not found"));
       }
 
       res.status(200).json(value);
     } catch (error) {
       errorLogger(error, this._logger);
-      errorHandler("Error retrieving configuration", res, 500);
+      updateAndSendExpressResponseFromNativeError(res, error);
+    }
+  }
+
+  /**
+   * Method to get configuration restrictions by key
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async getConfigurationRestrictionsByKey(req, res) {
+    const { key } = req.query;
+    if (!key) {
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError("Missing configuration key"));
+    }
+
+    try {
+      const restrictions = await this._qcConfigurationService.getConfigurationRestrictionsByKey(key);
+      if (!restrictions) {
+        updateAndSendExpressResponseFromNativeError(res, new NotFoundError("Configuration not found"));
+      }
+
+      res.status(200).json(restrictions);
+    } catch (error) {
+      errorLogger(error, this._logger);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 }

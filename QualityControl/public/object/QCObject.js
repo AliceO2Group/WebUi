@@ -12,15 +12,16 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Observable, RemoteData, iconArrowTop } from '/js/src/index.js';
+import { RemoteData, iconArrowTop } from '/js/src/index.js';
 import ObjectTree from './ObjectTree.class.js';
 import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
+import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
  */
-export default class QCObject extends Observable {
+export default class QCObject extends BaseViewModel {
   /**
    * Initialize model with empty values
    * @param {Model} model - root model of the application
@@ -51,11 +52,10 @@ export default class QCObject extends Observable {
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
 
-    this.sideTree = new ObjectTree('database');
-    this.sideTree.bubbleTo(this);
     this.queryingObjects = false;
     this.scrollTop = 0;
     this.scrollHeight = 0;
+    this.filterModel = model.filterModel;
   }
 
   /**
@@ -178,7 +178,7 @@ export default class QCObject extends Observable {
     this.notify();
     this.queryingObjects = true;
     let offlineObjects = [];
-    const result = await this.model.services.object.getObjects();
+    const result = await this.model.services.object.getObjects(this.filterModel.filterMap);
     if (result.isSuccess()) {
       offlineObjects = result.payload;
     } else {
@@ -219,7 +219,9 @@ export default class QCObject extends Observable {
   async loadObjectByName(objectName, timestamp = undefined, id = undefined) {
     this.objects[objectName] = RemoteData.loading();
     this.notify();
-    const obj = await this.model.services.object.getObjectByName(objectName, id, timestamp, undefined, this);
+
+    const obj =
+      await this.model.services.object.getObjectByName(objectName, id, timestamp, this);
 
     // TODO Is it a TTree?
     if (obj.isSuccess()) {
@@ -245,10 +247,9 @@ export default class QCObject extends Observable {
   /**
    * Load objects provided by a list of paths
    * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
-   * @param {object} filter - to be applied on quering objects
    * @returns {undefined}
    */
-  async loadObjects(objectsName, filter = {}) {
+  async loadObjects(objectsName) {
     this.objectsRemote = RemoteData.loading();
     this.objects = {}; // Remove any in-memory loaded objects
     this.model.services.object.objectsLoadedMap = {}; // TODO not here
@@ -261,8 +262,8 @@ export default class QCObject extends Observable {
     await Promise.allSettled(objectsName.map(async (objectName) => {
       this.objects[objectName] = RemoteData.Loading();
       this.notify();
-      this.objects[objectName] = await this
-        .model.services.object.getObjectByName(objectName, undefined, undefined, filter, this);
+      this.objects[objectName] =
+        await this.model.services.object.getObjectByName(objectName, undefined, undefined, this);
       this.notify();
     }));
     this.objectsRemote = RemoteData.success();
@@ -461,5 +462,14 @@ export default class QCObject extends Observable {
     } else {
       return [];
     }
+  }
+
+  /**
+   * Function that reloads the object list with filters applied
+   * @returns {undefined}
+   */
+  async triggerFilter() {
+    this.selected = null;
+    await this.loadList();
   }
 }

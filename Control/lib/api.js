@@ -240,13 +240,15 @@ module.exports.setup = (http, ws) => {
   const qcValidateService = qcConfigurationService.validateService.bind(qcConfigurationService);
   http.get(
     "/configurations", qcValidateService,
-    qcConfigurationController.getConfigurationsKeys.bind(qcConfigurationController),
-    { public: true }
+    qcConfigurationController.getConfigurationsKeys.bind(qcConfigurationController)
   );
   http.get(
-    '/configuration', qcValidateService,
-    qcConfigurationController.getConfigurationByKey.bind(qcConfigurationController),
-    { public: true }
+    '/configuration', qcValidateService, 
+    qcConfigurationController.getConfigurationByKey.bind(qcConfigurationController)
+  );
+  http.get(
+    '/configuration/restrictions', qcValidateService, 
+    qcConfigurationController.getConfigurationRestrictionsByKey.bind(qcConfigurationController)
   );
 
   // Consul

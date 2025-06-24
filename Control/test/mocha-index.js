@@ -173,6 +173,9 @@ describe('Control', function() {
   require('./api/lock/api-get-locks.test');
   require('./api/lock/api-put-locks.test');
 
+  require('./api/configuration/api-get-configurations.test');
+  require('./api/configuration/api-get-configuration-restrictions.test');
+
   beforeEach(() => this.ok = true);
 
   afterEach(() => {
