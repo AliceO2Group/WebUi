@@ -65,6 +65,47 @@ describe('`getDetectorsLockOwnershipMiddlewareFactory` test suite', () => {
     assert.ok(resMock.json.notCalled);
   });
 
+  it('should call next() if the environment in request does not have detectors attribute (e.g. qc workflow)', async () => {
+    lockServiceMock.hasLocks.resolves(true);
+    detectorlessReqMock = {
+      session: {
+        name: 'Test User',
+        username: 'testuser',
+        personid: '12345',
+        access: 'admin',
+      },
+      body: {
+      },
+    };
+
+    await getDetectorsLockOwnershipMiddlewareFactory(lockServiceMock)(detectorlessReqMock, resMock, nextMock);
+
+    assert.ok(nextMock.calledOnce);
+    assert.ok(resMock.status.notCalled);
+    assert.ok(resMock.json.notCalled);
+  });
+
+  it('should call next() if the environment in request has empty detectors list (e.g. qc workflow)', async () => {
+    lockServiceMock.hasLocks.resolves(true);
+    detectorlessReqMock = {
+      session: {
+        name: 'Test User',
+        username: 'testuser',
+        personid: '12345',
+        access: 'admin',
+      },
+      body: {
+        detectors: [],
+      },
+    };
+
+    await getDetectorsLockOwnershipMiddlewareFactory(lockServiceMock)(detectorlessReqMock, resMock, nextMock);
+
+    assert.ok(nextMock.calledOnce);
+    assert.ok(resMock.status.notCalled);
+    assert.ok(resMock.json.notCalled);
+  });
+
   it('should return 403 if the user does not have ownership of the locks', async () => {
     lockServiceMock.hasLocks.returns(false);
 
