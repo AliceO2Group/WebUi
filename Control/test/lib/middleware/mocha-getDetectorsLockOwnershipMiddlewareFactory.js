@@ -67,7 +67,7 @@ describe('`getDetectorsLockOwnershipMiddlewareFactory` test suite', () => {
 
   it('should call next() if the environment in request does not have detectors attribute (e.g. qc workflow)', async () => {
     lockServiceMock.hasLocks.resolves(true);
-    detectorlessReqMock = {
+    const detectorlessReqMock = {
       session: {
         name: 'Test User',
         username: 'testuser',
@@ -87,7 +87,7 @@ describe('`getDetectorsLockOwnershipMiddlewareFactory` test suite', () => {
 
   it('should call next() if the environment in request has empty detectors list (e.g. qc workflow)', async () => {
     lockServiceMock.hasLocks.resolves(true);
-    detectorlessReqMock = {
+    const detectorlessReqMock = {
       session: {
         name: 'Test User',
         username: 'testuser',
