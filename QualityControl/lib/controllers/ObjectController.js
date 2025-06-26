@@ -92,15 +92,6 @@ export class ObjectController {
   }
 
   /**
-   * Check the status of a run based on provided filters
-   * @param {number} runNumber - Identifier of the run whose status is being checked
-   * @returns {Promise<RunStatus|null>} - Promise resolving to run status or null if no RunNumber in filters
-   */
-  async checkRunStatus(runNumber) {
-    return await this._filterService.getRunStatus(runNumber);
-  }
-
-  /**
    * Helper function to handle cached data retrieval and active run monitoring
    * @param {object} callbackParams - Parameters for the callback function
    * @param {Function} callback - The function to call for data retrieval
