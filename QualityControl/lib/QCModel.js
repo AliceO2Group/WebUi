@@ -43,6 +43,7 @@ import { objectGetByIdValidationMiddlewareFactory }
 import { objectsGetValidationMiddlewareFactory } from './middleware/objects/objectsGetValidationMiddlewareFactory.js';
 import { objectGetContentsValidationMiddlewareFactory }
   from './middleware/objects/objectGetContentsValidationMiddlewareFactory.js';
+import { RunMonitoringService } from './services/RunMonitoringService.js';
 
 /**
  * Model initialization for the QCG application
@@ -78,7 +79,8 @@ export const setupQcModel = () => {
 
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
   const filterService = new FilterService(bookkeepingService, config);
-  const objectController = new ObjectController(qcObjectService, filterService, intervalsService);
+  const runMonitoringService = new RunMonitoringService(qcObjectService, filterService, intervalsService);
+  const objectController = new ObjectController(qcObjectService, runMonitoringService);
 
   const filterController = new FilterController(filterService);
 

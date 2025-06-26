@@ -13,9 +13,6 @@
  */
 'use strict';
 import { LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
-import { RunStatus } from '../../common/library/runStatus.enum.js';
-
-const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/object-ctrl`);
 
 /**
  * Gateway for all QC Objects requests
@@ -26,17 +23,19 @@ export class ObjectController {
    * Setup Object Controller:
    * - CcdbService - retrieve data about objects
    * @param {QCObjectService} objService - objService to be used for retrieval of information
-   * @param {FilterService} filterService - objService to be used for retrieval run statuses
-   * @param {IntervalsService} intervalsService - service to manage intervals for active runs
+   * @param {RunMonitoringService} runMonitoringService - for monitoring the status of runs periodically
    */
-  constructor(objService, filterService, intervalsService) {
+  constructor(objService, runMonitoringService) {
     /**
      * @type {QCObjectService}
      */
     this._objService = objService;
-    this._filterService = filterService;
-    this._intervalsService = intervalsService;
-    this._UPDATE_INTERVAL = 30 * 1000;
+
+    /**
+     * @type {RunMonitoringService}
+     */
+    this._runMonitoringService = runMonitoringService;
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/object-ctrl`);
   }
 
   /**
@@ -111,88 +110,19 @@ export class ObjectController {
    */
   async _handleDataRetrieval(callbackParams, callback, res, errorMessage) {
     try {
-      const RunNumber = callbackParams.filters?.RunNumber;
       const queryKey = JSON.stringify(callbackParams);
       const cachedData = this._objService.getRunCache(queryKey);
-      let runStatus = null;
 
       if (cachedData) {
         return res.status(200).json(cachedData.data);
       }
-
-      if (RunNumber) {
-        runStatus = await this.checkRunStatus(RunNumber);
-      }
-
       const data = await callback(callbackParams);
-
-      if (runStatus === RunStatus.ACTIVE) {
-        await this._setupActiveRunMonitoring(queryKey, callbackParams, callback);
-      }
-
+      this._runMonitoringService.handleRunMonitoring(queryKey, callbackParams, callback);
       res.status(200).json(data);
     } catch (error) {
       const responseError = new Error(errorMessage);
-      logger.errorMessage(`Error retrieving data: ${error}`);
+      this._logger.errorMessage(`Error retrieving data: ${error}`);
       updateAndSendExpressResponseFromNativeError(res, responseError);
     }
-  }
-
-  /**
-   * Set up periodic monitoring for an active run with specific query parameters
-   * @param {string} queryKey - The unique key for the query parameters
-   * @param {object} callbackParams - The parameter object to be used for the calback function parameters
-   * @param {Function} callback - The function that will be used to update the cache.
-   * @returns {Promise<void>}
-   */
-  async _setupActiveRunMonitoring(queryKey, callbackParams, callback) {
-    if (this._intervalsService.activeInterval(queryKey)) {
-      return;
-    }
-    logger.infoMessage(`Setting up periodic monitoring for query ${queryKey}`);
-
-    await this._updateAndCheckStatus(queryKey, callbackParams, callback);
-
-    this._intervalsService.register(
-      this._updateAndCheckStatus.bind(this, queryKey, callbackParams, callback),
-      this._filterService.runStatusRefreshInterval,
-      queryKey,
-    );
-  }
-
-  /**
-   * Update cache and check run status for active run monitoring
-   * @param {string} queryKey - The unique key for the query parameters
-   * @param {object} callbackParams - The parameter object to be used for the calback function parameters
-   * the calbackParams object should at least have filters.RunNumber. The other entries are callback specific
-   * @param {Function} callback - The function that will be used to update the cache.
-   * @returns {Promise<void>}
-   */
-  async _updateAndCheckStatus(queryKey, callbackParams, callback) {
-    try {
-      const { RunNumber } = callbackParams.filters;
-      const status = await this.checkRunStatus(RunNumber);
-
-      if (status !== RunStatus.ACTIVE) {
-        logger.infoMessage(`Run ${RunNumber} is no longer active, stopping monitoring`);
-        this._cleanupRunMonitoring(queryKey);
-        return;
-      }
-
-      const data = await callback(callbackParams);
-      this._objService.setRunCache(queryKey, { data, timestamp: Date.now() });
-      logger.debugMessage(`Updated cache for query ${queryKey}`);
-    } catch (error) {
-      logger.errorMessage(`Failed to update cache or check status for query ${queryKey}: ${error}`);
-    }
-  }
-
-  /**
-   * Clean up monitoring for a specific query
-   * @param {string} queryKey - The unique key for the query parameters
-   */
-  _cleanupRunMonitoring(queryKey) {
-    this._intervalsService.deregister(queryKey);
-    this._objService.removeRunCache(queryKey);
   }
 }
