@@ -23,7 +23,7 @@ export class RunMonitoringService {
    * Creates a new RunMonitoringService to monitor the status of runs periodically.
    * @param {QcObjectService} objectService - Used to access and store cached run data.
    * @param {FilterService} filterService - Used to check the status of a run.
-   * @param {IntervalsService} intervalsService - Used to manage periodic update intervals.
+   * @param {IntervalsService} intervalsService - Used to manage intervals.
    */
   constructor(
     objectService,
@@ -39,10 +39,7 @@ export class RunMonitoringService {
   }
 
   /**
-   * Starts monitoring if the run is active.
-   *
-   * If a RunNumber is found in the parameters and the run is active,
-   * we start checking its status periodically and updating the cache.
+   * Starts monitoring when the parameters contain a RunNumber, and the run status is determined to be active
    * @param {string} queryKey - Unique key used for identifying the cache entry.
    * @param {object} callbackParams - Parameters for the data-fetching callback (must include filters.RunNumber).
    * @param {Function} callback - A function to fetch updated data.
@@ -89,16 +86,38 @@ export class RunMonitoringService {
    */
   async _checkStatusAndUpdateCache(queryKey, callbackParams, callback) {
     try {
-      const runNumber = callbackParams.filters?.RunNumber;
-      const status = await this._checkRunStatus(runNumber);
-
-      if (status !== RunStatus.ACTIVE) {
-        this._stopMonitoring(queryKey);
-        this._logger.infoMessage(`Run ${runNumber} is no longer active, stopping monitoring`);
+      const shouldContinue = await this._shouldContinueMonitoring(queryKey, callbackParams);
+      if (!shouldContinue) {
         return;
       }
+      this._updateCache(callbackParams, callback, queryKey);
+    } catch (error) {
+      this._logger.errorMessage(`Failed to update cache or check status for query ${queryKey}: ${error}`);
+    }
+  }
 
-      // Run is still active: get updated data and save it in the cache with a timestamp
+  /**
+   * Checks whether the run is still active and monitoring should continue.
+   * @param {string} queryKey - Identifier for logging and cleanup.
+   * @param {object} callbackParams - Parameters that include filters with RunNumber.
+   * @param {boolean} skipStatusCheck - If true, assumes the run is active without checking.
+   * @returns {Promise<boolean>} - True if monitoring should continue, false otherwise.
+   */
+  async _shouldContinueMonitoring(queryKey, callbackParams) {
+    const runNumber = callbackParams.filters?.RunNumber;
+    const status = await this._checkRunStatus(runNumber);
+
+    if (status !== RunStatus.ACTIVE) {
+      this._stopMonitoring(queryKey);
+      this._logger.infoMessage(`Run ${runNumber} is no longer active, stopping monitoring`);
+      return false;
+    }
+
+    return true;
+  }
+
+  async _updateCache(callbackParams, callback, queryKey) {
+    try {
       const data = await callback(callbackParams);
       this._objectService.setRunCache(queryKey, {
         data,
@@ -106,14 +125,14 @@ export class RunMonitoringService {
       });
       this._logger.debugMessage(`Updated cache for query ${queryKey}`);
     } catch (error) {
-      this._logger.errorMessage(`Failed to update cache or check status for query ${queryKey}: ${error}`);
+      this._logger.errorMessage(`Failed to update cache for query ${callbackParams}: ${error}`);
     }
   }
 
   /**
    * Gets the current status of a given run from the filter service.
    * @param {string} runNumber - The number of the run.
-   * @returns {Promise<RunStatus>}
+   * @returns {Promise<RunStatus>} - A promise with the status of the run
    */
   async _checkRunStatus(runNumber) {
     return this._filterService.getRunStatus(runNumber);
