@@ -34,7 +34,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   const cardLayoutLinkPath = (cardPath) => `${cardPath} a`;
   const cardOfficialButtonPath = (cardPath) => `${cardPath} > .cardHeader > button`;
 
-  const filterPath = 'header > div > div:nth-child(3) > input';
+  const filterPath = 'header > div > div:nth-child(1) > div:nth-child(3) > input';
 
   await testParent.test('should successfully load layoutList page "/"', { timeout }, async () => {
     await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
@@ -58,7 +58,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should be able to close folders', async () => {
     await page.click(toggleFolderPath(officialLayoutIndex)); // This will close a folder
-    await delay(100);
+    await delay(1000);
 
     let nrOfOpenedFolders = await page.evaluate(() => document.querySelectorAll('.cardGrid').length);
 
@@ -97,7 +97,6 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should have a link to show a layout from users layout', async () => {
     const linkpath = cardLayoutLinkPath(cardPath(myLayoutIndex, 2));
-
     const href = await page.evaluate((path) => document.querySelector(path).href, linkpath);
 
     strictEqual(href, 'http://localhost:8080/?page=layoutShow&layoutId=671b8c22402408122e2f20dd');

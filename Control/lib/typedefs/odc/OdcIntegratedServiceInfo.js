@@ -1,11 +1,3 @@
-[
-  'runNumber',
-  'state',
-  'ddsSessionId',
-  'ddsSessionStatus',
-  'devices',
-  'hosts'
-]
 /**
  * @license
  * Copyright CERN and copyright holders of ALICE O2. This software is
