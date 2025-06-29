@@ -12,11 +12,33 @@
  * or submit itself to any jurisdiction.
  */
 
+import { useLocation } from "react-router";
+import { useConfigurationQuery } from "~/api/query/useConfigurationQuery";
+import { useConfigurationRestrictionsQuery } from "~/api/query/useConfigurationRestrictionsQuery";
+import Form from "~/components/form/Form";
+import { Spinner } from "~/ui/spinner";
+
 const ConfigurationPage = () => {
+  const { pathname } = useLocation();
+  const configurationName = pathname.split("/").pop() as string;
+
+  const { data: configuration, isLoading: isConfigurationLoading } =
+    useConfigurationQuery(configurationName);
+
+  const {
+    data: configurationRestrictions,
+    isLoading: isConfigurationRestrictionsLoading,
+  } = useConfigurationRestrictionsQuery(configurationName);
+
+  if (isConfigurationLoading || isConfigurationRestrictionsLoading)
+    return <Spinner />;
+
   return (
-    <div>
-      <h1>Configuration Details</h1>
-    </div>
+    <Form
+      sectionTitle="Configuration"
+      items={configuration}
+      itemsTypeMap={configurationRestrictions}
+    />
   );
 };
 

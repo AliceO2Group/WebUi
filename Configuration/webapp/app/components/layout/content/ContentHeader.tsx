@@ -27,6 +27,7 @@ const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => {
         borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
         display: 'flex',
         justifyContent: 'space-between',
+        flexShrink: 0,
       }}
       className="content-section__header"
     >

@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Box } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { type FC, type PropsWithChildren } from 'react';
 import ContentHeader from './ContentHeader';
 import { useParams } from 'react-router';
@@ -23,14 +23,14 @@ const Content: FC<ContentProps> = ({ children }) => {
   const params = useParams<{ '*': string }>();
   const configPath = params['*'];
   return (
-    <Box
+    <Stack
       component="main"
       sx={{ flexGrow: 1, bgcolor: 'background.default' }}
       className="content-section"
     >
-      <ContentHeader currentPath={configPath ?? ''} />
-      <Box sx={{ p: 3 }}>{children}</Box>
-    </Box>
+      <ContentHeader currentPath={configPath ?? '<no path selected>'} />
+      <Box sx={{ p: 3, overflow: "auto", flexGrow: 1, minHeight: 0 }}>{children}</Box>
+    </Stack>
   );
 };
 
