@@ -48,7 +48,8 @@ describe('Control', function() {
     const {calls: apricotCalls} = apricotGRPCServer(config);
 
     // Start web-server in background
-    subprocess = spawn('node', ['index.js', 'test/test-config.js'], {stdio: 'pipe'});
+    subprocess = spawn('node', ['index.js', 'test/test-config.js'],
+      {stdio: 'pipe', env: {...process.env, NODE_ENV: 'test'}});
     subprocess.stdout.on('data', (chunk) => {
       subprocessOutput += chunk.toString();
     });

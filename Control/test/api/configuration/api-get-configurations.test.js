@@ -20,7 +20,7 @@ describe(`'API - GET - /configurations' test suite`, () => {
   it('should successfully get all configurations', async () => {
     await request(`${TEST_URL}/api/configurations`)
       .get(`/?token=${ADMIN_TEST_TOKEN}`)
-      .expect(200);
+      .expect(200, ['key1']);
   });
 
   it('should return unauthorized error for missing token requests', async () => {
