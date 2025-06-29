@@ -17,18 +17,19 @@ const config = require('../test-config');
 
 const CONSUL_URL = `http://${config.consul.hostname}:${config.consul.port}`;
 const KV_PATH = '/v1/kv/';
-const QC_CONFIG_PATH = `${KV_PATH}${config.consul.qcPath}/ANY/any`;
-const QC_CONFIG_QUERY = '?recurse=true';
 
 /**
  * Setup nock environment to intercept requests to the Consul API.
  */
 const initializeNockForConsul = () => {
-  console.log('Initializing nock for Consul...');
-  console.log(`Mocking Consul at ${CONSUL_URL}`);
   nock(CONSUL_URL)
     .persist()
-    .get(`${QC_CONFIG_PATH}${QC_CONFIG_QUERY}`)
+    .get('/v1/status/leader')
+    .reply(200, 'http://localhost:8550');
+
+  nock(CONSUL_URL)
+    .persist()
+    .get(`${KV_PATH}${config.consul.qcPath}/ANY/any?recurse=true`)
     .reply(200, JSON.stringify([
       {
         LockIndex: 0,
@@ -39,6 +40,11 @@ const initializeNockForConsul = () => {
         ModifyIndex: 1
       }
     ]))
+  
+  nock(CONSUL_URL)
+    .persist()
+    .get(`${KV_PATH}key1?raw=true`)
+    .reply(200, JSON.stringify({key: "value"}))
 }
 
 module.exports = {

@@ -64,7 +64,7 @@ describe(`'QCConfigurationController' test suite`, () => {
     let qcConfigurationService, qcConfigurationController;
     before(() => {
       qcConfigurationService = new QCConfigurationService({
-        getOnlyRawValueByKey: sinon.stub().resolves({"key1": "value1", "key2": "value2"}),
+        getOnlyRawValueByKey: sinon.stub().resolves({key1: "value1", key2: "value2"}),
       });
 
       qcConfigurationController = new QCConfigurationController(qcConfigurationService, {consul: {qcPath: 'o2/components/qc'}});

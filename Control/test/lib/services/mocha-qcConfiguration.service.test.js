@@ -56,14 +56,14 @@ describe(`'QCConfigurationService' test suite`, () => {
     let qcConfigurationService;
     before(() => {
       qcConfigurationService = new QCConfigurationService({
-        getOnlyRawValueByKey: sinon.stub().resolves({"key1": "value1", "key2": "value2"}),
+        getOnlyRawValueByKey: sinon.stub().resolves({key1: "value1", key2: "value2"}),
       });
     });
 
     it("should return configuration for a valid key", async () => {
       const key = "any/prefix1";
       const configuration = await qcConfigurationService.getConfigurationByKey(key);
-      assert.deepStrictEqual(configuration, {"key1": "value1", "key2": "value2"});
+      assert.deepStrictEqual(configuration, {key1: "value1", key2: "value2"});
     });
   });
 });

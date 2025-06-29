@@ -175,6 +175,7 @@ describe('Control', function() {
   require('./api/lock/api-put-locks.test');
 
   require('./api/configuration/api-get-configurations.test');
+  require('./api/configuration/api-get-configuration.test');
 
   beforeEach(() => this.ok = true);
 
