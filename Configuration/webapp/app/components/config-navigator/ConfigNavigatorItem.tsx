@@ -42,7 +42,7 @@ const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = ({
       className="config_navigator__item"
     >
       <Link
-        to={`${BASE_CONFIGURATION_PATH}/${title}`}
+        to={`configuration/${BASE_CONFIGURATION_PATH}/${title}`}
         style={{ width: '100%' }}
       >
         <ListItemButton
