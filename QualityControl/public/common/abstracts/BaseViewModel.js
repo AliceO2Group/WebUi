@@ -12,17 +12,19 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconCircleX } from '/js/src/index.js';
+import { Observable } from '/js/src/index.js';
 
 /**
- * Display error message & icon
- * @param {string} message - message to be displayed to the user
- * @returns {vnode} - virtual node element
+ * Abstract class to define default behaviour for child classes
  */
-export const errorDiv = (message) =>h(
-  '.flex-column.items-center.justify-center#Error',
-  [
-    h('.f1', iconCircleX()),
-    h('span.f3', message),
-  ],
-);
+export class BaseViewModel extends Observable {
+  constructor() {
+    super();
+  }
+
+  /**
+   * Default triggerFilter implementation to be overwritten by the subclasses
+   * @returns {undefined}
+   */
+  triggerFilter() { };
+}

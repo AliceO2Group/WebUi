@@ -12,17 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconCircleX } from '/js/src/index.js';
-
-/**
- * Display error message & icon
- * @param {string} message - message to be displayed to the user
- * @returns {vnode} - virtual node element
- */
-export const errorDiv = (message) =>h(
-  '.flex-column.items-center.justify-center#Error',
-  [
-    h('.f1', iconCircleX()),
-    h('span.f3', message),
-  ],
-);
+import copyrightLicense from "./copyright-license.js";
+const plugin = { rules: { "copyright-license": copyrightLicense } };
+export default plugin;

@@ -79,6 +79,7 @@ import { objectGetContentsValidationMiddlewareTest }
   from './lib/middlewares/objects/objectGetByContentsValidation.middleware.test.js';
 import { objectGetByIdValidationMiddlewareTest }
   from './lib/middlewares/objects/objectGetByIdValidation.middleware.test.js';
+import { filterTests } from './public/features/filterTest.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -162,6 +163,8 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       { timeout: ABOUT_VIEW_PAGE_TIMEOUT },
       async (testParent) => await aboutPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
+    test('should successfully import and run tests for filter', async (testParent) =>
+      filterTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent));
   });
 
   suite('API - test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
