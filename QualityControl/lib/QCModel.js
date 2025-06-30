@@ -79,8 +79,8 @@ export const setupQcModel = () => {
 
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
   const filterService = new FilterService(bookkeepingService, config);
-  const runMonitoringService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService);
-  const objectController = new ObjectController(qcObjectService, runMonitoringService);
+  const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService);
+  const objectController = new ObjectController(qcObjectService, runModeService);
 
   const filterController = new FilterController(filterService);
 
@@ -111,10 +111,10 @@ export const setupQcModel = () => {
  * @param {Intervals} intervalsService - wrapper for storing intervals
  * @param {QcObjectService} qcObjectService - service for retrieving information on qc objects
  * @param {FilterService} filterService - service for retrieving run types information from Bookkeeping
- * @param {RunModeService} runMonitoringService - service for monitoring the status of runs
+ * @param {RunModeService} runModeService - service for monitoring the status of runs
  * @returns {void}
  */
-function initializeIntervals(intervalsService, qcObjectService, filterService, runMonitoringService) {
+function initializeIntervals(intervalsService, qcObjectService, filterService, runModeService) {
   intervalsService.register(
     qcObjectService.refreshCache.bind(qcObjectService),
     qcObjectService.getCacheRefreshRate(),
@@ -125,10 +125,10 @@ function initializeIntervals(intervalsService, qcObjectService, filterService, r
     filterService.refreshInterval,
   );
 
-  if (runMonitoringService.refreshInterval > 0) {
+  if (runModeService.refreshInterval > 0) {
     intervalsService.register(
-      runMonitoringService.refreshRunsCache.bind(runMonitoringService),
-      runMonitoringService.refreshInterval,
+      runModeService.refreshRunsCache.bind(runModeService),
+      runModeService.refreshInterval,
     );
   }
 }

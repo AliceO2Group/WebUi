@@ -23,9 +23,9 @@ export class ObjectController {
    * Setup Object Controller:
    * - CcdbService - retrieve data about objects
    * @param {QCObjectService} objService - objService to be used for retrieval of information
-   * @param {RunMonitoringService} runMonitoringService - for monitoring the status of runs periodically
+   * @param {RunMonitoringService} runModeService - for monitoring the status of runs periodically
    */
-  constructor(objService, runMonitoringService) {
+  constructor(objService, runModeService) {
     /**
      * @type {QCObjectService}
      */
@@ -34,7 +34,7 @@ export class ObjectController {
     /**
      * @type {RunMonitoringService}
      */
-    this._runMonitoringService = runMonitoringService;
+    this._runModeService = runModeService;
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/object-ctrl`);
   }
 
@@ -56,7 +56,7 @@ export class ObjectController {
           new InvalidInputError('RunNumber is required when in run mode'),
         );
       } else if (inRunMode && runNumber) {
-        list = await this._runMonitoringService.retrievePathsAndSetRunStatus(runNumber, prefix);
+        list = await this._runModeService.retrievePathsAndSetRunStatus(runNumber, prefix);
       } else {
         list = await this._objService.retrieveLatestVersionOfObjects({ prefix, fields, filters });
       }
@@ -80,12 +80,17 @@ export class ObjectController {
    * @returns {Promise<void>}
    */
   async getObjectContent(req, res) {
-    const { path, validFrom, filters, id } = req.query;
-    const callbackParams = { path, validFrom, filters, id };
+    try {
+      const { path, validFrom, filters, id } = req.query;
 
-    const callback = this._objService.retrieveQcObject.bind(this._objService);
+      const object = await this._objService.retrieveQcObject({ path, validFrom, id, filters });
+      res.status(200).json(object);
+    } catch (error) {
+      const responseError = new Error('Failed to retrieve object content');
 
-    await this._handleDataRetrieval(callbackParams, callback, res, 'Failed to retrieve object content');
+      this._logger.errorMessage(`Error whilst retrieving object content: ${error}`);
+      updateAndSendExpressResponseFromNativeError(res, responseError);
+    }
   }
 
   /**
@@ -100,36 +105,16 @@ export class ObjectController {
    * @returns {Promise<void>}
    */
   async getObjectById(req, res) {
-    const qcObjectId = req.params.id;
-    const { validFrom, filters, id } = req.query;
-    const callbackParams = { validFrom, filters, id, qcObjectId };
-    const callback = this._objService.retrieveQcObjectByQcgId.bind(this._objService);
-
-    await this._handleDataRetrieval(callbackParams, callback, res, 'Unable to identify object or read it by qcg id');
-  }
-
-  /**
-   * Helper function to handle cached data retrieval and active run monitoring
-   * @param {object} callbackParams - Parameters for the callback function
-   * @param {Function} callback - The function to call for data retrieval
-   * @param {Response} res - HTTP response object
-   * @param {string} errorMessage - Error message to use if something fails
-   * @returns {Promise<void>}
-   */
-  async _handleDataRetrieval(callbackParams, callback, res, errorMessage) {
     try {
-      const queryKey = JSON.stringify(callbackParams);
-      const cachedData = this._objService.getRunCache(queryKey);
+      const qcObjectId = req.params.id;
+      const { validFrom, filters, id } = req.query;
 
-      if (cachedData) {
-        return res.status(200).json(cachedData.data);
-      }
-      const data = await callback(callbackParams);
-      this._runMonitoringService.checkAndSetRunMonitoring(queryKey, callbackParams, callback);
-      res.status(200).json(data);
+      const object = await this._objService.retrieveQcObjectByQcgId({ qcObjectId, id, validFrom, filters });
+      res.status(200).json(object);
     } catch (error) {
-      const responseError = new Error(errorMessage);
-      this._logger.errorMessage(`Error retrieving data: ${error}`);
+      const responseError = new Error('Unable to identify object or read it by qcg id');
+
+      this._logger.errorMessage(`Error whilst retrieving object: ${error}`);
       updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   }
