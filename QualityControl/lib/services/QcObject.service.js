@@ -60,7 +60,6 @@ export class QcObjectService {
       objects: undefined,
       lastUpdate: undefined,
     };
-    this._activeRunCache = new Map();
 
     this._logger = LogManager.getLogger(LOG_FACILITY);
   }
@@ -102,16 +101,17 @@ export class QcObjectService {
   async retrieveLatestVersionOfObjects({ prefix = this._dbService.PREFIX, fields, useCache = true, filters }) {
     const hasFilters = typeof filters === 'object' && Object.keys(filters).length;
 
-    if (!hasFilters && useCache && this._cache.objects?.length) {
-      return this._cache.objects.filter((object) => object.name.startsWith(prefix));
+    if (!hasFilters) {
+      // Use /tree endpoint of DataService
+      if (useCache && this._cache.objects?.length) {
+        return this._cache.objects.filter((object) => object.name.startsWith(prefix));
+      }
+      const objects = await this._dbService.getObjectsTreeList(prefix);
+      return this._parseObjects(objects);
     }
 
-    let objects = [];
-    if (!hasFilters) {
-      objects = await this._dbService.getObjectsTreeList(prefix);
-    } else {
-      objects = await this._dbService.getObjectsLatestVersionList({ prefix, filters, fields });
-    }
+    // If filters are provided, use /latest endpoint of DataService
+    const objects = await this._dbService.getObjectsLatestVersionList({ prefix, filters, fields });
     return this._parseObjects(objects);
   }
 
@@ -233,33 +233,5 @@ export class QcObjectService {
    */
   getCacheRefreshRate() {
     return this._dbService.CACHE_REFRESH_RATE;
-  }
-
-  /**
-   * Remove a specific query entry from the run cache
-   * @param {string} queryKey - Identifier for the cached entry
-   * @returns {boolean} - Whether the entry existed and was removed
-   */
-  removeRunCache(queryKey) {
-    return this._activeRunCache.delete(queryKey);
-  }
-
-  /**
-   * Retrieve cached data associated with a given query key
-   * @param {string} queryKey - Identifier for the cached entry
-   * @returns {object|Array<object>} - Cached data object or undefined if not found
-   */
-  getRunCache(queryKey) {
-    return this._activeRunCache.get(queryKey);
-  }
-
-  /**
-   * Store a data object in the run cache under a given key
-   * @param {string} queryKey - Identifier for the cached entry
-   * @param {object|Array<object>} dataObject - Data object to be cached
-   * @returns {undefined}
-   */
-  setRunCache(queryKey, dataObject) {
-    this._activeRunCache.set(queryKey, dataObject);
   }
 }

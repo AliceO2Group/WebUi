@@ -43,7 +43,7 @@ import { objectGetByIdValidationMiddlewareFactory }
 import { objectsGetValidationMiddlewareFactory } from './middleware/objects/objectsGetValidationMiddlewareFactory.js';
 import { objectGetContentsValidationMiddlewareFactory }
   from './middleware/objects/objectGetContentsValidationMiddlewareFactory.js';
-import { RunMonitoringService } from './services/RunMonitoringService.js';
+import { RunModeService } from './services/RunModeService.js';
 
 /**
  * Model initialization for the QCG application
@@ -79,7 +79,7 @@ export const setupQcModel = () => {
 
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
   const filterService = new FilterService(bookkeepingService, config);
-  const runMonitoringService = new RunMonitoringService(qcObjectService, filterService, intervalsService);
+  const runMonitoringService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService);
   const objectController = new ObjectController(qcObjectService, runMonitoringService);
 
   const filterController = new FilterController(filterService);
@@ -111,9 +111,10 @@ export const setupQcModel = () => {
  * @param {Intervals} intervalsService - wrapper for storing intervals
  * @param {QcObjectService} qcObjectService - service for retrieving information on qc objects
  * @param {FilterService} filterService - service for retrieving run types information from Bookkeeping
+ * @param {RunModeService} runMonitoringService - service for monitoring the status of runs
  * @returns {void}
  */
-function initializeIntervals(intervalsService, qcObjectService, filterService) {
+function initializeIntervals(intervalsService, qcObjectService, filterService, runMonitoringService) {
   intervalsService.register(
     qcObjectService.refreshCache.bind(qcObjectService),
     qcObjectService.getCacheRefreshRate(),
@@ -123,4 +124,11 @@ function initializeIntervals(intervalsService, qcObjectService, filterService) {
     filterService.getRunTypes.bind(filterService),
     filterService.refreshInterval,
   );
+
+  if (runMonitoringService.refreshInterval > 0) {
+    intervalsService.register(
+      runMonitoringService.refreshRunsCache.bind(runMonitoringService),
+      runMonitoringService.refreshInterval,
+    );
+  }
 }

@@ -13,7 +13,6 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
-import { RunStatus } from '../../common/library/runStatus.enum.js';
 const logger = LogManager.getLogger('filter/service');
 
 /**
@@ -60,20 +59,6 @@ export class FilterService {
     } catch (error) {
       logger.errorMessage(`Error while retrieving run types: ${error.message || error}`);
       this._runTypes = [];
-    }
-  }
-
-  /**
-   * This method is used to retrieve the list of run types from the bookkeeping service
-   * @param {number} runNumber - number of the run from which the status will be fetched
-   * @returns {RunStatus} - resolves when the list of run types is available
-   */
-  async getRunStatus(runNumber) {
-    try {
-      return await this._bookkeepingService.retrieveRunStatus(runNumber);
-    } catch (error) {
-      logger.errorMessage(`Error while retrieving run status for run number ${runNumber}: ${error.message || error}`);
-      return RunStatus.INVALID;
     }
   }
 

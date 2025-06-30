@@ -15,16 +15,16 @@
 import { suite, test, beforeEach, before } from 'node:test';
 import { strictEqual, deepStrictEqual, ok } from 'assert';
 import sinon from 'sinon';
-import { RunMonitoringService } from '../../../lib/services/RunMonitoringService.js';
+import { RunModeService } from '../../../lib/services/RunModeService.js';
 import { RunStatus } from '../../../common/library/runStatus.enum.js';
 import { LogManager } from '@aliceo2/web-ui';
 
 export const runMonitoringServiceTestSuite = async () => {
-  suite('RunMonitoringService', () => {
+  suite('RunModeService', () => {
     let objectServiceMock = null;
     let filterServiceMock = null;
     let intervalsServiceMock = null;
-    let runMonitoringService = null;
+    let runModeService = null;
     let mockedLogger = null;
 
     const queryKey = 'testQueryKey';
@@ -59,13 +59,13 @@ export const runMonitoringServiceTestSuite = async () => {
         deregister: sinon.stub(),
       };
 
-      runMonitoringService = new RunMonitoringService(objectServiceMock, filterServiceMock, intervalsServiceMock);
+      runModeService = new RunModeService(objectServiceMock, filterServiceMock, intervalsServiceMock);
     });
 
     test('should start monitoring when run is active', async () => {
-      filterServiceMock.getRunStatus.resolves(RunStatus.ACTIVE);
+      filterServiceMock.getRunStatus.resolves(RunStatus.ONGOING);
 
-      await runMonitoringService.handleRunMonitoring(queryKey, callbackParams, callback);
+      await runModeService.retrievePathsAndSetRunStatus(queryKey, callbackParams, callback);
 
       strictEqual(intervalsServiceMock.register.calledOnce, true);
       strictEqual(objectServiceMock.setRunCache.calledOnce, true);
@@ -76,9 +76,9 @@ export const runMonitoringServiceTestSuite = async () => {
     });
 
     test('should not start monitoring when run is not active', async () => {
-      filterServiceMock.getRunStatus.resolves(RunStatus.FINISHED);
+      filterServiceMock.getRunStatus.resolves(RunStatus.ENDED);
 
-      await runMonitoringService.handleRunMonitoring(queryKey, callbackParams, callback);
+      await runModeService.retrievePathsAndSetRunStatus(queryKey, callbackParams, callback);
 
       strictEqual(intervalsServiceMock.register.called, false);
       strictEqual(objectServiceMock.setRunCache.called, false);
@@ -91,12 +91,12 @@ export const runMonitoringServiceTestSuite = async () => {
       const callbackParams = { filters: { RunNumber: mockRunNumber } };
       const callback = sinon.stub().resolves(mockData);
 
-      filterServiceMock.getRunStatus.withArgs(mockRunNumber).resolves(RunStatus.ACTIVE);
+      filterServiceMock.getRunStatus.withArgs(mockRunNumber).resolves(RunStatus.ONGOING);
       intervalsServiceMock.activeInterval.withArgs(queryKey).returns(false);
 
       objectServiceMock.setRunCache = sinon.spy();
 
-      await runMonitoringService.handleRunMonitoring(queryKey, callbackParams, callback);
+      await runModeService.retrievePathsAndSetRunStatus(queryKey, callbackParams, callback);
 
       ok(intervalsServiceMock.register.calledOnce, 'Expected interval to be registered');
       ok(objectServiceMock.setRunCache.calledOnce, 'Expected cache to be set');
@@ -110,19 +110,19 @@ export const runMonitoringServiceTestSuite = async () => {
     });
 
     test('should skip if already monitoring', async () => {
-      filterServiceMock.getRunStatus.resolves(RunStatus.ACTIVE);
+      filterServiceMock.getRunStatus.resolves(RunStatus.ONGOING);
       intervalsServiceMock.activeInterval.returns(true);
 
-      await runMonitoringService.handleRunMonitoring(queryKey, callbackParams, callback);
+      await runModeService.retrievePathsAndSetRunStatus(queryKey, callbackParams, callback);
 
       strictEqual(intervalsServiceMock.register.called, false);
       strictEqual(objectServiceMock.setRunCache.called, false);
     });
 
     test('should stop monitoring when run is no longer active', async () => {
-      filterServiceMock.getRunStatus.resolves(RunStatus.FINISHED);
+      filterServiceMock.getRunStatus.resolves(RunStatus.ENDED);
 
-      await runMonitoringService._checkStatusAndUpdateCache(queryKey, callbackParams, callback);
+      await runModeService._checkStatusAndUpdateCache(queryKey, callbackParams, callback);
 
       strictEqual(intervalsServiceMock.deregister.calledWith(queryKey), true);
       strictEqual(objectServiceMock.removeRunCache.calledWith(queryKey), true);
@@ -131,7 +131,7 @@ export const runMonitoringServiceTestSuite = async () => {
     test('should log error when callback or status check fails', async () => {
       filterServiceMock.getRunStatus.rejects(new Error('error getting status'));
 
-      await runMonitoringService._checkStatusAndUpdateCache(queryKey, callbackParams, callback);
+      await runModeService._checkStatusAndUpdateCache(queryKey, callbackParams, callback);
 
       ok(mockedLogger.errorMessage.calledOnce);
       ok(mockedLogger.errorMessage.firstCall.args[0].includes('error getting status'));
