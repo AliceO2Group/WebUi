@@ -57,7 +57,6 @@ import { objectControllerTestSuite } from './lib/controllers/ObjectController.te
 import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
 import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
 import { bookkeepingServiceTestSuite } from './lib/services/BookkeepingService.test.js';
-import { runMonitoringServiceTestSuite } from './lib/services/RunMonitoringService.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
@@ -82,6 +81,7 @@ import { objectGetByIdValidationMiddlewareTest }
   from './lib/middlewares/objects/objectGetByIdValidation.middleware.test.js';
 import { filterTests } from './public/features/filterTest.test.js';
 import { qcObjectServiceTestSuite } from './lib/services/QcObjectService.test.js';
+import { runModeServiceTestSuite } from './lib/services/RunModeService.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -210,7 +210,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
       suite('JsonServiceTest test suite', async () => await jsonFileServiceTestSuite());
       suite('FilterService', async () => await filterServiceTestSuite());
-      suite('RunMonitoringService - Test Suite', async () => await runMonitoringServiceTestSuite());
+      suite('RunModeService - Test Suite', async () => await runModeServiceTestSuite());
       suite('QcObjectService - Test Suite', async () => await qcObjectServiceTestSuite());
     });
 
