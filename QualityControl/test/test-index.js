@@ -81,6 +81,7 @@ import { objectGetContentsValidationMiddlewareTest }
 import { objectGetByIdValidationMiddlewareTest }
   from './lib/middlewares/objects/objectGetByIdValidation.middleware.test.js';
 import { filterTests } from './public/features/filterTest.test.js';
+import { qcObjectServiceTestSuite } from './lib/services/QcObjectService.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -210,6 +211,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('JsonServiceTest test suite', async () => await jsonFileServiceTestSuite());
       suite('FilterService', async () => await filterServiceTestSuite());
       suite('RunMonitoringService - Test Suite', async () => await runMonitoringServiceTestSuite());
+      suite('QcObjectService - Test Suite', async () => await qcObjectServiceTestSuite());
     });
 
     suite('Middleware - Test Suite', async () => {
