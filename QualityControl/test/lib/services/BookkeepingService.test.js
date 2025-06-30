@@ -263,14 +263,14 @@ export const bookkeepingServiceTestSuite = async () => {
         strictEqual(result, RunStatus.ONGOING);
       });
 
-      test('should return INVALID status when no data is returned', async () => {
+      test('should return NOT_FOUND status when no data is returned', async () => {
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, {});
 
         const result = await bkpService.retrieveRunStatus(789);
         strictEqual(result, RunStatus.NOT_FOUND);
       });
 
-      test('should return INVALID status when request fails', async () => {
+      test('should return NOT_FOUND status when request fails', async () => {
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).replyWithError('connection failed');
 
         const result = await bkpService.retrieveRunStatus(404);
