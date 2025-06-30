@@ -37,7 +37,7 @@ export const objectControllerTestSuite = async () => {
       params: {},
     };
     RunMonitoringServiceMock = {
-      handleRunMonitoring: sinon.spy(),
+      checkAndSetRunMonitoring: sinon.spy(),
     };
   });
 
@@ -212,7 +212,7 @@ export const objectControllerTestSuite = async () => {
           getRunCache: sinon.stub().withArgs(mockQueryKey).returns(cachedResponse),
         };
         RunMonitoringServiceMock = {
-          handleRunMonitoring: sinon.spy(),
+          checkAndSetRunMonitoring: sinon.spy(),
         };
 
         resMock = {
@@ -225,17 +225,17 @@ export const objectControllerTestSuite = async () => {
 
         ok(resMock.status.calledWith(200));
         ok(resMock.json.calledWith(cachedResponse.data));
-        ok(RunMonitoringServiceMock.handleRunMonitoring.notCalled);
+        ok(RunMonitoringServiceMock.checkAndSetRunMonitoring.notCalled);
       });
 
-      test('should call callback and handleRunMonitoring if no cached data', async () => {
+      test('should call callback and checkAndSetRunMonitoring if no cached data', async () => {
         const callbackStub = sinon.stub().resolves(newData);
 
         QcObjectServiceMock = {
           getRunCache: sinon.stub().withArgs(mockQueryKey).returns(undefined),
         };
         RunMonitoringServiceMock = {
-          handleRunMonitoring: sinon.spy(),
+          checkAndSetRunMonitoring: sinon.spy(),
         };
 
         resMock = {
@@ -247,7 +247,7 @@ export const objectControllerTestSuite = async () => {
         await objectController._handleDataRetrieval(callbackParams, callbackStub, resMock, 'Custom error');
 
         ok(callbackStub.calledWith(callbackParams));
-        ok(RunMonitoringServiceMock.handleRunMonitoring.calledWith(mockQueryKey, callbackParams, callbackStub));
+        ok(RunMonitoringServiceMock.checkAndSetRunMonitoring.calledWith(mockQueryKey, callbackParams, callbackStub));
         ok(resMock.status.calledWith(200));
         ok(resMock.json.calledWith(newData));
       });
@@ -262,7 +262,7 @@ export const objectControllerTestSuite = async () => {
         };
 
         RunMonitoringServiceMock = {
-          handleRunMonitoring: sinon.spy(),
+          checkAndSetRunMonitoring: sinon.spy(),
         };
         resMock = {
           status: sinon.stub().returnsThis(),

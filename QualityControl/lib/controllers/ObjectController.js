@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 'use strict';
-import { LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
 /**
  * Gateway for all QC Objects requests
@@ -45,10 +45,27 @@ export class ObjectController {
    * @returns {void}
    */
   async getObjects(req, res) {
-    const { prefix, fields, filters } = req.query;
-    const callbackParams = { prefix, fields, filters };
-    const callback = this._objService.retrieveLatestVersionOfObjects.bind(this._objService);
-    await this._handleDataRetrieval(callbackParams, callback, res, 'Failed to retrieve list of objects latest version');
+    try {
+      const { prefix, fields, filters, inRunMode = false } = req.query;
+
+      const { RunNumber: runNumber } = filters;
+      let list = [];
+      if (inRunMode && !runNumber) {
+        return updateAndSendExpressResponseFromNativeError(
+          res,
+          new InvalidInputError('RunNumber is required when in run mode'),
+        );
+      } else if (inRunMode && runNumber) {
+        list = await this._runMonitoringService.retrievePathsAndSetRunStatus(runNumber, prefix);
+      } else {
+        list = await this._objService.retrieveLatestVersionOfObjects({ prefix, fields, filters });
+      }
+      res.status(200).json(list);
+    } catch (error) {
+      const responseError = new Error('Failed to retrieve list of objects latest version');
+      this._logger.errorMessage(`Error whilst retrieving objects: ${error}`);
+      updateAndSendExpressResponseFromNativeError(res, responseError);
+    }
   }
 
   /**
@@ -108,7 +125,7 @@ export class ObjectController {
         return res.status(200).json(cachedData.data);
       }
       const data = await callback(callbackParams);
-      this._runMonitoringService.handleRunMonitoring(queryKey, callbackParams, callback);
+      this._runMonitoringService.checkAndSetRunMonitoring(queryKey, callbackParams, callback);
       res.status(200).json(data);
     } catch (error) {
       const responseError = new Error(errorMessage);
