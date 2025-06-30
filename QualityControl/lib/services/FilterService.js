@@ -27,8 +27,11 @@ export class FilterService {
   constructor(bookkeepingService, config) {
     this._bookkeepingService = bookkeepingService;
     this._runTypes = [];
-    this._runTypesRefreshInterval = config?.bookkeeping?.runTypesRefreshInterval ?? 24 * 60 * 60 * 1000;
-    this._runStatusRefreshInterval = config?.bookkeeping?.runStatusRefreshInterval;
+
+    this._runTypesRefreshInterval = -1;
+    if (config.bookkeeping) {
+      this._runTypesRefreshInterval = config?.bookkeeping?.runTypesRefreshInterval ?? 24 * 60 * 60 * 1000;
+    }
     this.initFilters();
   }
 
@@ -67,15 +70,7 @@ export class FilterService {
    * @returns {number} Interval in milliseconds for refreshing the list of run types.
    */
   get runTypesRefreshInterval() {
-    return this._bookkeepingService.runTypesRefreshInterval;
-  }
-
-  /**
-   * Returns the runStatusInterval in milliseconds
-   * @returns {number} Interval in milliseconds for refreshing the status of a run.
-   */
-  get runStatusRefreshInterval() {
-    return this._bookkeepingService.runStatusRefreshInterval;
+    return this._runTypesRefreshInterval;
   }
 
   /**

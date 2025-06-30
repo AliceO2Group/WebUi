@@ -120,10 +120,12 @@ function initializeIntervals(intervalsService, qcObjectService, filterService, r
     qcObjectService.getCacheRefreshRate(),
   );
 
-  intervalsService.register(
-    filterService.getRunTypes.bind(filterService),
-    filterService.refreshInterval,
-  );
+  if (filterService.runTypesRefreshInterval > 0) {
+    intervalsService.register(
+      filterService.getRunTypes.bind(filterService),
+      filterService.runTypesRefreshInterval,
+    );
+  }
 
   if (runModeService.refreshInterval > 0) {
     intervalsService.register(
