@@ -242,7 +242,7 @@ export const bookkeepingServiceTestSuite = async () => {
         nock.cleanAll();
       });
 
-      test('should return FINISHED status when timeO2End is present', async () => {
+      test('should return ENDED status when timeO2End is present', async () => {
         const mockResponse = {
           data: {
             timeO2End: '2023-01-01T00:00:00Z',
@@ -251,30 +251,30 @@ export const bookkeepingServiceTestSuite = async () => {
 
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
         const result = await bkpService.retrieveRunStatus(123);
-        strictEqual(result, RunStatus.FINISHED);
+        strictEqual(result, RunStatus.ENDED);
       });
 
-      test('should return ACTIVE status when timeO2End is not present', async () => {
+      test('should return ONGOING status when timeO2End is not present', async () => {
         const mockResponse = { data: { timeO2End: undefined } };
 
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
 
         const result = await bkpService.retrieveRunStatus(456);
-        strictEqual(result, RunStatus.ACTIVE);
+        strictEqual(result, RunStatus.ONGOING);
       });
 
       test('should return INVALID status when no data is returned', async () => {
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, {});
 
         const result = await bkpService.retrieveRunStatus(789);
-        strictEqual(result, RunStatus.INVALID);
+        strictEqual(result, RunStatus.NOT_FOUND);
       });
 
       test('should return INVALID status when request fails', async () => {
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).replyWithError('connection failed');
 
         const result = await bkpService.retrieveRunStatus(404);
-        strictEqual(result, RunStatus.INVALID);
+        strictEqual(result, RunStatus.NOT_FOUND);
       });
     });
   });

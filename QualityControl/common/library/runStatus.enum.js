@@ -13,7 +13,7 @@
  */
 
 export const RunStatus = Object.freeze({
-  FINISHED: 'FINISHED',
-  ACTIVE: 'ACTIVE',
-  INVALID: 'INVALID', // Covers: not found, negative runnumber, non-numeric runnumber, etc
+  ENDED: 'ENDED',
+  ONGOING: 'ONGOING',
+  NOT_FOUND: 'NOT_FOUND',
 });

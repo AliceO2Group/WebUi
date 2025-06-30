@@ -127,14 +127,14 @@ export class BookkeepingService {
    * Retrieves the status of a specific run from the Bookkeeping service
    * @param {number} runNumber - The run number to check the status for
    * @returns {Promise<RunStatus>} - Returns a promise that resolves to the run status:
-   *                                 - RunStatus.ACTIVE if the run is ongoing
-   *                                 - RunStatus.FINISHED if the run has completed (has timeO2End)
-   *                                 - RunStatus.INVALID if there was an error or data is not available
+   *                                 - RunStatus.ONGOING if the run is ongoing
+   *                                 - RunStatus.ENDED if the run has completed (has timeO2End)
+   *                                 - RunStatus.NOT_FOUND if there was an error or data is not available
    */
   async retrieveRunStatus(runNumber) {
     if (!this.active) {
       logger.warnMessage('Could not connect to bookkeeping');
-      return RunStatus.INVALID;
+      return RunStatus.NOT_FOUND;
     }
 
     try {
@@ -144,18 +144,18 @@ export class BookkeepingService {
       });
 
       if (!data) {
-        logger.warnMessage(`The runstatus was invalid for run number ${runNumber}`);
-        return RunStatus.INVALID; // an error occured in bookkeeping
+        logger.warnMessage(`The run status was invalid for run number ${runNumber}`);
+        return RunStatus.NOT_FOUND;
       }
 
       if (data.timeO2End) {
-        return RunStatus.FINISHED;
+        return RunStatus.ENDED;
       }
 
-      return RunStatus.ACTIVE;
+      return RunStatus.ONGOING;
     } catch (error) {
-      logger.errorMessage(`An error occured whilst fetching run status: ${error.message || error}`);
-      return RunStatus.INVALID;
+      logger.errorMessage(`An error occurred whilst fetching run status: ${error.message || error}`);
+      return RunStatus.NOT_FOUND;
     }
   }
 
