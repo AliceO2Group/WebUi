@@ -46,7 +46,7 @@ export class ObjectController {
    */
   async getObjects(req, res) {
     try {
-      const { prefix, fields, filters, inRunMode = false } = req.query;
+      const { prefix, fields, filters = {}, inRunMode = false } = req.query;
 
       const { RunNumber: runNumber } = filters;
       let list = [];
