@@ -66,7 +66,7 @@ class QCConfigurationController {
    * @param {Response} res
    */
   async getConfigurationByKey(req, res) {
-    const { key } = req.query;
+    const { key } = req.params;
     if (!key) {
       updateAndSendExpressResponseFromNativeError(res, new InvalidInputError("Missing configuration key"));
     }

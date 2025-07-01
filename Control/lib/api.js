@@ -243,7 +243,7 @@ module.exports.setup = (http, ws) => {
     qcConfigurationController.getConfigurationsKeys.bind(qcConfigurationController)
   );
   http.get(
-    '/configuration', qcValidateService, 
+    '/configurations/:key(*)', qcValidateService, 
     qcConfigurationController.getConfigurationByKey.bind(qcConfigurationController)
   );
 

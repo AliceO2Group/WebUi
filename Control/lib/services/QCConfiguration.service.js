@@ -35,17 +35,6 @@ class QCConfigurationService {
   }
 
   /**
-   * Initialize Lock service based on the provided list of detectors
-   * @param {Array<String>} detectors = [] - list of detectors to be used for the lock mechanism
-   * @return {void}
-   */
-  // setLockStatesForDetectors(detectors = []) {
-  //   for (const detectorName of detectors) {
-  //     this._locksByDetector[detectorName] = new DetectorLock(detectorName);
-  //   }
-  // }
-
-  /**
    * Check if consulService is present:
    * * If yes, allow request to continue
    * * If not, send response accordingly
@@ -83,10 +72,10 @@ class QCConfigurationService {
 
       Object.entries(data || {}).forEach(([key, value]) => {
         try {
-          if (!JSON.parse(value)) {
+          if (!recurse && key.replace(`${prefix}/`, "").includes("/")) {
             return;
           }
-          if (!recurse && key.replace(`${prefix}/`, "").includes("/")) {
+          if (!JSON.parse(value)) {
             return;
           }
 

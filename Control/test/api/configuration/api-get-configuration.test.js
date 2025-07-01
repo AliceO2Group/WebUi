@@ -18,14 +18,14 @@ const { ADMIN_TEST_TOKEN, TEST_URL } = require('../generateToken.js');
 
 describe(`'API - GET - /configuration' test suite`, () => {
   it('should successfully get specific configuration', async () => {
-    await request(`${TEST_URL}/api/configuration`)
-      .get(`/?key=key1&token=${ADMIN_TEST_TOKEN}`)
+    await request(`${TEST_URL}/api/configurations/key1`)
+      .get(`/?token=${ADMIN_TEST_TOKEN}`)
       .expect(200, JSON.stringify({key: "value"}));
   });
 
   it('should return unauthorized error for missing token requests', async () => {
-    await request(`${TEST_URL}/api/configuration`)
-      .get('/key=key1')
+    await request(`${TEST_URL}/api/configurations/key1`)
+      .get('/')
       .expect(403, {
         error: '403 - Json Web Token Error',
         message: 'You must provide a JWT token'
@@ -33,8 +33,8 @@ describe(`'API - GET - /configuration' test suite`, () => {
   });
 
   it('should return  unauthorized error for invalid token requests', async () => {
-    await request(`${TEST_URL}/api/configuration`)
-      .get('/?key=key1&token=invalid-token')
+    await request(`${TEST_URL}/api/configurations/key1`)
+      .get('/?token=invalid-token')
       .expect(403, {
         error: '403 - Json Web Token Error',
         message: 'Invalid JWT token provided'

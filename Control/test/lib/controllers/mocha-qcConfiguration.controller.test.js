@@ -71,7 +71,7 @@ describe(`'QCConfigurationController' test suite`, () => {
     });
     
     it('should return configuration for a valid key', async () => {
-      const req = { query: { key: 'o2/components/qc/ANY/any/prefix1' } };
+      const req = { params: { key: 'o2/components/qc/ANY/any/prefix1' } };
       const res = { status: sinon.stub().returnsThis(), json: sinon.stub() };
       await qcConfigurationController.getConfigurationByKey(req, res);
       assert.ok(res.status.calledWith(200));
@@ -79,7 +79,7 @@ describe(`'QCConfigurationController' test suite`, () => {
     });
 
     it('should return 400 for missing configuration key', async () => {
-      const req = { query: {} };
+      const req = { params: {} };
       const res = { status: sinon.stub().returnsThis(), json: sinon.stub() };
       await qcConfigurationController.getConfigurationByKey(req, res);
       assert.ok(res.status.calledWith(400));
