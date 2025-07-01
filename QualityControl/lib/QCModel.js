@@ -88,7 +88,7 @@ export const setupQcModel = () => {
   const objectsGetValidation = objectsGetValidationMiddlewareFactory(filterService);
   const objectGetContentsValidation = objectGetContentsValidationMiddlewareFactory(filterService);
 
-  initializeIntervals(intervalsService, qcObjectService, filterService);
+  initializeIntervals(intervalsService, qcObjectService, filterService, runModeService);
 
   return {
     userController,
