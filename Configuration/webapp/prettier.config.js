@@ -10,14 +10,15 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
- */
+*/
 
-import { type RouteConfig, index, route, prefix } from '@react-router/dev/routes';
+// @ts-check
 
-export default [
-  index('routes/home.tsx'),
-  ...prefix('runs', [
-    index('routes/runs/overview.tsx'),
-    route(':runNumber', 'routes/runs/details.tsx'),
-  ]),
-] satisfies RouteConfig;
+const config = {
+  printWidth: 100,
+  trailingComma: "es5",
+  semi: true,
+  singleQuote: true,
+};
+
+export default config;
