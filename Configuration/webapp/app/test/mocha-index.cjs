@@ -2,13 +2,19 @@ const puppeteer = require('puppeteer');
 const config = require('./test-config.cjs');
 
 let page;
+
+global.test = {
+  page: null,
+  helpers: {},
+};
+
 describe('Configuration', function () {
   let browser;
   this.timeout(50000);
   this.slow(1000);
   const url = `http://${config.http.hostname}:${config.http.port}/`;
 
-  before(async () => {
+  before(async function () {
     browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
       headless: true,
@@ -30,22 +36,24 @@ describe('Configuration', function () {
       }
     });
     await page.setViewport({ width: 1200, height: 770 });
-    exports.page = page;
-    const helpers = { url };
-    exports.helpers = helpers;
+
+    global.test.page = page;
+    global.test.helpers.url = url;
   });
 
   require('./public/page-root-mocha.cjs');
 
-  beforeEach(() => (this.ok = true));
+  beforeEach(function () {
+    return (this.ok = true);
+  });
 
-  afterEach(() => {
+  afterEach(function () {
     if (!this.ok) {
       throw new Error('something went wrong');
     }
   });
 
-  after(async () => {
+  after(async function () {
     await browser.close();
   });
 });
