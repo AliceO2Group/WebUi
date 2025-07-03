@@ -93,9 +93,9 @@ function treeTable(model) {
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const treeRows = (model) => !model.object.sideTree
+const treeRows = (model) => !model.object.tree
   ? null
-  : model.object.sideTree.children.map((children) => treeRow(model, children, 0));
+  : model.object.tree.children.map((children) => treeRow(model, children, 0));
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows

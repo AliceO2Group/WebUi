@@ -34,15 +34,15 @@
     "mariadb": "3.4.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.28.0",
+    "@eslint/js": "^9.30.0",
     "@stylistic/eslint-plugin-js": "^4.4.0",
-    "eslint": "^9.28.0",
-    "eslint-plugin-jsdoc": "^50.7.1",
+    "eslint": "^9.30.0",
+    "eslint-plugin-jsdoc": "^51.3.1",
     "globals": "^16.2.0",
-    "mocha": "^11.5.0",
+    "mocha": "^11.7.0",
     "nyc": "^17.1.0",
-    "puppeteer": "^24.10.0",
-    "sinon": "^20.0.0"
+    "puppeteer": "^24.11.1",
+    "sinon": "^21.0.0"
   },
   "bundleDependencies": [
     "@aliceo2/web-ui"

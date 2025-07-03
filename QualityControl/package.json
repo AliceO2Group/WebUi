@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/qc",
-  "version": "3.12.1",
+  "version": "3.13.0",
   "description": "O2 Quality Control Web User Interface",
   "author": "George Raduta",
   "contributors": [
@@ -24,6 +24,7 @@
     "coverage-lcov": "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/lcov.info test/test-index.js",
     "coverage-local": "node --test --experimental-test-coverage --test-reporter=spec test/test-index.js",
     "test": "node --test test/test-index.js",
+    "test-debug": "node --inspect test/test-index.js --debug",
     "copy-config": "sh scripts/copy-config.sh",
     "docker-dev": "npm run copy-config && docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
     "docker-test": "docker compose -f docker-compose.yml -f docker-compose.test.yml up --build --abort-on-container-exit",
@@ -45,15 +46,15 @@
     "umzug": "^3.8.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.28.0",
+    "@eslint/js": "^9.29.0",
     "@stylistic/eslint-plugin-js": "^4.4.0",
-    "eslint": "^9.28.0",
-    "eslint-plugin-jsdoc": "^50.7.1",
+    "eslint": "^9.29.0",
+    "eslint-plugin-jsdoc": "^51.2.3",
     "globals": "^16.2.0",
     "nock": "^14.0.4",
     "puppeteer": "^24.10.0",
     "sequelize-cli": "^6.6.2",
-    "sinon": "^20.0.0",
+    "sinon": "^21.0.0",
     "supertest": "^7.1.0"
   },
   "bundleDependencies": [
