@@ -29,7 +29,7 @@ export const Navbar = () => (
       <StyledNavLink className={'btnStyledNav btn-tab'} to={'/runs'}>
         Runs
       </StyledNavLink>
-      <button onClick={() => console.log(getSessionData())}>Log session data</button>
+      <button onClick={() => alert(JSON.stringify(getSessionData()))}>Log session data</button>
     </div>
   </nav>
 );
