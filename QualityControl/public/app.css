@@ -119,3 +119,85 @@
   font-size: 2em;
   margin-bottom: .5em;
 }
+
+.runs-mode-container {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 3px;
+  padding-left: 25px;
+  background: #f7fafd;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8em;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.runs-mode-label {
+  gap: 0.75em;
+  cursor: default;
+  display: flex;
+  align-items: center;
+}
+
+.runs-mode-label.disabled {
+  opacity: 0.5;
+}
+
+.runs-mode-checkbox {
+  cursor: pointer;
+  margin-top: 0;
+}
+
+.runs-mode-checkbox:disabled {
+  cursor: not-allowed;
+}
+
+.runs-mode-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #333;
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.run-info-container {
+  display: flex;
+  gap: 2em;
+  margin-left: 1.5em;
+}
+
+.run-detail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border-left: 0.1px solid;
+  padding-left: 5px;
+}
+
+.run-detail-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.run-detail-value {
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+.status-ongoing {
+  color: var(--color-success);
+}
+
+.status-ended {
+  color: var(--color-primary-dark);
+}
+
+.status-not-found {
+  color: var(--color-danger);
+}
+
+.status-unknown {
+  color: var(--color-gray-dark);
+}
