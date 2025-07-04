@@ -78,6 +78,11 @@ export default class Model extends Observable {
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
 
+    //Run mode
+    this._inRunMode = false; // Whether the application is in run mode or not
+    this._runNumber = null; // Run number to be used in run mode
+    this._runStatus = null; // Status of the run in run mode
+
     // Setup keyboard dispatcher
     window.addEventListener('keydown', this.handleKeyboardDown.bind(this));
 
@@ -241,7 +246,7 @@ export default class Model extends Observable {
       case 'objectTree':
         this.page = 'objectTree';
         setBrowserTabTitle('QCG-Tree');
-        this.object.loadList();
+        await this.object.loadList();
         // Data is already loaded at beginning
         if (this.object.selected) {
           this.object.loadObjectByName(this.object.selected.name);
@@ -361,5 +366,38 @@ export default class Model extends Observable {
   set isUpdateVisible(value) {
     this._isUpdateVisible = value ? true : false;
     this.notify();
+  }
+
+  get inRunMode() {
+    return this._inRunMode;
+  }
+
+  set inRunMode(value) {
+    this._inRunMode = value;
+    if (value) {
+      this._runNumber = this.router.params.RunNumber || null;
+    } else {
+      this._runNumber = null;
+      this._runStatus = null; // Reset run status when leaving run mode
+    }
+
+    this.notify();
+  }
+
+  get runNumber() {
+    return this._runNumber;
+  }
+
+  get runStatus() {
+    return this._runStatus;
+  }
+
+  set runStatus(value) {
+    this._runStatus = value;
+    this.notify();
+  }
+
+  get canActivateRunsMode() {
+    return this.router.params.RunNumber && this.router.params.RunNumber.trim() !== '';
   }
 }

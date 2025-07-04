@@ -33,13 +33,14 @@ export default function objectTreeHeader(qcObject, filterModel) {
     : `${qcObject.currentList.length} items`;
 
   return [
-    h('.w-33.text-center', [
+    // display flex and align items center to make sure the header is aligned properly
+    h('.w-33.text-center.flex-grow', [
       h('b.f4', 'Objects'),
       ' ',
       qcObject.objectsRemote.isSuccess() && h('span', `(${howMany})`),
     ]),
-    h('.flex-grow.text-right', [
-      filterPanelToggleButton(filterModel),
+    h('.flex-row.items-center.g2.justify-end', [
+      model.inRunMode ? null : filterPanelToggleButton(filterModel),
       ' ',
       h('.dropdown', {
         title: 'Sort by', class: qcObject.sortBy.open ? 'dropdown-open' : '',
@@ -68,6 +69,7 @@ export default function objectTreeHeader(qcObject, filterModel) {
         disabled: qcObject.queryingObjects ? true : false,
         oninput: (e) => qcObject.search(e.target.value),
       }),
+      ' ',
     ]),
   ];
 }
