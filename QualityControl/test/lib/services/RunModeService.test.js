@@ -39,28 +39,35 @@ export const runModeServiceTestSuite = async () => {
     suite('retrievePathsAndSetRunStatus', () => {
       test('should retrieve paths and cache them if run is ongoing', async () => {
         const runNumber = 1234;
-        const expectedPaths = [{ path: '/run/path1' }];
+        const rawPaths = [{ path: '/run/path1' }];
 
         bookkeepingService.retrieveRunStatus.withArgs(runNumber).resolves(RunStatus.ONGOING);
-        dataService.getObjectsLatestVersionList.resolves(expectedPaths);
+        dataService.getObjectsLatestVersionList.resolves(rawPaths);
 
         const result = await runModeService.retrievePathsAndSetRunStatus(runNumber);
 
-        strictEqual(result, expectedPaths);
+        deepStrictEqual(result, {
+          paths: [{ name: '/run/path1' }],
+          runStatus: RunStatus.ONGOING,
+        });
+
         strictEqual(runModeService._ongoingRuns.has(runNumber), true);
-        strictEqual(runModeService._ongoingRuns.get(runNumber), expectedPaths);
+        strictEqual(runModeService._ongoingRuns.get(runNumber), rawPaths);
       });
 
       test('should not cache if run is not ongoing', async () => {
         const runNumber = 1234;
-        const expectedPaths = [{ path: '/ended/path' }];
+        const rawPaths = [{ path: '/ended/path' }];
 
         bookkeepingService.retrieveRunStatus.resolves(RunStatus.ENDED);
-        dataService.getObjectsLatestVersionList.resolves(expectedPaths);
+        dataService.getObjectsLatestVersionList.resolves(rawPaths);
 
         const result = await runModeService.retrievePathsAndSetRunStatus(runNumber);
 
-        strictEqual(result, expectedPaths);
+        deepStrictEqual(result, {
+          paths: [{ name: '/ended/path' }],
+          runStatus: RunStatus.ENDED,
+        });
         strictEqual(runModeService._ongoingRuns.has(runNumber), false);
       });
 
@@ -71,7 +78,11 @@ export const runModeServiceTestSuite = async () => {
 
         const result = await runModeService.retrievePathsAndSetRunStatus(runNumber);
 
-        strictEqual(result, cachedPaths);
+        deepStrictEqual(result, {
+          paths: [{ name: '/cached/path' }],
+          runStatus: 'ONGOING',
+        });
+
         sinon.assert.notCalled(bookkeepingService.retrieveRunStatus);
       });
     });
