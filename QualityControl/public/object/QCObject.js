@@ -171,19 +171,25 @@ export default class QCObject extends BaseViewModel {
 
   /**
    * Ask server for all available objects, fills `tree` of objects
+   * @param inRunMode
    * @returns {undefined}
    */
-  async loadList() {
+  async loadList(inRunMode = false) {
     this.objectsRemote = RemoteData.loading();
     this.notify();
     this.queryingObjects = true;
     let offlineObjects = [];
-    const result = await this.model.services.object.getObjects(this.filterModel.filterMap);
+    const result = await this.model.services.object.getObjects(inRunMode);
+
     if (result.isSuccess()) {
-      offlineObjects = result.payload;
+      offlineObjects = inRunMode ? result.payload.paths : result.payload;
+      if (inRunMode) {
+        this.model.runStatus = result.payload.runStatus;
+      }
     } else {
-      const failureMessage = 'Failed to retrieve list of objects. Please contact an administrator';
-      this.model.notification.show(failureMessage, 'danger', Infinity);
+      const errorMessage =
+        result?._error?.message || 'Failed to retrieve list of objects. Please contact an administrator';
+      this.model.notification.show(errorMessage, 'danger', Infinity);
     }
     this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
     this.list = offlineObjects;
@@ -466,10 +472,12 @@ export default class QCObject extends BaseViewModel {
 
   /**
    * Function that reloads the object list with filters applied
+   * @param inRunMode
+   * @param inRunMode
    * @returns {undefined}
    */
-  async triggerFilter() {
+  async triggerFilter(inRunMode = false) {
     this.selected = null;
-    await this.loadList();
+    await this.loadList(inRunMode);
   }
 }

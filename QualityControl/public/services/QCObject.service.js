@@ -168,13 +168,20 @@ export default class QCObjectService {
 
   /**
    * Ask server for all available objects from CCDB
+   * @param inRunMode
    * @returns {JSON} List of Objects
    * @deprecated
    */
-  async getObjects() {
+  async getObjects(inRunMode = false) {
     const hasFilters = Object.values(this.filterModel.filterMap).some(Boolean);
     const fields = hasFilters ? ['path'] : undefined; // If there are filters more unneeded fields are sent down.
-    const url = this._buildURL('/api/objects?', undefined, undefined, undefined, fields);
+    const url = this._buildURL(
+      `/api/objects?${inRunMode ? 'inRunMode=true' : ''}`, //url
+      undefined, // id
+      undefined, // validFrom
+      undefined, // filterMap
+      fields, // fields
+    );
     const { result, ok } = await this.model.loader.get(url);
     return ok ? RemoteData.success(result) : RemoteData.failure(result);
   }
