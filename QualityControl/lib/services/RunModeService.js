@@ -14,6 +14,8 @@
 
 import { LogManager } from '@aliceo2/web-ui';
 import { RunStatus } from '../../common/library/runStatus.enum.js';
+import { parseObjects } from '../../common/library/qcObject/utils.js';
+import QCObjectDto from '../dtos/QCObjectDto.js';
 
 /**
  * A service that fetches information about runs and their status.
@@ -47,21 +49,29 @@ export class RunModeService {
   /**
    * Starts monitoring when the parameters contain a RunNumber, and the run is determined to be ongoing
    * @param {number} runNumber - RunNumber to be applied when fetching list of objects.
-   * @returns {Promise<void>}
+   * @returns {Promise<{ paths: QCObjectDto[], runStatus: RunStatus }>}
    */
   async retrievePathsAndSetRunStatus(runNumber) {
     if (this._ongoingRuns.has(runNumber)) {
-      return this._ongoingRuns.get(runNumber);
+      const cachedPaths = parseObjects(this._ongoingRuns.get(runNumber), QCObjectDto);
+      return { paths: cachedPaths, runStatus: RunStatus.ONGOING };
     }
+
     const runStatus = await this._bookkeepingService.retrieveRunStatus(runNumber);
-    const paths = await this._dataService.getObjectsLatestVersionList({
+    const rawPaths = await this._dataService.getObjectsLatestVersionList({
       filters: { RunNumber: runNumber },
     });
 
     if (runStatus === RunStatus.ONGOING) {
-      this._ongoingRuns.set(runNumber, paths);
+      this._ongoingRuns.set(runNumber, rawPaths);
     }
-    return paths;
+
+    const parsedPaths = parseObjects(rawPaths, QCObjectDto);
+
+    return {
+      paths: parsedPaths,
+      runStatus,
+    };
   }
 
   /**

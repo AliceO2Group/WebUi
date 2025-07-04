@@ -13,7 +13,7 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
-import { isObjectOfTypeChecker } from '../../common/library/qcObject/utils.js';
+import { isObjectOfTypeChecker, parseObjects } from '../../common/library/qcObject/utils.js';
 import QCObjectDto from '../dtos/QCObjectDto.js';
 import QcObjectIdentificationDto from '../dtos/QcObjectIdentificationDto.js';
 
@@ -72,7 +72,7 @@ export class QcObjectService {
   async refreshCache() {
     try {
       const objects = await this._dbService.getObjectsTreeList(this._dbService.CACHE_PREFIX);
-      this._cache.objects = this._parseObjects(objects);
+      this._cache.objects = parseObjects(objects, QCObjectDto);
       this._cache.lastUpdate = Date.now();
     } catch (error) {
       this._logger.errorMessage(
@@ -107,12 +107,12 @@ export class QcObjectService {
         return this._cache.objects.filter((object) => object.name.startsWith(prefix));
       }
       const objects = await this._dbService.getObjectsTreeList(prefix);
-      return this._parseObjects(objects);
+      return parseObjects(objects, QCObjectDto);
     }
 
     // If filters are provided, use /latest endpoint of DataService
     const objects = await this._dbService.getObjectsLatestVersionList({ prefix, filters, fields });
-    return this._parseObjects(objects);
+    return parseObjects(objects, QCObjectDto);
   }
 
   /**
@@ -209,22 +209,6 @@ export class QcObjectService {
 
     const rootJson = await this._rootService.toJSON(root);
     return rootJson;
-  }
-
-  /**
-   * Given a list of objects form CCDB, parse, filter and keep only valid objects.
-   * Use `for loop` to iterate only once rather than chained array operations as we expect lots of objects
-   * @param {Array<object>} objects - objects to be filtered
-   * @returns {Array<QcObjectLeaf>} - list of objects parsed and filtered
-   */
-  _parseObjects(objects) {
-    const list = [];
-    for (const object of objects) {
-      if (QCObjectDto.isObjectPathValid(object)) {
-        list.push(QCObjectDto.toQcObjectLeaf(object));
-      }
-    }
-    return list;
   }
 
   /**

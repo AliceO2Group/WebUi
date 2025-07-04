@@ -49,14 +49,15 @@ export class ObjectController {
       const { prefix, fields, filters = {}, inRunMode = false } = req.query;
 
       const { RunNumber: runNumber } = filters;
-      let list = [];
+      let list = null;
       if (inRunMode && !runNumber) {
         return updateAndSendExpressResponseFromNativeError(
           res,
           new InvalidInputError('RunNumber is required when in run mode'),
         );
       } else if (inRunMode && runNumber) {
-        list = await this._runModeService.retrievePathsAndSetRunStatus(runNumber, prefix);
+        const { paths, runStatus } = await this._runModeService.retrievePathsAndSetRunStatus(runNumber, prefix);
+        list = { paths, runStatus };
       } else {
         list = await this._objService.retrieveLatestVersionOfObjects({ prefix, fields, filters });
       }
