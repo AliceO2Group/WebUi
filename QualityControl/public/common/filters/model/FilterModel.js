@@ -32,6 +32,7 @@ export default class FilterModel extends Observable {
     this.filterService = new FilterService(this);
     this._filterMap = {};
     this.isVisible = true;
+    this._runsModeInterval = null;
   }
 
   /**
@@ -140,5 +141,42 @@ export default class FilterModel extends Observable {
   activeFilter() {
     const { params } = this.model.router;
     return CCDB_QUERY_PARAMS.some((filterKey) => params[filterKey]?.trim());
+  }
+
+  async activateRunsMode(baseViewModel) {
+    model.inRunMode = true;
+    this._filterMap = { RunNumber: this.model.router.params.RunNumber };
+    this.setFilterToURL();
+    await baseViewModel.triggerFilter(true);
+    this.notify();
+
+    this._manageRunsModeInterval(baseViewModel);
+  }
+
+  async _manageRunsModeInterval(baseViewModel) {
+    this._clearRunsModeInterval();
+    if (model.runStatus === 'ONGOING') {
+      this._runsModeInterval = setInterval(async () => {
+        await baseViewModel.triggerFilter(true);
+        this.notify();
+        if (model.runStatus !== 'ONGOING') {
+          this._clearRunsModeInterval();
+        }
+      }, 30000);
+    }
+  }
+
+  _clearRunsModeInterval() {
+    if (this._runsModeInterval) {
+      clearInterval(this._runsModeInterval);
+      this._runsModeInterval = null;
+    }
+  }
+
+  async desactivateRunsMode(baseViewModel) {
+    model.inRunMode = false;
+    this.setFilterToURL();
+    await baseViewModel.triggerFilter(false);
+    this.notify();
   }
 }
