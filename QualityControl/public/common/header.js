@@ -21,6 +21,7 @@ import aboutViewHeader from '../pages/aboutView/components/aboutViewHeader.js';
 import LayoutListHeader from '../pages/layoutListView/components/LayoutListHeader.js';
 import { objectViewHeader } from '../pages/objectView/components/header.js';
 import { filtersPanel } from './filters/filterViews.js';
+import { runsModeCheckbox } from './runsModeCheckbox.js';
 
 /**
  * Shows header of the application, split with 3 parts:
@@ -33,6 +34,7 @@ import { filtersPanel } from './filters/filterViews.js';
 export default (model) => h('.flex-col', [
   h('.flex-row.p2', [
     commonHeader(model),
+    runsModeSpecific(model),
     headerSpecific(model),
   ]),
   filterSpecific(model),
@@ -69,6 +71,14 @@ const filterSpecific = (model) => {
     case 'objectTree': return filtersPanel(filterModel, object);
     case 'objectView': return filtersPanel(filterModel, objectViewModel);
     case 'about': return filtersPanel(filterModel, aboutViewModel);
+    default: return null;
+  }
+};
+
+const runsModeSpecific = (model) => {
+  const { page, filterModel, object } = model;
+  switch (page) {
+    case 'objectTree': return runsModeCheckbox(object, filterModel);
     default: return null;
   }
 };
