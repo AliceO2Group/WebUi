@@ -8,7 +8,7 @@ import { h } from '/js/src/index.js';
  */
 export function runsModeCheckbox(pageModel, filterModel) {
   const checkbox = createRunsModeCheckbox(pageModel, filterModel);
-  const label = h('span', { class: 'runs-mode-title' }, 'Run Mode');
+  const label = h('span.items-center.runs-mode-title', 'Run Mode');
   const runInfo = model.inRunMode ? createRunInfoDisplay() : null;
 
   const content = [checkbox, label];
@@ -16,17 +16,12 @@ export function runsModeCheckbox(pageModel, filterModel) {
     content.push(runInfo);
   }
 
-  return h(
-    'div',
-    {
-      class: 'runs-mode-container',
-    },
-    [
-      h('span', {
-        class: `runs-mode-label${model.canActivateRunsMode ? '' : ' disabled'}`,
-      }, content),
-    ],
-  );
+  return h('div.runs-mode-container', [
+    h(
+      `span.items-center.runs-mode-label${model.canActivateRunsMode ? '' : '.disabled'}`,
+      content,
+    ),
+  ]);
 }
 
 /**
@@ -36,17 +31,16 @@ export function runsModeCheckbox(pageModel, filterModel) {
  * @returns {vnode} - the checkbox element for runs mode
  */
 function createRunsModeCheckbox(pageModel, filterModel) {
-  return h('input.form-check-input', {
+  return h('input.form-check-input.runs-mode-checkbox', {
     type: 'checkbox',
     disabled: !model.canActivateRunsMode,
     checked: model.inRunMode || false,
-    class: 'runs-mode-checkbox',
     title: model.canActivateRunsMode
       ? 'Enable runs mode to filter objects by run number. Other filters will be disabled.'
       : 'Runs mode is disabled. Enter a run number to enable.',
     onclick: async (event) => event.target.checked
       ? filterModel.activateRunsMode(pageModel)
-      : filterModel.desactivateRunsMode(pageModel),
+      : filterModel.deactivateRunsMode(pageModel),
   });
 }
 
@@ -55,7 +49,7 @@ function createRunsModeCheckbox(pageModel, filterModel) {
  * @returns {vnode} - the run information display element
  */
 function createRunInfoDisplay() {
-  return h('div', { class: 'run-info-container' }, [
+  return h('div.run-info-container', [
     createRunDetail('Run Number', model.runNumber),
     createRunDetail('Status', model.runStatus || 'Unknown'),
   ]);
@@ -72,9 +66,9 @@ function createRunDetail(labelText, value) {
   const statusClass = isStatus ? getStatusClass(value) : '';
   const statusTitle = isStatus ? getStatusTitle(value) : undefined;
 
-  return h('div', { class: 'run-detail' }, [
-    h('span', { class: 'run-detail-label' }, labelText),
-    h('span', { class: `run-detail-value ${statusClass}`, title: statusTitle }, value),
+  return h('div.run-detail.flex-column.items-start', [
+    h('span.run-detail-label', labelText),
+    h(`b.${statusClass}`, { title: statusTitle }, value),
   ]);
 }
 
