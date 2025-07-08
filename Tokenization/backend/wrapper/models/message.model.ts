@@ -23,9 +23,9 @@
  * @property MESSAGE_EVENT_REVOKE_TOKEN: Event for revoking an existing token.
  */
 enum DuplexMessageEvent {
-  MESSAGE_EVENT_EMPTY = "MESSAGE_EVENT_EMPTY",
-  MESSAGE_EVENT_NEW_TOKEN = "MESSAGE_EVENT_NEW_TOKEN",
-  MESSAGE_EVENT_REVOKE_TOKEN = "MESSAGE_EVENT_REVOKE_TOKEN",
+  MESSAGE_EVENT_EMPTY = 0,
+  MESSAGE_EVENT_NEW_TOKEN = 1,
+  MESSAGE_EVENT_REVOKE_TOKEN = 2,
 }
 
 // ======================================
