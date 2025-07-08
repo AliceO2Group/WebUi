@@ -368,35 +368,56 @@ export default class Model extends Observable {
     this.notify();
   }
 
+  /**
+   * Checks if run mode is activated
+   * @returns {boolean} true if activated
+   */
   get inRunMode() {
     return this._inRunMode;
   }
 
-  set inRunMode(value) {
-    this._inRunMode = value;
-    if (value) {
-      this._runNumber = this.router.params.RunNumber || null;
-    } else {
-      this._runNumber = null;
-      this._runStatus = null; // Reset run status when leaving run mode
-    }
-
+  enterRunMode() {
+    this._inRunMode = true;
+    this._runNumber = this.router.params.RunNumber || null;
     this.notify();
   }
 
+  exitRunMode() {
+    this._inRunMode = false;
+    this._runNumber = null;
+    this._runStatus = null;
+    this.notify();
+  }
+
+  /**
+   * Get run number
+   * @returns {null | number} Run number or null if not set
+   */
   get runNumber() {
     return this._runNumber;
   }
 
+  /**
+   * Activate/Deactivate runs mode
+   * @returns {null | string} Run status or null if not set
+   */
   get runStatus() {
     return this._runStatus;
   }
 
+  /**
+   * Sets the current run status and triggers a notification update.
+   * @param {string} value - The new run status (e.g., 'ONGOING', 'COMPLETED').
+   */
   set runStatus(value) {
     this._runStatus = value;
     this.notify();
   }
 
+  /**
+   * Determines if runs mode can be activated based on the presence of a valid RunNumber in the router params.
+   * @returns {boolean} True if RunNumber is present and not empty
+   */
   get canActivateRunsMode() {
     return this.router.params.RunNumber && this.router.params.RunNumber.trim() !== '';
   }

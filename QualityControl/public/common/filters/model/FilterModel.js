@@ -143,16 +143,38 @@ export default class FilterModel extends Observable {
     return CCDB_QUERY_PARAMS.some((filterKey) => params[filterKey]?.trim());
   }
 
+  /**
+   * Activates the runs mode
+   * @param {object} baseViewModel - The view model that provides the triggerFilter method.
+   * @returns {Promise<void>}
+   */
   async activateRunsMode(baseViewModel) {
-    model.inRunMode = true;
     this._filterMap = { RunNumber: this.model.router.params.RunNumber };
     this.setFilterToURL();
+    this.model.enterRunMode();
     await baseViewModel.triggerFilter(true);
-    this.notify();
-
     this._manageRunsModeInterval(baseViewModel);
+    this.notify();
   }
 
+  /**
+   * Deactivates the runs mode
+   * @param {object} baseViewModel - The view model that provides the triggerFilter method.
+   * @returns {Promise<void>}
+   */
+  async deactivateRunsMode(baseViewModel) {
+    model.exitRunMode();
+    this.setFilterToURL();
+    await baseViewModel.triggerFilter(false);
+    this.notify();
+  }
+
+  /**
+   * Starts an interval to refresh data periodically while the run is ongoing.
+   * The interval is cleared if the run ends.
+   * @param {object} baseViewModel - The view model used to trigger data refresh.
+   * @returns {Promise<void>}
+   */
   async _manageRunsModeInterval(baseViewModel) {
     this._clearRunsModeInterval();
     if (model.runStatus === 'ONGOING') {
@@ -162,21 +184,18 @@ export default class FilterModel extends Observable {
         if (model.runStatus !== 'ONGOING') {
           this._clearRunsModeInterval();
         }
+      // TODO: Should be provided in config file ??
       }, 30000);
     }
   }
 
+  /**
+   * Clears the interval set during runs mode.
+   */
   _clearRunsModeInterval() {
     if (this._runsModeInterval) {
       clearInterval(this._runsModeInterval);
       this._runsModeInterval = null;
     }
-  }
-
-  async desactivateRunsMode(baseViewModel) {
-    model.inRunMode = false;
-    this.setFilterToURL();
-    await baseViewModel.triggerFilter(false);
-    this.notify();
   }
 }
