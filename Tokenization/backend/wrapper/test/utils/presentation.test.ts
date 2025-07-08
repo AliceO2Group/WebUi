@@ -1,4 +1,4 @@
-import { serializeRequest } from "../serialization.utils";
+import { serializeRequest } from "../../utils/serialization.utils";
 // 1. describe(), test(), it()
 // test suite "Basic Jest methods"
 describe("Basic Jest methods", () => {

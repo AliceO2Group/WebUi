@@ -12,7 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
-import { deserializeRequest, serializeRequest } from "../serialization.utils";
+import {
+  deserializeRequest,
+  serializeRequest,
+} from "../../utils/serialization.utils";
 import { describe, expect, test } from "@jest/globals";
 
 describe("serializeRequest", () => {
