@@ -11,35 +11,39 @@
  *  or submit itself to any jurisdiction.
  */
 
+const { getTaskShortName } = require('../../adapters/task/getTaskShortName.js');
+const { TaskState } = require('../../common/taskState.enum.js');
+const { TaskStatus } = require('../../common/taskStatus.enum.js');
+
 /**
  * Adapter for event messages received on run topic
  * @param {Event.proto} eventMessage - the event message to adapt
- * @param {int64.proto} eventMessage.timestamp - the timestamp of the event
  * @param {Ev_TaskEvent.proto} eventMessage.taskEvent - the object describing the task event
  * @return {TaskEvent} - the adapted event message without the timestampNano field
  */
-exports.taskEventAdapter = ({ timestamp, taskEvent }) => {
+exports.taskEventAdapter = ({ taskEvent }) => {
   const { 
-    name,
-    taskid: taskId,
-    state,
-    status,
+    name = '',
+    taskid,
+    state = TaskState.UNKNOWN,
+    status = TaskStatus.UNDEFINED,
     hostname,
     className,
-    traits,
+    traits: {
+      critical = false, // set to false by default to workaround the lack of optional usage in proto
+    } = {},
     environmentId,
-    path
   } = taskEvent;
+
   return {
-    timestamp: timestamp ? timestamp.toNumber() : undefined,
-    name,
-    taskId,
-    state,
-    status,
+    id: taskid,
+    taskId: taskid,
+    name: getTaskShortName(name),
     hostname,
+    status,
+    state: (state === TaskState.ERROR && critical) ? TaskState.ERROR_CRITICAL : state,
     className,
-    traits,
+    isCritical: critical,
     environmentId,
-    path
   }
 };

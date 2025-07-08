@@ -337,7 +337,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
     await page.evaluate(() => document.querySelector('#addKVListButton').click())
     const {variables, areaString} = await page.evaluate(() => {
-      return {variables: window.model.workflow.form.variables, areaString: window.model.workflow.kvPairsString};
+      return {variables: window.model.workflow.form.variables, areaString: window.model.workflow.getTextAreaValue()};
     });
     assert.deepStrictEqual(variables, currentVariables, 'diff vars');
     assert.strictEqual(areaString, toBeTyped, 'dif area')

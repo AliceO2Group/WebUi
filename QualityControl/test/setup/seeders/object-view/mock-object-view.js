@@ -1,6 +1,7 @@
-import { CCDB_RESPONSE_BODY_KEYS } from '../../../../lib/services/ccdb/CcdbConstants.js';
+import { CCDB_RESPONSE_BODY_KEYS, CCDB_FILTER_FIELDS } from '../../../../lib/services/ccdb/CcdbConstants.js';
 
 const { ID, PATH, VALID_FROM, VALID_UNTIL, CREATED } = CCDB_RESPONSE_BODY_KEYS;
+const { LAST_MODIFIED } = CCDB_FILTER_FIELDS;
 
 export const MOCK_OBJECT_IDENTIFICATION_RESPONSE = {
   path: 'qc/test/object/1',
@@ -62,6 +63,26 @@ export const MOCK_OBJECT_VERSIONS_RESPONSE = {
       [VALID_FROM]: 1655916321231,
       [CREATED]: 1655916321276,
       [ID]: '"b4944c1d-f24a-11ec-a509-c0a80209250c"',
+    },
+  ],
+};
+
+export const MOCK_OBJECT_VERSIONS_RESPONSE_RUN_NUMBER_FILTER = {
+  objects: [
+    {
+      [VALID_FROM]: 1656072357492,
+      [CREATED]: 1656072357533,
+      [ID]: '"016fa8ac-f3b6-11ec-b9a9-c0a80209250c"',
+    },
+  ],
+};
+
+export const MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER = {
+  objects: [
+    {
+      [PATH]: 'qc/test/object/1',
+      [CREATED]: 1656072357533,
+      [LAST_MODIFIED]: 1656072357492,
     },
   ],
 };

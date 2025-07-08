@@ -17,13 +17,17 @@ const { ConsumerGroups } = require('./enums/consumerGroups.enum.js');
 const { DcsIntegratedEventAdapter } = require('../adapters/DcsIntegratedEventAdapter.js');
 const {
   EmitterKeys: {
-    ENVIRONMENTS_TRACK, 
+    ENVIRONMENTS_TRACK,
+    TASKS_TRACK,
     INTEGRATED_SERVICES_TRACK: { ODC }
   }
 } = require('./../common/emitterKeys.enum.js');
 const { fromEcsIntegratedServiceEventToEvent } = require('./adapters/fromEcsIntegratedServiceEventToEvent.js');
+const { fromEcsEventToEnvironmentEvent } = require('./adapters/fromEcsEventToEnvironmentEvent.js');
+const { odcDeviceEventAdapter } = require('./adapters/odc/odcDeviceEventAdapter.js');
 const { runEventAdapter } = require('./adapters/runEventAdapter.js');
 const { taskEventAdapter } = require('./adapters/taskEventAdapter.js');
+const { adaptInt64ToNumber } = require('../common/utils/adaptInt64ToNumber.js');
 const { Topics } = require('./enums/topics.enum.js');
 
 /**
@@ -165,6 +169,7 @@ class AliEcsSynchronizer {
    */
   async _onIntegratedServiceOdcMessage(eventMessage) {
     const ODC_PARTITION_STATE_CHANGED_PREFIX = 'odc.partitionStateChanged';
+    const ODC_DEVICE_STATE_CHANGED_PREFIX = 'odc.deviceStateChanged';
 
     if (!eventMessage?.integratedServiceEvent) {
       this._logger.errorMessage(
@@ -179,6 +184,9 @@ class AliEcsSynchronizer {
     };
     if (integratedServiceEvent.name.startsWith(ODC_PARTITION_STATE_CHANGED_PREFIX)) {
       this._eventEmitter.emit(ODC.ENVIRONMENT_STATE_CHANGE, integratedServiceEvent);
+    } else if (integratedServiceEvent.name.startsWith(ODC_DEVICE_STATE_CHANGED_PREFIX)) {
+      const odcTaskEvent = odcDeviceEventAdapter(integratedServiceEvent);
+      this._eventEmitter.emit(ODC.DEVICE_STATE_CHANGE, odcTaskEvent);
     }
   }
 
@@ -194,7 +202,9 @@ class AliEcsSynchronizer {
       );
       return;
     }
-    this._eventEmitter.emit(ENVIRONMENTS_TRACK, eventMessage );
+    const environmentEvent = fromEcsEventToEnvironmentEvent(eventMessage);
+    environmentEvent.timestamp = adaptInt64ToNumber(eventMessage.timestamp);
+    this._eventEmitter.emit(ENVIRONMENTS_TRACK, environmentEvent);
   }
 
   /**
@@ -212,7 +222,16 @@ class AliEcsSynchronizer {
    * @return {void}
    */
   async _onTaskMessage(eventMessage) {
-    taskEventAdapter(eventMessage);
+    if (!eventMessage?.taskEvent) {
+      this._logger.errorMessage(
+        `Received task event message without taskEvent: ${JSON.stringify(eventMessage)}`
+      );
+      return;
+    }
+    const { timestamp: timestampInt64 } = eventMessage;
+    const timestamp = adaptInt64ToNumber(timestampInt64);
+    const taskEvent = taskEventAdapter(eventMessage);
+    this._eventEmitter.emit(TASKS_TRACK, {timestamp, taskEvent});
   }
 }
 
