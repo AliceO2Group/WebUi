@@ -13,7 +13,7 @@
 
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
-const SORTING_BUTTON_PATH = 'header > div > div > div:nth-child(3) > div > button';
+const SORTING_BUTTON_PATH = 'header > div > div > div:nth-child(4) > div > button';
 
 /**
  * Initial page setup tests
@@ -51,7 +51,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should sort list of histograms by name in descending order', async () => {
     await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByNameOptionPath = 'header > div > div > div:nth-child(3) > div > div > a:nth-child(2)';
+    const sortingByNameOptionPath = 'header > div > div > div:nth-child(4) > div > div > a:nth-child(2)';
     await page.locator(sortingByNameOptionPath).click();
 
     const sorted = await page.evaluate(() => ({
@@ -66,7 +66,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should sort list of histograms by name in ascending order', async () => {
     await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByNameOptionPath = 'header > div > div > div:nth-child(3) > div > div > a:nth-child(1)';
+    const sortingByNameOptionPath = 'header > div > div > div:nth-child(4) > div > div > a:nth-child(1)';
     await page.locator(sortingByNameOptionPath).click();
     const sorted = await page.evaluate(() => ({
       list: window.model.object.currentList,
@@ -79,7 +79,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should have filtered results on input search', async () => {
-    await page.type('header > div > div:nth-child(1) > div:nth-child(3) > input', 'qc/test/object/1');
+    await page.type('header > div > div:nth-child(1) > div:nth-child(4) > input', 'qc/test/object/1');
     const rowsDisplayed = await page.evaluate(() => {
       const rows = [];
       document.querySelectorAll('section > div > div > div > table > tbody > tr')
