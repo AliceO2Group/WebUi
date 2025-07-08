@@ -14,17 +14,17 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const proxyquire = require('proxyquire');
 const EventEmitter = require('events');
-const { EmitterKeys: {ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK: { ODC }} } = require('../../../../lib/common/emitterKeys.enum.js');
+const { EnvironmentCacheService } = require('../../../../lib/services/environment/EnvironmentCache.service.js');
+const { EmitterKeys: {
+  ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK: { ODC }, TASKS_TRACK,
+} } = require('../../../../lib/common/emitterKeys.enum.js');
 const { BroadcastKeys: {ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW} } = require('../../../../lib/common/broadcastKeys.enum.js');
 
 describe(`'EnvironmentCacheService' - test suite`, () => {
-  let EnvironmentCacheService;
   let broadcastServiceMock;
   let eventEmitter;
   let environmentCacheService;
-  let fromEcsEventToEnvironmentEventStub;
 
   beforeEach(() => {
     broadcastServiceMock = {
@@ -32,18 +32,6 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
     };
 
     eventEmitter = new EventEmitter();
-
-    fromEcsEventToEnvironmentEventStub = sinon.stub();
-
-    EnvironmentCacheService = proxyquire(
-      '../../../../lib/services/environment/EnvironmentCache.service.js',
-      {
-        './../../kafka/adapters/fromEcsEventToEnvironmentEvent.js': {
-          fromEcsEventToEnvironmentEvent: fromEcsEventToEnvironmentEventStub,
-        },
-      }
-    ).EnvironmentCacheService;
-
     environmentCacheService = new EnvironmentCacheService(broadcastServiceMock, eventEmitter);
   });
 
@@ -131,9 +119,6 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
 
   it('should add a new environment to the cache and broadcast it when receiving first event', () => {
     const environmentEvent = { id: 'abc123', timestamp: Date.now() };
-    const transformedEvent = { id: 'abc123', lastUpdate: environmentEvent.timestamp };
-
-    fromEcsEventToEnvironmentEventStub.returns(transformedEvent);
 
     eventEmitter.emit(ENVIRONMENTS_TRACK, environmentEvent);
 
@@ -147,8 +132,6 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
     const initialEvent = { id: 'abc135', timestamp: Date.now() - 1000 };
     const updatedEvent = { id: 'abc135', timestamp: Date.now() };
     const transformedEvent = { id: 'abc135', events: [], lastUpdate: updatedEvent.timestamp };
-
-    fromEcsEventToEnvironmentEventStub.returns(transformedEvent);
 
     // Emit initial event
     eventEmitter.emit(ENVIRONMENTS_TRACK, initialEvent);
@@ -259,6 +242,91 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
       assert.strictEqual(broadcastServiceMock.broadcast.callCount, 0);
   
       loggerStub.restore();
+    });
+  });
+
+  describe('Test the listener on track `ENVIRONMENTS_TRACK`', () => {
+    it('should NOT update the environment with first error event when it received a task that is not in ERROR/ERROR_CRITICAL', () => {
+      const initialEnvironment = {
+        id: 'env1',
+        hardware: {
+          epn: {
+            info: {
+              state: 'INITIAL_STATE',
+              ddsSessionId: '67890',
+              ddsSessionStatus: 'INACTIVE',
+            },
+          },
+        },
+      };
+      environmentCacheService.addOrUpdateEnvironment(initialEnvironment);
+
+      eventEmitter.emit(TASKS_TRACK, {
+        timestamp: Date.now(),
+        taskEvent: {
+          environmentId: 'env1',
+          state: 'RUNNING',
+          taskid: 1,
+          name: 'task1',
+          hostname: 'host1',
+          className: 'class1',
+          isCritical: false,
+        }
+      });
+      const env = environmentCacheService._environments.get('env1');
+      assert.ok(env, 'Environment "env1" should exist in the cache');
+      assert.strictEqual(env.firstTaskInError, undefined, 'firstTaskInError should be null when no error task is received');
+      assert.strictEqual(broadcastServiceMock.broadcast.callCount, 0, 'No broadcast should be made when task is not in ERROR/ERROR_CRITICAL');
+    });
+
+    it('should successfully update the environment with first error event when it received the first task in ERROR/ERROR_CRITICAL', () => {
+        const initialEnvironment = {
+        id: 'env1',
+        hardware: {
+          epn: {
+            info: {
+              state: 'INITIAL_STATE',
+              ddsSessionId: '67890',
+              ddsSessionStatus: 'INACTIVE',
+            },
+          },
+        },
+      };
+      environmentCacheService.addOrUpdateEnvironment(initialEnvironment);
+      const firstTaskInErrorEventSent = {
+          environmentId: 'env1',
+          state: 'ERROR',
+          taskid: 1,
+          name: 'task1',
+          hostname: 'host1',
+          className: 'class1',
+          isCritical: false,
+      };
+      eventEmitter.emit(TASKS_TRACK, {
+        timestamp: Date.now(),
+        taskEvent: firstTaskInErrorEventSent
+      });
+      let env = environmentCacheService._environments.get('env1');
+      assert.ok(env, 'Environment "env1" should exist in the cache');
+      assert.deepStrictEqual(env.firstTaskInError, firstTaskInErrorEventSent, 'firstTaskInError should Exist');
+      assert.strictEqual(broadcastServiceMock.broadcast.callCount, 1, 'Broadcast should be made when first task in ERROR/ERROR_CRITICAL is received');
+
+      const secondTaskInError = {
+        environmentId: 'env1',
+        state: 'ERROR',
+        taskid: 2,
+        name: 'task1',
+        hostname: 'host1',
+        className: 'class1',
+        isCritical: false,
+      };
+      eventEmitter.emit(TASKS_TRACK, {
+        timestamp: Date.now(),
+        taskEvent: secondTaskInError
+      });
+      env = environmentCacheService._environments.get('env1');
+      assert.deepStrictEqual(env.firstTaskInError, firstTaskInErrorEventSent, 'firstTaskInError should still be the first task in error');
+      assert.strictEqual(broadcastServiceMock.broadcast.callCount, 1, 'Broadcast should not be made again when subsequent task in ERROR/ERROR_CRITICAL is received');
     });
   });
 });
