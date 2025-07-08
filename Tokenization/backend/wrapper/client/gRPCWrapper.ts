@@ -1,4 +1,6 @@
+import path from "path";
 import { ConnectionManager } from "./ConnectionManager/ConnectionManager.ts";
+import { fileURLToPath } from "url";
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -35,5 +37,8 @@ export class gRPCWrapper {
   }
 }
 
-const grpc = new gRPCWrapper("../proto/wrapper.proto", "localhost:50051");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
+const grpc = new gRPCWrapper(PROTO_PATH, "localhost:50051");
 grpc.connectToCentralSystem();

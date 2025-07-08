@@ -1,5 +1,6 @@
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
+import { LogManager } from "@aliceo2/web-ui";
 
 /**
  * @description Manages all the connection between clients and central system.
@@ -20,6 +21,10 @@ import * as protoLoader from "@grpc/proto-loader";
  * - `reconnectAttempts`: The number of consecutive reconnection attempts made after a disconnect or error.
  */
 export class ConnectionManager {
+  // utilities
+  private logger = LogManager.getLogger("ConnectionManager");
+
+  // class properties
   private client: any;
   private stream?: grpc.ClientDuplexStream<any, any>;
   private readonly address: string;
@@ -45,7 +50,7 @@ export class ConnectionManager {
     });
 
     const proto = grpc.loadPackageDefinition(packageDef) as any;
-    const wrapper = proto.wrapper;
+    const wrapper = proto.webui.tokenization;
 
     // Create gRPC client
     this.client = new wrapper.CentralSystem(
@@ -67,13 +72,17 @@ export class ConnectionManager {
       });
 
       this.stream.on("end", () => {
-        console.warn("Stream ended, attempting to reconnect...");
+        this.logger.infoMessage(`Stream ended, attempting to reconnect...`);
         this.stream = undefined;
         this.scheduleReconnect();
       });
 
       this.stream.on("error", (err: any) => {
-        console.error("Wrapper stream error:", err);
+        this.logger.infoMessage(
+          `Stream error:`,
+          err,
+          " attempting to reconnect..."
+        );
         this.stream = undefined;
         this.scheduleReconnect();
       });
@@ -87,7 +96,9 @@ export class ConnectionManager {
     this.reconnectAttempts++;
     const delay = Math.min(1000 * 2 ** this.reconnectAttempts, 30000);
     setTimeout(() => {
-      console.log(`Reconnecting (attempt ${this.reconnectAttempts})...`);
+      this.logger.infoMessage(
+        `Reconnecting (attempt ${this.reconnectAttempts})...`
+      );
       this.connect();
     }, delay);
   }
@@ -98,7 +109,9 @@ export class ConnectionManager {
   public connectToCentralSystem() {
     if (!this.stream) {
       this.connect();
-      console.log(`ConnectionManager: connected to ${this.address}`);
+      this.logger.infoMessage(
+        `Connected to CentralSystem service at ${this.address}`
+      );
     }
   }
 
@@ -111,6 +124,6 @@ export class ConnectionManager {
       this.stream = undefined;
     }
     this.reconnectAttempts = 0;
-    console.log("Disconnected from central");
+    this.logger.infoMessage(`Disconnected from CentralSystem service`);
   }
 }

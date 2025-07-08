@@ -2,11 +2,16 @@ import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
 import { fileURLToPath } from "url";
+import { LogManager } from "@aliceo2/web-ui";
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
  */
 export class CentralSystemWrapper {
+  // utilities
+  private logger = LogManager.getLogger("CentralSystemWrapper");
+
+  // class properties
   private server: grpc.Server;
 
   /**
@@ -37,7 +42,7 @@ export class CentralSystemWrapper {
 
     // Load the package definition into a gRPC object
     const proto = grpc.loadPackageDefinition(packageDef) as any;
-    const wrapper = proto.wrapper;
+    const wrapper = proto.webui.tokenization;
 
     // Add the CentralSystem service and bind the stream handler
     this.server.addService(wrapper.CentralSystem.service, {
@@ -50,7 +55,10 @@ export class CentralSystemWrapper {
    * @param call The duplex stream call object.
    */
   private clientStreamHandler(call: grpc.ServerDuplexStream<any, any>): void {
-    console.log("Client connected to duplex stream");
+    this.logger.infoMessage(
+      `Client ${call.getPeer()} connected to CentralSystem stream stream`
+    );
+
     // Listen for data events from the client
     call.on("data", (payload: any) => {
       // TODO: Implement data handling logic
@@ -58,12 +66,17 @@ export class CentralSystemWrapper {
 
     // Handle stream end event
     call.on("end", () => {
-      console.log("Client ended stream");
+      this.logger.infoMessage(`Client ${call.getPeer()} ended stream.`);
       call.end();
     });
 
     // Handle stream error event
-    call.on("error", (err) => console.error("Stream error:", err));
+    call.on("error", (err) =>
+      this.logger.infoMessage(
+        `Stream error from client ${call.getPeer()}:`,
+        err
+      )
+    );
   }
 
   /**
@@ -76,10 +89,10 @@ export class CentralSystemWrapper {
       grpc.ServerCredentials.createInsecure(),
       (err, _port) => {
         if (err) {
-          console.error("Server bind error:", err);
+          this.logger.infoMessage("Server bind error:", err);
           return;
         }
-        console.log(`Server listening on ${addr}`);
+        this.logger.infoMessage(`CentralSytem started listening on ${addr}`);
       }
     );
   }
