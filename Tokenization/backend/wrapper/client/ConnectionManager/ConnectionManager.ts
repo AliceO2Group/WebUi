@@ -1,10 +1,23 @@
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
-import path from "path";
-import { fileURLToPath } from "url";
 
 /**
  * @description Manages all the connection between clients and central system.
+ */
+/**
+ * Manages the lifecycle and connection logic for a gRPC client communicating with the central system.
+ *
+ * This class is responsible for:
+ * - Initializing the gRPC client using the provided proto definition and address.
+ * - Managing a duplex stream (`stream`) for bidirectional communication.
+ * - Handling automatic reconnection with exponential backoff on stream errors or disconnects.
+ * - Providing methods to start (`connectToCentralSystem`) and stop (`disconnect`) the connection with central system.
+ *
+ * @remarks
+ * - `client`: The gRPC client instance for communicating with the central system.
+ * - `stream`: The active duplex stream for sending and receiving messages (optional).
+ * - `address`: The address of the central gRPC server.
+ * - `reconnectAttempts`: The number of consecutive reconnection attempts made after a disconnect or error.
  */
 export class ConnectionManager {
   private client: any;
@@ -12,13 +25,18 @@ export class ConnectionManager {
   private readonly address: string;
   private reconnectAttempts = 0;
 
-  constructor(centralAddress = "localhost:50051") {
+  /**
+   * @description Initializes a new instance of the ConnectionManager class.
+   *
+   * This constructor sets up the gRPC client for communication with the central system.
+   *
+   * @param protoPath - The file path to the gRPC proto definition.
+   * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
+   */
+  constructor(protoPath: string, centralAddress: string = "localhost:50051") {
     this.address = centralAddress;
 
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    const PROTO_PATH = path.join(__dirname, "../../proto/wrapper.proto");
-    const packageDef = protoLoader.loadSync(PROTO_PATH, {
+    const packageDef = protoLoader.loadSync(protoPath, {
       keepCase: true,
       longs: String,
       enums: String,
@@ -34,16 +52,13 @@ export class ConnectionManager {
       this.address,
       grpc.credentials.createInsecure()
     );
-
-    // Initial connection
-    this.connect();
-    console.log(`ConnectionManager: connected to ${this.address}`);
   }
 
   /**
    * @description Initializes the duplex stream and sets up handlers.
    */
   private connect() {
+    if (this.stream) return;
     this.stream = this.client.ClientStream();
 
     if (this.stream) {
@@ -53,11 +68,13 @@ export class ConnectionManager {
 
       this.stream.on("end", () => {
         console.warn("Stream ended, attempting to reconnect...");
+        this.stream = undefined;
         this.scheduleReconnect();
       });
 
       this.stream.on("error", (err: any) => {
         console.error("Wrapper stream error:", err);
+        this.stream = undefined;
         this.scheduleReconnect();
       });
     }
@@ -76,9 +93,19 @@ export class ConnectionManager {
   }
 
   /**
+   * @description Starts the connection to the central system.
+   */
+  public connectToCentralSystem() {
+    if (!this.stream) {
+      this.connect();
+      console.log(`ConnectionManager: connected to ${this.address}`);
+    }
+  }
+
+  /**
    * @description Disconnects from the gRPC stream and resets attempts.
    */
-  disconnect() {
+  public disconnect() {
     if (this.stream) {
       this.stream.end();
       this.stream = undefined;
