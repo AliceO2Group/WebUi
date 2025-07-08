@@ -62,7 +62,7 @@ export function filtersPanel(filterModel, pageModel) {
     return null;
   }
 
-  return model.inRunMode ? null : h(
+  return h(
     '.w-100.flex-row.p2.g2.justify-center#filterElement',
     [
       triggerFiltersButton(onEnterCallback),

@@ -68,7 +68,7 @@ const filterSpecific = (model) => {
   switch (page) {
     case 'layoutList': return filtersPanel(filterModel, layoutListModel);
     case 'layoutShow': return filtersPanel(filterModel, layout);
-    case 'objectTree': return filtersPanel(filterModel, object);
+    case 'objectTree': return model.inRunMode ? null : filtersPanel(filterModel, object);
     case 'objectView': return filtersPanel(filterModel, objectViewModel);
     case 'about': return filtersPanel(filterModel, aboutViewModel);
     default: return null;
