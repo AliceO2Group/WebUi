@@ -37,8 +37,6 @@ export class gRPCWrapper {
   }
 }
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
 const grpc = new gRPCWrapper(PROTO_PATH, "localhost:50051");
 grpc.connectToCentralSystem();
