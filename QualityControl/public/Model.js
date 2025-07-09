@@ -419,6 +419,6 @@ export default class Model extends Observable {
    * @returns {boolean} True if RunNumber is present and not empty
    */
   get canActivateRunsMode() {
-    return this.router.params.RunNumber && this.router.params.RunNumber.trim() !== '';
+    return Number.isInteger(Number(this.router.params.RunNumber));
   }
 }
