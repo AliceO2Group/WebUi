@@ -32,6 +32,7 @@ export function runsModeCheckbox(pageModel, filterModel) {
  */
 function createRunsModeCheckbox(pageModel, filterModel) {
   return h('input.form-check-input.runs-mode-checkbox', {
+    id: 'runsModeCheckbox',
     type: 'checkbox',
     disabled: !model.canActivateRunsMode,
     checked: model.inRunMode || false,
@@ -50,25 +51,26 @@ function createRunsModeCheckbox(pageModel, filterModel) {
  */
 function createRunInfoDisplay() {
   return h('div.run-info-container', [
-    createRunDetail('Run Number', model.runNumber),
-    createRunDetail('Status', model.runStatus || 'Unknown'),
+    createRunDetail('Run Number', 'runNumber', model.runNumber),
+    createRunDetail('Status', 'runStatus', model.runStatus || 'Unknown'),
   ]);
 }
 
 /**
  * Creates a detail display for run information
  * @param {string} labelText - The label for the detail
+ * @param {string} id - The id for the detail (currently unused)
  * @param {string} value - The value to display
  * @returns {vnode} - the detail display element
  */
-function createRunDetail(labelText, value) {
+function createRunDetail(labelText, id, value) {
   const isStatus = labelText.toLowerCase().includes('status');
   const statusClass = isStatus ? getStatusClass(value) : '';
   const statusTitle = isStatus ? getStatusTitle(value) : undefined;
 
   return h('div.run-detail.flex-column.items-start', [
     h('span.run-detail-label', labelText),
-    h(`b.${statusClass}`, { title: statusTitle }, value),
+    h(`b.${statusClass}`, { id, title: statusTitle }, value),
   ]);
 }
 

@@ -105,7 +105,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
   await testParent.test('should verify checkbox is not selected with correct title', async () => {
     const checkboxInfo = await page.evaluate(() => {
-      const checkbox = document.querySelector('header > div > div:nth-child(1) > div:nth-child(2) > span > input');
+      const checkbox = document.querySelector('#runsModeCheckbox');
       return {
         isCheckbox: checkbox?.type === 'checkbox',
         isChecked: checkbox?.checked,
@@ -137,13 +137,13 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   );
 
   await testParent.test('should enable checkbox after entering run number and triggering filter', async () => {
-    await page.type('#runNumberFilter', '12345');
+    await page.type('#runNumberFilter', '0');
     await page.click('#triggerFilterButton');
     await delay(2000);;
 
     const result = await page.evaluate(() => {
       const span = document.querySelector('header > div > div:nth-child(1) > div:nth-child(2) > span');
-      const checkbox = span?.querySelector('input[type="checkbox"]');
+      const checkbox = document.querySelector('#runsModeCheckbox');
 
       const spanDisabled = span?.getAttribute('aria-disabled') === 'true' || span?.classList.contains('disabled');
       const checkboxEnabled = checkbox && !checkbox.disabled;
@@ -156,5 +156,21 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
     ok(!result.spanDisabled);
     ok(result.checkboxEnabled);
+  });
+
+  await testParent.test('should enter runs mode after clicking the checkbox', async () => {
+    await page.click('#runsModeCheckbox');
+
+    const statusText = await page.evaluate(() => {
+      const runNumber = document.querySelector('#runNumber')?.textContent?.trim();
+      const status = document.querySelector('#runStatus')?.textContent?.trim();
+      return { status, runNumber };
+    });
+
+    strictEqual(statusText.runNumber, '0');
+    strictEqual(statusText.status, 'ONGOING');
+
+    //exit runs mode
+    await page.click('#runsModeCheckbox');
   });
 };
