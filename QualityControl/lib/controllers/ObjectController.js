@@ -50,12 +50,14 @@ export class ObjectController {
 
       const { RunNumber: runNumber } = filters;
       let list = null;
-      if (inRunMode && !runNumber) {
+      const isRunNumberInQuery = runNumber !== undefined && runNumber !== '';
+
+      if (inRunMode && !isRunNumberInQuery) {
         return updateAndSendExpressResponseFromNativeError(
           res,
           new InvalidInputError('RunNumber is required when in run mode'),
         );
-      } else if (inRunMode && runNumber) {
+      } else if (inRunMode && isRunNumberInQuery) {
         const { paths, runStatus } = await this._runModeService.retrievePathsAndSetRunStatus(runNumber, prefix);
         list = { paths, runStatus };
       } else {
