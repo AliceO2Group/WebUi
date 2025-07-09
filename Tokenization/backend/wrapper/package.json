@@ -7,9 +7,7 @@
     "start-central": "node --loader ts-node/esm ./central/CentralSystem.ts",
     "start-client": "node --loader ts-node/esm ./client/gRPCWrapper.ts"
   },
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "author": "ALICEO2",
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "jest": "^29.7.0",

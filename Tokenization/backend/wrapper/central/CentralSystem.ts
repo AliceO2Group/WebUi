@@ -1,25 +1,33 @@
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
-import { fileURLToPath } from "url";
+import { LogManager } from "@aliceo2/web-ui";
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
  */
 export class CentralSystemWrapper {
+  // utilities
+  private logger = LogManager.getLogger("CentralSystemWrapper");
+
+  // class properties
   private server: grpc.Server;
 
-  constructor(private port: number) {
+  /**
+   * Initializes the Wrapper for CentralSystem.
+   * @param port The port number to bind the gRPC server to.
+   */
+  constructor(private protoPath: string, private port: number) {
     this.server = new grpc.Server();
     this.setupService();
-    this.start();
   }
 
-  private setupService() {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
-    const packageDef = protoLoader.loadSync(PROTO_PATH, {
+  /**
+   * @description Loads the gRPC proto definition and sets up the CentralSystem service.
+   */
+  private setupService(): void {
+    // Load the proto definition with options
+    const packageDef = protoLoader.loadSync(this.protoPath, {
       keepCase: true,
       longs: String,
       enums: String,
@@ -27,46 +35,66 @@ export class CentralSystemWrapper {
       oneofs: true,
     });
 
+    // Load the package definition into a gRPC object
     const proto = grpc.loadPackageDefinition(packageDef) as any;
-    const wrapper = proto.wrapper;
+    const wrapper = proto.webui.tokenization;
 
+    // Add the CentralSystem service and bind the stream handler
     this.server.addService(wrapper.CentralSystem.service, {
       ClientStream: this.clientStreamHandler.bind(this),
     });
   }
 
-  private clientStreamHandler(call: grpc.ServerDuplexStream<any, any>) {
-    console.log("Client connected to duplex stream");
+  /**
+   * @description Handles the duplex stream from the client.
+   * @param call The duplex stream call object.
+   */
+  private clientStreamHandler(call: grpc.ServerDuplexStream<any, any>): void {
+    this.logger.infoMessage(
+      `Client ${call.getPeer()} connected to CentralSystem stream stream`
+    );
 
-    // hartbeat message
-    call.write({ event: "EMPTY_EVENT", emptyMessage: {} });
-
+    // Listen for data events from the client
     call.on("data", (payload: any) => {
       // TODO: Implement data handling logic
     });
 
+    // Handle stream end event
     call.on("end", () => {
-      console.log("Client ended stream");
+      this.logger.infoMessage(`Client ${call.getPeer()} ended stream.`);
       call.end();
     });
 
-    call.on("error", (err) => console.error("Stream error:", err));
+    // Handle stream error event
+    call.on("error", (err) =>
+      this.logger.infoMessage(
+        `Stream error from client ${call.getPeer()}:`,
+        err
+      )
+    );
   }
 
-  private start() {
+  /**
+   * @desciprion Starts the gRPC server and binds it to the specified in class port.
+   */
+  public listen() {
     const addr = `localhost:${this.port}`;
     this.server.bindAsync(
       addr,
       grpc.ServerCredentials.createInsecure(),
-      (err, port) => {
+      (err, _port) => {
         if (err) {
-          console.error("Server bind error:", err);
+          this.logger.infoMessage("Server bind error:", err);
           return;
         }
-        console.log(`Server listening on ${addr}`);
+        this.logger.infoMessage(`CentralSytem started listening on ${addr}`);
       }
     );
   }
 }
 
-const centralSystem = new CentralSystemWrapper(50051);
+// Instantiate the CentralSystemWrapper on port 50051, but don't start automatically
+const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
+const centralSystem = new CentralSystemWrapper(PROTO_PATH, 50051);
+// Start listening explicitly
+centralSystem.listen();

@@ -31,4 +31,15 @@ export const initializeNockForBkp = () => {
       data:
         BKP_MOCK_DATA.runTypes,
     });
+  nock(BKP_URL)
+    .persist()
+    .get(`/api/status/database${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        status: {
+          ok: true,
+          configured: true,
+        },
+      },
+    });
 };
