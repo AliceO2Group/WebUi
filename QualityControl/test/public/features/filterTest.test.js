@@ -93,7 +93,6 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     strictEqual(versionCount, 1);
 
     await page.locator('#filterElement #clearFilterButton').click();
-    await page.locator('#filterElement #triggerFilterButton').click();
 
     await page.waitForSelector('#ObjectPlot select option:nth-child(2)');
 
