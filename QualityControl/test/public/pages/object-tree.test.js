@@ -12,6 +12,7 @@
  */
 
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
+import { delay } from '../../testUtils/delay.js';
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
 const SORTING_BUTTON_PATH = 'header > div > div > div:nth-child(4) > div > button';
 
@@ -94,6 +95,32 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     );
   });
 
+  await testParent.test('should verify the span is disabled', async () => {
+    const isDisabled = await page.evaluate(() => {
+      const span = document.querySelector('header > div > div:nth-child(1) > div:nth-child(2) > span');
+      return span?.getAttribute('aria-disabled') === 'true' || span?.classList.contains('disabled');
+    });
+
+    ok(isDisabled, 'The span is not disabled as expected');
+  });
+  await testParent.test('should verify checkbox is not selected with correct title', async () => {
+    const checkboxInfo = await page.evaluate(() => {
+      const checkbox = document.querySelector('header > div > div:nth-child(1) > div:nth-child(2) > span > input');
+      return {
+        isCheckbox: checkbox?.type === 'checkbox',
+        isChecked: checkbox?.checked,
+        title: checkbox?.title,
+      };
+    });
+
+    ok(checkboxInfo.isCheckbox);
+    ok(!checkboxInfo.isChecked);
+    strictEqual(
+      checkboxInfo.title,
+      'Runs mode is disabled. Enter a run number to enable.',
+    );
+  });
+
   await testParent.test(
     'should have a selector with sorted options to filter by run type if there are run types loaded',
     { timeout },
@@ -108,4 +135,26 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       deepStrictEqual(options, ['', 'runType1', 'runType2']);
     },
   );
+
+  await testParent.test('should enable checkbox after entering run number and triggering filter', async () => {
+    await page.type('#runNumberFilter', '12345');
+    await page.click('#triggerFilterButton');
+    await delay(2000);;
+
+    const result = await page.evaluate(() => {
+      const span = document.querySelector('header > div > div:nth-child(1) > div:nth-child(2) > span');
+      const checkbox = span?.querySelector('input[type="checkbox"]');
+
+      const spanDisabled = span?.getAttribute('aria-disabled') === 'true' || span?.classList.contains('disabled');
+      const checkboxEnabled = checkbox && !checkbox.disabled;
+
+      return {
+        spanDisabled,
+        checkboxEnabled,
+      };
+    });
+
+    ok(!result.spanDisabled);
+    ok(result.checkboxEnabled);
+  });
 };
