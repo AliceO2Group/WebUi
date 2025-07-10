@@ -1,15 +1,14 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
     "target": "ES2022",
+    "module": "ESNext",
     "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": "./",
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "allowImportingTsExtensions": true,
-    "noEmit": true
+    "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": true,
+    "strict": true
   },
-  "ts-node": {
-    "esm": true
-  }
+  "include": ["client", "central", "utils", "types"]
 }

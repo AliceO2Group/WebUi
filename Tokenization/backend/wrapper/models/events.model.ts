@@ -11,19 +11,13 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+
 /**
- * @description This class represents a connection to a target client and manages sending messages to it.
+ * Interface representing a handler for processing events.
+ *
+ * @remarks
+ * The `handle` method receives an event object and performs the necessary processing.
  */
-export class Connection {
-  private token: string;
-  private targetAddress: string;
-
-  constructor(token: string, targetAddress: string) {
-    this.token = token;
-    this.targetAddress = targetAddress;
-  }
-
-  public handleNewToken(token: string): void {
-    this.token = token;
-  }
+export interface MessageHandler {
+  handle(event: any): void;
 }
