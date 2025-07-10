@@ -22,7 +22,6 @@ import type { MessageHandler } from "../../models/events.model";
 export class CentralConnection {
   private logger = LogManager.getLogger("CentralConnection");
   private stream?: grpc.ClientDuplexStream<any, any>;
-  private reconnectAttempts = 0;
 
   constructor(private client: any, private handler: MessageHandler) {}
 
@@ -59,14 +58,10 @@ export class CentralConnection {
    * @description Schedules a reconnect with exponential backoff.
    */
   private scheduleReconnect() {
-    this.reconnectAttempts++;
-    const delay = Math.min(1000 * 2 ** this.reconnectAttempts, 30000);
     setTimeout(() => {
-      this.logger.infoMessage(
-        `Reconnecting (attempt ${this.reconnectAttempts})...`
-      );
+      this.logger.infoMessage(`Trying to reconnect...`);
       this.connect();
-    }, delay);
+    }, 2000);
   }
 
   /**
@@ -85,7 +80,6 @@ export class CentralConnection {
       this.stream.end();
       this.stream = undefined;
     }
-    this.reconnectAttempts = 0;
     this.logger.infoMessage(`Disconnected from CentralSystem`);
   }
 }
