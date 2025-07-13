@@ -1,6 +1,5 @@
 import path from "path";
 import { ConnectionManager } from "./ConnectionManager/ConnectionManager.ts";
-import { fileURLToPath } from "url";
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
