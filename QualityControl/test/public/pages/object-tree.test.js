@@ -161,6 +161,11 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   await testParent.test('should enter runs mode after clicking the checkbox', async () => {
     await page.click('#runsModeCheckbox');
 
+    await page.waitForFunction(() => {
+      const el = document.querySelector('#runStatus');
+      return el && el.textContent?.trim() === 'ONGOING';
+    }, { timeout: 5000 });
+
     const statusText = await page.evaluate(() => {
       const runNumber = document.querySelector('#runNumber')?.textContent?.trim();
       const status = document.querySelector('#runStatus')?.textContent?.trim();
