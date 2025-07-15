@@ -49,20 +49,24 @@ export class ObjectController {
       const { prefix, fields, filters = {}, inRunMode = false } = req.query;
 
       const { RunNumber: runNumber } = filters;
-      let list = null;
+      const parsedRunNumber = parseInt(runNumber, 10);
 
-      if (inRunMode && !Number.isInteger(runNumber)) {
+      if (inRunMode && (!runNumber || isNaN(parsedRunNumber))) {
         return updateAndSendExpressResponseFromNativeError(
           res,
           new InvalidInputError('RunNumber is required when in run mode'),
         );
-      } else if (inRunMode && Number.isInteger(runNumber)) {
-        const { paths, runStatus } = await this._runModeService.retrievePathsAndSetRunStatus(runNumber, prefix);
-        list = { paths, runStatus };
-      } else {
-        list = await this._objService.retrieveLatestVersionOfObjects({ prefix, fields, filters });
+      } else if (inRunMode && runNumber && !isNaN(parsedRunNumber)) {
+        const { paths, runStatus } = await this._runModeService.retrievePathsAndSetRunStatus(parsedRunNumber, prefix);
+        return res.status(200).json({ paths, runStatus });
       }
-      res.status(200).json(list);
+
+      const objectsData = await this._objService.retrieveLatestVersionOfObjects({
+        prefix,
+        fields,
+        filters
+      });
+      res.status(200).json(objectsData);
     } catch (error) {
       const responseError = new Error('Failed to retrieve list of objects latest version');
       this._logger.errorMessage(`Error whilst retrieving objects: ${error}`);
