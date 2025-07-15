@@ -64,7 +64,7 @@ export class ObjectController {
       const objectsData = await this._objService.retrieveLatestVersionOfObjects({
         prefix,
         fields,
-        filters
+        filters,
       });
       res.status(200).json(objectsData);
     } catch (error) {

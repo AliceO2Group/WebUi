@@ -27,11 +27,11 @@ export class FilterService {
   constructor(bookkeepingService, config) {
     this._bookkeepingService = bookkeepingService;
     this._runTypes = [];
-    
-    this._runTypesRefreshInterval = config?.bookkeeping?.runTypesRefreshInterval ?? 
+
+    this._runTypesRefreshInterval = config?.bookkeeping?.runTypesRefreshInterval ??
       (config?.bookkeeping ? 24 * 60 * 60 * 1000 : -1);
-    
-    this.initFilters().catch(error => {
+
+    this.initFilters().catch((error) => {
       logger.errorMessage(`FilterService initialization failed: ${error.message || error}`);
     });
   }
