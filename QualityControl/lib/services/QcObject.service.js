@@ -72,13 +72,22 @@ export class QcObjectService {
   async refreshCache() {
     try {
       const objects = await this._dbService.getObjectsTreeList(this._dbService.CACHE_PREFIX);
-      this._cache.objects = parseObjects(objects, QCObjectDto);
-      this._cache.lastUpdate = Date.now();
+      const parsedObjects = parseObjects(objects, QCObjectDto);
+      this._cache = {
+        objects: parsedObjects,
+        lastUpdate: Date.now(),
+      };
+      return true;
     } catch (error) {
+      const lastUpdateStr = this._cache.lastUpdate
+        ? new Date(this._cache.lastUpdate).toISOString()
+        : 'never';
+
       this._logger.errorMessage(
-        `Last update ${new Date(this._cache.lastUpdate)}; Unable to update cache - objects due to ${error}`,
+        `Cache refresh failed. Last update: ${lastUpdateStr}. Error: ${error.message || error}`,
         { level: 1, facility: LOG_FACILITY },
       );
+      return false;
     }
   }
 
