@@ -25,12 +25,14 @@ import { RunStatus } from '../../../common/library/runStatus.enum.js';
  */
 export const bookkeepingServiceTestSuite = async () => {
   suite('Bookkeeping Test Suite', () => {
-    const VALID_CONFIG = { bookkeeping: {
-      url: 'http://localhost:4000',
-      token: 'valid-token',
-      runTypesRefreshInterval: 15000,
-      runStatusRefreshInterval: 15000,
-    } };
+    const VALID_CONFIG = {
+      bookkeeping: {
+        url: 'http://localhost:4000',
+        token: 'valid-token',
+        runTypesRefreshInterval: 15000,
+        runStatusRefreshInterval: 15000,
+      }
+    };
     before(() => nock.cleanAll());
     suite('Create a new instance of BookkeepingService', () => {
       test('should successfully initialize Bookkeeping Service', () => {
@@ -151,10 +153,12 @@ export const bookkeepingServiceTestSuite = async () => {
           .get('/api/status/database')
           .query({ token: VALID_CONFIG.bookkeeping.token })
           .reply(200, {
-            data: { status: {
-              ok: true,
-              configured: true,
-            } },
+            data: {
+              status: {
+                ok: true,
+                configured: true,
+              }
+            },
           });
 
         const result = await service.simulateConnection();
@@ -167,10 +171,12 @@ export const bookkeepingServiceTestSuite = async () => {
           .get('/api/status/database')
           .query({ token: VALID_CONFIG.bookkeeping.token })
           .reply(200, {
-            data: { status: {
-              ok: false,
-              configured: false,
-            } },
+            data: {
+              status: {
+                ok: false,
+                configured: false,
+              }
+            },
           });
 
         const result = await service.simulateConnection();
@@ -193,7 +199,7 @@ export const bookkeepingServiceTestSuite = async () => {
       });
     });
 
-    suite.skip('Retrieve run types', () => {
+    suite('Retrieve run types', () => {
       let bkpService = null;
 
       beforeEach(() => {
@@ -274,6 +280,13 @@ export const bookkeepingServiceTestSuite = async () => {
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).replyWithError('connection failed');
 
         const result = await bkpService.retrieveRunStatus(404);
+        strictEqual(result, RunStatus.NOT_FOUND);
+      });
+
+      test('should return NOT_FOUND status when service is not active', async () => {
+        bkpService.active = false;
+
+        const result = await bkpService.retrieveRunStatus(123);
         strictEqual(result, RunStatus.NOT_FOUND);
       });
     });
