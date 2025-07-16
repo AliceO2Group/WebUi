@@ -2,14 +2,14 @@ import { h } from '/js/src/index.js';
 
 /**
  * Checkbox component for 'Activate run mode'
- * @param {object} pageModel
- * @param {object} filterModel
+ * @param {object} pageModel - the model for the page
+ * @param {object} filterModel - the model for the filters
  * @returns {vnode}
  */
 export function runsModeCheckbox(pageModel, filterModel) {
   const checkbox = createRunsModeCheckbox(pageModel, filterModel);
   const label = h('span.items-center.runs-mode-title', 'Run Mode');
-  const runInfo = model.inRunMode ? createRunInfoDisplay() : null;
+  const runInfo = pageModel.model.inRunMode ? createRunInfoDisplay(pageModel.model) : null;
 
   const content = [checkbox, label];
   if (runInfo) {
@@ -18,7 +18,7 @@ export function runsModeCheckbox(pageModel, filterModel) {
 
   return h('div.runs-mode-container', [
     h(
-      `span.items-center.runs-mode-label${model.canActivateRunsMode ? '' : '.disabled'}`,
+      `span.items-center.runs-mode-label${pageModel.model.canActivateRunsMode ? '' : '.disabled'}`,
       content,
     ),
   ]);
@@ -31,6 +31,7 @@ export function runsModeCheckbox(pageModel, filterModel) {
  * @returns {vnode} - the checkbox element for runs mode
  */
 function createRunsModeCheckbox(pageModel, filterModel) {
+  const model = pageModel.model;
   return h('input.form-check-input.runs-mode-checkbox', {
     id: 'runsModeCheckbox',
     type: 'checkbox',
@@ -47,9 +48,10 @@ function createRunsModeCheckbox(pageModel, filterModel) {
 
 /**
  * Creates the display for run information when in runs mode
+ * @param {Model} model - the root model of the application
  * @returns {vnode} - the run information display element
  */
-function createRunInfoDisplay() {
+function createRunInfoDisplay(model) {
   return h('div.run-info-container', [
     createRunDetail('Run Number', 'runNumber', model.runNumber),
     createRunDetail('Status', 'runStatus', model.runStatus || 'Unknown'),
