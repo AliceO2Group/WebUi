@@ -47,7 +47,7 @@ export const bookkeepingServiceTestSuite = async () => {
       });
     });
 
-    suite.skip('validateConfig', () => {
+    suite('validateConfig', () => {
       test('should return false if no config provided', () => {
         const service = new BookkeepingService();
         const result = service.validateConfig();
@@ -91,7 +91,7 @@ export const bookkeepingServiceTestSuite = async () => {
         strictEqual(service._token, 'my-token');
       });
     });
-    suite.skip('connect', () => {
+    suite('connect', () => {
       let service = null;
       let validConfig = null;
       let simulateStub = null;
@@ -136,7 +136,7 @@ export const bookkeepingServiceTestSuite = async () => {
         ok(service.error.includes('simulated failure'));
       });
     });
-    suite.skip('simulateConnection', () => {
+    suite('simulateConnection', () => {
       let service = null;
 
       beforeEach(() => {
