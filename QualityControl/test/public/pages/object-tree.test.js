@@ -139,7 +139,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   await testParent.test('should enable checkbox after entering run number and triggering filter', async () => {
     await page.type('#runNumberFilter', '0');
     await page.click('#triggerFilterButton');
-    await delay(2000);;
+    await delay(2000);
 
     const result = await page.evaluate(() => {
       const span = document.querySelector('header > div > div:nth-child(1) > div:nth-child(2) > span');
