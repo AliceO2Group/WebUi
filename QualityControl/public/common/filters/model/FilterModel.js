@@ -74,7 +74,7 @@ export default class FilterModel extends Observable {
         parameters[filterKey] = encodeURI(this._filterMap[filterKey]);
       }
     });
-    this.model.router.go(buildQueryParametersString(parameters, { }), true, isSilent);
+    this.model.router.go(buildQueryParametersString(parameters, {}), true, isSilent);
   }
 
   /**
@@ -163,7 +163,7 @@ export default class FilterModel extends Observable {
    * @returns {Promise<void>}
    */
   async deactivateRunsMode(baseViewModel) {
-    model.exitRunMode();
+    this.model.exitRunMode();
     this.setFilterToURL();
     await baseViewModel.triggerFilter(false);
     this.notify();
@@ -177,14 +177,14 @@ export default class FilterModel extends Observable {
    */
   async _manageRunsModeInterval(baseViewModel) {
     this._clearRunsModeInterval();
-    if (model.runStatus === 'ONGOING') {
+    if (this.model.runStatus === 'ONGOING') {
       this._runsModeInterval = setInterval(async () => {
         await baseViewModel.triggerFilter(true);
         this.notify();
-        if (model.runStatus !== 'ONGOING') {
+        if (this.model.runStatus !== 'ONGOING') {
           this._clearRunsModeInterval();
         }
-      // TODO: Should be provided in config file ??
+        // TODO: Should be provided in config file ??
       }, 30000);
     }
   }
