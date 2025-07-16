@@ -179,15 +179,18 @@ export class QcObjectService {
    * @param {string} options.qcObjectId - id of the object configuration stored in QCG database (different than CCDB)
    * @param {string} options.id - id of the object to be retrieved as per CCDB etag
    * @param {number|null} options.validFrom - timestamp in ms
-   * @param {string} options.filters = {}] - filter as string to be sent to CCDB
+   * @param {object} options.filters - filter as string to be sent to CCDB
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
-   * @throws
+   * @throws {Error} - if object with specified id is not found
    */
   async retrieveQcObjectByQcgId({ qcObjectId, id, validFrom = undefined, filters = {} }) {
-    const { object, layoutName, tabName } = this._chartRepository.getObjectById(qcObjectId);
+    const result = this._chartRepository.getObjectById(qcObjectId);
+    if (!result) {
+      throw new Error(`Object with id ${qcObjectId} not found`);
+    }
+    const { object, layoutName, tabName } = result;
     const { name, options = {}, ignoreDefaults = false } = object;
     const qcObject = await this.retrieveQcObject({ path: name, validFrom, id, filters });
-
     return {
       ...qcObject,
       layoutDisplayOptions: options,
