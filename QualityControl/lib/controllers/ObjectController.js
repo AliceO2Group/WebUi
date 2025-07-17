@@ -54,8 +54,8 @@ export class ObjectController {
       if (inRunMode && (!runNumber || isNaN(parsedRunNumber))) {
         return updateAndSendExpressResponseFromNativeError(
           res,
-          new InvalidInputError(!runNumber 
-            ? 'RunNumber is required when in run mode' 
+          new InvalidInputError(!runNumber
+            ? 'RunNumber is required when in run mode'
             : 'RunNumber must be a number'),
         );
       } else if (inRunMode && runNumber && !isNaN(parsedRunNumber)) {
