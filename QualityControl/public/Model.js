@@ -29,6 +29,7 @@ import AboutViewModel from './pages/aboutView/AboutViewModel.js';
 import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
 import { RequestFields } from './common/RequestFields.enum.js';
 import FilterModel from './common/filters/model/FilterModel.js';
+import { RunStatus } from './common/enums/RunStatus.enum.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -244,7 +245,7 @@ export default class Model extends Observable {
       case 'objectTree':
         this.page = 'objectTree';
         setBrowserTabTitle('QCG-Tree');
-        await this.object.loadList();
+        this.object.loadList();
         // Data is already loaded at beginning
         if (this.object.selected) {
           this.object.loadObjectByName(this.object.selected.name);
@@ -411,10 +412,14 @@ export default class Model extends Observable {
 
   /**
    * Sets the current run status and triggers a notification update.
-   * @param {string} value - The new run status (e.g., 'ONGOING', 'COMPLETED').
+   * @param {string} value - The new run status from RunStatus enum (e.g., ONGOING, COMPLETED, STOPPED).
    */
   set runStatus(value) {
-    this._runStatus = value;
+    if (value !== null && !Object.values(RunStatus).includes(value)) {
+      this._runStatus = RunStatus.UNKNOWN;
+    } else {
+      this._runStatus = value;
+    }
     this.notify();
   }
 

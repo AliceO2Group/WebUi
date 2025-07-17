@@ -15,6 +15,7 @@
 import { Observable } from '/js/src/index.js';
 import { buildQueryParametersString } from '../../buildQueryParametersString.js';
 import FilterService from '../../../services/Filter.service.js';
+import { RunStatus } from '../../enums/RunStatus.enum.js';
 const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
 
 /**
@@ -181,11 +182,11 @@ export default class FilterModel extends Observable {
    */
   async _manageRunsModeInterval(baseViewModel) {
     this._clearRunsModeInterval();
-    if (this.model.runStatus === 'ONGOING') {
+    if (this.model.runStatus === RunStatus.ONGOING) {
       this._runsModeInterval = setInterval(async () => {
         await baseViewModel.triggerFilter(true);
         this.notify();
-        if (this.model.runStatus !== 'ONGOING') {
+        if (this.model.runStatus !== RunStatus.ONGOING) {
           this._clearRunsModeInterval();
         }
         // TODO: Should be provided in config file ??
