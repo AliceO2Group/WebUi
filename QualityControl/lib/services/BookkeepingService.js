@@ -174,10 +174,10 @@ export class BookkeepingService {
    * Helper method to construct a URL path with the required authentication token.
    * Appends the service's token as a query parameter to the provided path.
    * @private
-   * @param {number} RunNumber - The run number to be appended
+   * @param {number} runNumber - The run number to be appended
    * @returns {string} The constructed run path with the token query parameter
    */
-  _createRunPath(RunNumber) {
-    return this._createPath(`${GET_RUN_PATH}/${RunNumber}`);
+  _createRunPath(runNumber) {
+    return this._createPath(`${GET_RUN_PATH}/${runNumber}`);
   }
 }

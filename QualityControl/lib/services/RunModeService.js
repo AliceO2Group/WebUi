@@ -49,7 +49,7 @@ export class RunModeService {
   /**
    * Starts monitoring when the parameters contain a RunNumber, and the run is determined to be ongoing
    * @param {number} runNumber - RunNumber to be applied when fetching list of objects.
-   * @returns {Promise<{ paths: QCObjectDto[], runStatus: RunStatus }>}
+   * @returns {Promise<{ paths: QCObjectDto[], runStatus: RunStatus }>} - Resolveswith path and run status
    */
   async retrievePathsAndSetRunStatus(runNumber) {
     if (this._ongoingRuns.has(runNumber)) {

@@ -72,13 +72,22 @@ export class QcObjectService {
   async refreshCache() {
     try {
       const objects = await this._dbService.getObjectsTreeList(this._dbService.CACHE_PREFIX);
-      this._cache.objects = parseObjects(objects, QCObjectDto);
-      this._cache.lastUpdate = Date.now();
+      const parsedObjects = parseObjects(objects, QCObjectDto);
+      this._cache = {
+        objects: parsedObjects,
+        lastUpdate: Date.now(),
+      };
+      return true;
     } catch (error) {
+      const lastUpdateStr = this._cache.lastUpdate
+        ? new Date(this._cache.lastUpdate).toISOString()
+        : 'never';
+
       this._logger.errorMessage(
-        `Last update ${new Date(this._cache.lastUpdate)}; Unable to update cache - objects due to ${error}`,
+        `Cache refresh failed. Last update: ${lastUpdateStr}. Error: ${error.message || error}`,
         { level: 1, facility: LOG_FACILITY },
       );
+      return false;
     }
   }
 
@@ -170,15 +179,18 @@ export class QcObjectService {
    * @param {string} options.qcObjectId - id of the object configuration stored in QCG database (different than CCDB)
    * @param {string} options.id - id of the object to be retrieved as per CCDB etag
    * @param {number|null} options.validFrom - timestamp in ms
-   * @param {string} options.filters = {}] - filter as string to be sent to CCDB
+   * @param {object} options.filters - filter as string to be sent to CCDB
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
-   * @throws
+   * @throws {Error} - if object with specified id is not found
    */
   async retrieveQcObjectByQcgId({ qcObjectId, id, validFrom = undefined, filters = {} }) {
-    const { object, layoutName, tabName } = this._chartRepository.getObjectById(qcObjectId);
+    const result = this._chartRepository.getObjectById(qcObjectId);
+    if (!result) {
+      throw new Error(`Object with id ${qcObjectId} not found`);
+    }
+    const { object, layoutName, tabName } = result;
     const { name, options = {}, ignoreDefaults = false } = object;
     const qcObject = await this.retrieveQcObject({ path: name, validFrom, id, filters });
-
     return {
       ...qcObject,
       layoutDisplayOptions: options,

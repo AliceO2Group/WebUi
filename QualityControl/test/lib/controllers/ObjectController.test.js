@@ -68,6 +68,19 @@ export const objectControllerTestSuite = async () => {
       }));
     });
 
+    test('should return an invalid input error if run number is not a number in run mode', async () => {
+      reqMock.query.inRunMode = true;
+      reqMock.query.filters = { RunNumber: 'abc' };
+      await objectController.getObjects(reqMock, resMock);
+      ok(resMock.status.calledWith(400));
+      ok(resMock.json.calledWithMatch({
+        message: 'RunNumber must be a number',
+        status: 400,
+        title: 'Invalid Input',
+      }));
+    });
+
+
     test('should retrieve paths and set run status in run mode with run number', async () => {
       reqMock.query.inRunMode = true;
       reqMock.query.filters = { RunNumber: 123 };
