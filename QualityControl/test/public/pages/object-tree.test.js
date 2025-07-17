@@ -159,23 +159,43 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should enter runs mode after clicking the checkbox', async () => {
+    const initialState = await page.evaluate(() => ({
+      checkboxChecked: document.querySelector('#runsModeCheckbox')?.checked,
+      inRunMode: window.model?.inRunMode,
+      hasRunInfo: Boolean(document.querySelector('.run-info-container')),
+    }));
+
+    ok(!initialState.checkboxChecked);
+    ok(!initialState.inRunMode);
+    ok(!initialState.hasRunInfo);
+
     await page.click('#runsModeCheckbox');
+    await page.waitForSelector('.run-info-container', { timeout: 5000 });
 
-    await page.waitForFunction(() => {
-      const el = document.querySelector('#runStatus');
-      return el && el.textContent?.trim() === 'ONGOING';
-    }, { timeout: 5000 });
+    const activatedState = await page.evaluate(() => ({
+      checkboxChecked: document.querySelector('#runsModeCheckbox')?.checked,
+      inRunMode: window.model?.inRunMode,
+      runNumber: document.querySelector('#runNumber')?.textContent?.trim(),
+      modelRunNumber: window.model?.runNumber,
+    }));
 
-    const statusText = await page.evaluate(() => {
-      const runNumber = document.querySelector('#runNumber')?.textContent?.trim();
-      const status = document.querySelector('#runStatus')?.textContent?.trim();
-      return { status, runNumber };
-    });
-
-    strictEqual(statusText.runNumber, '0');
-    strictEqual(statusText.status, 'ONGOING');
-
-    //exit runs mode
+    ok(activatedState.checkboxChecked);
+    ok(activatedState.inRunMode);
+    strictEqual(activatedState.runNumber, '0');
+    strictEqual(activatedState.modelRunNumber, '0');
+  });
+  await testParent.test('should exit runs mode after clicking the checkbox again', async () => {
     await page.click('#runsModeCheckbox');
+    await page.waitForFunction(() => !document.querySelector('.run-info-container'), { timeout: 5000 });
+
+    const deactivatedState = await page.evaluate(() => ({
+      checkboxChecked: document.querySelector('#runsModeCheckbox')?.checked,
+      inRunMode: window.model?.inRunMode,
+      modelRunNumber: window.model?.runNumber,
+    }));
+
+    ok(!deactivatedState.checkboxChecked);
+    ok(!deactivatedState.inRunMode);
+    ok(deactivatedState.modelRunNumber === null);
   });
 };
