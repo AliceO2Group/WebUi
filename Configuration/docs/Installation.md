@@ -16,7 +16,7 @@ git clone https://github.com/AliceO2Group/WebUi.git
 ```
 
 ## 3. Setup Control backend dependencies
-Navigate to the `QualityControl` directory within the cloned repository and follow the setup instructions there. Control backend is dependency of this project.
+Navigate to the `Control` directory within the cloned repository and follow the setup instructions there. Control backend is dependency of this project.
 
 Change port of Control to `8081`, as our app uses `8080` already.
 
