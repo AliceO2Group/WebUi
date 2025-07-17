@@ -40,7 +40,7 @@ export default function objectTreeHeader(qcObject, filterModel) {
       qcObject.objectsRemote.isSuccess() && h('span', `(${howMany})`),
     ]),
     h('.flex-row.items-center.g2.justify-end', [
-      model.inRunMode ? null : filterPanelToggleButton(filterModel),
+      qcObject.model.inRunMode ? null : filterPanelToggleButton(filterModel),
       ' ',
       h('.dropdown', {
         title: 'Sort by', class: qcObject.sortBy.open ? 'dropdown-open' : '',
