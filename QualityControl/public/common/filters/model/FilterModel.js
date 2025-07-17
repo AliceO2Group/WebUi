@@ -33,6 +33,10 @@ export default class FilterModel extends Observable {
     this._filterMap = {};
     this.isVisible = true;
     this._runsModeInterval = null;
+
+    // Run mode state management
+    this._inRunMode = false;
+    this._runNumber = null;
   }
 
   /**
@@ -151,7 +155,7 @@ export default class FilterModel extends Observable {
   async activateRunsMode(baseViewModel) {
     this._filterMap = { RunNumber: this.model.router.params.RunNumber };
     this.setFilterToURL();
-    this.model.enterRunMode();
+    this.enterRunMode();
     await baseViewModel.triggerFilter(true);
     this._manageRunsModeInterval(baseViewModel);
     this.notify();
@@ -163,7 +167,7 @@ export default class FilterModel extends Observable {
    * @returns {Promise<void>}
    */
   async deactivateRunsMode(baseViewModel) {
-    this.model.exitRunMode();
+    this.exitRunMode();
     this.setFilterToURL();
     await baseViewModel.triggerFilter(false);
     this.notify();
@@ -197,5 +201,50 @@ export default class FilterModel extends Observable {
       clearInterval(this._runsModeInterval);
       this._runsModeInterval = null;
     }
+  }
+
+  /**
+   * Checks if run mode is activated
+   * @returns {boolean} true if activated
+   */
+  get inRunMode() {
+    return this._inRunMode;
+  }
+
+  /**
+   * Enter run mode
+   * @returns {undefined}
+   */
+  enterRunMode() {
+    this._inRunMode = true;
+    this._runNumber = this.model.router.params.RunNumber || null;
+    this.notify();
+  }
+
+  /**
+   * Exit run mode
+   * @returns {undefined}
+   */
+  exitRunMode() {
+    this._inRunMode = false;
+    this._runNumber = null;
+    this._clearRunsModeInterval();
+    this.notify();
+  }
+
+  /**
+   * Get run number
+   * @returns {null | number} Run number or null if not set
+   */
+  get runNumber() {
+    return this._runNumber;
+  }
+
+  /**
+   * Determines if runs mode can be activated based on the presence of a valid RunNumber in the router params.
+   * @returns {boolean} True if RunNumber is present and not empty
+   */
+  get canActivateRunsMode() {
+    return Number.isInteger(Number(this.model.router.params.RunNumber));
   }
 }

@@ -78,9 +78,7 @@ export default class Model extends Observable {
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
 
-    //Run mode
-    this._inRunMode = false; // Whether the application is in run mode or not
-    this._runNumber = null; // Run number to be used in run mode
+    //Run mode - status tracking (UI state management)
     this._runStatus = null; // Status of the run in run mode
 
     // Setup keyboard dispatcher
@@ -369,32 +367,38 @@ export default class Model extends Observable {
   }
 
   /**
-   * Checks if run mode is activated
+   * Checks if run mode is activated (delegates to FilterModel)
    * @returns {boolean} true if activated
    */
   get inRunMode() {
-    return this._inRunMode;
+    return this.filterModel.inRunMode;
   }
 
+  /**
+   * Enter run mode (delegates to FilterModel)
+   * @returns {undefined}
+   */
   enterRunMode() {
-    this._inRunMode = true;
-    this._runNumber = this.router.params.RunNumber || null;
+    this.filterModel.enterRunMode();
     this.notify();
   }
 
+  /**
+   * Exit run mode (delegates to FilterModel)
+   * @returns {undefined}
+   */
   exitRunMode() {
-    this._inRunMode = false;
-    this._runNumber = null;
+    this.filterModel.exitRunMode();
     this._runStatus = null;
     this.notify();
   }
 
   /**
-   * Get run number
+   * Get run number (delegates to FilterModel)
    * @returns {null | number} Run number or null if not set
    */
   get runNumber() {
-    return this._runNumber;
+    return this.filterModel.runNumber;
   }
 
   /**
@@ -415,10 +419,10 @@ export default class Model extends Observable {
   }
 
   /**
-   * Determines if runs mode can be activated based on the presence of a valid RunNumber in the router params.
+   * Determines if runs mode can be activated (delegates to FilterModel)
    * @returns {boolean} True if RunNumber is present and not empty
    */
   get canActivateRunsMode() {
-    return Number.isInteger(Number(this.router.params.RunNumber));
+    return this.filterModel.canActivateRunsMode;
   }
 }
