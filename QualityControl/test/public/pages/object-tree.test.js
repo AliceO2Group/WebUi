@@ -143,7 +143,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
     const result = await page.evaluate(() => {
       const span = document.querySelector('header > div > div:nth-child(1) > div:nth-child(2) > span');
-      const checkbox = document.querySelector('#runsModeCheckbox');
+      const checkbox = span?.querySelector('input[type="checkbox"]');
 
       const spanDisabled = span?.getAttribute('aria-disabled') === 'true' || span?.classList.contains('disabled');
       const checkboxEnabled = checkbox && !checkbox.disabled;
