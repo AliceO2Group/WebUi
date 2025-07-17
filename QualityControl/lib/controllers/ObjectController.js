@@ -12,9 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 'use strict';
-import { LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
-
-const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/object-ctrl`);
+import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
 /**
  * Gateway for all QC Objects requests
@@ -25,12 +23,19 @@ export class ObjectController {
    * Setup Object Controller:
    * - CcdbService - retrieve data about objects
    * @param {QCObjectService} objService - objService to be used for retrieval of information
+   * @param {RunMonitoringService} runModeService - for monitoring the status of runs periodically
    */
-  constructor(objService) {
+  constructor(objService, runModeService) {
     /**
      * @type {QCObjectService}
      */
     this._objService = objService;
+
+    /**
+     * @type {RunMonitoringService}
+     */
+    this._runModeService = runModeService;
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/object-ctrl`);
   }
 
   /**
@@ -41,14 +46,32 @@ export class ObjectController {
    */
   async getObjects(req, res) {
     try {
-      const { prefix, fields, filters } = req.query;
+      const { prefix, fields, filters = {}, inRunMode = false } = req.query;
 
-      const list = await this._objService.retrieveLatestVersionOfObjects({ prefix, fields, filters });
-      res.status(200).json(list);
+      const { RunNumber: runNumber } = filters;
+      const parsedRunNumber = parseInt(runNumber, 10);
+
+      if (inRunMode && (!runNumber || isNaN(parsedRunNumber))) {
+        return updateAndSendExpressResponseFromNativeError(
+          res,
+          new InvalidInputError(!runNumber
+            ? 'RunNumber is required when in run mode'
+            : 'RunNumber must be a number'),
+        );
+      } else if (inRunMode && runNumber && !isNaN(parsedRunNumber)) {
+        const { paths, runStatus } = await this._runModeService.retrievePathsAndSetRunStatus(parsedRunNumber, prefix);
+        return res.status(200).json({ paths, runStatus });
+      }
+
+      const objectsData = await this._objService.retrieveLatestVersionOfObjects({
+        prefix,
+        fields,
+        filters,
+      });
+      res.status(200).json(objectsData);
     } catch (error) {
       const responseError = new Error('Failed to retrieve list of objects latest version');
-
-      logger.errorMessage(`Error whilst retrieving objects: ${error}`);
+      this._logger.errorMessage(`Error whilst retrieving objects: ${error}`);
       updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   }
@@ -62,18 +85,18 @@ export class ObjectController {
    * interpretation with JSROOT.draw
    * @param {Request} req - HTTP request object with "query" information
    * @param {Response} res - HTTP response object to provide information on request
-   * @returns {void}
+   * @returns {Promise<void>}
    */
   async getObjectContent(req, res) {
     try {
       const { path, validFrom, filters, id } = req.query;
 
-      const object = await this._objService.retrieveQcObject(path, validFrom, id, filters);
+      const object = await this._objService.retrieveQcObject({ path, validFrom, id, filters });
       res.status(200).json(object);
     } catch (error) {
       const responseError = new Error('Failed to retrieve object content');
 
-      logger.errorMessage(`Error whilst retrieving object content: ${error}`);
+      this._logger.errorMessage(`Error whilst retrieving object content: ${error}`);
       updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   }
@@ -87,19 +110,19 @@ export class ObjectController {
    * interpretation with JSROOT.draw
    * @param {Request} req - HTTP request object with "query" information
    * @param {Response} res - HTTP response object to provide information on request
-   * @returns {void}
+   * @returns {Promise<void>}
    */
   async getObjectById(req, res) {
     try {
       const qcObjectId = req.params.id;
       const { validFrom, filters, id } = req.query;
 
-      const object = await this._objService.retrieveQcObjectByQcgId(qcObjectId, id, validFrom, filters);
+      const object = await this._objService.retrieveQcObjectByQcgId({ qcObjectId, id, validFrom, filters });
       res.status(200).json(object);
     } catch (error) {
       const responseError = new Error('Unable to identify object or read it by qcg id');
 
-      logger.errorMessage(`Error whilst retrieving object: ${error}`);
+      this._logger.errorMessage(`Error whilst retrieving object: ${error}`);
       updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   }
