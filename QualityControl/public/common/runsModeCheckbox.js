@@ -4,7 +4,7 @@ import { h } from '/js/src/index.js';
  * Checkbox component for 'Activate run mode'
  * @param {object} pageModel - the model for the page
  * @param {object} filterModel - the model for the filters
- * @returns {vnode}
+ * @returns {vnode} - the checkbox component for runs mode
  */
 export function runsModeCheckbox(pageModel, filterModel) {
   const checkbox = createRunsModeCheckbox(pageModel, filterModel);
@@ -31,7 +31,7 @@ export function runsModeCheckbox(pageModel, filterModel) {
  * @returns {vnode} - the checkbox element for runs mode
  */
 function createRunsModeCheckbox(pageModel, filterModel) {
-  const model = pageModel.model;
+  const { model } = pageModel;
   return h('input.form-check-input.runs-mode-checkbox', {
     id: 'runsModeCheckbox',
     type: 'checkbox',

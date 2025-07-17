@@ -168,7 +168,7 @@ export default class QCObjectService {
 
   /**
    * Ask server for all available objects from CCDB
-   * @param inRunMode
+   * @param {boolean} inRunMode - if true, inRunMode is added to the path
    * @returns {JSON} List of Objects
    * @deprecated
    */

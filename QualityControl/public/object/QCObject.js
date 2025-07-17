@@ -472,7 +472,7 @@ export default class QCObject extends BaseViewModel {
 
   /**
    * Function that reloads the object list with filters applied
-   * @param inRunMode - true if we want to check the run status and refresh the paths if ongoing
+   * @param {boolean} inRunMode - true if we want to check the run status and refresh the paths if ongoing
    * @returns {undefined}
    */
   async triggerFilter(inRunMode = false) {
