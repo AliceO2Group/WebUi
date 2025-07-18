@@ -68,7 +68,7 @@ const filterSpecific = (model) => {
   switch (page) {
     case 'layoutList': return filtersPanel(filterModel, layoutListModel);
     case 'layoutShow': return filtersPanel(filterModel, layout);
-    case 'objectTree': return model.inRunMode ? null : filtersPanel(filterModel, object);
+    case 'objectTree': return filterModel.inRunMode ? null : filtersPanel(filterModel, object);
     case 'objectView': return filtersPanel(filterModel, objectViewModel);
     case 'about': return filtersPanel(filterModel, aboutViewModel);
     default: return null;
@@ -78,7 +78,7 @@ const filterSpecific = (model) => {
 const runsModeSpecific = (model) => {
   const { page, filterModel, object } = model;
   switch (page) {
-    case 'objectTree': return model.inRunMode ? runModeHeader(model, filterModel, object) : null;
+    case 'objectTree': return filterModel.inRunMode ? runModeHeader(model, filterModel, object) : null;
     default: return null;
   }
 };

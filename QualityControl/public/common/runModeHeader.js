@@ -23,31 +23,30 @@ import { h, info } from '/js/src/index.js';
  * @returns {vnode} - virtual node element
  */
 export function runModeHeader(model, filterModel, pageModel) {
-  if (!model.inRunMode) {
+  if (!filterModel.inRunMode) {
     return null;
   }
 
   return h('.run-mode-header.flex-row.items-center.p2.g2.bg-gray-lighter', {
     id: 'run-mode-header',
   }, [
-    renderRunModeInfo(model, filterModel),
+    renderRunModeInfo(filterModel),
     h('.flex-grow'),
     renderExitButton(filterModel, pageModel),
   ]);
 
   /**
    * Renders the run mode information section
-   * @param {Model} model - root model of the application
    * @param {FilterModel} filterModel - model that manages filter state
    * @returns {vnode} - virtual node element
    */
-  function renderRunModeInfo(model, filterModel) {
+  function renderRunModeInfo(filterModel) {
     return h('.run-mode-info.flex-row.items-center.g2', {
       id: 'run-mode-info',
     }, [
       renderTitle(),
-      renderRunNumber(model.runNumber),
-      renderRunStatus(model, filterModel),
+      renderRunNumber(filterModel.runNumber),
+      renderRunStatus(filterModel),
     ]);
   }
 
@@ -69,24 +68,15 @@ export function runModeHeader(model, filterModel, pageModel) {
    * @returns {vnode} - virtual node element
    */
   function renderRunNumber(runNumber = 'N/A') {
-    const copyToClipboard = async () => {
-      if (runNumber === 'N/A') {
-        return;
-      }
-      await navigator.clipboard.writeText(runNumber);
-      model.notification.show('Run number copied to clipboard', 'success', 1500);
-    };
-
     return h('.run-detail.flex-row.items-center.g1', {
       id: 'run-number',
     }, [
       h('span.gray-darker', {
         id: 'run-number-label',
-      }, 'Run:'),
+      }, '#'),
       h('span.text-no-select', {
         id: 'run-number-value',
         title: runNumber === 'N/A' ? 'No run number available' : 'Click to copy run number',
-        onclick: copyToClipboard,
         style: runNumber !== 'N/A' ? 'cursor: pointer; user-select: none;' : 'cursor: default;',
       }, runNumber),
     ]);
@@ -94,17 +84,16 @@ export function runModeHeader(model, filterModel, pageModel) {
 
   /**
    * Renders the status detail with dropdown
-   * @param {Model} model - root model of the application
    * @param {FilterModel} filterModel - model that manages filter state
    * @returns {vnode} - virtual node element
    */
-  function renderRunStatus(model, filterModel) {
+  function renderRunStatus(filterModel) {
     return h('.run-detail.flex-row.items-center.g1', [
       h('span.gray-darker', 'Status:'),
       h(
-        `span.${getStatusClass(model.runStatus)}`,
+        `span.${getStatusClass(filterModel.runStatus)}`,
         { id: 'run-status', style: 'font-weight:bold' },
-        model.runStatus || 'Unknown',
+        filterModel.runStatus || 'Unknown',
       ),
       renderStatusInfoDropdown(filterModel),
     ]);
@@ -112,7 +101,6 @@ export function runModeHeader(model, filterModel, pageModel) {
 
   /**
    * Renders the status info dropdown
-   * @param {Model} model - root model of the application
    * @param {FilterModel} filterModel - model that manages filter state
    * @returns {vnode} - virtual node element
    */

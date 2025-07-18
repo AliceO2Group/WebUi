@@ -29,7 +29,6 @@ import AboutViewModel from './pages/aboutView/AboutViewModel.js';
 import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
 import { RequestFields } from './common/RequestFields.enum.js';
 import FilterModel from './common/filters/model/FilterModel.js';
-import { RunStatus } from './common/enums/RunStatus.enum.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -78,9 +77,6 @@ export default class Model extends Observable {
     // Setup router
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
-
-    //Run mode - status tracking (UI state management)
-    this._runStatus = null; // Status of the run in run mode
 
     // Setup keyboard dispatcher
     window.addEventListener('keydown', this.handleKeyboardDown.bind(this));
@@ -173,11 +169,11 @@ export default class Model extends Observable {
   async handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
     clearInterval(this.layout.tabInterval);
-    if (this.inRunMode) {
-      this.exitRunMode();
+    if (this.filterModel.inRunMode) {
+      this.filterModel.inRunMode = false;
     }
 
-    await this.filterModel.filterService.initFilterService();
+    this.filterModel.filterService.initFilterService();
     this.filterModel.setFilterFromURL();
     this.filterModel.setFilterToURL();
 
@@ -369,69 +365,5 @@ export default class Model extends Observable {
   set isUpdateVisible(value) {
     this._isUpdateVisible = value ? true : false;
     this.notify();
-  }
-
-  /**
-   * Checks if run mode is activated (delegates to FilterModel)
-   * @returns {boolean} true if activated
-   */
-  get inRunMode() {
-    return this.filterModel.inRunMode;
-  }
-
-  /**
-   * Enter run mode (delegates to FilterModel)
-   * @returns {undefined}
-   */
-  enterRunMode() {
-    this.filterModel.enterRunMode();
-    this.notify();
-  }
-
-  /**
-   * Exit run mode (delegates to FilterModel)
-   * @returns {undefined}
-   */
-  exitRunMode() {
-    this.filterModel.exitRunMode();
-    this._runStatus = null;
-    this.notify();
-  }
-
-  /**
-   * Get run number (delegates to FilterModel)
-   * @returns {null | number} Run number or null if not set
-   */
-  get runNumber() {
-    return this.filterModel.runNumber;
-  }
-
-  /**
-   * Activate/Deactivate runs mode
-   * @returns {null | string} Run status or null if not set
-   */
-  get runStatus() {
-    return this._runStatus;
-  }
-
-  /**
-   * Sets the current run status and triggers a notification update.
-   * @param {string} value - The new run status from RunStatus enum (e.g., ONGOING, COMPLETED, STOPPED).
-   */
-  set runStatus(value) {
-    if (value !== null && !Object.values(RunStatus).includes(value)) {
-      this._runStatus = RunStatus.UNKNOWN;
-    } else {
-      this._runStatus = value;
-    }
-    this.notify();
-  }
-
-  /**
-   * Determines if runs mode can be activated (delegates to FilterModel)
-   * @returns {boolean} True if RunNumber is present and not empty
-   */
-  get canActivateRunsMode() {
-    return this.filterModel.canActivateRunsMode;
   }
 }

@@ -38,6 +38,7 @@ export default class FilterModel extends Observable {
     // Run mode
     this._inRunMode = false;
     this._runNumber = null;
+    this._runStatus = RunStatus.UNKNOWN;
     this._dropdownOpen = false;
     this._statusInfoOpen = false;
   }
@@ -157,10 +158,10 @@ export default class FilterModel extends Observable {
    */
   async activateRunsMode(baseViewModel) {
     this._previousFilterMap = { ...this._filterMap };
-    const runNumber = this._filterMap.RunNumber || this.model.router.params.RunNumber;
-    this._filterMap = { RunNumber: runNumber };
+    this._runNumber = this._filterMap.RunNumber || this.model.router.params.RunNumber;
+    this._filterMap = { RunNumber: this._runNumber };
     this.setFilterToURL();
-    this.enterRunMode();
+    this.inRunMode = true;
     await baseViewModel.triggerFilter(true);
     this._manageRunsModeInterval(baseViewModel);
     this.notify();
@@ -172,7 +173,7 @@ export default class FilterModel extends Observable {
    * @returns {Promise<void>}
    */
   async deactivateRunsMode(baseViewModel) {
-    this.exitRunMode();
+    this.inRunMode = false;
     this.setFilterToURL();
     await baseViewModel.triggerFilter(false);
     this.notify();
@@ -186,11 +187,11 @@ export default class FilterModel extends Observable {
    */
   async _manageRunsModeInterval(baseViewModel) {
     this._clearRunsModeInterval();
-    if (this.model.runStatus === RunStatus.ONGOING) {
+    if (this.runStatus === RunStatus.ONGOING) {
       this._runsModeInterval = setInterval(async () => {
         await baseViewModel.triggerFilter(true);
         this.notify();
-        if (this.model.runStatus !== RunStatus.ONGOING) {
+        if (this.runStatus !== RunStatus.ONGOING) {
           this._clearRunsModeInterval();
         }
         // TODO: Should be provided in config file ??
@@ -216,13 +217,21 @@ export default class FilterModel extends Observable {
     return this._inRunMode;
   }
 
+  set inRunMode(value) {
+    this._inRunMode = value;
+    if (value) {
+      this.enterRunMode();
+    } else {
+      this.exitRunMode();
+    }
+  }
+
   /**
    * Enter run mode
    * @returns {undefined}
    */
   enterRunMode() {
-    this._inRunMode = true;
-    this._runNumber = this.model.router.params.RunNumber || null;
+    this.runNumber = this.model.router?.params?.RunNumber || null;
     this.notify();
   }
 
@@ -231,8 +240,8 @@ export default class FilterModel extends Observable {
    * @returns {undefined}
    */
   exitRunMode() {
-    this._inRunMode = false;
-    this._runNumber = null;
+    this.runNumber = null;
+    this.runStatus = RunStatus.UNKNOWN;
     this._clearRunsModeInterval();
     this._dropdownOpen = false;
     this._statusInfoOpen = false;
@@ -246,6 +255,34 @@ export default class FilterModel extends Observable {
    */
   get runNumber() {
     return this._runNumber;
+  }
+
+  /**
+   * Set run number
+   * @param {number} runNumber - The run number to set
+   * @returns {undefined}
+   */
+  set runNumber(runNumber) {
+    this._runNumber = runNumber;
+    this.notify();
+  }
+
+  /**
+   * Get run status
+   * @returns {RunStatus} The current run status
+   */
+  get runStatus() {
+    return this._runStatus;
+  }
+
+  /**
+   * Set run status
+   * @param {RunStatus} runStatus - The run status to set
+   * @returns {undefined}
+   */
+  set runStatus(runStatus) {
+    this._runStatus = runStatus;
+    this.notify();
   }
 
   /**

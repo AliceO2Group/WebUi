@@ -55,7 +55,6 @@ export default class QCObject extends BaseViewModel {
     this.queryingObjects = false;
     this.scrollTop = 0;
     this.scrollHeight = 0;
-    this.filterModel = model.filterModel;
   }
 
   /**
@@ -184,7 +183,7 @@ export default class QCObject extends BaseViewModel {
     if (result.isSuccess()) {
       offlineObjects = inRunMode ? result.payload.paths : result.payload;
       if (inRunMode) {
-        this.model.runStatus = result.payload.runStatus;
+        this.model.filterModel.runStatus = result.payload.runStatus;
       }
     } else {
       const errorMessage =
@@ -477,6 +476,6 @@ export default class QCObject extends BaseViewModel {
    */
   async triggerFilter(inRunMode = false) {
     this.selected = null;
-    await this.loadList(inRunMode);
+    this.loadList(inRunMode);
   }
 }
