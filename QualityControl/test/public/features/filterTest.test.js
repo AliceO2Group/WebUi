@@ -110,6 +110,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     const runNumber = '0';
     await page.locator('#runNumberFilter').fill(runNumber);
     await page.locator('#filterElement #triggerFilterButton').click();
+    await page.locator('#updateOnlyButton').click();
 
     await extendTree(3, 5);
 
@@ -123,7 +124,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     await page.waitForSelector(versionsPath);
 
     let versionCount = await page.evaluate((path) => document.querySelectorAll(path).length, versionsPath);
-    strictEqual(versionCount, 1);
+    strictEqual(versionCount, 1, 'Number of versions is not 1');
 
     await page.locator('#filterElement #clearFilterButton').click();
     await page.locator('#filterElement #triggerFilterButton').click();
@@ -134,7 +135,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     await page.waitForSelector(versionsPath);
 
     versionCount = await page.evaluate((path) => document.querySelectorAll(path).length, versionsPath);
-    strictEqual(versionCount, 2);
+    strictEqual(versionCount, 2, 'Number of versions is not 2');
   });
 
   /**

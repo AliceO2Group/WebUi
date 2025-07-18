@@ -124,6 +124,7 @@ const updateDropdownButton = (onClickCallback, filterModel, pageModel) => {
       style: 'top: 100%; left: 0; z-index: 1000;',
     }, [
       h('button.dropdown-item', {
+        id: 'updateOnlyButton',
         onclick: (e) => {
           e.stopPropagation();
           filterModel._dropdownOpen = false;
