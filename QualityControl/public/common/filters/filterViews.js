@@ -58,14 +58,14 @@ export function filtersPanel(filterModel, pageModel) {
   const clearFilterCallback = clearFilter.bind(filterModel, pageModel);
   const filtersList = filtersConfig(filterService);
 
-  if (!isVisible) {
+  if (!isVisible || filterModel.inRunMode) {
     return null;
   }
 
   return h(
     '.w-100.flex-row.p2.g2.justify-center#filterElement',
     [
-      triggerFiltersButton(onEnterCallback),
+      triggerFiltersButton(onEnterCallback, filterModel, pageModel),
       clearFiltersButton(clearFilterCallback),
       ...filtersList.map((filter) =>
         createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
@@ -76,10 +76,72 @@ export function filtersPanel(filterModel, pageModel) {
 /**
  * Button which will allow the user to update filter parameters after the input
  * @param {Function} onClickCallback - Function to trigger the filter mechanism
+ * @param {FilterModel} filterModel - Model that manages filter state
+ * @param {PageModel} pageModel - Model that manages the state of the page
  * @returns {vnode} - virtual node element
  */
-const triggerFiltersButton = (onClickCallback) =>
-  h('button.btn.btn-primary#triggerFilterButton', { onclick: onClickCallback, title: 'Update filters' }, 'Update');
+const triggerFiltersButton = (onClickCallback, filterModel, pageModel) => {
+  const runNumber = filterModel.filterMap.RunNumber;
+  const isValidRunNumber = runNumber && !isNaN(Number(runNumber));
+  const isObjectTreePage = pageModel.model && pageModel.model.page === 'objectTree';
+
+  if (isValidRunNumber && isObjectTreePage) {
+    return updateDropdownButton(onClickCallback, filterModel, pageModel);
+  }
+
+  return h(
+    'button.btn.btn-primary',
+    { id: 'triggerFilterButton', onclick: onClickCallback, title: 'Update filters' },
+    'Update',
+  );
+};
+
+/**
+ * Dropdown button for update options when run number is present
+ * @param {Function} onClickCallback - Function to trigger the filter mechanism
+ * @param {FilterModel} filterModel - Model that manages filter state
+ * @param {PageModel} pageModel - Model that manages the state of the page
+ * @returns {vnode} - virtual node element
+ */
+const updateDropdownButton = (onClickCallback, filterModel, pageModel) => {
+  // Use a simple property on the filterModel to track dropdown state
+  const isDropdownOpen = filterModel._dropdownOpen || false;
+
+  return h('.dropdown.position-relative', [
+    h('button.btn.btn-primary.dropdown-toggle', {
+      id: 'triggerFilterButton',
+      onclick: (e) => {
+        e.stopPropagation();
+        filterModel._dropdownOpen = !isDropdownOpen;
+        filterModel.notify();
+      },
+      title: 'Update options',
+    }, [
+      'Update ',
+      isDropdownOpen ? iconChevronTop() : iconChevronBottom(),
+    ]),
+    isDropdownOpen && h('.dropdown-menu.show.position-absolute', {
+      style: 'top: 100%; left: 0; z-index: 1000;',
+    }, [
+      h('button.dropdown-item', {
+        onclick: (e) => {
+          e.stopPropagation();
+          filterModel._dropdownOpen = false;
+          filterModel.notify();
+          onClickCallback();
+        },
+      }, 'Update only'),
+      h('button.dropdown-item', {
+        onclick: async (e) => {
+          e.stopPropagation();
+          filterModel._dropdownOpen = false;
+          filterModel.notify();
+          await filterModel.activateRunsMode(pageModel);
+        },
+      }, 'Update & Run Mode'),
+    ]),
+  ]);
+};
 
 /**
  * Button which will allow the user to clear the filter element

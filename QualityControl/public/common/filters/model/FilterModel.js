@@ -35,9 +35,11 @@ export default class FilterModel extends Observable {
     this.isVisible = true;
     this._runsModeInterval = null;
 
-    // Run mode state management
+    // Run mode
     this._inRunMode = false;
     this._runNumber = null;
+    this._dropdownOpen = false;
+    this._statusInfoOpen = false;
   }
 
   /**
@@ -154,7 +156,9 @@ export default class FilterModel extends Observable {
    * @returns {Promise<void>}
    */
   async activateRunsMode(baseViewModel) {
-    this._filterMap = { RunNumber: this.model.router.params.RunNumber };
+    this._previousFilterMap = { ...this._filterMap };
+    const runNumber = this._filterMap.RunNumber || this.model.router.params.RunNumber;
+    this._filterMap = { RunNumber: runNumber };
     this.setFilterToURL();
     this.enterRunMode();
     await baseViewModel.triggerFilter(true);
@@ -230,6 +234,9 @@ export default class FilterModel extends Observable {
     this._inRunMode = false;
     this._runNumber = null;
     this._clearRunsModeInterval();
+    this._dropdownOpen = false;
+    this._statusInfoOpen = false;
+    this.isVisible = true;
     this.notify();
   }
 
@@ -247,5 +254,14 @@ export default class FilterModel extends Observable {
    */
   get canActivateRunsMode() {
     return Number.isInteger(Number(this.model.router.params.RunNumber));
+  }
+
+  /**
+   * Validates if a run number is a valid number
+   * @param {string|number} runNumber - The run number to validate
+   * @returns {boolean} True if the run number is valid
+   */
+  isValidRunNumber(runNumber) {
+    return runNumber && !isNaN(Number(runNumber)) && Number.isInteger(Number(runNumber));
   }
 }

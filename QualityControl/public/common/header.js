@@ -21,7 +21,7 @@ import aboutViewHeader from '../pages/aboutView/components/aboutViewHeader.js';
 import LayoutListHeader from '../pages/layoutListView/components/LayoutListHeader.js';
 import { objectViewHeader } from '../pages/objectView/components/header.js';
 import { filtersPanel } from './filters/filterViews.js';
-import { runsModeCheckbox } from './runsModeCheckbox.js';
+import { runModeHeader } from './runModeHeader.js';
 
 /**
  * Shows header of the application, split with 3 parts:
@@ -78,7 +78,7 @@ const filterSpecific = (model) => {
 const runsModeSpecific = (model) => {
   const { page, filterModel, object } = model;
   switch (page) {
-    case 'objectTree': return runsModeCheckbox(object, filterModel);
+    case 'objectTree': return model.inRunMode ? runModeHeader(model, filterModel, object) : null;
     default: return null;
   }
 };
