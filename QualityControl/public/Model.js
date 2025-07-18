@@ -173,6 +173,10 @@ export default class Model extends Observable {
   async handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
     clearInterval(this.layout.tabInterval);
+    if (this.inRunMode) {
+      this.exitRunMode();
+    }
+
     await this.filterModel.filterService.initFilterService();
     this.filterModel.setFilterFromURL();
     this.filterModel.setFilterToURL();
