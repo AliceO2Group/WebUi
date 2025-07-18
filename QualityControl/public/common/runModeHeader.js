@@ -106,7 +106,7 @@ export function runModeHeader(model, filterModel, pageModel) {
         { id: 'run-status', style: 'font-weight:bold' },
         model.runStatus || 'Unknown',
       ),
-      renderStatusInfoDropdown(model, filterModel),
+      renderStatusInfoDropdown(filterModel),
     ]);
   }
 
@@ -116,12 +116,12 @@ export function runModeHeader(model, filterModel, pageModel) {
    * @param {FilterModel} filterModel - model that manages filter state
    * @returns {vnode} - virtual node element
    */
-  function renderStatusInfoDropdown(model, filterModel) {
+  function renderStatusInfoDropdown(filterModel) {
     return h('.dropdown.mh1', {
       class: filterModel._statusInfoOpen ? 'dropdown-open' : '',
     }, [
       renderInfoButton(filterModel),
-      filterModel._statusInfoOpen && renderDropdownMenu(model),
+      filterModel._statusInfoOpen && renderDropdownMenu(),
     ]);
   }
 
@@ -144,7 +144,6 @@ export function runModeHeader(model, filterModel, pageModel) {
 
   /**
    * Renders the dropdown menu content
-   * @param {Model} model - root model of the application
    * @returns {vnode} - virtual node element
    */
   function renderDropdownMenu() {
