@@ -34,7 +34,7 @@ export default function objectTreeHeader(qcObject, filterModel) {
 
   return [
     // display flex and align items center to make sure the header is aligned properly
-    h('.w-33.text-center.flex-grow', [
+    h('.w-33.text-center.flex-grow.flex-row.justify-center.items-center', [
       h('b.f4', 'Objects'),
       ' ',
       qcObject.objectsRemote.isSuccess() && h('span', `(${howMany})`),
