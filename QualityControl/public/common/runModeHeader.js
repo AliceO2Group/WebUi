@@ -27,9 +27,7 @@ export function runModeHeader(model, filterModel, pageModel) {
     return null;
   }
 
-  return h('.run-mode-header.flex-row.items-center.p2.g2.bg-gray-lighter', {
-    id: 'run-mode-header',
-  }, [
+  return h('.flex-row.items-center.p2.g2.bg-gray-lighter', [
     renderRunModeInfo(filterModel),
     h('.flex-grow'),
     renderExitButton(filterModel, pageModel),
@@ -41,11 +39,12 @@ export function runModeHeader(model, filterModel, pageModel) {
    * @returns {vnode} - virtual node element
    */
   function renderRunModeInfo(filterModel) {
-    return h('.run-mode-info.flex-row.items-center.g2', {
-      id: 'run-mode-info',
-    }, [
-      renderTitle(),
+    return h('.flex-row.items-center.g2', [
+      // renderTitle(),
       renderRunNumber(filterModel.runNumber),
+      h('div.mh2', {
+        style: 'width: 1px; height: 1.2em; background-color: var(--color-gray-dark);',
+      }),
       renderRunStatus(filterModel),
     ]);
   }
@@ -54,31 +53,16 @@ export function runModeHeader(model, filterModel, pageModel) {
    * Renders the run mode title
    * @returns {vnode} - virtual node element
    */
-  function renderTitle() {
-    return h('span.run-mode-title', {
-      id: 'run-mode-title',
-      title: 'Run Mode filters objects by a specific run number and monitors run status.' +
-      ' Other filters are disabled while active.',
-    }, 'Run Mode');
-  }
 
   /**
    * Renders a run detail item for run number with copy functionality
    * @param {string} runNumber - The run number value to display
    * @returns {vnode} - virtual node element
    */
-  function renderRunNumber(runNumber = 'N/A') {
-    return h('.run-detail.flex-row.items-center.g1', {
-      id: 'run-number',
-    }, [
-      h('span.gray-darker', {
-        id: 'run-number-label',
-      }, '#'),
-      h('span.text-no-select', {
-        id: 'run-number-value',
-        title: runNumber === 'N/A' ? 'No run number available' : 'Click to copy run number',
-        style: runNumber !== 'N/A' ? 'cursor: pointer; user-select: none;' : 'cursor: default;',
-      }, runNumber),
+  function renderRunNumber(runNumber) {
+    return h('.flex-row.items-center.g1', [
+      h('span.gray-darker', 'Run'),
+      h('b', `#${runNumber}`),
     ]);
   }
 
@@ -88,13 +72,9 @@ export function runModeHeader(model, filterModel, pageModel) {
    * @returns {vnode} - virtual node element
    */
   function renderRunStatus(filterModel) {
-    return h('.run-detail.flex-row.items-center.g1', [
+    return h('.flex-row.items-center.g1', [
       h('span.gray-darker', 'Status:'),
-      h(
-        `span.${getStatusClass(filterModel.runStatus)}`,
-        { id: 'run-status', style: 'font-weight:bold' },
-        filterModel.runStatus || 'Unknown',
-      ),
+      h(`b.${getStatusClass(filterModel.runStatus)}`, filterModel.runStatus || 'Unknown'),
       renderStatusInfoDropdown(filterModel),
     ]);
   }
@@ -126,7 +106,6 @@ export function runModeHeader(model, filterModel, pageModel) {
         filterModel._statusInfoOpen = !filterModel._statusInfoOpen;
         filterModel.notify();
       },
-      style: 'padding: 2px 6px; font-size: 0.75rem;',
     }, info());
   }
 
@@ -135,10 +114,10 @@ export function runModeHeader(model, filterModel, pageModel) {
    * @returns {vnode} - virtual node element
    */
   function renderDropdownMenu() {
-    return h('.dropdown-menu.show', [
-      h('.p2.text-left', [
-        h('span.gray-darker', 'Status meanings:'),
-        h('hr'),
+    return h('.dropdown-menu', [
+      h('.p2', [
+        h('div.gray-darker.mv1', 'Status meanings:'),
+        h('hr.mv1'),
         renderStatusList(),
       ]),
     ]);
@@ -149,20 +128,14 @@ export function runModeHeader(model, filterModel, pageModel) {
    * @returns {vnode} - virtual node element
    */
   function renderStatusList() {
-    return h('div', [
-      h('div', ...Object.values(RunStatus).map((status) =>
-        h('label', {
-          style: 'transition: transform 0.2s;',
-          onmouseover: (e) => {
-            e.target.style.transform = 'scale(1.02)';
-            e.target.style.cursor = 'pointer';
-          },
-          onmouseout: (e) => {
-            e.target.style.transform = 'scale(1)';
-            e.target.style.cursor = 'default';
-          },
-        }, h(`span.${getStatusClass(status)}`, { style: 'font-weight:bold' }, status), ' - ', getStatusTitle(status)))),
-    ]);
+    return h('div', Object.values(RunStatus).map((status) => h('div.flex-row.items-center.mv1', {
+      style: 'white-space: nowrap;',
+    }, [
+      h('div.flex-row.items-center.g1', [
+        h('badge.bg-gray-light', h(`b.${getStatusClass(status)}`, [status])),
+        h('span.gray-darker', ` - ${getStatusTitle(status)}`),
+      ]),
+    ])));
   }
 
   /**
@@ -172,10 +145,10 @@ export function runModeHeader(model, filterModel, pageModel) {
    * @returns {vnode} - virtual node element
    */
   function renderExitButton(filterModel, pageModel) {
-    return h('button.btn.btn-sm.btn-outline-secondary', {
+    return h('button.btn.btn-sm', {
       onclick: async () => await filterModel.deactivateRunsMode(pageModel),
       title: 'Exit run mode and show all filters',
-    }, 'X Exit');
+    }, 'Exit');
   }
 
   /**
@@ -184,15 +157,15 @@ export function runModeHeader(model, filterModel, pageModel) {
    * @returns {string} - The corresponding CSS class
    */
   function getStatusClass(status) {
-    switch (status.toLowerCase()) {
+    switch (status) {
       case RunStatus.ONGOING:
         return 'status-ongoing';
       case RunStatus.NOT_FOUND:
-        return 'status-not-found';
+        return 'danger';
       case RunStatus.ENDED:
-        return 'status-ended';
+        return 'primary';
       default:
-        return 'status-unknown';
+        return 'gray-darker';
     }
   }
 
@@ -201,7 +174,7 @@ export function runModeHeader(model, filterModel, pageModel) {
    * @param {string} status - The run status value
    * @returns {string} - The corresponding title text
    */
-  function getStatusTitle(status = RunStatus.UNKNOWN) {
+  function getStatusTitle(status) {
     switch (status) {
       case RunStatus.ENDED:
         return 'The run has ended successfully. No new paths or objects will be added.';

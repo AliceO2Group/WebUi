@@ -106,8 +106,10 @@ const updateDropdownButton = (onClickCallback, filterModel, pageModel) => {
   // Use a simple property on the filterModel to track dropdown state
   const isDropdownOpen = filterModel._dropdownOpen || false;
 
-  return h('.dropdown.position-relative', [
-    h('button.btn.btn-primary.dropdown-toggle', {
+  return h('.dropdown', {
+    class: isDropdownOpen ? 'dropdown-open' : '',
+  }, [
+    h('button.btn.btn-primary', {
       id: 'triggerFilterButton',
       onclick: (e) => {
         e.stopPropagation();
@@ -119,26 +121,28 @@ const updateDropdownButton = (onClickCallback, filterModel, pageModel) => {
       'Update ',
       isDropdownOpen ? iconChevronTop() : iconChevronBottom(),
     ]),
-    isDropdownOpen && h('.dropdown-menu.show.position-absolute', {
-      style: 'top: 100%; left: 0; z-index: 1000;',
-    }, [
-      h('button.dropdown-item', {
-        id: 'updateOnlyButton',
-        onclick: (e) => {
-          e.stopPropagation();
-          filterModel._dropdownOpen = false;
-          filterModel.notify();
-          onClickCallback();
-        },
-      }, 'Update only'),
-      h('button.dropdown-item', {
-        onclick: async (e) => {
-          e.stopPropagation();
-          filterModel._dropdownOpen = false;
-          filterModel.notify();
-          await filterModel.activateRunsMode(pageModel);
-        },
-      }, 'Update & Run Mode'),
+    isDropdownOpen && h('.dropdown-menu', [
+      h('.p2', [
+        h('div.menu-item', {
+          id: 'updateOnlyButton',
+          onclick: (e) => {
+            e.stopPropagation();
+            filterModel._dropdownOpen = false;
+            filterModel.notify();
+            onClickCallback();
+          },
+          style: 'white-space: nowrap;',
+        }, 'Update only'),
+        h('div.menu-item', {
+          onclick: async (e) => {
+            e.stopPropagation();
+            filterModel._dropdownOpen = false;
+            filterModel.notify();
+            await filterModel.activateRunsMode(pageModel);
+          },
+          style: 'white-space: nowrap;',
+        }, 'Update & Run Mode'),
+      ]),
     ]),
   ]);
 };
