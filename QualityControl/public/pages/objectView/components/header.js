@@ -28,7 +28,7 @@ export const objectViewHeader = (model) => {
     h('.flex-column.text-center.justify-center.w-33', h('b', title)),
     h('.flex-row.items-center.p2.g2.w-33.justify-end', [
       getBackToQCGButton(objectViewModel, router),
-      !model.inRunMode && filterPanelToggleButton(filterModel),
+      filterPanelToggleButton(filterModel),
       model.isContextSecure() && h('.flex-row', getCopyURLToClipboardButton(model)),
     ]),
   ];

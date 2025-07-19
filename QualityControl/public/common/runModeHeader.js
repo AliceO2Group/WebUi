@@ -184,17 +184,13 @@ export function runModeHeader(model, filterModel, pageModel) {
    * @returns {string} - The corresponding CSS class
    */
   function getStatusClass(status) {
-    if (!status) {
-      return 'text-muted';
-    }
-
     switch (status.toLowerCase()) {
-      case 'ended':
-        return 'status-ended';
-      case 'ongoing':
+      case RunStatus.ONGOING:
         return 'status-ongoing';
-      case 'not_found':
+      case RunStatus.NOT_FOUND:
         return 'status-not-found';
+      case RunStatus.ENDED:
+        return 'status-ended';
       default:
         return 'status-unknown';
     }
@@ -205,17 +201,13 @@ export function runModeHeader(model, filterModel, pageModel) {
    * @param {string} status - The run status value
    * @returns {string} - The corresponding title text
    */
-  function getStatusTitle(status) {
-    if (!status) {
-      return 'Status unknown';
-    }
-
-    switch (status.toLowerCase()) {
-      case 'ended':
+  function getStatusTitle(status = RunStatus.UNKNOWN) {
+    switch (status) {
+      case RunStatus.ENDED:
         return 'The run has ended successfully. No new paths or objects will be added.';
-      case 'ongoing':
+      case RunStatus.ONGOING:
         return 'The run is currently ongoing. New paths and objects will be added periodically.';
-      case 'not_found':
+      case RunStatus.NOT_FOUND:
         return 'The run was not found in the database. Please check the run number.';
       default:
         return 'The status of the run is unknown. Please check the run number or the system status.';

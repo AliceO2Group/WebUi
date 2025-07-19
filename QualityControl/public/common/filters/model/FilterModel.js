@@ -157,10 +157,15 @@ export default class FilterModel extends Observable {
    * @returns {Promise<void>}
    */
   async activateRunsMode(baseViewModel) {
+    // Save current filters before activating run mode
     this._previousFilterMap = { ...this._filterMap };
-    this._runNumber = this._filterMap.RunNumber || this.model.router.params.RunNumber;
+    this.runNumber = this._filterMap.RunNumber;
+
+    // Clear all filters except RunNumber
     this._filterMap = { RunNumber: this._runNumber };
     this.setFilterToURL();
+
+    // Activate run mode
     this.inRunMode = true;
     await baseViewModel.triggerFilter(true);
     this._manageRunsModeInterval(baseViewModel);
@@ -173,10 +178,25 @@ export default class FilterModel extends Observable {
    * @returns {Promise<void>}
    */
   async deactivateRunsMode(baseViewModel) {
-    this.inRunMode = false;
+    this._resetRunsMode();
     this.setFilterToURL();
     await baseViewModel.triggerFilter(false);
     this.notify();
+  }
+
+  /**
+   * Resets the runs mode state
+   * @returns {void}
+   */
+  async _resetRunsMode() {
+    this._filterMap = this._previousFilterMap || {};
+    this.inRunMode = false;
+    this.runNumber = null;
+    this.runStatus = RunStatus.UNKNOWN;
+    this._clearRunsModeInterval();
+    this._dropdownOpen = false;
+    this._statusInfoOpen = false;
+    this._previousFilterMap = null;
   }
 
   /**
@@ -195,12 +215,13 @@ export default class FilterModel extends Observable {
           this._clearRunsModeInterval();
         }
         // TODO: Should be provided in config file ??
-      }, 30000);
+      }, 5000);
     }
   }
 
   /**
    * Clears the interval set during runs mode.
+   * @returns {void}
    */
   _clearRunsModeInterval() {
     if (this._runsModeInterval) {
@@ -217,35 +238,13 @@ export default class FilterModel extends Observable {
     return this._inRunMode;
   }
 
+  /**
+   * Set run mode
+   * @param {boolean} value - Whether to activate or deactivate run mode
+   * @returns {void}
+   */
   set inRunMode(value) {
     this._inRunMode = value;
-    if (value) {
-      this.enterRunMode();
-    } else {
-      this.exitRunMode();
-    }
-  }
-
-  /**
-   * Enter run mode
-   * @returns {undefined}
-   */
-  enterRunMode() {
-    this.runNumber = this.model.router?.params?.RunNumber || null;
-    this.notify();
-  }
-
-  /**
-   * Exit run mode
-   * @returns {undefined}
-   */
-  exitRunMode() {
-    this.runNumber = null;
-    this.runStatus = RunStatus.UNKNOWN;
-    this._clearRunsModeInterval();
-    this._dropdownOpen = false;
-    this._statusInfoOpen = false;
-    this.isVisible = true;
     this.notify();
   }
 
@@ -260,7 +259,7 @@ export default class FilterModel extends Observable {
   /**
    * Set run number
    * @param {number} runNumber - The run number to set
-   * @returns {undefined}
+   * @returns {void}
    */
   set runNumber(runNumber) {
     this._runNumber = runNumber;
@@ -278,19 +277,11 @@ export default class FilterModel extends Observable {
   /**
    * Set run status
    * @param {RunStatus} runStatus - The run status to set
-   * @returns {undefined}
+   * @returns {void}
    */
   set runStatus(runStatus) {
     this._runStatus = runStatus;
     this.notify();
-  }
-
-  /**
-   * Determines if runs mode can be activated based on the presence of a valid RunNumber in the router params.
-   * @returns {boolean} True if RunNumber is present and not empty
-   */
-  get canActivateRunsMode() {
-    return Number.isInteger(Number(this.model.router.params.RunNumber));
   }
 
   /**

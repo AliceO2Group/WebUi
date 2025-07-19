@@ -169,9 +169,8 @@ export default class Model extends Observable {
   async handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
     clearInterval(this.layout.tabInterval);
-    if (this.filterModel.inRunMode) {
-      this.filterModel.inRunMode = false;
-    }
+    //TODO: For the moment, we deactivate the run mode when changing page
+    this.filterModel.inRunMode = false;
 
     this.filterModel.filterService.initFilterService();
     this.filterModel.setFilterFromURL();
