@@ -66,7 +66,7 @@ describe("ConnectionManager", () => {
 
   test("disconnect() should end stream and reset reconnectAttempts", () => {
     conn.connectToCentralSystem();
-    conn.disconnect();
+    conn.disconnectFromCentralSystem();
 
     expect(mockStream.end).toHaveBeenCalled();
   });
