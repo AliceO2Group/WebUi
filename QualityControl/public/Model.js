@@ -172,7 +172,7 @@ export default class Model extends Observable {
     //TODO: For the moment, we deactivate the run mode when changing page
     this.filterModel.inRunMode = false;
 
-    this.filterModel.filterService.initFilterService();
+    await this.filterModel.filterService.initFilterService();
     this.filterModel.setFilterFromURL();
     this.filterModel.setFilterToURL();
 
