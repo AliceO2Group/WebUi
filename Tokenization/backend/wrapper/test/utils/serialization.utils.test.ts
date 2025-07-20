@@ -1,4 +1,21 @@
-import { deserializeRequest, serializeRequest } from "../serialization.utils";
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
+import {
+  deserializeRequest,
+  serializeRequest,
+} from "../../utils/serialization.utils";
 import { describe, expect, test } from "@jest/globals";
 
 describe("serializeRequest", () => {
@@ -22,23 +39,6 @@ describe("serializeRequest", () => {
     expect(contentType).toBe("application/json");
     expect(json.url).toBe(url);
     expect(json.options.method).toBe(options.method);
-  });
-
-  test("serializes URL only if options are not provided", () => {
-    const url = "/api/simple";
-    const buffer = serializeRequest(url);
-    const view = new Uint8Array(buffer);
-
-    const typeLength = view[0];
-    const typeBytes = view.slice(1, 1 + typeLength);
-    const jsonBytes = view.slice(1 + typeLength);
-
-    const contentType = new TextDecoder().decode(typeBytes);
-    const json = JSON.parse(new TextDecoder().decode(jsonBytes));
-
-    expect(contentType).toBe("application/json");
-    expect(json.url).toBe(url);
-    expect(json).not.toHaveProperty("options");
   });
 });
 

@@ -20,6 +20,7 @@
  * @property {String} id
  * @property {Number} currentRunNumber
  * @property {Number} createdWhen - timestamp in ms
+ * @property {TaskEvent} firstTaskInError - the first task in error, if any
  * @property {String} state - STANDBY, DEPLOYED, CONFIGURED, RUNNING, ERROR, MIXED, SHUTDOWN
  * @property {String} currentTransition - DEPLOY, CONFIGURE, RESET, START_ACTIVITY, STOP_ACTIVITY, EXIT, GO_ERROR, RECOVER AS PER https://github.com/AliceO2Group/Control/blob/master/core/environment/environment.go#L143 
  * @property {String} rootRole - workflow selected by user

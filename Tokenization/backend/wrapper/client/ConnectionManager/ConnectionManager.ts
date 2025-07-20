@@ -1,32 +1,55 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
-import path from "path";
-import { fileURLToPath } from "url";
-import { Connection } from "../Connection/Connection.ts";
-import { DuplexMessageEvent } from "../../models/message.model.ts";
+import { CentralConnection } from "./CentralConnection";
+import { EventDispatcher } from "../ConnectionManager/EventManagement/EventDispatcher";
+import { Connection } from "../Connection/Connection";
+import { LogManager } from "@aliceo2/web-ui";
 
 /**
  * @description Manages all the connection between clients and central system.
  */
+/**
+ * Manages the lifecycle and connection logic for a gRPC client communicating with the central system.
+ *
+ * This class is responsible for:
+ * - Initializing the gRPC client using the provided proto definition and address.
+ * - Delegating stream handling to CentralConnection.
+ * - Managing sending/receiving connections to other clients.
+ *
+ * @remarks
+ * - `centralConnection`: Handles the duplex stream with the central gRPC server.
+ * - `sendingConnections`: Map of active outbound connections.
+ * - `receivingConnections`: Map of active inbound connections.
+ */
 export class ConnectionManager {
-  private client: any;
-  private stream?: grpc.ClientDuplexStream<any, any>;
-  private readonly address: string;
-  private reconnectAttempts = 0;
+  private logger = LogManager.getLogger("ConnectionManager");
+  private centralConnection: CentralConnection;
+  private sendingConnections = new Map<string, Connection>();
+  private receivingConnections = new Map<string, Connection>();
 
-  // Map to store sending connections by target address
-  private sendingConnections: Map<string, Connection> = new Map();
-
-  // Map to store receiving connections by target address
-  private receivingConnections: Map<string, Connection> = new Map();
-
-  constructor(centralAddress = "localhost:50051") {
-    this.address = centralAddress;
-
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    const PROTO_PATH = path.join(__dirname, "../../proto/wrapper.proto");
-    const packageDef = protoLoader.loadSync(PROTO_PATH, {
+  /**
+   * @description Initializes a new instance of the ConnectionManager class.
+   *
+   * This constructor sets up the gRPC client for communication with the central system.
+   *
+   * @param protoPath - The file path to the gRPC proto definition.
+   * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
+   */
+  constructor(protoPath: string, centralAddress: string = "localhost:50051") {
+    const packageDef = protoLoader.loadSync(protoPath, {
       keepCase: true,
       longs: String,
       enums: String,
@@ -35,114 +58,31 @@ export class ConnectionManager {
     });
 
     const proto = grpc.loadPackageDefinition(packageDef) as any;
-    const wrapper = proto.wrapper;
+    const wrapper = proto.webui.tokenization;
 
-    // Create gRPC client
-    this.client = new wrapper.CentralSystem(
-      this.address,
+    const client = new wrapper.CentralSystem(
+      centralAddress,
       grpc.credentials.createInsecure()
     );
 
-    // Initial connection
-    this.connect();
-    console.log(`ConnectionManager: connected to ${this.address}`);
+    const dispatcher = new EventDispatcher();
+    this.centralConnection = new CentralConnection(client, dispatcher);
 
     this.sendingConnections.set("a", new Connection("1", "a"));
     this.sendingConnections.set("b", new Connection("2", "b"));
   }
 
   /**
-   * @description Initializes the duplex stream and sets up handlers.
+   * @description Starts the connection to the central system.
    */
-  private connect() {
-    this.stream = this.client.ClientStream();
-
-    if (this.stream) {
-      this.stream.on("data", (payload) => {
-        switch (payload.event) {
-          // Central system replacing a new token for existing connection
-          case DuplexMessageEvent.EMPTY_EVENT:
-            console.log("Empty event: ", payload?.data);
-            break;
-          case DuplexMessageEvent.NEW_TOKEN:
-            this.handleNewToken(
-              payload.newToken.token,
-              payload.newToken.targetAddress
-            );
-            break;
-          case DuplexMessageEvent.REVOKE_TOKEN:
-            this.handleRevokeToken(payload.revokeToken.token);
-            break;
-          default:
-            console.warn(`Unhandled event: ${payload.event}`);
-        }
-      });
-
-      this.stream.on("end", () => {
-        console.warn("Stream ended, attempting to reconnect...");
-        this.scheduleReconnect();
-      });
-
-      this.stream.on("error", (err: any) => {
-        console.error("Wrapper stream error:", err);
-        this.scheduleReconnect();
-      });
-    }
+  connectToCentralSystem() {
+    this.centralConnection.start();
   }
 
   /**
-   * @description Handles a new token received from the central system and replaces it in proper Connection object.
-   * @param newToken
+   * @description Disconnects from the central system.
    */
-  private handleNewToken(newToken: string, targetAddress: string) {
-    console.log(`Received new token for ${targetAddress}: ${newToken}`);
-
-    // Check if we have a sending connection for this target address
-    const sendingConnection = this.sendingConnections.get(targetAddress);
-    if (sendingConnection) {
-      sendingConnection.handleNewToken(newToken);
-      console.log(`Updated sending connection for ${targetAddress}`);
-      console.log(sendingConnection.getToken());
-    } else {
-      console.warn(`No sending connection found for ${targetAddress}`);
-    }
-  }
-
-  private handleRevokeToken(targetAddress: string) {
-    console.log(`Revoke token for ${targetAddress}`);
-
-    const sendingConnection = this.sendingConnections.get(targetAddress);
-    if (sendingConnection) {
-      sendingConnection.handleRevokeToken();
-    }
-
-    const receivingConnection = this.receivingConnections.get(targetAddress);
-    if (receivingConnection) {
-      receivingConnection.handleRevokeToken();
-    }
-  }
-
-  /**
-   * @description Schedules a reconnect with exponential backoff.
-   */
-  private scheduleReconnect() {
-    this.reconnectAttempts++;
-    const delay = Math.min(1000 * 2 ** this.reconnectAttempts, 30000);
-    setTimeout(() => {
-      console.log(`Reconnecting (attempt ${this.reconnectAttempts})...`);
-      this.connect();
-    }, delay);
-  }
-
-  /**
-   * @description Disconnects from the gRPC stream and resets attempts.
-   */
-  disconnect() {
-    if (this.stream) {
-      this.stream.end();
-      this.stream = undefined;
-    }
-    this.reconnectAttempts = 0;
-    console.log("Disconnected from central");
+  disconnectFromCentralSystem() {
+    this.centralConnection.disconnect();
   }
 }

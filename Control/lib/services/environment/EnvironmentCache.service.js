@@ -13,13 +13,15 @@
 */
 
 const { LogManager } = require('@aliceo2/web-ui');
-const { BroadcastKeys: { ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW } } = require('./../../common/broadcastKeys.enum');
+const { BroadcastKeys: {
+  ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW, NOTIFICATION
+} } = require('./../../common/broadcastKeys.enum');
 const {
   EmitterKeys: {
-    ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK
+    ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK, TASKS_TRACK
   }
 } = require('./../../common/emitterKeys.enum.js');
-const { fromEcsEventToEnvironmentEvent } = require('./../../kafka/adapters/fromEcsEventToEnvironmentEvent.js');
+const { TaskState } = require('../../common/taskState.enum.js');
 const EPN_PATH_IN_ENVIRONMENT_INFO = 'hardware.epn.info';
 
 /**
@@ -112,11 +114,10 @@ class EnvironmentCacheService {
    * @returns {void}
    */
   _listenToEventsAndBroadcast() {
-    this._eventEmitter.on(ENVIRONMENTS_TRACK, (event) => {
-      const { timestamp } = event;
-
-      const environmentEvent = fromEcsEventToEnvironmentEvent(event);
-      environmentEvent.timestamp = this._adaptInt64ToNumber(timestamp);
+    /**
+     * @param {EnvironmentEvent} environmentEvent - the event object containing the payload and environmentId
+     */
+    this._eventEmitter.on(ENVIRONMENTS_TRACK, (environmentEvent) => {
       const { id } = environmentEvent;
 
       const cachedEnvironment = this._environments.has(id)
@@ -124,7 +125,7 @@ class EnvironmentCacheService {
         : { id, events: [] };
 
       cachedEnvironment.events.push(environmentEvent);
-      cachedEnvironment.lastUpdate = this._adaptInt64ToNumber(timestamp);
+      cachedEnvironment.lastUpdate = environmentEvent.timestamp;
       this._environments.set(id, cachedEnvironment);
       this._broadcastService.broadcast(ENVIRONMENT_EVENTS, cachedEnvironment);
       this._lastUpdate = Date.now();
@@ -137,7 +138,7 @@ class EnvironmentCacheService {
        * @param {object} event - the event object containing the payload and environmentId
        */
       (event) => {
-        const { payload: {state, ddsSessionId, ddsSessionStatus}, environmentId } = event;
+        const { payload: { state, ddsSessionId, ddsSessionStatus }, environmentId } = event;
         const environmentUpdated = this._updateAttributeOfEnvironment(
           environmentId,
           EPN_PATH_IN_ENVIRONMENT_INFO,
@@ -147,17 +148,50 @@ class EnvironmentCacheService {
           this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environments.values()]);
         }
       });
+    
+    this._eventEmitter.on(TASKS_TRACK,
+      /**
+       * @private
+       * An event handler for receiving a task event update, parse it as per GUI expectations and broadcast it to NodeJS EventEmitter listeners
+       * @param {object} event - the event object containing the payload and environmentId
+       * @param {TaskEvent} event.taskEvent - the task event object containing the task information
+       * @param {number} event.timestamp - the timestamp of the event
+       * @returns {void}
+       */
+      ({ taskEvent }) => this._handleFirstTaskInError(taskEvent.environmentId, taskEvent)
+    );
+    
+    this._eventEmitter.on(INTEGRATED_SERVICES_TRACK.ODC.DEVICE_STATE_CHANGE,
+      /**
+       * @private
+       * An event handler for receiving an integrated service task state change, parse it as per GUI expectations and broadcast it to NodeJS EventEmitter listeners
+       * @param {OdcDeviceInfoEvent} odcDeviceInfoEvent - the task event object containing the task information
+       * @returns {void}
+       */
+      (odcDeviceEvent) => this._handleFirstTaskInError(odcDeviceEvent.environmentId, odcDeviceEvent)
+    );
   }
-
+  
   /**
+   * Handles the events emitted to tracks TASKS_TRACKS and INTEGRATED_SERVICES_TRACK.ODC.DEVICE_STATE_CHANGE, that is
+   * FLP tasks or ODC device state changes.
+   * This method checks if the event is in an error state and if it is the first task in error for the environment. 
    * @private
-   * Method to adapt the int64 timestamp to a number
-   * @param {BigInt} int64 - the int64 timestamp to be adapted
-   * @return {number} - the adapted timestamp
+   * @param {string} environmentId - the id of the environment to check if it already has a first task in error
+   * @param {TaskEvent|OdcDeviceInfoEvent} event - the task event object containing the task information
+   * @return {void}
    */
-  _adaptInt64ToNumber(int64) {
-    const bigIntTimestamp = BigInt(int64.toString(10));
-    return Number(bigIntTimestamp);
+  _handleFirstTaskInError(environmentId, event) {
+    if (
+      (event.state === TaskState.ERROR || event.state === TaskState.ERROR_CRITICAL)
+      && this._environments.has(environmentId)
+      && !this._environments.get(environmentId).firstTaskInError
+    ) {
+      const environment = JSON.parse(JSON.stringify(this._environments.get(environmentId)));
+      environment.firstTaskInError = event;
+      this._environments.set(environmentId, environment);
+      this._broadcastService.broadcast(NOTIFICATION, event);
+    }
   }
 }
 
