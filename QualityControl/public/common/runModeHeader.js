@@ -17,19 +17,17 @@ import { h, info } from '/js/src/index.js';
 
 /**
  * Run mode header component showing run information and exit button
- * @param {Model} model - root model of the application
  * @param {FilterModel} filterModel - model that manages filter state
  * @param {PageModel} pageModel - model that manages the state of the page
  * @returns {vnode} - virtual node element
  */
-export function runModeHeader(model, filterModel, pageModel) {
+export function runModeHeader(filterModel, pageModel) {
   if (!filterModel.inRunMode) {
     return null;
   }
 
   return h('.flex-row.items-center.p2.g2.bg-gray-lighter', [
     renderRunModeInfo(filterModel),
-    h('.flex-grow'),
     renderExitButton(filterModel, pageModel),
   ]);
 
