@@ -67,6 +67,24 @@ export class FilterService {
   }
 
   /**
+   * This method is used to retrieve the run status from the bookkeeping service
+   * @param runNumber - run number to retrieve the status for
+   * @returns {Promise<Array>} - resolves with the list of run statuses
+   */
+  async getRunStatus(runNumber) {
+    try {
+      if (!this._bookkeepingService.active) {
+        return [];
+      }
+      const runStatus = await this._bookkeepingService.retrieveRunStatus(runNumber);
+      return runStatus;
+    } catch (error) {
+      logger.errorMessage(`Error while retrieving run status: ${error.message || error}`);
+      return [];
+    }
+  }
+
+  /**
    * Returns the interval in milliseconds for how often the list of run types should be refreshed.
    * @returns {number} Interval in milliseconds for refreshing the list of run types.
    */

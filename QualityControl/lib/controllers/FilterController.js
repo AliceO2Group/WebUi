@@ -12,6 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
+import {
+  InvalidInputError,
+  LogManager,
+  NotFoundError,
+  updateAndSendExpressResponseFromNativeError,
+}
+  from '@aliceo2/web-ui';
+
 /**
  * Gateaway class to be used to retrieve data with regard to filters
  */
@@ -25,6 +33,7 @@ export class FilterController {
      * @type {FilterService}
      */
     this._filterService = filterService;
+    this._logger = LogManager.getLogger('FilterController');
   }
 
   /**
@@ -43,6 +52,29 @@ export class FilterController {
       });
     } catch (error) {
       res.status(503).json({ error: error.message || error });
+    }
+  }
+
+  /**
+   * HTTP GET endpoint for retrieving run status information from Bookkeeping
+   * @param {Request} req - HTTP request
+   * @param {Response} res - HTTP response to provide run status information
+   * @returns {Promise<void>} - Promise to be resolved when the response has been sent
+   */
+  async getRunStatusHandler(req, res) {
+    try {
+      const { runNumber } = req.params;
+      if (!runNumber) {
+        return updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Run number not provided'));
+      }
+      const runStatus = await this._filterService.getRunStatus(runNumber);
+      if (!runStatus) {
+        return updateAndSendExpressResponseFromNativeError(res, new NotFoundError(`Run ${runNumber} not found`));
+      }
+      res.status(200).json(runStatus);
+    } catch (error) {
+      updateAndSendExpressResponseFromNativeError(res, new Error('Failed to retrieve run status'));
+      this._logger.errorMessage(error.message || error);
     }
   }
 }
