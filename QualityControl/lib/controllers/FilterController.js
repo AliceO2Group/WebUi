@@ -63,10 +63,17 @@ export class FilterController {
   async getRunStatusHandler(req, res) {
     try {
       const { runNumber } = req.params;
+
       if (!runNumber) {
         return updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Run number not provided'));
       }
-      const runStatus = await this._filterService.getRunStatus(runNumber);
+
+      const parsedRunNumber = parseInt(runNumber, 10);
+      if (isNaN(parsedRunNumber) || parsedRunNumber <= 0) {
+        return updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Invalid run number format'));
+      }
+
+      const runStatus = await this._filterService.getRunStatus(parsedRunNumber);
       res.status(200).json(runStatus);
     } catch (error) {
       this._logger

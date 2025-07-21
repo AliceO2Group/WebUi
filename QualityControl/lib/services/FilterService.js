@@ -74,25 +74,12 @@ export class FilterService {
    */
   async getRunStatus(runNumber) {
     try {
-      // Ensure run number is numeric
-      const parsedRunNumber = parseInt(runNumber, 10);
-      if (isNaN(parsedRunNumber) || parsedRunNumber <= 0) {
-        logger.warnMessage(`getRunStatus called with invalid run number: ${runNumber}`);
-        return RunStatus.UNKNOWN;
-      }
-
-      if (!this._bookkeepingService || !this._bookkeepingService.active) {
-        logger.warnMessage('Bookkeeping service is not active');
-        return RunStatus.UNKNOWN;
-      }
-
-      const runStatus = await this._bookkeepingService.retrieveRunStatus(parsedRunNumber);
+      const runStatus = await this._bookkeepingService.retrieveRunStatus(runNumber);
 
       if (!runStatus || !Object.values(RunStatus).includes(runStatus)) {
-        logger.warnMessage(`Invalid run status received for run ${parsedRunNumber}: ${runStatus}`);
+        logger.warnMessage(`Invalid run status received for run ${runNumber}: ${runStatus}`);
         return RunStatus.UNKNOWN;
       }
-
       return runStatus;
     } catch (error) {
       const message = `Error while retrieving run status for run ${runNumber}: ${error.message || error}`;
