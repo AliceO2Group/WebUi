@@ -173,18 +173,15 @@ export default class QCObject extends BaseViewModel {
    * @param {boolean} inRunMode - true if we want to check the run status and refresh the paths if ongoing
    * @returns {undefined}
    */
-  async loadList(inRunMode = false) {
+  async loadList() {
     this.objectsRemote = RemoteData.loading();
     this.notify();
     this.queryingObjects = true;
     let offlineObjects = [];
-    const result = await this.model.services.object.getObjects(inRunMode);
+    const result = await this.model.services.object.getObjects(this.model.filterModel.inRunMode);
 
     if (result.isSuccess()) {
-      offlineObjects = inRunMode ? result.payload.paths : result.payload;
-      if (inRunMode) {
-        this.model.filterModel.runStatus = result.payload.runStatus;
-      }
+      offlineObjects = this.model.filterModel.inRunMode ? result.payload.paths : result.payload;
     } else {
       const errorMessage =
         result?._error?.message || 'Failed to retrieve list of objects. Please contact an administrator';
@@ -474,8 +471,8 @@ export default class QCObject extends BaseViewModel {
    * @param {boolean} inRunMode - true if we want to check the run status and refresh the paths if ongoing
    * @returns {undefined}
    */
-  async triggerFilter(inRunMode = false) {
+  async triggerFilter() {
     this.selected = null;
-    this.loadList(inRunMode);
+    this.loadList();
   }
 }

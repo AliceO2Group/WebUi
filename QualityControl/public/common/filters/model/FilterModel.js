@@ -112,8 +112,9 @@ export default class FilterModel extends Observable {
    * @param {BaseViewModel} baseViewModel - The view model that should be filtered
    * @returns {undefined}
    */
-  triggerFilter(baseViewModel) {
+  async triggerFilter(baseViewModel) {
     this.setFilterToURL();
+    this.runStatus = await this.filterService.getRunStatus(this.runNumber);
     baseViewModel.triggerFilter();
   }
 
@@ -163,11 +164,10 @@ export default class FilterModel extends Observable {
 
     // Clear all filters except RunNumber
     this._filterMap = { RunNumber: this._runNumber };
-    this.setFilterToURL();
 
     // Activate run mode
     this.inRunMode = true;
-    await baseViewModel.triggerFilter(true);
+    await this.triggerFilter(baseViewModel);
     this._manageRunsModeInterval(baseViewModel);
     this.notify();
   }
@@ -180,7 +180,7 @@ export default class FilterModel extends Observable {
   async deactivateRunsMode(baseViewModel) {
     this._resetRunsMode();
     this.setFilterToURL();
-    await baseViewModel.triggerFilter(false);
+    await baseViewModel.triggerFilter();
     this.notify();
   }
 
@@ -209,7 +209,7 @@ export default class FilterModel extends Observable {
     this._clearRunsModeInterval();
     if (this.runStatus === RunStatus.ONGOING) {
       this._runsModeInterval = setInterval(async () => {
-        await baseViewModel.triggerFilter(true);
+        await this.triggerFilter(baseViewModel);
         this.notify();
         if (this.runStatus !== RunStatus.ONGOING) {
           this._clearRunsModeInterval();

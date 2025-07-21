@@ -169,8 +169,6 @@ export default class Model extends Observable {
   async handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
     clearInterval(this.layout.tabInterval);
-    //TODO: For the moment, we deactivate the run mode when changing page
-    this.filterModel.inRunMode = false;
 
     await this.filterModel.filterService.initFilterService();
     this.filterModel.setFilterFromURL();
@@ -182,6 +180,7 @@ export default class Model extends Observable {
 
     switch (params.page) {
       case 'layoutList':
+        this.filterModel.inRunMode = false;
         this.page = 'layoutList';
         setBrowserTabTitle('QCG-Layouts');
         this.services.layout.getLayouts(RequestFields.LAYOUT_CARD);
@@ -261,6 +260,7 @@ export default class Model extends Observable {
         break;
       }
       case 'about':
+        this.filterModel.inRunMode = false;
         this.page = 'about';
         setBrowserTabTitle('QCG-About');
         this.aboutViewModel.retrieveAllServicesStatus();
@@ -298,32 +298,6 @@ export default class Model extends Observable {
    */
   isContextSecure() {
     return window.isSecureContext;
-  }
-
-  /**
-   * Set the interval to update objects currently loaded and shown to user.
-   * This will reload only data associated to them
-   * @param {number} intervalSeconds - in seconds
-   * @returns {undefined}
-   */
-  setRefreshInterval(intervalSeconds) {
-    // Stop any other timer
-    clearTimeout(this.refreshTimer);
-
-    // Validate user input
-    let parsedValue = parseInt(intervalSeconds, 10);
-    if (isNaN(parsedValue) || parsedValue < 1) {
-      parsedValue = 2;
-    }
-
-    // Start new timer
-    this.refreshInterval = parsedValue;
-    this.refreshTimer = setTimeout(() => {
-      this.setRefreshInterval(this.refreshInterval);
-    }, this.refreshInterval * 1000);
-    this.notify();
-
-    this.object.refreshObjects();
   }
 
   /**
