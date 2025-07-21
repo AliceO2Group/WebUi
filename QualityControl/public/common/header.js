@@ -77,6 +77,11 @@ const filterSpecific = (model) => {
   }
 };
 
+/**
+ * Shows the runs mode component
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
+ */
 const runsModeSpecific = (model) => {
   const { page, filterModel, object, layout } = model;
 
