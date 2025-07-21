@@ -48,11 +48,11 @@ export default (model) => h('.flex-col', [
 const headerSpecific = (model) => {
   const { layoutListModel, filterModel, layout, object, page } = model;
   switch (page) {
-    case 'layoutList': return LayoutListHeader(layoutListModel, filterModel);
+    case 'layoutList': return LayoutListHeader(layoutListModel);
     case 'layoutShow': return layoutViewHeader(layout, filterModel);
     case 'objectTree': return objectTreeHeader(object, filterModel);
     case 'objectView': return objectViewHeader(model);
-    case 'about': return aboutViewHeader(filterModel);
+    case 'about': return aboutViewHeader();
     default: return null;
   }
 };
