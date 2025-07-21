@@ -180,12 +180,13 @@ export default class Model extends Observable {
 
     switch (params.page) {
       case 'layoutList':
-        this.filterModel.inRunMode = false;
+        this.filterModel.resetRunsMode();
         this.page = 'layoutList';
         setBrowserTabTitle('QCG-Layouts');
         this.services.layout.getLayouts(RequestFields.LAYOUT_CARD);
         break;
       case 'layoutShow':
+        this.filterModel.resetRunsMode();
         setBrowserTabTitle('QCG-LayoutShow');
         if (!params.layoutId) {
           const { definition, pdpBeamType, detector, runType, runNumber } = params;
@@ -251,6 +252,7 @@ export default class Model extends Observable {
         this.notify();
         break;
       case 'objectView': {
+        this.filterModel.resetRunsMode();
         this.page = 'objectView';
         this.sidebar = false;
         setBrowserTabTitle('QCG-View');
@@ -260,13 +262,14 @@ export default class Model extends Observable {
         break;
       }
       case 'about':
-        this.filterModel.inRunMode = false;
+        this.filterModel.resetRunsMode();
         this.page = 'about';
         setBrowserTabTitle('QCG-About');
         this.aboutViewModel.retrieveAllServicesStatus();
         this.notify();
         break;
       default:
+        this.filterModel.resetRunsMode();
         // Default route, replace the current one not handled
         this.router.go('?page=layoutList', true);
         break;

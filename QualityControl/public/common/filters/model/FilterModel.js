@@ -178,7 +178,7 @@ export default class FilterModel extends Observable {
    * @returns {Promise<void>}
    */
   async deactivateRunsMode(baseViewModel) {
-    this._resetRunsMode();
+    this.resetRunsMode();
     this.setFilterToURL();
     await baseViewModel.triggerFilter();
     this.notify();
@@ -188,7 +188,7 @@ export default class FilterModel extends Observable {
    * Resets the runs mode state
    * @returns {void}
    */
-  async _resetRunsMode() {
+  async resetRunsMode() {
     this._filterMap = this._previousFilterMap || {};
     this.inRunMode = false;
     this.runNumber = null;
@@ -197,6 +197,7 @@ export default class FilterModel extends Observable {
     this._dropdownOpen = false;
     this._statusInfoOpen = false;
     this._previousFilterMap = null;
+    this.notify();
   }
 
   /**
