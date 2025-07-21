@@ -15,7 +15,7 @@
 import { Observable } from '/js/src/index.js';
 import { buildQueryParametersString } from '../../buildQueryParametersString.js';
 import FilterService from '../../../services/Filter.service.js';
-import { RunStatus } from '../../enums/RunStatus.enum.js';
+import { RunStatus } from '../../../library/RunStatus.enum.js';
 const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
 
 /**

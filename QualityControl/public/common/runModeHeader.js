@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { RunStatus } from '../common/enums/RunStatus.enum.js';
+import { RunStatus } from '../../library/runStatus.enum.js';
 import { h, info } from '/js/src/index.js';
 
 /**

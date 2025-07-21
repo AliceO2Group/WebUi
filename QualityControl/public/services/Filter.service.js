@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { RunStatus } from '../common/enums/RunStatus.enum.js';
+import { RunStatus } from '../../library/runStatus.enum.js';
 import { RemoteData } from '/js/src/index.js';
 
 /**
