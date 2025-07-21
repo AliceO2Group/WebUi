@@ -83,12 +83,11 @@ const filterSpecific = (model) => {
  * @returns {vnode} - virtual node element
  */
 const runsModeSpecific = (model) => {
-  const { page, filterModel, object, layout } = model;
+  const { page, filterModel, object } = model;
 
   if (filterModel.inRunMode && isRunModeSupported(page)) {
     switch (page) {
       case 'objectTree': return runModeHeader(filterModel, object);
-      case 'layoutShow': return runModeHeader(filterModel, layout);
       default: return null;
     }
   }

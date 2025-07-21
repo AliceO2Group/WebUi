@@ -179,6 +179,7 @@ export default class FilterModel extends Observable {
    */
   async deactivateRunsMode(baseViewModel) {
     this.resetRunsMode();
+    this._filterMap = this._previousFilterMap || {};
     this.setFilterToURL();
     await baseViewModel.triggerFilter();
     this.notify();
@@ -189,7 +190,6 @@ export default class FilterModel extends Observable {
    * @returns {void}
    */
   async resetRunsMode() {
-    this._filterMap = this._previousFilterMap || {};
     this.inRunMode = false;
     this.runNumber = null;
     this.runStatus = RunStatus.UNKNOWN;
