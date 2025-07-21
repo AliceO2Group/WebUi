@@ -16,7 +16,6 @@ import { h } from '/js/src/index.js';
 
 /**
  * Shows header of Framework Information
- * @param {FilterModel} filterModel - model that controlls the filter state
  * @returns {vnode} - virtual node element
  */
 export default () => [
