@@ -15,7 +15,6 @@
 import {
   InvalidInputError,
   LogManager,
-  NotFoundError,
   updateAndSendExpressResponseFromNativeError,
 }
   from '@aliceo2/web-ui';
@@ -68,13 +67,11 @@ export class FilterController {
         return updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Run number not provided'));
       }
       const runStatus = await this._filterService.getRunStatus(runNumber);
-      if (!runStatus) {
-        return updateAndSendExpressResponseFromNativeError(res, new NotFoundError(`Run ${runNumber} not found`));
-      }
       res.status(200).json(runStatus);
     } catch (error) {
+      this._logger
+        .errorMessage(`Failed to retrieve run status for run ${req.params?.runNumber}: ${error.message || error}`);
       updateAndSendExpressResponseFromNativeError(res, new Error('Failed to retrieve run status'));
-      this._logger.errorMessage(error.message || error);
     }
   }
 }

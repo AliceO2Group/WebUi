@@ -49,17 +49,26 @@ export default class FilterService {
   /**
    * Method to get run status for a specific run number
    * @param {number} runNumber - The run number to get status for
-   * @returns {Promise<Array>} - Array of run statuses
+   * @returns {Promise<string>} - Run status string
    */
   async getRunStatus(runNumber) {
-    if (!runNumber) {
-      return [];
+    try {
+      const parsedRunNumber = parseInt(runNumber, 10);
+
+      if (Number.isNaN(parsedRunNumber)) {
+        return RunStatus.UNKNOWN;
+      }
+
+      const { result, ok } = await this.loader.get(`/api/filter/run-status/${parsedRunNumber}`);
+
+      if (!ok || !result || !Object.values(RunStatus).includes(result)) {
+        return RunStatus.UNKNOWN;
+      }
+
+      return result;
+    } catch {
+      return RunStatus.UNKNOWN;
     }
-    const { result, ok } = await this.loader.get(`/api/filter/run-status/${runNumber}`);
-    if (ok && result) {
-      return Object.values(RunStatus).includes(result) ? result : RunStatus.UNKNOWN;
-    }
-    return RunStatus.UNKNOWN;
   }
 
   /**

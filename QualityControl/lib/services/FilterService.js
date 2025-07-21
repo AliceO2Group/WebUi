@@ -13,6 +13,7 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
+import { RunStatus } from '../../common/library/runStatus.enum.js';
 const logger = LogManager.getLogger('filter/service');
 
 /**
@@ -68,19 +69,35 @@ export class FilterService {
 
   /**
    * This method is used to retrieve the run status from the bookkeeping service
-   * @param runNumber - run number to retrieve the status for
-   * @returns {Promise<Array>} - resolves with the list of run statuses
+   * @param {number} runNumber - run number to retrieve the status for
+   * @returns {Promise<string>} - resolves with the run status
    */
   async getRunStatus(runNumber) {
     try {
-      if (!this._bookkeepingService.active) {
-        return [];
+      // Ensure run number is numeric
+      const parsedRunNumber = parseInt(runNumber, 10);
+      if (isNaN(parsedRunNumber) || parsedRunNumber <= 0) {
+        logger.warnMessage(`getRunStatus called with invalid run number: ${runNumber}`);
+        return RunStatus.UNKNOWN;
       }
-      const runStatus = await this._bookkeepingService.retrieveRunStatus(runNumber);
+
+      if (!this._bookkeepingService || !this._bookkeepingService.active) {
+        logger.warnMessage('Bookkeeping service is not active');
+        return RunStatus.UNKNOWN;
+      }
+
+      const runStatus = await this._bookkeepingService.retrieveRunStatus(parsedRunNumber);
+
+      if (!runStatus || !Object.values(RunStatus).includes(runStatus)) {
+        logger.warnMessage(`Invalid run status received for run ${parsedRunNumber}: ${runStatus}`);
+        return RunStatus.UNKNOWN;
+      }
+
       return runStatus;
     } catch (error) {
-      logger.errorMessage(`Error while retrieving run status: ${error.message || error}`);
-      return [];
+      const message = `Error while retrieving run status for run ${runNumber}: ${error.message || error}`;
+      logger.errorMessage(message);
+      return RunStatus.UNKNOWN;
     }
   }
 
