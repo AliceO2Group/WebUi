@@ -73,6 +73,7 @@ import { userControllerTestSuite } from './lib/controllers/UserController.test.j
 import { chartRepositoryTest } from './lib/repositories/ChartRepository.test.js';
 import { filterServiceTestSuite } from './lib/services/FilterService.test.js';
 import { apiGetLayoutsTests } from './api/layouts/api-get-layout.test.js';
+import { apiGetRunStatusTests } from './api/filters/api-get-run-status.test.js';
 import { apiGetObjectsTests } from './api/objects/api-get-object.test.js';
 import { objectsGetValidationMiddlewareTest } from './lib/middlewares/objects/objectsGetValidation.middleware.test.js';
 import { objectGetContentsValidationMiddlewareTest }
@@ -186,6 +187,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     suite('Layout PUT request test suite', async () => apiPutLayoutTests());
     suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
     suite('Object GET request test suite', async () => apiGetObjectsTests());
+    suite('Run status GET request test suite', async () => apiGetRunStatusTests());
   });
 
   suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
