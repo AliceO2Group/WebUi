@@ -63,18 +63,16 @@ const headerSpecific = (model) => {
  * @returns {vnode} - virtual node element
  */
 const filterSpecific = (model) => {
-  const { page, filterModel, layout, object, objectViewModel, aboutViewModel, layoutListModel } = model;
+  const { page, filterModel, layout, object, objectViewModel } = model;
 
   if (filterModel.inRunMode && isRunModeSupported(page)) {
     return null;
   }
 
   switch (page) {
-    case 'layoutList': return filtersPanel(filterModel, layoutListModel);
     case 'layoutShow': return filtersPanel(filterModel, layout);
     case 'objectTree': return filtersPanel(filterModel, object);
     case 'objectView': return filtersPanel(filterModel, objectViewModel);
-    case 'about': return filtersPanel(filterModel, aboutViewModel);
     default: return null;
   }
 };
