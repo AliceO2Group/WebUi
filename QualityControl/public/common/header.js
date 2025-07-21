@@ -32,11 +32,11 @@ import { runModeHeader } from './runModeHeader.js';
  * @returns {vnode} - header element
  */
 export default (model) => h('.flex-col', [
-  h('.flex-row.p2', [
+  h('.flex-row.p2.items-center', [
     commonHeader(model),
-    runsModeSpecific(model),
     headerSpecific(model),
   ]),
+  runsModeSpecific(model),
   filterSpecific(model),
 ]);
 
@@ -65,10 +65,14 @@ const headerSpecific = (model) => {
 const filterSpecific = (model) => {
   const { page, filterModel, layout, object, objectViewModel, aboutViewModel, layoutListModel } = model;
 
+  if (filterModel.inRunMode && isRunModeSupported(page)) {
+    return null;
+  }
+
   switch (page) {
     case 'layoutList': return filtersPanel(filterModel, layoutListModel);
     case 'layoutShow': return filtersPanel(filterModel, layout);
-    case 'objectTree': return filterModel.inRunMode ? null : filtersPanel(filterModel, object);
+    case 'objectTree': return filtersPanel(filterModel, object);
     case 'objectView': return filtersPanel(filterModel, objectViewModel);
     case 'about': return filtersPanel(filterModel, aboutViewModel);
     default: return null;
@@ -76,12 +80,24 @@ const filterSpecific = (model) => {
 };
 
 const runsModeSpecific = (model) => {
-  const { page, filterModel, object } = model;
-  switch (page) {
-    case 'objectTree': return filterModel.inRunMode ? runModeHeader(filterModel, object) : null;
-    default: return null;
+  const { page, filterModel, object, layout } = model;
+
+  if (filterModel.inRunMode && isRunModeSupported(page)) {
+    switch (page) {
+      case 'objectTree': return runModeHeader(filterModel, object);
+      case 'layoutShow': return runModeHeader(filterModel, layout);
+      default: return null;
+    }
   }
+  return null;
 };
+
+/**
+ * Determines if a page supports run mode
+ * @param {string} page - current page
+ * @returns {boolean} - whether the page supports run mode
+ */
+const isRunModeSupported = (page) => ['objectTree', 'layoutShow'].includes(page);
 
 /**
  * Shows app header, common to all pages (profile button + app title)

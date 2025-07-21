@@ -26,7 +26,7 @@ export function runModeHeader(filterModel, pageModel) {
     return null;
   }
 
-  return h('.flex-row.items-center.p2.g2.bg-gray-lighter', [
+  return h('.flex-row.items-center.justify-center.p2.g2.bg-gray-lighter', [
     renderRunModeInfo(filterModel),
     renderExitButton(filterModel, pageModel),
   ]);

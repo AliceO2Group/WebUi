@@ -82,9 +82,8 @@ export function filtersPanel(filterModel, pageModel) {
  */
 const triggerFiltersButton = (onClickCallback, filterModel, pageModel) => {
   const runNumber = filterModel.filterMap.RunNumber;
-  const isObjectTreePage = pageModel.model && pageModel.model.page === 'objectTree';
-
-  if (filterModel.isValidRunNumber(runNumber) && isObjectTreePage) {
+  const isRunsModeAllowed = pageModel.model && ['objectTree'].includes(pageModel.model.page);
+  if (filterModel.isValidRunNumber(runNumber) && isRunsModeAllowed) {
     return updateDropdownButton(onClickCallback, filterModel, pageModel);
   }
 
