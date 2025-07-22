@@ -39,8 +39,8 @@ export default class FilterModel extends Observable {
     this._inRunMode = false;
     this._runNumber = null;
     this._runStatus = RunStatus.UNKNOWN;
-    this._dropdownOpen = false;
-    this._statusInfoOpen = false;
+    this.dropdownOpen = false;
+    this.statusInfoOpen = false;
   }
 
   /**
@@ -189,13 +189,13 @@ export default class FilterModel extends Observable {
    * Resets the runs mode state
    * @returns {void}
    */
-  async resetRunsMode() {
+  resetRunsMode() {
     this.inRunMode = false;
     this.runNumber = null;
     this.runStatus = RunStatus.UNKNOWN;
     this.clearRunsModeInterval();
-    this._dropdownOpen = false;
-    this._statusInfoOpen = false;
+    this.dropdownOpen = false;
+    this.statusInfoOpen = false;
     this._previousFilterMap = null;
     this.notify();
   }
@@ -208,14 +208,16 @@ export default class FilterModel extends Observable {
    */
   async _manageRunsModeInterval(baseViewModel) {
     this.clearRunsModeInterval();
+    this._currentViewModel = baseViewModel;
     if (this.runStatus === RunStatus.ONGOING) {
       this._runsModeInterval = setInterval(async () => {
-        await this.triggerFilter(baseViewModel);
-        this.notify();
-        if (this.runStatus !== RunStatus.ONGOING) {
-          this.clearRunsModeInterval();
+        if (this._currentViewModel) {
+          await this.triggerFilter(this._currentViewModel);
+          if (this.runStatus !== RunStatus.ONGOING) {
+            this.clearRunsModeInterval();
+          }
         }
-        // TODO: Should be provided in config file ??
+        // TODO: Should be provided in config file (ticket OGUI-1743)
       }, 5000);
     }
   }
@@ -228,6 +230,18 @@ export default class FilterModel extends Observable {
     if (this._runsModeInterval) {
       clearInterval(this._runsModeInterval);
       this._runsModeInterval = null;
+    }
+    this._currentViewModel = null;
+  }
+
+  /**
+   * Restarts the runs mode interval if needed
+   * @param {object} baseViewModel - The view model that provides the triggerFilter method
+   * @returns {void}
+   */
+  restartRunsModeIntervals(baseViewModel) {
+    if (this.inRunMode && this.runStatus === RunStatus.ONGOING) {
+      this._manageRunsModeInterval(baseViewModel);
     }
   }
 

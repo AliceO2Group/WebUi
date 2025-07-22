@@ -84,10 +84,10 @@ export function runModeHeader(filterModel, pageModel) {
    */
   function renderStatusInfoDropdown(filterModel) {
     return h('.dropdown.mh1', {
-      class: filterModel._statusInfoOpen ? 'dropdown-open' : '',
+      class: filterModel.statusInfoOpen ? 'dropdown-open' : '',
     }, [
       renderInfoButton(filterModel),
-      filterModel._statusInfoOpen && renderDropdownMenu(),
+      filterModel.statusInfoOpen && renderDropdownMenu(),
     ]);
   }
 
@@ -101,7 +101,7 @@ export function runModeHeader(filterModel, pageModel) {
       title: 'Show status information',
       onclick: (e) => {
         e.stopPropagation();
-        filterModel._statusInfoOpen = !filterModel._statusInfoOpen;
+        filterModel.statusInfoOpen = !filterModel.statusInfoOpen;
         filterModel.notify();
       },
     }, info());

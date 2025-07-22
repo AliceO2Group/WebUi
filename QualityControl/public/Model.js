@@ -168,12 +168,11 @@ export default class Model extends Observable {
    */
   async handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
-    clearInterval(this.layout.tabInterval);
+    this._clearAllIntervals();
 
     await this.filterModel.filterService.initFilterService();
     this.filterModel.setFilterFromURL();
     this.filterModel.setFilterToURL();
-    this.filterModel.clearRunsModeInterval();
 
     this.services.layout.getLayoutsByUserId(this.session.personid, RequestFields.LAYOUT_CARD);
 
@@ -237,6 +236,7 @@ export default class Model extends Observable {
 
               this.router.go(`?page=layoutShow&layoutId=${this.router.params.layoutId}`, true, true);
             }
+            this.filterModel.restartRunsModeIntervals(this.layout);
             this.notify();
           }).catch(() => true); // Error is handled inside loadItem
         break;
@@ -248,6 +248,7 @@ export default class Model extends Observable {
         if (this.object.selected) {
           this.object.loadObjectByName(this.object.selected.name);
         }
+        this.filterModel.restartRunsModeIntervals(this.object);
         this.notify();
         break;
       case 'objectView': {
@@ -288,6 +289,26 @@ export default class Model extends Observable {
   toggleAccountMenu() {
     this.accountMenuEnabled = !this.accountMenuEnabled;
     this.notify();
+  }
+
+  /**
+   * Clears all active intervals in the application
+   * @returns {void}
+   */
+  _clearAllIntervals() {
+    // Clear layout tab interval
+    if (this.layout?.tabInterval) {
+      clearInterval(this.layout.tabInterval);
+    }
+
+    // Clear filter model runs mode interval
+    this.filterModel.clearRunsModeInterval();
+
+    // Clear main refresh timer if it exists
+    if (this._refreshTimer) {
+      clearInterval(this._refreshTimer);
+      this._refreshTimer = null;
+    }
   }
 
   /**

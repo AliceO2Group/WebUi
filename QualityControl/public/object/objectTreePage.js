@@ -18,7 +18,6 @@ import { draw } from './objectDraw.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
 import virtualTable from './virtualTable.js';
 import { qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
-import { RunStatus } from '../../../library/runStatus.enum.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -27,13 +26,7 @@ import { RunStatus } from '../../../library/runStatus.enum.js';
  * @returns {vnode} - virtual node element
  */
 export default (model) => {
-  const { object, router, filterModel } = model;
-
-  if (filterModel.inRunMode && filterModel.runStatus === RunStatus.ONGOING) {
-    if (!filterModel._runsModeInterval) {
-      filterModel._manageRunsModeInterval(object);
-    }
-  }
+  const { object, router } = model;
 
   return h('.h-100.flex-column', { key: router.params.page }, [
     h('.flex-row.flex-grow', [

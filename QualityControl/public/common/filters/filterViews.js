@@ -103,7 +103,7 @@ const triggerFiltersButton = (onClickCallback, filterModel, pageModel) => {
  */
 const updateDropdownButton = (onClickCallback, filterModel, pageModel) => {
   // Use a simple property on the filterModel to track dropdown state
-  const isDropdownOpen = filterModel._dropdownOpen || false;
+  const isDropdownOpen = filterModel.dropdownOpen || false;
 
   return h('.dropdown', {
     class: isDropdownOpen ? 'dropdown-open' : '',
@@ -112,7 +112,7 @@ const updateDropdownButton = (onClickCallback, filterModel, pageModel) => {
       id: 'triggerFilterButton',
       onclick: (e) => {
         e.stopPropagation();
-        filterModel._dropdownOpen = !isDropdownOpen;
+        filterModel.dropdownOpen = !isDropdownOpen;
         filterModel.notify();
       },
       title: 'Update options',
@@ -126,7 +126,7 @@ const updateDropdownButton = (onClickCallback, filterModel, pageModel) => {
           id: 'updateOnlyButton',
           onclick: (e) => {
             e.stopPropagation();
-            filterModel._dropdownOpen = false;
+            filterModel.dropdownOpen = false;
             filterModel.notify();
             onClickCallback();
           },
@@ -135,7 +135,7 @@ const updateDropdownButton = (onClickCallback, filterModel, pageModel) => {
         h('div.menu-item', {
           onclick: async (e) => {
             e.stopPropagation();
-            filterModel._dropdownOpen = false;
+            filterModel.dropdownOpen = false;
             filterModel.notify();
             await filterModel.activateRunsMode(pageModel);
           },
