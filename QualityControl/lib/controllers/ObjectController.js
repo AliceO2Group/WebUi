@@ -59,8 +59,8 @@ export class ObjectController {
             : 'RunNumber must be a number'),
         );
       } else if (inRunMode && runNumber && !isNaN(parsedRunNumber)) {
-        const { paths, runStatus } = await this._runModeService.retrievePathsAndSetRunStatus(parsedRunNumber, prefix);
-        return res.status(200).json({ paths, runStatus });
+        const { paths } = await this._runModeService.retrievePathsAndSetRunStatus(parsedRunNumber, prefix);
+        return res.status(200).json({ paths });
       }
 
       const objectsData = await this._objService.retrieveLatestVersionOfObjects({

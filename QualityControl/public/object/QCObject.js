@@ -170,7 +170,6 @@ export default class QCObject extends BaseViewModel {
 
   /**
    * Ask server for all available objects, fills `tree` of objects
-   * @param {boolean} inRunMode - true if we want to check the run status and refresh the paths if ongoing
    * @returns {undefined}
    */
   async loadList() {
@@ -468,7 +467,6 @@ export default class QCObject extends BaseViewModel {
 
   /**
    * Function that reloads the object list with filters applied
-   * @param {boolean} inRunMode - true if we want to check the run status and refresh the paths if ongoing
    * @returns {undefined}
    */
   async triggerFilter() {

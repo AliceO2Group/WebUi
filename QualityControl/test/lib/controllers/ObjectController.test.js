@@ -80,23 +80,18 @@ export const objectControllerTestSuite = async () => {
       }));
     });
 
-
     test('should retrieve paths and set run status in run mode with run number', async () => {
       reqMock.query.inRunMode = true;
       reqMock.query.filters = { RunNumber: 123 };
       RunMonitoringServiceMock.retrievePathsAndSetRunStatus.resolves({
-        paths: mockObjectsList,
-        runStatus: 'ONGOING',
-      });
+        paths: mockObjectsList });
 
       await objectController.getObjects(reqMock, resMock);
 
       ok(RunMonitoringServiceMock.retrievePathsAndSetRunStatus.calledWith(123, undefined));
       ok(resMock.status.calledWith(200));
       ok(resMock.json.calledWith({
-        paths: mockObjectsList,
-        runStatus: 'ONGOING',
-      }));
+        paths: mockObjectsList }));
     });
 
     test('should retrieve latest version of objects when not in run mode', async () => {
