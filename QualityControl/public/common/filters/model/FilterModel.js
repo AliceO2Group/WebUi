@@ -178,8 +178,8 @@ export default class FilterModel extends Observable {
    * @returns {Promise<void>}
    */
   async deactivateRunsMode(baseViewModel) {
-    this.resetRunsMode();
     this._filterMap = this._previousFilterMap || {};
+    this.resetRunsMode();
     this.setFilterToURL();
     await baseViewModel.triggerFilter();
     this.notify();
@@ -193,7 +193,7 @@ export default class FilterModel extends Observable {
     this.inRunMode = false;
     this.runNumber = null;
     this.runStatus = RunStatus.UNKNOWN;
-    this._clearRunsModeInterval();
+    this.clearRunsModeInterval();
     this._dropdownOpen = false;
     this._statusInfoOpen = false;
     this._previousFilterMap = null;
@@ -207,13 +207,13 @@ export default class FilterModel extends Observable {
    * @returns {Promise<void>}
    */
   async _manageRunsModeInterval(baseViewModel) {
-    this._clearRunsModeInterval();
+    this.clearRunsModeInterval();
     if (this.runStatus === RunStatus.ONGOING) {
       this._runsModeInterval = setInterval(async () => {
         await this.triggerFilter(baseViewModel);
         this.notify();
         if (this.runStatus !== RunStatus.ONGOING) {
-          this._clearRunsModeInterval();
+          this.clearRunsModeInterval();
         }
         // TODO: Should be provided in config file ??
       }, 5000);
@@ -224,7 +224,7 @@ export default class FilterModel extends Observable {
    * Clears the interval set during runs mode.
    * @returns {void}
    */
-  _clearRunsModeInterval() {
+  clearRunsModeInterval() {
     if (this._runsModeInterval) {
       clearInterval(this._runsModeInterval);
       this._runsModeInterval = null;

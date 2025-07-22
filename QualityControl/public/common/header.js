@@ -65,10 +65,6 @@ const headerSpecific = (model) => {
 const filterSpecific = (model) => {
   const { page, filterModel, layout, object, objectViewModel } = model;
 
-  if (filterModel.inRunMode && isRunModeSupported(page)) {
-    return null;
-  }
-
   switch (page) {
     case 'layoutShow': return filtersPanel(filterModel, layout);
     case 'objectTree': return filtersPanel(filterModel, object);
@@ -83,23 +79,14 @@ const filterSpecific = (model) => {
  * @returns {vnode} - virtual node element
  */
 const runsModeSpecific = (model) => {
-  const { page, filterModel, object } = model;
+  const { page, filterModel, object, layout } = model;
 
-  if (filterModel.inRunMode && isRunModeSupported(page)) {
-    switch (page) {
-      case 'objectTree': return runModeHeader(filterModel, object);
-      default: return null;
-    }
+  switch (page) {
+    case 'objectTree': return runModeHeader(filterModel, object);
+    case 'layoutShow': return runModeHeader(filterModel, layout);
+    default: return null;
   }
-  return null;
 };
-
-/**
- * Determines if a page supports run mode
- * @param {string} page - current page
- * @returns {boolean} - whether the page supports run mode
- */
-const isRunModeSupported = (page) => ['objectTree', 'layoutShow'].includes(page);
 
 /**
  * Shows app header, common to all pages (profile button + app title)
