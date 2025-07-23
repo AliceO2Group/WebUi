@@ -15,7 +15,7 @@
 import { Observable } from '/js/src/index.js';
 import { buildQueryParametersString } from '../../buildQueryParametersString.js';
 import FilterService from '../../../services/Filter.service.js';
-import { RunStatus } from '../../../library/RunStatus.enum.js';
+import { RunStatus } from '../../../library/runStatus.enum.js';
 const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
 
 /**
@@ -114,7 +114,9 @@ export default class FilterModel extends Observable {
    */
   async triggerFilter(baseViewModel) {
     this.setFilterToURL();
-    this.runStatus = await this.filterService.getRunStatus(this.runNumber);
+    if (this.inRunMode) {
+      this.runStatus = await this.filterService.getRunStatus(this.runNumber);
+    }
     baseViewModel.triggerFilter();
   }
 
