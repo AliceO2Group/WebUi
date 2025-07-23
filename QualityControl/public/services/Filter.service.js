@@ -12,7 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
+import { RunStatus } from '../../library/runStatus.enum.js';
 import { RemoteData } from '/js/src/index.js';
+
+const API_GET_RUN_STATUS = '/api/filter/run-status/';
 
 /**
  * Service to get the data to populate the filters
@@ -43,6 +46,27 @@ export default class FilterService {
       this.runTypes = RemoteData.failure('Error retrieving runTypes');
     }
     this.filterModel.notify();
+  }
+
+  /**
+   * Gets run status for a specific run number
+   * @param {number|string} runNumber - The run number to get status for
+   * @returns {Promise<string>} - Run status string
+   */
+  async getRunStatus(runNumber) {
+    const parsedRunNumber = parseInt(runNumber, 10);
+    const isValidRunNumber = !Number.isNaN(parsedRunNumber);
+    if (!isValidRunNumber) {
+      return RunStatus.UNKNOWN;
+    }
+    try {
+      const { result, ok } = await this.loader.get(`${API_GET_RUN_STATUS}${parsedRunNumber}`);
+      return ok && result && Object.values(RunStatus).includes(result)
+        ? result
+        : RunStatus.UNKNOWN;
+    } catch {
+      return RunStatus.UNKNOWN;
+    }
   }
 
   /**
