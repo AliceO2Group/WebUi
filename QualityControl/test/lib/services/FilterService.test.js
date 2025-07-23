@@ -16,6 +16,7 @@ import { deepStrictEqual } from 'node:assert';
 import { suite, test, beforeEach, afterEach } from 'node:test';
 import { FilterService } from '../../../lib/services/FilterService.js';
 import { stub, restore } from 'sinon';
+import { RunStatus } from '../../../common/library/runStatus.enum.js';
 
 export const filterServiceTestSuite = async () => {
   let filterService = null;
@@ -112,6 +113,37 @@ export const filterServiceTestSuite = async () => {
     test('should return an empty array if no run types are set', () => {
       filterService._runTypes = [];
       deepStrictEqual(filterService.runTypes, []);
+    });
+  });
+
+  suite('getRunStatus', async () => {
+    test('should return run status from bookkeeping service when valid', async () => {
+      const mockRunStatus = RunStatus.ONGOING;
+      bookkeepingServiceMock.retrieveRunStatus = stub().resolves(mockRunStatus);
+
+      const result = await filterService.getRunStatus(123);
+
+      deepStrictEqual(bookkeepingServiceMock.retrieveRunStatus.calledWith(123), true);
+      deepStrictEqual(result, mockRunStatus);
+    });
+
+    test('should return UNKNOWN when bookkeeping service returns invalid status', async () => {
+      const invalidRunStatus = 'INVALID_STATUS';
+      bookkeepingServiceMock.retrieveRunStatus = stub().resolves(invalidRunStatus);
+
+      const result = await filterService.getRunStatus(123);
+
+      deepStrictEqual(bookkeepingServiceMock.retrieveRunStatus.calledWith(123), true);
+      deepStrictEqual(result, RunStatus.UNKNOWN);
+    });
+
+    test('should return UNKNOWN when bookkeeping service throws error', async () => {
+      bookkeepingServiceMock.retrieveRunStatus = stub().rejects(new Error());
+
+      const result = await filterService.getRunStatus(123);
+
+      deepStrictEqual(bookkeepingServiceMock.retrieveRunStatus.calledWith(123), true);
+      deepStrictEqual(result, RunStatus.UNKNOWN);
     });
   });
 };

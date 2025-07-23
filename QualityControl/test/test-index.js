@@ -66,6 +66,7 @@ import { layoutServiceMiddlewareTest } from './lib/middlewares/layouts/layoutSer
 import { statusComponentMiddlewareTest } from './lib/middlewares/status/statusComponent.middleware.test.js';
 import { apiPutLayoutTests } from './api/layouts/api-put-layout.test.js';
 import { apiPatchLayoutTests } from './api/layouts/api-patch-layout.test.js';
+import { apiGetRunStatusTests } from './api/filters/api-get-run-status.test.js';
 import { layoutRepositoryTest } from './lib/repositories/LayoutRepository.test.js';
 import { userRepositoryTest } from './lib/repositories/UserRepository.test.js';
 import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
@@ -186,6 +187,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     suite('Layout PUT request test suite', async () => apiPutLayoutTests());
     suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
     suite('Object GET request test suite', async () => apiGetObjectsTests());
+    suite('Filters GET run status request test suite', async () => apiGetRunStatusTests());
   });
 
   suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {

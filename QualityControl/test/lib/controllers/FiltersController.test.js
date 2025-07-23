@@ -68,4 +68,97 @@ export const filtersControllerTestSuite = async () => {
       );
     });
   });
+
+  suite('getRunStatusHandler', async () => {
+    test('should successfully retrieve run status from FilterService', async () => {
+      const filterService = sinon.createStubInstance(FilterService);
+      const mockedRunStatus = 'ONGOING';
+      filterService.getRunStatus.resolves(mockedRunStatus);
+
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      };
+      const req = {
+        params: { runNumber: '123' },
+      };
+
+      const filterController = new FilterController(filterService);
+      await filterController.getRunStatusHandler(req, res);
+
+      ok(
+        filterService.getRunStatus.calledWith(123),
+        'FilterService.getRunStatus was not called with correct run number',
+      );
+      ok(res.status.calledWith(200), 'Response status was not 200');
+      ok(res.json.calledWith(mockedRunStatus), 'Run status was not sent back correctly');
+    });
+
+    test('should return error when run number is not provided', async () => {
+      const filterService = sinon.createStubInstance(FilterService);
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      };
+      const req = {
+        params: {},
+      };
+
+      const filterController = new FilterController(filterService);
+      await filterController.getRunStatusHandler(req, res);
+
+      ok(res.status.calledWith(400), 'Response status was not 400');
+      ok(res.json.calledWith({
+        status: 400,
+        title: 'Invalid Input',
+        message: 'Run number not provided',
+      }), 'Error message was not sent back');
+      ok(filterService.getRunStatus.notCalled, 'FilterService.getRunStatus should not have been called');
+    });
+
+    test('should return error when run number format is invalid', async () => {
+      const filterService = sinon.createStubInstance(FilterService);
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      };
+      const req = {
+        params: { runNumber: 'invalid' },
+      };
+
+      const filterController = new FilterController(filterService);
+      await filterController.getRunStatusHandler(req, res);
+
+      ok(res.status.calledWith(400), 'Response status was not 400');
+      ok(res.json.calledWithMatch({
+        status: 400,
+        title: 'Invalid Input',
+        message: 'Invalid run number format',
+      }), 'Error message was not sent back');
+      ok(filterService.getRunStatus.notCalled, 'FilterService.getRunStatus should not have been called');
+    });
+    test('should return error when service throws', async () => {
+      const filterService = sinon.createStubInstance(FilterService);
+      const error = new Error();
+      filterService.getRunStatus.rejects(error);
+
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      };
+      const req = {
+        params: { runNumber: '123' },
+      };
+
+      const filterController = new FilterController(filterService);
+      await filterController.getRunStatusHandler(req, res);
+
+      ok(res.status.calledWith(500), 'Response status was not 500');
+      ok(res.json.calledWithMatch({
+        status: 500,
+        title: 'Unknown Error',
+        message: 'Failed to retrieve run status',
+      }), 'Error message was not sent back');
+    });
+  });
 };

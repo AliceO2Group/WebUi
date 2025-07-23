@@ -94,4 +94,5 @@ export const setup = (http, ws) => {
   http.get('/checkUser', userController.addUserHandler.bind(userController));
 
   http.get('/filter/configuration', filterController.getFilterConfigurationHandler.bind(filterController));
+  http.get('/filter/run-status/:runNumber', filterController.getRunStatusHandler.bind(filterController));
 };

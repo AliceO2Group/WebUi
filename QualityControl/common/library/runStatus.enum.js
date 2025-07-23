@@ -16,4 +16,5 @@ export const RunStatus = Object.freeze({
   ENDED: 'ENDED',
   ONGOING: 'ONGOING',
   NOT_FOUND: 'NOT_FOUND',
+  UNKNOWN: 'UNKNOWN',
 });

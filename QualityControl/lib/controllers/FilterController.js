@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
+import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+
 /**
  * Gateaway class to be used to retrieve data with regard to filters
  */
@@ -25,6 +27,7 @@ export class FilterController {
      * @type {FilterService}
      */
     this._filterService = filterService;
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/filter-ctrl`);
   }
 
   /**
@@ -43,6 +46,41 @@ export class FilterController {
       });
     } catch (error) {
       res.status(503).json({ error: error.message || error });
+    }
+  }
+
+  /**
+   HTTP GET endpoint for retrieving run status information from Bookkeeping
+   * @param {Request} req - HTTP request
+   * @param {Response} res - HTTP response to provide run status information
+   * @returns {Promise<void>} - Promise to be resolved when the response has been sent
+   */
+
+  async getRunStatusHandler(req, res) {
+    try {
+      const { runNumber } = req.params || {};
+
+      if (!runNumber) {
+        return updateAndSendExpressResponseFromNativeError(
+          res,
+          new InvalidInputError('Run number not provided'),
+        );
+      }
+
+      const parsedRunNumber = parseInt(runNumber, 10);
+      if (isNaN(parsedRunNumber) || parsedRunNumber <= 0) {
+        return updateAndSendExpressResponseFromNativeError(
+          res,
+          new InvalidInputError('Invalid run number format'),
+        );
+      }
+
+      const runStatus = await this._filterService.getRunStatus(parsedRunNumber);
+      res.status(200).json(runStatus);
+    } catch (error) {
+      this._logger.errorMessage(`Failed to retrieve run status for run 
+        ${req.params?.runNumber}: ${error.message || error}`);
+      updateAndSendExpressResponseFromNativeError(res, new Error('Failed to retrieve run status'));
     }
   }
 }
