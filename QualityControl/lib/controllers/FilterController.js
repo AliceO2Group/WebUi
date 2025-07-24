@@ -18,6 +18,7 @@ import {
   updateAndSendExpressResponseFromNativeError,
 }
   from '@aliceo2/web-ui';
+import { RunNumberDto } from '../dtos/RunNumberDto.js';
 
 /**
  * Gateaway class to be used to retrieve data with regard to filters
@@ -64,18 +65,13 @@ export class FilterController {
     try {
       const { runNumber } = req.params;
 
-      if (!runNumber) {
-        return updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Run number not provided'));
-      }
-
-      const parsedRunNumber = parseInt(runNumber, 10);
-      if (isNaN(parsedRunNumber) || parsedRunNumber <= 0) {
-        return updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Invalid run number format'));
-      }
-
-      const runStatus = await this._filterService.getRunStatus(parsedRunNumber);
+      const validatedRunNumber = RunNumberDto.isRunNumberValid(runNumber);
+      const runStatus = await this._filterService.getRunStatus(validatedRunNumber);
       res.status(200).json(runStatus);
     } catch (error) {
+      if (error.message && error.message.includes('Run number')) {
+        return updateAndSendExpressResponseFromNativeError(res, new InvalidInputError(error.message));
+      }
       this._logger
         .errorMessage(`Failed to retrieve run status for run ${req.params?.runNumber}: ${error.message || error}`);
       updateAndSendExpressResponseFromNativeError(res, new Error('Failed to retrieve run status'));

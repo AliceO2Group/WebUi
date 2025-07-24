@@ -13,6 +13,7 @@
  */
 'use strict';
 import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import { RunNumberDto } from '../dtos/RunNumberDto.js';
 
 /**
  * Gateway for all QC Objects requests
@@ -47,19 +48,11 @@ export class ObjectController {
   async getObjects(req, res) {
     try {
       const { prefix, fields, filters = {}, inRunMode = false } = req.query;
+      const runNumber = filters?.RunNumber;
 
-      const { RunNumber: runNumber } = filters;
-      const parsedRunNumber = parseInt(runNumber, 10);
-
-      if (inRunMode && (!runNumber || isNaN(parsedRunNumber))) {
-        return updateAndSendExpressResponseFromNativeError(
-          res,
-          new InvalidInputError(!runNumber
-            ? 'RunNumber is required when in run mode'
-            : 'RunNumber must be a number'),
-        );
-      } else if (inRunMode && runNumber && !isNaN(parsedRunNumber)) {
-        const { paths } = await this._runModeService.retrievePathsAndSetRunStatus(parsedRunNumber, prefix);
+      if (inRunMode) {
+        const validatedRunNumber = RunNumberDto.isRunNumberValid(runNumber);
+        const { paths } = await this._runModeService.retrievePathsAndSetRunStatus(validatedRunNumber, prefix);
         return res.status(200).json({ paths });
       }
 
@@ -68,8 +61,11 @@ export class ObjectController {
         fields,
         filters,
       });
-      res.status(200).json(objectsData);
+      return res.status(200).json(objectsData);
     } catch (error) {
+      if (error.message && (error.message.includes('Run number') || error.message.includes('must be'))) {
+        return updateAndSendExpressResponseFromNativeError(res, new InvalidInputError(error.message));
+      }
       const responseError = new Error('Failed to retrieve list of objects latest version');
       this._logger.errorMessage(`Error whilst retrieving objects: ${error}`);
       updateAndSendExpressResponseFromNativeError(res, responseError);

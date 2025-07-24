@@ -62,7 +62,7 @@ export const objectControllerTestSuite = async () => {
       await objectController.getObjects(reqMock, resMock);
       ok(resMock.status.calledWith(400));
       ok(resMock.json.calledWithMatch({
-        message: 'RunNumber is required when in run mode',
+        message: 'Run number is required when in run mode',
         status: 400,
         title: 'Invalid Input',
       }));
@@ -74,7 +74,7 @@ export const objectControllerTestSuite = async () => {
       await objectController.getObjects(reqMock, resMock);
       ok(resMock.status.calledWith(400));
       ok(resMock.json.calledWithMatch({
-        message: 'RunNumber must be a number',
+        message: 'Run number must be a valid number',
         status: 400,
         title: 'Invalid Input',
       }));
