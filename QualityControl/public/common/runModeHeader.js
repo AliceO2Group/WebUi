@@ -26,7 +26,9 @@ export function runModeHeader(filterModel, pageModel) {
     return null;
   }
 
-  return h('.flex-row.items-center.justify-center.p2.g2.bg-gray-lighter', [
+  return h('.flex-row.items-center.justify-center.p2.g2.bg-gray-lighter', {
+    id: 'runModeHeader',
+  }, [
     renderRunModeInfo(filterModel),
     renderExitButton(filterModel, pageModel),
   ]);
@@ -58,10 +60,14 @@ export function runModeHeader(filterModel, pageModel) {
    * @returns {vnode} - virtual node element
    */
   function renderRunNumber(runNumber) {
-    return h('.flex-row.items-center.g1', [
-      h('span.gray-darker', 'Run'),
-      h('b', `#${runNumber}`),
-    ]);
+    return h(
+      '.flex-row.items-center.g1',
+      { id: 'runNumber' },
+      [
+        h('span.gray-darker', 'Run'),
+        h('b', `#${runNumber}`),
+      ],
+    );
   }
 
   /**
@@ -70,7 +76,9 @@ export function runModeHeader(filterModel, pageModel) {
    * @returns {vnode} - virtual node element
    */
   function renderRunStatus(filterModel) {
-    return h('.flex-row.items-center.g1', [
+    return h('.flex-row.items-center.g1', {
+      id: 'runStatus',
+    }, [
       h('span.gray-darker', 'Status:'),
       h(`b.${getStatusClass(filterModel.runStatus)}`, filterModel.runStatus || 'Unknown'),
       renderStatusInfoDropdown(filterModel),
@@ -98,6 +106,7 @@ export function runModeHeader(filterModel, pageModel) {
    */
   function renderInfoButton(filterModel) {
     return h('button.btn.btn-sm', {
+      id: 'runsModeInfoButton',
       title: 'Show status information',
       onclick: (e) => {
         e.stopPropagation();
@@ -112,7 +121,9 @@ export function runModeHeader(filterModel, pageModel) {
    * @returns {vnode} - virtual node element
    */
   function renderDropdownMenu() {
-    return h('.dropdown-menu', [
+    return h('.dropdown-menu', {
+      id: 'statusInfoDropdown',
+    }, [
       h('.p2', [
         h('div.gray-darker.mv1', 'Status meanings:'),
         h('hr.mv1'),
@@ -126,7 +137,9 @@ export function runModeHeader(filterModel, pageModel) {
    * @returns {vnode} - virtual node element
    */
   function renderStatusList() {
-    return h('div', Object.values(RunStatus).map((status) => h('div.flex-row.items-center.mv1', {
+    return h('div', {
+      id: 'runStatusList',
+    }, Object.values(RunStatus).map((status) => h('div.flex-row.items-center.mv1', {
       style: 'white-space: nowrap;',
     }, [
       h('div.flex-row.items-center.g1', [
@@ -144,6 +157,7 @@ export function runModeHeader(filterModel, pageModel) {
    */
   function renderExitButton(filterModel, pageModel) {
     return h('button.btn.btn-sm', {
+      id: 'exitRunModeButton',
       onclick: async () => await filterModel.deactivateRunsMode(pageModel),
       title: 'Exit run mode and show all filters',
     }, 'Exit');

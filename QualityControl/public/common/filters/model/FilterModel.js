@@ -180,8 +180,8 @@ export default class FilterModel extends Observable {
    * @returns {Promise<void>}
    */
   async deactivateRunsMode(baseViewModel) {
-    this.resetRunsMode();
     this._filterMap = this._previousFilterMap || {};
+    this.resetRunsMode();
     this.setFilterToURL();
     await baseViewModel.triggerFilter();
     this.notify();
