@@ -13,7 +13,7 @@
  */
 
 import { suite, test } from 'node:test';
-import { strictEqual } from 'node:assert';
+import { strictEqual, deepStrictEqual } from 'node:assert';
 import { OWNER_TEST_TOKEN, URL_ADDRESS } from '../config.js';
 import request from 'supertest';
 import { RunStatus } from '../../../common/library/runStatus.enum.js';
@@ -39,11 +39,11 @@ export const apiGetRunStatusTests = () => {
         .get(`?token=${OWNER_TEST_TOKEN}`)
         .expect(400)
         .expect((res) => {
-          strictEqual(res.body.status, 400);
-          strictEqual(res.body.title, 'Invalid Input');
-          if (!res.body.message.includes('Invalid run number format')) {
-            throw new Error(`Expected error message about invalid format, got: ${res.body.message}`);
-          }
+          deepStrictEqual(res.body, {
+            status: 400,
+            title: 'Invalid Input',
+            message: 'Run number must be a valid number',
+          });
         });
     });
 
@@ -53,11 +53,11 @@ export const apiGetRunStatusTests = () => {
         .get(`?token=${OWNER_TEST_TOKEN}`)
         .expect(400)
         .expect((res) => {
-          strictEqual(res.body.status, 400);
-          strictEqual(res.body.title, 'Invalid Input');
-          if (!res.body.message.includes('Invalid run number format')) {
-            throw new Error(`Expected error message about invalid format, got: ${res.body.message}`);
-          }
+          deepStrictEqual(res.body, {
+            status: 400,
+            title: 'Invalid Input',
+            message: 'Run number must be an integer greater than or equal to 0',
+          });
         });
     });
   });

@@ -189,8 +189,22 @@ export default class QCObject extends BaseViewModel {
     this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
     this.list = offlineObjects;
 
+    let treeState = null;
+    let selectedObject = null;
+
+    // save the state of the tree in run mode
+    if (this.model.filterModel.inRunMode) {
+      treeState = this.saveTreeState();
+      selectedObject = this.selected;
+    }
+
     this.tree.initTree('database');
     this.tree.addChildren(offlineObjects);
+
+    // restore tree state if in run mode
+    if (this.model.filterModel.inRunMode && treeState) {
+      this.restoreTreeState(treeState);
+    }
 
     this.currentList = offlineObjects;
     this.sortBy = {
@@ -202,7 +216,13 @@ export default class QCObject extends BaseViewModel {
     };
     this._computeFilters();
 
-    if (this.selected && !this.selected.lastModified) {
+    // if w are in run mode and an object was opened
+    if (this.model.filterModel.inRunMode && selectedObject) {
+      const foundObject = this.list.find((object) => object.name === selectedObject.name);
+      if (foundObject) {
+        this.selected = foundObject;
+      }
+    } else if (this.selected && !this.selected.lastModified) {
       this.selected = this.list.find((object) => object.name === this.selected.name);
     }
     this.queryingObjects = false;
@@ -466,11 +486,61 @@ export default class QCObject extends BaseViewModel {
   }
 
   /**
+   * Save the current state of the tree
+   * @returns {object} - Map of path strings to their open state
+   */
+  saveTreeState() {
+    const state = {};
+
+    /**
+     * Save the state of each node in the tree
+     * @param {object} node - The tree node to save state for
+     * @returns {undefined}
+     */
+    function saveNodeState(node) {
+      if (node.pathString) {
+        state[node.pathString] = node.open;
+      }
+      for (let i = 0; i < node.children.length; i++) {
+        saveNodeState(node.children[i]);
+      }
+    }
+    saveNodeState(this.tree);
+    return state;
+  }
+
+  /**
+   * Restore the tree state from a previously saved state
+   * @param {object} state - Map of path strings to their open state
+   * @returns {undefined}
+   */
+  restoreTreeState(state) {
+    /**
+     * Restore the state of each node in the tree
+     * @param {object} node - The tree node to save state for
+     * @returns {undefined}
+     */
+    function restoreNodeState(node) {
+      if (node.pathString && state[node.pathString] !== undefined) {
+        node.open = state[node.pathString];
+      }
+      for (let i = 0; i < node.children.length; i++) {
+        restoreNodeState(node.children[i]);
+      }
+    };
+
+    restoreNodeState(this.tree);
+  }
+
+  /**
    * Function that reloads the object list with filters applied
    * @returns {undefined}
    */
   async triggerFilter() {
-    this.selected = null;
+    // don't clear selected object refreshing in run mode
+    if (!this.model.filterModel.inRunMode) {
+      this.selected = null;
+    }
     this.loadList();
   }
 }

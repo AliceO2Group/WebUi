@@ -111,7 +111,7 @@ export const filtersControllerTestSuite = async () => {
       ok(res.json.calledWith({
         status: 400,
         title: 'Invalid Input',
-        message: 'Run number not provided',
+        message: 'Run number is required when in run mode',
       }), 'Error message was not sent back');
       ok(filterService.getRunStatus.notCalled, 'FilterService.getRunStatus should not have been called');
     });
@@ -133,7 +133,7 @@ export const filtersControllerTestSuite = async () => {
       ok(res.json.calledWithMatch({
         status: 400,
         title: 'Invalid Input',
-        message: 'Invalid run number format',
+        message: 'Run number must be a valid number',
       }), 'Error message was not sent back');
       ok(filterService.getRunStatus.notCalled, 'FilterService.getRunStatus should not have been called');
     });

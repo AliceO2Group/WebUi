@@ -133,6 +133,7 @@ const updateDropdownButton = (onClickCallback, filterModel, pageModel) => {
           style: 'white-space: nowrap;',
         }, 'Update only'),
         h('div.menu-item', {
+          id: 'updateAndRunModeButton',
           onclick: async (e) => {
             e.stopPropagation();
             filterModel.dropdownOpen = false;
