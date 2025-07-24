@@ -14,8 +14,8 @@
 import { strictEqual } from 'node:assert';
 
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
-export const runsModeObjectTreeTests = async (url, page, timeout = 5000, testParent) => {
-  await testParent.test('should enable updateAndRunModeButton when run number is entered', async () => {
+export const runsModeLayoutShowTests = async (url, page, timeout = 5000, testParent) => {
+  await testParent.test('should activate runs mode in object tree page', async () => {
     await page.goto(`${url}${OBJECT_TREE_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
     //wait for filters
     await page.waitForSelector('#runNumberFilter', { timeout });
@@ -33,17 +33,23 @@ export const runsModeObjectTreeTests = async (url, page, timeout = 5000, testPar
       return button && !button.disabled;
     });
     strictEqual(isButtonEnabled, true, 'updateAndRunModeButton should be enabled when run number is entered');
+
+    // Activate runs mode
+    await page.click('#updateAndRunModeButton');
+    await page.waitForSelector('#runModeHeader', { timeout });
   });
 
-  await testParent.test('should show runModeHeader when updateAndRunModeButton is clicked', async () => {
-    await page.click('#updateAndRunModeButton');
-    //check the url to not have runType as filter
-    const currentUrl = page.url();
-    strictEqual(currentUrl.includes('RunType'), false, 'RunType should not be in url');
-    strictEqual(currentUrl.includes('RunNumber'), true, 'RunNumber should be in url');
+  await testParent.test('should navigate to layout page and verify runs mode persists', async () => {
+    // Navigate to layout page using the provided selector
+    await page.waitForSelector('.sidebar > div:nth-of-type(3) a:nth-child(1)', { visible: true, stable: true });
+    await page.locator('.sidebar > div:nth-of-type(3) a:nth-child(1)').click(); // navigate to layout show
 
-    //wait for elements in run mode header
+    //wait for network
+
+    // Wait for layout page to load
     await page.waitForSelector('#runModeHeader', { timeout });
+
+    // Verify runs mode header elements are present
     await page.waitForSelector('#runNumber', { timeout });
     await page.waitForSelector('#runStatus', { timeout });
     await page.waitForSelector('#runsModeInfoButton', { timeout });
@@ -63,20 +69,24 @@ export const runsModeObjectTreeTests = async (url, page, timeout = 5000, testPar
         exitButton?.textContent === 'Exit' && exitButton?.title === 'Exit run mode and show all filters',
       ];
     });
-    strictEqual(runNumberDisplayed, true, 'runNumber should be displayed');
-    strictEqual(runStatusDisplayed, true, 'runStatus should be displayed');
-    strictEqual(infoButtonDisplayed, true, 'infoButton should be displayed');
-    strictEqual(exitButtonDisplayed, true, 'exitRunModeButton should be displayed');
+    strictEqual(runNumberDisplayed, true, 'runNumber should be displayed in layout page');
+    strictEqual(runStatusDisplayed, true, 'runStatus should be displayed in layout page');
+    strictEqual(infoButtonDisplayed, true, 'infoButton should be displayed in layout page');
+    strictEqual(exitButtonDisplayed, true, 'exitRunModeButton should be displayed in layout page');
+
+    // Verify runs mode is still active
+    const isRunMode = await page.evaluate(() => window.model.filterModel.inRunMode);
+    strictEqual(isRunMode, true, 'inRunMode should persist in layout page');
   });
 
-  await testParent.test('should show statusInfoDropdown when runsModeInfoButton is clicked', async () => {
-    await page.click('#runsModeInfoButton');
-    await page.waitForSelector('#statusInfoDropdown', { timeout });
-    await page.waitForSelector('#runStatusList', { timeout });
-    const runStatusList = await page.evaluate(() => {
-      const runStatusList = document.querySelector('#runStatusList');
-      return runStatusList?.children?.length === 4;
-    });
-    strictEqual(runStatusList, true, 'list of status should have 4 elements');
+  await testParent.test('should exit run mode from layout page', async () => {
+    await page.click('#exitRunModeButton');
+
+    // filters are shown again
+    await page.waitForSelector('#filterElement', { timeout });
+    await page.waitForSelector('#triggerFilterButton', { timeout });
+    // window.model.filterModel.inRunMode is false
+    const isRunMode = await page.evaluate(() => window.model.filterModel.inRunMode);
+    strictEqual(isRunMode, false, 'inRunMode should be false after exiting from layout page');
   });
 };
