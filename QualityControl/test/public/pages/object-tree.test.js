@@ -39,6 +39,17 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     ok(rowsCount > 1); // more than 1 object in the tree
   });
 
+  await testParent.test('should not preserve state if refreshed not in run mode', { timeout }, async () => {
+    const tbodyPath = 'section > div > div > div > table > tbody';
+    await page.locator(`${tbodyPath} > tr:nth-child(2)`).click();
+    await page.reload({ waitUntil: 'networkidle0' });
+
+    const rowCount = await page.evaluate(() =>
+      document.querySelectorAll('section > div > div > div > table > tbody > tr').length);
+
+    strictEqual(rowCount, 2);
+  });
+
   await testParent.test('should have a button to sort by (default "Name" ASC)', async () => {
     const sortByButtonTitle = await page.evaluate((path) => document.querySelector(path).title, SORTING_BUTTON_PATH);
     strictEqual(sortByButtonTitle, 'Sort by');
