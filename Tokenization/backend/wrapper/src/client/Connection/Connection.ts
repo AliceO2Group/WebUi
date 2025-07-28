@@ -1,4 +1,4 @@
-import { ConnectionStatus } from "../../models/connection.model.ts";
+import { ConnectionStatus } from "../../models/connection.model";
 
 /**
  * @license

@@ -27,9 +27,12 @@ export class EventDispatcher implements MessageHandler {
    */
   handle(event: any): void {
     switch (event.event) {
-      case "EMPTY_EVENT":
+      case DuplexMessageEvent.MESSAGE_EVENT_EMPTY:
         // handle empty event
         break;
+      case DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN:
+        this.logger.infoMessage("Token revoked:", event.revokeToken);
+      // handle token revocation
       default:
         this.logger.infoMessage("Unknown event type:", event.event);
     }

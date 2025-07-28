@@ -2,11 +2,6 @@ import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
 import { LogManager } from "@aliceo2/web-ui";
-import { fileURLToPath } from "url";
-import {
-  DuplexMessageEvent,
-  DuplexMessageModel,
-} from "../models/message.model.ts";
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
@@ -61,7 +56,7 @@ export class CentralSystemWrapper {
 
     // Listen for data events from the client
     call.on("data", (payload: any) => {
-      console.log(`Received from ${clientAddress}:`, payload);
+      console.log(`Received from ${call.getPeer()}:`, payload);
     });
 
     // Handle stream end event
@@ -99,8 +94,6 @@ export class CentralSystemWrapper {
 }
 
 // Instantiate the CentralSystemWrapper on port 50051, but don't start automatically
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
 const centralSystem = new CentralSystemWrapper(PROTO_PATH, 50051);
 // Start listening explicitly

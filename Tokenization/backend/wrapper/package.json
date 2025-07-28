@@ -1,14 +1,12 @@
 {
   "name": "grpc-wrapper",
   "version": "1.0.0",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "test": "jest",
-    "build": "tsc && tsc-alias --resolve-full-paths && cp -r proto dist",
+    "build": "tsc -p tsconfig.build.json && cp -r src/proto dist",
     "start-client": "node dist/client/gRPCWrapper.js",
-    "start-central": "node dist/central/CentralSystem.js",
-    "dev-client": "ts-node-esm client/gRPCWrapper.ts",
-    "dev-central": "ts-node-esm central/CentralSystem.ts"
+    "start-central": "node dist/central/CentralSystem.js"
   },
   "author": "ALICEO2",
   "devDependencies": {

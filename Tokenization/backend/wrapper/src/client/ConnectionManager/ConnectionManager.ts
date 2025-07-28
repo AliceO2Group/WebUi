@@ -14,7 +14,7 @@
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import { CentralConnection } from "./CentralConnection";
-import { EventDispatcher } from "../ConnectionManager/EventManagement/EventDispatcher";
+import { EventDispatcher } from "./EventManagement/EventDispatcher";
 import { Connection } from "../Connection/Connection";
 import { LogManager } from "@aliceo2/web-ui";
 
