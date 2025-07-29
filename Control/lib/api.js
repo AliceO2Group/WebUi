@@ -292,6 +292,10 @@ module.exports.setup = (http, ws) => {
     '/configurations/:key(*)', validateConsulServiceMiddleware, 
     qcConfigurationController.getConfigurationByKeyHandler.bind(qcConfigurationController)
   );
+  http.post(
+    "/configurations/:key(*)", qcValidateService,
+    qcConfigurationController.editConfigurationByKey.bind(qcConfigurationController)
+  );
 
   // Consul
   http.get('/consul/flps', validateConsulServiceMiddleware, consulController.getFLPs.bind(consulController));

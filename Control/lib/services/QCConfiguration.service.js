@@ -29,7 +29,7 @@ class QCConfigurationService {
      * @type {ConsulService}
      */
     this._consulService = consulService;
-    
+
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? "cnf"}/qc-configuration-service`);
   }
 
@@ -77,6 +77,20 @@ class QCConfigurationService {
     });
 
     return parsedData;
+  }
+
+  /**
+   * Edit configuration by key in Consul
+   * @param {String} key - the key of the configuration
+   * @param {String} value - the configuration
+   */
+  async editConfigurationByKey(key, value) {
+    try {
+      const listOfConfigurationsToEdit = [{ [key]: JSON.stringify(value, null, 2) }];
+      return await this._consulService.putListOfKeyValues(listOfConfigurationsToEdit);
+    } catch (error) {
+      throw new ServiceUnavailableError(`Error editing configuration for key: ${key}`);
+    }
   }
 }
 

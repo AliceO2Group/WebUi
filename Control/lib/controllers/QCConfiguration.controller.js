@@ -93,6 +93,31 @@ class QCConfigurationController {
       }
     }
   }
+
+  /**
+   * Method to edit configuration value
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async editConfigurationByKey(req, res) {
+    const { key } = req.params;
+    const { configuration } = req.body;
+    if (!key) {
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError("Missing configuration key"));
+    }
+
+    try {
+      const editStatus = await this._qcConfigurationService.editConfigurationByKey(key, configuration);
+      if (!editStatus) {
+        updateAndSendExpressResponseFromNativeError(res, new ServiceUnavailableError("Could not edit configuration"));
+      }
+
+      res.status(200).json(editStatus);
+    } catch (error) {
+      errorLogger(error, this._logger);
+      updateAndSendExpressResponseFromNativeError(res, error);
+    }
+  }
 }
 
 exports.QCConfigurationController = QCConfigurationController;
