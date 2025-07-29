@@ -145,4 +145,20 @@ describe(`'QCConfigurationService' test suite`, () => {
       assert.deepStrictEqual(qcConfigurationService.filterConfigurations({}, false, 'any'), []);
     });
   });
+
+  describe(`'editConfigurationByKey' test suite`, () => {
+    let qcConfigurationService;
+    before(() => {
+      qcConfigurationService = new QCConfigurationService({
+        putListOfKeyValues: sinon.stub().resolves({ allPut: true }),
+      });
+    });
+
+    it("should return {allPut: true} for a valid key and configuration", async () => {
+      const key = "any/prefix1";
+      const value = { key: "value" };
+      const editStatus = await qcConfigurationService.editConfigurationByKey(key, value);
+      assert.deepStrictEqual(editStatus, { allPut: true });
+    });
+  });
 });
