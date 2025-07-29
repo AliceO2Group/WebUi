@@ -35,7 +35,7 @@
   "dependencies": {
     "@aliceo2/web-ui": "2.8.4",
     "@grpc/grpc-js": "1.13.0",
-    "@grpc/proto-loader": "0.7.0",
+    "@grpc/proto-loader": "0.8.0",
     "google-protobuf": "3.21.0",
     "kafkajs": "2.2.4"
   },
