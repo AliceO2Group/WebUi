@@ -11,15 +11,15 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import { CommandHandler } from "models/commands.model";
+import { CommandHandler } from "../../models/commands.model";
 import { RevokeTokenCommand } from "./revokeToken.command";
-import { ConnectionManager } from "client/ConnectionManager/ConnectionManager";
+import { ConnectionManager } from "../ConnectionManager/ConnectionManager";
 
 export class RevokeTokenHandler implements CommandHandler<RevokeTokenCommand> {
   constructor(private manager: ConnectionManager) {}
 
   async handle(command: RevokeTokenCommand): Promise<void> {
-    const { targetAddress } = command.payload.data.revokeToken || {};
+    const { targetAddress } = command.payload.revokeToken || {};
     if (!targetAddress) {
       throw new Error("Target address is required to revoke token.");
     }

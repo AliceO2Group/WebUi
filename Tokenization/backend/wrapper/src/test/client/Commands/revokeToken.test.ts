@@ -1,0 +1,106 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
+import { RevokeTokenCommand } from "../../../client/Commands/revokeToken.command";
+import { RevokeTokenHandler } from "../../../client/Commands/revokeToken.handler";
+import { Connection } from "../../../client/Connection/Connection";
+import { ConnectionManager } from "../../../client/ConnectionManager/ConnectionManager";
+import { DuplexMessageEvent } from "../../../models/message.model";
+import { ConnectionStatus } from "../../../models/connection.model";
+
+describe("RevokeToken", () => {
+  function createEventMessage(targetAddress: string) {
+    return {
+      event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
+      revokeToken: {
+        token: "test-token",
+        targetAddress,
+      },
+    };
+  }
+
+  let manager: ConnectionManager;
+
+  beforeEach(() => {
+    manager = {
+      sendingConnections: new Map<string, Connection>(),
+      receivingConnections: new Map<string, Connection>(),
+      getConnectionByAddress: jest.fn(function (this: any, address: string) {
+        return (
+          this.sendingConnections.get(address) ||
+          this.receivingConnections.get(address)
+        );
+      }),
+    } as unknown as ConnectionManager;
+  });
+
+  it("should revoke token when connection found in sendingConnections", async () => {
+    const targetAddress = "peer-123";
+    const conn = new Connection("valid-token", targetAddress);
+    (manager as any).sendingConnections!.set(targetAddress, conn);
+
+    const handler = new RevokeTokenHandler(manager);
+    const command = new RevokeTokenCommand(createEventMessage(targetAddress));
+
+    await handler.handle(command);
+
+    expect(conn.getToken()).toBe("");
+    expect(conn.getStatus()).toBe(ConnectionStatus.UNAUTHORIZED);
+  });
+
+  it("should revoke token when connection found in receivingConnections", async () => {
+    const targetAddress = "peer-456";
+    const conn = new Connection("valid-token", targetAddress);
+    (manager as any).receivingConnections.set(targetAddress, conn);
+
+    const handler = new RevokeTokenHandler(manager);
+    const command = new RevokeTokenCommand(createEventMessage(targetAddress));
+
+    await handler.handle(command);
+
+    expect(conn.getToken()).toBe("");
+    expect(conn.getStatus()).toBe(ConnectionStatus.UNAUTHORIZED);
+  });
+
+  it("should do nothing when connection not found", async () => {
+    const targetAddress = "non-existent";
+    const handler = new RevokeTokenHandler(manager);
+    const command = new RevokeTokenCommand(createEventMessage(targetAddress));
+
+    await expect(handler.handle(command)).resolves.toBeUndefined();
+    expect(manager.getConnectionByAddress).toHaveBeenCalledWith(targetAddress);
+  });
+
+  it("should throw error when targetAddress is missing", async () => {
+    const invalidMessage = {
+      event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
+      revokeToken: { token: "test-token" },
+    };
+
+    const handler = new RevokeTokenHandler(manager);
+    const command = new RevokeTokenCommand(invalidMessage as any);
+
+    await expect(handler.handle(command)).rejects.toThrow(
+      "Target address is required to revoke token."
+    );
+  });
+
+  it("should create command with correct type and payload", () => {
+    const eventMessage = createEventMessage("peer-001");
+    const command = new RevokeTokenCommand(eventMessage);
+
+    expect(command.type).toBe(DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN);
+    expect(command.payload).toEqual(eventMessage);
+  });
+});
