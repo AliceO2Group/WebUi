@@ -1,5 +1,3 @@
-import { ConnectionStatus } from "../../models/connection.model";
-
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -13,6 +11,8 @@ import { ConnectionStatus } from "../../models/connection.model";
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+import { ConnectionStatus } from "../../models/connection.model";
+
 /**
  * @description This class represents a connection to a target client and manages sending messages to it.
  */

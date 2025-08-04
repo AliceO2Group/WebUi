@@ -14,9 +14,11 @@
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import { CentralConnection } from "./CentralConnection";
-import { EventDispatcher } from "./EventManagement/EventDispatcher";
+import { CentralCommandDispatcher } from "./EventManagement/CentralCommandDispatcher";
 import { Connection } from "../Connection/Connection";
 import { LogManager } from "@aliceo2/web-ui";
+import { Command, CommandHandler } from "models/commands.model";
+import { DuplexMessageEvent } from "models/message.model";
 
 /**
  * @description Manages all the connection between clients and central system.
@@ -36,6 +38,7 @@ import { LogManager } from "@aliceo2/web-ui";
  */
 export class ConnectionManager {
   private logger = LogManager.getLogger("ConnectionManager");
+  private centralDispatcher: CentralCommandDispatcher;
   private centralConnection: CentralConnection;
   private sendingConnections = new Map<string, Connection>();
   private receivingConnections = new Map<string, Connection>();
@@ -65,24 +68,50 @@ export class ConnectionManager {
       grpc.credentials.createInsecure()
     );
 
-    const dispatcher = new EventDispatcher();
-    this.centralConnection = new CentralConnection(client, dispatcher);
+    this.centralDispatcher = new CentralCommandDispatcher();
+
+    this.centralConnection = new CentralConnection(
+      client,
+      this.centralDispatcher
+    );
 
     this.sendingConnections.set("a", new Connection("1", "a"));
     this.sendingConnections.set("b", new Connection("2", "b"));
   }
 
+  registerCommandHandlers(
+    commandHandlers: {
+      event: DuplexMessageEvent;
+      handler: CommandHandler<Command>;
+    }[]
+  ): void {
+    commandHandlers.forEach(({ event, handler }) => {
+      this.centralDispatcher.register(event, handler);
+    });
+  }
+
   /**
    * @description Starts the connection to the central system.
    */
-  connectToCentralSystem() {
+  connectToCentralSystem(): void {
     this.centralConnection.start();
   }
 
   /**
    * @description Disconnects from the central system.
    */
-  disconnectFromCentralSystem() {
+  disconnectFromCentralSystem(): void {
     this.centralConnection.disconnect();
+  }
+
+  /**
+   * @description Gets the connection instance by address.
+   * @returns{Connection} connection instance.
+   */
+  getConnectionByAddress(address: string): Connection | undefined {
+    return (
+      this.sendingConnections.get(address) ||
+      this.receivingConnections.get(address)
+    );
   }
 }

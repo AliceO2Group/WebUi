@@ -22,7 +22,7 @@
  * @property MESSAGE_EVENT_NEW_TOKEN: Event for replacing with newly generated token.
  * @property MESSAGE_EVENT_REVOKE_TOKEN: Event for revoking an existing token.
  */
-enum DuplexMessageEvent {
+export enum DuplexMessageEvent {
   MESSAGE_EVENT_EMPTY = 0,
   MESSAGE_EVENT_NEW_TOKEN = 1,
   MESSAGE_EVENT_REVOKE_TOKEN = 2,
@@ -37,8 +37,8 @@ enum DuplexMessageEvent {
  * @property {string} token - The token to be replaced or revoked.
  * @property {string} targetAddress - The address of connection binded to this token.
  */
-interface TokenMessage {
-  token: string;
+export interface TokenMessage {
+  token?: string;
   targetAddress: string;
 }
 
@@ -48,8 +48,10 @@ interface TokenMessage {
  * @property {TokenMessage} data - The data associated with the event, it may be undefined for some events.
  * @example {event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN, data: {token: '', targetAddress: ''}}
  */
-interface DuplexMessageModel {
+export interface DuplexMessageModel {
   event: DuplexMessageEvent;
-  newToken?: TokenMessage;
-  revokeToken?: TokenMessage;
+  data: {
+    newToken?: TokenMessage;
+    revokeToken?: TokenMessage;
+  };
 }

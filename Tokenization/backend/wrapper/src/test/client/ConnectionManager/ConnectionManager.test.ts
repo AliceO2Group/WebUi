@@ -1,5 +1,6 @@
 import * as grpc from "@grpc/grpc-js";
 import { ConnectionManager } from "../../../client/ConnectionManager/ConnectionManager";
+import { DuplexMessageEvent } from "../../../models/message.model";
 
 // Mock duplex stream
 const mockStream = {
@@ -15,12 +16,13 @@ const mockClient = {
 // Mock CentralSystem constructor
 const CentralSystemMock = jest.fn(() => mockClient);
 
-// Mock EventDispatcher
+// Mock dispatcher
+const mockDispatch = jest.fn();
 jest.mock(
-  "../../../client/ConnectionManager/EventManagement/EventDispatcher",
+  "../../../client/ConnectionManager/EventManagement/CentralCommandDispatcher",
   () => ({
-    EventDispatcher: jest.fn(() => ({
-      handle: jest.fn(),
+    CentralCommandDispatcher: jest.fn(() => ({
+      dispatch: mockDispatch,
     })),
   })
 );
@@ -101,7 +103,7 @@ describe("ConnectionManager", () => {
     onEnd?.(); // simulate 'end'
     jest.advanceTimersByTime(2000);
 
-    expect(mockClient.ClientStream).toHaveBeenCalledTimes(2); // initial + reconnect
+    expect(mockClient.ClientStream).toHaveBeenCalledTimes(2);
     jest.useRealTimers();
   });
 
@@ -117,5 +119,26 @@ describe("ConnectionManager", () => {
 
     expect(mockClient.ClientStream).toHaveBeenCalledTimes(2);
     jest.useRealTimers();
+  });
+
+  test("should dispatch event when 'data' is received", () => {
+    conn.connectToCentralSystem();
+    const onData = mockStream.on.mock.calls.find(
+      ([event]) => event === "data"
+    )?.[1];
+
+    const mockMessage = {
+      event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
+      data: {
+        revokeToken: {
+          token: "abc123",
+          targetAddress: "peer-123",
+        },
+      },
+    };
+
+    onData?.(mockMessage);
+
+    expect(mockDispatch).toHaveBeenCalledWith(mockMessage);
   });
 });
