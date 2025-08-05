@@ -12,12 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 import { Command } from "../../models/commands.model";
-import {
-  DuplexMessageEvent,
-  DuplexMessageModel,
-} from "../../models/message.model";
+import { DuplexMessageEvent, TokenMessage } from "../../models/message.model";
 
 export class RevokeTokenCommand implements Command {
-  readonly type = DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN;
-  constructor(public payload: DuplexMessageModel) {}
+  readonly event = DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN;
+  constructor(public payload: TokenMessage) {}
 }

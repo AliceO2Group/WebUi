@@ -18,16 +18,17 @@ import { Connection } from "../../../client/Connection/Connection";
 import { ConnectionManager } from "../../../client/ConnectionManager/ConnectionManager";
 import { DuplexMessageEvent } from "../../../models/message.model";
 import { ConnectionStatus } from "../../../models/connection.model";
+import { Command } from "models/commands.model";
 
 describe("RevokeToken", () => {
   function createEventMessage(targetAddress: string) {
     return {
       event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
-      revokeToken: {
+      payload: {
         token: "test-token",
         targetAddress,
       },
-    };
+    } as Command;
   }
 
   let manager: ConnectionManager;
@@ -51,7 +52,9 @@ describe("RevokeToken", () => {
     (manager as any).sendingConnections!.set(targetAddress, conn);
 
     const handler = new RevokeTokenHandler(manager);
-    const command = new RevokeTokenCommand(createEventMessage(targetAddress));
+    const command = new RevokeTokenCommand(
+      createEventMessage(targetAddress).payload
+    );
 
     await handler.handle(command);
 
@@ -65,7 +68,9 @@ describe("RevokeToken", () => {
     (manager as any).receivingConnections.set(targetAddress, conn);
 
     const handler = new RevokeTokenHandler(manager);
-    const command = new RevokeTokenCommand(createEventMessage(targetAddress));
+    const command = new RevokeTokenCommand(
+      createEventMessage(targetAddress).payload
+    );
 
     await handler.handle(command);
 
@@ -76,7 +81,9 @@ describe("RevokeToken", () => {
   it("should do nothing when connection not found", async () => {
     const targetAddress = "non-existent";
     const handler = new RevokeTokenHandler(manager);
-    const command = new RevokeTokenCommand(createEventMessage(targetAddress));
+    const command = new RevokeTokenCommand(
+      createEventMessage(targetAddress).payload
+    );
 
     await expect(handler.handle(command)).resolves.toBeUndefined();
     expect(manager.getConnectionByAddress).toHaveBeenCalledWith(targetAddress);
@@ -98,9 +105,9 @@ describe("RevokeToken", () => {
 
   it("should create command with correct type and payload", () => {
     const eventMessage = createEventMessage("peer-001");
-    const command = new RevokeTokenCommand(eventMessage);
+    const command = new RevokeTokenCommand(eventMessage.payload);
 
-    expect(command.type).toBe(DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN);
+    expect(command.event).toBe(DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN);
     expect(command.payload).toEqual(eventMessage);
   });
 });

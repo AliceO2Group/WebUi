@@ -22,7 +22,7 @@ import { DuplexMessageEvent } from "./message.model";
  */
 
 export interface Command {
-  type: DuplexMessageEvent;
+  event: DuplexMessageEvent;
   payload: any;
 }
 

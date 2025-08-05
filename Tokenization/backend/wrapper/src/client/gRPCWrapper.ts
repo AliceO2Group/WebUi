@@ -14,7 +14,8 @@
 import path from "path";
 import { ConnectionManager } from "./ConnectionManager/ConnectionManager";
 import { RevokeTokenHandler } from "./Commands/revokeToken.handler";
-import { DuplexMessageEvent } from "models/message.model";
+import { DuplexMessageEvent } from "../models/message.model";
+import { Connection } from "./Connection/Connection";
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -52,11 +53,44 @@ export class gRPCWrapper {
   /**
    * @description Starts the Connection Manager stream connection with Central System
    */
-  public connectToCentralSystem(): void {
+  public connectToCentralSystem() {
     this.ConnectionManager.connectToCentralSystem();
+  }
+
+  /**
+   * @description Returns all saved connections.
+   *
+   * @returns An object containing the sending and receiving connections.
+   */
+  public getAllConnections(): {
+    sending: Connection[];
+    receiving: Connection[];
+  } {
+    return this.ConnectionManager.getAllConnections();
+  }
+
+  public getSummary(): string {
+    const conn = this.ConnectionManager.getAllConnections();
+    return (
+      `Wrapper Summary: ` +
+      `\nSending Connections: ${conn.sending.length}` +
+      `\nReceiving Connections: ${conn.receiving.length}` +
+      conn.sending
+        .map((c) => `\n- ${c.getTargetAddress()} (${c.getStatus()})`)
+        .join("") +
+      conn.receiving
+        .map((c) => `\n- ${c.getTargetAddress()} (${c.getStatus()})`)
+        .join("")
+    );
   }
 }
 
 const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
 const grpc = new gRPCWrapper(PROTO_PATH, "localhost:50051");
 grpc.connectToCentralSystem();
+console.log(grpc.getSummary());
+
+setTimeout(() => {
+  console.log("New status after 10 seconds and token revokation:");
+  console.log(grpc.getSummary());
+}, 10000);

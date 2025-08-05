@@ -44,8 +44,7 @@ message Payload {
     // Data related to specific event type
     oneof data {
         EmptyMessage emptyMessage = 2;
-        Token newToken = 3;
-        Token revokeToken = 4;
+        Token payload = 3;
     }
 }
 

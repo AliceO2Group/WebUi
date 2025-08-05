@@ -18,7 +18,7 @@ import { CentralCommandDispatcher } from "./EventManagement/CentralCommandDispat
 import { Connection } from "../Connection/Connection";
 import { LogManager } from "@aliceo2/web-ui";
 import { Command, CommandHandler } from "models/commands.model";
-import { DuplexMessageEvent } from "models/message.model";
+import { DuplexMessageEvent } from "../../models/message.model";
 
 /**
  * @description Manages all the connection between clients and central system.
@@ -113,5 +113,15 @@ export class ConnectionManager {
       this.sendingConnections.get(address) ||
       this.receivingConnections.get(address)
     );
+  }
+
+  public getAllConnections(): {
+    sending: Connection[];
+    receiving: Connection[];
+  } {
+    return {
+      sending: [...this.sendingConnections.values()],
+      receiving: [...this.receivingConnections.values()],
+    };
   }
 }

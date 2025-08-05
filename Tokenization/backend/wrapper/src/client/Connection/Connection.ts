@@ -56,4 +56,12 @@ export class Connection {
   public getStatus(): string {
     return this.status;
   }
+
+  /**
+   * @description Returns target address for this Connection object
+   * @returns Target address
+   */
+  public getTargetAddress(): string {
+    return this.targetAddress;
+  }
 }

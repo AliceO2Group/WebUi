@@ -23,9 +23,9 @@
  * @property MESSAGE_EVENT_REVOKE_TOKEN: Event for revoking an existing token.
  */
 export enum DuplexMessageEvent {
-  MESSAGE_EVENT_EMPTY = 0,
-  MESSAGE_EVENT_NEW_TOKEN = 1,
-  MESSAGE_EVENT_REVOKE_TOKEN = 2,
+  MESSAGE_EVENT_EMPTY = "MESSAGE_EVENT_EMPTY",
+  MESSAGE_EVENT_NEW_TOKEN = "MESSAGE_EVENT_NEW_TOKEN",
+  MESSAGE_EVENT_REVOKE_TOKEN = "MESSAGE_EVENT_REVOKE_TOKEN",
 }
 
 // ======================================
@@ -46,10 +46,9 @@ export interface TokenMessage {
  * @description Model for duplex stream messages between client and central system.
  * @property {DuplexMessageEvent} event - The event type of the message.
  * @property {TokenMessage} data - The data associated with the event, it may be undefined for some events.
- * @example {event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN, data: {token: '', targetAddress: ''}}
+ * @example {event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN, {token: '', targetAddress: ''}}
  */
 export interface DuplexMessageModel {
   event: DuplexMessageEvent;
-  newToken?: TokenMessage;
-  revokeToken?: TokenMessage;
+  payload: TokenMessage;
 }

@@ -14,6 +14,7 @@
 import * as grpc from "@grpc/grpc-js";
 import { LogManager } from "@aliceo2/web-ui";
 import { CentralCommandDispatcher } from "./EventManagement/CentralCommandDispatcher";
+import { DuplexMessageModel } from "../../models/message.model";
 
 /**
  * @description This class manages the duplex stream with the CentralSystem gRPC service.
@@ -36,7 +37,8 @@ export class CentralConnection {
 
     this.stream = this.client.ClientStream();
 
-    this.stream!.on("data", (payload) => {
+    this.stream!.on("data", (payload: DuplexMessageModel) => {
+      console.log("Received payload:", JSON.stringify(payload));
       this.dispatcher.dispatch(payload);
     });
 

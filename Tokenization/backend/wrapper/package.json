@@ -5,8 +5,8 @@
   "scripts": {
     "test": "jest",
     "build": "tsc -p tsconfig.build.json && cp -r src/proto dist",
-    "start-client": "node dist/client/gRPCWrapper.js",
-    "start-central": "node dist/central/CentralSystem.js"
+    "client": "node dist/client/gRPCWrapper.js",
+    "central": "node dist/central/CentralSystem.js"
   },
   "author": "ALICEO2",
   "devDependencies": {

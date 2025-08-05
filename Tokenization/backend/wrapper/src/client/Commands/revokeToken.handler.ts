@@ -19,7 +19,7 @@ export class RevokeTokenHandler implements CommandHandler<RevokeTokenCommand> {
   constructor(private manager: ConnectionManager) {}
 
   async handle(command: RevokeTokenCommand): Promise<void> {
-    const { targetAddress } = command.payload.revokeToken || {};
+    const { targetAddress } = command.payload || {};
     if (!targetAddress) {
       throw new Error("Target address is required to revoke token.");
     }

@@ -14,24 +14,26 @@
 
 import { LogManager } from "@aliceo2/web-ui";
 import { Command, CommandHandler } from "models/commands.model";
-import { DuplexMessageEvent } from "models/message.model";
+import { DuplexMessageEvent } from "../../../models/message.model";
 
 export class CentralCommandDispatcher {
   private handlers = new Map<DuplexMessageEvent, CommandHandler>();
   private logger = LogManager.getLogger("CentralCommandDispatcher");
 
   register<T extends Command>(
-    type: DuplexMessageEvent,
+    event: DuplexMessageEvent,
     handler: CommandHandler<T>
   ): void {
-    this.handlers.set(type, handler);
+    console.log(`Registering handler for command type: ${event}`);
+    this.handlers.set(event, handler);
   }
 
   async dispatch(command: Command): Promise<void> {
-    const handler = this.handlers.get(command.type);
+    const handler = this.handlers.get(command.event);
+    this.logger.debugMessage(`Dispatching command: ${command.event}`);
     if (!handler) {
       this.logger.warnMessage(
-        `No handler registered for command type: ${command.type}`
+        `No handler registered for command type: ${command.event}`
       );
       return;
     }
@@ -40,7 +42,7 @@ export class CentralCommandDispatcher {
       await handler.handle(command);
     } catch (error) {
       this.logger.errorMessage(
-        `Error handling command ${command.type}:`,
+        `Error handling command ${command.event}:`,
         error
       );
     }
