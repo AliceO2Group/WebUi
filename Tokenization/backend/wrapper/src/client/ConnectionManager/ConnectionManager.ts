@@ -18,7 +18,10 @@ import { CentralCommandDispatcher } from "./EventManagement/CentralCommandDispat
 import { Connection } from "../Connection/Connection";
 import { LogManager } from "@aliceo2/web-ui";
 import { Command, CommandHandler } from "models/commands.model";
-import { DuplexMessageEvent } from "../../models/message.model";
+import {
+  ConnectionDirection,
+  DuplexMessageEvent,
+} from "../../models/message.model";
 
 /**
  * @description Manages all the connection between clients and central system.
@@ -75,8 +78,14 @@ export class ConnectionManager {
       this.centralDispatcher
     );
 
-    this.sendingConnections.set("a", new Connection("1", "a"));
-    this.sendingConnections.set("b", new Connection("2", "b"));
+    this.sendingConnections.set(
+      "a",
+      new Connection("1", "a", ConnectionDirection.SENDING)
+    );
+    this.sendingConnections.set(
+      "b",
+      new Connection("2", "b", ConnectionDirection.SENDING)
+    );
   }
 
   registerCommandHandlers(
@@ -108,11 +117,19 @@ export class ConnectionManager {
    * @description Gets the connection instance by address.
    * @returns{Connection} connection instance.
    */
-  getConnectionByAddress(address: string): Connection | undefined {
-    return (
-      this.sendingConnections.get(address) ||
-      this.receivingConnections.get(address)
-    );
+  getConnectionByAddress(
+    address: string,
+    direction: ConnectionDirection
+  ): Connection | undefined {
+    switch (direction) {
+      case ConnectionDirection.SENDING:
+        return this.sendingConnections.get(address);
+      case ConnectionDirection.RECEIVING:
+        return this.receivingConnections.get(address);
+      default:
+        this.logger.errorMessage(`Invalid connection direction: ${direction}`);
+        return undefined;
+    }
   }
 
   public getAllConnections(): {

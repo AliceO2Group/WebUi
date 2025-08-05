@@ -35,12 +35,14 @@ message EmptyMessage {}
 message Token {
     string token = 1;
     string targetAddress = 2;
+    ConnectionDirection connectionDirection = 3;
 }
 
 // Stream message that can contain one of specific messages
 message Payload {
     // Message event type
     MessageEvent event = 1;
+    
     // Data related to specific event type
     oneof data {
         EmptyMessage emptyMessage = 2;
@@ -61,4 +63,15 @@ enum MessageEvent {
 
     // Revoke token message type, contains a token to be revoked
     MESSAGE_EVENT_REVOKE_TOKEN = 2;
+}
+
+enum ConnectionDirection {
+    // Direction from client to server
+    SENDING = 1;
+
+    // Direction from server to client
+    RECEIVING = 2;
+
+    // Duplex connection, both sending and receiving
+    DUPLEX = 3;
 }

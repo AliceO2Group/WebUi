@@ -24,7 +24,11 @@ export class RevokeTokenHandler implements CommandHandler<RevokeTokenCommand> {
       throw new Error("Target address is required to revoke token.");
     }
 
-    const conn = this.manager.getConnectionByAddress(targetAddress);
+    const conn = this.manager.getConnectionByAddress(
+      targetAddress,
+      command.payload.connectionDirection
+    );
+
     conn?.handleRevokeToken();
   }
 }

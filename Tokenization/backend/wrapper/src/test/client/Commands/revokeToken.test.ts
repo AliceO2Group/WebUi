@@ -16,7 +16,10 @@ import { RevokeTokenCommand } from "../../../client/Commands/revokeToken.command
 import { RevokeTokenHandler } from "../../../client/Commands/revokeToken.handler";
 import { Connection } from "../../../client/Connection/Connection";
 import { ConnectionManager } from "../../../client/ConnectionManager/ConnectionManager";
-import { DuplexMessageEvent } from "../../../models/message.model";
+import {
+  ConnectionDirection,
+  DuplexMessageEvent,
+} from "../../../models/message.model";
 import { ConnectionStatus } from "../../../models/connection.model";
 import { Command } from "models/commands.model";
 
@@ -48,7 +51,11 @@ describe("RevokeToken", () => {
 
   it("should revoke token when connection found in sendingConnections", async () => {
     const targetAddress = "peer-123";
-    const conn = new Connection("valid-token", targetAddress);
+    const conn = new Connection(
+      "valid-token",
+      targetAddress,
+      ConnectionDirection.SENDING
+    );
     (manager as any).sendingConnections!.set(targetAddress, conn);
 
     const handler = new RevokeTokenHandler(manager);
@@ -64,7 +71,11 @@ describe("RevokeToken", () => {
 
   it("should revoke token when connection found in receivingConnections", async () => {
     const targetAddress = "peer-456";
-    const conn = new Connection("valid-token", targetAddress);
+    const conn = new Connection(
+      "valid-token",
+      targetAddress,
+      ConnectionDirection.RECEIVING
+    );
     (manager as any).receivingConnections.set(targetAddress, conn);
 
     const handler = new RevokeTokenHandler(manager);

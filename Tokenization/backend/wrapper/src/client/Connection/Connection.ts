@@ -11,6 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+import { ConnectionDirection } from "../../models/message.model";
 import { ConnectionStatus } from "../../models/connection.model";
 
 /**
@@ -21,7 +22,11 @@ export class Connection {
   private targetAddress: string;
   private status: ConnectionStatus;
 
-  constructor(token: string, targetAddress: string) {
+  constructor(
+    token: string,
+    targetAddress: string,
+    public direction: ConnectionDirection
+  ) {
     this.token = token;
     this.targetAddress = targetAddress;
 

@@ -16,6 +16,7 @@ import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
 import { LogManager } from "@aliceo2/web-ui";
 import {
+  ConnectionDirection,
   DuplexMessageEvent,
   DuplexMessageModel,
 } from "../models/message.model";
@@ -194,6 +195,7 @@ setTimeout(() => {
   centralSystem.sendEvent(centralSystem.getConnectedClients()[0], {
     event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
     payload: {
+      connectionDirection: ConnectionDirection.SENDING,
       targetAddress: "a",
     },
   });

@@ -76,10 +76,16 @@ export class gRPCWrapper {
       `\nSending Connections: ${conn.sending.length}` +
       `\nReceiving Connections: ${conn.receiving.length}` +
       conn.sending
-        .map((c) => `\n- ${c.getTargetAddress()} (${c.getStatus()})`)
+        .map(
+          (c) =>
+            `\n- ${c.getTargetAddress()} - ${c.direction}\n\t(${c.getStatus()})`
+        )
         .join("") +
       conn.receiving
-        .map((c) => `\n- ${c.getTargetAddress()} (${c.getStatus()})`)
+        .map(
+          (c) =>
+            `\n- ${c.getTargetAddress()} - ${c.direction}\n\t(${c.getStatus()})`
+        )
         .join("")
     );
   }
