@@ -11,6 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import { CentralConnection } from "./CentralConnection";
@@ -36,6 +37,7 @@ import {
  *
  * @remarks
  * - `centralConnection`: Handles the duplex stream with the central gRPC server.
+ * - `centralDispatcher`: Dispatcher for central system events
  * - `sendingConnections`: Map of active outbound connections.
  * - `receivingConnections`: Map of active inbound connections.
  */
@@ -71,8 +73,8 @@ export class ConnectionManager {
       grpc.credentials.createInsecure()
     );
 
+    // event dispatcher for central system events
     this.centralDispatcher = new CentralCommandDispatcher();
-
     this.centralConnection = new CentralConnection(
       client,
       this.centralDispatcher
@@ -88,6 +90,10 @@ export class ConnectionManager {
     );
   }
 
+  /**
+   * Registers new Command Handler for specific central event
+   * @param commandHandlers Array of event names and handler instances
+   */
   registerCommandHandlers(
     commandHandlers: {
       event: DuplexMessageEvent;

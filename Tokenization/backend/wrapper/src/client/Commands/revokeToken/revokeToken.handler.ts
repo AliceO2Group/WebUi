@@ -11,13 +11,30 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+
 import { CommandHandler } from "../../../models/commands.model";
 import { RevokeTokenCommand } from "./revokeToken.command";
 import { ConnectionManager } from "../../ConnectionManager/ConnectionManager";
 
+/**
+ * RevokeTokenHandler is responsible for handling the RevokeTokenCommand.
+ * It retrieves the target connection using the provided address and direction,
+ * and calls `handleRevokeToken()` on that connection if it exists.
+ */
 export class RevokeTokenHandler implements CommandHandler<RevokeTokenCommand> {
+  /**
+   * Creates a new instance of RevokeTokenHandler.
+   *
+   * @param manager - The ConnectionManager used to retrieve active connections.
+   */
   constructor(private manager: ConnectionManager) {}
 
+  /**
+   * Handles the RevokeTokenCommand by revoking the token on the target connection.
+   *
+   * @param command - The RevokeTokenCommand containing the target address and direction.
+   * @throws Will throw an error if the target address is missing in the command payload.
+   */
   async handle(command: RevokeTokenCommand): Promise<void> {
     const { targetAddress } = command.payload || {};
     if (!targetAddress) {

@@ -11,12 +11,16 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+
 import { Command } from "../../../models/commands.model";
 import {
   DuplexMessageEvent,
   TokenMessage,
 } from "../../../models/message.model";
 
+/**
+ * @description Command used to trigger new token for a specific connection. Handles structure logic.
+ */
 export class NewTokenCommand implements Command {
   readonly event = DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN;
   constructor(public payload: TokenMessage) {}

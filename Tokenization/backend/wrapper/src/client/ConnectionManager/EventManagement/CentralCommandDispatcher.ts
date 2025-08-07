@@ -16,10 +16,21 @@ import { LogManager } from "@aliceo2/web-ui";
 import { Command, CommandHandler } from "models/commands.model";
 import { DuplexMessageEvent } from "../../../models/message.model";
 
+/**
+ * CentralCommandDispatcher is responsible for registering and dispatching command handlers
+ * based on the command's event type. It acts as the central hub for routing incoming
+ * command messages coming from central system to the appropriate handler functions.
+ */
 export class CentralCommandDispatcher {
   private handlers = new Map<DuplexMessageEvent, CommandHandler>();
   private logger = LogManager.getLogger("CentralCommandDispatcher");
 
+  /**
+   * Registers a command handler for a specific command event type.
+   *
+   * @param event - The event type of the command to be handled.
+   * @param handler - The handler that should process commands of the given event type.
+   */
   register<T extends Command>(
     event: DuplexMessageEvent,
     handler: CommandHandler<T>
@@ -28,6 +39,12 @@ export class CentralCommandDispatcher {
     this.handlers.set(event, handler);
   }
 
+  /**
+   * Dispatches a command to the appropriate registered handler based on its event type.
+   * Logs warnings if no handler is found, and catches/logs errors during handler execution.
+   *
+   * @param command - The command object containing an event and its associated payload.
+   */
   async dispatch(command: Command): Promise<void> {
     const handler = this.handlers.get(command.event);
     this.logger.debugMessage(`Dispatching command: ${command.event}`);

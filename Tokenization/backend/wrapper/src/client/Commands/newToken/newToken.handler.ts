@@ -11,14 +11,28 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+
 import { CommandHandler } from "../../../models/commands.model";
 import { NewTokenCommand } from "./newToken.command";
 import { ConnectionManager } from "../../ConnectionManager/ConnectionManager";
 import { ConnectionDirection } from "../../../models/message.model";
 
+/**
+ * @description Handles the NewTokenCommand by updating or creating a connection with a new authentication token.
+ */
 export class NewTokenHandler implements CommandHandler<NewTokenCommand> {
+  /**
+   * @param manager - Instance of ConnectionManager used to access and manage connections.
+   */
   constructor(private manager: ConnectionManager) {}
 
+  /**
+   * @description Processes the NewTokenCommand by assigning a new token to the specified connection.
+   * If the connection does not exist, it is created.
+   *
+   * @param command - The new token event command.
+   * @throws Will throw an error if any of the required payload fields are missing.
+   */
   async handle(command: NewTokenCommand): Promise<void> {
     const { targetAddress, connectionDirection, token } = command.payload || {};
     if (!targetAddress || !token || !connectionDirection) {

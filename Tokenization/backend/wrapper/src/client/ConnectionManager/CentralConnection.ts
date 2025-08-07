@@ -11,6 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+
 import * as grpc from "@grpc/grpc-js";
 import { LogManager } from "@aliceo2/web-ui";
 import { CentralCommandDispatcher } from "./EventManagement/CentralCommandDispatcher";
@@ -38,7 +39,7 @@ export class CentralConnection {
     this.stream = this.client.ClientStream();
 
     this.stream!.on("data", (payload: DuplexMessageModel) => {
-      console.log("Received payload:", JSON.stringify(payload));
+      this.logger.debugMessage(`Received payload: ${JSON.stringify(payload)}`);
       this.dispatcher.dispatch(payload);
     });
 

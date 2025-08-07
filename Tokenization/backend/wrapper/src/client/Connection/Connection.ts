@@ -11,6 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+
 import { ConnectionDirection } from "../../models/message.model";
 import { ConnectionStatus } from "../../models/connection.model";
 
@@ -22,6 +23,13 @@ export class Connection {
   private targetAddress: string;
   private status: ConnectionStatus;
 
+  /**
+   * @description Creates a new Connection instance with the given token, target address, and connection direction.
+   *
+   * @param token - The authentication token for the connection.
+   * @param targetAddress - The unique address of the target client.
+   * @param direction - The direction of the connection (e.g., sending or receiving).
+   */
   constructor(
     token: string,
     targetAddress: string,
@@ -41,6 +49,9 @@ export class Connection {
     this.token = token;
   }
 
+  /**
+   * @description Revoke current token and set status of unauthorized connection
+   */
   public handleRevokeToken(): void {
     this.token = "";
     this.status = ConnectionStatus.UNAUTHORIZED;

@@ -11,6 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+
 import path from "path";
 import { ConnectionManager } from "./ConnectionManager/ConnectionManager";
 import { RevokeTokenHandler } from "./Commands/revokeToken/revokeToken.handler";
@@ -28,7 +29,7 @@ import { NewTokenHandler } from "./Commands/newToken/newToken.handler";
  *
  * @example
  * ```typescript
- * const grpcWrapper = new gRPCWrapper();
+ * const grpcWrapper = new gRPCWrapper(PROTO_PATH, CENTRAL_SYSTEM_ADDRESS);
  * // Use grpcWrapper to interact with gRPC services
  * ```
  */
@@ -74,6 +75,9 @@ export class gRPCWrapper {
     return this.ConnectionManager.getAllConnections();
   }
 
+  /**
+   * @returns Returns string with summary of all connection
+   */
   public getSummary(): string {
     const conn = this.ConnectionManager.getAllConnections();
     return (
