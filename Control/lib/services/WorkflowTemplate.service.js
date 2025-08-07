@@ -123,7 +123,7 @@ class WorkflowTemplateService {
    * @return {Array<string>} - list of hosts to be ignored
    */
   async retrieveHostsToIgnore(runType) {
-    let hostsToIgnoreString = '{}';
+    let hostsToIgnoreString;
     try {
       hostsToIgnoreString = await this._apricotGrpc.getRuntimeEntryByComponent(COG, RUN_TYPE_TO_HOST_MAPPING);
     } catch (grpcError) {

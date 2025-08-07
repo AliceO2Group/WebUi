@@ -14,7 +14,6 @@
 
 const {LogManager} = require('@aliceo2/web-ui');
 const CoreUtils = require('./../control-core/CoreUtils.js');
-const LOG_FACILITY = 'cog/deployment-service';
 
 /**
  * **high-level service for deployment**
@@ -84,13 +83,13 @@ class DeploymentService {
    */
   async _retrieveUserVars(requestedVars, savedConfigurationName = undefined) {
     if (savedConfigurationName && savedConfigurationName.trim() !== '') {
-        const { variables } = await this._workflowService.retrieveWorkflowSavedConfiguration(savedConfigurationName);
+      const { variables } = await this._workflowService.retrieveWorkflowSavedConfiguration(savedConfigurationName);
 
-        const { hosts = [], epn_enabled = 'false', odc_n_epns = '0' } = requestedVars;
-        variables.hosts = hosts;
-        variables.epn_enabled = epn_enabled;
-        variables.odc_n_epns = odc_n_epns;
-        return variables;
+      const { hosts = [], epn_enabled = 'false', odc_n_epns = '0' } = requestedVars;
+      variables.hosts = hosts;
+      variables.epn_enabled = epn_enabled;
+      variables.odc_n_epns = odc_n_epns;
+      return variables;
     }
     return requestedVars;
   }
