@@ -12,22 +12,20 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Observable, RemoteData } from '/js/src/index.js';
+import { RemoteData } from '/js/src/index.js';
 
 import GridList from './Grid.js';
 import LayoutUtils from './LayoutUtils.js';
 import { objectId, clone, setBrowserTabTitle } from '../common/utils.js';
 import { assertTabObject, assertLayout } from '../common/Types.js';
 import { buildQueryParametersString } from '../common/buildQueryParametersString.js';
-import { RequestFields } from '../common/RequestFields.enum.js';
-
-const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
+import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 
 /**
  * Model namespace with all requests to load or create layouts, compute their position on a grid,
  * and search them.
  */
-export default class Layout extends Observable {
+export default class Layout extends BaseViewModel {
   /**
    * Initialize with empty values
    * @param {Model} model - root model of the application
@@ -48,8 +46,6 @@ export default class Layout extends Observable {
 
     this.requestedLayout = RemoteData.notAsked();
 
-    this.searchInput = '';
-
     this.editEnabled = false; // Activate UI for adding, dragging and deleting tabObjects inside the current tab
     this.editingTabObject = null; // Pointer to a tabObject being modified
     this.editOriginalClone = null; // Contains a deep clone of item before editing
@@ -66,8 +62,7 @@ export default class Layout extends Observable {
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
     // GridList.grid.length: integer, number of rows
-
-    this.filter = {};
+    this.shouldApplyTreeFilter = true;
   }
 
   /**
@@ -110,11 +105,9 @@ export default class Layout extends Observable {
       this.model.router.go('?page=layouts');
     } else {
       const result = await this.model.services.layout.getLayoutById(layoutId);
-
       if (result.isSuccess()) {
         this.item = assertLayout(result.payload);
         this.item.autoTabChange = this.item.autoTabChange || 0;
-        this.setFilterFromURL();
         let tabIndex = this.item.tabs
           .findIndex((tab) => tab.name?.toLocaleUpperCase() === tabName?.toLocaleUpperCase());
         if (tabIndex < 0) {
@@ -129,38 +122,6 @@ export default class Layout extends Observable {
         this.model.router.go('?page=layouts');
       }
     }
-  }
-
-  /**
-   * Look for parameters used for filtering in URL and apply them in the layout if it exists
-   * @returns {undefined}
-   */
-  setFilterFromURL() {
-    const parameters = this.model.router.params;
-    CCDB_QUERY_PARAMS.forEach((filterKey) => {
-      if (parameters[filterKey]) {
-        this.filter[filterKey] = decodeURI(parameters[filterKey]);
-      }
-    });
-    this.notify();
-  }
-
-  /**
-   * When the user updates the displayed Objects, the filters should be placed in the URL as well
-   * @param {boolean} isSilent - whether the route should be silent or not
-   * @returns {undefined}
-   */
-  setFilterToURL(isSilent = true) {
-    const parameters = this.model.router.params;
-
-    CCDB_QUERY_PARAMS.forEach((filterKey) => {
-      if (!this.filter[filterKey] && this.filter[filterKey] !== 0) {
-        delete parameters[filterKey];
-      } else {
-        parameters[filterKey] = encodeURI(this.filter[filterKey]);
-      }
-    });
-    this.model.router.go(buildQueryParametersString(parameters, { }), true, isSilent);
   }
 
   /**
@@ -306,21 +267,6 @@ export default class Layout extends Observable {
   }
 
   /**
-   * Given an ID and new value for official status, update it accordingly
-   * @param {string} id - of layout to modify
-   * @returns {void}
-   */
-  async toggleOfficial(id) {
-    const { isOfficial } = this.model.services.layout.list.payload.find((item) => item.id === id);
-
-    await this.model.services.layout.patchLayout(id, { isOfficial: !isOfficial });
-
-    await this.model.services.layout.getLayouts(RequestFields.LAYOUT_CARD, this);
-
-    this.model.notify();
-  }
-
-  /**
    * Toggle edit menu dropdown
    * @returns {undefined}
    */
@@ -377,13 +323,12 @@ export default class Layout extends Observable {
     setBrowserTabTitle(`${this.item.name}/${tabName}`);
     this.model.router.go(buildQueryParametersString(parameters, { tab: tabName }), true, true);
 
-    this.setFilterFromURL();
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
     }
     this.tab = this.item.tabs[index];
     this._tabIndex = index;
-    this.model.object.loadObjects(this.tab.objects.map((object) => object.name), this.filter);
+    this.model.object.loadObjects(this.tab.objects.map((object) => object.name));
     const { columns } = this.item.tabs[index];
     if (columns > 0) {
       this.resizeGridByXY(columns);
@@ -455,26 +400,13 @@ export default class Layout extends Observable {
   }
 
   /**
-   * Set user's input for search and use a fuzzy algo to filter list of layouts.
-   * Fuzzy allows missing chars "aaa" can find "a/a/a" or "aa/a/bbbbb"
-   * @param {string} searchInput - string input from the user to search by
-   * @returns {undefined}
-   */
-  search(searchInput) {
-    this.searchInput = searchInput;
-    this.model.folder.map.forEach((folder) => {
-      folder.searchInput = new RegExp(searchInput, 'i');
-    });
-    this.notify();
-  }
-
-  /**
    * Creates a deep clone of current layout `item` inside `editOriginalClone` to edit it without side effect.
    * @returns {undefined}
    */
   edit() {
     this.toggleEditMenu();
-    this.model.services.object.listObjects();
+    this.listObjects();
+
     if (!this.item) {
       throw new Error('An item should be loaded before editing it');
     }
@@ -496,7 +428,6 @@ export default class Layout extends Observable {
     this.editEnabled = false;
     this.editingTabObject = null;
     this.saveItem();
-    this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     this.notify();
   }
 
@@ -697,6 +628,14 @@ export default class Layout extends Observable {
   }
 
   /**
+   * Wrapper function for the filterModel::activeFilter function.
+   * @returns {boolean} if there is a currently active filter.
+   */
+  activeFilter() {
+    return this.model.filterModel.activeFilter();
+  }
+
+  /**
    * Getters / Setters
    */
 
@@ -728,6 +667,10 @@ export default class Layout extends Observable {
     if (!this.item.tabs || this.item.tabs.length === 0) {
       clearInterval(this.tabInterval);
     } else if (time >= 10) {
+      if (this.tabInterval) {
+        clearInterval(this.tabInterval);
+      }
+
       this.tabInterval = setInterval(() => {
         this._tabIndex = this._tabIndex + 1 >= this.item.tabs.length ? 0 : this._tabIndex + 1;
         this.selectTab(this._tabIndex);
@@ -808,37 +751,42 @@ export default class Layout extends Observable {
   }
 
   /**
-   * Sets the selector filter value for the passed key and applies the layout changes
-   * @param {object} value - event for which to set the value
-   * @param {string} key - label to be used when querying storage service
+   * Function that fetches the object versions in accordance with the provided filters
    * @returns {undefined}
    */
-  selectOption(value, key) {
-    this.setFilterValue(key, value);
-    this.applyLayoutChanges();
-  };
-
-  /**
-   * Method to allow the addition/update/removal of key;value pairs in filter object
-   * @param {string} key - key to look for in filter object
-   * @param {any} value - value to update for given key; if none, entry is removed from object
-   * @returns {undefined}
-   */
-  setFilterValue(key, value) {
-    if (value !== null && value !== undefined) {
-      this.filter[key] = value;
-    } else {
-      delete this.filter[key];
-    }
-    this.notify();
-  };
-
-  /**
-   * Applies the current filters to the current layout
-   * @returns {undefined}
-   */
-  applyLayoutChanges() {
-    this.setFilterToURL();
+  triggerFilter() {
     this.selectTab(this.tabIndex);
+    if (this.editEnabled) { // To re-render the objectTree in edit mode
+      this.listObjects();
+    }
+  }
+
+  /**
+   * Determines whether the current authenticated user owns the specified layout.
+   * Compares the current session user's person ID with the owner ID of the given layout item to verify ownership.
+   * @param {number} layoutOwnerId - The owner id to check ownership against.
+   * @returns {boolean}  whether the current user's person ID matches the layout's owner ID
+   */
+  ownsLayout(layoutOwnerId) {
+    return this.model.session.personid == layoutOwnerId;
+  }
+
+  /**
+   * Activates/deactivates the effects of the filter on the objectTree inside layout edit mode.
+   */
+  toggleObjectTreeFilter() {
+    if (this.activeFilter()) {
+      this.shouldApplyTreeFilter = !this.shouldApplyTreeFilter;
+      this.listObjects();
+    }
+  }
+
+  /**
+   * Wrapper function for qcObjectServices. If shouldApplyTreeFilter is false,
+   * the objectTree will be loaded without applying the filters.
+   */
+  listObjects() {
+    const filterMap = this.shouldApplyTreeFilter ? undefined : {};
+    this.model.services.object.listObjects(undefined, filterMap);
   }
 }

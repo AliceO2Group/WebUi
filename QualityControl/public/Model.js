@@ -15,20 +15,20 @@
 /* global JSROOT */
 
 import {
-  sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification, RemoteData,
+  sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification,
 } from '/js/src/index.js';
 
 import Layout from './layout/Layout.js';
 import QCObject from './object/QCObject.js';
 import LayoutService from './services/Layout.service.js';
-import FilterService from './services/Filter.service.js';
-import Folder from './folder/Folder.js';
 import QCObjectService from './services/QCObject.service.js';
 import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
 import { setBrowserTabTitle } from './common/utils.js';
 import { buildQueryParametersString } from './common/buildQueryParametersString.js';
 import AboutViewModel from './pages/aboutView/AboutViewModel.js';
+import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
 import { RequestFields } from './common/RequestFields.enum.js';
+import FilterModel from './common/filters/model/FilterModel.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -42,22 +42,20 @@ export default class Model extends Observable {
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // Cast, sessionService has only strings
 
+    this.loader = new Loader(this);
+    this.loader.bubbleTo(this);
+
+    this.filterModel = new FilterModel(this);
+    this.filterModel.bubbleTo(this);
+
     this.object = new QCObject(this);
     this.object.bubbleTo(this);
 
     this.objectViewModel = new ObjectViewModel(this);
     this.objectViewModel.bubbleTo(this);
 
-    this.loader = new Loader(this);
-    this.loader.bubbleTo(this);
-
-    this.folder = new Folder(this);
-    this.folder.addFolder({
-      title: 'Official', isOpened: true, list: RemoteData.notAsked(), searchInput: '', classList: 'bg-primary white',
-    });
-    this.folder.addFolder({ title: 'My Layouts', isOpened: true, list: RemoteData.notAsked(), searchInput: '' });
-    this.folder.addFolder({ title: 'All Layouts', isOpened: false, list: RemoteData.notAsked(), searchInput: '' });
-    this.folder.bubbleTo(this);
+    this.layoutListModel = new LayoutListModel(this);
+    this.layoutListModel.bubbleTo(this);
 
     this.layout = new Layout(this);
     this.layout.bubbleTo(this);
@@ -100,7 +98,6 @@ export default class Model extends Observable {
     this.services = {
       object: new QCObjectService(this),
       layout: new LayoutService(this),
-      filter: new FilterService(this),
     };
 
     this.loader.get('/api/checkUser');
@@ -172,9 +169,14 @@ export default class Model extends Observable {
   async handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
     clearInterval(this.layout.tabInterval);
+    await this.filterModel.filterService.initFilterService();
+    this.filterModel.setFilterFromURL();
+    this.filterModel.setFilterToURL();
+
     this.services.layout.getLayoutsByUserId(this.session.personid, RequestFields.LAYOUT_CARD);
 
     const { params } = this.router;
+
     switch (params.page) {
       case 'layoutList':
         this.page = 'layoutList';
@@ -182,7 +184,6 @@ export default class Model extends Observable {
         this.services.layout.getLayouts(RequestFields.LAYOUT_CARD);
         break;
       case 'layoutShow':
-        this.services.filter.initFilterService();
         setBrowserTabTitle('QCG-LayoutShow');
         if (!params.layoutId) {
           const { definition, pdpBeamType, detector, runType, runNumber } = params;
@@ -223,6 +224,7 @@ export default class Model extends Observable {
             return;
           }
         }
+
         this.layout.loadItem(this.router.params.layoutId, params?.tab ?? '')
           .then(() => {
             this.page = 'layoutShow';
@@ -248,6 +250,7 @@ export default class Model extends Observable {
         break;
       case 'objectView': {
         this.page = 'objectView';
+        this.sidebar = false;
         setBrowserTabTitle('QCG-View');
         const { params } = this.router;
         this.objectViewModel.init(params);

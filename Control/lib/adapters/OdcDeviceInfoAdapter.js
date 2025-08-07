@@ -16,11 +16,11 @@ const { TaskState } = require("../common/taskState.enum");
 
 /**
  * OdcDeviceInfoAdapter - Given an ODC device, construct an OdcDeviceInfo object for GUI purposes
- * Source: https://github.com/FairRootGroup/ODC/blob/master/odc/grpc/odc.proto#L87
+ * Source: Device - https://github.com/FairRootGroup/ODC/blob/master/odc/grpc/odc.proto#L81
  */
 class OdcDeviceInfoAdapter {
   /**
-   * ShortTaskInfoAdapter
+   * OdcDeviceInfoAdapter
    */
   constructor() { }
 
@@ -44,7 +44,7 @@ class OdcDeviceInfoAdapter {
     let ecsState = device.ecsState ?? TaskState.UNKNOWN;
 
     if (epnState === TaskState.ERROR && ecsState !== TaskState.ERROR) {
-      // It may be that ECS did not have the change to handle the ERROR state
+      // It may be that ECS did not have the chance to handle the ERROR state
       // and the task is still in the previous state (e.g. CONFIGURED, UNKNOWN, etc.)
       // In this case, we set the ECS state to ERROR as well
       ecsState = TaskState.ERROR;
@@ -56,6 +56,7 @@ class OdcDeviceInfoAdapter {
 
     return {
       taskId,
+      id: taskId, // model in front-end expects id field for task failure
       state: ecsState,
       epnState,
       path,

@@ -15,7 +15,7 @@ const {LogManager, updateAndSendExpressResponseFromNativeError, InvalidInputErro
 const LOG_LABEL = `${process.env.npm_config_log_label ?? 'cog'}/get-set-det-for-env`;
 
 /**
- * Factory function which retrieves the included detectors in an environment and add a list of them to the request body
+ * Factory function which retrieves the included detectors in an environment and add a list(can be empty) of them to the request body
  *
  * @param {EnvironmentService} environmentService - service to be used to retrieve environment information
  * @return {function(req, res, next): void} - middleware function
@@ -36,8 +36,8 @@ const setDetectorsFromEnvironmentMiddlewareFactory = (environmentService) => {
     try {
       if (!id) {
         throw new InvalidInputError('Invalid input: environment id must be provided');
-      }
-      const {includedDetectors = []} = await environmentService.getEnvironment(id);
+      } 
+      const { includedDetectors = [] } = await environmentService.getEnvironment(id);
       if (!req.body) {
         req.body = {};
       }

@@ -30,6 +30,9 @@
 .layout-selected { border: 0.3em solid var(--color-primary); }
 .layout-edit-layer { cursor: move; opacity: 0; }
 
+.flex-grow { flex-grow: 1; }
+.justify-end { justify-content: end; }
+
 .cardGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -45,10 +48,9 @@
 }
 
 .cardHeader { 
-  border-top-right-radius: 0.5rem; 
-  border-top-left-radius: 0.5rem; 
   padding-left: var(--space-s);
 }
+
 .cardHeader > h5 { 
   align-content: center;
 }
@@ -60,9 +62,12 @@
 .cardBody { 
   border: solid 1px var(--color-primary); 
   border-top: white;
-  border-bottom-left-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
+  border-radius: 0 0 .5rem .5rem;
   height: 100%;
+}
+
+.folderHeader, .cardHeader {
+  border-radius: .5rem .5rem 0 0;
 }
 
 .status-bar { border-top: 1px solid var(--color-gray-dark); }
@@ -98,4 +103,19 @@
 .panel-title {
   border: 1px solid #ddd;
   background: var(--color-gray-light);
+}
+
+.error-box {
+  background-color: #f8d7da;
+  height: 100%;
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  border-radius: 5px;
+  border: 1px solid var(--color-danger);
+}
+
+.error-icon {
+  font-size: 2em;
+  margin-bottom: .5em;
 }

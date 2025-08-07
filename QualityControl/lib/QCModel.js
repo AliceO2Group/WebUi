@@ -38,6 +38,12 @@ import { UserRepository } from './repositories/UserRepository.js';
 import { ChartRepository } from './repositories/ChartRepository.js';
 import { initDatabase } from './database/index.js';
 import { SequelizeDatabase } from './database/SequelizeDatabase.js';
+import { objectGetByIdValidationMiddlewareFactory }
+  from './middleware/objects/objectGetByIdValidationMiddlewareFactory.js';
+import { objectsGetValidationMiddlewareFactory } from './middleware/objects/objectsGetValidationMiddlewareFactory.js';
+import { objectGetContentsValidationMiddlewareFactory }
+  from './middleware/objects/objectGetContentsValidationMiddlewareFactory.js';
+import { RunModeService } from './services/RunModeService.js';
 
 /**
  * Model initialization for the QCG application
@@ -69,15 +75,20 @@ export const setupQcModel = () => {
   const qcObjectService = new QcObjectService(ccdbService, chartRepository, { openFile, toJSON });
   qcObjectService.refreshCache();
 
-  const objectController = new ObjectController(qcObjectService);
   const intervalsService = new IntervalsService();
 
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
-  const filterService = new FilterService(bookkeepingService);
+  const filterService = new FilterService(bookkeepingService, config);
+  const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService);
+  const objectController = new ObjectController(qcObjectService, runModeService);
 
   const filterController = new FilterController(filterService);
 
-  initializeIntervals(intervalsService, qcObjectService, filterService);
+  const objectGetByIdValidation = objectGetByIdValidationMiddlewareFactory(filterService);
+  const objectsGetValidation = objectsGetValidationMiddlewareFactory(filterService);
+  const objectGetContentsValidation = objectGetContentsValidationMiddlewareFactory(filterService);
+
+  initializeIntervals(intervalsService, qcObjectService, filterService, runModeService);
 
   return {
     userController,
@@ -89,6 +100,9 @@ export const setupQcModel = () => {
     filterController,
     layoutRepository,
     jsonFileService,
+    objectGetByIdValidation,
+    objectsGetValidation,
+    objectGetContentsValidation,
   };
 };
 
@@ -97,16 +111,26 @@ export const setupQcModel = () => {
  * @param {Intervals} intervalsService - wrapper for storing intervals
  * @param {QcObjectService} qcObjectService - service for retrieving information on qc objects
  * @param {FilterService} filterService - service for retrieving run types information from Bookkeeping
+ * @param {RunModeService} runModeService - service for monitoring the status of runs
  * @returns {void}
  */
-function initializeIntervals(intervalsService, qcObjectService, filterService) {
+function initializeIntervals(intervalsService, qcObjectService, filterService, runModeService) {
   intervalsService.register(
     qcObjectService.refreshCache.bind(qcObjectService),
     qcObjectService.getCacheRefreshRate(),
   );
 
-  intervalsService.register(
-    filterService.getRunTypes.bind(filterService),
-    filterService.refreshInterval,
-  );
+  if (filterService.runTypesRefreshInterval > 0) {
+    intervalsService.register(
+      filterService.getRunTypes.bind(filterService),
+      filterService.runTypesRefreshInterval,
+    );
+  }
+
+  if (runModeService.refreshInterval > 0) {
+    intervalsService.register(
+      runModeService.refreshRunsCache.bind(runModeService),
+      runModeService.refreshInterval,
+    );
+  }
 }

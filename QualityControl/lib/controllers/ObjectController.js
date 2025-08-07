@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 'use strict';
-import { errorHandler } from './../utils/utils.js';
+import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
 /**
  * Gateway for all QC Objects requests
@@ -23,12 +23,19 @@ export class ObjectController {
    * Setup Object Controller:
    * - CcdbService - retrieve data about objects
    * @param {QCObjectService} objService - objService to be used for retrieval of information
+   * @param {RunMonitoringService} runModeService - for monitoring the status of runs periodically
    */
-  constructor(objService) {
+  constructor(objService, runModeService) {
     /**
      * @type {QCObjectService}
      */
     this._objService = objService;
+
+    /**
+     * @type {RunMonitoringService}
+     */
+    this._runModeService = runModeService;
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/object-ctrl`);
   }
 
   /**
@@ -38,18 +45,34 @@ export class ObjectController {
    * @returns {void}
    */
   async getObjects(req, res) {
-    const { prefix, fields = [] } = req.query;
-    if (prefix && typeof prefix !== 'string') {
-      res.status(400).json({ message: 'Invalid parameters provided: prefix must be of type string' });
-    } else if (!Array.isArray(fields)) {
-      res.status(400).json({ message: 'Invalid parameters provided: fields must be of type Array' });
-    } else {
-      try {
-        const list = await this._objService.retrieveLatestVersionOfObjects(prefix, fields);
-        res.status(200).json(list);
-      } catch (error) {
-        errorHandler(error, 'Failed to retrieve list of objects latest version', res, 502, 'object');
+    try {
+      const { prefix, fields, filters = {}, inRunMode = false } = req.query;
+
+      const { RunNumber: runNumber } = filters;
+      const parsedRunNumber = parseInt(runNumber, 10);
+
+      if (inRunMode && (!runNumber || isNaN(parsedRunNumber))) {
+        return updateAndSendExpressResponseFromNativeError(
+          res,
+          new InvalidInputError(!runNumber
+            ? 'RunNumber is required when in run mode'
+            : 'RunNumber must be a number'),
+        );
+      } else if (inRunMode && runNumber && !isNaN(parsedRunNumber)) {
+        const { paths, runStatus } = await this._runModeService.retrievePathsAndSetRunStatus(parsedRunNumber, prefix);
+        return res.status(200).json({ paths, runStatus });
       }
+
+      const objectsData = await this._objService.retrieveLatestVersionOfObjects({
+        prefix,
+        fields,
+        filters,
+      });
+      res.status(200).json(objectsData);
+    } catch (error) {
+      const responseError = new Error('Failed to retrieve list of objects latest version');
+      this._logger.errorMessage(`Error whilst retrieving objects: ${error}`);
+      updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   }
 
@@ -62,19 +85,19 @@ export class ObjectController {
    * interpretation with JSROOT.draw
    * @param {Request} req - HTTP request object with "query" information
    * @param {Response} res - HTTP response object to provide information on request
-   * @returns {void}
+   * @returns {Promise<void>}
    */
   async getObjectContent(req, res) {
-    const { path, validFrom, id, filters } = req.query;
-    if (!path) {
-      res.status(400).json({ message: 'Invalid URL parameters: missing object path' });
-    } else {
-      try {
-        const object = await this._objService.retrieveQcObject(path, Number(validFrom), id, filters);
-        res.status(200).json(object);
-      } catch (error) {
-        errorHandler(error, 'Unable to identify object or read it', res, 502, 'object');
-      }
+    try {
+      const { path, validFrom, filters, id } = req.query;
+
+      const object = await this._objService.retrieveQcObject({ path, validFrom, id, filters });
+      res.status(200).json(object);
+    } catch (error) {
+      const responseError = new Error('Failed to retrieve object content');
+
+      this._logger.errorMessage(`Error whilst retrieving object content: ${error}`);
+      updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   }
 
@@ -87,20 +110,20 @@ export class ObjectController {
    * interpretation with JSROOT.draw
    * @param {Request} req - HTTP request object with "query" information
    * @param {Response} res - HTTP response object to provide information on request
-   * @returns {void}
+   * @returns {Promise<void>}
    */
   async getObjectById(req, res) {
-    const qcgId = req.params?.id;
-    const { validFrom, filters, id } = req.query;
-    if (!qcgId) {
-      res.status(400).json({ message: 'Invalid URL parameters: missing object ID' });
-    } else {
-      try {
-        const object = await this._objService.retrieveQcObjectByQcgId(qcgId, id, validFrom, filters);
-        res.status(200).json(object);
-      } catch (error) {
-        errorHandler(error, 'Unable to identify object or read it by qcg id', res, 502, 'object');
-      }
+    try {
+      const qcObjectId = req.params.id;
+      const { validFrom, filters, id } = req.query;
+
+      const object = await this._objService.retrieveQcObjectByQcgId({ qcObjectId, id, validFrom, filters });
+      res.status(200).json(object);
+    } catch (error) {
+      const responseError = new Error('Unable to identify object or read it by qcg id');
+
+      this._logger.errorMessage(`Error whilst retrieving object: ${error}`);
+      updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   }
 }
