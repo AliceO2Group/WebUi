@@ -121,7 +121,6 @@ class WorkflowTemplateService {
    * or if the JSON is not valid
    * @param {string} runType - run type for which the hosts should be ignored
    * @return {Array<string>} - list of hosts to be ignored
-   * @throws
    */
   async retrieveHostsToIgnore(runType) {
     let hostsToIgnoreString = '{}';

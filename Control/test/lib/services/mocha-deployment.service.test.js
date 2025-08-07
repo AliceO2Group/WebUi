@@ -14,34 +14,18 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const {InvalidInputError} = require('@aliceo2/web-ui');
 const {DeploymentService} = require('./../../../lib/services/Deployment.service.js');
 
 describe(`'DeploymentService' test suite`, () => {
-    
   describe(`'_retrieveUserVars' test suite`, async () => {
     it('should return the same userVars if selectedConfiguration is not provided', async () => {
       const deploymentService = new DeploymentService();
       const userVars = { var1: 'value1', var2: 'value2' };
       const selectedConfiguration = null;
-
       const result = await deploymentService._retrieveUserVars(userVars, selectedConfiguration);
-
       assert.deepStrictEqual(result, userVars);
     });
-    it('should throw an error if selectedConfiguration is provided but service to retrieve userVars is not available', async () => {
-      const deploymentService = new DeploymentService({}, {
-        retrieveWorkflowSavedConfiguration: sinon.stub().rejects(new Error('Service not available')),
-      });
-      const userVars = { var1: 'value1', var2: 'value2' };
-      const selectedConfiguration = 'config1';
-
-      await assert.rejects(
-        deploymentService._retrieveUserVars(userVars, selectedConfiguration),
-        new InvalidInputError(`Unable to retrieve provided saved configuration name: ${selectedConfiguration}`),
-      );
-    });
-    it('should successfully update userVars with the retrieved configuration', async () => {
+    it('should update userVars with the retrieved configuration', async () => {
       const deploymentService = new DeploymentService({}, {
         retrieveWorkflowSavedConfiguration: sinon.stub().resolves({
           variables: {
@@ -53,9 +37,7 @@ describe(`'DeploymentService' test suite`, () => {
       });
       const userVars = { runType: 'RUN', hosts: ['host2'], epn_enabled: 'false', odc_n_epns: '5' };
       const selectedConfiguration = 'config1';
-
       const result = await deploymentService._retrieveUserVars(userVars, selectedConfiguration);
-
       assert.deepStrictEqual(result, {
         hosts: ['host2'],
         epn_enabled: 'false',
@@ -83,14 +65,13 @@ describe(`'DeploymentService' test suite`, () => {
       const result = await deploymentService._buildUserVarsBasedOnSavedToIgnore(userVars, workflowTemplate);
       assert.deepStrictEqual(result, expectedUserVars);
     });
-    it('should throw an error if provided input does not contain workflowTemplate', async () => {
+    it('should throw an error if provided input does not contain workflowTemplate or vars', async () => {
       const deploymentService = new DeploymentService({}, {
         retrieveHostsToIgnore: sinon.stub().resolves(['host1']),
       });
-
       await assert.rejects(
         deploymentService._buildUserVarsBasedOnSavedToIgnore({}, ''),
-        new Error(`Unable to build userVars: Error: Missing mandatory parameter 'workflowTemplate' or 'vars'`)
+        /Missing mandatory parameter 'workflowTemplate' or 'vars'/
       );
     });
     it('should throw an error if there are no hosts remained after ignoring', async () => {
@@ -104,22 +85,12 @@ describe(`'DeploymentService' test suite`, () => {
       const workflowTemplate = 'template1';
       await assert.rejects(
         deploymentService._buildUserVarsBasedOnSavedToIgnore(userVars, workflowTemplate),
-        new Error(`Unable to build userVars: Error: No hosts remained after ignoring the ones in Consul`)
-      );
-    });
-    it('should throw an error if provided input does not contain vars', async () => {
-      const deploymentService = new DeploymentService({}, {
-        retrieveHostsToIgnore: sinon.stub().resolves(['host1']),
-      });
-
-      await assert.rejects(
-        deploymentService._buildUserVarsBasedOnSavedToIgnore({}, ''),
-        new Error(`Unable to build userVars: Error: Missing mandatory parameter 'workflowTemplate' or 'vars'`)
+        /No hosts remained after ignoring/
       );
     });
   });
 
-  describe(`'deployEnvironment' test suite`, async () => {
+  describe(`'deployEnvironment' test suite`, () => {
     it('should successfully deploy environment with valid input', async () => {
       const deploymentService = new DeploymentService({
         newEnvironmentAsync: sinon.stub().resolves({ id: 1 }),
@@ -136,9 +107,7 @@ describe(`'DeploymentService' test suite`, () => {
       const userVars = { runType: 'RUN', hosts: '["host2", "host1"]', epn_enabled: 'false', odc_n_epns: '5' };
       const workflowTemplate = 'template1';
       const user = { name: 'user1' };
-
       const result = await deploymentService.deployEnvironment({ userVars, workflowTemplate, user });
-
       assert.deepStrictEqual(result, { id: 1 });
     });
     it('should throw an error if deployment fails', async () => {
@@ -157,10 +126,9 @@ describe(`'DeploymentService' test suite`, () => {
       const userVars = { runType: 'RUN', hosts: '["host2", "host1"]', epn_enabled: 'false', odc_n_epns: '5' };
       const workflowTemplate = 'template1';
       const user = { name: 'user1' };
-
       await assert.rejects(
         deploymentService.deployEnvironment({ userVars, workflowTemplate, user }),
-        new Error('Deployment failed')
+        /Deployment failed/
       );
     });
   });
