@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const { LogLevel, InvalidInputError } = require('@aliceo2/web-ui');
+const { InvalidInputError } = require('@aliceo2/web-ui');
 
 /**
  * Shared methods used within Core Services/Controllers
