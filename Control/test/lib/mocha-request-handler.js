@@ -32,7 +32,9 @@ describe('Request Handler of Control Service test suite', () => {
       body: {
         detectors: 'TPC',
         workflowTemplate: 'readout',
-        vars: {}
+        vars: {
+          hosts: '["host1"]',
+        }
       },
       session: {
         name: 'test'
