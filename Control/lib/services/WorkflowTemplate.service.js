@@ -113,7 +113,7 @@ class WorkflowTemplateService {
    *   "runType1": ["host1", "host2"],
    *   "runType2": ["host3", "host4"]
    * }
-   * returns ["host1", "host2"] for runType1 and [] for runType22
+   * returns ["host1", "host2"] for "runType1" and [] for "runType22"
    * 
    * Information is stored in the KV store under the key defined in variable RUN_TYPE_TO_HOST_MAPPING
    * 
@@ -126,10 +126,10 @@ class WorkflowTemplateService {
   async retrieveHostsToIgnore(runType) {
     let hostsToIgnoreString = '{}';
     try {
-      (hostsToIgnoreString = await this._apricotGrpc.getRuntimeEntryByComponent(COG, RUN_TYPE_TO_HOST_MAPPING));
+      hostsToIgnoreString = await this._apricotGrpc.getRuntimeEntryByComponent(COG, RUN_TYPE_TO_HOST_MAPPING);
     } catch (grpcError) {
-      this._logger.warnMessage('Failed to retrieve hosts to ignore from Consul. Deployment will continue', {
-        level: LogLevel.SUPPORT, system: 'GUI', facility: LOG_FACILITY
+      this._logger.warnMessage('Failed to retrieve hosts to ignore from KV Store. Deployment will continue', {
+        level: LogLevel.SUPPORT
       });
       this._logger.errorMessage(grpcErrorToNativeError(grpcError));
       return [];
@@ -137,12 +137,13 @@ class WorkflowTemplateService {
 
     try {
       const hostsToIgnoreMap = JSON.parse(hostsToIgnoreString);
-      return Array.isArray(hostsToIgnoreMap[runType])
-        ? hostsToIgnoreMap[runType]
+      const hostsToIgnoreForRunType = hostsToIgnoreMap[runType];
+      return Array.isArray(hostsToIgnoreForRunType)
+        ? hostsToIgnoreForRunType
         : [];
     } catch (error) {
-      this._logger.warnMessage('Failed to parse payload about hosts to ignore from Consul. Deployment will continue', {
-        level: LogLevel.SUPPORT, system: 'GUI', facility: LOG_FACILITY
+      this._logger.warnMessage('Failed to parse payload on hosts to ignore from KV Store. Deployment will continue', {
+        level: LogLevel.SUPPORT
       });
       this._logger.errorMessage(error);
       return [];

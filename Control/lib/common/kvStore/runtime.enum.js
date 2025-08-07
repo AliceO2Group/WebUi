@@ -12,12 +12,24 @@
  * or submit itself to any jurisdiction.
 */
 
+/**
+ * KV Store paths of components that are to be used during runtime of the application
+ * @example 
+ * * COG_V1 contains saved configurations for deployments
+ * * COG contains further sub-paths for runtime COG specific components
+ */
 const RUNTIME_COMPONENT = Object.freeze({
   PDP_VERSION: 'aliecs/defaults',
   COG: 'COG',
   COG_V1: 'COG_V1',
 });
 
+/**
+ * KV Store keys of components that are to be used during runtime of the application
+ * @example
+ * * RUN_TYPE_TO_HOST_MAPPING contains mapping of run types to hosts that are to be ignored in a deployment
+ * * WORKFLOW_MAPPINGS contains mapping of workflow templates to their names
+ */
 const RUNTIME_KEY = Object.freeze({
   FLP_VERSION: 'flp_suite_version',
   PDP_VERSION: 'pdp_o2pdpsuite_version',

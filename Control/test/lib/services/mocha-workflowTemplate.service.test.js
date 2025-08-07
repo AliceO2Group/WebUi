@@ -165,10 +165,47 @@ describe('WorkflowTemplateService test suite', () => {
       const result = await workflowTemplate.retrieveHostsToIgnore('runType1');
       assert.deepStrictEqual(result, []);
     });
-
     it('should catch error due to apricot service throwing not found error due to missing key', async () => {
       const getRuntimeEntryByComponent = sinon.stub().rejects({code: 5, details: 'Could not be found'});
       const workflowTemplate = new WorkflowTemplateService({}, {getRuntimeEntryByComponent});
+      const result = await workflowTemplate.retrieveHostsToIgnore('runType1');
+      assert.deepStrictEqual(result, []);
+    });
+    it('should return empty array if value retrieved from kv store for runType is not an array', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().resolves(
+        JSON.stringify({ runType1: 'notAnArray' })
+      );
+      const workflowTemplate = new WorkflowTemplateService({}, { getRuntimeEntryByComponent });
+      const result = await workflowTemplate.retrieveHostsToIgnore('runType1');
+      assert.deepStrictEqual(result, []);
+    });
+    it('should return empty array if returned JSON from kv store is not an object', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().resolves(
+        JSON.stringify(['host1', 'host2'])
+      );
+      const workflowTemplate = new WorkflowTemplateService({}, { getRuntimeEntryByComponent });
+      const result = await workflowTemplate.retrieveHostsToIgnore('runType1');
+      assert.deepStrictEqual(result, []);
+    });
+    it('should return empty array if returned JSON from kv store is empty object', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().resolves(
+        JSON.stringify({})
+      );
+      const workflowTemplate = new WorkflowTemplateService({}, { getRuntimeEntryByComponent });
+      const result = await workflowTemplate.retrieveHostsToIgnore('runType1');
+      assert.deepStrictEqual(result, []);
+    });
+    it('should return empty array if returned JSON from kv store is null', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().resolves(
+        null
+      );
+      const workflowTemplate = new WorkflowTemplateService({}, { getRuntimeEntryByComponent });
+      const result = await workflowTemplate.retrieveHostsToIgnore('runType1');
+      assert.deepStrictEqual(result, []);
+    });
+    it('should return empty array if gRPC call throws a general error when trying to retrieve from kv store', async () => {
+      const getRuntimeEntryByComponent = sinon.stub().rejects(new Error('Some error'));
+      const workflowTemplate = new WorkflowTemplateService({}, { getRuntimeEntryByComponent });
       const result = await workflowTemplate.retrieveHostsToIgnore('runType1');
       assert.deepStrictEqual(result, []);
     });
