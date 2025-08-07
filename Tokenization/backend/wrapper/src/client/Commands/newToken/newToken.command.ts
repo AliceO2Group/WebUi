@@ -11,10 +11,13 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import { Command } from "../../models/commands.model";
-import { DuplexMessageEvent, TokenMessage } from "../../models/message.model";
+import { Command } from "../../../models/commands.model";
+import {
+  DuplexMessageEvent,
+  TokenMessage,
+} from "../../../models/message.model";
 
-export class RevokeTokenCommand implements Command {
-  readonly event = DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN;
+export class NewTokenCommand implements Command {
+  readonly event = DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN;
   constructor(public payload: TokenMessage) {}
 }

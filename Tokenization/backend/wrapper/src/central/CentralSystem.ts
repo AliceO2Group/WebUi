@@ -199,4 +199,20 @@ setTimeout(() => {
       targetAddress: "a",
     },
   });
+  centralSystem.sendEvent(centralSystem.getConnectedClients()[0], {
+    event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
+    payload: {
+      connectionDirection: ConnectionDirection.SENDING,
+      targetAddress: "a",
+      token: "newToken",
+    },
+  });
+  centralSystem.sendEvent(centralSystem.getConnectedClients()[0], {
+    event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
+    payload: {
+      connectionDirection: ConnectionDirection.SENDING,
+      targetAddress: "c",
+      token: "tokenForNewAddress",
+    },
+  });
 }, 5000);

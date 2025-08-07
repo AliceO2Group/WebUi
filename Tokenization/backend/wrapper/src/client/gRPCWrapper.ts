@@ -13,9 +13,10 @@
  */
 import path from "path";
 import { ConnectionManager } from "./ConnectionManager/ConnectionManager";
-import { RevokeTokenHandler } from "./Commands/revokeToken.handler";
+import { RevokeTokenHandler } from "./Commands/revokeToken/revokeToken.handler";
 import { DuplexMessageEvent } from "../models/message.model";
 import { Connection } from "./Connection/Connection";
+import { NewTokenHandler } from "./Commands/newToken/newToken.handler";
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -46,6 +47,10 @@ export class gRPCWrapper {
       {
         event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
         handler: new RevokeTokenHandler(this.ConnectionManager),
+      },
+      {
+        event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
+        handler: new NewTokenHandler(this.ConnectionManager),
       },
     ]);
   }
@@ -78,13 +83,17 @@ export class gRPCWrapper {
       conn.sending
         .map(
           (c) =>
-            `\n- ${c.getTargetAddress()} - ${c.direction}\n\t(${c.getStatus()})`
+            `\n- ${c.getTargetAddress()} \nDirection - ${
+              c.direction
+            }\n\tStatus: (${c.getStatus()})\n\tToken: (${c.getToken()})`
         )
         .join("") +
       conn.receiving
         .map(
           (c) =>
-            `\n- ${c.getTargetAddress()} - ${c.direction}\n\t(${c.getStatus()})`
+            `\n- ${c.getTargetAddress()} \nDirection - ${
+              c.direction
+            }\n\tStatus: (${c.getStatus()})\n\tToken: (${c.getToken()})`
         )
         .join("")
     );
@@ -97,6 +106,6 @@ grpc.connectToCentralSystem();
 console.log(grpc.getSummary());
 
 setTimeout(() => {
-  console.log("New status after 10 seconds and token revokation:");
+  console.log("New status after 10 seconds, token revokation and new token:");
   console.log(grpc.getSummary());
 }, 10000);

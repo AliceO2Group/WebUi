@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { RevokeTokenCommand } from "../../../client/Commands/revokeToken.command";
-import { RevokeTokenHandler } from "../../../client/Commands/revokeToken.handler";
+import { RevokeTokenCommand } from "../../../client/Commands/revokeToken/revokeToken.command";
+import { RevokeTokenHandler } from "../../../client/Commands/revokeToken/revokeToken.handler";
 import { Connection } from "../../../client/Connection/Connection";
 import { ConnectionManager } from "../../../client/ConnectionManager/ConnectionManager";
 import {

@@ -114,6 +114,28 @@ export class ConnectionManager {
   }
 
   /**
+   * Creates new connection
+   * @param address Target (external) address of the connection
+   * @param direction Direction of connection
+   * @param token Optional token for connection
+   */
+  createNewConnection(
+    address: string,
+    direction: ConnectionDirection,
+    token?: string
+  ) {
+    const conn = new Connection(token || "", address, direction);
+
+    if (direction === ConnectionDirection.RECEIVING) {
+      this.receivingConnections.set(address, conn);
+    } else {
+      this.sendingConnections.set(address, conn);
+    }
+
+    return conn;
+  }
+
+  /**
    * @description Gets the connection instance by address.
    * @returns{Connection} connection instance.
    */
@@ -132,6 +154,10 @@ export class ConnectionManager {
     }
   }
 
+  /**
+   * Returns object with all connections
+   * @returns Object of all connections
+   */
   public getAllConnections(): {
     sending: Connection[];
     receiving: Connection[];

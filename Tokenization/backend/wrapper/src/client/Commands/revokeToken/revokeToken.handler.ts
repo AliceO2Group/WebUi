@@ -11,9 +11,9 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import { CommandHandler } from "../../models/commands.model";
+import { CommandHandler } from "../../../models/commands.model";
 import { RevokeTokenCommand } from "./revokeToken.command";
-import { ConnectionManager } from "../ConnectionManager/ConnectionManager";
+import { ConnectionManager } from "../../ConnectionManager/ConnectionManager";
 
 export class RevokeTokenHandler implements CommandHandler<RevokeTokenCommand> {
   constructor(private manager: ConnectionManager) {}
