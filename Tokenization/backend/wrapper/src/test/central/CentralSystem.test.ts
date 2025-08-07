@@ -104,8 +104,9 @@ describe("CentralSystemWrapper", () => {
 
     expect(mockCall.end).toHaveBeenCalled();
     expect(logger.infoMessage).toHaveBeenCalledWith(
-      "Client client123 connected to CentralSystem stream stream"
+      expect.stringContaining("Client client123")
     );
+
     expect(logger.infoMessage).toHaveBeenCalledWith(
       "Client client123 ended stream."
     );

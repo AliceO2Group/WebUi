@@ -28,8 +28,8 @@ describe("RevokeToken", () => {
     return {
       event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
       payload: {
+        targetAddress: targetAddress,
         token: "test-token",
-        targetAddress,
       },
     } as Command;
   }
@@ -97,7 +97,10 @@ describe("RevokeToken", () => {
     );
 
     await expect(handler.handle(command)).resolves.toBeUndefined();
-    expect(manager.getConnectionByAddress).toHaveBeenCalledWith(targetAddress);
+    expect(manager.getConnectionByAddress).toHaveBeenCalledWith(
+      targetAddress,
+      undefined
+    );
   });
 
   it("should throw error when targetAddress is missing", async () => {
@@ -119,6 +122,6 @@ describe("RevokeToken", () => {
     const command = new RevokeTokenCommand(eventMessage.payload);
 
     expect(command.event).toBe(DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN);
-    expect(command.payload).toEqual(eventMessage);
+    expect(command).toEqual(eventMessage);
   });
 });
