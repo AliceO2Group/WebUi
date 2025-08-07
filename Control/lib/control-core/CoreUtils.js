@@ -117,7 +117,8 @@ class CoreUtils {
 
     const filteredHosts = hostsList.filter((host) => !hostsToIgnore.includes(host));
     if (filteredHosts.length === 0) {
-      throw new InvalidInputError(`No hosts remained after ignoring the ones in store: ${filteredHosts.join(', ').slice(0, 100)}`);
+      const hostListString = hostsList.join(', ').slice(0, 100);
+      throw new InvalidInputError(`No hosts remained after ignoring the ones in store: ${hostListString}`);
     }
     payload.vars.hosts = JSON.stringify(filteredHosts);
 
