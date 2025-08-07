@@ -35,7 +35,7 @@ export class CentralCommandDispatcher {
     event: DuplexMessageEvent,
     handler: CommandHandler<T>
   ): void {
-    console.log(`Registering handler for command type: ${event}`);
+    this.logger.infoMessage(`Registering handler for command type: ${event}`);
     this.handlers.set(event, handler);
   }
 
