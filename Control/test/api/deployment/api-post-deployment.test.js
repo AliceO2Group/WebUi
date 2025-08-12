@@ -86,7 +86,7 @@ describe('POST /deploy', function () {
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.RELEASE}/MID?token=${DET_MID_TEST_TOKEN}`)
       .expect(200, {
-        MID: { name: 'MID', state: 'TAKEN', owner: { username: 'det-mid', fullName: 'Detector User', personid: 2 } },
+        MID: { name: 'MID', state: 'FREE' },
         DCS: { name: 'DCS', state: 'FREE' },
         ODC: { name: 'ODC', state: 'FREE' }
       });
