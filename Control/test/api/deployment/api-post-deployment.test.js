@@ -84,7 +84,7 @@ describe('POST /deploy', function () {
     
     // Release the lock after the test so that tests are not chained
     await request(`${TEST_URL}/api/locks`)
-      .put(`/${DetectorLockAction.TAKE}/MID?token=${DET_MID_TEST_TOKEN}`)
+      .put(`/${DetectorLockAction.RELEASE}/MID?token=${DET_MID_TEST_TOKEN}`)
       .expect(200, {
         MID: { name: 'MID', state: 'TAKEN', owner: { username: 'det-mid', fullName: 'Detector User', personid: 2 } },
         DCS: { name: 'DCS', state: 'FREE' },

@@ -34,7 +34,7 @@ describe('DeploymentController test suite', function() {
     };
   });
 
-  it('should return 400 if both workflowTemplate and selectedConfiguration arenp missing', async function() {
+  it('should return 400 if both workflowTemplate and selectedConfiguration are missing', async function() {
     req.body = { workflowTemplate: null, selectedConfiguration: null };
     await deploymentController.newAsyncDeploymentHandler(req, res);
     assert.ok(res.status.calledWith(400));

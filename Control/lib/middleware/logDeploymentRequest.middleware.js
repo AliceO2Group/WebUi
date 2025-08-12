@@ -28,11 +28,10 @@ const logDeploymentRequestMiddleware = (req, _, next) => {
   const { selectedConfiguration, workflowTemplate, detectors = [] } = req.body;
   const { username } = req.session;
 
-  const detectorsString = detectors.length > 0 ? `detectors: ${detectors.join(', ')}` : 'no detectors specified';
   const logMessage = `Deployment request from user: ${ username }`
     + (workflowTemplate ? ` for workflow: ${workflowTemplate}` : '')
     + (selectedConfiguration ? ` with configuration: ${selectedConfiguration}` : '')
-    + ` with detectors: ${detectorsString}`;
+    + ` with detectors: ${detectors.length > 0 ? detectors.join(', ') : 'none'}`;
 
   LogManager
     .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/deployment-request`)
