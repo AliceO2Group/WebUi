@@ -130,16 +130,22 @@ export default class Environment extends Observable {
 
   /**
    * Create a new remote environment, creation action result into `itemNew` as RemoteData
-   * See protobuf definition for properties of `itemForm` as body
-   * @param {string} itemForm
+   * If request is successful, the user will be redirected to the active environments page
+   * @param {DeploymentRequest} deploymentRequest - deployment request object containing all necessary information to deploy a new environment
+   * @return {void}
    */
-  async newEnvironment(itemForm) {
+  async newEnvironment(deploymentRequest) {
     this.itemNew = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/core/request`, itemForm);
-    this.itemNew = !ok ? RemoteData.failure(result.message) : RemoteData.notAsked();
-    this.model.router.go(`?page=environments`);
+    const { result, ok } = await this.model.loader.post(`/api/deploy`, deploymentRequest);
+    if (!ok) {
+      this.itemNew = RemoteData.failure(result.message);
+      this.notify();
+    } else {
+      this.itemNew = RemoteData.notAsked();
+      this.model.router.go(`?page=environment&id=${id}`);
+    }
   }
 
   /**
