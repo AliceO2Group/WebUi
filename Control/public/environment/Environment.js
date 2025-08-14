@@ -143,6 +143,7 @@ export default class Environment extends Observable {
       this.itemNew = RemoteData.failure(result.message);
       this.notify();
     } else {
+      const { id } = result;
       this.itemNew = RemoteData.notAsked();
       this.model.router.go(`?page=environment&id=${id}`);
     }

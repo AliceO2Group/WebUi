@@ -78,6 +78,10 @@ const coreGRPCServer = (config) => {
         callback(null, {environment: envTest.environment});
       }
     },
+    async newEnvironmentAsync(call, callback) {
+        calls['newEnvironmentAsync'] = true;
+        callback(null, {environment: envTest.environment});
+    },
     getWorkflowTemplates(call, callback) {
       calls['getWorkflowTemplates'] = true;
       callback(null, envTest.workflowTemplates);

@@ -430,7 +430,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.strictEqual(message, 'Configuration saved successfully as My_Config');
   });
 
-  it('should successfully create a new environment', async () => {
+  it('should successfully create a new environment and redirect user to its environment details page', async () => {
     await page.locator('#deploy-env')
       .setTimeout(1000)
       .click();
@@ -438,15 +438,8 @@ describe('`pageNewEnvironment` test-suite', async () => {
       waitUntil: 'networkidle0',
     });
     const location = await page.evaluate(() => window.location);
-    assert.strictEqual(location.search, '?page=environments');
-  });
-
-  it('should display successful environment request', async () => {
-    await page.waitForSelector('tr.primary > th:nth-child(1)');
-    const detector = await page.evaluate(() => document.querySelector('table.table:nth-child(4) > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)').innerText);
-    const state = await page.evaluate(() => document.querySelector('table.table:nth-child(4) > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(6)').innerText);
-    assert.strictEqual(detector, 'MID');
-    assert.strictEqual(state, 'ONGOING');
+    assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220');
+    assert.ok(calls['newEnvironmentAsync']);
   });
 
   /**
