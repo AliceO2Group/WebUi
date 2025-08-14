@@ -20,10 +20,11 @@
 exports.fromEcsEventToEnvironmentEvent = ({ environmentEvent }) => {
   const {
     environmentId: id,
-    error, message, transition, transitionStep, transitionStatus,
+    state, error, message, transition, transitionStep, transitionStatus,
   } = environmentEvent;
   return {
     id,
+    state,
     error,
     message,
     transition: {

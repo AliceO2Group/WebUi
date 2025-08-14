@@ -13,7 +13,8 @@
 */
 
 /**
- * Available environment transitions of ECS
+ * Available environment transitions of ECS 
+ * @link https://github.com/AliceO2Group/Control/blob/master/core/environment/environment.go#L153-L160
  */
 const EnvironmentState = Object.freeze({
   STANDBY: 'STANDBY',
