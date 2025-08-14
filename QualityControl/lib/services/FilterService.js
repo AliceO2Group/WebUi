@@ -22,11 +22,18 @@ export class FilterService {
   /**
    * Creates an instance of FilterService to map and expose data from the bookkeeping service.
    * @param {BookkeepingService} bookkeepingService - Low level data provider fetching raw data from the BKP source
+   * @param {object} config - Config object file that defines the refresh intervals for checking run status and runtypes
    */
-  constructor(bookkeepingService) {
+  constructor(bookkeepingService, config) {
     this._bookkeepingService = bookkeepingService;
     this._runTypes = [];
-    this.initFilters();
+
+    this._runTypesRefreshInterval = config?.bookkeeping?.runTypesRefreshInterval ??
+      (config?.bookkeeping ? 24 * 60 * 60 * 1000 : -1);
+
+    this.initFilters().catch((error) => {
+      logger.errorMessage(`FilterService initialization failed: ${error.message || error}`);
+    });
   }
 
   /**
@@ -57,6 +64,14 @@ export class FilterService {
       logger.errorMessage(`Error while retrieving run types: ${error.message || error}`);
       this._runTypes = [];
     }
+  }
+
+  /**
+   * Returns the interval in milliseconds for how often the list of run types should be refreshed.
+   * @returns {number} Interval in milliseconds for refreshing the list of run types.
+   */
+  get runTypesRefreshInterval() {
+    return this._runTypesRefreshInterval;
   }
 
   /**

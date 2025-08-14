@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/web-ui",
-  "version": "2.8.4",
+  "version": "2.8.5",
   "description": "ALICE O2 Web UX framework",
   "author": "Adam Wegrzynek",
   "contributors": [
@@ -43,15 +43,15 @@
     "protobufjs": "^7.5.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.29.0",
+    "@eslint/js": "^9.33.0",
     "@stylistic/eslint-plugin-js": "^4.4.0",
-    "eslint": "^9.29.0",
-    "eslint-plugin-jsdoc": "^51.0.1",
-    "globals": "^16.2.0",
-    "mocha": "^11.6.0",
+    "eslint": "^9.33.0",
+    "eslint-plugin-jsdoc": "^53.0.1",
+    "globals": "^16.3.0",
+    "mocha": "^11.7.0",
     "nock": "14.0.0",
     "nyc": "^17.1.0",
-    "puppeteer": "^24.10.0",
+    "puppeteer": "^24.16.1",
     "sinon": "21.0.0",
     "supertest": "^7.1.0",
     "long": "^5.3.1"
