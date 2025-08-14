@@ -21,8 +21,11 @@ const {
     ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK, TASKS_TRACK
   }
 } = require('./../../common/emitterKeys.enum.js');
+const { EnvironmentState } = require('../../common/environmentState.enum.js');
 const { TaskState } = require('../../common/taskState.enum.js');
 const EPN_PATH_IN_ENVIRONMENT_INFO = 'hardware.epn.info';
+
+const ECS_TRANSITION_DONE_MESSAGE = 'transition completed successfully';
 
 /**
  * @class
@@ -118,11 +121,27 @@ class EnvironmentCacheService {
      * @param {EnvironmentEvent} environmentEvent - the event object containing the payload and environmentId
      */
     this._eventEmitter.on(ENVIRONMENTS_TRACK, (environmentEvent) => {
-      const { id } = environmentEvent;
+      const { id, state, message, error } = environmentEvent;
 
       const cachedEnvironment = this._environments.has(id)
         ? this._environments.get(id)
         : { id, events: [] };
+
+      if (cachedEnvironment.isDeploying && error) {
+        // If the environment is deploying and there is an error, environment will not be active in ECS anymore but
+        // we still want to keep the information in the cache until a user acknowledges the error
+        cachedEnvironment.isDeploying = false;
+        cachedEnvironment.deploymentError = error;
+      }
+      if (
+        state === EnvironmentState.CONFIGURED &&
+        message === ECS_TRANSITION_DONE_MESSAGE
+        // OCTRL-1038 - currently comparing to hardcoded string, but this should be replaced with transition status
+      ) {
+        // Once the environment is configured and ongoing transition is done, we can set the isDeploying to false
+        // This can happen when the environment also goes form RUNNING to CONFIGURED but it is already marked as not deploying anymore
+        cachedEnvironment.isDeploying = false;
+      }
 
       cachedEnvironment.events.push(environmentEvent);
       cachedEnvironment.lastUpdate = environmentEvent.timestamp;
