@@ -34,14 +34,14 @@
     "mariadb": "3.4.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.32.0",
+    "@eslint/js": "^9.33.0",
     "@stylistic/eslint-plugin-js": "^4.4.0",
-    "eslint": "^9.32.0",
-    "eslint-plugin-jsdoc": "^52.0.0",
+    "eslint": "^9.33.0",
+    "eslint-plugin-jsdoc": "^53.0.1",
     "globals": "^16.3.0",
     "mocha": "^11.7.0",
     "nyc": "^17.1.0",
-    "puppeteer": "^24.15.0",
+    "puppeteer": "^24.16.1",
     "sinon": "^21.0.0"
   },
   "bundleDependencies": [
