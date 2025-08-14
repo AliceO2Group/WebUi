@@ -75,13 +75,12 @@ class EnvironmentService {
         this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, []);
         return [];
       }
-      const environmentList = [];
+      const activeEnvironmentList = [];
       const cachedEnvironmentIds = [...this._environmentCacheService.environments.keys()];
       for (const { id } of environments) {
         let environment;
         try {
           // Retrieving environments one by one is needed so that ODC devices tasks info is part of the payload
-          // Issue reported: OCTRL-1012
           environment = await this.getEnvironment(id, '', false);
         } catch (error) {
           this._logger.errorMessage(`Failed to retrieve environment ${id}: ${error}`);
@@ -90,18 +89,28 @@ class EnvironmentService {
           if (shouldUpdateCache) {
             this._environmentCacheService.addOrUpdateEnvironment(environment, false);
           }
-          environmentList.push(environment);
+          activeEnvironmentList.push(environment);
         }
        
       }
-      // Remove environments from cache that are not in the retrieved list
+      // Remove environments from cache that are not in the retrieved list and that are not in deploying state
+      // Environments that are `isDeploying` should not be removed. If deployment failed, ECS will delete it 
+      // but we need to keep it until user acknowledges the failure
+      // and removes it from the cache manually
       for (const cachedEnvironmentId of cachedEnvironmentIds) {
-        if (!environmentList.some(env => env.id === cachedEnvironmentId)) {
-          this._environmentCacheService.environments.delete(cachedEnvironmentId);
+        if (!activeEnvironmentList.some(env => env.id === cachedEnvironmentId)) {
+          const environmentPotentiallyToRemove = this._environmentCacheService.environments.get(cachedEnvironmentId);
+          if (environmentPotentiallyToRemove.isDeploying || environmentPotentiallyToRemove.deploymentError) {
+            // If the environment is deploying or has a deployment error, we still consider it active
+            // and we do not remove it from the cache
+            activeEnvironmentList.push(environmentPotentiallyToRemove);
+          } else {
+            this._environmentCacheService.environments.delete(cachedEnvironmentId);
+          }
         }
       }
       this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environmentCacheService.environments.values()]);
-      return environmentList;
+      return activeEnvironmentList;
     } catch (error) {
       this._logger.errorMessage(error);
     }
@@ -207,7 +216,7 @@ class EnvironmentService {
      * @type {EnvironmentInfo}
      * @property {string} currentTransition - the current transition of the environment
      */
-    environmentInfo.currentTransition = environmentInfo.currentTransition || 'DEPLOY';
+    environmentInfo.isDeploying = true;
     this._environmentCacheService.addOrUpdateEnvironment(environmentInfo, true);
     return environmentInfo;
   }
