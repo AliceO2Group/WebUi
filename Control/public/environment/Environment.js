@@ -62,25 +62,13 @@ export default class Environment extends Observable {
    * Remove environment request
    */
   async removeEnvironmentRequest(id) {
-    this.requests = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.model.loader.post(`/api/core/removeRequest/${id}`);
-    this.requests = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
-    this.notify();
+    try {
+      await jsonDelete(`/api/deploy/${id}`, {body: {id}});
+    } catch (error) {
+      this.model.notification.show(error.message, 'danger', 5000);
+    }
   }
 
-  /**
-   * Get environments requests
-   */
-  async getEnvironmentRequests() {
-    this.requests = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.model.loader.get(`/api/core/requests`);
-    this.requests = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
-    this.notify();
-  }
   /**
    * Load one environment into `item` as RemoteData
    * @param {Object} body - See protobuf definition for properties

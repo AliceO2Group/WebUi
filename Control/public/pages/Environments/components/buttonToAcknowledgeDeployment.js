@@ -21,12 +21,12 @@ import { ROLES } from '../../../workflow/constants.js';
  * Button to acknowledge a failed deployment and remove it from the cache
  * The button is only visible to users with Admin role or the person who attempted the deployment
  * @param {string} environmentId - ID of the failed deployment (environment) to acknowledge
- * @param {Number} personid - ID of the person who attempted the deployment
+ * @param {{externalId: number, name: string}} user - ID of the person who attempted the deployment
  * @param {Function} acknowledgeCallback - Callback function to call when the button is clicked
  * @return {vnode} - Virtual node representing the button
  */
-export const buttonToAcknowledgeDeployment = (environmentId, personid, acknowledgeCallback) => {
-  if (isUserAllowedRole(ROLES.Admin) || di.session.personid === personid) {
+export const buttonToAcknowledgeDeployment = (environmentId, user, acknowledgeCallback) => {
+  if (isUserAllowedRole(ROLES.Admin) || di.session.personid === user.externalId) {
     return h('button.btn.btn-danger', {
       title: 'Acknowledge failed deployment and remove it from the cache',
       onclick: () => acknowledgeCallback(environmentId)
