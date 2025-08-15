@@ -56,7 +56,7 @@ class DeploymentController {
     /**
      * @type {DeploymentRequest}
      */
-    const { workflowTemplate, selectedConfiguration, userVars } = req.body;
+    const { workflowTemplate, selectedConfiguration, userVars, detectors } = req.body;
 
     if (!workflowTemplate && !selectedConfiguration) {
       updateAndSendExpressResponseFromNativeError(
@@ -68,6 +68,14 @@ class DeploymentController {
 
     const { personid, name, username } = req.session || {};
     const user = new User(username, name, personid);
+
+    const logMessage = 'New deployment request by '
+      + `user ${user.username} with `
+      + `workflow template ${workflowTemplate} `
+      + `and detectors ${detectors}`;
+    this._logger.infoMessage(logMessage, {
+      level: LogLevel.OPERATIONS,
+    });
 
     try {
       const environment = await this._deploymentService.deployEnvironment({
