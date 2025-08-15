@@ -76,7 +76,6 @@ const environmentsTablesVerticalComponent = (environments, model) => {
      */
     ([active, requests], environment) => {
       if (!environment.deploymentError) {
-        requests.push(environment);
         active.push(environment);
       } else {
         requests.push(environment);
