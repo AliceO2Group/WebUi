@@ -82,4 +82,39 @@ describe('DeploymentController test suite', function() {
       title: 'Unknown Error'
     }));
   });
+
+    describe('acknowledgeDeploymentFailureHandler - tests', function() {
+      let envServiceMock, res;
+      beforeEach(function() {
+        envServiceMock = { acknowledgeEnvironmentDeploymentFailure: sinon.stub() };
+        deploymentController._envService = envServiceMock;
+        req.params = { id: 'env1' };
+        res = {
+          status: sinon.stub().returnsThis(),
+          json: sinon.stub()
+        };
+      });
+
+      it('should return status 400 and not found message if id is missing from request params', async function() {
+        req.params = {};
+        await deploymentController.acknowledgeDeploymentFailureHandler({params: {}}, res);
+        assert.ok(res.status.calledWith(400));
+      });
+
+      it('should call acknowledgeEnvironmentDeploymentFailure with correct arguments', async function() {
+        await deploymentController.acknowledgeDeploymentFailureHandler({
+          params: { id: 'env1' },
+          session: { username: 'testuser', name: 'Test User', personid: '123' } 
+        }, res);
+        
+        assert.ok(envServiceMock.acknowledgeEnvironmentDeploymentFailure.firstCall.args[0], 'env1');
+        assert.ok(envServiceMock.acknowledgeEnvironmentDeploymentFailure.firstCall.args[1] instanceof User);
+      });
+
+      it('should return 204 and acknowledgement message on success', async function() {
+        await deploymentController.acknowledgeDeploymentFailureHandler(req, res);
+        assert.ok(res.status.calledWith(204));
+        assert.ok(res.json.calledWith({ message: 'Environment deployment failure acknowledged' }));
+      });
+    });
 });

@@ -61,7 +61,6 @@ const {NotificationService, ConsulService} = require('@aliceo2/web-ui');
 
 // AliECS Core
 const { AliEcsSynchronizer } = require('./kafka/AliEcsSynchronizer.js');
-const AliecsRequestHandler = require('./control-core/RequestHandler.js');
 const ApricotService = require('./control-core/ApricotService.js');
 const ControlService = require('./control-core/ControlService.js');
 const GrpcServiceClient = require('./control-core/GrpcServiceClient.js');

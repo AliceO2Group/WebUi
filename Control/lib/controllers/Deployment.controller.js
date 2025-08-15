@@ -90,6 +90,26 @@ class DeploymentController {
       updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
+
+  /**
+   * API - DELETE endpoint for acknowledging an environment deployment failure
+   * @param {Request} req - HTTP Request object which expects an `id` as mandatory parameter
+   * @param {string} req.params.id - the id of the environment to be acknowledged
+   * @param {Response} res - HTTP Response object with result of the acknowledgement
+   * @returns {void}
+   */
+  async acknowledgeDeploymentFailureHandler(req, res) {
+    const { id } = req.params;
+    const { personid, name, username } = req.session || {};
+    const user = new User(username, name, personid);
+
+    if (!id) {
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));
+      return;
+    }
+    this._envService.acknowledgeEnvironmentDeploymentFailure(id, user);
+    res.status(204).json({ message: 'Environment deployment failure acknowledged' });
+  }
 }
 
 module.exports = { DeploymentController };
