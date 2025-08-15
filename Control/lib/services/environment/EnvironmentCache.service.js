@@ -59,6 +59,21 @@ class EnvironmentCacheService {
   }
 
   /**
+   * Method to remove an environment from the cache by its id
+   * @param {string} id - the id of the environment to be removed
+   * @returns {void}
+   */
+  removeEnvironmentById(id, shouldBroadcast = true) {
+    if (this._environments.has(id)) {
+      this._environments.delete(id);
+      if (shouldBroadcast) {
+        this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environments.values()]);
+      }
+      this._lastUpdate = Date.now();
+    }
+  }
+
+  /**
    * Update an environment in the cache by its id
    * @param {string} id - the id of the environment to be updated
    * @param {EnvironmentInfo} environment - the new environment information to be set

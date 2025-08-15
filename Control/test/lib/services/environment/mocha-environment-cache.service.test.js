@@ -113,6 +113,38 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
     });
   });
 
+  describe('`removeEnvironmentById` tests', () => {
+    it('should remove an environment by id and broadcast if shouldBroadcast is true', () => {
+      const env = { id: 'env1', state: 'active', deploymentError: 'Error'};
+      environmentCacheService.addOrUpdateEnvironment(env);
+      const beforeUpdate = environmentCacheService._lastUpdate;
+      environmentCacheService.removeEnvironmentById('env1', true);
+      assert.strictEqual(environmentCacheService._environments.has('env1'), false);
+      assert.strictEqual(broadcastServiceMock.broadcast.calledOnce, true);
+      assert.strictEqual(broadcastServiceMock.broadcast.firstCall.args[0], ENVIRONMENTS_OVERVIEW);
+      assert.deepStrictEqual(broadcastServiceMock.broadcast.firstCall.args[1], []);
+      assert.ok(environmentCacheService._lastUpdate >= beforeUpdate);
+    });
+
+    it('should remove an environment by id and not broadcast if shouldBroadcast is false', () => {
+      const env = { id: 'env2', state: 'inactive' };
+      environmentCacheService.addOrUpdateEnvironment(env);
+      broadcastServiceMock.broadcast.resetHistory();
+      environmentCacheService.removeEnvironmentById('env2', false);
+      assert.strictEqual(environmentCacheService._environments.has('env2'), false);
+      assert.strictEqual(broadcastServiceMock.broadcast.called, false);
+    });
+
+    it('should do nothing if id does not exist', () => {
+      broadcastServiceMock.broadcast.resetHistory();
+      const beforeUpdate = environmentCacheService._lastUpdate;
+      environmentCacheService.removeEnvironmentById('nonexistent', true);
+      assert.strictEqual(broadcastServiceMock.broadcast.called, false);
+      assert.strictEqual(environmentCacheService._environments.size, 0);
+      assert.strictEqual(environmentCacheService._lastUpdate, beforeUpdate);
+    });
+  });
+
   it('should initialize class with an empty environment cache map', () => {
     assert.strictEqual(environmentCacheService._environments.size, 0);
   });
