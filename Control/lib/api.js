@@ -115,7 +115,7 @@ module.exports.setup = (http, ws) => {
     ctrlProxy, apricotService, cacheService, broadcastService, environmentCacheService
   );
   const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
-  const deploymentService = new DeploymentService(environmentService, workflowService);
+  const deploymentService = new DeploymentService(environmentService, workflowService, environmentCacheService);
 
   /**
    * Controllers are initialized with the services they depend on.
@@ -123,10 +123,6 @@ module.exports.setup = (http, ws) => {
   const envCtrl = new EnvironmentController(environmentService, workflowService, lockService, detectorService);
   const workflowController = new WorkflowTemplateController(workflowService);
   const deploymentController = new DeploymentController(deploymentService);
-
-  const aliecsReqHandler = new AliecsRequestHandler(ctrlService, apricotService);
-  aliecsReqHandler.setWs(ws);
-  aliecsReqHandler.workflowService = workflowService;
 
   const bkpService = new BookkeepingService(config.bookkeeping ?? {});
   const runService = new RunService(bkpService, apricotService, cacheService);
@@ -175,9 +171,6 @@ module.exports.setup = (http, ws) => {
     (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res)),
   );
 
-  http.get('/core/requests', coreMiddleware, (req, res) => aliecsReqHandler.getAll(req, res));
-  http.post('/core/removeRequest/:id', coreMiddleware, (req, res) => aliecsReqHandler.remove(req, res));
-
   http.get('/workflow/template/default/source', workflowController.getDefaultTemplateSource.bind(workflowController));
   http.get('/workflow/template/mappings', workflowController.getWorkflowMapping.bind(workflowController));
   http.get('/workflow/configuration', workflowController.getWorkflowConfiguration.bind(workflowController));
@@ -206,6 +199,11 @@ module.exports.setup = (http, ws) => {
     minimumRoleMiddleware(Role.DETECTOR),
     verifyLockOwnershipMiddleware,
     deploymentController.newAsyncDeploymentHandler.bind(deploymentController)
+  );
+
+  http.delete('/deploy/:id',
+    minimumRoleMiddleware(Role.DETECTOR),
+    deploymentController.acknowledgeDeploymentFailureHandler.bind(deploymentController)
   );
 
   http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));
