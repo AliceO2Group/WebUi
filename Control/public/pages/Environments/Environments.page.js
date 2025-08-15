@@ -16,6 +16,7 @@ import {h} from '/js/src/index.js';
 import {buttonToAcknowledgeDeployment} from './components/buttonToAcknowledgeDeployment.js';
 import {detectorHeader} from '../../common/detectorHeader.js';
 import {environmentReadinessStatus} from '../../common/environment/environmentReadinessStatus.js';
+import {EnvironmentState} from '../../common/enums/EnvironmentState.enum.js';
 import {informationRedirectActionPanel} from '../../common/environment/informationRedirectActionPanel.js';
 import {isGlobalRun} from '../../utilities/isGlobalRun.js';
 import {parseObject, parseOdcStatusPerEnv} from '../../common/utils.js';
@@ -124,7 +125,15 @@ const deploymentsTable = (deployments, model) => {
           h('td', { style: 'text-align: center;' }, getUserFromUserVars(userVars).name || '-'),
           h('td', { style: 'text-align: center;' }, parseObject(createdWhen, 'createdWhen')),
           h('td.f6', { style: 'text-align: center;' }, deploymentError ?? '-'),
-          h('td', { style: 'text-align: center;' }, buttonToAcknowledgeDeployment(id, getUserFromUserVars(userVars), removeEnvironmentRequest.bind(model.environment)))
+          h(
+            'td',
+            { style: 'text-align: center;' },
+            buttonToAcknowledgeDeployment(
+              id,
+              getUserFromUserVars(userVars),
+              removeEnvironmentRequest.bind(model.environment)
+            )
+          )
         ])
       })
     ])
@@ -139,8 +148,8 @@ const deploymentsTable = (deployments, model) => {
  */
 const environmentsTable = (environments, model) => {
   const tableHeaders = [
-    'Run', 'State', 'ID', 'Detectors', 'Run Type', 'Created', 'Started', 'Ended', 'FLPs', 'EPNs', 'DCS', 'TRG', 'CTP Readout',
-    'ODC', 'InfoLogger'
+    'Run', 'State', 'ID', 'Detectors', 'Run Type', 'Created', 'Started', 'Ended', 'FLPs', 'EPNs', 'DCS', 'TRG',
+    'CTP Readout', 'ODC', 'InfoLogger'
   ];
 
   return h('table.table', [
@@ -155,10 +164,14 @@ const environmentsTable = (environments, model) => {
           class: isGlobalRun(item?.userVars ?? {}) ? 'bg-global-run' : ''
         }, [
           runColumn(item, model),
-           h('td', {
-            class: (item.state === 'RUNNING' ?
+          h('td', {
+            class: (item.state === EnvironmentState.RUNNING ?
               'success'
-              : (item.state === 'CONFIGURED' ? 'primary' : (item.state === 'ERROR' ? 'danger' : ''))),
+              : (item.state === EnvironmentState.CONFIGURED
+                ? 'primary'
+                : (item.state === EnvironmentState.ERROR ? 'danger' : '')
+              )
+            ),
             style: 'font-weight: bold; text-align: center;'
           }, item.state
           ),

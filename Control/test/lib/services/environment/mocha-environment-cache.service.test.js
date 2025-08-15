@@ -62,6 +62,8 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
       assert.strictEqual(environmentCacheService._environments.size, 1);
       assert.deepStrictEqual(environmentCacheService._environments.get('abc123'), {
         id: 'abc123',
+        isDeploying: undefined,
+        deploymentError: undefined,
         state: 'inactive',
         events: []
       });
@@ -163,7 +165,6 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
   it('should update an existing environment in the cache and broadcast it', () => {
     const initialEvent = { id: 'abc135', timestamp: Date.now() - 1000 };
     const updatedEvent = { id: 'abc135', timestamp: Date.now() };
-    const transformedEvent = { id: 'abc135', events: [], lastUpdate: updatedEvent.timestamp };
 
     // Emit initial event
     eventEmitter.emit(ENVIRONMENTS_TRACK, initialEvent);

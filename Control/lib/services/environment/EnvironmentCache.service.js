@@ -244,7 +244,7 @@ class EnvironmentCacheService {
       cachedEnvironment.isDeploying = false;
     }
     cachedEnvironment.state = state;
-    cachedEnvironment.currentTransition = transition.name;
+    cachedEnvironment.currentTransition = transition?.name ?? '-';
     cachedEnvironment.currentRunNumber = runNumber;
     cachedEnvironment.events.push(environmentEvent);
     cachedEnvironment.lastUpdate = environmentEvent.timestamp;

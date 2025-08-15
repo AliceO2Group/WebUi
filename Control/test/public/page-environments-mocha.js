@@ -50,7 +50,7 @@ describe('`pageEnvironments` test-suite', () => {
     });
 
     it('should successfully navigate to environment page when clicking on environment ID', async () => {
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(2) > a').click());
+      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(3) > a').click());
       assert.ok(calls['getEnvironment']);
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220&panel=general');
