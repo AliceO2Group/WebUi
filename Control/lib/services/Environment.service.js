@@ -76,7 +76,6 @@ class EnvironmentService {
         return [];
       }
       const activeEnvironmentList = [];
-      const cachedEnvironmentIds = [...this._environmentCacheService.environments.keys()];
       for (const { id } of environments) {
         let environment;
         try {
@@ -91,21 +90,21 @@ class EnvironmentService {
           }
           activeEnvironmentList.push(environment);
         }
-       
       }
       // Remove environments from cache that are not in the retrieved list and that are not in deploying state
-      // Environments that are `isDeploying` should not be removed. If deployment failed, ECS will delete it 
+      // Environments that are `isDeploying` should not be removed. If deployment failed, ECS will delete it
       // but we need to keep it until user acknowledges the failure
       // and removes it from the cache manually
+      const cachedEnvironmentIds = [...this._environmentCacheService.environments.keys()];
       for (const cachedEnvironmentId of cachedEnvironmentIds) {
-        if (!activeEnvironmentList.some(env => env.id === cachedEnvironmentId)) {
+        if (!activeEnvironmentList.some((env) => env.id === cachedEnvironmentId)) {
           const environmentPotentiallyToRemove = this._environmentCacheService.environments.get(cachedEnvironmentId);
           if (environmentPotentiallyToRemove.isDeploying || environmentPotentiallyToRemove.deploymentError) {
             // If the environment is deploying or has a deployment error, we still consider it active
             // and we do not remove it from the cache
             activeEnvironmentList.push(environmentPotentiallyToRemove);
           } else {
-            this._environmentCacheService.environments.delete(cachedEnvironmentId);
+            this._environmentCacheService.removeEnvironmentById(cachedEnvironmentId);
           }
         }
       }
@@ -143,6 +142,8 @@ class EnvironmentService {
     if (retrieveEvents && this._environmentCacheService.environments.has(id)) {
       const cachedEnvironment = this._environmentCacheService.environments.get(id);
       environmentInfo.events = [...cachedEnvironment.events];
+      environmentInfo.isDeploying = cachedEnvironment.isDeploying;
+      environmentInfo.deploymentError = cachedEnvironment.deploymentError; 
     } 
     return environmentInfo;
   }
@@ -208,7 +209,6 @@ class EnvironmentService {
 
     const detectorsAll = this._apricotGrpc.detectors ?? [];
     const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
-    const environmentInfo = EnvironmentInfoAdapter.toEntity(environment, '', detectorsAll, hostsByDetector);
     /**
      * Transition is not yet started as per ECS, but we set the state to DEPLOYING to ensure that the UI
      * is updated accordingly. The state will be updated once the environment is created and the transition
@@ -216,7 +216,8 @@ class EnvironmentService {
      * @type {EnvironmentInfo}
      * @property {string} currentTransition - the current transition of the environment
      */
-    environmentInfo.isDeploying = true;
+    environment.isDeploying = true;
+    const environmentInfo = EnvironmentInfoAdapter.toEntity(environment, '', detectorsAll, hostsByDetector);
     this._environmentCacheService.addOrUpdateEnvironment(environmentInfo, true);
     return environmentInfo;
   }

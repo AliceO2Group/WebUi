@@ -74,7 +74,10 @@ class EnvironmentCacheService {
   }
 
   /**
-   * Update an environment in the cache by its id
+   * Update an environment in the cache by its id. This method can be used by either
+   * * ECS GUI results of a transition - which should contain `isDeploying` and `deploymentError` properties
+   * * Heartbeat calls (GetEnvironment/GetEnvironments) - which will NOT contain `isDeploying` and `deploymentError` properties
+   * * Cache caught events - which should contain `isDeploying` and `deploymentError` properties
    * @param {string} id - the id of the environment to be updated
    * @param {EnvironmentInfo} environment - the new environment information to be set
    * @returns {void}
@@ -84,8 +87,11 @@ class EnvironmentCacheService {
     if (this._environments.has(id)) {
       const cachedEnvironment = this._environments.get(id);
       const { events = [] } = cachedEnvironment;
+      const {isDeploying, deploymentError } = cachedEnvironment;
       const updatedEnvironment = Object.assign({}, cachedEnvironment, environment);
       updatedEnvironment.events = [...events];
+      updatedEnvironment.isDeploying = isDeploying;
+      updatedEnvironment.deploymentError = deploymentError;
       this._environments.set(id, updatedEnvironment);
     } else {
       this._environments.set(id, { ...environment, events: environment.events ?? [] });
@@ -135,35 +141,7 @@ class EnvironmentCacheService {
     /**
      * @param {EnvironmentEvent} environmentEvent - the event object containing the payload and environmentId
      */
-    this._eventEmitter.on(ENVIRONMENTS_TRACK, (environmentEvent) => {
-      const { id, state, message, error } = environmentEvent;
-
-      const cachedEnvironment = this._environments.has(id)
-        ? this._environments.get(id)
-        : { id, events: [] };
-
-      if (cachedEnvironment.isDeploying && error) {
-        // If the environment is deploying and there is an error, environment will not be active in ECS anymore but
-        // we still want to keep the information in the cache until a user acknowledges the error
-        cachedEnvironment.isDeploying = false;
-        cachedEnvironment.deploymentError = error;
-      }
-      if (
-        state === EnvironmentState.CONFIGURED &&
-        message === ECS_TRANSITION_DONE_MESSAGE
-        // OCTRL-1038 - currently comparing to hardcoded string, but this should be replaced with transition status
-      ) {
-        // Once the environment is configured and ongoing transition is done, we can set the isDeploying to false
-        // This can happen when the environment also goes form RUNNING to CONFIGURED but it is already marked as not deploying anymore
-        cachedEnvironment.isDeploying = false;
-      }
-
-      cachedEnvironment.events.push(environmentEvent);
-      cachedEnvironment.lastUpdate = environmentEvent.timestamp;
-      this._environments.set(id, cachedEnvironment);
-      this._broadcastService.broadcast(ENVIRONMENT_EVENTS, cachedEnvironment);
-      this._lastUpdate = Date.now();
-    });
+    this._eventEmitter.on(ENVIRONMENTS_TRACK, this._handleEnvironmentEvent.bind(this));
 
     this._eventEmitter.on(INTEGRATED_SERVICES_TRACK.ODC.ENVIRONMENT_STATE_CHANGE,
       /**
@@ -226,6 +204,54 @@ class EnvironmentCacheService {
       this._environments.set(environmentId, environment);
       this._broadcastService.broadcast(NOTIFICATION, event);
     }
+  }
+
+  /**
+   * Handles the environment event by:
+   * * updating the cache with interested changes
+   * * broadcasting the event information
+   * It does not:
+   * * broadcast the overview of environments 
+   * @private
+   * @param {EnvironmentEvent} environmentEvent - the event object containing the payload and environmentId
+   * @returns {void}
+   */
+  _handleEnvironmentEvent(environmentEvent) {
+    const { id, state, transition, message, error, runNumber } = environmentEvent;
+    const cachedEnvironment = this._environments.has(id)
+      ? this._environments.get(id)
+      : { id, events: [] };
+
+    if (state === EnvironmentState.PENDING) {
+      // If the environment is pending, we set isDeploying to true as it is the first event we receive for this environment
+      // and we want to ensure that the UI is updated accordingly.
+      cachedEnvironment.isDeploying = true;
+    }
+    if (cachedEnvironment.isDeploying && error) {
+      // If the environment is deploying and there is an error, environment will not be active in ECS anymore but
+      // we still want to keep the information in the cache until a user acknowledges the error
+      cachedEnvironment.isDeploying = false;
+      cachedEnvironment.deploymentError = error;
+    }
+   
+    if (
+      state === EnvironmentState.CONFIGURED &&
+      message === ECS_TRANSITION_DONE_MESSAGE
+      // OCTRL-1038 - currently comparing to hardcoded string, but this should be replaced with transition status
+    ) {
+      // Once the environment is configured and ongoing transition is done, we can set the isDeploying to false
+      // This can happen when the environment also goes form RUNNING to CONFIGURED but it is already marked as not deploying anymore
+      cachedEnvironment.isDeploying = false;
+    }
+    cachedEnvironment.state = state;
+    cachedEnvironment.currentTransition = transition.name;
+    cachedEnvironment.currentRunNumber = runNumber;
+    cachedEnvironment.events.push(environmentEvent);
+    cachedEnvironment.lastUpdate = environmentEvent.timestamp;
+    this._environments.set(id, cachedEnvironment);
+
+    this._broadcastService.broadcast(ENVIRONMENT_EVENTS, cachedEnvironment);
+    this._lastUpdate = Date.now();
   }
 }
 
