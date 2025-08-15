@@ -65,24 +65,3 @@ describe('`pageEnvironments` test-suite', () => {
     });
   });
 });
-
-/**
- * Wait for response create env request to fail
- * @param {Object} page
- * @param {number} iterations - number of times to wait for default timeout
- * @return {Promise}
- */
-async function waitForEnvRequest(page, iterations = 10, timeout = 1000) {
-  return new Promise(async (resolve) => {
-    let i = 0;
-    while (i++ < iterations) {
-      const requestFailed = await page.evaluate(() => window.model?.environment?.requests?.payload?.requests[0]?.failed);
-      if (requestFailed) {
-        await new Promise((r) => setTimeout((r), timeout))
-        resolve();
-      } else {
-        await new Promise((r) => setTimeout((r), timeout))
-      }
-    }
-  });
-}

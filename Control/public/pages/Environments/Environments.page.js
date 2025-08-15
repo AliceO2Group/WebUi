@@ -67,26 +67,26 @@ const environmentsTablesVerticalComponent = (environments, model) => {
   if (environments.length === 0) {
     return h('h3.m4', ['No environments found.']);
   }
-  const [activeEnvironments, deployments] = environments.reduce(
+  const [activeEnvironments, failedDeployments] = environments.reduce(
     /**
-     * @param {Array} active - List of active environments to be built
-     * @param {Array} requests - List of deployments to be built
+     * @param {Array} environments - List of active environments to be built
+     * @param {Array} failedDeployments - List of deployments to be built
      * @param {EnvironmentInfo} environment - Environment object to be processed
-     * @returns {Array} - Tuple with active environments and deployment requests
+     * @returns {Array} - Tuple with active environments and failed deployments
      */
-    ([active, requests], environment) => {
+    ([environments, failedDeployments], environment) => {
       if (!environment.deploymentError) {
-        active.push(environment);
+        environments.push(environment);
       } else {
-        requests.push(environment);
+        failedDeployments.push(environment);
       }
-      return [active, requests];
+      return [environments, failedDeployments];
     },
     [[], []]
   );
   return [
     h('.scroll-auto', environmentsTable(activeEnvironments, model)),
-    deployments.length > 0 && h('.scroll-auto', deploymentsTable(deployments, model))
+    failedDeployments.length > 0 && h('.scroll-auto', deploymentsTable(failedDeployments, model))
   ];
 }
 

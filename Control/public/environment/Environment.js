@@ -32,7 +32,6 @@ export default class Environment extends Observable {
     this.taskTableModel.bubbleTo(model);
 
     this.model = model;
-    this.requests = RemoteData.notAsked();
     this.list = RemoteData.notAsked();
     this.item = RemoteData.notAsked();
     this.itemControl = RemoteData.notAsked();
