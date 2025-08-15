@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const {LogManager} = require('@aliceo2/web-ui');
+const {LogManager, LogLevel, NotFoundError} = require('@aliceo2/web-ui');
 const CoreUtils = require('./../control-core/CoreUtils.js');
 
 /**
@@ -30,9 +30,10 @@ class DeploymentService {
    * @param {EnvironmentService} environmentService - to use for creating new environments
    * @param {WorkflowService} workflowService - to use for retrieving template workflow information
    */
-  constructor(environmentService, workflowService) {
+  constructor(environmentService, workflowService, environmentCacheService) {
     this._environmentService = environmentService;
     this._workflowService = workflowService;
+    this._environmentCacheService = environmentCacheService;
 
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/deployment-service`);
   }
@@ -62,6 +63,28 @@ class DeploymentService {
   }
 
   /**
+   * Method to acknowledge a deployment failure for a given environment. 
+   * A failed deployment is not considered active anymore by ECS, thus it will only be present in the GUI cache
+   * @param {string} environmentId - the id of the environment to acknowledge the failure
+   * @param {User} user - the user that acknowledged the failure
+   * @returns {Promise<void>} - resolves when the environment is acknowledged
+   * @throws {Error} - if the environment cannot be acknowledged or does not exist in the cache
+   */
+  acknowledgeEnvironmentDeploymentFailure(environmentId, user) {
+    if (!this._environmentCacheService.environments.has(environmentId)) {
+      throw new NotFoundError(`Environment (id: ${environmentId}) not found in cache`);
+    }
+    const environment = this._environmentCacheService.environments.get(environmentId);
+    if (!environment.deploymentError) {
+      throw new Error(`Environment (id: ${environmentId}) does not have a deployment error to acknowledge`);
+    }
+    this._environmentCacheService.removeEnvironmentById(environmentId, true);
+    this._logger.infoMessage(`Environment (${environmentId}) failed deployment acknowledged by user ${user.username}`,
+      { level: LogLevel.OPERATIONS }
+    );
+  }
+
+  /**
    * @private
    * If a saved configuration name is provided, then configuration is build as follows:
    * - fetch the latest version of the chosen saved configuration
@@ -85,7 +108,7 @@ class DeploymentService {
     if (savedConfigurationName && savedConfigurationName.trim() !== '') {
       const { variables } = await this._workflowService.retrieveWorkflowSavedConfiguration(savedConfigurationName);
 
-      const { hosts = [], epn_enabled = 'false', odc_n_epns = '0' } = requestedVars;
+      const { hosts = [], epn_enabled, odc_n_epns } = requestedVars;
       variables.hosts = hosts;
       variables.epn_enabled = epn_enabled;
       variables.odc_n_epns = odc_n_epns;
