@@ -107,8 +107,12 @@ class DeploymentController {
       updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));
       return;
     }
-    this._envService.acknowledgeEnvironmentDeploymentFailure(id, user);
-    res.status(204).json({ message: 'Environment deployment failure acknowledged' });
+    try {
+      this._deploymentService.acknowledgeEnvironmentDeploymentFailure(id, user);
+      res.status(204).json({ message: 'Environment deployment failure acknowledged' });
+    } catch (error) {
+      updateAndSendExpressResponseFromNativeError(res, error);
+    }
   }
 }
 

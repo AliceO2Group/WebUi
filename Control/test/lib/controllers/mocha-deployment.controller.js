@@ -84,10 +84,10 @@ describe('DeploymentController test suite', function() {
   });
 
     describe('acknowledgeDeploymentFailureHandler - tests', function() {
-      let envServiceMock, res;
+      let deploymentServiceMock, res;
       beforeEach(function() {
-        envServiceMock = { acknowledgeEnvironmentDeploymentFailure: sinon.stub() };
-        deploymentController._envService = envServiceMock;
+        deploymentServiceMock = { acknowledgeEnvironmentDeploymentFailure: sinon.stub() };
+        deploymentController._deploymentService = deploymentServiceMock;
         req.params = { id: 'env1' };
         res = {
           status: sinon.stub().returnsThis(),
@@ -107,8 +107,8 @@ describe('DeploymentController test suite', function() {
           session: { username: 'testuser', name: 'Test User', personid: '123' } 
         }, res);
         
-        assert.ok(envServiceMock.acknowledgeEnvironmentDeploymentFailure.firstCall.args[0], 'env1');
-        assert.ok(envServiceMock.acknowledgeEnvironmentDeploymentFailure.firstCall.args[1] instanceof User);
+        assert.ok(deploymentServiceMock.acknowledgeEnvironmentDeploymentFailure.firstCall.args[0], 'env1');
+        assert.ok(deploymentServiceMock.acknowledgeEnvironmentDeploymentFailure.firstCall.args[1] instanceof User);
       });
 
       it('should return 204 and acknowledgement message on success', async function() {
