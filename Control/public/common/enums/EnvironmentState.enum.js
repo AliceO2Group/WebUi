@@ -21,6 +21,7 @@ export const EnvironmentState = Object.freeze({
   DEPLOYED: 'DEPLOYED',
   CONFIGURED: 'CONFIGURED',
   RUNNING: 'RUNNING',
+  PENDING: 'PENDING',
   ERROR: 'ERROR',
   UNKNOWN: 'UNKNOWN'
 });
