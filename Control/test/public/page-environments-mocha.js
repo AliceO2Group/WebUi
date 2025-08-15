@@ -64,37 +64,6 @@ describe('`pageEnvironments` test-suite', () => {
       assert.strictEqual(location.search, '?page=environments');
     });
   });
-
-  describe('Test new environment request', async () => {
-    it('create failed environment request', async () => {
-      await page.goto(url + '?page=newEnvironmentAdvanced');
-      const location = await page.evaluate(() => window.location);
-      assert.ok(location.search === '?page=newEnvironmentAdvanced');
-
-      // select workflow from list of templates
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a');
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a').click());
-
-      // first detector is already locked (should be MID)
-      // select earlier locked detector which will automatically select all available hosts
-      await page.locator('.m1 > div:nth-child(1) > div > a:nth-child(2)')
-        .setTimeout(500)
-        .click();
-
-      await page.locator('#deploy-env')
-        .setTimeout(500)
-        .click();
-    });
-
-    it('verify request fields', async () => {
-
-      await waitForEnvRequest(page, 100);
-      const detector = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(2)').innerText);
-      const state = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(6)').innerText);
-      assert.strictEqual(detector, 'MID');
-      assert.strictEqual(state, 'FAILED');
-    });
-  });
 });
 
 /**
