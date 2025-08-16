@@ -1,15 +1,10 @@
 name: Grpc Wrapper
 
 on:
-  push:
-    branches: ["**"]
-    paths:
-      - "Tokenization/backend/wrapper/test/**"
-      - ".github/workflows/grpc-wrapper.yml"
   pull_request:
     branches: ["**"]
     paths:
-      - "Tokenization/backend/wrapper/test/**"
+      - "Tokenization/backend/wrapper/**"
       - ".github/workflows/grpc-wrapper.yml"
 
 concurrency:
@@ -22,7 +17,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: "Tokenization/backend/wrapper"
+        working-directory: Tokenization/backend/wrapper
 
     steps:
       - uses: actions/checkout@v4
@@ -30,8 +25,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22.x"
-          cache: npm
-          cache-dependency-path: "Tokenization/backend/wrapper/package-lock.json"
 
       - name: Install dependencies
         run: npm ci
