@@ -67,7 +67,7 @@ export class CentralSystemWrapper {
 
     // Handle stream error event
     call.on("error", (err) =>
-      this.logger.infoMessage(
+      this.logger.errorMessage(
         `Stream error from client ${call.getPeer()}:`,
         err
       )
@@ -84,7 +84,7 @@ export class CentralSystemWrapper {
       grpc.ServerCredentials.createInsecure(),
       (err, _port) => {
         if (err) {
-          this.logger.infoMessage("Server bind error:", err);
+          this.logger.errorMessage("Server bind error:", err);
           return;
         }
         this.logger.infoMessage(`CentralSytem started listening on ${addr}`);
