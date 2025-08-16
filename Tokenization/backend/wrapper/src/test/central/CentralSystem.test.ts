@@ -23,11 +23,15 @@ const logger = {
   infoMessage: jest.fn(),
 };
 
-jest.mock("@aliceo2/web-ui", () => ({
-  LogManager: {
-    getLogger: () => logger,
-  },
-}));
+jest.mock(
+  "@aliceo2/web-ui",
+  () => ({
+    LogManager: {
+      getLogger: () => logger,
+    },
+  }),
+  { virtual: true }
+);
 
 jest.mock("@grpc/proto-loader", () => ({
   loadSync: jest.fn(() => {
