@@ -2,6 +2,7 @@ import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
 import { LogManager } from "@aliceo2/web-ui";
+import { CentralSystemConfig } from "../models/config.model";
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
@@ -12,12 +13,18 @@ export class CentralSystemWrapper {
 
   // class properties
   private server: grpc.Server;
+  private protoPath: string;
+  private host: string;
+  private port: number;
 
   /**
    * Initializes the Wrapper for CentralSystem.
    * @param port The port number to bind the gRPC server to.
    */
-  constructor(private protoPath: string, private port: number) {
+  constructor(config: CentralSystemConfig) {
+    this.protoPath = config.protoPath;
+    this.host = config.host || "0.0.0.0";
+    this.port = config.port || 50051;
     this.server = new grpc.Server();
     this.setupService();
   }
@@ -78,7 +85,7 @@ export class CentralSystemWrapper {
    * @desciprion Starts the gRPC server and binds it to the specified in class port.
    */
   public listen() {
-    const addr = `localhost:${this.port}`;
+    const addr = `${this.host}:${this.port}`;
     this.server.bindAsync(
       addr,
       grpc.ServerCredentials.createInsecure(),
@@ -95,6 +102,10 @@ export class CentralSystemWrapper {
 
 // Instantiate the CentralSystemWrapper on port 50051, but don't start automatically
 const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
-const centralSystem = new CentralSystemWrapper(PROTO_PATH, 50051);
+const centralSystem = new CentralSystemWrapper({
+  protoPath: PROTO_PATH,
+  host: "localhost",
+  port: 50051,
+});
 // Start listening explicitly
 centralSystem.listen();

@@ -1,5 +1,6 @@
 import path from "path";
 import { ConnectionManager } from "./ConnectionManager/ConnectionManager.ts";
+import { gRPCWrapperConfig } from "../models/config.model.ts";
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -24,8 +25,11 @@ export class gRPCWrapper {
    * @param protoPath - The file path to the gRPC proto definition.
    * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
    */
-  constructor(protoPath: string, centralAddress: string = "localhost:50051") {
-    this.ConnectionManager = new ConnectionManager(protoPath, centralAddress);
+  constructor(config: gRPCWrapperConfig) {
+    this.ConnectionManager = new ConnectionManager(
+      config.protoPath,
+      config.centralAddress || "localhost"
+    );
   }
 
   /**
@@ -37,5 +41,8 @@ export class gRPCWrapper {
 }
 
 const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
-const grpc = new gRPCWrapper(PROTO_PATH, "localhost:50051");
+const grpc = new gRPCWrapper({
+  protoPath: PROTO_PATH,
+  centralAddress: "localhost:50051",
+});
 grpc.connectToCentralSystem();
