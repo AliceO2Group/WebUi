@@ -28,7 +28,7 @@ export class gRPCWrapper {
   constructor(config: gRPCWrapperConfig) {
     this.ConnectionManager = new ConnectionManager(
       config.protoPath,
-      config.centralAddress || "localhost"
+      config.centralAddress
     );
   }
 

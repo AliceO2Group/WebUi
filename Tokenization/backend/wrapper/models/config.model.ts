@@ -24,6 +24,6 @@ export interface CentralSystemConfig {
 export interface gRPCWrapperConfig {
   /** Path to the proto file defining the services. */
   protoPath: string;
-  /** Address of the CentralSystem server. Defaults to "localhost". */
+  /** Address of the CentralSystem server. */
   centralAddress: string;
 }
