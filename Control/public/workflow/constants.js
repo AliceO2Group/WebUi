@@ -22,7 +22,8 @@ const PREFIX = {
     NONE: '-',
     FILE: 'file://',
     CONSUL: 'consul-ini://'
-  }
+  },
+  SSO_DET_ROLE: 'det-'
 };
 
 const WIDGET_VAR = {
@@ -47,4 +48,11 @@ const STORAGE = {
   DETECTOR: 'DETECTOR'
 }
 
-export {PREFIX, WIDGET_VAR, VAR_TYPE, STORAGE};
+const ROLES = Object.freeze({
+  Admin: 1,
+  Global: 2,
+  Detector: 3,
+  Guest: 4
+});
+
+export {PREFIX, WIDGET_VAR, VAR_TYPE, STORAGE, ROLES};

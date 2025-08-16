@@ -11,22 +11,30 @@
     - [O2Control gRPC](#o2control-grpc)
     - [Apricot gRPC](#apricot-grpc)
     - [Grafana](#grafana)
+    - [Bookkeeping](#bookkeeping)
     - [Consul](#consul)
-    - [Kafka](#kafka)
+    - [Notification service](#notification-service)
     - [InfoLogger GUI](#infologger-gui)
+    - [InfoLogger EPN GUI](#infologger-epn-gui)
     - [QualityControl GUI](#qualitycontrol-gui)
     - [Bookkeeping GUI](#bookkeeping-gui)
     - [Utils](#utils)
   - [Features](#features)
+    - [Calibration Page](#calibration-page)
+    - [Global Runs Page](#global-runs-page)
+    - [Ignore FLPs by Run Type](#ignore-flps-by-run-type)
     - [GUI](#gui)
       - [Enable/Disable CRU Links](#enabledisable-cru-links)
       - [Clean Resources/Tasks](#clean-resourcestasks)
+    - [Roles](#roles)
+    - [Monitoring of gRPC channel and automatic reconnection](#monitoring-of-grpc-channel-and-automatic-reconnection)
     - [Integration with ControlWorkflows](#integration-with-controlworkflows)
       - [List of fixed variables used by AliECS GUI for user logic](#list-of-fixed-variables-used-by-aliecs-gui-for-user-logic)
       - [Dynamically built Workflow Panels](#dynamically-built-workflow-panels)
   - [Continuous Integration Workflows](#continuous-integration-workflows)
     - [control.yml](#controlyml)
     - [release.yml](#releaseyml)
+    - [proto-sync.yml](#proto-syncyml)
 
 ## Description
 This is a prototype of Control GUI. It aims to replace current ECS HI and provide intuitive way of controlling the O<sup>2</sup> data taking.
@@ -34,7 +42,7 @@ This is a prototype of Control GUI. It aims to replace current ECS HI and provid
 It communicates with [Control agent](https://github.com/AliceO2Group/Control) over gRPC.
 
 ## Requirements
-- `nodejs` >= `14.16.0`
+- `nodejs` >= `22.x`
 
 ## Installation
 1. `git clone https://github.com/AliceO2Group/WebUi.git`
@@ -63,46 +71,60 @@ It communicates with [Control agent](https://github.com/AliceO2Group/Control) ov
 * `package` - name of the gRPC package
 
 ### Grafana
-* `hostname` - Grafana instance hostname
-* `port` - Grafana instance port
+* `url` - built URL which points to grafana instance: `<protocol>://<instance>:<port>`
+
+### Bookkeeping
+* `url` - URL which points to Bookkeeping API: `<protocol>://<instance>:<port>`, `<protocol>://<domain_name>`
+* `token` - token needed for permissions to retrieve data from Bookkeeping
+* `[refreshRate = 10000]` - number representing how often should the data from Bookkeeping be refreshed in ms;
+
+Bookkeeping is going to be used as the source of latest `CALIBRATION` runs as per the [definition](https://github.com/AliceO2Group/Bookkeeping/blob/main/docs/RUN_DEFINITIONS.md). Detectors may need these run before stable beams, with some needing _none_, some only _one_ run and others _multiple_ ones defined by the `RUN TYPE` attribute. As this can vary depending on the period, the types corresponding to a detector will be defined and retrieved from the KV store of [O2Apricot](https://github.com/AliceO2Group/Control/tree/master/apricot) (key and value TBD).
 
 ### Consul
 Use of a Consul instance is optional
 
 * `hostname` - Consul head node hostname
 * `port` - Consul head node port
+* `ui` - Consul UI URL (will default to `hostname:port`)
 * `flpHardwarePath` - Prefix for KV Store for the content about the FLPs machines
 * `readoutPath` - Prefix for KV Store for readout's configuration
 * `readoutCardPath` - Prefix for KV Store for readout-card's configuration
 * `qcPath` - Prefix for KV Store for quality-control's configuration
 * `kVPrefix` - Name of the Consul cluster used by AliceO2
 
-### Kafka
-Use of a Kafka instance is optional. It is being used for prompting and receiving notifications, see more in [Kafka connector - Notification](../Framework/docs/guide/kafka.md) framework guide.
+### Notification service
+Use of a Notification service is optional. It is being used for prompting and receiving notifications from global Notification Service, see more in [Notification service](../Framework/docs/guide/notification.md.md) framework guide.
 
 ### InfoLogger GUI
-Use of InfoLogger GUI instance is optional. Configuration details about it are being used only for building URLs to help the user navigate the logs of its actions.
+Use of InfoLogger GUI instance is optional. Configuration details about it are being used only for displaying URLs to help the user navigate the logs of its actions.
 
-* `hostname` - InfoLogger GUI hostname
-* `port` - InfoLogger GUI port
+* `url` - Prebuilt URL which is in format `host:port`
+
+### InfoLogger EPN GUI
+Use of InfoLogger **EPN** GUI instance is optional. Configuration details about it are being used only for displaying URLs to help the user navigate the logs of EPN actions.
+
+* `url` - Prebuilt URL which is in format `host:port`
 
 ### QualityControl GUI
 Use of QualityControl GUI instance is optional. Configuration details about it are being used only for building URLs to help the user navigate the objects created within an environment.
 
-* `hostname` - QualityControl GUI hostname
-* `port` - QualityControl GUI port
+* `url` - Prebuilt URL which is in format `host:port`
 
 ### Bookkeeping GUI
 Use of Bookkeeping GUI instance is optional. Configuration details about it are being used only for building URLs to help the user navigate to the run details of their environments.
 
-* `hostname` - Bookkeeping GUI hostname
-* `port` - Bookkeeping GUI port
+* `url` - Prebuilt URL which is in format `host:port`
 
 ### Utils
 Use of utils field is optional. Here, a user can specify configuration fields for various uses of AliECS GUI:
 * `refreshTask` - specifies how often (ms) the page `taskList` should refresh its content if the user has it opened; Default value is `10000`
-* `refreshEnvs` - specifies how often (ms) the page `environments` should refresh its content if the user has it opened; Default value is `10000`
+
 ## Features
+
+### [Calibration Page](./docs/CALIBRATION_PAGE.md)
+### [Global Runs Page](./docs/GLOBAL_RUNS_PAGE.md)
+### [Ignore FLPs by Run Type](./docs/IGNORE_FLPS_BY_RUN_TYPE.md)
+
 
 ### GUI
 1. Lock interface - single user is allowed to execute commands, others act as spectators
@@ -110,7 +132,7 @@ Use of utils field is optional. Here, a user can specify configuration fields fo
 3. External resources access:
    * [gRPC](https://grpc.io/)
    * [Consul](https://www.consul.io/) - used for KV Store
-   * [Kafka-Node](https://www.npmjs.com/package/kafka-node) - used for prompting [Browser Notifications](#integration-with-notification-service) to the user
+   * [Kafka-Node](https://www.npmjs.com/package/kafka-node) - used for prompting Native Browser Notifications to the user
    * [Grafana](https://grafana.com/) - used to display control environment plots
 
 #### Enable/Disable CRU Links
@@ -123,16 +145,48 @@ Use of utils field is optional. Here, a user can specify configuration fields fo
    * the updates will be saved directly in Consul for the selected hosts;
    * the CRUs of the selected hosts will be updated with the configuration previously saved in Consul.
 
-It is important to understand that the `Save & Configure` action will also apply any other `CRU` changes that are present in `Consul` and NOT only the state of the links which are updatable via the Interface. 
+It is important to understand that the `Save & Configure` action will also apply any other `CRU` changes that are present in `Consul` and NOT only the state of the links which are updatable via the Interface.
 
 #### Clean Resources/Tasks
 1. Navigate to the `Tasks` page by clicking on the `Task list` sub-menu from the left side-bar
-   
+
 Here, tasks will be grouped by host and each host has an in-line button to provide a download button for the logs of that machine
 
 2. Lock the interface via the top-left lock button
 3. Use the top-right orange text `Clean Resources` button to request AliECS Core to run the `o2-roc-cleanup` workflow
 4. Use the top-right red text `Clean Tasks` button to request AliECS Core to remove all tasks that do not belong to an environment
+
+### Roles
+The GUI adapts its view depending on SSO roles configured in Application Portal (see more details in [OpenID docs](https://github.com/AliceO2Group/WebUi/blob/dev/Framework/docs/guide/openid.md#admin-role)). Currently supported roles are:
+- Guest - read-only access
+- Detector - only standalone runs for given detector(s)
+- Global - access to global runs and standalone runs for all detectors
+- Admin - "Global" + admin actions such as "Force lock"
+
+### Monitoring of gRPC channel and automatic reconnection
+The GUI back-end includes a robust monitoring and reconnection mechanism for the gRPC channel between the gRPC client (GUI back-end, [GrpcServiceClient.js](./lib/control-core/GrpcServiceClient.js)) and the gRPC server. This ensures uninterrupted communication in the following scenarios:
+
+1. **Service Deployment Order Issues**: In O2 deployments, the order of service deployment is not guaranteed. This can result in the gRPC channel failing to establish due to a timeout. In such cases, the GUI will automatically retry the connection after the timeout plus a configurable reconnect delta time (`1000ms` by default).
+2. **Server Crashes or Connection Loss**: If the gRPC server crashes or the connection is lost, causing the channel to transition to states like `TRANSIENT_FAILURE`, the GUI will actively monitor the channel state and attempt to reconnect indefinitely until the connection is restored. This is critical as the AliECS GUI is a key component in controlling the experiment.
+
+The reconnection logic is implemented with the following features:
+- **Retry Logic**: The client continuously attempts to reconnect with a configurable retry interval (`connectionTimeout + reconnect delta time`).
+- **Channel State Monitoring**: The client monitors the gRPC channel's state and triggers reconnection if the state is not `READY` or `IDLE`.
+- **Promisified gRPC Calls**: All gRPC methods are promisified for easier asynchronous handling, with built-in support for deadlines.
+
+The following configuration parameters make this feature flexible:
+- `[timeout=30000]` (ms): Timeout for gRPC service calls.
+- `[connectionTimeout=10000]` (ms): Timeout for establishing a connection.
+- `[maxMessageLength=50]` (MB): Maximum allowed message size for gRPC calls.
+
+This mechanism ensures that the GUI remains resilient and operational even in challenging network or deployment conditions.
+```
+// Example of failure of gRPC server, monitoring and reconnection
+
+2025-04-14T11:31:52.521Z [cog/GrpcServiceClient] [error]: Connection to Control server (dns:server:32102) failed due to: Error: Channel state changed to TRANSIENT_FAILURE
+2025-04-14T11:31:55.672Z [cog/envcache] [error]: Error: 14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED server:32102
+2025-04-14T11:31:56.208Z [cog/GrpcServiceClient] [error]: Control gRPC connected to dns:server:32102
+```
 
 ### Integration with ControlWorkflows
 
@@ -140,21 +194,26 @@ Here, tasks will be grouped by host and each host has an in-line button to provi
 There is a set of variables which are fixed and used by the AliECS GUI. If there is a need for changing the name of these variables in the [ControlWorkflows](https://github.com/AliceO2Group/ControlWorkflows)  repository, then the AliECS GUI developers should be notified to update accordingly.
 ```json
 dcs_enabled
-trg_enabled
+ddsched_enabled
+dd_enabled
 epn_enabled
+minimal_dpl_enabled
 odc_topology
 odc_enabled
-qcdd_enabled
-dd_enabled
-ddsched_enabled
-minimal_dpl_enabled
-readout_cfg_uri
+pdp_config_option
+pdp_o2_data_processing_hash
+pdp_o2_data_processing_path
+pdp_topology_description_library_file
+pdp_workflow_name
 qc_config_uri
+qcdd_enabled
+readout_cfg_uri
+trg_enabled
 ```
 #### Dynamically built Workflow Panels
 From version `1.28.0` onwards, the AliECS GUI allows the user to define custom workflow templates. These are defined in `YAML` in the [ControlWorkflows](https://github.com/AliceO2Group/ControlWorkflows) repository.
 
-Each variable belonging to a template will follow the definition present in the [protofile](https://github.com/AliceO2Group/WebUi/blob/dev/Control/protobuf/o2control.proto#L380) and will be dynamically built and displayed by the AliECS GUI based on the conditions provided. 
+Each variable belonging to a template will follow the definition present in the [protofile](https://github.com/AliceO2Group/WebUi/blob/dev/Control/protobuf/o2control.proto#L380) and will be dynamically built and displayed by the AliECS GUI based on the conditions provided.
 e.g
 ```json
   "roc_ctp_emulator_enabled": {
@@ -170,7 +229,7 @@ e.g
     "defaultValue": "Some Default Value",
     "type": 0,
     "label": "DCS SOR parameters",
-    "description": "", // EDIT_BOX with condition to be displayed only if component roc_ctp_emulator_enabled has a value higher or equal to 20 
+    "description": "", // EDIT_BOX with condition to be displayed only if component roc_ctp_emulator_enabled has a value higher or equal to 20
     "panel": "dcsPanel",
     "visibleIf": "$$roc_ctp_emulator_enabled >= \"20\""
   },
@@ -196,3 +255,9 @@ Control project makes use of two workflows.
 ### [release.yml](../.github/workflows/release.yml)
 * Releases a new version of the project to the [NPM Registry](npmjs.com/) under the tag [@aliceo2/control](https://www.npmjs.com/package/@aliceo2/control)
 * Builds a `tgz` file which contains an archive of the project. This can than be used for local repositories installations
+
+### [proto-sync.yml](../.github/workflows/proto-sync.yml)
+* Every week the workflow will be checking if there are any updates on the 2 proto files from [Control](https://github.com/AliceO2Group/Control) that are being used in AliECS GUI:
+  * o2control
+  * apricot 
+* If there are any changes, the workflow will automatically raise a PR with the file(s) updates.

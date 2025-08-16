@@ -10,10 +10,11 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {Log} = require('@aliceo2/web-ui');
-const log = new Log(`${process.env.npm_config_log_label ?? 'ilg'}/config`);
+const { LogManager } = require('@aliceo2/web-ui');
+
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/config`);
 const fs = require('fs');
 const path = require('path');
 
@@ -27,18 +28,27 @@ let configFile = path.join(__dirname, '../config.js');
 
 // Replace if provided by command line
 if (process.argv.length >= 3 && /\.js$/.test(process.argv[2])) {
-  configFile = process.argv[2];
+  [,, configFile] = process.argv;
 }
 
 try {
   configFile = fs.realpathSync(configFile);
 } catch (err) {
-  log.error(`Unable to read config file: ${err.message}`);
+  logger.errorMessage(`Unable to read config file: ${err.message}`);
   process.exit(1);
 }
 
 const config = require(configFile);
-Log.configure(config);
-log.info(`Read config file "${configFile}"`);
+
+LogManager.configure(config);
+logger.infoMessage(`Loaded configuration file: "${configFile}"`);
+
+if (!config.mysql) {
+  logger.warnMessage('MySQL configuration not found. Database querying is not be available');
+}
+
+if (!config.infoLoggerServer) {
+  logger.warnMessage('InfoLogger server configuration not found. Live monitoring is not available');
+}
 
 module.exports = config;

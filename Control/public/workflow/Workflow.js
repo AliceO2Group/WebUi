@@ -14,6 +14,7 @@
 
 import {Observable, RemoteData} from '/js/src/index.js';
 import {PREFIX, VAR_TYPE} from './constants.js';
+import {DetectorLockAction} from '../common/enums/DetectorLockAction.enum.js';
 import FlpSelection from './panels/flps/FlpSelection.js';
 import WorkflowVariable from './panels/variables/WorkflowVariable.js';
 import WorkflowForm from './WorkflowForm.js';
@@ -60,17 +61,26 @@ export default class Workflow extends Observable {
     this.selectedVarsMap = {};
     this.groupedPanels = {};
     this.panelsUtils = {};
+    this.isQcWorkflow = false; // a QC Workflow does not require any detectors | hosts selection
 
     this.READOUT_PREFIX = PREFIX.READOUT;
     this.QC_PREFIX = PREFIX.QC;
 
+    this._advancedInputPanel = {
+      pair: {
+        key: '',
+        value: ''
+      },
+      textArea: {
+        value: '',
+      }
+    };
     this.dom = {
       keyInput: '',
       keyValueArea: ''
     };
 
     this.advErrorPanel = [];
-    this.kvPairsString = ''; // variable stored for Adv Config Panel
   }
 
   /**
@@ -83,6 +93,7 @@ export default class Workflow extends Observable {
     this.getAndSetSavedConfigurations();
     this.flpSelection.init();
     this.selectedConfiguration = '';
+    this.selectedConfigurationRaw = '';
     this.resetErrorMessage();
   }
 
@@ -95,6 +106,10 @@ export default class Workflow extends Observable {
     this.resetRevision(repository);
     this.setTemplatesData();
     this.form.setTemplate('');
+
+    this.selectedConfiguration = '';
+    this.selectedConfigurationRaw = '';
+    this.advErrorPanel = [];
 
     this.resetErrorMessage();
 
@@ -195,10 +210,10 @@ export default class Workflow extends Observable {
    * Make API call to be saved
    * @param {String} name
    */
-  saveEnvConfiguration(name) {
+  saveEnvConfiguration(name, action = 'save') {
     const {ok, message, variables} = this._checkAndMergeVariables(this.form.variables, this.form.basicVariables);
     if (!ok) {
-      // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
+      // Check the user did not introduce items with the same key in General Configuration and Advanced Configuration
       this.model.environment.itemNew = RemoteData.failure(message);
     } else if (variables.hosts && variables.hosts.length > 0 && this.form.hosts.length > 0) {
       // Check FLP Selection is not duplicated in vars host
@@ -215,7 +230,7 @@ export default class Workflow extends Observable {
         const revision = this.form.revision;
         const workflow = this.form.template;
         const data = {name, detectors, repository, revision, workflow, variables};
-        this.model.environment.saveEnvConfiguration(data);
+        this.model.environment.saveEnvConfiguration(data, action);
       }
     }
     this.notify();
@@ -227,7 +242,7 @@ export default class Workflow extends Observable {
   async createNewEnvironment() {
     const {ok, message, variables} = this._checkAndMergeVariables(this.form.variables, this.form.basicVariables);
     if (!ok) {
-      // Check the user did not introduce items with the same key in Basic Configuration and Advanced Configuration
+      // Check the user did not introduce items with the same key in General Configuration and Advanced Configuration
       this.model.environment.itemNew = RemoteData.failure(message);
     } else if (this.flpSelection.unavailableDetectors.length !== 0) {
       this.model.environment.itemNew =
@@ -246,7 +261,11 @@ export default class Workflow extends Observable {
         path = this.parseRepository(this.form.repository) + `/workflows/${this.form.template}@${this.form.revision}`;
 
         // Combine Readout URI if it was used
-        this.model.environment.newEnvironment({workflowTemplate: path, vars: variables});
+        this.model.environment.newEnvironment({
+          workflowTemplate: path,
+          vars: variables,
+          detectors: this.flpSelection.selectedDetectors
+        });
       }
     }
     this.notify();
@@ -270,14 +289,14 @@ export default class Workflow extends Observable {
    * @param {string} key
    * @param {Object} value
    */
-  addVariable(keyToAdd, valueToAdd) {
-    const {key, value, ok, error} = WorkflowVariable.parseKVPair(keyToAdd, valueToAdd, this.selectedVarsMap);
+  addVariable(keyToAdd, valueToAdd, inEdit = false) {
+    const {key, value, ok, error} = WorkflowVariable.parseKVPair(keyToAdd, valueToAdd, this.selectedVarsMap, inEdit);
     if (ok) {
       const isKnownKey = Object.keys(this.selectedVarsMap).includes(key);
       if (isKnownKey) {
         this.form.basicVariables[key] = value;
         this.model.notification.show(
-          'Variable has been successfully imported in the configuration panels', 'success', 3000
+          'Variable has been successfully imported in the configuration panels', 'success', 1000
         );
       } else {
         this.form.variables[key] = value;
@@ -287,6 +306,25 @@ export default class Workflow extends Observable {
       this.advErrorPanel = [error];
     }
     this.notify();
+  }
+
+  /**
+   * Method to add a new KV Pair to the variables form for creating a new environment
+   * It will take the current value from the input field and add it to the variables
+   * @return {void}
+   */
+  addVariableFromInput() {
+    const keyToAdd = this.getPairInputKey();
+
+    const currentValue = this.getPairInputValue();
+    const valueWithoutNewline = currentValue?.endsWith('\n') ? currentValue.slice(0, -1) : currentValue;
+    
+    this.addVariable(keyToAdd, valueWithoutNewline, true);
+
+    this.setPairInputKey('');
+    this.setPairInputValue('');
+    
+    this.dom.keyInput.focus();
   }
 
   /**
@@ -300,15 +338,15 @@ export default class Workflow extends Observable {
       const isKnownKey = Object.keys(this.selectedVarsMap).includes(key);
       if (isKnownKey) {
         this.form.basicVariables[key] = parsedKVJSON[key];
-        this.model.notification.show(
-          'Variables have been successfully imported in the configuration panels', 'success', 3000
-        );
       } else {
         this.form.variables[key] = parsedKVJSON[key];
       }
     });
     if (errors.length === 0) {
-      this.kvPairsString = '';
+      this._advancedInputPanel.textArea.value = '';
+      this.model.notification.show(
+        'Variables have been successfully imported in the configuration panels', 'success', 1000
+      );
     }
     this.advErrorPanel = errors;
     this.notify();
@@ -336,7 +374,7 @@ export default class Workflow extends Observable {
    * @return {boolean}
    */
   removeVariableByKey(key) {
-    if (this.form.variables[key]) {
+    if (this.form.variables[key] !== null && this.form.variables[key] !== undefined) {
       delete this.form.variables[key];
       this.notify();
       return true;
@@ -355,7 +393,16 @@ export default class Workflow extends Observable {
     this.form.basicVariables = {};
     this.groupedPanels = {};
     if (this.templatesVarsMap[template] && Object.keys(this.templatesVarsMap[template]).length > 0) {
-      Object.keys(this.templatesVarsMap[template]).forEach((key) => {
+      const keys = Object.keys(this.templatesVarsMap[template]);
+      const detectorIndex = keys.indexOf('detectors');
+      if (detectorIndex >= 0) {
+        this.isQcWorkflow = false;
+        keys.splice(detectorIndex, 1);
+      } else {
+        this.flpSelection.init();
+        this.isQcWorkflow = true;
+      }
+      keys.forEach((key) => {
         // Generate panels by grouping the variables by the `panel` field
         const variable = this.templatesVarsMap[template][key];
         const panelBelongingTo = variable.panel ? variable.panel : 'mainPanel';
@@ -389,6 +436,8 @@ export default class Workflow extends Observable {
         });
         this.groupedPanels[key] = sortedVars;
       });
+    } else {
+      this.isQcWorkflow = false;
     }
   }
 
@@ -407,8 +456,11 @@ export default class Workflow extends Observable {
         .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1;
       return !isVariableDetector || isVariableIncludedDetector;
     }
-    if (this.model.detectors.selected) {
-      // TODO when detector view will be enabled
+    if (this.model.detectors.selected && this.model.detectors.selected !== 'GLOBAL') {
+      const prefix = key.split('_')[0];
+      const isVariableDetector = this.flpSelection.detectors.payload
+        .findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1
+      return !isVariableDetector || this.model.detectors.selected.toLocaleUpperCase() === prefix.toLocaleUpperCase();
     }
     return true;
   }
@@ -487,7 +539,8 @@ export default class Workflow extends Observable {
     } else {
       const templateList = [];
       result.workflowTemplates.map((templateObject) => {
-        templateList.push(templateObject.template);
+        const description = templateObject.description ? templateObject.description : '';
+        templateList.push({name: templateObject.template, description});
         if (templateObject.varSpecMap && Object.keys(templateObject.varSpecMap).length > 0) {
           this.templatesVarsMap[templateObject.template] = templateObject.varSpecMap;
         }
@@ -516,11 +569,11 @@ export default class Workflow extends Observable {
       this.model.environment.itemNew = RemoteData.notAsked();
       this.loadingConfiguration = RemoteData.loading();
       this.notify();
-      this.loadedConfiguration = await this.remoteDataPostRequest(
-        this.loadedConfiguration, '/api/GetRuntimeEntry', {component: 'COG-v1', key}
-      );
+
+      const {result: configuration, ok} = await this.model.loader.get(`/api/workflow/configuration`, {name: key});
+      this.loadedConfiguration = ok ? RemoteData.success(configuration) : RemoteData.failure(configuration.message);
+      this.notify();
       try {
-        const configuration = JSON.parse(this.loadedConfiguration.payload.payload);
         const variables = configuration.variables;
         let hosts = [];
         if (variables.hosts) {
@@ -536,14 +589,24 @@ export default class Workflow extends Observable {
         ) {
           this.flpSelection.detectorViewConfigurationError = true;
         } else {
-          await this.flpSelection.setDetectorsAndHosts(detectors, hosts);
-          this.addVariableJSON(JSON.stringify(variables));
+          const unavailableDetectors = detectors.filter(name =>
+            this.flpSelection.isDetectorActive(name)
+            || !(!this.model.lock.isLocked(name) || this.model.lock.isLockedByCurrentUser(name))
+          );
+          if (unavailableDetectors.length <= 0 || (unavailableDetectors.length > 0 && confirm(
+            `The following detectors are not available: ${unavailableDetectors.join(',')}\nDo you want to continue?`)
+          )) {
+            detectors.forEach(detector => this.model.lock.actionOnLock(detector, DetectorLockAction.TAKE, false));
+            await this.flpSelection.setDetectorsAndHosts(detectors, hosts);
+            this.addVariableJSON(JSON.stringify(variables));
+          }
         }
         this.loadingConfiguration = RemoteData.notAsked();
       } catch (error) {
         console.error(error);
         this.loadingConfiguration = RemoteData.notAsked();
-        this.model.notification.show('Unable to load configuration. Please contact an administrator', 'warning', 2000);
+        this.model.notification.show(`SyntaxError - Failed to load configuration '${key}'.`
+          + ' Please contact an administrator', 'warning', 6000);
       }
       this.notify();
     }
@@ -585,7 +648,7 @@ export default class Workflow extends Observable {
     if (sameKeys.length > 0) {
       return {
         variables: {}, ok: false,
-        message: `Due to Basic Configuration selection, you cannot use the following keys: ${sameKeys}`
+        message: `Due to General Configuration selection, you cannot use the following keys: ${sameKeys}`
       };
     } else {
       const readoutResult = this.parseReadoutURI(basicVariables);
@@ -599,6 +662,9 @@ export default class Workflow extends Observable {
       }
       basicVariables = qcResult.variables;
       const allVariables = Object.assign({}, basicVariables, variables);
+      Object.keys(allVariables)
+        .filter((key) => allVariables[key])
+        .forEach((key) => allVariables[key] = allVariables[key].trim().replace(/\r?\n/g, ' '));
       return {ok: true, message: '', variables: allVariables};
     }
   }
@@ -667,5 +733,56 @@ export default class Workflow extends Observable {
       delete vars['qc_config_uri_pre'];
     }
     return {variables: vars, ok: true, message: ''};
+  }
+
+  /**
+   * Get method for retrieving only the key from the advanced input panel
+   * @return {string}
+   */
+  getPairInputKey() {
+    return this._advancedInputPanel?.pair?.key ?? '';
+  }
+
+  /**
+   * Set method for updating the key of the pair input in the advanced input panel
+   * @return {void}
+   */
+  setPairInputKey(value) {
+    this._advancedInputPanel.pair.key = value;
+    this.notify();
+  }
+
+  /**
+   * Get method for retrieving only the value from the advanced input panel
+   * @return {string}
+   */
+  getPairInputValue() {
+    return this._advancedInputPanel?.pair?.value ?? '';
+  }
+
+  /**
+   * Set method for updating the value of the pair input in the advanced input panel
+   * @return {void}
+   */
+  setPairInputValue(value) {
+    this._advancedInputPanel.pair.value = value;
+    this.notify();
+  }
+
+  /**
+   * Get method for retrieving the value of the text area in the advanced input panel
+   * @return {string}
+   */
+  getTextAreaValue() {
+    return this._advancedInputPanel?.textArea?.value ?? '';
+  }
+
+  /**
+   * Set method for updating the text area value in the advanced input panel
+   * @return {void}
+   */
+  setTextAreaValue(value) {
+    this._advancedInputPanel.textArea.value = value;
+    this.notify();
   }
 }

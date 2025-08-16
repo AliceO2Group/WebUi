@@ -28,9 +28,9 @@ const detectorHeader = (model) => {
     },[
       h('h4.f5.flex-row', {style: 'justify-content: center;'},
         h('.ph2', `Detector View: ${selected}`),
-        h('a.f6.actionable-icon', {
+        h('a.f6.actionable-icon.ph2', {
           onclick: () => model.resetDetectorView('')
-        }, [iconPencil()])
+        }, iconPencil()),
       )
     ])
   }

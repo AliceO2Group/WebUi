@@ -1,0 +1,115 @@
+version: 2
+updates:
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "monthly"
+- package-ecosystem: npm
+  directory: "/Control"
+  schedule:
+    interval: weekly
+    day: "tuesday"
+    time: "07:00"
+    timezone: "Europe/Zurich"
+  groups:
+    dev-dependencies:
+      patterns:
+        # - "eslint"
+        - "mocha"
+        - "nock"
+        - "nyc"
+        - "puppeteer"
+        - "sinon"
+    grpc:
+      patterns:
+        - "@grpc/grpc-js"
+        - "@grpc/proto-loader"
+  labels:
+    - "Control"
+  open-pull-requests-limit: 10
+  versioning-strategy: increase
+  ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-patch"]
+- package-ecosystem: npm
+  directory: "/QualityControl"
+  schedule:
+    interval: weekly
+    day: "tuesday"
+    time: "07:00"
+    timezone: "Europe/Zurich"
+  groups:
+    dev-dependencies:
+      patterns:
+        - "eslint"
+        - "@eslint/js"
+        - "@stylistic/eslint-plugin-js"
+        - "eslint-plugin-jsdoc"
+        - "globals"
+        - "mocha"
+        - "nock"
+        - "nyc"
+        - "puppeteer"
+        - "sinon"
+  labels:
+    - "Quality Control"
+  open-pull-requests-limit: 10
+  versioning-strategy: increase
+  ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-patch"]
+- package-ecosystem: npm
+  directory: "/InfoLogger"
+  schedule:
+    interval: weekly
+    day: "tuesday"
+    time: "07:00"
+    timezone: "Europe/Zurich"
+  groups:
+    dev-dependencies:
+      patterns:
+        - "eslint"
+        - "@eslint/js"
+        - "@stylistic/eslint-plugin-js"
+        - "eslint-plugin-jsdoc"
+        - "globals"
+        - "mocha"
+        - "nock"
+        - "nyc"
+        - "puppeteer"
+        - "sinon"
+  labels:
+    - "InfoLogger"
+  open-pull-requests-limit: 10
+  versioning-strategy: increase
+  ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-patch"]
+- package-ecosystem: npm
+  directory: "/Framework"
+  schedule:
+    interval: weekly
+    day: "tuesday"
+    time: "07:00"
+    timezone: "Europe/Zurich"
+  groups:
+    dev-dependencies:
+      patterns:
+        - "eslint"
+        - "@eslint/js"
+        - "@stylistic/eslint-plugin-js"
+        - "eslint-plugin-jsdoc"
+        - "globals"
+        - "mocha"
+        - "nock"
+        - "nyc"
+        - "puppeteer"
+        - "sinon"
+        - "supertest"
+  labels:
+    - "Framework"
+  open-pull-requests-limit: 10
+  versioning-strategy: increase
+  ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-patch"]

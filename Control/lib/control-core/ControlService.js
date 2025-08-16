@@ -14,8 +14,7 @@
 
 const assert = require('assert');
 const path = require('path');
-const {WebSocketMessage, Log} = require('@aliceo2/web-ui');
-const log = new Log(`${process.env.npm_config_log_label ?? 'cog'}/controlservice`);
+const {WebSocketMessage, LogManager, LogLevel} = require('@aliceo2/web-ui');
 const {errorHandler, errorLogger} = require('./../utils.js');
 const CoreUtils = require('./CoreUtils.js');
 
@@ -25,24 +24,23 @@ const CoreUtils = require('./CoreUtils.js');
 class ControlService {
   /**
    * Constructor initializing dependencies
-   * @param {Padlock} padLock
-   * @param {GrpcProxy} ctrlProx
+   * @param {GrpcServiceClient} grpcClient - gRPC client to be used for communication with AliECS Core
    * @param {WebSocket} webSocket
-   * @param {ConsulConnector} consulConnector
+   * @param {ConsulController} consulController
    * * @param {JSON} coreConfig
    */
-  constructor(padLock, ctrlProx, consulConnector, coreConfig) {
-    assert(padLock, 'Missing PadLock dependency');
-    assert(ctrlProx, 'Missing GrpcProxy dependency for AliECS');
-    this.padLock = padLock;
-    this.ctrlProx = ctrlProx;
-    this.consulConnector = consulConnector;
+  constructor(grpcClient, consulController, coreConfig, O2_CONTROL_PROTO_PATH) {
+    assert(grpcClient, 'Missing GrpcServiceClient dependency for AliECS');
+    this._grpcClient = grpcClient;
+    this.consulController = consulController;
     this.coreConfig = coreConfig;
+    this.O2_CONTROL_PROTO_PATH = O2_CONTROL_PROTO_PATH;
+    this._logger =  LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/controlservice`);
   }
 
   /**
    * Set websocket after server initialization
-   * @param {WebSocket} webSocket 
+   * @param {WebSocket} webSocket
    */
   setWS(webSocket) {
     this.webSocket = webSocket;
@@ -57,7 +55,7 @@ class ControlService {
    * Current supported auto environments:
    * * resources-cleanup: will execute for all existing hosts
    * * o2-roc-config: will execute only for passed hosts
-   * * 
+   * *
    * @param {Request} req
    * @param {Response} res
    */
@@ -83,17 +81,17 @@ class ControlService {
       try {
         vars = !vars ? {} : vars;
         if (!vars.hosts) {
-          vars.hosts = await this.consulConnector.getFLPsList();
-        } 
+          vars.hosts = await this.consulController.getFLPsList();
+        }
         vars.hosts = JSON.stringify(vars.hosts);
-        const {repos: repositories} = await this.ctrlProx['ListRepos']();
+        const {repos: repositories} = await this._grpcClient['ListRepos']();
         const {name: repositoryName, defaultRevision} = repositories.find((repository) => repository.default);
         if (!defaultRevision) {
           throw new Error(`Unable to find a default revision for repository: ${repositoryName}`);
         }
 
         // Setup Stream Channel
-        const streamChannel = this.ctrlProx.client['Subscribe']({id: channelId})
+        const streamChannel = this._grpcClient.client['Subscribe']({id: channelId});
         streamChannel.on('data', (data) => this.onData(channelId, operation, data));
         streamChannel.on('error', (err) => this.onError(channelId, operation, err));
         // onEnd gets called no matter what
@@ -105,11 +103,14 @@ class ControlService {
           vars,
           workflowTemplate: path.join(repositoryName, `workflows/${operation}@${defaultRevision}`),
         };
-        await this.ctrlProx[method](coreConf);
+        this._logger.infoMessage(`Request of user: ${req.session.username} to "${operation}" for ${channelId}`, {
+          level: LogLevel.OPERATIONS, system: 'GUI', facility: 'cog/controlservice'
+        });
+        await this._grpcClient[method](coreConf);
         res.status(200).json({
           ended: false, success: true, id: channelId,
           info: {message: `Request for "${operation}" was successfully sent and is now in progress`}
-        })
+        });
       } catch (error) {
         // Failed to getFLPs, ListRepos or NewAutoEnvironment
         errorLogger(error);
@@ -129,9 +130,20 @@ class ControlService {
    */
   executeCommand(req, res) {
     const method = CoreUtils.parseMethodNameString(req.path);
-    this.ctrlProx[method](req.body)
+    this._grpcClient[method](req.body)
       .then((response) => res.json(response))
       .catch((error) => errorHandler(error, res, 504));
+  }
+
+  /**
+   * Execute Command but do not respond to user
+   * @param {string} method - AliECS method name
+   * @param {object} body - request body
+   * @param {JSON} options - optional parameters that are to be set to the gRPC call (e.g deadline)
+   * @return {Promise}
+   */
+  executeCommandNoResponse(method, body = {}, options = undefined) {
+    return this._grpcClient[method](body, options);
   }
 
   /**
@@ -140,7 +152,7 @@ class ControlService {
    */
   async getAliECSInfo() {
     const method = CoreUtils.parseMethodNameString('GetFrameworkInfo');
-    const response = CoreUtils.parseFrameworkInfo(await this.ctrlProx[method]());
+    const response = CoreUtils.parseFrameworkInfo(await this._grpcClient[method]());
     response.version = CoreUtils.parseAliEcsVersion(response.version);
     return response;
   }
@@ -151,7 +163,7 @@ class ControlService {
    */
   async getIntegratedServicesInfo() {
     const method = CoreUtils.parseMethodNameString('GetIntegratedServices');
-    const response = await this.ctrlProx[method]();
+    const response = await this._grpcClient[method]();
     return response;
   }
 
@@ -163,37 +175,15 @@ class ControlService {
    * @return {boolean}
    */
   isConnectionReady(_, res, next) {
-    if (!this.ctrlProx?.isConnectionReady) {
+    if (!this._grpcClient?.isConnectionReady) {
       let error = 'Could not establish connection to AliECS Core';
-      if (this.ctrlProx.connectionError?.message) {
-        error = this.ctrlProx.connectionError.message;
+      if (this._grpcClient.connectionError?.message) {
+        error = this._grpcClient.connectionError.message;
       }
       errorHandler(error, res, 503);
     } else {
       next();
     }
-  }
-
-  /**
-   * Middleware method to check if lock is needed and if yes if it is acquired
-   * @param {Request} req
-   * @param {Response} res
-   * @param {Next} next
-   * @return {boolean}
-   */
-  isLockSetUp(req, res, next) {
-    const method = CoreUtils.parseMethodNameString(req.path);
-    // disallow 'not-Get' methods if not owning the lock
-    if (!method.startsWith('Get') && method !== 'ListRepos') {
-      if (this.padLock.lockedBy == null) {
-        errorHandler(`Control is not locked`, res, 403);
-        return;
-      } else if (req.session.personid != this.padLock.lockedBy) {
-        errorHandler(`Control is locked by ${this.padLock.lockedByName}`, res, 403);
-        return;
-      }
-    }
-    next();
   }
 
   /**
@@ -204,9 +194,22 @@ class ControlService {
    */
   logAction(req, _, next) {
     const method = CoreUtils.parseMethodNameString(req.path);
-    if (!method.startsWith('Get')) {
+    const username = req?.session?.username ?? '';
+    const personid = req?.session?.personid ?? '';
+    if (method.startsWith('New') || method.startsWith('CleanupTasks')) {
+      const operation = req.body.operation ? ` (${req.body.operation})` : '';
+      this._logger.infoMessage(`${username}(${personid}) => ${method} ${operation}`, {
+        level: 1, facility: 'cog/controlservice'
+      });
+    } else if (method.startsWith('Control') || method.startsWith('Destroy')) {
       const type = req.body.type ? ` (${req.body.type})` : '';
-      log.info(`${req.session.personid} => ${method} ${type}`, 6);
+      const partition = req.body.id;
+      const run = req.body.runNumber;
+      delete req.body.runNumber;
+
+      this._logger.infoMessage(`${username}(${personid}) => ${method} ${type}`, {
+        level: 1, facility: 'cog/controlservice', partition, run
+      });
     }
     next();
   }

@@ -10,35 +10,51 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {Log, HttpServer} = require('@aliceo2/web-ui');
-const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/index`);
-const path = require('path');
-const api = require('./lib/api.js');
+import { LogManager, HttpServer, WebSocket } from '@aliceo2/web-ui';
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/index`);
+import path from 'path';
+import { setup } from './lib/api.js';
 
 // Reading config file
-const config = require('./lib/config/configProvider.js');
-const {buildPublicConfig} = require('./lib/config/publicConfigProvider');
+import { config } from './lib/config/configProvider.js';
 
 // Quick check config at start
 
 if (config.http.tls) {
-  log.info(`HTTPS endpoint: https://${config.http.hostname}:${config.http.portSecure}`);
+  logger.info(`HTTPS endpoint: https://${config.http.hostname}:${config.http.portSecure}`);
 }
-log.info(`HTTP endpoint: http://${config.http.hostname}:${config.http.port}`);
+logger.info(`HTTP endpoint: http://${config.http.hostname}:${config.http.port}`);
 if (typeof config.demoData != 'undefined' && config.demoData) {
-  log.info(`Using demo data`);
+  logger.info('Using demo data');
 } else {
   config.demoData = false;
 }
 
-buildPublicConfig(config);
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 // Start servers
 const http = new HttpServer(config.http, config.jwt, config.openId);
+http.addStaticPath(path.join(__dirname, 'common'));
 http.addStaticPath(path.join(__dirname, 'public'));
-http.addStaticPath(path.join(require.resolve('jsroot'), '../..'), 'jsroot');
-http.addStaticPath(path.join(__dirname, 'zstd'));
 
-api.setup(http);
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const pathName = require.resolve('jsroot');
+http.addStaticPath(path.join(pathName, '../..'), 'jsroot');
+
+const ws = new WebSocket(http);
+
+if (process.env.NODE_ENV === 'test') {
+  // Initialize nock for CCDB and Bookkeeping only if we are in test environment
+  const { initializeNockForCcdb } = await import('./test/setup/testSetupForCcdb.js');
+  const { initializeNockForBkp } = await import('./test/setup/testSetupForBkp.js');
+
+  initializeNockForCcdb();
+  initializeNockForBkp();
+}
+setup(http, ws);

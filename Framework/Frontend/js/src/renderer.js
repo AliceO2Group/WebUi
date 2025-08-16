@@ -10,37 +10,41 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /**
  * Template engine functions using vnode and DOM diff algo
  * @module renderer
  */
 
-// mithril function 'm' will be injected into window
-// it is used by renderer as an abstracted engine
+/* eslint-disable @stylistic/js/max-len */
+
+/*
+ * Mithril function 'm' will be injected into window
+ * it is used by renderer as an abstracted engine
+ */
 import '/mithril/mithril.min.js';
 
 if (!window.m) {
   throw new Error('mithril must be loaded into window');
 }
 if (!window.requestAnimationFrame) {
-  throw new Error('renderer must be run inside a browser envirnnement');
+  throw new Error('renderer must be run inside a browser environment');
 }
 
 /**
  * Register a callback to be called one time at browser render time if
- * the trigger was called before. Used to push new renderings efficitly.
+ * the trigger was called before. Used to push new renderings efficiently.
  * @param {function} fn - The callback to be registered
  * @return {function} The trigger to be called
  */
 function frameDebouncer(fn) {
   let requestFrame;
-  return function(...args) {
+  return function (...args) {
     if (requestFrame) {
       window.cancelAnimationFrame(requestFrame);
     }
-    requestFrame = window.requestAnimationFrame(function() {
+    requestFrame = window.requestAnimationFrame(() => {
       fn(...args);
     });
   };
@@ -49,14 +53,14 @@ function frameDebouncer(fn) {
 /**
  * Renders a vnode tree inside the dom element.
  * @param {Element} element - the dom element
- * @param {Vnode} vnode - the vnode tree
+ * @param {vnode} vnode - the vnode tree
  * @example
  * import {h, render} from '/js/src/index.js';
  * let virtualNode = h('h1.title', 'World');
  * render(document.body, virtualNode);
  */
 function render(element, vnode) {
-  // encapsulate mithril engine so we can change if needed
+  // Encapsulate mithril engine so we can change if needed
   window.m.render(element, vnode);
 }
 
@@ -77,20 +81,21 @@ function render(element, vnode) {
  * Hyperscript function to represente a DOM element
  * it produces a vnode usable by render function.
  *
- * @param {String} selector - Tag name (div, p, h1...) and optional classes as CSS selector (.foo.bar.baz), empty string =~ 'div'
- * @param {Object} attributes - (optional) Properties and attributes of DOM elements and hooks (see description). Here is a non-exhaustive list of common uses:
- * @param {string} attributes.className - Additional class names
- * @param {function} attributes.onclick - On mouse click [DOM handler onclick](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/onclick)
- * @param {function} attributes.oninput - On content typed inside input tag [DOM handler oninput](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/oninput)
- * @param {string|Object} attributes.style - `style: "background:red;"` or `style: {background: "red"}`
- * @param {string} attributes.href - Destination for links [DOM href property](https://developer.mozilla.org/en-US/docs/Web/API/HTMLHyperlinkElementUtils/href)
- * @param {string} attributes.placeholder - Placeholder for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
- * @param {string} attributes.value - Value for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
- * @param {Hook} attributes.oncreate - Hook called after a DOM element is created and attached to the document
- * @param {Hook} attributes.onupdate - Hook is called after each render, while DOM element is attached to the document
- * @param {Hook} attributes.onremove - Hook is called before a DOM element is removed from the document
- * @param {Array.<Vnode|string>|string} children - Children inside this tag
- * @return {Vnode} the Vnode representation
+ * @param {...any} args - arguments to be passes as below
+ * @param {String} args.selector - Tag name (div, p, h1...) and optional classes as CSS selector (.foo.bar.baz), empty string =~ 'div'
+ * @param {Object} args.attributes - (optional) Properties and attributes of DOM elements and hooks (see description). Here is a non-exhaustive list of common uses:
+ * @param {string} args.attributes.className - Additional class names
+ * @param {function} args.attributes.onclick - On mouse click [DOM handler onclick](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/onclick)
+ * @param {function} args.attributes.oninput - On content typed inside input tag [DOM handler oninput](https://developer.mozilla.org/fr/docs/Web/API/GlobalEventHandlers/oninput)
+ * @param {string|Object} args.attributes.style - `style: "background:red;"` or `style: {background: "red"}`
+ * @param {string} args.attributes.href - Destination for links [DOM href property](https://developer.mozilla.org/en-US/docs/Web/API/HTMLHyperlinkElementUtils/href)
+ * @param {string} args.attributes.placeholder - Placeholder for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
+ * @param {string} args.attributes.value - Value for inputs [DOM input, all properties](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
+ * @param {Hook} args.attributes.oncreate - Hook called after a DOM element is created and attached to the document
+ * @param {Hook} args.attributes.onupdate - Hook is called after each render, while DOM element is attached to the document
+ * @param {Hook} args.attributes.onremove - Hook is called before a DOM element is removed from the document
+ * @param {Array.<vnode|string>|string} args.children - Children inside this tag
+ * @return {vnode} the vnode representation
  * @example <caption>Simple tag declaration</caption>
  * import {h, render} from '/js/src/index.js';
  * const virtualNode1 = h('h1.text-center', 'World');
@@ -113,7 +118,7 @@ function render(element, vnode) {
  * render(document.body, containerNode);
  */
 function h(...args) {
-  // encapsulate mithril engine so we can change if needed
+  // Encapsulate mithril engine so we can change if needed
   return window.m(...args);
 }
 
@@ -121,9 +126,9 @@ function h(...args) {
  * Bind together a model and a view to render both on a DOM element.
  * When the model change and is an `Observable`, view refresh by itself (unlike `render()`)
  * @param {Element} element - The DOM element
- * @param {Function} view - The functional view which produces a vnode tree
+ * @param {function|{view: function}} view - The view which produces a vnode tree
  * @param {Observable} model - The model containing the state
- * @param {boolean} debug - Facultative. Shows the rendering time each time
+ * @param {boolean} [debug] - Facultative. Shows the rendering time each time
  * @example
  * import {h, mount, Observable} from '/js/src/index.js';
  * const model = new Observable();
@@ -139,7 +144,7 @@ function mount(element, view, model, debug) {
       console.time('render');
     }
     try {
-      render(element, view(model));
+      render(element, (typeof view === 'function' ? view : view.view)(model));
     } finally {
       if (debug) {
         // eslint-disable-next-line no-console
@@ -149,9 +154,9 @@ function mount(element, view, model, debug) {
   });
 
   if (model.observe) {
-    model.observe(smartRender); // redraw on changes
+    model.observe(smartRender); // Redraw on changes
   }
-  render(element, view(model)); // first draw
+  render(element, (typeof view === 'function' ? view : view.view)(model)); // First draw
 }
 
-export {h, render, frameDebouncer, mount};
+export { h, render, frameDebouncer, mount };

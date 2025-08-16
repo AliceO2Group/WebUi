@@ -8,3 +8,4 @@ npm-debug.log
 
 coverage
 Frontend/js/mithril.js
+Backend/test/error.log

@@ -10,29 +10,28 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, iconArrowRight, iconArrowLeft} from '/js/src/index.js';
+import { h, iconArrowRight, iconArrowLeft } from '/js/src/index.js';
 
 import tableColGroup from './tableColGroup.js';
 
 export default (model) => h('table.table-logs-header', [
   tableColGroup(model),
-  tableBody(model, model.table.colsHeader)
+  tableBody(model, model.table.colsHeader),
 ]);
-
 
 /**
  * Create body of the table
- * @param {Object} model
- * @param {JSON} colsHeader
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @param {object} colsHeader - columns header
+ * @returns {vnode} - the body of the table
  */
 const tableBody = (model, colsHeader) =>
   h('tbody', [
     h('tr', [
-      h('td.cell.text-ellipsis.cell-xs', {title: 'Severity'}, 'Severity'),
-      h('td.cell.text-ellipsis.cell-xs.cell-bordered', {title: 'Level'}, 'Level'),
+      h('td.cell.text-ellipsis.cell-xs', { title: 'Severity' }, 'Severity'),
+      h('td.cell.text-ellipsis.cell-xs.cell-bordered', { title: 'Level' }, 'Level'),
       colsHeader.date.visible && generateCellHeader(model, colsHeader.date, 'Date'),
       colsHeader.time.visible && generateCellHeader(model, colsHeader.time, 'Time'),
       colsHeader.hostname.visible && generateCellHeader(model, colsHeader.hostname, 'Hostname'),
@@ -50,22 +49,22 @@ const tableBody = (model, colsHeader) =>
       colsHeader.message.visible && generateCellHeader(model, colsHeader.message, 'Message'),
     ]),
   ]);
+
 /**
  * Create a cell header with specs
- * @param {Object} model
+ * @param {Model} model - root model of the application
  * @param {string} cell cell-characteristics
- * @param {string} headerName
- * @return {vnode}
+ * @param {string} headerName - name of the header cell
+ * @returns {vnode} - the cell header
  */
 const generateCellHeader = (model, cell, headerName) =>
   h(`td.cell.text-ellipsis.cell-bordered.${cell.size}`, {
-    title: headerName
+    title: headerName,
   }, [
     h('span.text-lighter.gray-darker.resizeWidth.br2', {
       title: 'Expand size of cell',
-      onclick: () => model.table.setNextSizeOfColumn(cell.size, headerName.toLowerCase())
+      onclick: () => model.table.setNextSizeOfColumn(cell.size, headerName.toLowerCase()),
     }, cell.size === 'cell-xl' ? iconArrowLeft() : iconArrowRight()),
     ' ',
     h('span.ph1', headerName),
   ]);
-  // h(`td.cell.text-ellipsis.cell-bordered.cell-m`, headerName);

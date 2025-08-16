@@ -15,7 +15,6 @@
 /* global COG */
 
 import {h} from '/js/src/index.js';
-
 /**
  * Panel which allows the user to select various options
  * to configure the workflow
@@ -24,7 +23,7 @@ import {h} from '/js/src/index.js';
  */
 const basicPanel = (workflow) =>
   h('.w-100', [
-    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', 'Basic Configuration')),
+    h('h5.bg-gray-light.p2.panel-title.w-100.flex-row', h('.w-100', 'General Configuration')),
     h('.p2.panel', [
       dcsPanel(workflow),
       dataDistributionPanel(workflow),
@@ -346,11 +345,11 @@ const readoutPanel = (workflow) => {
       h('.w-25'),
       h('a.w-75.f5.action', {
         style: 'font-style: italic; cursor: pointer',
-        href: `//${COG.CONSUL.kvStoreReadout}/${(
+        href: `//${COG.CONSUL.kvStoreReadout + (
           variables['readout_cfg_uri'] ?
             variables['readout_cfg_uri'] + '/edit' : '')}`,
         target: '_blank',
-      }, consulPre + COG.CONSUL.readoutPrefix + (
+      }, consulPre + COG.CONSUL.kvStoreReadout + (
         variables['readout_cfg_uri'] ?
           variables['readout_cfg_uri'] : '')
       )
@@ -433,11 +432,11 @@ const qcUriPanel = (workflow) => {
       h('.w-25'),
       h('a.w-75.f5.action', {
         style: 'font-style: italic; cursor: pointer',
-        href: `//${COG.CONSUL.kvStoreQC}/${(
+        href: `//${COG.CONSUL.kvStoreQC + (
           variables['qc_config_uri'] ?
             variables['qc_config_uri'] + '/edit' : '')}`,
         target: '_blank',
-      }, consulPre + COG.CONSUL.qcPrefix + (
+      }, consulPre + COG.CONSUL.kvStoreQC + (
         variables['qc_config_uri'] ?
           variables['qc_config_uri'] : '')
       )

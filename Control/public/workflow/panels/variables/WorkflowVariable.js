@@ -30,7 +30,7 @@ export default class WorkflowVariable {
     this.defaultValue = this.getDefaultValueFromVariable(variable);
     this.label = variable.label ? variable.label : 'Label Unknown';
     this.description = variable.description ? variable.description : '';
-    this.panel = variable.panel ? variable.panel : 'BasicConfiguration';
+    this.panel = variable.panel ? variable.panel : 'GeneralConfiguration';
     this.allowedValues = variable.allowedValues ? variable.allowedValues : [];
     this.key = variable.key;
     this.index = variable.index ? variable.index : 0;
@@ -130,30 +130,39 @@ export default class WorkflowVariable {
   /**
    * Given a KV Pair it will check if:
    * * key is valid after being trimmed
-   * * value is valid by chechking it's existence in the provided varSpecMap
+   * * value is valid by checking it's existence in the provided varSpecMap and it is not empty unless in EDIT mode
    * @param {String} key
    * @param {Object} value
    * @param {Map<String, JSON>} varSpecMap
    * @return {key:string, value:object, ok: boolean, error: string}
    */
-  static parseKVPair(key, value, varSpecMap = {}) {
+  static parseKVPair(key, value, varSpecMap = {}, inEdit = false) {
     const isKeyValid = key && key.trim() !== '';
+    const isValueValid = (value && value.trim() !== '') || inEdit;
     if (!isKeyValid) {
       return {ok: false, error: `Invalid key '${key}' provided`};
+    } if (!isValueValid) {
+      return {ok: false, error: `Invalid value '${value}' provided for key: '${key}'`};
     } else {
       key = key.trim();
+      value = value.trim();
       if (Object.keys(varSpecMap).length === 0 || !varSpecMap[key]) {
         // template does not support dynamic workflows or template does not contain provided key
         return {ok: true, key, value};
-      } else {
-        if (varSpecMap[key].type === VAR_TYPE.BOOL && value !== 'true' && value !== 'false') {
-          return {ok: false, error: `Provided value for key '${key}' should be 'true' or 'false'`};
-        } else if (varSpecMap[key].allowedValues.length === 0 || varSpecMap[key].allowedValues.includes(value)) {
-          return {ok: true, key, value};
-        } else {
-          return {ok: false, error: `Provided value for key '${key}' is not allowed`};
-        }
+      } else if (varSpecMap[key].type === VAR_TYPE.BOOL && value !== 'true' && value !== 'false') {
+        return {ok: false, error: `Provided value for key '${key}' should be 'true' or 'false'`};
+      } else if (varSpecMap[key].widget === WIDGET_VAR.DROPDOWN_BOX && !varSpecMap[key].allowedValues.includes(value)) {
+        return {ok: false, error: `Allowed values for key '${key}' are ${varSpecMap[key].allowedValues.toString()}`};
+      } else if (varSpecMap[key].type === VAR_TYPE.STRING && typeof value !== 'string') {
+        return {ok: false, error: `Allowed values for key '${key}' are have to be of type string`};
+      } else if (varSpecMap[key].type === VAR_TYPE.NUMBER && Number.isNaN(Number(value))) {
+        return {ok: false, error: `Allowed values for key '${key}' need to be of type number`};
+      } else if (varSpecMap[key].type === VAR_TYPE.ARRAY && !Array.isArray(value)) {
+        return {ok: false, error: `Allowed values for key '${key}' need to be of type Array`};
+      } else if (varSpecMap[key].type === VAR_TYPE.JSON && typeof value !== 'object') {
+        return {ok: false, error: `Allowed values for key '${key}' need to be of type a JSON`};
       }
+      return {ok: true, key, value};
     }
   }
 
@@ -161,7 +170,7 @@ export default class WorkflowVariable {
    * Given a String of KV Pairs it will check if each:
    * * provided string is a valid JSON
    * * key is valid after being trimmed
-   * * value is valid by chechking it's existence in the provided varSpecMap
+   * * value is valid by checking it's existence in the provided varSpecMap
    * @param {String} kvPairsString
    * @param {Map<String, Object>} varSpecMap
    * @return {kvMpa: Map<string, Object>, errors: Array<String>}

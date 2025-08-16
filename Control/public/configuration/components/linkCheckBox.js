@@ -23,15 +23,10 @@ import {h} from '/js/src/index.js';
  * @param {Object} model
  * @param {string} key - format link0
  * @param {JSON} config - reference to the configuration in CRUsMapByHost
+ * @param {string} label - name of link
  * @return {vnode}
  */
-const cruLinkCheckBox = (model, key, config) => {
-  let id;
-  try {
-    id = '#' + key.split('link')[1];
-  } catch (error) {
-    id = key;
-  }
+const cruLinkCheckBox = (model, key, config, label) => {
   return h('label.d-inline.f6.ph2', {
     style: 'white-space: nowrap',
     title: `Toggle selection of ${key}`
@@ -42,7 +37,7 @@ const cruLinkCheckBox = (model, key, config) => {
       config[key].enabled = config[key].enabled !== 'true' ? 'true' : 'false';
       model.configuration.notify();
     }
-  }), ' ' + id);
+  }), label);
 };
 
 export {cruLinkCheckBox};

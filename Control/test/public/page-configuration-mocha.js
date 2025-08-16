@@ -27,7 +27,6 @@ describe('`pageConfiguration` test-suite', async () => {
   describe('loading page with no consul connection', () => {
     it('should load configuration page', async () => {
       await page.goto(url + '?page=configuration', {waitUntil: 'networkidle0'});
-      await page.waitForTimeout(500);
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=configuration');
     });
@@ -55,7 +54,6 @@ describe('`pageConfiguration` test-suite', async () => {
 
     it('should load configuration page', async () => {
       await page.goto(url + '?page=configuration', {waitUntil: 'networkidle0'});
-      await page.waitForTimeout(500);
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=configuration');
     });
@@ -84,7 +82,6 @@ describe('`pageConfiguration` test-suite', async () => {
 
     it('should load configuration page', async () => {
       await page.goto(url + '?page=configuration', {waitUntil: 'networkidle0'});
-      await page.waitForTimeout(500);
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=configuration');
     });
@@ -113,7 +110,6 @@ describe('`pageConfiguration` test-suite', async () => {
 
     it('should load configuration page', async () => {
       await page.goto(url + '?page=configuration', {waitUntil: 'networkidle0'});
-      await page.waitForTimeout(500);
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=configuration');
     });

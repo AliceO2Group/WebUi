@@ -10,67 +10,70 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX} from '/js/src/index.js';
-import spinner from '../loader/spinner.js';
-import {draw} from './objectDraw.js';
-import infoButton from './../common/infoButton.js';
+import { h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX } from '/js/src/index.js';
+import { spinner } from '../common/spinner.js';
+import { draw } from './objectDraw.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
 import virtualTable from './virtualTable.js';
+import { qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
  * and a status bar for selected object name and # of objects
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
-export default (model) => h('.h-100.flex-column', {key: model.router.params.page}, [
+export default (model) => h('.h-100.flex-column', { key: model.router.params.page }, [
   h('.flex-row.flex-grow', [
     h('.scroll-y.flex-column', {
       style: {
-        width: model.object.selected ? '50%' : '100%'
+        width: model.object.selected ? '50%' : '100%',
       },
-    }, model.object.searchInput.trim() !== '' ?
-      virtualTable(model, 'main')
-      :
-      model.object.objectsRemote.match({
-        NotAsked: () => null,
-        Loading: () => h('.absolute-fill.flex-column.items-center.justify-center.f5', [
-          spinner(5), h('', 'Loading Objects')
-        ]),
-        Success: () => tableShow(model),
-        Failure: () => null, // notification is displayed
-      })
-    ),
+    }, model.object.objectsRemote.match({
+      NotAsked: () => null,
+      Loading: () =>
+        h('.absolute-fill.flex-column.items-center.justify-center.f5', [spinner(5), h('', 'Loading Objects')]),
+      Success: () => {
+        const searchInput = model.object?.searchInput?.trim() ?? '';
+        if (searchInput !== '') {
+          const objectsLoaded = model.object.list;
+          const objectsToDisplay = objectsLoaded.filter((qcObject) =>
+            qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
+          return virtualTable(model, 'main', objectsToDisplay);
+        }
+        return tableShow(model);
+      },
+      Failure: () => null, // Notification is displayed
+    })),
     h('.animate-width.scroll-y', {
       style: {
-        width: model.object.selected ? '50%' : 0
-      }
-    }, model.object.selected ? objectPanel(model) : null
-    )
+        width: model.object.selected ? '50%' : 0,
+      },
+    }, model.object.selected ? objectPanel(model) : null),
   ]),
   h('.f6.status-bar.ph1.flex-row', [
     statusBarLeft(model),
     statusBarRight(model),
-  ])
+  ]),
 ]);
 
 /**
  * Method to tackle various states for the selected objects
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
 function objectPanel(model) {
   const selectedObjectName = model.object.selected.name;
   if (model.object.objects && model.object.objects[selectedObjectName]) {
     return model.object.objects[selectedObjectName].match({
       NotAsked: () => null,
-      Loading: () => h('.h-100.w-100.flex-column.items-center.justify-center.f5', [
-        spinner(3), h('', 'Loading Object')]),
-      Success: () => drawPlot(model),
-      Failure: (error) => h('.h-100.w-100.flex-column.items-center.justify-center.f5', [
-        h('.f1', iconCircleX()), error]),
+      Loading: () =>
+        h('.h-100.w-100.flex-column.items-center.justify-center.f5', [spinner(3), h('', 'Loading Object')]),
+      Success: (data) => drawPlot(model, data),
+      Failure: (error) =>
+        h('.h-100.w-100.flex-column.items-center.justify-center.f5', [h('.f1', iconCircleX()), error]),
     });
   }
   return null;
@@ -78,37 +81,43 @@ function objectPanel(model) {
 
 /**
  * Draw the object including the info button and history dropdown
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @param {JSON} object - {qcObject, info, timestamps}
+ * @returns {vnode} - virtual node element
  */
-const drawPlot = (model) =>
-  h('', {style: 'height:100%; display: flex; flex-direction: column'},
-    [
-      h('.resize-button.flex-row', [
-        infoButton(model.object, model.isOnlineModeEnabled),
-        h('.p1.text-left', {style: 'padding-bottom: 0;'},
-          h('a.btn',
-            {
-              title: 'Open object plot in full screen',
-              href: `?page=objectView&objectName=${model.object.selected.name}`,
-              onclick: (e) => model.router.handleLinkEvent(e)
-            }, iconResizeBoth()
-          )
-        )]),
-      h('', {style: 'height:100%; display: flex; flex-direction: column'},
-        draw(model, model.object.selected.name, {stat: true}, 'treePage')
-      ),
-      h('.w-100.flex-row', {style: 'justify-content: center'}, h('.w-50', timestampSelectForm(model)))
-    ]
-  );
+const drawPlot = (model, object) => {
+  const { name, validFrom, id } = object;
+  const href = validFrom ?
+    `?page=objectView&objectName=${name}&ts=${validFrom}&id=${id}`
+    : `?page=objectView&objectName=${name}`;
+  const info = object;
+  return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
+    h('.resize-button.flex-row', [
+      h('.p1.text-left', { style: 'padding-bottom: 0;' }, h(
+        'a.btn',
+        {
+          title: 'Open object plot in full screen',
+          href,
+          onclick: (e) => model.router.handleLinkEvent(e),
+        },
+        iconResizeBoth(),
+      )),
+    ]),
+    h('', { style: 'height:77%;' }, draw(model, name, { stat: true })),
+    h('.scroll-y', {}, [
+      h('.w-100.flex-row', { style: 'justify-content: center' }, h('.w-80', timestampSelectForm(model))),
+      qcObjectInfoPanel(info, { 'font-size': '.875rem;' }),
+    ]),
+  ]);
+};
 
 /**
  * Shows status of current tree with its options (online, loaded, how many)
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
 function statusBarLeft(model) {
-  let itemsInfo;
+  let itemsInfo = '';
   if (!model.object.currentList) {
     itemsInfo = 'Loading objects...';
   } else if (model.object.searchInput) {
@@ -122,8 +131,8 @@ function statusBarLeft(model) {
 
 /**
  * Shows current selected object path
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
 const statusBarRight = (model) => model.object.selected
   ? h('span.right', model.object.selected.name)
@@ -131,52 +140,43 @@ const statusBarRight = (model) => model.object.selected
 
 /**
  * Shows a tree of objects inside a table with indentation
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
 const tableShow = (model) =>
   h('table.table.table-sm.text-no-select', [
-    h('thead', [
-      h('tr', [
-        h('th', 'Name'),
-      ])
-    ]),
-    h('tbody', [
-      treeRows(model),
-    ])
+    h('thead', [h('tr', [h('th', 'Name')])]),
+    h('tbody', [treeRows(model)]),
   ]);
 
 /**
  * Shows a list of lines <tr> of objects
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
 const treeRows = (model) => !model.object.tree ?
   null
   :
-  (
-    (model.object.tree.children.length === 0) ?
-      h('.w-100.text-center', 'No objects found')
-      :
-      model.object.tree.children.map((children) => treeRow(model, children, 0))
-  );
 
+  model.object.tree.children.length === 0
+    ? h('.w-100.text-center', 'No objects found')
+    : model.object.tree.children.map((children) => treeRow(model, children, 0));
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
  * sub-nodes of `tree` as additional lines if they are open in the tree.
  * Indentation is added according to tree level during recursive call of treeRow
  * Tree is traversed in depth-first with pre-order (root then subtrees)
- * @param {Object} model
+ * @param {Model} model - root model of the application
  * @param {ObjectTree} tree - data-structure containing an object per node
  * @param {number} level - used for indentation within recursive call of treeRow
- * @return {vnode}
+ * @returns {vnode} - virtual node element
  */
 function treeRow(model, tree, level) {
   const padding = `${level}em`;
   const levelDeeper = level + 1;
   const children = tree.open ? tree.children.map((children) => treeRow(model, children, levelDeeper)) : [];
-  const path = tree.path.join('/');
+  const path = tree.name;
   const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
 
   if (model.object.searchInput) {
@@ -188,12 +188,12 @@ function treeRow(model, tree, level) {
       return [
         leafRow(path, () => model.object.select(tree.object), className, padding, tree.name),
         branchRow(path, tree, padding),
-        children
+        children,
       ];
     }
     return [
       branchRow(path, tree, padding),
-      children
+      children,
     ];
   }
 }
@@ -201,32 +201,37 @@ function treeRow(model, tree, level) {
 /**
  * Creates a row containing specific visuals for leaf object and on selection
  * it will plot the object with JSRoot
- * @param {String} path - full name of the object
+ * @param {string} path - full name of the object
  * @param {Action} selectItem - action for plotting the object
- * @param {String} className - name of the row class
+ * @param {string} className - name of the row class
  * @param {number} padding - space needed to be displayed so that leaf is within its parent
- * @param {String} leafName - name of the object
- * @return {vnode}
+ * @param {string} leafName - name of the object
+ * @returns {vnode} - virtual node element
  */
 const leafRow = (path, selectItem, className, padding, leafName) =>
-  h('tr.object-selectable', {key: path, title: path, onclick: selectItem, class: className}, [
+  h('tr.object-selectable', {
+    key: path, title: path, onclick: selectItem, class: className, id: path,
+  }, [
     h('td.highlight', [
-      h('span', {style: {paddingLeft: padding}}, iconBarChart()), ' ', leafName]),
+      h('span', { style: { paddingLeft: padding } }, iconBarChart()),
+      ' ',
+      leafName,
+    ]),
   ]);
 
 /**
  * Creates a row containing specific visuals for branch object and on selection
  * it will open its children
- * @param {String} path - full name of the object
+ * @param {string} path - full name of the object
  * @param {ObjectTree} tree - current selected tree
  * @param {number} padding - space needed to be displayed so that branch is within its parent
- * @return {vnode}
+ * @returns {vnode} - virtual node element
  */
 const branchRow = (path, tree, padding) =>
-  h('tr.object-selectable', {key: path, title: path, onclick: () => tree.toggle()}, [
+  h('tr.object-selectable', { key: path, title: path, onclick: () => tree.toggle() }, [
     h('td.highlight', [
-      h('span', {style: {paddingLeft: padding}}, tree.open ? iconCaretBottom() : iconCaretRight()),
+      h('span', { style: { paddingLeft: padding } }, tree.open ? iconCaretBottom() : iconCaretRight()),
       ' ',
-      tree.name
+      tree.name,
     ]),
   ]);

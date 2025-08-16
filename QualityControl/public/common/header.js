@@ -10,109 +10,70 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h, iconPerson, iconMediaPlay, iconMediaStop} from '/js/src/index.js';
+import { h, iconPerson } from '/js/src/index.js';
 
-import spinner from '../loader/spinner.js';
-import layoutShowHeader from '../layout/layoutShowHeader.js';
-import layoutListHeader from '../layout/layoutListHeader.js';
+import { spinner } from './spinner.js';
+import layoutViewHeader from '../layout/view/header.js';
 import objectTreeHeader from '../object/objectTreeHeader.js';
-import frameworkInfoHeader from '../frameworkInfo/frameworkInfoHeader.js';
+import aboutViewHeader from '../pages/aboutView/components/aboutViewHeader.js';
+import LayoutListHeader from '../pages/layoutListView/components/LayoutListHeader.js';
 
 /**
  * Shows header of the application, split with 3 parts:
  * - app part on left side
  * - page title on center
  * - page actions on right side
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - header element
  */
 export default (model) => h('.flex-row.p2', [
   commonHeader(model),
-  headerSpecific(model)
+  headerSpecific(model),
 ]);
 
-let onlineButtonIcon = iconMediaPlay();
-let onlineButtonStyle = 'btn-default';
 /**
  * Shows the page specific header (center and right side)
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
 const headerSpecific = (model) => {
   switch (model.page) {
-    case 'layoutList': return layoutListHeader(model);
-    case 'layoutShow': return layoutShowHeader(model);
+    case 'layoutList': return LayoutListHeader(model.layoutListModel);
+    case 'layoutShow': return layoutViewHeader(model.layout);
     case 'objectTree': return objectTreeHeader(model);
-    case 'about': return frameworkInfoHeader(model);
+    case 'about': return aboutViewHeader();
     default: return null;
   }
 };
 
 /**
  * Shows app header, common to all pages (profile button + app title)
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
-const commonHeader = (model) => h('.flex-grow', [
+const commonHeader = (model) => h('.flex-grow.flex-row.items-center', [
   loginButton(model),
   ' ',
-  onlineButton(model),
-  ' ',
   h('span.f4.gray', 'Quality Control'),
-  model.loader.active && h('span.f4.mh1.gray', spinner())
+  model.loader.active && h('span.f4.mh1.gray', spinner()),
 ]);
 
 /**
  * Shows profile button to logout or check who is the current owner of session
- * @param {Object} model
- * @return {vnode}
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
  */
 const loginButton = (model) =>
   h('.dropdown', {
-    title: 'Login', class: model.accountMenuEnabled ? 'dropdown-open' : ''
+    title: 'Login', class: model.accountMenuEnabled ? 'dropdown-open' : '',
   }, [
-    h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
+    h('button.btn', { onclick: () => model.toggleAccountMenu() }, iconPerson()),
     h('.dropdown-menu', [
       h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`),
-      model.session.personid === 0 // anonymous user has id 0
+      model.session.personid === 0 // Anonymous user has id 0
         ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
-        : h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout'),
+        : h('a.menu-item', { onclick: () => alert('Not implemented') }, 'Logout'),
     ]),
   ]);
-
-/**
- * Create button which will allow user to enable/disable online mode
- * @param {Object} model
- * @return {vnode}
- */
-const onlineButton = (model) => h('button.btn',
-  {
-    className: onlineButtonStyle,
-    onclick: () => toggleOnlineButton(model),
-    disabled: model.object.queryingObjects ? true : false,
-    title: model.object.queryingObjects ? 'Toggling disabled while querying' : 'Toggle Mode (Online/Offline)',
-    style: model.isOnlineModeConnectionAlive ? '' : 'display: none'
-  },
-  'Online',
-  ' ',
-  onlineButtonIcon
-);
-
-/**
- * Action to disable/enable online mode
- * @param {Object} model
- */
-function toggleOnlineButton(model) {
-  model.toggleMode();
-  switch (model.isOnlineModeEnabled) {
-    case true:
-      onlineButtonStyle = 'btn-success';
-      onlineButtonIcon = iconMediaStop();
-      break;
-    default:
-      onlineButtonStyle = 'btn-default';
-      onlineButtonIcon = iconMediaPlay();
-  }
-}

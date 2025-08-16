@@ -10,16 +10,13 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /* eslint-disable */
 
 const puppeteer = require('puppeteer');
 const assert = require('assert');
 const {spawn} = require('child_process');
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
 const port = 8085;
 
 let browser;
@@ -42,7 +39,7 @@ describe('Framework Frontend', function() {
   // Start browser to test UI
   before(async function() {
     // Start web-server in background
-    subprocess = spawn('node', ['index-test.js'], {stdio: 'pipe'});
+    subprocess = spawn('node', ['Frontend/test/index-test.js'], {stdio: 'pipe'});
     subprocess.stdout.on('data', (chunk) => {
       subprocessOutput += chunk.toString();
     });
@@ -50,7 +47,7 @@ describe('Framework Frontend', function() {
       subprocessOutput += chunk.toString();
     });
 
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: 'new'});
     page = await browser.newPage();
     page.on('requestfailed', (request) => {
       console.error(`Navigator failed to load ${request.url()}`);
@@ -304,12 +301,6 @@ describe('Framework Frontend', function() {
   });
 
   describe('BrowserStorage class', function() {
-    it('should successfully create a BrowserStorage instance', async () => {
-      await page.evaluate(async () => {
-        const storage = new BrowserStorage();
-      });
-    });
-
     it('should successfully set (key,value) in localStorage & sessionStorage', async () => {
       const storage = await page.evaluate(async () => {
         const storage = new BrowserStorage('TEST');

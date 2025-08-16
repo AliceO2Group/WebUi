@@ -33,6 +33,7 @@ const coreGRPCServer = (config) => {
   const octlProto = grpcLibrary.loadPackageDefinition(packageDefinition);
   const credentials = grpcLibrary.ServerCredentials.createInsecure();
   const address = `${config.grpc.hostname}:${config.grpc.port}`;
+
   server.addService(octlProto.o2control.Control.service, {
     getFrameworkInfo(call, callback) {
       calls['getFrameworkInfo'] = true;
@@ -59,7 +60,7 @@ const coreGRPCServer = (config) => {
           envTest.environment.state = 'CONFIGURED';
           break;
         case 4: // RESET
-          envTest.environment.state = 'STANDBY';
+          envTest.environment.state = 'DEPLOYED';
           break;
       }
       callback(null, {id: envTest.environment.id});
@@ -68,9 +69,14 @@ const coreGRPCServer = (config) => {
       calls['getEnvironment'] = true;
       callback(null, envTest);
     },
-    newEnvironment(call, callback) {
-      calls['newEnvironment'] = true;
-      callback(null, {environment: envTest.environment});
+    async newEnvironment(call, callback) {
+      if (refreshCall++ == 1) {
+        callback(new Error('Cannot create environment'), {});
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        calls['newEnvironment'] = true;
+        callback(null, {environment: envTest.environment});
+      }
     },
     getWorkflowTemplates(call, callback) {
       calls['getWorkflowTemplates'] = true;
@@ -82,11 +88,7 @@ const coreGRPCServer = (config) => {
     },
     refreshRepos(call, callback) {
       calls['refreshRepos'] = true;
-      if (refreshCall++ === 0) {
-        callback(new Error('504: Unable to refresh repositories'), {});
-      } else {
-        callback(null, {});
-      }
+      callback(null, {});
     },
     destroyEnvironment(call, callback) {
       calls['destroyEnvironment'] = true;
@@ -106,11 +108,9 @@ const coreGRPCServer = (config) => {
     if (error) {
       console.error(error);
       throw error;
-    } else {
-      server.start();
     }
-
   };
+
   server.bindAsync(address, credentials, bindCallback);
   return {server, calls};
 };
@@ -119,11 +119,12 @@ const coreGRPCServer = (config) => {
 const envTest = {
   environment: {
     id: '6f6d6387-6577-11e8-993a-f07959157220',
-    createdWhen: '2018-06-01 10:40:27.97536195 +0200 CEST',
+    createdWhen: '1648121309974',
     state: 'CONFIGURED',
     tasks: [],
     rootRole: 'copy-push',
     numberOfFlps: 2,
+    includedDetectors: ['MID'],
     userVars: {
       odc_enabled: 'true',
       mid_enabled: 'false',
@@ -131,7 +132,7 @@ const envTest = {
       dd_enabled: 'true',
       run_type: 'run'
     },
-    vaars: {
+    vars: {
       odc_enabled: 'true',
       mid_enabled: 'false',
       mid_something: 'test',
@@ -142,12 +143,17 @@ const envTest = {
       dcs_topology: 'test',
       dd_enabled: 'true',
       run_type: 'run'
+    },
+    integratedServices: {
     }
   },
   workflow: {},
   workflowTemplates: {
     workflowTemplates: [
-      {repo: 'git.cern.ch/some-user/some-repo/', template: 'prettyreadout-1', revision: 'master'},
+      {
+        repo: 'git.cern.ch/some-user/some-repo/',
+        template: 'prettyreadout-1', revision: 'master', description: 'something'
+      },
     ]
   },
   listRepos: {
@@ -156,4 +162,5 @@ const envTest = {
       {name: 'git.com/alice-user/alice-repo/'}]
   }
 };
+
 module.exports = {coreGRPCServer};

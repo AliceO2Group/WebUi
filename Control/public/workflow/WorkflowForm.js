@@ -15,7 +15,7 @@
 import {Observable} from '/js/src/index.js';
 
 /**
- * Model representing Workflow
+ * Model representing Workflow Template configuration that is to be potentially used for deploying an environment
  */
 export default class WorkflowForm extends Observable {
   /**
@@ -32,6 +32,18 @@ export default class WorkflowForm extends Observable {
     this.basicVariables = {};
 
     this.hosts = [];
+    this._detectors = [];
+  }
+
+  /**
+   * Set template metadata information
+   * @param {object} - information retrieved for the default configuration template
+   * @return {void}
+   */
+  setTemplateInfo({repository = '', revision = '', template = ''}) {
+    this.repository = repository;
+    this.revision = revision;
+    this.template = template;
   }
 
   /**
@@ -87,6 +99,15 @@ export default class WorkflowForm extends Observable {
    */
   removeHostByIndex(index) {
     this.hosts.splice(index, 1);
+    this.notify();
+  }
+
+  /**
+   * Reset the selection for variables
+   */
+  resetVariables() {
+    this.variables = {};
+    this.basicVariables = {};
     this.notify();
   }
 }

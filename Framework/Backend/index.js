@@ -10,29 +10,95 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 'use strict';
-const WebSocket = require('./websocket/server');
-const HttpServer = require('./http/server');
-const WebSocketMessage = require('./websocket/message.js');
-const Log = require('./log/Log.js');
-const InfoLoggerSender = require('./log/InfoLoggerSender.js');
-const InfoLoggerReceiver = require('./log/InfoLoggerReceiver.js');
-const MySQL = require('./db/mysql.js');
-const JwtToken = require('./jwt/token.js');
 const ConsulService = require('./services/consul.service.js');
+const HttpServer = require('./http/server.js');
+const InfoLoggerReceiver = require('./log/InfoLoggerReceiver.js');
+const InfoLoggerSender = require('./log/InfoLoggerSender.js');
 const Jira = require('./services/jira.js');
-const KafkaConnector = require('./services/kafka.js');
+const O2TokenService = require('./services/O2TokenService.js');
+const { LogLevel } = require('./log/LogLevel.js');
+const { LogSeverity } = require('./log/LogSeverity.js');
+const { LogManager, Log } = require('./log/LogManager.js');
+const MySQL = require('./db/mysql.js');
+const NotificationService = require('./services/notification.js');
+const WebSocket = require('./websocket/server.js');
+const WebSocketMessage = require('./websocket/message.js');
+
+const { FailedDependencyError } = require('./errors/FailedDependencyError.js');
+const { InvalidInputError } = require('./errors/InvalidInputError.js');
+const { NotFoundError } = require('./errors/NotFoundError.js');
+const { ServiceUnavailableError } = require('./errors/ServiceUnavailableError.js');
+const { TimeoutError } = require('./errors/TimeoutError.js');
+const { UnauthorizedAccessError } = require('./errors/UnauthorizedAccessError.js');
+const { grpcErrorToNativeError } = require('./errors/grpcErrorToNativeError.js');
+const { GrpcErrorCodes } = require('./errors/grpcErrorCodes.enum.js');
+const {
+  updateAndSendExpressResponseFromNativeError,
+} = require('./errors/updateAndSendExpressResponseFromNativeError.js');
+const { Logger } = require('./log/Logger');
+
+const { getWebUiProtoIncludeDir } = require('./protobuf/getWebUiProtoIncludeDir');
+const { AliEcsEventMessagesConsumer } = require('./kafka/AliEcsEventMessagesConsumer.js');
+
+const { parseUrlParameters } = require('./http/parseUrlParameters.js');
+const { buildUrl } = require('./http/buildUrl.js');
+
+exports.ConsulService = ConsulService;
+
+exports.HttpServer = HttpServer;
+
+exports.InfoLoggerReceiver = InfoLoggerReceiver;
+
+exports.InfoLoggerSender = InfoLoggerSender;
+
+exports.Jira = Jira;
+
+exports.O2TokenService = O2TokenService;
+
+exports.Log = Log;
+
+exports.LogManager = LogManager;
+
+// Use only as type, use LogManager to create loggers
+exports.Logger = Logger;
+
+exports.LogLevel = LogLevel;
+
+exports.LogSeverity = LogSeverity;
+
+exports.MySQL = MySQL;
+
+exports.NotificationService = NotificationService;
 
 exports.WebSocket = WebSocket;
-exports.HttpServer = HttpServer;
+
 exports.WebSocketMessage = WebSocketMessage;
-exports.Log = Log;
-exports.MySQL = MySQL;
-exports.JwtToken = JwtToken;
-exports.InfoLoggerSender = InfoLoggerSender;
-exports.InfoLoggerReceiver = InfoLoggerReceiver;
-exports.ConsulService = ConsulService;
-exports.Jira = Jira;
-exports.KafkaConnector= KafkaConnector;
+
+exports.FailedDependencyError = FailedDependencyError;
+
+exports.InvalidInputError = InvalidInputError;
+
+exports.NotFoundError = NotFoundError;
+
+exports.ServiceUnavailableError = ServiceUnavailableError;
+
+exports.TimeoutError = TimeoutError;
+
+exports.UnauthorizedAccessError = UnauthorizedAccessError;
+
+exports.GrpcErrorCodes = GrpcErrorCodes;
+
+exports.grpcErrorToNativeError = grpcErrorToNativeError;
+
+exports.updateAndSendExpressResponseFromNativeError = updateAndSendExpressResponseFromNativeError;
+
+exports.getWebUiProtoIncludeDir = getWebUiProtoIncludeDir;
+
+exports.AliEcsEventMessagesConsumer = AliEcsEventMessagesConsumer;
+
+exports.buildUrl = buildUrl;
+
+exports.parseUrlParameters = parseUrlParameters;

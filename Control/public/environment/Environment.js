@@ -13,8 +13,9 @@
 */
 
 import {Observable, RemoteData} from '/js/src/index.js';
-import Task from './Task.js';
-import {getTaskShortName} from '../common/utils.js';
+import {jsonDelete} from './../utilities/jsonDelete.js';
+import {jsonPut} from './../utilities/jsonPut.js';
+import { TaskTableModel } from './../common/task/TaskTableModel.js';
 
 /**
  * Model representing Environment CRUD
@@ -27,10 +28,11 @@ export default class Environment extends Observable {
   constructor(model) {
     super();
 
-    this.task = new Task(model);
-    this.task.bubbleTo(model);
+    this.taskTableModel = new TaskTableModel(model);
+    this.taskTableModel.bubbleTo(model);
 
     this.model = model;
+    this.requests = RemoteData.notAsked();
     this.list = RemoteData.notAsked();
     this.item = RemoteData.notAsked();
     this.itemControl = RemoteData.notAsked();
@@ -40,52 +42,7 @@ export default class Environment extends Observable {
       userVars: true,
       vars: false,
       defaults: false,
-    }
-  }
-
-  /**
-   * Check if variable is known and if yes return a user readable name for that variable
-   * Otherwise return the variable itself;
-   * @param {String} variable 
-   * @returns {string}
-   */
-  getVariableDescription(variable) {
-    switch (variable) {
-      case 'dcs_enabled':
-        return 'DCS'
-      case 'odc_enabled':
-        return 'EPN';
-      case 'qcdd_enabled':
-        return 'General QC (FLP)';
-      case 'dd_enabled':
-        return 'Data Distribution';
-      case 'ddsched_enabled':
-        return 'Data Distribution Scheduler'
-      case 'minimal_dpl_enabled':
-        return 'Minimal DPL workflow';
-      case 'readout_cfg_uri':
-        return 'Readout URI';
-      case 'qc_config_uri':
-        return 'QC URI';
-      default:
-        return variable;
-    }
-  }
-
-  /**
-   * Check if the passed variable is known to belong to radio button group
-   */
-  isVariableInRadioGroup(variable) {
-    return [
-      'odc_enabled', 'qcdd_enabled', 'dd_enabled', 'ddsched_enabled', 'minimal_dpl_enabled', 'dcs_enabled'
-    ].includes(variable);
-  }
-
-  /**
-   * Check if the passed variable is known to belong to radio button group
-   */
-  isKVPairInConsulUriGroup(key, value) {
-    return ['qc_config_uri', 'readout_cfg_uri'].includes(key) && value.includes('consul');
+    };
   }
 
   /**
@@ -95,51 +52,79 @@ export default class Environment extends Observable {
     this.list = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/GetEnvironments`);
-    if (!ok) {
-      this.list = RemoteData.failure(result.message);
-      this.notify();
-      return;
-    }
-    this.list = RemoteData.success(result);
+    const {result, ok} = await this.model.loader.get(`/api/environments`);
+    this.list = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
+    this.notify();
+  }
+
+
+  /**
+   * Remove environment request
+   */
+  async removeEnvironmentRequest(id) {
+    this.requests = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this.model.loader.post(`/api/core/removeRequest/${id}`);
+    this.requests = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
     this.notify();
   }
 
   /**
+   * Get environments requests
+   */
+  async getEnvironmentRequests() {
+    this.requests = RemoteData.loading();
+    this.notify();
+
+    const {result, ok} = await this.model.loader.get(`/api/core/requests`);
+    this.requests = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
+    this.notify();
+  }
+  /**
    * Load one environment into `item` as RemoteData
    * @param {Object} body - See protobuf definition for properties
    */
-  async getEnvironment(body) {
-    this.item = RemoteData.loading();
+  async getEnvironment(body, itShouldLoad = true, panel = '') {
+    if (itShouldLoad) {
+      this.item = RemoteData.loading();
+    } else if (this.item.isSuccess()) {
+      // Clear tasks to avoid flickering or bad display when switching from EPN to FLP
+      this.item.payload.tasks = RemoteData.loading();
+    }
     this.notify();
-    const {result, ok} = await this.model.loader.post(`/api/GetEnvironment`, body);
+
+    const { result, ok } = await this.model.loader.get(`/api/environment/${body.id}/${panel}`);
     if (!ok) {
       this.item = RemoteData.failure(result.message);
-      this.notify();
-      return;
+    } else {
+      result.tasks = RemoteData.success(result.tasks);
+      this.item = RemoteData.success(result);
     }
-    this.item = RemoteData.success(this._parseEnvResult(result));
     this.itemControl = RemoteData.notAsked();
     this.notify();
   }
 
   /**
-   * Control a remote environment, store action result into `itemControl` as RemoteData
-   * @param {Object} body - See protobuf definition for properties
+   * Request the control of an environment to transition to a new state. 
+   * In case of success, the user will be redirected to the environment details page with the new state
+   * In case of failure, an error message which be stored in `itemControl` and displayed under the button action panel
+   * @param {String} id - environmentId that the user whishes to control
+   * @param {String} type - type of the transition that the user whishes to apply
+   * @param {Number} runNumber - current run number if the environment is in RUNNING state
+   * @return {void}
    */
-  async controlEnvironment(body) {
+  async controlEnvironment(id, type, runNumber) {
     this.itemControl = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/ControlEnvironment`, body);
-    if (!ok) {
-      this.itemControl = RemoteData.failure(result.message);
-      this.notify();
-      return;
+    try {
+      const result = await jsonPut(`/api/environment/${id}`, {body: {id, type, runNumber}});
+      this.itemControl = RemoteData.success(result);
+      this.model.router.go(`?page=environment&id=${result.id}`);
+    } catch (error) {
+      this.itemControl = RemoteData.failure(error);
     }
-    this.itemControl = RemoteData.success(result);
-    this.itemNew = RemoteData.notAsked();
-    this.model.router.go(`?page=environment&id=${result.id}`);
     this.notify();
   }
 
@@ -152,98 +137,77 @@ export default class Environment extends Observable {
     this.itemNew = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/NewEnvironment`, itemForm);
-    if (!ok) {
-      this.itemNew = RemoteData.failure(result.message);
-      this.notify();
-      return;
-    }
-    this.itemNew = RemoteData.notAsked();
-    this.model.router.go(`?page=environment&id=${result.environment.id}`);
+    const {result, ok} = await this.model.loader.post(`/api/core/request`, itemForm);
+    this.itemNew = !ok ? RemoteData.failure(result.message) : RemoteData.notAsked();
+    this.model.router.go(`?page=environments`);
   }
 
   /**
    * Destroy a remote environment, store action result into `this.itemControl` as RemoteData
-   * @param {Object} body - See protobuf definition for properties
+   * @param {String} id - id of the environment to be destroyed
+   * @param {Number} runNumber - if environment is in running state
+   * @param {Boolean} [allowInRunningState = false] - if the environment should be allowed to stop in running state
+   * @param {Boolean} [force = false] - if the environment should be killed via force flag
    */
-  async destroyEnvironment(body) {
+  async destroyEnvironment(id, runNumber, allowInRunningState, force) {
     this.itemControl = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/DestroyEnvironment`, body);
-    if (!ok) {
-      this.model.notification.show(result.message, 'danger', 5000);
-      this.itemControl = RemoteData.failure(result.message);
+    try {
+      await jsonDelete(`/api/environment/${id}`, {body: {id, runNumber, allowInRunningState, force}});
+      this.itemControl = RemoteData.notAsked();
+      this.model.router.go(`?page=environments`);
+    } catch (error) {
+      this.model.notification.show(error.message, 'danger', 5000);
+      this.itemControl = RemoteData.failure(error.message);
       this.notify();
-      return;
     }
-    this.itemControl = RemoteData.notAsked();
-    this.model.router.go(`?page=environments`);
   }
 
   /**
    * Save configuration of the new environment page
    * @param {JSON} data - configuration to be saved
    */
-  async saveEnvConfiguration(data) {
+  async saveEnvConfiguration(data, action = 'save') {
     this.itemNew = RemoteData.loading();
     this.notify();
-    const {result, ok} = await this.model.loader.post(`/api/configuration/save`, data);
+    const {result, ok} = await this.model.loader.post(`/api/core/environments/configuration/${action}`, data, true);
     if (!ok) {
+      this.model.notification.show(result.message, 'danger', 10000);
       this.itemNew = RemoteData.failure(result.message);
     } else {
+      this.model.notification.show(result.message, 'success', 3000);
       this.itemNew = RemoteData.success(result.message);
     }
     this.notify();
   }
 
   /**
-   * Helpers
+   * If the user has the environment page opened and there is an 
+   * @param {EnvironmentInfo} environments - partial env info from AliECS via WebSocket message
    */
-
-  /**
-   * Given a JSON containing environment information and a specific key:
-   * * check if that key maps to an existing values
-   * * remove any variables that are a detector variable but are not part of the included detector
-   * @param {JSON} dataToFilter
-   * @param {string} label
-   * @return {JSON}
-   */
-  _filterOutDetectorsVariables(dataToFilter, label) {
-    const data = JSON.parse(JSON.stringify(dataToFilter));
-    const detectors = this.model.detectors.listRemote;
-    const includedDetectors = data.includedDetectors;
-    if (data[label] && includedDetectors && includedDetectors.length !== 0 && detectors.isSuccess()) {
-      Object.keys(data[label])
-        .filter((variable) => {
-          const prefix = variable.split('_')[0];
-          const isVariableDetector =
-            detectors.payload.findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1
-          const isVariableIncludedDetector =
-            includedDetectors.findIndex((det) => det.toLocaleUpperCase() === prefix.toLocaleUpperCase()) !== -1;
-          return isVariableDetector && !isVariableIncludedDetector;
-        })
-        .forEach((variable) => delete data[label][variable])
+  updateItemEnvironment(environments = []) {
+    if (this.item.isSuccess()) {
+      const {id, currentTransition} = this.item.payload;
+      let envExists = false;
+      environments.forEach((env) => {
+        if (env.id === id) {
+          envExists = true;
+          if (!env.currentTransition) {
+            env.currentTransition = undefined;
+          }
+          delete env.tasks;
+          Object.assign(this.item.payload, env);
+          this.notify();
+          if (currentTransition && !env.currentTransition) {
+            this.getEnvironment({id}, false);
+          }
+          return;
+        }
+      });
+      if (!envExists) {
+        this.item = RemoteData.failure('Environment was destroyed');
+      }
     }
-    return data;
-  }
-
-  /**
-   * Method to remove and parse fields from environment result
-   * @param {JSON} result
-   * @return {JSON}
-   */
-  _parseEnvResult(result) {
-    let task = undefined;
-    if (result.environment.tasks) {
-      task = result.environment.tasks.find((task) => task.mesosStdout);
-      result.environment.tasks.forEach((task) => task.name = getTaskShortName(task.name));
-    }
-    result.mesosStdout = (task && task.mesosStdout) ? task.mesosStdout : '';
-
-    result.environment = this._filterOutDetectorsVariables(result.environment, 'vars');
-    result.environment = this._filterOutDetectorsVariables(result.environment, 'userVars');
-    result.environment = this._filterOutDetectorsVariables(result.environment, 'defaults');
-    return result;
   }
 }

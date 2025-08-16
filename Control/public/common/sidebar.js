@@ -14,7 +14,8 @@
 
 import {h} from '/js/src/index.js';
 import {
-  iconGridTwoUp, iconGridThreeUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSkipForward, iconCog
+  iconGridTwoUp, iconGridThreeUp, iconExcerpt, iconPlus, iconMediaSkipBackward, iconMediaSkipForward, iconCog,
+  iconCalculator, iconLockLocked, iconWrench
 } from '/js/src/icons.js';
 
 /**
@@ -25,12 +26,18 @@ import {
 export default (model) => h('.absolute-fill scroll-y.flex-column', [
   h('h5.menu-title-large.mh1',
     model.sideBarMenu ? 'Environments' : 'ENVS'),
-  menuItem(model, 'Create', 'newEnvironment', iconPlus()),
-  menuItem(model, 'Active', 'environments', iconGridTwoUp()),
+  menuItem(model, 'Global Runs', 'newEnvironment', iconPlus()),
+  menuItem(model, 'Calibration Runs', 'calibrationRuns', iconWrench()),
+  menuItem(model, 'Active Environments', 'environments', iconGridTwoUp()),
+  menuItem(model, 'Create', 'newEnvironmentAdvanced', iconPlus()),
   menuItem(model, 'Task list', 'taskList', iconGridThreeUp()),
   h('h5.menu-title-large.mh1',
-    model.sideBarMenu ? 'Configuration' : 'CONF'),
+    model.sideBarMenu ? 'Hardware' : 'HDW'),
   menuItem(model, 'Links', 'configuration', iconCog()),
+  menuItem(model, 'FLPs', 'hardware', iconCalculator()),
+  h('h5.menu-title-large.mh1',
+    model.sideBarMenu ? 'Admin' : 'ADM'),
+  menuItem(model, 'Locks', 'locks', iconLockLocked()),
   h('', {style: 'flex-grow:1'}), // empty item to fill in space
   menuItem(model, 'About', 'about', iconExcerpt()),
   collapseSidebarMenuItem(model),

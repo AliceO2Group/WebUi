@@ -10,22 +10,22 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const net = require('net');
 const EventEmitter = require('events');
-const Log = require('./Log.js');
 
 const protocols = require('./infologger-protocols.js');
+const { LogManager } = require('./LogManager');
 
-/* @class InfoLoggerReceiver
+/**
+ * @class InfoLoggerReceiver
  * Connects to server
  * Stream data
  * Parse data
  * Emit row ony by one
  */
-
-module.exports = class InfoLoggerReceiver extends EventEmitter {
+class InfoLoggerReceiver extends EventEmitter {
   /**
    * Initialize, without connecting.
    */
@@ -38,7 +38,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
 
     this.isConnected = false;
 
-    this.log = new Log(`${process.env.npm_config_log_label ?? 'framework'}/ilreceiver`);
+    this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ilreceiver`);
   }
 
   /**
@@ -60,25 +60,25 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
     this.client.on('connect', () => {
       this.isConnected = true;
       this.emit('connected');
-      this.log.info(`Connected to infoLoggerServer ${options.host}:${options.port}`);
+      this.logger.info(`Connected to infoLoggerServer ${options.host}:${options.port}`);
     });
 
     this.client.on('end', () => {
-      this.log.error('Connection to infoLoggerServer ended (FIN)');
+      this.logger.error('Connection to infoLoggerServer ended (FIN)');
       this.isConnected = false;
       this.emit('close');
       setTimeout(() => {
-        this.log.info('Quickly reconnecting infoLoggerServer socket...');
+        this.logger.info('Quickly reconnecting infoLoggerServer socket...');
         this.client.connect(this.port, this.host);
       }, 5000);
     });
 
     this.client.on('error', (error) => {
       this.isConnected = false;
-      this.log.error(`Failed to connect to infoLoggerServer ${this.host}:${this.port} - ${error.code}`);
+      this.logger.error(`Failed to connect to infoLoggerServer ${this.host}:${this.port} - ${error.code}`);
       setTimeout(() => {
         this.emit('connection-issue', 'Unable to connect to InfoLogger Server. Retrying in 5 seconds...');
-        this.log.info('Reconnecting infoLoggerServer socket...');
+        this.logger.info('Reconnecting infoLoggerServer socket...');
         this.client.connect(this.port, this.host);
       }, 5000);
     });
@@ -93,7 +93,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
     }
     this.isConnected = false;
     this.client.end();
-    this.client = null; // gc
+    this.client = null; // Gc
   }
 
   /**
@@ -104,7 +104,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
   onData(data) {
     let dataString = this.buffer + data.toString();
     this.buffer = '';
-    // detect whether the last log is chopped in the middle
+    // Detect whether the last log is chopped in the middle
     if (dataString[dataString.length - 1] !== '\n') {
       const indexLast = dataString.lastIndexOf('\n');
       this.buffer = dataString.substring(indexLast);
@@ -116,16 +116,18 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
       if (!message) {
         continue;
       }
+
       /**
-      * Message event containing log properties
-      *
-      * @event LiveDataSource#message
-      * @type {object}
-      */
-      this.emit('message', this.parse(message + '\n'));
+       * Message event containing log properties
+       *
+       * @event LiveDataSource#message
+       * @type {object}
+       */
+      this.emit('message', this.parse(`${message}\n`));
     }
   }
 
+  // eslint-disable-next-line jsdoc/require-returns-check
   /**
    * Parse an input string frame to corresponding object
    * Empty fields are ignored.
@@ -133,18 +135,18 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
    * *1.4#I##1505140368.399439#aido2db##143388#root#########test Mon Sep 11 16:32:48 CEST 2017
    * Example of output:
    * {severity: 'I', hostname: 'aido2db', ...}
-   * @param {string} frame
-   * @return {Object}
+   * @param {string} frame - frame that is to be parsed
+   * @return {object} - parsed object
    */
   parse(frame) {
     // Check frame integrity (header and footer)
     if (frame[0] !== '*') {
-      this.log.warn(`Parsing: discard uncomplete frame (length=${frame.length}), must begins with *`);
+      this.logger.warn(`Parsing: discard uncomplete frame (length=${frame.length}), must begins with *`);
       return;
     }
 
     if (frame[frame.length - 1] !== '\n') {
-      this.log.warn(`Parsing: discard uncomplete frame (length=${frame.length}), must ends with \\n`);
+      this.logger.warn(`Parsing: discard uncomplete frame (length=${frame.length}), must ends with \\n`);
       return;
     }
 
@@ -153,7 +155,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
     const frameProtocol = protocols.find((protocol) => protocol.version === frameVersion);
     if (!frameProtocol) {
       const protocolsVersions = protocols.map((protocol) => protocol.version);
-      this.log.warn(`Parsing: unreconized protocol, found "${frameVersion}",
+      this.logger.warn(`Parsing: unreconized protocol, found "${frameVersion}",
         support ${protocolsVersions.join(', ')}`);
       return;
     }
@@ -164,7 +166,7 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
 
     // Check frame integrity (number of fields)
     if (fields.length !== frameProtocol.fields.length) {
-      this.log.warn(`Parsing: expected ${frameProtocol.fields.length} fields for
+      this.logger.warn(`Parsing: expected ${frameProtocol.fields.length} fields for
         protocol version ${frameProtocol.version}, found ${fields.length}`);
       return;
     }
@@ -183,4 +185,6 @@ module.exports = class InfoLoggerReceiver extends EventEmitter {
 
     return message;
   }
-};
+}
+
+module.exports = InfoLoggerReceiver;

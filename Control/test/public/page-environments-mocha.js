@@ -33,40 +33,27 @@ describe('`pageEnvironments` test-suite', () => {
   });
 
   describe('Check transition to particular environment works', async () => {
-    it('should successfully load page and request data', async () => {
+    it('should successfully load page', async () => {
       await page.goto(url + '?page=environments', {waitUntil: 'networkidle0'});
+
       const location = await page.evaluate(() => window.location);
-
       assert.strictEqual(location.search, '?page=environments');
-      assert.ok(calls['getEnvironments']);
-    });
-
-    it('should have a button in Action column for More Details', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(11) > div > button', {timeout: 2000});
-      const detailsButton = await page.evaluate(() => {
-        const title = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(11) > div >button').title;
-        const label = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(11) > div > button').innerText;
-        return {title, label};
-      });
-      assert.strictEqual(detailsButton.title, 'Open the environment page with more details');
-      assert.strictEqual(detailsButton.label, 'Details');
     });
 
     it('should have a button in Action column for InfoLogger', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(11) > div > a', {timeout: 2000});
+      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(15) > div > a', {timeout: 2000});
       const detailsButton = await page.evaluate(() => {
-        const label = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(11) > div > a').innerText;
+        const label = document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(15) > div > a').innerText;
         return {label};
       });
-      assert.strictEqual(detailsButton.label, 'ILG');
+      assert.strictEqual(detailsButton.label, 'FLP');
     });
 
-    it('should successfully navigate to environment page on click Details', async () => {
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(11) > div > button').click());
-      await page.waitForTimeout(200);
+    it('should successfully navigate to environment page when clicking on environment ID', async () => {
+      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > table > tbody > tr > td:nth-child(2) > a').click());
       assert.ok(calls['getEnvironment']);
       const location = await page.evaluate(() => window.location);
-      assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220');
+      assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220&panel=general');
     });
   });
 
@@ -76,21 +63,57 @@ describe('`pageEnvironments` test-suite', () => {
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=environments');
     });
+  });
 
-    it('should click LOCK button', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-      await page.waitForTimeout(500);
-      const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-      assert.strictEqual(lockButton, 'Lock is taken by Anonymous (id 0)');
+  describe('Test new environment request', async () => {
+    it('create failed environment request', async () => {
+      await page.goto(url + '?page=newEnvironmentAdvanced');
+      const location = await page.evaluate(() => window.location);
+      assert.ok(location.search === '?page=newEnvironmentAdvanced');
+
+      // select workflow from list of templates
+      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a');
+      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div:nth-child(3) > div > div > a').click());
+
+      // first detector is already locked (should be MID)
+      // select earlier locked detector which will automatically select all available hosts
+      await page.locator('.m1 > div:nth-child(1) > div > a:nth-child(2)')
+        .setTimeout(500)
+        .click();
+
+      await page.locator('#deploy-env')
+        .setTimeout(500)
+        .click();
     });
 
-    it('should click LOCK button to remove control', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-      await page.waitForTimeout(500);
-      const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-      assert.strictEqual(lockButton, 'Lock is free');
+    it('verify request fields', async () => {
+
+      await waitForEnvRequest(page, 100);
+      const detector = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(2)').innerText);
+      const state = await page.evaluate(() => document.querySelector('body > div.flex-column.absolute-fill > div.flex-grow.flex-row > div.flex-grow.relative > div > table > tbody > tr > td:nth-child(6)').innerText);
+      assert.strictEqual(detector, 'MID');
+      assert.strictEqual(state, 'FAILED');
     });
   });
 });
+
+/**
+ * Wait for response create env request to fail
+ * @param {Object} page
+ * @param {number} iterations - number of times to wait for default timeout
+ * @return {Promise}
+ */
+async function waitForEnvRequest(page, iterations = 10, timeout = 1000) {
+  return new Promise(async (resolve) => {
+    let i = 0;
+    while (i++ < iterations) {
+      const requestFailed = await page.evaluate(() => window.model?.environment?.requests?.payload?.requests[0]?.failed);
+      if (requestFailed) {
+        await new Promise((r) => setTimeout((r), timeout))
+        resolve();
+      } else {
+        await new Promise((r) => setTimeout((r), timeout))
+      }
+    }
+  });
+}

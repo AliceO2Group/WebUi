@@ -12,11 +12,15 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconChevronBottom, iconChevronTop} from '/js/src/index.js';
+import {h, iconChevronBottom, iconChevronTop, RemoteData} from '/js/src/index.js';
 import pageLoading from '../common/pageLoading.js';
 import errorPage from '../common/errorPage.js';
 import {detectorHeader} from '../common/detectorHeader.js';
-import {iconLockLocked, iconLockUnlocked, iconCloudDownload, iconCircleX, iconCircleCheck} from '/js/src/icons.js';
+import {iconCircleX, iconCircleCheck} from '/js/src/icons.js';
+import {ROLES} from './../workflow/constants.js';
+import {isUserAllowedRole} from './../common/userRole.js';
+import {tasksPerHostPanel} from '../common/task/tasksPerHostPanel.js';
+import { HardwareComponent } from '../common/enums/HardwareComponent.js';
 
 /**
  * @file Content of the Task Page that displays list of tasks grouped by their host and detector
@@ -85,25 +89,18 @@ const getListOfTasks = (model, task) =>
  * @param {Task} task 
  * @returns {vnode}
  */
-const showContent = (model, items) =>
-  h('.text-left.ph2', [
-    h('.w-100.flex-column.items-end.pv2', searchTasks(model)),
+const showContent = (model, items) => {
+  const isAdmin =  model.detectors.selected === 'GLOBAL' && isUserAllowedRole(ROLES.Admin, true);
+  return h('.text-left.ph2', [
+    h('.w-100.flex-row.pv2.items-center', [
+      isAdmin && h('.w-100.flex-row.flex-end.pv2.g2', [
+        cleanResourcesButton(model.task),
+        cleanTasksButton(model.task)
+      ]),
+    ]),
     h('.w-100', detectorPanels(model, items))
   ]);
-
-/**
- * Adds a search bar for the user to filter tasks by name
- * @param {Object} model 
- * @returns 
- */
-const searchTasks = (model) =>
-  h('.w-20',
-    h('input.form-control', {
-      id: 'searchTasksInput',
-      placeholder: 'Search tasks by name',
-      oninput: (e) => model.task.filterBy = e.target.value
-    })
-  );
+};
 
 /**
  * Build a list of panels per detector with hosts and their respective tasks
@@ -113,14 +110,17 @@ const searchTasks = (model) =>
  */
 const detectorPanels = (model, detectors) => [
   Object.keys(detectors)
-    .filter((detector) => (detector === model.detectors.selected || model.detectors.selected === 'GLOBAL'))
+    .filter((detector) => (
+      detector === model.detectors.selected ||
+      model.detectors.selected === 'GLOBAL' ||
+      isUserAllowedRole(ROLES.Guest, true)))
     .map((detector) => h('.w-100', [
       h('.panel-title.flex-row.p2', [
         h('h4.w-20', detector),
         h('.w-80.text-right', toggleDetectorPanel(model, detectors[detector])),
       ]),
       detectors[detector].isOpened && h('.panel', [
-        tasksTables(model, detectors[detector].list.payload)
+        tasksTables(model.task.taskTableModel, detectors[detector].list.payload)
       ])
     ]))
 ];
@@ -141,49 +141,48 @@ const toggleDetectorPanel = (model, taskPanel) =>
     }, taskPanel.isOpened ? iconChevronTop() : iconChevronBottom());
 
 /**
- * Display all running task grouped by hosts
- * @param {Object} model
- * @param {Map<String, JSON>} tasks
- * @returns {vnode}
+ * Display all known task grouped by hosts
+ * @param {TaskTableModel} taskTableModel - task table model
+ * @param {Map<String, JSON>} tasksByHost - tasks grouped by host
+ * @return {vnode} - table with tasks details
  */
-const tasksTables = (model, tasksByHost) =>
-  Object.keys(tasksByHost)
+const tasksTables = (taskTableModel, tasksByHost) => {
+  return Object.keys(tasksByHost)
     .filter((hostname) => tasksByHost[hostname] && tasksByHost[hostname].list && tasksByHost[hostname].stdout)
-    .map((hostname) => [
-      h('.shadow-level1', [
-        h('table.table', {
-          style: 'white-space: pre-wrap;'
-        }, [
-          h('thead',
-            h('tr.table-primary',
-              h('th', {colspan: 3}, hostname),
-              h('th.flex-row', {style: {'justify-content': 'flex-end'}, colspan: 1},
-                h('a', {
-                  title: 'Download Mesos Environment Logs',
-                  href: tasksByHost[hostname].stdout,
-                  target: '_blank'
-                }, h('button.btn-sm.primary', iconCloudDownload())
-                )
-              )
-            ),
-            h('tr', ['Name', 'PID', 'State', 'Locked'].map((header) => h('th', header)))
-          ),
-          h('tbody', tasksByHost[hostname].list
-            .filter((task) => model.task.filterBy.test(task.name))
-            .map((task) => [
-              h('tr', [
-                h('td.w-50', task.name),
-                h('td.w-10', task.pid),
-                h('td.w-10', {
-                  class: (task.state === 'RUNNING' ? 'success'
-                    : (task.state === 'CONFIGURED' ? 'warning'
-                      : ((task.state === 'ERROR' || task.state === 'UNKNOWN') ? 'danger' : ''))),
-                  style: 'font-weight: bold;'
-                }, task.state),
-                h('td.w-10', task.locked ? iconLockLocked('fill-orange') : iconLockUnlocked('fill-green'))
-              ])
-            ])
-          )
-        ])
-      ])
-    ]);
+    .map((hostname) => tasksPerHostPanel(
+      { taskTableModel },
+      { tasks: RemoteData.success(tasksByHost[hostname].list) },
+      HardwareComponent.FLP)
+    );
+};
+
+/**
+ * Prepares cleanup tasks button in top right corner
+ */
+const cleanTasksButton = (task) =>
+  h('.flex-column.dropdown#flp_selection_info_icon', {style: 'display: flex'}, [
+    h(`button.btn.btn-danger`, {
+      class: task.cleanUpTasksRequest.isLoading() ? 'loading' : '',
+      disabled: task.cleanUpTasksRequest.isLoading(),
+      onclick: () => confirm(`Are you sure you know what you are doing?`)
+      && task.cleanUpTasks(),
+    }, 'Clean tasks'),
+    h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 350px'},
+      'Shutdowns or kills any task that is unlocked and not part of an active environment')
+  ]);
+
+/**
+* Prepares cleanup resources button in top right corner
+*/
+const cleanResourcesButton = (task) =>
+  h('.flex-column.dropdown#flp_selection_info_icon', {style: 'display: flex'}, [
+    h(`button.btn.btn-warning`, {
+      class: task.cleanUpTasksRequest.isLoading() ? 'loading' : '',
+      disabled: task.cleanUpTasksRequest.isLoading(),
+      onclick: () => task.cleanUpResources(),
+    }, 'Clean resources'),
+    h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 500px'}, [
+      h('', `It runs 'roc-cleanup' and 'fairmq-shmmonitor -c' to clean RAM and disk resources, including SHM files.`),
+      h('', `It does nothing to tasks.`)
+    ])
+  ]);

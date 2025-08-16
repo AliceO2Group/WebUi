@@ -10,146 +10,88 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const {Log, WebSocket} = require('@aliceo2/web-ui');
-const config = require('./config/configProvider.js');
-const log = new Log(`${process.env.npm_config_log_label ?? 'qcg'}/api`);
-
-// Load data source (demo or DB)
-const model = config.demoData ? require('./QCModelDemo.js') : require('./QCModel.js');
+import { setupQcModel } from './QCModel.js';
+import { minimumRoleMiddleware } from './middleware/minimumRole.middleware.js';
+import { UserRole } from './../common/library/userRole.enum.js';
+import { layoutOwnerMiddleware } from './middleware/layouts/layoutOwner.middleware.js';
+import { layoutIdMiddleware } from './middleware/layouts/layoutId.middleware.js';
+import { layoutServiceMiddleware } from './middleware/layouts/layoutService.middleware.js';
+import { statusComponentMiddleware } from './middleware/status/statusComponent.middleware.js';
 
 /**
  * Adds paths and binds websocket to instance of HttpServer passed
- * @param {HttpServer} http
+ * @param {HttpServer} http - web-ui based server implementation
+ * @param {WebSocket} ws - web-ui websocket server implementation
+ * @returns {void}
  */
-module.exports.setup = (http) => {
-  http.get('/readObjectData', readObjectData, {public: true});
-  http.get('/listObjects', listObjects, {public: true});
-  http.get('/objectTimestampList', getObjectTimestampList, {public: true});
-  http.get('/listOnlineObjects', listOnlineObjects);
-  http.get('/isOnlineModeConnectionAlive', isOnlineModeConnectionAlive);
-  http.post('/readLayout', model.layoutService.readLayout.bind(model.layoutService));
-  http.post('/writeLayout', model.layoutService.updateLayout.bind(model.layoutService));
-  http.post('/listLayouts', model.layoutService.listLayouts.bind(model.layoutService));
-  http.delete('/layout/:layoutId', model.layoutService.deleteLayout.bind(model.layoutService));
-  http.post('/layout', model.layoutService.createLayout.bind(model.layoutService));
-  http.get('/getFrameworkInfo', model.statusService.frameworkInfo.bind(model.statusService), {public: true});
-  http.get('/checkUser', model.userService.addUser.bind(model.userService));
-  new WebSocket(http);
+export const setup = (http, ws) => {
+  /**
+   * @type {{
+   *   layoutController: import('./controllers/LayoutController.js').LayoutController,
+   *   objectController: import('./controllers/ObjectController.js').ObjectController,
+   *   statusController: import('./controllers/StatusController.js').StatusController,
+   *   statusService: import('./services/statusService').StatusService,
+   *   userController: import('./controllers/UserController.js').UserController,
+   *   jsonFileService: import('./services/JsonFileService.js').JsonFileService
+   * }}
+   */
+  const {
+    layoutController,
+    objectController,
+    statusController,
+    statusService,
+    userController,
+    layoutRepository,
+    jsonFileService,
+    filterController,
+    objectGetByIdValidation,
+    objectsGetValidation,
+    objectGetContentsValidation,
+  } = setupQcModel();
+  statusService.ws = ws;
+
+  http.get('/object/:id', objectGetByIdValidation, objectController.getObjectById.bind(objectController));
+  http.get('/object', objectGetContentsValidation, objectController.getObjectContent.bind(objectController));
+
+  http.get('/objects', objectsGetValidation, objectController.getObjects.bind(objectController), { public: true });
+
+  http.get('/layouts', layoutController.getLayoutsHandler.bind(layoutController));
+  http.get('/layout/:id', layoutController.getLayoutHandler.bind(layoutController));
+  http.get('/layout', layoutController.getLayoutByNameHandler.bind(layoutController));
+  http.post('/layout', layoutController.postLayoutHandler.bind(layoutController));
+  http.put(
+    '/layout/:id',
+    layoutServiceMiddleware(jsonFileService),
+    layoutIdMiddleware(layoutRepository),
+    layoutOwnerMiddleware(layoutRepository),
+    layoutController.putLayoutHandler.bind(layoutController),
+  );
+  http.patch(
+    '/layout/:id',
+    layoutServiceMiddleware(jsonFileService),
+    layoutIdMiddleware(layoutRepository),
+    minimumRoleMiddleware(UserRole.GLOBAL),
+    layoutController.patchLayoutHandler.bind(layoutController),
+  );
+  http.delete(
+    '/layout/:id',
+    layoutServiceMiddleware(jsonFileService),
+    layoutIdMiddleware(layoutRepository),
+    layoutOwnerMiddleware(layoutRepository),
+    layoutController.deleteLayoutHandler.bind(layoutController),
+  );
+
+  http.get('/status/gui', statusController.getQCGStatus.bind(statusController), { public: true });
+  http.get(
+    '/status/:service',
+    statusComponentMiddleware,
+    statusController.getServiceStatusHandler.bind(statusController),
+    { public: true },
+  );
+
+  http.get('/checkUser', userController.addUserHandler.bind(userController));
+
+  http.get('/filter/configuration', filterController.getFilterConfigurationHandler.bind(filterController));
 };
-
-/**
- * List all objects without data
- * @param {Request} req
- * @param {Response} res
- */
-function listObjects(req, res) {
-  model.listObjects()
-    .then((data) => res.status(200).json(data))
-    .catch((err) => errorHandler(err, res));
-}
-
-/**
- * Method to retrieve a list of timestamps for the requested objectName
- * @param {Request} req
- * @param {Response} res
- */
-function getObjectTimestampList(req, res) {
-  model.getObjectTimestampList(req.query.objectName)
-    .then((data) => {
-      res.status(200);
-      res.json(data);
-    })
-    .catch((err) => errorHandler(err, res));
-}
-
-/**
- * List all Online objects' name if online mode is enabled
- * @param {Request} req
- * @param {Response} res
- */
-function listOnlineObjects(req, res) {
-  if (typeof model.consulService !== 'undefined') {
-    model.consulService.getServices()
-      .then((services) => {
-        const tags = getTagsFromServices(services);
-        res.status(200).json(tags);
-      })
-      .catch((err) => errorHandler(err, res));
-  } else {
-    errorHandler('Online mode is not enabled due to missing Consul configuration', res, 503);
-  }
-}
-
-/**
- * Check the state of OnlineMode by checking the status of Consul Leading Agent
- * @param {Request} req
- * @param {Response} res
- */
-function isOnlineModeConnectionAlive(req, res) {
-  if (typeof model.consulService !== 'undefined') {
-    model.consulService.getConsulLeaderStatus()
-      .then(() => res.status(200).json({running: true}))
-      .catch((err) => errorHandler(`Unable to retrieve Consul Status: ${err}`, res));
-  } else {
-    errorHandler('Online mode is not enabled due to missing Consul configuration', res, 503);
-  }
-}
-
-/**
- * Request data of an object based on name and optionally timestamp
- * Returned data will contained the QC Object and a list of its corresponding timestamps
- * @param {Request} req
- * @param {Response} res
- */
-async function readObjectData(req, res) {
-  const objectName = req.query.objectName;
-  if (!objectName) {
-    res.status(400).send('parameter objectName is needed');
-    return;
-  }
-  try {
-    const timestamps = await model.getObjectTimestampList(objectName);
-    res.status(timestamps.length > 0 ? 200 : 404).json({timestamps: timestamps.slice(0, 50)});
-  } catch (err) {
-    errorHandler('Reading object data: ' + err, res);
-  }
-}
-
-/**
- * Global HTTP error handler, sends status 500
- * @param {string} err - Message error
- * @param {Response} res - Response object to send to
- * @param {number} status - status code 4xx 5xx, 500 will print to debug
- */
-function errorHandler(err, res, status = 500) {
-  if (err.stack) {
-    log.trace(err);
-  }
-  log.error(err.message || err);
-  res.status(status).send({message: err.message || err});
-}
-
-/**
- * Helpers
- */
-
-/**
- * Method to extract the tags (with a specified prefix) from a list of services.
- * This represents objects that are in online mode
- * @param {JSON} services
- * @return {Array<JSON>} [{ name: tag1 }, { name: tag2 }]
- */
-function getTagsFromServices(services) {
-  const prefix = model.queryPrefix;
-  const tags = [];
-  for (const serviceName in services) {
-    if (services[serviceName] && services[serviceName].Tags && services[serviceName].Tags.length > 0) {
-      const tagsToBeAdded = services[serviceName].Tags;
-      tagsToBeAdded.filter((tag) => tag.startsWith(prefix))
-        .forEach((tag) => tags.push({name: tag}));
-    }
-  }
-  return tags;
-}

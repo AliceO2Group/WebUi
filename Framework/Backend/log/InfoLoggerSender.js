@@ -10,74 +10,97 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-const fs = require('fs');
-const {execFile} = require("child_process");
+const { access, constants: { X_OK } } = require('fs');
+const { execFile } = require('child_process');
+const InfoLoggerMessage = require('./InfoLoggerMessage.js');
+const { LogLevel } = require('./LogLevel.js');
+const { LogSeverity } = require('./LogSeverity.js');
 
 /**
- * Sends InfoLogger logs to InfoLoggerD over UNIX named socket
+ * Sends logs as InfoLogger objects to InfoLoggerD over UNIX named socket
  * @docs https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md
  */
 class InfoLoggerSender {
   /**
-   * @param {object} winston - local loging object
+   * Constructor for InfoLoggerSender expecting a winston instance
+   * @param {import('winston').Logger} winston - local winston instance object
    */
   constructor(winston) {
-    this.configured = false;
+    this._isConfigured = false;
     this.winston = winston;
+    const label = 'gui/infologger';
 
-    // for security reasons this path is hardcoded
-    this.path = '/opt/o2-InfoLogger/bin/o2-infologger-log';
-    fs.access(this.path, fs.constants.X_OK, (err) => {
+    // For security reasons this path is hardcoded
+    this._PATH = '/opt/o2-InfoLogger/bin/o2-infologger-log';
+    access(this._PATH, X_OK, (err) => {
       if (err) {
-        this.winston.debug('[ILSender] InfoLogger executable not found');
+        this.winston.debug({ message: 'InfoLogger executable not found', label });
       } else {
-        this.winston.debug('[ILSender] Created instance of InfoLogger sender');
-        this.configured = true;
+        this.winston.debug({ message: 'Created instance of InfoLogger sender', label });
+        this._isConfigured = true;
       }
     });
   }
 
   /**
-   * Send a message to InfoLogger with certain fields filled.
-   * @param {string} log - log message
-   * @param {string} severity - one of InfoLogger supported severities: 'Info'(default), 'Error', 'Fatal', 'Warning', 'Debug'
-   * @param {string} facility - the name of the module/library injecting the message
-   * @param {number} level - visibility of the message
+   * Send an InfoLoggerMessage to InfoLoggerServer if configured
+   * @param {InfoLoggerMessage} log - log message
    */
-  send(log, severity = 'Info', facility = '', level = 99) {
-    if (this.configured) {
-      log = this._removeNewLinesAndTabs(log);
-      execFile(this.path, [
-        `-oSeverity=${severity}`, `-oFacility=${facility}`, `-oSystem=GUI`, `-oLevel=${level}`, `${log}`
-      ], (error, stdout, stderr) => {
+  sendMessage(log) {
+    if (this._isConfigured) {
+      execFile(this._PATH, log.getComponentsOfMessage(), (error, _, stderr) => {
         if (error) {
-          this.winston.debug(`[ILSender] Impossible to write a log to InfoLogger due to: ${error}`);
+          this.winston.debug({
+            message: `Impossible to write a log to InfoLogger due to: ${error}`,
+            label: log._facility,
+          });
         }
         if (stderr) {
-          this.winston.debug(`[ILSender] Impossible to write a log to InfoLogger due to: ${stderr}`);
+          this.winston.debug({
+            message: `Impossible to write a log to InfoLogger due to: ${stderr}`,
+            label: log._facility,
+          });
         }
       });
     }
   }
 
   /**
-   * Replace all occurences of new lines, tabs or groups of 4 spaces with an empty space
-   * @param {Object|Error|String} log
-   * @return {String}
+   * Send a message to InfoLogger with certain fields filled.
+   * @param {string} log - log message
+   * @param {LogSeverity} severity - one of InfoLogger supported severities {@see LogSeverity}
+   * @param {string} facility - the name of the module/library injecting the message
+   * @param {number} level - visibility of the message {@see LogLevel}
+   * @deprecated
    */
-  _removeNewLinesAndTabs(log) {
-    try {
-      if (log instanceof Error) {
-        return log.toString().replace(/ {4}|[\t\n\r]/gm, ' ');
-      } else if (log instanceof Object) {
-        return JSON.stringify(log).replace(/ {4}|[\t\n\r]/gm, ' ');
-      }
-      return log.replace(/ {4}|[\t\n\r]/gm, ' ');
-    } catch (error) {
-      return '';
+  send(log, severity = LogSeverity.INFO, facility = '', level = LogLevel.MAX) {
+    if (this._isConfigured) {
+      log = InfoLoggerMessage._removeNewLinesAndTabs(log);
+      execFile(this._PATH, [
+        `-oSeverity=${severity}`,
+        `-oFacility=${facility}`,
+        '-oSystem=GUI',
+        `-oLevel=${level}`,
+        `${log}`,
+      ], (error, _, stderr) => {
+        if (error) {
+          this.winston.debug({ message: `Impossible to write a log to InfoLogger due to: ${error}`, label: facility });
+        }
+        if (stderr) {
+          this.winston.debug({ message: `Impossible to write a log to InfoLogger due to: ${stderr}`, label: facility });
+        }
+      });
     }
+  }
+
+  /**
+   * Returns if InfoLoggerD service is configured
+   * @returns {boolean}
+   */
+  get isConfigured() {
+    return this._isConfigured;
   }
 }
 

@@ -21,6 +21,11 @@ module.exports = {
     // cert: './cert/cert.pem',
     tls: false,
   },
+  jwt: {
+    secret: 'test-secret',
+    issuer: 'test-gui',
+    expiration: '1d',
+  },
   grpc: {
     hostname: 'localhost',
     port: 9090,
@@ -36,9 +41,11 @@ module.exports = {
     package: 'apricot'
   },
   consul: {
+    ui: 'localhost.cern.ch',
     hostname: 'localhost',
     port: 8550,
     flpHardwarePath: 'test/o2/hardware/flps',
+    detHardwarePath: 'test/o2/hardware/detectors',
     readoutPath: 'test/o2/readout/components',
     readoutCardPath: 'test/o2/readoutcard/components',
     qcPath: 'test/o2/qc/components',
@@ -47,17 +54,19 @@ module.exports = {
   infoLoggerGui: {
     url: 'http://localhost:8081',
   },
+  infoLoggerEpnGui: {
+    url: 'http://localhost:8083',
+  },
   grafana: {
     url: 'http://localhost:2020'
   },
-  bookkeepingGui: {
-    url: 'http://localhost:2021'
+  bookkeeping: {
+    url: 'http://localhost:2021',
   },
   qcGui: {
     url: 'http://localhost:2022'
   },
   utils: {
     refreshTask: 5000, // how often should task list page should refresh its content
-    refreshEnvs: 10000, // how often should env list page should refresh its content
   }
 };

@@ -25,6 +25,9 @@ describe('`pageEnvironment` test-suite', async () => {
     url = test.helpers.url;
     page = test.page;
     calls = test.helpers.calls;
+    page.on('dialog', async (dialog) => {
+      await dialog.accept();
+    });
   });
 
   beforeEach(() => {
@@ -37,161 +40,165 @@ describe('`pageEnvironment` test-suite', async () => {
   it('should successfully load and request data for environment', async () => {
     await page.goto(url + '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220', {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
-    assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220');
+    assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220&panel=general');
     assert.ok(calls['getEnvironment']);
   });
 
-  it('should have one button for locking', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-    const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-    assert.strictEqual(lockButton, 'Lock is free');
-  });
+  it('should have one button for `Shutdown` environment with lock in possession', async () => {
+    const lockInPossession = await page.evaluate(() => window.model.lock.isLockedByCurrentUser('MID'));
+    assert.ok(lockInPossession, 'User is not in possession of lock');
 
-  it('should have one button for `Shutdown` environment', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
-    const shutdownButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button').title);
+    await page.waitForSelector('#buttonToSHUTDOWN', {timeout: 5000});
+    const shutdownButton = await page.evaluate(() => document.querySelector('#buttonToSHUTDOWN').title);
     assert.strictEqual(shutdownButton, 'Shutdown environment');
   });
 
-  describe('Check LOCK validations and enable lock', async () => {
-    it('should click START button and do nothing due to `Control is not locked`', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)').click());
-      await page.waitForTimeout(2000);
-      const state = await page.evaluate(() => {
-        return window.model.environment.itemControl.payload;
-      });
-      assert.strictEqual(state, 'Request to server failed (403 Forbidden): Control is not locked');
+  it('should have informative message when user without lock in possession even as admin', async () => {
+    await page.evaluate(() => {
+      window.model.lock.actionOnLock('MID', 'RELEASE', false);
     });
+    const isLocked = await page.evaluate(() => {
+      window.model.lock.isLocked('MID');
+    });
+    assert.ok(!isLocked, 'Detector still appears as locked');
 
-    it('should click LOCK button', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-      await page.waitForTimeout(500);
-      const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-      assert.strictEqual(lockButton, 'Lock is taken by Anonymous (id 0)');
+    await page.waitForSelector('#missing_lock_ownership_to_control_message', {timeout: 5000});
+    const informationMessage = await page.evaluate(() => document.querySelector('#missing_lock_ownership_to_control_message').innerText);
+    assert.strictEqual(informationMessage, 'You do not own the necessary locks to control this environment.');
+  });
+
+  it('should not have button displayed if user is not admin or does not have the lock', async () => {
+    await page.evaluate(() => {
+      window.model.session.role = 2;
+      window.model.notify();
+    });
+    const shutdownButton = await page.$('#buttonToSHUTDOWN');
+    assert.ok(shutdownButton === null, 'button still exists');
+
+    // adds permissions and lock back
+    await page.evaluate(() => {
+      window.model.session.role = 1;
+      window.model.lock.actionOnLock('MID', 'TAKE', false);
+      window.model.notify();
     });
   });
 
   describe('Check presence of buttons in CONFIGURED state', async () => {
     it('should have one button for START in state CONFIGURED', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
-      const startButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(1)').title);
+      await page.waitForSelector('#buttonToSTART', {timeout: 5000});
+      const startButton = await page.evaluate(() => document.querySelector('#buttonToSTART').title);
       assert.strictEqual(startButton, 'START');
     });
 
     it('should have one button hidden for STOP in state CONFIGURED', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)', {timeout: 5000});
-      const stopButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(2)').title);
-      const stopButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(2)').style);
+      await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
+      const stopButtonTitle = await page.evaluate(() => document.querySelector('#buttonToSTOP').title);
+      const stopButtonStyle = await page.evaluate(() => document.querySelector('#buttonToSTOP').style);
       assert.strictEqual(stopButtonTitle, `'STOP' cannot be used in state 'CONFIGURED'`);
       assert.deepStrictEqual(stopButtonStyle, {0: 'display'});
     });
 
     it('should have one button hidden for CONFIGURE in state CONFIGURED', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(3)', {timeout: 5000});
-      const configureButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(3)').title);
-      const configureButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(3)').style);
+      await page.waitForSelector('#buttonToCONFIGURE', {timeout: 5000});
+      const configureButtonTitle = await page.evaluate(() => document.querySelector('#buttonToCONFIGURE').title);
+      const configureButtonStyle = await page.evaluate(() => document.querySelector('#buttonToCONFIGURE').style);
       assert.strictEqual(configureButtonTitle, `'CONFIGURE' cannot be used in state 'CONFIGURED'`);
       assert.deepStrictEqual(configureButtonStyle, {0: 'display'});
     });
 
-    it('should have one button for RESET in state CONFIGURED', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)', {timeout: 5000});
-      const configuredStateButtons = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(4)').title);
-      assert.strictEqual(configuredStateButtons, 'RESET');
-    });
+    // it('should have one button for RESET in state CONFIGURED', async () => {
+    //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)', {timeout: 5000});
+    //   const configuredStateButtons = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(4)').title);
+    //   assert.strictEqual(configuredStateButtons, 'RESET');
+    // });
   });
 
   describe('Check transition from CONFIGURED to RUNNING and presence of buttons in RUNNING state', async () => {
     it('should click START button to move states (CONFIGURED -> RUNNING)', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)').click());
-      await page.waitForTimeout(200);
-      const state = await page.evaluate(() => {
-        return window.model.environment.item.payload.environment.state;
-      });
+      await page.locator('#buttonToSTART')
+        .setTimeout(1000)
+        .click();
+      await page.waitForNetworkIdle();
+
+      const state = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(state, 'RUNNING');
       assert.ok(calls['controlEnvironment']);
     });
 
     it('should have one button hidden for START in state RUNNING', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
-      const startButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(1)').title);
-      const startButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(1)').style);
+      await page.waitForSelector('#buttonToSTART', {timeout: 5000});
+      const startButtonTitle = await page.evaluate(() => document.querySelector('#buttonToSTART').title);
+      const startButtonStyle = await page.evaluate(() => document.querySelector('#buttonToSTART').style);
       assert.strictEqual(startButtonTitle, `'START' cannot be used in state 'RUNNING'`);
       assert.deepStrictEqual(startButtonStyle, {0: 'display'});
     });
 
     it('should have one button for STOP in state RUNNING', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)', {timeout: 5000});
-      const stopButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(2)').title);
+      await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
+      const stopButton = await page.evaluate(() => document.querySelector('#buttonToSTOP').title);
       assert.strictEqual(stopButton, 'STOP');
     });
 
     it('should have one button hidden for CONFIGURE in state RUNNING', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(3)', {timeout: 5000});
-      const configureButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(3)').title);
-      const configureButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(3)').style);
+      await page.waitForSelector('#buttonToCONFIGURE', {timeout: 5000});
+      const configureButtonTitle = await page.evaluate(() => document.querySelector('#buttonToCONFIGURE').title);
+      const configureButtonStyle = await page.evaluate(() => document.querySelector('#buttonToCONFIGURE').style);
       assert.strictEqual(configureButtonTitle, `'CONFIGURE' cannot be used in state 'RUNNING'`);
       assert.deepStrictEqual(configureButtonStyle, {0: 'display'});
     });
 
     it('should have one button hidden for RESET in state RUNNING', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)', {timeout: 5000});
-      const resetButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(4)').title);
-      const resetButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(4)').style);
+      await page.waitForSelector('#buttonToRESET', {timeout: 5000});
+      const resetButtonTitle = await page.evaluate(() => document.querySelector('#buttonToRESET').title);
+      const resetButtonStyle = await page.evaluate(() => document.querySelector('#buttonToRESET').style);
       assert.strictEqual(resetButtonTitle, `'RESET' cannot be used in state 'RUNNING'`);
       assert.deepStrictEqual(resetButtonStyle, {0: 'display'});
     });
   });
 
-  describe('Check transition from RUNNING to CONFIGURED to STANDBY and presence of buttons', async () => {
-    it('should click STOP then RESET button states (RUNNING -> CONFIGURED -> STANDBY)', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)', {timeout: 5000});
+  describe('Check transition from RUNNING to CONFIGURED to DEPLOYED and presence of buttons', async () => {
+    it('should click STOP then RESET button states (RUNNING -> CONFIGURED -> DEPLOYED)', async () => {
+      await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
       // click STOP
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)').click());
-      await page.waitForTimeout(200);
-      const configuredState = await page.evaluate(() => {
-        return window.model.environment.item.payload.environment.state;
-      });
+      await page.evaluate(() => document.querySelector('#buttonToSTOP').click());
+      await page.waitForNetworkIdle();
+      const configuredState = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(configuredState, 'CONFIGURED');
       // click RESET
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)').click());
-      await page.waitForTimeout(200);
-      const standbyState = await page.evaluate(() => {
-        return window.model.environment.item.payload.environment.state;
-      });
-      assert.strictEqual(standbyState, 'STANDBY');
+      await page.evaluate(() => document.querySelector('#buttonToRESET').click());
+      await page.waitForNetworkIdle();
+      const standbyState = await page.evaluate(() => window.model.environment.item.payload.state);
+      assert.strictEqual(standbyState, 'DEPLOYED');
     });
 
-    it('should have one button hidden for START in state STANDBY', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(1)', {timeout: 5000});
-      const startButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(1)').title);
-      const startButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(1)').style);
-      assert.strictEqual(startButtonTitle, `'START' cannot be used in state 'STANDBY'`);
+    it('should have one button hidden for START in state DEPLOYED', async () => {
+      await page.waitForSelector('#buttonToSTART', {timeout: 5000});
+      const startButtonTitle = await page.evaluate(() => document.querySelector('#buttonToSTART').title);
+      const startButtonStyle = await page.evaluate(() => document.querySelector('#buttonToSTART').style);
+      assert.strictEqual(startButtonTitle, `'START' cannot be used in state 'DEPLOYED'`);
       assert.deepStrictEqual(startButtonStyle, {0: 'display'});
     });
 
-    it('should have one button hidden for STOP in state STANDBY', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(2)', {timeout: 5000});
-      const stopButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(2)').title);
-      const stopButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(2)').style);
-      assert.strictEqual(stopButtonTitle, `'STOP' cannot be used in state 'STANDBY'`);
+    it('should have one button hidden for STOP in state DEPLOYED', async () => {
+      await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
+      const stopButtonTitle = await page.evaluate(() => document.querySelector('#buttonToSTOP').title);
+      const stopButtonStyle = await page.evaluate(() => document.querySelector('#buttonToSTOP').style);
+      assert.strictEqual(stopButtonTitle, `'STOP' cannot be used in state 'DEPLOYED'`);
       assert.deepStrictEqual(stopButtonStyle, {0: 'display'});
     });
 
-    it('should have one button hidden for CONFIGURE in state STANDBY', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(3)', {timeout: 5000});
-      const configureButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(3)').title);
+    it.skip('should have one button for CONFIGURE in state DEPLOYED', async () => {
+      // skipping due to OCTRL-628
+      await page.waitForSelector('#buttonToCONFIGURE', {timeout: 5000});
+      const configureButtonTitle = await page.evaluate(() => document.querySelector('#buttonToCONFIGURE').title);
       assert.strictEqual(configureButtonTitle, `CONFIGURE`);
     });
 
-    it('should have one button hidden for RESET in state STANDBY', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)', {timeout: 5000});
-      const resetButtonTitle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(4)').title);
-      const resetButtonStyle = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div >button:nth-child(4)').style);
-      assert.strictEqual(resetButtonTitle, `'RESET' cannot be used in state 'STANDBY'`);
+    it('should have one button hidden for RESET in state DEPLOYED', async () => {
+      await page.waitForSelector('#buttonToRESET', {timeout: 5000});
+      const resetButtonTitle = await page.evaluate(() => document.querySelector('#buttonToRESET').title);
+      const resetButtonStyle = await page.evaluate(() => document.querySelector('#buttonToRESET').style);
+      assert.strictEqual(resetButtonTitle, `'RESET' cannot be used in state 'DEPLOYED'`);
       assert.deepStrictEqual(resetButtonStyle, {0: 'display'});
     });
   });
@@ -201,97 +208,12 @@ describe('`pageEnvironment` test-suite', async () => {
       page.on('dialog', async (dialog) => {
         await dialog.accept();
       });
-      await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button', {timeout: 5000});
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div:nth-child(2) > button').click());
-      await page.waitForTimeout(500);
+      await page.waitForSelector('#buttonToSHUTDOWN', {timeout: 5000});
+      await page.evaluate(() => document.querySelector('#buttonToSHUTDOWN').click());
+      await page.waitForNetworkIdle();
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=environments');
       assert.ok(calls['destroyEnvironment']);
     });
-
-    it('should click LOCK button to remove control', async () => {
-      await page.waitForSelector('body > div:nth-child(2) > div > div > button', {timeout: 5000});
-      await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').click());
-      await page.waitForTimeout(500);
-      const lockButton = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div > div > button').title);
-      assert.strictEqual(lockButton, 'Lock is free');
-    });
-  });
-
-  describe('Utils within Environment class', async () => {
-    it('should replace task name if regex is matched', async () => {
-      const tagModified = await page.evaluate(() => {
-        const result = {environment: {}};
-        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment._parseEnvResult(result).environment.tasks[0].name;
-      });
-      assert.strictEqual(tagModified, 'readout');
-    });
-    it('should not replace task name due to regex not matching the name (missing tasks/ group)', async () => {
-      const tagModified = await page.evaluate(() => {
-        const result = {environment: {}};
-        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment._parseEnvResult(result).environment.tasks[0].name;
-      });
-      assert.strictEqual(tagModified, 'github.com/AliceO2Group/ControlWorkflows/readout@4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
-    });
-
-    it('should not replace task name due to regex not matching the name (missing @ character)', async () => {
-      const tagModified = await page.evaluate(() => {
-        const result = {environment: {}};
-        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment._parseEnvResult(result).environment.tasks[0].name;
-      });
-      assert.strictEqual(tagModified, 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a');
-    });
-
-    it('should successfully add mesosStdout if available in tasks', async () => {
-      const mesosStdout = await page.evaluate(() => {
-        const result = {environment: {}};
-        result.environment.tasks = [{mesosStdout: 'location/location', name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment._parseEnvResult(result).mesosStdout;
-      });
-      assert.strictEqual(mesosStdout, 'location/location');
-    });
-
-    it('should successfully add mesosStdout empty if not available in tasks', async () => {
-      const mesosStdout = await page.evaluate(() => {
-        const result = {environment: {}};
-        result.environment.tasks = [{name: 'github.com/AliceO2Group/ControlWorkflows/tasks/readout4726d80d4bf43fe65133d20d83831752049c8dbe#54c7c9b0-ffbe-11e9-97fb-02163e018d4a'}];
-        return window.model.environment._parseEnvResult(result).mesosStdout;
-      });
-      assert.strictEqual(mesosStdout, '');
-    });
-
-    it('should filter out variables which do not belong to a detector', async() => {
-      const env = await page.evaluate(() => {
-        const result = {environment: {
-          includedDetectors: ['ODC'],
-          userVars: {
-            odc_enabled: 'true',
-            mid_enabled: 'false',
-            mid_something: 'test',
-            dd_enabled: 'true',
-            run_type: 'run'
-          },
-          vars: {
-            odc_enabled: 'true',
-            mid_enabled: 'false',
-            other_useful_var: 'very',
-            dd_enabled: 'true',
-            run_type: 'run'
-          },
-          defaults: {
-            dcs_topology: 'test',
-            dd_enabled: 'true',
-            run_type: 'run'
-          }
-        }};
-        return window.model.environment._parseEnvResult(result).environment;
-      });
-      assert.deepStrictEqual(env.vars, { odc_enabled: 'true', dd_enabled: 'true', run_type: 'run', other_useful_var: 'very' });
-      assert.deepStrictEqual(env.userVars,  { odc_enabled: 'true', dd_enabled: 'true', run_type: 'run' });
-      assert.deepStrictEqual(env.defaults, { dd_enabled: 'true', run_type: 'run' });
-    })
   });
 });

@@ -14,41 +14,44 @@
 
 import {h} from '/js/src/index.js';
 import {iconLockLocked, iconLockUnlocked} from '/js/src/icons.js';
+import {DetectorLockAction} from './../common/enums/DetectorLockAction.enum.js';
 
 /**
- * View of lock button, when taken, it shows who owns it
- * Otherwise show a loading button
- * @param {Object} model
- * @return {vnode}
+ * Button build with builtin logic of detector lock state which allows users to:
+ * - take/release lock with/without force as admins
+ * - see who owns the lock
+ * 
+ * When the user releases a lock, the detector also has to be unselected from the workflow.
+ * @param {Model} model - root model of the application
+ * @param {String} detector - detector name
+ * @param {Object} lockState - lock state of the detector
  */
-export default (model) => [
-  model.lock.padlockState.match({
-    NotAsked: () => buttonLoading(),
-    Loading: () => buttonLoading(),
-    Success: (data) => button(model, data),
-    Failure: (_error) => null,
-  })
-];
+export const detectorLockButton = (model, detector, lockState, isIcon = false) => {
+  const lockModel = model.lock;
+  const isDetectorLockTaken = lockModel.isLocked(detector);
 
-/**
- * Shows lock or unlock icon depending of padlock state (taken or not)
- * Shows also name of owner and its ID on mouse over
- * @param {Object} model
- * @param {Object} padlockState
- * @return {vnode}
- */
-const button = (model, padlockState) => typeof padlockState.lockedBy !== 'number'
-  ? h('button.btn', {
-    title: 'Lock is free',
-    onclick: () => model.lock.lock()
-  }, iconLockUnlocked())
-  : h('button.btn', {
-    title: `Lock is taken by ${padlockState.lockedByName} (id ${padlockState.lockedBy})`,
-    onclick: () => model.lock.unlock()
-  }, (model.session.personid == padlockState.lockedBy) ? iconLockLocked('fill-green') : iconLockLocked('fill-orange'));
+  let detectorLockHandler = null;
+  let detectorLockButtonClass = '.gray-darker';
 
-/**
- * Simple loading button
- * @return {vnode}
- */
-const buttonLoading = () => h('button.btn', {className: 'loading', disabled: true}, iconLockLocked());
+  if (isDetectorLockTaken) {
+    if (lockModel.isLockedByCurrentUser(detector)) {
+      detectorLockButtonClass = '.success';
+      detectorLockHandler = () => {
+        lockModel.actionOnLock(detector, DetectorLockAction.RELEASE, false);
+        model.workflow.flpSelection.unselectDetector(detector);
+      };
+    } else {
+      detectorLockButtonClass = '.warning.disabled.disabled-item';
+    }
+  } else {
+    detectorLockHandler = () => lockModel.actionOnLock(detector, DetectorLockAction.TAKE, false);
+  }
+  const element = isIcon ? '.flex-row.items-center.actionable-icon' : 'button.btn';
+
+  return h(`${element}.${detectorLockButtonClass}`, {
+    id: `detectorLockButtonFor${detector}`,
+    title: isDetectorLockTaken ? `Lock is taken by ${lockState.owner.fullName}` : 'Lock is free',
+    disabled: isDetectorLockTaken && !lockModel.isLockedByCurrentUser(detector),
+    onclick: detectorLockHandler,
+  }, isDetectorLockTaken ? iconLockLocked() : iconLockUnlocked());
+};

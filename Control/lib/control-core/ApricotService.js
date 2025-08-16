@@ -13,10 +13,14 @@
 */
 
 const assert = require('assert');
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/apricotservice`);
-const {errorHandler} = require('./../utils.js');
+const {LogManager, LogLevel} = require('@aliceo2/web-ui');
+const {errorHandler, errorLogger} = require('./../utils.js');
+const CoreEnvConfig = require('../dtos/CoreEnvConfig.js');
 const CoreUtils = require('./CoreUtils.js');
 const COMPONENT = 'COG-v1';
+const {User} = require('./../dtos/User.js');
+const {APRICOT_COMMANDS: {ListRuntimeEntries, GetRuntimeEntry}} = require('./ApricotCommands.js');
+const LOG_FACILITY = 'cog/apricotservice';
 
 /**
  * Gateway for all Apricot - Core calls
@@ -24,14 +28,65 @@ const COMPONENT = 'COG-v1';
 class ApricotService {
   /**
    * Constructor initializing dependencies
-   * @param {GrpcProxy} apricotProxy
+   * @param {GrpcServiceClient} grpcClient - instance of the grpc client to be used
    */
-  constructor(apricotProxy) {
-    assert(apricotProxy, 'Missing GrpcProxy dependency for Apricot');
-    this.apricotProxy = apricotProxy;
+  constructor(grpcClient) {
+    assert(grpcClient, 'Missing GrpcServiceClient dependency for Apricot');
+    this._grpcClient = grpcClient;
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/apricotservice`);
 
     this.detectors = [];
     this.hostsByDetector = new Map();
+  }
+
+  /**
+   * Initialize service with static data from AliECS
+   */
+  async init() {
+    try {
+      this.detectors = (await this._grpcClient['ListDetectors']()).detectors;
+      this._logger.infoMessage(`Initial data retrieved from AliECS/Apricot: ${this.detectors} detectors`, {
+        level: 99,
+        system: 'GUI',
+        facility: 'cog/api'
+      });
+      await Promise.allSettled(
+        this.detectors.map(async (detector) => {
+          try {
+            const {hosts} = await this._grpcClient['GetHostInventory']({detector});
+            this.hostsByDetector.set(detector, hosts);
+          } catch (error) {
+            this._logger.error(`Unable to retrieve list of hosts for detector: ${detector}`);
+          }
+        })
+      );
+    } catch (error) {
+      this._logger.error('Unable to list detectors');
+    }
+  }
+
+  /**
+   * Use Apricot defined `o2apricot.proto` `GetRuntimeEntry` to retrieve the value stored in a specified key
+   *
+   * Corner cases for Apricot returns:
+   * * if key(component) does not exist, Apricot wrongly returns code 2 instead of 5 in the gRPC error;
+   * * if key exists but there is no content, Apricot returns '{}'
+   * * if key exists and there is content, Apricot returns content within payload attribute '{payload}'
+   * @param {String} component - component for which it should query
+   * @param {String} key - key for which value should be retrieved
+   * @returns {Promise<String>} - value stored by apricot
+   */
+  async getRuntimeEntryByComponent(component, key) {
+    try {
+      const {payload = '{}'} = await this._grpcClient[GetRuntimeEntry]({component, key});
+      return payload;
+    } catch (error) {
+      const {code, details = ''} = error;
+      if (code === 2 && details.includes('nil')) {
+        error.code = 5;
+      }
+      throw error;
+    }
   }
 
   /**
@@ -43,8 +98,7 @@ class ApricotService {
   async getDetectorList(_, res) {
     if (this.detectors.length === 0) {
       try {
-        log.info('AliECS GUI => ListDetectors')
-        this.detectors = (await this.apricotProxy['ListDetectors']()).detectors;
+        this.detectors = (await this._grpcClient['ListDetectors']()).detectors;
       } catch (error) {
         errorHandler(error, res, 503, 'apricotservice');
         return;
@@ -62,18 +116,16 @@ class ApricotService {
   async getHostsByDetectorList(_, res) {
     if (this.hostsByDetector.size === 0) {
       try {
-        log.info('AliECS GUI => ListDetectors');
-        this.detectors = (await this.apricotProxy['ListDetectors']()).detectors;
+        this.detectors = (await this._grpcClient['ListDetectors']()).detectors;
 
         await Promise.allSettled(
           this.detectors.map(async (detector) => {
             try {
-              log.info(`AliECS GUI => GetHostInventory for detector: ${detector}`);
-              const {hosts} = await this.apricotProxy['GetHostInventory']({detector});
+              const {hosts} = await this._grpcClient['GetHostInventory']({detector});
               this.hostsByDetector.set(detector, hosts);
             } catch (error) {
-              log.error(`Unable to retrieve list of hosts for detector: ${detector}`);
-              log.error(error);
+              this._logger.error(`Unable to retrieve list of hosts for detector: ${detector}`);
+              this._logger.error(error);
             }
           })
         );
@@ -86,19 +138,19 @@ class ApricotService {
   }
 
   /**
-   * Request a list of detectors from Apricot to confirm 
+   * Request a list of detectors from Apricot to confirm
    * connection and O2Apricot are up
    * @return {Promise}
    */
   async getStatus() {
     try {
-      if (this.apricotProxy?.isConnectionReady) {
-        await this.apricotProxy['ListDetectors']();
+      if (this._grpcClient?.isConnectionReady) {
+        await this._grpcClient['ListDetectors']();
       } else {
         throw new Error('Unable to check status of Apricot')
       }
     } catch (error) {
-      log.error(error);
+      this._logger.error(error);
       throw error;
     }
   }
@@ -110,100 +162,115 @@ class ApricotService {
    */
   executeCommand(req, res) {
     const method = CoreUtils.parseMethodNameString(req.path);
-    if (this.apricotProxy?.isConnectionReady && method) {
-      if (!method.startsWith('Get')) {
-        const type = req.body.type ? ` (${req.body.type})` : '';
-        log.info(`${req.session.personid} => ${method} ${type}`, 6);
-      }
-      this.apricotProxy[method](req.body)
+    if (this._grpcClient?.isConnectionReady && method) {
+      this._grpcClient[method](req.body)
         .then((response) => res.json(response))
         .catch((error) => errorHandler(error, res, 504, 'apricotservice'));
     } else {
-      const error = this.apricotProxy?.connectionError?.message
+      const error = this._grpcClient?.connectionError?.message
         ?? 'Could not establish connection to O2Apricot due to potentially undefined method';
       errorHandler(error, res, 503, 'apricotservice');
     }
   }
 
   /**
-   * Receive request to save a configuration for creating a new environment
-   * * Parses data to be saved including user data and attempt to save it via Apricot
-   * * If name of the configuration already exists an error message will be sent back to the user
-   * @param {Request} req
-   * @param {Response} res
+   * Responds to request to save a configuration for creating a new environment;
+   * * Parses data to be saved including user data;
+   * * If name of the configuration already exists throws an error to inform user to load and update rather than direct save;
+   * * If name is new, the environment will be saved via Apricot
+   * @param {Request} req - HTTP Object with data on the configuration to be saved/updated
+   * @param {Response} res - HTTP Object used to send a response back to the client with the status of its action
+   * @returns {void}
    */
-  async saveConfiguration(req, res) {
+  async saveCoreEnvConfig(req, res) {
     try {
-      const {key, value} = this._buildConfigurationObject(req);
-      const {payload: existingConfs} = await this.apricotProxy['ListRuntimeEntries']({component: COMPONENT});
-      if (existingConfs.includes(key)) {
-        errorHandler(`A configuration with name '${value.name}' already exists`, res, 409, 'apricotservice');
+      const data = req.body;
+      const {username, personid} = req.session;
+      data.user = {username, personid};
+      const envConf = CoreEnvConfig.fromJSON(data);
+
+      const {payload: configurations} = await this._grpcClient[ListRuntimeEntries]({component: COMPONENT});
+      if (configurations.includes(envConf.id)) {
+        errorHandler(`A configuration with name '${envConf.id}' already exists. `
+          + 'Please load existing configuration and use \'Update\'', res, 409, 'apricotservice');
       } else {
-        await this.apricotProxy['SetRuntimeEntry']({component: COMPONENT, key, value: JSON.stringify(value, null, 2)});
-        res.status(200).json({message: `Configuration saved successfully as ${key}`})
+        this._logger.infoMessage(
+          `${req.session.username} request to save new core environment configuration "${envConf.id}"`,
+          {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
+        );
+        await this._grpcClient['SetRuntimeEntry']({component: COMPONENT, key: envConf.id, value: envConf.toString()});
+        res.status(201).json({message: `Configuration successfully saved as ${envConf.id}`});
       }
     } catch (error) {
       errorHandler(error, res, 503, 'apricotservice');
     }
   }
 
-  /*
-   * Helpers
-  */
-
   /**
-   * Builds configuration object to be stored in Apricot based on request
-   * @param {Request} req
-   * @returns {JSON}
+   * Receive request to update a configuration for a CoreEnvConfig;
+   * * Parses data to be saved including user data and attempt to save it via Apricot
+   * * If name of the configuration already exists checks if the user is admin or the author of the existing configuration.
+   * * If it is not, throw an error. Otherwise, updates the configuration;
+   * @param {Request} req - HTTP Object with data on the configuration to be saved/updated
+   * @param {Response} res - HTTP Object used to send a response back to the client with the status of its action
+   * @returns {void}
    */
-  _buildConfigurationObject(req) {
-    const missingFields = [];
-    if (!req.body?.name) {
-      missingFields.push('name');
-    }
-    if (!req.body?.workflow) {
-      missingFields.push('workflow');
-    }
-    if (!req.body?.repository) {
-      missingFields.push('repository');
-    }
-    if (!req.body?.revision) {
-      missingFields.push('revision');
-    }
+  async updateCoreEnvConfig(req, res) {
+    try {
+      const data = req.body;
+      const {username, name, personid, access} = req.session;
+      const user = new User(username, name, personid, access);
+      data.user = {username, personid};
+      const envConf = CoreEnvConfig.fromJSON(data);
 
-    if (missingFields.length !== 0) {
-      throw new Error(`Configuration cannot be saved without the following fields: ${missingFields.toString()}`);
-    } else {
-      const user = {
-        username: req?.session?.username ?? 'anonymous',
-        personid: req?.session?.personid ?? 0
-      };
-      const created = Date.now();
-      const edited = Date.now();
-      const variables = req.body?.variables ?? {};
-      const detectors = req.body?.detectors ?? [];
-      const workflow = req.body.workflow;
-      const revision = req.body.revision;
-      const repository = req.body.repository;
-      const name = req.body.name;
-      const id = this._getNameAsId(name);
-      return {
-        key: id, value: {
-          user, created, edited, variables, workflow, repository, revision, detectors, name, id
-        }
-      };
+      const envConfigToSave = await this._getUpdatedConfigIfExists(envConf, user);
+      this._logger.infoMessage(
+        `${req.session.username} requested to update new core environment configuration "${envConf.id}"`,
+        {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
+      );
+      await this._grpcClient['SetRuntimeEntry']({
+        component: COMPONENT,
+        key: envConfigToSave.id,
+        value: envConfigToSave.toString()
+      });
+      res.status(200).json({message: `Successfully updated configuration: ${envConf.id}`});
+    } catch (error) {
+      errorHandler(error, res, 503, 'apricotservice');
     }
   }
 
   /**
-   * Build the ID of the configuration to be saved from the name:
-   * * Replace any existing `/` from it with `_` so that Apricot is able to understand Consul storage
-   * * Replace any spaces from it with `_`
-   * @param {String} name 
-   * @returns {String}
+   * Helpers
    */
-  _getNameAsId(name) {
-    return `${name.trim().replace(/ /g, '_')}`.replace(/\//g, '_');
+
+  /**
+   * Method to update existing configuration with the new one if user has permissions to do so;
+   * * If the configuration name does not exist, any user is allowed to create one, thus same configuration will be returned;
+   * * If the configuration already exists, only admins or the original author can update it
+   * * * If user is allowed to update the configuration, the existing configuration data will be returned;
+   * * * If the user is not allowed to update, an error will be thrown;
+   * @param {CoreEnvConfig} envConfig - configuration unique id to be searched by
+   * @param {Session} user - object containing information with regards to user requesting the action
+   * @returns {Promise<JSON,Error>} - if user is not allowed, an error will be thrown
+   */
+  async _getUpdatedConfigIfExists(envConfig, user) {
+    let existingConfig = '';
+    try {
+      const {payload: envConfigAsString} = await this._grpcClient['GetRuntimeEntry']({
+        component: COMPONENT,
+        key: envConfig.id,
+      });
+      existingConfig = CoreEnvConfig.fromString(envConfigAsString);
+    } catch (error) {
+      errorLogger(error, 'apricotservice');
+      throw new Error(`Unable to find any existing configuration named: ${envConfig.id}`);
+    }
+
+    if (!existingConfig.isUpdatableBy(user)) {
+      throw new Error(`Configuration '${envConfig.id}' exists already and you do NOT have permissions to update it!`);
+    }
+    envConfig.applyUpdatableParams(existingConfig);
+    return envConfig;
   }
 }
 

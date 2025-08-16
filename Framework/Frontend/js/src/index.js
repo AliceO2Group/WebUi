@@ -10,28 +10,44 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 // Design patterns
-export {default as Observable} from './Observable.js';
-export {default as EventEmitter} from './EventEmitter.js';
-export {default as RemoteData} from './RemoteData.js';
+export { default as Observable } from './Observable.js';
+export { default as EventEmitter } from './EventEmitter.js';
+export { RemoteData } from './RemoteData.js';
 
 // Template engine
-export {render, h, frameDebouncer, mount} from './renderer.js';
-export {default as QueryRouter} from './QueryRouter.js';
+export { render, h, frameDebouncer, mount } from './renderer.js';
+export { default as QueryRouter } from './QueryRouter.js';
 
 // Utils
-export {default as switchCase} from './switchCase.js';
+export { default as switchCase } from './switchCase.js';
+export { documentClickTaggedEventRegistry } from './utilities/documentClickTaggedEventRegistry.js';
+export { buildUrl } from './utilities/buildUrl.js';
+export { parseUrlParameters } from './utilities/parseUrlParameters.js';
+
+// Formatters
+export { formatTimeDuration } from './formatter/formatTimeDuration.js';
 
 // Singleton retrieving session data
-export {default as sessionService} from './sessionService.js';
+export { default as sessionService } from './sessionService.js';
 
 // Data sources
-export {default as fetchClient} from './fetchClient.js';
-export {default as WebSocketClient} from './WebSocketClient.js';
-export {default as Loader} from './Loader.js';
-export {default as BrowserStorage} from './BrowserStorage.js';
+export { default as fetchClient } from './fetchClient.js';
+export { default as WebSocketClient } from './WebSocketClient.js';
+export { default as Loader } from './Loader.js';
+export { default as BrowserStorage } from './BrowserStorage.js';
+
+// Reusable components
+export { StatefulComponent } from './components/StatefulComponent.js';
+export { CopyToClipboardComponent } from './components/CopyToClipboardComponent.js';
+export { createPortal } from './components/createPortal.js';
+export { DropdownComponent } from './components/DropdownComponent.js';
+export { getUniqueId } from './components/getUniqueId.js';
+export { popover } from './components/popover.js';
+export { PopoverAnchors } from './components/PopoverEngine.js';
+export { PopoverTriggerPreConfiguration } from './components/PopoverPreConfigurations.js';
 
 // All icons helpers, namespaced with prefix 'icon*'
 export * from './icons.js';

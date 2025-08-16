@@ -27,20 +27,21 @@
   },
   "log": {
     "winston": {
-      "file": "./error.log",
-      "fileLvl": "error",
-      "consoleLvl": "debug"
+      "file": {
+        "name": "./error.log",
+        "level": "error"
+      },
+      "console": {
+        "level": "debug"
+      }
     },
-    "infologger": {
-      "host": "127.0.0.1",
-      "port": 6102
-    }
+    "infologger": true
   },
   "consul": {
     "hostname": "localhost",
     "port": 8080
   },
-  "kafka": {
+  "notification": {
     "brokers": ["localhost:9092"]
   }
 }

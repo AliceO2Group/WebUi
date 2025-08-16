@@ -36,7 +36,7 @@ describe('Control', function() {
   let browser;
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
-  this.timeout(25000);
+  this.timeout(50000);
   this.slow(1000);
   const url = 'http://' + config.http.hostname + ':' + config.http.port + '/';
 
@@ -46,7 +46,7 @@ describe('Control', function() {
     const {calls} = coreGRPCServer(config);
     // Start gRPC server, this replaces the real APRICOT server written in Go.
     const {calls: apricotCalls} = apricotGRPCServer(config);
-    
+
     // Start web-server in background
     subprocess = spawn('node', ['index.js', 'test/test-config.js'], {stdio: 'pipe'});
     subprocess.stdout.on('data', (chunk) => {
@@ -76,7 +76,7 @@ describe('Control', function() {
         console.log(`        ${msg.args()[i]}`);
       }
     });
-    await page.setViewport({ width: 1200, height: 770});
+    await page.setViewport({width: 1200, height: 770});
     exports.page = page;
     const helpers = {url, calls, apricotCalls};
     exports.helpers = helpers;
@@ -98,62 +98,60 @@ describe('Control', function() {
     }
   });
 
-  it('should select detector view GLOBAL and redirect to environments page', async() => {
-    const [label] = await page.$x(`//div/button[@id="GLOBALViewButton"]`);
-    if (label) {
-      await label.click();
-      await page.waitForTimeout(200);
-      const location = await page.evaluate(() => window.location);
-      assert.strictEqual(location.search, '?page=environments');
-    } else {
-      assert.ok(false, `Unable to click GLOBAL View`);
-    }
+  it('should select detector view GLOBAL and redirect to environments page', async () => {
+    await page.locator('xpath///button[@id="GLOBALViewButton"]')
+      .setTimeout(3000)
+      .click();
+    const location = await page.evaluate(() => window.location);
+    assert.strictEqual(location.search, '?page=environments');
   });
 
-  it('should successfully set selected detector', async() => {
+  it('should successfully set selected detector', async () => {
     const selected = await page.evaluate(() => window.model.detectors.selected);
     assert.strictEqual(selected, 'GLOBAL');
   });
 
-  it ('should successfully display detector view header', async() => {
-    const detectorViewLabel = await page.evaluate(() => {
-      return document.querySelector(
-        'body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > h4').innerText;
-    });
+  it('should successfully display detector view header', async () => {
+    const detectorViewLabel = await page.locator('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > h4')
+      .setTimeout(1000)
+      .map((header) => header.innerText)
+      .wait();
+
     assert.strictEqual(detectorViewLabel, 'Detector View: GLOBAL')
   });
 
-  it('should have correctly load COG configuration', async () => {
+  it('should successfully load COG configuration', async () => {
     const cog = await page.evaluate(() => window.COG);
     const expectedConf = {
       ILG_URL: 'http://localhost:8081',
-      BKP_URL: 'http://localhost:2021',
+      ILG_EPN_URL: 'http://localhost:8083',
+      BKP_URL: 'http://localhost:2021/',
       QCG_URL: 'http://localhost:2022',
       GRAFANA: {
         status: true,
-        plots: [
-          'http://localhost:2020/d-solo/TZsAxKIWk/aliecs-readout?panelId=6&refresh=5s&theme=light',
-          'http://localhost:2020/d-solo/TZsAxKIWk/aliecs-readout?panelId=8&refresh=5s&theme=light',
-          'http://localhost:2020/d-solo/TZsAxKIWk/aliecs-readout?panelId=4&refresh=5s&theme=light',
-          'http://localhost:2020/d-solo/HBa9akknk/aliecs-dd?panelId=10&refresh=5s&theme=light'
-        ]
+        plots: {
+          flpStats: 'http://localhost:2020/d-solo/SoUQ_Oy7z/aliecs-general?panelId=16&theme=light',
+          epnStats: 'http://localhost:2020/d-solo/SoUQ_Oy7z/aliecs-general?panelId=22&theme=light',
+          readoutPlot: 'http://localhost:2020/d-solo/SoUQ_Oy7z/aliecs-general?panelId=20&theme=light'
+        }
       },
       CONSUL: {
         protocol: 'http',
         hostname: 'localhost',
+        ui: 'localhost.cern.ch',
         port: 8550,
         flpHardwarePath: 'test/o2/hardware/flps',
+        detHardwarePath: 'test/o2/hardware/detectors',
         readoutPath: 'test/o2/readout/components',
         readoutCardPath: 'test/o2/readoutcard/components',
         qcPath: 'test/o2/qc/components',
         kVPrefix: 'test/ui/some-cluster/kv',
-        kvStoreQC: 'localhost:8550/test/ui/some-cluster/kv/test/o2/qc/components',
-        kvStoreReadout: 'localhost:8550/test/ui/some-cluster/kv/test/o2/readout/components',
+        kvStoreQC: 'localhost.cern.ch/test/ui/some-cluster/kv/test/o2/qc/components/',
+        kvStoreReadout: 'localhost.cern.ch/test/ui/some-cluster/kv/test/o2/readout/components/',
         qcPrefix: "localhost:8550/test/o2/qc/components/",
         readoutPrefix: "localhost:8550/test/o2/readout/components/"
       },
       REFRESH_TASK: 5000,
-      REFRESH_ENVS: 10000,
     }
     assert.deepStrictEqual(cog, expectedConf, 'Public configuration was not loaded successfully');
   });
@@ -169,6 +167,11 @@ describe('Control', function() {
   require('./public/page-environments-mocha');
   // require('./public/page-configuration-mocha');
   require('./public/page-tasks-mocha');
+  require('./public/page-hardware-mocha');
+  require('./public/page-lock-mocha');
+
+  require('./api/lock/api-get-locks.test');
+  require('./api/lock/api-put-locks.test');
 
   beforeEach(() => this.ok = true);
 

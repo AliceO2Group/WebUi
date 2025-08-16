@@ -12,8 +12,10 @@
  * or submit itself to any jurisdiction.
 */
 
-const log = new (require('@aliceo2/web-ui').Log)(`${process.env.npm_config_log_label ?? 'cog'}/utils`);
+const logger = (require('@aliceo2/web-ui').LogManager)
+  .getLogger(`${process.env.npm_config_log_label ?? 'cog'}/utils`);
 const http = require('http');
+const https = require('https');
 
 /**
  * Global HTTP error handler, sends status 500
@@ -22,52 +24,58 @@ const http = require('http');
  * @param {number} status - status code 4xx 5xx, 500 will print to debug
  */
 function errorHandler(err, res, status = 500, facility = 'utils') {
-  log.facility = `${process.env.npm_config_log_label ?? 'cog'}/${facility}`;
-  if (err.stack) {
-    log.trace(err);
-  }
-  log.error(err.message || err);
+  errorLogger(err, facility);
   res.status(status);
   res.send({message: err.message || err});
 }
 
 /**
  * Global Error Logger for AliECS GUI
- * @param {Error} err 
+ * @param {Error} err
  */
-function errorLogger(err) {
+function errorLogger(err, facility = 'utils') {
+  logger.facility = `${process.env.npm_config_log_label ?? 'cog'}/${facility}`;
   if (err.stack) {
-    log.trace(err);
+    logger.trace(err);
   }
-  log.error(err.message || err);
+  logger.error(err.message || err);
 }
 
 /**
-  * Util to get JSON data (parsed) from server
+  * Util to get JSON data (parsed) following a GET request
   * @param {string} host - hostname of the server
   * @param {number} port - port of the server
   * @param {string} path - path of the server request
+  * @param {JSON} options - specific request options (e.g range of accepted status code)
   * @return {Promise.<Object, Error>} JSON response
   */
-function httpGetJson(host, port, path) {
+function httpGetJson(hostname, port, path, options = undefined) {
+  options = {
+    statusCodeMin: 200,
+    statusCodeMax: 299,
+    rejectMessage: 'Non-2xx status code: ',
+    protocol: 'http:',
+    rejectUnauthorized: true,
+    ...options ?? {}
+  };
   return new Promise((resolve, reject) => {
     const requestOptions = {
-      hostname: host,
-      port: port,
-      path: path,
+      hostname,
+      port,
+      path,
       method: 'GET',
+      rejectUnauthorized: Boolean(options.rejectUnauthorized),
       headers: {
         Accept: 'application/json'
       }
     };
     /**
-     * Generic handler for client http requests,
-     * buffers response, checks status code and parses JSON
+     * Generic handler for GET HTTP requests, buffers response, checks status code and parses JSON
      * @param {Response} response
      */
     const requestHandler = (response) => {
-      if (response.statusCode < 200 || response.statusCode > 299) {
-        reject(new Error('Non-2xx status code: ' + response.statusCode));
+      if (response.statusCode < options.statusCodeMin || response.statusCode > options.statusCodeMax) {
+        reject(new Error(options.rejectMessage + response.statusCode));
         return;
       }
 
@@ -82,8 +90,12 @@ function httpGetJson(host, port, path) {
         }
       });
     };
-
-    const request = http.request(requestOptions, requestHandler);
+    let request;
+    if (options.protocol === 'https:') {
+      request = https.request(requestOptions, requestHandler);
+    } else {
+      request = http.request(requestOptions, requestHandler);
+    }
     request.on('error', (err) => reject(err));
     request.end();
   });

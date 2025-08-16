@@ -28,12 +28,12 @@ function buildPublicConfig(config) {
   }
   const publicConfig = {
     ILG_URL: _getInfoLoggerURL(config),
+    ILG_EPN_URL: _getInfoLoggerEpnUrl(config),
     QCG_URL: _getQcgURL(config),
     BKP_URL: _getBookkeepingURL(config),
     GRAFANA: _getGrafanaConfig(config),
     CONSUL: getConsulConfig(config),
     REFRESH_TASK: config?.utils?.refreshTask || 10000,
-    REFRESH_ENVS: config?.utils?.refreshEnvs || 10000,
   };
   let codeStr = `/* eslint-disable quote-props */\n`
     + `const publicConfig = ${JSON.stringify(publicConfig, null, 2)}; \nexport {publicConfig as COG};\n`;
@@ -48,15 +48,17 @@ function buildPublicConfig(config) {
 function getConsulConfig(config) {
   if (config?.consul) {
     const conf = config.consul;
-    conf.protocol = conf?.protocol ? conf.protocol : 'http';
-    conf.flpHardwarePath = conf?.flpHardwarePath ? conf.flpHardwarePath : 'o2/hardware/flps';
-    conf.readoutCardPath = conf?.readoutCardPath ? conf.readoutCardPath : 'o2/components/readoutcard';
-    conf.qcPath = conf?.qcPath ? conf.qcPath : 'o2/components/qc';
-    conf.readoutPath = conf?.readoutPath ? conf.readoutPath : 'o2/components/readout';
-    conf.kVPrefix = conf?.kVPrefix ? conf.kVPrefix : 'ui/alice-o2-cluster/kv';
+    conf.protocol = conf?.protocol || 'http';
+    conf.flpHardwarePath = conf?.flpHardwarePath || 'o2/hardware/flps';
+    conf.detHardwarePath = conf?.detHardwarePath || 'o2/hardware/detectors',
+    conf.readoutCardPath = conf?.readoutCardPath || 'o2/components/readoutcard';
+    conf.qcPath = conf?.qcPath || 'o2/components/qc';
+    conf.readoutPath = conf?.readoutPath || 'o2/components/readout';
+    conf.kVPrefix = conf?.kVPrefix || 'ui/alice-o2-cluster/kv';
 
-    conf.kvStoreQC = `${conf.hostname}:${conf.port}/${conf.kVPrefix}/${conf.qcPath}`;
-    conf.kvStoreReadout = `${conf.hostname}:${conf.port}/${conf.kVPrefix}/${conf.readoutPath}`;
+    conf.ui = conf.ui || `${conf.hostname}:${conf.port}`;
+    conf.kvStoreQC = `${conf.ui}/${conf.kVPrefix}/${conf.qcPath}/`;
+    conf.kvStoreReadout = `${conf.ui}/${conf.kVPrefix}/${conf.readoutPath}/`;
     conf.qcPrefix = `${conf.hostname}:${conf.port}/${conf.qcPath}/`;
     conf.readoutPrefix = `${conf.hostname}:${conf.port}/${conf.readoutPath}/`;
     return conf;
@@ -72,19 +74,15 @@ function getConsulConfig(config) {
 function _getGrafanaConfig(config) {
   if (config?.grafana?.url) {
     const hostPort = config.grafana.url;
-    const plotReadoutRateNumber = 'd-solo/TZsAxKIWk/aliecs-readout?panelId=6';
-    const plotReadoutRate = 'd-solo/TZsAxKIWk/aliecs-readout?panelId=8';
-    const plotReadoutRateGraph = 'd-solo/TZsAxKIWk/aliecs-readout?panelId=4';
-    const plotDDGraph = 'd-solo/HBa9akknk/aliecs-dd?panelId=10';
-    const theme = '&refresh=5s&theme=light';
+    const ecsDashboard = 'd-solo/SoUQ_Oy7z/aliecs-general';
+    const theme = '&theme=light';
     return {
       status: true,
-      plots: [
-        `${hostPort}/${plotReadoutRateNumber}${theme}`,
-        `${hostPort}/${plotReadoutRate}${theme}`,
-        `${hostPort}/${plotReadoutRateGraph}${theme}`,
-        `${hostPort}/${plotDDGraph}${theme}`,
-      ]
+      plots: {
+        flpStats: `${hostPort}/${ecsDashboard}?panelId=16${theme}`,
+        epnStats: `${hostPort}/${ecsDashboard}?panelId=22${theme}`,
+        readoutPlot: `${hostPort}/${ecsDashboard}?panelId=20${theme}`,
+      }
     };
   } else {
     return {status: false};
@@ -99,6 +97,15 @@ function _getGrafanaConfig(config) {
  */
 function _getInfoLoggerURL(config) {
   const ilg = config?.infoLoggerGui;
+  return (ilg?.url) ? `${ilg.url}` : '';
+}
+
+/**
+ * Retrieves the EPN InfoLogger URL and sends it
+ * @param {JSON} config - server configuration
+ */
+function _getInfoLoggerEpnUrl(config) {
+  const ilg = config?.infoLoggerEpnGui;
   return (ilg?.url) ? `${ilg.url}` : '';
 }
 
@@ -119,9 +126,9 @@ function _getQcgURL(config) {
  * @param {JSON} config - server configuration
  * @returns {string}
  */
-function _getBookkeepingURL(config) {
-  const bkp = config?.bookkeepingGui;
-  return (bkp?.url) ? `${bkp.url}` : '';
+function _getBookkeepingURL(config = {}) {
+  const {bookkeeping = {}} = config;
+  return bookkeeping.url ? new URL(bookkeeping.url) : null
 }
 
 module.exports = {

@@ -43,9 +43,9 @@ Then, open your browser and navigate to [http://localhost:8080](http://localhost
 
 Open the `index.js` file.
 
-The first line is responsible for importing framework modules: `HttpServer`, `Log`, `WebSocket`, `WebSocketMessage`.
+The first line is responsible for importing framework modules: `HttpServer`, `LogManager`, `WebSocket`, `WebSocketMessage`.
 ```js
-const {HttpServer, Log, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
+const {HttpServer, LogManager, WebSocket, WebSocketMessage} = require('@aliceo2/web-ui');
 ```
 
 Then, the configuration file is loaded. It is good practice to include it in the root file of the project.
@@ -82,7 +82,7 @@ wsServer.bind('stream-date', (body) => {
     return;
   }
 
-  Log.info('start timer');
+  LogManager.getLogger('APPLICATION').info('start timer');
 
   streamTimer = setInterval(() => {
     wsServer.broadcast(

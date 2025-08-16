@@ -10,11 +10,12 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {Observable, RemoteData, iconArrowTop} from '/js/src/index.js';
-import QCObjectService from './../services/QCObject.service.js';
+import { Observable, RemoteData, iconArrowTop } from '/js/src/index.js';
 import ObjectTree from './ObjectTree.class.js';
+import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
+import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
@@ -22,7 +23,7 @@ import ObjectTree from './ObjectTree.class.js';
 export default class QCObject extends Observable {
   /**
    * Initialize model with empty values
-   * @param {Object} model
+   * @param {Model} model - root model of the application
    */
   constructor(model) {
     super();
@@ -33,28 +34,24 @@ export default class QCObject extends Observable {
     this.list = null;
 
     this.objectsRemote = RemoteData.notAsked();
-    this.selected = null; // object - { name; createTime; lastModified; }
+    this.selected = null; // Object - { name; createTime; lastModified; }
     this.selectedOpen = false;
-    this.objects = {}; // objectName -> RemoteData.payload -> plot
+    this.objects = {}; // ObjectName -> RemoteData.payload -> plot
 
-    this.qcObjectService = new QCObjectService(this.model);
-
-    this.listOnline = []; // list of online objects name
-
-    this.searchInput = ''; // string - content of input search
-    this.searchResult = []; // array<object> - result list of search
+    this.searchInput = ''; // String - content of input search
+    this.searchResult = []; // Array<object> - result list of search
     this.sortBy = {
       field: 'name',
       title: 'Name',
       order: 1,
       icon: iconArrowTop(),
-      open: false
+      open: false,
     };
 
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
 
-    this.sideTree = new ObjectTree('online');
+    this.sideTree = new ObjectTree('database');
     this.sideTree.bubbleTo(this);
     this.queryingObjects = false;
     this.scrollTop = 0;
@@ -65,6 +62,7 @@ export default class QCObject extends Observable {
    * Set searched items table UI sizes to allow virtual scrolling
    * @param {number} scrollTop - position of the user's scroll cursor
    * @param {number} scrollHeight - height of table's viewport (not content height which is higher)
+   * @returns {undefined}
    */
   setScrollTop(scrollTop, scrollHeight) {
     this.scrollTop = scrollTop;
@@ -74,16 +72,17 @@ export default class QCObject extends Observable {
 
   /**
    * Method to toggle the box displaying more information about the histogram
-   * @param {string} objectName
+   * @param {string} objectName - object for which the toggle should be done
+   * @returns {undefined}
    */
   toggleInfoArea(objectName) {
     this.selectedOpen = !this.selectedOpen;
     this.notify();
     if (objectName) {
       if (!this.list) {
-        this.selected = {name: objectName};
+        this.selected = { name: objectName };
       } else if (this.selectedOpen && this.list
-        && ((this.selected && !this.selected.lastModified)
+        && (this.selected && !this.selected.lastModified
           || !this.selected)
       ) {
         this.selected = this.list.find((object) => object.name === objectName);
@@ -93,23 +92,8 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Method to display sideTree(edit layout mode) based on onlineList / offlineList
-   * @param {boolean} isOnlineListRequested
-   */
-  toggleSideTree(isOnlineListRequested) {
-    this.sideTree.bubbleTo(this);
-    if (isOnlineListRequested) {
-      this.sideTree.initTree('online');
-      this.sideTree.addChildren(this.listOnline);
-    } else {
-      this.sideTree.initTree('database');
-      this.sideTree.addChildren(this.list);
-    }
-    this.notify();
-  }
-
-  /**
    * Toggle the display of the sort by dropdown
+   * @returns {undefined}
    */
   toggleSortDropdown() {
     this.sortBy.open = !this.sortBy.open;
@@ -117,19 +101,15 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Computes the final list of objects to be seen by user depending on those factors:
-   * - online filter enabled
-   * - online objects according to information service
-   * - search input from user
+   * Computes the final list of objects to be seen by user depending on search input from user
    * If any of those changes, this method should be called to update the outputs.
+   * @returns {undefined}
    */
   _computeFilters() {
     if (this.searchInput) {
-      const listSource = (this.model.isOnlineModeEnabled ? this.listOnline : this.list) || []; // with fallback
+      const listSource = this.list || []; // With fallback
       const fuzzyRegex = new RegExp(this.searchInput, 'i');
-      this.searchResult = listSource.filter((item) => {
-        return fuzzyRegex.test(item.name);
-      });
+      this.searchResult = listSource.filter((item) => fuzzyRegex.test(item.name));
     } else {
       this.searchResult = [];
     }
@@ -137,162 +117,124 @@ export default class QCObject extends Observable {
 
   /**
    * Method to sort a list of JSON objects by one of its fields
-   * @param {Array<JSON>} listSource
-   * @param {string} field
-   * @param {string} order
+   * @param {Array<JSON>} listSource - list of objects to be sorted
+   * @param {string} field - filed by which the sort should be done
+   * @param {number} order - acending (1) or decending (-1)
+   * @returns {undefined}
    */
   sortListByField(listSource, field, order) {
-    listSource.sort((a, b) => {
-      if (field === 'createTime') {
-        if (a[field] < b[field]) {
-          return -1 * order;
-        } else {
-          return 1 * order;
-        }
-      } else if (field === 'name') {
-        if (a[field].toUpperCase() < b[field].toUpperCase()) {
-          return -1 * order;
-        } else {
-          return 1 * order;
-        }
-      }
-    });
+    listSource.sort((a, b) => typeof a[field] === 'string' ?
+      this._compareStrings(a[field], b[field], order) :
+      this._compareNumbers(a[field], b[field], order));
+  }
+
+  /**
+   * Helper method for sortListByField for sorting strings
+   * @param {string} a - first string to be sorted
+   * @param {string} b - second string to be sorted
+   * @param {number} order - acending (1) or decending (-1)
+   * @returns {undefined}
+   */
+  _compareStrings(a, b, order) {
+    return a.toUpperCase().localeCompare(b.toUpperCase()) * order;
+  }
+
+  /**
+   * Helper method for sortListByField for sorting numbers
+   * @param {number} a - first number to be sorted
+   * @param {number} b - second number to be sorted
+   * @param {number} order - acending (1) or decending (-1)
+   * @returns {undefined}
+   */
+  _compareNumbers(a, b, order) {
+    return (a - b) * order;
   }
 
   /**
    * Sort Tree of Objects by specified field and order
-   * @param {string} title
-   * @param {string} field
+   * @param {string} title - title of the tree to be sorted
+   * @param {string} field - field by which the sort operation should happen
    * @param {number} order {-1; 1}
-   * @param {function} icon
+   * @param {Function} icon - icon to be displayed based on sort order
+   * @returns {undefined}
    */
   sortTree(title, field, order, icon) {
     this.sortListByField(this.currentList, field, order);
-    if (!this.model.isOnlineModeEnabled) {
-      this.tree.initTree('database');
-      this.tree.addChildren(this.currentList);
-    } else {
-      this.tree.initTree('online');
-      this.tree.addChildren(this.currentList);
-    }
+    this.tree.initTree('database');
+    this.tree.addChildren(this.currentList);
 
     this._computeFilters();
 
-    this.sortBy = {
-      field: field,
-      title: title,
-      order: order,
-      icon: icon,
-      open: false
-    };
+    this.sortBy = { field, title, order, icon, open: false };
     this.notify();
   }
 
   /**
    * Ask server for all available objects, fills `tree` of objects
+   * @returns {undefined}
    */
   async loadList() {
-    if (!this.model.isOnlineModeEnabled) {
-      this.objectsRemote = RemoteData.loading();
-      this.notify();
-      this.queryingObjects = true;
-      let offlineObjects = [];
-      const result = await this.qcObjectService.getObjects();
-      if (result.isSuccess()) {
-        offlineObjects = result.payload;
-      } else {
-        const failureMessage = `Failed to retrieve list of objects. Please contact an administrator`;
-        this.model.notification.show(failureMessage, 'danger', Infinity);
-      }
-      this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
-      this.list = offlineObjects;
-
-      this.tree.initTree('database');
-      this.tree.addChildren(offlineObjects);
-
-      this.sideTree.initTree('database');
-      this.sideTree.addChildren(offlineObjects);
-
-      this.currentList = offlineObjects;
-      this.sortBy = {
-        field: 'name',
-        title: 'Name',
-        order: 1,
-        icon: iconArrowTop(),
-        open: false
-      };
-      this._computeFilters();
-
-      if (this.selected && !this.selected.lastModified) {
-        this.selected = this.list.find((object) => object.name === this.selected.name);
-      }
-      this.queryingObjects = false;
-      this.objectsRemote = RemoteData.success();
-      this.notify();
-    } else {
-      this.loadOnlineList();
-    }
-  }
-
-  /**
-   * Ask server for online objects and fills tree with them
-   */
-  async loadOnlineList() {
     this.objectsRemote = RemoteData.loading();
-    this.queryingObjects = true;
     this.notify();
-    let onlineObjects = [];
-    const result = await this.qcObjectService.getOnlineObjects();
+    this.queryingObjects = true;
+    let offlineObjects = [];
+    const result = await this.model.services.object.getObjects();
     if (result.isSuccess()) {
-      onlineObjects = result.payload;
-      this.sortListByField(onlineObjects, 'name', 1);
-      this.sortBy = {
-        field: 'name',
-        title: 'Name',
-        order: 1,
-        icon: iconArrowTop(),
-        open: false
-      };
+      offlineObjects = result.payload;
     } else {
-      const failureMessage = `Failed to retrieve list of online objects. Please contact an administrator`;
+      const failureMessage = 'Failed to retrieve list of objects. Please contact an administrator';
       this.model.notification.show(failureMessage, 'danger', Infinity);
     }
+    this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
+    this.list = offlineObjects;
 
-    this.tree.initTree('online');
-    this.tree.addChildren(onlineObjects);
+    this.tree.initTree('database');
+    this.tree.addChildren(offlineObjects);
 
-    this.listOnline = onlineObjects;
-    this.currentList = onlineObjects;
-    this.search('');
-    this.objectsRemote = RemoteData.success();
+    this.currentList = offlineObjects;
+    this.sortBy = {
+      field: 'name',
+      title: 'Name',
+      order: 1,
+      icon: iconArrowTop(),
+      open: false,
+    };
+    this._computeFilters();
+
+    if (this.selected && !this.selected.lastModified) {
+      this.selected = this.list.find((object) => object.name === this.selected.name);
+    }
     this.queryingObjects = false;
-
+    this.objectsRemote = RemoteData.success();
     this.notify();
   }
 
   /**
    * Load full content of an object in-memory
    * @param {string} objectName - e.g. /FULL/OBJECT/PATH
-   * @param {number} timestamp
+   * @param {number} timestamp - timestamp in ms
+   * @param {string} id - id of object as per data storage
+   * @returns {undefined}
    */
-  async loadObjectByName(objectName, timestamp = -1) {
+  async loadObjectByName(objectName, timestamp = undefined, id = undefined) {
     this.objects[objectName] = RemoteData.loading();
     this.notify();
-    const obj = await this.qcObjectService.getObjectByName(objectName, timestamp);
+    const obj = await this.model.services.object.getObjectByName(objectName, id, timestamp, undefined, this);
 
     // TODO Is it a TTree?
     if (obj.isSuccess()) {
-      if (this.isObjectChecker(obj.payload.qcObject)) {
+      if (isObjectOfTypeChecker(obj.payload.qcObject.root)) {
         this.objects[objectName] = obj;
         this.notify();
       } else {
-        // link JSROOT methods to object. JSROOT.parse call was removed due to bug
+        // Link JSROOT methods to object. JSROOT.parse call was removed due to bug
         this.objects[objectName] = RemoteData.success(obj.payload);
         this.notify();
       }
       if (this.selected) {
-        this.selected.version = timestamp === -1 ?
-          parseInt(this.objects[objectName].payload.timestamps[0]) : parseInt(timestamp);
+        this.selected.version = !timestamp
+          ? parseInt(this.objects[objectName].payload.versions[0].createdAt, 10)
+          : parseInt(timestamp, 10);
       }
     } else {
       this.objects[objectName] = obj;
@@ -301,57 +243,44 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Method to check if passed object type is a checker
-   * @param {JSON} object
-   * @return {boolean}
-   */
-  isObjectChecker(object) {
-    const objectType = object['_typename'];
-    if (objectType && objectType.toLowerCase().includes('qualityobject')) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  /**
    * Load objects provided by a list of paths
    * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
+   * @param {object} filter - to be applied on quering objects
+   * @returns {undefined}
    */
-  async loadObjects(objectsName) {
+  async loadObjects(objectsName, filter = {}) {
     this.objectsRemote = RemoteData.loading();
-    this.objects = {}; // remove any in-memory loaded objects
+    this.objects = {}; // Remove any in-memory loaded objects
+    this.model.services.object.objectsLoadedMap = {}; // TODO not here
     this.notify();
     if (!objectsName || !objectsName.length) {
       this.objectsRemote = RemoteData.success();
       this.notify();
       return;
     }
-
-    await Promise.allSettled(
-      objectsName.map(async (objectName) => {
-        this.objects[objectName] = RemoteData.Loading()
-        this.notify();
-        this.objects[objectName] = await this.qcObjectService.getObjectByNameOnly(objectName);
-        this.notify();
-      })
-    );
+    await Promise.allSettled(objectsName.map(async (objectName) => {
+      this.objects[objectName] = RemoteData.Loading();
+      this.notify();
+      this.objects[objectName] = await this
+        .model.services.object.getObjectByName(objectName, undefined, undefined, filter, this);
+      this.notify();
+    }));
     this.objectsRemote = RemoteData.success();
     this.notify();
   }
 
   /**
-   * Refreshes currently displayed objects and requests an updated list
-   * of online objects from Consul
+   * Refreshes currently displayed objects
+   * @returns {undefined}
    */
   refreshObjects() {
     this.loadObjects(Object.keys(this.objects));
-    this.loadOnlineList();
   }
 
   /**
    * Indicate that the object loaded is wrong. Used after trying to print it with jsroot
    * @param {string} name - name of the object
+   * @returns {undefined}
    */
   invalidObject(name) {
     this.objects[name] = RemoteData.failure('JSROOT was unable to draw this object');
@@ -361,26 +290,26 @@ export default class QCObject extends Observable {
   /**
    * Set the current selected object by user
    * Search within `currentList`;
-   * If user is in online mode, `list` will be used instead
-   * @param {QCObject} object
+   * @param {QCObject} object - object to be selected and loaded
+   * @returns {undefined}
    */
   async select(object) {
-    if (this.currentList.length > 0) {
-      this.selected = this.currentList.find((obj) => obj.name === object.name);
+    let foundObject = this.currentList.find((obj) => obj.name === object.name);
+
+    if (foundObject && this.list && this.list.length > 0) {
+      foundObject = this.list.find((obj) => obj.name === object.name);
     }
-    if (!this.selected && this.list && this.list.length > 0) {
-      this.selected = this.list.find((obj) => obj.name === object.name);
-    }
-    if (!this.selected) {
-      this.selected = object;
-    }
-    await this.loadObjectByName(object.name);
+
+    this.selected = foundObject || object;
+    setBrowserTabTitle(this.selected.name);
+    await this.loadObjectByName(this.selected.name);
     this.notify();
   }
 
   /**
    * Set the current user search string and compute next visible list of objects
-   * @param {string} searchInput
+   * @param {string} searchInput - user input by which the sort should be done
+   * @returns {undefined}
    */
   search(searchInput) {
     this.searchInput = searchInput;
@@ -390,36 +319,28 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Method to check if an object is in online mode
-   * @param {string} objectName format: QcTask/example
-   * @return {boolean}
-   */
-  isObjectInOnlineList(objectName) {
-    return this.model.isOnlineModeEnabled && this.listOnline
-      && this.listOnline.map((item) => item.name).includes(objectName);
-  }
-
-
-  /**
    * Method to generate drawing options based on where in the application the plot is displayed
-   * @param {Object} tabObject
-   * @param {Object} objectRemoteData
-   * @return {Array<string>}
+   * @param {TabObject} tabObject - tab dto representation
+   * @param {RemoteData<{king: string, payload: QcObject}>} objectRemoteData - QC object within RemoteData type
+   * @returns {Array<string>} - list of drawing options
    */
   generateDrawingOptions(tabObject, objectRemoteData) {
     let objectOptionList = [];
     let drawingOptions = [];
-    const qcObject = objectRemoteData.payload.qcObject;
+
+    const { qcObject } = objectRemoteData.payload;
     if (qcObject.fOption) {
       objectOptionList = qcObject.fOption.split(' ');
     }
-    if (qcObject.metadata && qcObject.metadata.drawOptions) {
-      const metaOpt = qcObject.metadata.drawOptions.split(' ');
-      objectOptionList = objectOptionList.concat(metaOpt);
+
+    if (qcObject.drawOptions) {
+      objectOptionList = [...objectOptionList, ...qcObject.drawOptions];
     }
-    if (qcObject.metadata && qcObject.metadata.displayHints) {
-      const metaHints = qcObject.metadata.displayHints.split(' ');
-      objectOptionList = objectOptionList.concat(metaHints);
+    if (qcObject.displayHints) {
+      objectOptionList = [...objectOptionList, ...qcObject.displayHints];
+    }
+    if (tabObject.options) {
+      objectOptionList = objectOptionList.concat(tabObject.options);
     }
     switch (this.model.page) {
       case 'objectTree':
@@ -436,18 +357,18 @@ export default class QCObject extends Observable {
         } else {
           drawingOptions = JSON.parse(JSON.stringify(tabObject.options));
         }
-        // merge all options or ignore if in layout view and user specifies so
+        // Merge all options or ignore if in layout view and user specifies so
         break;
       }
       case 'objectView': {
-        const layoutId = this.model.router.params.layoutId;
-        const objectId = this.model.router.params.objectId;
+        const { layoutId } = this.model.router.params;
+        const { objectId } = this.model.router.params;
 
         if (!layoutId || !objectId) {
-          // object opened from tree view -> use only its own options
+          // Object opened from tree view -> use only its own options
           drawingOptions = JSON.parse(JSON.stringify(objectOptionList));
         } else {
-          // object opened from layout view -> use the layout/tab configuration
+          // Object opened from layout view -> use the layout/tab configuration
           if (this.model.layout.requestedLayout.isSuccess()) {
             let objectData = {};
             this.model.layout.requestedLayout.payload.tabs.forEach((tab) => {
@@ -479,9 +400,9 @@ export default class QCObject extends Observable {
 
   /**
    * Method to parse through tabs and objects of a layout to return one object by ID
-   * @param {Object} layout
-   * @param {string} objectId
-   * @return {string}
+   * @param {object} layout - layout dto representation
+   * @param {string} objectId - id of the object within the layout
+   * @returns {string} - object name queried by id
    */
   getObjectNameByIdFromLayout(layout, objectId) {
     let objectName = '';
@@ -496,58 +417,49 @@ export default class QCObject extends Observable {
 
   /**
    * Method to search for the object which info was requested for and return lastModified timestamp
-   * @param {string} objectName
-   * @return {string}
+   * @param {string} objectName - name of the object
+   * @returns {string|'Loading'|'-'} - date of last modified
    */
   getLastModifiedByName(objectName) {
-    if (this.currentList.length === 0) {
-      return 'Loading ...';
-    }
-    const object = this.currentList.find((object) => object.name === objectName);
-    if (object) {
-      return new Date(object.lastModified).toLocaleString('en-UK');
+    const objMap = this.model.services.object.objectsLoadedMap;
+    if (objMap[objectName]) {
+      if (objMap[objectName].isSuccess()) {
+        const date = objMap[objectName].payload.lastModified;
+        return prettyFormatDate(date);
+      } else if (objMap[objectName].isLoading()) {
+        return 'Loading...';
+      }
     }
     return '-';
   }
 
   /**
-   * Sends back the timestamp/date for the selected object based on
-   * preferred format
-   * @param {boolean} displayDate
-   * @return {string}
+   * Method to search for the object which info was requested for and return runNumber
+   * @param {string} objectName - name of the object in question
+   * @returns {string|'Loading'|'-'} - RunNumber of the object
    */
-  getLastModifiedForSelected(displayDate = false) {
-    if (this.selected && this.selected.lastModified) {
-      return displayDate === 'date' ?
-        new Date(this.selected.lastModified).toLocaleString('en-UK') : this.selected.lastModified.toString();
-    } else {
-      return '-';
+  getRunNumberByName(objectName) {
+    const objMap = this.model.services.object.objectsLoadedMap;
+    if (objMap[objectName]) {
+      if (objMap[objectName].isSuccess()) {
+        return objMap[objectName].payload.runNumber || '-';
+      } else if (objMap[objectName].isLoading()) {
+        return 'Loading...';
+      }
     }
+    return '-';
   }
 
   /**
    * Return the list of object timestamps
-   * @param {string} name
-   * @return {array<numbers>}
+   * @param {string} name - name of the object to be retrieving the list
+   * @returns {Array<number>} - list of timestamps for queried object
    */
-  getObjectTimestamps(name) {
+  getObjectVersions(name) {
     if (this.objects[name] && this.objects[name].kind === 'Success') {
-      return this.objects[name].payload.timestamps;
+      return this.objects[name].payload.versions;
     } else {
       return [];
-    }
-  }
-
-  /**
-   * Convert a timestamp to a date string in browser format
-   * @param {number} timestamp
-   * @return {string}
-   */
-  getDateFromTimestamp(timestamp) {
-    try {
-      return new Date(timestamp).toLocaleString('en-UK');
-    } catch (_err) {
-      return 'Invalid Timestamp';
     }
   }
 }

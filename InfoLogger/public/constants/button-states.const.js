@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 export const BUTTON = {
   PRIMARY: 'btn-primary',
@@ -20,5 +20,5 @@ export const BUTTON = {
   DANGER: 'btn-danger',
   DANGER_ACTIVE: 'btn-danger active',
   DEFAULT: 'btn-default',
-  DEFAULT_ACTIVE: 'btn-default active'
+  DEFAULT_ACTIVE: 'btn-default active',
 };

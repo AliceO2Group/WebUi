@@ -10,11 +10,11 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const mysql = require('mysql');
 const assert = require('assert');
-const log = new (require('./../log/Log.js'))(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
+const { LogManager } = require('../log/LogManager');
 
 /**
  * MySQL pool wrapper
@@ -32,19 +32,20 @@ class MySQL {
     assert(config.host, 'Missing config value: mysql.host');
     assert(config.user, 'Missing config value: mysql.user');
     assert(config.database, 'Missing config value: mysql.database');
-    config.port = (!config.port) ? 3306 : config.port;
-    config.connectionLimit = (!config.connectionLimit) ? 25 : config.connectionLimit;
-    config.queueLimit = (!config.queueLimit) ? 50 : config.queueLimit;
-    config.password = (!config.password) ? '' : config.password;
-    config.timeout = (!config.timeout) ? 30000 : config.timeout;
+    config.port = !config.port ? 3306 : config.port;
+    config.connectionLimit = config.connectionLimit ?? 25;
+    config.queueLimit = config.queueLimit ?? 50;
+    config.password = !config.password ? '' : config.password;
+    config.timeout = config.timeout ?? 30000;
 
     this.config = config;
+    this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/mysql`);
     this.pool = mysql.createPool(config);
   }
 
   /**
    * Method to test connection of mysql connector once initialized
-   * @return {Promise}
+   * @return {Promise} - a promise that resolves if connection is successful
    */
   testConnection() {
     return new Promise((resolve, reject) => {
@@ -71,12 +72,12 @@ class MySQL {
       this.pool.query({
         sql: query,
         timeout: this.config.timeout,
-        values: parameters
+        values: parameters,
       }, (error, results) => {
         if (error) {
           reject(new Error(this.errorHandler(error)));
         }
-        log.debug(mysql.format(query, parameters));
+        this.logger.debug(mysql.format(query, parameters));
         resolve(results);
       });
     });
@@ -108,8 +109,9 @@ class MySQL {
     } else {
       message = `MySQL error: ${err.code}, ${err.message}`;
     }
-    log.error(message);
+    this.logger.error(message);
     return message;
   }
 }
+
 module.exports = MySQL;

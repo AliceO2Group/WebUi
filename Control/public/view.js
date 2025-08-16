@@ -18,6 +18,8 @@ import {h, switchCase, notification} from '/js/src/index.js';
 // Common app helpers
 import appHeader from './common/appHeader.js';
 import sidebar from './common/sidebar.js';
+import { ROLES } from './workflow/constants.js';
+import { isUserAllowedRole } from './common/userRole.js';
 
 // Page specific views (contents and headers)
 import {
@@ -25,24 +27,39 @@ import {
   header as workflowsHeader
 } from './workflow/workflowsPage.js';
 import {
+  EnvironmentCreationHeader,
+  EnvironmentCreationPage
+} from './pages/EnvironmentCreation/EnvironmentCreation.page.js';
+import {
+  EnvironmentPageHeader,
+  EnvironmentPageContent,
+} from './pages/Environment/Environment.page.js';
+import {
+  CalibrationRunsHeader,
+  CalibrationRunsContent
+} from './pages/CalibrationRuns/CalibrationRuns.page.js';
+import {
   content as environmentsContent,
   header as environmentsHeader
 } from './environment/environmentsPage.js';
-import {
-  content as environmentContent,
-  header as environmentHeader
-} from './environment/environmentPage.js';
-import {
-  content as statusContent,
-  header as statusHeader
-} from './frameworkinfo/frameworkInfoPage.js';
+import {header as statusHeader} from './about/header.js';
+import {content as statusContent} from './about/content.js';
 import {
   content as configurationContent,
   header as configurationHeader
 } from './configuration/configPage.js';
 import {header as taskHeader} from './task/header.js';
 import {content as taskContent} from './task/content.js';
+import {
+  content as hardwareContent,
+  header as hardwareHeader
+} from './hardware/hardwarePage.js';
 import {detectorsModal} from './common/detectorModal.js';
+import {
+  content as lockContent,
+  header as lockHeader
+} from './lock/lockPage.js';
+import {alertPanel} from './common/alertPanel.js';
 
 /**
  * Main view layout
@@ -74,13 +91,18 @@ export default (model) => [
 const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
   appHeader(model),
   switchCase(model.router.params.page, {
-    newEnvironment: workflowsHeader,
+    newEnvironmentAdvanced: workflowsHeader,
+    newEnvironment: EnvironmentCreationHeader,
+    calibrationRuns: CalibrationRunsHeader,
     environments: environmentsHeader,
-    environment: environmentHeader,
+    environment: EnvironmentPageHeader,
     about: statusHeader,
     configuration: configurationHeader,
-    taskList: taskHeader
-  })(model)
+    taskList: taskHeader,
+    hardware: hardwareHeader,
+    locks: lockHeader
+  })(model),
+  alertPanel(model.about.services, model)
 ]);
 
 /**
@@ -88,13 +110,28 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
  * @param {object} model
  * @return {vnode}
  */
-const content = (model) => [
-  switchCase(model.router.params.page, {
-    newEnvironment: workflowsContent,
-    environments: environmentsContent,
-    environment: environmentContent,
-    about: statusContent,
-    configuration: configurationContent,
-    taskList: taskContent
-  })(model)
-];
+const content = (model) => {
+  const page = model?.router?.params?.page ?? 'environments' // Default page;
+  // Permissions check pages
+  const minimumDetectorRolePages = [
+    'about', 'calibrationRuns', 'configuration', 'environment', 'locks', 'newEnvironment', 'newEnvironmentAdvanced',
+    'taskList'
+  ];
+  if (minimumDetectorRolePages.includes(page) && !isUserAllowedRole(ROLES.Detector)) {
+    return h('h3.m4.warning.text-center', ['You do not own the permissions to use this page.'])
+  }
+  return [
+    switchCase(model.router.params.page, {
+      newEnvironmentAdvanced: workflowsContent,
+      newEnvironment: EnvironmentCreationPage,
+      calibrationRuns: CalibrationRunsContent,
+      environments: environmentsContent,
+      environment: EnvironmentPageContent,
+      about: statusContent,
+      configuration: configurationContent,
+      taskList: taskContent,
+      hardware: hardwareContent,
+      locks: lockContent
+    })(model)
+  ]
+};

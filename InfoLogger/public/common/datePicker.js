@@ -10,13 +10,15 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import {h} from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 
 export default (model, parsedDate) => h('.datetime-helper.arrow-up-left', [
   h('.datetime-helper-result', [
-    h('span', parsedDate ? model.timezone.format(parsedDate, 'datetime') : 'Which datetime? (CEST / Geneva timezone)'),
+    h('span', parsedDate
+      ? model.timezone.format(parsedDate, 'datetime')
+      : 'Which datetime? (CEST / Geneva timezone)'),
   ]),
   h('.datetime-helper-memo', [
     h('span', [
@@ -52,6 +54,6 @@ export default (model, parsedDate) => h('.datetime-helper.arrow-up-left', [
       h('span', '-5m'),
       h('span.pull-right', 'five minutes ago'),
       h('br'),
-    ])
+    ]),
   ]),
 ]);

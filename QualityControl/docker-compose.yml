@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  database:
+    image: "mariadb:10.5.9"
+    container_name: qcg-database
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-cern}"
+    ports:
+      - "3306:3306"
+    volumes:
+      - type: volume
+        source: database-data
+        target: /var/lib/mysql
+      - type: bind
+        read_only: true
+        source: ./docker/database/configuration
+        target: /etc/mysql/conf.d
+      - type: bind
+        read_only: true
+        source: ./docker/database/populate
+        target: /docker-entrypoint-initdb.d
+
+volumes:
+  database-data:

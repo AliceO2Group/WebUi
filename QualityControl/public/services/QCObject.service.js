@@ -10,11 +10,11 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-/* global JSROOT, QCG */
+/* global JSROOT */
 
-import {RemoteData} from '/js/src/index.js';
+import { RemoteData } from '/js/src/index.js';
 
 /**
  * Quality Control Object service to get/send data
@@ -22,95 +22,150 @@ import {RemoteData} from '/js/src/index.js';
 export default class QCObjectService {
   /**
    * Initialize service
-   * @param {Object} model
+   * @param {Model} model - root model of the application
    */
   constructor(model) {
     this.model = model;
+    this.list = RemoteData.notAsked(); // List of objects in CCDB with some of their parameters
+
+    this.objectsLoadedMap = {};
+    // Qcobject --ccdb info; root plot, query params? in ccdb info
   }
 
   /**
-   * Ask server for all available objects
-   * @return {JSON} List of Objects
+   * Retrieve a list of all objects from CCDB
+   * @param {Class<Observable>} that - object extending observer class to notify component on request end
+   * @returns {JSON} List of Objects
    */
-  async getObjects() {
-    const {result, ok} = await this.model.loader.get('/api/listObjects');
+  async listObjects(that = this.model) {
+    this.list = RemoteData.loading();
+    that.notify();
+
+    const { result, ok } = await this.model.loader.get('/api/objects', {}, true);
+
     if (ok) {
-      return RemoteData.success(result);
+      this.list = RemoteData.success(result);
+      this.model.object.sideTree.initTree('database');
+      this.model.object.sideTree.addChildren(result);
     } else {
-      return RemoteData.failure(result);
+      this.list = RemoteData.failure({ message: result.message });
     }
+
+    that.notify();
   }
 
   /**
-   * Ask server for all available objects
-   * @return {JSON} List of Objects
+   * Ask server for an object by name and optionally timestamp
+   * If timestamp is not provided, Date.now() will be used to request latest version of the object
+   * @param {string} objectName - name/path of the object to get
+   * @param {string} id - if as per CCDB storage
+   * @param {number} validFrom - timestamp in ms
+   * @param {Map<string, string>} filters - metadata attributes to filter by
+   * @param {Class<Observable>} that - object to be used to notify
+   * @returns {Promise<RemoteData>} {result, ok, status}
    */
-  async getOnlineObjects() {
-    const {result, ok} = await this.model.loader.get('/api/listOnlineObjects');
-    if (ok) {
-      return RemoteData.success(result);
-    } else {
-      return RemoteData.failure(result);
-    }
-  }
+  async getObjectByName(objectName, id = '', validFrom = undefined, filters = undefined, that = this) {
+    this.objectsLoadedMap[objectName] = RemoteData.loading();
+    that.notify();
 
-  /**
-   * Ask server for online mode service status
-   */
-  async isOnlineModeConnectionAlive() {
-    const {ok} = await this.model.loader.get('/api/isOnlineModeConnectionAlive');
-    if (ok) {
-      return RemoteData.success(ok);
-    } else {
-      return RemoteData.failure(ok);
+    try {
+      // `/api/object?path=${objectName}&timestamp=${timestamp}&filter=${filter}`
+      const url = this._buildURL(`/api/object?path=${objectName}`, id, validFrom, filters);
+      const { result, ok } = await this.model.loader.get(url);
+      if (ok) {
+        result.qcObject = {
+          root: JSROOT.parse(result.root),
+          drawOptions: JSON.parse(JSON.stringify(result.drawOptions)),
+          displayHints: JSON.parse(JSON.stringify(result.displayHints)),
+        };
+        delete result.root;
+        this.objectsLoadedMap[objectName] = RemoteData.success(result);
+        that.notify();
+        return RemoteData.success(result);
+      } else {
+        this.objectsLoadedMap[objectName] = RemoteData.failure(`404: Object "${objectName}" could not be found.`);
+        that.notify();
+        return RemoteData.failure(`404: Object "${objectName}" could not be found.`);
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      this.objectsLoadedMap[objectName] = RemoteData.failure(`404: Object "${objectName}" could not be loaded.`);
+      that.notify();
+      return RemoteData.failure(`Object '${objectName}' could not be loaded`);
     }
   }
 
   /**
    * Ask server for an object by name and optionally timestamp
    * If timestamp is not provided, Date.now() will be used to request latest version of the object
-   * @param {string} objectName
-   * @param {number} timestamp
-   * @return {JSON} {result, ok, status}
+   * @param {string} objectId - name/path of the object to get
+   * @param {string} id - id/etag as stored by CCDB
+   * @param {number} timestamp - timestamp in ms
+   * @param {string} filter - filter as string to be applied on query
+   * @param {Class<Observable>} that - object to be used to notify
+   * @returns {Promise<RemoteData>} {result, ok, status}
    */
-  async getObjectByName(objectName, timestamp = -1) {
+  async getObjectById(objectId, id = '', timestamp = undefined, filter = undefined, that = this) {
     try {
-      if (timestamp === -1) {
-        timestamp = Date.now();
-      }
-      const filename = `${QCG.CCDB_PLOT_URL}/${objectName}/${timestamp}`;
-      let [qcObject, timeStampsReq] = await Promise.all([
-        JSROOT.openFile(filename).then((file) => file.readObject("ccdb_object")),
-        this.model.loader.get(`/api/readObjectData?objectName=${objectName}&timestamp=${timestamp}`)
-      ]);
-      const {result, ok, status} = timeStampsReq;
+      // `/api/object?path=${objectName}&timestamp=${timestamp}&filter=${filter}`
+      const url = this._buildURL(`/api/object/${objectId}?`, id, timestamp, filter);
+
+      const { result, ok } = await this.model.loader.get(url);
       if (ok) {
-        const obj = {qcObject, timestamps: result.timestamps};
-        return RemoteData.success(obj);
+        result.qcObject = {
+          root: JSROOT.parse(result.root),
+          drawingOptions: result.drawOptions,
+          displayHints: result.displayHints,
+        };
+        const objectName = result.name;
+        delete result.root;
+        this.objectsLoadedMap[objectName] = RemoteData.success(result);
+        that.notify();
+        return RemoteData.success(result);
       } else {
-        if (status === 404) {
-          return RemoteData.failure(`404: Object "${objectName}" could not be found.`);
-        }
-        return RemoteData.failure(`${status}: Object '${objectName}' could not be loaded`);
+        this.objectsLoadedMap[objectId] = RemoteData.failure(`404: Object with ID: "${objectId}" could not be found.`);
+        that.notify();
+        return RemoteData.failure(`404: Object with ID:"${objectId}" could not be found.`);
       }
     } catch (error) {
-      return RemoteData.failure(`Object '${objectName}' could not be loaded`);
+      // eslint-disable-next-line no-console
+      console.error(error);
+      this.objectsLoadedMap[objectId] = RemoteData.failure(`404: Object with ID: "${objectId}" could not be loaded.`);
+      that.notify();
+      return RemoteData.failure(`Object with ID:"${objectId}" could not be loaded`);
     }
   }
 
   /**
-   * Retrieve the JSON version of a ROOT Object through JSROOT
-   * @param {string} objectName - full path object name
-   * @return {RemoteData}
+   * Given a prebuild URL, append timestamp and filter if provided
+   * @param {string} url - initial URL with objectId or object name
+   * @param {string} id - id of the object
+   * @param {number} validFrom - timestamps in ms
+   * @param {Map<string, string>} filters - Metadata attributes for retrieving specific object
+   * @returns {string} - url with appended parameters
    */
-  async getObjectByNameOnly(objectName) {
-    try {
-      const url = `${QCG.CCDB_PLOT_URL}/${objectName}/${Date.now()}`;
-      const file = await JSROOT.openFile(url);
-      const obj = await file.readObject("ccdb_object");
-      return RemoteData.success({qcObject: obj});
-    } catch (error) {
-      return RemoteData.failure(`Unable to load object ${objectName}`);
+  _buildURL(url, id, validFrom = undefined, filters = undefined) {
+    if (filters && Object.keys(filters).length > 0) {
+      const filterAsString = Object.entries(filters).map(([key, value]) => `filters[${key}]=${value}`).join('&');
+      url += `&${filterAsString}`;
     }
+    if (validFrom) {
+      url += `&validFrom=${validFrom}`;
+    }
+    if (id) {
+      url += `&id=${id}`;
+    }
+    return url;
+  }
+
+  /**
+   * Ask server for all available objects from CCDB
+   * @returns {JSON} List of Objects
+   * @deprecated
+   */
+  async getObjects() {
+    const { result, ok } = await this.model.loader.get('/api/objects');
+    return ok ? RemoteData.success(result) : RemoteData.failure(result);
   }
 }

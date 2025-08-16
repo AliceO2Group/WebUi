@@ -1,11 +1,12 @@
 {
   "name": "@aliceo2/infologger",
-  "version": "1.9.0",
+  "version": "1.15.1",
   "description": "Infologger GUI to query and stream log events",
   "author": "Vladimir Kosmala",
   "contributors": [
+    "Adam Wegrzynek",
     "George Raduta",
-    "Adam Wegrzynek"
+    "Martin Boulais"
   ],
   "license": "GPL-3.0",
   "repository": {
@@ -13,33 +14,37 @@
     "url": "https://github.com/AliceO2Group/WebUi.git"
   },
   "engines": {
-    "node": ">= 8.9.4"
+    "node": ">= 22.x"
   },
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
     "start": "node index.js",
     "test": "npm run eslint && npm run mocha",
-    "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
-    "simul": "node test/live-simulator/infoLoggerServer.js",
-    "eslint": "./node_modules/.bin/eslint --config ../.eslintrc.js *.js lib/ public/",
+    "dev": "nodemon --inspect --watch index.js --watch lib --watch config.js index.js",
+    "simul": "node test/live-simulator/runInfoLoggerServer.js",
+    "eslint": "./node_modules/.bin/eslint --config eslint.config.js lib/ public/",
     "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
     "coverage": "npm run eslint && nyc npm run mocha",
     "coverage-local": "nyc --reporter=lcov npm run mocha",
     "integration-query-test": "mocha --exit --bail ./test/integration/ilg-query-tests.js -R min"
   },
+  "main": "index.js",
   "dependencies": {
-    "@aliceo2/web-ui": "1.21.3"
+    "@aliceo2/web-ui": "2.8.4",
+    "mariadb": "3.4.0"
   },
   "devDependencies": {
-    "eslint": "^7.32.0",
-    "eslint-config-google": "^0.12.0",
-    "mocha": "^9.1.2",
-    "nyc": "^15.1.0",
-    "puppeteer": "5.4.1",
-    "sinon": "^9.2.1"
+    "@eslint/js": "^9.29.0",
+    "@stylistic/eslint-plugin-js": "^4.4.0",
+    "eslint": "^9.29.0",
+    "eslint-plugin-jsdoc": "^51.0.1",
+    "globals": "^16.2.0",
+    "mocha": "^11.6.0",
+    "nyc": "^17.1.0",
+    "puppeteer": "^24.10.0",
+    "sinon": "^21.0.0"
   },
-  "bundledDependencies": [
+  "bundleDependencies": [
     "@aliceo2/web-ui"
-  ],
-  "main": "index.js"
+  ]
 }

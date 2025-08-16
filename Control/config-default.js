@@ -12,6 +12,7 @@ module.exports = {
     hostname: 'localhost',
     port: 9090,
     timeout: 20000, // ms, gRPC deadline for service calls
+    connectionTimeout: 1000, // ms, gRPC connection timeout
     maxMessageLength: 50, // MB, gRPC receive message limit
     label: 'Control',
     package: 'o2control'
@@ -20,6 +21,7 @@ module.exports = {
     hostname: 'localhost',
     port: 9090,
     timeout: 20000, // ms, gRPC deadline for service calls
+    connectionTimeout: 1000, // ms, gRPC connection timeout
     maxMessageLength: 50, // MB, gRPC receive message limit
     label: 'Apricot',
     package: 'apricot'
@@ -27,32 +29,37 @@ module.exports = {
   grafana: {
     url: 'http://localhost:3000'
   },
+  bookkeeping: {
+    url: 'http://localhost:4000',
+    token: 'some-token',
+    refreshRate: 10000,
+  },
   consul: {
+    ui: 'localhost:8500',
     hostname: 'localhost',
     port: 8500,
     flpHardwarePath: 'o2/hardware/key/prefix',
+    detHardwarePath: 'o2/hardware/detectors',
     readoutPath: 'o2/components/readout/key/prefix',
     readoutCardPath: 'o2/components/readoutcard/key/prefix',
     qcPath: 'o2/components/qc/key/prefix',
     kVPrefix: 'o2/cluster/key/prefix',
-    coreServices: 'o2/components/aliecs/some/settings/path',
   },
   infoLoggerGui: {
-    hostname: 'localhost',
-    port: 8081
+    url: 'localhost:8081',
+  },
+  infoLoggerEpnGui: {
+    url: 'localhost:8083',
   },
   qcGui: {
-    hostname: 'localhost',
-    port: 8081
-  },
-  bookkeepingGui: {
-    hostname: 'localhost',
-    port: 8081
+    url: 'qcg.cern.ch'
   },
   utils: {
     refreshTask: 10000, // how often should task list page should refresh its content
-    refreshEnvs: 10000, // how often should env list page should refresh its content
-  }
+  },
+  logging: {
+    infologger: false,
+  },
   // infoLoggerGui: {
   //   hostname: 'localhost',
   //   port: 8081

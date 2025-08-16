@@ -27,16 +27,46 @@
 .object-selectable:hover { cursor: pointer; background-color: var(--color-gray-dark) !important; color: var(--color-gray-lighter); }
 
 .layout-selectable { border: 0.0em solid var(--color-primary); transition: border 0.1s; }
-.layout-online { border: 0.15em solid var(--color-success); transition: border 0s; }
 .layout-selected { border: 0.3em solid var(--color-primary); }
 .layout-edit-layer { cursor: move; opacity: 0; }
 
-.object-online { border: 0.15em solid var(--color-success); transition: border 0s; }
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--space-xs);
+  width: 100%;
+  padding: var(--space-xs);
+}
+
+.card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardHeader { 
+  padding-left: var(--space-s);
+}
+.cardHeader > h5 { 
+  align-content: center;
+}
+
+.cardHeaderButton {
+  min-width: 145px; 
+}
+
+.cardBody { 
+  border: solid 1px var(--color-primary); 
+  border-top: white;
+  border-radius: 0 0 .5rem .5rem;
+  height: 100%;
+}
+
+.folderHeader, .cardHeader {
+  border-radius: .5rem .5rem 0 0;
+}
 
 .status-bar { border-top: 1px solid var(--color-gray-dark); }
-
-/* Force jsroot's background to be transparent */
-.canvas_fillrect { fill: transparent !important; }
 
 /* Show plots gradually */
 .jsroot { animation-name: appearance; animation-duration: 0.2s; }
@@ -59,3 +89,29 @@
 .actionable-icon:active {transform: scale(1.5);}
 
 .table-logs-content { width: 100%; border-collapse: collapse; }
+
+.o2-modal{z-index:1001; display:block; padding-top:10em; position:fixed; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgb(0,0,0); background-color:rgba(0,0,0,0.4); }
+.o2-modal-content{margin:auto; background-color:#fff; position:relative; padding:0; outline:0; width:700px;  border-radius: 5px 20px 5px; }
+
+.right-menu {right:0; left:auto;}
+.resize-vertical { resize: vertical}
+
+.panel-title {
+  border: 1px solid #ddd;
+  background: var(--color-gray-light);
+}
+
+.error-box {
+  background-color: #f8d7da;
+  height: 100%;
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  border-radius: 5px;
+  border: 1px solid var(--color-danger);
+}
+
+.error-icon {
+  font-size: 2em;
+  margin-bottom: .5em;
+}
