@@ -13,7 +13,6 @@
  */
 
 const assert = require('assert');
-// const test = require('../mocha-index.cjs');
 
 describe('`pageRoot` test-suite', function () {
   let url;
