@@ -14,13 +14,13 @@
 
 import { Toolbar, Typography } from '@mui/material';
 import React, { type FC } from 'react';
-import UserSection from '../../user-section/UserSection';
+import { UserSection } from '../../user-section/UserSection';
 
 interface ContentHeaderProps {
   currentPath: string;
 }
 
-const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => (
+export const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => (
   <Toolbar
     style={{
       borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
@@ -33,5 +33,3 @@ const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => (
     <UserSection userName="John D." />
   </Toolbar>
 );
-
-export default ContentHeader;

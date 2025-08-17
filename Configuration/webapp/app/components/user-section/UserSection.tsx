@@ -19,7 +19,7 @@ interface UserSectionProps {
   userName: string;
 }
 
-const UserSection: React.FC<UserSectionProps> = ({ userName }) => {
+export const UserSection: React.FC<UserSectionProps> = ({ userName }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -56,5 +56,3 @@ const UserSection: React.FC<UserSectionProps> = ({ userName }) => {
     </Box>
   );
 };
-
-export default UserSection;

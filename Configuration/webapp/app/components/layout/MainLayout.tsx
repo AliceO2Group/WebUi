@@ -14,8 +14,8 @@
 
 import { Box } from '@mui/material';
 import React, { type FC, type PropsWithChildren } from 'react';
-import LeftDrawer from './drawer/LeftDrawer';
-import Content from './content/Content';
+import { LeftDrawer } from './drawer/LeftDrawer';
+import { Content } from './content/Content';
 
 const MainLayout: FC<PropsWithChildren> = ({ children }) => (
   <Box

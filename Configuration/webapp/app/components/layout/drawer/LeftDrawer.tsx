@@ -14,12 +14,12 @@
 
 import React from 'react';
 import { Box, Drawer, List, ListItem, ListItemText } from '@mui/material';
-import LeftDrawerFooter from './LeftDrawerFooter';
-import LeftDrawerHeader from './LeftDrawerHeader';
+import { LeftDrawerFooter } from './LeftDrawerFooter';
+import { LeftDrawerHeader } from './LeftDrawerHeader';
 
 const DRAWER_WIDTH = 250;
 
-const LeftDrawer = () => (
+export const LeftDrawer = () => (
   <Drawer
     sx={{
       width: DRAWER_WIDTH,
@@ -48,5 +48,3 @@ const LeftDrawer = () => (
     <LeftDrawerFooter />
   </Drawer>
 );
-
-export default LeftDrawer;

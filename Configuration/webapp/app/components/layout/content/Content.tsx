@@ -14,9 +14,9 @@
 
 import { Box } from '@mui/material';
 import React, { type FC, type PropsWithChildren } from 'react';
-import ContentHeader from './ContentHeader';
+import { ContentHeader } from './ContentHeader';
 
-const Content: FC<PropsWithChildren> = ({ children }) => (
+export const Content: FC<PropsWithChildren> = ({ children }) => (
   <Box
     component="main"
     sx={{ flexGrow: 1, bgcolor: 'background.default' }}
@@ -26,5 +26,3 @@ const Content: FC<PropsWithChildren> = ({ children }) => (
     <Box sx={{ p: 3 }}>{children}</Box>
   </Box>
 );
-
-export default Content;
