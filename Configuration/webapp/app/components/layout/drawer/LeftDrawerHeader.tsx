@@ -15,6 +15,11 @@
 import { Toolbar, Typography } from '@mui/material';
 import React from 'react';
 
+/**
+ * LeftDrawerHeader component
+ * Represents the header of the left drawer in the application layout.
+ * @returns {React.ReactElement} LeftDrawerHeader
+ */
 export const LeftDrawerHeader = () => (
   <Toolbar
     style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}

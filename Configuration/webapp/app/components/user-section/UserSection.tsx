@@ -19,6 +19,12 @@ interface UserSectionProps {
   userName: string;
 }
 
+/**
+ * UserSection component
+ * Represents a user section with an avatar and a dropdown menu for user actions.
+ * @param {UserSectionProps} props
+ * @returns {React.ReactElement} UserSection
+ */
 export const UserSection: React.FC<UserSectionProps> = ({ userName }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 

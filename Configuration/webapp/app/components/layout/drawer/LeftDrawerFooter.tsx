@@ -15,6 +15,11 @@
 import { Box, Typography } from '@mui/material';
 import React from 'react';
 
+/**
+ * LeftDrawerFooter component
+ * Represents the footer of the left drawer in the application layout.
+ * @returns {React.ReactElement} LeftDrawerFooter
+ */
 export const LeftDrawerFooter = () => (
   <Box sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }} className="left-drawer__footer">
     <Typography variant="caption">Left Drawer Footer</Typography>

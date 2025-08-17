@@ -19,6 +19,11 @@ import { LeftDrawerHeader } from './LeftDrawerHeader';
 
 const DRAWER_WIDTH = 250;
 
+/**
+ * LeftDrawer component
+ * Represents the left sidebar of the application layout.
+ * @returns {ReactElement} LeftDrawer
+ */
 export const LeftDrawer = () => (
   <Drawer
     sx={{
