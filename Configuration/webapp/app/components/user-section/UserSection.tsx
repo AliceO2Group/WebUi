@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import React from 'react';
+import { useState, type FC, type MouseEvent } from 'react';
 import { Box, IconButton, Menu, MenuItem, Avatar } from '@mui/material';
 
 interface UserSectionProps {
@@ -25,10 +25,10 @@ interface UserSectionProps {
  * @param {UserSectionProps} props - Component props.
  * @returns {React.ReactElement} UserSection
  */
-export const UserSection: React.FC<UserSectionProps> = ({ userName }) => {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+export const UserSection: FC<UserSectionProps> = ({ userName }) => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClick = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 

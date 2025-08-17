@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import React from 'react';
 import { Box, Drawer, List, ListItem, ListItemText } from '@mui/material';
 import { LeftDrawerFooter } from './LeftDrawerFooter';
 import { LeftDrawerHeader } from './LeftDrawerHeader';

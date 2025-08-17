@@ -13,7 +13,7 @@
  */
 
 import { Toolbar, Typography } from '@mui/material';
-import React, { type FC } from 'react';
+import { type FC } from 'react';
 import { UserSection } from '../../user-section/UserSection';
 
 interface ContentHeaderProps {

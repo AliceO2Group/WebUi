@@ -13,7 +13,7 @@
  */
 
 import { Box } from '@mui/material';
-import React, { type FC, type PropsWithChildren } from 'react';
+import { type FC, type PropsWithChildren } from 'react';
 import { ContentHeader } from './ContentHeader';
 
 /**
