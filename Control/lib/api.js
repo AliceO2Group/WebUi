@@ -21,8 +21,9 @@ const config = require('./config/configProvider.js');
 const { DetectorId } = require('./common/detectorId.enum.js');
 
 // middleware
-const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 const {addDetectorIdMiddleware} = require('./middleware/addDetectorId.middleware.js');
+const {logDeploymentRequestMiddleware} = require('./middleware/logDeploymentRequest.middleware.js');
+const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 const {requireDetectorOrGlobalRoleMiddleware} = require('./middleware/requireDetectorOrGlobalRole.middleware.js');
 const {validateConsulServiceMiddlewareFactory} = require('./middleware/validateConsulServiceMiddlewareFactory.js');
 
@@ -36,6 +37,7 @@ const {
 // controllers
 const {QCConfigurationController} = require('./controllers/QCConfiguration.controller.js');
 const {ConsulController} = require('./controllers/Consul.controller.js');
+const {DeploymentController} = require('./controllers/Deployment.controller.js');
 const {EnvironmentController} = require('./controllers/Environment.controller.js');
 const {LockController} = require('./controllers/Lock.controller.js');
 const {RunController} = require('./controllers/Run.controller.js');
@@ -47,8 +49,9 @@ const {WorkflowTemplateController} = require('./controllers/WorkflowTemplate.con
 const {BookkeepingService} = require('./services/Bookkeeping.service.js');
 const {BroadcastService} = require('./services/Broadcast.service.js');
 const {CacheService} = require('./services/Cache.service.js');
-const {EnvironmentCacheService} = require('./services/environment/EnvironmentCache.service.js');
+const {DeploymentService} = require('./services/Deployment.service.js');
 const {DetectorService} = require('./services/Detector.service.js');
+const {EnvironmentCacheService} = require('./services/environment/EnvironmentCache.service.js');
 const {EnvironmentService} = require('./services/Environment.service.js');
 const {Intervals} = require('./services/Intervals.service.js');
 const {LockService} = require('./services/Lock.service.js');
@@ -85,6 +88,11 @@ if (!config.grafana) {
 
 module.exports.setup = (http, ws) => {
   const eventEmitter = new EventEmitter();
+  
+  /**
+   * Services are initialized with the configuration they need and in order of their dependencies.
+   * The services are then used by the controllers to perform actions.
+   */
   let consulService;
   if (config.consul) {
     consulService = new ConsulService(config.consul);
@@ -113,9 +121,14 @@ module.exports.setup = (http, ws) => {
     ctrlProxy, apricotService, cacheService, broadcastService, environmentCacheService
   );
   const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
+  const deploymentService = new DeploymentService(environmentService, workflowService);
 
+  /**
+   * Controllers are initialized with the services they depend on.
+   */
   const envCtrl = new EnvironmentController(environmentService, workflowService, lockService, detectorService);
   const workflowController = new WorkflowTemplateController(workflowService);
+  const deploymentController = new DeploymentController(deploymentService);
 
   const aliecsReqHandler = new AliecsRequestHandler(ctrlService, apricotService);
   aliecsReqHandler.setWs(ws);
@@ -192,6 +205,14 @@ module.exports.setup = (http, ws) => {
     setDetectorsFromEnvironmentMiddleware,
     verifyLockOwnershipMiddleware,
     envCtrl.destroyEnvironmentHandler.bind(envCtrl),
+  );
+
+  http.post('/deploy',
+    coreMiddleware,
+    logDeploymentRequestMiddleware,
+    minimumRoleMiddleware(Role.DETECTOR),
+    verifyLockOwnershipMiddleware,
+    deploymentController.newAsyncDeploymentHandler.bind(deploymentController)
   );
 
   http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));

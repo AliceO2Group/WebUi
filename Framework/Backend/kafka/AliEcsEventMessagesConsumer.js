@@ -16,9 +16,16 @@ const path = require('node:path');
 const { KafkaMessagesConsumer } = require('./KafkaMessagesConsumer.js');
 const { getWebUiProtoIncludeDir } = require('../protobuf/getWebUiProtoIncludeDir.js');
 
-// Customize protobuf loader to set the import directory, protobuf do not allow to do so...
+// Customize protobuf loader to set the import directory as protobuf does not allow to do so
 const root = new protobuf.Root();
-root.resolvePath = (origin, target) => {
+
+/**
+ * Override the resolvePath of protobuf root object method to use the custom include directory
+ * @param {string} _ - the origin path
+ * @param {string} target - the target path to resolve taken from the proto file e.g. `import public "protos/common.proto";`
+ * @returns {string} the resolved path
+ */
+root.resolvePath = (_, target) => {
   if (path.isAbsolute(target)) {
     return target;
   }

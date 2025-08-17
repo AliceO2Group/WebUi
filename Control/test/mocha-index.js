@@ -171,8 +171,10 @@ describe('Control', function() {
   require('./public/page-hardware-mocha');
   require('./public/page-lock-mocha');
 
+  // API tests
   require('./api/lock/api-get-locks.test');
   require('./api/lock/api-put-locks.test');
+  require('./api/deployment/api-post-deployment.test');
 
   require('./api/configuration/api-get-configurations.test');
   require('./api/configuration/api-get-configuration.test');

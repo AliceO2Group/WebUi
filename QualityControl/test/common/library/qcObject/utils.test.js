@@ -19,7 +19,9 @@ import {
   isObjectOfTypeChecker,
   OBJECT_TYPE_KEY,
   generateDrawingOptionList,
+  parseObjects,
 } from './../../../../common/library/qcObject/utils.js';
+import QCObjectDto from '../../../../lib/dtos/QCObjectDto.js';
 
 /**
  * Test Suite for the common library of qcg - utils module
@@ -74,6 +76,30 @@ export const commonLibraryQcObjectUtilsTestSuite = () => {
         generateDrawingOptionList({ _typename: 'TGraph' }, ['gridx', 'stat']),
         ['gridx', 'optstat=1111'],
       );
+    });
+  });
+
+  suite('parseObjects - test suite', () => {
+    test('should successfully parse objects', () => {
+      const objectsToParse = [{ path: 'qc/CPV/M0/Physics/BadChannelMapM2' }];
+      const expectedParsed = [{ name: 'qc/CPV/M0/Physics/BadChannelMapM2' }];
+      deepStrictEqual(
+        parseObjects(objectsToParse, QCObjectDto),
+        expectedParsed,
+      );
+    });
+    test('should skip object without path', () => {
+      const objectsToParse = [{ notPath: 'something' }];
+      const expectedParsed = [];
+
+      deepStrictEqual(parseObjects(objectsToParse, QCObjectDto), expectedParsed);
+    });
+
+    test('should skip object with invalid path format', () => {
+      const objectsToParse = [{ path: 'invalid_path' }];
+      const expectedParsed = [];
+
+      deepStrictEqual(parseObjects(objectsToParse, QCObjectDto), expectedParsed);
     });
   });
 };
