@@ -16,6 +16,13 @@ import { Box } from '@mui/material';
 import React, { type FC, type PropsWithChildren } from 'react';
 import { ContentHeader } from './ContentHeader';
 
+/**
+ * Content component
+ * Represents the main content area of the application layout.
+ * It includes a header and wraps children components.
+ * @param {PropsWithChildren} props
+ * @returns {React.ReactElement} Content
+ */
 export const Content: FC<PropsWithChildren> = ({ children }) => (
   <Box
     component="main"

@@ -20,6 +20,13 @@ interface ContentHeaderProps {
   currentPath: string;
 }
 
+/**
+ * ContentHeader component
+ * Represents the header of the content area in the application layout.
+ * It displays the current path and includes a user section.
+ * @param {ContentHeaderProps} props
+ * @returns {React.ReactElement} ContentHeader
+ */
 export const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => (
   <Toolbar
     style={{
