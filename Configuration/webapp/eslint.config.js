@@ -284,7 +284,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['app/test/**/*.cjs', 'app/test/**/*.js'],
+    files: ['app/test/**/*.ts', 'app/test/**/*.ts'],
     extends: [
       pluginJs.configs.recommended,
       mochaPlugin.configs.recommended,
@@ -293,7 +293,7 @@ export default tseslint.config(
       mocha: mochaPlugin,
     },
     languageOptions: {
-      sourceType: 'script', // For .cjs and plain .js files
+      sourceType: 'module',
       ecmaVersion: 'latest',
       globals: {
         ...globals.node,
@@ -304,5 +304,12 @@ export default tseslint.config(
     rules: {
       'mocha/no-setup-in-describe': 'off',
     },
+  },
+  {
+    files: ['app/test/**'],
+    rules: {
+      'no-console': 'off',
+      'prefer-arrow-callback': 'off'
+    }
   },
 );

@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-const sessionParams: string[] = [];
+const sessionData: Record<string, string> = {};
 
 export const fetchSessionData = async () => {
   // only to get the data from server redirect
@@ -21,23 +21,14 @@ export const fetchSessionData = async () => {
   const response = await fetch('http://localhost:8080/control');
   const { searchParams } = new URL(response.url);
   searchParams.forEach((value, key) => {
-    sessionStorage.setItem(key, value);
-    sessionParams.push(key);
+    sessionData[key] = value;
   });
 };
 
-export const getSessionData = (): Record<string, string> => {
-  const output: Record<string, string> = {};
-  sessionParams.forEach((sessionParam) => {
-    const param = sessionStorage.getItem(sessionParam);
-    if (param) {
-      output[sessionParam] = param;
-    }
-  });
-  return output;
-};
+export const getSessionData = (): Record<string, string> => sessionData;
 
 export const deleteSessionData = () => {
-  sessionStorage.clear();
-  sessionParams.length = 0;
+  for (const key in sessionData) {
+    delete sessionData[key];
+  }
 };
