@@ -132,7 +132,7 @@ class RequestHandler {
           level: LogLevel.ERROR, system: 'GUI', facility: LOG_FACILITY, partition: error.envId
         });
       } else {
-        let logMessage = `Creation of environment failed with: ${error.details}. `;
+        let logMessage = `Creation of environment failed with: ${error}. `;
         logMessage += `User: ${username}, `;
         if (req.body.workflowTemplate) {
           logMessage += `workflow: ${req.body.workflowTemplate}, `;

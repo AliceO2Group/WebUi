@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+const { InvalidInputError } = require('@aliceo2/web-ui');
+
 /**
  * Shared methods used within Core Services/Controllers
  */
@@ -94,28 +96,31 @@ class CoreUtils {
   }
 
   /**
-   * Temporal removal of bad FLP host if run_type is as per specified
+   * Remove hosts that are defined in the kvStore from the list of hosts that are to be used for the deployment
    * @param {EnvironmentCreation} payload -  configuration for creating an environment in raw format
+   * @param {Array<String>} hostsToIgnore - list of hosts that should be removed from payload
    * @returns {EnvironmentCreation} - validated and parsed configuration 
+   * @throws {Error} if no hosts are left after removing the ones in kvStore
    */
   static _removeHostsFromSelection(payload, hostsToIgnore = []) {
+    const hostsAsString = payload?.vars?.hosts ?? '[]';
+    let hostsList = [];
+
     try {
-      const hostsAsString = payload?.vars?.hosts ?? '[]';
-      const hostsList = JSON.parse(hostsAsString);
-      hostsToIgnore.forEach((knownHost) => {
-        try {
-          const index = hostsList.findIndex((host) => knownHost === host);
-          if (index >= 0) {
-            hostsList.splice(index, 1);
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      });
-      payload.vars.hosts = JSON.stringify(hostsList);
+      hostsList = JSON.parse(hostsAsString);
+      if (!Array.isArray(hostsList)) {
+        throw new InvalidInputError(`Hosts from deployment payload should be an array, but got ${typeof hostsList}`);
+      }
     } catch (error) {
-      console.error(error)
+      throw new InvalidInputError(`Invalid hosts JSON: ${hostsAsString} (${error})`);
     }
+
+    const filteredHosts = hostsList.filter((host) => !hostsToIgnore.includes(host));
+    if (filteredHosts.length === 0) {
+      const hostListString = hostsList.join(', ').slice(0, 100);
+      throw new InvalidInputError(`No hosts remained after ignoring the ones in store: ${hostListString}`);
+    }
+    payload.vars.hosts = JSON.stringify(filteredHosts);
 
     return payload;
   }
