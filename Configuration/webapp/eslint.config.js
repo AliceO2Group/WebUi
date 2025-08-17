@@ -307,4 +307,11 @@ export default tseslint.config(
       'prefer-arrow-callback': 'off'
     },
   },
+  {
+    files: ['app/test/**'],
+    rules: {
+      'no-console': 'off',
+      'prefer-arrow-callback': 'off'
+    }
+  },
 );
