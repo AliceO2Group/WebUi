@@ -27,8 +27,8 @@ const { getConsulConfig } = require("../config/publicConfigProvider.js");
 class QCConfigurationController {
   /**
    * Setup QCConfigurationController
-   * @param {QCConfigurationService} qcConfigurationService
-   * @param {JSON} config
+   * @param {QCConfigurationService} qcConfigurationService - service for managing QC configurations
+   * @param {JSON} config - consul configuration
    */
   constructor(qcConfigurationService, config) {
     this._qcConfigurationService = qcConfigurationService;
@@ -40,8 +40,8 @@ class QCConfigurationController {
 
   /**
    * Method to get configurations names
-   * @param {Request} req
-   * @param {Response} res
+   * @param {Request} req - HTTP Request object
+   * @param {Response} res - HTTP Response object
    */
   async getConfigurationsKeys(req, res) {
     const { prefix = "", recurse = false } = req.query;
@@ -49,8 +49,10 @@ class QCConfigurationController {
 
     try {
       const parsedData = await this._qcConfigurationService.getKeysOfValidConfigurations(prefixPath, recurse);
+      
       if (!parsedData || parsedData.length === 0) {
         updateAndSendExpressResponseFromNativeError(res, new NotFoundError("No configurations found"));
+        return;
       }
 
       res.status(200).json(parsedData);
@@ -62,21 +64,19 @@ class QCConfigurationController {
 
   /**
    * Method to get configuration value by key
-   * @param {Request} req
-   * @param {Response} res
+   * @param {Request} req - HTTP Request object
+   * @param {Response} res - HTTP Response object
    */
   async getConfigurationByKey(req, res) {
     const { key } = req.params;
-    if (!key) {
+
+    if (!key || key.trim() === "") {
       updateAndSendExpressResponseFromNativeError(res, new InvalidInputError("Missing configuration key"));
+      return;
     }
 
     try {
       const value = await this._qcConfigurationService.getConfigurationByKey(key);
-      if (!value) {
-        updateAndSendExpressResponseFromNativeError(res, new NotFoundError("Configuration not found"));
-      }
-
       res.status(200).json(value);
     } catch (error) {
       errorLogger(error, this._logger);

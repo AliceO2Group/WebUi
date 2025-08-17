@@ -58,6 +58,19 @@ describe(`'QCConfigurationController' test suite`, () => {
       assert.ok(res.status.calledWith(200));
       assert.deepStrictEqual(res.json.firstCall.args[0], ['o2/components/qc/ANY/any/dir1/prefix1', 'o2/components/qc/ANY/any/prefix1']);
     });
+
+    it('should return 404 when no configurations are found', async () => {
+      qcConfigurationController._qcConfigurationService._consulService.getOnlyRawValuesByKeyPrefix.resolves({});
+      const req = { query: { } };
+      const res = { status: sinon.stub().returnsThis(), json: sinon.stub() };
+      await qcConfigurationController.getConfigurationsKeys(req, res);
+      assert.ok(res.status.calledWith(404));
+      assert.deepStrictEqual(res.json.firstCall.args[0], {
+        message: 'No configurations found',
+        status: 404,
+        title: 'Not Found',
+      });
+    });
   })
 
   describe(`'getConfigurationByKey' test suite`, () => {
@@ -87,6 +100,19 @@ describe(`'QCConfigurationController' test suite`, () => {
         message: 'Missing configuration key',
         status: 400,
         title: 'Invalid Input',
+      });
+    });
+
+    it('should return 404 for non-existing configuration key', async () => {
+      qcConfigurationController._qcConfigurationService._consulService.getOnlyRawValueByKey.rejects(new Error("Non-2xx status code"));
+      const req = { params: { key: 'o2/components/qc/ANY/any/non-existing-key' } };
+      const res = { status: sinon.stub().returnsThis(), json: sinon.stub() };
+      await qcConfigurationController.getConfigurationByKey(req, res);
+      assert.ok(res.status.calledWith(404));
+      assert.deepStrictEqual(res.json.firstCall.args[0], {
+        message: 'Configuration not found for key: o2/components/qc/ANY/any/non-existing-key',
+        status: 404,
+        title: 'Not Found',
       });
     });
   });

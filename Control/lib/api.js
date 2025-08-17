@@ -24,6 +24,7 @@ const { DetectorId } = require('./common/detectorId.enum.js');
 const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 const {addDetectorIdMiddleware} = require('./middleware/addDetectorId.middleware.js');
 const {requireDetectorOrGlobalRoleMiddleware} = require('./middleware/requireDetectorOrGlobalRole.middleware.js');
+const {validateConsulServiceMiddlewareFactory} = require('./middleware/validateConsulServiceMiddlewareFactory.js');
 
 const {
   setDetectorsFromEnvironmentMiddlewareFactory
@@ -92,13 +93,11 @@ module.exports.setup = (http, ws) => {
   const broadcastService = new BroadcastService(ws);
   const cacheService = new CacheService(broadcastService);
   const environmentCacheService = new EnvironmentCacheService(broadcastService, eventEmitter);
-  const qcConfigurationService = new QCConfigurationService(consulService);
-  qcConfigurationService.testConsulStatus();
 
+  const qcConfigurationService = new QCConfigurationService(consulService);
   const qcConfigurationController = new QCConfigurationController(qcConfigurationService, config.consul);
 
   const consulController = new ConsulController(consulService, config.consul);
-  consulController.testConsulStatus();
 
   const ctrlProxy = new GrpcServiceClient(config.grpc, O2_CONTROL_PROTO_PATH);
   const ctrlService = new ControlService(ctrlProxy, consulController, config.grpc, O2_CONTROL_PROTO_PATH);
@@ -156,7 +155,7 @@ module.exports.setup = (http, ws) => {
 
   const intervals = new Intervals();
 
-  initializeData(apricotService, lockService);
+  initializeData(apricotService, lockService, consulService);
   initializeIntervals(intervals, statusService, runService, bkpService, environmentService);
 
   const coreMiddleware = [
@@ -164,6 +163,7 @@ module.exports.setup = (http, ws) => {
   ];
   const setDetectorsFromEnvironmentMiddleware = setDetectorsFromEnvironmentMiddlewareFactory(environmentService);
   const verifyLockOwnershipMiddleware = getDetectorsLockOwnershipMiddlewareFactory(lockService);
+  const validateConsulServiceMiddleware = validateConsulServiceMiddlewareFactory(consulService);
 
   ctrlProxy.methods.forEach(
     (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res)),
@@ -237,23 +237,30 @@ module.exports.setup = (http, ws) => {
   );
 
   // Configuration
-  const qcValidateService = qcConfigurationService.validateService.bind(qcConfigurationService);
   http.get(
-    "/configurations", qcValidateService,
+    '/configurations', validateConsulServiceMiddleware,
     qcConfigurationController.getConfigurationsKeys.bind(qcConfigurationController)
   );
   http.get(
-    '/configurations/:key(*)', qcValidateService, 
+    '/configurations/:key(*)', validateConsulServiceMiddleware, 
     qcConfigurationController.getConfigurationByKey.bind(qcConfigurationController)
   );
 
   // Consul
-  const validateService = consulController.validateService.bind(consulController);
-  http.get('/consul/flps', validateService, consulController.getFLPs.bind(consulController));
-  http.get('/consul/crus', validateService, consulController.getCRUs.bind(consulController));
-  http.get('/consul/crus/config', validateService, consulController.getCRUsWithConfiguration.bind(consulController));
-  http.get('/consul/crus/aliases', validateService, consulController.getCRUsAlias.bind(consulController));
-  http.post('/consul/crus/config/save', validateService, consulController.saveCRUsConfiguration.bind(consulController));
+  http.get('/consul/flps', validateConsulServiceMiddleware, consulController.getFLPs.bind(consulController));
+  http.get('/consul/crus', validateConsulServiceMiddleware, consulController.getCRUs.bind(consulController));
+  http.get(
+    '/consul/crus/config', validateConsulServiceMiddleware, 
+    consulController.getCRUsWithConfiguration.bind(consulController)
+  );
+  http.get(
+    '/consul/crus/aliases', validateConsulServiceMiddleware, 
+    consulController.getCRUsAlias.bind(consulController)
+  );
+  http.post(
+    '/consul/crus/config/save', validateConsulServiceMiddleware, 
+    consulController.saveCRUsConfiguration.bind(consulController)
+  );
 };
 
 /**
@@ -297,8 +304,21 @@ function initializeIntervals(intervalsService, statusService, runService, bkpSer
  * Function to initialize in order dependent services
  * @param {ApricotService} apricotService - request initial set of data from AliECS/Apricot
  * @param {LockService} lockService - initialize service with data from Apricot
+ * @param {ConsulService} consulService - service for communicating with Consul
  */
-async function initializeData(apricotService, lockService) {
+async function initializeData(apricotService, lockService, consulService) {
   await apricotService.init();
   lockService.setLockStatesForDetectors(apricotService.detectors);
+  await testConsulStatus(consulService);
+}
+
+/**
+ * Method to check if consul service can be used
+ * @param {ConsulService} consulService
+ */
+async function testConsulStatus(consulService) {
+  consulService
+    .getConsulLeaderStatus()
+    .then((data) => logger.info(`Service is up and running on: ${data}`))
+    .catch((error) => logger.error(`Connection failed due to ${error}`));
 }
