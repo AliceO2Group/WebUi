@@ -24,7 +24,7 @@ interface ContentHeaderProps {
  * ContentHeader component
  * Represents the header of the content area in the application layout.
  * It displays the current path and includes a user section.
- * @param {ContentHeaderProps} props
+ * @param {ContentHeaderProps} props - Component props.
  * @returns {React.ReactElement} ContentHeader
  */
 export const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => (

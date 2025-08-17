@@ -22,7 +22,7 @@ interface UserSectionProps {
 /**
  * UserSection component
  * Represents a user section with an avatar and a dropdown menu for user actions.
- * @param {UserSectionProps} props
+ * @param {UserSectionProps} props - Component props.
  * @returns {React.ReactElement} UserSection
  */
 export const UserSection: React.FC<UserSectionProps> = ({ userName }) => {

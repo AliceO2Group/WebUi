@@ -20,7 +20,7 @@ import { ContentHeader } from './ContentHeader';
  * Content component
  * Represents the main content area of the application layout.
  * It includes a header and wraps children components.
- * @param {PropsWithChildren} props
+ * @param {PropsWithChildren} props - Component props.
  * @returns {React.ReactElement} Content
  */
 export const Content: FC<PropsWithChildren> = ({ children }) => (

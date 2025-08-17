@@ -20,7 +20,7 @@ import { Content } from './content/Content';
 /**
  * MainLayout component
  * Represents the main layout of the application, including the left drawer and content area.
- * @param {PropsWithChildren} props
+ * @param {PropsWithChildren} props - Component props.
  * @returns {React.ReactElement} MainLayout
  */
 const MainLayout: FC<PropsWithChildren> = ({ children }) => (
