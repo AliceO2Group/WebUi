@@ -61,7 +61,9 @@ export const mochaHooks = {
   },
 
   async afterAll() {
-    const { test: { browser } } = global;
+    const {
+      test: { browser },
+    } = global;
     if (browser === null) {
       return;
     }

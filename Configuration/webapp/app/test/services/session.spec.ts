@@ -22,7 +22,12 @@ describe('`pageRoot` test-suite', function () {
   let page: Page | null = null;
 
   before(function () {
-    ({ test: { page, helpers: { url } } } = global);
+    ({
+      test: {
+        page,
+        helpers: { url },
+      },
+    } = global);
   });
 
   it('should load root page', async function () {
