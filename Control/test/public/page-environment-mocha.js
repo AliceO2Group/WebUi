@@ -115,10 +115,10 @@ describe('`pageEnvironment` test-suite', async () => {
 
   describe('Check transition from CONFIGURED to RUNNING and presence of buttons in RUNNING state', async () => {
     it('should click START button to move states (CONFIGURED -> RUNNING)', async () => {
+      await page.waitForNetworkIdle();
       await page.locator('#buttonToSTART')
         .setTimeout(1000)
         .click();
-      await page.waitForNetworkIdle();
 
       const state = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(state, 'RUNNING');
