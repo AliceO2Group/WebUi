@@ -13,7 +13,8 @@
 */
 
 /**
- * Available environment transitions as per: https://github.com/AliceO2Group/Control/blob/master/core/protos/o2control.proto#L228
+ * Available environment transitions as per: 
+ * @link https://github.com/AliceO2Group/Control/blob/master/core/protos/o2control.proto#L228
  */
 const EnvironmentTransitionType = Object.freeze({
   NOOP: 'NOOP',
