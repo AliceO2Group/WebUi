@@ -165,7 +165,6 @@ describe('Control', function() {
   require('./public/page-about-mocha');
   require('./public/page-environment-mocha');
   require('./public/page-environments-mocha');
-  require('./public/page-configuration-mocha');
   require('./public/page-tasks-mocha');
   require('./public/page-hardware-mocha');
   require('./public/page-lock-mocha');
