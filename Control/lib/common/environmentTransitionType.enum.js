@@ -23,6 +23,7 @@ const EnvironmentTransitionType = Object.freeze({
   RESET: 'RESET',
   GO_ERROR: 'GO_ERROR',
   DEPLOY: 'DEPLOY',
+  DESTROY: 'DESTROY',
 });
 
 exports.EnvironmentTransitionType = EnvironmentTransitionType;

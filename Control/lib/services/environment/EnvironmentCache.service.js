@@ -23,9 +23,11 @@ const {
 } = require('./../../common/emitterKeys.enum.js');
 const { EnvironmentState } = require('../../common/environmentState.enum.js');
 const { TaskState } = require('../../common/taskState.enum.js');
+const { EnvironmentTransitionType } = require('../../common/environmentTransitionType.enum.js');
 const EPN_PATH_IN_ENVIRONMENT_INFO = 'hardware.epn.info';
 
 const ECS_TRANSITION_DONE_MESSAGE = 'transition completed successfully';
+const ECS_DESTROY_TRANSITION_DONE_MESSAGE = 'environment teardown complete';
 
 /**
  * @class
@@ -243,12 +245,20 @@ class EnvironmentCacheService {
       // This can happen when the environment also goes form RUNNING to CONFIGURED but it is already marked as not deploying anymore
       cachedEnvironment.isDeploying = false;
     }
-    cachedEnvironment.state = state;
     cachedEnvironment.currentTransition = transition?.name ?? '-';
     cachedEnvironment.currentRunNumber = runNumber;
     cachedEnvironment.events.push(environmentEvent);
     cachedEnvironment.lastUpdate = environmentEvent.timestamp;
     this._environments.set(id, cachedEnvironment);
+
+    if (
+      transition.name === EnvironmentTransitionType.DESTROY  &&
+      state === EnvironmentState.DONE &&
+      message === ECS_DESTROY_TRANSITION_DONE_MESSAGE
+    ) {
+      // That is, if the environment successfully ended the DESTROY transition
+      this.removeEnvironmentById(id);
+    }
 
     this._broadcastService.broadcast(ENVIRONMENT_EVENTS, cachedEnvironment);
     this._lastUpdate = Date.now();

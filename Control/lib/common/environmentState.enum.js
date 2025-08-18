@@ -19,6 +19,7 @@
 const EnvironmentState = Object.freeze({
   STANDBY: 'STANDBY',
   DEPLOYED: 'DEPLOYED',
+  DONE: 'DONE',
   CONFIGURED: 'CONFIGURED',
   RUNNING: 'RUNNING',
   PENDING: 'PENDING',
