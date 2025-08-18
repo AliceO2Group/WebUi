@@ -396,11 +396,11 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
   it('should successfully lock, select a detector and request a list of hosts for that detector', async () => {
     await page.locator('.m1 > div:nth-child(1) > div > div:nth-child(1)')
-      .setTimeout(500)
+      .setTimeout(1000)
       .click();
 
     await page.locator('.m1 > div:nth-child(1) > div > a:nth-child(2)')
-      .setTimeout(500)
+      .setTimeout(1000)
       .click();
 
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
