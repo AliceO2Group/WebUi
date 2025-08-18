@@ -105,21 +105,14 @@ describe('`pageEnvironment` test-suite', async () => {
       assert.strictEqual(configureButtonTitle, `'CONFIGURE' cannot be used in state 'CONFIGURED'`);
       assert.deepStrictEqual(configureButtonStyle, {0: 'display'});
     });
-
-    // it('should have one button for RESET in state CONFIGURED', async () => {
-    //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)', {timeout: 5000});
-    //   const configuredStateButtons = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(4)').title);
-    //   assert.strictEqual(configuredStateButtons, 'RESET');
-    // });
   });
 
   describe('Check transition from CONFIGURED to RUNNING and presence of buttons in RUNNING state', async () => {
     it('should click START button to move states (CONFIGURED -> RUNNING)', async () => {
+       await page.waitForSelector('#buttonToSTART', {timeout: 5000});
+      // click STOP
+      await page.evaluate(() => document.querySelector('#buttonToSTART').click());
       await page.waitForNetworkIdle();
-      await page.locator('#buttonToSTART')
-        .setTimeout(1000)
-        .click();
-
       const state = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(state, 'RUNNING');
       assert.ok(calls['controlEnvironment']);
