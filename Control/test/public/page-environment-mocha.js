@@ -15,6 +15,7 @@
 /* eslint-disable max-len */
 const assert = require('assert');
 const test = require('../mocha-index');
+const waitForTimeout = (timeout) => new Promise((res) => setTimeout(res, timeout));
 
 describe('`pageEnvironment` test-suite', async () => {
   let url;
@@ -112,7 +113,7 @@ describe('`pageEnvironment` test-suite', async () => {
        await page.waitForSelector('#buttonToSTART', {timeout: 5000});
       // click STOP
       await page.evaluate(() => document.querySelector('#buttonToSTART').click());
-      await page.waitForFunction(() => window.model.environment.item.payload.state === 'RUNNING');
+      await waitForTimeout(2000)
 
       const state = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(state, 'RUNNING');
