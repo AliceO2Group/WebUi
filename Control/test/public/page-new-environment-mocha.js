@@ -15,6 +15,7 @@
 /* eslint-disable max-len */
 const assert = require('assert');
 const test = require('../mocha-index');
+const {waitForTimeout} = require('../utils/puppeteerUtils.js');
 
 let url;
 let page;
@@ -173,6 +174,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should have error of missing revisions for this repository', async () => {
+    await waitForTimeout(1000);
     const errorMessage = await page.locator('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div:nth-child(2) > div > div')
       .setTimeout(1000)
       .map((element) => element.innerText)

@@ -136,18 +136,6 @@ const envTest = {
       dd_enabled: 'true',
       run_type: 'run'
     },
-    vars: {
-      odc_enabled: 'true',
-      mid_enabled: 'false',
-      mid_something: 'test',
-      dd_enabled: 'true',
-      run_type: 'run'
-    },
-    defaults: {
-      dcs_topology: 'test',
-      dd_enabled: 'true',
-      run_type: 'run'
-    },
     integratedServices: {
     }
   },
