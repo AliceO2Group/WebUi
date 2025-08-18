@@ -56,6 +56,7 @@ function createBaseObjectsGetDto({ runTypes }) {
     token: Joi.string().required(),
     fields: Joi.array().default([]).items(Joi.string()),
     filters: createFiltersSchema(runTypes),
+    inRunMode: Joi.boolean().default(false),
   }).options({ allowUnknown: false });
 }
 
