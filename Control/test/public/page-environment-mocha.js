@@ -205,7 +205,7 @@ describe('`pageEnvironment` test-suite', async () => {
       });
       await page.waitForSelector('#buttonToSHUTDOWN', {timeout: 5000});
       await page.evaluate(() => document.querySelector('#buttonToSHUTDOWN').click());
-      await page.waitForNetworkIdle();
+      await waitForTimeout(1000);
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=environments');
       assert.ok(calls['destroyEnvironment']);
