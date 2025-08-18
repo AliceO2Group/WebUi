@@ -113,7 +113,7 @@ describe('`pageEnvironment` test-suite', async () => {
        await page.waitForSelector('#buttonToSTART', {timeout: 5000});
       // click STOP
       await page.evaluate(() => document.querySelector('#buttonToSTART').click());
-      await waitForTimeout(2000)
+      await waitForTimeout(1000)
 
       const state = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(state, 'RUNNING');
@@ -156,12 +156,12 @@ describe('`pageEnvironment` test-suite', async () => {
       await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
       // click STOP
       await page.evaluate(() => document.querySelector('#buttonToSTOP').click());
-      await page.waitForNetworkIdle();
+      await waitForTimeout(1000);
       const configuredState = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(configuredState, 'CONFIGURED');
       // click RESET
       await page.evaluate(() => document.querySelector('#buttonToRESET').click());
-      await page.waitForNetworkIdle();
+      await waitForTimeout(1000);
       const standbyState = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(standbyState, 'DEPLOYED');
     });
