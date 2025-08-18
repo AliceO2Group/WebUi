@@ -112,7 +112,8 @@ describe('`pageEnvironment` test-suite', async () => {
        await page.waitForSelector('#buttonToSTART', {timeout: 5000});
       // click STOP
       await page.evaluate(() => document.querySelector('#buttonToSTART').click());
-      await page.waitForNetworkIdle();
+      await page.waitForFunction(() => window.model.environment.item.payload.state === 'RUNNING');
+
       const state = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(state, 'RUNNING');
       assert.ok(calls['controlEnvironment']);
