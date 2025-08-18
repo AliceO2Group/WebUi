@@ -107,7 +107,7 @@ describe('DeploymentController test suite', function() {
           session: { username: 'testuser', name: 'Test User', personid: '123' } 
         }, res);
         
-        assert.ok(deploymentServiceMock.acknowledgeEnvironmentDeploymentFailure.firstCall.args[0], 'env1');
+        assert.strictEqual(deploymentServiceMock.acknowledgeEnvironmentDeploymentFailure.firstCall.args[0], 'env1');
         assert.ok(deploymentServiceMock.acknowledgeEnvironmentDeploymentFailure.firstCall.args[1] instanceof User);
       });
 

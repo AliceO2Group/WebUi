@@ -100,7 +100,6 @@ class GrpcServiceClient {
         this.client[methodName](args, options, (error, response) => {
           if (error) {
             reject(error);
-            return
           }
           resolve(response);
         });
