@@ -219,7 +219,7 @@ class EnvironmentCacheService {
    * @returns {void}
    */
   _handleEnvironmentEvent(environmentEvent) {
-    const { id, state, transition, message, error, runNumber } = environmentEvent;
+    const { id, state, transition = {}, message, error, runNumber } = environmentEvent;
     const cachedEnvironment = this._environments.has(id)
       ? this._environments.get(id)
       : { id, events: [] };
@@ -252,7 +252,7 @@ class EnvironmentCacheService {
     this._environments.set(id, cachedEnvironment);
 
     if (
-      transition.name === EnvironmentTransitionType.DESTROY  &&
+      transition?.name === EnvironmentTransitionType.DESTROY  &&
       state === EnvironmentState.DONE &&
       message === ECS_DESTROY_TRANSITION_DONE_MESSAGE
     ) {

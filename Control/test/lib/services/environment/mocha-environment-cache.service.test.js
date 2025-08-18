@@ -18,8 +18,11 @@ const EventEmitter = require('events');
 const { EnvironmentCacheService } = require('../../../../lib/services/environment/EnvironmentCache.service.js');
 const { EmitterKeys: {
   ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK: { ODC }, TASKS_TRACK,
-} } = require('../../../../lib/common/emitterKeys.enum.js');
+}, 
+EmitterKeys} = require('../../../../lib/common/emitterKeys.enum.js');
 const { BroadcastKeys: {ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW} } = require('../../../../lib/common/broadcastKeys.enum.js');
+const { EnvironmentState } = require('../../../../lib/common/environmentState.enum.js');
+const { EnvironmentTransitionType } = require('../../../../lib/common/environmentTransitionType.enum.js');
 
 describe(`'EnvironmentCacheService' - test suite`, () => {
   let broadcastServiceMock;
@@ -360,6 +363,27 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
       env = environmentCacheService._environments.get('env1');
       assert.deepStrictEqual(env.firstTaskInError, firstTaskInErrorEventSent, 'firstTaskInError should still be the first task in error');
       assert.strictEqual(broadcastServiceMock.broadcast.callCount, 1, 'Broadcast should not be made again when subsequent task in ERROR/ERROR_CRITICAL is received');
+    });
+
+    it('should successfully remove environment from cache on successful DESTROY transition', () => {
+      const initialEnvironment = {
+        id: 'env1',
+        state: EnvironmentState.CONFIGURED
+      };
+      environmentCacheService.addOrUpdateEnvironment(initialEnvironment);
+
+      eventEmitter.emit(EmitterKeys.ENVIRONMENTS_TRACK, {
+        id: 'env1',
+        transition: {
+          name: EnvironmentTransitionType.DESTROY,
+        },
+        message: 'environment teardown complete',
+        state: EnvironmentState.DONE
+      });
+
+      const env = environmentCacheService._environments.get('env1');
+      assert.ok(!env, 'Environment "env1" should be removed from the cache');
+      assert.strictEqual(broadcastServiceMock.broadcast.callCount, 2, 'Broadcast (event and overview) should be made when environment is removed');
     });
   });
 });
