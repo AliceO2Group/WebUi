@@ -13,18 +13,9 @@
 */
 
 /**
- * Available environment transitions as per: 
- * @link https://github.com/AliceO2Group/Control/blob/master/core/protos/o2control.proto#L228
+ * Wait for a specific timeout period. To be used in puppeteer tests as the `waitForFunction` and `waitForNetworkIdle` are not reliable
+ * Puppeteer used to have a built-in `waitForTimeout` function, but it was removed in later versions.
+ * @param {number} timeout - The time to wait in milliseconds.
+ * @returns {Promise<void>} - A promise that resolves after the specified timeout.
  */
-const EnvironmentTransitionType = Object.freeze({
-  NOOP: 'NOOP',
-  START_ACTIVITY: 'START_ACTIVITY',
-  STOP_ACTIVITY: 'STOP_ACTIVITY',
-  CONFIGURE: 'CONFIGURE',
-  RESET: 'RESET',
-  GO_ERROR: 'GO_ERROR',
-  DEPLOY: 'DEPLOY',
-  DESTROY: 'DESTROY',
-});
-
-exports.EnvironmentTransitionType = EnvironmentTransitionType;
+export const waitForTimeout = (timeout) => new Promise((res) => setTimeout(res, timeout));

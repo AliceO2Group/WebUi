@@ -73,10 +73,10 @@ describe('Control', function() {
     });
     page.on('console', (msg) => {
       for (let i = 0; i < msg.args().length; ++i) {
-        console.log(`        ${msg.args()[i]}`);
+        console.log(`[browser]        ${msg.args()[i]}`);
       }
     });
-    await page.setViewport({width: 1200, height: 770});
+    await page.setViewport({ width: 1920, height: 1080 });
     exports.page = page;
     const helpers = {url, calls, apricotCalls};
     exports.helpers = helpers;
@@ -165,7 +165,6 @@ describe('Control', function() {
   require('./public/page-about-mocha');
   require('./public/page-environment-mocha');
   require('./public/page-environments-mocha');
-  // require('./public/page-configuration-mocha');
   require('./public/page-tasks-mocha');
   require('./public/page-hardware-mocha');
   require('./public/page-lock-mocha');

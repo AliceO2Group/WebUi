@@ -18,8 +18,11 @@ const EventEmitter = require('events');
 const { EnvironmentCacheService } = require('../../../../lib/services/environment/EnvironmentCache.service.js');
 const { EmitterKeys: {
   ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK: { ODC }, TASKS_TRACK,
-} } = require('../../../../lib/common/emitterKeys.enum.js');
+}, 
+EmitterKeys} = require('../../../../lib/common/emitterKeys.enum.js');
 const { BroadcastKeys: {ENVIRONMENT_EVENTS, ENVIRONMENTS_OVERVIEW} } = require('../../../../lib/common/broadcastKeys.enum.js');
+const { EnvironmentState } = require('../../../../lib/common/environmentState.enum.js');
+const { EnvironmentTransitionType } = require('../../../../lib/common/environmentTransitionType.enum.js');
 
 describe(`'EnvironmentCacheService' - test suite`, () => {
   let broadcastServiceMock;
@@ -62,6 +65,8 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
       assert.strictEqual(environmentCacheService._environments.size, 1);
       assert.deepStrictEqual(environmentCacheService._environments.get('abc123'), {
         id: 'abc123',
+        isDeploying: undefined,
+        deploymentError: undefined,
         state: 'inactive',
         events: []
       });
@@ -113,6 +118,38 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
     });
   });
 
+  describe('`removeEnvironmentById` tests', () => {
+    it('should remove an environment by id and broadcast if shouldBroadcast is true', () => {
+      const env = { id: 'env1', state: 'active', deploymentError: 'Error'};
+      environmentCacheService.addOrUpdateEnvironment(env);
+      const beforeUpdate = environmentCacheService._lastUpdate;
+      environmentCacheService.removeEnvironmentById('env1', true);
+      assert.strictEqual(environmentCacheService._environments.has('env1'), false);
+      assert.strictEqual(broadcastServiceMock.broadcast.calledOnce, true);
+      assert.strictEqual(broadcastServiceMock.broadcast.firstCall.args[0], ENVIRONMENTS_OVERVIEW);
+      assert.deepStrictEqual(broadcastServiceMock.broadcast.firstCall.args[1], []);
+      assert.ok(environmentCacheService._lastUpdate >= beforeUpdate);
+    });
+
+    it('should remove an environment by id and not broadcast if shouldBroadcast is false', () => {
+      const env = { id: 'env2', state: 'inactive' };
+      environmentCacheService.addOrUpdateEnvironment(env);
+      broadcastServiceMock.broadcast.resetHistory();
+      environmentCacheService.removeEnvironmentById('env2', false);
+      assert.strictEqual(environmentCacheService._environments.has('env2'), false);
+      assert.strictEqual(broadcastServiceMock.broadcast.called, false);
+    });
+
+    it('should do nothing if id does not exist', () => {
+      broadcastServiceMock.broadcast.resetHistory();
+      const beforeUpdate = environmentCacheService._lastUpdate;
+      environmentCacheService.removeEnvironmentById('nonexistent', true);
+      assert.strictEqual(broadcastServiceMock.broadcast.called, false);
+      assert.strictEqual(environmentCacheService._environments.size, 0);
+      assert.strictEqual(environmentCacheService._lastUpdate, beforeUpdate);
+    });
+  });
+
   it('should initialize class with an empty environment cache map', () => {
     assert.strictEqual(environmentCacheService._environments.size, 0);
   });
@@ -131,7 +168,6 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
   it('should update an existing environment in the cache and broadcast it', () => {
     const initialEvent = { id: 'abc135', timestamp: Date.now() - 1000 };
     const updatedEvent = { id: 'abc135', timestamp: Date.now() };
-    const transformedEvent = { id: 'abc135', events: [], lastUpdate: updatedEvent.timestamp };
 
     // Emit initial event
     eventEmitter.emit(ENVIRONMENTS_TRACK, initialEvent);
@@ -327,6 +363,27 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
       env = environmentCacheService._environments.get('env1');
       assert.deepStrictEqual(env.firstTaskInError, firstTaskInErrorEventSent, 'firstTaskInError should still be the first task in error');
       assert.strictEqual(broadcastServiceMock.broadcast.callCount, 1, 'Broadcast should not be made again when subsequent task in ERROR/ERROR_CRITICAL is received');
+    });
+
+    it('should successfully remove environment from cache on successful DESTROY transition', () => {
+      const initialEnvironment = {
+        id: 'env1',
+        state: EnvironmentState.CONFIGURED
+      };
+      environmentCacheService.addOrUpdateEnvironment(initialEnvironment);
+
+      eventEmitter.emit(EmitterKeys.ENVIRONMENTS_TRACK, {
+        id: 'env1',
+        transition: {
+          name: EnvironmentTransitionType.DESTROY,
+        },
+        message: 'environment teardown complete',
+        state: EnvironmentState.DONE
+      });
+
+      const env = environmentCacheService._environments.get('env1');
+      assert.ok(!env, 'Environment "env1" should be removed from the cache');
+      assert.strictEqual(broadcastServiceMock.broadcast.callCount, 2, 'Broadcast (event and overview) should be made when environment is removed');
     });
   });
 });

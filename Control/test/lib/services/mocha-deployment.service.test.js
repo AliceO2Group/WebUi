@@ -14,6 +14,7 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
+const {NotFoundError} = require('@aliceo2/web-ui');
 const {DeploymentService} = require('./../../../lib/services/Deployment.service.js');
 
 describe(`'DeploymentService' test suite`, () => {
@@ -43,6 +44,46 @@ describe(`'DeploymentService' test suite`, () => {
         epn_enabled: 'false',
         odc_n_epns: '5',
       });
+    });
+  });
+
+  describe('acknowledgeEnvironmentDeploymentFailure - tests', () => {
+    let deploymentService;
+    let environmentCacheServiceMock;
+    let loggerMock;
+    const user = { username: 'testuser' };
+    const environmentId = 'env1';
+
+    beforeEach(() => {
+      environmentCacheServiceMock = {
+        environments: new Map(),
+        removeEnvironmentById: sinon.stub(),
+      };
+      loggerMock = {
+        infoMessage: sinon.stub(),
+      };
+      deploymentService = new DeploymentService({}, {}, environmentCacheServiceMock);
+      deploymentService._logger = loggerMock;
+    });
+
+    it('should acknowledge request of deployment failure and remove environment from cache', () => {
+      environmentCacheServiceMock.environments.set(environmentId, { deploymentError: true });
+      deploymentService.acknowledgeEnvironmentDeploymentFailure(environmentId, user);
+      sinon.assert.calledWith(environmentCacheServiceMock.removeEnvironmentById, environmentId, true);
+      sinon.assert.calledWith(loggerMock.infoMessage, sinon.match.string, { level: sinon.match.any });
+    });
+
+    it('should throw NotFoundError if environment does not exist in cache', () => {
+      assert.throws(() => {
+        deploymentService.acknowledgeEnvironmentDeploymentFailure('notfound', user);
+      }, new NotFoundError('Environment (id: notfound) not found in cache'));
+    });
+
+    it('should throw Error if environment exists in cache but does not have deploymentError', () => {
+      environmentCacheServiceMock.environments.set(environmentId, {});
+      assert.throws(() => {
+        deploymentService.acknowledgeEnvironmentDeploymentFailure(environmentId, user);
+      }, new Error(`Environment (id: ${environmentId}) does not have a deployment error to acknowledge`));
     });
   });
 

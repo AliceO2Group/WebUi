@@ -78,6 +78,10 @@ const coreGRPCServer = (config) => {
         callback(null, {environment: envTest.environment});
       }
     },
+    async newEnvironmentAsync(call, callback) {
+        calls['newEnvironmentAsync'] = true;
+        callback(null, {environment: envTest.environment});
+    },
     getWorkflowTemplates(call, callback) {
       calls['getWorkflowTemplates'] = true;
       callback(null, envTest.workflowTemplates);
@@ -129,18 +133,6 @@ const envTest = {
       odc_enabled: 'true',
       mid_enabled: 'false',
       mid_something: 'test',
-      dd_enabled: 'true',
-      run_type: 'run'
-    },
-    vars: {
-      odc_enabled: 'true',
-      mid_enabled: 'false',
-      mid_something: 'test',
-      dd_enabled: 'true',
-      run_type: 'run'
-    },
-    defaults: {
-      dcs_topology: 'test',
       dd_enabled: 'true',
       run_type: 'run'
     },
