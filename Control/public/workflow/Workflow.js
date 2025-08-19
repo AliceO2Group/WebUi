@@ -263,7 +263,7 @@ export default class Workflow extends Observable {
         // Combine Readout URI if it was used
         this.model.environment.newEnvironment({
           workflowTemplate: path,
-          vars: variables,
+          userVars: variables,
           detectors: this.flpSelection.selectedDetectors
         });
       }

@@ -56,7 +56,7 @@ class DeploymentController {
     /**
      * @type {DeploymentRequest}
      */
-    const { workflowTemplate, selectedConfiguration, userVars } = req.body;
+    const { workflowTemplate, selectedConfiguration, userVars, detectors } = req.body;
 
     if (!workflowTemplate && !selectedConfiguration) {
       updateAndSendExpressResponseFromNativeError(
@@ -69,6 +69,14 @@ class DeploymentController {
     const { personid, name, username } = req.session || {};
     const user = new User(username, name, personid);
 
+    const logMessage = 'New deployment request by '
+      + `user ${user.username} with `
+      + `workflow template ${workflowTemplate} `
+      + `and detectors ${detectors}`;
+    this._logger.infoMessage(logMessage, {
+      level: LogLevel.OPERATIONS,
+    });
+
     try {
       const environment = await this._deploymentService.deployEnvironment({
         userVars,
@@ -79,6 +87,30 @@ class DeploymentController {
       res.status(201).json(environment);
     } catch (error) {
       this._logger.errorMessage(error, { level: LogLevel.SUPPORT });
+      updateAndSendExpressResponseFromNativeError(res, error);
+    }
+  }
+
+  /**
+   * API - DELETE endpoint for acknowledging an environment deployment failure
+   * @param {Request} req - HTTP Request object which expects an `id` as mandatory parameter
+   * @param {string} req.params.id - the id of the environment to be acknowledged
+   * @param {Response} res - HTTP Response object with result of the acknowledgement
+   * @returns {void}
+   */
+  async acknowledgeDeploymentFailureHandler(req, res) {
+    const { id } = req.params;
+    const { personid, name, username } = req.session || {};
+    const user = new User(username, name, personid);
+
+    if (!id) {
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));
+      return;
+    }
+    try {
+      this._deploymentService.acknowledgeEnvironmentDeploymentFailure(id, user);
+      res.status(204).json({ message: 'Environment deployment failure acknowledged' });
+    } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
