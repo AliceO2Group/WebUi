@@ -19,12 +19,10 @@ import stylistic from '@stylistic/eslint-plugin';
 import react from 'eslint-plugin-react';
 import tseslint from 'typescript-eslint';
 import customRules from './custom_eslint_rules/index.js';
+import mochaPlugin from 'eslint-plugin-mocha';
 
 export default tseslint.config(
-  jsdoc.configs['flat/recommended'],
   pluginJs.configs.recommended,
-  react.configs.flat.recommended,
-  tseslint.configs.recommendedTypeChecked,
   {
     languageOptions: {
       parserOptions: {
@@ -38,13 +36,19 @@ export default tseslint.config(
   },
   {
     files: ["**/*.ts", "**/*.tsx", "**/*.cts", "**.*.mts"],
-    ignores: ['config-default.js', 'config.js', 'jsconfig.json'],
     plugins: {
       jsdoc,
+      react,
       '@stylistic': stylistic,
       'custom-rules': customRules
     },
+    extends: [
+      jsdoc.configs['flat/recommended'],
+      react.configs.flat.recommended,
+      tseslint.configs.recommendedTypeChecked,
+    ],
     languageOptions: {
+      parser: tseslint.parser,
       parserOptions: {
         sourceType: 'module',
         ecmaFeatures: {
@@ -277,6 +281,28 @@ export default tseslint.config(
         'never',
       ],
       'no-magic-numbers': 'off', // TODO: enable
+    },
+  },
+  {
+    files: ['app/test/**/*.cjs', 'app/test/**/*.js'],
+    extends: [
+      pluginJs.configs.recommended,
+      mochaPlugin.configs.recommended,
+    ],
+    plugins: {
+      mocha: mochaPlugin,
+    },
+    languageOptions: {
+      sourceType: 'script', // For .cjs and plain .js files
+      ecmaVersion: 'latest',
+      globals: {
+        ...globals.node,
+        ...globals.mocha,
+        window: 'readonly'
+      },
+    },
+    rules: {
+      'mocha/no-setup-in-describe': 'off',
     },
   },
 );
