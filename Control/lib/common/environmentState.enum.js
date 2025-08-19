@@ -13,18 +13,18 @@
 */
 
 /**
- * Available environment transitions as per: 
- * @link https://github.com/AliceO2Group/Control/blob/master/core/protos/o2control.proto#L228
+ * Available environment transitions of ECS 
+ * @link https://github.com/AliceO2Group/Control/blob/master/core/environment/environment.go#L153-L160
  */
-const EnvironmentTransitionType = Object.freeze({
-  NOOP: 'NOOP',
-  START_ACTIVITY: 'START_ACTIVITY',
-  STOP_ACTIVITY: 'STOP_ACTIVITY',
-  CONFIGURE: 'CONFIGURE',
-  RESET: 'RESET',
-  GO_ERROR: 'GO_ERROR',
-  DEPLOY: 'DEPLOY',
-  DESTROY: 'DESTROY',
+const EnvironmentState = Object.freeze({
+  STANDBY: 'STANDBY',
+  DEPLOYED: 'DEPLOYED',
+  DONE: 'DONE',
+  CONFIGURED: 'CONFIGURED',
+  RUNNING: 'RUNNING',
+  PENDING: 'PENDING',
+  ERROR: 'ERROR',
+  UNKNOWN: 'UNKNOWN'
 });
 
-exports.EnvironmentTransitionType = EnvironmentTransitionType;
+exports.EnvironmentState = EnvironmentState;
