@@ -39,9 +39,9 @@ import {
   CalibrationRunsContent
 } from './pages/CalibrationRuns/CalibrationRuns.page.js';
 import {
-  content as environmentsContent,
-  header as environmentsHeader
-} from './environment/environmentsPage.js';
+  EnvironmentsPageHeader,
+  EnvironmentsPageContent,
+} from './pages/Environments/Environments.page.js';
 import {header as statusHeader} from './about/header.js';
 import {content as statusContent} from './about/content.js';
 import {
@@ -94,7 +94,7 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
     newEnvironmentAdvanced: workflowsHeader,
     newEnvironment: EnvironmentCreationHeader,
     calibrationRuns: CalibrationRunsHeader,
-    environments: environmentsHeader,
+    environments: EnvironmentsPageHeader,
     environment: EnvironmentPageHeader,
     about: statusHeader,
     configuration: configurationHeader,
@@ -125,7 +125,7 @@ const content = (model) => {
       newEnvironmentAdvanced: workflowsContent,
       newEnvironment: EnvironmentCreationPage,
       calibrationRuns: CalibrationRunsContent,
-      environments: environmentsContent,
+      environments: EnvironmentsPageContent,
       environment: EnvironmentPageContent,
       about: statusContent,
       configuration: configurationContent,

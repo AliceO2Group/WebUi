@@ -13,18 +13,14 @@
 */
 
 /**
- * Available environment transitions as per: 
- * @link https://github.com/AliceO2Group/Control/blob/master/core/protos/o2control.proto#L228
+ * Checks if a run is considered global as per the definition:
+ * * trg_enabled is true
+ * * trg_global_run_enabled is true
+ * @param {JSON} userVars - the user variables present in the environment
+ * @param {string} userVars.trg_enabled - indicates if the TRG is enabled
+ * @param {string} userVars.trg_global_run_enabled - indicates if the global run
+ * @returns {boolean}
  */
-const EnvironmentTransitionType = Object.freeze({
-  NOOP: 'NOOP',
-  START_ACTIVITY: 'START_ACTIVITY',
-  STOP_ACTIVITY: 'STOP_ACTIVITY',
-  CONFIGURE: 'CONFIGURE',
-  RESET: 'RESET',
-  GO_ERROR: 'GO_ERROR',
-  DEPLOY: 'DEPLOY',
-  DESTROY: 'DESTROY',
-});
-
-exports.EnvironmentTransitionType = EnvironmentTransitionType;
+export const isGlobalRun = ({trg_enabled, trg_global_run_enabled}) => {
+  return trg_enabled === 'true' && trg_global_run_enabled === 'true';
+}
