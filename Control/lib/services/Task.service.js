@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const {LogManager, LogLevel, grpcErrorToNativeError} = require('@aliceo2/web-ui');
+const {LogManager, grpcErrorToNativeError} = require('@aliceo2/web-ui');
 const { ShortTaskInfoAdapter } = require('../adapters/task/ShortTaskInfoAdapter');
 
 /**

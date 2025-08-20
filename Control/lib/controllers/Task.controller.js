@@ -11,7 +11,9 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-const {LogManager, LogLevel, InvalidInputError, updateAndSendExpressResponseFromNativeError} = require('@aliceo2/web-ui');
+const {
+  LogManager, LogLevel, InvalidInputError, updateAndSendExpressResponseFromNativeError
+} = require('@aliceo2/web-ui');
 
 /**
  * Controller for dealing with all API requests on tasks
