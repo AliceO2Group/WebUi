@@ -30,7 +30,7 @@ describe(`'TaskController' test suite`, () => {
     it('should successfully return all tasks with status 200', async () => {
       const tasks = [{ id: '1' }, { id: '2' }];
       const mockedTaskService = {
-        getTasks: sinon.stub().resolves(tasks)
+        getTaskList: sinon.stub().resolves(tasks)
       };
       const controller = new TaskController(mockedTaskService);
       await controller.getTaskListHandler({}, res);
@@ -41,7 +41,7 @@ describe(`'TaskController' test suite`, () => {
     it('should handle errors and call error response', async () => {
       const error = new Error('Failed');
       const mockedTaskService = {
-        getTasks: sinon.stub().rejects(error),
+        getTaskList: sinon.stub().rejects(error),
       };
       const controller = new TaskController(mockedTaskService);
       await controller.getTaskListHandler({}, res);
@@ -85,8 +85,8 @@ describe(`'TaskController' test suite`, () => {
   });
 
   describe('cleanUpTasksHandler', () => {
-    it('should return killedTasks and activeTasks with status 200', async () => {
-      const result = { killedTasks: [{ id: 'a' }], activeTasks: [{ id: 'b' }] };
+    it('should return killedTasks and runningTasks with status 200', async () => {
+      const result = { killedTasks: [{ id: 'a' }], runningTasks: [{ id: 'b' }] };
       const mockedTaskService = {
         cleanUpTasks: sinon.stub().resolves(result)
       };

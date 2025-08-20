@@ -76,7 +76,7 @@ describe(`'TaskService' test suite`, () => {
   describe('cleanUpTasks', () => {
     it('should return killedTasks and runningTasks when grpcClient resolves', async () => {
       const grpcClient = {
-        CleanUpTasks: sinon.stub().resolves({ killedTasks: [{ taskId: 't1' }], runningTasks: [{ taskId: 't2' }] })
+        CleanupTasks: sinon.stub().resolves({ killedTasks: [{ taskId: 't1' }], runningTasks: [{ taskId: 't2' }] })
       };
       const service = new TaskService(grpcClient);
       const result = await service.cleanUpTasks();
@@ -84,7 +84,7 @@ describe(`'TaskService' test suite`, () => {
         killedTasks: [{ taskId: 't1' }].map((task) => ShortTaskInfoAdapter.toEntity(task)),
         runningTasks: [{ taskId: 't2' }].map((task) => ShortTaskInfoAdapter.toEntity(task)),
       });
-      assert.ok(grpcClient.CleanUpTasks.calledOnce);
+      assert.ok(grpcClient.CleanupTasks.calledOnce);
     });
 
     it('should throw native error when grpcClient rejects', async () => {
@@ -93,7 +93,7 @@ describe(`'TaskService' test suite`, () => {
         details: 'not found'
       };
       const grpcClient = {
-        CleanUpTasks: sinon.stub().rejects(grpcError)
+        CleanupTasks: sinon.stub().rejects(grpcError)
       };
       const service = new TaskService(grpcClient);
       await assert.rejects(service.cleanUpTasks(), new NotFoundError('not found'));
