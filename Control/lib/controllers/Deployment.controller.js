@@ -62,7 +62,7 @@ class DeploymentController {
       updateAndSendExpressResponseFromNativeError(
         res,
         new InvalidInputError('Invalid input: workflowTemplate or selectedConfiguration must be provided')
-      )
+      );
       return;
     }
 
