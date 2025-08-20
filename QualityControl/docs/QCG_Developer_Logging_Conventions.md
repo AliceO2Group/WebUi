@@ -12,7 +12,9 @@ Logging in QCG should use the O2 Logging application from the `@aliceo2/web-ui` 
 
 Each QCG deployment (e.g., `qcg`, `qcg-mc`, `qcg-async`) should have its own log label. This allows logs to be easily attributed to the correct deployment and QCDB instance.
 The standard for the log_facility is: `<application_name>/<file>`
+The standard for the log_facility is: `<application_name>/<service>`
 
+> **Note:** The `<service>` portion should be a descriptive name for the service, module, or controller (e.g., `bkp-service`, `obj-controller`). This helps make logs more readable and traceable. Avoid using generic filenames; prefer meaningful service names as shown in the examples below.
 ### Setting the Log Facility
 
 The log facility string should be built using the `process.env.npm_config_log_label` environment variable. If not set, a sensible default (e.g., `qcg`) should be used.
