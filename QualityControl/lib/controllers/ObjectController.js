@@ -15,6 +15,8 @@
 import { InvalidInputError, NotFoundError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 import { LogManager } from '@aliceo2/web-ui';
 
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/obj-controller`;
+
 /**
  * Gateway for all QC Objects requests
  * @class
@@ -30,7 +32,7 @@ export class ObjectController {
      * @type {QCObjectService}
      */
     this._objService = objService;
-    this._logger = LogManager.getLogger('object/controller');
+    this._logger = LogManager.getLogger(LOG_FACILITY);
   }
 
   /**

@@ -13,7 +13,8 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
-const logger = LogManager.getLogger('filter/service');
+
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/filter-service`;
 
 /**
  * High level service that composes, processes and maps data from the bookkeeping service
@@ -26,6 +27,7 @@ export class FilterService {
   constructor(bookkeepingService) {
     this._bookkeepingService = bookkeepingService;
     this._runTypes = [];
+    this._logger = LogManager.getLogger(LOG_FACILITY);
     this.initFilters();
   }
 
@@ -54,7 +56,7 @@ export class FilterService {
       }
       this._runTypes.sort();
     } catch (error) {
-      logger.errorMessage(`Error while retrieving run types: ${error.message || error}`);
+      this._logger.errorMessage(`Error while retrieving run types: ${error.message || error}`);
       this._runTypes = [];
     }
   }

@@ -21,7 +21,7 @@ import QcObjectIdentificationDto from '../dtos/QcObjectIdentificationDto.js';
  * @typedef {import('../repositories/ChartRepository.js').ChartRepository} ChartRepository
  */
 
-const LOG_FACILITY = 'qcg/obj-service';
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/obj-service`;
 
 /**
  * High-level service class for retrieving and composing object information from storage (CCDB/QCDB)
