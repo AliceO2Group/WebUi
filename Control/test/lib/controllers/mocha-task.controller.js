@@ -45,7 +45,7 @@ describe(`'TaskController' test suite`, () => {
       };
       const controller = new TaskController(mockedTaskService);
       await controller.getTaskListHandler({}, res);
-      assert.ok(res.status.calledWith(500))
+      assert.ok(res.status.calledWith(500));
       assert.ok(res.json.calledWith({status: 500, title: 'Unknown Error', message: 'Failed'}));
     });
   });
