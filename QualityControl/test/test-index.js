@@ -56,7 +56,7 @@ import { objectControllerTestSuite } from './lib/controllers/ObjectController.te
  */
 import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
 import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
-import { bookkeepingServiceTestSuite } from './lib/services/BookeepingService.test.js';
+import { bookkeepingServiceTestSuite } from './lib/services/BookkeepingService.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
@@ -73,6 +73,15 @@ import { userControllerTestSuite } from './lib/controllers/UserController.test.j
 import { chartRepositoryTest } from './lib/repositories/ChartRepository.test.js';
 import { filterServiceTestSuite } from './lib/services/FilterService.test.js';
 import { apiGetLayoutsTests } from './api/layouts/api-get-layout.test.js';
+import { apiGetObjectsTests } from './api/objects/api-get-object.test.js';
+import { objectsGetValidationMiddlewareTest } from './lib/middlewares/objects/objectsGetValidation.middleware.test.js';
+import { objectGetContentsValidationMiddlewareTest }
+  from './lib/middlewares/objects/objectGetByContentsValidation.middleware.test.js';
+import { objectGetByIdValidationMiddlewareTest }
+  from './lib/middlewares/objects/objectGetByIdValidation.middleware.test.js';
+import { filterTests } from './public/features/filterTest.test.js';
+import { qcObjectServiceTestSuite } from './lib/services/QcObjectService.test.js';
+import { runModeServiceTestSuite } from './lib/services/RunModeService.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -156,6 +165,8 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       { timeout: ABOUT_VIEW_PAGE_TIMEOUT },
       async (testParent) => await aboutPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
+    test('should successfully import and run tests for filter', async (testParent) =>
+      filterTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent));
   });
 
   suite('API - test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
@@ -174,6 +185,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     suite('Layout GET request test suite', async () => apiGetLayoutsTests());
     suite('Layout PUT request test suite', async () => apiPutLayoutTests());
     suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
+    suite('Object GET request test suite', async () => apiGetObjectsTests());
   });
 
   suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
@@ -198,6 +210,8 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
       suite('JsonServiceTest test suite', async () => await jsonFileServiceTestSuite());
       suite('FilterService', async () => await filterServiceTestSuite());
+      suite('RunModeService - Test Suite', async () => await runModeServiceTestSuite());
+      suite('QcObjectService - Test Suite', async () => await qcObjectServiceTestSuite());
     });
 
     suite('Middleware - Test Suite', async () => {
@@ -206,6 +220,10 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('LayoutOwnerMiddleware test suite', async () => layoutOwnerMiddlewareTest());
       suite('StatusComponentMiddleware test suite', async () => statusComponentMiddlewareTest());
       suite('BookkeepingServiceTest test suite', async () => await bookkeepingServiceTestSuite());
+      suite('ObjectsGetValidationMiddleware test suite', async () => objectsGetValidationMiddlewareTest());
+      suite('ObjectGetContentsValidationMiddleware test suite', async () =>
+        objectGetContentsValidationMiddlewareTest());
+      suite('ObjectGetByIdValidationMiddleware test suite', async () => objectGetByIdValidationMiddlewareTest());
     });
 
     suite('Controllers - Test Suite', async () => {

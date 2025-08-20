@@ -38,7 +38,7 @@ RUN apk add --no-cache \
     freetype=2.13.2-r0 \
     freetype-dev=2.13.2-r0 \
     harfbuzz=8.5.0-r0 \
-    ca-certificates=20241121-r1
+    ca-certificates=20250619-r0 
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser

@@ -1,33 +1,13 @@
-# Demonstration project for react-based webapp
+## Configuration - Web Graphical User Interface for O<sup>2</sup> default parameters configuration
 
-## Directory structure
+Configuration is a **Web-based graphical user interface (GUI)** designed for [**O<sup>2</sup> Quality Control**](https://github.com/AliceO2Group/QualityControl). It provides an intuitive interface for managing and visualizing the default parameters of quality control data in the context of the O<sup>2</sup> project.
 
-The project is composed of:
+### Badges
 
-- ./webapp:
-    - Contains a SPA frontend based on react (using react-router as framework)
+![Actions Status](https://github.com/AliceO2Group/WebUi/workflows/Configuration/badge.svg) 
+![JIRA](https://img.shields.io/badge/JIRA-issues-blue.svg)
 
-- ./docker:
-    - Contains the necessaries files for docker setup, especially the configuration of nginx
-
-## Get started
-
-To start the development, simply launch the docker compose stack:
-
-```shell
-docker compose up
-```
-
-This will launch the following containers:
-
-- install-webapp
-    - Install the webapp dependencies then stops
-- webapp
-    - Runs the development server of the webapp once the `install-webapp` exited successfully
-- reverse-proxy
-    - Provides a single endpoint for the backend and development server
-
-## Deployment
-
-To deploy the application, run the command `npm run build` from the webapp directory. This will build the webapp sources
-as static files that can be served by any static file server.
+## Table of Contents
+- [Architecture](docs/Architecture.md)
+- [Development](docs/Development.md)
+- [Installation](docs/Installation.md)

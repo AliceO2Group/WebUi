@@ -93,7 +93,7 @@ export class EnvironmentCreationModel extends Observable {
     this._model.environment.newEnvironment({
       workflowTemplate: path,
       selectedConfiguration: this._selectedConfigurationLabel,
-      vars: this._creationModel.variables,
+      userVars: this._creationModel.variables,
       detectors: this._model.workflow.flpSelection.selectedDetectors
     });
   }
@@ -197,7 +197,7 @@ export class EnvironmentCreationModel extends Observable {
   }
 
   /**
-   * Check if all selected detectors are PFR ready. 
+   * Check if all selected detectors are PFR ready.
    * @return {Boolean}
    */
   isPfrAvailable() {
