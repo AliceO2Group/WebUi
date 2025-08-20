@@ -21,7 +21,7 @@ import QcObjectIdentificationDto from '../dtos/QcObjectIdentificationDto.js';
  * @typedef {import('../repositories/ChartRepository.js').ChartRepository} ChartRepository
  */
 
-const LOG_FACILITY = 'qcg/obj-service';
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/obj-service`;
 
 /**
  * High-level service class for retrieving and composing object information from storage (CCDB/QCDB)
@@ -90,7 +90,6 @@ export class QcObjectService {
    * * make a new request and get data directly from data service
    * * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
    * @param {string|Regex} prefix - Prefix for which CCDB should search for objects.
-   * @param {Array<string>} [fields = []] - List of fields that should be requested for each object
    * @param {boolean} [useCache = true] - if the list should be the cached version or not
    * @returns {Promise.<Array<QcObjectLeaf>>} - results of objects with required fields
    * @rejects {Error}

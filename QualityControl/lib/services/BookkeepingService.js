@@ -15,9 +15,9 @@
 import { httpGetJson } from '../utils/httpRequests.js';
 import { LogManager } from '@aliceo2/web-ui';
 
-const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'bkp-service'}`);
 const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/bkp-service`;
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
@@ -33,6 +33,8 @@ export class BookkeepingService {
     this._token = '';
     this._protocol = '';
     this._refreshInterval = config?.refreshRate ?? 24 * 60 * 60 * 1000;
+
+    this._logger = LogManager.getLogger(LOG_FACILITY);
   }
 
   /**
@@ -68,12 +70,12 @@ export class BookkeepingService {
    */
   async connect() {
     if (!this.validateConfig()) {
-      logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
+      this._logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
       return;
     }
     this.active = await this.simulateConnection();
     if (!this.active) {
-      logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
+      this._logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
     }
   }
 
@@ -93,7 +95,7 @@ export class BookkeepingService {
         },
       );
       if (data && data?.status?.ok && data?.status?.configured) {
-        logger.infoMessage('Successfully connected to Bookkeeping');
+        this._logger.infoMessage('Successfully connected to Bookkeeping');
         return true;
       } else {
         this.error = 'Bookkeeping service is not configured or status is not OK';
