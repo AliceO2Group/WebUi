@@ -16,6 +16,7 @@ import assert from 'assert';
 import { LogLevel, LogManager } from '@aliceo2/web-ui';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/user-controller`;
+
 /**
  * @typedef {import('../repositories/UserRepository.js').UserRepository} UserRepository
  */
