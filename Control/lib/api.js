@@ -217,7 +217,12 @@ module.exports.setup = (http, ws) => {
    */
   http.get('/tasks/:id', coreMiddleware, taskController.getTaskHandler.bind(taskController));
   http.get('/tasks', coreMiddleware, taskController.getTaskListHandler.bind(taskController));
-  http.delete('/tasks', coreMiddleware, taskController.cleanUpTasksHandler.bind(taskController));
+  http.delete('/tasks',
+    coreMiddleware,
+    minimumRoleMiddleware(Role.ADMIN),
+    verifyLockOwnershipMiddleware,
+    taskController.cleanUpTasksHandler.bind(taskController)
+  );
 
   apricotProxy.methods.forEach(
     (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res)),

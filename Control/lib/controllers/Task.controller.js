@@ -41,7 +41,7 @@ class TaskController {
   async getTaskListHandler(_, res) {
     let tasks;
     try {
-      tasks = await this._taskService.getTasks();
+      tasks = await this._taskService.getTaskList();
       res.status(200).json(tasks);
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);
@@ -79,8 +79,8 @@ class TaskController {
       const { session: { username } = {}} = req.session;
       this._logger.infoMessage(`CleanUpTasks request from ${username}`, {level: LogLevel.OPERATIONS});
 
-      const { killedTasks, activeTasks } = await this._taskService.cleanUpTasks();
-      res.status(200).json({killedTasks, activeTasks});
+      const { killedTasks, runningTasks } = await this._taskService.cleanUpTasks();
+      res.status(200).json({killedTasks, runningTasks});
     } catch (error) {
       this._logger.errorMessage(error, {level: LogLevel.OPERATIONS});
       updateAndSendExpressResponseFromNativeError(res, error);

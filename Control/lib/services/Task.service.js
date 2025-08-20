@@ -70,14 +70,15 @@ class TaskService {
    * @return {Promise<{killedTasks: Array<ShortTaskInfo>, runningTasks: Array<ShortTaskInfo>}>}
    */
   async cleanUpTasks() {
+    let killedTasks, runningTasks;
     try {
-      const { killedTasks, runningTasks } = await this._grpcClient.CleanUpTasks();
-      const killedTasksAdapted = killedTasks.map((task) => ShortTaskInfoAdapter.toEntity(task));
-      const runningTasksAdapted = runningTasks.map((task) => ShortTaskInfoAdapter.toEntity(task));
-      return { killedTasks: killedTasksAdapted, runningTasks: runningTasksAdapted };
+      ({ killedTasks, runningTasks } = await this._grpcClient.CleanupTasks());
     } catch (grpcError) {
       throw grpcErrorToNativeError(grpcError);
     }
+    const killedTasksAdapted = killedTasks.map((task) => ShortTaskInfoAdapter.toEntity(task));
+    const runningTasksAdapted = runningTasks.map((task) => ShortTaskInfoAdapter.toEntity(task));
+    return { killedTasks: killedTasksAdapted, runningTasks: runningTasksAdapted };
   }
 }
 
