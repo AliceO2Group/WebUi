@@ -260,11 +260,11 @@ module.exports.setup = (http, ws) => {
   // Configuration
   http.get(
     '/configurations', validateConsulServiceMiddleware,
-    qcConfigurationController.getConfigurationsKeys.bind(qcConfigurationController)
+    qcConfigurationController.getConfigurationsKeysHandler.bind(qcConfigurationController)
   );
   http.get(
     '/configurations/:key(*)', validateConsulServiceMiddleware, 
-    qcConfigurationController.getConfigurationByKey.bind(qcConfigurationController)
+    qcConfigurationController.getConfigurationByKeyHandler.bind(qcConfigurationController)
   );
 
   // Consul
@@ -328,16 +328,16 @@ function initializeIntervals(intervalsService, statusService, runService, bkpSer
  * @param {ConsulService} consulService - service for communicating with Consul
  */
 async function initializeData(apricotService, lockService, consulService) {
+  testConsulStatus(consulService);
   await apricotService.init();
   lockService.setLockStatesForDetectors(apricotService.detectors);
-  await testConsulStatus(consulService);
 }
 
 /**
  * Method to check if consul service can be used
  * @param {ConsulService} consulService
  */
-async function testConsulStatus(consulService) {
+function testConsulStatus(consulService) {
   consulService
     .getConsulLeaderStatus()
     .then((data) => logger.info(`Service is up and running on: ${data}`))

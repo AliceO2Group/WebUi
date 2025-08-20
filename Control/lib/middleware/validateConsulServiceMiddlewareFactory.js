@@ -11,6 +11,8 @@
  *  or submit itself to any jurisdiction.
  */
 
+const { updateAndSendExpressResponseFromNativeError, ServiceUnavailableError } = require("@aliceo2/web-ui");
+
 /**
  * Factory function to check if consul service is available
  *
@@ -29,7 +31,7 @@ const validateConsulServiceMiddlewareFactory = (consulService) => {
     if (consulService) {
       next();
     } else {
-      res.status(502).json({ message: "Unable to retrieve configuration of consul service" });
+      updateAndSendExpressResponseFromNativeError(res, new ServiceUnavailableError("Consul service is not available"));
     }
   };
 };

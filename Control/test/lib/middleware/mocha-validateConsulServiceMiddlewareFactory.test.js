@@ -44,14 +44,14 @@ describe('`validateConsulServiceMiddlewareFactory` test suite', () => {
     assert.ok(resMock.json.notCalled);
   });
 
-  it('should return 502 if there consulService is not available', async () => {
+  it('should return 503 if there consulService is not available', async () => {
     consulService = null;
     await validateConsulServiceMiddlewareFactory(consulService)(reqMock, resMock, nextMock);
 
-    assert.ok(resMock.status.calledOnceWith(502));
-    assert.ok(resMock.json.calledOnceWith({
-      message: 'Unable to retrieve configuration of consul service',
-    }));
+    assert.ok(resMock.status.calledOnceWith(503));
+    assert.ok(resMock.json.calledOnceWith(
+      sinon.match({ message: "Consul service is not available" })
+    ));
     assert.ok(nextMock.notCalled);
   });
 });

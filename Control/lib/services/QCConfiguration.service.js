@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-const { NotFoundError, LogManager } = require("@aliceo2/web-ui");
+const { LogManager } = require("@aliceo2/web-ui");
 
 /**
  * @class
@@ -38,15 +38,8 @@ class QCConfigurationService {
    * @param {String} prefix - prefix to filter the keys
    * @param {boolean} [recurse=false] - whether to recurse into subdirectories
    */
-  async getKeysOfValidConfigurations(prefix, recurse = false) {
-    let data;
-
-    try {
-      data = await this._consulService.getOnlyRawValuesByKeyPrefix(prefix);
-    } catch (e) {
-      return [];
-    }
-
+  async retrieveKeysOfValidConfigurations(prefix, recurse = false) {
+    const data = await this._consulService.getOnlyRawValuesByKeyPrefix(prefix);
     return this.filterConfigurations(data, recurse, prefix);
   }
 
@@ -54,13 +47,8 @@ class QCConfigurationService {
    * Get configuration by key from Consul
    * @param {string} key - the key of the configuration
    */
-  async getConfigurationByKey(key) {
-    try{
-      return await this._consulService.getOnlyRawValueByKey(key);
-    }catch (error) {
-      this._logger.error(`Error getting configuration by key: ${key}`, error);
-      throw new NotFoundError(`Configuration not found for key: ${key}`);
-    }
+  async retrieveConfigurationByKey(key) {
+    return await this._consulService.getOnlyRawValueByKey(key);
   }
 
 

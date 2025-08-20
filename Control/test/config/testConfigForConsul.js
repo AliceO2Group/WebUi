@@ -27,6 +27,7 @@ const initializeNockForConsul = () => {
     .get('/v1/status/leader')
     .reply(200, 'http://localhost:8550');
 
+  // /configurations
   nock(CONSUL_URL)
     .persist()
     .get(`${KV_PATH}${config.consul.qcPath}/ANY/any?recurse=true`)
@@ -40,11 +41,46 @@ const initializeNockForConsul = () => {
         ModifyIndex: 1
       }
     ]))
+
+  nock(CONSUL_URL)
+    .persist()
+    .get(`${KV_PATH}${config.consul.qcPath}/ANY/any/empty-prefix?recurse=true`)
+    .reply(200, JSON.stringify([
+      {
+        LockIndex: 0,
+        Key: "empty-prefix",
+        Flags: 0,
+        Value: null,
+        CreateIndex: 1,
+        ModifyIndex: 1
+      }
+    ]))
+
+  nock(CONSUL_URL)
+    .persist()
+    .get(`${KV_PATH}${config.consul.qcPath}/ANY/any/nonexistent-prefix?recurse=true`)
+    .reply(404)
+
+  nock(CONSUL_URL)
+    .persist()
+    .get(`${KV_PATH}${config.consul.qcPath}/ANY/any/server-error-prefix?recurse=true`)
+    .reply(503)
   
+  // /configurations/:key(*)
   nock(CONSUL_URL)
     .persist()
     .get(`${KV_PATH}key1?raw=true`)
     .reply(200, JSON.stringify({key: "value"}))
+  
+  nock(CONSUL_URL)
+    .persist()
+    .get(`${KV_PATH}nonexistent?raw=true`)
+    .reply(404)
+  
+  nock(CONSUL_URL)
+    .persist()
+    .get(`${KV_PATH}consul-failure?raw=true`)
+    .reply(503)
 }
 
 module.exports = {
