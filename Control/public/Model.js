@@ -178,9 +178,6 @@ export default class Model extends Observable {
         }
         break;
       }
-      case BroadcastKeys.RESOURCES_CLEANUP:
-        this.task.setResourcesRequest(message.payload);
-        break;
       case BroadcastKeys.O2_ROC_CONFIG:
         this.configuration.setConfigurationRequest(message.payload);
         break;
