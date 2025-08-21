@@ -257,12 +257,10 @@ export default class Workflow extends Observable {
         this.model.environment.itemNew =
           RemoteData.failure('Please select repository, revision and workflow in order to create an environment');
       } else {
-        let path = '';
-        path = this.parseRepository(this.form.repository) + `/workflows/${this.form.template}@${this.form.revision}`;
-
-        // Combine Readout URI if it was used
         this.model.environment.newEnvironment({
-          workflowTemplate: path,
+          repository: this.parseRepository(this.form.repository),
+          revision: this.form.revision,
+          template: this.form.template,
           userVars: variables,
           detectors: this.flpSelection.selectedDetectors
         });
