@@ -39,6 +39,7 @@ const {EnvironmentController} = require('./controllers/Environment.controller.js
 const {LockController} = require('./controllers/Lock.controller.js');
 const {RunController} = require('./controllers/Run.controller.js');
 const {StatusController} = require('./controllers/Status.controller.js');
+const {TaskController} = require('./controllers/Task.controller.js');
 const {WebSocketService} = require('./services/WebSocket.service.js');
 const {WorkflowTemplateController} = require('./controllers/WorkflowTemplate.controller.js');
 
@@ -54,6 +55,7 @@ const {Intervals} = require('./services/Intervals.service.js');
 const {LockService} = require('./services/Lock.service.js');
 const {RunService} = require('./services/Run.service.js');
 const {StatusService} = require('./services/Status.service.js');
+const {TaskService} = require('./services/Task.service.js');
 const {WorkflowTemplateService} = require('./services/WorkflowTemplate.service.js');
 
 // web-ui services
@@ -115,6 +117,7 @@ module.exports.setup = (http, ws) => {
   );
   const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
   const deploymentService = new DeploymentService(environmentService, workflowService, environmentCacheService);
+  const taskService = new TaskService(ctrlProxy);
 
   /**
    * Controllers are initialized with the services they depend on.
@@ -122,6 +125,7 @@ module.exports.setup = (http, ws) => {
   const envCtrl = new EnvironmentController(environmentService, workflowService, lockService, detectorService);
   const workflowController = new WorkflowTemplateController(workflowService);
   const deploymentController = new DeploymentController(deploymentService);
+  const taskController = new TaskController(taskService);
 
   const bkpService = new BookkeepingService(config.bookkeeping ?? {});
   const runService = new RunService(bkpService, apricotService, cacheService);
@@ -207,6 +211,25 @@ module.exports.setup = (http, ws) => {
 
   http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));
   http.post('/core/environments/configuration/update', (req, res) => apricotService.updateCoreEnvConfig(req, res));
+
+  /**
+   * Tasks Routes
+   */
+  http.get('/tasks/:id',
+    coreMiddleware,
+    minimumRoleMiddleware(Role.DETECTOR),
+    taskController.getTaskHandler.bind(taskController)
+  );
+  http.get('/tasks',
+    coreMiddleware,
+    minimumRoleMiddleware(Role.DETECTOR),
+    taskController.getTaskListHandler.bind(taskController));
+  http.delete('/tasks',
+    coreMiddleware,
+    minimumRoleMiddleware(Role.ADMIN),
+    verifyLockOwnershipMiddleware,
+    taskController.cleanUpTasksHandler.bind(taskController)
+  );
 
   apricotProxy.methods.forEach(
     (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res)),

@@ -17,6 +17,8 @@
 import {Observable, RemoteData} from '/js/src/index.js';
 import { getTasksByFlp } from './../common/utils.js';
 import { TaskTableModel } from './../common/task/TaskTableModel.js';
+import { jsonDelete } from '../utilities/jsonDelete.js';
+import { jsonGet } from '../utilities/jsonGet.js';
 
 /**
  * Model representing Tasks
@@ -72,21 +74,23 @@ export default class Task extends Observable {
    * In global view close all detector panels while in single view open that respective panel
    */
   async initTasks() {
-    const {result, ok} = await this.model.loader.post('/api/GetTasks');
-    if (!ok) {
-      this.detectorPanels = RemoteData.failure(result.message);
-    } else if (this.detectorPanels.isSuccess()) {
-      const detectorsMap = this.detectorPanels.payload;
-      const tasksByFlpMap = getTasksByFlp(result.tasks);
-      Object.keys(detectorsMap).forEach((detector) => {
-        const detectorJSON = detectorsMap[detector];
-        if (detectorJSON.list.isSuccess()) {
-          Object.keys(detectorJSON.list.payload).forEach((host) => {
-            detectorJSON.list.payload[host] = tasksByFlpMap[host]
-          });
-        }
-      });
-      this.detectorPanels = RemoteData.success(detectorsMap)
+    try {
+      const taskList = await jsonGet('/api/tasks');
+      if (this.detectorPanels.isSuccess()) {
+        const detectorsMap = this.detectorPanels.payload;
+        const tasksByFlpMap = getTasksByFlp(taskList);
+        Object.keys(detectorsMap).forEach((detector) => {
+          const detectorJSON = detectorsMap[detector];
+          if (detectorJSON.list.isSuccess()) {
+            Object.keys(detectorJSON.list.payload).forEach((host) => {
+              detectorJSON.list.payload[host] = tasksByFlpMap[host]
+            });
+          }
+        });
+        this.detectorPanels = RemoteData.success(detectorsMap);
+      }
+    } catch (error) {
+      this.detectorPanels = RemoteData.failure(error.message);
     }
     this.notify();
   }
@@ -98,15 +102,16 @@ export default class Task extends Observable {
     this.cleanUpTasksRequest = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post('/api/CleanupTasks');
-    if (!ok) {
-      this.cleanUpTasksRequest = RemoteData.failure(result.message);
-      this.model.notification.show(`Unable to clean up tasks: ${result.message}`, 'danger', 2000);
-    } else {
+    try {
+      const detectors = Object.keys(this.detectorPanels.payload) ?? [];
+      const { killedTasks } = await jsonDelete('/api/tasks', { body: { detectors } });
       this.cleanUpTasksRequest = RemoteData.success();
-      this.model.notification.show(`Tasks have been cleaned`, 'success');
+      this.model.notification.show(`A total of: ${killedTasks?.length ?? 0} tasks have been cleaned`, 'success');
       this.model.router.go('?page=taskList');
-    }
+    } catch (error) {
+      this.cleanUpTasksRequest = RemoteData.failure(error.message);
+      this.model.notification.show(`Unable to clean up tasks: ${error.message}`, 'danger', 4000);
+    } 
     this.notify();
   }
 
