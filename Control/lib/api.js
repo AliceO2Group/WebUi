@@ -103,8 +103,7 @@ module.exports.setup = (http, ws) => {
   consulController.testConsulStatus();
 
   const ctrlProxy = new GrpcServiceClient(config.grpc, O2_CONTROL_PROTO_PATH);
-  const ctrlService = new ControlService(ctrlProxy, consulController, config.grpc, O2_CONTROL_PROTO_PATH);
-  ctrlService.setWS(ws);
+  const ctrlService = new ControlService(ctrlProxy);
   const apricotProxy = new GrpcServiceClient(config.apricot, O2_APRICOT_PROTO_PATH);
   const apricotService = new ApricotService(apricotProxy);
 
@@ -124,7 +123,7 @@ module.exports.setup = (http, ws) => {
    */
   const envCtrl = new EnvironmentController(environmentService, workflowService, lockService, detectorService);
   const workflowController = new WorkflowTemplateController(workflowService);
-  const deploymentController = new DeploymentController(deploymentService);
+  const deploymentController = new DeploymentController(deploymentService, workflowService);
   const taskController = new TaskController(taskService);
 
   const bkpService = new BookkeepingService(config.bookkeeping ?? {});
@@ -237,7 +236,6 @@ module.exports.setup = (http, ws) => {
   http.get('/core/detectors', (req, res) => apricotService.getDetectorList(req, res));
   http.get('/core/hostsByDetectors', (req, res) => apricotService.getHostsByDetectorList(req, res));
 
-  http.post('/execute/resources-cleanup', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
   http.post('/execute/o2-roc-config', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
 
   // Lock Service
