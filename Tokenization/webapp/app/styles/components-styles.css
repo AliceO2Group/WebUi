@@ -10,10 +10,5 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-
-.container {
-    display: grid;
-    grid-template-rows: 1fr 3fr 1.3fr;
-    grid-template-columns: 0.575fr 3fr; 
-}
+ */
+ 

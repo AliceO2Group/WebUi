@@ -10,7 +10,8 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
+import type { Route } from './+types/root';
 
 import {
   isRouteErrorResponse,
@@ -21,12 +22,13 @@ import {
   ScrollRestoration, useNavigation,
 } from 'react-router';
 
-import {useState} from 'react';
-import type { Route } from './+types/root';
+import { Spinner } from '~/ui/spinner';
+import AppLayout from '~/ui/layout';
+
+import '@aliceo2/web-ui/Frontend/css/src/bootstrap.css';
 import './app.css';
-import '@aliceo2/web-ui/Frontend/css/src/bootstrap.css'
-import {Spinner} from '~/ui/spinner';
-import AppLayout from '~/ui/layout'
+import './styles/components-styles.css'
+import './styles/ui-styles.css'
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { state } = useNavigation();
@@ -41,7 +43,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <AppLayout state={state}>
-          {children}  
+          {children}
         </AppLayout>
         <ScrollRestoration />
         <Scripts />
@@ -55,7 +57,7 @@ export default function App() {
 }
 
 export function HydrateFallback() {
-  return <Spinner />
+  return <Spinner />;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

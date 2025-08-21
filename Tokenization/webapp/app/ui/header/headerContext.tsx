@@ -10,13 +10,9 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-
-
-
+ */
 
 import { createContext, useContext } from 'react';
-
 
 /**
  * HeaderContext
@@ -24,16 +20,18 @@ import { createContext, useContext } from 'react';
  * React context providing the setHeaderContent function for updating the header content
  * from any component within the provider tree.
  */
-export const HeaderContext = createContext({ 
-    setHeaderContent: (_: string) => {} 
+export const HeaderContext = createContext({
+  /**
+   * Updates headers content
+   */
+  setHeaderContent: (_: string) => {},
 });
 
 /**
- * useSetHeader
+ * UseSetHeader
  *
  * Custom React hook to access the HeaderContext.
  * Allows components to call setHeaderContent to update the header text.
- *
- * @returns The context value containing setHeaderContent.
+ * @return The context value containing setHeaderContent.
  */
 export const useSetHeader = () => useContext(HeaderContext);

@@ -10,30 +10,36 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import type { Log } from '~/components/logs/log';
 
 interface TokenLogsProps {
-    logs: Log[];
+  logs: Log[];
 }
 
-export const TokenLogs = ({logs}: TokenLogsProps) => {
-    if (logs.length === 0) {
-        return <p><em>No logs linked to this token</em></p>
-    }
-    return <table className={'table'}>
-        <thead>
-        <tr>
-            <th>Title</th>
-            <th>Content</th>
-        </tr>
-        </thead>
-        <tbody>
-        {logs.map(({id, title, content}) => <tr key={id}>
-            <td>{title}</td>
-            <td>{content}</td>
-        </tr>)}
-        </tbody>
-    </table>
-}
+/**
+ * Displays log entries associated with a token in a table format.
+ * Shows a "no logs" message when the logs array is empty.
+ *
+ * @param logs - Array of log entries to display
+ */
+export const TokenLogs = ({ logs }: TokenLogsProps) => {
+  if (logs.length === 0) {
+    return <p><em>No logs linked to this token</em></p>;
+  }
+  return <table className={'table'}>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Content</th>
+      </tr>
+    </thead>
+    <tbody>
+      {logs.map(({ id, title, content }) => <tr key={id}>
+        <td>{title}</td>
+        <td>{content}</td>
+      </tr>)}
+    </tbody>
+  </table>;
+};
