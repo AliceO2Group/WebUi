@@ -15,15 +15,16 @@
 /* global COG */
 
 import {Observable, RemoteData} from '/js/src/index.js';
-import { getTasksByFlp } from './../common/utils.js';
-import { TaskTableModel } from './../common/task/TaskTableModel.js';
+import { getTasksByFlp } from '../common/utils.js';
+import { TaskTableModel } from '../common/task/TaskTableModel.js';
 import { jsonDelete } from '../utilities/jsonDelete.js';
 import { jsonGet } from '../utilities/jsonGet.js';
+import { jsonPost } from '../utilities/jsonPost.js';
 
 /**
  * Model representing Tasks
  */
-export default class Task extends Observable {
+export default class TaskPageModel extends Observable {
   /** 
    * Initialize remoteData items to NotAsked
    * @param {Object} model
@@ -35,7 +36,6 @@ export default class Task extends Observable {
 
     this.cleanUpTasksRequest = RemoteData.notAsked();
     this.cleanUpResourcesRequest = RemoteData.notAsked();
-    this.cleanUpResourcesID = 0;
 
     this.detectorPanels = RemoteData.notAsked(); // JSON containing information on detectors panels; isOpened, list of hosts
 
@@ -122,13 +122,13 @@ export default class Task extends Observable {
     this.cleanUpResourcesRequest = RemoteData.loading();
     this.notify();
 
-    this.cleanUpResourcesID = (Math.floor(Math.random() * (999999 - 100000) + 100000)).toString();
-    const {result, ok} = await this.model.loader
-      .post(`/api/execute/resources-cleanup`, {channelId: this.cleanUpResourcesID, operation: 'resources-cleanup'});
-    if (!ok) {
-      this.cleanUpResourcesRequest = RemoteData.failure(result.message);
-    } else {
+    try {
+      const detectors = Object.keys(this.model.detectors.hostsByDetectorRemote.payload);
+      const hosts = Object.values(this.model.detectors.hostsByDetectorRemote.payload).flat();
+      const result = await jsonPost(`/api/deploy`, { body: { template: 'resources-cleanup', detectors, userVars: { hosts: JSON.stringify(hosts) } } });
       this.cleanUpResourcesRequest = RemoteData.success(result);
+    } catch (error) {
+      this.cleanUpResourcesRequest = RemoteData.failure(error.message);
     }
     this.notify();
   }
@@ -136,6 +136,7 @@ export default class Task extends Observable {
   /**
    * Initialize page and request data
    * Adds an automatic refresh of the content if another request is not ongoing already
+   * * TODO: Remote Task Interval and rely on kafka [OGUI-1151]
    */
   async getTasks() {
     this.initTaskPage();
@@ -144,23 +145,6 @@ export default class Task extends Observable {
         await this.initTasks();
       }
     }, COG.REFRESH_TASK);
-  }
-
-  /**
-   * Method to update the message with regards to the `CleanResources` command
-   * If message id will match the user's it will be displayed
-   * @param {WebSocketMessagePayload} req 
-   */
-  setResourcesRequest(message) {
-    const messageId = message.id || '';
-    if (this.cleanUpResourcesID.toString() === messageId.toString()) {
-      if (message.success) {
-        this.cleanUpResourcesRequest = RemoteData.success(message);
-      } else {
-        this.cleanUpResourcesRequest = RemoteData.success(message);
-      }
-      this.notify();
-    }
   }
 
   /**

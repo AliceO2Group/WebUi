@@ -36,7 +36,7 @@ export const content = (model) => [
   detectorHeader(model),
   h('.text-center.scroll-y.absolute-fill', {style: 'top: 40px'}, [
     infoPanel(model),
-    getListOfTasks(model, model.task)
+    getListOfTasks(model, model.taskPageModel)
   ])
 ];
 
@@ -47,7 +47,7 @@ export const content = (model) => [
  * @return {vnode}
  */
 const infoPanel = (model) =>
-  model.task.cleanUpResourcesRequest.match({
+  model.taskPageModel.cleanUpResourcesRequest.match({
     NotAsked: () => null,
     Loading: () => h('.m2.f6.p2.shadow-level1.text-left.flex-row', [
       h('.p2.text-center', pageLoading(1.5)),
@@ -90,12 +90,13 @@ const getListOfTasks = (model, task) =>
  * @returns {vnode}
  */
 const showContent = (model, items) => {
-  const isAdmin =  model.detectors.selected === 'GLOBAL' && isUserAllowedRole(ROLES.Admin, true);
+  const isAdmin = model.detectors.selected === 'GLOBAL' && isUserAllowedRole(ROLES.Admin, true);
+  const isDetectorAndHostListLoaded = model.detectors.hostsByDetectorRemote.isSuccess();
   return h('.text-left.ph2', [
     h('.w-100.flex-row.pv2.items-center', [
       isAdmin && h('.w-100.flex-row.flex-end.pv2.g2', [
-        cleanResourcesButton(model.task),
-        cleanTasksButton(model.task)
+        cleanResourcesButton(model.taskPageModel, isDetectorAndHostListLoaded),
+        cleanTasksButton(model.taskPageModel)
       ]),
     ]),
     h('.w-100', detectorPanels(model, items))
@@ -131,12 +132,12 @@ const detectorPanels = (model, detectors) => [
  * @param {JSON} tasks 
  */
 const toggleDetectorPanel = (model, taskPanel) =>
-  !model.task.areTasksInDetector(taskPanel.list.payload) ?
+  !model.taskPageModel.areTasksInDetector(taskPanel.list.payload) ?
     h('label', 'No tasks')
     : h('button.btn', {
       onclick: () => {
         taskPanel.isOpened = !taskPanel.isOpened;
-        model.task.notify();
+        model.taskPageModel.notify();
       }
     }, taskPanel.isOpened ? iconChevronTop() : iconChevronBottom());
 
@@ -174,11 +175,11 @@ const cleanTasksButton = (task) =>
 /**
 * Prepares cleanup resources button in top right corner
 */
-const cleanResourcesButton = (task) =>
+const cleanResourcesButton = (task, isDetectorAndHostListLoaded) =>
   h('.flex-column.dropdown#flp_selection_info_icon', {style: 'display: flex'}, [
     h(`button.btn.btn-warning`, {
       class: task.cleanUpTasksRequest.isLoading() ? 'loading' : '',
-      disabled: task.cleanUpTasksRequest.isLoading(),
+      disabled: task.cleanUpTasksRequest.isLoading() || !isDetectorAndHostListLoaded,
       onclick: () => task.cleanUpResources(),
     }, 'Clean resources'),
     h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 500px'}, [
