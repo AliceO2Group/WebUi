@@ -79,7 +79,13 @@ class DeploymentController {
 
     if (!repository || !revision) {
       try {
-        ({ repository, revision } = await this._workflowService.getDefaultTemplateSource());
+        const defaults = await this._workflowService.getDefaultTemplateSource();
+        if (!repository) {
+          repository = defaults.repository;
+        }
+        if (!revision) {
+          revision = defaults.revision;
+        }
       } catch (error) {
         updateAndSendExpressResponseFromNativeError(res, error);
         return;
