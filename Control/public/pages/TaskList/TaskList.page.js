@@ -21,32 +21,32 @@ import {ROLES} from '../../workflow/constants.js';
 import {isUserAllowedRole} from '../../common/userRole.js';
 import {tasksPerHostPanel} from '../../common/task/tasksPerHostPanel.js';
 import { HardwareComponent } from '../../common/enums/HardwareComponent.js';
-
+import { cleanupResourcesButton } from './components/cleanupResourcesButton.js';
+import { cleanupTasksButton } from './components/cleanupTasksButton.js';
 /**
- * @file Content of the Task Page that displays list of tasks grouped by their host and detector
+ * @file Content of the TaskList Page that displays list of tasks grouped by their host and detector and allows 
+ * cleaning operations via ECS deployments or gRPC requests
  */
 
 /**
- * Header
- * @param {Object} model
+ * Header of the page with its title
  * @return {vnode}
  */
-export const TaskListHeader = (model) => [
+export const TaskListHeader = () => [
   h('.w-100.text-center', [
     h('h4', 'Task list')
   ]),
 ];
 
 /**
- * Content
- * Show loading or error on other cases
+ * Content of the page with main components
  * @param {Object} model
  * @return {vnode}
  */
 export const TaskListContent = (model) => [
   detectorHeader(model),
   h('.text-center.scroll-y.absolute-fill', {style: 'top: 40px'}, [
-    infoPanel(model),
+    infoPanel(model.taskPageModel),
     getListOfTasks(model, model.taskPageModel)
   ])
 ];
@@ -54,11 +54,11 @@ export const TaskListContent = (model) => [
 /**
  * Panel in which response messages from stream operations such as
  * `clean resources` will be displayed
- * @param {Object} model
+ * @param {TaskPageModel} taskPageModel
  * @return {vnode}
  */
-const infoPanel = (model) =>
-  model.taskPageModel.cleanUpResourcesRequest.match({
+const infoPanel = (taskPageModel) =>
+  taskPageModel.cleanUpResourcesRequest.match({
     NotAsked: () => null,
     Loading: () => h('.m2.f6.p2.shadow-level1.text-left.flex-row', [
       h('.p2.text-center', pageLoading(1.5)),
@@ -103,11 +103,13 @@ const getListOfTasks = (model, task) =>
 const showContent = (model, items) => {
   const isAdmin = model.detectors.selected === 'GLOBAL' && isUserAllowedRole(ROLES.Admin, true);
   const isDetectorAndHostListLoaded = model.detectors.hostsByDetectorRemote.isSuccess();
+  const cleanResourcesCallback = () => model.taskPageModel.cleanUpResources();
+  const cleanupTasksCallback = () => model.taskPageModel.cleanUpTasks();
   return h('.text-left.ph2', [
     h('.w-100.flex-row.pv2.items-center', [
       isAdmin && h('.w-100.flex-row.flex-end.pv2.g2', [
-        cleanResourcesButton(model.taskPageModel, isDetectorAndHostListLoaded),
-        cleanTasksButton(model.taskPageModel)
+        cleanupResourcesButton(model.taskPageModel.cleanUpTasksRequest, isDetectorAndHostListLoaded, cleanResourcesCallback),
+        cleanupTasksButton(model.taskPageModel.cleanUpTasksRequest, cleanupTasksCallback)
       ]),
     ]),
     h('.w-100', detectorPanels(model, items))
@@ -167,34 +169,3 @@ const tasksTables = (taskTableModel, tasksByHost) => {
       HardwareComponent.FLP)
     );
 };
-
-/**
- * Prepares cleanup tasks button in top right corner
- */
-const cleanTasksButton = (task) =>
-  h('.flex-column.dropdown#flp_selection_info_icon', {style: 'display: flex'}, [
-    h(`button.btn.btn-danger`, {
-      class: task.cleanUpTasksRequest.isLoading() ? 'loading' : '',
-      disabled: task.cleanUpTasksRequest.isLoading(),
-      onclick: () => confirm(`Are you sure you know what you are doing?`)
-      && task.cleanUpTasks(),
-    }, 'Clean tasks'),
-    h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 350px'},
-      'Shutdowns or kills any task that is unlocked and not part of an active environment')
-  ]);
-
-/**
-* Prepares cleanup resources button in top right corner
-*/
-const cleanResourcesButton = (task, isDetectorAndHostListLoaded) =>
-  h('.flex-column.dropdown#flp_selection_info_icon', {style: 'display: flex'}, [
-    h(`button.btn.btn-warning`, {
-      class: task.cleanUpTasksRequest.isLoading() ? 'loading' : '',
-      disabled: task.cleanUpTasksRequest.isLoading() || !isDetectorAndHostListLoaded,
-      onclick: () => task.cleanUpResources(),
-    }, 'Clean resources'),
-    h('.p2.dropdown-menu-right#flp_selection_info.text-center', {style: 'width: 500px'}, [
-      h('', `It runs 'roc-cleanup' and 'fairmq-shmmonitor -c' to clean RAM and disk resources, including SHM files.`),
-      h('', `It does nothing to tasks.`)
-    ])
-  ]);
