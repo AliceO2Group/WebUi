@@ -76,7 +76,7 @@ class TaskController {
    */
   async cleanUpTasksHandler(req, res) {
     try {
-      const { session: { username } = {}} = req.session;
+      const { username } = req.session || {};
       this._logger.infoMessage(`CleanUpTasks request from ${username}`, {level: LogLevel.OPERATIONS});
 
       const { killedTasks, runningTasks } = await this._taskService.cleanUpTasks();

@@ -117,7 +117,7 @@ module.exports.setup = (http, ws) => {
   );
   const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
   const deploymentService = new DeploymentService(environmentService, workflowService, environmentCacheService);
-  const taskService = new TaskService(ctrlProxy)
+  const taskService = new TaskService(ctrlProxy);
 
   /**
    * Controllers are initialized with the services they depend on.
