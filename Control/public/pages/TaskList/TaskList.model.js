@@ -15,14 +15,14 @@
 /* global COG */
 
 import {Observable, RemoteData} from '/js/src/index.js';
-import { getTasksByFlp } from '../common/utils.js';
-import { TaskTableModel } from '../common/task/TaskTableModel.js';
-import { jsonDelete } from '../utilities/jsonDelete.js';
-import { jsonGet } from '../utilities/jsonGet.js';
-import { jsonPost } from '../utilities/jsonPost.js';
+import { getTasksByFlp } from '../../common/utils.js';
+import { TaskTableModel } from '../../common/task/TaskTableModel.js';
+import { jsonDelete } from '../../utilities/jsonDelete.js';
+import { jsonGet } from '../../utilities/jsonGet.js';
+import { jsonPost } from '../../utilities/jsonPost.js';
 
 /**
- * Model representing Tasks
+ * Model for the taskList page
  */
 export default class TaskPageModel extends Observable {
   /** 
@@ -46,7 +46,13 @@ export default class TaskPageModel extends Observable {
   /**
    * Initialize task page by requesting detectors and hosts for each detector
    */
-  async initTaskPage() {
+  async init() {
+    this.refreshInterval = setInterval(async () => {
+      if (!this.model.loader.active) {
+        await this.initTasks();
+      }
+    }, COG.REFRESH_TASK);
+
     this.detectorPanels = RemoteData.loading();
     this.notify();
 
@@ -131,20 +137,6 @@ export default class TaskPageModel extends Observable {
       this.cleanUpResourcesRequest = RemoteData.failure(error.message);
     }
     this.notify();
-  }
-
-  /**
-   * Initialize page and request data
-   * Adds an automatic refresh of the content if another request is not ongoing already
-   * * TODO: Remote Task Interval and rely on kafka [OGUI-1151]
-   */
-  async getTasks() {
-    this.initTaskPage();
-    this.refreshInterval = setInterval(async () => {
-      if (!this.model.loader.active) {
-        await this.initTasks();
-      }
-    }, COG.REFRESH_TASK);
   }
 
   /**

@@ -19,7 +19,7 @@ import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
 import About from './about/About.js';
 import Workflow from './workflow/Workflow.js';
-import TaskPageModel from './task/TaskPageModel.js';
+import TaskPageModel from './pages/TaskList/TaskList.model.js';
 import Config from './configuration/ConfigByCru.js';
 import DetectorService from './services/DetectorService.js';
 import {PREFIX, ROLES} from './../workflow/constants.js';
@@ -299,7 +299,7 @@ export default class Model extends Observable {
         this.calibrationRunsModel.initPage();
         break;
       case 'taskList':
-        this.taskPageModel.getTasks();
+        this.taskPageModel.init();
         break;
       case 'about':
         break;

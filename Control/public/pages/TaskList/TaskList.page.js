@@ -13,18 +13,29 @@
 */
 
 import {h, iconChevronBottom, iconChevronTop, RemoteData} from '/js/src/index.js';
-import pageLoading from '../common/pageLoading.js';
-import errorPage from '../common/errorPage.js';
-import {detectorHeader} from '../common/detectorHeader.js';
+import pageLoading from '../../common/pageLoading.js';
+import errorPage from '../../common/errorPage.js';
+import {detectorHeader} from '../../common/detectorHeader.js';
 import {iconCircleX, iconCircleCheck} from '/js/src/icons.js';
-import {ROLES} from './../workflow/constants.js';
-import {isUserAllowedRole} from './../common/userRole.js';
-import {tasksPerHostPanel} from '../common/task/tasksPerHostPanel.js';
-import { HardwareComponent } from '../common/enums/HardwareComponent.js';
+import {ROLES} from '../../workflow/constants.js';
+import {isUserAllowedRole} from '../../common/userRole.js';
+import {tasksPerHostPanel} from '../../common/task/tasksPerHostPanel.js';
+import { HardwareComponent } from '../../common/enums/HardwareComponent.js';
 
 /**
  * @file Content of the Task Page that displays list of tasks grouped by their host and detector
  */
+
+/**
+ * Header
+ * @param {Object} model
+ * @return {vnode}
+ */
+export const TaskListHeader = (model) => [
+  h('.w-100.text-center', [
+    h('h4', 'Task list')
+  ]),
+];
 
 /**
  * Content
@@ -32,7 +43,7 @@ import { HardwareComponent } from '../common/enums/HardwareComponent.js';
  * @param {Object} model
  * @return {vnode}
  */
-export const content = (model) => [
+export const TaskListContent = (model) => [
   detectorHeader(model),
   h('.text-center.scroll-y.absolute-fill', {style: 'top: 40px'}, [
     infoPanel(model),

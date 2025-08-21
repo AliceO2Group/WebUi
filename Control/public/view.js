@@ -48,8 +48,10 @@ import {
   content as configurationContent,
   header as configurationHeader
 } from './configuration/configPage.js';
-import {header as taskHeader} from './task/header.js';
-import {content as taskContent} from './task/content.js';
+import {
+  TaskListHeader,
+  TaskListContent
+} from './pages/TaskList/TaskList.page.js';
 import {
   content as hardwareContent,
   header as hardwareHeader
@@ -98,7 +100,7 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
     environment: EnvironmentPageHeader,
     about: statusHeader,
     configuration: configurationHeader,
-    taskList: taskHeader,
+    taskList: TaskListHeader,
     hardware: hardwareHeader,
     locks: lockHeader
   })(model),
@@ -129,7 +131,7 @@ const content = (model) => {
       environment: EnvironmentPageContent,
       about: statusContent,
       configuration: configurationContent,
-      taskList: taskContent,
+      taskList: TaskListContent,
       hardware: hardwareContent,
       locks: lockContent
     })(model)
