@@ -215,8 +215,15 @@ module.exports.setup = (http, ws) => {
   /**
    * Tasks Routes
    */
-  http.get('/tasks/:id', coreMiddleware, taskController.getTaskHandler.bind(taskController));
-  http.get('/tasks', coreMiddleware, taskController.getTaskListHandler.bind(taskController));
+  http.get('/tasks/:id',
+    coreMiddleware,
+    minimumRoleMiddleware(Role.DETECTOR),
+    taskController.getTaskHandler.bind(taskController)
+  );
+  http.get('/tasks',
+    coreMiddleware,
+    minimumRoleMiddleware(Role.DETECTOR),
+    taskController.getTaskListHandler.bind(taskController));
   http.delete('/tasks',
     coreMiddleware,
     minimumRoleMiddleware(Role.ADMIN),
