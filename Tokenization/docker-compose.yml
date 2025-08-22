@@ -44,9 +44,8 @@ services:
         condition: service_completed_successfully
 
   reverse-proxy:
-    image: nginx:1.27
-    volumes:
-      - ./docker/provisioning/nginx/conf.d/:/etc/nginx/conf.d/
+    build:
+      target: reverse-proxy
     ports:
       - "8080:8080"
     depends_on:
