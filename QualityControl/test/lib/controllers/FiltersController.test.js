@@ -18,13 +18,20 @@ import { FilterController } from '../../../lib/controllers/FilterController.js';
 import sinon from 'sinon';
 import { FilterService } from '../../../lib/services/FilterService.js';
 
+const VALID_CONFIG = { bookkeeping: {
+  url: 'http://localhost:4000',
+  token: 'valid-token',
+  runTypesRefreshInterval: 15000,
+  runStatusRefreshInterval: 15000,
+} };
+
 export const filtersControllerTestSuite = async () => {
   suite('Creating a new FiltersController instance', () => {
     test('should successfully initialize FiltersController', () => {
       const bookkeepingServiceStub = {
         connect: sinon.stub().resolves(),
       };
-      const filterService = new FilterService(bookkeepingServiceStub);
+      const filterService = new FilterService(bookkeepingServiceStub, VALID_CONFIG);
       doesNotThrow(() => new FilterController(filterService));
     });
   });

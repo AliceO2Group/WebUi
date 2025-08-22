@@ -27,6 +27,7 @@ export default class QCObjectService {
   constructor(model) {
     this.model = model;
     this.list = RemoteData.notAsked(); // List of objects in CCDB with some of their parameters
+    this.filterModel = model.filterModel;
 
     this.objectsLoadedMap = {};
     // Qcobject --ccdb info; root plot, query params? in ccdb info
@@ -35,18 +36,23 @@ export default class QCObjectService {
   /**
    * Retrieve a list of all objects from CCDB
    * @param {Class<Observable>} that - object extending observer class to notify component on request end
+   * @param {Map<FilterType, string>} filterMap - optional argument to change default filter behaviour.
    * @returns {JSON} List of Objects
    */
-  async listObjects(that = this.model) {
+  async listObjects(that = this.model, filterMap = this.filterModel.filterMap) {
     this.list = RemoteData.loading();
     that.notify();
 
-    const { result, ok } = await this.model.loader.get('/api/objects', {}, true);
+    const hasFilters = Object.values(filterMap).some(Boolean);
+    const fields = hasFilters ? ['path'] : undefined; // If there are filters more unneeded fields are sent down.
+    const url = this._buildURL('/api/objects?', undefined, undefined, filterMap, fields);
+
+    const { result, ok } = await this.model.loader.get(url, {}, true);
 
     if (ok) {
       this.list = RemoteData.success(result);
-      this.model.object.sideTree.initTree('database');
-      this.model.object.sideTree.addChildren(result);
+      this.model.object.tree.initTree('database');
+      this.model.object.tree.addChildren(result);
     } else {
       this.list = RemoteData.failure({ message: result.message });
     }
@@ -60,17 +66,16 @@ export default class QCObjectService {
    * @param {string} objectName - name/path of the object to get
    * @param {string} id - if as per CCDB storage
    * @param {number} validFrom - timestamp in ms
-   * @param {Map<string, string>} filters - metadata attributes to filter by
    * @param {Class<Observable>} that - object to be used to notify
    * @returns {Promise<RemoteData>} {result, ok, status}
    */
-  async getObjectByName(objectName, id = '', validFrom = undefined, filters = undefined, that = this) {
+  async getObjectByName(objectName, id = '', validFrom = undefined, that = this) {
     this.objectsLoadedMap[objectName] = RemoteData.loading();
     that.notify();
 
     try {
       // `/api/object?path=${objectName}&timestamp=${timestamp}&filter=${filter}`
-      const url = this._buildURL(`/api/object?path=${objectName}`, id, validFrom, filters);
+      const url = this._buildURL(`/api/object?path=${objectName}`, id, validFrom, this.filterModel.filterMap);
       const { result, ok } = await this.model.loader.get(url);
       if (ok) {
         result.qcObject = {
@@ -102,14 +107,13 @@ export default class QCObjectService {
    * @param {string} objectId - name/path of the object to get
    * @param {string} id - id/etag as stored by CCDB
    * @param {number} timestamp - timestamp in ms
-   * @param {string} filter - filter as string to be applied on query
    * @param {Class<Observable>} that - object to be used to notify
    * @returns {Promise<RemoteData>} {result, ok, status}
    */
-  async getObjectById(objectId, id = '', timestamp = undefined, filter = undefined, that = this) {
+  async getObjectById(objectId, id = '', timestamp = undefined, that = this) {
     try {
       // `/api/object?path=${objectName}&timestamp=${timestamp}&filter=${filter}`
-      const url = this._buildURL(`/api/object/${objectId}?`, id, timestamp, filter);
+      const url = this._buildURL(`/api/object/${objectId}?`, id, timestamp);
 
       const { result, ok } = await this.model.loader.get(url);
       if (ok) {
@@ -142,19 +146,22 @@ export default class QCObjectService {
    * @param {string} url - initial URL with objectId or object name
    * @param {string} id - id of the object
    * @param {number} validFrom - timestamps in ms
-   * @param {Map<string, string>} filters - Metadata attributes for retrieving specific object
+   * @param {Map<FilterType,string>} filterMap - object of filters by which the objects will be filterd
+   * @param {Array<string>} fields - The fields that are to be send from the backend.
    * @returns {string} - url with appended parameters
    */
-  _buildURL(url, id, validFrom = undefined, filters = undefined) {
-    if (filters && Object.keys(filters).length > 0) {
-      const filterAsString = Object.entries(filters).map(([key, value]) => `filters[${key}]=${value}`).join('&');
-      url += `&${filterAsString}`;
-    }
+  _buildURL(url, id, validFrom = undefined, filterMap = this.filterModel.filterMap, fields = undefined) {
+    const filterAsString = Object.entries(filterMap).map(([key, value]) => `filters[${key}]=${value}`).join('&');
+    url += `&${filterAsString}`;
+
     if (validFrom) {
       url += `&validFrom=${validFrom}`;
     }
     if (id) {
       url += `&id=${id}`;
+    }
+    if (Array.isArray(fields)) {
+      url += `&fields[]=${fields.join('fields[]=')}`;
     }
     return url;
   }
@@ -165,7 +172,10 @@ export default class QCObjectService {
    * @deprecated
    */
   async getObjects() {
-    const { result, ok } = await this.model.loader.get('/api/objects');
+    const hasFilters = Object.values(this.filterModel.filterMap).some(Boolean);
+    const fields = hasFilters ? ['path'] : undefined; // If there are filters more unneeded fields are sent down.
+    const url = this._buildURL('/api/objects?', undefined, undefined, undefined, fields);
+    const { result, ok } = await this.model.loader.get(url);
     return ok ? RemoteData.success(result) : RemoteData.failure(result);
   }
 }

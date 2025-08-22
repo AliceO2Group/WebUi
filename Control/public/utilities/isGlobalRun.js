@@ -10,21 +10,17 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
- */
+*/
 
 /**
- * Given an object with K;V pairs, build a URL component and return it as string
- * @example
- * { RunNumber: 42, PassName: 1 } -> '&RunUmber=42&PassName=1'
- * @param {object} filter - filters as KV pairs
- * @returns {string} - partial URL
+ * Checks if a run is considered global as per the definition:
+ * * trg_enabled is true
+ * * trg_global_run_enabled is true
+ * @param {JSON} userVars - the user variables present in the environment
+ * @param {string} userVars.trg_enabled - indicates if the TRG is enabled
+ * @param {string} userVars.trg_global_run_enabled - indicates if the global run
+ * @returns {boolean}
  */
-export const getUrlPathFromObject = (filter) => {
-  let urlPath = '';
-  if (Object.keys(filter).length > 0) {
-    urlPath = Object.entries(filter)
-      .map(([key, value]) => `&${key}=${value}`)
-      .join('');
-  }
-  return urlPath;
-};
+export const isGlobalRun = ({trg_enabled, trg_global_run_enabled}) => {
+  return trg_enabled === 'true' && trg_global_run_enabled === 'true';
+}
