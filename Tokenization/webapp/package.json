@@ -9,7 +9,9 @@
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "docker:typecheck": "docker compose exec webapp npm run typecheck"
+    "docker:typecheck": "docker compose exec webapp npm run typecheck",
+    "lint": "eslint app --ignore-pattern 'app/styles' --no-warn-ignored",
+    "lint:fix": "eslint --fix app --ignore-pattern 'app/styles' --no-warn-ignored"
   },
   "repository": {
     "type": "git",
@@ -39,6 +41,15 @@
     "@types/react-dom": "^19.0.1",
     "typescript": "^5.7.2",
     "vite": "^6.0.11",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "@eslint/js": "^9.28.0",
+    "@stylistic/eslint-plugin-ts": "^2.10.1",
+    "@stylistic/eslint-plugin-js": "^2.10.1",
+    "typescript-eslint": "^8.34.0",
+    "eslint": "^9.28.0",
+    "eslint-plugin-jsdoc": "^50.7.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "globals": "^16.2.0"
   }
 }

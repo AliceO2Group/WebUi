@@ -20,3 +20,7 @@
 .ml2 { margin-left: var(--space-s); }
 .ml3 { margin-left: var(--space-m); }
 .ml4 { margin-left: var(--space-l); }
+
+.scale25 {
+    transform: scale(2.5);
+}

@@ -43,6 +43,7 @@ export const config = {
   bookkeeping: {
     url: 'http://localhost:4000',
     token: 'token-test',
-    refreshRate: 15000,
+    runTypesRefreshInterval: 15000,
+    runStatusRefreshInterval: 15000,
   },
 };

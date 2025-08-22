@@ -54,3 +54,20 @@ export function generateDrawingOptionList(rootObject, options) {
   }
   return options;
 }
+
+/**
+ * Given a list of objects form CCDB, parse, filter and keep only valid objects.
+ * Use `for loop` to iterate only once rather than chained array operations as we expect lots of objects
+ * @param {Array<object>} objects - objects to be filtered
+ * @param dto
+ * @returns {Array<QcObjectLeaf>} - list of objects parsed and filtered
+ */
+export function parseObjects(objects, dto) {
+  const list = [];
+  for (const object of objects) {
+    if (dto.isObjectPathValid(object)) {
+      list.push(dto.toQcObjectLeaf(object));
+    }
+  }
+  return list;
+}

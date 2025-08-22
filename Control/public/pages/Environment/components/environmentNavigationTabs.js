@@ -15,7 +15,7 @@
 import {h} from '/js/src/index.js';
 import {currentPageAndParameters} from '../../../utilities/currentPageAndParameters.js';
 import {environmentConfigurationTable} from './environmentConfigurationTable.js';
-import {isGlobalRun} from '../../../environment/environmentsPage.js';
+import {isGlobalRun} from '../../../utilities/isGlobalRun.js';
 import {miniCard} from '../../../common/card/miniCard.js';
 import {parseObject, parseOdcStatusPerEnv} from '../../../common/utils.js';
 import {rowForCard} from '../../../common/card/rowForCard.js';

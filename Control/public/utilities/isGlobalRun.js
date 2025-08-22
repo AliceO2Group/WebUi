@@ -12,8 +12,15 @@
  * or submit itself to any jurisdiction.
 */
 
-.container {
-    display: grid;
-    grid-template-rows: 1fr 3fr 1.3fr;
-    grid-template-columns: 0.575fr 3fr; 
+/**
+ * Checks if a run is considered global as per the definition:
+ * * trg_enabled is true
+ * * trg_global_run_enabled is true
+ * @param {JSON} userVars - the user variables present in the environment
+ * @param {string} userVars.trg_enabled - indicates if the TRG is enabled
+ * @param {string} userVars.trg_global_run_enabled - indicates if the global run
+ * @returns {boolean}
+ */
+export const isGlobalRun = ({trg_enabled, trg_global_run_enabled}) => {
+  return trg_enabled === 'true' && trg_global_run_enabled === 'true';
 }

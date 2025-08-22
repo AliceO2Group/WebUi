@@ -47,3 +47,86 @@ export const subfolders = [
   'qc/test/object/2',
   'qc/test/object/11',
 ];
+
+export const MOCK_OBJECT_BY_ID_RESULT = {
+  id: '016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
+  path: 'qc/test/object/1',
+  name: 'qc/test/object/1',
+  validFrom: 1656072357492,
+  validUntil: 1971432357492,
+  createdAt: 1656072357533,
+  lastModified: 1656072357000,
+  drawOptions: [],
+  displayHints: [],
+  etag: '016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
+  runNumber: '0',
+  runType: '0',
+  partName: 'send',
+  qcCheckName: 'Pedestals/mPedestalChannelFECHG',
+  qcQuality: '3',
+  qcDetectorName: 'TPC',
+  qcVersion: '1.64.0',
+  objectType: 'o2::quality_control::core::QualityObject',
+  location: '/download/016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
+  layoutDisplayOptions: [],
+  layoutName: 'a-test',
+  tabName: 'main',
+  ignoreDefaults: false,
+};
+
+export const OBJECT_VERSIONS = [
+  {
+    validFrom: 1656072357492,
+    createdAt: 1656072357533,
+    id: '016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
+  },
+  {
+    validFrom: 1655916321231,
+    createdAt: 1655916321276,
+    id: 'b4944c1d-f24a-11ec-a509-c0a80209250c',
+  },
+];
+
+export const OBJECT_VERSIONS_FILTERED_BY_RUN_NUMBER = [
+  {
+    createdAt: 1656072357533,
+    id: '016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
+    validFrom: 1656072357492,
+  },
+];
+
+export const OBJECT_BY_PATH_RESULT = {
+  id: '016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
+  path: 'qc/test/object/1',
+  name: 'qc/test/object/1',
+  validFrom: 1656072357492,
+  validUntil: 1971432357492,
+  createdAt: 1656072357533,
+  lastModified: 1656072357000,
+  drawOptions: [],
+  displayHints: [],
+  etag: '016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
+  runNumber: '0',
+  runType: '0',
+  partName: 'send',
+  qcCheckName: 'Pedestals/mPedestalChannelFECHG',
+  qcQuality: '3',
+  qcDetectorName: 'TPC',
+  qcVersion: '1.64.0',
+  objectType: 'o2::quality_control::core::QualityObject',
+  location: '/download/016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
+};
+
+export const TREE_API_OBJECTS = [
+  { name: 'qc/test/object/1' },
+  { name: 'qc/test/object/2' },
+  { name: 'qc/test/object/11' },
+];
+
+export const OBJECT_LATEST_FILTERED_BY_RUN_NUMBER = [
+  {
+    [PATH]: 'qc/test/object/1',
+    createdAt: 1656072357533,
+    name: 'qc/test/object/1',
+  },
+];
