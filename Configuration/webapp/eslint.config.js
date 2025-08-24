@@ -284,7 +284,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['app/test/**/*.ts', 'app/test/**/*.ts'],
+    files: ['app/test/**'],
     extends: [
       pluginJs.configs.recommended,
       mochaPlugin.configs.recommended,
@@ -303,13 +303,8 @@ export default tseslint.config(
     },
     rules: {
       'mocha/no-setup-in-describe': 'off',
-    },
-  },
-  {
-    files: ['app/test/**'],
-    rules: {
       'no-console': 'off',
       'prefer-arrow-callback': 'off'
-    }
+    },
   },
 );

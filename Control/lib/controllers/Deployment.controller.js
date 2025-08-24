@@ -28,26 +28,36 @@ class DeploymentController {
   /**
    * Constructor for initializing controller with a deployment service
    * @param {DeploymentService} deploymentService - service to use to request AliECS a new deployment
+   * @param {WorkflowService} workflowService - service to use to retrieve workflow templates
    */
-  constructor(deploymentService) {
+  constructor(deploymentService, workflowService) {
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/deployment-ctrl`);
 
     /**
      * @type {DeploymentService}
      */
     this._deploymentService = deploymentService;
+
+    /**
+     * @type {WorkflowService}
+     */
+    this._workflowService = workflowService;
   }
 
   /**
    * Handles the request to make a deployment by:
-   * - validating the user built request
+   * - validating the user received request
    * - preparing the request payload for ECS
    * - calling the ECS service to deploy the environment
    *
    * User must be authenticated and authorized to perform this action and this is verified via middlewares
-   * 
-   * The result of a deployment is an environment
-   * 
+   *
+   * A user can provide only the template that wishes to use or the entire workflowTemplate.
+   * If only a template is provided, the default revision and repository will be used to build the template.
+   * e.g. the resources-cleanup and calibration workflows require the latest default revision and repository
+   *
+   * The result of a deployment is an environment.
+   *
    * @param {Express.Request} req - the request object
    * @param {Express.Response} res - the response object
    * @returns {Promise<void>}
@@ -56,18 +66,43 @@ class DeploymentController {
     /**
      * @type {DeploymentRequest}
      */
-    const { workflowTemplate, selectedConfiguration, userVars } = req.body;
+    const { template, selectedConfiguration, userVars, detectors } = req.body;
+    let { repository, revision } = req.body;
 
-    if (!workflowTemplate && !selectedConfiguration) {
+    if (!template) {
       updateAndSendExpressResponseFromNativeError(
         res,
-        new InvalidInputError('Invalid input: workflowTemplate or selectedConfiguration must be provided')
-      )
+        new InvalidInputError('Invalid input: template must be provided')
+      );
       return;
     }
 
+    if (!repository || !revision) {
+      try {
+        const defaults = await this._workflowService.getDefaultTemplateSource();
+        if (!repository) {
+          repository = defaults.repository;
+        }
+        if (!revision) {
+          revision = defaults.revision;
+        }
+      } catch (error) {
+        updateAndSendExpressResponseFromNativeError(res, error);
+        return;
+      }
+    }
+    const workflowTemplate = `${repository}/workflows/${template}@${revision}`;
+
     const { personid, name, username } = req.session || {};
     const user = new User(username, name, personid);
+
+    const logMessage = 'New deployment request by '
+      + `user ${user.username} with `
+      + `workflow template ${workflowTemplate} `
+      + `and detectors ${detectors}`;
+    this._logger.infoMessage(logMessage, {
+      level: LogLevel.OPERATIONS,
+    });
 
     try {
       const environment = await this._deploymentService.deployEnvironment({
@@ -79,6 +114,30 @@ class DeploymentController {
       res.status(201).json(environment);
     } catch (error) {
       this._logger.errorMessage(error, { level: LogLevel.SUPPORT });
+      updateAndSendExpressResponseFromNativeError(res, error);
+    }
+  }
+
+  /**
+   * API - DELETE endpoint for acknowledging an environment deployment failure
+   * @param {Request} req - HTTP Request object which expects an `id` as mandatory parameter
+   * @param {string} req.params.id - the id of the environment to be acknowledged
+   * @param {Response} res - HTTP Response object with result of the acknowledgement
+   * @returns {void}
+   */
+  async acknowledgeDeploymentFailureHandler(req, res) {
+    const { id } = req.params;
+    const { personid, name, username } = req.session || {};
+    const user = new User(username, name, personid);
+
+    if (!id) {
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));
+      return;
+    }
+    try {
+      this._deploymentService.acknowledgeEnvironmentDeploymentFailure(id, user);
+      res.status(204).json({ message: 'Environment deployment failure acknowledged' });
+    } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);
     }
   }

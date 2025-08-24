@@ -16,8 +16,10 @@
  *
  * Deployment request as needed to be sent by the user to the API
  *
- * @property {string} workflowTemplate - the workflow template to use for the deployment, can be optional if selectedConfiguration is provided
- * @property {string} [selectedConfiguration] - the selected configuration for the deployment, can be optional if workflowTemplate is provided
+ * @property {string} template - the template to use for the deployment
+ * @property {string} [repository] - the repository to use for the deployment
+ * @property {string} [revision] - the revision to use for the deployment
+ * @property {string} [selectedConfiguration] - the selected configuration for the deployment, can be optional if template is provided
  * @property {Map<string, object>} [userVars] - user variables to be used in the deployment, if none provided, ECS will use the default ones
  * @property {string[]} detectors - list of detectors to be deployed
  */
