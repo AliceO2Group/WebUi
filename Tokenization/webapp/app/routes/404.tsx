@@ -12,16 +12,15 @@
  * or submit itself to any jurisdiction.
  */
 
-import { type RouteConfig, index, route, prefix } from '@react-router/dev/routes';
-
-export default [
-  route('', 'ui/layout.tsx', [
-    index('routes/home.tsx'),
-    ...prefix('tokens', [
-      index('routes/tokens/overview.tsx'),
-      route(':tokenId', 'routes/tokens/details.tsx'),
-    ]),
-    route('*', 'routes/404.tsx'),
-  ]),
-
-] satisfies RouteConfig;
+/**
+ * 404 Not Found page component.
+ * Displays a user-friendly error message when a requested page doesn't exist.
+ */
+export default function NotFound() {
+  return (
+    <div style={{ textAlign: 'center', marginTop: '10vh' }}>
+      <h1>404 - Page Not Found</h1>
+      <p>The page you are looking for does not exist.</p>
+    </div>
+  );
+}
