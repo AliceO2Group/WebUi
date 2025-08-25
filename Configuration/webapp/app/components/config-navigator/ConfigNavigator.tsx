@@ -16,7 +16,7 @@ import { List } from '@mui/material';
 import { useEffect, useState } from 'react';
 import ConfigNavigatorItem from './ConfigNavigatorItem';
 
-const ConfigNavigator = () => {
+export const ConfigNavigator = () => {
   const [configKeys, setConfigKeys] = useState<string[]>([]);
 
   const fetchConfigurationKeys = async () => {
@@ -27,7 +27,7 @@ const ConfigNavigator = () => {
   };
 
   useEffect(() => {
-    fetchConfigurationKeys();
+    void fetchConfigurationKeys();
   }, []);
 
   return (
@@ -38,5 +38,3 @@ const ConfigNavigator = () => {
     </List>
   );
 };
-
-export default ConfigNavigator;

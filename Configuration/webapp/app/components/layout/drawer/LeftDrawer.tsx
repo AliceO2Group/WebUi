@@ -10,18 +10,21 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import { type FC, type PropsWithChildren } from 'react';
 import { Box, Drawer } from '@mui/material';
-import LeftDrawerFooter from './LeftDrawerFooter';
-import LeftDrawerHeader from './LeftDrawerHeader';
+import { LeftDrawerFooter } from './LeftDrawerFooter';
+import { LeftDrawerHeader } from './LeftDrawerHeader';
 
 const DRAWER_WIDTH = 300;
 
-interface LeftDrawerProps extends PropsWithChildren {}
-
-const LeftDrawer: FC<LeftDrawerProps> = ({ children }) => {
+/**
+ * LeftDrawer component
+ * Represents the left sidebar of the application layout.
+ * @returns {ReactElement} LeftDrawer
+ */
+export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => {
   return (
     <Drawer
       sx={{
@@ -44,5 +47,3 @@ const LeftDrawer: FC<LeftDrawerProps> = ({ children }) => {
     </Drawer>
   );
 };
-
-export default LeftDrawer;

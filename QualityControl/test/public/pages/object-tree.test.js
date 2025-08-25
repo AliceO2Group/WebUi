@@ -11,9 +11,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, ok } from 'node:assert';
+import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
-const SORTING_BUTTON_PATH = 'header > div > div:nth-child(3) > div > button';
+const SORTING_BUTTON_PATH = 'header > div > div > div:nth-child(3) > div > button';
 
 /**
  * Initial page setup tests
@@ -40,8 +40,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should have a button to sort by (default "Name" ASC)', async () => {
-    const sortByButtonTitle = await page.evaluate(() =>
-      document.querySelector('header > div > div:nth-child(3) > div > button').title);
+    const sortByButtonTitle = await page.evaluate((path) => document.querySelector(path).title, SORTING_BUTTON_PATH);
     strictEqual(sortByButtonTitle, 'Sort by');
   });
 
@@ -52,7 +51,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should sort list of histograms by name in descending order', async () => {
     await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByNameOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(2)';
+    const sortingByNameOptionPath = 'header > div > div > div:nth-child(3) > div > div > a:nth-child(2)';
     await page.locator(sortingByNameOptionPath).click();
 
     const sorted = await page.evaluate(() => ({
@@ -67,7 +66,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should sort list of histograms by name in ascending order', async () => {
     await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByNameOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(1)';
+    const sortingByNameOptionPath = 'header > div > div > div:nth-child(3) > div > div > a:nth-child(1)';
     await page.locator(sortingByNameOptionPath).click();
     const sorted = await page.evaluate(() => ({
       list: window.model.object.currentList,
@@ -80,7 +79,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should have filtered results on input search', async () => {
-    await page.type('header > div > div:nth-child(3) > input', 'qc/test/object/1');
+    await page.type('header > div > div:nth-child(1) > div:nth-child(3) > input', 'qc/test/object/1');
     const rowsDisplayed = await page.evaluate(() => {
       const rows = [];
       document.querySelectorAll('section > div > div > div > table > tbody > tr')
@@ -94,4 +93,19 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       + `Identified filtered: ${filteredRows.length} and displayed: ${rowsDisplayed.length}`,
     );
   });
+
+  await testParent.test(
+    'should have a selector with sorted options to filter by run type if there are run types loaded',
+    { timeout },
+    async () => {
+      const selectorId = '#runTypeFilter > option';
+
+      const options = await page.evaluate((selectorId) => {
+        const optionElements = document.querySelectorAll(selectorId);
+        return Array.from(optionElements).map((option) => option.value);
+      }, selectorId);
+
+      deepStrictEqual(options, ['', 'runType1', 'runType2']);
+    },
+  );
 };

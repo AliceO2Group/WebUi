@@ -10,19 +10,20 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import { Toolbar, Typography } from '@mui/material';
 
-const LeftDrawerHeader = () => {
-  return (
-    <Toolbar
-      style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}
-      className="left-drawer__header"
-    >
-      <Typography variant="h5">Configuration GUI</Typography>
-    </Toolbar>
-  );
-};
-
-export default LeftDrawerHeader;
+/**
+ * LeftDrawerHeader component
+ * Represents the header of the left drawer in the application layout.
+ * @returns {React.ReactElement} LeftDrawerHeader
+ */
+export const LeftDrawerHeader = () => (
+  <Toolbar
+    style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}
+    className="left-drawer__header"
+  >
+    <Typography variant="h5">Configuration GUI</Typography>
+  </Toolbar>
+);

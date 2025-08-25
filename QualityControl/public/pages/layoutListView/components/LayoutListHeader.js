@@ -12,16 +12,19 @@
  * or submit itself to any jurisdiction.
  */
 
+import { filterPanelToggleButton } from '../../../common/filters/filterViews.js';
 import { h } from '/js/src/index.js';
 
 /**
  * Shows header of list of layouts with one search input to filter them
  * @param {LayoutListModel} layoutListModel - The model handeling the state of the LayoutListPage
+ * @param {FilterModel} filterModel - The model handeling the filter state
  * @returns {vnode} - virtual node element
  */
-export default (layoutListModel) => [
+export default (layoutListModel, filterModel) => [
   h('.w-50.text-center', [h('b.f4', 'Layouts')]),
   h('.flex-grow.text-right', [
+    filterPanelToggleButton(filterModel),
     h('input.form-control.form-inline.mh1.w-33', {
       placeholder: 'Search',
       type: 'text',

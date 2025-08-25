@@ -10,19 +10,17 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import { Box, Typography } from '@mui/material';
 
-const LeftDrawerFooter = () => {
-  return (
-    <Box
-      sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}
-      className="left-drawer__footer"
-    >
-      <Typography variant="caption">Left Drawer Footer</Typography>
-    </Box>
-  );
-};
-
-export default LeftDrawerFooter;
+/**
+ * LeftDrawerFooter component
+ * Represents the footer of the left drawer in the application layout.
+ * @returns {React.ReactElement} LeftDrawerFooter
+ */
+export const LeftDrawerFooter = () => (
+  <Box sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }} className="left-drawer__footer">
+    <Typography variant="caption">Left Drawer Footer</Typography>
+  </Box>
+);

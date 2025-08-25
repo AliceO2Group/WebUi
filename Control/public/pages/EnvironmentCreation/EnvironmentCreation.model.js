@@ -87,13 +87,13 @@ export class EnvironmentCreationModel extends Observable {
    */
   async deployEnvironment() {
     this._creationModel.variables.hosts = JSON.stringify(this._model.workflow.form.hosts);
-    const path = this.parseRepository(this._creationModel.repository)
-      + `/workflows/${this._creationModel.template}@${this._creationModel.revision}`;
 
     this._model.environment.newEnvironment({
-      workflowTemplate: path,
+      repository: this.parseRepository(this._creationModel.repository),
+      revision: this._creationModel.revision,
+      template: this._creationModel.template,
       selectedConfiguration: this._selectedConfigurationLabel,
-      vars: this._creationModel.variables,
+      userVars: this._creationModel.variables,
       detectors: this._model.workflow.flpSelection.selectedDetectors
     });
   }
@@ -197,7 +197,7 @@ export class EnvironmentCreationModel extends Observable {
   }
 
   /**
-   * Check if all selected detectors are PFR ready. 
+   * Check if all selected detectors are PFR ready.
    * @return {Boolean}
    */
   isPfrAvailable() {

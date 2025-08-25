@@ -19,7 +19,13 @@ interface UserSectionProps {
   userName: string;
 }
 
-const UserSection: FC<UserSectionProps> = ({ userName }) => {
+/**
+ * UserSection component
+ * Represents a user section with an avatar and a dropdown menu for user actions.
+ * @param {UserSectionProps} props - Component props.
+ * @returns {React.ReactElement} UserSection
+ */
+export const UserSection: FC<UserSectionProps> = ({ userName }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleClick = (event: MouseEvent<HTMLElement>) => {
@@ -56,5 +62,3 @@ const UserSection: FC<UserSectionProps> = ({ userName }) => {
     </Box>
   );
 };
-
-export default UserSection;
