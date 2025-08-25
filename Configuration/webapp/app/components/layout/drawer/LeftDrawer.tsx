@@ -22,28 +22,27 @@ const DRAWER_WIDTH = 300;
 /**
  * LeftDrawer component
  * Represents the left sidebar of the application layout.
+ * @param {PropsWithChildren} children - The children elements to render inside the drawer.
  * @returns {ReactElement} LeftDrawer
  */
-export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => {
-  return (
-    <Drawer
-      sx={{
+export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => (
+  <Drawer
+    sx={{
+      width: DRAWER_WIDTH,
+      flexShrink: 0,
+      '& .MuiDrawer-paper': {
         width: DRAWER_WIDTH,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: DRAWER_WIDTH,
-          boxSizing: 'border-box',
-          display: 'flex',
-          flexDirection: 'column',
-        },
-      }}
-      variant="permanent"
-      anchor="left"
-      className="left-drawer"
-    >
-      <LeftDrawerHeader />
-      <Box sx={{ overflow: 'auto', flexGrow: 1 }}>{children}</Box>
-      <LeftDrawerFooter />
-    </Drawer>
-  );
-};
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+      },
+    }}
+    variant="permanent"
+    anchor="left"
+    className="left-drawer"
+  >
+    <LeftDrawerHeader />
+    <Box sx={{ overflow: 'auto', flexGrow: 1 }}>{children}</Box>
+    <LeftDrawerFooter />
+  </Drawer>
+);
