@@ -65,4 +65,12 @@ describe('`pageRoot` test-suite', function () {
     const userSectionMenu = await page.$$('.user-section__menu');
     assert.strictEqual(userSectionMenu.length, 1);
   });
+
+  it('should successfully display configurations list', async function () {
+      const res = await fetch('http://localhost:8080/api/api/configurations');
+      const data = await res.json();
+  
+      const configNavigatorItems = await page.$$('.config_navigator__item');
+      assert.strictEqual(configNavigatorItems.length, data.length);
+    });
 });
