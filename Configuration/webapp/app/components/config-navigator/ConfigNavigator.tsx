@@ -36,5 +36,9 @@ export const ConfigNavigator = () => {
     void fetchConfigurationKeys();
   }, []);
 
-  return <List>{configKeys?.map((text) => <ConfigNavigatorItem key={text} title={text} />)}</List>;
+  return (
+    <List className="config_navigator">
+      {configKeys?.map((text) => <ConfigNavigatorItem key={text} title={text} />)}
+    </List>
+  );
 };

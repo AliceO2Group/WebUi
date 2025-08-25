@@ -67,10 +67,23 @@ describe('`pageRoot` test-suite', function () {
   });
 
   it('should successfully display configurations list', async function () {
-      const res = await fetch('http://localhost:8080/api/api/configurations');
-      const data = await res.json();
-  
-      const configNavigatorItems = await page.$$('.config_navigator__item');
-      assert.strictEqual(configNavigatorItems.length, data.length);
-    });
+    const configNavigator = await page.$$('.config_navigator');
+    assert.strictEqual(configNavigator.length, 1);
+  });
+
+  it('should successfully display configurations list items', async function () {
+    const res = await fetch('http://localhost:8080/api/api/configurations');
+    const data = await res.json();
+
+    const configNavigatorItems = await page.$$('.config_navigator__item');
+    assert.strictEqual(configNavigatorItems.length, data.length);
+  });
+
+  it('should display configurations list', async function () {
+    const res = await fetch('http://localhost:8080/api/api/configurations');
+    const data = await res.json();
+
+    const configNavigatorItems = await page.$$('.config_navigator__item');
+    assert.strictEqual(configNavigatorItems.length, data.length);
+  });
 });
