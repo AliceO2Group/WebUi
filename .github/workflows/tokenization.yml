@@ -1,0 +1,23 @@
+name: Tokenization
+on:
+  pull_request:
+    paths:
+      - 'Tokenization/**/*'
+      - '.github/workflows/tokenization.yml'
+  push:
+    branches:
+      - 'main'
+      - 'dev'
+
+jobs:
+  ui-test:
+    name: Check eslint rules on ubuntu-latest
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - run: (cd Tokenization/webapp; npm run docker:test)
