@@ -99,7 +99,7 @@ http.get(
 // );
 
 const centralSystemModel = new CentralSystem(50049);
-
+// to zmainy i do dodania
 http.get(
   "/tokens",
   centralSystemModel.tokenController.getTokensHandler.bind(
