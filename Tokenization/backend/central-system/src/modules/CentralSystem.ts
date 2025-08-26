@@ -12,8 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { CentralSystemWrapper } from "./services/CentralSystemWrapper.js";
-import { TokensController } from "./controllers/TokensController.js";
+import { CentralSystemWrapper } from "../services/CentralSystemWrapper.js";
+import { TokensController } from "../controllers/TokensController.js";
+import path from "path";
 
 /*
  * CentralSystem class to handle token management.
@@ -23,6 +24,7 @@ import { TokensController } from "./controllers/TokensController.js";
  */
 class CentralSystem {
   private centralSystemWrapper: CentralSystemWrapper;
+  private PROTO_PATH = path.join(__dirname, "./proto/wrapper.proto");
   private fakeTokens: Map<
     number,
     { tokenId: number; validity: string; payload: string }
@@ -30,12 +32,17 @@ class CentralSystem {
   public tokenController: TokensController;
 
   public constructor(wrapperPort: number) {
-    // You can add any initialization logic here if needed
-    this.centralSystemWrapper = new CentralSystemWrapper(wrapperPort);
+    this.centralSystemWrapper = new CentralSystemWrapper(
+      this.PROTO_PATH,
+      wrapperPort
+    );
+    this.centralSystemWrapper.listen();
+
     this.fakeTokens = new Map([
       [1, { tokenId: 1, validity: "good", payload: "payload1" }],
       [2, { tokenId: 2, validity: "bad", payload: "payload2" }],
     ]);
+
     this.tokenController = new TokensController(
       this.fakeTokens,
       this.centralSystemWrapper

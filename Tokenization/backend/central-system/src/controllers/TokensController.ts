@@ -16,11 +16,14 @@ import { CentralSystemWrapper } from "../services/CentralSystemWrapper";
 import {
   DuplexMessageEvent,
   DuplexMessageModel,
+  ConnectionDirection,
 } from "../services/models/message.model.js";
 
 import { LogManager, InvalidInputError } from "@aliceo2/web-ui";
 
 import type { Request, Response } from "express";
+
+import { TokensGetService } from "../services/TokensGetService";
 
 const logger = LogManager.getLogger("TokensController");
 
@@ -56,13 +59,12 @@ export class TokensController {
    * @return {Promise<void>}
    */
   public async getTokensHandler(req: Request, res: Response): Promise<void> {
+    // In future, replace with database/vault call service
+    const tokensGetService: TokensGetService = new TokensGetService();
+
     setTimeout(() => {
       try {
-        const tokens = Array.from(this.tokensService.values()).map((token) => ({
-          tokenId: token.tokenId,
-          validity: token.validity,
-          payload: token.payload.slice(-5),
-        }));
+        const tokens = tokensGetService.getTokens(this.tokensService);
         res.status(200).json(tokens);
       } catch (error: any) {
         if (error.stack) {
@@ -96,15 +98,16 @@ export class TokensController {
       };
       this.tokensService.set(newTokenId, newToken);
 
-      const client = Array.from(
-        this.centralSystemWrapperService.getClients()
+      const client: string = Array.from(
+        this.centralSystemWrapperService.getConnectedClients()
       )[0];
-      console.log(client);
-      this.centralSystemWrapperService.clientSend(client, {
-        event: DuplexMessageEvent.NEW_TOKEN,
-        newToken: {
-          token: "new token",
+
+      this.centralSystemWrapperService.sendEvent(client, {
+        event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
+        payload: {
+          connectionDirection: ConnectionDirection.SENDING,
           targetAddress: "a",
+          token: "newToken",
         },
       });
 
@@ -166,15 +169,16 @@ export class TokensController {
       await this._validateTokenID(idNumber);
       this.tokensService.delete(idNumber);
 
-      const client = Array.from(
-        this.centralSystemWrapperService.getClients()
+      const client: string = Array.from(
+        this.centralSystemWrapperService.getConnectedClients()
       )[0];
-      console.log(client);
-      this.centralSystemWrapperService.clientSend(client, {
-        event: DuplexMessageEvent.REVOKE_TOKEN,
-        newToken: {
-          token: id,
+
+      this.centralSystemWrapperService.sendEvent(client, {
+        event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
+        payload: {
+          connectionDirection: ConnectionDirection.SENDING,
           targetAddress: "a",
+          token: "newToken",
         },
       });
 
@@ -194,15 +198,4 @@ export class TokensController {
       }
     }
   }
-
-  // /**
-  //  * @description Provides a token to a client based on the client ID.
-  //  * @param clientID - The ID of the client to whom the token is provided.
-  //  * @param token - The token to be provided.
-  //  * @return {Promise<void>}
-  //  */
-  // public async provideTokeToClient(
-  //   clientID: number,
-  //   token: string
-  // ): Promise<void> {}
 }
