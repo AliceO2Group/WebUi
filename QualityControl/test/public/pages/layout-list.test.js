@@ -45,6 +45,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   await testParent.test('should go to layoutList page when clicking on title', { timeout }, async () => {
     await page.goto(`${url}?page=about`, { waitUntil: 'networkidle0' });
     await page.click('#qcgTitle');
+    await delay(100);
     await page.waitForNetworkIdle();
     const location = await page.evaluate(() => window.location);
     strictEqual(location.search, '?page=layoutList');
