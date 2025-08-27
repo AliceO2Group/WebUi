@@ -8,18 +8,21 @@
     "watch:ts": "tsc -w"
   },
   "dependencies": {
+    "@aliceo2/web-ui": "^2.8.4",
     "crypto": "^1.0.1",
     "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2",
-    "@aliceo2/web-ui": "^2.8.4"
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "@grpc/grpc-js": "^1.13.4",
     "@grpc/proto-loader": "^0.7.15",
     "@types/express": "^4.17.21",
+    "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20.4.2",
+    "jest": "^30.0.5",
     "nodemon": "^3.1.10",
+    "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

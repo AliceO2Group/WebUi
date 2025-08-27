@@ -10,7 +10,8 @@
     "watch:ts": "npm --prefix central-system run watch:ts",
     "watch:node": "nodemon --watch index.js --watch central-system/dist --ext js,json --exec \"node index.js\"",
     "dev": "npm run build && concurrently -k \"npm:watch:*\"",
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "jest --runInBand"
   },
   "repository": {
     "type": "git",
@@ -23,7 +24,12 @@
     "@aliceo2/web-ui": "^2.8.4"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/supertest": "^6.0.3",
     "concurrently": "^9.0.1",
-    "nodemon": "^3.1.10"
+    "jest": "^30.0.5",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.1"
   }
 }
