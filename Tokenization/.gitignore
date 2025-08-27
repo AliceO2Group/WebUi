@@ -6,3 +6,4 @@ backend/node_modules
 backend/central-system/node_modules
 backend/external-connector/node_modules
 backend/central-system/dist
+backend/certs
