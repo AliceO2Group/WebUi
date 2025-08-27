@@ -21,7 +21,9 @@ export class TokensGetService {
      * @param tokens - A map representing the data source of tokens.
      * @return An array of token objects containing tokenId, validity, and a truncated payload.
      */
-    getTokens(tokens) {
+    async getTokens(tokens) {
+        const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+        await sleep(1000);
         return Array.from(tokens.values()).map((token) => ({
             tokenId: token.tokenId,
             validity: token.validity,

@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
+import { setMaxIdleHTTPParsers } from "http";
+
 /**
  * @description Service for retrieving tokens from a data source.
  */
@@ -22,9 +24,11 @@ export class TokensGetService {
    * @param tokens - A map representing the data source of tokens.
    * @return An array of token objects containing tokenId, validity, and a truncated payload.
    */
-  public getTokens(
+  public async getTokens(
     tokens: Map<number, { tokenId: number; validity: string; payload: string }>
-  ): Array<{ tokenId: number; validity: string; payload: string }> {
+  ): Promise<Array<{ tokenId: number; validity: string; payload: string }>> {
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    await sleep(1000);
     return Array.from(tokens.values()).map((token) => ({
       tokenId: token.tokenId,
       validity: token.validity,
