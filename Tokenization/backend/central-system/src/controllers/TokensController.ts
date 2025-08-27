@@ -15,7 +15,6 @@
 import { CentralSystemWrapper } from "../wrapper/CentralSystemWrapper";
 import {
   DuplexMessageEvent,
-  DuplexMessageModel,
   ConnectionDirection,
 } from "../services/models/message.model.js";
 
