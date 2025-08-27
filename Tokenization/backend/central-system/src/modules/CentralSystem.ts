@@ -15,7 +15,10 @@
 import { CentralSystemWrapper } from "../services/CentralSystemWrapper.js";
 import { TokensController } from "../controllers/TokensController.js";
 import path from "path";
+import { fileURLToPath } from "url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 /*
  * CentralSystem class to handle token management.
  * It includes methods to get tokens, create a new token, revoke tokens and provide tokens to relecant clients.
@@ -24,7 +27,7 @@ import path from "path";
  */
 class CentralSystem {
   private centralSystemWrapper: CentralSystemWrapper;
-  private PROTO_PATH = path.join(__dirname, "./proto/wrapper.proto");
+  private PROTO_PATH = path.join(__dirname, "../../proto/wrapper.proto");
   private fakeTokens: Map<
     number,
     { tokenId: number; validity: string; payload: string }
@@ -37,12 +40,10 @@ class CentralSystem {
       wrapperPort
     );
     this.centralSystemWrapper.listen();
-
     this.fakeTokens = new Map([
       [1, { tokenId: 1, validity: "good", payload: "payload1" }],
       [2, { tokenId: 2, validity: "bad", payload: "payload2" }],
     ]);
-
     this.tokenController = new TokensController(
       this.fakeTokens,
       this.centralSystemWrapper

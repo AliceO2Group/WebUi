@@ -23,7 +23,7 @@ import { LogManager, InvalidInputError } from "@aliceo2/web-ui";
 
 import type { Request, Response } from "express";
 
-import { TokensGetService } from "../services/TokensGetService";
+import { TokensGetService } from "../services/TokensGetService.js";
 
 const logger = LogManager.getLogger("TokensController");
 

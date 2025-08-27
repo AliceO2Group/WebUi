@@ -5,7 +5,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "node --watch index.js"
+    "postinstall": "npm --prefix central-system install",
+    "build": "npm --prefix central-system run build",
+    "watch:ts": "npm --prefix central-system run watch:ts",
+    "watch:node": "nodemon --watch index.js --watch central-system/dist --ext js,json --exec \"node index.js\"",
+    "dev": "npm run build && concurrently -k \"npm:watch:*\"",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -16,5 +21,9 @@
   "homepage": "https://github.com/AliceO2Group/WebUi#readme",
   "dependencies": {
     "@aliceo2/web-ui": "^2.8.4"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1",
+    "nodemon": "^3.1.10"
   }
 }

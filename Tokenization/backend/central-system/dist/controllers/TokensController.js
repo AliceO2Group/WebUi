@@ -11,8 +11,9 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import { DuplexMessageEvent, } from "../services/models/message.model.js";
+import { DuplexMessageEvent, ConnectionDirection, } from "../services/models/message.model.js";
 import { LogManager, InvalidInputError } from "@aliceo2/web-ui";
+import { TokensGetService } from "../services/TokensGetService.js";
 const logger = LogManager.getLogger("TokensController");
 /**
  * @description Controller for managing tokens in the Central System.
@@ -34,13 +35,11 @@ export class TokensController {
      * @return {Promise<void>}
      */
     async getTokensHandler(req, res) {
+        // In future, replace with database/vault call service
+        const tokensGetService = new TokensGetService();
         setTimeout(() => {
             try {
-                const tokens = Array.from(this.tokensService.values()).map((token) => ({
-                    tokenId: token.tokenId,
-                    validity: token.validity,
-                    payload: token.payload.slice(-5),
-                }));
+                const tokens = tokensGetService.getTokens(this.tokensService);
                 res.status(200).json(tokens);
             }
             catch (error) {
@@ -69,13 +68,13 @@ export class TokensController {
                 payload: payload,
             };
             this.tokensService.set(newTokenId, newToken);
-            const client = Array.from(this.centralSystemWrapperService.getClients())[0];
-            console.log(client);
-            this.centralSystemWrapperService.clientSend(client, {
-                event: DuplexMessageEvent.NEW_TOKEN,
-                newToken: {
-                    token: "new token",
+            const client = Array.from(this.centralSystemWrapperService.getConnectedClients())[0];
+            this.centralSystemWrapperService.sendEvent(client, {
+                event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
+                payload: {
+                    connectionDirection: ConnectionDirection.SENDING,
                     targetAddress: "a",
+                    token: "newToken",
                 },
             });
             res.status(200).json("Token created successfully");
@@ -132,13 +131,13 @@ export class TokensController {
             const idNumber = parseInt(id, 10);
             await this._validateTokenID(idNumber);
             this.tokensService.delete(idNumber);
-            const client = Array.from(this.centralSystemWrapperService.getClients())[0];
-            console.log(client);
-            this.centralSystemWrapperService.clientSend(client, {
-                event: DuplexMessageEvent.REVOKE_TOKEN,
-                newToken: {
-                    token: id,
+            const client = Array.from(this.centralSystemWrapperService.getConnectedClients())[0];
+            this.centralSystemWrapperService.sendEvent(client, {
+                event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
+                payload: {
+                    connectionDirection: ConnectionDirection.SENDING,
                     targetAddress: "a",
+                    token: "newToken",
                 },
             });
             res.status(200).json("Token revoked successfully");
