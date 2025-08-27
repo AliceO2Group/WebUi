@@ -11,10 +11,11 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import { CentralSystemWrapper } from "../services/CentralSystemWrapper.js";
+import { CentralSystemWrapper } from "../wrapper/CentralSystemWrapper.js";
 import { TokensController } from "../controllers/TokensController.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import { TokensGetService } from "../services/TokensGetService.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 /*
@@ -26,13 +27,14 @@ const __dirname = path.dirname(__filename);
 class CentralSystem {
     constructor(wrapperPort) {
         this.PROTO_PATH = path.join(__dirname, "../../proto/wrapper.proto");
+        const tokensGetService = new TokensGetService();
         this.centralSystemWrapper = new CentralSystemWrapper(this.PROTO_PATH, wrapperPort);
         this.centralSystemWrapper.listen();
         this.fakeTokens = new Map([
             [1, { tokenId: 1, validity: "good", payload: "payload1" }],
             [2, { tokenId: 2, validity: "bad", payload: "payload2" }],
         ]);
-        this.tokenController = new TokensController(this.fakeTokens, this.centralSystemWrapper);
+        this.tokenController = new TokensController(tokensGetService, this.fakeTokens, this.centralSystemWrapper);
     }
 }
 export default CentralSystem;

@@ -12,10 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
-import { CentralSystemWrapper } from "../services/CentralSystemWrapper.js";
+import { CentralSystemWrapper } from "../wrapper/CentralSystemWrapper.js";
 import { TokensController } from "../controllers/TokensController.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import { TokensGetService } from "../services/TokensGetService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,9 +33,10 @@ class CentralSystem {
     number,
     { tokenId: number; validity: string; payload: string }
   >;
-  public tokenController: TokensController;
+  public readonly tokenController: TokensController;
 
   public constructor(wrapperPort: number) {
+    const tokensGetService = new TokensGetService();
     this.centralSystemWrapper = new CentralSystemWrapper(
       this.PROTO_PATH,
       wrapperPort
@@ -45,6 +47,7 @@ class CentralSystem {
       [2, { tokenId: 2, validity: "bad", payload: "payload2" }],
     ]);
     this.tokenController = new TokensController(
+      tokensGetService,
       this.fakeTokens,
       this.centralSystemWrapper
     );

@@ -20,7 +20,7 @@ import {
   ConnectionDirection,
   DuplexMessageEvent,
   DuplexMessageModel,
-} from "./models/message.model";
+} from "../services/models/message.model";
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.

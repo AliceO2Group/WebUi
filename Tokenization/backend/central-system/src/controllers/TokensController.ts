@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { CentralSystemWrapper } from "../services/CentralSystemWrapper";
+import { CentralSystemWrapper } from "../wrapper/CentralSystemWrapper";
 import {
   DuplexMessageEvent,
   DuplexMessageModel,
@@ -43,6 +43,7 @@ export class TokensController {
    * @param centralSystemWrapper - An instance of CentralSystemWrapper to handle client connections.
    */
   constructor(
+    private readonly tokensGetService: TokensGetService,
     fakeTokens: Map<
       number,
       { tokenId: number; validity: string; payload: string }
@@ -60,23 +61,18 @@ export class TokensController {
    */
   public async getTokensHandler(req: Request, res: Response): Promise<void> {
     // In future, replace with database/vault call service
-    const tokensGetService: TokensGetService = new TokensGetService();
 
-    setTimeout(() => {
-      try {
-        const tokens = tokensGetService.getTokens(this.tokensService);
-        res.status(200).json(tokens);
-      } catch (error: any) {
-        if (error.stack) {
-          logger.trace(error);
-        }
-        logger.errorMessage(
-          `Error while retrieving run types: ${error.message}`
-        );
-
-        res.status(500).json({ error: "Failed to retrieve tokens" });
+    try {
+      const tokens = await this.tokensGetService.getTokens(this.tokensService);
+      res.status(200).json(tokens);
+    } catch (error: any) {
+      if (error.stack) {
+        logger.trace(error);
       }
-    }, 1000);
+      logger.errorMessage(`Error while retrieving run types: ${error.message}`);
+
+      res.status(500).json({ error: "Failed to retrieve tokens" });
+    }
   }
 
   /**

@@ -13,7 +13,6 @@
  */
 import { DuplexMessageEvent, ConnectionDirection, } from "../services/models/message.model.js";
 import { LogManager, InvalidInputError } from "@aliceo2/web-ui";
-import { TokensGetService } from "../services/TokensGetService.js";
 const logger = LogManager.getLogger("TokensController");
 /**
  * @description Controller for managing tokens in the Central System.
@@ -24,7 +23,8 @@ export class TokensController {
      * @param fakeTokens - A map simulating a database of tokens.
      * @param centralSystemWrapper - An instance of CentralSystemWrapper to handle client connections.
      */
-    constructor(fakeTokens, centralSystemWrapper) {
+    constructor(tokensGetService, fakeTokens, centralSystemWrapper) {
+        this.tokensGetService = tokensGetService;
         this.tokensService = fakeTokens;
         this.centralSystemWrapperService = centralSystemWrapper;
     }
@@ -36,20 +36,17 @@ export class TokensController {
      */
     async getTokensHandler(req, res) {
         // In future, replace with database/vault call service
-        const tokensGetService = new TokensGetService();
-        setTimeout(() => {
-            try {
-                const tokens = tokensGetService.getTokens(this.tokensService);
-                res.status(200).json(tokens);
+        try {
+            const tokens = await this.tokensGetService.getTokens(this.tokensService);
+            res.status(200).json(tokens);
+        }
+        catch (error) {
+            if (error.stack) {
+                logger.trace(error);
             }
-            catch (error) {
-                if (error.stack) {
-                    logger.trace(error);
-                }
-                logger.errorMessage(`Error while retrieving run types: ${error.message}`);
-                res.status(500).json({ error: "Failed to retrieve tokens" });
-            }
-        }, 1000);
+            logger.errorMessage(`Error while retrieving run types: ${error.message}`);
+            res.status(500).json({ error: "Failed to retrieve tokens" });
+        }
     }
     /**
      * @description Creates a new token with the provided payload.
