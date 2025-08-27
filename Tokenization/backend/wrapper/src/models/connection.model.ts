@@ -28,3 +28,35 @@ export enum ConnectionStatus {
   // The connection is refreshing its authentication token
   TOKEN_REFRESH = "TOKEN_REFRESH",
 }
+
+export type ConnectionHeaders = Record<string, string>;
+
+export type FetchOptions = {
+  method?: string;
+  path?: string;
+  headers?: ConnectionHeaders;
+  body?: string | Buffer | Uint8Array | null;
+};
+
+export type FetchResponse = {
+  status: number;
+  headers: ConnectionHeaders;
+  body: Buffer;
+  text: () => Promise<string>;
+  json: () => Promise<any>;
+};
+
+export type HttpLikeRequest = {
+  method: string;
+  path: string;
+  headers: Headers;
+  body: Buffer;
+  correlation_id?: string;
+  sequence_number?: number;
+};
+
+export type HttpLikeResponse = {
+  status: number;
+  headers: Headers;
+  body: Buffer;
+};

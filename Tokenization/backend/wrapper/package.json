@@ -5,12 +5,11 @@
   "scripts": {
     "test": "jest",
     "build": "tsc -p tsconfig.build.json && cp -r src/proto dist",
-    "client": "node dist/client/gRPCWrapper.js",
-    "central": "node dist/central/CentralSystem.js",
     "process-banners": "node scripts/banner.js"
   },
   "author": "ALICEO2",
   "devDependencies": {
+    "@types/express": "^5.0.3",
     "@types/jest": "^29.5.14",
     "jest": "^29.7.0",
     "ts-jest": "^29.4.0",
@@ -19,6 +18,7 @@
   "dependencies": {
     "@grpc/grpc-js": "^1.13.4",
     "@grpc/proto-loader": "^0.7.15",
+    "express": "^5.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

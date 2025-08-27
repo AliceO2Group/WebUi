@@ -23,6 +23,7 @@ import {
   ConnectionDirection,
   DuplexMessageEvent,
 } from "../../models/message.model";
+import { ConnectionStatus } from "../../models/connection.model";
 
 /**
  * @description Manages all the connection between clients and central system.
@@ -43,10 +44,16 @@ import {
  */
 export class ConnectionManager {
   private logger = LogManager.getLogger("ConnectionManager");
+  private wrapper: any; // gRPC wrapper file
+
   private centralDispatcher: CentralCommandDispatcher;
   private centralConnection: CentralConnection;
   private sendingConnections = new Map<string, Connection>();
+
   private receivingConnections = new Map<string, Connection>();
+  private peerCtor: any; // p2p gRPC constructor
+  private peerServer?: grpc.Server;
+  private baseAPIPath: string = "localhost:40041/api/";
 
   /**
    * @description Initializes a new instance of the ConnectionManager class.
@@ -66,9 +73,10 @@ export class ConnectionManager {
     });
 
     const proto = grpc.loadPackageDefinition(packageDef) as any;
-    const wrapper = proto.webui.tokenization;
+    this.wrapper = proto.webui.tokenization;
+    this.peerCtor = this.wrapper.Peer2Peer;
 
-    const client = new wrapper.CentralSystem(
+    const centralClient = new this.wrapper.CentralSystem(
       centralAddress,
       grpc.credentials.createInsecure()
     );
@@ -76,17 +84,17 @@ export class ConnectionManager {
     // event dispatcher for central system events
     this.centralDispatcher = new CentralCommandDispatcher();
     this.centralConnection = new CentralConnection(
-      client,
+      centralClient,
       this.centralDispatcher
     );
 
     this.sendingConnections.set(
       "a",
-      new Connection("1", "a", ConnectionDirection.SENDING)
+      new Connection("1", "a", ConnectionDirection.SENDING, this.peerCtor)
     );
     this.sendingConnections.set(
       "b",
-      new Connection("2", "b", ConnectionDirection.SENDING)
+      new Connection("2", "b", ConnectionDirection.SENDING, this.peerCtor)
     );
   }
 
@@ -125,18 +133,40 @@ export class ConnectionManager {
    * @param direction Direction of connection
    * @param token Optional token for connection
    */
-  createNewConnection(
+  public async createNewConnection(
     address: string,
     direction: ConnectionDirection,
     token?: string
   ) {
-    const conn = new Connection(token || "", address, direction);
+    let conn: Connection | undefined;
+
+    // Checks if connection already exists
+    conn =
+      direction === ConnectionDirection.RECEIVING
+        ? this.receivingConnections.get(address)
+        : this.sendingConnections.get(address);
+
+    // Return existing connection if found
+    if (conn) {
+      if (token) {
+        conn.handleNewToken(token);
+      }
+      return conn;
+    }
+
+    // Create new connection
+    conn = new Connection(token || "", address, direction, this.peerCtor);
+    conn.updateStatus(ConnectionStatus.CONNECTING);
 
     if (direction === ConnectionDirection.RECEIVING) {
       this.receivingConnections.set(address, conn);
     } else {
       this.sendingConnections.set(address, conn);
     }
+    conn.updateStatus(ConnectionStatus.CONNECTED);
+    this.logger.infoMessage(
+      `Connection with ${address} has been estabilished. Status: ${conn.getStatus()}`
+    );
 
     return conn;
   }
@@ -172,5 +202,97 @@ export class ConnectionManager {
       sending: [...this.sendingConnections.values()],
       receiving: [...this.receivingConnections.values()],
     };
+  }
+
+  /** Starts a listener server for p2p connections */
+  public async listenForPeers(
+    port: number,
+    baseAPIPath?: string
+  ): Promise<void> {
+    if (baseAPIPath) this.baseAPIPath = baseAPIPath;
+
+    if (this.peerServer) {
+      this.peerServer.forceShutdown();
+      this.peerServer = undefined;
+    }
+
+    this.peerServer = new grpc.Server();
+    this.peerServer.addService(this.wrapper.Peer2Peer.service, {
+      Fetch: async (
+        call: grpc.ServerUnaryCall<any, any>,
+        callback: grpc.sendUnaryData<any>
+      ) => {
+        try {
+          const clientAddress = call.getPeer();
+          this.logger.infoMessage(`Incoming request from ${clientAddress}`);
+
+          let conn: Connection | undefined =
+            this.receivingConnections.get(clientAddress);
+
+          if (!conn) {
+            conn = new Connection(
+              "",
+              clientAddress,
+              ConnectionDirection.RECEIVING,
+              this.peerCtor
+            );
+            conn.updateStatus(ConnectionStatus.CONNECTED);
+            this.receivingConnections.set(clientAddress, conn);
+            this.logger.infoMessage(
+              `New incoming connection registered for: ${clientAddress}`
+            );
+          }
+
+          // create request to forward to local API endpoint
+          const method = String(call.request?.method || "POST").toUpperCase();
+          const url = this.baseAPIPath + (call.request?.path || "");
+          const headers: { [key: string]: string } = call.request?.headers;
+          const body = call.request?.body
+            ? Buffer.from(call.request.body).toString("utf-8")
+            : undefined;
+
+          this.logger.infoMessage(
+            `Received payload from ${clientAddress}: \n${url}\n${JSON.stringify(
+              headers
+            )}\n${JSON.stringify(body)}\n`
+          );
+
+          const httpResp = await fetch(url, {
+            method,
+            headers: headers,
+            body,
+          });
+
+          const respHeaders: Record<string, string> = {};
+          httpResp.headers.forEach((v, k) => (respHeaders[k] = v));
+          const resBody = Buffer.from(await httpResp.arrayBuffer());
+
+          callback(null, {
+            status: httpResp.status,
+            headers: respHeaders,
+            body: resBody,
+          });
+        } catch (e: any) {
+          this.logger.errorMessage(
+            `Error forwarding request: ${e ?? "Uknown error"}`
+          );
+
+          callback({
+            code: grpc.status.INTERNAL,
+            message: e?.message ?? "forward error",
+          } as any);
+        }
+      },
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      this.peerServer!.bindAsync(
+        `localhost:${port}`,
+        grpc.ServerCredentials.createInsecure(),
+        (err) => (err ? reject(err) : resolve())
+      );
+    });
+
+    this.logger.infoMessage(`Peer server listening on localhost:${port}`);
   }
 }
