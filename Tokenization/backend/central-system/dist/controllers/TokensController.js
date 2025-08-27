@@ -35,7 +35,6 @@ export class TokensController {
      * @return {Promise<void>}
      */
     async getTokensHandler(req, res) {
-        // In future, replace with database/vault call service
         try {
             const tokens = await this.tokensGetService.getTokens(this.tokensService);
             res.status(200).json(tokens);
@@ -74,7 +73,7 @@ export class TokensController {
                     token: "newToken",
                 },
             });
-            res.status(200).json("Token created successfully");
+            res.status(201).json("Token created successfully");
         }
         catch (error) {
             if (error.stack) {
@@ -137,7 +136,7 @@ export class TokensController {
                     token: "newToken",
                 },
             });
-            res.status(200).json("Token revoked successfully");
+            res.status(204).json("Token revoked successfully");
         }
         catch (error) {
             if (error.stack) {
