@@ -74,6 +74,27 @@ export function filtersPanel(filterModel, viewModel) {
 };
 
 /**
+ * Determines if runs mode is allowed based on current page and context
+ * @param {object} viewModel - Model that manages the state of the page
+ * @returns {boolean} - whether runs mode is allowed
+ */
+const isRunsModeAllowed = (viewModel) => {
+  const { model } = viewModel;
+
+  const allowedPages = ['objectTree', 'layoutShow', 'objectView'];
+  if (!model || !allowedPages.includes(model.page)) {
+    return false;
+  }
+
+  // not allow runs mode if in edit mode
+  if (model.page === 'layoutShow' && viewModel.editEnabled) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
  * Button which will allow the user to update filter parameters after the input
  * @param {Function} onClickCallback - Function to trigger the filter mechanism
  * @param {FilterModel} filterModel - Model that manages filter state
@@ -82,9 +103,7 @@ export function filtersPanel(filterModel, viewModel) {
  */
 const triggerFiltersButton = (onClickCallback, filterModel, viewModel) => {
   const runNumber = filterModel.filterMap.RunNumber;
-  const isRunsModeAllowed = viewModel.model &&
-  ['objectTree', 'layoutShow', 'objectView'].includes(viewModel.model.page);
-  if (filterModel.isValidRunNumber(runNumber) && isRunsModeAllowed) {
+  if (filterModel.isValidRunNumber(runNumber) && isRunsModeAllowed(viewModel)) {
     return updateDropdownButton(onClickCallback, filterModel, viewModel);
   }
 
