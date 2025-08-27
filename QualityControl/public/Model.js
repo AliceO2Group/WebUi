@@ -257,6 +257,7 @@ export default class Model extends Observable {
         setBrowserTabTitle('QCG-View');
         const { params } = this.router;
         this.objectViewModel.init(params);
+        this.filterModel.restartRunsModeIntervals(this.objectViewModel);
         this.notify();
         break;
       }
