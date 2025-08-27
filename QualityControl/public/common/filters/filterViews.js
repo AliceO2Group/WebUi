@@ -47,15 +47,15 @@ const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback
 /**
  * Builds a panel containing multiple filters to allow user to apply for objectTree show/view
  * @param {FilterModel} filterModel - Model that manages filter state
- * @param {PageModel} pageModel - Model that manages the state of the page that the filter is on.
+ * @param {object} viewModel - Model that manages the state of the page that the filter is on.
  * @returns {vnode} - virtual node element
  */
-export function filtersPanel(filterModel, pageModel) {
+export function filtersPanel(filterModel, viewModel) {
   const { filterMap, setFilterValue, filterService, isVisible, clearFilter } = filterModel;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
-  const onEnterCallback = () => filterModel.triggerFilter(pageModel);
-  const clearFilterCallback = clearFilter.bind(filterModel, pageModel);
+  const onEnterCallback = () => filterModel.triggerFilter(viewModel);
+  const clearFilterCallback = clearFilter.bind(filterModel, viewModel);
   const filtersList = filtersConfig(filterService);
 
   if (!isVisible || filterModel.inRunMode) {
@@ -65,7 +65,7 @@ export function filtersPanel(filterModel, pageModel) {
   return h(
     '.w-100.flex-row.p2.g2.justify-center#filterElement',
     [
-      triggerFiltersButton(onEnterCallback, filterModel, pageModel),
+      triggerFiltersButton(onEnterCallback, filterModel, viewModel),
       clearFiltersButton(clearFilterCallback),
       ...filtersList.map((filter) =>
         createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
@@ -77,15 +77,15 @@ export function filtersPanel(filterModel, pageModel) {
  * Button which will allow the user to update filter parameters after the input
  * @param {Function} onClickCallback - Function to trigger the filter mechanism
  * @param {FilterModel} filterModel - Model that manages filter state
- * @param {PageModel} pageModel - Model that manages the state of the page
+ * @param {object} viewModel - Model that manages the state of the page
  * @returns {vnode} - virtual node element
  */
-const triggerFiltersButton = (onClickCallback, filterModel, pageModel) => {
+const triggerFiltersButton = (onClickCallback, filterModel, viewModel) => {
   const runNumber = filterModel.filterMap.RunNumber;
-  const isRunsModeAllowed = pageModel.model &&
-  ['objectTree', 'layoutShow', 'objectView'].includes(pageModel.model.page);
+  const isRunsModeAllowed = viewModel.model &&
+  ['objectTree', 'layoutShow', 'objectView'].includes(viewModel.model.page);
   if (filterModel.isValidRunNumber(runNumber) && isRunsModeAllowed) {
-    return updateDropdownButton(onClickCallback, filterModel, pageModel);
+    return updateDropdownButton(onClickCallback, filterModel, viewModel);
   }
 
   return h(
@@ -99,10 +99,10 @@ const triggerFiltersButton = (onClickCallback, filterModel, pageModel) => {
  * Dropdown button for update options when run number is present
  * @param {Function} onClickCallback - Function to trigger the filter mechanism
  * @param {FilterModel} filterModel - Model that manages filter state
- * @param {PageModel} pageModel - Model that manages the state of the page
+ * @param {object} viewModel - Model that manages the state of the page
  * @returns {vnode} - virtual node element
  */
-const updateDropdownButton = (onClickCallback, filterModel, pageModel) => {
+const updateDropdownButton = (onClickCallback, filterModel, viewModel) => {
   // Use a simple property on the filterModel to track dropdown state
   const isDropdownOpen = filterModel.dropdownOpen || false;
 
@@ -139,7 +139,7 @@ const updateDropdownButton = (onClickCallback, filterModel, pageModel) => {
             e.stopPropagation();
             filterModel.dropdownOpen = false;
             filterModel.notify();
-            await filterModel.activateRunsMode(pageModel);
+            await filterModel.activateRunsMode(viewModel);
           },
           style: 'white-space: nowrap;',
         }, 'Update & Run Mode'),

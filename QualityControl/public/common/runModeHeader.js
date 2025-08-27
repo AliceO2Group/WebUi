@@ -18,10 +18,10 @@ import { h, info } from '/js/src/index.js';
 /**
  * Run mode header component showing run information and exit button
  * @param {FilterModel} filterModel - model that manages filter state
- * @param {PageModel} pageModel - model that manages the state of the page
+ * @param {object} viewModel - model that manages the state of the view
  * @returns {vnode} - virtual node element
  */
-export function runModeHeader(filterModel, pageModel) {
+export function runModeHeader(filterModel, viewModel) {
   if (!filterModel.inRunMode) {
     return null;
   }
@@ -30,7 +30,7 @@ export function runModeHeader(filterModel, pageModel) {
     id: 'runModeHeader',
   }, [
     renderRunModeInfo(filterModel),
-    renderExitButton(filterModel, pageModel),
+    renderExitButton(filterModel, viewModel),
   ]);
 
   /**
@@ -152,13 +152,13 @@ export function runModeHeader(filterModel, pageModel) {
   /**
    * Renders the exit button
    * @param {FilterModel} filterModel - model that manages filter state
-   * @param {PageModel} pageModel - model that manages the state of the page
+   * @param {object} viewModel - model that manages the state of the view
    * @returns {vnode} - virtual node element
    */
-  function renderExitButton(filterModel, pageModel) {
+  function renderExitButton(filterModel, viewModel) {
     return h('button.btn.btn-sm', {
       id: 'exitRunModeButton',
-      onclick: async () => await filterModel.deactivateRunsMode(pageModel),
+      onclick: async () => await filterModel.deactivateRunsMode(viewModel),
       title: 'Exit run mode and show all filters',
     }, 'Exit');
   }
