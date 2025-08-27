@@ -173,6 +173,9 @@ describe('Control', function() {
   require('./api/lock/api-get-locks.test');
   require('./api/lock/api-put-locks.test');
   require('./api/deployment/api-post-deployment.test');
+  require('./api/tasks/api-get-task-by-id.test');
+  require('./api/tasks/api-get-tasks.test');
+  require('./api/tasks/api-delete-tasks-test');
 
   beforeEach(() => this.ok = true);
 
