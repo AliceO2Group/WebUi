@@ -42,6 +42,15 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(location.search, '?page=layoutList');
   });
 
+  await testParent.test('should go to layoutList page when clicking on title', { timeout }, async () => {
+    await page.goto(`${url}?page=about`, { waitUntil: 'networkidle0' });
+    await page.click('#qcgTitle');
+    await delay(100);
+    await page.waitForNetworkIdle();
+    const location = await page.evaluate(() => window.location);
+    strictEqual(location.search, '?page=layoutList');
+  });
+
   await testParent.test('should have folder for official layouts', async () => {
     const label = await page.evaluate((path) =>
       document.querySelector(path).textContent.trim(), toggleFolderPath(officialLayoutIndex));

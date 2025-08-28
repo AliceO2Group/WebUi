@@ -81,7 +81,12 @@ const filterSpecific = (model) => {
 const commonHeader = (model) => h('.flex-grow.flex-row.items-center', [
   loginButton(model),
   ' ',
-  h('span.f4.gray', 'Quality Control'),
+  h('span.f4.gray', {
+    id: 'qcgTitle',
+    style: 'cursor: pointer',
+    onclick: () => model.router.go('?page=layoutList'),
+    title: 'Go to layouts list page',
+  }, 'Quality Control'),
   model.loader.active && h('span.f4.mh1.gray', spinner()),
 ]);
 
