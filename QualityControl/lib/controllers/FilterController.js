@@ -33,7 +33,7 @@ export class FilterController {
      * @type {FilterService}
      */
     this._filterService = filterService;
-    this._logger = LogManager.getLogger('FilterController');
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/filter-ctrl`);
   }
 
   /**
@@ -65,16 +65,18 @@ export class FilterController {
     try {
       const { runNumber } = req.params;
 
-      const validatedRunNumber = RunNumberDto.isRunNumberValid(runNumber);
+      const validatedRunNumber = RunNumberDto.validateRunNumber(runNumber);
       const runStatus = await this._filterService.getRunStatus(validatedRunNumber);
       res.status(200).json(runStatus);
     } catch (error) {
-      if (error.message && error.message.includes('Run number')) {
-        return updateAndSendExpressResponseFromNativeError(res, new InvalidInputError(error.message));
-      }
       this._logger
         .errorMessage(`Failed to retrieve run status for run ${req.params?.runNumber}: ${error.message || error}`);
-      updateAndSendExpressResponseFromNativeError(res, new Error('Failed to retrieve run status'));
+      updateAndSendExpressResponseFromNativeError(
+        res,
+        error instanceof InvalidInputError
+          ? error
+          : new Error('Failed to retrieve run status'),
+      );
     }
   }
 }

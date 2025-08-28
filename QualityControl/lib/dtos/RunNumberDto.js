@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
+import { InvalidInputError } from '@aliceo2/web-ui';
+
 /**
  * RunNumber DTO for validating run numbers
  */
@@ -22,25 +24,25 @@ export class RunNumberDto {
    * @returns {number} The validated run number
    * @throws {Error} If input cannot be parsed or is invalid
    */
-  static isRunNumberValid(runNumber) {
+  static validateRunNumber(runNumber) {
     if (runNumber === undefined || runNumber === null || runNumber === '') {
-      throw new Error('Run number is required when in run mode');
+      throw new InvalidInputError('Run number is required when in run mode');
     }
 
     let parsedValue = null;
     if (typeof runNumber === 'string') {
       parsedValue = parseInt(runNumber, 10);
       if (isNaN(parsedValue)) {
-        throw new Error('Run number must be a valid number');
+        throw new InvalidInputError('Run number must be a valid number');
       }
     } else if (typeof runNumber === 'number') {
       parsedValue = runNumber;
     } else {
-      throw new Error('Run number must be a number');
+      throw new InvalidInputError('Run number must be a number');
     }
 
     if (!Number.isInteger(parsedValue) || parsedValue < 0) {
-      throw new Error('Run number must be an integer greater than or equal to 0');
+      throw new InvalidInputError('Run number must be an integer greater than or equal to 0');
     }
 
     return parsedValue;

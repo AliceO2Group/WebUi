@@ -51,7 +51,7 @@ export class ObjectController {
       const runNumber = filters?.RunNumber;
 
       if (inRunMode) {
-        const validatedRunNumber = RunNumberDto.isRunNumberValid(runNumber);
+        const validatedRunNumber = RunNumberDto.validateRunNumber(runNumber);
         const { paths } = await this._runModeService.retrievePathsAndSetRunStatus(validatedRunNumber, prefix);
         return res.status(200).json({ paths });
       }
@@ -63,12 +63,11 @@ export class ObjectController {
       });
       return res.status(200).json(objectsData);
     } catch (error) {
-      if (error.message && (error.message.includes('Run number') || error.message.includes('must be'))) {
-        return updateAndSendExpressResponseFromNativeError(res, new InvalidInputError(error.message));
-      }
-      const responseError = new Error('Failed to retrieve list of objects latest version');
+      const defaultError = new Error('Failed to retrieve list of objects latest version');
       this._logger.errorMessage(`Error whilst retrieving objects: ${error}`);
-      updateAndSendExpressResponseFromNativeError(res, responseError);
+      updateAndSendExpressResponseFromNativeError(res, error instanceof InvalidInputError
+        ? error
+        : defaultError);
     }
   }
 
