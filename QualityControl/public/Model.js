@@ -180,6 +180,7 @@ export default class Model extends Observable {
 
     switch (params.page) {
       case 'layoutList':
+        this.clearURL('layoutList');
         this.page = 'layoutList';
         setBrowserTabTitle('QCG-Layouts');
         this.services.layout.getLayouts(RequestFields.LAYOUT_CARD);
@@ -262,6 +263,7 @@ export default class Model extends Observable {
         break;
       }
       case 'about':
+        this.clearURL('about');
         this.page = 'about';
         setBrowserTabTitle('QCG-About');
         this.aboutViewModel.retrieveAllServicesStatus();
@@ -272,6 +274,15 @@ export default class Model extends Observable {
         this.router.go('?page=layoutList', true);
         break;
     }
+  }
+
+  /**
+   * Clear URL parameters and redirect to a certain page
+   * @param {*} pageName - name of the page to be redirected to
+   * @returns {undefined}
+   */
+  clearURL(pageName) {
+    this.router.go(`?page=${pageName}`, true, true);
   }
 
   /**
