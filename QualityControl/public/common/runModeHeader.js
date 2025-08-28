@@ -143,7 +143,7 @@ export function runModeHeader(filterModel, viewModel) {
       style: 'white-space: nowrap;',
     }, [
       h('div.flex-row.items-center.g1', [
-        h('badge.bg-gray-light', h(`b.${getStatusClass(status)}`, [status])),
+        h(`b.${getStatusClass(status)}`, [status]),
         h('span.gray-darker', ` - ${getStatusTitle(status)}`),
       ]),
     ])));
