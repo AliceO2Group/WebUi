@@ -1,6 +1,5 @@
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
-import path from "path";
 import { LogManager } from "@aliceo2/web-ui";
 import { CentralSystemConfig } from "../models/config.model";
 
