@@ -75,8 +75,7 @@ export class CentralSystemWrapper {
     // Handle stream error event
     call.on("error", (err) =>
       this.logger.errorMessage(
-        `Stream error from client ${call.getPeer()}:`,
-        err
+        `Stream error from client ${call.getPeer()}: ${err}`
       )
     );
   }
@@ -91,7 +90,7 @@ export class CentralSystemWrapper {
       grpc.ServerCredentials.createInsecure(),
       (err, _port) => {
         if (err) {
-          this.logger.errorMessage("Server bind error:", err);
+          this.logger.errorMessage(`Server bind error: ${err}`);
           return;
         }
         this.logger.infoMessage(`CentralSytem started listening on ${addr}`);
@@ -99,13 +98,3 @@ export class CentralSystemWrapper {
     );
   }
 }
-
-// Instantiate the CentralSystemWrapper on port 50051, but don't start automatically
-const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
-const centralSystem = new CentralSystemWrapper({
-  protoPath: PROTO_PATH,
-  host: "localhost",
-  port: 50051,
-});
-// Start listening explicitly
-centralSystem.listen();

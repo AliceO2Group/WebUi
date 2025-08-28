@@ -39,10 +39,3 @@ export class gRPCWrapper {
     this.ConnectionManager.connectToCentralSystem();
   }
 }
-
-const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
-const grpc = new gRPCWrapper({
-  protoPath: PROTO_PATH,
-  centralAddress: "localhost:50051",
-});
-grpc.connectToCentralSystem();

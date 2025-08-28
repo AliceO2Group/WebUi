@@ -122,8 +122,8 @@ export class ConnectionManager {
     if (this.stream) {
       this.stream.end();
       this.stream = undefined;
+      this.logger.infoMessage(`Disconnected from CentralSystem service`);
     }
     this.reconnectAttempts = 0;
-    this.logger.infoMessage(`Disconnected from CentralSystem service`);
   }
 }

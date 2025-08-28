@@ -41,7 +41,7 @@ jest.mock("@grpc/grpc-js", () => {
   };
 });
 
-import { CentralSystemWrapper } from "../../central/CentralSystem";
+import { CentralSystemWrapper } from "../../central/CentralSystemWrapper";
 import * as grpc from "@grpc/grpc-js";
 
 describe("CentralSystemWrapper", () => {
@@ -49,7 +49,10 @@ describe("CentralSystemWrapper", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    wrapper = new CentralSystemWrapper("dummy.proto", 12345);
+    wrapper = new CentralSystemWrapper({
+      protoPath: "dummy.proto",
+      port: 12345,
+    });
   });
 
   test("should set up gRPC service and add it to the server", () => {
