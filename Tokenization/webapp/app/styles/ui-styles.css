@@ -12,8 +12,19 @@
  * or submit itself to any jurisdiction.
  */
 
-export interface Log {
-  id: number;
-  title: string;
-  content: string;
+ .container {
+    display: grid;
+    grid-template-rows: 1fr 3fr 1.3fr;
+    grid-template-columns: 0.575fr 3fr; 
 }
+
+.header-1 {
+    justify-self: stretch;
+    grid-column: span 2;
+}
+
+.sidebar-1 {
+    border-radius: 2% 0 0 2% ;
+    grid-row: span 2;
+}
+
