@@ -25,7 +25,10 @@ const PROTO_PATH = path.join(__dirname, './../../protobuf/o2control.proto');
  * Create and run a mock gRPC server for O2Core
  */
 const coreGRPCServer = (config) => {
-  let refreshCall = 0;
+  let callCounters = {
+    cleanupTasks: 0,
+    newEnvironment: 0
+  };
   let calls = {};
 
   const server = new grpcLibrary.Server();
@@ -70,13 +73,17 @@ const coreGRPCServer = (config) => {
       callback(null, envTest);
     },
     async newEnvironment(call, callback) {
-      if (refreshCall++ == 1) {
+      if (callCounters.newEnvironment++ == 1) {
         callback(new Error('Cannot create environment'), {});
       } else {
         await new Promise(resolve => setTimeout(resolve, 3000));
         calls['newEnvironment'] = true;
         callback(null, {environment: envTest.environment});
       }
+    },
+    async newEnvironmentAsync(call, callback) {
+        calls['newEnvironmentAsync'] = true;
+        callback(null, {environment: envTest.environment});
     },
     getWorkflowTemplates(call, callback) {
       calls['getWorkflowTemplates'] = true;
@@ -102,6 +109,39 @@ const coreGRPCServer = (config) => {
       calls['getActiveDetectors'] = true;
       callback(null, {detectors: ['DCS']});
     },
+    getTask(call, callback) {
+      if (call.request.taskId === '12345') {
+        calls['getTask'] = true;
+        callback(null, {
+          task: {
+            shortInfo: {
+              taskId: '12345',
+              name: 'Test Task',
+              state: 'RUNNING'
+            }
+          }
+        });
+      } else {
+        callback({
+          code: 5,
+          details: 'gRPC sourced Error: Task not found'
+        }, null)
+      }
+    },
+    cleanupTasks(call, callback) {
+      calls['cleanupTasks'] = true;
+      if (callCounters.cleanupTasks++ === 0) {
+        callback(null, {
+          killedTasks: [],
+          runningTasks: []
+        });
+      } else {
+        callback({
+          code: 4,
+          details: 'gRPC sourced Error: Cleanup timed out'
+        }, null);
+      }
+    }
   });
 
   const bindCallback = (error, _) => {
@@ -129,18 +169,6 @@ const envTest = {
       odc_enabled: 'true',
       mid_enabled: 'false',
       mid_something: 'test',
-      dd_enabled: 'true',
-      run_type: 'run'
-    },
-    vars: {
-      odc_enabled: 'true',
-      mid_enabled: 'false',
-      mid_something: 'test',
-      dd_enabled: 'true',
-      run_type: 'run'
-    },
-    defaults: {
-      dcs_topology: 'test',
       dd_enabled: 'true',
       run_type: 'run'
     },

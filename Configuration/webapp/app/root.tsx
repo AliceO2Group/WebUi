@@ -19,23 +19,23 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useNavigation,
 } from 'react-router';
 
 import type { Route } from './+types/root';
 import './app.css';
 import '@aliceo2/web-ui/Frontend/css/src/bootstrap.css';
-import { Navbar } from '~/ui/navbar';
+
 import { Spinner } from '~/ui/spinner';
 
+import MainLayout from './components/layout/MainLayout';
+
 /**
- * Layout component
- * @param {React.FC.Props} props React props object
- * @returns {React.ReactElement} Layout
+ * Root component
+ * @param {{ children: React.ReactElement }} props Props of the component
+ * @param {React.ReactElement} props.children React nodes to embed inside of this component
+ * @returns {React.ReactElement} Root
  */
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { state } = useNavigation();
-
   return (
     <html lang="en">
       <head>
@@ -45,8 +45,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <Navbar />
-        <div className={'p2'}>{state === 'loading' ? <Spinner /> : children}</div>
+        <MainLayout>{children}</MainLayout>
         <ScrollRestoration />
         <Scripts />
       </body>
