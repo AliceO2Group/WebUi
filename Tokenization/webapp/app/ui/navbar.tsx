@@ -10,26 +10,43 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-import { NavLink } from 'react-router';
-import type {NavLinkProps} from 'react-router';
+import React from 'react';
+import { Box, Tabs } from '@mui/material';
 
-const StyledNavLink = ({children, className: _, ...props}: NavLinkProps) => {
-    return <NavLink
-        {...props}
-        className={({isActive}) => `btn btn-tab ${isActive ? 'selected' : ''}`}
-    >{children}</NavLink>
+interface TabsNavbarArguments {
+  tabIndex: number;
+  setTabIndex: (index: number) => void;
+  children?: React.ReactNode;
 }
 
-export const Navbar = () => {
-    return <nav className={'flex-row justify-between items-center p2 shadow-level2 level2 bg-gray-light'}>
-        <span className={'f4 gray-darker'}>Tokenization light</span>
-        <div className={'btn-group'}>
-            <StyledNavLink to={'/'}>Home</StyledNavLink>
-            <StyledNavLink className={'btnStyledNav btn-tab'} to={'/tokens'}>Tokens</StyledNavLink>
-        </div>
-        <div>
-        </div>
-    </nav>
+/**
+ * TabsNavbar
+ *
+ * A reusable component that renders a Material-UI Tabs navigation bar.
+ * Allows switching between different sections using tab buttons.
+ * @param tabIndex The currently selected tab index.
+ * @param setTabIndex Function to update the selected tab index.
+ * @param children Tab (@mui/material) components (usually <Tab />) to be rendered inside the navigation bar.
+ */
+export function TabsNavbar({ tabIndex, setTabIndex, children }: TabsNavbarArguments) {
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabIndex(newValue);
+  };
+
+  return (
+    <Box>
+      <Tabs
+        value={tabIndex}
+        onChange={handleTabChange}
+        variant="fullWidth"
+        textColor="secondary"
+        indicatorColor="secondary"
+      >
+        {children}
+      </Tabs>
+    </Box>
+  );
 }
