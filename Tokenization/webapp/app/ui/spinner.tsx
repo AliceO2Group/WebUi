@@ -10,33 +10,37 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 interface SpinnerProps {
-    /**
-     * Size of the spinner in rem, default 10
-     */
-    size?: number;
+  /**
+   * Size of the spinner in rem, default 10
+   */
+  size?: number;
 
-    /**
-     * Horizontal alignment of the spinner, default 'center'
-     */
-    align?: 'left' | 'center' | 'right';
+  /**
+   * Horizontal alignment of the spinner, default 'center'
+   */
+  align?: 'left' | 'center' | 'right';
 }
 
-export const Spinner = ({size = 10, align = 'center'}: SpinnerProps) => {
-    return <div className={`flex-row justify-${align} items-center`}>
-    <div style={{fontSize: `${size}rem`}}>
-        <div className={'atom-spinner'}>
-            <div className={'spinner-inner'}>
-                <div className={'spinner-line'}></div>
-                <div className={'spinner-line'}></div>
-                <div className={'spinner-line'}></div>
-                <div className={'spinner-circle'}>
-                    <div>●</div>
-                </div>
-            </div>
+/**
+ * Renders animated spinner
+ *
+ * @param size
+ * @param align
+ */
+export const Spinner = ({ size = 10, align = 'center' }: SpinnerProps) => <div className={`flex-row justify-${align} items-center`}>
+  <div style={{ fontSize: `${size}rem` }}>
+    <div className={'atom-spinner'}>
+      <div className={'spinner-inner'}>
+        <div className={'spinner-line'}></div>
+        <div className={'spinner-line'}></div>
+        <div className={'spinner-line'}></div>
+        <div className={'spinner-circle'}>
+          <div>●</div>
         </div>
+      </div>
     </div>
-    </div>
-}
+  </div>
+</div>;
