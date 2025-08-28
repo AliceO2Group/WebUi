@@ -82,3 +82,17 @@ The GUI provides an intuitive and user-friendly way for layout creators to edit 
    - The system validates the JSON structure to ensure it is correctly formatted.
    - Certain fields, such as the `ID`, cannot be set manually.
 5. Make the necessary changes and click `Save`.
+
+## Runs Mode
+
+Runs Mode enables real-time monitoring of a specific run by tracking its run number. When activated, QCG automatically refreshes the displayed data to show the latest paths for that run, making it easy to follow progress and status updates.
+
+**How to use Runs Mode:**
+1. Navigate to a page that supports Runs Mode (e.g., `objectTree`, `layoutShow`).
+2. Enter the desired run number in the filters panel. It must be an integer number greater than 0.
+3. The update button will change to a dropdown menu.
+4. Select **Update & Run Mode** from the dropdown.
+5. The filters panel transforms into a dedicated header, displaying:
+   - The tracked run number
+   - The current status of the run
+   - An info button for additional details
