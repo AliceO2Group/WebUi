@@ -12,8 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
-const { LogManager } = require("@aliceo2/web-ui");
-const { errorHandler, errorLogger } = require("../utils.js");
+const {
+  LogManager,
+  updateAndSendExpressResponseFromNativeError,
+  InvalidInputError,
+  NotFoundError,
+  ServiceUnavailableError,
+} = require("@aliceo2/web-ui");
+const { errorLogger } = require("../utils.js");
 const { getConsulConfig } = require("../config/publicConfigProvider.js");
 
 /**
@@ -21,10 +27,10 @@ const { getConsulConfig } = require("../config/publicConfigProvider.js");
  */
 class QCConfigurationController {
   /**
-     * Setup QCConfigurationController
-     * @param {QCConfigurationService} qcConfigurationService
-     * @param {JSON} config
-     */
+   * Setup QCConfigurationController
+   * @param {QCConfigurationService} qcConfigurationService - service for managing QC configurations
+   * @param {JSON} config - consul configuration
+   */
   constructor(qcConfigurationService, config) {
     this._qcConfigurationService = qcConfigurationService;
     this._config = getConsulConfig({ consul: config });
@@ -35,47 +41,56 @@ class QCConfigurationController {
 
   /**
    * Method to get configurations names
-   * @param {Request} req
-   * @param {Response} res
+   * @param {Request} req - HTTP Request object
+   * @param {Response} res - HTTP Response object
    */
-  async getConfigurationsKeys(req, res) {
+  async getConfigurationsKeysHandler(req, res) {
     const { prefix = "", recurse = false } = req.query;
     const prefixPath = prefix ? `${this._qcConfigurationsPath}/${prefix}` : this._qcConfigurationsPath;
 
     try {
-      const parsedData = await this._qcConfigurationService.getKeysOfValidConfigurations(prefixPath, recurse);
-      if (!parsedData || parsedData.length === 0) {
-        return errorHandler("No configurations found", res, 404);
+      const validKeys = await this._qcConfigurationService.retrieveKeysOfValidConfigurations(prefixPath, recurse);
+      
+      if (!validKeys || validKeys.length === 0) {
+        updateAndSendExpressResponseFromNativeError(res, new NotFoundError("No valid configurations found"));
+        return;
       }
 
-      res.status(200).json(parsedData);
+      res.status(200).json(validKeys);
     } catch (error) {
       errorLogger(error, this._logger);
-      errorHandler("Error retrieving configurations", res, 500);
+      if (error.message?.includes('Non-2xx status code: 404')) {
+        updateAndSendExpressResponseFromNativeError(res, 
+          new NotFoundError(`Configurations prefix not found: "${prefixPath}"`));
+      } else {
+        updateAndSendExpressResponseFromNativeError(res, new ServiceUnavailableError("Consul service unavailable"));
+      }
     }
   }
 
   /**
    * Method to get configuration value by key
-   * @param {Request} req
-   * @param {Response} res
+   * @param {Request} req - HTTP Request object
+   * @param {Response} res - HTTP Response object
    */
-  async getConfigurationByKey(req, res) {
-    const { key } = req.query;
-    if (!key) {
-      return errorHandler("Missing configuration key", res, 400);
+  async getConfigurationByKeyHandler(req, res) {
+    const { key } = req.params;
+
+    if (!key || key.trim() === "") {
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError("Missing configuration key"));
+      return;
     }
 
     try {
-      const value = await this._qcConfigurationService.getConfigurationByKey(key);
-      if (!value) {
-        return errorHandler("Configuration not found", res, 404);
-      }
-
+      const value = await this._qcConfigurationService.retrieveConfigurationByKey(key);
       res.status(200).json(value);
     } catch (error) {
       errorLogger(error, this._logger);
-      errorHandler("Error retrieving configuration", res, 500);
+      if (error.message?.includes('Non-2xx status code: 404')) {
+        updateAndSendExpressResponseFromNativeError(res, new NotFoundError(`Configuration not found for key: ${key}`));
+      } else {
+        updateAndSendExpressResponseFromNativeError(res, new ServiceUnavailableError("Consul service unavailable"));
+      }
     }
   }
 }

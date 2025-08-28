@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const assert = require('assert');
 const fs = require('fs');
@@ -23,24 +23,26 @@ const TEST_CONTENT = {
   colsHeader: {
     date: {
       visible: true,
-      size: 'cell-m'
-    }, message: {
+      size: 'cell-m',
+    },
+    message: {
       visible: true,
-      size: 'cell-s'
-    }
-  }
+      size: 'cell-s',
+    },
+  },
 };
 
 const NEW_CONTENT = {
   colsHeader: {
     date: {
       visible: false,
-      size: 'cell-xl'
-    }, message: {
+      size: 'cell-xl',
+    },
+    message: {
       visible: false,
-      size: 'cell-xl'
-    }
-  }
+      size: 'cell-xl',
+    },
+  },
 };
 
 let jsonConfig;
@@ -55,34 +57,35 @@ describe('JSON file custom database', () => {
   });
 
   describe('Creating a new profile', () => {
-    it('should throw an error if username is undefined', () => {
-      return assert.rejects(async () => {
-        await jsonConfig.createNewProfile(undefined, TEST_CONTENT);
-      }, new Error('username for profile is mandatory'));
+    it('should throw an error if username is undefined', async () => {
+      await assert.rejects(
+        jsonConfig.createNewProfile(undefined, TEST_CONTENT),
+        new Error('username for profile is mandatory'),
+      );
     });
 
-    it('should throw an error if username is null', () => {
-      return assert.rejects(async () => {
-        await jsonConfig.createNewProfile(null, TEST_CONTENT);
-      }, new Error('username for profile is mandatory'));
+    it('should throw an error if username is null', async () => {
+      await assert.rejects(
+        jsonConfig.createNewProfile(null, TEST_CONTENT),
+        new Error('username for profile is mandatory'),
+      );
     });
 
-    it('should successfully create a new profile', () => {
-      return assert.doesNotReject(async () => {
-        await jsonConfig.createNewProfile('anonymous', TEST_CONTENT);
-        const newProfile = await jsonConfig.getProfileByUsername('anonymous');
+    it('should successfully create a new profile', async () => {
+      await assert.doesNotReject(jsonConfig.createNewProfile('anonymous', TEST_CONTENT));
+      const newProfile = await jsonConfig.getProfileByUsername('anonymous');
 
-        assert.ok(newProfile.createdTimestamp);
-        assert.ok(newProfile.lastModifiedTimestamp);
-        assert.deepStrictEqual(newProfile.content, TEST_CONTENT);
-        assert.strictEqual(newProfile.username, 'anonymous');
-      });
+      assert.ok(newProfile.createdTimestamp);
+      assert.ok(newProfile.lastModifiedTimestamp);
+      assert.deepStrictEqual(newProfile.content, TEST_CONTENT);
+      assert.strictEqual(newProfile.username, 'anonymous');
     });
 
-    it('should throw an error when creating a new profile with the username as an existing profile', () => {
-      return assert.rejects(async () => {
-        await jsonConfig.createNewProfile('anonymous', TEST_CONTENT);
-      }, new Error('Profile with this username (anonymous) already exists'));
+    it('should throw an error when creating a new profile with the username as an existing profile', async () => {
+      await assert.rejects(
+        jsonConfig.createNewProfile('anonymous', TEST_CONTENT),
+        new Error('Profile with this username (anonymous) already exists'),
+      );
     });
   });
 
@@ -116,16 +119,14 @@ describe('JSON file custom database', () => {
       });
     });
 
-    it('should throw an error when trying to update a profile which does not exist', () => {
-      return assert.rejects(async () => {
-        await jsonConfig.updateProfile('no-one', TEST_CONTENT);
-      }, new Error('Profile with this username (no-one) cannot be updated as it does not exist'));
-    });
+    it('should throw an error when trying to update a profile which does not exist', () => assert.rejects(async () => {
+      await jsonConfig.updateProfile('no-one', TEST_CONTENT);
+    }, new Error('Profile with this username (no-one) cannot be updated as it does not exist')));
   });
 
   describe('Testing read/write to fs', () => {
     it('should reject when profiles are missing from data with error of bad data format ', async () => {
-      return assert.rejects(async () => {
+      await assert.rejects(async () => {
         jsonConfig.data = '{}';
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
@@ -133,7 +134,7 @@ describe('JSON file custom database', () => {
     });
 
     it('should reject when there is no data with error of bad data format ', async () => {
-      return assert.rejects(async () => {
+      await assert.rejects(async () => {
         jsonConfig.data = '';
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
@@ -141,32 +142,35 @@ describe('JSON file custom database', () => {
     });
 
     it('should reject when data.profiles is not an Array with error of bad data format ', async () => {
-      return assert.rejects(async () => {
-        jsonConfig.data = {profiles: 'test'};
+      await assert.rejects(async () => {
+        jsonConfig.data = { profiles: 'test' };
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
       }, new Error(`DB file should have an array of profiles ${CONFIG_FILE}`));
     });
 
     it('should successfully read profiles from data', async () => {
-      return assert.doesNotReject(async () => {
-        jsonConfig.data = {profiles: []};
+      await assert.doesNotReject(async () => {
+        jsonConfig.data = { profiles: [] };
         await jsonConfig._writeToFile();
         await jsonConfig._readFromFile();
       });
     });
 
     it('should reject when there is missing data with error of bad JSON format ', async () => {
-      return assert.rejects(async () => {
-        jsonConfig.data = undefined;
-        await jsonConfig._writeToFile();
-        await jsonConfig._readFromFile();
-      }, new TypeError(`The "data" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined`));
-    });
-
-    after(() => {
-      fs.unlinkSync(CONFIG_FILE);
+      const errorMessage = 'The "data" argument must be of type string or an instance of Buffer, '
+        + 'TypedArray, or DataView. Received undefined';
+      await assert.rejects(
+        async () => {
+          jsonConfig.data = undefined;
+          await jsonConfig._writeToFile();
+          await jsonConfig._readFromFile();
+        },
+        new TypeError(errorMessage),
+      );
     });
   });
+  after(() => {
+    fs.unlinkSync(CONFIG_FILE);
+  });
 });
-
