@@ -102,10 +102,6 @@ module.exports.setup = (http, ws) => {
   const broadcastService = new BroadcastService(ws);
   const cacheService = new CacheService(broadcastService);
   const environmentCacheService = new EnvironmentCacheService(broadcastService, eventEmitter);
-  const qcConfigurationService = new QCConfigurationService(consulService);
-  qcConfigurationService.testConsulStatus();
-
-  const qcConfigurationController = new QCConfigurationController(qcConfigurationService, config.consul);
 
   const qcConfigurationService = new QCConfigurationService(consulService);
   const qcConfigurationController = new QCConfigurationController(qcConfigurationService, config.consul);
