@@ -51,7 +51,7 @@ export class ObjectController {
       if (inRunMode) {
         const runNumber = filters?.RunNumber;
         const { paths } = await this._runModeService.retrievePathsAndSetRunStatus(runNumber);
-        return res.status(200).json(paths);
+        return res.status(200).json({ paths });
       }
 
       const objectsData = await this._objService.retrieveLatestVersionOfObjects({
