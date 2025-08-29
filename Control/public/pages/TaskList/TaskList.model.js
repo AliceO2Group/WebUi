@@ -12,8 +12,6 @@
  * or submit itself to any jurisdiction.
 */
 
-/* global COG */
-
 import {Observable, RemoteData} from '/js/src/index.js';
 import { getTasksByFlp } from '../../common/utils.js';
 import { TaskTableModel } from '../../common/task/TaskTableModel.js';
@@ -102,7 +100,9 @@ export default class TaskPageModel extends Observable {
   }
 
   /**
-   * Clean up tasks
+   * Update the UI with state request elements and send an HTTP DELETE request for tasks to be cleaned up
+   * Notify the user of the result
+   * @return {void}
    */
   async cleanUpTasks() {
     this.cleanUpTasksRequest = RemoteData.loading();
@@ -122,7 +122,8 @@ export default class TaskPageModel extends Observable {
   }
 
   /**
-   * Clean up resources request
+   * Update the UI with state request elements and send an HTTP POST deployment request for template 'resources-cleanup'
+   * @return {void}
    */
   async cleanUpResources() {
     this.cleanUpResourcesRequest = RemoteData.loading();
@@ -137,15 +138,5 @@ export default class TaskPageModel extends Observable {
       this.cleanUpResourcesRequest = RemoteData.failure(error.message);
     }
     this.notify();
-  }
-
-  /**
-   * Check that for a given map of hosts there is at least one host
-   * containing at least 1 task
-   * @param {JSON} data 
-   */
-  areTasksInDetector(data) {
-    return Object.keys(data)
-      .some((host) => data[host] && data[host].list && data[host].stdout && data[host].list.length > 0);
   }
 }
