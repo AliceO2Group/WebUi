@@ -53,7 +53,8 @@ export const TaskListContent = (model) => {
   let resourcesCleanupEvents = [];
   if (list.isSuccess()) {
     const currentActiveEnvironments = list.payload.environments;
-    const resourcesCleanupEnvironments = currentActiveEnvironments.filter(({rootRole}) => rootRole === 'resources-cleanup');
+    const resourcesCleanupEnvironments =
+      currentActiveEnvironments.filter(({ rootRole }) => rootRole === 'resources-cleanup');
     if (resourcesCleanupEnvironments.length > 0) {
       resourcesCleanupEvents = resourcesCleanupEnvironments[resourcesCleanupEnvironments.length - 1].events;
     }
@@ -90,7 +91,7 @@ export const TaskListContent = (model) => {
       taskPageModel.detectorPanels.match({
         NotAsked: () => null,
         Loading: () => pageLoading(),
-        Success: (detectorPanelsPayload) => showTaskPanelGroupedByDetector(detectorPanelsPayload, taskPageModel, currentDetectorView),
+        Success: (detector) => showTaskPanelGroupedByDetector(detector, taskPageModel, currentDetectorView),
         Failure: (error) => errorPage(error),
       })
     ])
@@ -121,6 +122,9 @@ const showTaskPanelGroupedByDetector = (detectorPanels, taskPageModel, currentDe
  * @returns {vnode}
  */
 const detectorPanelsNode = (detectorAcronym, detectorPanel, taskPageModel) => {
+  /**
+   * Callback to toggle the visibility of the detector panel
+   */
   const toggleVisibilityButtonCallback = () => {
     detectorPanel.isOpened = !detectorPanel.isOpened;
     taskPageModel.notify();

@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+/* global COG */
+
 import {Observable, RemoteData} from '/js/src/index.js';
 import { getTasksByFlp } from '../../common/utils.js';
 import { TaskTableModel } from '../../common/task/TaskTableModel.js';
@@ -129,7 +131,10 @@ export default class TaskPageModel extends Observable {
     try {
       const detectors = Object.keys(this.model.detectors.hostsByDetectorRemote.payload);
       const hosts = Object.values(this.model.detectors.hostsByDetectorRemote.payload).flat();
-      await jsonPost(`/api/deploy`, { body: { template: 'resources-cleanup', detectors, userVars: { hosts: JSON.stringify(hosts) } } });
+      await jsonPost(
+        `/api/deploy`,
+        { body: { template: 'resources-cleanup', detectors, userVars: { hosts: JSON.stringify(hosts) } } }
+      );
       this.cleanUpRequest = RemoteData.success('Cleanup Resources environment has been successfully requested');
     } catch (error) {
       this.cleanUpRequest = RemoteData.failure(error.message);

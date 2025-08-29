@@ -70,7 +70,15 @@ const eventRow = (event, indexOfRow) => {
     key: `event-row-${indexOfRow}`
   }, [
     transition.step 
-      ? h(`.mh4${error ? '.danger' : ''}`, `[${new Date(timestamp).toISOString()}] At step: ${transition.step} and has ${message} ${error ? `with error: ${error}` : ''}`)
-      : h(`${error ? '.danger' : ''}`, `[${new Date(timestamp).toISOString()}] ${transition.name ?? ''} ${message} ${error ? `with error: ${error}` : ''}`),
+      ? h(
+        `.mh4${error ? '.danger' : ''}`,
+        `[${new Date(timestamp).toISOString()}] ` +
+        `At step: ${ transition.step } and has ${ message } ${ error? `with error: ${error}` : ''}`
+      )
+      : h(
+        `${error ? '.danger' : ''}`,
+        `[${new Date(timestamp).toISOString()}] ` +
+        `${ transition.name ?? '' } ${ message } ${ error? `with error: ${error}` : ''}`
+      ),
   ]);
 };
