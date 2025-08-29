@@ -13,7 +13,7 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
-import { RunStatus } from '../../common/library/runStatus.enum';
+import { RunStatus } from '../../common/library/runStatus.enum.js';
 const logger = LogManager.getLogger('filter/service');
 
 /**

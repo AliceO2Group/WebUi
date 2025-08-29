@@ -82,6 +82,7 @@ import { objectGetByIdValidationMiddlewareTest }
 import { filterTests } from './public/features/filterTest.test.js';
 import { qcObjectServiceTestSuite } from './lib/services/QcObjectService.test.js';
 import { runModeServiceTestSuite } from './lib/services/RunModeService.test.js';
+import { apiGetRunStatusTests } from './api/filters/api-get-run-status.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -186,6 +187,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     suite('Layout PUT request test suite', async () => apiPutLayoutTests());
     suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
     suite('Object GET request test suite', async () => apiGetObjectsTests());
+    suite('Filters GET run status test suite', async () => await apiGetRunStatusTests());
   });
 
   suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
