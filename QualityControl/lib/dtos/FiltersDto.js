@@ -12,9 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-export const RunStatus = Object.freeze({
-  ENDED: 'ENDED',
-  ONGOING: 'ONGOING',
-  NOT_FOUND: 'NOT_FOUND',
-  UNKNOWN: 'UNKNOWN',
-});
+import Joi from 'joi';
+
+export const RunNumberDto = Joi.number().integer().min(0).max(999999).integer();

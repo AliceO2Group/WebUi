@@ -19,6 +19,7 @@ import { layoutOwnerMiddleware } from './middleware/layouts/layoutOwner.middlewa
 import { layoutIdMiddleware } from './middleware/layouts/layoutId.middleware.js';
 import { layoutServiceMiddleware } from './middleware/layouts/layoutService.middleware.js';
 import { statusComponentMiddleware } from './middleware/status/statusComponent.middleware.js';
+import { runStatusMiddleware } from './middleware/filters/runStatusFilter.middleware.js';
 
 /**
  * Adds paths and binds websocket to instance of HttpServer passed
@@ -94,4 +95,9 @@ export const setup = (http, ws) => {
   http.get('/checkUser', userController.addUserHandler.bind(userController));
 
   http.get('/filter/configuration', filterController.getFilterConfigurationHandler.bind(filterController));
+  http.get(
+    '/filter/run-status/:runNumber',
+    runStatusMiddleware,
+    filterController.getRunStatusHandler.bind(filterController),
+  );
 };
