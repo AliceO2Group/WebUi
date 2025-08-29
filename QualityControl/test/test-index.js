@@ -36,6 +36,8 @@ import { objectViewFromObjectTreeTests } from './public/pages/object-view-from-o
 import { objectViewFromLayoutShowTests } from './public/pages/object-view-from-layout-show.test.js';
 import { layoutShowTests } from './public/pages/layout-show.test.js';
 import { aboutPageTests } from './public/pages/about-page.test.js';
+import { runsModeObjectTreeTests } from './public/features/runsMode/runsModeObjectTree.test.js';
+import { runsModeLayoutShowTests } from './public/features/runsMode/runsModeLayoutShow.test.js';
 
 /**
  * Backend tests imports
@@ -97,6 +99,7 @@ const OBJECT_VIEW_FROM_OBJECT_TREE_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 5
 const OBJECT_VIEW_FROM_LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 4;
 const LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 23;
 const ABOUT_VIEW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 4;
+const RUNS_MODE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 4;
 
 const FRONT_END_TIMEOUT = INITIAL_PAGE_SETUP_TIMEOUT
   + QC_DRAWING_OPTIONS_TIMEOUT
@@ -170,6 +173,15 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     );
     test('should successfully import and run tests for filter', async (testParent) =>
       filterTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent));
+
+    test(
+      'should successfully run runs mode tests',
+      { timeout: RUNS_MODE_TIMEOUT * 2 },
+      async (testParent) => {
+        await runsModeObjectTreeTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent);
+        await runsModeLayoutShowTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent);
+      },
+    );
   });
 
   suite('API - test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
