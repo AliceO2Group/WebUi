@@ -32,8 +32,7 @@ export default class TaskPageModel extends Observable {
     this.model = model;
     this.tasksByFlp = RemoteData.notAsked();
 
-    this.cleanUpTasksRequest = RemoteData.notAsked();
-    this.cleanUpResourcesRequest = RemoteData.notAsked();
+    this.cleanUpRequest = RemoteData.notAsked();
 
     this.detectorPanels = RemoteData.notAsked(); // JSON containing information on detectors panels; isOpened, list of hosts
 
@@ -51,6 +50,7 @@ export default class TaskPageModel extends Observable {
       }
     }, COG.REFRESH_TASK);
 
+    this.cleanUpRequest = RemoteData.notAsked();
     this.detectorPanels = RemoteData.loading();
     this.notify();
 
@@ -105,18 +105,15 @@ export default class TaskPageModel extends Observable {
    * @return {void}
    */
   async cleanUpTasks() {
-    this.cleanUpTasksRequest = RemoteData.loading();
+    this.cleanUpRequest = RemoteData.loading();
     this.notify();
 
     try {
       const detectors = Object.keys(this.detectorPanels.payload) ?? [];
       const { killedTasks } = await jsonDelete('/api/tasks', { body: { detectors } });
-      this.cleanUpTasksRequest = RemoteData.success();
-      this.model.notification.show(`A total of: ${killedTasks?.length ?? 0} tasks have been cleaned`, 'success');
-      this.model.router.go('?page=taskList');
+      this.cleanUpRequest = RemoteData.success(`A total of: ${killedTasks?.length ?? 0} tasks have been cleaned`);
     } catch (error) {
-      this.cleanUpTasksRequest = RemoteData.failure(error.message);
-      this.model.notification.show(`Unable to clean up tasks: ${error.message}`, 'danger', 4000);
+      this.cleanUpRequest = RemoteData.failure(error.message);
     } 
     this.notify();
   }
@@ -126,16 +123,16 @@ export default class TaskPageModel extends Observable {
    * @return {void}
    */
   async cleanUpResources() {
-    this.cleanUpResourcesRequest = RemoteData.loading();
+    this.cleanUpRequest = RemoteData.loading();
     this.notify();
 
     try {
       const detectors = Object.keys(this.model.detectors.hostsByDetectorRemote.payload);
       const hosts = Object.values(this.model.detectors.hostsByDetectorRemote.payload).flat();
       const result = await jsonPost(`/api/deploy`, { body: { template: 'resources-cleanup', detectors, userVars: { hosts: JSON.stringify(hosts) } } });
-      this.cleanUpResourcesRequest = RemoteData.success(result);
+      this.cleanUpRequest = RemoteData.success('Cleanup Resources environment has been successfully requested');
     } catch (error) {
-      this.cleanUpResourcesRequest = RemoteData.failure(error.message);
+      this.cleanUpRequest = RemoteData.failure(error.message);
     }
     this.notify();
   }

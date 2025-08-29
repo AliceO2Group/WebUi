@@ -48,24 +48,44 @@ export const TaskListHeader = () => [
  * @return {vnode}
  */
 export const TaskListContent = (model) => {
-  const { services: { detectors }, taskPageModel } = model;
+  const { services: { detectors }, taskPageModel, environment: {list} } = model;
+
+  let resourcesCleanupEvents = [];
+  if (list.isSuccess()) {
+    const currentActiveEnvironments = list.payload.environments;
+    const resourcesCleanupEnvironments = currentActiveEnvironments.filter(({rootRole}) => rootRole === 'resources-cleanup');
+    if (resourcesCleanupEnvironments.length > 0) {
+      resourcesCleanupEvents = resourcesCleanupEnvironments[resourcesCleanupEnvironments.length - 1].events;
+    }
+  }
 
   const { selected: currentDetectorView, hostsByDetectorRemote } = detectors;
   const isAdmin = currentDetectorView === GLOBAL_VIEW && isUserAllowedRole(ROLES.Admin, true);
   const isDetectorAndHostListLoaded = hostsByDetectorRemote.isSuccess();
 
-  const { cleanUpTasksRequest } = taskPageModel;
+  const { cleanUpRequest } = taskPageModel;
   const cleanUpTasksCallback = taskPageModel.cleanUpTasks.bind(taskPageModel);
   const cleanUpResourcesCallback = taskPageModel.cleanUpResources.bind(taskPageModel);
-
   return [
     detectorHeader(model),
-    h('.text-center.scroll-y.absolute-fill.flex-column.p1.g1', { style: 'top: 40px' }, [
-      // events.length > 0 && environmentEventsPanel(events),
-      isAdmin && h('.w-100.flex-row.flex-end.g1', [
-        // Cleanup operations are ran across all detectors, thus user needs to be in global view  and be an admin
-        cleanupResourcesButton(cleanUpTasksRequest, isDetectorAndHostListLoaded, cleanUpResourcesCallback),
-        cleanupTasksButton(cleanUpTasksRequest, cleanUpTasksCallback)
+    h('.scroll-y.absolute-fill.flex-column.p1.g1', { style: 'top: 40px' }, [
+      isAdmin &&
+      h('.flex-row.w-100', [
+        cleanUpRequest.match({
+          NotAsked: () => null,
+          Loading: () => null,
+          Success: (message) => h('.flex-row.justify-center.items-center.success', { style: 'flex: 1' }, message),
+          Failure: (error) => h('.flex-row.justify-center.items-center.danger', { style: 'flex: 1' }, error),
+        }),
+        h('.flex-row.right-align.g1', [
+          // Cleanup operations are ran across all detectors, thus user needs to be in global view  and be an admin
+          cleanupResourcesButton(cleanUpRequest, isDetectorAndHostListLoaded, cleanUpResourcesCallback),
+          cleanupTasksButton(cleanUpRequest, cleanUpTasksCallback)
+        ]),
+      ]),
+      resourcesCleanupEvents.length > 0 && h('', [
+        h('h5', 'Resources Cleanup Events (last attempt)'),
+        environmentEventsPanel(resourcesCleanupEvents),
       ]),
       taskPageModel.detectorPanels.match({
         NotAsked: () => null,
@@ -86,7 +106,7 @@ export const TaskListContent = (model) => {
  * @returns {vnode}
  */
 const showTaskPanelGroupedByDetector = (detectorPanels, taskPageModel, currentDetectorView) => {
-  return h('.w-100', [
+  return h('.w-100.g1.flex-column', [
     Object.keys(detectorPanels)
       .filter((detectorAcronym) => currentDetectorView === GLOBAL_VIEW || detectorAcronym === currentDetectorView)
       .map((detectorAcronym) => detectorPanelsNode(detectorAcronym, detectorPanels[detectorAcronym], taskPageModel))
