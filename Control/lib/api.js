@@ -103,7 +103,8 @@ module.exports.setup = (http, ws) => {
   consulController.testConsulStatus();
 
   const ctrlProxy = new GrpcServiceClient(config.grpc, O2_CONTROL_PROTO_PATH);
-  const ctrlService = new ControlService(ctrlProxy);
+  const ctrlService = new ControlService(ctrlProxy, consulController, config.grpc, O2_CONTROL_PROTO_PATH);
+  ctrlService.setWS(ws);
   const apricotProxy = new GrpcServiceClient(config.apricot, O2_APRICOT_PROTO_PATH);
   const apricotService = new ApricotService(apricotProxy);
 
