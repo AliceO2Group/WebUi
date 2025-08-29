@@ -54,7 +54,7 @@ export class RunModeService {
   async retrievePathsAndSetRunStatus(runNumber) {
     if (this._ongoingRuns.has(runNumber)) {
       const cachedPaths = parseObjects(this._ongoingRuns.get(runNumber), QCObjectDto);
-      return { paths: cachedPaths, runStatus: RunStatus.ONGOING };
+      return { paths: cachedPaths };
     }
 
     const runStatus = await this._bookkeepingService.retrieveRunStatus(runNumber);
@@ -70,7 +70,6 @@ export class RunModeService {
 
     return {
       paths: parsedPaths,
-      runStatus,
     };
   }
 
