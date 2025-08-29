@@ -24,6 +24,7 @@ exports.fromEcsEventToEnvironmentEvent = ({ environmentEvent }) => {
     state,
     error, message,
     transition, transitionStep, transitionStatus,
+    workflowTemplateInfo = {}
   } = environmentEvent;
   return {
     id,
@@ -31,6 +32,7 @@ exports.fromEcsEventToEnvironmentEvent = ({ environmentEvent }) => {
     error,
     message,
     runNumber,
+    workflowTemplateInfoName: workflowTemplateInfo?.name ?? '',
     transition: {
       name: transition,
       step: transitionStep,
