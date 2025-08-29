@@ -13,7 +13,6 @@
 */
 
 import { h } from '/js/src/index.js';
-import { ALIECS_TRANSITION_COLOR } from '../constants/stateColors.js';
 
 /**
  * Groups events by consecutive transition categories
