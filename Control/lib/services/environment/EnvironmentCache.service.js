@@ -249,6 +249,9 @@ class EnvironmentCacheService {
     cachedEnvironment.currentRunNumber = runNumber;
     cachedEnvironment.events.push(environmentEvent);
     cachedEnvironment.lastUpdate = environmentEvent.timestamp;
+    if (!cachedEnvironment.rootRole) {
+      cachedEnvironment.rootRole = environmentEvent.workflowTemplateInfoName;
+    }
     this._environments.set(id, cachedEnvironment);
 
     if (
