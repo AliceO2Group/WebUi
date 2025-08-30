@@ -19,6 +19,13 @@ const config = require('./lib/config/configProvider.js');
 const {buildPublicConfig} = require('./lib/config/publicConfigProvider.js');
 const api = require('./lib/api.js');
 
+
+// Initialize nock for Consul only if we are in test environment
+if (process.env.NODE_ENV === "test") {
+  const { initializeNockForConsul } = require("./test/config/testConfigForConsul.js");
+  initializeNockForConsul();
+}
+
 // -------------------------------------------------------
 
 buildPublicConfig(config);

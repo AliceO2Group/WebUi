@@ -20,6 +20,7 @@
  * @property {string} [repository] - the repository to use for the deployment
  * @property {string} [revision] - the revision to use for the deployment
  * @property {string} [selectedConfiguration] - the selected configuration for the deployment, can be optional if template is provided
+ * @property {boolean} [shouldAutoTransition] - whether the deployment should automatically transition to the next state after creation
  * @property {Map<string, object>} [userVars] - user variables to be used in the deployment, if none provided, ECS will use the default ones
  * @property {string[]} detectors - list of detectors to be deployed
  */

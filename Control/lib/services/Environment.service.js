@@ -193,13 +193,13 @@ class EnvironmentService {
    * @returns {Promise.<{EnvironmentInfo}, Error>} - if operation was a success ECS will return a partialEnvironmentInfo object
    * @throws {Error} - if the operation failed
    */
-  async newEnvironmentAsync({ workflowTemplate, userVars, user }) {
+  async newEnvironmentAsync({ workflowTemplate, userVars, user, shouldAutoTransition = false }) {
     let environment = undefined;
     try {
       ({ environment } = await this._coreGrpc.NewEnvironmentAsync({
         workflowTemplate,
         vars: userVars,
-        autoTransition: false,
+        autoTransition: shouldAutoTransition,
         requestUser: user.toEcsFormat()
       })
       );

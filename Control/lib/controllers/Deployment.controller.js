@@ -66,7 +66,7 @@ class DeploymentController {
     /**
      * @type {DeploymentRequest}
      */
-    const { template, selectedConfiguration, userVars, detectors } = req.body;
+    const { template, selectedConfiguration, userVars, detectors, shouldAutoTransition } = req.body;
     let { repository, revision } = req.body;
 
     if (!template) {
@@ -110,9 +110,11 @@ class DeploymentController {
         selectedConfiguration,
         workflowTemplate,
         user,
+        shouldAutoTransition,
       });
       res.status(201).json(environment);
     } catch (error) {
+      this._logger.trace(error);
       this._logger.errorMessage(error, { level: LogLevel.SUPPORT });
       updateAndSendExpressResponseFromNativeError(res, error);
     }

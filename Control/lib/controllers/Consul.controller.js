@@ -40,31 +40,6 @@ class ConsulController {
   }
 
   /**
-   * Check if consulService is present:
-   * * If yes, allow request to continue
-   * * If not, send response accordingly
-   * @param {Request} req
-   * @param {Response} res
-   * @param {Next} next
-   */
-  validateService(req, res, next) {
-    if (this.consulService) {
-      next();
-    } else {
-      errorHandler('Unable to retrieve configuration of consul service', res, 502);
-    }
-  }
-
-  /**
-   * Method to check if consul service can be used
-   */
-  async testConsulStatus() {
-    this.consulService.getConsulLeaderStatus()
-      .then((data) => this._logger.info(`Service is up and running on: ${data}`))
-      .catch((error) => this._logger.error(`Connection failed due to ${error}`));
-  }
-
-  /**
   * Method to request all CRUs available in consul KV store under the
   * hardware key
   * @param {Request} req
