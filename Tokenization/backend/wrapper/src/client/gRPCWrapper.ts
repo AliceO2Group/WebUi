@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import path from "path";
 import { ConnectionManager } from "./ConnectionManager/ConnectionManager";
 import { RevokeTokenHandler } from "./Commands/revokeToken/revokeToken.handler";
 import {
