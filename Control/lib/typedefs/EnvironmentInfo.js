@@ -21,8 +21,10 @@
  * @property {Number} currentRunNumber
  * @property {Number} createdWhen - timestamp in ms
  * @property {TaskEvent} firstTaskInError - the first task in error, if any
- * @property {String} state - STANDBY, DEPLOYED, CONFIGURED, RUNNING, ERROR, MIXED, SHUTDOWN
+ * @property {EnvironmentState} state - STANDBY, DEPLOYED, CONFIGURED, RUNNING, ERROR, MIXED, SHUTDOWN
  * @property {String} currentTransition - DEPLOY, CONFIGURE, RESET, START_ACTIVITY, STOP_ACTIVITY, EXIT, GO_ERROR, RECOVER AS PER https://github.com/AliceO2Group/Control/blob/master/core/environment/environment.go#L143 
+ * @property {Boolean} isDeploying - if true, the environment is being deployed (custom ECS GUI property only). Once ECS reports the environment in state CONFIGURED with no currentTransition, this property will be set to false
+ * @property {String} deploymentError - if the deployment failed, this will contain the error message
  * @property {String} rootRole - workflow selected by user
  * @property {String} description
  * @property {Number} numberOfFlps
