@@ -22,8 +22,31 @@ import {
 } from "../../../models/message.model";
 import { ConnectionStatus } from "../../../models/connection.model";
 import { Command } from "models/commands.model";
+import * as grpc from "@grpc/grpc-js";
+import * as protoLoader from "@grpc/proto-loader";
+import path from "path";
 
 describe("RevokeToken", () => {
+  const protoPath = path.join(
+    __dirname,
+    "..",
+    "..",
+    "..",
+    "proto",
+    "wrapper.proto"
+  );
+  const packageDef = protoLoader.loadSync(protoPath, {
+    keepCase: true,
+    longs: String,
+    enums: String,
+    defaults: true,
+    oneofs: true,
+  });
+
+  const proto = grpc.loadPackageDefinition(packageDef) as any;
+  const wrapper = proto.webui.tokenization;
+  const peerCtor = wrapper.Peer2Peer;
+
   function createEventMessage(targetAddress: string) {
     return {
       event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
@@ -54,7 +77,8 @@ describe("RevokeToken", () => {
     const conn = new Connection(
       "valid-token",
       targetAddress,
-      ConnectionDirection.SENDING
+      ConnectionDirection.SENDING,
+      peerCtor
     );
     (manager as any).sendingConnections!.set(targetAddress, conn);
 
@@ -74,7 +98,8 @@ describe("RevokeToken", () => {
     const conn = new Connection(
       "valid-token",
       targetAddress,
-      ConnectionDirection.RECEIVING
+      ConnectionDirection.RECEIVING,
+      peerCtor
     );
     (manager as any).receivingConnections.set(targetAddress, conn);
 

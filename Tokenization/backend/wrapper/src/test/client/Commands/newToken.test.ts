@@ -21,6 +21,9 @@ import {
   ConnectionDirection,
   DuplexMessageEvent,
 } from "../../../models/message.model";
+import * as grpc from "@grpc/grpc-js";
+import * as protoLoader from "@grpc/proto-loader";
+import path from "path";
 
 /**
  * Helper to create a new token command with given address, direction, and token.
@@ -41,6 +44,26 @@ function createEventMessage(
 
 describe("NewTokenHandler", () => {
   let manager: ConnectionManager;
+
+  const protoPath = path.join(
+    __dirname,
+    "..",
+    "..",
+    "..",
+    "proto",
+    "wrapper.proto"
+  );
+  const packageDef = protoLoader.loadSync(protoPath, {
+    keepCase: true,
+    longs: String,
+    enums: String,
+    defaults: true,
+    oneofs: true,
+  });
+
+  const proto = grpc.loadPackageDefinition(packageDef) as any;
+  const wrapper = proto.webui.tokenization;
+  const peerCtor = wrapper.Peer2Peer;
 
   beforeEach(() => {
     manager = {
@@ -64,7 +87,7 @@ describe("NewTokenHandler", () => {
         dir: ConnectionDirection,
         token: string
       ) {
-        const conn = new Connection(token, address, dir);
+        const conn = new Connection(token, address, dir, peerCtor);
         if (dir === ConnectionDirection.SENDING) {
           this.sendingConnections.set(address, conn);
         } else {
@@ -80,7 +103,8 @@ describe("NewTokenHandler", () => {
     const conn = new Connection(
       "old-token",
       targetAddress,
-      ConnectionDirection.SENDING
+      ConnectionDirection.SENDING,
+      peerCtor
     );
     (manager as any).sendingConnections.set(targetAddress, conn);
 
