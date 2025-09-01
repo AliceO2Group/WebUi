@@ -14,7 +14,10 @@
 
 const sessionData: Record<string, string> = {};
 
-export const fetchSessionData = async () => {
+/**
+ * Function for fetching session data from the Control server
+ */
+export async function fetchSessionData() {
   // only to get the data from server redirect
   // (line 264, commit 3ba4600 of github.com/AliceO2Group/WebUi/blob/dev/Framework/Backend/http/server.js)
   // this should be replaced with endpoint designed for authentication only
@@ -23,11 +26,21 @@ export const fetchSessionData = async () => {
   searchParams.forEach((value, key) => {
     sessionData[key] = value;
   });
-};
+}
 
-export const getSessionData = (): Record<string, string> => sessionData;
+/**
+ * Function for reading session data fetched from the Control server
+ * @returns {Record<string, string>} sessionData
+ */
+export function getSessionData(): Record<string, string> {
+  return sessionData;
+}
 
-export const deleteSessionData = () => {
+/**
+ * Function for deleting session data fetched from the Control server
+ * Intended to logout the user
+ */
+export function deleteSessionData() {
   for (const key in sessionData) {
     delete sessionData[key];
   }
