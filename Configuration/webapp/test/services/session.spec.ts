@@ -15,7 +15,7 @@
 import assert from 'assert';
 import { Page } from 'puppeteer';
 import global from '../mocha-index';
-import { fetchSessionData, getSessionData } from '../../services/session';
+import { fetchSessionData, getSessionData } from '../../app/services/session';
 
 describe('`pageRoot` test-suite', function () {
   let url: string | null = null;

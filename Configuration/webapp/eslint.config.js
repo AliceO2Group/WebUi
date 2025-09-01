@@ -284,7 +284,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['app/test/**'],
+    files: ['test/**'],
     extends: [
       pluginJs.configs.recommended,
       mochaPlugin.configs.recommended,
