@@ -44,4 +44,4 @@ export function deleteSessionData() {
   for (const key in sessionData) {
     delete sessionData[key];
   }
-};
+}
