@@ -1,4 +1,3 @@
-import path from "path";
 import { ConnectionManager } from "./ConnectionManager/ConnectionManager.ts";
 import { gRPCWrapperConfig } from "../models/config.model.ts";
 
