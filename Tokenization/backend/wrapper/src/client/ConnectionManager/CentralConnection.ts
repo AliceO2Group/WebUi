@@ -16,6 +16,7 @@ import * as grpc from "@grpc/grpc-js";
 import { LogManager } from "@aliceo2/web-ui";
 import { CentralCommandDispatcher } from "./EventManagement/CentralCommandDispatcher";
 import { DuplexMessageModel } from "../../models/message.model";
+import { ReconnectionScheduler } from "utils/reconnectionScheduler";
 
 /**
  * @description This class manages the duplex stream with the CentralSystem gRPC service.
@@ -24,6 +25,12 @@ import { DuplexMessageModel } from "../../models/message.model";
 export class CentralConnection {
   private logger = LogManager.getLogger("CentralConnection");
   private stream?: grpc.ClientDuplexStream<any, any>;
+  private reconnectionScheduler: ReconnectionScheduler =
+    new ReconnectionScheduler(
+      () => this.connect(),
+      { initialDelay: 1000, maxDelay: 30000 },
+      this.logger
+    );
 
   constructor(
     private client: any,
@@ -40,13 +47,14 @@ export class CentralConnection {
 
     this.stream!.on("data", (payload: DuplexMessageModel) => {
       this.logger.debugMessage(`Received payload: ${JSON.stringify(payload)}`);
+      this.reconnectionScheduler.reset();
       this.dispatcher.dispatch(payload);
     });
 
     this.stream!.on("end", () => {
       this.logger.infoMessage(`Stream ended, attempting to reconnect...`);
       this.stream = undefined;
-      this.scheduleReconnect();
+      this.reconnectionScheduler.schedule();
     });
 
     this.stream!.on("error", (err: any) => {
@@ -56,18 +64,8 @@ export class CentralConnection {
         " attempting to reconnect..."
       );
       this.stream = undefined;
-      this.scheduleReconnect();
+      this.reconnectionScheduler.schedule();
     });
-  }
-
-  /**
-   * @description Schedules a reconnect with exponential backoff.
-   */
-  private scheduleReconnect() {
-    setTimeout(() => {
-      this.logger.infoMessage(`Trying to reconnect...`);
-      this.connect();
-    }, 2000);
   }
 
   /**
