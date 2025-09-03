@@ -156,76 +156,6 @@ describe('ApricotService test suite', () => {
     });
   });
 
-  describe('Check executing commands through `GrpcServiceClient`', () => {
-    let apricotService;
-    let req, res;
-    beforeEach(() => {
-      apricotService = null;
-      req = {
-        session: {
-          personid: 0
-        },
-        path: 'ListDetectors',
-        body: {value: 'Test'}
-      };
-      res = {
-        json: sinon.fake.returns(),
-        status: sinon.fake.returns(),
-        send: sinon.fake.returns()
-      };
-    });
-
-    it('should successfully execute command, send response with status and message', async () => {
-      const apricotProxy = {
-        isConnectionReady: true,
-        ListDetectors: sinon.stub().resolves(['TPC', 'TPA'])
-      };
-      apricotService = new ApricotService(apricotProxy);
-
-      await apricotService.executeCommand(req, res);
-      assert.ok(res.json.calledOnce);
-      assert.ok(res.json.calledWith(['TPC', 'TPA']));
-    });
-
-    it('should attempt execute command but send response with error if connection is not ready and no connection error is provided', async () => {
-      const apricotProxy = {isConnectionReady: false};
-      apricotService = new ApricotService(apricotProxy);
-
-      await apricotService.executeCommand(req, res);
-      assert.ok(res.status.calledOnce);
-      assert.ok(res.status.calledWith(503));
-      assert.ok(res.send.calledOnce);
-      assert.ok(res.send.calledWith({message: 'Could not establish connection to O2Apricot due to potentially undefined method'}));
-    });
-
-    it('should attempt execute command but send response with error if connection is not ready and connection error is provided', async () => {
-      const apricotProxy = {isConnectionReady: false, connectionError: {message: 'Something went wrong'}};
-      apricotService = new ApricotService(apricotProxy);
-
-      await apricotService.executeCommand(req, res);
-      assert.ok(res.status.calledOnce);
-      assert.ok(res.status.calledWith(503));
-      assert.ok(res.send.calledOnce);
-      assert.ok(res.send.calledWith({message: 'Something went wrong'}));
-    });
-
-    it('should attempt execute command but send response with error if method was not provided', async () => {
-      const apricotProxy = {isConnectionReady: true};
-      apricotService = new ApricotService(apricotProxy);
-      req = {
-        session: {
-          personid: 0
-        }, // missing path
-        body: {value: 'Test'}
-      };
-      await apricotService.executeCommand(req, res);
-      assert.ok(res.status.calledOnce);
-      assert.ok(res.status.calledWith(503));
-      assert.ok(res.send.calledOnce);
-      assert.ok(res.send.calledWith({message: 'Could not establish connection to O2Apricot due to potentially undefined method'}));
-    });
-  });
-
   describe('Check saving configuration via ApricotService ', () => {
     let apricotService;
     let req, res;
@@ -513,7 +443,7 @@ describe('ApricotService test suite', () => {
       stub.withArgs({component: 'COG', key: 'found-one'}).resolves({payload: JSON.stringify([{label: 'test', configuration: 'test_1'}])});
       stub.withArgs({component: 'COG', key: 'not-found'}).rejects({code: 2, details: 'nil response for that key'});
       stub.withArgs({component: 'COG', key: 'general-error'}).rejects({code: 2, details: 'some general error'});
-      apricotService = new ApricotService({[GetRuntimeEntry]: stub});
+      apricotService = new ApricotService({GetRuntimeEntry: stub});
     });
 
     it('should successfully return payload for component specified', async () => {

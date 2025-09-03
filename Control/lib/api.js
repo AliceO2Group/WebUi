@@ -238,9 +238,6 @@ module.exports.setup = (http, ws) => {
     taskController.cleanUpTasksHandler.bind(taskController)
   );
 
-  apricotProxy.methods.forEach(
-    (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res)),
-  );
   http.get('/core/detectors', (req, res) => apricotService.getDetectorList(req, res));
   http.get('/core/hostsByDetectors', (req, res) => apricotService.getHostsByDetectorList(req, res));
 
