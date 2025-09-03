@@ -14,6 +14,7 @@ describe('Puppeteer test', () => {
 
         await page.goto('http://prod-container:80/')
 
+        await page.waitForSelector('header')
         const headerContent = await page.$eval('header', el => el.textContent)
         assert.ok(headerContent.includes('Tokenization'))
 
