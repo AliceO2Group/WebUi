@@ -202,9 +202,6 @@ class AliEcsSynchronizer {
       );
       return;
     }
-    console.log('environment event handler: BEGIN---------')
-    console.log(eventMessage);
-    console.log('environment event handler: END---------')
     const environmentEvent = fromEcsEventToEnvironmentEvent(eventMessage);
     environmentEvent.timestamp = adaptInt64ToNumber(eventMessage.timestamp);
     this._eventEmitter.emit(ENVIRONMENTS_TRACK, environmentEvent);

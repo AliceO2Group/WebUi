@@ -147,7 +147,7 @@ module.exports.setup = (http, ws) => {
   if (config.kafka && config.kafka?.enable) {
     try {
       const kafkaClient = new Kafka({
-        clientId: 'control-gui-local',
+        clientId: 'control-gui',
         brokers: config.kafka.brokers,
         retry: { retries: Infinity },
         logLevel: logLevel.NOTHING,
