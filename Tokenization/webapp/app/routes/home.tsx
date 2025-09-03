@@ -10,19 +10,23 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import { Link } from 'react-router';
 import { useSetHeader } from '~/ui/header/headerContext';
 
+/**
+ * Home page component for the Tokenization Admin Interface.
+ * Sets the page header and provides navigation to the tokens overview.
+ */
 export default function Home() {
 
   const { setHeaderContent } = useSetHeader();
   setHeaderContent('Tokenization Admin Interface');
-  
+
   return <>
-      <h1>Welcome to (dummy) Tokenization GUI!</h1>
-      <Link to={'/tokens'}>Tokens overview</Link>
+    <h1>Welcome to (dummy) Tokenization GUI!</h1>
+    <Link to={'/tokens'}>Tokens overview</Link>
 
   </>;
 }

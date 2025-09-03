@@ -122,7 +122,7 @@ const deploymentsTable = (deployments, model) => {
           h('td', { style: 'text-align: center;' },
             includedDetectors?.length > 0 ? includedDetectors.sort().join(' ') : '-'
           ),
-          h('td', { style: 'text-align: center;' }, getUserFromUserVars(userVars).name || '-'),
+          h('td', { style: 'text-align: center;' }, getUserFromUserVars(userVars)?.name || '-'),
           h('td', { style: 'text-align: center;' }, parseObject(createdWhen, 'createdWhen')),
           h('td.f6', { style: 'text-align: center;' }, deploymentError ?? '-'),
           h(
