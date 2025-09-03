@@ -11,21 +11,29 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import { Link } from 'react-router';
 
+import { Outlet, useNavigation } from 'react-router';
+
+import { Spinner } from '~/ui/spinner';
 import { useSetHeader } from '~/ui/header/headerContext';
+import { TabsNavbar, LinkTab } from '~/ui/navbar';
 
 /**
- * Home page component for the Tokenization Admin Interface.
- * Sets the page header and provides navigation to the tokens overview.
+ * Layout for tokens subpage
  */
-export default function Home() {
+export default function TokenLayout() {
 
-  useSetHeader('Tokenization Admin Interface');
+  const { state }  = useNavigation();
 
-  return <>
-    <h1>Welcome to (dummy) Tokenization GUI!</h1>
-    <Link to={'/tokens'}>Tokens overview</Link>
+  useSetHeader('Tokens');
 
-  </>;
+  return (
+    <div>
+      <TabsNavbar >
+        <LinkTab label="List of tokens" to=""/>
+        <LinkTab label="Create token" to="new"/>
+      </TabsNavbar>
+
+      {state === 'loading' ? <Spinner /> : <Outlet/>}
+    </div> );
 }

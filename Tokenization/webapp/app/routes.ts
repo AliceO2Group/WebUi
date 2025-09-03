@@ -12,13 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
-import { type RouteConfig, index, route, prefix } from '@react-router/dev/routes';
+import { type RouteConfig, index, route } from '@react-router/dev/routes';
 
 export default [
   route('', 'ui/layout.tsx', [
     index('routes/home.tsx'),
-    ...prefix('tokens', [
+    route('tokens', 'routes/tokens/layout.tsx', [
       index('routes/tokens/overview.tsx'),
+      route('new', 'routes/tokens/create.tsx'),
       route(':tokenId', 'routes/tokens/details.tsx'),
     ]),
     route('*', 'routes/404.tsx'),

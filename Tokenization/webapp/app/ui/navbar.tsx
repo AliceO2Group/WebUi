@@ -13,11 +13,10 @@
  */
 
 import React from 'react';
-import { Box, Tabs } from '@mui/material';
+import { NavLink } from 'react-router';
+import { Box, Tab } from '@mui/material';
 
 interface TabsNavbarArguments {
-  tabIndex: number;
-  setTabIndex: (index: number) => void;
   children?: React.ReactNode;
 }
 
@@ -30,23 +29,29 @@ interface TabsNavbarArguments {
  * @param setTabIndex Function to update the selected tab index.
  * @param children Tab (@mui/material) components (usually <Tab />) to be rendered inside the navigation bar.
  */
-export function TabsNavbar({ tabIndex, setTabIndex, children }: TabsNavbarArguments) {
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabIndex(newValue);
-  };
-
+export function TabsNavbar({ children }: TabsNavbarArguments) {
   return (
     <Box>
-      <Tabs
-        value={tabIndex}
-        onChange={handleTabChange}
-        variant="fullWidth"
-        textColor="secondary"
-        indicatorColor="secondary"
-      >
-        {children}
-      </Tabs>
+      {children}
     </Box>
   );
 }
+
+interface LinkTabProps {
+  label: string;
+  to: string;
+}
+
+export const LinkTab = ({ label, to }: LinkTabProps) => (
+  <Tab
+    component={NavLink}
+    to={to}
+    label={label}
+    end
+    sx={{
+      '&.active': {
+        color: 'secondary.main',
+      },
+    }}
+  />
+);

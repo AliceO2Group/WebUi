@@ -14,27 +14,27 @@
 import type { Route } from './+types/overview';
 import type { Token } from '../../components/tokens/token';
 
-import { Link } from 'react-router';
-import { useState } from 'react';
-import { Tab } from '@mui/material';
-
-import { useSetHeader } from '~/ui/header/headerContext';
-import { TabsNavbar } from '~/ui/navbar';
+import React from 'react';
+import { Link, Await } from 'react-router';
+import { Spinner } from '~/ui/spinner';
 
 /**
  * Client loader that fetches all tokens from the API.
  *
  * @returns Promise that resolves to an array of tokens
  */
-export const clientLoader = async (): Promise<Token[]> => {
-  const response = await fetch('/api/tokens');
-  if (!response.ok) {
-    throw new Error('An error occurred!');
-  }
-  return response.json();
+export const clientLoader = async (): Promise<{ tokens: Promise<Token[]> }> => {
+  const tokensPromise = fetch('/api/tokens')
+    .then(r => r.json())
+    .catch(_ => {
+      throw new Error('An error occurred');
+    });
+
+  return {
+    tokens: tokensPromise,
+  };
 };
 
-// Will be changed in next PR
 /**
  * Table component that displays a list of tokens with their ID and validity.
  * Token IDs are clickable links that navigate to the token details page.
@@ -60,30 +60,16 @@ function TokenTable({ tokens }: { tokens: Token[] }) {
 
 /**
  * Tokens overview page component with tabbed interface.
- * Displays a list of tokens and provides a placeholder for token creation.
+ * Displays a list of tokens
  *
- * @param loaderData - Array of tokens loaded by the client loader
+ * @param loaderData - Object containing the deferred tokens promise
  */
-export default function Overview({ loaderData: tokens }: Route.ComponentProps) {
-
-  const { setHeaderContent } = useSetHeader();
-  setHeaderContent('Tokens');
-
-  const [tabIndex, setTabIndex] = useState<number>(0);
-
-  return  <div>
-    <TabsNavbar tabIndex={tabIndex} setTabIndex={setTabIndex}>
-      <Tab label="List of tokens" />
-      <Tab label="Create token" />
-    </TabsNavbar>
-
-    {
-      tabIndex == 0 ?
-        <TokenTable tokens={tokens} /> :
-        <div className="p-4">
-          <h2 className="text-2xl font-bold mb-4">Create Token</h2>
-          <p>Form to create a new token will go here.</p>
-        </div>
-    }
-  </div>;
+export default function Overview({ loaderData: { tokens } }: Route.ComponentProps) {
+  return (
+    <React.Suspense fallback={<Spinner/>}>
+      <Await resolve={tokens}>
+        {(data) => <TokenTable tokens={data} />}
+      </Await>
+    </React.Suspense>
+  );
 }

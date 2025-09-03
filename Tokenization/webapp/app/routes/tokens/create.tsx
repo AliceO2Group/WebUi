@@ -11,21 +11,19 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import { Link } from 'react-router';
 
-import { useSetHeader } from '~/ui/header/headerContext';
+import { useNavigate } from 'react-router';
 
 /**
- * Home page component for the Tokenization Admin Interface.
- * Sets the page header and provides navigation to the tokens overview.
+ * First version of page for creating tokens
  */
-export default function Home() {
+export default function CreateToken() {
+  const navigate = useNavigate();
 
-  useSetHeader('Tokenization Admin Interface');
-
-  return <>
-    <h1>Welcome to (dummy) Tokenization GUI!</h1>
-    <Link to={'/tokens'}>Tokens overview</Link>
-
-  </>;
+  return (
+    <div>
+      <h1>Create New Token</h1>
+      <button onClick={() => navigate('/tokens')}>Back to Tokens</button>
+    </div>
+  );
 }

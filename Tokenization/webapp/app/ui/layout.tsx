@@ -12,21 +12,18 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Outlet, useNavigation } from 'react-router';
+import { Outlet } from 'react-router';
 import { useState } from 'react';
 
 import { AppHeader } from './header/header';
 import { HeaderContext } from './header/headerContext';
 import { AppSidebar } from './sidebar';
-import { Spinner } from './spinner';
 
 /**
  * Component provides main layout for the application
  * Uses useNavigation state to check if page is loaded
  */
 export default function Layout() {
-  const { state }  = useNavigation();
-
   const [headerContent, setHeaderContent] = useState<string>('Tokenization Admin Interface');
 
   return (
@@ -35,7 +32,7 @@ export default function Layout() {
         <AppHeader headerContent={headerContent}/>
         <AppSidebar />
         <div id="content" className="bg-gray" style={{ gridRow: 'span 2', width: '95.3%' }}>
-          {state === 'loading' ? <Spinner /> : <Outlet/>}
+          <Outlet/>
         </div>
       </div>
     </HeaderContext.Provider>
