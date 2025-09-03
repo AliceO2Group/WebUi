@@ -16,11 +16,11 @@
  * @returns {Object} - the object containing the consumer groups
  */
 exports.ConsumerGroups = Object.freeze({
-  ENVIRONMENT: 'cog-environment',
+  ENVIRONMENT: 'cog-environment-localo',
   INTEGRATED_SERVICE: {
-    DCS: 'cog-dcs-integrated-service',
-    ODC: 'cog-odc-integrated-service'
+    DCS: 'cog-dcs-integrated-service-local',
+    ODC: 'cog-odc-integrated-service-local',
   },
-  RUN: 'cog-run',
-  TASK: 'cog-task',
+  RUN: 'cog-run-local',
+  TASK: 'cog-task-local',
 });
