@@ -18,7 +18,6 @@
 export const BroadcastKeys = Object.freeze({
   PADLOCK_UPDATE: 'padlock-update',
   NOTIFICATION: 'notification',
-  RESOURCES_CLEANUP: 'resources-cleanup',
   O2_ROC_CONFIG: 'o2-roc-config',
   COMPONENT_STATUS: 'component-STATUS',
   CALIBRATION_RUNS_BY_DETECTOR: 'CALIBRATION_RUNS_BY_DETECTOR',
