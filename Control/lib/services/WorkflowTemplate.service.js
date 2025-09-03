@@ -47,7 +47,7 @@ class WorkflowTemplateService {
      */
     let repositoriesReply = {};
     try {
-      repositoriesReply = await this._coreGrpc['ListRepos']();
+      repositoriesReply = await this._coreGrpc.ListRepos();
       
     } catch (error) {
       throw grpcErrorToNativeError(error);

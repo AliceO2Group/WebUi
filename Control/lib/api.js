@@ -183,7 +183,7 @@ module.exports.setup = (http, ws) => {
 
   http.get('/workflow/template/default/source', workflowController.getDefaultTemplateSource.bind(workflowController));
   http.get('/workflow/template/mappings', workflowController.getWorkflowMapping.bind(workflowController));
-  http.get('/workflow/configuration', workflowController.getWorkflowConfiguration.bind(workflowController));
+  http.get('/workflow/configuration', workflowController.getWorkflowSavedConfiguration.bind(workflowController));
 
   http.get('/runs/calibration/config', [
     minimumRoleMiddleware(Role.GLOBAL),

@@ -95,19 +95,19 @@ describe('WorkflowController test suite', () => {
     });
   });
 
-  describe(`'getWorkflowConfiguration' test suite`, async () => {
+  describe(`'getWorkflowSavedConfiguration' test suite`, async () => {
     it('should successfully return 200 with saved configuration for the workflow', async () => {
       const workflowCtrl = new WorkflowTemplateController({
         retrieveWorkflowSavedConfiguration: sinon.stub().resolves({name: 'test', detectors: ['TPC', 'MFT']})
       });
-      await workflowCtrl.getWorkflowConfiguration({query: {name: 'test'}}, res);
+      await workflowCtrl.getWorkflowSavedConfiguration({query: {name: 'test'}}, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({name: 'test', detectors: ['TPC', 'MFT']}));
     });
 
     it('should return 400 and message on invalid configuration name', async () => {
       const workflowCtrl = new WorkflowTemplateController({});
-      await workflowCtrl.getWorkflowConfiguration({query:{}}, res);
+      await workflowCtrl.getWorkflowSavedConfiguration({query:{}}, res);
       assert.ok(res.status.calledWith(400));
       assert.ok(res.json.calledWith({
         message: 'No name for the configuration provided',
@@ -120,7 +120,7 @@ describe('WorkflowController test suite', () => {
       const workflowCtrl = new WorkflowTemplateController({
         retrieveWorkflowSavedConfiguration: sinon.stub().rejects(new NotFoundError('No configuration found'))
       });
-      await workflowCtrl.getWorkflowConfiguration({query: {name: 'test'}}, res);
+      await workflowCtrl.getWorkflowSavedConfiguration({query: {name: 'test'}}, res);
       assert.ok(res.status.calledWith(404));
       assert.ok(res.json.calledWith({
         message: 'No configuration found',
