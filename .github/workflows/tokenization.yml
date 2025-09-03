@@ -10,8 +10,19 @@ on:
       - 'dev'
 
 jobs:
-  lint-check:
-    name: Check eslint rules on ubuntu-latest
+  lint-check-backend:
+    name: Check eslint rules for backend on ubuntu-latest
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@vk
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - run: (cd Tokenization/backend; npm i)      
+  lint-check-webapp:
+    name: Check eslint rules for webapp on ubuntu-latest
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
