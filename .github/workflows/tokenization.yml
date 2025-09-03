@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-      - run: (cd Tokenization/webapp; npm ci )
+      - run: (cd Tokenization/webapp; npm i )
       - run: (cd Tokenization/webapp; npm run typecheck)
       - run: (cd Tokenization/webapp; npm run lint)
 

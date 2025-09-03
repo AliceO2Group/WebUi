@@ -28,7 +28,7 @@ RUN npm --silent install
 # ---- Build  ----
 FROM base AS build
 COPY webapp/package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm i --only=production && npm cache clean --force
 COPY webapp .
 RUN npm run build
 
