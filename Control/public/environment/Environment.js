@@ -130,9 +130,10 @@ export default class Environment extends Observable {
       this.itemNew = RemoteData.failure(result.message);
       this.notify();
     } else {
-      const { id } = result;
       this.itemNew = RemoteData.notAsked();
-      this.model.router.go(`?page=environment&id=${id}`);
+      // Users cannot be redirected to specific environment as it does not exist in 
+      // ECS until it becomes active, thus users would get a NotFound reply from ECS
+      this.model.router.go(`?page=environments`);
     }
   }
 
