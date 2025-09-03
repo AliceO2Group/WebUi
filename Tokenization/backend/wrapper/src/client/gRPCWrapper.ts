@@ -129,35 +129,3 @@ export class gRPCWrapper {
     );
   }
 }
-
-// const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
-// const grpc = new gRPCWrapper(PROTO_PATH, "localhost:50051");
-// grpc.connectToCentralSystem();
-// console.log(grpc.getSummary());
-
-// setTimeout(() => {
-//   console.log("New status after 10 seconds, token revokation and new token:");
-//   console.log(grpc.getSummary());
-// }, 10000);
-
-// grpc.connectToCentralSystem();
-
-// const conn1: Connection = grpc.connectToClient("localhost:40001");
-
-// // wrapping request
-// conn1
-//   .fetch({
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: "bearer someToken",
-//     },
-//     body: JSON.stringify({
-//       name: "Jan Kowalski",
-//       email: "jan.kowalski@example.com",
-//       age: 28,
-//     }),
-//   })
-//   .then((response) => response.json())
-//   .then((data) => console.log("Response:", data))
-//   .catch((error) => console.error("Error:", error));

@@ -28,7 +28,9 @@ export class ReconnectionScheduler {
   private attemptCount: number;
   private timeoutId: any;
   private logger: Logger;
+
   private isResetting: boolean = false;
+  private isScheduling: boolean = false;
 
   /**
    * @param reconnectCallback Function to call for reconnection attempt
@@ -54,6 +56,8 @@ export class ReconnectionScheduler {
    * @description Schedules the next reconnection attempt using exponential backoff.
    */
   schedule() {
+    if (this.isScheduling) return;
+    this.isScheduling = true;
     this.isResetting = false;
     this.attemptCount++;
 
@@ -70,6 +74,7 @@ export class ReconnectionScheduler {
 
     // plan the reconnection attempt
     this.timeoutId = setTimeout(() => {
+      this.isScheduling = false;
       this.reconnectCallback();
     }, this.currentDelay);
   }
