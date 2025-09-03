@@ -77,7 +77,7 @@ describe('POST /deploy', function () {
         userVars: { foo: 'bar' }
       })
       .expect(400, {
-        message: 'Invalid input: workflowTemplate or selectedConfiguration must be provided',
+        message: 'Invalid input: template must be provided',
         status: 400,
         title: 'Invalid Input'
       });

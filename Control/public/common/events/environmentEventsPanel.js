@@ -13,7 +13,7 @@
 */
 
 import { h } from '/js/src/index.js';
-import { ALIECS_TRANSITION_COLOR } from './../../../common/constants/stateColors.js';
+
 /**
  * Groups events by consecutive transition categories
  * @param {{message: string, transition: object}[]} events - the events to be grouped
@@ -52,11 +52,9 @@ export const environmentEventsPanel = (events = []) => {
   }
   const groupedEvents = groupEventsByConsecutiveCategory(reversedEvents);
   return groupedEvents.map((group) => {
-    const { category, events } = group;
-    const transitionClass = ALIECS_TRANSITION_COLOR[category] ? `bg-${ALIECS_TRANSITION_COLOR[category]}` : '';
+    const { events } = group;
     return h('', [
-      h(`h5.white.${transitionClass}.ph2`, `Transition: ${category}`),
-      h('.w-100.m2', events.map(eventRow))
+      h('.w-100', events.map((event, idx) => eventRow(event, idx)))
     ]);
   });
 };
@@ -66,11 +64,21 @@ export const environmentEventsPanel = (events = []) => {
  * @param {{message: string, transition: object, timestamp: number}} event - the event to be displayed
  * @return {vnode} - html table with the environment configuration
  */
-const eventRow = (event) => {
-  const { message, transition, timestamp } = event;
-  return h('', [
+const eventRow = (event, indexOfRow) => {
+  const { message, transition, timestamp, error } = event;
+  return h('', {
+    key: `event-row-${indexOfRow}`
+  }, [
     transition.step 
-      ? h('.mh4', `[${new Date(timestamp).toISOString()}] At step: ${transition.step} and has ${event.message}`)
-      : h('', `[${new Date(timestamp).toISOString()}] ${transition.name} ${message} `),
+      ? h(
+        `.mh4${error ? '.danger' : ''}`,
+        `[${new Date(timestamp).toISOString()}] ` +
+        `At step: ${ transition.step } and has ${ message } ${ error? `with error: ${error}` : ''}`
+      )
+      : h(
+        `${error ? '.danger' : ''}`,
+        `[${new Date(timestamp).toISOString()}] ` +
+        `${ transition.name ?? '' } ${ message } ${ error? `with error: ${error}` : ''}`
+      ),
   ]);
 };
