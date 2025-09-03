@@ -60,12 +60,12 @@ class WorkflowTemplateController {
   }
 
   /**
-   * API - GET endpoint for retrieving by name a saved configuration content
+   * API - GET endpoint for retrieving a saved configuration by name
    * @param {Request} req - HTTP Request object
    * @param {Response} res - HTTP Response object with EnvironmentDetails
    * @returns {void}
    */
-  async getWorkflowConfiguration(req, res) {
+  async getWorkflowSavedConfiguration(req, res) {
     try {
       const {name} = req.query;
       if (!name) {

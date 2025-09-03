@@ -16,10 +16,8 @@ const assert = require('assert');
 const {LogManager, LogLevel} = require('@aliceo2/web-ui');
 const {errorHandler, errorLogger} = require('./../utils.js');
 const CoreEnvConfig = require('../dtos/CoreEnvConfig.js');
-const CoreUtils = require('./CoreUtils.js');
-const COMPONENT = 'COG-v1';
+const {RUNTIME_COMPONENT: {COG_V1}} = require('./../common/kvStore/runtime.enum.js')
 const {User} = require('./../dtos/User.js');
-const {APRICOT_COMMANDS: {ListRuntimeEntries, GetRuntimeEntry}} = require('./ApricotCommands.js');
 const LOG_FACILITY = 'cog/apricotservice';
 
 /**
@@ -78,7 +76,7 @@ class ApricotService {
    */
   async getRuntimeEntryByComponent(component, key) {
     try {
-      const {payload = '{}'} = await this._grpcClient[GetRuntimeEntry]({component, key});
+      const {payload = '{}'} = await this._grpcClient.GetRuntimeEntry({component, key});
       return payload;
     } catch (error) {
       const {code, details = ''} = error;
@@ -156,24 +154,6 @@ class ApricotService {
   }
 
   /**
-   * Method to execute command contained by req.path and send back results
-   * @param {Request} req
-   * @param {Response} res
-   */
-  executeCommand(req, res) {
-    const method = CoreUtils.parseMethodNameString(req.path);
-    if (this._grpcClient?.isConnectionReady && method) {
-      this._grpcClient[method](req.body)
-        .then((response) => res.json(response))
-        .catch((error) => errorHandler(error, res, 504, 'apricotservice'));
-    } else {
-      const error = this._grpcClient?.connectionError?.message
-        ?? 'Could not establish connection to O2Apricot due to potentially undefined method';
-      errorHandler(error, res, 503, 'apricotservice');
-    }
-  }
-
-  /**
    * Responds to request to save a configuration for creating a new environment;
    * * Parses data to be saved including user data;
    * * If name of the configuration already exists throws an error to inform user to load and update rather than direct save;
@@ -189,7 +169,7 @@ class ApricotService {
       data.user = {username, personid};
       const envConf = CoreEnvConfig.fromJSON(data);
 
-      const {payload: configurations} = await this._grpcClient[ListRuntimeEntries]({component: COMPONENT});
+      const {payload: configurations} = await this._grpcClient.ListRuntimeEntries({component: COG_V1});
       if (configurations.includes(envConf.id)) {
         errorHandler(`A configuration with name '${envConf.id}' already exists. `
           + 'Please load existing configuration and use \'Update\'', res, 409, 'apricotservice');
@@ -198,7 +178,7 @@ class ApricotService {
           `${req.session.username} request to save new core environment configuration "${envConf.id}"`,
           {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
         );
-        await this._grpcClient['SetRuntimeEntry']({component: COMPONENT, key: envConf.id, value: envConf.toString()});
+        await this._grpcClient['SetRuntimeEntry']({component: COG_V1, key: envConf.id, value: envConf.toString()});
         res.status(201).json({message: `Configuration successfully saved as ${envConf.id}`});
       }
     } catch (error) {
@@ -229,7 +209,7 @@ class ApricotService {
         {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
       );
       await this._grpcClient['SetRuntimeEntry']({
-        component: COMPONENT,
+        component: COG_V1,
         key: envConfigToSave.id,
         value: envConfigToSave.toString()
       });
@@ -256,8 +236,8 @@ class ApricotService {
   async _getUpdatedConfigIfExists(envConfig, user) {
     let existingConfig = '';
     try {
-      const {payload: envConfigAsString} = await this._grpcClient['GetRuntimeEntry']({
-        component: COMPONENT,
+      const {payload: envConfigAsString} = await this._grpcClient.GetRuntimeEntry({
+        component: COG_V1,
         key: envConfig.id,
       });
       existingConfig = CoreEnvConfig.fromString(envConfigAsString);
