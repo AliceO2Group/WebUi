@@ -10,8 +10,22 @@ on:
       - 'dev'
 
 jobs:
-  ui-test:
+  lint-check:
     name: Check eslint rules on ubuntu-latest
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - run: (cd Tokenization/webapp; npm ci )
+      - run: (cd Tokenization/webapp; npm run typecheck)
+      - run: (cd Tokenization/webapp; npm run lint)
+
+  ui-test:
+    name: UI-tests for webapp application
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
