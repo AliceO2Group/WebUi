@@ -70,35 +70,6 @@ describe('Control Service test suite', () => {
     });
   });
 
-  describe('Check executing commands through `GrpcServiceClient`', () => {
-    let ctrlService = null;
-    const req = {
-      session: {
-        personid: 0
-      },
-      path: 'ListRepos',
-      body: 'Test'
-    };
-
-    const res = {
-      json: sinon.fake.returns(),
-      status: sinon.stub().returns(),
-      send: sinon.stub()
-    };
-
-    it('should successfully execute command, send response with status and message', async () => {
-      const ctrlProxy = {
-        isConnectionReady: true,
-        ListRepos: sinon.stub().resolves(['RepoA', 'RepoB'])
-      };
-      ctrlService = new ControlService(ctrlProxy);
-
-      await ctrlService.executeCommand(req, res);
-      assert.ok(res.json.calledOnce);
-      assert.ok(res.json.calledWith(['RepoA', 'RepoB']));
-    });
-  });
-
   describe('Check Framework Information', () => {
     it('should successfully resolve with AliECS Version', async () => {
       const versionJSON = {

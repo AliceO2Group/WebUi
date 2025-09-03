@@ -124,29 +124,6 @@ class ControlService {
   }
 
   /**
-   * Method to execute command contained by req.path and send back results
-   * @param {Request} req
-   * @param {Response} res
-   */
-  executeCommand(req, res) {
-    const method = CoreUtils.parseMethodNameString(req.path);
-    this._grpcClient[method](req.body)
-      .then((response) => res.json(response))
-      .catch((error) => errorHandler(error, res, 504));
-  }
-
-  /**
-   * Execute Command but do not respond to user
-   * @param {string} method - AliECS method name
-   * @param {object} body - request body
-   * @param {JSON} options - optional parameters that are to be set to the gRPC call (e.g deadline)
-   * @return {Promise}
-   */
-  executeCommandNoResponse(method, body = {}, options = undefined) {
-    return this._grpcClient[method](body, options);
-  }
-
-  /**
    * Method to execute specified command return results
    * @return {Promise}
    */

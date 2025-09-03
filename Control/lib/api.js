@@ -108,22 +108,22 @@ module.exports.setup = (http, ws) => {
 
   const consulController = new ConsulController(consulService, config.consul);
 
-  const ctrlProxy = new GrpcServiceClient(config.grpc, O2_CONTROL_PROTO_PATH);
-  const ctrlService = new ControlService(ctrlProxy, consulController, config.grpc, O2_CONTROL_PROTO_PATH);
+  const grpcClientForO2Control = new GrpcServiceClient(config.grpc, O2_CONTROL_PROTO_PATH);
+  const ctrlService = new ControlService(grpcClientForO2Control, consulController, config.grpc, O2_CONTROL_PROTO_PATH);
   ctrlService.setWS(ws);
-  const apricotProxy = new GrpcServiceClient(config.apricot, O2_APRICOT_PROTO_PATH);
-  const apricotService = new ApricotService(apricotProxy);
+  const grpcClientForO2Apricot = new GrpcServiceClient(config.apricot, O2_APRICOT_PROTO_PATH);
+  const apricotService = new ApricotService(grpcClientForO2Apricot);
 
   const lockService = new LockService(broadcastService);
   const lockController = new LockController(lockService);
 
-  const detectorService = new DetectorService(ctrlProxy);
+  const detectorService = new DetectorService(grpcClientForO2Control);
   const environmentService = new EnvironmentService(
-    ctrlProxy, apricotService, cacheService, broadcastService, environmentCacheService
+    grpcClientForO2Control, apricotService, cacheService, broadcastService, environmentCacheService
   );
-  const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
+  const workflowService = new WorkflowTemplateService(grpcClientForO2Control, apricotService);
   const deploymentService = new DeploymentService(environmentService, workflowService, environmentCacheService);
-  const taskService = new TaskService(ctrlProxy);
+  const taskService = new TaskService(grpcClientForO2Control);
 
   /**
    * Controllers are initialized with the services they depend on.
@@ -176,10 +176,6 @@ module.exports.setup = (http, ws) => {
   const setDetectorsFromEnvironmentMiddleware = setDetectorsFromEnvironmentMiddlewareFactory(environmentService);
   const verifyLockOwnershipMiddleware = getDetectorsLockOwnershipMiddlewareFactory(lockService);
   const validateConsulServiceMiddleware = validateConsulServiceMiddlewareFactory(consulService);
-
-  ctrlProxy.methods.forEach(
-    (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res)),
-  );
 
   http.get('/workflow/template/default/source', workflowController.getDefaultTemplateSource.bind(workflowController));
   http.get('/workflow/template/mappings', workflowController.getWorkflowMapping.bind(workflowController));
