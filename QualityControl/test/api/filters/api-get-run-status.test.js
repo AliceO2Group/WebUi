@@ -37,7 +37,7 @@ export const apiGetRunStatusTests = () => {
       await request(`${URL_ADDRESS}/api/filter/run-status/-1`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
         .expect(400, {
-          message: '"value" must be greater than or equal to 0',
+          message: 'Run number must be positive',
           status: 400,
           title: 'Invalid Input',
         });
@@ -47,7 +47,7 @@ export const apiGetRunStatusTests = () => {
       await request(`${URL_ADDRESS}/api/filter/run-status/1000000`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
         .expect(400, {
-          message: '"value" must be less than or equal to 999999',
+          message: 'Run number must not exceed 999999',
           status: 400,
           title: 'Invalid Input',
         });
@@ -57,7 +57,7 @@ export const apiGetRunStatusTests = () => {
       await request(`${URL_ADDRESS}/api/filter/run-status/invalid`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
         .expect(400, {
-          message: '"value" must be a number',
+          message: 'Run number must be a number',
           status: 400,
           title: 'Invalid Input',
         });

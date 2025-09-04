@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { validateRunNumber } from '../helpers/validateRunNumber.js';
+import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import { RunNumberDto } from '../../dtos/filters/RunNumberDto.js';
 
 /**
  * Middleware function to validate the run number and attach it to the request object.
@@ -22,11 +23,17 @@ f
  * @param {Function} next - The next middleware function in the stack.
  * @returns {Promise<void>}
  */
-export const runStatusMiddleware = async (req, res, next) => {
-  const parsedRunNumber = await validateRunNumber(req.params.runNumber, res);
-  if (parsedRunNumber === null) {
-    return;
+export const runStatusFilterMiddleware = async (req, res, next) => {
+  try {
+    const validatedRunNumber = await RunNumberDto.validateAsync(req.params.runNumber);
+    req.params.runNumber = validatedRunNumber;
+    next();
+  } catch (error) {
+    updateAndSendExpressResponseFromNativeError(
+      res,
+      error.isJoi
+        ? new InvalidInputError(error.details[0].message)
+        : error,
+    );
   }
-  req.runNumber = parsedRunNumber;
-  next();
 };

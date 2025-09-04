@@ -15,12 +15,12 @@
 import { suite, test } from 'node:test';
 import { ok } from 'node:assert';
 import sinon from 'sinon';
-import { runStatusMiddleware } from '../../../../lib/middleware/filters/runStatusFilter.middleware.js';
+import { runStatusFilterMiddleware } from '../../../../lib/middleware/filters/runStatusFilter.middleware.js';
 
 /**
  * Test suite for the run status middleware that validates run numbers from URL parameters
  */
-export const runStatusMiddlewareTest = () => {
+export const runStatusFilterMiddlewareTest = () => {
   suite('Run status middleware', () => {
     test('should return 400 error if run number parameter is missing', async () => {
       const req = {
@@ -32,7 +32,7 @@ export const runStatusMiddlewareTest = () => {
       };
       const next = sinon.stub();
 
-      await runStatusMiddleware(req, res, next);
+      await runStatusFilterMiddleware(req, res, next);
 
       ok(res.status.calledWith(400), 'Status should be 400');
       ok(res.json.calledWith({
@@ -55,11 +55,11 @@ export const runStatusMiddlewareTest = () => {
       };
       const next = sinon.stub();
 
-      await runStatusMiddleware(req, res, next);
+      await runStatusFilterMiddleware(req, res, next);
 
       ok(res.status.calledWith(400), 'Status should be 400');
       ok(res.json.calledWith({
-        message: '"value" must be a number',
+        message: 'Run number must be a number',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error message');
@@ -78,11 +78,11 @@ export const runStatusMiddlewareTest = () => {
       };
       const next = sinon.stub();
 
-      await runStatusMiddleware(req, res, next);
+      await runStatusFilterMiddleware(req, res, next);
 
       ok(res.status.calledWith(400), 'Status should be 400');
       ok(res.json.calledWith({
-        message: '"value" must be greater than or equal to 0',
+        message: 'Run number must be positive',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error message');
@@ -101,11 +101,11 @@ export const runStatusMiddlewareTest = () => {
       };
       const next = sinon.stub();
 
-      await runStatusMiddleware(req, res, next);
+      await runStatusFilterMiddleware(req, res, next);
 
       ok(res.status.calledWith(400), 'Status should be 400');
       ok(res.json.calledWith({
-        message: '"value" must be less than or equal to 999999',
+        message: 'Run number must not exceed 999999',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error message');
@@ -121,9 +121,9 @@ export const runStatusMiddlewareTest = () => {
       const res = {};
       const next = sinon.stub();
 
-      await runStatusMiddleware(req, res, next);
+      await runStatusFilterMiddleware(req, res, next);
 
-      ok(req.runNumber === 123456, 'Run number should be parsed and attached to request');
+      ok(req.params.runNumber === 123456, 'Run number should be parsed and attached to request');
       ok(next.calledOnce, 'next() should be called once');
     });
 
@@ -136,9 +136,9 @@ export const runStatusMiddlewareTest = () => {
       const res = {};
       const next = sinon.stub();
 
-      await runStatusMiddleware(req, res, next);
+      await runStatusFilterMiddleware(req, res, next);
 
-      ok(req.runNumber === 654321, 'Numeric run number should be validated and attached');
+      ok(req.params.runNumber === 654321, 'Numeric run number should be validated and attached');
       ok(next.calledOnce, 'next() should be called once');
     });
 
@@ -151,9 +151,9 @@ export const runStatusMiddlewareTest = () => {
       const res = {};
       const next = sinon.stub();
 
-      await runStatusMiddleware(req, res, next);
+      await runStatusFilterMiddleware(req, res, next);
 
-      ok(req.runNumber === 999999, 'Maximum valid run number should be accepted');
+      ok(req.params.runNumber === 999999, 'Maximum valid run number should be accepted');
       ok(next.calledOnce, 'next() should be called once');
     });
   });
