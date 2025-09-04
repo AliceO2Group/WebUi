@@ -298,6 +298,29 @@ export default class FilterModel extends Observable {
    */
   set runStatus(runStatus) {
     this._runStatus = runStatus;
+
+    // exit runs mode if run is not found or status is unknown
+    if (this.inRunMode && runStatus !== RunStatus.ONGOING && runStatus !== RunStatus.ENDED) {
+      setTimeout(async () => {
+        if (this._currentViewModel) {
+          let reason = '';
+          switch (runStatus) {
+            case RunStatus.NOT_FOUND:
+              reason = 'The run number provided does not correspond to any known run.';
+              break;
+            case RunStatus.BOOKKEEPING_UNAVAILABLE:
+              reason = 'The bookkeeping service is not available.';
+              break;
+            default:
+              reason = 'Unable to retrieve the run status.';
+          }
+
+          await this.deactivateRunsMode(this._currentViewModel);
+          this.model.notification.show(`Runs mode cannot be accesed: ${reason}`, 'warning', 4000);
+        }
+      }, 0);
+    }
+
     this.notify();
   }
 

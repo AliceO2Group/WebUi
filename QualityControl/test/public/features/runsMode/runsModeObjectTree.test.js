@@ -75,8 +75,8 @@ export const runsModeObjectTreeTests = async (url, page, timeout = 5000, testPar
     await page.waitForSelector('#runStatusList', { timeout });
     const runStatusList = await page.evaluate(() => {
       const runStatusList = document.querySelector('#runStatusList');
-      return runStatusList?.children?.length === 4;
+      return runStatusList?.children?.length === 2;
     });
-    strictEqual(runStatusList, true, 'list of status should have 4 elements');
+    strictEqual(runStatusList, true, 'list of status should have 2 elements');
   });
 };

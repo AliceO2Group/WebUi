@@ -70,11 +70,12 @@ export function runModeHeader(filterModel, viewModel) {
    * @returns {vnode} - virtual node element
    */
   function renderRunStatus(filterModel) {
+    const statusClass = filterModel.runStatus === RunStatus.ONGOING ? 'status-ongoing' : 'primary';
     return h('.flex-row.items-center.g1', {
       id: 'runStatus',
     }, [
       h('span.gray-darker', 'Status:'),
-      h(`b.${getStatusClass(filterModel.runStatus)}`, filterModel.runStatus || 'Unknown'),
+      h(`b.${statusClass}`, filterModel.runStatus),
       renderStatusInfoDropdown(filterModel),
     ]);
   }
@@ -122,6 +123,7 @@ export function runModeHeader(filterModel, viewModel) {
         h('div.gray-darker.mv1', 'Status meanings:'),
         h('hr.mv1'),
         renderStatusList(),
+        h('span', '* Note: All other filters have been removed. Only the run number filter is applied.'),
       ]),
     ]);
   }
@@ -133,14 +135,24 @@ export function runModeHeader(filterModel, viewModel) {
   function renderStatusList() {
     return h('div', {
       id: 'runStatusList',
-    }, Object.values(RunStatus).map((status) => h('div.flex-row.items-center.mv1', {
-      style: 'white-space: nowrap;',
     }, [
-      h('div.flex-row.items-center.g1', [
-        h(`b.${getStatusClass(status)}`, [status]),
-        h('span.gray-darker', ` - ${getStatusTitle(status)}`),
+      h('div.flex-row.items-center.mv1', {
+        style: 'white-space: nowrap;',
+      }, [
+        h('div.flex-row.items-center.g1', [
+          h('b.status-ongoing', [RunStatus.ONGOING]),
+          h('span.gray-darker', ' - The run is currently ongoing. New paths and objects will be added periodically.'),
+        ]),
       ]),
-    ])));
+      h('div.flex-row.items-center.mv1', {
+        style: 'white-space: nowrap;',
+      }, [
+        h('div.flex-row.items-center.g1', [
+          h('b.primary', [RunStatus.ENDED]),
+          h('span.gray-darker', ' - The run has ended successfully. No new paths or objects will be added.'),
+        ]),
+      ]),
+    ]);
   }
 
   /**
@@ -155,41 +167,5 @@ export function runModeHeader(filterModel, viewModel) {
       onclick: async () => await filterModel.deactivateRunsMode(viewModel),
       title: 'Exit run mode and show all filters',
     }, 'Exit');
-  }
-
-  /**
-   * Returns the CSS class based on the run status
-   * @param {string} status - The run status value
-   * @returns {string} - The corresponding CSS class
-   */
-  function getStatusClass(status) {
-    switch (status) {
-      case RunStatus.ONGOING:
-        return 'status-ongoing';
-      case RunStatus.NOT_FOUND:
-        return 'danger';
-      case RunStatus.ENDED:
-        return 'primary';
-      default:
-        return 'gray-darker';
-    }
-  }
-
-  /**
-   * Returns the title based on the run status
-   * @param {string} status - The run status value
-   * @returns {string} - The corresponding title text
-   */
-  function getStatusTitle(status) {
-    switch (status) {
-      case RunStatus.ENDED:
-        return 'The run has ended successfully. No new paths or objects will be added.';
-      case RunStatus.ONGOING:
-        return 'The run is currently ongoing. New paths and objects will be added periodically.';
-      case RunStatus.NOT_FOUND:
-        return 'The run was not found in the database. Please check the run number.';
-      default:
-        return 'The status of the run is unknown. Please check the run number or the system status.';
-    }
   }
 }
