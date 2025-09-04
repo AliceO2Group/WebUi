@@ -62,7 +62,6 @@ export const setup = (http, ws) => {
     objectsGetValidation,
     runModeMiddleware,
     objectController.getObjects.bind(objectController),
-    { public: true },
   );
 
   http.get('/layouts', layoutController.getLayoutsHandler.bind(layoutController));
