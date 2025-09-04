@@ -71,10 +71,6 @@ class EnvironmentService {
       throw grpcErrorToNativeError(error);
     }
     try { 
-      if (!environments || environments.length === 0) {
-        this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, []);
-        return [];
-      }
       const activeEnvironmentList = [];
       for (const { id } of environments) {
         let environment;
