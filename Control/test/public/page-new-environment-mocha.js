@@ -440,7 +440,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
       waitUntil: 'networkidle0',
     });
     const location = await page.evaluate(() => window.location);
-    assert.strictEqual(location.search, '?page=environment&id=6f6d6387-6577-11e8-993a-f07959157220&panel=general');
+    assert.strictEqual(location.search, '?page=environments');
     assert.ok(calls['newEnvironmentAsync']);
   });
 
