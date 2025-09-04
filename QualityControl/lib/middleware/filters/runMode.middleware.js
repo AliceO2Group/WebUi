@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import { updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 import { validateRunNumber } from '../helpers/validateRunNumber.js';
 
 /**
@@ -24,14 +25,14 @@ import { validateRunNumber } from '../helpers/validateRunNumber.js';
 export const runModeMiddleware = async (req, res, next) => {
   const { inRunMode = false, filters = {} } = req.query;
   if (!inRunMode) {
-    return next();
-  }
-
-  const parsedRunNumber = await validateRunNumber(filters?.RunNumber, res);
-  if (parsedRunNumber === null) {
+    next();
     return;
   }
-
-  req.query.filters.RunNumber = parsedRunNumber;
-  next();
+  try {
+    const parsedRunNumber = await validateRunNumber(filters?.RunNumber);
+    req.query.filters.RunNumber = parsedRunNumber;
+    next();
+  } catch (error) {
+    updateAndSendExpressResponseFromNativeError(res, error);
+  }
 };

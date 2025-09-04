@@ -12,17 +12,18 @@
  * or submit itself to any jurisdiction.
  */
 
-import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
-import { RunNumberDto } from '../../dtos/FiltersDto.js';
+import { InvalidInputError } from '@aliceo2/web-ui';
+import { RunNumberDto } from '../../dtos/filters/RunNumberDto.js';
 
 /**
  * Helper to validate and parse a run number.
  * Handles both Joi validation errors and native errors.
  * @param {string|number} runNumber - The run number to validate.
- * @param {object} res - Express response object (for error handling).
  * @returns {Promise<number|null>} - Returns the parsed run number, or null if error response was already sent.
+ * @throws {InvalidInputError} - If the run number is invalid or missing.
+ * @throws {Error} - If any other error occurs during validation.
  */
-export const validateRunNumber = async (runNumber, res) => {
+export const validateRunNumber = async (runNumber) => {
   try {
     if (runNumber === undefined) {
       throw new InvalidInputError('Run number is required');
@@ -34,13 +35,8 @@ export const validateRunNumber = async (runNumber, res) => {
     return parsedRunNumber;
   } catch (error) {
     if (error.isJoi) {
-      updateAndSendExpressResponseFromNativeError(
-        res,
-        new InvalidInputError(error.message),
-      );
-    } else {
-      updateAndSendExpressResponseFromNativeError(res, error);
+      throw new InvalidInputError(error.details[0].message);
     }
-    return null;
+    throw error;
   }
 };

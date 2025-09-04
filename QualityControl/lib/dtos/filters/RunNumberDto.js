@@ -14,4 +14,13 @@
 
 import Joi from 'joi';
 
-export const RunNumberDto = Joi.number().integer().min(0).max(999999).integer();
+export const RunNumberDto = Joi.number()
+  .integer()
+  .min(0)
+  .max(999999)
+  .messages({
+    'number.base': 'Run number must be a number',
+    'number.integer': 'Run number must be an integer',
+    'number.min': 'Run number must be positive',
+    'number.max': 'Run number must not exceed 999999',
+  });

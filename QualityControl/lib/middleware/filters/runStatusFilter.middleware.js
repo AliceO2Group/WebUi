@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import { updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 import { validateRunNumber } from '../helpers/validateRunNumber.js';
 
 /**
@@ -22,11 +23,12 @@ f
  * @param {Function} next - The next middleware function in the stack.
  * @returns {Promise<void>}
  */
-export const runStatusMiddleware = async (req, res, next) => {
-  const parsedRunNumber = await validateRunNumber(req.params.runNumber, res);
-  if (parsedRunNumber === null) {
-    return;
+export const runStatusFilterMiddleware = async (req, res, next) => {
+  try {
+    const parsedRunNumber = await validateRunNumber(req.params.runNumber);
+    req.params.runNumber = parsedRunNumber;
+    next();
+  } catch (error) {
+    updateAndSendExpressResponseFromNativeError(res, error);
   }
-  req.runNumber = parsedRunNumber;
-  next();
 };

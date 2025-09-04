@@ -67,7 +67,7 @@ export const runModeMiddlewareTest = () => {
 
       ok(res.status.calledWith(400), 'Status should be 400');
       ok(res.json.calledWith({
-        message: '"value" must be a number',
+        message: 'Run number must be a number',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error message');
@@ -93,7 +93,7 @@ export const runModeMiddlewareTest = () => {
 
       ok(res.status.calledWith(400), 'Status should be 400');
       ok(res.json.calledWith({
-        message: '"value" must be greater than or equal to 0',
+        message: 'Run number must be positive',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error message');

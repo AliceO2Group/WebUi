@@ -19,7 +19,7 @@ import { layoutOwnerMiddleware } from './middleware/layouts/layoutOwner.middlewa
 import { layoutIdMiddleware } from './middleware/layouts/layoutId.middleware.js';
 import { layoutServiceMiddleware } from './middleware/layouts/layoutService.middleware.js';
 import { statusComponentMiddleware } from './middleware/status/statusComponent.middleware.js';
-import { runStatusMiddleware } from './middleware/filters/runStatusFilter.middleware.js';
+import { runStatusFilterMiddleware } from './middleware/filters/runStatusFilter.middleware.js';
 import { runModeMiddleware } from './middleware/filters/runMode.middleware.js';
 
 /**
@@ -104,7 +104,7 @@ export const setup = (http, ws) => {
   http.get('/filter/configuration', filterController.getFilterConfigurationHandler.bind(filterController));
   http.get(
     '/filter/run-status/:runNumber',
-    runStatusMiddleware,
+    runStatusFilterMiddleware,
     filterController.getRunStatusHandler.bind(filterController),
   );
 };
