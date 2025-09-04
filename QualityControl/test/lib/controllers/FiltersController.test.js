@@ -76,7 +76,9 @@ export const filtersControllerTestSuite = async () => {
       filterService.getRunStatus.resolves(RunStatus.ONGOING);
 
       const req = {
-        runNumber: 123456,
+        params: {
+          runNumber: 123456,
+        },
       };
       const res = {
         status: sinon.stub().returnsThis(),
@@ -88,7 +90,9 @@ export const filtersControllerTestSuite = async () => {
 
       ok(filterService.getRunStatus.calledWith(123456), 'FilterService.getRunStatus should be called with run number');
       ok(res.status.calledWith(200), 'Response status should be 200');
-      ok(res.json.calledWith(RunStatus.ONGOING), 'Response should contain the run status');
+      ok(res.json.calledWith({
+        runStatus: RunStatus.ONGOING,
+      }), 'Response should contain the run status');
     });
 
     test('should handle errors from FilterService and send error response', async () => {
@@ -97,7 +101,9 @@ export const filtersControllerTestSuite = async () => {
       filterService.getRunStatus.rejects(testError);
 
       const req = {
-        runNumber: 123456,
+        params: {
+          runNumber: 123456,
+        },
       };
       const res = {
         status: sinon.stub().returnsThis(),
@@ -121,7 +127,9 @@ export const filtersControllerTestSuite = async () => {
       filterService.getRunStatus.resolves('UNKNOWN');
 
       const req = {
-        runNumber: 999999,
+        params: {
+          runNumber: 999999,
+        },
       };
       const res = {
         status: sinon.stub().returnsThis(),
@@ -133,7 +141,9 @@ export const filtersControllerTestSuite = async () => {
 
       ok(filterService.getRunStatus.calledWith(999999), 'FilterService.getRunStatus should be called with run number');
       ok(res.status.calledWith(200), 'Response status should be 200');
-      ok(res.json.calledWith('UNKNOWN'), 'Response should contain UNKNOWN status');
+      ok(res.json.calledWith({
+        runStatus: RunStatus.UNKNOWN,
+      }), 'Response should contain UNKNOWN status');
     });
   });
 };

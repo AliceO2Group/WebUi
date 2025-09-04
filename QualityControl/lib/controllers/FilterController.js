@@ -41,8 +41,10 @@ export class FilterController {
    */
   async getRunStatusHandler(req, res) {
     try {
-      const runStatus = await this._filterService.getRunStatus(req.runNumber);
-      res.status(200).json(runStatus);
+      const runStatus = await this._filterService.getRunStatus(req.params.runNumber);
+      res.status(200).json({
+        runStatus: runStatus,
+      });
     } catch (error) {
       this._logger.errorMessage('Error getting run status:', error);
       updateAndSendExpressResponseFromNativeError(res, error);
