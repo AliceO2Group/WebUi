@@ -66,7 +66,6 @@ import { layoutServiceMiddlewareTest } from './lib/middlewares/layouts/layoutSer
 import { statusComponentMiddlewareTest } from './lib/middlewares/status/statusComponent.middleware.test.js';
 import { runModeMiddlewareTest } from './lib/middlewares/filters/runMode.middleware.test.js';
 import { runStatusFilterMiddlewareTest } from './lib/middlewares/filters/runStatusFilter.middleware.test.js';
-import { validateRunNumberTestSuite } from './lib/middlewares/helpers/validateRunNumber.test.js';
 import { apiPutLayoutTests } from './api/layouts/api-put-layout.test.js';
 import { apiPatchLayoutTests } from './api/layouts/api-patch-layout.test.js';
 import { layoutRepositoryTest } from './lib/repositories/LayoutRepository.test.js';
@@ -224,7 +223,6 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('LayoutIdMiddleware test suite', async () => layoutIdMiddlewareTest());
       suite('LayoutOwnerMiddleware test suite', async () => layoutOwnerMiddlewareTest());
       suite('StatusComponentMiddleware test suite', async () => statusComponentMiddlewareTest());
-      suite('Validate run number helper test suite', async () => validateRunNumberTestSuite());
       suite('RunModeMiddleware test suite', async () => runModeMiddlewareTest());
       suite('RunStatusFilterMiddleware test suite', async () => runStatusFilterMiddlewareTest());
       suite('BookkeepingServiceTest test suite', async () => await bookkeepingServiceTestSuite());
