@@ -144,18 +144,18 @@ export class BookkeepingService {
       });
 
       if (!data) {
-        throw new Error('No data received from bookkeeping');
+        throw new Error('No data available');
       }
 
       return data.timeO2End ? RunStatus.ENDED : RunStatus.ONGOING;
     } catch (error) {
-      const msg = String(error.message);
+      const msg = error?.message ?? String(error);
       if (msg.includes('404')) {
         logger.warnMessage(`Run number ${runNumber} not found in bookkeeping`);
         return RunStatus.NOT_FOUND;
       }
       logger.errorMessage(`Error fetching run status: ${error.message || error}`);
-      return RunStatus.UNKNNOWN;
+      return RunStatus.UNKNOWN;
     }
   }
 
