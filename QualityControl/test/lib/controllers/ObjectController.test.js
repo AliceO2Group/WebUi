@@ -1,194 +1,213 @@
-import { strict as assert } from 'assert';
-import { suite, test, beforeEach } from 'node:test';
-import { ObjectController } from '../../../lib/controllers/ObjectController.js';
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
+import test, { afterEach, beforeEach, suite } from 'node:test';
+import { ok } from 'node:assert';
 import sinon from 'sinon';
+import { ObjectController } from '../../../lib/controllers/ObjectController.js';
 
 export const objectControllerTestSuite = async () => {
-  suite('ObjectController test suite', () => {
-    let res = null;
-    let req = null;
-    let qcObjectServiceStub = null;
-    let objectController = null;
+  let QcObjectServiceMock = null;
+  let reqMock = null;
+  let resMock = null;
+  let objectController = null;
+  let RunMonitoringServiceMock = null;
 
-    beforeEach(() => {
-      res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
-      };
-      req = {
-        params: {},
-        query: {},
-      };
-      qcObjectServiceStub = {
-        retrieveLatestVersionOfObjects: sinon.stub(),
-        retrieveQcObjectByQcgId: sinon.stub(),
-        retrieveQcObject: sinon.stub(),
-      };
-      objectController = new ObjectController(qcObjectServiceStub);
+  beforeEach(() => {
+    resMock = {
+      status: sinon.stub().returnsThis(),
+      send: sinon.spy(),
+      json: sinon.spy(),
+    };
+    reqMock = {
+      query: { token: 'someToken' },
+      params: {},
+    };
+    QcObjectServiceMock = {
+      retrieveLatestVersionOfObjects: sinon.stub(),
+      retrieveQcObject: sinon.stub(),
+      retrieveQcObjectByQcgId: sinon.stub(),
+    };
+    RunMonitoringServiceMock = {
+      checkAndSetRunMonitoring: sinon.spy(),
+      retrievePathsAndSetRunStatus: sinon.stub(),
+    };
+    objectController = new ObjectController(QcObjectServiceMock, RunMonitoringServiceMock);
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  suite('getObjects() tests', () => {
+    const mockObjectsList = [
+      { objectName: 'object1', path: 'qc/path/object1' },
+      { objectName: 'object2', path: 'qc/path/object2' },
+    ];
+
+    test('should return an invalid input error if no run number is provided in run mode', async () => {
+      reqMock.query.inRunMode = true;
+      reqMock.query.filters = {};
+      await objectController.getObjects(reqMock, resMock);
+      ok(resMock.status.calledWith(400));
+      ok(resMock.json.calledWithMatch({
+        message: 'RunNumber is required when in run mode',
+        status: 400,
+        title: 'Invalid Input',
+      }));
     });
 
-    suite('`getObjects()` tests', () => {
-      test('should return 400 if prefix is not a string', async () => {
-        const req = {
-          query: { prefix: 123, fields: [] },
-        };
-
-        await objectController.getObjects(req, res);
-
-        assert.ok(res.status.calledWith(400));
-        assert.ok(res.json.calledWith({
-          message: 'Invalid parameters provided: prefix must be of type string',
-          title: 'Invalid Input',
-          status: 400,
-        }));
-      });
-
-      test('should return 400 if fields is not an array', async () => {
-        const req = {
-          query: { prefix: 'some/path', fields: 'not-an-array' },
-        };
-
-        await objectController.getObjects(req, res);
-
-        assert.ok(res.status.calledWith(400));
-        assert.ok(res.json.calledWith({
-          message: 'Invalid parameters provided: fields must be of type Array',
-          title: 'Invalid Input',
-          status: 400,
-        }));
-      });
-
-      test('should return 200 and list of objects if parameters are valid', async () => {
-        const mockList = [{ name: 'object1' }, { name: 'object2' }];
-        qcObjectServiceStub.retrieveLatestVersionOfObjects.resolves(mockList);
-
-        const req = {
-          query: { prefix: 'valid/path', fields: ['field1', 'field2'] },
-        };
-
-        await objectController.getObjects(req, res);
-
-        assert.ok(res.status.calledWith(200));
-        assert.ok(res.json.calledWith(mockList));
-      });
-
-      test('should return 500 if service throws error', async () => {
-        qcObjectServiceStub.retrieveLatestVersionOfObjects.rejects(new Error('Service failed'));
-
-        const req = {
-          query: { prefix: 'valid/path', fields: ['f'] },
-        };
-
-        await objectController.getObjects(req, res);
-
-        assert.ok(res.status.calledWith(500));
-        assert.ok(res.json.calledWith({
-          message: 'Failed to retrieve list of objects latest version',
-          title: 'Unknown Error',
-          status: 500,
-        }));
-      });
+    test('should return an invalid input error if run number is not a number in run mode', async () => {
+      reqMock.query.inRunMode = true;
+      reqMock.query.filters = { RunNumber: 'abc' };
+      await objectController.getObjects(reqMock, resMock);
+      ok(resMock.status.calledWith(400));
+      ok(resMock.json.calledWithMatch({
+        message: 'RunNumber must be a number',
+        status: 400,
+        title: 'Invalid Input',
+      }));
     });
 
-    suite('`getObjectsContent()` test suite', () => {
-      test('should return a 400 error if URL is invalid', async () => {
-        await objectController.getObjectContent(req, res);
-        assert.ok(res.json.calledWith({
-          message: 'Invalid URL parameters: missing object path',
-          title: 'Invalid Input',
-          status: 400,
-        }));
+
+    test('should retrieve paths and set run status in run mode with run number', async () => {
+      reqMock.query.inRunMode = true;
+      reqMock.query.filters = { RunNumber: 123 };
+      RunMonitoringServiceMock.retrievePathsAndSetRunStatus.resolves({
+        paths: mockObjectsList,
+        runStatus: 'ONGOING',
       });
-      test('should return 200 with the QcObject', async () => {
-        const mockObject = { id: 'obj1', name: 'Test Object' };
 
-        req.query = {
-          path: 'valid/path.json',
-          validFrom: '1700000000',
-          id: 'id123',
-          filters: JSON.stringify({ a: 'b', empty: '' }),
-        };
+      await objectController.getObjects(reqMock, resMock);
 
-        qcObjectServiceStub.retrieveQcObject.resolves(mockObject);
-
-        await objectController.getObjectContent(req, res);
-
-        assert.ok(res.status.calledWith(200));
-        assert.ok(res.json.calledWith(mockObject));
-      });
-      test('should return a 500 error if service fails', async () => {
-        const error = new Error('Service failure');
-
-        req.query = {
-          path: 'valid/path.json',
-          validFrom: '1700000000',
-          id: 'id123',
-          filters: JSON.stringify({ key: 'value' }),
-        };
-
-        qcObjectServiceStub.retrieveQcObject.rejects(error);
-
-        objectController.updateAndSendExpressResponseFromNativeError = (res, err) => {
-          res.status(500).json({
-            message: err.message,
-            title: 'Unknown error',
-            status: 500,
-          });
-        };
-
-        await objectController.getObjectContent(req, res);
-
-        assert.ok(res.status.calledWith(500));
-        assert.ok(res.json.calledWith({
-          message: 'Unable to identify object or read it',
-          title: 'Unknown Error',
-          status: 500,
-        }));
-      });
+      ok(RunMonitoringServiceMock.retrievePathsAndSetRunStatus.calledWith(123, undefined));
+      ok(resMock.status.calledWith(200));
+      ok(resMock.json.calledWith({
+        paths: mockObjectsList,
+        runStatus: 'ONGOING',
+      }));
     });
 
-    suite('`getObjectById()` tests', () => {
-      test('should return 400 if ID param is missing', async () => {
-        await objectController.getObjectById(req, res);
+    test('should retrieve latest version of objects when not in run mode', async () => {
+      reqMock.query = {
+        prefix: 'qc/path',
+        fields: 'objectName,path',
+        filters: { RunNumber: 123 },
+      };
+      QcObjectServiceMock.retrieveLatestVersionOfObjects.resolves(mockObjectsList);
+      await objectController.getObjects(reqMock, resMock);
+      ok(resMock.status.calledWith(200));
+      ok(resMock.json.calledWith(mockObjectsList));
+      ok(QcObjectServiceMock.retrieveLatestVersionOfObjects.calledWith({
+        prefix: reqMock.query.prefix,
+        fields: reqMock.query.fields,
+        filters: reqMock.query.filters,
+      }));
+    });
 
-        assert.ok(res.status.calledWith(400));
-        assert.ok(res.json.calledWith({
-          message: 'Invalid URL parameters: missing object ID',
-          title: 'Invalid Input',
-          status: 400,
-        }));
-      });
+    test('should throw error when retrieving objects fails', async () => {
+      QcObjectServiceMock.retrieveLatestVersionOfObjects.rejects(new Error('Service error'));
+      await objectController.getObjects(reqMock, resMock);
+      ok(resMock.status.calledWith(500));
+      ok(resMock.json.calledWithMatch({
+        message: 'Failed to retrieve list of objects latest version',
+        status: 500,
+        title: 'Unknown Error',
+      }));
+    });
+  });
 
-      test('should return 200 and the object if retrieval is successful', async () => {
-        const mockObject = { name: 'ObjectName' };
-        req.params.id = 'abc123';
-        req.query = { id: 'sub-id', validFrom: '2024-01-01', filters: { foo: 'bar' } };
+  suite('getObjectContent() tests', () => {
+    const stubObject = {
+      path: 'qc/path',
+      versions: [
+        {
+          validFrom: 1736424299423,
+          id: '4f9917a2-ce82-11ef-936c-c0a80209250c',
+          createdAt: 1736424454827,
+        },
+        {
+          validFrom: 1736420279131,
+          id: '21a6de32-ce79-11ef-936b-c0a80209250c',
+          createdAt: 1736420512272,
+        },
+      ],
+    };
 
-        qcObjectServiceStub.retrieveQcObjectByQcgId.resolves(mockObject);
+    test('should successfully retrieve object content', async () => {
+      reqMock.query.path = stubObject.path;
+      QcObjectServiceMock.retrieveQcObject.resolves(stubObject);
+      await objectController.getObjectContent(reqMock, resMock);
 
-        await objectController.getObjectById(req, res);
+      ok(resMock.status.calledWith(200));
+      ok(resMock.json.calledWith(stubObject));
+      ok(QcObjectServiceMock.retrieveQcObject.calledWith({
+        path: stubObject.path,
+        validFrom: undefined,
+        filters: undefined,
+        id: undefined,
+      }));
+    });
 
-        assert.ok(qcObjectServiceStub.retrieveQcObjectByQcgId
-          .calledWith('abc123', 'sub-id', '2024-01-01', { foo: 'bar' }));
-        assert.ok(res.status.calledWith(200));
-        assert.ok(res.json.calledWith(mockObject));
-      });
+    test('should handle service errors when retrieving object content', async () => {
+      reqMock.query.path = 'qc/test';
+      QcObjectServiceMock.retrieveQcObject.rejects(new Error('Service error'));
+      objectController = new ObjectController(QcObjectServiceMock, RunMonitoringServiceMock);
+      await objectController.getObjectContent(reqMock, resMock);
 
-      test('should call errorHandler with 404 if service throws error', async () => {
-        req.params.id = 'abc123';
-        req.query = { id: 'some-id' };
+      ok(resMock.status.calledWith(500));
+      ok(resMock.json.calledWithMatch({
+        message: 'Failed to retrieve object content',
+        status: 500,
+        title: 'Unknown Error',
+      }));
+    });
+  });
 
-        const error = new Error('Service failure');
-        qcObjectServiceStub.retrieveQcObjectByQcgId.rejects(error);
+  suite('getObjectById() tests', () => {
+    const mockObject = {
+      id: '21a6de32-ce79-11ef-936b-c0a80209250c',
+      path: 'qc/path/object',
+      validFrom: 1736420279131,
+    };
 
-        await objectController.getObjectById(req, res);
-        assert.ok(res.json.calledWith({
-          message: 'Unable to identify object or read it by qcg id',
-          title: 'Not Found',
-          status: 404,
-        }));
-        assert.ok(res.status.calledWith(404));
-      });
+    test('should successfully retrieve object by QCG ID', async () => {
+      reqMock.params.id = mockObject.id;
+      QcObjectServiceMock.retrieveQcObjectByQcgId.resolves(mockObject);
+      await objectController.getObjectById(reqMock, resMock);
+
+      ok(resMock.status.calledWith(200));
+      ok(resMock.json.calledWith(mockObject));
+      ok(QcObjectServiceMock.retrieveQcObjectByQcgId.calledWith({
+        validFrom: undefined,
+        filters: undefined,
+        id: undefined,
+        qcObjectId: mockObject.id,
+      }));
+    });
+
+    test('should handle service errors when retrieving object by ID', async () => {
+      reqMock.params.id = 'some-id';
+      QcObjectServiceMock.retrieveQcObjectByQcgId.rejects(new Error('Service error'));
+      await objectController.getObjectById(reqMock, resMock);
+
+      ok(resMock.status.calledWith(500));
+      ok(resMock.json.calledWithMatch({
+        message: 'Unable to identify object or read it by qcg id',
+        status: 500,
+        title: 'Unknown Error',
+      }));
     });
   });
 };

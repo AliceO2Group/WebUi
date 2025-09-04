@@ -18,10 +18,12 @@
  * The parsing is done based on the object received from ECS in `events.proto` definition
  *
  * @property {string} id
+ * @property {EnvironmentState} state - STANDBY, DEPLOYED, CONFIGURED, RUNNING, ERROR, UNKNOWN
  * @property {Error} error - any error that occurred during the transition
  * @property {String} message - any additional message concerning the current state or transition
  * @property {object} transition - DEPLOY, CONFIGURE, RESET, START_ACTIVITY, STOP_ACTIVITY, EXIT, GO_ERROR, RECOVER AS PER https://github.com/AliceO2Group/Control/blob/master/core/environment/environment.go#L143 
  * @property {string} transition.name - the name of the transition as defined in ControlWorkflows
  * @property {string} transition.step - the current step of the transition as defined in ControlWorkflows
- * @property {string} transition.status - the status of the transition as defined in ControlWorkflows
+ * @property {string} transition.status - the status of the transition: NULL,STARTED,ONGOING,DONE_OK,DONE_ERROR,DONE_TIMEOUT
+ * @property {string} workflowTemplateInfoName - the name of the workflow template as defined in ControlWorkflows (readout-dataflow, cleanup-resources, o2-roc-config, etc.)
  */

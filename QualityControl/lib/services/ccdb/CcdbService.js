@@ -111,7 +111,6 @@ export class CcdbService {
     if (!Array.isArray(subfolders)) {
       throw new FailedDependencyError('Invalid response format from server - expected subfolders array');
     }
-    // console.log(await this.getObjectsLatestVersionList(prefix));
 
     return subfolders.map((folder) => ({ path: folder }));
   }
@@ -125,18 +124,21 @@ export class CcdbService {
    *
    * Attributes of objects wished to be requested for each object can be passed through the fields parameter;
    * If attributes list is missing, a default minimal list will be used: PATH, CREATED, LAST_MODIFIED
-   * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
-   * @param {string} [prefix] - Prefix for which CCDB should search for objects
-   * @param {Array<string>} [fields] - List of fields that should be requested for each object
+   * @example Equivalent of URL request: `/latest/qc/TPC/object.* /RunNumber=42`
+   * @param {object} options - An object that contains the arguments
+   * @param {string} options.prefix - Prefix for which CCDB should search for objects
+   * @param {object} options.filters - Object metadata that will be used to construct a endpoint path.
+   * @param {Array<string>} options.fields - List of fields that should be requested for each object
    * @returns {Promise.<Array<{PATH, CREATED, LAST_MODIFIED}>>} - results of objects query or error
-   * @rejects {Error}
    */
-  async getObjectsLatestVersionList(prefix = this._PREFIX, fields = []) {
-    const headers = {
-      accept: 'application/json',
-      'x-filter-fields': fields.length > 0 ? fields.join(',') : `${PATH},${CREATED},${LAST_MODIFIED}`,
-    };
-    const { objects } = await httpGetJson(this._hostname, this._port, `/latest/${prefix}.*`, { headers });
+  async getObjectsLatestVersionList({ prefix = this._PREFIX, filters, fields } = {}) {
+    fields = fields?.length ? fields : [PATH, CREATED, LAST_MODIFIED];
+    const identification = { path: `${prefix}.*`, filters };
+
+    const headers = { accept: 'application/json', 'x-filter-fields': fields.join(',') };
+
+    const path = `/latest${this._buildCcdbUrlPath(identification)}`;
+    const { objects } = await httpGetJson(this._hostname, this._port, path, { headers });
     return objects;
   }
 

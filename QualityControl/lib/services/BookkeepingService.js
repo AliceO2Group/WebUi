@@ -12,11 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
+import { RunStatus } from '../../common/library/runStatus.enum.js';
 import { httpGetJson } from '../utils/httpRequests.js';
 import { LogManager } from '@aliceo2/web-ui';
 
 const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
+const GET_RUN_PATH = '/api/runs';
+
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/bkp-service`;
 
 /**
@@ -32,7 +35,6 @@ export class BookkeepingService {
     this._port = null;
     this._token = '';
     this._protocol = '';
-    this._refreshInterval = config?.refreshRate ?? 24 * 60 * 60 * 1000;
 
     this._logger = LogManager.getLogger(LOG_FACILITY);
   }
@@ -50,8 +52,8 @@ export class BookkeepingService {
     try {
       const normalizedURL = new URL(url);
       this._hostname = normalizedURL.hostname;
-      this._port = normalizedURL.port || (normalizedURL.protocol === 'https:' ? 443 : 80);
       this._protocol = normalizedURL.protocol;
+      this._port = normalizedURL.port || (normalizedURL.protocol === 'https:' ? 443 : 80);
     } catch {
       this.error = `Invalid configuration. ${url} is not a valid URL`;
       return false;
@@ -115,7 +117,7 @@ export class BookkeepingService {
     const { data } = await httpGetJson(
       this._hostname,
       this._port,
-      `${GET_RUN_TYPES_PATH}?token=${this._token}`,
+      this._createPath(GET_RUN_TYPES_PATH),
       {
         protocol: this._protocol,
         rejectUnauthorized: false,
@@ -125,10 +127,60 @@ export class BookkeepingService {
   }
 
   /**
-   * Returns the interval in milliseconds for how often the list of run types should be refreshed.
-   * @returns {number} Interval in milliseconds for refreshing the list of run types.
+   * Retrieves the status of a specific run from the Bookkeeping service
+   * @param {number} runNumber - The run number to check the status for
+   * @returns {Promise<RunStatus>} - Returns a promise that resolves to the run status:
+   *                                 - RunStatus.ONGOING if the run is ongoing
+   *                                 - RunStatus.ENDED if the run has completed (has timeO2End)
+   *                                 - RunStatus.NOT_FOUND if there was an error or data is not available
    */
-  get refreshInterval() {
-    return this._refreshInterval;
+  async retrieveRunStatus(runNumber) {
+    if (!this.active) {
+      logger.warnMessage('Could not connect to bookkeeping');
+      return RunStatus.NOT_FOUND;
+    }
+
+    try {
+      const { data } = await httpGetJson(this._hostname, this._port, this._createRunPath(runNumber), {
+        protocol: this._protocol,
+        rejectUnauthorized: false,
+      });
+
+      if (!data) {
+        logger.warnMessage(`The run status was invalid for run number ${runNumber}`);
+        return RunStatus.NOT_FOUND;
+      }
+
+      if (data.timeO2End) {
+        return RunStatus.ENDED;
+      }
+
+      return RunStatus.ONGOING;
+    } catch (error) {
+      logger.errorMessage(`An error occurred whilst fetching run status: ${error.message || error}`);
+      return RunStatus.NOT_FOUND;
+    }
+  }
+
+  /**
+   * Helper method to construct a URL path with the required authentication token.
+   * Appends the service's token as a query parameter to the provided path.
+   * @private
+   * @param {string} path - The base path (e.g., `/api/endpoint`) to which the token will be appended.
+   * @returns {string} The constructed path with the token query parameter (e.g., `/api/endpoint?token=ABC123`).
+   */
+  _createPath(path) {
+    return `${path}?token=${this._token}`;
+  }
+
+  /**
+   * Helper method to construct a URL path with the required authentication token.
+   * Appends the service's token as a query parameter to the provided path.
+   * @private
+   * @param {number} runNumber - The run number to be appended
+   * @returns {string} The constructed run path with the token query parameter
+   */
+  _createRunPath(runNumber) {
+    return this._createPath(`${GET_RUN_PATH}/${runNumber}`);
   }
 }

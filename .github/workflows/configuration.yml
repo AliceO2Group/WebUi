@@ -1,0 +1,37 @@
+name: Configuration
+on:
+  pull_request:
+    paths:
+      - 'Configuration/**/*'
+      - '.github/workflows/configuration.yml'
+  push:
+    branches:
+      - 'main'
+      - 'dev'
+
+jobs:
+  formatting-check:
+    name: Check prettier formatting rules on ubuntu-latest
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - run: (cd Configuration/webapp; npm ci )
+      - run: (cd Configuration/webapp; npm run prettier-check )
+  lint-check:
+    name: Check eslint rules on ubuntu-latest
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - run: (cd Configuration/webapp; npm ci )
+      - run: (cd Configuration/webapp; npm run typecheck ) # generate .react-router directory
+      - run: (cd Configuration/webapp; npm run eslint )
