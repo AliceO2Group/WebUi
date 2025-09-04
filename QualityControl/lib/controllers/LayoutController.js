@@ -52,7 +52,7 @@ export class LayoutController {
 
   /**
    * HTTP GET endpoint for retrieving a list of layouts
-   * * can be filtered by "owner_id"
+   * * can be filtered by "owner_id" or "object_path"
    * * if no owner_id is provided, all layouts will be fetched;
    * @param {Request} req - HTTP request object with information on owner_id
    * @param {Response} res - HTTP response object to provide layouts information
@@ -61,11 +61,13 @@ export class LayoutController {
   async getLayoutsHandler(req, res) {
     let fields = undefined;
     let owner_id = undefined;
+    let object_path = undefined;
 
     try {
       const validated = await LayoutsGetDto.validateAsync(req.query);
-      ({ fields, owner_id } = validated);
+      ({ fields, owner_id, object_path } = validated);
     } catch (error) {
+
       const responseError = error.isJoi ?
         new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`) :
         new Error('Unable to process request');

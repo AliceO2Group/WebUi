@@ -147,6 +147,29 @@ export const layoutControllerTestSuite = async () => {
       ok(responseArg.message === 'Invalid query parameters: "token" is required', 'Error message incorrect');
     });
 
+    test('should return 400 when object_path contain an invalid type', async () => {
+      const jsonStub = sinon.createStubInstance(LayoutRepository);
+      const req = {
+        query: {
+          object_path: 12345,
+          token: 'fasdfsdfa',
+        },
+      };
+      const layoutConnector = new LayoutController(jsonStub);
+
+      await layoutConnector.getLayoutsHandler(req, res);
+
+      ok(res.status.calledWith(400), 'Response status was not 400');
+      ok(res.json.calledOnce, 'Response was not sent');
+      
+
+      ok(res.json.calledWith({
+        message: 'Invalid query parameters: "Object path" must be a string',
+        status: 400,
+        title: 'Invalid Input',
+      }), 'Error message was incorrect');
+    });
+
     test('should return 400 when fields contain invalid values', async () => {
       const jsonStub = sinon.createStubInstance(LayoutRepository);
       const req = {
