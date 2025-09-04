@@ -15,7 +15,6 @@
 /**
  * Creates default options for drawing and display hints in the database.
  * @param {object} queryInterface - The Sequelize query interface.
- * @param {Sequelize} Sequelize - The Sequelize library.
  * @returns {Promise<void>} A promise that resolves when the options are created.
  */
 export const up = async (queryInterface) => {

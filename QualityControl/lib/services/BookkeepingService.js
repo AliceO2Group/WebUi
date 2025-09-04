@@ -136,7 +136,7 @@ export class BookkeepingService {
    */
   async retrieveRunStatus(runNumber) {
     if (!this.active) {
-      logger.warnMessage('Could not connect to bookkeeping');
+      this._logger.warnMessage('Could not connect to bookkeeping');
       return RunStatus.NOT_FOUND;
     }
 
@@ -147,7 +147,7 @@ export class BookkeepingService {
       });
 
       if (!data) {
-        logger.warnMessage(`The run status was invalid for run number ${runNumber}`);
+        this._logger.warnMessage(`The run status was invalid for run number ${runNumber}`);
         return RunStatus.NOT_FOUND;
       }
 
@@ -157,7 +157,7 @@ export class BookkeepingService {
 
       return RunStatus.ONGOING;
     } catch (error) {
-      logger.errorMessage(`An error occurred whilst fetching run status: ${error.message || error}`);
+      this._logger.errorMessage(`An error occurred whilst fetching run status: ${error.message || error}`);
       return RunStatus.NOT_FOUND;
     }
   }

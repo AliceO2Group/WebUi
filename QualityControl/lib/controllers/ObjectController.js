@@ -37,7 +37,7 @@ export class ObjectController {
      * @type {RunMonitoringService}
      */
     this._runModeService = runModeService;
-    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/object-ctrl`);
+    this._logger = LogManager.getLogger(LOG_FACILITY);
   }
 
   /**
