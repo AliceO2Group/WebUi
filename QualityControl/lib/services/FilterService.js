@@ -14,7 +14,7 @@
 
 import { LogManager } from '@aliceo2/web-ui';
 import { RunStatus } from '../../common/library/runStatus.enum.js';
-const logger = LogManager.getLogger('filter/service');
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/filter-svc`;
 
 /**
  * High level service that composes, processes and maps data from the bookkeeping service
@@ -26,6 +26,7 @@ export class FilterService {
    * @param {object} config - Config object file that defines the refresh intervals for checking run status and runtypes
    */
   constructor(bookkeepingService, config) {
+    this._logger = LogManager.getLogger(LOG_FACILITY);
     this._bookkeepingService = bookkeepingService;
     this._runTypes = [];
 
@@ -33,7 +34,7 @@ export class FilterService {
       (config?.bookkeeping ? 24 * 60 * 60 * 1000 : -1);
 
     this.initFilters().catch((error) => {
-      logger.errorMessage(`FilterService initialization failed: ${error.message || error}`);
+      this._logger.errorMessage(`FilterService initialization failed: ${error.message || error}`);
     });
   }
 
@@ -62,7 +63,7 @@ export class FilterService {
       }
       this._runTypes.sort();
     } catch (error) {
-      logger.errorMessage(`Error while retrieving run types: ${error.message || error}`);
+      this._logger.errorMessage(`Error while retrieving run types: ${error.message || error}`);
       this._runTypes = [];
     }
   }
@@ -93,13 +94,13 @@ export class FilterService {
       const runStatus = await this._bookkeepingService.retrieveRunStatus(runNumber);
 
       if (!runStatus || !Object.values(RunStatus).includes(runStatus)) {
-        logger.warnMessage(`Invalid run status received for run ${runNumber}: ${runStatus}`);
+        this._logger.warnMessage(`Invalid run status received for run ${runNumber}: ${runStatus}`);
         return RunStatus.UNKNOWN;
       }
       return runStatus;
     } catch (error) {
       const message = `Error while retrieving run status for run ${runNumber}: ${error.message || error}`;
-      logger.errorMessage(message);
+      this._logger.errorMessage(message);
       return RunStatus.UNKNOWN;
     }
   }
