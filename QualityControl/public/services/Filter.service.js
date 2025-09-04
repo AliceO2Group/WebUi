@@ -61,11 +61,11 @@ export default class FilterService {
 
       const { result, ok } = await this.loader.get(`/api/filter/run-status/${parsedRunNumber}`);
 
-      if (!ok || !result || !Object.values(RunStatus).includes(result)) {
+      if (!ok || !result || !Object.values(RunStatus).includes(result?.runStatus)) {
         return RunStatus.UNKNOWN;
       }
 
-      return result;
+      return result?.runStatus;
     } catch {
       return RunStatus.UNKNOWN;
     }
