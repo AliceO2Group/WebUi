@@ -25,4 +25,5 @@
  * @property {string} transition.name - the name of the transition as defined in ControlWorkflows
  * @property {string} transition.step - the current step of the transition as defined in ControlWorkflows
  * @property {string} transition.status - the status of the transition: NULL,STARTED,ONGOING,DONE_OK,DONE_ERROR,DONE_TIMEOUT
+ * @property {string} workflowTemplateInfoName - the name of the workflow template as defined in ControlWorkflows (readout-dataflow, cleanup-resources, o2-roc-config, etc.)
  */

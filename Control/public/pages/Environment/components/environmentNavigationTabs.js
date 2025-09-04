@@ -20,7 +20,7 @@ import {miniCard} from '../../../common/card/miniCard.js';
 import {parseObject, parseOdcStatusPerEnv} from '../../../common/utils.js';
 import {rowForCard} from '../../../common/card/rowForCard.js';
 import {tasksPerHostPanel} from '../../../common/task/tasksPerHostPanel.js';
-import {environmentEventsPanel} from './environmentEventsPanel.js';
+import {environmentEventsPanel} from '../../../common/events/environmentEventsPanel.js';
 
 /**
  * @file Builds the navigation tabs that are to be displayed on the environment details page which contains the following tabs:
