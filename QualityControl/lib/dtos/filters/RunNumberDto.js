@@ -12,9 +12,17 @@
  * or submit itself to any jurisdiction.
  */
 
-export const RunStatus = Object.freeze({
-  ENDED: 'ENDED',
-  ONGOING: 'ONGOING',
-  NOT_FOUND: 'NOT_FOUND',
-  UNKNOWN: 'UNKNOWN',
-});
+import Joi from 'joi';
+
+export const RunNumberDto = Joi.number()
+  .required()
+  .integer()
+  .min(0)
+  .max(999999)
+  .messages({
+    'any.required': 'Run number is required',
+    'number.base': 'Run number must be a number',
+    'number.integer': 'Run number must be an integer',
+    'number.min': 'Run number must be positive',
+    'number.max': 'Run number must not exceed 999999',
+  });
