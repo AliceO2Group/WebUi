@@ -19,7 +19,7 @@ exports.ConsumerGroups = Object.freeze({
   ENVIRONMENT: 'cog-environment',
   INTEGRATED_SERVICE: {
     DCS: 'cog-dcs-integrated-service',
-    ODC: 'cog-odc-integrated-service'
+    ODC: 'cog-odc-integrated-service',
   },
   RUN: 'cog-run',
   TASK: 'cog-task',
