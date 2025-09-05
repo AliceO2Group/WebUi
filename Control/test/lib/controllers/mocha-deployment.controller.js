@@ -66,6 +66,7 @@ describe('DeploymentController test suite', function() {
       assert.deepStrictEqual(mockDeploymentService.deployEnvironment.firstCall.args[0], {
         workflowTemplate: `${repository}/workflows/${template}@${revision}`,
         selectedConfiguration: undefined,
+        shouldAutoTransition: undefined,
         userVars: { var1: 'value1' },
         user: new User(req.session.username, req.session.name, req.session.personid)
       });
@@ -113,6 +114,7 @@ describe('DeploymentController test suite', function() {
       assert.deepStrictEqual(mockDeploymentService.deployEnvironment.firstCall.args[0], {
         workflowTemplate: `${repository}/workflows/${template}@${revision}`,
         selectedConfiguration: undefined,
+        shouldAutoTransition: undefined,
         userVars: { var1: 'value1' },
         user: new User(req.session.username, req.session.name, req.session.personid)
       });

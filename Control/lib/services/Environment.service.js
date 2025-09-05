@@ -71,10 +71,6 @@ class EnvironmentService {
       throw grpcErrorToNativeError(error);
     }
     try { 
-      if (!environments || environments.length === 0) {
-        this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, []);
-        return [];
-      }
       const activeEnvironmentList = [];
       for (const { id } of environments) {
         let environment;
@@ -193,13 +189,13 @@ class EnvironmentService {
    * @returns {Promise.<{EnvironmentInfo}, Error>} - if operation was a success ECS will return a partialEnvironmentInfo object
    * @throws {Error} - if the operation failed
    */
-  async newEnvironmentAsync({ workflowTemplate, userVars, user }) {
+  async newEnvironmentAsync({ workflowTemplate, userVars, user, shouldAutoTransition = false }) {
     let environment = undefined;
     try {
       ({ environment } = await this._coreGrpc.NewEnvironmentAsync({
         workflowTemplate,
         vars: userVars,
-        autoTransition: false,
+        autoTransition: shouldAutoTransition,
         requestUser: user.toEcsFormat()
       })
       );
