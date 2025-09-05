@@ -147,7 +147,7 @@ export const layoutControllerTestSuite = async () => {
       ok(responseArg.message === 'Invalid query parameters: "token" is required', 'Error message incorrect');
     });
 
-    test('should return 400 when object_path contain an invalid type', async () => {
+    test('should return 400 when object_path contain an invalid type, number', async () => {
       const jsonStub = sinon.createStubInstance(LayoutRepository);
       const req = {
         query: {
@@ -161,13 +161,82 @@ export const layoutControllerTestSuite = async () => {
 
       ok(res.status.calledWith(400), 'Response status was not 400');
       ok(res.json.calledOnce, 'Response was not sent');
-      
+
 
       ok(res.json.calledWith({
         message: 'Invalid query parameters: "Object path" must be a string',
         status: 400,
         title: 'Invalid Input',
       }), 'Error message was incorrect');
+    });
+
+    test('should return layout when object_path contain a valid value', async () => {
+      const response = [
+        { user_id: 1, name: 'somelayout' },
+        { user_id: 2, name: 'somelayout2' },
+      ];
+      const fields = 'name';
+
+      const jsonStub = sinon.createStubInstance(LayoutRepository, {
+        listLayouts: sinon.stub().resolves(response),
+      });
+      const req = {
+        query: {
+          object_path: "qc/CPV/MO/NoiseOnFLP/BadChannelMapM2",
+          token: 'fasdfsdfa',
+        },
+      };
+      const layoutConnector = new LayoutController(jsonStub);
+
+      await layoutConnector.getLayoutsHandler(req, res);
+
+      let f = res.json.args;
+      console.log(f)
+
+      ok(res.json.calledOnce, 'Response was not sent');
+      ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
+    });
+
+    test('should return 400 when object_path contain an invalid character: -', async () => {
+      const jsonStub = sinon.createStubInstance(LayoutRepository);
+      const req = {
+        query: {
+          object_path: "qc/CPV/MO/Noise-OnFLP/BadChannelMapM2",
+          token: 'fasdfsdfa',
+        },
+      };
+      const layoutConnector = new LayoutController(jsonStub);
+
+      await layoutConnector.getLayoutsHandler(req, res);
+
+      ok(res.status.calledWith(400), 'Response status was not 400');
+      ok(res.json.calledOnce, 'Response was not sent');
+
+      var actual = res.json.firstCall.args[0];
+      ok(actual && actual.status === 400, 'status incorrect');
+      ok(actual && actual.title === 'Invalid Input', 'title incorrect');
+      ok(actual && actual.message && actual.message.indexOf('Invalid query parameters: "Object path" with value "qc/CPV/MO/Noise-OnFLP/BadChannelMapM2" fails to match the required pattern:') === 0, 'message prefix incorrect');
+    });
+
+    test('should return 400 when object_path contain an invalid character: #', async () => {
+      const jsonStub = sinon.createStubInstance(LayoutRepository);
+      const req = {
+        query: {
+          object_path: "qc/CPV/MO/Noise#OnFLP/BadChannelMapM2",
+          token: 'fasdfsdfa',
+        },
+      };
+      const layoutConnector = new LayoutController(jsonStub);
+
+      await layoutConnector.getLayoutsHandler(req, res);
+
+      ok(res.status.calledWith(400), 'Response status was not 400');
+      ok(res.json.calledOnce, 'Response was not sent');
+
+      var actual = res.json.firstCall.args[0];
+      ok(actual && actual.status === 400, 'status incorrect');
+      ok(actual && actual.title === 'Invalid Input', 'title incorrect');
+      ok(actual && actual.message && actual.message.indexOf('Invalid query parameters: "Object path" with value "qc/CPV/MO/Noise#OnFLP/BadChannelMapM2" fails to match the required pattern:') === 0, 'message prefix incorrect');
     });
 
     test('should return 400 when fields contain invalid values', async () => {
