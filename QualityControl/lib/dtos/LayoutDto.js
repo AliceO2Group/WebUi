@@ -84,7 +84,7 @@ export const LayoutDto = Joi.object({
 export const LayoutsGetDto = Joi.object({
   owner_id: Joi.number().integer().optional(),
   name: Joi.string().optional(),
-  object_path: Joi.string().pattern(/^[A-Za-z0-9_\/]+$/).optional().max(100).label("Object path"),
+  object_path: Joi.string().pattern(/^[A-Za-z0-9_/]+$/).optional().max(100).label('Object path'),
   token: Joi.string().required(),
   fields: Joi.string()
     .custom(parseAndValidateFields, 'Field validation')

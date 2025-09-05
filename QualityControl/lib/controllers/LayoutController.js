@@ -65,9 +65,9 @@ export class LayoutController {
 
     try {
       const validated = await LayoutsGetDto.validateAsync(req.query);
+      // eslint-disable-next-line no-unused-vars
       ({ fields, owner_id, object_path } = validated);
     } catch (error) {
-
       const responseError = error.isJoi ?
         new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`) :
         new Error('Unable to process request');
