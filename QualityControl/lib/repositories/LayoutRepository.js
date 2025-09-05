@@ -24,16 +24,26 @@ export class LayoutRepository extends BaseRepository {
    * @param {number} [options.owner_id] - Filter layouts by owner ID
    * @param {string} [options.name] - Filter layouts by exact name match
    * @param {Array<string>} [options.fields] - Array of field names to include in each returned layout object
+   * @param {string} [object_path] - Filter layouts by containing object_path, case insensitive
    * @returns {Array<object>} Array of layout objects matching the filters, containing only the specified fields
    * @throws {TypeError} If fields parameter is provided but is not an array
    * @throws {Error} If any specified field does not exist in the layout objects
    */
-  listLayouts({ name, owner_id, fields = [] } = {}) {
+  listLayouts({ name, owner_id, fields = [], object_path } = {}) {
     const { layouts } = this._jsonFileService.data;
 
-    const layoutFilter = (layout) =>
-      (owner_id === undefined || layout.owner_id === owner_id) &&
-      (name === undefined || layout.name === name);
+    if (object_path !== undefined) object_path = object_path.toLowerCase();
+
+    // Filter using object_path should it be defined, otherwise filter by name and owner_id.
+    const layoutFilter = (object_path === undefined) ?
+      (layout) =>
+        (owner_id === undefined || layout.owner_id === owner_id) &&
+        (name === undefined || layout.name === name)
+      :
+      (layout) =>
+        (layout.tabs ?? [])
+          .flatMap(tab => tab.objects ?? [])
+          .filter(object => (object.name ?? '').toLowerCase().includes(object_path)).length > 0;
 
     const filteredLayouts = layouts.filter(layoutFilter);
 
