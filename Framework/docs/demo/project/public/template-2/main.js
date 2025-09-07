@@ -1,8 +1,18 @@
-<!doctype html>
-<link rel="stylesheet" href="../../Frontend/css/src/bootstrap.css">
-<script type="module">
-// Import Framework tools
-import {mount, h, Observable} from '../../Frontend/js/src/index.js';
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
+import {mount, h, Observable} from '/js/src/index.js';
 
 // This is our model, each time it is modified, it calls notify() and view is updated thanks to controller mount().
 class Model extends Observable {
@@ -48,4 +58,3 @@ mount(document.body, view, model, debug);
 
 // Expose model to interact with it the browser's console
 window.model = model;
-</script>
