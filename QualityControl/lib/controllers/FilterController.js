@@ -43,7 +43,7 @@ export class FilterController {
     try {
       const runStatus = await this._filterService.getRunStatus(req.params.runNumber);
       res.status(200).json({
-        runStatus: runStatus,
+        runStatus,
       });
     } catch (error) {
       this._logger.errorMessage('Error getting run status:', error);

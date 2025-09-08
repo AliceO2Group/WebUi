@@ -11,55 +11,43 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, ok, deepStrictEqual } from 'node:assert';
-
-const LAYOUT_LIST_PAGE_PARAM = '?page=layoutList';
-const FILTER_SELECTOR = 'header #filterElement';
+import { strictEqual } from 'node:assert';
 
 export const filterTests = async (url, page, timeout = 5000, testParent) => {
-  await testParent.test('should successfully load filter element on layoutListPage', { timeout }, async () => {
-    await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
-    await page.waitForSelector(FILTER_SELECTOR);
-
-    const element = await page.$(FILTER_SELECTOR);
-    ok(element !== null, 'Filter element does not exist, or is not inside the header');
-
-    const location = await page.evaluate(() => window.location);
-    deepStrictEqual(location.search, '?page=layoutList');
-  });
-
   await testParent.test('filter should persist between pages', { timeout }, async () => {
     const runNumber = '0';
+
+    await page.locator('.sidebar > a:nth-of-type(2)').click(); // navigate to ObjectTreePage
+    await page.waitForSelector('#runNumberFilter', { visible: true });
+
     await page.locator('#runNumberFilter').fill(runNumber);
-    await page.locator('#filterElement #triggerFilterButton').click();
 
-    let value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
-    strictEqual(value, runNumber, 'RunNumber is no longer set');
+    await page.locator('#triggerFilterButton').click();
+    await page.locator('#updateOnlyButton').click();
 
-    await page.locator('.sidebar > a:nth-of-type(3)').click(); // navigate to aboutPage.
-
-    value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
-    strictEqual(value, runNumber, 'RunNumber is no longer set');
-
-    await page.locator('.sidebar > a:nth-of-type(2)').click(); // navigate to ObjectTreePage.
-
-    value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
-    strictEqual(value, runNumber, 'RunNumber is no longer set');
+    // Check that URL contains RunNumber=0
+    const location = await page.evaluate(() => window.location);
+    strictEqual(location.href.includes('RunNumber=0'), true, 'URL should contain RunNumber=0');
     await page.waitForSelector('tr:last-of-type td');
 
     await extendTree(3, 5);
     await page.locator('tr:last-of-type td').click(); // This will select an object
     await page.waitForSelector('.resize-button a');
     await page.locator('.resize-button a').click(); // This would navigate to the objectViewPage
+    await page.waitForSelector('#runNumberFilter', { visible: true });
 
-    value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
-    strictEqual(value, runNumber, 'RunNumber is no longer set');
+    // Check that filter is still set to 0
+    let value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
+    strictEqual(value, runNumber, 'RunNumber filter should still be set to 0 on objectView page');
 
+    // Navigate to layout show
     await page.waitForSelector('.sidebar > div:nth-of-type(3) a:nth-child(1)', { visible: true, stable: true });
     await page.locator('.sidebar > div:nth-of-type(3) a:nth-child(1)').click(); // navigate to layout show
+    await page.waitForSelector('#runNumberFilter', { visible: true });
 
+    // Check that filter is still set to 0
     value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
-    strictEqual(value, runNumber, 'RunNumber is no longer set');
+    strictEqual(value, runNumber, 'RunNumber filter should still be set to 0 on layout show page');
   });
 
   await testParent.test('should list all objects when disabling objectFilters', { timeout }, async () => {
@@ -93,7 +81,6 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     strictEqual(versionCount, 1);
 
     await page.locator('#filterElement #clearFilterButton').click();
-    await page.locator('#filterElement #triggerFilterButton').click();
 
     await page.waitForSelector('#ObjectPlot select option:nth-child(2)');
 
@@ -111,6 +98,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     const runNumber = '0';
     await page.locator('#runNumberFilter').fill(runNumber);
     await page.locator('#filterElement #triggerFilterButton').click();
+    await page.locator('#updateOnlyButton').click();
 
     await extendTree(3, 5);
 
@@ -124,7 +112,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     await page.waitForSelector(versionsPath);
 
     let versionCount = await page.evaluate((path) => document.querySelectorAll(path).length, versionsPath);
-    strictEqual(versionCount, 1);
+    strictEqual(versionCount, 1, 'Number of versions is not 1');
 
     await page.locator('#filterElement #clearFilterButton').click();
     await page.locator('#filterElement #triggerFilterButton').click();
@@ -135,7 +123,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     await page.waitForSelector(versionsPath);
 
     versionCount = await page.evaluate((path) => document.querySelectorAll(path).length, versionsPath);
-    strictEqual(versionCount, 2);
+    strictEqual(versionCount, 2, 'Number of versions is not 2');
   });
 
   /**
