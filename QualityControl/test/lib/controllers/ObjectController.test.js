@@ -56,46 +56,19 @@ export const objectControllerTestSuite = async () => {
       { objectName: 'object2', path: 'qc/path/object2' },
     ];
 
-    test('should return an invalid input error if no run number is provided in run mode', async () => {
-      reqMock.query.inRunMode = true;
-      reqMock.query.filters = {};
-      await objectController.getObjects(reqMock, resMock);
-      ok(resMock.status.calledWith(400));
-      ok(resMock.json.calledWithMatch({
-        message: 'RunNumber is required when in run mode',
-        status: 400,
-        title: 'Invalid Input',
-      }));
-    });
-
-    test('should return an invalid input error if run number is not a number in run mode', async () => {
-      reqMock.query.inRunMode = true;
-      reqMock.query.filters = { RunNumber: 'abc' };
-      await objectController.getObjects(reqMock, resMock);
-      ok(resMock.status.calledWith(400));
-      ok(resMock.json.calledWithMatch({
-        message: 'RunNumber must be a number',
-        status: 400,
-        title: 'Invalid Input',
-      }));
-    });
-
-
     test('should retrieve paths and set run status in run mode with run number', async () => {
       reqMock.query.inRunMode = true;
       reqMock.query.filters = { RunNumber: 123 };
       RunMonitoringServiceMock.retrievePathsAndSetRunStatus.resolves({
         paths: mockObjectsList,
-        runStatus: 'ONGOING',
       });
 
       await objectController.getObjects(reqMock, resMock);
 
-      ok(RunMonitoringServiceMock.retrievePathsAndSetRunStatus.calledWith(123, undefined));
+      ok(RunMonitoringServiceMock.retrievePathsAndSetRunStatus.calledWith(123));
       ok(resMock.status.calledWith(200));
       ok(resMock.json.calledWith({
         paths: mockObjectsList,
-        runStatus: 'ONGOING',
       }));
     });
 

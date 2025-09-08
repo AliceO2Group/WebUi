@@ -21,6 +21,7 @@ import aboutViewHeader from '../pages/aboutView/components/aboutViewHeader.js';
 import LayoutListHeader from '../pages/layoutListView/components/LayoutListHeader.js';
 import { objectViewHeader } from '../pages/objectView/components/header.js';
 import { filtersPanel } from './filters/filterViews.js';
+import { runModeHeader } from './runModeHeader.js';
 
 /**
  * Shows header of the application, split with 3 parts:
@@ -31,10 +32,11 @@ import { filtersPanel } from './filters/filterViews.js';
  * @returns {vnode} - header element
  */
 export default (model) => h('.flex-col', [
-  h('.flex-row.p2', [
+  h('.flex-row.p2.items-center', [
     commonHeader(model),
     headerSpecific(model),
   ]),
+  runsModeSpecific(model),
   filterSpecific(model),
 ]);
 
@@ -46,11 +48,11 @@ export default (model) => h('.flex-col', [
 const headerSpecific = (model) => {
   const { layoutListModel, filterModel, layout, object, page } = model;
   switch (page) {
-    case 'layoutList': return LayoutListHeader(layoutListModel, filterModel);
+    case 'layoutList': return LayoutListHeader(layoutListModel);
     case 'layoutShow': return layoutViewHeader(layout, filterModel);
     case 'objectTree': return objectTreeHeader(object, filterModel);
     case 'objectView': return objectViewHeader(model);
-    case 'about': return aboutViewHeader(filterModel);
+    case 'about': return aboutViewHeader();
     default: return null;
   }
 };
@@ -61,14 +63,28 @@ const headerSpecific = (model) => {
  * @returns {vnode} - virtual node element
  */
 const filterSpecific = (model) => {
-  const { page, filterModel, layout, object, objectViewModel, aboutViewModel, layoutListModel } = model;
+  const { page, filterModel, layout, object, objectViewModel } = model;
 
   switch (page) {
-    case 'layoutList': return filtersPanel(filterModel, layoutListModel);
     case 'layoutShow': return filtersPanel(filterModel, layout);
     case 'objectTree': return filtersPanel(filterModel, object);
     case 'objectView': return filtersPanel(filterModel, objectViewModel);
-    case 'about': return filtersPanel(filterModel, aboutViewModel);
+    default: return null;
+  }
+};
+
+/**
+ * Shows the runs mode component
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
+ */
+const runsModeSpecific = (model) => {
+  const { page, filterModel, object, layout, objectViewModel } = model;
+
+  switch (page) {
+    case 'objectTree': return runModeHeader(filterModel, object);
+    case 'layoutShow': return runModeHeader(filterModel, layout);
+    case 'objectView': return runModeHeader(filterModel, objectViewModel);
     default: return null;
   }
 };
