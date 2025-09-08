@@ -47,25 +47,25 @@ const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback
 /**
  * Builds a panel containing multiple filters to allow user to apply for objectTree show/view
  * @param {FilterModel} filterModel - Model that manages filter state
- * @param {PageModel} pageModel - Model that manages the state of the page that the filter is on.
+ * @param {object} viewModel - Model that manages the state of the page that the filter is on.
  * @returns {vnode} - virtual node element
  */
-export function filtersPanel(filterModel, pageModel) {
+export function filtersPanel(filterModel, viewModel) {
   const { filterMap, setFilterValue, filterService, isVisible, clearFilter } = filterModel;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
-  const onEnterCallback = () => filterModel.triggerFilter(pageModel);
-  const clearFilterCallback = clearFilter.bind(filterModel, pageModel);
+  const onEnterCallback = () => filterModel.triggerFilter(viewModel);
+  const clearFilterCallback = clearFilter.bind(filterModel, viewModel);
   const filtersList = filtersConfig(filterService);
 
-  if (!isVisible) {
+  if (!isVisible || filterModel.inRunMode) {
     return null;
   }
 
   return h(
     '.w-100.flex-row.p2.g2.justify-center#filterElement',
     [
-      triggerFiltersButton(onEnterCallback),
+      triggerFiltersButton(onEnterCallback, filterModel, viewModel),
       clearFiltersButton(clearFilterCallback),
       ...filtersList.map((filter) =>
         createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
@@ -74,12 +74,98 @@ export function filtersPanel(filterModel, pageModel) {
 };
 
 /**
+ * Determines if runs mode is allowed based on current page and context
+ * @param {object} viewModel - Model that manages the state of the page
+ * @returns {boolean} - whether runs mode is allowed
+ */
+const isRunsModeAllowed = (viewModel) => {
+  const { model } = viewModel;
+
+  const allowedPages = ['objectTree', 'layoutShow', 'objectView'];
+  if (!model || !allowedPages.includes(model.page)) {
+    return false;
+  }
+
+  // not allow runs mode if in edit mode
+  if (model.page === 'layoutShow' && viewModel.editEnabled) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
  * Button which will allow the user to update filter parameters after the input
  * @param {Function} onClickCallback - Function to trigger the filter mechanism
+ * @param {FilterModel} filterModel - Model that manages filter state
+ * @param {object} viewModel - Model that manages the state of the page
  * @returns {vnode} - virtual node element
  */
-const triggerFiltersButton = (onClickCallback) =>
-  h('button.btn.btn-primary#triggerFilterButton', { onclick: onClickCallback, title: 'Update filters' }, 'Update');
+const triggerFiltersButton = (onClickCallback, filterModel, viewModel) => {
+  const runNumber = filterModel.filterMap.RunNumber;
+  if (filterModel.isValidRunNumber(runNumber) && isRunsModeAllowed(viewModel)) {
+    return updateDropdownButton(onClickCallback, filterModel, viewModel);
+  }
+
+  return h(
+    'button.btn.btn-primary',
+    { id: 'triggerFilterButton', onclick: onClickCallback, title: 'Update filters' },
+    'Update',
+  );
+};
+
+/**
+ * Dropdown button for update options when run number is present
+ * @param {Function} onClickCallback - Function to trigger the filter mechanism
+ * @param {FilterModel} filterModel - Model that manages filter state
+ * @param {object} viewModel - Model that manages the state of the page
+ * @returns {vnode} - virtual node element
+ */
+const updateDropdownButton = (onClickCallback, filterModel, viewModel) => {
+  // Use a simple property on the filterModel to track dropdown state
+  const isDropdownOpen = filterModel.dropdownOpen || false;
+
+  return h('.dropdown', {
+    class: isDropdownOpen ? 'dropdown-open' : '',
+  }, [
+    h('button.btn.btn-primary', {
+      id: 'triggerFilterButton',
+      onclick: (e) => {
+        e.stopPropagation();
+        filterModel.dropdownOpen = !isDropdownOpen;
+        filterModel.notify();
+      },
+      title: 'Update options',
+    }, [
+      'Update ',
+      isDropdownOpen ? iconChevronTop() : iconChevronBottom(),
+    ]),
+    isDropdownOpen && h('.dropdown-menu', [
+      h('.p2', [
+        h('div.menu-item', {
+          id: 'updateOnlyButton',
+          onclick: (e) => {
+            e.stopPropagation();
+            filterModel.dropdownOpen = false;
+            filterModel.notify();
+            onClickCallback();
+          },
+          style: 'white-space: nowrap;',
+        }, 'Update only'),
+        h('div.menu-item', {
+          id: 'updateAndRunModeButton',
+          onclick: async (e) => {
+            e.stopPropagation();
+            filterModel.dropdownOpen = false;
+            filterModel.notify();
+            await filterModel.activateRunsMode(viewModel);
+          },
+          style: 'white-space: nowrap;',
+        }, 'Update & Run Mode'),
+      ]),
+    ]),
+  ]);
+};
 
 /**
  * Button which will allow the user to clear the filter element
