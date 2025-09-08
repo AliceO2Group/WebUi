@@ -134,7 +134,7 @@ export class BookkeepingService {
   async retrieveRunStatus(runNumber) {
     if (!this.active) {
       logger.warnMessage('Could not connect to bookkeeping');
-      return RunStatus.NOT_FOUND;
+      return RunStatus.BOOKKEEPING_UNAVAILABLE;
     }
 
     try {
@@ -144,18 +144,18 @@ export class BookkeepingService {
       });
 
       if (!data) {
-        logger.warnMessage(`The run status was invalid for run number ${runNumber}`);
+        throw new Error('No data available');
+      }
+
+      return data.timeO2End ? RunStatus.ENDED : RunStatus.ONGOING;
+    } catch (error) {
+      const msg = error?.message ?? String(error);
+      if (msg.includes('404')) {
+        logger.warnMessage(`Run number ${runNumber} not found in bookkeeping`);
         return RunStatus.NOT_FOUND;
       }
-
-      if (data.timeO2End) {
-        return RunStatus.ENDED;
-      }
-
-      return RunStatus.ONGOING;
-    } catch (error) {
-      logger.errorMessage(`An error occurred whilst fetching run status: ${error.message || error}`);
-      return RunStatus.NOT_FOUND;
+      logger.errorMessage(`Error fetching run status: ${error.message || error}`);
+      return RunStatus.UNKNOWN;
     }
   }
 
