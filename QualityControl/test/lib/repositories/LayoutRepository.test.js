@@ -69,17 +69,22 @@ export const layoutRepositoryTest = async () => {
       });
 
       test('should return only layout with specified object_name', () => {
-        const object_path = "qc/MCH/QO/DataDecodingCheck";
+        const object_path = 'qc/MCH/QO/DataDecodingCheck';
         const result = layoutRepository.listLayouts({ object_path });
-        ok((result.length === 1), "listLayouts's object_name filter should only return one layout");
+        ok(result.length === 1, "listLayouts's object_name filter should only return one layout");
       });
 
       test('should return layouts with specified partial object_name', () => {
-        const object_path = "/1";
+        const object_path = '/1';
         const result = layoutRepository.listLayouts({ object_path });
-        ok((result.length === 2), "listLayouts's object_name filter should only return 2 layouts");
+        ok(result.length === 2, "listLayouts's object_name filter should only return 2 layouts");
       });
 
+      test('should return all layouts when object_name is empty string', () => {
+        const object_path = '';
+        const result = layoutRepository.listLayouts({ object_path });
+        ok(result.length === 3, "listLayouts's object_name filter should only return 3 (all) layouts");
+      });
 
       test('should return only specified fields when fields array is provided', () => {
         const fields = ['id', 'name'];
