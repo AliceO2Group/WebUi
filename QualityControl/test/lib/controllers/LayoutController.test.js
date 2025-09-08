@@ -101,7 +101,7 @@ export const layoutControllerTestSuite = async () => {
       ok(res.status.calledWith(200), 'Response status was not 200');
       ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
       ok(
-        jsonStub.listLayouts.calledWith({ owner_id: undefined, fields }),
+        jsonStub.listLayouts.calledWith({ owner_id: undefined, fields, object_path: undefined }),
         'Fields were not passed correctly',
       );
     });
@@ -122,7 +122,7 @@ export const layoutControllerTestSuite = async () => {
       ok(res.status.calledWith(200), 'Response status was not 200');
       ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
       ok(
-        jsonStub.listLayouts.calledWith({ owner_id: 1, fields: [fields] }),
+        jsonStub.listLayouts.calledWith({ owner_id: 1, fields: [fields], object_path: undefined }),
         'Owner id was not used in data connector call',
       );
     });
@@ -147,7 +147,7 @@ export const layoutControllerTestSuite = async () => {
       ok(responseArg.message === 'Invalid query parameters: "token" is required', 'Error message incorrect');
     });
 
-    test('should return 400 when object_path contain an invalid type, number', async () => {
+    test('should return 400 when object_path contains an invalid type, number', async () => {
       const jsonStub = sinon.createStubInstance(LayoutRepository);
       const req = {
         query: {
@@ -169,7 +169,7 @@ export const layoutControllerTestSuite = async () => {
       }), 'Error message was incorrect');
     });
 
-    test('should return layout when object_path contain a valid value', async () => {
+    test('should return layout when object_path contains a valid value', async () => {
       const response = [
         { user_id: 1, name: 'somelayout' },
         { user_id: 2, name: 'somelayout2' },
@@ -204,15 +204,15 @@ export const layoutControllerTestSuite = async () => {
 
       await layoutConnector.getLayoutsHandler(req, res);
 
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledOnce, 'Response was not sent');
+      const message = 'Invalid query parameters: "Object path" with' +
+      ' value "qc/CPV/MO/Noise-OnFLP/BadChannelMapM2" fails to match the required pattern: /^[A-Za-z0-9_/]+$/';
 
-      const [actual] = res.json.firstCall.args;
-      ok(actual && actual.status === 400, 'status incorrect');
-      ok(actual && actual.title === 'Invalid Input', 'title incorrect');
-      ok(actual && actual.message && actual.message.indexOf('Invalid query parameters: "Object path" with '
-        + 'value "qc/CPV/MO/Noise-OnFLP/BadChannelMapM2" fails to match the required '
-        + 'pattern:') === 0, 'message prefix incorrect');
+      ok(res.status.calledWith(400), 'Response status was not 400');
+      ok(res.json.calledWith({
+        message: message,
+        status: 400,
+        title: 'Invalid Input',
+      }), 'Error message is not as expected');
     });
 
     test('should return 400 when object_path contain an invalid character: #', async () => {
@@ -227,15 +227,16 @@ export const layoutControllerTestSuite = async () => {
 
       await layoutConnector.getLayoutsHandler(req, res);
 
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledOnce, 'Response was not sent');
+      const message = 'Invalid query parameters: "Object path" with value ' +
+      '"qc/CPV/MO/Noise#OnFLP/BadChannelMapM2" fails to match the required pattern: /^[A-Za-z0-9_/]+$/';
 
-      const [actual] = res.json.firstCall.args;
-      ok(actual && actual.status === 400, 'status incorrect');
-      ok(actual && actual.title === 'Invalid Input', 'title incorrect');
-      ok(actual && actual.message && actual.message.indexOf('Invalid query parameters: "Object path" with '
-        + 'value "qc/CPV/MO/Noise#OnFLP/BadChannelMapM2" fails to match the '
-        + 'required pattern:') === 0, 'message prefix incorrect');
+      ok(res.status.calledWith(400), 'Response status was not 400');
+      ok(res.status.calledWith(400), 'Response status was not 400');
+      ok(res.json.calledWith({
+        message: message,
+        status: 400,
+        title: 'Invalid Input',
+      }), 'Error message is not as expected');
     });
 
     test('should return 400 when fields contain invalid values', async () => {

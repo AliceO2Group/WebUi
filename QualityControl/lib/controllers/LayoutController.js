@@ -65,7 +65,6 @@ export class LayoutController {
 
     try {
       const validated = await LayoutsGetDto.validateAsync(req.query);
-      // eslint-disable-next-line no-unused-vars
       ({ fields, owner_id, object_path } = validated);
     } catch (error) {
       const responseError = error.isJoi ?
@@ -77,7 +76,7 @@ export class LayoutController {
     }
 
     try {
-      const layouts = await this._layoutRepository.listLayouts({ owner_id, fields });
+      const layouts = await this._layoutRepository.listLayouts({ owner_id, fields, object_path });
       return res.status(200).json(layouts);
     } catch (error) {
       logger.errorMessage(`Error retrieving layouts: ${error}`);
