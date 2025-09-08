@@ -21,11 +21,11 @@ import { RemoteData } from '/js/src/index.js';
 export default class FilterService {
   /**
    * Initialize filterModel
-   * @param {FilterModel} filterModel - The root filterModel that manages filter state
+   * @param {Model} model - root model of the application
    */
-  constructor(filterModel) {
-    this.filterModel = filterModel;
-    this.loader = filterModel.model.loader;
+  constructor(model) {
+    this.model = model;
+    this.loader = model.loader;
 
     this.runTypes = RemoteData.notAsked();
   }
@@ -36,14 +36,14 @@ export default class FilterService {
    */
   async getRunTypes() {
     this.runTypes = RemoteData.loading();
-    this.filterModel.notify();
+    this.model.notify();
     const { result, ok } = await this.loader.get('/api/filter/configuration');
     if (ok) {
       this.runTypes = RemoteData.success(result?.runTypes || []);
     } else {
       this.runTypes = RemoteData.failure('Error retrieving runTypes');
     }
-    this.filterModel.notify();
+    this.model.notify();
   }
 
   /**
@@ -69,13 +69,5 @@ export default class FilterService {
     } catch {
       return RunStatus.UNKNOWN;
     }
-  }
-
-  /**
-   * Method to initialize the filter service
-   * @returns {void}
-   */
-  async initFilterService() {
-    await this.getRunTypes();
   }
 }

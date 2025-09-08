@@ -51,12 +51,12 @@ const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback
  * @returns {vnode} - virtual node element
  */
 export function filtersPanel(filterModel, viewModel) {
-  const { filterMap, setFilterValue, filterService, isVisible, clearFilter } = filterModel;
+  const { filterMap, setFilterValue, isVisible, clearFilter, model } = filterModel;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onEnterCallback = () => filterModel.triggerFilter(viewModel);
   const clearFilterCallback = clearFilter.bind(filterModel, viewModel);
-  const filtersList = filtersConfig(filterService);
+  const filtersList = filtersConfig(model.services.filter);
 
   if (!isVisible || filterModel.inRunMode) {
     return null;

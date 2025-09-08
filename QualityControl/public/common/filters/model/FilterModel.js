@@ -14,7 +14,6 @@
 
 import { Observable } from '/js/src/index.js';
 import { buildQueryParametersString } from '../../buildQueryParametersString.js';
-import FilterService from '../../../services/Filter.service.js';
 import { RunStatus } from '../../../library/runStatus.enum.js';
 const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
 
@@ -30,7 +29,6 @@ export default class FilterModel extends Observable {
     super();
 
     this.model = model;
-    this.filterService = new FilterService(this);
     this._filterMap = {};
     this.isVisible = true;
     this._runsModeInterval = null;
@@ -55,7 +53,7 @@ export default class FilterModel extends Observable {
       }
     });
 
-    this.filterService.runTypes.match({
+    this.model.services.filter.runTypes.match({
       Success: (runTypes) => {
         if (runTypes.length > 0 && !runTypes.includes(this._filterMap.RunType)) {
           delete this._filterMap.RunType;
@@ -115,7 +113,7 @@ export default class FilterModel extends Observable {
   async triggerFilter(baseViewModel) {
     this.setFilterToURL();
     if (this.inRunMode) {
-      this.runStatus = await this.filterService.getRunStatus(this.runNumber);
+      this.runStatus = await this.model.services.filter.getRunStatus(this.runNumber);
     }
     baseViewModel.triggerFilter();
   }
