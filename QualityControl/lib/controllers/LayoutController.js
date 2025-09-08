@@ -61,11 +61,11 @@ export class LayoutController {
   async getLayoutsHandler(req, res) {
     let fields = undefined;
     let owner_id = undefined;
-    let object_path = undefined;
+    let filter = undefined;
 
     try {
       const validated = await LayoutsGetDto.validateAsync(req.query);
-      ({ fields, owner_id, object_path } = validated);
+      ({ fields, owner_id, filter } = validated);
     } catch (error) {
       const responseError = error.isJoi ?
         new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`) :
@@ -76,7 +76,7 @@ export class LayoutController {
     }
 
     try {
-      const layouts = await this._layoutRepository.listLayouts({ owner_id, fields, object_path });
+      const layouts = await this._layoutRepository.listLayouts({ owner_id, fields, filter });
       return res.status(200).json(layouts);
     } catch (error) {
       logger.errorMessage(`Error retrieving layouts: ${error}`);
