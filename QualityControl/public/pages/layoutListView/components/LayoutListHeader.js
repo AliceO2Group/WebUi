@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import { filterPanelToggleButton } from '../../../common/filters/filterViews.js';
 import { h } from '/js/src/index.js';
 
 /**
@@ -21,10 +20,9 @@ import { h } from '/js/src/index.js';
  * @param {FilterModel} filterModel - The model handeling the filter state
  * @returns {vnode} - virtual node element
  */
-export default (layoutListModel, filterModel) => [
+export default (layoutListModel) => [
   h('.w-50.text-center', [h('b.f4', 'Layouts')]),
   h('.flex-grow.text-right', [
-    filterPanelToggleButton(filterModel),
     h('input.form-control.form-inline.mh1.w-33', {
       placeholder: 'Search',
       type: 'text',
