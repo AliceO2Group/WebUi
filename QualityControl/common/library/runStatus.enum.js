@@ -18,4 +18,5 @@ export const RunStatus = Object.freeze({
   NOT_FOUND: 'NOT_FOUND',
   UNKNOWN: 'UNKNOWN',
   BOOKKEEPING_UNAVAILABLE: 'BOOKKEEPING_UNAVAILABLE',
+  ERROR: 'ERROR',
 });
