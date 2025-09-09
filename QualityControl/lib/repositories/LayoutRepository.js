@@ -42,7 +42,7 @@ export class LayoutRepository extends BaseRepository {
     const layoutFilter = filter?.objectPath !== undefined ?
 
     /**
-     * Function doc
+     * Filter layouts using the objectPath on included objects
      * @param {Layout} layout - layout to filter trough
      * @returns {boolean} - filter condition satisfied, based on objectPath
      */
@@ -53,7 +53,7 @@ export class LayoutRepository extends BaseRepository {
       :
 
     /**
-     * Function doc
+     * Filter layouts using the layout.owner_id and or layout.name
      * @param {Layout} layout - layout to filter trough
      * @returns {boolean} - filter condition satisfied, based on owner_id and or layout.name
      */
