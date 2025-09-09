@@ -92,11 +92,6 @@ export class FilterService {
   async getRunStatus(runNumber) {
     try {
       const runStatus = await this._bookkeepingService.retrieveRunStatus(runNumber);
-
-      if (!runStatus || !Object.values(RunStatus).includes(runStatus)) {
-        this._logger.warnMessage(`Invalid run status received for run ${runNumber}: ${runStatus}`);
-        return RunStatus.UNKNOWN;
-      }
       return runStatus;
     } catch (error) {
       const message = `Error while retrieving run status for run ${runNumber}: ${error.message || error}`;
