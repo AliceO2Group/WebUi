@@ -68,6 +68,35 @@ export const layoutRepositoryTest = async () => {
         );
       });
 
+      test('should return only layout with specified filter.objectPath', () => {
+        const objectPath = 'qc/MCH/QO/DataDecodingCheck';
+        const result = layoutRepository.listLayouts({ filter: {
+          objectPath: objectPath,
+        } });
+        ok(result.length === 1, "listLayouts's filter.objectPath should only return one layout");
+      });
+
+      test('should return layouts with specified partial filter.objectPath', () => {
+        const objectPath = '/1';
+        const result = layoutRepository.listLayouts({ filter: {
+          objectPath,
+        } });
+        ok(result.length === 2, "listLayouts's filter.objectPath should only return 2 layouts");
+      });
+
+      test('should return all layouts when filter.objectPath is empty string', () => {
+        const objectPath = '';
+        const result = layoutRepository.listLayouts({ filter: {
+          objectPath,
+        } });
+        ok(result.length === 3, "listLayouts's filter.objectPath should only return 3 (all) layouts");
+      });
+
+      test('should return all layouts when filter is an empty object', () => {
+        const result = layoutRepository.listLayouts({ filter: {} });
+        ok(result.length === 3, "listLayouts's empty filter object should only return 3 (all) layouts");
+      });
+
       test('should return only specified fields when fields array is provided', () => {
         const fields = ['id', 'name'];
         const result = layoutRepository.listLayouts({ fields });
