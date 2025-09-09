@@ -70,14 +70,23 @@ export default class LayoutListModel extends BaseViewModel {
    * Set user's input for search and use a fuzzy algo to filter list of layouts.
    * Fuzzy allows missing chars "aaa" can find "a/a/a" or "aa/a/bbbbb"
    * @param {string} searchInput - string input from the user to search by
+   * @param {string} objectPath - string input from the user to search layouts by objectPath
    * @returns {undefined}
    */
-  search(searchInput) {
-    this._searchInput = searchInput;
-    this.folders.forEach((folder) => {
-      folder.searchInput = new RegExp(searchInput, 'i');
-    });
-    this.notify();
+  search(searchInput, objectPath) {
+    if (objectPath === undefined) {
+      this._searchInput = searchInput;
+      this.folders.forEach((folder) => {
+        folder.searchInput = new RegExp(searchInput, 'i');
+      });
+      this.notify();
+    } else {
+      const layoutService = this.model.services.layout;
+      this._searchInput = objectPath;
+      layoutService.getLayoutsByFilter(undefined, {
+        objectPath,
+      }, this.model);
+    }
   }
 
   /**

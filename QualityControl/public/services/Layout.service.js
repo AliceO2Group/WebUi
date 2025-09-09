@@ -34,6 +34,7 @@ export default class LayoutService {
 
     this.list = RemoteData.notAsked(); // List of all existing layouts in QCG;
     this.userList = RemoteData.notAsked(); // List of layouts owned by current user;
+    this.filterList = RemoteData.notAsked(); // List of all layouts filtered by filter object;
   }
 
   /**
@@ -96,6 +97,44 @@ export default class LayoutService {
       }
     }
 
+    that.notify();
+  }
+
+  /**
+   * Method to get all layouts by a given filter object
+   * Only one type of filter condition exists right now, filter.objectPath.
+   * Check the controller: 'QualityControl/lib/dtos/LayoutDto.js' line 88
+   * for more future filter options.
+   * @param {string|undefined} fields - comma seperated string values. Represent the fields that should be fetched.
+   * If left empty all available fields will be fetched
+   * @param {object} filter - filter information to be parsed by the backend.
+   * @param {Class<Observable>} that - Observer requesting data that should be notified of changes
+   * @returns {undefined}
+   */
+  async getLayoutsByFilter(fields = undefined, filter = undefined, that = this.model) {
+    this.filterList = RemoteData.loading();
+    that.notify();
+    if (filter !== undefined) {
+      const filterSearchParam = new URLSearchParams();
+      if (fields !== undefined) {
+        filterSearchParam.append('fields', fields);
+      }
+
+      filterSearchParam.append('filter', JSON.stringify(filter));
+      filter.objectPath = filter.objectPath.trim();
+      const url = `/api/layouts?${filterSearchParam.size > 0 ? `${filterSearchParam.toString()}` : ''}`;
+
+      const { result, ok } = await this.loader.get(url);
+      if (ok) {
+        const sortedLayouts = result.sort(this._compareByName);
+        // My layouts/userlist or should this be about all layouts?
+        this.filterList = RemoteData.success(sortedLayouts);
+      } else {
+        this.filterList = RemoteData.failure(result.error || result.message);
+      }
+    } else {
+      this.filterList = RemoteData.failure('Filter is not defined');
+    }
     that.notify();
   }
 

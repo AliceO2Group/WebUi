@@ -52,7 +52,7 @@ export class LayoutController {
 
   /**
    * HTTP GET endpoint for retrieving a list of layouts
-   * * can be filtered by "owner_id" or "object_path"
+   * * Can be filtered by "owner_id" or "objectPath" using filter.objectPath
    * * if no owner_id is provided, all layouts will be fetched;
    * @param {Request} req - HTTP request object with information on owner_id
    * @param {Response} res - HTTP response object to provide layouts information
@@ -64,6 +64,15 @@ export class LayoutController {
     let filter = undefined;
 
     try {
+      if (req.query.filter !== undefined) {
+        // Attempt filter JSON parse
+        try {
+          req.query.filter = JSON.parse(req.query.filter);
+        } catch {
+          logger.errorMessage('Error validating query parameters: following'
+          + ` JSON parse failed: ${req.query.filter}`);
+        }
+      }
       const validated = await LayoutsGetDto.validateAsync(req.query);
       ({ fields, owner_id, filter } = validated);
     } catch (error) {
