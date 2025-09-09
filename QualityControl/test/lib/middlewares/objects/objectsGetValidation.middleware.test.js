@@ -80,7 +80,7 @@ export const objectsGetValidationMiddlewareTest = () => {
       ok(res.status.calledWith(400), 'Should return 400 status');
 
       ok(res.json.calledWithMatch({
-        message: 'Invalid query parameters: "filters.RunNumber" must be less than or equal to 999999',
+        message: 'Invalid query parameters: Run number must not exceed 999999',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error');
@@ -92,7 +92,7 @@ export const objectsGetValidationMiddlewareTest = () => {
       ok(res.status.calledWith(400), 'Should return 400 status');
 
       ok(res.json.calledWithMatch({
-        message: 'Invalid query parameters: "filters.RunNumber" must be greater than or equal to 0',
+        message: 'Invalid query parameters: Run number must be greater than 0',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error');

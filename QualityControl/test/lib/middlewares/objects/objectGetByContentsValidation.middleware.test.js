@@ -120,7 +120,7 @@ export const objectGetContentsValidationMiddlewareTest = () => {
         await middleWare(req, res, next);
         ok(res.status.calledWith(400), 'Should return 400 status');
         ok(res.json.calledWithMatch({
-          message: 'Invalid query parameters: "filters.RunNumber" must be a number',
+          message: 'Invalid query parameters: Run number must be a number',
           status: 400,
           title: 'Invalid Input',
         }), 'Should return validation error');
