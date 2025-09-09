@@ -13,6 +13,7 @@
  */
 
 import Joi from 'joi';
+import { RunNumberDto } from './filters/RunNumberDto.js';
 
 const periodNamePattern = /^LHC\d{1,2}[a-z]+$/i;
 
@@ -23,7 +24,7 @@ const periodNamePattern = /^LHC\d{1,2}[a-z]+$/i;
  */
 function createFiltersSchema(runTypes) {
   return Joi.object({
-    RunNumber: Joi.number().integer().min(0).max(999999).optional(),
+    RunNumber: RunNumberDto.optional(),
     RunType: runTypes.length > 0
       ? Joi.string().valid(...runTypes).optional()
       : Joi.string().optional(),

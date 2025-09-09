@@ -37,7 +37,7 @@ export const apiGetRunStatusTests = () => {
       await request(`${URL_ADDRESS}/api/filter/run-status/-1`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
         .expect(400, {
-          message: 'Run number must be positive',
+          message: 'Run number must be greater than 0',
           status: 400,
           title: 'Invalid Input',
         });
