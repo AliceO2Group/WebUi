@@ -24,16 +24,42 @@ export class LayoutRepository extends BaseRepository {
    * @param {number} [options.owner_id] - Filter layouts by owner ID
    * @param {string} [options.name] - Filter layouts by exact name match
    * @param {Array<string>} [options.fields] - Array of field names to include in each returned layout object
+   * @param {object} [options.filter] - Filter layouts by containing filter.objectPath, case insensitive
    * @returns {Array<object>} Array of layout objects matching the filters, containing only the specified fields
    * @throws {TypeError} If fields parameter is provided but is not an array
    * @throws {Error} If any specified field does not exist in the layout objects
    */
-  listLayouts({ name, owner_id, fields = [] } = {}) {
+  listLayouts({ name, owner_id, fields = [], filter } = {}) {
     const { layouts } = this._jsonFileService.data;
 
-    const layoutFilter = (layout) =>
-      (owner_id === undefined || layout.owner_id === owner_id) &&
-      (name === undefined || layout.name === name);
+    // Better to lowercase once rather than at every single object_path comparison.
+    if (filter?.objectPath !== undefined) {
+      filter.objectPath = filter.objectPath.toLowerCase();
+    }
+
+    // Filter using filter.objectPath should filter and its objectPath be defined,
+    // otherwise filter by name and owner_id.
+    const layoutFilter = filter?.objectPath !== undefined ?
+
+    /**
+     * Filter layouts using the objectPath on included objects
+     * @param {Layout} layout - layout to filter trough
+     * @returns {boolean} - filter condition satisfied, based on objectPath
+     */
+      (layout) =>
+        (layout.tabs ?? [])
+          .flatMap((tab) => tab.objects ?? [])
+          .filter((object) => (object.name ?? '').toLowerCase().includes(filter.objectPath)).length > 0
+      :
+
+    /**
+     * Filter layouts using the layout.owner_id and or layout.name
+     * @param {Layout} layout - layout to filter trough
+     * @returns {boolean} - filter condition satisfied, based on owner_id and or layout.name
+     */
+      (layout) =>
+        (owner_id === undefined || layout.owner_id === owner_id) &&
+        (name === undefined || layout.name === name);
 
     const filteredLayouts = layouts.filter(layoutFilter);
 
