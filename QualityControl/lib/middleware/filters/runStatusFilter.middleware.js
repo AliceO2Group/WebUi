@@ -25,9 +25,13 @@ f
  */
 export const runStatusFilterMiddleware = async (req, res, next) => {
   try {
+    if (!req.params.runNumber) {
+      throw new InvalidInputError('Run number is required');
+    }
     const validatedRunNumber = await RunNumberDto.validateAsync(req.params.runNumber);
     req.params.runNumber = validatedRunNumber;
     next();
+    return;
   } catch (error) {
     updateAndSendExpressResponseFromNativeError(
       res,
@@ -35,5 +39,6 @@ export const runStatusFilterMiddleware = async (req, res, next) => {
         ? new InvalidInputError(error.details[0].message)
         : error,
     );
+    return;
   }
 };

@@ -14,6 +14,8 @@
 'use strict';
 import { LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/obj-controller`;
+
 /**
  * Gateway for all QC Objects requests
  * @class
@@ -35,7 +37,7 @@ export class ObjectController {
      * @type {RunMonitoringService}
      */
     this._runModeService = runModeService;
-    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/object-ctrl`);
+    this._logger = LogManager.getLogger(LOG_FACILITY);
   }
 
   /**

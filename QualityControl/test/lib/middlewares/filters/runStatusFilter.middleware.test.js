@@ -82,7 +82,7 @@ export const runStatusFilterMiddlewareTest = () => {
 
       ok(res.status.calledWith(400), 'Status should be 400');
       ok(res.json.calledWith({
-        message: 'Run number must be positive',
+        message: 'Run number must be greater than 0',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error message');
