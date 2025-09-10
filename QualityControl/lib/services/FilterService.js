@@ -30,7 +30,6 @@ export class FilterService {
     this._logger = LogManager.getLogger(LOG_FACILITY);
     this._bookkeepingService = bookkeepingService;
     this._runTypes = [];
-    this._logger = LogManager.getLogger(LOG_FACILITY);
     this.initFilters();
 
     this._runTypesRefreshInterval = config?.bookkeeping?.runTypesRefreshInterval ??
