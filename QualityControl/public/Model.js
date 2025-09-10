@@ -66,7 +66,6 @@ export default class Model extends Observable {
     this.aboutViewModel = new AboutViewModel(this);
     this.aboutViewModel.bubbleTo(this);
 
-    this.refreshTimer = 0;
     this.refreshInterval = 0; // Seconds
     this.sidebar = true;
     this.accountMenuEnabled = false;
