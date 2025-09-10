@@ -21,7 +21,7 @@ import { copyMockDataFileToUse } from './testServerSetup.js';
 export const initTest = async () => {
   await copyMockDataFileToUse();
   const jsonFile = config.dbFile;
-  const _logger = LogManager.getLogger('TESTS');
+  const _logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/tests-repository-setup`);
   let mockedLayouts = [];
 
   try {

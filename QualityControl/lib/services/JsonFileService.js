@@ -13,9 +13,10 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
-const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/json`);
 import fs from 'fs';
 import path from 'path';
+
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/json-service`;
 
 /**
  * Store layouts inside JSON based file with atomic write
@@ -26,6 +27,8 @@ export class JsonFileService {
    * @param {string} pathname - path to JSON DB file
    */
   constructor(pathname) {
+    this._logger = LogManager.getLogger(LOG_FACILITY);
+
     // Path of the file to store data
     this.pathname = path.join(pathname);
     this.pathnameTmp = `${this.pathname}~tmp`;
@@ -41,7 +44,7 @@ export class JsonFileService {
   async _syncFileAndInternalState() {
     await this._readFromFile();
     await this.writeToFile();
-    logger.infoMessage(`Preferences will be saved in ${this.pathname}`);
+    this._logger.infoMessage(`Preferences will be saved in ${this.pathname}`);
   }
 
   /**
@@ -54,7 +57,7 @@ export class JsonFileService {
         if (err) {
           // File does not exist, it's ok, we will create it
           if (err.code === 'ENOENT') {
-            logger.info('DB file does not exist, will create one');
+            this._logger.infoMessage('DB file does not exist, will create one');
             return resolve();
           }
 
@@ -93,9 +96,9 @@ export class JsonFileService {
       const dataToFile = JSON.stringify(this.data, null, 1);
       await fs.promises.writeFile(this.pathnameTmp, dataToFile);
       await fs.promises.rename(this.pathnameTmp, this.pathname);
-      logger.infoMessage('DB file updated');
+      this._logger.infoMessage('DB file updated');
     } catch (err) {
-      logger.errorMessage('Error writing to DB file:', err);
+      this._logger.errorMessage('Error writing to DB file:', err);
       throw err;
     } finally {
       this.lock.release();
