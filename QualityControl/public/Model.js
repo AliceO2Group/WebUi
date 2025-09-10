@@ -66,7 +66,6 @@ export default class Model extends Observable {
     this.aboutViewModel = new AboutViewModel(this);
     this.aboutViewModel.bubbleTo(this);
 
-    this.refreshTimer = 0;
     this.refreshInterval = 0; // Seconds
     this.sidebar = true;
     this.accountMenuEnabled = false;
@@ -314,12 +313,6 @@ export default class Model extends Observable {
 
     // Clear filter model runs mode interval
     this.filterModel.clearRunsModeInterval();
-
-    // Clear main refresh timer if it exists
-    if (this._refreshTimer) {
-      clearInterval(this._refreshTimer);
-      this._refreshTimer = null;
-    }
   }
 
   /**
