@@ -39,6 +39,7 @@ export default class FilterModel extends Observable {
     this._inRunMode = false;
     this._runNumber = null;
     this._runStatus = RunStatus.UNKNOWN;
+    this._reason = '';
     this.dropdownOpen = false;
     this.statusInfoOpen = false;
   }
@@ -115,7 +116,9 @@ export default class FilterModel extends Observable {
   async triggerFilter(baseViewModel) {
     this.setFilterToURL();
     if (this.inRunMode) {
-      this.runStatus = await this.filterService.getRunStatus(this.runNumber);
+      const { status, reason } = await this.filterService.getRunStatus(this.runNumber);
+      this._reason = reason;
+      this.runStatus = status;
     }
     baseViewModel.triggerFilter();
   }
@@ -297,8 +300,6 @@ export default class FilterModel extends Observable {
    * @returns {void}
    */
   set runStatus(runStatus) {
-    this._runStatus = runStatus;
-
     // exit runs mode if run is not found or status is unknown
     if (this.inRunMode && runStatus !== RunStatus.ONGOING && runStatus !== RunStatus.ENDED) {
       setTimeout(async () => {
@@ -311,16 +312,22 @@ export default class FilterModel extends Observable {
             case RunStatus.BOOKKEEPING_UNAVAILABLE:
               reason = 'The bookkeeping service is not available.';
               break;
+            case RunStatus.UNKNOWN:
+              reason = 'Unknwon reason';
+              break;
             default:
-              reason = 'Unable to retrieve the run status.';
+              reason = this._reason;
           }
-
           await this.deactivateRunsMode(this._currentViewModel);
-          this.model.notification.show(`Runs mode cannot be accesed: ${reason}`, 'warning', 4000);
+          this.model.notification.show(
+            `Runs mode cannot be accesed: ${reason}`,
+            runStatus === RunStatus.ERROR ? 'danger' : 'warning',
+            4000,
+          );
         }
       }, 0);
     }
-
+    this._runStatus = runStatus;
     this.notify();
   }
 
