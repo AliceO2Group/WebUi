@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import { RunStatus } from '../../library/runStatus.enum.js';
 import { RemoteData } from '/js/src/index.js';
 
 /**
@@ -43,6 +44,37 @@ export default class FilterService {
       this.runTypes = RemoteData.failure('Error retrieving runTypes');
     }
     this.filterModel.notify();
+  }
+
+  /**
+   * Method to get run status for a specific run number
+   * @param {number} runNumber - The run number to get status for
+   * @returns {Promise<string>} - Run status string
+   */
+  async getRunStatus(runNumber) {
+    try {
+      let status = RunStatus.UNKNOWN;
+      let reason = '';
+      const parsedRunNumber = parseInt(runNumber, 10);
+
+      if (Number.isNaN(parsedRunNumber)) {
+        status = RunStatus.ERROR;
+        reason = 'Run number provided is not a number';
+      } else {
+        const { result, ok } = await this.loader.get(`/api/filter/run-status/${parsedRunNumber}`);
+        if (!ok || !result || !Object.values(RunStatus).includes(result?.runStatus)) {
+          status = RunStatus.ERROR;
+          reason = result?.message;
+        } else {
+          status = result?.runStatus;
+        }
+      }
+      return {
+        status, reason,
+      };
+    } catch {
+      return RunStatus.UNKNOWN;
+    }
   }
 
   /**

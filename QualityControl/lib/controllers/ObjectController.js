@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 'use strict';
-import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import { LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/obj-controller`;
 
@@ -50,19 +50,10 @@ export class ObjectController {
     try {
       const { prefix, fields, filters = {}, inRunMode = false } = req.query;
 
-      const { RunNumber: runNumber } = filters;
-      const parsedRunNumber = parseInt(runNumber, 10);
-
-      if (inRunMode && (!runNumber || isNaN(parsedRunNumber))) {
-        return updateAndSendExpressResponseFromNativeError(
-          res,
-          new InvalidInputError(!runNumber
-            ? 'RunNumber is required when in run mode'
-            : 'RunNumber must be a number'),
-        );
-      } else if (inRunMode && runNumber && !isNaN(parsedRunNumber)) {
-        const { paths, runStatus } = await this._runModeService.retrievePathsAndSetRunStatus(parsedRunNumber, prefix);
-        return res.status(200).json({ paths, runStatus });
+      if (inRunMode) {
+        const runNumber = filters?.RunNumber;
+        const { paths } = await this._runModeService.retrievePathsAndSetRunStatus(runNumber);
+        return res.status(200).json({ paths });
       }
 
       const objectsData = await this._objService.retrieveLatestVersionOfObjects({

@@ -13,6 +13,7 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
+import { RunStatus } from '../../common/library/runStatus.enum.js';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/filter-service`;
 
@@ -26,6 +27,7 @@ export class FilterService {
    * @param {object} config - Config object file that defines the refresh intervals for checking run status and runtypes
    */
   constructor(bookkeepingService, config) {
+    this._logger = LogManager.getLogger(LOG_FACILITY);
     this._bookkeepingService = bookkeepingService;
     this._runTypes = [];
     this._logger = LogManager.getLogger(LOG_FACILITY);
@@ -83,5 +85,21 @@ export class FilterService {
    */
   get runTypes() {
     return [...this._runTypes];
+  }
+
+  /**
+   * This method is used to retrieve the run status from the bookkeeping service
+   * @param {number} runNumber - run number to retrieve the status for
+   * @returns {Promise<string>} - resolves with the run status
+   */
+  async getRunStatus(runNumber) {
+    try {
+      const runStatus = await this._bookkeepingService.retrieveRunStatus(runNumber);
+      return runStatus;
+    } catch (error) {
+      const message = `Error while retrieving run status for run ${runNumber}: ${error.message || error}`;
+      this._logger.errorMessage(message);
+      return RunStatus.UNKNOWN;
+    }
   }
 }

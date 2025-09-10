@@ -42,4 +42,12 @@ export const initializeNockForBkp = () => {
         },
       },
     });
+  nock(BKP_URL)
+    .persist()
+    .get(`/api/runs/0${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: null,
+      },
+    });
 };

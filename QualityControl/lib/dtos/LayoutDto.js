@@ -13,6 +13,7 @@
  */
 
 import Joi from 'joi';
+import { ObjectPathDto } from './ObjectPathDto.js';
 
 const ALLOWED_LAYOUT_FIELDS = [
   'isOfficial',
@@ -84,6 +85,9 @@ export const LayoutDto = Joi.object({
 export const LayoutsGetDto = Joi.object({
   owner_id: Joi.number().integer().optional(),
   name: Joi.string().optional(),
+  filter: Joi.object({
+    objectPath: ObjectPathDto,
+  }).optional(),
   token: Joi.string().required(),
   fields: Joi.string()
     .custom(parseAndValidateFields, 'Field validation')

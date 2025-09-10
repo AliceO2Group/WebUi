@@ -12,11 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-export const RunStatus = Object.freeze({
-  ENDED: 'ENDED',
-  ONGOING: 'ONGOING',
-  NOT_FOUND: 'NOT_FOUND',
-  UNKNOWN: 'UNKNOWN',
-  BOOKKEEPING_UNAVAILABLE: 'BOOKKEEPING_UNAVAILABLE',
-  ERROR: 'ERROR',
-});
+import Joi from 'joi';
+
+export const ObjectPathDto = Joi.string().pattern(/^[A-Za-z0-9_\-/]+$/).optional().max(100).label('Object path');
