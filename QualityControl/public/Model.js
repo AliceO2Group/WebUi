@@ -313,12 +313,6 @@ export default class Model extends Observable {
 
     // Clear filter model runs mode interval
     this.filterModel.clearRunsModeInterval();
-
-    // Clear main refresh timer if it exists
-    if (this._refreshTimer) {
-      clearInterval(this._refreshTimer);
-      this._refreshTimer = null;
-    }
   }
 
   /**
