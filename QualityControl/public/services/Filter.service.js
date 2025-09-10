@@ -53,19 +53,25 @@ export default class FilterService {
    */
   async getRunStatus(runNumber) {
     try {
+      let status = RunStatus.UNKNOWN;
+      let reason = '';
       const parsedRunNumber = parseInt(runNumber, 10);
 
       if (Number.isNaN(parsedRunNumber)) {
-        return RunStatus.UNKNOWN;
+        status = RunStatus.ERROR;
+        reason = 'Run number provided is not a number';
+      } else {
+        const { result, ok } = await this.loader.get(`/api/filter/run-status/${parsedRunNumber}`);
+        if (!ok || !result || !Object.values(RunStatus).includes(result?.runStatus)) {
+          status = RunStatus.ERROR;
+          reason = result?.message;
+        } else {
+          status = result?.runStatus;
+        }
       }
-
-      const { result, ok } = await this.loader.get(`/api/filter/run-status/${parsedRunNumber}`);
-
-      if (!ok || !result || !Object.values(RunStatus).includes(result?.runStatus)) {
-        return RunStatus.UNKNOWN;
-      }
-
-      return result?.runStatus;
+      return {
+        status, reason,
+      };
     } catch {
       return RunStatus.UNKNOWN;
     }
