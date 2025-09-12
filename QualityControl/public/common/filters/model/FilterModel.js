@@ -12,11 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Observable } from '/js/src/index.js';
+import { Observable, RemoteData } from '/js/src/index.js';
 import { buildQueryParametersString } from '../../buildQueryParametersString.js';
 import FilterService from '../../../services/Filter.service.js';
 import { RunStatus } from '../../../library/runStatus.enum.js';
 const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
+const ONGOING_RUN_INTERVAL_MS = 15000;
 
 /**
  * Model namespace that manages the filter state in the application.
@@ -35,12 +36,12 @@ export default class FilterModel extends Observable {
     this.isVisible = true;
     this._runsModeInterval = null;
 
-    // Run mode
-    this._inRunMode = false;
-    this._runNumber = null;
-    this._runStatus = RunStatus.UNKNOWN;
+    this.runNumber = null;
+    this.runStatus = RemoteData.notAsked();
     this.dropdownOpen = false;
     this.statusInfoOpen = false;
+    this.pageIsFullyLoaded = false;
+    this.isRunModeActivated = false;
   }
 
   /**
@@ -114,8 +115,12 @@ export default class FilterModel extends Observable {
    */
   async triggerFilter(baseViewModel) {
     this.setFilterToURL();
-    if (this.inRunMode) {
+    if (this.isRunModeActivated) {
+      this.runNumber = this._filterMap['RunNumber'];
+      this.runStatus = RemoteData.loading();
       this.runStatus = await this.filterService.getRunStatus(this.runNumber);
+      this._manageRunsModeInterval(baseViewModel);
+      this.notify();
     }
     baseViewModel.triggerFilter();
   }
@@ -159,18 +164,11 @@ export default class FilterModel extends Observable {
    * @param {object} baseViewModel - The view model that provides the triggerFilter method.
    * @returns {Promise<void>}
    */
-  async activateRunsMode(baseViewModel) {
-    // Save current filters before activating run mode
-    this._previousFilterMap = { ...this._filterMap };
-    this.runNumber = this._filterMap.RunNumber;
-
-    // Clear all filters except RunNumber
-    this._filterMap = { RunNumber: this._runNumber };
-
-    // Activate run mode
-    this.inRunMode = true;
-    await this.triggerFilter(baseViewModel);
-    this._manageRunsModeInterval(baseViewModel);
+  async activateRunsMode() {
+    if (this._filterMap.RunNumber !== undefined) {
+      this._filterMap = this._filterMap.RunNumber ? { RunNumber: this._filterMap.RunNumber } : {};
+    }
+    this.isRunModeActivated = true;
     this.notify();
   }
 
@@ -180,9 +178,7 @@ export default class FilterModel extends Observable {
    * @returns {Promise<void>}
    */
   async deactivateRunsMode(baseViewModel) {
-    this._filterMap = this._previousFilterMap || {};
     this.resetRunsMode();
-    this.setFilterToURL();
     await baseViewModel.triggerFilter();
     this.notify();
   }
@@ -192,13 +188,10 @@ export default class FilterModel extends Observable {
    * @returns {void}
    */
   resetRunsMode() {
-    this.inRunMode = false;
+    this.isRunModeActivated = false;
     this.runNumber = null;
-    this.runStatus = RunStatus.UNKNOWN;
+    this.runStatus = RemoteData.notAsked();
     this.clearRunsModeInterval();
-    this.dropdownOpen = false;
-    this.statusInfoOpen = false;
-    this._previousFilterMap = null;
     this.notify();
   }
 
@@ -211,17 +204,21 @@ export default class FilterModel extends Observable {
   async _manageRunsModeInterval(baseViewModel) {
     this.clearRunsModeInterval();
     this._currentViewModel = baseViewModel;
-    if (this.runStatus === RunStatus.ONGOING) {
-      this._runsModeInterval = setInterval(async () => {
-        if (this._currentViewModel) {
-          await this.triggerFilter(this._currentViewModel);
-          if (this.runStatus !== RunStatus.ONGOING) {
+    this._runsModeInterval = setInterval(async () => {
+      if (!this._currentViewModel) {
+        return;
+      }
+      this.runStatus.match({
+        Success: (res) => {
+          if (res?.runStatus !== RunStatus.ONGOING) {
             this.clearRunsModeInterval();
+          } else {
+            baseViewModel.triggerFilter();
           }
-        }
-        // TODO: Should be provided in config file (ticket OGUI-1743)
-      }, 5000);
-    }
+        },
+        Other: () => this.clearRunsModeInterval(),
+      });
+    }, ONGOING_RUN_INTERVAL_MS);
   }
 
   /**
@@ -242,86 +239,18 @@ export default class FilterModel extends Observable {
    * @returns {void}
    */
   restartRunsModeIntervals(baseViewModel) {
-    if (this.inRunMode && this.runStatus === RunStatus.ONGOING) {
-      this._manageRunsModeInterval(baseViewModel);
+    if (!this.isRunModeActivated) {
+      return;
     }
-  }
 
-  /**
-   * Checks if run mode is activated
-   * @returns {boolean} true if activated
-   */
-  get inRunMode() {
-    return this._inRunMode;
-  }
-
-  /**
-   * Set run mode
-   * @param {boolean} value - Whether to activate or deactivate run mode
-   * @returns {void}
-   */
-  set inRunMode(value) {
-    this._inRunMode = value;
-    this.notify();
-  }
-
-  /**
-   * Get run number
-   * @returns {null | number} Run number or null if not set
-   */
-  get runNumber() {
-    return this._runNumber;
-  }
-
-  /**
-   * Set run number
-   * @param {number} runNumber - The run number to set
-   * @returns {void}
-   */
-  set runNumber(runNumber) {
-    this._runNumber = runNumber;
-    this.notify();
-  }
-
-  /**
-   * Get run status
-   * @returns {RunStatus} The current run status
-   */
-  get runStatus() {
-    return this._runStatus;
-  }
-
-  /**
-   * Set run status
-   * @param {RunStatus} runStatus - The run status to set
-   * @returns {void}
-   */
-  set runStatus(runStatus) {
-    this._runStatus = runStatus;
-
-    // exit runs mode if run is not found or status is unknown
-    if (this.inRunMode && runStatus !== RunStatus.ONGOING && runStatus !== RunStatus.ENDED) {
-      setTimeout(async () => {
-        if (this._currentViewModel) {
-          let reason = '';
-          switch (runStatus) {
-            case RunStatus.NOT_FOUND:
-              reason = 'The run number provided does not correspond to any known run.';
-              break;
-            case RunStatus.BOOKKEEPING_UNAVAILABLE:
-              reason = 'The bookkeeping service is not available.';
-              break;
-            default:
-              reason = 'Unable to retrieve the run status.';
-          }
-
-          await this.deactivateRunsMode(this._currentViewModel);
-          this.model.notification.show(`Runs mode cannot be accesed: ${reason}`, 'warning', 4000);
+    this.runStatus.match({
+      Success: (res) => {
+        if (res?.runStatus === RunStatus.ONGOING && !this._runsModeInterval) {
+          this._manageRunsModeInterval(baseViewModel);
         }
-      }, 0);
-    }
-
-    this.notify();
+      },
+      Other: () => null,
+    });
   }
 
   /**
