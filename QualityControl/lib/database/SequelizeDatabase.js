@@ -21,12 +21,14 @@ import { getDbConfig } from '../config/database.js';
 import models from './models/index.js';
 import { SequelizeStorage } from 'umzug';
 
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/database`;
+
 /**
  * Sequelize implementation of the Database.
  */
 export class SequelizeDatabase {
   constructor(config) {
-    this._logger = LogManager.getLogger('qcg/database');
+    this._logger = LogManager.getLogger(LOG_FACILITY);
 
     if (!config) {
       this._logger.warnMessage('No configuration provided for SequelizeDatabase. Using default configuration.');
