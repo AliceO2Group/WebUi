@@ -162,13 +162,17 @@ export default class FilterModel extends Observable {
   /**
    * Activates the runs mode
    * @param {object} baseViewModel - The view model that provides the triggerFilter method.
+   * @param viewModel
    * @returns {Promise<void>}
    */
-  async activateRunsMode() {
-    if (this._filterMap.RunNumber !== undefined) {
-      this._filterMap = this._filterMap.RunNumber ? { RunNumber: this._filterMap.RunNumber } : {};
-    }
+  async activateRunsMode(viewModel) {
     this.isRunModeActivated = true;
+    if (this._filterMap.RunNumber) {
+      this._filterMap = { RunNumber: this._filterMap.RunNumber };
+      this.triggerFilter(viewModel);
+    } else {
+      this._filterMap = {};
+    }
     this.notify();
   }
 
@@ -208,6 +212,8 @@ export default class FilterModel extends Observable {
       if (!this._currentViewModel) {
         return;
       }
+      this.runStatus = RemoteData.loading();
+      this.runStatus = await this.filterService.getRunStatus(this.runNumber);
       this.runStatus.match({
         Success: (res) => {
           if (res?.runStatus !== RunStatus.ONGOING) {

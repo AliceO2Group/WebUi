@@ -27,7 +27,7 @@ export const runModeCheckbox = (filterModel, viewModel) => {
     if (isRunModeActivated) {
       filterModel.deactivateRunsMode(viewModel);
     } else {
-      filterModel.activateRunsMode();
+      filterModel.activateRunsMode(viewModel);
     }
   };
   return h(
