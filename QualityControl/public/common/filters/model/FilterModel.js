@@ -161,8 +161,7 @@ export default class FilterModel extends Observable {
 
   /**
    * Activates the runs mode
-   * @param {object} baseViewModel - The view model that provides the triggerFilter method.
-   * @param viewModel
+   * @param {object} viewModel The model of the view
    * @returns {Promise<void>}
    */
   async activateRunsMode(viewModel) {

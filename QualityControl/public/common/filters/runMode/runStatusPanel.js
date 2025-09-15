@@ -17,7 +17,6 @@ import { h } from '/js/src/index.js';
  * Render a run mode switch
  * @param {number} runNumber - The run number
  * @param {RunStatus} status - The run status
- * @param timeRemaining
  * @returns {HTMLElement} - The rendered run status panel
  */
 export const runStatusPanel = (runNumber, status) =>

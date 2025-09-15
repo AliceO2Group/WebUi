@@ -111,7 +111,6 @@ export function filtersPanel(filterModel, viewModel) {
  * Button which will allow the user to update filter parameters after the input
  * @param {Function} onClickCallback - Function to trigger the filter mechanism
  * @param {FilterModel} filterModel - Model that manages filter state
- * @param {object} viewModel - Model that manages the state of the page
  * @returns {vnode} - virtual node element
  */
 const triggerFiltersButton = (onClickCallback, filterModel) => {

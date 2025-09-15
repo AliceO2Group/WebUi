@@ -16,7 +16,7 @@ import { h } from '/js/src/index.js';
 /**
  * Render a run mode switch
  * @param {object} filterModel the filter model
- * @param viewModel
+ * @param {object} viewModel the model of the view
  * @returns {Component} the run mode switch component
  */
 export const runModeCheckbox = (filterModel, viewModel) => {

@@ -17,7 +17,6 @@ import { h } from '/js/src/index.js';
 /**
  * Shows header of list of layouts with one search input to filter them
  * @param {LayoutListModel} layoutListModel - The model handeling the state of the LayoutListPage
- * @param {FilterModel} filterModel - The model handeling the filter state
  * @returns {vnode} - virtual node element
  */
 export default (layoutListModel) => [
