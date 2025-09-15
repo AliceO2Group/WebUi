@@ -32,13 +32,14 @@ export const runStatusPanel = (runNumber, status) =>
       ]),
 
     Success: (res) =>
-      h('div.flex-row.g1.items-center.justify-center', [
-        h('b', `#${runNumber}`),
+      h('div.flex-row.g1.items-center.justify-center', { id: 'runStatusPanel' }, [
+        h('b', { id: 'runNumber' }, `#${runNumber}`),
         h('div.flex-row.g1', [
           h('span', 'Status: '),
           h(
             'b',
             {
+              id: 'runStatus',
               style: `color: var(--${
                 res?.runStatus === 'ONGOING' ? 'color-success' : 'color-gray'
               })`,
