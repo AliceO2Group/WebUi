@@ -61,6 +61,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
 
     //Clear filters
     await page.locator('#clearFilterButton').click();
+    await delay(100);
     objectList = await page.evaluate(() => window.model.object.list);
     strictEqual(objectList.length, 3);
   });

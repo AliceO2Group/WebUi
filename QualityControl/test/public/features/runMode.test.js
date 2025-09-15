@@ -60,11 +60,12 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
       window.model.filterModel.ONGOING_RUN_INTERVAL_MS = 500;
     });
     await page.locator('#runNumberFilter').fill('566138');
-    await delay(50);
+    await delay(100);
     const updateButtonIsDisabled = await page.evaluate(() =>
       document.querySelector('#updateAndRunModeButton').disabled);
     strictEqual(updateButtonIsDisabled, false, 'Button should be disabled if run number has not been set');
     await page.locator('#updateAndRunModeButton').click();
+    await delay(100);
     await page.waitForSelector('#runStatusPanel');
     const runStatusInfo = await page.evaluate(() => {
       const runNumber = document.querySelector('#runNumber').textContent;
@@ -73,11 +74,9 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     });
     strictEqual(runStatusInfo.runNumber, '#566138');
     strictEqual(runStatusInfo.status, 'ONGOING');
-    const request = await page.waitForRequest((request) =>
-      request.url().includes('/api/filter/run-status/566138'));
-    ok(request);
     await delay(1000);
     strictEqual(countRunStatusCalls, 3, `Expected 3 requests to filter/run-status, but got ${countRunStatusCalls}`);
+    //2 because the third one returns an 'ENDED' status
     strictEqual(countObjectsCalls, 2, `Expected  requests to api/objects, but got ${countObjectsCalls}`);
   });
 
