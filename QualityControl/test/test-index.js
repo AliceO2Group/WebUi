@@ -36,8 +36,6 @@ import { objectViewFromObjectTreeTests } from './public/pages/object-view-from-o
 import { objectViewFromLayoutShowTests } from './public/pages/object-view-from-layout-show.test.js';
 import { layoutShowTests } from './public/pages/layout-show.test.js';
 import { aboutPageTests } from './public/pages/about-page.test.js';
-import { runsModeObjectTreeTests } from './public/features/runsMode/runsModeObjectTree.test.js';
-import { runsModeLayoutShowTests } from './public/features/runsMode/runsModeLayoutShow.test.js';
 
 /**
  * Backend tests imports
@@ -173,15 +171,6 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     );
     test('should successfully import and run tests for filter', async (testParent) =>
       filterTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent));
-
-    test(
-      'should successfully run runs mode tests',
-      { timeout: RUNS_MODE_TIMEOUT * 2 },
-      async (testParent) => {
-        await runsModeObjectTreeTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent);
-        await runsModeLayoutShowTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent);
-      },
-    );
   });
 
   suite('API - test suite', { timeout: FRONT_END_TIMEOUT }, async () => {

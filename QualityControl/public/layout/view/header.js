@@ -76,7 +76,7 @@ const toolbarViewModeTab = (layout, tab, i) => {
   const selectTab = () => layout.selectTab(i);
 
   return [
-    h('button.br-pill.ph2.btn.btn-tab', { class: linkClass, onclick: selectTab }, tab.name),
+    h('button.br-pill.ph2.btn.btn-tab', { id: `tab-${i}`, class: linkClass, onclick: selectTab }, tab.name),
     ' ',
   ];
 };
@@ -110,7 +110,7 @@ const toolbarEditMode = (layout, filterModel) => {
         ]),
       ]),
     ]),
-    h('.text-right', [
+    h('.text-right flex-grow', [
       h('input.form-control.form-inline', {
         type: 'text',
         value: layout.item.name,
@@ -189,8 +189,9 @@ const editDropdown = (layout) =>
     h('button.btn.btn-primary', { onclick: () => layout.toggleEditMenu() }, iconPencil()),
     h('.dropdown-menu.right-menu', [
       h('.text-ellipsis', [
-        h('a.menu-item', { title: 'Edit via GUI', onclick: () => layout.edit() }, 'Edit via GUI'),
+        h('a.menu-item', { id: 'editByGui', title: 'Edit via GUI', onclick: () => layout.edit() }, 'Edit via GUI'),
         h('a.menu-item', {
+          id: 'editByJson',
           title: 'Edit via JSON',
           onclick: () => layout.initializeEditViaJson(),
         }, 'Edit via JSON'),
@@ -255,7 +256,7 @@ const saveButton = (layout) =>
  */
 const cancelButton = (layout) =>
   h('button.btn', {
-    key: 'cancel-button',
+    id: 'cancel-button',
     onclick: () => layout.cancelEdit(),
     title: 'Cancel',
   }, iconBan());
