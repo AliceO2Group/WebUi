@@ -32,7 +32,7 @@ export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate 
   return runStatus.match({
     Loading: () =>
       h('div.flex-row.g1.items-center.justify-center', [
-        h('b', `#${runNumber}`),
+        h('b', `Run #${runNumber}`),
         h('div.flex-row.g1', [
           h('div.label', 'Status: '),
           h('b.color-gray', 'Loading...'),
@@ -41,10 +41,14 @@ export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate 
 
     Success: (res) => {
       const formattedDate = formatDateTime(lastRefresh);
-
+      const runStatus = res?.runStatus;
+      const shouldShowTimestamp = runStatus === RunStatus.ONGOING || runStatus === RunStatus.ENDED;
       return h('div.flex-column', [
         h('div.flex-row.g1.items-center.justify-center', { id: 'runStatusPanel' }, [
-          h('b', { id: 'runNumber' }, `#${runNumber}`),
+          h('span', { id: 'runNumber' }, [
+            'Run ',
+            h('b', `#${runNumber}`),
+          ]),
           h('div.flex-row.g1', [
             h('span', '| Status: '),
             h(
@@ -60,7 +64,10 @@ export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate 
           'div.flex-row.g1.items-center.justify-center',
           h(
             'span.f7.gray-darker.text-center',
-            `Last: ${formattedDate} ${res?.runStatus === RunStatus.ONGOING ? `- As run is ONGOING, will refresh every ${refreshRate / 1000}  seconds` : ''}`,
+            shouldShowTimestamp &&
+            `Last update: ${formattedDate} ${res?.runStatus === RunStatus.ONGOING
+              ? `- As run is ONGOING, will refresh every ${refreshRate / 1000}  seconds`
+              : ''}`,
           ),
         ),
       ]);
