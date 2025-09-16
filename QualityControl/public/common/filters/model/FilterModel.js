@@ -45,6 +45,8 @@ export default class FilterModel extends Observable {
     this.isRunModeActivated = false;
     this.lastRefresh = null;
     this.ONGOING_RUN_INTERVAL_MS = 15000;
+
+    this.ONGOING_RUN_INTERVAL_MS = 15000;
   }
 
   /**
