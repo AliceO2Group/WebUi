@@ -225,10 +225,10 @@ class EnvironmentService {
       environment.userVars.last_request_user = {
         externalId: user.personid,
         name: user.username,
-      }
+      };
     }
     if (!environment.rootRole) {
-      environment.rootRole = workflowTemplate
+      environment.rootRole = workflowTemplate;
     }
     if (!environment.includedDetectors || environment.includedDetectors.length === 0) {
       environment.includedDetectors = detectors ?? [];
