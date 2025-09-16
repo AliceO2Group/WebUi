@@ -17,7 +17,6 @@ import { buildQueryParametersString } from '../../buildQueryParametersString.js'
 import FilterService from '../../../services/Filter.service.js';
 import { RunStatus } from '../../../library/runStatus.enum.js';
 const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
-const ONGOING_RUN_INTERVAL_MS = 15000;
 
 /**
  * Model namespace that manages the filter state in the application.
@@ -42,6 +41,8 @@ export default class FilterModel extends Observable {
     this.statusInfoOpen = false;
     this.pageIsFullyLoaded = false;
     this.isRunModeActivated = false;
+
+    this.ONGOING_RUN_INTERVAL_MS = 15000;
   }
 
   /**
@@ -213,6 +214,7 @@ export default class FilterModel extends Observable {
       }
       this.runStatus = RemoteData.loading();
       this.runStatus = await this.filterService.getRunStatus(this.runNumber);
+      this.notify();
       this.runStatus.match({
         Success: (res) => {
           if (res?.runStatus !== RunStatus.ONGOING) {
@@ -223,7 +225,7 @@ export default class FilterModel extends Observable {
         },
         Other: () => this.clearRunsModeInterval(),
       });
-    }, ONGOING_RUN_INTERVAL_MS);
+    }, this.ONGOING_RUN_INTERVAL_MS);
   }
 
   /**
