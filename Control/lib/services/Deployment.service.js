@@ -55,12 +55,13 @@ class DeploymentService {
     workflowTemplate,
     user,
     shouldAutoTransition,
+    detectors,
   }) {
     userVars = await this._retrieveUserVars(userVars, selectedConfiguration);
     userVars = await this._buildUserVarsBasedOnSavedToIgnore(userVars, workflowTemplate);
 
     const environment = await this._environmentService.newEnvironmentAsync({
-      workflowTemplate, userVars, user, shouldAutoTransition
+      workflowTemplate, userVars, user, shouldAutoTransition, detectors
     });
     return environment;
   }
