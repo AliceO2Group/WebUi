@@ -28,12 +28,6 @@ export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate 
     return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ` +
            `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   };
-  const el = document.getElementById('lastUpdate');
-  if (el) {
-    el.classList.remove('highlight');
-    void el.offsetWidth;
-    el.classList.add('highlight');
-  }
 
   return runStatus.match({
     Loading: () =>
@@ -47,6 +41,13 @@ export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate 
 
     Success: (res) => {
       const formattedDate = formatDateTime(lastRefresh);
+      const el = document.getElementById('lastUpdate');
+
+      if (el && !el.textContent.includes(formattedDate)) {
+        el.classList.remove('highlight');
+        void el.offsetWidth;
+        el.classList.add('highlight');
+      }
       const timestampEl = h(
         'span.f7.gray-darker.text-center',
         { id: 'lastUpdate' },
