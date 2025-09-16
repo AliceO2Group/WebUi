@@ -11,43 +11,62 @@
  * or submit itself to any jurisdiction.
  */
 
+import { RunStatus } from '../../../../../library/runStatus.enum.js';
 import { h } from '/js/src/index.js';
 
 /**
  * Render a run mode switch
  * @param {number} runNumber - The run number
  * @param {RunStatus} status - The run status
+ * @param lastRefreshed
  * @returns {HTMLElement} - The rendered run status panel
  */
-export const runStatusPanel = (runNumber, status) =>
-  status.match({
+export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate }) => {
+  const formatDateTime = (dateStr) => {
+    const date = new Date(dateStr);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ` +
+           `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  };
+
+  return runStatus.match({
     Loading: () =>
       h('div.flex-row.g1.items-center.justify-center', [
         h('b', `#${runNumber}`),
         h('div.flex-row.g1', [
-          h('div', { class: 'label' }, 'Status: '),
+          h('div.label', 'Status: '),
           h('b.color-gray', 'Loading...'),
         ]),
       ]),
 
-    Success: (res) =>
-      h('div.flex-row.g1.items-center.justify-center', { id: 'runStatusPanel' }, [
-        h('b', { id: 'runNumber' }, `#${runNumber}`),
-        h('div.flex-row.g1', [
-          h('span', 'Status: '),
-          h(
-            'b',
-            {
-              id: 'runStatus',
-              style: `color: var(--${
-                res?.runStatus === 'ONGOING' ? 'color-success' : 'color-gray'
-              })`,
-            },
-            res?.runStatus,
-          ),
+    Success: (res) => {
+      const formattedDate = formatDateTime(lastRefresh);
+
+      return h('div.flex-column', [
+        h('div.flex-row.g1.items-center.justify-center', { id: 'runStatusPanel' }, [
+          h('b', { id: 'runNumber' }, `#${runNumber}`),
+          h('div.flex-row.g1', [
+            h('span', '| Status: '),
+            h(
+              `b.${res?.runStatus === RunStatus.ONGOING ? 'success' : 'gray-darker'}`,
+              { id: 'runStatus' },
+              res?.runStatus,
+            ),
+          ]),
         ]),
-      ]),
+
+        // Last update
+        h(
+          'div.flex-row.g1.items-center.justify-center',
+          h(
+            'span.f7.gray-darker.text-center',
+            `Last: ${formattedDate} ${res?.runStatus === RunStatus.ONGOING ? `- As run is ONGOING, will refresh every ${refreshRate / 1000}  seconds` : ''}`,
+          ),
+        ),
+      ]);
+    },
 
     NotAsked: () => null,
     Other: () => null,
   });
+};
