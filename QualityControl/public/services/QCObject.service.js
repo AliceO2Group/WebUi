@@ -173,13 +173,14 @@ export default class QCObjectService {
    * @deprecated
    */
   async getObjects(inRunMode = false) {
-    const hasFilters = Object.values(this.filterModel.filterMap).some(Boolean);
+    const filters = inRunMode ? { RunNumber: this.filterModel.runNumber } : this.filterModel.filterMap;
+    const hasFilters = Object.values(filters).some(Boolean);
     const fields = hasFilters ? ['path'] : undefined; // If there are filters more unneeded fields are sent down.
     const url = this._buildURL(
       `/api/objects?${inRunMode ? 'inRunMode=true' : ''}`,
       undefined,
       undefined,
-      undefined,
+      filters,
       fields,
     );
     const { result, ok } = await this.model.loader.get(url);

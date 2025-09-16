@@ -162,7 +162,7 @@ const treeRows = (model) => !model.object.tree ?
   :
 
   model.object.tree.children.length === 0
-    ? h('.w-100.text-center', 'No objects found')
+    ? h('.w-100.text-center', 'No objects found. Please change the filters and try again. ')
     : model.object.tree.children.map((children) => treeRow(model, children, 0));
 
 /**
