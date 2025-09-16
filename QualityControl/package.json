@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/qc",
-  "version": "3.13.0",
+  "version": "3.14.0",
   "description": "O2 Quality Control Web User Interface",
   "author": "George Raduta",
   "contributors": [
@@ -46,13 +46,13 @@
     "umzug": "^3.8.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.34.0",
+    "@eslint/js": "^9.35.0",
     "@stylistic/eslint-plugin-js": "^4.4.0",
-    "eslint": "^9.34.0",
-    "eslint-plugin-jsdoc": "^54.1.0",
-    "globals": "^16.3.0",
+    "eslint": "^9.35.0",
+    "eslint-plugin-jsdoc": "^57.2.1",
+    "globals": "^16.4.0",
     "nock": "^14.0.4",
-    "puppeteer": "^24.17.0",
+    "puppeteer": "^24.21.0",
     "sequelize-cli": "^6.6.2",
     "sinon": "^21.0.0",
     "supertest": "^7.1.0"

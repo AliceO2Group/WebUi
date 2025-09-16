@@ -48,7 +48,6 @@ export const runModeServiceTestSuite = async () => {
 
         deepStrictEqual(result, {
           paths: [{ name: '/run/path1' }],
-          runStatus: RunStatus.ONGOING,
         });
 
         strictEqual(runModeService._ongoingRuns.has(runNumber), true);
@@ -66,7 +65,6 @@ export const runModeServiceTestSuite = async () => {
 
         deepStrictEqual(result, {
           paths: [{ name: '/ended/path' }],
-          runStatus: RunStatus.ENDED,
         });
         strictEqual(runModeService._ongoingRuns.has(runNumber), false);
       });
@@ -80,7 +78,6 @@ export const runModeServiceTestSuite = async () => {
 
         deepStrictEqual(result, {
           paths: [{ name: '/cached/path' }],
-          runStatus: 'ONGOING',
         });
 
         sinon.assert.notCalled(bookkeepingService.retrieveRunStatus);
