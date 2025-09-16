@@ -168,11 +168,25 @@ export default class QCObject extends BaseViewModel {
     this.notify();
   }
 
+  async checkIfRefreshIsNeeded() {
+    if (this.model.filterModel.runsModeInterval) {
+      const result = await this.model.services.object.getObjects(true);
+      if (result.isSuccess() && result.payload.paths.length === this.list.length) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /**
    * Ask server for all available objects, fills `tree` of objects
    * @returns {undefined}
    */
   async loadList() {
+    const shouldRefresh = await this.checkIfRefreshIsNeeded();
+    if (!shouldRefresh) {
+      return;
+    }
     this.objectsRemote = RemoteData.loading();
     this.notify();
     this.queryingObjects = true;

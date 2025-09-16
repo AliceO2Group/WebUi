@@ -297,4 +297,8 @@ export default class FilterModel extends Observable {
   isValidRunNumber(runNumber) {
     return runNumber && !isNaN(Number(runNumber)) && Number.isInteger(Number(runNumber));
   }
+
+  get runsModeInterval() {
+    return this._runsModeInterval;
+  }
 }
