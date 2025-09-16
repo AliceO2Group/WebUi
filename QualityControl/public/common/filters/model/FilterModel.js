@@ -35,8 +35,8 @@ export default class FilterModel extends Observable {
     this.isVisible = true;
     this._runsModeInterval = null;
 
-    this.runNumber = null;
-    this.runStatus = RemoteData.notAsked();
+    this._runNumber = null;
+    this._runStatus = RemoteData.notAsked();
     this.isRunModeActivated = false;
 
     this.ONGOING_RUN_INTERVAL_MS = 15000;
@@ -255,5 +255,37 @@ export default class FilterModel extends Observable {
       },
       Other: () => null,
     });
+  }
+
+  /**
+   * Gets the current run number.
+   * @returns {number} The run number.
+   */
+  get runNumber() {
+    return this._runNumber;
+  }
+
+  /**
+   * Sets the run number.
+   * @param {number} value - The new run number.
+   */
+  set runNumber(value) {
+    this._runNumber = value;
+  }
+
+  /**
+   * Gets the current run status.
+   * @returns {RemoteData} The run status.
+   */
+  get runStatus() {
+    return this._runStatus;
+  }
+
+  /**
+   * Sets the run status.
+   * @param {RemoteData} value - The new run status.
+   */
+  set runStatus(value) {
+    this._runStatus = value;
   }
 }
