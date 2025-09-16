@@ -53,7 +53,8 @@ const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback
  * @returns {vnode} - virtual node element
  */
 export function filtersPanel(filterModel, viewModel) {
-  const { filterMap,
+  const {
+    filterMap,
     setFilterValue,
     filterService,
     clearFilter,
@@ -81,7 +82,7 @@ export function filtersPanel(filterModel, viewModel) {
       h('.flex-row.g2.justify-center', [
         runModeCheckbox(filterModel, viewModel),
 
-        ...isRunModeActivated
+        isRunModeActivated
           ? [
             ...filtersList.map((filter) =>
               createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),

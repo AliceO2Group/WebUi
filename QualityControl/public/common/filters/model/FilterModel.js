@@ -35,11 +35,6 @@ export default class FilterModel extends Observable {
     this.isVisible = true;
     this._runsModeInterval = null;
 
-    this.dropdownOpen = false;
-    this.statusInfoOpen = false;
-    this.pageIsFullyLoaded = false;
-
-    // Runs mode
     this.runNumber = null;
     this.runStatus = RemoteData.notAsked();
     this.isRunModeActivated = false;
@@ -238,8 +233,8 @@ export default class FilterModel extends Observable {
     const trackedRunNumber = this.runNumber;
     this._runsModeInterval = setInterval(async () => {
       this.runStatus = RemoteData.loading();
-      this.runStatus = await this.filterService.getRunStatus(trackedRunNumber);
       this.notify();
+      this.runStatus = await this.filterService.getRunStatus(trackedRunNumber);
       this.runStatus.match({
         Success: (res) => {
           if (res?.runStatus === RunStatus.ONGOING || res?.runStatus === RunStatus.ENDED) {
@@ -287,15 +282,6 @@ export default class FilterModel extends Observable {
       },
       Other: () => null,
     });
-  }
-
-  /**
-   * Validates if a run number is a valid number
-   * @param {string|number} runNumber - The run number to validate
-   * @returns {boolean} True if the run number is valid
-   */
-  isValidRunNumber(runNumber) {
-    return runNumber && !isNaN(Number(runNumber)) && Number.isInteger(Number(runNumber));
   }
 
   get runsModeInterval() {
