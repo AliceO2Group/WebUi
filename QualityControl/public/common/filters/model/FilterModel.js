@@ -120,16 +120,37 @@ export default class FilterModel extends Observable {
    */
   async triggerFilter(baseViewModel) {
     this.setFilterToURL();
-    if (this.isRunModeActivated) {
-      this.runNumber = this._filterMap['RunNumber'];
-      this.runStatus = RemoteData.loading();
-      this.runStatus = await this.filterService.getRunStatus(this.runNumber);
-      this._manageRunsModeInterval(baseViewModel);
+
+    if (!this.isRunModeActivated) {
+      baseViewModel.triggerFilter();
+      this.lastRefresh = Date.now();
       this.notify();
+      return;
     }
-    baseViewModel.triggerFilter();
-    this.lastRefresh = Date.now();
+    this.runNumber = this._filterMap['RunNumber'];
+    this.runStatus = RemoteData.loading();
+    this.runStatus = await this.filterService.getRunStatus(this.runNumber);
     this.notify();
+    this.runStatus.match({
+      Success: (res) => {
+        baseViewModel.triggerFilter();
+        this.lastRefresh = Date.now();
+        this.notify();
+
+        if (res?.runStatus === RunStatus.ONGOING) {
+          this._manageRunsModeInterval(baseViewModel);
+        } else {
+          this.clearRunsModeInterval();
+        }
+      },
+      Failure: (err) => {
+        this.model.notification.show(err, 'danger', Infinity);
+        this.clearRunsModeInterval();
+      },
+      Other: () => {
+        this.clearRunsModeInterval();
+      },
+    });
   }
 
   /**
@@ -189,6 +210,7 @@ export default class FilterModel extends Observable {
    */
   async deactivateRunsMode(baseViewModel) {
     this.resetRunsMode();
+    this.lastRefresh = Date.now();
     await baseViewModel.triggerFilter();
     this.notify();
   }
@@ -213,24 +235,25 @@ export default class FilterModel extends Observable {
    */
   async _manageRunsModeInterval(baseViewModel) {
     this.clearRunsModeInterval();
-    this._currentViewModel = baseViewModel;
+    const trackedRunNumber = this.runNumber;
     this._runsModeInterval = setInterval(async () => {
-      if (!this._currentViewModel) {
-        return;
-      }
       this.runStatus = RemoteData.loading();
-      this.runStatus = await this.filterService.getRunStatus(this.runNumber);
-      this.lastRefresh = Date.now();
+      this.runStatus = await this.filterService.getRunStatus(trackedRunNumber);
       this.notify();
       this.runStatus.match({
         Success: (res) => {
+          if (res?.runStatus === RunStatus.ONGOING || res?.runStatus === RunStatus.ENDED) {
+            baseViewModel.triggerFilter();
+            this.lastRefresh = Date.now();
+            this.notify();
+          }
           if (res?.runStatus !== RunStatus.ONGOING) {
             this.clearRunsModeInterval();
-          } else {
-            baseViewModel.triggerFilter();
           }
         },
-        Other: () => this.clearRunsModeInterval(),
+        Other: () => {
+          this.clearRunsModeInterval();
+        },
       });
     }, this.ONGOING_RUN_INTERVAL_MS);
   }
@@ -244,7 +267,6 @@ export default class FilterModel extends Observable {
       clearInterval(this._runsModeInterval);
       this._runsModeInterval = null;
     }
-    this._currentViewModel = null;
   }
 
   /**
