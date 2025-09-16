@@ -330,6 +330,10 @@ export default class FilterModel extends Observable {
     this._isRunModeActivated = value;
   }
 
+  /**
+   * Gets the interval for the ongoing run.
+   * @returns {NodeJS.Timeout} Interval in miliseconds.
+   */
   get runsModeInterval() {
     return this._runsModeInterval;
   }

@@ -15,13 +15,16 @@ import { RunStatus } from '../../../../../library/runStatus.enum.js';
 import { h } from '/js/src/index.js';
 
 /**
- * Render a run mode switch
- * @param {number} runNumber - The run number
- * @param {RunStatus} status - The run status
- * @param lastRefreshed
- * @returns {HTMLElement} - The rendered run status panel
+ * Creates and returns a run status panel element displaying the current run number,
+ * its status, the last refresh timestamp, and the refresh rate.
+ * @param {object} options Options for rendering the run status panel.
+ * @param {number} options.runNumber The current run number to display.
+ * @param {string} options.runStatus The status of the run (e.g., "running", "completed").
+ * @param {Date} options.lastRefresh Timestamp of the last refresh.
+ * @param {number} options.refreshRate - Refresh rate in milliseconds.
+ * @returns {vnode} The element representing the run status panel.
  */
-export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate }) => {
+export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate = 15000 }) => {
   const formatDateTime = (dateStr) => {
     const date = new Date(dateStr);
     const pad = (n) => String(n).padStart(2, '0');
