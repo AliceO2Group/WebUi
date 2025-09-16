@@ -72,7 +72,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
       const status = document.querySelector('#runStatus').textContent;
       return { runNumber, status };
     });
-    strictEqual(runStatusInfo.runNumber, '#566138');
+    strictEqual(runStatusInfo.runNumber, 'Run #566138');
     strictEqual(runStatusInfo.status, 'ONGOING');
     await delay(1000);
     strictEqual(countRunStatusCalls, 3, `Expected 3 requests to filter/run-status, but got ${countRunStatusCalls}`);
@@ -95,7 +95,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
       const status = document.querySelector('#runStatus').textContent;
       return { runNumber, status };
     });
-    strictEqual(runStatusInfo.runNumber, '#566138');
+    strictEqual(runStatusInfo.runNumber, 'Run #566138');
     strictEqual(runStatusInfo.status, 'ENDED');
     await delay(500);
     strictEqual(count, 0, `No requests expected, but got ${count}`);
