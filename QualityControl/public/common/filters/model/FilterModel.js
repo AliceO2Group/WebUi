@@ -37,7 +37,7 @@ export default class FilterModel extends Observable {
 
     this._runNumber = null;
     this._runStatus = RemoteData.notAsked();
-    this.isRunModeActivated = false;
+    this._isRunModeActivated = false;
 
     this.ONGOING_RUN_INTERVAL_MS = 15000;
   }
@@ -287,5 +287,21 @@ export default class FilterModel extends Observable {
    */
   set runStatus(value) {
     this._runStatus = value;
+  }
+
+  /**
+   * Gets the current run mode status.
+   * @returns {boolean} True if turned on.
+   */
+  get isRunModeActivated() {
+    return this._isRunModeActivated;
+  }
+
+  /**
+   * Sets the run mode status.
+   * @param {boolean} value - True if should be turned on.
+   */
+  set isRunModeActivated(value) {
+    this._isRunModeActivated = value;
   }
 }
