@@ -95,7 +95,8 @@ export function filtersPanel(filterModel, viewModel) {
               createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
           ],
       ]),
-      isRunModeActivated && runStatusPanel({ runNumber, runStatus, lastRefresh, refreshRate }),
+      isRunModeActivated
+      && runStatusPanel({ runNumber, runStatus, lastRefresh, refreshRate }),
     ],
   );
 };
@@ -114,12 +115,19 @@ export function filtersPanel(filterModel, viewModel) {
  */
 const triggerFiltersButton = (onClickCallback, filterModel) => {
   const isRunModeActivated = filterModel?.isRunModeActivated;
-  const hasRunNumber = filterModel?.filterMap?.RunNumber;
-  const shouldDisable = isRunModeActivated && !hasRunNumber;
+  let shouldDisable = false;
+  const runNumber = filterModel?.filterMap?.RunNumber;
+  let title = '';
 
+  if (isRunModeActivated) {
+    const { isValid, title: validationTitle } = validateRunNumber(runNumber);
+    shouldDisable = !isValid;
+    title = validationTitle;
+  } else {
+    title = 'Update filters';
+  }
   const buttonId = isRunModeActivated ? 'updateAndRunModeButton' : 'triggerFilterButton';
   const buttonText = isRunModeActivated ? 'Update & Run Mode' : 'Update';
-  const buttonTitle = isRunModeActivated ? 'Update filters and activate run mode' : 'Update filters';
 
   return h(
     'button.btn.btn-primary',
@@ -127,7 +135,7 @@ const triggerFiltersButton = (onClickCallback, filterModel) => {
       id: buttonId,
       onclick: shouldDisable ? null : onClickCallback,
       disabled: shouldDisable,
-      title: shouldDisable ? 'Enter a run number to enable' : buttonTitle,
+      title,
     },
     buttonText,
   );
@@ -152,3 +160,25 @@ export function filterPanelToggleButton(filterModel) {
     onclick: () => filterModel.toggleFilterVisibility(),
   }, ['Filters ', isVisible ? iconChevronTop() : iconChevronBottom()]);
 }
+
+/**
+ * Validates a run number for run mode.
+ * @param {string} runNumber - The run number to validate.
+ * @returns {{ isValid: boolean, title: string }} An object indicating
+ *          whether the run number is valid and a corresponding message.
+ */
+function validateRunNumber(runNumber) {
+  if (runNumber === undefined || runNumber === null || runNumber === '') {
+    return { isValid: false, title: 'Run number is required' };
+  }
+  if (isNaN(runNumber)) {
+    return { isValid: false, title: 'Run number must be a valid number' };
+  }
+  if (!Number.isInteger(Number(runNumber))) {
+    return { isValid: false, title: 'Run number must be an integer' };
+  }
+  if (Number(runNumber) > 999999) {
+    return { isValid: false, title: 'Run number must be 999999 or less' };
+  }
+  return { isValid: true, title: 'Update filters and activate run mode' };
+};
