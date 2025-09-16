@@ -30,6 +30,7 @@ export default class LayoutListModel extends BaseViewModel {
     this.model = model;
     this._searchInput = '';
     this.folders = new Map();
+    // this.searchObjectPathMode = false;
 
     this._initializeFolders();
   }
@@ -67,6 +68,18 @@ export default class LayoutListModel extends BaseViewModel {
     return this._searchInput.trim();
   }
 
+  // set searchInput(value) {
+  //   this._searchInput = value;
+  // }
+
+  // /**
+  //  * Toggle objectPath search mode for layout searches in the search bar.
+  //  */
+  // toggleObjectPathSearchMode() {
+  //   this.searchObjectPathMode = !this.searchObjectPathMode;
+  //   this.notify();
+  // }
+
   /**
    * Set user's input for search and use a fuzzy algo to filter list of layouts.
    * Fuzzy allows missing chars "aaa" can find "a/a/a" or "aa/a/bbbbb"
@@ -76,7 +89,7 @@ export default class LayoutListModel extends BaseViewModel {
    */
   search(searchInput, objectPath) {
     if (objectPath === undefined) {
-      this._searchInput = searchInput;
+      this.searchInput = searchInput;
       this.folders.forEach((folder) => {
         folder.searchInput = new RegExp(searchInput, 'i');
       });

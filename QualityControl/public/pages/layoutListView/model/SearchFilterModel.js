@@ -13,7 +13,7 @@
  */
 
 import { BaseViewModel } from '../../../common/abstracts/BaseViewModel.js';
-import { createFilterModel } from '../Filter.js';
+import { FilterModel } from '../FilterModel.js';
 
 /**
  * SearchFilter model to control the search and filter state
@@ -24,6 +24,14 @@ export default class SearchFilterModel extends BaseViewModel {
     super();
     this.model = model;
     this.searchInput = '';
-    this.filterModel = createFilterModel();
+    this.filterModel = new FilterModel;
+    this.filters = this.filterModel.getAll();
+    this.filterModel.observe(() => {
+      this.filters = this.filterModel.getAll();
+      console.log('Detected model change!!!!');
+      console.log(this.filterModel.get('objectPath').getValue());
+      console.log(this.filters);
+      return;
+    });
   }
 }

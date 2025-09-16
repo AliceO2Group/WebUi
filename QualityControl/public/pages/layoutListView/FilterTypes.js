@@ -15,9 +15,9 @@
 /**
  * @typedef {object} Filter
  * @property {string} key - searchable key of the filter.
- * @property {Function} isActive - has the filter any active value('s)
- * @property {Function} getValue - gets the current value('s) of the filter
- * @property {Function} set - set value of the filter
+ * @property {function(): (boolean)} isActive - has the filter any active value('s)
+ * @property {function(): (string|string[]|null)} getValue - gets the current value('s) of the filter
+ * @property {function(string): void} set - set value of the filter
  * @property {Function} reset - reset filter to default state
  */
 

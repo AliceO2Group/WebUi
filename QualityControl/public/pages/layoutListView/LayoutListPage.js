@@ -31,10 +31,8 @@ export default (folderModels) => {
     h('.scroll-y.absolute-fill', [
       h(
         '.flex-row.text-right.m2',
-        // h('.btn.btn-primary', 'Filter'),
-        // eslint-disable-next-line @stylistic/js/array-bracket-newline
         [
-          filtersPanelPopover(searchFilterModel.filterModel),
+          filtersPanelPopover(searchFilterModel),
           h(
             'input.form-control.form-inline.mh1.w-33',
             {
@@ -60,7 +58,7 @@ export default (folderModels) => {
 
 /**
  * Initializes the filterModel model.
- * @param {import('./Filter.js').FilterModel} filterModel - filterModel of the searchFilterModel.
+ * @param {import('./FilterModel.js').FilterModel} filterModel - filterModel of the searchFilterModel.
  */
 function initializeSearchFilters(filterModel) {
   console.log(filterModel.register(createKeyValueFilter('objectPath', 'abc')));

@@ -13,30 +13,36 @@
  */
 
 // Adopted from Bookkeeping/lib/public/components/Filters/common/filtersPanelPopover.js
-import { h, info, popover, PopoverAnchors, PopoverTriggerPreConfiguration } from '/js/src/index.js';
+import { h, popover, PopoverAnchors, PopoverTriggerPreConfiguration } from '/js/src/index.js';
 // import { tooltip } from '../../common/popover/tooltip.js';
 
-//imports for JSDoc + VSCode navigation:
-// eslint-disable-next-line no-unused-vars
-import { createFilterModel } from './Filter.js';
+/**
+ * imports for JSDoc + VSCode navigation:
+ * @import SearchFilterModel from './model/SearchFilterModel.js';
+ * @import { FilterModel } from './FilterModel.js';
+ */
 
 /**
  * Return the filters panel popover trigger
- * @return {Component} the button component
+ * @returns {Component} the button component
  */
 const filtersToggleTrigger = () => h('button#openFilterToggle.btn.btn.btn-primary', 'Filters');
 
 /**
  * Create main header of the filters panel
- * @param {import('./Filter').FilterModel} filteringModel {@link createFilterModel} filtering model.
+ * @param {FilterModel} filterModel {@link FilterModel} filtering model.
  * @returns {Component} main panel header.
  */
-const filtersToggleContentHeader = (filteringModel) => h('.flex-row.justify-between', [
+const filtersToggleContentHeader = (filterModel) => h('.flex-row.justify-between', [
   h('.f4', 'Filters'),
   h(
     'button#reset-filters.btn.btn-danger',
     {
-      onclick: () => filteringModel.resetAll(),
+      onclick: () => {
+        console.log(filterModel.get('objectPath').getValue());
+        filterModel.resetAll();
+        console.log(filterModel.get('objectPath').getValue());
+      },
       // TODO fix check for active filters over filteringmodel.....
       // ? filteringModel.resetFiltering()
       // : filteringModel.reset(true),
@@ -49,61 +55,49 @@ const filtersToggleContentHeader = (filteringModel) => h('.flex-row.justify-betw
 
 /**
  * Return the filters panel popover content section
- * @param {import('./Filter.js').FilterModel} filterModel the filter model
+ * @param {SearchFilterModel} searchFilterModel the searchFilter model
  * @returns {Component} the filters section
  */
-export const filtersSection = (filterModel = {}) =>
-  h('.flex-column.g2', [
-    'hello world!!',
-    filterModel.getAll().forEach((filter)=> {
-      filter.getValue.toString();
-    }),
-    // Object.entries(filtersConfiguration)
-    //   .filter(([_, column]) => {
-    //     let columnProfiles = column.profiles ?? [profiles.none];
-    //     if (typeof columnProfiles === 'string') {
-    //       columnProfiles = [columnProfiles];
-    //     }
-    //     return applyProfile(column, appliedProfile, columnProfiles)?.filter;
-    //   })
-    //   .map(([columnKey, { name, filterTooltip, filter }]) =>
-    //     name
-    //       ? [
-    //         h(`.flex-row.items-baseline.${columnKey}-filter`, [
-    //           h('.w-30.f5.flex-row.items-center.g2', [
-    //             name,
-    //             filterTooltip ? tooltip(info(), filterTooltip) : null,
-    //           ]),
-    //           h('.w-70', typeof filter === 'function' ? filter(filteringModel) : filter),
-    //         ]),
-    //       ]
-    //       : typeof filter === 'function' ? filter(filteringModel) : filter),
-  ]);
+export const filtersSection = (searchFilterModel = {}) => [
+  searchFilterModel.filters.flatMap((filter) => [
+    h('.flex-row.g2', [
+      h('.w-30.f5.flex-row.items-center.g2', [filter.key]),
+      h('.w-70', [
+        h('input.form-control.w-100', {
+          placeholder: 'Search',
+          type: 'text',
+          value: filter.getValue(),
+          onchange: (e) => searchFilterModel.filterModel.setValue(filter.key, e.target.value),
+        }),
+      ]),
+    ]),
+  ]),
+];
 
 /**
  * Return the filters panel popover content (i.e. the actual filters)
- * @param {FilteringModel} filteringModel the filtering model
+ * @param {FilterModel} filterModel the filtering model
  * @param {object} [configuration] additional configuration
  * @param {string} [configuration.profile = profiles.none] profile which filters should be rendered @see Column
  * @returns {Component} the filters panel
  */
 const filtersToggleContent = (
-  filteringModel,
+  searchFilterModel,
   configuration = {},
 ) => h('.w-l.flex-column.p3.g3', [
-  filtersToggleContentHeader(filteringModel),
-  filtersSection(filteringModel, configuration),
+  filtersToggleContentHeader(searchFilterModel.filterModel),
+  filtersSection(searchFilterModel, configuration),
 ]);
 
 /**
  * Return component composed of the filtering popover and its button trigger
- * @param {FilteringModel} filteringModel the filtering model
+ * @param {FilterModel} filterModel the filtering model
  * @param {object} [configuration] optional configuration
  * @returns {Component} the filter component
  */
-export const filtersPanelPopover = (filteringModel, configuration) => popover(
+export const filtersPanelPopover = (searchFilterModel, configuration) => popover(
   filtersToggleTrigger(),
-  filtersToggleContent(filteringModel, configuration),
+  filtersToggleContent(searchFilterModel, configuration),
   {
     ...PopoverTriggerPreConfiguration.click,
     anchor: PopoverAnchors.RIGHT_START,
