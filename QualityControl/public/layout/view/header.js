@@ -110,7 +110,7 @@ const toolbarEditMode = (layout, filterModel) => {
         ]),
       ]),
     ]),
-    h('.text-right flex-grow', [
+    h('.text-right.flex-grow', [
       h('input.form-control.form-inline', {
         type: 'text',
         value: layout.item.name,

@@ -37,9 +37,6 @@ export default class FilterModel extends Observable {
 
     this.runNumber = null;
     this.runStatus = RemoteData.notAsked();
-    this.dropdownOpen = false;
-    this.statusInfoOpen = false;
-    this.pageIsFullyLoaded = false;
     this.isRunModeActivated = false;
 
     this.ONGOING_RUN_INTERVAL_MS = 15000;
@@ -119,9 +116,9 @@ export default class FilterModel extends Observable {
     if (this.isRunModeActivated) {
       this.runNumber = this._filterMap['RunNumber'];
       this.runStatus = RemoteData.loading();
+      this.notify();
       this.runStatus = await this.filterService.getRunStatus(this.runNumber);
       this._manageRunsModeInterval(baseViewModel);
-      this.notify();
     }
     baseViewModel.triggerFilter();
   }
@@ -213,8 +210,8 @@ export default class FilterModel extends Observable {
         return;
       }
       this.runStatus = RemoteData.loading();
-      this.runStatus = await this.filterService.getRunStatus(this.runNumber);
       this.notify();
+      this.runStatus = await this.filterService.getRunStatus(this.runNumber);
       this.runStatus.match({
         Success: (res) => {
           if (res?.runStatus !== RunStatus.ONGOING) {
@@ -258,14 +255,5 @@ export default class FilterModel extends Observable {
       },
       Other: () => null,
     });
-  }
-
-  /**
-   * Validates if a run number is a valid number
-   * @param {string|number} runNumber - The run number to validate
-   * @returns {boolean} True if the run number is valid
-   */
-  isValidRunNumber(runNumber) {
-    return runNumber && !isNaN(Number(runNumber)) && Number.isInteger(Number(runNumber));
   }
 }

@@ -55,13 +55,4 @@ export const runModeCheckbox = (filterModel, viewModel) => {
       'Runs mode',
     ],
   );
-
-  // Button version (commented out):
-  // const buttonClass = value ? 'btn.btn-primary' : 'btn';
-  // return h('.flex-row.g1.items-center.justify-center', [
-  //   h(`button.${buttonClass}`, {
-  //     onclick: handleClick,
-  //     title: value ? 'Deactivate run mode' : 'Activate run mode',
-  //   }, 'Run mode'),
-  // ]);
 };
