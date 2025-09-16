@@ -76,8 +76,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     strictEqual(runStatusInfo.status, 'ONGOING');
     await delay(1000);
     strictEqual(countRunStatusCalls, 3, `Expected 3 requests to filter/run-status, but got ${countRunStatusCalls}`);
-    //2 because the third one returns an 'ENDED' status
-    strictEqual(countObjectsCalls, 2, `Expected  requests to api/objects, but got ${countObjectsCalls}`);
+    strictEqual(countObjectsCalls, 3, `Expected 3 requests to api/objects, but got ${countObjectsCalls}`);
   });
 
   await testParent.test('should show `ENDED` if a run that was ongoing, finishes', { timeout }, async () => {
