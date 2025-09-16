@@ -76,7 +76,7 @@ const filterSpecific = (model) => {
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const commonHeader = (model) => h('.flex-row.items-center.w-33', [
+const commonHeader = (model) => h('.flex-row.items-center', [
   loginButton(model),
   ' ',
   h('span.f4.gray', {
