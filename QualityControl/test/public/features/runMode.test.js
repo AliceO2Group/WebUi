@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, ok } from 'node:assert';
+import { strictEqual, ok, match } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 export const runModeTests = async (url, page, timeout = 5000, testParent) => {
   //
@@ -46,6 +46,8 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
   await testParent.test('should allow user to track a run', { timeout }, async () => {
     const urlRunStatus = '/api/filter/run-status/566138';
     const urlObjects = '/api/objects?inRunMode=true&filters[RunNumber]=566138';
+    const regex =
+      /^Last update: \d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}:\d{2} - As run is ONGOING, will refresh every 0.5 seconds$/;
     let countRunStatusCalls = 0;
     let countObjectsCalls = 0;
     page.on('request', (req) => {
@@ -70,10 +72,13 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     const runStatusInfo = await page.evaluate(() => {
       const runNumber = document.querySelector('#runNumber').textContent;
       const status = document.querySelector('#runStatus').textContent;
-      return { runNumber, status };
+      const lastUpdate = document.querySelector('#lastUpdate').textContent;
+      return { runNumber, status, lastUpdate };
     });
+    strictEqual(runStatusInfo.lastUpdate !== '', true, 'Last update should have a value');
     strictEqual(runStatusInfo.runNumber, 'Run #566138');
     strictEqual(runStatusInfo.status, 'ONGOING');
+    match(runStatusInfo.lastUpdate, regex);
     await delay(1000);
     strictEqual(countRunStatusCalls, 3, `Expected 3 requests to filter/run-status, but got ${countRunStatusCalls}`);
     strictEqual(countObjectsCalls, 3, `Expected 3 requests to api/objects, but got ${countObjectsCalls}`);
