@@ -128,7 +128,6 @@ const triggerFiltersButton = (onClickCallback, filterModel) => {
     title = 'Update filters';
   }
   const buttonId = isRunModeActivated ? 'updateAndRunModeButton' : 'triggerFilterButton';
-  const buttonText = isRunModeActivated ? 'Update & Run Mode' : 'Update';
 
   return h(
     'button.btn.btn-primary',
@@ -138,7 +137,7 @@ const triggerFiltersButton = (onClickCallback, filterModel) => {
       disabled: shouldDisable,
       title,
     },
-    buttonText,
+    'Update',
   );
 };
 
