@@ -111,6 +111,7 @@ class DeploymentController {
         workflowTemplate,
         user,
         shouldAutoTransition,
+        detectors,
       });
       res.status(201).json(environment);
     } catch (error) {
