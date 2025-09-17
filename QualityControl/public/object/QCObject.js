@@ -168,15 +168,15 @@ export default class QCObject extends BaseViewModel {
     this.notify();
   }
 
-  async checkIfRefreshIsNeeded() {
-    if (this.model.filterModel.runsModeInterval) {
-      const result = await this.model.services.object.getObjects(true);
-      if (result.isSuccess() && result.payload.paths.length === this.list.length) {
-        return { refreshNeeded: false, data: null };
-      }
-      return { refreshNeeded: true, data: result };
-    }
-    return { refreshNeeded: true, data: null };
+  /**
+   * Checks if the object list needs to be refreshed.
+   * @returns {Promise<{ refreshNeeded: boolean, data: object | null }>}
+   * whether a refresh is needed and the fetched data
+   */
+  async fetchAndValidateRefresh() {
+    const fetchFn = async () => await this.model.services.object.getObjects(true);
+    const validateFn = (result) => result.isSuccess() && result.payload.length === this.list.length;
+    return await this.model.filterModel.refreshCheck(fetchFn, validateFn);
   }
 
   /**
@@ -184,7 +184,7 @@ export default class QCObject extends BaseViewModel {
    * @returns {undefined}
    */
   async loadList() {
-    const { refreshNeeded, data } = await this.checkIfRefreshIsNeeded();
+    const { refreshNeeded, data } = await this.fetchAndValidateRefresh();
     if (!refreshNeeded) {
       return;
     }
@@ -192,10 +192,7 @@ export default class QCObject extends BaseViewModel {
     this.notify();
     this.queryingObjects = true;
     let offlineObjects = [];
-    let result = data;
-    if (!result) {
-      result = await this.model.services.object.getObjects(this.model.filterModel.isRunModeActivated);
-    }
+    const result = data ?? await this.model.services.object.getObjects(this.model.filterModel.isRunModeActivated);
     if (result.isSuccess()) {
       offlineObjects = this.model.filterModel.isRunModeActivated ? result.payload.paths : result.payload;
     } else {

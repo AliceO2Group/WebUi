@@ -331,10 +331,17 @@ export default class FilterModel extends Observable {
   }
 
   /**
-   * Gets the interval for the ongoing run.
-   * @returns {NodeJS.Timeout} Interval in miliseconds.
+   * Executes a generic check to determine if a refresh is required.
+   * @param {() => Promise<T>} fetchFn - Async function to fetch the data or object.
+   * @param {(RemoteData) => boolean} validateFn - Validates whether the fetched result means no refresh is needed.
+   * @returns {Promise<{ refreshNeeded: boolean, data: object | null }>}
    */
-  get runsModeInterval() {
-    return this._runsModeInterval;
+  async refreshCheck(fetchFn, validateFn) {
+    if (this._runsModeInterval) {
+      const data = await fetchFn();
+      const refreshNeeded = validateFn(data);
+      return { refreshNeeded, data };
+    }
+    return { refreshNeeded: true, data: null };
   }
 }
