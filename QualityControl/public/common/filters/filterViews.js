@@ -120,7 +120,6 @@ const triggerFiltersButton = (onClickCallback, filterModel) => {
   const shouldDisable = isRunModeActivated && !hasRunNumber;
 
   const buttonId = isRunModeActivated ? 'updateAndRunModeButton' : 'triggerFilterButton';
-  const buttonText = isRunModeActivated ? 'Update & Run Mode' : 'Update';
   const buttonTitle = isRunModeActivated ? 'Update filters and activate run mode' : 'Update filters';
 
   return h(
@@ -131,7 +130,7 @@ const triggerFiltersButton = (onClickCallback, filterModel) => {
       disabled: shouldDisable,
       title: shouldDisable ? 'Enter a run number to enable' : buttonTitle,
     },
-    buttonText,
+    'Update',
   );
 };
 
