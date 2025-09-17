@@ -172,10 +172,11 @@ export default class QCObject extends BaseViewModel {
     if (this.model.filterModel.runsModeInterval) {
       const result = await this.model.services.object.getObjects(true);
       if (result.isSuccess() && result.payload.paths.length === this.list.length) {
-        return false;
+        return { refreshNeeded: false, data: null };
       }
+      return { refreshNeeded: true, data: result };
     }
-    return true;
+    return { refreshNeeded: true, data: null };
   }
 
   /**
@@ -183,16 +184,18 @@ export default class QCObject extends BaseViewModel {
    * @returns {undefined}
    */
   async loadList() {
-    const shouldRefresh = await this.checkIfRefreshIsNeeded();
-    if (!shouldRefresh) {
+    const { refreshNeeded, data } = await this.checkIfRefreshIsNeeded();
+    if (!refreshNeeded) {
       return;
     }
     this.objectsRemote = RemoteData.loading();
     this.notify();
     this.queryingObjects = true;
     let offlineObjects = [];
-    const result = await this.model.services.object.getObjects(this.model.filterModel.isRunModeActivated);
-
+    let result = data;
+    if (!result) {
+      result = await this.model.services.object.getObjects(this.model.filterModel.isRunModeActivated);
+    }
     if (result.isSuccess()) {
       offlineObjects = this.model.filterModel.isRunModeActivated ? result.payload.paths : result.payload;
     } else {
