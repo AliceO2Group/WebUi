@@ -13,25 +13,106 @@
  */
 
 import { BaseViewModel } from '../../../common/abstracts/BaseViewModel.js';
-import { FilterModel } from '../FilterModel.js';
+import { createKeyValueFilter } from '../FilterTypes.js';
 
 /**
  * SearchFilter model to control the search and filter state
- * @param {Model} model - The the application model
+ * @import { Filter } from '../FilterTypes.js';
  */
 export default class SearchFilterModel extends BaseViewModel {
-  constructor(model) {
+  constructor() {
     super();
-    this.model = model;
+
+    /**
+     * filters storage map
+     * @type {Map<string,Filter>}
+     */
+    this.filters = new Map(); // key -> filter instance
     this.searchInput = '';
-    this.filterModel = new FilterModel;
-    this.filters = this.filterModel.getAll();
-    this.filterModel.observe(() => {
-      this.filters = this.filterModel.getAll();
-      console.log('Detected model change!!!!');
-      console.log(this.filterModel.get('objectPath').getValue());
-      console.log(this.filters);
+    this.register(createKeyValueFilter('objectPath', null));
+  }
+
+  /**
+   * register a filter object.
+   * @param {Filter} filter - Filter object to register.
+   * @returns {Filter} - Filter object that was registered.
+   */
+  register(filter) {
+    if (!filter?.key) {
+      throw new Error('Invalid filter');
+    }
+    if (this.filters.has(filter.key)) {
+      throw new Error(`Filter already registered: ${filter.key}`);
+    }
+    this.filters.set(filter.key, filter);
+    this.notify();
+    return filter;
+  }
+
+  // eslint-disable-next-line jsdoc/require-returns
+  /**
+   * unregisters a specified filter by key.
+   * @param {string} key - filter key.
+   */
+  unregister(key) {
+    const filter = this.get(key);
+    if (!filter) {
       return;
-    });
+    }
+    const result = this.filters.delete(key);
+    this.notify();
+    return result;
+  }
+
+  /**
+   * gets a specified filter object by filter.key
+   * @param {string} key - filter key.
+   * @returns {Filter} - Filter object
+   */
+  get(key) {
+    return this.filters.get(key);
+  }
+
+  /**
+   * gets all registered filters
+   * @returns {Array<Filter>} - Filter object that was registered.
+   */
+  getAll() {
+    return Array.from(this.filters.values());
+  }
+
+  /**
+   * set filter by key with specified value('s)
+   * @param {string} key - filter key.
+   * @param {any[]} args - value('s) to set.
+   * @returns {void} - void.
+   */
+  setValue(key, ...args) {
+    const filter = this.get(key);
+    if (!filter) {
+      throw new Error(`Unknown filter: ${key}`);
+    }
+    if (typeof filter.set !== 'function') {
+      // not a proper filter, we need the setter.
+      throw new Error(`Filter has no set method: ${key}`);
+    }
+    filter.set(...args);
+    this.notify();
+    return;
+  }
+
+  resetAll() {
+    this.allInActive();
+    for (const filter of this.filters.values()) {
+      if (typeof filter.reset === 'function') {
+        filter.reset();
+      }
+      this.notify();
+    }
+  }
+
+  allInActive() {
+    const activeCount = this.filters.values().filter((filter) => filter.isActive()).toArray().length;
+    return activeCount > 0 ? false : true;
   }
 }

@@ -19,7 +19,6 @@ import { h, popover, PopoverAnchors, PopoverTriggerPreConfiguration } from '/js/
 /**
  * imports for JSDoc + VSCode navigation:
  * @import SearchFilterModel from './model/SearchFilterModel.js';
- * @import { FilterModel } from './FilterModel.js';
  */
 
 /**
@@ -30,24 +29,18 @@ const filtersToggleTrigger = () => h('button#openFilterToggle.btn.btn.btn-primar
 
 /**
  * Create main header of the filters panel
- * @param {FilterModel} filterModel {@link FilterModel} filtering model.
+ * @param {SearchFilterModel} searchFilterModel {@link SearchFilterModel} filtering model.
  * @returns {Component} main panel header.
  */
-const filtersToggleContentHeader = (filterModel) => h('.flex-row.justify-between', [
+const filtersToggleContentHeader = (searchFilterModel) => h('.flex-row.justify-between', [
   h('.f4', 'Filters'),
   h(
     'button#reset-filters.btn.btn-danger',
     {
       onclick: () => {
-        console.log(filterModel.get('objectPath').getValue());
-        filterModel.resetAll();
-        console.log(filterModel.get('objectPath').getValue());
+        searchFilterModel.resetAll();
       },
-      // TODO fix check for active filters over filteringmodel.....
-      // ? filteringModel.resetFiltering()
-      // : filteringModel.reset(true),
-      //   disabled: !filteringModel.isAnyFilterActive(),
-      disabled: false,
+      disabled: searchFilterModel.allInActive() ? true : false,
     },
     'Reset all filters',
   ),
@@ -59,7 +52,7 @@ const filtersToggleContentHeader = (filterModel) => h('.flex-row.justify-between
  * @returns {Component} the filters section
  */
 export const filtersSection = (searchFilterModel = {}) => [
-  searchFilterModel.filters.flatMap((filter) => [
+  searchFilterModel.getAll().flatMap((filter) => [
     h('.flex-row.g2', [
       h('.w-30.f5.flex-row.items-center.g2', [filter.key]),
       h('.w-70', [
@@ -67,7 +60,7 @@ export const filtersSection = (searchFilterModel = {}) => [
           placeholder: 'Search',
           type: 'text',
           value: filter.getValue(),
-          onchange: (e) => searchFilterModel.filterModel.setValue(filter.key, e.target.value),
+          onchange: (e) => searchFilterModel.setValue(filter.key, e.target.value),
         }),
       ]),
     ]),
@@ -76,7 +69,7 @@ export const filtersSection = (searchFilterModel = {}) => [
 
 /**
  * Return the filters panel popover content (i.e. the actual filters)
- * @param {FilterModel} filterModel the filtering model
+ * @param {SearchFilterModel} searchFilterModel the filtering model
  * @param {object} [configuration] additional configuration
  * @param {string} [configuration.profile = profiles.none] profile which filters should be rendered @see Column
  * @returns {Component} the filters panel
@@ -85,13 +78,13 @@ const filtersToggleContent = (
   searchFilterModel,
   configuration = {},
 ) => h('.w-l.flex-column.p3.g3', [
-  filtersToggleContentHeader(searchFilterModel.filterModel),
+  filtersToggleContentHeader(searchFilterModel),
   filtersSection(searchFilterModel, configuration),
 ]);
 
 /**
  * Return component composed of the filtering popover and its button trigger
- * @param {FilterModel} filterModel the filtering model
+ * @param {SearchFilterModel} searchFilterModel the filtering model
  * @param {object} [configuration] optional configuration
  * @returns {Component} the filter component
  */

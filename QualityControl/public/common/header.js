@@ -46,9 +46,9 @@ export default (model) => h('.flex-col', [
  * @returns {vnode} - virtual node element
  */
 const headerSpecific = (model) => {
-  const { layoutListModel, filterModel, layout, object, page } = model;
+  const { filterModel, layout, object, page } = model;
   switch (page) {
-    case 'layoutList': return LayoutListHeader(layoutListModel);
+    case 'layoutList': return LayoutListHeader();
     case 'layoutShow': return layoutViewHeader(layout, filterModel);
     case 'objectTree': return objectTreeHeader(object, filterModel);
     case 'objectView': return objectViewHeader(model);

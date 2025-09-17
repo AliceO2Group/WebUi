@@ -16,6 +16,7 @@ import FolderModel, { FolderType } from '../../../folder/model/FolderModel.js';
 import LayoutCardModel from './LayoutCardModel.js';
 import { BaseViewModel } from '../../../common/abstracts/BaseViewModel.js';
 import { RequestFields } from '../../../common/RequestFields.enum.js';
+import SearchFilterModel from './SearchFilterModel.js';
 
 /**
  * LayoutListModel namespace to control the layoutCards spread between its folders
@@ -28,9 +29,10 @@ export default class LayoutListModel extends BaseViewModel {
   constructor(model) {
     super();
     this.model = model;
-    this._searchInput = '';
     this.folders = new Map();
-    // this.searchObjectPathMode = false;
+    this.searchFilterModel = new SearchFilterModel();
+    // Notify the root model to redraw.
+    this.searchFilterModel.observe(() => this.notify());
 
     this._initializeFolders();
   }
@@ -65,20 +67,12 @@ export default class LayoutListModel extends BaseViewModel {
    * @returns {string} The trimmed search input
    */
   get searchInput() {
-    return this._searchInput.trim();
+    return this.searchFilterModel.searchInput.trim();
   }
 
-  // set searchInput(value) {
-  //   this._searchInput = value;
-  // }
-
-  // /**
-  //  * Toggle objectPath search mode for layout searches in the search bar.
-  //  */
-  // toggleObjectPathSearchMode() {
-  //   this.searchObjectPathMode = !this.searchObjectPathMode;
-  //   this.notify();
-  // }
+  set searchInput(value) {
+    this.searchFilterModel.searchInput = value;
+  }
 
   /**
    * Set user's input for search and use a fuzzy algo to filter list of layouts.

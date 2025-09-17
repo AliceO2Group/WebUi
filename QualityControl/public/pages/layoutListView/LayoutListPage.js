@@ -14,59 +14,36 @@
 
 import FolderComponent from '../../folder/view/FolderComponent.js';
 import { h } from '/js/src/index.js';
-import SearchFilterModel from './model/SearchFilterModel.js';
-import { createKeyValueFilter } from './FilterTypes.js';
 import { filtersPanelPopover } from './filtersPanelPopover.js';
 
 /**
  * Shows a list of layouts grouped by user and more
- * @param {Array<FolderModel>} folderModels - LayoutListModel.folders: The Folders used by LayoutListModel
+ * @param {LayoutListModel} layoutListModel - LayoutListModel which contains the folders and searchfiltermodel.
  * @returns {vnode} - virtual node element
+ * @import LayoutListModel from './model/LayoutListModel.js';
  */
-export default (folderModels) => {
-  const searchFilterModel = new SearchFilterModel();
-  initializeSearchFilters(searchFilterModel.filterModel);
-
-  return [
-    h('.scroll-y.absolute-fill', [
-      h(
-        '.flex-row.text-right.m2',
-        [
-          filtersPanelPopover(searchFilterModel),
-          h(
-            'input.form-control.form-inline.mh1.w-33',
-            {
-              placeholder: 'Search',
-              type: 'text',
-              value: searchFilterModel.searchInput,
-              // switch to search(undefined, e.target.value) when searching for objectPath
-              // oninput: (e) => layoutListModel.search(undefined, e.target.value),
-              oninput: (e) => {
-                searchFilterModel.searchInput = e.target.value;
-              },
+export default (layoutListModel) => [
+  h('.scroll-y.absolute-fill', [
+    h(
+      '.flex-row.text-right.m2',
+      [
+        filtersPanelPopover(layoutListModel.searchFilterModel),
+        h(
+          'input.form-control.form-inline.mh1.w-33',
+          {
+            placeholder: 'Search',
+            type: 'text',
+            value: layoutListModel.searchFilterModel.searchInput,
+            oninput: (e) => {
+              layoutListModel.search(e.target.value);
             },
-          ),
-        ],
-      ),
+          },
+        ),
+      ],
+    ),
 
-      h('', {
-        style: 'display: flex; flex-direction: column',
-      }, Array.from(folderModels.values()).map(FolderComponent)),
-    ]),
-  ];
-};
-
-/**
- * Initializes the filterModel model.
- * @param {import('./FilterModel.js').FilterModel} filterModel - filterModel of the searchFilterModel.
- */
-function initializeSearchFilters(filterModel) {
-  console.log(filterModel.register(createKeyValueFilter('objectPath', 'abc')));
-
-  // TESTFUNCJASP(filterModel);
-  return;
-}
-
-// function TESTFUNCJASP(filterModel) {
-//   // filterModel.setValue('objectPath', 'test');
-// }
+    h('', {
+      style: 'display: flex; flex-direction: column',
+    }, Array.from(layoutListModel.folders.values()).map(FolderComponent)),
+  ]),
+];
