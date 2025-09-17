@@ -65,6 +65,24 @@ export default class ObjectViewModel extends BaseViewModel {
   }
 
   /**
+   * Checks if the object list needs to be refreshed.
+   * @param params
+   * @param id
+   * @param validFrom
+   * @returns {Promise<{ refreshNeeded: boolean, data: object | null }>}
+   * whether a refresh is needed and the fetched data
+   */
+  async fetchAndValidateRefresh(params, id, validFrom) {
+    const fetchFn = async () => params.objectName
+      ? await this.model.services.object.getObjectByName(params.objectName, id, validFrom, this, true)
+      : await this.model.services.object.getObjectById(params.objectId, id, validFrom, this, true);
+    const validateFn = (objectToSelect) =>
+      objectToSelect.isSuccess() &&
+      objectToSelect.payload.id === this.selected.payload.id;
+    return this.model.filterModel.refreshCheck(fetchFn, validateFn);
+  }
+
+  /**
    * Updates the selected object from ObjectViewModel
    * @param {object} object - object with name or id to be used for content retrieval
    * @param {number} validFrom - timestamp in ms for a specific object
@@ -74,6 +92,10 @@ export default class ObjectViewModel extends BaseViewModel {
   async updateObjectSelection(object, validFrom = undefined, id = '') {
     const { objectName = undefined, objectId = undefined } = object;
     const { params } = this.model.router;
+    const { refreshNeeded, data } = await this.checkIfRefreshNeeded(params, id, validFrom);
+    if (!refreshNeeded) {
+      return;
+    }
 
     if (!objectName && !objectId && !params.objectId && !params.objectName && !this.selected.isSuccess()) {
       return; // This will permanently put the page in loading mode.
@@ -83,7 +105,7 @@ export default class ObjectViewModel extends BaseViewModel {
     this.notify();
 
     let currentParams = '?page=objectView';
-    this.selected = params.objectName
+    this.selected = data ?? params.objectName
       ? await this.model.services.object.getObjectByName(params.objectName, id, validFrom, this)
       : await this.model.services.object.getObjectById(params.objectId, id, validFrom, this);
 
