@@ -25,12 +25,10 @@ import { h } from '/js/src/index.js';
  * @returns {vnode} The element representing the run status panel.
  */
 export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate = 15000 }) => {
-  const formatDateTime = (dateStr) => {
-    const date = new Date(dateStr);
-    const pad = (n) => String(n).padStart(2, '0');
-    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ` +
-           `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-  };
+  const formatDateTime = (dateStr) =>
+    new Date(dateStr).toLocaleString('en-GB'); // dd/mm/yyyy, hh:mm:ss
+
+  const formattedDate = formatDateTime(lastRefresh);
 
   return runStatus.match({
     Loading: () =>
@@ -43,16 +41,8 @@ export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate 
       ]),
 
     Success: (res) => {
-      const formattedDate = formatDateTime(lastRefresh);
-      const el = document.getElementById('lastUpdate');
-
-      if (el && !el.textContent.includes(formattedDate)) {
-        el.classList.remove('highlight');
-        void el.offsetWidth;
-        el.classList.add('highlight');
-      }
       const timestampEl = h(
-        'span.f7.gray-darker.text-center',
+        'span.f7.gray-darker.text-center.highlight',
         { id: 'lastUpdate' },
         `Last update: ${formattedDate} ${res?.runStatus === RunStatus.ONGOING
           ? `- As run is ONGOING, will refresh every ${refreshRate / 1000} seconds`
