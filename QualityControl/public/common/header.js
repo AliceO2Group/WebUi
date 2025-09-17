@@ -31,7 +31,7 @@ import { filtersPanel } from './filters/filterViews.js';
  * @returns {vnode} - header element
  */
 export default (model) => h('.flex-col', [
-  h('.flex-row.p2.items-center', { id: 'qcg-header' }, [
+  h('.flex-row.p2.items-center.flex-wrap', { id: 'qcg-header' }, [
     h('div.w-33', commonHeader(model)),
     h('div.flex-grow.flex-row', headerSpecific(model)),
   ]),

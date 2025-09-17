@@ -33,12 +33,12 @@ export default function objectTreeHeader(qcObject, filterModel) {
     : `${qcObject.currentList.length} items`;
 
   return [
-    h('.w-33.text-center.flex-grow.flex-row.justify-center.items-center', [
+    h('.w-50.text-center.flex-row.justify-center.items-center.flex-wrap', [
       h('b.f4', 'Objects'),
       ' ',
       qcObject.objectsRemote.isSuccess() && h('span', `(${howMany})`),
     ]),
-    h('.flex-row.items-center.g2.justify-end', [
+    h('.flex-row.flex-grow.items-center.g2.justify-end.flex-wrap', [
       filterModel.isRunModeActivated ? null : filterPanelToggleButton(filterModel),
       ' ',
       h('.dropdown', {
