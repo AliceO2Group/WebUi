@@ -86,7 +86,7 @@ export const LayoutsGetDto = Joi.object({
   owner_id: Joi.number().integer().optional(),
   name: Joi.string().optional(),
   filter: Joi.object({
-    objectPathPrefix: ObjectPathRegexDto,
+    objectPath: ObjectPathRegexDto,
   }).optional(),
   token: Joi.string().required(),
   fields: Joi.string()

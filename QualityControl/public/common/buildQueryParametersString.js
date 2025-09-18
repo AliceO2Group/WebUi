@@ -15,9 +15,9 @@
 /**
  * Given an existing object of used parameters and new ones to add/update, return a string with desired URL format
  * @example
- * { page: 'test', filter: { name: 'mylayout', objectPathPrefix: 'test' } }
+ * { page: 'test', filter: { name: 'mylayout', objectPath: 'test' } }
  * results in:
- * ?page=test&filter[name]=mylayout&filter[objectPathPrefix]=test
+ * ?page=test&filter[name]=mylayout&filter[objectPath]=test
  * @param {object} currentParameters - current parameters in the URL
  * @param {object} parameters - object containing what parameters should be added or updated
  * @returns {string} - updated URL

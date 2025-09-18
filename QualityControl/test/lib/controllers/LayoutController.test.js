@@ -148,12 +148,12 @@ export const layoutControllerTestSuite = async () => {
       ok(responseArg.message === 'Invalid query parameters: "token" is required', 'Error message incorrect');
     });
 
-    test('should return 400 when filter.objectPathPrefix contains an invalid type, number', async () => {
+    test('should return 400 when filter.objectPath contains an invalid type, number', async () => {
       const jsonStub = sinon.createStubInstance(LayoutRepository);
       const req = {
         query: {
           filter: {
-            objectPathPrefix: 12345,
+            objectPath: 12345,
           },
           token: 'fasdfsdfa',
         },
@@ -172,7 +172,7 @@ export const layoutControllerTestSuite = async () => {
       }), 'Error message was incorrect');
     });
 
-    test('should return layouts when filter.objectPathPrefix contains a valid value', async () => {
+    test('should return layouts when filter.objectPath contains a valid value', async () => {
       const response = [
         { user_id: 1, name: 'somelayout' },
         { user_id: 2, name: 'somelayout2' },
@@ -184,7 +184,7 @@ export const layoutControllerTestSuite = async () => {
       const req = {
         query: {
           filter: {
-            objectPathPrefix: 'qc/CPV/MO/NoiseOnFLP/BadChannelMapM2',
+            objectPath: 'qc/CPV/MO/NoiseOnFLP/BadChannelMapM2',
           },
           token: 'fasdfsdfa',
         },
@@ -197,7 +197,7 @@ export const layoutControllerTestSuite = async () => {
       ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
     });
 
-    test('should return layouts when filter.objectPathPrefix contains a valid value, minus character', async () => {
+    test('should return layouts when filter.objectPath contains a valid value, minus character', async () => {
       const response = [
         { user_id: 1, name: 'somelayout' },
         { user_id: 2, name: 'somelayout2' },
@@ -209,7 +209,7 @@ export const layoutControllerTestSuite = async () => {
       const req = {
         query: {
           filter: {
-            objectPathPrefix: 'qc/CPV/MO/NoiseOn-FLP/BadChannelMapM2',
+            objectPath: 'qc/CPV/MO/NoiseOn-FLP/BadChannelMapM2',
           },
           token: 'fasdfsdfa',
         },
@@ -222,7 +222,7 @@ export const layoutControllerTestSuite = async () => {
       ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
     });
 
-    test('should return layouts when filter is present but contains no objectPathPrefix', async () => {
+    test('should return layouts when filter is present but contains no objectPath', async () => {
       const response = [
         { user_id: 1, name: 'somelayout' },
         { user_id: 2, name: 'somelayout2' },
@@ -245,12 +245,12 @@ export const layoutControllerTestSuite = async () => {
       ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
     });
 
-    test('should return 400 when filter.objectPathPrefix contains an invalid character: #', async () => {
+    test('should return 400 when filter.objectPath contains an invalid character: #', async () => {
       const jsonStub = sinon.createStubInstance(LayoutRepository);
       const req = {
         query: {
           filter: {
-            objectPathPrefix: 'qc/CPV/MO/Noise#OnFLP/BadChannelMapM2',
+            objectPath: 'qc/CPV/MO/Noise#OnFLP/BadChannelMapM2',
           },
           token: 'fasdfsdfa',
         },

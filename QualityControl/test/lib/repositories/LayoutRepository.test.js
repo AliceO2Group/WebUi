@@ -68,28 +68,28 @@ export const layoutRepositoryTest = async () => {
         );
       });
 
-      test('should return only layout with specified filter.objectPathPrefix', () => {
-        const objectPathPrefix = 'qc/MCH/QO/DataDecodingCheck';
+      test('should return only layout with specified filter.objectPath', () => {
+        const objectPath = 'qc/MCH/QO/DataDecodingCheck';
         const result = layoutRepository.listLayouts({ filter: {
-          objectPathPrefix,
+          objectPath,
         } });
-        ok(result.length === 1, "listLayouts's filter.objectPathPrefix should only return one layout");
+        ok(result.length === 1, "listLayouts's filter.objectPath should only return one layout");
       });
 
-      test('should return layouts with specified partial filter.objectPathPrefix', () => {
-        const objectPathPrefix = '/1';
+      test('should return layouts with specified partial filter.objectPath', () => {
+        const objectPath = '/1';
         const result = layoutRepository.listLayouts({ filter: {
-          objectPathPrefix,
+          objectPath,
         } });
-        ok(result.length === 2, "listLayouts's filter.objectPathPrefix should only return 2 layouts");
+        ok(result.length === 2, "listLayouts's filter.objectPath should only return 2 layouts");
       });
 
-      test('should return all layouts when filter.objectPathPrefix is empty string', () => {
-        const objectPathPrefix = '';
+      test('should return all layouts when filter.objectPath is empty string', () => {
+        const objectPath = '';
         const result = layoutRepository.listLayouts({ filter: {
-          objectPathPrefix,
+          objectPath,
         } });
-        ok(result.length === 3, "listLayouts's filter.objectPathPrefix should only return 3 (all) layouts");
+        ok(result.length === 3, "listLayouts's filter.objectPath should only return 3 (all) layouts");
       });
 
       test('should return all layouts when filter is an empty object', () => {

@@ -48,11 +48,11 @@ export class LayoutRepository extends BaseRepository {
    * @param {object} filter - Filtering object
    * @param {number} [filter.owner_id] - owner id to filter by
    * @param {string} [filter.name] - name to filter by
-   * @param {string} [filter.objectPathPrefix] - object path prefix for potential objects to be contained by layout
+   * @param {string} [filter.objectPath] - object path prefix for potential objects to be contained by layout
    * @returns {Array<object>} Filtered layouts.
    */
-  _filterLayouts(layouts, { owner_id, name, objectPathPrefix } = {}) {
-    const objectPathLowerCase = objectPathPrefix?.toLowerCase();
+  _filterLayouts(layouts, { owner_id, name, objectPath } = {}) {
+    const objectPathLowerCase = objectPath?.toLowerCase();
     return layouts.filter((layout) => {
       if (owner_id !== undefined && layout.owner_id !== owner_id) {
         return false;
