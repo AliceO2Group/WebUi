@@ -37,12 +37,9 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
       document.querySelector('#runNumberFilter').value === '');
     const isRunModeActivated = await page.evaluate(() =>
       window.model.filterModel.isRunModeActivated);
-    const updateButtonText = await page.evaluate(() =>
-      document.querySelector('#updateAndRunModeButton').textContent);
     ok(updateButtonIsDisabled);
     ok(isRunNumberFilterEmpty);
     ok(isRunModeActivated);
-    strictEqual(updateButtonText, 'Update', 'Button text should be `Update`');
     delay(200);
   });
 

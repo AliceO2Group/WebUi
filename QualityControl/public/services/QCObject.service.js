@@ -75,7 +75,10 @@ export default class QCObjectService {
 
     try {
       // `/api/object?path=${objectName}&timestamp=${timestamp}&filter=${filter}`
-      const url = this._buildURL(`/api/object?path=${objectName}`, id, validFrom, this.filterModel.filterMap);
+      const filters = this.filterModel.isRunModeActivated
+        ? { RunNumber: this.filterModel.runNumber }
+        : this.filterModel.filterMap;
+      const url = this._buildURL(`/api/object?path=${objectName}`, id, validFrom, filters);
       const { result, ok } = await this.model.loader.get(url);
       if (ok) {
         result.qcObject = {
@@ -180,7 +183,7 @@ export default class QCObjectService {
       `/api/objects?${inRunMode ? 'inRunMode=true' : ''}`,
       undefined,
       undefined,
-      filters,
+      inRunMode ? { RunNumber: this.filterModel.runNumber } : this.filterModel.filterMap,
       fields,
     );
     const { result, ok } = await this.model.loader.get(url);
