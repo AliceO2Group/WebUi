@@ -118,6 +118,7 @@ export default class FilterModel extends Observable {
       this.runStatus = RemoteData.loading();
       this.notify();
       this.runStatus = await this.filterService.getRunStatus(this.runNumber);
+      this.notify();
       this._manageRunsModeInterval(baseViewModel);
     }
     baseViewModel.triggerFilter();
@@ -212,6 +213,7 @@ export default class FilterModel extends Observable {
       this.runStatus = RemoteData.loading();
       this.notify();
       this.runStatus = await this.filterService.getRunStatus(this.runNumber);
+      this.notify();
       this.runStatus.match({
         Success: (res) => {
           if (res?.runStatus !== RunStatus.ONGOING) {
