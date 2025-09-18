@@ -16,6 +16,7 @@ import { jsonDelete } from './utils/jsonDelete.js';
 import { jsonPatch } from './utils/jsonPatch.js';
 import { jsonPut } from './utils/jsonPut.js';
 import { RemoteData } from '/js/src/index.js';
+import { buildQueryParametersString } from '../common/buildQueryParametersString.js';
 
 /**
  * Model namespace with all CRUD requests for layouts
@@ -34,21 +35,25 @@ export default class LayoutService {
 
     this.list = RemoteData.notAsked(); // List of all existing layouts in QCG;
     this.userList = RemoteData.notAsked(); // List of layouts owned by current user;
-    this.filterList = RemoteData.notAsked(); // List of all layouts filtered by filter object;
   }
 
   /**
    * Method to get all layouts shared between users
-   * @param {string|undefined} fields - comma seperated string values. Represent the fields that should be fetched.
+   * @param {string|undefined} fields - comma separated string values. Represent the fields that should be fetched.
+   * @param {object|undefined} filter - filter information to be parsed by the backend.
    * If left empty all available fields will be fetched
    * @param {Class<Observable>} that - Observer requesting data that should be notified of changes
    * @returns {undefined}
    */
-  async getLayouts(fields = undefined, that = this.model) {
+  async getLayouts(fields = undefined, filter = {}, that = this.model) {
     this.list = RemoteData.loading();
     that.notify();
 
-    const url = `/api/layouts${fields !== undefined ? `?fields=${fields}` : ''}`;
+    const queryString = buildQueryParametersString({}, {
+      ...fields !== undefined ? { fields } : {},
+      filter,
+    });
+    const url = `/api/layouts${queryString}`;
     const { result, ok } = await this.loader.get(url);
 
     if (ok) {
@@ -97,44 +102,6 @@ export default class LayoutService {
       }
     }
 
-    that.notify();
-  }
-
-  /**
-   * Method to get all layouts by a given filter object
-   * Only one type of filter condition exists right now, filter.objectPath.
-   * Check the controller: 'QualityControl/lib/dtos/LayoutDto.js' line 88
-   * for more future filter options.
-   * @param {string|undefined} fields - comma seperated string values. Represent the fields that should be fetched.
-   * If left empty all available fields will be fetched
-   * @param {object} filter - filter information to be parsed by the backend.
-   * @param {Class<Observable>} that - Observer requesting data that should be notified of changes
-   * @returns {undefined}
-   */
-  async getLayoutsByFilter(fields = undefined, filter = undefined, that = this.model) {
-    this.filterList = RemoteData.loading();
-    that.notify();
-    if (filter !== undefined) {
-      const filterSearchParam = new URLSearchParams();
-      if (fields !== undefined) {
-        filterSearchParam.append('fields', fields);
-      }
-
-      filterSearchParam.append('filter', JSON.stringify(filter));
-      filter.objectPath = filter.objectPath.trim();
-      const url = `/api/layouts?${filterSearchParam.size > 0 ? `${filterSearchParam.toString()}` : ''}`;
-
-      const { result, ok } = await this.loader.get(url);
-      if (ok) {
-        const sortedLayouts = result.sort(this._compareByName);
-        // My layouts/userlist or should this be about all layouts?
-        this.filterList = RemoteData.success(sortedLayouts);
-      } else {
-        this.filterList = RemoteData.failure(result.error || result.message);
-      }
-    } else {
-      this.filterList = RemoteData.failure('Filter is not defined');
-    }
     that.notify();
   }
 
