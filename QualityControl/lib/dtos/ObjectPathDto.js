@@ -14,4 +14,4 @@
 
 import Joi from 'joi';
 
-export const ObjectPathRegexDto = Joi.string().pattern(/^[A-Za-z0-9_\-/]+$/).optional().max(100).label('Object path');
+export const ObjectPathDto = Joi.string().pattern(/^[A-Za-z0-9_\-/]+$/).optional().max(100).label('Object path');
