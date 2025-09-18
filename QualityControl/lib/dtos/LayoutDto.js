@@ -13,7 +13,7 @@
  */
 
 import Joi from 'joi';
-import { ObjectPathDto } from './ObjectPathDto.js';
+import { ObjectPathRegexDto } from './ObjectPathRegexDto.js';
 
 const ALLOWED_LAYOUT_FIELDS = [
   'isOfficial',
@@ -86,7 +86,7 @@ export const LayoutsGetDto = Joi.object({
   owner_id: Joi.number().integer().optional(),
   name: Joi.string().optional(),
   filter: Joi.object({
-    objectPath: ObjectPathDto,
+    objectPathPrefix: ObjectPathRegexDto,
   }).optional(),
   token: Joi.string().required(),
   fields: Joi.string()
