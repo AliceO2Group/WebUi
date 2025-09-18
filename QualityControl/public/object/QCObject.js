@@ -173,10 +173,31 @@ export default class QCObject extends BaseViewModel {
    * @returns {Promise<{ refreshNeeded: boolean, data: object | null }>}
    * whether a refresh is needed and the fetched data
    */
-  async fetchAndValidateRefresh() {
+  async checkIfThereAreNewObjects() {
     const fetchFn = async () => await this.model.services.object.getObjects(true);
-    const validateFn = (result) => result.isSuccess() && result.payload.length === this.list.length;
+    const validateFn = (result) => {
+      result.isSuccess() && result.payload.length !== this.list.length;
+    };
     return await this.model.filterModel.refreshCheck(fetchFn, validateFn);
+  }
+
+  async refreshSelectedObjectIfNeeded() {
+    const fetchFn = async () =>
+      await this.model.services.object.getObjectByName(this.selected.name, undefined, undefined, this);
+    const validateFn = (result) => {
+      if (!result.isSuccess()) {
+        return true; //force refresh if it fails
+      }
+      const newObject = result.payload;
+      return newObject.id !== this.objects[this.selected.name]?.payload?.id;
+    };
+    const { refreshNeeded, data } = await this.model.filterModel.refreshCheck(fetchFn, validateFn);
+    if (refreshNeeded) {
+      const updatedObject = data ?? await fetchFn();
+      if (updatedObject.isSuccess()) {
+        this.select(updatedObject.payload);
+      }
+    }
   }
 
   /**
@@ -184,7 +205,7 @@ export default class QCObject extends BaseViewModel {
    * @returns {undefined}
    */
   async loadList() {
-    const { refreshNeeded, data } = await this.fetchAndValidateRefresh();
+    const { refreshNeeded, data } = await this.checkIfThereAreNewObjects();
     if (!refreshNeeded) {
       return;
     }
@@ -552,10 +573,14 @@ export default class QCObject extends BaseViewModel {
    * @returns {undefined}
    */
   async triggerFilter() {
-    // don't clear selected object refreshing in run mode
-    if (!this.model.filterModel.isRunModeActivated) {
-      this.selected = null;
+    if (this.selected && this.selected.name) {
+      await this.refreshSelectedObjectIfNeeded();
+    } else {
+      if (!this.model.filterModel.isRunModeActivated) {
+        this.selected = null;
+        this.notify();
+      }
+      this.loadList();
     }
-    this.loadList();
   }
 }
