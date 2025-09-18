@@ -64,15 +64,6 @@ export class LayoutController {
     let filter = undefined;
 
     try {
-      if (req.query.filter !== undefined) {
-        // Attempt filter JSON parse
-        try {
-          req.query.filter = JSON.parse(req.query.filter);
-        } catch {
-          logger.errorMessage('Error validating query parameters: following'
-          + ` JSON parse failed: ${req.query.filter}`);
-        }
-      }
       const validated = await LayoutsGetDto.validateAsync(req.query);
       ({ fields, owner_id, filter } = validated);
     } catch (error) {
@@ -85,7 +76,7 @@ export class LayoutController {
     }
 
     try {
-      const layouts = await this._layoutRepository.listLayouts({ owner_id, fields, filter });
+      const layouts = await this._layoutRepository.listLayouts({ fields, filter: { ...filter, owner_id } });
       return res.status(200).json(layouts);
     } catch (error) {
       logger.errorMessage(`Error retrieving layouts: ${error}`);
