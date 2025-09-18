@@ -35,7 +35,6 @@ export default class LayoutService {
 
     this.list = RemoteData.notAsked(); // List of all existing layouts in QCG;
     this.userList = RemoteData.notAsked(); // List of layouts owned by current user;
-    this.filterList = RemoteData.notAsked(); // List of all layouts filtered by filter object;
   }
 
   /**
@@ -111,14 +110,15 @@ export default class LayoutService {
    * Only one type of filter condition exists right now, filter.objectPath.
    * Check the controller: 'QualityControl/lib/dtos/LayoutDto.js' line 88
    * for more future filter options.
+   * @param {string} userId - user id for which to query layouts
    * @param {string|undefined} fields - comma seperated string values. Represent the fields that should be fetched.
    * If left empty all available fields will be fetched
    * @param {object} filter - filter information to be parsed by the backend.
    * @param {Class<Observable>} that - Observer requesting data that should be notified of changes
    * @returns {undefined}
    */
-  async getLayoutsByFilter(fields = undefined, filter = undefined, that = this.model) {
-    this.filterList = RemoteData.loading();
+  async getLayoutsByFilter(userId = undefined, fields = undefined, filter = undefined, that = this.model) {
+    this.list = RemoteData.loading();
     that.notify();
     if (filter !== undefined) {
       const filterSearchParam = new URLSearchParams();
@@ -134,13 +134,19 @@ export default class LayoutService {
       if (ok) {
         const sortedLayouts = result.sort(this._compareByName);
         // My layouts/userlist or should this be about all layouts?
-        this.filterList = RemoteData.success(sortedLayouts);
+        this.list = RemoteData.success(sortedLayouts);
       } else {
-        this.filterList = RemoteData.failure(result.error || result.message);
+        this.list = RemoteData.failure(result.error || result.message);
       }
     } else {
-      this.filterList = RemoteData.failure('Filter is not defined');
+      this.list = RemoteData.failure('Filter is not defined');
     }
+    //unpack remote-data/filter, repack and set
+    const unpacked =
+    this.list._payload.filter((layout) => layout.owner_id === userId);
+    this.userList = RemoteData.success(unpacked);
+    this.model.layoutListModel.folders.get('My Layouts').list = this.userList;
+    this.model.layoutListModel.folders.get('All Layouts').list = this.list;
     that.notify();
   }
 
