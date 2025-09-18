@@ -102,7 +102,7 @@ export const layoutControllerTestSuite = async () => {
       ok(res.status.calledWith(200), 'Response status was not 200');
       ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
       ok(
-        jsonStub.listLayouts.calledWith({ owner_id: undefined, fields, filter: undefined }),
+        jsonStub.listLayouts.calledWith({ fields, filter: { owner_id: undefined } }),
         'Fields were not passed correctly',
       );
     });
@@ -123,7 +123,7 @@ export const layoutControllerTestSuite = async () => {
       ok(res.status.calledWith(200), 'Response status was not 200');
       ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
       ok(
-        jsonStub.listLayouts.calledWith({ owner_id: 1, fields: [fields], filter: undefined }),
+        jsonStub.listLayouts.calledWith({ fields: [fields], filter: { owner_id: 1 } }),
         'Owner id was not used in data connector call',
       );
     });
