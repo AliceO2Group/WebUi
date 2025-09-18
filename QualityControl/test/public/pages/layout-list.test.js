@@ -38,6 +38,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   const cardOfficialButtonPath = (cardPath) => `${cardPath} > .cardHeader > button`;
 
   const filterPath = 'section > div > div:nth-child(1) > input';
+  const filterObjectPath = 'input.form-control:nth-child(1)';
 
   await testParent.test('should successfully load layoutList page "/"', { timeout }, async () => {
     await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
@@ -178,11 +179,46 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(officialLayoutCard, true, 'The official layout folder should have had a card added in previous test');
   });
 
+  await testParent.test('should have a folder with one card after object path filtering', async () => {
+    const preFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
+    strictEqual(preFilterCardCount, 2);
+    await page.locator('#openFilterToggle').click();
+    await delay(100);
+    await page.locator(filterObjectPath).fill('qc/MCH/QO/');
+    await page.locator('#openFilterToggle').click();
+    await delay(100);
+    const postFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
+    strictEqual(postFilterCardCount, 1);
+  });
+
+  await testParent.test('should have a folder with 1 card after object path filtering + regular search', async () => {
+    // reset page, thus reset filter/search.
+    await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
+    await delay(100);
+    await page.locator('div.m2:nth-child(3) > div:nth-child(1)').click();
+    await delay(100);
+    const preFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
+    strictEqual(preFilterCardCount, 5);
+    await page.locator('#openFilterToggle').click();
+    await delay(100);
+    await page.locator(filterObjectPath).fill('object');
+    await page.locator('#openFilterToggle').click();
+    await delay(100);
+    let postFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
+    strictEqual(postFilterCardCount, 3);
+    await page.locator(filterPath).fill('pdpBeamType');
+    await delay(100);
+    postFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
+    strictEqual(postFilterCardCount, 1);
+  });
+
   await testParent.test('should have a folder with one card after filtering', async () => {
+    // reset page, thus reset filter/search.
+    await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
+    await delay(100);
     const preFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
     strictEqual(preFilterCardCount, 2);
     await page.locator(filterPath).fill('a');
-
     await delay(100);
     const postFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
     strictEqual(postFilterCardCount, 1);
