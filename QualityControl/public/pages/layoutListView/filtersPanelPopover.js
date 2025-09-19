@@ -70,16 +70,11 @@ export const filtersSection = (searchFilterModel = {}) => [
 /**
  * Return the filters panel popover content (i.e. the actual filters)
  * @param {SearchFilterModel} searchFilterModel the filtering model
- * @param {object} [configuration] additional configuration
- * @param {string} [configuration.profile = profiles.none] profile which filters should be rendered @see Column
  * @returns {Component} the filters panel
  */
-const filtersToggleContent = (
-  searchFilterModel,
-  configuration = {},
-) => h('.w-l.flex-column.p3.g3', [
+const filtersToggleContent = (searchFilterModel) => h('.w-l.flex-column.p3.g3', [
   filtersToggleContentHeader(searchFilterModel),
-  filtersSection(searchFilterModel, configuration),
+  filtersSection(searchFilterModel),
 ]);
 
 /**
