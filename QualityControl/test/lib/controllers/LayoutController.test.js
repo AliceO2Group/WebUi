@@ -61,6 +61,7 @@ export const layoutControllerTestSuite = async () => {
         title: 'Unknown Error',
       }), 'Error message was incorrect');
     });
+
     test('should log error when non-Joi validation error occurs', async () => {
       const response = [{ id: 5, name: 'somelayout' }];
       const jsonStub = sinon.createStubInstance(LayoutRepository, {
@@ -101,7 +102,7 @@ export const layoutControllerTestSuite = async () => {
       ok(res.status.calledWith(200), 'Response status was not 200');
       ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
       ok(
-        jsonStub.listLayouts.calledWith({ owner_id: undefined, fields, filter: undefined }),
+        jsonStub.listLayouts.calledWith({ fields, filter: { owner_id: undefined } }),
         'Fields were not passed correctly',
       );
     });
@@ -122,7 +123,7 @@ export const layoutControllerTestSuite = async () => {
       ok(res.status.calledWith(200), 'Response status was not 200');
       ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
       ok(
-        jsonStub.listLayouts.calledWith({ owner_id: 1, fields: [fields], filter: undefined }),
+        jsonStub.listLayouts.calledWith({ fields: [fields], filter: { owner_id: 1 } }),
         'Owner id was not used in data connector call',
       );
     });
@@ -244,7 +245,7 @@ export const layoutControllerTestSuite = async () => {
       ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
     });
 
-    test('should return 400 when filter.objectPath contain an invalid character: #', async () => {
+    test('should return 400 when filter.objectPath contains an invalid character: #', async () => {
       const jsonStub = sinon.createStubInstance(LayoutRepository);
       const req = {
         query: {
