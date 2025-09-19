@@ -36,7 +36,7 @@ export const runStatusPanel = (runNumber, status) =>
         h('div.flex-row.g1', [
           h('span', 'Status: '),
           h(
-            `b.color-${
+            `b.${
               res?.runStatus === 'ONGOING' ? 'success' : 'gray'
             }`,
             {
