@@ -62,6 +62,8 @@ export function filtersPanel(filterModel, viewModel) {
     runNumber,
     runStatus,
     isVisible,
+    lastRefresh,
+    ONGOING_RUN_INTERVAL_MS: refreshRate,
   } = filterModel;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
@@ -84,10 +86,7 @@ export function filtersPanel(filterModel, viewModel) {
         ...filtersList.map((filter) =>
           createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
       ]),
-      isRunModeActivated && runStatusPanel(
-        runNumber,
-        runStatus,
-      ),
+      isRunModeActivated && runStatusPanel({ runNumber, runStatus, lastRefresh, refreshRate }),
     ],
   );
 };

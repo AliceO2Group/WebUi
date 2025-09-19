@@ -43,12 +43,11 @@ const toolbarViewMode = (layout, filterModel) => {
   const layoutItem = layout.item;
   const { isOfficial, owner_id, name } = layoutItem;
 
-  return [
-    h('.flex-grow.text-center', h('.header-layout', [tabViewLinks(layoutItem, layout)])),
-    h('.flex-grow.text-right', [
+  return {
+    centerCol: h('.flex-grow.text-center', [h('.header-layout', [tabViewLinks(layoutItem, layout)])]),
+    rightCol: h('.w-33.text-right.g2.flex-row.justify-end', [
       h('b.f4.items-center', [isOfficial ? iconBadge() : '', layoutItem.name]),
       ' ',
-      // Show group button edit/duplicate only for owner of the layout shown
       h('.btn-group', [
         filterPanelToggleButton(filterModel),
         newLayoutButton(layout),
@@ -56,7 +55,7 @@ const toolbarViewMode = (layout, filterModel) => {
         layout.ownsLayout(owner_id) && [editDropdown(layout), deleteButton(layout)],
       ]),
     ]),
-  ];
+  };
 };
 
 /**
@@ -92,8 +91,8 @@ const toolbarEditMode = (layout, filterModel) => {
     layout.item.name = e.target.value.trim();
   };
 
-  return [
-    h('.w-50.text-center', [
+  return {
+    centerCol: h('.flex-grow.text-center', [
       h('div', { class: 'header-layout' }, [
         h('span', editTabLinks(layout)),
         h('.btn-group', [
@@ -110,7 +109,7 @@ const toolbarEditMode = (layout, filterModel) => {
         ]),
       ]),
     ]),
-    h('.text-right.flex-grow', [
+    rightCol: h('.w-33.text-right.flex-row.justify-end', [
       h('input.form-control.form-inline', {
         type: 'text',
         value: layout.item.name,
@@ -122,7 +121,7 @@ const toolbarEditMode = (layout, filterModel) => {
         cancelButton(layout),
       ]),
     ]),
-  ];
+  };
 };
 
 /**
