@@ -12,6 +12,7 @@
  */
 
 import { RunStatus } from '../../../../../library/runStatus.enum.js';
+import { spinner } from '../../spinner.js';
 import { h } from '/js/src/index.js';
 
 /**
@@ -30,11 +31,13 @@ export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate 
     h('b', `#${runNumber}`),
   ]);
   const runStatusPanel = (runStatus) =>
-    h(
-      `div.badge.white.bg-${runStatus === RunStatus.ONGOING ? 'success' : 'gray-darker'}`,
-      { id: 'runStatus' },
-      runStatus,
-    );
+    runStatus
+      ? h(
+        `div.badge.white.bg-${runStatus === RunStatus.ONGOING ? 'success' : 'gray-darker'}`,
+        { id: 'runStatus' },
+        runStatus,
+      )
+      : h('span', spinner(1));
   const formatDateTime = (dateStr) =>
     new Date(dateStr).toLocaleString('en-GB'); // dd/mm/yyyy, hh:mm:ss
 
