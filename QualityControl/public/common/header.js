@@ -30,18 +30,24 @@ import { filtersPanel } from './filters/filterViews.js';
  * @param {Model} model - root model of the application
  * @returns {vnode} - header element
  */
-export default (model) => h('.flex-col', [
-  h('.flex-row.p2.items-center', { id: 'qcg-header' }, [
-    commonHeader(model),
-    h('.flex-grow.flex-row', headerSpecific(model)),
-  ]),
-  filterSpecific(model),
-]);
+export default (model) => {
+  const specific = headerSpecific(model) || {};
+  const { centerCol, rightCol } = specific;
+
+  return h('.flex-col', [
+    h('.flex-row.p2.items-center', { id: 'qcg-header' }, [
+      commonHeader(model),
+      centerCol || h('.flex-grow'),
+      rightCol || h('.w-33'),
+    ]),
+    filterSpecific(model),
+  ]);
+};
 
 /**
  * Shows the page specific header (center and right side)
  * @param {Model} model - root model of the application
- * @returns {vnode} - virtual node element
+ * @returns {{centerCol: vnode, rightCol: vnode} | null}
  */
 const headerSpecific = (model) => {
   const { layoutListModel, filterModel, layout, object, page } = model;
