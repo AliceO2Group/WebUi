@@ -111,8 +111,40 @@ export default class SearchFilterModel extends BaseViewModel {
     }
   }
 
+  /**
+   * Get all the currently active filters.
+   * @returns {Array<Filter>} all active filters
+   */
+  getAllActive() {
+    return this.filters.values().filter((filter) => filter.isActive()).toArray();
+  }
+
+  /**
+   * check if all filters are inactive or not.
+   * @returns {boolean} all filters are inactive
+   */
   allInActive() {
     const activeCount = this.filters.values().filter((filter) => filter.isActive()).toArray().length;
     return activeCount > 0 ? false : true;
+  }
+
+  /**
+   * return the active filters in a representable way.
+   * @returns {string} Active filters: filter.friendlyName().
+   */
+  stringifyActiveFiltersFriendly() {
+    let activeFilterText = 'Active filters: ';
+    if (this.allInActive()) {
+      activeFilterText += 'None.';
+      return activeFilterText;
+    } else {
+      for (const filter of this.getAllActive()) {
+        activeFilterText += ` ${filter.friendlyName()},`;
+      }
+      activeFilterText = activeFilterText.slice(0, activeFilterText.length - 1);
+      activeFilterText += '.';
+
+      return activeFilterText;
+    }
   }
 }
