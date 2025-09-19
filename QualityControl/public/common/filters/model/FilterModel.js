@@ -232,12 +232,12 @@ export default class FilterModel extends Observable {
     this._runsModeInterval = setInterval(async () => {
       this.runStatus = RemoteData.loading();
       this.notify();
-      this.runStatus = await this.filterService.getRunStatus(this.runNumber);
+      this.runStatus = await this.filterService.getRunStatus(trackedRunNumber);
       this.notify();
       this.runStatus.match({
-        Success: (res) => {
+        Success: async (res) => {
           if (res?.runStatus === RunStatus.ONGOING || res?.runStatus === RunStatus.ENDED) {
-            baseViewModel.triggerFilter();
+            await baseViewModel.triggerFilter();
             this.lastRefresh = Date.now();
             this.notify();
           }

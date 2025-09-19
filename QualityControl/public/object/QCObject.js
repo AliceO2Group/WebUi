@@ -186,6 +186,7 @@ export default class QCObject extends BaseViewModel {
   async loadList() {
     const { refreshNeeded, data } = await this.fetchAndValidateRefresh();
     if (!refreshNeeded) {
+      this.notify();
       return;
     }
     this.objectsRemote = RemoteData.loading();
@@ -556,6 +557,7 @@ export default class QCObject extends BaseViewModel {
     if (!this.model.filterModel.isRunModeActivated) {
       this.selected = null;
     }
+
     this.loadList();
   }
 }
