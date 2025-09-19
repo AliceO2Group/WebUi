@@ -306,4 +306,34 @@ export default class FilterModel extends Observable {
   set isRunModeActivated(value) {
     this._isRunModeActivated = value;
   }
+
+  /**
+   * Validates a run number for run mode.
+   * @returns {{ isValid: boolean, title: string }} An object indicating
+   *          whether the run number is valid and a corresponding message.
+   */
+  validateRunNumber() {
+    const runNumber = this._filterMap?.RunNumber;
+    if (runNumber === undefined || runNumber === null || runNumber === '') {
+      if (this.isRunModeActivated) {
+        return { isValid: false, title: 'Run number is required' };
+      } else {
+        return { isValid: true, title: 'Update filters' };
+      }
+    }
+    if (isNaN(runNumber)) {
+      return { isValid: false, title: 'Run number must be a valid number' };
+    }
+    if (!Number.isInteger(Number(runNumber))) {
+      return { isValid: false, title: 'Run number must be an integer' };
+    }
+    //must be positive
+    if (Number(runNumber) < 0) {
+      return { isValid: false, title: 'Run number must be a positive integer' };
+    }
+    if (Number(runNumber) > 999999) {
+      return { isValid: false, title: 'Run number must be 999999 or less' };
+    }
+    return { isValid: true, title: 'Update filters' };
+  };
 }

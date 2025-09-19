@@ -79,20 +79,10 @@ export function filtersPanel(filterModel, viewModel) {
     [
       h('.flex-row.g2.justify-center', [
         runModeCheckbox(filterModel, viewModel),
-
-        isRunModeActivated
-          ? [
-            ...filtersList.map((filter) =>
-              createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
-            triggerFiltersButton(onEnterCallback, filterModel),
-
-          ]
-          : [
-            triggerFiltersButton(onEnterCallback, filterModel),
-            clearFiltersButton(clearFilterCallback),
-            ...filtersList.map((filter) =>
-              createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
-          ],
+        triggerFiltersButton(onEnterCallback, filterModel),
+        !isRunModeActivated && clearFiltersButton(clearFilterCallback),
+        ...filtersList.map((filter) =>
+          createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
       ]),
       isRunModeActivated && runStatusPanel(
         runNumber,
@@ -116,19 +106,17 @@ export function filtersPanel(filterModel, viewModel) {
  */
 const triggerFiltersButton = (onClickCallback, filterModel) => {
   const isRunModeActivated = filterModel?.isRunModeActivated;
-  const hasRunNumber = filterModel?.filterMap?.RunNumber;
-  const shouldDisable = isRunModeActivated && !hasRunNumber;
+  const { isValid, title } = filterModel.validateRunNumber();
 
   const buttonId = isRunModeActivated ? 'updateAndRunModeButton' : 'triggerFilterButton';
-  const buttonTitle = isRunModeActivated ? 'Update filters and activate run mode' : 'Update filters';
 
   return h(
     'button.btn.btn-primary',
     {
       id: buttonId,
-      onclick: shouldDisable ? null : onClickCallback,
-      disabled: shouldDisable,
-      title: shouldDisable ? 'Enter a run number to enable' : buttonTitle,
+      onclick: isValid ? onClickCallback : null,
+      disabled: !isValid,
+      title,
     },
     'Update',
   );
