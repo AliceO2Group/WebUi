@@ -57,7 +57,7 @@ export const filtersSection = (searchFilterModel = {}) => [
       h('.w-30.f5.flex-row.items-center.g2', [filter.friendlyName()]),
       h('.w-70', [
         h('input.form-control.w-100', {
-          placeholder: 'Search',
+          placeholder: filter.inputPlaceholder(),
           type: 'text',
           value: filter.getValue(),
           onchange: (e) => searchFilterModel.setValue(filter.key, e.target.value),

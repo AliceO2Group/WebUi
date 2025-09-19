@@ -16,6 +16,7 @@
  * @typedef {object} Filter
  * @property {string} key - searchable key of the filter.
  * @property {function(): (string)} friendlyName - friendly name of the filter else key.
+ * @property {function(): (string)} inputPlaceholder - Input element's placeholder, use examples of filter.
  * @property {function(): (boolean)} isActive - has the filter any active value('s)
  * @property {function(): (string|string[]|null)} getValue - gets the current value('s) of the filter
  * @property {function(string): void} set - set value of the filter
@@ -26,13 +27,15 @@
  * creates a key-value filter.
  * @param {string} key - key used to save and retrieve value.
  * @param {string|null} friendlyName - friendly name of the filter.
+ * @param {string|null} inputPlaceholder - input placeholder text.
  * @param {string} value - value associated with key.
  * @returns {Filter} key-value filter object.
  */
-export function createKeyValueFilter(key, friendlyName = null, value = '') {
+export function createKeyValueFilter(key, friendlyName = null, inputPlaceholder = null, value = '') {
   return {
     key,
     friendlyName: () => friendlyName ? friendlyName : key,
+    inputPlaceholder: () => inputPlaceholder ? inputPlaceholder : 'Conditions',
     getValue: () => value ? value : null,
     // trim checks if value is a string value, test this
     isActive: () => Boolean(value && value.trim()),
@@ -51,23 +54,17 @@ export function createKeyValueFilter(key, friendlyName = null, value = '') {
  * @param {string} key - key used to save and retrieve value.
  * @param {string|null} friendlyName - friendly name of the filter.
  * @param {Array<string>} value - values (array) associated with key.
+ * @param {string|null} inputPlaceholder - input placeholder text.
  * @returns {Filter} multiple value filter, key with array with values.
  */
-export function createMultiValueFilter(key, friendlyName = null, value = []) {
+export function createMultiValueFilter(key, friendlyName = null, inputPlaceholder = null, value = []) {
   let values = Array.isArray(value) ? value : [];
   return {
     key,
     friendlyName: () => friendlyName ? friendlyName : key,
+    inputPlaceholder: () => inputPlaceholder ? inputPlaceholder : 'Conditions',
     getValue: () => values,
     isActive: () => values.length > 0,
-    add: (v) => {
-      if (!values.includes(v)) {
-        values.push(v);
-      }
-    },
-    remove: (v) => {
-      values = values.filter((x) => x !== v);
-    },
     set: (arr) => {
       values = Array.isArray(arr) ? arr : [];
     },

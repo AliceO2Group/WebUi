@@ -31,7 +31,7 @@ export default (layoutListModel) => [
         h(
           'input.form-control.form-inline.mh1.w-33',
           {
-            placeholder: 'Search',
+            placeholder: 'Layout name',
             type: 'text',
             value: layoutListModel.searchFilterModel.searchInput,
             oninput: (e) => {

@@ -29,7 +29,7 @@ export default class SearchFilterModel extends BaseViewModel {
      */
     this.filters = new Map(); // key -> filter instance
     this.searchInput = '';
-    this.register(createKeyValueFilter('objectPath', 'Object path'));
+    this.register(createKeyValueFilter('objectPath', 'Object path', 'e.g. TPC'));
   }
 
   /**
