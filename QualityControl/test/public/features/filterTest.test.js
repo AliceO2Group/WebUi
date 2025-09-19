@@ -12,93 +12,90 @@
  */
 
 import { strictEqual } from 'node:assert';
+import { delay } from '../../testUtils/delay.js';
 
 export const filterTests = async (url, page, timeout = 5000, testParent) => {
   await testParent.test('filter should persist between pages', { timeout }, async () => {
-    const runNumber = '0';
+    // Navigate to objects tree
+    await page.goto(
+      `${url}?page=objectTree`,
+      { waitUntil: 'networkidle0' },
+    );
 
-    await page.locator('.sidebar > a:nth-of-type(2)').click(); // navigate to ObjectTreePage
-    await page.waitForSelector('#runNumberFilter', { visible: true });
-
-    await page.locator('#runNumberFilter').fill(runNumber);
-
+    //Fill and trigger the filter
+    await page.locator('#runNumberFilter').fill('0');
     await page.locator('#triggerFilterButton').click();
-    await page.locator('#updateOnlyButton').click();
 
-    // Check that URL contains RunNumber=0
+    // URL should contain run number
     const location = await page.evaluate(() => window.location);
     strictEqual(location.href.includes('RunNumber=0'), true, 'URL should contain RunNumber=0');
-    await page.waitForSelector('tr:last-of-type td');
 
+    //Naviagte to object view
     await extendTree(3, 5);
-    await page.locator('tr:last-of-type td').click(); // This will select an object
+    await page.locator('tr:last-of-type td').click();
     await page.waitForSelector('.resize-button a');
-    await page.locator('.resize-button a').click(); // This would navigate to the objectViewPage
+    await page.locator('.resize-button a').click();
     await page.waitForSelector('#runNumberFilter', { visible: true });
 
     // Check that filter is still set to 0
     let value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
-    strictEqual(value, runNumber, 'RunNumber filter should still be set to 0 on objectView page');
+    strictEqual(value, '0', 'RunNumber filter should still be set to 0 on objectView page');
 
     // Navigate to layout show
-    await page.waitForSelector('.sidebar > div:nth-of-type(3) a:nth-child(1)', { visible: true, stable: true });
-    await page.locator('.sidebar > div:nth-of-type(3) a:nth-child(1)').click(); // navigate to layout show
+    await page.locator('.menu-item:nth-child(1)').click();
     await page.waitForSelector('#runNumberFilter', { visible: true });
 
     // Check that filter is still set to 0
     value = await page.evaluate(() => document.querySelector('#runNumberFilter').value);
-    strictEqual(value, runNumber, 'RunNumber filter should still be set to 0 on layout show page');
+    strictEqual(value, '0', 'RunNumber filter should still be set to 0 on layout show page');
   });
 
-  await testParent.test('should list all objects when disabling objectFilters', { timeout }, async () => {
-    const buttonPath = 'header > div > div > div:nth-child(3) > div > div> button';
-    const optionPath = 'header > div > div > div:nth-child(3) > div > div > div > div > a:nth-child(1)';
-    await page.waitForSelector(buttonPath, { visible: true, stable: true });
-    await page.locator(buttonPath).click();
+  await testParent.test('should list all objects when clearing filters', { timeout }, async () => {
+    //Navigate to object tree
+    ///html/body/div[1]/div/nav/a[2]
+    await page.locator('nav > a:nth-child(3)').click();
 
-    await page.waitForSelector(optionPath, { visible: true, stable: true });
-    await page.locator(optionPath).click();
+    //With filter applied
+    let objectList = await page.evaluate(() => window.model.object.list);
+    strictEqual(objectList.length, 1);
 
-    await extendTree(2, 4);
-    let rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
-
-    strictEqual(rowCount, 4); // Due to the filter there are two objects fewer.
-
-    await page.locator('#inputApplyFilters').click(); // Will prevent filter from affecting it.
-
-    await extendTree(2, 4);
-    rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
-
-    strictEqual(rowCount, 6); // Due to the filter being removed, there are now 6 rows.
+    //Clear filters
+    await page.locator('#clearFilterButton').click();
+    await delay(100);
+    objectList = await page.evaluate(() => window.model.object.list);
+    strictEqual(objectList.length, 3);
   });
 
   await testParent.test('ObjectShow should only list versions based on the filter', { timeout }, async () => {
-    // For whatever reason, click and locator.click cannot be used for this. Hence why evalutate is used.
-    await page.evaluate(() => document.querySelector('#subcanvas > div:nth-child(1) a.btn').click());
-    await page.waitForSelector('#ObjectPlot select option');
+    await page.goto(
+      `${url}?page=objectView&objectName=qc/test/object/1`,
+      { waitUntil: 'networkidle0' },
+    );
+    let optionsCount = await page.evaluate(() => document.querySelector('#dateSelector').length);
+    strictEqual(optionsCount, 2);
 
-    let versionCount = await page.evaluate(() => document.querySelectorAll('#ObjectPlot select option').length);
-    strictEqual(versionCount, 1);
+    await page.locator('#runNumberFilter').fill('0');
+    await page.locator('#triggerFilterButton').click();
 
-    await page.locator('#filterElement #clearFilterButton').click();
+    await delay(200);
 
-    await page.waitForSelector('#ObjectPlot select option:nth-child(2)');
-
-    versionCount = await page.evaluate(() => document.querySelectorAll('#ObjectPlot select option').length);
-    strictEqual(versionCount, 2);
+    optionsCount = await page.evaluate(() => document.querySelector('#dateSelector').length);
+    strictEqual(optionsCount, 1);
   });
 
   await testParent.test('ObjectTreePage should apply filters for the objects', { timeout }, async () => {
-    await page.locator('.sidebar > a:nth-of-type(2)').click(); // navigate to ObjectTreePage.
+    await page.goto(
+      `${url}?page=objectTree`,
+      { waitUntil: 'networkidle0' },
+    );
 
     await extendTree(3, 5);
     let rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
-    strictEqual(rowCount, 7); // Due to the filter there are two objects fewer.
+    strictEqual(rowCount, 7);
 
     const runNumber = '0';
     await page.locator('#runNumberFilter').fill(runNumber);
     await page.locator('#filterElement #triggerFilterButton').click();
-    await page.locator('#updateOnlyButton').click();
 
     await extendTree(3, 5);
 

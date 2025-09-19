@@ -50,4 +50,27 @@ export const initializeNockForBkp = () => {
         timeO2End: null,
       },
     });
+  nock(BKP_URL)
+    .get(`/api/runs/566138${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: null,
+      },
+    })
+    .get(`/api/runs/566138${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: null,
+      },
+    })
+    .get(`/api/runs/566138${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: null,
+      },
+    })
+    .get(`/api/runs/566138${TOKEN_PATH}`)
+    .reply(200, {
+      data: { timeO2End: 'hello' },
+    });
 };

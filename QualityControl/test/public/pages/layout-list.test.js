@@ -34,8 +34,6 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   const cardLayoutLinkPath = (cardPath) => `${cardPath} a`;
   const cardOfficialButtonPath = (cardPath) => `${cardPath} > .cardHeader > button`;
 
-  const filterPath = 'header > div > div:nth-child(1) > div:nth-child(3) > input';
-
   await testParent.test('should successfully load layoutList page "/"', { timeout }, async () => {
     await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
     const location = await page.evaluate(() => window.location);
@@ -174,7 +172,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   await testParent.test('should have a folder with one card after filtering', async () => {
     const preFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
     strictEqual(preFilterCardCount, 2);
-    await page.locator(filterPath).fill('a');
+    await page.locator('.form-control').fill('a');
 
     await delay(100);
     const postFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);

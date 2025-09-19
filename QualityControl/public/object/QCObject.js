@@ -177,10 +177,10 @@ export default class QCObject extends BaseViewModel {
     this.notify();
     this.queryingObjects = true;
     let offlineObjects = [];
-    const result = await this.model.services.object.getObjects(this.model.filterModel.inRunMode);
+    const result = await this.model.services.object.getObjects(this.model.filterModel.isRunModeActivated);
 
     if (result.isSuccess()) {
-      offlineObjects = this.model.filterModel.inRunMode ? result.payload.paths : result.payload;
+      offlineObjects = this.model.filterModel.isRunModeActivated ? result.payload.paths : result.payload;
     } else {
       const errorMessage =
         result?._error?.message || 'Failed to retrieve list of objects. Please contact an administrator';
@@ -193,7 +193,7 @@ export default class QCObject extends BaseViewModel {
     let selectedObject = null;
 
     // save the state of the tree in run mode
-    if (this.model.filterModel.inRunMode) {
+    if (this.model.filterModel.isRunModeActivated) {
       treeState = this.saveTreeState();
       selectedObject = this.selected;
     }
@@ -202,7 +202,7 @@ export default class QCObject extends BaseViewModel {
     this.tree.addChildren(offlineObjects);
 
     // restore tree state if in run mode
-    if (this.model.filterModel.inRunMode && treeState) {
+    if (this.model.filterModel.isRunModeActivated && treeState) {
       this.restoreTreeState(treeState);
     }
 
@@ -217,7 +217,7 @@ export default class QCObject extends BaseViewModel {
     this._computeFilters();
 
     // if w are in run mode and an object was opened
-    if (this.model.filterModel.inRunMode && selectedObject) {
+    if (this.model.filterModel.isRunModeActivated && selectedObject) {
       const foundObject = this.list.find((object) => object.name === selectedObject.name);
       if (foundObject) {
         this.selected = foundObject;
@@ -336,6 +336,7 @@ export default class QCObject extends BaseViewModel {
   search(searchInput) {
     this.searchInput = searchInput;
     this._computeFilters();
+
     this.sortListByField(this.searchResult, this.sortBy.field, this.sortBy.order);
     this.notify();
   }
@@ -538,7 +539,7 @@ export default class QCObject extends BaseViewModel {
    */
   async triggerFilter() {
     // don't clear selected object refreshing in run mode
-    if (!this.model.filterModel.inRunMode) {
+    if (!this.model.filterModel.isRunModeActivated) {
       this.selected = null;
     }
     this.loadList();

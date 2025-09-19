@@ -48,3 +48,18 @@ export const filtersConfig = ({ runTypes }) => [
     id: 'passNameFilter',
   },
 ];
+
+/**
+ * Returns a filter configuration object used to render dynamic filter in run mode.
+ * @returns {object} Filter configuration object
+ */
+export const runModeFilterConfig = () => [
+  {
+    type: FilterType.INPUT,
+    queryLabel: 'RunNumber',
+    placeholder: 'RunNumber (e.g. 546783)',
+    id: 'runNumberFilter',
+    inputType: 'number',
+    width: 'w-10',
+  },
+];
