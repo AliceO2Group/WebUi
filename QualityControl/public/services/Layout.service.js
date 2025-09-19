@@ -16,6 +16,7 @@ import { jsonDelete } from './utils/jsonDelete.js';
 import { jsonPatch } from './utils/jsonPatch.js';
 import { jsonPut } from './utils/jsonPut.js';
 import { RemoteData } from '/js/src/index.js';
+import { buildQueryParametersString } from '../common/buildQueryParametersString.js';
 
 /**
  * Model namespace with all CRUD requests for layouts
@@ -38,16 +39,21 @@ export default class LayoutService {
 
   /**
    * Method to get all layouts shared between users
-   * @param {string|undefined} fields - comma seperated string values. Represent the fields that should be fetched.
+   * @param {string|undefined} fields - comma separated string values. Represent the fields that should be fetched.
+   * @param {object|undefined} filter - filter information to be parsed by the backend.
    * If left empty all available fields will be fetched
    * @param {Class<Observable>} that - Observer requesting data that should be notified of changes
    * @returns {undefined}
    */
-  async getLayouts(fields = undefined, that = this.model) {
+  async getLayouts(fields = undefined, filter = {}, that = this.model) {
     this.list = RemoteData.loading();
     that.notify();
 
-    const url = `/api/layouts${fields !== undefined ? `?fields=${fields}` : ''}`;
+    const queryString = buildQueryParametersString({}, {
+      ...fields !== undefined ? { fields } : '',
+      filter,
+    });
+    const url = `/api/layouts${queryString}`;
     const { result, ok } = await this.loader.get(url);
 
     if (ok) {

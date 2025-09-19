@@ -52,7 +52,7 @@ export class LayoutController {
 
   /**
    * HTTP GET endpoint for retrieving a list of layouts
-   * * can be filtered by "owner_id" or "object_path"
+   * * Can be filtered by "owner_id" or "objectPath" using filter.objectPath
    * * if no owner_id is provided, all layouts will be fetched;
    * @param {Request} req - HTTP request object with information on owner_id
    * @param {Response} res - HTTP response object to provide layouts information
@@ -76,7 +76,7 @@ export class LayoutController {
     }
 
     try {
-      const layouts = await this._layoutRepository.listLayouts({ owner_id, fields, filter });
+      const layouts = await this._layoutRepository.listLayouts({ fields, filter: { ...filter, owner_id } });
       return res.status(200).json(layouts);
     } catch (error) {
       logger.errorMessage(`Error retrieving layouts: ${error}`);

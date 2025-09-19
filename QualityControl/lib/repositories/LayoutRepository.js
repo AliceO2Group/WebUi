@@ -21,58 +21,54 @@ export class LayoutRepository extends BaseRepository {
   /**
    * Retrieves a filtered list of layouts with optional field selection
    * @param {object} [options] - Filtering and field selection options
-   * @param {number} [options.owner_id] - Filter layouts by owner ID
    * @param {string} [options.name] - Filter layouts by exact name match
    * @param {Array<string>} [options.fields] - Array of field names to include in each returned layout object
    * @param {object} [options.filter] - Filter layouts by containing filter.objectPath, case insensitive
    * @returns {Array<object>} Array of layout objects matching the filters, containing only the specified fields
-   * @throws {TypeError} If fields parameter is provided but is not an array
-   * @throws {Error} If any specified field does not exist in the layout objects
    */
-  listLayouts({ name, owner_id, fields = [], filter } = {}) {
+  listLayouts({ name, fields = [], filter } = {}) {
     const { layouts } = this._jsonFileService.data;
-
-    // Better to lowercase once rather than at every single object_path comparison.
-    if (filter?.objectPath !== undefined) {
-      filter.objectPath = filter.objectPath.toLowerCase();
-    }
-
-    // Filter using filter.objectPath should filter and its objectPath be defined,
-    // otherwise filter by name and owner_id.
-    const layoutFilter = filter?.objectPath !== undefined ?
-
-    /**
-     * Filter layouts using the objectPath on included objects
-     * @param {Layout} layout - layout to filter trough
-     * @returns {boolean} - filter condition satisfied, based on objectPath
-     */
-      (layout) =>
-        (layout.tabs ?? [])
-          .flatMap((tab) => tab.objects ?? [])
-          .filter((object) => (object.name ?? '').toLowerCase().includes(filter.objectPath)).length > 0
-      :
-
-    /**
-     * Filter layouts using the layout.owner_id and or layout.name
-     * @param {Layout} layout - layout to filter trough
-     * @returns {boolean} - filter condition satisfied, based on owner_id and or layout.name
-     */
-      (layout) =>
-        (owner_id === undefined || layout.owner_id === owner_id) &&
-        (name === undefined || layout.name === name);
-
-    const filteredLayouts = layouts.filter(layoutFilter);
+    const filteredLayouts = this._filterLayouts(layouts, { ...filter, name });
 
     if (fields.length === 0) {
       return filteredLayouts;
     }
-
     return filteredLayouts.map((layout) => {
       const layoutObj = {};
       fields.forEach((field) => {
         layoutObj[field] = layout[field];
       });
       return layoutObj;
+    });
+  }
+
+  /**
+   * Filters layouts by filter object
+   * @param {Array<object>} layouts - Array of layouts to filter
+   * @param {object} filter - Filtering object
+   * @param {number} [filter.owner_id] - owner id to filter by
+   * @param {string} [filter.name] - name to filter by
+   * @param {string} [filter.objectPath] - object path prefix for potential objects to be contained by layout
+   * @returns {Array<object>} Filtered layouts.
+   */
+  _filterLayouts(layouts, { owner_id, name, objectPath } = {}) {
+    const objectPathLowerCase = objectPath?.toLowerCase();
+    return layouts.filter((layout) => {
+      if (owner_id !== undefined && layout.owner_id !== owner_id) {
+        return false;
+      }
+      if (name !== undefined && layout.name !== name) {
+        return false;
+      }
+      if (objectPathLowerCase) {
+        const hasMatchingObject = layout.tabs?.some((tab) =>
+          tab.objects?.some((obj) =>
+            obj.name?.toLowerCase().includes(objectPathLowerCase)));
+        if (!hasMatchingObject) {
+          return false;
+        }
+      }
+      return true;
     });
   }
 
