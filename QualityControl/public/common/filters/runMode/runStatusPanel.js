@@ -23,31 +23,28 @@ export const runStatusPanel = (runNumber, status) =>
   status.match({
     Loading: () =>
       h('div.flex-row.g1.items-center.justify-center', [
-        h('b', `#${runNumber}`),
+        h('b', { id: 'runNumberLabel' }, `#${runNumber}`),
         h('div.flex-row.g1', [
-          h('div', { class: 'label' }, 'Status: '),
+          h('div.label', 'Status: '),
           h('b.color-gray', 'Loading...'),
         ]),
       ]),
 
     Success: (res) =>
       h('div.flex-row.g1.items-center.justify-center', { id: 'runStatusPanel' }, [
-        h('b', { id: 'runNumber' }, `#${runNumber}`),
+        h('b', { id: 'runNumberLabel' }, `#${runNumber}`),
         h('div.flex-row.g1', [
           h('span', 'Status: '),
           h(
-            'b',
+            `b.color-${
+              res?.runStatus === 'ONGOING' ? 'success' : 'gray'
+            }`,
             {
               id: 'runStatus',
-              style: `color: var(--${
-                res?.runStatus === 'ONGOING' ? 'color-success' : 'color-gray'
-              })`,
             },
             res?.runStatus,
           ),
         ]),
       ]),
-
-    NotAsked: () => null,
     Other: () => null,
   });
