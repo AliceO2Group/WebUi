@@ -86,13 +86,13 @@ export default class LayoutListModel extends BaseViewModel {
    * Set user's input for search and use a fuzzy algo to filter list of layouts.
    * Fuzzy allows missing chars "aaa" can find "a/a/a" or "aa/a/bbbbb".
    * If searchInput and objectPath are not included get all non-filtered layouts.
+   * All params can be undefined if you want all layouts.
    * @param {string} searchInput - string input from the user to search by.
    * @param {string} objectPath - string input from the user to search layouts by objectPath.
-   * @param {string} userid - userId to check if layout is owned by you.
    */
-  search(searchInput, objectPath, userid = undefined) {
+  search(searchInput, objectPath) {
     if (searchInput === undefined && objectPath === undefined) {
-      this.model.services.layout.getLayouts(undefined, this.model);
+      this.model.services.layout.getLayouts(undefined, undefined, this.model);
     } else if (objectPath === undefined) {
       // Normal offline search
       this.searchInput = searchInput;
