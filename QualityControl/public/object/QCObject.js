@@ -175,7 +175,7 @@ export default class QCObject extends BaseViewModel {
    */
   async fetchAndValidateRefresh() {
     const fetchFn = async () => await this.model.services.object.getObjects(true);
-    const validateFn = (result) => result.isSuccess() && result.payload.length === this.list.length;
+    const validateFn = (result) => result.isSuccess() && result.payload?.paths.length !== this.list.length;
     return await this.model.filterModel.refreshCheck(fetchFn, validateFn);
   }
 
