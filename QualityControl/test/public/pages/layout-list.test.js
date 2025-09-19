@@ -191,6 +191,21 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(postFilterCardCount, 1);
   });
 
+  await testParent.test('should show the active filter name', async () => {
+    // reset page, thus reset filter/search.
+    await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
+    await delay(100);
+    const preFilterText = await page.evaluate(() => document.querySelector('div.mh1').textContent.trim());
+    strictEqual(preFilterText, 'Active filters: None.');
+    await page.locator('#openFilterToggle').click();
+    await delay(100);
+    await page.locator(filterObjectPath).fill('TPC');
+    await page.locator('#openFilterToggle').click();
+    await delay(100);
+    const postFilterText = await page.evaluate(() => document.querySelector('div.mh1').textContent.trim());
+    strictEqual(postFilterText, 'Active filters:  Object path.');
+  });
+
   await testParent.test('should have a folder with 1 card after object path filtering + regular search', async () => {
     // reset page, thus reset filter/search.
     await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });

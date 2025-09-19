@@ -39,10 +39,12 @@ export default (layoutListModel) => [
             },
           },
         ),
-        h(
-          '.mh1',
-          layoutListModel.searchFilterModel.stringifyActiveFiltersFriendly(),
-        ),
+        h('.p1', [
+          h(
+            '.mh1',
+            layoutListModel.searchFilterModel.stringifyActiveFiltersFriendly(),
+          ),
+        ]),
       ],
     ),
 
