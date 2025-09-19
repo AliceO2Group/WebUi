@@ -47,7 +47,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     const urlRunStatus = '/api/filter/run-status/566138';
     const urlObjects = '/api/objects?inRunMode=true&filters[RunNumber]=566138';
     const regex =
-      /^Last update: \d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}:\d{2} - As run is ONGOING, will refresh every 0.5 seconds$/;
+      /^Last update: \d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}:\d{2}$/;
     let countRunStatusCalls = 0;
     let countObjectsCalls = 0;
     page.on('request', (req) => {
@@ -73,12 +73,14 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
       const runNumber = document.querySelector('#runNumberLabel').textContent;
       const status = document.querySelector('#runStatus').textContent;
       const lastUpdate = document.querySelector('#lastUpdate').textContent;
-      return { runNumber, status, lastUpdate };
+      const refreshInfo = document.querySelector('#refreshInfo')?.textContent;
+      return { runNumber, status, lastUpdate, refreshInfo };
     });
-    strictEqual(runStatusInfo.lastUpdate !== '', true, 'Last update should have a value');
     strictEqual(runStatusInfo.runNumber, 'Run #566138');
     strictEqual(runStatusInfo.status, 'ONGOING');
+    strictEqual(runStatusInfo.refreshInfo, ' - As run is ONGOING, will refresh every 0.5 seconds');
     match(runStatusInfo.lastUpdate, regex);
+
     await delay(1000);
     strictEqual(countRunStatusCalls, 3, `Expected 3 requests to filter/run-status, but got ${countRunStatusCalls}`);
     strictEqual(countObjectsCalls, 3, `Expected 3 requests to api/objects, but got ${countObjectsCalls}`);
