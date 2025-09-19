@@ -33,7 +33,7 @@ export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate 
   return runStatus.match({
     Loading: () =>
       h('div.flex-row.g1.items-center.justify-center', [
-        h('b', `Run #${runNumber}`),
+        h('b', { id: 'runNumberLabel' }, `#${runNumber}`),
         h('div.flex-row.g1', [
           h('div.label', 'Status: '),
           h('b.color-gray', 'Loading...'),
@@ -52,14 +52,14 @@ export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate 
       const shouldShowTimestamp = runStatus === RunStatus.ONGOING || runStatus === RunStatus.ENDED;
       return h('div.flex-column', [
         h('div.flex-row.g1.items-center.justify-center', { id: 'runStatusPanel' }, [
-          h('span', { id: 'runNumber' }, [
+          h('span', { id: 'runNumberLabel' }, [
             'Run ',
             h('b', `#${runNumber}`),
           ]),
           h('div.flex-row.g1', [
             h('span', '| Status: '),
             h(
-              `b.${res?.runStatus === RunStatus.ONGOING ? 'success' : 'gray-darker'}`,
+              `b.color-${res?.runStatus === RunStatus.ONGOING ? 'success' : 'gray-darker'}`,
               { id: 'runStatus' },
               res?.runStatus,
             ),

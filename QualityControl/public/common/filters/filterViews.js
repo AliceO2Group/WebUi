@@ -81,20 +81,10 @@ export function filtersPanel(filterModel, viewModel) {
     [
       h('.flex-row.g2.justify-center', [
         runModeCheckbox(filterModel, viewModel),
-
-        isRunModeActivated
-          ? [
-            ...filtersList.map((filter) =>
-              createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
-            triggerFiltersButton(onEnterCallback, filterModel),
-
-          ]
-          : [
-            triggerFiltersButton(onEnterCallback, filterModel),
-            clearFiltersButton(clearFilterCallback),
-            ...filtersList.map((filter) =>
-              createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
-          ],
+        triggerFiltersButton(onEnterCallback, filterModel),
+        !isRunModeActivated && clearFiltersButton(clearFilterCallback),
+        ...filtersList.map((filter) =>
+          createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
       ]),
       isRunModeActivated
       && runStatusPanel({ runNumber, runStatus, lastRefresh, refreshRate }),
@@ -116,25 +106,16 @@ export function filtersPanel(filterModel, viewModel) {
  */
 const triggerFiltersButton = (onClickCallback, filterModel) => {
   const isRunModeActivated = filterModel?.isRunModeActivated;
-  let shouldDisable = false;
-  const runNumber = filterModel?.filterMap?.RunNumber;
-  let title = '';
+  const { isValid, title } = filterModel.validateRunNumber();
 
-  if (isRunModeActivated) {
-    const { isValid, title: validationTitle } = validateRunNumber(runNumber);
-    shouldDisable = !isValid;
-    title = validationTitle;
-  } else {
-    title = 'Update filters';
-  }
   const buttonId = isRunModeActivated ? 'updateAndRunModeButton' : 'triggerFilterButton';
 
   return h(
     'button.btn.btn-primary',
     {
       id: buttonId,
-      onclick: shouldDisable ? null : onClickCallback,
-      disabled: shouldDisable,
+      onclick: isValid ? onClickCallback : null,
+      disabled: !isValid,
       title,
     },
     'Update',

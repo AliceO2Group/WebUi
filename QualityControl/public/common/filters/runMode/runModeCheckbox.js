@@ -20,7 +20,6 @@ import { h } from '/js/src/index.js';
  * @returns {Component} the run mode switch component
  */
 export const runModeCheckbox = (filterModel, viewModel) => {
-  const { active } = viewModel.model.loader;
   const { isRunModeActivated } = filterModel;
 
   const handleClick = () => {
@@ -30,25 +29,26 @@ export const runModeCheckbox = (filterModel, viewModel) => {
       filterModel.activateRunsMode(viewModel);
     }
   };
+  const isAvailable = filterModel.validateRunNumber();
   return h(
     'label.flex-row.g1.items-center.form-check-label',
     {
-      style: `cursor:${active ? 'not-allowed' : 'pointer'}`,
+      style: `cursor:${isAvailable ? 'pointer' : 'not-allowed'}`,
     },
     [
       h(
         '.switch',
         [
           h('input', {
-            onchange: () => !active && handleClick(),
-            disabled: active,
+            onchange: () =>isAvailable && handleClick(),
             type: 'checkbox',
             checked: isRunModeActivated,
           }),
-          h('span.slider.round', {
+          h(`span.slider.round.bg-${
+            isRunModeActivated ? 'primary' : 'gray'
+          }`, {
             style: `
-          background-color:${isRunModeActivated ? 'var(--color-primary)' : 'var(--color-gray)'};
-          cursor:${active ? 'not-allowed' : 'pointer'}`,
+          cursor: ${isAvailable ? 'pointer' : 'not-allowed'};`,
           }),
         ],
       ),

@@ -70,7 +70,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     await delay(100);
     await page.waitForSelector('#runStatusPanel');
     const runStatusInfo = await page.evaluate(() => {
-      const runNumber = document.querySelector('#runNumber').textContent;
+      const runNumber = document.querySelector('#runNumberLabel').textContent;
       const status = document.querySelector('#runStatus').textContent;
       const lastUpdate = document.querySelector('#lastUpdate').textContent;
       return { runNumber, status, lastUpdate };
@@ -95,7 +95,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     //nock has been configured to stop the run after 3 calls
     await page.waitForSelector('#runStatusPanel');
     const runStatusInfo = await page.evaluate(() => {
-      const runNumber = document.querySelector('#runNumber').textContent;
+      const runNumber = document.querySelector('#runNumberLabel').textContent;
       const status = document.querySelector('#runStatus').textContent;
       return { runNumber, status };
     });
@@ -109,7 +109,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     await page.locator('.menu-item:nth-child(3) > .ph2').click();
     await page.waitForSelector('#runStatusPanel');
     const runInfo = await page.evaluate(() => {
-      const runNumber = document.querySelector('#runNumber').textContent;
+      const runNumber = document.querySelector('#runNumberLabel').textContent;
       const status = document.querySelector('#runStatus').textContent;
       return { runNumber, status };
     });
