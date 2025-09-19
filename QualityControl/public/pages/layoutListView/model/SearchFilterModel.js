@@ -24,7 +24,7 @@ export default class SearchFilterModel extends BaseViewModel {
     super();
 
     /**
-     * filters storage map
+     * Filters storage map
      * @type {Map<string,Filter>}
      */
     this.filters = new Map(); // key -> filter instance
@@ -33,7 +33,7 @@ export default class SearchFilterModel extends BaseViewModel {
   }
 
   /**
-   * register a filter object.
+   * Register a filter object.
    * @param {Filter} filter - Filter object to register.
    * @returns {Filter} - Filter object that was registered.
    */
@@ -49,10 +49,10 @@ export default class SearchFilterModel extends BaseViewModel {
     return filter;
   }
 
-  // eslint-disable-next-line jsdoc/require-returns
   /**
-   * unregisters a specified filter by key.
+   * Unregisters a specified filter by key.
    * @param {string} key - filter key.
+   * @returns {void|boolean} void when key is not registered or true when the filter was successfully unregistered.
    */
   unregister(key) {
     const filter = this.get(key);
@@ -65,7 +65,7 @@ export default class SearchFilterModel extends BaseViewModel {
   }
 
   /**
-   * gets a specified filter object by filter.key
+   * Gets a specified filter object by filter.key
    * @param {string} key - filter key.
    * @returns {Filter} - Filter object
    */
@@ -74,7 +74,7 @@ export default class SearchFilterModel extends BaseViewModel {
   }
 
   /**
-   * gets all registered filters
+   * Gets all registered filters
    * @returns {Array<Filter>} - Filter object that was registered.
    */
   getAll() {
@@ -82,7 +82,7 @@ export default class SearchFilterModel extends BaseViewModel {
   }
 
   /**
-   * set filter by key with specified value('s)
+   * Set filter by key with specified value('s)
    * @param {string} key - filter key.
    * @param {any[]} args - value('s) to set.
    * @returns {void} - void.
@@ -102,10 +102,13 @@ export default class SearchFilterModel extends BaseViewModel {
   }
 
   resetAll() {
-    this.allInActive();
-    for (const filter of this.filters.values()) {
-      if (typeof filter.reset === 'function') {
-        filter.reset();
+    if (this.allInActive()) {
+      return;
+    } else {
+      for (const filter of this.filters.values()) {
+        if (typeof filter.reset === 'function') {
+          filter.reset();
+        }
       }
       this.notify();
     }
@@ -142,8 +145,8 @@ export default class SearchFilterModel extends BaseViewModel {
   }
 
   /**
-   * return the active filters in a representable way.
-   * @returns {string} Active filters: filter.friendlyName().
+   * Return the active filters in a representable way.
+   * @returns {string} Active filters: filter.friendlyName(), ... .
    */
   stringifyActiveFiltersFriendly() {
     let activeFilterText = 'Active filters: ';
@@ -154,6 +157,7 @@ export default class SearchFilterModel extends BaseViewModel {
       for (const filter of this.getAllActive()) {
         activeFilterText += ` ${filter.friendlyName()},`;
       }
+      // Remove trailing comma
       activeFilterText = activeFilterText.slice(0, activeFilterText.length - 1);
       activeFilterText += '.';
 

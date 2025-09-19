@@ -90,7 +90,8 @@ export default class LayoutListModel extends BaseViewModel {
    */
   search(searchInput, filters) {
     if (searchInput === undefined && filters === undefined) {
-      this.model.services.layout.getLayouts(undefined, undefined);
+      // Get all layouts
+      this.model.services.layout.getLayouts(RequestFields.LAYOUT_CARD, undefined);
     } else if (filters === undefined) {
       // Normal offline search
       this.searchInput = searchInput;
@@ -99,7 +100,7 @@ export default class LayoutListModel extends BaseViewModel {
       });
       this.notify();
     } else {
-      // online search
+      // online search using filters
       this.model.services.layout.getLayouts(RequestFields.LAYOUT_CARD, filters);
     }
   }

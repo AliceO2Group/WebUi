@@ -48,9 +48,9 @@ export function createKeyValueFilter(key, friendlyName = null, inputPlaceholder 
   };
 }
 
-// Multi-value filter
 /**
  * Creates a multiple value filter, key with array value.
+ * Not used in the code yet but serves as an example.
  * @param {string} key - key used to save and retrieve value.
  * @param {string|null} friendlyName - friendly name of the filter.
  * @param {string|null} inputPlaceholder - input placeholder text.
