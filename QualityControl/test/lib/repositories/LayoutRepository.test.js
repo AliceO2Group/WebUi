@@ -54,7 +54,7 @@ export const layoutRepositoryTest = async () => {
 
       test('should filter layouts by owner_id', () => {
         const ownerId = 0;
-        const result = layoutRepository.listLayouts({ owner_id: ownerId });
+        const result = layoutRepository.listLayouts({ filter: { owner_id: ownerId } });
 
         strictEqual(result.length, 2, 'number of layouts is incorrect');
         result.forEach((layout) => {
@@ -71,7 +71,7 @@ export const layoutRepositoryTest = async () => {
       test('should return only layout with specified filter.objectPath', () => {
         const objectPath = 'qc/MCH/QO/DataDecodingCheck';
         const result = layoutRepository.listLayouts({ filter: {
-          objectPath: objectPath,
+          objectPath,
         } });
         ok(result.length === 1, "listLayouts's filter.objectPath should only return one layout");
       });
