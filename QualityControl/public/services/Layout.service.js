@@ -50,7 +50,7 @@ export default class LayoutService {
     that.notify();
 
     const queryString = buildQueryParametersString({}, {
-      ...fields !== undefined ? { fields } : {},
+      ...fields !== undefined ? { fields } : '',
       filter,
     });
     const url = `/api/layouts${queryString}`;
