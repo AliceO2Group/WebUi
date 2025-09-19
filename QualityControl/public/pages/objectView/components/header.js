@@ -18,20 +18,21 @@ import { filterPanelToggleButton } from '../../../common/filters/filterViews.js'
 /**
  * Builds header which contains information on plotted object and actions that can be applied
  * @param {Model} model - root model of the application
- * @returns {vnode} - virtual node element
+ * @returns {{centerCol: vnode, rightCol: vnode} | null} - object with vnode elements
  */
 export const objectViewHeader = (model) => {
   const { objectViewModel, filterModel, router } = model;
   const title = computeTitle(objectViewModel, router);
 
-  return [
-    h('.flex-column.text-center.justify-center.w-50', h('b', title)),
-    h('.flex-row.flex-grow.items-center.p2.g2.w-33.justify-end', [
+  return {
+    centerCol: h('.text-center.justify-center.flex-grow', [h('b', title)]),
+
+    rightCol: h('.w-33.flex-row.flex-grow.items-center.p2.g2.justify-end', [
       getBackToQCGButton(objectViewModel, router),
       filterPanelToggleButton(filterModel),
       model.isContextSecure() && h('.flex-row', getCopyURLToClipboardButton(model)),
     ]),
-  ];
+  };
 };
 
 const computeTitle = (objectViewModel, router) => {
