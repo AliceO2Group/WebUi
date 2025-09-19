@@ -106,51 +106,6 @@ export default class LayoutService {
   }
 
   /**
-   * Method to get all layouts by a given filter object
-   * Only one type of filter condition exists right now, filter.objectPath.
-   * Check the controller: 'QualityControl/lib/dtos/LayoutDto.js' line 88
-   * for more future filter options.
-   * @param {string} userId - user id for which to query layouts
-   * @param {string|undefined} fields - comma seperated string values. Represent the fields that should be fetched.
-   * If left empty all available fields will be fetched
-   * @param {object} filter - filter information to be parsed by the backend.
-   * @param {Class<Observable>} that - Observer requesting data that should be notified of changes
-   * @returns {undefined}
-   */
-  async getLayoutsByFilter(userId = undefined, fields = undefined, filter = undefined, that = this.model) {
-    this.list = RemoteData.loading();
-    that.notify();
-    if (filter !== undefined) {
-      const filterSearchParam = new URLSearchParams();
-      if (fields !== undefined) {
-        filterSearchParam.append('fields', fields);
-      }
-
-      filterSearchParam.append('filter', JSON.stringify(filter));
-      filter.objectPath = filter.objectPath.trim();
-      const url = `/api/layouts?${filterSearchParam.size > 0 ? `${filterSearchParam.toString()}` : ''}`;
-
-      const { result, ok } = await this.loader.get(url);
-      if (ok) {
-        const sortedLayouts = result.sort(this._compareByName);
-        // My layouts/userlist or should this be about all layouts?
-        this.list = RemoteData.success(sortedLayouts);
-      } else {
-        this.list = RemoteData.failure(result.error || result.message);
-      }
-    } else {
-      this.list = RemoteData.failure('Filter is not defined');
-    }
-    //unpack remote-data/filter, repack and set
-    const unpacked =
-    this.list._payload.filter((layout) => layout.owner_id === userId);
-    this.userList = RemoteData.success(unpacked);
-    this.model.layoutListModel.folders.get('My Layouts').list = this.userList;
-    this.model.layoutListModel.folders.get('All Layouts').list = this.list;
-    that.notify();
-  }
-
-  /**
    * Comparator function to sort layouts alphabetically by their name property
    * @param {Layout} layout1 - First layout object to compare
    * @param {Layout} layout2 - Second layout object to compare

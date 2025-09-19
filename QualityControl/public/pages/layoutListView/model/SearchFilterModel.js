@@ -129,6 +129,19 @@ export default class SearchFilterModel extends BaseViewModel {
   }
 
   /**
+   * Returns all filters in a object like so
+   * This is the object that we can actually search with.
+   * {
+   *    objectPath: 'TPC',
+   *    pizza: 'Peperoni',
+   * }
+   * @returns {object} object containing all key/value pairs from all filters.
+   */
+  getAllAsObject() {
+    return Object.fromEntries(this.getAll().map((filter) => [filter.key, filter.getValue()]));
+  }
+
+  /**
    * return the active filters in a representable way.
    * @returns {string} Active filters: filter.friendlyName().
    */

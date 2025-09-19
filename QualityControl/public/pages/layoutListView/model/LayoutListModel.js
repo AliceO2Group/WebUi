@@ -31,14 +31,12 @@ export default class LayoutListModel extends BaseViewModel {
     this.model = model;
     this.folders = new Map();
     this.searchFilterModel = new SearchFilterModel();
-    // Notify the root model to redraw.
     this.searchFilterModel.observe(() => {
       this.notify();
       if (!this.searchFilterModel.allInActive()) {
-        this.search(undefined, this.searchFilterModel.filters.get('objectPath')
-          .getValue(), this.model.session.personid);
+        this.search(undefined, this.searchFilterModel.getAllAsObject());
       } else {
-        this.search(undefined, undefined, this.model.session.personid);
+        this.search(undefined, undefined);
       }
     });
 
@@ -88,12 +86,12 @@ export default class LayoutListModel extends BaseViewModel {
    * If searchInput and objectPath are not included get all non-filtered layouts.
    * All params can be undefined if you want all layouts.
    * @param {string} searchInput - string input from the user to search by.
-   * @param {string} objectPath - string input from the user to search layouts by objectPath.
+   * @param {object} filters - filters object contains all filter key value pairs in one object.
    */
-  search(searchInput, objectPath) {
-    if (searchInput === undefined && objectPath === undefined) {
-      this.model.services.layout.getLayouts(undefined, undefined, this.model);
-    } else if (objectPath === undefined) {
+  search(searchInput, filters) {
+    if (searchInput === undefined && filters === undefined) {
+      this.model.services.layout.getLayouts(undefined, undefined);
+    } else if (filters === undefined) {
       // Normal offline search
       this.searchInput = searchInput;
       this.folders.forEach((folder) => {
@@ -102,9 +100,7 @@ export default class LayoutListModel extends BaseViewModel {
       this.notify();
     } else {
       // online search
-      const layoutService = this.model.services.layout;
-      this._searchInput = objectPath;
-      layoutService.getLayouts(RequestFields.LAYOUT_CARD, { objectPath }, this.model);
+      this.model.services.layout.getLayouts(RequestFields.LAYOUT_CARD, filters);
     }
   }
 
