@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, ok } from 'node:assert';
+import { strictEqual, ok, match } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 export const runModeTests = async (url, page, timeout = 5000, testParent) => {
   //
@@ -46,6 +46,8 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
   await testParent.test('should allow user to track a run', { timeout }, async () => {
     const urlRunStatus = '/api/filter/run-status/566138';
     const urlObjects = '/api/objects?inRunMode=true&filters[RunNumber]=566138';
+    const regex =
+      /^Last update: \d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}:\d{2}$/;
     let countRunStatusCalls = 0;
     let countObjectsCalls = 0;
     page.on('request', (req) => {
@@ -69,15 +71,19 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     await page.waitForSelector('#runStatusPanel');
     const runStatusInfo = await page.evaluate(() => {
       const runNumber = document.querySelector('#runNumberLabel').textContent;
-      const status = document.querySelector('#runStatus').textContent;
-      return { runNumber, status };
+      const status = document.querySelector('#runStatusBadge').textContent;
+      const lastUpdate = document.querySelector('#lastUpdate').textContent;
+      const refreshInfo = document.querySelector('#refreshInfo')?.textContent;
+      return { runNumber, status, lastUpdate, refreshInfo };
     });
-    strictEqual(runStatusInfo.runNumber, '#566138');
+    strictEqual(runStatusInfo.runNumber, 'Run #566138');
     strictEqual(runStatusInfo.status, 'ONGOING');
+    strictEqual(runStatusInfo.refreshInfo, ' - As run is ONGOING, will refresh every 0.5 seconds');
+    match(runStatusInfo.lastUpdate, regex);
+
     await delay(1000);
     strictEqual(countRunStatusCalls, 3, `Expected 3 requests to filter/run-status, but got ${countRunStatusCalls}`);
-    //2 because the third one returns an 'ENDED' status
-    strictEqual(countObjectsCalls, 2, `Expected  requests to api/objects, but got ${countObjectsCalls}`);
+    strictEqual(countObjectsCalls, 3, `Expected 3 requests to api/objects, but got ${countObjectsCalls}`);
   });
 
   await testParent.test('should show `ENDED` if a run that was ongoing, finishes', { timeout }, async () => {
@@ -92,10 +98,10 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     await page.waitForSelector('#runStatusPanel');
     const runStatusInfo = await page.evaluate(() => {
       const runNumber = document.querySelector('#runNumberLabel').textContent;
-      const status = document.querySelector('#runStatus').textContent;
+      const status = document.querySelector('#runStatusBadge').textContent;
       return { runNumber, status };
     });
-    strictEqual(runStatusInfo.runNumber, '#566138');
+    strictEqual(runStatusInfo.runNumber, 'Run #566138');
     strictEqual(runStatusInfo.status, 'ENDED');
     await delay(500);
     strictEqual(count, 0, `No requests expected, but got ${count}`);
@@ -106,7 +112,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     await page.waitForSelector('#runStatusPanel');
     const runInfo = await page.evaluate(() => {
       const runNumber = document.querySelector('#runNumberLabel').textContent;
-      const status = document.querySelector('#runStatus').textContent;
+      const status = document.querySelector('#runStatusBadge').textContent;
       return { runNumber, status };
     });
     const isRunModeActivated = await page.evaluate(() => window.model.filterModel.isRunModeActivated);
