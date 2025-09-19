@@ -44,7 +44,7 @@ const toolbarViewMode = (layout, filterModel) => {
   const { isOfficial, owner_id, name } = layoutItem;
 
   return [
-    h('.flex-grow.text-center', h('div.header-layout', [tabViewLinks(layoutItem, layout)])),
+    h('.flex-grow.text-center', h('.header-layout', [tabViewLinks(layoutItem, layout)])),
     h('.flex-grow.text-right', [
       h('b.f4.items-center', [isOfficial ? iconBadge() : '', layoutItem.name]),
       ' ',

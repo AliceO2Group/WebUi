@@ -22,18 +22,18 @@ import { h } from '/js/src/index.js';
 export const runStatusPanel = (runNumber, status) =>
   status.match({
     Loading: () =>
-      h('div.flex-row.g1.items-center.justify-center', [
+      h('.flex-row.g1.items-center.justify-center', [
         h('b', { id: 'runNumberLabel' }, `#${runNumber}`),
-        h('div.flex-row.g1', [
-          h('div.label', 'Status: '),
+        h('.flex-row.g1', [
+          h('label', 'Status: '),
           h('b.color-gray', 'Loading...'),
         ]),
       ]),
 
     Success: (res) =>
-      h('div.flex-row.g1.items-center.justify-center', { id: 'runStatusPanel' }, [
+      h('.flex-row.g1.items-center.justify-center', { id: 'runStatusPanel' }, [
         h('b', { id: 'runNumberLabel' }, `#${runNumber}`),
-        h('div.flex-row.g1', [
+        h('.flex-row.g1', [
           h('span', 'Status: '),
           h(
             `b.${

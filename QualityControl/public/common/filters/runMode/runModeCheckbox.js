@@ -40,7 +40,7 @@ export const runModeCheckbox = (filterModel, viewModel) => {
         '.switch',
         [
           h('input', {
-            onchange: () =>isAvailable && handleClick(),
+            onchange: () => isAvailable && handleClick(),
             type: 'checkbox',
             checked: isRunModeActivated,
           }),
