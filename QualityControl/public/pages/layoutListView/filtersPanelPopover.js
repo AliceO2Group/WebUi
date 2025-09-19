@@ -80,12 +80,11 @@ const filtersToggleContent = (searchFilterModel) => h('.w-l.flex-column.p3.g3', 
 /**
  * Return component composed of the filtering popover and its button trigger
  * @param {SearchFilterModel} searchFilterModel the filtering model
- * @param {object} [configuration] optional configuration
  * @returns {Component} the filter component
  */
-export const filtersPanelPopover = (searchFilterModel, configuration) => popover(
+export const filtersPanelPopover = (searchFilterModel) => popover(
   filtersToggleTrigger(),
-  filtersToggleContent(searchFilterModel, configuration),
+  filtersToggleContent(searchFilterModel),
   {
     ...PopoverTriggerPreConfiguration.click,
     anchor: PopoverAnchors.RIGHT_START,
