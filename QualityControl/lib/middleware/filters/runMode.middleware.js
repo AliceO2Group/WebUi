@@ -13,7 +13,6 @@
  */
 
 import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
-import { RunNumberDto } from '../../dtos/filters/RunNumberDto.js';
 
 /**
  * Middleware function to validate the run number if in run mode.
@@ -24,20 +23,12 @@ import { RunNumberDto } from '../../dtos/filters/RunNumberDto.js';
  */
 export const runModeMiddleware = async (req, res, next) => {
   const { inRunMode = false, filters = {} } = req.query;
-  if (!inRunMode) {
-    next();
-    return;
-  }
-  try {
-    const validatedRunNumber = await RunNumberDto.validateAsync(filters?.RunNumber);
-    req.query.filters = { ...filters, RunNumber: validatedRunNumber };
-    next();
-  } catch (error) {
+  if (inRunMode && !filters.RunNumber) {
     updateAndSendExpressResponseFromNativeError(
       res,
-      error.isJoi
-        ? new InvalidInputError(error.details[0].message)
-        : error,
+      new InvalidInputError('Run number is required'),
     );
+    return;
   }
+  next();
 };

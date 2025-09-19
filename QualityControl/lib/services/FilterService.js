@@ -14,7 +14,8 @@
 
 import { LogManager } from '@aliceo2/web-ui';
 import { RunStatus } from '../../common/library/runStatus.enum.js';
-const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/filter-svc`;
+
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/filter-service`;
 
 /**
  * High level service that composes, processes and maps data from the bookkeeping service
@@ -29,6 +30,7 @@ export class FilterService {
     this._logger = LogManager.getLogger(LOG_FACILITY);
     this._bookkeepingService = bookkeepingService;
     this._runTypes = [];
+    this.initFilters();
 
     this._runTypesRefreshInterval = config?.bookkeeping?.runTypesRefreshInterval ??
       (config?.bookkeeping ? 24 * 60 * 60 * 1000 : -1);
@@ -92,11 +94,6 @@ export class FilterService {
   async getRunStatus(runNumber) {
     try {
       const runStatus = await this._bookkeepingService.retrieveRunStatus(runNumber);
-
-      if (!runStatus || !Object.values(RunStatus).includes(runStatus)) {
-        this._logger.warnMessage(`Invalid run status received for run ${runNumber}: ${runStatus}`);
-        return RunStatus.UNKNOWN;
-      }
       return runStatus;
     } catch (error) {
       const message = `Error while retrieving run status for run ${runNumber}: ${error.message || error}`;
