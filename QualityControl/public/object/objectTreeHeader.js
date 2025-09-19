@@ -39,10 +39,10 @@ export default function objectTreeHeader(qcObject, filterModel) {
       qcObject.objectsRemote.isSuccess() && h('span', `(${howMany})`),
     ]),
     h('.flex-row.items-center.g2.justify-end', [
-      filterModel.inRunMode ? null : filterPanelToggleButton(filterModel),
+      filterModel.isRunModeActivated ? null : filterPanelToggleButton(filterModel),
       ' ',
       h('.dropdown', {
-        title: 'Sort by', class: qcObject.sortBy.open ? 'dropdown-open' : '',
+        id: 'sortTreeButton', title: 'Sort by', class: qcObject.sortBy.open ? 'dropdown-open' : '',
       }, [
         h('button.btn', {
           title: 'Sort by',
@@ -62,6 +62,7 @@ export default function objectTreeHeader(qcObject, filterModel) {
       }, iconCollapseUp()),
       ' ',
       h('input.form-control.form-inline.mh1.w-33', {
+        id: 'searchObjectTree',
         placeholder: 'Search',
         type: 'text',
         value: qcObject.searchInput,

@@ -21,7 +21,6 @@ import aboutViewHeader from '../pages/aboutView/components/aboutViewHeader.js';
 import LayoutListHeader from '../pages/layoutListView/components/LayoutListHeader.js';
 import { objectViewHeader } from '../pages/objectView/components/header.js';
 import { filtersPanel } from './filters/filterViews.js';
-import { runModeHeader } from './runModeHeader.js';
 
 /**
  * Shows header of the application, split with 3 parts:
@@ -32,11 +31,10 @@ import { runModeHeader } from './runModeHeader.js';
  * @returns {vnode} - header element
  */
 export default (model) => h('.flex-col', [
-  h('.flex-row.p2.items-center', [
+  h('.flex-row.p2.items-center', { id: 'qcg-header' }, [
     commonHeader(model),
-    headerSpecific(model),
+    h('.flex-grow.flex-row', headerSpecific(model)),
   ]),
-  runsModeSpecific(model),
   filterSpecific(model),
 ]);
 
@@ -74,27 +72,11 @@ const filterSpecific = (model) => {
 };
 
 /**
- * Shows the runs mode component
- * @param {Model} model - root model of the application
- * @returns {vnode} - virtual node element
- */
-const runsModeSpecific = (model) => {
-  const { page, filterModel, object, layout, objectViewModel } = model;
-
-  switch (page) {
-    case 'objectTree': return runModeHeader(filterModel, object);
-    case 'layoutShow': return runModeHeader(filterModel, layout);
-    case 'objectView': return runModeHeader(filterModel, objectViewModel);
-    default: return null;
-  }
-};
-
-/**
  * Shows app header, common to all pages (profile button + app title)
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const commonHeader = (model) => h('.flex-grow.flex-row.items-center', [
+const commonHeader = (model) => h('.flex-row.items-center.w-33', [
   loginButton(model),
   ' ',
   h('span.f4.gray', {

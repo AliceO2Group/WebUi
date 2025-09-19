@@ -404,7 +404,7 @@ export default class Layout extends BaseViewModel {
    * @returns {undefined}
    */
   edit() {
-    if (this.model.filterModel.inRunMode) {
+    if (this.model.filterModel.isRunModeActivated) {
       this.model.filterModel.deactivateRunsMode(this);
     }
     this.toggleEditMenu();
