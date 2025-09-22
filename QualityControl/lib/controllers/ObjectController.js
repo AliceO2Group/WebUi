@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 'use strict';
-import { LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import { ObjectGetDownloadDTO } from '../dtos/ObjectGetDto.js';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/obj-controller`;
 
@@ -24,14 +25,22 @@ export class ObjectController {
   /**
    * Setup Object Controller:
    * - CcdbService - retrieve data about objects
+   * @import { QcdbProxyService } from '../services/QcdbProxy.service.js';
    * @param {QCObjectService} objService - objService to be used for retrieval of information
    * @param {RunMonitoringService} runModeService - for monitoring the status of runs periodically
+   * @param {QcdbProxyService} qcdbProxyService - service that will proxy our request to qcdb and back.
    */
-  constructor(objService, runModeService) {
+  constructor(objService, runModeService, qcdbProxyService) {
     /**
      * @type {QCObjectService}
      */
     this._objService = objService;
+
+    /**
+     * @type {QcdbProxyService}
+     * @import { QcdbProxyService } from '../services/QcdbProxy.service.js';
+     */
+    this._qcdbProxyService = qcdbProxyService;
 
     /**
      * @type {RunMonitoringService}
@@ -67,6 +76,29 @@ export class ObjectController {
       this._logger.errorMessage(`Error whilst retrieving objects: ${error}`);
       updateAndSendExpressResponseFromNativeError(res, responseError);
     }
+  }
+
+  /**
+   * Download a ROOT object using the QcdbProxy.
+   * @param {Request} req - ExpressJs req object.
+   * @param {Response} res - ExpressJs res object.
+   * @returns {void}
+   */
+  async getDownloadObject(req, res) {
+    let objectId = undefined;
+    try {
+      const validated = await ObjectGetDownloadDTO.validateAsync(req.query);
+      ({ objectId } = validated);
+    } catch (e) {
+      const responseError = e.isJoi ?
+        new InvalidInputError(`Invalid query parameters: ${e.details[0].message}`) :
+        new Error('Unable to process request');
+
+      this._logger.errorMessage(`Error validating query parameters: ${e}`);
+      return updateAndSendExpressResponseFromNativeError(res, responseError);
+    }
+    req.url = `download/${objectId}`;
+    this._qcdbProxyService.qcdbProxyRouter(req, res);
   }
 
   /**

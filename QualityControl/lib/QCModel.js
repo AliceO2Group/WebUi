@@ -44,6 +44,7 @@ import { objectsGetValidationMiddlewareFactory } from './middleware/objects/obje
 import { objectGetContentsValidationMiddlewareFactory }
   from './middleware/objects/objectGetContentsValidationMiddlewareFactory.js';
 import { RunModeService } from './services/RunModeService.js';
+import { QcdbProxyService } from './services/QcdbProxy.service.js';
 
 /**
  * Model initialization for the QCG application
@@ -69,6 +70,8 @@ export const setupQcModel = () => {
   const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
   const statusController = new StatusController(statusService);
 
+  const qcdbProxyService = new QcdbProxyService(config.ccdb);
+
   const ccdbService = CcdbService.setup(config.ccdb);
   statusService.dataService = ccdbService;
 
@@ -80,7 +83,7 @@ export const setupQcModel = () => {
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
   const filterService = new FilterService(bookkeepingService, config);
   const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService);
-  const objectController = new ObjectController(qcObjectService, runModeService);
+  const objectController = new ObjectController(qcObjectService, runModeService, qcdbProxyService);
 
   const filterController = new FilterController(filterService);
 

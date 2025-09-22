@@ -26,6 +26,8 @@ import { runModeMiddleware } from './middleware/filters/runMode.middleware.js';
  * Adds paths and binds websocket to instance of HttpServer passed
  * @param {HttpServer} http - web-ui based server implementation
  * @param {WebSocket} ws - web-ui websocket server implementation
+ * @import {HttpServer} from '@aliceo2/web-ui';
+ * @import {WebSocket} from '@aliceo2/web-ui';
  * @returns {void}
  */
 export const setup = (http, ws) => {
@@ -63,6 +65,8 @@ export const setup = (http, ws) => {
     runModeMiddleware,
     objectController.getObjects.bind(objectController),
   );
+
+  http.get('/object/proxy/download/', objectController.getDownloadObject.bind(objectController));
 
   http.get('/layouts', layoutController.getLayoutsHandler.bind(layoutController));
   http.get('/layout/:id', layoutController.getLayoutHandler.bind(layoutController));
