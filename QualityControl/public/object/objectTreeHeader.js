@@ -21,7 +21,7 @@ import { filterPanelToggleButton } from '../common/filters/filterViews.js';
  * by name.
  * @param {QcObject} qcObject - Model that manages the QCObject state.
  * @param {FilterModel} filterModel - The model handeling the filter state
- * @returns {vnode} - virtual node element
+ * @returns {{centerCol: vnode, rightCol: vnode} | null} - object with vnode elements
  */
 export default function objectTreeHeader(qcObject, filterModel) {
   if (!qcObject.currentList) {
@@ -32,13 +32,14 @@ export default function objectTreeHeader(qcObject, filterModel) {
     ? `${qcObject.searchResult.length} found of ${qcObject.currentList.length}`
     : `${qcObject.currentList.length} items`;
 
-  return [
-    h('.w-33.text-center.flex-grow.flex-row.justify-center.items-center', [
+  return {
+    centerCol: h('.flex-grow.text-center.flex-row.justify-center.items-center', [
       h('b.f4', 'Objects'),
       ' ',
       qcObject.objectsRemote.isSuccess() && h('span', `(${howMany})`),
     ]),
-    h('.flex-row.items-center.g2.justify-end', [
+
+    rightCol: h('.w-33.flex-row.items-center.g2.justify-end', [
       filterModel.isRunModeActivated ? null : filterPanelToggleButton(filterModel),
       ' ',
       h('.dropdown', {
@@ -71,7 +72,7 @@ export default function objectTreeHeader(qcObject, filterModel) {
       }),
       ' ',
     ]),
-  ];
+  };
 }
 
 /**

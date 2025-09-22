@@ -169,15 +169,31 @@ export default class QCObject extends BaseViewModel {
   }
 
   /**
+   * Checks if the object list needs to be refreshed.
+   * @returns {Promise<{ refreshNeeded: boolean, data: object | null }>}
+   * whether a refresh is needed and the fetched data
+   */
+  checkIfListHasToBeRefreshed() {
+    const fetchFn = async () => await this.model.services.object.getObjects(true);
+    const validateFn = (result) => result.isSuccess() && result.payload.paths?.length !== this.list?.length;
+    return this.model.filterModel.refreshCheck(fetchFn, validateFn);
+  }
+
+  /**
    * Ask server for all available objects, fills `tree` of objects
    * @returns {undefined}
    */
   async loadList() {
+    const { refreshNeeded, data } = await this.checkIfListHasToBeRefreshed();
+    if (!refreshNeeded) {
+      this.notify();
+      return;
+    }
     this.objectsRemote = RemoteData.loading();
     this.notify();
     this.queryingObjects = true;
     let offlineObjects = [];
-    const result = await this.model.services.object.getObjects(this.model.filterModel.isRunModeActivated);
+    const result = data ?? await this.model.services.object.getObjects(this.model.filterModel.isRunModeActivated);
 
     if (result.isSuccess()) {
       offlineObjects = this.model.filterModel.isRunModeActivated ? result.payload.paths : result.payload;
@@ -539,7 +555,7 @@ export default class QCObject extends BaseViewModel {
    */
   async triggerFilter() {
     // don't clear selected object refreshing in run mode
-    if (!this.model.filterModel.isRunModeActivated) {
+    if (!this.model.filterModel.isRunModeActivated || !this.model.filterModel.runsModeInterval) {
       this.selected = null;
     }
     this.loadList();

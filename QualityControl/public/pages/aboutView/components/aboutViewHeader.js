@@ -18,10 +18,7 @@ import { h } from '/js/src/index.js';
  * Shows header of Framework Information
  * @returns {vnode} - virtual node element
  */
-export default () => [
-  h(
-    '.w-50.flex-row.justify-center',
-    h('b.f4.ph2', 'About'),
-  ),
-  h('.flex-grow'),
-];
+export default () => ({
+  centerCol: h('.flex-row.justify-center.flex-grow', [h('b.f4.ph2', 'About')]),
+  rightCol: h('.w-33'),
+});
