@@ -18,13 +18,13 @@ const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/ecs-synchroni
 const RUN_TOPICS = ['aliecs.run'];
 
 /**
- * Service for processing events sent via Kafka from AlIECS with proto objects
+ * Service for processing events sent via Kafka from AliECS with proto objects
  */
 export class AliEcsSynchronizer {
   /**
    * Constructor
    * @param {import('kafkajs').Kafka} kafkaClient - configured kafka client
-   * @param {KafkaConfiguration.consumerGroups} consumerGroups - instance of CacheService
+   * @param {KafkaConfiguration.consumerGroups} consumerGroups - consumer groups to be used for various topics
    * @param {EventEmitter} eventEmitter - event emitter to be used to emit events when new data is available
    */
   constructor(kafkaClient, consumerGroups, eventEmitter) {
