@@ -51,9 +51,6 @@ export default class ObjectViewModel extends BaseViewModel {
    * @returns {undefined}
    */
   async init(urlParams) {
-    this.selected = RemoteData.loading();
-    this.notify();
-
     const { objectName, layoutId, objectId, id, ts = undefined } = urlParams;
     if (objectName) {
       this.updateObjectSelection({ objectName }, ts, id);
@@ -64,6 +61,14 @@ export default class ObjectViewModel extends BaseViewModel {
     }
   }
 
+  async checkIfRefreshIsNeeded(params, id, validFrom) {
+    const fetchFn = async () => params.objectName
+      ? await this.model.services.object.getObjectByName(params.objectName, id, validFrom, this)
+      : await this.model.services.object.getObjectById(params.objectId, id, validFrom, this);
+    const validateFn = (result) => result.isSuccess() && this.selected.payload.id !== result.payload.id;
+    return await this.model.filterModel.refreshCheck(fetchFn, validateFn);
+  }
+
   /**
    * Updates the selected object from ObjectViewModel
    * @param {object} object - object with name or id to be used for content retrieval
@@ -72,18 +77,24 @@ export default class ObjectViewModel extends BaseViewModel {
    * @returns {undefined}
    */
   async updateObjectSelection(object, validFrom = undefined, id = '') {
+    const { refreshNeeded, data } = await this.checkIfRefreshIsNeeded(params, id, validFrom);
+    if (!refreshNeeded) {
+      return;
+    }
+
     const { objectName = undefined, objectId = undefined } = object;
     const { params } = this.model.router;
 
-    if (!objectName && !objectId && !params.objectId && !params.objectName && !this.selected.isSuccess()) {
-      return; // This will permanently put the page in loading mode.
-    }
     this._setParameters(objectName, objectId, params);
     this.selected = RemoteData.loading();
     this.notify();
 
+    if (!objectName && !objectId && !params.objectId && !params.objectName && !this.selected.isSuccess()) {
+      return; // This will permanently put the page in loading mode.
+    }
+
     let currentParams = '?page=objectView';
-    this.selected = params.objectName
+    this.selected = data ?? params.objectName
       ? await this.model.services.object.getObjectByName(params.objectName, id, validFrom, this)
       : await this.model.services.object.getObjectById(params.objectId, id, validFrom, this);
 

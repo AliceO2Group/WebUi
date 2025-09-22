@@ -549,14 +549,28 @@ export default class QCObject extends BaseViewModel {
     restoreNodeState(this.tree);
   }
 
+  async checkIfRefreshSelectedObject() {
+    const currentId = this.objects[this.selected.name].payload.id;
+    const fetchFn = async () =>
+      await this.model.services.object.getObjectByName(this.selected.name, undefined, undefined, this);
+    const validateFn = (result) =>
+      result.isSuccess() && result.payload.id !== currentId;
+    return this.model.filterModel.refreshCheck(fetchFn, validateFn);
+  }
+
   /**
    * Function that reloads the object list with filters applied
    * @returns {undefined}
    */
   async triggerFilter() {
-    // don't clear selected object refreshing in run mode
     if (!this.model.filterModel.isRunModeActivated || !this.model.filterModel.runsModeInterval) {
       this.selected = null;
+    }
+    if (this.selected && this.selected.name) {
+      const { refreshNeeded, data } = await this.checkIfRefreshSelectedObject();
+      if (refreshNeeded) {
+        this.select(data?.payload ?? { name: this.selected.name });
+      }
     }
     this.loadList();
   }
