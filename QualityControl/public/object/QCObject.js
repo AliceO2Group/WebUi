@@ -329,9 +329,10 @@ export default class QCObject extends BaseViewModel {
    * Set the current selected object by user
    * Search within `currentList`;
    * @param {QCObject} object - object to be selected and loaded
-   * @returns {undefined}
+   * @param {object} [preloadedData] - optional object data already fetched
+   *  @returns {undefined}
    */
-  async select(object) {
+  async select(object, preloadedData = null) {
     let foundObject = this.currentList.find((obj) => obj.name === object.name);
 
     if (foundObject && this.list && this.list.length > 0) {
@@ -340,7 +341,11 @@ export default class QCObject extends BaseViewModel {
 
     this.selected = foundObject || object;
     setBrowserTabTitle(this.selected.name);
-    await this.loadObjectByName(this.selected.name);
+    if (preloadedData) {
+      this.objects[this.selected.name] = RemoteData.success(preloadedData);
+    } else {
+      await this.loadObjectByName(this.selected.name);
+    }
     this.notify();
   }
 
@@ -568,8 +573,8 @@ export default class QCObject extends BaseViewModel {
     }
     if (this.selected && this.selected.name) {
       const { refreshNeeded, data } = await this.checkIfRefreshSelectedObject();
-      if (refreshNeeded) {
-        this.select(data?.payload ?? { name: this.selected.name });
+      if (refreshNeeded && data?.payload) {
+        this.select({ name: this.selected.name }, data.payload);
       }
     }
     this.loadList();
