@@ -60,6 +60,7 @@ export class AliEcsSynchronizer {
     const { runEvent, timestamp } = eventMessage;
     if (!runEvent) {
       this._logger.warnMessage('Received run message on run topic without runEvent field');
+      return;
     } else {
       const { runNumber, transition } = runEvent;
       this._eventEmitter.emit(EmitterKeys.RUN_TRACK, {
