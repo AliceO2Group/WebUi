@@ -37,9 +37,7 @@ const filtersToggleContentHeader = (searchFilterModel) => h('.flex-row.justify-b
   h(
     'button#reset-filters.btn.btn-danger',
     {
-      onclick: () => {
-        searchFilterModel.resetAll();
-      },
+      onclick: () => searchFilterModel.resetAll(),
       disabled: searchFilterModel.allInActive() ? true : false,
     },
     'Reset all filters',
@@ -54,7 +52,7 @@ const filtersToggleContentHeader = (searchFilterModel) => h('.flex-row.justify-b
 export const filtersSection = (searchFilterModel = {}) => [
   searchFilterModel.getAll().flatMap((filter) => [
     h('.flex-row.g2', [
-      h('.w-30.f5.flex-row.items-center.g2', [filter.friendlyName()]),
+      h('.w-30.f5.flex-row.items-center.g2', filter.friendlyName()),
       h('.w-70', [
         h('input.form-control.w-100', {
           placeholder: filter.inputPlaceholder(),

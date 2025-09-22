@@ -32,7 +32,6 @@ export default class LayoutListModel extends BaseViewModel {
     this.folders = new Map();
     this.searchFilterModel = new SearchFilterModel();
     this.searchFilterModel.observe(() => {
-      this.notify();
       if (!this.searchFilterModel.allInActive()) {
         this.search(undefined, this.searchFilterModel.getAllAsObject());
       } else {

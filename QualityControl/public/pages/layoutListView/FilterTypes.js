@@ -35,41 +35,13 @@ export function createKeyValueFilter(key, friendlyName = null, inputPlaceholder 
   return {
     key,
     friendlyName: () => friendlyName ? friendlyName : key,
-    inputPlaceholder: () => inputPlaceholder ? inputPlaceholder : 'Conditions',
+    inputPlaceholder: () => inputPlaceholder ? inputPlaceholder : '',
     getValue: () => value ? value : null,
     // trim checks if value is a string value, test this
     isActive: () => Boolean(value && value.trim()),
-    set: (v) => {
-      value = v;
-    },
-    reset: () => {
-      value = '';
-    },
-  };
-}
-
-/**
- * Creates a multiple value filter, key with array value.
- * Not used in the code yet but serves as an example.
- * @param {string} key - key used to save and retrieve value.
- * @param {string|null} friendlyName - friendly name of the filter.
- * @param {string|null} inputPlaceholder - input placeholder text.
- * @param {Array<string>} value - values (array) associated with key.
- * @returns {Filter} multiple value filter, key with array with values.
- */
-export function createMultiValueFilter(key, friendlyName = null, inputPlaceholder = null, value = []) {
-  let values = Array.isArray(value) ? value : [];
-  return {
-    key,
-    friendlyName: () => friendlyName ? friendlyName : key,
-    inputPlaceholder: () => inputPlaceholder ? inputPlaceholder : 'Conditions',
-    getValue: () => values,
-    isActive: () => values.length > 0,
-    set: (arr) => {
-      values = Array.isArray(arr) ? arr : [];
-    },
-    reset: () => {
-      values = [];
-    },
+    // eslint-disable-next-line @stylistic/js/brace-style
+    set: (v) => { value = v; },
+    // eslint-disable-next-line @stylistic/js/brace-style
+    reset: () => { value = ''; },
   };
 }

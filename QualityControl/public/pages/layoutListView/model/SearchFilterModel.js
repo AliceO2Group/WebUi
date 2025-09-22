@@ -151,15 +151,11 @@ export default class SearchFilterModel extends BaseViewModel {
   stringifyActiveFiltersFriendly() {
     let activeFilterText = 'Active filters: ';
     if (this.allInActive()) {
-      activeFilterText += 'None.';
+      activeFilterText = '';
       return activeFilterText;
     } else {
-      for (const filter of this.getAllActive()) {
-        activeFilterText += ` ${filter.friendlyName()},`;
-      }
-      // Remove trailing comma
-      activeFilterText = activeFilterText.slice(0, activeFilterText.length - 1);
-      activeFilterText += '.';
+      const activeNames = this.getAllActive().map((filter) => filter.friendlyName());
+      activeFilterText += `${activeNames.join(', ')}.`;
 
       return activeFilterText;
     }
