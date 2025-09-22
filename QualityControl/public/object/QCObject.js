@@ -554,12 +554,18 @@ export default class QCObject extends BaseViewModel {
     restoreNodeState(this.tree);
   }
 
-  async checkIfRefreshSelectedObject() {
-    const currentId = this.objects[this.selected.name].payload.id;
+  /**
+   * Checks if the given object needs to be refreshed by comparing its ID
+   * @param {object} object - The object to check for refresh.
+   * @param {string} object.name - The name of the object to look up.
+   * @param {string|number} object.id - The current ID of the object being validated.
+   * @returns {Promise<boolean,RemoteData>} A promise that resolves to `true` if the object should be refreshed
+   */
+  async checkIfRefreshObject(object) {
     const fetchFn = async () =>
-      await this.model.services.object.getObjectByName(this.selected.name, undefined, undefined, this);
+      await this.model.services.object.getObjectByName(object.name, undefined, undefined, this);
     const validateFn = (result) =>
-      result.isSuccess() && result.payload.id !== currentId;
+      result.isSuccess() && result.payload.id !== object.id;
     return this.model.filterModel.refreshCheck(fetchFn, validateFn);
   }
 
@@ -572,7 +578,7 @@ export default class QCObject extends BaseViewModel {
       this.selected = null;
     }
     if (this.selected && this.selected.name) {
-      const { refreshNeeded, data } = await this.checkIfRefreshSelectedObject();
+      const { refreshNeeded, data } = await this.checkIfRefreshObject(this.objects[this.selected.name].payload);
       if (refreshNeeded && data?.payload) {
         this.select({ name: this.selected.name }, data.payload);
       }

@@ -61,14 +61,6 @@ export default class ObjectViewModel extends BaseViewModel {
     }
   }
 
-  async checkIfRefreshIsNeeded(params, id, validFrom) {
-    const fetchFn = async () => params.objectName
-      ? await this.model.services.object.getObjectByName(params.objectName, id, validFrom, this)
-      : await this.model.services.object.getObjectById(params.objectId, id, validFrom, this);
-    const validateFn = (result) => result.isSuccess() && this.selected.payload.id !== result.payload.id;
-    return await this.model.filterModel.refreshCheck(fetchFn, validateFn);
-  }
-
   /**
    * Updates the selected object from ObjectViewModel
    * @param {object} object - object with name or id to be used for content retrieval
@@ -79,7 +71,7 @@ export default class ObjectViewModel extends BaseViewModel {
   async updateObjectSelection(object, validFrom = undefined, id = '') {
     const { objectName = undefined, objectId = undefined } = object;
     const { params } = this.model.router;
-    const { refreshNeeded, data } = await this.checkIfRefreshIsNeeded(params, id, validFrom);
+    const { refreshNeeded, data } = await this.model.object.checkIfRefreshObject(this.selected.payload);
     if (!refreshNeeded) {
       return;
     }
