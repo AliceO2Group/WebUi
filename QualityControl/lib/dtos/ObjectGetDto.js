@@ -97,3 +97,11 @@ export function createObjectGetByIdDto({ runTypes }) {
  */
 export const qcObjectIdDto =
   Joi.string().required().trim().min(1).messages({ 'string.empty': 'Missing object ID in URL' });
+
+/**
+ * Joi calidation schema for downloading a ROOT object trough the QcdbProxy
+ */
+export const ObjectGetDownloadDTO = Joi.object({
+  token: Joi.string().required(),
+  objectId: Joi.string().required(),
+});
