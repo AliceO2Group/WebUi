@@ -77,13 +77,12 @@ export default class ObjectViewModel extends BaseViewModel {
    * @returns {undefined}
    */
   async updateObjectSelection(object, validFrom = undefined, id = '') {
+    const { objectName = undefined, objectId = undefined } = object;
+    const { params } = this.model.router;
     const { refreshNeeded, data } = await this.checkIfRefreshIsNeeded(params, id, validFrom);
     if (!refreshNeeded) {
       return;
     }
-
-    const { objectName = undefined, objectId = undefined } = object;
-    const { params } = this.model.router;
 
     this._setParameters(objectName, objectId, params);
     this.selected = RemoteData.loading();
