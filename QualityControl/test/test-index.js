@@ -56,7 +56,7 @@ import { objectControllerTestSuite } from './lib/controllers/ObjectController.te
  */
 import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
 import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
-import { bookkeepingServiceTestSuite } from './lib/services/BookkeepingService.test.js';
+import { bookkeepingServiceTestSuite } from './lib/services/external/BookkeepingService.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
@@ -221,6 +221,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('FilterService', async () => await filterServiceTestSuite());
       suite('RunModeService - Test Suite', async () => await runModeServiceTestSuite());
       suite('QcObjectService - Test Suite', async () => await qcObjectServiceTestSuite());
+      suite('BookkeepingServiceTest test suite', async () => await bookkeepingServiceTestSuite());
       suite('AliEcsSynchronizer - Test Suite', async () => await aliecsSynchronizerTestSuite());
     });
 
@@ -231,7 +232,6 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('StatusComponentMiddleware test suite', async () => statusComponentMiddlewareTest());
       suite('RunModeMiddleware test suite', async () => runModeMiddlewareTest());
       suite('RunStatusFilterMiddleware test suite', async () => runStatusFilterMiddlewareTest());
-      suite('BookkeepingServiceTest test suite', async () => await bookkeepingServiceTestSuite());
       suite('ObjectsGetValidationMiddleware test suite', async () => objectsGetValidationMiddlewareTest());
       suite('ObjectGetContentsValidationMiddleware test suite', async () =>
         objectGetContentsValidationMiddlewareTest());
