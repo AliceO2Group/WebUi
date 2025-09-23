@@ -29,14 +29,25 @@ import Joi from 'joi';
  */
 export const KafkaConfigDto = Joi.object({
   enabled: Joi.boolean().default(false),
-  clientId: Joi.string().invalid('qc-gui'),
+  clientId: Joi.string().custom((value, helpers) => {
+    if (process.env.NODE_ENV === 'PRODUCTION') {
+      return value;
+    }
+    if (value === 'qc-gui') {
+      return helpers.error('any.invalid');
+    }
+    return value;
+  }, 'qc-gui not allowed unless in PRODUCTION'),
   consumerGroups: Joi.object().custom((obj, helpers) => {
+    if (process.env.NODE_ENV === 'PRODUCTION') {
+      return obj;
+    }
     for (const [key, value] of Object.entries(obj)) {
       if (key === 'qcg-run' || value === 'qcg-run') {
         return helpers.error('any.invalid');
       }
     }
     return obj;
-  }, 'No key or value can be qcg-run'),
+  }, 'No key or value can be qcg-run unless in PRODUCTION'),
   brokers: Joi.array().items(Joi.string()),
 });
