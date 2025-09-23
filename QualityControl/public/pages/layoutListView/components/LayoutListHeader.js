@@ -15,10 +15,10 @@
 import { h } from '/js/src/index.js';
 
 /**
- * Shows header of list of layouts.
- * @returns {vnode} - virtual node element
+ * Shows header of list of layouts with one search input to filter them
+ * @returns {{centerCol: vnode, rightCol: vnode}} - object with virtual node elements
  */
-export default () => [
-  h('.w-50.text-center', [h('b.f4', 'Layouts')]),
-  h('.flex-grow.text-right'),
-];
+export default () => ({
+  centerCol: h('.flex-grow.text-center', [h('b.f4', 'Layouts')]),
+  rightCol: h('.w-33.text-right'),
+});
