@@ -47,7 +47,7 @@ export default (model) => {
 /**
  * Shows the page specific header (center and right side)
  * @param {Model} model - root model of the application
- * @returns {{centerCol: vnode, rightCol: vnode} | null}
+ * @returns {{centerCol: vnode, rightCol: vnode} | null} - virtual node element
  */
 const headerSpecific = (model) => {
   const { layoutListModel, filterModel, layout, object, page } = model;
