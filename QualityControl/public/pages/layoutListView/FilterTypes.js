@@ -39,9 +39,11 @@ export function createKeyValueFilter(key, friendlyName = null, inputPlaceholder 
     getValue: () => value ? value : null,
     // trim checks if value is a string value, test this
     isActive: () => Boolean(value && value.trim()),
-    // eslint-disable-next-line @stylistic/js/brace-style
-    set: (v) => { value = v; },
-    // eslint-disable-next-line @stylistic/js/brace-style
-    reset: () => { value = ''; },
+    set: (v) => {
+      value = v;
+    },
+    reset: () => {
+      value = '';
+    },
   };
 }

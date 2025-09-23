@@ -13,7 +13,6 @@
  */
 
 import { BaseViewModel } from '../../../common/abstracts/BaseViewModel.js';
-import { createKeyValueFilter } from '../FilterTypes.js';
 
 /**
  * SearchFilter model to control the search and filter state
@@ -29,7 +28,6 @@ export default class SearchFilterModel extends BaseViewModel {
      */
     this.filters = new Map(); // key -> filter instance
     this.searchInput = '';
-    this.register(createKeyValueFilter('objectPath', 'Object path', 'e.g. TPC'));
   }
 
   /**
@@ -127,21 +125,21 @@ export default class SearchFilterModel extends BaseViewModel {
    * @returns {boolean} all filters are inactive
    */
   allInActive() {
-    const activeCount = this.filters.values().filter((filter) => filter.isActive()).toArray().length;
+    const activeCount = this.getAllActive().length;
     return activeCount > 0 ? false : true;
   }
 
   /**
-   * Returns all filters in a object like so
+   * Returns all active filters in a object like so
    * This is the object that we can actually search with.
    * {
    *    objectPath: 'TPC',
    *    pizza: 'Peperoni',
    * }
-   * @returns {object} object containing all key/value pairs from all filters.
+   * @returns {object} object containing all key/value pairs from all active filters.
    */
-  getAllAsObject() {
-    return Object.fromEntries(this.getAll().map((filter) => [filter.key, filter.getValue()]));
+  getAllActiveAsObject() {
+    return Object.fromEntries(this.getAllActive().map((filter) => [filter.key, filter.getValue()]));
   }
 
   /**

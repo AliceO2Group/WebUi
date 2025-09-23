@@ -17,6 +17,7 @@ import LayoutCardModel from './LayoutCardModel.js';
 import { BaseViewModel } from '../../../common/abstracts/BaseViewModel.js';
 import { RequestFields } from '../../../common/RequestFields.enum.js';
 import SearchFilterModel from './SearchFilterModel.js';
+import { createKeyValueFilter } from '../FilterTypes.js';
 
 /**
  * LayoutListModel namespace to control the layoutCards spread between its folders
@@ -31,9 +32,10 @@ export default class LayoutListModel extends BaseViewModel {
     this.model = model;
     this.folders = new Map();
     this.searchFilterModel = new SearchFilterModel();
+    this.searchFilterModel.register(createKeyValueFilter('objectPath', 'Object path', 'e.g. TPC'));
     this.searchFilterModel.observe(() => {
       if (!this.searchFilterModel.allInActive()) {
-        this.search(undefined, this.searchFilterModel.getAllAsObject());
+        this.search(undefined, this.searchFilterModel.getAllActiveAsObject());
       } else {
         this.search(undefined, undefined);
       }

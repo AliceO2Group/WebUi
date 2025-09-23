@@ -14,7 +14,6 @@
 
 // Adopted from Bookkeeping/lib/public/components/Filters/common/filtersPanelPopover.js
 import { h, popover, PopoverAnchors, PopoverTriggerPreConfiguration } from '/js/src/index.js';
-// import { tooltip } from '../../common/popover/tooltip.js';
 
 /**
  * imports for JSDoc + VSCode navigation:
