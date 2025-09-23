@@ -1,3 +1,4 @@
+/* eslint-disable @stylistic/js/comma-dangle */
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -23,6 +24,7 @@ export const objectControllerTestSuite = async () => {
   let resMock = null;
   let objectController = null;
   let RunMonitoringServiceMock = null;
+  let qcdbProxyServiceMock = null;
 
   beforeEach(() => {
     resMock = {
@@ -43,7 +45,10 @@ export const objectControllerTestSuite = async () => {
       checkAndSetRunMonitoring: sinon.spy(),
       retrievePathsAndSetRunStatus: sinon.stub(),
     };
-    objectController = new ObjectController(QcObjectServiceMock, RunMonitoringServiceMock);
+    qcdbProxyServiceMock = {
+      qcdbProxyRouter: sinon.spy(),
+    };
+    objectController = new ObjectController(QcObjectServiceMock, RunMonitoringServiceMock, qcdbProxyServiceMock);
   });
 
   afterEach(() => {
@@ -181,6 +186,36 @@ export const objectControllerTestSuite = async () => {
         status: 500,
         title: 'Unknown Error',
       }));
+    });
+  });
+
+  suite('getDownloadObject() tests', () => {
+    const mockObject = {
+      id: '21a6de32-ce79-11ef-936b-c0a80209250c',
+      path: 'qc/path/object',
+      validFrom: 1736420279131,
+    };
+
+    test('should successfully transform url', async () => {
+      reqMock.query = {
+        token: 'some token',
+        objectId: mockObject.id,
+      };
+      await objectController.getDownloadObject(reqMock, resMock);
+      const reqMockExp = reqMock;
+      reqMockExp.url = `download/${mockObject.id}`;
+      ok(qcdbProxyServiceMock.qcdbProxyRouter.calledWith(reqMockExp, resMock));
+    });
+
+    test('should fail when objectId is not present', async () => {
+      const responseMsg = {
+        message: 'Invalid query parameters: "objectId" is required',
+        status: 400,
+        title: 'Invalid Input'
+      };
+      await objectController.getDownloadObject(reqMock, resMock);
+      ok(resMock.status.calledWith(400));
+      ok(resMock.json.calledWith(responseMsg));
     });
   });
 };
