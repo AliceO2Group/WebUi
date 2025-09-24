@@ -27,6 +27,7 @@ export default class FilterService {
     this.loader = filterModel.model.loader;
 
     this.runTypes = RemoteData.notAsked();
+    this.ongoingRuns = RemoteData.notAsked();
   }
 
   /**
@@ -53,7 +54,7 @@ export default class FilterService {
   async getRunStatus(runNumber) {
     const parsedRunNumber = parseInt(runNumber, 10);
     const { result, ok } = await this.loader.get(`/api/filter/run-status/${parsedRunNumber}`);
-    return this.parseResult(result, ok);
+    return ok ? result.runStatus : null;
   }
 
   /**
@@ -76,5 +77,21 @@ export default class FilterService {
     } else {
       return RemoteData.success(result);
     }
+  }
+
+  /**
+   * Gets the run numbers for the ongoing runs
+   * @returns {void} assigns the remoteData object to ongoingRuns
+   */
+  async getOngoingRuns() {
+    this.ongoingRuns = RemoteData.loading();
+    this.filterModel.notify();
+    const { result, ok } = await this.loader.get('/api/filter/ongoingRuns');
+    if (ok) {
+      this.ongoingRuns = RemoteData.success(result?.ongoingRuns);
+    } else {
+      this.ongoingRuns = RemoteData.failure('Error retrieving ongoing runs');
+    }
+    this.filterModel.notify();
   }
 }
