@@ -356,8 +356,7 @@ export default class FilterModel extends Observable {
    * Executes a generic check to determine if a refresh is required.
    * @param {() => Promise<T>} fetchFn - Async function to fetch the data or object.
    * @param {(RemoteData) => boolean} validateFn - Validates whether the fetched result means no refresh is needed.
-   * @returns {Promise<{ refreshNeeded: boolean, data: object | null }>} - indicate if refresh is needed
-   * and fetched data if any.
+   * @returns {Promise<{ refreshNeeded: boolean, data: object | null }>}
    */
   async refreshCheck(fetchFn, validateFn) {
     if (this._runsModeInterval) {

@@ -27,7 +27,7 @@ import { StatusService } from './services/Status.service.js';
 import { JsonFileService } from './services/JsonFileService.js';
 import { QcObjectService } from './services/QcObject.service.js';
 import { FilterService } from './services/FilterService.js';
-import { BookkeepingService } from './services/external/BookkeepingService.js';
+import { BookkeepingService } from './services/BookkeepingService.js';
 import { AliEcsSynchronizer } from './services/external/AliEcsSynchronizer.js';
 
 import { LayoutController } from './controllers/LayoutController.js';

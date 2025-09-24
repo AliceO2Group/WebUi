@@ -90,7 +90,7 @@ export class LayoutRepository extends BaseRepository {
    * Given a string, representing layout name, retrieve the layout if it exists
    * @param {string} layoutName - name of the layout to retrieve
    * @returns {Layout} - object with layout information
-   * @throws {NotFoundError} - if the layout is not found
+   * @throws
    */
   readLayoutByName(layoutName) {
     const layout = this._jsonFileService.data.layouts.find((layout) => layout.name === layoutName);

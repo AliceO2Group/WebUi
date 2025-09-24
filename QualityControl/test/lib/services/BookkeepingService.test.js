@@ -17,8 +17,8 @@ import { suite, test, before, beforeEach, afterEach } from 'node:test';
 import nock from 'nock';
 import { stub, restore } from 'sinon';
 
-import { BookkeepingService } from '../../../../lib/services/external/BookkeepingService.js';
-import { RunStatus } from '../../../../common/library/runStatus.enum.js';
+import { BookkeepingService } from '../../../lib/services/BookkeepingService.js';
+import { RunStatus } from '../../../common/library/runStatus.enum.js';
 
 /**
  * Tests for the Bookkeeping service

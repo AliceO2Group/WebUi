@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { RunStatus } from '../../../common/library/runStatus.enum.js';
-import { httpGetJson } from '../../utils/httpRequests.js';
+import { RunStatus } from '../../common/library/runStatus.enum.js';
+import { httpGetJson } from '../utils/httpRequests.js';
 import { LogManager } from '@aliceo2/web-ui';
 
 const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
