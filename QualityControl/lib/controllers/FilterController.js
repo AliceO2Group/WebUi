@@ -82,7 +82,7 @@ export class FilterController {
    * @param {Request} req HTTP Request
    * @param {Response} res HTTP Response with the ongoing runs
    */
-  getOngoingRuns(req, res) {
+  getOngoingRunsHandler(req, res) {
     const ongoingRuns = this._runsModeService?.ongoingRuns ?? [];
     res.status(200).json({ ongoingRuns });
   }
