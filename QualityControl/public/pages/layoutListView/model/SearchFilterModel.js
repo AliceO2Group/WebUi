@@ -100,7 +100,7 @@ export default class SearchFilterModel extends BaseViewModel {
   }
 
   resetAll() {
-    if (this.allInActive()) {
+    if (this.allInactive()) {
       return;
     } else {
       for (const filter of this.filters.values()) {
@@ -124,7 +124,7 @@ export default class SearchFilterModel extends BaseViewModel {
    * check if all filters are inactive or not.
    * @returns {boolean} all filters are inactive
    */
-  allInActive() {
+  allInactive() {
     const activeCount = this.getAllActive().length;
     return activeCount > 0 ? false : true;
   }
@@ -148,7 +148,7 @@ export default class SearchFilterModel extends BaseViewModel {
    */
   stringifyActiveFiltersFriendly() {
     let activeFilterText = 'Active filters: ';
-    if (this.allInActive()) {
+    if (this.allInactive()) {
       activeFilterText = '';
       return activeFilterText;
     } else {

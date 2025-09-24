@@ -37,7 +37,7 @@ const filtersToggleContentHeader = (searchFilterModel) => h('.flex-row.justify-b
     'button#reset-filters.btn.btn-danger',
     {
       onclick: () => searchFilterModel.resetAll(),
-      disabled: searchFilterModel.allInActive() ? true : false,
+      disabled: searchFilterModel.allInactive() ? true : false,
     },
     'Reset all filters',
   ),
