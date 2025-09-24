@@ -16,7 +16,7 @@ import FolderModel, { FolderType } from '../../../folder/model/FolderModel.js';
 import LayoutCardModel from './LayoutCardModel.js';
 import { BaseViewModel } from '../../../common/abstracts/BaseViewModel.js';
 import { RequestFields } from '../../../common/RequestFields.enum.js';
-import SearchFilterModel from './SearchFilterModel.js';
+import { SearchFilterModel } from './SearchFilterModel.js';
 import { createKeyValueFilter } from '../FilterTypes.js';
 
 /**

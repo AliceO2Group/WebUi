@@ -18,7 +18,7 @@ import { BaseViewModel } from '../../../common/abstracts/BaseViewModel.js';
  * SearchFilter model to control the search and filter state
  * @import { Filter } from '../FilterTypes.js';
  */
-export default class SearchFilterModel extends BaseViewModel {
+export class SearchFilterModel extends BaseViewModel {
   constructor() {
     super();
 

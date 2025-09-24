@@ -17,7 +17,7 @@ import { h, popover, PopoverAnchors, PopoverTriggerPreConfiguration } from '/js/
 
 /**
  * imports for JSDoc + VSCode navigation:
- * @import SearchFilterModel from './model/SearchFilterModel.js';
+ * @import { SearchFilterModel } from './model/SearchFilterModel.js';
  */
 
 /**
