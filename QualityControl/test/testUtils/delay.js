@@ -28,7 +28,8 @@ export const delay = (ms = 500) => new Promise((resolve) => setTimeout(() => res
 export const delayAndCheck = async (conditionFunc, ms = 500, maxRetries = 10) => {
   let retries = 0;
   while (retries < maxRetries) {
-    if (conditionFunc()) {
+    const isConditionMet = await conditionFunc();
+    if (isConditionMet) {
       return;
     }
     await delay(ms);
