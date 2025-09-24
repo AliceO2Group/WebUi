@@ -13,6 +13,8 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
+import { EmitterKeys } from '../../common/library/enums/emitterKeys.enum.js';
+import { Transition } from '../../common/library/enums/transition.enum.js';
 import { RunStatus } from '../../common/library/runStatus.enum.js';
 import { parseObjects } from '../../common/library/qcObject/utils.js';
 import QCObjectDto from '../dtos/QCObjectDto.js';
@@ -26,14 +28,17 @@ export class RunModeService {
    * @param {object} config - Configuration defined as `bookkeeping` in the config file.
    * @param {BookkeepingService} bookkeepingService - Used to check the status of a run.
    * @param {CcdbService} dataService - Used to fetch data from the CCDB.
+   * @param {EventEmitter} eventEmitter - Event emitter to be used to emit events when new data is available
    */
   constructor(
     config,
     bookkeepingService,
     dataService,
+    eventEmitter,
   ) {
     this._bookkeepingService = bookkeepingService;
     this._dataService = dataService;
+    this._eventEmitter = eventEmitter;
 
     this._ongoingRuns = new Map();
     this._lastRunsRefresh = 0;
@@ -44,6 +49,7 @@ export class RunModeService {
     }
 
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/run-mode-service`);
+    this._listenToEvents();
   }
 
   /**
@@ -96,6 +102,38 @@ export class RunModeService {
       }
     }
     this._lastOngoingRunsRefresh = Date.now();
+  }
+
+  /**
+   * Listens to events emitted by the event emitter and handles them accordingly.
+   * @returns {void}
+   */
+  _listenToEvents() {
+    this._eventEmitter.on(EmitterKeys.RUN_TRACK, (runEvent) => this._onRunTrackEvent(runEvent));
+  }
+
+  /**
+   * Handles run track events emitted by the event emitter.
+   * Updates the ongoing runs cache based on the transition type.
+   * @param {object} runEvent - Object containing runNumber and transition type.
+   * @param {number} runEvent.runNumber - The run number associated with the event.
+   * @param {string} runEvent.transition - The transition type (e.g., 'START_ACTIVITY', 'STOP_ACTIVITY').
+   * @returns {Promise<void>}
+   */
+  async _onRunTrackEvent({ runNumber, transition }) {
+    if (transition === Transition.START_ACTIVITY) {
+      let rawPaths = [];
+      try {
+        rawPaths = await this._dataService.getObjectsLatestVersionList({
+          filters: { RunNumber: runNumber },
+        });
+      } catch (error) {
+        this._logger.errorMessage(`Error fetching initial paths for run ${runNumber}: ${error.message || error}`);
+      }
+      this._ongoingRuns.set(runNumber, rawPaths);
+    } else if (transition === Transition.STOP_ACTIVITY) {
+      this._ongoingRuns.delete(runNumber);
+    }
   }
 
   /**
