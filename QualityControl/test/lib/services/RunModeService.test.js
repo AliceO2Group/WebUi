@@ -13,16 +13,21 @@
  */
 
 import { suite, test, beforeEach } from 'node:test';
-import { strictEqual, deepStrictEqual } from 'assert';
+import { strictEqual, deepStrictEqual, ok } from 'assert';
+import { EventEmitter } from 'events';
 import sinon from 'sinon';
 import { RunModeService } from '../../../lib/services/RunModeService.js';
 import { RunStatus } from '../../../common/library/runStatus.enum.js';
+import { EmitterKeys } from '../../../common/library/enums/emitterKeys.enum.js';
+import { Transition } from '../../../common/library/enums/transition.enum.js';
+import { delayAndCheck } from '../../testUtils/delay.js';
 
 export const runModeServiceTestSuite = async () => {
   suite('RunModeService', () => {
     let runModeService = undefined;
     let bookkeepingService = undefined;
     let dataService = undefined;
+    const eventEmitter = new EventEmitter();
 
     beforeEach(() => {
       bookkeepingService = {
@@ -34,7 +39,7 @@ export const runModeServiceTestSuite = async () => {
       };
 
       const config = { refreshInterval: 60000 };
-      runModeService = new RunModeService(config, bookkeepingService, dataService);
+      runModeService = new RunModeService(config, bookkeepingService, dataService, eventEmitter);
     });
     suite('retrievePathsAndSetRunStatus', () => {
       test('should retrieve paths and cache them if run is ongoing', async () => {
@@ -112,6 +117,41 @@ export const runModeServiceTestSuite = async () => {
     suite('get refreshInterval', () => {
       test('should expose configured refresh interval', () => {
         strictEqual(runModeService.refreshInterval, 60000);
+      });
+    });
+
+    suite('_onRunTrackEvent - test suite', () => {
+      test('should correctly parse event to RUN_TRACK and update ongoing runs map', async () => {
+        const runEvent = { runNumber: 1234, transition: 'START_ACTIVITY' };
+        runModeService._dataService.getObjectsLatestVersionList = sinon.stub().resolves([{ path: '/path/from/event' }]);
+
+        await runModeService._onRunTrackEvent(runEvent);
+
+        strictEqual(runModeService._ongoingRuns.has(runEvent.runNumber), true);
+        ok(runModeService._dataService.getObjectsLatestVersionList.calledOnceWith({
+          filters: { RunNumber: runEvent.runNumber },
+        }));
+      });
+
+      test('should listen to events on RUN_TRACK and update ongoing runs map', async () => {
+        const runEvent = { runNumber: 1234, transition: Transition.START_ACTIVITY };
+        runModeService._dataService.getObjectsLatestVersionList = sinon.stub().resolves([{ path: '/path/from/event' }]);
+
+        eventEmitter.emit(EmitterKeys.RUN_TRACK, runEvent);
+        await delayAndCheck(() => runModeService._ongoingRuns.has(runEvent.runNumber), 500, 10);
+        ok(runModeService._ongoingRuns.has(runEvent.runNumber));
+        ok(runModeService._dataService.getObjectsLatestVersionList.calledOnceWith({
+          filters: { RunNumber: runEvent.runNumber },
+        }));
+      });
+
+      test('should remove run from ongoing runs map on STOP_ACTIVITY event', async () => {
+        const runEventStop = { runNumber: 5678, transition: Transition.STOP_ACTIVITY };
+        runModeService._ongoingRuns.set(runEventStop.runNumber, [{ path: '/some/path' }]);
+
+        eventEmitter.emit(EmitterKeys.RUN_TRACK, runEventStop);
+        await delayAndCheck(() => !runModeService._ongoingRuns.has(runEventStop.runNumber), 500, 10);
+        ok(!runModeService._ongoingRuns.has(runEventStop.runNumber));
       });
     });
   });

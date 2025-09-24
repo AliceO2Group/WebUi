@@ -28,7 +28,7 @@ import { runModeMiddleware } from './middleware/filters/runMode.middleware.js';
  * @param {WebSocket} ws - web-ui websocket server implementation
  * @returns {void}
  */
-export const setup = (http, ws) => {
+export const setup = async (http, ws) => {
   /**
    * @type {{
    *   layoutController: import('./controllers/LayoutController.js').LayoutController,
@@ -51,7 +51,7 @@ export const setup = (http, ws) => {
     objectGetByIdValidation,
     objectsGetValidation,
     objectGetContentsValidation,
-  } = setupQcModel();
+  } = await setupQcModel();
   statusService.ws = ws;
 
   http.get('/object/:id', objectGetByIdValidation, objectController.getObjectById.bind(objectController));
