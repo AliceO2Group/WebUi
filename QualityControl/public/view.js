@@ -51,7 +51,7 @@ export default (model) => [
  */
 function page(model) {
   switch (model.page) {
-    case 'layoutList': return LayoutListPage(model.layoutListModel.folders);
+    case 'layoutList': return LayoutListPage(model.layoutListModel);
     case 'layoutShow': return layoutViewPage(model);
     case 'objectTree': return objectTreePage(model);
     case 'objectView': return ObjectViewPage(model.objectViewModel);
