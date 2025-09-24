@@ -26,12 +26,13 @@ export class AliEcsSynchronizer {
    * @param {import('kafkajs').Kafka} kafkaClient - configured kafka client
    * @param {KafkaConfiguration.consumerGroups} consumerGroups - consumer groups to be used for various topics
    * @param {EventEmitter} eventEmitter - event emitter to be used to emit events when new data is available
+   * @param {class} ConsumerClass - class to be used for creating the consumer, defaults to AliEcsEventMessagesConsumer
    */
-  constructor(kafkaClient, consumerGroups, eventEmitter) {
+  constructor(kafkaClient, consumerGroups, eventEmitter, ConsumerClass = AliEcsEventMessagesConsumer) {
     this._logger = LogManager.getLogger(LOG_FACILITY);
     this._eventEmitter = eventEmitter;
 
-    this._ecsRunConsumer = new AliEcsEventMessagesConsumer(
+    this._ecsRunConsumer = new ConsumerClass(
       kafkaClient,
       consumerGroups.QCG_RUN,
       RUN_TOPICS,
