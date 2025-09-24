@@ -16,7 +16,7 @@ import { strictEqual, deepStrictEqual, ok } from 'node:assert';
 import { suite, test, before, beforeEach, afterEach } from 'node:test';
 import nock from 'nock';
 
-import { BookkeepingService } from '../../../lib/services/BookkeepingService.js';
+import { BookkeepingService } from '../../../lib/services/external/BookkeepingService.js';
 import { stub, restore } from 'sinon';
 import { RunStatus } from '../../../common/library/runStatus.enum.js';
 
