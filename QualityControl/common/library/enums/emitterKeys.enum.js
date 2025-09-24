@@ -12,13 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h } from '/js/src/index.js';
-
 /**
- * Shows header of list of layouts with one search input to filter them
- * @returns {{centerCol: vnode, rightCol: vnode}} - object with virtual node elements
+ * Keys that are used define the tracks to follow events on the Node Emitter
  */
-export default () => ({
-  centerCol: h('.flex-grow.text-center', [h('b.f4', 'Layouts')]),
-  rightCol: h('.w-33.text-right'),
+export const EmitterKeys = Object.freeze({
+  RUN_TRACK: 'RUN_TRACK',
 });

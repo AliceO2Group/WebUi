@@ -12,13 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h } from '/js/src/index.js';
-
 /**
- * Shows header of list of layouts with one search input to filter them
- * @returns {{centerCol: vnode, rightCol: vnode}} - object with virtual node elements
+ * Enumeration for different types of transitions
+ * @enum {string}
+ * @readonly
  */
-export default () => ({
-  centerCol: h('.flex-grow.text-center', [h('b.f4', 'Layouts')]),
-  rightCol: h('.w-33.text-right'),
+export const Transition = Object.freeze({
+  START_ACTIVITY: 'START_ACTIVITY',
+  STOP_ACTIVITY: 'STOP_ACTIVITY',
 });
