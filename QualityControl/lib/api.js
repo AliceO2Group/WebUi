@@ -106,4 +106,8 @@ export const setup = async (http, ws) => {
     runStatusFilterMiddleware,
     filterController.getRunStatusHandler.bind(filterController),
   );
+  http.get(
+    '/filter/ongoingRuns',
+    filterController.getOngoingRunsHandler.bind(filterController),
+  );
 };

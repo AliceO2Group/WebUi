@@ -109,7 +109,7 @@ export const setupQcModel = async () => {
   const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService, eventEmitter);
   const objectController = new ObjectController(qcObjectService, runModeService);
 
-  const filterController = new FilterController(filterService);
+  const filterController = new FilterController(filterService, runModeService);
 
   const objectGetByIdValidation = objectGetByIdValidationMiddlewareFactory(filterService);
   const objectsGetValidation = objectsGetValidationMiddlewareFactory(filterService);

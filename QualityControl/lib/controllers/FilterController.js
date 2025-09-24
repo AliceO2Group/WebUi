@@ -25,12 +25,19 @@ export class FilterController {
   /**
    * Creates an instance of FilterController class
    * @param {FilterService} filterService To retrieve the information displayed in the filters
+   * @param {RunModeService} runsModeService To retrieve the ongoing runs
    */
-  constructor(filterService) {
+  constructor(filterService, runsModeService) {
     /**
      * @type {FilterService}
      */
     this._filterService = filterService;
+
+    /**
+     * @type {RunModeService}
+     */
+    this._runsModeService = runsModeService;
+
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/filter-ctrl`);
   }
 
@@ -68,5 +75,15 @@ export class FilterController {
     } catch (error) {
       res.status(503).json({ error: error.message || error });
     }
+  }
+
+  /**
+   * HTTP GET endpoint for retrieving a list of ongoing runs from Runs Mode Service
+   * @param {Request} req HTTP Request
+   * @param {Response} res HTTP Response with the ongoing runs
+   */
+  getOngoingRuns(req, res) {
+    const ongoingRuns = this._runsModeService?.ongoingRuns ?? [];
+    res.status(200).json({ ongoingRuns });
   }
 }
