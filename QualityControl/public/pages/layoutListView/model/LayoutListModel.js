@@ -33,7 +33,6 @@ export default class LayoutListModel extends BaseViewModel {
     this.folders = new Map();
     this.searchFilterModel = new SearchFilterModel();
     this.searchFilterModel.register(createKeyValueFilter('objectPath', 'Object path', 'e.g. TPC'));
-    this.searchFilterModel.register(createKeyValueFilter('objectPath2', 'Object path', 'e.g. TPC'));
     this.searchFilterModel.observe(() => {
       if (!this.searchFilterModel.allInactive()) {
         this.search(undefined, this.searchFilterModel.getAllActiveAsObject());
