@@ -164,7 +164,7 @@ export const ongoingRunsSelector = (config, filterMap, options, onChangeCallback
       },
       optionsWithSelected.length > 0
         ? optionsWithSelected.map((option) =>
-          h('option', { value: option, selected: option === selectedValue }, option))
+          h('option', { value: option }, option))
         : [h('option', { value: '', disabled: true }, 'No ongoing runs available')],
     ),
   ]);

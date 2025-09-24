@@ -86,6 +86,12 @@ export const setupQcModel = async () => {
     }
   }
 
+  // Setup mock Kafka events for test environment
+  if (process.env.NODE_ENV === 'test') {
+    const { setupMockKafkaEvents } = await import('../test/setup/mockKafkaEvents.js');
+    setupMockKafkaEvents(eventEmitter);
+  }
+
   const layoutRepository = new LayoutRepository(jsonFileService);
   const userRepository = new UserRepository(jsonFileService);
   const chartRepository = new ChartRepository(jsonFileService);

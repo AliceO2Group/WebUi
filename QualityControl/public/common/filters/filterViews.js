@@ -118,10 +118,9 @@ export function filtersPanel(filterModel, viewModel) {
  * @returns {vnode} - virtual node element
  */
 const triggerFiltersButton = (onClickCallback, filterModel) => {
-  const isRunModeActivated = filterModel?.isRunModeActivated;
   const { isValid, title } = filterModel.validateRunNumber();
 
-  const buttonId = isRunModeActivated ? 'updateAndRunModeButton' : 'triggerFilterButton';
+  const buttonId = 'triggerFilterButton';
 
   return h(
     'button.btn.btn-primary',

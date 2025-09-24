@@ -166,14 +166,14 @@ export default class FilterModel extends Observable {
    */
   async activateRunsMode(viewModel) {
     this.isRunModeActivated = true;
-    await this.filterService.getOngoingRuns();
     if (this._filterMap.RunNumber) {
       this._filterMap = { RunNumber: this._filterMap.RunNumber };
       this.triggerFilter(viewModel);
     } else {
+      await this.filterService.getOngoingRuns();
       const { ongoingRuns } = this.filterService;
       if (ongoingRuns.isSuccess() && ongoingRuns.payload.length > 0) {
-        this._filterMap = { RunNumber: ongoingRuns.payload[0] };
+        this._filterMap = { RunNumber: String(ongoingRuns.payload[0]) };
         this.triggerFilter(viewModel);
       } else {
         this._filterMap = {};
