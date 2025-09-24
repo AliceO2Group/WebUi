@@ -224,6 +224,7 @@ export default class FilterModel extends Observable {
       }
       this.runStatus = await this.filterService.getRunStatus(currentRunNumber);
       this.notify();
+
       if (this.runStatus !== RunStatus.ONGOING) {
         this.clearRunsModeInterval();
       }
@@ -349,6 +350,7 @@ export default class FilterModel extends Observable {
    * @param {() => Promise<T>} fetchFn - Async function to fetch the data or object.
    * @param {(RemoteData) => boolean} validateFn - Validates whether the fetched result means no refresh is needed.
    * @returns {Promise<{ refreshNeeded: boolean, data: object | null }>}
+   * a promise with if is needed to refresh and the fetched data (if fetched)
    */
   async refreshCheck(fetchFn, validateFn) {
     if (this._runsModeInterval) {

@@ -47,12 +47,12 @@ export default (model) => {
 /**
  * Shows the page specific header (center and right side)
  * @param {Model} model - root model of the application
- * @returns {{centerCol: vnode, rightCol: vnode} | null}
+ * @returns {{centerCol: vnode, rightCol: vnode} | null} center column and right column
  */
 const headerSpecific = (model) => {
-  const { layoutListModel, filterModel, layout, object, page } = model;
+  const { filterModel, layout, object, page } = model;
   switch (page) {
-    case 'layoutList': return LayoutListHeader(layoutListModel);
+    case 'layoutList': return LayoutListHeader();
     case 'layoutShow': return layoutViewHeader(layout, filterModel);
     case 'objectTree': return objectTreeHeader(object, filterModel);
     case 'objectView': return objectViewHeader(model);

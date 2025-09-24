@@ -13,6 +13,7 @@
  */
 
 import Joi from 'joi';
+import { isRunningInProduction } from '../utils/environment.js';
 
 /**
  * @typedef {KafkaConfiguration}
@@ -29,25 +30,29 @@ import Joi from 'joi';
  */
 export const KafkaConfigDto = Joi.object({
   enabled: Joi.boolean().default(false),
-  clientId: Joi.string().custom((value, helpers) => {
-    if (process.env.NODE_ENV === 'PRODUCTION') {
-      return value;
-    }
-    if (value === 'qc-gui') {
-      return helpers.error('any.invalid');
-    }
-    return value;
-  }, 'qc-gui not allowed unless in PRODUCTION'),
-  consumerGroups: Joi.object().custom((obj, helpers) => {
-    if (process.env.NODE_ENV === 'PRODUCTION') {
-      return obj;
-    }
-    for (const [key, value] of Object.entries(obj)) {
-      if (key === 'qcg-run' || value === 'qcg-run') {
-        return helpers.error('any.invalid');
+  clientId: Joi.string()
+    .custom((value, helpers) => {
+      if (isRunningInProduction) {
+        return value;
       }
-    }
-    return obj;
-  }, 'No key or value can be qcg-run unless in PRODUCTION'),
+      if (value === 'qc-gui') {
+        return helpers.message('clientId "qc-gui" is not allowed outside PRODUCTION');
+      }
+      return value;
+    }, 'kafka clientId validation')
+    .default('qcg-client-local'),
+  consumerGroups: Joi.object()
+    .custom((obj, helpers) => {
+      if (isRunningInProduction) {
+        return obj;
+      }
+      for (const [key, value] of Object.entries(obj)) {
+        if (key === 'qcg-run' || value === 'qcg-run') {
+          return helpers.message('No key or value can be qcg-run unless in PRODUCTION');
+        }
+      }
+      return obj;
+    }, 'kafka consumerGroups validation')
+    .default({ QCG_RUN: 'qcg-run-local' }),
   brokers: Joi.array().items(Joi.string()),
 });

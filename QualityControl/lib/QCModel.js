@@ -50,7 +50,7 @@ import { objectGetContentsValidationMiddlewareFactory }
 import { RunModeService } from './services/RunModeService.js';
 import { KafkaConfigDto } from './dtos/KafkaConfigurationDto.js';
 
-const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/setup-service`;
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/model-setup`;
 
 /**
  * Model initialization for the QCG application

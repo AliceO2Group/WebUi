@@ -41,7 +41,7 @@ export const lastUpdatePanel = (runStatus, lastRefresh, refreshRate = 15000) => 
 
   return shouldShowTimestamp && h('.flex-row.g1.items-center.justify-center.f7.gray-darker.text-center', [
     h(
-      'span.highlight',
+      'span',
       { id: 'lastUpdate' },
       `Last update: ${formatDateTime(lastRefresh)}`,
     ),
