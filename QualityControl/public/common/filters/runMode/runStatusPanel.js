@@ -43,7 +43,7 @@ export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate 
 
   const lastUpdatePanel = (runStatus) => [
     h(
-      'span.highlight',
+      'span',
       { id: 'lastUpdate' },
       `Last update: ${formatDateTime(lastRefresh)}`,
     ),
@@ -54,28 +54,16 @@ export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate 
         ` - As run is ONGOING, will refresh every ${refreshRate / 1000} seconds`,
       ),
   ];
+  const shouldShowTimestamp = runStatus === RunStatus.ONGOING || runStatus === RunStatus.ENDED;
 
-  return runStatus.match({
-    Loading: () =>
-      h('.flex-row.g1.items-center.justify-center', [
-        runNumberPanel,
-        statusPanel(null),
-      ]),
-
-    Success: (res) => {
-      const runStatus = res?.runStatus;
-      const shouldShowTimestamp = runStatus === RunStatus.ONGOING || runStatus === RunStatus.ENDED;
-      return h('.flex-column', [
-        h('.flex-row.g1.items-center.justify-center', { id: 'runStatusPanel' }, [
-          runNumberPanel,
-          statusPanel(runStatus),
-        ]),
-        shouldShowTimestamp && h(
-          '.flex-row.g1.items-center.justify-center.f7.gray-darker.text-center',
-          lastUpdatePanel(runStatus),
-        ),
-      ]);
-    },
-    Other: () => null,
-  });
+  return runNumber && runStatus && h('.flex-column', [
+    h('.flex-row.g1.items-center.justify-center', { id: 'runStatusPanel' }, [
+      runNumberPanel,
+      statusPanel(runStatus),
+    ]),
+    shouldShowTimestamp && h(
+      '.flex-row.g1.items-center.justify-center.f7.gray-darker.text-center',
+      lastUpdatePanel(runStatus),
+    ),
+  ]);
 };
