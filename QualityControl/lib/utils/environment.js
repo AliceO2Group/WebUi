@@ -12,13 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h } from '/js/src/index.js';
-
-/**
- * Shows header of list of layouts with one search input to filter them
- * @returns {{centerCol: vnode, rightCol: vnode}} - object with virtual node elements
- */
-export default () => ({
-  centerCol: h('.flex-grow.text-center', [h('b.f4', 'Layouts')]),
-  rightCol: h('.w-33.text-right'),
-});
+export const isRunningInProduction = process.env?.NODE_ENV === 'PRODUCTION' || process.env?.NODE_ENV === 'production';
+export const isRunningInTest = process.env?.NODE_ENV === 'test' || process.env?.NODE_ENV === 'TEST';
+export const isRunningInDevelopment = !isRunningInProduction && !isRunningInTest;
