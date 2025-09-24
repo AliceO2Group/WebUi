@@ -13,6 +13,7 @@
  */
 
 import { RemoteData } from '/js/src/index.js';
+import { RunStatus } from '../../library/runStatus.enum.js';
 
 /**
  * Service to get the data to populate the filters
@@ -53,7 +54,7 @@ export default class FilterService {
   async getRunStatus(runNumber) {
     const parsedRunNumber = parseInt(runNumber, 10);
     const { result, ok } = await this.loader.get(`/api/filter/run-status/${parsedRunNumber}`);
-    return this.parseResult(result, ok);
+    return ok ? result?.runStatus : RunStatus.UNKNOWN;
   }
 
   /**
