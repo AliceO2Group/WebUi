@@ -12,11 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
-import { filterInput, dynamicSelector } from './filter.js';
+import { filterInput, dynamicSelector, ongoingRunsSelector } from './filter.js';
 import { FilterType } from './filterTypes.js';
 import { filtersConfig, runModeFilterConfig } from './filtersConfig.js';
 import { runModeCheckbox } from './runMode/runModeCheckbox.js';
-import { runStatusPanel } from './runMode/runStatusPanel.js';
+import { lastUpdatePanel, runStatusPanel } from './runMode/runStatusPanel.js';
 import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
 
 /**
@@ -26,25 +26,37 @@ import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
  * @param {Function} onInputCallback - A callback function that triggers upon Input
  * @param {Function} onEnterCallback - A callback function that triggers upon Enter
  * @param {Function} onChangeCallback - A callback function that triggers upon Change
+ * @param onFocusCallback
  * @returns {undefined}
  */
-const createFilterElement = (config, filterMap, onInputCallback, onEnterCallback, onChangeCallback) => {
-  const { type, queryLabel, placeholder, id, inputType = 'text', options, width } = config;
-  const commonConfig = {
-    queryLabel,
-    placeholder,
-    id,
-    filterMap,
-    onInputCallback,
-    onEnterCallback,
-    width,
+const createFilterElement =
+  (config, filterMap, onInputCallback, onEnterCallback, onChangeCallback, onFocusCallback) => {
+    const { type, queryLabel, placeholder, id, inputType = 'text', options, width } = config;
+    const commonConfig = {
+      queryLabel,
+      placeholder,
+      id,
+      filterMap,
+      onInputCallback,
+      onEnterCallback,
+      width,
+    };
+    switch (type) {
+      case FilterType.INPUT: return filterInput({ ...commonConfig, type: inputType });
+      case FilterType.DROPDOWN:
+        return dynamicSelector({ ...commonConfig, options, onChangeCallback, inputType });
+      case FilterType.RUN_MODE:
+        return ongoingRunsSelector(
+          { ...commonConfig },
+          filterMap,
+          options,
+          onChangeCallback,
+          onEnterCallback,
+          onFocusCallback,
+        );
+      default: return null;
+    }
   };
-  switch (type) {
-    case FilterType.INPUT: return filterInput({ ...commonConfig, type: inputType });
-    case FilterType.DROPDOWN: return dynamicSelector({ ...commonConfig, options, onChangeCallback });
-    default: return null;
-  }
-};
 
 /**
  * Builds a panel containing multiple filters to allow user to apply for objectTree show/view
@@ -56,10 +68,10 @@ export function filtersPanel(filterModel, viewModel) {
   const {
     filterMap,
     setFilterValue,
+    getOngoingRuns,
     filterService,
     clearFilter,
     isRunModeActivated,
-    runNumber,
     runStatus,
     isVisible,
     lastRefresh,
@@ -67,13 +79,14 @@ export function filtersPanel(filterModel, viewModel) {
   } = filterModel;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
+  const onFocusCallback = getOngoingRuns.bind(filterModel);
   const onEnterCallback = () => filterModel.triggerFilter(viewModel);
   const clearFilterCallback = clearFilter.bind(filterModel, viewModel);
   if (!isVisible) {
     return null;
   }
   const filtersList = isRunModeActivated
-    ? runModeFilterConfig()
+    ? runModeFilterConfig(filterService)
     : filtersConfig(filterService);
 
   return h(
@@ -81,12 +94,13 @@ export function filtersPanel(filterModel, viewModel) {
     [
       h('.flex-row.g2.justify-center', [
         runModeCheckbox(filterModel, viewModel),
-        triggerFiltersButton(onEnterCallback, filterModel),
-        !isRunModeActivated && clearFiltersButton(clearFilterCallback),
+        !isRunModeActivated &&
+        [triggerFiltersButton(onEnterCallback, filterModel), clearFiltersButton(clearFilterCallback)],
         ...filtersList.map((filter) =>
-          createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback)),
+          createFilterElement(filter, filterMap, onInputCallback, onEnterCallback, onChangeCallback, onFocusCallback)),
+        isRunModeActivated && runStatusPanel(runStatus),
       ]),
-      isRunModeActivated && runStatusPanel({ runNumber, runStatus, lastRefresh, refreshRate }),
+      lastUpdatePanel(runStatus, lastRefresh, refreshRate),
     ],
   );
 };

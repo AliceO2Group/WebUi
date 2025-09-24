@@ -133,3 +133,39 @@ const dropdownSelector = (config) => {
     ]),
   ]);
 };
+
+export const ongoingRunsSelector = (config, filterMap, options, onChangeCallback, onEnterCallback, onFocusCallback) => {
+  const handleChange = (value) => {
+    onChangeCallback('RunNumber', value, true);
+    onEnterCallback();
+  };
+
+  const availableOptions = options.isSuccess()
+    ? [...new Set([...options.payload].map((v) => String(v)))]
+    : [];
+
+  const selectedValue = filterMap['RunNumber'] ?? availableOptions[0] ?? '';
+  const optionsWithSelected = selectedValue
+    ? availableOptions.includes(selectedValue)
+      ? availableOptions
+      : [selectedValue, ...availableOptions]
+    : availableOptions;
+
+  return h(`.${config.width}`, [
+    h(
+      'select.form-control',
+      {
+        placeholder: config.placeholder,
+        id: config.id,
+        name: config.id,
+        value: selectedValue,
+        onmousedown: onFocusCallback,
+        onchange: (event) => handleChange(event.target.value),
+      },
+      optionsWithSelected.length > 0
+        ? optionsWithSelected.map((option) =>
+          h('option', { value: option, selected: option === selectedValue }, option))
+        : [h('option', { value: '', disabled: true }, 'No ongoing runs available')],
+    ),
+  ]);
+};
