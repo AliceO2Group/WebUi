@@ -296,23 +296,35 @@ export default class QCObject extends BaseViewModel {
       this.notify();
       return;
     }
-    await Promise.allSettled(objectsName.map(async (objectName) => {
-      this.objects[objectName] = RemoteData.Loading();
-      this.notify();
-      this.objects[objectName] =
-        await this.model.services.object.getObjectByName(objectName, undefined, undefined, this);
-      this.notify();
-    }));
+    await this.refreshObjects(objectsName);
     this.objectsRemote = RemoteData.success();
     this.notify();
   }
 
   /**
    * Refreshes currently displayed objects
+   * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
    * @returns {undefined}
    */
-  refreshObjects() {
-    this.loadObjects(Object.keys(this.objects));
+  async refreshObjects(objectsName) {
+    await Promise.allSettled(objectsName.map(async (objectName) => {
+      let fetchedData = null;
+      if (this.objects[objectName]?.isSuccess() && this.objects[objectName]?.payload?.name) {
+        const { refreshNeeded, data } = await this.checkIfRefreshObject(this.objects[objectName].payload);
+        fetchedData = data;
+        if (!refreshNeeded) {
+          return;
+        }
+      }
+
+      this.objects[objectName] = RemoteData.Loading();
+      this.notify();
+
+      this.objects[objectName] =
+    fetchedData ?? await this.model.services.object.getObjectByName(objectName, undefined, undefined, this);
+
+      this.notify();
+    }));
   }
 
   /**

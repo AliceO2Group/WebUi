@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Observable, RemoteData } from '/js/src/index.js';
+import { Observable } from '/js/src/index.js';
 import { buildQueryParametersString } from '../../buildQueryParametersString.js';
 import FilterService from '../../../services/Filter.service.js';
 import { RunStatus } from '../../../library/runStatus.enum.js';
@@ -36,7 +36,7 @@ export default class FilterModel extends Observable {
     this._runsModeInterval = null;
 
     this._runNumber = null;
-    this._runStatus = RemoteData.notAsked();
+    this._runStatus = null;
     this._isRunModeActivated = false;
     this._lastRefresh = null;
 
@@ -116,8 +116,6 @@ export default class FilterModel extends Observable {
     this.setFilterToURL();
     if (this.isRunModeActivated) {
       this.runNumber = this._filterMap['RunNumber'];
-      this.runStatus = RemoteData.loading();
-      this.notify();
       this.runStatus = await this.filterService.getRunStatus(this.runNumber);
       this.notify();
       this._manageRunsModeInterval(baseViewModel);
@@ -195,7 +193,7 @@ export default class FilterModel extends Observable {
   resetRunsMode() {
     this.isRunModeActivated = false;
     this.runNumber = null;
-    this.runStatus = RemoteData.notAsked();
+    this.runStatus = null;
     this._lastRefresh = null;
     this.clearRunsModeInterval();
     this.notify();
@@ -210,28 +208,22 @@ export default class FilterModel extends Observable {
   async _manageRunsModeInterval(baseViewModel) {
     this.clearRunsModeInterval();
     const currentRunNumber = this.runNumber;
-    if (this.runStatus?.payload?.runStatus !== RunStatus.ONGOING) {
+    if (this.runStatus !== RunStatus.ONGOING) {
       return;
     }
     this._runsModeInterval = setInterval(async () => {
       if (!baseViewModel) {
         return;
       }
-      this.runStatus = RemoteData.loading();
-      this.notify();
       this.runStatus = await this.filterService.getRunStatus(currentRunNumber);
       this.notify();
-      this.runStatus.match({
-        Success: (res) => {
-          if (res?.runStatus !== RunStatus.ONGOING) {
-            this.clearRunsModeInterval();
-          }
-          baseViewModel.triggerFilter();
-          this._lastRefresh = Date.now();
-          this.notify();
-        },
-        Other: () => this.clearRunsModeInterval(),
-      });
+
+      if (this.runStatus !== RunStatus.ONGOING) {
+        this.clearRunsModeInterval();
+      }
+      baseViewModel.triggerFilter();
+      this._lastRefresh = Date.now();
+      this.notify();
     }, this.ONGOING_RUN_INTERVAL_MS);
   }
 
@@ -255,15 +247,9 @@ export default class FilterModel extends Observable {
     if (!this.isRunModeActivated) {
       return;
     }
-
-    this.runStatus.match({
-      Success: (res) => {
-        if (res?.runStatus === RunStatus.ONGOING && !this._runsModeInterval) {
-          this._manageRunsModeInterval(baseViewModel);
-        }
-      },
-      Other: () => null,
-    });
+    if (this.runStatus === RunStatus.ONGOING && !this._runsModeInterval) {
+      this._manageRunsModeInterval(baseViewModel);
+    }
   }
 
   /**
@@ -357,6 +343,7 @@ export default class FilterModel extends Observable {
    * @param {() => Promise<T>} fetchFn - Async function to fetch the data or object.
    * @param {(RemoteData) => boolean} validateFn - Validates whether the fetched result means no refresh is needed.
    * @returns {Promise<{ refreshNeeded: boolean, data: object | null }>}
+   * a promise with if is needed to refresh and the fetched data (if fetched)
    */
   async refreshCheck(fetchFn, validateFn) {
     if (this._runsModeInterval) {
