@@ -39,6 +39,9 @@ export default class LayoutService {
 
   /**
    * Method to get all layouts shared between users
+   * username is used for matching the user to their own layouts.
+   * This is chosen over user_id due to CERN users sometimes having multiple accounts,
+   * different user_id but same user_name.
    * @param {string|undefined} fields - comma separated string values. Represent the fields that should be fetched.
    * @param {object|undefined} filter - filter information to be parsed by the backend.
    * If left empty all available fields will be fetched

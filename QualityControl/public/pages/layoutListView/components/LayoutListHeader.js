@@ -16,17 +16,9 @@ import { h } from '/js/src/index.js';
 
 /**
  * Shows header of list of layouts with one search input to filter them
- * @param {LayoutListModel} layoutListModel - The model handling the state of the LayoutListPage
  * @returns {{centerCol: vnode, rightCol: vnode}} - object with virtual node elements
  */
-export default (layoutListModel) => ({
+export default () => ({
   centerCol: h('.flex-grow.text-center', [h('b.f4', 'Layouts')]),
-  rightCol: h('.w-33.text-right', [
-    h('input.form-control.form-inline.mh1.w-33', {
-      placeholder: 'Search',
-      type: 'text',
-      value: layoutListModel.searchInput,
-      oninput: (e) => layoutListModel.search(e.target.value),
-    }),
-  ]),
+  rightCol: h('.w-33.text-right'),
 });
