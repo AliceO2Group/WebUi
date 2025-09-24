@@ -51,15 +51,20 @@ export const filtersConfig = ({ runTypes }) => [
 
 /**
  * Returns a filter configuration object used to render dynamic filter in run mode.
+ *   @param {FilterService} filterService - service to get the data to populate the filters
+ *   @param {Array<string>} filterService.ongoingRuns - run numbers to show in the dropdown
  * @returns {object} Filter configuration object
  */
-export const runModeFilterConfig = () => [
+export const runModeFilterConfig = ({ ongoingRuns }) => [
   {
-    type: FilterType.INPUT,
+    type: FilterType.RUN_MODE,
     queryLabel: 'RunNumber',
     placeholder: 'RunNumber (e.g. 546783)',
-    id: 'runNumberFilter',
+    id: 'ongoingRunsFilter',
     inputType: 'number',
     width: 'w-10',
+    options: ongoingRuns,
+    defaultToFirst: true,
+    noOptionsTitle: 'There are no runs ongoing currently',
   },
 ];
