@@ -68,11 +68,15 @@ import { runModeMiddlewareTest } from './lib/middlewares/filters/runMode.middlew
 import { runStatusFilterMiddlewareTest } from './lib/middlewares/filters/runStatusFilter.middleware.test.js';
 import { apiPutLayoutTests } from './api/layouts/api-put-layout.test.js';
 import { apiPatchLayoutTests } from './api/layouts/api-patch-layout.test.js';
-import { layoutRepositoryTest } from './lib/repositories/LayoutRepository.test.js';
-import { userRepositoryTest } from './lib/repositories/UserRepository.test.js';
 import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
 import { userControllerTestSuite } from './lib/controllers/UserController.test.js';
-import { chartRepositoryTest } from './lib/repositories/ChartRepository.test.js';
+import { layoutRepositoryTestSuite } from './lib/database/repositories/LayoutRepository.test.js';
+import { userRepositoryTestSuite } from './lib/database/repositories/UserRepository.test.js';
+import { chartRepositoryTestSuite } from './lib/database/repositories/ChartRepository.test.js';
+import { chartOptionsRepositoryTestSuite } from './lib/database/repositories/ChartOptionsRepository.test.js';
+import { gridTabCellRepositoryTestSuite } from './lib/database/repositories/GridTabCellRepository.test.js';
+import { tabRepositoryTestSuite } from './lib/database/repositories/TabRepository.test.js';
+import { optionRepositoryTestSuite } from './lib/database/repositories/OptionRepository.test.js';
 import { filterServiceTestSuite } from './lib/services/FilterService.test.js';
 import { apiGetLayoutsTests } from './api/layouts/api-get-layout.test.js';
 import { apiGetObjectsTests } from './api/objects/api-get-object.test.js';
@@ -209,9 +213,13 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     });
 
     suite('Repositories - Test Suite', async () => {
-      suite('Layout Repository - Test Suite', async () => await layoutRepositoryTest());
-      suite('User Repository - Test Suite', async () => await userRepositoryTest());
-      suite('Chart Repository - Test Suite', async () => await chartRepositoryTest());
+      suite('Layout Repository - Test Suite', async () => await layoutRepositoryTestSuite());
+      suite('User Repository - Test Suite', async () => await userRepositoryTestSuite());
+      suite('Chart Repository - Test Suite', async () => await chartRepositoryTestSuite());
+      suite('Chart Options Repository - Test Suite', async () => await chartOptionsRepositoryTestSuite());
+      suite('Grid Tab Cell Repository - Test Suite', async () => await gridTabCellRepositoryTestSuite());
+      suite('Tab Repository - Test Suite', async () => await tabRepositoryTestSuite());
+      suite('Option Repository - Test Suite', async () => await optionRepositoryTestSuite());
     });
 
     suite('Services - Test Suite', async () => {
