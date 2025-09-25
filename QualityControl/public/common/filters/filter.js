@@ -134,6 +134,16 @@ const dropdownSelector = (config) => {
   ]);
 };
 
+/**
+ * Renders a dropdown selector for ongoing runs.
+ * @param {object} config - Selector config ({ id, placeholder, width }).
+ * @param {object} filterMap - Current filters (RunNumber or empty).
+ * @param {RemoteData} options - Available ongoing runs.
+ * @param {Function} onChangeCallback - To change the selection and update the filterMap
+ * @param {Function} onEnterCallback - To trigger the filter
+ * @param {Function} [onFocusCallback] - To retrieve ongoing runs
+ * @returns {object} Virtual DOM node (hyperscript element).
+ */
 export const ongoingRunsSelector = (config, filterMap, options, onChangeCallback, onEnterCallback, onFocusCallback) => {
   const handleChange = (value) => {
     onChangeCallback('RunNumber', value, false);
