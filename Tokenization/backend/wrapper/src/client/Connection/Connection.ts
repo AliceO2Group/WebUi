@@ -20,6 +20,7 @@ import {
   FetchResponse,
 } from "../../models/connection.model";
 import * as grpc from "@grpc/grpc-js";
+import * as fs from "fs";
 
 /**
  * @description This class represents a connection to a target client and manages sending messages to it.
@@ -38,21 +39,32 @@ export class Connection {
    * @param token - The authentication token for the connection.
    * @param targetAddress - The unique address of the target client.
    * @param direction - The direction of the connection (e.g., sending or receiving).
+   * @param peerCtor - The constructor for the gRPC client to be used for communication.
+   * @param caCertPath - Path to the CA certificate file.
+   * @param clientCertPath - Path to the client certificate file.
+   * @param clientKeyPath - Path to the client key file.
    */
   constructor(
     token: string,
     targetAddress: string,
     direction: ConnectionDirection,
-    peerCtor: any
+    peerCtor: any,
+    private readonly caCert: NonSharedBuffer,
+    private readonly clientCert: NonSharedBuffer,
+    private readonly clientKey: NonSharedBuffer
   ) {
     this.token = token;
     this.targetAddress = targetAddress;
     this.direction = direction;
 
-    this.peerClient = new peerCtor(
-      targetAddress,
-      grpc.credentials.createInsecure()
+    // create grpc credentials
+    const sslCreds = grpc.credentials.createSsl(
+      this.caCert,
+      this.clientKey,
+      this.clientCert
     );
+
+    this.peerClient = new peerCtor(targetAddress, sslCreds);
 
     this.status = ConnectionStatus.CONNECTED;
   }

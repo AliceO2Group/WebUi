@@ -16,6 +16,7 @@ import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import { LogManager } from "@aliceo2/web-ui";
 import { DuplexMessageModel } from "../models/message.model";
+import * as fs from "fs";
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
@@ -35,7 +36,13 @@ export class CentralSystemWrapper {
    * Initializes the Wrapper for CentralSystem.
    * @param port The port number to bind the gRPC server to.
    */
-  constructor(private protoPath: string, private port: number) {
+  constructor(
+    private protoPath: string,
+    private port: number,
+    private readonly caCertPath: string,
+    private readonly centralCertPath: string,
+    private readonly centralKeyPath: string
+  ) {
     this.server = new grpc.Server();
     this.setupService();
   }
@@ -113,7 +120,7 @@ export class CentralSystemWrapper {
 
     // Handle stream error event
     call.on("error", (err) => {
-      this.logger.infoMessage(`Stream error from client ${clientIp}:`, err);
+      this.logger.errorMessage(`Stream error from client ${clientIp}:`, err);
       this.cleanupClient(peer);
     });
   }
@@ -167,16 +174,29 @@ export class CentralSystemWrapper {
    */
   public listen() {
     const addr = `localhost:${this.port}`;
-    this.server.bindAsync(
-      addr,
-      grpc.ServerCredentials.createInsecure(),
-      (err, _port) => {
-        if (err) {
-          this.logger.infoMessage("Server bind error:", err);
-          return;
-        }
-        this.logger.infoMessage(`CentralSytem started listening on ${addr}`);
-      }
+
+    // create mTLS secure gRPC server
+    const caCert = fs.readFileSync(this.caCertPath);
+    const centralKey = fs.readFileSync(this.centralKeyPath);
+    const centralCert = fs.readFileSync(this.centralCertPath);
+
+    const sslCreds = grpc.ServerCredentials.createSsl(
+      caCert,
+      [
+        {
+          private_key: centralKey,
+          cert_chain: centralCert,
+        },
+      ],
+      true
     );
+
+    this.server.bindAsync(addr, sslCreds, (err, _port) => {
+      if (err) {
+        this.logger.errorMessage("Server bind error:", err);
+        return;
+      }
+      this.logger.infoMessage(`CentralSytem started listening on ${addr}`);
+    });
   }
 }

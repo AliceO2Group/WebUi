@@ -20,6 +20,8 @@ import {
 } from "../models/message.model";
 import { Connection } from "./Connection/Connection";
 import { NewTokenHandler } from "./Commands/newToken/newToken.handler";
+import { gRPCWrapperConfig } from "../models/config.model.ts";
+import * as fs from "fs";
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -37,6 +39,8 @@ import { NewTokenHandler } from "./Commands/newToken/newToken.handler";
  */
 export class gRPCWrapper {
   private ConnectionManager: ConnectionManager;
+  private listenerKey?: NonSharedBuffer;
+  private listenerCert?: NonSharedBuffer;
 
   /**
    * @description Initializes an instance of gRPCWrapper class.
@@ -44,8 +48,28 @@ export class gRPCWrapper {
    * @param protoPath - The file path to the gRPC proto definition.
    * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
    */
-  constructor(protoPath: string, centralAddress: string = "localhost:50051") {
-    this.ConnectionManager = new ConnectionManager(protoPath, centralAddress);
+  constructor(
+    protoPath: string,
+    centralAddress: string = "localhost:50051",
+    private readonly clientCerts: {
+      keyPath: string;
+      certPath: string;
+      caPath: string;
+    },
+    private listenerCertPaths?: { keyPath: string; certPath: string }
+  ) {
+    if (listenerCertPaths?.keyPath && listenerCertPaths?.certPath) {
+      this.listenerKey = fs.readFileSync(listenerCertPaths.keyPath);
+      this.listenerCert = fs.readFileSync(listenerCertPaths.certPath);
+    }
+
+    this.ConnectionManager = new ConnectionManager(
+      protoPath,
+      centralAddress,
+      this.clientCerts.caPath,
+      this.clientCerts.certPath,
+      this.clientCerts.keyPath
+    );
     this.ConnectionManager.registerCommandHandlers([
       {
         event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
@@ -84,9 +108,26 @@ export class gRPCWrapper {
    */
   public async listenForPeers(
     port: number,
-    baseAPIPath?: string
+    baseAPIPath?: string,
+    listenerCertPaths?: { keyPath: string; certPath: string }
   ): Promise<void> {
-    return this.ConnectionManager.listenForPeers(port, baseAPIPath);
+    if (listenerCertPaths?.keyPath && listenerCertPaths?.certPath) {
+      this.listenerKey = fs.readFileSync(listenerCertPaths.keyPath);
+      this.listenerCert = fs.readFileSync(listenerCertPaths.certPath);
+    }
+
+    if (!this.listenerKey || !this.listenerCert) {
+      throw new Error(
+        "Listener certificates are required to start P2P listener. Please provide valid paths."
+      );
+    }
+
+    return this.ConnectionManager.listenForPeers(
+      port,
+      this.listenerKey,
+      this.listenerCert,
+      baseAPIPath
+    );
   }
 
   /**

@@ -24,6 +24,7 @@ import {
   DuplexMessageEvent,
 } from "../../models/message.model";
 import { ConnectionStatus } from "../../models/connection.model";
+import * as fs from "fs";
 
 /**
  * @description Manages all the connection between clients and central system.
@@ -55,6 +56,11 @@ export class ConnectionManager {
   private peerServer?: grpc.Server;
   private baseAPIPath: string = "localhost:40041/api/";
 
+  // client certificates
+  private caCert: NonSharedBuffer;
+  private clientCert: NonSharedBuffer;
+  private clientKey: NonSharedBuffer;
+
   /**
    * @description Initializes a new instance of the ConnectionManager class.
    *
@@ -62,8 +68,17 @@ export class ConnectionManager {
    *
    * @param protoPath - The file path to the gRPC proto definition.
    * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
+   * @param caCertPath - Path to the CA certificate file.
+   * @param clientCertPath - Path to the client certificate file.
+   * @param clientKeyPath - Path to the client key file.
    */
-  constructor(protoPath: string, centralAddress: string = "localhost:50051") {
+  constructor(
+    protoPath: string,
+    centralAddress: string = "localhost:50051",
+    caCertPath: string,
+    clientCertPath: string,
+    clientKeyPath: string
+  ) {
     const packageDef = protoLoader.loadSync(protoPath, {
       keepCase: true,
       longs: String,
@@ -76,9 +91,20 @@ export class ConnectionManager {
     this.wrapper = proto.webui.tokenization;
     this.peerCtor = this.wrapper.Peer2Peer;
 
+    // read certs
+    this.caCert = fs.readFileSync(caCertPath);
+    this.clientCert = fs.readFileSync(clientCertPath);
+    this.clientKey = fs.readFileSync(clientKeyPath);
+
+    // create grpc credentials
+    const sslCreds = grpc.credentials.createSsl(
+      this.caCert,
+      this.clientKey,
+      this.clientCert
+    );
     const centralClient = new this.wrapper.CentralSystem(
       centralAddress,
-      grpc.credentials.createInsecure()
+      sslCreds
     );
 
     // event dispatcher for central system events
@@ -90,11 +116,27 @@ export class ConnectionManager {
 
     this.sendingConnections.set(
       "a",
-      new Connection("1", "a", ConnectionDirection.SENDING, this.peerCtor)
+      new Connection(
+        "1",
+        "a",
+        ConnectionDirection.SENDING,
+        this.peerCtor,
+        this.caCert,
+        this.clientKey,
+        this.clientCert
+      )
     );
     this.sendingConnections.set(
       "b",
-      new Connection("2", "b", ConnectionDirection.SENDING, this.peerCtor)
+      new Connection(
+        "2",
+        "b",
+        ConnectionDirection.SENDING,
+        this.peerCtor,
+        this.caCert,
+        this.clientKey,
+        this.clientCert
+      )
     );
   }
 
@@ -155,7 +197,15 @@ export class ConnectionManager {
     }
 
     // Create new connection
-    conn = new Connection(token || "", address, direction, this.peerCtor);
+    conn = new Connection(
+      token || "",
+      address,
+      direction,
+      this.peerCtor,
+      this.caCert,
+      this.clientKey,
+      this.clientCert
+    );
     conn.updateStatus(ConnectionStatus.CONNECTING);
 
     if (direction === ConnectionDirection.RECEIVING) {
@@ -207,6 +257,8 @@ export class ConnectionManager {
   /** Starts a listener server for p2p connections */
   public async listenForPeers(
     port: number,
+    listenerKey: NonSharedBuffer,
+    listenerCert: NonSharedBuffer,
     baseAPIPath?: string
   ): Promise<void> {
     if (baseAPIPath) this.baseAPIPath = baseAPIPath;
@@ -234,7 +286,10 @@ export class ConnectionManager {
               "",
               clientAddress,
               ConnectionDirection.RECEIVING,
-              this.peerCtor
+              this.peerCtor,
+              this.caCert,
+              this.clientKey,
+              this.clientCert
             );
             conn.updateStatus(ConnectionStatus.CONNECTED);
             this.receivingConnections.set(clientAddress, conn);
@@ -285,11 +340,20 @@ export class ConnectionManager {
       },
     });
 
+    const sslCreds = grpc.ServerCredentials.createSsl(
+      this.caCert,
+      [
+        {
+          private_key: listenerKey,
+          cert_chain: listenerCert,
+        },
+      ],
+      true
+    );
+
     await new Promise<void>((resolve, reject) => {
-      this.peerServer!.bindAsync(
-        `localhost:${port}`,
-        grpc.ServerCredentials.createInsecure(),
-        (err) => (err ? reject(err) : resolve())
+      this.peerServer!.bindAsync(`localhost:${port}`, sslCreds, (err) =>
+        err ? reject(err) : resolve()
       );
     });
 
