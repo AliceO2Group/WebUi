@@ -11,120 +11,138 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, ok, match } from 'node:assert';
+import { strictEqual, ok } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
+
+// If using nock for HTTP mocking (uncomment if available)
+// import nock from 'nock';
 export const runModeTests = async (url, page, timeout = 5000, testParent) => {
-  //
+  let countOngoingRunsCalls = 0;
+  let countRunStatusCalls = 0;
+  let countObjectsCalls = 0;
+
+  page.on('request', (req) => {
+    const url = req.url();
+    const decodedUrl = decodeURIComponent(url);
+    if (url.includes('/api/filter/ongoingRuns')) {
+      countOngoingRunsCalls++;
+    }
+    if (url.includes('/api/filter/run-status/500001')) {
+      countRunStatusCalls++;
+    }
+    if (url.includes('/api/objects') && decodedUrl.includes('filters[RunNumber]=500001')) {
+      countObjectsCalls++;
+    }
+  });
+
   await testParent.test('should have a switch to enable runs mode', { timeout }, async () => {
     await page.goto(
       `${url}?page=objectTree`,
       { waitUntil: 'networkidle0' },
     );
+    await page.evaluate(() => {
+      window.model.filterModel.ONGOING_RUN_INTERVAL_MS = 500;
+    });
     await page.locator('.form-check-label > .switch');
     const runsModeTitle = await page.evaluate(() =>
       document.querySelector('.form-check-label').textContent);
     strictEqual(runsModeTitle, 'Runs mode', 'The text displayed is not `Runs mode`');
   });
 
-  await testParent.test('should enter runs mode successfully', { timeout }, async () => {
+  await testParent.test('should activate run mode', { timeout }, async () => {
     await page.locator('.form-check-label > .switch').click();
     await delay(50);
-    await page.locator('#filterElement');
 
-    const updateButtonIsDisabled = await page.evaluate(() =>
-      document.querySelector('#updateAndRunModeButton').disabled);
-    const isRunNumberFilterEmpty = await page.evaluate(() =>
-      document.querySelector('#runNumberFilter').value === '');
-    const isRunModeActivated = await page.evaluate(() =>
-      window.model.filterModel.isRunModeActivated);
-    ok(updateButtonIsDisabled);
-    ok(isRunNumberFilterEmpty);
-    ok(isRunModeActivated);
-    delay(200);
+    const isRunModeActivated = await page.evaluate(() => window.model.filterModel.isRunModeActivated);
+    ok(isRunModeActivated, 'Run mode should be activated');
   });
 
-  await testParent.test('should allow user to track a run', { timeout }, async () => {
-    const urlRunStatus = '/api/filter/run-status/566138';
-    const urlObjects = '/api/objects?inRunMode=true&filters[RunNumber]=566138';
-    const regex =
-      /^Last update: \d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}:\d{2}$/;
-    let countRunStatusCalls = 0;
-    let countObjectsCalls = 0;
-    page.on('request', (req) => {
-      if (req.url().includes(encodeURI(urlRunStatus))) {
-        countRunStatusCalls++;
-      }
-      if (req.url().includes(encodeURI(urlObjects))) {
-        countObjectsCalls++;
-      }
-    });
-    await page.evaluate(() => {
-      window.model.filterModel.ONGOING_RUN_INTERVAL_MS = 500;
-    });
-    await page.locator('#runNumberFilter').fill('566138');
-    await delay(100);
-    const updateButtonIsDisabled = await page.evaluate(() =>
-      document.querySelector('#updateAndRunModeButton').disabled);
-    strictEqual(updateButtonIsDisabled, false, 'Button should be disabled if run number has not been set');
-    await page.locator('#updateAndRunModeButton').click();
-    await delay(100);
-    await page.waitForSelector('#runStatusPanel');
-    const runStatusInfo = await page.evaluate(() => {
-      const runNumber = document.querySelector('#runNumberLabel').textContent;
-      const status = document.querySelector('#runStatusBadge').textContent;
-      const lastUpdate = document.querySelector('#lastUpdate').textContent;
-      const refreshInfo = document.querySelector('#refreshInfo')?.textContent;
-      return { runNumber, status, lastUpdate, refreshInfo };
-    });
-    strictEqual(runStatusInfo.runNumber, 'Run #566138');
-    strictEqual(runStatusInfo.status, 'ONGOING');
-    strictEqual(runStatusInfo.refreshInfo, ' - As run is ONGOING, will refresh every 0.5 seconds');
-    match(runStatusInfo.lastUpdate, regex);
-
-    await delay(1000);
-    strictEqual(countRunStatusCalls, 3, `Expected 3 requests to filter/run-status, but got ${countRunStatusCalls}`);
-    strictEqual(countObjectsCalls, 3, `Expected 3 requests to api/objects, but got ${countObjectsCalls}`);
+  await testParent.test('should make a request to ongoing runs API', { timeout }, async () => {
+    await delay(200);
+    strictEqual(countOngoingRunsCalls, 1, `Expect 1 req to /api/filter/ongoingRuns, but got ${countOngoingRunsCalls}`);
   });
 
-  await testParent.test('should show `ENDED` if a run that was ongoing, finishes', { timeout }, async () => {
-    let count = 0;
-    page.on('request', (req) => {
-      if (req.url().includes('/api/filter/run-status/566138')) {
-        count++;
-      }
+  await testParent.test('should display ongoing runs selector', { timeout }, async () => {
+    await page.waitForSelector('#ongoingRunsFilter', { timeout: 1000 });
+    const selector = await page.locator('#ongoingRunsFilter');
+    ok(selector, 'Ongoing runs selector should be present');
+  });
+
+  await testParent.test('should have correct options in ongoing runs selector', { timeout }, async () => {
+    const availableOptions = await page.evaluate(() => {
+      const selector = document.querySelector('#ongoingRunsFilter');
+      return Array.from(selector.options)
+        .map((option) => option.value)
+        .filter((value) => value !== '');
     });
 
-    //nock has been configured to stop the run after 3 calls
-    await page.waitForSelector('#runStatusPanel');
-    const runStatusInfo = await page.evaluate(() => {
-      const runNumber = document.querySelector('#runNumberLabel').textContent;
-      const status = document.querySelector('#runStatusBadge').textContent;
-      return { runNumber, status };
+    ok(availableOptions.length > 0, 'Should have ongoing runs available in selector');
+    ['500001', '500002', '500003'].forEach((run) => {
+      ok(availableOptions.includes(run), `Should include mock run ${run}`);
     });
-    strictEqual(runStatusInfo.runNumber, 'Run #566138');
-    strictEqual(runStatusInfo.status, 'ENDED');
+  });
+
+  await testParent.test('should automatically select first run and update URL', { timeout }, async () => {
     await delay(500);
-    strictEqual(count, 0, `No requests expected, but got ${count}`);
+    const currentUrl = await page.evaluate(() => window.location.href);
+    ok(currentUrl.includes('RunNumber=500001'), 'URL should contain RunNumber=500001 parameter');
+
+    const selectedRunNumber = await page.evaluate(() => {
+      const selector = document.querySelector('#ongoingRunsFilter');
+      return selector.value;
+    });
+    strictEqual(selectedRunNumber, '500001', 'First ongoing run should be automatically selected');
+  });
+
+  await testParent.test('should make requests for run status and objects of selected run', { timeout }, async () => {
+    strictEqual(countRunStatusCalls, 2, `Expected: 2 req to /api/filter/run-status, actual: ${countRunStatusCalls}`);
+    strictEqual(countObjectsCalls, 2, `Expected: 2 req to /api/objects, actual: ${countObjectsCalls}`);
+  });
+
+  await testParent.test('should show ENDED status when run finishes', { timeout }, async () => {
+    await delay(1000);
+    await page.waitForSelector('#runStatusPanel');
+    const runStatusInfo = await page.evaluate(() => {
+      const status = document.querySelector('#runStatusBadge')?.textContent;
+      return { status };
+    });
+
+    // Verify the run status changed to ENDED
+    strictEqual(runStatusInfo.status, 'ENDED', 'Run status should be ENDED');
   });
 
   await testParent.test('should persist runs mode between pages', { timeout }, async () => {
     await page.locator('.menu-item:nth-child(3) > .ph2').click();
     await page.waitForSelector('#runStatusPanel');
     const runInfo = await page.evaluate(() => {
-      const runNumber = document.querySelector('#runNumberLabel').textContent;
       const status = document.querySelector('#runStatusBadge').textContent;
-      return { runNumber, status };
+      const selector = document.querySelector('#ongoingRunsFilter');
+      const [, firstOption] = selector.options;
+      const isSelected = firstOption.selected;
+      const { value } = firstOption;
+      return { status, isSelected, value };
     });
     const isRunModeActivated = await page.evaluate(() => window.model.filterModel.isRunModeActivated);
     ok(isRunModeActivated);
-    ok(runInfo.runNumber, '#566138');
+    ok(runInfo.isSelected);
+    ok(runInfo.value, '500001');
     ok(runInfo.status, 'ENDED');
   });
 
   await testParent.test('should exit runs mode successfully', { timeout }, async () => {
+    // Verify run mode is currently active
+    let isRunModeActive = await page.evaluate(() => window.model.filterModel.isRunModeActivated);
+    ok(isRunModeActive, 'Run mode should be active before disabling');
+
+    // Click the run mode checkbox to disable it
     await page.locator('.form-check-label > .switch').click();
-    await delay(50);
-    const isRunModeActivated = await page.evaluate(() => window.model.filterModel.isRunModeActivated);
-    ok(!isRunModeActivated);
+    await delay(100);
+
+    // Verify run mode is now deactivated
+    isRunModeActive = await page.evaluate(() => window.model.filterModel.isRunModeActivated);
+    ok(!isRunModeActive, 'Run mode should be deactivated after clicking checkbox');
+
+    //check the filters element is back again
+    await page.locator('#filterElement');
   });
 };

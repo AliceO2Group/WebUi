@@ -71,6 +71,18 @@ export const initializeNockForCcdb = () => {
     .reply(200, MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER);
 
   nock(CCDB_URL, xFieldHeader1).persist()
+    .get(`${CCDB_API_PATH_LATEST}.*/RunNumber=500001`)
+    .reply(200, MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER);
+
+  nock(CCDB_URL, xFieldHeader1).persist()
+    .get(`${CCDB_API_PATH_LATEST}.*/RunNumber=500002`)
+    .reply(200, MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER);
+
+  nock(CCDB_URL, xFieldHeader1).persist()
+    .get(`${CCDB_API_PATH_LATEST}.*/RunNumber=500003`)
+    .reply(200, MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER);
+
+  nock(CCDB_URL, xFieldHeader1).persist()
     .get(`${CCDB_API_PATH_LATEST}.*/RunNumber=566138`)
     .reply(200, MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER);
 
