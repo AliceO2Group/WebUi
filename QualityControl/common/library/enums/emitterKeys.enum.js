@@ -12,13 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h } from '/js/src/index.js';
-
 /**
- * Shows header of Framework Information
- * @returns {vnode} - virtual node element
+ * Keys that are used define the tracks to follow events on the Node Emitter
  */
-export default () => ({
-  centerCol: h('.flex-row.justify-center.flex-grow', [h('b.f4.ph2', 'About')]),
-  rightCol: h('.w-33'),
+export const EmitterKeys = Object.freeze({
+  RUN_TRACK: 'RUN_TRACK',
 });

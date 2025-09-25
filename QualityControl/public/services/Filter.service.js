@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { RunStatus } from '../../library/runStatus.enum.js';
 import { RemoteData } from '/js/src/index.js';
+import { RunStatus } from '../../library/runStatus.enum.js';
 
 /**
  * Service to get the data to populate the filters
@@ -49,32 +49,12 @@ export default class FilterService {
   /**
    * Method to get run status for a specific run number
    * @param {number} runNumber - The run number to get status for
-   * @returns {Promise<string>} - Run status string
+   * @returns {RemoteData} - result within a RemoteData object
    */
   async getRunStatus(runNumber) {
-    try {
-      let status = RunStatus.UNKNOWN;
-      let reason = '';
-      const parsedRunNumber = parseInt(runNumber, 10);
-
-      if (Number.isNaN(parsedRunNumber)) {
-        status = RunStatus.ERROR;
-        reason = 'Run number provided is not a number';
-      } else {
-        const { result, ok } = await this.loader.get(`/api/filter/run-status/${parsedRunNumber}`);
-        if (!ok || !result || !Object.values(RunStatus).includes(result?.runStatus)) {
-          status = RunStatus.ERROR;
-          reason = result?.message;
-        } else {
-          status = result?.runStatus;
-        }
-      }
-      return {
-        status, reason,
-      };
-    } catch {
-      return RunStatus.UNKNOWN;
-    }
+    const parsedRunNumber = parseInt(runNumber, 10);
+    const { result, ok } = await this.loader.get(`/api/filter/run-status/${parsedRunNumber}`);
+    return ok ? result?.runStatus : RunStatus.UNKNOWN;
   }
 
   /**
@@ -83,5 +63,19 @@ export default class FilterService {
    */
   async initFilterService() {
     await this.getRunTypes();
+  }
+
+  /**
+   * Method which will return RemoteData object based on the status of the request
+   * @param {object} result - value to be added in RemoteData object
+   * @param {boolean} ok - whether result was ok or not
+   * @returns {RemoteData} - passed result in a RemoteData object
+   */
+  parseResult(result, ok) {
+    if (!ok) {
+      return RemoteData.failure(result.error || result.message);
+    } else {
+      return RemoteData.success(result);
+    }
   }
 }

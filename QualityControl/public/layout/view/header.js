@@ -43,12 +43,11 @@ const toolbarViewMode = (layout, filterModel) => {
   const layoutItem = layout.item;
   const { isOfficial, owner_id, name } = layoutItem;
 
-  return [
-    h('.flex-grow.text-center', h('div.header-layout', [tabViewLinks(layoutItem, layout)])),
-    h('.flex-grow.text-right', [
+  return {
+    centerCol: h('.flex-grow.text-center', [h('.header-layout', [tabViewLinks(layoutItem, layout)])]),
+    rightCol: h('.w-33.text-right.g2.flex-row.justify-end', [
       h('b.f4.items-center', [isOfficial ? iconBadge() : '', layoutItem.name]),
       ' ',
-      // Show group button edit/duplicate only for owner of the layout shown
       h('.btn-group', [
         filterPanelToggleButton(filterModel),
         newLayoutButton(layout),
@@ -56,7 +55,7 @@ const toolbarViewMode = (layout, filterModel) => {
         layout.ownsLayout(owner_id) && [editDropdown(layout), deleteButton(layout)],
       ]),
     ]),
-  ];
+  };
 };
 
 /**
@@ -76,7 +75,7 @@ const toolbarViewModeTab = (layout, tab, i) => {
   const selectTab = () => layout.selectTab(i);
 
   return [
-    h('button.br-pill.ph2.btn.btn-tab', { class: linkClass, onclick: selectTab }, tab.name),
+    h('button.br-pill.ph2.btn.btn-tab', { id: `tab-${i}`, class: linkClass, onclick: selectTab }, tab.name),
     ' ',
   ];
 };
@@ -92,8 +91,8 @@ const toolbarEditMode = (layout, filterModel) => {
     layout.item.name = e.target.value.trim();
   };
 
-  return [
-    h('.w-50.text-center', [
+  return {
+    centerCol: h('.flex-grow.text-center', [
       h('div', { class: 'header-layout' }, [
         h('span', editTabLinks(layout)),
         h('.btn-group', [
@@ -110,7 +109,7 @@ const toolbarEditMode = (layout, filterModel) => {
         ]),
       ]),
     ]),
-    h('.text-right', [
+    rightCol: h('.w-33.text-right.flex-row.justify-end', [
       h('input.form-control.form-inline', {
         type: 'text',
         value: layout.item.name,
@@ -122,7 +121,7 @@ const toolbarEditMode = (layout, filterModel) => {
         cancelButton(layout),
       ]),
     ]),
-  ];
+  };
 };
 
 /**
@@ -189,8 +188,9 @@ const editDropdown = (layout) =>
     h('button.btn.btn-primary', { onclick: () => layout.toggleEditMenu() }, iconPencil()),
     h('.dropdown-menu.right-menu', [
       h('.text-ellipsis', [
-        h('a.menu-item', { title: 'Edit via GUI', onclick: () => layout.edit() }, 'Edit via GUI'),
+        h('a.menu-item', { id: 'editByGui', title: 'Edit via GUI', onclick: () => layout.edit() }, 'Edit via GUI'),
         h('a.menu-item', {
+          id: 'editByJson',
           title: 'Edit via JSON',
           onclick: () => layout.initializeEditViaJson(),
         }, 'Edit via JSON'),
@@ -255,7 +255,7 @@ const saveButton = (layout) =>
  */
 const cancelButton = (layout) =>
   h('button.btn', {
-    key: 'cancel-button',
+    id: 'cancel-button',
     onclick: () => layout.cancelEdit(),
     title: 'Cancel',
   }, iconBan());

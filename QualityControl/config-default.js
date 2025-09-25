@@ -56,7 +56,14 @@ export const config = {
     runTypesRefreshInterval: 15000,
     runStatusRefreshInterval: 30000,
   },
-
+  kafka: {
+    enabled: true,
+    clientId: 'qcg-client-local',
+    consumerGroups: {
+      QCG_RUN: 'qcg-run-local'
+    },
+    brokers: ['localhost:9092'],
+  },
 
   /*
    * Absolute path where to save layouts, default = root of this app

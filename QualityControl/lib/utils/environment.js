@@ -12,13 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h } from '/js/src/index.js';
-
-/**
- * Shows header of Framework Information
- * @returns {vnode} - virtual node element
- */
-export default () => ({
-  centerCol: h('.flex-row.justify-center.flex-grow', [h('b.f4.ph2', 'About')]),
-  rightCol: h('.w-33'),
-});
+export const isRunningInProduction = process.env?.NODE_ENV === 'PRODUCTION' || process.env?.NODE_ENV === 'production';
+export const isRunningInTest = process.env?.NODE_ENV === 'test' || process.env?.NODE_ENV === 'TEST';
+export const isRunningInDevelopment = !isRunningInProduction && !isRunningInTest;
