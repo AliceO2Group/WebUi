@@ -49,19 +49,31 @@ export class Connection {
     targetAddress: string,
     direction: ConnectionDirection,
     peerCtor: any,
-    private readonly caCert: NonSharedBuffer,
-    private readonly clientCert: NonSharedBuffer,
-    private readonly clientKey: NonSharedBuffer
+    private readonly connectionCerts: {
+      caCert: NonSharedBuffer;
+      clientCert: NonSharedBuffer;
+      clientKey: NonSharedBuffer;
+    }
   ) {
     this.token = token;
     this.targetAddress = targetAddress;
     this.direction = direction;
 
+    if (
+      !connectionCerts.caCert ||
+      !connectionCerts.clientCert ||
+      !connectionCerts.clientKey
+    ) {
+      throw new Error(
+        "Connection certificates are required to create a Connection."
+      );
+    }
+
     // create grpc credentials
     const sslCreds = grpc.credentials.createSsl(
-      this.caCert,
-      this.clientKey,
-      this.clientCert
+      this.connectionCerts.caCert,
+      this.connectionCerts.clientKey,
+      this.connectionCerts.clientCert
     );
 
     this.peerClient = new peerCtor(targetAddress, sslCreds);

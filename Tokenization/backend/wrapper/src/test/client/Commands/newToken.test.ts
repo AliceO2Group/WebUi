@@ -24,6 +24,7 @@ import {
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
+import { getTestCerts } from "../../testCerts/testCerts";
 
 /**
  * Helper to create a new token command with given address, direction, and token.
@@ -87,7 +88,13 @@ describe("NewTokenHandler", () => {
         dir: ConnectionDirection,
         token: string
       ) {
-        const conn = new Connection(token, address, dir, peerCtor);
+        const conn = new Connection(
+          token,
+          address,
+          dir,
+          peerCtor,
+          getTestCerts()
+        );
         if (dir === ConnectionDirection.SENDING) {
           this.sendingConnections.set(address, conn);
         } else {
@@ -104,8 +111,10 @@ describe("NewTokenHandler", () => {
       "old-token",
       targetAddress,
       ConnectionDirection.SENDING,
-      peerCtor
+      peerCtor,
+      getTestCerts()
     );
+
     (manager as any).sendingConnections.set(targetAddress, conn);
 
     const handler = new NewTokenHandler(manager);

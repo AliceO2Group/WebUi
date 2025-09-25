@@ -21,6 +21,7 @@ const mockServerInstance = {
 
 const logger = {
   infoMessage: jest.fn(),
+  errorMessage: jest.fn(),
 };
 
 jest.mock(
@@ -45,7 +46,7 @@ jest.mock("@grpc/grpc-js", () => {
     ...original,
     Server: jest.fn(() => mockServerInstance),
     ServerCredentials: {
-      createInsecure: jest.fn(() => "mock-credentials"),
+      createSsl: jest.fn(() => "mock-credentials"),
     },
     loadPackageDefinition: jest.fn(() => ({
       webui: {
@@ -61,22 +62,25 @@ jest.mock("@grpc/grpc-js", () => {
 
 import { CentralSystemWrapper } from "../../central/CentralSystemWrapper";
 import * as grpc from "@grpc/grpc-js";
+import { getTestCentralCertPaths } from "../testCerts/testCerts";
 
 describe("CentralSystemWrapper", () => {
   let wrapper: CentralSystemWrapper;
+  const testCentralCertPaths = getTestCentralCertPaths();
 
   beforeEach(() => {
     jest.clearAllMocks();
     wrapper = new CentralSystemWrapper({
       protoPath: "dummy.proto",
       port: 12345,
+      serverCerts: testCentralCertPaths,
     });
   });
 
   test("should set up gRPC service and add it to the server", () => {
     expect(grpc.Server).toHaveBeenCalled();
     expect(grpc.loadPackageDefinition).toHaveBeenCalled();
-    expect(grpc.ServerCredentials.createInsecure).not.toHaveBeenCalled();
+    expect(grpc.ServerCredentials.createSsl).not.toHaveBeenCalled();
     expect(wrapper).toBeDefined();
   });
 
@@ -98,7 +102,7 @@ describe("CentralSystemWrapper", () => {
 
     wrapper.listen();
 
-    expect(logger.infoMessage).toHaveBeenCalledWith(
+    expect(logger.errorMessage).toHaveBeenCalledWith(
       "Server bind error:",
       error
     );
@@ -131,7 +135,7 @@ describe("CentralSystemWrapper", () => {
     expect(logger.infoMessage).toHaveBeenCalledWith(
       "Client client123 ended stream."
     );
-    expect(logger.infoMessage).toHaveBeenCalledWith(
+    expect(logger.errorMessage).toHaveBeenCalledWith(
       "Stream error from client client123:",
       expect.any(Error)
     );

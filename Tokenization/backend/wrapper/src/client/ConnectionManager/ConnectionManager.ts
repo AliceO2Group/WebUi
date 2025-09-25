@@ -116,27 +116,19 @@ export class ConnectionManager {
 
     this.sendingConnections.set(
       "a",
-      new Connection(
-        "1",
-        "a",
-        ConnectionDirection.SENDING,
-        this.peerCtor,
-        this.caCert,
-        this.clientKey,
-        this.clientCert
-      )
+      new Connection("1", "a", ConnectionDirection.SENDING, this.peerCtor, {
+        caCert: this.caCert,
+        clientCert: this.clientCert,
+        clientKey: this.clientKey,
+      })
     );
     this.sendingConnections.set(
       "b",
-      new Connection(
-        "2",
-        "b",
-        ConnectionDirection.SENDING,
-        this.peerCtor,
-        this.caCert,
-        this.clientKey,
-        this.clientCert
-      )
+      new Connection("2", "b", ConnectionDirection.SENDING, this.peerCtor, {
+        caCert: this.caCert,
+        clientCert: this.clientCert,
+        clientKey: this.clientKey,
+      })
     );
   }
 
@@ -197,15 +189,11 @@ export class ConnectionManager {
     }
 
     // Create new connection
-    conn = new Connection(
-      token || "",
-      address,
-      direction,
-      this.peerCtor,
-      this.caCert,
-      this.clientKey,
-      this.clientCert
-    );
+    conn = new Connection(token || "", address, direction, this.peerCtor, {
+      caCert: this.caCert,
+      clientCert: this.clientCert,
+      clientKey: this.clientKey,
+    });
     conn.updateStatus(ConnectionStatus.CONNECTING);
 
     if (direction === ConnectionDirection.RECEIVING) {
@@ -287,9 +275,11 @@ export class ConnectionManager {
               clientAddress,
               ConnectionDirection.RECEIVING,
               this.peerCtor,
-              this.caCert,
-              this.clientKey,
-              this.clientCert
+              {
+                caCert: this.caCert,
+                clientCert: this.clientCert,
+                clientKey: this.clientKey,
+              }
             );
             conn.updateStatus(ConnectionStatus.CONNECTED);
             this.receivingConnections.set(clientAddress, conn);

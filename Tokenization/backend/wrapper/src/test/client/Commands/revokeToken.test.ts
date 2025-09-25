@@ -25,6 +25,7 @@ import { Command } from "models/commands.model";
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
+import { getTestCerts } from "../../testCerts/testCerts";
 
 describe("RevokeToken", () => {
   const protoPath = path.join(
@@ -78,7 +79,8 @@ describe("RevokeToken", () => {
       "valid-token",
       targetAddress,
       ConnectionDirection.SENDING,
-      peerCtor
+      peerCtor,
+      getTestCerts()
     );
     (manager as any).sendingConnections!.set(targetAddress, conn);
 
@@ -99,7 +101,8 @@ describe("RevokeToken", () => {
       "valid-token",
       targetAddress,
       ConnectionDirection.RECEIVING,
-      peerCtor
+      peerCtor,
+      getTestCerts()
     );
     (manager as any).receivingConnections.set(targetAddress, conn);
 

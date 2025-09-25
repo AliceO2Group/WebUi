@@ -20,8 +20,9 @@ import {
 } from "../models/message.model";
 import { Connection } from "./Connection/Connection";
 import { NewTokenHandler } from "./Commands/newToken/newToken.handler";
-import { gRPCWrapperConfig } from "../models/config.model.ts";
+import { gRPCWrapperConfig } from "../models/config.model";
 import * as fs from "fs";
+import { LogManager } from "@aliceo2/web-ui";
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -41,6 +42,7 @@ export class gRPCWrapper {
   private ConnectionManager: ConnectionManager;
   private listenerKey?: NonSharedBuffer;
   private listenerCert?: NonSharedBuffer;
+  private logger = LogManager.getLogger("gRPCWrapper");
 
   /**
    * @description Initializes an instance of gRPCWrapper class.
@@ -48,27 +50,32 @@ export class gRPCWrapper {
    * @param protoPath - The file path to the gRPC proto definition.
    * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
    */
-  constructor(
-    protoPath: string,
-    centralAddress: string = "localhost:50051",
-    private readonly clientCerts: {
-      keyPath: string;
-      certPath: string;
-      caPath: string;
-    },
-    private listenerCertPaths?: { keyPath: string; certPath: string }
-  ) {
-    if (listenerCertPaths?.keyPath && listenerCertPaths?.certPath) {
-      this.listenerKey = fs.readFileSync(listenerCertPaths.keyPath);
-      this.listenerCert = fs.readFileSync(listenerCertPaths.certPath);
+  constructor(config: gRPCWrapperConfig) {
+    if (
+      !config.protoPath ||
+      !config.centralAddress ||
+      !config.clientCerts ||
+      !config.clientCerts.caCertPath ||
+      !config.clientCerts.certPath ||
+      !config.clientCerts.keyPath
+    ) {
+      throw new Error("Invalid gRPCWrapper configuration provided.");
+    }
+
+    if (
+      config.listenerCertPaths?.keyPath &&
+      config.listenerCertPaths?.certPath
+    ) {
+      this.listenerKey = fs.readFileSync(config.listenerCertPaths.keyPath);
+      this.listenerCert = fs.readFileSync(config.listenerCertPaths.certPath);
     }
 
     this.ConnectionManager = new ConnectionManager(
-      protoPath,
-      centralAddress,
-      this.clientCerts.caPath,
-      this.clientCerts.certPath,
-      this.clientCerts.keyPath
+      config.protoPath,
+      config.centralAddress,
+      config.clientCerts.caCertPath,
+      config.clientCerts.certPath,
+      config.clientCerts.keyPath
     );
     this.ConnectionManager.registerCommandHandlers([
       {
@@ -117,9 +124,10 @@ export class gRPCWrapper {
     }
 
     if (!this.listenerKey || !this.listenerCert) {
-      throw new Error(
+      this.logger.errorMessage(
         "Listener certificates are required to start P2P listener. Please provide valid paths."
       );
+      return;
     }
 
     return this.ConnectionManager.listenForPeers(

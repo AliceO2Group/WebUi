@@ -17,6 +17,7 @@ import * as protoLoader from "@grpc/proto-loader";
 import { LogManager } from "@aliceo2/web-ui";
 import { DuplexMessageModel } from "../models/message.model";
 import * as fs from "fs";
+import { CentralSystemConfig } from "models/config.model";
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
@@ -27,6 +28,11 @@ export class CentralSystemWrapper {
 
   // class properties
   private server: grpc.Server;
+  private protoPath: string;
+  private port: number;
+
+  // certificates paths
+  private serverCerts: CentralSystemConfig["serverCerts"];
 
   // clients management
   private clients = new Map<string, grpc.ServerDuplexStream<any, any>>();
@@ -36,13 +42,21 @@ export class CentralSystemWrapper {
    * Initializes the Wrapper for CentralSystem.
    * @param port The port number to bind the gRPC server to.
    */
-  constructor(
-    private protoPath: string,
-    private port: number,
-    private readonly caCertPath: string,
-    private readonly centralCertPath: string,
-    private readonly centralKeyPath: string
-  ) {
+  constructor(config: CentralSystemConfig) {
+    if (
+      !config.protoPath ||
+      !config.serverCerts ||
+      !config.serverCerts.caCertPath ||
+      !config.serverCerts.certPath ||
+      !config.serverCerts.keyPath
+    ) {
+      throw new Error("Invalid CentralSystemConfig provided");
+    }
+
+    this.protoPath = config.protoPath;
+    this.serverCerts = config.serverCerts;
+    this.port = config.port || 50051;
+
     this.server = new grpc.Server();
     this.setupService();
   }
@@ -176,9 +190,9 @@ export class CentralSystemWrapper {
     const addr = `localhost:${this.port}`;
 
     // create mTLS secure gRPC server
-    const caCert = fs.readFileSync(this.caCertPath);
-    const centralKey = fs.readFileSync(this.centralKeyPath);
-    const centralCert = fs.readFileSync(this.centralCertPath);
+    const caCert = fs.readFileSync(this.serverCerts.caCertPath);
+    const centralKey = fs.readFileSync(this.serverCerts.keyPath);
+    const centralCert = fs.readFileSync(this.serverCerts.certPath);
 
     const sslCreds = grpc.ServerCredentials.createSsl(
       caCert,
