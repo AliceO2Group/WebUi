@@ -7,11 +7,11 @@ export const getTestCentralCertPaths =
     const CA_CERT_PATH = path.join(__dirname, "./ca.crt");
     const SERVER_CERT_PATH = path.join(
       __dirname,
-      "./centralSystem/central.system.svc.local.crt"
+      "./centralSystem/central-system.crt"
     );
     const SERVER_KEY_PATH = path.join(
       __dirname,
-      "./centralSystem/central.system.svc.local.key"
+      "./centralSystem/central-system.key"
     );
 
     return {
@@ -26,11 +26,30 @@ export const getTestClientListenerCertPaths =
     const CA_CERT_PATH = path.join(__dirname, "./ca.crt");
     const CLIENT_CERT_PATH = path.join(
       __dirname,
-      "./clientListener/client-b.svc.local.crt"
+      "./clientListener/client-b-client.crt"
     );
     const CLIENT_KEY_PATH = path.join(
       __dirname,
-      "./clientListener/client-b.svc.local.key"
+      "./clientListener/client-b.key"
+    );
+
+    return {
+      caCertPath: CA_CERT_PATH,
+      certPath: CLIENT_CERT_PATH,
+      keyPath: CLIENT_KEY_PATH,
+    };
+  };
+
+export const getTestClientListenerServerCertPaths =
+  (): gRPCWrapperConfig["clientCerts"] => {
+    const CA_CERT_PATH = path.join(__dirname, "./ca.crt");
+    const CLIENT_CERT_PATH = path.join(
+      __dirname,
+      "./clientListenerServer/client-b-server.crt"
+    );
+    const CLIENT_KEY_PATH = path.join(
+      __dirname,
+      "./clientListenerServer/client-b.key"
     );
 
     return {
@@ -45,12 +64,9 @@ export const getTestClientSenderCertPaths =
     const CA_CERT_PATH = path.join(__dirname, "./ca.crt");
     const CLIENT_CERT_PATH = path.join(
       __dirname,
-      "./clientSender/client-a.svc.local.crt"
+      "./clientSender/client-a-client.crt"
     );
-    const CLIENT_KEY_PATH = path.join(
-      __dirname,
-      "./clientSender/client-a.svc.local.key"
-    );
+    const CLIENT_KEY_PATH = path.join(__dirname, "./clientSender/client-a.key");
 
     return {
       caCertPath: CA_CERT_PATH,
@@ -63,11 +79,11 @@ export const getTestCerts = () => {
   const CA_CERT_PATH = path.join(__dirname, "./ca.crt");
   const SERVER_CERT_PATH = path.join(
     __dirname,
-    "./centralSystem/central.system.svc.local.crt"
+    "./centralSystem/central-system.crt"
   );
   const SERVER_KEY_PATH = path.join(
     __dirname,
-    "./centralSystem/central.system.svc.local.key"
+    "./centralSystem/central-system.key"
   );
 
   const caCert = fs.readFileSync(CA_CERT_PATH);
