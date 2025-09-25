@@ -143,4 +143,12 @@ export class RunModeService {
   get refreshInterval() {
     return this._refreshRunsInterval;
   }
+
+  /**
+   * Returns the list of runs that are ongoing
+   * @returns {Array} array of run numbers
+   */
+  get ongoingRuns() {
+    return [...this._ongoingRuns.keys()];
+  }
 }

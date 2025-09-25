@@ -26,9 +26,9 @@ import { runModeMiddleware } from './middleware/filters/runMode.middleware.js';
  * Adds paths and binds websocket to instance of HttpServer passed
  * @param {HttpServer} http - web-ui based server implementation
  * @param {WebSocket} ws - web-ui websocket server implementation
- * @returns {void}
+ * @param {EventEmitter} eventEmitter - Event emitter instance (Kafka)
  */
-export const setup = async (http, ws) => {
+export const setup = async (http, ws, eventEmitter) => {
   /**
    * @type {{
    *   layoutController: import('./controllers/LayoutController.js').LayoutController,
@@ -51,7 +51,7 @@ export const setup = async (http, ws) => {
     objectGetByIdValidation,
     objectsGetValidation,
     objectGetContentsValidation,
-  } = await setupQcModel();
+  } = await setupQcModel(eventEmitter);
   statusService.ws = ws;
 
   http.get('/object/:id', objectGetByIdValidation, objectController.getObjectById.bind(objectController));
@@ -105,5 +105,9 @@ export const setup = async (http, ws) => {
     '/filter/run-status/:runNumber',
     runStatusFilterMiddleware,
     filterController.getRunStatusHandler.bind(filterController),
+  );
+  http.get(
+    '/filter/ongoingRuns',
+    filterController.getOngoingRunsHandler.bind(filterController),
   );
 };
