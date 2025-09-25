@@ -404,7 +404,7 @@ export default class Layout extends BaseViewModel {
    * @returns {undefined}
    */
   edit() {
-    if (this.model.filterModel.inRunMode) {
+    if (this.model.filterModel.isRunModeActivated) {
       this.model.filterModel.deactivateRunsMode(this);
     }
     this.toggleEditMenu();
@@ -758,6 +758,10 @@ export default class Layout extends BaseViewModel {
    * @returns {undefined}
    */
   triggerFilter() {
+    if (this.model.filterModel.runsModeInterval) {
+      this.model.object.refreshObjects(this.tab.objects.map((object) => object.name));
+      return;
+    }
     this.selectTab(this.tabIndex);
     if (this.editEnabled) { // To re-render the objectTree in edit mode
       this.listObjects();
