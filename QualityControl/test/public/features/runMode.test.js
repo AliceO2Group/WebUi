@@ -110,45 +110,39 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     // Verify the run status changed to ENDED
     strictEqual(runStatusInfo.status, 'ENDED', 'Run status should be ENDED');
   });
-  // await testParent.test('should show `ENDED` if a run that was ongoing, finishes', { timeout }, async () => {
-  //   let count = 0;
-  //   page.on('request', (req) => {
-  //     if (req.url().includes('/api/filter/run-status/566138')) {
-  //       count++;
-  //     }
-  //   });
 
-  //   //nock has been configured to stop the run after 3 calls
-  //   await page.waitForSelector('#runStatusPanel');
-  //   const runStatusInfo = await page.evaluate(() => {
-  //     const runNumber = document.querySelector('#runNumberLabel').textContent;
-  //     const status = document.querySelector('#runStatusBadge').textContent;
-  //     return { runNumber, status };
-  //   });
-  //   strictEqual(runStatusInfo.runNumber, 'Run #566138');
-  //   strictEqual(runStatusInfo.status, 'ENDED');
-  //   await delay(500);
-  //   strictEqual(count, 0, `No requests expected, but got ${count}`);
-  // });
+  await testParent.test('should persist runs mode between pages', { timeout }, async () => {
+    await page.locator('.menu-item:nth-child(3) > .ph2').click();
+    await page.waitForSelector('#runStatusPanel');
+    const runInfo = await page.evaluate(() => {
+      const status = document.querySelector('#runStatusBadge').textContent;
+      const selector = document.querySelector('#ongoingRunsFilter');
+      const [, firstOption] = selector.options;
+      const isSelected = firstOption.selected;
+      const { value } = firstOption;
+      return { status, isSelected, value };
+    });
+    const isRunModeActivated = await page.evaluate(() => window.model.filterModel.isRunModeActivated);
+    ok(isRunModeActivated);
+    ok(runInfo.isSelected);
+    ok(runInfo.value, '500001');
+    ok(runInfo.status, 'ENDED');
+  });
 
-  // await testParent.test('should persist runs mode between pages', { timeout }, async () => {
-  //   await page.locator('.menu-item:nth-child(3) > .ph2').click();
-  //   await page.waitForSelector('#runStatusPanel');
-  //   const runInfo = await page.evaluate(() => {
-  //     const runNumber = document.querySelector('#runNumberLabel').textContent;
-  //     const status = document.querySelector('#runStatusBadge').textContent;
-  //     return { runNumber, status };
-  //   });
-  //   const isRunModeActivated = await page.evaluate(() => window.model.filterModel.isRunModeActivated);
-  //   ok(isRunModeActivated);
-  //   ok(runInfo.runNumber, '#566138');
-  //   ok(runInfo.status, 'ENDED');
-  // });
+  await testParent.test('should exit runs mode successfully', { timeout }, async () => {
+    // Verify run mode is currently active
+    let isRunModeActive = await page.evaluate(() => window.model.filterModel.isRunModeActivated);
+    ok(isRunModeActive, 'Run mode should be active before disabling');
 
-  // await testParent.test('should exit runs mode successfully', { timeout }, async () => {
-  //   await page.locator('.form-check-label > .switch').click();
-  //   await delay(50);
-  //   const isRunModeActivated = await page.evaluate(() => window.model.filterModel.isRunModeActivated);
-  //   ok(!isRunModeActivated);
-  // });
+    // Click the run mode checkbox to disable it
+    await page.locator('.form-check-label > .switch').click();
+    await delay(100);
+
+    // Verify run mode is now deactivated
+    isRunModeActive = await page.evaluate(() => window.model.filterModel.isRunModeActivated);
+    ok(!isRunModeActive, 'Run mode should be deactivated after clicking checkbox');
+
+    //check the filters element is back again
+    await page.locator('#filterElement');
+  });
 };
