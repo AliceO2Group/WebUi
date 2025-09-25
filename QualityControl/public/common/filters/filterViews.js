@@ -68,7 +68,6 @@ export function filtersPanel(filterModel, viewModel) {
   const {
     filterMap,
     setFilterValue,
-    getOngoingRuns,
     filterService,
     clearFilter,
     isRunModeActivated,
@@ -77,9 +76,10 @@ export function filtersPanel(filterModel, viewModel) {
     lastRefresh,
     ONGOING_RUN_INTERVAL_MS: refreshRate,
   } = filterModel;
+  const { fetchOngoingRuns } = filterService;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
-  const onFocusCallback = getOngoingRuns.bind(filterModel);
+  const onFocusCallback = fetchOngoingRuns.bind(filterService);
   const onEnterCallback = () => filterModel.triggerFilter(viewModel);
   const clearFilterCallback = clearFilter.bind(filterModel, viewModel);
   if (!isVisible) {

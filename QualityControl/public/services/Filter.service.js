@@ -84,7 +84,7 @@ export default class FilterService {
    * Gets the run numbers for the ongoing runs
    * @returns {void} assigns the remoteData object to ongoingRuns
    */
-  async getOngoingRuns() {
+  async fetchOngoingRuns() {
     this.ongoingRuns = RemoteData.loading();
     this.filterModel.notify();
     const { result, ok } = await this.loader.get('/api/filter/ongoingRuns');

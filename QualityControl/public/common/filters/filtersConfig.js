@@ -59,7 +59,7 @@ export const runModeFilterConfig = ({ ongoingRuns }) => [
   {
     type: FilterType.RUN_MODE,
     queryLabel: 'RunNumber',
-    placeholder: 'RunNumber (e.g. 546783)',
+    placeholder: 'Select a run number',
     id: 'ongoingRunsFilter',
     inputType: 'number',
     width: 'w-10',
