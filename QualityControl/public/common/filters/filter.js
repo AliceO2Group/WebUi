@@ -136,35 +136,52 @@ const dropdownSelector = (config) => {
 
 export const ongoingRunsSelector = (config, filterMap, options, onChangeCallback, onEnterCallback, onFocusCallback) => {
   const handleChange = (value) => {
-    onChangeCallback('RunNumber', value, true);
-    onEnterCallback();
+    onChangeCallback('RunNumber', value, false);
+    if (value) {
+      setTimeout(() => onEnterCallback(), 50);
+    }
   };
-
   const availableOptions = options.isSuccess()
     ? [...new Set([...options.payload].map((v) => String(v)))]
     : [];
 
-  const selectedValue = filterMap['RunNumber'] ?? availableOptions[0] ?? '';
-  const optionsWithSelected = selectedValue
-    ? availableOptions.includes(selectedValue)
-      ? availableOptions
-      : [selectedValue, ...availableOptions]
-    : availableOptions;
+  const selectedValue = filterMap['RunNumber'] || '';
+
+  const handleFocus = () => {
+    if (onFocusCallback) {
+      onFocusCallback();
+    }
+  };
+
+  const buildOptions = () => {
+    const options = [];
+    options.push(h('option', { value: '', disabled: true }, config.placeholder || 'Select a run'));
+    if (selectedValue) {
+      options.push(h('option', { value: selectedValue }, selectedValue));
+    }
+
+    availableOptions
+      .filter((option) => option !== selectedValue)
+      .forEach((option) => {
+        options.push(h('option', { value: option }, option));
+      });
+
+    return options;
+  };
 
   return h(`.${config.width}`, [
     h(
       'select.form-control',
       {
-        placeholder: config.placeholder,
+        placeholder: config.placeholder || 'Select a run',
         id: config.id,
         name: config.id,
         value: selectedValue,
-        onmousedown: onFocusCallback,
+        onfocus: handleFocus,
         onchange: (event) => handleChange(event.target.value),
       },
-      optionsWithSelected.length > 0
-        ? optionsWithSelected.map((option) =>
-          h('option', { value: option }, option))
+      availableOptions.length > 0 || selectedValue
+        ? buildOptions()
         : [h('option', { value: '', disabled: true }, 'No ongoing runs available')],
     ),
   ]);
