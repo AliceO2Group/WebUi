@@ -122,7 +122,7 @@ export default class QCObject extends BaseViewModel {
    * @returns {undefined}
    */
   sortListByField(listSource, field, order) {
-    listSource.sort((a, b) => typeof a[field] === 'string' ?
+    listSource?.sort((a, b) => typeof a[field] === 'string' ?
       this._compareStrings(a[field], b[field], order) :
       this._compareNumbers(a[field], b[field], order));
   }
@@ -310,7 +310,8 @@ export default class QCObject extends BaseViewModel {
     await Promise.allSettled(objectsName.map(async (objectName) => {
       let fetchedData = null;
       if (this.objects[objectName]?.isSuccess() && this.objects[objectName]?.payload?.name) {
-        const { refreshNeeded, data } = await this.checkIfRefreshObject(this.objects[objectName].payload);
+        const context = { objectName };
+        const { refreshNeeded, data } = await this.checkIfRefreshObject(this.objects[objectName].payload, context);
         fetchedData = data;
         if (!refreshNeeded) {
           return;
@@ -571,11 +572,32 @@ export default class QCObject extends BaseViewModel {
    * @param {object} object - The object to check for refresh.
    * @param {string} object.name - The name of the object to look up.
    * @param {string|number} object.id - The current ID of the object being validated.
+   * @param {object} context - Additional context to determine fetch method
+   * @param {string} context.objectName - Object name from URL params
+   * @param {string} context.objectId - Object ID from URL params
    * @returns {Promise<boolean,RemoteData>} A promise that resolves to `true` if the object should be refreshed
    */
-  async checkIfRefreshObject(object) {
-    const fetchFn = async () =>
-      await this.model.services.object.getObjectByName(object.name, undefined, undefined, this);
+  async checkIfRefreshObject(object, context = {}) {
+    const { objectName, objectId } = context;
+
+    const fetchFn = async () => {
+      if (objectId) {
+        return await this.model.services.object.getObjectById(
+          objectId,
+          undefined,
+          undefined,
+          this,
+        );
+      } else {
+        return await this.model.services.object.getObjectByName(
+          objectName || object.name,
+          undefined,
+          undefined,
+          this,
+        );
+      }
+    };
+
     const validateFn = (result) =>
       result.isSuccess() && result.payload.id !== object.id;
     return this.model.filterModel.refreshCheck(fetchFn, validateFn);
@@ -590,7 +612,9 @@ export default class QCObject extends BaseViewModel {
       this.selected = null;
     }
     if (this.selected && this.selected.name) {
-      const { refreshNeeded, data } = await this.checkIfRefreshObject(this.objects[this.selected.name].payload);
+      const context = { objectName: this.selected.name };
+      const { refreshNeeded, data } =
+        await this.checkIfRefreshObject(this.objects[this.selected.name].payload, context);
       if (refreshNeeded && data?.payload) {
         this.select({ name: this.selected.name }, data.payload);
       }

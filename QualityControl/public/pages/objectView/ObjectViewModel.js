@@ -71,7 +71,8 @@ export default class ObjectViewModel extends BaseViewModel {
   async updateObjectSelection(object, validFrom = undefined, id = '') {
     const { objectName = undefined, objectId = undefined } = object;
     const { params } = this.model.router;
-    const { refreshNeeded, data } = await this.model.object.checkIfRefreshObject(this.selected.payload);
+    const context = { objectName: objectName || params.objectName, objectId: objectId || params.objectId };
+    const { refreshNeeded, data } = await this.model.object.checkIfRefreshObject(this.selected.payload, context);
     if (!refreshNeeded) {
       return;
     }
@@ -85,9 +86,15 @@ export default class ObjectViewModel extends BaseViewModel {
     }
 
     let currentParams = '?page=objectView';
-    this.selected = data ?? params.objectName
-      ? await this.model.services.object.getObjectByName(params.objectName, id, validFrom, this)
-      : await this.model.services.object.getObjectById(params.objectId, id, validFrom, this);
+
+    // Use refreshed data if available, otherwise fetch based on available parameters
+    if (data) {
+      this.selected = data;
+    } else if (params.objectName) {
+      this.selected = await this.model.services.object.getObjectByName(params.objectName, id, validFrom, this);
+    } else if (params.objectId) {
+      this.selected = await this.model.services.object.getObjectById(params.objectId, id, validFrom, this);
+    }
 
     setBrowserTabTitle(this.selected.payload.name);
 
