@@ -20,7 +20,6 @@ import {
   FetchResponse,
 } from "../../models/connection.model";
 import * as grpc from "@grpc/grpc-js";
-import * as fs from "fs";
 
 /**
  * @description This class represents a connection to a target client and manages sending messages to it.
