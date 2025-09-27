@@ -27,6 +27,8 @@ export enum ConnectionStatus {
   RECONNECTING = "RECONNECTING",
   // The connection is refreshing its authentication token
   TOKEN_REFRESH = "TOKEN_REFRESH",
+  // The connection has been blocked
+  BLOCKED = "BLOCKED",
 }
 
 export type ConnectionHeaders = Record<string, string>;

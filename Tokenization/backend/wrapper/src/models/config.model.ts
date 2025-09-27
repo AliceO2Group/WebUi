@@ -37,10 +37,14 @@ export interface gRPCWrapperConfig {
   /** Client TLS certificates paths. */
   clientCerts: {
     caCertPath: string;
-    keyPath: string;
+    publicKeyPath: string;
     certPath: string;
   };
 
   /** Optional listener TLS certificates paths. If provided, the gRPCWrapper will be able to accept incoming connections. */
-  listenerCertPaths?: { keyPath: string; certPath: string };
+  listenerCertPaths?: {
+    publicKeyPath: string;
+    privateKeyPath: string;
+    certPath: string;
+  };
 }

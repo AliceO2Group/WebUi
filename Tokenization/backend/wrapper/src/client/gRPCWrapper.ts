@@ -40,7 +40,8 @@ import { LogManager } from "@aliceo2/web-ui";
  */
 export class gRPCWrapper {
   private ConnectionManager: ConnectionManager;
-  private listenerKey?: NonSharedBuffer;
+  private listenerPublicKey?: NonSharedBuffer;
+  private listenerPrivateKey?: NonSharedBuffer;
   private listenerCert?: NonSharedBuffer;
   private logger = LogManager.getLogger("gRPCWrapper");
 
@@ -57,16 +58,21 @@ export class gRPCWrapper {
       !config.clientCerts ||
       !config.clientCerts.caCertPath ||
       !config.clientCerts.certPath ||
-      !config.clientCerts.keyPath
+      !config.clientCerts.publicKeyPath
     ) {
       throw new Error("Invalid gRPCWrapper configuration provided.");
     }
 
     if (
-      config.listenerCertPaths?.keyPath &&
+      config.listenerCertPaths?.publicKeyPath &&
       config.listenerCertPaths?.certPath
     ) {
-      this.listenerKey = fs.readFileSync(config.listenerCertPaths.keyPath);
+      this.listenerPublicKey = fs.readFileSync(
+        config.listenerCertPaths.publicKeyPath
+      );
+      this.listenerPrivateKey = fs.readFileSync(
+        config.listenerCertPaths.privateKeyPath
+      );
       this.listenerCert = fs.readFileSync(config.listenerCertPaths.certPath);
     }
 
@@ -75,7 +81,7 @@ export class gRPCWrapper {
       config.centralAddress,
       config.clientCerts.caCertPath,
       config.clientCerts.certPath,
-      config.clientCerts.keyPath
+      config.clientCerts.publicKeyPath
     );
     this.ConnectionManager.registerCommandHandlers([
       {
@@ -119,11 +125,15 @@ export class gRPCWrapper {
     listenerCertPaths?: { keyPath: string; certPath: string }
   ): Promise<void> {
     if (listenerCertPaths?.keyPath && listenerCertPaths?.certPath) {
-      this.listenerKey = fs.readFileSync(listenerCertPaths.keyPath);
+      this.listenerPublicKey = fs.readFileSync(listenerCertPaths.keyPath);
       this.listenerCert = fs.readFileSync(listenerCertPaths.certPath);
     }
 
-    if (!this.listenerKey || !this.listenerCert) {
+    if (
+      !this.listenerPublicKey ||
+      !this.listenerPrivateKey ||
+      !this.listenerCert
+    ) {
       this.logger.errorMessage(
         "Listener certificates are required to start P2P listener. Please provide valid paths."
       );
@@ -132,8 +142,9 @@ export class gRPCWrapper {
 
     return this.ConnectionManager.listenForPeers(
       port,
-      this.listenerKey,
+      this.listenerPublicKey,
       this.listenerCert,
+      this.listenerPrivateKey,
       baseAPIPath
     );
   }

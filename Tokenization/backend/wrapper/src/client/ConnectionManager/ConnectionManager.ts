@@ -25,6 +25,7 @@ import {
 } from "../../models/message.model";
 import { ConnectionStatus } from "../../models/connection.model";
 import * as fs from "fs";
+import { gRPCAuthInterceptor } from "./Interceptors/grpc.auth.interceptor";
 
 /**
  * @description Manages all the connection between clients and central system.
@@ -245,8 +246,9 @@ export class ConnectionManager {
   /** Starts a listener server for p2p connections */
   public async listenForPeers(
     port: number,
-    listenerKey: NonSharedBuffer,
+    listenerPublicKey: NonSharedBuffer,
     listenerCert: NonSharedBuffer,
+    listenerPrivateKey: NonSharedBuffer,
     baseAPIPath?: string
   ): Promise<void> {
     if (baseAPIPath) this.baseAPIPath = baseAPIPath;
@@ -262,6 +264,15 @@ export class ConnectionManager {
         call: grpc.ServerUnaryCall<any, any>,
         callback: grpc.sendUnaryData<any>
       ) => {
+        // run auth interceptor
+        gRPCAuthInterceptor(
+          call,
+          callback,
+          this.receivingConnections,
+          listenerPrivateKey,
+          listenerPublicKey
+        );
+
         try {
           const clientAddress = call.getPeer();
           this.logger.infoMessage(`Incoming request from ${clientAddress}`);
@@ -334,7 +345,7 @@ export class ConnectionManager {
       this.caCert,
       [
         {
-          private_key: listenerKey,
+          private_key: listenerPublicKey,
           cert_chain: listenerCert,
         },
       ],
@@ -349,4 +360,6 @@ export class ConnectionManager {
 
     this.logger.infoMessage(`Peer server listening on localhost:${port}`);
   }
+
+  private createPeerAuthInterceptor() {}
 }
