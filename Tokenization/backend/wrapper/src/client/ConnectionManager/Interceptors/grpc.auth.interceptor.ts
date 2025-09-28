@@ -139,10 +139,17 @@ export const gRPCAuthInterceptor = async (
       pub
     );
 
-    // Optional: Additional check to ensure correct signing algorithm was used
-    // if (protectedHeader.alg !== "EdDSA" && protectedHeader.alg !== "Ed25519") {
-    //   throw new Error("JWS signed with an unexpected algorithm.");
-    // }
+    // Additional check to ensure correct signing algorithm was used
+    if (protectedHeader.alg !== "EdDSA" && protectedHeader.alg !== "Ed25519") {
+      const error = {
+        name: "AuthenticationError",
+        message: "Incorrect signing algorithm for JWS.",
+        code: grpc.status.UNAUTHENTICATED,
+      };
+
+      callback(error, null);
+      return { isAuthenticated: false, conn };
+    }
 
     // Decode and parse the JWT payload
     const payloadString = new TextDecoder().decode(jwtPayload);
@@ -188,7 +195,7 @@ export const gRPCAuthInterceptor = async (
 
   // Authentication and Authorization successful
   // Update Connection state with SN and status
-  conn.handleSuccessfulAuth(payload as any);
+  conn.handleSuccessfulAuth(payload);
   return { isAuthenticated: true, conn };
 };
 
