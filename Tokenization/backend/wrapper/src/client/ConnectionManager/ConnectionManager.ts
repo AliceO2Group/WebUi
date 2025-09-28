@@ -273,8 +273,7 @@ export class ConnectionManager {
           call,
           callback,
           this.receivingConnections,
-          listenerPrivateKey,
-          this.peerCtor
+          listenerPrivateKey
         );
 
         if (!isAuthenticated || !conn) {

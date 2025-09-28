@@ -15,7 +15,10 @@
 import * as grpc from "@grpc/grpc-js";
 import { Connection } from "../../../client/Connection/Connection";
 import { importPKCS8, importJWK, compactDecrypt, compactVerify } from "jose";
-import { TokenPayload } from "../../../models/connection.model";
+import {
+  ConnectionStatus,
+  TokenPayload,
+} from "../../../models/connection.model";
 import { ConnectionDirection } from "../../../models/message.model";
 
 // IMPORTANT: This key must be securely provided to the interceptor.
@@ -29,8 +32,7 @@ export const gRPCAuthInterceptor = async (
   call: grpc.ServerUnaryCall<any, any>,
   callback: grpc.sendUnaryData<any>,
   clientConnections: Map<string, Connection>,
-  privateKeyBuffer: NonSharedBuffer, // RSA Private Key (PKCS8) for JWE decryption
-  peerCtor: any
+  privateKeyBuffer: NonSharedBuffer // RSA Private Key (PKCS8) for JWE decryption
 ): Promise<{ isAuthenticated: Boolean; conn: Connection | null }> => {
   const metadata = call.metadata.getMap();
   const jweToken = metadata.jweToken as string;
@@ -48,16 +50,50 @@ export const gRPCAuthInterceptor = async (
     return { isAuthenticated: false, conn: null };
   }
 
-  // Connection must exist
-  if (!conn) {
+  // Check if connection exists
+  if (conn) {
+    // Check if connection is blocked
+    if (conn.getStatus() === ConnectionStatus.BLOCKED) {
+      const error = {
+        name: "AuthenticationError",
+        message: "Connection is blocked. Contact administrator.",
+        code: grpc.status.UNAUTHENTICATED,
+      };
+      callback(error, null);
+      return { isAuthenticated: false, conn };
+    }
+
+    if (conn.getToken() === jweToken) {
+      // check for allowed requests and serial number match if token is the same
+      if (
+        !isRequestAllowed(conn.getCachedTokenPayload(), call.request, callback)
+      ) {
+        return { isAuthenticated: false, conn };
+      }
+
+      if (
+        !isSerialNumberMatching(
+          conn.getCachedTokenPayload(),
+          (call as any).getPeerCertificate(),
+          callback
+        )
+      ) {
+        conn.handleFailedAuth();
+        return { isAuthenticated: false, conn };
+      }
+
+      return { isAuthenticated: true, conn };
+    }
+  } else {
     conn = new Connection(
       jweToken,
       clientAddress,
-      ConnectionDirection.RECEIVING,
-      peerCtor
+      ConnectionDirection.RECEIVING
     );
+    clientConnections.set(clientAddress, conn);
   }
 
+  // New connection - need to authenticate
   // JWE decryption (RSA-OAEP-256) -> JWS (Plaintext)
   let privateKey: any;
   let jwsToken: string;
@@ -78,6 +114,7 @@ export const gRPCAuthInterceptor = async (
     };
     // TODO: Consider logging or informing a central security system about potential attack/misconfiguration.
     callback(error, null);
+    conn.handleFailedAuth();
     return { isAuthenticated: false, conn };
   }
 
@@ -123,14 +160,68 @@ export const gRPCAuthInterceptor = async (
     };
     // TODO: Consider logging or informing a central security system about failed verification.
     callback(error, null);
+
+    if (!isExpired) {
+      conn.handleFailedAuth();
+    }
+
     return { isAuthenticated: false, conn };
   }
 
   // mTLS binding check and authorization
   // Connection tunnel verification with serialNumber (mTLS SN vs Token SN)
-  const peerCert = (call as any).getPeerCertificate(); // Retrieves the mTLS client certificate details
+  if (
+    !isSerialNumberMatching(
+      payload,
+      (call as any).getPeerCertificate(),
+      callback
+    )
+  ) {
+    conn.handleFailedAuth();
+    return { isAuthenticated: false, conn };
+  }
+
+  // Validate permission for request method (Authorization check)
+  if (!isRequestAllowed(payload, call.request, callback)) {
+    return { isAuthenticated: false, conn };
+  }
+
+  // Authentication and Authorization successful
+  // Update Connection state with SN and status
+  conn.handleSuccessfulAuth(payload as any);
+  return { isAuthenticated: true, conn };
+};
+
+const isRequestAllowed = (
+  tokenPayload: TokenPayload | undefined,
+  request: any,
+  callback: grpc.sendUnaryData<any>
+): Boolean => {
+  const method = String(request?.method || "POST").toUpperCase();
+  if (
+    !tokenPayload?.allowedRequests ||
+    !tokenPayload.allowedRequests.includes(method as any)
+  ) {
+    const error = {
+      name: "AuthorizationError",
+      code: grpc.status.PERMISSION_DENIED,
+      message: `Request of type ${method} is not allowed by the token policy.`,
+    } as any;
+
+    callback(error, null);
+    return false;
+  }
+
+  return true;
+};
+
+const isSerialNumberMatching = (
+  tokenPayload: TokenPayload | undefined,
+  peerCert: any,
+  callback: grpc.sendUnaryData<any>
+): Boolean => {
   const clientSerialNumber = peerCert ? peerCert.serialNumber : null;
-  const tokenSerialNumber = payload.serialNumber; // Serial number is inside the signed payload
+  const tokenSerialNumber = tokenPayload?.serialNumber; // Serial number is inside the signed payload
 
   if (!clientSerialNumber || tokenSerialNumber !== clientSerialNumber) {
     // Critical security failure!!!: The token holder does not match the mTLS certificate holder.
@@ -141,24 +232,8 @@ export const gRPCAuthInterceptor = async (
     } as any;
     // TODO: This should trigger a high-priority security alert.
     callback(error, null);
-    return { isAuthenticated: false, conn };
+    return false;
   }
 
-  // Validate permission for request method (Authorization check)
-  const method = String(call.request?.method || "POST").toUpperCase();
-  if (!payload.allowedRequests.includes(method as any)) {
-    const error = {
-      name: "AuthorizationError",
-      code: grpc.status.PERMISSION_DENIED,
-      message: `Request of type ${method} is not allowed by the token policy.`,
-    } as any;
-
-    callback(error, null);
-    return { isAuthenticated: false, conn };
-  }
-
-  // Authentication and Authorization successful
-  // Update Connection state with SN and status
-  conn.handleSuccessfulAuth(payload as any);
-  return { isAuthenticated: true, conn };
+  return true;
 };
