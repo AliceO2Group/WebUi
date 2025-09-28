@@ -114,23 +114,6 @@ export class ConnectionManager {
       centralClient,
       this.centralDispatcher
     );
-
-    this.sendingConnections.set(
-      "a",
-      new Connection("1", "a", ConnectionDirection.SENDING, this.peerCtor, {
-        caCert: this.caCert,
-        clientCert: this.clientCert,
-        clientKey: this.clientKey,
-      })
-    );
-    this.sendingConnections.set(
-      "b",
-      new Connection("2", "b", ConnectionDirection.SENDING, this.peerCtor, {
-        caCert: this.caCert,
-        clientCert: this.clientCert,
-        clientKey: this.clientKey,
-      })
-    );
   }
 
   /**
@@ -166,12 +149,12 @@ export class ConnectionManager {
    * Creates new connection
    * @param address Target (external) address of the connection
    * @param direction Direction of connection
-   * @param token Optional token for connection
+   * @param jweToken Optional encrypted JWE token for connection
    */
   public async createNewConnection(
     address: string,
     direction: ConnectionDirection,
-    token?: string
+    jweToken?: string
   ) {
     let conn: Connection | undefined;
 
@@ -183,14 +166,15 @@ export class ConnectionManager {
 
     // Return existing connection if found
     if (conn) {
-      if (token) {
-        conn.handleNewToken(token);
+      if (jweToken) {
+        conn.handleNewToken(jweToken);
       }
       return conn;
     }
 
     // Create new connection
-    conn = new Connection(token || "", address, direction, this.peerCtor, {
+    conn = new Connection(jweToken || "", address, direction);
+    conn.createSslTunnel(this.peerCtor, {
       caCert: this.caCert,
       clientCert: this.clientCert,
       clientKey: this.clientKey,
@@ -230,6 +214,27 @@ export class ConnectionManager {
   }
 
   /**
+   * @description Searches through all receiving and sending connections to find a connection by its client Serial Number (SN).
+   * @param serialNumber The unique serial number of the peer's certificate.
+   * @returns The matching Connection object or undefined.
+   */
+  getConnectionBySerialNumber(serialNumber: string): Connection | undefined {
+    // Check receiving connections first
+    for (const conn of this.receivingConnections.values()) {
+      if (conn.getSerialNumber() === serialNumber) {
+        return conn;
+      }
+    }
+    // Check sending connections
+    for (const conn of this.sendingConnections.values()) {
+      if (conn.getSerialNumber() === serialNumber) {
+        return conn;
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * Returns object with all connections
    * @returns Object of all connections
    */
@@ -246,7 +251,6 @@ export class ConnectionManager {
   /** Starts a listener server for p2p connections */
   public async listenForPeers(
     port: number,
-    listenerPublicKey: NonSharedBuffer,
     listenerCert: NonSharedBuffer,
     listenerPrivateKey: NonSharedBuffer,
     baseAPIPath?: string
@@ -265,39 +269,25 @@ export class ConnectionManager {
         callback: grpc.sendUnaryData<any>
       ) => {
         // run auth interceptor
-        gRPCAuthInterceptor(
+        const { isAuthenticated, conn } = await gRPCAuthInterceptor(
           call,
           callback,
           this.receivingConnections,
           listenerPrivateKey,
-          listenerPublicKey
+          this.peerCtor
         );
+
+        if (!isAuthenticated || !conn) {
+          // Authentication failed - response already sent in interceptor
+          return;
+        }
 
         try {
           const clientAddress = call.getPeer();
           this.logger.infoMessage(`Incoming request from ${clientAddress}`);
 
-          let conn: Connection | undefined =
-            this.receivingConnections.get(clientAddress);
-
-          if (!conn) {
-            conn = new Connection(
-              "",
-              clientAddress,
-              ConnectionDirection.RECEIVING,
-              this.peerCtor,
-              {
-                caCert: this.caCert,
-                clientCert: this.clientCert,
-                clientKey: this.clientKey,
-              }
-            );
-            conn.updateStatus(ConnectionStatus.CONNECTED);
-            this.receivingConnections.set(clientAddress, conn);
-            this.logger.infoMessage(
-              `New incoming connection registered for: ${clientAddress}`
-            );
-          }
+          conn.updateStatus(ConnectionStatus.CONNECTED);
+          this.receivingConnections.set(clientAddress, conn);
 
           // create request to forward to local API endpoint
           const method = String(call.request?.method || "POST").toUpperCase();
@@ -345,7 +335,7 @@ export class ConnectionManager {
       this.caCert,
       [
         {
-          private_key: listenerPublicKey,
+          private_key: listenerPrivateKey,
           cert_chain: listenerCert,
         },
       ],
@@ -360,6 +350,4 @@ export class ConnectionManager {
 
     this.logger.infoMessage(`Peer server listening on localhost:${port}`);
   }
-
-  private createPeerAuthInterceptor() {}
 }

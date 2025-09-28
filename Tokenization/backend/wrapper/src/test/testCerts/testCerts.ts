@@ -36,7 +36,7 @@ export const getTestClientListenerCertPaths =
     return {
       caCertPath: CA_CERT_PATH,
       certPath: CLIENT_CERT_PATH,
-      keyPath: CLIENT_KEY_PATH,
+      publicKeyPath: CLIENT_KEY_PATH,
     };
   };
 
@@ -55,7 +55,7 @@ export const getTestClientListenerServerCertPaths =
     return {
       caCertPath: CA_CERT_PATH,
       certPath: CLIENT_CERT_PATH,
-      keyPath: CLIENT_KEY_PATH,
+      publicKeyPath: CLIENT_KEY_PATH,
     };
   };
 
@@ -71,7 +71,7 @@ export const getTestClientSenderCertPaths =
     return {
       caCertPath: CA_CERT_PATH,
       certPath: CLIENT_CERT_PATH,
-      keyPath: CLIENT_KEY_PATH,
+      publicKeyPath: CLIENT_KEY_PATH,
     };
   };
 

@@ -13,128 +13,152 @@
  */
 
 import * as grpc from "@grpc/grpc-js";
-import { Connection } from "client/Connection/Connection";
+import { Connection } from "../../../client/Connection/Connection";
 import { importPKCS8, importJWK, compactDecrypt, compactVerify } from "jose";
+import { TokenPayload } from "../../../models/connection.model";
+import { ConnectionDirection } from "../../../models/message.model";
 
-interface TokenPayload {
-  serialNumber: string;
-  allowedRequests: ("POST" | "GET" | "PUT" | "DELETE" | "PATCH")[];
-}
+// IMPORTANT: This key must be securely provided to the interceptor.
+const RAW_ED25519_B64_KEY = "VqkcxlpJYVZI/SxgWH/VqVNeKhMGIbUfHn0okzdGs2E=";
 
+/**
+ * @description gRPC interceptor function responsible for JWE decryption, JWS verification,
+ * certificate serial number matching (mTLS binding), and basic authorization.
+ */
 export const gRPCAuthInterceptor = async (
   call: grpc.ServerUnaryCall<any, any>,
   callback: grpc.sendUnaryData<any>,
   clientConnections: Map<string, Connection>,
-  privateKeyBuffer: NonSharedBuffer,
-  publicKeyBuffer: NonSharedBuffer
-): Promise<Boolean> => {
+  privateKeyBuffer: NonSharedBuffer, // RSA Private Key (PKCS8) for JWE decryption
+  peerCtor: any
+): Promise<{ isAuthenticated: Boolean; conn: Connection | null }> => {
   const metadata = call.metadata.getMap();
-  const jweToken = metadata.token as string;
+  const jweToken = metadata.jweToken as string;
+  const clientAddress = call.getPeer();
+  let conn = clientConnections.get(clientAddress);
 
-  // check if token exists
+  // Check if token exists
   if (!jweToken) {
     const error = {
       name: "AuthenticationError",
       message: "No token provided",
       code: grpc.status.UNAUTHENTICATED,
     };
-
     callback(error, null);
-    return false;
+    return { isAuthenticated: false, conn: null };
   }
 
-  // validate JWE (encrypted JWS) - decode JWE -> JWS
+  // Connection must exist
+  if (!conn) {
+    conn = new Connection(
+      jweToken,
+      clientAddress,
+      ConnectionDirection.RECEIVING,
+      peerCtor
+    );
+  }
+
+  // JWE decryption (RSA-OAEP-256) -> JWS (Plaintext)
   let privateKey: any;
-  let jwsToken: any;
+  let jwsToken: string;
   try {
+    // Importing RSA private key for decryption
     privateKey = await importPKCS8(
       privateKeyBuffer.toString("utf-8"),
       "RSA-OAEP-256"
     );
-    const { plaintext } = await compactDecrypt(jweToken, privateKey); // decrypt JWE token
-    jwsToken = plaintext.toString();
+
+    const { plaintext } = await compactDecrypt(jweToken, privateKey);
+    jwsToken = new TextDecoder().decode(plaintext).trim();
   } catch (_e) {
     const error = {
       name: "AuthenticationError",
-      message: "Incorrect token provided",
+      message: "Incorrect token provided (JWE Decryption failed)",
       code: grpc.status.UNAUTHENTICATED,
     };
-
-    // TODO?: inform central system about incorrect token coming for peer
-    // or create counter with incorrect tries and then inform central system
-    // it potentially might be an attack here.
-
+    // TODO: Consider logging or informing a central security system about potential attack/misconfiguration.
     callback(error, null);
-    return false;
+    return { isAuthenticated: false, conn };
   }
 
-  // check if connection is blocked
-  const conn = clientConnections.get();
-
-  // validate JWS signature
-  let publicKey: any;
+  // Verify JWS (With signature) and payload extraction
+  let pub: any;
   let payload: TokenPayload;
-  try {
-    publicKey = await importJWK(JSON.parse(publicKeyBuffer.toString()));
-    const { payload: jwtPayload } = await compactVerify(jwsToken, publicKey);
 
+  try {
+    // Convert a raw Base64 Ed25519 public key to JWK format
+    const jwk = {
+      kty: "OKP",
+      crv: "Ed25519",
+      x: Buffer.from(RAW_ED25519_B64_KEY, "base64").toString("base64url"),
+    };
+
+    // Importing the Ed25519 public key for verification - using "EdDSA" algorithm
+    pub = await importJWK(jwk, "EdDSA");
+
+    // Compact verify - verify with key and decode the JWS token in one step
+    const { payload: jwtPayload, protectedHeader } = await compactVerify(
+      jwsToken,
+      pub
+    );
+
+    // Optional: Additional check to ensure correct signing algorithm was used
+    // if (protectedHeader.alg !== "EdDSA" && protectedHeader.alg !== "Ed25519") {
+    //   throw new Error("JWS signed with an unexpected algorithm.");
+    // }
+
+    // Decode and parse the JWT payload
     const payloadString = new TextDecoder().decode(jwtPayload);
     payload = JSON.parse(payloadString);
   } catch (e: any) {
+    const isExpired = e.message?.includes("expired");
     const error = {
       name: "AuthenticationError",
-      message: `JWS ${
-        e.message.includes("expired") ? "Expiration" : "Verification"
-      } error`,
-      code: e.message.includes("expired")
+      message: `JWS Verification error: ${
+        isExpired ? "Token expired" : "Invalid signature"
+      }`,
+      code: isExpired
         ? grpc.status.UNAUTHENTICATED
         : grpc.status.PERMISSION_DENIED,
     };
-
-    // TODO?: inform central system about incorrect token coming for peer
-    // or create counter with incorrect tries and then inform central system
-    // it potentially might be an attack here.
-
+    // TODO: Consider logging or informing a central security system about failed verification.
     callback(error, null);
-    return false;
+    return { isAuthenticated: false, conn };
   }
 
-  // Connection tunnel verification with SN
-  const peerCert = (call as any).getPeerCertificate(); // its not publicly exposed
+  // mTLS binding check and authorization
+  // Connection tunnel verification with serialNumber (mTLS SN vs Token SN)
+  const peerCert = (call as any).getPeerCertificate(); // Retrieves the mTLS client certificate details
   const clientSerialNumber = peerCert ? peerCert.serialNumber : null;
-  const tokenSerialNumber = payload.serialNumber; // Serial number is inside payload
+  const tokenSerialNumber = payload.serialNumber; // Serial number is inside the signed payload
 
   if (!clientSerialNumber || tokenSerialNumber !== clientSerialNumber) {
+    // Critical security failure!!!: The token holder does not match the mTLS certificate holder.
     const error = {
       name: "AuthenticationError",
       code: grpc.status.PERMISSION_DENIED,
-      message: "Serial number mismatch.",
+      message: "Serial number mismatch (mTLS binding failure).",
     } as any;
-
-    // TODO?: inform central system about incorrect token coming for peer
-    // or create counter with incorrect tries and then inform central system
-    // it potentially might be an attack here.
-
+    // TODO: This should trigger a high-priority security alert.
     callback(error, null);
-    return false;
+    return { isAuthenticated: false, conn };
   }
 
-  // Validate permission for request method
+  // Validate permission for request method (Authorization check)
   const method = String(call.request?.method || "POST").toUpperCase();
   if (!payload.allowedRequests.includes(method as any)) {
     const error = {
       name: "AuthorizationError",
       code: grpc.status.PERMISSION_DENIED,
-      message: `Request of type ${method} is not allowed.`,
+      message: `Request of type ${method} is not allowed by the token policy.`,
     } as any;
 
-    // TODO?: inform central system about incorrect token coming for peer
-    // or create counter with incorrect tries and then inform central system
-    // it potentially might be an attack here.
-
     callback(error, null);
-    return false;
+    return { isAuthenticated: false, conn };
   }
 
-  return true;
+  // Authentication and Authorization successful
+  // Update Connection state with SN and status
+  conn.handleSuccessfulAuth(payload as any);
+  return { isAuthenticated: true, conn };
 };

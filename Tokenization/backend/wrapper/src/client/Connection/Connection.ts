@@ -18,45 +18,79 @@ import {
   ConnectionStatus,
   FetchOptions,
   FetchResponse,
+  TokenPayload,
 } from "../../models/connection.model";
 import * as grpc from "@grpc/grpc-js";
+import { LogManager } from "@aliceo2/web-ui";
+
+type ConnectionCerts = {
+  caCert: NonSharedBuffer;
+  clientCert: NonSharedBuffer;
+  clientKey: NonSharedBuffer;
+};
 
 /**
  * @description This class represents a connection to a target client and manages sending messages to it.
  */
 export class Connection {
-  private token: string;
+  private jweToken: string;
   private status: ConnectionStatus;
   private peerClient?: any; // a client grpc connection instance
+
+  // security management variables
+  private clientSerialNumber?: string; // The certificate SN used to uniquely identify the peer.
+  private lastActiveTimestamp: number; // Timestamp of the last successful request (for garbage collection).
+  private authFailures: number; // Counter for consecutive authentication failures (for anti-DDoS/throttling).
+  private cachedTokenPayload?: TokenPayload; // Cache of the successfully verified token payload.
 
   public targetAddress: string;
   public direction: ConnectionDirection;
 
+  // utils
+  private logger;
+
   /**
    * @description Creates a new Connection instance with the given token, target address, and connection direction.
    *
-   * @param token - The authentication token for the connection.
+   * @param jweToken - The encrypted JWE token for the connection.
    * @param targetAddress - The unique address of the target client.
    * @param direction - The direction of the connection (e.g., sending or receiving).
-   * @param peerCtor - The constructor for the gRPC client to be used for communication.
-   * @param caCertPath - Path to the CA certificate file.
-   * @param clientCertPath - Path to the client certificate file.
-   * @param clientKeyPath - Path to the client key file.
+   * @param clientSN - Optional serial number of the peer's certificate (used for lookups).
    */
   constructor(
-    token: string,
+    jweToken: string,
     targetAddress: string,
     direction: ConnectionDirection,
-    peerCtor: any,
-    private readonly connectionCerts: {
-      caCert: NonSharedBuffer;
-      clientCert: NonSharedBuffer;
-      clientKey: NonSharedBuffer;
-    }
+    clientSN?: string
   ) {
-    this.token = token;
+    this.jweToken = jweToken;
     this.targetAddress = targetAddress;
     this.direction = direction;
+
+    // Initialize state fields
+    this.clientSerialNumber = clientSN;
+    this.lastActiveTimestamp = Date.now();
+    this.authFailures = 0;
+    this.status = ConnectionStatus.CONNECTED;
+
+    this.logger = LogManager.getLogger(`Connection ${targetAddress}`);
+  }
+
+  /**
+   * @description Creates the mTLS gRPC client and attaches it to the connection.
+   * This method is REQUIRED ONLY for outbound (SENDING) connections.
+   * * @param peerCtor - The constructor for the gRPC client to be used for communication.
+   * @param connectionCerts - Required sending client certificates for mTLS.
+   */
+  public createSslTunnel(
+    peerCtor: any,
+    connectionCerts: ConnectionCerts
+  ): void {
+    if (this.direction !== ConnectionDirection.SENDING) {
+      this.logger.warnMessage(
+        "Attempted to create SSL tunnel on a RECEIVING connection. This is usually unnecessary."
+      );
+    }
 
     if (
       !connectionCerts.caCert ||
@@ -64,36 +98,63 @@ export class Connection {
       !connectionCerts.clientKey
     ) {
       throw new Error(
-        "Connection certificates are required to create a Connection."
+        "Connection certificates are required to create an mTLS tunnel."
       );
     }
 
     // create grpc credentials
     const sslCreds = grpc.credentials.createSsl(
-      this.connectionCerts.caCert,
-      this.connectionCerts.clientKey,
-      this.connectionCerts.clientCert
+      connectionCerts.caCert,
+      connectionCerts.clientKey,
+      connectionCerts.clientCert
     );
 
-    this.peerClient = new peerCtor(targetAddress, sslCreds);
-
-    this.status = ConnectionStatus.CONNECTED;
+    this.peerClient = new peerCtor(this.targetAddress, sslCreds);
+    this.updateStatus(ConnectionStatus.CONNECTED);
   }
 
   /**
    * @description Replace newly generated token
-   * @param token New token to be replaced
+   * @param jweToken New token to be replaced
    */
-  public handleNewToken(token: string): void {
-    this.token = token;
+  public handleNewToken(jweToken: string): void {
+    this.jweToken = jweToken;
   }
 
   /**
    * @description Revoke current token and set status of unauthorized connection
    */
   public handleRevokeToken(): void {
-    this.token = "";
+    this.jweToken = "";
     this.status = ConnectionStatus.UNAUTHORIZED;
+  }
+
+  /**
+   * @description Handles a successful authentication event. Updates the active timestamp,
+   * resets the failure counter, and caches the new token payload.
+   * This is crucial for high-performance applications to avoid re-validating the same token.
+   * @param payload The decoded and verified token payload.
+   */
+  public handleSuccessfulAuth(payload: TokenPayload): void {
+    this.lastActiveTimestamp = Date.now();
+    this.authFailures = 0;
+    this.cachedTokenPayload = payload;
+    this.updateStatus(ConnectionStatus.CONNECTED);
+  }
+
+  /**
+   * @description Handles an authentication failure. Increments the failure counter.
+   * If the failure count exceeds a local threshold, the connection is locally marked as BLOCKED.
+   * @returns The new count of consecutive failures.
+   */
+  public handleFailedAuth(): number {
+    this.authFailures += 1;
+
+    // Local throttling mechanism
+    if (this.authFailures >= 5) {
+      this.updateStatus(ConnectionStatus.BLOCKED);
+    }
+    return this.authFailures;
   }
 
   /**
@@ -101,7 +162,7 @@ export class Connection {
    * @returns Connection token
    */
   public getToken(): string {
-    return this.token;
+    return this.jweToken;
   }
 
   /**
@@ -129,6 +190,39 @@ export class Connection {
   }
 
   /**
+   * @description Returns the client's Serial Number (SN).
+   * @returns The client's serial number or undefined.
+   */
+  public getSerialNumber(): string | undefined {
+    return this.clientSerialNumber;
+  }
+
+  /**
+   * @description Sets the client's Serial Number. Primarily used for RECEIVING connections
+   * where the SN is extracted during the first mTLS handshake in the interceptor.
+   * @param serialNumber The serial number string.
+   */
+  public setSerialNumber(serialNumber: string): void {
+    this.clientSerialNumber = serialNumber;
+  }
+
+  /**
+   * @description Returns the timestamp of the last successful interaction.
+   * @returns UNIX timestamp in milliseconds.
+   */
+  public getLastActiveTimestamp(): number {
+    return this.lastActiveTimestamp;
+  }
+
+  /**
+   * @description Returns the cached token payload.
+   * @returns The cached payload or undefined.
+   */
+  public getCachedTokenPayload(): TokenPayload | undefined {
+    return this.cachedTokenPayload;
+  }
+
+  /**
    * @description Attaches gRPC client to that connection
    */
   public attachGrpcClient(client: any): void {
@@ -151,6 +245,11 @@ export class Connection {
     const path = options.path || "/";
     const headers: ConnectionHeaders = { ...(options.headers || {}) };
 
+    // set mandatory grpc metadata
+    const metadata = new grpc.Metadata();
+    metadata.set("jweToken", this.jweToken);
+
+    // build body buffer
     let bodyBuf: Buffer = Buffer.alloc(0);
     const b = options.body;
     if (b != null) {
@@ -167,7 +266,7 @@ export class Connection {
 
     // return promise with response
     return new Promise<FetchResponse>((resolve, reject) => {
-      this.peerClient.Fetch(req, (err: any, resp: any) => {
+      this.peerClient.Fetch(req, metadata, (err: any, resp: any) => {
         if (err) return reject(err);
 
         const resBody = resp?.body ? Buffer.from(resp.body) : Buffer.alloc(0);

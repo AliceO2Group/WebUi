@@ -37,6 +37,24 @@ const mockClient = {
 // Mock CentralSystem constructor
 const CentralSystemMock = jest.fn(() => mockClient);
 
+// Mock gRPC auth interceptor
+jest.mock(
+  "../../../client/ConnectionManager/Interceptors/grpc.auth.interceptor",
+  () => ({
+    gRPCAuthInterceptor: jest.fn((call, callback) => {
+      return Promise.resolve({
+        isAuthenticated: true,
+        conn: {
+          updateStatus: jest.fn(),
+          handleSuccessfulAuth: jest.fn(),
+          getSerialNumber: jest.fn(),
+          setSerialNumber: jest.fn(),
+        },
+      });
+    }),
+  })
+);
+
 // Mock dispatcher
 const mockDispatch = jest.fn();
 jest.mock(
@@ -242,7 +260,6 @@ describe("ConnectionManager", () => {
       expect.any(Function)
     );
 
-    // implementacja metody Fetch została przechwycona
     expect(capturedServerImpl).toBeTruthy();
     expect(typeof capturedServerImpl.Fetch).toBe("function");
   });
@@ -255,7 +272,7 @@ describe("ConnectionManager", () => {
       "http://localhost:40041/api/"
     );
 
-    // przygotuj dane wywołania
+    // prepare data to call
     const call = {
       getPeer: () => "client-42",
       request: {

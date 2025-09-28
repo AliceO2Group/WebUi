@@ -26,13 +26,28 @@ import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
 import { getTestCerts } from "../../testCerts/testCerts";
 
+// Mock logger
+jest.mock(
+  "@aliceo2/web-ui",
+  () => ({
+    LogManager: {
+      getLogger: () => ({
+        infoMessage: jest.fn(),
+        debugMessage: jest.fn(),
+        errorMessage: jest.fn(),
+      }),
+    },
+  }),
+  { virtual: true }
+);
+
 /**
  * Helper to create a new token command with given address, direction, and token.
  */
-function createEventMessage(
+const createEventMessage = (
   targetAddress: string,
   connectionDirection: ConnectionDirection
-): Command {
+): Command => {
   return {
     event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
     payload: {
@@ -41,7 +56,7 @@ function createEventMessage(
       token: "test-token",
     },
   } as Command;
-}
+};
 
 describe("NewTokenHandler", () => {
   let manager: ConnectionManager;
@@ -88,15 +103,10 @@ describe("NewTokenHandler", () => {
         dir: ConnectionDirection,
         token: string
       ) {
-        const conn = new Connection(
-          token,
-          address,
-          dir,
-          peerCtor,
-          getTestCerts()
-        );
+        const conn = new Connection(token, address, dir);
         if (dir === ConnectionDirection.SENDING) {
           this.sendingConnections.set(address, conn);
+          conn.createSslTunnel(peerCtor, getTestCerts());
         } else {
           this.receivingConnections.set(address, conn);
         }
@@ -110,10 +120,9 @@ describe("NewTokenHandler", () => {
     const conn = new Connection(
       "old-token",
       targetAddress,
-      ConnectionDirection.SENDING,
-      peerCtor,
-      getTestCerts()
+      ConnectionDirection.SENDING
     );
+    conn.createSslTunnel(peerCtor, getTestCerts());
 
     (manager as any).sendingConnections.set(targetAddress, conn);
 

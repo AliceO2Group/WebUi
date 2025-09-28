@@ -62,3 +62,8 @@ export type HttpLikeResponse = {
   headers: Headers;
   body: Buffer;
 };
+
+export type TokenPayload = {
+  serialNumber: string;
+  allowedRequests: ("POST" | "GET" | "PUT" | "DELETE" | "PATCH")[];
+};

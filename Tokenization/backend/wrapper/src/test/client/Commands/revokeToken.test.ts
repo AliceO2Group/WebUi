@@ -27,6 +27,21 @@ import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
 import { getTestCerts } from "../../testCerts/testCerts";
 
+// Mock logger
+jest.mock(
+  "@aliceo2/web-ui",
+  () => ({
+    LogManager: {
+      getLogger: () => ({
+        infoMessage: jest.fn(),
+        debugMessage: jest.fn(),
+        errorMessage: jest.fn(),
+      }),
+    },
+  }),
+  { virtual: true }
+);
+
 describe("RevokeToken", () => {
   const protoPath = path.join(
     __dirname,
@@ -48,7 +63,7 @@ describe("RevokeToken", () => {
   const wrapper = proto.webui.tokenization;
   const peerCtor = wrapper.Peer2Peer;
 
-  function createEventMessage(targetAddress: string) {
+  const createEventMessage = (targetAddress: string) => {
     return {
       event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
       payload: {
@@ -56,7 +71,7 @@ describe("RevokeToken", () => {
         token: "test-token",
       },
     } as Command;
-  }
+  };
 
   let manager: ConnectionManager;
 
@@ -78,10 +93,9 @@ describe("RevokeToken", () => {
     const conn = new Connection(
       "valid-token",
       targetAddress,
-      ConnectionDirection.SENDING,
-      peerCtor,
-      getTestCerts()
+      ConnectionDirection.SENDING
     );
+    conn.createSslTunnel(peerCtor, getTestCerts());
     (manager as any).sendingConnections!.set(targetAddress, conn);
 
     const handler = new RevokeTokenHandler(manager);
@@ -100,9 +114,7 @@ describe("RevokeToken", () => {
     const conn = new Connection(
       "valid-token",
       targetAddress,
-      ConnectionDirection.RECEIVING,
-      peerCtor,
-      getTestCerts()
+      ConnectionDirection.RECEIVING
     );
     (manager as any).receivingConnections.set(targetAddress, conn);
 
