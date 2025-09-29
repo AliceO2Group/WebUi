@@ -20,9 +20,7 @@ import {
   TokenPayload,
 } from "../../../models/connection.model";
 import { ConnectionDirection } from "../../../models/message.model";
-
-// IMPORTANT: This key must be securely provided to the interceptor.
-const RAW_ED25519_B64_KEY = "VqkcxlpJYVZI/SxgWH/VqVNeKhMGIbUfHn0okzdGs2E=";
+import { SecurityContext } from "../../../utils/security/SecurityContext";
 
 /**
  * @description gRPC interceptor function responsible for JWE decryption, JWS verification,
@@ -32,12 +30,13 @@ export const gRPCAuthInterceptor = async (
   call: grpc.ServerUnaryCall<any, any>,
   callback: grpc.sendUnaryData<any>,
   clientConnections: Map<string, Connection>,
-  privateKeyBuffer: NonSharedBuffer // RSA Private Key (PKCS8) for JWE decryption
+  securityContext: SecurityContext
 ): Promise<{ isAuthenticated: Boolean; conn: Connection | null }> => {
   const metadata = call.metadata.getMap();
-  const jweToken = metadata.jweToken as string;
+  const jweToken = metadata.jwetoken as string;
   const clientAddress = call.getPeer();
   let conn = clientConnections.get(clientAddress);
+  const peerCert = getPeerCertFromCall(call);
 
   // Check if token exists
   if (!jweToken) {
@@ -74,7 +73,7 @@ export const gRPCAuthInterceptor = async (
       if (
         !isSerialNumberMatching(
           conn.getCachedTokenPayload(),
-          (call as any).getPeerCertificate(),
+          peerCert,
           callback
         )
       ) {
@@ -100,7 +99,7 @@ export const gRPCAuthInterceptor = async (
   try {
     // Importing RSA private key for decryption
     privateKey = await importPKCS8(
-      privateKeyBuffer.toString("utf-8"),
+      securityContext.clientPrivateKey.toString("utf-8"),
       "RSA-OAEP-256"
     );
 
@@ -127,7 +126,9 @@ export const gRPCAuthInterceptor = async (
     const jwk = {
       kty: "OKP",
       crv: "Ed25519",
-      x: Buffer.from(RAW_ED25519_B64_KEY, "base64").toString("base64url"),
+      x: Buffer.from(securityContext.JWS_PUBLIC_KEY, "base64").toString(
+        "base64url"
+      ),
     };
 
     // Importing the Ed25519 public key for verification - using "EdDSA" algorithm
@@ -177,13 +178,7 @@ export const gRPCAuthInterceptor = async (
 
   // mTLS binding check and authorization
   // Connection tunnel verification with serialNumber (mTLS SN vs Token SN)
-  if (
-    !isSerialNumberMatching(
-      payload,
-      (call as any).getPeerCertificate(),
-      callback
-    )
-  ) {
+  if (!isSerialNumberMatching(payload, peerCert, callback)) {
     conn.handleFailedAuth();
     return { isAuthenticated: false, conn };
   }
@@ -199,16 +194,20 @@ export const gRPCAuthInterceptor = async (
   return { isAuthenticated: true, conn };
 };
 
-const isRequestAllowed = (
+/**
+ * @description Checks if the request method is allowed based on the token permissions.
+ * @param tokenPayload payload extracted from the token
+ * @param request gRPC request object containing method information
+ * @param callback callback to return gRPC error if needed
+ * @returns true if request method is allowed, false otherwise
+ */
+export const isRequestAllowed = (
   tokenPayload: TokenPayload | undefined,
   request: any,
   callback: grpc.sendUnaryData<any>
 ): Boolean => {
   const method = String(request?.method || "POST").toUpperCase();
-  if (
-    !tokenPayload?.allowedRequests ||
-    !tokenPayload.allowedRequests.includes(method as any)
-  ) {
+  if (!tokenPayload?.perm || !Object.keys(tokenPayload.perm).includes(method)) {
     const error = {
       name: "AuthorizationError",
       code: grpc.status.PERMISSION_DENIED,
@@ -222,25 +221,50 @@ const isRequestAllowed = (
   return true;
 };
 
-const isSerialNumberMatching = (
+/**
+ * @description Checks if the serial number from the peer certificate matches the one in the token payload.
+ * @param tokenPayload payload extracted from the token
+ * @param peerCert certificate object retrieved from the gRPC call
+ * @param callback callback to return gRPC error if needed
+ * @returns true if serial numbers match, false otherwise
+ */
+export const isSerialNumberMatching = (
   tokenPayload: TokenPayload | undefined,
   peerCert: any,
   callback: grpc.sendUnaryData<any>
 ): Boolean => {
-  const clientSerialNumber = peerCert ? peerCert.serialNumber : null;
-  const tokenSerialNumber = tokenPayload?.serialNumber; // Serial number is inside the signed payload
+  const clientSN = normalizeSerial(peerCert?.serialNumber);
+  const tokenSN = normalizeSerial(tokenPayload?.subSerialNumber);
 
-  if (!clientSerialNumber || tokenSerialNumber !== clientSerialNumber) {
-    // Critical security failure!!!: The token holder does not match the mTLS certificate holder.
+  if (!clientSN || clientSN !== tokenSN) {
     const error = {
       name: "AuthenticationError",
       code: grpc.status.PERMISSION_DENIED,
       message: "Serial number mismatch (mTLS binding failure).",
     } as any;
-    // TODO: This should trigger a high-priority security alert.
     callback(error, null);
     return false;
   }
-
   return true;
+};
+
+/**
+ * @description Normalizes a certificate serial number by removing colons and converting to uppercase.
+ * @param sn serial number string possibly containing colons or being null/undefined
+ * @returns normalized serial number string
+ */
+const normalizeSerial = (sn?: string | null): string => {
+  // Node retrieves serial number as hex string, without leading 0x and with possible colons so we need to normalize it
+  return (sn || "").replace(/[^0-9a-f]/gi, "").toUpperCase();
+};
+
+/**
+ * @description Retrieves the peer certificate from the gRPC call object.
+ * @param call gRPC call object
+ * @returns peer certificate object from the gRPC call
+ */
+export const getPeerCertFromCall = (call: any) => {
+  const session = call?.call?.stream?.session;
+  const sock = session?.socket as any;
+  return sock?.getPeerCertificate(true); // whole certificate info from TLS socket
 };

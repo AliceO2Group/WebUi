@@ -24,9 +24,9 @@ import * as grpc from "@grpc/grpc-js";
 import { LogManager } from "@aliceo2/web-ui";
 
 type ConnectionCerts = {
-  caCert: NonSharedBuffer;
-  clientCert: NonSharedBuffer;
-  clientKey: NonSharedBuffer;
+  caCert: Buffer;
+  clientCert: Buffer;
+  clientKey: Buffer;
 };
 
 /**
@@ -247,7 +247,7 @@ export class Connection {
 
     // set mandatory grpc metadata
     const metadata = new grpc.Metadata();
-    metadata.set("jweToken", this.jweToken);
+    metadata.set("jwetoken", this.jweToken);
 
     // build body buffer
     let bodyBuf: Buffer = Buffer.alloc(0);

@@ -19,26 +19,29 @@ export class SecurityContext {
   // mTLS keys (RSA)
   public readonly caCert: Buffer;
   public readonly clientSenderCert: Buffer;
-  public readonly clientListenerCert: Buffer;
+  public readonly clientListenerCert?: Buffer;
   public readonly clientPublicKey: Buffer;
   // RSA Private Key (PKCS8) for JWE decryption
   public readonly clientPrivateKey: Buffer;
 
   // Public Ed25519 key for JWS verification
-  public static readonly JWS_PUBLIC_KEY =
-    "VqkcxlpJYVZI/SxgWH/VqVNeKhMGIbUfHn0okzdGs2E=";
+  public readonly JWS_PUBLIC_KEY =
+    "hTb3l5gwoIWISOLi6cQMwcultawKyA6vxnimXWtE6JI=";
 
   constructor(
     caCert: Buffer,
     clientSenderCert: Buffer,
-    clientListenerCert: Buffer,
     clientPrivateKey: Buffer,
-    clientPublicKey: Buffer
+    clientPublicKey: Buffer,
+    clientListenerCert?: Buffer
   ) {
     this.caCert = caCert;
     this.clientSenderCert = clientSenderCert;
-    this.clientListenerCert = clientListenerCert;
     this.clientPrivateKey = clientPrivateKey;
     this.clientPublicKey = clientPublicKey;
+
+    if (clientListenerCert) {
+      this.clientListenerCert = clientListenerCert;
+    }
   }
 }

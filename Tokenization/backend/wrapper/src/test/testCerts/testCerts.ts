@@ -28,15 +28,20 @@ export const getTestClientListenerCertPaths =
       __dirname,
       "./clientListener/client-b-client.crt"
     );
-    const CLIENT_KEY_PATH = path.join(
+    const CLIENT_PRIVATE_KEY_PATH = path.join(
       __dirname,
       "./clientListener/client-b.key"
+    );
+    const CLIENT_PUBLIC_KEY_PATH = path.join(
+      __dirname,
+      "./clientListener/client-b.pub.pem"
     );
 
     return {
       caCertPath: CA_CERT_PATH,
       certPath: CLIENT_CERT_PATH,
-      publicKeyPath: CLIENT_KEY_PATH,
+      privateKeyPath: CLIENT_PRIVATE_KEY_PATH,
+      publicKeyPath: CLIENT_PUBLIC_KEY_PATH,
     };
   };
 
@@ -47,15 +52,20 @@ export const getTestClientListenerServerCertPaths =
       __dirname,
       "./clientListenerServer/client-b-server.crt"
     );
-    const CLIENT_KEY_PATH = path.join(
+    const CLIENT_PRIVATE_KEY_PATH = path.join(
       __dirname,
-      "./clientListenerServer/client-b.key"
+      "./clientListener/client-b.key"
+    );
+    const CLIENT_PUBLIC_KEY_PATH = path.join(
+      __dirname,
+      "./clientListener/client-b.pub.pem"
     );
 
     return {
       caCertPath: CA_CERT_PATH,
       certPath: CLIENT_CERT_PATH,
-      publicKeyPath: CLIENT_KEY_PATH,
+      publicKeyPath: CLIENT_PUBLIC_KEY_PATH,
+      privateKeyPath: CLIENT_PRIVATE_KEY_PATH,
     };
   };
 
@@ -66,12 +76,20 @@ export const getTestClientSenderCertPaths =
       __dirname,
       "./clientSender/client-a-client.crt"
     );
-    const CLIENT_KEY_PATH = path.join(__dirname, "./clientSender/client-a.key");
+    const CLIENT_PRIVATE_KEY_PATH = path.join(
+      __dirname,
+      "./clientSender/client-a.key"
+    );
+    const CLIENT_PUBLIC_KEY_PATH = path.join(
+      __dirname,
+      "./clientSender/client-a.pub.pem"
+    );
 
     return {
       caCertPath: CA_CERT_PATH,
       certPath: CLIENT_CERT_PATH,
-      publicKeyPath: CLIENT_KEY_PATH,
+      privateKeyPath: CLIENT_PRIVATE_KEY_PATH,
+      publicKeyPath: CLIENT_PUBLIC_KEY_PATH,
     };
   };
 

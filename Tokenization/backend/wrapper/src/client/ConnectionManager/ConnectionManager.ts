@@ -26,6 +26,7 @@ import {
 import { ConnectionStatus } from "../../models/connection.model";
 import * as fs from "fs";
 import { gRPCAuthInterceptor } from "./Interceptors/grpc.auth.interceptor";
+import { SecurityContext } from "../../utils/security/SecurityContext";
 
 /**
  * @description Manages all the connection between clients and central system.
@@ -57,11 +58,6 @@ export class ConnectionManager {
   private peerServer?: grpc.Server;
   private baseAPIPath: string = "localhost:40041/api/";
 
-  // client certificates
-  private caCert: NonSharedBuffer;
-  private clientCert: NonSharedBuffer;
-  private clientKey: NonSharedBuffer;
-
   /**
    * @description Initializes a new instance of the ConnectionManager class.
    *
@@ -69,16 +65,12 @@ export class ConnectionManager {
    *
    * @param protoPath - The file path to the gRPC proto definition.
    * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
-   * @param caCertPath - Path to the CA certificate file.
-   * @param clientCertPath - Path to the client certificate file.
-   * @param clientKeyPath - Path to the client key file.
+   * @param securityContext - The security context containing certificates and keys for secure communication.
    */
   constructor(
     protoPath: string,
     centralAddress: string = "localhost:50051",
-    caCertPath: string,
-    clientCertPath: string,
-    clientKeyPath: string
+    private readonly securityContext: SecurityContext
   ) {
     const packageDef = protoLoader.loadSync(protoPath, {
       keepCase: true,
@@ -92,16 +84,11 @@ export class ConnectionManager {
     this.wrapper = proto.webui.tokenization;
     this.peerCtor = this.wrapper.Peer2Peer;
 
-    // read certs
-    this.caCert = fs.readFileSync(caCertPath);
-    this.clientCert = fs.readFileSync(clientCertPath);
-    this.clientKey = fs.readFileSync(clientKeyPath);
-
     // create grpc credentials
     const sslCreds = grpc.credentials.createSsl(
-      this.caCert,
-      this.clientKey,
-      this.clientCert
+      this.securityContext.caCert,
+      this.securityContext.clientPrivateKey,
+      this.securityContext.clientSenderCert
     );
     const centralClient = new this.wrapper.CentralSystem(
       centralAddress,
@@ -174,16 +161,17 @@ export class ConnectionManager {
 
     // Create new connection
     conn = new Connection(jweToken || "", address, direction);
-    conn.createSslTunnel(this.peerCtor, {
-      caCert: this.caCert,
-      clientCert: this.clientCert,
-      clientKey: this.clientKey,
-    });
     conn.updateStatus(ConnectionStatus.CONNECTING);
 
     if (direction === ConnectionDirection.RECEIVING) {
       this.receivingConnections.set(address, conn);
     } else {
+      // open tunnel only on sending connections
+      conn.createSslTunnel(this.peerCtor, {
+        caCert: this.securityContext.caCert,
+        clientCert: this.securityContext.clientSenderCert,
+        clientKey: this.securityContext.clientPrivateKey,
+      });
       this.sendingConnections.set(address, conn);
     }
     conn.updateStatus(ConnectionStatus.CONNECTED);
@@ -251,11 +239,16 @@ export class ConnectionManager {
   /** Starts a listener server for p2p connections */
   public async listenForPeers(
     port: number,
-    listenerCert: NonSharedBuffer,
-    listenerPrivateKey: NonSharedBuffer,
     baseAPIPath?: string
   ): Promise<void> {
     if (baseAPIPath) this.baseAPIPath = baseAPIPath;
+
+    if (!this.securityContext.clientListenerCert) {
+      this.logger.errorMessage(
+        "Listener certificate not provided in gRPCWrapper. Cannot start peer listener."
+      );
+      return;
+    }
 
     if (this.peerServer) {
       this.peerServer.forceShutdown();
@@ -273,7 +266,7 @@ export class ConnectionManager {
           call,
           callback,
           this.receivingConnections,
-          listenerPrivateKey
+          this.securityContext
         );
 
         if (!isAuthenticated || !conn) {
@@ -331,11 +324,11 @@ export class ConnectionManager {
     });
 
     const sslCreds = grpc.ServerCredentials.createSsl(
-      this.caCert,
+      this.securityContext.caCert,
       [
         {
-          private_key: listenerPrivateKey,
-          cert_chain: listenerCert,
+          private_key: this.securityContext.clientPrivateKey,
+          cert_chain: this.securityContext.clientListenerCert,
         },
       ],
       true

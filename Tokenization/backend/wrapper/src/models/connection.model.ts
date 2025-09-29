@@ -33,6 +33,7 @@ export enum ConnectionStatus {
 
 export type ConnectionHeaders = Record<string, string>;
 
+// Options for making fetch-like requests over a connection
 export type FetchOptions = {
   method?: string;
   path?: string;
@@ -40,6 +41,7 @@ export type FetchOptions = {
   body?: string | Buffer | Uint8Array | null;
 };
 
+// A more specific type for fetch responses, including status, headers, and body
 export type FetchResponse = {
   status: number;
   headers: ConnectionHeaders;
@@ -63,7 +65,12 @@ export type HttpLikeResponse = {
   body: Buffer;
 };
 
+// Payload structure for authentication tokens
 export type TokenPayload = {
-  serialNumber: string;
-  allowedRequests: ("POST" | "GET" | "PUT" | "DELETE" | "PATCH")[];
+  subSerialNumber: string;
+  aud: string;
+  perm: Object;
+  iat: number;
+  exp: number;
+  jti: string;
 };

@@ -21,8 +21,8 @@ import {
 import { Connection } from "./Connection/Connection";
 import { NewTokenHandler } from "./Commands/newToken/newToken.handler";
 import { gRPCWrapperConfig } from "../models/config.model";
+import { SecurityContext } from "../utils/security/SecurityContext";
 import * as fs from "fs";
-import { LogManager } from "@aliceo2/web-ui";
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -35,21 +35,17 @@ import { LogManager } from "@aliceo2/web-ui";
  * @example
  * ```typescript
  * const grpcWrapper = new gRPCWrapper(PROTO_PATH, CENTRAL_SYSTEM_ADDRESS);
- * // Use grpcWrapper to interact with gRPC services
+ * Use grpcWrapper to interact with gRPC services
  * ```
  */
 export class gRPCWrapper {
   private ConnectionManager: ConnectionManager;
-  private listenerPublicKey?: NonSharedBuffer;
-  private listenerPrivateKey?: NonSharedBuffer;
-  private listenerCert?: NonSharedBuffer;
-  private logger = LogManager.getLogger("gRPCWrapper");
+  private securityContext: SecurityContext;
 
   /**
    * @description Initializes an instance of gRPCWrapper class.
    *
-   * @param protoPath - The file path to the gRPC proto definition.
-   * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
+   * @param config - External configuration object containing necessary paths and addresses.
    */
   constructor(config: gRPCWrapperConfig) {
     if (
@@ -58,31 +54,42 @@ export class gRPCWrapper {
       !config.clientCerts ||
       !config.clientCerts.caCertPath ||
       !config.clientCerts.certPath ||
-      !config.clientCerts.publicKeyPath
+      !config.clientCerts.publicKeyPath ||
+      !config.clientCerts.privateKeyPath
     ) {
-      throw new Error("Invalid gRPCWrapper configuration provided.");
+      throw new Error(
+        "Invalid gRPCWrapper configuration provided. Missing required paths."
+      );
     }
 
-    if (
-      config.listenerCertPaths?.publicKeyPath &&
-      config.listenerCertPaths?.certPath
-    ) {
-      this.listenerPublicKey = fs.readFileSync(
-        config.listenerCertPaths.publicKeyPath
-      );
-      this.listenerPrivateKey = fs.readFileSync(
-        config.listenerCertPaths.privateKeyPath
-      );
-      this.listenerCert = fs.readFileSync(config.listenerCertPaths.certPath);
+    let clientListenerCert: Buffer = Buffer.alloc(0);
+
+    // Klucze do wysyłania (Sender) są obowiązkowe
+    const caCert = fs.readFileSync(config.clientCerts.caCertPath);
+    const clientSenderCert = fs.readFileSync(config.clientCerts.certPath);
+    const clientPublicKey = fs.readFileSync(config.clientCerts.publicKeyPath);
+    const clientPrivateKey = fs.readFileSync(config.clientCerts.privateKeyPath);
+
+    if (config.listenerCertPath) {
+      // If we have dedicated listener cert, use it
+      clientListenerCert = fs.readFileSync(config.listenerCertPath);
     }
+
+    this.securityContext = new SecurityContext(
+      caCert,
+      clientSenderCert,
+      clientPrivateKey,
+      clientPublicKey,
+      clientListenerCert
+    );
 
     this.ConnectionManager = new ConnectionManager(
       config.protoPath,
       config.centralAddress,
-      config.clientCerts.caCertPath,
-      config.clientCerts.certPath,
-      config.clientCerts.publicKeyPath
+      this.securityContext
     );
+
+    // Register all command handlers
     this.ConnectionManager.registerCommandHandlers([
       {
         event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
@@ -121,32 +128,9 @@ export class gRPCWrapper {
    */
   public async listenForPeers(
     port: number,
-    baseAPIPath?: string,
-    listenerCertPaths?: { keyPath: string; certPath: string }
+    baseAPIPath?: string
   ): Promise<void> {
-    if (listenerCertPaths?.keyPath && listenerCertPaths?.certPath) {
-      this.listenerPublicKey = fs.readFileSync(listenerCertPaths.keyPath);
-      this.listenerCert = fs.readFileSync(listenerCertPaths.certPath);
-    }
-
-    if (
-      !this.listenerPublicKey ||
-      !this.listenerPrivateKey ||
-      !this.listenerCert
-    ) {
-      this.logger.errorMessage(
-        "Listener certificates are required to start P2P listener. Please provide valid paths."
-      );
-      return;
-    }
-
-    return this.ConnectionManager.listenForPeers(
-      port,
-      this.listenerPublicKey,
-      this.listenerCert,
-      this.listenerPrivateKey,
-      baseAPIPath
-    );
+    return this.ConnectionManager.listenForPeers(port, baseAPIPath);
   }
 
   /**

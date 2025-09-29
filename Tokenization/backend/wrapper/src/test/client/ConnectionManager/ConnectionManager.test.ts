@@ -18,10 +18,7 @@ import {
   ConnectionDirection,
   DuplexMessageEvent,
 } from "../../../models/message.model";
-import {
-  getTestCentralCertPaths,
-  getTestCerts,
-} from "../../testCerts/testCerts";
+import { SecurityContext } from "../../../utils/security/SecurityContext";
 
 // Mock duplex stream
 const mockStream = {
@@ -146,7 +143,14 @@ jest.mock("@grpc/grpc-js", () => {
 
 describe("ConnectionManager", () => {
   let conn: ConnectionManager;
-  const { caCertPath, certPath, keyPath } = getTestCentralCertPaths();
+  const MOCK_CERT = Buffer.from("MOCK_CERT");
+  const securityContext = new SecurityContext(
+    MOCK_CERT,
+    MOCK_CERT,
+    MOCK_CERT,
+    MOCK_CERT,
+    MOCK_CERT
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -155,9 +159,7 @@ describe("ConnectionManager", () => {
     conn = new ConnectionManager(
       "dummy.proto",
       "localhost:12345",
-      caCertPath,
-      certPath,
-      keyPath
+      securityContext
     );
   });
 
@@ -241,12 +243,7 @@ describe("ConnectionManager", () => {
   });
 
   test("listenForPeers() should start server and register service", async () => {
-    await conn.listenForPeers(
-      50055,
-      getTestCerts().clientCert,
-      getTestCerts().caCert,
-      "http://localhost:40041/api/"
-    );
+    await conn.listenForPeers(50055, "http://localhost:40041/api/");
 
     const serverCtor = (grpc.Server as any).mock;
     expect(serverCtor).toBeDefined();
@@ -265,12 +262,7 @@ describe("ConnectionManager", () => {
   });
 
   test("p2p Fetch should register incoming receiving connection and forward request", async () => {
-    await conn.listenForPeers(
-      50056,
-      getTestCerts().clientCert,
-      getTestCerts().caCert,
-      "http://localhost:40041/api/"
-    );
+    await conn.listenForPeers(50056, "http://localhost:40041/api/");
 
     // prepare data to call
     const call = {
@@ -328,12 +320,7 @@ describe("ConnectionManager", () => {
   });
 
   test("p2p Fetch should return INTERNAL on forward error", async () => {
-    await conn.listenForPeers(
-      50057,
-      getTestCerts().clientCert,
-      getTestCerts().caCert,
-      "http://localhost:40041/api/"
-    );
+    await conn.listenForPeers(50057, "http://localhost:40041/api/");
 
     const call = {
       getPeer: () => "client-error",
