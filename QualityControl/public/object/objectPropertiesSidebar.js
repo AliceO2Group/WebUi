@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import { displayHints, drawingOptions } from './../library/enums/objectOptions.enum.js';
 import { h } from '/js/src/index.js';
 
 /**
@@ -47,13 +48,7 @@ export default function objectPropertiesSidebar(model) {
         ]),
       ),
       h('.flex-row.flex-wrap', [
-        btnOption(model, tabObject, 'lego'),
-        ' ',
-        btnOption(model, tabObject, 'colz'),
-        ' ',
-        btnOption(model, tabObject, 'lcolz'),
-        ' ',
-        btnOption(model, tabObject, 'text'),
+        drawingOptions.map((option) => btnOption(model, tabObject, option)),
         ' ',
       ]),
       h(
@@ -63,23 +58,7 @@ export default function objectPropertiesSidebar(model) {
           h('.tooltiptext', 'Canvas options'),
         ]),
       ),
-      h('.flex-row', [
-        btnOption(model, tabObject, 'logx'),
-        ' ',
-        btnOption(model, tabObject, 'logy'),
-        ' ',
-        btnOption(model, tabObject, 'logz'),
-        ' ',
-      ]),
-      h('.flex-row', [
-        btnOption(model, tabObject, 'gridx'),
-        ' ',
-        btnOption(model, tabObject, 'gridy'),
-        ' ',
-        btnOption(model, tabObject, 'gridz'),
-        ' ',
-      ]),
-      h('.flex-row', [btnOption(model, tabObject, 'stat'), ' ']),
+      h('.flex-row.flex-wrap', [...displayHints.map((option) => btnOption(model, tabObject, option))]),
     ]),
 
     h('hr'),
