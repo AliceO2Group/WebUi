@@ -11,8 +11,9 @@
  * or submit itself to any jurisdiction.
  */
 
+import { InvalidInputError } from '@aliceo2/web-ui';
 import { BaseRepository } from './BaseRepository.js';
-import { Op } from 'sequelize';
+import { Op, UniqueConstraintError } from 'sequelize';
 
 /**
  * @typedef {object} LayoutAttributes
@@ -65,39 +66,50 @@ export class LayoutRepository extends BaseRepository {
   /**
    * Finds a layout by its ID
    * @param {string} id id of the layout
-   * @returns {Promise<LayoutAttributes|null>}
+   * @returns {Promise<LayoutAttributes|null>} Layout found or null
    */
   async findLayoutById(id) {
     return this.model.findByPk(id, { include: this._layoutInfoToInclude });
   }
 
   /**
-   * Finds all layouts
-   * @returns {Promise<LayoutAttributes[]>}
+   * Finds layouts
+   * @returns {Promise<LayoutAttributes[]>} Array of layouts found
    */
   async findAllLayouts() {
-    return this.model.findAll({ include: this._layoutInfoToInclude });
+    return this.model.findAll({
+      include: this._layoutInfoToInclude,
+    });
   }
 
-  //TODO: this replaces the listLayouts method
   /**
    * Finds layouts by filters using Op.and and optionally selects specific fields.
    * @param {object[]} filters - Array of Sequelize filter objects
-   * @param {string[]} [fields] - Optional array of fields/columns to return
-   * @returns {Promise<LayoutAttributes[]>}
+   * @param {string} [objectPath] - Optional object path to filter charts by (case-insensitive, partial match)
+   * @returns {Promise<LayoutAttributes[]>} Array of layouts found
    */
-  async findLayoustByFilters(filters, fields) {
+  async findLayoutsByFilters({ objectPath, ...filters }) {
+    const include = [...this._layoutInfoToInclude];
+    const [tabsInclude] = include;
+    const [gridTabCellsInclude] = tabsInclude.include;
+    const [chartInclude] = gridTabCellsInclude.include;
+    if (objectPath) {
+      const objectPathLower = objectPath.toLowerCase();
+      chartInclude.required = true;
+      chartInclude.where = {
+        object_name: { [Op.iLike]: `%${objectPathLower}%` },
+      };
+    }
     return this.model.findAll({
-      where: { [Op.and]: filters },
-      attributes: fields || undefined, // return all columns if fields not specified
-      include: this._layoutInfoToInclude,
+      where: filters,
+      include,
     });
   }
 
   /**
    * Finds layouts by name
    * @param {string} name name of the layout
-   * @returns {Promise<LayoutAttributes[]>}
+   * @returns {Promise<LayoutAttributes[]>} Array of layouts found
    */
   async findLayoutByName(name) {
     return this.model.findOne({
@@ -109,182 +121,48 @@ export class LayoutRepository extends BaseRepository {
   /**
    * Creates a new layout
    * @param {Partial<LayoutAttributes>} layoutData new layout
+   * @param {object} options Sequelize create options (e.g. transaction)
    * @returns {Promise<LayoutAttributes>}
    */
-  async createLayout(layoutData) {
-    return this.model.create(layoutData);
+  async createLayout(layoutData, options = {}) {
+    try {
+      const newLayout = await this.model.create(layoutData, { ...options });
+      return newLayout;
+    } catch (error) {
+      if (error instanceof UniqueConstraintError) {
+        const field = error.errors?.[0]?.path || 'name';
+        throw new InvalidInputError(`A layout with the same ${field} already exists.`);
+      }
+      throw error;
+    }
   }
 
   /**
    * Updates an existing layout by ID
-   * @param {string} id
+   * @param {string} id id of the layout to update
    * @param {Partial<LayoutAttributes>} updateData updated layout
+   * @param {object} options Sequelize update options (e.g. transaction)
    * @returns {Promise<number>} Number of updated rows
    */
-  async updateLayout(id, updateData) {
-    const [updatedCount] = await this.model.update(updateData, { where: { id } });
-    return updatedCount;
+  async updateLayout(id, updateData, options = {}) {
+    try {
+      const [updatedCount] = await this.model.update(updateData, { where: { id }, ...options });
+      return updatedCount;
+    } catch (error) {
+      if (error instanceof UniqueConstraintError) {
+        const field = error.errors?.[0]?.path || 'name';
+        throw new InvalidInputError(`A layout with the same ${field} already exists.`);
+      }
+      throw error;
+    }
   }
 
   /**
    * Deletes a layout by ID
-   * @param {string} id id of the layout to delete
+   * @param {string} id Id of the layout to delete
    * @returns {Promise<number>} Number of deleted rows
    */
   async deleteLayout(id) {
     return this.model.destroy({ where: { id } });
   }
 }
-
-// export class LayoutRepository extends BaseRepository {
-//   /**
-//    * Retrieves a filtered list of layouts with optional field selection
-//    * @param {object} [options] - Filtering and field selection options
-//    * @param {string} [options.name] - Filter layouts by exact name match
-//    * @param {Array<string>} [options.fields] - Array of field names to include in each returned layout object
-//    * @param {object} [options.filter] - Filter layouts by containing filter.objectPath, case insensitive
-//    * @returns {Array<object>} Array of layout objects matching the filters, containing only the specified fields
-//    */
-//   listLayouts({ name, fields = [], filter } = {}) {
-//     const { layouts } = this._jsonFileService.data;
-//     const filteredLayouts = this._filterLayouts(layouts, { ...filter, name });
-
-//     if (fields.length === 0) {
-//       return filteredLayouts;
-//     }
-//     return filteredLayouts.map((layout) => {
-//       const layoutObj = {};
-//       fields.forEach((field) => {
-//         layoutObj[field] = layout[field];
-//       });
-//       return layoutObj;
-//     });
-//   }
-
-//   /**
-//    * Filters layouts by filter object
-//    * @param {Array<object>} layouts - Array of layouts to filter
-//    * @param {object} filter - Filtering object
-//    * @param {number} [filter.owner_id] - owner id to filter by
-//    * @param {string} [filter.name] - name to filter by
-//    * @param {string} [filter.objectPath] - object path prefix for potential objects to be contained by layout
-//    * @returns {Array<object>} Filtered layouts.
-//    */
-//   _filterLayouts(layouts, { owner_id, name, objectPath } = {}) {
-//     const objectPathLowerCase = objectPath?.toLowerCase();
-//     return layouts.filter((layout) => {
-//       if (owner_id !== undefined && layout.owner_id !== owner_id) {
-//         return false;
-//       }
-//       if (name !== undefined && layout.name !== name) {
-//         return false;
-//       }
-//       if (objectPathLowerCase) {
-//         const hasMatchingObject = layout.tabs?.some((tab) =>
-//           tab.objects?.some((obj) =>
-//             obj.name?.toLowerCase().includes(objectPathLowerCase)));
-//         if (!hasMatchingObject) {
-//           return false;
-//         }
-//       }
-//       return true;
-//     });
-//   }
-
-//   /**
-//    * Retrieve a layout by its id or throws an error
-//    * @param {string} layoutId - layout id
-//    * @returns {Layout} - layout object
-//    * @throws {NotFoundError} - if the layout is not found
-//    */
-//   readLayoutById(layoutId) {
-//     const foundLayout = this._jsonFileService.data.layouts.find((layout) => layout.id === layoutId);
-//     if (!foundLayout) {
-//       throw new NotFoundError(`layout (${layoutId}) not found`);
-//     }
-//     return foundLayout;
-//   }
-
-//   /**
-//    * Given a string, representing layout name, retrieve the layout if it exists
-//    * @param {string} layoutName - name of the layout to retrieve
-//    * @returns {Layout} - object with layout information
-//    * @throws
-//    */
-//   readLayoutByName(layoutName) {
-//     const layout = this._jsonFileService.data.layouts.find((layout) => layout.name === layoutName);
-//     if (!layout) {
-//       throw new NotFoundError(`Layout (${layoutName}) not found`);
-//     }
-//     return layout;
-//   }
-
-//   /**
-//    * Create a layout
-//    * @param {Layout} newLayout - layout object to be saved
-//    * @returns {object} Empty details
-//    */
-//   async createLayout(newLayout) {
-//     if (!newLayout.id) {
-//       throw new Error('layout id is mandatory');
-//     }
-//     if (!newLayout.name) {
-//       throw new Error('layout name is mandatory');
-//     }
-
-//     const layout = this._jsonFileService.data.layouts.find((layout) => layout.id === newLayout.id);
-//     if (layout) {
-//       throw new Error(`layout with this id (${layout.id}) already exists`);
-//     }
-//     this._jsonFileService.data.layouts.push(newLayout);
-//     await this._jsonFileService.writeToFile();
-//     return newLayout;
-//   }
-
-//   /**
-//    * Update a single layout by its id
-//    * @param {string} layoutId - id of the layout to be updated
-//    * @param {LayoutDto} newData - layout new data
-//    * @returns {string} id of the layout updated
-//    */
-//   async updateLayout(layoutId, newData) {
-//     const layout = this.readLayoutById(layoutId);
-//     Object.assign(layout, newData);
-//     await this._jsonFileService.writeToFile();
-//     return layoutId;
-//   }
-
-//   /**
-//    * Delete a single layout by its id
-//    * @param {string} layoutId - id of the layout to be removed
-//    * @returns {string} id of the layout deleted
-//    */
-//   async deleteLayout(layoutId) {
-//     const layout = this.readLayoutById(layoutId);
-//     const index = this._jsonFileService.data.layouts.indexOf(layout);
-//     this._jsonFileService.data.layouts.splice(index, 1);
-//     await this._jsonFileService.writeToFile();
-//     return layoutId;
-//   }
-
-//   /**
-//    * Return an object by its id that is saved within a layout
-//    * @param {string} id - id of the object to retrieve
-//    * @returns {{object: object, layoutName: string}} - object configuration stored
-//    */
-//   getObjectById(id) {
-//     if (!id) {
-//       throw new Error('Missing mandatory parameter: id');
-//     }
-//     for (const layout of this._jsonFileService.data.layouts) {
-//       for (const tab of layout.tabs) {
-//         for (const object of tab.objects) {
-//           if (object.id === id) {
-//             return { object, layoutName: layout.name, tabName: tab.name };
-//           }
-//         }
-//       }
-//     }
-//     throw new Error(`Object with ${id} could not be found`);
-//   }
-// }

@@ -27,10 +27,6 @@ import { BaseRepository } from './BaseRepository.js';
  * Repository class for managing Option entities.
  */
 export class OptionRepository extends BaseRepository {
-  /**
-   * Creates an instance of OptionRepository.
-   * @param {object} optionModel - The Sequelize model for options.
-   */
   constructor(optionModel) {
     super(optionModel);
   }
@@ -38,9 +34,10 @@ export class OptionRepository extends BaseRepository {
   /**
    * Retrieves option by name
    * @param {string} name The name of the option
+   * @param {object} options additional options for the query (e.g. transaction)
    * @returns {Promise<Option>}
    */
-  async findOptionByName(name) {
-    this._model.findOne({ where: { name } });
+  async findOptionByName(name, options = {}) {
+    return this.model.findOne({ where: { name }, ...options });
   }
 }

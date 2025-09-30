@@ -11,9 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-/**
- * @typedef {import('sequelize').Model<any, any>} Model - Generic Sequelize model type
- */
+/** @typedef {import('sequelize').Model} Model */
 
 /**
  * Parent class for repositories

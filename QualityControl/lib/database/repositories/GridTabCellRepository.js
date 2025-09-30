@@ -17,10 +17,6 @@ import { BaseRepository } from './BaseRepository.js';
  * Repository for managing grid tab cells.
  */
 export class GridTabCellRepository extends BaseRepository {
-  /**
-   * Creates an instance of the GridTabCellRepository class
-   * @param {typeof GridTabCell} gridTabCellModel - Sequelize GridTabCell model
-   */
   constructor(gridTabCellModel) {
     super(gridTabCellModel);
   }
@@ -28,25 +24,17 @@ export class GridTabCellRepository extends BaseRepository {
   /**
    * Finds all grid tab cells by tab ID.
    * @param {string} tabId id of the tab
-   * @returns {Promise<GridTabCellAttributes[]>}
+   * @param {object} options additional options for the query (e.g. transaction)
+   * @returns {Promise<GridTabCellAttributes[]>} List of grid tab cells
    */
-  async findByTabId(tabId) {
-    return this.model.findAll({ where: { tab_id: tabId } });
-  }
-
-  /**
-   * Finds all grid tab cells by chart ID.
-   * @param {string} chartId id of the chart
-   * @returns {Promise<GridTabCellAttributes[]>}
-   */
-  async findByChartId(chartId) {
-    return this.model.findAll({ where: { chart_id: chartId } });
+  async findByTabId(tabId, options = {}) {
+    return this.model.findAll({ where: { tab_id: tabId }, ...options });
   }
 
   /**
    * Finds grid tab cells as a plain object by chart ID.
    * @param {string} chartId id of the chart
-   * @returns {Promise<object[]>}
+   * @returns {Promise<object[]>} List of grid tab cells with associated tab and chart details
    */
   async findObjectByChartId(chartId) {
     const include = [
@@ -78,29 +66,24 @@ export class GridTabCellRepository extends BaseRepository {
   /**
    * Creates a new grid tab cell.
    * @param {Partial<GridTabCellAttributes>} cellData new data
-   * @returns {Promise<GridTabCellAttributes>}
+   * @param {object} options additional options for the query (e.g. transaction)
+   * @returns {Promise<GridTabCellAttributes>} Created grid tab cell
    */
-  async createGridTabCell(cellData) {
-    return this.model.create(cellData);
+  async createGridTabCell(cellData, options = {}) {
+    return this.model.create(cellData, { ...options });
   }
 
   /**
    * Updates a grid tab cell by ID.
-   * @param {number} id
+   * @param {number} id ID of the grid tab cell to update
    * @param {Partial<GridTabCellAttributes>} updateData updated data
+   * @param {object} options additional options for the update (e.g. transaction)
    * @returns {Promise<number>} Number of updated rows
    */
-  async updateGridTabCell(id, updateData) {
-    const [updatedCount] = await this.model.update(updateData, { where: { id } });
+  async updateGridTabCell(id, updateData, options = {}) {
+    const { chartId, tabId } = id;
+    const [updatedCount] =
+      await this.model.update(updateData, { where: { chart_id: chartId, tab_id: tabId }, ...options });
     return updatedCount;
-  }
-
-  /**
-   * Deletes a grid tab cell by ID.
-   * @param {number} id
-   * @returns {Promise<number>} Number of deleted rows
-   */
-  async deleteGridTabCell(id) {
-    return this.model.destroy({ where: { id } });
   }
 }

@@ -43,51 +43,34 @@ export const chartOptionsRepositoryTestSuite = () => {
       strictEqual(chartOptionsRepository.model, mockChartOptionsModel);
     });
 
-    test('should inherit from BaseRepository', () => {
-      ok(chartOptionsRepository.model);
+    test('should create a new chart option', async () => {
+      const optionData = { chart_id: 1, option_id: 2 };
+      const createdOption = { id: 1, ...optionData };
+      mockChartOptionsModel.create.resolves(createdOption);
+
+      const result = await chartOptionsRepository.createChartOption(optionData, { transaction: 'tx' });
+      deepStrictEqual(result, createdOption);
+      ok(mockChartOptionsModel.create.calledOnceWith(optionData, { transaction: 'tx' }));
     });
 
-    test('should handle chart options creation', async () => {
-      const optionsData = { chart_id: '1', option_id: '1', value: 'test' };
-      const createdOptions = { id: '1', ...optionsData };
-      mockChartOptionsModel.create.resolves(createdOptions);
+    test('should find chart options by chart ID', async () => {
+      const chartId = 1;
+      const foundOptions = [{ chart_id: chartId, option_id: 2 }, { chart_id: chartId, option_id: 3 }];
+      mockChartOptionsModel.findAll.resolves(foundOptions);
 
-      const result = await chartOptionsRepository.model.create(optionsData);
-      deepStrictEqual(result, createdOptions);
-      ok(mockChartOptionsModel.create.calledWith(optionsData));
+      const result = await chartOptionsRepository.findChartOptionsByChartId(chartId, { transaction: 'tx' });
+      deepStrictEqual(result, foundOptions);
+      ok(mockChartOptionsModel.findAll.calledOnceWith({ where: { chart_id: chartId }, transaction: 'tx' }));
     });
 
-    test('should handle bulk chart options creation', async () => {
-      const optionsArray = [
-        { chart_id: '1', option_id: '1', value: 'test1' },
-        { chart_id: '1', option_id: '2', value: 'test2' },
-      ];
-      const createdOptions = optionsArray.map((opt, i) => ({ id: String(i + 1), ...opt }));
-      mockChartOptionsModel.bulkCreate.resolves(createdOptions);
+    test('should delete a chart option', async () => {
+      const params = { chartId: 1, optionId: 2 };
+      mockChartOptionsModel.destroy.resolves(1);
 
-      const result = await chartOptionsRepository.model.bulkCreate(optionsArray);
-      deepStrictEqual(result, createdOptions);
-      ok(mockChartOptionsModel.bulkCreate.calledWith(optionsArray));
-    });
-
-    test('should handle chart options retrieval by chart', async () => {
-      const mockOptions = [
-        { id: '1', chart_id: '1', option_id: '1', value: 'test1' },
-        { id: '2', chart_id: '1', option_id: '2', value: 'test2' },
-      ];
-      mockChartOptionsModel.findAll.resolves(mockOptions);
-
-      const result = await chartOptionsRepository.model.findAll({ where: { chart_id: '1' } });
-      deepStrictEqual(result, mockOptions);
-      ok(mockChartOptionsModel.findAll.calledWith({ where: { chart_id: '1' } }));
-    });
-
-    test('should handle chart options deletion', async () => {
-      mockChartOptionsModel.destroy.resolves(2);
-
-      const result = await chartOptionsRepository.model.destroy({ where: { chart_id: '1' } });
-      strictEqual(result, 2);
-      ok(mockChartOptionsModel.destroy.calledWith({ where: { chart_id: '1' } }));
+      const result = await chartOptionsRepository.deleteChartOption(params, { transaction: 'tx' });
+      strictEqual(result, 1);
+      ok(mockChartOptionsModel.destroy.calledOnceWith({
+        where: { chart_id: params.chartId, option_id: params.optionId }, transaction: 'tx' }));
     });
   });
 };

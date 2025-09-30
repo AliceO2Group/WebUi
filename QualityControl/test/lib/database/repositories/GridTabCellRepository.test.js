@@ -43,61 +43,62 @@ export const gridTabCellRepositoryTestSuite = () => {
       strictEqual(gridTabCellRepository.model, mockGridTabCellModel);
     });
 
-    test('should inherit from BaseRepository', () => {
-      ok(gridTabCellRepository.model);
+    test('should find grid tab cells by tab ID', async () => {
+      const tabId = 'tab123';
+      const expectedCells = [{ id: 1, tab_id: tabId }, { id: 2, tab_id: tabId }];
+      mockGridTabCellModel.findAll.resolves(expectedCells);
+
+      const cells = await gridTabCellRepository.findByTabId(tabId);
+
+      deepStrictEqual(cells, expectedCells);
+      ok(mockGridTabCellModel.findAll.calledOnceWith({ where: { tab_id: tabId } }));
     });
 
-    test('should handle grid tab cell creation', async () => {
-      const cellData = { tab_id: '1', x: 0, y: 0, w: 1, h: 1 };
-      const createdCell = { id: '1', ...cellData };
+    test('should find object by chart ID', async () => {
+      const chartId = 'chart123';
+      const expectedCells = [{ id: 1, chart_id: chartId }, { id: 2, chart_id: chartId }];
+      mockGridTabCellModel.findAll.resolves(expectedCells);
+
+      const cells = await gridTabCellRepository.findObjectByChartId(chartId);
+
+      deepStrictEqual(cells, expectedCells);
+      ok(mockGridTabCellModel.findAll.calledOnce);
+      const [callArgs] = mockGridTabCellModel.findAll.getCall(0).args;
+      strictEqual(callArgs.where.chart_id, chartId);
+      ok(Array.isArray(callArgs.include));
+      const tabInclude = callArgs.include.find((inc) => inc.association === 'tab');
+      ok(tabInclude);
+      const chartInclude = callArgs.include.find((inc) => inc.association === 'chart');
+      ok(chartInclude);
+      const chartOptionsInclude = chartInclude.include.find((inc) => inc.association === 'chartOptions');
+      ok(chartOptionsInclude);
+      const optionInclude = chartOptionsInclude.include.find((inc) => inc.association === 'option');
+      ok(optionInclude);
+    });
+
+    test('should create a new grid tab cell', async () => {
+      const newCellData = { tab_id: 'tab123', chart_id: 'chart123' };
+      const createdCell = { id: 1, ...newCellData };
       mockGridTabCellModel.create.resolves(createdCell);
 
-      const result = await gridTabCellRepository.model.create(cellData);
-      deepStrictEqual(result, createdCell);
-      ok(mockGridTabCellModel.create.calledWith(cellData));
+      const cell = await gridTabCellRepository.createGridTabCell(newCellData);
+      deepStrictEqual(cell, createdCell);
+      ok(mockGridTabCellModel.create.calledOnceWith(newCellData));
     });
 
-    test('should handle grid tab cell retrieval by tab', async () => {
-      const mockCells = [
-        { id: '1', tab_id: '1', x: 0, y: 0, w: 1, h: 1 },
-        { id: '2', tab_id: '1', x: 1, y: 0, w: 1, h: 1 },
-      ];
-      mockGridTabCellModel.findAll.resolves(mockCells);
+    test('should update a grid tab cell by chart ID and tab ID', async () => {
+      const chartId = 'chart123';
+      const tabId = 'tab123';
+      const updateData = { some_field: 'newValue' };
+      const updatedCount = 1;
+      mockGridTabCellModel.update.resolves([updatedCount]);
 
-      const result = await gridTabCellRepository.model.findAll({ where: { tab_id: '1' } });
-      deepStrictEqual(result, mockCells);
-      ok(mockGridTabCellModel.findAll.calledWith({ where: { tab_id: '1' } }));
-    });
-
-    test('should handle bulk grid tab cell creation', async () => {
-      const cellsArray = [
-        { tab_id: '1', x: 0, y: 0, w: 1, h: 1 },
-        { tab_id: '1', x: 1, y: 0, w: 1, h: 1 },
-      ];
-      const createdCells = cellsArray.map((cell, i) => ({ id: String(i + 1), ...cell }));
-      mockGridTabCellModel.bulkCreate.resolves(createdCells);
-
-      const result = await gridTabCellRepository.model.bulkCreate(cellsArray);
-      deepStrictEqual(result, createdCells);
-      ok(mockGridTabCellModel.bulkCreate.calledWith(cellsArray));
-    });
-
-    test('should handle grid tab cell updates', async () => {
-      const updateData = { x: 2, y: 2 };
-      const updateResult = [1];
-      mockGridTabCellModel.update.resolves(updateResult);
-
-      const result = await gridTabCellRepository.model.update(updateData, { where: { id: '1' } });
-      deepStrictEqual(result, updateResult);
-      ok(mockGridTabCellModel.update.calledWith(updateData, { where: { id: '1' } }));
-    });
-
-    test('should handle grid tab cell deletion by tab', async () => {
-      mockGridTabCellModel.destroy.resolves(2);
-
-      const result = await gridTabCellRepository.model.destroy({ where: { tab_id: '1' } });
-      strictEqual(result, 2);
-      ok(mockGridTabCellModel.destroy.calledWith({ where: { tab_id: '1' } }));
+      const result = await gridTabCellRepository.updateGridTabCell({ chartId, tabId }, updateData);
+      strictEqual(result, updatedCount);
+      ok(mockGridTabCellModel.update.calledOnceWith(
+        updateData,
+        { where: { chart_id: chartId, tab_id: tabId } },
+      ));
     });
   });
 };

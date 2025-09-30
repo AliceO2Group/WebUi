@@ -24,10 +24,6 @@ import { BaseRepository } from './BaseRepository.js';
  * Repository for managing chart options.
  */
 export class ChartRepository extends BaseRepository {
-  /**
-   * Creates an instance of the ChartRepository class
-   * @param {typeof Chart} chartModel - Sequelize Chart model.
-   */
   constructor(chartModel) {
     super(chartModel);
   }
@@ -35,38 +31,42 @@ export class ChartRepository extends BaseRepository {
   /**
    * Finds a chart by its ID.
    * @param {string} chartId id of the chart
+   * @param {object} options additional options for the query (e.g. transaction)
    * @returns {Promise<ChartAttributes|null>} The chart or null if not found.
    */
-  async findChartById(chartId) {
-    return this.model.findByPk(chartId);
+  async findChartById(chartId, options = {}) {
+    return this.model.findByPk(chartId, { ...options });
   }
 
   /**
    * Creates a new chart.
-   * @param {Partial<ChartAttributes>} chartData new chart
+   * @param {Partial<ChartAttributes>} chartData new chart data
+   * @param {object} options additional options for the creation (e.g. transaction)
    * @returns {Promise<ChartAttributes>} The created chart.
    */
-  async createChart(chartData) {
-    return this.model.create(chartData);
+  async createChart(chartData, options = {}) {
+    return this.model.create(chartData, { ...options });
   }
 
   /**
-   * Updates an existing chart by ID.
-   * @param {string} chartId id of the chart
-   * @param {Partial<ChartAttributes>} updateData new chart
+   * Updates an existing chart.
+   * @param {string} chartId id of the chart to update
+   * @param {Partial<ChartAttributes>} updateData new chart data
+   * @param {object} options additional options for the update (e.g. transaction)
    * @returns {Promise<number>} Number of updated rows (0 or 1).
    */
-  async updateChart(chartId, updateData) {
-    const [updatedCount] = await this.model.update(updateData, { where: { id: chartId } });
+  async updateChart(chartId, updateData, options = {}) {
+    const [updatedCount] = await this.model.update(updateData, { where: { id: chartId }, ...options });
     return updatedCount;
   }
 
   /**
-   * Deletes a chart by ID.
+   * Deletes a chart.
    * @param {string} chartId id of the chart
+   * @param {object} options additional options for the deletion (e.g. transaction)
    * @returns {Promise<number>} Number of deleted rows (0 or 1).
    */
-  async deleteChart(chartId) {
-    return this.model.destroy({ where: { id: chartId } });
+  async deleteChart(chartId, options = {}) {
+    return this.model.destroy({ where: { id: chartId }, ...options });
   }
 }
