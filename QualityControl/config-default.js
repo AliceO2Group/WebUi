@@ -48,6 +48,7 @@ export const config = {
     collate: 'utf8mb4_general_ci',
     timezone: '+00:00',
     logging: false,
+    migrationSeed: false,
     retryThrottle: 5000,
   },
   bookkeeping: {

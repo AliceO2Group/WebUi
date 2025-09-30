@@ -23,7 +23,6 @@ export const up = async (queryInterface, Sequelize) => {
       type: Sequelize.INTEGER,
       allowNull: false,
       primaryKey: true,
-      autoIncrement: true,
     },
     username: {
       type: Sequelize.STRING(250),
