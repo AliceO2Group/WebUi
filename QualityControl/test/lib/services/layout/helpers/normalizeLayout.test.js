@@ -13,10 +13,10 @@
  */
 
 import { deepStrictEqual } from 'node:assert';
-import { normalizeLayout } from '../../../../../lib/services/layout/helpers/layoutMapper.js';
+import { normalizeLayout } from '../../../../../lib/services/layout/helpers/normalizeLayout.js';
 import { test } from 'node:test';
 
-export const layoutMapperTestSuite = async () => {
+export const normalizeLayoutTestSuite = async () => {
   const mockUserService = {
     getUsernameById: async (id) => {
       const users = {

@@ -35,8 +35,6 @@ export class GridTabCellSynchronizer {
    * @param {object} transaction Sequelize transaction
    */
   async sync(tabId, objects, transaction) {
-    this._logger.infoMessage(`[GridTabCellSynchronizer] syncing cells for tabId=${tabId}`);
-
     let existingCells = null;
     try {
       existingCells = await this._gridTabCellRepository.findByTabId(tabId, { transaction });

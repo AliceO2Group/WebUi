@@ -269,3 +269,73 @@ export const LAYOUT_MOCK_6 = {
   ],
   collaborators: [],
 };
+
+export const LAYOUT_FROM_BACKEND = {
+  id: '671b8c22402408122e2f20dd',
+  name: 'test',
+  owner: {
+    id: 0,
+    name: 'Anonymous',
+  },
+  description: 'description',
+  display_timestamp: false,
+  auto_tab_change_interval: 0,
+  is_official: true,
+  collaborators: [],
+  tabs: [
+    {
+      id: '671b8c227b3227b0c603c29d',
+      name: 'main',
+      column_count: 2,
+      gridTabCells: [
+        {
+          chart: {
+            id: '671b8c25d5b49dbf80e81926',
+            object_name: 'qc/MCH/QO/Aggregator/MCHQuality',
+            chartOptions: [
+              { option: { name: 'option1' } },
+              { option: { name: 'option2' } },
+            ],
+          },
+          row: 1,
+          col: 2,
+          row_span: 3,
+          col_span: 4,
+        },
+      ],
+    },
+  ],
+
+};
+
+export const CONVERTED_LAYOUT_FROM_BACKEND = {
+  id: '671b8c22402408122e2f20dd',
+  name: 'test',
+  owner_id: 0,
+  owner_name: 'Anonymous',
+  description: 'description',
+  displayTimestamp: false,
+  autoTabChange: 0,
+  tabs: [
+    {
+      id: '671b8c227b3227b0c603c29d',
+      name: 'main',
+      objects: [
+        {
+          id: '671b8c25d5b49dbf80e81926',
+          x: 2,
+          y: 1,
+          h: 3,
+          w: 4,
+          name: 'qc/MCH/QO/Aggregator/MCHQuality',
+          options: ['option1', 'option2'],
+          autoSize: false,
+          ignoreDefaults: false,
+        },
+      ],
+      columns: 2,
+    },
+  ],
+  isOfficial: true,
+  collaborators: [],
+};

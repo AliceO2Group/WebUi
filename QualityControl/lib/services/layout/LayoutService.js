@@ -14,7 +14,7 @@
 
 import { InvalidInputError, LogManager, NotFoundError } from '@aliceo2/web-ui';
 import { UserService } from './UserService.js';
-import { normalizeLayout } from './helpers/layoutMapper.js';
+import { normalizeLayout } from './helpers/normalizeLayout.js';
 import { ChartOptionsSynchronizer } from './helpers/chartOptionsSynchronizer.js';
 import { GridTabCellSynchronizer } from './helpers/gridTabCellSynchronizer.js';
 import { TabSynchronizer } from './helpers/tabSynchronizer.js';
@@ -166,13 +166,8 @@ export class LayoutService {
    * @throws {Error} If an error occurs updating the layout
    */
   async patchLayout(id, updateData) {
-    try {
-      const normalizedLayout = await normalizeLayout(updateData, {}, false, this._userService);
-      await this._updateLayout(id, normalizedLayout);
-    } catch (error) {
-      this._logger.errorMessage(`Error in patchLayout: ${error.message || error}`);
-      throw error;
-    }
+    const normalizedLayout = await normalizeLayout(updateData, {}, false, this._userService);
+    await this._updateLayout(id, normalizedLayout);
   }
 
   /**
@@ -184,14 +179,9 @@ export class LayoutService {
    * @returns {Promise<void>}
    */
   async _updateLayout(layoutId, updateData, transaction) {
-    try {
-      const updatedCount = await this._layoutRepository.updateLayout(layoutId, updateData, { transaction });
-      if (updatedCount === 0) {
-        throw new NotFoundError(`Layout with id ${layoutId} not found`);
-      }
-    } catch (error) {
-      this._logger.errorMessage(`Error in _updateLayout: ${error.message || error}`);
-      throw error;
+    const updatedCount = await this._layoutRepository.updateLayout(layoutId, updateData, { transaction });
+    if (updatedCount === 0) {
+      throw new NotFoundError(`Layout with id ${layoutId} not found`);
     }
   }
 
@@ -202,14 +192,9 @@ export class LayoutService {
    * @returns {Promise<void>}
    */
   async removeLayout(id) {
-    try {
-      const deletedCount = await this._layoutRepository.deleteLayout(id);
-      if (deletedCount === 0) {
-        throw new NotFoundError(`Layout with id ${id} not found`);
-      }
-    } catch (error) {
-      this._logger.errorMessage(`Error in removeLayout: ${error.message || error}`);
-      throw error;
+    const deletedCount = await this._layoutRepository.deleteLayout(id);
+    if (deletedCount === 0) {
+      throw new NotFoundError(`Layout with id ${id} not found`);
     }
   }
 
@@ -231,7 +216,6 @@ export class LayoutService {
       return newLayout;
     } catch (error) {
       await transaction.rollback();
-      this._logger.errorMessage(`Error in postLayout: ${error.message || error}`);
       throw error;
     }
   }
