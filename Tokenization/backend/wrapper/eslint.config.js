@@ -12,14 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
-import globals from 'globals';
-import pluginJs from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import pluginReact from 'eslint-plugin-react';
-import pluginReactHooks from 'eslint-plugin-react-hooks';
-import jsdoc from 'eslint-plugin-jsdoc';
-import stylisticTs from '@stylistic/eslint-plugin-ts';
-import stylisticJs from '@stylistic/eslint-plugin-js';
+const globals = require('globals');
+const pluginJs = require('@eslint/js');
+const tseslint = require('typescript-eslint');
+const jsdoc = require('eslint-plugin-jsdoc');
+const stylisticTs = require('@stylistic/eslint-plugin-ts');
+const stylisticJs = require('@stylistic/eslint-plugin-js');
 
 const licenseHeader = `/**
  * @license
@@ -67,36 +65,30 @@ const licenseHeaderRule = {
   },
 };
 
-export default [
+module.exports = [
   {
     ignores: [
-      'test/',
-      'tests/',
-      'node_modules/',
-      'build/',
-      'dist/',
-      '.react-router/',
-      'database/data/',
-      'lib/public/assets/',
-      'cpp-api-client/',
-      'tmp/',
-      '.nyc_output/',
-      'app/ui/icon.tsx',
-      'app/root.tsx',   
+      '**/test/',
+      '**/tests/',
+      '**/node_modules/',
+      '**/build/',
+      '**/dist/',
+      '**/database/data/',
+      '**/lib/public/assets/',
+      '**/cpp-api-client/',
+      '**/tmp/',
+      '**/.nyc_output/',
     ],
   },
   
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
-  pluginReact.configs.flat.recommended,
 
+ 
   {
-    files: ['**/*.{js,mjs,cjs,ts,tsx,jsx}'],
-    
+    files: ['**/*.{js,ts}'],
     plugins: {
       '@typescript-eslint': tseslint.plugin,
-      'react': pluginReact,
-      'react-hooks': pluginReactHooks,
       'jsdoc': jsdoc,
       '@stylistic/ts': stylisticTs,
       '@stylistic/js': stylisticJs,
@@ -111,24 +103,17 @@ export default [
       parser: tseslint.parser,
       parserOptions: {
         ecmaVersion: 'latest',
-        sourceType: 'module',
-        ecmaFeatures: {
-          jsx: true,
-        },
-        project: './tsconfig.json',
+        sourceType: 'commonjs',
+        project: ['./tsconfig.json'], 
       },
       globals: {
-        ...globals.browser,
         ...globals.node,
         ...globals.es2021,
-        React: 'readonly',
+        ...globals.commonjs,
       },
     },
     
     settings: {
-      react: {
-        version: 'detect',
-      },
       jsdoc: {
         mode: 'typescript',
         tagNamePreference: {
@@ -155,12 +140,6 @@ export default [
       '@typescript-eslint/prefer-optional-chain': 'error',
       '@typescript-eslint/no-non-null-assertion': 'warn',
       '@typescript-eslint/consistent-type-imports': 'error',
-      
-      // === REACT SPECIFIC RULES ===
-      'react/react-in-jsx-scope': 'off',
-      'react/prop-types': 'off',
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
       
       // === GENERAL CODE QUALITY ===
       'arrow-body-style': ['error', 'as-needed'],
@@ -211,13 +190,32 @@ export default [
       '@stylistic/js/no-trailing-spaces': 'error',
       '@stylistic/js/eol-last': ['error', 'always'],
       '@stylistic/js/max-len': ['error', { code: 145 }],
-      "@stylistic/js/no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 0 }],
+      '@stylistic/js/no-multiple-empty-lines': ['error', { 'max': 1, 'maxEOF': 0 }],
       
       // === DISABLED RULES ===
       'no-magic-numbers': 'off',
       'sort-keys': 'off',
       'sort-imports': 'off',
       'sort-vars': 'off',
+    },
+  },
+  {
+    files: ['**/*.test.{js,ts}', '**/test/**/*.{js,ts}'],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+       
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+      },
+    },
+
+    rules: {
+      'no-console': 'off', 
+      'jsdoc/require-jsdoc': 'off',
     },
   },
 ];

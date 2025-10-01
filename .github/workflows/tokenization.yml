@@ -10,7 +10,7 @@ on:
       - 'dev'
 
 jobs:
-  lint-check-backend:
+  lint-check-wrapper:
     name: Check eslint rules for backend on ubuntu-latest
     runs-on: ubuntu-latest
     timeout-minutes: 6
@@ -20,7 +20,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-      - run: (cd Tokenization/backend; npm i)      
+      - run: (cd Tokenization/backend/wrapper; npm i) 
+      - run: (cd Tokenization/backend/wrapper; npm run lint)
+
   lint-check-webapp:
     name: Check eslint rules for webapp on ubuntu-latest
     runs-on: ubuntu-latest
@@ -35,7 +37,20 @@ jobs:
       - run: (cd Tokenization/webapp; npm run typecheck)
       - run: (cd Tokenization/webapp; npm run lint)
 
-  ui-test:
+  unit-tests-wrapper:
+    name: Unit tests for wrapper 
+        runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - run: (cd Tokenization/backend/wrapper; npm i )
+      - run: (cd Tokenization/backend/wrapper; npm run test)
+
+  ui-tests:
     name: UI-tests for webapp application
     runs-on: ubuntu-latest
     timeout-minutes: 6
