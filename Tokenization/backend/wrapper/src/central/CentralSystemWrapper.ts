@@ -175,6 +175,17 @@ export class CentralSystemWrapper {
     }
   }
 
+  public broadcastEvent(data: DuplexMessageModel): void {
+    this.clients.forEach((client, ip) => {
+      try {
+        client.write(data);
+        this.logger.infoMessage(`Broadcasted event to ${ip}:`, data);
+      } catch (err) {
+        this.logger.errorMessage(`Error broadcasting to ${ip}:`, err);
+      }
+    });
+  }
+
   /**
    * @description Gets all connected client IPs
    * @returns Array of connected client IPs
