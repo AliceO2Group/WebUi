@@ -25,7 +25,7 @@ export class TabSynchronizer {
    * Creates an instance of TabSynchronizer to synchronize tabs for a layout.
    * @param {TabRepository} tabRepository - The repository for tab operations.
    * @param {GridTabCellSynchronizer} gridTabCellSynchronizer - The synchronizer for grid tab cells.
-   * @param {import('@aliceo2/web-ui').Logger} logger - Logger instance for logging operations.
+   * @returns {void}
    */
   constructor(tabRepository, gridTabCellSynchronizer) {
     this._tabRepository = tabRepository;
@@ -34,10 +34,12 @@ export class TabSynchronizer {
   }
 
   /**
-   * Sincroniza tabs de un layout (upsert + delete)
-   * @param {string} layoutId
-   * @param {Array<object>} tabs
-   * @param {object} transaction
+   * Synchronizes the tabs for a given layout.
+   * @param {number} layoutId - The ID of the layout to synchronize tabs for.
+   * @param {Array<object>} tabs - The array of tab objects to synchronize.
+   * @param {object} transaction - The database transaction object.
+   * @throws {Error} If an error occurs during synchronization.
+   * @returns {Promise<void>}
    */
   async sync(layoutId, tabs, transaction) {
     const incomingIds = tabs.filter((t) => t.id).map((t) => t.id);

@@ -19,12 +19,12 @@ const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/validate-layo
 
 /**
  * Middleware for validating request bodies with context (create/update/etc.)
- * @param {Express.Request} req - HTTP Request
- * @param {Express.Response} res - HTTP Response
- * @param {Express.Next} next - HTTP Next (check pass)
- * @param {"create"|"update"|"delete"} action
- * @param {Joi.ObjectSchema<any>} dto DTO to validate the body against
- * @returns {Promise<void>} Resolves when validation is done and next is called
+ * @param {string} action Action being performed (e.g., 'create', 'update')
+ * @param {object} dto Joi schema for validation
+ * @returns {(
+ * req: Express.Request,
+ * res: Express.Response,
+ * next: Express.NextFunction) => Promise<void>} Middleware function
  */
 const validateLayoutWithAction = (action, dto) => async (req, res, next) => {
   const logger = LogManager.getLogger(LOG_FACILITY);

@@ -20,9 +20,9 @@ const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/database`;
 /**
  * Initializes the database connection and runs migrations.
  * @param {object} sequelizeDatabase - The Sequelize database instance.
- * @param root0
- * @param root0.forceSeed
- * @param root0.drop
+ * @param {object} options - Options for database initialization.
+ * @param {boolean} [options.forceSeed=false] - Whether to force seeding the database.
+ * @param {boolean} [options.drop=false] - Whether to drop existing tables before migration (development only).
  * @returns {Promise<void>} A promise that resolves when the database is initialized.
  */
 export const initDatabase = async (sequelizeDatabase, { forceSeed = false, drop = false }) => {

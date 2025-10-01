@@ -13,8 +13,12 @@
 'use strict';
 
 /**
+ * @typedef {import('sequelize').QueryInterface} QueryInterface
+ */
+
+/**
  * Seed chart options
- * @param {*} queryInterface - The query interface
+ * @param {QueryInterface} queryInterface - The query interface to perform database operations
  */
 export const up = async (queryInterface) => {
   await queryInterface.bulkInsert('chart_options', [

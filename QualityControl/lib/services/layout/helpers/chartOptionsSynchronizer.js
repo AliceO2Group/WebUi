@@ -19,13 +19,14 @@ const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/chart-options
 /**
  * @typedef {import('../../../database/repositories/ChartOptionsRepository.js')
  * .ChartOptionsRepository} ChartOptionsRepository
+ * @typedef {import('../../../database/repositories/OptionsRepository.js').OptionsRepository} OptionsRepository
  */
 
 export class ChartOptionsSynchronizer {
   /**
    * Creates an instance of ChartOptionsSynchronizer.
    * @param {ChartOptionsRepository} chartOptionRepository Chart options repository
-   * @param optionsRepository
+   * @param {OptionsRepository} optionsRepository Options repository
    */
   constructor(chartOptionRepository, optionsRepository) {
     this._chartOptionRepository = chartOptionRepository;

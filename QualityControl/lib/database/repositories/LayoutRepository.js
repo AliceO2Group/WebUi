@@ -17,15 +17,15 @@ import { Op, UniqueConstraintError } from 'sequelize';
 
 /**
  * @typedef {object} LayoutAttributes
- * @property {string} id
- * @property {string} name
- * @property {string} [description]
- * @property {boolean} display_timestamp
- * @property {number} auto_tab_change_interval
- * @property {string} owner_username
- * @property {boolean} is_official
- * @property {Date} created_at
- * @property {Date} updated_at
+ * @property {string} id - UUID
+ * @property {string} name - unique name of the layout
+ * @property {string} [description] - optional description of the layout
+ * @property {boolean} display_timestamp - whether to display the timestamp
+ * @property {number} auto_tab_change_interval - interval for automatic tab change in seconds
+ * @property {string} owner_username - username of the owner
+ * @property {boolean} is_official - whether the layout is official
+ * @property {Date} created_at - timestamp when the layout was created
+ * @property {Date} updated_at - timestamp when the layout was last updated
  */
 
 /**
@@ -84,8 +84,8 @@ export class LayoutRepository extends BaseRepository {
 
   /**
    * Finds layouts by filters using Op.and and optionally selects specific fields.
-   * @param {object[]} filters - Array of Sequelize filter objects
-   * @param {string} [objectPath] - Optional object path to filter charts by (case-insensitive, partial match)
+   * @param {object} filters key-value pairs to filter the layouts
+   * @param {string} [filters.objectPath] optional object path to filter charts
    * @returns {Promise<LayoutAttributes[]>} Array of layouts found
    */
   async findLayoutsByFilters({ objectPath, ...filters }) {
@@ -122,7 +122,9 @@ export class LayoutRepository extends BaseRepository {
    * Creates a new layout
    * @param {Partial<LayoutAttributes>} layoutData new layout
    * @param {object} options Sequelize create options (e.g. transaction)
-   * @returns {Promise<LayoutAttributes>}
+   * @returns {Promise<LayoutAttributes>} The created layout
+   * @throws {InvalidInputError} If a layout with the same unique fields (e.g., name) already exists
+   * @throws {Error} If an error occurs creating the layout
    */
   async createLayout(layoutData, options = {}) {
     try {

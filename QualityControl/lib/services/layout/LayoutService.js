@@ -40,12 +40,14 @@ export class LayoutService {
   /**
    * Creates an instance of the LayoutService class
    * @param {LayoutRepository} layoutRepository Repository that handles the datbase operations for the layouts
-   * @param {UserRepository} userRepository
-   * @param {TabRepository} tabRepository
+   * @param {UserRepository} userRepository Repository that handles the datbase operations for the users
+   * @param {TabRepository} tabRepository Repository that handles the datbase operations for the tabs
    * @param {GridTabCellRepository} gridTabCellRepository
-   * @param {ChartRepository} chartRepository
+   * Repository that handles the datbase operations for the grid tab cells
+   * @param {ChartRepository} chartRepository Repository that handles the datbase operations for the charts
    * @param {ChartOptionsRepository} chartOptionsRepository
-   * @param {OptionRepository} optionRepository
+   * Repository that handles the datbase operations for the chart options
+   * @param {OptionRepository} optionRepository Repository that handles the datbase operations for the options
    */
   constructor(
     layoutRepository,

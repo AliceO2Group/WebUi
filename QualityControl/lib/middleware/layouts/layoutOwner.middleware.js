@@ -23,7 +23,9 @@ import { NotFoundError, UnauthorizedAccessError, updateAndSendExpressResponseFro
  * Middleware that checks if the requestor is the owner of the layout
  * @param {LayoutService} layoutService Service that handles layouts business logic
  * @param {UserService} userService Service that handles user business logic
- * @returns  {function(req, res, next): Function} - middleware function
+ * @returns {(req: Express.Request,
+ * res: Express.Response,
+ * next: Express.NextFunction) => Promise<void>} - middleware function
  */
 export const layoutOwnerMiddleware = (layoutService, userService) =>
 

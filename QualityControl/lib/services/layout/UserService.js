@@ -32,8 +32,10 @@ export class UserService {
 
   /**
    * Creates a new user
-   * @param {Partial<UserAttributes>} userData - Data for the new user
-   * @param user
+   * @param {Partial<UserAttributes>} user - Data for the new user
+   * @param {string} user.username - Username of the new user
+   * @param {string} user.name - Name of the new user
+   * @param {string} user.personid - ID of the new user
    * @throws {InvalidInputError} If a user with the same unique fields already exists
    * @returns {Promise<void>}
    */

@@ -22,11 +22,11 @@ const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/layout-normal
 
 /**
  * Helper to normalize layout data
- * @param {*} patch partial layout data
- * @param {*} layout original layout
- * @param {*} isFull if true, patch is a full layout
- * @param {*} userService user service to get username from id
- * @returns
+ * @param {object} patch - Partial layout data to be normalized
+ * @param {object} layout - Existing layout data (for patches)
+ * @param {boolean} isFull - Whether the patch is a full layout or a partial update
+ * @param {UserService} userService - Instance of the UserService to fetch user information
+ * @returns {Promise<object>} - Normalized layout data
  */
 export const normalizeLayout = async (patch, layout = {}, isFull = false, userService) => {
   try {
