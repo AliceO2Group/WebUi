@@ -317,30 +317,6 @@ describe("gRPCAuthInterceptor", () => {
     );
   });
 
-  it("should fail if JWS is expired", async () => {
-    (jose.compactVerify as jest.Mock).mockRejectedValue({
-      message: "JWT is expired",
-    });
-
-    const result = await interceptor.gRPCAuthInterceptor(
-      mockCall,
-      mockCallback,
-      mockClientConnections as any,
-      mockSecurityContext
-    );
-
-    const created = getCreatedConn();
-    expect(result.isAuthenticated).toBe(false);
-    expect(created!.handleFailedAuth).not.toHaveBeenCalled(); // for expired token, we do not block the connection
-    expect(mockCallback).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: "JWS Verification error: Token expired",
-        code: grpc.status.UNAUTHENTICATED,
-      }),
-      null
-    );
-  });
-
   it("should fail if mTLS serial number mismatch occurs after decryption", async () => {
     isSerialNumberMatchingSpy.mockImplementation((_p, _pc, cb) => {
       cb(

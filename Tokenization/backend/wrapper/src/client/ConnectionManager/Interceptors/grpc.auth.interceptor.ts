@@ -156,23 +156,15 @@ export const gRPCAuthInterceptor = async (
     const payloadString = new TextDecoder().decode(jwtPayload);
     payload = JSON.parse(payloadString);
   } catch (e: any) {
-    const isExpired = e.message?.includes("expired");
     const error = {
       name: "AuthenticationError",
-      message: `JWS Verification error: ${
-        isExpired ? "Token expired" : "Invalid signature"
-      }`,
-      code: isExpired
-        ? grpc.status.UNAUTHENTICATED
-        : grpc.status.PERMISSION_DENIED,
+      message: `JWS Verification error: Invalid signature`,
+      code: grpc.status.PERMISSION_DENIED,
     };
     // TODO: Consider logging or informing a central security system about failed verification.
     callback(error, null);
 
-    if (!isExpired) {
-      conn.handleFailedAuth();
-    }
-
+    conn.handleFailedAuth();
     return { isAuthenticated: false, conn };
   }
 
@@ -207,14 +199,78 @@ export const isRequestAllowed = (
   callback: grpc.sendUnaryData<any>
 ): Boolean => {
   const method = String(request?.method || "POST").toUpperCase();
-  if (!tokenPayload?.perm || !Object.keys(tokenPayload.perm).includes(method)) {
+  const isValidPayload = validateTokenPayload(tokenPayload, request.method);
+  let isUnexpired;
+
+  if (isValidPayload) {
+    isUnexpired = isPermissionUnexpired(
+      tokenPayload.iat[method],
+      tokenPayload.exp[method]
+    );
+  }
+
+  if (!isValidPayload || !isUnexpired) {
     const error = {
       name: "AuthorizationError",
-      code: grpc.status.PERMISSION_DENIED,
-      message: `Request of type ${method} is not allowed by the token policy.`,
+      code: isUnexpired
+        ? grpc.status.PERMISSION_DENIED
+        : grpc.status.UNAUTHENTICATED,
+      message: isUnexpired
+        ? `Request of type ${method} is not allowed by the token policy.`
+        : `Request of type ${method}, permission has expired.`,
     } as any;
 
     callback(error, null);
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * @description Validates the structure and types of the token payload.
+ * @returns true if token payload is valid, false otherwise
+ */
+const validateTokenPayload = (
+  tokenPayload: TokenPayload | undefined,
+  method: string
+): tokenPayload is TokenPayload => {
+  if (!tokenPayload) {
+    return false;
+  }
+
+  if (
+    typeof tokenPayload.iat !== "object" ||
+    typeof tokenPayload.exp !== "object" ||
+    typeof tokenPayload.sub !== "string" ||
+    typeof tokenPayload.aud !== "string" ||
+    typeof tokenPayload.iss !== "string" ||
+    typeof tokenPayload.jti !== "string" ||
+    Object.keys(tokenPayload.iat).length === 0 ||
+    Object.keys(tokenPayload.exp).length === 0 ||
+    !tokenPayload.iat.hasOwnProperty(method) ||
+    !tokenPayload.exp.hasOwnProperty(method)
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * @description Checks if the permissions granted in the token have expired.
+ * @param iat issued-at timestamp for the specific method
+ * @param exp expiration timestamp for the specific method
+ * @returns true if permission is still valid, false if expired
+ */
+export const isPermissionUnexpired = (iat: number, exp: number): Boolean => {
+  const nowInSeconds = Math.floor(Date.now() / 1000);
+
+  if (nowInSeconds >= exp) {
+    return false;
+  }
+
+  if (iat > nowInSeconds) {
     return false;
   }
 
@@ -234,7 +290,7 @@ export const isSerialNumberMatching = (
   callback: grpc.sendUnaryData<any>
 ): Boolean => {
   const clientSN = normalizeSerial(peerCert?.serialNumber);
-  const tokenSN = normalizeSerial(tokenPayload?.subSerialNumber);
+  const tokenSN = normalizeSerial(tokenPayload?.sub);
 
   if (!clientSN || clientSN !== tokenSN) {
     const error = {

@@ -25,15 +25,15 @@ export class SecurityContext {
   public readonly clientPrivateKey: Buffer;
 
   // Public Ed25519 key for JWS verification
-  public readonly JWS_PUBLIC_KEY =
-    "hTb3l5gwoIWISOLi6cQMwcultawKyA6vxnimXWtE6JI=";
+  public readonly JWS_PUBLIC_KEY: string;
 
   constructor(
     caCert: Buffer,
     clientSenderCert: Buffer,
     clientPrivateKey: Buffer,
     clientPublicKey: Buffer,
-    clientListenerCert?: Buffer
+    clientListenerCert?: Buffer,
+    JWS_PUBLIC_KEY?: string
   ) {
     this.caCert = caCert;
     this.clientSenderCert = clientSenderCert;
@@ -42,6 +42,12 @@ export class SecurityContext {
 
     if (clientListenerCert) {
       this.clientListenerCert = clientListenerCert;
+    }
+
+    if (JWS_PUBLIC_KEY) {
+      this.JWS_PUBLIC_KEY = JWS_PUBLIC_KEY;
+    } else {
+      this.JWS_PUBLIC_KEY = "hTb3l5gwoIWISOLi6cQMwcultawKyA6vxnimXWtE6JI=";
     }
   }
 }
