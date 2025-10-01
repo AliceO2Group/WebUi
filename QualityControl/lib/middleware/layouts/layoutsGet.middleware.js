@@ -12,28 +12,29 @@
  * or submit itself to any jurisdiction.
  */
 
-import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import { LayoutsGetDto } from '../../dtos/LayoutDto.js';
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/get-layout-mw`;
 
 /**
- * @typedef {import('../../database/repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
- */
-
-/**
- * Middleware that checks if the layout id is present in the request
+ * Middleware that checks if the query is valid in the request
  * @param {Express.Request} req - HTTP Request
  * @param {Express.Response} res - HTTP Response
  * @param {Express.Next} next - HTTP Next (check pass)
  * @returns {Promise<void>} Resolves when validation is done and next is called
  */
-export const layoutIdMiddleware = async (req, res, next) => {
-  const { id = '' } = req.params ?? {};
+export const getLayoutsMiddleware = async (req, res, next) => {
+  const logger = LogManager.getLogger(LOG_FACILITY);
   try {
-    if (!id) {
-      throw new InvalidInputError('The "id" parameter is missing from the request');
-    }
+    const validated = await LayoutsGetDto.validateAsync(req.query);
+    req.query = validated;
     next();
   } catch (error) {
-    updateAndSendExpressResponseFromNativeError(res, error);
+    logger.errorMessage(`Error validating layout: ${error.message || error}`);
+    const responseError = error.isJoi ?
+      new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`) :
+      new Error('Unable to process request');
+    updateAndSendExpressResponseFromNativeError(res, responseError);
     return;
   }
 };
