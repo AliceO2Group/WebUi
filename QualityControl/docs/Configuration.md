@@ -98,4 +98,5 @@ The application requires the following database configuration parameters:
 | `timezone`      | Time zone used for all date/time values in the database connection.                         |
 | `logging`       | Enables or disables SQL query logging (useful for debugging).                               |
 | `retryThrottle` | Time in milliseconds to wait before retrying a failed database connection.                  |
-| `migrationSeed` | *(Optional)* Set to `true` to execute seeders that populate the database with mock data.   |
+| `drop` | *(only in dev)* Set to `true` to drop all tables before the database migration.   |
+| `forceSeed` | *(only in dev)* Set to `true` to execute seeders that populate the database with mock data.   |

@@ -29,6 +29,7 @@ export function getDbConfig(config) {
     timezone: config.timezone ?? '+00:00',
     logging: config.logging ?? false,
     retryThrottle: config.retryThrottle ?? 5000,
-    migrationSeed: config.migrationSeed ?? false,
+    forceSeed: config.forceSeed ?? false,
+    drop: config.drop ?? false,
   };
 };

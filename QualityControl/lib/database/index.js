@@ -13,19 +13,36 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
+import { isRunningInDevelopment, isRunningInProduction, isRunningInTest } from '../utils/environment.js';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/database`;
 
 /**
  * Initializes the database connection and runs migrations.
  * @param {object} sequelizeDatabase - The Sequelize database instance.
+ * @param root0
+ * @param root0.forceSeed
+ * @param root0.drop
  * @returns {Promise<void>} A promise that resolves when the database is initialized.
  */
-export const initDatabase = async (sequelizeDatabase) => {
+export const initDatabase = async (sequelizeDatabase, { forceSeed = false, drop = false }) => {
   const _logger = LogManager.getLogger(LOG_FACILITY);
   try {
-    await sequelizeDatabase.connect();
-    await sequelizeDatabase.migrate();
+    if (isRunningInTest) {
+      await sequelizeDatabase.dropAllTables();
+      await sequelizeDatabase.migrate();
+      await sequelizeDatabase.seed();
+    } else if (isRunningInDevelopment) {
+      if (drop) {
+        await sequelizeDatabase.dropAllTables();
+      }
+      await sequelizeDatabase.migrate();
+      if (forceSeed) {
+        await sequelizeDatabase.seed();
+      }
+    } else if (isRunningInProduction) {
+      await sequelizeDatabase.migrate();
+    }
   } catch (error) {
     _logger.errorMessage(`Failed to initialize database: ${error.message}`);
   }
