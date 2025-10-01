@@ -55,6 +55,9 @@ export class LayoutController {
    * * Can be filtered by "owner_id" or "objectPath" using filter.objectPath
    * * if no owner_id is provided, all layouts will be fetched;
    * @param {Request} req - HTTP request object with information on owner_id
+   * @param {string} [req.query.owner_id] - Optional owner_id to filter layouts by
+   * @param {string} [req.query.filter] - Optional filter object as JSON string
+   * @param {string} [req.query.fields] - Optional comma-separated list of fields to include in the response
    * @param {Response} res - HTTP response object to provide layouts information
    * @returns {undefined}
    */

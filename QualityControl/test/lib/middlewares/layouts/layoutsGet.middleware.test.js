@@ -43,7 +43,7 @@ export const getLayoutsMiddlewareTestSuite = async () => {
       req.query = { token: 'validToken', filter: { objectPath: 'invalid path!' } };
       await getLayoutsMiddleware(req, res, next);
       const message =
-        '"ObjectPath" with value "invalid path!" fails to match the required pattern: /^[A-Za-z0-9_\\-/]+$/';
+        '"Object path" with value "invalid path!" fails to match the required pattern: /^[A-Za-z0-9_\\-/]+$/';
       strictEqual(res.json.calledWith(invalidInputErrorJson(message)), true);
     });
     test('should throw if fields is not a string', async () => {

@@ -36,10 +36,10 @@ export class LayoutAdapter {
           columns: tab.column_count,
           objects: tab.gridTabCells.map((cell) => ({
             id: cell.chart.id,
-            x: cell.chart.col,
-            y: cell.chart.row,
-            h: cell.chart.row_span,
-            w: cell.chart.col_span,
+            x: cell.col || 0,
+            y: cell.row || 0,
+            h: cell.row_span || 1,
+            w: cell.col_span || 1,
             name: cell.chart.object_name,
             options: cell.chart.chartOptions.map((chartOption) => chartOption.option.name),
             autoSize: false,
@@ -49,11 +49,9 @@ export class LayoutAdapter {
         isOfficial: layout.is_official,
         collaborators: [],
       };
-
-      const arrayOfFields = fields?.split(',');
-      if (Array.isArray(arrayOfFields) && arrayOfFields.length > 0) {
+      if (Array.isArray(fields) && fields.length > 0) {
         const filteredLayout = {};
-        for (const field of arrayOfFields) {
+        for (const field of fields) {
           if (field in layoutAdapted) {
             filteredLayout[field] = layoutAdapted[field];
           }

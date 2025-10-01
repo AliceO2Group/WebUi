@@ -16,10 +16,8 @@ import { ok, throws, doesNotThrow, AssertionError } from 'node:assert';
 import { suite, test, beforeEach } from 'node:test';
 import sinon from 'sinon';
 
-import { CONVERTED_LAYOUT_FROM_BACKEND, LAYOUT_FROM_BACKEND, LAYOUT_MOCK_1 } from './../../demoData/layout/layout.mock.js';
 import { LayoutController } from './../../../lib/controllers/LayoutController.js';
-import { LayoutRepository } from '../../../lib/database/repositories/LayoutRepository.js';
-import { LayoutsGetDto } from '../../../lib/dtos/LayoutDto.js';
+import { CONVERTED_LAYOUT_FROM_BACKEND, LAYOUT_FROM_BACKEND } from '../../demoData/layout/layout.mock.js';
 
 export const layoutControllerTestSuite = async () => {
   suite('LayoutController Test Suite', () => {
@@ -63,7 +61,7 @@ export const layoutControllerTestSuite = async () => {
         ok(res.json.calledWith([CONVERTED_LAYOUT_FROM_BACKEND]), 'A JSON defining a layout should have been sent back');
       });
       test('should successfully return a list of layouts with only requested fields', async () => {
-        req = { query: { owner_id: 'test-owner-id', filter: {}, fields: 'id,name' } };
+        req = { query: { owner_id: 'test-owner-id', filter: {}, fields: ['id', 'name'] } };
         layoutServiceMock.getLayoutsByFilters = sinon.stub().resolves([LAYOUT_FROM_BACKEND]);
         await layoutController.getLayoutsHandler(req, res);
         ok(res.status.calledWith(200), 'Response status was not 200');
@@ -163,7 +161,10 @@ export const layoutControllerTestSuite = async () => {
         layoutServiceMock.putLayout = sinon.stub().resolves('test-layout-id');
         await layoutController.putLayoutHandler(req, res);
         ok(res.status.calledWith(200), 'Response status was not 200');
-        ok(res.json.calledWith({ id: 'test-layout-id' }), 'A JSON with the updated layout ID should have been sent back');
+        ok(
+          res.json.calledWith({ id: 'test-layout-id' }),
+          'A JSON with the updated layout ID should have been sent back',
+        );
       });
       test('should return error if service failed to update layout', async () => {
         req = { params: { id: 'test-layout-id' }, body: {} };
@@ -183,7 +184,10 @@ export const layoutControllerTestSuite = async () => {
         layoutServiceMock.removeLayout = sinon.stub().resolves({ id: 'test-layout-id', deleted: true });
         await layoutController.deleteLayoutHandler(req, res);
         ok(res.status.calledWith(200), 'Response status was not 200');
-        ok(res.json.calledWith({ id: 'test-layout-id', deleted: true }), 'A JSON with the deletion result should have been sent back');
+        ok(
+          res.json.calledWith({ id: 'test-layout-id', deleted: true }),
+          'A JSON with the deletion result should have been sent back',
+        );
       });
       test('should return error if service failed to delete layout', async () => {
         req = { params: { id: 'test-layout-id' } };
@@ -223,7 +227,10 @@ export const layoutControllerTestSuite = async () => {
         layoutServiceMock.patchLayout = sinon.stub().resolves('test-layout-id');
         await layoutController.patchLayoutHandler(req, res);
         ok(res.status.calledWith(200), 'Response status was not 200');
-        ok(res.json.calledWith({ id: 'test-layout-id' }), 'A JSON with the patched layout ID should have been sent back');
+        ok(
+          res.json.calledWith({ id: 'test-layout-id' }),
+          'A JSON with the patched layout ID should have been sent back',
+        );
       });
       test('should return error if service failed to patch layout', async () => {
         req = { params: { id: 'test-layout-id' }, body: {} };
