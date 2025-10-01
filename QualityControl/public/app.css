@@ -119,3 +119,20 @@
   font-size: 2em;
   margin-bottom: .5em;
 }
+
+.status-ongoing {
+  color: var(--color-success);
+  animation: ongoing-pulse 1s ease-in-out infinite;
+}
+
+@keyframes ongoing-pulse {
+  0% {
+    color: var(--color-success);
+  }
+  50% {
+    color: var(--color-success-dark);
+  }
+  100% {
+    color: var(--color-success);
+  }
+}
