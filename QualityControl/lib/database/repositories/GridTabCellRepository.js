@@ -2,15 +2,15 @@ import { BaseRepository } from './BaseRepository.js';
 
 /**
  * @typedef {object} GridTabCellAttributes
- * @property {number} id
- * @property {string} chart_id
- * @property {number} row
- * @property {number} col
- * @property {string} tab_id
- * @property {number} [row_span]
- * @property {number} [col_span]
- * @property {Date} created_at
- * @property {Date} updated_at
+ * @property {number} id - auto-incremented ID
+ * @property {string} chart_id - ID of the associated chart
+ * @property {number} row - position in the grid
+ * @property {number} col - position in the grid
+ * @property {string} tab_id - ID of the associated tab
+ * @property {number} [row_span] - optional row span
+ * @property {number} [col_span] - optional column span
+ * @property {Date} created_at - timestamp when the record was created
+ * @property {Date} updated_at - timestamp when the record was last updated
  */
 
 /**

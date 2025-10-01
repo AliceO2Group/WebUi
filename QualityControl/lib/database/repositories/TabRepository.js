@@ -16,12 +16,12 @@ import { BaseRepository } from './BaseRepository.js';
 
 /**
  * @typedef {object} TabAttributes
- * @property {string} id
- * @property {string} name
- * @property {string} layout_id
- * @property {number} column_count
- * @property {Date} created_at
- * @property {Date} updated_at
+ * @property {string} id - UUID
+ * @property {string} name - name of the tab
+ * @property {string} layout_id - ID of the associated layout
+ * @property {number} column_count - number of columns in the tab
+ * @property {Date} created_at - timestamp when the tab was created
+ * @property {Date} updated_at - timestamp when the tab was last updated
  */
 
 /**
@@ -55,8 +55,8 @@ export class TabRepository extends BaseRepository {
   /**
    * Creates a new tab
    * @param {Partial<TabAttributes>} tabData new tab
-   * @param options
-   * @returns {Promise<TabAttributes>}
+   * @param {object} options - Sequelize options (e.g., transaction)
+   * @returns {Promise<TabAttributes>} The created tab
    */
   async createTab(tabData, options = {}) {
     return this.model.create(tabData, options);

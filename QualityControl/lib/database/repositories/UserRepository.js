@@ -15,11 +15,11 @@ import { BaseRepository } from './BaseRepository.js';
 
 /**
  * @typedef {object} UserAttributes
- * @property {string} id
- * @property {string} username
- * @property {string} name
- * @property {Date} created_at
- * @property {Date} updated_at
+ * @property {string} id - UUID
+ * @property {string} username - unique username
+ * @property {string} name - full name of the user
+ * @property {Date} created_at - date of creation
+ * @property {Date} updated_at - date of last update
  */
 
 /**

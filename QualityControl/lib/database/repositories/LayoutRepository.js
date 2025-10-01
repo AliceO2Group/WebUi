@@ -103,8 +103,8 @@ export class LayoutRepository extends BaseRepository {
 
   /**
    * Finds layouts by filters using Op.and and optionally selects specific fields.
-   * @param {object} filters - Array of Sequelize filter objects
-   * @param {string} [objectPath] - Optional object path to filter charts by (case-insensitive, partial match)
+   * @param {object} filters key-value pairs to filter the layouts
+   * @param {string} [filters.objectPath] optional object path to filter charts
    * @returns {Promise<LayoutAttributes[]>} Array of layouts found
    */
   async findLayoutsByFilters(filters) {
@@ -141,7 +141,9 @@ export class LayoutRepository extends BaseRepository {
    * Creates a new layout
    * @param {Partial<LayoutAttributes>} layoutData new layout
    * @param {object} options Sequelize create options (e.g. transaction)
-   * @returns {Promise<LayoutAttributes>}
+   * @returns {Promise<LayoutAttributes>} The created layout
+   * @throws {InvalidInputError} If a layout with the same unique fields (e.g., name) already exists
+   * @throws {Error} If an error occurs creating the layout
    */
   async createLayout(layoutData, options = {}) {
     try {
