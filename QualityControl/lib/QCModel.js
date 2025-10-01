@@ -16,7 +16,9 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { readFileSync } from 'fs';
 
+import { LogManager } from '@aliceo2/web-ui';
 import { openFile, toJSON } from 'jsroot';
+import { Kafka, logLevel } from 'kafkajs';
 
 import { CcdbService } from './services/ccdb/CcdbService.js';
 import { IntervalsService } from './services/Intervals.service.js';
@@ -25,6 +27,7 @@ import { JsonFileService } from './services/JsonFileService.js';
 import { QcObjectService } from './services/QcObject.service.js';
 import { FilterService } from './services/FilterService.js';
 import { BookkeepingService } from './services/BookkeepingService.js';
+import { AliEcsSynchronizer } from './services/external/AliEcsSynchronizer.js';
 
 import { LayoutController } from './controllers/LayoutController.js';
 import { StatusController } from './controllers/StatusController.js';
@@ -44,12 +47,18 @@ import { objectsGetValidationMiddlewareFactory } from './middleware/objects/obje
 import { objectGetContentsValidationMiddlewareFactory }
   from './middleware/objects/objectGetContentsValidationMiddlewareFactory.js';
 import { RunModeService } from './services/RunModeService.js';
+import { KafkaConfigDto } from './dtos/KafkaConfigurationDto.js';
+
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/model-setup`;
 
 /**
  * Model initialization for the QCG application
+ * @param {EventEmitter} eventEmitter - Event emitter instance for inter-service communication
  * @returns {Promise<object>} Multiple services and controllers that are to be used by the QCG application
  */
-export const setupQcModel = () => {
+export const setupQcModel = async (eventEmitter) => {
+  const logger = LogManager.getLogger(LOG_FACILITY);
+
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
   const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
@@ -57,6 +66,23 @@ export const setupQcModel = () => {
   const jsonFileService = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
   if (config.database) {
     initDatabase(new SequelizeDatabase(config?.database || {}));
+  }
+
+  if (config?.kafka?.enabled) {
+    try {
+      const validConfig = await KafkaConfigDto.validateAsync(config.kafka);
+      const { clientId, brokers, consumerGroups } = validConfig;
+      const kafkaClient = new Kafka({
+        clientId,
+        brokers,
+        retry: { retries: Infinity },
+        logLevel: logLevel.NOTHING,
+      });
+      const aliEcsSynchronizer = new AliEcsSynchronizer(kafkaClient, consumerGroups, eventEmitter);
+      aliEcsSynchronizer.start();
+    } catch (error) {
+      logger.errorMessage(`Kafka initialization/connection failed: ${error.message}`);
+    }
   }
 
   const layoutRepository = new LayoutRepository(jsonFileService);
@@ -79,10 +105,10 @@ export const setupQcModel = () => {
 
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
   const filterService = new FilterService(bookkeepingService, config);
-  const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService);
+  const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService, eventEmitter);
   const objectController = new ObjectController(qcObjectService, runModeService);
 
-  const filterController = new FilterController(filterService);
+  const filterController = new FilterController(filterService, runModeService);
 
   const objectGetByIdValidation = objectGetByIdValidationMiddlewareFactory(filterService);
   const objectsGetValidation = objectsGetValidationMiddlewareFactory(filterService);
