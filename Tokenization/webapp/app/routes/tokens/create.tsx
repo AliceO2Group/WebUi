@@ -17,6 +17,7 @@ import Select, { type MultiValue, type SingleValue } from 'react-select';
 import { useState, useCallback } from 'react';
 import {
   TextField,
+  InputAdornment,
 } from '@mui/material';
 
 import { DangerAlert } from '~/ui/alert';
@@ -55,7 +56,7 @@ const httpMethodOptions = [
  */
 export default function CreateToken({ loaderData }: { loaderData?: OptionType[] }) {
   const navigate = useNavigate();
-  const [expirationTime, setExpirationTime] = useState<string>('1');
+  const [expirationTime, setExpirationTime] = useState<string>('');
   const [firstSelectedService, setFirstSelectedService] = useState<string>('');
   const [secondSelectedService, setSecondSelectedService] = useState<string>('');
   const [selectedMethods, setSelectedMethods] = useState<HttpMethod[]>([]);
@@ -67,7 +68,6 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
   const options: OptionType[] = loaderData ?? clientLoader();
 
   const auth = useAuth('admin')
-  const session = useSession()
 
   const resetForm = useCallback(() => {
     setExpirationTime('');
@@ -77,8 +77,6 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
   }, []);
 
   const handleCreateToken = useCallback(() => {
-    console.log(session)
-
     if(auth)
     {
       console.log('Creating token...', {
@@ -88,18 +86,17 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
         permissions: selectedMethods,
       });      
     }else{
-
       setSnackbarMessage("Authorization error");
       setOpenSnackbar(true);
     }
 
     resetForm();
     setShowDialogWindow(false);
-  }, [resetForm]);
+  }, [auth, firstSelectedService, secondSelectedService, expirationTime, selectedMethods, resetForm]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (firstSelectedService && secondSelectedService && expirationTime) {
+    if (firstSelectedService && secondSelectedService && expirationTime && selectedMethods.length > 0) {
       setShowDialogWindow(true);
     } else {
       let message = 'Please fill in all required fields: ';
@@ -111,6 +108,9 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
       }
       if (!expirationTime) {
         message += 'Expiration time, ';
+      }
+      if(selectedMethods.length == 0) {
+        message += 'HTTP methods, '
       }
       message = message.slice(0, -2);
       setSnackbarMessage(message);
@@ -125,7 +125,7 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
     <div>
       <h1>Create New Token</h1>
       <form onSubmit={handleSubmit}>
-        <div>
+        <div style={{ marginBottom: '20px' }}>
           <label>Select first service:</label>
           <Select<OptionType>
             options={options}
@@ -136,7 +136,8 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
             placeholder="Select first service..."
           />
         </div>
-        <div>
+        
+        <div style={{ marginBottom: '20px' }}>
           <label>Select second service:</label>
           <Select<OptionType>
             options={options}
@@ -148,11 +149,7 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
           />
         </div>
 
-        <div>
-          
-        </div>
-
-        <div>
+        <div style={{ marginBottom: '20px' }}>
           <label>Select HTTP Methods:</label>
           <Select
             isMulti
@@ -166,9 +163,32 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
           />
         </div>
 
-        <div>
+        <div >
+          <label>Expiration Time:</label>
+          <TextField
+            fullWidth
+            variant="outlined"
+            type="number"
+            value={expirationTime}
+            onChange={(e) => setExpirationTime(e.target.value)}
+            placeholder="Enter expiration time"
+            slotProps={{
+              input: {
+                endAdornment: <InputAdornment position="end">hours</InputAdornment>,
+                inputProps: { min: 1 }
+              }
+            }}
+            label=""
+          />
+        </div>
+
+        <div style={{ marginTop: '30px' }}>
           <button type="submit">Create Token</button>
-          <button type="button" onClick={() => navigate('/tokens')}>
+          <button 
+            type="button" 
+            onClick={() => navigate('/tokens')}
+            style={{ marginLeft: '10px' }}
+          >
             Back to Tokens
           </button>
         </div>
