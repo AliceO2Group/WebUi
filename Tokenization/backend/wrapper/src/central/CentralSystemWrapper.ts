@@ -18,6 +18,7 @@ import { LogManager } from "@aliceo2/web-ui";
 import { DuplexMessageModel } from "../models/message.model";
 import * as fs from "fs";
 import { CentralSystemConfig } from "models/config.model";
+import { CentralCommandDispatcher } from "client/ConnectionManager/EventManagement/CentralCommandDispatcher";
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
@@ -25,6 +26,7 @@ import { CentralSystemConfig } from "models/config.model";
 export class CentralSystemWrapper {
   // utilities
   private logger = LogManager.getLogger("CentralSystemWrapper");
+  private dispatcher = new CentralCommandDispatcher();
 
   // class properties
   private server: grpc.Server;
@@ -56,6 +58,13 @@ export class CentralSystemWrapper {
     this.protoPath = config.protoPath;
     this.serverCerts = config.serverCerts;
     this.port = config.port || 50051;
+
+    // Register command handlers if provided
+    if (config.commandHandlers) {
+      config.commandHandlers.forEach(({ command, handler }) => {
+        this.dispatcher.register(command, handler);
+      });
+    }
 
     this.server = new grpc.Server();
     this.setupService();
@@ -158,7 +167,7 @@ export class CentralSystemWrapper {
    * @param data Data to send
    * @returns Whether the data was successfully sent
    */
-  public sendEvent(ip: string, data: DuplexMessageModel): boolean {
+  public sendEvent(ip: string, data: DuplexMessageModel): Boolean {
     const client = this.clients.get(ip);
     if (!client) {
       this.logger.warnMessage(`Client ${ip} not found for sending event`);

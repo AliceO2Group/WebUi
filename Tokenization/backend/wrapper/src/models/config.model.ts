@@ -12,6 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
+import { CommandHandler } from "./commands.model";
+import { DuplexMessageEvent } from "./message.model";
+
 export interface CentralSystemConfig {
   /** Path to the proto file defining the services. */
   protoPath: string;
@@ -26,6 +29,11 @@ export interface CentralSystemConfig {
     certPath: string;
     keyPath: string;
   };
+
+  commandHandlers?: {
+    command: DuplexMessageEvent;
+    handler: CommandHandler<any>;
+  }[];
 }
 
 export interface gRPCWrapperConfig {

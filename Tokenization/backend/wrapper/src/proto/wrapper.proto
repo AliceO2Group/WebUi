@@ -45,6 +45,11 @@ message Token {
     ConnectionDirection connectionDirection = 3;
 }
 
+// List of multiple tokens
+message TokenList {
+    repeated Token tokens = 1;
+}
+
 // Stream message that can contain one of specific messages
 message Payload {
     // Message event type
@@ -53,7 +58,8 @@ message Payload {
     // Data related to specific event type
     oneof data {
         EmptyMessage emptyMessage = 2;
-        Token payload = 3;
+        Token singleToken = 3;
+        TokenList tokensList = 4;
     }
 }
 
@@ -88,14 +94,22 @@ message HttpLikeResponse {
 // ======================================
 
 enum MessageEvent {
-    // Default value, represents an empty event
-    MESSAGE_EVENT_EMPTY = 0;
+  // Central system commands
+  // Default value, represents an empty event
+  MESSAGE_EVENT_EMPTY = 0;
 
-    // New token message type, contains a new token and target address
-    MESSAGE_EVENT_NEW_TOKEN = 1;
+  // New token message type, contains a new token and target address
+  MESSAGE_EVENT_NEW_TOKEN = 1;
 
-    // Revoke token message type, contains a token to be revoked
-    MESSAGE_EVENT_REVOKE_TOKEN = 2;
+  // Revoke token message type, contains a token to be revoked
+  MESSAGE_EVENT_REVOKE_TOKEN = 2;
+  
+  // Client commands
+  // Get all tokens assigned to this client
+  MESSAGE_EVENT_GET_ALL_TOKENS = 3;
+
+  // Renew a token after expiration
+  MESSAGE_EVENT_RENEW_TOKEN = 4;
 }
 
 enum ConnectionDirection {

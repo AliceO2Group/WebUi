@@ -15,7 +15,10 @@
 import * as grpc from "@grpc/grpc-js";
 import { LogManager } from "@aliceo2/web-ui";
 import { CentralCommandDispatcher } from "./EventManagement/CentralCommandDispatcher";
-import { DuplexMessageModel } from "../../models/message.model";
+import {
+  DuplexMessageEvent,
+  DuplexMessageModel,
+} from "../../models/message.model";
 import { ReconnectionScheduler } from "../../utils/reconnectionScheduler";
 
 /**
@@ -66,6 +69,29 @@ export class CentralConnection {
       this.stream = undefined;
       this.reconnectionScheduler.schedule();
     });
+  }
+
+  /**
+   *
+   * @param data Message with event type and corresponding payload
+   * @returns
+   */
+  public sendEvent(data: DuplexMessageModel) {
+    if (!this.stream) {
+      this.logger.warnMessage(
+        `Stream is not defined. Connect to Central System first.`
+      );
+      return false;
+    }
+
+    try {
+      this.stream.write(data);
+      this.logger.infoMessage(`Sent event to Central System:`, data);
+      return true;
+    } catch (err) {
+      this.logger.errorMessage(`Error sending to Central System:`, err);
+      return false;
+    }
   }
 
   /**

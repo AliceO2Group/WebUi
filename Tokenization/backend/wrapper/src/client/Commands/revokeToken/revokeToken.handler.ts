@@ -36,14 +36,15 @@ export class RevokeTokenHandler implements CommandHandler<RevokeTokenCommand> {
    * @throws Will throw an error if the target address is missing in the command payload.
    */
   async handle(command: RevokeTokenCommand): Promise<void> {
-    const { targetAddress } = command.payload || {};
+    const { targetAddress, connectionDirection } =
+      command.payload.singleToken || {};
     if (!targetAddress) {
       throw new Error("Target address is required to revoke token.");
     }
 
     const conn = this.manager.getConnectionByAddress(
       targetAddress,
-      command.payload.connectionDirection
+      connectionDirection
     );
 
     conn?.handleRevokeToken();

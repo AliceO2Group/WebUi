@@ -34,7 +34,8 @@ export class NewTokenHandler implements CommandHandler<NewTokenCommand> {
    * @throws Will throw an error if any of the required payload fields are missing.
    */
   async handle(command: NewTokenCommand): Promise<void> {
-    const { targetAddress, connectionDirection, token } = command.payload || {};
+    const { targetAddress, connectionDirection, token } =
+      command.payload.singleToken || {};
     if (!targetAddress || !token || !connectionDirection) {
       throw new Error(
         "Insufficient arguments. Expected: targetAddress, connectionDirection, token."

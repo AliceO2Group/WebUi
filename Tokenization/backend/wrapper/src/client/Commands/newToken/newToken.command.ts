@@ -15,7 +15,7 @@
 import { Command } from "../../../models/commands.model";
 import {
   DuplexMessageEvent,
-  TokenMessage,
+  SingleTokenPayload,
 } from "../../../models/message.model";
 
 /**
@@ -23,5 +23,5 @@ import {
  */
 export class NewTokenCommand implements Command {
   readonly event = DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN;
-  constructor(public payload: TokenMessage) {}
+  constructor(public payload: SingleTokenPayload) {}
 }

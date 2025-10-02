@@ -19,9 +19,9 @@ import {
 } from "../../../models/message.model";
 
 /**
- * @description Command used to trigger token revocation for a specific connection. Handles structure logic.
+ * @description Command used to renew token for a client after its expiration. Handles structure logic.
  */
-export class RevokeTokenCommand implements Command {
-  readonly event = DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN;
-  constructor(public payload: SingleTokenPayload) {}
+export class RenewTokenCommand implements Command {
+  readonly event = DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN;
+  constructor(payload: SingleTokenPayload) {}
 }

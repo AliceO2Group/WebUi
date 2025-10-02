@@ -13,15 +13,12 @@
  */
 
 import { Command } from "../../../models/commands.model";
-import {
-  DuplexMessageEvent,
-  SingleTokenPayload,
-} from "../../../models/message.model";
+import { DuplexMessageEvent } from "../../../models/message.model";
 
 /**
- * @description Command used to trigger token revocation for a specific connection. Handles structure logic.
+ * @description Command used to retrieve all tokens for a client. Handles structure logic.
  */
-export class RevokeTokenCommand implements Command {
-  readonly event = DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN;
-  constructor(public payload: SingleTokenPayload) {}
+export class GetAllTokensCommand implements Command {
+  readonly event = DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN;
+  constructor() {}
 }

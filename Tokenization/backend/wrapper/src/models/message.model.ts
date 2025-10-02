@@ -21,11 +21,18 @@
  * @property MESSAGE_EVENT_EMPTY: No event, used for initialization or no response.
  * @property MESSAGE_EVENT_NEW_TOKEN: Event for replacing with newly generated token.
  * @property MESSAGE_EVENT_REVOKE_TOKEN: Event for revoking an existing token.
+ * @property MESSAGE_EVENT_GET_ALL_TOKENS: Event for getting all tokens for this client.
+ * @property MESSAGE_EVENT_RENEW_TOKEN: Event for renewing a token after expiration.
  */
 export enum DuplexMessageEvent {
+  // Central system commands
   MESSAGE_EVENT_EMPTY = "MESSAGE_EVENT_EMPTY",
   MESSAGE_EVENT_NEW_TOKEN = "MESSAGE_EVENT_NEW_TOKEN",
   MESSAGE_EVENT_REVOKE_TOKEN = "MESSAGE_EVENT_REVOKE_TOKEN",
+
+  // Client commands
+  MESSAGE_EVENT_GET_ALL_TOKENS = "MESSAGE_EVENT_GET_LAST_TOKEN",
+  MESSAGE_EVENT_RENEW_TOKEN = "MESSAGE_EVENT_RENEW_TOKEN",
 }
 
 /**
@@ -47,6 +54,7 @@ export enum ConnectionDirection {
 /**
  * @description Model for token generation and revocation messages.
  * @property {string} token - The token to be replaced or revoked.
+ * @property {ConnectionDirection} connectionDirection - Direction of a connection token
  * @property {string} targetAddress - The address of connection binded to this token.
  */
 export interface TokenMessage {
@@ -54,6 +62,16 @@ export interface TokenMessage {
   connectionDirection: ConnectionDirection;
   targetAddress: string;
 }
+
+export interface TokenListPayload {
+  tokensList: TokenMessage[];
+}
+
+export interface SingleTokenPayload {
+  singleToken: TokenMessage;
+}
+
+export type TokenPayloadVariant = TokenListPayload | SingleTokenPayload;
 
 /**
  * @description Model for duplex stream messages between client and central system.
@@ -69,5 +87,5 @@ export interface TokenMessage {
  */
 export interface DuplexMessageModel {
   event: DuplexMessageEvent;
-  payload: TokenMessage;
+  payload?: TokenPayloadVariant;
 }
