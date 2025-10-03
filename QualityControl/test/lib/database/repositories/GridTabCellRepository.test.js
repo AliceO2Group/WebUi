@@ -56,24 +56,19 @@ export const gridTabCellRepositoryTestSuite = () => {
 
     test('should find object by chart ID', async () => {
       const chartId = 'chart123';
-      const expectedCells = [{ id: 1, chart_id: chartId }, { id: 2, chart_id: chartId }];
-      mockGridTabCellModel.findAll.resolves(expectedCells);
+      const expectedCell = {
+        id: 1,
+        chart_id: chartId,
+        tab: {
 
-      const cells = await gridTabCellRepository.findObjectByChartId(chartId);
-
-      deepStrictEqual(cells, expectedCells);
-      ok(mockGridTabCellModel.findAll.calledOnce);
-      const [callArgs] = mockGridTabCellModel.findAll.getCall(0).args;
-      strictEqual(callArgs.where.chart_id, chartId);
-      ok(Array.isArray(callArgs.include));
-      const tabInclude = callArgs.include.find((inc) => inc.association === 'tab');
-      ok(tabInclude);
-      const chartInclude = callArgs.include.find((inc) => inc.association === 'chart');
-      ok(chartInclude);
-      const chartOptionsInclude = chartInclude.include.find((inc) => inc.association === 'chartOptions');
-      ok(chartOptionsInclude);
-      const optionInclude = chartOptionsInclude.include.find((inc) => inc.association === 'option');
-      ok(optionInclude);
+          name: 'Tab1', layout: { name: 'Layout1' },
+        },
+        chart: { object_name: 'Chart1', ignore_defaults: true, chartOptions: [] },
+      };
+      mockGridTabCellModel.findOne.resolves(expectedCell);
+      const cell = await gridTabCellRepository.findObjectByChartId(chartId);
+      deepStrictEqual(cell, expectedCell);
+      ok(mockGridTabCellModel.findOne.calledOnceWith({ where: { chart_id: chartId }, include: sinon.match.array }));
     });
 
     test('should create a new grid tab cell', async () => {
