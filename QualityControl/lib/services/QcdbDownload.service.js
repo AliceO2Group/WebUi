@@ -52,11 +52,11 @@ export class QcdbDownloadService {
         this._logger.errorMessage(`QCDB returned ${response.status} ${response.statusText}`);
         throw new Error(`Cannot get ROOT file from qcdb object id: ${objectId}`);
       }
+      const contentType = response.headers.get('Content-Type');
       const contentDisposition = response.headers.get('Content-Disposition');
       const filename = contentDisposition?.slice(17, contentDisposition.length - 1);
       // We will stream the data from QCDB's answer directly back to the user.
       if (res != undefined) {
-        const contentType = response.headers.get('Content-Type');
         const contentLength = response.headers.get('Content-Length');
 
         res.setHeader('Content-Type', contentType ?? 'application/root');
@@ -70,7 +70,7 @@ export class QcdbDownloadService {
       } else {
         // We'll return the file from the response back.
         const blob = await response.blob();
-        const file = new File([blob], filename ?? 'export.root', { type: 'application/root' });
+        const file = new File([blob], filename ?? 'export.root', { type: contentType ?? 'application/root' });
         return file;
       }
     } catch (error) {
