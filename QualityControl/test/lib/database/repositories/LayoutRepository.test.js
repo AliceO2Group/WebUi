@@ -53,6 +53,19 @@ export const layoutRepositoryTestSuite = () => {
       ok(mockLayoutModel.findByPk.calledOnceWith('1', { include: layoutRepository._layoutInfoToInclude }));
     });
 
+    test('should find a layout by name', async () => {
+      const mockLayout = { id: '1', name: 'Unique Layout' };
+      mockLayoutModel.findOne.resolves(mockLayout);
+
+      const result = await layoutRepository.findLayoutByName('Unique Layout');
+
+      deepStrictEqual(result, mockLayout);
+      ok(mockLayoutModel.findOne.calledOnceWith({
+        where: { name: 'Unique Layout' },
+        include: layoutRepository._layoutInfoToInclude,
+      }));
+    });
+
     test('should find all layouts', async () => {
       const mockLayouts = [
         { id: '1', name: 'Layout 1' },
@@ -67,43 +80,23 @@ export const layoutRepositoryTestSuite = () => {
     });
 
     test('should find layouts by filters', async () => {
-      const mockLayouts = [{ id: '1', name: 'Filtered Layout 1' }];
-      const filters = { name: 'Filtered Layout 1' };
-      mockLayoutModel.findAll.resolves(mockLayouts);
-
-      const result = await layoutRepository.findLayoutsByFilters(filters);
-
-      deepStrictEqual(result, mockLayouts);
-      ok(mockLayoutModel.findAll.calledOnce);
-      const [callArgs] = mockLayoutModel.findAll.getCall(0).args;
-      ok(callArgs.where, 'Expected callArgs.where to be defined');
-      strictEqual(callArgs.where.name, 'Filtered Layout 1', 'Expected filter name to match');
-      deepStrictEqual(
-        callArgs.include,
-        layoutRepository._layoutInfoToInclude,
-        'Expected include to match',
-      );
-    });
-
-    test('should filterLayouts by objectPath', async () => {
-      const mockLayouts = [{ id: '1', name: 'Filtered Layout 1' }];
+      //mock _getLayoutIdsByObjectPath
+      sinon.stub(layoutRepository, '_getLayoutIdsByObjectPath').resolves(['1', '2']);
+      const mockLayouts = [
+        { id: '1', name: 'Filtered Layout 1' },
+        { id: '2', name: 'Filtered Layout 2' },
+      ];
       const filters = { objectPath: 'ITS/MC/RT' };
       mockLayoutModel.findAll.resolves(mockLayouts);
+
       const result = await layoutRepository.findLayoutsByFilters(filters);
+
       deepStrictEqual(result, mockLayouts);
+      ok(layoutRepository._getLayoutIdsByObjectPath.calledOnceWith('ITS/MC/RT'));
       ok(mockLayoutModel.findAll.calledOnce, 'Expected findAll to be called once');
       const [callArgs] = mockLayoutModel.findAll.getCall(0).args;
       ok(callArgs.include, 'Expected include to be defined');
-      const [tabsInclude] = callArgs.include;
-      const [gridTabCellsInclude] = tabsInclude.include;
-      const [chartInclude] = gridTabCellsInclude.include;
-      strictEqual(chartInclude.required, true, 'Expected chartInclude to be required');
-      ok(chartInclude.where, 'Expected chartInclude.where to be defined');
-      strictEqual(
-        chartInclude.where.object_name[Op.iLike],
-        '%its/mc/rt%',
-        'Expected object_name filter to use iLike with objectPath',
-      );
+      strictEqual(callArgs.where.id[Op.in].length, 2, 'Expected where clause to filter by two IDs');
     });
 
     test('should find layout by name', async () => {
