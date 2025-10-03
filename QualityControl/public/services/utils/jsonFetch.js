@@ -28,12 +28,20 @@ export const jsonFetch = async (endpoint, options) => {
     return Promise.reject({ message: 'Connection to server failed, please try again' });
   }
   try {
-    const result = response.status === 204 // case in which response is empty
-      ? null
-      : await response.json();
+    if (response.status === 204) {
+      return null;
+    }
+    const contentType = response.headers.get('content-type') || '';
+    let result = null;
+    if (!contentType.includes('application/json')) {
+      result = await response.json();
+    } else {
+      const text = await response.text();
+      result = text ? { message: text } : null;
+    }
     return response.ok
       ? result
-      : Promise.reject({ message: result.message || 'Unknown error received' });
+      : Promise.reject({ message: result?.message || 'Unknown error received' });
   } catch {
     return Promise.reject({ message: 'Parsing result from server failed' });
   }
