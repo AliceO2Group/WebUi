@@ -74,7 +74,12 @@ export const clientLoader = async ({ params }: Route.ClientLoaderArgs): Promise<
 export default function Details({ loaderData: { token, logs } }: Route.ComponentProps) {
   return <>
     <h1>Token {token.tokenId} details</h1>
-    <p>The token has a {token.validity} validity.</p>
+    <p> Last 4 token characters: <strong> {token.last4chars} </strong></p>
+    <p> Issuer: <strong>{token.issuer}</strong></p>
+    <p> Issued at: <strong>{token.iat}</strong></p>
+    <p> Subject: <strong>{token.serviceFrom}</strong></p>
+    <p> Audience: <strong>{token.serviceTo}</strong></p>
+    <p> Expires at: <strong>{token.exp}</strong></p>
     <h2>Logs</h2>
     <Suspense fallback={<Spinner size={2} align={'left'} />}>
       <Await resolve={logs} errorElement={<div><em>Failed to load the logs</em></div>}>
