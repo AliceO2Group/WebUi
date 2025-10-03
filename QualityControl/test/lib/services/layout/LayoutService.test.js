@@ -147,11 +147,14 @@ export const layoutServiceTestSuite = async () => {
 
     suite('getObjectById()', () => {
       test('should return object when found', async () => {
-        const mockObject = { id: '1', name: 'Test Object' };
+        const mockObject = {
+          toJSON: () => ({ id: '1', name: 'Test Object' }),
+        };
         mockGridTabCellRepository.findObjectByChartId = () => Promise.resolve(mockObject);
 
         const result = await layoutService.getObjectById('1');
-        strictEqual(result, mockObject);
+        strictEqual(result.id, '1');
+        strictEqual(result.name, 'Test Object');
       });
 
       test('should throw InvalidInputError when id is not provided', async () => {

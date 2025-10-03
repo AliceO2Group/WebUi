@@ -52,8 +52,6 @@ export class LayoutController {
 
   /**
    * HTTP GET endpoint for retrieving a list of layouts
-   * * Can be filtered by "owner_id" or "objectPath" using filter.objectPath
-   * * if no owner_id is provided, all layouts will be fetched;
    * @param {Request} req - HTTP request object with information on owner_id
    * @param {string} [req.query.owner_id] - Optional owner_id to filter layouts by
    * @param {string} [req.query.filter] - Optional filter object as JSON string
@@ -84,8 +82,7 @@ export class LayoutController {
    */
   async getLayoutHandler(req, res) {
     try {
-      const layout = await this._layoutService.getLayoutById(req.params.id);
-      const adaptedLayout = LayoutAdapter.adaptLayoutForExpressAPI(layout);
+      const adaptedLayout = LayoutAdapter.adaptLayoutForExpressAPI(req.layout);
       res.status(200).json(adaptedLayout);
     } catch (error) {
       this._logger.errorMessage(`Error retrieving layout by ID: ${error.message || error}`);
@@ -115,7 +112,7 @@ export class LayoutController {
       return;
     }
     try {
-      const layout = await this._layoutService.getLayoutsByFilters({ name: layoutName });
+      const layout = await this._layoutService.getLayoutByName(layoutName);
       const adaptedLayout = LayoutAdapter.adaptLayoutForExpressAPI(layout);
       res.status(200).json(adaptedLayout);
     } catch (error) {

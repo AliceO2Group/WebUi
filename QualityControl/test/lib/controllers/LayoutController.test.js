@@ -17,7 +17,7 @@ import { suite, test, beforeEach } from 'node:test';
 import sinon from 'sinon';
 
 import { LayoutController } from './../../../lib/controllers/LayoutController.js';
-import { CONVERTED_LAYOUT_FROM_BACKEND, LAYOUT_FROM_BACKEND } from '../../demoData/layout/layout.mock.js';
+import { LAYOUT_ADAPTED_FOR_FRONTEND_API, LAYOUT_FROM_BACKEND } from '../../demoData/layout/layout.mock.js';
 
 export const layoutControllerTestSuite = async () => {
   suite('LayoutController Test Suite', () => {
@@ -33,7 +33,6 @@ export const layoutControllerTestSuite = async () => {
       };
       layoutServiceMock = {
         getLayoutsByFilters: sinon.stub(),
-        getLayoutById: sinon.stub(),
         getLayoutByName: sinon.stub(),
       };
       layoutController = new LayoutController(layoutServiceMock);
@@ -58,7 +57,7 @@ export const layoutControllerTestSuite = async () => {
         layoutServiceMock.getLayoutsByFilters = sinon.stub().resolves([LAYOUT_FROM_BACKEND]);
         await layoutController.getLayoutsHandler(req, res);
         ok(res.status.calledWith(200), 'Response status was not 200');
-        ok(res.json.calledWith([CONVERTED_LAYOUT_FROM_BACKEND]), 'A JSON defining a layout should have been sent back');
+        ok(res.json.calledWith([LAYOUT_ADAPTED_FOR_FRONTEND_API]), 'A JSON defining a layout should have been sent back');
       });
       test('should successfully return a list of layouts with only requested fields', async () => {
         req = { query: { owner_id: 'test-owner-id', filter: {}, fields: ['id', 'name'] } };
@@ -84,56 +83,37 @@ export const layoutControllerTestSuite = async () => {
     });
     suite('`getLayoutByIdHandler()` tests', () => {
       test('should successfully return a layout specified by its id', async () => {
-        req = { params: { id: 'test-layout-id' } };
-        //only mock the response for the id we are going to request
-        layoutServiceMock.getLayoutById = sinon.stub().callsFake(async (id) => {
-          if (id === 'test-layout-id') {
-            return LAYOUT_FROM_BACKEND;
-          }
-          return null;
-        });
+        req = { params: { id: 'test-layout-id' }, layout: LAYOUT_FROM_BACKEND };
         await layoutController.getLayoutHandler(req, res);
         ok(res.status.calledWith(200), 'Response status was not 200');
-        ok(res.json.calledWith(CONVERTED_LAYOUT_FROM_BACKEND), 'A JSON defining a layout should have been sent back');
-      });
-      test('should return error if service failed to retrieve layout by id', async () => {
-        req = { params: { id: 'test-layout-id' } };
-        layoutServiceMock.getLayoutById = sinon.stub().rejects(new Error('Unable to retrieve layout by id'));
-        const layoutController = new LayoutController(layoutServiceMock);
-        await layoutController.getLayoutHandler(req, res);
-        ok(res.status.calledWith(500), 'Response status was not 500');
-        ok(res.json.calledWith({
-          message: 'Unable to retrieve layout by id',
-          status: 500,
-          title: 'Unknown Error',
-        }), 'Error message was incorrect');
+        ok(res.json.calledWith(LAYOUT_ADAPTED_FOR_FRONTEND_API), 'A JSON defining a layout should have been sent back');
       });
     });
     suite('`getLayoutByNameHandler()` tests', () => {
-      test('should successfully call getLayoutsByFilters with name', async () => {
-        layoutServiceMock.getLayoutsByFilters = sinon.stub().resolves([LAYOUT_FROM_BACKEND]);
+      test('should successfully call getLLayoutByName with name', async () => {
+        layoutServiceMock.getLayoutByName = sinon.stub().resolves(LAYOUT_FROM_BACKEND);
         req = { query: { name: 'CALIBRATIONS' } };
         await layoutController.getLayoutByNameHandler(req, res);
         ok(
-          layoutServiceMock.getLayoutsByFilters.calledWith({ name: 'CALIBRATIONS' }),
+          layoutServiceMock.getLayoutByName.calledWith('CALIBRATIONS'),
           'Service was not called with correct parameters',
         );
       });
-      test('should successfully call getLayoutsByFilters with runDefinition and pdpBeamType', async () => {
-        layoutServiceMock.getLayoutsByFilters = sinon.stub().resolves([LAYOUT_FROM_BACKEND]);
+      test('should successfully call getLayoutByName with runDefinition and pdpBeamType', async () => {
+        layoutServiceMock.getLayoutByName = sinon.stub().resolves(LAYOUT_FROM_BACKEND);
         req = { query: { runDefinition: 'LHC18b', pdpBeamType: 'A' } };
         await layoutController.getLayoutByNameHandler(req, res);
         ok(
-          layoutServiceMock.getLayoutsByFilters.calledWith({ name: 'LHC18b_A' }),
+          layoutServiceMock.getLayoutByName.calledWith('LHC18b_A'),
           'Service was not called with correct parameters',
         );
       });
-      test('should successfully call getLayoutsByFilters with only runDefinition', async () => {
-        layoutServiceMock.getLayoutsByFilters = sinon.stub().resolves([LAYOUT_FROM_BACKEND]);
+      test('should successfully call getLayoutByName with only runDefinition', async () => {
+        layoutServiceMock.getLayoutByName = sinon.stub().resolves([LAYOUT_FROM_BACKEND]);
         req = { query: { runDefinition: 'LHC18b' } };
         await layoutController.getLayoutByNameHandler(req, res);
         ok(
-          layoutServiceMock.getLayoutsByFilters.calledWith({ name: 'LHC18b' }),
+          layoutServiceMock.getLayoutByName.calledWith('LHC18b'),
           'Service was not called with correct parameters',
         );
       });
@@ -149,10 +129,10 @@ export const layoutControllerTestSuite = async () => {
       });
       test('should successfully return a layout specified by its name', async () => {
         req = { query: { name: 'CALIBRATIONS' } };
-        layoutServiceMock.getLayoutsByFilters = sinon.stub().resolves(LAYOUT_FROM_BACKEND);
+        layoutServiceMock.getLayoutByName = sinon.stub().resolves(LAYOUT_FROM_BACKEND);
         await layoutController.getLayoutByNameHandler(req, res);
         ok(res.status.calledWith(200), 'Response status was not 200');
-        ok(res.json.calledWith(CONVERTED_LAYOUT_FROM_BACKEND), 'A JSON defining a layout should have been sent back');
+        ok(res.json.calledWith(LAYOUT_ADAPTED_FOR_FRONTEND_API), 'A JSON defining a layout should have been sent back');
       });
     });
     suite('`putLayoutHandler()` tests', () => {
@@ -203,14 +183,14 @@ export const layoutControllerTestSuite = async () => {
     });
     suite('`postLayoutHandler()` tests', () => {
       test('should successfully create a new layout', async () => {
-        req = { body: CONVERTED_LAYOUT_FROM_BACKEND };
-        layoutServiceMock.postLayout = sinon.stub().resolves(CONVERTED_LAYOUT_FROM_BACKEND);
+        req = { body: LAYOUT_ADAPTED_FOR_FRONTEND_API };
+        layoutServiceMock.postLayout = sinon.stub().resolves(LAYOUT_ADAPTED_FOR_FRONTEND_API);
         await layoutController.postLayoutHandler(req, res);
         ok(res.status.calledWith(201), 'Response status was not 201');
-        ok(res.json.calledWith(CONVERTED_LAYOUT_FROM_BACKEND), 'A JSON with the new layout should have been sent back');
+        ok(res.json.calledWith(LAYOUT_ADAPTED_FOR_FRONTEND_API), 'A JSON with the new layout should have been sent back');
       });
       test('should return error if service failed to create a new layout', async () => {
-        req = { body: CONVERTED_LAYOUT_FROM_BACKEND };
+        req = { body: LAYOUT_ADAPTED_FOR_FRONTEND_API };
         layoutServiceMock.postLayout = sinon.stub().rejects(new Error('Unable to create layout'));
         await layoutController.postLayoutHandler(req, res);
         ok(res.status.calledWith(500), 'Response status was not 500');

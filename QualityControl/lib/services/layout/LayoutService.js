@@ -90,10 +90,11 @@ export class LayoutService {
     if (Number.isInteger(filters?.owner_id)) {
       const ownerId = parseInt(filters.owner_id, 10);
       const owner_username = await this._userService.getUsernameById(ownerId);
-      filters = { ...filters, owner_username };
+      filters.owner_username = owner_username;
     }
     delete filters.owner_id;
     const layouts = await this._layoutRepository.findLayoutsByFilters(filters);
+
     return layouts;
   }
 
@@ -107,6 +108,20 @@ export class LayoutService {
     const layoutFound = await this._layoutRepository.findLayoutById(id);
     if (!layoutFound) {
       throw new NotFoundError(`Layout with id: ${id} was not found`);
+    }
+    return layoutFound;
+  }
+
+  /**
+   * Finds a layout by its name
+   * @param {string} name - Layout name
+   * @throws {NotFoundError} If no layout is found with the given name
+   * @returns {Promise<LayoutAttributes>} The layout found
+   */
+  async getLayoutByName(name) {
+    const layoutFound = await this._layoutRepository.findLayoutByName(name);
+    if (!layoutFound) {
+      throw new NotFoundError(`Layout with name: ${name} was not found`);
     }
     return layoutFound;
   }
@@ -128,7 +143,7 @@ export class LayoutService {
       if (!object) {
         throw new NotFoundError(`Object with id ${id} not found`);
       }
-      return object;
+      return object?.toJSON();
     } catch (error) {
       this._logger.errorMessage(`Error getting object by ID: ${error?.message || error}`);
       throw error;
@@ -164,12 +179,13 @@ export class LayoutService {
    * Partially updates an existing layout by ID
    * @param {string} id - Layout ID
    * @param {Partial<LayoutAttributes>} updateData - Fields to update
-   * @returns {Promise<void>}
+   * @returns {Promise<string>} Layout ID of the updated layout
    * @throws {Error} If an error occurs updating the layout
    */
   async patchLayout(id, updateData) {
     const normalizedLayout = await normalizeLayout(updateData, {}, false, this._userService);
     await this._updateLayout(id, normalizedLayout);
+    return id;
   }
 
   /**
