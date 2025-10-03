@@ -14,6 +14,7 @@
 
 import { LogManager } from '@aliceo2/web-ui';
 import { pipeline } from 'node:stream';
+import { promisify } from 'node:util';
 
 /**
  * @class
@@ -31,28 +32,50 @@ export class QcdbDownloadService {
     this._target = `${this._protocol}://${this._hostname}:${this._port}`;
 
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/proxy`);
+    this._pipelineAsync = promisify(pipeline);
   }
 
   /**
-   * Get ROOT object from qcdb
+   * Get ROOT object from qcdb.
+   * If a response object is given it is assumed that this is the only request
+   * the body of the answer from qcdb will then be streamed into our response.
    * @param {string} objectId - id of ROOT object to retrieve from qcdb.
-   * @returns {File} - ROOT file from qcdb.
+   * @param {Express.Response} res - Optional Express response object if we want to stream qcdb's answer as our own.
+   * @returns {File|boolean} - ROOT file from qcdb, false if error and true if it responded itself.
    */
-  async requestObject(objectId) {
+  async requestObject(objectId, res = undefined) {
+    this._logger.infoMessage(`Object ID Request: ${objectId}`);
     const myRequest = new Request(`${this._target}/download/${objectId}`, { method: 'GET' });
     try {
       const response = await fetch(myRequest);
       if (!response.ok) {
-        throw new Error(`Cannot get objectId from qcdb: ${objectId}`);
+        this._logger.errorMessage(`QCDB returned ${response.status} ${response.statusText}`);
+        throw new Error(`Cannot get ROOT file from qcdb object id: ${objectId}`);
       }
-      const blob = await response.blob();
-      const contentDisposition = response.headers.get('content-disposition');
-      const fileName = contentDisposition?.slice(17, contentDisposition.length - 1);
-      const file = new File([blob], fileName ?? 'export.root', { type: 'application/root' });
-      return file;
+      const contentDisposition = response.headers.get('Content-Disposition');
+      const filename = contentDisposition?.slice(17, contentDisposition.length - 1);
+      // We will stream the data from QCDB's answer directly back to the user.
+      if (res != undefined) {
+        const contentType = response.headers.get('Content-Type');
+        const contentLength = response.headers.get('Content-Length');
+
+        res.setHeader('Content-Type', contentType ?? 'application/root');
+        res.setHeader('Content-Disposition', contentDisposition ?? `attachment; filename="${filename}"`);
+        if (contentLength) {
+          res.setHeader('Content-Length', contentLength);
+        }
+
+        await this._pipelineAsync(response.body, res);
+        return true;
+      } else {
+        // We'll return the file from the response back.
+        const blob = await response.blob();
+        const file = new File([blob], filename ?? 'export.root', { type: 'application/root' });
+        return file;
+      }
     } catch (error) {
       this._logger.errorMessage(error);
-      return null;
+      return false;
     }
   }
 
@@ -65,29 +88,16 @@ export class QcdbDownloadService {
   async getQcdbRootObjects(objectIds, res) {
     const promises = [];
     if (typeof objectIds === 'string') {
-      promises.push(this.requestObject(objectIds));
+      promises.push(this.requestObject(objectIds, res));
     } else {
-      // Technically this can be stopped at the DTO layer but multiple will be implemented soon.
+      // Technically this can be stopped at the DTO layer but multiple id's will be implemented soon.
       res.status(500).send('Option to retrieve more than 1 ROOT object not implemented yet.');
     }
 
     try {
       const files = await Promise.all(promises);
-      if (files.filter((file) => file === null).length > 0) {
+      if (files.filter((file) => file === false).length > 0) {
         throw new Error('qcdb object request failed.');
-      }
-      this._logger.infoMessage(`Object ID Requests: ${objectIds}`);
-
-      if (files.length === 1) {
-        res.setHeader('Content-Type', 'application/root');
-        res.setHeader('Content-Disposition', `attachment; filename="${files[0].name}"`);
-        res.setHeader('Content-Length', files[0].size);
-
-        pipeline(files[0].stream(), res, (err) => {
-          if (err) {
-            throw err;
-          }
-        });
       }
     } catch (error) {
       this._logger.errorMessage(error.message);
