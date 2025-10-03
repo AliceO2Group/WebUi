@@ -74,7 +74,7 @@ export const setup = async (http, ws, eventEmitter) => {
 
   /* ------------------- Layouts ------------------------ */
   http.get('/layouts', getLayoutsMiddleware, layoutController.getLayoutsHandler.bind(layoutController));
-  http.get('/layout/:id', layoutIdMiddleware, layoutController.getLayoutHandler.bind(layoutController));
+  http.get('/layout/:id', layoutIdMiddleware(layoutService), layoutController.getLayoutHandler.bind(layoutController));
   http.get('/layout', layoutController.getLayoutByNameHandler.bind(layoutController));
   http.post(
     '/layout',
@@ -83,21 +83,21 @@ export const setup = async (http, ws, eventEmitter) => {
   );
   http.put(
     '/layout/:id',
-    validateUpdateLayoutMiddleware,
-    layoutIdMiddleware,
+    layoutIdMiddleware(layoutService),
     layoutOwnerMiddleware(layoutService, userService),
+    validateUpdateLayoutMiddleware,
     layoutController.putLayoutHandler.bind(layoutController),
   );
   http.patch(
     '/layout/:id',
     validatePatchLayoutMiddleware,
-    layoutIdMiddleware,
+    layoutIdMiddleware(layoutService),
     minimumRoleMiddleware(UserRole.GLOBAL),
     layoutController.patchLayoutHandler.bind(layoutController),
   );
   http.delete(
     '/layout/:id',
-    layoutIdMiddleware,
+    layoutIdMiddleware(layoutService),
     layoutOwnerMiddleware(layoutService, userService),
     layoutController.deleteLayoutHandler.bind(layoutController),
   );

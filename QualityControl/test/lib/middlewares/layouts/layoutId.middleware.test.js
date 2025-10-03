@@ -15,89 +15,61 @@
 import { suite, test } from 'node:test';
 import { ok } from 'node:assert';
 import { layoutIdMiddleware } from '../../../../lib/middleware/layouts/layoutId.middleware.js';
+import sinon from 'sinon';
+import { NotFoundError } from '@aliceo2/web-ui';
 
 /**
  * Test suite for the middlewares involved in the ID check of the layout requests
  */
 export const layoutIdMiddlewareTest = () => {
   suite('Layout id middleware', () => {
-    const jsonError = {
-      message: 'The "id" parameter is missing from the request',
-      status: 400,
-      title: 'Invalid Input',
+    const mockLayoutService = {
+      getLayoutById: sinon.stub(),
     };
-    test('Should call next if id is present in req.params', async () => {
+    const middleware = layoutIdMiddleware(mockLayoutService);
+    const res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    };
+    test('should add the layout to the request object when id is valid', async () => {
       const req = {
-        params: {
-          id: '123',
-        },
+        params: { id: 'valid-id' },
       };
-      const res = {};
-      let nextCalled = false;
-      const next = () => {
-        nextCalled = true;
-      };
-      await layoutIdMiddleware(req, res, next);
-      ok(nextCalled, 'Next was not called');
+      const next = sinon.spy();
+      const mockLayout = { id: 'valid-id', name: 'Test Layout' };
+      mockLayoutService.getLayoutById.resolves(mockLayout);
+
+      await middleware(req, res, next);
     });
-    test('Should return 400 error if id is not present in req.params', async () => {
+    test('should throw invalid input error when id is missing', async () => {
       const req = {
-        params: {
-        },
+        params: {},
       };
-      const res = {
-        status: (code) => {
-          ok(code === 400, 'Status code was not 400');
-          return res;
-        },
-        json: (obj) => {
-          ok(JSON.stringify(obj) === JSON.stringify(jsonError), 'Error message was incorrect');
-          return res;
-        },
-      };
-      const next = () => {
-        throw new Error('Next should not be called');
-      };
-      await layoutIdMiddleware(req, res, next);
+      const next = sinon.spy();
+      await middleware(req, res, next);
+      ok(res.status.calledWith(400), `Expected status 400 but got ${res.status.firstCall.args[0]}`);
+      ok(res.json.calledWith({
+        message: 'Layout id is required',
+        status: 400,
+        title: 'Invalid Input',
+      }), 'Expected error message for missing id');
+      ok(next.notCalled, 'Expected next not to be called');
     });
-    test('Should return 400 error if id is empty in req.params', async () => {
+    test('should throw invalid input error when layout is not found', async () => {
       const req = {
-        params: {
-          id: '',
-        },
+        params: { id: 'non-existent-id' },
       };
-      const res = {
-        status: (code) => {
-          ok(code === 400, 'Status code was not 400');
-          return res;
-        },
-        json: (obj) => {
-          ok(JSON.stringify(obj) === JSON.stringify(jsonError), 'Error message was incorrect');
-          return res;
-        },
-      };
-      const next = () => {
-        throw new Error('Next should not be called');
-      };
-      await layoutIdMiddleware(req, res, next);
-    });
-    test('Should return 400 error if req.params is not present', async () => {
-      const req = {
-      };
-      const res = {
-        status: (code) => {
-          ok(code === 400, 'Status code was not 400');
-          return res;
-        },
-        json: (obj) => {
-          ok(JSON.stringify(obj) === JSON.stringify(jsonError), 'Error message was incorrect');
-          return res;
-        },
-      };
-      const next = () => {
-        throw new Error('Next should not be called');
-      };
-      await layoutIdMiddleware(req, res, next);
+      const next = sinon.spy();
+      mockLayoutService.getLayoutById.rejects(new NotFoundError('Layout with id: non-existent-id was not found'));
+
+      await middleware(req, res, next);
+      ok(res.status.calledWith(404), `Expected status 400 but got ${res.status.firstCall.args[0]}`);
+      ok(res.json.calledWith({
+        message: 'Layout with id: non-existent-id was not found',
+        status: 404,
+        title: 'Not Found',
+      }), 'Expected error message for layout not found');
+      ok(next.notCalled, 'Expected next not to be called');
     });
   });
 };

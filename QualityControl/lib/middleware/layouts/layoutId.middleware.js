@@ -23,14 +23,17 @@ import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '
  * @param {Express.Request} req - HTTP Request
  * @param {Express.Response} res - HTTP Response
  * @param {Express.Next} next - HTTP Next (check pass)
+ * @param layoutService
  * @returns {Promise<void>} Resolves when validation is done and next is called
  */
-export const layoutIdMiddleware = async (req, res, next) => {
-  const { id = '' } = req.params ?? {};
+export const layoutIdMiddleware = (layoutService) => async (req, res, next) => {
   try {
-    if (!id) {
-      throw new InvalidInputError('The "id" parameter is missing from the request');
+    const { id } = req.params;
+    if (!id || id.trim() === '') {
+      throw new InvalidInputError('Layout id is required');
     }
+    const layout = await layoutService.getLayoutById(id);
+    req.layout = layout;
     next();
   } catch (error) {
     updateAndSendExpressResponseFromNativeError(res, error);
