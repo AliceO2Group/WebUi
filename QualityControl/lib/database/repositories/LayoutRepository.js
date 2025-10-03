@@ -14,19 +14,24 @@
 import { InvalidInputError } from '@aliceo2/web-ui';
 import { BaseRepository } from './BaseRepository.js';
 import { Op, UniqueConstraintError } from 'sequelize';
+import path from 'path';
+import fs from 'fs';
 
 /**
  * @typedef {object} LayoutAttributes
- * @property {string} id
- * @property {string} name
- * @property {string} [description]
- * @property {boolean} display_timestamp
- * @property {number} auto_tab_change_interval
- * @property {string} owner_username
- * @property {boolean} is_official
- * @property {Date} created_at
- * @property {Date} updated_at
+ * @property {string} id - UUID
+ * @property {string} name - unique name of the layout
+ * @property {string} [description] - optional description of the layout
+ * @property {boolean} display_timestamp - whether to display the timestamp
+ * @property {number} auto_tab_change_interval - interval for automatic tab change in seconds
+ * @property {string} owner_username - username of the owner
+ * @property {boolean} is_official - whether the layout is official
+ * @property {Date} created_at - timestamp when the layout was created
+ * @property {Date} updated_at - timestamp when the layout was last updated
  */
+
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+const getLayoutsByChartQueryPath = path.join(__dirname, '../queries/getLayoutIdsWithChartObjectName.sql');
 
 /**
  * Repository for managing layouts.
@@ -39,6 +44,7 @@ export class LayoutRepository extends BaseRepository {
     this._layoutInfoToInclude = [
       {
         association: 'tabs',
+        required: true,
         include: [
           {
             association: 'gridTabCells',
@@ -61,6 +67,7 @@ export class LayoutRepository extends BaseRepository {
         attributes: ['id', 'username', 'name'],
       },
     ];
+    this.getLayoutsByChartQuery = fs.readFileSync(getLayoutsByChartQueryPath, 'utf8');
   }
 
   /**
@@ -70,6 +77,18 @@ export class LayoutRepository extends BaseRepository {
    */
   async findLayoutById(id) {
     return this.model.findByPk(id, { include: this._layoutInfoToInclude });
+  }
+
+  /**
+   * Finds a layout by its name
+   * @param {string} name name of the layout
+   * @returns {Promise<LayoutAttributes|null>} Layout found or null
+   */
+  async findLayoutByName(name) {
+    return this.model.findOne({
+      where: { name },
+      include: this._layoutInfoToInclude,
+    });
   }
 
   /**
@@ -84,38 +103,38 @@ export class LayoutRepository extends BaseRepository {
 
   /**
    * Finds layouts by filters using Op.and and optionally selects specific fields.
-   * @param {object[]} filters - Array of Sequelize filter objects
+   * @param {object} filters - Array of Sequelize filter objects
    * @param {string} [objectPath] - Optional object path to filter charts by (case-insensitive, partial match)
    * @returns {Promise<LayoutAttributes[]>} Array of layouts found
    */
-  async findLayoutsByFilters({ objectPath, ...filters }) {
-    const include = [...this._layoutInfoToInclude];
-    const [tabsInclude] = include;
-    const [gridTabCellsInclude] = tabsInclude.include;
-    const [chartInclude] = gridTabCellsInclude.include;
+  async findLayoutsByFilters(filters) {
+    const { objectPath } = filters || {};
+    const whereClause = {};
     if (objectPath) {
-      const objectPathLower = objectPath.toLowerCase();
-      chartInclude.required = true;
-      chartInclude.where = {
-        object_name: { [Op.iLike]: `%${objectPathLower}%` },
-      };
+      const layoutIds = await this._getLayoutIdsByObjectPath(objectPath);
+
+      if (!layoutIds.length) {
+        return [];
+      }
+      whereClause.id = { [Op.in]: layoutIds };
     }
     return this.model.findAll({
-      where: filters,
-      include,
+      where: whereClause,
+      include: this._layoutInfoToInclude,
     });
   }
 
   /**
-   * Finds layouts by name
-   * @param {string} name name of the layout
-   * @returns {Promise<LayoutAttributes[]>} Array of layouts found
+   * Helper function to get layout IDs by object path
+   * @param {string} objectPath partial object path to search for
+   * @returns {Promise<string[]>} Array of layout IDs
    */
-  async findLayoutByName(name) {
-    return this.model.findOne({
-      where: { name },
-      include: this._layoutInfoToInclude,
+  async _getLayoutIdsByObjectPath(objectPath) {
+    const results = await this.model.sequelize.query(this.getLayoutsByChartQuery, {
+      replacements: { objectPath: `%${objectPath}%` },
+      type: this.model.sequelize.QueryTypes.SELECT,
     });
+    return results.map((r) => r.layout_id);
   }
 
   /**
