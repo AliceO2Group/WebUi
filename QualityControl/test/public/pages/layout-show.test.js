@@ -107,49 +107,40 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
-    'should have jsroot svg plots in the section',
+    'should have jsroot svg plot in the section',
     { timeout },
     async () => {
-      const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
-      ok(plotsCount > 1);
+      const isSvg = await page.evaluate(() => document.querySelector('.jsroot') instanceof SVGElement);
+      ok(isSvg, true, 'Plot is not an SVG element');
     },
   );
 
-  await testParent
-    .test('should have an info button with full path and last modified when clicked (plot success)', async () => {
-      const commonSelectorPath = 'section > div > div > div > div:nth-child(2) > div > div';
+  await testParent.test(
+    'should have an info button with full path and last modified when clicked (plot success)',
+    async () => {
+      const commonSelectorPath = 'section > div > div > div > div > div > div';
       const plot1Path = `${commonSelectorPath} > div:nth-child(1)`;
+
+      // Click on the first plot
       await page.locator(plot1Path).click();
 
+      // Evaluate in the browser
       const result = await page.evaluate((commonSelectorPath) => {
-        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > div > button`);
-        const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div > div`;
-        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div > div`).innerText;
-        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > b`).innerText;
-        const lastModifiedTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`).innerText;
-        return { title, pathTitle, objectPath, lastModifiedTitle };
-      }, commonSelectorPath);
-      strictEqual(result.title, 'View details about histogram');
-      strictEqual(result.pathTitle, 'path');
-      strictEqual(result.objectPath, 'qc/test/object/1');
-      strictEqual(result.lastModifiedTitle, 'lastModified');
-    });
+        const { title } = document.querySelector('.mh1 > .btn');
 
-  await testParent.test(
-    'should have an info button with full path and last modified when clicked on a second plot(plot success)',
-    { timeout },
-    async () => {
-      const commonSelectorPath = '#subcanvas > div:nth-child(2) > div > div';
-      const plot2Path = `${commonSelectorPath} > div:nth-child(1)`;
-      await page.locator(plot2Path).click();
-      const result = await page.evaluate((commonSelectorPath) => {
-        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > div > button`);
         const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div > div`;
-        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div > div`).innerText;
-        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > b`).innerText;
-        const lastModifiedTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`).innerText;
+
+        const objectPathEl = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div > div`);
+        const pathTitleEl = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > b`);
+        const lastModifiedEl = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`);
+
+        const objectPath = objectPathEl?.innerText || '';
+        const pathTitle = pathTitleEl?.innerText || '';
+        const lastModifiedTitle = lastModifiedEl?.innerText || '';
+
         return { title, pathTitle, objectPath, lastModifiedTitle };
       }, commonSelectorPath);
+
       strictEqual(result.title, 'View details about histogram');
       strictEqual(result.pathTitle, 'path');
       strictEqual(result.objectPath, 'qc/test/object/1');

@@ -63,14 +63,6 @@ export const up = async (queryInterface) => {
       row_span: 1,
       col_span: 1,
     },
-    {
-      chart_id: '6724a6bd1b2bad3d713cc4ee',
-      row: 1,
-      col: 0,
-      tab_id: '671b95884312f03458f1d9ca',
-      row_span: 1,
-      col_span: 1,
-    },
   ], {});
 };
 

@@ -32,6 +32,22 @@ export const up = async (queryInterface) => {
       auto_tab_change_interval: 0,
       owner_username: 'anonymous',
     },
+    {
+      id: '671b961f3d23cd0d67bdc78a',
+      name: 'SYNTHETIC',
+      description: '',
+      display_timestamp: false,
+      auto_tab_change_interval: 0,
+      owner_username: 'anonymous',
+    },
+    {
+      id: '671b95a8e4f3f70f2f5e4b1a',
+      name: 'SYNTHETIC_proton-proton',
+      description: '',
+      display_timestamp: false,
+      auto_tab_change_interval: 0,
+      owner_username: 'anonymous',
+    },
   ], {});
 };
 

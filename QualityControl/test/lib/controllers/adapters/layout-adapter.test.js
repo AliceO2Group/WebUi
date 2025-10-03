@@ -1,20 +1,20 @@
 import { deepStrictEqual } from 'node:assert';
 import { suite, test } from 'node:test';
 
-import { LAYOUT_FROM_BACKEND, CONVERTED_LAYOUT_FROM_BACKEND } from '../../../demoData/layout/layout.mock.js';
+import { LAYOUT_FROM_BACKEND, LAYOUT_ADAPTED_FOR_FRONTEND_API } from '../../../demoData/layout/layout.mock.js';
 import { LayoutAdapter } from '../../../../lib/controllers/adapters/layout-adapter.js';
 
 export const layoutAdapterTestSuite = async () => {
   suite('LayoutAdapter Test Suite', () => {
     test('should adapt layout correctly without fields filter', () => {
       const adaptedLayout = LayoutAdapter.adaptLayoutForExpressAPI(LAYOUT_FROM_BACKEND);
-      deepStrictEqual(sortKeys(adaptedLayout), sortKeys(CONVERTED_LAYOUT_FROM_BACKEND));
+      deepStrictEqual(sortKeys(adaptedLayout), sortKeys(LAYOUT_ADAPTED_FOR_FRONTEND_API));
     });
     test('should adapt layout correctly with fields filter', () => {
       const adaptedLayout = LayoutAdapter.adaptLayoutForExpressAPI(LAYOUT_FROM_BACKEND, ['id', 'name']);
       deepStrictEqual(
         sortKeys(adaptedLayout),
-        sortKeys({ id: CONVERTED_LAYOUT_FROM_BACKEND.id, name: CONVERTED_LAYOUT_FROM_BACKEND.name }),
+        sortKeys({ id: LAYOUT_ADAPTED_FOR_FRONTEND_API.id, name: LAYOUT_ADAPTED_FOR_FRONTEND_API.name }),
       );
     });
   });

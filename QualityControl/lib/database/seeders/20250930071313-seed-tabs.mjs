@@ -39,7 +39,18 @@ export const up = async (queryInterface) => {
       layout_id: '671b95883d23cd0d67bdc787',
       column_count: 2,
     },
-
+    {
+      id: '671b961f9f1e4e0f4c5b8c3d',
+      name: 'main',
+      layout_id: '671b961f3d23cd0d67bdc78a',
+      column_count: 2,
+    },
+    {
+      id: '671b95a8f0e4f70f2f5e4b1b',
+      name: 'main',
+      layout_id: '671b95a8e4f3f70f2f5e4b1a',
+      column_count: 2,
+    },
   ], {});
 };
 
