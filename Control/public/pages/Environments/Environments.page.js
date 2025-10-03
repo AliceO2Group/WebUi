@@ -221,7 +221,7 @@ const runColumn = (item, model) => {
  * Extracts the user information from the userVars object
  * @param {Object} userVars - The userVars object containing user information
  */
-const getUserFromUserVars = ({last_request_user}) => {
+const getUserFromUserVars = ({last_request_user} = {}) => {
   if (!last_request_user) {
     return null;
   }

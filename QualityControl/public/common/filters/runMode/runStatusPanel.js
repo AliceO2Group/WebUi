@@ -12,36 +12,34 @@
  */
 
 import { RunStatus } from '../../../../../library/runStatus.enum.js';
-import { spinner } from '../../spinner.js';
 import { h } from '/js/src/index.js';
 
 /**
  * Creates and returns a run status panel element displaying the current run number,
  * its status, the last refresh timestamp, and the refresh rate.
- * @param {object} options Options for rendering the run status panel.
- * @param {number} options.runNumber The current run number to display.
- * @param {string} options.runStatus The status of the run (e.g., "running", "completed").
- * @param {Date} options.lastRefresh Timestamp of the last refresh.
- * @param {number} options.refreshRate - Refresh rate in milliseconds.
+ * @param {string} runStatus The status of the run (e.g., "running", "completed").
  * @returns {vnode} The element representing the run status panel.
  */
-export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate = 15000 }) => {
-  const runNumberPanel = h('span', { id: 'runNumberLabel' }, [
-    'Run ',
-    h('b', `#${runNumber}`),
-  ]);
-  const statusPanel = (runStatus) =>
-    runStatus
-      ? h(
+export const runStatusPanel = (runStatus) =>
+  runStatus && h(
+    '.flex-row.g1.items-center.justify-center',
+    { id: 'runStatusPanel' },
+    [
+      h(
         `.badge.white.bg-${runStatus === RunStatus.ONGOING ? 'success' : 'gray-darker'}`,
         { id: 'runStatusBadge' },
         runStatus,
-      )
-      : h('span', spinner(1));
+      ),
+    ],
+  );
+
+export const lastUpdatePanel = (runStatus, lastRefresh, refreshRate = 15000) => {
+  const shouldShowTimestamp = runStatus === RunStatus.ONGOING || runStatus === RunStatus.ENDED;
+
   const formatDateTime = (dateStr) =>
     new Date(dateStr).toLocaleString('en-GB'); // dd/mm/yyyy, hh:mm:ss
 
-  const lastUpdatePanel = (runStatus) => [
+  return shouldShowTimestamp && h('.flex-row.g1.items-center.justify-center.f7.gray-darker.text-center', [
     h(
       'span',
       { id: 'lastUpdate' },
@@ -53,17 +51,5 @@ export const runStatusPanel = ({ runNumber, runStatus, lastRefresh, refreshRate 
         { id: 'refreshInfo' },
         ` - As run is ONGOING, will refresh every ${refreshRate / 1000} seconds`,
       ),
-  ];
-  const shouldShowTimestamp = runStatus === RunStatus.ONGOING || runStatus === RunStatus.ENDED;
-
-  return runNumber && runStatus && h('.flex-column', [
-    h('.flex-row.g1.items-center.justify-center', { id: 'runStatusPanel' }, [
-      runNumberPanel,
-      statusPanel(runStatus),
-    ]),
-    shouldShowTimestamp && h(
-      '.flex-row.g1.items-center.justify-center.f7.gray-darker.text-center',
-      lastUpdatePanel(runStatus),
-    ),
   ]);
 };
