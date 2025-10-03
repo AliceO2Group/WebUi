@@ -99,9 +99,9 @@ export const qcObjectIdDto =
   Joi.string().required().trim().min(1).messages({ 'string.empty': 'Missing object ID in URL' });
 
 /**
- * Joi calidation schema for downloading a ROOT object trough the QcdbProxy
+ * Joi calidation schema for downloading ROOT objects trough the QcdbProxy
  */
 export const ObjectGetDownloadDTO = Joi.object({
   token: Joi.string().required(),
-  objectId: Joi.string().required(),
+  objectIds: [Joi.array().min(1).items(Joi.string()).required(), Joi.string().required()],
 });

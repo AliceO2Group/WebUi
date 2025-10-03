@@ -25,10 +25,10 @@ export class ObjectController {
   /**
    * Setup Object Controller:
    * - CcdbService - retrieve data about objects
-   * @import { QcdbProxyService } from '../services/QcdbProxy.service.js';
+   * @import { QcdbDownloadService } from '../services/QcdbDownload.service.js';
    * @param {QCObjectService} objService - objService to be used for retrieval of information
    * @param {RunMonitoringService} runModeService - for monitoring the status of runs periodically
-   * @param {QcdbProxyService} qcdbProxyService - service that will proxy our request to qcdb and back.
+   * @param {QcdbDownloadService} qcdbProxyService - service that will proxy our request to qcdb and back.
    */
   constructor(objService, runModeService, qcdbProxyService) {
     /**
@@ -37,8 +37,8 @@ export class ObjectController {
     this._objService = objService;
 
     /**
-     * @type {QcdbProxyService}
-     * @import { QcdbProxyService } from '../services/QcdbProxy.service.js';
+     * @type {QcdbDownloadService}
+     * @import { QcdbDownloadService } from '../services/QcdbDownload.service.js';
      */
     this._qcdbProxyService = qcdbProxyService;
 
@@ -79,16 +79,17 @@ export class ObjectController {
   }
 
   /**
-   * Download a ROOT object using the QcdbProxy.
+   * Download ROOT objects using the QcdbProxy.
+   * Only support 1 root object for now.
    * @param {Request} req - ExpressJs req object.
    * @param {Response} res - ExpressJs res object.
    * @returns {void}
    */
-  async getDownloadObject(req, res) {
-    let objectId = undefined;
+  async getDownloadObjects(req, res) {
+    let objectIds = undefined;
     try {
       const validated = await ObjectGetDownloadDTO.validateAsync(req.query);
-      ({ objectId } = validated);
+      ({ objectIds } = validated);
     } catch (e) {
       const responseError = e.isJoi ?
         new InvalidInputError(`Invalid query parameters: ${e.details[0].message}`) :
@@ -97,8 +98,7 @@ export class ObjectController {
       this._logger.errorMessage(`Error validating query parameters: ${e}`);
       return updateAndSendExpressResponseFromNativeError(res, responseError);
     }
-    req.url = `download/${objectId}`;
-    this._qcdbProxyService.qcdbProxyRouter(req, res);
+    this._qcdbProxyService.getQcdbRootObjects(objectIds, res);
   }
 
   /**

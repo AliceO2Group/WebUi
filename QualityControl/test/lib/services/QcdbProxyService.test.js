@@ -15,7 +15,7 @@
 import { strictEqual } from 'node:assert';
 import { suite, test, before } from 'node:test';
 import nock from 'nock';
-import { QcdbProxyService } from '../../../lib/services/QcdbProxy.service.js';
+import { QcdbDownloadService } from '../../../lib/services/QcdbDownload.service.js';
 
 export const qcdbProxyServiceTestSuite = async () => {
   suite('CCDB Test Suite - ', () => {
@@ -23,7 +23,7 @@ export const qcdbProxyServiceTestSuite = async () => {
 
     suite('Creating a new QcdbProxy instance', () => {
       test('should successfully initialize QcdbProxyService', () => {
-        const qcdbProxyService = new QcdbProxyService
+        const qcdbProxyService = new QcdbDownloadService
         ({ hostname: 'ccdb-local', port: 8083, protocol: 'https', prefix: 'qc/' });
 
         strictEqual(qcdbProxyService._hostname, 'ccdb-local');
@@ -32,7 +32,7 @@ export const qcdbProxyServiceTestSuite = async () => {
       });
 
       test('should successfully initialize QcdbProxy with default values', () => {
-        const qcdbProxyService = new QcdbProxyService();
+        const qcdbProxyService = new QcdbDownloadService();
 
         strictEqual(qcdbProxyService._hostname, 'localhost');
         strictEqual(qcdbProxyService._port, 8080);

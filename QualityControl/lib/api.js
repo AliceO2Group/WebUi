@@ -67,7 +67,7 @@ export const setup = async (http, ws, eventEmitter) => {
     objectController.getObjects.bind(objectController),
   );
 
-  http.get('/object/proxy/download/', objectController.getDownloadObject.bind(objectController));
+  http.get('/object/proxy/download/', objectController.getDownloadObjects.bind(objectController));
 
   http.get('/layouts', layoutController.getLayoutsHandler.bind(layoutController));
   http.get('/layout/:id', layoutController.getLayoutHandler.bind(layoutController));
