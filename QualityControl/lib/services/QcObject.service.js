@@ -187,12 +187,14 @@ export class QcObjectService {
     const { tab, chart } = object;
     const { name: tabName, layout } = tab;
     const { name: layoutName } = layout;
-    const { object_name: name, ignore_defaults: ignoreDefaults, chartOptions: options } = chart;
+    const { object_name: name, ignore_defaults: ignoreDefaults, chartOptions } = chart;
+    const layoutDisplayOptions =
+      chartOptions?.length > 0 ? chartOptions.map((chartOption) => chartOption.option.name) : [];
 
     const qcObject = await this.retrieveQcObject({ path: name, validFrom, id, filters });
     return {
       ...qcObject,
-      layoutDisplayOptions: options,
+      layoutDisplayOptions,
       layoutName,
       tabName,
       ignoreDefaults,
