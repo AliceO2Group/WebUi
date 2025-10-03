@@ -60,7 +60,7 @@ export class GridTabCellRepository extends BaseRepository {
       },
     ];
 
-    return this.model.findAll({ where: { chart_id: chartId }, include });
+    return this.model.findOne({ where: { chart_id: chartId }, include });
   }
 
   /**
