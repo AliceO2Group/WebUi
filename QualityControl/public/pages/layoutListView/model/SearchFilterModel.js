@@ -117,7 +117,7 @@ export class SearchFilterModel extends BaseViewModel {
    * @returns {Array<Filter>} all active filters
    */
   getAllActive() {
-    return this.filters.values().filter((filter) => filter.isActive()).toArray();
+    return [...this.filters.values()].filter((f) => f.isActive());
   }
 
   /**
