@@ -24,7 +24,6 @@ import {
   DuplexMessageEvent,
 } from "../../models/message.model";
 import { ConnectionStatus } from "../../models/connection.model";
-import * as fs from "fs";
 import { gRPCAuthInterceptor } from "./Interceptors/grpc.auth.interceptor";
 import { SecurityContext } from "../../utils/security/SecurityContext";
 
