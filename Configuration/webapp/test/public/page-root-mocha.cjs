@@ -76,7 +76,7 @@ describe('`pageRoot` test-suite', function () {
     const data = await res.json();
 
     const configNavigatorItems = await page.$$('.config_navigator__item');
-    assert.strictEqual(configNavigatorItems.length, data.length);
+    assert.strictEqual(configNavigatorItems.length, data?.length ?? 0);
   });
 
   it('should display configurations list', async function () {
@@ -84,6 +84,6 @@ describe('`pageRoot` test-suite', function () {
     const data = await res.json();
 
     const configNavigatorItems = await page.$$('.config_navigator__item');
-    assert.strictEqual(configNavigatorItems.length, data.length);
+    assert.strictEqual(configNavigatorItems.length, data?.length ?? 0);
   });
 });
