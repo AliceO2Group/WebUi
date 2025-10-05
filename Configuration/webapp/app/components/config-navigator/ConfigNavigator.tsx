@@ -23,13 +23,21 @@ import ConfigNavigatorItem from './ConfigNavigatorItem';
  */
 export const ConfigNavigator = () => {
   const [configKeys, setConfigKeys] = useState<string[]>([]);
+  const [isError, setIsError] = useState(false);
 
   const fetchConfigurationKeys = async () => {
-    const res = await fetch('http://localhost:8080/api/api/configurations');
-    const data = (await res.json()) as string[];
-    const newConfigKeys = data?.map((key) => key.split('/').pop() ?? '');
-
-    setConfigKeys(newConfigKeys);
+    try {
+      const res = await fetch('http://localhost:8080/api/api/configurations');
+      const data = (await res.json()) as string[];
+      const newConfigKeys = data?.map((key) => key.split('/').pop() ?? '');
+      setConfigKeys(newConfigKeys);
+    } catch (_error) {
+      // temporarily disable the linting rule for this line
+      // fetching will be refactored once Tanstack Query is introduced
+      // eslint-disable-next-line no-console
+      console.error('Error while fetching configuration keys', _error);
+      setIsError(true);
+    }
   };
 
   useEffect(() => {
@@ -38,7 +46,11 @@ export const ConfigNavigator = () => {
 
   return (
     <List className="config_navigator">
-      {configKeys?.map((text) => <ConfigNavigatorItem key={text} title={text} />)}
+      {isError ? (
+        <p>Error while fetching configuration keys</p>
+      ) : (
+        configKeys?.map((text) => <ConfigNavigatorItem key={text} title={text} />)
+      )}
     </List>
   );
 };
