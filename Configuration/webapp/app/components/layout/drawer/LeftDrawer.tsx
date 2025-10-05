@@ -22,7 +22,8 @@ const DRAWER_WIDTH = 300;
 /**
  * LeftDrawer component
  * Represents the left sidebar of the application layout.
- * @param {PropsWithChildren} children - The children elements to render inside the drawer.
+ * @param {PropsWithChildren} props - The props of the component.
+ * @param {ReactElement} props.children - The children elements to render inside the drawer.
  * @returns {ReactElement} LeftDrawer
  */
 export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => (

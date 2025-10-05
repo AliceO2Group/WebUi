@@ -23,7 +23,8 @@ interface ContentHeaderProps {
 /**
  * Content component
  * Represents the header of the content area.
- * @param {string} currentPath - Current configuration path.
+ * @param {ContentHeaderProps} props - The props of the component.
+ * @param {string} props.currentPath - Current configuration path.
  * @returns {React.ReactElement} Content
  */
 export const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => (

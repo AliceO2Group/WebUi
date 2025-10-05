@@ -26,8 +26,9 @@ interface ConfigNavigatorItemProps {
 /**
  * ConfigNavigatorItem component
  * Represents an item in the configuration navigator.
- * @param {string} title - The title of the configuration item.
- * @param {function} onClick - Callback function to handle item click.
+ * @param {ConfigNavigatorItemProps} props - The props of the component.
+ * @param {string} props.title - The title of the configuration item.
+ * @param {Function} props.onClick - Callback function to handle item click.
  * @returns {React.ReactElement} ConfigNavigatorItem
  */
 const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = ({ title, onClick }) => (
