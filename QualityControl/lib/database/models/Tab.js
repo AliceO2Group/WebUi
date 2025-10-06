@@ -59,6 +59,12 @@ export default (sequelize) => {
     underscored: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
+    indexes: [
+      {
+        unique: true,
+        fields: ['layout_id', 'name'],
+      },
+    ],
   });
 
   TabModel.associate = (models) => {
