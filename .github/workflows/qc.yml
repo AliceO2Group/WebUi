@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22.x'
       - run: (cd QualityControl; npm ci )
@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22.x'
       - run: (cd QualityControl; npm run docker-test )
@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22.x'
       - run: mkdir -p QualityControl/coverage 
