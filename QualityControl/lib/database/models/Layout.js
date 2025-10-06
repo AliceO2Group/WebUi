@@ -28,6 +28,7 @@ export default (sequelize) => {
     name: {
       type: STRING(40),
       allowNull: false,
+      unique: true,
     },
     description: {
       type: STRING(100),
