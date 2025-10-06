@@ -24,7 +24,7 @@ export const objectControllerTestSuite = async () => {
   let resMock = null;
   let objectController = null;
   let RunMonitoringServiceMock = null;
-  let CdbDownloadServiceMock = null;
+  let QcdbDownloadServiceMock = null;
 
   beforeEach(() => {
     resMock = {
@@ -45,10 +45,10 @@ export const objectControllerTestSuite = async () => {
       checkAndSetRunMonitoring: sinon.spy(),
       retrievePathsAndSetRunStatus: sinon.stub(),
     };
-    CdbDownloadServiceMock = {
+    QcdbDownloadServiceMock = {
       getQcdbRootObjects: sinon.spy(),
     };
-    objectController = new ObjectController(QcObjectServiceMock, RunMonitoringServiceMock, CdbDownloadServiceMock);
+    objectController = new ObjectController(QcObjectServiceMock, RunMonitoringServiceMock, QcdbDownloadServiceMock);
   });
 
   afterEach(() => {
@@ -201,7 +201,7 @@ export const objectControllerTestSuite = async () => {
         objectIds: mockObject.id,
       };
       await objectController.getDownloadObjects(reqMock, resMock);
-      ok(CdbDownloadServiceMock.getQcdbRootObjects.calledWith(mockObject.id, resMock));
+      ok(QcdbDownloadServiceMock.getQcdbRootObjects.calledWith(mockObject.id, resMock));
     });
 
     test('should fail when objectId is not present', async () => {

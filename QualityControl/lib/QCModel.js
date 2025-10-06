@@ -95,7 +95,7 @@ export const setupQcModel = async (eventEmitter) => {
   const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
   const statusController = new StatusController(statusService);
 
-  const qcdbProxyService = new QcdbDownloadService(config.ccdb);
+  const qcdbDownloadService = new QcdbDownloadService(config.ccdb);
 
   const ccdbService = CcdbService.setup(config.ccdb);
   statusService.dataService = ccdbService;
@@ -108,7 +108,7 @@ export const setupQcModel = async (eventEmitter) => {
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
   const filterService = new FilterService(bookkeepingService, config);
   const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService, eventEmitter);
-  const objectController = new ObjectController(qcObjectService, runModeService, qcdbProxyService);
+  const objectController = new ObjectController(qcObjectService, runModeService, qcdbDownloadService);
 
   const filterController = new FilterController(filterService, runModeService);
 
