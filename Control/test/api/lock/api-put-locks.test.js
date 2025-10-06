@@ -149,7 +149,6 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
   });
 
   it('should successfully FORCE take ALL available lock as Admin user', async () => {
-    console.log('herreeeeeeee')
     await request(`${TEST_URL}/api/locks`)
       .put(`/force/${DetectorLockAction.TAKE}/ALL?token=${ADMIN_TEST_TOKEN}`)
       .expect(200, {
