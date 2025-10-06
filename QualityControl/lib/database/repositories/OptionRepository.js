@@ -16,7 +16,7 @@ import { BaseRepository } from './BaseRepository.js';
 
 /**
  * @typedef {object} OptionAttributes
- * @property {string} id - UUID
+ * @property {number} id - UUID
  * @property {string} name - unique name of the option
  * @property {string} type - type of the option (e.g., string, number, boolean)
  * @property {Date} created_at - timestamp when the option was created
@@ -38,6 +38,6 @@ export class OptionRepository extends BaseRepository {
    * @returns {Promise<OptionAttributes|null>} The option found or null if not found
    */
   async findOptionByName(name, options = {}) {
-    return this.model.findOne({ where: { name }, ...options });
+    return super.findOne({ name }, { ...options });
   }
 }

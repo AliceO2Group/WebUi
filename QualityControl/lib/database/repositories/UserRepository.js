@@ -15,7 +15,7 @@ import { BaseRepository } from './BaseRepository.js';
 
 /**
  * @typedef {object} UserAttributes
- * @property {string} id - UUID
+ * @property {number} id - personId
  * @property {string} username - unique username
  * @property {string} name - full name of the user
  * @property {Date} created_at - date of creation
@@ -40,9 +40,7 @@ export class UserRepository extends BaseRepository {
    * @returns {Promise<User|null>} A promise that resolves to the user object if found, otherwise null.
    */
   async findUser(filters) {
-    return await this.model.findOne({
-      where: filters,
-    });
+    return await super.findOne(filters);
   }
 
   /**
@@ -51,6 +49,6 @@ export class UserRepository extends BaseRepository {
    * @returns {Promise<UserAttributes>} The created user
    */
   async createUser(userData) {
-    return this.model.create(userData);
+    return this.create(userData);
   }
 }

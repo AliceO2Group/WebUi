@@ -65,7 +65,7 @@ export const chartRepositoryTestSuite = () => {
     test('should update an existing chart', async () => {
       const chartId = 'chart1';
       const updateData = { object_name: 'Updated Chart', ignore_defaults: true };
-      mockChartModel.update.resolves([1]); // Simulate one row updated
+      mockChartModel.update.resolves(1); // Simulate one row updated
 
       const result = await chartRepository.updateChart(chartId, updateData, { transaction: 'tx' });
       strictEqual(result, 1);

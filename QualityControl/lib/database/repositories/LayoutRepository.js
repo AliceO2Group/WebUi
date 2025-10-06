@@ -17,7 +17,7 @@ import { Op, UniqueConstraintError } from 'sequelize';
 
 /**
  * @typedef {object} LayoutAttributes
- * @property {string} id - UUID
+ * @property {number} id - UUID
  * @property {string} name - unique name of the layout
  * @property {string} [description] - optional description of the layout
  * @property {boolean} display_timestamp - whether to display the timestamp
@@ -70,7 +70,7 @@ export class LayoutRepository extends BaseRepository {
    * @returns {Promise<LayoutAttributes|null>} Layout found or null
    */
   async findLayoutById(id) {
-    return this.model.findByPk(id, { include: this._layoutInfoToInclude });
+    return super.findById(id, { include: this._layoutInfoToInclude });
   }
 
   /**
@@ -79,10 +79,7 @@ export class LayoutRepository extends BaseRepository {
    * @returns {Promise<LayoutAttributes|null>} Layout found or null
    */
   async findLayoutByName(name) {
-    return this.model.findOne({
-      where: { name },
-      include: this._layoutInfoToInclude,
-    });
+    return super.findOne({ name }, { include: this._layoutInfoToInclude });
   }
 
   /**
@@ -90,9 +87,7 @@ export class LayoutRepository extends BaseRepository {
    * @returns {Promise<LayoutAttributes[]>} Array of layouts found
    */
   async findAllLayouts() {
-    return this.model.findAll({
-      include: this._layoutInfoToInclude,
-    });
+    return super.findAll({ include: this._layoutInfoToInclude });
   }
 
   /**
@@ -155,7 +150,7 @@ export class LayoutRepository extends BaseRepository {
    */
   async createLayout(layoutData, options = {}) {
     try {
-      const newLayout = await this.model.create(layoutData, { ...options });
+      const newLayout = await this.create(layoutData, { ...options });
       return newLayout;
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
@@ -168,14 +163,14 @@ export class LayoutRepository extends BaseRepository {
 
   /**
    * Updates an existing layout by ID
-   * @param {string} id id of the layout to update
+   * @param {string} layoutId id of the layout to update
    * @param {Partial<LayoutAttributes>} updateData updated layout
    * @param {object} options Sequelize update options (e.g. transaction)
    * @returns {Promise<number>} Number of updated rows
    */
-  async updateLayout(id, updateData, options = {}) {
+  async updateLayout(layoutId, updateData, options = {}) {
     try {
-      const [updatedCount] = await this.model.update(updateData, { where: { id }, ...options });
+      const updatedCount = await super.update(layoutId, updateData, { ...options });
       return updatedCount;
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
@@ -189,9 +184,10 @@ export class LayoutRepository extends BaseRepository {
   /**
    * Deletes a layout by ID
    * @param {string} id Id of the layout to delete
+   * @param {object} options Sequelize delete options (e.g. transaction)
    * @returns {Promise<number>} Number of deleted rows
    */
-  async deleteLayout(id) {
-    return this.model.destroy({ where: { id } });
+  async deleteLayout(id, options = {}) {
+    return this.delete(id, { ...options });
   }
 }

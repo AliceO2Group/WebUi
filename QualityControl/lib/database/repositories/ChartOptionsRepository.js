@@ -34,7 +34,7 @@ export class ChartOptionsRepository extends BaseRepository {
    * @returns {Promise<ChartOptionAttributes>} The created chart option.
    */
   async createChartOption(optionData, options = {}) {
-    return this.model.create(optionData, { ...options });
+    return super.create(optionData, { ...options });
   }
 
   /**
@@ -44,7 +44,7 @@ export class ChartOptionsRepository extends BaseRepository {
    * @returns {Promise<ChartOptionAttributes[]>} List of chart options.
    */
   async findChartOptionsByChartId(chartId, options = {}) {
-    return this.model.findAll({ where: { chart_id: chartId }, ...options });
+    return super.findAll({ where: { chart_id: chartId }, ...options });
   }
 
   /**

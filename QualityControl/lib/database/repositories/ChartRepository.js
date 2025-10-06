@@ -15,7 +15,7 @@ import { BaseRepository } from './BaseRepository.js';
 
 /**
  * @typedef {object} ChartAttributes
- * @property {string} id id of the chart
+ * @property {number} id id of the chart
  * @property {string} object_name name of the object
  * @property {boolean} ignore_defaults whether to ignore defaults
  */
@@ -30,43 +30,42 @@ export class ChartRepository extends BaseRepository {
 
   /**
    * Finds a chart by its ID.
-   * @param {string} chartId id of the chart
-   * @param {object} options additional options for the query (e.g. transaction)
+   * @param {number} chartId id of the chart
+   * @param {object} [options={}] additional options for the query
    * @returns {Promise<ChartAttributes|null>} The chart or null if not found.
    */
   async findChartById(chartId, options = {}) {
-    return this.model.findByPk(chartId, { ...options });
+    return super.findById(chartId, { ...options });
   }
 
   /**
    * Creates a new chart.
    * @param {Partial<ChartAttributes>} chartData new chart data
-   * @param {object} options additional options for the creation (e.g. transaction)
+   * @param {object} [options={}] additional options for the creation (e.g. transaction)
    * @returns {Promise<ChartAttributes>} The created chart.
    */
   async createChart(chartData, options = {}) {
-    return this.model.create(chartData, { ...options });
+    return super.create(chartData, { ...options });
   }
 
   /**
    * Updates an existing chart.
-   * @param {string} chartId id of the chart to update
+   * @param {number} chartId id of the chart to update
    * @param {Partial<ChartAttributes>} updateData new chart data
-   * @param {object} options additional options for the update (e.g. transaction)
+   * @param {object} [options={}] additional options for the update (e.g. transaction)
    * @returns {Promise<number>} Number of updated rows (0 or 1).
    */
   async updateChart(chartId, updateData, options = {}) {
-    const [updatedCount] = await this.model.update(updateData, { where: { id: chartId }, ...options });
-    return updatedCount;
+    return super.update(chartId, updateData, { ...options });
   }
 
   /**
    * Deletes a chart.
-   * @param {string} chartId id of the chart
-   * @param {object} options additional options for the deletion (e.g. transaction)
+   * @param {number} chartId id of the chart
+   * @param {object} [options={}] additional options for the deletion (e.g. transaction)
    * @returns {Promise<number>} Number of deleted rows (0 or 1).
    */
   async deleteChart(chartId, options = {}) {
-    return this.model.destroy({ where: { id: chartId }, ...options });
+    return super.delete(chartId, { ...options });
   }
 }

@@ -12,13 +12,15 @@
  * or submit itself to any jurisdiction.
  */
 
+import { UniqueConstraintError } from 'sequelize';
 import { BaseRepository } from './BaseRepository.js';
+import { InvalidInputError } from '@aliceo2/web-ui';
 
 /**
  * @typedef {object} TabAttributes
- * @property {string} id - UUID
+ * @property {number} id - UUID
  * @property {string} name - name of the tab
- * @property {string} layout_id - ID of the associated layout
+ * @property {number} layout_id - ID of the associated layout
  * @property {number} column_count - number of columns in the tab
  * @property {Date} created_at - timestamp when the tab was created
  * @property {Date} updated_at - timestamp when the tab was last updated
@@ -39,7 +41,7 @@ export class TabRepository extends BaseRepository {
    * @returns {Promise<TabAttributes[]>} List of tabs found
    */
   async findTabsByLayoutId(layoutId, options = {}) {
-    return this.model.findAll({ where: { layout_id: layoutId }, ...options });
+    return super.findAll({ where: { layout_id: layoutId }, ...options });
   }
 
   /**
@@ -49,7 +51,7 @@ export class TabRepository extends BaseRepository {
    * @returns {Promise<TabAttributes|null>} The tab or null if not found
    */
   async findTabById(id, options = {}) {
-    return this.model.findByPk(id, options);
+    return super.findById(id, options);
   }
 
   /**
@@ -59,7 +61,15 @@ export class TabRepository extends BaseRepository {
    * @returns {Promise<TabAttributes>} The created tab
    */
   async createTab(tabData, options = {}) {
-    return this.model.create(tabData, options);
+    try {
+      return super.create(tabData, options);
+    } catch (error) {
+      if (error instanceof UniqueConstraintError) {
+        const message = `A tab with name "${tabData.name}" already exists for layout ID "${tabData.layout_id}".`;
+        throw new InvalidInputError(message);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -70,8 +80,16 @@ export class TabRepository extends BaseRepository {
    * @returns {Promise<number>} Number of updated rows
    */
   async updateTab(id, updateData, options = {}) {
-    const [updatedCount] = await this.model.update(updateData, { where: { id }, ...options });
-    return updatedCount;
+    try {
+      const updatedCount = await super.update(id, updateData, { ...options });
+      return updatedCount;
+    } catch (error) {
+      if (error instanceof UniqueConstraintError) {
+        const message = `A tab with name "${updateData.name}" already exists for layout ID "${updateData.layout_id}".`;
+        throw new InvalidInputError(message);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -81,6 +99,6 @@ export class TabRepository extends BaseRepository {
    * @returns {Promise<number>} Number of deleted rows
    */
   async deleteTab(id, options = {}) {
-    return this.model.destroy({ where: { id }, ...options });
+    return super.delete(id, options);
   }
 }

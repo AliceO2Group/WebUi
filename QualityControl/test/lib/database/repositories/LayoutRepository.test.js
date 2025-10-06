@@ -161,11 +161,11 @@ export const layoutRepositoryTestSuite = () => {
     test('should update a layout', async () => {
       const layoutId = '1';
       const updateData = { name: 'Updated Layout' };
-      const [updateCount] = [1];
-      mockLayoutModel.update.resolves([updateCount]);
+      const updateCount = 1;
+      mockLayoutModel.update.resolves(updateCount);
 
-      const result = await layoutRepository.updateLayout(layoutId, updateData);
-      strictEqual(result, updateCount);
+      const affectedCount = await layoutRepository.updateLayout(layoutId, updateData);
+      strictEqual(affectedCount, updateCount);
       ok(mockLayoutModel.update.calledOnceWith(updateData, { where: { id: layoutId } }));
     });
 

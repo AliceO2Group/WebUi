@@ -36,4 +36,66 @@ export class BaseRepository {
   get model() {
     return this._model;
   }
+
+  /**
+   * Finds a record by its primary key.
+   * @param {number} id - The primary key of the record to find.
+   * @param {object} [options={}] - Additional options for the query.
+   * @returns {Promise<Model|null>} A promise that resolves to the found record or null if not found.
+   */
+  async findById(id, options = {}) {
+    return this._model.findByPk(id, options);
+  }
+
+  /**
+   * Finds a single record that matches the given constraints.
+   * @param {object} [constraints={}] - Constraints to filter the records.
+   * @param {object} [options={}] - Additional options for the query.
+   * @returns {Promise<Model|null>} A promise that resolves to the found record or null if not found.
+   */
+  async findOne(constraints = {}, options = {}) {
+    return this._model.findOne({ where: constraints, ...options });
+  }
+
+  /**
+   * Finds all records that match the given options.
+   * @param {object} [constraints={}] - Constraints to filter the records.
+   * @param {object} [options={}] - Options for filtering, sorting, and including related models.
+   * @returns {Promise<Model[]>} A promise that resolves to an array of found records.
+   */
+  async findAll(options = {}) {
+    return this._model.findAll({ ...options });
+  }
+
+  /**
+   * Creates a new record in the database.
+   * @param {object} item - The data for the new record.
+   * @param {object} [options={}] - Additional options for the creation.
+   * @returns {Promise<Model>} A promise that resolves to the created record.
+   */
+  async create(item, options = {}) {
+    return this._model.create(item, options);
+  }
+
+  /**
+   * Updates an existing record in the database.
+   * @param {number} id - The primary key of the record to update.
+   * @param {object} updateData - The data to update the record with.
+   * @param {object} [options={}] - Additional options for the update.
+   * @returns {Promise<number>} A promise that resolves to the number of records updated.
+   */
+  async update(id, updateData, options = {}) {
+    const updatedCount = await this._model.update(updateData, { where: { id }, ...options });
+    return updatedCount;
+  }
+
+  /**
+   * Deletes a record from the database.
+   * @param {number} id - The primary key of the record to delete.
+   * @param {object} [options={}] - Additional options for the deletion.
+   * @returns {Promise<number>} A promise that resolves to the number of records deleted.
+   */
+  async delete(id, options = {}) {
+    return this._model.destroy({ where: { id }, ...options });
+  }
 }

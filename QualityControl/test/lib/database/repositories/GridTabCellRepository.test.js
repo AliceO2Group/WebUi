@@ -81,18 +81,17 @@ export const gridTabCellRepositoryTestSuite = () => {
       ok(mockGridTabCellModel.create.calledOnceWith(newCellData));
     });
 
-    test('should update a grid tab cell by chart ID and tab ID', async () => {
-      const chartId = 'chart123';
-      const tabId = 'tab123';
+    test('should update a grid tab cell by cell ID', async () => {
+      const cellId = 1;
       const updateData = { some_field: 'newValue' };
       const updatedCount = 1;
-      mockGridTabCellModel.update.resolves([updatedCount]);
+      mockGridTabCellModel.update.resolves(updatedCount);
 
-      const result = await gridTabCellRepository.updateGridTabCell({ chartId, tabId }, updateData);
+      const result = await gridTabCellRepository.updateGridTabCell(cellId, updateData);
       strictEqual(result, updatedCount);
       ok(mockGridTabCellModel.update.calledOnceWith(
         updateData,
-        { where: { chart_id: chartId, tab_id: tabId } },
+        { where: { id: cellId } },
       ));
     });
   });
