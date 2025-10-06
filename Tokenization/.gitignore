@@ -3,6 +3,13 @@ webapp/node_modules
 webapp/.react-router
 webapp/build
 backend/node_modules
-backend/certs
 backend/central-system/dist
 backend/central-system/node_modules
+backend/central-system/dist
+backend/certs
+backend/central-system/ca
+backend/central-system/vault
+backend/central-system/crt
+backend/central-system/policies
+central-system.hcl
+backend/central-system/.env
