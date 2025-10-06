@@ -103,5 +103,8 @@ export const qcObjectIdDto =
  */
 export const ObjectGetDownloadDTO = Joi.object({
   token: Joi.string().required(),
-  objectIds: [Joi.array().min(1).items(Joi.string()).required(), Joi.string().required()],
+  objectIds: Joi.alternatives().try(
+    Joi.array().min(1).items(Joi.string()).required(),
+    Joi.string(),
+  ).required(),
 });

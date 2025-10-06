@@ -45,20 +45,20 @@ export class QcdbDownloadService {
    */
   async requestObject(objectId, res = undefined) {
     this._logger.infoMessage(`Object ID Request: ${objectId}`);
-    const myRequest = new Request(`${this._target}/download/${objectId}`, { method: 'GET' });
+    const qcdbRequest = new Request(`${this._target}/download/${objectId}`, { method: 'GET' });
     try {
-      const response = await fetch(myRequest);
+      const response = await fetch(qcdbRequest);
       if (!response.ok) {
         this._logger.errorMessage(`QCDB returned ${response.status} ${response.statusText}`);
         throw new Error(`Cannot get ROOT file from qcdb object id: ${objectId}`);
       }
+      const contentLength = response.headers.get('Content-Length');
       const contentType = response.headers.get('Content-Type');
       const contentDisposition = response.headers.get('Content-Disposition');
       const filename = contentDisposition?.slice(17, contentDisposition.length - 1);
+      this._logger.infoMessage(`ROOT size: ${contentLength}`);
       // We will stream the data from QCDB's answer directly back to the user.
       if (res != undefined) {
-        const contentLength = response.headers.get('Content-Length');
-
         res.setHeader('Content-Type', contentType ?? 'application/root');
         res.setHeader('Content-Disposition', contentDisposition ?? `attachment; filename="${filename}"`);
         if (contentLength) {

@@ -28,9 +28,9 @@ export class ObjectController {
    * @import { QcdbDownloadService } from '../services/QcdbDownload.service.js';
    * @param {QCObjectService} objService - objService to be used for retrieval of information
    * @param {RunMonitoringService} runModeService - for monitoring the status of runs periodically
-   * @param {QcdbDownloadService} qcdbProxyService - service that will proxy our request to qcdb and back.
+   * @param {QcdbDownloadService} qcdbDownloadService - service that will download from qcdb.
    */
-  constructor(objService, runModeService, qcdbProxyService) {
+  constructor(objService, runModeService, qcdbDownloadService) {
     /**
      * @type {QCObjectService}
      */
@@ -40,7 +40,7 @@ export class ObjectController {
      * @type {QcdbDownloadService}
      * @import { QcdbDownloadService } from '../services/QcdbDownload.service.js';
      */
-    this._qcdbProxyService = qcdbProxyService;
+    this._qcdbDownloadService = qcdbDownloadService;
 
     /**
      * @type {RunMonitoringService}
@@ -98,7 +98,7 @@ export class ObjectController {
       this._logger.errorMessage(`Error validating query parameters: ${e}`);
       return updateAndSendExpressResponseFromNativeError(res, responseError);
     }
-    this._qcdbProxyService.getQcdbRootObjects(objectIds, res);
+    this._qcdbDownloadService.getQcdbRootObjects(objectIds, res);
   }
 
   /**

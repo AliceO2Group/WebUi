@@ -24,7 +24,7 @@ export const objectControllerTestSuite = async () => {
   let resMock = null;
   let objectController = null;
   let RunMonitoringServiceMock = null;
-  let qcdbProxyServiceMock = null;
+  let CdbDownloadServiceMock = null;
 
   beforeEach(() => {
     resMock = {
@@ -45,10 +45,10 @@ export const objectControllerTestSuite = async () => {
       checkAndSetRunMonitoring: sinon.spy(),
       retrievePathsAndSetRunStatus: sinon.stub(),
     };
-    qcdbProxyServiceMock = {
-      qcdbProxyRouter: sinon.spy(),
+    CdbDownloadServiceMock = {
+      getQcdbRootObjects: sinon.spy(),
     };
-    objectController = new ObjectController(QcObjectServiceMock, RunMonitoringServiceMock, qcdbProxyServiceMock);
+    objectController = new ObjectController(QcObjectServiceMock, RunMonitoringServiceMock, CdbDownloadServiceMock);
   });
 
   afterEach(() => {
@@ -189,31 +189,31 @@ export const objectControllerTestSuite = async () => {
     });
   });
 
-  suite('getDownloadObject() tests', () => {
+  suite('getDownloadObjects() tests', () => {
     const mockObject = {
       id: '21a6de32-ce79-11ef-936b-c0a80209250c',
       path: 'qc/path/object',
       validFrom: 1736420279131,
     };
-
-    test('should successfully transform url', async () => {
+    test('should successfully call getQcdbRootObjects with objectIds', async () => {
       reqMock.query = {
         token: 'some token',
-        objectId: mockObject.id,
+        objectIds: mockObject.id,
       };
-      await objectController.getDownloadObject(reqMock, resMock);
-      const reqMockExp = reqMock;
-      reqMockExp.url = `download/${mockObject.id}`;
-      ok(qcdbProxyServiceMock.qcdbProxyRouter.calledWith(reqMockExp, resMock));
+      await objectController.getDownloadObjects(reqMock, resMock);
+      ok(CdbDownloadServiceMock.getQcdbRootObjects.calledWith(mockObject.id, resMock));
     });
 
     test('should fail when objectId is not present', async () => {
+      reqMock.query = {
+        token: 'some token',
+      };
       const responseMsg = {
-        message: 'Invalid query parameters: "objectId" is required',
+        message: 'Invalid query parameters: "objectIds" is required',
         status: 400,
         title: 'Invalid Input'
       };
-      await objectController.getDownloadObject(reqMock, resMock);
+      await objectController.getDownloadObjects(reqMock, resMock);
       ok(resMock.status.calledWith(400));
       ok(resMock.json.calledWith(responseMsg));
     });
