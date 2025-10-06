@@ -81,13 +81,6 @@ export const qcdbDownloadServiceTestSuite = async () => {
         resMock.on('data', (d) => {
           data = Buffer.concat([data, d]);
         });
-        // const resMock = {
-        //   status: sinon.stub().returnsThis(),
-        //   send: sinon.spy(),
-        //   json: sinon.spy(),
-        //   body: '',
-        //   setHeader: sinon.stub(),
-        // };
         const _filename = fileURLToPath(import.meta.url);
         const _dirname = dirname(_filename);
         const filePath = join(_dirname, '../../demoData/qcdbRoot/TObject_1732326337752.root');
