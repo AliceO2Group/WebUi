@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { INTEGER, STRING, DATE, NOW } from 'sequelize';
+import { INTEGER, DATE, NOW } from 'sequelize';
 
 /**
  * GridTabCell model that represents the association between charts in a grid and tabs.
@@ -22,11 +22,12 @@ export default (sequelize) => {
   const GridTabCell = sequelize.define('GridTabCell', {
     id: {
       type: INTEGER,
+      allowNull: false,
       primaryKey: true,
       autoIncrement: true,
     },
     chart_id: {
-      type: STRING(250),
+      type: INTEGER,
       allowNull: false,
       references: {
         model: 'Chart',
@@ -42,7 +43,7 @@ export default (sequelize) => {
       allowNull: false,
     },
     tab_id: {
-      type: STRING(250),
+      type: INTEGER,
       allowNull: false,
       references: {
         model: 'Tab',
@@ -74,8 +75,8 @@ export default (sequelize) => {
     createdAt: 'created_at',
     updatedAt: 'updated_at',
     uniqueKeys: {
-      unique_chart_per_cell: {
-        fields: ['chart_id', 'row', 'col'],
+      unique_grid_tab_cells: {
+        fields: ['chart_id', 'row', 'col', 'tab_id'],
       },
     },
   });

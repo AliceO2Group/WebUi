@@ -21,9 +21,15 @@ import { STRING, BOOLEAN, INTEGER, DATE, NOW } from 'sequelize';
 export default (sequelize) => {
   const LayoutModel = sequelize.define('Layout', {
     id: {
-      type: STRING(250),
+      type: INTEGER,
       allowNull: false,
       primaryKey: true,
+      autoIncrement: true,
+    },
+    old_id: {
+      type: STRING(100),
+      allowNull: true,
+      unique: true,
     },
     name: {
       type: STRING(40),

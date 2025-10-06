@@ -24,6 +24,7 @@ export default (sequelize) => {
       type: INTEGER,
       primaryKey: true,
       allowNull: false,
+      autoIncrement: false,
     },
     username: {
       type: STRING(250),

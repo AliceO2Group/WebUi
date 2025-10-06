@@ -23,7 +23,7 @@ export const up = async (queryInterface, Sequelize) => {
       type: Sequelize.INTEGER,
       allowNull: false,
       primaryKey: true,
-      autoIncrement: true,
+      autoIncrement: false,
     },
     username: {
       type: Sequelize.STRING(250),
@@ -49,9 +49,15 @@ export const up = async (queryInterface, Sequelize) => {
 
   await queryInterface.createTable('layouts', {
     id: {
-      type: Sequelize.STRING(250),
+      type: Sequelize.INTEGER,
       allowNull: false,
       primaryKey: true,
+      autoIncrement: true,
+    },
+    old_id: {
+      type: Sequelize.STRING(100),
+      allowNull: true,
+      unique: true,
     },
     name: {
       type: Sequelize.STRING(40),
@@ -99,16 +105,17 @@ export const up = async (queryInterface, Sequelize) => {
 
   await queryInterface.createTable('tabs', {
     id: {
-      type: Sequelize.STRING(250),
+      type: Sequelize.INTEGER,
       allowNull: false,
       primaryKey: true,
+      autoIncrement: true,
     },
     name: {
       type: Sequelize.STRING(50),
       allowNull: false,
     },
     layout_id: {
-      type: Sequelize.STRING(250),
+      type: Sequelize.INTEGER,
       allowNull: false,
       references: {
         model: 'layouts',
@@ -136,9 +143,10 @@ export const up = async (queryInterface, Sequelize) => {
 
   await queryInterface.createTable('charts', {
     id: {
-      type: Sequelize.STRING(250),
+      type: Sequelize.INTEGER,
       primaryKey: true,
       allowNull: false,
+      autoIncrement: true,
     },
     object_name: {
       type: Sequelize.STRING(255),
@@ -169,7 +177,7 @@ export const up = async (queryInterface, Sequelize) => {
       autoIncrement: true,
     },
     chart_id: {
-      type: Sequelize.STRING(250),
+      type: Sequelize.INTEGER,
       allowNull: false,
       references: {
         model: 'charts',
@@ -187,7 +195,7 @@ export const up = async (queryInterface, Sequelize) => {
       allowNull: false,
     },
     tab_id: {
-      type: Sequelize.STRING(250),
+      type: Sequelize.INTEGER,
       allowNull: false,
       references: {
         model: 'tabs',
@@ -230,11 +238,11 @@ export const up = async (queryInterface, Sequelize) => {
       autoIncrement: true,
     },
     name: {
-      type: Sequelize.STRING(255),
+      type: Sequelize.STRING(50),
       allowNull: false,
     },
     type: {
-      type: Sequelize.STRING(255),
+      type: Sequelize.STRING(50),
       allowNull: false,
     },
     created_at: {
@@ -257,7 +265,7 @@ export const up = async (queryInterface, Sequelize) => {
       autoIncrement: true,
     },
     chart_id: {
-      type: Sequelize.STRING(250),
+      type: Sequelize.INTEGER,
       allowNull: false,
       references: {
         model: 'charts',
