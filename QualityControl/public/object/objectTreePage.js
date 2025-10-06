@@ -96,15 +96,18 @@ const drawPlot = (model, object) => {
   const info = object;
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
     h('.resize-button.flex-row', [
-      h('.p1.text-left', { style: 'padding-bottom: 0;' }, h(
-        'a.btn',
-        {
-          title: 'Open object plot in full screen',
-          href,
-          onclick: (e) => model.router.handleLinkEvent(e),
-        },
-        iconResizeBoth(),
-      )),
+      h('.p1.text-left', { style: 'padding-bottom: 0;' }, [
+        model.services.object.getDownloadQcdbObjectElement(object.id),
+        h(
+          'a.btn',
+          {
+            title: 'Open object plot in full screen',
+            href,
+            onclick: (e) => model.router.handleLinkEvent(e),
+          },
+          iconResizeBoth(),
+        ),
+      ]),
     ]),
     h('', { style: 'height:77%;' }, draw(model, name, { stat: true })),
     h('.scroll-y', {}, [

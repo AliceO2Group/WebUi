@@ -37,7 +37,7 @@ export const objectInfoResizePanel = (model, tabObject) => {
     style: 'display: none; padding: .25rem .25rem 0rem .25rem;',
   }, [
 
-    h('', { style: 'padding-bottom: 0;' }, h('.dropdown.mh1', { class: isSelectedOpen ? 'dropdown-open' : '' }, [
+    h('.dropdown.mh1', { class: isSelectedOpen ? 'dropdown-open' : '' }, [
       h('button.btn', {
         title: 'View details about histogram',
         onclick: () => object.toggleInfoArea(name),
@@ -47,7 +47,8 @@ export const objectInfoResizePanel = (model, tabObject) => {
         { style: 'right:0.1em; width: 35em;left: auto;' },
         objectRemoteData.isSuccess() && h('.p1', qcObjectInfoPanel(objectRemoteData.payload)),
       ),
-    ])),
+    ]),
+    objectRemoteData.isSuccess() && model.services.object.getDownloadQcdbObjectElement(objectRemoteData.payload.id),
     h('a.btn', {
       title: 'Open object plot in full screen',
       href: uri,

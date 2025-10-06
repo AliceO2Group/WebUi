@@ -54,7 +54,7 @@ function page(model) {
     case 'layoutList': return LayoutListPage(model.layoutListModel);
     case 'layoutShow': return layoutViewPage(model);
     case 'objectTree': return objectTreePage(model);
-    case 'objectView': return ObjectViewPage(model.objectViewModel);
+    case 'objectView': return ObjectViewPage(model.objectViewModel, model.services.object);
     case 'about': return AboutViewPage(model);
 
     // Should be seen only at the first start when the view is not yet really to be shown (data loading)
