@@ -138,17 +138,18 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
       });
   });
 
-  it('should successfully FORCE take ALL available lock as Global user', async () => {
+  it('should fail to FORCE take ALL available lock as Global user', async () => {
     await request(`${TEST_URL}/api/locks`)
       .put(`/force/${DetectorLockAction.TAKE}/ALL?token=${GLOBAL_TEST_TOKEN}`)
-      .expect(200, {
-        MID: { name: 'MID', state: 'TAKEN', owner: { username: 'global', fullName: 'Global User', personid: 1 } },
-        DCS: { name: 'DCS', state: 'TAKEN', owner: { username: 'global', fullName: 'Global User', personid: 1 } },
-        ODC: { name: 'ODC', state: 'TAKEN', owner: { username: 'global', fullName: 'Global User', personid: 1 } },
+      .expect(403, {
+        message: 'Not enough permissions for this operation',
+        status: 403,
+        title: 'Unauthorized Access',
       });
   });
 
   it('should successfully FORCE take ALL available lock as Admin user', async () => {
+    console.log('herreeeeeeee')
     await request(`${TEST_URL}/api/locks`)
       .put(`/force/${DetectorLockAction.TAKE}/ALL?token=${ADMIN_TEST_TOKEN}`)
       .expect(200, {
@@ -198,7 +199,7 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
       });
   });
 
-  it('should successfully force release ALL locks from all users', async () => {
+  it('should fail to force release ALL locks from all users as global', async () => {
     // first we retake a lock to ensure we have a lock to release from different types of users
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.TAKE}/DCS?token=${GLOBAL_TEST_TOKEN}`)
@@ -210,6 +211,16 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
 
     await request(`${TEST_URL}/api/locks`)
       .put(`/force/${DetectorLockAction.RELEASE}/ALL?token=${GLOBAL_TEST_TOKEN}`)
+       .expect(403, {
+        message: 'Not enough permissions for this operation',
+        status: 403,
+        title: 'Unauthorized Access',
+      });
+  });
+
+  it('should successfully force release ALL locks from all users as admin', async () => {
+    await request(`${TEST_URL}/api/locks`)
+      .put(`/force/${DetectorLockAction.RELEASE}/ALL?token=${ADMIN_TEST_TOKEN}`)
       .expect(200, {
         MID: { name: 'MID', state: 'FREE' },
         DCS: { name: 'DCS', state: 'FREE' },
