@@ -13,7 +13,7 @@
 
 import { suite, test, beforeEach } from 'node:test';
 import { deepStrictEqual, ok, strictEqual } from 'node:assert';
-import sinon from 'sinon';
+import { stub, match } from 'sinon';
 import { GridTabCellRepository } from '../../../../lib/database/repositories/GridTabCellRepository.js';
 
 /**
@@ -27,13 +27,13 @@ export const gridTabCellRepositoryTestSuite = () => {
     beforeEach(() => {
       mockGridTabCellModel = {
         name: 'GridTabCell',
-        findAll: sinon.stub(),
-        findByPk: sinon.stub(),
-        create: sinon.stub(),
-        update: sinon.stub(),
-        destroy: sinon.stub(),
-        findOne: sinon.stub(),
-        bulkCreate: sinon.stub(),
+        findAll: stub(),
+        findByPk: stub(),
+        create: stub(),
+        update: stub(),
+        destroy: stub(),
+        findOne: stub(),
+        bulkCreate: stub(),
       };
       gridTabCellRepository = new GridTabCellRepository(mockGridTabCellModel);
     });
@@ -68,7 +68,7 @@ export const gridTabCellRepositoryTestSuite = () => {
       mockGridTabCellModel.findOne.resolves(expectedCell);
       const cell = await gridTabCellRepository.findObjectByChartId(chartId);
       deepStrictEqual(cell, expectedCell);
-      ok(mockGridTabCellModel.findOne.calledOnceWith({ where: { chart_id: chartId }, include: sinon.match.array }));
+      ok(mockGridTabCellModel.findOne.calledOnceWith({ where: { chart_id: chartId }, include: match.array }));
     });
 
     test('should create a new grid tab cell', async () => {

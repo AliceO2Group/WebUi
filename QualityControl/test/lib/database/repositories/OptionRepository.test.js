@@ -13,7 +13,7 @@
 
 import { suite, test, beforeEach } from 'node:test';
 import { ok, strictEqual } from 'node:assert';
-import sinon from 'sinon';
+import { stub } from 'sinon';
 import { OptionRepository } from '../../../../lib/database/repositories/OptionRepository.js';
 
 /**
@@ -26,7 +26,7 @@ export const optionRepositoryTestSuite = () => {
 
     beforeEach(() => {
       mockOptionModel = {
-        findOne: sinon.stub(),
+        findOne: stub(),
       };
       optionRepository = new OptionRepository(mockOptionModel);
     });

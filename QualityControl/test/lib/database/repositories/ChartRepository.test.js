@@ -13,7 +13,7 @@
 
 import { suite, test, beforeEach } from 'node:test';
 import { deepStrictEqual, ok, strictEqual } from 'node:assert';
-import sinon from 'sinon';
+import { stub } from 'sinon';
 import { ChartRepository } from '../../../../lib/database/repositories/ChartRepository.js';
 
 /**
@@ -27,12 +27,12 @@ export const chartRepositoryTestSuite = () => {
     beforeEach(() => {
       mockChartModel = {
         name: 'Chart',
-        findAll: sinon.stub(),
-        findByPk: sinon.stub(),
-        create: sinon.stub(),
-        update: sinon.stub(),
-        destroy: sinon.stub(),
-        findOne: sinon.stub(),
+        findAll: stub(),
+        findByPk: stub(),
+        create: stub(),
+        update: stub(),
+        destroy: stub(),
+        findOne: stub(),
       };
       chartRepository = new ChartRepository(mockChartModel);
     });

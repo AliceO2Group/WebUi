@@ -13,7 +13,7 @@
 
 import { suite, test, beforeEach } from 'node:test';
 import { deepStrictEqual, ok, strictEqual } from 'node:assert';
-import sinon from 'sinon';
+import { stub } from 'sinon';
 import { TabRepository } from '../../../../lib/database/repositories/TabRepository.js';
 
 /**
@@ -27,13 +27,13 @@ export const tabRepositoryTestSuite = () => {
     beforeEach(() => {
       mockTabModel = {
         name: 'Tab',
-        findAll: sinon.stub(),
-        findByPk: sinon.stub(),
-        create: sinon.stub(),
-        update: sinon.stub(),
-        destroy: sinon.stub(),
-        findOne: sinon.stub(),
-        bulkCreate: sinon.stub(),
+        findAll: stub(),
+        findByPk: stub(),
+        create: stub(),
+        update: stub(),
+        destroy: stub(),
+        findOne: stub(),
+        bulkCreate: stub(),
       };
       tabRepository = new TabRepository(mockTabModel);
     });
