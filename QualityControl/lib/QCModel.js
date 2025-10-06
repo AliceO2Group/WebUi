@@ -15,7 +15,6 @@
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { readFileSync } from 'fs';
-import { EventEmitter } from 'events';
 
 import { LogManager } from '@aliceo2/web-ui';
 import { openFile, toJSON } from 'jsroot';
@@ -54,9 +53,10 @@ const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/model-setup`;
 
 /**
  * Model initialization for the QCG application
+ * @param {EventEmitter} eventEmitter - Event emitter instance for inter-service communication
  * @returns {Promise<object>} Multiple services and controllers that are to be used by the QCG application
  */
-export const setupQcModel = async () => {
+export const setupQcModel = async (eventEmitter) => {
   const logger = LogManager.getLogger(LOG_FACILITY);
 
   const __filename = fileURLToPath(import.meta.url);
@@ -68,7 +68,6 @@ export const setupQcModel = async () => {
     initDatabase(new SequelizeDatabase(config?.database || {}));
   }
 
-  const eventEmitter = new EventEmitter();
   if (config?.kafka?.enabled) {
     try {
       const validConfig = await KafkaConfigDto.validateAsync(config.kafka);
@@ -109,7 +108,7 @@ export const setupQcModel = async () => {
   const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService, eventEmitter);
   const objectController = new ObjectController(qcObjectService, runModeService);
 
-  const filterController = new FilterController(filterService);
+  const filterController = new FilterController(filterService, runModeService);
 
   const objectGetByIdValidation = objectGetByIdValidationMiddlewareFactory(filterService);
   const objectsGetValidation = objectsGetValidationMiddlewareFactory(filterService);
