@@ -6,6 +6,13 @@ backend/wrapper/dist/
 backend/wrapper/node_modules/
 backend/wrapper/src/run_tests/
 backend/node_modules
-backend/certs
 backend/central-system/dist
 backend/central-system/node_modules
+backend/certs
+backend/central-system/ca
+backend/central-system/vault
+backend/central-system/crt
+backend/central-system/policies
+central-system.hcl
+backend/central-system/.env
+
