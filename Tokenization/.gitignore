@@ -7,3 +7,9 @@ backend/central-system/node_modules
 backend/external-connector/node_modules
 backend/central-system/dist
 backend/certs
+backend/central-system/ca
+backend/central-system/vault
+backend/central-system/crt
+backend/central-system/policies
+central-system.hcl
+backend/central-system/.env
