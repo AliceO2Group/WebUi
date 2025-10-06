@@ -42,36 +42,37 @@ export const userRepositoryTestSuite = () => {
       strictEqual(userRepository.model, mockUserModel);
     });
 
-    test('should have createUser method', async () => {
-      const userData = { username: 'testuser', name: 'Test User' };
-      const createdUser = { id: '1', ...userData };
-      mockUserModel.create.resolves(createdUser);
+    test('should find user by username', async () => {
+      const mockUser = { id: '1', username: 'testuser', name: 'Test User' };
+      mockUserModel.findOne.resolves(mockUser);
 
-      const result = await userRepository.createUser(userData);
-      deepStrictEqual(result, createdUser);
-      ok(mockUserModel.create.calledWith(userData));
-    });
+      const filters = { username: 'testuser' };
+      const result = await userRepository.findUser(filters);
 
-    test('should inherit from BaseRepository', () => {
-      ok(userRepository.model);
-    });
-
-    test('should handle user creation with minimal data', async () => {
-      const userData = { username: 'minimal' };
-      const createdUser = { id: '2', ...userData };
-      mockUserModel.create.resolves(createdUser);
-
-      const result = await userRepository.createUser(userData);
-      deepStrictEqual(result, createdUser);
-    });
-
-    test('should handle model operations', async () => {
-      const mockUser = { id: '1', username: 'testuser' };
-      mockUserModel.findByPk.resolves(mockUser);
-
-      const result = await userRepository.model.findByPk('1');
       deepStrictEqual(result, mockUser);
-      ok(mockUserModel.findByPk.calledWith('1'));
+      ok(mockUserModel.findOne.calledOnceWith({ where: filters }));
+    });
+
+    test('should filter user by id', async () => {
+      const mockUser = { id: '1', username: 'testuser', name: 'Test User' };
+      mockUserModel.findOne.resolves(mockUser);
+
+      const filters = { id: '1' };
+      const result = await userRepository.findUser(filters);
+
+      deepStrictEqual(result, mockUser);
+      ok(mockUserModel.findOne.calledOnceWith({ where: filters }));
+    });
+
+    test(' should create a new user', async () => {
+      const newUser = { username: 'newuser', name: 'New User' };
+      const createdUser = { id: '2', ...newUser };
+      mockUserModel.create.resolves(createdUser);
+
+      const result = await userRepository.createUser(newUser);
+
+      deepStrictEqual(result, createdUser);
+      ok(mockUserModel.create.calledOnceWith(newUser));
     });
   });
 };

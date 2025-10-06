@@ -28,10 +28,6 @@ import { BaseRepository } from './BaseRepository.js';
  * Repository for managing tabs.
  */
 export class TabRepository extends BaseRepository {
-  /**
-   * Creates an instance of the TabRepository
-   * @param {typeof Tab} tabModel - Sequelize Tab model
-   */
   constructor(tabModel) {
     super(tabModel);
   }
@@ -39,38 +35,52 @@ export class TabRepository extends BaseRepository {
   /**
    * Finds all tabs by layout ID
    * @param {string} layoutId id of the layout
-   * @returns {Promise<TabAttributes[]>}
+   * @param {object} options additional options for the query (e.g. transaction)
+   * @returns {Promise<TabAttributes[]>} List of tabs found
    */
-  async findTabsByLayoutId(layoutId) {
-    return this.model.findAll({ where: { layout_id: layoutId } });
+  async findTabsByLayoutId(layoutId, options = {}) {
+    return this.model.findAll({ where: { layout_id: layoutId }, ...options });
+  }
+
+  /**
+   * Finds a tab by its ID
+   * @param {string} id id of the tab
+   * @param {object} options additional options for the query (e.g. transaction)
+   * @returns {Promise<TabAttributes|null>} The tab or null if not found
+   */
+  async findTabById(id, options = {}) {
+    return this.model.findByPk(id, options);
   }
 
   /**
    * Creates a new tab
    * @param {Partial<TabAttributes>} tabData new tab
+   * @param options
    * @returns {Promise<TabAttributes>}
    */
-  async createTab(tabData) {
-    return this.model.create(tabData);
+  async createTab(tabData, options = {}) {
+    return this.model.create(tabData, options);
   }
 
   /**
    * Updates an existing tab by ID
    * @param {string} id id of the tab
    * @param {Partial<TabAttributes>} updateData updated tab
+   * @param {object} options - Sequelize options (e.g., transaction)
    * @returns {Promise<number>} Number of updated rows
    */
-  async updateTab(id, updateData) {
-    const [updatedCount] = await this.model.update(updateData, { where: { id } });
+  async updateTab(id, updateData, options = {}) {
+    const [updatedCount] = await this.model.update(updateData, { where: { id }, ...options });
     return updatedCount;
   }
 
   /**
    * Deletes a tab by ID
    * @param {string} id id of the tab
+   * @param {object} options - Sequelize options (e.g., transaction)
    * @returns {Promise<number>} Number of deleted rows
    */
-  async deleteTab(id) {
-    return this.model.destroy({ where: { id } });
+  async deleteTab(id, options = {}) {
+    return this.model.destroy({ where: { id }, ...options });
   }
 }

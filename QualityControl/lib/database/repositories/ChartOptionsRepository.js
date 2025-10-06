@@ -16,17 +16,13 @@ import { BaseRepository } from './BaseRepository.js';
 /**
  * @typedef {object} ChartOptionAttributes
  * @property {number} chart_id chart ID
- * @property {number} option_id - ID de la opción.
+ * @property {number} option_id - option ID
  */
 
 /**
  * Repository for managing chart options.
  */
 export class ChartOptionsRepository extends BaseRepository {
-  /**
-   * Creates an instance of the ChartOptionsRepository class
-   * @param {typeof ChartOption} chartOptionModel - Sequelize ChartOption model.
-   */
   constructor(chartOptionModel) {
     super(chartOptionModel);
   }
@@ -34,19 +30,21 @@ export class ChartOptionsRepository extends BaseRepository {
   /**
    * Creates a new chart option.
    * @param {Partial<ChartOptionAttributes>} optionData - Data for the new chart option.
+   * @param {object} options - Additional options for the creation (e.g. transaction).
    * @returns {Promise<ChartOptionAttributes>} The created chart option.
    */
-  async createChartOption(optionData) {
-    return this.model.create(optionData);
+  async createChartOption(optionData, options = {}) {
+    return this.model.create(optionData, { ...options });
   }
 
   /**
    * Finds all chart options by chart ID.
    * @param {number} chartId - Chart identifier.
+   * @param {object} options - Additional options for the query (e.g. transaction).
    * @returns {Promise<ChartOptionAttributes[]>} List of chart options.
    */
-  async findChartOptionsByChartId(chartId) {
-    return this.model.findAll({ where: { chart_id: chartId } });
+  async findChartOptionsByChartId(chartId, options = {}) {
+    return this.model.findAll({ where: { chart_id: chartId }, ...options });
   }
 
   /**
@@ -54,10 +52,11 @@ export class ChartOptionsRepository extends BaseRepository {
    * @param {object} params - identifiers
    * @param {number} params.chartId - Chart identifier.
    * @param {number} params.optionId - Option identifier.
+   * @param {object} options - Additional options for the deletion (e.g. transaction).
    * @returns {Promise<number>} Number of deleted records.
    */
-  async deleteChartOption(params) {
+  async deleteChartOption(params, options = {}) {
     const { chartId, optionId } = params;
-    return this.model.destroy({ where: { chart_id: chartId, option_id: optionId } });
+    return this.model.destroy({ where: { chart_id: chartId, option_id: optionId }, ...options });
   }
 }

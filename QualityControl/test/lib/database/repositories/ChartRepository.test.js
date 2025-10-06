@@ -42,45 +42,43 @@ export const chartRepositoryTestSuite = () => {
       strictEqual(chartRepository.model, mockChartModel);
     });
 
-    test('should inherit from BaseRepository', () => {
-      ok(chartRepository.model);
+    test('should find a chart by ID', async () => {
+      const chartId = 'chart1';
+      const foundChart = { id: chartId, object_name: 'Test Chart', ignore_defaults: false };
+      mockChartModel.findByPk.resolves(foundChart);
+
+      const result = await chartRepository.findChartById(chartId, { transaction: 'tx' });
+      deepStrictEqual(result, foundChart);
+      ok(mockChartModel.findByPk.calledOnceWith(chartId, { transaction: 'tx' }));
     });
 
-    test('should handle chart creation', async () => {
-      const chartData = { name: 'Test Chart', type: 'line' };
-      const createdChart = { id: '1', ...chartData };
+    test('should create a new chart', async () => {
+      const chartData = { id: 'chart2', object_name: 'New Chart', ignore_defaults: true };
+      const createdChart = { ...chartData };
       mockChartModel.create.resolves(createdChart);
 
-      const result = await chartRepository.model.create(chartData);
+      const result = await chartRepository.createChart(chartData, { transaction: 'tx' });
       deepStrictEqual(result, createdChart);
-      ok(mockChartModel.create.calledWith(chartData));
+      ok(mockChartModel.create.calledOnceWith(chartData, { transaction: 'tx' }));
     });
 
-    test('should handle chart retrieval', async () => {
-      const mockChart = { id: '1', name: 'Test Chart', type: 'bar' };
-      mockChartModel.findByPk.resolves(mockChart);
+    test('should update an existing chart', async () => {
+      const chartId = 'chart1';
+      const updateData = { object_name: 'Updated Chart', ignore_defaults: true };
+      mockChartModel.update.resolves([1]); // Simulate one row updated
 
-      const result = await chartRepository.model.findByPk('1');
-      deepStrictEqual(result, mockChart);
-      ok(mockChartModel.findByPk.calledWith('1'));
-    });
-
-    test('should handle chart updates', async () => {
-      const updateData = { name: 'Updated Chart' };
-      const updateResult = [1];
-      mockChartModel.update.resolves(updateResult);
-
-      const result = await chartRepository.model.update(updateData, { where: { id: '1' } });
-      deepStrictEqual(result, updateResult);
-      ok(mockChartModel.update.calledWith(updateData, { where: { id: '1' } }));
-    });
-
-    test('should handle chart deletion', async () => {
-      mockChartModel.destroy.resolves(1);
-
-      const result = await chartRepository.model.destroy({ where: { id: '1' } });
+      const result = await chartRepository.updateChart(chartId, updateData, { transaction: 'tx' });
       strictEqual(result, 1);
-      ok(mockChartModel.destroy.calledWith({ where: { id: '1' } }));
+      ok(mockChartModel.update.calledOnceWith(updateData, { where: { id: chartId }, transaction: 'tx' }));
+    });
+
+    test('should delete a chart by ID', async () => {
+      const chartId = 'chart1';
+      mockChartModel.destroy.resolves(1); // Simulate one row deleted
+
+      const result = await chartRepository.deleteChart(chartId, { transaction: 'tx' });
+      strictEqual(result, 1);
+      ok(mockChartModel.destroy.calledOnceWith({ where: { id: chartId }, transaction: 'tx' }));
     });
   });
 };

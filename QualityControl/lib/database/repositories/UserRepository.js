@@ -35,6 +35,17 @@ export class UserRepository extends BaseRepository {
   }
 
   /**
+   * Retrieves a user based on given filters.
+   * @param {object} filters - An object containing the criteria to search for.
+   * @returns {Promise<User|null>} A promise that resolves to the user object if found, otherwise null.
+   */
+  async findUser(filters) {
+    return await this.model.findOne({
+      where: filters,
+    });
+  }
+
+  /**
    * Creates a new user
    * @param {Partial<UserAttributes>} userData new user to create
    * @returns {Promise<UserAttributes>} The created user
