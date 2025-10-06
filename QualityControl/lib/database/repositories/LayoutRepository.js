@@ -14,8 +14,6 @@
 import { InvalidInputError } from '@aliceo2/web-ui';
 import { BaseRepository } from './BaseRepository.js';
 import { Op, UniqueConstraintError } from 'sequelize';
-import path from 'path';
-import fs from 'fs';
 
 /**
  * @typedef {object} LayoutAttributes
@@ -29,9 +27,6 @@ import fs from 'fs';
  * @property {Date} created_at - timestamp when the layout was created
  * @property {Date} updated_at - timestamp when the layout was last updated
  */
-
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
-const getLayoutsByChartQueryPath = path.join(__dirname, '../queries/getLayoutIdsWithChartObjectName.sql');
 
 /**
  * Repository for managing layouts.
@@ -67,7 +62,6 @@ export class LayoutRepository extends BaseRepository {
         attributes: ['id', 'username', 'name'],
       },
     ];
-    this.getLayoutsByChartQuery = fs.readFileSync(getLayoutsByChartQueryPath, 'utf8');
   }
 
   /**
@@ -112,8 +106,7 @@ export class LayoutRepository extends BaseRepository {
     const whereClause = {};
     if (objectPath) {
       const layoutIds = await this._getLayoutIdsByObjectPath(objectPath);
-
-      if (!layoutIds.length) {
+      if (layoutIds.length === 0) {
         return [];
       }
       whereClause.id = { [Op.in]: layoutIds };
@@ -130,11 +123,26 @@ export class LayoutRepository extends BaseRepository {
    * @returns {Promise<string[]>} Array of layout IDs
    */
   async _getLayoutIdsByObjectPath(objectPath) {
-    const results = await this.model.sequelize.query(this.getLayoutsByChartQuery, {
-      replacements: { objectPath: `%${objectPath}%` },
-      type: this.model.sequelize.QueryTypes.SELECT,
+    const layoutsWithMatchingCharts = await this.model.findAll({
+      include: [
+        {
+          association: 'tabs',
+          include: [
+            {
+              association: 'gridTabCells',
+              include: [
+                {
+                  association: 'chart',
+                  where: { object_name: { [Op.like]: `%${objectPath}%` } },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      attributes: ['id'],
     });
-    return results.map((r) => r.layout_id);
+    return layoutsWithMatchingCharts.map((layout) => layout.id);
   }
 
   /**

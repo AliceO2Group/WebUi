@@ -13,7 +13,7 @@
 
 import { suite, test, beforeEach } from 'node:test';
 import { deepStrictEqual, ok, strictEqual } from 'node:assert';
-import sinon from 'sinon';
+import { stub } from 'sinon';
 import { LayoutRepository } from '../../../../lib/database/repositories/LayoutRepository.js';
 import { Op } from 'sequelize';
 
@@ -28,12 +28,12 @@ export const layoutRepositoryTestSuite = () => {
     beforeEach(() => {
       mockLayoutModel = {
         name: 'Layout',
-        findAll: sinon.stub(),
-        findByPk: sinon.stub(),
-        create: sinon.stub(),
-        update: sinon.stub(),
-        destroy: sinon.stub(),
-        findOne: sinon.stub(),
+        findAll: stub(),
+        findByPk: stub(),
+        create: stub(),
+        update: stub(),
+        destroy: stub(),
+        findOne: stub(),
       };
       layoutRepository = new LayoutRepository(mockLayoutModel);
     });
@@ -79,24 +79,60 @@ export const layoutRepositoryTestSuite = () => {
       ok(mockLayoutModel.findAll.calledOnceWith({ include: layoutRepository._layoutInfoToInclude }));
     });
 
-    test('should find layouts by filters', async () => {
-      //mock _getLayoutIdsByObjectPath
-      sinon.stub(layoutRepository, '_getLayoutIdsByObjectPath').resolves(['1', '2']);
+    test('should filter layout by objectPath', async () => {
       const mockLayouts = [
-        { id: '1', name: 'Filtered Layout 1' },
-        { id: '2', name: 'Filtered Layout 2' },
+        {
+          id: '1',
+          name: 'Layout 1',
+          tabs: [
+            { objects: [{ name: 'ObjectA' }, { name: 'ObjectB' }] },
+            { objects: [{ name: 'ObjectC' }] },
+          ],
+        },
+        {
+          id: '2',
+          name: 'Layout 2',
+          tabs: [{ objects: [{ name: 'ObjectD' }] }],
+        },
       ];
-      const filters = { objectPath: 'ITS/MC/RT' };
+
+      stub(layoutRepository, '_getLayoutIdsByObjectPath').resolves(['1']);
+
+      layoutRepository.model.findAll = stub().resolves([mockLayouts[0]]);
+
+      const result = await layoutRepository.findLayoutsByFilters({ objectPath: 'objectb' });
+
+      deepStrictEqual(result, [mockLayouts[0]], 'Should return only layouts containing ObjectB');
+
+      ok(layoutRepository.model.findAll.calledOnceWithMatch({
+        where: { id: { [Op.in]: ['1'] } },
+        include: layoutRepository._layoutInfoToInclude,
+      }));
+
+      layoutRepository._getLayoutIdsByObjectPath.restore();
+    });
+
+    test('should return empty array if no layouts match objectPath filter', async () => {
+      stub(layoutRepository, '_getLayoutIdsByObjectPath').resolves([]);
+      const result = await layoutRepository.findLayoutsByFilters({ objectPath: 'nonexistent' });
+
+      deepStrictEqual(result, [], 'Should return empty array when no layouts match');
+      ok(layoutRepository.model.findAll.notCalled, 'findAll should not be called when no IDs are found');
+      layoutRepository._getLayoutIdsByObjectPath.restore();
+    });
+
+    test('should return all layouts when no filters are applied', async () => {
+      const mockLayouts = [
+        { id: '1', name: 'Layout 1' },
+        { id: '2', name: 'Layout 2' },
+      ];
       mockLayoutModel.findAll.resolves(mockLayouts);
-
-      const result = await layoutRepository.findLayoutsByFilters(filters);
-
+      const result = await layoutRepository.findLayoutsByFilters({});
       deepStrictEqual(result, mockLayouts);
-      ok(layoutRepository._getLayoutIdsByObjectPath.calledOnceWith('ITS/MC/RT'));
-      ok(mockLayoutModel.findAll.calledOnce, 'Expected findAll to be called once');
-      const [callArgs] = mockLayoutModel.findAll.getCall(0).args;
-      ok(callArgs.include, 'Expected include to be defined');
-      strictEqual(callArgs.where.id[Op.in].length, 2, 'Expected where clause to filter by two IDs');
+      ok(mockLayoutModel.findAll.calledOnceWithMatch({
+        where: {},
+        include: layoutRepository._layoutInfoToInclude,
+      }));
     });
 
     test('should find layout by name', async () => {
