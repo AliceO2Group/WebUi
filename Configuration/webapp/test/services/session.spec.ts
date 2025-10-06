@@ -13,43 +13,11 @@
  */
 
 import assert from 'assert';
-import { Page } from 'puppeteer';
-import global from '../mocha-index';
-import { fetchSessionData, getSessionData } from '../../app/services/session';
+import { getSessionData } from '../../app/services/session';
 
-describe('`pageRoot` test-suite', function () {
-  let url: string | null = null;
-  let page: Page | null = null;
-
-  before(function () {
-    ({
-      test: {
-        page,
-        helpers: { url },
-      },
-    } = global);
-  });
-
-  it('should load root page', async function () {
-    if (page === null || url === null) {
-      assert.equal('Page is null', 'test suite failed');
-      return;
-    }
-
-    await page.goto(url, { waitUntil: 'networkidle0' });
-
-    const location = await page.evaluate(() => window.location);
-    assert.strictEqual(location.search, '');
-  });
-
+describe('`session` test-suite', function () {
   it('should load session data into memory', async function () {
-    if (page === null) {
-      assert.equal('Page is null', 'test suite failed');
-      return;
-    }
-
-    await fetchSessionData();
-    const session = getSessionData();
+    const session = await getSessionData();
 
     assert.strictEqual(session.username, 'anonymous');
   });

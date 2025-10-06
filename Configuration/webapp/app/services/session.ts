@@ -17,7 +17,7 @@ const sessionData: Record<string, string> = {};
 /**
  * Function for fetching session data from the Control server
  */
-export async function fetchSessionData() {
+async function fetchSessionData() {
   // only to get the data from server redirect
   // (line 264, commit 3ba4600 of github.com/AliceO2Group/WebUi/blob/dev/Framework/Backend/http/server.js)
   // this should be replaced with endpoint designed for authentication only
@@ -32,7 +32,10 @@ export async function fetchSessionData() {
  * Function for reading session data fetched from the Control server
  * @returns {Record<string, string>} sessionData
  */
-export function getSessionData(): Record<string, string> {
+export async function getSessionData(): Promise<Record<string, string>> {
+  if (Object.keys(sessionData).length === 0) {
+    await fetchSessionData();
+  }
   return sessionData;
 }
 
