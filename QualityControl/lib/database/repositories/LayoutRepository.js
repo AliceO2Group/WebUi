@@ -106,7 +106,7 @@ export class LayoutRepository extends BaseRepository {
       }
       whereClause.id = { [Op.in]: layoutIds };
     }
-    return this.model.findAll({
+    return super.findAll({
       where: whereClause,
       include: this._layoutInfoToInclude,
     });
@@ -118,7 +118,7 @@ export class LayoutRepository extends BaseRepository {
    * @returns {Promise<string[]>} Array of layout IDs
    */
   async _getLayoutIdsByObjectPath(objectPath) {
-    const layoutsWithMatchingCharts = await this.model.findAll({
+    const layoutsWithMatchingCharts = await super.findAll({
       include: [
         {
           association: 'tabs',
@@ -150,7 +150,7 @@ export class LayoutRepository extends BaseRepository {
    */
   async createLayout(layoutData, options = {}) {
     try {
-      const newLayout = await this.create(layoutData, { ...options });
+      const newLayout = await super.create(layoutData, { ...options });
       return newLayout;
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
@@ -188,6 +188,6 @@ export class LayoutRepository extends BaseRepository {
    * @returns {Promise<number>} Number of deleted rows
    */
   async deleteLayout(id, options = {}) {
-    return this.delete(id, { ...options });
+    return super.delete(id, { ...options });
   }
 }

@@ -49,6 +49,6 @@ export class UserRepository extends BaseRepository {
    * @returns {Promise<UserAttributes>} The created user
    */
   async createUser(userData) {
-    return this.create(userData);
+    return super.create(userData);
   }
 }
