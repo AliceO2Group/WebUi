@@ -1,0 +1,141 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
+const assert = require('assert');
+
+async function selectReactOption(reactSelect, optionIndex) {
+  await reactSelect.click();
+  await setTimeout(() => {}, 100);
+  return reactSelect.$(`div[role="listbox"] div:nth-child(${optionIndex})`);
+}
+
+async function fillNumberInput(inputElement, number) {
+  return inputElement.type(number.toString());
+}
+
+async function fillAllFormFields(page, reactSelect1, reactSelect2, reactSelect3, expirationInput, button) {
+  const opt1 = await selectReactOption(reactSelect1, 1);
+  await opt1.click();
+  const select1Content = (await opt1.evaluate(el => el.textContent)).trim();
+
+  const opt2 = await selectReactOption( reactSelect2, 2);
+  await opt2.click();
+  const select2Content = (await opt2.evaluate(el => el.textContent)).trim();
+
+  const opt3 = await selectReactOption(reactSelect3, 1);
+  await opt3.click();
+  const select3Content = (await opt3.evaluate(el => el.textContent)).trim();
+
+  const filledNumber = 10;
+  await fillNumberInput(expirationInput, filledNumber);
+  await button.click();
+
+  const dialogHandle = await page.waitForSelector('.MuiDialog-paper');
+  const dialogContent = (await dialogHandle.evaluate(el => el.textContent)).trim();
+
+  return {
+    dialogHandle,
+    dialogContent,
+    select1Content,
+    select2Content,
+    select3Content,
+    filledNumber,
+  };
+}
+
+describe('token creation', function() {
+  let url;
+  let page;
+
+  before(async function() {
+    ({ page, helpers: { url } } = test);
+  });
+
+  beforeEach(async function() {
+    await page.goto(`${url}/tokens/new`);
+    this.reactSelect1 = await page.waitForSelector('#first-service-select');
+    this.reactSelect2 = await page.waitForSelector('#second-service-select');
+    this.reactSelect3 = await page.waitForSelector('#http-methods-select');
+    this.expirationInput = await page.waitForSelector('#expiration-time-input');
+    this.button = await page.waitForSelector('button[type="submit"]');
+  });
+
+  it('Not filling form shows error', async function() {
+    await this.button.click();
+    await page.waitForSelector('#danger-alert');
+    const alertContent = await page.$eval('#danger-alert', el => el.textContent);
+    assert.ok(alertContent.includes('Please fill in all required fields'));
+  });
+
+  describe('filling partially the form', function() {
+    it('error alert shows exp-time and HTTP methods are missing', async function() {
+      const opt1 = await selectReactOption(this.reactSelect1, 1);
+      await opt1.click();
+      const opt2 = await selectReactOption(this.reactSelect2, 2);
+      await opt2.click();
+
+      await this.button.click();
+      await page.waitForSelector('#danger-alert');
+      const alertContent = await page.$eval('#danger-alert', el => el.textContent);
+      assert.ok(alertContent.includes('Expiration time', 'HTTP methods'));
+    });
+
+    it('error alert shows first service and HTTP methods are missing', async function() {
+      const opt2 = await selectReactOption(this.reactSelect2, 2);
+      await opt2.click();
+      await fillNumberInput(this.expirationInput, 10);
+
+      await this.button.click();
+      await page.waitForSelector('#danger-alert');
+      const alertContent = await page.$eval('#danger-alert', el => el.textContent);
+      assert.ok(alertContent.includes('First service', 'HTTP methods'));
+    });
+
+    it('error alert shows First service, Second service and Exp-time are missing', async function() {
+      const opt3 = await selectReactOption(this.reactSelect3, 1);
+      await opt3.click();
+
+      await this.button.click();
+      await page.waitForSelector('#danger-alert');
+      const alertContent = await page.$eval('#danger-alert', el => el.textContent);
+      assert.ok(
+        alertContent.includes('First service', 'Second service', 'Expiration time'),
+      );
+    });
+  });
+
+  it('filling the form correctly shows proper success message with alert', async function() {
+    const { dialogContent, select1Content, select2Content, select3Content, filledNumber } =
+      await fillAllFormFields(page, this.reactSelect1, this.reactSelect2, this.reactSelect3, this.expirationInput, this.button);
+    assert.ok(dialogContent.includes('Confirm Token Creation'));
+    assert.ok(dialogContent.includes('First machine: ' + select1Content));
+    assert.ok(dialogContent.includes('Second machine: ' + select2Content));
+    assert.ok(dialogContent.includes(select3Content));
+    assert.ok(dialogContent.includes('Expiration time: ' + filledNumber.toString() + ' hours'));
+  });
+
+  it('no auth error shows alert', async function() {
+    const { dialogHandle } = await fillAllFormFields(page, this.reactSelect1, this.reactSelect2, this.reactSelect3, this.expirationInput, this.button);
+    const confirmButton = await dialogHandle.$('button:nth-child(2)');
+    await confirmButton.click();
+
+    await page.waitForSelector('#danger-alert');
+    const alertContent = await page.$eval('#danger-alert', el => el.textContent);
+    assert.ok(alertContent.includes('Authorization error'));
+  }),
+
+  it('happy path', async function() {
+    assert.ok(true);
+  })
+});

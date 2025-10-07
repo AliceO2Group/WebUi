@@ -14,7 +14,7 @@
 
 const assert = require('assert');
 
-describe('no-label tests', function() {
+describe('general tests', function() {
   let url;
   let page;
 
@@ -30,7 +30,7 @@ describe('no-label tests', function() {
     headerContent = await page.$eval('header', el => el.textContent);
     assert.ok(headerContent.includes('Tokenization'));
 
-    await page.goto(`${url  }/tokens`);
+    await page.goto(`${url}/tokens`);
     await page.waitForSelector('header');
     headerContent = await page.$eval('header', el => el.textContent);
     assert.ok(headerContent.includes('Tokens'));

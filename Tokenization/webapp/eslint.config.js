@@ -107,7 +107,7 @@ export default [
       },
     },
     rules: {
-      // JS-only stylistic rules (aplikowane globalnie)
+      // JS-only stylistic rules 
       '@stylistic/js/indent': ['error', 2],
       '@stylistic/js/quotes': ['error', 'single', { avoidEscape: true }],
       '@stylistic/js/semi': 'error',
@@ -213,7 +213,7 @@ export default [
         },
       ],
 
-      // === TYPESCRIPT STYLISTIC RULES (moved here) ===
+      // === TYPESCRIPT STYLISTIC RULES ===
       '@stylistic/ts/comma-dangle': ['error', 'always-multiline'],
       '@stylistic/ts/comma-spacing': ['error', { before: false, after: true }],
       '@stylistic/ts/indent': ['error', 2],
@@ -226,7 +226,6 @@ export default [
       '@stylistic/ts/type-annotation-spacing': 'error',
       '@stylistic/ts/member-delimiter-style': 'error',
 
-      // keep JS stylistic ones if you need them additionally in TS:
       '@stylistic/js/array-bracket-spacing': ['error', 'never'],
       '@stylistic/js/brace-style': ['error', '1tbs'],
       '@stylistic/js/no-trailing-spaces': 'error',

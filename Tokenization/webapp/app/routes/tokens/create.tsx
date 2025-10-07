@@ -22,7 +22,7 @@ import {
 
 import { DangerAlert } from '~/ui/alert';
 import { CreationTokenDialog } from '~/ui/dialog';
-import { useAuth, useSession } from '~/hooks/session';
+import { useAuth } from '~/hooks/session';
 
 export interface OptionType {
   value: string;
@@ -67,7 +67,7 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
 
   const options: OptionType[] = loaderData ?? clientLoader();
 
-  const auth = useAuth('admin')
+  const auth = useAuth('admin');
 
   const resetForm = useCallback(() => {
     setExpirationTime('');
@@ -77,16 +77,16 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
   }, []);
 
   const handleCreateToken = useCallback(() => {
-    if(auth)
-    {
+    if (auth) {
+      // eslint-disable-next-line no-console
       console.log('Creating token...', {
         first: firstSelectedService,
         second: secondSelectedService,
         expiration: expirationTime,
         permissions: selectedMethods,
-      });      
-    }else{
-      setSnackbarMessage("Authorization error");
+      });
+    } else {
+      setSnackbarMessage('Authorization error');
       setOpenSnackbar(true);
     }
 
@@ -109,8 +109,8 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
       if (!expirationTime) {
         message += 'Expiration time, ';
       }
-      if(selectedMethods.length == 0) {
-        message += 'HTTP methods, '
+      if (selectedMethods.length == 0) {
+        message += 'HTTP methods, ';
       }
       message = message.slice(0, -2);
       setSnackbarMessage(message);
@@ -128,6 +128,7 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
         <div style={{ marginBottom: '20px' }}>
           <label>Select first service:</label>
           <Select<OptionType>
+            id="first-service-select"
             options={options}
             value={firstSelectedOption}
             onChange={(srv: SingleValue<OptionType>) => {
@@ -136,10 +137,11 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
             placeholder="Select first service..."
           />
         </div>
-        
+
         <div style={{ marginBottom: '20px' }}>
           <label>Select second service:</label>
           <Select<OptionType>
+            id="second-service-select"
             options={options}
             value={secondSelectedOption}
             onChange={(srv: SingleValue<OptionType>) => {
@@ -152,6 +154,7 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
         <div style={{ marginBottom: '20px' }}>
           <label>Select HTTP Methods:</label>
           <Select
+            id="http-methods-select"
             isMulti
             options={httpMethodOptions}
             value={httpMethodOptions.filter(option => selectedMethods.includes(option.value as HttpMethod))}
@@ -166,6 +169,7 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
         <div >
           <label>Expiration Time:</label>
           <TextField
+            id="expiration-time-input"
             fullWidth
             variant="outlined"
             type="number"
@@ -175,8 +179,8 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
             slotProps={{
               input: {
                 endAdornment: <InputAdornment position="end">hours</InputAdornment>,
-                inputProps: { min: 1 }
-              }
+                inputProps: { min: 1 },
+              },
             }}
             label=""
           />
@@ -184,8 +188,8 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
 
         <div style={{ marginTop: '30px' }}>
           <button type="submit">Create Token</button>
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => navigate('/tokens')}
             style={{ marginLeft: '10px' }}
           >

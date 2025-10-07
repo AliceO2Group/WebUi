@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Snackbar, Alert } from '@mui/material';
 
 interface AlertProps {
@@ -25,18 +25,12 @@ interface AlertProps {
  *
  */
 export function DangerAlert({ openSnackbar, setOpenSnackbar, snackbarMessage }: AlertProps) {
-  useEffect(() => {
-    if ( openSnackbar == true) {
-      setInterval(() => {
-        setOpenSnackbar(false);
-      }, 8000);
-    }
-  });
 
   return (
     <Snackbar
+      id="danger-alert"
       open={openSnackbar}
-      autoHideDuration={6000}
+      autoHideDuration={8000}
       onClose={() => setOpenSnackbar(false)}
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
     >
