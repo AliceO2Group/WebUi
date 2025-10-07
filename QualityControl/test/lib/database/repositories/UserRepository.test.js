@@ -20,14 +20,25 @@ import { UserRepository } from '../../../../lib/database/repositories/UserReposi
  */
 export const userRepositoryTestSuite = () => {
   suite('UserRepository', () => {
+    const users = [];
     const mockUserModel = {
       name: 'User',
+      create: async (user) => {
+        users.push(user); return user;
+      },
     };
     const userRepository = new UserRepository(mockUserModel);
 
     test('should create instance with user model', () => {
       ok(userRepository instanceof UserRepository);
       strictEqual(userRepository.model, mockUserModel);
+    });
+
+    test('should create a new user', async () => {
+      const newUser = { id: 1, name: 'Alice', username: 'alice' };
+      await userRepository.createUser(newUser);
+      strictEqual(users.length, 1);
+      strictEqual(users[0], newUser);
     });
   });
 };
