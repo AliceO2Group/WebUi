@@ -38,7 +38,7 @@ export default (model) => {
     h('.flex-row.p2.items-center', { id: 'qcg-header' }, [
       commonHeader(model),
       centerCol || h('.flex-grow'),
-      rightCol || h('.w-33'),
+      rightCol || h('.w-25'),
     ]),
     filterSpecific(model),
   ]);
@@ -82,7 +82,7 @@ const filterSpecific = (model) => {
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const commonHeader = (model) => h('.flex-row.items-center.w-33', [
+const commonHeader = (model) => h('.flex-row.items-center.w-25', [
   loginButton(model),
   ' ',
   h('span.f4.gray', {
