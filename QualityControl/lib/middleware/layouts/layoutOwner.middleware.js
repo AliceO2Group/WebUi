@@ -15,15 +15,19 @@
 import { NotFoundError, UnauthorizedAccessError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
 /**
- * @typedef {import('../../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
+ * @typedef {import('../../services/layout/LayoutService.js').LayoutService} LayoutService
+ * @typedef {import('../../services/layout/UserService.js').UserService} UserService
  */
 
 /**
  * Middleware that checks if the requestor is the owner of the layout
- * @param {LayoutRepository} layoutRepository - Repository for getting/setting layout data
- * @returns  {function(req, res, next): Function} - middleware function
+ * @param {LayoutService} layoutService Service that handles layouts business logic
+ * @param {UserService} userService Service that handles user business logic
+ * @returns {(req: Express.Request,
+ * res: Express.Response,
+ * next: Express.NextFunction) => Promise<void>} - middleware function
  */
-export const layoutOwnerMiddleware = (layoutRepository) =>
+export const layoutOwnerMiddleware = (layoutService, userService) =>
 
 /**
  * Returned middleware method
@@ -34,14 +38,17 @@ export const layoutOwnerMiddleware = (layoutRepository) =>
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { personid = '', name = '' } = req.session ?? {};
-      const { owner_name = '', owner_id = '' } = await layoutRepository.readLayoutById(id) ?? {};
-      if (owner_id === '' || owner_name === '') {
+      const { personid = '', username = '' } = req.session ?? {};
+      if (personid === '' || username === '') {
+        throw new UnauthorizedAccessError('Unable to retrieve session information');
+      }
+      const { owner_username } = await layoutService.getLayoutById(id) ?? {};
+      const ownerId = await userService.getOwnerIdByUsername(owner_username);
+      if (ownerId === '' || owner_username === '') {
         throw new NotFoundError('Unable to retrieve layout owner information');
-      } else if (personid === '' || name === '') {
-        throw new NotFoundError('Unable to retrieve session information');
-      } else if (owner_name !== name || owner_id !== personid) {
-        throw new UnauthorizedAccessError('Only the owner of the layout can delete it');
+      }
+      if (owner_username !== username || ownerId !== personid) {
+        throw new UnauthorizedAccessError('Only the owner of the layout can make changes to this layout');
       }
       next();
     } catch (error) {

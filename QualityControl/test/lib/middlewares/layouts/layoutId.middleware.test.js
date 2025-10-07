@@ -14,72 +14,62 @@
 
 import { suite, test } from 'node:test';
 import { ok } from 'node:assert';
-import sinon from 'sinon';
 import { layoutIdMiddleware } from '../../../../lib/middleware/layouts/layoutId.middleware.js';
+import sinon from 'sinon';
 import { NotFoundError } from '@aliceo2/web-ui';
-import { LayoutRepository } from '../../../../lib/repositories/LayoutRepository.js';
 
 /**
  * Test suite for the middlewares involved in the ID check of the layout requests
  */
 export const layoutIdMiddlewareTest = () => {
-  suite('Layout id middlewares', () => {
-    test('should return an "Invalid input" error if the layout id is not provided', () => {
+  suite('Layout id middleware', () => {
+    const mockLayoutService = {
+      getLayoutById: sinon.stub(),
+    };
+    const middleware = layoutIdMiddleware(mockLayoutService);
+    const res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    };
+    test('should add the layout to the request object when id is valid', async () => {
       const req = {
-        params: {
-          id: null,
-        },
+        params: { id: 'valid-id' },
       };
-      const res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub().returns(),
+      const next = sinon.spy();
+      const mockLayout = { id: 'valid-id', name: 'Test Layout' };
+      mockLayoutService.getLayoutById.resolves(mockLayout);
+
+      await middleware(req, res, next);
+    });
+    test('should throw invalid input error when id is missing', async () => {
+      const req = {
+        params: {},
       };
-      const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(LayoutRepository);
-      layoutIdMiddleware(dataServiceStub)(req, res, next);
-      ok(res.status.calledWith(400), 'The status code should be 400');
+      const next = sinon.spy();
+      await middleware(req, res, next);
+      ok(res.status.calledWith(400), `Expected status 400 but got ${res.status.firstCall.args[0]}`);
       ok(res.json.calledWith({
-        message: 'The "id" parameter is missing from the request',
+        message: 'Layout id is required',
         status: 400,
         title: 'Invalid Input',
-      }));
+      }), 'Expected error message for missing id');
+      ok(next.notCalled, 'Expected next not to be called');
     });
-
-    test('should return a "Not found" error if the layout id does not exist', () => {
-      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().throwsException(new NotFoundError('Layout not found')),
-      });
+    test('should throw invalid input error when layout is not found', async () => {
       const req = {
-        params: {
-          id: 'nonExistingId',
-        },
+        params: { id: 'non-existent-id' },
       };
-      const res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub().returns(),
-      };
-      const next = sinon.stub().returns();
-      layoutIdMiddleware(dataServiceStub)(req, res, next);
-      ok(res.status.calledWith(404));
+      const next = sinon.spy();
+      mockLayoutService.getLayoutById.rejects(new NotFoundError('Layout with id: non-existent-id was not found'));
+
+      await middleware(req, res, next);
+      ok(res.status.calledWith(404), `Expected status 400 but got ${res.status.firstCall.args[0]}`);
       ok(res.json.calledWith({
-        message: 'Layout not found',
+        message: 'Layout with id: non-existent-id was not found',
         status: 404,
         title: 'Not Found',
-      }));
-    });
-
-    test('should successfully pass the check if the layout id is provided and exists', async () => {
-      const req = {
-        params: {
-          id: 'layoutId',
-        },
-      };
-      const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().resolves({}),
-      });
-      await layoutIdMiddleware(dataServiceStub)(req, {}, next);
-      ok(next.called, 'It should call the next middleware');
+      }), 'Expected error message for layout not found');
+      ok(next.notCalled, 'Expected next not to be called');
     });
   });
 };

@@ -12,111 +12,108 @@
  * or submit itself to any jurisdiction.
  */
 
-import { suite, test } from 'node:test';
+import { beforeEach, suite, test } from 'node:test';
 import { ok } from 'node:assert';
 import sinon from 'sinon';
 import { layoutOwnerMiddleware } from '../../../../lib/middleware/layouts/layoutOwner.middleware.js';
-import { LayoutRepository } from '../../../../lib/repositories/LayoutRepository.js';
 
 /**
  * Test suite for the middleware that checks the owner of the layout
  */
 export const layoutOwnerMiddlewareTest = () => {
   suite('Layout owner middleware', () => {
-    test('should return an "UnauthorizedAccessError" if the layout does not belong to the user', async () => {
-      const req = {
-        params: { id: 'layoutId' },
-        session: { personid: 'notTheOwnerId', name: 'notTheOwnerName' },
-      };
-      const res = {
+    let req = null;
+    let res = null;
+    let next = null;
+    let layoutService = null;
+    let userService = null;
+    beforeEach(() => {
+      req = { params: { id: '1' }, session: { personid: '1', username: 'validUser' } };
+      res = {
         status: sinon.stub().returnsThis(),
-        json: sinon.stub().returns(),
+        json: sinon.stub().returnsThis(),
       };
-      const next = sinon.stub(); // Do not call fake to catch unexpected execution
-
-      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().resolves({ owner_name: 'ownerName', owner_id: 'ownerId' }),
-      });
-
-      await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
-
-      sinon.assert.calledWith(res.status, 403);
-      sinon.assert.calledWith(res.json, sinon.match({
-        message: 'Only the owner of the layout can delete it',
+      next = sinon.stub();
+      layoutService = {
+        getLayoutById: sinon.stub().resolves({ owner_username: 'validUser' }),
+      };
+      userService = {
+        getOwnerIdByUsername: sinon.stub().resolves('1'),
+      };
+    });
+    test('should throw unauthorized if session is missing', async () => {
+      req.session = null;
+      await layoutOwnerMiddleware(layoutService, userService)(req, res, next);
+      ok(res.json.called);
+      ok(res.json.calledWith({
+        message: 'Unable to retrieve session information',
         status: 403,
         title: 'Unauthorized Access',
       }));
     });
-
-    test('should return an "NotFound" error if the owner data of the layout is not accesible', async () => {
-      const req = {
-        params: {
-          id: 'layoutId',
-        },
-        session: {
-          personid: 'ownerId',
-          name: 'ownerName',
-        },
-      };
-      const res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub().returns(),
-      };
-      const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().returns(),
+    test('should throw unauthorized if session personid is missing', async () => {
+      req.session.personid = '';
+      await layoutOwnerMiddleware(layoutService, userService)(req, res, next);
+      ok(res.json.called);
+      ok(res.json.calledWith({
+        message: 'Unable to retrieve session information',
+        status: 403,
+        title: 'Unauthorized Access',
+      }));
+    });
+    test('should throw unauthorized if session username is missing', async () => {
+      req.session.username = '';
+      await layoutOwnerMiddleware(layoutService, userService)(req, res, next);
+      ok(res.json.called);
+      ok(res.json.calledWith({
+        message: 'Unable to retrieve session information',
+        status: 403,
+        title: 'Unauthorized Access',
+      }));
+    });
+    test('should throw not found if layout does not exist', async () => {
+      layoutService.getLayoutById = sinon.stub().resolves({
+        owner_username: '',
       });
-      await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
-      ok(res.status.calledWith(404));
+      await layoutOwnerMiddleware(layoutService, userService)(req, res, next);
+      ok(res.json.called);
       ok(res.json.calledWith({
         message: 'Unable to retrieve layout owner information',
         status: 404,
         title: 'Not Found',
       }));
     });
-    test('should return an "NotFound" error if the session information is not accesible', async () => {
-      const req = {
-        params: {
-          id: 'layoutId',
-        },
-        session: {
-          personid: '',
-          name: '',
-        },
-      };
-      const res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub().returns(),
-      };
-      const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().returns({ owner_name: 'ownerName', owner_id: 'ownerId' }),
-      });
-      await layoutOwnerMiddleware(dataServiceStub)(req, res, next);
-      ok(res.status.calledWith(404));
+    test('should throw not found if owner_id is not found', async () => {
+      userService.getOwnerIdByUsername = sinon.stub().resolves('');
+      await layoutOwnerMiddleware(layoutService, userService)(req, res, next);
+      ok(res.json.called);
       ok(res.json.calledWith({
-        message: 'Unable to retrieve session information',
+        message: 'Unable to retrieve layout owner information',
         status: 404,
         title: 'Not Found',
       }));
     });
-
-    test('should successfully pass the check if the layout belongs to the user', async () => {
-      const req = {
-        params: {
-          id: 'layoutId',
-        },
-        session: {
-          personid: 'ownerId',
-          name: 'ownerName',
-        },
-      };
-      const next = sinon.stub().returns();
-      const dataServiceStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().resolves({ owner_name: 'ownerName', owner_id: 'ownerId' }),
+    test('should throw unauthorized if session personid does not match owner_id', async () => {
+      userService.getOwnerIdByUsername = sinon.stub().resolves('2');
+      await layoutOwnerMiddleware(layoutService, userService)(req, res, next);
+      ok(res.json.called);
+      ok(res.json.calledWith({
+        message: 'Only the owner of the layout can make changes to this layout',
+        status: 403,
+        title: 'Unauthorized Access',
+      }));
+    });
+    test('should throw unauthorized if session username does not match owner_username', async () => {
+      layoutService.getLayoutById = sinon.stub().resolves({
+        owner_username: 'invalidUser',
       });
-      await layoutOwnerMiddleware(dataServiceStub)(req, {}, next);
-      ok(next.called, 'The next() callback should be called');
+      await layoutOwnerMiddleware(layoutService, userService)(req, res, next);
+      ok(res.json.called);
+      ok(res.json.calledWith({
+        message: 'Only the owner of the layout can make changes to this layout',
+        status: 403,
+        title: 'Unauthorized Access',
+      }));
     });
   });
 };

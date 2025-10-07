@@ -15,12 +15,20 @@
 import { setupQcModel } from './QCModel.js';
 import { minimumRoleMiddleware } from './middleware/minimumRole.middleware.js';
 import { UserRole } from './../common/library/userRole.enum.js';
+
+// Middlewares
 import { layoutOwnerMiddleware } from './middleware/layouts/layoutOwner.middleware.js';
 import { layoutIdMiddleware } from './middleware/layouts/layoutId.middleware.js';
-import { layoutServiceMiddleware } from './middleware/layouts/layoutService.middleware.js';
 import { statusComponentMiddleware } from './middleware/status/statusComponent.middleware.js';
 import { runStatusFilterMiddleware } from './middleware/filters/runStatusFilter.middleware.js';
 import { runModeMiddleware } from './middleware/filters/runMode.middleware.js';
+import { getLayoutsMiddleware } from './middleware/layouts/layoutsGet.middleware.js';
+import {
+  validateCreateLayoutMiddleware,
+  validatePatchLayoutMiddleware,
+  validateUpdateLayoutMiddleware,
+} from './middleware/layouts/layoutValidate.middleware.js';
+import { validateUserSession } from './middleware/validateUser.middleware.js';
 
 /**
  * Adds paths and binds websocket to instance of HttpServer passed
@@ -41,22 +49,22 @@ export const setup = async (http, ws, eventEmitter) => {
    */
   const {
     layoutController,
-    objectController,
-    statusController,
-    statusService,
     userController,
-    layoutRepository,
-    jsonFileService,
+    statusService,
+    statusController,
+    objectController,
     filterController,
+    layoutService,
+    userService,
     objectGetByIdValidation,
     objectsGetValidation,
     objectGetContentsValidation,
   } = await setupQcModel(eventEmitter);
   statusService.ws = ws;
 
+  /* -------------------Objects ------------------------- */
   http.get('/object/:id', objectGetByIdValidation, objectController.getObjectById.bind(objectController));
   http.get('/object', objectGetContentsValidation, objectController.getObjectContent.bind(objectController));
-
   http.get(
     '/objects',
     objectsGetValidation,
@@ -64,32 +72,37 @@ export const setup = async (http, ws, eventEmitter) => {
     objectController.getObjects.bind(objectController),
   );
 
-  http.get('/layouts', layoutController.getLayoutsHandler.bind(layoutController));
-  http.get('/layout/:id', layoutController.getLayoutHandler.bind(layoutController));
+  /* ------------------- Layouts ------------------------ */
+  http.get('/layouts', getLayoutsMiddleware, layoutController.getLayoutsHandler.bind(layoutController));
+  http.get('/layout/:id', layoutIdMiddleware(layoutService), layoutController.getLayoutHandler.bind(layoutController));
   http.get('/layout', layoutController.getLayoutByNameHandler.bind(layoutController));
-  http.post('/layout', layoutController.postLayoutHandler.bind(layoutController));
+  http.post(
+    '/layout',
+    validateCreateLayoutMiddleware,
+    layoutController.postLayoutHandler.bind(layoutController),
+  );
   http.put(
     '/layout/:id',
-    layoutServiceMiddleware(jsonFileService),
-    layoutIdMiddleware(layoutRepository),
-    layoutOwnerMiddleware(layoutRepository),
+    layoutIdMiddleware(layoutService),
+    layoutOwnerMiddleware(layoutService, userService),
+    validateUpdateLayoutMiddleware,
     layoutController.putLayoutHandler.bind(layoutController),
   );
   http.patch(
     '/layout/:id',
-    layoutServiceMiddleware(jsonFileService),
-    layoutIdMiddleware(layoutRepository),
+    validatePatchLayoutMiddleware,
+    layoutIdMiddleware(layoutService),
     minimumRoleMiddleware(UserRole.GLOBAL),
     layoutController.patchLayoutHandler.bind(layoutController),
   );
   http.delete(
     '/layout/:id',
-    layoutServiceMiddleware(jsonFileService),
-    layoutIdMiddleware(layoutRepository),
-    layoutOwnerMiddleware(layoutRepository),
+    layoutIdMiddleware(layoutService),
+    layoutOwnerMiddleware(layoutService, userService),
     layoutController.deleteLayoutHandler.bind(layoutController),
   );
 
+  /* ------------------- Status ------------------------- */
   http.get('/status/gui', statusController.getQCGStatus.bind(statusController), { public: true });
   http.get(
     '/status/:service',
@@ -98,8 +111,10 @@ export const setup = async (http, ws, eventEmitter) => {
     { public: true },
   );
 
-  http.get('/checkUser', userController.addUserHandler.bind(userController));
+  /* ------------------- Users -------------------------- */
+  http.get('/checkUser', validateUserSession, userController.addUserHandler.bind(userController));
 
+  /* ------------------- Filters ------------------------ */
   http.get('/filter/configuration', filterController.getFilterConfigurationHandler.bind(filterController));
   http.get(
     '/filter/run-status/:runNumber',

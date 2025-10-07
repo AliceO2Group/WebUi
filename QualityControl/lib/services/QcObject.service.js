@@ -18,7 +18,7 @@ import QCObjectDto from '../dtos/QCObjectDto.js';
 import QcObjectIdentificationDto from '../dtos/QcObjectIdentificationDto.js';
 
 /**
- * @typedef {import('../repositories/ChartRepository.js').ChartRepository} ChartRepository
+ * @typedef {import('./layout/LayoutService.js').LayoutService} LayoutService
  */
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/obj-service`;
@@ -31,19 +31,19 @@ export class QcObjectService {
   /**
    * Setup service constructor and initialize needed dependencies
    * @param {CcdbService} dbService - CCDB service to retrieve raw information about the QC objects
-   * @param {ChartRepository} chartRepository - service to be used for retrieving configurations on saved layouts
+   * @param {LayoutService} layoutService - service to be used for retrieving configurations on saved layouts
    * @param {RootService} rootService - root library to be used for interacting with ROOT Objects
    */
-  constructor(dbService, chartRepository, rootService) {
+  constructor(dbService, layoutService, rootService) {
     /**
      * @type {CcdbService}
      */
     this._dbService = dbService;
 
     /**
-     *  @type {ChartRepository}
+     *  @type {LayoutService}
      */
-    this._chartRepository = chartRepository;
+    this._layoutService = layoutService;
 
     /**
      * @type {RootService}
@@ -181,19 +181,20 @@ export class QcObjectService {
    * @param {number|null} options.validFrom - timestamp in ms
    * @param {object} options.filters - filter as string to be sent to CCDB
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
-   * @throws {Error} - if object with specified id is not found
    */
   async retrieveQcObjectByQcgId({ qcObjectId, id, validFrom = undefined, filters = {} }) {
-    const result = this._chartRepository.getObjectById(qcObjectId);
-    if (!result) {
-      throw new Error(`Object with id ${qcObjectId} not found`);
-    }
-    const { object, layoutName, tabName } = result;
-    const { name, options = {}, ignoreDefaults = false } = object;
+    const object = await this._layoutService.getObjectById(qcObjectId);
+    const { tab, chart } = object;
+    const { name: tabName, layout } = tab;
+    const { name: layoutName } = layout;
+    const { object_name: name, ignore_defaults: ignoreDefaults, chartOptions } = chart;
+    const layoutDisplayOptions =
+      chartOptions?.length > 0 ? chartOptions.map((chartOption) => chartOption.option.name) : [];
+
     const qcObject = await this.retrieveQcObject({ path: name, validFrom, id, filters });
     return {
       ...qcObject,
-      layoutDisplayOptions: options,
+      layoutDisplayOptions,
       layoutName,
       tabName,
       ignoreDefaults,

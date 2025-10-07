@@ -68,7 +68,7 @@ export const MOCK_OBJECT_BY_ID_RESULT = {
   qcVersion: '1.64.0',
   objectType: 'o2::quality_control::core::QualityObject',
   location: '/download/016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
-  layoutDisplayOptions: [],
+  layoutDisplayOptions: ['logz'],
   layoutName: 'a-test',
   tabName: 'main',
   ignoreDefaults: false,

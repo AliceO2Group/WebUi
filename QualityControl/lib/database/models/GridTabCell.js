@@ -74,8 +74,8 @@ export default (sequelize) => {
     createdAt: 'created_at',
     updatedAt: 'updated_at',
     uniqueKeys: {
-      unique_grid_tab_cells: {
-        fields: ['chart_id', 'row', 'col', 'tab_id'],
+      unique_chart_per_cell: {
+        fields: ['chart_id', 'row', 'col'],
       },
     },
   });

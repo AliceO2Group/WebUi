@@ -15,32 +15,28 @@
 import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 
 /**
- * @typedef {import('../../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
+ * @typedef {import('../../database/repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
  */
 
 /**
  * Middleware that checks if the layout id is present in the request
- * @param {LayoutRepository} layoutRepository - repository for getting/setting layout data
- * @returns  {function(req, res, next): Function} - middleware function
- */
-export const layoutIdMiddleware = (layoutRepository) =>
-
-/**
- * Returned middleware method
  * @param {Express.Request} req - HTTP Request
  * @param {Express.Response} res - HTTP Response
  * @param {Express.Next} next - HTTP Next (check pass)
+ * @param layoutService
+ * @returns {Promise<void>} Resolves when validation is done and next is called
  */
-  async (req, res, next) => {
-    const { id = '' } = req.params ?? {};
-    try {
-      if (!id) {
-        throw new InvalidInputError('The "id" parameter is missing from the request');
-      }
-      await layoutRepository.readLayoutById(id);
-      next();
-    } catch (error) {
-      updateAndSendExpressResponseFromNativeError(res, error);
-      return;
+export const layoutIdMiddleware = (layoutService) => async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!id || id.trim() === '') {
+      throw new InvalidInputError('Layout id is required');
     }
-  };
+    const layout = await layoutService.getLayoutById(id);
+    req.layout = layout;
+    next();
+  } catch (error) {
+    updateAndSendExpressResponseFromNativeError(res, error);
+    return;
+  }
+};

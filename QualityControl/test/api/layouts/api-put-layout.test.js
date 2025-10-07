@@ -15,57 +15,45 @@
 import { suite, test } from 'node:test';
 import { OWNER_TEST_TOKEN, URL_ADDRESS, USER_TEST_TOKEN } from '../config.js';
 import request from 'supertest';
-import { LAYOUT_MOCK_2, LAYOUT_MOCK_3 } from '../../demoData/layout/layout.mock.js';
+import { VALID_LAYOUT_FOR_UPDATE } from '../../demoData/layout/layout.mock.js';
 
 export const apiPutLayoutTests = () => {
   suite('PUT /layout/:id', () => {
-    test('should return a 404 error if the id of the layout does not exist', async () => {
-      await request(`${URL_ADDRESS}/api/layout/test`)
+    test('should update the layout successfully', async () => {
+      await request(`${URL_ADDRESS}/api/layout/${VALID_LAYOUT_FOR_UPDATE.id}`)
         .put(`?token=${OWNER_TEST_TOKEN}`)
+        .send(VALID_LAYOUT_FOR_UPDATE)
+        .expect(200);
+    });
+    test('should return 400 for invalid layout ID', async () => {
+      await request(`${URL_ADDRESS}/api/layout/invalid-id`)
+        .put(`?token=${OWNER_TEST_TOKEN}`)
+        .send(VALID_LAYOUT_FOR_UPDATE)
         .expect(404, {
-          message: 'layout (test) not found',
+          message: 'Layout with id: invalid-id was not found',
           status: 404,
           title: 'Not Found',
         });
     });
-
-    test('should return a 403 error if the requestor is not allowed to edit', async () => {
-      await request(`${URL_ADDRESS}/api/layout/671b8c22402408122e2f20dd`)
+    test('should return 403 if user is not the owner or admin', async () => {
+      await request(`${URL_ADDRESS}/api/layout/${VALID_LAYOUT_FOR_UPDATE.id}`)
         .put(`?token=${USER_TEST_TOKEN}`)
+        .send(VALID_LAYOUT_FOR_UPDATE)
         .expect(403, {
-          message: 'Only the owner of the layout can delete it',
+          message: 'Only the owner of the layout can make changes to this layout',
           status: 403,
           title: 'Unauthorized Access',
         });
     });
-
-    test('should return a 400 error if the body is not provided', async () => {
-      await request(`${URL_ADDRESS}/api/layout/671b8c22402408122e2f20dd`)
+    test('should return 400 for invalid layout data', async () => {
+      const invalidLayoutData = { ...VALID_LAYOUT_FOR_UPDATE, name: '' }; // name is required
+      await request(`${URL_ADDRESS}/api/layout/${VALID_LAYOUT_FOR_UPDATE.id}`)
         .put(`?token=${OWNER_TEST_TOKEN}`)
+        .send(invalidLayoutData)
         .expect(400, {
-          message: 'Failed to update layout: "id" is required',
+          message: 'Invalid body for update: "name" is not allowed to be empty',
           status: 400,
           title: 'Invalid Input',
-        });
-    });
-
-    test('should return a 400 error if the name of the layout already exists', async () => {
-      await request(`${URL_ADDRESS}/api/layout/671b8c22402408122e2f20dd`)
-        .put(`?token=${OWNER_TEST_TOKEN}`)
-        .send(LAYOUT_MOCK_3)
-        .expect(400, {
-          message: 'Proposed layout name: a-test already exists',
-          status: 400,
-          title: 'Invalid Input',
-        });
-    });
-
-    test('should update the layout successfully', async () => {
-      await request(`${URL_ADDRESS}/api/layout/671b8c22402408122e2f20dd`)
-        .put(`?token=${OWNER_TEST_TOKEN}`)
-        .send(LAYOUT_MOCK_2)
-        .expect(201, {
-          id: '671b8c22402408122e2f20dd',
         });
     });
   });

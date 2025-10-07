@@ -20,6 +20,12 @@ services:
         read_only: true
         source: ./docker/database/populate
         target: /docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
 
 volumes:
   database-data:
