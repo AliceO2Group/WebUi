@@ -26,8 +26,6 @@ import './app.css';
 import '@aliceo2/web-ui/Frontend/css/src/bootstrap.css';
 
 import { Spinner } from '~/ui/spinner';
-import { useEffect } from 'react';
-import { fetchSessionData } from './services/session';
 
 import MainLayout from './components/layout/MainLayout';
 
@@ -38,10 +36,6 @@ import MainLayout from './components/layout/MainLayout';
  * @returns {React.ReactElement} Root
  */
 export function Layout({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    void fetchSessionData();
-  }, []);
-
   return (
     <html lang="en">
       <head>
