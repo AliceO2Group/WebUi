@@ -149,7 +149,7 @@ const clearFiltersButton = (clearFilterCallback) =>
  */
 export function filterPanelToggleButton(filterModel) {
   const { isVisible } = filterModel;
-  return h(`button.btn.btn-default${isVisible ? '.active' : ''}`, {
+  return !filterModel.isRunModeActivated && h(`button.btn.btn-default${isVisible ? '.active' : ''}`, {
     onclick: () => filterModel.toggleFilterVisibility(),
   }, ['Filters ', isVisible ? iconChevronTop() : iconChevronBottom()]);
 }

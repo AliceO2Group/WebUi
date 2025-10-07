@@ -83,10 +83,9 @@ const toolbarViewModeTab = (layout, tab, i) => {
 /**
  * Toolbar in edit mode (center and right) with rename, trash, save buttons
  * @param {Layout} layout - the model that handles the object state
- * @param {FilterModel} filterModel - The model handeling the filter state
  * @returns {vnode} - virtual node element
  */
-const toolbarEditMode = (layout, filterModel) => {
+const toolbarEditMode = (layout) => {
   const inputHandler = (e) => {
     layout.item.name = e.target.value.trim();
   };
@@ -116,7 +115,6 @@ const toolbarEditMode = (layout, filterModel) => {
         oninput: inputHandler,
       }),
       h('.btn-group.m1', [
-        filterPanelToggleButton(filterModel),
         saveButton(layout),
         cancelButton(layout),
       ]),

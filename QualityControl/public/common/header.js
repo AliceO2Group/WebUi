@@ -70,7 +70,7 @@ const filterSpecific = (model) => {
   const { page, filterModel, layout, object, objectViewModel } = model;
 
   switch (page) {
-    case 'layoutShow': return filtersPanel(filterModel, layout);
+    case 'layoutShow': return !layout.editEnabled && filtersPanel(filterModel, layout);
     case 'objectTree': return filtersPanel(filterModel, object);
     case 'objectView': return filtersPanel(filterModel, objectViewModel);
     default: return null;
