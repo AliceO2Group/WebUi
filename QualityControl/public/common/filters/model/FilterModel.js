@@ -140,9 +140,14 @@ export default class FilterModel extends Observable {
    * @returns {undefined}
    */
   clearFilter(baseViewModel) {
-    this._filterMap = {};
-
+    this.clearFilterSilent();
     this.triggerFilter(baseViewModel);
+    this.notify();
+  }
+
+  clearFilterSilent() {
+    this._filterMap = {};
+    this.setFilterToURL(true);
     this.notify();
   }
 

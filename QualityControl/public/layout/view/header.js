@@ -28,7 +28,7 @@ import { filterPanelToggleButton } from '../../common/filters/filterViews.js';
 export default (layout, filterModel) => {
   const { item, editEnabled = false } = layout;
   if (item) {
-    return editEnabled ? toolbarEditMode(layout, filterModel) : toolbarViewMode(layout, filterModel);
+    return editEnabled ? toolbarEditMode(layout) : toolbarViewMode(layout, filterModel);
   }
   return;
 };
