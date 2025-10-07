@@ -30,27 +30,33 @@ import { filtersPanel } from './filters/filterViews.js';
  * @param {Model} model - root model of the application
  * @returns {vnode} - header element
  */
-export default (model) => h('.flex-col', [
-  h('.flex-row.p2', [
-    commonHeader(model),
-    headerSpecific(model),
-  ]),
-  filterSpecific(model),
-]);
+export default (model) => {
+  const specific = headerSpecific(model) || {};
+  const { centerCol, rightCol } = specific;
+
+  return h('.flex-col', [
+    h('.flex-row.p2.items-center', { id: 'qcg-header' }, [
+      commonHeader(model),
+      centerCol || h('.flex-grow'),
+      rightCol || h('.w-33'),
+    ]),
+    filterSpecific(model),
+  ]);
+};
 
 /**
  * Shows the page specific header (center and right side)
  * @param {Model} model - root model of the application
- * @returns {vnode} - virtual node element
+ * @returns {{centerCol: vnode, rightCol: vnode} | null} center column and right column
  */
 const headerSpecific = (model) => {
-  const { layoutListModel, filterModel, layout, object, page } = model;
+  const { filterModel, layout, object, page } = model;
   switch (page) {
-    case 'layoutList': return LayoutListHeader(layoutListModel, filterModel);
+    case 'layoutList': return LayoutListHeader();
     case 'layoutShow': return layoutViewHeader(layout, filterModel);
     case 'objectTree': return objectTreeHeader(object, filterModel);
     case 'objectView': return objectViewHeader(model);
-    case 'about': return aboutViewHeader(filterModel);
+    case 'about': return aboutViewHeader();
     default: return null;
   }
 };
@@ -61,14 +67,12 @@ const headerSpecific = (model) => {
  * @returns {vnode} - virtual node element
  */
 const filterSpecific = (model) => {
-  const { page, filterModel, layout, object, objectViewModel, aboutViewModel, layoutListModel } = model;
+  const { page, filterModel, layout, object, objectViewModel } = model;
 
   switch (page) {
-    case 'layoutList': return filtersPanel(filterModel, layoutListModel);
     case 'layoutShow': return filtersPanel(filterModel, layout);
     case 'objectTree': return filtersPanel(filterModel, object);
     case 'objectView': return filtersPanel(filterModel, objectViewModel);
-    case 'about': return filtersPanel(filterModel, aboutViewModel);
     default: return null;
   }
 };
@@ -78,7 +82,7 @@ const filterSpecific = (model) => {
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const commonHeader = (model) => h('.flex-grow.flex-row.items-center', [
+const commonHeader = (model) => h('.flex-row.items-center.w-33', [
   loginButton(model),
   ' ',
   h('span.f4.gray', {
