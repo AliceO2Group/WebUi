@@ -61,25 +61,4 @@ export class GridTabCellRepository extends BaseRepository {
     ];
     return super.findOne({ chart_id: chartId }, { include });
   }
-
-  /**
-   * Creates a new grid tab cell.
-   * @param {Partial<GridTabCellAttributes>} cellData new data
-   * @param {object} options additional options for the query (e.g. transaction)
-   * @returns {Promise<GridTabCellAttributes>} Created grid tab cell
-   */
-  async createGridTabCell(cellData, options = {}) {
-    return super.create(cellData, { ...options });
-  }
-
-  /**
-   * Updates a grid tab cell by ID.
-   * @param {number} id ID of the grid tab cell to update
-   * @param {Partial<GridTabCellAttributes>} updateData updated data
-   * @param {object} options additional options for the update (e.g. transaction)
-   * @returns {Promise<number>} Number of updated rows
-   */
-  async updateGridTabCell(id, updateData, options = {}) {
-    return super.update(id, updateData, { ...options });
-  }
 }

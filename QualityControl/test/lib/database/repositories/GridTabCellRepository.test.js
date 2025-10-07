@@ -76,7 +76,7 @@ export const gridTabCellRepositoryTestSuite = () => {
       const createdCell = { id: 1, ...newCellData };
       mockGridTabCellModel.create.resolves(createdCell);
 
-      const cell = await gridTabCellRepository.createGridTabCell(newCellData);
+      const cell = await gridTabCellRepository.create(newCellData);
       deepStrictEqual(cell, createdCell);
       ok(mockGridTabCellModel.create.calledOnceWith(newCellData));
     });
@@ -87,7 +87,7 @@ export const gridTabCellRepositoryTestSuite = () => {
       const updatedCount = 1;
       mockGridTabCellModel.update.resolves(updatedCount);
 
-      const result = await gridTabCellRepository.updateGridTabCell(cellId, updateData);
+      const result = await gridTabCellRepository.update(cellId, updateData);
       strictEqual(result, updatedCount);
       ok(mockGridTabCellModel.update.calledOnceWith(
         updateData,
