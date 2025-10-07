@@ -35,7 +35,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     }
   });
 
-  await testParent.test('should have a switch to enable runs mode', { timeout }, async () => {
+  await testParent.test('should have a switch to enable run mode', { timeout }, async () => {
     await page.goto(
       `${url}?page=objectTree`,
       { waitUntil: 'networkidle0' },
@@ -46,7 +46,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     await page.locator('.form-check-label > .switch');
     const runsModeTitle = await page.evaluate(() =>
       document.querySelector('.form-check-label').textContent);
-    strictEqual(runsModeTitle, 'Runs mode', 'The text displayed is not `Runs mode`');
+    strictEqual(runsModeTitle, 'Run mode', 'The text displayed is not `Runs mode`');
   });
 
   await testParent.test('should activate run mode', { timeout }, async () => {

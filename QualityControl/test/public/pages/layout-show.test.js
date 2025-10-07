@@ -173,7 +173,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
         const container = document.querySelector('.btn-group');
         return container ? container.children.length : 0;
       });
-      strictEqual(count, 5);
+      strictEqual(count, 4);
     },
   );
 
@@ -181,7 +181,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have one duplicate button in the header to create a new duplicated layout',
     { timeout },
     async () => {
-      const buttonPath = '.btn-group > button:nth-child(2)';
+      const buttonPath = '.btn-group > button:nth-child(1)';
       const duplicateButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
       strictEqual(duplicateButton, 'Duplicate layout');
     },
@@ -191,7 +191,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have one delete button in the header to delete layout',
     { timeout },
     async () => {
-      const buttonPath = '.btn-group > button:nth-of-type(3)';
+      const buttonPath = '.btn-group > button:nth-of-type(2)';
       const deleteButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
       strictEqual(deleteButton, 'Delete layout');
     },
@@ -201,7 +201,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have one link button in the header to download layout skeleton',
     { timeout },
     async () => {
-      const buttonPath = '.btn-group > a:nth-of-type(1)';
+      const buttonPath = '.btn-group > a';
       const editButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
       strictEqual(editButton, 'Export layout skeleton as JSON file');
     },
