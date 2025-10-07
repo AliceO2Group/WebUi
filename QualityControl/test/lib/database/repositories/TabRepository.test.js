@@ -12,9 +12,10 @@
  */
 
 import { suite, test, beforeEach } from 'node:test';
-import { deepStrictEqual, ok, strictEqual } from 'node:assert';
+import { deepStrictEqual, ok, rejects, strictEqual } from 'node:assert';
 import { stub } from 'sinon';
 import { TabRepository } from '../../../../lib/database/repositories/TabRepository.js';
+import { UniqueConstraintError } from 'sequelize';
 
 /**
  * Test suite for TabRepository
@@ -38,75 +39,88 @@ export const tabRepositoryTestSuite = () => {
       tabRepository = new TabRepository(mockTabModel);
     });
 
-    test('should create instance with tab model', () => {
-      ok(tabRepository instanceof TabRepository);
+    test('should initialize with the correct model', () => {
       strictEqual(tabRepository.model, mockTabModel);
     });
 
-    test('should inherit from BaseRepository', () => {
-      ok(tabRepository.model);
+    test('should find tabs by layout ID', async () => {
+      const layoutId = 1;
+      const expectedResult = [
+        { id: 1, layout_id: layoutId, name: 'Tab 1' },
+        { id: 2, layout_id: layoutId, name: 'Tab 2' },
+      ];
+      mockTabModel.findAll.resolves(expectedResult);
+
+      const result = await tabRepository.findTabsByLayoutId(layoutId);
+
+      deepStrictEqual(result, expectedResult);
+      ok(mockTabModel.findAll.calledOnceWithExactly({
+        include: [],
+        where: { layout_id: layoutId },
+      }));
     });
 
-    test('should handle tab creation', async () => {
-      const tabData = { layout_id: '1', name: 'Test Tab', order: 1 };
-      const createdTab = { id: '1', ...tabData };
+    test('should create a new tab', async () => {
+      const newTabData = { layout_id: 1, name: 'New Tab' };
+      const createdTab = { id: 1, ...newTabData };
       mockTabModel.create.resolves(createdTab);
 
-      const result = await tabRepository.model.create(tabData);
+      const result = await tabRepository.createTab(newTabData);
+
       deepStrictEqual(result, createdTab);
-      ok(mockTabModel.create.calledWith(tabData));
+      ok(mockTabModel.create.calledOnceWithExactly(newTabData, {}));
     });
 
-    test('should handle tab retrieval by layout', async () => {
-      const mockTabs = [
-        { id: '1', layout_id: '1', name: 'Tab 1', order: 1 },
-        { id: '2', layout_id: '1', name: 'Tab 2', order: 2 },
-      ];
-      mockTabModel.findAll.resolves(mockTabs);
+    test('should throw an invalid input error when creating a tab with duplicate name', async () => {
+      const newTabData = { layout_id: 1, name: 'Duplicate Tab' };
+      const uniqueConstraintError = new UniqueConstraintError();
+      mockTabModel.create.rejects(uniqueConstraintError);
 
-      const result = await tabRepository.model.findAll({ where: { layout_id: '1' } });
-      deepStrictEqual(result, mockTabs);
-      ok(mockTabModel.findAll.calledWith({ where: { layout_id: '1' } }));
+      await rejects(
+        async () => {
+          await tabRepository.createTab(newTabData);
+        },
+        (error) => {
+          strictEqual(
+            error.message,
+            `A tab with name "${newTabData.name}" already exists for layout ID "${newTabData.layout_id}".`,
+          );
+          return true;
+        },
+      );
+      ok(mockTabModel.create.calledOnceWithExactly(newTabData, {}));
     });
 
-    test('should handle bulk tab creation', async () => {
-      const tabsArray = [
-        { layout_id: '1', name: 'Tab 1', order: 1 },
-        { layout_id: '1', name: 'Tab 2', order: 2 },
-      ];
-      const createdTabs = tabsArray.map((tab, i) => ({ id: String(i + 1), ...tab }));
-      mockTabModel.bulkCreate.resolves(createdTabs);
+    test('should update an existing tab', async () => {
+      const tabId = 1;
+      const updateData = { name: 'Updated Tab' };
+      mockTabModel.update.resolves(1);
 
-      const result = await tabRepository.model.bulkCreate(tabsArray);
-      deepStrictEqual(result, createdTabs);
-      ok(mockTabModel.bulkCreate.calledWith(tabsArray));
+      const result = await tabRepository.updateTab(tabId, updateData);
+
+      strictEqual(result, 1);
+      ok(mockTabModel.update.calledOnceWithExactly(updateData, { where: { id: tabId } }));
     });
 
-    test('should handle tab updates', async () => {
-      const updateData = { name: 'Updated Tab', order: 3 };
-      const updateResult = [1];
-      mockTabModel.update.resolves(updateResult);
+    test('should throw an invalid input error when updating a tab with duplicate name', async () => {
+      const tabId = 1;
+      const updateData = { name: 'Duplicate Tab' };
+      const uniqueConstraintError = new UniqueConstraintError();
+      mockTabModel.update.rejects(uniqueConstraintError);
 
-      const result = await tabRepository.model.update(updateData, { where: { id: '1' } });
-      deepStrictEqual(result, updateResult);
-      ok(mockTabModel.update.calledWith(updateData, { where: { id: '1' } }));
-    });
-
-    test('should handle tab deletion by layout', async () => {
-      mockTabModel.destroy.resolves(2);
-
-      const result = await tabRepository.model.destroy({ where: { layout_id: '1' } });
-      strictEqual(result, 2);
-      ok(mockTabModel.destroy.calledWith({ where: { layout_id: '1' } }));
-    });
-
-    test('should handle single tab retrieval', async () => {
-      const mockTab = { id: '1', layout_id: '1', name: 'Test Tab', order: 1 };
-      mockTabModel.findByPk.resolves(mockTab);
-
-      const result = await tabRepository.model.findByPk('1');
-      deepStrictEqual(result, mockTab);
-      ok(mockTabModel.findByPk.calledWith('1'));
+      await rejects(
+        async () => {
+          await tabRepository.updateTab(tabId, updateData);
+        },
+        (error) => {
+          strictEqual(
+            error.message,
+            `A tab with name "${updateData.name}" already exists for layout ID "${updateData.layout_id}".`,
+          );
+          return true;
+        },
+      );
+      ok(mockTabModel.update.calledOnceWithExactly(updateData, { where: { id: tabId } }));
     });
   });
 };

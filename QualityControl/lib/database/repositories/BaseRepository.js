@@ -102,8 +102,7 @@ export class BaseRepository {
    * @returns {Promise<number>} A promise that resolves to the number of records updated.
    */
   async update(id, updateData, options = {}) {
-    const updatedCount = await this._model.update(updateData, { where: { id }, ...options });
-    return updatedCount;
+    return this._model.update(updateData, { where: { id }, ...options });
   }
 
   /**

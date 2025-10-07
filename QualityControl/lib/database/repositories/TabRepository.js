@@ -45,16 +45,6 @@ export class TabRepository extends BaseRepository {
   }
 
   /**
-   * Finds a tab by its ID
-   * @param {string} id id of the tab
-   * @param {object} options additional options for the query (e.g. transaction)
-   * @returns {Promise<TabAttributes|null>} The tab or null if not found
-   */
-  async findTabById(id, options = {}) {
-    return super.findById(id, options);
-  }
-
-  /**
    * Creates a new tab
    * @param {Partial<TabAttributes>} tabData new tab
    * @param {object} options - Sequelize options (e.g., transaction)
@@ -62,7 +52,8 @@ export class TabRepository extends BaseRepository {
    */
   async createTab(tabData, options = {}) {
     try {
-      return super.create(tabData, options);
+      const createdTab = await super.create(tabData, options);
+      return createdTab;
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
         const message = `A tab with name "${tabData.name}" already exists for layout ID "${tabData.layout_id}".`;
@@ -90,15 +81,5 @@ export class TabRepository extends BaseRepository {
       }
       throw error;
     }
-  }
-
-  /**
-   * Deletes a tab by ID
-   * @param {string} id id of the tab
-   * @param {object} options - Sequelize options (e.g., transaction)
-   * @returns {Promise<number>} Number of deleted rows
-   */
-  async deleteTab(id, options = {}) {
-    return super.delete(id, options);
   }
 }
