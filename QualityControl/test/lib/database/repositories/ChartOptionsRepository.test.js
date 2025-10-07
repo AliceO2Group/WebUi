@@ -63,14 +63,43 @@ export const chartOptionsRepositoryTestSuite = () => {
       ok(mockChartOptionsModel.findAll.calledOnceWith({ where: { chart_id: chartId }, transaction: 'tx' }));
     });
 
-    test('should delete a chart option', async () => {
-      const params = { chartId: 1, optionId: 2 };
+    test('should find a chart option by chart ID and option ID', async () => {
+      const chartId = 1;
+      const optionId = 2;
+      const foundOption = { chart_id: chartId, option_id: optionId };
+      mockChartOptionsModel.findOne.resolves(foundOption);
+
+      const result = await chartOptionsRepository.findChartOption(chartId, optionId, { transaction: 'tx' });
+      deepStrictEqual(result, foundOption);
+      ok(mockChartOptionsModel.findOne.calledOnceWith({
+        where: { chart_id: chartId, option_id: optionId },
+        transaction: 'tx',
+      }));
+    });
+
+    test('should return null if chart option not found', async () => {
+      const chartId = 1;
+      const optionId = 99;
+      mockChartOptionsModel.findOne.resolves(null);
+
+      const result = await chartOptionsRepository.findChartOption(chartId, optionId, { transaction: 'tx' });
+      strictEqual(result, null);
+      ok(mockChartOptionsModel.findOne.calledOnceWith({
+        where: { chart_id: chartId, option_id: optionId },
+        transaction: 'tx',
+      }), `findOne called with incorrect parameters: ${JSON.stringify(mockChartOptionsModel.findOne.getCall(0).args)}`);
+    });
+
+    test('should delete a chart option by ID', async () => {
+      const chartOptionId = 1;
       mockChartOptionsModel.destroy.resolves(1);
 
-      const result = await chartOptionsRepository.deleteChartOption(params, { transaction: 'tx' });
+      const result = await chartOptionsRepository.deleteChartOption(chartOptionId, { transaction: 'tx' });
       strictEqual(result, 1);
       ok(mockChartOptionsModel.destroy.calledOnceWith({
-        where: { chart_id: params.chartId, option_id: params.optionId }, transaction: 'tx' }));
+        where: { id: chartOptionId },
+        transaction: 'tx',
+      }));
     });
   });
 };

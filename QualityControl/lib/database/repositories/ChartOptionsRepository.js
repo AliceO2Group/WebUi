@@ -48,15 +48,23 @@ export class ChartOptionsRepository extends BaseRepository {
   }
 
   /**
-   * Deletes a chart option by chart and option ID.
-   * @param {object} params - identifiers
-   * @param {number} params.chartId - Chart identifier.
-   * @param {number} params.optionId - Option identifier.
-   * @param {object} options - Additional options for the deletion (e.g. transaction).
-   * @returns {Promise<number>} Number of deleted records.
+   * Finds a chart option by chart ID and option ID.
+   * @param {number} chartId - Chart identifier.
+   * @param {number} optionId - Option identifier.
+   * @param {object} options - Additional options for the query (e.g. transaction).
+   * @returns {Promise<ChartOptionAttributes|null>} The found chart option or null if not found.
    */
-  async deleteChartOption(params, options = {}) {
-    const { chartId, optionId } = params;
-    return this.model.destroy({ where: { chart_id: chartId, option_id: optionId }, ...options });
+  async findChartOption(chartId, optionId, options = {}) {
+    return super.findOne({ chart_id: chartId, option_id: optionId }, { ...options });
+  }
+
+  /**
+   * Deletes a chart option by its ID.
+   * @param {number} chartOptionId - ID of the chart option to delete.
+   * @param {object} options - Additional options for the deletion (e.g. transaction).
+   * @returns {Promise<number>} Number of deleted rows.
+   */
+  async deleteChartOption(chartOptionId, options = {}) {
+    return super.delete(chartOptionId, { ...options });
   }
 }
