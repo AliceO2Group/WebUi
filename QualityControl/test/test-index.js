@@ -57,6 +57,14 @@ import { objectControllerTestSuite } from './lib/controllers/ObjectController.te
 import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
 import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
 import { bookkeepingServiceTestSuite } from './lib/services/BookkeepingService.test.js';
+import { aliecsSynchronizerTestSuite } from './lib/services/external/AliEcsSynchronizer.test.js';
+import { filterServiceTestSuite } from './lib/services/FilterService.test.js';
+import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
+import { qcObjectServiceTestSuite } from './lib/services/QcObjectService.test.js';
+import { runModeServiceTestSuite } from './lib/services/RunModeService.test.js';
+import { tabSynchronizerTestSuite } from './lib/services/layout/helpers/TabSynchronizer.test.js';
+import { gridTabCellSynchronizerTestSuite } from './lib/services/layout/helpers/GridTabCellSynchronizer.test.js';
+import { chartOptionsSynchronizerTestSuite } from './lib/services/layout/helpers/ChartOptionsSynchronizer.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
@@ -70,10 +78,8 @@ import { apiPutLayoutTests } from './api/layouts/api-put-layout.test.js';
 import { apiPatchLayoutTests } from './api/layouts/api-patch-layout.test.js';
 import { layoutRepositoryTest } from './lib/repositories/LayoutRepository.test.js';
 import { userRepositoryTest } from './lib/repositories/UserRepository.test.js';
-import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
 import { userControllerTestSuite } from './lib/controllers/UserController.test.js';
 import { chartRepositoryTest } from './lib/repositories/ChartRepository.test.js';
-import { filterServiceTestSuite } from './lib/services/FilterService.test.js';
 import { apiGetLayoutsTests } from './api/layouts/api-get-layout.test.js';
 import { apiGetObjectsTests } from './api/objects/api-get-object.test.js';
 import { objectsGetValidationMiddlewareTest } from './lib/middlewares/objects/objectsGetValidation.middleware.test.js';
@@ -82,11 +88,8 @@ import { objectGetContentsValidationMiddlewareTest }
 import { objectGetByIdValidationMiddlewareTest }
   from './lib/middlewares/objects/objectGetByIdValidation.middleware.test.js';
 import { filterTests } from './public/features/filterTest.test.js';
-import { qcObjectServiceTestSuite } from './lib/services/QcObjectService.test.js';
-import { runModeServiceTestSuite } from './lib/services/RunModeService.test.js';
 import { apiGetRunStatusTests } from './api/filters/api-get-run-status.test.js';
 import { runModeTests } from './public/features/runMode.test.js';
-import { aliecsSynchronizerTestSuite } from './lib/services/external/AliEcsSynchronizer.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -223,6 +226,11 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('QcObjectService - Test Suite', async () => await qcObjectServiceTestSuite());
       suite('BookkeepingServiceTest test suite', async () => await bookkeepingServiceTestSuite());
       suite('AliEcsSynchronizer - Test Suite', async () => await aliecsSynchronizerTestSuite());
+      suite('Layout Service - Test Suite', async () => {
+        await tabSynchronizerTestSuite();
+        await gridTabCellSynchronizerTestSuite();
+        await chartOptionsSynchronizerTestSuite();
+      });
     });
 
     suite('Middleware - Test Suite', async () => {
