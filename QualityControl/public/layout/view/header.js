@@ -45,11 +45,11 @@ const toolbarViewMode = (layout, filterModel) => {
 
   return {
     centerCol: h('.flex-grow.text-center', [h('.header-layout', [tabViewLinks(layoutItem, layout)])]),
-    rightCol: h('.w-33.text-right.g2.flex-row.justify-end', [
+    rightCol: h('.w-25.text-right.g2.flex-row.justify-end.flex-wrap', [
       h('b.f4.items-center', [isOfficial ? iconBadge() : '', layoutItem.name]),
       ' ',
-      h('.btn-group', [
-        filterPanelToggleButton(filterModel),
+      filterPanelToggleButton(filterModel),
+      h('.btn-group.flex-wrap', [
         newLayoutButton(layout),
         jsonExportButton(layoutItem, name),
         layout.ownsLayout(owner_id) && [editDropdown(layout), deleteButton(layout)],

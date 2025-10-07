@@ -92,7 +92,7 @@ export function filtersPanel(filterModel, viewModel) {
   return h(
     '.w-100.flex-column.p2.g2.justify-center#filterElement',
     [
-      h('.flex-row.g2.justify-center', [
+      h('.flex-row.g2.justify-center.items-center', [
         runModeCheckbox(filterModel, viewModel),
         !isRunModeActivated &&
         [triggerFiltersButton(onEnterCallback, filterModel), clearFiltersButton(clearFilterCallback)],
