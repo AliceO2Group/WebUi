@@ -27,6 +27,7 @@ export class BaseRepository {
       throw new Error('A Sequelize model must be provided to BaseRepository.');
     }
     this._model = model;
+    this._defaultInclude = [];
   }
 
   /**
@@ -38,13 +39,29 @@ export class BaseRepository {
   }
 
   /**
+   * The default include options for Sequelize queries.
+   * @returns {Array} the default include options
+   */
+  get defaultInclude() {
+    return this._defaultInclude;
+  }
+
+  /**
+   * Sets the default include options for Sequelize queries.
+   * @param {Array} include - The include options to set as default
+   */
+  set defaultInclude(include) {
+    this._defaultInclude = include;
+  }
+
+  /**
    * Finds a record by its primary key.
    * @param {number} id - The primary key of the record to find.
    * @param {object} [options={}] - Additional options for the query.
    * @returns {Promise<Model|null>} A promise that resolves to the found record or null if not found.
    */
   async findById(id, options = {}) {
-    return this._model.findByPk(id, options);
+    return this._model.findByPk(id, { include: this._defaultInclude, ...options });
   }
 
   /**
@@ -54,7 +71,7 @@ export class BaseRepository {
    * @returns {Promise<Model|null>} A promise that resolves to the found record or null if not found.
    */
   async findOne(constraints = {}, options = {}) {
-    return this._model.findOne({ where: constraints, ...options });
+    return this._model.findOne({ where: constraints, include: this._defaultInclude, ...options });
   }
 
   /**
@@ -64,7 +81,7 @@ export class BaseRepository {
    * @returns {Promise<Model[]>} A promise that resolves to an array of found records.
    */
   async findAll(options = {}) {
-    return this._model.findAll({ ...options });
+    return this._model.findAll({ include: this._defaultInclude, ...options });
   }
 
   /**
@@ -74,7 +91,7 @@ export class BaseRepository {
    * @returns {Promise<Model>} A promise that resolves to the created record.
    */
   async create(item, options = {}) {
-    return this._model.create(item, options);
+    return this._model.create(item, { ...options });
   }
 
   /**

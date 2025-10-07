@@ -58,6 +58,18 @@ import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
 import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
 import { bookkeepingServiceTestSuite } from './lib/services/BookkeepingService.test.js';
 
+/**
+ * Repositories
+ */
+import { baseRepositoryTestSuite } from './lib/database/repositories/BaseRepository.test.js';
+import { layoutRepositoryTestSuite } from './lib/database/repositories/LayoutRepository.test.js';
+import { userRepositoryTestSuite } from './lib/database/repositories/UserRepository.test.js';
+import { chartRepositoryTestSuite } from './lib/database/repositories/ChartRepository.test.js';
+import { chartOptionsRepositoryTestSuite } from './lib/database/repositories/ChartOptionsRepository.test.js';
+import { gridTabCellRepositoryTestSuite } from './lib/database/repositories/GridTabCellRepository.test.js';
+import { tabRepositoryTestSuite } from './lib/database/repositories/TabRepository.test.js';
+import { optionRepositoryTestSuite } from './lib/database/repositories/OptionRepository.test.js';
+
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
 import { layoutIdMiddlewareTest } from './lib/middlewares/layouts/layoutId.middleware.test.js';
@@ -70,13 +82,7 @@ import { apiPutLayoutTests } from './api/layouts/api-put-layout.test.js';
 import { apiPatchLayoutTests } from './api/layouts/api-patch-layout.test.js';
 import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
 import { userControllerTestSuite } from './lib/controllers/UserController.test.js';
-import { layoutRepositoryTestSuite } from './lib/database/repositories/LayoutRepository.test.js';
-import { userRepositoryTestSuite } from './lib/database/repositories/UserRepository.test.js';
-import { chartRepositoryTestSuite } from './lib/database/repositories/ChartRepository.test.js';
-import { chartOptionsRepositoryTestSuite } from './lib/database/repositories/ChartOptionsRepository.test.js';
-import { gridTabCellRepositoryTestSuite } from './lib/database/repositories/GridTabCellRepository.test.js';
-import { tabRepositoryTestSuite } from './lib/database/repositories/TabRepository.test.js';
-import { optionRepositoryTestSuite } from './lib/database/repositories/OptionRepository.test.js';
+
 import { filterServiceTestSuite } from './lib/services/FilterService.test.js';
 import { apiGetLayoutsTests } from './api/layouts/api-get-layout.test.js';
 import { apiGetObjectsTests } from './api/objects/api-get-object.test.js';
@@ -213,6 +219,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     });
 
     suite('Repositories - Test Suite', async () => {
+      suite('Base Repository - Test Suite', async () => await baseRepositoryTestSuite());
       suite('Layout Repository - Test Suite', async () => await layoutRepositoryTestSuite());
       suite('User Repository - Test Suite', async () => await userRepositoryTestSuite());
       suite('Chart Repository - Test Suite', async () => await chartRepositoryTestSuite());

@@ -36,7 +36,7 @@ export class LayoutRepository extends BaseRepository {
     super(layoutModel);
 
     // Build common include structure for all find queries
-    this._layoutInfoToInclude = [
+    this.defaultInclude = [
       {
         association: 'tabs',
         required: true,
@@ -65,29 +65,12 @@ export class LayoutRepository extends BaseRepository {
   }
 
   /**
-   * Finds a layout by its ID
-   * @param {string} id id of the layout
-   * @returns {Promise<LayoutAttributes|null>} Layout found or null
-   */
-  async findLayoutById(id) {
-    return super.findById(id, { include: this._layoutInfoToInclude });
-  }
-
-  /**
    * Finds a layout by its name
    * @param {string} name name of the layout
    * @returns {Promise<LayoutAttributes|null>} Layout found or null
    */
   async findLayoutByName(name) {
-    return super.findOne({ name }, { include: this._layoutInfoToInclude });
-  }
-
-  /**
-   * Finds layouts
-   * @returns {Promise<LayoutAttributes[]>} Array of layouts found
-   */
-  async findAllLayouts() {
-    return super.findAll({ include: this._layoutInfoToInclude });
+    return super.findOne({ name });
   }
 
   /**
@@ -106,9 +89,9 @@ export class LayoutRepository extends BaseRepository {
       }
       whereClause.id = { [Op.in]: layoutIds };
     }
-    return super.findAll({
+    return this.model.findAll({
       where: whereClause,
-      include: this._layoutInfoToInclude,
+      include: this.defaultInclude,
     });
   }
 
@@ -179,15 +162,5 @@ export class LayoutRepository extends BaseRepository {
       }
       throw error;
     }
-  }
-
-  /**
-   * Deletes a layout by ID
-   * @param {string} id Id of the layout to delete
-   * @param {object} options Sequelize delete options (e.g. transaction)
-   * @returns {Promise<number>} Number of deleted rows
-   */
-  async deleteLayout(id, options = {}) {
-    return super.delete(id, { ...options });
   }
 }

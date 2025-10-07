@@ -38,21 +38,6 @@ export const layoutRepositoryTestSuite = () => {
       layoutRepository = new LayoutRepository(mockLayoutModel);
     });
 
-    test('should create instance with layout model', () => {
-      ok(layoutRepository instanceof LayoutRepository);
-      strictEqual(layoutRepository.model, mockLayoutModel);
-    });
-
-    test('should find layout by ID', async () => {
-      const mockLayout = { id: '1', name: 'Test Layout' };
-      mockLayoutModel.findByPk.resolves(mockLayout);
-
-      const result = await layoutRepository.findLayoutById('1');
-
-      deepStrictEqual(result, mockLayout);
-      ok(mockLayoutModel.findByPk.calledOnceWith('1', { include: layoutRepository._layoutInfoToInclude }));
-    });
-
     test('should find a layout by name', async () => {
       const mockLayout = { id: '1', name: 'Unique Layout' };
       mockLayoutModel.findOne.resolves(mockLayout);
@@ -62,21 +47,8 @@ export const layoutRepositoryTestSuite = () => {
       deepStrictEqual(result, mockLayout);
       ok(mockLayoutModel.findOne.calledOnceWith({
         where: { name: 'Unique Layout' },
-        include: layoutRepository._layoutInfoToInclude,
+        include: layoutRepository.defaultInclude,
       }));
-    });
-
-    test('should find all layouts', async () => {
-      const mockLayouts = [
-        { id: '1', name: 'Layout 1' },
-        { id: '2', name: 'Layout 2' },
-      ];
-      mockLayoutModel.findAll.resolves(mockLayouts);
-
-      const result = await layoutRepository.findAllLayouts();
-
-      deepStrictEqual(result, mockLayouts);
-      ok(mockLayoutModel.findAll.calledOnceWith({ include: layoutRepository._layoutInfoToInclude }));
     });
 
     test('should filter layout by objectPath', async () => {
@@ -106,7 +78,7 @@ export const layoutRepositoryTestSuite = () => {
 
       ok(layoutRepository.model.findAll.calledOnceWithMatch({
         where: { id: { [Op.in]: ['1'] } },
-        include: layoutRepository._layoutInfoToInclude,
+        include: layoutRepository.defaultInclude,
       }));
 
       layoutRepository._getLayoutIdsByObjectPath.restore();
@@ -131,20 +103,7 @@ export const layoutRepositoryTestSuite = () => {
       deepStrictEqual(result, mockLayouts);
       ok(mockLayoutModel.findAll.calledOnceWithMatch({
         where: {},
-        include: layoutRepository._layoutInfoToInclude,
-      }));
-    });
-
-    test('should find layout by name', async () => {
-      const mockLayout = { id: '1', name: 'Unique Layout' };
-      mockLayoutModel.findOne.resolves(mockLayout);
-
-      const result = await layoutRepository.findLayoutByName('Unique Layout');
-
-      deepStrictEqual(result, mockLayout);
-      ok(mockLayoutModel.findOne.calledOnceWith({
-        where: { name: 'Unique Layout' },
-        include: layoutRepository._layoutInfoToInclude,
+        include: layoutRepository.defaultInclude,
       }));
     });
 
@@ -167,16 +126,6 @@ export const layoutRepositoryTestSuite = () => {
       const affectedCount = await layoutRepository.updateLayout(layoutId, updateData);
       strictEqual(affectedCount, updateCount);
       ok(mockLayoutModel.update.calledOnceWith(updateData, { where: { id: layoutId } }));
-    });
-
-    test('should delete a layout', async () => {
-      const layoutId = '1';
-      const deleteCount = 1;
-      mockLayoutModel.destroy.resolves(deleteCount);
-
-      const result = await layoutRepository.deleteLayout(layoutId);
-      strictEqual(result, deleteCount);
-      ok(mockLayoutModel.destroy.calledOnceWith({ where: { id: layoutId } }));
     });
   });
 };

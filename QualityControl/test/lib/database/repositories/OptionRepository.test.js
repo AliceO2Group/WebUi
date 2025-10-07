@@ -12,7 +12,7 @@
  */
 
 import { suite, test, beforeEach } from 'node:test';
-import { ok, strictEqual } from 'node:assert';
+import { ok } from 'node:assert';
 import { stub } from 'sinon';
 import { OptionRepository } from '../../../../lib/database/repositories/OptionRepository.js';
 
@@ -34,20 +34,18 @@ export const optionRepositoryTestSuite = () => {
     test('should create instance with option model', () => {
       ok(optionRepository instanceof OptionRepository);
     });
-
     test('should find option by name', async () => {
       const optionName = 'testOption';
-      const mockOption = { id: 1, name: optionName, type: 'testType' };
-      mockOptionModel.findOne.resolves(mockOption);
-      const result = await optionRepository.findOptionByName(optionName);
-      strictEqual(result, mockOption);
-    });
+      const expectedOption = { name: optionName, value: 'testValue' };
+      mockOptionModel.findOne.resolves(expectedOption);
 
-    test('should return null if option not found', async () => {
-      const optionName = 'nonExistentOption';
-      mockOptionModel.findOne.resolves(null);
       const result = await optionRepository.findOptionByName(optionName);
-      strictEqual(result, null);
+
+      ok(mockOptionModel.findOne.calledOnceWith({
+        where: { name: optionName },
+        include: [],
+      }));
+      ok(result === expectedOption);
     });
   });
 };

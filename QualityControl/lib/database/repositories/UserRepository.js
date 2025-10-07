@@ -14,15 +14,6 @@
 import { BaseRepository } from './BaseRepository.js';
 
 /**
- * @typedef {object} UserAttributes
- * @property {number} id - personId
- * @property {string} username - unique username
- * @property {string} name - full name of the user
- * @property {Date} created_at - date of creation
- * @property {Date} updated_at - date of last update
- */
-
-/**
  * Repository for managing users.
  */
 export class UserRepository extends BaseRepository {
@@ -32,23 +23,5 @@ export class UserRepository extends BaseRepository {
    */
   constructor(userModel) {
     super(userModel);
-  }
-
-  /**
-   * Retrieves a user based on given filters.
-   * @param {object} filters - An object containing the criteria to search for.
-   * @returns {Promise<User|null>} A promise that resolves to the user object if found, otherwise null.
-   */
-  async findUser(filters) {
-    return await super.findOne(filters);
-  }
-
-  /**
-   * Creates a new user
-   * @param {Partial<UserAttributes>} userData new user to create
-   * @returns {Promise<UserAttributes>} The created user
-   */
-  async createUser(userData) {
-    return super.create(userData);
   }
 }

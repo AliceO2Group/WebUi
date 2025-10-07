@@ -28,16 +28,6 @@ export class ChartOptionsRepository extends BaseRepository {
   }
 
   /**
-   * Creates a new chart option.
-   * @param {Partial<ChartOptionAttributes>} optionData - Data for the new chart option.
-   * @param {object} options - Additional options for the creation (e.g. transaction).
-   * @returns {Promise<ChartOptionAttributes>} The created chart option.
-   */
-  async createChartOption(optionData, options = {}) {
-    return super.create(optionData, { ...options });
-  }
-
-  /**
    * Finds all chart options by chart ID.
    * @param {number} chartId - Chart identifier.
    * @param {object} options - Additional options for the query (e.g. transaction).
@@ -56,15 +46,5 @@ export class ChartOptionsRepository extends BaseRepository {
    */
   async findChartOption(chartId, optionId, options = {}) {
     return super.findOne({ chart_id: chartId, option_id: optionId }, { ...options });
-  }
-
-  /**
-   * Deletes a chart option by its ID.
-   * @param {number} chartOptionId - ID of the chart option to delete.
-   * @param {object} options - Additional options for the deletion (e.g. transaction).
-   * @returns {Promise<number>} Number of deleted rows.
-   */
-  async deleteChartOption(chartOptionId, options = {}) {
-    return super.delete(chartOptionId, { ...options });
   }
 }

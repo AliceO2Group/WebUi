@@ -51,7 +51,7 @@ export const gridTabCellRepositoryTestSuite = () => {
       const cells = await gridTabCellRepository.findByTabId(tabId);
 
       deepStrictEqual(cells, expectedCells);
-      ok(mockGridTabCellModel.findAll.calledOnceWith({ where: { tab_id: tabId } }));
+      ok(mockGridTabCellModel.findAll.calledOnceWith({ include: [], where: { tab_id: tabId } }));
     });
 
     test('should find object by chart ID', async () => {
