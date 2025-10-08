@@ -15,7 +15,13 @@
 import { suite, test } from 'node:test';
 import { OWNER_TEST_TOKEN, URL_ADDRESS } from '../config.js';
 import request from 'supertest';
-import { deepStrictEqual, strictEqual } from 'node:assert';
+import { deepStrictEqual, ok, strictEqual } from 'node:assert';
+import { dirname, join } from 'path';
+import fs from 'node:fs';
+import { promisify } from 'node:util';
+import nock from 'nock';
+import { fileURLToPath } from 'url';
+
 import { MOCK_OBJECT_BY_ID_RESULT, OBJECT_BY_PATH_RESULT, OBJECT_LATEST_FILTERED_BY_RUN_NUMBER, OBJECT_VERSIONS,
   OBJECT_VERSIONS_FILTERED_BY_RUN_NUMBER, TREE_API_OBJECTS } from '../../setup/seeders/ccdbObjects.js';
 
@@ -44,6 +50,30 @@ export const apiGetObjectsTests = () => {
     test('should return 500 if service fails to retrieve object', async () => {
       const url = `${URL_ADDRESS}/api/object?token=${OWNER_TEST_TOKEN}&path=invalid/path`;
       await testResult(url, 500, { message: 'Failed to retrieve object content', status: 500, title: 'Unknown Error' });
+    });
+  });
+
+  suite('GET /object/proxy/download/', () => {
+    test('should return ROOT details from qcdb', async () => {
+      const _filename = fileURLToPath(import.meta.url);
+      const _dirname = dirname(_filename);
+      const filePath = join(_dirname, '../../demoData/qcdbRoot/TObject_1732326337752.root');
+      const readfile = promisify(fs.readFile);
+      const testBuffer = await readfile(filePath);
+      const testFile = new File([testBuffer], 'TObject_1732326337752.root');
+
+      const objectIds = '95c51d3b-9f64-11f0-bd06-bcb9d03ba1a2';
+      const url = `http://${URL_ADDRESS}/api/object/proxy/download/?token=${OWNER_TEST_TOKEN}&objectIds=${objectIds}`;
+      const response = await fetch(`${url}`);
+
+      strictEqual(await response.text(), await testFile.text()) ;
+    });
+
+    test('should return 400 if objectIds are missing', async () => {
+      const url = `http://${URL_ADDRESS}/api/object/proxy/download/?token=${OWNER_TEST_TOKEN}`;
+      const response = await fetch(`${url}`);
+
+      strictEqual(response.status, 400) ;
     });
   });
 

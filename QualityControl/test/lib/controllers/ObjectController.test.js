@@ -214,8 +214,7 @@ export const objectControllerTestSuite = async () => {
         title: 'Invalid Input'
       };
       await objectController.getDownloadObjects(reqMock, resMock);
-      ok(resMock.status.calledWith(400));
-      ok(resMock.json.calledWith(responseMsg));
+      ok(resMock.json.calledWithMatch(responseMsg));
     });
   });
 };

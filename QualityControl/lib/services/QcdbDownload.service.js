@@ -82,7 +82,7 @@ export class QcdbDownloadService {
   async requestObject(objectId, res = undefined) {
     this._logger.infoMessage(`Object ID Request: ${objectId}`);
     try {
-      const response = await fetch(`${this._target}/download/${objectId}`);;
+      const response = await fetch(`${this._target}/download/${objectId}`);
       if (!response.ok) {
         this._logger.errorMessage(`QCDB returned ${response.status} ${response.statusText}`);
         throw new Error(`Cannot get ROOT file from qcdb object id: ${objectId}`);
