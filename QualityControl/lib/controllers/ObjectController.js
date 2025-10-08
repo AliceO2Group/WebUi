@@ -90,15 +90,19 @@ export class ObjectController {
     try {
       const validated = await ObjectGetDownloadDTO.validateAsync(req.query);
       ({ objectIds } = validated);
+      this._qcdbDownloadService.getQcdbRootObjects(objectIds, res);
     } catch (e) {
-      const responseError = e.isJoi ?
-        new InvalidInputError(`Invalid query parameters: ${e.details[0].message}`) :
-        new Error('Unable to process request');
+      let responseError = '';
+      if (e.isJoi) {
+        this._logger.errorMessage(`Error validating query parameters: ${e}`);
+        responseError = new InvalidInputError(`Invalid query parameters: ${e.details[0].message}`);
+      } else {
+        this._logger.errorMessage(e?.message ?? e);
+        responseError = new Error('Unable to process request');
+      }
 
-      this._logger.errorMessage(`Error validating query parameters: ${e}`);
       return updateAndSendExpressResponseFromNativeError(res, responseError);
     }
-    this._qcdbDownloadService.getQcdbRootObjects(objectIds, res);
   }
 
   /**

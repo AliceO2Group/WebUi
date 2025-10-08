@@ -31,13 +31,49 @@ export class QcdbDownloadService {
     this._protocol = config.protocol ?? 'http';
     this._target = `${this._protocol}://${this._hostname}:${this._port}`;
 
-    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/proxy`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/qcdb-download-svc`);
     this._pipelineAsync = promisify(pipeline);
   }
 
   /**
+   * Stream the ROOT file contained in the QCDB response into our reponse back to the user.
+   * @param {Response} response - Response from QCDB
+   * @param {Express.Response} res - Outgoing response object we'll write our data into
+   * @returns {void}
+   */
+  async _streamToResponse(response, res) {
+    const contentLength = response.headers.get('Content-Length');
+    const contentType = response.headers.get('Content-Type');
+    const contentDisposition = response.headers.get('Content-Disposition');
+    const filename = contentDisposition?.slice(17, contentDisposition.length - 1);
+    // We will stream the data from QCDB's answer directly back to the user.
+    res.setHeader('Content-Type', contentType ?? 'application/root');
+    res.setHeader('Content-Disposition', contentDisposition ?? `attachment; filename="${filename}"`);
+    if (contentLength) {
+      res.setHeader('Content-Length', contentLength);
+    }
+
+    await this._pipelineAsync(response.body, res);
+    return;
+  }
+
+  /**
+   * Get a ROOT file from a QCDB download request.
+   * @param {Response} response - response from QCDB.
+   * @returns {File} - ROOT file from response.
+   */
+  async _getFileFromResponse(response) {
+    const contentType = response.headers.get('Content-Type');
+    const contentDisposition = response.headers.get('Content-Disposition');
+    const filename = contentDisposition?.slice(17, contentDisposition.length - 1);
+    const blob = await response.blob();
+    const file = new File([blob], filename ?? 'export.root', { type: contentType ?? 'application/root' });
+    return file;
+  }
+
+  /**
    * Get ROOT object from qcdb.
-   * If a response object is given it is assumed that this is the only request
+   * If a response object is given it is assumed that this is the only request.
    * the body of the answer from qcdb will then be streamed into our response.
    * @param {string} objectId - id of ROOT object to retrieve from qcdb.
    * @param {Express.Response} res - Optional Express response object if we want to stream qcdb's answer as our own.
@@ -45,36 +81,22 @@ export class QcdbDownloadService {
    */
   async requestObject(objectId, res = undefined) {
     this._logger.infoMessage(`Object ID Request: ${objectId}`);
-    const qcdbRequest = new Request(`${this._target}/download/${objectId}`, { method: 'GET' });
     try {
-      const response = await fetch(qcdbRequest);
+      const response = await fetch(`${this._target}/download/${objectId}`);;
       if (!response.ok) {
         this._logger.errorMessage(`QCDB returned ${response.status} ${response.statusText}`);
         throw new Error(`Cannot get ROOT file from qcdb object id: ${objectId}`);
       }
       const contentLength = response.headers.get('Content-Length');
-      const contentType = response.headers.get('Content-Type');
-      const contentDisposition = response.headers.get('Content-Disposition');
-      const filename = contentDisposition?.slice(17, contentDisposition.length - 1);
       this._logger.infoMessage(`ROOT size: ${contentLength}`);
       // We will stream the data from QCDB's answer directly back to the user.
       if (res != undefined) {
-        res.setHeader('Content-Type', contentType ?? 'application/root');
-        res.setHeader('Content-Disposition', contentDisposition ?? `attachment; filename="${filename}"`);
-        if (contentLength) {
-          res.setHeader('Content-Length', contentLength);
-        }
-
-        await this._pipelineAsync(response.body, res);
-        return true;
+        this._streamToResponse(response, res);
       } else {
-        // We'll return the file from the response back.
-        const blob = await response.blob();
-        const file = new File([blob], filename ?? 'export.root', { type: contentType ?? 'application/root' });
-        return file;
+        return this._getFileFromResponse(response);
       }
-    } catch (error) {
-      this._logger.errorMessage(error);
+    } catch (e) {
+      this._logger.errorMessage(e?.message ?? e);
       return false;
     }
   }
@@ -91,17 +113,13 @@ export class QcdbDownloadService {
       promises.push(this.requestObject(objectIds, res));
     } else {
       // Technically this can be stopped at the DTO layer but multiple id's will be implemented soon.
-      res.status(500).send('Option to retrieve more than 1 ROOT object not implemented yet.');
+      throw new Error('Option to retrieve more than 1 ROOT object not implemented yet.');
     }
 
-    try {
-      const files = await Promise.all(promises);
-      if (files.filter((file) => file === false).length > 0) {
-        throw new Error('qcdb object request failed.');
-      }
-    } catch (error) {
-      this._logger.errorMessage(error.message);
-      res.status(500).send("Unable to retrieve ROOT object('s)");
+    const files = await Promise.all(promises);
+    // Request to QCDB failed to give a file back.
+    if (files.filter((file) => file === false).length > 0) {
+      throw new Error('qcdb object request failed.');
     }
   }
 }
