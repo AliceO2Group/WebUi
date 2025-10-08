@@ -97,11 +97,12 @@ const drawPlot = (model, object) => {
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
     h('.resize-button.flex-row', [
       h('.p1.text-left', { style: 'padding-bottom: 0;' }, [
-        model.services.object.getDownloadQcdbObjectElement(object.id),
+        model.services.object.getDownloadQcdbObjectElement(object.id, { style: 'margin-right: .25rem;' }),
         h(
-          'a.btn',
+          'a.btn#fs-button',
           {
             title: 'Open object plot in full screen',
+            style: 'margin-right: .25rem;',
             href,
             onclick: (e) => model.router.handleLinkEvent(e),
           },

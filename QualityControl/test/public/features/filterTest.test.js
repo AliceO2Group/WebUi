@@ -33,8 +33,8 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     //Naviagte to object view
     await extendTree(3, 5);
     await page.locator('tr:last-of-type td').click();
-    await page.waitForSelector('.resize-button a');
-    await page.locator('.resize-button a').click();
+    await page.waitForSelector('#fs-button');
+    await page.locator('#fs-button').click();
     await page.waitForSelector('#runNumberFilter', { visible: true });
 
     // Check that filter is still set to 0
