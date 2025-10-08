@@ -65,6 +65,8 @@ import { runModeServiceTestSuite } from './lib/services/RunModeService.test.js';
 import { tabSynchronizerTestSuite } from './lib/services/layout/helpers/TabSynchronizer.test.js';
 import { gridTabCellSynchronizerTestSuite } from './lib/services/layout/helpers/GridTabCellSynchronizer.test.js';
 import { chartOptionsSynchronizerTestSuite } from './lib/services/layout/helpers/ChartOptionsSynchronizer.test.js';
+import { layoutServiceTestSuite } from './lib/services/layout/LayoutService.test.js';
+import { userServiceTestSuite } from './lib/services/layout/UserService.test.js';
 
 /**
  * Repositories
@@ -245,6 +247,8 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
         await tabSynchronizerTestSuite();
         await gridTabCellSynchronizerTestSuite();
         await chartOptionsSynchronizerTestSuite();
+        await userServiceTestSuite();
+        await layoutServiceTestSuite();
       });
     });
 

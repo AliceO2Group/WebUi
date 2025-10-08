@@ -12,33 +12,24 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from '@aliceo2/web-ui';
-
-/**
- * @typedef {import('../../../services/layout/UserService.js').UserService} UserService
- */
-
-const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/layout-mapper`;
-
 /**
  * Helper to normalize layout data
- * @param {*} patch partial layout data
- * @param {*} layout original layout
- * @param {*} isFull if true, patch is a full layout
- * @param {*} userService user service to get username from id
- * @returns
+ * @param {object} patch partial layout data
+ * @param {object} layout original layout
+ * @param {boolean} isFull if true, patch is a full layout
+ * @param {UserService} userService user service to get username from id
+ * @returns {Promise<object>} normalized layout data
  */
-export const normalizeLayout = async (patch, layout = {}, isFull = false, userService) => {
-  const logger = LogManager.getLogger(LOG_FACILITY);
+export const normalizeLayout = async (patch, layout = {}, isFull = false) => {
   const source = isFull ? { ...layout, ...patch } : patch;
 
   const fieldMap = {
-    id: 'id',
     name: 'name',
     description: 'description',
     displayTimestamp: 'display_timestamp',
     autoTabChange: 'auto_tab_change_interval',
     isOfficial: 'is_official',
+    ownerUsername: 'owner_username',
   };
 
   const data = Object.entries(fieldMap).reduce((acc, [frontendKey, backendKey]) => {
@@ -47,15 +38,6 @@ export const normalizeLayout = async (patch, layout = {}, isFull = false, userSe
     }
     return acc;
   }, {});
-
-  if ('owner_id' in source && userService?.getUsernameById) {
-    try {
-      const username = await userService.getUsernameById(source.owner_id);
-      data.owner_username = username;
-    } catch (error) {
-      logger.errorMessage('Failed to get username by id', error);
-    }
-  }
 
   return data;
 };
