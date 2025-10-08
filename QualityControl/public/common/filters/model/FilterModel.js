@@ -197,8 +197,7 @@ export default class FilterModel extends Observable {
    */
   async deactivateRunsMode(baseViewModel) {
     this.resetRunsMode();
-    await baseViewModel.triggerFilter();
-    this.notify();
+    this.clearFilter(baseViewModel);
   }
 
   /**

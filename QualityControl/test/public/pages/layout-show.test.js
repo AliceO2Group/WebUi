@@ -414,6 +414,49 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     const location2 = await page.evaluate(() => window.location);
     strictEqual(location2.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=test`);
   });
+
+  await testParent.test(
+    'should update layout name in sidebar when name is changed and saved via JSON editor',
+    { timeout },
+    async () => {
+      const originalSidebarName = await page.evaluate(() => {
+        const sidebarLayoutLink = document.querySelector('nav a.menu-item.w-wrapped.selected span:nth-child(2)');
+        return sidebarLayoutLink ? sidebarLayoutLink.textContent.trim() : null;
+      });
+
+      const editDropdownButtonPath = '.btn-group > div > button';
+      await page.locator(editDropdownButtonPath).click();
+      await delay(100);
+
+      const editViaJSONButtonPath = '#editByJson';
+      await page.locator(editViaJSONButtonPath).click();
+      await delay(100);
+
+      const currentJSON = await page.evaluate(() => {
+        const textareaPath = 'body > div > div > div > div > textarea';
+        return document.querySelector(textareaPath).value;
+      });
+
+      const layoutData = JSON.parse(currentJSON);
+      const newLayoutName = 'Updated Layout Name Test';
+      layoutData.name = newLayoutName;
+
+      const textareaPath = '#layout-json-editor';
+      await page.locator(textareaPath).fill(JSON.stringify(layoutData));
+
+      const updateButtonPath = '#updateLayoutButton';
+      await page.locator(updateButtonPath).click();
+      await delay(200);
+
+      const updatedSidebarName = await page.evaluate(() => {
+        const sidebarLayoutLink = document.querySelector('nav a.menu-item.w-wrapped.selected span:nth-child(2)');
+        return sidebarLayoutLink ? sidebarLayoutLink.textContent.trim() : null;
+      });
+
+      strictEqual(updatedSidebarName, newLayoutName);
+      ok(originalSidebarName !== updatedSidebarName, 'Sidebar name should have changed from original');
+    },
+  );
 };
 
 const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {
