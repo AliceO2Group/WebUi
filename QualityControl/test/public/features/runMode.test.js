@@ -35,7 +35,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     }
   });
 
-  await testParent.test('should have a switch to enable runs mode', { timeout }, async () => {
+  await testParent.test('should have a switch to enable run mode', { timeout }, async () => {
     await page.goto(
       `${url}?page=objectTree`,
       { waitUntil: 'networkidle0' },
@@ -46,7 +46,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     await page.locator('.form-check-label > .switch');
     const runsModeTitle = await page.evaluate(() =>
       document.querySelector('.form-check-label').textContent);
-    strictEqual(runsModeTitle, 'Runs mode', 'The text displayed is not `Runs mode`');
+    strictEqual(runsModeTitle, 'Run mode', 'The text displayed is not `Runs mode`');
   });
 
   await testParent.test('should activate run mode', { timeout }, async () => {
@@ -142,7 +142,16 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     isRunModeActive = await page.evaluate(() => window.model.filterModel.isRunModeActivated);
     ok(!isRunModeActive, 'Run mode should be deactivated after clicking checkbox');
 
-    //check the filters element is back again
+    //check the filters element is back again and run number and URL are cleared
     await page.locator('#filterElement');
+    const currentUrl = await page.evaluate(() => window.location.href);
+    ok(!currentUrl.includes('RunNumber=500001'), 'URL should not contain RunNumber parameter after disabling run mode');
+
+    //filterElement to be empty
+    const filterElementContent = await page.evaluate(() => {
+      const filterElement = document.querySelector('#runNumberFilter');
+      return filterElement.textContent.trim();
+    });
+    strictEqual(filterElementContent, '', 'Filter element should be empty after disabling run mode');
   });
 };
