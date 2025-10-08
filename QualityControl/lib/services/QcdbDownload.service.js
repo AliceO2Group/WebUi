@@ -19,6 +19,7 @@ import { promisify } from 'node:util';
 const CONTENT_LENGTH_HEADER = 'Content-Length';
 const CONTENT_TYPE_HEADER = 'Content-Type';
 const CONTENT_DISPLOSITION_HEADER = 'Content-Disposition';
+const FILENAME_START_INDEX = 17;
 
 const CONTENT_TYPE_DEFAULT = 'application/root';
 const CONTENT_DISPLOSITION_DEFAULT_PARTIAL = 'attachment; filename=';
@@ -53,7 +54,7 @@ export class QcdbDownloadService {
     const contentLength = response.headers.get(CONTENT_LENGTH_HEADER);
     const contentType = response.headers.get(CONTENT_TYPE_HEADER);
     const contentDisposition = response.headers.get(CONTENT_DISPLOSITION_HEADER);
-    const filename = contentDisposition?.slice(17, contentDisposition.length - 1);
+    const filename = contentDisposition?.slice(FILENAME_START_INDEX, contentDisposition.length - 1);
     // We will stream the data from QCDB's answer directly back to the user.
     res.setHeader(CONTENT_TYPE_HEADER, contentType ?? CONTENT_TYPE_DEFAULT);
     res.setHeader(CONTENT_DISPLOSITION_HEADER, contentDisposition ?? `${CONTENT_DISPLOSITION_DEFAULT_PARTIAL}
@@ -74,7 +75,7 @@ export class QcdbDownloadService {
   async _getFileFromResponse(response) {
     const contentType = response.headers.get(CONTENT_TYPE_HEADER);
     const contentDisposition = response.headers.get(CONTENT_DISPLOSITION_HEADER);
-    const filename = contentDisposition?.slice(17, contentDisposition.length - 1);
+    const filename = contentDisposition?.slice(FILENAME_START_INDEX, contentDisposition.length - 1);
     const blob = await response.blob();
     const file = new File([blob], filename ?? FILENAME_DEFAULT, { type: contentType ?? CONTENT_TYPE_DEFAULT });
     return file;
