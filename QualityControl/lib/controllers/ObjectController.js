@@ -90,7 +90,7 @@ export class ObjectController {
     try {
       const validated = await ObjectGetDownloadDTO.validateAsync(req.query);
       ({ objectIds } = validated);
-      this._qcdbDownloadService.getQcdbRootObjects(objectIds, res);
+      await this._qcdbDownloadService.getQcdbRootObjects(objectIds, res);
     } catch (error) {
       let responseError = '';
       if (error.isJoi) {
