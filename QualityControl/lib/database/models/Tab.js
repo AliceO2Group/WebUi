@@ -21,16 +21,17 @@ import { STRING, INTEGER, DATE, NOW } from 'sequelize';
 export default (sequelize) => {
   const TabModel = sequelize.define('Tab', {
     id: {
-      type: STRING(250),
+      type: INTEGER,
       allowNull: false,
       primaryKey: true,
+      autoIncrement: true,
     },
     name: {
       type: STRING(50),
       allowNull: false,
     },
     layout_id: {
-      type: STRING(250),
+      type: INTEGER,
       allowNull: false,
       references: {
         model: 'Layout',
@@ -58,6 +59,12 @@ export default (sequelize) => {
     underscored: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
+    indexes: [
+      {
+        unique: true,
+        fields: ['layout_id', 'name'],
+      },
+    ],
   });
 
   TabModel.associate = (models) => {
