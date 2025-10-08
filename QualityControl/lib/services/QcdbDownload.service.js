@@ -57,8 +57,8 @@ export class QcdbDownloadService {
     const filename = contentDisposition?.slice(FILENAME_START_INDEX, contentDisposition.length - 1);
     // We will stream the data from QCDB's answer directly back to the user.
     res.setHeader(CONTENT_TYPE_HEADER, contentType ?? CONTENT_TYPE_DEFAULT);
-    res.setHeader(CONTENT_DISPOSITION_HEADER, contentDisposition ?? `${CONTENT_DISPOSITION_DEFAULT_PARTIAL}
-      "${filename}"`);
+    res.setHeader(CONTENT_DISPOSITION_HEADER, contentDisposition ??
+      `${CONTENT_DISPOSITION_DEFAULT_PARTIAL}"${filename}"`);
     if (contentLength) {
       res.setHeader(CONTENT_LENGTH_HEADER, contentLength);
     }
@@ -101,7 +101,7 @@ export class QcdbDownloadService {
       this._logger.infoMessage(`ROOT size: ${contentLength}`);
       // We will stream the data from QCDB's answer directly back to the user.
       if (res != undefined) {
-        this._streamToResponse(response, res);
+        await this._streamToResponse(response, res);
       } else {
         return this._getFileFromResponse(response);
       }
