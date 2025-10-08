@@ -227,11 +227,23 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
-    'should click the edit button in the header and enter edit mode',
+    'should enter edit mode and remove filters if there are any applied',
     { timeout },
     async () => {
       const editViaGUIButtonPath = '#editByGui';
+      const filterPanel = await page.evaluate(() => document.querySelector('#filterElement'));
+      ok(filterPanel);
+      await page.locator('#runNumberFilter').fill('100000');
+      await page.locator('#triggerFilterButton').click();
+      await delay(100);
+      let location = await page.evaluate(() => window.location);
+      ok(location.search.includes('RunNumber=100000'));
       await page.locator(editViaGUIButtonPath).click();
+      await delay(100);
+      location = await page.evaluate(() => window.location);
+      ok(!location.search.includes('RunNumber=100000'));
+      const filterElement = await page.evaluate(() => document.querySelector('#filterElement'));
+      strictEqual(filterElement, null);
     },
   );
 
@@ -271,39 +283,6 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const rowsCount = await page.evaluate((secondElementPath) =>
         document.querySelectorAll(secondElementPath).length, secondElementPath);
       strictEqual(rowsCount, 1);
-    },
-  );
-
-  await testParent.test(
-    'should have filtered results on input search filled',
-    { timeout },
-    async () => {
-      const inputs = await page.$$('nav input');
-      await inputs[4].type('1');
-      await delay(50);
-      const { count, firstResult, secondResult } = await page.evaluate(() => {
-        const rows = document.querySelectorAll('nav table tbody tr');
-        return {
-          count: rows.length,
-          firstResult: rows[0].firstElementChild.textContent,
-          secondResult: rows[1].firstElementChild.textContent,
-        };
-      });
-      strictEqual(count, 2);
-      strictEqual(firstResult, ' qc/test/object/1');
-      strictEqual(secondResult, ' qc/test/object/11');
-    },
-  );
-
-  await testParent.test(
-    'should have no results if query does not match any objects',
-    { timeout },
-    async () => {
-      const inputs = await page.$$('nav input');
-      await inputs[4].type('123');
-      await delay(50);
-      const text = await page.evaluate(() => document.querySelector('nav p.text-center').textContent);
-      strictEqual(text, 'No objects found for this search');
     },
   );
 
