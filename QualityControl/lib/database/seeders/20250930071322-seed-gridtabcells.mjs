@@ -13,6 +13,12 @@
 
 'use strict';
 
+/** @typedef {import('sequelize').QueryInterface} QueryInterface */
+
+/**
+ * Seed grid tab cells
+ * @param {QueryInterface} queryInterface - The query interface
+ */
 export const up = async (queryInterface) => {
   await queryInterface.bulkInsert('grid_tab_cells', [
     {
@@ -74,6 +80,10 @@ export const up = async (queryInterface) => {
   ], {});
 };
 
+/**
+ * Remove seeded grid tab cells
+ * @param {QueryInterface} queryInterface - The query interface
+ */
 export const down = async (queryInterface) => {
   await queryInterface.sequelize.transaction(async (transaction) => {
     await queryInterface.bulkDelete('grid_tab_cells', null, { transaction });

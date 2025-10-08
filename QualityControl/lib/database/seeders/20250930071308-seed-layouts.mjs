@@ -14,6 +14,12 @@
 
 'use strict';
 
+/** @typedef {import('sequelize').QueryInterface} QueryInterface */
+
+/**
+ * Seed layouts
+ * @param {QueryInterface} queryInterface - The query interface
+ */
 export const up = async (queryInterface) => {
   await queryInterface.bulkInsert('layouts', [
     {
@@ -37,6 +43,10 @@ export const up = async (queryInterface) => {
   ], {});
 };
 
+/**
+ * Remove seeded layouts
+ * @param {QueryInterface} queryInterface - The query interface
+ */
 export const down = async (queryInterface) => {
   await queryInterface.sequelize.transaction(async (transaction) => {
     await queryInterface.bulkDelete('layouts', null, { transaction });
