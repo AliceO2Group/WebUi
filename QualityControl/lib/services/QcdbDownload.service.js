@@ -16,6 +16,14 @@ import { LogManager } from '@aliceo2/web-ui';
 import { pipeline } from 'node:stream';
 import { promisify } from 'node:util';
 
+const CONTENT_LENGTH_HEADER = 'Content-Length';
+const CONTENT_TYPE_HEADER = 'Content-Type';
+const CONTENT_DISPLOSITION_HEADER = 'Content-Disposition';
+
+const CONTENT_TYPE_DEFAULT = 'application/root';
+const CONTENT_DISPLOSITION_DEFAULT_PARTIAL = 'attachment; filename=';
+const FILENAME_DEFAULT = 'export.root';
+
 /**
  * @class
  * Class which sets up the QCDB download service.
@@ -23,7 +31,7 @@ import { promisify } from 'node:util';
 export class QcdbDownloadService {
   /**
    * Constructor
-   * @param {object} config - application's {config.js}.ccdb, needed for Qcdb hostname+port
+   * @param {object} config - application's {config.js}.ccdb, needed for QCDB hostname+port
    */
   constructor(config = {}) {
     this._hostname = config.hostname ?? 'localhost';
@@ -31,7 +39,7 @@ export class QcdbDownloadService {
     this._protocol = config.protocol ?? 'http';
     this._target = `${this._protocol}://${this._hostname}:${this._port}`;
 
-    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/qcdb-download-svc`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/qcdb-download-service`);
     this._pipelineAsync = promisify(pipeline);
   }
 
@@ -42,15 +50,16 @@ export class QcdbDownloadService {
    * @returns {void}
    */
   async _streamToResponse(response, res) {
-    const contentLength = response.headers.get('Content-Length');
-    const contentType = response.headers.get('Content-Type');
-    const contentDisposition = response.headers.get('Content-Disposition');
+    const contentLength = response.headers.get(CONTENT_LENGTH_HEADER);
+    const contentType = response.headers.get(CONTENT_TYPE_HEADER);
+    const contentDisposition = response.headers.get(CONTENT_DISPLOSITION_HEADER);
     const filename = contentDisposition?.slice(17, contentDisposition.length - 1);
     // We will stream the data from QCDB's answer directly back to the user.
-    res.setHeader('Content-Type', contentType ?? 'application/root');
-    res.setHeader('Content-Disposition', contentDisposition ?? `attachment; filename="${filename}"`);
+    res.setHeader(CONTENT_TYPE_HEADER, contentType ?? CONTENT_TYPE_DEFAULT);
+    res.setHeader(CONTENT_DISPLOSITION_HEADER, contentDisposition ?? `${CONTENT_DISPLOSITION_DEFAULT_PARTIAL}
+      "${filename}"`);
     if (contentLength) {
-      res.setHeader('Content-Length', contentLength);
+      res.setHeader(CONTENT_LENGTH_HEADER, contentLength);
     }
 
     await this._pipelineAsync(response.body, res);
@@ -63,21 +72,21 @@ export class QcdbDownloadService {
    * @returns {File} - ROOT file from response.
    */
   async _getFileFromResponse(response) {
-    const contentType = response.headers.get('Content-Type');
-    const contentDisposition = response.headers.get('Content-Disposition');
+    const contentType = response.headers.get(CONTENT_TYPE_HEADER);
+    const contentDisposition = response.headers.get(CONTENT_DISPLOSITION_HEADER);
     const filename = contentDisposition?.slice(17, contentDisposition.length - 1);
     const blob = await response.blob();
-    const file = new File([blob], filename ?? 'export.root', { type: contentType ?? 'application/root' });
+    const file = new File([blob], filename ?? FILENAME_DEFAULT, { type: contentType ?? CONTENT_TYPE_DEFAULT });
     return file;
   }
 
   /**
-   * Get ROOT object from qcdb.
+   * Get ROOT object from QCDB.
    * If a response object is given it is assumed that this is the only request.
-   * the body of the answer from qcdb will then be streamed into our response.
-   * @param {string} objectId - id of ROOT object to retrieve from qcdb.
-   * @param {Express.Response} res - Optional Express response object if we want to stream qcdb's answer as our own.
-   * @returns {File|boolean} - ROOT file from qcdb, false if error and true if it responded itself.
+   * the body of the answer from QCDB will then be streamed into our response.
+   * @param {string} objectId - id of ROOT object to retrieve from QCDB.
+   * @param {Express.Response} res - Optional Express response object if we want to stream QCDB's answer as our own.
+   * @returns {File|boolean} - ROOT file from QCDB, false if error and true if it responded itself.
    */
   async requestObject(objectId, res = undefined) {
     this._logger.infoMessage(`Object ID Request: ${objectId}`);
@@ -85,9 +94,9 @@ export class QcdbDownloadService {
       const response = await fetch(`${this._target}/download/${objectId}`);
       if (!response.ok) {
         this._logger.errorMessage(`QCDB returned ${response.status} ${response.statusText}`);
-        throw new Error(`Cannot get ROOT file from qcdb object id: ${objectId}`);
+        throw new Error(`Cannot get ROOT file from QCDB object id: ${objectId}`);
       }
-      const contentLength = response.headers.get('Content-Length');
+      const contentLength = response.headers.get(CONTENT_LENGTH_HEADER);
       this._logger.infoMessage(`ROOT size: ${contentLength}`);
       // We will stream the data from QCDB's answer directly back to the user.
       if (res != undefined) {
@@ -95,14 +104,14 @@ export class QcdbDownloadService {
       } else {
         return this._getFileFromResponse(response);
       }
-    } catch (e) {
-      this._logger.errorMessage(e?.message ?? e);
+    } catch (error) {
+      this._logger.errorMessage(error?.message ?? error);
       return false;
     }
   }
 
   /**
-   * Get qcdb root objects from qcdb.
+   * Get QCDB root objects from QCDB.
    * Only a single root object request supported for now.
    * @param {string} objectIds - Id of ROOT object to request.
    * @param {Express.Response} res - Express response object.
@@ -119,7 +128,7 @@ export class QcdbDownloadService {
     const files = await Promise.all(promises);
     // Request to QCDB failed to give a file back.
     if (files.filter((file) => file === false).length > 0) {
-      throw new Error('qcdb object request failed.');
+      throw new Error('QCDB object request failed.');
     }
   }
 }

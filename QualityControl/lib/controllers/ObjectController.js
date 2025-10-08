@@ -79,7 +79,7 @@ export class ObjectController {
   }
 
   /**
-   * Download ROOT objects using the QcdbProxy.
+   * Download ROOT objects using the QcdbDownloadService.
    * Only support 1 root object for now.
    * @param {Request} req - ExpressJs req object.
    * @param {Response} res - ExpressJs res object.
@@ -91,13 +91,13 @@ export class ObjectController {
       const validated = await ObjectGetDownloadDTO.validateAsync(req.query);
       ({ objectIds } = validated);
       this._qcdbDownloadService.getQcdbRootObjects(objectIds, res);
-    } catch (e) {
+    } catch (error) {
       let responseError = '';
-      if (e.isJoi) {
-        this._logger.errorMessage(`Error validating query parameters: ${e}`);
-        responseError = new InvalidInputError(`Invalid query parameters: ${e.details[0].message}`);
+      if (error.isJoi) {
+        this._logger.errorMessage(`Error validating query parameters: ${error}`);
+        responseError = new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`);
       } else {
-        this._logger.errorMessage(e?.message ?? e);
+        this._logger.errorMessage(error?.message ?? error);
         responseError = new Error('Unable to process request');
       }
 
