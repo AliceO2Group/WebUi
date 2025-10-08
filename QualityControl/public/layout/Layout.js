@@ -407,7 +407,7 @@ export default class Layout extends BaseViewModel {
     }
     this.toggleEditMenu();
     this.editEnabled = true;
-    this.model.filterModel.clearFilterSilent();
+    this.model.filterModel.clearFilters();
     this.model.services.object.listObjects(this);
 
     if (!this.item) {

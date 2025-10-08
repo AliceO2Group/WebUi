@@ -69,7 +69,7 @@ export function filtersPanel(filterModel, viewModel) {
     filterMap,
     setFilterValue,
     filterService,
-    clearFilter,
+    clearFiltersAndTrigger,
     isRunModeActivated,
     runStatus,
     isVisible,
@@ -81,7 +81,7 @@ export function filtersPanel(filterModel, viewModel) {
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onFocusCallback = fetchOngoingRuns.bind(filterService);
   const onEnterCallback = () => filterModel.triggerFilter(viewModel);
-  const clearFilterCallback = clearFilter.bind(filterModel, viewModel);
+  const clearFilterCallback = clearFiltersAndTrigger.bind(filterModel, viewModel);
   if (!isVisible) {
     return null;
   }
