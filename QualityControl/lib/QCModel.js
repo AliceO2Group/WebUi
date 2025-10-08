@@ -65,18 +65,17 @@ export const setupQcModel = async (eventEmitter) => {
 
   const jsonFileService = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
 
-  try {
-    const databaseConfig = config.database || {};
-    if (!databaseConfig || Object.keys(databaseConfig).length === 0) {
-      logger.errorMessage('Database configuration is not provided. The application cannot be initialized');
-      throw new Error('Database configuration is missing');
+  const databaseConfig = config.database || {};
+  if (Object.keys(databaseConfig).length > 0) {
+    try {
+      const sequelizeDatabase = new SequelizeDatabase(databaseConfig);
+      await initDatabase(sequelizeDatabase, { forceSeed: config?.database?.forceSeed, drop: config?.database?.drop });
+      logger.infoMessage('Database initialized successfully');
+    } catch (error) {
+      logger.errorMessage(`Database initialization failed: ${error.message}`);
     }
-
-    const sequelizeDatabase = new SequelizeDatabase(databaseConfig);
-    initDatabase(sequelizeDatabase, { forceSeed: config?.database?.forceSeed, drop: config?.database?.drop });
-  } catch (error) {
-    logger.errorMessage(`Database initialization failed: ${error.message}`);
-    throw error;
+  } else {
+    logger.warnMessage('No database configuration found, skipping database initialization');
   }
 
   if (config?.kafka?.enabled) {
