@@ -51,7 +51,7 @@ export const objectInfoResizePanel = (model, tabObject) => {
       ),
     ]),
     objectRemoteData.isSuccess() && model.services.object.getDownloadQcdbObjectElement(objectRemoteData
-      .payload.id, { style: 'margin-right: .25rem;' }),
+      .payload.id, { style: 'margin-right: .25rem;', id: 'dl-button' }),
     h('a.btn', {
       title: 'Open object plot in full screen',
       href: uri,

@@ -97,7 +97,8 @@ const drawPlot = (model, object) => {
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
     h('.resize-button.flex-row', [
       h('.p1.text-left', { style: 'padding-bottom: 0;' }, [
-        model.services.object.getDownloadQcdbObjectElement(object.id, { style: 'margin-right: .25rem;' }),
+        model.services.object.getDownloadQcdbObjectElement(object.id, {
+          style: 'margin-right: .25rem;', id: 'dl-button' }),
         h(
           'a.btn#fs-button',
           {

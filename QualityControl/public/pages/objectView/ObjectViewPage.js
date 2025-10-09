@@ -50,7 +50,7 @@ const objectPlotAndInfo = (objectViewModel, qcObjectService) =>
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.items-center.h-10', [
-          qcObjectService.getDownloadQcdbObjectElement(qcObject.id),
+          qcObjectService.getDownloadQcdbObjectElement(qcObject.id, { id: 'dl-button' }),
           h(
             '.w-40.p2.f6',
             dateSelector(
