@@ -20,5 +20,5 @@ import { h } from '/js/src/index.js';
  */
 export default () => ({
   centerCol: h('.flex-row.justify-center.flex-grow', [h('b.f4.ph2', 'About')]),
-  rightCol: h('.w-33'),
+  rightCol: h('.w-25'),
 });
