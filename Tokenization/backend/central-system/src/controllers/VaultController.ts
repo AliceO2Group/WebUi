@@ -17,10 +17,8 @@ import { VaultAuthService } from "../services/VaultAuthService";
 import { VaultSignService } from "../services/VaultSignService";
 import { Agent } from "https";
 import { bus } from "../lib/event-bus";
+import { SignTokenReq, GetCredentialReq, CreateOrUpdateCredentialReq } from "../lib/event-type.js";
 
-// Define request and response types for signing tokens
-type SignTokenReq = { subject: string; claims?: Record<string, unknown> };
-type SignTokenRes = { token: string; exp: number };
 
 /**
  * @description Controller for managing interactions with the Vault service.
@@ -28,6 +26,8 @@ type SignTokenRes = { token: string; exp: number };
 export class VaultController {
   // Agent for HTTPS requests
   private readonly agent: Agent;
+  // Access token for Vault
+  private readonly vaultAccessToken: string = "";
 
   /**
    * @description Constructs a new VaultController. Initializes the HTTPS agent using
@@ -60,9 +60,83 @@ export class VaultController {
     });
   }
 
+  /**
+   * @description Signs a token using the VaultSignService.
+   * @param payload - The payload containing the subject and optional claims for the token.
+   * @returns A promise that resolves to the signed token and its expiration time.
+   */
+  public async signToken(payload: any): Promise<string> {
+    return this.tokenSignService.signToken(
+      process.env.VAULT_ADDR! + "/v1/transit/sign/signing-key",
+      this.vaultAccessToken,
+      this.agent,
+      payload.data
+    );
+  }
+  /**
+   * @description Logs into the vault using the VaultAuthService and retrieves an access token.
+   * @returns A promise that resolves to the access token.
+   */
+  public async loginVault(): Promise<string> {
+    return this.authService.login(
+      process.env.VAULT_ADDR! +
+        `/v1/auth/${process.env.VAULT_AUTH_METHOD}/login`,
+      process.env.VAULT_AUTH_METHOD!,
+      this.agent,
+      JSON.stringify({
+        name: process.env.VAULT_ROLE,
+      })
+    );
+  }
+
+  /**
+   * @description Renews the vault access token using the VaultAuthService.
+   * @returns A promise that resolves to the renewed access token.
+   */
+  public async renewVaultToken(): Promise<string> {
+    return this.authService.renew(
+      process.env.VAULT_ADDR! + "/v1/auth/token/renew-self",
+      this.vaultAccessToken,
+      this.agent,
+      null
+    );
+  }
+
+  /**
+   * @description Retrieves a credential from the vault using the VaultCredentialsService.
+   * @param id - The identifier of the credential to retrieve.
+   * @returns A promise that resolves to the retrieved credential.
+   */
+  public async getCredentialFromVault(path: string): Promise<any> {
+    return this.credentialsService.getCredential(
+      process.env.VAULT_ADDR! + `/v1/secret/data/${path}`,
+      this.vaultAccessToken,
+      this.agent
+    );
+  }
+
+  public async createOrUpdateCredentialInVault(
+    path: string,
+    body: string
+  ): Promise<void> {
+    return this.credentialsService.createOrUpdateCredential(
+      process.env.VAULT_ADDR! + `/v1/secret/data/${path}`,
+      this.vaultAccessToken,
+      this.agent,
+      body
+    );
+  }
+
+  /**
+   * @description Registers event listeners for handling vault-related requests.
+   * The listeners respond to events for signing tokens, logging in, and renewing tokens.
+   * Each listener emits a reply event with the result or an error.
+   * This method should be called once during the application initialization.
+   * @throws Will throw an error if event registration fails.
+   */
   public register() {
     bus.on(
-      "SIGN_TOKEN",
+      "SIGN_TOKEN_VAULT",
       async ({
         id,
         replyEvent,
@@ -73,7 +147,7 @@ export class VaultController {
         payload: SignTokenReq;
       }) => {
         try {
-          const data = await this.signToken(payload);
+          const data = await this.signToken(payload.data);
           bus.emit(replyEvent, { ok: true as const, data });
         } catch (err: any) {
           bus.emit(replyEvent, {
@@ -87,7 +161,98 @@ export class VaultController {
         }
       }
     );
-  }
+    bus.on(
+      "LOGIN_VAULT",
+      async ({ id, replyEvent }: { id: string; replyEvent: string }) => {
+        try {
+          const data = await this.loginVault();
+          bus.emit(replyEvent, { ok: true as const, data });
+        } catch (err: any) {
+          bus.emit(replyEvent, {
+            ok: false as const,
+            error: {
+              message: err?.message ?? "Unknown error",
+              code: err?.code,
+              stack: err?.stack,
+            },
+          });
+        }
+      }
+    );
+    bus.on(
+      "RENEW_VAULT_TOKEN",
+      async ({ id, replyEvent }: { id: string; replyEvent: string }) => {
+        try {
+          const data = await this.renewVaultToken();
+          bus.emit(replyEvent, { ok: true as const, data });
+        } catch (err: any) {
+          bus.emit(replyEvent, {
+            ok: false as const,
+            error: {
+              message: err?.message ?? "Unknown error",
+              code: err?.code,
+              stack: err?.stack,
+            },
+          });
+        }
+      }
+    );
 
-  async signToken(payload: any) {}
+    bus.on(
+      "GET_CREDENTIAL_VAULT",
+      async ({
+        id,
+        replyEvent,
+        payload,
+      }: {
+        id: string;
+        replyEvent: string;
+        payload: GetCredentialReq;
+      }) => {
+        try {
+          const data = await this.getCredentialFromVault(payload.path);
+          bus.emit(replyEvent, { ok: true as const, data });
+        } catch (err: any) {
+          bus.emit(replyEvent, {
+            ok: false as const,
+            error: {
+              message: err?.message ?? "Unknown error",
+              code: err?.code,
+              stack: err?.stack,
+            },
+          });
+        }
+      }
+    );
+
+    bus.on(
+      "CREATE_OR_UPDATE_CREDENTIAL_VAULT",
+      async ({
+        id,
+        replyEvent,
+        payload,
+      }: {
+        id: string;
+        replyEvent: string;
+        payload: CreateOrUpdateCredentialReq;
+      }) => {
+        try {
+          await this.createOrUpdateCredentialInVault(
+            payload.path,
+            payload.body
+          );
+          bus.emit(replyEvent, { ok: true as const });
+        } catch (err: any) {
+          bus.emit(replyEvent, {
+            ok: false as const,
+            error: {
+              message: err?.message ?? "Unknown error",
+              code: err?.code,
+              stack: err?.stack,
+            },
+          });
+        }
+      }
+    );
+  }
 }
