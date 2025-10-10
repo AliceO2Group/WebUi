@@ -22,6 +22,6 @@ import {
  * @description Command used to renew token for a client after its expiration. Handles structure logic.
  */
 export class RenewTokenCommand implements Command {
-  readonly event = DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN;
+  readonly event = DuplexMessageEvent.MESSAGE_EVENT_RENEW_TOKEN;
   constructor(payload: SingleTokenPayload) {}
 }
