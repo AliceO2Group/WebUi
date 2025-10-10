@@ -18,12 +18,6 @@ import { suite, test } from 'node:test';
 
 export const layoutMapperTestSuite = async () => {
   suite('layoutMapper tests suite', () => {
-    const mockUserService = {
-      getUsernameById: async (id) => {
-        const users = { 1: 'alice', 2: 'bob' };
-        return users[id] || null;
-      },
-    };
 
     const baseLayout = {
       id: 10,
