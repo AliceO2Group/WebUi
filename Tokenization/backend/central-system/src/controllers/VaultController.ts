@@ -16,6 +16,12 @@ import { VaultCredentialsService } from "../services/VaulCredentialsService";
 import { VaultAuthService } from "../services/VaultAuthService";
 import { VaultSignService } from "../services/VaultSignService";
 import { Agent } from "https";
+import { bus } from "../lib/event-bus";
+
+// Define request and response types for signing tokens
+type SignTokenReq = { subject: string; claims?: Record<string, unknown> };
+type SignTokenRes = { token: string; exp: number };
+
 /**
  * @description Controller for managing interactions with the Vault service.
  */
@@ -23,15 +29,14 @@ export class VaultController {
   // Agent for HTTPS requests
   private readonly agent: Agent;
 
-
   /**
-    * @description Constructs a new VaultController. Initializes the HTTPS agent using
-    * TLS certificates provided via environment variables.
-    * @param tokenSignService - Service for signing tokens.
-    * @param authService - Service for authenticating with the vault.
-    * @param credentialsService - Service for retrieving credentials from the vault.
-    * @throws Will throw an error if required environment variables are missing.
-    */
+   * @description Constructs a new VaultController. Initializes the HTTPS agent using
+   * TLS certificates provided via environment variables.
+   * @param tokenSignService - Service for signing tokens.
+   * @param authService - Service for authenticating with the vault.
+   * @param credentialsService - Service for retrieving credentials from the vault.
+   * @throws Will throw an error if required environment variables are missing.
+   */
   constructor(
     private readonly tokenSignService: VaultSignService,
     private readonly authService: VaultAuthService,
@@ -55,7 +60,34 @@ export class VaultController {
     });
   }
 
+  public register() {
+    bus.on(
+      "SIGN_TOKEN",
+      async ({
+        id,
+        replyEvent,
+        payload,
+      }: {
+        id: string;
+        replyEvent: string;
+        payload: SignTokenReq;
+      }) => {
+        try {
+          const data = await this.signToken(payload);
+          bus.emit(replyEvent, { ok: true as const, data });
+        } catch (err: any) {
+          bus.emit(replyEvent, {
+            ok: false as const,
+            error: {
+              message: err?.message ?? "Unknown error",
+              code: err?.code,
+              stack: err?.stack,
+            },
+          });
+        }
+      }
+    );
+  }
 
-  async signToken()
-  {}
+  async signToken(payload: any) {}
 }

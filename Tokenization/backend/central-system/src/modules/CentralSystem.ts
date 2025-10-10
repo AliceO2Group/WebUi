@@ -21,6 +21,8 @@ import { TokensGetService } from '../services/TokensGetService.js';
 import { VaultSignService } from '../services/VaultSignService.js';
 import { db } from '../lib/database/Database.js';
 import { SequalizeDatabase } from '../lib/database/SequalizeDatabase.js';
+import { VaultAuthService } from '../services/VaultAuthService.js';
+import { VaultCredentialsService } from '../services/VaulCredentialsService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,7 +39,7 @@ class CentralSystem {
     number,
     { tokenId: number; validity: string; payload: string }
   >;
-  public readonly tokenController: ConnectionController;
+  public readonly connectionController: ConnectionController;
   public readonly vaultController: VaultController;
   public _db: SequalizeDatabase;
 
@@ -54,12 +56,17 @@ class CentralSystem {
       [1, { tokenId: 1, validity: 'good', payload: 'payload1' }],
       [2, { tokenId: 2, validity: 'bad', payload: 'payload2' }],
     ]);
-    this.tokenController = new ConnectionController(
+    this.connectionController = new ConnectionController(
       tokensGetService,
       this._fakeTokens,
       this._centralSystemWrapper
     );
-    this.vaultController = new VaultController(vaultSignService);
+    this.vaultController = new VaultController(
+      new VaultSignService(),
+      new VaultAuthService(),
+      new VaultCredentialsService()
+    );
+    this.vaultController.register();
   }
 }
 
