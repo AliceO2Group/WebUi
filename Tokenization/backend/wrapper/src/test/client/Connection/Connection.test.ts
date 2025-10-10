@@ -23,14 +23,18 @@ import {
   TokenPayload,
 } from "../../../models/connection.model";
 
-jest.mock("@aliceo2/web-ui", () => ({
-  LogManager: {
-    getLogger: jest.fn(() => ({
-      warnMessage: jest.fn(),
-      errorMessage: jest.fn(),
-    })),
-  },
-}));
+jest.mock(
+  "@aliceo2/web-ui",
+  () => ({
+    LogManager: {
+      getLogger: jest.fn(() => ({
+        warnMessage: jest.fn(),
+        errorMessage: jest.fn(),
+      })),
+    },
+  }),
+  { virtual: true }
+);
 
 const mockRenewToken = jest.fn();
 
