@@ -15,8 +15,10 @@
 import { bus } from './event-bus';
 import { randomUUID } from 'node:crypto';
 
+// Error structure for RPC failures
 export type RpcError = { message: string; code?: string; stack?: string };
 
+// Custom Error class to include code and stack
 export class RpcCustomError extends Error {
   code?: string;
   override stack?: string;
@@ -28,12 +30,23 @@ export class RpcCustomError extends Error {
   }
 }
 
+// Payload structure for emitted events
 interface RpcEventPayload<Req> {
   id: string;
   replyEvent: string;
   payload: Req;
 }
 
+/**
+ * @description Emits an event on the bus and waits for a corresponding reply event.
+ * The function generates a unique ID for the request, listens for the reply,
+ * and resolves or rejects based on the response received.
+ * @param baseEvent - The base name of the event to emit.
+ * @param payload - The payload to send with the event.
+ * @param timeoutMs - Optional timeout in milliseconds to wait for a reply (default is 10 seconds).
+ * @returns A promise that resolves with the response data or rejects with an error.
+ * @throws Will throw an error if the timeout is reached or if the response indicates a failure.
+ */
 export async function emitAndWait<Req, Res>(
   baseEvent: string,
   payload: Req,

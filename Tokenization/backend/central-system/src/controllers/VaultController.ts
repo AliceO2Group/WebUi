@@ -20,7 +20,7 @@ import {
   SignTokenReq,
   GetCredentialReq,
   CreateOrUpdateCredentialReq,
-} from "../lib/event-type.js";
+} from "../lib/event-req-types.js";
 
 import { registerBusHandler } from "../lib/register-bus-handler.js";
 
