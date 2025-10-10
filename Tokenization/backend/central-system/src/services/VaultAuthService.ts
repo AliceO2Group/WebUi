@@ -26,13 +26,6 @@ interface AuthResponse {
  * @description Service for authenticating with an external vault service.
  */
 export class VaultAuthService {
-  /**
-   * @description Logs in to the vault service and retrieves a client token.
-   * @param url - The URL of the external vault service.
-   * @param agent - The HTTPS agent to use for the request.
-   * @param body - The body of the login request.
-   * @return A promise that resolves to the client token.
-   */
   public async login(
     url: string,
     agent: Agent,
