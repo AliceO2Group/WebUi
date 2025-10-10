@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { CentralSystemWrapper } from '../wrapper/CentralSystemWrapper.js';
+import { CentralSystemWrapper } from '../lib/CentralSystemWrapper.js';
 import { ConnectionController } from '../controllers/ConnectionController.js';
 import { VaultController } from '../controllers/VaultController.js';
 import path from 'path';
