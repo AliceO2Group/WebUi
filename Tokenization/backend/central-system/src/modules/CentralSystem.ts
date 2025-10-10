@@ -13,10 +13,12 @@
  */
 
 import { CentralSystemWrapper } from '../wrapper/CentralSystemWrapper.js';
-import { TokensController } from '../controllers/TokensController.js';
+import { ConnectionController } from '../controllers/ConnectionController.js';
+import { VaultController } from '../controllers/VaultController.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { TokensGetService } from '../services/TokensGetService.js';
+import { VaultSignService } from '../services/VaultSignService.js';
 import { db } from '../lib/database/Database.js';
 import { SequalizeDatabase } from '../lib/database/SequalizeDatabase.js';
 
@@ -35,12 +37,14 @@ class CentralSystem {
     number,
     { tokenId: number; validity: string; payload: string }
   >;
-  public readonly tokenController: TokensController;
+  public readonly tokenController: ConnectionController;
+  public readonly vaultController: VaultController;
   public _db: SequalizeDatabase;
 
   public constructor(wrapperPort: number) {
     this._db = db;
     const tokensGetService = new TokensGetService();
+    const vaultSignService = new VaultSignService();
     this._centralSystemWrapper = new CentralSystemWrapper(
       this.PROTO_PATH,
       wrapperPort
@@ -50,11 +54,12 @@ class CentralSystem {
       [1, { tokenId: 1, validity: 'good', payload: 'payload1' }],
       [2, { tokenId: 2, validity: 'bad', payload: 'payload2' }],
     ]);
-    this.tokenController = new TokensController(
+    this.tokenController = new ConnectionController(
       tokensGetService,
       this._fakeTokens,
       this._centralSystemWrapper
     );
+    this.vaultController = new VaultController(vaultSignService);
   }
 }
 
