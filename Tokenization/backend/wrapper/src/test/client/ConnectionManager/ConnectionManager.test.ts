@@ -38,8 +38,8 @@ const CentralSystemMock = jest.fn(() => mockClient);
 jest.mock(
   "../../../client/ConnectionManager/Interceptors/grpc.auth.interceptor",
   () => ({
-    gRPCAuthInterceptor: jest.fn((call, callback) => {
-      return Promise.resolve({
+    GRPCAuthInterceptor: jest.fn().mockImplementation(() => ({
+      validate: jest.fn().mockResolvedValue({
         isAuthenticated: true,
         conn: {
           updateStatus: jest.fn(),
@@ -47,8 +47,8 @@ jest.mock(
           getSerialNumber: jest.fn(),
           setSerialNumber: jest.fn(),
         },
-      });
-    }),
+      }),
+    })),
   })
 );
 

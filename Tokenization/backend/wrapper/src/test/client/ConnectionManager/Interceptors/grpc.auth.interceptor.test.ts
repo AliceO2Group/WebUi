@@ -12,19 +12,21 @@
  * or submit itself to any jurisdiction.
  */
 
-import {
-  isRequestAllowed,
-  isPermissionUnexpired,
-  isSerialNumberMatching,
-  getPeerCertFromCall,
-} from "../../../../client/ConnectionManager/Interceptors/grpc.auth.interceptor";
-
 jest.mock("jose", () => ({
   importPKCS8: jest.fn(),
   importJWK: jest.fn(),
   compactDecrypt: jest.fn(),
   compactVerify: jest.fn(),
 }));
+
+import { GRPCAuthInterceptor } from "../../../../client/ConnectionManager/Interceptors/grpc.auth.interceptor";
+
+const {
+  isPermissionUnexpired,
+  isRequestAllowed,
+  isSerialNumberMatching,
+  getPeerCertFromCall,
+} = GRPCAuthInterceptor as typeof GRPCAuthInterceptor;
 
 describe("grpc.auth.interceptor", () => {
   describe("isPermissionUnexpired", () => {
@@ -45,14 +47,15 @@ describe("grpc.auth.interceptor", () => {
   });
 
   describe("isRequestAllowed", () => {
+    const now = Math.floor(Date.now() / 1000);
     const validPayload = {
-      iat: { POST: Math.floor(Date.now() / 1000) - 10 },
-      exp: { POST: Math.floor(Date.now() / 1000) + 100 },
+      iat: { POST: now - 10 },
+      exp: { POST: now + 100 },
       sub: "serial",
       aud: "aud",
       iss: "iss",
       jti: "jti",
-    };
+    } as any;
 
     it("returns true for valid payload and unexpired permission", () => {
       expect(isRequestAllowed(validPayload, { method: "POST" })).toEqual({
@@ -64,9 +67,9 @@ describe("grpc.auth.interceptor", () => {
     it("returns false and calls callback for expired permission", () => {
       const expiredPayload = {
         ...validPayload,
-        iat: { POST: Math.floor(Date.now() / 1000) - 100 },
-        exp: { POST: Math.floor(Date.now() / 1000) - 10 },
-      };
+        iat: { POST: now - 100 },
+        exp: { POST: now - 10 },
+      } as any;
       expect(isRequestAllowed(expiredPayload, { method: "POST" })).toEqual({
         isAllowed: false,
         isUnexpired: false,
@@ -82,8 +85,6 @@ describe("grpc.auth.interceptor", () => {
   });
 
   describe("isSerialNumberMatching", () => {
-    const callback = jest.fn();
-
     it("returns true if serial numbers match", () => {
       const payload = { sub: "ABCDEF" } as any;
       const peerCert = { serialNumber: "ab:cd:ef" };
@@ -93,14 +94,12 @@ describe("grpc.auth.interceptor", () => {
     it("returns false and calls callback if serial numbers do not match", () => {
       const payload = { sub: "ABCDEF" } as any;
       const peerCert = { serialNumber: "123456" };
-      callback.mockClear();
       expect(isSerialNumberMatching(payload, peerCert)).toBe(false);
     });
 
     it("returns false and calls callback if serial number is missing", () => {
       const payload = { sub: "ABCDEF" } as any;
       const peerCert = {};
-      callback.mockClear();
       expect(isSerialNumberMatching(payload, peerCert)).toBe(false);
     });
   });
@@ -123,7 +122,7 @@ describe("grpc.auth.interceptor", () => {
     });
 
     it("returns undefined if structure is missing", () => {
-      expect(getPeerCertFromCall({})).toBeUndefined();
+      expect(getPeerCertFromCall({} as any)).toBeUndefined();
     });
   });
 });

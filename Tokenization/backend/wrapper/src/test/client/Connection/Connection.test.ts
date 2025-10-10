@@ -13,15 +13,13 @@
  */
 
 import { Connection } from "../../../client/Connection/Connection";
+import { ConnectionDirection } from "../../../models/message.model";
+import { ConnectionStatus } from "../../../models/connection.model";
 import {
-  ConnectionDirection,
   TOKEN_REASON_HEADER,
   TokenAuthReason,
-} from "../../../models/message.model";
-import {
-  ConnectionStatus,
   TokenPayload,
-} from "../../../models/connection.model";
+} from "../../../models/token.model";
 
 jest.mock(
   "@aliceo2/web-ui",
