@@ -29,7 +29,7 @@ const logger = LogManager.getLogger("TokensController");
 /**
  * @description Controller for managing tokens in the Central System.
  */
-export class TokensController {
+export class ConnectionController {
   private tokensService: Map<
     number,
     { tokenId: number; validity: string; payload: string }
