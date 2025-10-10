@@ -55,6 +55,7 @@ import { objectControllerTestSuite } from './lib/controllers/ObjectController.te
  * Services
  */
 import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
+import { qcdbDownloadServiceTestSuite } from './lib/services/QcdbDownloadService.test.js';
 import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
 import { bookkeepingServiceTestSuite } from './lib/services/BookkeepingService.test.js';
 
@@ -231,6 +232,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
 
     suite('Services - Test Suite', async () => {
       suite('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
+      suite('QcdbDownloadService - Test Suite', async () => await qcdbDownloadServiceTestSuite());
       suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
       suite('JsonServiceTest test suite', async () => await jsonFileServiceTestSuite());
       suite('FilterService', async () => await filterServiceTestSuite());
