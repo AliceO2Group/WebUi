@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { CentralSystemWrapper } from "../lib/CentralSystemWrapper";
+import { CentralSystemWrapper } from "../lib/CentralSystemWrapper.js";
 import {
   DuplexMessageEvent,
   ConnectionDirection,

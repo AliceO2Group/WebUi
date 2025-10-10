@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { bus } from './event-bus';
+import { bus } from './event-bus.js';
 import { randomUUID } from 'node:crypto';
 
 // Error structure for RPC failures

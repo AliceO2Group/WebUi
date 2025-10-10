@@ -102,8 +102,8 @@ const centralSystemModel = new CentralSystem(50049);
 // to zmainy i do dodania
 http.get(
   "/tokens",
-  centralSystemModel.tokenController.getTokensHandler.bind(
-    centralSystemModel.tokenController
+  centralSystemModel.connectionController.getTokensHandler.bind(
+    centralSystemModel.connectionController
   ),
   {
     public: true,
@@ -112,16 +112,16 @@ http.get(
 
 http.post(
   "/tokens/create",
-  centralSystemModel.tokenController.createTokenHandler.bind(
-    centralSystemModel.tokenController
+  centralSystemModel.connectionController.createTokenHandler.bind(
+    centralSystemModel.connectionController
   ),
   { public: true }
 );
 
 http.post(
   "/tokens/revoke",
-  centralSystemModel.tokenController.revokeTokenHandler.bind(
-    centralSystemModel.tokenController
+  centralSystemModel.connectionController.revokeTokenHandler.bind(
+    centralSystemModel.connectionController
   ),
   { public: true }
 );
