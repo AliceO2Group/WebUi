@@ -19,6 +19,10 @@
     "crypto": "^1.0.1",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
+    "sequelize": "6.37.0",
+    "umzug": "3.8.2",
+    "mariadb": "3.0.0",
+    "node-fetch": "^3.3.2",
     "@grpc/grpc-js": "^1.13.4",
     "@grpc/proto-loader": "^0.7.15"
   },
@@ -33,6 +37,7 @@
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "sequelize-cli": "6.6.0"
   }
 }
