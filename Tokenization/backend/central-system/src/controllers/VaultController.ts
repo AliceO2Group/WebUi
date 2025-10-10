@@ -33,7 +33,7 @@ export class VaultController {
   // Agent for HTTPS requests
   private readonly agent: Agent;
   // Access token for Vault
-  private readonly vaultAccessToken: string = "";
+  private vaultAccessToken: string = "";
 
   /**
    * @description Constructs a new VaultController. Initializes the HTTPS agent using
@@ -83,8 +83,8 @@ export class VaultController {
    * @description Logs into the vault using the VaultAuthService and retrieves an access token.
    * @returns A promise that resolves to the access token.
    */
-  public async loginVault(): Promise<string> {
-    return this.authService.login(
+  public async loginVault(): Promise<void> {
+    this.vaultAccessToken = await this.authService.login(
       process.env.VAULT_ADDR! +
         `/v1/auth/${process.env.VAULT_AUTH_METHOD}/login`,
       process.env.VAULT_AUTH_METHOD!,
@@ -99,8 +99,8 @@ export class VaultController {
    * @description Renews the vault access token using the VaultAuthService.
    * @returns A promise that resolves to the renewed access token.
    */
-  public async renewVaultToken(): Promise<string> {
-    return this.authService.renew(
+  public async renewVaultToken(): Promise<void> {
+    this.authService.renew(
       process.env.VAULT_ADDR! + "/v1/auth/token/renew-self",
       this.vaultAccessToken,
       this.agent,
@@ -159,10 +159,8 @@ export class VaultController {
 
     registerBusHandler<CreateOrUpdateCredentialReq>(
       EventType.CREATE_OR_UPDATE_CREDENTIAL_VAULT,
-      async (payload) => {
-        await this.createOrUpdateCredentialInVault(payload.path, payload.body);
-        return undefined;
-      }
+      async (payload) =>
+        this.createOrUpdateCredentialInVault(payload.path, payload.body)
     );
   }
 }
