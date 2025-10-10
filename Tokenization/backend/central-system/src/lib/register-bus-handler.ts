@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import {bus} from "./event-bus";
+import {bus} from "./event-bus.js";
 
 // Generic handler type
 type Handler<TPayload, TResult = any> = (payload: TPayload) => Promise<TResult>;

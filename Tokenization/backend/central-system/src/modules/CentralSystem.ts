@@ -23,6 +23,8 @@ import { db } from '../lib/database/Database.js';
 import { SequalizeDatabase } from '../lib/database/SequalizeDatabase.js';
 import { VaultAuthService } from '../services/VaultAuthService.js';
 import { VaultCredentialsService } from '../services/VaulCredentialsService.js';
+import { EventType } from '../lib/events.js';
+import { bus } from '../lib/event-bus.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -71,8 +73,16 @@ class CentralSystem {
       .loginVault()
       .then(() => {})
       .catch((error) => {
-        console.error("Failed to log in to Vault:", error);
+        console.error('Failed to log in to Vault:', error);
       });
+
+    setInterval(() => {
+      bus.emit(EventType.RENEW_VAULT_TOKEN, {
+        id: 'periodic-renew',
+        replyEvent: 'RENEW_VAULT_TOKEN:REPLY:periodic-renew',
+        payload: undefined,
+      });
+    }, 6 * 3600 * 1000); // Renew every 6 hours
   }
 }
 
