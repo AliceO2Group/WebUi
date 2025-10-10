@@ -16,9 +16,13 @@ import { VaultCredentialsService } from "../services/VaulCredentialsService";
 import { VaultAuthService } from "../services/VaultAuthService";
 import { VaultSignService } from "../services/VaultSignService";
 import { Agent } from "https";
-import { bus } from "../lib/event-bus";
-import { SignTokenReq, GetCredentialReq, CreateOrUpdateCredentialReq } from "../lib/event-type.js";
+import {
+  SignTokenReq,
+  GetCredentialReq,
+  CreateOrUpdateCredentialReq,
+} from "../lib/event-type.js";
 
+import { registerBusHandler } from "../lib/register-bus-handler.js";
 
 /**
  * @description Controller for managing interactions with the Vault service.
@@ -127,131 +131,32 @@ export class VaultController {
     );
   }
 
-  /**
-   * @description Registers event listeners for handling vault-related requests.
-   * The listeners respond to events for signing tokens, logging in, and renewing tokens.
-   * Each listener emits a reply event with the result or an error.
-   * This method should be called once during the application initialization.
-   * @throws Will throw an error if event registration fails.
+  /** 
+   *  @description Registers the event handlers for vault-related operations.
+   *  This method sets up handlers for signing tokens, logging in, renewing tokens,
+   *  and managing credentials in the vault.
    */
   public register() {
-    bus.on(
-      "SIGN_TOKEN_VAULT",
-      async ({
-        id,
-        replyEvent,
-        payload,
-      }: {
-        id: string;
-        replyEvent: string;
-        payload: SignTokenReq;
-      }) => {
-        try {
-          const data = await this.signToken(payload.data);
-          bus.emit(replyEvent, { ok: true as const, data });
-        } catch (err: any) {
-          bus.emit(replyEvent, {
-            ok: false as const,
-            error: {
-              message: err?.message ?? "Unknown error",
-              code: err?.code,
-              stack: err?.stack,
-            },
-          });
-        }
-      }
-    );
-    bus.on(
-      "LOGIN_VAULT",
-      async ({ id, replyEvent }: { id: string; replyEvent: string }) => {
-        try {
-          const data = await this.loginVault();
-          bus.emit(replyEvent, { ok: true as const, data });
-        } catch (err: any) {
-          bus.emit(replyEvent, {
-            ok: false as const,
-            error: {
-              message: err?.message ?? "Unknown error",
-              code: err?.code,
-              stack: err?.stack,
-            },
-          });
-        }
-      }
-    );
-    bus.on(
-      "RENEW_VAULT_TOKEN",
-      async ({ id, replyEvent }: { id: string; replyEvent: string }) => {
-        try {
-          const data = await this.renewVaultToken();
-          bus.emit(replyEvent, { ok: true as const, data });
-        } catch (err: any) {
-          bus.emit(replyEvent, {
-            ok: false as const,
-            error: {
-              message: err?.message ?? "Unknown error",
-              code: err?.code,
-              stack: err?.stack,
-            },
-          });
-        }
-      }
+    registerBusHandler<SignTokenReq>("SIGN_TOKEN_VAULT", async (payload) =>
+      this.signToken(payload.data)
     );
 
-    bus.on(
+    registerBusHandler<undefined>("LOGIN_VAULT", async () => this.loginVault());
+
+    registerBusHandler<undefined>("RENEW_VAULT_TOKEN", async () =>
+      this.renewVaultToken()
+    );
+
+    registerBusHandler<GetCredentialReq>(
       "GET_CREDENTIAL_VAULT",
-      async ({
-        id,
-        replyEvent,
-        payload,
-      }: {
-        id: string;
-        replyEvent: string;
-        payload: GetCredentialReq;
-      }) => {
-        try {
-          const data = await this.getCredentialFromVault(payload.path);
-          bus.emit(replyEvent, { ok: true as const, data });
-        } catch (err: any) {
-          bus.emit(replyEvent, {
-            ok: false as const,
-            error: {
-              message: err?.message ?? "Unknown error",
-              code: err?.code,
-              stack: err?.stack,
-            },
-          });
-        }
-      }
+      async (payload) => this.getCredentialFromVault(payload.path)
     );
 
-    bus.on(
+    registerBusHandler<CreateOrUpdateCredentialReq>(
       "CREATE_OR_UPDATE_CREDENTIAL_VAULT",
-      async ({
-        id,
-        replyEvent,
-        payload,
-      }: {
-        id: string;
-        replyEvent: string;
-        payload: CreateOrUpdateCredentialReq;
-      }) => {
-        try {
-          await this.createOrUpdateCredentialInVault(
-            payload.path,
-            payload.body
-          );
-          bus.emit(replyEvent, { ok: true as const });
-        } catch (err: any) {
-          bus.emit(replyEvent, {
-            ok: false as const,
-            error: {
-              message: err?.message ?? "Unknown error",
-              code: err?.code,
-              stack: err?.stack,
-            },
-          });
-        }
+      async (payload) => {
+        await this.createOrUpdateCredentialInVault(payload.path, payload.body);
+        return undefined;
       }
     );
   }
