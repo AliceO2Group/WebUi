@@ -18,13 +18,12 @@ import { CentralConnection } from "./CentralConnection";
 import { CentralCommandDispatcher } from "./EventManagement/CentralCommandDispatcher";
 import { Connection } from "../Connection/Connection";
 import { LogManager } from "@aliceo2/web-ui";
-import { Command, CommandHandler } from "models/commands.model";
+import { Command, CommandHandler } from "../../models/commands.model";
 import {
   ConnectionDirection,
   DuplexMessageEvent,
 } from "../../models/message.model";
 import { ConnectionStatus } from "../../models/connection.model";
-import * as fs from "fs";
 import { gRPCAuthInterceptor } from "./Interceptors/grpc.auth.interceptor";
 import { SecurityContext } from "../../utils/security/SecurityContext";
 
@@ -51,9 +50,10 @@ export class ConnectionManager {
 
   private centralDispatcher: CentralCommandDispatcher;
   private centralConnection: CentralConnection;
-  private sendingConnections = new Map<string, Connection>();
 
+  private sendingConnections = new Map<string, Connection>();
   private receivingConnections = new Map<string, Connection>();
+
   private peerCtor: any; // p2p gRPC constructor
   private peerServer?: grpc.Server;
   private baseAPIPath: string = "localhost:40041/api/";
@@ -160,7 +160,12 @@ export class ConnectionManager {
     }
 
     // Create new connection
-    conn = new Connection(jweToken || "", address, direction);
+    conn = new Connection(
+      jweToken || "",
+      address,
+      direction,
+      this.renewToken.bind(this)
+    );
     conn.updateStatus(ConnectionStatus.CONNECTING);
 
     if (direction === ConnectionDirection.RECEIVING) {
@@ -199,6 +204,25 @@ export class ConnectionManager {
         this.logger.errorMessage(`Invalid connection direction: ${direction}`);
         return undefined;
     }
+  }
+
+  /**
+   * @description Retrieves a connection instance by its token.
+   * @param {string} token - The token to search for.
+   * @returns {Connection | undefined} The connection instance with the matching token, or undefined if not found.
+   */
+  getConnectionByToken(token: string): Connection | undefined {
+    for (const conn of this.sendingConnections.values()) {
+      if (conn.getToken() === token) {
+        return conn;
+      }
+    }
+    for (const conn of this.receivingConnections.values()) {
+      if (conn.getToken() === token) {
+        return conn;
+      }
+    }
+    return undefined;
   }
 
   /**
@@ -265,7 +289,7 @@ export class ConnectionManager {
         const { isAuthenticated, conn } = await gRPCAuthInterceptor(
           call,
           callback,
-          this.receivingConnections,
+          this,
           this.securityContext
         );
 
@@ -341,5 +365,38 @@ export class ConnectionManager {
     });
 
     this.logger.infoMessage(`Peer server listening on localhost:${port}`);
+  }
+
+  /**
+   * @description Sends command to central system to get all tokens
+   * @returns Promise<void> - central system will send asynchronously MESSAGE_EVENT_SEND_ALL_TOKENS with TokenListPayload interface
+   */
+  public getAllTokens(): void {
+    this.centralConnection.sendEvent({
+      event: DuplexMessageEvent.MESSAGE_EVENT_GET_ALL_TOKENS,
+    });
+  }
+
+  /**
+   * @description Sends command to central system to renew token for a specific target connection
+   * @param expiredToken token that needs to be renew
+   * @param targetAddress target address we want to send to
+   * @returns Promise<void> - central system will send asynchronously MESSAGE_EVENT_NEW_TOKEN with SingleTokenPayload interface
+   */
+  private renewToken(expiredToken: string, targetAddress: string): void {
+    const conn = this.sendingConnections.get(targetAddress);
+    if (!conn) {
+      return;
+    }
+
+    this.centralConnection.sendEvent({
+      event: DuplexMessageEvent.MESSAGE_EVENT_RENEW_TOKEN,
+      payload: {
+        singleToken: {
+          token: expiredToken,
+          targetAddress: targetAddress,
+        },
+      },
+    });
   }
 }

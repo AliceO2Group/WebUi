@@ -15,10 +15,7 @@
 import * as grpc from "@grpc/grpc-js";
 import { LogManager } from "@aliceo2/web-ui";
 import { CentralCommandDispatcher } from "./EventManagement/CentralCommandDispatcher";
-import {
-  DuplexMessageEvent,
-  DuplexMessageModel,
-} from "../../models/message.model";
+import { DuplexMessageModel } from "../../models/message.model";
 import { ReconnectionScheduler } from "../../utils/reconnectionScheduler";
 
 /**

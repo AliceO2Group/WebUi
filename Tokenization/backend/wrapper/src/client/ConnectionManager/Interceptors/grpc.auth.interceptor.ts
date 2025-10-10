@@ -19,8 +19,14 @@ import {
   ConnectionStatus,
   TokenPayload,
 } from "../../../models/connection.model";
-import { ConnectionDirection } from "../../../models/message.model";
+import {
+  ConnectionDirection,
+  TOKEN_REASON_HEADER,
+  TOKEN_TARGET_HEADER,
+  TokenAuthReason,
+} from "../../../models/message.model";
 import { SecurityContext } from "../../../utils/security/SecurityContext";
+import { ConnectionManager } from "../ConnectionManager";
 
 /**
  * @description gRPC interceptor function responsible for JWE decryption, JWS verification,
@@ -29,37 +35,42 @@ import { SecurityContext } from "../../../utils/security/SecurityContext";
 export const gRPCAuthInterceptor = async (
   call: grpc.ServerUnaryCall<any, any>,
   callback: grpc.sendUnaryData<any>,
-  clientConnections: Map<string, Connection>,
+  connectionManager: ConnectionManager,
   securityContext: SecurityContext
-): Promise<{ isAuthenticated: Boolean; conn: Connection | null }> => {
+): Promise<{ isAuthenticated: Boolean; conn: Connection | undefined }> => {
   const metadata = call.metadata.getMap();
   const jweToken = metadata.jwetoken as string;
   const clientAddress = call.getPeer();
-  let conn = clientConnections.get(clientAddress);
+  let conn = connectionManager.getConnectionByAddress(
+    clientAddress,
+    ConnectionDirection.RECEIVING
+  );
   const peerCert = getPeerCertFromCall(call);
 
   // Check if token exists
   if (!jweToken) {
-    const error = {
-      name: "AuthenticationError",
-      message: "No token provided",
-      code: grpc.status.UNAUTHENTICATED,
-    };
-    callback(error, null);
-    return { isAuthenticated: false, conn: null };
+    return createFailAuthResponse(
+      call,
+      callback,
+      conn,
+      grpc.status.UNAUTHENTICATED,
+      "No token provided",
+      TokenAuthReason.NO_TOKEN
+    );
   }
 
   // Check if connection exists
   if (conn) {
     // Check if connection is blocked
     if (conn.getStatus() === ConnectionStatus.BLOCKED) {
-      const error = {
-        name: "AuthenticationError",
-        message: "Connection is blocked. Contact administrator.",
-        code: grpc.status.UNAUTHENTICATED,
-      };
-      callback(error, null);
-      return { isAuthenticated: false, conn };
+      return createFailAuthResponse(
+        call,
+        callback,
+        conn,
+        grpc.status.UNAUTHENTICATED,
+        "No token provided",
+        TokenAuthReason.NO_TOKEN
+      );
     }
 
     if (conn.getToken() === jweToken) {
@@ -67,7 +78,14 @@ export const gRPCAuthInterceptor = async (
       if (
         !isRequestAllowed(conn.getCachedTokenPayload(), call.request, callback)
       ) {
-        return { isAuthenticated: false, conn };
+        return createFailAuthResponse(
+          call,
+          callback,
+          conn,
+          grpc.status.PERMISSION_DENIED,
+          "Method not allowed",
+          TokenAuthReason.PERMISSION_FORBIDDEN
+        );
       }
 
       if (
@@ -78,18 +96,24 @@ export const gRPCAuthInterceptor = async (
         )
       ) {
         conn.handleFailedAuth();
-        return { isAuthenticated: false, conn };
+        return createFailAuthResponse(
+          call,
+          callback,
+          conn,
+          grpc.status.UNAUTHENTICATED,
+          "Serial number mismatch",
+          TokenAuthReason.SERIAL_MISMATCH
+        );
       }
 
       return { isAuthenticated: true, conn };
     }
   } else {
-    conn = new Connection(
-      jweToken,
+    conn = await connectionManager.createNewConnection(
       clientAddress,
-      ConnectionDirection.RECEIVING
+      ConnectionDirection.RECEIVING,
+      jweToken
     );
-    clientConnections.set(clientAddress, conn);
   }
 
   // New connection - need to authenticate
@@ -106,15 +130,14 @@ export const gRPCAuthInterceptor = async (
     const { plaintext } = await compactDecrypt(jweToken, privateKey);
     jwsToken = new TextDecoder().decode(plaintext).trim();
   } catch (_e) {
-    const error = {
-      name: "AuthenticationError",
-      message: "Incorrect token provided (JWE Decryption failed)",
-      code: grpc.status.UNAUTHENTICATED,
-    };
-    // TODO: Consider logging or informing a central security system about potential attack/misconfiguration.
-    callback(error, null);
-    conn.handleFailedAuth();
-    return { isAuthenticated: false, conn };
+    return createFailAuthResponse(
+      call,
+      callback,
+      conn,
+      grpc.status.UNAUTHENTICATED,
+      "Incorrect token provided (JWE Decryption failed)",
+      TokenAuthReason.JWE_DECRYPT_FAIL
+    );
   }
 
   // Verify JWS (With signature) and payload extraction
@@ -142,42 +165,54 @@ export const gRPCAuthInterceptor = async (
 
     // Additional check to ensure correct signing algorithm was used
     if (protectedHeader.alg !== "EdDSA" && protectedHeader.alg !== "Ed25519") {
-      const error = {
-        name: "AuthenticationError",
-        message: "Incorrect signing algorithm for JWS.",
-        code: grpc.status.UNAUTHENTICATED,
-      };
-
-      callback(error, null);
-      return { isAuthenticated: false, conn };
+      return createFailAuthResponse(
+        call,
+        callback,
+        conn,
+        grpc.status.UNAUTHENTICATED,
+        "Incorrect signing algorithm for JWS.",
+        TokenAuthReason.JWS_INVALID
+      );
     }
 
     // Decode and parse the JWT payload
     const payloadString = new TextDecoder().decode(jwtPayload);
     payload = JSON.parse(payloadString);
   } catch (e: any) {
-    const error = {
-      name: "AuthenticationError",
-      message: `JWS Verification error: Invalid signature`,
-      code: grpc.status.PERMISSION_DENIED,
-    };
-    // TODO: Consider logging or informing a central security system about failed verification.
-    callback(error, null);
-
-    conn.handleFailedAuth();
-    return { isAuthenticated: false, conn };
+    return createFailAuthResponse(
+      call,
+      callback,
+      conn,
+      grpc.status.UNAUTHENTICATED,
+      "JWS Verification error: Invalid signature",
+      TokenAuthReason.JWS_INVALID
+    );
   }
 
   // mTLS binding check and authorization
   // Connection tunnel verification with serialNumber (mTLS SN vs Token SN)
   if (!isSerialNumberMatching(payload, peerCert, callback)) {
     conn.handleFailedAuth();
-    return { isAuthenticated: false, conn };
+    return createFailAuthResponse(
+      call,
+      callback,
+      conn,
+      grpc.status.UNAUTHENTICATED,
+      "Serial number mismatch",
+      TokenAuthReason.SERIAL_MISMATCH
+    );
   }
 
   // Validate permission for request method (Authorization check)
   if (!isRequestAllowed(payload, call.request, callback)) {
-    return { isAuthenticated: false, conn };
+    return createFailAuthResponse(
+      call,
+      callback,
+      conn,
+      grpc.status.PERMISSION_DENIED,
+      "Method not allowed",
+      TokenAuthReason.PERMISSION_FORBIDDEN
+    );
   }
 
   // Authentication and Authorization successful
@@ -323,4 +358,23 @@ export const getPeerCertFromCall = (call: any) => {
   const session = call?.call?.stream?.session;
   const sock = session?.socket as any;
   return sock?.getPeerCertificate(true); // whole certificate info from TLS socket
+};
+
+const createFailAuthResponse = (
+  call: grpc.ServerUnaryCall<any, any>,
+  callback: grpc.sendUnaryData<any>,
+  conn: Connection | undefined,
+  code: grpc.status,
+  msg: string,
+  reason: TokenAuthReason
+) => {
+  const md = new grpc.Metadata();
+  md.set(TOKEN_REASON_HEADER, reason);
+  md.set(TOKEN_TARGET_HEADER, call.getPeer() || "");
+  const err = Object.assign(new Error(msg), {
+    code,
+    metadata: md,
+  });
+  callback(err, null);
+  return { isAuthenticated: false, conn };
 };

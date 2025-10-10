@@ -23,6 +23,7 @@ import { NewTokenHandler } from "./Commands/newToken/newToken.handler";
 import { gRPCWrapperConfig } from "../models/config.model";
 import { SecurityContext } from "../utils/security/SecurityContext";
 import * as fs from "fs";
+import { SendAllTokensHandler } from "./Commands/sendAllTokens/sendAllTokens.handler";
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -99,6 +100,10 @@ export class gRPCWrapper {
         event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
         handler: new NewTokenHandler(this.ConnectionManager),
       },
+      {
+        event: DuplexMessageEvent.MESSAGE_EVENT_SEND_ALL_TOKENS,
+        handler: new SendAllTokensHandler(this.ConnectionManager),
+      },
     ]);
   }
 
@@ -107,6 +112,7 @@ export class gRPCWrapper {
    */
   public connectToCentralSystem() {
     this.ConnectionManager.connectToCentralSystem();
+    this.ConnectionManager.getAllTokens();
   }
 
   /**

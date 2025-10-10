@@ -12,7 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
-import { ConnectionDirection } from "../../models/message.model";
+import {
+  ConnectionDirection,
+  TOKEN_REASON_HEADER,
+  TokenAuthReason,
+} from "../../models/message.model";
 import {
   ConnectionHeaders,
   ConnectionStatus,
@@ -22,6 +26,8 @@ import {
 } from "../../models/connection.model";
 import * as grpc from "@grpc/grpc-js";
 import { LogManager } from "@aliceo2/web-ui";
+import { RetryQueue, RetryTask } from "../../utils/queues/RetryQueue";
+import { genId } from "../../utils/custom.identifier";
 
 type ConnectionCerts = {
   caCert: Buffer;
@@ -48,6 +54,24 @@ export class Connection {
 
   // utils
   private logger;
+  private retryQueue = new RetryQueue({
+    maxRetries: 5,
+    baseDelayMs: 300,
+    maxDelayMs: 8000,
+    jitter: true,
+  });
+  private pendingTokenRefresh?: Promise<void>;
+  private isRefreshing = false;
+
+  // for debug purposes
+  private failedRequestsLog: Array<{
+    id: string;
+    method: string;
+    path: string;
+    reason: string;
+    at: number;
+    tryNo: number;
+  }> = [];
 
   /**
    * @description Creates a new Connection instance with the given token, target address, and connection direction.
@@ -61,6 +85,7 @@ export class Connection {
     jweToken: string,
     targetAddress: string,
     direction: ConnectionDirection,
+    private renewToken: (token: string, targetAddress: string) => void,
     clientSN?: string
   ) {
     this.jweToken = jweToken;
@@ -119,6 +144,22 @@ export class Connection {
    */
   public handleNewToken(jweToken: string): void {
     this.jweToken = jweToken;
+
+    // reset
+    this.authFailures = 0;
+    this.updateStatus(ConnectionStatus.CONNECTED);
+
+    // drain retry queue on all after hanling new token
+    this.retryQueue.drainNow();
+
+    // end of refreshing
+    this.isRefreshing = false;
+    const p = this.pendingTokenRefresh;
+    this.pendingTokenRefresh = undefined;
+    // if someone awaited pendingTokenRefresh then we resolve it:
+    if (p) {
+      (p as any)._resolve?.(); // createTokenRefreshPromise
+    }
   }
 
   /**
@@ -229,57 +270,193 @@ export class Connection {
     this.peerClient = client;
   }
 
+  // -----------------------------------------------------------------------------------------------------------------------------
+  //                                                  FETCH HANDLING SECTION
+  // -----------------------------------------------------------------------------------------------------------------------------
+  /**
+   * @description Waits for the token to be refreshed
+   * @returns Promise<void>
+   */
+  private async awaitTokenRefresh(): Promise<void> {
+    if (!this.pendingTokenRefresh) return;
+    return this.pendingTokenRefresh;
+  }
+
+  /**
+   * @description Creates a promise that resolves when a new token is refreshed
+   * It is used internally to handle the token refresh process.
+   * If the token is currently being refreshed, it returns the existing promise.
+   * If not, it creates a new promise and stores it in the connection object.
+   * When the new token is received, it resolves the promise.
+   * @returns A promise that resolves when the token is refreshed.
+   */
+  private createTokenRefreshPromise(): Promise<void> {
+    if (this.pendingTokenRefresh) return this.pendingTokenRefresh;
+
+    let _resolve!: () => void;
+    let _reject!: (e: any) => void;
+    const newPromise = new Promise<void>((resolve, reject) => {
+      _resolve = resolve;
+      _reject = reject;
+    }) as any;
+    // add reference to be resolved by handleNewToken
+    newPromise._resolve = _resolve;
+    newPromise._reject = _reject;
+    this.pendingTokenRefresh = newPromise;
+    return newPromise;
+  }
+
+  /**
+   * @description Triggers token renewal if not already in progress.
+   * Updates connection status to TOKEN_REFRESH and creates a new promise to be resolved when the new token is received.
+   * Logs a warning message with the reason for the token renewal.
+   * @param reason The reason for the token renewal.
+   */
+  private triggerTokenRenewIfNeeded(reason: TokenAuthReason) {
+    if (this.isRefreshing) return;
+    this.isRefreshing = true;
+    this.updateStatus(ConnectionStatus.TOKEN_REFRESH);
+    this.createTokenRefreshPromise(); // sets pendingTokenRefresh
+    this.logger.warnMessage(
+      `Trigger token renew due to: ${TokenAuthReason[reason]}`
+    );
+    this.renewToken(this.jweToken, this.targetAddress);
+  }
+
+  /**
+   * @description Performs a fetch-like request over a gRPC connection.
+   * Returns a promise that resolves with a FetchResponse object, containing the response status, headers, and body.
+   * The body can be accessed as a Buffer, or as a string or JSON object using the text() and json() methods respectively.
+   * @param req The request object to be sent over the gRPC connection.
+   * @param metadata The metadata object to be sent with the request.
+   * @returns A promise that resolves with a FetchResponse object.
+   */
+  private grpcFetch(req: any, metadata: grpc.Metadata): Promise<FetchResponse> {
+    return new Promise<FetchResponse>((resolve, reject) => {
+      this.peerClient!.Fetch(req, metadata, (err: any, resp: any) => {
+        if (err) return reject(err);
+
+        const resBody = resp?.body ? Buffer.from(resp.body) : Buffer.alloc(0);
+        resolve({
+          status: Number(resp?.status ?? 200),
+          headers: resp?.headers || {},
+          body: resBody,
+          text: async () => resBody.toString("utf8"),
+          json: async () => JSON.parse(resBody.toString("utf8")),
+        });
+      });
+    });
+  }
+
+  /**
+   * Checks if the given TokenAuthReason is eligible for token renewal.
+   * @param reason The reason for the authentication failure, or undefined if the authentication succeeded.
+   * @returns True if the reason is eligible for token renewal, false otherwise.
+   */
+  private isAuthRenewable(reason: TokenAuthReason | undefined): boolean {
+    return (
+      reason === TokenAuthReason.NO_TOKEN ||
+      reason === TokenAuthReason.PERMISSION_EXPIRED ||
+      reason === TokenAuthReason.JWE_DECRYPT_FAIL ||
+      reason === TokenAuthReason.JWS_INVALID ||
+      reason === TokenAuthReason.SERIAL_MISMATCH
+    );
+  }
+
   /**
    * @description "HTTP-like" fetch via gRPC protocol
    * @returns Promise with peer's response
    */
-  public fetch(options: FetchOptions = {}): Promise<FetchResponse> {
+  public async fetch(options: FetchOptions = {}): Promise<FetchResponse> {
     if (!this.peerClient) {
-      return Promise.reject(
-        new Error(`Peer client not attached for ${this.getTargetAddress()}`)
+      throw new Error(
+        `Peer client not attached for ${this.getTargetAddress()}`
+      );
+    }
+    if (this.status === ConnectionStatus.BLOCKED) {
+      throw new Error(
+        "Connection is blocked. Contact your admin for further details."
       );
     }
 
-    // build a request object
     const method = (options.method || "POST").toUpperCase();
     const path = options.path || "/";
     const headers: ConnectionHeaders = { ...(options.headers || {}) };
 
-    // set mandatory grpc metadata
     const metadata = new grpc.Metadata();
     metadata.set("jwetoken", this.jweToken);
 
-    // build body buffer
     let bodyBuf: Buffer = Buffer.alloc(0);
     const b = options.body;
     if (b != null) {
       if (Buffer.isBuffer(b)) bodyBuf = b;
       else if (b instanceof Uint8Array) bodyBuf = Buffer.from(b);
       else if (typeof b === "string") bodyBuf = Buffer.from(b, "utf8");
-      else
-        return Promise.reject(
-          new Error("Body must be a string/Buffer/Uint8Array")
-        );
+      else throw new Error("Body must be a string/Buffer/Uint8Array");
     }
 
     const req = { method, path, headers, body: bodyBuf };
 
-    // return promise with response
-    return new Promise<FetchResponse>((resolve, reject) => {
-      this.peerClient.Fetch(req, metadata, (err: any, resp: any) => {
-        if (err) return reject(err);
+    // If someone is already refreshing token then wait and retry
+    if (this.status === ConnectionStatus.TOKEN_REFRESH) {
+      await this.awaitTokenRefresh();
+      // after refresh we have new token to setup in metadata
+      const meta = new grpc.Metadata();
+      meta.set("jwetoken", this.jweToken);
+      return this.grpcFetch(req, meta);
+    }
 
-        const resBody = resp?.body ? Buffer.from(resp.body) : Buffer.alloc(0);
-        const fetchResponse: FetchResponse = {
-          status: Number(resp?.status ?? 200),
-          headers: resp?.headers || {},
-          body: resBody,
-          text: async () => resBody.toString("utf8"),
-          json: async () => JSON.parse(resBody.toString("utf8")),
+    // First try of request fetching
+    try {
+      return await this.grpcFetch(req, metadata);
+    } catch (err: any) {
+      const reason: TokenAuthReason | undefined =
+        err?.metadataMap?.get?.(TOKEN_REASON_HEADER);
+
+      if (!this.isAuthRenewable(reason)) {
+        // errors that are not eligible for token renewal (e.g. FORBIDDEN, BLOCKED, INTERNAL, etc.)
+        this.logger.errorMessage(
+          `Error fetching for ${this.targetAddress}: (${method}):`,
+          err
+        );
+        throw err;
+      }
+
+      // Queue and refresh section
+      const id = genId(); // id of the request
+      this.failedRequestsLog.push({
+        id,
+        method,
+        path,
+        reason: TokenAuthReason[reason!],
+        at: Date.now(),
+        tryNo: 1,
+      });
+
+      // trigger renewal
+      this.triggerTokenRenewIfNeeded(reason!);
+
+      // create retry fetch object that will resolve when the token is refreshed
+      return new Promise<FetchResponse>((resolve, reject) => {
+        const task: RetryTask<FetchResponse> = {
+          id,
+          tryNo: 1,
+          createdAt: Date.now(),
+          reason: TokenAuthReason[reason!],
+          // retry function – will be executed after a drainNow() or after a backoff
+          exec: async () => {
+            // if still refreshing token then wait
+            await this.awaitTokenRefresh();
+            const meta = new grpc.Metadata();
+            meta.set("jwetoken", this.jweToken);
+            return this.grpcFetch(req, meta);
+          },
+          resolve,
+          reject,
         };
 
-        resolve(fetchResponse);
+        this.retryQueue.enqueue(task);
       });
-    });
+    }
   }
 }

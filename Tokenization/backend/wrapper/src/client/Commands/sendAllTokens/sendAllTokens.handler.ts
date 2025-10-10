@@ -13,15 +13,13 @@
  */
 
 import { CommandHandler } from "../../../models/commands.model";
-import { RevokeTokenCommand } from "./revokeToken.command";
+import { SendAllTokensCommand } from "./sendAllTokens.command";
 import { ConnectionManager } from "../../ConnectionManager/ConnectionManager";
+import { ConnectionDirection } from "../../../models/message.model";
 
-/**
- * RevokeTokenHandler is responsible for handling the RevokeTokenCommand.
- * It retrieves the target connection using the provided address and direction,
- * and calls `handleRevokeToken()` on that connection if it exists.
- */
-export class RevokeTokenHandler implements CommandHandler<RevokeTokenCommand> {
+export class SendAllTokensHandler
+  implements CommandHandler<SendAllTokensCommand>
+{
   /**
    * Creates a new instance of RevokeTokenHandler.
    *
@@ -35,20 +33,15 @@ export class RevokeTokenHandler implements CommandHandler<RevokeTokenCommand> {
    * @param command - The RevokeTokenCommand containing the target address and direction.
    * @throws Will throw an error if the target address or direction is missing in the command payload.
    */
-  async handle(command: RevokeTokenCommand): Promise<void> {
-    const { targetAddress, connectionDirection } =
-      command.payload.singleToken || {};
-    if (!targetAddress || !connectionDirection) {
-      throw new Error(
-        "Target address and connection direction are required to revoke token."
+  async handle(command: SendAllTokensCommand): Promise<void> {
+    const { tokensList } = command.payload;
+
+    for (const token of tokensList) {
+      this.manager.createNewConnection(
+        token.targetAddress,
+        token.connectionDirection || ConnectionDirection.SENDING,
+        token.token || ""
       );
     }
-
-    const conn = this.manager.getConnectionByAddress(
-      targetAddress,
-      connectionDirection
-    );
-
-    conn?.handleRevokeToken();
   }
 }
