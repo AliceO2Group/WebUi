@@ -33,7 +33,7 @@ export const objectInfoResizePanel = (model, tabObject) => {
     .forEach(([key, value]) => {
       uri += `&${key}=${encodeURI(value)}`;
     });
-  return h('.text-right.resize-element.resize-button.flex-row', {
+  return h('.text-right.resize-element.item-action-row.flex-row', {
     style: 'display: none; padding: .25rem .25rem 0rem .25rem;',
   }, [
 
@@ -50,8 +50,11 @@ export const objectInfoResizePanel = (model, tabObject) => {
         objectRemoteData.isSuccess() && h('.p1', qcObjectInfoPanel(objectRemoteData.payload)),
       ),
     ]),
-    objectRemoteData.isSuccess() && model.services.object.getDownloadQcdbObjectElement(objectRemoteData
-      .payload.id, { style: 'margin-right: .25rem;', id: 'dl-button' }),
+    objectRemoteData.isSuccess() &&
+    model.objectViewModel.getDownloadQcdbObjectElement(
+      objectRemoteData.payload.id,
+      { style: 'margin-right: .25rem;', id: 'dl-button' },
+    ),
     h('a.btn', {
       title: 'Open object plot in full screen',
       href: uri,

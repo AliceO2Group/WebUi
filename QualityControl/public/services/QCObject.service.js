@@ -15,7 +15,6 @@
 /* global JSROOT */
 
 import { RemoteData } from '/js/src/index.js';
-import { h, iconDataTransferDownload } from '/js/src/index.js';
 
 /**
  * Quality Control Object service to get/send data
@@ -168,19 +167,6 @@ export default class QCObjectService {
       url += `&fields[]=${fields.join('fields[]=')}`;
     }
     return url;
-  }
-
-  getDownloadQcdbObjectElement(objectId = undefined, elementOptions = {}) {
-    if (objectId == undefined || model.session.token == undefined) {
-      return;
-    }
-    const url = `/api/object/proxy/download/?token=${this.model.session.token}&objectIds=${objectId}`;
-    return h('a.btn', {
-      title: 'Download object',
-      target: '_blank',
-      href: url,
-      ...elementOptions,
-    }, iconDataTransferDownload());
   }
 
   /**

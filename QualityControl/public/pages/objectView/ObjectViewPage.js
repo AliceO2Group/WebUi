@@ -22,21 +22,18 @@ import { qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
 /**
  * Shows a page to view an object on the whole page
  * @param {ObjectViewModel} objectViewModel - model that manages the objectView state
- * @param {QcObjectService} qcObjectService - QCObject.service.js instance.
  * @returns {vnode} - virtual node element
- * @import { QcObjectService } from '../../../lib/services/QcObject.service.js';
  * @import { ObjectViewModel } from '../objectView/ObjectViewModel.js';
  */
-export default (objectViewModel, qcObjectService) =>
-  h('.absolute-fill.flex-column', objectPlotAndInfo(objectViewModel, qcObjectService));
+export default (objectViewModel) =>
+  h('.absolute-fill.flex-column', objectPlotAndInfo(objectViewModel));
 
 /**
  * Build an element which plots the object and displays metadata information
  * @param {ObjectViewModel} objectViewModel - model for object view page
- * @param {QcObjectService} qcObjectService - QCObject.service.js instance.
  * @returns {vnode} - virtual node element
  */
-const objectPlotAndInfo = (objectViewModel, qcObjectService) =>
+const objectPlotAndInfo = (objectViewModel) =>
   objectViewModel.selected.match({
     NotAsked: () => null,
     Loading: () => spinner(10, 'Loading object...'),
@@ -50,7 +47,7 @@ const objectPlotAndInfo = (objectViewModel, qcObjectService) =>
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.items-center.h-10', [
-          qcObjectService.getDownloadQcdbObjectElement(qcObject.id, { id: 'dl-button' }),
+          objectViewModel.getDownloadQcdbObjectElement(qcObject.id, { id: 'dl-button' }),
           h(
             '.w-40.p2.f6',
             dateSelector(

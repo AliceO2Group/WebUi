@@ -95,9 +95,9 @@ const drawPlot = (model, object) => {
     : `?page=objectView&objectName=${name}`;
   const info = object;
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
-    h('.resize-button.flex-row', [
+    h('.item-action-row.flex-row', [
       h('.p1.text-left', { style: 'padding-bottom: 0;' }, [
-        model.services.object.getDownloadQcdbObjectElement(object.id, {
+        model.objectViewModel.getDownloadQcdbObjectElement(object.id, {
           style: 'margin-right: .25rem;', id: 'dl-button' }),
         h(
           'a.btn#fs-button',
