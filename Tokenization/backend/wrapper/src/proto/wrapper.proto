@@ -60,6 +60,7 @@ message Payload {
         EmptyMessage emptyMessage = 2;
         Token singleToken = 3;
         TokenList tokensList = 4;
+        Alert alertMessage = 5;
     }
 }
 
@@ -121,4 +122,33 @@ enum ConnectionDirection {
 
     // Duplex connection, both sending and receiving
     DUPLEX = 3;
+}
+
+enum AlertLevel {
+  // Default value
+  ALERT_LEVEL_UNSPECIFIED = 0;
+  INFO = 1;
+  WARNING = 2;
+  ERROR = 3;
+  CRITICAL = 4;
+}
+
+enum AlertCode {
+  ALERT_CODE_UNSPECIFIED = 0;
+  AUTH_NO_TOKEN = 1;
+  AUTH_JWE_DECRYPT_FAIL = 2;
+  AUTH_JWS_INVALID = 3;
+  AUTH_SN_MISMATCH = 4;
+  AUTH_METHOD_FORBIDDEN = 5;
+  AUTH_PERMISSION_EXPIRED = 6;
+  AUTH_CONN_BLOCKED = 7;
+  P2P_FORWARD_ERROR = 8;
+}
+
+message Alert {
+  string alert = 1;
+  AlertLevel level = 2;
+  AlertCode code = 3;
+  int64 ts = 4;
+  map<string, string> context = 5;
 }

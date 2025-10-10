@@ -24,8 +24,9 @@ import {
   DuplexMessageEvent,
 } from "../../models/message.model";
 import { ConnectionStatus } from "../../models/connection.model";
-import { gRPCAuthInterceptor } from "./Interceptors/grpc.auth.interceptor";
+import { GRPCAuthInterceptor } from "./Interceptors/grpc.auth.interceptor";
 import { SecurityContext } from "../../utils/security/SecurityContext";
+import { AlertPayload } from "../../models/alert.model";
 
 /**
  * @description Manages all the connection between clients and central system.
@@ -70,7 +71,8 @@ export class ConnectionManager {
   constructor(
     protoPath: string,
     centralAddress: string = "localhost:50051",
-    private readonly securityContext: SecurityContext
+    private readonly securityContext: SecurityContext,
+    private gRPCAuthInterceptor = new GRPCAuthInterceptor(this, securityContext)
   ) {
     const packageDef = protoLoader.loadSync(protoPath, {
       keepCase: true,
@@ -286,12 +288,8 @@ export class ConnectionManager {
         callback: grpc.sendUnaryData<any>
       ) => {
         // run auth interceptor
-        const { isAuthenticated, conn } = await gRPCAuthInterceptor(
-          call,
-          callback,
-          this,
-          this.securityContext
-        );
+        const { isAuthenticated, conn } =
+          await this.gRPCAuthInterceptor.validate(call, callback);
 
         if (!isAuthenticated || !conn) {
           // Authentication failed - response already sent in interceptor
@@ -396,6 +394,20 @@ export class ConnectionManager {
           token: expiredToken,
           targetAddress: targetAddress,
         },
+      },
+    });
+  }
+
+  /**
+   * @description Sends alert to the central system.
+   * @param alert AlertPayload containing alert code, level, code, and timestamp.
+   * @returns void
+   */
+  public sendCentralAlert(alert: AlertPayload): void {
+    this.centralConnection.sendEvent({
+      event: DuplexMessageEvent.MESSAGE_EVENT_SEND_ALERT,
+      payload: {
+        ...alert,
       },
     });
   }

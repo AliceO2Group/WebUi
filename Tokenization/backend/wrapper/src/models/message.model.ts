@@ -12,6 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
+import { AlertPayload } from "./alert.model";
+import { SingleTokenPayload, TokenListPayload } from "./token.model";
+
 // ======================================
 //                 ENUMS
 // ======================================
@@ -23,6 +26,7 @@
  * @property MESSAGE_EVENT_REVOKE_TOKEN: Event for revoking an existing token.
  * @property MESSAGE_EVENT_GET_ALL_TOKENS: Event for getting all tokens for this client.
  * @property MESSAGE_EVENT_RENEW_TOKEN: Event for renewing a token after expiration.
+ * @property MESSAGE_EVENT_SEND_ALERT: Event for sending an alert to the central system.
  */
 export enum DuplexMessageEvent {
   // Central system commands
@@ -34,6 +38,7 @@ export enum DuplexMessageEvent {
   // Client commands
   MESSAGE_EVENT_GET_ALL_TOKENS = "MESSAGE_EVENT_GET_LAST_TOKEN",
   MESSAGE_EVENT_RENEW_TOKEN = "MESSAGE_EVENT_RENEW_TOKEN",
+  MESSAGE_EVENT_SEND_ALERT = "MESSAGE_EVENT_SEND_ALERT",
 }
 
 /**
@@ -48,62 +53,19 @@ export enum ConnectionDirection {
   DUPLEX = "DUPLEX",
 }
 
-/**
- * @remarks This enum is used to indicate specific causes when token-based authentication does not succeed.
- *
- * @enum
- * @property NO_TOKEN - No authentication token was provided.
- * @property CONNECTION_BLOCKED - The connection was blocked, possibly due to security policies.
- * @property JWE_DECRYPT_FAIL - Failed to decrypt the JWE (JSON Web Encryption) token.
- * @property JWS_INVALID - The JWS (JSON Web Signature) token is invalid.
- * @property SERIAL_MISMATCH - The token's serial number does not match the expected value.
- * @property PERMISSION_EXPIRED - The permissions associated with the token have expired.
- * @property PERMISSION_FORBIDDEN - The token does not have the required permissions.
- */
-export enum TokenAuthReason {
-  NO_TOKEN = "NO_TOKEN",
-  CONNECTION_BLOCKED = "CONNECTION_BLOCKED",
-  JWE_DECRYPT_FAIL = "JWE_DECRYPT_FAIL",
-  JWS_INVALID = "JWS_INVALID",
-  SERIAL_MISMATCH = "SERIAL_MISMATCH",
-  PERMISSION_EXPIRED = "PERMISSION_EXPIRED",
-  PERMISSION_FORBIDDEN = "PERMISSION_FORBIDDEN",
-}
-
-// Header names for token messages
-export const TOKEN_REASON_HEADER = "x-token-reason"; // TokenAuthReason from enum
-export const TOKEN_TARGET_HEADER = "x-token-target"; // address/peer
-
 // ======================================
 //              INTERFACES
 // ======================================
 
-/**
- * @description Model for token generation and revocation messages.
- * @property {string} token - The token to be replaced or revoked.
- * @property {ConnectionDirection} connectionDirection - The direction of the connection associated with this token.
- * @property {string} targetAddress - The address of connection binded to this token.
- */
-export interface TokenMessage {
-  token?: string;
-  connectionDirection?: ConnectionDirection;
-  targetAddress: string;
-}
-
-export interface TokenListPayload {
-  tokensList: TokenMessage[];
-}
-
-export interface SingleTokenPayload {
-  singleToken: TokenMessage;
-}
-
-export type TokenPayloadVariant = TokenListPayload | SingleTokenPayload;
+export type PayloadVariant =
+  | TokenListPayload
+  | SingleTokenPayload
+  | AlertPayload;
 
 /**
  * @description Model for duplex stream messages between client and central system.
  * @property {DuplexMessageEvent} event - The event type of the message.
- * @property {TokenPayloadVariant} payload - The data associated with the event, it may be undefined for some events.
+ * @property {PayloadVariant} payload - The data associated with the event, it may be undefined for some events.
  * @example
  * {
  *  event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
@@ -112,5 +74,5 @@ export type TokenPayloadVariant = TokenListPayload | SingleTokenPayload;
  */
 export interface DuplexMessageModel {
   event: DuplexMessageEvent;
-  payload?: TokenPayloadVariant;
+  payload?: PayloadVariant;
 }

@@ -13,7 +13,7 @@
  */
 
 import { LogManager } from "@aliceo2/web-ui";
-import { Command, CommandHandler } from "models/commands.model";
+import { Command, CommandHandler } from "../../../models/commands.model";
 import { DuplexMessageEvent } from "../../../models/message.model";
 
 /**

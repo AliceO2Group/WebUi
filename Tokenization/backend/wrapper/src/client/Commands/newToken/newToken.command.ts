@@ -12,11 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
+import { SingleTokenPayload } from "../../../models/token.model";
 import { Command } from "../../../models/commands.model";
-import {
-  DuplexMessageEvent,
-  SingleTokenPayload,
-} from "../../../models/message.model";
+import { DuplexMessageEvent } from "../../../models/message.model";
 
 /**
  * @description Command used to trigger new token for a specific connection. Handles structure logic.

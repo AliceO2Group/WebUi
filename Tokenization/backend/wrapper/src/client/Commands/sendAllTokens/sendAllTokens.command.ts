@@ -12,11 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
+import { TokenListPayload } from "../../../models/token.model";
 import { Command } from "../../../models/commands.model";
-import {
-  DuplexMessageEvent,
-  TokenListPayload,
-} from "../../../models/message.model";
+import { DuplexMessageEvent } from "../../../models/message.model";
 
 /**
  * @description Command used to handle all tokens from a central system. Handles structure logic.

@@ -64,21 +64,3 @@ export type HttpLikeResponse = {
   headers: Headers;
   body: Buffer;
 };
-
-/**
- * @description Payload structure for authentication tokens
- * @sub {string} sub - Subject: Client's certificate serial number
- * @aud {string} aud - Audience: Listener's certificate serial number
- * @iss {string} iss - Issuer: Central system's certificate serial number
- * @iat {Object} iat - Issued At: Permissions granted to the client (e.g., allowed HTTP methods with timestamps)
- * @exp {number} exp - Expiration: Expiry timestamps for the granted permissions
- * @jti {string} jti - JWT ID: Unique identifier for the token
- */
-export type TokenPayload = {
-  sub: string;
-  aud: string;
-  iss: string;
-  iat: { [method: string]: number };
-  exp: { [method: string]: number };
-  jti: string;
-};

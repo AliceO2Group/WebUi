@@ -12,14 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
-import { SingleTokenPayload } from "../../../models/token.model";
 import { Command } from "../../../models/commands.model";
 import { DuplexMessageEvent } from "../../../models/message.model";
+import { AlertPayload } from "../../../models/alert.model";
 
 /**
- * @description Command used to trigger token revocation for a specific connection. Handles structure logic.
+ * @description Command used to send specific alert to central system logs. Handles structure logic.
  */
-export class RevokeTokenCommand implements Command {
-  readonly event = DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN;
-  constructor(public payload: SingleTokenPayload) {}
+export class SendAlertCommand implements Command {
+  readonly event = DuplexMessageEvent.MESSAGE_EVENT_SEND_ALERT;
+  constructor(payload: AlertPayload) {}
 }

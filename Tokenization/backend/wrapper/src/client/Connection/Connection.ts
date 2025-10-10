@@ -12,22 +12,22 @@
  * or submit itself to any jurisdiction.
  */
 
-import {
-  ConnectionDirection,
-  TOKEN_REASON_HEADER,
-  TokenAuthReason,
-} from "../../models/message.model";
+import { ConnectionDirection } from "../../models/message.model";
 import {
   ConnectionHeaders,
   ConnectionStatus,
   FetchOptions,
   FetchResponse,
-  TokenPayload,
 } from "../../models/connection.model";
 import * as grpc from "@grpc/grpc-js";
 import { LogManager } from "@aliceo2/web-ui";
 import { RetryQueue, RetryTask } from "../../utils/queues/RetryQueue";
 import { genId } from "../../utils/custom.identifier";
+import {
+  TOKEN_REASON_HEADER,
+  TokenAuthReason,
+  TokenPayload,
+} from "../../models/token.model";
 
 type ConnectionCerts = {
   caCert: Buffer;

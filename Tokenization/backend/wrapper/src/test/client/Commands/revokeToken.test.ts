@@ -26,7 +26,6 @@ import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
 import { getTestCerts } from "../../testCerts/testCerts";
-import { connect } from "http2";
 
 // Mock logger
 jest.mock(

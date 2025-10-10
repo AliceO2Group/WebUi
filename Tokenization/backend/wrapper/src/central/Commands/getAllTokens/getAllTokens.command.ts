@@ -19,6 +19,6 @@ import { DuplexMessageEvent } from "../../../models/message.model";
  * @description Command used to retrieve all tokens for a client. Handles structure logic.
  */
 export class GetAllTokensCommand implements Command {
-  readonly event = DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN;
+  readonly event = DuplexMessageEvent.MESSAGE_EVENT_GET_ALL_TOKENS;
   constructor() {}
 }
