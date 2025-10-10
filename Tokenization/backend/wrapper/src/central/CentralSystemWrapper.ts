@@ -132,6 +132,7 @@ export class CentralSystemWrapper {
     // Listen for data events from the client
     call.on("data", (payload: any) => {
       this.logger.infoMessage(`Received from ${clientIp}:`, payload);
+      this.dispatcher.dispatch(payload);
     });
 
     // Handle stream end event
