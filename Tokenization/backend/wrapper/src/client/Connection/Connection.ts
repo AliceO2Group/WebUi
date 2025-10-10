@@ -313,7 +313,13 @@ export class Connection {
    * @param reason The reason for the token renewal.
    */
   private triggerTokenRenewIfNeeded(reason: TokenAuthReason) {
-    if (this.isRefreshing) return;
+    if (
+      this.isRefreshing ||
+      (reason !== TokenAuthReason.PERMISSION_EXPIRED &&
+        reason !== TokenAuthReason.NO_TOKEN &&
+        reason !== TokenAuthReason.PERMISSION_FORBIDDEN)
+    )
+      return;
     this.isRefreshing = true;
     this.updateStatus(ConnectionStatus.TOKEN_REFRESH);
     this.createTokenRefreshPromise(); // sets pendingTokenRefresh

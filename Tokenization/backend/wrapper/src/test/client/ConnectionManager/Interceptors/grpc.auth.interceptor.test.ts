@@ -31,8 +31,6 @@ describe("grpc.auth.interceptor", () => {
   });
 
   describe("isRequestAllowed", () => {
-    const callback = jest.fn();
-
     const validPayload = {
       iat: { POST: Math.floor(Date.now() / 1000) - 10 },
       exp: { POST: Math.floor(Date.now() / 1000) + 100 },
@@ -43,9 +41,10 @@ describe("grpc.auth.interceptor", () => {
     };
 
     it("returns true for valid payload and unexpired permission", () => {
-      expect(isRequestAllowed(validPayload, { method: "POST" }, callback)).toBe(
-        true
-      );
+      expect(isRequestAllowed(validPayload, { method: "POST" })).toEqual({
+        isAllowed: true,
+        isUnexpired: true,
+      });
     });
 
     it("returns false and calls callback for expired permission", () => {
@@ -54,19 +53,17 @@ describe("grpc.auth.interceptor", () => {
         iat: { POST: Math.floor(Date.now() / 1000) - 100 },
         exp: { POST: Math.floor(Date.now() / 1000) - 10 },
       };
-      callback.mockClear();
-      expect(
-        isRequestAllowed(expiredPayload, { method: "POST" }, callback)
-      ).toBe(false);
-      expect(callback).toHaveBeenCalled();
+      expect(isRequestAllowed(expiredPayload, { method: "POST" })).toEqual({
+        isAllowed: false,
+        isUnexpired: false,
+      });
     });
 
     it("returns false and calls callback for invalid payload", () => {
-      callback.mockClear();
-      expect(isRequestAllowed(undefined, { method: "POST" }, callback)).toBe(
-        false
-      );
-      expect(callback).toHaveBeenCalled();
+      expect(isRequestAllowed(undefined, { method: "POST" })).toEqual({
+        isAllowed: false,
+        isUnexpired: true,
+      });
     });
   });
 
@@ -76,23 +73,21 @@ describe("grpc.auth.interceptor", () => {
     it("returns true if serial numbers match", () => {
       const payload = { sub: "ABCDEF" } as any;
       const peerCert = { serialNumber: "ab:cd:ef" };
-      expect(isSerialNumberMatching(payload, peerCert, callback)).toBe(true);
+      expect(isSerialNumberMatching(payload, peerCert)).toBe(true);
     });
 
     it("returns false and calls callback if serial numbers do not match", () => {
       const payload = { sub: "ABCDEF" } as any;
       const peerCert = { serialNumber: "123456" };
       callback.mockClear();
-      expect(isSerialNumberMatching(payload, peerCert, callback)).toBe(false);
-      expect(callback).toHaveBeenCalled();
+      expect(isSerialNumberMatching(payload, peerCert)).toBe(false);
     });
 
     it("returns false and calls callback if serial number is missing", () => {
       const payload = { sub: "ABCDEF" } as any;
       const peerCert = {};
       callback.mockClear();
-      expect(isSerialNumberMatching(payload, peerCert, callback)).toBe(false);
-      expect(callback).toHaveBeenCalled();
+      expect(isSerialNumberMatching(payload, peerCert)).toBe(false);
     });
   });
 

@@ -75,26 +75,24 @@ export const gRPCAuthInterceptor = async (
 
     if (conn.getToken() === jweToken) {
       // check for allowed requests and serial number match if token is the same
-      if (
-        !isRequestAllowed(conn.getCachedTokenPayload(), call.request, callback)
-      ) {
+      const isReqAllowed = isRequestAllowed(
+        conn.getCachedTokenPayload(),
+        call.request
+      );
+      if (!isReqAllowed.isAllowed) {
         return createFailAuthResponse(
           call,
           callback,
           conn,
           grpc.status.PERMISSION_DENIED,
           "Method not allowed",
-          TokenAuthReason.PERMISSION_FORBIDDEN
+          isReqAllowed.isUnexpired
+            ? TokenAuthReason.PERMISSION_FORBIDDEN
+            : TokenAuthReason.PERMISSION_EXPIRED
         );
       }
 
-      if (
-        !isSerialNumberMatching(
-          conn.getCachedTokenPayload(),
-          peerCert,
-          callback
-        )
-      ) {
+      if (!isSerialNumberMatching(conn.getCachedTokenPayload(), peerCert)) {
         conn.handleFailedAuth();
         return createFailAuthResponse(
           call,
@@ -191,7 +189,7 @@ export const gRPCAuthInterceptor = async (
 
   // mTLS binding check and authorization
   // Connection tunnel verification with serialNumber (mTLS SN vs Token SN)
-  if (!isSerialNumberMatching(payload, peerCert, callback)) {
+  if (!isSerialNumberMatching(payload, peerCert)) {
     conn.handleFailedAuth();
     return createFailAuthResponse(
       call,
@@ -204,14 +202,20 @@ export const gRPCAuthInterceptor = async (
   }
 
   // Validate permission for request method (Authorization check)
-  if (!isRequestAllowed(payload, call.request, callback)) {
+  const isReqAllowed = isRequestAllowed(
+    conn.getCachedTokenPayload(),
+    call.request
+  );
+  if (!isReqAllowed.isAllowed) {
     return createFailAuthResponse(
       call,
       callback,
       conn,
       grpc.status.PERMISSION_DENIED,
       "Method not allowed",
-      TokenAuthReason.PERMISSION_FORBIDDEN
+      isReqAllowed.isUnexpired
+        ? TokenAuthReason.PERMISSION_FORBIDDEN
+        : TokenAuthReason.PERMISSION_EXPIRED
     );
   }
 
@@ -230,12 +234,11 @@ export const gRPCAuthInterceptor = async (
  */
 export const isRequestAllowed = (
   tokenPayload: TokenPayload | undefined,
-  request: any,
-  callback: grpc.sendUnaryData<any>
-): Boolean => {
+  request: any
+): { isAllowed: boolean; isUnexpired: boolean } => {
   const method = String(request?.method || "POST").toUpperCase();
   const isValidPayload = validateTokenPayload(tokenPayload, request.method);
-  let isUnexpired;
+  let isUnexpired = true;
 
   if (isValidPayload) {
     isUnexpired = isPermissionUnexpired(
@@ -245,21 +248,10 @@ export const isRequestAllowed = (
   }
 
   if (!isValidPayload || !isUnexpired) {
-    const error = {
-      name: "AuthorizationError",
-      code: isUnexpired
-        ? grpc.status.PERMISSION_DENIED
-        : grpc.status.UNAUTHENTICATED,
-      message: isUnexpired
-        ? `Request of type ${method} is not allowed by the token policy.`
-        : `Request of type ${method}, permission has expired.`,
-    } as any;
-
-    callback(error, null);
-    return false;
+    return { isAllowed: false, isUnexpired: isUnexpired };
   }
 
-  return true;
+  return { isAllowed: true, isUnexpired: isUnexpired };
 };
 
 /**
@@ -298,7 +290,7 @@ const validateTokenPayload = (
  * @param exp expiration timestamp for the specific method
  * @returns true if permission is still valid, false if expired
  */
-export const isPermissionUnexpired = (iat: number, exp: number): Boolean => {
+export const isPermissionUnexpired = (iat: number, exp: number): boolean => {
   const nowInSeconds = Math.floor(Date.now() / 1000);
 
   if (nowInSeconds >= exp) {
@@ -321,19 +313,12 @@ export const isPermissionUnexpired = (iat: number, exp: number): Boolean => {
  */
 export const isSerialNumberMatching = (
   tokenPayload: TokenPayload | undefined,
-  peerCert: any,
-  callback: grpc.sendUnaryData<any>
+  peerCert: any
 ): Boolean => {
   const clientSN = normalizeSerial(peerCert?.serialNumber);
   const tokenSN = normalizeSerial(tokenPayload?.sub);
 
   if (!clientSN || clientSN !== tokenSN) {
-    const error = {
-      name: "AuthenticationError",
-      code: grpc.status.PERMISSION_DENIED,
-      message: "Serial number mismatch (mTLS binding failure).",
-    } as any;
-    callback(error, null);
     return false;
   }
   return true;
