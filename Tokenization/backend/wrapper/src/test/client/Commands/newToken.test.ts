@@ -46,14 +46,17 @@ jest.mock(
  */
 const createEventMessage = (
   targetAddress: string,
-  connectionDirection: ConnectionDirection
+  connectionDirection: ConnectionDirection,
+  token: string
 ): Command => {
   return {
     event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
     payload: {
-      targetAddress,
-      connectionDirection,
-      token: "test-token",
+      singleToken: {
+        targetAddress,
+        connectionDirection,
+        token,
+      },
     },
   } as Command;
 };
@@ -103,7 +106,7 @@ describe("NewTokenHandler", () => {
         dir: ConnectionDirection,
         token: string
       ) {
-        const conn = new Connection(token, address, dir);
+        const conn = new Connection(token, address, dir, null as any);
         if (dir === ConnectionDirection.SENDING) {
           this.sendingConnections.set(address, conn);
           conn.createSslTunnel(peerCtor, getTestCerts());
@@ -120,7 +123,8 @@ describe("NewTokenHandler", () => {
     const conn = new Connection(
       "old-token",
       targetAddress,
-      ConnectionDirection.SENDING
+      ConnectionDirection.SENDING,
+      null as any
     );
     conn.createSslTunnel(peerCtor, getTestCerts());
 
@@ -128,12 +132,16 @@ describe("NewTokenHandler", () => {
 
     const handler = new NewTokenHandler(manager);
     const command = new NewTokenCommand(
-      createEventMessage(targetAddress, ConnectionDirection.SENDING).payload
+      createEventMessage(
+        targetAddress,
+        ConnectionDirection.SENDING,
+        "new-token"
+      ).payload
     );
 
     await handler.handle(command);
 
-    expect(conn.getToken()).toBe("test-token");
+    expect(conn.getToken()).toBe("new-token");
   });
 
   it("should create new RECEIVING connection if not found", async () => {
@@ -141,7 +149,11 @@ describe("NewTokenHandler", () => {
 
     const handler = new NewTokenHandler(manager);
     const command = new NewTokenCommand(
-      createEventMessage(targetAddress, ConnectionDirection.RECEIVING).payload
+      createEventMessage(
+        targetAddress,
+        ConnectionDirection.RECEIVING,
+        "test-token"
+      ).payload
     );
 
     await handler.handle(command);
@@ -156,7 +168,11 @@ describe("NewTokenHandler", () => {
 
     const handler = new NewTokenHandler(manager);
     const command = new NewTokenCommand(
-      createEventMessage(targetAddress, ConnectionDirection.DUPLEX).payload
+      createEventMessage(
+        targetAddress,
+        ConnectionDirection.DUPLEX,
+        "new-token"
+      ).payload
     );
 
     await handler.handle(command);
@@ -168,8 +184,8 @@ describe("NewTokenHandler", () => {
 
     expect(sendingConn).toBeDefined();
     expect(receivingConn).toBeDefined();
-    expect(sendingConn.getToken()).toBe("test-token");
-    expect(receivingConn.getToken()).toBe("test-token");
+    expect(sendingConn.getToken()).toBe("new-token");
+    expect(receivingConn.getToken()).toBe("new-token");
   });
 
   it("should throw error when payload is missing required fields", async () => {
@@ -183,9 +199,11 @@ describe("NewTokenHandler", () => {
 
   it("should create command with correct event and payload", () => {
     const payload = {
-      targetAddress: "peer-000",
-      connectionDirection: ConnectionDirection.SENDING,
-      token: "sample-token",
+      singleToken: {
+        targetAddress: "peer-000",
+        connectionDirection: ConnectionDirection.SENDING,
+        token: "sample-token",
+      },
     };
 
     const command = new NewTokenCommand(payload);

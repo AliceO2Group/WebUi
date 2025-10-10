@@ -18,7 +18,7 @@ import { LogManager } from "@aliceo2/web-ui";
 import { DuplexMessageModel } from "../models/message.model";
 import * as fs from "fs";
 import { CentralSystemConfig } from "models/config.model";
-import { CentralCommandDispatcher } from "client/ConnectionManager/EventManagement/CentralCommandDispatcher";
+import { CentralCommandDispatcher } from "../client/ConnectionManager/EventManagement/CentralCommandDispatcher";
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.

@@ -26,6 +26,7 @@ import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
 import { getTestCerts } from "../../testCerts/testCerts";
+import { connect } from "http2";
 
 // Mock logger
 jest.mock(
@@ -67,8 +68,11 @@ describe("RevokeToken", () => {
     return {
       event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
       payload: {
-        targetAddress: targetAddress,
-        token: "test-token",
+        singleToken: {
+          targetAddress: targetAddress,
+          token: "test-token",
+          connectionDirection: ConnectionDirection.SENDING,
+        },
       },
     } as Command;
   };
@@ -93,7 +97,8 @@ describe("RevokeToken", () => {
     const conn = new Connection(
       "valid-token",
       targetAddress,
-      ConnectionDirection.SENDING
+      ConnectionDirection.SENDING,
+      null as any
     );
     conn.createSslTunnel(peerCtor, getTestCerts());
     (manager as any).sendingConnections!.set(targetAddress, conn);
@@ -114,7 +119,8 @@ describe("RevokeToken", () => {
     const conn = new Connection(
       "valid-token",
       targetAddress,
-      ConnectionDirection.RECEIVING
+      ConnectionDirection.RECEIVING,
+      null as any
     );
     (manager as any).receivingConnections.set(targetAddress, conn);
 
@@ -139,7 +145,7 @@ describe("RevokeToken", () => {
     await expect(handler.handle(command)).resolves.toBeUndefined();
     expect(manager.getConnectionByAddress).toHaveBeenCalledWith(
       targetAddress,
-      undefined
+      "SENDING"
     );
   });
 
@@ -153,7 +159,7 @@ describe("RevokeToken", () => {
     const command = new RevokeTokenCommand(invalidMessage as any);
 
     await expect(handler.handle(command)).rejects.toThrow(
-      "Target address is required to revoke token."
+      "Target address and connection direction are required to revoke token."
     );
   });
 
