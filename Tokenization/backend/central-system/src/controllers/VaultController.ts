@@ -15,14 +15,16 @@
 import { VaultCredentialsService } from "../services/VaulCredentialsService";
 import { VaultAuthService } from "../services/VaultAuthService";
 import { VaultSignService } from "../services/VaultSignService";
+
 import { Agent } from "https";
+
 import {
   SignTokenReq,
   GetCredentialReq,
   CreateOrUpdateCredentialReq,
 } from "../lib/event-req-types.js";
-
 import { registerBusHandler } from "../lib/register-bus-handler.js";
+import { EventType } from "../lib/events.js";
 
 /**
  * @description Controller for managing interactions with the Vault service.
@@ -131,29 +133,32 @@ export class VaultController {
     );
   }
 
-  /** 
+  /**
    *  @description Registers the event handlers for vault-related operations.
    *  This method sets up handlers for signing tokens, logging in, renewing tokens,
    *  and managing credentials in the vault.
    */
   public register() {
-    registerBusHandler<SignTokenReq>("SIGN_TOKEN_VAULT", async (payload) =>
-      this.signToken(payload.data)
+    registerBusHandler<SignTokenReq>(
+      EventType.SIGN_TOKEN_VAULT,
+      async (payload) => this.signToken(payload.data)
     );
 
-    registerBusHandler<undefined>("LOGIN_VAULT", async () => this.loginVault());
+    registerBusHandler<undefined>(EventType.LOGIN_VAULT, async () =>
+      this.loginVault()
+    );
 
-    registerBusHandler<undefined>("RENEW_VAULT_TOKEN", async () =>
+    registerBusHandler<undefined>(EventType.RENEW_VAULT_TOKEN, async () =>
       this.renewVaultToken()
     );
 
     registerBusHandler<GetCredentialReq>(
-      "GET_CREDENTIAL_VAULT",
+      EventType.GET_CREDENTIAL_VAULT,
       async (payload) => this.getCredentialFromVault(payload.path)
     );
 
     registerBusHandler<CreateOrUpdateCredentialReq>(
-      "CREATE_OR_UPDATE_CREDENTIAL_VAULT",
+      EventType.CREATE_OR_UPDATE_CREDENTIAL_VAULT,
       async (payload) => {
         await this.createOrUpdateCredentialInVault(payload.path, payload.body);
         return undefined;
