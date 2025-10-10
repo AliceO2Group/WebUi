@@ -12,25 +12,50 @@
  * or submit itself to any jurisdiction.
  */
 
+import { VaultCredentialsService } from "../services/VaulCredentialsService";
+import { VaultAuthService } from "../services/VaultAuthService";
 import { VaultSignService } from "../services/VaultSignService";
-
+import { Agent } from "https";
 /**
  * @description Controller for managing interactions with the Vault service.
  */
 export class VaultController {
-  /**
-   * @description Initializes the VaultController with a VaultSignService instance.
-   * @param tokenSignService - An instance of VaultSignService to handle token signing.
-   */
-  constructor(private readonly tokenSignService: VaultSignService) {}
+  // Agent for HTTPS requests
+  private readonly agent: Agent;
+
 
   /**
-   * @description Signs a token using the VaultSignService.
-   * @param tokenJWT - The JWT token to be signed.
-   * @param url - The URL of the external vault service.
-   * @return A promise that resolves to the response from the vault service.
-   */
-  public async signToken(tokenJWT: string, url: string) {
-    return this.tokenSignService.signToken(tokenJWT, url);
+    * @description Constructs a new VaultController. Initializes the HTTPS agent using
+    * TLS certificates provided via environment variables.
+    * @param tokenSignService - Service for signing tokens.
+    * @param authService - Service for authenticating with the vault.
+    * @param credentialsService - Service for retrieving credentials from the vault.
+    * @throws Will throw an error if required environment variables are missing.
+    */
+  constructor(
+    private readonly tokenSignService: VaultSignService,
+    private readonly authService: VaultAuthService,
+    private readonly credentialsService: VaultCredentialsService
+  ) {
+    const caPem = process.env.CA_PEM_B64;
+    const certPem = process.env.CERT_PEM_B64;
+    const keyPem = process.env.KEY_PEM_B64;
+
+    if (!caPem || !certPem || !keyPem) {
+      throw new Error(
+        "Missing required environment variables for TLS certificates."
+      );
+    }
+
+    this.agent = new Agent({
+      keepAlive: true,
+      ca: Buffer.from(caPem, "base64"),
+      cert: Buffer.from(certPem, "base64"),
+      key: Buffer.from(keyPem, "base64"),
+    });
   }
+
+
+  async signToken()
+  {}
 }
