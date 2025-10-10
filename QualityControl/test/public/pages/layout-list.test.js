@@ -42,7 +42,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   await testParent.test('should not show a download button when there is no data', async () => {
     await page.goto(`${url}?page=layoutShow&layoutId=671b8c22402408122e2f20dd&tab=main`, { waitUntil: 'networkidle0' });
 
-    const downloadCount = await page.evaluate(() => document.querySelectorAll('#dl-button').length);
+    const downloadCount = await page.evaluate(() => document.querySelectorAll('#download-button').length);
 
     strictEqual(downloadCount, 0);
   });

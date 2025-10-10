@@ -39,7 +39,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     { timeout },
     async () => {
       const objectId = '016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
-      const dlButton = await page.evaluate(() => document.querySelector('#dl-button').href);
+      const dlButton = await page.evaluate(() => document.querySelector('#download-button').href);
       const token = await page.evaluate(() => model.session.token);
       strictEqual(dlButton, `${url}api/object/proxy/download/?token=${token}&objectIds=${objectId}`);
     },

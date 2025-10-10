@@ -13,7 +13,7 @@
  */
 
 import { qcObjectInfoPanel } from './../../../common/object/objectInfoCard.js';
-import { h, iconResizeBoth, info } from '/js/src/index.js';
+import { h, iconResizeBoth, info, iconDataTransferDownload } from '/js/src/index.js';
 
 /**
  * Builds 2 actionable buttons which are to be placed on top of a JSROOT plot
@@ -33,12 +33,11 @@ export const objectInfoResizePanel = (model, tabObject) => {
     .forEach(([key, value]) => {
       uri += `&${key}=${encodeURI(value)}`;
     });
-  return h('.text-right.resize-element.item-action-row.flex-row', {
+  return h('.text-right.resize-element.item-action-row.flex-row.g1', {
     style: 'display: none; padding: .25rem .25rem 0rem .25rem;',
   }, [
 
     h('.dropdown', { class: isSelectedOpen ? 'dropdown-open' : '',
-      style: 'margin-right: .25rem;',
     }, [
       h('button.btn', {
         title: 'View details about histogram',
@@ -51,14 +50,14 @@ export const objectInfoResizePanel = (model, tabObject) => {
       ),
     ]),
     objectRemoteData.isSuccess() &&
-    model.objectViewModel.getDownloadQcdbObjectElement(
-      objectRemoteData.payload.id,
-      { style: 'margin-right: .25rem;', id: 'dl-button' },
-    ),
+    h('a.btn#download-button', {
+      title: 'Download object',
+      target: '_blank',
+      href: model.objectViewModel.getDownloadQcdbObjectUrl(objectRemoteData.payload.id),
+    }, iconDataTransferDownload()),
     h('a.btn', {
       title: 'Open object plot in full screen',
       href: uri,
-      style: 'margin-right: .25rem;',
       onclick: (e) => router.handleLinkEvent(e),
     }, iconResizeBoth()),
   ]);

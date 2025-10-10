@@ -14,7 +14,7 @@
 
 import { BaseViewModel } from '../../common/abstracts/BaseViewModel.js';
 import { setBrowserTabTitle } from '../../common/utils.js';
-import { RemoteData, h, iconDataTransferDownload } from '/js/src/index.js';
+import { RemoteData } from '/js/src/index.js';
 
 /**
  * Model namespace for ObjectViewPage
@@ -116,22 +116,15 @@ export default class ObjectViewModel extends BaseViewModel {
   }
 
   /**
-   * Gets/creates the download button element
+   * Creates the href url for the download element
    * @param {string} objectId - id of root object
-   * @param {object} elementOptions - options for the Mithril element
-   * @returns {h|void} download button element
+   * @returns {string|void} download link
    */
-  getDownloadQcdbObjectElement(objectId = undefined, elementOptions = {}) {
+  getDownloadQcdbObjectUrl(objectId = undefined) {
     if (objectId == undefined || model.session.token == undefined) {
       return;
     }
-    const url = `/api/object/proxy/download/?token=${this.model.session.token}&objectIds=${objectId}`;
-    return h('a.btn', {
-      title: 'Download object',
-      target: '_blank',
-      href: url,
-      ...elementOptions,
-    }, iconDataTransferDownload());
+    return `/api/object/proxy/download/?token=${this.model.session.token}&objectIds=${objectId}`;
   }
 
   /**

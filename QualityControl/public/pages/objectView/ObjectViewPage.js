@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h } from '/js/src/index.js';
+import { h, iconDataTransferDownload } from '/js/src/index.js';
 import { draw } from './../../common/object/draw.js';
 import { spinner } from './../../common/spinner.js';
 import { errorDiv } from '../../common/errorDiv.js';
@@ -47,7 +47,11 @@ const objectPlotAndInfo = (objectViewModel) =>
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.items-center.h-10', [
-          objectViewModel.getDownloadQcdbObjectElement(qcObject.id, { id: 'dl-button' }),
+          h('a.btn#download-button', {
+            title: 'Download object',
+            target: '_blank',
+            href: model.objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
+          }, iconDataTransferDownload()),
           h(
             '.w-40.p2.f6',
             dateSelector(
