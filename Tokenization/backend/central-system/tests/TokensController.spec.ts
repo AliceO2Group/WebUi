@@ -1,6 +1,6 @@
 import express from 'express';
 import request from 'supertest';
-import { TokensController } from '../src/controllers/TokensController';
+import { ConnectionController } from '../src/controllers/ConnectionController';
 import { TokensGetService } from '../src/services/TokensGetService';
 
 // --- Fakes ---
@@ -36,7 +36,8 @@ function makeApp(tokensMap?: Map<number, any>) {
 
   const wrapper = new FakeWrapper();
   const svc = new FakeTokensGetService();
-  const controller = new TokensController(svc, fakeTokens, wrapper as any);
+  const controller = new ConnectionController
+(svc, fakeTokens, wrapper as any);
 
   const app = express();
   app.use(express.json());
@@ -48,7 +49,8 @@ function makeApp(tokensMap?: Map<number, any>) {
 
 // --- Tests ---
 
-describe('TokensController', () => {
+describe('ConnectionController
+', () => {
   test('GET /tokens returns transformed tokens', async () => {
     const { app } = makeApp();
     const res = await request(app).get('/tokens');

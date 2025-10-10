@@ -13,10 +13,12 @@
  */
 
 import { CentralSystemWrapper } from "../wrapper/CentralSystemWrapper.js";
-import { TokensController } from "../controllers/TokensController.js";
+import { ConnectionController } from "../controllers/ConnectionController.js";
+import { VaultController } from "../controllers/VaultController.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { TokensGetService } from "../services/TokensGetService.js";
+import { VaultSignService } from "../services/VaultSignService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,10 +35,12 @@ class CentralSystem {
     number,
     { tokenId: number; validity: string; payload: string }
   >;
-  public readonly tokenController: TokensController;
+  public readonly tokenController: ConnectionController;
+  public readonly vaultController: VaultController;
 
   public constructor(wrapperPort: number) {
     const tokensGetService = new TokensGetService();
+    const vaultSignService = new VaultSignService();
     this.centralSystemWrapper = new CentralSystemWrapper(
       this.PROTO_PATH,
       wrapperPort
@@ -46,11 +50,12 @@ class CentralSystem {
       [1, { tokenId: 1, validity: "good", payload: "payload1" }],
       [2, { tokenId: 2, validity: "bad", payload: "payload2" }],
     ]);
-    this.tokenController = new TokensController(
+    this.tokenController = new ConnectionController(
       tokensGetService,
       this.fakeTokens,
       this.centralSystemWrapper
     );
+    this.vaultController = new VaultController(vaultSignService);
   }
 }
 
