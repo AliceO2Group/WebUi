@@ -37,7 +37,7 @@ export const layoutMapperTestSuite = async () => {
 
     test('should patch a layout correctly', async () => {
       const patch = { isOfficial: true };
-      const result = await normalizeLayout(patch, baseLayout, false, mockUserService);
+      const result = await normalizeLayout(patch, baseLayout, false);
       deepStrictEqual(result, {
         is_official: true,
       });
@@ -53,7 +53,7 @@ export const layoutMapperTestSuite = async () => {
         owner_id: 2,
       };
 
-      const result = await normalizeLayout(fullUpdate, baseLayout, true, mockUserService);
+      const result = await normalizeLayout(fullUpdate, baseLayout, true);
 
       deepStrictEqual(result, {
         id: 10,
@@ -68,19 +68,19 @@ export const layoutMapperTestSuite = async () => {
 
     test('should handle missing userService', async () => {
       const patch = { owner_id: 1 };
-      const result = await normalizeLayout(patch, baseLayout, false, null);
+      const result = await normalizeLayout(patch, baseLayout, false);
       deepStrictEqual(result, {});
     });
 
     test('should handle missing fields', async () => {
       const patch = {};
-      const result = await normalizeLayout(patch, baseLayout, false, mockUserService);
+      const result = await normalizeLayout(patch, baseLayout, false);
       deepStrictEqual(result, {});
     });
 
     test('should return null username if user not found', async () => {
       const patch = { owner_id: 999 };
-      const result = await normalizeLayout(patch, baseLayout, false, mockUserService);
+      const result = await normalizeLayout(patch, baseLayout, false);
       deepStrictEqual(result, { owner_username: null });
     });
   });
