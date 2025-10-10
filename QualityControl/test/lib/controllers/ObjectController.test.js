@@ -1,3 +1,4 @@
+/* eslint-disable @stylistic/js/comma-dangle */
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -23,6 +24,7 @@ export const objectControllerTestSuite = async () => {
   let resMock = null;
   let objectController = null;
   let RunMonitoringServiceMock = null;
+  let QcdbDownloadServiceMock = null;
 
   beforeEach(() => {
     resMock = {
@@ -43,7 +45,10 @@ export const objectControllerTestSuite = async () => {
       checkAndSetRunMonitoring: sinon.spy(),
       retrievePathsAndSetRunStatus: sinon.stub(),
     };
-    objectController = new ObjectController(QcObjectServiceMock, RunMonitoringServiceMock);
+    QcdbDownloadServiceMock = {
+      getQcdbRootObjects: sinon.spy(),
+    };
+    objectController = new ObjectController(QcObjectServiceMock, RunMonitoringServiceMock, QcdbDownloadServiceMock);
   });
 
   afterEach(() => {
@@ -181,6 +186,35 @@ export const objectControllerTestSuite = async () => {
         status: 500,
         title: 'Unknown Error',
       }));
+    });
+  });
+
+  suite('getDownloadObjects() tests', () => {
+    const mockObject = {
+      id: '21a6de32-ce79-11ef-936b-c0a80209250c',
+      path: 'qc/path/object',
+      validFrom: 1736420279131,
+    };
+    test('should successfully call getQcdbRootObjects with objectIds', async () => {
+      reqMock.query = {
+        token: 'some token',
+        objectIds: mockObject.id,
+      };
+      await objectController.getDownloadObjects(reqMock, resMock);
+      ok(QcdbDownloadServiceMock.getQcdbRootObjects.calledWith(mockObject.id, resMock));
+    });
+
+    test('should fail when objectId is not present', async () => {
+      reqMock.query = {
+        token: 'some token',
+      };
+      const responseMsg = {
+        message: 'Invalid query parameters: "objectIds" is required',
+        status: 400,
+        title: 'Invalid Input'
+      };
+      await objectController.getDownloadObjects(reqMock, resMock);
+      ok(resMock.json.calledWithMatch(responseMsg));
     });
   });
 };

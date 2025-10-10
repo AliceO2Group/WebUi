@@ -27,6 +27,9 @@ import { runModeMiddleware } from './middleware/filters/runMode.middleware.js';
  * @param {HttpServer} http - web-ui based server implementation
  * @param {WebSocket} ws - web-ui websocket server implementation
  * @param {EventEmitter} eventEmitter - Event emitter instance (Kafka)
+ * @import {HttpServer} from '@aliceo2/web-ui';
+ * @import {WebSocket} from '@aliceo2/web-ui';
+ * @returns {void}
  */
 export const setup = async (http, ws, eventEmitter) => {
   /**
@@ -63,6 +66,8 @@ export const setup = async (http, ws, eventEmitter) => {
     runModeMiddleware,
     objectController.getObjects.bind(objectController),
   );
+
+  http.get('/object/proxy/download/', objectController.getDownloadObjects.bind(objectController));
 
   http.get('/layouts', layoutController.getLayoutsHandler.bind(layoutController));
   http.get('/layout/:id', layoutController.getLayoutHandler.bind(layoutController));
