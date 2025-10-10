@@ -12,7 +12,7 @@
     "dev": "npm run build && concurrently -k \"npm:watch:*\"",
     "start": "node index.js",
     "test": "jest --runInBand",
-    "docker-dev:up": "cd .. && docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d",
+    "docker-dev:up": "cd .. && docker compose -f docker-compose.dev.yml up -d  && docker compose -f docker-compose.yml up -d",
     "docker-dev:down": "cd .. && docker compose -f docker-compose.yml -f docker-compose.dev.yml down"
   },
   "repository": {

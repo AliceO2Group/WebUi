@@ -12,9 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { VaultCredentialsService } from "../services/VaulCredentialsService";
-import { VaultAuthService } from "../services/VaultAuthService";
-import { VaultSignService } from "../services/VaultSignService";
+import { VaultCredentialsService } from "../services/VaulCredentialsService.js";
+import { VaultAuthService } from "../services/VaultAuthService.js";
+import { VaultSignService } from "../services/VaultSignService.js";
 
 import { Agent } from "https";
 
@@ -26,6 +26,8 @@ import {
 import { registerBusHandler } from "../lib/register-bus-handler.js";
 import { EventType } from "../lib/events.js";
 
+import { LogManager } from "@aliceo2/web-ui";
+const logger = LogManager.getLogger("VaultController");
 /**
  * @description Controller for managing interactions with the Vault service.
  */
@@ -48,10 +50,9 @@ export class VaultController {
     private readonly authService: VaultAuthService,
     private readonly credentialsService: VaultCredentialsService
   ) {
-    const caPem = process.env.CA_PEM_B64;
-    const certPem = process.env.CERT_PEM_B64;
-    const keyPem = process.env.KEY_PEM_B64;
-
+    const caPem = process.env.VAULT_CACERT_B64;
+    const certPem = process.env.VAULT_CENTRAL_SYSTEM_CERT_B64;
+    const keyPem = process.env.VAULT_CENTRAL_SYSTEM_KEY_B64;
     if (!caPem || !certPem || !keyPem) {
       throw new Error(
         "Missing required environment variables for TLS certificates."
@@ -93,6 +94,9 @@ export class VaultController {
         name: process.env.VAULT_ROLE,
       })
     );
+    logger.info(
+      `Logged into Vault successfully.Token: ${this.vaultAccessToken}`
+    );
   }
 
   /**
@@ -106,6 +110,7 @@ export class VaultController {
       this.agent,
       null
     );
+    logger.info("Vault token renewed successfully.");
   }
 
   /**
