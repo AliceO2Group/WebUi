@@ -22,7 +22,13 @@ interface AlertProps {
 }
 
 /**
+ * DangerAlert
  *
+ * A reusable component to display error alerts using MUI's Snackbar and Alert components.
+ *
+ * @param props.openSnackbar Boolean to control the visibility of the snackbar.
+ * @param props.setOpenSnackbar Function to update the visibility state of the snackbar.
+ * @param props.snackbarMessage The message to display inside the alert.
  */
 export function DangerAlert({ openSnackbar, setOpenSnackbar, snackbarMessage }: AlertProps) {
 

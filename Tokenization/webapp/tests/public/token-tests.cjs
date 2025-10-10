@@ -64,11 +64,26 @@ describe('token creation', function() {
 
   beforeEach(async function() {
     await page.goto(`${url}/tokens/new`);
-    this.reactSelect1 = await page.waitForSelector('#first-service-select');
-    this.reactSelect2 = await page.waitForSelector('#second-service-select');
-    this.reactSelect3 = await page.waitForSelector('#http-methods-select');
-    this.expirationInput = await page.waitForSelector('#expiration-time-input');
-    this.button = await page.waitForSelector('button[type="submit"]');
+
+    const [
+      reactSelect1,
+      reactSelect2,
+      reactSelect3,
+      expirationInput,
+      button,
+    ] = await Promise.all([
+      page.waitForSelector('#first-service-select'),
+      page.waitForSelector('#second-service-select'),
+      page.waitForSelector('#http-methods-select'),
+      page.waitForSelector('#expiration-time-input'),
+      page.waitForSelector('button[type="submit"]'),
+    ]);
+
+    this.reactSelect1 = reactSelect1;
+    this.reactSelect2 = reactSelect2;
+    this.reactSelect3 = reactSelect3;
+    this.expirationInput = expirationInput;
+    this.button = button;
   });
 
   it('Not filling form shows error', async function() {
@@ -126,7 +141,9 @@ describe('token creation', function() {
   });
 
   it('no auth error shows alert', async function() {
-    const { dialogHandle } = await fillAllFormFields(page, this.reactSelect1, this.reactSelect2, this.reactSelect3, this.expirationInput, this.button);
+    const { dialogHandle } = await fillAllFormFields(
+      page, this.reactSelect1, this.reactSelect2, this.reactSelect3, this.expirationInput, this.button,
+    );
     const confirmButton = await dialogHandle.$('button:nth-child(2)');
     await confirmButton.click();
 
@@ -137,5 +154,5 @@ describe('token creation', function() {
 
   it('happy path', async function() {
     assert.ok(true);
-  })
+  });
 });

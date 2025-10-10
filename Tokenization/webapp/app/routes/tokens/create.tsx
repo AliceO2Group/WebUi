@@ -20,18 +20,12 @@ import {
   InputAdornment,
 } from '@mui/material';
 
+import type { OptionType, HttpMethod } from '~/utils/types';
 import { DangerAlert } from '~/ui/alert';
 import { CreationTokenDialog } from '~/ui/dialog';
 import { useAuth } from '~/hooks/session';
 
-export interface OptionType {
-  value: string;
-  label: string;
-}
-
-/**
- *
- */
+// eslint-disable-next-line jsdoc/require-jsdoc
 export function clientLoader(): OptionType[] {
   return [
     { value: 'service1', label: 'Service 1' },
@@ -41,9 +35,7 @@ export function clientLoader(): OptionType[] {
   ];
 }
 
-export type HttpMethod = 'GET' | 'POST' | 'DELETE' | 'PUT';
-
-// Opcje metod HTTP
+// HTTP Method options
 const httpMethodOptions = [
   { value: 'GET', label: 'GET' },
   { value: 'POST', label: 'POST' },
@@ -52,8 +44,54 @@ const httpMethodOptions = [
 ];
 
 /**
+ * FormCreationInput
  *
+ * Container component for form inputs in the token creation form.
+ *
+ * @param props.children element input/select/itp.
+ * @param props.labelText  Optional label text to display above the input field.
  */
+function FormCreationInput({ children, labelText }: { children: React.ReactNode; labelText?: string }) {
+  return <div style={{ marginBottom: '20px' }}>
+    <label>{labelText}</label>
+    {children}
+  </div>;
+}
+
+interface FormCreationSelectInputProps {
+  id: string;
+  labelText?: string;
+  options: OptionType[];
+  value: MultiValue<OptionType> | SingleValue<OptionType>;
+  onChange: (value: MultiValue<OptionType> | SingleValue<OptionType>) => void;
+  placeholder: string;
+  isMulti?: boolean;
+}
+
+/**
+ * FormCreationSelectInput
+ *
+ * Container component for select inputs in the token creation form.
+ *
+ * @param props.id The id of the select input.
+ * @param props.labelText Optional label text to display above the select field.
+ * @param props.options The options to display in the select dropdown.
+ * @param props.value The currently selected value(s).
+ * @param props.onChange Callback function to handle changes in selection.
+ * @param props.placeholder Placeholder text for the select input.
+ * @param props.isMulti Boolean indicating if multiple selections are allowed.
+ */
+function FormCreationSelectInput(props: FormCreationSelectInputProps) {
+  const { labelText, ...rest } = props;
+
+  return <FormCreationInput labelText={labelText}>
+    <Select
+      {...rest}
+    />
+  </FormCreationInput>;
+}
+
+// eslint-disable-next-line jsdoc/require-jsdoc
 export default function CreateToken({ loaderData }: { loaderData?: OptionType[] }) {
   const navigate = useNavigate();
   const [expirationTime, setExpirationTime] = useState<string>('');
@@ -125,49 +163,56 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
     <div>
       <h1>Create New Token</h1>
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '20px' }}>
-          <label>Select first service:</label>
-          <Select<OptionType>
-            id="first-service-select"
-            options={options}
-            value={firstSelectedOption}
-            onChange={(srv: SingleValue<OptionType>) => {
-              setFirstSelectedService(srv ? srv.value : '');
-            }}
-            placeholder="Select first service..."
-          />
-        </div>
+        <FormCreationSelectInput
+          id="first-service-select"
+          labelText="Select first service:"
+          options={options}
+          value={firstSelectedOption}
+          onChange={(srv: SingleValue<OptionType> | MultiValue<OptionType>) => {
+            if (Array.isArray(srv)) {
+              setFirstSelectedService('');
+              return;
+            }
+            const srv1 = srv as SingleValue<OptionType>;
+            setFirstSelectedService(srv1 ? srv1.value : '');
+          }}
+          placeholder="Select first service..."
+        />
 
-        <div style={{ marginBottom: '20px' }}>
-          <label>Select second service:</label>
-          <Select<OptionType>
-            id="second-service-select"
-            options={options}
-            value={secondSelectedOption}
-            onChange={(srv: SingleValue<OptionType>) => {
-              setSecondSelectedService(srv ? srv.value : '');
-            }}
-            placeholder="Select second service..."
-          />
-        </div>
+        <FormCreationSelectInput
+          id="second-service-select"
+          labelText="Select second service:"
+          options={options}
+          value={secondSelectedOption}
+          onChange={(srv: SingleValue<OptionType> | MultiValue<OptionType>) => {
+            if (Array.isArray(srv)) {
+              setSecondSelectedService('');
+              return;
+            }
+            const srv1 = srv as SingleValue<OptionType>;
+            setSecondSelectedService(srv1 ? srv1.value : '');
+          }}
+          placeholder="Select second service..."
+        />
 
-        <div style={{ marginBottom: '20px' }}>
-          <label>Select HTTP Methods:</label>
-          <Select
-            id="http-methods-select"
-            isMulti
-            options={httpMethodOptions}
-            value={httpMethodOptions.filter(option => selectedMethods.includes(option.value as HttpMethod))}
-            onChange={(selected: MultiValue<{ value: string; label: string }>) => {
-              const methods = selected.map(item => item.value) as HttpMethod[];
-              setSelectedMethods(methods);
-            }}
-            placeholder="Select permissions..."
-          />
-        </div>
+        <FormCreationSelectInput
+          id="http-methods-select"
+          labelText="Select HTTP Methods:"
+          isMulti
+          options={httpMethodOptions}
+          value={httpMethodOptions.filter(option => selectedMethods.includes(option.value as HttpMethod))}
+          onChange={(selected: MultiValue<OptionType> | SingleValue<OptionType>) => {
+            if (!selected || !Array.isArray(selected)) {
+              setSelectedMethods([]);
+              return;
+            }
+            const methods = selected.map(item => item.value) as HttpMethod[];
+            setSelectedMethods(methods);
+          }}
+          placeholder="Select permissions..."
+        />
 
-        <div >
-          <label>Expiration Time:</label>
+        <FormCreationInput labelText="Expiration Time:">
           <TextField
             id="expiration-time-input"
             fullWidth
@@ -184,7 +229,7 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
             }}
             label=""
           />
-        </div>
+        </FormCreationInput>
 
         <div style={{ marginTop: '30px' }}>
           <button type="submit">Create Token</button>

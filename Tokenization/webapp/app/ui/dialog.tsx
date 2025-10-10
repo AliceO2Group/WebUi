@@ -15,7 +15,7 @@
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 
-import type { OptionType, HttpMethod } from '~/routes/tokens/create';
+import type { OptionType, HttpMethod } from '~/utils/types';
 
 interface DialogProps {
   showDialogWindow: boolean;
@@ -28,11 +28,22 @@ interface CreationTokenDialogProps extends DialogProps {
   secondSelectedService: string;
   expirationTime: string;
   selectedMethods: HttpMethod[];
-  onCreateToken?: () => void; // Dodaj opcjonalny callback
+  onCreateToken?: () => void;
 }
 
 /**
+ * CreationTokenDialog
  *
+ * A reusable dialog component for confirming token creation.
+ *
+ * @param props.showDialogWindow Boolean to control the visibility of the dialog.
+ * @param props.setShowDialogWindow Function to update the visibility state of the dialog.
+ * @param props.options List of available services for selection.
+ * @param props.firstSelectedService The first selected service value.
+ * @param props.secondSelectedService The second selected service value.
+ * @param props.expirationTime The expiration time for the token.
+ * @param props.selectedMethods List of selected HTTP methods for the token.
+ * @param props.onCreateToken Optional callback function to be called when the "Create" button is clicked.
  */
 export function CreationTokenDialog({
   showDialogWindow,
