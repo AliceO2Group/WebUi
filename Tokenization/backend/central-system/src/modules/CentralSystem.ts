@@ -67,6 +67,12 @@ class CentralSystem {
       new VaultCredentialsService()
     );
     this.vaultController.register();
+    this.vaultController
+      .loginVault()
+      .then(() => {})
+      .catch((error) => {
+        console.error("Failed to log in to Vault:", error);
+      });
   }
 }
 
