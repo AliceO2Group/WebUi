@@ -31,7 +31,7 @@ import { TokensGetService } from '../services/TokensGetService.js';
 /**
  * @description Controller for managing tokens in the Central System.
  */
-export class TokensController {
+export class ConnectionController {
   private _logger;
 
   /**
