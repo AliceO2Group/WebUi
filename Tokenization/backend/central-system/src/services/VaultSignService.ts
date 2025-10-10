@@ -12,6 +12,16 @@
  * or submit itself to any jurisdiction.
  */
 
+import { Agent } from "https";
+import fetch from "node-fetch";
+
+// Define the structure of the sign response
+interface SignResponse {
+  data: {
+    signature: string;
+  };
+}
+
 /**
  * @description Service for signing tokens using an external vault service.
  */
@@ -22,14 +32,23 @@ export class VaultSignService {
    * @param url - The URL of the external vault service.
    * @return A promise that resolves to the response from the vault service.
    */
-  public async signToken(tokenJWT: string, url: string) {
-    return await fetch(url, {
+  public async signToken(
+    url: string,
+    token: string,
+    agent: Agent,
+    body: Buffer | string | NodeJS.ReadableStream | null
+  ) {
+    const result = await fetch(url, {
       method: "POST",
+      body,
       headers: {
-        "X-Vault-Token": "xyz",
-        input: tokenJWT,
-        marshaling_algorithm: "jws",
+        "content-type": "application/json",
+        "X-Vault-Token": token,
       },
+      agent,
     });
+    if (!result.ok) throw new Error(await result.text());
+    const data = await result.json() as SignResponse;
+    return data.data.signature;
   }
 }
