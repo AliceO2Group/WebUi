@@ -11,7 +11,11 @@
     "@aliceo2/web-ui": "^2.8.4",
     "crypto": "^1.0.1",
     "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "sequelize": "6.37.0",
+    "umzug": "3.8.2",
+    "mariadb": "3.0.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@grpc/grpc-js": "^1.13.4",
@@ -24,6 +28,7 @@
     "nodemon": "^3.1.10",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "sequelize-cli": "6.6.0"
   }
 }
