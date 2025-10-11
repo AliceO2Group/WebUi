@@ -85,12 +85,8 @@ class QCConfigurationService {
    * @param {String} value - the configuration
    */
   async editConfigurationByKey(key, value) {
-    try {
-      const listOfConfigurationsToEdit = [{ [key]: JSON.stringify(value, null, 2) }];
-      return await this._consulService.putListOfKeyValues(listOfConfigurationsToEdit);
-    } catch (error) {
-      throw new ServiceUnavailableError(`Error editing configuration for key: ${key}`);
-    }
+    const listOfConfigurationsToEdit = [{ [key]: JSON.stringify(value, null, 2) }];
+    return await this._consulService.putListOfKeyValues(listOfConfigurationsToEdit);
   }
 }
 

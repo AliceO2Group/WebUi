@@ -99,7 +99,7 @@ class QCConfigurationController {
    * @param {Request} req
    * @param {Response} res
    */
-  async editConfigurationByKey(req, res) {
+  async editConfigurationByKeyHandler(req, res) {
     const { key } = req.params;
     const { configuration } = req.body;
     if (!key) {

@@ -169,7 +169,7 @@ describe(`'QCConfigurationController' test suite`, () => {
     });
   });
   
-  describe(`'editConfigurationByKey' test suite`, () => {
+  describe(`'editConfigurationByKeyHandler' test suite`, () => {
     let qcConfigurationService, qcConfigurationController;
     before(() => {
       qcConfigurationService = new QCConfigurationService({
@@ -187,7 +187,7 @@ describe(`'QCConfigurationController' test suite`, () => {
         body: { configuration: { key1: "value1", key2: "value2" } },
       };
       const res = { status: sinon.stub().returnsThis(), json: sinon.stub() };
-      await qcConfigurationController.editConfigurationByKey(req, res);
+      await qcConfigurationController.editConfigurationByKeyHandler(req, res);
       assert.ok(res.status.calledWith(200));
       assert.deepStrictEqual(res.json.firstCall.args[0], { allPut: true });
     });
@@ -195,7 +195,7 @@ describe(`'QCConfigurationController' test suite`, () => {
     it("should return 400 for missing configuration key", async () => {
       const req = { params: {}, body: { configuration: {} } };
       const res = { status: sinon.stub().returnsThis(), json: sinon.stub() };
-      await qcConfigurationController.editConfigurationByKey(req, res);
+      await qcConfigurationController.editConfigurationByKeyHandler(req, res);
       assert.ok(res.status.calledWith(400));
       assert.deepStrictEqual(res.json.firstCall.args[0], {
         message: "Missing configuration key",
