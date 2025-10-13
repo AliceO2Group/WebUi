@@ -18,7 +18,7 @@ import QCObjectDto from '../dtos/QCObjectDto.js';
 import QcObjectIdentificationDto from '../dtos/QcObjectIdentificationDto.js';
 
 /**
- * @typedef {import('./layout/LayoutService.js').LayoutService} LayoutService
+ * @typedef {import('../repositories/ChartRepository.js').ChartRepository} ChartRepository
  */
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/obj-service`;
@@ -31,19 +31,19 @@ export class QcObjectService {
   /**
    * Setup service constructor and initialize needed dependencies
    * @param {CcdbService} dbService - CCDB service to retrieve raw information about the QC objects
-   * @param {LayoutService} layoutService - service to be used for retrieving configurations on saved layouts
+   * @param {ChartRepository} chartRepository - service to be used for retrieving configurations on saved layouts
    * @param {RootService} rootService - root library to be used for interacting with ROOT Objects
    */
-  constructor(dbService, layoutService, rootService) {
+  constructor(dbService, chartRepository, rootService) {
     /**
      * @type {CcdbService}
      */
     this._dbService = dbService;
 
     /**
-     *  @type {LayoutService}
+     *  @type {ChartRepository}
      */
-    this._layoutService = layoutService;
+    this._chartRepository = chartRepository;
 
     /**
      * @type {RootService}
@@ -98,7 +98,7 @@ export class QcObjectService {
    * The service can return objects either:
    * * from cache if it is requested by the client and the system is configured to use a cache;
    * * make a new request and get data directly from data service
-   * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
+   * * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
    * @param {object} options - An object that contains query parameters among other arguments
    * @param {string|Regex} options.prefix - Prefix for which CCDB should search for objects.
    * @param {Array<string>} options.fields - List of fields that should be requested for each object
@@ -181,13 +181,15 @@ export class QcObjectService {
    * @param {number|null} options.validFrom - timestamp in ms
    * @param {object} options.filters - filter as string to be sent to CCDB
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
+   * @throws {Error} - if object with specified id is not found
    */
   async retrieveQcObjectByQcgId({ qcObjectId, id, validFrom = undefined, filters = {} }) {
-    const object = await this._layoutService.getObjectById(qcObjectId);
-    const { tab, chart } = object;
-    const { name: tabName, layout } = tab;
-    const { name: layoutName } = layout;
-    const { object_name: name, ignore_defaults: ignoreDefaults, chartOptions: options } = chart;
+    const result = this._chartRepository.getObjectById(qcObjectId);
+    if (!result) {
+      throw new Error(`Object with id ${qcObjectId} not found`);
+    }
+    const { object, layoutName, tabName } = result;
+    const { name, options = {}, ignoreDefaults = false } = object;
     const qcObject = await this.retrieveQcObject({ path: name, validFrom, id, filters });
     return {
       ...qcObject,
