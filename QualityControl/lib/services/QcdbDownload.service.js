@@ -98,7 +98,7 @@ export class QcdbDownloadService {
         throw new Error(`Cannot get ROOT file from QCDB object id: ${objectId}`);
       }
       const contentLength = response.headers.get(CONTENT_LENGTH_HEADER);
-      this._logger.infoMessage(`ROOT size: ${contentLength}`);
+      this._logger.infoMessage(`ROOT size (bytes): ${contentLength}`);
       // We will stream the data from QCDB's answer directly back to the user.
       if (res != undefined) {
         await this._streamToResponse(response, res);
