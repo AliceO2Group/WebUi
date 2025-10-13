@@ -12,8 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
+import objectDownloadButton from '../../../object/objectDownloadButton.js';
 import { qcObjectInfoPanel } from './../../../common/object/objectInfoCard.js';
-import { h, iconResizeBoth, info, iconDataTransferDownload } from '/js/src/index.js';
+import { h, iconResizeBoth, info } from '/js/src/index.js';
 
 /**
  * Builds 2 actionable buttons which are to be placed on top of a JSROOT plot
@@ -50,11 +51,7 @@ export const objectInfoResizePanel = (model, tabObject) => {
       ),
     ]),
     objectRemoteData.isSuccess() &&
-    h('a.btn#download-button', {
-      title: 'Download object',
-      target: '_blank',
-      href: model.objectViewModel.getDownloadQcdbObjectUrl(objectRemoteData.payload.id),
-    }, iconDataTransferDownload()),
+    objectDownloadButton(model.objectViewModel, objectRemoteData.payload.id),
     h('a.btn', {
       title: 'Open object plot in full screen',
       href: uri,
