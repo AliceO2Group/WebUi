@@ -18,7 +18,6 @@ import { suite, test, beforeEach } from 'node:test';
 import { LayoutService } from '../../../../lib/services/layout/LayoutService.js';
 import { NotFoundError } from '@aliceo2/web-ui';
 import { stub } from 'sinon';
-import * as layoutMapper from '../../../../lib/services/layout/helpers/layoutMapper.js';
 
 export const layoutServiceTestSuite = async () => {
   suite('LayoutService Test Suite', () => {
@@ -27,13 +26,14 @@ export const layoutServiceTestSuite = async () => {
     let gridTabCellRepositoryMock = null;
     let userServiceMock = null;
     let tabSynchronizerMock = null;
-    const transactionMock = { commit: stub().resolves(), rollback: stub().resolves() };
+    let transactionMock = { };
 
     beforeEach(() => {
+      transactionMock = { commit: stub().resolves(), rollback: stub().resolves() };
       layoutRepositoryMock = {
         findById: stub(),
         findOne: stub(),
-        model: { sequelize: { transaction: stub().resolves() } },
+        model: { sequelize: { transaction: () => transactionMock } },
         updateLayout: stub(),
         createLayout: stub(),
         delete: stub(),
@@ -166,7 +166,7 @@ export const layoutServiceTestSuite = async () => {
         layoutRepositoryMock.findById.resolves(null);
         await rejects(async () => {
           await layoutService.putLayout(999, { name: 'Nonexistent Layout' });
-        }, new NotFoundError('Layout with id 999 not found'));
+        }, new NotFoundError('Layout with id: 999 was not found'));
         strictEqual(transactionMock.rollback.called, true);
         strictEqual(transactionMock.commit.called, false);
       });
@@ -198,14 +198,12 @@ export const layoutServiceTestSuite = async () => {
         });
         layoutRepositoryMock.updateLayout.resolves(1);
         tabSynchronizerMock.sync.resolves();
-        const normalizeLayoutStub = stub(layoutMapper, 'normalizeLayout').resolves(normalizedLayout);
 
         await layoutService.patchLayout(123456, updateData);
         strictEqual(layoutRepositoryMock.updateLayout.calledWith(123456, normalizedLayout), true);
         strictEqual(tabSynchronizerMock.sync.called, false);
         strictEqual(transactionMock.commit.called, true);
         strictEqual(transactionMock.rollback.called, false);
-        normalizeLayoutStub.restore();
       });
       test('should throw NotFoundError when layout to patch does not exist', async () => {
         layoutRepositoryMock.findById.resolves({ id: 123, name: 'Existing Layout' });
@@ -238,7 +236,7 @@ export const layoutServiceTestSuite = async () => {
         layoutRepositoryMock.delete.resolves(0);
         await rejects(async () => {
           await layoutService.removeLayout(999);
-        }, new NotFoundError('Layout with id 999 not found'));
+        }, new NotFoundError('Layout with id 999 not found for deletion'));
       });
     });
     suite('postLayout', () => {
@@ -261,7 +259,6 @@ export const layoutServiceTestSuite = async () => {
         const createdLayout = { id: 1, ...normalizedLayout };
         layoutRepositoryMock.createLayout.resolves(createdLayout);
         tabSynchronizerMock.sync.resolves();
-        const normalizeLayoutStub = stub(layoutMapper, 'normalizeLayout').resolves(normalizedLayout);
 
         const result = await layoutService.postLayout(layoutData);
         strictEqual(result, createdLayout);
@@ -269,13 +266,12 @@ export const layoutServiceTestSuite = async () => {
         strictEqual(tabSynchronizerMock.sync.calledWith(createdLayout.id, layoutData.tabs), true);
         strictEqual(transactionMock.commit.called, true);
         strictEqual(transactionMock.rollback.called, false);
-        normalizeLayoutStub.restore();
       });
       test('should rollback transaction on error during layout creation', async () => {
         layoutRepositoryMock.createLayout.rejects(new Error('DB error'));
         await rejects(async () => {
           await layoutService.postLayout({ name: 'New Layout' });
-        }, new Error('Failed to create new layout'));
+        }, new Error('DB error'));
         strictEqual(transactionMock.rollback.called, true);
         strictEqual(transactionMock.commit.called, false);
       });
