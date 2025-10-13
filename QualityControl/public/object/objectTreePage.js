@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX } from '/js/src/index.js';
+import { h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX,
+  iconDataTransferDownload } from '/js/src/index.js';
 import { spinner } from '../common/spinner.js';
 import { draw } from './objectDraw.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
@@ -95,16 +96,21 @@ const drawPlot = (model, object) => {
     : `?page=objectView&objectName=${name}`;
   const info = object;
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
-    h('.resize-button.flex-row', [
-      h('.p1.text-left', { style: 'padding-bottom: 0;' }, h(
-        'a.btn',
+    h('.item-action-row.flex-row.g1.p1', [
+      h('a.btn#download-button', {
+        title: 'Download object',
+        target: '_blank',
+        href: model.objectViewModel.getDownloadQcdbObjectUrl(object.id),
+      }, iconDataTransferDownload()),
+      h(
+        'a.btn#fullscreen-button',
         {
           title: 'Open object plot in full screen',
           href,
           onclick: (e) => model.router.handleLinkEvent(e),
         },
         iconResizeBoth(),
-      )),
+      ),
     ]),
     h('', { style: 'height:77%;' }, draw(model, name, { stat: true })),
     h('.scroll-y', {}, [

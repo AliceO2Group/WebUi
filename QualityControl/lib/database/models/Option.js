@@ -27,11 +27,11 @@ export default (sequelize) => {
       autoIncrement: true,
     },
     name: {
-      type: STRING(255),
+      type: STRING(50),
       allowNull: false,
     },
     type: {
-      type: STRING(255),
+      type: STRING(50),
       allowNull: false,
     },
     created_at: {
