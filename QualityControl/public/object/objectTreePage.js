@@ -18,7 +18,7 @@ import { draw } from './objectDraw.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
 import virtualTable from './virtualTable.js';
 import { qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
-import objectDownloadButton from './objectDownloadButton.js';
+import downloadButton from '../common/downloadButton.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -97,7 +97,11 @@ const drawPlot = (model, object) => {
   const info = object;
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
     h('.item-action-row.flex-row.g1.p1', [
-      objectDownloadButton(model.objectViewModel, object.id),
+      downloadButton({
+        href: model.objectViewModel.getDownloadQcdbObjectUrl(object.id),
+        target: '_blank',
+        title: 'Download object',
+      }),
       h(
         'a.btn#fullscreen-button',
         {

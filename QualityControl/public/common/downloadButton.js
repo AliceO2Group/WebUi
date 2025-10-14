@@ -15,14 +15,10 @@
 import { h, iconDataTransferDownload } from '/js/src/index.js';
 
 /**
- * Download button for downloading an object from QCDB download service.
- * @param {ObjectViewModel} objectViewModel - which contains the download url.
- * @param {string} qcObjectId - QCDB object id.
+ * Download button.
+ * @param {object} options - vnode options.
  * @returns {vnode} - Download button element.
- * @import ObjectViewModel from '../pages/objectView/ObjectViewModel';
  */
-export default (objectViewModel, qcObjectId) => h('a.btn#download-button', {
-  title: 'Download object',
-  target: '_blank',
-  href: objectViewModel.getDownloadQcdbObjectUrl(qcObjectId),
+export default (options = {}) => h('a.btn#download-button', {
+  ...options,
 }, iconDataTransferDownload());
