@@ -37,8 +37,8 @@ import {environmentEventsPanel} from '../../../common/events/environmentEventsPa
  * @param {Model} model - the root model of the application
  * @param {EnvironmentInfo} environment - the environment to display
  */
-export const environmentNavigationTabs = (model, item) => {
-  const { hardware: { flp, qc, epn, trg } } = item;
+export const environmentNavigationTabs = (model, item = {}) => {
+  const { hardware: { flp, qc, epn, trg } = {} } = item;
   const panels = {
     general: {
       name: 'General',
@@ -105,7 +105,7 @@ export const environmentNavigationTabs = (model, item) => {
  */
 const environmentGeneralInfoContent = (environmentModel, environment) => {
   const {currentTransition = '-', userVars = {}, createdWhen, rootRole, hardware = {epn: {}}} = environment;
-  const {epn: {info}} = hardware;
+  const {epn: {info = {}} = {}} = hardware;
   const {state: odcState, styleClass: odcStyle} = parseOdcStatusPerEnv(environment);
 
   return miniCard(
