@@ -66,7 +66,9 @@ const hardwareComponentsTableHeaderRow = (hardware = {}) => h('tr', [
  * @param {Boolean} shouldDisplaySorAvailability - flag to display the SOR availability
  * @return {vnode} - component with an HTML table row
  */
-const detectorsTableHeaderRow = ({flp: {detectorCounters = {}} = {}} = {}, availability, shouldDisplaySorAvailability) =>
+const detectorsTableHeaderRow = (
+  { flp: { detectorCounters = {} } = {} } = {}, availability, shouldDisplaySorAvailability
+) =>
   h('tr', [
     h('th', 'States'),
     Object.keys(detectorCounters).map((detector) => h('th.text-center', [

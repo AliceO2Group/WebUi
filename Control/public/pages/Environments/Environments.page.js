@@ -190,8 +190,12 @@ const environmentsTable = (environments, model) => {
           ]),
           h('td', {style: 'text-align: center;'}, userVars?.run_type ?? '-'),
           h('td', {style: 'text-align: center;'}, userVars && parseObject(item.createdWhen, 'createdWhen')),
-          h('td', {style: 'text-align: center;'}, userVars && parseObject(userVars['run_start_time_ms'], 'run_start_time_ms')),
-          h('td', {style: 'text-align: center;'}, userVars && parseObject(userVars['run_end_time_ms'], 'run_end_time_ms')),
+          h('td', { style: 'text-align: center;' },
+            userVars && parseObject(userVars['run_start_time_ms'], 'run_start_time_ms')
+          ),
+          h('td', { style: 'text-align: center;' },
+            userVars && parseObject(userVars['run_end_time_ms'], 'run_end_time_ms')
+          ),
           h('td', {style: 'text-align: center;'}, item.numberOfFlps ? item.numberOfFlps : '-'),
           h('td', {style: 'text-align: center;'}, userVars && parseObject(userVars, 'odc_n_epns')),
           h('td', {style: 'text-align: center;'}, userVars && parseObject(userVars, 'dcs_enabled')),
