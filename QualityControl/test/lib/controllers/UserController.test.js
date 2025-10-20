@@ -18,16 +18,16 @@ import sinon from 'sinon';
 import { ok } from 'node:assert';
 
 export const userControllerTestSuite = async () => {
-  let userRepositoryMock = null;
+  let userServiceMock = null;
   let userController = null;
   let reqMock = null;
   let resMock = null;
 
   beforeEach(() => {
-    userRepositoryMock = {
-      createUser: sinon.stub().resolves(),
+    userServiceMock = {
+      saveUser: sinon.stub().resolves(),
     };
-    userController = new UserController(userRepositoryMock);
+    userController = new UserController(userServiceMock);
     reqMock = {
       session: {
         personid: 123,
@@ -49,9 +49,9 @@ export const userControllerTestSuite = async () => {
     test('should add a user successfully', async () => {
       await userController.addUserHandler(reqMock, resMock);
 
-      ok(userRepositoryMock.createUser.calledOnce);
-      ok(userRepositoryMock.createUser.calledWith({
-        id: 123,
+      ok(userServiceMock.saveUser.calledOnce);
+      ok(userServiceMock.saveUser.calledWith({
+        personid: 123,
         name: 'Test User',
         username: 'testuser',
       }));
@@ -61,7 +61,7 @@ export const userControllerTestSuite = async () => {
 
     test('should handle errors during user creation', async () => {
       const error = new Error('User creation failed');
-      userRepositoryMock.createUser.rejects(error);
+      userServiceMock.saveUser.rejects(error);
 
       await userController.addUserHandler(reqMock, resMock);
 
@@ -77,7 +77,7 @@ export const userControllerTestSuite = async () => {
 
       await userController.addUserHandler(reqMock, resMock);
 
-      ok(userRepositoryMock.createUser.notCalled);
+      ok(userServiceMock.saveUser.notCalled);
       ok(resMock.status.calledWith(502));
       ok(resMock.json.calledWith({
         ok: false,
@@ -90,7 +90,7 @@ export const userControllerTestSuite = async () => {
 
       await userController.addUserHandler(reqMock, resMock);
 
-      ok(userRepositoryMock.createUser.notCalled);
+      ok(userServiceMock.saveUser.notCalled);
       ok(resMock.status.calledWith(502));
       ok(resMock.json.calledWith({
         ok: false,
@@ -103,7 +103,7 @@ export const userControllerTestSuite = async () => {
 
       await userController.addUserHandler(reqMock, resMock);
 
-      ok(userRepositoryMock.createUser.notCalled);
+      ok(userServiceMock.saveUser.notCalled);
       ok(resMock.status.calledWith(502));
       ok(resMock.json.calledWith({
         ok: false,
@@ -116,7 +116,7 @@ export const userControllerTestSuite = async () => {
 
       await userController.addUserHandler(reqMock, resMock);
 
-      ok(userRepositoryMock.createUser.notCalled);
+      ok(userServiceMock.saveUser.notCalled);
       ok(resMock.status.calledWith(502));
       ok(resMock.json.calledWith({
         ok: false,
