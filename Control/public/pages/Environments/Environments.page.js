@@ -159,43 +159,48 @@ const environmentsTable = (environments, model) => {
     ]),
     h('tbody', [
       environments.map((item) => {
-        const {state: odcState, styleClass: odcStyle} = parseOdcStatusPerEnv(item);
+        const { state: odcState, styleClass: odcStyle } = parseOdcStatusPerEnv(item);
+        const { userVars = {}, state = EnvironmentState.UNKNOWN, id, includedDetectors = []} = item;
         return h('tr', {
-          class: isGlobalRun(item?.userVars ?? {}) ? 'bg-global-run' : ''
+          class: isGlobalRun(userVars ?? {}) ? 'bg-global-run' : ''
         }, [
           runColumn(item, model),
           h('td', {
-            class: (item.state === EnvironmentState.RUNNING ?
+            class: (state === EnvironmentState.RUNNING ?
               'success'
-              : (item.state === EnvironmentState.CONFIGURED
+              : (state === EnvironmentState.CONFIGURED
                 ? 'primary'
-                : (item.state === EnvironmentState.ERROR ? 'danger' : '')
+                : (state === EnvironmentState.ERROR ? 'danger' : '')
               )
             ),
             style: 'font-weight: bold; text-align: center;'
-          }, item.state
+          }, state
           ),
           h('td', {style: 'text-align: center;'},
             h('a', {
-              href: `?page=environment&id=${item.id}`,
+              href: `?page=environment&id=${id}`,
               onclick: (e) => model.router.handleLinkEvent(e),
-            }, item.id
+            }, id
             )
           ),
           h('td', {style: 'text-align: center;'}, [
-            item.includedDetectors && item.includedDetectors.length > 0 ?
-              item.includedDetectors.sort().map((detector) => `${detector} `)
+            includedDetectors.length > 0 ?
+              includedDetectors.sort().map((detector) => `${detector} `)
               : '-'
           ]),
-          h('td', {style: 'text-align: center;'}, item.userVars.run_type ? item.userVars.run_type : '-'),
-          h('td', {style: 'text-align: center;'}, parseObject(item.createdWhen, 'createdWhen')),
-          h('td', {style: 'text-align: center;'}, parseObject(item.userVars['run_start_time_ms'], 'run_start_time_ms')),
-          h('td', {style: 'text-align: center;'}, parseObject(item.userVars['run_end_time_ms'], 'run_end_time_ms')),
+          h('td', {style: 'text-align: center;'}, userVars?.run_type ?? '-'),
+          h('td', {style: 'text-align: center;'}, userVars && parseObject(item.createdWhen, 'createdWhen')),
+          h('td', { style: 'text-align: center;' },
+            userVars && parseObject(userVars['run_start_time_ms'], 'run_start_time_ms')
+          ),
+          h('td', { style: 'text-align: center;' },
+            userVars && parseObject(userVars['run_end_time_ms'], 'run_end_time_ms')
+          ),
           h('td', {style: 'text-align: center;'}, item.numberOfFlps ? item.numberOfFlps : '-'),
-          h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'odc_n_epns')),
-          h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'dcs_enabled')),
-          h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'trg_enabled')),
-          h('td', {style: 'text-align: center;'}, parseObject(item.userVars, 'ctp_readout_enabled')),
+          h('td', {style: 'text-align: center;'}, userVars && parseObject(userVars, 'odc_n_epns')),
+          h('td', {style: 'text-align: center;'}, userVars && parseObject(userVars, 'dcs_enabled')),
+          h('td', {style: 'text-align: center;'}, userVars && parseObject(userVars, 'trg_enabled')),
+          h('td', {style: 'text-align: center;'}, userVars && parseObject(userVars, 'ctp_readout_enabled')),
           h('td', {style: 'text-align: center;', class: odcStyle}, odcState),
           h('td', {style: 'text-align: center;'}, informationRedirectActionPanel(item, true))
         ]);
