@@ -14,6 +14,9 @@
 
 import { LogManager, NotFoundError } from '@aliceo2/web-ui';
 import { normalizeLayout } from './helpers/layoutMapper.js';
+import { TabSynchronizer } from '../../services/layout/helpers/tabSynchronizer.js';
+import { GridTabCellSynchronizer } from './helpers/gridTabCellSynchronizer.js';
+import { ChartOptionsSynchronizer } from './helpers/chartOptionsSynchronizer.js';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/layout-svc`;
 
@@ -31,21 +34,42 @@ export class LayoutService {
   /**
    * Creates an instance of the LayoutService class
    * @param {LayoutRepository} layoutRepository Layout repository instance
+   * @param tabRepository
    * @param {GridTabCellRepository} gridTabCellRepository Grid tab cell repository instance
    * @param {UserService} userService User service instance
    * @param {TabSynchronizer} tabSynchronizer Tab synchronizer instance
+   * @param chartRepository
+   * @param chartOptionRepository
+   * @param optionRepository
    */
   constructor(
     layoutRepository,
-    gridTabCellRepository,
     userService,
-    tabSynchronizer,
+    tabRepository,
+    gridTabCellRepository,
+    chartRepository,
+    chartOptionRepository,
+    optionRepository,
   ) {
     this._logger = LogManager.getLogger(LOG_FACILITY);
     this._layoutRepository = layoutRepository;
     this._gridTabCellRepository = gridTabCellRepository;
     this._userService = userService;
-    this._tabSynchronizer = tabSynchronizer;
+
+    // Synchronizers
+    this._chartOptionsSynchronizer = new ChartOptionsSynchronizer(
+      chartOptionRepository,
+      optionRepository,
+    );
+    this._gridTabCellSynchronizer = new GridTabCellSynchronizer(
+      gridTabCellRepository,
+      chartRepository,
+      this._chartOptionsSynchronizer,
+    );
+    this._tabSynchronizer = new TabSynchronizer(
+      tabRepository,
+      this._gridTabCellSynchronizer,
+    );
   }
 
   /**
