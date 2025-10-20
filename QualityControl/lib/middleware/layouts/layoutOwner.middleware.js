@@ -12,7 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-import { NotFoundError, UnauthorizedAccessError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import {
+  InvalidInputError,
+  NotFoundError,
+  UnauthorizedAccessError,
+  updateAndSendExpressResponseFromNativeError,
+} from '@aliceo2/web-ui';
+import { UserDto } from '../../dtos/LayoutDto.js';
 
 /**
  * @typedef {import('../../services/layout/LayoutService').LayoutService} LayoutService
@@ -34,19 +40,32 @@ export const layoutOwnerMiddleware = (layoutService) =>
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { personid = '', name = '' } = req.session ?? {};
-      const { owner } = await layoutService.getLayoutById(id) ?? {};
-      const { id: owner_id, name: owner_name } = owner ?? {};
-      if (owner_id === '' || owner_name === '') {
+
+      if (!req.session) {
+        throw new NotFoundError('Session not found');
+      }
+
+      const { personid, name } = req.session;
+      try {
+        await UserDto.validateAsync({ id: personid, name });
+      } catch (error) {
+        if (error.isJoi) {
+          throw new InvalidInputError('User could not be validated');
+        }
+      }
+
+      const layout = await layoutService.getLayoutById(id);
+      const owner = layout?.owner;
+      if (owner?.id == null || owner?.name == null || owner.id === '' || owner.name === '') {
         throw new NotFoundError('Unable to retrieve layout owner information');
-      } else if (personid === '' || name === '') {
-        throw new NotFoundError('Unable to retrieve session information');
-      } else if (owner_name !== name || owner_id !== personid) {
+      }
+
+      if (owner.name !== name || owner.id !== personid) {
         throw new UnauthorizedAccessError('Only the owner of the layout can delete it');
       }
+
       next();
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);
-      return;
     }
   };
