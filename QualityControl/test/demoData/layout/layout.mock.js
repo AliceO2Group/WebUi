@@ -269,3 +269,107 @@ export const LAYOUT_MOCK_6 = {
   ],
   collaborators: [],
 };
+
+// Mocks for LayoutController tests
+export const LAYOUT_CONTROLLER_MOCK_1 = {
+  id: 10001,
+  name: 'Test Layout 1',
+  owner: { id: 123, name: 'Owner 1' },
+  tabs: [{ id: 1, name: 'Tab 1', gridTabCells: [] }],
+  is_official: true,
+};
+
+export const LAYOUT_CONTROLLER_MOCK_2 = {
+  id: 10002,
+  name: 'Test Layout 2',
+  owner: { id: 123, name: 'Owner 1' },
+  tabs: [{ id: 1, name: 'Tab 1', gridTabCells: [] }],
+  is_official: true,
+};
+
+//Mocks for mapLayoutToAPI tests
+export const RAW_LAYOUT_MOCK = {
+  id: 10003,
+  name: 'Raw Layout',
+  owner: { id: 456, name: 'Owner 2' },
+  description: 'A raw layout for testing',
+  display_timestamp: true,
+  auto_tab_change_interval: 30,
+  tabs: [
+    {
+      id: 1,
+      name: 'Tab 1',
+      column_count: 3,
+      gridTabCells: [
+        {
+          row: 0,
+          col: 0,
+          row_span: 1,
+          col_span: 1,
+          chart: {
+            id: 2001,
+            object_name: 'Chart 1',
+            chartOptions: [{ option: { name: 'Option A' } }, { option: { name: 'Option B' } }],
+            ignore_defaults: false,
+          },
+        },
+        {
+          row: 0,
+          col: 1,
+          row_span: 2,
+          col_span: 2,
+          chart: {
+            id: 2002,
+            object_name: 'Chart 2',
+            chartOptions: [{ option: { name: 'Option C' } }],
+            ignore_defaults: true,
+          },
+        },
+      ],
+    },
+  ],
+  is_official: false,
+};
+
+export const API_ADAPTED_LAYOUT_MOCK = {
+  id: 10003,
+  name: 'Raw Layout',
+  owner_id: 456,
+  owner_name: 'Owner 2',
+  description: 'A raw layout for testing',
+  displayTimestamp: true,
+  autoTabChange: 30,
+  tabs: [
+    {
+      id: 1,
+      name: 'Tab 1',
+      columns: 3,
+      objects: [
+        {
+          id: 2001,
+          x: 0,
+          y: 0,
+          h: 1,
+          w: 1,
+          name: 'Chart 1',
+          options: ['Option A', 'Option B'],
+          autoSize: false,
+          ignoreDefaults: false,
+        },
+        {
+          id: 2002,
+          x: 1,
+          y: 0,
+          h: 2,
+          w: 2,
+          name: 'Chart 2',
+          options: ['Option C'],
+          autoSize: false,
+          ignoreDefaults: true,
+        },
+      ],
+    },
+  ],
+  isOfficial: false,
+  collaborators: [],
+};
