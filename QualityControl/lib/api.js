@@ -16,8 +16,6 @@ import { setupQcModel } from './QCModel.js';
 import { minimumRoleMiddleware } from './middleware/minimumRole.middleware.js';
 import { UserRole } from './../common/library/userRole.enum.js';
 import { layoutOwnerMiddleware } from './middleware/layouts/layoutOwner.middleware.js';
-import { layoutIdMiddleware } from './middleware/layouts/layoutId.middleware.js';
-import { layoutServiceMiddleware } from './middleware/layouts/layoutService.middleware.js';
 import { statusComponentMiddleware } from './middleware/status/statusComponent.middleware.js';
 import { runStatusFilterMiddleware } from './middleware/filters/runStatusFilter.middleware.js';
 import { runModeMiddleware } from './middleware/filters/runMode.middleware.js';
@@ -39,7 +37,6 @@ export const setup = async (http, ws, eventEmitter) => {
    *   statusController: import('./controllers/StatusController.js').StatusController,
    *   statusService: import('./services/statusService').StatusService,
    *   userController: import('./controllers/UserController.js').UserController,
-   *   jsonFileService: import('./services/JsonFileService.js').JsonFileService
    * }}
    */
   const {
@@ -48,8 +45,7 @@ export const setup = async (http, ws, eventEmitter) => {
     statusController,
     statusService,
     userController,
-    layoutRepository,
-    jsonFileService,
+    layoutService,
     filterController,
     objectGetByIdValidation,
     objectsGetValidation,
@@ -75,23 +71,17 @@ export const setup = async (http, ws, eventEmitter) => {
   http.post('/layout', layoutController.postLayoutHandler.bind(layoutController));
   http.put(
     '/layout/:id',
-    layoutServiceMiddleware(jsonFileService),
-    layoutIdMiddleware(layoutRepository),
-    layoutOwnerMiddleware(layoutRepository),
+    layoutOwnerMiddleware(layoutService),
     layoutController.putLayoutHandler.bind(layoutController),
   );
   http.patch(
     '/layout/:id',
-    layoutServiceMiddleware(jsonFileService),
-    layoutIdMiddleware(layoutRepository),
     minimumRoleMiddleware(UserRole.GLOBAL),
     layoutController.patchLayoutHandler.bind(layoutController),
   );
   http.delete(
     '/layout/:id',
-    layoutServiceMiddleware(jsonFileService),
-    layoutIdMiddleware(layoutRepository),
-    layoutOwnerMiddleware(layoutRepository),
+    layoutOwnerMiddleware(layoutService),
     layoutController.deleteLayoutHandler.bind(layoutController),
   );
 

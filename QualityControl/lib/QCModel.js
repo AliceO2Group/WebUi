@@ -23,7 +23,6 @@ import { Kafka, logLevel } from 'kafkajs';
 import { CcdbService } from './services/ccdb/CcdbService.js';
 import { IntervalsService } from './services/Intervals.service.js';
 import { StatusService } from './services/Status.service.js';
-import { JsonFileService } from './services/JsonFileService.js';
 import { QcObjectService } from './services/QcObject.service.js';
 import { FilterService } from './services/FilterService.js';
 import { BookkeepingService } from './services/BookkeepingService.js';
@@ -36,9 +35,6 @@ import { FilterController } from './controllers/FilterController.js';
 import { UserController } from './controllers/UserController.js';
 
 import { config } from './config/configProvider.js';
-import { LayoutRepository } from './repositories/LayoutRepository.js';
-import { UserRepository } from './repositories/UserRepository.js';
-import { ChartRepository } from './repositories/ChartRepository.js';
 import { initDatabase } from './database/index.js';
 import { SequelizeDatabase } from './database/SequelizeDatabase.js';
 import { objectGetByIdValidationMiddlewareFactory }
@@ -49,6 +45,9 @@ import { objectGetContentsValidationMiddlewareFactory }
 import { RunModeService } from './services/RunModeService.js';
 import { KafkaConfigDto } from './dtos/KafkaConfigurationDto.js';
 import { QcdbDownloadService } from './services/QcdbDownload.service.js';
+import { LayoutService } from './services/layout/LayoutService.js';
+import { setupRepositories } from './database/repositories/index.js';
+import { UserService } from './services/layout/UserService.js';
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/model-setup`;
 
 /**
@@ -63,10 +62,13 @@ export const setupQcModel = async (eventEmitter) => {
   const __dirname = dirname(__filename);
   const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
 
-  const jsonFileService = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
-  if (config.database) {
-    initDatabase(new SequelizeDatabase(config?.database || {}));
+  const databaseConfig = config.database || {};
+  if (!databaseConfig || Object.keys(databaseConfig).length === 0) {
+    logger.errorMessage('Database configuration is not provided. The application cannot be initialized');
+    return;
   }
+  const sequelizeDatabase = new SequelizeDatabase(databaseConfig);
+  initDatabase(sequelizeDatabase, { forceSeed: config?.database?.forceSeed, drop: config?.database?.drop });
 
   if (config?.kafka?.enabled) {
     try {
@@ -85,12 +87,29 @@ export const setupQcModel = async (eventEmitter) => {
     }
   }
 
-  const layoutRepository = new LayoutRepository(jsonFileService);
-  const userRepository = new UserRepository(jsonFileService);
-  const chartRepository = new ChartRepository(jsonFileService);
+  const {
+    layoutRepository,
+    gridTabCellRepository,
+    userRepository,
+    tabRepository,
+    chartRepository,
+    chartOptionRepository,
+    optionRepository,
+  } = setupRepositories(sequelizeDatabase);
 
-  const userController = new UserController(userRepository);
-  const layoutController = new LayoutController(layoutRepository);
+  const userService = new UserService(userRepository);
+  const layoutService = new LayoutService(
+    layoutRepository,
+    userService,
+    tabRepository,
+    gridTabCellRepository,
+    chartRepository,
+    chartOptionRepository,
+    optionRepository,
+  );
+
+  const userController = new UserController(userService);
+  const layoutController = new LayoutController(layoutService);
 
   const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
   const statusController = new StatusController(statusService);
@@ -100,7 +119,7 @@ export const setupQcModel = async (eventEmitter) => {
   const ccdbService = CcdbService.setup(config.ccdb);
   statusService.dataService = ccdbService;
 
-  const qcObjectService = new QcObjectService(ccdbService, chartRepository, { openFile, toJSON });
+  const qcObjectService = new QcObjectService(ccdbService, layoutService, { openFile, toJSON });
   qcObjectService.refreshCache();
 
   const intervalsService = new IntervalsService();
@@ -125,9 +144,8 @@ export const setupQcModel = async (eventEmitter) => {
     statusController,
     objectController,
     intervalsService,
+    layoutService,
     filterController,
-    layoutRepository,
-    jsonFileService,
     objectGetByIdValidation,
     objectsGetValidation,
     objectGetContentsValidation,
