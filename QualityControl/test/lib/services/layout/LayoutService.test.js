@@ -25,7 +25,10 @@ export const layoutServiceTestSuite = async () => {
     let layoutRepositoryMock = null;
     let gridTabCellRepositoryMock = null;
     let userServiceMock = null;
-    let tabSynchronizerMock = null;
+    let chartRepositoryMock = null;
+    let chartOptionsRepositoryMock = null;
+    let optionRepositoryMock = null;
+    let tabRepositoryMock = null;
     let transactionMock = { };
 
     beforeEach(() => {
@@ -39,16 +42,26 @@ export const layoutServiceTestSuite = async () => {
         delete: stub(),
       };
       userServiceMock = { getUsernameById: stub() };
-      tabSynchronizerMock = { sync: stub() };
       gridTabCellRepositoryMock = {
         findObjectByChartId: stub(),
       };
+      chartRepositoryMock = {};
+      chartOptionsRepositoryMock = {};
+      optionRepositoryMock = {};
+      tabRepositoryMock = {};
+
       layoutService = new LayoutService(
         layoutRepositoryMock,
-        gridTabCellRepositoryMock,
         userServiceMock,
-        tabSynchronizerMock,
+        tabRepositoryMock,
+        gridTabCellRepositoryMock,
+        chartRepositoryMock,
+        chartOptionsRepositoryMock,
+        optionRepositoryMock,
       );
+      layoutService._tabSynchronizer = {
+        sync: stub(),
+      };
     });
 
     suite('getLayoutById', () => {
@@ -154,11 +167,11 @@ export const layoutServiceTestSuite = async () => {
           tabs: [{ id: 1, name: 'Tab 1' }],
         });
         layoutRepositoryMock.updateLayout.resolves(1);
-        tabSynchronizerMock.sync.resolves();
+        layoutService._tabSynchronizer.sync.resolves();
         const result = await layoutService.putLayout(123456, updatedData);
         strictEqual(result, 123456);
         strictEqual(layoutRepositoryMock.updateLayout.calledWith(123456, normalizedLayout), true);
-        strictEqual(tabSynchronizerMock.sync.calledWith(123456, updatedData.tabs), true);
+        strictEqual(layoutService._tabSynchronizer.sync.calledWith(123456, updatedData.tabs), true);
         strictEqual(transactionMock.commit.called, true);
         strictEqual(transactionMock.rollback.called, false);
       });
@@ -197,11 +210,11 @@ export const layoutServiceTestSuite = async () => {
           tabs: [{ id: 1, name: 'Tab 1' }],
         });
         layoutRepositoryMock.updateLayout.resolves(1);
-        tabSynchronizerMock.sync.resolves();
+        layoutService._tabSynchronizer.sync.resolves();
 
         await layoutService.patchLayout(123456, updateData);
         strictEqual(layoutRepositoryMock.updateLayout.calledWith(123456, normalizedLayout), true);
-        strictEqual(tabSynchronizerMock.sync.called, false);
+        strictEqual(layoutService._tabSynchronizer.sync.called, false);
         strictEqual(transactionMock.commit.called, true);
         strictEqual(transactionMock.rollback.called, false);
       });
@@ -258,12 +271,12 @@ export const layoutServiceTestSuite = async () => {
         };
         const createdLayout = { id: 1, ...normalizedLayout };
         layoutRepositoryMock.createLayout.resolves(createdLayout);
-        tabSynchronizerMock.sync.resolves();
+        layoutService._tabSynchronizer.sync.resolves();
 
         const result = await layoutService.postLayout(layoutData);
         strictEqual(result, createdLayout);
         strictEqual(layoutRepositoryMock.createLayout.calledWith(normalizedLayout), true);
-        strictEqual(tabSynchronizerMock.sync.calledWith(createdLayout.id, layoutData.tabs), true);
+        strictEqual(layoutService._tabSynchronizer.sync.calledWith(createdLayout.id, layoutData.tabs), true);
         strictEqual(transactionMock.commit.called, true);
         strictEqual(transactionMock.rollback.called, false);
       });
