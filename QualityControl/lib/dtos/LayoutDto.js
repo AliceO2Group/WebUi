@@ -44,7 +44,7 @@ function parseAndValidateFields(value, helpers) {
 }
 
 const ObjectDto = Joi.object({
-  id: Joi.string().required(),
+  id: Joi.number().required(),
   name: Joi.string().required(),
   x: Joi.number().min(0).default(0),
   y: Joi.number().min(0).default(0),
@@ -56,19 +56,19 @@ const ObjectDto = Joi.object({
 });
 
 const TabsDto = Joi.object({
-  id: Joi.string().required(),
+  id: Joi.number().required(),
   name: Joi.string().min(1).max(50).required(),
   columns: Joi.number().min(1).max(5).default(2),
   objects: Joi.array().max(30).items(ObjectDto).default([]),
 });
 
-const UserDto = Joi.object({
+export const UserDto = Joi.object({
   id: Joi.number().min(0).required(),
   name: Joi.string().required(),
 });
 
 export const LayoutDto = Joi.object({
-  id: Joi.string().required(),
+  id: Joi.number().required(),
   name: Joi.string().min(3).max(40).required(),
   tabs: Joi.array().min(1).max(45).items(TabsDto).required(),
   owner_id: Joi.number().min(0).required(),
