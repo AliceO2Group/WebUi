@@ -123,7 +123,7 @@ const deploymentsTable = (deployments, model) => {
             includedDetectors?.length > 0 ? includedDetectors.sort().join(' ') : '-'
           ),
           h('td', { style: 'text-align: center;' }, getUserFromUserVars(userVars)?.name || '-'),
-          h('td', { style: 'text-align: center;' }, parseObject(createdWhen, 'createdWhen')),
+          h('td', { style: 'text-align: center;' }, parseObject({ createdWhen }, 'createdWhen')),
           h('td.f6', { style: 'text-align: center;' }, deploymentError ?? '-'),
           h(
             'td',
@@ -189,12 +189,12 @@ const environmentsTable = (environments, model) => {
               : '-'
           ]),
           h('td', {style: 'text-align: center;'}, userVars?.run_type ?? '-'),
-          h('td', {style: 'text-align: center;'}, userVars && parseObject(item.createdWhen, 'createdWhen')),
+          h('td', {style: 'text-align: center;'}, userVars && parseObject(item, 'createdWhen')),
           h('td', { style: 'text-align: center;' },
-            userVars && parseObject(userVars['run_start_time_ms'], 'run_start_time_ms')
+            userVars && parseObject(userVars, 'run_start_time_ms')
           ),
           h('td', { style: 'text-align: center;' },
-            userVars && parseObject(userVars['run_end_time_ms'], 'run_end_time_ms')
+            userVars && parseObject(userVars, 'run_end_time_ms')
           ),
           h('td', {style: 'text-align: center;'}, item.numberOfFlps ? item.numberOfFlps : '-'),
           h('td', {style: 'text-align: center;'}, userVars && parseObject(userVars, 'odc_n_epns')),
