@@ -23,12 +23,12 @@ import {EnvironmentState} from '../../../common/enums/EnvironmentState.enum.js';
  * @returns {vnode}
  */
 export const environmentStateSummary = (environment) => {
-  const {currentRunNumber, state = EnvironmentState.UNKNOWN, id, createdWhen, userVars} = environment;
-  let transitionTime = parseObject(createdWhen, 'createdWhen');
+  const { currentRunNumber, state = EnvironmentState.UNKNOWN, id, createdWhen, userVars } = environment;
+  let transitionTime = parseObject({ createdWhen }, 'createdWhen');
 
   let transitionLabel = 'Created At: ';
   if (state === EnvironmentState.RUNNING) {
-    transitionTime = parseObject(userVars['run_start_time_ms'], 'run_start_time_ms');
+    transitionTime = parseObject(userVars, 'run_start_time_ms');
     transitionLabel = 'Running since: ';
   }
 
