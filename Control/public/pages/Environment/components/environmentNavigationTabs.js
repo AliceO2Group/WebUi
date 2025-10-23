@@ -114,9 +114,9 @@ const environmentGeneralInfoContent = (environmentModel, environment) => {
       h('.flex-column.', [
         rowForCard('Global:', isGlobalRun(userVars) ? 'ON' : '-'),
         rowForCard('Transitioning:', currentTransition),
-        rowForCard('ENV Created:', parseObject(createdWhen, 'createdWhen')),
-        rowForCard('RUN Started:', parseObject(userVars['run_start_time_ms'], 'run_start_time_ms')),
-        rowForCard('RUN Ended:', parseObject(userVars['run_end_time_ms'], 'run_end_time_ms')),
+        rowForCard('ENV Created:', parseObject({ createdWhen }, 'createdWhen')),
+        rowForCard('RUN Started:', parseObject(userVars, 'run_start_time_ms')),
+        rowForCard('RUN Ended:', parseObject(userVars, 'run_end_time_ms')),
         rowForCard('Run Type:', userVars.run_type),
         rowForCard('Template:', rootRole),
         rowForCard('DCS:', parseObject(userVars, 'dcs_enabled')),

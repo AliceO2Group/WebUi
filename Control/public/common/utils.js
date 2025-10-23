@@ -38,8 +38,8 @@ const parseObject = (item = {}, key) => {
     case 'createdWhen':
     case 'run_start_time_ms':
     case 'run_end_time_ms':
-      return item
-        ? new Date(Number.parseInt(item)).toLocaleString()
+      return item[key]
+        ? new Date(Number.parseInt(item[key])).toLocaleString()
         : '-';
     case 'odc_n_epns':
       return (item['epn_enabled'] && item['epn_enabled'] == 'true') ? item['odc_n_epns'] : 'OFF';
