@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { objectId, clone } from '../common/utils.js';
+import { clone } from '../common/utils.js';
 
 /**
  * Class with a layout type
