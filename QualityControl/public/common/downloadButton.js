@@ -15,9 +15,9 @@
 import { h, iconDataTransferDownload } from '/js/src/index.js';
 
 /**
- * @typedef {object} downloadButtonOptions
+ * @typedef {object} DownloadButtonOptions
  * @property {string} id - html id property.
- * @property {string} class - html class property.
+ * @property {string} class - html class property, multiple classes can be passed as a single space seperated string.
  * @property {string} title - title shown on hover.
  * @property {string} target - target property, defaults to '_blank'.
  * @property {string} href - href property.
@@ -25,12 +25,12 @@ import { h, iconDataTransferDownload } from '/js/src/index.js';
 
 /**
  * Download button.
- * @param {downloadButtonOptions} options - vnode options.
+ * @param {DownloadButtonOptions} options - vnode options.
  * @param {() => void} onclick - onClick callback.
  * @returns {vnode} - Download button element.
  */
 export function downloadButton(options = {}, onclick) {
-  const mergedOptions = { target: '_blank', ...options };
+  const mergedOptions = { target: '_blank', class: 'download-button', ...options };
   return h('a.btn', {
     ...mergedOptions,
     onclick,

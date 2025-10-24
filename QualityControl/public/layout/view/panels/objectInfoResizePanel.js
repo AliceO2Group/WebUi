@@ -54,7 +54,7 @@ export const objectInfoResizePanel = (model, tabObject) => {
     downloadButton({
       href: model.objectViewModel.getDownloadQcdbObjectUrl(objectRemoteData.payload.id),
       title: 'Download object',
-      class: 'download-button',
+      id: `download-button-${objectRemoteData.payload.id}`,
     }),
     h('a.btn', {
       title: 'Open object plot in full screen',

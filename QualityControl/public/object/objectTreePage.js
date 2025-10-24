@@ -100,7 +100,6 @@ const drawPlot = (model, object) => {
       downloadButton({
         href: model.objectViewModel.getDownloadQcdbObjectUrl(object.id),
         title: 'Download object',
-        class: 'download-button',
       }),
       h(
         'a.btn#fullscreen-button',

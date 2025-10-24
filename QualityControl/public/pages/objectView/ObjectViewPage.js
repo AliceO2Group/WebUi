@@ -51,7 +51,6 @@ const objectPlotAndInfo = (objectViewModel) =>
           downloadButton({
             href: model.objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
             title: 'Download object',
-            class: 'download-button',
           }),
           h(
             '.w-40.p2.f6',
