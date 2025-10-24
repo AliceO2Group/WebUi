@@ -373,3 +373,188 @@ export const API_ADAPTED_LAYOUT_MOCK = {
   isOfficial: false,
   collaborators: [],
 };
+export const MOCK_GET_LAYOUTS_ALL = [
+  {
+    id: 1,
+    name: 'test',
+    owner_id: 0,
+    owner_name: 'Anonymous',
+    description: '',
+    displayTimestamp: false,
+    autoTabChange: 0,
+    tabs: [
+      {
+        id: 1,
+        name: 'main',
+        columns: 2,
+        objects: [
+          {
+            id: 1,
+            x: 0,
+            y: 0,
+            h: 1,
+            w: 1,
+            name: 'qc/TPC/QO/CheckOfTrack_Trending',
+            options: [
+              'lego',
+              'colz',
+            ],
+            autoSize: false,
+            ignoreDefaults: false,
+          },
+          {
+            id: 2,
+            x: 1,
+            y: 0,
+            h: 1,
+            w: 1,
+            name: 'qc/MCH/QO/DataDecodingCheck',
+            options: ['lego'],
+            autoSize: false,
+            ignoreDefaults: false,
+          },
+          {
+            id: 3,
+            x: 2,
+            y: 0,
+            h: 1,
+            w: 1,
+            name: 'qc/MCH/QO/MFTRefCheck',
+            options: ['lcolz'],
+            autoSize: false,
+            ignoreDefaults: false,
+          },
+          {
+            id: 4,
+            x: 0,
+            y: 1,
+            h: 1,
+            w: 1,
+            name: 'qc/MCH/MO/Pedestals/ST5/DE1006/BadChannels_XY_B_1006',
+            options: ['text'],
+            autoSize: false,
+            ignoreDefaults: false,
+          },
+        ],
+      },
+      {
+        id: 2,
+        name: 'test-tab',
+        columns: 3,
+        objects: [
+          {
+            id: 5,
+            x: 0,
+            y: 0,
+            h: 1,
+            w: 1,
+            name: 'qc/MCH/MO/Pedestals/BadChannelsPerDE',
+            options: [
+              'logx',
+              'logy',
+            ],
+            autoSize: false,
+            ignoreDefaults: false,
+          },
+        ],
+      },
+    ],
+    isOfficial: false,
+    collaborators: [],
+  },
+  {
+    id: 2,
+    name: 'a-test',
+    owner_id: 0,
+    owner_name: 'Anonymous',
+    description: '',
+    displayTimestamp: false,
+    autoTabChange: 0,
+    tabs: [
+      {
+        id: 3,
+        name: 'main',
+        columns: 2,
+        objects: [
+          {
+            id: 6,
+            x: 0,
+            y: 0,
+            h: 1,
+            w: 1,
+            name: 'qc/test/object/1',
+            options: ['logz'],
+            autoSize: false,
+            ignoreDefaults: false,
+          },
+        ],
+      },
+      {
+        id: 4,
+        name: 'a',
+        columns: 2,
+        objects: [],
+      },
+    ],
+    isOfficial: false,
+    collaborators: [],
+  },
+  {
+    id: 3,
+    name: 'rundefinition_pdpBeamType',
+    owner_id: 99,
+    owner_name: 'Some other owner',
+    description: '',
+    displayTimestamp: false,
+    autoTabChange: 0,
+    tabs: [
+      {
+        id: 5,
+        name: 'main',
+        columns: 2,
+        objects: [
+          {
+            id: 7,
+            x: 0,
+            y: 0,
+            h: 1,
+            w: 1,
+            name: 'qc/test/object/1',
+            options: [],
+            autoSize: false,
+            ignoreDefaults: false,
+          },
+          {
+            id: 8,
+            x: 0,
+            y: 0,
+            h: 1,
+            w: 1,
+            name: 'qc/test/object/1',
+            options: [],
+            autoSize: false,
+            ignoreDefaults: false,
+          },
+        ],
+      },
+      {
+        id: 6,
+        name: 'a',
+        columns: 2,
+        objects: [],
+      },
+    ],
+    isOfficial: false,
+    collaborators: [],
+  },
+];
+export const MOCK_GET_LAYOUTS_BY_OWNER_ID = (ownerId) =>
+  MOCK_GET_LAYOUTS_ALL.filter((layout) => layout.owner_id === ownerId);
+
+export const MOCK_GET_ONLY_NAME_AND_OWNER_ID = MOCK_GET_LAYOUTS_ALL.map((layout) => ({
+  name: layout.name,
+  owner_id: layout.owner_id,
+}));
+
+export const [MOCK_GET_LAYOUT_1, MOCK_GET_LAYOUT_A_TEST, MOCK_GET_LAYOUT_RUN_DEF] = MOCK_GET_LAYOUTS_ALL;
+export const MOCK_UPDATED_LAYOUT = { ...MOCK_GET_LAYOUTS_ALL[0], name: 'Updated Layout Name' };
