@@ -49,6 +49,8 @@ export const config = {
     timezone: '+00:00',
     logging: false,
     retryThrottle: 5000,
+     //forceSeed: true, --- ONLY IN DEVELOPMENT ---
+    //drop: true, --- ONLY IN DEVELOPMENT ---
   },
   bookkeeping: {
     url: 'http://localhost:4000', // local insance

@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { objectId, clone } from '../common/utils.js';
+import { clone } from '../common/utils.js';
 
 /**
  * Class with a layout type
@@ -31,29 +31,6 @@ export class LayoutClass {
     this.tabs = [];
     this.shouldDisplayInfo = false; // DisplayTimestamp
     this.autoTabChange = 0;
-  }
-
-  /**
-   * Given a layout skeleton, parse its structure and add ids to the layout, tabs and objects
-   * Return a format expected to be accepted by the API - create layout route
-   * @param {JSON} skeleton - layout as given by the user
-   * @returns {JSON} newly validated layout
-   */
-  static fromSkeleton(skeleton) {
-    const layout = clone(skeleton);
-    layout.id = objectId();
-    if (layout.tabs) {
-      layout.tabs.map((tab) => {
-        tab.id = objectId();
-        if (tab.objects) {
-          tab.objects.map((object) => {
-            object.id = objectId();
-          });
-        }
-        return tab;
-      });
-    }
-    return layout;
   }
 
   /**

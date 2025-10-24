@@ -56,4 +56,18 @@ export const config = {
     },
     brokers: ['localhost:9092'],
   },
+
+  database: {
+    host: 'database',
+    port: '3306',
+    username: 'cern',
+    password: 'cern',
+    database: 'qcg',
+    charset: 'utf8mb4',
+    collate: 'utf8mb4_unicode_ci',
+    timezone: 'Etc/GMT+2',
+    logging: false,
+    maxRetries: 5,
+    retryThrottle: 5000,
+  },
 };

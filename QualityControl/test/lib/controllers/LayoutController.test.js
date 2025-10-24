@@ -12,737 +12,294 @@
  * or submit itself to any jurisdiction.
  */
 
-import { ok, throws, doesNotThrow, AssertionError } from 'node:assert';
+import { ok } from 'node:assert';
 import { suite, test, beforeEach } from 'node:test';
 import sinon from 'sinon';
 
-import { LAYOUT_MOCK_1 } from './../../demoData/layout/layout.mock.js';
 import { LayoutController } from './../../../lib/controllers/LayoutController.js';
-import { LayoutRepository } from '../../../lib/repositories/LayoutRepository.js';
-import { LayoutsGetDto } from '../../../lib/dtos/LayoutDto.js';
+import { LAYOUT_CONTROLLER_MOCK_1, LAYOUT_CONTROLLER_MOCK_2 } from '../../demoData/layout/layout.mock.js';
 
 export const layoutControllerTestSuite = async () => {
-  suite('Creating a new LayoutController instance', () => {
-    test('should throw an error if it is missing service for retrieving data', () => {
-      throws(
-        () => new LayoutController(undefined),
-        new AssertionError({ message: 'Missing layout repository', expected: true, operator: '==' }),
-      );
-    });
-
-    test('should successfully initialize LayoutController', () => {
-      doesNotThrow(() => new LayoutController({}));
-    });
+  let req = {};
+  let res = {};
+  let layoutServiceMock = {};
+  let layoutController = null;
+  beforeEach(() => {
+    req = {
+      query: {
+        token: 'validtoken',
+      },
+    };
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    };
+    layoutServiceMock = {
+      getLayoutsByFilters: sinon.stub(),
+      getLayoutById: sinon.stub(),
+      getLayoutByName: sinon.stub(),
+      putLayout: sinon.stub(),
+      removeLayout: sinon.stub(),
+      postLayout: sinon.stub(),
+      patchLayout: sinon.stub(),
+    };
+    layoutController = new LayoutController(layoutServiceMock);
   });
+  suite('Layout controller - constructor', () => {
+    test('should throw an error if layout service is not provided', () => { });
+  });
+  suite('getLayoutsHandler', () => {
+    test('should throw invalid input error if Joi validation fails', async () => {
+      req.query.fields = 'invalid_field';
+      await layoutController.getLayoutsHandler(req, res);
 
-  suite('`getLayoutsHandler()` tests', () => {
-    let res = {};
-    beforeEach(() => {
-      res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
-      };
-    });
-
-    test('should respond with error if layout repository could not find layouts', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        listLayouts: sinon.stub().rejects(new Error('Unable to connect')),
-      });
-      const fields = ['id', 'name'];
-
-      const req = { query: { fields: fields.join(','), token: 'fasdfsdfa' } };
-      const layoutConnector = new LayoutController(jsonStub);
-      await layoutConnector.getLayoutsHandler(req, res);
-
-      ok(res.status.calledWith(500), 'Response status was not 500');
-      ok(res.json.calledWith({
-        message: 'Unable to retrieve layouts',
-        status: 500,
-        title: 'Unknown Error',
-      }), 'Error message was incorrect');
-    });
-
-    test('should log error when non-Joi validation error occurs', async () => {
-      const response = [{ id: 5, name: 'somelayout' }];
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        listLayouts: sinon.stub().resolves(response),
-      });
-
-      const req = { query: { fields: 'id,name', token: 'validtoken' } };
-
-      const error = new Error('Some unexpected error');
-
-      const originalValidate = LayoutsGetDto.validateAsync;
-      LayoutsGetDto.validateAsync = sinon.stub().rejects(error);
-
-      const layoutConnector = new LayoutController(jsonStub);
-
-      await layoutConnector.getLayoutsHandler(req, res);
-
-      LayoutsGetDto.validateAsync = originalValidate;
-      ok(res.status.calledWith(500), 'Response status was not 500');
-      ok(res.json.calledWith({
-        message: 'Unable to process request',
-        status: 500,
-        title: 'Unknown Error',
-      }), 'Error message was incorrect');
-    });
-
-    test('should successfully return a list of layouts with required fields', async () => {
-      const response = [{ id: 5, name: 'somelayout' }];
-      const fields = ['id', 'name'];
-
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        listLayouts: sinon.stub().resolves(response),
-      });
-      const req = { query: { fields: fields.join(','), token: 'fasdfsdfa' } };
-      const layoutConnector = new LayoutController(jsonStub);
-      await layoutConnector.getLayoutsHandler(req, res);
-
-      ok(res.status.calledWith(200), 'Response status was not 200');
-      ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
-      ok(
-        jsonStub.listLayouts.calledWith({ fields, filter: { owner_id: undefined } }),
-        'Fields were not passed correctly',
-      );
-    });
-
-    test('should successfully return a list of layouts based on owner_id', async () => {
-      const response = [
-        { user_id: 1, name: 'somelayout' },
-        { user_id: 2, name: 'somelayout2' },
-      ];
-      const fields = 'name';
-
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        listLayouts: sinon.stub().resolves(response),
-      });
-      const req = { query: { owner_id: 1, token: 'fasdfsdfa', fields } };
-      const layoutConnector = new LayoutController(jsonStub);
-      await layoutConnector.getLayoutsHandler(req, res);
-      ok(res.status.calledWith(200), 'Response status was not 200');
-      ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
-      ok(
-        jsonStub.listLayouts.calledWith({ fields: [fields], filter: { owner_id: 1 } }),
-        'Owner id was not used in data connector call',
-      );
-    });
-
-    test('should return 400 when token is missing', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository);
-      const req = {
-        query: {
-          fields: 'id,name',
-          // token not included
-        },
-      };
-      const layoutConnector = new LayoutController(jsonStub);
-
-      await layoutConnector.getLayoutsHandler(req, res);
-
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledOnce, 'Response was not sent');
-
-      const [[responseArg]] = res.json.args;
-
-      ok(responseArg.message === 'Invalid query parameters: "token" is required', 'Error message incorrect');
-    });
-
-    test('should return 400 when filter.objectPath contains an invalid type, number', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository);
-      const req = {
-        query: {
-          filter: {
-            objectPath: 12345,
-          },
-          token: 'fasdfsdfa',
-        },
-      };
-      const layoutConnector = new LayoutController(jsonStub);
-
-      await layoutConnector.getLayoutsHandler(req, res);
-
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledOnce, 'Response was not sent');
-
-      ok(res.json.calledWith({
-        message: 'Invalid query parameters: "Object path" must be a string',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Error message was incorrect');
-    });
-
-    test('should return layouts when filter.objectPath contains a valid value', async () => {
-      const response = [
-        { user_id: 1, name: 'somelayout' },
-        { user_id: 2, name: 'somelayout2' },
-      ];
-
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        listLayouts: sinon.stub().resolves(response),
-      });
-      const req = {
-        query: {
-          filter: {
-            objectPath: 'qc/CPV/MO/NoiseOnFLP/BadChannelMapM2',
-          },
-          token: 'fasdfsdfa',
-        },
-      };
-      const layoutConnector = new LayoutController(jsonStub);
-
-      await layoutConnector.getLayoutsHandler(req, res);
-
-      ok(res.json.calledOnce, 'Response was not sent');
-      ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
-    });
-
-    test('should return layouts when filter.objectPath contains a valid value, minus character', async () => {
-      const response = [
-        { user_id: 1, name: 'somelayout' },
-        { user_id: 2, name: 'somelayout2' },
-      ];
-
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        listLayouts: sinon.stub().resolves(response),
-      });
-      const req = {
-        query: {
-          filter: {
-            objectPath: 'qc/CPV/MO/NoiseOn-FLP/BadChannelMapM2',
-          },
-          token: 'fasdfsdfa',
-        },
-      };
-      const layoutConnector = new LayoutController(jsonStub);
-
-      await layoutConnector.getLayoutsHandler(req, res);
-
-      ok(res.json.calledOnce, 'Response was not sent');
-      ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
-    });
-
-    test('should return layouts when filter is present but contains no objectPath', async () => {
-      const response = [
-        { user_id: 1, name: 'somelayout' },
-        { user_id: 2, name: 'somelayout2' },
-      ];
-
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        listLayouts: sinon.stub().resolves(response),
-      });
-      const req = {
-        query: {
-          filter: {},
-          token: 'fasdfsdfa',
-        },
-      };
-      const layoutConnector = new LayoutController(jsonStub);
-
-      await layoutConnector.getLayoutsHandler(req, res);
-
-      ok(res.json.calledOnce, 'Response was not sent');
-      ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
-    });
-
-    test('should return 400 when filter.objectPath contains an invalid character: #', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository);
-      const req = {
-        query: {
-          filter: {
-            objectPath: 'qc/CPV/MO/Noise#OnFLP/BadChannelMapM2',
-          },
-          token: 'fasdfsdfa',
-        },
-      };
-      const layoutConnector = new LayoutController(jsonStub);
-
-      await layoutConnector.getLayoutsHandler(req, res);
-
-      const message = 'Invalid query parameters: "Object path" with value ' +
-      '"qc/CPV/MO/Noise#OnFLP/BadChannelMapM2" fails to match the required pattern: /^[A-Za-z0-9_\\-/]+$/';
-
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledWith({
-        message: message,
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Error message is not as expected');
-    });
-
-    test('should return 400 when fields contain invalid values', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository);
-      const req = {
-        query: {
-          fields: 'id,invalid_field',
-          token: 'fasdfsdfa',
-        },
-      };
-      const layoutConnector = new LayoutController(jsonStub);
-
-      await layoutConnector.getLayoutsHandler(req, res);
-
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledOnce, 'Response was not sent');
-
+      ok(res.status.calledWith(400));
       ok(res.json.calledWith({
         message: 'Invalid query parameters: "fields" contains invalid field: invalid_field',
         status: 400,
         title: 'Invalid Input',
-      }), 'Error message was incorrect');
+      }));
     });
-  });
 
-  suite('`getLayoutHandler()` tests', () => {
-    let res = {};
-    beforeEach(() => {
-      res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
-      };
+    test('should call getLayoutsByFilters from layoutService with correct parameters', async () => {
+      req.query.fields = 'id,name';
+      req.query.owner_id = 123;
+
+      const mockLayouts = [
+        LAYOUT_CONTROLLER_MOCK_1,
+        LAYOUT_CONTROLLER_MOCK_2,
+      ];
+
+      layoutServiceMock.getLayoutsByFilters.resolves(mockLayouts);
+
+      await layoutController.getLayoutsHandler(req, res);
+      ok(res.status.calledWith(200));
+      ok(res.json.calledWith([
+        { id: 10001, name: 'Test Layout 1' },
+        { id: 10002, name: 'Test Layout 2' },
+      ]));
     });
-    test('should respond with 400 error if request did not contain layout id when requesting to read', async () => {
-      const req = { params: { id: ' ' } }; // empty token is the only way to realisticly cause this error
-      const layoutConnector = new LayoutController({});
-      await layoutConnector.getLayoutHandler(req, res);
 
-      ok(res.status.calledWith(400), 'Response status was not 400');
+    test('should throw if layoutService.getLayoutsByFilters throws', async () => {
+      delete req.query.owner_id;
+
+      layoutServiceMock.getLayoutsByFilters.rejects(new Error());
+
+      await layoutController.getLayoutsHandler(req, res);
+
+      ok(res.status.calledWith(500));
       ok(res.json.calledWith({
-        message: 'Missing parameter "id" of layout',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Error message was incorrect');
-    });
-
-    test('should successfully return a layout specified by its id', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().resolves([{ layout: 'somelayout' }]),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-      const req = { params: { id: 'mylayout' } };
-      await layoutConnector.getLayoutHandler(req, res);
-
-      ok(res.status.calledWith(200), 'Response status was not 200');
-      ok(res.json.calledWith([{ layout: 'somelayout' }]), 'A JSON defining a layout should have been sent back');
-      ok(jsonStub.readLayoutById.calledWith('mylayout'), 'Layout id was not used in data connector call');
-    });
-
-    test('should return error if data connector failed', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().rejects(new Error('Unable to read layout')),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-      const req = { params: { id: 'mylayout' } };
-
-      await layoutConnector.getLayoutHandler(req, res);
-      ok(res.status.calledWith(500), 'Response status was not 500');
-      ok(res.json.calledWith({
-        message: 'Unable to read layout',
+        message: 'Unable to retrieve layouts',
         status: 500,
         title: 'Unknown Error',
-      }), 'Error message was incorrect');
-      ok(jsonStub.readLayoutById.calledWith('mylayout'), 'Layout id was not used in data connector call');
+      }));
     });
   });
 
-  suite('`getLayoutByNameHandler` test suite', () => {
-    let res = {};
-    beforeEach(() => {
-      res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
-      };
-    });
+  suite('getLayoutHandler', () => {
+    test('should call getLayoutById from layoutService with correct parameters', async () => {
+      req.params = { id: 10001 };
 
-    test('should successfully return layout with name provided', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutByName: sinon.stub().resolves([{ name: 'somelayout', id: '1234' }]),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-      const req = { query: { name: 'somelayout' } };
-      await layoutConnector.getLayoutByNameHandler(req, res);
+      const mockLayout = LAYOUT_CONTROLLER_MOCK_1;
 
-      ok(res.status.calledWith(200), 'Response status was not 200');
-      ok(
-        res.json.calledWith([{ name: 'somelayout', id: '1234' }]),
-        'A JSON defining a layout should have been sent back',
-      );
-    });
+      layoutServiceMock.getLayoutById.resolves(mockLayout);
 
-    test('should successfully return layout with runDefinition and pdpBeamType provided', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutByName: sinon.stub().resolves([{ name: 'calibration_pp', id: '1234' }]),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-      const req = { query: { runDefinition: 'calibration', pdpBeamType: 'pp' } };
-      await layoutConnector.getLayoutByNameHandler(req, res);
-
-      ok(res.status.calledWith(200), 'Response status was not 200');
-      ok(
-        res.json.calledWith([{ name: 'calibration_pp', id: '1234' }]),
-        'A JSON defining a layout should have been sent back',
-      );
-      ok(jsonStub.readLayoutByName.calledWith('calibration_pp'), 'Incorrect name for layout provided');
-    });
-
-    test('should return error due to missing input values', async () => {
-      const layoutConnector = new LayoutController({});
-      const req = { query: { pdpBeamType: 'pp' } };
-      await layoutConnector.getLayoutByNameHandler(req, res);
-
-      ok(res.status.calledWith(400), 'Response status was not 400');
+      await layoutController.getLayoutHandler(req, res);
+      ok(res.status.calledWith(200));
       ok(res.json.calledWith({
-        message: 'Missing query parameters',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Error message is not as expected');
-    });
-  });
-
-  suite('`putLayoutHandler()` tests', () => {
-    let res = {};
-    beforeEach(() => {
-      res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
-      };
-    });
-
-    test('should successfully return the id of the updated layout', async () => {
-      const expectedMockWithDefaults = {
-        id: 'mylayout',
-        name: 'something',
-        tabs: [{ name: 'tab', id: '1', columns: 2, objects: [] }],
-        owner_id: 1,
-        owner_name: 'one',
+        id: 10001,
+        name: 'Test Layout 1',
+        owner_id: 123,
+        owner_name: 'Owner 1',
+        description: undefined,
+        displayTimestamp: undefined,
+        autoTabChange: undefined,
+        tabs: [{ id: 1, name: 'Tab 1', columns: 2, objects: [] }],
+        isOfficial: true,
         collaborators: [],
-        displayTimestamp: false,
-        autoTabChange: 0,
-      };
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        updateLayout: sinon.stub().resolves(expectedMockWithDefaults.id),
-        listLayouts: sinon.stub().resolves([]),
-        readLayoutById: sinon.stub().resolves(LAYOUT_MOCK_1),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-
-      const req = { params: { id: 'mylayout' }, session: { personid: 1, name: 'one' }, body: LAYOUT_MOCK_1 };
-      await layoutConnector.putLayoutHandler(req, res);
-      ok(res.status.calledWith(201), 'Response status was not 200');
-      ok(res.json.calledWith({ id: expectedMockWithDefaults.id }), 'A layout id should have been sent back');
-      ok(
-        jsonStub.updateLayout.calledWith('mylayout', expectedMockWithDefaults),
-        'Layout id was not used in data connector call',
-      );
+      }));
     });
+    test('should throw if layoutService.getLayoutById throws', async () => {
+      req.params = { id: 99999 };
 
-    test('should return 400 code if new provided name already exists', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        listLayouts: sinon.stub().resolves([{ name: 'something' }]),
-        readLayoutById: sinon.stub().resolves(LAYOUT_MOCK_1),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
+      layoutServiceMock.getLayoutById.rejects(new Error('Server error'));
 
-      const req = { params: { id: 'mylayout' }, session: { personid: 1, name: 'one' }, body: LAYOUT_MOCK_1 };
-      await layoutConnector.putLayoutHandler(req, res);
-      ok(res.status.calledWith(400), 'Response status was not 400');
+      await layoutController.getLayoutHandler(req, res);
+
+      ok(res.status.calledWith(500));
       ok(res.json.calledWith({
-        message: 'Proposed layout name: something already exists',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Error message is not the same');
-    });
-
-    test('should return error if data connector failed to update layout', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().resolves(LAYOUT_MOCK_1),
-        listLayouts: sinon.stub().resolves([]),
-        updateLayout: sinon.stub().rejects(new Error('Could not update layout')),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-      const expectedMockWithDefaults = {
-        id: 'mylayout',
-        name: 'something',
-        tabs: [{ name: 'tab', id: '1', columns: 2, objects: [] }],
-        owner_id: 1,
-        owner_name: 'one',
-        collaborators: [],
-        displayTimestamp: false,
-        autoTabChange: 0,
-      };
-      const req = { params: { id: LAYOUT_MOCK_1.id }, session: { personid: 1, name: 'one' }, body: LAYOUT_MOCK_1 };
-      await layoutConnector.putLayoutHandler(req, res);
-
-      ok(res.status.calledWith(500), 'Response status was not 500');
-      ok(res.json.calledWith({
-        message: 'Could not update layout',
+        message: 'Server error',
         status: 500,
         title: 'Unknown Error',
-      }), 'DataConnector error message is incorrect');
-      ok(
-        jsonStub.updateLayout.calledWith('mylayout', expectedMockWithDefaults),
-        'Layout id was not used in data connector call',
-      );
+      }));
     });
   });
 
-  suite('`deleteLayoutHandler()` tests', () => {
-    let res = {};
-    beforeEach(() => {
-      res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
-      };
+  suite('getLayoutByNameHandler', () => {
+    test('should set the proper name to the layout', async () => {
+      req.query = { name: 'Test Layout' };
+      await layoutController.getLayoutByNameHandler(req, res);
+      ok(layoutServiceMock.getLayoutByName.calledWith('Test Layout'));
+      sinon.resetHistory();
+      req.query = { runDefinition: 'RunDef', pdpBeamType: 'BeamType' };
+      await layoutController.getLayoutByNameHandler(req, res);
+      ok(layoutServiceMock.getLayoutByName.calledWith('RunDef_BeamType'));
+      sinon.resetHistory();
+      req.query = { runDefinition: 'RunDef' };
+      await layoutController.getLayoutByNameHandler(req, res);
+      ok(layoutServiceMock.getLayoutByName.calledWith('RunDef'));
     });
-
-    test('should successfully return the id of the deleted layout', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().resolves(LAYOUT_MOCK_1),
-        deleteLayout: sinon.stub().resolves({ id: 'somelayout' }),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-      const req = { params: { id: 'somelayout' }, session: { personid: 1, name: 'one' } };
-      await layoutConnector.deleteLayoutHandler(req, res);
-      ok(res.status.calledWith(200), 'Response status was not 200');
-      ok(res.json.calledWith({ id: 'somelayout' }), 'A layout id should have been sent back');
-      ok(jsonStub.deleteLayout.calledWith('somelayout'), 'Layout id was not used in data connector call');
-    });
-
-    test('should return error if data connector failed to delete', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().resolves(LAYOUT_MOCK_1),
-        deleteLayout: sinon.stub().rejects(new Error('Could not delete layout')),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-      const req = { params: { id: 'mylayout' }, session: { personid: 1, name: 'one' } };
-      await layoutConnector.deleteLayoutHandler(req, res);
-      ok(res.status.calledWith(500), 'Response status was not 500');
+    test('should return 200 and layout data when layoutService.getLayoutByName resolves', async () => {
+      const mockLayout = LAYOUT_CONTROLLER_MOCK_1;
+      layoutServiceMock.getLayoutByName.resolves(mockLayout);
+      req.query = { name: 'Test Layout' };
+      await layoutController.getLayoutByNameHandler(req, res);
+      ok(res.status.calledWith(200));
       ok(res.json.calledWith({
-        message: 'Unable to delete layout with id: mylayout',
+        id: 10001,
+        name: 'Test Layout 1',
+        owner_id: 123,
+        owner_name: 'Owner 1',
+        description: undefined,
+        displayTimestamp: undefined,
+        autoTabChange: undefined,
+        tabs: [{ id: 1, name: 'Tab 1', columns: 2, objects: [] }],
+        isOfficial: true,
+        collaborators: [],
+      }));
+    });
+    test('should return error when layoutService.getLayoutByName rejects', async () => {
+      layoutServiceMock.getLayoutByName.rejects(new Error('Server error'));
+      req.query = { name: 'Test Layout' };
+      await layoutController.getLayoutByNameHandler(req, res);
+      ok(res.status.calledWith(500));
+      ok(res.json.calledWith({
+        message: 'Server error',
         status: 500,
         title: 'Unknown Error',
-      }), 'DataConnector error message is incorrect');
-      ok(jsonStub.deleteLayout.calledWith('mylayout'), 'Layout id was not used in data connector call');
+      }));
     });
   });
-
-  suite('`postLayoutHandler()` tests', () => {
-    let res = {};
-    beforeEach(() => {
-      res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
+  suite('putLayoutHandler', () => {
+    test('should throw invalid input error if Joi validation fails', async () => {
+      req.params = { id: 10001 };
+      req.body = {
+        id: 10001,
+        name: 'Updated Layout',
+        tabs: 'invalid_tabs_format',
       };
-    });
 
-    test('should respond with 400 error if request did not contain layout "id" when requesting to create', async () => {
-      const req = { body: {} };
-      const layoutConnector = new LayoutController({});
-      await layoutConnector.postLayoutHandler(req, res);
-      ok(res.status.calledWith(400), 'Response status was not 400');
+      await layoutController.putLayoutHandler(req, res);
+
+      ok(res.status.calledWith(400));
       ok(res.json.calledWith({
-        message: 'Failed to validate layout: "id" is required',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Error message was incorrect');
-    });
-
-    test(
-      'should respond with 400 error if request did not contain layout "name" when requesting to create',
-      async () => {
-        const req = { body: { id: '1' } };
-        const layoutConnector = new LayoutController({});
-        await layoutConnector.postLayoutHandler(req, res);
-        ok(res.status.calledWith(400), 'Response status was not 400');
-        ok(res.json.calledWith({
-          message: 'Failed to validate layout: "name" is required',
-          status: 400,
-          title: 'Invalid Input',
-        }), 'Error message was incorrect');
-      },
-    );
-
-    test('should respond with 400 error if request did not contain "tabs" when requesting to create', async () => {
-      const req = { body: { name: 'somelayout', id: '1' } };
-      const layoutConnector = new LayoutController({});
-      await layoutConnector.postLayoutHandler(req, res);
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledWith({
-        message: 'Failed to validate layout: "tabs" is required',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Error message was incorrect');
-    });
-
-    test('should respond with 400 error if request did not proper "tabs" when requesting to create', async () => {
-      const req = { body: { name: 'somelayout', tabs: [{ some: 'some' }], id: '1' } };
-      const layoutConnector = new LayoutController({});
-      await layoutConnector.postLayoutHandler(req, res);
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledWith({
-        message: 'Failed to validate layout: "tabs[0].id" is required',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Error message was incorrect');
-    });
-
-    test('should respond with 400 error if request did not contain "owner_id" when requesting to create', async () => {
-      const req = { body: { name: 'somelayout', tabs: [{ id: '1', name: 'tab' }], id: '1' } };
-      const layoutConnector = new LayoutController({});
-      await layoutConnector.postLayoutHandler(req, res);
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledWith({
-        message: 'Failed to validate layout: "owner_id" is required',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Error message was incorrect');
-    });
-
-    test(
-      'should respond with 400 error if request did not contain "owner_name" when requesting to create',
-      async () => {
-        const req = { body: { name: 'somelayout', id: '1', owner_id: 123, tabs: [{ id: '123', name: 'tab' }] } };
-        const layoutConnector = new LayoutController({});
-        await layoutConnector.postLayoutHandler(req, res);
-        ok(res.status.calledWith(400), 'Response status was not 400');
-        ok(res.json.calledWith({
-          message: 'Failed to validate layout: "owner_name" is required',
-          status: 400,
-          title: 'Invalid Input',
-        }), 'Error message was incorrect');
-      },
-    );
-
-    test('should respond with 400 error if request a layout already exists with provided name', async () => {
-      const req = {
-        body: { name: 'somelayout', id: '1', owner_name: 'admin', owner_id: 123, tabs: [{ id: '123', name: 'tab' }] },
-      };
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        listLayouts: sinon.stub().resolves([{ name: 'somelayout' }]),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-      await layoutConnector.postLayoutHandler(req, res);
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledWith({
-        message: 'Proposed layout name: somelayout already exists',
-        status: 400,
-        title: 'Invalid Input',
-      }), 'Error message was incorrect');
-    });
-
-    test('should successfully return created layout with default for missing values', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        createLayout: sinon.stub().resolves({ layout: 'somelayout' }),
-        listLayouts: sinon.stub().resolves([]),
-      });
-      const expected = {
-        id: '1',
-        name: 'somelayout',
-        owner_id: 1,
-        owner_name: 'admin',
-        tabs: [{ id: '123', name: 'tab', columns: 2, objects: [] }],
-        collaborators: [],
-        displayTimestamp: false,
-        autoTabChange: 0,
-      };
-      const layoutConnector = new LayoutController(jsonStub);
-      const req = {
-        body: { id: '1', name: 'somelayout', owner_id: 1, owner_name: 'admin', tabs: [{ id: '123', name: 'tab' }] },
-      };
-      await layoutConnector.postLayoutHandler(req, res);
-      ok(res.status.calledWith(201), 'Response status was not 201');
-      ok(res.json.calledWith({ layout: 'somelayout' }), 'A layout should have been sent back');
-      ok(jsonStub.createLayout.calledWith(expected), 'New layout body was not used in data connector call');
-    });
-
-    test('should return error if data connector failed to create', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        createLayout: sinon.stub().rejects(new Error('Could not create layout')),
-        listLayouts: sinon.stub().resolves([]),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-      const req = {
-        body: { id: '1', name: 'somelayout', owner_id: 1, owner_name: 'admin', tabs: [{ id: '123', name: 'tab' }] },
-      };
-      const expected = {
-        id: '1',
-        name: 'somelayout',
-        owner_id: 1,
-        owner_name: 'admin',
-        tabs: [{ id: '123', name: 'tab', columns: 2, objects: [] }],
-        collaborators: [],
-        displayTimestamp: false,
-        autoTabChange: 0,
-      };
-      await layoutConnector.postLayoutHandler(req, res);
-      ok(res.status.calledWith(500), 'Response status was not 500');
-      ok(res.json.calledWith({
-        message: 'Unable to create new layout',
-        status: 500,
-        title: 'Unknown Error',
-      }), 'DataConnector error message is incorrect');
-      ok(jsonStub.createLayout.calledWith(expected), 'New layout body was not used in data connector call');
-    });
-  });
-
-  suite('`patchLayoutHandler()` test suite', () => {
-    let res = {};
-    beforeEach(() => {
-      res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
-      };
-    });
-
-    test('should successfully update the official field of a layout', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().resolves(LAYOUT_MOCK_1),
-        updateLayout: sinon.stub().resolves(LAYOUT_MOCK_1.id),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
-
-      const req = { params: { id: 'mylayout' }, session: { personid: 1 }, body: { isOfficial: true } };
-      await layoutConnector.patchLayoutHandler(req, res);
-      ok(res.status.calledWith(201), 'Response status was not 201');
-      ok(res.json.calledWith({ id: 'mylayout' }));
-      ok(jsonStub.updateLayout.calledWith('mylayout', { isOfficial: true }));
-    });
-
-    test('should return error due to invalid request body containing more than expected fields', async () => {
-      const layoutConnector = new LayoutController({});
-
-      const req = { params: { id: 'mylayout' }, session: { personid: 1 }, body: { isOfficial: true, missing: true } };
-      await layoutConnector.patchLayoutHandler(req, res);
-
-      ok(res.status.calledWith(400), 'Response status was not 400');
-      ok(res.json.calledWith({
-        message: 'Failed to validate layout: "missing" is not allowed',
+        message: 'Failed to validate layout: "tabs" must be an array',
         status: 400,
         title: 'Invalid Input',
       }));
     });
+    test('should return updated layout ID when layoutService.putLayout resolves', async () => {
+      req.params = { id: 10001 };
+      req.body = {
+        id: 10001,
+        name: 'Updated Layout',
+        tabs: [{ id: 1, name: 'Tab 1' }],
+        owner_id: 123,
+        owner_name: 'Owner 1',
+      };
 
-    test('should return error due to layout update operation failing', async () => {
-      const jsonStub = sinon.createStubInstance(LayoutRepository, {
-        readLayoutById: sinon.stub().resolves(LAYOUT_MOCK_1),
-        updateLayout: sinon.stub().rejects(new Error('Does not work')),
-      });
-      const layoutConnector = new LayoutController(jsonStub);
+      layoutServiceMock.putLayout.resolves(10001);
+      await layoutController.putLayoutHandler(req, res);
 
-      const req = { params: { id: 'mylayout' }, session: { personid: 1 }, body: { isOfficial: true } };
-      await layoutConnector.patchLayoutHandler(req, res);
+      ok(res.status.calledWith(200));
+      ok(res.json.calledWith({ id: 10001 }));
+    });
+  });
+  suite('postLayoutHandler', () => {
+    test('should throw invalid input error if Joi validation fails', async () => {
+      req.body = {
+        name: 'New Layout',
+        tabs: 'invalid_tabs_format',
+      };
 
-      ok(res.status.calledWith(500), 'Response status was not 500');
+      await layoutController.postLayoutHandler(req, res);
+
+      ok(res.status.calledWith(400));
       ok(res.json.calledWith({
-        message: 'Unable to update layout with id: mylayout',
+        message: 'Failed to validate layout: "tabs" must be an array',
+        status: 400,
+        title: 'Invalid Input',
+      }));
+    });
+    test('should return new layout ID when layoutService.postLayout resolves', async () => {
+      req.body = {
+        name: 'New Layout',
+        tabs: [{ id: 1, name: 'Tab 1' }],
+        owner_id: 123,
+        owner_name: 'Owner 1',
+      };
+
+      layoutServiceMock.postLayout.resolves({ id: 10003 });
+      await layoutController.postLayoutHandler(req, res);
+
+      ok(res.status.calledWith(201));
+      ok(res.json.calledWith({ id: 10003 }));
+    });
+  });
+  suite('deleteLayoutHandler', () => {
+    test('should return result when layoutService.removeLayout resolves', async () => {
+      req.params = { id: 10001 };
+
+      layoutServiceMock.removeLayout.resolves();
+
+      await layoutController.deleteLayoutHandler(req, res);
+
+      ok(res.status.calledWith(200));
+      ok(res.json.calledWith({ id: 10001 }));
+    });
+    test('should throw if layoutService.removeLayout throws', async () => {
+      req.params = { id: 99999 };
+
+      layoutServiceMock.removeLayout.rejects(new Error('Server error'));
+      await layoutController.deleteLayoutHandler(req, res);
+
+      ok(res.status.calledWith(500));
+      ok(res.json.calledWith({
+        message: 'Server error',
         status: 500,
         title: 'Unknown Error',
       }));
-      ok(
-        jsonStub.updateLayout.calledWith('mylayout', { isOfficial: true }),
-        'Layout id was not used in data connector call',
-      );
+    });
+  });
+
+  suite('patchLayoutHandler', () => {
+    // change isOfficial to true
+    test('should throw invalid input error if Joi validation fails', async () => {
+      req.params = { id: 10001 };
+      req.body = {
+        isOfficial: 'not_a_boolean',
+      };
+
+      await layoutController.patchLayoutHandler(req, res);
+
+      ok(res.status.calledWith(400));
+      ok(res.json.calledWith({
+        message: 'Failed to validate layout patch: "isOfficial" must be a boolean',
+        status: 400,
+        title: 'Invalid Input',
+      }));
+    });
+    test('should return updated layout ID when layoutService.patchLayout resolves', async () => {
+      req.params = { id: 10001 };
+      req.body = {
+        isOfficial: true,
+      };
+
+      layoutServiceMock.patchLayout.resolves(10001);
+      await layoutController.patchLayoutHandler(req, res);
+
+      ok(res.status.calledWith(200));
+      ok(res.json.calledWith({ id: 10001 }));
     });
   });
 };

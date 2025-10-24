@@ -16,7 +16,14 @@ import { suite, test } from 'node:test';
 import { OWNER_TEST_TOKEN, URL_ADDRESS } from '../config.js';
 import request from 'supertest';
 import { deepStrictEqual } from 'node:assert';
-import { LAYOUT_MOCK_4, LAYOUT_MOCK_5, LAYOUT_MOCK_6 } from '../../demoData/layout/layout.mock.js';
+import {
+  MOCK_GET_LAYOUT_1,
+  MOCK_GET_LAYOUT_A_TEST,
+  MOCK_GET_LAYOUT_RUN_DEF,
+  MOCK_GET_LAYOUTS_ALL,
+  MOCK_GET_LAYOUTS_BY_OWNER_ID,
+  MOCK_GET_ONLY_NAME_AND_OWNER_ID,
+} from '../../demoData/layout/layout.mock.js';
 
 export const apiGetLayoutsTests = () => {
   suite('GET /layouts', () => {
@@ -31,6 +38,7 @@ export const apiGetLayoutsTests = () => {
           if (res.body.length < 2) {
             throw new Error(`Expected at least 3 layouts ${res.body.length}`);
           }
+          deepStrictEqual(res.body, MOCK_GET_LAYOUTS_ALL);
         });
     });
 
@@ -43,8 +51,7 @@ export const apiGetLayoutsTests = () => {
           if (!Array.isArray(res.body)) {
             throw new Error('Expected array of layouts');
           }
-
-          deepStrictEqual(res.body, [LAYOUT_MOCK_4, LAYOUT_MOCK_5], 'Unexpected Layout structure was returned');
+          deepStrictEqual(res.body, MOCK_GET_LAYOUTS_BY_OWNER_ID(ownerId));
         });
     });
 
@@ -57,13 +64,7 @@ export const apiGetLayoutsTests = () => {
           if (!Array.isArray(res.body)) {
             throw new Error('Expected array of layouts');
           }
-          res.body.forEach((layout) => {
-            const hasName = Object.prototype.hasOwnProperty.call(layout, 'name');
-            const hasOwnerId = Object.prototype.hasOwnProperty.call(layout, 'owner_id');
-            if (Object.keys(layout).length !== 2 || !hasName || !hasOwnerId) {
-              throw new Error(`Expected only name and owner_id fields but instead got: ${Object.keys(layout)}`);
-            }
-          });
+          deepStrictEqual(res.body, MOCK_GET_ONLY_NAME_AND_OWNER_ID);
         });
     });
 
@@ -78,25 +79,31 @@ export const apiGetLayoutsTests = () => {
   });
 
   suite('GET /layout/:id', () => {
-    test('should return a single layout by id', async () => {
+    test('should return a single layout by the old id', async () => {
       const layoutId = '671b8c22402408122e2f20dd';
       await request(`${URL_ADDRESS}/api/layout/${layoutId}`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
         .expect(200)
-        .expect((res) => deepStrictEqual(res.body, LAYOUT_MOCK_6, 'Unexpected Layout structure was returned'));
+        .expect((res) => {
+          deepStrictEqual(res.body, MOCK_GET_LAYOUT_1, 'Unexpected Layout structure was returned');
+        });
     });
 
-    test('should return 400 when id parameter is an empty string', async () => {
-      await request(`${URL_ADDRESS}/api/layout/ `)
+    test('should return a single layout by id', async () => {
+      const layoutId = 1;
+      await request(`${URL_ADDRESS}/api/layout/${layoutId}`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
-        .expect(400, { message: 'Missing parameter "id" of layout', status: 400, title: 'Invalid Input' });
+        .expect(200)
+        .expect((res) => {
+          deepStrictEqual(res.body, MOCK_GET_LAYOUT_1, 'Unexpected Layout structure was returned');
+        });
     });
 
     test('should return 404 when layout is not found', async () => {
       const nonExistentId = 'nonexistent123';
       await request(`${URL_ADDRESS}/api/layout/${nonExistentId}`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
-        .expect(404, { message: 'layout (nonexistent123) not found', status: 404, title: 'Not Found' });
+        .expect(404, { message: 'Layout with id: nonexistent123 was not found', status: 404, title: 'Not Found' });
     });
   });
 
@@ -106,7 +113,7 @@ export const apiGetLayoutsTests = () => {
       await request(`${URL_ADDRESS}/api/layout`)
         .get(`?token=${OWNER_TEST_TOKEN}&name=${layoutName}`)
         .expect(200)
-        .expect((res) => deepStrictEqual(res.body, LAYOUT_MOCK_5, 'Unexpected Layout structure was returned'));
+        .expect((res) => deepStrictEqual(res.body, MOCK_GET_LAYOUT_A_TEST, 'Unexpected Layout structure was returned'));
     });
 
     test('should return layout by runDefinition', async () => {
@@ -114,7 +121,7 @@ export const apiGetLayoutsTests = () => {
       await request(`${URL_ADDRESS}/api/layout`)
         .get(`?token=${OWNER_TEST_TOKEN}&runDefinition=${runDefinition}`)
         .expect(200)
-        .expect((res) => deepStrictEqual(res.body, LAYOUT_MOCK_5, 'Unexpected Layout structure was returned'));
+        .expect((res) => deepStrictEqual(res.body, MOCK_GET_LAYOUT_A_TEST, 'Unexpected Layout structure was returned'));
     });
     test('should return layout by runDefinition and pdpBeamType combination', async () => {
       const runDefinition = 'rundefinition';
@@ -123,11 +130,7 @@ export const apiGetLayoutsTests = () => {
         .get(`?token=${OWNER_TEST_TOKEN}&runDefinition=${runDefinition}&pdpBeamType=${pdpBeamType}`)
         .expect(200)
         .expect((res) => {
-          deepStrictEqual(
-            res.body.name,
-            `${runDefinition}_${pdpBeamType}`,
-            'Expected layout name to be combination of runDefinition and pdpBeamType',
-          );
+          deepStrictEqual(res.body, MOCK_GET_LAYOUT_RUN_DEF, 'Unexpected Layout structure was returned');
         });
     });
 
@@ -141,7 +144,11 @@ export const apiGetLayoutsTests = () => {
       const nonExistentName = 'nonexistent-layout';
       await request(`${URL_ADDRESS}/api/layout`)
         .get(`?token=${OWNER_TEST_TOKEN}&name=${nonExistentName}`)
-        .expect(404, { message: `Layout (${nonExistentName}) not found`, status: 404, title: 'Not Found' });
+        .expect(404, {
+          message: `Layout with name: ${nonExistentName} was not found`,
+          status: 404,
+          title: 'Not Found',
+        });
     });
   });
 };

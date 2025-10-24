@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { objectId, clone } from '../common/utils.js';
+import { clone } from '../common/utils.js';
 
 /**
  * Class with utility functions for Layouts
@@ -33,19 +33,6 @@ export default class LayoutUtils {
   static fromSkeleton(skeleton) {
     const layout = clone(skeleton);
     delete layout.isOfficial;
-
-    layout.id = objectId();
-    if (layout.tabs) {
-      layout.tabs.map((tab) => {
-        tab.id = objectId();
-        if (tab.objects) {
-          tab.objects.map((object) => {
-            object.id = objectId();
-          });
-        }
-        return tab;
-      });
-    }
     return layout;
   }
 

@@ -77,15 +77,17 @@ export const apiGetObjectsTests = () => {
   });
 
   suite('GET /object/:id', () => {
-    const objectId = '6724a6bd1b2bad3d713cc4ee';
+    const objectId = 6;
 
     test('should return QCObject details with all versions', async () => {
       const url = `${URL_ADDRESS}/api/object/${objectId}?token=${OWNER_TEST_TOKEN}`;
+      console.log('URL1:', url);
       await testResult(url, 200, MOCK_OBJECT_BY_ID_RESULT, OBJECT_VERSIONS);
     });
 
     test('should return QCObject versions if a filter is added', async () => {
       const url = `${URL_ADDRESS}/api/object/${objectId}?token=${OWNER_TEST_TOKEN}&filters[RunNumber]=0`;
+      console.log('URL2:', url);
       await testResult(url, 200, MOCK_OBJECT_BY_ID_RESULT, OBJECT_VERSIONS_FILTERED_BY_RUN_NUMBER);
     });
 

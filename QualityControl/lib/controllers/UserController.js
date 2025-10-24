@@ -18,7 +18,7 @@ import { LogLevel, LogManager } from '@aliceo2/web-ui';
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/user-controller`;
 
 /**
- * @typedef {import('../repositories/UserRepository.js').UserRepository} UserRepository
+ * @typedef {import('../services/layout/UserService.js').UserService} UserService
  */
 
 /**
@@ -27,19 +27,19 @@ const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/user-controll
 export class UserController {
 /**
  * Creates an instance of UserController.
- * @param {UserRepository} userRepository - An instance of UserRepository to interact with user data.
- * @throws {Error} Throws an error if the UserRepository is not provided.
+ * @param {UserService} userService - An instance of UserService to interact with user data.
+ * @throws {Error} Throws an error if the UserService is not provided.
  */
-  constructor(userRepository) {
-    assert(userRepository, 'Missing User Repository');
+  constructor(userService) {
+    assert(userService, 'Missing User Service');
     this._logger = LogManager.getLogger(LOG_FACILITY);
 
     /**
-     * User repository for interacting with user data.
-     * @type {UserRepository}
+     * User service for interacting with user data.
+     * @type {UserService}
      * @private
      */
-    this._userRepository = userRepository;
+    this._userService = userService;
   }
 
   /**
@@ -49,11 +49,11 @@ export class UserController {
    * @returns {undefined}
    */
   async addUserHandler(req, res) {
-    const { personid: id, name, username } = req.session;
+    const { personid, name, username } = req.session;
 
     try {
-      this._validateUser(username, name, id);
-      await this._userRepository.createUser({ id, name, username });
+      this._validateUser(username, name, personid);
+      await this._userService.saveUser({ personid, name, username });
       res.status(200).json({ ok: true });
     } catch (err) {
       if (err.stack) {

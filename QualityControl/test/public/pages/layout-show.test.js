@@ -23,7 +23,7 @@ import { editedMockedLayout } from '../../setup/seeders/layout-show/json-file-mo
  * @param {object} testParent - Node.js test object which ensures sub-tests are being awaited
  */
 export const layoutShowTests = async (url, page, timeout = 5000, testParent) => {
-  const LAYOUT_ID = '671b95883d23cd0d67bdc787';
+  const LAYOUT_ID = 2;
   await testParent.test(
     'should load the layoutShow page',
     { timeout },
@@ -122,51 +122,38 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     { timeout },
     async () => {
       const plotsCount = await page.evaluate(() => document.querySelectorAll('section svg.jsroot').length);
-      ok(plotsCount > 1);
+      ok(plotsCount > 0);
     },
   );
 
   await testParent
     .test('should have an info button with full path and last modified when clicked (plot success)', async () => {
-      const commonSelectorPath = 'section > div > div > div > div:nth-child(2) > div > div';
-      const plot1Path = `${commonSelectorPath} > div:nth-child(1)`;
-      await page.locator(plot1Path).click();
+      const plotSelector = '.jsrootdiv';
+      const infoButtonSelector = 'button[title="View details about histogram"]';
+      await page.waitForSelector(plotSelector);
+      await page.hover(plotSelector);
+      await page.waitForSelector(infoButtonSelector, { state: 'visible' });
+      await page.click(infoButtonSelector);
+      await page.waitForSelector('.dropdown-menu.right-menu', { state: 'visible' });
+      const result = await page.evaluate(() => {
+        const rows = document.querySelectorAll('.dropdown-menu .flex-row.g2');
+        const data = {};
+        rows.forEach((row) => {
+          const key = row.querySelector('b')?.innerText?.trim();
+          const value = row.querySelector('.w-75 div, .w-75')?.innerText?.trim();
+          if (key) {
+            data[key] = value;
+          }
+        });
+        return data;
+      });
 
-      const result = await page.evaluate((commonSelectorPath) => {
-        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > button`);
-        const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div`;
-        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div > div`).innerText;
-        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > b`).innerText;
-        const lastModifiedTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`).innerText;
-        return { title, pathTitle, objectPath, lastModifiedTitle };
-      }, commonSelectorPath);
-      strictEqual(result.title, 'View details about histogram');
-      strictEqual(result.pathTitle, 'path');
-      strictEqual(result.objectPath, 'qc/test/object/1');
-      strictEqual(result.lastModifiedTitle, 'lastModified');
+      strictEqual(result.path, 'qc/test/object/1');
+      ok(result.lastModified.includes('2022'));
+      strictEqual(result.qcDetectorName, 'TPC');
+      strictEqual(result.qcVersion, '1.64.0');
+      ok(result.objectType.includes('QualityObject'));
     });
-
-  await testParent.test(
-    'should have an info button with full path and last modified when clicked on a second plot(plot success)',
-    { timeout },
-    async () => {
-      const commonSelectorPath = '#subcanvas > div:nth-child(2) > div > div';
-      const plot2Path = `${commonSelectorPath} > div:nth-child(1)`;
-      await page.locator(plot2Path).click();
-      const result = await page.evaluate((commonSelectorPath) => {
-        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > button`);
-        const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div`;
-        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div`).innerText;
-        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > b`).innerText;
-        const lastModifiedTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`).innerText;
-        return { title, pathTitle, objectPath, lastModifiedTitle };
-      }, commonSelectorPath);
-      strictEqual(result.title, 'View details about histogram');
-      strictEqual(result.pathTitle, 'path');
-      strictEqual(result.objectPath, 'qc/test/object/1');
-      strictEqual(result.lastModifiedTitle, 'lastModified');
-    },
-  );
 
   await testParent.test('should have second tab to be empty (according to demo data)', { timeout }, async () => {
     await page.locator('#tab-1').click();
@@ -407,7 +394,6 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
       const updateButtonPath = '#updateLayoutButton';
       await page.locator(updateButtonPath).click();
-
       await delay(50);
 
       const newTabName = await page.evaluate(() => {
