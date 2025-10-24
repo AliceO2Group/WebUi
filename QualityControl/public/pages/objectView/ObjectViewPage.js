@@ -18,13 +18,16 @@ import { spinner } from './../../common/spinner.js';
 import { errorDiv } from '../../common/errorDiv.js';
 import { dateSelector } from '../../common/object/dateSelector.js';
 import { qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
+import { downloadButton } from '../../common/downloadButton.js';
 
 /**
  * Shows a page to view an object on the whole page
  * @param {ObjectViewModel} objectViewModel - model that manages the objectView state
  * @returns {vnode} - virtual node element
+ * @import { ObjectViewModel } from '../objectView/ObjectViewModel.js';
  */
-export default (objectViewModel) => h('.absolute-fill.flex-column', objectPlotAndInfo(objectViewModel));
+export default (objectViewModel) =>
+  h('.absolute-fill.flex-column', objectPlotAndInfo(objectViewModel));
 
 /**
  * Build an element which plots the object and displays metadata information
@@ -44,11 +47,20 @@ const objectPlotAndInfo = (objectViewModel) =>
         layoutDisplayOptions
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
-        h('.flex-row.justify-center.h-10', h('.w-40.p2.f6', dateSelector(
-          { validFrom, id },
-          versions,
-          objectViewModel.updateObjectSelection.bind(objectViewModel),
-        ))),
+        h('.flex-row.justify-center.items-center.h-10', [
+          downloadButton({
+            href: model.objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
+            title: 'Download object',
+          }),
+          h(
+            '.w-40.p2.f6',
+            dateSelector(
+              { validFrom, id },
+              versions,
+              objectViewModel.updateObjectSelection.bind(objectViewModel),
+            ),
+          ),
+        ]),
         h('.w-100.flex-row.g2.m2', { style: 'height: 0;flex-grow:1' }, [
           h('.w-70', draw(qcObject, {}, drawingOptions)),
           h('.w-30.scroll-y', [

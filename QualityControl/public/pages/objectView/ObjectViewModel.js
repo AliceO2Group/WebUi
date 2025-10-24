@@ -116,6 +116,18 @@ export default class ObjectViewModel extends BaseViewModel {
   }
 
   /**
+   * Creates the href url for the download element
+   * @param {string} objectId - id of root object
+   * @returns {string|void} download link
+   */
+  getDownloadQcdbObjectUrl(objectId = undefined) {
+    if (objectId == undefined || this.model.session.token == undefined) {
+      return;
+    }
+    return `/api/object/proxy/download/?token=${this.model.session.token}&objectIds=${objectId}`;
+  }
+
+  /**
    * Sets routing parameters for object retrieval based on the available information.
    * Ensures only one of objectName or objectId is set, and removes irrelevant keys.
    * @param {string|undefined} objectName - Name of the object, if available.
