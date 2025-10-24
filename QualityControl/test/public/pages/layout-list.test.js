@@ -123,13 +123,13 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     const linkpath = cardLayoutLinkPath(cardPath(myLayoutIndex, 2));
     const href = await page.evaluate((path) => document.querySelector(path).href, linkpath);
 
-    strictEqual(href, 'http://localhost:8080/?page=layoutShow&layoutId=671b8c22402408122e2f20dd');
+    strictEqual(href, 'http://localhost:8080/?page=layoutShow&layoutId=1');
 
     await page.click(linkpath);
     await page.waitForNetworkIdle();
     const location = await page.evaluate(() => window.location);
 
-    strictEqual(location.search, '?page=layoutShow&layoutId=671b8c22402408122e2f20dd&tab=main');
+    strictEqual(location.search, '?page=layoutShow&layoutId=1&tab=main');
   });
 
   await testParent.test('should add official logo the \'make Official\' button is pressed', async () => {

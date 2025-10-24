@@ -48,8 +48,8 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
     'should load a plot and update button text to "Back to layout" if layoutId parameter is provided',
     { timeout },
     async () => {
-      const objectId = '6724a6bd1b2bad3d713cc4ee';
-      const layoutId = '671b95883d23cd0d67bdc787';
+      const objectId = 6;
+      const layoutId = 2;
       await page
         .goto(`${url}?page=objectView&objectId=${objectId}&layoutId=${layoutId}`, { waitUntil: 'networkidle0' });
 
@@ -62,7 +62,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       });
       strictEqual(
         result.location,
-        '?page=objectView&objectId=6724a6bd1b2bad3d713cc4ee&layoutId=671b95883d23cd0d67bdc787',
+        '?page=objectView&objectId=6&layoutId=2',
       );
       strictEqual(result.backButtonTitle, 'Back to layout');
     },
@@ -83,7 +83,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
     'should take back the user to page=layoutShow when clicking "Back to layout"',
     { timeout },
     async () => {
-      const layoutId = '671b95883d23cd0d67bdc787';
+      const layoutId = 2;
       const backToLayoutButtonPath = 'div > div > div > div > a';
       const href = await page.evaluate((backToLayoutButtonPath) =>
         document.querySelector(backToLayoutButtonPath).href, backToLayoutButtonPath);
@@ -100,8 +100,8 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
     'should load page=objectView and display a plot when objectId and layoutId are passed',
     { timeout },
     async () => {
-      const objectId = '6724a6bd1b2bad3d713cc4ee';
-      const layoutId = '671b95883d23cd0d67bdc787';
+      const objectId = 6;
+      const layoutId = 2;
       await page.goto(
         `${url}?page=objectView&objectId=${objectId}&layoutId=${layoutId}`,
         { waitUntil: 'networkidle0' },
