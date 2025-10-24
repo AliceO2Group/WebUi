@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import downloadButton from '../../../common/downloadButton.js';
+import { downloadButton } from '../../../common/downloadButton.js';
 import { qcObjectInfoPanel } from './../../../common/object/objectInfoCard.js';
 import { h, iconResizeBoth, info } from '/js/src/index.js';
 
@@ -53,8 +53,9 @@ export const objectInfoResizePanel = (model, tabObject) => {
     objectRemoteData.isSuccess() &&
     downloadButton({
       href: model.objectViewModel.getDownloadQcdbObjectUrl(objectRemoteData.payload.id),
-      target: '_blank',
-      title: 'Download object' }),
+      title: 'Download object',
+      class: 'download-button',
+    }),
     h('a.btn', {
       title: 'Open object plot in full screen',
       href: uri,

@@ -18,7 +18,7 @@ import { spinner } from './../../common/spinner.js';
 import { errorDiv } from '../../common/errorDiv.js';
 import { dateSelector } from '../../common/object/dateSelector.js';
 import { qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
-import downloadButton from '../../common/downloadButton.js';
+import { downloadButton } from '../../common/downloadButton.js';
 
 /**
  * Shows a page to view an object on the whole page
@@ -50,8 +50,8 @@ const objectPlotAndInfo = (objectViewModel) =>
         h('.flex-row.justify-center.items-center.h-10', [
           downloadButton({
             href: model.objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
-            target: '_blank',
             title: 'Download object',
+            class: 'download-button',
           }),
           h(
             '.w-40.p2.f6',
