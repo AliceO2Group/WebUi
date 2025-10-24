@@ -209,7 +209,7 @@ export const layoutServiceTestSuite = async () => {
           is_official: false,
           tabs: [{ id: 1, name: 'Tab 1' }],
         });
-        layoutRepositoryMock.updateLayout.resolves(1);
+        layoutRepositoryMock.updateLayout.resolves([1]);
         layoutService._tabSynchronizer.sync.resolves();
 
         await layoutService.patchLayout(123456, updateData);

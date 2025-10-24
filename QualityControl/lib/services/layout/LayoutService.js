@@ -79,7 +79,7 @@ export class LayoutService {
    */
   async getLayoutsByFilters(filters = {}) {
     try {
-      if (filters.owner_id) {
+      if (filters.owner_id !== undefined) {
         filters = await this._addOwnerUsername(filters);
       }
       const layouts = await this._layoutRepository.findLayoutsByFilters(filters);
@@ -115,8 +115,14 @@ export class LayoutService {
    */
   async getLayoutById(id) {
     try {
-      const layoutFoundById = await this._layoutRepository.findById(Number(id));
-      const layoutFoundByOldId = await this._layoutRepository.findOne({ old_id: String(id) });
+      if (!id) {
+        throw new Error('Layout ID must be provided');
+      }
+      const layoutFoundById = await this._layoutRepository.findById(id);
+      let layoutFoundByOldId = null;
+      if (!layoutFoundById) {
+        layoutFoundByOldId = await this._layoutRepository.findOne({ old_id: id });
+      }
 
       if (!layoutFoundById && !layoutFoundByOldId) {
         throw new NotFoundError(`Layout with id: ${id} was not found`);
@@ -124,6 +130,25 @@ export class LayoutService {
       return layoutFoundById || layoutFoundByOldId;
     } catch (error) {
       this._logger.errorMessage(`Error getting layout by ID: ${error?.message || error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Finds a layout by its name
+   * @param {string} name - Layout name
+   * @throws {NotFoundError} If no layout is found with the given name
+   * @returns {Promise<LayoutAttributes>} The layout found
+   */
+  async getLayoutByName(name) {
+    try {
+      const layout = await this._layoutRepository.findOne({ name });
+      if (!layout) {
+        throw new NotFoundError(`Layout with name: ${name} was not found`);
+      }
+      return layout;
+    } catch (error) {
+      this._logger.errorMessage(`Error getting layout by name: ${error?.message || error}`);
       throw error;
     }
   }
@@ -167,7 +192,7 @@ export class LayoutService {
         throw new NotFoundError(`Layout with id ${id} not found`);
       }
       if (updateData.tabs) {
-        await this._tabSynchronizer.sync(id, updateData.tabs);
+        await this._tabSynchronizer.sync(id, updateData.tabs, transaction);
       }
       await transaction.commit();
       return id;
@@ -197,6 +222,7 @@ export class LayoutService {
         await this._tabSynchronizer.sync(id, updateData.tabs, transaction);
       }
       await transaction.commit();
+      return id;
     } catch (error) {
       await transaction.rollback();
       this._logger.errorMessage(`Error in patchLayout: ${error.message || error}`);
@@ -213,14 +239,10 @@ export class LayoutService {
    * @returns {Promise<void>}
    */
   async _updateLayout(layoutId, updateData, transaction) {
-    try {
-      const updatedCount = await this._layoutRepository.updateLayout(layoutId, updateData, { transaction });
-      if (updatedCount === 0) {
-        throw new NotFoundError(`Layout with id ${layoutId} not found`);
-      }
-    } catch (error) {
-      this._logger.errorMessage(`Error in _updateLayout: ${error.message || error}`);
-      throw error;
+    const result = await this._layoutRepository.updateLayout(layoutId, updateData, { transaction });
+    const updatedCount = Array.isArray(result) ? result[0] : result;
+    if (updatedCount === 0) {
+      throw new NotFoundError(`Layout with id ${layoutId} not found`);
     }
   }
 

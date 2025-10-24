@@ -16,6 +16,7 @@ import { strictEqual, rejects } from 'node:assert';
 import { suite, test, beforeEach } from 'node:test';
 
 import { TabSynchronizer } from '../../../../../lib/services/layout/helpers/tabSynchronizer.js';
+import { NotFoundError } from '@aliceo2/web-ui';
 
 export const tabSynchronizerTestSuite = async () => {
   suite('TabSynchronizer Test Suite', () => {
@@ -42,13 +43,8 @@ export const tabSynchronizerTestSuite = async () => {
 
     suite('Constructor', () => {
       test('should successfully initialize TabSynchronizer', () => {
-        const tabRepo = { test: 'tabRepo' };
-        const gridSync = { test: 'gridSync' };
-        const sync = new TabSynchronizer(tabRepo, gridSync);
-
-        strictEqual(sync._tabRepository, tabRepo);
-        strictEqual(sync._gridTabCellSynchronizer, gridSync);
-        strictEqual(typeof sync._logger, 'object');
+        strictEqual(synchronizer._tabRepository, mockTabRepository);
+        strictEqual(synchronizer._gridTabCellSynchronizer, mockGridTabCellSynchronizer);
       });
     });
 
@@ -75,11 +71,16 @@ export const tabSynchronizerTestSuite = async () => {
         const tabs = [{ id: 1, name: 'Updated Tab', objects: [] }];
         const updatedTabs = [];
 
-        mockTabRepository.findTabsByLayoutId = () => Promise.resolve([{ id: 1 }]);
+        mockTabRepository.findTabsByLayoutId = () =>
+          Promise.resolve([{ id: 1, name: 'Updated Tab' }]);
+
         mockTabRepository.updateTab = (id, tab) => {
           updatedTabs.push({ id, tab });
           return Promise.resolve(1);
         };
+
+        mockTabRepository.delete = () => Promise.resolve(1);
+        mockTabRepository.createTab = () => Promise.resolve(null);
 
         await synchronizer.sync(layoutId, tabs, mockTransaction);
 
@@ -94,14 +95,17 @@ export const tabSynchronizerTestSuite = async () => {
         const deletedTabs = [];
 
         mockTabRepository.findTabsByLayoutId = () => Promise.resolve([
-          { id: 1 }, // Should be deleted
-          { id: 2 }, // Should remain
+          { id: 1, name: 'Old Tab' },
+          { id: 2, name: 'Keep Tab' }, // ✅ Should remain
         ]);
+
         mockTabRepository.delete = (id) => {
           deletedTabs.push(id);
           return Promise.resolve(1);
         };
+
         mockTabRepository.updateTab = () => Promise.resolve(1);
+        mockTabRepository.createTab = () => Promise.resolve(null); // Optional safety
 
         await synchronizer.sync(layoutId, tabs, mockTransaction);
 
@@ -128,20 +132,39 @@ export const tabSynchronizerTestSuite = async () => {
         strictEqual(syncCalls[0].objects.length, 1);
       });
 
-      test('should throw error and rollback when operation fails', async () => {
+      test('should throw NotFoundError when delete returns 0', async () => {
         const layoutId = 'layout-1';
-        const tabs = [{ name: 'New Tab' }];
-        const error = new Error('Database error');
-        let rollbackCalled = false;
+        const tabs = [{ id: 2, name: 'Keep Tab' }];
 
-        mockTabRepository.findTabsByLayoutId = () => Promise.resolve([]);
-        mockTabRepository.createTab = () => Promise.reject(error);
-        mockTransaction.rollback = () => {
-          rollbackCalled = true;
+        mockTabRepository.findTabsByLayoutId = () => Promise.resolve([
+          { id: 1, name: 'Old Tab' },
+          { id: 2, name: 'Keep Tab' },
+        ]);
+
+        mockTabRepository.delete = (id) => {
+          if (id === 1) {
+            return Promise.resolve(0);
+          }
+          return Promise.resolve(1);
         };
 
-        await rejects(synchronizer.sync(layoutId, tabs, mockTransaction), error);
-        strictEqual(rollbackCalled, true, 'Transaction should be rolled back on error');
+        await rejects(
+          synchronizer.sync(layoutId, tabs, mockTransaction),
+          new NotFoundError('Tab with id=1 not found for deletion'),
+        );
+      });
+
+      test('should throw Error when createTab fails', async () => {
+        const layoutId = 'layout-1';
+        const tabs = [{ name: 'New Tab', objects: [] }]; // no id = triggers create
+
+        mockTabRepository.findTabsByLayoutId = () => Promise.resolve([]); // no existing tabs
+        mockTabRepository.createTab = () => Promise.resolve(null); // fail creation
+
+        await rejects(
+          synchronizer.sync(layoutId, tabs, mockTransaction),
+          new Error('Failed to create new tab'),
+        );
       });
     });
   });
