@@ -46,6 +46,18 @@ export const up = async (queryInterface) => {
       layout_id: 2,
       column_count: 2,
     },
+    {
+      id: 5,
+      name: 'main',
+      layout_id: 3,
+      column_count: 2,
+    },
+    {
+      id: 6,
+      name: 'a',
+      layout_id: 3,
+      column_count: 2,
+    },
 
   ], {});
 };
