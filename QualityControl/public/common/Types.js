@@ -34,7 +34,9 @@ export function assertLayouts(array) {
  * @returns {boolean} true is correct
  */
 export function assertLayout(obj) {
-  assertNumber(obj.id);
+  if (obj.id !== undefined) {
+    assertNumber(obj.id);
+  }
   assertString(obj.name);
   assertNumber(obj.owner_id);
   assertString(obj.owner_name);

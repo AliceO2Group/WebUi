@@ -273,6 +273,8 @@ export class LayoutService {
   async postLayout(layoutData) {
     const transaction = await this._layoutRepository.model.sequelize.transaction();
     try {
+      const ownerUsername = await this._userService.getUsernameById(layoutData.owner_id);
+      layoutData.ownerUsername = ownerUsername;
       const normalizedLayout = await normalizeLayout(layoutData, {}, true);
       const newLayout = await this._layoutRepository.createLayout(normalizedLayout, { transaction });
       if (!newLayout) {

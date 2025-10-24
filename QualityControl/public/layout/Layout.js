@@ -218,9 +218,10 @@ export default class Layout extends BaseViewModel {
         this.model.notification.show(result.payload || 'Unable to create layout', 'danger', 2000);
         return;
       }
+      const { id } = result.payload;
 
       // Read the new layout created and edit it
-      this.model.router.go(`?page=layoutShow&layoutId=${layout.id}&edit=true`, false, false);
+      this.model.router.go(`?page=layoutShow&layoutId=${id}&edit=true`, false, false);
 
       // Update user list in background
       this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
