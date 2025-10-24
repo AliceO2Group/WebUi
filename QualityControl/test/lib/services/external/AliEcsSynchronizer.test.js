@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { ok, deepStrictEqual } from 'node:assert';
+import { ok, deepStrictEqual, strictEqual } from 'node:assert';
 import { test, beforeEach, afterEach } from 'node:test';
 import { stub, restore } from 'sinon';
 import { AliEcsSynchronizer } from '../../../../lib/services/external/AliEcsSynchronizer.js';
@@ -50,12 +50,18 @@ export const aliecsSynchronizerTestSuite = async () => {
   test('should emit a run track event when a valid run message is received', () => {
     const runNumber = 123;
     const transition = Transition.START_ACTIVITY;
-    const timestamp = { toNumber: () => Date.now() } ;
+    const timestamp = { toNumber: () => Date.now() };
+
     aliecsSynchronizer._onRunMessage({ runEvent: { runNumber, transition }, timestamp });
+
     ok(eventEmitterMock.emit.called);
     deepStrictEqual(eventEmitterMock.emit.firstCall.args[0], EmitterKeys.RUN_TRACK);
-    deepStrictEqual(eventEmitterMock.emit.firstCall.args[1], {
-      runNumber, transition, timestamp: timestamp.toNumber()
-    });
+
+    const [, emitted] = eventEmitterMock.emit.firstCall.args;
+
+    strictEqual(emitted.runNumber, runNumber);
+    strictEqual(emitted.transition, transition);
+    // Allow ±5ms margin
+    ok(Math.abs(emitted.timestamp - timestamp.toNumber()) <= 5);
   });
 };
