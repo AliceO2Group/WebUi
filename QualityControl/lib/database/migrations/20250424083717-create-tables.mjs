@@ -62,6 +62,7 @@ export const up = async (queryInterface, Sequelize) => {
     name: {
       type: Sequelize.STRING(40),
       allowNull: false,
+      unique: true,
     },
     description: {
       type: Sequelize.STRING(100),

@@ -25,7 +25,13 @@ export const up = async (queryInterface) => {
     {
       id: 0,
       name: 'Anonymous',
-      username: 'anonymous' },
+      username: 'anonymous',
+    },
+    {
+      id: 99,
+      name: 'Some other owner',
+      username: 'some_other_owner',
+    },
   ], {});
 };
 

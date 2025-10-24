@@ -40,6 +40,15 @@ export const up = async (queryInterface) => {
       auto_tab_change_interval: 0,
       owner_username: 'anonymous',
     },
+    {
+      id: 3,
+      old_id: '3d23671b9588787cd0d67bdc',
+      name: 'rundefinition_pdpBeamType',
+      description: '',
+      display_timestamp: false,
+      auto_tab_change_interval: 0,
+      owner_username: 'some_other_owner',
+    },
   ], {});
 };
 

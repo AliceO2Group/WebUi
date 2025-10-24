@@ -52,6 +52,16 @@ export const up = async (queryInterface) => {
       object_name: 'qc/test/object/1',
       ignore_defaults: false,
     },
+    {
+      id: 7,
+      object_name: 'qc/test/object/1',
+      ignore_defaults: false,
+    },
+    {
+      id: 8,
+      object_name: 'qc/test/object/1',
+      ignore_defaults: false,
+    },
   ], {});
 };
 
