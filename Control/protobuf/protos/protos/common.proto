@@ -46,3 +46,48 @@ message WorkflowTemplateInfo {
   string path = 3;
   bool public = 4; // whether the environment is public or not
 }
+
+/**
+ * Beam information at a specific point in time (e.g. start or end of stable beams)
+ */
+message BeamInfo {
+  int64 stableBeamsStart = 1; // milliseconds since epoch when stable beams started
+  int64 stableBeamsEnd = 2;   // milliseconds since epoch when stable beams ended
+  int32 fillNumber = 3;       // LHC fill number
+  string fillingSchemeName = 4; // LHC filling scheme name e.g. 25ns_2460b_2448_2089_2227_144bpi_20inj
+  float beam1Energy = 5; // in GeV
+  float beam2Energy = 6; // in GeV
+  string beamType = 7; // e.g. PROTON-PROTON, O8-O8, Pb-Pb, p-Pb, Pb-p
+  BeamMode beamMode = 8;
+}
+
+/**
+ * Beam modes as defined and sent by LHC DIP client plus:
+ * * virtual type LOST_BEAMS - that is generated when beam 1 and beam 2 energy values are not equal anymore as per LHC DIP track: dip/acc/LHC/RunControl/SafeBeam
+ * * virtual type UNKNOWN - that is generated when there is no beam in the machine or value not added by the BKP-LHC Client
+ * Source of Beam Modes: https://lhc-commissioning.web.cern.ch/systems/data-exchange/doc/LHC-OP-ES-0005-10-00.pdf
+ */
+enum BeamMode {
+  UNKNOWN = 0; // virtual type
+  SETUP = 1;
+  ABORT = 2;
+  INJECTION_PROBE_BEAM = 3;
+  INJECTION_SETUP_BEAM = 4;
+  INJECTION_PHYSICS_BEAM = 5;
+  PREPARE_RAMP = 6;
+  RAMP = 7;
+  FLAT_TOP = 8;
+  SQUEEZE = 9;
+  ADJUST = 10;
+  STABLE_BEAMS = 11;
+  LOST_BEAMS = 12; // virtual type
+  UNSTABLE_BEAMS = 13;
+  BEAM_DUMP_WARNING = 14;
+  BEAM_DUMP = 15;
+  RAMP_DOWN = 16;
+  CYCLING = 17;
+  RECOVERY = 18;
+  INJECT_AND_DUMP = 19;
+  CIRCULATE_AND_DUMP = 20;
+  NO_BEAM = 21;
+}
