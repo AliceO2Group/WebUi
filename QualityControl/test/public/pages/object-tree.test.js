@@ -73,7 +73,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       await delay(500);
       await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(4)').click());
       await delay(1000);
-      const dlButton = await page.evaluate(() => document.querySelector('#download-button').href);
+      const dlButton = await page.evaluate(() => document.querySelector('.download-button').href);
       const token = await page.evaluate(() => model.session.token);
       strictEqual(dlButton, `${url}api/object/proxy/download/?token=${token}&objectIds=${objectId}`);
     },

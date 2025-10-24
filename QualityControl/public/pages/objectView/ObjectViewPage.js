@@ -12,12 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconDataTransferDownload } from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 import { draw } from './../../common/object/draw.js';
 import { spinner } from './../../common/spinner.js';
 import { errorDiv } from '../../common/errorDiv.js';
 import { dateSelector } from '../../common/object/dateSelector.js';
 import { qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
+import { downloadButton } from '../../common/downloadButton.js';
 
 /**
  * Shows a page to view an object on the whole page
@@ -47,11 +48,10 @@ const objectPlotAndInfo = (objectViewModel) =>
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.items-center.h-10', [
-          h('a.btn#download-button', {
-            title: 'Download object',
-            target: '_blank',
+          downloadButton({
             href: model.objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
-          }, iconDataTransferDownload()),
+            title: 'Download object',
+          }),
           h(
             '.w-40.p2.f6',
             dateSelector(
