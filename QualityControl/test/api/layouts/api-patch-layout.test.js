@@ -20,25 +20,16 @@ export const apiPatchLayoutTests = () => {
   suite('PATCH /layout/:id', () => {
     test('should return a 404 error if the id of the layout is not provided', async () => {
       await request(`${URL_ADDRESS}/api/layout/`)
-        .patch(`?token=${OWNER_TEST_TOKEN}`)
+        .patch(`?token=${GLOBAL_TEST_TOKEN}`)
         .expect(404, {
           error: '404 - Page not found',
           message: 'The requested URL was not found on this server.',
         });
     });
 
-    test('should return a 404 error if the id of the layout does not exist', async () => {
-      await request(`${URL_ADDRESS}/api/layout/test`)
-        .patch(`?token=${OWNER_TEST_TOKEN}`)
-        .expect(404, {
-          message: 'layout (test) not found',
-          status: 404,
-          title: 'Not Found',
-        });
-    });
-
-    test('should return a 403 error if role is not enough to update the layout', async () => {
-      await request(`${URL_ADDRESS}/api/layout/671b8c22402408122e2f20dd`)
+    //if not enough permissions
+    test('should return a 403 error if the requestor is not allowed to edit', async () => {
+      await request(`${URL_ADDRESS}/api/layout/1`)
         .patch(`?token=${OWNER_TEST_TOKEN}`)
         .expect(403, {
           message: 'Not enough permissions for this operation',
@@ -47,27 +38,56 @@ export const apiPatchLayoutTests = () => {
         });
     });
 
-    test('should return a 400 error for invalid body', async () => {
-      await request(`${URL_ADDRESS}/api/layout/671b8c22402408122e2f20dd`)
+    //if body is not provided
+    test('should return a 400 error if the body is not provided', async () => {
+      await request(`${URL_ADDRESS}/api/layout/1`)
         .patch(`?token=${GLOBAL_TEST_TOKEN}`)
-        .send({
-          test: 'test',
-        })
         .expect(400, {
-          message: 'Failed to validate layout: "test" is not allowed',
+          message: 'No layout data provided in the request body',
           status: 400,
           title: 'Invalid Input',
         });
     });
 
-    test('should successfully update the layout', async () => {
-      await request(`${URL_ADDRESS}/api/layout/671b8c22402408122e2f20dd`)
+    test('should return a 400 error if invalid body', async () => {
+      await request(`${URL_ADDRESS}/api/layout/1`)
         .patch(`?token=${GLOBAL_TEST_TOKEN}`)
         .send({
-          isOfficial: false,
+          test: 'test',
         })
-        .expect(201, {
-          id: '671b8c22402408122e2f20dd',
+        .expect(400, {
+          message: 'Failed to validate layout patch: "test" is not allowed',
+          status: 400,
+          title: 'Invalid Input',
+        });
+    });
+
+    //if the id does not exist
+    test('should return a 404 error if the id of the layout does not exist', async () => {
+      await request(`${URL_ADDRESS}/api/layout/9999`)
+        .patch(`?token=${GLOBAL_TEST_TOKEN}`)
+        .send({
+          isOfficial: true,
+        })
+        .expect(404, {
+          message: 'Layout with id 9999 not found',
+          status: 404,
+          title: 'Not Found',
+        });
+    });
+
+    //200 response
+    test('should return a 200 response with the id of the updated layout', async () => {
+      await request(`${URL_ADDRESS}/api/layout/2`)
+        .patch(`?token=${GLOBAL_TEST_TOKEN}`)
+        .send({
+          isOfficial: true,
+        })
+        .expect(200)
+        .then((response) => {
+          if (!response.body.id || response.body.id !== 2) {
+            throw new Error('Response does not contain the correct layout id');
+          }
         });
     });
   });
