@@ -392,7 +392,6 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const mockedJSON = JSON.stringify(editedMockedLayout);
       await page.locator(textareaPath).fill(mockedJSON);
 
-      page.screenshot({ path: 'layout-show-before-update.png' });
       const updateButtonPath = '#updateLayoutButton';
       await page.locator(updateButtonPath).click();
       await delay(50);

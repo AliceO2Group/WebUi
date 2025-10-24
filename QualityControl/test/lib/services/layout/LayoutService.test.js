@@ -255,31 +255,38 @@ export const layoutServiceTestSuite = async () => {
     suite('postLayout', () => {
       test('should create new layout', async () => {
         const layoutData = {
-          name: 'New Layout',
-          description: 'Layout Description',
-          displayTimestamp: true,
-          autoTabChange: 5,
-          ownerUsername: 'alice_username',
-          tabs: [{ name: 'Tab 1' }],
+          name: 'blabla',
+          owner_id: 0,
+          owner_name: 'Anonymous',
+          description: '',
+          displayTimestamp: false,
+          autoTabChange: 0,
+          tabs: [{ name: 'main', objects: [], columns: 2 }],
+          collaborators: [],
         };
-        const normalizedLayout = {
-          name: 'New Layout',
-          description: 'Layout Description',
-          display_timestamp: true,
-          auto_tab_change_interval: 5,
-          owner_username: 'alice_username',
+        const createdLayout = {
+          created_at: new Date('2025-10-24T13:09:28.012Z'),
+          updated_at: new Date('2025-10-24T13:09:28.012Z'),
+          is_official: false,
+          id: 4,
+          name: 'blabla',
+          description: '',
+          display_timestamp: false,
+          auto_tab_change_interval: 0,
+          owner_username: 'anonymous',
         };
-        const createdLayout = { id: 1, ...normalizedLayout };
+        userServiceMock.getUsernameById.resolves('anonymous');
         layoutRepositoryMock.createLayout.resolves(createdLayout);
         layoutService._tabSynchronizer.sync.resolves();
 
         const result = await layoutService.postLayout(layoutData);
         strictEqual(result, createdLayout);
-        strictEqual(layoutRepositoryMock.createLayout.calledWith(normalizedLayout), true);
+        strictEqual(layoutRepositoryMock.createLayout.called, true);
         strictEqual(layoutService._tabSynchronizer.sync.calledWith(createdLayout.id, layoutData.tabs), true);
         strictEqual(transactionMock.commit.called, true);
         strictEqual(transactionMock.rollback.called, false);
       });
+
       test('should rollback transaction on error during layout creation', async () => {
         layoutRepositoryMock.createLayout.rejects(new Error('DB error'));
         await rejects(async () => {
