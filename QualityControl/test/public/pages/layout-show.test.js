@@ -390,7 +390,6 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
       const textareaPath = '#layout-json-editor';
       const mockedJSON = JSON.stringify(editedMockedLayout);
-      console.log('Filling JSON editor with:', mockedJSON);
       await page.locator(textareaPath).fill(mockedJSON);
 
       page.screenshot({ path: 'layout-show-before-update.png' });

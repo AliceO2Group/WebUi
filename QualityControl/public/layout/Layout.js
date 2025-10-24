@@ -258,6 +258,7 @@ export default class Layout extends BaseViewModel {
     }
     const result = await this.model.services.layout.saveLayout(this.item);
     if (result.isSuccess()) {
+      await this.loadItem(this.item.id, this.tab.name);
       await this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
       this.model.notification.show(`Layout "${this.item.name}" has been saved successfully.`, 'success');
     } else {
