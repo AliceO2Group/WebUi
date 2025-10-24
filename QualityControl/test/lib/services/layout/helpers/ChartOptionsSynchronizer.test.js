@@ -42,13 +42,8 @@ export const chartOptionsSynchronizerTestSuite = async () => {
 
     suite('Constructor', () => {
       test('should successfully initialize ChartOptionsSynchronizer', () => {
-        const chartRepo = { test: 'chartRepo' };
-        const optionsRepo = { test: 'optionsRepo' };
-        const sync = new ChartOptionsSynchronizer(chartRepo, optionsRepo);
-
-        strictEqual(sync._chartOptionRepository, chartRepo);
-        strictEqual(sync._optionsRepository, optionsRepo);
-        strictEqual(typeof sync._logger, 'object');
+        strictEqual(synchronizer._chartOptionRepository, mockChartOptionRepository);
+        strictEqual(synchronizer._optionsRepository, mockOptionsRepository);
       });
     });
 
@@ -193,40 +188,34 @@ export const chartOptionsSynchronizerTestSuite = async () => {
       });
 
       test('should throw error when findOptionByName fails', async () => {
-        let rollbackCalled = false;
         const chart = { id: 1, options: ['option1'] };
-        const error = new Error('Database connection failed');
 
         mockChartOptionRepository.findChartOptionsByChartId = () => Promise.resolve([]);
-        mockOptionsRepository.findOptionByName = () => Promise.reject(error);
-        mockTransaction.rollback = () => {
-          rollbackCalled = true;
-        };
+        mockOptionsRepository.findOptionByName = () => Promise.reject(new Error('DB error'));
+
         await rejects(
-          async () => await synchronizer.sync(chart, mockTransaction),
-          error,
+          async () => {
+            await synchronizer.sync(chart, mockTransaction);
+          },
+          {
+            message: 'DB error',
+          },
         );
-        strictEqual(rollbackCalled, true, 'Transaction should be rolled back on error');
       });
 
-      test('should throw error when create fails', async () => {
-        const chart = { id: 1, options: ['option1'] };
-        const error = new Error('Failed to create chart option');
-        let rollbackCalled = false;
+      test('should throw error when delete operation fails', async () => {
+        const chart = { id: 1, options: ['Option1'] }; // provide at least one option
 
-        mockChartOptionRepository.findChartOptionsByChartId = () => Promise.resolve([]);
-        mockOptionsRepository.findOptionByName = () => Promise.resolve({ id: 10, name: 'option1' });
-        mockChartOptionRepository.create = () => Promise.reject(error);
+        // Mock repository methods
+        mockChartOptionRepository.findChartOptionsByChartId = () =>
+          Promise.resolve([{ option_id: 10 }]);
+        mockChartOptionRepository.delete = () => Promise.resolve(0); // Simulate failure
+        mockOptionsRepository.findOptionByName = () =>
+          Promise.resolve({ id: 20, name: 'Option1' }); // Return a dummy option
 
-        mockTransaction.rollback = () => {
-          rollbackCalled = true;
-        };
-
-        await rejects(
-          async () => await synchronizer.sync(chart, mockTransaction),
-          error,
-        );
-        strictEqual(rollbackCalled, true, 'Transaction should be rolled back on error');
+        await rejects(synchronizer.sync(chart, mockTransaction), {
+          message: 'Not found chart option with chart=1 and option=10 for deletion',
+        });
       });
     });
   });

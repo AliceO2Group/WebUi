@@ -12,8 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/tab-synchronizer`;
-import { LogManager, NotFoundError } from '@aliceo2/web-ui';
+import { NotFoundError } from '@aliceo2/web-ui';
 
 /**
  * @typedef {import('../../database/repositories/TabRepository').TabRepository} TabRepository
@@ -25,57 +24,52 @@ export class TabSynchronizer {
    * Creates an instance of TabSynchronizer to synchronize tabs for a layout.
    * @param {TabRepository} tabRepository - The repository for tab operations.
    * @param {GridTabCellSynchronizer} gridTabCellSynchronizer - The synchronizer for grid tab cells.
-   * @param {import('@aliceo2/web-ui').Logger} logger - Logger instance for logging operations.
    */
   constructor(tabRepository, gridTabCellSynchronizer) {
     this._tabRepository = tabRepository;
     this._gridTabCellSynchronizer = gridTabCellSynchronizer;
-    this._logger = LogManager.getLogger(LOG_FACILITY);
   }
 
   /**
-   * Sincroniza tabs de un layout (upsert + delete)
-   * @param {string} layoutId
-   * @param {Array<object>} tabs
-   * @param {object} transaction
+   * Synchronizes the tabs of a layout with the provided list of tabs.
+   * @param {string} layoutId - The ID of the layout whose tabs are to be synchronized.
+   * @param {Array<object>} tabs - The list of tabs to synchronize.
+   * @param {object} transaction - The database transaction object.
    */
   async sync(layoutId, tabs, transaction) {
-    const incomingIds = tabs.filter((t) => t.id).map((t) => t.id);
     const existingTabs = await this._tabRepository.findTabsByLayoutId(layoutId, { transaction });
-    const existingIds = existingTabs.map((t) => t.id);
+    const existingTabsByName = Object.fromEntries(existingTabs.map((t) => [t.name, t]));
 
-    const idsToDelete = existingIds.filter((id) => !incomingIds.includes(id));
-    for (const id of idsToDelete) {
-      try {
-        const deletedCount = await this._tabRepository.delete(id, { transaction });
-        if (deletedCount === 0) {
-          throw new NotFoundError(`Tab with id=${id} not found for deletion`);
-        }
-      } catch (error) {
-        this._logger.errorMessage(`Failed to delete tabId=${id}: ${error.message}`);
-        await transaction.rollback();
-        throw error;
+    for (const tab of tabs) {
+      tab.layout_id = layoutId;
+
+      if (!tab.id && existingTabsByName[tab.name]) {
+        tab.id = existingTabsByName[tab.name].id;
+      }
+    }
+
+    const incomingNames = tabs.map((t) => t.name);
+    const tabsToDelete = existingTabs.filter((t) => !incomingNames.includes(t.name));
+
+    for (const tab of tabsToDelete) {
+      const deletedCount = await this._tabRepository.delete(tab.id, { transaction });
+      if (deletedCount === 0) {
+        throw new NotFoundError(`Tab with id=${tab.id} not found for deletion`);
       }
     }
 
     for (const tab of tabs) {
-      tab.layout_id = layoutId;
-      try {
-        if (tab.id && existingIds.includes(tab.id)) {
-          await this._tabRepository.updateTab(tab.id, tab, { transaction });
-        } else {
-          const tabRecord = await this._tabRepository.createTab(tab, { transaction });
-          if (!tabRecord) {
-            throw new Error('Failed to create new tab');
-          }
+      if (tab.id && existingTabsByName[tab.name]) {
+        await this._tabRepository.updateTab(tab.id, tab, { transaction });
+      } else {
+        const tabRecord = await this._tabRepository.createTab(tab, { transaction });
+        if (!tabRecord) {
+          throw new Error('Failed to create new tab');
         }
-        if (tab.objects && tab.objects.length) {
-          await this._gridTabCellSynchronizer.sync(tab.id, tab.objects, transaction);
-        }
-      } catch (error) {
-        this._logger.errorMessage(`Failed to upsert tab (id=${tab.id ?? 'new'}): ${error.message}`);
-        await transaction.rollback();
-        throw error;
+        tab.id = tabRecord.id;
+      }
+      if (tab.objects && tab.objects.length) {
+        await this._gridTabCellSynchronizer.sync(tab.id, tab.objects, transaction);
       }
     }
   }

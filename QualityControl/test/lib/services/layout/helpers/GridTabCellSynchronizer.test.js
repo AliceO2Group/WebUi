@@ -54,15 +54,9 @@ export const gridTabCellSynchronizerTestSuite = async () => {
 
     suite('Constructor', () => {
       test('should successfully initialize GridTabCellSynchronizer', () => {
-        const gridTabCellRepo = { test: 'gridTabCellRepo' };
-        const chartRepo = { test: 'chartRepo' };
-        const chartOptionsSync = { test: 'chartOptionsSync' };
-        const sync = new GridTabCellSynchronizer(gridTabCellRepo, chartRepo, chartOptionsSync);
-
-        strictEqual(sync._gridTabCellRepository, gridTabCellRepo);
-        strictEqual(sync._chartRepository, chartRepo);
-        strictEqual(sync._chartOptionsSynchronizer, chartOptionsSync);
-        strictEqual(typeof sync._logger, 'object');
+        strictEqual(synchronizer._gridTabCellRepository, mockGridTabCellRepository);
+        strictEqual(synchronizer._chartRepository, mockChartRepository);
+        strictEqual(synchronizer._chartOptionsSynchronizer, mockChartOptionsSynchronizer);
       });
     });
 
@@ -148,22 +142,18 @@ export const gridTabCellSynchronizerTestSuite = async () => {
         deepStrictEqual(syncCalls[0].options, ['option1']);
       });
 
-      test('should throw error and rollback when operation fails', async () => {
+      test('should throw error when updating non-existing chart', async () => {
         const tabId = 'test-tab';
-        const objects = [];
-        const error = new Error('Database connection failed');
-        let rollbackCalled = false;
+        const objects = [{ id: 1, name: 'Non-existing Chart' }];
 
-        mockGridTabCellRepository.findByTabId = () => Promise.reject(error);
-        mockTransaction.rollback = () => {
-          rollbackCalled = true;
-        };
+        mockGridTabCellRepository.findByTabId = () => Promise.resolve([{ chart_id: 1 }]);
+        mockChartRepository.update = () => Promise.resolve(0);
+        mockGridTabCellRepository.update = () => Promise.resolve(0);
 
         await rejects(
-          async () => await synchronizer.sync(tabId, objects, mockTransaction),
-          error,
+          synchronizer.sync(tabId, objects, mockTransaction),
+          /Chart or cell not found for update/,
         );
-        strictEqual(rollbackCalled, true, 'Transaction should be rolled back on error');
       });
     });
 

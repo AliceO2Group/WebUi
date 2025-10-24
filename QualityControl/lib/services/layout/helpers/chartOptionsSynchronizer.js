@@ -12,9 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from '@aliceo2/web-ui';
-
-const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/chart-options-synchronizer`;
+import { NotFoundError } from '@aliceo2/web-ui';
 
 /**
  * @typedef {import('../../../database/repositories/ChartOptionsRepository.js')
@@ -30,7 +28,6 @@ export class ChartOptionsSynchronizer {
   constructor(chartOptionRepository, optionsRepository) {
     this._chartOptionRepository = chartOptionRepository;
     this._optionsRepository = optionsRepository;
-    this._logger = LogManager.getLogger(LOG_FACILITY);
   }
 
   /**
@@ -49,43 +46,28 @@ export class ChartOptionsSynchronizer {
     let incomingOptions = null;
     let incomingOptionIds = null;
 
-    try {
-      existingOptions = await this._chartOptionRepository.findChartOptionsByChartId(chart.id, { transaction });
-      existingOptionIds = existingOptions.map((co) => co.option_id);
-      incomingOptions = await Promise.all(chart.options.map((o) =>
-        this._optionsRepository.findOptionByName(o, { transaction })));
-      incomingOptionIds = incomingOptions.map((o) => o.id);
-    } catch (error) {
-      this._logger.errorMessage(`Failed to fetch chart options: ${error.message}`);
-      await transaction.rollback();
-      throw error;
-    }
+    existingOptions = await this._chartOptionRepository.findChartOptionsByChartId(chart.id, { transaction });
+    existingOptionIds = existingOptions.map((co) => co.option_id);
+    incomingOptions = await Promise.all(chart.options.map((o) =>
+      this._optionsRepository.findOptionByName(o, { transaction })));
+    incomingOptionIds = incomingOptions.map((o) => o.id);
 
     const toDelete = existingOptionIds.filter((id) => !incomingOptionIds.includes(id));
     for (const optionId of toDelete) {
-      try {
-        await this._chartOptionRepository.delete({ chartId: chart.id, optionId }, { transaction });
-      } catch (error) {
-        this._logger.errorMessage(`Failed to delete chart option: ${error.message}`);
-        transaction.rollback();
-        throw error;
+      const deletedCount = await this._chartOptionRepository.delete({ chartId: chart.id, optionId }, { transaction });
+      if (deletedCount === 0) {
+        throw new NotFoundError(`Not found chart option with chart=${chart.id} and option=${optionId} for deletion`);
       }
     }
 
     for (const option of incomingOptions) {
       if (!existingOptionIds.includes(option.id)) {
-        try {
-          const createdOption = await this._chartOptionRepository.create(
-            { chart_id: chart.id, option_id: option.id },
-            { transaction },
-          );
-          if (!createdOption) {
-            throw new Error('Option creation returned null');
-          }
-        } catch (error) {
-          this._logger.errorMessage(`Failed to create chart option: ${error.message}`);
-          transaction.rollback();
-          throw error;
+        const createdOption = await this._chartOptionRepository.create(
+          { chart_id: chart.id, option_id: option.id },
+          { transaction },
+        );
+        if (!createdOption) {
+          throw new Error('Option creation returned null');
         }
       }
     }
