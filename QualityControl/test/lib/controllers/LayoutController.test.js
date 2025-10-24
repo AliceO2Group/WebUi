@@ -158,9 +158,14 @@ export const layoutControllerTestSuite = async () => {
       ok(res.json.calledWith({
         id: 10001,
         name: 'Test Layout 1',
-        owner: { id: 123, name: 'Owner 1' },
-        tabs: [{ id: 1, name: 'Tab 1', gridTabCells: [] }],
-        is_official: true,
+        owner_id: 123,
+        owner_name: 'Owner 1',
+        description: undefined,
+        displayTimestamp: undefined,
+        autoTabChange: undefined,
+        tabs: [{ id: 1, name: 'Tab 1', columns: 2, objects: [] }],
+        isOfficial: true,
+        collaborators: [],
       }));
     });
     test('should return error when layoutService.getLayoutByName rejects', async () => {
@@ -179,6 +184,7 @@ export const layoutControllerTestSuite = async () => {
     test('should throw invalid input error if Joi validation fails', async () => {
       req.params = { id: 10001 };
       req.body = {
+        id: 10001,
         name: 'Updated Layout',
         tabs: 'invalid_tabs_format',
       };
@@ -187,7 +193,7 @@ export const layoutControllerTestSuite = async () => {
 
       ok(res.status.calledWith(400));
       ok(res.json.calledWith({
-        message: 'Failed to update layout: "tabs" must be an array',
+        message: 'Failed to validate layout: "tabs" must be an array',
         status: 400,
         title: 'Invalid Input',
       }));
@@ -195,6 +201,7 @@ export const layoutControllerTestSuite = async () => {
     test('should return updated layout ID when layoutService.putLayout resolves', async () => {
       req.params = { id: 10001 };
       req.body = {
+        id: 10001,
         name: 'Updated Layout',
         tabs: [{ id: 1, name: 'Tab 1' }],
         owner_id: 123,
@@ -277,7 +284,7 @@ export const layoutControllerTestSuite = async () => {
 
       ok(res.status.calledWith(400));
       ok(res.json.calledWith({
-        message: 'Failed to validate layout: "isOfficial" must be a boolean',
+        message: 'Failed to validate layout patch: "isOfficial" must be a boolean',
         status: 400,
         title: 'Invalid Input',
       }));

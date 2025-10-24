@@ -74,7 +74,7 @@ export class LayoutController {
     }
 
     try {
-      const filters = owner_id ? { owner_id, ...filter } : { ...filter };
+      const filters = owner_id !== undefined ? { owner_id, ...filter } : { ...filter };
       const layouts = await this._layoutService.getLayoutsByFilters(filters);
       const adaptedLayouts = layouts.map((layout) =>
         mapLayoutToAPI(layout, fields));
@@ -125,7 +125,8 @@ export class LayoutController {
     }
     try {
       const layout = await this._layoutService.getLayoutByName(layoutName);
-      res.status(200).json(layout);
+      const adaptedLayout = mapLayoutToAPI(layout);
+      res.status(200).json(adaptedLayout);
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);
     }
@@ -142,17 +143,26 @@ export class LayoutController {
   async putLayoutHandler(req, res) {
     const { id } = req.params;
     let layoutProposed = req.body;
+    const parsedId = parseInt(id, 10);
     try {
+      if (Object.keys(layoutProposed).length === 0) {
+        throw new InvalidInputError('No layout data provided in the request body');
+      }
+      if (parsedId !== layoutProposed.id) {
+        throw new InvalidInputError('Layout ID in the path does not match ID in the body');
+      }
       layoutProposed = await LayoutDto.validateAsync({ ...layoutProposed });
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(
         res,
-        new InvalidInputError(`Failed to update layout: ${error?.details?.[0]?.message || ''}`),
+        error.isJoi ?
+          new InvalidInputError(`Failed to validate layout: ${error?.details[0]?.message || ''}`) :
+          error,
       );
       return;
     }
     try {
-      const updatedLayoutId = await this._layoutService.putLayout(id, layoutProposed);
+      const updatedLayoutId = await this._layoutService.putLayout(parsedId, layoutProposed);
       res.status(200).json({ id: updatedLayoutId });
     } catch (error) {
       updateAndSendExpressResponseFromNativeError(res, error);
@@ -208,21 +218,23 @@ export class LayoutController {
    */
   async patchLayoutHandler(req, res) {
     const { id } = req.params;
-    let layout = {};
+    const parsedId = parseInt(id, 10);
     try {
-      layout = await LayoutPatchDto.validateAsync(req.body);
-    } catch (error) {
-      updateAndSendExpressResponseFromNativeError(
-        res,
-        new InvalidInputError(`Failed to validate layout: ${error?.details[0]?.message || ''}`),
-      );
-      return;
-    }
-    try {
-      const updatedLayoutId = await this._layoutService.patchLayout(id, layout);
+      if (Object.keys(req.body).length === 0) {
+        throw new InvalidInputError('No layout data provided in the request body');
+      }
+      // Validate the patch object
+      const layout = await LayoutPatchDto.validateAsync(req.body);
+
+      // Apply the patch
+      const updatedLayoutId = await this._layoutService.patchLayout(parsedId, layout);
       res.status(200).json({ id: updatedLayoutId });
     } catch (error) {
-      updateAndSendExpressResponseFromNativeError(res, error);
+      let responseError = error;
+      if (error.isJoi) {
+        responseError = new InvalidInputError(`Failed to validate layout patch: ${error?.details[0]?.message || ''}`);
+      }
+      updateAndSendExpressResponseFromNativeError(res, responseError);
       return;
     }
   }

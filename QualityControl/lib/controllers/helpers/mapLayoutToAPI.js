@@ -22,7 +22,7 @@
 export function mapLayoutToAPI(layout, fields) {
   try {
     const layoutAdapted = {
-      id: layout.id?.toString(),
+      id: layout.id,
       name: layout.name,
       owner_id: layout.owner.id,
       owner_name: layout.owner.name,
@@ -30,11 +30,11 @@ export function mapLayoutToAPI(layout, fields) {
       displayTimestamp: layout?.display_timestamp,
       autoTabChange: layout?.auto_tab_change_interval,
       tabs: layout.tabs.map((tab) => ({
-        id: tab.id?.toString(),
+        id: tab.id,
         name: tab.name,
         columns: tab?.column_count || 2,
         objects: (tab.gridTabCells || []).map((cell) => ({
-          id: cell.chart.id?.toString(),
+          id: cell.chart.id,
           x: cell.col || 0,
           y: cell.row || 0,
           h: cell.row_span || 1,
