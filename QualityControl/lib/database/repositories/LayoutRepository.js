@@ -79,18 +79,20 @@ export class LayoutRepository extends BaseRepository {
    * @param {string} [filters.objectPath] optional object path to filter charts
    * @returns {Promise<LayoutAttributes[]>} Array of layouts found
    */
-  async findLayoutsByFilters(filters) {
-    const { objectPath } = filters || {};
-    const whereClause = {};
-    if (objectPath) {
-      const layoutIds = await this._getLayoutIdsByObjectPath(objectPath);
-      if (layoutIds.length === 0) {
+  async findLayoutsByFilters(filters = {}) {
+    const where = {};
+
+    if (filters.objectPath) {
+      const layoutIds = await this._getLayoutIdsByObjectPath(filters.objectPath);
+      if (!layoutIds?.length) {
         return [];
       }
-      whereClause.id = { [Op.in]: layoutIds };
+      where.id = { [Op.in]: layoutIds };
+      delete filters.objectPath;
     }
+    Object.assign(where, filters);
     return this.model.findAll({
-      where: whereClause,
+      where,
       include: this.defaultInclude,
     });
   }
@@ -105,12 +107,15 @@ export class LayoutRepository extends BaseRepository {
       include: [
         {
           association: 'tabs',
+          required: true,
           include: [
             {
               association: 'gridTabCells',
+              required: true,
               include: [
                 {
                   association: 'chart',
+                  required: true,
                   where: { object_name: { [Op.like]: `%${objectPath}%` } },
                 },
               ],
