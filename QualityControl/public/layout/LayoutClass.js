@@ -34,29 +34,6 @@ export class LayoutClass {
   }
 
   /**
-   * Given a layout skeleton, parse its structure and add ids to the layout, tabs and objects
-   * Return a format expected to be accepted by the API - create layout route
-   * @param {JSON} skeleton - layout as given by the user
-   * @returns {JSON} newly validated layout
-   */
-  static fromSkeleton(skeleton) {
-    const layout = clone(skeleton);
-    layout.id = objectId();
-    if (layout.tabs) {
-      layout.tabs.map((tab) => {
-        tab.id = objectId();
-        if (tab.objects) {
-          tab.objects.map((object) => {
-            object.id = objectId();
-          });
-        }
-        return tab;
-      });
-    }
-    return layout;
-  }
-
-  /**
    * Given a layout, send back a stringified version of it stripped of IDs
    * @param {JSON} layout - layout dto representation
    * @returns {string} - string version of the provided layout

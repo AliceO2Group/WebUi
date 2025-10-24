@@ -16,7 +16,7 @@ import { RemoteData } from '/js/src/index.js';
 
 import GridList from './Grid.js';
 import LayoutUtils from './LayoutUtils.js';
-import { objectId, clone, setBrowserTabTitle } from '../common/utils.js';
+import { clone, setBrowserTabTitle } from '../common/utils.js';
 import { assertTabObject, assertLayout } from '../common/Types.js';
 import { buildQueryParametersString } from '../common/buildQueryParametersString.js';
 import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
@@ -104,6 +104,9 @@ export default class Layout extends BaseViewModel {
     } else {
       const result = await this.model.services.layout.getLayoutById(layoutId);
       if (result.isSuccess()) {
+        //change params to have correct tab name in url
+        layoutId = result.payload.id;
+        this.model.router.params.layoutId = layoutId;
         this.item = assertLayout(result.payload);
         this.item.autoTabChange = this.item.autoTabChange || 0;
         let tabIndex = this.item.tabs
@@ -196,7 +199,6 @@ export default class Layout extends BaseViewModel {
       this.model.notification.show('A new layout was not created due to invalid name', 'warning', 2000);
     } else {
       const layout = assertLayout({
-        id: objectId(),
         name: layoutName,
         owner_id: this.model.session.personid,
         owner_name: this.model.session.name,
@@ -205,7 +207,6 @@ export default class Layout extends BaseViewModel {
         autoTabChange: 0,
         tabs: [
           {
-            id: objectId(),
             name: 'main',
             objects: [],
           },
@@ -391,7 +392,6 @@ export default class Layout extends BaseViewModel {
     }
 
     this.item.tabs.push({
-      id: objectId(),
       name: name,
       objects: [],
     });
@@ -454,7 +454,6 @@ export default class Layout extends BaseViewModel {
    */
   addItem(objectName) {
     const newTabObject = assertTabObject({
-      id: objectId(),
       x: 0,
       y: 100, // Place it at the end first
       h: 1,
@@ -600,7 +599,6 @@ export default class Layout extends BaseViewModel {
 
     itemToDuplicate.tabs.forEach((tab) => {
       const duplicatedTab = {
-        id: objectId(),
         name: tab.name,
         objects: clone(tab.objects),
         columns: tab.columns,
@@ -610,7 +608,6 @@ export default class Layout extends BaseViewModel {
 
     // Create new duplicated layout
     const layout = assertLayout({
-      id: objectId(),
       name: layoutName,
       owner_id: this.model.session.personid,
       owner_name: this.model.session.name,
@@ -726,7 +723,6 @@ export default class Layout extends BaseViewModel {
 
       this.item = {
         ...updatedLayout,
-        id: this.item.id,
       };
 
       this.save();

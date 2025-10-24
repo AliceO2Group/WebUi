@@ -15,15 +15,6 @@
 import { isUserRoleSufficient } from '../../../../library/userRole.enum.js';
 
 /**
- * Generates a new ObjectId
- * @returns {string} 16 random chars, base 16
- */
-export function objectId() {
-  const timestamp = (new Date().getTime() / 1000 | 0).toString(16);
-  return timestamp + 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, () => (Math.random() * 16 | 0).toString(16)).toLowerCase();
-}
-
-/**
  * Make a deep clone of object provided
  * @param {object} obj - to be cloned
  * @returns {object} a deep copy

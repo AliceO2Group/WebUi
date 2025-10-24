@@ -34,7 +34,7 @@ export function assertLayouts(array) {
  * @returns {boolean} true is correct
  */
 export function assertLayout(obj) {
-  assertString(obj.id);
+  assertNumber(obj.id);
   assertString(obj.name);
   assertNumber(obj.owner_id);
   assertString(obj.owner_name);
@@ -59,7 +59,7 @@ export function assertTabs(array) {
  * @returns {boolean} true is correct
  */
 export function assertTab(obj) {
-  assertString(obj.id);
+  assertNumber(obj.id);
   assertString(obj.name);
   assertArray(obj.objects);
   return obj;
@@ -71,7 +71,7 @@ export function assertTab(obj) {
  * @returns {boolean} true is correct
  */
 export function assertTabObject(obj) {
-  assertString(obj.id);
+  assertNumber(obj.id);
   assertString(obj.name);
   assertArray(obj.options);
   assertNumber(obj.x);
