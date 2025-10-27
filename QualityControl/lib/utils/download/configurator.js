@@ -2,22 +2,23 @@ import { LayoutData } from './classes/data/LayoutData.js';
 import { DownloadConfigData } from './classes/data/DownloadConfigData.js';
 import { mapDownloadConfigToDomain } from './classes/DownloadConfigMapper.js';
 
+/** @import { DownloadConfigDomain } from './classes/domain/DownloadConfigDomain.js'; */
 /** @import { LayoutDomain } from './classes/domain/LayoutDomain.js'; */
 /** @import { Request, Response, NextFunction } from 'express' */
 
 /**
  * @typedef {object} Query
- * @property {string} tabIds
- * @property {string} objectIds
- * @property {string|string[]} archiveNameTemplateOptions
- * @property {string|string[]} objectNameTemplateOptions
- * @property {string} key
+ * @property {string} tabIds - tabIds to download
+ * @property {string} objectIds - objectIds to download
+ * @property {string|string[]} archiveNameTemplateOptions - archiveNameTemplateOptions
+ * @property {string|string[]} objectNameTemplateOptions - objectNameTemplateOptions
+ * @property {string} key - key received by earlier post if any.
  */
 
 /**
  * parse request to download configuration
- * @param {Request<Query>} req
- * @returns {DownloadConfigDomain}
+ * @param {Request<Query>} req - request
+ * @returns {DownloadConfigDomain} - Parsed DownloadConfigDomain model
  */
 export function parseRequestToConfig(req) {
   const plainConfigReq = req.query;
@@ -31,8 +32,8 @@ export function parseRequestToConfig(req) {
 
 /**
  * parse request to download layout
- * @param {Request<Query>} req
- * @returns {LayoutDomain}
+ * @param {Request<Query>} req - request
+ * @returns {LayoutDomain} - parsed LayoutDomainModel
  */
 export function parseRequestToLayout(req) {
   // Create Layout object

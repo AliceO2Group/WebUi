@@ -1,5 +1,4 @@
-// eslint-disable-next-line no-unused-vars
-import { ObjectDomain } from './ObjectDomain.js';
+/** @import { ObjectDomain } from './ObjectDomain.js'; */
 
 export class TabDomain {
   /**

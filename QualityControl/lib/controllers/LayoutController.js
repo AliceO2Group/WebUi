@@ -225,8 +225,8 @@ export class LayoutController {
 
   /**
    * Store layout data for later download request.
-   * @param {Request<import('../utils/download/configurator.js').Query>}req
-   * @param {Response} res
+   * @param {Request<import('../utils/download/configurator.js').Query>}req - request
+   * @param {Response} res - response
    */
   async postDownloadHandler(req, res) {
     try {

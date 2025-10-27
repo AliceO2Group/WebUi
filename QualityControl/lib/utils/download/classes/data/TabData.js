@@ -1,13 +1,14 @@
+/* eslint-disable jsdoc/reject-any-type */
 import { TabDomain } from '../domain/TabDomain.js';
 import { ObjectData } from './ObjectData.js';
 
 export class TabData {
   /**
    * constructor
-   * @param {string} id
-   * @param {string} name
-   * @param {ObjectData[]} objects
-   * @param {number} columns
+   * @param {string} id - id
+   * @param {string} name - name of tab
+   * @param {ObjectData[]} objects - objects within tab
+   * @param {number} columns - columnds
    */
   constructor(id, name, objects, columns) {
     this.id = id,
@@ -27,8 +28,8 @@ export class TabData {
   /**
    * mapFromPlain, map to an instance of TabData from a plain object.
    * @static
-   * @param {any} tabPlain
-   * @returns {TabData}
+   * @param {any} tabPlain - plain object of tab.
+   * @returns {TabData} - mapped TabData.
    */
   static mapFromPlain(tabPlain) {
     if (!tabPlain || typeof tabPlain !== 'object') {
@@ -40,7 +41,7 @@ export class TabData {
 
   /**
    * mapper to Domain model.
-   * @returns {TabDomain}
+   * @returns {TabDomain} - mapped TabDomain.
    */
   mapToDomain() {
     return new TabDomain(this.id, this.name, this.objects.map((object) => object.mapToDomain()));

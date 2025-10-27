@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/reject-any-type */
+/* eslint-disable jsdoc/require-param-description */
 import { LayoutDomain } from '../../classes/domain/LayoutDomain.js';
 import { TabData } from './TabData.js';
 export class LayoutData {
@@ -47,7 +49,7 @@ export class LayoutData {
    *  map to an instance of LayoutData from a plain object.
    * @static
    * @param {any} layoutPlain
-   * @returns {LayoutData}
+   * @returns {LayoutData} - mapped layoutData
    */
   static mapFromPlain(layoutPlain) {
     if (!layoutPlain || typeof layoutPlain !== 'object' || layoutPlain.id == undefined) {

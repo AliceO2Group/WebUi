@@ -4,8 +4,8 @@ import { DownloadMode } from '../enum/DownloadMode.js';
 
 /**
  * map download config to domain model
- * @param downloadConfigData
- * @returns
+ * @param {string} downloadConfigData - DownloadconfigData to map
+ * @returns {DownloadConfigDomain} - mapped DownloadConfigDomain
  */
 export function mapDownloadConfigToDomain(downloadConfigData) {
   const archiveNameTemplateOptions = downloadConfigData.archiveNameTemplateOptions.map(mapNameTemplateOption);
@@ -17,8 +17,8 @@ export function mapDownloadConfigToDomain(downloadConfigData) {
 
 /**
  * map string to name template option
- * @param nameTemplateOption
- * @returns {number}
+ * @param {string} nameTemplateOption - string representation
+ * @returns {number} - name template option
  */
 function mapNameTemplateOption(nameTemplateOption) {
   if (typeof nameTemplateOption === 'string') {
@@ -37,8 +37,8 @@ function mapNameTemplateOption(nameTemplateOption) {
 
 /**
  * map number to download mode.
- * @param downloadMode
- * @returns {number}
+ * @param {string} downloadMode - download mode (tab/object/layout)
+ * @returns {number} - mapped downloadmode
  */
 function mapDownloadMode(downloadMode) {
   if (typeof downloadMode === 'string') {
@@ -54,4 +54,3 @@ function mapDownloadMode(downloadMode) {
     throw new Error('Failed to map DownloadMode, it should be a string');
   }
 }
-//# sourceMappingURL=DownloadConfigMapper.js.map

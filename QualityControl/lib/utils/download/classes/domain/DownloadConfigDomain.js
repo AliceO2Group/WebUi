@@ -1,12 +1,12 @@
 export class DownloadConfigDomain {
   /**
    * constructor
-   * @param {string[]} tabIds
-   * @param {string[]} objectIds
-   * @param {NameTemplateOption[]} archiveNameTemplateOptions
-   * @param {NameTemplateOption[]} objectNameTemplateOptions
-   * @param {DownloadMode} downloadMode
-   * @param {boolean} pathNameStructure
+   * @param {string[]} tabIds - tabIds to download
+   * @param {string[]} objectIds - objectIds to download
+   * @param {NameTemplateOption[]} archiveNameTemplateOptions - name options for the archive (*.tar.gz)
+   * @param {NameTemplateOption[]} objectNameTemplateOptions - name options for the individual object files
+   * @param {DownloadMode} downloadMode - download mode (layout/tab/object)
+   * @param {boolean} pathNameStructure - enable full pathname structure
    */
   constructor(
     tabIds, objectIds, archiveNameTemplateOptions,

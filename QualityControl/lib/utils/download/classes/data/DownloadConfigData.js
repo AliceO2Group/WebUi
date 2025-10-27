@@ -1,14 +1,15 @@
+/* eslint-disable jsdoc/reject-any-type */
 import { DownloadMode } from '../../enum/DownloadMode.js';
 
 export class DownloadConfigData {
   /**
    * constructor
-   * @param {string[]} tabIds
-   * @param {string[]} objectIds
-   * @param {string[]} archiveNameTemplateOptions
-   * @param {string[]} objectNameTemplateOptions
-   * @param {string} downloadMode
-   * @param {boolean} pathNameStructure
+   * @param {string[]} tabIds - tabIds to download
+   * @param {string[]} objectIds - objectIds to download
+   * @param {string[]} archiveNameTemplateOptions - name options for the archive (*.tar.gz)
+   * @param {string[]} objectNameTemplateOptions - name options for the individual object files
+   * @param {string} downloadMode - download mode (layout/tab/object)
+   * @param {boolean} pathNameStructure - enable full pathname structure
    */
   constructor(
     tabIds, objectIds, archiveNameTemplateOptions,
@@ -37,8 +38,8 @@ export class DownloadConfigData {
   /**
    * mapper from plain object to instance of DownloadConfigData.
    * @static
-   * @param {any} downloadConfigPlain
-   * @returns {DownloadConfigData}
+   * @param {any} downloadConfigPlain - plain object download config.
+   * @returns {DownloadConfigData} - mapped DownloadConfigData.
    */
   static mapFromPlain(downloadConfigPlain) {
     if (!downloadConfigPlain || typeof downloadConfigPlain !== 'object') {

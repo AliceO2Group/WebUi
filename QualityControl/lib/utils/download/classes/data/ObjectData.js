@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/require-param-description */
+/* eslint-disable jsdoc/reject-any-type */
 import { ObjectDomain } from '../../classes/domain/ObjectDomain.js';
 export class ObjectData {
   /**
@@ -45,8 +47,8 @@ export class ObjectData {
   /**
    * mapper to map from plain object to instance of ObjectData.
    * @static
-   * @param {any} objectPlain
-   * @returns {ObjectData}
+   * @param {any} objectPlain - plain js object
+   * @returns {ObjectData} - mapped object data
    */
   static mapFromPlain(objectPlain) {
     if (!objectPlain || typeof objectPlain !== 'object') {
@@ -61,7 +63,7 @@ export class ObjectData {
 
   /**
    * mapper to domain model.
-   * @returns {ObjectDomain}
+   * @returns {ObjectDomain} - mapped objectDomain model.
    */
   mapToDomain() {
     return new ObjectDomain(this.id, this.name);
