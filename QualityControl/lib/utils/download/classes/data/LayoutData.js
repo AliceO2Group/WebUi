@@ -50,7 +50,7 @@ export class LayoutData {
    * @returns {LayoutData}
    */
   static mapFromPlain(layoutPlain) {
-    if (!layoutPlain || typeof layoutPlain !== 'object') {
+    if (!layoutPlain || typeof layoutPlain !== 'object' || layoutPlain.id == undefined) {
       throw new Error('invalid layout');
     }
     // eslint-disable-next-line @stylistic/js/max-len

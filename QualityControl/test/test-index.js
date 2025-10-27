@@ -98,6 +98,7 @@ import { runModeServiceTestSuite } from './lib/services/RunModeService.test.js';
 import { apiGetRunStatusTests } from './api/filters/api-get-run-status.test.js';
 import { runModeTests } from './public/features/runMode.test.js';
 import { aliecsSynchronizerTestSuite } from './lib/services/external/AliEcsSynchronizer.test.js';
+import { apiPostDownloadTests } from './api/download/api-post-download.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -202,6 +203,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     });
 
     suite('Layout GET request test suite', async () => apiGetLayoutsTests());
+    suite('Layout POST request test suite', async () => apiPostDownloadTests());
     suite('Layout PUT request test suite', async () => apiPutLayoutTests());
     suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
     suite('Object GET request test suite', async () => apiGetObjectsTests());

@@ -27,7 +27,7 @@ import {
   from '@aliceo2/web-ui';
 import { parseRequestToLayout } from '../utils/download/configurator.js';
 import { MapStorage } from '../utils/download/classes/domain/MapStorage.js';
-import { saveDownloadData } from '../utils/download/downloadEngine.js';
+import { saveDownloadData } from '../utils/download/DownloadEngine.js';
 
 /**
  * @typedef {import('../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
@@ -229,10 +229,14 @@ export class LayoutController {
    * @param {Response} res
    */
   async postDownloadHandler(req, res) {
-    const downloadLayoutDomain = parseRequestToLayout(req);
-    const userId = Number(req.query.user_id ?? 0);
-    const key = saveDownloadData(mapStorage, downloadLayoutDomain, userId);
-    res.send(key);
+    try {
+      const downloadLayoutDomain = parseRequestToLayout(req);
+      const userId = Number(req.query.user_id ?? 0);
+      const key = saveDownloadData(mapStorage, downloadLayoutDomain, userId);
+      res.status(201).send(key);
+    } catch {
+      res.status(400).send('Could not save download data');
+    }
   };
 
   /**

@@ -37,9 +37,15 @@ export function parseRequestToConfig(req) {
 export function parseRequestToLayout(req) {
   // Create Layout object
   const jsonBody = req.body;
+  if (Object.keys(jsonBody).length === 0) {
+    throw new Error('Json cannot be empty');
+  }
   // Data
   const layout = LayoutData.mapFromPlain(jsonBody);
   // Domain
+  if (layout.id == 0) {
+    throw new Error('Layout cannot have an empty id');
+  }
   const layoutDomain = layout.mapToDomain();
   if (layout == undefined) {
     throw new Error('Layout not found.');
