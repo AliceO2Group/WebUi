@@ -34,8 +34,8 @@ export class TabData {
     if (!tabPlain || typeof tabPlain !== 'object') {
       throw new Error('invalid tab');
     }
-    // eslint-disable-next-line @stylistic/js/max-len
-    return new TabData(tabPlain.id, tabPlain.name, Array.isArray(tabPlain.objects) ? tabPlain.objects.map(ObjectData.mapFromPlain) : [], Number(tabPlain.columns));
+    return new TabData(tabPlain.id, tabPlain.name, Array.isArray(tabPlain.objects) ?
+      tabPlain.objects.map(ObjectData.mapFromPlain) : [], Number(tabPlain.columns));
   }
 
   /**

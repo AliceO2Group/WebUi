@@ -10,8 +10,10 @@ export class DownloadConfigData {
    * @param {string} downloadMode
    * @param {boolean} pathNameStructure
    */
-  // eslint-disable-next-line @stylistic/js/max-len
-  constructor(tabIds, objectIds, archiveNameTemplateOptions, objectNameTemplateOptions, downloadMode, pathNameStructure) {
+  constructor(
+    tabIds, objectIds, archiveNameTemplateOptions,
+    objectNameTemplateOptions, downloadMode, pathNameStructure,
+  ) {
     this.tabIds = tabIds,
     this.objectIds = objectIds,
     this.archiveNameTemplateOptions = archiveNameTemplateOptions,
@@ -42,7 +44,14 @@ export class DownloadConfigData {
     if (!downloadConfigPlain || typeof downloadConfigPlain !== 'object') {
       throw new Error('invalid DownloadConfig');
     }
-    // eslint-disable-next-line @stylistic/js/max-len
-    return new DownloadConfigData(Array.isArray(downloadConfigPlain.tabIds) ? downloadConfigPlain.tabIds : downloadConfigPlain.tabIds?.split(',') ?? [], Array.isArray(downloadConfigPlain.objectIds) ? downloadConfigPlain.objectIds : downloadConfigPlain.objectIds?.split(',') ?? [], Array.isArray(downloadConfigPlain.archiveNameTemplateOptions) ? downloadConfigPlain.archiveNameTemplateOptions : downloadConfigPlain.archiveNameTemplateOptions?.split(',') ?? [], Array.isArray(downloadConfigPlain.objectNameTemplateOptions) ? downloadConfigPlain.objectNameTemplateOptions : downloadConfigPlain.objectNameTemplateOptions?.split(',') ?? [], downloadConfigPlain?.downloadMode ?? DownloadMode.object, downloadConfigPlain?.pathNameStructure == 'true' ? true : false);
+    return new DownloadConfigData(Array.isArray(downloadConfigPlain.tabIds) ?
+      downloadConfigPlain.tabIds : downloadConfigPlain.tabIds?.split(',') ??
+    [], Array.isArray(downloadConfigPlain.objectIds) ? downloadConfigPlain.objectIds :
+      downloadConfigPlain.objectIds?.split(',') ?? [], Array.isArray(downloadConfigPlain.archiveNameTemplateOptions) ?
+      downloadConfigPlain.archiveNameTemplateOptions : downloadConfigPlain.archiveNameTemplateOptions?.split(',')
+    ?? [], Array.isArray(downloadConfigPlain.objectNameTemplateOptions) ?
+      downloadConfigPlain.objectNameTemplateOptions : downloadConfigPlain.objectNameTemplateOptions?.split(',')
+    ?? [], downloadConfigPlain?.downloadMode ??
+    DownloadMode.object, downloadConfigPlain?.pathNameStructure == 'true' ? true : false);
   }
 }

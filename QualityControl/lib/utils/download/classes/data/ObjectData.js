@@ -52,8 +52,11 @@ export class ObjectData {
     if (!objectPlain || typeof objectPlain !== 'object') {
       throw new Error('invalid object');
     }
-    // eslint-disable-next-line @stylistic/js/max-len
-    return new ObjectData(objectPlain.id, Number(objectPlain.x ?? 0), Number(objectPlain.y ?? 0), Number(objectPlain.h ?? 0), Number(objectPlain.w ?? 0), objectPlain.name, Array.isArray(objectPlain.options) ? objectPlain.options : [], Boolean(objectPlain.autoSize), Boolean(objectPlain.ignoreDefaults));
+    return new ObjectData(objectPlain.id, Number(objectPlain.x ??
+        0), Number(objectPlain.y ?? 0), Number(objectPlain.h ??
+        0), Number(objectPlain.w ??
+        0), objectPlain.name, Array.isArray(objectPlain.options) ? objectPlain.options :
+      [], Boolean(objectPlain.autoSize), Boolean(objectPlain.ignoreDefaults));
   }
 
   /**
