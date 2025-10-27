@@ -27,7 +27,7 @@ import {
   from '@aliceo2/web-ui';
 import { parseRequestToLayout } from '../utils/download/configurator.js';
 import { MapStorage } from '../utils/download/classes/domain/MapStorage.js';
-import { saveDownloadData } from '../utils/download/DownloadEngineeee.js';
+import { saveDownloadData } from '../utils/download/downloadEngine.js';
 
 /**
  * @typedef {import('../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
