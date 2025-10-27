@@ -55,10 +55,8 @@ message BeamInfo {
   int64 stableBeamsEnd = 2;   // milliseconds since epoch when stable beams ended
   int32 fillNumber = 3;       // LHC fill number
   string fillingSchemeName = 4; // LHC filling scheme name e.g. 25ns_2460b_2448_2089_2227_144bpi_20inj
-  float beam1Energy = 5; // in GeV
-  float beam2Energy = 6; // in GeV
-  string beamType = 7; // e.g. PROTON-PROTON, O8-O8, Pb-Pb, p-Pb, Pb-p
-  BeamMode beamMode = 8;
+  string beamType = 5; // e.g. PROTON-PROTON, O8-O8, Pb-Pb, p-Pb, Pb-p
+  BeamMode beamMode = 6;
 }
 
 /**
