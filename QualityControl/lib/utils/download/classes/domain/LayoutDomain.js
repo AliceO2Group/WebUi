@@ -1,3 +1,6 @@
+// eslint-disable-next-line no-unused-vars
+import { TabDomain } from './TabDomain';
+
 export class LayoutDomain {
   /**
    * constructor
