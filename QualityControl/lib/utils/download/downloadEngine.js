@@ -1,8 +1,7 @@
-import { LayoutDomainStorage } from '../classes/domain/LayoutDomainStorage.js';
-// eslint-disable-next-line no-unused-vars
-import { LayoutDomain } from './classes/domain/LayoutDomain.js';
-// eslint-disable-next-line no-unused-vars
-import { MapStorage } from './classes/domain/MapStorage.js';
+import { LayoutDomainStorage } from './classes/domain/LayoutDomainStorage.js';
+
+/** @import { LayoutDomain } from './classes/domain/LayoutDomain.js'; */
+/** @import { MapStorage } from './classes/domain/MapStorage.js'; */
 
 /**
  * save download data to cache

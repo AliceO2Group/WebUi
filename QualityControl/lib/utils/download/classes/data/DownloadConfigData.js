@@ -1,4 +1,4 @@
-import { DownloadMode } from '../../enums/DownloadMode.js';
+import { DownloadMode } from '../../enum/DownloadMode.js';
 
 export class DownloadConfigData {
   /**

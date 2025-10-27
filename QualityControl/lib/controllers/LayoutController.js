@@ -25,12 +25,16 @@ import {
   updateAndSendExpressResponseFromNativeError,
 }
   from '@aliceo2/web-ui';
+import { parseRequestToLayout } from '../utils/download/configurator.js';
+import { MapStorage } from '../utils/download/classes/domain/MapStorage.js';
+import { saveDownloadData } from '../utils/download/downloadEngine.js';
 
 /**
  * @typedef {import('../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
  */
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/layout-ctrl`);
+const mapStorage = new MapStorage();
 
 /**
  * Gateway for all HTTP requests with regards to QCG Layouts
@@ -218,6 +222,18 @@ export class LayoutController {
       updateAndSendExpressResponseFromNativeError(res, new Error('Unable to create new layout'));
     }
   }
+
+  /**
+   * Store layout data for later download request.
+   * @param {Request<import('../utils/download/configurator.js').Query>}req
+   * @param {Response} res
+   */
+  async postDownloadHandler(req, res) {
+    const downloadLayoutDomain = parseRequestToLayout(req);
+    const userId = Number(req.query.user_id ?? 0);
+    const key = saveDownloadData(mapStorage, downloadLayoutDomain, userId);
+    res.send(key);
+  };
 
   /**
    * Patch a layout entity with information as per LayoutPatchDto.js

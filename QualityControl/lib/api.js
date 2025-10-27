@@ -73,6 +73,7 @@ export const setup = async (http, ws, eventEmitter) => {
   http.get('/layout/:id', layoutController.getLayoutHandler.bind(layoutController));
   http.get('/layout', layoutController.getLayoutByNameHandler.bind(layoutController));
   http.post('/layout', layoutController.postLayoutHandler.bind(layoutController));
+  http.post('/download', layoutController.postDownloadHandler.bind(layoutController));
   http.put(
     '/layout/:id',
     layoutServiceMiddleware(jsonFileService),
