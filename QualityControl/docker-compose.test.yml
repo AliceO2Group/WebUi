@@ -8,4 +8,5 @@ services:
       target: test
     environment:
       NODE_ENV: test
+    tty: true
     container_name: qcg-application-test
