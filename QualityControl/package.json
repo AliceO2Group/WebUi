@@ -40,7 +40,7 @@
   "dependencies": {
     "@aliceo2/web-ui": "2.8.4",
     "joi": "18.0.0",
-    "jsroot": "7.9.1",
+    "jsroot": "7.10.0",
     "kafkajs": "^2.2.4",
     "mariadb": "^3.4.1",
     "sequelize": "^6.37.7",
