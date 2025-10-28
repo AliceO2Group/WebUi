@@ -23,7 +23,7 @@ export const apiPostDownloadTests = () => {
     test('should return a GUID key', async () => {
       const layoutBody = downloadMockLayout1;
       await request(`${URL_ADDRESS}/api/download`)
-        .post(`?token=${OWNER_TEST_TOKEN}`)
+        .post(`?token=${OWNER_TEST_TOKEN}&user_id=1`)
         .send(layoutBody)
         .expect(201)
         .expect((res) => deepStrictEqual(res.text?.length, 36));

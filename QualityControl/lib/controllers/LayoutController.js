@@ -231,6 +231,7 @@ export class LayoutController {
   async postDownloadHandler(req, res) {
     try {
       const downloadLayoutDomain = parseRequestToLayout(req);
+      // Note: if userId becomes 0 it will throw when creating the storagelayout.
       const userId = Number(req.query.user_id ?? 0);
       const key = saveDownloadData(mapStorage, downloadLayoutDomain, userId);
       res.status(201).send(key);
