@@ -27,8 +27,14 @@ export class LayoutDomainStorage extends LayoutDomain {
    * @param {number} downloadUserId - userid of the user who requested this download.
    */
   constructor(id, name, tabs, downloadUserId) {
-    super(id, name, tabs);
-    this.downloadUserId = downloadUserId;
+    if (
+      downloadUserId != 0
+    ) {
+      super(id, name, tabs);
+      this.downloadUserId = downloadUserId;
+    } else {
+      throw new Error('Failed to instanciate LayoutDomainStorage');
+    }
   }
 
   downloadUserId;

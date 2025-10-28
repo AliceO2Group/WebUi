@@ -21,9 +21,16 @@ export class LayoutDomain {
    * @param {TabDomain[]} tabs - tabs
    */
   constructor(id, name, tabs) {
-    this.id = id,
-    this.name = name,
-    this.tabs = tabs;
+    if (
+      id != undefined && id != '' && name != undefined && name != ''
+      && tabs.length != 0
+    ) {
+      this.id = id,
+      this.name = name,
+      this.tabs = tabs;
+    } else {
+      throw new Error('Failed to instanciate new LayoutDomain');
+    }
   }
 
   id;

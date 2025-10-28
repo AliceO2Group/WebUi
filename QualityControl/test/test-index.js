@@ -99,6 +99,7 @@ import { apiGetRunStatusTests } from './api/filters/api-get-run-status.test.js';
 import { runModeTests } from './public/features/runMode.test.js';
 import { aliecsSynchronizerTestSuite } from './lib/services/external/AliEcsSynchronizer.test.js';
 import { apiPostDownloadTests } from './api/download/api-post-download.test.js';
+import { downloadTestSuite } from './common/library/download/downloadMappers.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -214,6 +215,10 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     suite('Lib - Test Suite', async () => {
       suite('Utility "errorHandler" methods test suite', async () => await errorHandlerTestSuite());
       suite('Utility "httpRequests" methods test suite', async () => await httpRequestsTestSuite());
+    });
+
+    suite('Download - Test Suite', () => {
+      suite('Download mapper test suite', () => downloadTestSuite());
     });
 
     suite('Common Library - Test Suite', () => {

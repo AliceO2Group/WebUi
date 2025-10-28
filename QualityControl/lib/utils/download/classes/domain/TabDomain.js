@@ -21,9 +21,16 @@ export class TabDomain {
    * @param {ObjectDomain[]} objects - objects
    */
   constructor(id, name, objects) {
-    this.id = id,
-    this.name = name,
-    this.objects = objects;
+    if (
+      id != undefined && id != '' && name != undefined && name != ''
+      && objects.length != 0
+    ) {
+      this.id = id,
+      this.name = name,
+      this.objects = objects;
+    } else {
+      throw new Error('Failed to instanciate new TabDomain');
+    }
   }
 
   id;

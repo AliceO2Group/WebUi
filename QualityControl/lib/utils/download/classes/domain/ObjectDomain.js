@@ -18,8 +18,12 @@ export class ObjectDomain {
    * @param {string} name - name
    */
   constructor(id, name) {
-    this.id = id,
-    this.name = name;
+    if (id != undefined && id != '' && name != undefined && name != '') {
+      this.id = id,
+      this.name = name;
+    } else {
+      throw new Error('Failed to instanciate new ObjectDomain');
+    }
   }
 
   id;
