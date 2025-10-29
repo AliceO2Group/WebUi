@@ -13,14 +13,14 @@
  */
 
 export interface SequalizeDatabaseConfig {
-  host?: string;
-  port?: number;
-  username?: string;
-  password?: string;
-  database?: string;
-  charset?: string;
-  collate?: string;
-  timezone?: string;
-  logging?: boolean | ((sql: string, timing?: number) => void);
-  retryThrottle?: number;
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  database: string;
+  charset: string;
+  collate: string;
+  timezone: string;
+  logging: boolean | ((sql: string, timing?: number) => void);
+  retryThrottle: number;
 }
