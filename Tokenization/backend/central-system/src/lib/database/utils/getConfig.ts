@@ -12,12 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
+import { SequalizeDatabaseConfig } from "./sequalizeDatabaseConfig";
+
 /**
  * Returns database configuration with default values if not provided.
  * @param config - Partial database configuration object.
  * @returns Complete database configuration object.
  */
-export function getConfig(config: any): any {
+export function getConfig(config: any): SequalizeDatabaseConfig {
   return {
     host: config.host ?? "localhost",
     port: config.port ?? 3306,
