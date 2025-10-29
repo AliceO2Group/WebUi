@@ -22,9 +22,9 @@ import {
   SignTokenReq,
   GetCredentialReq,
   CreateOrUpdateCredentialReq,
-} from "../lib/event-req-types.js";
-import { registerBusHandler } from "../lib/register-bus-handler.js";
-import { EventType } from "../lib/events.js";
+} from "../lib/utils/event-req-types.js";
+import { registerBusHandler } from "../lib/event-bus/register-bus-handler.js";
+import { EventType } from "../lib/utils/events.js";
 
 import { LogManager } from "@aliceo2/web-ui";
 const logger = LogManager.getLogger("VaultController");
