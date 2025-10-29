@@ -21,8 +21,8 @@ import { TokensGetService } from "../services/TokensGetService.js";
 import { VaultSignService } from "../services/VaultSignService.js";
 import { VaultAuthService } from "../services/VaultAuthService.js";
 import { VaultCredentialsService } from "../services/VaulCredentialsService.js";
-import { EventType } from "../lib/events.js";
-import { bus } from "../lib/event-bus.js";
+import { EventType } from "../lib/utils/events.js";
+import { bus } from "../lib/event-bus/event-bus.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 /*
