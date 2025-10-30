@@ -80,7 +80,7 @@
 .jsroot-container pre { background-color: initial; }
 .jsrootdiv:hover + .resize-element, .resize-element:hover{ display: flex !important; }
 
-.resize-button { position: absolute; right: 0%; z-index: 100 }
+.item-action-row { position: absolute; right: 0%; z-index: 100 }
 
 /* Removing borders and arrows from select-dropdown */
 /* select {-webkit-appearance: none;-moz-appearance: none;text-indent: 1px;text-overflow: '';} */
@@ -118,4 +118,21 @@
 .error-icon {
   font-size: 2em;
   margin-bottom: .5em;
+}
+
+.status-ongoing {
+  color: var(--color-success);
+  animation: ongoing-pulse 1s ease-in-out infinite;
+}
+
+@keyframes ongoing-pulse {
+  0% {
+    color: var(--color-success);
+  }
+  50% {
+    color: var(--color-success-dark);
+  }
+  100% {
+    color: var(--color-success);
+  }
 }

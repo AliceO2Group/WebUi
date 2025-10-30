@@ -133,3 +133,66 @@ const dropdownSelector = (config) => {
     ]),
   ]);
 };
+
+/**
+ * Renders a dropdown selector for ongoing runs.
+ * @param {object} config - Selector config ({ id, placeholder, width }).
+ * @param {object} filterMap - Current filters (RunNumber or empty).
+ * @param {RemoteData} options - Available ongoing runs.
+ * @param {Function} onChangeCallback - To change the selection and update the filterMap
+ * @param {Function} onEnterCallback - To trigger the filter
+ * @param {Function} [onFocusCallback] - To retrieve ongoing runs
+ * @returns {object} Virtual DOM node (hyperscript element).
+ */
+export const ongoingRunsSelector = (config, filterMap, options, onChangeCallback, onEnterCallback, onFocusCallback) => {
+  const handleChange = (value) => {
+    onChangeCallback('RunNumber', value, false);
+    if (value) {
+      setTimeout(() => onEnterCallback(), 50);
+    }
+  };
+  const availableOptions = options.isSuccess()
+    ? [...new Set([...options.payload].map((v) => String(v)))]
+    : [];
+
+  const selectedValue = filterMap['RunNumber'] || '';
+
+  const handleFocus = () => {
+    if (onFocusCallback) {
+      onFocusCallback();
+    }
+  };
+
+  const buildOptions = () => {
+    const options = [];
+    options.push(h('option', { value: '', disabled: true }, config.placeholder || 'Select a run'));
+    if (selectedValue) {
+      options.push(h('option', { value: selectedValue }, selectedValue));
+    }
+
+    availableOptions
+      .filter((option) => option !== selectedValue)
+      .forEach((option) => {
+        options.push(h('option', { value: option }, option));
+      });
+
+    return options;
+  };
+
+  return h(`.${config.width}`, [
+    h(
+      'select.form-control',
+      {
+        placeholder: config.placeholder || 'Select a run',
+        id: config.id,
+        name: config.id,
+        value: selectedValue,
+        onfocus: handleFocus,
+        onchange: (event) => handleChange(event.target.value),
+      },
+      availableOptions.length > 0 || selectedValue
+        ? buildOptions()
+        : [h('option', { value: '', disabled: true }, 'No ongoing runs available')],
+    ),
+  ]);
+};

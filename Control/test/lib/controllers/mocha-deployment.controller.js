@@ -56,6 +56,7 @@ describe('DeploymentController test suite', function() {
         template,
         repository,
         revision,
+        detectors: ['TST'],
         userVars: { var1: 'value1' }
       };
       mockDeploymentService.deployEnvironment.returns({ id: 'env123' });
@@ -66,7 +67,9 @@ describe('DeploymentController test suite', function() {
       assert.deepStrictEqual(mockDeploymentService.deployEnvironment.firstCall.args[0], {
         workflowTemplate: `${repository}/workflows/${template}@${revision}`,
         selectedConfiguration: undefined,
+        shouldAutoTransition: undefined,
         userVars: { var1: 'value1' },
+        detectors: ['TST'],
         user: new User(req.session.username, req.session.name, req.session.personid)
       });
 
@@ -102,6 +105,7 @@ describe('DeploymentController test suite', function() {
       const template = 'readout-dataflow';
       req.body = {
         template,
+        detectors: ['TST'],
         userVars: { var1: 'value1' }
       };
       mockDeploymentService.deployEnvironment.returns({ id: 'env123' });
@@ -113,7 +117,9 @@ describe('DeploymentController test suite', function() {
       assert.deepStrictEqual(mockDeploymentService.deployEnvironment.firstCall.args[0], {
         workflowTemplate: `${repository}/workflows/${template}@${revision}`,
         selectedConfiguration: undefined,
+        shouldAutoTransition: undefined,
         userVars: { var1: 'value1' },
+        detectors: ['TST'],
         user: new User(req.session.username, req.session.name, req.session.personid)
       });
 

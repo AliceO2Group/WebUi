@@ -12,6 +12,8 @@
  */
 
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
+import { delay } from '../../testUtils/delay.js';
+
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
 const SORTING_BUTTON_PATH = 'header > div > div > div:nth-child(3) > div > button';
 
@@ -39,8 +41,19 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     ok(rowsCount > 1); // more than 1 object in the tree
   });
 
+  await testParent.test('should not preserve state if refreshed not in run mode', { timeout }, async () => {
+    const tbodyPath = 'section > div > div > div > table > tbody';
+    await page.locator(`${tbodyPath} > tr:nth-child(2)`).click();
+    await page.reload({ waitUntil: 'networkidle0' });
+
+    const rowCount = await page.evaluate(() =>
+      document.querySelectorAll('section > div > div > div > table > tbody > tr').length);
+
+    strictEqual(rowCount, 2);
+  });
+
   await testParent.test('should have a button to sort by (default "Name" ASC)', async () => {
-    const sortByButtonTitle = await page.evaluate((path) => document.querySelector(path).title, SORTING_BUTTON_PATH);
+    const sortByButtonTitle = await page.evaluate((path) => document.querySelector(path).title, '#sortTreeButton');
     strictEqual(sortByButtonTitle, 'Sort by');
   });
 
@@ -49,9 +62,26 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(name, 'qc/test/object/1');
   });
 
+  await testParent.test(
+    'should have a correctly made download button',
+    { timeout },
+    async () => {
+      const objectId = '016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(2)').click());
+      await delay(500);
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(3)').click());
+      await delay(500);
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(4)').click());
+      await delay(1000);
+      const dlButton = await page.evaluate(() => document.querySelector('#download-button').href);
+      const token = await page.evaluate(() => model.session.token);
+      strictEqual(dlButton, `${url}api/object/proxy/download/?token=${token}&objectIds=${objectId}`);
+    },
+  );
+
   await testParent.test('should sort list of histograms by name in descending order', async () => {
-    await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByNameOptionPath = 'header > div > div > div:nth-child(3) > div > div > a:nth-child(2)';
+    await page.locator('#sortTreeButton').click();
+    const sortingByNameOptionPath = '#sortTreeButton > div > a:nth-child(2)';
     await page.locator(sortingByNameOptionPath).click();
 
     const sorted = await page.evaluate(() => ({
@@ -65,8 +95,8 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should sort list of histograms by name in ascending order', async () => {
-    await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByNameOptionPath = 'header > div > div > div:nth-child(3) > div > div > a:nth-child(1)';
+    await page.locator('#sortTreeButton').click();
+    const sortingByNameOptionPath = '#sortTreeButton > div > a:nth-child(1)';
     await page.locator(sortingByNameOptionPath).click();
     const sorted = await page.evaluate(() => ({
       list: window.model.object.currentList,
@@ -79,7 +109,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should have filtered results on input search', async () => {
-    await page.type('header > div > div:nth-child(1) > div:nth-child(3) > input', 'qc/test/object/1');
+    await page.type('#searchObjectTree', 'qc/test/object/1');
     const rowsDisplayed = await page.evaluate(() => {
       const rows = [];
       document.querySelectorAll('section > div > div > div > table > tbody > tr')

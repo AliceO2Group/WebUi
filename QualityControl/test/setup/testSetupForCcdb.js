@@ -13,6 +13,8 @@
  */
 
 import nock from 'nock';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 import { readFileSync } from 'fs';
 import { CCDB_FILTER_FIELDS, CCDB_MONITOR, CCDB_VERSION_KEY } from './../../lib/services/ccdb/CcdbConstants.js';
 import { config } from './../config.js';
@@ -51,6 +53,10 @@ const xFieldHeader3 =
   { reqheaders: { Accept: 'application/json', 'X-Filter-Fields': `${VALID_FROM},${ID},${CREATED}` } };
 const xFieldHeader4 = { reqheaders: { Accept: 'application/json', 'X-Filter-Fields': PATH } };
 
+const _filename = fileURLToPath(import.meta.url);
+const _dirname = dirname(_filename);
+const filePath = join(_dirname, '../demoData/qcdbRoot/TObject_1732326337752.root');
+
 /**
  * Setup nock environment for ccdb which is to intercept all CCDB requests used in the Frontend test suites
  * Requests will have to persist as tests might run multiple times and we want to intercept all
@@ -60,6 +66,13 @@ export const initializeNockForCcdb = () => {
     .get(CCDB_API_MONITOR)
     .reply(200, versionResponse);
 
+  nock(CCDB_URL)
+    .replyContentLength()
+    .get('/download/95c51d3b-9f64-11f0-bd06-bcb9d03ba1a2')
+    .replyWithFile(200, filePath, {
+      'Content-Type': 'application/root',
+    }).persist();
+
   nock(CCDB_URL, xFieldHeader1).persist()
     .get(`${CCDB_API_PATH_LATEST}.*`)
     .reply(200, { objects })
@@ -68,6 +81,22 @@ export const initializeNockForCcdb = () => {
 
   nock(CCDB_URL, xFieldHeader4).persist()
     .get(`${CCDB_API_PATH_LATEST}.*/RunNumber=0`)
+    .reply(200, MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER);
+
+  nock(CCDB_URL, xFieldHeader1).persist()
+    .get(`${CCDB_API_PATH_LATEST}.*/RunNumber=500001`)
+    .reply(200, MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER);
+
+  nock(CCDB_URL, xFieldHeader1).persist()
+    .get(`${CCDB_API_PATH_LATEST}.*/RunNumber=500002`)
+    .reply(200, MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER);
+
+  nock(CCDB_URL, xFieldHeader1).persist()
+    .get(`${CCDB_API_PATH_LATEST}.*/RunNumber=500003`)
+    .reply(200, MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER);
+
+  nock(CCDB_URL, xFieldHeader1).persist()
+    .get(`${CCDB_API_PATH_LATEST}.*/RunNumber=566138`)
     .reply(200, MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER);
 
   nock(CCDB_URL, acceptHeader).persist()
@@ -112,4 +141,6 @@ export const initializeNockForCcdb = () => {
     .replyContentLength()
     .get(`${CCDB_API_DOWNLOAD_ROOT_OBJECT.path}/${CCDB_API_DOWNLOAD_ROOT_OBJECT.id}`)
     .reply(200, fileContent);
+
+  //runs mode
 };

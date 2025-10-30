@@ -122,7 +122,7 @@ const deploymentsTable = (deployments, model) => {
           h('td', { style: 'text-align: center;' },
             includedDetectors?.length > 0 ? includedDetectors.sort().join(' ') : '-'
           ),
-          h('td', { style: 'text-align: center;' }, getUserFromUserVars(userVars).name || '-'),
+          h('td', { style: 'text-align: center;' }, getUserFromUserVars(userVars)?.name || '-'),
           h('td', { style: 'text-align: center;' }, parseObject(createdWhen, 'createdWhen')),
           h('td.f6', { style: 'text-align: center;' }, deploymentError ?? '-'),
           h(
@@ -221,7 +221,7 @@ const runColumn = (item, model) => {
  * Extracts the user information from the userVars object
  * @param {Object} userVars - The userVars object containing user information
  */
-const getUserFromUserVars = ({last_request_user}) => {
+const getUserFromUserVars = ({last_request_user} = {}) => {
   if (!last_request_user) {
     return null;
   }
