@@ -16,10 +16,11 @@ import { RunStatus } from '../../common/library/runStatus.enum.js';
 import { httpGetJson } from '../utils/httpRequests.js';
 import { LogManager } from '@aliceo2/web-ui';
 
-const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'bkp-service'}`);
 const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
 const GET_RUN_PATH = '/api/runs';
+
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/bkp-service`;
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
@@ -34,6 +35,8 @@ export class BookkeepingService {
     this._port = null;
     this._token = '';
     this._protocol = '';
+
+    this._logger = LogManager.getLogger(LOG_FACILITY);
   }
 
   /**
@@ -69,12 +72,12 @@ export class BookkeepingService {
    */
   async connect() {
     if (!this.validateConfig()) {
-      logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
+      this._logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
       return;
     }
     this.active = await this.simulateConnection();
     if (!this.active) {
-      logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
+      this._logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
     }
   }
 
@@ -94,7 +97,7 @@ export class BookkeepingService {
         },
       );
       if (data && data?.status?.ok && data?.status?.configured) {
-        logger.infoMessage('Successfully connected to Bookkeeping');
+        this._logger.infoMessage('Successfully connected to Bookkeeping');
         return true;
       } else {
         this.error = 'Bookkeeping service is not configured or status is not OK';
@@ -133,8 +136,8 @@ export class BookkeepingService {
    */
   async retrieveRunStatus(runNumber) {
     if (!this.active) {
-      logger.warnMessage('Could not connect to bookkeeping');
-      return RunStatus.NOT_FOUND;
+      this._logger.warnMessage('Could not connect to bookkeeping');
+      return RunStatus.BOOKKEEPING_UNAVAILABLE;
     }
 
     try {
@@ -144,18 +147,18 @@ export class BookkeepingService {
       });
 
       if (!data) {
-        logger.warnMessage(`The run status was invalid for run number ${runNumber}`);
+        throw new Error('No data available');
+      }
+
+      return data.timeO2End ? RunStatus.ENDED : RunStatus.ONGOING;
+    } catch (error) {
+      const msg = error?.message ?? String(error);
+      if (msg.includes('404')) {
+        this._logger.warnMessage(`Run number ${runNumber} not found in bookkeeping`);
         return RunStatus.NOT_FOUND;
       }
-
-      if (data.timeO2End) {
-        return RunStatus.ENDED;
-      }
-
-      return RunStatus.ONGOING;
-    } catch (error) {
-      logger.errorMessage(`An error occurred whilst fetching run status: ${error.message || error}`);
-      return RunStatus.NOT_FOUND;
+      this._logger.errorMessage(`Error fetching run status: ${error.message || error}`);
+      return RunStatus.UNKNOWN;
     }
   }
 

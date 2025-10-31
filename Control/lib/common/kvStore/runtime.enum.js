@@ -21,7 +21,7 @@
 const RUNTIME_COMPONENT = Object.freeze({
   PDP_VERSION: 'aliecs/defaults',
   COG: 'COG',
-  COG_V1: 'COG_V1',
+  COG_V1: 'COG-v1',
 });
 
 /**
