@@ -121,7 +121,7 @@ export default class ObjectViewModel extends BaseViewModel {
    * @returns {string|void} download link
    */
   getDownloadQcdbObjectUrl(objectId = undefined) {
-    if (objectId == undefined || model.session.token == undefined) {
+    if (objectId == undefined || this.model.session.token == undefined) {
       return;
     }
     return `/api/object/proxy/download/?token=${this.model.session.token}&objectIds=${objectId}`;

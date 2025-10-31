@@ -12,23 +12,31 @@
  * or submit itself to any jurisdiction.
  */
 
-const puppeteer = require('puppeteer');
-const config = require('./test-config.cjs');
+import puppeteer, { Browser, Page } from 'puppeteer';
+import config from './test-config';
 
-let page;
+let page: Page | null = null;
 
-global.test = {
-  page: null,
-  helpers: {},
+type Global = {
+  test: {
+    page: Page | null;
+    browser: Browser | null;
+    helpers: Record<string, string>;
+  };
 };
 
-describe('Configuration', function () {
-  let browser;
-  this.timeout(50000);
-  this.slow(1000);
-  const url = `http://${config.http.hostname}:${config.http.port}/`;
+const global: Global = {
+  test: {
+    page: null,
+    browser: null,
+    helpers: {},
+  },
+};
 
-  before(async function () {
+export const mochaHooks = {
+  async beforeAll() {
+    let browser: Browser | null = null;
+    const url = `http://${config.http.hostname}:${config.http.port}/`;
     browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
       headless: true,
@@ -38,36 +46,29 @@ describe('Configuration', function () {
     // Listen to browser
     page.on('error', (pageerror) => {
       console.error('        ', pageerror);
-      this.ok = false;
     });
     page.on('pageerror', (pageerror) => {
       console.error('        ', pageerror);
-      this.ok = false;
     });
     page.on('console', (msg) => {
-      for (let i = 0; i < msg.args().length; ++i) {
-        console.log(`        ${msg.args()[i]}`);
-      }
+      console.log(msg.args());
     });
     await page.setViewport({ width: 1200, height: 770 });
 
     global.test.page = page;
+    global.test.browser = browser;
     global.test.helpers.url = url;
-  });
+  },
 
-  require('./public/page-root-mocha.cjs');
-
-  beforeEach(function () {
-    return (this.ok = true);
-  });
-
-  afterEach(function () {
-    if (!this.ok) {
-      throw new Error('something went wrong');
+  async afterAll() {
+    const {
+      test: { browser },
+    } = global;
+    if (browser === null) {
+      return;
     }
-  });
-
-  after(async function () {
     await browser.close();
-  });
-});
+  },
+};
+
+export default global;

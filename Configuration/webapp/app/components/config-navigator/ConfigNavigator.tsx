@@ -27,7 +27,7 @@ export const ConfigNavigator = () => {
 
   const fetchConfigurationKeys = async () => {
     try {
-      const res = await fetch('http://localhost:8080/api/api/configurations');
+      const res = await fetch('http://localhost:8080/control/api/configurations');
       const data = (await res.json()) as string[];
       const newConfigKeys = data?.map((key) => key.split('/').pop() ?? '');
       setConfigKeys(newConfigKeys);
