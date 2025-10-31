@@ -35,7 +35,7 @@ describe('CoreUtils test suite', () => {
   });
 
   describe('Check `_removeHostsFromSelection` test suite', () => {
-    it('should remove requested hosts from payload for specific run_type', () => {
+    it('should successfully remove requested hosts from payload for specific run_type', () => {
       const payload = {
         vars: {
           hosts: JSON.stringify(['host-145', 'host-146'])
@@ -49,6 +49,20 @@ describe('CoreUtils test suite', () => {
       assert.deepStrictEqual(CoreUtils._removeHostsFromSelection(payload, ['host-145']), expectedPayload);
     });
 
+    it('should successfully work with empty hostsToIgnore', () => {
+      const payload = {
+        vars: {
+          hosts: JSON.stringify(['host-1', 'host-2'])
+        }
+      };
+      const expectedPayload = {
+        vars: {
+          hosts: JSON.stringify(['host-1', 'host-2'])
+        }
+      };
+      assert.deepStrictEqual(CoreUtils._removeHostsFromSelection(payload, []), expectedPayload);
+    });
+
     it('should not remove host that is not found', () => {
       const payload = {
         vars: {
@@ -56,7 +70,55 @@ describe('CoreUtils test suite', () => {
         }
       };
       assert.deepStrictEqual(CoreUtils._removeHostsFromSelection(payload, ['host-222']), payload);
-    })
+    });
+
+    it('should throw if all hosts were removed following the filtering', () => {
+      const payload = {
+        vars: {
+          hosts: JSON.stringify(['host-1'])
+        }
+      };
+      assert.throws(
+        () => CoreUtils._removeHostsFromSelection(payload, ['host-1']),
+        /No hosts remained after ignoring the ones in store/
+      );
+    });
+
+    it('should throw if provided deployment payload for hosts is not valid JSON', () => {
+      const payload = {
+        vars: {
+          hosts: '[not valid json]'
+        }
+      };
+      assert.throws(
+        () => CoreUtils._removeHostsFromSelection(payload, []),
+        /Invalid hosts JSON/
+      );
+    });
+
+    it('should throw if provided deployment payload hosts is not an array', () => {
+      const payload = {
+        vars: {
+          hosts: JSON.stringify({ host: 'host-1' })
+        }
+      };
+      assert.throws(
+        () => CoreUtils._removeHostsFromSelection(payload, []),
+        /Hosts from deployment payload should be an array/
+      );
+    });
+
+    it('should throw when provided deployments payload hosts is empty array', () => {
+      const payload = {
+        vars: {
+          hosts: JSON.stringify([])
+        }
+      };
+      assert.throws(
+        () => CoreUtils._removeHostsFromSelection(payload, ['host-1']),
+        /No hosts remained after ignoring the ones in store/
+      );
+    });
   });
 
   describe('Check parseFrameworkInfo', () => {

@@ -19,7 +19,7 @@ import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
 import About from './about/About.js';
 import Workflow from './workflow/Workflow.js';
-import Task from './task/Task.js';
+import TaskPageModel from './pages/TaskList/TaskList.model.js';
 import Config from './configuration/ConfigByCru.js';
 import DetectorService from './services/DetectorService.js';
 import {PREFIX, ROLES} from './../workflow/constants.js';
@@ -89,8 +89,8 @@ export default class Model extends Observable {
     this.calibrationRunsModel = new CalibrationRunsModel(this);
     this.calibrationRunsModel.bubbleTo(this);
 
-    this.task = new Task(this);
-    this.task.bubbleTo(this);
+    this.taskPageModel = new TaskPageModel(this);
+    this.taskPageModel.bubbleTo(this);
 
     this.about = new About(this);
     this.about.bubbleTo(this);
@@ -178,20 +178,8 @@ export default class Model extends Observable {
         }
         break;
       }
-      case BroadcastKeys.RESOURCES_CLEANUP:
-        this.task.setResourcesRequest(message.payload);
-        break;
       case BroadcastKeys.O2_ROC_CONFIG:
         this.configuration.setConfigurationRequest(message.payload);
-        break;
-      case BroadcastKeys.ENVIRONMENTS_OVERVIEW:
-        this.environment.list = RemoteData.success({ environments: message.payload ?? [] });
-        this.environment.updateItemEnvironment(message.payload, this.router.params?.panel ?? '');
-        this.notify();
-        break;
-      case BroadcastKeys.REQUESTS:
-        this.environment.requests = RemoteData.success(message.payload);
-        this.notify();
         break;
       case BroadcastKeys.COMPONENT_STATUS:
         if (message?.payload[STATUS_COMPONENTS_KEYS.GENERAL_SYSTEM_KEY]) {
@@ -219,14 +207,28 @@ export default class Model extends Observable {
         this.cache.dcs.sor = message.payload;
         this.notify();
         break;
+      case BroadcastKeys.ENVIRONMENTS_OVERVIEW:
+        this.environment.list = RemoteData.success({ environments: message.payload ?? [] });
+        this.environment.updateItemEnvironment(message.payload, this.router.params?.panel ?? '');
+        this.notify();
+        break;
       case BroadcastKeys.ENVIRONMENT_EVENTS:
         if (this.environment.item.isSuccess()) {
           const { id } = this.environment.item.payload;
-          const { id: eventsId, events } = message.payload;
-          if (id === eventsId) {
-            this.environment.item.payload.events = events;
+          const eventPayload = message.payload;
+          if (id === eventPayload.id) {
+            Object.assign(this.environment.item.payload, eventPayload);
             this.environment.notify();
           }
+        }
+        if (this.environment.list.isSuccess()) {
+          const environmentEvent = message.payload;
+          this.environment.list.payload.environments.forEach((environment) => {
+            if (environment.id === environmentEvent.id) {
+              Object.assign(environment, environmentEvent);
+              this.notify();
+            }
+          });
         }
         break;
     }
@@ -239,7 +241,7 @@ export default class Model extends Observable {
    * * Retries to connect to server every 10 seconds; If successful, informs de user
    */
   handleWSClose() {
-    clearInterval(this.task.refreshInterval);
+    clearInterval(this.taskPageModel.refreshInterval);
 
     // Release client-side
     this.lock.padlockState = {};
@@ -270,12 +272,11 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending new location of the page
    */
   handleLocationChange() {
-    clearInterval(this.task.refreshInterval);
+    clearInterval(this.taskPageModel.refreshInterval);
     this.about.retrieveInfo();
     switch (this.router.params.page) {
       case 'environments':
         this.environment.getEnvironments();
-        this.environment.getEnvironmentRequests();
         break;
       case 'environment':
         if (!this.router.params.id) {
@@ -298,7 +299,7 @@ export default class Model extends Observable {
         this.calibrationRunsModel.initPage();
         break;
       case 'taskList':
-        this.task.getTasks();
+        this.taskPageModel.init();
         break;
       case 'about':
         break;

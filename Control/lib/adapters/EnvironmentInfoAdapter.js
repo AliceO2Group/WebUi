@@ -49,6 +49,8 @@ class EnvironmentInfoAdapter {
     const {
       id,
       currentRunNumber,
+      isDeploying,
+      deploymentError,
       createdWhen,
       firstTaskInError = null,
       state = '',
@@ -69,6 +71,8 @@ class EnvironmentInfoAdapter {
     const environmentInfo = {
       id,
       currentRunNumber,
+      isDeploying,
+      deploymentError,
       createdWhen,
       firstTaskInError,
       state,

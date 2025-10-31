@@ -15,9 +15,9 @@ jobs:
     runs-on: macOS-latest
     timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22.x'
       - run: (cd Framework/Backend; openssl req -new  -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=CH/ST=Test/L=Test/O=Tst/CN=localhost" -keyout test.key -out test.pem)
@@ -28,8 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22.x'
       - run: (cd Framework; npm ci )
@@ -46,8 +46,8 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22.x'
       - run: cd Framework; npm ci
@@ -62,9 +62,9 @@ jobs:
     steps:
       - name: Run Control tests by using `@aliceo2/web-ui` from local `../Framework`
         run : (echo "Run Control tests by using @aliceo2/web-ui from local ../Framework";) 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22.x'
       - run: (cd Framework; npm ci)
@@ -84,9 +84,9 @@ jobs:
   #   steps:
   #     - name: Run QualityControl tests by using `@aliceo2/web-ui` from local `../Framework`
   #       run : (echo "Run QualityControl tests by using @aliceo2/web-ui from local ../Framework";) 
-  #     - uses: actions/checkout@v4
+  #     - uses: actions/checkout@v5
   #     - name: Setup node
-  #       uses: actions/setup-node@v4
+  #       uses: actions/setup-node@v5
   #       with:
   #         node-version: '22.x'
   #     - run: (cd Framework; npm ci)
@@ -105,9 +105,9 @@ jobs:
     steps:
       - name: Run InfoLogger tests by using `@aliceo2/web-ui` from local `../Framework`
         run : (echo "Run InfoLogger tests by using @aliceo2/web-ui from local ../Framework";) 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22.x'
       - run: (cd Framework; npm ci)

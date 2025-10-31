@@ -19,93 +19,130 @@ const sinon = require("sinon");
 const { QCConfigurationService } = require("../../../lib/services/QCConfiguration.service.js");
 
 describe(`'QCConfigurationService' test suite`, () => {
+  let consulServiceStub, qcConfigurationService;
 
-  describe(`'getKeysOfValidConfigurations' test suite`, () => {
-    let qcConfigurationService;
-    before(() => {
-      qcConfigurationService = new QCConfigurationService({
-        getOnlyRawValuesByKeyPrefix: sinon.stub().resolves({
-          "any/dir1": undefined,
-          "any/dir1/prefix1": '{"key1": "value1", "key2": "value2"}',
-          "any/prefix1": '{"key1": "value1", "key2": "value2"}',
-          "any/prefix2": '"key1": "value1"',
-        }),
-      });
-    });
+  beforeEach(() => {
+    consulServiceStub = {
+      getOnlyRawValuesByKeyPrefix: sinon.stub(),
+      getOnlyRawValueByKey: sinon.stub(),
+    };
+    qcConfigurationService = new QCConfigurationService(consulServiceStub);
+  });
 
-    it("should return keys of all valid configurations in main directory", async () => {
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  describe(`'retrieveKeysOfValidConfigurations' test suite`, () => {
+    it("should return keys of valid configurations only in the root of the prefix (recurse=false)", async () => {
       const prefix = "any";
-      const configurations = await qcConfigurationService.getKeysOfValidConfigurations(prefix);
-      assert.deepStrictEqual(configurations, ["any/prefix1"]);
-    });
+      const rawData = {
+        "any/dir1/nested": '{"key": "value"}',
+        "any/valid1": '{"key1": "value1"}',
+        "any/invalid_json": '"key1": "value1"',
+        "any/valid2": '{}',
+      };
+      consulServiceStub.getOnlyRawValuesByKeyPrefix.resolves(rawData);
 
-    it("should return keys of all valid configurations in prefix directory when prefix is set", async () => {
-      const prefix = "any/dir1";
-      const configurations = await qcConfigurationService.getKeysOfValidConfigurations(prefix);
-      assert.deepStrictEqual(configurations, ["any/dir1/prefix1"]);
+      const configurations = await qcConfigurationService.retrieveKeysOfValidConfigurations(prefix, false);
+
+      assert.ok(consulServiceStub.getOnlyRawValuesByKeyPrefix.calledOnceWith(prefix));
+      assert.deepStrictEqual(configurations, ["any/valid1", "any/valid2"]);
     });
 
     it("should return keys of all valid configurations when recurse is true", async () => {
       const prefix = "any";
-      const configurations = await qcConfigurationService.getKeysOfValidConfigurations(prefix, true);
-      assert.deepStrictEqual(configurations, ["any/dir1/prefix1", "any/prefix1"]);
+      const rawData = {
+        "any/dir1/nested": '{"key": "value"}',
+        "any/valid1": '{"key1": "value1"}',
+        "any/dir1/invalid": 'just string',
+      };
+      consulServiceStub.getOnlyRawValuesByKeyPrefix.resolves(rawData);
+
+      const configurations = await qcConfigurationService.retrieveKeysOfValidConfigurations(prefix, true);
+
+      assert.ok(consulServiceStub.getOnlyRawValuesByKeyPrefix.calledOnceWith(prefix));
+      assert.deepStrictEqual(configurations, ["any/dir1/nested", "any/valid1"]);
+    });
+
+    it("should return an empty array when consul service returns no data", async () => {
+      const prefix = "nonexistent";
+      consulServiceStub.getOnlyRawValuesByKeyPrefix.resolves({});
+
+      const configurations = await qcConfigurationService.retrieveKeysOfValidConfigurations(prefix);
+
+      assert.ok(consulServiceStub.getOnlyRawValuesByKeyPrefix.calledOnceWith(prefix));
+      assert.deepStrictEqual(configurations, []);
+    });
+
+    it("should propagate errors from the consul service", async () => {
+      const testError = new Error("Consul not working");
+      consulServiceStub.getOnlyRawValuesByKeyPrefix.rejects(testError);
+
+      await assert.rejects(
+        async () => await qcConfigurationService.retrieveKeysOfValidConfigurations("any"),
+        testError
+      );
     });
   });
 
-  describe(`'getConfigurationByKey' test suite`, () => {
-    let qcConfigurationService;
-    before(() => {
-      qcConfigurationService = new QCConfigurationService({
-        getOnlyRawValueByKey: sinon.stub().resolves({"key1": "value1", "key2": "value2"}),
-      });
-    });
-
+  describe(`'retrieveConfigurationByKey' test suite`, () => {
     it("should return configuration for a valid key", async () => {
       const key = "any/prefix1";
-      const configuration = await qcConfigurationService.getConfigurationByKey(key);
-      assert.deepStrictEqual(configuration, {"key1": "value1", "key2": "value2"});
+      const expectedConfig = { key1: "value1", key2: "value2" };
+      consulServiceStub.getOnlyRawValueByKey.resolves(expectedConfig);
+
+      const configuration = await qcConfigurationService.retrieveConfigurationByKey(key);
+
+      assert.ok(consulServiceStub.getOnlyRawValueByKey.calledOnceWith(key));
+      assert.deepStrictEqual(configuration, expectedConfig);
+    });
+    
+    it("should propagate errors from the consul service", async () => {
+      const testError = new Error("Consul not working");
+      consulServiceStub.getOnlyRawValueByKey.rejects(testError);
+
+      await assert.rejects(
+        async () => await qcConfigurationService.retrieveConfigurationByKey("any"),
+        testError
+      );
     });
   });
 
-  describe(`'getConfigurationRestrictionsByKey' test suite`, () => {
-    let qcConfigurationService;
-    before(() => {
-      qcConfigurationService = new QCConfigurationService({
-        getOnlyRawValueByKey: sinon.stub().resolves({
-          qc: {
-            bool: "true",
-            numeric: "-90",
-            text: "description",
-            list: [
-              "item 1",
-              "item 2"
-            ],
-            nested: {
-              moreText: "details",
-              nextBool: "false",
-              lastNumeric: "1.2e-3"
-            }
-          }
-        }),
-      });
+  describe('`filterConfigurations` test suite', () => {
+    it('should return keys of valid JSON objects and ignore others when recurse is false', () => {
+      const configs = {
+        'any/valid_object': '{"key": "value"}',
+        'any/empty_object': '{}',
+        'any/nested/key': '{"a": 1}',
+        'any/not_a_json': 'just a plain string',
+        'any/malformed_json': '{"key":',
+        'any/json_string': '"a valid json string"',
+        'any/json_array': '[1, 2, 3]',
+        'any/json_null': 'null',
+      };
+      const expectedKeys = ['any/valid_object', 'any/empty_object'];
+      
+      const result = qcConfigurationService.filterConfigurations(configs, false, 'any');
+      assert.deepStrictEqual(result, expectedKeys);
     });
 
-    it("should return configuration restrictions for a valid key", async () => {
-      const key = "any/prefix1";
-      const configurationRestrictions = await qcConfigurationService.getConfigurationRestrictionsByKey(key);
-      assert.deepStrictEqual(configurationRestrictions, {
-        qc: {
-          bool: "boolean",
-          numeric: "number",
-          text: "string",
-          list: "array",
-          nested: {
-            moreText: "string",
-            nextBool: "boolean",
-            lastNumeric: "number"
-          }
-        }
-      });
+    it('should include nested keys when recurse is true', () => {
+      const configs = {
+        'any/valid_object': '{"key": "value"}',
+        'any/nested/key': '{"a": 1}',
+        'any/nested/invalid': 'not json',
+      };
+      const expectedKeys = ['any/valid_object', 'any/nested/key'];
+
+      const result = qcConfigurationService.filterConfigurations(configs, true, 'any');
+      assert.deepStrictEqual(result, expectedKeys);
+    });
+
+    it('should return an empty array for null, undefined and empty object input', () => {
+      assert.deepStrictEqual(qcConfigurationService.filterConfigurations(null, false, 'any'), []);
+      assert.deepStrictEqual(qcConfigurationService.filterConfigurations(undefined, false, 'any'), []);
+      assert.deepStrictEqual(qcConfigurationService.filterConfigurations({}, false, 'any'), []);
     });
   });
 });

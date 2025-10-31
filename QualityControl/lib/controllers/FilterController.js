@@ -12,6 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
+import {
+  LogManager,
+  updateAndSendExpressResponseFromNativeError,
+}
+  from '@aliceo2/web-ui';
+
 /**
  * Gateaway class to be used to retrieve data with regard to filters
  */
@@ -19,12 +25,37 @@ export class FilterController {
   /**
    * Creates an instance of FilterController class
    * @param {FilterService} filterService To retrieve the information displayed in the filters
+   * @param {RunModeService} runsModeService To retrieve the ongoing runs
    */
-  constructor(filterService) {
+  constructor(filterService, runsModeService) {
     /**
      * @type {FilterService}
      */
     this._filterService = filterService;
+
+    /**
+     * @type {RunModeService}
+     */
+    this._runsModeService = runsModeService;
+
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/filter-ctrl`);
+  }
+
+  /**
+   * HTTP GET endpoint for retrieving the status of a run from Bookkeeping
+   * @param {Request} req - HTTP request
+   * @param {Response} res - HTTP response to provide run status information
+   */
+  async getRunStatusHandler(req, res) {
+    try {
+      const runStatus = await this._filterService.getRunStatus(req.params.runNumber);
+      res.status(200).json({
+        runStatus,
+      });
+    } catch (error) {
+      this._logger.errorMessage('Error getting run status:', error);
+      updateAndSendExpressResponseFromNativeError(res, error);
+    }
   }
 
   /**
@@ -44,5 +75,15 @@ export class FilterController {
     } catch (error) {
       res.status(503).json({ error: error.message || error });
     }
+  }
+
+  /**
+   * HTTP GET endpoint for retrieving a list of ongoing runs from Runs Mode Service
+   * @param {Request} req HTTP Request
+   * @param {Response} res HTTP Response with the ongoing runs
+   */
+  getOngoingRunsHandler(req, res) {
+    const ongoingRuns = this._runsModeService?.ongoingRuns ?? [];
+    res.status(200).json({ ongoingRuns });
   }
 }
