@@ -17,6 +17,14 @@ import { suite, test } from 'node:test';
 import { FilterController } from '../../../lib/controllers/FilterController.js';
 import sinon from 'sinon';
 import { FilterService } from '../../../lib/services/FilterService.js';
+import { RunStatus } from '../../../common/library/runStatus.enum.js';
+
+const VALID_CONFIG = { bookkeeping: {
+  url: 'http://localhost:4000',
+  token: 'valid-token',
+  runTypesRefreshInterval: 15000,
+  runStatusRefreshInterval: 15000,
+} };
 
 export const filtersControllerTestSuite = async () => {
   suite('Creating a new FiltersController instance', () => {
@@ -24,7 +32,7 @@ export const filtersControllerTestSuite = async () => {
       const bookkeepingServiceStub = {
         connect: sinon.stub().resolves(),
       };
-      const filterService = new FilterService(bookkeepingServiceStub);
+      const filterService = new FilterService(bookkeepingServiceStub, VALID_CONFIG);
       doesNotThrow(() => new FilterController(filterService));
     });
   });
@@ -59,6 +67,83 @@ export const filtersControllerTestSuite = async () => {
         res.json.calledWith({ runTypes: [] }),
         'Run types were not sent as an empty array',
       );
+    });
+  });
+
+  suite('getRunStatusHandler', async () => {
+    test('should successfully retrieve run status from FilterService', async () => {
+      const filterService = sinon.createStubInstance(FilterService);
+      filterService.getRunStatus.resolves(RunStatus.ONGOING);
+
+      const req = {
+        params: {
+          runNumber: 123456,
+        },
+      };
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      };
+
+      const filterController = new FilterController(filterService);
+      await filterController.getRunStatusHandler(req, res);
+
+      ok(filterService.getRunStatus.calledWith(123456), 'FilterService.getRunStatus should be called with run number');
+      ok(res.status.calledWith(200), 'Response status should be 200');
+      ok(res.json.calledWith({
+        runStatus: RunStatus.ONGOING,
+      }), 'Response should contain the run status');
+    });
+
+    test('should handle errors from FilterService and send error response', async () => {
+      const filterService = sinon.createStubInstance(FilterService);
+      const testError = new Error('Bookkeeping service unavailable');
+      filterService.getRunStatus.rejects(testError);
+
+      const req = {
+        params: {
+          runNumber: 123456,
+        },
+      };
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      };
+
+      const filterController = new FilterController(filterService);
+      await filterController.getRunStatusHandler(req, res);
+
+      ok(filterService.getRunStatus.calledWith(123456), 'FilterService.getRunStatus should be called with run number');
+      ok(res.status.calledWith(500), 'Response status should be 500 for service errors');
+      ok(res.json.calledWithMatch({
+        message: 'Bookkeeping service unavailable',
+        status: 500,
+        title: 'Unknown Error',
+      }), 'Response should contain error details');
+    });
+
+    test('should return UNKNOWN status when FilterService returns invalid status', async () => {
+      const filterService = sinon.createStubInstance(FilterService);
+      filterService.getRunStatus.resolves('UNKNOWN');
+
+      const req = {
+        params: {
+          runNumber: 999999,
+        },
+      };
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      };
+
+      const filterController = new FilterController(filterService);
+      await filterController.getRunStatusHandler(req, res);
+
+      ok(filterService.getRunStatus.calledWith(999999), 'FilterService.getRunStatus should be called with run number');
+      ok(res.status.calledWith(200), 'Response status should be 200');
+      ok(res.json.calledWith({
+        runStatus: RunStatus.UNKNOWN,
+      }), 'Response should contain UNKNOWN status');
     });
   });
 };

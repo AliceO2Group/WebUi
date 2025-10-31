@@ -12,13 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
+import { BaseViewModel } from '../../common/abstracts/BaseViewModel.js';
 import { setBrowserTabTitle } from '../../common/utils.js';
-import { Observable, RemoteData } from '/js/src/index.js';
+import { RemoteData } from '/js/src/index.js';
 
 /**
  * Model namespace for ObjectViewPage
  */
-export default class ObjectViewModel extends Observable {
+export default class ObjectViewModel extends BaseViewModel {
   /**
    * Initialize model with empty values
    * @param {Model} model - root model of the application
@@ -42,13 +43,6 @@ export default class ObjectViewModel extends Observable {
     this.drawingOptions = [];
     this.displayHints = [];
     this.ignoreDefaults = false;
-
-    /**
-     * @type {object} TODO add it as FilterModel
-     */
-    this.filter = {};
-
-    this._filterVisibility = true;
   }
 
   /**
@@ -57,20 +51,11 @@ export default class ObjectViewModel extends Observable {
    * @returns {undefined}
    */
   async init(urlParams) {
-    this.selected = RemoteData.loading();
-    this.notify();
-
     const { objectName, layoutId, objectId, id, ts = undefined } = urlParams;
-    const filter = {};
-    Object.keys(urlParams)
-      .filter((key) => !['page', 'objectName', 'layoutId', 'objectId', 'ts', 'id'].includes(key))
-      .forEach((key) => {
-        filter[key] = urlParams[key];
-      });
     if (objectName) {
-      this.updateObjectSelection({ objectName }, ts, id, filter);
+      this.updateObjectSelection({ objectName }, ts, id);
     } else if (layoutId && objectId) {
-      this.updateObjectSelection({ objectId }, ts, id, filter);
+      this.updateObjectSelection({ objectId }, ts, id);
     } else {
       this.selected = RemoteData.failure('Invalid URL parameters provided');
     }
@@ -81,44 +66,42 @@ export default class ObjectViewModel extends Observable {
    * @param {object} object - object with name or id to be used for content retrieval
    * @param {number} validFrom - timestamp in ms for a specific object
    * @param {string} id - id as per the CCDB storage
-   * @param {object} filters - specific fields that should be applied
    * @returns {undefined}
    */
-  async updateObjectSelection(object, validFrom = undefined, id = '', filters = this.filter) {
-    let { objectName = undefined, objectId = undefined } = object;
-    const { objectName: objectNameUrl, objectId: objectIdUrl, layoutId } = this.model.router.params;
-
-    if (!objectName && !objectId && !objectIdUrl && !objectNameUrl && !this.selected.isSuccess()) {
+  async updateObjectSelection(object, validFrom = undefined, id = '') {
+    const { objectName = undefined, objectId = undefined } = object;
+    const { params } = this.model.router;
+    const context = { objectName: objectName || params.objectName, objectId: objectId || params.objectId };
+    const { refreshNeeded, data } = await this.model.object.checkIfRefreshObject(this.selected.payload, context);
+    if (!refreshNeeded) {
       return;
-    } else if (!objectName && !objectId) {
-      if (objectIdUrl && layoutId) {
-        objectId = objectIdUrl;
-      } else if (objectNameUrl) {
-        objectName = objectNameUrl;
-      } else if (this.selected.isSuccess()) {
-        objectName = this.selected.payload.path;
-      }
     }
+
+    this._setParameters(objectName, objectId, params);
     this.selected = RemoteData.loading();
     this.notify();
 
-    this.filter = filters;
-    let currentParams = '?page=objectView';
-    if (objectId) {
-      currentParams += `&objectId=${encodeURI(objectId)}&layoutId=${encodeURI(layoutId)}`;
-      this.selected = await this.model.services.object.getObjectById(objectId, id, validFrom, filters, this);
-    } else if (objectName) {
-      currentParams += `&objectName=${encodeURI(objectName)}`;
-      this.selected = await this.model.services.object.getObjectByName(objectName, id, validFrom, filters, this);
+    if (!objectName && !objectId && !params.objectId && !params.objectName && !this.selected.isSuccess()) {
+      return; // This will permanently put the page in loading mode.
     }
+
+    let currentParams = '?page=objectView';
+
+    // Use refreshed data if available, otherwise fetch based on available parameters
+    if (data) {
+      this.selected = data;
+    } else if (params.objectName) {
+      this.selected = await this.model.services.object.getObjectByName(params.objectName, id, validFrom, this);
+    } else if (params.objectId) {
+      this.selected = await this.model.services.object.getObjectById(params.objectId, id, validFrom, this);
+    }
+
     setBrowserTabTitle(this.selected.payload.name);
 
-    if (filters && Object.keys(filters).length > 0) {
-      Object.entries(filters)
-        .forEach(([key, value]) => {
-          currentParams += `&${key}=${encodeURI(value)}`;
-        });
-    }
+    Object.entries(params).forEach(([key, value]) => {
+      currentParams += `&${key}=${encodeURI(value)}`;
+    });
+
     if (validFrom) {
       let path = `${currentParams}&ts=${validFrom}`;
       if (id) {
@@ -133,37 +116,61 @@ export default class ObjectViewModel extends Observable {
   }
 
   /**
-   * Method to allow the addition/update/removal of key;value pairs in filter object
-   * @param {string} key - key to look for in filter object
-   * @param {string} value - value to update for given key; if none, entry is removed from object
+   * Creates the href url for the download element
+   * @param {string} objectId - id of root object
+   * @returns {string|void} download link
+   */
+  getDownloadQcdbObjectUrl(objectId = undefined) {
+    if (objectId == undefined || this.model.session.token == undefined) {
+      return;
+    }
+    return `/api/object/proxy/download/?token=${this.model.session.token}&objectIds=${objectId}`;
+  }
+
+  /**
+   * Sets routing parameters for object retrieval based on the available information.
+   * Ensures only one of objectName or objectId is set, and removes irrelevant keys.
+   * @param {string|undefined} objectName - Name of the object, if available.
+   * @param {string|undefined} objectId - ID of the object, if available.
+   * @param {object} params - The router parameters object to be updated in-place.
    * @returns {void}
    */
-  updateFilterKeyValue(key, value) {
-    if (value) {
-      this.filter[key] = value;
-    } else {
-      delete this.filter[key];
+  _setParameters(objectName, objectId, params) {
+    delete params.page; // page, ts and id are set manually
+    delete params.ts;
+    delete params.id;
+
+    // The priority is as follows: provided name/id, name/id already in params, name from the selected object
+    if (objectId) {
+      delete params.objectName;
+      params.objectId = objectId;
+    } else if (objectName) {
+      this._setObjectName(params, objectName);
+    } else if (params.objectId) {
+      delete params.objectName;
+    } else if (params.objectName) {
+      this._setObjectName(params, params.objectName /* only removes layoutId and ObjectId from params */);
+    } else if (this.selected.isSuccess()) {
+      this._setObjectName(params, this.selected.payload.path);
     }
   }
 
   /**
-   * Helpers
-   */
-
-  /**
-   * Return the current state of the filter panel
-   * @returns {boolean} - true/false depending on filter being opened/closed
-   */
-  isFilterVisible() {
-    return this._filterVisibility;
-  }
-
-  /**
-   * Change the state of the visibility of the filter panel
+   * Sets the objectName in parameters and removes conflicting keys.
+   * @param {object} params - The router parameters object to be updated in-place.
+   * @param {string} name - The object name to set in the parameters.
    * @returns {void}
    */
-  toggleFilterVisibility() {
-    this._filterVisibility = !this._filterVisibility;
-    this.notify();
+  _setObjectName(params, name) {
+    delete params.objectId;
+    delete params.layoutId;
+    params.objectName = name;
+  };
+
+  /**
+   * Wrapper function for updateObjectSelection that will be triggered by filterModel;
+   */
+  async triggerFilter() {
+    await this.init(this.model.router.params);
   }
 }

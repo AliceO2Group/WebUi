@@ -19,23 +19,26 @@ import { Connection } from "../Connection/Connection";
 import { LogManager } from "@aliceo2/web-ui";
 
 /**
- * @description Manages all the connection between clients and central system.
- */
-/**
- * Manages the lifecycle and connection logic for a gRPC client communicating with the central system.
- *
- * This class is responsible for:
- * - Initializing the gRPC client using the provided proto definition and address.
- * - Delegating stream handling to CentralConnection.
- * - Managing sending/receiving connections to other clients.
+ * - Managing a duplex stream (`stream`) for bidirectional communication.
+ * - Handling automatic reconnection with exponential backoff on stream errors or disconnects.
+ * - Providing methods to start (`connectToCentralSystem`) and stop (`disconnect`) the connection with central system.
  *
  * @remarks
- * - `centralConnection`: Handles the duplex stream with the central gRPC server.
- * - `sendingConnections`: Map of active outbound connections.
- * - `receivingConnections`: Map of active inbound connections.
+ * - `client`: The gRPC client instance for communicating with the central system.
+ * - `stream`: The active duplex stream for sending and receiving messages (optional).
+ * - `address`: The address of the central gRPC server.
+ * - `reconnectAttempts`: The number of consecutive reconnection attempts made after a disconnect or error.
  */
 export class ConnectionManager {
+  // utilities
   private logger = LogManager.getLogger("ConnectionManager");
+
+  // class properties
+  private client: any;
+  private stream?: grpc.ClientDuplexStream<any, any>;
+  private readonly address: string;
+  private reconnectAttempts = 0;
+
   private centralConnection: CentralConnection;
   private sendingConnections = new Map<string, Connection>();
   private receivingConnections = new Map<string, Connection>();
@@ -70,6 +73,55 @@ export class ConnectionManager {
 
     this.sendingConnections.set("a", new Connection("1", "a"));
     this.sendingConnections.set("b", new Connection("2", "b"));
+    // Create gRPC client
+    this.client = new wrapper.CentralSystem(
+      this.address,
+      grpc.credentials.createInsecure()
+    );
+  }
+
+  /**
+   * @description Initializes the duplex stream and sets up handlers.
+   */
+  private connect() {
+    if (this.stream) return;
+    this.stream = this.client.ClientStream();
+
+    if (this.stream) {
+      this.stream.on("data", (payload) => {
+        // handle data received from the stream
+      });
+
+      this.stream.on("end", () => {
+        this.logger.infoMessage(`Stream ended, attempting to reconnect...`);
+        this.stream = undefined;
+        this.scheduleReconnect();
+      });
+
+      this.stream.on("error", (err: any) => {
+        this.logger.infoMessage(
+          `Stream error:`,
+          err,
+          " attempting to reconnect..."
+        );
+        this.stream = undefined;
+        this.scheduleReconnect();
+      });
+    }
+  }
+
+  /**
+   * @description Schedules a reconnect with exponential backoff.
+   */
+  private scheduleReconnect() {
+    this.reconnectAttempts++;
+    const delay = Math.min(1000 * 2 ** this.reconnectAttempts, 30000);
+    setTimeout(() => {
+      this.logger.infoMessage(
+        `Reconnecting (attempt ${this.reconnectAttempts})...`
+      );
+      this.connect();
+    }, delay);
   }
 
   /**

@@ -13,13 +13,13 @@
  */
 
 import assert from 'assert';
-import { LogManager } from '@aliceo2/web-ui';
+import { LogLevel, LogManager } from '@aliceo2/web-ui';
+
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/user-controller`;
 
 /**
  * @typedef {import('../repositories/UserRepository.js').UserRepository} UserRepository
  */
-
-const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/user`);
 
 /**
  * Gateway for all User data calls
@@ -32,6 +32,7 @@ export class UserController {
  */
   constructor(userRepository) {
     assert(userRepository, 'Missing User Repository');
+    this._logger = LogManager.getLogger(LOG_FACILITY);
 
     /**
      * User repository for interacting with user data.
@@ -56,9 +57,11 @@ export class UserController {
       res.status(200).json({ ok: true });
     } catch (err) {
       if (err.stack) {
-        logger.trace(err);
+        this._logger.trace(err);
       }
-      logger.error('Unable to add user to memory');
+      this._logger.errorMessage('Unable to add user to memory', {
+        level: LogLevel.SUPPORT,
+      });
       res.status(502).json({ ok: false, message: 'Unable to add user to memory' });
     }
   }

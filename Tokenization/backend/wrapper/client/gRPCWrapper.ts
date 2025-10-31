@@ -1,6 +1,19 @@
-import path from "path";
-import { ConnectionManager } from "./ConnectionManager/ConnectionManager";
-import { fileURLToPath } from "url";
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
+import { ConnectionManager } from "./ConnectionManager/ConnectionManager.ts";
+import { gRPCWrapperConfig } from "../models/config.model.ts";
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -25,8 +38,11 @@ export class gRPCWrapper {
    * @param protoPath - The file path to the gRPC proto definition.
    * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
    */
-  constructor(protoPath: string, centralAddress: string = "localhost:50051") {
-    this.ConnectionManager = new ConnectionManager(protoPath, centralAddress);
+  constructor(config: gRPCWrapperConfig) {
+    this.ConnectionManager = new ConnectionManager(
+      config.protoPath,
+      config.centralAddress
+    );
   }
 
   /**
@@ -36,9 +52,3 @@ export class gRPCWrapper {
     this.ConnectionManager.connectToCentralSystem();
   }
 }
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
-const grpc = new gRPCWrapper(PROTO_PATH, "localhost:50051");
-grpc.connectToCentralSystem();

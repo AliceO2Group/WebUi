@@ -59,7 +59,8 @@ const editBox = (variable, model) => {
   } else if (variable.type === VAR_TYPE.STRING) {
     box = 'textarea';
     delete options.type;
-    style = {style: 'resize: vertical; height: 2em;'};
+    options.rows = variable.rows ? variable.rows : 1;
+    style = {style: 'resize: vertical;'};
   }
 
   return h('.flex-row', [
