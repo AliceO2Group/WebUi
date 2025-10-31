@@ -135,14 +135,22 @@ export default class FilterModel extends Observable {
   }
 
   /**
-   * Clears all currently set filters and updates the URL accordingly
+   * Clears all currently set filters and triggers a filter action on the provided view model.
    * @param {BaseViewModel} baseViewModel - The view model that should be filtered
-   * @returns {undefined}
+   * @returns {void}
    */
-  clearFilter(baseViewModel) {
-    this._filterMap = {};
-
+  clearFiltersAndTrigger(baseViewModel) {
+    this.clearFilters();
     this.triggerFilter(baseViewModel);
+  }
+
+  /**
+   * Clears all filters without triggering a filter action, but still updates the URL and notifies observers.
+   * @returns {void}
+   */
+  clearFilters() {
+    this._filterMap = {};
+    this.setFilterToURL(true);
     this.notify();
   }
 
@@ -189,7 +197,7 @@ export default class FilterModel extends Observable {
    */
   async deactivateRunsMode(baseViewModel) {
     this.resetRunsMode();
-    this.clearFilter(baseViewModel);
+    this.clearFilters(baseViewModel);
   }
 
   /**

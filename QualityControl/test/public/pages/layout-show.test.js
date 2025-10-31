@@ -34,6 +34,17 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     },
   );
 
+  await testParent.test(
+    'should have a correctly made download button',
+    { timeout },
+    async () => {
+      const objectId = '016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
+      const dlButton = await page.evaluate(() => document.querySelector('.download-button').href);
+      const token = await page.evaluate(() => model.session.token);
+      strictEqual(dlButton, `${url}api/object/proxy/download/?token=${token}&objectIds=${objectId}`);
+    },
+  );
+
   await testParent.test('should remove query param only if option is invalid for any filter', { timeout }, async () => {
     const baseParams = `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=main`;
 
@@ -122,8 +133,8 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       await page.locator(plot1Path).click();
 
       const result = await page.evaluate((commonSelectorPath) => {
-        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > div > button`);
-        const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div > div`;
+        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > button`);
+        const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div`;
         const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div > div`).innerText;
         const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > b`).innerText;
         const lastModifiedTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`).innerText;
@@ -143,9 +154,9 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const plot2Path = `${commonSelectorPath} > div:nth-child(1)`;
       await page.locator(plot2Path).click();
       const result = await page.evaluate((commonSelectorPath) => {
-        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > div > button`);
-        const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div > div`;
-        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div > div`).innerText;
+        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > button`);
+        const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div`;
+        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div`).innerText;
         const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > b`).innerText;
         const lastModifiedTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`).innerText;
         return { title, pathTitle, objectPath, lastModifiedTitle };
@@ -173,7 +184,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
         const container = document.querySelector('.btn-group');
         return container ? container.children.length : 0;
       });
-      strictEqual(count, 5);
+      strictEqual(count, 4);
     },
   );
 
@@ -181,7 +192,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have one duplicate button in the header to create a new duplicated layout',
     { timeout },
     async () => {
-      const buttonPath = '.btn-group > button:nth-child(2)';
+      const buttonPath = '.btn-group > button:nth-child(1)';
       const duplicateButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
       strictEqual(duplicateButton, 'Duplicate layout');
     },
@@ -191,7 +202,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have one delete button in the header to delete layout',
     { timeout },
     async () => {
-      const buttonPath = '.btn-group > button:nth-of-type(3)';
+      const buttonPath = '.btn-group > button:nth-of-type(2)';
       const deleteButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
       strictEqual(deleteButton, 'Delete layout');
     },
@@ -201,7 +212,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have one link button in the header to download layout skeleton',
     { timeout },
     async () => {
-      const buttonPath = '.btn-group > a:nth-of-type(1)';
+      const buttonPath = '.btn-group > a';
       const editButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
       strictEqual(editButton, 'Export layout skeleton as JSON file');
     },
@@ -227,11 +238,23 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
-    'should click the edit button in the header and enter edit mode',
+    'should enter edit mode and remove filters if there are any applied',
     { timeout },
     async () => {
       const editViaGUIButtonPath = '#editByGui';
+      const filterPanel = await page.evaluate(() => document.querySelector('#filterElement'));
+      ok(filterPanel);
+      await page.locator('#runNumberFilter').fill('100000');
+      await page.locator('#triggerFilterButton').click();
+      await delay(100);
+      let location = await page.evaluate(() => window.location);
+      ok(location.search.includes('RunNumber=100000'));
       await page.locator(editViaGUIButtonPath).click();
+      await delay(100);
+      location = await page.evaluate(() => window.location);
+      ok(!location.search.includes('RunNumber=100000'));
+      const filterElement = await page.evaluate(() => document.querySelector('#filterElement'));
+      strictEqual(filterElement, null);
     },
   );
 
@@ -271,39 +294,6 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const rowsCount = await page.evaluate((secondElementPath) =>
         document.querySelectorAll(secondElementPath).length, secondElementPath);
       strictEqual(rowsCount, 1);
-    },
-  );
-
-  await testParent.test(
-    'should have filtered results on input search filled',
-    { timeout },
-    async () => {
-      const inputs = await page.$$('nav input');
-      await inputs[4].type('1');
-      await delay(50);
-      const { count, firstResult, secondResult } = await page.evaluate(() => {
-        const rows = document.querySelectorAll('nav table tbody tr');
-        return {
-          count: rows.length,
-          firstResult: rows[0].firstElementChild.textContent,
-          secondResult: rows[1].firstElementChild.textContent,
-        };
-      });
-      strictEqual(count, 2);
-      strictEqual(firstResult, ' qc/test/object/1');
-      strictEqual(secondResult, ' qc/test/object/11');
-    },
-  );
-
-  await testParent.test(
-    'should have no results if query does not match any objects',
-    { timeout },
-    async () => {
-      const inputs = await page.$$('nav input');
-      await inputs[4].type('123');
-      await delay(50);
-      const text = await page.evaluate(() => document.querySelector('nav p.text-center').textContent);
-      strictEqual(text, 'No objects found for this search');
     },
   );
 

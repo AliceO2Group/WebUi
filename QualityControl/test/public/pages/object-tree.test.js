@@ -12,6 +12,8 @@
  */
 
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
+import { delay } from '../../testUtils/delay.js';
+
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
 const SORTING_BUTTON_PATH = 'header > div > div > div:nth-child(3) > div > button';
 
@@ -59,6 +61,23 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     const { name } = await page.evaluate(() => window.model.object.currentList[0]);
     strictEqual(name, 'qc/test/object/1');
   });
+
+  await testParent.test(
+    'should have a correctly made download button',
+    { timeout },
+    async () => {
+      const objectId = '016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(2)').click());
+      await delay(500);
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(3)').click());
+      await delay(500);
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(4)').click());
+      await delay(1000);
+      const dlButton = await page.evaluate(() => document.querySelector('.download-button').href);
+      const token = await page.evaluate(() => model.session.token);
+      strictEqual(dlButton, `${url}api/object/proxy/download/?token=${token}&objectIds=${objectId}`);
+    },
+  );
 
   await testParent.test('should sort list of histograms by name in descending order', async () => {
     await page.locator('#sortTreeButton').click();

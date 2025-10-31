@@ -20,5 +20,5 @@ import { h } from '/js/src/index.js';
  */
 export default () => ({
   centerCol: h('.flex-grow.text-center', [h('b.f4', 'Layouts')]),
-  rightCol: h('.w-33.text-right'),
+  rightCol: h('.w-25.text-right'),
 });
