@@ -11,7 +11,6 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import path from "path";
 import { ConnectionManager } from "./ConnectionManager/ConnectionManager";
 import { RevokeTokenHandler } from "./Commands/revokeToken.handler";
 import { DuplexMessageEvent } from "../models/message.model";
@@ -90,13 +89,3 @@ export class gRPCWrapper {
     );
   }
 }
-
-const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
-const grpc = new gRPCWrapper(PROTO_PATH, "localhost:50051");
-grpc.connectToCentralSystem();
-console.log(grpc.getSummary());
-
-setTimeout(() => {
-  console.log("New status after 10 seconds and token revokation:");
-  console.log(grpc.getSummary());
-}, 10000);

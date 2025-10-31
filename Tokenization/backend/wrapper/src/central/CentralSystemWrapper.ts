@@ -13,13 +13,8 @@
  */
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
-import path from "path";
 import { LogManager } from "@aliceo2/web-ui";
-import {
-  ConnectionDirection,
-  DuplexMessageEvent,
-  DuplexMessageModel,
-} from "../models/message.model";
+import { DuplexMessageModel } from "../models/message.model";
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
@@ -184,19 +179,3 @@ export class CentralSystemWrapper {
     );
   }
 }
-
-// Instantiate the CentralSystemWrapper on port 50051, but don't start automatically
-const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
-const centralSystem = new CentralSystemWrapper(PROTO_PATH, 50051);
-// Start listening explicitly
-centralSystem.listen();
-
-setTimeout(() => {
-  centralSystem.sendEvent(centralSystem.getConnectedClients()[0], {
-    event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
-    payload: {
-      connectionDirection: ConnectionDirection.SENDING,
-      targetAddress: "a",
-    },
-  });
-}, 5000);
