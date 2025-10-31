@@ -66,7 +66,6 @@ export default class Model extends Observable {
     this.aboutViewModel = new AboutViewModel(this);
     this.aboutViewModel.bubbleTo(this);
 
-    this.refreshTimer = 0;
     this.refreshInterval = 0; // Seconds
     this.sidebar = true;
     this.accountMenuEnabled = false;
@@ -168,7 +167,7 @@ export default class Model extends Observable {
    */
   async handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
-    clearInterval(this.layout.tabInterval);
+    this._clearAllIntervals();
     await this.filterModel.filterService.initFilterService();
     this.filterModel.setFilterFromURL();
     this.filterModel.setFilterToURL();
@@ -179,6 +178,7 @@ export default class Model extends Observable {
 
     switch (params.page) {
       case 'layoutList':
+        this.clearURL('layoutList');
         this.page = 'layoutList';
         setBrowserTabTitle('QCG-Layouts');
         this.services.layout.getLayouts(RequestFields.LAYOUT_CARD);
@@ -235,6 +235,7 @@ export default class Model extends Observable {
 
               this.router.go(`?page=layoutShow&layoutId=${this.router.params.layoutId}`, true, true);
             }
+            this.filterModel.restartRunsModeIntervals(this.layout);
             this.notify();
           }).catch(() => true); // Error is handled inside loadItem
         break;
@@ -246,6 +247,7 @@ export default class Model extends Observable {
         if (this.object.selected) {
           this.object.loadObjectByName(this.object.selected.name);
         }
+        this.filterModel.restartRunsModeIntervals(this.object);
         this.notify();
         break;
       case 'objectView': {
@@ -254,10 +256,12 @@ export default class Model extends Observable {
         setBrowserTabTitle('QCG-View');
         const { params } = this.router;
         this.objectViewModel.init(params);
+        this.filterModel.restartRunsModeIntervals(this.objectViewModel);
         this.notify();
         break;
       }
       case 'about':
+        this.clearURL('about');
         this.page = 'about';
         setBrowserTabTitle('QCG-About');
         this.aboutViewModel.retrieveAllServicesStatus();
@@ -268,6 +272,15 @@ export default class Model extends Observable {
         this.router.go('?page=layoutList', true);
         break;
     }
+  }
+
+  /**
+   * Clear URL parameters and redirect to a certain page
+   * @param {*} pageName - name of the page to be redirected to
+   * @returns {undefined}
+   */
+  clearURL(pageName) {
+    this.router.go(`?page=${pageName}`, true, true);
   }
 
   /**
@@ -289,38 +302,26 @@ export default class Model extends Observable {
   }
 
   /**
+   * Clears all active intervals in the application
+   * @returns {void}
+   */
+  _clearAllIntervals() {
+    // Clear layout tab interval
+    if (this.layout?.tabInterval) {
+      clearInterval(this.layout.tabInterval);
+    }
+
+    // Clear filter model runs mode interval
+    this.filterModel.clearRunsModeInterval();
+  }
+
+  /**
    * Method to check if connection is secure to enable certain improvements
    * e.g navigator.clipboard, notifications, service workers
    * @returns {boolean} - whether window is in secure context
    */
   isContextSecure() {
     return window.isSecureContext;
-  }
-
-  /**
-   * Set the interval to update objects currently loaded and shown to user.
-   * This will reload only data associated to them
-   * @param {number} intervalSeconds - in seconds
-   * @returns {undefined}
-   */
-  setRefreshInterval(intervalSeconds) {
-    // Stop any other timer
-    clearTimeout(this.refreshTimer);
-
-    // Validate user input
-    let parsedValue = parseInt(intervalSeconds, 10);
-    if (isNaN(parsedValue) || parsedValue < 1) {
-      parsedValue = 2;
-    }
-
-    // Start new timer
-    this.refreshInterval = parsedValue;
-    this.refreshTimer = setTimeout(() => {
-      this.setRefreshInterval(this.refreshInterval);
-    }, this.refreshInterval * 1000);
-    this.notify();
-
-    this.object.refreshObjects();
   }
 
   /**

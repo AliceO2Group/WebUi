@@ -61,8 +61,6 @@ export default class Layout extends BaseViewModel {
     });
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
-    // GridList.grid.length: integer, number of rows
-    this.shouldApplyTreeFilter = true;
   }
 
   /**
@@ -258,6 +256,7 @@ export default class Layout extends BaseViewModel {
     }
     const result = await this.model.services.layout.saveLayout(this.item);
     if (result.isSuccess()) {
+      await this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
       this.model.notification.show(`Layout "${this.item.name}" has been saved successfully.`, 'success');
     } else {
       this.item = this.editOriginalClone;
@@ -404,14 +403,18 @@ export default class Layout extends BaseViewModel {
    * @returns {undefined}
    */
   edit() {
+    if (this.model.filterModel.isRunModeActivated) {
+      this.model.filterModel.deactivateRunsMode(this);
+    }
     this.toggleEditMenu();
-    this.listObjects();
+    this.editEnabled = true;
+    this.model.filterModel.clearFilters();
+    this.model.services.object.listObjects(this);
 
     if (!this.item) {
       throw new Error('An item should be loaded before editing it');
     }
     this.setTabInterval(0);
-    this.editEnabled = true;
     this.editOriginalClone = JSON.parse(JSON.stringify(this.item));
     this.editingTabObject = null;
     window.dispatchEvent(new Event('resize'));
@@ -755,9 +758,13 @@ export default class Layout extends BaseViewModel {
    * @returns {undefined}
    */
   triggerFilter() {
+    if (this.model.filterModel.runsModeInterval) {
+      this.model.object.refreshObjects(this.tab.objects.map((object) => object.name));
+      return;
+    }
     this.selectTab(this.tabIndex);
     if (this.editEnabled) { // To re-render the objectTree in edit mode
-      this.listObjects();
+      this.model.services.object.listObjects(this);
     }
   }
 
@@ -769,24 +776,5 @@ export default class Layout extends BaseViewModel {
    */
   ownsLayout(layoutOwnerId) {
     return this.model.session.personid == layoutOwnerId;
-  }
-
-  /**
-   * Activates/deactivates the effects of the filter on the objectTree inside layout edit mode.
-   */
-  toggleObjectTreeFilter() {
-    if (this.activeFilter()) {
-      this.shouldApplyTreeFilter = !this.shouldApplyTreeFilter;
-      this.listObjects();
-    }
-  }
-
-  /**
-   * Wrapper function for qcObjectServices. If shouldApplyTreeFilter is false,
-   * the objectTree will be loaded without applying the filters.
-   */
-  listObjects() {
-    const filterMap = this.shouldApplyTreeFilter ? undefined : {};
-    this.model.services.object.listObjects(undefined, filterMap);
   }
 }

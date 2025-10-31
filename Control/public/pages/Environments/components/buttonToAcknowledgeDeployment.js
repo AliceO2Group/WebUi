@@ -26,10 +26,12 @@ import { ROLES } from '../../../workflow/constants.js';
  * @return {vnode} - Virtual node representing the button
  */
 export const buttonToAcknowledgeDeployment = (environmentId, user, acknowledgeCallback) => {
-  if (isUserAllowedRole(ROLES.Admin) || di.session.personid === user.externalId) {
+  if (isUserAllowedRole(ROLES.Global) || di.session.personid === user?.externalId) {
     return h('button.btn.btn-danger', {
       title: 'Acknowledge failed deployment and remove it from the cache',
       onclick: () => acknowledgeCallback(environmentId)
     }, 'Acknowledge');
+  } else {
+    return h('.f6', 'Not enough permissions' );
   }
 };
