@@ -118,7 +118,7 @@ describe('`pageRoot` test-suite', function () {
   });
 
   it('should successfully display configurations list items', async function () {
-    const res = await fetch('http://localhost:8080/api/api/configurations');
+    const res = await fetch('http://localhost:8080/control/api/configurations');
     const data = await res.json();
 
     const configNavigatorItems = await page.$$('.config_navigator__item');
@@ -126,7 +126,7 @@ describe('`pageRoot` test-suite', function () {
   });
 
   it('should display configurations list', async function () {
-    const res = await fetch('http://localhost:8080/api/api/configurations');
+    const res = await fetch('http://localhost:8080/control/api/configurations');
     const data = await res.json();
 
     const configNavigatorItems = await page.$$('.config_navigator__item');
