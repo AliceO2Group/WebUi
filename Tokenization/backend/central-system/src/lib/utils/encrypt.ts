@@ -12,8 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import  {importSPKI, CompactEncrypt } from 'jose';
-
+import { importSPKI, CompactEncrypt } from "jose";
 
 /** * @description Encrypts data using a provided public key with RSA-OAEP-256 and A256GCM.
  * @param publicKey - The public key in PEM format used for encryption.
@@ -21,13 +20,14 @@ import  {importSPKI, CompactEncrypt } from 'jose';
  * @returns A promise that resolves to the encrypted data in JWE compact serialization format.
  * @throws Will throw an error if the encryption process fails.
  */
-async function encryptWithPublicKey(publicKey: string, data: string): Promise<string> {
-  const pubKey = await importSPKI(publicKey, 'RSA-OAEP-256');
+export async function encryptWithPublicKey(
+  publicKey: string,
+  data: string
+): Promise<string> {
+  const pubKey = await importSPKI(publicKey, "RSA-OAEP-256");
   const encoder = new TextEncoder();
   const encrypted = await new CompactEncrypt(encoder.encode(data))
-    .setProtectedHeader({ alg:'RSA-OAEP-256', enc:'A256GCM', typ:'JWE'  })
+    .setProtectedHeader({ alg: "RSA-OAEP-256", enc: "A256GCM", typ: "JWE" })
     .encrypt(pubKey);
   return encrypted;
 }
-
-export { encryptWithPublicKey };

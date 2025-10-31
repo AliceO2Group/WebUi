@@ -146,7 +146,7 @@ export class VaultController {
   public register() {
     registerBusHandler<SignTokenReq>(
       EventType.SIGN_TOKEN_VAULT,
-      async (payload) => this.signToken(payload.data)
+      async (payload) => this.signToken(payload)
     );
 
     registerBusHandler<undefined>(EventType.LOGIN_VAULT, async () =>
