@@ -14,8 +14,9 @@
 
 import http from "http";
 import path from "path";
-import { CentralSystemWrapper } from "../wrapper/central/CentralSystemWrapper";
-import { gRPCWrapper } from "../wrapper/client/gRPCWrapper";
+import express from "express";
+import { CentralSystemWrapper } from "../wrapper/src/central/CentralSystemWrapper";
+import { gRPCWrapper } from "../wrapper/src/client/gRPCWrapper";
 
 // Handles to the started E2E environment
 export interface TestEnvHandles {
@@ -33,45 +34,31 @@ export interface TestEnvHandles {
  * - Client B: peer listener on :40042, HTTP echo on :8082
  */
 export async function startTestEnvironment(): Promise<TestEnvHandles> {
-  // TEST CERTIFICATES ?????????????????????????
-  const CERTS_DIR = path.resolve(__dirname, "../certs");
+  // TEST CERTIFICATES
+  const CERTS_DIR = path.resolve(__dirname, "../authorization");
   const CA = path.join(CERTS_DIR, "ca.crt");
-  const CENTRAL_CERT = path.join(CERTS_DIR, "central.crt");
-  const CENTRAL_KEY = path.join(CERTS_DIR, "central.key");
+  const CENTRAL_CERT = path.join(CERTS_DIR, "central-system.crt");
+  const CENTRAL_KEY = path.join(CERTS_DIR, "central-system.key");
 
   // --- Client certificates ---
   const A = {
     ca: CA,
-    cert: path.join(CERTS_DIR, "a.sender.crt"),
-    key: path.join(CERTS_DIR, "a.key"),
-    listener: path.join(CERTS_DIR, "a.listener.crt"),
+    cert: path.join(CERTS_DIR, "client-a-client.crt"),
+    key: path.join(CERTS_DIR, "client-a.key"),
+    listener: path.join(CERTS_DIR, "client-a-server.crt"),
   };
 
   const B = {
     ca: CA,
-    cert: path.join(CERTS_DIR, "b.sender.crt"),
-    key: path.join(CERTS_DIR, "b.key"),
-    listener: path.join(CERTS_DIR, "b.listener.crt"),
+    cert: path.join(CERTS_DIR, "client-b-client.crt"),
+    key: path.join(CERTS_DIR, "client-b.key"),
+    listener: path.join(CERTS_DIR, "client-b-server.crt"),
   };
 
   const PROTO = path.resolve(__dirname, "../wrapper/proto/wrapper.proto");
 
   // --- local HTTP server at Client B ---
-  const serverB = http.createServer((req, res) => {
-    if (req.method === "POST" && req.url === "/api/echo") {
-      let body = "";
-      req.on("data", (c) => (body += c));
-      req.on("end", () => {
-        res.writeHead(200, { "content-type": "application/json" });
-        res.end(JSON.stringify({ ok: true }));
-      });
-      return;
-    }
-    res.writeHead(404);
-    res.end();
-  });
-
-  await new Promise<void>((resolve) => serverB.listen(8082, resolve));
+  const serverB = await startServerB(8082);
 
   // --- Central System ---
   const central = new CentralSystemWrapper({
@@ -98,6 +85,7 @@ export async function startTestEnvironment(): Promise<TestEnvHandles> {
       caCertPath: A.ca,
       certPath: A.cert,
       privateKeyPath: A.key,
+      publicKeyPath: A.key, // not needed
     },
     listenerCertPath: A.listener,
   });
@@ -112,13 +100,14 @@ export async function startTestEnvironment(): Promise<TestEnvHandles> {
       caCertPath: B.ca,
       certPath: B.cert,
       privateKeyPath: B.key,
+      publicKeyPath: B.key, // not needed
     },
     listenerCertPath: B.listener,
   });
 
   // helper to stop everything
   const stop = async () => {
-    await new Promise<void>((resolve) => serverB.close(() => resolve()));
+    await stopServerB(serverB);
     process.exitCode = 0;
   };
 
@@ -142,4 +131,28 @@ export async function waitFor(
 // Simple sleep utility
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+// Starts a simple Express server for E2E testing
+export function startServerB(port = 8082) {
+  const app = express();
+  app.use(express.json());
+
+  app.get("/api/echo", (_req, res) => {
+    res.status(200).json({
+      message: "Hello from ClientB's local endpoint!",
+    });
+  });
+
+  app.use((_req, res) => res.sendStatus(404));
+
+  const server = http.createServer(app);
+  return new Promise<http.Server>((resolve) => {
+    server.listen(port, () => resolve(server));
+  });
+}
+
+// Stops the Express server
+export async function stopServerB(server: http.Server) {
+  await new Promise<void>((resolve) => server.close(() => resolve()));
 }
