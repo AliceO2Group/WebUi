@@ -113,11 +113,21 @@ describe('`pageRoot` test-suite', function () {
   });
 
   it('should successfully display configurations list', async function () {
+    if (page === null) {
+      assert.equal('Page is null', 'test suite failed');
+      return;
+    }
+
     const configNavigator = await page.$$('.config_navigator');
     assert.strictEqual(configNavigator.length, 1);
   });
 
   it('should successfully display configurations list items', async function () {
+    if (page === null || url === null) {
+      assert.equal('Page is null', 'test suite failed');
+      return;
+    }
+
     const res = await fetch('http://localhost:8080/control/api/configurations');
     const data = await res.json();
 
@@ -126,6 +136,11 @@ describe('`pageRoot` test-suite', function () {
   });
 
   it('should display configurations list', async function () {
+    if (page === null || url === null) {
+      assert.equal('Page is null', 'test suite failed');
+      return;
+    }
+    
     const res = await fetch('http://localhost:8080/control/api/configurations');
     const data = await res.json();
 
