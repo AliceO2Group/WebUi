@@ -20,7 +20,7 @@ import {miniCard} from '../../../common/card/miniCard.js';
 import {parseObject, parseOdcStatusPerEnv} from '../../../common/utils.js';
 import {rowForCard} from '../../../common/card/rowForCard.js';
 import {tasksPerHostPanel} from '../../../common/task/tasksPerHostPanel.js';
-import {environmentEventsPanel} from './environmentEventsPanel.js';
+import {environmentEventsPanel} from '../../../common/events/environmentEventsPanel.js';
 
 /**
  * @file Builds the navigation tabs that are to be displayed on the environment details page which contains the following tabs:
@@ -37,8 +37,8 @@ import {environmentEventsPanel} from './environmentEventsPanel.js';
  * @param {Model} model - the root model of the application
  * @param {EnvironmentInfo} environment - the environment to display
  */
-export const environmentNavigationTabs = (model, item) => {
-  const { hardware: { flp, qc, epn, trg } } = item;
+export const environmentNavigationTabs = (model, item = {}) => {
+  const { hardware: { flp, qc, epn, trg } = {} } = item;
   const panels = {
     general: {
       name: 'General',
@@ -105,7 +105,7 @@ export const environmentNavigationTabs = (model, item) => {
  */
 const environmentGeneralInfoContent = (environmentModel, environment) => {
   const {currentTransition = '-', userVars = {}, createdWhen, rootRole, hardware = {epn: {}}} = environment;
-  const {epn: {info}} = hardware;
+  const {epn: {info = {}} = {}} = hardware;
   const {state: odcState, styleClass: odcStyle} = parseOdcStatusPerEnv(environment);
 
   return miniCard(
@@ -114,9 +114,9 @@ const environmentGeneralInfoContent = (environmentModel, environment) => {
       h('.flex-column.', [
         rowForCard('Global:', isGlobalRun(userVars) ? 'ON' : '-'),
         rowForCard('Transitioning:', currentTransition),
-        rowForCard('ENV Created:', parseObject(createdWhen, 'createdWhen')),
-        rowForCard('RUN Started:', parseObject(userVars['run_start_time_ms'], 'run_start_time_ms')),
-        rowForCard('RUN Ended:', parseObject(userVars['run_end_time_ms'], 'run_end_time_ms')),
+        rowForCard('ENV Created:', parseObject({ createdWhen }, 'createdWhen')),
+        rowForCard('RUN Started:', parseObject(userVars, 'run_start_time_ms')),
+        rowForCard('RUN Ended:', parseObject(userVars, 'run_end_time_ms')),
         rowForCard('Run Type:', userVars.run_type),
         rowForCard('Template:', rootRole),
         rowForCard('DCS:', parseObject(userVars, 'dcs_enabled')),
