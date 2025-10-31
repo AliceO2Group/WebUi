@@ -2,10 +2,15 @@
   "name": "central-system",
   "version": "1.0.0",
   "type": "module",
+  "main": "dist/index.js",
+  "description": "A NodeJS backend for the token issuer within ALICE O2",
   "scripts": {
-    "dev": "nodemon",
     "build": "tsc",
-    "watch:ts": "tsc -w"
+    "watch:ts": "tsc -w",
+    "watch:node": "nodemon --watch dist --ext js,json --exec \"node index.js\"",
+    "dev": "npm run build && concurrently -k \"npm:watch:*\"",
+    "start": "node index.js",
+    "test": "jest --runInBand"
   },
   "dependencies": {
     "@aliceo2/web-ui": "^2.8.4",
@@ -20,8 +25,10 @@
     "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20.4.2",
+    "concurrently": "^9.0.1",
     "jest": "^30.0.5",
     "nodemon": "^3.1.10",
+    "supertest": "^7.1.4",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
