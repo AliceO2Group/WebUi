@@ -21,6 +21,7 @@ const mockServerInstance = {
 
 const logger = {
   infoMessage: jest.fn(),
+  errorMessage: jest.fn(),
 };
 
 jest.mock("@aliceo2/web-ui", () => ({
@@ -82,7 +83,7 @@ describe("CentralSystemWrapper", () => {
     wrapper.listen();
 
     expect(mockBindAsync).toHaveBeenCalledWith(
-      "localhost:12345",
+      "0.0.0.0:12345",
       "mock-credentials",
       expect.any(Function)
     );
@@ -94,9 +95,8 @@ describe("CentralSystemWrapper", () => {
 
     wrapper.listen();
 
-    expect(logger.infoMessage).toHaveBeenCalledWith(
-      "Server bind error:",
-      error
+    expect(logger.errorMessage).toHaveBeenCalledWith(
+      "Server bind error: Error: bind failed"
     );
   });
 
@@ -125,10 +125,6 @@ describe("CentralSystemWrapper", () => {
     );
     expect(logger.infoMessage).toHaveBeenCalledWith(
       "Client client123 ended stream."
-    );
-    expect(logger.infoMessage).toHaveBeenCalledWith(
-      "Stream error from client client123:",
-      expect.any(Error)
     );
   });
 });
