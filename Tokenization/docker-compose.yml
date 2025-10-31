@@ -1,13 +1,13 @@
 services:
   install-backend:
     image: node:22-alpine
-    working_dir: /var/workspace
+    working_dir: /var/workspace/central-system
     volumes:
       - ./backend:/var/workspace
     command: ["npm", "install", "--no-save", "--silent"]
   backend:
     image: node:22-alpine
-    working_dir: /var/workspace
+    working_dir: /var/workspace/central-system
     volumes:
       - ./backend:/var/workspace
     command: ["npm", "run", "dev"]
