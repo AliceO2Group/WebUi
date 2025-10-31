@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { CentralSystemWrapper } from "../lib/CentralSystemWrapper.js";
+import { CentralSystemWrapper } from "../wrapper/CentralSystemWrapper.js";
 import { ConnectionController } from "../controllers/ConnectionController.js";
 import { VaultController } from "../controllers/VaultController.js";
 import path from "path";
@@ -42,10 +42,15 @@ class CentralSystem {
   public readonly vaultController: VaultController;
 
   public constructor(wrapperPort: number) {
-    this.centralSystemWrapper = new CentralSystemWrapper(
-      this.PROTO_PATH,
-      wrapperPort
-    );
+    this.centralSystemWrapper = new CentralSystemWrapper({
+      protoPath: this.PROTO_PATH,
+      port: wrapperPort,
+      serverCerts: {
+        caCertPath: path.join(__dirname, "../../ca/ca.crt"),
+        certPath: path.join(__dirname, "../../crt/central-system.crt"),
+        keyPath: path.join(__dirname, "../../crt/central-system.key"),
+      },
+    });
     this.centralSystemWrapper.listen();
     this.fakeTokens = new Map([
       [1, { tokenId: 1, validity: "good", payload: "payload1" }],

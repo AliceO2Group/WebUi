@@ -14,6 +14,7 @@
 
 import { Agent } from "https";
 import fetch from "node-fetch";
+import { LogManager } from "@aliceo2/web-ui";
 
 // Define the structure of the login response
 interface AuthResponse {
@@ -26,6 +27,7 @@ interface AuthResponse {
  * @description Service for authenticating with an external vault service.
  */
 export class VaultAuthService {
+  private _logger = LogManager.getLogger("VaultAuthService");
   /**
    * @description Logs in to the vault service and retrieves a client token.
    * @param url - The URL of the external vault service.
@@ -48,6 +50,7 @@ export class VaultAuthService {
     });
     if (!result.ok) throw new Error(await result.text());
     const data = (await result.json()) as AuthResponse;
+    this._logger.info(`Logged in to vault method ${name}`);
     return data.auth.client_token;
   }
 
@@ -76,6 +79,7 @@ export class VaultAuthService {
     });
     if (!result.ok) throw new Error(await result.text());
     const data = (await result.json()) as AuthResponse;
+    this._logger.info(` Renewed token ${data.auth.client_token}`);
     return data.auth.client_token;
   }
 }
