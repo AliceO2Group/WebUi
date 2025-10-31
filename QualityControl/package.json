@@ -20,6 +20,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon --watch index.js --watch lib --watch config.js index.js",
+    "dev-networked-mount": "nodemon -L --watch index.js --watch lib --watch config.js index.js",
     "lint": "./node_modules/.bin/eslint --config eslint.config.js lib public",
     "coverage-lcov": "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/lcov.info test/test-index.js",
     "coverage-local": "node --test --experimental-test-coverage --test-reporter=spec test/test-index.js",
