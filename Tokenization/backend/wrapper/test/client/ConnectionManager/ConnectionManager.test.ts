@@ -14,6 +14,7 @@
 
 import * as grpc from "@grpc/grpc-js";
 import { ConnectionManager } from "../../../client/ConnectionManager/ConnectionManager";
+import { CentralConnection } from "../../../client/ConnectionManager/CentralConnection";
 
 // Mock of client and stream
 const mockStream = {
@@ -80,16 +81,17 @@ describe("ConnectionManager", () => {
 
   test("disconnect() should end stream and reset reconnectAttempts", () => {
     conn.connectToCentralSystem();
-    conn.disconnect();
+    conn.disconnectFromCentralSystem();
 
     expect(mockStream.end).toHaveBeenCalled();
   });
 
   test("scheduleReconnect() should call connect after delay", () => {
     jest.useFakeTimers();
-    const spy = jest.spyOn<any, any>(conn as any, "connect");
+    const spy = jest.spyOn<any, any>(CentralConnection.prototype, "connect");
 
-    (conn as any).scheduleReconnect();
+    const centralConnection = new CentralConnection(mockClient, {} as any);
+    (centralConnection as any).scheduleReconnect();
 
     jest.advanceTimersByTime(1000 * 2);
     expect(spy).toHaveBeenCalled();
@@ -102,7 +104,10 @@ describe("ConnectionManager", () => {
       ([event]) => event === "end"
     )[1];
 
-    const reconnectSpy = jest.spyOn<any, any>(conn as any, "scheduleReconnect");
+    const reconnectSpy = jest.spyOn<any, any>(
+      CentralConnection.prototype,
+      "scheduleReconnect"
+    );
     onEnd();
 
     expect(reconnectSpy).toHaveBeenCalled();
@@ -114,7 +119,10 @@ describe("ConnectionManager", () => {
       ([event]) => event === "error"
     )[1];
 
-    const reconnectSpy = jest.spyOn<any, any>(conn as any, "scheduleReconnect");
+    const reconnectSpy = jest.spyOn<any, any>(
+      CentralConnection.prototype,
+      "scheduleReconnect"
+    );
     onError(new Error("Stream failed"));
 
     expect(reconnectSpy).toHaveBeenCalled();
