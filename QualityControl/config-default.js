@@ -49,7 +49,21 @@ export const config = {
     timezone: '+00:00',
     logging: false,
     retryThrottle: 5000,
-  }
+  },
+  bookkeeping: {
+    url: 'http://localhost:4000', // local insance
+    token: '<paste a token from bookkeeping here>',
+    runTypesRefreshInterval: 15000,
+    runStatusRefreshInterval: 30000,
+  },
+  kafka: {
+    enabled: true,
+    clientId: 'qcg-client-local',
+    consumerGroups: {
+      QCG_RUN: 'qcg-run-local'
+    },
+    brokers: ['localhost:9092'],
+  },
 
   /*
    * Absolute path where to save layouts, default = root of this app

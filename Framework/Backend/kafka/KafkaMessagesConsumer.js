@@ -90,9 +90,11 @@ class KafkaMessagesConsumer {
    */
   async _handleEvent(message) {
     for (const listener of this._listeners) {
-      listener(message).catch((error) => {
+      try {
+        await listener(message);
+      } catch (error) {
         this._logger.errorMessage(`An error occurred when handling event: ${error.message}\n${error.stack}`);
-      });
+      }
     }
   }
 

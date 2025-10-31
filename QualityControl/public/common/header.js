@@ -19,6 +19,8 @@ import layoutViewHeader from '../layout/view/header.js';
 import objectTreeHeader from '../object/objectTreeHeader.js';
 import aboutViewHeader from '../pages/aboutView/components/aboutViewHeader.js';
 import LayoutListHeader from '../pages/layoutListView/components/LayoutListHeader.js';
+import { objectViewHeader } from '../pages/objectView/components/header.js';
+import { filtersPanel } from './filters/filterViews.js';
 
 /**
  * Shows header of the application, split with 3 parts:
@@ -28,22 +30,49 @@ import LayoutListHeader from '../pages/layoutListView/components/LayoutListHeade
  * @param {Model} model - root model of the application
  * @returns {vnode} - header element
  */
-export default (model) => h('.flex-row.p2', [
-  commonHeader(model),
-  headerSpecific(model),
-]);
+export default (model) => {
+  const specific = headerSpecific(model) || {};
+  const { centerCol, rightCol } = specific;
+
+  return h('.flex-col', [
+    h('.flex-row.p2.items-center', { id: 'qcg-header' }, [
+      commonHeader(model),
+      centerCol || h('.flex-grow'),
+      rightCol || h('.w-25'),
+    ]),
+    filterSpecific(model),
+  ]);
+};
+
+/**
+ * Shows the page specific header (center and right side)
+ * @param {Model} model - root model of the application
+ * @returns {{centerCol: vnode, rightCol: vnode} | null} center column and right column
+ */
+const headerSpecific = (model) => {
+  const { filterModel, layout, object, page } = model;
+  switch (page) {
+    case 'layoutList': return LayoutListHeader();
+    case 'layoutShow': return layoutViewHeader(layout, filterModel);
+    case 'objectTree': return objectTreeHeader(object, filterModel);
+    case 'objectView': return objectViewHeader(model);
+    case 'about': return aboutViewHeader();
+    default: return null;
+  }
+};
 
 /**
  * Shows the page specific header (center and right side)
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const headerSpecific = (model) => {
-  switch (model.page) {
-    case 'layoutList': return LayoutListHeader(model.layoutListModel);
-    case 'layoutShow': return layoutViewHeader(model.layout);
-    case 'objectTree': return objectTreeHeader(model);
-    case 'about': return aboutViewHeader();
+const filterSpecific = (model) => {
+  const { page, filterModel, layout, object, objectViewModel } = model;
+
+  switch (page) {
+    case 'layoutShow': return !layout.editEnabled && filtersPanel(filterModel, layout);
+    case 'objectTree': return filtersPanel(filterModel, object);
+    case 'objectView': return filtersPanel(filterModel, objectViewModel);
     default: return null;
   }
 };
@@ -53,10 +82,15 @@ const headerSpecific = (model) => {
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const commonHeader = (model) => h('.flex-grow.flex-row.items-center', [
+const commonHeader = (model) => h('.flex-row.items-center.w-25', [
   loginButton(model),
   ' ',
-  h('span.f4.gray', 'Quality Control'),
+  h('span.f4.gray', {
+    id: 'qcgTitle',
+    style: 'cursor: pointer',
+    onclick: () => model.router.go('?page=layoutList'),
+    title: 'Go to layouts list page',
+  }, 'Quality Control'),
   model.loader.active && h('span.f4.mh1.gray', spinner()),
 ]);
 

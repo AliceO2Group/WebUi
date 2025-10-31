@@ -13,20 +13,22 @@
  */
 
 import { RemoteData } from '/js/src/index.js';
+import { RunStatus } from '../../library/runStatus.enum.js';
 
 /**
  * Service to get the data to populate the filters
  */
 export default class FilterService {
   /**
-   * Initialize model
-   * @param {Model} model - root model of the application
+   * Initialize filterModel
+   * @param {FilterModel} filterModel - The root filterModel that manages filter state
    */
-  constructor(model) {
-    this.model = model;
-    this.loader = model.loader;
+  constructor(filterModel) {
+    this.filterModel = filterModel;
+    this.loader = filterModel.model.loader;
 
     this.runTypes = RemoteData.notAsked();
+    this.ongoingRuns = RemoteData.notAsked();
   }
 
   /**
@@ -35,21 +37,62 @@ export default class FilterService {
    */
   async getRunTypes() {
     this.runTypes = RemoteData.loading();
-    this.model.notify();
+    this.filterModel.notify();
     const { result, ok } = await this.loader.get('/api/filter/configuration');
     if (ok) {
       this.runTypes = RemoteData.success(result?.runTypes || []);
     } else {
       this.runTypes = RemoteData.failure('Error retrieving runTypes');
     }
-    this.model.notify();
+    this.filterModel.notify();
+  }
+
+  /**
+   * Method to get run status for a specific run number
+   * @param {number} runNumber - The run number to get status for
+   * @returns {RemoteData} - result within a RemoteData object
+   */
+  async getRunStatus(runNumber) {
+    const parsedRunNumber = parseInt(runNumber, 10);
+    const { result, ok } = await this.loader.get(`/api/filter/run-status/${parsedRunNumber}`);
+    return ok ? result?.runStatus : RunStatus.UNKNOWN;
   }
 
   /**
    * Method to initialize the filter service
    * @returns {void}
    */
-  initFilterService() {
-    this.getRunTypes();
+  async initFilterService() {
+    await this.getRunTypes();
+  }
+
+  /**
+   * Method which will return RemoteData object based on the status of the request
+   * @param {object} result - value to be added in RemoteData object
+   * @param {boolean} ok - whether result was ok or not
+   * @returns {RemoteData} - passed result in a RemoteData object
+   */
+  parseResult(result, ok) {
+    if (!ok) {
+      return RemoteData.failure(result.error || result.message);
+    } else {
+      return RemoteData.success(result);
+    }
+  }
+
+  /**
+   * Gets the run numbers for the ongoing runs
+   * @returns {void} assigns the remoteData object to ongoingRuns
+   */
+  async fetchOngoingRuns() {
+    this.ongoingRuns = RemoteData.loading();
+    this.filterModel.notify();
+    const { result, ok } = await this.loader.get('/api/filter/ongoingRuns');
+    if (ok) {
+      this.ongoingRuns = RemoteData.success(result?.ongoingRuns);
+    } else {
+      this.ongoingRuns = RemoteData.failure('Error retrieving ongoing runs');
+    }
+    this.filterModel.notify();
   }
 }

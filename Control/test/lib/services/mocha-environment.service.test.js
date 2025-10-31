@@ -142,6 +142,49 @@ describe('EnvironmentService test suite', () => {
       assert.strictEqual(result[1].id, 'env2');
       assert.ok(envService._environmentCacheService.addOrUpdateEnvironment.calledTwice);
     });
+    it('should retrieve environments and update the cache and keep environment that are isDeploying true', async () => {
+      const mockEnvironments = [
+        { id: 'env1', state: 'active' },
+        { id: 'env2', state: 'inactive' },
+      ];
+      GetEnvironmentsStub.resolves({ environments: mockEnvironments });
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[0].id }).resolves({ environment: mockEnvironments[0] });
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[1].id }).resolves({ environment: mockEnvironments[1] });
+      envService._environmentCacheService.environments = new Map([
+        ['env3', { id: 'env3', isDeploying: true, events: [] }],
+        ['env2', { id: 'env2', isDeploying: false, events: [] }],
+      ]);
+      envService._environmentCacheService.addOrUpdateEnvironment = sinon.stub().returns();
+      const result = await envService.getEnvironments(false, true);
+
+      assert.strictEqual(result.length, 3);
+      assert.strictEqual(result[0].id, 'env1');
+      assert.strictEqual(result[1].id, 'env2');
+      assert.strictEqual(result[2].id, 'env3');
+      assert.ok(envService._environmentCacheService.addOrUpdateEnvironment.calledTwice);
+    });
+
+    it('should retrieve environments and update the cache and keep environment that failed deployment', async () => {
+      const mockEnvironments = [
+        { id: 'env1', state: 'active' },
+        { id: 'env2', state: 'inactive' },
+      ];
+      GetEnvironmentsStub.resolves({ environments: mockEnvironments });
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[0].id }).resolves({ environment: mockEnvironments[0] });
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[1].id }).resolves({ environment: mockEnvironments[1] });
+      envService._environmentCacheService.environments = new Map([
+        ['env4', { id: 'env4', isDeploying: false, deploymentError: 'ERROR', events: [] }],
+        ['env2', { id: 'env2', isDeploying: false, events: [] }],
+      ]);
+      envService._environmentCacheService.addOrUpdateEnvironment = sinon.stub().returns();
+      const result = await envService.getEnvironments(false, true);
+
+      assert.strictEqual(result.length, 3);
+      assert.strictEqual(result[0].id, 'env1');
+      assert.strictEqual(result[1].id, 'env2');
+      assert.strictEqual(result[2].id, 'env4');
+      assert.ok(envService._environmentCacheService.addOrUpdateEnvironment.calledTwice);
+    });
   });
 
   describe(`'getEnvironment' test suite`, async () => {
@@ -198,7 +241,7 @@ describe('EnvironmentService test suite', () => {
     it('should successfully return environment id if successfully created', async () => {
       const environmentTransitioned = await envService.newEnvironmentAsync({ workflowTemplate: 'github/template/1.1.0', userVars: {keyA: 'keyA'}, user });
       assert.strictEqual(environmentTransitioned.id, ENVIRONMENT_VALID);
-      assert.strictEqual(environmentTransitioned.currentTransition, 'DEPLOY');
+      assert.ok(environmentTransitioned.isDeploying);
     });
 
     it('should add environment to cache when successfully deployed', async () => {

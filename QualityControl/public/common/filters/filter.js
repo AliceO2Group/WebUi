@@ -31,7 +31,7 @@ import { h, RemoteData } from '/js/src/index.js';
  * @param {string} [config.width='.'] - The CSS class that defines the width of the filter.
  * @returns {vnode} - A virtual node element representing the filter element (input or dropdown).
  */
-const dynamicSelector = (config) => {
+export const dynamicSelector = (config) => {
   const {
     queryLabel,
     placeholder,
@@ -75,7 +75,7 @@ const dynamicSelector = (config) => {
  * @param {string} [config.width='.w-20'] - The CSS class that defines the width of the filter.
  * @returns {vnode} - A virtual node element representing the filter input.
  */
-const filterInput = (config) => {
+export const filterInput = (config) => {
   const { queryLabel, placeholder, id, filterMap, onInputCallback, onEnterCallback, type, width = '.w-20' } = config;
 
   return h(`${width}`, [
@@ -85,7 +85,7 @@ const filterInput = (config) => {
       id,
       name: id,
       min: 0,
-      value: filterMap[queryLabel],
+      value: filterMap[queryLabel] || '',
       oninput: (event) => onInputCallback(queryLabel, event.target.value),
       onkeydown: ({ keyCode }) => {
         if (keyCode === 13) {
@@ -112,9 +112,12 @@ const filterInput = (config) => {
 const dropdownSelector = (config) => {
   const { queryLabel, placeholder, id, filterMap, options, onChangeCallback, width = '.w-20' } = config;
   const optionSelected = filterMap[queryLabel];
+  const setUrl = false;
+
   const validValue = options.map(String).includes(String(optionSelected));
+
   if (optionSelected && !validValue) {
-    onChangeCallback('', queryLabel);
+    onChangeCallback(queryLabel, '', setUrl);
   }
   return h(`${width}`, [
     h('select.form-control', {
@@ -122,7 +125,7 @@ const dropdownSelector = (config) => {
       id,
       name: id,
       value: validValue ? optionSelected : '',
-      onchange: (event) => onChangeCallback(event.target.value, queryLabel),
+      onchange: (event) => onChangeCallback(queryLabel, event.target.value, setUrl),
     }, [
       h('option', { value: '' }, placeholder),
       h('hr'),
@@ -131,7 +134,65 @@ const dropdownSelector = (config) => {
   ]);
 };
 
-export const filters = {
-  filterInput,
-  dynamicSelector,
+/**
+ * Renders a dropdown selector for ongoing runs.
+ * @param {object} config - Selector config ({ id, placeholder, width }).
+ * @param {object} filterMap - Current filters (RunNumber or empty).
+ * @param {RemoteData} options - Available ongoing runs.
+ * @param {Function} onChangeCallback - To change the selection and update the filterMap
+ * @param {Function} onEnterCallback - To trigger the filter
+ * @param {Function} [onFocusCallback] - To retrieve ongoing runs
+ * @returns {object} Virtual DOM node (hyperscript element).
+ */
+export const ongoingRunsSelector = (config, filterMap, options, onChangeCallback, onEnterCallback, onFocusCallback) => {
+  const handleChange = (value) => {
+    onChangeCallback('RunNumber', value, false);
+    if (value) {
+      setTimeout(() => onEnterCallback(), 50);
+    }
+  };
+  const availableOptions = options.isSuccess()
+    ? [...new Set([...options.payload].map((v) => String(v)))]
+    : [];
+
+  const selectedValue = filterMap['RunNumber'] || '';
+
+  const handleFocus = () => {
+    if (onFocusCallback) {
+      onFocusCallback();
+    }
+  };
+
+  const buildOptions = () => {
+    const options = [];
+    options.push(h('option', { value: '', disabled: true }, config.placeholder || 'Select a run'));
+    if (selectedValue) {
+      options.push(h('option', { value: selectedValue }, selectedValue));
+    }
+
+    availableOptions
+      .filter((option) => option !== selectedValue)
+      .forEach((option) => {
+        options.push(h('option', { value: option }, option));
+      });
+
+    return options;
+  };
+
+  return h(`.${config.width}`, [
+    h(
+      'select.form-control',
+      {
+        placeholder: config.placeholder || 'Select a run',
+        id: config.id,
+        name: config.id,
+        value: selectedValue,
+        onfocus: handleFocus,
+        onchange: (event) => handleChange(event.target.value),
+      },
+      availableOptions.length > 0 || selectedValue
+        ? buildOptions()
+        : [h('option', { value: '', disabled: true }, 'No ongoing runs available')],
+    ),
+  ]);
 };

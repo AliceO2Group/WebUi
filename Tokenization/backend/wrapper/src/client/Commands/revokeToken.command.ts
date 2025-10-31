@@ -11,6 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+
 import { Command } from "../../models/commands.model";
 import { DuplexMessageEvent, TokenMessage } from "../../models/message.model";
 
