@@ -23,6 +23,13 @@ import { VaultAuthService } from "../services/VaultAuthService.js";
 import { VaultCredentialsService } from "../services/VaulCredentialsService.js";
 import { EventType } from "../lib/utils/events.js";
 import { bus } from "../lib/event-bus/event-bus.js";
+import { DuplexMessageEvent } from "../wrapper/models/message.model.js";
+import { GetAllTokensHandler } from "../wrapper/Commands/getAllTokens/getAllTokens.handler.js";
+import { RenewTokenHandler } from "../wrapper/Commands/renewToken/renewToken.handler.js";
+import { sendAlertHandler } from "../wrapper/Commands/sendAlert/sendAlert.handler.js";
+import { getTokensHelper } from "../lib/utils/getTokensHelper.js";
+import { getNewToken } from "../lib/utils/getNewToken.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 /*
@@ -51,6 +58,26 @@ class CentralSystem {
         keyPath: path.join(__dirname, "../../crt/central-system.key"),
       },
     });
+
+    this.centralSystemWrapper.registerCommandHandlers([
+      {
+        command: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
+        handler: new RenewTokenHandler(getNewToken, this.centralSystemWrapper),
+      },
+      {
+        command: DuplexMessageEvent.MESSAGE_EVENT_GET_ALL_TOKENS,
+        handler: new GetAllTokensHandler(
+          getTokensHelper,
+          this.centralSystemWrapper
+        ),
+      },
+
+      {
+        command: DuplexMessageEvent.MESSAGE_EVENT_SEND_ALERT,
+        handler: new sendAlertHandler(),
+      },
+    ]);
+
     this.centralSystemWrapper.listen();
     this.fakeTokens = new Map([
       [1, { tokenId: 1, validity: "good", payload: "payload1" }],

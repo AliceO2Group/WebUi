@@ -15,11 +15,14 @@
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import { LogManager } from "@aliceo2/web-ui";
-import { DuplexMessageModel } from "./models/message.model.js";
+import {
+  DuplexMessageEvent,
+  DuplexMessageModel,
+} from "./models/message.model.js";
 import * as fs from "fs";
 import { CentralSystemConfig } from "./models/config.model.js";
 import { CentralCommandDispatcher } from "./utils/client/CentralCommandDispatcher.js";
-import { Command } from "./models/commands.model.js";
+import { Command, CommandHandler } from "./models/commands.model.js";
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
@@ -94,7 +97,18 @@ export class CentralSystemWrapper {
     });
   }
 
- 
+  /**
+   * @description Registers multiple command handlers at once.
+   * @param handlersArray Array of objects containing command event types and their corresponding handlers.
+   */
+  public registerCommandHandlers(
+    handlersArray: { command: DuplexMessageEvent; handler: CommandHandler }[]
+  ): void {
+    handlersArray.forEach(({ command, handler }) => {
+      this.dispatcher.register(command, handler);
+    });
+  }
+
   /**
    * @description Handles the duplex stream from the client.
    * @param call The duplex stream call object.
@@ -105,7 +119,6 @@ export class CentralSystemWrapper {
     const clientSerialNumber = CentralSystemWrapper.normalizeSerial(
       cert?.serialNumber
     );
-
 
     this.logger.infoMessage(
       `Client ${clientSerialNumber} (${peer}) connected to CentralSystem stream`
@@ -134,7 +147,7 @@ export class CentralSystemWrapper {
      *    token:...
      *  }
      * }
-     * 
+     *
      * dispatch:
      * {
      *  clientSerialNumber:...,
@@ -152,7 +165,10 @@ export class CentralSystemWrapper {
 
     // Handle stream error event
     call.on("error", (err) => {
-      this.logger.errorMessage(`Stream error from client ${clientSerialNumber}:`, err);
+      this.logger.errorMessage(
+        `Stream error from client ${clientSerialNumber}:`,
+        err
+      );
       this.cleanupClient(peer);
     });
   }
@@ -176,10 +192,15 @@ export class CentralSystemWrapper {
    * @param data Data to send
    * @returns Whether the data was successfully sent
    */
-  public sendEvent(clientSerialNumber: string, data: DuplexMessageModel): Boolean {
+  public sendEvent(
+    clientSerialNumber: string,
+    data: DuplexMessageModel
+  ): Boolean {
     const client = this.clients.get(clientSerialNumber);
     if (!client) {
-      this.logger.warnMessage(`Client ${clientSerialNumber} not found for sending event`);
+      this.logger.warnMessage(
+        `Client ${clientSerialNumber} not found for sending event`
+      );
       return false;
     }
 
@@ -197,9 +218,15 @@ export class CentralSystemWrapper {
     this.clients.forEach((client, clientSerialNumber) => {
       try {
         client.write(data);
-        this.logger.infoMessage(`Broadcasted event to ${clientSerialNumber}:`, data);
+        this.logger.infoMessage(
+          `Broadcasted event to ${clientSerialNumber}:`,
+          data
+        );
       } catch (err) {
-        this.logger.errorMessage(`Error broadcasting to ${clientSerialNumber}:`, err);
+        this.logger.errorMessage(
+          `Error broadcasting to ${clientSerialNumber}:`,
+          err
+        );
       }
     });
   }
