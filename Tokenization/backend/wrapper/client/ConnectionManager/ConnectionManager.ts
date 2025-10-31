@@ -36,7 +36,6 @@ export class ConnectionManager {
   // class properties
   private client: any;
   private stream?: grpc.ClientDuplexStream<any, any>;
-  private readonly address: string;
   private reconnectAttempts = 0;
 
   private centralConnection: CentralConnection;
@@ -51,7 +50,10 @@ export class ConnectionManager {
    * @param protoPath - The file path to the gRPC proto definition.
    * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
    */
-  constructor(protoPath: string, centralAddress: string = "localhost:50051") {
+  constructor(
+    protoPath: string,
+    private centralAddress: string = "localhost:50051"
+  ) {
     const packageDef = protoLoader.loadSync(protoPath, {
       keepCase: true,
       longs: String,
@@ -75,53 +77,9 @@ export class ConnectionManager {
     this.sendingConnections.set("b", new Connection("2", "b"));
     // Create gRPC client
     this.client = new wrapper.CentralSystem(
-      this.address,
+      this.centralAddress,
       grpc.credentials.createInsecure()
     );
-  }
-
-  /**
-   * @description Initializes the duplex stream and sets up handlers.
-   */
-  private connect() {
-    if (this.stream) return;
-    this.stream = this.client.ClientStream();
-
-    if (this.stream) {
-      this.stream.on("data", (payload) => {
-        // handle data received from the stream
-      });
-
-      this.stream.on("end", () => {
-        this.logger.infoMessage(`Stream ended, attempting to reconnect...`);
-        this.stream = undefined;
-        this.scheduleReconnect();
-      });
-
-      this.stream.on("error", (err: any) => {
-        this.logger.infoMessage(
-          `Stream error:`,
-          err,
-          " attempting to reconnect..."
-        );
-        this.stream = undefined;
-        this.scheduleReconnect();
-      });
-    }
-  }
-
-  /**
-   * @description Schedules a reconnect with exponential backoff.
-   */
-  private scheduleReconnect() {
-    this.reconnectAttempts++;
-    const delay = Math.min(1000 * 2 ** this.reconnectAttempts, 30000);
-    setTimeout(() => {
-      this.logger.infoMessage(
-        `Reconnecting (attempt ${this.reconnectAttempts})...`
-      );
-      this.connect();
-    }, delay);
   }
 
   /**

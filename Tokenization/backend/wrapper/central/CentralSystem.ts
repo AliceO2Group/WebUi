@@ -93,11 +93,3 @@ export class CentralSystemWrapper {
     );
   }
 }
-
-// Instantiate the CentralSystemWrapper on port 50051, but don't start automatically
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
-const centralSystem = new CentralSystemWrapper(PROTO_PATH, 50051);
-// Start listening explicitly
-centralSystem.listen();
