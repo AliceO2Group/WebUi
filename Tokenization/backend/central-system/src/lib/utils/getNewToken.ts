@@ -22,16 +22,21 @@ import { DuplexMessageEvent } from "../../wrapper/models/message.model.js";
 import { SingleTokenPayload } from "../../wrapper/models/token.model.js";
 import { TokenMessage } from "../../services/models/message.model.js";
 
+/**
+ * @description Helper function to generate a new token for a client and send it via the central system wrapper.
+ */
 export async function getNewToken(
   clientSerialNumber: string,
   targetAddress: string,
   centralSystemWrapper: CentralSystemWrapper
 ): Promise<void> {
+    // Retrieve policies, receiver address, and public key from the credential vault
   const policicies = (
     await emitAndWait<{ path: string }, any>(EventType.GET_CREDENTIAL_VAULT, {
       path: `${clientSerialNumber}/policicies`,
     })
   ).policies;
+  //Retrieve receiver address and public key
   const receiverAdress = (
     await emitAndWait<{ path: string }, any>(EventType.GET_CREDENTIAL_VAULT, {
       path: `${targetAddress}/serialNumber`,
@@ -42,6 +47,7 @@ export async function getNewToken(
       path: `${receiverAdress}/publicKey`,
     })
   ).publicKey;
+
   const centralSystremSerialNumber = process.env
     .CENTRAL_SYSTEM_SERIAL_NUMBER as string;
 
@@ -52,6 +58,8 @@ export async function getNewToken(
     iat[policy] = Date.now();
     exp[policy] = Date.now() + (time as number);
   }
+
+  // Build JWT token
   const header = { alg: "EdDSA", typ: "JWT", kid: "jwt-signer:v1" };
   const payload = {
     sub: clientSerialNumber,
@@ -64,6 +72,7 @@ export async function getNewToken(
 
   const { input, signingInput } = buildTransitInput(header, payload);
 
+  // Sign the JWT using Vault
   const signB64 = await emitAndWait<{ data: string }, string>(
     EventType.SIGN_TOKEN_VAULT,
     { data: input }

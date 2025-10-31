@@ -16,11 +16,19 @@ import { CommandHandler } from "../../models/commands.model.js";
 import { SendAlertCommand } from "./sendAlert.command.js";
 import { LogManager } from "@aliceo2/web-ui";
 
+/**
+ * @description Handler for SendAlertCommand. Logs alerts sent by clients.
+ */
 export class sendAlertHandler implements CommandHandler<SendAlertCommand> {
   private _logger = LogManager.getLogger("ClientAlert");
+
   public constructor() {
   }
 
+  /**
+   * @description Handles the SendAlertCommand by logging the alert details.
+   * @param command The SendAlertCommand containing the alert payload.
+   */
   public async handle(command: SendAlertCommand): Promise<void> {
     this._logger.warnMessage(
       `ALERT from client: ${JSON.stringify((command as any).clientSerialNumber)}`

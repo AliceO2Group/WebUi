@@ -16,7 +16,14 @@ import { CommandHandler } from "../../models/commands.model.js";
 import { RenewTokenCommand } from "./renewToken.command.js";
 import { CentralSystemWrapper } from "../../CentralSystemWrapper.js";
 
+
+/** * @description Command handler used to renew token for a client after its expiration. Handles logic.
+ */
 export class RenewTokenHandler implements CommandHandler<RenewTokenCommand> {
+    /**
+     * @param getNewToken - Function to get a new token for the client.
+     * @param _centralSystemWrapper - Instance of CentralSystemWrapper.
+     */
   constructor(
     private getNewToken: (
       clientSerialNumber: string,
@@ -28,6 +35,10 @@ export class RenewTokenHandler implements CommandHandler<RenewTokenCommand> {
     this.getNewToken = getNewToken;
   }
 
+  /**
+   * @description Handles the RenewTokenCommand by invoking the getNewToken function.
+   * @param command The RenewTokenCommand containing the token renewal payload.
+   */
   public async handle(
     command: RenewTokenCommand & { clientSerialNumber?: string }
   ): Promise<void> {

@@ -15,6 +15,9 @@
 const toB64Url = (s: string) => Buffer.from(s, "utf8").toString("base64url");
 const toB64Std = (s: string) => Buffer.from(s, "utf8").toString("base64");
 
+/**
+ * @description Helper function to build the base64url and base64 standard encoded inputs for transit token generation.
+ */
 export function buildTransitInput(
   header: Record<string, unknown>,
   payload: Record<string, unknown>

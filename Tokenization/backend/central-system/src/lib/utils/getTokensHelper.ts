@@ -16,6 +16,9 @@ import { TokenListPayload } from "../../wrapper/models/token.model";
 import { CentralSystemWrapper } from "../../wrapper/CentralSystemWrapper";
 import { DuplexMessageEvent } from "../../wrapper/models/message.model";
 
+/**
+ * @description Helper function to get all tokens for a client and send them via the central system wrapper.
+ */
 export async function getTokensHelper(
   clientSerialNumber: string,
   centralSystemWrapper: CentralSystemWrapper

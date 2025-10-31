@@ -16,9 +16,16 @@ import { CommandHandler } from "../../models/commands.model.js";
 import { GetAllTokensCommand } from "./getAllTokens.command.js";
 import { CentralSystemWrapper } from "../../CentralSystemWrapper.js";
 
+/**
+ * @description Handler for the GetAllTokensCommand. Implements the command handling logic.
+ */
 export class GetAllTokensHandler
   implements CommandHandler<GetAllTokensCommand>
 {
+    /**
+     * @param getTokens - Function to retrieve all tokens for a client.
+     * @param _centralSystemWrapper - Instance of CentralSystemWrapper.
+     */
   constructor(
     private getTokens: (
       client: any,
@@ -29,6 +36,10 @@ export class GetAllTokensHandler
     this.getTokens = getTokens;
   }
 
+  /**
+   * @description Handles the GetAllTokensCommand by invoking the getTokens function.
+   * @param command The GetAllTokensCommand containing the payload.
+   */
   public async handle(
     command: GetAllTokensCommand & { clientSerialNumber?: string }
   ): Promise<void> {
