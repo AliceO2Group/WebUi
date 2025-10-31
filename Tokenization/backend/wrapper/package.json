@@ -1,0 +1,21 @@
+{
+  "name": "grpc-wrapper",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "jest",
+    "start": "node --loader ts-node/esm ./central/CentralSystem.ts"
+  },
+  "author": "ALICEO2",
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.3.4"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.13.4",
+    "@grpc/proto-loader": "^0.7.15",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
