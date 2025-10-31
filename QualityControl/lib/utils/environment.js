@@ -10,21 +10,8 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-
-import {h} from '/js/src/index.js';
-
-/**
- * @file Header of the Task Page that displays the title and 2 clean operations
  */
 
-/**
- * Header
- * @param {Object} model
- * @return {vnode}
- */
-export const header = (model) => [
-  h('.w-100.text-center', [
-    h('h4', 'Task list')
-  ]),
-];
+export const isRunningInProduction = process.env?.NODE_ENV === 'PRODUCTION' || process.env?.NODE_ENV === 'production';
+export const isRunningInTest = process.env?.NODE_ENV === 'test' || process.env?.NODE_ENV === 'TEST';
+export const isRunningInDevelopment = !isRunningInProduction && !isRunningInTest;

@@ -55,10 +55,9 @@ export class CcdbService {
    * @returns {CcdbService} - an instance of the newly created service
    */
   static setup(config = {}) {
-    const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb-setup`);
-
     const { hostname, port } = config;
     if (!hostname || !port) {
+      const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb-setup`);
       logger.warnMessage(
         'Missing or incomplete configuration for CCDB. Will proceed with using default values',
         { level: 11, system: 'GUI', facility: 'qcg/ccdb-setup' },

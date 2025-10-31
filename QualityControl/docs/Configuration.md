@@ -58,7 +58,20 @@ bookkeeping: {
 },
 ```
 
+### KafkaJS
+QCG provides live updates with respect to the ongoing runs in the configured environment. This is achieved via Kafka and [QCG Run Mode](./Features.md#runs-mode)
+The following object should be used as configuration template if use of Kafka is desired:
 
+```js
+  kafka: {
+    enabled: false, // if kafka should be used in QCG startup
+    clientId: 'qcg-client-local',
+    consumerGroups: {
+      QCG_RUN: 'qcg-run-local'
+    },
+    brokers: ['localhost:9092'],
+  },
+```
 
 ### QC Environment Configuration
 In the qc section, you can define whether QCG should be started as part of a Quality Control (QC) integrated environment.

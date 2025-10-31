@@ -21,6 +21,6 @@
  * @param {string} userVars.trg_global_run_enabled - indicates if the global run
  * @returns {boolean}
  */
-export const isGlobalRun = ({trg_enabled, trg_global_run_enabled}) => {
+export const isGlobalRun = ({trg_enabled, trg_global_run_enabled} = {}) => {
   return trg_enabled === 'true' && trg_global_run_enabled === 'true';
 }
