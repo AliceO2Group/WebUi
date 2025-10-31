@@ -18,26 +18,6 @@ import CentralSystem from "./dist/modules/CentralSystem.js";
 
 const http = new HttpServer({ port: 8080, allow: "*" });
 
-const fakeTokens = new Map([
-  [1, { tokenId: 1, validity: "good" }],
-  [2, { tokenId: 2, validity: "bad" }],
-]);
-
-const fakeLogs = new Map([
-  [1, []],
-  [
-    2,
-    [
-      { id: 1, title: "The first token ever", content: "Log for token" },
-      {
-        id: 3,
-        title: "No second log?",
-        content: "Looks like second log is lost somewhere",
-      },
-    ],
-  ],
-]);
-
 http.get(
   "/healthcheck",
   (req, res) => {
