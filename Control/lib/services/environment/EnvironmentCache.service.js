@@ -249,14 +249,20 @@ class EnvironmentCacheService {
     cachedEnvironment.currentRunNumber = runNumber;
     cachedEnvironment.events.push(environmentEvent);
     cachedEnvironment.lastUpdate = environmentEvent.timestamp;
-    this._environments.set(id, cachedEnvironment);
+    if (!cachedEnvironment.rootRole) {
+      cachedEnvironment.rootRole = environmentEvent.workflowTemplateInfoName;
+    }
+
+    this.addOrUpdateEnvironment(cachedEnvironment, false);
 
     if (
       transition?.name === EnvironmentTransitionType.DESTROY  &&
       state === EnvironmentState.DONE &&
-      message === ECS_DESTROY_TRANSITION_DONE_MESSAGE
+      message === ECS_DESTROY_TRANSITION_DONE_MESSAGE &&
+      !cachedEnvironment.deploymentError
     ) {
       // That is, if the environment successfully ended the DESTROY transition
+      // while not having a deployment error
       this.removeEnvironmentById(id);
     }
 

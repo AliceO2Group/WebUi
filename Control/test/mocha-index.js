@@ -48,7 +48,8 @@ describe('Control', function() {
     const {calls: apricotCalls} = apricotGRPCServer(config);
 
     // Start web-server in background
-    subprocess = spawn('node', ['index.js', 'test/test-config.js'], {stdio: 'pipe'});
+    subprocess = spawn('node', ['index.js', 'test/test-config.js'],
+      {stdio: 'pipe', env: {...process.env, NODE_ENV: 'test'}});
     subprocess.stdout.on('data', (chunk) => {
       subprocessOutput += chunk.toString();
     });
@@ -176,6 +177,9 @@ describe('Control', function() {
   require('./api/tasks/api-get-task-by-id.test');
   require('./api/tasks/api-get-tasks.test');
   require('./api/tasks/api-delete-tasks-test');
+
+  require('./api/configuration/api-get-configurations.test');
+  require('./api/configuration/api-get-configuration.test');
 
   beforeEach(() => this.ok = true);
 
