@@ -286,15 +286,15 @@ module.exports.setup = (http, ws) => {
   // Configuration
   http.get(
     '/configurations', validateConsulServiceMiddleware,
-    qcConfigurationController.getConfigurationsKeysHandler.bind(qcConfigurationController), {public: true}
+    qcConfigurationController.getConfigurationsKeysHandler.bind(qcConfigurationController)
   );
   http.get(
     '/configurations/:key(*)', validateConsulServiceMiddleware, 
-    qcConfigurationController.getConfigurationByKeyHandler.bind(qcConfigurationController), {public: true}
+    qcConfigurationController.getConfigurationByKeyHandler.bind(qcConfigurationController)
   );
   http.get(
     '/configuration/restrictions', validateConsulServiceMiddleware,
-    qcConfigurationController.getConfigurationRestrictionsByKeyHandler.bind(qcConfigurationController), {public: true}
+    qcConfigurationController.getConfigurationRestrictionsByKeyHandler.bind(qcConfigurationController)
   );
 
   // Consul
