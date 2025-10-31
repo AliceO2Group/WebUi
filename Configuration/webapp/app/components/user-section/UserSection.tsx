@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useState, type FC, type MouseEvent } from 'react';
 import { Box, IconButton, Menu, MenuItem, Avatar } from '@mui/material';
+import { useState, type FC, type MouseEvent } from 'react';
 import { getSessionData } from '~/services/session';
 
 interface UserSectionProps {

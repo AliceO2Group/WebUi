@@ -111,4 +111,40 @@ describe('`pageRoot` test-suite', function () {
     const userSectionMenu = await page.$$('.user-section__menu');
     assert.strictEqual(userSectionMenu.length, 1);
   });
+
+  it('should successfully display configurations list', async function () {
+    if (page === null) {
+      assert.equal('Page is null', 'test suite failed');
+      return;
+    }
+
+    const configNavigator = await page.$$('.config_navigator');
+    assert.strictEqual(configNavigator.length, 1);
+  });
+
+  it('should successfully display configurations list items', async function () {
+    if (page === null || url === null) {
+      assert.equal('Page is null', 'test suite failed');
+      return;
+    }
+
+    const res = await fetch('http://localhost:8080/control/api/configurations');
+    const data = await res.json();
+
+    const configNavigatorItems = await page.$$('.config_navigator__item');
+    assert.strictEqual(configNavigatorItems.length, data?.length ?? 0);
+  });
+
+  it('should display configurations list', async function () {
+    if (page === null || url === null) {
+      assert.equal('Page is null', 'test suite failed');
+      return;
+    }
+    
+    const res = await fetch('http://localhost:8080/control/api/configurations');
+    const data = await res.json();
+
+    const configNavigatorItems = await page.$$('.config_navigator__item');
+    assert.strictEqual(configNavigatorItems.length, data?.length ?? 0);
+  });
 });
