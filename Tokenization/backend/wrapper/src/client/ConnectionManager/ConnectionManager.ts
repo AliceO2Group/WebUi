@@ -56,8 +56,8 @@ export class ConnectionManager {
   private receivingConnections = new Map<string, Connection>();
 
   private peerCtor: any; // p2p gRPC constructor
-  private peerServer?: grpc.Server;
-  private baseAPIPath: string = "localhost:40041/api/";
+  private peerServer?: grpc.Server; // p2p gRPC server
+  private baseAPIPath: string = "localhost:8082/api/"; // default local API path
 
   /**
    * @description Initializes a new instance of the ConnectionManager class.
