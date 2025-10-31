@@ -12,13 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX,
-  iconDataTransferDownload } from '/js/src/index.js';
+import { h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX } from '/js/src/index.js';
 import { spinner } from '../common/spinner.js';
 import { draw } from './objectDraw.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
 import virtualTable from './virtualTable.js';
 import { qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
+import { downloadButton } from '../common/downloadButton.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -97,11 +97,10 @@ const drawPlot = (model, object) => {
   const info = object;
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
     h('.item-action-row.flex-row.g1.p1', [
-      h('a.btn#download-button', {
-        title: 'Download object',
-        target: '_blank',
+      downloadButton({
         href: model.objectViewModel.getDownloadQcdbObjectUrl(object.id),
-      }, iconDataTransferDownload()),
+        title: 'Download object',
+      }),
       h(
         'a.btn#fullscreen-button',
         {
