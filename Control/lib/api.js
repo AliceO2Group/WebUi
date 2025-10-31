@@ -293,7 +293,7 @@ module.exports.setup = (http, ws) => {
     qcConfigurationController.getConfigurationByKeyHandler.bind(qcConfigurationController)
   );
   http.put(
-    "/configurations/:key(*)", validateConsulServiceMiddleware,
+    '/configurations/:key(*)', validateConsulServiceMiddleware,
     qcConfigurationController.putConfigurationByKeyHandler.bind(qcConfigurationController)
   );
 

@@ -149,8 +149,8 @@ describe('Control', function() {
         kVPrefix: 'test/ui/some-cluster/kv',
         kvStoreQC: 'localhost.cern.ch/test/ui/some-cluster/kv/test/o2/qc/components/',
         kvStoreReadout: 'localhost.cern.ch/test/ui/some-cluster/kv/test/o2/readout/components/',
-        qcPrefix: "localhost:8550/test/o2/qc/components/",
-        readoutPrefix: "localhost:8550/test/o2/readout/components/"
+        qcPrefix: 'localhost:8550/test/o2/qc/components/',
+        readoutPrefix: 'localhost:8550/test/o2/readout/components/'
       },
       REFRESH_TASK: 5000,
     }

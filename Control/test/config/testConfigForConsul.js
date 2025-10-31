@@ -35,9 +35,9 @@ const initializeNockForConsul = () => {
     .reply(200, JSON.stringify([
       {
         LockIndex: 0,
-        Key: "key1",
+        Key: 'key1',
         Flags: 0,
-        Value: Buffer.from(JSON.stringify({key1: "value1"})).toString('base64'),
+        Value: Buffer.from(JSON.stringify({key1: 'value1'})).toString('base64'),
         CreateIndex: 1,
         ModifyIndex: 1
       }
@@ -49,7 +49,7 @@ const initializeNockForConsul = () => {
     .reply(200, JSON.stringify([
       {
         LockIndex: 0,
-        Key: "empty-prefix",
+        Key: 'empty-prefix',
         Flags: 0,
         Value: null,
         CreateIndex: 1,
@@ -71,7 +71,7 @@ const initializeNockForConsul = () => {
   nock(CONSUL_URL)
     .persist()
     .get(`${KV_PATH}key1?raw=true`)
-    .reply(200, JSON.stringify({key: "value"}))
+    .reply(200, JSON.stringify({key: 'value'}))
   
   nock(CONSUL_URL)
     .persist()

@@ -17,7 +17,7 @@ const { ADMIN_TEST_TOKEN, TEST_URL } = require('../generateToken.js');
 
 describe(`'API - PUT - /configurations/:key(*)' test suite`, () => {
 
-  const validPayload = { configuration: { newKey: "newValue" } };
+  const validPayload = { configuration: { newKey: 'newValue' } };
 
   it('should return 200 with { allPut: true } when configuration is updated', async () => {
     const expectedBody = { allPut: true };
@@ -29,9 +29,9 @@ describe(`'API - PUT - /configurations/:key(*)' test suite`, () => {
 
   it('should return 400 when the key parameter is empty', async () => {
     const expectedError = {
-      message: "Missing configuration key",
+      message: 'Missing configuration key',
       status: 400,
-      title: "Invalid Input"
+      title: 'Invalid Input'
     };
     await request(`${TEST_URL}/api/configurations`)
       .put(`/%20?token=${ADMIN_TEST_TOKEN}`)
