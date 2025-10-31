@@ -99,11 +99,12 @@ class QCConfigurationController {
    * @param {Request} req
    * @param {Response} res
    */
-  async editConfigurationByKeyHandler(req, res) {
+  async putConfigurationByKeyHandler(req, res) {
     const { key } = req.params;
     const { configuration } = req.body;
-    if (!key) {
+    if (!key || key.trim() === "") {
       updateAndSendExpressResponseFromNativeError(res, new InvalidInputError("Missing configuration key"));
+      return;
     }
 
     try {

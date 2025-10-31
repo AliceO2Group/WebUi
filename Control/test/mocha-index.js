@@ -183,6 +183,7 @@ describe('Control', function() {
 
   require('./api/configuration/api-get-configurations.test');
   require('./api/configuration/api-get-configuration.test');
+  require('./api/configuration/api-put-configuration.test');
 
   beforeEach(() => this.ok = true);
 

@@ -294,7 +294,7 @@ module.exports.setup = (http, ws) => {
   );
   http.put(
     "/configurations/:key(*)", validateConsulServiceMiddleware,
-    qcConfigurationController.editConfigurationByKeyHandler.bind(qcConfigurationController)
+    qcConfigurationController.putConfigurationByKeyHandler.bind(qcConfigurationController)
   );
 
   // Consul
