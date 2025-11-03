@@ -16,18 +16,16 @@ import { List } from '@mui/material';
 import ConfigNavigatorItem from './ConfigNavigatorItem';
 import { useConfigurationKeysQuery } from '~/api/query/useConfigurationKeysQuery';
 
-const ConfigNavigator = () => {
-  const { data: configKeys } = useConfigurationKeysQuery();
+export const ConfigNavigator = () => {
+  const { data: configKeys, isError, error } = useConfigurationKeysQuery();
 
   return (
     <List className="config_navigator">
       {isError ? (
-        <p>Error while fetching configuration keys</p>
+        <p>Error while fetching configuration keys: {error?.message ?? 'Unknown error'}</p>
       ) : (
         configKeys?.map((text: string) => <ConfigNavigatorItem key={text} title={text} />)
       )}
     </List>
   );
 };
-
-export default ConfigNavigator;

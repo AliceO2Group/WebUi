@@ -13,17 +13,20 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
+import type { AxiosResponse } from 'axios';
 import axiosInstance from '../axiosInstance';
 
 export const CONFIGURATION_KEYS_QUERY_KEY = 'configuration-keys';
 
-export const useConfigurationKeysQuery = () =>
-  useQuery({
+type ConfigurationKeysResponse = string[];
+
+export const useConfigurationKeysQuery = (): UseQueryResult<string[], Error> =>
+  useQuery<string[], Error>({
     queryKey: [CONFIGURATION_KEYS_QUERY_KEY],
-    queryFn: async () =>
-      axiosInstance
-        .get('configurations/')
-        .then((response) =>
-          response.data.map((key: string) => key.split('/').pop())
-        ),
+    queryFn: async (): Promise<string[]> => {
+      const response: AxiosResponse<ConfigurationKeysResponse> =
+        await axiosInstance.get('configurations/');
+      return response.data.map((key: string) => key.split('/').pop() as string);
+    },
   });

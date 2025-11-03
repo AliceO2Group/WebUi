@@ -26,7 +26,7 @@ const queryClient = new QueryClient({
   },
 });
 
-let persister: Persister;
+let persister: Persister = undefined as unknown as Persister;
 
 if (typeof window !== 'undefined') {
   persister = createSyncStoragePersister({
