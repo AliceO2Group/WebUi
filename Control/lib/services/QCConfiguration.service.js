@@ -37,6 +37,7 @@ class QCConfigurationService {
    * Get keys of configurations stored in Consul
    * @param {String} prefix - prefix to filter the keys
    * @param {boolean} [recurse=false] - whether to recurse into subdirectories
+   * @returns {Array<string>} names of configurations which are valid JSON
    */
   async retrieveKeysOfValidConfigurations(prefix, recurse = false) {
     const data = await this._consulService.getOnlyRawValuesByKeyPrefix(prefix);
@@ -46,6 +47,7 @@ class QCConfigurationService {
   /**
    * Get configuration by key from Consul
    * @param {string} key - the key of the configuration
+   * @returns {Promise<string, Error>} - the raw value stored for the requested key
    */
   async retrieveConfigurationByKey(key) {
     return await this._consulService.getOnlyRawValueByKey(key);
@@ -57,6 +59,7 @@ class QCConfigurationService {
    * @param {object} configs - an object with string values to be checked.
    * @param {boolean} recurse - whether to recurse into subdirectories
    * @param {string} prefix - the prefix to filter keys
+   * @returns {Array<string>} names of configurations which are valid JSON
    */
   filterConfigurations(configs, recurse, prefix) {
     const parsedData = [];
@@ -81,7 +84,9 @@ class QCConfigurationService {
 
   /**
    * Get configuration restrictions by key from Consul
-   * @param {String} key - the key of the configuration
+   * @param {string} key - the key of the configuration
+   * @return {Promise<TypeMap>}
+   * @throws {NotFoundError | ServiceUnavailableError}
    */
   async getConfigurationRestrictionsByKey(key) {
     try {
@@ -98,7 +103,6 @@ class QCConfigurationService {
   /**
    * Derive type of value for every key-val pair of given object
    * @param {Object} value object we want
-   * @typedef {Record<string, "string" | "boolean" | "number" | "array<`TypeMap`>" | TypeMap>} TypeMap
    * @returns {TypeMap} derived type from the given value
    */
   _computeRestrictions(value) {
@@ -109,8 +113,8 @@ class QCConfigurationService {
 
   /**
    * Derive type of value, possible types are string, boolean, number, array<TypeMap>, TypeMap
-   * @param {String | Array | Object} value that we want to get Type of
-   * @returns {String | TypeMap} derived type from the given value, TypeMap type is defined in _computeRestrictions function
+   * @param {string | Array | Object} value that we want to get Type of
+   * @returns {string | TypeMap} derived type from the given value, TypeMap type is defined in _computeRestrictions function
    */
   _deriveValueType(value) {
     // TODO: implement function _combineTypes, so we can derive Type of value[0] and
@@ -124,8 +128,9 @@ class QCConfigurationService {
   
   /**
    * Edit configuration by key in Consul
-   * @param {String} key - the key of the configuration
-   * @param {String} value - the configuration
+   * @param {string} key - the key of the configuration
+   * @param {string} value - the configuration
+   * @returns {Promise<JSON, Error>} - JSON object with the status of the transaction
    */
   async editConfigurationByKey(key, value) {
     const listOfConfigurationsToEdit = [{ [key]: JSON.stringify(value, null, 2) }];
