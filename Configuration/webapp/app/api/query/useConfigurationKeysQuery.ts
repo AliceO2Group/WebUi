@@ -21,7 +21,7 @@ export const CONFIGURATION_KEYS_QUERY_KEY = 'configuration-keys';
 
 type ConfigurationKeysResponse = string[];
 
-export const useConfigurationKeysQuery = (): UseQueryResult<string[], Error> =>
+export const useConfigurationKeysQuery = (): UseQueryResult<ConfigurationKeysResponse, Error> =>
   useQuery<string[], Error>({
     queryKey: [CONFIGURATION_KEYS_QUERY_KEY],
     queryFn: async (): Promise<string[]> => {
