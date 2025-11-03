@@ -19,9 +19,8 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
     await page.goto(`${url}${OBJECT_VIEW_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
     const location = await page.evaluate(() => window.location);
     strictEqual(location.search, OBJECT_VIEW_PAGE_PARAM);
-
-    const errorMessageElement = 'body > div > div:nth-child(2) > span';
-    const errorIconElement = 'body > div > div:nth-child(2) > div > svg';
+    const errorMessageElement = '#Error > span.f3';
+    const errorIconElement = '#Error > div.f1 > svg';
 
     await page.waitForSelector(errorMessageElement, { timeout: 1000 });
     await page.waitForSelector(errorIconElement, { timeout: 1000 });
@@ -58,7 +57,7 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
     async () => {
       const objectName = 'NOT_FOUND_OBJECT';
       await page.goto(`${url}?page=objectView&objectName=${objectName}`, { waitUntil: 'networkidle0' });
-      const errorMessageElement = 'body > div > div:nth-child(2) > span';
+      const errorMessageElement = '#Error > span.f3';
       await page.waitForSelector(errorMessageElement, { timeout: 1000 });
       const message = await page.evaluate(
         (element) => document.querySelector(element).textContent,
@@ -76,7 +75,7 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
       const result = await page.evaluate(() => {
         const title = document.querySelector('div div b').innerText;
         const rootPlotClassList =
-                document.querySelector('body > div > div:nth-child(2) > div:nth-child(2) > div > div').classList;
+                document.querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(1) > div').classList;
         return { title, rootPlotClassList, selectedObjectPath: window.model.objectViewModel.selected.payload.path };
       });
       strictEqual(result.title, path);
@@ -93,13 +92,12 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
         `${url}?page=layoutShow&layoutId=671b95883d23cd0d67bdc787&tab=main`,
         { waitUntil: 'networkidle0' },
       );
-      await page
-        .hover('body > div > div > section > div > div > div:nth-child(2) > div > div > div > div:nth-child(1)');
 
+      await page.hover('.jsrootdiv');
       const result = await page.evaluate(() => {
-        const commonSelectorPath = 'body > div > div > section > div > div > div:nth-child(2) > div > div > div';
-        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > div > button`);
-        const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div > div`;
+        const commonSelectorPath = '.layout-selectable > div';
+        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > button`);
+        const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div`;
         const path = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div > div`).innerText;
         const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > b`).innerText;
         const lastModifiedTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`).innerText;

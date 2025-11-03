@@ -20,12 +20,19 @@
 exports.fromEcsEventToEnvironmentEvent = ({ environmentEvent }) => {
   const {
     environmentId: id,
-    error, message, transition, transitionStep, transitionStatus,
+    runNumber,
+    state,
+    error, message,
+    transition, transitionStep, transitionStatus,
+    workflowTemplateInfo = {}
   } = environmentEvent;
   return {
     id,
+    state,
     error,
     message,
+    runNumber,
+    workflowTemplateInfoName: workflowTemplateInfo?.name ?? '',
     transition: {
       name: transition,
       step: transitionStep,

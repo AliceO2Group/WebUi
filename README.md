@@ -12,3 +12,4 @@
 ## General Documentation
 Documentation below can be applied to all the aforementioned projects with small changes applied depending on the project. 
 - [NodeJS Profiling](./documentation/NODEJS_PROFILING.md)
+- [Conventions for Developers](./documentation/CONVENTIONS.md)

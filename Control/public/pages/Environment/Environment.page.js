@@ -55,7 +55,7 @@ export const EnvironmentPageContent = (model) => h('.scroll-y.absolute-fill', [
  * @return {vnode} - content of environment info
  */
 const showEnvironmentPage = (model, environmentInfo) => {
-  const { id, state, currentTransition = undefined, includedDetectors, userVars } = environmentInfo;
+  const { id, state, currentTransition = undefined, includedDetectors = [], userVars = {} } = environmentInfo;
   const isDcsEnabled = userVars?.['dcs_enabled'] === 'true';
   const isRunningStable = !currentTransition && state === EnvironmentState.RUNNING;
   const { services: { detectors: { availability = {} } = {} } } = model;

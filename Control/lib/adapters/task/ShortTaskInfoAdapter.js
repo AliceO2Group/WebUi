@@ -32,7 +32,7 @@ class ShortTaskInfoAdapter {
    */
   static toEntity(task) {
     const {
-      name,
+      name = '',
       locked,
       taskId,
       status,

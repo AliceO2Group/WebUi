@@ -8,7 +8,11 @@
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "docker:typecheck": "docker compose exec webapp npm run typecheck",
-    "mocha": "mocha --exit $(find app/test -name 'mocha-*.cjs')"
+    "mocha": "tsx node_modules/.bin/mocha --require test/mocha-index.ts test/**/*.spec.ts",
+    "eslint": "eslint app/**",
+    "eslint-fix": "eslint --fix app/**",
+    "prettier": "prettier --write app/**",
+    "prettier-check": "prettier --check app/**"
   },
   "dependencies": {
     "@aliceo2/web-ui": "^2.7.4",
@@ -31,12 +35,25 @@
     "react-router": "7.5.3"
   },
   "devDependencies": {
+    "@eslint/js": "^9.28.0",
     "@react-router/dev": "7.5.3",
+    "@stylistic/eslint-plugin": "^4.4.1",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^20",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",
+    "eslint": "^9.28.0",
+    "eslint-plugin-jsdoc": "^50.7.1",
+    "eslint-plugin-mocha": "^11.1.0",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.2.0",
+    "mocha": "^11.7.1",
+    "prettier": "3.5.3",
+    "puppeteer": "^24.18.0",
+    "tsx": "^4.20.4",
     "typescript": "^5.7.2",
-    "vite": "^6.3.5",
+    "typescript-eslint": "^8.34.0",
+    "vite": "^6.3.6",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }

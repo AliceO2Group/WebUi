@@ -20,10 +20,12 @@ const ConfigNavigator = () => {
   const { data: configKeys } = useConfigurationKeysQuery();
 
   return (
-    <List>
-      {configKeys?.map((text: string) => (
-        <ConfigNavigatorItem key={text} title={text} />
-      ))}
+    <List className="config_navigator">
+      {isError ? (
+        <p>Error while fetching configuration keys</p>
+      ) : (
+        configKeys?.map((text: string) => <ConfigNavigatorItem key={text} title={text} />)
+      )}
     </List>
   );
 };

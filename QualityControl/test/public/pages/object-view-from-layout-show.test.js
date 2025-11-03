@@ -25,8 +25,8 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       const location = await page.evaluate(() => window.location);
       strictEqual(location.search, OBJECT_VIEW_PAGE_PARAM);
 
-      const errorMessageElement = 'body > div > div:nth-child(2) > span';
-      const errorIconElement = 'body > div > div:nth-child(2) > div > svg';
+      const errorMessageElement = '#Error > span.f3';
+      const errorIconElement = '#Error > div.f1 > svg';
 
       await page.waitForSelector(errorMessageElement, { timeout: 1000 });
       await page.waitForSelector(errorIconElement, { timeout: 1000 });
@@ -69,6 +69,17 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
+    'should have a correctly made download button',
+    { timeout },
+    async () => {
+      const objectId = '016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
+      const dlButton = await page.evaluate(() => document.querySelector('.download-button').href);
+      const token = await page.evaluate(() => model.session.token);
+      strictEqual(dlButton, `${url}api/object/proxy/download/?token=${token}&objectIds=${objectId}`);
+    },
+  );
+
+  await testParent.test(
     'should take back the user to page=layoutShow when clicking "Back to layout"',
     { timeout },
     async () => {
@@ -98,7 +109,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       const result = await page.evaluate(() => {
         const title = document.querySelector('div div b').textContent;
         const rootPlotClassList = document
-          .querySelector('body > div > div:nth-child(2) > div:nth-child(2) > div > div').classList;
+          .querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(1) > div').classList;
         const selectedObjectPath = window.model.objectViewModel.selected.payload.path;
         return {
           title, rootPlotClassList, selectedObjectPath,

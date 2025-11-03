@@ -10,39 +10,40 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import { type FC, type PropsWithChildren } from 'react';
 import { Box, Drawer } from '@mui/material';
-import LeftDrawerFooter from './LeftDrawerFooter';
-import LeftDrawerHeader from './LeftDrawerHeader';
+import { LeftDrawerFooter } from './LeftDrawerFooter';
+import { LeftDrawerHeader } from './LeftDrawerHeader';
 
 const DRAWER_WIDTH = 300;
 
-interface LeftDrawerProps extends PropsWithChildren {}
-
-const LeftDrawer: FC<LeftDrawerProps> = ({ children }) => {
-  return (
-    <Drawer
-      sx={{
+/**
+ * LeftDrawer component
+ * Represents the left sidebar of the application layout.
+ * @param {PropsWithChildren} props - The props of the component.
+ * @param {ReactElement} props.children - The children elements to render inside the drawer.
+ * @returns {ReactElement} LeftDrawer
+ */
+export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => (
+  <Drawer
+    sx={{
+      width: DRAWER_WIDTH,
+      flexShrink: 0,
+      '& .MuiDrawer-paper': {
         width: DRAWER_WIDTH,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: DRAWER_WIDTH,
-          boxSizing: 'border-box',
-          display: 'flex',
-          flexDirection: 'column',
-        },
-      }}
-      variant="permanent"
-      anchor="left"
-      className="left-drawer"
-    >
-      <LeftDrawerHeader />
-      <Box sx={{ overflow: 'auto', flexGrow: 1 }}>{children}</Box>
-      <LeftDrawerFooter />
-    </Drawer>
-  );
-};
-
-export default LeftDrawer;
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+      },
+    }}
+    variant="permanent"
+    anchor="left"
+    className="left-drawer"
+  >
+    <LeftDrawerHeader />
+    <Box sx={{ overflow: 'auto', flexGrow: 1 }}>{children}</Box>
+    <LeftDrawerFooter />
+  </Drawer>
+);

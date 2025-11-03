@@ -10,30 +10,33 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import { Toolbar, Typography } from '@mui/material';
 import { type FC } from 'react';
-import UserSection from '../../user-section/UserSection';
+import { UserSection } from '../../user-section/UserSection';
 
 interface ContentHeaderProps {
   currentPath: string;
 }
 
-const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => {
-  return (
-    <Toolbar
-      style={{
-        borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-        display: 'flex',
-        justifyContent: 'space-between',
-      }}
-      className="content-section__header"
-    >
-      <Typography variant="h5">{currentPath}</Typography>
-      <UserSection userName="John D." />
-    </Toolbar>
-  );
-};
-
-export default ContentHeader;
+/**
+ * Content component
+ * Represents the header of the content area.
+ * @param {ContentHeaderProps} props - The props of the component.
+ * @param {string} props.currentPath - Current configuration path.
+ * @returns {React.ReactElement} Content
+ */
+export const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => (
+  <Toolbar
+    style={{
+      borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+      display: 'flex',
+      justifyContent: 'space-between',
+    }}
+    className="content-section__header"
+  >
+    <Typography variant="h5">{currentPath}</Typography>
+    <UserSection userName="John D." />
+  </Toolbar>
+);

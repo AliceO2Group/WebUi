@@ -32,7 +32,6 @@ export default class Environment extends Observable {
     this.taskTableModel.bubbleTo(model);
 
     this.model = model;
-    this.requests = RemoteData.notAsked();
     this.list = RemoteData.notAsked();
     this.item = RemoteData.notAsked();
     this.itemControl = RemoteData.notAsked();
@@ -62,25 +61,13 @@ export default class Environment extends Observable {
    * Remove environment request
    */
   async removeEnvironmentRequest(id) {
-    this.requests = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.model.loader.post(`/api/core/removeRequest/${id}`);
-    this.requests = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
-    this.notify();
+    try {
+      await jsonDelete(`/api/deploy/${id}`, {body: {id}});
+    } catch (error) {
+      this.model.notification.show(error.message, 'danger', 5000);
+    }
   }
 
-  /**
-   * Get environments requests
-   */
-  async getEnvironmentRequests() {
-    this.requests = RemoteData.loading();
-    this.notify();
-
-    const {result, ok} = await this.model.loader.get(`/api/core/requests`);
-    this.requests = !ok ? RemoteData.failure(result.message) : RemoteData.success(result);
-    this.notify();
-  }
   /**
    * Load one environment into `item` as RemoteData
    * @param {Object} body - See protobuf definition for properties
@@ -130,16 +117,24 @@ export default class Environment extends Observable {
 
   /**
    * Create a new remote environment, creation action result into `itemNew` as RemoteData
-   * See protobuf definition for properties of `itemForm` as body
-   * @param {string} itemForm
+   * If request is successful, the user will be redirected to the active environments page
+   * @param {DeploymentRequest} deploymentRequest - deployment request object containing all necessary information to deploy a new environment
+   * @return {void}
    */
-  async newEnvironment(itemForm) {
+  async newEnvironment(deploymentRequest) {
     this.itemNew = RemoteData.loading();
     this.notify();
 
-    const {result, ok} = await this.model.loader.post(`/api/core/request`, itemForm);
-    this.itemNew = !ok ? RemoteData.failure(result.message) : RemoteData.notAsked();
-    this.model.router.go(`?page=environments`);
+    const { result, ok } = await this.model.loader.post(`/api/deploy`, deploymentRequest);
+    if (!ok) {
+      this.itemNew = RemoteData.failure(result.message);
+      this.notify();
+    } else {
+      this.itemNew = RemoteData.notAsked();
+      // Users cannot be redirected to specific environment as it does not exist in 
+      // ECS until it becomes active, thus users would get a NotFound reply from ECS
+      this.model.router.go(`?page=environments`);
+    }
   }
 
   /**

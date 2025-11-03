@@ -21,8 +21,13 @@ const {
     ENVIRONMENTS_TRACK, INTEGRATED_SERVICES_TRACK, TASKS_TRACK
   }
 } = require('./../../common/emitterKeys.enum.js');
+const { EnvironmentState } = require('../../common/environmentState.enum.js');
 const { TaskState } = require('../../common/taskState.enum.js');
+const { EnvironmentTransitionType } = require('../../common/environmentTransitionType.enum.js');
 const EPN_PATH_IN_ENVIRONMENT_INFO = 'hardware.epn.info';
+
+const ECS_TRANSITION_DONE_MESSAGE = 'transition completed successfully';
+const ECS_DESTROY_TRANSITION_DONE_MESSAGE = 'environment teardown complete';
 
 /**
  * @class
@@ -56,7 +61,25 @@ class EnvironmentCacheService {
   }
 
   /**
-   * Update an environment in the cache by its id
+   * Method to remove an environment from the cache by its id
+   * @param {string} id - the id of the environment to be removed
+   * @returns {void}
+   */
+  removeEnvironmentById(id, shouldBroadcast = true) {
+    if (this._environments.has(id)) {
+      this._environments.delete(id);
+      if (shouldBroadcast) {
+        this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, [...this._environments.values()]);
+      }
+      this._lastUpdate = Date.now();
+    }
+  }
+
+  /**
+   * Update an environment in the cache by its id. This method can be used by either
+   * * ECS GUI results of a transition - which should contain `isDeploying` and `deploymentError` properties
+   * * Heartbeat calls (GetEnvironment/GetEnvironments) - which will NOT contain `isDeploying` and `deploymentError` properties
+   * * Cache caught events - which should contain `isDeploying` and `deploymentError` properties
    * @param {string} id - the id of the environment to be updated
    * @param {EnvironmentInfo} environment - the new environment information to be set
    * @returns {void}
@@ -66,8 +89,11 @@ class EnvironmentCacheService {
     if (this._environments.has(id)) {
       const cachedEnvironment = this._environments.get(id);
       const { events = [] } = cachedEnvironment;
+      const {isDeploying, deploymentError } = cachedEnvironment;
       const updatedEnvironment = Object.assign({}, cachedEnvironment, environment);
       updatedEnvironment.events = [...events];
+      updatedEnvironment.isDeploying = isDeploying;
+      updatedEnvironment.deploymentError = deploymentError;
       this._environments.set(id, updatedEnvironment);
     } else {
       this._environments.set(id, { ...environment, events: environment.events ?? [] });
@@ -117,19 +143,7 @@ class EnvironmentCacheService {
     /**
      * @param {EnvironmentEvent} environmentEvent - the event object containing the payload and environmentId
      */
-    this._eventEmitter.on(ENVIRONMENTS_TRACK, (environmentEvent) => {
-      const { id } = environmentEvent;
-
-      const cachedEnvironment = this._environments.has(id)
-        ? this._environments.get(id)
-        : { id, events: [] };
-
-      cachedEnvironment.events.push(environmentEvent);
-      cachedEnvironment.lastUpdate = environmentEvent.timestamp;
-      this._environments.set(id, cachedEnvironment);
-      this._broadcastService.broadcast(ENVIRONMENT_EVENTS, cachedEnvironment);
-      this._lastUpdate = Date.now();
-    });
+    this._eventEmitter.on(ENVIRONMENTS_TRACK, this._handleEnvironmentEvent.bind(this));
 
     this._eventEmitter.on(INTEGRATED_SERVICES_TRACK.ODC.ENVIRONMENT_STATE_CHANGE,
       /**
@@ -192,6 +206,68 @@ class EnvironmentCacheService {
       this._environments.set(environmentId, environment);
       this._broadcastService.broadcast(NOTIFICATION, event);
     }
+  }
+
+  /**
+   * Handles the environment event by:
+   * * updating the cache with interested changes
+   * * broadcasting the event information
+   * It does not:
+   * * broadcast the overview of environments 
+   * @private
+   * @param {EnvironmentEvent} environmentEvent - the event object containing the payload and environmentId
+   * @returns {void}
+   */
+  _handleEnvironmentEvent(environmentEvent) {
+    const { id, state, transition = {}, message, error, runNumber } = environmentEvent;
+    const cachedEnvironment = this._environments.has(id)
+      ? this._environments.get(id)
+      : { id, events: [] };
+
+    if (state === EnvironmentState.PENDING) {
+      // If the environment is pending, we set isDeploying to true as it is the first event we receive for this environment
+      // and we want to ensure that the UI is updated accordingly.
+      cachedEnvironment.isDeploying = true;
+    }
+    if (cachedEnvironment.isDeploying && error) {
+      // If the environment is deploying and there is an error, environment will not be active in ECS anymore but
+      // we still want to keep the information in the cache until a user acknowledges the error
+      cachedEnvironment.isDeploying = false;
+      cachedEnvironment.deploymentError = error;
+    }
+   
+    if (
+      state === EnvironmentState.CONFIGURED &&
+      message === ECS_TRANSITION_DONE_MESSAGE
+      // OCTRL-1038 - currently comparing to hardcoded string, but this should be replaced with transition status
+    ) {
+      // Once the environment is configured and ongoing transition is done, we can set the isDeploying to false
+      // This can happen when the environment also goes form RUNNING to CONFIGURED but it is already marked as not deploying anymore
+      cachedEnvironment.isDeploying = false;
+    }
+    cachedEnvironment.currentTransition = transition?.name ?? '-';
+    cachedEnvironment.currentRunNumber = runNumber;
+    cachedEnvironment.events.push(environmentEvent);
+    cachedEnvironment.lastUpdate = environmentEvent.timestamp;
+    if (!cachedEnvironment.rootRole) {
+      cachedEnvironment.rootRole = environmentEvent.workflowTemplateInfoName;
+    }
+
+    this.addOrUpdateEnvironment(cachedEnvironment, false);
+
+    if (
+      transition?.name === EnvironmentTransitionType.DESTROY  &&
+      state === EnvironmentState.DONE &&
+      message === ECS_DESTROY_TRANSITION_DONE_MESSAGE &&
+      !cachedEnvironment.deploymentError
+    ) {
+      // That is, if the environment successfully ended the DESTROY transition
+      // while not having a deployment error
+      this.removeEnvironmentById(id);
+    }
+
+    this._broadcastService.broadcast(ENVIRONMENT_EVENTS, cachedEnvironment);
+    this._lastUpdate = Date.now();
   }
 }
 

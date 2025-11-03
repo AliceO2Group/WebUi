@@ -10,16 +10,23 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import { Box, IconButton, Menu, MenuItem, Avatar } from '@mui/material';
 import { useState, type FC, type MouseEvent } from 'react';
+import { getSessionData } from '~/services/session';
 
 interface UserSectionProps {
   userName: string;
 }
 
-const UserSection: FC<UserSectionProps> = ({ userName }) => {
+/**
+ * UserSection component
+ * Represents a user section with an avatar and a dropdown menu for user actions.
+ * @param {UserSectionProps} props - Component props.
+ * @returns {React.ReactElement} UserSection
+ */
+export const UserSection: FC<UserSectionProps> = ({ userName }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleClick = (event: MouseEvent<HTMLElement>) => {
@@ -28,6 +35,15 @@ const UserSection: FC<UserSectionProps> = ({ userName }) => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const displayProfileData = () => {
+    const getData = async () => {
+      const data = await getSessionData();
+      alert(JSON.stringify(data));
+    };
+
+    void getData();
   };
 
   return (
@@ -49,12 +65,10 @@ const UserSection: FC<UserSectionProps> = ({ userName }) => {
         onClose={handleClose}
         className="user-section__menu"
       >
-        <MenuItem onClick={handleClose}>Profile</MenuItem>
+        <MenuItem onClick={displayProfileData}>Profile</MenuItem>
         <MenuItem onClick={handleClose}>My account</MenuItem>
         <MenuItem onClick={handleClose}>Logout</MenuItem>
       </Menu>
     </Box>
   );
 };
-
-export default UserSection;

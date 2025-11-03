@@ -21,7 +21,6 @@ import {
 import Layout from './layout/Layout.js';
 import QCObject from './object/QCObject.js';
 import LayoutService from './services/Layout.service.js';
-import FilterService from './services/Filter.service.js';
 import QCObjectService from './services/QCObject.service.js';
 import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
 import { setBrowserTabTitle } from './common/utils.js';
@@ -29,6 +28,7 @@ import { buildQueryParametersString } from './common/buildQueryParametersString.
 import AboutViewModel from './pages/aboutView/AboutViewModel.js';
 import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
 import { RequestFields } from './common/RequestFields.enum.js';
+import FilterModel from './common/filters/model/FilterModel.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -42,14 +42,17 @@ export default class Model extends Observable {
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // Cast, sessionService has only strings
 
+    this.loader = new Loader(this);
+    this.loader.bubbleTo(this);
+
+    this.filterModel = new FilterModel(this);
+    this.filterModel.bubbleTo(this);
+
     this.object = new QCObject(this);
     this.object.bubbleTo(this);
 
     this.objectViewModel = new ObjectViewModel(this);
     this.objectViewModel.bubbleTo(this);
-
-    this.loader = new Loader(this);
-    this.loader.bubbleTo(this);
 
     this.layoutListModel = new LayoutListModel(this);
     this.layoutListModel.bubbleTo(this);
@@ -63,7 +66,6 @@ export default class Model extends Observable {
     this.aboutViewModel = new AboutViewModel(this);
     this.aboutViewModel.bubbleTo(this);
 
-    this.refreshTimer = 0;
     this.refreshInterval = 0; // Seconds
     this.sidebar = true;
     this.accountMenuEnabled = false;
@@ -95,7 +97,6 @@ export default class Model extends Observable {
     this.services = {
       object: new QCObjectService(this),
       layout: new LayoutService(this),
-      filter: new FilterService(this),
     };
 
     this.loader.get('/api/checkUser');
@@ -166,18 +167,23 @@ export default class Model extends Observable {
    */
   async handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
-    clearInterval(this.layout.tabInterval);
+    this._clearAllIntervals();
+    await this.filterModel.filterService.initFilterService();
+    this.filterModel.setFilterFromURL();
+    this.filterModel.setFilterToURL();
+
     this.services.layout.getLayoutsByUserId(this.session.personid, RequestFields.LAYOUT_CARD);
 
     const { params } = this.router;
+
     switch (params.page) {
       case 'layoutList':
+        this.clearURL('layoutList');
         this.page = 'layoutList';
         setBrowserTabTitle('QCG-Layouts');
         this.services.layout.getLayouts(RequestFields.LAYOUT_CARD);
         break;
       case 'layoutShow':
-        this.services.filter.initFilterService();
         setBrowserTabTitle('QCG-LayoutShow');
         if (!params.layoutId) {
           const { definition, pdpBeamType, detector, runType, runNumber } = params;
@@ -218,6 +224,7 @@ export default class Model extends Observable {
             return;
           }
         }
+
         this.layout.loadItem(this.router.params.layoutId, params?.tab ?? '')
           .then(() => {
             this.page = 'layoutShow';
@@ -228,6 +235,7 @@ export default class Model extends Observable {
 
               this.router.go(`?page=layoutShow&layoutId=${this.router.params.layoutId}`, true, true);
             }
+            this.filterModel.restartRunsModeIntervals(this.layout);
             this.notify();
           }).catch(() => true); // Error is handled inside loadItem
         break;
@@ -239,17 +247,21 @@ export default class Model extends Observable {
         if (this.object.selected) {
           this.object.loadObjectByName(this.object.selected.name);
         }
+        this.filterModel.restartRunsModeIntervals(this.object);
         this.notify();
         break;
       case 'objectView': {
         this.page = 'objectView';
+        this.sidebar = false;
         setBrowserTabTitle('QCG-View');
         const { params } = this.router;
         this.objectViewModel.init(params);
+        this.filterModel.restartRunsModeIntervals(this.objectViewModel);
         this.notify();
         break;
       }
       case 'about':
+        this.clearURL('about');
         this.page = 'about';
         setBrowserTabTitle('QCG-About');
         this.aboutViewModel.retrieveAllServicesStatus();
@@ -260,6 +272,15 @@ export default class Model extends Observable {
         this.router.go('?page=layoutList', true);
         break;
     }
+  }
+
+  /**
+   * Clear URL parameters and redirect to a certain page
+   * @param {*} pageName - name of the page to be redirected to
+   * @returns {undefined}
+   */
+  clearURL(pageName) {
+    this.router.go(`?page=${pageName}`, true, true);
   }
 
   /**
@@ -281,38 +302,26 @@ export default class Model extends Observable {
   }
 
   /**
+   * Clears all active intervals in the application
+   * @returns {void}
+   */
+  _clearAllIntervals() {
+    // Clear layout tab interval
+    if (this.layout?.tabInterval) {
+      clearInterval(this.layout.tabInterval);
+    }
+
+    // Clear filter model runs mode interval
+    this.filterModel.clearRunsModeInterval();
+  }
+
+  /**
    * Method to check if connection is secure to enable certain improvements
    * e.g navigator.clipboard, notifications, service workers
    * @returns {boolean} - whether window is in secure context
    */
   isContextSecure() {
     return window.isSecureContext;
-  }
-
-  /**
-   * Set the interval to update objects currently loaded and shown to user.
-   * This will reload only data associated to them
-   * @param {number} intervalSeconds - in seconds
-   * @returns {undefined}
-   */
-  setRefreshInterval(intervalSeconds) {
-    // Stop any other timer
-    clearTimeout(this.refreshTimer);
-
-    // Validate user input
-    let parsedValue = parseInt(intervalSeconds, 10);
-    if (isNaN(parsedValue) || parsedValue < 1) {
-      parsedValue = 2;
-    }
-
-    // Start new timer
-    this.refreshInterval = parsedValue;
-    this.refreshTimer = setTimeout(() => {
-      this.setRefreshInterval(this.refreshInterval);
-    }, this.refreshInterval * 1000);
-    this.notify();
-
-    this.object.refreshObjects();
   }
 
   /**

@@ -12,14 +12,17 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Observable } from '/js/src/index.js';
 import FolderModel, { FolderType } from '../../../folder/model/FolderModel.js';
 import LayoutCardModel from './LayoutCardModel.js';
+import { BaseViewModel } from '../../../common/abstracts/BaseViewModel.js';
+import { RequestFields } from '../../../common/RequestFields.enum.js';
+import { SearchFilterModel } from './SearchFilterModel.js';
+import { createKeyValueFilter } from '../FilterTypes.js';
 
 /**
  * LayoutListModel namespace to control the layoutCards spread between its folders
  */
-export default class LayoutListModel extends Observable {
+export default class LayoutListModel extends BaseViewModel {
   /**
    * Creates a new LayoutListModel instance
    * @param {Model} model - The the application model
@@ -27,8 +30,16 @@ export default class LayoutListModel extends Observable {
   constructor(model) {
     super();
     this.model = model;
-    this._searchInput = '';
     this.folders = new Map();
+    this.searchFilterModel = new SearchFilterModel();
+    this.searchFilterModel.register(createKeyValueFilter('objectPath', 'Object path', 'e.g. TPC'));
+    this.searchFilterModel.observe(() => {
+      if (!this.searchFilterModel.allInactive()) {
+        this.search(undefined, this.searchFilterModel.getAllActiveAsObject());
+      } else {
+        this.search(undefined, undefined);
+      }
+    });
 
     this._initializeFolders();
   }
@@ -63,21 +74,36 @@ export default class LayoutListModel extends Observable {
    * @returns {string} The trimmed search input
    */
   get searchInput() {
-    return this._searchInput.trim();
+    return this.searchFilterModel.searchInput.trim();
+  }
+
+  set searchInput(value) {
+    this.searchFilterModel.searchInput = value;
   }
 
   /**
    * Set user's input for search and use a fuzzy algo to filter list of layouts.
-   * Fuzzy allows missing chars "aaa" can find "a/a/a" or "aa/a/bbbbb"
-   * @param {string} searchInput - string input from the user to search by
-   * @returns {undefined}
+   * Fuzzy allows missing chars "aaa" can find "a/a/a" or "aa/a/bbbbb".
+   * If searchInput and objectPath are not included get all non-filtered layouts.
+   * All params can be undefined if you want all layouts.
+   * @param {string} searchInput - string input from the user to search by.
+   * @param {object} filters - filters object contains all filter key value pairs in one object.
    */
-  search(searchInput) {
-    this._searchInput = searchInput;
-    this.folders.forEach((folder) => {
-      folder.searchInput = new RegExp(searchInput, 'i');
-    });
-    this.notify();
+  search(searchInput, filters) {
+    if (searchInput === undefined && filters === undefined) {
+      // Get all layouts
+      this.model.services.layout.getLayouts(RequestFields.LAYOUT_CARD, undefined);
+    } else if (filters === undefined) {
+      // Normal offline search
+      this.searchInput = searchInput;
+      this.folders.forEach((folder) => {
+        folder.searchInput = new RegExp(searchInput, 'i');
+      });
+      this.notify();
+    } else {
+      // online search using filters
+      this.model.services.layout.getLayouts(RequestFields.LAYOUT_CARD, filters);
+    }
   }
 
   /**
