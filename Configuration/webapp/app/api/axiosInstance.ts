@@ -14,14 +14,14 @@
 
 import axios from 'axios';
 
-const API_URL = "http://localhost:8080/api/api/"
+const API_URL = 'http://localhost:8080/control/api';
 
 const axiosInstance = axios.create({
-    baseURL: API_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    withCredentials: false,
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: false,
 });
 
 export default axiosInstance;
