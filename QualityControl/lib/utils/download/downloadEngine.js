@@ -33,6 +33,7 @@ const _pipelineAsync = promisify(pipeline);
 /** @import { LayoutDomain } from './classes/domain/LayoutDomain.js'; */
 /** @import { MapStorage } from './classes/domain/MapStorage.js'; */
 /** @import { DownloadConfigDomain } from './classes/domain/DownloadConfigDomain.js' */
+/** @import { ObjectDomain } from './classes/domain/ObjectDomain.js'; */
 
 /**
  * main download function
@@ -100,14 +101,15 @@ export async function download(downloadLayout, downloadConfiguration, runNumber,
  * save download data to cache
  * @param {MapStorage} mapStorage - map storage used to store data from post request
  * @param {LayoutDomain} layoutDomain - layoutDomain data to store.
+ * @param {DownloadConfigDomain} configDomain - configDomain data to store.
  * @param {number} userId - userId of user wanting to download.
  * @returns {`${string}-${string}-${string}-${string}-${string}`} - UUID key of Map entry
  */
-export function saveDownloadData(mapStorage, layoutDomain, userId) {
+export function saveDownloadData(mapStorage, layoutDomain, configDomain, userId) {
   // Delete existing download Layout data.
   mapStorage.deleteByUserId(userId);
   const layoutDomainStorage = new LayoutDomainStorage(layoutDomain.id, layoutDomain.name, layoutDomain.tabs, userId);
-  const insertedLayoutKey = mapStorage.writeLayout(layoutDomainStorage);
+  const insertedLayoutKey = mapStorage.writeRequest(layoutDomainStorage, configDomain);
   return insertedLayoutKey;
 }
 
@@ -115,10 +117,10 @@ export function saveDownloadData(mapStorage, layoutDomain, userId) {
  * load saved data from cache
  * @param {MapStorage} mapStorage - map storage used to retrieve data from earlier post request
  * @param {string} key - UUID key of Map entry to retrieve layout by
- * @returns {LayoutDomainStorage | undefined} - found layout if any
+ * @returns {[LayoutDomainStorage, DownloadConfigDomain] | undefined} - found download request if any
  */
 export function loadSavedData(mapStorage, key) {
-  return mapStorage.readLayout(key);
+  return mapStorage.readRequest(key);
 }
 
 /**
@@ -243,14 +245,14 @@ function processFileNameTemplate(nameTemplateOption, object = undefined, tabName
   // Prevent tar from creating a folder structure if wished for.
   const index = object?.name.lastIndexOf('/') ?? 0;
   const name = pathNameStructure ? object?.name : object?.name.slice(index + 1, object?.name.length - 1);
-  console.log(name);
+  const objectId = object?.id ?? '';
   nameTemplateOption.forEach((nameTemplateOption) => {
     switch (nameTemplateOption) {
       case NameTemplateOption.objectName:
         rv += rv.length > nameStartingLength ? `_${name}` : name;
         break;
       case NameTemplateOption.objectId:
-        rv += rv.length > nameStartingLength ? `_${name}` : name;
+        rv += rv.length > nameStartingLength ? `_${objectId}` : objectId;
         break;
       case NameTemplateOption.tabName:
         rv += rv.length > nameStartingLength ? `_${tabName}` : tabName;

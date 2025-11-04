@@ -230,10 +230,12 @@ export class LayoutController {
    */
   async postDownloadHandler(req, res) {
     try {
+      const downloadConfigDomain = parseRequestToConfig(req);
       const downloadLayoutDomain = parseRequestToLayout(req);
       // Note: if userId becomes 0 it will throw when creating the storagelayout.
       const userId = Number(req.query.user_id ?? 0);
-      const key = saveDownloadData(mapStorage, downloadLayoutDomain, userId);
+      const key = saveDownloadData(mapStorage, downloadLayoutDomain, downloadConfigDomain, userId);
+      console.log(`Saved layout key: ${key}`);
       res.status(201).send(key);
     } catch {
       res.status(400).send('Could not save download data');
@@ -246,15 +248,17 @@ export class LayoutController {
    * @param {Response} res - response
    */
   async getDownloadHandler(req, res) {
-    console.log(req.params.key);
+    const { key } = req.query;
+    if (key == '') {
+      res.status(400).send('Key not defined correctly');
+    }
     try {
-      const downloadConfigDomain = parseRequestToConfig(req);
-      console.log(downloadConfigDomain);
-      const downloadLayoutDomain = mapStorage.readLayout(req.params.key)?.toSuper();
-      if (downloadLayoutDomain == undefined) {
+      const downloadLayoutDomain = mapStorage.readRequest(key)?.[0].toSuper();
+      const downloadConfigDomain = mapStorage.readRequest(key)?.[1];
+      console.log(mapStorage.readRequest(key));
+      if (downloadLayoutDomain == undefined || downloadConfigDomain == undefined) {
         throw new Error('Layout could not be found with key');
       }
-
       // fire the download engine!!!!!!!
       await download(downloadLayoutDomain, downloadConfigDomain, 1234567, res);
     } catch (error) {

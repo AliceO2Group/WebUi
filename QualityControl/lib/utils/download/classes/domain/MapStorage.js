@@ -21,20 +21,21 @@ export class MapStorage {
   /**
    * read func
    * @param {string} key - key
-   * @returns {LayoutDomainStorage | undefined} found Layout
+   * @returns {[LayoutDomainStorage, DownloadConfigDomain] | undefined} found Download request
    */
-  readLayout(key) {
+  readRequest(key) {
     return this.layoutStorage.get(key);
   }
 
   /**
    * write func
    * @param {LayoutDomainStorage} layout - layout
+   * @param {DownloadConfigDomain} config - config
    * @returns {string} - key
    */
-  writeLayout(layout) {
+  writeRequest(layout, config) {
     const mapKey = crypto.randomUUID();
-    this.layoutStorage.set(mapKey, layout);
+    this.layoutStorage.set(mapKey, [layout, config]);
     return mapKey;
   }
 
@@ -43,16 +44,16 @@ export class MapStorage {
    * @param {string} key - key
    * @returns {boolean} - true if deleted
    */
-  deleteLayout(key) {
+  deleteRequest(key) {
     return this.layoutStorage.delete(key);
   }
 
   /**
-   * delete cached layout data by user id
+   * delete cached download data by user id
    * @param {number} userId - userid
    */
   deleteByUserId(userId) {
-    const found = this.layoutStorage.entries().filter((entry) => entry[1].downloadUserId == userId);
+    const found = this.layoutStorage.entries().filter((entry) => entry[1][0].downloadUserId == userId);
     found.forEach((entry) => {
       this.layoutStorage.delete(entry[0]);
     });
