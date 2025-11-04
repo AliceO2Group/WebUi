@@ -12,8 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useState, type FC, type MouseEvent } from 'react';
 import { Box, IconButton, Menu, MenuItem, Avatar } from '@mui/material';
+import { useState, type FC, type MouseEvent } from 'react';
+import { getSessionData } from '~/services/session';
 
 interface UserSectionProps {
   userName: string;
@@ -36,6 +37,15 @@ export const UserSection: FC<UserSectionProps> = ({ userName }) => {
     setAnchorEl(null);
   };
 
+  const displayProfileData = () => {
+    const getData = async () => {
+      const data = await getSessionData();
+      alert(JSON.stringify(data));
+    };
+
+    void getData();
+  };
+
   return (
     <Box sx={{ flexGrow: 0 }} className="user-section">
       <IconButton sx={{ p: 0 }} onClick={handleClick}>
@@ -55,7 +65,7 @@ export const UserSection: FC<UserSectionProps> = ({ userName }) => {
         onClose={handleClose}
         className="user-section__menu"
       >
-        <MenuItem onClick={handleClose}>Profile</MenuItem>
+        <MenuItem onClick={displayProfileData}>Profile</MenuItem>
         <MenuItem onClick={handleClose}>My account</MenuItem>
         <MenuItem onClick={handleClose}>Logout</MenuItem>
       </Menu>

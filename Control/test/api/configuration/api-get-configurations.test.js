@@ -39,7 +39,7 @@ describe(`'API - GET - /configurations' test suite`, () => {
   it('should return 404 when the specified prefix does not exist', async () => {
     const prefix = 'nonexistent-prefix';
     const expectedError = {
-      message: `Configurations prefix not found: "${qcPath}/ANY/any/${prefix}"`,
+      message: `Configurations prefix not found: '${qcPath}/ANY/any/${prefix}'`,
       status: 404,
       title: "Not Found"
     };
