@@ -28,7 +28,7 @@ import { filterPanelToggleButton } from '../../common/filters/filterViews.js';
 export default (layout, filterModel) => {
   const { item, editEnabled = false } = layout;
   if (item) {
-    return editEnabled ? toolbarEditMode(layout, filterModel) : toolbarViewMode(layout, filterModel);
+    return editEnabled ? toolbarEditMode(layout) : toolbarViewMode(layout, filterModel);
   }
   return;
 };
@@ -45,11 +45,11 @@ const toolbarViewMode = (layout, filterModel) => {
 
   return {
     centerCol: h('.flex-grow.text-center', [h('.header-layout', [tabViewLinks(layoutItem, layout)])]),
-    rightCol: h('.w-33.text-right.g2.flex-row.justify-end', [
+    rightCol: h('.w-25.text-right.g2.flex-row.justify-end.flex-wrap', [
       h('b.f4.items-center', [isOfficial ? iconBadge() : '', layoutItem.name]),
       ' ',
-      h('.btn-group', [
-        filterPanelToggleButton(filterModel),
+      filterPanelToggleButton(filterModel),
+      h('.btn-group.flex-wrap', [
         newLayoutButton(layout),
         jsonExportButton(layoutItem, name),
         layout.ownsLayout(owner_id) && [editDropdown(layout), deleteButton(layout)],
@@ -83,10 +83,9 @@ const toolbarViewModeTab = (layout, tab, i) => {
 /**
  * Toolbar in edit mode (center and right) with rename, trash, save buttons
  * @param {Layout} layout - the model that handles the object state
- * @param {FilterModel} filterModel - The model handeling the filter state
  * @returns {vnode} - virtual node element
  */
-const toolbarEditMode = (layout, filterModel) => {
+const toolbarEditMode = (layout) => {
   const inputHandler = (e) => {
     layout.item.name = e.target.value.trim();
   };
@@ -116,7 +115,6 @@ const toolbarEditMode = (layout, filterModel) => {
         oninput: inputHandler,
       }),
       h('.btn-group.m1', [
-        filterPanelToggleButton(filterModel),
         saveButton(layout),
         cancelButton(layout),
       ]),

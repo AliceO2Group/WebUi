@@ -32,7 +32,6 @@ export default (model) =>
     ),
     displayObjectTime(model),
     displayAutoTabTimeSelector(model),
-    applyFilters(model.layout),
     h('hr.w-100'),
     objectTreeSidebar(model),
   ]);
@@ -78,32 +77,6 @@ const displayObjectTime = (model) =>
         id: 'inputShowTimestamp',
         checked: model.layout.item.displayTimestamp,
         onchange: (e) => model.layout.setLayoutProperty('displayTimestamp', e.target.checked),
-      }),
-    ),
-  ]);
-
-/**
- * Panel allowing users to select filters should be applied for the object tree
- * @param {Layout} layout - the model that manages the layout state
- * @returns {vnode} - virtual node element
- */
-const applyFilters = (layout) =>
-  h('.w-100.flex-row', [
-    h(
-      '.w-80',
-      h('label.form-check-label', {
-        for: 'applyFilters',
-        style: 'cursor: pointer',
-      }, 'Apply filters'),
-    ),
-    h(
-      '.w-20.text-right',
-      h('input', {
-        type: 'checkbox',
-        id: 'inputApplyFilters',
-        checked: layout.activeFilter() && layout.shouldApplyTreeFilter,
-        disabled: !layout.activeFilter(),
-        onchange: () => layout.toggleObjectTreeFilter(),
       }),
     ),
   ]);

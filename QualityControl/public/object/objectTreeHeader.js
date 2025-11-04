@@ -39,7 +39,7 @@ export default function objectTreeHeader(qcObject, filterModel) {
       qcObject.objectsRemote.isSuccess() && h('span', `(${howMany})`),
     ]),
 
-    rightCol: h('.w-33.flex-row.items-center.g2.justify-end', [
+    rightCol: h('.w-25.flex-row.items-center.g2.justify-end', [
       filterModel.isRunModeActivated ? null : filterPanelToggleButton(filterModel),
       ' ',
       h('.dropdown', {

@@ -12,18 +12,21 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Box, Drawer, List, ListItem, ListItemText } from '@mui/material';
+import { type FC, type PropsWithChildren } from 'react';
+import { Box, Drawer } from '@mui/material';
 import { LeftDrawerFooter } from './LeftDrawerFooter';
 import { LeftDrawerHeader } from './LeftDrawerHeader';
 
-const DRAWER_WIDTH = 250;
+const DRAWER_WIDTH = 300;
 
 /**
  * LeftDrawer component
  * Represents the left sidebar of the application layout.
+ * @param {PropsWithChildren} props - The props of the component.
+ * @param {ReactElement} props.children - The children elements to render inside the drawer.
  * @returns {ReactElement} LeftDrawer
  */
-export const LeftDrawer = () => (
+export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => (
   <Drawer
     sx={{
       width: DRAWER_WIDTH,
@@ -40,15 +43,7 @@ export const LeftDrawer = () => (
     className="left-drawer"
   >
     <LeftDrawerHeader />
-    <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
-      <List>
-        {['Item 1', 'Item 2', 'Item 3', 'Item 4'].map((text) => (
-          <ListItem key={text}>
-            <ListItemText primary={text} />
-          </ListItem>
-        ))}
-      </List>
-    </Box>
+    <Box sx={{ overflow: 'auto', flexGrow: 1 }}>{children}</Box>
     <LeftDrawerFooter />
   </Drawer>
 );
