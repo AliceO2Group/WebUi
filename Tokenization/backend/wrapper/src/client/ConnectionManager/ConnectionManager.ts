@@ -132,7 +132,12 @@ export class ConnectionManager {
     }
   }
 
-  public getAllConnections(): {
+  /**
+   * @description Returns all saved connections.
+   *
+   * @returns An object containing the sending and receiving connections.
+   */
+  public get connections(): {
     sending: Connection[];
     receiving: Connection[];
   } {

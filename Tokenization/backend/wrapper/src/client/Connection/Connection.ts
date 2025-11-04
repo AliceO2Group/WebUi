@@ -18,55 +18,55 @@ import { ConnectionStatus } from "../../models/connection.model";
  * @description This class represents a connection to a target client and manages sending messages to it.
  */
 export class Connection {
-  private token: string;
-  private targetAddress: string;
-  private status: ConnectionStatus;
+  private _token: string;
+  private _targetAddress: string;
+  private _status: ConnectionStatus;
 
   constructor(
     token: string,
     targetAddress: string,
     public direction: ConnectionDirection
   ) {
-    this.token = token;
-    this.targetAddress = targetAddress;
+    this._token = token;
+    this._targetAddress = targetAddress;
 
-    this.status = ConnectionStatus.CONNECTED;
+    this._status = ConnectionStatus.CONNECTED;
   }
 
   /**
    * @description Replace newly generated token
    * @param token New token to be replaced
    */
-  public handleNewToken(token: string): void {
-    this.token = token;
+  public set token(token: string) {
+    this._token = token;
   }
 
   public handleRevokeToken(): void {
-    this.token = "";
-    this.status = ConnectionStatus.UNAUTHORIZED;
+    this._token = "";
+    this._status = ConnectionStatus.UNAUTHORIZED;
   }
 
   /**
    * @description Returns token for this Connection object
    * @returns Connection token
    */
-  public getToken(): string {
-    return this.token;
+  public get token(): string {
+    return this._token;
   }
 
   /**
    * @description Returns status for specific
    * @returns Connection status
    */
-  public getStatus(): string {
-    return this.status;
+  public get status(): string {
+    return this._status;
   }
 
   /**
    * @description Returns target address for this Connection object
    * @returns Target address
    */
-  public getTargetAddress(): string {
-    return this.targetAddress;
+  public get targetAddress(): string {
+    return this._targetAddress;
   }
 }

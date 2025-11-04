@@ -157,7 +157,7 @@ export class CentralSystemWrapper {
    * @description Gets all connected client IPs
    * @returns Array of connected client IPs
    */
-  public getConnectedClients(): string[] {
+  public get connectedClients(): string[] {
     return Array.from(this.clients.keys());
   }
 

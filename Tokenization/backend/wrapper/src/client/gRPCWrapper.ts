@@ -61,30 +61,24 @@ export class gRPCWrapper {
    *
    * @returns An object containing the sending and receiving connections.
    */
-  public getAllConnections(): {
+  public get connections(): {
     sending: Connection[];
     receiving: Connection[];
   } {
-    return this.ConnectionManager.getAllConnections();
+    return this.ConnectionManager.connections;
   }
 
   public getSummary(): string {
-    const conn = this.ConnectionManager.getAllConnections();
+    const conn = this.ConnectionManager.connections;
     return (
       `Wrapper Summary: ` +
       `\nSending Connections: ${conn.sending.length}` +
       `\nReceiving Connections: ${conn.receiving.length}` +
       conn.sending
-        .map(
-          (c) =>
-            `\n- ${c.getTargetAddress()} - ${c.direction}\n\t(${c.getStatus()})`
-        )
+        .map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`)
         .join("") +
       conn.receiving
-        .map(
-          (c) =>
-            `\n- ${c.getTargetAddress()} - ${c.direction}\n\t(${c.getStatus()})`
-        )
+        .map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`)
         .join("")
     );
   }
