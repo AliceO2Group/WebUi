@@ -23,7 +23,7 @@ import { useLocation, useNavigate } from 'react-router';
  *   - token: Authentication token
  *   - username: User's username
  *   - access: Array of user's access roles
- * 
+ *
  */
 interface Session {
   personid: string | null;

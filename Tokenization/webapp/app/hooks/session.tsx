@@ -19,7 +19,12 @@ import { SessionContext } from '../contexts/sessionContext';
 /**
  * Custom hook to access the current user session data.
  *
- * @returns {Session} The current session object
+ * @returns {Session} The current session object containing:
+ *   - personid: User's person ID
+ *   - name: User's display name
+ *   - token: Authentication token
+ *   - username: User's username
+ *   - access: Array of user's access roles
  *
  * @throws {Error} If the hook is used outside of SessionProvider
  *
