@@ -22,8 +22,19 @@ describe(`'API - GET - /configuration/restrictions' test suite`, () => {
       .get(`/key1?token=${ADMIN_TEST_TOKEN}`)
       .expect(200);
   });
+  
+  it('should return 400 when the key parameter is missing', async () => {
+    const expectedError = {
+      message: "Missing configuration key",
+      status: 400,
+      title: "Invalid Input"
+    };
+    await request(`${TEST_URL}/api/configuration/restrictions`)
+      .get(`/%20?token=${ADMIN_TEST_TOKEN}`)
+      .expect(400, expectedError);
+  });
 
-  it('should return unauthorized error for missing token requests', async () => {
+  it('should return 403 unauthorized for missing token requests', async () => {
     await request(`${TEST_URL}/api/configuration/restrictions`)
       .get('/')
       .expect(403, {
@@ -32,12 +43,34 @@ describe(`'API - GET - /configuration/restrictions' test suite`, () => {
       });
   });
 
-  it('should return  unauthorized error for invalid token requests', async () => {
+  it('should return 403 unauthorized for invalid token requests', async () => {
     await request(`${TEST_URL}/api/configuration/restrictions`)
       .get('/?token=invalid-token')
       .expect(403, {
         error: '403 - Json Web Token Error',
         message: 'Invalid JWT token provided'
       });
+  });
+  
+  it('should return 404 when the configuration key does not exist', async () => {
+    const expectedError = {
+      message: "Configuration not found for key: nonexistent",
+      status: 404,
+      title: "Not Found"
+    };
+    await request(`${TEST_URL}/api/configuration/restrictions`)
+      .get(`/nonexistent?token=${ADMIN_TEST_TOKEN}`)
+      .expect(404, expectedError);
+  });
+  
+  it('should return 503  when Consul fails to respond', async () => {
+    const expectedError = {
+      message: "Consul service unavailable",
+      status: 503,
+      title: "Service Unavailable"
+    };
+    await request(`${TEST_URL}/api/configurations`)
+      .get(`/consul-failure?token=${ADMIN_TEST_TOKEN}`)
+      .expect(503, expectedError);
   });
 });
