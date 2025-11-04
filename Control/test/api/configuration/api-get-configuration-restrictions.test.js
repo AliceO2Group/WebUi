@@ -19,7 +19,7 @@ const { ADMIN_TEST_TOKEN, TEST_URL } = require('../generateToken.js');
 describe(`'API - GET - /configuration/restrictions' test suite`, () => {
   it('should successfully get a restriction TypeMap for given configurations', async () => {
     await request(`${TEST_URL}/api/configuration/restrictions`)
-      .get(`/?key=o2/components/qc/ANY/any/ctp-raw-qc-full&token=${ADMIN_TEST_TOKEN}`)
+      .get(`/key1?token=${ADMIN_TEST_TOKEN}`)
       .expect(200);
   });
 
