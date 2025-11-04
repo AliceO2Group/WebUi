@@ -22,10 +22,22 @@
  * @property MESSAGE_EVENT_NEW_TOKEN: Event for replacing with newly generated token.
  * @property MESSAGE_EVENT_REVOKE_TOKEN: Event for revoking an existing token.
  */
-enum DuplexMessageEvent {
-  MESSAGE_EVENT_EMPTY = 0,
-  MESSAGE_EVENT_NEW_TOKEN = 1,
-  MESSAGE_EVENT_REVOKE_TOKEN = 2,
+export enum DuplexMessageEvent {
+  MESSAGE_EVENT_EMPTY = "MESSAGE_EVENT_EMPTY",
+  MESSAGE_EVENT_NEW_TOKEN = "MESSAGE_EVENT_NEW_TOKEN",
+  MESSAGE_EVENT_REVOKE_TOKEN = "MESSAGE_EVENT_REVOKE_TOKEN",
+}
+
+/**
+ * @enum Represents the direction of a connection in the system.
+ * @property SENDING: Indicates a connection where messages are sent to another client.
+ * @property RECEIVING: Indicates a connection where messages are received from another client.
+ * @property DUPLEX: Indicates a connection that can both send and receive messages.
+ */
+export enum ConnectionDirection {
+  SENDING = "SENDING",
+  RECEIVING = "RECEIVING",
+  DUPLEX = "DUPLEX",
 }
 
 // ======================================
@@ -37,18 +49,25 @@ enum DuplexMessageEvent {
  * @property {string} token - The token to be replaced or revoked.
  * @property {string} targetAddress - The address of connection binded to this token.
  */
-interface TokenMessage {
-  token: string;
+export interface TokenMessage {
+  token?: string;
+  connectionDirection: ConnectionDirection;
   targetAddress: string;
 }
 
 /**
  * @description Model for duplex stream messages between client and central system.
  * @property {DuplexMessageEvent} event - The event type of the message.
+ * @property {ConnectionDirection} connectionDirection - The direction of the connection, optional for some events.
  * @property {TokenMessage} data - The data associated with the event, it may be undefined for some events.
- * @example {event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN, data: {token: '', targetAddress: ''}}
+ * @example
+ * {
+ *  event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
+ *  connectionDirection: ConnectionDirection.SENDING,
+ *  payload: {token: 'abc', targetAddress: 'localhost:50051'}
+ * }
  */
-interface DuplexMessageModel {
+export interface DuplexMessageModel {
   event: DuplexMessageEvent;
-  data?: TokenMessage;
+  payload: TokenMessage;
 }

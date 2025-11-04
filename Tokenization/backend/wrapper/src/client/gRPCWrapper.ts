@@ -11,9 +11,10 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-
-import { ConnectionManager } from "./ConnectionManager/ConnectionManager.ts";
-import { gRPCWrapperConfig } from "../models/config.model.ts";
+import { ConnectionManager } from "./ConnectionManager/ConnectionManager";
+import { RevokeTokenHandler } from "./Commands/revokeToken.handler";
+import { DuplexMessageEvent } from "../models/message.model";
+import { Connection } from "./Connection/Connection";
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -38,17 +39,47 @@ export class gRPCWrapper {
    * @param protoPath - The file path to the gRPC proto definition.
    * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
    */
-  constructor(config: gRPCWrapperConfig) {
-    this.ConnectionManager = new ConnectionManager(
-      config.protoPath,
-      config.centralAddress
-    );
+  constructor(protoPath: string, centralAddress: string = "localhost:50051") {
+    this.ConnectionManager = new ConnectionManager(protoPath, centralAddress);
+    this.ConnectionManager.registerCommandHandlers([
+      {
+        event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
+        handler: new RevokeTokenHandler(this.ConnectionManager),
+      },
+    ]);
   }
 
   /**
    * @description Starts the Connection Manager stream connection with Central System
    */
-  public connectToCentralSystem(): void {
+  public connectToCentralSystem() {
     this.ConnectionManager.connectToCentralSystem();
+  }
+
+  /**
+   * @description Returns all saved connections.
+   *
+   * @returns An object containing the sending and receiving connections.
+   */
+  public get connections(): {
+    sending: Connection[];
+    receiving: Connection[];
+  } {
+    return this.ConnectionManager.connections;
+  }
+
+  public getSummary(): string {
+    const conn = this.ConnectionManager.connections;
+    return (
+      `Wrapper Summary: ` +
+      `\nSending Connections: ${conn.sending.length}` +
+      `\nReceiving Connections: ${conn.receiving.length}` +
+      conn.sending
+        .map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`)
+        .join("") +
+      conn.receiving
+        .map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`)
+        .join("")
+    );
   }
 }

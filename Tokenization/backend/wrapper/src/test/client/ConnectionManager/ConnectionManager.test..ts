@@ -14,18 +14,34 @@
 
 import * as grpc from "@grpc/grpc-js";
 import { ConnectionManager } from "../../../client/ConnectionManager/ConnectionManager";
-import { CentralConnection } from "../../../client/ConnectionManager/CentralConnection";
+import { DuplexMessageEvent } from "../../../models/message.model";
 
-// Mock of client and stream
+// Mock duplex stream
 const mockStream = {
   on: jest.fn(),
   end: jest.fn(),
 };
 
+// Mock gRPC client
 const mockClient = {
   ClientStream: jest.fn(() => mockStream),
 };
 
+// Mock CentralSystem constructor
+const CentralSystemMock = jest.fn(() => mockClient);
+
+// Mock dispatcher
+const mockDispatch = jest.fn();
+jest.mock(
+  "../../../client/ConnectionManager/EventManagement/CentralCommandDispatcher",
+  () => ({
+    CentralCommandDispatcher: jest.fn(() => ({
+      dispatch: mockDispatch,
+    })),
+  })
+);
+
+// Mock logger
 jest.mock("@aliceo2/web-ui", () => ({
   LogManager: {
     getLogger: () => ({
@@ -34,6 +50,7 @@ jest.mock("@aliceo2/web-ui", () => ({
   },
 }));
 
+// Mock gRPC proto loader and client
 jest.mock("@grpc/proto-loader", () => ({
   loadSync: jest.fn(() => {
     return {};
@@ -50,7 +67,7 @@ jest.mock("@grpc/grpc-js", () => {
     loadPackageDefinition: jest.fn(() => ({
       webui: {
         tokenization: {
-          CentralSystem: jest.fn(() => mockClient),
+          CentralSystem: CentralSystemMock,
         },
       },
     })),
@@ -68,9 +85,13 @@ describe("ConnectionManager", () => {
   test("should initialize client with correct address", () => {
     expect(conn).toBeDefined();
     expect(grpc.loadPackageDefinition).toHaveBeenCalled();
+    expect(CentralSystemMock).toHaveBeenCalledWith(
+      "localhost:12345",
+      undefined
+    );
   });
 
-  test("connectToCentralSystem() should create stream and log message", () => {
+  test("connectToCentralSystem() should set up stream listeners", () => {
     conn.connectToCentralSystem();
 
     expect(mockClient.ClientStream).toHaveBeenCalled();
@@ -79,52 +100,59 @@ describe("ConnectionManager", () => {
     expect(mockStream.on).toHaveBeenCalledWith("error", expect.any(Function));
   });
 
-  test("disconnect() should end stream and reset reconnectAttempts", () => {
+  test("disconnectFromCentralSystem() should end stream", () => {
     conn.connectToCentralSystem();
     conn.disconnectFromCentralSystem();
 
     expect(mockStream.end).toHaveBeenCalled();
   });
 
-  test("scheduleReconnect() should call connect after delay", () => {
-    jest.useFakeTimers();
-    const spy = jest.spyOn<any, any>(CentralConnection.prototype, "connect");
-
-    const centralConnection = new CentralConnection(mockClient, {} as any);
-    (centralConnection as any).scheduleReconnect();
-
-    jest.advanceTimersByTime(1000 * 2);
-    expect(spy).toHaveBeenCalled();
-    jest.useRealTimers();
-  });
-
   test("should reconnect on stream 'end'", () => {
+    jest.useFakeTimers();
     conn.connectToCentralSystem();
     const onEnd = mockStream.on.mock.calls.find(
       ([event]) => event === "end"
-    )[1];
+    )?.[1];
 
-    const reconnectSpy = jest.spyOn<any, any>(
-      CentralConnection.prototype,
-      "scheduleReconnect"
-    );
-    onEnd();
+    onEnd?.(); // simulate 'end'
+    jest.advanceTimersByTime(2000);
 
-    expect(reconnectSpy).toHaveBeenCalled();
+    expect(mockClient.ClientStream).toHaveBeenCalledTimes(2);
+    jest.useRealTimers();
   });
 
   test("should reconnect on stream 'error'", () => {
+    jest.useFakeTimers();
     conn.connectToCentralSystem();
     const onError = mockStream.on.mock.calls.find(
       ([event]) => event === "error"
-    )[1];
+    )?.[1];
 
-    const reconnectSpy = jest.spyOn<any, any>(
-      CentralConnection.prototype,
-      "scheduleReconnect"
-    );
-    onError(new Error("Stream failed"));
+    onError?.(new Error("Simulated error"));
+    jest.advanceTimersByTime(2000);
 
-    expect(reconnectSpy).toHaveBeenCalled();
+    expect(mockClient.ClientStream).toHaveBeenCalledTimes(2);
+    jest.useRealTimers();
+  });
+
+  test("should dispatch event when 'data' is received", () => {
+    conn.connectToCentralSystem();
+    const onData = mockStream.on.mock.calls.find(
+      ([event]) => event === "data"
+    )?.[1];
+
+    const mockMessage = {
+      event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
+      data: {
+        revokeToken: {
+          token: "abc123",
+          targetAddress: "peer-123",
+        },
+      },
+    };
+
+    onData?.(mockMessage);
+
+    expect(mockDispatch).toHaveBeenCalledWith(mockMessage);
   });
 });

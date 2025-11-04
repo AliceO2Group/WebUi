@@ -12,18 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
-export interface CentralSystemConfig {
-  /** Path to the proto file defining the services. */
-  protoPath: string;
-  /** Host/IP to bind the gRPC server on. Defaults to "0.0.0.0" which is docker-friendly. */
-  host?: string;
-  /** Port to bind. Defaults to 50051. */
-  port?: number;
-}
+import { Command } from "../../models/commands.model";
+import { DuplexMessageEvent, TokenMessage } from "../../models/message.model";
 
-export interface gRPCWrapperConfig {
-  /** Path to the proto file defining the services. */
-  protoPath: string;
-  /** Address of the CentralSystem server. */
-  centralAddress: string;
+export class RevokeTokenCommand implements Command {
+  readonly event = DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN;
+  constructor(public payload: TokenMessage) {}
 }

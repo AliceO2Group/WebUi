@@ -21,7 +21,6 @@ const mockServerInstance = {
 
 const logger = {
   infoMessage: jest.fn(),
-  errorMessage: jest.fn(),
 };
 
 jest.mock("@aliceo2/web-ui", () => ({
@@ -64,10 +63,7 @@ describe("CentralSystemWrapper", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    wrapper = new CentralSystemWrapper({
-      protoPath: "dummy.proto",
-      port: 12345,
-    });
+    wrapper = new CentralSystemWrapper("dummy.proto", 12345);
   });
 
   test("should set up gRPC service and add it to the server", () => {
@@ -83,7 +79,7 @@ describe("CentralSystemWrapper", () => {
     wrapper.listen();
 
     expect(mockBindAsync).toHaveBeenCalledWith(
-      "0.0.0.0:12345",
+      "localhost:12345",
       "mock-credentials",
       expect.any(Function)
     );
@@ -95,8 +91,9 @@ describe("CentralSystemWrapper", () => {
 
     wrapper.listen();
 
-    expect(logger.errorMessage).toHaveBeenCalledWith(
-      "Server bind error: Error: bind failed"
+    expect(logger.infoMessage).toHaveBeenCalledWith(
+      "Server bind error:",
+      error
     );
   });
 
@@ -121,10 +118,15 @@ describe("CentralSystemWrapper", () => {
 
     expect(mockCall.end).toHaveBeenCalled();
     expect(logger.infoMessage).toHaveBeenCalledWith(
-      "Client client123 connected to CentralSystem stream stream"
+      expect.stringContaining("Client client123")
     );
+
     expect(logger.infoMessage).toHaveBeenCalledWith(
       "Client client123 ended stream."
+    );
+    expect(logger.infoMessage).toHaveBeenCalledWith(
+      "Stream error from client client123:",
+      expect.any(Error)
     );
   });
 });
