@@ -36,7 +36,6 @@ export function mapDownloadConfigToDomain(downloadConfigData) {
 function mapNameTemplateOption(nameTemplateOption) {
   if (typeof nameTemplateOption === 'string') {
     nameTemplateOption = nameTemplateOption.trim();
-    nameTemplateOption = nameTemplateOption.toLowerCase();
     const mappedNameTemplateOption = NameTemplateOption[nameTemplateOption];
     if (mappedNameTemplateOption === undefined) {
       throw new Error('Failed to map NameTemplateOption, perhaps an invalid option was passed?');

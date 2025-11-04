@@ -25,9 +25,9 @@ import {
   updateAndSendExpressResponseFromNativeError,
 }
   from '@aliceo2/web-ui';
-import { parseRequestToLayout } from '../utils/download/configurator.js';
+import { parseRequestToConfig, parseRequestToLayout } from '../utils/download/configurator.js';
 import { MapStorage } from '../utils/download/classes/domain/MapStorage.js';
-import { saveDownloadData } from '../utils/download/downloadEngine.js';
+import { download, saveDownloadData } from '../utils/download/downloadEngine.js';
 
 /**
  * @typedef {import('../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
@@ -239,6 +239,34 @@ export class LayoutController {
       res.status(400).send('Could not save download data');
     }
   };
+
+  /**
+   * Download objects using key from post download request.
+   * @param {Request<import('../utils/download/configurator.js').Query>}req - request
+   * @param {Response} res - response
+   */
+  async getDownloadHandler(req, res) {
+    console.log(req.params.key);
+    try {
+      const downloadConfigDomain = parseRequestToConfig(req);
+      console.log(downloadConfigDomain);
+      const downloadLayoutDomain = mapStorage.readLayout(req.params.key)?.toSuper();
+      if (downloadLayoutDomain == undefined) {
+        throw new Error('Layout could not be found with key');
+      }
+
+      // fire the download engine!!!!!!!
+      await download(downloadLayoutDomain, downloadConfigDomain, 1234567, res);
+    } catch (error) {
+      // log detailed message if present
+      if (error?.details && Array.isArray(error.details) && error.details[0]?.message) {
+        console.log(error.details[0].message);
+      } else {
+        console.log(error);
+      }
+      res.status(400).send('Could not download objects');
+    }
+  }
 
   /**
    * Patch a layout entity with information as per LayoutPatchDto.js
