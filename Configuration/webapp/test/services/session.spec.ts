@@ -10,17 +10,15 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-.justify-end {
-    justify-content: flex-end;
-}
+import assert from 'assert';
+import { getSessionData } from '../../app/services/session';
 
-.ml1 { margin-left: var(--space-xs);  }
-.ml2 { margin-left: var(--space-s); }
-.ml3 { margin-left: var(--space-m); }
-.ml4 { margin-left: var(--space-l); }
+describe('`session` test-suite', function () {
+  it('should load session data into memory', async function () {
+    const session = await getSessionData();
 
-.scale25 {
-    transform: scale(2.5);
-}
+    assert.strictEqual(session.username, 'anonymous');
+  });
+});

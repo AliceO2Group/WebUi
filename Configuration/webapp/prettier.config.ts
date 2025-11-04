@@ -10,17 +10,13 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-.justify-end {
-    justify-content: flex-end;
-}
+import { type Config } from 'prettier';
 
-.ml1 { margin-left: var(--space-xs);  }
-.ml2 { margin-left: var(--space-s); }
-.ml3 { margin-left: var(--space-m); }
-.ml4 { margin-left: var(--space-l); }
+const config: Config = {
+  printWidth: 100,
+  trailingComma: 'es5',
+};
 
-.scale25 {
-    transform: scale(2.5);
-}
+export default config;

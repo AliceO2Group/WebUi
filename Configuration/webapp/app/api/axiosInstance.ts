@@ -10,17 +10,18 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-.justify-end {
-    justify-content: flex-end;
-}
+import axios from 'axios';
 
-.ml1 { margin-left: var(--space-xs);  }
-.ml2 { margin-left: var(--space-s); }
-.ml3 { margin-left: var(--space-m); }
-.ml4 { margin-left: var(--space-l); }
+const API_URL = 'http://localhost:8080/control/api';
 
-.scale25 {
-    transform: scale(2.5);
-}
+const axiosInstance = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: false,
+});
+
+export default axiosInstance;

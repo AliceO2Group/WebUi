@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-module.exports = {
+export default {
   http: {
     port: 8080,
     hostname: 'localhost',

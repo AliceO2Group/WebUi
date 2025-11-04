@@ -10,17 +10,17 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-.justify-end {
-    justify-content: flex-end;
-}
-
-.ml1 { margin-left: var(--space-xs);  }
-.ml2 { margin-left: var(--space-s); }
-.ml3 { margin-left: var(--space-m); }
-.ml4 { margin-left: var(--space-l); }
-
-.scale25 {
-    transform: scale(2.5);
+/**
+ * 404 Not Found page component.
+ * Displays a user-friendly error message when a requested page doesn't exist.
+ */
+export default function NotFound() {
+  return (
+    <div style={{ textAlign: 'center', marginTop: '10vh' }}>
+      <h1>404 - Page Not Found</h1>
+      <p>The page you are looking for does not exist.</p>
+    </div>
+  );
 }
