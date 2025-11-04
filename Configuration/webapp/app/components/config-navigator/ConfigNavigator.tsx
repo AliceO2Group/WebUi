@@ -13,43 +13,18 @@
  */
 
 import { List } from '@mui/material';
-import { useEffect, useState } from 'react';
 import ConfigNavigatorItem from './ConfigNavigatorItem';
+import { useConfigurationKeysQuery } from '~/api/query/useConfigurationKeysQuery';
 
-/**
- * ConfigNavigator component
- * Represents the configuration navigator sidebar.
- * @returns {React.ReactElement} ConfigNavigator
- */
 export const ConfigNavigator = () => {
-  const [configKeys, setConfigKeys] = useState<string[]>([]);
-  const [isError, setIsError] = useState(false);
-
-  const fetchConfigurationKeys = async () => {
-    try {
-      const res = await fetch('http://localhost:8080/control/api/configurations');
-      const data = (await res.json()) as string[];
-      const newConfigKeys = data?.map((key) => key.split('/').pop() ?? '');
-      setConfigKeys(newConfigKeys);
-    } catch (_error) {
-      // temporarily disable the linting rule for this line
-      // fetching will be refactored once Tanstack Query is introduced
-      // eslint-disable-next-line no-console
-      console.error('Error while fetching configuration keys', _error);
-      setIsError(true);
-    }
-  };
-
-  useEffect(() => {
-    void fetchConfigurationKeys();
-  }, []);
+  const { data: configKeys, isError, error } = useConfigurationKeysQuery();
 
   return (
     <List className="config_navigator">
       {isError ? (
-        <p>Error while fetching configuration keys</p>
+        <p>Error while fetching configuration keys: {error?.message ?? 'Unknown error'}</p>
       ) : (
-        configKeys?.map((text) => <ConfigNavigatorItem key={text} title={text} />)
+        configKeys?.map((text: string) => <ConfigNavigatorItem key={text} title={text} />)
       )}
     </List>
   );
