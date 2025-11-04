@@ -12,17 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-/**
- * Layout
- *
- * Main layout component for the application.
- * Provides the header, sidebar, and main content area.
- * Also sets up the HeaderContext to allow child components to update the header content.
- * @param state The current loading state of the application (e.g., 'loading' or ready).
- * @param children The main content to be rendered inside the layout.
- * @return The application layout with header, sidebar, and content area.
- */
-
+import { Outlet, useNavigation } from 'react-router';
 import { useState } from 'react';
 
 import { AppHeader } from './header/header';
@@ -30,18 +20,12 @@ import { HeaderContext } from './header/headerContext';
 import { AppSidebar } from './sidebar';
 import { Spinner } from './spinner';
 
-interface LayoutArgs {
-  state: string;
-  children: React.ReactNode;
-}
-
 /**
- * Component provides layout for the applicatio
- *
- * @param state - refers to state of the whole website if data are loaded its - loading
- * @param children - elements to render inside layout component
+ * Component provides main layout for the application
+ * Uses useNavigation state to check if page is loaded
  */
-export default function Layout({ state, children }: LayoutArgs) {
+export default function Layout() {
+  const { state }  = useNavigation();
 
   const [headerContent, setHeaderContent] = useState<string>('Tokenization Admin Interface');
 
@@ -51,7 +35,7 @@ export default function Layout({ state, children }: LayoutArgs) {
         <AppHeader headerContent={headerContent}/>
         <AppSidebar />
         <div id="content" className="bg-gray" style={{ gridRow: 'span 2', width: '95.3%' }}>
-          {state === 'loading' ? <Spinner /> : children}
+          {state === 'loading' ? <Spinner /> : <Outlet/>}
         </div>
       </div>
     </HeaderContext.Provider>
