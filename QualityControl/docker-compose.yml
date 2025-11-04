@@ -22,7 +22,7 @@ services:
         target: /docker-entrypoint-initdb.d
     # Max total time for the container to start 2 mins (20s + 5*20s)
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD:-cern}"]
       interval: 20s
       timeout: 20s
       retries: 5
