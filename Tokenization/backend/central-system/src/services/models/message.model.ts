@@ -23,9 +23,9 @@
  * @property MESSAGE_EVENT_REVOKE_TOKEN: Event for revoking an existing token.
  */
 export enum DuplexMessageEvent {
-  MESSAGE_EVENT_EMPTY = "MESSAGE_EVENT_EMPTY",
-  MESSAGE_EVENT_NEW_TOKEN = "MESSAGE_EVENT_NEW_TOKEN",
-  MESSAGE_EVENT_REVOKE_TOKEN = "MESSAGE_EVENT_REVOKE_TOKEN",
+  MESSAGE_EVENT_EMPTY = 'MESSAGE_EVENT_EMPTY',
+  MESSAGE_EVENT_NEW_TOKEN = 'MESSAGE_EVENT_NEW_TOKEN',
+  MESSAGE_EVENT_REVOKE_TOKEN = 'MESSAGE_EVENT_REVOKE_TOKEN',
 }
 
 /**
@@ -35,9 +35,9 @@ export enum DuplexMessageEvent {
  * @property DUPLEX: Indicates a connection that can both send and receive messages.
  */
 export enum ConnectionDirection {
-  SENDING = "SENDING",
-  RECEIVING = "RECEIVING",
-  DUPLEX = "DUPLEX",
+  SENDING = 'SENDING',
+  RECEIVING = 'RECEIVING',
+  DUPLEX = 'DUPLEX',
 }
 
 // ======================================

@@ -12,45 +12,39 @@
  * or submit itself to any jurisdiction.
  */
 
-import { CentralSystemWrapper } from "../wrapper/CentralSystemWrapper";
+import { CentralSystemWrapper } from '../wrapper/CentralSystemWrapper';
 import {
   DuplexMessageEvent,
   ConnectionDirection,
-} from "../services/models/message.model.js";
+} from '../services/models/message.model.js';
 
-import { LogManager, InvalidInputError } from "@aliceo2/web-ui";
+import { LogManager, InvalidInputError } from '@aliceo2/web-ui';
 
-import type { Request, Response } from "express";
+import type { Request, Response } from 'express';
 
-import { TokensGetService } from "../services/TokensGetService.js";
-
-const logger = LogManager.getLogger("TokensController");
+import { TokensGetService } from '../services/TokensGetService.js';
+import updateAndSendExpressResponseFromNativeError from '@aliceo2/web-ui';
 
 /**
  * @description Controller for managing tokens in the Central System.
  */
 export class TokensController {
-  private tokensService: Map<
-    number,
-    { tokenId: number; validity: string; payload: string }
-  >;
+  private _logger;
 
-  private centralSystemWrapperService: CentralSystemWrapper;
   /**
    * @description Initializes the TokensController with a map of fake tokens and a CentralSystemWrapper instance.
    * @param fakeTokens - A map simulating a database of tokens.
    * @param centralSystemWrapper - An instance of CentralSystemWrapper to handle client connections.
    */
   constructor(
-    private readonly tokensGetService: TokensGetService,
-    fakeTokens: Map<
+    private readonly _tokensGetService: TokensGetService,
+    private readonly _tokensService: Map<
       number,
       { tokenId: number; validity: string; payload: string }
     >,
-    centralSystemWrapper: CentralSystemWrapper
+    private readonly _centralSystemWrapper: CentralSystemWrapper
   ) {
-    this.tokensService = fakeTokens;
-    this.centralSystemWrapperService = centralSystemWrapper;
+    this._logger = LogManager.getLogger('TokensController');
   }
   /**
    * @description Retrieves all tokens data source. Returns a serialized binary payload of the tokens.
@@ -60,15 +54,19 @@ export class TokensController {
    */
   public async getTokensHandler(req: Request, res: Response): Promise<void> {
     try {
-      const tokens = await this.tokensGetService.getTokens(this.tokensService);
+      const tokens = await this._tokensGetService.getTokens(
+        this._tokensService
+      );
       res.status(200).json(tokens);
     } catch (error: any) {
       if (error.stack) {
-        logger.trace(error);
+        this._logger.trace(error);
       }
-      logger.errorMessage(`Error while retrieving run types: ${error.message}`);
+      this._logger.errorMessage(
+        `Error while retrieving run types: ${error.message}`
+      );
 
-      res.status(500).json({ error: "Failed to retrieve tokens" });
+      res.status(500).json({ error: 'Failed to retrieve tokens' });
     }
   }
 
@@ -81,42 +79,43 @@ export class TokensController {
   public async createTokenHandler(req: Request, res: Response): Promise<void> {
     try {
       const { payload } = req.body;
-      await this._validateTokenPayload(payload);
+      this._validateTokenPayload(payload);
 
-      const newTokenId = this.tokensService.size + 1;
+      const newTokenId = this._tokensService.size + 1;
       const newToken = {
         tokenId: newTokenId,
-        validity: "good",
-        payload: payload,
+        validity: 'good',
+        payload,
       };
-      this.tokensService.set(newTokenId, newToken);
+      this._tokensService.set(newTokenId, newToken);
 
-      const client: string = Array.from(
-        this.centralSystemWrapperService.getConnectedClients()
-      )[0];
+      const client: string =
+        this._centralSystemWrapper.getConnectedClients()[0];
 
-      this.centralSystemWrapperService.sendEvent(client, {
+      this._centralSystemWrapper.sendEvent(client, {
         event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
         payload: {
           connectionDirection: ConnectionDirection.SENDING,
-          targetAddress: "a",
-          token: "newToken",
+          targetAddress: 'a',
+          token: 'newToken',
         },
       });
 
-      res.status(201).json("Token created successfully");
+      res.status(201).json('Token created successfully');
     } catch (error: any) {
       if (error.stack) {
-        logger.trace(error);
+        this._logger.trace(error);
       }
       if (error instanceof InvalidInputError) {
-        logger.errorMessage(`Invalid input: ${error.message}`);
+        this._logger.errorMessage(`Invalid input: ${error.message}`);
 
         res.status(400).json({ error: error.message });
       } else if (error instanceof Error) {
-        logger.errorMessage(`Error while creating a token: ${error.message}`);
+        this._logger.errorMessage(
+          `Error while creating a token: ${error.message}`
+        );
 
-        res.status(500).json({ error: "Failed to create a token" });
+        res.status(500).json({ error: 'Failed to create a token' });
       }
     }
   }
@@ -126,11 +125,11 @@ export class TokensController {
    * @param payload - The payload to be validated.
    * @description Validates the payload of a token.
    * @throws {InvalidInputError} If the payload is empty.
-   * @return {Promise<void>}
+   * @return {void}
    */
-  private async _validateTokenPayload(payload: string): Promise<void> {
+  private _validateTokenPayload(payload: string): void {
     if (!payload) {
-      throw new InvalidInputError("Payload cannot be empty");
+      throw new InvalidInputError('Payload cannot be empty');
     }
   }
 
@@ -138,13 +137,13 @@ export class TokensController {
    * @description Validates the token ID.
    * @param id - The ID of the token to be validated.
    * @throws {InvalidInputError} If the ID is missing or invalid.
-   * @return {Promise<void>}
+   * @return {void}
    */
-  private async _validateTokenID(id: number): Promise<void> {
+  private _validateTokenID(id: number): void {
     if (!id) {
-      throw new InvalidInputError("Missing token ID");
+      throw new InvalidInputError('Missing token ID');
     }
-    if (!this.tokensService.has(id)) {
+    if (!this._tokensService.has(id)) {
       throw new InvalidInputError(`Token with ID ${id} does not exist`);
     }
   }
@@ -159,35 +158,35 @@ export class TokensController {
     try {
       const { id } = req.body;
       const idNumber = parseInt(id, 10);
-      await this._validateTokenID(idNumber);
-      this.tokensService.delete(idNumber);
+      this._validateTokenID(idNumber);
+      this._tokensService.delete(idNumber);
 
-      const client: string = Array.from(
-        this.centralSystemWrapperService.getConnectedClients()
-      )[0];
+      const client: string =
+        this._centralSystemWrapper.getConnectedClients()[0];
 
-      this.centralSystemWrapperService.sendEvent(client, {
+      this._centralSystemWrapper.sendEvent(client, {
         event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
         payload: {
           connectionDirection: ConnectionDirection.SENDING,
-          targetAddress: "a",
-          token: "newToken",
+          targetAddress: 'a',
         },
       });
 
-      res.status(204).json("Token revoked successfully");
+      res.status(204).json('Token revoked successfully');
     } catch (error: any) {
       if (error.stack) {
-        logger.trace(error);
+        this._logger.trace(error);
       }
       if (error instanceof InvalidInputError) {
-        logger.errorMessage(`Invalid input: ${error.message}`);
+        this._logger.errorMessage(`Invalid input: ${error.message}`);
 
         res.status(400).json({ error: error.message });
       } else if (error instanceof Error) {
-        logger.errorMessage(`Error while revoking the token: ${error.message}`);
+        this._logger.errorMessage(
+          `Error while revoking the token: ${error.message}`
+        );
 
-        res.status(500).json({ error: "Failed to revoke the token" });
+        res.status(500).json({ error: 'Failed to revoke the token' });
       }
     }
   }

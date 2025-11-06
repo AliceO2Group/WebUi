@@ -12,75 +12,23 @@
  * or submit itself to any jurisdiction.
  */
 
-import { HttpServer } from "@aliceo2/web-ui";
+import { HttpServer } from '@aliceo2/web-ui';
 
-import CentralSystem from "./dist/modules/CentralSystem.js";
+import CentralSystem from './dist/modules/CentralSystem.js';
 
-const http = new HttpServer({ port: 8080, allow: "*" });
+const http = new HttpServer({ port: 8080, allow: '*' });
 
 http.get(
-  "/healthcheck",
+  '/healthcheck',
   (req, res) => {
     res.status(200).send();
   },
   { public: true }
 );
 
-// http.get(
-//   "/tokens/:tokenId/logs",
-//   (req, res) => {
-//     const tokenId = parseInt(req.params.tokenId, 10);
-
-//     // Artificially add an error
-//     if (tokenId === 3) {
-//       res.status(500).json({
-//         error: `An error occurred when trying to load logs for token ${tokenId}`,
-//       });
-//       return;
-//     }
-
-//     const logs = fakeLogs.get(tokenId) ?? [];
-
-//     if (!logs) {
-//       res
-//         .status(404)
-//         .json({ error: `No logs found found for token ${tokenId}` });
-//       return;
-//     }
-
-//     setTimeout(() => res.status(200).json(logs), 1000);
-//   },
-//   { public: true }
-// );
-
-// http.get(
-//   "/tokens/:tokenId",
-//   (req, res) => {
-//     const tokenId = parseInt(req.params.tokenId, 10);
-//     const token = fakeTokens.get(tokenId) ?? null;
-
-//     if (!token) {
-//       res.status(404).json({ error: `No token found with id ${tokenId}` });
-//       return;
-//     }
-
-//     res.status(200).json(token);
-//   },
-//   { public: true }
-// );
-
-// http.get(
-//   "/tokens",
-//   (req, res) => {
-//     // Fake long page load
-//     setTimeout(() => res.status(200).json([...fakeTokens.values()]), 1000);
-//   },
-//   { public: true }
-// );
-
-const centralSystemModel = new CentralSystem(50049);
+const centralSystemModel = new CentralSystem(4041);
 http.get(
-  "/tokens",
+  '/tokens',
   centralSystemModel.tokenController.getTokensHandler.bind(
     centralSystemModel.tokenController
   ),
@@ -90,7 +38,7 @@ http.get(
 );
 
 http.post(
-  "/tokens/create",
+  '/tokens/create',
   centralSystemModel.tokenController.createTokenHandler.bind(
     centralSystemModel.tokenController
   ),
@@ -98,7 +46,7 @@ http.post(
 );
 
 http.post(
-  "/tokens/revoke",
+  '/tokens/revoke',
   centralSystemModel.tokenController.revokeTokenHandler.bind(
     centralSystemModel.tokenController
   ),

@@ -12,22 +12,20 @@
  * or submit itself to any jurisdiction.
  */
 
-import * as grpc from "@grpc/grpc-js";
-import * as protoLoader from "@grpc/proto-loader";
-import { LogManager } from "@aliceo2/web-ui";
-import {
-  DuplexMessageModel,
-} from "../services/models/message.model";
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
+import { LogManager } from '@aliceo2/web-ui';
+import { DuplexMessageModel } from '../services/models/message.model';
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
  */
 export class CentralSystemWrapper {
   // utilities
-  private logger = LogManager.getLogger("CentralSystemWrapper");
+  private _logger = LogManager.getLogger('CentralSystemWrapper');
 
   // class properties
-  private server: grpc.Server;
+  private _server: grpc.Server;
 
   // clients management
   private clients = new Map<string, grpc.ServerDuplexStream<any, any>>();
@@ -38,7 +36,7 @@ export class CentralSystemWrapper {
    * @param port The port number to bind the gRPC server to.
    */
   constructor(private protoPath: string, private port: number) {
-    this.server = new grpc.Server();
+    this._server = new grpc.Server();
     this.setupService();
   }
 
@@ -60,7 +58,7 @@ export class CentralSystemWrapper {
     const wrapper = proto.webui.tokenization;
 
     // Add the CentralSystem service and bind the stream handler
-    this.server.addService(wrapper.CentralSystem.service, {
+    this._server.addService(wrapper.CentralSystem.service, {
       ClientStream: this.clientStreamHandler.bind(this),
     });
   }
@@ -72,8 +70,8 @@ export class CentralSystemWrapper {
    */
   private extractIpFromPeer(peer: string): string {
     // Context
-    // IPv4 format: "ipv4:127.0.0.1:12345"
-    // IPv6 format: "ipv6:[::1]:12345"
+    // IPv4 format: 'ipv4:127.0.0.1:12345'
+    // IPv6 format: 'ipv6:[::1]:12345'
 
     const ipv4Match = peer.match(/^ipv4:(.+?):\d+$/);
     if (ipv4Match) return ipv4Match[1];
@@ -93,7 +91,7 @@ export class CentralSystemWrapper {
     const peer = call.getPeer();
     const clientIp = this.extractIpFromPeer(peer);
 
-    this.logger.infoMessage(
+    this._logger.infoMessage(
       `Client ${clientIp} (${peer}) connected to CentralSystem stream`
     );
 
@@ -102,20 +100,20 @@ export class CentralSystemWrapper {
     this.clientIps.set(peer, clientIp);
 
     // Listen for data events from the client
-    call.on("data", (payload: any) => {
-      this.logger.infoMessage(`Received from ${clientIp}:`, payload);
+    call.on('data', (payload: any) => {
+      this._logger.infoMessage(`Received from ${clientIp}:`, payload);
     });
 
     // Handle stream end event
-    call.on("end", () => {
-      this.logger.infoMessage(`Client ${clientIp} ended stream.`);
+    call.on('end', () => {
+      this._logger.infoMessage(`Client ${clientIp} ended stream.`);
       this.cleanupClient(peer);
       call.end();
     });
 
     // Handle stream error event
-    call.on("error", (err) => {
-      this.logger.infoMessage(`Stream error from client ${clientIp}:`, err);
+    call.on('error', (err) => {
+      this._logger.infoMessage(`Stream error from client ${clientIp}:`, err);
       this.cleanupClient(peer);
     });
   }
@@ -129,7 +127,7 @@ export class CentralSystemWrapper {
     if (clientIp) {
       this.clients.delete(clientIp);
       this.clientIps.delete(peer);
-      this.logger.infoMessage(`Cleaned up resources of ${clientIp}`);
+      this._logger.infoMessage(`Cleaned up resources of ${clientIp}`);
     }
   }
 
@@ -142,16 +140,16 @@ export class CentralSystemWrapper {
   public sendEvent(ip: string, data: DuplexMessageModel): boolean {
     const client = this.clients.get(ip);
     if (!client) {
-      this.logger.warnMessage(`Client ${ip} not found for sending event`);
+      this._logger.warnMessage(`Client ${ip} not found for sending event`);
       return false;
     }
 
     try {
       client.write(data);
-      this.logger.infoMessage(`Sent event to ${ip}:`, data);
+      this._logger.infoMessage(`Sent event to ${ip}:`, data);
       return true;
     } catch (err) {
-      this.logger.errorMessage(`Error sending to ${ip}:`, err);
+      this._logger.errorMessage(`Error sending to ${ip}:`, err);
       return false;
     }
   }
@@ -169,48 +167,16 @@ export class CentralSystemWrapper {
    */
   public listen() {
     const addr = `localhost:${this.port}`;
-    this.server.bindAsync(
+    this._server.bindAsync(
       addr,
       grpc.ServerCredentials.createInsecure(),
       (err, _port) => {
         if (err) {
-          this.logger.infoMessage("Server bind error:", err);
+          this._logger.infoMessage('Server bind error:', err);
           return;
         }
-        this.logger.infoMessage(`CentralSytem started listening on ${addr}`);
+        this._logger.infoMessage(`CentralSytem started listening on ${addr}`);
       }
     );
   }
 }
-
-// // Instantiate the CentralSystemWrapper on port 50051, but don't start automatically
-// const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
-// const centralSystem = new CentralSystemWrapper(PROTO_PATH, 50051);
-// // Start listening explicitly
-// centralSystem.listen();
-
-// setTimeout(() => {
-//   centralSystem.sendEvent(centralSystem.getConnectedClients()[0], {
-//     event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
-//     payload: {
-//       connectionDirection: ConnectionDirection.SENDING,
-//       targetAddress: "a",
-//     },
-//   });
-//   centralSystem.sendEvent(centralSystem.getConnectedClients()[0], {
-//     event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
-//     payload: {
-//       connectionDirection: ConnectionDirection.SENDING,
-//       targetAddress: "a",
-//       token: "newToken",
-//     },
-//   });
-//   centralSystem.sendEvent(centralSystem.getConnectedClients()[0], {
-//     event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
-//     payload: {
-//       connectionDirection: ConnectionDirection.SENDING,
-//       targetAddress: "c",
-//       token: "tokenForNewAddress",
-//     },
-//   });
-// }, 5000);
