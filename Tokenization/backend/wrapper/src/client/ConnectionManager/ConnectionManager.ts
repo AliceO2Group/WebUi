@@ -42,11 +42,11 @@ import {
  * - `receivingConnections`: Map of active inbound connections.
  */
 export class ConnectionManager {
-  private logger = LogManager.getLogger("ConnectionManager");
-  private centralDispatcher: CentralCommandDispatcher;
-  private centralConnection: CentralConnection;
-  private sendingConnections = new Map<string, Connection>();
-  private receivingConnections = new Map<string, Connection>();
+  private _logger = LogManager.getLogger("ConnectionManager");
+  private _centralDispatcher: CentralCommandDispatcher;
+  private _centralConnection: CentralConnection;
+  private _sendingConnections = new Map<string, Connection>();
+  private _receivingConnections = new Map<string, Connection>();
 
   /**
    * @description Initializes a new instance of the ConnectionManager class.
@@ -74,19 +74,10 @@ export class ConnectionManager {
     );
 
     // event dispatcher for central system events
-    this.centralDispatcher = new CentralCommandDispatcher();
-    this.centralConnection = new CentralConnection(
+    this._centralDispatcher = new CentralCommandDispatcher();
+    this._centralConnection = new CentralConnection(
       client,
-      this.centralDispatcher
-    );
-
-    this.sendingConnections.set(
-      "a",
-      new Connection("1", "a", ConnectionDirection.SENDING)
-    );
-    this.sendingConnections.set(
-      "b",
-      new Connection("2", "b", ConnectionDirection.SENDING)
+      this._centralDispatcher
     );
   }
 
@@ -101,7 +92,7 @@ export class ConnectionManager {
     }[]
   ): void {
     commandHandlers.forEach(({ event, handler }) => {
-      this.centralDispatcher.register(event, handler);
+      this._centralDispatcher.register(event, handler);
     });
   }
 
@@ -109,14 +100,14 @@ export class ConnectionManager {
    * @description Starts the connection to the central system.
    */
   connectToCentralSystem(): void {
-    this.centralConnection.start();
+    this._centralConnection.start();
   }
 
   /**
    * @description Disconnects from the central system.
    */
   disconnectFromCentralSystem(): void {
-    this.centralConnection.disconnect();
+    this._centralConnection.disconnect();
   }
 
   /**
@@ -133,9 +124,9 @@ export class ConnectionManager {
     const conn = new Connection(token || "", address, direction);
 
     if (direction === ConnectionDirection.RECEIVING) {
-      this.receivingConnections.set(address, conn);
+      this._receivingConnections.set(address, conn);
     } else {
-      this.sendingConnections.set(address, conn);
+      this._sendingConnections.set(address, conn);
     }
 
     return conn;
@@ -151,11 +142,11 @@ export class ConnectionManager {
   ): Connection | undefined {
     switch (direction) {
       case ConnectionDirection.SENDING:
-        return this.sendingConnections.get(address);
+        return this._sendingConnections.get(address);
       case ConnectionDirection.RECEIVING:
-        return this.receivingConnections.get(address);
+        return this._receivingConnections.get(address);
       default:
-        this.logger.errorMessage(`Invalid connection direction: ${direction}`);
+        this._logger.errorMessage(`Invalid connection direction: ${direction}`);
         return undefined;
     }
   }
@@ -170,8 +161,8 @@ export class ConnectionManager {
     receiving: Connection[];
   } {
     return {
-      sending: [...this.sendingConnections.values()],
-      receiving: [...this.receivingConnections.values()],
+      sending: [...this._sendingConnections.values()],
+      receiving: [...this._receivingConnections.values()],
     };
   }
 }

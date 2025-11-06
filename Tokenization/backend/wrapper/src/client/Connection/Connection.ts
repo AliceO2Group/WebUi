@@ -22,6 +22,7 @@ export class Connection {
   private _token: string;
   private _targetAddress: string;
   private _status: ConnectionStatus;
+  public direction: ConnectionDirection;
 
   /**
    * @description Creates a new Connection instance with the given token, target address, and connection direction.
@@ -33,10 +34,11 @@ export class Connection {
   constructor(
     token: string,
     targetAddress: string,
-    public direction: ConnectionDirection
+    direction: ConnectionDirection
   ) {
     this._token = token;
     this._targetAddress = targetAddress;
+    this.direction = direction;
 
     this._status = ConnectionStatus.CONNECTED;
   }

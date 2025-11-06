@@ -22,8 +22,8 @@ import { DuplexMessageEvent } from "../../../models/message.model";
  * command messages coming from central system to the appropriate handler functions.
  */
 export class CentralCommandDispatcher {
-  private handlers = new Map<DuplexMessageEvent, CommandHandler>();
-  private logger = LogManager.getLogger("CentralCommandDispatcher");
+  private _handlers = new Map<DuplexMessageEvent, CommandHandler>();
+  private _logger = LogManager.getLogger("CentralCommandDispatcher");
 
   /**
    * Registers a command handler for a specific command event type.
@@ -35,8 +35,8 @@ export class CentralCommandDispatcher {
     event: DuplexMessageEvent,
     handler: CommandHandler<T>
   ): void {
-    this.logger.infoMessage(`Registering handler for command type: ${event}`);
-    this.handlers.set(event, handler);
+    this._logger.infoMessage(`Registering handler for command type: ${event}`);
+    this._handlers.set(event, handler);
   }
 
   /**
@@ -46,10 +46,10 @@ export class CentralCommandDispatcher {
    * @param command - The command object containing an event and its associated payload.
    */
   async dispatch(command: Command): Promise<void> {
-    const handler = this.handlers.get(command.event);
-    this.logger.debugMessage(`Dispatching command: ${command.event}`);
+    const handler = this._handlers.get(command.event);
+    this._logger.debugMessage(`Dispatching command: ${command.event}`);
     if (!handler) {
-      this.logger.warnMessage(
+      this._logger.warnMessage(
         `No handler registered for command type: ${command.event}`
       );
       return;
@@ -58,7 +58,7 @@ export class CentralCommandDispatcher {
     try {
       await handler.handle(command);
     } catch (error) {
-      this.logger.errorMessage(
+      this._logger.errorMessage(
         `Error handling command ${command.event}:`,
         error
       );

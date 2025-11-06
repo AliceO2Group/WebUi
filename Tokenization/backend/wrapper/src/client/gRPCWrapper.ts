@@ -33,7 +33,7 @@ import { NewTokenHandler } from "./Commands/newToken/newToken.handler";
  * ```
  */
 export class gRPCWrapper {
-  private ConnectionManager: ConnectionManager;
+  private _connectionManager: ConnectionManager;
 
   /**
    * @description Initializes an instance of gRPCWrapper class.
@@ -42,15 +42,15 @@ export class gRPCWrapper {
    * @param centralAddress - The address of the central gRPC server (default: "localhost:4100").
    */
   constructor(protoPath: string, centralAddress: string = "localhost:4100") {
-    this.ConnectionManager = new ConnectionManager(protoPath, centralAddress);
-    this.ConnectionManager.registerCommandHandlers([
+    this._connectionManager = new ConnectionManager(protoPath, centralAddress);
+    this._connectionManager.registerCommandHandlers([
       {
         event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
-        handler: new RevokeTokenHandler(this.ConnectionManager),
+        handler: new RevokeTokenHandler(this._connectionManager),
       },
       {
         event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
-        handler: new NewTokenHandler(this.ConnectionManager),
+        handler: new NewTokenHandler(this._connectionManager),
       },
     ]);
   }
@@ -59,7 +59,7 @@ export class gRPCWrapper {
    * @description Starts the Connection Manager stream connection with Central System
    */
   public connectToCentralSystem() {
-    this.ConnectionManager.connectToCentralSystem();
+    this._connectionManager.connectToCentralSystem();
   }
 
   /**
@@ -71,11 +71,11 @@ export class gRPCWrapper {
     sending: Connection[];
     receiving: Connection[];
   } {
-    return this.ConnectionManager.connections;
+    return this._connectionManager.connections;
   }
 
   public getSummary(): string {
-    const conn = this.ConnectionManager.connections;
+    const conn = this._connectionManager.connections;
     return (
       `Wrapper Summary: ` +
       `\nSending Connections: ${conn.sending.length}` +

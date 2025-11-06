@@ -20,22 +20,26 @@ import { DuplexMessageModel } from "../models/message.model";
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
  */
 export class CentralSystemWrapper {
+  // config
+  private _protoPath: string;
+
   // utilities
-  private logger = LogManager.getLogger("CentralSystemWrapper");
+  private _logger = LogManager.getLogger("CentralSystemWrapper");
 
   // class properties
-  private server: grpc.Server;
+  private _server: grpc.Server;
 
   // clients management
-  private clients = new Map<string, grpc.ServerDuplexStream<any, any>>();
-  private clientIps = new Map<string, string>(); // Peer -> IP map
+  private _clients = new Map<string, grpc.ServerDuplexStream<any, any>>();
+  private _clientIps = new Map<string, string>(); // Peer -> IP map
 
   /**
    * Initializes the Wrapper for CentralSystem.
    * @param port The port number to bind the gRPC server to.
    */
-  constructor(private protoPath: string, private port: number) {
-    this.server = new grpc.Server();
+  constructor(protoPath: string, private port: number) {
+    this._protoPath = protoPath;
+    this._server = new grpc.Server();
     this.setupService();
   }
 
@@ -44,7 +48,7 @@ export class CentralSystemWrapper {
    */
   private setupService(): void {
     // Load the proto definition with options
-    const packageDef = protoLoader.loadSync(this.protoPath, {
+    const packageDef = protoLoader.loadSync(this._protoPath, {
       keepCase: true,
       longs: String,
       enums: String,
@@ -57,7 +61,7 @@ export class CentralSystemWrapper {
     const wrapper = proto.webui.tokenization;
 
     // Add the CentralSystem service and bind the stream handler
-    this.server.addService(wrapper.CentralSystem.service, {
+    this._server.addService(wrapper.CentralSystem.service, {
       ClientStream: this.clientStreamHandler.bind(this),
     });
   }
@@ -90,29 +94,29 @@ export class CentralSystemWrapper {
     const peer = call.getPeer();
     const clientIp = this.extractIpFromPeer(peer);
 
-    this.logger.infoMessage(
+    this._logger.infoMessage(
       `Client ${clientIp} (${peer}) connected to CentralSystem stream`
     );
 
     // Add client to maps
-    this.clients.set(clientIp, call);
-    this.clientIps.set(peer, clientIp);
+    this._clients.set(clientIp, call);
+    this._clientIps.set(peer, clientIp);
 
     // Listen for data events from the client
     call.on("data", (payload: any) => {
-      this.logger.infoMessage(`Received from ${clientIp}:`, payload);
+      this._logger.infoMessage(`Received from ${clientIp}:`, payload);
     });
 
     // Handle stream end event
     call.on("end", () => {
-      this.logger.infoMessage(`Client ${clientIp} ended stream.`);
+      this._logger.infoMessage(`Client ${clientIp} ended stream.`);
       this.cleanupClient(peer);
       call.end();
     });
 
     // Handle stream error event
     call.on("error", (err) => {
-      this.logger.infoMessage(`Stream error from client ${clientIp}:`, err);
+      this._logger.infoMessage(`Stream error from client ${clientIp}:`, err);
       this.cleanupClient(peer);
     });
   }
@@ -122,11 +126,11 @@ export class CentralSystemWrapper {
    * @param peer Original peer string
    */
   private cleanupClient(peer: string): void {
-    const clientIp = this.clientIps.get(peer);
+    const clientIp = this._clientIps.get(peer);
     if (clientIp) {
-      this.clients.delete(clientIp);
-      this.clientIps.delete(peer);
-      this.logger.infoMessage(`Cleaned up resources of ${clientIp}`);
+      this._clients.delete(clientIp);
+      this._clientIps.delete(peer);
+      this._logger.infoMessage(`Cleaned up resources of ${clientIp}`);
     }
   }
 
@@ -137,18 +141,18 @@ export class CentralSystemWrapper {
    * @returns Whether the data was successfully sent
    */
   public sendEvent(ip: string, data: DuplexMessageModel): boolean {
-    const client = this.clients.get(ip);
+    const client = this._clients.get(ip);
     if (!client) {
-      this.logger.warnMessage(`Client ${ip} not found for sending event`);
+      this._logger.warnMessage(`Client ${ip} not found for sending event`);
       return false;
     }
 
     try {
       client.write(data);
-      this.logger.infoMessage(`Sent event to ${ip}:`, data);
+      this._logger.infoMessage(`Sent event to ${ip}:`, data);
       return true;
     } catch (err) {
-      this.logger.errorMessage(`Error sending to ${ip}:`, err);
+      this._logger.errorMessage(`Error sending to ${ip}:`, err);
       return false;
     }
   }
@@ -158,7 +162,7 @@ export class CentralSystemWrapper {
    * @returns Array of connected client IPs
    */
   public get connectedClients(): string[] {
-    return Array.from(this.clients.keys());
+    return Array.from(this._clients.keys());
   }
 
   /**
@@ -166,15 +170,15 @@ export class CentralSystemWrapper {
    */
   public listen() {
     const addr = `localhost:${this.port}`;
-    this.server.bindAsync(
+    this._server.bindAsync(
       addr,
       grpc.ServerCredentials.createInsecure(),
       (err, _port) => {
         if (err) {
-          this.logger.infoMessage("Server bind error:", err);
+          this._logger.infoMessage("Server bind error:", err);
           return;
         }
-        this.logger.infoMessage(`CentralSytem started listening on ${addr}`);
+        this._logger.infoMessage(`CentralSytem started listening on ${addr}`);
       }
     );
   }
