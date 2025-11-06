@@ -77,7 +77,8 @@ export class ConnectionManager {
     this._centralDispatcher = new CentralCommandDispatcher();
     this._centralConnection = new CentralConnection(
       client,
-      this._centralDispatcher
+      this._centralDispatcher,
+      centralAddress
     );
   }
 

@@ -27,7 +27,8 @@ export class CentralConnection {
 
   constructor(
     private _client: any,
-    private _dispatcher: CentralCommandDispatcher
+    private _dispatcher: CentralCommandDispatcher,
+    public centralAddress: string
   ) {}
 
   /**
@@ -75,7 +76,9 @@ export class CentralConnection {
    */
   start() {
     this.connect();
-    this._logger.infoMessage(`Connected to CentralSystem`);
+    this._logger.infoMessage(
+      `Connected to CentralSystem on ${this.centralAddress}`
+    );
   }
 
   /**
