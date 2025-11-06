@@ -51,7 +51,7 @@ export class NewTokenHandler implements CommandHandler<NewTokenCommand> {
       if (!conn) {
         conn = this.manager.createNewConnection(targetAddress, dir, token);
       }
-      conn.handleNewToken(token);
+      conn.token = token;
     }
   }
 }

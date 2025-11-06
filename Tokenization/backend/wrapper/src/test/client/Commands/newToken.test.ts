@@ -106,7 +106,7 @@ describe("NewTokenHandler", () => {
 
     const conn = (manager as any).receivingConnections.get(targetAddress);
     expect(conn).toBeDefined();
-    expect(conn.getToken()).toBe("test-token");
+    expect(conn.token).toBe("test-token");
   });
 
   it("should handle DUPLEX direction by updating/creating both connections", async () => {
@@ -126,8 +126,8 @@ describe("NewTokenHandler", () => {
 
     expect(sendingConn).toBeDefined();
     expect(receivingConn).toBeDefined();
-    expect(sendingConn.getToken()).toBe("test-token");
-    expect(receivingConn.getToken()).toBe("test-token");
+    expect(sendingConn.token).toBe("test-token");
+    expect(receivingConn.token).toBe("test-token");
   });
 
   it("should throw error when payload is missing required fields", async () => {
