@@ -12,10 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
-import express from "express";
-import request from "supertest";
-import { TokensController } from "../src/controllers/TokensController";
-import { TokensGetService } from "../src/services/TokensGetService";
+import express from 'express';
+import request from 'supertest';
+import { TokensController } from '../src/controllers/TokensController';
+import { TokensGetService } from '../src/services/TokensGetService';
 
 // --- Fakes ---
 class FakeTokensGetService extends TokensGetService {
@@ -33,8 +33,8 @@ class FakeTokensGetService extends TokensGetService {
 
 class FakeWrapper {
   public sent: any[] = [];
-  getConnectedClients(): Set<string> {
-    return new Set(["client-1"]);
+  getConnectedClients(): Array<string> {
+    return new Array('client-1');
   }
   sendEvent(client: string, payload: any) {
     this.sent.push({ client, payload });
@@ -46,8 +46,8 @@ function makeApp(tokensMap?: Map<number, any>) {
   const fakeTokens =
     tokensMap ??
     new Map<number, any>([
-      [1, { tokenId: 1, validity: "good", payload: "payload1" }],
-      [2, { tokenId: 2, validity: "bad", payload: "payload2" }],
+      [1, { tokenId: 1, validity: 'good', payload: 'payload1' }],
+      [2, { tokenId: 2, validity: 'bad', payload: 'payload2' }],
     ]);
 
   const wrapper = new FakeWrapper();
@@ -56,71 +56,73 @@ function makeApp(tokensMap?: Map<number, any>) {
 
   const app = express();
   app.use(express.json());
-  app.get("/tokens", controller.getTokensHandler.bind(controller));
-  app.post("/tokens/create", controller.createTokenHandler.bind(controller));
-  app.post("/tokens/revoke", controller.revokeTokenHandler.bind(controller));
+  app.get('/tokens', controller.getTokensHandler.bind(controller));
+  app.post('/tokens/create', controller.createTokenHandler.bind(controller));
+  app.post('/tokens/revoke', controller.revokeTokenHandler.bind(controller));
   return { app, wrapper, tokens: fakeTokens };
 }
 
 // --- Tests ---
 
-describe("TokensController", () => {
-  test("GET /tokens returns transformed tokens", async () => {
+describe('TokensController', () => {
+  test('GET /tokens returns transformed tokens', async () => {
     const { app } = makeApp();
-    const res = await request(app).get("/tokens");
+    const res = await request(app).get('/tokens');
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
 
     // payload should be truncated to last 5 chars by service
-    expect(res.body[0]).toHaveProperty("payload");
+    expect(res.body[0]).toHaveProperty('payload');
     expect(res.body[0].payload.length).toBeLessThanOrEqual(5);
   });
 
-  test("POST /tokens/create validates and creates a token, emits wrapper event", async () => {
+  test('POST /tokens/create validates and creates a token, emits wrapper event', async () => {
     const { app, wrapper, tokens } = makeApp();
 
     const res = await request(app)
-      .post("/tokens/create")
-      .send({ payload: "new-payload-xyz" });
+      .post('/tokens/create')
+      .send({ payload: 'new-payload-xyz' });
 
     expect(res.status).toBe(201);
 
     expect(tokens.size).toBe(3);
 
     expect(wrapper.sent.length).toBe(1);
-    expect(wrapper.sent[0].client).toBe("client-1");
-    expect(wrapper.sent[0].payload).toHaveProperty("event");
+    expect(wrapper.sent[0].client).toBe('client-1');
+    expect(wrapper.sent[0].payload).toHaveProperty('event');
   });
 
-  test("POST /tokens/create with empty payload -> 400", async () => {
+  test('POST /tokens/create with empty payload -> 400', async () => {
     const { app } = makeApp();
 
-    const res = await request(app).post("/tokens/create").send({ payload: "" });
+    const res = await request(app).post('/tokens/create').send({ payload: '' });
 
     expect(res.status).toBe(400);
-    expect(res.body).toHaveProperty("error");
+    expect(res.body).toHaveProperty('message');
+    expect(res.body).toHaveProperty('title', 'Invalid Input');
   });
 
-  test("POST /tokens/revoke deletes token and emits wrapper event", async () => {
+  test('POST /tokens/revoke deletes token and emits wrapper event', async () => {
     const { app, wrapper, tokens } = makeApp();
 
     // sanity: token 2 exists
     expect(tokens.has(2)).toBe(true);
 
-    const res = await request(app).post("/tokens/revoke").send({ id: 2 });
+    const res = await request(app).post('/tokens/revoke').send({ id: 2 });
 
     expect(res.status).toBe(204);
     expect(tokens.has(2)).toBe(false);
     // one event sent
     expect(wrapper.sent.length).toBe(1);
-    expect(wrapper.sent[0].payload).toHaveProperty("event");
+    expect(wrapper.sent[0].payload).toHaveProperty('event');
   });
 
-  test("POST /tokens/revoke with non-existing id -> 400", async () => {
+  test('POST /tokens/revoke with non-existing id -> 400', async () => {
     const { app } = makeApp();
-    const res = await request(app).post("/tokens/revoke").send({ id: 999 });
+    const res = await request(app).post('/tokens/revoke').send({ id: 999 });
 
     expect(res.status).toBe(400);
-    expect(res.body).toHaveProperty("error");
+    expect(res.body).toHaveProperty('message');
+    expect(res.body).toHaveProperty('title', 'Invalid Input');
   });
 });
