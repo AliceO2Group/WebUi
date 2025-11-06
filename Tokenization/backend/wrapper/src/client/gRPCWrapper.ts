@@ -39,9 +39,9 @@ export class gRPCWrapper {
    * @description Initializes an instance of gRPCWrapper class.
    *
    * @param protoPath - The file path to the gRPC proto definition.
-   * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
+   * @param centralAddress - The address of the central gRPC server (default: "localhost:4100").
    */
-  constructor(protoPath: string, centralAddress: string = "localhost:50051") {
+  constructor(protoPath: string, centralAddress: string = "localhost:4100") {
     this.ConnectionManager = new ConnectionManager(protoPath, centralAddress);
     this.ConnectionManager.registerCommandHandlers([
       {
