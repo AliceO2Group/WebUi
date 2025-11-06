@@ -6,8 +6,7 @@
     "test": "jest",
     "build": "tsc -p tsconfig.build.json && cp -r src/proto dist",
     "client": "node dist/client/gRPCWrapper.js",
-    "central": "node dist/central/CentralSystem.js",
-    "process-banners": "node scripts/banner.js"
+    "central": "node dist/central/CentralSystem.js"
   },
   "author": "ALICEO2",
   "devDependencies": {
