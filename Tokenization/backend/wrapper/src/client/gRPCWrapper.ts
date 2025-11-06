@@ -12,11 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
-import { ConnectionManager } from "./ConnectionManager/ConnectionManager";
-import { RevokeTokenHandler } from "./Commands/revokeToken/revokeToken.handler";
+import { ConnectionManager } from "./connectionManager/ConnectionManager";
+import { RevokeTokenHandler } from "./commands/revokeToken/revokeToken.handler";
 import { DuplexMessageEvent } from "../models/message.model";
-import { Connection } from "./Connection/Connection";
-import { NewTokenHandler } from "./Commands/newToken/newToken.handler";
+import { Connection } from "./connection/Connection";
+import { NewTokenHandler } from "./commands/newToken/newToken.handler";
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.

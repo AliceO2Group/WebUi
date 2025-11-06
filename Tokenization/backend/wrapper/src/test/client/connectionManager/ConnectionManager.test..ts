@@ -13,7 +13,7 @@
  */
 
 import * as grpc from "@grpc/grpc-js";
-import { ConnectionManager } from "../../../client/ConnectionManager/ConnectionManager";
+import { ConnectionManager } from "../../../client/connectionManager/ConnectionManager";
 import { DuplexMessageEvent } from "../../../models/message.model";
 
 // Mock duplex stream

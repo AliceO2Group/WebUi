@@ -14,7 +14,7 @@
 
 import { CommandHandler } from "../../../models/commands.model";
 import { NewTokenCommand } from "./newToken.command";
-import { ConnectionManager } from "../../ConnectionManager/ConnectionManager";
+import { ConnectionManager } from "../../connectionManager/ConnectionManager";
 import { ConnectionDirection } from "../../../models/message.model";
 
 /**

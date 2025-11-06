@@ -14,7 +14,7 @@
 
 import { CommandHandler } from "../../../models/commands.model";
 import { RevokeTokenCommand } from "./revokeToken.command";
-import { ConnectionManager } from "../../ConnectionManager/ConnectionManager";
+import { ConnectionManager } from "../../connectionManager/ConnectionManager";
 
 /**
  * RevokeTokenHandler is responsible for handling the RevokeTokenCommand.

@@ -15,8 +15,8 @@
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import { CentralConnection } from "./CentralConnection";
-import { CentralCommandDispatcher } from "./EventManagement/CentralCommandDispatcher";
-import { Connection } from "../Connection/Connection";
+import { CentralCommandDispatcher } from "./eventManagement/CentralCommandDispatcher";
+import { Connection } from "../connection/Connection";
 import { LogManager } from "@aliceo2/web-ui";
 import { Command, CommandHandler } from "models/commands.model";
 import {
