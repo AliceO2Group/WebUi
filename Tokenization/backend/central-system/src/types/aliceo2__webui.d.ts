@@ -15,4 +15,9 @@
 declare module '@aliceo2/web-ui' {
   export const LogManager: any;
   export const InvalidInputError: any;
+  export function updateAndSendExpressResponseFromNativeError(
+    res: any,
+    error: any
+  ): void;
+  export const ServiceUnavailableError: any;
 }
