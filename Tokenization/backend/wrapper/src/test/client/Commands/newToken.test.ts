@@ -91,7 +91,7 @@ describe("NewTokenHandler", () => {
 
     await handler.handle(command);
 
-    expect(conn.getToken()).toBe("test-token");
+    expect(conn.token).toBe("test-token");
   });
 
   it("should create new RECEIVING connection if not found", async () => {
