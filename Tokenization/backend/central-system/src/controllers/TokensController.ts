@@ -18,12 +18,16 @@ import {
   ConnectionDirection,
 } from '../services/models/message.model.js';
 
-import { LogManager, InvalidInputError } from '@aliceo2/web-ui';
+import {
+  LogManager,
+  InvalidInputError,
+  ServiceUnavailableError,
+  updateAndSendExpressResponseFromNativeError,
+} from '@aliceo2/web-ui';
 
 import type { Request, Response } from 'express';
 
 import { TokensGetService } from '../services/TokensGetService.js';
-import updateAndSendExpressResponseFromNativeError from '@aliceo2/web-ui';
 
 /**
  * @description Controller for managing tokens in the Central System.
@@ -66,7 +70,7 @@ export class TokensController {
         `Error while retrieving run types: ${error.message}`
       );
 
-      res.status(500).json({ error: 'Failed to retrieve tokens' });
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
@@ -79,7 +83,8 @@ export class TokensController {
   public async createTokenHandler(req: Request, res: Response): Promise<void> {
     try {
       const { payload } = req.body;
-      this._validateTokenPayload(payload);
+      if (!this._isTokenPayloadValid(payload))
+        throw new InvalidInputError('Invalid token payload');
 
       const newTokenId = this._tokensService.size + 1;
       const newToken = {
@@ -106,17 +111,7 @@ export class TokensController {
       if (error.stack) {
         this._logger.trace(error);
       }
-      if (error instanceof InvalidInputError) {
-        this._logger.errorMessage(`Invalid input: ${error.message}`);
-
-        res.status(400).json({ error: error.message });
-      } else if (error instanceof Error) {
-        this._logger.errorMessage(
-          `Error while creating a token: ${error.message}`
-        );
-
-        res.status(500).json({ error: 'Failed to create a token' });
-      }
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
@@ -124,28 +119,28 @@ export class TokensController {
    *
    * @param payload - The payload to be validated.
    * @description Validates the payload of a token.
-   * @throws {InvalidInputError} If the payload is empty.
-   * @return {void}
+   * @return {boolean}
    */
-  private _validateTokenPayload(payload: string): void {
+  private _isTokenPayloadValid(payload: string): boolean {
     if (!payload) {
-      throw new InvalidInputError('Payload cannot be empty');
+      return false;
     }
+    return true;
   }
 
   /**
    * @description Validates the token ID.
    * @param id - The ID of the token to be validated.
-   * @throws {InvalidInputError} If the ID is missing or invalid.
-   * @return {void}
+   * @return {boolean}
    */
-  private _validateTokenID(id: number): void {
+  private _isTokenIDValid(id: number): boolean {
     if (!id) {
-      throw new InvalidInputError('Missing token ID');
+      return false;
     }
     if (!this._tokensService.has(id)) {
-      throw new InvalidInputError(`Token with ID ${id} does not exist`);
+      return false;
     }
+    return true;
   }
 
   /**
@@ -158,7 +153,8 @@ export class TokensController {
     try {
       const { id } = req.body;
       const idNumber = parseInt(id, 10);
-      this._validateTokenID(idNumber);
+      if (!this._isTokenIDValid(idNumber))
+        throw new InvalidInputError('Invalid token ID');
       this._tokensService.delete(idNumber);
 
       const client: string =
@@ -177,17 +173,7 @@ export class TokensController {
       if (error.stack) {
         this._logger.trace(error);
       }
-      if (error instanceof InvalidInputError) {
-        this._logger.errorMessage(`Invalid input: ${error.message}`);
-
-        res.status(400).json({ error: error.message });
-      } else if (error instanceof Error) {
-        this._logger.errorMessage(
-          `Error while revoking the token: ${error.message}`
-        );
-
-        res.status(500).json({ error: 'Failed to revoke the token' });
-      }
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 }
