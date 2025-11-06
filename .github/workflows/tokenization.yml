@@ -58,4 +58,4 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: '22.x'
-      - run: (cd Tokenization/backend/central-system; npm run test)
+      - run: (cd Tokenization/backend/central-system; npm i; npm run test)
