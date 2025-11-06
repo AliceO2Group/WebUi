@@ -28,7 +28,7 @@ const __dirname = path.dirname(__filename);
  */
 class CentralSystem {
   private _centralSystemWrapper: CentralSystemWrapper;
-  private PROTO_PATH = path.join(__dirname, '../../proto/wrapper.proto');
+  private PROTO_PATH = path.join(__dirname, '../../../proto/wrapper.proto');
   private _fakeTokens: Map<
     number,
     { tokenId: number; validity: string; payload: string }
