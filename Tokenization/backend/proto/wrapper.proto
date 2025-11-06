@@ -56,6 +56,9 @@ message Payload {
 // ======================================
 
 enum MessageEvent {
+    // Unspecified event type
+    MESSAGE_EVENT_UNSPECIFIED = 0;
+
     // Default value, represents an empty event
     MESSAGE_EVENT_EMPTY = 0;
 
@@ -67,6 +70,9 @@ enum MessageEvent {
 }
 
 enum ConnectionDirection {
+    // Unspecified direction
+    UNSPECIFIED = 0;
+
     // Direction from client to server
     SENDING = 1;
 
