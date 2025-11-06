@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: '22.x'
-      - run: (cd Tokenization/backend; npm i)      
+      - run: (cd Tokenization/backend/central-system; npm i)
   lint-check-webapp:
     name: Check eslint rules for webapp on ubuntu-latest
     runs-on: ubuntu-latest
