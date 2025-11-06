@@ -4,23 +4,26 @@ services:
     working_dir: /var/workspace
     volumes:
       - ./backend:/var/workspace
-    command: ["npm", "install", "--no-save", "--silent"]
+    command: ['npm', 'install', '--no-save', '--silent']
 
   backend:
     image: node:22-alpine
-    working_dir: /var/workspace
+    working_dir: /var/workspace/central-system
     volumes:
       - ./backend:/var/workspace
-    command: ["npm", "run", "dev"]
+    command: ['npm', 'run', 'dev']
     healthcheck:
       interval: 1s
-      test: ["CMD-SHELL",
-             "node", "-c",
-             "node --input-type=module -e \"process.exit((await fetch('http://backend:8080/api/healthcheck')).ok === true ? 0 : 1)\""]
+      test:
+        [
+          'CMD-SHELL',
+          'node',
+          '-c',
+          'node --input-type=module -e "process.exit((await fetch(''http://backend:8080/api/healthcheck'')).ok === true ? 0 : 1)"',
+        ]
     depends_on:
       install-backend:
         condition: service_completed_successfully
-
 
   prod-container:
     build:
@@ -28,7 +31,7 @@ services:
       dockerfile: Dockerfile
       target: production
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/"]
+      test: ['CMD', 'curl', '-f', 'http://localhost/']
       interval: 5s
       timeout: 3s
       retries: 5
