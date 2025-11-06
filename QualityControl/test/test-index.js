@@ -55,8 +55,21 @@ import { objectControllerTestSuite } from './lib/controllers/ObjectController.te
  * Services
  */
 import { ccdbServiceTestSuite } from './lib/services/CcdbService.test.js';
+import { qcdbDownloadServiceTestSuite } from './lib/services/QcdbDownloadService.test.js';
 import { statusServiceTestSuite } from './lib/services/StatusService.test.js';
-import { bookkeepingServiceTestSuite } from './lib/services/BookeepingService.test.js';
+import { bookkeepingServiceTestSuite } from './lib/services/BookkeepingService.test.js';
+
+/**
+ * Repositories
+ */
+import { baseRepositoryTestSuite } from './lib/database/repositories/BaseRepository.test.js';
+import { layoutRepositoryTestSuite } from './lib/database/repositories/LayoutRepository.test.js';
+import { userRepositoryTestSuite } from './lib/database/repositories/UserRepository.test.js';
+import { chartRepositoryTestSuite } from './lib/database/repositories/ChartRepository.test.js';
+import { chartOptionsRepositoryTestSuite } from './lib/database/repositories/ChartOptionsRepository.test.js';
+import { gridTabCellRepositoryTestSuite } from './lib/database/repositories/GridTabCellRepository.test.js';
+import { tabRepositoryTestSuite } from './lib/database/repositories/TabRepository.test.js';
+import { optionRepositoryTestSuite } from './lib/database/repositories/OptionRepository.test.js';
 
 import { commonLibraryQcObjectUtilsTestSuite } from './common/library/qcObject/utils.test.js';
 import { commonLibraryUtilsDateTimeTestSuite } from './common/library/utils/dateTimeFormat.test.js';
@@ -64,13 +77,13 @@ import { layoutIdMiddlewareTest } from './lib/middlewares/layouts/layoutId.middl
 import { layoutOwnerMiddlewareTest } from './lib/middlewares/layouts/layoutOwner.middleware.test.js';
 import { layoutServiceMiddlewareTest } from './lib/middlewares/layouts/layoutService.middleware.test.js';
 import { statusComponentMiddlewareTest } from './lib/middlewares/status/statusComponent.middleware.test.js';
+import { runModeMiddlewareTest } from './lib/middlewares/filters/runMode.middleware.test.js';
+import { runStatusFilterMiddlewareTest } from './lib/middlewares/filters/runStatusFilter.middleware.test.js';
 import { apiPutLayoutTests } from './api/layouts/api-put-layout.test.js';
 import { apiPatchLayoutTests } from './api/layouts/api-patch-layout.test.js';
-import { layoutRepositoryTest } from './lib/repositories/LayoutRepository.test.js';
-import { userRepositoryTest } from './lib/repositories/UserRepository.test.js';
 import { jsonFileServiceTestSuite } from './lib/services/JsonFileService.test.js';
 import { userControllerTestSuite } from './lib/controllers/UserController.test.js';
-import { chartRepositoryTest } from './lib/repositories/ChartRepository.test.js';
+
 import { filterServiceTestSuite } from './lib/services/FilterService.test.js';
 import { apiGetLayoutsTests } from './api/layouts/api-get-layout.test.js';
 import { apiGetObjectsTests } from './api/objects/api-get-object.test.js';
@@ -79,6 +92,12 @@ import { objectGetContentsValidationMiddlewareTest }
   from './lib/middlewares/objects/objectGetByContentsValidation.middleware.test.js';
 import { objectGetByIdValidationMiddlewareTest }
   from './lib/middlewares/objects/objectGetByIdValidation.middleware.test.js';
+import { filterTests } from './public/features/filterTest.test.js';
+import { qcObjectServiceTestSuite } from './lib/services/QcObjectService.test.js';
+import { runModeServiceTestSuite } from './lib/services/RunModeService.test.js';
+import { apiGetRunStatusTests } from './api/filters/api-get-run-status.test.js';
+import { runModeTests } from './public/features/runMode.test.js';
+import { aliecsSynchronizerTestSuite } from './lib/services/external/AliEcsSynchronizer.test.js';
 
 const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this timeout
 // remaining tests are based on the number of individual tests in each suite
@@ -162,6 +181,11 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       { timeout: ABOUT_VIEW_PAGE_TIMEOUT },
       async (testParent) => await aboutPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
+    test('should successfully import and run tests for filter', async (testParent) =>
+      filterTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent));
+
+    test('should successfully use run mode when available', async (testParent) =>
+      await runModeTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent));
   });
 
   suite('API - test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
@@ -181,6 +205,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     suite('Layout PUT request test suite', async () => apiPutLayoutTests());
     suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
     suite('Object GET request test suite', async () => apiGetObjectsTests());
+    suite('Filters GET run status test suite', async () => await apiGetRunStatusTests());
   });
 
   suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
@@ -195,16 +220,26 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     });
 
     suite('Repositories - Test Suite', async () => {
-      suite('Layout Repository - Test Suite', async () => await layoutRepositoryTest());
-      suite('User Repository - Test Suite', async () => await userRepositoryTest());
-      suite('Chart Repository - Test Suite', async () => await chartRepositoryTest());
+      suite('Base Repository - Test Suite', async () => await baseRepositoryTestSuite());
+      suite('Layout Repository - Test Suite', async () => await layoutRepositoryTestSuite());
+      suite('User Repository - Test Suite', async () => await userRepositoryTestSuite());
+      suite('Chart Repository - Test Suite', async () => await chartRepositoryTestSuite());
+      suite('Chart Options Repository - Test Suite', async () => await chartOptionsRepositoryTestSuite());
+      suite('Grid Tab Cell Repository - Test Suite', async () => await gridTabCellRepositoryTestSuite());
+      suite('Tab Repository - Test Suite', async () => await tabRepositoryTestSuite());
+      suite('Option Repository - Test Suite', async () => await optionRepositoryTestSuite());
     });
 
     suite('Services - Test Suite', async () => {
       suite('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
+      suite('QcdbDownloadService - Test Suite', async () => await qcdbDownloadServiceTestSuite());
       suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
       suite('JsonServiceTest test suite', async () => await jsonFileServiceTestSuite());
       suite('FilterService', async () => await filterServiceTestSuite());
+      suite('RunModeService - Test Suite', async () => await runModeServiceTestSuite());
+      suite('QcObjectService - Test Suite', async () => await qcObjectServiceTestSuite());
+      suite('BookkeepingServiceTest test suite', async () => await bookkeepingServiceTestSuite());
+      suite('AliEcsSynchronizer - Test Suite', async () => await aliecsSynchronizerTestSuite());
     });
 
     suite('Middleware - Test Suite', async () => {
@@ -212,7 +247,8 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       suite('LayoutIdMiddleware test suite', async () => layoutIdMiddlewareTest());
       suite('LayoutOwnerMiddleware test suite', async () => layoutOwnerMiddlewareTest());
       suite('StatusComponentMiddleware test suite', async () => statusComponentMiddlewareTest());
-      suite('BookkeepingServiceTest test suite', async () => await bookkeepingServiceTestSuite());
+      suite('RunModeMiddleware test suite', async () => runModeMiddlewareTest());
+      suite('RunStatusFilterMiddleware test suite', async () => runStatusFilterMiddlewareTest());
       suite('ObjectsGetValidationMiddleware test suite', async () => objectsGetValidationMiddlewareTest());
       suite('ObjectGetContentsValidationMiddleware test suite', async () =>
         objectGetContentsValidationMiddlewareTest());

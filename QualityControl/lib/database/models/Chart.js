@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { DATE, NOW, STRING, BOOLEAN } from 'sequelize';
+import { DATE, NOW, STRING, BOOLEAN, INTEGER } from 'sequelize';
 
 /**
  * Chart model that represents a chart in the database.
@@ -24,9 +24,10 @@ export default (sequelize) => {
     'Chart',
     {
       id: {
-        type: STRING(250),
+        type: INTEGER,
         primaryKey: true,
         allowNull: false,
+        autoIncrement: true,
       },
       object_name: {
         type: STRING(255),

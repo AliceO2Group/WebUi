@@ -11,7 +11,7 @@
  *  or submit itself to any jurisdiction.
  */
 
-const { LogManager, updateAndSendExpressResponseFromNativeError, InvalidInputError } = require('@aliceo2/web-ui');
+const { LogManager, updateAndSendExpressResponseFromNativeError } = require('@aliceo2/web-ui');
 const {User} = require('../dtos/User.js');
 
 const LOG_LABEL = `${process.env.npm_config_log_label ?? 'cog'}/get-det-lock-ownership`;
@@ -25,6 +25,7 @@ const LOG_LABEL = `${process.env.npm_config_log_label ?? 'cog'}/get-det-lock-own
 const getDetectorsLockOwnershipMiddlewareFactory = (lockService) => {
   /**
    * Middleware function to check that the user has ownership of the locks for the given detectors
+   * - if no detectors are present, check is by-passed as there are workflows that do not require locks
    * @param {Request} req - HTTP Request object
    * @param {@aliceo2/web-ui.Session} req.session - Session object from request
    * @param {object} req.body - Body object from request
@@ -40,12 +41,6 @@ const getDetectorsLockOwnershipMiddlewareFactory = (lockService) => {
     const { detectors = [] } = req.body;
 
     try {
-      if (!Array.isArray(detectors)) {
-        throw new InvalidInputError('Invalid input: detectors must be an array');
-      }
-      if (detectors.length === 0) {
-        throw new InvalidInputError('Invalid input: detectors array must not be empty');
-      }
       if (!lockService.hasLocks(requestor, detectors)) {
         res.status(403).json({message: `Action not allowed for user ${name} due to missing ownership of lock(s)`});
       } else {

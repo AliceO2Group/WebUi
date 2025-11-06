@@ -161,10 +161,11 @@ export class ConnectionManager {
   }
 
   /**
-   * Returns object with all connections
-   * @returns Object of all connections
+   * @description Returns all saved connections.
+   *
+   * @returns An object containing the sending and receiving connections.
    */
-  public getAllConnections(): {
+  public get connections(): {
     sending: Connection[];
     receiving: Connection[];
   } {

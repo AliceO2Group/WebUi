@@ -10,14 +10,18 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import { type RouteConfig, index, route, prefix } from '@react-router/dev/routes';
 
 export default [
+  route('', 'ui/layout.tsx', [
     index('routes/home.tsx'),
     ...prefix('tokens', [
-        index('routes/tokens/overview.tsx'),
-        route(':tokenId', 'routes/tokens/details.tsx'),
+      index('routes/tokens/overview.tsx'),
+      route(':tokenId', 'routes/tokens/details.tsx'),
     ]),
+    route('*', 'routes/404.tsx'),
+  ]),
+
 ] satisfies RouteConfig;

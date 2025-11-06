@@ -65,8 +65,8 @@ describe("RevokeToken", () => {
 
     await handler.handle(command);
 
-    expect(conn.getToken()).toBe("");
-    expect(conn.getStatus()).toBe(ConnectionStatus.UNAUTHORIZED);
+    expect(conn.token).toBe("");
+    expect(conn.status).toBe(ConnectionStatus.UNAUTHORIZED);
   });
 
   it("should revoke token when connection found in receivingConnections", async () => {
@@ -85,8 +85,8 @@ describe("RevokeToken", () => {
 
     await handler.handle(command);
 
-    expect(conn.getToken()).toBe("");
-    expect(conn.getStatus()).toBe(ConnectionStatus.UNAUTHORIZED);
+    expect(conn.token).toBe("");
+    expect(conn.status).toBe(ConnectionStatus.UNAUTHORIZED);
   });
 
   it("should do nothing when connection not found", async () => {

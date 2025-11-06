@@ -12,15 +12,16 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Observable, RemoteData, iconArrowTop } from '/js/src/index.js';
+import { RemoteData, iconArrowTop } from '/js/src/index.js';
 import ObjectTree from './ObjectTree.class.js';
 import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
+import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
  */
-export default class QCObject extends Observable {
+export default class QCObject extends BaseViewModel {
   /**
    * Initialize model with empty values
    * @param {Model} model - root model of the application
@@ -51,8 +52,6 @@ export default class QCObject extends Observable {
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
 
-    this.sideTree = new ObjectTree('database');
-    this.sideTree.bubbleTo(this);
     this.queryingObjects = false;
     this.scrollTop = 0;
     this.scrollHeight = 0;
@@ -123,7 +122,7 @@ export default class QCObject extends Observable {
    * @returns {undefined}
    */
   sortListByField(listSource, field, order) {
-    listSource.sort((a, b) => typeof a[field] === 'string' ?
+    listSource?.sort((a, b) => typeof a[field] === 'string' ?
       this._compareStrings(a[field], b[field], order) :
       this._compareNumbers(a[field], b[field], order));
   }
@@ -170,26 +169,58 @@ export default class QCObject extends Observable {
   }
 
   /**
+   * Checks if the object list needs to be refreshed.
+   * @returns {Promise<{ refreshNeeded: boolean, data: object | null }>}
+   * whether a refresh is needed and the fetched data
+   */
+  checkIfListHasToBeRefreshed() {
+    const fetchFn = async () => await this.model.services.object.getObjects(true);
+    const validateFn = (result) => result.isSuccess() && result.payload.paths?.length !== this.list?.length;
+    return this.model.filterModel.refreshCheck(fetchFn, validateFn);
+  }
+
+  /**
    * Ask server for all available objects, fills `tree` of objects
    * @returns {undefined}
    */
   async loadList() {
+    const { refreshNeeded, data } = await this.checkIfListHasToBeRefreshed();
+    if (!refreshNeeded) {
+      this.notify();
+      return;
+    }
     this.objectsRemote = RemoteData.loading();
     this.notify();
     this.queryingObjects = true;
     let offlineObjects = [];
-    const result = await this.model.services.object.getObjects();
+    const result = data ?? await this.model.services.object.getObjects(this.model.filterModel.isRunModeActivated);
+
     if (result.isSuccess()) {
-      offlineObjects = result.payload;
+      offlineObjects = this.model.filterModel.isRunModeActivated ? result.payload.paths : result.payload;
     } else {
-      const failureMessage = 'Failed to retrieve list of objects. Please contact an administrator';
-      this.model.notification.show(failureMessage, 'danger', Infinity);
+      const errorMessage =
+        result?._error?.message || 'Failed to retrieve list of objects. Please contact an administrator';
+      this.model.notification.show(errorMessage, 'danger', Infinity);
     }
     this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
     this.list = offlineObjects;
 
+    let treeState = null;
+    let selectedObject = null;
+
+    // save the state of the tree in run mode
+    if (this.model.filterModel.isRunModeActivated) {
+      treeState = this.saveTreeState();
+      selectedObject = this.selected;
+    }
+
     this.tree.initTree('database');
     this.tree.addChildren(offlineObjects);
+
+    // restore tree state if in run mode
+    if (this.model.filterModel.isRunModeActivated && treeState) {
+      this.restoreTreeState(treeState);
+    }
 
     this.currentList = offlineObjects;
     this.sortBy = {
@@ -201,7 +232,13 @@ export default class QCObject extends Observable {
     };
     this._computeFilters();
 
-    if (this.selected && !this.selected.lastModified) {
+    // if w are in run mode and an object was opened
+    if (this.model.filterModel.isRunModeActivated && selectedObject) {
+      const foundObject = this.list.find((object) => object.name === selectedObject.name);
+      if (foundObject) {
+        this.selected = foundObject;
+      }
+    } else if (this.selected && !this.selected.lastModified) {
       this.selected = this.list.find((object) => object.name === this.selected.name);
     }
     this.queryingObjects = false;
@@ -219,7 +256,9 @@ export default class QCObject extends Observable {
   async loadObjectByName(objectName, timestamp = undefined, id = undefined) {
     this.objects[objectName] = RemoteData.loading();
     this.notify();
-    const obj = await this.model.services.object.getObjectByName(objectName, id, timestamp, undefined, this);
+
+    const obj =
+      await this.model.services.object.getObjectByName(objectName, id, timestamp, this);
 
     // TODO Is it a TTree?
     if (obj.isSuccess()) {
@@ -245,10 +284,9 @@ export default class QCObject extends Observable {
   /**
    * Load objects provided by a list of paths
    * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
-   * @param {object} filter - to be applied on quering objects
    * @returns {undefined}
    */
-  async loadObjects(objectsName, filter = {}) {
+  async loadObjects(objectsName) {
     this.objectsRemote = RemoteData.loading();
     this.objects = {}; // Remove any in-memory loaded objects
     this.model.services.object.objectsLoadedMap = {}; // TODO not here
@@ -258,23 +296,36 @@ export default class QCObject extends Observable {
       this.notify();
       return;
     }
-    await Promise.allSettled(objectsName.map(async (objectName) => {
-      this.objects[objectName] = RemoteData.Loading();
-      this.notify();
-      this.objects[objectName] = await this
-        .model.services.object.getObjectByName(objectName, undefined, undefined, filter, this);
-      this.notify();
-    }));
+    await this.refreshObjects(objectsName);
     this.objectsRemote = RemoteData.success();
     this.notify();
   }
 
   /**
    * Refreshes currently displayed objects
+   * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
    * @returns {undefined}
    */
-  refreshObjects() {
-    this.loadObjects(Object.keys(this.objects));
+  async refreshObjects(objectsName) {
+    await Promise.allSettled(objectsName.map(async (objectName) => {
+      let fetchedData = null;
+      if (this.objects[objectName]?.isSuccess() && this.objects[objectName]?.payload?.name) {
+        const context = { objectName };
+        const { refreshNeeded, data } = await this.checkIfRefreshObject(this.objects[objectName].payload, context);
+        fetchedData = data;
+        if (!refreshNeeded) {
+          return;
+        }
+      }
+
+      this.objects[objectName] = RemoteData.Loading();
+      this.notify();
+
+      this.objects[objectName] =
+    fetchedData ?? await this.model.services.object.getObjectByName(objectName, undefined, undefined, this);
+
+      this.notify();
+    }));
   }
 
   /**
@@ -291,9 +342,10 @@ export default class QCObject extends Observable {
    * Set the current selected object by user
    * Search within `currentList`;
    * @param {QCObject} object - object to be selected and loaded
-   * @returns {undefined}
+   * @param {object} [preloadedData] - optional object data already fetched
+   *  @returns {undefined}
    */
-  async select(object) {
+  async select(object, preloadedData = null) {
     let foundObject = this.currentList.find((obj) => obj.name === object.name);
 
     if (foundObject && this.list && this.list.length > 0) {
@@ -302,7 +354,11 @@ export default class QCObject extends Observable {
 
     this.selected = foundObject || object;
     setBrowserTabTitle(this.selected.name);
-    await this.loadObjectByName(this.selected.name);
+    if (preloadedData) {
+      this.objects[this.selected.name] = RemoteData.success(preloadedData);
+    } else {
+      await this.loadObjectByName(this.selected.name);
+    }
     this.notify();
   }
 
@@ -314,6 +370,7 @@ export default class QCObject extends Observable {
   search(searchInput) {
     this.searchInput = searchInput;
     this._computeFilters();
+
     this.sortListByField(this.searchResult, this.sortBy.field, this.sortBy.order);
     this.notify();
   }
@@ -461,5 +518,107 @@ export default class QCObject extends Observable {
     } else {
       return [];
     }
+  }
+
+  /**
+   * Save the current state of the tree
+   * @returns {object} - Map of path strings to their open state
+   */
+  saveTreeState() {
+    const state = {};
+
+    /**
+     * Save the state of each node in the tree
+     * @param {object} node - The tree node to save state for
+     * @returns {undefined}
+     */
+    function saveNodeState(node) {
+      if (node.pathString) {
+        state[node.pathString] = node.open;
+      }
+      for (let i = 0; i < node.children.length; i++) {
+        saveNodeState(node.children[i]);
+      }
+    }
+    saveNodeState(this.tree);
+    return state;
+  }
+
+  /**
+   * Restore the tree state from a previously saved state
+   * @param {object} state - Map of path strings to their open state
+   * @returns {undefined}
+   */
+  restoreTreeState(state) {
+    /**
+     * Restore the state of each node in the tree
+     * @param {object} node - The tree node to save state for
+     * @returns {undefined}
+     */
+    function restoreNodeState(node) {
+      if (node.pathString && state[node.pathString] !== undefined) {
+        node.open = state[node.pathString];
+      }
+      for (let i = 0; i < node.children.length; i++) {
+        restoreNodeState(node.children[i]);
+      }
+    };
+
+    restoreNodeState(this.tree);
+  }
+
+  /**
+   * Checks if the given object needs to be refreshed by comparing its ID
+   * @param {object} object - The object to check for refresh.
+   * @param {string} object.name - The name of the object to look up.
+   * @param {string|number} object.id - The current ID of the object being validated.
+   * @param {object} context - Additional context to determine fetch method
+   * @param {string} context.objectName - Object name from URL params
+   * @param {string} context.objectId - Object ID from URL params
+   * @returns {Promise<boolean,RemoteData>} A promise that resolves to `true` if the object should be refreshed
+   */
+  async checkIfRefreshObject(object, context = {}) {
+    const { objectName, objectId } = context;
+
+    const fetchFn = async () => {
+      if (objectId) {
+        return await this.model.services.object.getObjectById(
+          objectId,
+          undefined,
+          undefined,
+          this,
+        );
+      } else {
+        return await this.model.services.object.getObjectByName(
+          objectName || object.name,
+          undefined,
+          undefined,
+          this,
+        );
+      }
+    };
+
+    const validateFn = (result) =>
+      result.isSuccess() && result.payload.id !== object.id;
+    return this.model.filterModel.refreshCheck(fetchFn, validateFn);
+  }
+
+  /**
+   * Function that reloads the object list with filters applied
+   * @returns {undefined}
+   */
+  async triggerFilter() {
+    if (!this.model.filterModel.isRunModeActivated || !this.model.filterModel.runsModeInterval) {
+      this.selected = null;
+    }
+    if (this.selected && this.selected.name) {
+      const context = { objectName: this.selected.name };
+      const { refreshNeeded, data } =
+        await this.checkIfRefreshObject(this.objects[this.selected.name].payload, context);
+      if (refreshNeeded && data?.payload) {
+        this.select({ name: this.selected.name }, data.payload);
+      }
+    }
+    this.loadList();
   }
 }

@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import path from "path";
 import { ConnectionManager } from "./ConnectionManager/ConnectionManager";
 import { RevokeTokenHandler } from "./Commands/revokeToken/revokeToken.handler";
 import { DuplexMessageEvent } from "../models/message.model";
@@ -68,48 +67,25 @@ export class gRPCWrapper {
    *
    * @returns An object containing the sending and receiving connections.
    */
-  public getAllConnections(): {
+  public get connections(): {
     sending: Connection[];
     receiving: Connection[];
   } {
-    return this.ConnectionManager.getAllConnections();
+    return this.ConnectionManager.connections;
   }
 
-  /**
-   * @returns Returns string with summary of all connection
-   */
   public getSummary(): string {
-    const conn = this.ConnectionManager.getAllConnections();
+    const conn = this.ConnectionManager.connections;
     return (
       `Wrapper Summary: ` +
       `\nSending Connections: ${conn.sending.length}` +
       `\nReceiving Connections: ${conn.receiving.length}` +
       conn.sending
-        .map(
-          (c) =>
-            `\n- ${c.getTargetAddress()} \nDirection - ${
-              c.direction
-            }\n\tStatus: (${c.getStatus()})\n\tToken: (${c.getToken()})`
-        )
+        .map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`)
         .join("") +
       conn.receiving
-        .map(
-          (c) =>
-            `\n- ${c.getTargetAddress()} \nDirection - ${
-              c.direction
-            }\n\tStatus: (${c.getStatus()})\n\tToken: (${c.getToken()})`
-        )
+        .map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`)
         .join("")
     );
   }
 }
-
-const PROTO_PATH = path.join(__dirname, "../proto/wrapper.proto");
-const grpc = new gRPCWrapper(PROTO_PATH, "localhost:50051");
-grpc.connectToCentralSystem();
-console.log(grpc.getSummary());
-
-setTimeout(() => {
-  console.log("New status after 10 seconds, token revokation and new token:");
-  console.log(grpc.getSummary());
-}, 10000);
