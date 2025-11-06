@@ -67,10 +67,11 @@ describe("CentralSystemWrapper", () => {
   });
 
   test("should set up gRPC service and add it to the server", () => {
+    const testWrapper = new CentralSystemWrapper("dummy.proto", 12345);
     expect(grpc.Server).toHaveBeenCalled();
     expect(grpc.loadPackageDefinition).toHaveBeenCalled();
     expect(grpc.ServerCredentials.createInsecure).not.toHaveBeenCalled();
-    expect(wrapper).toBeDefined();
+    expect(testWrapper).toBeDefined();
   });
 
   test("should call listen and bind the server", () => {

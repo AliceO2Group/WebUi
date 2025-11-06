@@ -83,7 +83,8 @@ describe("ConnectionManager", () => {
   });
 
   test("should initialize client with correct address", () => {
-    expect(conn).toBeDefined();
+    const connManager = new ConnectionManager("dummy.proto", "localhost:12345");
+    expect(connManager).toBeDefined();
     expect(grpc.loadPackageDefinition).toHaveBeenCalled();
     expect(CentralSystemMock).toHaveBeenCalledWith(
       "localhost:12345",
@@ -92,7 +93,8 @@ describe("ConnectionManager", () => {
   });
 
   test("connectToCentralSystem() should set up stream listeners", () => {
-    conn.connectToCentralSystem();
+    const connManager = new ConnectionManager("dummy.proto", "localhost:12345");
+    connManager.connectToCentralSystem();
 
     expect(mockClient.ClientStream).toHaveBeenCalled();
     expect(mockStream.on).toHaveBeenCalledWith("data", expect.any(Function));
