@@ -16,11 +16,11 @@
     "@aliceo2/web-ui": "^2.8.4",
     "crypto": "^1.0.1",
     "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "@grpc/grpc-js": "^1.13.4",
+    "@grpc/proto-loader": "^0.7.15"
   },
   "devDependencies": {
-    "@grpc/grpc-js": "^1.13.4",
-    "@grpc/proto-loader": "^0.7.15",
     "@types/express": "^4.17.21",
     "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.9",
