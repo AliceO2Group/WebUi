@@ -51,6 +51,10 @@ export class Connection {
     this._token = token;
   }
 
+  /**
+   * Revokes the token of the connection, effectively invalidating it.
+   * The connection status is set to UNAUTHORIZED.
+   */
   public handleRevokeToken(): void {
     this._token = "";
     this._status = ConnectionStatus.UNAUTHORIZED;

@@ -74,6 +74,12 @@ export class gRPCWrapper {
     return this._connectionManager.connections;
   }
 
+  /**
+   * @description Returns a summary of the connections managed by the ConnectionManager.
+   * The summary includes the number of sending and receiving connections, as well as the target address, direction, and status of each connection.
+   *
+   * @returns A string summary of the connections.
+   */
   public getSummary(): string {
     const conn = this._connectionManager.connections;
     return (

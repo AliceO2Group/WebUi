@@ -25,6 +25,13 @@ export class CentralConnection {
   private _logger = LogManager.getLogger("CentralConnection");
   private _stream?: grpc.ClientDuplexStream<any, any>;
 
+  /**
+   * @description Constructor for the CentralConnection class.
+   *
+   * @param {_client} - The gRPC client instance used to connect to the CentralSystem.
+   * @param {_dispatcher} - The CentralCommandDispatcher instance used to delegate incoming messages.
+   * @param {centralAddress} - The address of the CentralSystem gRPC service.
+   */
   constructor(
     private _client: any,
     private _dispatcher: CentralCommandDispatcher,
