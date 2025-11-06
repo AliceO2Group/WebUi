@@ -12,64 +12,56 @@
  * or submit itself to any jurisdiction.
  */
 
-import * as grpc from "@grpc/grpc-js";
-import { LogManager } from "@aliceo2/web-ui";
-import { CentralCommandDispatcher } from "./eventManagement/CentralCommandDispatcher";
-import { DuplexMessageModel } from "../../models/message.model";
+import type * as grpc from '@grpc/grpc-js';
+import { LogManager } from '@aliceo2/web-ui';
+import type { CentralCommandDispatcher } from './eventManagement/CentralCommandDispatcher';
+import type { DuplexMessageModel } from '../../models/message.model';
 
 /**
- * @description This class manages the duplex stream with the CentralSystem gRPC service.
+ * This class manages the duplex stream with the CentralSystem gRPC service.
  * It is responsible for connecting, reconnecting with backoff, and delegating received messages.
  */
 export class CentralConnection {
-  private _logger = LogManager.getLogger("CentralConnection");
-  private _stream?: grpc.ClientDuplexStream<any, any>;
+  private _logger = LogManager.getLogger('CentralConnection');
+  private _stream?: grpc.ClientDuplexStream<unknown, unknown>;
 
   /**
-   * @description Constructor for the CentralConnection class.
+   * Constructor for the CentralConnection class.
    *
    * @param {_client} - The gRPC client instance used to connect to the CentralSystem.
    * @param {_dispatcher} - The CentralCommandDispatcher instance used to delegate incoming messages.
    * @param {centralAddress} - The address of the CentralSystem gRPC service.
    */
-  constructor(
-    private _client: any,
-    private _dispatcher: CentralCommandDispatcher,
-    public centralAddress: string
-  ) {}
+  constructor(private _client: any, private _dispatcher: CentralCommandDispatcher, public centralAddress: string) {}
 
   /**
-   * @description Initializes the duplex stream and sets up event handlers.
+   * Initializes the duplex stream and sets up event handlers.
    */
   connect() {
     if (this._stream) return;
 
     this._stream = this._client.ClientStream();
 
-    this._stream!.on("data", (payload: DuplexMessageModel) => {
+    this._stream?.on('data', (payload: DuplexMessageModel) => {
       this._logger.debugMessage(`Received payload: ${JSON.stringify(payload)}`);
       this._dispatcher.dispatch(payload);
     });
 
-    this._stream!.on("end", () => {
+    this._stream?.on('end', () => {
       this._logger.infoMessage(`Stream ended, attempting to reconnect...`);
       this._stream = undefined;
       this.scheduleReconnect();
     });
 
-    this._stream!.on("error", (err: any) => {
-      this._logger.infoMessage(
-        "Stream error:",
-        err,
-        " attempting to reconnect..."
-      );
+    this._stream?.on('error', (err: any) => {
+      this._logger.infoMessage('Stream error:', err, ' attempting to reconnect...');
       this._stream = undefined;
       this.scheduleReconnect();
     });
   }
 
   /**
-   * @description Schedules a reconnect with exponential backoff.
+   * Schedules a reconnect with exponential backoff.
    */
   private scheduleReconnect() {
     setTimeout(() => {
@@ -79,17 +71,15 @@ export class CentralConnection {
   }
 
   /**
-   * @description Starts the connection to the central system.
+   * Starts the connection to the central system.
    */
   start() {
     this.connect();
-    this._logger.infoMessage(
-      `Connected to CentralSystem on ${this.centralAddress}`
-    );
+    this._logger.infoMessage(`Connected to CentralSystem on ${this.centralAddress}`);
   }
 
   /**
-   * @description Disconnects from the gRPC stream and resets attempts.
+   * Disconnects from the gRPC stream and resets attempts.
    */
   disconnect() {
     if (this._stream) {

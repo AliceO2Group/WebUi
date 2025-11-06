@@ -12,9 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from "@aliceo2/web-ui";
-import { Command, CommandHandler } from "models/commands.model";
-import { DuplexMessageEvent } from "../../../models/message.model";
+import { LogManager } from '@aliceo2/web-ui';
+import type { Command, CommandHandler } from 'models/commands.model';
+import type { DuplexMessageEvent } from '../../../models/message.model';
 
 /**
  * CentralCommandDispatcher is responsible for registering and dispatching command handlers
@@ -23,7 +23,7 @@ import { DuplexMessageEvent } from "../../../models/message.model";
  */
 export class CentralCommandDispatcher {
   private _handlers = new Map<DuplexMessageEvent, CommandHandler>();
-  private _logger = LogManager.getLogger("CentralCommandDispatcher");
+  private _logger = LogManager.getLogger('CentralCommandDispatcher');
 
   /**
    * Registers a command handler for a specific command event type.
@@ -31,10 +31,7 @@ export class CentralCommandDispatcher {
    * @param event - The event type of the command to be handled.
    * @param handler - The handler that should process commands of the given event type.
    */
-  register<T extends Command>(
-    event: DuplexMessageEvent,
-    handler: CommandHandler<T>
-  ): void {
+  register<T extends Command>(event: DuplexMessageEvent, handler: CommandHandler<T>): void {
     this._logger.infoMessage(`Registering handler for command type: ${event}`);
     this._handlers.set(event, handler);
   }
@@ -49,19 +46,14 @@ export class CentralCommandDispatcher {
     const handler = this._handlers.get(command.event);
     this._logger.debugMessage(`Dispatching command: ${command.event}`);
     if (!handler) {
-      this._logger.warnMessage(
-        `No handler registered for command type: ${command.event}`
-      );
+      this._logger.warnMessage(`No handler registered for command type: ${command.event}`);
       return;
     }
 
     try {
       await handler.handle(command);
     } catch (error) {
-      this._logger.errorMessage(
-        `Error handling command ${command.event}:`,
-        error
-      );
+      this._logger.errorMessage(`Error handling command ${command.event}:`, error);
     }
   }
 }

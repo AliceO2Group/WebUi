@@ -12,22 +12,24 @@
  * or submit itself to any jurisdiction.
  */
 
-import { CommandHandler } from "../../../models/commands.model";
-import { NewTokenCommand } from "./newToken.command";
-import { ConnectionManager } from "../../connectionManager/ConnectionManager";
-import { ConnectionDirection } from "../../../models/message.model";
+import type { CommandHandler } from '../../../models/commands.model';
+import type { NewTokenCommand } from './newToken.command';
+import type { ConnectionManager } from '../../connectionManager/ConnectionManager';
+import { ConnectionDirection } from '../../../models/message.model';
 
 /**
  * @description Handles the NewTokenCommand by updating or creating a connection with a new authentication token.
  */
 export class NewTokenHandler implements CommandHandler<NewTokenCommand> {
   /**
-   * @param manager - Instance of ConnectionManager used to access and manage connections.
+   * Constructor for NewTokenHandler.
+   *
+   * @param manager - The ConnectionManager instance to manage connections.
    */
   constructor(private manager: ConnectionManager) {}
 
   /**
-   * @description Processes the NewTokenCommand by assigning a new token to the specified connection.
+   * Processes the NewTokenCommand by assigning a new token to the specified connection.
    * If the connection does not exist, it is created.
    *
    * @param command - The new token event command.
@@ -36,21 +38,15 @@ export class NewTokenHandler implements CommandHandler<NewTokenCommand> {
   async handle(command: NewTokenCommand): Promise<void> {
     const { targetAddress, connectionDirection, token } = command.payload || {};
     if (!targetAddress || !token || !connectionDirection) {
-      throw new Error(
-        "Insufficient arguments. Expected: targetAddress, connectionDirection, token."
-      );
+      throw new Error('Insufficient arguments. Expected: targetAddress, connectionDirection, token.');
     }
 
     const directions =
-      connectionDirection === ConnectionDirection.DUPLEX
-        ? [ConnectionDirection.SENDING, ConnectionDirection.RECEIVING]
-        : [connectionDirection];
+      connectionDirection === ConnectionDirection.DUPLEX ? [ConnectionDirection.SENDING, ConnectionDirection.RECEIVING] : [connectionDirection];
 
     for (const dir of directions) {
       let conn = this.manager.getConnectionByAddress(targetAddress, dir);
-      if (!conn) {
-        conn = this.manager.createNewConnection(targetAddress, dir, token);
-      }
+      conn ??= this.manager.createNewConnection(targetAddress, dir, token);
       conn.token = token;
     }
   }

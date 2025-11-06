@@ -12,11 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
-import { ConnectionManager } from "./connectionManager/ConnectionManager";
-import { RevokeTokenHandler } from "./commands/revokeToken/revokeToken.handler";
-import { DuplexMessageEvent } from "../models/message.model";
-import { Connection } from "./connection/Connection";
-import { NewTokenHandler } from "./commands/newToken/newToken.handler";
+import { ConnectionManager } from './connectionManager/ConnectionManager';
+import { RevokeTokenHandler } from './commands/revokeToken/revokeToken.handler';
+import { DuplexMessageEvent } from '../models/message.model';
+import type { Connection } from './connection/Connection';
+import { NewTokenHandler } from './commands/newToken/newToken.handler';
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -36,12 +36,12 @@ export class gRPCWrapper {
   private _connectionManager: ConnectionManager;
 
   /**
-   * @description Initializes an instance of gRPCWrapper class.
+   * Initializes an instance of gRPCWrapper class.
    *
    * @param protoPath - The file path to the gRPC proto definition.
    * @param centralAddress - The address of the central gRPC server (default: "localhost:4100").
    */
-  constructor(protoPath: string, centralAddress: string = "localhost:4100") {
+  constructor(protoPath: string, centralAddress: string = 'localhost:4100') {
     this._connectionManager = new ConnectionManager(protoPath, centralAddress);
     this._connectionManager.registerCommandHandlers([
       {
@@ -56,14 +56,14 @@ export class gRPCWrapper {
   }
 
   /**
-   * @description Starts the Connection Manager stream connection with Central System
+   * Starts the Connection Manager stream connection with Central System
    */
   public connectToCentralSystem() {
     this._connectionManager.connectToCentralSystem();
   }
 
   /**
-   * @description Returns all saved connections.
+   * Returns all saved connections.
    *
    * @returns An object containing the sending and receiving connections.
    */
@@ -75,7 +75,7 @@ export class gRPCWrapper {
   }
 
   /**
-   * @description Returns a summary of the connections managed by the ConnectionManager.
+   * Returns a summary of the connections managed by the ConnectionManager.
    * The summary includes the number of sending and receiving connections, as well as the target address, direction, and status of each connection.
    *
    * @returns A string summary of the connections.
@@ -85,13 +85,9 @@ export class gRPCWrapper {
     return (
       `Wrapper Summary: ` +
       `\nSending Connections: ${conn.sending.length}` +
-      `\nReceiving Connections: ${conn.receiving.length}` +
-      conn.sending
+      `\nReceiving Connections: ${conn.receiving.length}${conn.sending
         .map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`)
-        .join("") +
-      conn.receiving
-        .map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`)
-        .join("")
+        .join('')}${conn.receiving.map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`).join('')}`
     );
   }
 }

@@ -12,16 +12,19 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Command } from "../../../models/commands.model";
-import {
-  DuplexMessageEvent,
-  TokenMessage,
-} from "../../../models/message.model";
+import type { Command } from '../../../models/commands.model';
+import type { TokenMessage } from '../../../models/message.model';
+import { DuplexMessageEvent } from '../../../models/message.model';
 
 /**
  * @description Command used to trigger new token for a specific connection. Handles structure logic.
  */
 export class NewTokenCommand implements Command {
   readonly event = DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN;
+
+  /**
+   * Constructor for NewTokenCommand.
+   * @param {TokenMessage} payload - TokenMessage containing the new token.
+   */
   constructor(public payload: TokenMessage) {}
 }

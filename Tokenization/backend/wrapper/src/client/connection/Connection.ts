@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { ConnectionDirection } from "../../models/message.model";
-import { ConnectionStatus } from "../../models/connection.model";
+import type { ConnectionDirection } from '../../models/message.model';
+import { ConnectionStatus } from '../../models/connection.model';
 
 /**
  * @description This class represents a connection to a target client and manages sending messages to it.
@@ -25,17 +25,13 @@ export class Connection {
   public direction: ConnectionDirection;
 
   /**
-   * @description Creates a new Connection instance with the given token, target address, and connection direction.
+   * Creates a new Connection instance with the given token, target address, and connection direction.
    *
    * @param token - The authentication token for the connection.
    * @param targetAddress - The unique address of the target client.
    * @param direction - The direction of the connection (e.g., sending or receiving).
    */
-  constructor(
-    token: string,
-    targetAddress: string,
-    direction: ConnectionDirection
-  ) {
+  constructor(token: string, targetAddress: string, direction: ConnectionDirection) {
     this._token = token;
     this._targetAddress = targetAddress;
     this.direction = direction;
@@ -44,7 +40,7 @@ export class Connection {
   }
 
   /**
-   * @description Replace newly generated token
+   * Replace newly generated token
    * @param token New token to be replaced
    */
   public set token(token: string) {
@@ -56,12 +52,12 @@ export class Connection {
    * The connection status is set to UNAUTHORIZED.
    */
   public handleRevokeToken(): void {
-    this._token = "";
+    this._token = '';
     this._status = ConnectionStatus.UNAUTHORIZED;
   }
 
   /**
-   * @description Returns token for this Connection object
+   * Returns token for this Connection object
    * @returns Connection token
    */
   public get token(): string {
@@ -69,7 +65,7 @@ export class Connection {
   }
 
   /**
-   * @description Returns status for specific
+   * Returns status for specific
    * @returns Connection status
    */
   public get status(): string {
@@ -77,7 +73,7 @@ export class Connection {
   }
 
   /**
-   * @description Returns target address for this Connection object
+   * Returns target address for this Connection object
    * @returns Target address
    */
   public get targetAddress(): string {

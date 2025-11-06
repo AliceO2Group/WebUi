@@ -12,9 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { CommandHandler } from "../../../models/commands.model";
-import { RevokeTokenCommand } from "./revokeToken.command";
-import { ConnectionManager } from "../../connectionManager/ConnectionManager";
+import type { CommandHandler } from '../../../models/commands.model';
+import type { RevokeTokenCommand } from './revokeToken.command';
+import type { ConnectionManager } from '../../connectionManager/ConnectionManager';
 
 /**
  * RevokeTokenHandler is responsible for handling the RevokeTokenCommand.
@@ -38,13 +38,10 @@ export class RevokeTokenHandler implements CommandHandler<RevokeTokenCommand> {
   async handle(command: RevokeTokenCommand): Promise<void> {
     const { targetAddress } = command.payload || {};
     if (!targetAddress) {
-      throw new Error("Target address is required to revoke token.");
+      throw new Error('Target address is required to revoke token.');
     }
 
-    const conn = this.manager.getConnectionByAddress(
-      targetAddress,
-      command.payload.connectionDirection
-    );
+    const conn = this.manager.getConnectionByAddress(targetAddress, command.payload.connectionDirection);
 
     conn?.handleRevokeToken();
   }

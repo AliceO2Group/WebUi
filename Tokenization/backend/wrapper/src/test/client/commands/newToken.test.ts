@@ -12,45 +12,35 @@
  * or submit itself to any jurisdiction.
  */
 
-import { NewTokenCommand } from "../../../client/commands/newToken/newToken.command";
-import { NewTokenHandler } from "../../../client/commands/newToken/newToken.handler";
-import { Connection } from "../../../client/connection/Connection";
-import { ConnectionManager } from "../../../client/connectionManager/ConnectionManager";
-import { Command } from "models/commands.model";
-import {
-  ConnectionDirection,
-  DuplexMessageEvent,
-} from "../../../models/message.model";
+import { NewTokenCommand } from '../../../client/commands/newToken/newToken.command';
+import { NewTokenHandler } from '../../../client/commands/newToken/newToken.handler';
+import { Connection } from '../../../client/connection/Connection';
+import { ConnectionManager } from '../../../client/connectionManager/ConnectionManager';
+import { Command } from 'models/commands.model';
+import { ConnectionDirection, DuplexMessageEvent } from '../../../models/message.model';
 
 /**
  * Helper to create a new token command with given address, direction, and token.
  */
-function createEventMessage(
-  targetAddress: string,
-  connectionDirection: ConnectionDirection
-): Command {
+function createEventMessage(targetAddress: string, connectionDirection: ConnectionDirection): Command {
   return {
     event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
     payload: {
       targetAddress,
       connectionDirection,
-      token: "test-token",
+      token: 'test-token',
     },
   } as Command;
 }
 
-describe("NewTokenHandler", () => {
+describe('NewTokenHandler', () => {
   let manager: ConnectionManager;
 
   beforeEach(() => {
     manager = {
       sendingConnections: new Map<string, Connection>(),
       receivingConnections: new Map<string, Connection>(),
-      getConnectionByAddress: jest.fn(function (
-        this: any,
-        address: string,
-        dir: ConnectionDirection
-      ) {
+      getConnectionByAddress: jest.fn(function (this: any, address: string, dir: ConnectionDirection) {
         if (dir === ConnectionDirection.SENDING) {
           return this.sendingConnections.get(address);
         } else if (dir === ConnectionDirection.RECEIVING) {
@@ -58,12 +48,7 @@ describe("NewTokenHandler", () => {
         }
         return undefined;
       }),
-      createNewConnection: jest.fn(function (
-        this: any,
-        address: string,
-        dir: ConnectionDirection,
-        token: string
-      ) {
+      createNewConnection: jest.fn(function (this: any, address: string, dir: ConnectionDirection, token: string) {
         const conn = new Connection(token, address, dir);
         if (dir === ConnectionDirection.SENDING) {
           this.sendingConnections.set(address, conn);
@@ -75,75 +60,61 @@ describe("NewTokenHandler", () => {
     } as unknown as ConnectionManager;
   });
 
-  it("should update token on existing SENDING connection", async () => {
-    const targetAddress = "peer-123";
-    const conn = new Connection(
-      "old-token",
-      targetAddress,
-      ConnectionDirection.SENDING
-    );
+  it('should update token on existing SENDING connection', async () => {
+    const targetAddress = 'peer-123';
+    const conn = new Connection('old-token', targetAddress, ConnectionDirection.SENDING);
     (manager as any).sendingConnections.set(targetAddress, conn);
 
     const handler = new NewTokenHandler(manager);
-    const command = new NewTokenCommand(
-      createEventMessage(targetAddress, ConnectionDirection.SENDING).payload
-    );
+    const command = new NewTokenCommand(createEventMessage(targetAddress, ConnectionDirection.SENDING).payload);
 
     await handler.handle(command);
 
-    expect(conn.token).toBe("test-token");
+    expect(conn.token).toBe('test-token');
   });
 
-  it("should create new RECEIVING connection if not found", async () => {
-    const targetAddress = "peer-456";
+  it('should create new RECEIVING connection if not found', async () => {
+    const targetAddress = 'peer-456';
 
     const handler = new NewTokenHandler(manager);
-    const command = new NewTokenCommand(
-      createEventMessage(targetAddress, ConnectionDirection.RECEIVING).payload
-    );
+    const command = new NewTokenCommand(createEventMessage(targetAddress, ConnectionDirection.RECEIVING).payload);
 
     await handler.handle(command);
 
     const conn = (manager as any).receivingConnections.get(targetAddress);
     expect(conn).toBeDefined();
-    expect(conn.token).toBe("test-token");
+    expect(conn.token).toBe('test-token');
   });
 
-  it("should handle DUPLEX direction by updating/creating both connections", async () => {
-    const targetAddress = "peer-789";
+  it('should handle DUPLEX direction by updating/creating both connections', async () => {
+    const targetAddress = 'peer-789';
 
     const handler = new NewTokenHandler(manager);
-    const command = new NewTokenCommand(
-      createEventMessage(targetAddress, ConnectionDirection.DUPLEX).payload
-    );
+    const command = new NewTokenCommand(createEventMessage(targetAddress, ConnectionDirection.DUPLEX).payload);
 
     await handler.handle(command);
 
     const sendingConn = (manager as any).sendingConnections.get(targetAddress);
-    const receivingConn = (manager as any).receivingConnections.get(
-      targetAddress
-    );
+    const receivingConn = (manager as any).receivingConnections.get(targetAddress);
 
     expect(sendingConn).toBeDefined();
     expect(receivingConn).toBeDefined();
-    expect(sendingConn.token).toBe("test-token");
-    expect(receivingConn.token).toBe("test-token");
+    expect(sendingConn.token).toBe('test-token');
+    expect(receivingConn.token).toBe('test-token');
   });
 
-  it("should throw error when payload is missing required fields", async () => {
+  it('should throw error when payload is missing required fields', async () => {
     const invalidCommand = new NewTokenCommand({} as any);
 
     const handler = new NewTokenHandler(manager);
-    await expect(handler.handle(invalidCommand)).rejects.toThrow(
-      "Insufficient arguments. Expected: targetAddress, connectionDirection, token."
-    );
+    await expect(handler.handle(invalidCommand)).rejects.toThrow('Insufficient arguments. Expected: targetAddress, connectionDirection, token.');
   });
 
-  it("should create command with correct event and payload", () => {
+  it('should create command with correct event and payload', () => {
     const payload = {
-      targetAddress: "peer-000",
+      targetAddress: 'peer-000',
       connectionDirection: ConnectionDirection.SENDING,
-      token: "sample-token",
+      token: 'sample-token',
     };
 
     const command = new NewTokenCommand(payload);

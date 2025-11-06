@@ -12,17 +12,15 @@
  * or submit itself to any jurisdiction.
  */
 
-import * as grpc from "@grpc/grpc-js";
-import * as protoLoader from "@grpc/proto-loader";
-import { CentralConnection } from "./CentralConnection";
-import { CentralCommandDispatcher } from "./eventManagement/CentralCommandDispatcher";
-import { Connection } from "../connection/Connection";
-import { LogManager } from "@aliceo2/web-ui";
-import { Command, CommandHandler } from "models/commands.model";
-import {
-  ConnectionDirection,
-  DuplexMessageEvent,
-} from "../../models/message.model";
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
+import { CentralConnection } from './CentralConnection';
+import { CentralCommandDispatcher } from './eventManagement/CentralCommandDispatcher';
+import { Connection } from '../connection/Connection';
+import { LogManager } from '@aliceo2/web-ui';
+import type { Command, CommandHandler } from 'models/commands.model';
+import type { DuplexMessageEvent } from '../../models/message.model';
+import { ConnectionDirection } from '../../models/message.model';
 
 /**
  * @description Manages all the connection between clients and central system.
@@ -42,21 +40,21 @@ import {
  * - `receivingConnections`: Map of active inbound connections.
  */
 export class ConnectionManager {
-  private _logger = LogManager.getLogger("ConnectionManager");
+  private _logger = LogManager.getLogger('ConnectionManager');
   private _centralDispatcher: CentralCommandDispatcher;
   private _centralConnection: CentralConnection;
   private _sendingConnections = new Map<string, Connection>();
   private _receivingConnections = new Map<string, Connection>();
 
   /**
-   * @description Initializes a new instance of the ConnectionManager class.
+   * Initializes a new instance of the ConnectionManager class.
    *
    * This constructor sets up the gRPC client for communication with the central system.
    *
    * @param protoPath - The file path to the gRPC proto definition.
    * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
    */
-  constructor(protoPath: string, centralAddress: string = "localhost:50051") {
+  constructor(protoPath: string, centralAddress: string = 'localhost:50051') {
     const packageDef = protoLoader.loadSync(protoPath, {
       keepCase: true,
       longs: String,
@@ -68,18 +66,11 @@ export class ConnectionManager {
     const proto = grpc.loadPackageDefinition(packageDef) as any;
     const wrapper = proto.webui.tokenization;
 
-    const client = new wrapper.CentralSystem(
-      centralAddress,
-      grpc.credentials.createInsecure()
-    );
+    const client = new wrapper.CentralSystem(centralAddress, grpc.credentials.createInsecure());
 
-    // event dispatcher for central system events
+    // Event dispatcher for central system events
     this._centralDispatcher = new CentralCommandDispatcher();
-    this._centralConnection = new CentralConnection(
-      client,
-      this._centralDispatcher,
-      centralAddress
-    );
+    this._centralConnection = new CentralConnection(client, this._centralDispatcher, centralAddress);
   }
 
   /**
@@ -98,14 +89,14 @@ export class ConnectionManager {
   }
 
   /**
-   * @description Starts the connection to the central system.
+   * Starts the connection to the central system.
    */
   connectToCentralSystem(): void {
     this._centralConnection.start();
   }
 
   /**
-   * @description Disconnects from the central system.
+   * Disconnects from the central system.
    */
   disconnectFromCentralSystem(): void {
     this._centralConnection.disconnect();
@@ -117,12 +108,8 @@ export class ConnectionManager {
    * @param direction Direction of connection
    * @param token Optional token for connection
    */
-  createNewConnection(
-    address: string,
-    direction: ConnectionDirection,
-    token?: string
-  ) {
-    const conn = new Connection(token || "", address, direction);
+  createNewConnection(address: string, direction: ConnectionDirection, token?: string) {
+    const conn = new Connection(token ?? '', address, direction);
 
     if (direction === ConnectionDirection.RECEIVING) {
       this._receivingConnections.set(address, conn);
@@ -134,13 +121,10 @@ export class ConnectionManager {
   }
 
   /**
-   * @description Gets the connection instance by address.
+   * Gets the connection instance by address.
    * @returns{Connection} connection instance.
    */
-  getConnectionByAddress(
-    address: string,
-    direction: ConnectionDirection
-  ): Connection | undefined {
+  getConnectionByAddress(address: string, direction: ConnectionDirection): Connection | undefined {
     switch (direction) {
       case ConnectionDirection.SENDING:
         return this._sendingConnections.get(address);
@@ -153,7 +137,7 @@ export class ConnectionManager {
   }
 
   /**
-   * @description Returns all saved connections.
+   * Returns all saved connections.
    *
    * @returns An object containing the sending and receiving connections.
    */

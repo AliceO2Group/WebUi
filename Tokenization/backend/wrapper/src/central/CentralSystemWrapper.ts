@@ -12,25 +12,25 @@
  * or submit itself to any jurisdiction.
  */
 
-import * as grpc from "@grpc/grpc-js";
-import * as protoLoader from "@grpc/proto-loader";
-import { LogManager } from "@aliceo2/web-ui";
-import { DuplexMessageModel } from "../models/message.model";
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
+import { LogManager } from '@aliceo2/web-ui';
+import type { DuplexMessageModel } from '../models/message.model';
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
  */
 export class CentralSystemWrapper {
-  // config
+  // Config
   private _protoPath: string;
 
-  // utilities
-  private _logger = LogManager.getLogger("CentralSystemWrapper");
+  // Utilities
+  private _logger = LogManager.getLogger('CentralSystemWrapper');
 
-  // class properties
+  // Class properties
   private _server: grpc.Server;
 
-  // clients management
+  // Clients management
   private _clients = new Map<string, grpc.ServerDuplexStream<any, any>>();
   private _clientIps = new Map<string, string>(); // Peer -> IP map
 
@@ -45,7 +45,7 @@ export class CentralSystemWrapper {
   }
 
   /**
-   * @description Loads the gRPC proto definition and sets up the CentralSystem service.
+   * Loads the gRPC proto definition and sets up the CentralSystem service.
    */
   private setupService(): void {
     // Load the proto definition with options
@@ -68,7 +68,7 @@ export class CentralSystemWrapper {
   }
 
   /**
-   * @description Extracts IP address from peer string
+   * Extracts IP address from peer string
    * @param peer string e.g. ipv4:127.0.0.1:12345
    * @returns Extracted IP address
    */
@@ -83,47 +83,45 @@ export class CentralSystemWrapper {
     const ipv6Match = peer.match(/^ipv6:\[(.+?)\]:\d+$/);
     if (ipv6Match) return ipv6Match[1];
 
-    // fallback to original peer if pattern doesn't match any
+    // Fallback to original peer if pattern doesn't match any
     return peer;
   }
 
   /**
-   * @description Handles the duplex stream from the client.
+   * Handles the duplex stream from the client.
    * @param call The duplex stream call object.
    */
   private clientStreamHandler(call: grpc.ServerDuplexStream<any, any>): void {
     const peer = call.getPeer();
     const clientIp = this.extractIpFromPeer(peer);
 
-    this._logger.infoMessage(
-      `Client ${clientIp} (${peer}) connected to CentralSystem stream`
-    );
+    this._logger.infoMessage(`Client ${clientIp} (${peer}) connected to CentralSystem stream`);
 
     // Add client to maps
     this._clients.set(clientIp, call);
     this._clientIps.set(peer, clientIp);
 
     // Listen for data events from the client
-    call.on("data", (payload: any) => {
+    call.on('data', (payload: any) => {
       this._logger.infoMessage(`Received from ${clientIp}:`, payload);
     });
 
     // Handle stream end event
-    call.on("end", () => {
+    call.on('end', () => {
       this._logger.infoMessage(`Client ${clientIp} ended stream.`);
       this.cleanupClient(peer);
       call.end();
     });
 
     // Handle stream error event
-    call.on("error", (err) => {
+    call.on('error', (err) => {
       this._logger.infoMessage(`Stream error from client ${clientIp}:`, err);
       this.cleanupClient(peer);
     });
   }
 
   /**
-   * @description Cleans up client resources
+   * Cleans up client resources
    * @param peer Original peer string
    */
   private cleanupClient(peer: string): void {
@@ -136,7 +134,7 @@ export class CentralSystemWrapper {
   }
 
   /**
-   * @description Sends data to a specific client by IP address
+   * Sends data to a specific client by IP address
    * @param ip Client IP address
    * @param data Data to send
    * @returns Whether the data was successfully sent
@@ -159,7 +157,7 @@ export class CentralSystemWrapper {
   }
 
   /**
-   * @description Gets all connected client IPs
+   * Gets all connected client IPs
    * @returns Array of connected client IPs
    */
   public get connectedClients(): string[] {
@@ -167,20 +165,16 @@ export class CentralSystemWrapper {
   }
 
   /**
-   * @desciprion Starts the gRPC server and binds it to the specified in class port.
+   * Starts the gRPC server and binds it to the specified in class port.
    */
   public listen() {
     const addr = `localhost:${this.port}`;
-    this._server.bindAsync(
-      addr,
-      grpc.ServerCredentials.createInsecure(),
-      (err, _port) => {
-        if (err) {
-          this._logger.infoMessage("Server bind error:", err);
-          return;
-        }
-        this._logger.infoMessage(`CentralSytem started listening on ${addr}`);
+    this._server.bindAsync(addr, grpc.ServerCredentials.createInsecure(), (err, _port) => {
+      if (err) {
+        this._logger.infoMessage('Server bind error:', err);
+        return;
       }
-    );
+      this._logger.infoMessage(`CentralSytem started listening on ${addr}`);
+    });
   }
 }

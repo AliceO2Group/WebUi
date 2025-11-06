@@ -12,24 +12,21 @@
  * or submit itself to any jurisdiction.
  */
 
-import { RevokeTokenCommand } from "../../../client/commands/revokeToken/revokeToken.command";
-import { RevokeTokenHandler } from "../../../client/commands/revokeToken/revokeToken.handler";
-import { Connection } from "../../../client/connection/Connection";
-import { ConnectionManager } from "../../../client/connectionManager/ConnectionManager";
-import {
-  ConnectionDirection,
-  DuplexMessageEvent,
-} from "../../../models/message.model";
-import { ConnectionStatus } from "../../../models/connection.model";
-import { Command } from "models/commands.model";
+import { RevokeTokenCommand } from '../../../client/commands/revokeToken/revokeToken.command';
+import { RevokeTokenHandler } from '../../../client/commands/revokeToken/revokeToken.handler';
+import { Connection } from '../../../client/connection/Connection';
+import { ConnectionManager } from '../../../client/connectionManager/ConnectionManager';
+import { ConnectionDirection, DuplexMessageEvent } from '../../../models/message.model';
+import { ConnectionStatus } from '../../../models/connection.model';
+import { Command } from 'models/commands.model';
 
-describe("RevokeToken", () => {
+describe('RevokeToken', () => {
   function createEventMessage(targetAddress: string) {
     return {
       event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
       payload: {
         targetAddress: targetAddress,
-        token: "test-token",
+        token: 'test-token',
       },
     } as Command;
   }
@@ -41,84 +38,62 @@ describe("RevokeToken", () => {
       sendingConnections: new Map<string, Connection>(),
       receivingConnections: new Map<string, Connection>(),
       getConnectionByAddress: jest.fn(function (this: any, address: string) {
-        return (
-          this.sendingConnections.get(address) ||
-          this.receivingConnections.get(address)
-        );
+        return this.sendingConnections.get(address) || this.receivingConnections.get(address);
       }),
     } as unknown as ConnectionManager;
   });
 
-  it("should revoke token when connection found in sendingConnections", async () => {
-    const targetAddress = "peer-123";
-    const conn = new Connection(
-      "valid-token",
-      targetAddress,
-      ConnectionDirection.SENDING
-    );
+  it('should revoke token when connection found in sendingConnections', async () => {
+    const targetAddress = 'peer-123';
+    const conn = new Connection('valid-token', targetAddress, ConnectionDirection.SENDING);
     (manager as any).sendingConnections!.set(targetAddress, conn);
 
     const handler = new RevokeTokenHandler(manager);
-    const command = new RevokeTokenCommand(
-      createEventMessage(targetAddress).payload
-    );
+    const command = new RevokeTokenCommand(createEventMessage(targetAddress).payload);
 
     await handler.handle(command);
 
-    expect(conn.token).toBe("");
+    expect(conn.token).toBe('');
     expect(conn.status).toBe(ConnectionStatus.UNAUTHORIZED);
   });
 
-  it("should revoke token when connection found in receivingConnections", async () => {
-    const targetAddress = "peer-456";
-    const conn = new Connection(
-      "valid-token",
-      targetAddress,
-      ConnectionDirection.RECEIVING
-    );
+  it('should revoke token when connection found in receivingConnections', async () => {
+    const targetAddress = 'peer-456';
+    const conn = new Connection('valid-token', targetAddress, ConnectionDirection.RECEIVING);
     (manager as any).receivingConnections.set(targetAddress, conn);
 
     const handler = new RevokeTokenHandler(manager);
-    const command = new RevokeTokenCommand(
-      createEventMessage(targetAddress).payload
-    );
+    const command = new RevokeTokenCommand(createEventMessage(targetAddress).payload);
 
     await handler.handle(command);
 
-    expect(conn.token).toBe("");
+    expect(conn.token).toBe('');
     expect(conn.status).toBe(ConnectionStatus.UNAUTHORIZED);
   });
 
-  it("should do nothing when connection not found", async () => {
-    const targetAddress = "non-existent";
+  it('should do nothing when connection not found', async () => {
+    const targetAddress = 'non-existent';
     const handler = new RevokeTokenHandler(manager);
-    const command = new RevokeTokenCommand(
-      createEventMessage(targetAddress).payload
-    );
+    const command = new RevokeTokenCommand(createEventMessage(targetAddress).payload);
 
     await expect(handler.handle(command)).resolves.toBeUndefined();
-    expect(manager.getConnectionByAddress).toHaveBeenCalledWith(
-      targetAddress,
-      undefined
-    );
+    expect(manager.getConnectionByAddress).toHaveBeenCalledWith(targetAddress, undefined);
   });
 
-  it("should throw error when targetAddress is missing", async () => {
+  it('should throw error when targetAddress is missing', async () => {
     const invalidMessage = {
       event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
-      revokeToken: { token: "test-token" },
+      revokeToken: { token: 'test-token' },
     };
 
     const handler = new RevokeTokenHandler(manager);
     const command = new RevokeTokenCommand(invalidMessage as any);
 
-    await expect(handler.handle(command)).rejects.toThrow(
-      "Target address is required to revoke token."
-    );
+    await expect(handler.handle(command)).rejects.toThrow('Target address is required to revoke token.');
   });
 
-  it("should create command with correct type and payload", () => {
-    const eventMessage = createEventMessage("peer-001");
+  it('should create command with correct type and payload', () => {
+    const eventMessage = createEventMessage('peer-001');
     const command = new RevokeTokenCommand(eventMessage.payload);
 
     expect(command.event).toBe(DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN);
