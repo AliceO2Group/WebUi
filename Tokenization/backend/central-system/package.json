@@ -19,17 +19,17 @@
     "jsonwebtoken": "^9.0.2",
     "@grpc/grpc-js": "^1.13.4",
     "@grpc/proto-loader": "^0.7.15",
-    "jest": "^30.0.5"
+    "jest": "^30.0.5",
+    "ts-jest": "^29.4.1",
+    "@types/jest": "^30.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
-    "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20.4.2",
     "concurrently": "^9.0.1",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4",
-    "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }
