@@ -13,13 +13,13 @@
  */
 
 import { Outlet, useNavigation } from 'react-router';
-import { useState } from 'react';
 
 import { AppHeader } from './header/header';
 import { AppSidebar } from './sidebar';
 import { Spinner } from './spinner';
 
 import logo from "../assets/4_Color_Logo_CB.png";
+
 const Logo = ({name}: {name: string}) => {
   return (
     <div className="flex-row">
