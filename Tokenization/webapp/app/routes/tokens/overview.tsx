@@ -15,11 +15,9 @@ import type { Route } from './+types/overview';
 import type { Token } from '../../components/tokens/token';
 
 import { Link } from 'react-router';
-import { useState } from 'react';
-import { Tab } from '@mui/material';
 
+import {Box} from "../../components/box"
 import { useSetHeader } from '~/ui/header/headerContext';
-import { TabsNavbar } from '~/ui/navbar';
 
 /**
  * Client loader that fetches all tokens from the API.
@@ -69,21 +67,17 @@ export default function Overview({ loaderData: tokens }: Route.ComponentProps) {
   const { setHeaderContent } = useSetHeader();
   setHeaderContent('Tokens');
 
-  const [tabIndex, setTabIndex] = useState<number>(0);
-
-  return  <div>
-    <TabsNavbar tabIndex={tabIndex} setTabIndex={setTabIndex}>
-      <Tab label="List of tokens" />
-      <Tab label="Create token" />
-    </TabsNavbar>
-
-    {
-      tabIndex == 0 ?
-        <TokenTable tokens={tokens} /> :
-        <div className="p-4">
-          <h2 className="text-2xl font-bold mb-4">Create Token</h2>
-          <p>Form to create a new token will go here.</p>
-        </div>
-    }
-  </div>;
+  return (  
+    <div className="grid-1-2">
+        <Box>
+          <TokenTable tokens={tokens} /> 
+        </Box>
+        <Box>
+          <div className="p-4">
+            <h2 className="text-2xl font-bold mb-4">Create Token</h2>
+            <p>Form to create a new token will go here.</p>
+          </div>
+        </Box>
+    </div>
+  )
 }

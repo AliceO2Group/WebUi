@@ -11,4 +11,21 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+
+ .grid-1-2 {
+    display: grid;
+    grid-template-columns: 0.5fr 0.5fr;
+    grid-auto-rows: 1fr;
+ }
  
+ .min-height-box-1 {
+    min-height: 88vh;
+}
+
+.min-height-box-2 {
+    min-height: 44vh;
+}
+
+.min-height-box-3 {
+    min-height: 22vh;
+}

@@ -13,8 +13,8 @@
  */
 import type { NavLinkProps } from 'react-router';
 
+import React from 'react'
 import { NavLink } from 'react-router';
-import Button from '@mui/material/Button';
 
 type StyledNavLinkProps = {
   children: React.ReactNode;
@@ -24,23 +24,36 @@ type StyledNavLinkProps = {
 /**
  * StyledNavLink
  *
- * A wrapper component that renders a Material-UI Button styled as a navigation link.
+ * A wrapper component that renders styled navigation link.
  * It uses NavLink from react-router to determine if the link is active and applies
  * the 'contained' variant for the active route and 'outlined' for inactive routes.
  * @param children The content to display inside the button.
  * @param to The target route path.
  */
-const StyledNavLink = ({ children, to }: StyledNavLinkProps) => <NavLink to={to}>
-  {({ isActive }) => (
-    <Button
-      variant={isActive ? 'contained' : 'outlined'}
-      color='secondary'
-      sx={{ width: '15em' }}
-    >
-      {children}
-    </Button>
-  )}
-</NavLink>;
+const StyledNavLink = ({ children, to }: StyledNavLinkProps) =>
+  <NavLink to={to}>
+    {({ isActive }) => (
+      <div
+        className={isActive ? "primary" : "black"}
+      >
+        {children}
+      </div>
+    )}
+  </NavLink>;
+
+
+const NavList = ({children}: {children: React.ReactNode}) => {
+  const items = React.Children.toArray(children)
+  return <ul className="flex-row">
+    {
+      items.map((el, idx) => 
+        <li className="nav-item" key={idx}>
+          {el}
+        </li>
+      )
+    }
+  </ul>
+}
 
 /**
  * AppSidebar
@@ -51,9 +64,11 @@ const StyledNavLink = ({ children, to }: StyledNavLinkProps) => <NavLink to={to}
  * @return The sidebar navigation JSX element.
  */
 export const AppSidebar = () =>
-  <nav className={'bg-gray-light flex-row justify-center pv4 ml4 sidebar-1'}>
-    <div className="flex-column justify-start items-center g4">
-      <StyledNavLink to={'/tokens'}>Tokens</StyledNavLink>
-      <StyledNavLink to={'/certs'}>Certificates</StyledNavLink>
-    </div>
-  </nav>;
+  <div className="flex-row justify-center">
+    <nav>
+      <NavList>
+        <StyledNavLink to="/tokens">Tokens</StyledNavLink>
+        <StyledNavLink to="/certs">Certificates</StyledNavLink>      
+      </NavList>
+    </nav>
+  </div>

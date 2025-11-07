@@ -16,9 +16,18 @@ import { Outlet, useNavigation } from 'react-router';
 import { useState } from 'react';
 
 import { AppHeader } from './header/header';
-import { HeaderContext } from './header/headerContext';
 import { AppSidebar } from './sidebar';
 import { Spinner } from './spinner';
+
+import logo from "../assets/4_Color_Logo_CB.png";
+const Logo = ({name}: {name: string}) => {
+  return (
+    <div className="flex-row">
+      <img src={logo} className="self-center logo-fluid"/>
+      <h4 className="self-center">{name}</h4>
+    </div>
+  )
+}
 
 /**
  * Component provides main layout for the application
@@ -27,18 +36,16 @@ import { Spinner } from './spinner';
 export default function Layout() {
   const { state }  = useNavigation();
 
-  const [headerContent, setHeaderContent] = useState<string>('Tokenization Admin Interface');
-
   return (
-    <HeaderContext.Provider value={{ setHeaderContent }}>
-      <div className='container'>
-        <AppHeader headerContent={headerContent}/>
+    <div className='container'>
+      <AppHeader>
+        <Logo name="Tokenization"/>
         <AppSidebar />
-        <div id="content" className="bg-gray" style={{ gridRow: 'span 2', width: '95.3%' }}>
-          {state === 'loading' ? <Spinner /> : <Outlet/>}
-        </div>
+      </AppHeader>
+      <div id="content">
+        {state === 'loading' ? <Spinner /> : <Outlet/>}
       </div>
-    </HeaderContext.Provider>
+    </div>
   );
 
 }

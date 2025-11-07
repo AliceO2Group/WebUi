@@ -12,19 +12,39 @@
  * or submit itself to any jurisdiction.
  */
 
- .container {
-    display: grid;
-    grid-template-rows: 1fr 3fr 1.3fr;
-    grid-template-columns: 0.575fr 3fr; 
+
+/* Nav-item similar to menu-item */
+nav ul {
+    list-style: none
 }
 
-.header-1 {
+.nav-item {
+    cursor: pointer;
+    text-decoration: none;
+    border-radius: 0.25em;
+}
+
+.nav-item > a {
+    text-decoration: none;
+}
+
+.nav-item > a > div {
+    padding: 0.4em;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.nav-item:hover {
+    background-color: rgb(60, 60, 60);
+}
+/**/
+.header {
     justify-self: stretch;
     grid-column: span 2;
 }
 
-.sidebar-1 {
-    border-radius: 2% 0 0 2% ;
-    grid-row: span 2;
+.logo-fluid {
+    height: 40px;
+    margin: 0.2em 1em 
 }
 

@@ -23,7 +23,7 @@ import { useSetHeader } from '~/ui/header/headerContext';
 export default function Home() {
 
   const { setHeaderContent } = useSetHeader();
-  setHeaderContent('Tokenization Admin Interface');
+  setHeaderContent('Admin Interface');
 
   return <>
     <h1>Welcome to (dummy) Tokenization GUI!</h1>

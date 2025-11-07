@@ -23,25 +23,12 @@ import { IconHome, IconCog } from '../icon';
  * @param headerContent.headerContent
  * @param headerContent Optional string to display as the header title.
  */
-export function AppHeader({ headerContent }: { headerContent?: string }) {
+export function AppHeader({ children }: { children?: React.ReactNode }) {
   return (
-    <div className={'flex-row justify-center mv4 g4 header-1'}>
-
-      <Link to="/">
-        <div className="mv4 mh4" style={{ transform: 'scale(2.5)' }}>
-          <IconHome/>
+    <header className="flex-row justify-center bg-gray">
+        <div className="flex-row justify-between w-95">
+          {children}    
         </div>
-      </Link>
-      <Link to="/settings">
-        <div className="mv4 mh4" style={{ transform: 'scale(2.5)' }}>
-          <IconCog />
-        </div>
-      </Link>
-
-      <header className="bg-gray flex-row justify-end w-80 ph3">
-        <h1>{headerContent ?? 'Tokenization Admin Interface'}</h1>
-      </header>
-
-    </div>
+    </header>
   );
 }

@@ -16,11 +16,27 @@
     justify-content: flex-end;
 }
 
+.self-center {
+    align-self: center;
+}
+
 .ml1 { margin-left: var(--space-xs);  }
 .ml2 { margin-left: var(--space-s); }
 .ml3 { margin-left: var(--space-m); }
 .ml4 { margin-left: var(--space-l); }
+.ml5 { margin-left: var(--space-xl)}
+
+.scale12 {
+    transform: scale(1.2);
+}
+
+.scale15 {
+    transform: scale(1.5);
+}
 
 .scale25 {
     transform: scale(2.5);
 }
+
+
+
