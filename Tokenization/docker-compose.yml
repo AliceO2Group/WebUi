@@ -12,7 +12,7 @@ services:
       - ./backend:/var/workspace
     env_file:
       - ./backend/central-system/.env
-    command: ["npm", "run", "dev"]
+    command: ['npm', 'run', 'dev']
     healthcheck:
       interval: 1s
       test:
@@ -25,6 +25,8 @@ services:
     depends_on:
       install-backend:
         condition: service_completed_successfully
+      database:
+        condition: service_healthy
 
   install-webapp:
     image: node:22-alpine

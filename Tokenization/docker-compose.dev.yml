@@ -6,6 +6,8 @@ services:
       - '127.0.0.1:8200:9300'
       - '127.0.0.1:8201:9301'
     environment:
+      VAULT_ADDR: https://vault:9300
+      VAULT_CACERT: /etc/ssl/certs/vault-ca.crt
       VAULT_LOCAL_CONFIG: |
         ui = true
         disable_mlock = true
@@ -41,6 +43,12 @@ services:
     cap_add:
       - IPC_LOCK
     restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'vault', 'status']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
   database:
     image: 'mariadb:10.5.9'
     container_name: tokenization-database
