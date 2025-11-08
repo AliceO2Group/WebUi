@@ -19,5 +19,4 @@ declare module '@aliceo2/web-ui' {
     res: any,
     error: any
   ): void;
-  export const ServiceUnavailableError: any;
 }
