@@ -23,7 +23,7 @@ import { db } from '../lib/database/Database.js';
 import { SequalizeDatabase } from '../lib/database/SequalizeDatabase.js';
 import { VaultAuthService } from '../services/VaultAuthService.js';
 import { VaultCredentialsService } from '../services/VaulCredentialsService.js';
-import { EventType } from '../lib/events.js';
+import { EventType } from '../lib/utils/events.js';
 import { bus } from '../lib/event-bus/event-bus.js';
 
 const __filename = fileURLToPath(import.meta.url);

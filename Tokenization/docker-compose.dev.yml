@@ -37,10 +37,6 @@ services:
       default:
         aliases:
           - vault.local
-    networks:
-      default:
-        aliases:
-          - vault.local
     volumes:
       - ./backend/central-system/vault/vault-data:/vault/data
       - ./backend/central-system/vault/vault.crt:/vault/config/vault.crt:ro
