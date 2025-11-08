@@ -19,8 +19,10 @@ class Database {
     config: object
   ): Promise<SequalizeDatabase> {
     const database = new SequalizeDatabase(config);
+
     await database.connect();
     await database.migrate();
+
     return database;
   }
 }
