@@ -12,16 +12,16 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from "@aliceo2/web-ui";
-import { Sequelize } from "sequelize";
-import { getConfig } from "./utils/getConfig.js";
-import { models } from "./models/models.js";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { join } from "path";
-import { createUmzug } from "./umzug.js";
-import { SequalizeDatabaseConfig } from "./utils/sequalizeDatabaseConfig.js";
-import { SequelizeStorage } from "umzug";
+import { LogManager } from '@aliceo2/web-ui';
+import { Sequelize } from 'sequelize';
+import { getConfig } from './utils/getConfig.js';
+import { models } from './models/models.js';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { join } from 'path';
+import { createUmzug } from './umzug.js';
+import { SequalizeDatabaseConfig } from './utils/sequalizeDatabaseConfig.js';
+import { SequelizeStorage } from 'umzug';
 
 export class SequalizeDatabase {
   private _logger;
@@ -34,10 +34,10 @@ export class SequalizeDatabase {
    * @param config - Database configuration object.
    */
   constructor(config: object) {
-    this._logger = LogManager.getLogger("database/sequalize");
+    this._logger = LogManager.getLogger('database/sequalize');
 
     if (!config) {
-      this._logger.warnMessage("No database configuration provided");
+      this._logger.warnMessage('No database configuration provided');
     }
     this._dbConfig = getConfig(config);
 
@@ -56,7 +56,7 @@ export class SequalizeDatabase {
     this.sequelize = new Sequelize(database, username, password, {
       host,
       port,
-      dialect: "mariadb",
+      dialect: 'mariadb',
       dialectOptions: {
         charset,
         collate,
@@ -68,7 +68,7 @@ export class SequalizeDatabase {
       },
     });
     this._models = models(this.sequelize);
-    this._logger.infoMessage("Database connection initialized successfully.");
+    this._logger.infoMessage('Database connection initialized successfully.');
   }
 
   /** Connects to the database with retry logic. */
@@ -92,19 +92,19 @@ export class SequalizeDatabase {
 
   /** Executes pending database migrations. */
   async migrate() {
-    this._logger.debugMessage("Executing pending migrations...");
+    this._logger.debugMessage('Executing pending migrations...');
     try {
       const __filename = fileURLToPath(import.meta.url);
       const __dirname = dirname(__filename);
       const umzug = createUmzug(
         this.sequelize,
-        join(__dirname, "migrations"),
+        join(__dirname, 'migrations'),
         new SequelizeStorage({
           sequelize: this.sequelize,
         })
       );
       await umzug.up();
-      this._logger.infoMessage("Migrations completed successfully.");
+      this._logger.infoMessage('Migrations completed successfully.');
     } catch (error) {
       this._logger.errorMessage(`Error executing migrations: ${error}`);
       throw error;
