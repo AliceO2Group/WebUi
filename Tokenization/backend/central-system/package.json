@@ -11,8 +11,8 @@
     "dev": "npm run build && concurrently -k \"npm:watch:*\"",
     "start": "node index.js",
     "test": "jest --runInBand",
-    "docker:up": "cd ../.. && docker compose -f docker-compose.yml up",
-    "docker:down": "cd ../.. && docker compose -f docker-compose.yml down"
+    "docker:up": "cd ../.. && docker compose -f docker-compose.dev.yml -f docker-compose.yml up",
+    "docker:down": "cd ../.. && docker compose -f docker-compose.dev.yml-f docker-compose.yml down"
   },
   "dependencies": {
     "@aliceo2/web-ui": "^2.8.4",
