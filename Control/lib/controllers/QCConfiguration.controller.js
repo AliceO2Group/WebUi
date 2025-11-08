@@ -104,7 +104,7 @@ class QCConfigurationController {
    */
   async getConfigurationRestrictionsByKeyHandler(req, res) {
     const { key } = req.params;
-    if (!key) {
+    if (!key || key.trim() === '') {
       updateAndSendExpressResponseFromNativeError(res, new InvalidInputError("Missing configuration key"));
       return;
     }
