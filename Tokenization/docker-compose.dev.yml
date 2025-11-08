@@ -37,10 +37,6 @@ services:
         set -e
         docker-entrypoint.sh >/dev/null 2>&1 || true
         exec vault server -config=/vault/config/local.json
-    networks:
-      default:
-        aliases:
-          - vault.local
     volumes:
       - ./backend/central-system/vault/vault-data:/vault/data
       - ./backend/central-system/vault/vault.crt:/vault/config/vault.crt:ro
