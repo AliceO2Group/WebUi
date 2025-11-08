@@ -21,7 +21,6 @@ import {
 import {
   LogManager,
   InvalidInputError,
-  ServiceUnavailableError,
   updateAndSendExpressResponseFromNativeError,
 } from '@aliceo2/web-ui';
 
