@@ -6,8 +6,6 @@ services:
       - '127.0.0.1:8200:9300'
       - '127.0.0.1:8201:9301'
     environment:
-      VAULT_ADDR: https://vault:9300
-      VAULT_CACERT: /etc/ssl/certs/vault-ca.crt
       VAULT_LOCAL_CONFIG: |
         ui = true
         disable_mlock = true
@@ -43,12 +41,21 @@ services:
     cap_add:
       - IPC_LOCK
     restart: unless-stopped
-    healthcheck:
-      test: ['CMD', 'vault', 'status']
-      interval: 5s
-      timeout: 5s
-      retries: 20
-      start_period: 30s
+
+  vault-unseal:
+    image: curlimages/curl:8.9.1
+    depends_on:
+      vault:
+        condition: service_started
+    environment:
+      VAULT_ADDR: https://vault.local:9300
+      VAULT_UNSEAL_KEY: '/Ljh14bkF2VAkxII4bQevZQAnNbNHeg2qK3ND7CL3lU='
+    volumes:
+      - ./backend/central-system/ca/ca.crt:/ca.crt:ro
+      - ./backend/central-system/vault/unseal.sh:/unseal.sh:ro
+    entrypoint: ['/bin/sh', '-lc']
+    command: ['/unseal.sh']
+    restart: 'no'
   database:
     image: 'mariadb:10.5.9'
     container_name: tokenization-database
