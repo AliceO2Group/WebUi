@@ -33,6 +33,10 @@ services:
         set -e
         docker-entrypoint.sh >/dev/null 2>&1 || true
         exec vault server -config=/vault/config/local.json
+    networks:
+      default:
+        aliases:
+          - vault.local
     volumes:
       - ./backend/central-system/vault/vault-data:/vault/data
       - ./backend/central-system/vault/vault.crt:/vault/config/vault.crt:ro
@@ -41,7 +45,6 @@ services:
     cap_add:
       - IPC_LOCK
     restart: unless-stopped
-
   vault-unseal:
     image: curlimages/curl:8.9.1
     depends_on:
@@ -56,6 +59,12 @@ services:
     entrypoint: ['/bin/sh', '-lc']
     command: ['/unseal.sh']
     restart: 'no'
+    healthcheck:
+      test: ['CMD', 'vault', 'status']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
   database:
     image: 'mariadb:10.5.9'
     container_name: tokenization-database
