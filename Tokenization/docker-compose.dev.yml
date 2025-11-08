@@ -53,7 +53,7 @@ services:
         condition: service_started
     environment:
       VAULT_ADDR: https://vault.local:9300
-      VAULT_UNSEAL_KEY: ${VAULT_UNSEAL_KEY}
+      VAULT_UNSEAL_KEY: '/Ljh14bkF2VAkxII4bQevZQAnNbNHeg2qK3ND7CL3lU='
     volumes:
       - ./backend/central-system/ca/ca.crt:/ca.crt:ro
       - ./backend/central-system/vault/unseal.sh:/unseal.sh:ro
