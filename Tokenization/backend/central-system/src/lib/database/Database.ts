@@ -14,7 +14,18 @@
 
 import { SequalizeDatabase } from './SequalizeDatabase.js';
 
-export const db = new SequalizeDatabase({
+class Database {
+  public static async createDatabase(
+    config: object
+  ): Promise<SequalizeDatabase> {
+    const database = new SequalizeDatabase(config);
+    await database.connect();
+    await database.migrate();
+    return database;
+  }
+}
+
+export const db = await Database.createDatabase({
   host: process.env.DB_HOST ?? 'database',
   port: Number(process.env.DB_PORT ?? 3306),
   username: process.env.DB_USER ?? 'central-system',
@@ -25,9 +36,3 @@ export const db = new SequalizeDatabase({
   timezone: process.env.DB_TZ ?? '+00:00',
   logging: process.env.DB_LOGGIN ?? false,
 });
-
-export async function initializeDB() {
-  await db.connect();
-  await db.migrate();
-  return db;
-}
