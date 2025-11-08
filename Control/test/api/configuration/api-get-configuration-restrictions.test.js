@@ -16,9 +16,9 @@
 const request = require('supertest');
 const { ADMIN_TEST_TOKEN, TEST_URL } = require('../generateToken.js');
 
-describe(`'API - GET - /configuration/restrictions' test suite`, () => {
+describe(`'API - GET - /configurations/restrictions' test suite`, () => {
   it('should successfully get a restriction TypeMap for given configurations', async () => {
-    await request(`${TEST_URL}/api/configuration/restrictions`)
+    await request(`${TEST_URL}/api/configurations/restrictions`)
       .get(`/key1?token=${ADMIN_TEST_TOKEN}`)
       .expect(200);
   });
@@ -29,13 +29,13 @@ describe(`'API - GET - /configuration/restrictions' test suite`, () => {
       status: 400,
       title: "Invalid Input"
     };
-    await request(`${TEST_URL}/api/configuration/restrictions`)
+    await request(`${TEST_URL}/api/configurations/restrictions`)
       .get(`/%20?token=${ADMIN_TEST_TOKEN}`)
       .expect(400, expectedError);
   });
 
   it('should return 403 unauthorized for missing token requests', async () => {
-    await request(`${TEST_URL}/api/configuration/restrictions`)
+    await request(`${TEST_URL}/api/configurations/restrictions`)
       .get('/')
       .expect(403, {
         error: '403 - Json Web Token Error',
@@ -44,7 +44,7 @@ describe(`'API - GET - /configuration/restrictions' test suite`, () => {
   });
 
   it('should return 403 unauthorized for invalid token requests', async () => {
-    await request(`${TEST_URL}/api/configuration/restrictions`)
+    await request(`${TEST_URL}/api/configurations/restrictions`)
       .get('/?token=invalid-token')
       .expect(403, {
         error: '403 - Json Web Token Error',
@@ -58,7 +58,7 @@ describe(`'API - GET - /configuration/restrictions' test suite`, () => {
       status: 404,
       title: "Not Found"
     };
-    await request(`${TEST_URL}/api/configuration/restrictions`)
+    await request(`${TEST_URL}/api/configurations/restrictions`)
       .get(`/nonexistent?token=${ADMIN_TEST_TOKEN}`)
       .expect(404, expectedError);
   });

@@ -13,7 +13,7 @@
  */
 
 const { NotFoundError, LogManager } = require("@aliceo2/web-ui");
-const computeRestrictions = require("../kafka/adapters/consulConfigurationsHelpers");
+const { computeRestrictions } = require("../adapters/ConsulConfigurationAdapter");
 
 /**
  * @class

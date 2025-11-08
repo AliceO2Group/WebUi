@@ -284,6 +284,11 @@ module.exports.setup = (http, ws) => {
   );
 
   // Configuration
+  // this order of registering endpoints is necessary
+  http.get(
+    '/configurations/restrictions/:key(*)', validateConsulServiceMiddleware,
+    qcConfigurationController.getConfigurationRestrictionsByKeyHandler.bind(qcConfigurationController)
+  );
   http.get(
     '/configurations', validateConsulServiceMiddleware,
     qcConfigurationController.getConfigurationsKeysHandler.bind(qcConfigurationController)
@@ -291,10 +296,6 @@ module.exports.setup = (http, ws) => {
   http.get(
     '/configurations/:key(*)', validateConsulServiceMiddleware, 
     qcConfigurationController.getConfigurationByKeyHandler.bind(qcConfigurationController)
-  );
-  http.get(
-    '/configurations/restrictions/:key(*)', validateConsulServiceMiddleware,
-    qcConfigurationController.getConfigurationRestrictionsByKeyHandler.bind(qcConfigurationController)
   );
   http.put(
     '/configurations/:key(*)', validateConsulServiceMiddleware,

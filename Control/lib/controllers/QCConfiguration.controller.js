@@ -111,15 +111,14 @@ class QCConfigurationController {
 
     try {
       const restrictions = await this._qcConfigurationService.getConfigurationRestrictionsByKey(key);
-      if (!restrictions) {
-        updateAndSendExpressResponseFromNativeError(res, new NotFoundError("Configuration not found"));
-        return;
-      }
-
       res.status(200).json(restrictions);
     } catch (error) {
       errorLogger(error, this._logger);
-      updateAndSendExpressResponseFromNativeError(res, error);
+      if (error.message?.includes('Non-2xx status code: 404')) {
+        updateAndSendExpressResponseFromNativeError(res, new NotFoundError(`Configuration not found for key: ${key}`));
+      } else {
+        updateAndSendExpressResponseFromNativeError(res, error);
+      }
     }
   }
 
