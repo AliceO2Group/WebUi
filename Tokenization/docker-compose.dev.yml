@@ -37,10 +37,6 @@ services:
       default:
         aliases:
           - vault.local
-    networks:
-      default:
-        aliases:
-          - vault.local
     volumes:
       - type: volume
         source: vault-data
