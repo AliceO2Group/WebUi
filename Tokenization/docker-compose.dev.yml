@@ -3,8 +3,8 @@ services:
     image: hashicorp/vault:latest
     container_name: vault
     ports:
-      - "127.0.0.1:8200:9300"
-      - "127.0.0.1:8201:9301"
+      - '127.0.0.1:8200:9300'
+      - '127.0.0.1:8201:9301'
     environment:
       VAULT_LOCAL_CONFIG: |
         ui = true
@@ -42,17 +42,40 @@ services:
       - IPC_LOCK
     restart: unless-stopped
   database:
-    image: mariadb:10.5.9
+    image: 'mariadb:10.5.9'
+    container_name: tokenization-database
     environment:
-      MYSQL_ROOT_PASSWORD: cern
-    ports: 
-        - "3306:3306"
-    restart: unless-stopped
+      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD:-cern}'
+    ports:
+      - '3306:3306'
     volumes:
-      - type: bind
-        read_only: false
-        source: ./database/data
+      - type: volume
+        source: database-data
         target: /var/lib/mysql
+      - type: bind
+        read_only: true
+        source: ./docker/database/configuration
+        target: /etc/mysql/conf.d
+      - type: bind
+        read_only: true
+        source: ./docker/database/populate
+        target: /docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-uroot',
+          '-p${MYSQL_ROOT_PASSWORD:-cern}',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
 
 volumes:
   database-data:

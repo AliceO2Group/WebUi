@@ -15,3 +15,4 @@ central-system.hcl
 backend/central-system/.env
 database/*
 banner.js
+.env
