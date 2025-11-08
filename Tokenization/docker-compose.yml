@@ -27,6 +27,8 @@ services:
         condition: service_completed_successfully
       database:
         condition: service_healthy
+      vault-unseal:
+        condition: service_completed_successfully
 
   install-webapp:
     image: node:22-alpine
