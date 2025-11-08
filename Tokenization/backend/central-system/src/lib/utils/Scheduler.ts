@@ -12,9 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from "@aliceo2/web-ui";
+import { LogManager } from '@aliceo2/web-ui';
 
-const logger = LogManager.getLogger("utils/Scheduler");
+const logger = LogManager.getLogger('utils/Scheduler');
 
 type Key = string;
 

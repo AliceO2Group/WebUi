@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Sequelize, Model, DataTypes } from "sequelize";
+import { Sequelize, Model, DataTypes } from 'sequelize';
 
 // Define the structure of the token object
 interface TokenAttributes {
@@ -69,10 +69,10 @@ export default (sequelize: Sequelize): any =>
     },
     {
       sequelize,
-      tableName: "tokens",
+      tableName: 'tokens',
       timestamps: true,
       underscored: true,
-      createdAt: "created_at",
-      updatedAt: "updated_at",
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
     }
   );

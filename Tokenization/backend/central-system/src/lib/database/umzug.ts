@@ -5,20 +5,20 @@
  * All rights not expressly granted are reserved.
  *
  * This software is distributed under the terms of the GNU General Public
- * License v3 (GPL Version 3), copied verbatim in the file 'COPYING'.
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
  *
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
 
-import pkg, { SequelizeStorage } from "umzug";
-import { Sequelize } from "sequelize";
-import { LogManager } from "@aliceo2/web-ui";
-import { MigrationParams } from "umzug";
+import pkg, { SequelizeStorage } from 'umzug';
+import { Sequelize } from 'sequelize';
+import { LogManager } from '@aliceo2/web-ui';
+import { MigrationParams } from 'umzug';
 
 const { Umzug } = pkg;
-const logger = LogManager.getLogger("database/umzug");
+const logger = LogManager.getLogger('database/umzug');
 
 export const createUmzug = (
   sequelize: Sequelize,
@@ -35,15 +35,15 @@ export const createUmzug = (
       }: MigrationParams<Sequelize>) => {
         const loadMigration = async () => {
           if (!migrationPath) {
-            throw new Error(`Missing migration path for "${name}"`);
+            throw new Error(`Missing migration path for '${name}'`);
           }
           const migration = await import(migrationPath);
           if (
-            typeof migration.up !== "function" ||
-            typeof migration.down !== "function"
+            typeof migration.up !== 'function' ||
+            typeof migration.down !== 'function'
           ) {
             throw new Error(
-              `Migration "${name}" is missing valid up/down functions.`
+              `Migration '${name}' is missing valid up/down functions.`
             );
           }
           return migration;
