@@ -31,7 +31,8 @@ export const db = await Database.createDatabase({
   host: process.env.DB_HOST ?? 'database',
   port: Number(process.env.DB_PORT ?? 3306),
   username: process.env.DB_USER ?? 'central-system',
-  password: process.env.DB_PASSWORD ?? 'dev-password',
+  password:
+    process.env.DB_PASSWORD ?? 'super_secret_password_for_dev_purposes_only',
   database: process.env.DB_NAME ?? 'tokenization',
   charset: 'utf8mb4',
   collate: 'utf8mb4_unicode_ci',

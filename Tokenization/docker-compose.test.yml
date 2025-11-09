@@ -10,8 +10,6 @@ services:
     working_dir: /var/workspace/central-system
     volumes:
       - ./backend:/var/workspace
-    env_file:
-      - ./backend/central-system/.env
     command: ['npm', 'run', 'dev']
     healthcheck:
       interval: 1s
