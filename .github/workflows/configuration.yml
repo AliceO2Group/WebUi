@@ -45,24 +45,17 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: '22.x'
-          
       - name: Install backend (Control) dependencies
-        run: (cd Control; npm ci) 
-        
+        run: (cd Control; npm ci)
       - name: Install frontend (Configuration) dependencies
         run: (cd Configuration/webapp; npm ci)
-
       - name: Copy backend config file
         run: cp Control/config-default.js Control/config.js
-        
       - name: Modify backend config port
         run: sed -i 's/port: 8080,/port: 8081,/' Control/config.js
-
       - name: Start backend (Control) in background
-        run: (cd Control; npm start &) 
-        
+        run: (cd Control; npm start &)
       - name: Wait for backend to be ready
         run: npx wait-on http://localhost:8081 --timeout 120000
-        
       - name: Run frontend (Configuration) tests
         run: (cd Configuration/webapp; npm test)
