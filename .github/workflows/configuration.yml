@@ -52,7 +52,8 @@ jobs:
       - name: Copy backend config file
         run: cp Control/config-default.js Control/config.js
       - name: Modify backend config port
-        run: sed -i 's/port: 8080,/port: 8081,/' Control/config.js
+        run: | 
+          sed -i 's/port: 8080,/port: 8081,/' Control/config.js
       - name: Start backend (Control) in background
         run: (cd Control; npm start &)
       - name: Wait for backend to be ready
