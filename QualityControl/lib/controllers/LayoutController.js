@@ -235,7 +235,7 @@ export class LayoutController {
       // Note: if userId becomes 0 it will throw when creating the storagelayout.
       const userId = Number(req.query.user_id ?? 0);
       const key = saveDownloadData(mapStorage, downloadLayoutDomain, downloadConfigDomain, userId);
-      console.log(`Saved layout key: ${key}`);
+      logger.infoMessage(`Saved layout key: ${key}`);
       res.status(201).send(key);
     } catch {
       res.status(400).send('Could not save download data');
@@ -255,19 +255,13 @@ export class LayoutController {
     try {
       const downloadLayoutDomain = mapStorage.readRequest(key)?.[0].toSuper();
       const downloadConfigDomain = mapStorage.readRequest(key)?.[1];
-      console.log(mapStorage.readRequest(key));
       if (downloadLayoutDomain == undefined || downloadConfigDomain == undefined) {
         throw new Error('Layout could not be found with key');
       }
-      // fire the download engine!!!!!!!
+      // start the download engine
       await download(downloadLayoutDomain, downloadConfigDomain, 1234567, res);
     } catch (error) {
-      // log detailed message if present
-      if (error?.details && Array.isArray(error.details) && error.details[0]?.message) {
-        console.log(error.details[0].message);
-      } else {
-        console.log(error);
-      }
+      logger.errorMessage(error?.message ?? error);
       res.status(400).send('Could not download objects');
     }
   }

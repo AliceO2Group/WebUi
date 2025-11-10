@@ -1,3 +1,5 @@
+/* eslint-disable jsdoc/require-returns-description */
+/* eslint-disable jsdoc/require-param-description */
 /* eslint-disable jsdoc/require-description */
 // parse a 512-byte header block to a data object, or vice-versa
 // encode returns `true` if a pax extended header is needed, because
@@ -54,9 +56,7 @@ export class Header {
    * @param {Buffer | HeaderData} [data]
    */
   constructor(data) {
-    if (Buffer.isBuffer(data)) {
-    }
-    else if (data) {
+    if (!Buffer.isBuffer(data) && data) {
       this.#slurp(data);
     }
   }
@@ -67,7 +67,7 @@ export class Header {
    * @returns {void}
    */
   #slurp(ex, gex = false) {
-    Object.assign(this, Object.fromEntries(Object.entries(ex).filter(([k, v]) => 
+    Object.assign(this, Object.fromEntries(Object.entries(ex).filter(([k, v]) =>
       // we slurp in everything except for the path attribute in
       // a global extended header, because that's weird. Also, any
       // null/undefined values are ignored.

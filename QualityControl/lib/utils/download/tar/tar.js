@@ -11,14 +11,16 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-/* eslint-disable jsdoc/require-param-description */
+import { LogManager } from '@aliceo2/web-ui';
 import { Header } from './header.js';
 import { Buffer } from 'node:buffer';
+
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/download-tar`);
 
 /**
  * Create a Tarball File,
  * @param {Array<File>} files - Files to add to Tarball.
- * @param {string} tarName
+ * @param {string} tarName - Tarball file name.
  * @returns {Promise<File>} - Tarball file
  */
 export async function createTar(files, tarName) {
@@ -41,8 +43,8 @@ export async function createTar(files, tarName) {
     if (remainder !== 0) {
       bytesToPad = 512 - remainder;
     }
-    console.log(`Remainder: ${remainder}`);
-    console.log(`Bytes to padd: ${bytesToPad}`);
+    logger.debugMessage(`Remainder: ${remainder}`);
+    logger.debugMessage(`Bytes to padd: ${bytesToPad}`);
     const header = new Header({
       path: file.name,
       size: file.size,
@@ -65,9 +67,9 @@ export async function createTar(files, tarName) {
 
 /**
  * add file to tarball
- * @param {File} file
- * @param {Buffer} buf
- * @param {number} offset
+ * @param {File} file - file to add.
+ * @param {Buffer} buf - buffer to add to.
+ * @param {number} offset - current offset of buffer.
  * @returns {Promise<number>} offset.
  */
 async function writeFile(file, buf, offset) {
@@ -80,9 +82,9 @@ async function writeFile(file, buf, offset) {
 
 /**
  * pad the block
- * @param {Buffer} buf
- * @param {number} bytesToPad
- * @param {number} offset
+ * @param {Buffer} buf - buffer to pad.
+ * @param {number} bytesToPad - amount of bytes to pad buffer with.
+ * @param {number} offset - current offset.
  * @returns {number} offset.
  */
 function padBlock(buf, bytesToPad, offset) {
@@ -90,8 +92,8 @@ function padBlock(buf, bytesToPad, offset) {
   if (bytesToPad == 0) {
     return offset;
   }
-  console.log(`bytes to pad = ${bytesToPad}`);
-  console.log(`padding zeros from ${offset} to ${offset + bytesToPad}.`);
+  logger.debugMessage(`bytes to pad = ${bytesToPad}`);
+  logger.debugMessage(`padding zeros from ${offset} to ${offset + bytesToPad}.`);
   // fill buffer with zero's
   buf.fill('', offset, offset + bytesToPad, 'utf-8');
   return offset + bytesToPad;
