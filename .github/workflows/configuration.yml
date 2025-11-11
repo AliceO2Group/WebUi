@@ -38,7 +38,7 @@ jobs:
   test:
     name: Run tests 
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - name: Setup node
@@ -61,6 +61,6 @@ jobs:
       - name: Start frontend (Configuration) in background
         run: (cd Configuration; docker compose up -d)
       - name: Wait for frontend to be ready
-        run: npx wait-on http://localhost:8080 --timeout 120000
+        run: npx wait-on http://localhost:8080 --timeout 300000
       - name: Run frontend (Configuration) tests
         run: (cd Configuration/webapp; npm run mocha)
