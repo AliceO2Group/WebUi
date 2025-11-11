@@ -17,6 +17,7 @@ const config = require('../test-config');
 
 const CONSUL_URL = `http://${config.consul.hostname}:${config.consul.port}`;
 const KV_PATH = '/v1/kv/';
+const TXN_PATH = '/v1/txn';
 
 /**
  * Setup nock environment to intercept requests to the Consul API.
@@ -34,9 +35,9 @@ const initializeNockForConsul = () => {
     .reply(200, JSON.stringify([
       {
         LockIndex: 0,
-        Key: "key1",
+        Key: 'key1',
         Flags: 0,
-        Value: Buffer.from(JSON.stringify({key1: "value1"})).toString('base64'),
+        Value: Buffer.from(JSON.stringify({key1: 'value1'})).toString('base64'),
         CreateIndex: 1,
         ModifyIndex: 1
       }
@@ -48,7 +49,7 @@ const initializeNockForConsul = () => {
     .reply(200, JSON.stringify([
       {
         LockIndex: 0,
-        Key: "empty-prefix",
+        Key: 'empty-prefix',
         Flags: 0,
         Value: null,
         CreateIndex: 1,
@@ -70,7 +71,7 @@ const initializeNockForConsul = () => {
   nock(CONSUL_URL)
     .persist()
     .get(`${KV_PATH}key1?raw=true`)
-    .reply(200, JSON.stringify({key: "value"}))
+    .reply(200, JSON.stringify({key: 'value'}))
   
   nock(CONSUL_URL)
     .persist()
@@ -81,6 +82,21 @@ const initializeNockForConsul = () => {
     .persist()
     .get(`${KV_PATH}consul-failure?raw=true`)
     .reply(503)
+  
+  // /configurations/:key(*) - PUT
+  nock(CONSUL_URL)
+    .persist()
+    .put(TXN_PATH, body => {
+      return body && body[0] && body[0].KV && body[0].KV.Key === 'key1';
+    })
+    .reply(200, { Results: [{ KV: { ModifyIndex: 12345 } }] });
+
+  nock(CONSUL_URL)
+    .persist()
+    .put(TXN_PATH, body => {
+      return body && body[0] && body[0].KV && body[0].KV.Key === 'consul-failure';
+    })
+    .reply(503);
 }
 
 module.exports = {

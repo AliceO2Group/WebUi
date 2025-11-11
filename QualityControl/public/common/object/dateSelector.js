@@ -25,6 +25,7 @@ import { prettyFormatDate } from './../utils.js';
 export const dateSelector = (selected, versions, callback) => h(
   '.w-100.flex-row',
   h('select.form-control.gray-darker.text-center.w-25', {
+    id: 'dateSelector',
     onchange: (e) => {
       const { value } = e.target;
       const { validFrom, id } = JSON.parse(value);

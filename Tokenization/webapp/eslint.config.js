@@ -20,6 +20,7 @@ import pluginReactHooks from 'eslint-plugin-react-hooks';
 import jsdoc from 'eslint-plugin-jsdoc';
 import stylisticTs from '@stylistic/eslint-plugin-ts';
 import stylisticJs from '@stylistic/eslint-plugin-js';
+import mochaPlugin from 'eslint-plugin-mocha';
 
 const licenseHeader = `/**
  * @license
@@ -70,8 +71,6 @@ const licenseHeaderRule = {
 export default [
   {
     ignores: [
-      'test/',
-      'tests/',
       'node_modules/',
       'build/',
       'dist/',
@@ -86,13 +85,56 @@ export default [
     ],
   },
   
-  pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
-  pluginReact.configs.flat.recommended,
+  {
+    files: ['**/*.{js,cjs,mjs}'],
+    ...pluginJs.configs['flat/recommended'],
+  },
+  
+  {
+    files: ['**/*.{ts,tsx,jsx}'],
+    ...pluginJs.configs['flat/recommended'],
+    ...pluginReact.configs.flat.recommended,
+    ...tseslint.configs['flat/recommended']
+  },
+  {
+    files: ['**/*.{js,cjs,mjs,ts,tsx,jsx}'],
+    plugins: {
+      '@stylistic/js': stylisticJs,
+      custom: {
+        rules: {
+          'license-header': licenseHeaderRule,
+        },
+      },
+    },
+    rules: {
+      // JS-only stylistic rules (aplikowane globalnie)
+      '@stylistic/js/indent': ['error', 2],
+      '@stylistic/js/quotes': ['error', 'single', { avoidEscape: true }],
+      '@stylistic/js/semi': 'error',
+      '@stylistic/js/space-before-blocks': 'error',
+      '@stylistic/js/space-infix-ops': 'error',
+      '@stylistic/js/object-curly-spacing': ['error', 'always'],
+      '@stylistic/js/keyword-spacing': 'error',
+      '@stylistic/js/comma-dangle': ['error', 'always-multiline'],
+      '@stylistic/js/comma-spacing': ['error', { before: false, after: true }],
+
+      // other JS stylistic helpers
+      '@stylistic/js/array-bracket-spacing': ['error', 'never'],
+      '@stylistic/js/brace-style': ['error', '1tbs'],
+      '@stylistic/js/no-trailing-spaces': 'error',
+      '@stylistic/js/eol-last': ['error', 'always'],
+      '@stylistic/js/max-len': ['error', { code: 145 }],
+      '@stylistic/js/no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
+
+      // keep license rule active everywhere
+      'custom/license-header': 'error',
+    }
+    
+  },
 
   {
-    files: ['**/*.{js,mjs,cjs,ts,tsx,jsx}'],
-    
+    files: ['**/*.{ts,tsx,jsx}'],
+
     plugins: {
       '@typescript-eslint': tseslint.plugin,
       'react': pluginReact,
@@ -100,21 +142,14 @@ export default [
       'jsdoc': jsdoc,
       '@stylistic/ts': stylisticTs,
       '@stylistic/js': stylisticJs,
-      'custom': { 
-        rules: {
-          'license-header': licenseHeaderRule,
-        },
-      },
     },
-    
+
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        ecmaFeatures: {
-          jsx: true,
-        },
+        ecmaFeatures: { jsx: true },
         project: './tsconfig.json',
       },
       globals: {
@@ -124,44 +159,30 @@ export default [
         React: 'readonly',
       },
     },
-    
+
     settings: {
-      react: {
-        version: 'detect',
-      },
-      jsdoc: {
-        mode: 'typescript',
-        tagNamePreference: {
-          returns: 'return',
-        },
-      },
+      react: { version: 'detect' },
+      jsdoc: { mode: 'typescript', tagNamePreference: { returns: 'return' } },
     },
-    
+
     rules: {
-      // === CUSTOM RULES ===
-      'custom/license-header': 'error',
-      
       // === TYPESCRIPT SPECIFIC RULES ===
       '@typescript-eslint/no-unused-vars': [
         'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          ignoreRestSiblings: true,
-        },
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', ignoreRestSiblings: true },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/prefer-nullish-coalescing': 'error',
       '@typescript-eslint/prefer-optional-chain': 'error',
       '@typescript-eslint/no-non-null-assertion': 'warn',
       '@typescript-eslint/consistent-type-imports': 'error',
-      
+
       // === REACT SPECIFIC RULES ===
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-      
+
       // === GENERAL CODE QUALITY ===
       'arrow-body-style': ['error', 'as-needed'],
       'curly': 'error',
@@ -174,7 +195,7 @@ export default [
       'prefer-destructuring': 'warn',
       'prefer-template': 'error',
       'radix': 'error',
-      
+
       // === COMMENTS AND DOCUMENTATION ===
       'capitalized-comments': ['error', 'always'],
       'jsdoc/require-description': 'error',
@@ -191,8 +212,8 @@ export default [
           },
         },
       ],
-      
-      // === TYPESCRIPT STYLISTIC RULES (only ones that exist) ===
+
+      // === TYPESCRIPT STYLISTIC RULES (moved here) ===
       '@stylistic/ts/comma-dangle': ['error', 'always-multiline'],
       '@stylistic/ts/comma-spacing': ['error', { before: false, after: true }],
       '@stylistic/ts/indent': ['error', 2],
@@ -204,15 +225,15 @@ export default [
       '@stylistic/ts/keyword-spacing': 'error',
       '@stylistic/ts/type-annotation-spacing': 'error',
       '@stylistic/ts/member-delimiter-style': 'error',
-      
-      // === JAVASCRIPT STYLISTIC RULES ===
+
+      // keep JS stylistic ones if you need them additionally in TS:
       '@stylistic/js/array-bracket-spacing': ['error', 'never'],
       '@stylistic/js/brace-style': ['error', '1tbs'],
       '@stylistic/js/no-trailing-spaces': 'error',
       '@stylistic/js/eol-last': ['error', 'always'],
       '@stylistic/js/max-len': ['error', { code: 145 }],
-      "@stylistic/js/no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 0 }],
-      
+      '@stylistic/js/no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
+
       // === DISABLED RULES ===
       'no-magic-numbers': 'off',
       'sort-keys': 'off',
@@ -220,4 +241,26 @@ export default [
       'sort-vars': 'off',
     },
   },
+  {
+    files: ['app/test/**/*.cjs'],
+    extends: [
+      pluginJs.configs.recommended,
+      mochaPlugin.configs.recommended,
+    ],
+    plugins: {
+      mocha: mochaPlugin,
+    },
+    languageOptions: {
+      sourceType: 'script', 
+      ecmaVersion: 'latest',
+      globals: {
+        ...globals.node,
+        ...globals.mocha,
+        window: 'readonly'
+      },
+    },
+    rules: {
+      'mocha/no-setup-in-describe': 'off',
+    },
+  }
 ];

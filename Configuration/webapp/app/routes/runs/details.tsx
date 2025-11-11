@@ -21,7 +21,7 @@ import { RunLogs } from '~/components/runs/run-logs';
 import { Spinner } from '~/ui/spinner';
 
 const getRun = async (runNumber: number): Promise<Run> => {
-  const response = await fetch(`http://localhost:8080/api/runs/${runNumber}`);
+  const response = await fetch(`http://localhost:8080/control/api/runs/${runNumber}`);
   if (!response.ok) {
     throw data(`Failed to fetch run with run number ${runNumber}`, { status: response.status });
   }
@@ -29,7 +29,7 @@ const getRun = async (runNumber: number): Promise<Run> => {
 };
 
 const getLogs = async (runNumber: number): Promise<Log[]> => {
-  const response = await fetch(`http://localhost:8080/api/runs/${runNumber}/logs`);
+  const response = await fetch(`http://localhost:8080/control/api/runs/${runNumber}/logs`);
   if (!response.ok) {
     throw data(`Failed to fetch logs related to run with run number ${runNumber}`, {
       status: response.status,

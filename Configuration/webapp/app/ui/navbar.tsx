@@ -14,6 +14,7 @@
 
 import { NavLink } from 'react-router';
 import type { NavLinkProps } from 'react-router';
+import { getSessionData } from '~/services/session';
 
 const StyledNavLink = ({ children, ...props }: NavLinkProps) => (
   <NavLink {...props} className={({ isActive }) => `btn btn-tab ${isActive ? 'selected' : ''}`}>
@@ -28,7 +29,7 @@ export const Navbar = () => (
       <StyledNavLink className={'btnStyledNav btn-tab'} to={'/runs'}>
         Runs
       </StyledNavLink>
+      <button onClick={() => alert(JSON.stringify(getSessionData()))}>Log session data</button>
     </div>
-    <div></div>
   </nav>
 );
