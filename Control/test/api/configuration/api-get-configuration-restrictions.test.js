@@ -69,7 +69,7 @@ describe(`'API - GET - /configurations/restrictions' test suite`, () => {
       status: 503,
       title: "Service Unavailable"
     };
-    await request(`${TEST_URL}/api/configurations`)
+    await request(`${TEST_URL}/api/configurations/restrictions`)
       .get(`/consul-failure?token=${ADMIN_TEST_TOKEN}`)
       .expect(503, expectedError);
   });

@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-const { NotFoundError, LogManager } = require("@aliceo2/web-ui");
-const { computeRestrictions } = require("../adapters/ConsulConfigurationAdapter");
+const { LogManager } = require("@aliceo2/web-ui");
+const { computeRestrictions } = require("../adapters/QCConfigurationAdapter");
 
 /**
  * @class
@@ -91,9 +91,6 @@ class QCConfigurationService {
    */
   async getConfigurationRestrictionsByKey(key) {
     const configuration = await this._consulService.getOnlyRawValueByKey(key);
-    if (!configuration) {
-      throw new NotFoundError(`Configuration not found for key: ${key}`);
-    }
     return computeRestrictions(configuration);
   }
   

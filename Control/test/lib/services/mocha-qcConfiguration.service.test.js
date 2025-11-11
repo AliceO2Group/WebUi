@@ -146,6 +146,30 @@ describe(`'QCConfigurationService' test suite`, () => {
     });
   });
 
+  describe(`'getConfigurationRestrictionsByKey' test suite`, () => {
+    it('should return restrictions for a valid key', async () => {
+      const key = 'any/prefix1';
+      const mockConfiguration = { key1: 'value1', key2: 'value2' };
+      const expectedRestrictions = { key1: 'string', key2: 'string' };
+      consulServiceStub.getOnlyRawValueByKey.resolves(mockConfiguration);
+
+      const restrictions = await qcConfigurationService.getConfigurationRestrictionsByKey(key);
+
+      assert.ok(consulServiceStub.getOnlyRawValueByKey.calledOnceWith(key));
+      assert.deepStrictEqual(restrictions, expectedRestrictions);
+    });
+    
+    it('should propagate errors from the consul service', async () => {
+      const testError = new Error('Consul not working');
+      consulServiceStub.getOnlyRawValueByKey.rejects(testError);
+
+      await assert.rejects(
+        async () => await qcConfigurationService.getConfigurationRestrictionsByKey('any'),
+        testError
+      );
+    });
+  });
+
   describe(`'editConfigurationByKey' test suite`, () => {
     let qcConfigurationService;
     before(() => {

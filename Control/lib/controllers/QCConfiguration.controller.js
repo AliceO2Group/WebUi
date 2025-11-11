@@ -117,7 +117,7 @@ class QCConfigurationController {
       if (error.message?.includes('Non-2xx status code: 404')) {
         updateAndSendExpressResponseFromNativeError(res, new NotFoundError(`Configuration not found for key: ${key}`));
       } else {
-        updateAndSendExpressResponseFromNativeError(res, error);
+        updateAndSendExpressResponseFromNativeError(res, new ServiceUnavailableError('Consul service unavailable'));
       }
     }
   }

@@ -25,6 +25,7 @@ describe(`'QCConfigurationController' test suite`, () => {
     qcConfigurationService = new QCConfigurationService({});
     qcConfigurationService.retrieveKeysOfValidConfigurations = sinon.stub();
     qcConfigurationService.retrieveConfigurationByKey = sinon.stub();
+    qcConfigurationService.getConfigurationRestrictionsByKey = sinon.stub();
 
     qcConfigurationController = new QCConfigurationController(
       qcConfigurationService,
@@ -120,6 +121,60 @@ describe(`'QCConfigurationController' test suite`, () => {
     });
   });
 
+  describe(`'getConfigurationRestrictionsByKeyHandler' test suite`, () => {
+    it('should return 200 with restrictions for a valid key', async () => {
+      const config = { key1: 'value1' };
+      const configKey = 'o2/qc/path/config1';
+      req.params.key = configKey;
+      qcConfigurationService.getConfigurationRestrictionsByKey.resolves(config);
+
+      await qcConfigurationController.getConfigurationRestrictionsByKeyHandler(req, res);
+
+      assert.ok(qcConfigurationService.getConfigurationRestrictionsByKey.calledWith(configKey));
+      assert.ok(statusStub.calledWith(200));
+      assert.deepStrictEqual(jsonStub.firstCall.args[0], config);
+    });
+
+    it('should return 400 if key is missing', async () => {
+      req.params.key = undefined;
+      
+      await qcConfigurationController.getConfigurationRestrictionsByKeyHandler(req, res);
+      
+      assert.ok(statusStub.calledWith(400));
+      assert.deepStrictEqual(jsonStub.firstCall.args[0].message, 'Missing configuration key');
+    });
+
+    it('should return 400 if key is an empty string', async () => {
+      req.params.key = '  ';
+        
+      await qcConfigurationController.getConfigurationRestrictionsByKeyHandler(req, res);
+        
+      assert.ok(statusStub.calledWith(400));
+      assert.deepStrictEqual(jsonStub.firstCall.args[0].message, 'Missing configuration key');
+    });
+
+    it('should return 404 when service throws a "404" error for a non-existent key', async () => {
+      const nonExistentKey = 'non-existent-key';
+      req.params.key = nonExistentKey;
+      qcConfigurationService.getConfigurationRestrictionsByKey.rejects(new Error('Non-2xx status code: 404'));
+
+      await qcConfigurationController.getConfigurationRestrictionsByKeyHandler(req, res);
+
+      assert.ok(statusStub.calledWith(404));
+      assert.deepStrictEqual(jsonStub.firstCall.args[0].message, `Configuration not found for key: ${nonExistentKey}`);
+    });
+
+    it('should return 503 when service throws a service unavailable error', async () => {
+      req.params.key = 'some-key';
+      qcConfigurationService.getConfigurationRestrictionsByKey.rejects(new Error('Consul not working'));
+
+      await qcConfigurationController.getConfigurationRestrictionsByKeyHandler(req, res);
+      
+      assert.ok(statusStub.calledWith(503));
+      assert.deepStrictEqual(jsonStub.firstCall.args[0].message, 'Consul service unavailable');
+    });
+  });
+  
   describe(`'getConfigurationByKeyHandler' test suite`, () => {
     it('should return 200 with configuration for a valid key', async () => {
       const config = { key1: 'value1' };
