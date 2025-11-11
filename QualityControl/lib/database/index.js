@@ -14,13 +14,15 @@
 
 import { LogManager } from '@aliceo2/web-ui';
 
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/database`;
+
 /**
  * Initializes the database connection and runs migrations.
  * @param {object} sequelizeDatabase - The Sequelize database instance.
  * @returns {Promise<void>} A promise that resolves when the database is initialized.
  */
 export const initDatabase = async (sequelizeDatabase) => {
-  const _logger = LogManager.getLogger('qcg/database');
+  const _logger = LogManager.getLogger(LOG_FACILITY);
   try {
     await sequelizeDatabase.connect();
     await sequelizeDatabase.migrate();

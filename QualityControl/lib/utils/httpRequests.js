@@ -46,7 +46,7 @@ export function httpGetJson(hostname, port, path, options) {
  * @param {number} port - Target server port.
  * @param {string} path - Request path.
  * @param {object} options - Additional HTTP options.
- * @returns {Promise<{status: number, headers: object}>}
+ * @returns {Promise<{status: number, headers: object}>} - HTTP headers and status code.
  */
 export function httpHeadJson(hostname, port, path, options) {
   const httpOptions = _getHttpOptions(options);
@@ -135,7 +135,7 @@ function _getHttpOptions(options = {}) {
 /**
  * Returns the correct HTTP(S) client based on protocol.
  * @param {string} protocol - 'http:' or 'https:'
- * @returns {typeof http | typeof https}
+ * @returns {typeof http | typeof https} - The HTTP(S) module to use for requests.
  */
 function _getHttpModuleByProtocol(protocol) {
   return protocol === 'https:' ? https : http;

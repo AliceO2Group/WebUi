@@ -30,6 +30,9 @@
 .layout-selected { border: 0.3em solid var(--color-primary); }
 .layout-edit-layer { cursor: move; opacity: 0; }
 
+.flex-grow { flex-grow: 1; }
+.justify-end { justify-content: end; }
+
 .cardGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -47,6 +50,7 @@
 .cardHeader { 
   padding-left: var(--space-s);
 }
+
 .cardHeader > h5 { 
   align-content: center;
 }
@@ -76,7 +80,7 @@
 .jsroot-container pre { background-color: initial; }
 .jsrootdiv:hover + .resize-element, .resize-element:hover{ display: flex !important; }
 
-.resize-button { position: absolute; right: 0%; z-index: 100 }
+.item-action-row { position: absolute; right: 0%; z-index: 100 }
 
 /* Removing borders and arrows from select-dropdown */
 /* select {-webkit-appearance: none;-moz-appearance: none;text-indent: 1px;text-overflow: '';} */
@@ -114,4 +118,21 @@
 .error-icon {
   font-size: 2em;
   margin-bottom: .5em;
+}
+
+.status-ongoing {
+  color: var(--color-success);
+  animation: ongoing-pulse 1s ease-in-out infinite;
+}
+
+@keyframes ongoing-pulse {
+  0% {
+    color: var(--color-success);
+  }
+  50% {
+    color: var(--color-success-dark);
+  }
+  100% {
+    color: var(--color-success);
+  }
 }

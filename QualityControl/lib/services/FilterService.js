@@ -13,7 +13,9 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
-const logger = LogManager.getLogger('filter/service');
+import { RunStatus } from '../../common/library/runStatus.enum.js';
+
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/filter-service`;
 
 /**
  * High level service that composes, processes and maps data from the bookkeeping service
@@ -22,11 +24,20 @@ export class FilterService {
   /**
    * Creates an instance of FilterService to map and expose data from the bookkeeping service.
    * @param {BookkeepingService} bookkeepingService - Low level data provider fetching raw data from the BKP source
+   * @param {object} config - Config object file that defines the refresh intervals for checking run status and runtypes
    */
-  constructor(bookkeepingService) {
+  constructor(bookkeepingService, config) {
+    this._logger = LogManager.getLogger(LOG_FACILITY);
     this._bookkeepingService = bookkeepingService;
     this._runTypes = [];
     this.initFilters();
+
+    this._runTypesRefreshInterval = config?.bookkeeping?.runTypesRefreshInterval ??
+      (config?.bookkeeping ? 24 * 60 * 60 * 1000 : -1);
+
+    this.initFilters().catch((error) => {
+      this._logger.errorMessage(`FilterService initialization failed: ${error.message || error}`);
+    });
   }
 
   /**
@@ -54,9 +65,17 @@ export class FilterService {
       }
       this._runTypes.sort();
     } catch (error) {
-      logger.errorMessage(`Error while retrieving run types: ${error.message || error}`);
+      this._logger.errorMessage(`Error while retrieving run types: ${error.message || error}`);
       this._runTypes = [];
     }
+  }
+
+  /**
+   * Returns the interval in milliseconds for how often the list of run types should be refreshed.
+   * @returns {number} Interval in milliseconds for refreshing the list of run types.
+   */
+  get runTypesRefreshInterval() {
+    return this._runTypesRefreshInterval;
   }
 
   /**
@@ -65,5 +84,21 @@ export class FilterService {
    */
   get runTypes() {
     return [...this._runTypes];
+  }
+
+  /**
+   * This method is used to retrieve the run status from the bookkeeping service
+   * @param {number} runNumber - run number to retrieve the status for
+   * @returns {Promise<string>} - resolves with the run status
+   */
+  async getRunStatus(runNumber) {
+    try {
+      const runStatus = await this._bookkeepingService.retrieveRunStatus(runNumber);
+      return runStatus;
+    } catch (error) {
+      const message = `Error while retrieving run status for run ${runNumber}: ${error.message || error}`;
+      this._logger.errorMessage(message);
+      return RunStatus.UNKNOWN;
+    }
   }
 }

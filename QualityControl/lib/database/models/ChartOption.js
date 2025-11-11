@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { INTEGER, STRING, DATE, NOW } from 'sequelize';
+import { INTEGER, DATE, NOW } from 'sequelize';
 
 /**
  * ChartOption model that represents the association between charts and options.
@@ -27,7 +27,7 @@ export default (sequelize) => {
       autoIncrement: true,
     },
     chart_id: {
-      type: STRING(250),
+      type: INTEGER,
       allowNull: false,
       references: {
         model: 'Chart',

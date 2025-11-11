@@ -127,13 +127,24 @@ message Ev_RunEvent {
   common.User lastRequestUser = 8;
 }
 
+/**
+ * Beam mode changes are propagated as Kafka events and to be sent by the BKP-LHC-Client on a dedicated topic
+ * e.g. dip.lhc.beam_mode
+ */
+message Ev_BeamModeEvent {
+  int64 timestamp = 1;            // milliseconds since epoch when the beam mode change happened
+  common.BeamInfo beamInfo = 2;
+}
+
 message Event {
   int64 timestamp = 1;
   int64 timestampNano = 2;
   reserved 3 to 10;
   reserved 17 to 100;
+  reserved 104 to 199;
 
   oneof Payload {
+    // Events produced by AliECS
     Ev_EnvironmentEvent environmentEvent                 = 11;
     Ev_TaskEvent taskEvent                               = 12;
     Ev_RoleEvent roleEvent                               = 13;
@@ -141,8 +152,12 @@ message Event {
     Ev_IntegratedServiceEvent integratedServiceEvent     = 15;
     Ev_RunEvent runEvent                                 = 16;
 
+    // Meta events produced by AliECS or its components
     Ev_MetaEvent_FrameworkEvent frameworkEvent           = 101;
     Ev_MetaEvent_MesosHeartbeat mesosHeartbeatEvent      = 102;
     Ev_MetaEvent_CoreStart coreStartEvent                = 103;
+
+    // Events produced by other systems, but natively supported and defined by AliECS
+    Ev_BeamModeEvent beamModeEvent                       = 200;
   }
 }

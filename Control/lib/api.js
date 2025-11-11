@@ -21,9 +21,11 @@ const config = require('./config/configProvider.js');
 const { DetectorId } = require('./common/detectorId.enum.js');
 
 // middleware
-const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 const {addDetectorIdMiddleware} = require('./middleware/addDetectorId.middleware.js');
+const {logDeploymentRequestMiddleware} = require('./middleware/logDeploymentRequest.middleware.js');
+const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 const {requireDetectorOrGlobalRoleMiddleware} = require('./middleware/requireDetectorOrGlobalRole.middleware.js');
+const {validateConsulServiceMiddlewareFactory} = require('./middleware/validateConsulServiceMiddlewareFactory.js');
 
 const {
   setDetectorsFromEnvironmentMiddlewareFactory
@@ -33,11 +35,14 @@ const {
 } = require('./middleware/getDetectorsLockOwnershipMiddlewareFactory.js');
 
 // controllers
+const {QCConfigurationController} = require('./controllers/QCConfiguration.controller.js');
 const {ConsulController} = require('./controllers/Consul.controller.js');
+const {DeploymentController} = require('./controllers/Deployment.controller.js');
 const {EnvironmentController} = require('./controllers/Environment.controller.js');
 const {LockController} = require('./controllers/Lock.controller.js');
 const {RunController} = require('./controllers/Run.controller.js');
 const {StatusController} = require('./controllers/Status.controller.js');
+const {TaskController} = require('./controllers/Task.controller.js');
 const {WebSocketService} = require('./services/WebSocket.service.js');
 const {WorkflowTemplateController} = require('./controllers/WorkflowTemplate.controller.js');
 
@@ -45,21 +50,23 @@ const {WorkflowTemplateController} = require('./controllers/WorkflowTemplate.con
 const {BookkeepingService} = require('./services/Bookkeeping.service.js');
 const {BroadcastService} = require('./services/Broadcast.service.js');
 const {CacheService} = require('./services/Cache.service.js');
-const {EnvironmentCacheService} = require('./services/environment/EnvironmentCache.service.js');
+const {DeploymentService} = require('./services/Deployment.service.js');
 const {DetectorService} = require('./services/Detector.service.js');
+const {EnvironmentCacheService} = require('./services/environment/EnvironmentCache.service.js');
 const {EnvironmentService} = require('./services/Environment.service.js');
 const {Intervals} = require('./services/Intervals.service.js');
 const {LockService} = require('./services/Lock.service.js');
 const {RunService} = require('./services/Run.service.js');
 const {StatusService} = require('./services/Status.service.js');
+const {TaskService} = require('./services/Task.service.js');
 const {WorkflowTemplateService} = require('./services/WorkflowTemplate.service.js');
+const {QCConfigurationService} = require('./services/QCConfiguration.service.js');
 
 // web-ui services
 const {NotificationService, ConsulService} = require('@aliceo2/web-ui');
 
 // AliECS Core
 const { AliEcsSynchronizer } = require('./kafka/AliEcsSynchronizer.js');
-const AliecsRequestHandler = require('./control-core/RequestHandler.js');
 const ApricotService = require('./control-core/ApricotService.js');
 const ControlService = require('./control-core/ControlService.js');
 const GrpcServiceClient = require('./control-core/GrpcServiceClient.js');
@@ -82,6 +89,11 @@ if (!config.grafana) {
 
 module.exports.setup = (http, ws) => {
   const eventEmitter = new EventEmitter();
+  
+  /**
+   * Services are initialized with the configuration they need and in order of their dependencies.
+   * The services are then used by the controllers to perform actions.
+   */
   let consulService;
   if (config.consul) {
     consulService = new ConsulService(config.consul);
@@ -91,8 +103,10 @@ module.exports.setup = (http, ws) => {
   const cacheService = new CacheService(broadcastService);
   const environmentCacheService = new EnvironmentCacheService(broadcastService, eventEmitter);
 
+  const qcConfigurationService = new QCConfigurationService(consulService);
+  const qcConfigurationController = new QCConfigurationController(qcConfigurationService, config.consul);
+
   const consulController = new ConsulController(consulService, config.consul);
-  consulController.testConsulStatus();
 
   const ctrlProxy = new GrpcServiceClient(config.grpc, O2_CONTROL_PROTO_PATH);
   const ctrlService = new ControlService(ctrlProxy, consulController, config.grpc, O2_CONTROL_PROTO_PATH);
@@ -108,13 +122,16 @@ module.exports.setup = (http, ws) => {
     ctrlProxy, apricotService, cacheService, broadcastService, environmentCacheService
   );
   const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
+  const deploymentService = new DeploymentService(environmentService, workflowService, environmentCacheService);
+  const taskService = new TaskService(ctrlProxy);
 
+  /**
+   * Controllers are initialized with the services they depend on.
+   */
   const envCtrl = new EnvironmentController(environmentService, workflowService, lockService, detectorService);
   const workflowController = new WorkflowTemplateController(workflowService);
-
-  const aliecsReqHandler = new AliecsRequestHandler(ctrlService, apricotService);
-  aliecsReqHandler.setWs(ws);
-  aliecsReqHandler.workflowService = workflowService;
+  const deploymentController = new DeploymentController(deploymentService, workflowService);
+  const taskController = new TaskController(taskService);
 
   const bkpService = new BookkeepingService(config.bookkeeping ?? {});
   const runService = new RunService(bkpService, apricotService, cacheService);
@@ -150,7 +167,7 @@ module.exports.setup = (http, ws) => {
 
   const intervals = new Intervals();
 
-  initializeData(apricotService, lockService);
+  initializeData(apricotService, lockService, consulService);
   initializeIntervals(intervals, statusService, runService, bkpService, environmentService);
 
   const coreMiddleware = [
@@ -158,13 +175,11 @@ module.exports.setup = (http, ws) => {
   ];
   const setDetectorsFromEnvironmentMiddleware = setDetectorsFromEnvironmentMiddlewareFactory(environmentService);
   const verifyLockOwnershipMiddleware = getDetectorsLockOwnershipMiddlewareFactory(lockService);
+  const validateConsulServiceMiddleware = validateConsulServiceMiddlewareFactory(consulService);
 
   ctrlProxy.methods.forEach(
     (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res)),
   );
-  http.post('/core/request', coreMiddleware, (req, res) => aliecsReqHandler.add(req, res));
-  http.get('/core/requests', coreMiddleware, (req, res) => aliecsReqHandler.getAll(req, res));
-  http.post('/core/removeRequest/:id', coreMiddleware, (req, res) => aliecsReqHandler.remove(req, res));
 
   http.get('/workflow/template/default/source', workflowController.getDefaultTemplateSource.bind(workflowController));
   http.get('/workflow/template/mappings', workflowController.getWorkflowMapping.bind(workflowController));
@@ -188,8 +203,40 @@ module.exports.setup = (http, ws) => {
     envCtrl.destroyEnvironmentHandler.bind(envCtrl),
   );
 
+  http.post('/deploy',
+    coreMiddleware,
+    logDeploymentRequestMiddleware,
+    minimumRoleMiddleware(Role.DETECTOR),
+    verifyLockOwnershipMiddleware,
+    deploymentController.newAsyncDeploymentHandler.bind(deploymentController)
+  );
+
+  http.delete('/deploy/:id',
+    minimumRoleMiddleware(Role.DETECTOR),
+    deploymentController.acknowledgeDeploymentFailureHandler.bind(deploymentController)
+  );
+
   http.post('/core/environments/configuration/save', (req, res) => apricotService.saveCoreEnvConfig(req, res));
   http.post('/core/environments/configuration/update', (req, res) => apricotService.updateCoreEnvConfig(req, res));
+
+  /**
+   * Tasks Routes
+   */
+  http.get('/tasks/:id',
+    coreMiddleware,
+    minimumRoleMiddleware(Role.DETECTOR),
+    taskController.getTaskHandler.bind(taskController)
+  );
+  http.get('/tasks',
+    coreMiddleware,
+    minimumRoleMiddleware(Role.DETECTOR),
+    taskController.getTaskListHandler.bind(taskController));
+  http.delete('/tasks',
+    coreMiddleware,
+    minimumRoleMiddleware(Role.ADMIN),
+    verifyLockOwnershipMiddleware,
+    taskController.cleanUpTasksHandler.bind(taskController)
+  );
 
   apricotProxy.methods.forEach(
     (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res)),
@@ -197,7 +244,6 @@ module.exports.setup = (http, ws) => {
   http.get('/core/detectors', (req, res) => apricotService.getDetectorList(req, res));
   http.get('/core/hostsByDetectors', (req, res) => apricotService.getHostsByDetectorList(req, res));
 
-  http.post('/execute/resources-cleanup', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
   http.post('/execute/o2-roc-config', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
 
   // Lock Service
@@ -214,9 +260,16 @@ module.exports.setup = (http, ws) => {
     requireDetectorOrGlobalRoleMiddleware,
     lockController.actionLockHandler.bind(lockController)
   );
+
+  http.put(`/locks/force/:action/${DetectorId.ALL}`,
+    minimumRoleMiddleware(Role.ADMIN),
+    addDetectorIdMiddleware(DetectorId.ALL),
+    lockController.actionForceLockHandler.bind(lockController)
+  );
   http.put('/locks/force/:action/:detectorId',
     minimumRoleMiddleware(Role.GLOBAL),
-    lockController.actionForceLockHandler.bind(lockController));
+    lockController.actionForceLockHandler.bind(lockController)
+  );
 
   // Status Service
   http.get('/status/consul', statusController.getConsulStatus.bind(statusController));
@@ -230,13 +283,35 @@ module.exports.setup = (http, ws) => {
     statusController.getAliECSIntegratedServicesStatus.bind(statusController),
   );
 
+  // Configuration
+  http.get(
+    '/configurations', validateConsulServiceMiddleware,
+    qcConfigurationController.getConfigurationsKeysHandler.bind(qcConfigurationController)
+  );
+  http.get(
+    '/configurations/:key(*)', validateConsulServiceMiddleware, 
+    qcConfigurationController.getConfigurationByKeyHandler.bind(qcConfigurationController)
+  );
+  http.put(
+    '/configurations/:key(*)', validateConsulServiceMiddleware,
+    qcConfigurationController.putConfigurationByKeyHandler.bind(qcConfigurationController)
+  );
+
   // Consul
-  const validateService = consulController.validateService.bind(consulController);
-  http.get('/consul/flps', validateService, consulController.getFLPs.bind(consulController));
-  http.get('/consul/crus', validateService, consulController.getCRUs.bind(consulController));
-  http.get('/consul/crus/config', validateService, consulController.getCRUsWithConfiguration.bind(consulController));
-  http.get('/consul/crus/aliases', validateService, consulController.getCRUsAlias.bind(consulController));
-  http.post('/consul/crus/config/save', validateService, consulController.saveCRUsConfiguration.bind(consulController));
+  http.get('/consul/flps', validateConsulServiceMiddleware, consulController.getFLPs.bind(consulController));
+  http.get('/consul/crus', validateConsulServiceMiddleware, consulController.getCRUs.bind(consulController));
+  http.get(
+    '/consul/crus/config', validateConsulServiceMiddleware, 
+    consulController.getCRUsWithConfiguration.bind(consulController)
+  );
+  http.get(
+    '/consul/crus/aliases', validateConsulServiceMiddleware, 
+    consulController.getCRUsAlias.bind(consulController)
+  );
+  http.post(
+    '/consul/crus/config/save', validateConsulServiceMiddleware, 
+    consulController.saveCRUsConfiguration.bind(consulController)
+  );
 };
 
 /**
@@ -280,8 +355,21 @@ function initializeIntervals(intervalsService, statusService, runService, bkpSer
  * Function to initialize in order dependent services
  * @param {ApricotService} apricotService - request initial set of data from AliECS/Apricot
  * @param {LockService} lockService - initialize service with data from Apricot
+ * @param {ConsulService} consulService - service for communicating with Consul
  */
-async function initializeData(apricotService, lockService) {
+async function initializeData(apricotService, lockService, consulService) {
+  testConsulStatus(consulService);
   await apricotService.init();
   lockService.setLockStatesForDetectors(apricotService.detectors);
+}
+
+/**
+ * Method to check if consul service can be used
+ * @param {ConsulService} consulService
+ */
+function testConsulStatus(consulService) {
+  consulService
+    .getConsulLeaderStatus()
+    .then((data) => logger.info(`Service is up and running on: ${data}`))
+    .catch((error) => logger.error(`Connection failed due to ${error}`));
 }

@@ -15,72 +15,144 @@
 import { deepStrictEqual } from 'node:assert';
 import { suite, test, beforeEach, afterEach } from 'node:test';
 import { FilterService } from '../../../lib/services/FilterService.js';
+import { RunStatus } from '../../../common/library/runStatus.enum.js';
 import { stub, restore } from 'sinon';
 
 export const filterServiceTestSuite = async () => {
   let filterService = null;
   let bookkeepingServiceMock = null;
+  const configMock = {
+    bookkeeping: {
+      runTypesRefreshInterval: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  };
 
   beforeEach(() => {
     bookkeepingServiceMock = {
       connect: stub(),
       retrieveRunTypes: stub(),
+      retrieveRunStatus: stub(),
       active: true, // assume the bookkeeping service is active by default
     };
+    filterService = new FilterService(bookkeepingServiceMock, configMock);
   });
 
   afterEach(() => {
     restore();
   });
 
-  suite('should create a new instance of FilterService', async () => {
-    test('should initialize _runTypes as empty array', () => {
-      filterService = new FilterService(bookkeepingServiceMock);
+  suite('constructor', async () => {
+    test('should initialize with a bookkeeping service and config', () => {
+      deepStrictEqual(filterService._bookkeepingService, bookkeepingServiceMock);
+      deepStrictEqual(filterService._runTypesRefreshInterval, configMock.bookkeeping.runTypesRefreshInterval);
+    });
+
+    test('should set runTypesRefreshInterval to -1 if not provided in config', () => {
+      const filterServiceWithoutConfig = new FilterService(bookkeepingServiceMock, {});
+      deepStrictEqual(filterServiceWithoutConfig._runTypesRefreshInterval, -1);
+    });
+
+    test('should set run types refresh interval to default if not provided', () => {
+      const filterServiceWithDefaultConfig = new FilterService(bookkeepingServiceMock, { bookkeeping: {} });
+      deepStrictEqual(filterServiceWithDefaultConfig._runTypesRefreshInterval, 24 * 60 * 60 * 1000);
+    });
+
+    test('should set run types refresh interval to the value from config', () => {
+      const customConfig = { bookkeeping: { runTypesRefreshInterval: 5000 } };
+      const filterServiceWithCustomConfig = new FilterService(bookkeepingServiceMock, customConfig);
+      deepStrictEqual(filterServiceWithCustomConfig._runTypesRefreshInterval, 5000);
+    });
+
+    test('should init filters on instantiation', async () => {
+      const initFiltersStub = stub(filterService, 'initFilters');
+      await filterService.initFilters();
+      deepStrictEqual(initFiltersStub.calledOnce, true);
+    });
+  });
+
+  suite('initFilters', async () => {
+
+  });
+
+  suite('getRunTypes', async () => {
+    test('should return if bookkeeping service is not active', async () => {
+      filterService._bookkeepingService.active = false;
+      await filterService.getRunTypes();
+      deepStrictEqual(filterService._runTypes, []);
+    });
+
+    test('should retrieve run types sorted from bookkeeping service', async () => {
+      filterService._bookkeepingService.retrieveRunTypes.resolves([{ name: 'type2' }, { name: 'type1' }]);
+      await filterService.getRunTypes();
+      deepStrictEqual(filterService._runTypes, ['type1', 'type2']);
+    });
+
+    test('should empty run types on error', async () => {
+      filterService._bookkeepingService.retrieveRunTypes.rejects(new Error('Error retrieving run types'));
+      await filterService.getRunTypes();
+      deepStrictEqual(filterService._runTypes, []);
+    });
+  });
+
+  suite('runTypesRefreshInterval', async () => {
+    test('should return the run types refresh interval', () => {
+      deepStrictEqual(filterService.runTypesRefreshInterval, configMock.bookkeeping.runTypesRefreshInterval);
+    });
+
+    test('should return -1 if no interval is set', () => {
+      const filterServiceWithoutConfig = new FilterService(bookkeepingServiceMock, {});
+      deepStrictEqual(filterServiceWithoutConfig.runTypesRefreshInterval, -1);
+    });
+  });
+
+  suite('runTypes', async () => {
+    test('should return the list of run types', () => {
+      filterService._runTypes = ['type1', 'type2'];
+      deepStrictEqual(filterService.runTypes, ['type1', 'type2']);
+    });
+
+    test('should return an empty array if no run types are set', () => {
+      filterService._runTypes = [];
       deepStrictEqual(filterService.runTypes, []);
     });
   });
 
-  suite('should get the run types', () => {
-    test('should throw an error if cannot retrieve run types from bookkeeping', async () => {
-      const error = new Error('Failed to fetch run types');
-      bookkeepingServiceMock.retrieveRunTypes.rejects(error);
-      filterService = new FilterService(bookkeepingServiceMock);
+  suite('getRunStatus', async () => {
+    test('should return run status from bookkeeping service when valid', async () => {
+      bookkeepingServiceMock.retrieveRunStatus.resolves(RunStatus.ONGOING);
 
-      await filterService.getRunTypes();
+      const result = await filterService.getRunStatus(123456);
 
-      deepStrictEqual(filterService.runTypes, []);
+      deepStrictEqual(bookkeepingServiceMock.retrieveRunStatus.calledWith(123456), true);
+      deepStrictEqual(result, RunStatus.ONGOING);
     });
 
-    test('should return the run types sorted by name', async () => {
-      const mockRunTypes = [
-        { name: 'Beta' },
-        { name: 'Alpha' },
-        { name: 'Gamma' },
-      ];
-      bookkeepingServiceMock.retrieveRunTypes.resolves(mockRunTypes);
-      filterService = new FilterService(bookkeepingServiceMock);
+    test('should return ENDED status from bookkeeping service', async () => {
+      bookkeepingServiceMock.retrieveRunStatus.resolves(RunStatus.ENDED);
 
-      await filterService.getRunTypes();
+      const result = await filterService.getRunStatus(789012);
 
-      deepStrictEqual(filterService.runTypes, ['Alpha', 'Beta', 'Gamma']);
+      deepStrictEqual(bookkeepingServiceMock.retrieveRunStatus.calledWith(789012), true);
+      deepStrictEqual(result, RunStatus.ENDED);
     });
 
-    test('should handle empty run types response', async () => {
-      bookkeepingServiceMock.retrieveRunTypes.resolves([]);
-      filterService = new FilterService(bookkeepingServiceMock);
+    test('should return NOT_FOUND status from bookkeeping service', async () => {
+      bookkeepingServiceMock.retrieveRunStatus.resolves(RunStatus.NOT_FOUND);
 
-      await filterService.getRunTypes();
+      const result = await filterService.getRunStatus(345678);
 
-      deepStrictEqual(filterService.runTypes, []);
+      deepStrictEqual(bookkeepingServiceMock.retrieveRunStatus.calledWith(345678), true);
+      deepStrictEqual(result, RunStatus.NOT_FOUND);
     });
 
-    test('should handle when bookkeeping service is not active', async () => {
-      bookkeepingServiceMock.active = false;
-      filterService = new FilterService(bookkeepingServiceMock);
+    test('should return UNKNOWN when bookkeeping service throws error', async () => {
+      const testError = new Error('Bookkeeping service unavailable');
+      bookkeepingServiceMock.retrieveRunStatus.rejects(testError);
 
-      // When the service is not active, getRunTypes shouldn't modify the runTypes
-      await filterService.getRunTypes();
-      deepStrictEqual(filterService.runTypes, []);
+      const result = await filterService.getRunStatus(123456);
+
+      deepStrictEqual(bookkeepingServiceMock.retrieveRunStatus.calledWith(123456), true);
+      deepStrictEqual(result, RunStatus.UNKNOWN);
     });
   });
 };

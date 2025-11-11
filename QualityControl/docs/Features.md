@@ -7,6 +7,7 @@
 - [AutoTransitioning Tabs within Layouts](#autotransitioning-tabs-within-layouts)
 - [Filters](#filters)
    - [Available Filters](#available-filters)
+- [Runs Mode](#runs-mode)
 - [Actions](#actions)
 - [Edit a Layout](#edit-a-layout)
    - [Via GUI](#1-via-gui)
@@ -55,6 +56,23 @@ Filters allow users to refine the displayed objects within a layout, ensuring on
 
 Only objects in the layout that match the selected filters will be displayed.
 
+## Runs Mode
+Runs Mode is a specialized viewing mode that allows users to focus on data from a specific run. When activated, it simplifies the interface by removing all other filters and applying only the run number filter. If the run is still ongoing, it will refresh the latest paths generated periodically.
+
+### How to Use Runs Mode
+1. Navigate to the object tree or layout view.
+2. Select a specific run number to enter Runs Mode.
+3. The interface will automatically switch to show only data from the selected run.
+4. Use the "Exit" button in the run mode header to return to normal filtering mode.
+
+### Run Mode Header
+When in Runs Mode, a header appears at the top of the interface showing:
+- The current run number (e.g., "Run #12345")
+- The run status (ONGOING or ENDED)
+- An information button that provides status explanations
+- An exit button to leave Runs Mode
+
+
 ## Actions
 Users can perform the following actions within the layout editor:
 
@@ -82,3 +100,4 @@ The GUI provides an intuitive and user-friendly way for layout creators to edit 
    - The system validates the JSON structure to ensure it is correctly formatted.
    - Certain fields, such as the `ID`, cannot be set manually.
 5. Make the necessary changes and click `Save`.
+

@@ -46,15 +46,32 @@ Attribute to define the `Bookkeeping` endpoint. If this configuration is not pro
 
 - `url` - URL for accessing Bookkeeping API
 - `token` - Authentication token required to interact with the API securely.
-- `refreshRate` - Frequency (in miliseconds) at which the bookkeeping data is refreshed or synchronized.
+- `runTypesRefreshInterval` - Frequency (in miliseconds) at which the runtypes from bookkeeping are refreshed or synchronized.
+- `runStatusRefreshInterval` - Frequency (in miliseconds) at which the the status of ongoing runs from bookkeeping are refreshed or synchronized.
 
 ```javascript
 bookkeeping: {
-  url: 'http://localhost:4000',
+  url: 'http://localhost:4000', 
   token: 'example-token',
-  refreshRate: 15000000
-}
+  runTypesRefreshInterval: 15000,
+  runStatusRefreshInterval: 30000,
+},
+```
 
+### KafkaJS
+QCG provides live updates with respect to the ongoing runs in the configured environment. This is achieved via Kafka and [QCG Run Mode](./Features.md#runs-mode)
+The following object should be used as configuration template if use of Kafka is desired:
+
+```js
+  kafka: {
+    enabled: false, // if kafka should be used in QCG startup
+    clientId: 'qcg-client-local',
+    consumerGroups: {
+      QCG_RUN: 'qcg-run-local'
+    },
+    brokers: ['localhost:9092'],
+  },
+```
 
 ### QC Environment Configuration
 In the qc section, you can define whether QCG should be started as part of a Quality Control (QC) integrated environment.
