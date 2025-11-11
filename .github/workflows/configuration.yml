@@ -59,7 +59,7 @@ jobs:
       - name: Wait for backend to be ready
         run: npx wait-on http://localhost:8081 --timeout 120000
       - name: Start frontend (Configuration) in background
-        run: (cd Configuration/webapp; npm start &)
+        run: (cd Configuration; docker compose up -d)
       - name: Wait for frontend to be ready
         run: npx wait-on http://localhost:8080 --timeout 120000
       - name: Run frontend (Configuration) tests
