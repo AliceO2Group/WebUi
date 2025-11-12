@@ -102,7 +102,7 @@ const detectorLocksTable = (model, detectorLocksState) => {
     h('thead',
       h('tr',
         LOCK_TABLE_HEADER_KEYS.map((header) => h('th', header)),
-        isUserAllowedRole(ROLES.Admin) && h('th', 'Admin actions')
+        isUserAllowedRole(ROLES.Global) && h('th', 'Global actions')
       )
     ),
     h('tbody', [
@@ -138,7 +138,7 @@ const detectorLockRow = (model, detector, lockState) => {
       ])
     ),
     h('td', ownerName),
-    isUserAllowedRole(ROLES.Admin) && h('td', [
+    isUserAllowedRole(ROLES.Global) && h('td', [
       detectorLockActionButton(model.lock, detector, lockState, DetectorLockAction.RELEASE, true, 'Force Release'),
       detectorLockActionButton(model.lock, detector, lockState, DetectorLockAction.TAKE, true, 'Force Take')
     ])
