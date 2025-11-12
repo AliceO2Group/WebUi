@@ -15,16 +15,43 @@
 import { List } from '@mui/material';
 import ConfigNavigatorItem from './ConfigNavigatorItem';
 import { useConfigurationKeysQuery } from '~/api/query/useConfigurationKeysQuery';
+import { useEffect, useState } from 'react';
+import { useConfigurationNavigate } from '~/hooks/useConfigurationNavigate';
 
 export const ConfigNavigator = () => {
-  const { data: configKeys, isError, error } = useConfigurationKeysQuery();
+  const {
+    data: configKeys,
+    isError,
+    error,
+    isLoading: areConfigKeysLoading,
+  } = useConfigurationKeysQuery();
+
+  const [selectedConfigurationPath, setSelectedConfigurationPath] = useState<string | undefined>();
+
+  const navigate = useConfigurationNavigate();
+
+  useEffect(() => {
+    if (configKeys) {
+      setSelectedConfigurationPath(configKeys[0]);
+      navigate(configKeys[0]);
+    }
+  }, [configKeys, areConfigKeysLoading]);
 
   return (
     <List className="config_navigator">
       {isError ? (
         <p>Error while fetching configuration keys: {error?.message ?? 'Unknown error'}</p>
       ) : (
-        configKeys?.map((text: string) => <ConfigNavigatorItem key={text} title={text} />)
+        configKeys?.map((configKey: string) => (
+          <ConfigNavigatorItem
+            key={configKey}
+            title={configKey}
+            isSelected={configKey === selectedConfigurationPath}
+            onClick={() => {
+              setSelectedConfigurationPath(configKey);
+            }}
+          />
+        ))
       )}
     </List>
   );
