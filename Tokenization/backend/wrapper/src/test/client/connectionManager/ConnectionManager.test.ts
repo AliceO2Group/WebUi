@@ -12,96 +12,64 @@
  * or submit itself to any jurisdiction.
  */
 
-import * as grpc from "@grpc/grpc-js";
-import { ConnectionManager } from "../../../client/ConnectionManager/ConnectionManager";
-import {
-  ConnectionDirection,
-  DuplexMessageEvent,
-} from "../../../models/message.model";
+import * as grpc from '@grpc/grpc-js';
 
-// Mock duplex stream
-const mockStream = {
-  on: jest.fn(),
-  end: jest.fn(),
-};
-
-// Mock gRPC client
-const mockClient = {
-  ClientStream: jest.fn(() => mockStream),
-};
-
-// Mock CentralSystem constructor
-const CentralSystemMock = jest.fn(() => mockClient);
-
-// Mock dispatcher
-const mockDispatch = jest.fn();
-jest.mock(
-  "../../../client/ConnectionManager/EventManagement/CentralCommandDispatcher",
-  () => ({
-    CentralCommandDispatcher: jest.fn(() => ({
-      dispatch: mockDispatch,
-      register: jest.fn(),
-    })),
-  })
-);
-
-// Mock logger
-jest.mock(
-  "@aliceo2/web-ui",
-  () => ({
-    LogManager: {
-      getLogger: () => ({
-        infoMessage: jest.fn(),
-        debugMessage: jest.fn(),
-        errorMessage: jest.fn(),
-      }),
-    },
-  }),
-  { virtual: true }
-);
-
-// Mock gRPC proto loader and client
-jest.mock("@grpc/proto-loader", () => ({
-  loadSync: jest.fn(() => {
-    return {};
-  }),
-}));
-
+// Capture service impl registered on grpc.Server.addService
 let capturedServerImpl: any | null = null;
 
-jest.mock("@grpc/grpc-js", () => {
-  const original = jest.requireActual("@grpc/grpc-js");
-  const Peer2PeerMock: any = jest.fn(() => ({
-    Fetch: jest.fn(),
-  }));
-  // simulation of the service definition
-  Peer2PeerMock.service = {
-    Fetch: {
-      path: "/webui.tokenization.Peer2Peer/Fetch",
-      requestStream: false,
-      responseStream: false,
-      requestSerialize: (x: any) => x,
-      requestDeserialize: (x: any) => x,
-      responseSerialize: (x: any) => x,
-      responseDeserialize: (x: any) => x,
-    },
-  };
+// Mock proto-loader
+jest.mock('@grpc/proto-loader', () => ({
+  loadSync: jest.fn(() => ({})),
+}));
 
-  // Mock server
+// CentralSystem client mock returned from loadPackageDefinition
+const CentralSystemClientMock = jest.fn();
+
+// Minimal Peer2Peer client ctor placeholder (only to pass into Connection)
+const Peer2PeerCtorMock = jest.fn();
+
+// Mock @grpc/grpc-js
+jest.mock('@grpc/grpc-js', () => {
+  const original = jest.requireActual('@grpc/grpc-js');
+
+  // Fake Server with hooks we can assert on
   const mockServer = {
     addService: jest.fn((_svc: any, impl: any) => {
       capturedServerImpl = impl;
     }),
-    bindAsync: jest.fn((_addr: any, _creds: any, cb: any) => cb(null)),
+    bindAsync: jest.fn((_addr: string, _creds: any, cb: any) => cb(null)),
     forceShutdown: jest.fn(),
   };
+  const ServerCtor = jest.fn(() => mockServer);
 
-  const mockServerCtor = jest.fn(() => mockServer);
+  // loadPackageDefinition returns namespaced wrappers (CentralSystem + Peer2Peer)
+  const loadPackageDefinition = jest.fn(() => ({
+    webui: {
+      tokenization: {
+        CentralSystem: CentralSystemClientMock,
+        Peer2Peer: Object.assign(Peer2PeerCtorMock, {
+          // Simulated service definition used by addService
+          service: {
+            Fetch: {
+              path: '/webui.tokenization.Peer2Peer/Fetch',
+              requestStream: false,
+              responseStream: false,
+              requestSerialize: (x: any) => x,
+              requestDeserialize: (x: any) => x,
+              responseSerialize: (x: any) => x,
+              responseDeserialize: (x: any) => x,
+            },
+          },
+        }),
+      },
+    },
+  }));
 
   return {
     ...original,
+    loadPackageDefinition,
     credentials: {
-      createInsecure: jest.fn(),
+      createInsecure: jest.fn(() => ({})),
     },
     ServerCredentials: {
       createInsecure: jest.fn(() => ({})),
@@ -110,26 +78,91 @@ jest.mock("@grpc/grpc-js", () => {
       ...original.status,
       INTERNAL: 13,
     },
-    loadPackageDefinition: jest.fn(() => ({
-      webui: {
-        tokenization: {
-          CentralSystem: CentralSystemMock,
-          Peer2Peer: Peer2PeerMock,
-        },
-      },
-    })),
-    Server: mockServerCtor,
+    Server: ServerCtor,
   };
 });
 
-describe("ConnectionManager", () => {
-  let conn: ConnectionManager;
+// Mock CentralCommandDispatcher
+const dispatcherRegisterMock = jest.fn();
+jest.mock(
+  '../../../client/connectionManager/eventManagement/CentralCommandDispatcher',
+  () => ({
+    CentralCommandDispatcher: jest.fn().mockImplementation(() => ({
+      register: dispatcherRegisterMock,
+    })),
+  }),
+  { virtual: true }
+);
 
+// Mock CentralConnection
+const centralStartMock = jest.fn();
+const centralDisconnectMock = jest.fn();
+jest.mock(
+  '../../../client/connectionManager/CentralConnection',
+  () => ({
+    CentralConnection: jest.fn().mockImplementation(() => ({
+      start: centralStartMock,
+      disconnect: centralDisconnectMock,
+    })),
+  }),
+  { virtual: true }
+);
+
+// Track Connection instances & allow status changes
+type FakeConnInit = { token: string; address: string; direction: any; peerCtor: any };
+const createdConnections: any[] = [];
+const connectionCtorMock = jest.fn().mockImplementation(function (this: any, token: string, address: string, direction: any, peerCtor: any) {
+  this._token = token;
+  this._address = address;
+  this.direction = direction;
+  this.status = undefined;
+  this.targetAddress = address;
+  this.token = token;
+  // keep basic API similar enough for the code under test
+  Object.defineProperty(this, 'status', {
+    get: () => this._status,
+    set: (v) => (this._status = v),
+    configurable: true,
+  });
+  createdConnections.push({ token, address, direction, peerCtor, instance: this });
+});
+jest.mock(
+  '../../../client/connection/Connection',
+  () => ({
+    Connection: connectionCtorMock,
+  }),
+  { virtual: true }
+);
+
+// Mock logger
+const infoMessageMock = jest.fn();
+const errorMessageMock = jest.fn();
+jest.mock(
+  '@aliceo2/web-ui',
+  () => ({
+    LogManager: {
+      getLogger: () => ({
+        infoMessage: infoMessageMock,
+        errorMessage: errorMessageMock,
+        debugMessage: jest.fn(),
+      }),
+    },
+  }),
+  { virtual: true }
+);
+
+// Now import the SUT (after mocks)
+import { ConnectionManager } from '../../../client/connectionManager/ConnectionManager';
+import { ConnectionDirection } from '../../../models/message.model';
+import { ConnectionStatus } from '../../../models/connection.model';
+
+describe('ConnectionManager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedServerImpl = null;
+    createdConnections.length = 0;
+    // @ts-ignore
     global.fetch = jest.fn();
-    conn = new ConnectionManager("dummy.proto", "localhost:12345");
   });
 
   afterAll(() => {
@@ -137,181 +170,246 @@ describe("ConnectionManager", () => {
     delete global.fetch;
   });
 
-  test("should initialize client with correct address", () => {
-    expect(conn).toBeDefined();
-    expect(grpc.loadPackageDefinition).toHaveBeenCalled();
-    expect(CentralSystemMock).toHaveBeenCalledWith(
-      "localhost:12345",
-      undefined
-    );
+  test('constructor: loads proto, builds wrapper/peerCtor and CentralSystem client', () => {
+    const cm = new ConnectionManager('proto/file.proto', 'central:5555');
+    expect(cm).toBeDefined();
+
+    // grpc.loadPackageDefinition called with proto-loader result
+    expect((grpc as any).loadPackageDefinition).toHaveBeenCalled();
+    // CentralSystem client created with address + insecure creds
+    expect(CentralSystemClientMock).toHaveBeenCalledWith('central:5555', expect.any(Object));
+    expect(grpc.credentials.createInsecure).toHaveBeenCalled();
   });
 
-  test("connectToCentralSystem() should set up stream listeners", () => {
-    conn.connectToCentralSystem();
+  test('registerCommandHandlers: calls dispatcher.register for each item', () => {
+    const cm = new ConnectionManager('p.proto', 'c:1');
+    dispatcherRegisterMock.mockClear();
 
-    expect(mockClient.ClientStream).toHaveBeenCalled();
-    expect(mockStream.on).toHaveBeenCalledWith("data", expect.any(Function));
-    expect(mockStream.on).toHaveBeenCalledWith("end", expect.any(Function));
-    expect(mockStream.on).toHaveBeenCalledWith("error", expect.any(Function));
+    const handlers = [
+      { event: 1 as any, handler: { handle: jest.fn() } as any },
+      { event: 2 as any, handler: { handle: jest.fn() } as any },
+    ];
+
+    cm.registerCommandHandlers(handlers);
+
+    expect(dispatcherRegisterMock).toHaveBeenCalledTimes(2);
+    expect(dispatcherRegisterMock).toHaveBeenCalledWith(handlers[0].event, handlers[0].handler);
+    expect(dispatcherRegisterMock).toHaveBeenCalledWith(handlers[1].event, handlers[1].handler);
   });
 
-  test("disconnectFromCentralSystem() should end stream", () => {
-    conn.connectToCentralSystem();
-    conn.disconnectFromCentralSystem();
+  test('connectToCentralSystem/disconnectFromCentralSystem delegate to CentralConnection', () => {
+    const cm = new ConnectionManager('p.proto', 'c:1');
+    // @ts-ignore
+    cm['_peerCtor'] = Peer2PeerCtorMock;
+    cm.connectToCentralSystem();
+    expect(centralStartMock).toHaveBeenCalled();
 
-    expect(mockStream.end).toHaveBeenCalled();
+    cm.disconnectFromCentralSystem();
+    expect(centralDisconnectMock).toHaveBeenCalled();
   });
 
-  test("should reconnect on stream 'end'", () => {
-    jest.useFakeTimers();
-    conn.connectToCentralSystem();
-    const onEnd = mockStream.on.mock.calls.find(
-      ([event]) => event === "end"
-    )?.[1];
+  test('createNewConnection: adds to sending map, sets CONNECTED, logs', () => {
+    const cm = new ConnectionManager('p.proto', 'c:1');
+    // @ts-ignore
+    cm['_peerCtor'] = Peer2PeerCtorMock;
+    const conn = cm.createNewConnection('peer-A', ConnectionDirection.SENDING, 'tok123');
 
-    onEnd?.(); // simulate 'end'
-    jest.advanceTimersByTime(2000);
+    // Constructed with provided token, address, direction, uses peerCtor from wrapper
+    expect(connectionCtorMock).toHaveBeenCalledWith('tok123', 'peer-A', ConnectionDirection.SENDING, expect.any(Function));
+    expect(conn.status).toBe(ConnectionStatus.CONNECTED);
 
-    expect(mockClient.ClientStream).toHaveBeenCalledTimes(2);
-    jest.useRealTimers();
+    // Exposed via connections getter
+    const { sending, receiving } = cm.connections;
+    expect(sending.length).toBe(1);
+    expect(receiving.length).toBe(0);
+
+    // Log called
+    expect(infoMessageMock).toHaveBeenCalledWith(expect.stringContaining('Connection with peer-A has been estabilished'));
   });
 
-  test("should reconnect on stream 'error'", () => {
-    jest.useFakeTimers();
-    conn.connectToCentralSystem();
-    const onError = mockStream.on.mock.calls.find(
-      ([event]) => event === "error"
-    )?.[1];
+  test('createNewConnection: adds to receiving map if direction is RECEIVING', () => {
+    const cm = new ConnectionManager('p.proto', 'c:1');
+    cm.createNewConnection('peer-B', ConnectionDirection.RECEIVING);
 
-    onError?.(new Error("Simulated error"));
-    jest.advanceTimersByTime(2000);
-
-    expect(mockClient.ClientStream).toHaveBeenCalledTimes(2);
-    jest.useRealTimers();
+    const { sending, receiving } = cm.connections;
+    expect(sending.length).toBe(0);
+    expect(receiving.length).toBe(1);
   });
 
-  test("should dispatch event when 'data' is received", () => {
-    conn.connectToCentralSystem();
-    const onData = mockStream.on.mock.calls.find(
-      ([event]) => event === "data"
-    )?.[1];
+  test('getConnectionByAddress: returns by direction; logs on invalid direction', () => {
+    const cm = new ConnectionManager('p.proto', 'c:1');
+    const s = cm.createNewConnection('s-1', ConnectionDirection.SENDING);
+    const r = cm.createNewConnection('r-1', ConnectionDirection.RECEIVING);
 
-    const mockMessage = {
-      event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
-      data: {
-        revokeToken: {
-          token: "abc123",
-          targetAddress: "peer-123",
-        },
-      },
-    };
+    expect(cm.getConnectionByAddress('s-1', ConnectionDirection.SENDING)).toBe(s);
+    expect(cm.getConnectionByAddress('r-1', ConnectionDirection.RECEIVING)).toBe(r);
 
-    onData?.(mockMessage);
-
-    expect(mockDispatch).toHaveBeenCalledWith(mockMessage);
+    errorMessageMock.mockClear();
+    const invalid = cm.getConnectionByAddress('x', 999 as any);
+    expect(invalid).toBeUndefined();
+    expect(errorMessageMock).toHaveBeenCalledWith('Invalid connection direction: 999');
   });
 
-  test("listenForPeers() should start server and register service", async () => {
-    await conn.listenForPeers(50055, "http://localhost:40041/api/");
+  test('connections getter: returns arrays (copies) of maps', () => {
+    const cm = new ConnectionManager('p.proto', 'c:1');
+    cm.createNewConnection('a', ConnectionDirection.SENDING);
+    cm.createNewConnection('b', ConnectionDirection.RECEIVING);
 
-    const serverCtor = (grpc.Server as any).mock;
-    expect(serverCtor).toBeDefined();
-    expect(serverCtor.calls.length).toBeGreaterThan(0);
+    const { sending, receiving } = cm.connections;
+    expect(Array.isArray(sending)).toBe(true);
+    expect(Array.isArray(receiving)).toBe(true);
+    expect(sending.length).toBe(1);
+    expect(receiving.length).toBe(1);
+  });
 
-    const serverInstance = serverCtor.results[0].value;
+  test('listenForPeers: creates server, registers service, binds & logs', async () => {
+    const cm = new ConnectionManager('p.proto', 'c:1');
+    await cm.listenForPeers(50099, 'http://localhost:41000/api/');
+
+    const ServerCtor = (grpc.Server as any).mock;
+    expect(ServerCtor).toBeDefined();
+    expect(ServerCtor.calls.length).toBeGreaterThan(0);
+
+    const serverInstance = ServerCtor.results[0].value;
     expect(serverInstance.addService).toHaveBeenCalled();
-    expect(serverInstance.bindAsync).toHaveBeenCalledWith(
-      "localhost:50055",
-      expect.anything(),
-      expect.any(Function)
-    );
+    expect(serverInstance.bindAsync).toHaveBeenCalledWith('localhost:50099', expect.anything(), expect.any(Function));
+    expect(infoMessageMock).toHaveBeenCalledWith('Peer server listening on localhost:50099');
 
-    // implementacja metody Fetch została przechwycona
+    // Service impl captured
     expect(capturedServerImpl).toBeTruthy();
-    expect(typeof capturedServerImpl.Fetch).toBe("function");
+    expect(typeof capturedServerImpl.Fetch).toBe('function');
   });
 
-  test("p2p Fetch should register incoming receiving connection and forward request", async () => {
-    await conn.listenForPeers(50056, "http://localhost:40041/api/");
+  test('listenForPeers: calling twice shuts previous server down', async () => {
+    const cm = new ConnectionManager('p.proto', 'c:1');
+    await cm.listenForPeers(50100, 'http://localhost:41000/api/');
+    const firstServer = (grpc.Server as any).mock.results[0].value;
 
-    // przygotuj dane wywołania
+    await cm.listenForPeers(50101, 'http://localhost:41000/api/');
+    expect(firstServer.forceShutdown).toHaveBeenCalled();
+  });
+
+  test('p2p Fetch: registers new incoming receiving connection, forwards to local API, maps response', async () => {
+    const cm = new ConnectionManager('p.proto', 'c:1');
+    await cm.listenForPeers(50102, 'http://local/api/');
+
+    // Prepare incoming call and callback
     const call = {
-      getPeer: () => "client-42",
+      getPeer: () => 'client-42',
       request: {
-        method: "POST",
-        path: "echo",
-        headers: { "content-type": "application/json" },
+        method: 'post',
+        path: 'echo',
+        headers: { 'content-type': 'application/json' },
         body: Buffer.from(JSON.stringify({ ping: true })),
       },
     } as any;
-
     const callback = jest.fn();
 
-    // @ts-ignore - mock global.fetch response
+    // Mock fetch response
+    // @ts-ignore
     global.fetch.mockResolvedValue({
       status: 202,
       headers: {
         forEach: (fn: (v: string, k: string) => void) => {
-          fn("application/json", "content-type");
-          fn("test", "x-extra");
+          fn('application/json', 'content-type');
+          fn('abc', 'x-extra');
         },
       },
       arrayBuffer: async () => Buffer.from(JSON.stringify({ ok: 1 })),
     });
 
-    const before = conn.getAllConnections().receiving.length;
+    const before = cm.connections.receiving.length;
     await capturedServerImpl.Fetch(call, callback);
 
-    expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:40041/api/echo",
-      {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ping: true }),
-      }
-    );
+    // Forwarded correctly (note body converted to string)
+    expect(global.fetch).toHaveBeenCalledWith('http://local/api/echo', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ ping: true }),
+    });
 
-    // callback with response from forwarded fetch
+    // Response mapped back to gRPC
     expect(callback).toHaveBeenCalledWith(null, {
       status: 202,
-      headers: { "content-type": "application/json", "x-extra": "test" },
+      headers: { 'content-type': 'application/json', 'x-extra': 'abc' },
       body: expect.any(Buffer),
     });
 
-    // connection receiving should be registered
-    const after = conn.getAllConnections().receiving.length;
+    // Receiving connection was created & stored
+    const after = cm.connections.receiving.length;
     expect(after).toBeGreaterThan(before);
 
-    const rec = conn.getConnectionByAddress(
-      "client-42",
-      ConnectionDirection.RECEIVING
-    );
-    expect(rec).toBeDefined();
+    const found = cm.getConnectionByAddress('client-42', ConnectionDirection.RECEIVING);
+    expect(found).toBeDefined();
+    expect(infoMessageMock).toHaveBeenCalledWith(expect.stringContaining('Incoming request from client-42'));
+    expect(infoMessageMock).toHaveBeenCalledWith(expect.stringContaining('New incoming connection registered for: client-42'));
   });
 
-  test("p2p Fetch should return INTERNAL on forward error", async () => {
-    await conn.listenForPeers(50057, "http://localhost:40041/api/");
+  test('p2p Fetch: uses existing receiving connection when present (no duplicate creation)', async () => {
+    const cm = new ConnectionManager('p.proto', 'c:1');
+    await cm.listenForPeers(50103, 'http://local/api/');
+
+    // Pre-create receiving connection
+    cm.createNewConnection('client-77', ConnectionDirection.RECEIVING);
+
+    // @ts-ignore
+    global.fetch.mockResolvedValue({
+      status: 200,
+      headers: { forEach: (fn: any) => fn('text/plain', 'content-type') },
+      arrayBuffer: async () => Buffer.from('ok'),
+    });
 
     const call = {
-      getPeer: () => "client-error",
-      request: {
-        method: "GET",
-        path: "fail",
-        headers: {},
-      },
+      getPeer: () => 'client-77',
+      request: { method: 'get', path: 'pong', headers: {}, body: undefined },
     } as any;
 
     const callback = jest.fn();
 
+    const before = cm.connections.receiving.length;
+    await capturedServerImpl.Fetch(call, callback);
+
+    // No new receiving connection added
+    const after = cm.connections.receiving.length;
+    expect(after).toBe(before);
+
+    // Forwarded with GET and no body
+    expect(global.fetch).toHaveBeenCalledWith('http://local/api/pong', {
+      method: 'GET',
+      headers: {},
+      body: undefined,
+    });
+
+    expect(callback).toHaveBeenCalledWith(
+      null,
+      expect.objectContaining({
+        status: 200,
+        headers: { 'content-type': 'text/plain' },
+        body: expect.any(Buffer),
+      })
+    );
+  });
+
+  test('p2p Fetch: on forward error returns INTERNAL and logs error', async () => {
+    const cm = new ConnectionManager('p.proto', 'c:1');
+    await cm.listenForPeers(50104, 'http://local/api/');
+
     // @ts-ignore
-    global.fetch.mockRejectedValue(new Error("err"));
+    global.fetch.mockRejectedValue(new Error('boom'));
+
+    const call = {
+      getPeer: () => 'err-client',
+      request: { method: 'get', path: 'fail', headers: {} },
+    } as any;
+    const callback = jest.fn();
 
     await capturedServerImpl.Fetch(call, callback);
 
+    expect(errorMessageMock).toHaveBeenCalledWith(expect.stringContaining('Error forwarding request'));
     expect(callback).toHaveBeenCalledWith(
       expect.objectContaining({
         code: grpc.status.INTERNAL,
-        message: "err",
+        message: 'boom',
       })
     );
   });

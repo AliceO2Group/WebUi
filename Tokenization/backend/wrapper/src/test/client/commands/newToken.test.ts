@@ -18,6 +18,9 @@ import { Connection } from '../../../client/connection/Connection';
 import { ConnectionManager } from '../../../client/connectionManager/ConnectionManager';
 import { Command } from 'models/commands.model';
 import { ConnectionDirection, DuplexMessageEvent } from '../../../models/message.model';
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
+import path from 'path';
 
 /**
  * Helper to create a new token command with given address, direction, and token.
@@ -36,7 +39,7 @@ function createEventMessage(targetAddress: string, connectionDirection: Connecti
 describe('NewTokenHandler', () => {
   let manager: ConnectionManager;
 
-  const protoPath = path.join(__dirname, '..', '..', '..', 'proto', 'wrapper.proto');
+  const protoPath = path.join(__dirname, '..', '..', '..', '..', '..', 'proto', 'wrapper.proto');
   const packageDef = protoLoader.loadSync(protoPath, {
     keepCase: true,
     longs: String,
@@ -62,7 +65,7 @@ describe('NewTokenHandler', () => {
         return undefined;
       }),
       createNewConnection: jest.fn(function (this: any, address: string, dir: ConnectionDirection, token: string) {
-        const conn = new Connection(token, address, dir);
+        const conn = new Connection(token, address, dir, peerCtor);
         if (dir === ConnectionDirection.SENDING) {
           this.sendingConnections.set(address, conn);
         } else {
@@ -75,7 +78,7 @@ describe('NewTokenHandler', () => {
 
   it('should update token on existing SENDING connection', async () => {
     const targetAddress = 'peer-123';
-    const conn = new Connection('old-token', targetAddress, ConnectionDirection.SENDING);
+    const conn = new Connection('old-token', targetAddress, ConnectionDirection.SENDING, peerCtor);
     (manager as any).sendingConnections.set(targetAddress, conn);
 
     const handler = new NewTokenHandler(manager);

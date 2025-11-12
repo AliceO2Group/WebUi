@@ -16,7 +16,7 @@ import { ConnectionManager } from './connectionManager/ConnectionManager';
 import { RevokeTokenHandler } from './commands/revokeToken/revokeToken.handler';
 import { ConnectionDirection, DuplexMessageEvent } from '../models/message.model';
 import { NewTokenHandler } from './commands/newToken/newToken.handler';
-import type { Connection } from './Connection/Connection';
+import type { Connection } from './connection/Connection';
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -66,7 +66,7 @@ export class gRPCWrapper {
    * Starts the Connection Manager stream connection with Central System
    */
   public async connectToClient(address: string, token?: string): Promise<Connection> {
-    return this._connectionManager.createNewConnection(address, ConnectionDirection.SENDING, token || '');
+    return this._connectionManager.createNewConnection(address, ConnectionDirection.SENDING, token ?? '');
   }
 
   /**

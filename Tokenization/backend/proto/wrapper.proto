@@ -88,9 +88,6 @@ message HttpLikeResponse {
 // ======================================
 
 enum MessageEvent {
-    // Unspecified event type
-    MESSAGE_EVENT_UNSPECIFIED = 0;
-
     // Default value, represents an empty event
     MESSAGE_EVENT_EMPTY = 0;
 

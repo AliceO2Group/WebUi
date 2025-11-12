@@ -115,7 +115,7 @@ export class ConnectionManager {
    * @param token Optional token for connection
    */
   createNewConnection(address: string, direction: ConnectionDirection, token?: string) {
-    const conn = new Connection(token ?? '', address, direction);
+    const conn = new Connection(token ?? '', address, direction, this._peerCtor);
 
     if (direction === ConnectionDirection.RECEIVING) {
       this._receivingConnections.set(address, conn);
