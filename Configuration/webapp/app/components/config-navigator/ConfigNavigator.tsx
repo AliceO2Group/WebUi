@@ -18,6 +18,12 @@ import { useConfigurationKeysQuery } from '~/api/query/useConfigurationKeysQuery
 import { useEffect, useState } from 'react';
 import { useConfigurationNavigate } from '~/hooks/useConfigurationNavigate';
 
+/**
+ * ConfigNavigator component
+ * Represents the list of avaiable configuration keys.
+ * Enables navigation to different configuration items.
+ * @returns {React.ReactElement} ConfigNavigator
+ */
 export const ConfigNavigator = () => {
   const {
     data: configKeys,
