@@ -15,6 +15,11 @@
 import { useNavigate } from 'react-router';
 import { BASE_CONFIGURATION_PATH } from '~/config';
 
+/**
+ * useConfigurationNavigate hook
+ * Provides a navigate function to navigate to a configuration path.
+ * @returns {(relativePath: string) => void} navigate function to navigate to a configuration path.
+ */
 export const useConfigurationNavigate = () => {
   const reactRouterNavigate = useNavigate();
 
