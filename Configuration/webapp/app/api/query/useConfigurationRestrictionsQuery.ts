@@ -12,20 +12,18 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useNavigate } from 'react-router';
 import { BASE_CONFIGURATION_PATH } from '~/config';
+import { useQuery } from '@tanstack/react-query';
+import axiosInstance from '../axiosInstance';
+import type { FormItemType } from '~/components/form/Form';
 
-/**
- * useConfigurationNavigate hook
- * Provides a navigate function to navigate to a configuration path.
- * @returns {(relativePath: string) => void} navigate function to navigate to a configuration path.
- */
-export const useConfigurationNavigate = () => {
-  const reactRouterNavigate = useNavigate();
+export const CONFIGURATION_RESTRICTIONS_QUERY_KEY = 'configuration-restrictions';
 
-  const navigate = (relativePath: string) => {
-    void reactRouterNavigate(`configuration/${BASE_CONFIGURATION_PATH}/${relativePath}`);
-  };
-
-  return navigate;
-};
+export const useConfigurationRestrictionsQuery = (configuration: string) =>
+  useQuery({
+    queryKey: [CONFIGURATION_RESTRICTIONS_QUERY_KEY, configuration],
+    queryFn: async () =>
+      axiosInstance
+        .get<FormItemType>(`configurations/restrictions/${BASE_CONFIGURATION_PATH}/${configuration}`)
+        .then((response) => response.data),
+  });

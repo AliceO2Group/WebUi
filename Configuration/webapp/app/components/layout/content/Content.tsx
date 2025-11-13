@@ -34,7 +34,7 @@ export const Content: FC<PropsWithChildren> = ({ children }) => {
       className="content-section"
     >
       <ContentHeader currentPath={configPath ?? ''} />
-      <Box sx={{ p: 3 }}>{children}</Box>
+      <Box sx={{ p: 3, overflow: 'auto', flexFrow: 1, minHeight: 0, maxHeight: '100%' }}>{children}</Box>
     </Box>
   );
 };
