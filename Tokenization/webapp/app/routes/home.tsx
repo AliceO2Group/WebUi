@@ -11,7 +11,6 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-
 import { Link } from 'react-router';
 
 import { useSetHeader } from '~/ui/header/headerContext';
@@ -22,8 +21,7 @@ import { useSetHeader } from '~/ui/header/headerContext';
  */
 export default function Home() {
 
-  const { setHeaderContent } = useSetHeader();
-  setHeaderContent('Admin Interface');
+  useSetHeader('Tokenization Admin Interface');
 
   return <>
     <h1>Welcome to (dummy) Tokenization GUI!</h1>

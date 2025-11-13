@@ -59,6 +59,7 @@ describe('Tokenization', function() {
   });
 
   require('./public/basic.cjs');
+  require('./public/token-tests.cjs');
 
   beforeEach(function () {
     return (this.ok = true);

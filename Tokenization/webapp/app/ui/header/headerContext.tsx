@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 
 /**
  * HeaderContext
@@ -30,8 +30,13 @@ export const HeaderContext = createContext({
 /**
  * UseSetHeader
  *
- * Custom React hook to access the HeaderContext.
- * Allows components to call setHeaderContent to update the header text.
- * @return The context value containing setHeaderContent.
+ * Changes content of header
+ * @param headerContent new value for context
  */
-export const useSetHeader = () => useContext(HeaderContext);
+export const useSetHeader = (headerContent: string) => {
+  const { setHeaderContent } = useContext(HeaderContext);
+
+  useEffect(() => {
+    setHeaderContent(headerContent);
+  }, [setHeaderContent, headerContent]);
+};

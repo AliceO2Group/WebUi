@@ -21,6 +21,7 @@ import { Box1_2 } from "../../components/box"
 import { useSetHeader } from '~/ui/header/headerContext';
 import {TokenTable, TokenTableContent} from '../../components/tokens/token-table'
 
+
 /**
  * Client loader that fetches all tokens from the API.
  *
@@ -40,16 +41,14 @@ export const clientLoader = async (): Promise<{ tokens: Promise<Token[]>; }> => 
 
 /**
  * Tokens overview page component with tabbed interface.
- * Displays a list of tokens and provides a placeholder for token creation.
+ * Displays a list of tokens
  *
- * @param loaderData - Array of tokens loaded by the client loader
+ * @param loaderData - Object containing the deferred tokens promise
  */
 export default function Overview() {
 
   const {tokens} = useLoaderData()
-
-  const { setHeaderContent } = useSetHeader();
-  setHeaderContent('Tokens');
+  useSetHeader('Tokens');
 
   return (  
     <div className="grid-1-2">

@@ -12,18 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { type RouteConfig, index, route, prefix } from '@react-router/dev/routes';
+export interface OptionType {
+  value: string;
+  label: string;
+}
 
-export default [
-  route('', 'ui/layout.tsx', [
-    index('routes/home.tsx'),
-    ...prefix('tokens', [
-      index('routes/tokens/overview.tsx'),
-      route(':tokenId', 'routes/tokens/details.tsx'),
-      // route('table', 'routes/tokens/table.tsx'),
-      route('new', 'routes/tokens/create.tsx')
-    ]),
-    route('*', 'routes/404.tsx'),
-  ]),
-
-] satisfies RouteConfig;
+export type HttpMethod = 'GET' | 'POST' | 'DELETE' | 'PUT';

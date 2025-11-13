@@ -34,8 +34,9 @@ const Logo = ({name}: {name: string}) => {
  * Uses useNavigation state to check if page is loaded
  */
 export default function Layout() {
-  const { state }  = useNavigation();
 
+  const { state }  = useNavigation();
+ 
   return (
     <div className='container relative'>
       <AppHeader>
