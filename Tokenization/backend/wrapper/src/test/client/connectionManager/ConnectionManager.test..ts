@@ -39,13 +39,17 @@ jest.mock('../../../client/ConnectionManager/EventManagement/CentralCommandDispa
 }));
 
 // Mock logger
-jest.mock('@aliceo2/web-ui', () => ({
-  LogManager: {
-    getLogger: () => ({
-      infoMessage: jest.fn(),
-    }),
-  },
-}));
+jest.mock(
+  '@aliceo2/web-ui',
+  () => ({
+    LogManager: {
+      getLogger: () => ({
+        infoMessage: jest.fn(),
+      }),
+    },
+  }),
+  { virtual: true }
+);
 
 // Mock gRPC proto loader and client
 jest.mock('@grpc/proto-loader', () => ({
