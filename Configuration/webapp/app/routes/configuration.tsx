@@ -12,23 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-<<<<<<<< HEAD:Tokenization/backend/wrapper/src/client/commands/revokeToken/revokeToken.command.ts
-import type { Command } from '../../../models/commands.model';
-import type { TokenMessage } from '../../../models/message.model';
-import { DuplexMessageEvent } from '../../../models/message.model';
-
-/**
- * @description Command used to trigger token revocation for a specific connection. Handles structure logic.
- */
-export class RevokeTokenCommand implements Command {
-  readonly event = DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN;
-  /**
-   * Constructor for RevokeTokenCommand.
-   * @param {TokenMessage} payload - TokenMessage containing the address and direction of the connection to be revoked.
-   */
-  constructor(public payload: TokenMessage) {}
-}
-========
 const ConfigurationPage = () => (
   <div>
     <h1>Configuration Details</h1>
@@ -36,4 +19,3 @@ const ConfigurationPage = () => (
 );
 
 export default ConfigurationPage;
->>>>>>>> 3016aa2c3b7969f234f18cb3eec22c2b2c580180:Configuration/webapp/app/routes/configuration.tsx
