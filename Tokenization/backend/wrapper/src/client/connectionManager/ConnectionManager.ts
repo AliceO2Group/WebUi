@@ -25,9 +25,6 @@ import { ConnectionStatus } from '../../models/connection.model';
 import { peerListener } from '../../utils/connection/peerListener';
 
 /**
- * @description Manages all the connection between clients and central system.
- */
-/**
  * Manages the lifecycle and connection logic for a gRPC client communicating with the central system.
  *
  * This class is responsible for:
