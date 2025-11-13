@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect, type SetStateAction } from 'react';
-import { type OptionType as Option } from '~/utils/types';
+import React, { useEffect, useRef, useState, type SetStateAction, type JSX, type PropsWithChildren } from 'react';
+import { type OptionType as Option, type DialogPropsBase as DPB } from '~/utils/types';
 
-interface SelectInterface<T extends string | number = string> {
+interface SelectInterface<T = string | number | (string | number)[]> {
   id: string;
   options: Option[];
   placeholder?: string;
@@ -10,19 +10,94 @@ interface SelectInterface<T extends string | number = string> {
   setValue: React.Dispatch<SetStateAction<T>>;
 }
 
-export function FormSelect<T extends string | number = string>({
+interface SelectLabelProps extends DPB {
+  selected: Option | Option[] | null;
+  placeholder: string;
+}
+
+interface SelectOptionsProps<T> extends DPB {
+  options: Option[];
+  handleSelect?: (value: T) => void;
+}
+
+const SelectFrame = ({open, setOpen, selected, placeholder}: SelectLabelProps) => {
+  let _selected: Option | null = Array.isArray(selected) ? (selected.length > 0 ? selected[0] : null) : selected;
+  
+  return (<div
+        onClick={() => setOpen((prev) => !prev)}
+        className="flex-row border p2 justify-between br2 bg-white bra2"
+      >
+        <span>
+          {_selected ? _selected.label : <span>{placeholder}</span>}
+        </span>
+        <span>{open ? '▴' : '▾'}</span>
+      </div>
+      )
+}
+
+const SelectFrameMulti = (props: SelectLabelProps) => {
+  let {open, setOpen, selected, placeholder} = props
+  let _selected: Option[] | null = Array.isArray(selected) ? selected : (selected ? [selected] : null);
+
+  return (<div
+        onClick={() => setOpen((prev) => !prev)}
+        className="flex-row border p2 justify-between br2 bg-white bra2"
+      >
+        <span>
+          {_selected && 
+            _selected.length > 0 ? 
+            _selected.map((s) => s.label).join(', '): 
+            <span>{placeholder}</span>}
+        </span>
+        <span>{open ? '▴' : '▾'}</span>
+      </div>
+      )
+
+}
+
+const SelectOptions = <T,>({open, setOpen, handleSelect, options}: SelectOptionsProps<T>) => {
+  const visibleOptions = options;
+  const _handleSelect = (val: T) => {
+    handleSelect && handleSelect(val);
+    setOpen(false);
+  }
+
+  return ( 
+    <>
+      {open && (
+            <ul className="absolute w-100 bg-white br2 decoration-none bra2 p0 level1 mv1">
+              {visibleOptions.length > 0 ? (
+                visibleOptions.map((opt) => (
+                  <li
+                    key={String(opt.value)}
+                    onClick={() => _handleSelect(opt.value as T)}
+                    className="f4 menu-item m0"
+                  >
+                    {opt.label}
+                  </li>
+                ))
+              ) : (
+                <li>No options available</li>
+              )}
+            </ul>
+      )}
+    </>
+  )
+
+}
+
+export const FormSelect = <T extends string | number = string,>({
   id,
   options = [],
-  placeholder = 'Wybierz...',
+  placeholder = 'Choose an option...',
   label,
   value,
   setValue,
-}: SelectInterface<T>) {
+}: SelectInterface<T>): JSX.Element => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
   const selected = options.find((o) => o.value === value) || null;
-  const visibleOptions = options.filter((o) => o.value !== value);
 
   useEffect(() => {
     function handleOutsideClick(e: MouseEvent) {
@@ -34,55 +109,84 @@ export function FormSelect<T extends string | number = string>({
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
+  const onClickExpand = () => {
+    setOpen((prev) => !prev);
+  }
+
   const handleSelect = (val: T) => {
     setValue(val);
-    setOpen(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Escape') setOpen(false);
-    if (e.key === 'Enter') setOpen((prev) => !prev);
-  };
+  }
 
   return (
-    <div ref={rootRef} id={id} className="custom-select">
-      {label && <label htmlFor={id} className="custom-select__label">{label}</label>}
+    <div ref={rootRef} id={id} className="relative">
+      {label && <span onClick={onClickExpand}>{label}</span>}
+      <SelectFrame
+        open={open} 
+        setOpen={setOpen} 
+        selected={selected} 
+        placeholder={placeholder} 
+      />
+      <SelectOptions
+        open={open} 
+        setOpen={setOpen}
+        options={options}
+        handleSelect={handleSelect}
+      />
 
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={() => setOpen((prev) => !prev)}
-        onKeyDown={handleKeyDown}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        className="custom-select__trigger"
-      >
-        <span className="custom-select__value">
-          {selected ? selected.label : <span className="custom-select__placeholder">{placeholder}</span>}
-        </span>
-        <span className="custom-select__arrow">{open ? '▴' : '▾'}</span>
-      </div>
-
-      {open && (
-        <ul className="custom-select__list" role="listbox">
-          {visibleOptions.length > 0 ? (
-            visibleOptions.map((opt) => (
-              <li
-                key={opt.value}
-                role="option"
-                tabIndex={0}
-                className="custom-select__option"
-                onClick={() => handleSelect(opt.value as T)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSelect(opt.value as T)}
-              >
-                {opt.label}
-              </li>
-            ))
-          ) : (
-            <li className="custom-select__empty">Brak innych opcji</li>
-          )}
-        </ul>
-      )}
     </div>
   );
 }
+
+export const FormSelectMulti = <T extends string | number = string>({
+  id,
+  options = [],
+  placeholder = 'Choose options...',
+  label,
+  value,
+  setValue,
+}: SelectInterface<T[]>): JSX.Element => {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  const selected = options.filter((o) => value.includes(o.value as unknown as T)) || [];
+
+  useEffect(() => {
+    function handleOutsideClick(e: MouseEvent) {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
+
+  const onClickExpand = () => {
+    setOpen((prev) => !prev);
+  }
+
+  const handleSelect = (val: T) => {
+    setValue((prev) => {
+        return [...prev, val];
+    })
+  }
+
+  return (
+    <div ref={rootRef} id={id} className="relative">
+      {label && <span onClick={onClickExpand}>{label}</span>}
+      <SelectFrameMulti
+        open={open} 
+        setOpen={setOpen} 
+        selected={selected} 
+        placeholder={placeholder} 
+      />
+      <SelectOptions
+        open={open} 
+        setOpen={setOpen}
+        options={options}
+        handleSelect={handleSelect}
+      />
+    </div>
+  );
+}
+
+

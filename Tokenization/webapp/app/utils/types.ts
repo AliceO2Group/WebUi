@@ -18,3 +18,8 @@ export interface OptionType {
 }
 
 export type HttpMethod = 'GET' | 'POST' | 'DELETE' | 'PUT';
+
+export interface DialogPropsBase {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}

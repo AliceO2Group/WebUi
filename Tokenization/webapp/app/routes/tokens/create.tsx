@@ -27,7 +27,7 @@ import type { OptionType, HttpMethod } from '~/utils/types';
 import { Form } from '~/components/form/form';
 import { Box1_2 } from '~/components/box';
 import { FormInput } from '~/components/form/form-input';
-import { FormSelect } from '~/components/form/form-select';
+import { FormSelect, FormSelectMulti } from '~/components/form/form-select';
 
 // eslint-disable-next-line jsdoc/require-jsdoc
 export function clientLoader(): OptionType[] {
@@ -62,25 +62,34 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
           labelText="Expiration Time (hours):" 
           value={expirationTime}
           setValue={setExpirationTime}
-          inputProps={{step: 0.1}}
+          inputProps={{step: 1, min: 0}}
           />
-        {loaderData && <><FormSelect
-          id="first-service-select"
-          options={loaderData}
-          value={firstSelectedService}
-          setValue={setFirstSelectedService}
-          placeholder="Select First Service..."
-          label="First Service" 
+        <FormSelectMulti
+          id='http-select-methods'     
+          options={httpMethodOptions}
+          value={selectedMethods}
+          setValue={setSelectedMethods}
+          placeholder='Choose HTTP Methods for Token...'
+          label='HTTP Methods'
+        />
+        {loaderData && <>
+          <FormSelect
+            id="first-service-select"
+            options={loaderData}
+            value={firstSelectedService}
+            setValue={setFirstSelectedService}
+            placeholder="Select First Service..."
+            label="First Service" 
           />
           <FormSelect
-          id="second-service-select"
-          options={loaderData}
-          value={secondSelectedService}
-          setValue={setSecondSelectedService}
-          placeholder="Select Second Service..."
-          label="Second Service"
-          /></>}
-
+            id="second-service-select"
+            options={loaderData}
+            value={secondSelectedService}
+            setValue={setSecondSelectedService}
+            placeholder="Select Second Service..."
+            label="Second Service"
+          /></>
+        }
       </Form>
     </Box1_2>
     </>

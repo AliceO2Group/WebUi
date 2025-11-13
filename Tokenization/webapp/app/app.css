@@ -32,9 +32,12 @@
 .mb2 { margin-bottom: var(--space-s)}
 
 
-
 .no-border {
     border: 0;
+}
+
+.bra2 {
+    border: 2px solid black;
 }
 
 .brb2 {
