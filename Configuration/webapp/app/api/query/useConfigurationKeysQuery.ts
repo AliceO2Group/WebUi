@@ -21,6 +21,11 @@ export const CONFIGURATION_KEYS_QUERY_KEY = 'configuration-keys';
 
 type ConfigurationKeysResponse = string[];
 
+/**
+ * useConfigurationKeysQuery hook
+ * Fetches the list of configuration keys from the backend API.
+ * @returns {UseQueryResult<string[], Error>} query result containing the list of configuration keys.
+ */
 export const useConfigurationKeysQuery = (): UseQueryResult<ConfigurationKeysResponse, Error> =>
   useQuery<string[], Error>({
     queryKey: [CONFIGURATION_KEYS_QUERY_KEY],

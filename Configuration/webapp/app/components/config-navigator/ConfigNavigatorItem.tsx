@@ -17,10 +17,13 @@ import { ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/mater
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFile } from '@fortawesome/free-solid-svg-icons';
+import { Link } from 'react-router';
+import { BASE_CONFIGURATION_PATH } from '~/config';
 
 interface ConfigNavigatorItemProps {
   title: string;
   onClick?: () => void;
+  isSelected: boolean;
 }
 
 /**
@@ -31,14 +34,21 @@ interface ConfigNavigatorItemProps {
  * @param {Function} props.onClick - Callback function to handle item click.
  * @returns {React.ReactElement} ConfigNavigatorItem
  */
-const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = ({ title, onClick }) => (
+const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = ({ title, onClick, isSelected }) => (
   <ListItem style={{ paddingTop: 5, paddingBottom: 5 }} className="config_navigator__item">
-    <ListItemButton onClick={onClick} color="red" sx={{ borderRadius: 2, padding: 0 }}>
-      <ListItemIcon>
-        <FontAwesomeIcon icon={faFile} style={{ margin: 'auto' }} />
-      </ListItemIcon>
-      <ListItemText primary={title} />
-    </ListItemButton>
+    <Link to={`${BASE_CONFIGURATION_PATH}/${title}`} style={{ width: '100%' }}>
+      <ListItemButton
+        onClick={onClick}
+        color="red"
+        sx={{ borderRadius: 2, padding: 0 }}
+        selected={isSelected}
+      >
+        <ListItemIcon>
+          <FontAwesomeIcon icon={faFile} style={{ margin: 'auto' }} />
+        </ListItemIcon>
+        <ListItemText primary={title} />
+      </ListItemButton>
+    </Link>
   </ListItem>
 );
 
