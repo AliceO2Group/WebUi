@@ -12,7 +12,15 @@
  * or submit itself to any jurisdiction.
  */
 
-import { DuplexMessageEvent } from "./message.model";
+import type { DuplexMessageEvent } from './message.model';
+
+/**
+ * Interface representing a Command for specific event.
+ */
+export interface Command {
+  event: DuplexMessageEvent;
+  payload: any;
+}
 
 /**
  * Interface representing a handler for processing events.
@@ -20,12 +28,6 @@ import { DuplexMessageEvent } from "./message.model";
  * @remarks
  * The `handle` method receives an event object and performs the necessary processing.
  */
-
-export interface Command {
-  event: DuplexMessageEvent;
-  payload: any;
-}
-
 export interface CommandHandler<T extends Command = Command> {
   handle(command: T): Promise<void>;
 }

@@ -12,10 +12,4 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Command } from "../../models/commands.model";
-import { DuplexMessageEvent, TokenMessage } from "../../models/message.model";
-
-export class RevokeTokenCommand implements Command {
-  readonly event = DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN;
-  constructor(public payload: TokenMessage) {}
-}
+export const BASE_CONFIGURATION_PATH = 'configuration/o2/components/qc/ANY/any';
