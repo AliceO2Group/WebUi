@@ -14,7 +14,7 @@
 
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/control/api';
+export const API_URL = 'http://localhost:8080/control/api';
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
