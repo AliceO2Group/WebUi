@@ -22,6 +22,7 @@ import type { Command, CommandHandler } from 'models/commands.model';
 import type { DuplexMessageEvent } from '../../models/message.model';
 import { ConnectionDirection } from '../../models/message.model';
 import { ConnectionStatus } from '../../models/connection.model';
+import { peerListener } from '../../utils/connection/peerListener';
 
 /**
  * @description Manages all the connection between clients and central system.
@@ -170,52 +171,8 @@ export class ConnectionManager {
 
     this._peerServer = new grpc.Server();
     this._peerServer.addService(this._wrapper.Peer2Peer.service, {
-      Fetch: async (call: grpc.ServerUnaryCall<any, any>, callback: grpc.sendUnaryData<any>) => {
-        try {
-          const clientAddress = call.getPeer();
-          this._logger.infoMessage(`Incoming request from ${clientAddress}`);
-
-          let conn: Connection | undefined = this._receivingConnections.get(clientAddress);
-
-          if (!conn) {
-            conn = new Connection('', clientAddress, ConnectionDirection.RECEIVING, this._peerCtor);
-            conn.status = ConnectionStatus.CONNECTED;
-            this._receivingConnections.set(clientAddress, conn);
-            this._logger.infoMessage(`New incoming connection registered for: ${clientAddress}`);
-          }
-
-          // Create request to forward to local API endpoint
-          const method = String(call.request?.method ?? 'POST').toUpperCase();
-          const url = this._baseAPIPath + (call.request?.path ?? '');
-          const headers: { [key: string]: string } = call.request?.headers;
-          const body = call.request?.body ? Buffer.from(call.request.body).toString('utf-8') : undefined;
-
-          this._logger.infoMessage(`Received payload from ${clientAddress}: \n${url}\n${JSON.stringify(headers)}\n${JSON.stringify(body)}\n`);
-
-          const httpResp = await fetch(url, {
-            method,
-            headers: headers,
-            body,
-          });
-
-          const respHeaders: Record<string, string> = {};
-          httpResp.headers.forEach((v, k) => (respHeaders[k] = v));
-          const resBody = Buffer.from(await httpResp.arrayBuffer());
-
-          callback(null, {
-            status: httpResp.status,
-            headers: respHeaders,
-            body: resBody,
-          });
-        } catch (e: any) {
-          this._logger.errorMessage(`Error forwarding request: ${e ?? 'Uknown error'}`);
-
-          callback({
-            code: grpc.status.INTERNAL,
-            message: e?.message ?? 'forward error',
-          } as any);
-        }
-      },
+      Fetch: async (call: grpc.ServerUnaryCall<any, any>, callback: grpc.sendUnaryData<any>) =>
+        peerListener(call, callback, this._logger, this._receivingConnections, this._peerCtor, this._baseAPIPath),
     });
 
     await new Promise<void>((resolve, reject) => {
