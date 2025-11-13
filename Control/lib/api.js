@@ -260,9 +260,16 @@ module.exports.setup = (http, ws) => {
     requireDetectorOrGlobalRoleMiddleware,
     lockController.actionLockHandler.bind(lockController)
   );
+
+  http.put(`/locks/force/:action/${DetectorId.ALL}`,
+    minimumRoleMiddleware(Role.ADMIN),
+    addDetectorIdMiddleware(DetectorId.ALL),
+    lockController.actionForceLockHandler.bind(lockController)
+  );
   http.put('/locks/force/:action/:detectorId',
     minimumRoleMiddleware(Role.GLOBAL),
-    lockController.actionForceLockHandler.bind(lockController));
+    lockController.actionForceLockHandler.bind(lockController)
+  );
 
   // Status Service
   http.get('/status/consul', statusController.getConsulStatus.bind(statusController));
@@ -284,6 +291,10 @@ module.exports.setup = (http, ws) => {
   http.get(
     '/configurations/:key(*)', validateConsulServiceMiddleware, 
     qcConfigurationController.getConfigurationByKeyHandler.bind(qcConfigurationController)
+  );
+  http.put(
+    '/configurations/:key(*)', validateConsulServiceMiddleware,
+    qcConfigurationController.putConfigurationByKeyHandler.bind(qcConfigurationController)
   );
 
   // Consul

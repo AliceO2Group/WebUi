@@ -61,6 +61,7 @@ export const layoutControllerTestSuite = async () => {
         title: 'Unknown Error',
       }), 'Error message was incorrect');
     });
+
     test('should log error when non-Joi validation error occurs', async () => {
       const response = [{ id: 5, name: 'somelayout' }];
       const jsonStub = sinon.createStubInstance(LayoutRepository, {
@@ -101,7 +102,7 @@ export const layoutControllerTestSuite = async () => {
       ok(res.status.calledWith(200), 'Response status was not 200');
       ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
       ok(
-        jsonStub.listLayouts.calledWith({ owner_id: undefined, fields }),
+        jsonStub.listLayouts.calledWith({ fields, filter: { owner_id: undefined } }),
         'Fields were not passed correctly',
       );
     });
@@ -122,7 +123,7 @@ export const layoutControllerTestSuite = async () => {
       ok(res.status.calledWith(200), 'Response status was not 200');
       ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
       ok(
-        jsonStub.listLayouts.calledWith({ owner_id: 1, fields: [fields] }),
+        jsonStub.listLayouts.calledWith({ fields: [fields], filter: { owner_id: 1 } }),
         'Owner id was not used in data connector call',
       );
     });
@@ -145,6 +146,129 @@ export const layoutControllerTestSuite = async () => {
       const [[responseArg]] = res.json.args;
 
       ok(responseArg.message === 'Invalid query parameters: "token" is required', 'Error message incorrect');
+    });
+
+    test('should return 400 when filter.objectPath contains an invalid type, number', async () => {
+      const jsonStub = sinon.createStubInstance(LayoutRepository);
+      const req = {
+        query: {
+          filter: {
+            objectPath: 12345,
+          },
+          token: 'fasdfsdfa',
+        },
+      };
+      const layoutConnector = new LayoutController(jsonStub);
+
+      await layoutConnector.getLayoutsHandler(req, res);
+
+      ok(res.status.calledWith(400), 'Response status was not 400');
+      ok(res.json.calledOnce, 'Response was not sent');
+
+      ok(res.json.calledWith({
+        message: 'Invalid query parameters: "Object path" must be a string',
+        status: 400,
+        title: 'Invalid Input',
+      }), 'Error message was incorrect');
+    });
+
+    test('should return layouts when filter.objectPath contains a valid value', async () => {
+      const response = [
+        { user_id: 1, name: 'somelayout' },
+        { user_id: 2, name: 'somelayout2' },
+      ];
+
+      const jsonStub = sinon.createStubInstance(LayoutRepository, {
+        listLayouts: sinon.stub().resolves(response),
+      });
+      const req = {
+        query: {
+          filter: {
+            objectPath: 'qc/CPV/MO/NoiseOnFLP/BadChannelMapM2',
+          },
+          token: 'fasdfsdfa',
+        },
+      };
+      const layoutConnector = new LayoutController(jsonStub);
+
+      await layoutConnector.getLayoutsHandler(req, res);
+
+      ok(res.json.calledOnce, 'Response was not sent');
+      ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
+    });
+
+    test('should return layouts when filter.objectPath contains a valid value, minus character', async () => {
+      const response = [
+        { user_id: 1, name: 'somelayout' },
+        { user_id: 2, name: 'somelayout2' },
+      ];
+
+      const jsonStub = sinon.createStubInstance(LayoutRepository, {
+        listLayouts: sinon.stub().resolves(response),
+      });
+      const req = {
+        query: {
+          filter: {
+            objectPath: 'qc/CPV/MO/NoiseOn-FLP/BadChannelMapM2',
+          },
+          token: 'fasdfsdfa',
+        },
+      };
+      const layoutConnector = new LayoutController(jsonStub);
+
+      await layoutConnector.getLayoutsHandler(req, res);
+
+      ok(res.json.calledOnce, 'Response was not sent');
+      ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
+    });
+
+    test('should return layouts when filter is present but contains no objectPath', async () => {
+      const response = [
+        { user_id: 1, name: 'somelayout' },
+        { user_id: 2, name: 'somelayout2' },
+      ];
+
+      const jsonStub = sinon.createStubInstance(LayoutRepository, {
+        listLayouts: sinon.stub().resolves(response),
+      });
+      const req = {
+        query: {
+          filter: {},
+          token: 'fasdfsdfa',
+        },
+      };
+      const layoutConnector = new LayoutController(jsonStub);
+
+      await layoutConnector.getLayoutsHandler(req, res);
+
+      ok(res.json.calledOnce, 'Response was not sent');
+      ok(res.json.calledWith(response), 'A list of layouts should have been sent back');
+    });
+
+    test('should return 400 when filter.objectPath contains an invalid character: #', async () => {
+      const jsonStub = sinon.createStubInstance(LayoutRepository);
+      const req = {
+        query: {
+          filter: {
+            objectPath: 'qc/CPV/MO/Noise#OnFLP/BadChannelMapM2',
+          },
+          token: 'fasdfsdfa',
+        },
+      };
+      const layoutConnector = new LayoutController(jsonStub);
+
+      await layoutConnector.getLayoutsHandler(req, res);
+
+      const message = 'Invalid query parameters: "Object path" with value ' +
+      '"qc/CPV/MO/Noise#OnFLP/BadChannelMapM2" fails to match the required pattern: /^[A-Za-z0-9_\\-/]+$/';
+
+      ok(res.status.calledWith(400), 'Response status was not 400');
+      ok(res.status.calledWith(400), 'Response status was not 400');
+      ok(res.json.calledWith({
+        message: message,
+        status: 400,
+        title: 'Invalid Input',
+      }), 'Error message is not as expected');
     });
 
     test('should return 400 when fields contain invalid values', async () => {

@@ -14,6 +14,17 @@
 import React, { createContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
+/**
+ * Session context provides information about the current user session.
+ *
+ * The session object contains the following properties:
+ *   - personid: User's person ID
+ *   - name: User's display name
+ *   - token: Authentication token
+ *   - username: User's username
+ *   - access: Array of user's access roles
+ *
+ */
 interface Session {
   personid: string | null;
   name: string | null;

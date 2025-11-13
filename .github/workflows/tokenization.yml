@@ -6,7 +6,6 @@ on:
       - '.github/workflows/tokenization.yml'
   push:
     branches:
-      - 'main'
       - 'dev'
 
 jobs:
@@ -15,9 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22.x'
       - run: (cd Tokenization/backend; npm i)      
@@ -26,9 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22.x'
       - run: (cd Tokenization/webapp; npm i )
@@ -36,13 +35,14 @@ jobs:
       - run: (cd Tokenization/webapp; npm run lint)
 
   ui-test:
+    needs: lint-check-webapp
     name: UI-tests for webapp application
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22.x'
       - run: (cd Tokenization/webapp; npm run docker:test)
