@@ -52,7 +52,7 @@ interface DeleteDialogState {
 function TokenTable({ tokens }: { tokens: Token[] }) {
   const theaders = ['ID', 'Service From', 'Service To', 'Expires at', 'Actions'];
 
-  // Zmodyfikowany stan dla okna dialogowego
+  // State for dialog window
   const [deleteDialog, setDeleteDialog] = useState<DeleteDialogState>({
     isOpen: false,
     tokenId: '',
@@ -60,7 +60,7 @@ function TokenTable({ tokens }: { tokens: Token[] }) {
 
   const auth = useAuth('admin');
 
-  // Funkcja obsługująca potwierdzenie usunięcia
+  // Function to handle delete confirmation -> will be updated in next PR
   const handleConfirmDelete = async () => {
     if (auth) {
       console.log('Token Deleted');
@@ -86,7 +86,7 @@ function TokenTable({ tokens }: { tokens: Token[] }) {
               <td><Link to={`/tokens/${token.tokenId}`}>{token.tokenId}</Link></td>
               <td>{token.serviceFrom}</td>
               <td>{token.serviceTo}</td>
-              <td>{token.exp}</td>
+              <td>{token.exp.split('T').reverse().join(' - ')}</td>
               <td>
                 <ActionBlock
                   tokenId={token.tokenId}
