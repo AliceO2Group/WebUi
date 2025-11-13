@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-<<<<<<<< HEAD:Tokenization/backend/wrapper/src/client/commands/revokeToken/revokeToken.command.ts
 import type { Command } from '../../../models/commands.model';
 import type { TokenMessage } from '../../../models/message.model';
 import { DuplexMessageEvent } from '../../../models/message.model';
@@ -28,12 +27,3 @@ export class RevokeTokenCommand implements Command {
    */
   constructor(public payload: TokenMessage) {}
 }
-========
-const ConfigurationPage = () => (
-  <div>
-    <h1>Configuration Details</h1>
-  </div>
-);
-
-export default ConfigurationPage;
->>>>>>>> 3016aa2c3b7969f234f18cb3eec22c2b2c580180:Configuration/webapp/app/routes/configuration.tsx
