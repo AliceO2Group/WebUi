@@ -72,8 +72,8 @@ export const clientLoader = async ({ params }: Route.ClientLoaderArgs): Promise<
  * @param props.loaderData.logs - Promise that resolves to the logs array
  */
 export default function Details({ loaderData: { token, logs } }: Route.ComponentProps) {
-  
-  const {tokenId, last4chars, issuer, iat, serviceFrom, serviceTo, exp} = token;
+
+  const { tokenId, last4chars, issuer, iat, serviceFrom, serviceTo, exp } = token;
   const expirationDate = exp.split('T').reverse().join(' - ');
 
   const fields = [

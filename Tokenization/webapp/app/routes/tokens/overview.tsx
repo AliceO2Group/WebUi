@@ -63,6 +63,7 @@ function TokenTable({ tokens }: { tokens: Token[] }) {
   // Function to handle delete confirmation -> will be updated in next PR
   const handleConfirmDelete = async () => {
     if (auth) {
+      // eslint-disable-next-line no-console
       console.log('Token Deleted');
     }
     setDeleteDialog({ isOpen: false, tokenId: '' });
