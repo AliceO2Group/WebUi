@@ -56,7 +56,7 @@ function makeApp(tokensMap?: Map<number, any>) {
 
   const app = express();
   app.use(express.json());
-  app.get('/tokens', controller.getTokensHandler.bind(controller));
+  app.get('/tokens-get', controller.getTokensHandler.bind(controller));
   app.post('/tokens/create', controller.createTokenHandler.bind(controller));
   app.post('/tokens/revoke', controller.revokeTokenHandler.bind(controller));
   return { app, wrapper, tokens: fakeTokens };
@@ -67,7 +67,7 @@ function makeApp(tokensMap?: Map<number, any>) {
 describe('TokensController', () => {
   test('GET /tokens returns transformed tokens', async () => {
     const { app } = makeApp();
-    const res = await request(app).get('/tokens');
+    const res = await request(app).get('/tokens-get');
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
 
