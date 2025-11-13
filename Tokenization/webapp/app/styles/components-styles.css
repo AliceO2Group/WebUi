@@ -50,3 +50,18 @@
     transform: translate(-50%, -50%);
     border: 2px solid black;
 }
+
+/* Select component */
+
+.my-select {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: border 0.2s, box-shadow 0.2s;
+  position: relative;
+}

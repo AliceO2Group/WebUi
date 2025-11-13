@@ -4,7 +4,7 @@ import { IconArrowCircleRight, IconContainer } from "~/ui/icon";
 
 interface BoxInterface{
     children: React.ReactNode;
-    link: string
+    link: string | null
 }
 
 interface PrimaryBoxInterface extends BoxInterface {
@@ -17,11 +17,11 @@ export const Box = ({children, link, className_div1, className_div2}: PrimaryBox
     <div className={`bg-gray m3 ${className_div1}`}>
         <div className={`flex-row justify-center ${className_div2}`}>
             <div className="w-90">
-                <Link to={link}>
+                {link && <Link to={link}>
                     <IconContainer className="scale15">
                         <IconArrowCircleRight />
                     </IconContainer>
-                </Link>
+                </Link>}
             </div>
         </div>
         <div className="flex-row justify-center">
