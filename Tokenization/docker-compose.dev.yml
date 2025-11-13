@@ -15,10 +15,10 @@ services:
         cluster_addr = "https://vault.local:8201"
 
         listener "tcp" {
-          address         = "0.0.0.0:9300"   
+          address         = "0.0.0.0:9300"
           cluster_address = "0.0.0.0:9301"
-          tls_cert_file   = "/vault/config/vault.crt"
-          tls_key_file    = "/vault/config/vault.key"
+          tls_cert_file      = "/vault/config/vault.crt"
+          tls_key_file       = "/vault/config/vault.key"
           tls_client_ca_file = "/vault/config/ca.crt"
         }
 
@@ -38,33 +38,35 @@ services:
         aliases:
           - vault.local
     volumes:
-      - ./backend/central-system/vault/vault-data:/vault/data
-      - ./backend/central-system/vault/vault.crt:/vault/config/vault.crt:ro
-      - ./backend/central-system/vault/vault.key:/vault/config/vault.key:ro
-      - ./backend/central-system/ca/ca.crt:/vault/config/ca.crt:ro
+      - type: volume
+        source: vault-data
+        target: /vault/data
+
+      - ./docker/vault/vault.crt:/vault/config/vault.crt:ro
+      - ./docker/vault/vault.key:/vault/config/vault.key:ro
+      - ./docker/ca/ca.crt:/vault/config/ca.crt:ro
     cap_add:
       - IPC_LOCK
     restart: unless-stopped
-  vault-unseal:
-    image: curlimages/curl:8.9.1
+  vault-setup:
+    image: hashicorp/vault:latest
     depends_on:
       vault:
         condition: service_started
     environment:
       VAULT_ADDR: https://vault.local:9300
-      VAULT_UNSEAL_KEY: ${VAULT_UNSEAL_KEY}
+      VAULT_TLS_SERVER_NAME: vault.local
     volumes:
-      - ./backend/central-system/ca/ca.crt:/ca.crt:ro
-      - ./backend/central-system/vault/unseal.sh:/unseal.sh:ro
+      - vault-data:/vault/data
+      - ./docker/vault/vault.crt:/vault/config/vault.crt:ro
+      - ./docker/vault/vault.key:/vault/config/vault.key:ro
+      - ./docker/vault/ca.crt:/vault/config/ca.crt:ro
+      - ./docker/vault/vault-setup.sh:/vault-setup.sh:ro
+      - ./docker/vault/central-system.crt:/vault/config/central-system-client.crt:ro
     entrypoint: ['/bin/sh', '-lc']
-    command: ['/unseal.sh']
-    restart: 'no'
-    healthcheck:
-      test: ['CMD', 'vault', 'status']
-      interval: 5s
-      timeout: 5s
-      retries: 20
-      start_period: 30s
+    command: ['/vault-setup.sh']
+    restart: 'on-failure'
+
   database:
     image: 'mariadb:10.5.9'
     container_name: tokenization-database
@@ -103,3 +105,4 @@ services:
 
 volumes:
   database-data:
+  vault-data:

@@ -51,3 +51,9 @@ FROM nginx:1.27 AS reverse-proxy
 COPY ./docker/provisioning/nginx/conf.d/default.conf /etc/nginx/conf.d
 EXPOSE 8080
 
+# ---- Vault ----
+FROM hashicorp/vault:1.20
+COPY ./docker/vault/vault.crt ./docker/vault/vault.key ./docker/vault/ca.crt /vault/config/
+COPY ./docker/vault/central-system-client.crt /vault/config/central-system-client.crt
+COPY ./docker/vault/vault-init.sh /usr/local/bin/vault-init.sh
+RUN chmod +x /usr/local/bin/vault-init.sh

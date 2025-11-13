@@ -11,7 +11,9 @@
     "dev": "npm run build && concurrently -k \"npm:watch:*\"",
     "start": "node index.js",
     "test": "jest --runInBand",
+    "docker:build": "cd ../.. && docker compose -f docker-compose.dev.yml -f docker-compose.yml build",
     "docker:up": "cd ../.. && docker compose -f docker-compose.dev.yml -f docker-compose.yml up",
+    "docker:up:build": "npm run docker:build && npm run docker:up",
     "docker:down": "cd ../.. && docker compose -f docker-compose.dev.yml -f docker-compose.yml down"
   },
   "dependencies": {
