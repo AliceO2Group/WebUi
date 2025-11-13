@@ -37,7 +37,7 @@ export default function Layout() {
   const { state }  = useNavigation();
 
   return (
-    <div className='container'>
+    <div className='container relative'>
       <AppHeader>
         <Logo name="Tokenization"/>
         <AppSidebar />

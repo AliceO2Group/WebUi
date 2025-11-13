@@ -12,6 +12,10 @@
  * or submit itself to any jurisdiction.
 */
 
+.bg-transparent {
+    background-color: rgba(0,0,0,0);
+}
+
 .justify-end {
     justify-content: flex-end;
 }
@@ -25,6 +29,17 @@
 .ml3 { margin-left: var(--space-m); }
 .ml4 { margin-left: var(--space-l); }
 .ml5 { margin-left: var(--space-xl)}
+.mb2 { margin-bottom: var(--space-s)}
+
+
+
+.no-border {
+    border: 0;
+}
+
+.brb2 {
+    border-bottom: 2px solid black;
+}
 
 .scale12 {
     transform: scale(1.2);

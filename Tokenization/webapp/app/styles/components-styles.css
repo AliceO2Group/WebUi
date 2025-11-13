@@ -18,7 +18,7 @@
     grid-auto-rows: 1fr;
  }
  
- .min-height-box-1 {
+.min-height-box-1 {
     min-height: 88vh;
 }
 
@@ -28,4 +28,25 @@
 
 .min-height-box-3 {
     min-height: 22vh;
+}
+
+/* Modal */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal {
+    width: clamp(50px, 30%, 300px);
+    height: auto;
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid black;
 }

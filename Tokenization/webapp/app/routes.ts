@@ -20,6 +20,8 @@ export default [
     ...prefix('tokens', [
       index('routes/tokens/overview.tsx'),
       route(':tokenId', 'routes/tokens/details.tsx'),
+      // route('table', 'routes/tokens/table.tsx'),
+      // route('new', 'routes/tokens/create.tsx')
     ]),
     route('*', 'routes/404.tsx'),
   ]),

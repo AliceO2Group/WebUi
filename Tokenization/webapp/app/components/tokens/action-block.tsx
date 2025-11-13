@@ -12,35 +12,23 @@
  * or submit itself to any jurisdiction.
  */
 
-import React from 'react';
 import { IconDelete } from '~/ui/icon';
 
-interface DeleteDialogState {
-  isOpen: boolean;
-  tokenId: string;
-}
 
 interface ActionBlockProps {
   tokenId: string;
-  setActionDeleteWindow: React.Dispatch<React.SetStateAction<DeleteDialogState>>;
+  onClick: () => void;
 }
 
 /**
  * Action block component that provides token actions such as delete
  */
-export default function ActionBlock({ tokenId, setActionDeleteWindow }: ActionBlockProps) {
-  const handleDelete = () => {
-    setActionDeleteWindow({
-      isOpen: true,
-      tokenId: tokenId,
-    });
-  };
-
+export default function ActionBlock({ tokenId, onClick }: ActionBlockProps) {
   return (
     <div>
       <button
         className="bg-danger btn-sm"
-        onClick={handleDelete}
+        onClick={onClick}
         aria-label={`Delete token ${tokenId}`}
         title="Delete token"
       >
