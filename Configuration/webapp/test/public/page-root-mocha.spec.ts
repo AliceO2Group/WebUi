@@ -16,7 +16,7 @@ import assert from 'assert';
 import { Page } from 'puppeteer';
 import global from '../mocha-index';
 
-describe('`pageRoot` test-suite', function () {
+describe('`pageConfiguration` test-suite', function () {
   let url: string | null = null;
   let page: Page | null = null;
 
