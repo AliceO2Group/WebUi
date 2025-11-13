@@ -17,22 +17,17 @@ import * as grpc from '@grpc/grpc-js';
 // Capture service impl registered on grpc.Server.addService
 let capturedServerImpl: any | null = null;
 
-// Mock proto-loader
 jest.mock('@grpc/proto-loader', () => ({
   loadSync: jest.fn(() => ({})),
 }));
 
-// CentralSystem client mock returned from loadPackageDefinition
 const CentralSystemClientMock = jest.fn();
-
-// Minimal Peer2Peer client ctor placeholder (only to pass into Connection)
 const Peer2PeerCtorMock = jest.fn();
 
 // Mock @grpc/grpc-js
 jest.mock('@grpc/grpc-js', () => {
   const original = jest.requireActual('@grpc/grpc-js');
 
-  // Fake Server with hooks we can assert on
   const mockServer = {
     addService: jest.fn((_svc: any, impl: any) => {
       capturedServerImpl = impl;
@@ -42,13 +37,11 @@ jest.mock('@grpc/grpc-js', () => {
   };
   const ServerCtor = jest.fn(() => mockServer);
 
-  // loadPackageDefinition returns namespaced wrappers (CentralSystem + Peer2Peer)
   const loadPackageDefinition = jest.fn(() => ({
     webui: {
       tokenization: {
         CentralSystem: CentralSystemClientMock,
         Peer2Peer: Object.assign(Peer2PeerCtorMock, {
-          // Simulated service definition used by addService
           service: {
             Fetch: {
               path: '/webui.tokenization.Peer2Peer/Fetch',
@@ -108,8 +101,7 @@ jest.mock(
   { virtual: true }
 );
 
-// Track Connection instances & allow status changes
-type FakeConnInit = { token: string; address: string; direction: any; peerCtor: any };
+// Track Connection instances and allow status changes
 const createdConnections: any[] = [];
 const connectionCtorMock = jest.fn().mockImplementation(function (this: any, token: string, address: string, direction: any, peerCtor: any) {
   this._token = token;
@@ -118,7 +110,6 @@ const connectionCtorMock = jest.fn().mockImplementation(function (this: any, tok
   this.status = undefined;
   this.targetAddress = address;
   this.token = token;
-  // keep basic API similar enough for the code under test
   Object.defineProperty(this, 'status', {
     get: () => this._status,
     set: (v) => (this._status = v),
@@ -134,7 +125,6 @@ jest.mock(
   { virtual: true }
 );
 
-// Mock logger
 const infoMessageMock = jest.fn();
 const errorMessageMock = jest.fn();
 jest.mock(
@@ -151,7 +141,6 @@ jest.mock(
   { virtual: true }
 );
 
-// Now import the SUT (after mocks)
 import { ConnectionManager } from '../../../client/connectionManager/ConnectionManager';
 import { ConnectionDirection } from '../../../models/message.model';
 import { ConnectionStatus } from '../../../models/connection.model';
@@ -174,9 +163,7 @@ describe('ConnectionManager', () => {
     const cm = new ConnectionManager('proto/file.proto', 'central:5555');
     expect(cm).toBeDefined();
 
-    // grpc.loadPackageDefinition called with proto-loader result
     expect((grpc as any).loadPackageDefinition).toHaveBeenCalled();
-    // CentralSystem client created with address + insecure creds
     expect(CentralSystemClientMock).toHaveBeenCalledWith('central:5555', expect.any(Object));
     expect(grpc.credentials.createInsecure).toHaveBeenCalled();
   });
@@ -214,7 +201,6 @@ describe('ConnectionManager', () => {
     cm['_peerCtor'] = Peer2PeerCtorMock;
     const conn = cm.createNewConnection('peer-A', ConnectionDirection.SENDING, 'tok123');
 
-    // Constructed with provided token, address, direction, uses peerCtor from wrapper
     expect(connectionCtorMock).toHaveBeenCalledWith('tok123', 'peer-A', ConnectionDirection.SENDING, expect.any(Function));
     expect(conn.status).toBe(ConnectionStatus.CONNECTED);
 
@@ -223,7 +209,6 @@ describe('ConnectionManager', () => {
     expect(sending.length).toBe(1);
     expect(receiving.length).toBe(0);
 
-    // Log called
     expect(infoMessageMock).toHaveBeenCalledWith(expect.stringContaining('Connection with peer-A has been estabilished'));
   });
 
@@ -236,7 +221,7 @@ describe('ConnectionManager', () => {
     expect(receiving.length).toBe(1);
   });
 
-  test('getConnectionByAddress: returns by direction; logs on invalid direction', () => {
+  test('getConnectionByAddress: returns by direction. Logs on invalid direction', () => {
     const cm = new ConnectionManager('p.proto', 'c:1');
     const s = cm.createNewConnection('s-1', ConnectionDirection.SENDING);
     const r = cm.createNewConnection('r-1', ConnectionDirection.RECEIVING);
@@ -321,7 +306,6 @@ describe('ConnectionManager', () => {
     const before = cm.connections.receiving.length;
     await capturedServerImpl.Fetch(call, callback);
 
-    // Forwarded correctly (note body converted to string)
     expect(global.fetch).toHaveBeenCalledWith('http://local/api/echo', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -349,7 +333,6 @@ describe('ConnectionManager', () => {
     const cm = new ConnectionManager('p.proto', 'c:1');
     await cm.listenForPeers(50103, 'http://local/api/');
 
-    // Pre-create receiving connection
     cm.createNewConnection('client-77', ConnectionDirection.RECEIVING);
 
     // @ts-ignore
@@ -395,7 +378,7 @@ describe('ConnectionManager', () => {
     await cm.listenForPeers(50104, 'http://local/api/');
 
     // @ts-ignore
-    global.fetch.mockRejectedValue(new Error('boom'));
+    global.fetch.mockRejectedValue(new Error('err'));
 
     const call = {
       getPeer: () => 'err-client',
@@ -409,7 +392,7 @@ describe('ConnectionManager', () => {
     expect(callback).toHaveBeenCalledWith(
       expect.objectContaining({
         code: grpc.status.INTERNAL,
-        message: 'boom',
+        message: 'err',
       })
     );
   });
