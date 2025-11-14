@@ -12,13 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
-import { type RouteConfig, index, route, prefix } from '@react-router/dev/routes';
+const ConfigurationPage = () => (
+  <div>
+    <h1>Configuration Details</h1>
+  </div>
+);
 
-export default [
-  index('routes/home.tsx'),
-  ...prefix('runs', [
-    index('routes/runs/overview.tsx'),
-    route(':runNumber', 'routes/runs/details.tsx'),
-  ]),
-  route('configuration/*', 'routes/configuration.tsx'),
-] satisfies RouteConfig;
+export default ConfigurationPage;
