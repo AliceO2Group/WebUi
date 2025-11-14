@@ -31,6 +31,9 @@ import { LeftDrawer } from './components/layout/drawer/LeftDrawer';
 import { Content } from './components/layout/content/Content';
 import { ConfigNavigator } from './components/config-navigator/ConfigNavigator';
 
+import queryClient, { persister } from './api/queryClient';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+
 /**
  * Root component
  * @param {{ children: React.ReactElement }} props Props of the component
@@ -47,14 +50,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <MainLayout>
-          <LeftDrawer>
-            <ConfigNavigator />
-          </LeftDrawer>
-          <Content>{children}</Content>
-        </MainLayout>
-        <ScrollRestoration />
-        <Scripts />
+        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+          <MainLayout>
+            <LeftDrawer>
+              <ConfigNavigator />
+            </LeftDrawer>
+            <Content>{children}</Content>
+          </MainLayout>
+          <ScrollRestoration />
+          <Scripts />
+        </PersistQueryClientProvider>
       </body>
     </html>
   );

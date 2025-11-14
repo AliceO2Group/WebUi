@@ -1,21 +1,27 @@
 {
   "name": "grpc-wrapper",
   "version": "1.0.0",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "test": "jest",
-    "build": "tsc && tsc-alias --resolve-full-paths && cp -r proto dist",
-    "start-client": "node dist/client/gRPCWrapper.js",
-    "start-central": "node dist/central/CentralSystem.js",
-    "dev-client": "ts-node-esm client/gRPCWrapper.ts",
-    "dev-central": "ts-node-esm central/CentralSystem.ts"
+    "build": "tsc -p tsconfig.build.json && cp -r src/proto dist",
+    "client": "node dist/client/gRPCWrapper.js",
+    "central": "node dist/central/CentralSystem.js",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix"
   },
   "author": "ALICEO2",
   "devDependencies": {
+    "@stylistic/eslint-plugin-js": "^4.4.1",
+    "@stylistic/eslint-plugin-ts": "^4.4.1",
     "@types/jest": "^29.5.14",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsdoc": "^61.1.12",
     "jest": "^29.7.0",
     "ts-jest": "^29.4.0",
-    "tsc-alias": "^1.8.16"
+    "tsc-alias": "^1.8.16",
+    "typescript-eslint": "^8.46.3"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.13.4",
