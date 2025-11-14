@@ -16,10 +16,12 @@ import type { Token } from '../../components/tokens/token';
 
 import { Link } from 'react-router';
 import { useState } from 'react';
-import { Tab } from '@mui/material';
+import { Tab, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 
+import ActionBlock from '~/components/tokens/action-block';
 import { useSetHeader } from '~/ui/header/headerContext';
 import { TabsNavbar } from '~/ui/navbar';
+import { useAuth } from '~/hooks/session';
 
 /**
  * Client loader that fetches all tokens from the API.
@@ -34,6 +36,12 @@ export const clientLoader = async (): Promise<Token[]> => {
   return response.json();
 };
 
+// Interfejs stanu dla okna dialogowego usuwania tokena
+interface DeleteDialogState {
+  isOpen: boolean;
+  tokenId: string;
+}
+
 // Will be changed in next PR
 /**
  * Table component that displays a list of tokens with their ID and validity.
@@ -42,20 +50,81 @@ export const clientLoader = async (): Promise<Token[]> => {
  * @param tokens - Array of tokens to display
  */
 function TokenTable({ tokens }: { tokens: Token[] }) {
-  return  <table className={'table'}>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>validity</th>
-      </tr>
-    </thead>
-    <tbody>
-      {tokens.map((token: Token) => <tr key={token.tokenId}>
-        <td><Link to={`/tokens/${token.tokenId}`}>{token.tokenId}</Link></td>
-        <td className={token.validity === 'bad' ? 'danger' : ''}>{token.validity}</td>
-      </tr>)}
-    </tbody>
-  </table>;
+  const theaders = ['ID', 'Service From', 'Service To', 'Expires at', 'Actions'];
+
+  // State for dialog window
+  const [deleteDialog, setDeleteDialog] = useState<DeleteDialogState>({
+    isOpen: false,
+    tokenId: '',
+  });
+
+  const auth = useAuth('admin');
+
+  // Function to handle delete confirmation -> will be updated in next PR
+  const handleConfirmDelete = async () => {
+    if (auth) {
+      // eslint-disable-next-line no-console
+      console.log('Token Deleted');
+    }
+    setDeleteDialog({ isOpen: false, tokenId: '' });
+  };
+
+  const handleCloseDialog = () => {
+    setDeleteDialog({ isOpen: false, tokenId: '' });
+  };
+
+  return (
+    <>
+      <table className={'table'}>
+        <thead>
+          <tr>
+            {theaders.map((content, index) => <th key={index}>{content}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {tokens.map((token: Token) => (
+            <tr key={token.tokenId}>
+              <td><Link to={`/tokens/${token.tokenId}`}>{token.tokenId}</Link></td>
+              <td>{token.serviceFrom}</td>
+              <td>{token.serviceTo}</td>
+              <td>{token.exp.split('T').reverse().join(' - ')}</td>
+              <td>
+                <ActionBlock
+                  tokenId={token.tokenId}
+                  setActionDeleteWindow={setDeleteDialog}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <Dialog
+        open={deleteDialog.isOpen}
+        onClose={handleCloseDialog}
+        aria-labelledby="delete-token-dialog-title"
+        aria-describedby="delete-token-dialog-description"
+      >
+        <DialogTitle id="delete-token-dialog-title">
+          Confirm Token Deletion
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-token-dialog-description">
+            Are you sure you want to delete token with ID: {deleteDialog.tokenId}?
+            This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
 }
 
 /**

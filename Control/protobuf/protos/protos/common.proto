@@ -40,6 +40,15 @@ message User {
   string name = 3;
 }
 
+// Production and staging BKP recognizes these special user IDs.
+// They are used to associate certain actions (e.g. EOR) with certain subsystem
+// or AliECS component rather than a human user.
+enum SpecialUserId {
+  INVALID = 0;
+  LHC = 60;
+  TIMER = 65;
+}
+
 message WorkflowTemplateInfo {
   string name = 1;
   string description = 2;
