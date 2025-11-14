@@ -11,10 +11,12 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import { ConnectionManager } from "./ConnectionManager/ConnectionManager";
-import { RevokeTokenHandler } from "./Commands/revokeToken.handler";
-import { DuplexMessageEvent } from "../models/message.model";
-import { Connection } from "./Connection/Connection";
+
+import { ConnectionManager } from './connectionManager/ConnectionManager';
+import { RevokeTokenHandler } from './commands/revokeToken/revokeToken.handler';
+import { DuplexMessageEvent } from '../models/message.model';
+import type { Connection } from './connection/Connection';
+import { NewTokenHandler } from './commands/newToken/newToken.handler';
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -26,38 +28,42 @@ import { Connection } from "./Connection/Connection";
  *
  * @example
  * ```typescript
- * const grpcWrapper = new gRPCWrapper();
+ * const grpcWrapper = new gRPCWrapper(PROTO_PATH, CENTRAL_SYSTEM_ADDRESS);
  * // Use grpcWrapper to interact with gRPC services
  * ```
  */
 export class gRPCWrapper {
-  private ConnectionManager: ConnectionManager;
+  private _connectionManager: ConnectionManager;
 
   /**
-   * @description Initializes an instance of gRPCWrapper class.
+   * Initializes an instance of gRPCWrapper class.
    *
    * @param protoPath - The file path to the gRPC proto definition.
-   * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
+   * @param centralAddress - The address of the central gRPC server (default: "localhost:4100").
    */
-  constructor(protoPath: string, centralAddress: string = "localhost:50051") {
-    this.ConnectionManager = new ConnectionManager(protoPath, centralAddress);
-    this.ConnectionManager.registerCommandHandlers([
+  constructor(protoPath: string, centralAddress: string = 'localhost:4100') {
+    this._connectionManager = new ConnectionManager(protoPath, centralAddress);
+    this._connectionManager.registerCommandHandlers([
       {
         event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
-        handler: new RevokeTokenHandler(this.ConnectionManager),
+        handler: new RevokeTokenHandler(this._connectionManager),
+      },
+      {
+        event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
+        handler: new NewTokenHandler(this._connectionManager),
       },
     ]);
   }
 
   /**
-   * @description Starts the Connection Manager stream connection with Central System
+   * Starts the Connection Manager stream connection with Central System
    */
   public connectToCentralSystem() {
-    this.ConnectionManager.connectToCentralSystem();
+    this._connectionManager.connectToCentralSystem();
   }
 
   /**
-   * @description Returns all saved connections.
+   * Returns all saved connections.
    *
    * @returns An object containing the sending and receiving connections.
    */
@@ -65,21 +71,23 @@ export class gRPCWrapper {
     sending: Connection[];
     receiving: Connection[];
   } {
-    return this.ConnectionManager.connections;
+    return this._connectionManager.connections;
   }
 
+  /**
+   * Returns a summary of the connections managed by the ConnectionManager.
+   * The summary includes the number of sending and receiving connections, as well as the target address, direction, and status of each connection.
+   *
+   * @returns A string summary of the connections.
+   */
   public getSummary(): string {
-    const conn = this.ConnectionManager.connections;
+    const conn = this._connectionManager.connections;
     return (
       `Wrapper Summary: ` +
       `\nSending Connections: ${conn.sending.length}` +
-      `\nReceiving Connections: ${conn.receiving.length}` +
-      conn.sending
+      `\nReceiving Connections: ${conn.receiving.length}${conn.sending
         .map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`)
-        .join("") +
-      conn.receiving
-        .map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`)
-        .join("")
+        .join('')}${conn.receiving.map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`).join('')}`
     );
   }
 }

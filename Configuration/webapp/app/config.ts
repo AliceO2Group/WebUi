@@ -12,13 +12,4 @@
  * or submit itself to any jurisdiction.
  */
 
-import { type RouteConfig, index, route, prefix } from '@react-router/dev/routes';
-
-export default [
-  index('routes/home.tsx'),
-  ...prefix('runs', [
-    index('routes/runs/overview.tsx'),
-    route(':runNumber', 'routes/runs/details.tsx'),
-  ]),
-  route('configuration/*', 'routes/configuration.tsx'),
-] satisfies RouteConfig;
+export const BASE_CONFIGURATION_PATH = 'configuration/o2/components/qc/ANY/any';
