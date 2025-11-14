@@ -12,13 +12,20 @@
  * or submit itself to any jurisdiction.
  */
 
-import { type RouteConfig, index, route, prefix } from '@react-router/dev/routes';
+import { useNavigate } from 'react-router';
+import { BASE_CONFIGURATION_PATH } from '~/config';
 
-export default [
-  index('routes/home.tsx'),
-  ...prefix('runs', [
-    index('routes/runs/overview.tsx'),
-    route(':runNumber', 'routes/runs/details.tsx'),
-  ]),
-  route('configuration/*', 'routes/configuration.tsx'),
-] satisfies RouteConfig;
+/**
+ * useConfigurationNavigate hook
+ * Provides a navigate function to navigate to a configuration path.
+ * @returns {(relativePath: string) => void} navigate function to navigate to a configuration path.
+ */
+export const useConfigurationNavigate = () => {
+  const reactRouterNavigate = useNavigate();
+
+  const navigate = (relativePath: string) => {
+    void reactRouterNavigate(`${BASE_CONFIGURATION_PATH}/${relativePath}`);
+  };
+
+  return navigate;
+};

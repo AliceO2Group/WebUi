@@ -15,6 +15,7 @@
 import { Box } from '@mui/material';
 import { type FC, type PropsWithChildren } from 'react';
 import { ContentHeader } from './ContentHeader';
+import { useParams } from 'react-router';
 
 /**
  * Content component
@@ -23,13 +24,17 @@ import { ContentHeader } from './ContentHeader';
  * @param {PropsWithChildren} props - Component props.
  * @returns {React.ReactElement} Content
  */
-export const Content: FC<PropsWithChildren> = ({ children }) => (
-  <Box
-    component="main"
-    sx={{ flexGrow: 1, bgcolor: 'background.default' }}
-    className="content-section"
-  >
-    <ContentHeader currentPath="o2/components/qc/ANY/any/TPC/tpc-general_config" />
-    <Box sx={{ p: 3 }}>{children}</Box>
-  </Box>
-);
+export const Content: FC<PropsWithChildren> = ({ children }) => {
+  const params = useParams<{ '*': string }>();
+  const configPath = params['*'];
+  return (
+    <Box
+      component="main"
+      sx={{ flexGrow: 1, bgcolor: 'background.default' }}
+      className="content-section"
+    >
+      <ContentHeader currentPath={configPath ?? ''} />
+      <Box sx={{ p: 3 }}>{children}</Box>
+    </Box>
+  );
+};
