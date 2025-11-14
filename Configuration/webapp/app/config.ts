@@ -12,9 +12,4 @@
  * or submit itself to any jurisdiction.
  */
 
-module.exports = {
-  http: {
-    port: 8080,
-    hostname: 'localhost',
-  },
-};
+export const BASE_CONFIGURATION_PATH = 'configuration/o2/components/qc/ANY/any';

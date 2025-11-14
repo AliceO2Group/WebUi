@@ -20,4 +20,5 @@ export default [
     index('routes/runs/overview.tsx'),
     route(':runNumber', 'routes/runs/details.tsx'),
   ]),
+  route('configuration/*', 'routes/configuration.tsx'),
 ] satisfies RouteConfig;
