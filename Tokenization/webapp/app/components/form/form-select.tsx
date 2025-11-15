@@ -16,7 +16,7 @@ import React, { useEffect, useRef, useState, type SetStateAction, type JSX } fro
 import { type OptionType as Option, type DialogPropsBase as DPB } from '~/utils/types';
 import { SelectedList } from './multi-select-helper';
 
-interface SelectInterface<T = string | number | (string | number)[]> {
+interface SelectInterface<T = string | number | (string | number)[], V = T extends Array<infer U> ? U : T> {
   id: string;
   options: Option[];
   placeholder?: string;
@@ -24,8 +24,8 @@ interface SelectInterface<T = string | number | (string | number)[]> {
   value: T;
   setValue: React.Dispatch<SetStateAction<T>>;
   selected?: Option | Option[] | null;
-  handleSelect?: (value: T) => void;
-  handleDeselect?: (value: T) => void;
+  handleSelect?: (value: V) => void;
+  handleDeselect?: (value: V) => void;
   takeSelectedToOption?: boolean;
   render?: React.ElementType;
 }
@@ -113,7 +113,7 @@ const SelectOptions = <T extends string | number, >({ open, setOpen, handleSelec
   );
 };
 
-const FormSelectBase = <T extends string | number = string, > ({
+const FormSelectBase = <T extends string | number | (string|number)[] = string, V = T extends Array<infer U> ? U : T>({
   id,
   options = [],
   placeholder = 'Choose an option',
@@ -123,7 +123,7 @@ const FormSelectBase = <T extends string | number = string, > ({
   handleDeselect,
   takeSelectedToOption,
   render,
-}: SelectInterface<T>) => {
+}: SelectInterface<T, V>) => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
@@ -149,11 +149,11 @@ const FormSelectBase = <T extends string | number = string, > ({
     <div ref={rootRef} id={id} className="relative">
       {label && <span onClick={onClickExpand}>{label}</span>}
       {selectFrame}
-      <SelectOptions<T>
+      <SelectOptions
         open={open}
         setOpen={setOpen}
         options={options}
-        handleSelect={handleSelect}
+        handleSelect={handleSelect as (value: T extends Array<infer U> ? U : T) => void}
         selected={selected}
         takeSelectedToOption={takeSelectedToOption}
       />
@@ -161,7 +161,7 @@ const FormSelectBase = <T extends string | number = string, > ({
   );
 };
 
-export const FormSelect = <T extends string | number = string, >(props: SelectInterface<T>): JSX.Element => {
+export const FormSelect = <T extends string | number = string,>(props: SelectInterface<T>): JSX.Element => {
   const { value, setValue, options } = { ...props };
   const selected = options.find((o) => o.value === value) ?? null;
   const handleSelect = (val: T) => {
@@ -172,7 +172,7 @@ export const FormSelect = <T extends string | number = string, >(props: SelectIn
     <FormSelectBase
       {...props}
       selected={selected}
-      handleSelect={handleSelect}
+      handleSelect={handleSelect as (value: T extends Array<infer U> ? U : T) => void}
       render={SelectFrame}
     />
 

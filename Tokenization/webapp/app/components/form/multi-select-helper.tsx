@@ -29,7 +29,6 @@ const SelectedOption = ({ value, label, handleDeselect }: Option & { handleDesel
           <IconX/>
         </IconContainer>
       </button>
-
     </li>
   );
 };

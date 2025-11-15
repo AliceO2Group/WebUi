@@ -52,13 +52,13 @@ export default function Overview() {
   return (
     <div className="grid-1-2">
       <Box1_2 link="/tokens/table">
-        <TokenTable>
-          <Suspense fallback={<tbody><tr><td>Loading...</td></tr></tbody>}>
+        <Suspense fallback={<Spinner align='center' />}>
+          <TokenTable>
             <Await resolve={tokens}>
-              {(resolvedTokens: Token[]) =>  <TokenTableContent tokens={resolvedTokens}/>}
+              {(resolvedTokens: Token[]) => <TokenTableContent tokens={resolvedTokens}/>}
             </Await>
-          </Suspense>
-        </TokenTable>
+          </TokenTable>
+        </Suspense>
       </Box1_2>
 
       <Box1_2 link="/tokens/new">
