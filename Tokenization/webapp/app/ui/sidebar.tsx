@@ -13,7 +13,7 @@
  */
 import type { NavLinkProps } from 'react-router';
 
-import React from 'react'
+import React from 'react';
 import { NavLink } from 'react-router';
 
 type StyledNavLinkProps = {
@@ -34,26 +34,25 @@ const StyledNavLink = ({ children, to }: StyledNavLinkProps) =>
   <NavLink to={to}>
     {({ isActive }) => (
       <div
-        className={isActive ? "primary" : "black"}
+        className={isActive ? 'primary' : 'black'}
       >
         {children}
       </div>
     )}
   </NavLink>;
 
-
-const NavList = ({children}: {children: React.ReactNode}) => {
-  const items = React.Children.toArray(children)
+const NavList = ({ children }: { children: React.ReactNode }) => {
+  const items = React.Children.toArray(children);
   return <ul className="flex-row">
     {
-      items.map((el, idx) => 
+      items.map((el, idx) =>
         <li className="nav-item" key={idx}>
           {el}
-        </li>
+        </li>,
       )
     }
-  </ul>
-}
+  </ul>;
+};
 
 /**
  * AppSidebar
@@ -68,7 +67,7 @@ export const AppSidebar = () =>
     <nav>
       <NavList>
         <StyledNavLink to="/tokens">Tokens</StyledNavLink>
-        <StyledNavLink to="/certs">Certificates</StyledNavLink>      
+        <StyledNavLink to="/certs">Certificates</StyledNavLink>
       </NavList>
     </nav>
-  </div>
+  </div>;

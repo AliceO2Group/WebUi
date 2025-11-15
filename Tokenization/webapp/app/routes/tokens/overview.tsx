@@ -17,25 +17,24 @@ import { Await, useLoaderData } from 'react-router';
 import { Suspense } from 'react';
 
 import { Spinner } from '~/ui/spinner';
-import { Box1_2 } from "../../components/box"
+import { Box1_2 } from '../../components/box';
 import { useSetHeader } from '~/ui/header/headerContext';
-import {TokenTable, TokenTableContent} from '../../components/tokens/token-table'
-
+import { TokenTable, TokenTableContent } from '../../components/tokens/token-table';
 
 /**
  * Client loader that fetches all tokens from the API.
  *
  * @returns Promise that resolves to an array of tokens
  */
-export const clientLoader = async (): Promise<{ tokens: Promise<Token[]>; }> => {
+export const clientLoader = async (): Promise<{ tokens: Promise<Token[]> }> => {
   const tokens = fetch('/api/tokens')
     .then(response => {
       if (!response.ok) {
-          throw new Error('An error occurred!');
+        throw new Error('An error occurred!');
       }
-      return response.json()
-  });
-  
+      return response.json();
+    });
+
   return { tokens };
 };
 
@@ -47,21 +46,21 @@ export const clientLoader = async (): Promise<{ tokens: Promise<Token[]>; }> => 
  */
 export default function Overview() {
 
-  const {tokens} = useLoaderData()
+  const { tokens } = useLoaderData();
   useSetHeader('Tokens');
 
-  return (  
+  return (
     <div className="grid-1-2">
       <Box1_2 link="/tokens/table">
         <TokenTable>
-        <Suspense fallback={<Spinner/>}>
-          <Await resolve={tokens}>
-              {(resolvedTokens: Token[]) =>  <TokenTableContent tokens={resolvedTokens}/>} 
-          </Await>
-        </Suspense>
+          <Suspense fallback={<tbody><tr><td>Loading...</td></tr></tbody>}>
+            <Await resolve={tokens}>
+              {(resolvedTokens: Token[]) =>  <TokenTableContent tokens={resolvedTokens}/>}
+            </Await>
+          </Suspense>
         </TokenTable>
       </Box1_2>
-        
+
       <Box1_2 link="/tokens/new">
         <div className="p-4">
           <h2 className="text-2xl font-bold mb-4">Create Token</h2>
@@ -69,5 +68,5 @@ export default function Overview() {
         </div>
       </Box1_2>
     </div>
-  )
+  );
 }

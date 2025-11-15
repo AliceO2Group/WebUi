@@ -12,8 +12,12 @@
  * or submit itself to any jurisdiction.
 */
 
+:root {
+    --color-transparent: rgba(0,0,0,0)
+}
+
 .bg-transparent {
-    background-color: rgba(0,0,0,0);
+    background-color: var(--color-transparent);
 }
 
 .justify-end {
@@ -55,3 +59,19 @@
 .scale25 {
     transform: scale(2.5);
 }
+
+.menu-item-static { 
+    /* This class is the same as menu-item from aliceo2 css framework but can be used wihouth hover and active actions*/
+    text-decoration: none; 
+    height: 2em; 
+    line-height: 2em; 
+    padding-left: 1em; 
+    padding-right: 1em; 
+    color: var(--color-gray-darker); 
+    font-weight: 100; 
+    margin: 0.25em; 
+    border-radius: 0.25em; 
+    display: block; 
+    user-select: none; 
+}
+

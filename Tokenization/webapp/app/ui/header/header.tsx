@@ -26,9 +26,9 @@ import { IconHome, IconCog } from '../icon';
 export function AppHeader({ children }: { children?: React.ReactNode }) {
   return (
     <header className="flex-row justify-center bg-gray">
-        <div className="flex-row justify-between w-95">
-          {children}    
-        </div>
+      <div className="flex-row justify-between w-95">
+        {children}
+      </div>
     </header>
   );
 }

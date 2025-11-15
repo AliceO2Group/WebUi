@@ -18,16 +18,14 @@ import { AppHeader } from './header/header';
 import { AppSidebar } from './sidebar';
 import { Spinner } from './spinner';
 
-import logo from "../assets/4_Color_Logo_CB.png";
+import logo from '../assets/4_Color_Logo_CB.png';
 
-const Logo = ({name}: {name: string}) => {
-  return (
-    <div className="flex-row">
-      <img src={logo} className="self-center logo-fluid"/>
-      <h4 className="self-center">{name}</h4>
-    </div>
-  )
-}
+const Logo = ({ name }: { name: string }) => (
+  <div className="flex-row">
+    <img src={logo} className="self-center logo-fluid"/>
+    <h4 className="self-center">{name}</h4>
+  </div>
+);
 
 /**
  * Component provides main layout for the application
@@ -36,7 +34,7 @@ const Logo = ({name}: {name: string}) => {
 export default function Layout() {
 
   const { state }  = useNavigation();
- 
+
   return (
     <div className='container relative'>
       <AppHeader>

@@ -14,7 +14,6 @@
 
 import { IconDelete } from '~/ui/icon';
 
-
 interface ActionBlockProps {
   tokenId: string;
   onClick: () => void;

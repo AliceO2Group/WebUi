@@ -15,15 +15,15 @@
 import { useNavigate } from 'react-router';
 import Select, { type MultiValue, type SingleValue } from 'react-select';
 import { useState, useCallback } from 'react';
-// import {
+// Import {
 //   TextField,
 //   InputAdornment,
 // } from '@mui/material';
 
 import type { OptionType, HttpMethod } from '~/utils/types';
-// import { DangerAlert } from '~/ui/alert';
-// import { CreationTokenDialog } from '~/ui/dialog';
-// import { useAuth } from '~/hooks/session';
+// Import { DangerAlert } from '~/ui/alert';
+// Import { CreationTokenDialog } from '~/ui/dialog';
+// Import { useAuth } from '~/hooks/session';
 import { Form } from '~/components/form/form';
 import { Box1_2 } from '~/components/box';
 import { FormInput } from '~/components/form/form-input';
@@ -47,8 +47,9 @@ const httpMethodOptions = [
   { value: 'DELETE', label: 'DELETE' },
 ];
 
-
-
+/**
+ *
+ */
 export default function CreateToken({ loaderData }: { loaderData?: OptionType[] }) {
   const [expirationTime, setExpirationTime] = useState<number>(0);
   const [firstSelectedService, setFirstSelectedService] = useState<string>('');
@@ -59,13 +60,13 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
     <Box1_2 link={null}>
       <Form>
         <FormInput<number>
-          labelText="Expiration Time (hours):" 
+          labelText="Expiration Time (hours):"
           value={expirationTime}
           setValue={setExpirationTime}
-          inputProps={{step: 1, min: 0}}
-          />
+          inputProps={{ step: 1, min: 0 }}
+        />
         <FormSelectMulti
-          id='http-select-methods'     
+          id='http-select-methods'
           options={httpMethodOptions}
           value={selectedMethods}
           setValue={setSelectedMethods}
@@ -79,7 +80,7 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
             value={firstSelectedService}
             setValue={setFirstSelectedService}
             placeholder="Select First Service..."
-            label="First Service" 
+            label="First Service"
           />
           <FormSelect
             id="second-service-select"
@@ -92,6 +93,6 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
         }
       </Form>
     </Box1_2>
-    </>
+  </>
   );
 }
