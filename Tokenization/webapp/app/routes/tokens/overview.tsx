@@ -19,7 +19,7 @@ import { Suspense } from 'react';
 import { Spinner } from '~/ui/spinner';
 import { Box1_2 } from '../../components/box';
 import { useSetHeader } from '~/ui/header/headerContext';
-import { TokenTable, TokenTableContent } from '../../components/tokens/token-table';
+import { TokenTable } from '../../components/tokens/token-table';
 
 /**
  * Client loader that fetches all tokens from the API.
@@ -53,11 +53,9 @@ export default function Overview() {
     <div className="grid-1-2">
       <Box1_2 link="/tokens/table">
         <Suspense fallback={<Spinner align='center' />}>
-          <TokenTable>
-            <Await resolve={tokens}>
-              {(resolvedTokens: Token[]) => <TokenTableContent tokens={resolvedTokens}/>}
-            </Await>
-          </TokenTable>
+          <Await resolve={tokens}>
+            {(resolvedTokens: Token[]) => <TokenTable tokens={resolvedTokens}/>}
+          </Await>
         </Suspense>
       </Box1_2>
 

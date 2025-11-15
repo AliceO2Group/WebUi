@@ -22,7 +22,7 @@ const SelectedOption = ({ value, label, handleDeselect }: Option & { handleDesel
   };
 
   return (
-    <li className="">
+    <li>
       {label}
       <button onClick={(e) => _handleDeselect(e, value)}>
         <IconContainer>
@@ -35,6 +35,6 @@ const SelectedOption = ({ value, label, handleDeselect }: Option & { handleDesel
 
 export const SelectedList = ({ selected, handleDeselect }: any) => <ul className='flex-row justify-between multiselect-list'>
   {
-    selected.map((s: Option) => <SelectedOption value={s.value} label={s.label} handleDeselect={handleDeselect}/>)
+    selected.map((s: Option) => <SelectedOption key={s.value} value={s.value} label={s.label} handleDeselect={handleDeselect}/>)
   }
 </ul>;

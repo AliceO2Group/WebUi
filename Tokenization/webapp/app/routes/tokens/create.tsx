@@ -12,18 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useNavigate } from 'react-router';
-import Select, { type MultiValue, type SingleValue } from 'react-select';
-import { useState, useCallback } from 'react';
-// Import {
-//   TextField,
-//   InputAdornment,
-// } from '@mui/material';
+import { useState } from 'react';
 
 import type { OptionType, HttpMethod } from '~/utils/types';
-// Import { DangerAlert } from '~/ui/alert';
-// Import { CreationTokenDialog } from '~/ui/dialog';
-// Import { useAuth } from '~/hooks/session';
 import { Form } from '~/components/form/form';
 import { Box1_2 } from '~/components/box';
 import { FormInput } from '~/components/form/form-input';
@@ -56,15 +47,22 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
   const [secondSelectedService, setSecondSelectedService] = useState<string>('');
   const [selectedMethods, setSelectedMethods] = useState<HttpMethod[]>([]);
 
+  
   return ( <>
     <Box1_2 link={null}>
       <Form>
         <FormInput<number>
-          labelText="Expiration Time (hours):"
+          labelText='Expiration Time (hours):'
           value={expirationTime}
           setValue={setExpirationTime}
-          inputProps={{ step: 1, min: 0 }}
+          inputProps={{ type: 'number', step: 1, min: 0 }}
         />
+        {/* <FormInput<string>
+          labelText='Expiration Time (date)'
+          value={null}
+          setValue={null}
+          inputProps={{ type: 'datetime-local' }} 
+        /> */}
         <FormSelectMulti
           id='http-select-methods'
           options={httpMethodOptions}

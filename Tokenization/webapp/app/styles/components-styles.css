@@ -51,6 +51,14 @@
     border: 2px solid black;
 }
 
+/* Alert */
+.alert {
+    width: clamp(100, 10%, 300px);
+    position: fixed;
+    top: 10%;
+    right: 2%;
+}
+
 /* Select components */
 
 .my-select {
@@ -89,4 +97,31 @@ ul.multiselect-list {
 
 .multiselect-list button:hover {
     border: 0.1rem solid black;
+}
+
+/* input */
+/* .my-input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: border 0.2s, box-shadow 0.2s;
+  position: relative;
+} */
+
+.my-input input {
+  width: 40%;
+  padding: 8px 12px;
+  font-size: 20px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: border 0.2s, box-shadow 0.2s;
+  position: relative;
 }

@@ -13,15 +13,7 @@
  */
 
 import React from 'react';
-
-export interface FormInputProps<T extends string | number = string> {
-  value: T;
-  setValue: React.Dispatch<React.SetStateAction<T>>;
-  labelText?: string;
-  containerProps?: React.HTMLAttributes<HTMLDivElement>;
-  labelProps?: React.LabelHTMLAttributes<HTMLLabelElement>;
-  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
-}
+import { type FormInputInterface } from './form.d'
 
 export const FormInput = <T extends string | number = string>({
   value,
@@ -30,9 +22,8 @@ export const FormInput = <T extends string | number = string>({
   containerProps,
   labelProps,
   inputProps,
-}: FormInputProps<T>) => {
+}: FormInputInterface<T>) => {
   const inputId = inputProps?.id ?? labelProps?.htmlFor ?? undefined;
-  const type = typeof value === 'string' ? 'text' : 'number';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { target } = e;
@@ -47,7 +38,7 @@ export const FormInput = <T extends string | number = string>({
   };
 
   return (
-    <div {...containerProps}>
+    <div className='my-input' {...containerProps}>
       {labelText && (
         <label {...labelProps} htmlFor={inputId}>
           {labelText}
@@ -56,7 +47,6 @@ export const FormInput = <T extends string | number = string>({
       <input
         {...inputProps}
         id={inputId}
-        type={type}
         value={value as unknown as string}
         onChange={handleChange}
       />

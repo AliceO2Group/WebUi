@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import { type PropsWithChildren } from 'react';
 import { type Token } from './token';
 
 import { useState } from 'react';
@@ -20,44 +19,28 @@ import { Link } from 'react-router';
 
 import { useAuth } from '~/hooks/session';
 import ActionBlock from './action-block';
-import { Modal, ModalTitle, ModalContent, ModalButtonCancel, ModalButtonAccept } from '../modal';
+import Modal  from '../window/modal';
+import Alert from '../window/alert'
+import { WindowTitle, WindowContent, WindowButtonCancel, WindowButtonAccept, WindowCloseIcon} from '../window/window-objects';
 
-/**
- *
- */
-export function TokenTable({ children }: PropsWithChildren) {
+function TokenTableHeader() {
   const theaders = ['ID', 'Service From', 'Service To', 'Expires at', 'Actions'];
-  return <div className='scroll-auto'>
-    <table className='table'>
-      <thead>
-        <tr>
-          {theaders.map((content, index) => <th key={index}>{content}</th>)}
-        </tr>
-      </thead>
-      {children}
-    </table>
-  </div>;
+  return (
+    <thead>
+      <tr>
+        {theaders.map((el) => <th key={el}>{el}</th>)}
+      </tr>
+    </thead>
+  )
 }
 
-// Will be changed in next PR
 /**
  * Table component that displays a list of tokens with their ID and validity.
  * Token IDs are clickable links that navigate to the token details page.
  *
  * @param tokens - Array of tokens to display
  */
-export function TokenTableContent({ tokens }: { tokens: Token[] }) {
-  const [open, setOpen] = useState<boolean>(false);
-  const [tokenId, setTokenId] = useState<string>('');
-
-  const auth = useAuth('admin');
-
-  const deleteToken = () => {
-    if (auth) {
-      console.log(`Deleting token no. ${tokenId}`);
-    }
-    setTokenId('');
-  };
+function TokenTableContent({ tokens, actionBlockOnClick }: { tokens: Token[], actionBlockOnClick: (val: string) => void }) {
   return (
     <>
       <tbody>
@@ -70,27 +53,80 @@ export function TokenTableContent({ tokens }: { tokens: Token[] }) {
             <td>
               <ActionBlock
                 tokenId={token.tokenId}
-                onClick={() => {
-                  setTokenId(token.tokenId); setOpen(true);
-                }}
+                onClick={() => actionBlockOnClick(token.tokenId)}
               />
             </td>
           </tr>
         ))}
       </tbody>
-
-      <Modal
-        open={open}
-        setOpen={setOpen}
-        className="bg-primary"
-      >
-        <ModalTitle>Token delete</ModalTitle>
-        <ModalContent>
-          Are you sure you want to delete token with id: {tokenId}?
-        </ModalContent>
-        <ModalButtonCancel/>
-        <ModalButtonAccept action={deleteToken} className="btn-danger"/>
-      </Modal>
     </>
   );
 }
+
+/**
+ *
+ */
+export function TokenTable({ tokens }: {tokens: Token[]}) {
+  const [openM, setOpenM] = useState<boolean>(false); // used for modal logic
+  const [openA, setOpenA] = useState<boolean>(false); // used for alert logic
+  const [tokenId, setTokenId] = useState<string>('');
+  const auth = useAuth('admin');
+
+  const successInfo = {
+    title: 'Token deleted',
+    content: 'Token deleted successfully'
+  }
+
+  const failureInfo = {
+    title: 'Token wasn\'t deleted',
+    content: 'You don\'t have permission to do that operation!'
+  }
+
+  // will be used for API call
+  const deleteToken = () => {
+    if (auth) {
+      console.log(`Deleting token no. ${tokenId}`);
+    } 
+    setOpenA(true);
+    setTokenId('');
+  };
+
+  // prop for TokenTableContent
+  const actionBlockOnClick = (val: string) => {
+    setTokenId(val); setOpenM(true);
+  }
+
+  return <>
+    <div className='scroll-auto'>
+      <table className='table'>
+        <TokenTableHeader />
+        <TokenTableContent tokens={tokens} actionBlockOnClick={actionBlockOnClick} />
+      </table>
+    </div>
+    <Modal
+      open={openM}
+      setOpen={setOpenM}
+      className="bg-primary"
+    >
+      <WindowTitle>Token delete</WindowTitle>
+      <WindowContent>
+        Are you sure you want to delete token with id: {tokenId}?
+      </WindowContent>
+      <WindowButtonCancel/>
+      <WindowCloseIcon/>
+      <WindowButtonAccept action={deleteToken} className="btn-danger"/>
+    </Modal>
+    <Alert
+      open={openA}
+      setOpen={setOpenA}
+      className={auth ? 'bg-success white' :'bg-danger white'}
+      timeout={5000}
+    >
+      <WindowTitle>{auth ? successInfo.title : failureInfo.title}</WindowTitle>
+      <WindowContent>{auth ? successInfo.content : failureInfo.content}</WindowContent> 
+      <WindowCloseIcon/>
+    </Alert>
+  </>;
+}
+
+
