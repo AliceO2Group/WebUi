@@ -43,6 +43,11 @@ export default class ObjectViewModel extends BaseViewModel {
     this.drawingOptions = [];
     this.displayHints = [];
     this.ignoreDefaults = false;
+
+    /**
+     * Tracks whether the object information panel is currently visible.
+     */
+    this.objectInfoVisible = true;
   }
 
   /**
@@ -125,6 +130,38 @@ export default class ObjectViewModel extends BaseViewModel {
       return;
     }
     return `/api/object/proxy/download/?token=${this.model.session.token}&objectIds=${objectId}`;
+  }
+
+  /**
+   * Get the current display state of object information.
+   * @returns {boolean} - `true` if object information is currently displayed, `false` otherwise.
+   * @example
+   * const isVisible = objectViewModel.getObjectInfoVisible();
+   */
+  getObjectInfoVisible() {
+    return this.objectInfoVisible;
+  }
+
+  /**
+   * Set the display state of object information.
+   * Notifies any observers/listeners about the change.
+   * @param {boolean} objectInfoVisible - `true` to show object information, `false` to hide.
+   * @example
+   * objectViewModel.setObjectInfoVisible(true);
+   */
+  setObjectInfoVisible(objectInfoVisible) {
+    this.objectInfoVisible = objectInfoVisible;
+    this.notify();
+  }
+
+  /**
+   * Toggle the display state of object information.
+   * If currently visible, it becomes hidden; if hidden, it becomes visible.
+   * @example
+   * objectViewModel.toggleObjectInfoVisible();
+   */
+  toggleObjectInfoVisible() {
+    this.setObjectInfoVisible(!this.getObjectInfoVisible());
   }
 
   /**

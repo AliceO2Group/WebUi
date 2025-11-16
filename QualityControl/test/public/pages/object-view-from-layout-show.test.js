@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, deepStrictEqual } from 'node:assert';
+import { strictEqual, deepStrictEqual, match } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 
 const OBJECT_VIEW_PAGE_PARAM = '?page=objectView&objectId=123456';
@@ -118,6 +118,158 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       strictEqual(result.title, 'qc/test/object/1 (from layout: a-test)');
       deepStrictEqual(result.rootPlotClassList, { 0: 'relative', 1: 'jsroot-container' });
       strictEqual(result.selectedObjectPath, 'qc/test/object/1');
+    },
+  );
+
+  await testParent.test(
+    'should have a correctly made object info visibility button',
+    { timeout },
+    async () => {
+      const visibilityButtonClass = await page.evaluate(() =>
+        document.querySelector('.visibility-toggle-button').className);
+      match(visibilityButtonClass, /visibility-toggle-(on|off)/i);
+    },
+  );
+
+  await testParent.test(
+    'should have download button and visibility button inline and to the right of the timestamp dropdown',
+    { timeout },
+    async () => {
+      const positions = await page.evaluate(() => {
+        const dateSelector = document.querySelector('#dateSelector');
+        const dlButton = document.querySelector('.download-button');
+        const visibilityButton = document.querySelector('.visibility-toggle-button');
+
+        if (!dateSelector || !dlButton || !visibilityButton) {
+          return false;
+        }
+
+        const dateRect = dateSelector.getBoundingClientRect();
+        const dlRect = dlButton.getBoundingClientRect();
+        const visRect = visibilityButton.getBoundingClientRect();
+
+        // Helper to get vertical center
+        const verticalCenter = (rect) => (rect.top + rect.bottom) / 2;
+
+        const dateCenter = verticalCenter(dateRect);
+        const dlCenter = verticalCenter(dlRect);
+        const visCenter = verticalCenter(visRect);
+
+        return {
+          dlLeftOfDate: dlRect.left > dateRect.right,
+          visLeftOfDate: visRect.left > dateRect.right,
+          sameY: Math.abs(dateCenter - dlCenter) < 1 && Math.abs(dateCenter - visCenter) < 1,
+        };
+      });
+
+      if (!positions) {
+        throw new Error('One or more elements not found on the page');
+      }
+
+      strictEqual(positions.dlLeftOfDate, true, 'Download button is not to the right of the timestamp dropdown');
+      strictEqual(positions.visLeftOfDate, true, 'Visibility button is not to the right of the timestamp dropdown');
+      strictEqual(
+        positions.sameY,
+        true,
+        'Download button, visibility button, and timestamp dropdown are not vertically aligned within 1px',
+      );
+    },
+  );
+
+  await testParent.test(
+    'should have a visible object information panel on page load',
+    { timeout },
+    async () => {
+      /**
+       * Gets the visibility of the object information panel
+       * @returns {Promise<boolean>} `true` if visible, `false` if hidden
+       */
+      const getObjectInfoPanelVisibility = async () => await page.evaluate(() => {
+        const el = document.querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(2)');
+        if (!el) {
+          throw new Error('Object info container not found');
+        }
+        const style = window.getComputedStyle(el);
+        return style.display !== 'none' && parseFloat(style.opacity) > 0 && el.offsetWidth > 0 && el.offsetHeight > 0;
+      });
+
+      const isVisible = await getObjectInfoPanelVisibility();
+
+      strictEqual(isVisible, true, 'Object information panel is not visible');
+    },
+  );
+
+  await testParent.test(
+    'should toggle the object information panel visibility when the visibility (toggle) button is clicked',
+    { timeout },
+    async () => {
+      /**
+       * Gets the visibility of the object information panel
+       * @returns {Promise<boolean>} `true` if visible, `false` if hidden
+       */
+      const getObjectInfoPanelVisibility = async () => await page.evaluate(() => {
+        const el = document.querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(2)');
+        if (!el) {
+          throw new Error('Object info container not found');
+        }
+        const style = window.getComputedStyle(el);
+        return style.display !== 'none' && parseFloat(style.opacity) > 0 && el.offsetWidth > 0 && el.offsetHeight > 0;
+      });
+
+      // Capture initial visibility state
+      const initialVisibility = await getObjectInfoPanelVisibility();
+
+      // Click the toggle button once and check visibility
+      await page.click('.visibility-toggle-button');
+      await delay(100);
+      const afterFirstClick = await getObjectInfoPanelVisibility();
+
+      // Click the toggle button again to restore original state
+      await page.click('.visibility-toggle-button');
+      await delay(100);
+      const afterSecondClick = await getObjectInfoPanelVisibility();
+
+      strictEqual(
+        afterFirstClick,
+        !initialVisibility,
+        'Object information panel should toggle to the opposite state after the first click',
+      );
+      strictEqual(
+        afterSecondClick,
+        initialVisibility,
+        'Object information panel should return to its original state after the second click',
+      );
+    },
+  );
+
+  await testParent.test(
+    'should redraw the JSRoot object drawing when visibility toggle changes',
+    { timeout },
+    async () => {
+      /**
+       * Get the object info element
+       * @returns {Promise<Element>} The object information panel element
+       */
+      const getObjectPanelElement = async () => {
+        const el = await page.evaluateHandle(() =>
+          document.querySelector('#ObjectPlot > div:nth-child(2) > div > div'));
+        if (!el) {
+          throw new Error('Object info container not found');
+        }
+        return el;
+      };
+
+      const initialElement = await getObjectPanelElement();
+
+      await page.click('.visibility-toggle-button');
+      await delay(100);
+
+      const newElement = await getObjectPanelElement();
+
+      // Confirm that the DOM node is different
+      const redrawn = await page.evaluate((a, b) => a !== b, initialElement, newElement);
+
+      strictEqual(redrawn, true, 'JSRoot drawing was not redrawn on visibility toggle');
     },
   );
 };

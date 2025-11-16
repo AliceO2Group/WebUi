@@ -19,6 +19,7 @@ import { errorDiv } from '../../common/errorDiv.js';
 import { dateSelector } from '../../common/object/dateSelector.js';
 import { qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
 import { downloadButton } from '../../common/downloadButton.js';
+import { visibilityToggleButton } from '../../common/visibilityButton.js';
 
 /**
  * Shows a page to view an object on the whole page
@@ -46,12 +47,9 @@ const objectPlotAndInfo = (objectViewModel) =>
       const drawingOptions = ignoreDefaults ?
         layoutDisplayOptions
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
+      const isObjectInfoVisible = objectViewModel.getObjectInfoVisible();
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.items-center.h-10', [
-          downloadButton({
-            href: model.objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
-            title: 'Download object',
-          }),
           h(
             '.w-40.p2.f6',
             dateSelector(
@@ -60,13 +58,38 @@ const objectPlotAndInfo = (objectViewModel) =>
               objectViewModel.updateObjectSelection.bind(objectViewModel),
             ),
           ),
+          h('.item-action-row.flex-row.g1.p2', [
+            downloadButton({
+              href: objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
+              title: 'Download object',
+            }),
+            visibilityToggleButton(
+              {
+                isVisible: isObjectInfoVisible,
+                title: 'Toggle object information visibility',
+              },
+              () => objectViewModel.toggleObjectInfoVisible(),
+            ),
+          ]),
         ]),
         h('.w-100.flex-row.g2.m2', { style: 'height: 0;flex-grow:1' }, [
-          h('.w-70', draw(qcObject, {}, drawingOptions)),
-          h('.w-30.scroll-y', [
-            h('h3.text-center', 'Object information'),
-            qcObjectInfoPanel(qcObject, { gap: '.5em' }),
-          ]),
+          h(
+            isObjectInfoVisible ? '.w-70' : '.w-100',
+            {
+              key: isObjectInfoVisible ? 'objectPanel:infoVisible' : 'objectPanel:infoHidden',
+            },
+            draw(qcObject, {}, drawingOptions),
+          ),
+          h(
+            isObjectInfoVisible ? '.w-30.scroll-y' : '.scroll-off',
+            {
+              style: isObjectInfoVisible ? '' : 'width: 0;',
+            },
+            [
+              h('h3.text-center', 'Object information'),
+              qcObjectInfoPanel(qcObject, { gap: '.5em' }),
+            ],
+          ),
         ]),
       ]);
     },
