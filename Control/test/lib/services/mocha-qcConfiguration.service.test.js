@@ -37,10 +37,10 @@ describe(`'QCConfigurationService' test suite`, () => {
     it('should return keys of valid configurations only in the root of the prefix (recurse=false)', async () => {
       const prefix = 'any';
       const rawData = {
-        "any/dir1/nested": '{"key": "value"}',
-        "any/valid1": '{"key1": "value1"}',
-        "any/invalid_json": '"key1": "value1"',
-        "any/valid2": '{}',
+        'any/dir1/nested': '{"key": "value"}',
+        'any/valid1': '{"key1": "value1"}',
+        'any/invalid_json': '"key1": "value1"',
+        'any/valid2': '{}',
       };
       consulServiceStub.getOnlyRawValuesByKeyPrefix.resolves(rawData);
 
@@ -53,9 +53,9 @@ describe(`'QCConfigurationService' test suite`, () => {
     it('should return keys of all valid configurations when recurse is true', async () => {
       const prefix = 'any';
       const rawData = {
-        "any/dir1/nested": '{"key": "value"}',
-        "any/valid1": '{"key1": "value1"}',
-        "any/dir1/invalid": 'just string',
+        'any/dir1/nested': '{"key": "value"}',
+        'any/valid1': '{"key1": "value1"}',
+        'any/dir1/invalid': 'just string',
       };
       consulServiceStub.getOnlyRawValuesByKeyPrefix.resolves(rawData);
 

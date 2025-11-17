@@ -12,7 +12,7 @@
  */
 
 /**
- * @typedef {Object.<string, TypeMapEntry>} TypeMap
+ * @typedef {Object.<string, RestrictionsEntry>} Restrictions
  * 
  * Object which is a map of types.
  * Keys are taken from existing configuration.
@@ -21,31 +21,61 @@
  * For example for the given configuration:
  * ```
  *  {
- *      name: "Alice",
- *      age: 30,
- *      friends: [{ name: "Bob", isBald: true }, { name: "John", surname: "Doe" }],
- *      hasCar: true,
- *      carData: { brand: "BMW", works: false }
- *  }
+      active: 'false',
+      moduleName: 'QualityControl',
+      extendedTaskParameters: {
+        default: {
+          default: {
+            verbose : 'false',
+            retryDelay: '10',
+            databaseUrl: 'https://alice-ccdb.cern.ch'
+          }
+        }
+      },
+      dataSources: [
+        {
+          name: 'CTP Config',
+          path: 'CTP/Config/Config',
+          active: 'true'
+        },
+        {
+          name: 'CTP Scalers',
+          path: 'CTP/Calib/Scalers',
+          active: 'false'
+        }
+      ],
+    }
  * ```
  * 
- * The TypeMap is:
+ * The Restrictions are:
  * ```
  *  {
- *      name: "string",
- *      age: "number",
- *      friends: [{ name: "string", isBald: "boolean" }, { name: "string", surname: "string" }],
- *      hasCar: "boolean",
- *      carData: { brand: "string", works: "boolean" }
+ *    active: 'boolean',
+ *    moduleName: 'string',
+ *    extendedTaskParameters: {
+ *      default: {
+ *        default: {
+ *          verbose: 'boolean',
+ *          retryDelay: 'number',
+ *          databaseUrl: 'string'
+ *        }
+ *      }
+ *    },
+ *    dataSources: [
+ *      {
+ *        name: 'string',
+ *        path: 'string',
+ *        active: 'boolean'
+ *      }
+ *    ]
  *  }
  * ```
  */
 
 /**
- * A value in a `TypeMap` object can be:
- * - a string literal "string", "boolean", or "number"
- * - nested TypeMap
- * - array of nested TypeMaps
+ * A value in a `Restrictions` object can be:
+ * - a string literal 'string', 'boolean', 'number' or 'array'
+ * - nested Restrictions
  *
- * @typedef { "string" | "boolean" | "number" | TypeMap | TypeMap[] } TypeMapEntry
+ * @typedef { 'string' | 'boolean' | 'number' | Restrictions | Restrictions[] } RestrictionsEntry
  */

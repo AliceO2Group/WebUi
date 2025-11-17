@@ -17,7 +17,7 @@ const request = require('supertest');
 const { ADMIN_TEST_TOKEN, TEST_URL } = require('../generateToken.js');
 
 describe(`'API - GET - /configurations/restrictions' test suite`, () => {
-  it('should successfully get a restriction TypeMap for given configurations', async () => {
+  it('should successfully get a Restrictions object for given configurations', async () => {
     await request(`${TEST_URL}/api/configurations/restrictions`)
       .get(`/key1?token=${ADMIN_TEST_TOKEN}`)
       .expect(200);
@@ -25,9 +25,9 @@ describe(`'API - GET - /configurations/restrictions' test suite`, () => {
   
   it('should return 400 when the key parameter is missing', async () => {
     const expectedError = {
-      message: "Missing configuration key",
+      message: 'Missing configuration key',
       status: 400,
-      title: "Invalid Input"
+      title: 'Invalid Input'
     };
     await request(`${TEST_URL}/api/configurations/restrictions`)
       .get(`/%20?token=${ADMIN_TEST_TOKEN}`)
@@ -54,9 +54,9 @@ describe(`'API - GET - /configurations/restrictions' test suite`, () => {
   
   it('should return 404 when the configuration key does not exist', async () => {
     const expectedError = {
-      message: "Configuration not found for key: nonexistent",
+      message: 'Configuration not found for key: nonexistent',
       status: 404,
-      title: "Not Found"
+      title: 'Not Found'
     };
     await request(`${TEST_URL}/api/configurations/restrictions`)
       .get(`/nonexistent?token=${ADMIN_TEST_TOKEN}`)
@@ -65,9 +65,9 @@ describe(`'API - GET - /configurations/restrictions' test suite`, () => {
   
   it('should return 503  when Consul fails to respond', async () => {
     const expectedError = {
-      message: "Consul service unavailable",
+      message: 'Consul service unavailable',
       status: 503,
-      title: "Service Unavailable"
+      title: 'Service Unavailable'
     };
     await request(`${TEST_URL}/api/configurations/restrictions`)
       .get(`/consul-failure?token=${ADMIN_TEST_TOKEN}`)

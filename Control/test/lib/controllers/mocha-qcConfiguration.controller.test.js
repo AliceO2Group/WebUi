@@ -144,7 +144,7 @@ describe(`'QCConfigurationController' test suite`, () => {
       assert.deepStrictEqual(jsonStub.firstCall.args[0].message, 'Missing configuration key');
     });
 
-    it('should return 400 if key is an empty string', async () => {
+    it('should return 400 if key is a whitespace string', async () => {
       req.params.key = '  ';
         
       await qcConfigurationController.getConfigurationRestrictionsByKeyHandler(req, res);
@@ -198,7 +198,7 @@ describe(`'QCConfigurationController' test suite`, () => {
       assert.deepStrictEqual(jsonStub.firstCall.args[0].message, 'Missing configuration key');
     });
 
-    it('should return 400 if key is an empty string', async () => {
+    it('should return 400 if key is a whitespace string', async () => {
       req.params.key = '  ';
         
       await qcConfigurationController.getConfigurationByKeyHandler(req, res);

@@ -76,7 +76,7 @@ class QCConfigurationController {
    * @returns {void}
    */
   async getConfigurationByKeyHandler(req, res) {
-    const { key } = req.params;
+    const { key = '' } = req.params;
 
     if (!key || key.trim() === '') {
       updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing configuration key'));
@@ -98,14 +98,14 @@ class QCConfigurationController {
 
   /**
    * Method to get configuration restrictions by key
-   * @param {Request} req
-   * @param {Response} res
+   * @param {Request} req - HTTP Request object
+   * @param {Response} res - HTTP Response object
    * @returns {void}
    */
   async getConfigurationRestrictionsByKeyHandler(req, res) {
-    const { key } = req.params;
+    const { key = '' } = req.params;
     if (!key || key.trim() === '') {
-      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError("Missing configuration key"));
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing configuration key'));
       return;
     }
 
@@ -124,8 +124,8 @@ class QCConfigurationController {
 
   /**
    * Method to edit configuration value
-   * @param {Request} req
-   * @param {Response} res
+   * @param {Request} req - HTTP Request object
+   * @param {Response} res - HTTP Response object
    * @returns {void}
    */
   async putConfigurationByKeyHandler(req, res) {
