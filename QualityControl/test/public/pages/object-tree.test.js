@@ -79,6 +79,19 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     },
   );
 
+  await testParent.test(
+    'should close the object plot upon clicking the close button',
+    { timeout },
+    async () => {
+      await page.evaluate(() => document.querySelector('#close-button').click());
+      const selectedObject = await page.evaluate(() => model.object.selected);
+      const numberOfChildren = await page.evaluate(() =>
+        document.querySelector('section > div > div > div:nth-child(2)').children.length);
+      strictEqual(selectedObject, undefined);
+      strictEqual(numberOfChildren, 0);
+    }
+  )
+
   await testParent.test('should sort list of histograms by name in descending order', async () => {
     await page.locator('#sortTreeButton').click();
     const sortingByNameOptionPath = '#sortTreeButton > div > a:nth-child(2)';
