@@ -17,9 +17,48 @@ import { HttpServer } from '@aliceo2/web-ui';
 const http = new HttpServer({port: 8080, allow: '*'});
 
 const fakeTokens = new Map([
-    [1, {tokenId: 1, validity: 'good'}],
-    [2, {tokenId: 2, validity: 'bad'}],
+    [1, {
+        tokenId: 1,
+        last4chars: 'abcd',
+        serviceFrom: 'Service 1',
+        serviceTo: 'Service 2',
+        exp: '2026-01-12T11:31:12',
+        issuer: 'central-system',
+        iat: '2025-10-01T10:00:00',
+        permissions: ['GET', 'POST']
+    }],
+    [2, {
+        tokenId: 2,
+        last4chars: 'wxyz',
+        serviceFrom: 'Service 3',
+        serviceTo: 'Service 4',
+        exp: '2025-11-15T08:45:30',
+        issuer: 'admin-portal',
+        iat: '2025-09-15T14:22:10',
+        permissions: ['GET']
+    }],
+    [3, {
+        tokenId: 3,
+        last4chars: 'efgh',
+        serviceFrom: 'Service 2',
+        serviceTo: 'Service 1',
+        exp: '2026-03-20T16:30:00',
+        issuer: 'central-system',
+        iat: '2025-10-02T09:15:00',
+        permissions: ['GET', 'POST', 'PUT', 'DELETE']
+    }],
+    [4, {
+        tokenId: 4,
+        last4chars: '1234',
+        serviceFrom: 'Service 1',
+        serviceTo: 'Service 3',
+        exp: '2026-02-05T12:00:00',
+        issuer: 'api-gateway',
+        iat: '2025-09-25T11:30:45',
+        permissions: ['GET', 'PUT']
+    }]
 ]);
+
 
 const fakeLogs = new Map([
     [1, []],
