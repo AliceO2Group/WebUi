@@ -13,7 +13,7 @@
  */
 
 import React from 'react';
-import { type FormInputInterface } from './form.d'
+import { type FormInputInterface } from './form.d';
 
 export const FormInput = <T extends string | number = string>({
   value,

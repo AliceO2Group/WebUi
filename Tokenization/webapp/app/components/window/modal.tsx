@@ -16,8 +16,8 @@ import { type WindowInterface } from './window.d';
 import { useFullWindowLogic } from '../hooks/useWindowLogic';
 
 export default (props: WindowInterface) => {
-  const {className} = props;
-  const {visibility, ui_elements: {title, content, closeIcon, buttonCancel, buttonAccept }} = useFullWindowLogic(props);
+  const { className } = props;
+  const { visibility, ui_elements: { title, content, closeIcon, buttonCancel, buttonAccept } } = useFullWindowLogic(props);
 
   return (
     <div className={`modal-overlay shadow-level1 ${visibility}`}>

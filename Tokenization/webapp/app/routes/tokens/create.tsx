@@ -19,6 +19,7 @@ import { Form } from '~/components/form/form';
 import { Box1_2 } from '~/components/box';
 import { FormInput } from '~/components/form/form-input';
 import { FormSelect, FormSelectMulti } from '~/components/form/form-select';
+import { SelectGroup } from '~/components/form/select-group';
 
 // eslint-disable-next-line jsdoc/require-jsdoc
 export function clientLoader(): OptionType[] {
@@ -47,7 +48,6 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
   const [secondSelectedService, setSecondSelectedService] = useState<string>('');
   const [selectedMethods, setSelectedMethods] = useState<HttpMethod[]>([]);
 
-  
   return ( <>
     <Box1_2 link={null}>
       <Form>
@@ -61,7 +61,7 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
           labelText='Expiration Time (date)'
           value={null}
           setValue={null}
-          inputProps={{ type: 'datetime-local' }} 
+          inputProps={{ type: 'datetime-local' }}
         /> */}
         <FormSelectMulti
           id='http-select-methods'
@@ -71,23 +71,25 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
           placeholder='Choose HTTP Methods for Token...'
           label='HTTP Methods'
         />
-        {loaderData && <>
-          <FormSelect
-            id="first-service-select"
-            options={loaderData}
-            value={firstSelectedService}
-            setValue={setFirstSelectedService}
-            placeholder="Select First Service..."
-            label="First Service"
-          />
-          <FormSelect
-            id="second-service-select"
-            options={loaderData}
-            value={secondSelectedService}
-            setValue={setSecondSelectedService}
-            placeholder="Select Second Service..."
-            label="Second Service"
-          /></>
+        {loaderData &&
+          <SelectGroup>
+            <FormSelect
+              id="first-service-select"
+              options={loaderData}
+              value={firstSelectedService}
+              setValue={setFirstSelectedService}
+              placeholder="Select First Service..."
+              label="First Service"
+            />
+            <FormSelect
+              id="second-service-select"
+              options={loaderData}
+              value={secondSelectedService}
+              setValue={setSecondSelectedService}
+              placeholder="Select Second Service..."
+              label="Second Service"
+            />
+          </SelectGroup>
         }
       </Form>
     </Box1_2>

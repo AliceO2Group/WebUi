@@ -20,9 +20,12 @@ import { Link } from 'react-router';
 import { useAuth } from '~/hooks/session';
 import ActionBlock from './action-block';
 import Modal  from '../window/modal';
-import Alert from '../window/alert'
-import { WindowTitle, WindowContent, WindowButtonCancel, WindowButtonAccept, WindowCloseIcon} from '../window/window-objects';
+import Alert from '../window/alert';
+import { WindowTitle, WindowContent, WindowButtonCancel, WindowButtonAccept, WindowCloseIcon } from '../window/window-objects';
 
+/**
+ *
+ */
 function TokenTableHeader() {
   const theaders = ['ID', 'Service From', 'Service To', 'Expires at', 'Actions'];
   return (
@@ -31,7 +34,7 @@ function TokenTableHeader() {
         {theaders.map((el) => <th key={el}>{el}</th>)}
       </tr>
     </thead>
-  )
+  );
 }
 
 /**
@@ -40,7 +43,7 @@ function TokenTableHeader() {
  *
  * @param tokens - Array of tokens to display
  */
-function TokenTableContent({ tokens, actionBlockOnClick }: { tokens: Token[], actionBlockOnClick: (val: string) => void }) {
+function TokenTableContent({ tokens, actionBlockOnClick }: { tokens: Token[]; actionBlockOnClick: (val: string) => void }) {
   return (
     <>
       <tbody>
@@ -66,35 +69,35 @@ function TokenTableContent({ tokens, actionBlockOnClick }: { tokens: Token[], ac
 /**
  *
  */
-export function TokenTable({ tokens }: {tokens: Token[]}) {
-  const [openM, setOpenM] = useState<boolean>(false); // used for modal logic
-  const [openA, setOpenA] = useState<boolean>(false); // used for alert logic
+export function TokenTable({ tokens }: { tokens: Token[] }) {
+  const [openM, setOpenM] = useState<boolean>(false); // Used for modal logic
+  const [openA, setOpenA] = useState<boolean>(false); // Used for alert logic
   const [tokenId, setTokenId] = useState<string>('');
   const auth = useAuth('admin');
 
   const successInfo = {
     title: 'Token deleted',
-    content: 'Token deleted successfully'
-  }
+    content: 'Token deleted successfully',
+  };
 
   const failureInfo = {
     title: 'Token wasn\'t deleted',
-    content: 'You don\'t have permission to do that operation!'
-  }
+    content: 'You don\'t have permission to do that operation!',
+  };
 
-  // will be used for API call
+  // Will be used for API call
   const deleteToken = () => {
     if (auth) {
       console.log(`Deleting token no. ${tokenId}`);
-    } 
+    }
     setOpenA(true);
     setTokenId('');
   };
 
-  // prop for TokenTableContent
+  // Prop for TokenTableContent
   const actionBlockOnClick = (val: string) => {
     setTokenId(val); setOpenM(true);
-  }
+  };
 
   return <>
     <div className='scroll-auto'>
@@ -119,14 +122,12 @@ export function TokenTable({ tokens }: {tokens: Token[]}) {
     <Alert
       open={openA}
       setOpen={setOpenA}
-      className={auth ? 'bg-success white' :'bg-danger white'}
+      className={auth ? 'bg-success white' : 'bg-danger white'}
       timeout={5000}
     >
       <WindowTitle>{auth ? successInfo.title : failureInfo.title}</WindowTitle>
-      <WindowContent>{auth ? successInfo.content : failureInfo.content}</WindowContent> 
+      <WindowContent>{auth ? successInfo.content : failureInfo.content}</WindowContent>
       <WindowCloseIcon/>
     </Alert>
   </>;
 }
-
-

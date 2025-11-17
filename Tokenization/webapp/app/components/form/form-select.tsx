@@ -36,7 +36,6 @@ export const FormSelectMulti = <T extends string | number = string, >(props: Sel
   const { value, setValue, options } = { ...props };
   const selected = options.filter((o) => value.includes(o.value as unknown as T)) || [];
 
-
   const handleSelect = (val: T) => {
     setValue((prev) => [...prev, val]);
   };

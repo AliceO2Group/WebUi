@@ -54,7 +54,8 @@ export const SelectFrameMulti = <T extends string | number>(props: SelectLabelPr
 
 };
 
-export const SelectOptions = <T extends string | number, >({ open, setOpen, handleSelect, options, selected, takeSelectedToOption = true }: SelectOptionsProps<T>) => {
+export const SelectOptions = <T extends string | number, >({takeSelectedToOption = true, ...rest }: SelectOptionsProps<T>) => {
+  const {open, setOpen, handleSelect, options, selected } = rest;
   const _selected = Array.isArray(selected) ? selected : [selected];
   const visibleOptions = takeSelectedToOption ? options : options.filter((opt) => !(_selected.includes(opt)));
 
@@ -101,10 +102,7 @@ export const FormSelectBase = <T extends string | number | (string | number)[] =
   const rootRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    /**
-     *
-     */
-    function handleOutsideClick(e: MouseEvent) {
+    const handleOutsideClick = (e: MouseEvent) => {
       if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
