@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { RemoteData, iconArrowTop } from '/js/src/index.js';
+import { RemoteData, iconArrowTop, BrowserStorage } from '/js/src/index.js';
 import ObjectTree from './ObjectTree.class.js';
 import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
@@ -56,7 +56,8 @@ export default class QCObject extends BaseViewModel {
     this.scrollTop = 0;
     this.scrollHeight = 0;
 
-    this.leftPanelWidthPercent = 50;
+    this.storage = new BrowserStorage('object-view-left-panel-width');
+    this.leftPanelWidthPercent = this.storage.getLocalItem(this.model.session.personid.toString()) || 50;
   }
 
   /**
@@ -65,6 +66,7 @@ export default class QCObject extends BaseViewModel {
    * @returns {undefined}
    */
   setLeftPanelWidthPercent(widthPercent) {
+    this.storage.setLocalItem(this.model.session.personid.toString(), widthPercent);
     this.leftPanelWidthPercent = widthPercent;
     this.notify();
   }
