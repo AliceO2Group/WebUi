@@ -1,7 +1,9 @@
+version: '3.8'
+
 services:
   database:
     # Pinned to 11.8 LTS version, community support till 04-07-2028, enterprise: 15-10-2033.
-    image: "mariadb:11.8"
+    image: "mariadb:10.5.9"
     container_name: qcg-database
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-cern}"
@@ -22,7 +24,7 @@ services:
     # Max total time for the container to start 40 sec (10s + 6*5s)
     # https://mariadb.com/docs/server/server-management/automated-mariadb-deployment-and-administration/docker-and-mariadb/using-healthcheck-sh
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
       timeout: 10s
       retries: 6

@@ -50,8 +50,7 @@ export const aliecsSynchronizerTestSuite = async () => {
   test('should emit a run track event when a valid run message is received', () => {
     const runNumber = 123;
     const transition = Transition.START_ACTIVITY;
-    const timeNumber = Date.now();
-    const timestamp = { toNumber: () => timeNumber };
+    const timestamp = { toNumber: () => Date.now() };
     aliecsSynchronizer._onRunMessage({ runEvent: { runNumber, transition }, timestamp });
     ok(eventEmitterMock.emit.called);
     deepStrictEqual(eventEmitterMock.emit.firstCall.args[0], EmitterKeys.RUN_TRACK);

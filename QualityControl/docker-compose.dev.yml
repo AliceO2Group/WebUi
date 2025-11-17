@@ -16,5 +16,3 @@ services:
       - .:/usr/src/app
       # Ignore local node_modules to avoid conflicts with the container's node_modules
       - /usr/src/app/node_modules
-      # Mount local node_modules to container
-      # - ./node_modules:/usr/src/app/node_modules

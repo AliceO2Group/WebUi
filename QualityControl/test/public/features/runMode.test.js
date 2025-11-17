@@ -1,4 +1,3 @@
-/* eslint-disable @stylistic/js/max-len */
 /**
  * @license
  * Copyright CERN and copyright holders of ALICE O2. This software is
@@ -11,6 +10,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+/* eslint-disable @stylistic/js/max-len */
 
 import { strictEqual, ok } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
