@@ -28,7 +28,7 @@ import { downloadButton } from '../common/downloadButton.js';
  */
 export default (model) => {
   const { object, router } = model;
-  const leftPanelWidthPercent = object.leftPanelWidthPercent;
+  const { leftPanelWidthPercent } = object;
   return h('.h-100.flex-column', { key: `${router.params.page}-${leftPanelWidthPercent}` }, [
     h('.flex-row.flex-grow', [
       h('.scroll-y.flex-column', {
@@ -70,11 +70,11 @@ export default (model) => {
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const resizableDivider = (model) => {
-  return h('.bg-gray-light.flex-column.justify-center.items-center', {
+const resizableDivider = (model) =>
+  h('.bg-gray-light.flex-column.justify-center.items-center', {
     style: {
-      'width': '15px',
-      'cursor': 'col-resize',
+      width: '15px',
+      cursor: 'col-resize',
     },
     oncreate: (vnode) => {
       const handleMouseDown = (e) => {
@@ -86,8 +86,8 @@ const resizableDivider = (model) => {
         const dividerRect = vnode.dom.getBoundingClientRect();
         const initialLeft = dividerRect.left - rect.left;
         const dragLine = document.createElement('div');
-        dragLine.className = 'absolute';
         dragLine.style.cssText = `
+          position: absolute;
           top: 0;
           height: 100%;
           width: 6px;
@@ -97,39 +97,33 @@ const resizableDivider = (model) => {
           left: ${initialLeft}px;
         `;
         container.appendChild(dragLine);
-        
         const onMouseMove = (moveEvent) => {
           const newLeftWidth = moveEvent.clientX - rect.left;
           dragLine.style.left = `${newLeftWidth}px`;
         };
-        
         const onMouseUp = (upEvent) => {
           const newLeftWidth = upEvent.clientX - rect.left;
-          const newLeftPercent = (newLeftWidth / containerWidth) * 100;
+          const newLeftPercent = newLeftWidth / containerWidth * 100;
           const clampedPercent = Math.min(80, Math.max(20, newLeftPercent));
-      
           model.object.setLeftPanelWidthPercent(Math.round(clampedPercent));
 
           dragLine.remove();
           document.removeEventListener('mousemove', onMouseMove);
           document.removeEventListener('mouseup', onMouseUp);
         };
-        
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
       };
-      
       vnode.dom.addEventListener('mousedown', handleMouseDown);
-    }, 
+    },
   }, [
     h('div.bg-gray.br1', {
       style: {
         width: '6px',
-        height: '400px', 
-      }
-    })
+        height: '400px',
+      },
+    }),
   ]);
-};
 
 /**
  * Method to tackle various states for the selected objects
@@ -179,7 +173,7 @@ const drawPlot = (model, object) => {
         iconResizeBoth(),
       ),
     ]),
-    h('', { 
+    h('', {
       style: 'height:77%;',
     }, draw(model, name, { stat: true })),
     h('.scroll-y', {}, [
