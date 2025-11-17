@@ -114,10 +114,10 @@ const drawPlot = (model, object) => {
         'a.btn#close-button',
         {
           title: 'Close the object plot',
-          onclick: () => model.object.select()
+          onclick: () => model.object.select(),
         },
-        iconCircleX()
-      )
+        iconCircleX(),
+      ),
     ]),
     h('', { style: 'height:77%;' }, draw(model, name, { stat: true })),
     h('.scroll-y', {}, [
