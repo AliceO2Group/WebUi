@@ -35,6 +35,6 @@ export interface WindowInterface extends PropsWithChildren, React.HTMLAttributes
   timeout?: number | null;
 }
 
-export interface ButtonInterface extends PropsWithChildren, React.HTMLAttributes<HTMLDivElement> {
+export interface ButtonInterface extends PropsWithChildren, React.ButtonHTMLAttributes<HTMLButtonElement> {
   action?: () => void;
 }
