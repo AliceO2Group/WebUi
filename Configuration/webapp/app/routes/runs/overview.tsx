@@ -17,7 +17,7 @@ import type { Route } from './+types/overview';
 import { Link } from 'react-router';
 
 export const clientLoader = async (): Promise<Run[]> => {
-  const response = await fetch('http://localhost:8080/api/runs');
+  const response = await fetch('http://localhost:8080/control/api/runs');
   if (!response.ok) {
     throw new Error('An error occurred!');
   }

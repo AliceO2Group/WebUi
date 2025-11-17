@@ -35,7 +35,7 @@ export class StatusController {
    * @param {Response} res - HTTP response object
    * @returns {undefined}
    */
-  async getQCGStatus(_, res) {
+  async getQCGStatusHandler(_, res) {
     res.status(200).json(this._statusService.retrieveOwnStatus());
   }
 
