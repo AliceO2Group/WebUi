@@ -28,11 +28,12 @@ import { downloadButton } from '../common/downloadButton.js';
  */
 export default (model) => {
   const { object, router } = model;
+  const leftPanelWidthPercent = object.leftPanelWidthPercent;
   return h('.h-100.flex-column', { key: router.params.page }, [
     h('.flex-row.flex-grow', [
       h('.scroll-y.flex-column', {
         style: {
-          width: object.selected ? '50%' : '100%',
+          width: object.selected ? `${leftPanelWidthPercent}%` : '100%',
         },
       }, object.objectsRemote.match({
         NotAsked: () => null,
@@ -50,9 +51,10 @@ export default (model) => {
         },
         Failure: () => null, // Notification is displayed
       })),
+      object.selected ? resizableDivider(model) : null,
       h('.animate-width.scroll-y', {
         style: {
-          width: object.selected ? '50%' : 0,
+          width: object.selected ? `calc(${100 - leftPanelWidthPercent}% - 10px)` : '0%',
         },
       }, object.selected ? objectPanel(model) : null),
     ]),
@@ -60,6 +62,78 @@ export default (model) => {
       statusBarLeft(model),
       statusBarRight(model),
     ]),
+  ]);
+};
+
+/**
+ * Resizable divider between left and right panels
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - virtual node element
+ */
+const resizableDivider = (model) => {
+  const { object } = model;
+  
+  return h('.bg-gray-light.flex-column.justify-center.items-center', {
+    style: {
+      'width': '15px',
+      'cursor': 'col-resize',
+    },
+    oncreate: (vnode) => {
+      const handleMouseDown = (e) => {
+        e.preventDefault();
+        const container = vnode.dom.parentElement;
+        const rect = container.getBoundingClientRect();
+        const containerWidth = rect.width;
+
+        const dividerRect = vnode.dom.getBoundingClientRect();
+        const initialLeft = dividerRect.left - rect.left;
+        const dragLine = document.createElement('div');
+        dragLine.className = 'absolute';
+        dragLine.style.cssText = `
+          top: 0;
+          height: 100%;
+          width: 6px;
+          background: rgba(0, 123, 255, 0.8);
+          pointer-events: none;
+          z-index: 1001;
+          left: ${initialLeft}px;
+        `;
+        container.appendChild(dragLine);
+        
+        const onMouseMove = (moveEvent) => {
+          const newLeftWidth = moveEvent.clientX - rect.left;
+          dragLine.style.left = `${newLeftWidth}px`;
+        };
+        
+        const onMouseUp = (upEvent) => {
+          const newLeftWidth = upEvent.clientX - rect.left;
+          const newLeftPercent = (newLeftWidth / containerWidth) * 100;
+          const clampedPercent = Math.min(80, Math.max(20, newLeftPercent));
+          
+          console.log('Old Width Percent:', object.leftPanelWidthPercent);
+          object.setLeftPanelWidthPercent(Math.round(clampedPercent));
+          console.log('New Width Percent:', object.leftPanelWidthPercent);
+
+          //TODO: redraw the object panel to fit new size
+
+          dragLine.remove();
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        };
+        
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      };
+      
+      vnode.dom.addEventListener('mousedown', handleMouseDown);
+    }, 
+  }, [
+    h('div.bg-gray.br1', {
+      style: {
+        width: '6px',
+        height: '400px', 
+      }
+    })
   ]);
 };
 
@@ -111,7 +185,9 @@ const drawPlot = (model, object) => {
         iconResizeBoth(),
       ),
     ]),
-    h('', { style: 'height:77%;' }, draw(model, name, { stat: true })),
+    h('', { 
+      style: 'height:77%;',
+    }, draw(model, name, { stat: true })),
     h('.scroll-y', {}, [
       h('.w-100.flex-row', { style: 'justify-content: center' }, h('.w-80', timestampSelectForm(model))),
       qcObjectInfoPanel(info, { 'font-size': '.875rem;' }),
