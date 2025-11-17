@@ -66,7 +66,7 @@ export default class QCObject extends BaseViewModel {
    */
   setLeftPanelWidthPercent(widthPercent) {
     this.leftPanelWidthPercent = widthPercent;
-    this.notify()
+    this.notify(); 
   }
 
   /**

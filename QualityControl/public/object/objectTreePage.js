@@ -29,7 +29,7 @@ import { downloadButton } from '../common/downloadButton.js';
 export default (model) => {
   const { object, router } = model;
   const leftPanelWidthPercent = object.leftPanelWidthPercent;
-  return h('.h-100.flex-column', { key: router.params.page }, [
+  return h('.h-100.flex-column', { key: `${router.params.page}-${leftPanelWidthPercent}` }, [
     h('.flex-row.flex-grow', [
       h('.scroll-y.flex-column', {
         style: {
@@ -71,8 +71,6 @@ export default (model) => {
  * @returns {vnode} - virtual node element
  */
 const resizableDivider = (model) => {
-  const { object } = model;
-  
   return h('.bg-gray-light.flex-column.justify-center.items-center', {
     style: {
       'width': '15px',
@@ -109,12 +107,8 @@ const resizableDivider = (model) => {
           const newLeftWidth = upEvent.clientX - rect.left;
           const newLeftPercent = (newLeftWidth / containerWidth) * 100;
           const clampedPercent = Math.min(80, Math.max(20, newLeftPercent));
-          
-          console.log('Old Width Percent:', object.leftPanelWidthPercent);
-          object.setLeftPanelWidthPercent(Math.round(clampedPercent));
-          console.log('New Width Percent:', object.leftPanelWidthPercent);
-
-          //TODO: redraw the object panel to fit new size
+      
+          model.object.setLeftPanelWidthPercent(Math.round(clampedPercent));
 
           dragLine.remove();
           document.removeEventListener('mousemove', onMouseMove);
