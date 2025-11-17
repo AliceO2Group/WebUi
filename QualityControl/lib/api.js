@@ -95,7 +95,7 @@ export const setup = async (http, ws, eventEmitter) => {
     layoutController.deleteLayoutHandler.bind(layoutController),
   );
 
-  http.get('/status/gui', statusController.getQCGStatus.bind(statusController), { public: true });
+  http.get('/status/gui', statusController.getQCGStatusHandler.bind(statusController), { public: true });
   http.get(
     '/status/:service',
     statusComponentMiddleware,
