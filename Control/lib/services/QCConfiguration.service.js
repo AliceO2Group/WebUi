@@ -87,7 +87,6 @@ class QCConfigurationService {
    * Get configuration restrictions by key from Consul
    * @param {string} key - the key of the configuration
    * @returns {Promise<Restrictions>}
-   * @rejects {NotFoundError | ServiceUnavailableError}
    */
   async getConfigurationRestrictionsByKey(key) {
     const configuration = await this._consulService.getOnlyRawValueByKey(key);

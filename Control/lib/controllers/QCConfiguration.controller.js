@@ -43,7 +43,7 @@ class QCConfigurationController {
    * Method to get configurations names
    * @param {Request} req - HTTP Request object
    * @param {Response} res - HTTP Response object
-   * @returns {void}
+   * @returns {Promise<void>}
    */
   async getConfigurationsKeysHandler(req, res) {
     const { prefix = '', recurse = false } = req.query;
@@ -73,7 +73,7 @@ class QCConfigurationController {
    * Method to get configuration value by key
    * @param {Request} req - HTTP Request object
    * @param {Response} res - HTTP Response object
-   * @returns {void}
+   * @returns {Promise<void>}
    */
   async getConfigurationByKeyHandler(req, res) {
     const { key = '' } = req.params;
@@ -100,7 +100,7 @@ class QCConfigurationController {
    * Method to get configuration restrictions by key
    * @param {Request} req - HTTP Request object
    * @param {Response} res - HTTP Response object
-   * @returns {void}
+   * @returns {Promise<void>}
    */
   async getConfigurationRestrictionsByKeyHandler(req, res) {
     const { key = '' } = req.params;
@@ -126,7 +126,7 @@ class QCConfigurationController {
    * Method to edit configuration value
    * @param {Request} req - HTTP Request object
    * @param {Response} res - HTTP Response object
-   * @returns {void}
+   * @returns {Promise<void>}
    */
   async putConfigurationByKeyHandler(req, res) {
     const { key } = req.params;
