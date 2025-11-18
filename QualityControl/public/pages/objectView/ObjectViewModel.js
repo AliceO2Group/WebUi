@@ -45,7 +45,7 @@ export default class ObjectViewModel extends BaseViewModel {
     this.ignoreDefaults = false;
 
     this._storage = new BrowserStorage('object-view-info-visibility-setting');
-    this._objectInfoVisible = this.loadObjectInfoVisible();
+    this._loadObjectInfoVisible();
   }
 
   /**
@@ -134,15 +134,15 @@ export default class ObjectViewModel extends BaseViewModel {
    * Get the current display state of object information from the local storage.
    * If the value does not exist in storage, or if the stored value has been tampered
    * with and is invalid, this method will default to `true` (object information is visible).
-   * @returns {boolean} - `true` if object information is currently displayed, `false` otherwise.
+   * This method **sets `_objectInfoVisible` directly** without notifying any observers.
    */
-  loadObjectInfoVisible() {
+  _loadObjectInfoVisible() {
     try {
-      return this._storage.getLocalItem(this.model.session.personid.toString()) ?? true;
+      this._objectInfoVisible = this._storage.getLocalItem(this.model.session.personid.toString()) ?? true;
       // eslint-disable-next-line no-unused-vars
     } catch (_) {
       this._storage.removeLocalItem(this.model.session.personid.toString());
-      return true;
+      this._objectInfoVisible = true;
     }
   }
 
