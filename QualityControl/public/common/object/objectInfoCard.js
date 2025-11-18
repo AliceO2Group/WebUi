@@ -96,7 +96,7 @@ const getUILabel = (key) => {
  * Parses the value and returns it in a specific format based on type
  * @param {string} key - key of the object info
  * @param {string|number|object|undefined} value - value of the object info
- * @returns {string} - value of object based on its type
+ * @returns {vnode} - value of object based on its type
  */
 const infoPretty = (key, value) => {
   if (DATE_FIELDS.includes(key)) {
@@ -106,7 +106,7 @@ const infoPretty = (key, value) => {
       ? value.join(', ')
       : '-';
   }
-  return value;
+  return h('', value);
 };
 
 /**
@@ -136,6 +136,9 @@ const infoRowAttributes = (model, value) => {
           }
 
           model.notification.show('Value has been successfully copied to clipboard', 'success', 1500);
+          if (typeof value !== 'string') {
+            value = value.dom.textContent;
+          }
           navigator.clipboard.writeText(value);
 
           clickTimeout = undefined;
