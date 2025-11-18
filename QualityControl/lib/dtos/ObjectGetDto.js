@@ -15,7 +15,7 @@
 import Joi from 'joi';
 import { RunNumberDto } from './filters/RunNumberDto.js';
 
-const periodNamePattern = /^LHC\d{1,2}[a-z]+$/i;
+const periodNamePattern = /^LHC\d{1,2}[a-z0-9]+$/i;
 
 /**
  * Creates and returns a filters schema for object DTOs
