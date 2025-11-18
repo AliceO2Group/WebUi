@@ -12,20 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, icon, iconEye } from '/js/src/index.js';
-
-const iconNoEye = () => icon([
-  // 'path' is taken from iconEye
-  // eslint-disable-next-line @stylistic/js/max-len
-  h('path', { d: 'M4.031 1c-2.53 0-4.031 3-4.031 3s1.501 3 4.031 3c2.47 0 3.969-3 3.969-3s-1.499-3-3.969-3zm-.031 1c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 1c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1c0-.1-.032-.191-.063-.281-.08.16-.237.281-.438.281-.28 0-.5-.22-.5-.5 0-.2.121-.357.281-.438-.09-.03-.181-.063-.281-.063z' }),
-  h('line', {
-    x1: '0',
-    y1: '0',
-    x2: '8',
-    y2: '8',
-    stroke: 'currentColor',
-  }),
-]);
+import { h, iconChevronLeft, iconChevronRight } from '/js/src/index.js';
 
 /**
  * @typedef {object} VisibilityToggleButtonOptions
@@ -62,5 +49,5 @@ export function visibilityToggleButton(options = {}, onclick) {
   return h('a.btn', {
     ...mergedOptions,
     onclick,
-  }, isVisible ? iconEye() : iconNoEye());
+  }, isVisible ? iconChevronRight() : iconChevronLeft());
 }
