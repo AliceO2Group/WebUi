@@ -392,12 +392,25 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
     'should redraw the JSRoot object drawing when visibility toggle changes',
     { timeout },
     async () => {
-      const initialElement = await getObjectInfoPanelVisibility(page);
+      /**
+       * Get the object info element
+       * @returns {Promise<Element>} The object information panel element
+       */
+      const getObjectPanelElement = async () => {
+        const el = await page.evaluateHandle(() =>
+          document.querySelector('#ObjectPlot > div:nth-child(2) > div > div'));
+        if (!el) {
+          throw new Error('Object info container not found');
+        }
+        return el;
+      };
+
+      const initialElement = await getObjectPanelElement();
 
       await page.click('.visibility-toggle-button');
       await delay(100);
 
-      const newElement = await getObjectInfoPanelVisibility(page);
+      const newElement = await getObjectPanelElement();
 
       // Confirm that the DOM node is different
       const redrawn = await page.evaluate((a, b) => a !== b, initialElement, newElement);
