@@ -16,14 +16,15 @@ import { useState } from 'react';
 
 import type { OptionType, HttpMethod } from '~/utils/types';
 import { Form } from '~/components/form/form';
-import { Box1_2 } from '~/components/box';
+import { Box1_1 } from '~/components/box';
 import { FormInput } from '~/components/form/form-input';
 import { FormSelect, FormSelectMulti } from '~/components/form/form-select';
 import { SelectGroup } from '~/components/form/select-group';
 import { ResetButton, SubmitButton } from '~/components/form/form-buttons';
 import { useAuth } from '~/hooks/session';
 import Alert from '~/components/window/alert';
-import { WindowCloseIcon, WindowContent, WindowTitle } from '~/components/window/window-objects';
+import { WindowButtonAccept, WindowButtonCancel, WindowCloseIcon, WindowContent, WindowTitle } from '~/components/window/window-objects';
+import Modal from '~/components/window/modal';
 
 // eslint-disable-next-line jsdoc/require-jsdoc
 export function clientLoader(): OptionType[] {
@@ -54,19 +55,35 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
 
   const auth = useAuth('admin');
   const [openAlert, setOpenAlert] = useState<boolean>(false);
+  const [openModal, setOpenModal] = useState<boolean>(false);
 
   const [title, setTitle] = useState<string>('Token created');
   const [msg, setMsg] = useState<string>('Token has been created successfully.');
+  const [success, setSuccess] = useState<boolean>(false);
 
   const onSubmit = () => {
-    if(!expirationTime || !firstSelectedService || !secondSelectedService || selectedMethods.length === 0) {
-      
+    if(expirationTime && firstSelectedService && secondSelectedService && selectedMethods.length > 0) {
+      setOpenModal(true);
+    } else {
+     let message = 'Please fill in all required fields: ';
+      if (!firstSelectedService) {
+        message += 'First service, ';
+      }
+      if (!secondSelectedService) {
+        message += 'Second service, ';
+      }
+      if (!expirationTime) {
+        message += 'Expiration time, ';
+      }
+      if (selectedMethods.length == 0) {
+        message += 'HTTP methods, ';
+      }
+      message = message.slice(0, -2);
+      setTitle('Form incomplete');
+      setMsg(message);
+      setSuccess(false);
+      setOpenAlert(true);
     }
-    if (auth) {
-      // eslint-disable-next-line no-console
-      console.log('api call to backend to create token');
-    }
-    setOpenAlert(true);
   }
 
   const onReset = () => {
@@ -76,8 +93,24 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
     setSelectedMethods([]);
   }
 
+  const callApi = () => {
+    if (auth) {
+      // eslint-disable-next-line no-console
+      console.log('Creating token')
+      setTitle('Token created');
+      setMsg('Token has been created successfully.');
+      setSuccess(true);
+    } else {
+      setTitle('Token was not created');
+      setMsg('You do not have permission to perform this operation.');
+      setSuccess(false);
+    }
+    setOpenAlert(true);
+  }
+
+
   return ( <>
-    <Box1_2 link={null}>
+    <Box1_1 link={null}>
       <div className=''>
         <Form>
           <FormInput<number>
@@ -128,17 +161,35 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
           }
         </Form>
       </div>
-    </Box1_2>
+    </Box1_1>
     <Alert
       open={openAlert}
       setOpen={setOpenAlert}
       timeout={6000}
-      className='bg-success'
+      className={success ? 'bg-success' : 'bg-danger'}
     >
       <WindowTitle>{title}</WindowTitle>
       <WindowContent>{msg}</WindowContent>
       <WindowCloseIcon />
     </Alert>
+    <Modal
+      open={openModal}
+      setOpen={setOpenModal}
+      className='bg-primary '
+    >
+      <WindowTitle>Token creation</WindowTitle>
+      <WindowContent>
+          <div className='flex-column align-center justify-center'>  
+          <div className='mb2'>Are you sure you want to create the token with the specified settings?</div>
+          <div>Service from: {firstSelectedService}</div>
+          <div>Service to: {secondSelectedService}</div>
+          <div>Expiration time of {expirationTime} hours</div>
+          <div>HTTP methods: {selectedMethods.join(', ')}</div>
+          </div>
+      </WindowContent>
+      <WindowButtonAccept className='btn-success' action={callApi}/>
+      <WindowButtonCancel/>
+    </Modal>
   </>
   );
 }

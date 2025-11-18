@@ -28,23 +28,17 @@ interface PrimaryBoxInterface extends BoxInterface {
 
 export const Box = ({ children, link, className_div1, className_div2 }: PrimaryBoxInterface) => (
   <div className={`bg-gray m3 ${className_div1}`}>
-    {link && 
-      <div className={`flex-row justify-center ${className_div2}`}>
+    {link && <div className={`flex-row justify-center ${className_div2}`}>
         <div className="w-90 flex-row justify-end">
-          link && <Link to={link}>
+          <Link to={link}>
             <IconContainer className="scale15 actionable-icon">
               <IconExpandRight />
             </IconContainer>
           </Link>
-          
         </div>
       </div>
     }
-    <div className="flex-row justify-center">
-      <div className="w-95">
-        {children}
-      </div>
-    </div>
+    {children} 
   </div>
 );
 
@@ -54,6 +48,23 @@ export const Box1_2 = ({ children, link }: BoxInterface) => (
     className_div1="min-height-box-1"
     className_div2="mv3"
   >
-    {children}
+    <div className="flex-row justify-center">
+      <div className="w-95">
+        {children}
+      </div>
+    </div>
+  </Box>
+);
+
+export const Box1_1 = ({ children, link }: BoxInterface) => (
+  <Box
+    link={link}
+    className_div1="min-height-box-1"
+    className_div2="mv4"
+  >
+    <div className='p4'>
+      <div className='mv2'></div>
+      {children}
+    </div>
   </Box>
 );

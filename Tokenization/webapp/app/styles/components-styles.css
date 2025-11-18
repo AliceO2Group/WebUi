@@ -42,7 +42,7 @@
 }
 
 .modal {
-    width: clamp(50px, 30%, 300px);
+    width: clamp(50px, 30%, 800px);
     height: auto;
     position: fixed;
     top: 40%;
