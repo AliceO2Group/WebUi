@@ -98,14 +98,14 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
         const commonSelectorPath = '.layout-selectable > div';
         const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > button`);
         const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div`;
-        const path = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div > div`).innerText;
-        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > b`).innerText;
+        const path = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(1) > div > div`).innerText;
+        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(1) > b`).innerText;
         const lastModifiedTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`).innerText;
         return { title, pathTitle, path, lastModifiedTitle };
       });
       strictEqual(result.title, 'View details about histogram');
-      strictEqual(result.pathTitle, 'path');
+      strictEqual(result.pathTitle, 'Path');
       strictEqual(result.path, 'qc/test/object/1');
-      strictEqual(result.lastModifiedTitle, 'lastModified');
+      strictEqual(result.lastModifiedTitle, 'Last Modified');
     });
 };
