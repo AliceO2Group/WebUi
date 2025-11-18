@@ -210,7 +210,8 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       const getObjectInfoPanelVisibility = async () => await page.evaluate(() => {
         const el = document.querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(2)');
         if (!el) {
-          throw new Error('Object info container not found');
+          // Object is not loaded in the DOM
+          return false;
         }
         const style = window.getComputedStyle(el);
         return style.display !== 'none' && parseFloat(style.opacity) > 0 && el.offsetWidth > 0 && el.offsetHeight > 0;
