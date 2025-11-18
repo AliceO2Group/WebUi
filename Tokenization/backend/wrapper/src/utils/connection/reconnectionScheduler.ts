@@ -18,7 +18,7 @@ export interface ReconnectionOptions {
 }
 
 /**
- * @description Schedules reconnection attempts with exponential backoff.
+ * A scheduler that manages reconnection attempts with an exponential backoff.
  */
 export class ReconnectionScheduler {
   private reconnectCallback: any;
@@ -33,17 +33,15 @@ export class ReconnectionScheduler {
   private isScheduling: boolean = false;
 
   /**
-   * @param reconnectCallback Function to call for reconnection attempt
-   * @param options Configuration options for reconnection scheduling
+   * Creates a new instance of the ReconnectionScheduler.
+   * @param {any} reconnectCallback - The callback to be called when a reconnection attempt is scheduled.
+   * @param {ReconnectionOptions} [options] - Options for the reconnection schedule.
+   * @param {Logger} logger - The logger instance to be used for logging messages.
    */
-  constructor(
-    reconnectCallback: any,
-    options: ReconnectionOptions = {},
-    logger: Logger
-  ) {
+  constructor(reconnectCallback: any, options: ReconnectionOptions = {}, logger: Logger) {
     this.reconnectCallback = reconnectCallback;
-    this.initialDelay = options.initialDelay || 1000;
-    this.maxDelay = options.maxDelay || 30000;
+    this.initialDelay = options.initialDelay ?? 1000;
+    this.maxDelay = options.maxDelay ?? 30000;
 
     this.currentDelay = this.initialDelay;
     this.attemptCount = 0;
@@ -53,7 +51,7 @@ export class ReconnectionScheduler {
   }
 
   /**
-   * @description Schedules the next reconnection attempt using exponential backoff.
+   * Schedules the next reconnection attempt using exponential backoff.
    */
   schedule() {
     if (this.isScheduling) return;
@@ -61,18 +59,14 @@ export class ReconnectionScheduler {
     this.isResetting = false;
     this.attemptCount++;
 
-    // exponential backoff calculation
-    let delay = this.initialDelay * Math.pow(2, this.attemptCount);
+    // Exponential backoff calculation
+    const delay = this.initialDelay * Math.pow(2, this.attemptCount);
 
     this.currentDelay = Math.min(this.maxDelay, delay);
 
-    this.logger.infoMessage(
-      `Recconection attempt #${
-        this.attemptCount
-      }: Sleep for ${this.currentDelay.toFixed(0)} ms.`
-    );
+    this.logger.infoMessage(`Recconection attempt #${this.attemptCount}: Sleep for ${this.currentDelay.toFixed(0)} ms.`);
 
-    // plan the reconnection attempt
+    // Plan the reconnection attempt
     this.timeoutId = setTimeout(() => {
       this.isScheduling = false;
       this.reconnectCallback();
@@ -80,21 +74,15 @@ export class ReconnectionScheduler {
   }
 
   /**
-   * @description Resets the scheduler to its initial state.
+   * Resets the scheduler to its initial state.
    */
   reset() {
     if (this.isResetting) return;
+    this.isScheduling = false;
     this.isResetting = true;
 
     clearTimeout(this.timeoutId);
     this.attemptCount = 0;
     this.currentDelay = this.initialDelay;
-  }
-
-  /**
-   * @description stops the reconnection attempts.
-   */
-  stop() {
-    clearTimeout(this.timeoutId);
   }
 }
