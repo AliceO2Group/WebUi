@@ -42,4 +42,76 @@ export const initializeNockForBkp = () => {
         },
       },
     });
+  nock(BKP_URL)
+    .persist()
+    .get(`/api/runs/0${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: null,
+      },
+    });
+  nock(BKP_URL)
+    .get(`/api/runs/500001${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: null,
+      },
+    })
+    .get(`/api/runs/500001${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: null,
+      },
+    })
+    .get(`/api/runs/500001${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: '2023-12-01T10:30:00Z',
+      },
+    })
+    .get(`/api/runs/500001${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: '2023-12-01T10:30:00Z',
+      },
+    });
+  nock(BKP_URL)
+    .persist()
+    .get(`/api/runs/500002${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: null,
+      },
+    });
+  nock(BKP_URL)
+    .persist()
+    .get(`/api/runs/500003${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: null,
+      },
+    });
+  nock(BKP_URL)
+    .get(`/api/runs/566138${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: null,
+      },
+    })
+    .get(`/api/runs/566138${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: null,
+      },
+    })
+    .get(`/api/runs/566138${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: null,
+      },
+    })
+    .get(`/api/runs/566138${TOKEN_PATH}`)
+    .reply(200, {
+      data: { timeO2End: 'hello' },
+    });
 };

@@ -15,9 +15,13 @@
 import { type RouteConfig, index, route, prefix } from '@react-router/dev/routes';
 
 export default [
-  index('routes/home.tsx'),
-  ...prefix('tokens', [
-    index('routes/tokens/overview.tsx'),
-    route(':tokenId', 'routes/tokens/details.tsx'),
+  route('', 'ui/layout.tsx', [
+    index('routes/home.tsx'),
+    ...prefix('tokens', [
+      index('routes/tokens/overview.tsx'),
+      route(':tokenId', 'routes/tokens/details.tsx'),
+    ]),
+    route('*', 'routes/404.tsx'),
   ]),
+
 ] satisfies RouteConfig;

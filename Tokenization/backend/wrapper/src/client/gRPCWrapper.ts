@@ -12,14 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
-import { ConnectionManager } from "./ConnectionManager/ConnectionManager";
-import { RevokeTokenHandler } from "./Commands/revokeToken/revokeToken.handler";
-import {
-  ConnectionDirection,
-  DuplexMessageEvent,
-} from "../models/message.model";
-import { Connection } from "./Connection/Connection";
-import { NewTokenHandler } from "./Commands/newToken/newToken.handler";
+import { ConnectionManager } from './connectionManager/ConnectionManager';
+import { RevokeTokenHandler } from './commands/revokeToken/revokeToken.handler';
+import { ConnectionDirection, DuplexMessageEvent } from '../models/message.model';
+import { NewTokenHandler } from './commands/newToken/newToken.handler';
+import type { Connection } from './connection/Connection';
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -36,96 +33,86 @@ import { NewTokenHandler } from "./Commands/newToken/newToken.handler";
  * ```
  */
 export class gRPCWrapper {
-  private ConnectionManager: ConnectionManager;
+  private _connectionManager: ConnectionManager;
 
   /**
-   * @description Initializes an instance of gRPCWrapper class.
+   * Initializes an instance of gRPCWrapper class.
    *
    * @param protoPath - The file path to the gRPC proto definition.
-   * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
+   * @param centralAddress - The address of the central gRPC server (default: "localhost:4100").
    */
-  constructor(protoPath: string, centralAddress: string = "localhost:50051") {
-    this.ConnectionManager = new ConnectionManager(protoPath, centralAddress);
-    this.ConnectionManager.registerCommandHandlers([
+  constructor(protoPath: string, centralAddress: string = 'localhost:4100') {
+    this._connectionManager = new ConnectionManager(protoPath, centralAddress);
+    this._connectionManager.registerCommandHandlers([
       {
         event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
-        handler: new RevokeTokenHandler(this.ConnectionManager),
+        handler: new RevokeTokenHandler(this._connectionManager),
       },
       {
         event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
-        handler: new NewTokenHandler(this.ConnectionManager),
+        handler: new NewTokenHandler(this._connectionManager),
       },
     ]);
   }
 
   /**
-   * @description Starts the Connection Manager stream connection with Central System
+   * Connects to the central system using the underlying ConnectionManager.
+   *
+   * @remarks
+   * This method starts the duplex stream connection with the central gRPC server.
    */
   public connectToCentralSystem() {
-    this.ConnectionManager.connectToCentralSystem();
+    this._connectionManager.connectToCentralSystem();
   }
 
   /**
-   * @description Starts the Connection Manager stream connection with Central System
+   * Establishes a new connection to a target client.
+   *
+   * @param address - The target address of the client.
+   * @param token - Optional authentication token for the connection.
+   *
+   * @returns A promise that resolves to the newly created connection ready to use for fetching data.
    */
-  public async connectToClient(
-    address: string,
-    token?: string
-  ): Promise<Connection> {
-    return this.ConnectionManager.createNewConnection(
-      address,
-      ConnectionDirection.SENDING,
-      token || ""
-    );
+  public async connectToClient(address: string, token?: string): Promise<Connection> {
+    return this._connectionManager.createNewConnection(address, ConnectionDirection.SENDING, token ?? '');
   }
 
   /**
-   * @description Starts the Connection Manager stream connection with Central System
+   * Starts a listener server for p2p connections.
+   * @param port The port number to bind the p2p server to.
+   * @param baseAPIPath Optional base API path to forward requests to e.g. '/api'.
+   * @returns A promise that resolves when the p2p listener server is started.
    */
-  public async listenForPeers(
-    port: number,
-    baseAPIPath?: string
-  ): Promise<void> {
-    return this.ConnectionManager.listenForPeers(port, baseAPIPath);
+  public async listenForPeers(port: number, baseAPIPath?: string): Promise<void> {
+    return this._connectionManager.listenForPeers(port, baseAPIPath);
   }
 
   /**
-   * @description Returns all saved connections.
+   * Returns all saved connections.
    *
    * @returns An object containing the sending and receiving connections.
    */
-  public getAllConnections(): {
+  public get connections(): {
     sending: Connection[];
     receiving: Connection[];
   } {
-    return this.ConnectionManager.getAllConnections();
+    return this._connectionManager.connections;
   }
 
   /**
-   * @returns Returns string with summary of all connection
+   * Returns a summary of the connections managed by the ConnectionManager.
+   * The summary includes the number of sending and receiving connections, as well as the target address, direction, and status of each connection.
+   *
+   * @returns A string summary of the connections.
    */
   public getSummary(): string {
-    const conn = this.ConnectionManager.getAllConnections();
+    const conn = this._connectionManager.connections;
     return (
       `Wrapper Summary: ` +
       `\nSending Connections: ${conn.sending.length}` +
-      `\nReceiving Connections: ${conn.receiving.length}` +
-      conn.sending
-        .map(
-          (c) =>
-            `\n- ${c.getTargetAddress()} \nDirection - ${
-              c.direction
-            }\n\tStatus: (${c.getStatus()})\n\tToken: (${c.getToken()})`
-        )
-        .join("") +
-      conn.receiving
-        .map(
-          (c) =>
-            `\n- ${c.getTargetAddress()} \nDirection - ${
-              c.direction
-            }\n\tStatus: (${c.getStatus()})\n\tToken: (${c.getToken()})`
-        )
-        .join("")
+      `\nReceiving Connections: ${conn.receiving.length}${conn.sending
+        .map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`)
+        .join('')}${conn.receiving.map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`).join('')}`
     );
   }
 }

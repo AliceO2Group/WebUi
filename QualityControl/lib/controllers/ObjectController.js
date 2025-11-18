@@ -13,6 +13,9 @@
  */
 'use strict';
 import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import { ObjectGetDownloadDTO } from '../dtos/ObjectGetDto.js';
+
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/obj-controller`;
 
 /**
  * Gateway for all QC Objects requests
@@ -22,20 +25,28 @@ export class ObjectController {
   /**
    * Setup Object Controller:
    * - CcdbService - retrieve data about objects
+   * @import { QcdbDownloadService } from '../services/QcdbDownload.service.js';
    * @param {QCObjectService} objService - objService to be used for retrieval of information
    * @param {RunMonitoringService} runModeService - for monitoring the status of runs periodically
+   * @param {QcdbDownloadService} qcdbDownloadService - service that will download from qcdb.
    */
-  constructor(objService, runModeService) {
+  constructor(objService, runModeService, qcdbDownloadService) {
     /**
      * @type {QCObjectService}
      */
     this._objService = objService;
 
     /**
+     * @type {QcdbDownloadService}
+     * @import { QcdbDownloadService } from '../services/QcdbDownload.service.js';
+     */
+    this._qcdbDownloadService = qcdbDownloadService;
+
+    /**
      * @type {RunMonitoringService}
      */
     this._runModeService = runModeService;
-    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/object-ctrl`);
+    this._logger = LogManager.getLogger(LOG_FACILITY);
   }
 
   /**
@@ -44,23 +55,14 @@ export class ObjectController {
    * @param {Response} res - HTTP response object to provide information on request
    * @returns {void}
    */
-  async getObjects(req, res) {
+  async getObjectsHandler(req, res) {
     try {
       const { prefix, fields, filters = {}, inRunMode = false } = req.query;
 
-      const { RunNumber: runNumber } = filters;
-      const parsedRunNumber = parseInt(runNumber, 10);
-
-      if (inRunMode && (!runNumber || isNaN(parsedRunNumber))) {
-        return updateAndSendExpressResponseFromNativeError(
-          res,
-          new InvalidInputError(!runNumber
-            ? 'RunNumber is required when in run mode'
-            : 'RunNumber must be a number'),
-        );
-      } else if (inRunMode && runNumber && !isNaN(parsedRunNumber)) {
-        const { paths, runStatus } = await this._runModeService.retrievePathsAndSetRunStatus(parsedRunNumber, prefix);
-        return res.status(200).json({ paths, runStatus });
+      if (inRunMode) {
+        const runNumber = filters?.RunNumber;
+        const { paths } = await this._runModeService.retrievePathsAndSetRunStatus(runNumber);
+        return res.status(200).json({ paths });
       }
 
       const objectsData = await this._objService.retrieveLatestVersionOfObjects({
@@ -77,6 +79,33 @@ export class ObjectController {
   }
 
   /**
+   * Download ROOT objects using the QcdbDownloadService.
+   * Only support 1 root object for now.
+   * @param {Request} req - ExpressJs req object.
+   * @param {Response} res - ExpressJs res object.
+   * @returns {void}
+   */
+  async getDownloadObjectsHandler(req, res) {
+    let objectIds = undefined;
+    try {
+      const validated = await ObjectGetDownloadDTO.validateAsync(req.query);
+      ({ objectIds } = validated);
+      await this._qcdbDownloadService.getQcdbRootObjects(objectIds, res);
+    } catch (error) {
+      let responseError = '';
+      if (error.isJoi) {
+        this._logger.errorMessage(`Error validating query parameters: ${error}`);
+        responseError = new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`);
+      } else {
+        this._logger.errorMessage(error?.message ?? error);
+        responseError = new Error('Unable to process request');
+      }
+
+      return updateAndSendExpressResponseFromNativeError(res, responseError);
+    }
+  }
+
+  /**
    * Using `browse` option, request a list of `last-modified` and `valid-from` for a specified path for an object
    * Use the first `validFrom` option to make a head request to CCDB; Request which will in turn return object
    * information and download it locally on CCDB if it is not already done so;
@@ -87,7 +116,7 @@ export class ObjectController {
    * @param {Response} res - HTTP response object to provide information on request
    * @returns {Promise<void>}
    */
-  async getObjectContent(req, res) {
+  async getObjectContentHandler(req, res) {
     try {
       const { path, validFrom, filters, id } = req.query;
 
@@ -112,7 +141,7 @@ export class ObjectController {
    * @param {Response} res - HTTP response object to provide information on request
    * @returns {Promise<void>}
    */
-  async getObjectById(req, res) {
+  async getObjectByIdHandler(req, res) {
     try {
       const qcObjectId = req.params.id;
       const { validFrom, filters, id } = req.query;

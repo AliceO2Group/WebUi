@@ -71,10 +71,6 @@ class EnvironmentService {
       throw grpcErrorToNativeError(error);
     }
     try { 
-      if (!environments || environments.length === 0) {
-        this._broadcastService.broadcast(ENVIRONMENTS_OVERVIEW, []);
-        return [];
-      }
       const activeEnvironmentList = [];
       for (const { id } of environments) {
         let environment;
@@ -193,7 +189,7 @@ class EnvironmentService {
    * @returns {Promise.<{EnvironmentInfo}, Error>} - if operation was a success ECS will return a partialEnvironmentInfo object
    * @throws {Error} - if the operation failed
    */
-  async newEnvironmentAsync({ workflowTemplate, userVars, user, shouldAutoTransition = false }) {
+  async newEnvironmentAsync({ workflowTemplate, userVars, user, shouldAutoTransition = false, detectors }) {
     let environment = undefined;
     try {
       ({ environment } = await this._coreGrpc.NewEnvironmentAsync({
@@ -217,6 +213,26 @@ class EnvironmentService {
      * @property {string} currentTransition - the current transition of the environment
      */
     environment.isDeploying = true;
+    /**
+     * As per ticket OCTRL-1045, ECS is not able to respond with the static information yet. Thus, the GUI
+     * should keep track of the user that requested the environment and the detectors included in the deployment
+     * to be able to show this information in the UI.
+     */
+    if (!environment?.userVars?.last_request_user) {
+      if (!environment.userVars) {
+        environment.userVars = {};
+      }
+      environment.userVars.last_request_user = {
+        externalId: user.personid,
+        name: user.username,
+      };
+    }
+    if (!environment.rootRole) {
+      environment.rootRole = workflowTemplate;
+    }
+    if (!environment.includedDetectors || environment.includedDetectors.length === 0) {
+      environment.includedDetectors = detectors ?? [];
+    }
     const environmentInfo = EnvironmentInfoAdapter.toEntity(environment, '', detectorsAll, hostsByDetector);
     this._environmentCacheService.addOrUpdateEnvironment(environmentInfo, true);
     return environmentInfo;
