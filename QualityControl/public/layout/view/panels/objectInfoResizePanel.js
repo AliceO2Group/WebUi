@@ -47,7 +47,7 @@ export const objectInfoResizePanel = (model, tabObject) => {
       h(
         '.dropdown-menu',
         { style: 'right:0.1em; width: 35em;left: auto;' },
-        objectRemoteData.isSuccess() && h('.p1', qcObjectInfoPanel(objectRemoteData.payload)),
+        objectRemoteData.isSuccess() && h('.p1', qcObjectInfoPanel(model, objectRemoteData.payload)),
       ),
     ]),
     objectRemoteData.isSuccess() &&

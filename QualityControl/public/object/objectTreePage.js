@@ -122,7 +122,7 @@ const drawPlot = (model, object) => {
     h('', { style: 'height:77%;' }, draw(model, name, { stat: true })),
     h('.scroll-y', {}, [
       h('.w-100.flex-row', { style: 'justify-content: center' }, h('.w-80', timestampSelectForm(model))),
-      qcObjectInfoPanel(info, { 'font-size': '.875rem;' }),
+      qcObjectInfoPanel(model, info, { 'font-size': '.875rem;' }),
     ]),
   ]);
 };

@@ -136,3 +136,8 @@
     color: var(--color-success);
   }
 }
+
+.info-row {
+  background-color: var(--color-light-blue);
+  font-weight: 500;
+}
