@@ -405,4 +405,39 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       strictEqual(redrawn, true, 'JSRoot drawing was not redrawn on visibility toggle');
     },
   );
+
+  await testParent.test(
+    'should update localStorage state when visibility toggle button is clicked',
+    { timeout },
+    async () => {
+      const personId = await page.evaluate(() => window.model?.session?.personid?.toString());
+      if (!personId) {
+        throw new Error('Could not resolve personId from the application model');
+      }
+
+      const localStorageKey = `object-view-info-visibility-setting-${personId}`;
+      const visibilitySettingInitially = await getLocalStorageVisibilityFlag(page, localStorageKey);
+
+      // Click the toggle button (first time)
+      await page.click('.visibility-toggle-button');
+      await delay(100);
+      const visibilitySettingAfterFirstClick = await getLocalStorageVisibilityFlag(page, localStorageKey);
+
+      // Click the toggle button (second time)
+      await page.click('.visibility-toggle-button');
+      await delay(100);
+      const visibilitySettingAfterSecondClick = await getLocalStorageVisibilityFlag(page, localStorageKey);
+
+      strictEqual(
+        visibilitySettingAfterFirstClick,
+        !visibilitySettingInitially,
+        'LocalStorage state should be toggled after the first click',
+      );
+      strictEqual(
+        visibilitySettingAfterSecondClick,
+        visibilitySettingInitially,
+        'LocalStorage state should return to the initial value after the second click',
+      );
+    },
+  );
 };
