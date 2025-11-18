@@ -47,7 +47,7 @@ const objectPlotAndInfo = (objectViewModel) =>
       const drawingOptions = ignoreDefaults ?
         layoutDisplayOptions
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
-      const isObjectInfoVisible = objectViewModel.getObjectInfoVisible();
+      const isObjectInfoVisible = objectViewModel.objectInfoVisible;
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.items-center.h-10', [
           h(
@@ -73,23 +73,16 @@ const objectPlotAndInfo = (objectViewModel) =>
           ]),
         ]),
         h('.w-100.flex-row.g2.m2', { style: 'height: 0;flex-grow:1' }, [
-          h(
-            isObjectInfoVisible ? '.w-70' : '.w-100',
-            {
-              key: isObjectInfoVisible ? 'objectPanel:infoVisible' : 'objectPanel:infoHidden',
-            },
-            draw(qcObject, {}, drawingOptions),
-          ),
-          h(
-            isObjectInfoVisible ? '.w-30.scroll-y' : '.scroll-off',
-            {
-              style: isObjectInfoVisible ? '' : 'width: 0;',
-            },
-            [
-              h('h3.text-center', 'Object information'),
-              qcObjectInfoPanel(qcObject, { gap: '.5em' }),
-            ],
-          ),
+          h('.flex-grow', {
+            // Key change forces redraw when toggling info panel
+            key: isObjectInfoVisible ? 'objectPlotWithoutInfoPanel' : 'objectPlotWithInfoPanel',
+          }, draw(qcObject, {}, drawingOptions)),
+          isObjectInfoVisible && h('.scroll-y.w-30', {
+            key: 'objectInfoPanel',
+          }, [
+            h('h3.text-center', 'Object information'),
+            qcObjectInfoPanel(qcObject, { gap: '.5em' }),
+          ]),
         ]),
       ]);
     },

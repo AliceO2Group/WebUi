@@ -44,7 +44,8 @@ export default class ObjectViewModel extends BaseViewModel {
     this.displayHints = [];
     this.ignoreDefaults = false;
 
-    this.storage = new BrowserStorage('object-view-info-visibility-setting');
+    this._storage = new BrowserStorage('object-view-info-visibility-setting');
+    this._objectInfoVisible = this.loadObjectInfoVisible();
   }
 
   /**
@@ -130,43 +131,37 @@ export default class ObjectViewModel extends BaseViewModel {
   }
 
   /**
-   * Get the current display state of object information.
+   * Get the current display state of object information from the local storage.
    * If the value does not exist in storage, or if the stored value has been tampered
    * with and is invalid, this method will default to `true` (object information is visible).
    * @returns {boolean} - `true` if object information is currently displayed, `false` otherwise.
-   * @example
-   * const isVisible = objectViewModel.getObjectInfoVisible();
    */
-  getObjectInfoVisible() {
+  loadObjectInfoVisible() {
     try {
-      return this.storage.getLocalItem(this.model.session.personid.toString()) ?? true;
+      return this._storage.getLocalItem(this.model.session.personid.toString()) ?? true;
       // eslint-disable-next-line no-unused-vars
     } catch (_) {
-      this.storage.removeLocalItem(this.model.session.personid.toString());
+      this._storage.removeLocalItem(this.model.session.personid.toString());
       return true;
     }
   }
 
   /**
-   * Set the display state of object information.
-   * Notifies any observers/listeners about the change.
-   * @param {boolean} objectInfoVisible - `true` to show object information, `false` to hide.
-   * @example
-   * objectViewModel.setObjectInfoVisible(true);
+   * Get the current display state of object information.
+   * @returns {boolean} - `true` if object information is currently displayed, `false` otherwise.
    */
-  setObjectInfoVisible(objectInfoVisible) {
-    this.storage.setLocalItem(this.model.session.personid.toString(), objectInfoVisible);
-    this.notify();
+  get objectInfoVisible() {
+    return this._objectInfoVisible;
   }
 
   /**
-   * Toggle the display state of object information.
+   * Toggle the display state of object information and store it in the local storage.
    * If currently visible, it becomes hidden; if hidden, it becomes visible.
-   * @example
-   * objectViewModel.toggleObjectInfoVisible();
    */
   toggleObjectInfoVisible() {
-    this.setObjectInfoVisible(!this.getObjectInfoVisible());
+    this._objectInfoVisible = !this._objectInfoVisible;
+    this._storage.setLocalItem(this.model.session.personid.toString(), this._objectInfoVisible);
+    this.notify();
   }
 
   /**
