@@ -13,6 +13,7 @@
  */
 
 import axios from 'axios';
+import { getSessionData } from '~/services/session';
 
 export const API_URL = 'http://localhost:8080/control/api';
 
@@ -22,6 +23,15 @@ const axiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: false,
+});
+
+axiosInstance.interceptors.request.use(async (config) => {
+  const { token } = await getSessionData();
+  if (token) {
+    config.url = `${config.url}?token=${token}`;
+  }
+
+  return config;
 });
 
 export default axiosInstance;
