@@ -177,7 +177,11 @@ const resizeOnSizeUpdate = keyedTimerDebouncer(
         // Size stable across intervals (safe to redraw)
         if (dom.dataset.fingerprintResize !== currentFingerprint) {
           dom.dataset.fingerprintResize = currentFingerprint;
-          redraw(objectModel, dom, tabObject);
+          const objectRemoteData = objectModel.objects[tabObject.name];
+          const qcObject = objectRemoteData.payload.qcObject.root;
+          let drawingOptions = objectModel.generateDrawingOptions(tabObject, objectRemoteData);
+          drawingOptions = generateDrawingOptionList(qcObject, drawingOptions);
+          JSROOT.redraw(dom, qcObject, drawingOptions);
         }
 
         clearInterval(intervalId);
@@ -215,7 +219,31 @@ function redrawOnDataUpdate(model, dom, tabObject) {
     !isObjectOfTypeChecker(objectRemoteData.payload.qcObject.root) &&
     (shouldRedraw || shouldCleanRedraw)
   ) {
-    redraw(model.object, dom, tabObject);
+    const objectRemoteData = model.object.objects[tabObject.name];
+    const qcObject = objectRemoteData.payload.qcObject.root;
+    setTimeout(() => {
+      if (JSROOT.cleanup) {
+        /*
+         * Remove previous JSROOT content before draw to do a real redraw.
+         * Official redraw will keep options whenever they changed, we don't want this.
+         * (cleanup might not be loaded yet)
+         */
+        JSROOT.cleanup(dom);
+      }
+      let drawingOptions = model.object.generateDrawingOptions(tabObject, objectRemoteData);
+      drawingOptions = generateDrawingOptionList(qcObject, drawingOptions);
+
+      JSROOT.draw(dom, qcObject, drawingOptions.join(';')).then((painter) => {
+        if (painter === null) {
+          // Jsroot failed to paint it
+          model.object.invalidObject(tabObject.name);
+        }
+      }).catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error(error);
+        model.object.invalidObject(tabObject.name);
+      });
+    }, 0);
 
     dom.dataset.fingerprintRedraw = redrawHash;
     dom.dataset.fingerprintCleanRedraw = cleanRedrawHash;
@@ -227,40 +255,6 @@ function redrawOnDataUpdate(model, dom, tabObject) {
      * model.notify();
      */
   }
-}
-
-/**
- * Redraws the jsroot plot
- * @param {QCObject} objectModel - object model
- * @param {HTMLElement} dom - the element containing jsroot plot
- * @param {TabObject} tabObject - tabObject to be redrawn inside dom
- */
-function redraw(objectModel, dom, tabObject) {
-  const objectRemoteData = objectModel.objects[tabObject.name];
-  const qcObject = objectRemoteData.payload.qcObject.root;
-  setTimeout(() => {
-    if (JSROOT.cleanup) {
-      /*
-       * Remove previous JSROOT content before draw to do a real redraw.
-       * Official redraw will keep options whenever they changed, we don't want this.
-       * (cleanup might not be loaded yet)
-       */
-      JSROOT.cleanup(dom);
-    }
-    let drawingOptions = objectModel.generateDrawingOptions(tabObject, objectRemoteData);
-    drawingOptions = generateDrawingOptionList(qcObject, drawingOptions);
-
-    JSROOT.draw(dom, qcObject, drawingOptions.join(';')).then((painter) => {
-      if (painter === null) {
-        // Jsroot failed to paint it
-        objectModel.invalidObject(tabObject.name);
-      }
-    }).catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error(error);
-      objectModel.invalidObject(tabObject.name);
-    });
-  }, 0);
 }
 
 /**
