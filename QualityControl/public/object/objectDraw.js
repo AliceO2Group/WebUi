@@ -219,7 +219,6 @@ function redrawOnDataUpdate(model, dom, tabObject) {
     !isObjectOfTypeChecker(objectRemoteData.payload.qcObject.root) &&
     (shouldRedraw || shouldCleanRedraw)
   ) {
-    const objectRemoteData = model.object.objects[tabObject.name];
     const qcObject = objectRemoteData.payload.qcObject.root;
     setTimeout(() => {
       if (JSROOT.cleanup) {
