@@ -16,21 +16,36 @@ import { Box } from '@mui/material';
 import { type FC, type PropsWithChildren } from 'react';
 import { ContentHeader } from './ContentHeader';
 import { useParams } from 'react-router';
+import { DRAWER_WIDTH } from '../drawer/LeftDrawer';
+
+interface ContentProps extends PropsWithChildren {
+  isOpen?: boolean;
+}
 
 /**
  * Content component
  * Represents the main content area of the application layout.
  * It includes a header and wraps children components.
- * @param {PropsWithChildren} props - Component props.
+ * @param {ContentProps} props - Component props.
+ * @param {boolean} props.isOpen - Whether the drawer is open.
  * @returns {React.ReactElement} Content
  */
-export const Content: FC<PropsWithChildren> = ({ children }) => {
+export const Content: FC<ContentProps> = ({ children, isOpen = false }) => {
   const params = useParams<{ '*': string }>();
   const configPath = params['*'];
   return (
     <Box
       component="main"
-      sx={{ flexGrow: 1, bgcolor: 'background.default' }}
+      sx={{
+        flexGrow: 1,
+        bgcolor: 'background.default',
+        marginLeft: isOpen ? 0 : `-${DRAWER_WIDTH}px`,
+        transition: (theme) =>
+          theme.transitions.create('margin', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+      }}
       className="content-section"
     >
       <ContentHeader currentPath={configPath ?? ''} />
