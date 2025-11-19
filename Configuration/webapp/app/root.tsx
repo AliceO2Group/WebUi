@@ -33,6 +33,7 @@ import { ConfigNavigator } from './components/config-navigator/ConfigNavigator';
 
 import queryClient, { persister } from './api/queryClient';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { useState } from 'react';
 
 /**
  * Root component
@@ -41,6 +42,8 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
  * @returns {React.ReactElement} Root
  */
 export function Layout({ children }: { children: React.ReactNode }) {
+  const [isOpen, setIsOpen] = useState(true);
+
   return (
     <html lang="en">
       <head>
@@ -52,10 +55,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body>
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
           <MainLayout>
-            <LeftDrawer>
+            <LeftDrawer isOpen={isOpen} setIsOpen={setIsOpen}>
               <ConfigNavigator />
             </LeftDrawer>
-            <Content>{children}</Content>
+            <Content isOpen={isOpen}>
+              <button onClick={() => setIsOpen(!isOpen)}>TOGGLE</button>
+              {children}
+            </Content>
           </MainLayout>
           <ScrollRestoration />
           <Scripts />
