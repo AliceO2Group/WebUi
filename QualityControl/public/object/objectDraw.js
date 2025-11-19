@@ -15,7 +15,7 @@
 /* global JSROOT */
 
 import { h, iconWarning } from '/js/src/index.js';
-import { timerDebouncer, pointerId } from '../common/utils.js';
+import { keyedTimerDebouncer, pointerId } from '../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 import checkersPanel from './../common/object/checkersPanel.js';
 import { generateDrawingOptionList } from '../../library/qcObject/utils.js';
@@ -74,19 +74,16 @@ export function draw(model, tabObject, options) {
       // Ask model to load data to be shown
 
       // Setup resize function
-      vnode.dom.onresize = timerDebouncer(() => {
-        if (JSROOT.resize) {
-          // Resize might not be loaded yet
-          JSROOT.resize(vnode.dom);
-        }
-      }, 200);
+      vnode.dom.onresize = () => {
+        resizeOnSizeUpdate(model.object, vnode.dom, tabObject);
+      };
 
       // Resize on window size change
       window.addEventListener('resize', vnode.dom.onresize);
 
       // JSROOT setup
       redrawOnDataUpdate(model, vnode.dom, tabObject);
-      resizeOnSizeUpdate(model, vnode.dom, tabObject);
+      resizeOnSizeUpdate(model.object, vnode.dom, tabObject);
     },
 
     /**
@@ -97,7 +94,7 @@ export function draw(model, tabObject, options) {
     onupdate(vnode) {
       // JSROOT setup
       redrawOnDataUpdate(model, vnode.dom, tabObject);
-      resizeOnSizeUpdate(model, vnode.dom, tabObject);
+      resizeOnSizeUpdate(model.object, vnode.dom, tabObject);
     },
 
     /**
@@ -137,29 +134,69 @@ export function draw(model, tabObject, options) {
 }
 
 /**
- * Vnode update hook
- * Apply a JSROOT resize when view goes from one size state to another
- * State is stored DOM dataset of element
+ * Debounced resize handler that redraws a graph upon size update only after:
+ * - Rapid resize events have stopped (200 ms debounce)
+ * - The JSROOT element's size has fully stabilized (50 ms interval polling)
+ *
+ * *Why debounce:*
+ * Resize events can fire rapidly (window resize, panel changes, responsive layout).
+ * Redrawing on every event is expensive and unnecessary.
+ * Debouncing ensures only the final resize state triggers a redraw, preventing
+ * redundant work and improving performance.
+ *
+ * *Why interval:*
+ * Even after resize events stop firing, the element's width/height may still change
+ * due to transitions, animations, flexbox reflow, or delayed CSS effects.
+ * The 50 ms interval checks for consecutive identical size fingerprints to confirm that
+ * the element has fully settled before allowing a redraw.
+ * This prevents flicker and avoids redrawing into a layout that is still moving.
+ *
+ * *Note:*
+ * The debouncer is keyed by the JSROOT element itself, allowing multiple
+ * independent JSROOT graphs to debounce and update separately.
  * @param {Model} model - root model of the application
- * @param {object} dom - the div containing jsroot plot
+ * @param {HTMLElement} dom - the element containing jsroot plot
  * @param {TabObject} tabObject - tabObject to be redrawn inside dom
  * @returns {undefined}
  */
-function resizeOnSizeUpdate(model, dom, tabObject) {
-  const resizeHash = fingerprintResize(tabObject);
+const resizeOnSizeUpdate = keyedTimerDebouncer(
+  (_, dom) => dom,
+  (objectModel, dom, tabObject) => {
+    let previousFingerprint = dom.dataset.fingerprintResize;
 
-  if (dom.dataset.fingerprintResize !== resizeHash) {
-    dom.onresize();
-    dom.dataset.fingerprintResize = resizeHash;
-  }
-}
+    const intervalId = setInterval(() => {
+      try {
+        const currentFingerprint = fingerprintResize(dom.clientWidth, dom.clientHeight);
+
+        // Still changing: update the fingerprint and wait for the next interval
+        if (previousFingerprint !== currentFingerprint) {
+          previousFingerprint = currentFingerprint;
+          return;
+        }
+
+        // Size stable across intervals (safe to redraw)
+        if (dom.dataset.fingerprintResize !== currentFingerprint) {
+          dom.dataset.fingerprintResize = currentFingerprint;
+          redraw(objectModel, dom, tabObject);
+        }
+
+        clearInterval(intervalId);
+        // eslint-disable-next-line no-unused-vars
+      } catch (_) {
+        // stop monitoring on error
+        clearInterval(intervalId);
+      }
+    }, 50);
+  },
+  200,
+);
 
 /**
  * Vnode update hook.
  * Apply a JSROOT redraw when view goes from one data state to another
  * State is stored DOM dataset of element
  * @param {Model} model - root model of the application
- * @param {object} dom - the div containing jsroot plot
+ * @param {HTMLElement} dom - the div containing jsroot plot
  * @param {TabObject} tabObject - tabObject to be redrawn inside dom
  * @returns {undefined}
  */
@@ -178,30 +215,7 @@ function redrawOnDataUpdate(model, dom, tabObject) {
     !isObjectOfTypeChecker(objectRemoteData.payload.qcObject.root) &&
     (shouldRedraw || shouldCleanRedraw)
   ) {
-    const qcObject = objectRemoteData.payload.qcObject.root;
-    setTimeout(() => {
-      if (JSROOT.cleanup) {
-        /*
-         * Remove previous JSROOT content before draw to do a real redraw.
-         * Official redraw will keep options whenever they changed, we don't want this.
-         * (cleanup might not be loaded yet)
-         */
-        JSROOT.cleanup(dom);
-      }
-      let drawingOptions = model.object.generateDrawingOptions(tabObject, objectRemoteData);
-      drawingOptions = generateDrawingOptionList(qcObject, drawingOptions);
-
-      JSROOT.draw(dom, qcObject, drawingOptions.join(';')).then((painter) => {
-        if (painter === null) {
-          // Jsroot failed to paint it
-          model.object.invalidObject(tabObject.name);
-        }
-      }).catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error(error);
-        model.object.invalidObject(tabObject.name);
-      });
-    }, 0);
+    redraw(model.object, dom, tabObject);
 
     dom.dataset.fingerprintRedraw = redrawHash;
     dom.dataset.fingerprintCleanRedraw = cleanRedrawHash;
@@ -213,6 +227,40 @@ function redrawOnDataUpdate(model, dom, tabObject) {
      * model.notify();
      */
   }
+}
+
+/**
+ * Redraws the jsroot plot
+ * @param {QCObject} objectModel - object model
+ * @param {HTMLElement} dom - the element containing jsroot plot
+ * @param {TabObject} tabObject - tabObject to be redrawn inside dom
+ */
+function redraw(objectModel, dom, tabObject) {
+  const objectRemoteData = objectModel.objects[tabObject.name];
+  const qcObject = objectRemoteData.payload.qcObject.root;
+  setTimeout(() => {
+    if (JSROOT.cleanup) {
+      /*
+       * Remove previous JSROOT content before draw to do a real redraw.
+       * Official redraw will keep options whenever they changed, we don't want this.
+       * (cleanup might not be loaded yet)
+       */
+      JSROOT.cleanup(dom);
+    }
+    let drawingOptions = objectModel.generateDrawingOptions(tabObject, objectRemoteData);
+    drawingOptions = generateDrawingOptionList(qcObject, drawingOptions);
+
+    JSROOT.draw(dom, qcObject, drawingOptions.join(';')).then((painter) => {
+      if (painter === null) {
+        // Jsroot failed to paint it
+        objectModel.invalidObject(tabObject.name);
+      }
+    }).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      objectModel.invalidObject(tabObject.name);
+    });
+  }, 0);
 }
 
 /**
@@ -229,12 +277,12 @@ function fingerprintReplacement(tabObject) {
 /**
  * Generates a resize fingerprint.
  * When it changes, JSROOT should resize canvas
- * - tabObject.w and tabObject.h change size
- * @param {TabObject} tabObject - tab dto representation
- * @returns {vnode} - virtual node
+ * @param {number} width - the width of the element
+ * @param {number} height - the height of the element
+ * @returns {string} - the fingerprint
  */
-function fingerprintResize(tabObject) {
-  return `${tabObject.w}:${tabObject.h}`;
+function fingerprintResize(width, height) {
+  return `${width}:${height}`;
 }
 
 /**
