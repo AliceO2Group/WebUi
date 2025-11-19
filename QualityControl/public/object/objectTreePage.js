@@ -19,6 +19,7 @@ import timestampSelectForm from './../common/timestampSelectForm.js';
 import virtualTable from './virtualTable.js';
 import { qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
 import { downloadButton } from '../common/downloadButton.js';
+import { resizableDivider } from '../common/resizableDivider.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -51,12 +52,15 @@ export default (model) => {
         },
         Failure: () => null, // Notification is displayed
       })),
-      object.selected ? resizableDivider(model) : null,
-      h('.animate-width.scroll-y', {
-        style: {
-          width: object.selected ? `calc(${100 - leftPanelWidthPercent}% - 10px)` : '0%',
-        },
-      }, object.selected ? objectPanel(model) : null),
+      object.selected ? [
+        resizableDivider((newWidthPercent) => model.object.setLeftPanelWidthPercent(newWidthPercent)),
+        h('.animate-width.scroll-y', {
+          key: `object-panel-${leftPanelWidthPercent}`,
+          style: {
+            width: `calc(${100 - leftPanelWidthPercent}% - 10px)`,
+          },
+        }, objectPanel(model)),
+      ] : null,
     ]),
     h('.f6.status-bar.ph1.flex-row', [
       statusBarLeft(model),
@@ -64,66 +68,6 @@ export default (model) => {
     ]),
   ]);
 };
-
-/**
- * Resizable divider between left and right panels
- * @param {Model} model - root model of the application
- * @returns {vnode} - virtual node element
- */
-const resizableDivider = (model) =>
-  h('.bg-gray-light.flex-column.justify-center.items-center', {
-    style: {
-      width: '15px',
-      cursor: 'col-resize',
-    },
-    oncreate: (vnode) => {
-      const handleMouseDown = (e) => {
-        e.preventDefault();
-        const container = vnode.dom.parentElement;
-        const rect = container.getBoundingClientRect();
-        const containerWidth = rect.width;
-
-        const dividerRect = vnode.dom.getBoundingClientRect();
-        const initialLeft = dividerRect.left - rect.left;
-        const dragLine = document.createElement('div');
-        dragLine.style.cssText = `
-          position: absolute;
-          top: 0;
-          height: 100%;
-          width: 6px;
-          background: rgba(0, 123, 255, 0.8);
-          pointer-events: none;
-          z-index: 1001;
-          left: ${initialLeft}px;
-        `;
-        container.appendChild(dragLine);
-        const onMouseMove = (moveEvent) => {
-          const newLeftWidth = moveEvent.clientX - rect.left;
-          dragLine.style.left = `${newLeftWidth}px`;
-        };
-        const onMouseUp = (upEvent) => {
-          const newLeftWidth = upEvent.clientX - rect.left;
-          const newLeftPercent = newLeftWidth / containerWidth * 100;
-          const clampedPercent = Math.min(80, Math.max(20, newLeftPercent));
-          model.object.setLeftPanelWidthPercent(Math.round(clampedPercent));
-
-          dragLine.remove();
-          document.removeEventListener('mousemove', onMouseMove);
-          document.removeEventListener('mouseup', onMouseUp);
-        };
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-      };
-      vnode.dom.addEventListener('mousedown', handleMouseDown);
-    },
-  }, [
-    h('div.bg-gray.br1', {
-      style: {
-        width: '6px',
-        height: '400px',
-      },
-    }),
-  ]);
 
 /**
  * Method to tackle various states for the selected objects
