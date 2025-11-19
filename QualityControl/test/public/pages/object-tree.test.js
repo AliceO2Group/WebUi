@@ -80,6 +80,27 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   );
 
   await testParent.test(
+    'should correctly render the path as first in the object info panel',
+    { timeout },
+    async () => {
+      const firstRowKey = await page.evaluate(() =>
+        document.querySelector('#qcObjectInfoPanel > div:first-child > b').textContent);
+      strictEqual(firstRowKey, 'Path');
+    },
+  );
+
+  await testParent.test(
+    'should contain four highlighted rows',
+    { timeout },
+    async () => {
+      const highlightedClasses = '.info-row';
+      const rowCount = await page.evaluate((selector) =>
+        document.querySelectorAll(`#qcObjectInfoPanel > div${selector}`).length, highlightedClasses);
+      strictEqual(rowCount, 4);
+    },
+  );
+
+  await testParent.test(
     'should close the object plot upon clicking the close button',
     { timeout },
     async () => {

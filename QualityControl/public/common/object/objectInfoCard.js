@@ -33,7 +33,7 @@ const KEY_TO_RENDER_FIRST = 'path';
  * @returns {vnode} - panel with information about the object
  */
 export const qcObjectInfoPanel = (model, qcObject, style = {}) =>
-  h('.flex-column.scroll-y', { style }, [
+  h('.flex-column.scroll-y#qcObjectInfoPanel', { style }, [
     [
       KEY_TO_RENDER_FIRST,
       ...Object.keys(qcObject)
