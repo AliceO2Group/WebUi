@@ -17,20 +17,17 @@ import { type FC, type PropsWithChildren } from 'react';
 import { ContentHeader } from './ContentHeader';
 import { useParams } from 'react-router';
 import { DRAWER_WIDTH } from '../drawer/LeftDrawer';
-
-interface ContentProps extends PropsWithChildren {
-  isOpen?: boolean;
-}
+import { useDrawer } from '../../../contexts/DrawerContext';
 
 /**
  * Content component
  * Represents the main content area of the application layout.
  * It includes a header and wraps children components.
- * @param {ContentProps} props - Component props.
- * @param {boolean} props.isOpen - Whether the drawer is open.
+ * @param {PropsWithChildren} props - Component props.
  * @returns {React.ReactElement} Content
  */
-export const Content: FC<ContentProps> = ({ children, isOpen = false }) => {
+export const Content: FC<PropsWithChildren> = ({ children }) => {
+  const { isOpen } = useDrawer();
   const params = useParams<{ '*': string }>();
   const configPath = params['*'];
   return (
@@ -42,8 +39,10 @@ export const Content: FC<ContentProps> = ({ children, isOpen = false }) => {
         marginLeft: isOpen ? 0 : `-${DRAWER_WIDTH}px`,
         transition: (theme) =>
           theme.transitions.create('margin', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
+            easing: isOpen ? theme.transitions.easing.easeOut : theme.transitions.easing.sharp,
+            duration: isOpen
+              ? theme.transitions.duration.enteringScreen
+              : theme.transitions.duration.leavingScreen,
           }),
       }}
       className="content-section"

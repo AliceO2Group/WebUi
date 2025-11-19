@@ -30,10 +30,28 @@ import { MainLayout } from './components/layout/MainLayout';
 import { LeftDrawer } from './components/layout/drawer/LeftDrawer';
 import { Content } from './components/layout/content/Content';
 import { ConfigNavigator } from './components/config-navigator/ConfigNavigator';
+import { DrawerProvider } from './contexts/DrawerContext';
 
 import queryClient, { persister } from './api/queryClient';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { useState } from 'react';
+
+/**
+ * LayoutContent component
+ * Internal component that uses drawer context
+ * @param {{ children: React.ReactElement }} props Props of the component
+ * @param {React.ReactElement} props.children React nodes to embed inside of this component
+ * @returns {React.ReactElement} LayoutContent
+ */
+function LayoutContent({ children }: { children: React.ReactNode }) {
+  return (
+    <MainLayout>
+      <LeftDrawer>
+        <ConfigNavigator />
+      </LeftDrawer>
+      <Content>{children}</Content>
+    </MainLayout>
+  );
+}
 
 /**
  * Root component
@@ -42,8 +60,6 @@ import { useState } from 'react';
  * @returns {React.ReactElement} Root
  */
 export function Layout({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(true);
-
   return (
     <html lang="en">
       <head>
@@ -54,15 +70,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
-          <MainLayout>
-            <LeftDrawer isOpen={isOpen} setIsOpen={setIsOpen}>
-              <ConfigNavigator />
-            </LeftDrawer>
-            <Content isOpen={isOpen}>
-              <button onClick={() => setIsOpen(!isOpen)}>TOGGLE</button>
-              {children}
-            </Content>
-          </MainLayout>
+          <DrawerProvider>
+            <LayoutContent>{children}</LayoutContent>
+          </DrawerProvider>
           <ScrollRestoration />
           <Scripts />
         </PersistQueryClientProvider>
