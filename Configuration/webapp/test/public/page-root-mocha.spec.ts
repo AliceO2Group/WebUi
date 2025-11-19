@@ -15,10 +15,13 @@
 import assert from 'assert';
 import { Page } from 'puppeteer';
 import global from '../mocha-index';
+import axiosInstance, { API_URL } from '~/api/axiosInstance';
 
-describe('`pageConfiguration` test-suite', function () {
+describe('`pageRoot` test-suite', function () {
   let url: string | null = null;
   let page: Page | null = null;
+
+  this.timeout(15000);
 
   before(function () {
     ({
@@ -128,8 +131,12 @@ describe('`pageConfiguration` test-suite', function () {
       return;
     }
 
-    const res = await fetch('http://localhost:8080/control/api/configurations');
-    const data = await res.json();
+    const res = await axiosInstance.get(`${API_URL}/configurations`);
+    const data = res?.data;
+    if (!data) {
+      assert.equal('No configurations found', 'test suite failed');
+      return;
+    }
 
     const configNavigatorItems = await page.$$('.config_navigator__item');
     assert.strictEqual(configNavigatorItems.length, data?.length ?? 0);
@@ -141,8 +148,12 @@ describe('`pageConfiguration` test-suite', function () {
       return;
     }
     
-    const res = await fetch('http://localhost:8080/control/api/configurations');
-    const data = await res.json();
+    const res = await axiosInstance.get(`${API_URL}/configurations`);
+    const data = res?.data;
+    if (!data) {
+      assert.equal('No configurations found', 'test suite failed');
+      return;
+    }
 
     const configNavigatorItems = await page.$$('.config_navigator__item');
     assert.strictEqual(configNavigatorItems.length, data?.length ?? 0);

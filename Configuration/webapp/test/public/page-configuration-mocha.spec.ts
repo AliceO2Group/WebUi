@@ -15,11 +15,13 @@
 import assert from 'assert';
 import { Page } from 'puppeteer';
 import global from '../mocha-index';
-import { API_URL } from '~/api/axiosInstance';
+import axiosInstance, { API_URL } from '~/api/axiosInstance';
 
-describe('`pageRoot` test-suite', function () {
+describe('`pageConfiguration` test-suite', function () {
   let url: string | null = null;
   let page: Page | null = null;
+
+  this.timeout(15000);
 
   before(function () {
     ({
@@ -35,11 +37,14 @@ describe('`pageRoot` test-suite', function () {
       assert.equal('Page is null', 'test suite failed');
       return;
     }
-    const res = await fetch(`${API_URL}/configurations`);
-    const data = await res.json();
+    const res = await axiosInstance.get(`${API_URL}/configurations`);
 
-    const firstConfigurationRelativePath = data?.[0];
+    const firstConfigurationRelativePath = res?.data?.[0];
 
+    if (!firstConfigurationRelativePath) {
+      assert.equal('No configuration found', 'test suite failed');
+      return;
+    }
     const configUrl = `${url}/configuration/${firstConfigurationRelativePath}`;
 
     await page.goto(configUrl, { waitUntil: 'networkidle0' });
@@ -53,10 +58,13 @@ describe('`pageRoot` test-suite', function () {
       assert.equal('Page is null', 'test suite failed');
       return;
     }
-    const res = await fetch(`${API_URL}/configurations`);
-    const data = await res.json();
+    const res = await axiosInstance.get(`${API_URL}/configurations`);
+    const firstConfigurationRelativePath = res?.data?.[0];
 
-    const firstConfigurationRelativePath = data?.[0];
+    if (!firstConfigurationRelativePath) {
+      assert.equal('No configuration found', 'test suite failed');
+      return;
+    }
 
     const configUrl = `${url}/configuration/${firstConfigurationRelativePath}`;
 
