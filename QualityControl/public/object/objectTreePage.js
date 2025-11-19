@@ -172,6 +172,14 @@ const drawPlot = (model, object) => {
         },
         iconResizeBoth(),
       ),
+      h(
+        'a.btn#close-button',
+        {
+          title: 'Close the object plot',
+          onclick: () => model.object.select(),
+        },
+        iconCircleX(),
+      ),
     ]),
     h('', {
       style: 'height:77%;',
