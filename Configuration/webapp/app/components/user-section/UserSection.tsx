@@ -13,22 +13,18 @@
  */
 
 import { Box, IconButton, Menu, MenuItem, Avatar } from '@mui/material';
-import { useState, type FC, type MouseEvent } from 'react';
+import { useState, type MouseEvent } from 'react';
+import { useAuth } from '~/hooks/useAuth';
 import { getSessionData } from '~/services/session';
-
-interface UserSectionProps {
-  userName: string;
-}
 
 /**
  * UserSection component
  * Represents a user section with an avatar and a dropdown menu for user actions.
- * @param {UserSectionProps} props - Component props.
  * @returns {React.ReactElement} UserSection
  */
-export const UserSection: FC<UserSectionProps> = ({ userName }) => {
+export const UserSection = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
+  const { name: userName } = useAuth();
   const handleClick = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -49,7 +45,7 @@ export const UserSection: FC<UserSectionProps> = ({ userName }) => {
   return (
     <Box sx={{ flexGrow: 0 }} className="user-section">
       <IconButton sx={{ p: 0 }} onClick={handleClick}>
-        <Avatar>{userName[0]}</Avatar>
+        <Avatar>{userName?.[0] ?? ''}</Avatar>
       </IconButton>
       <Menu
         anchorEl={anchorEl}
@@ -65,9 +61,12 @@ export const UserSection: FC<UserSectionProps> = ({ userName }) => {
         onClose={handleClose}
         className="user-section__menu"
       >
-        <MenuItem onClick={displayProfileData}>Profile</MenuItem>
-        <MenuItem onClick={handleClose}>My account</MenuItem>
-        <MenuItem onClick={handleClose}>Logout</MenuItem>
+        <section style={{ padding: 10 }}>
+          <h5>Welcome, {userName}!</h5>
+          <MenuItem onClick={displayProfileData}>Profile</MenuItem>
+          <MenuItem onClick={handleClose}>My account</MenuItem>
+          <MenuItem onClick={handleClose}>Logout</MenuItem>
+        </section>
       </Menu>
     </Box>
   );

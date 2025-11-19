@@ -39,6 +39,6 @@ export const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => (
     <Typography variant="h5" className="config-page__header__text">
       {currentPath}
     </Typography>
-    <UserSection userName="John D." />
+    <UserSection />
   </Toolbar>
 );
