@@ -37,7 +37,7 @@ export class VaultSignService {
     token: string,
     agent: Agent,
     body: Buffer | string | NodeJS.ReadableStream | null
-  ) {
+  ) : Promise<string> {
     const result = await fetch(url, {
       method: "POST",
       body,
