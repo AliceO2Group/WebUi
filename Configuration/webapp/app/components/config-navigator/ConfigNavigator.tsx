@@ -13,10 +13,47 @@
  */
 
 import { List } from '@mui/material';
-import ConfigNavigatorItem from './ConfigNavigatorItem';
+import ConfigNavigatorItem, { type TreeNode } from './ConfigNavigatorItem';
 import { useConfigurationKeysQuery } from '~/api/query/useConfigurationKeysQuery';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useConfigurationNavigate } from '~/hooks/useConfigurationNavigate';
+import { BASE_CONFIGURATION_PATH } from '~/config';
+
+const buildTree = (paths: string[]): Record<string, TreeNode> => {
+  const root: Record<string, TreeNode> = {};
+
+  paths.forEach((path) => {
+    let relativePath = path;
+    if (path.startsWith(BASE_CONFIGURATION_PATH)) {
+      relativePath = path.substring(BASE_CONFIGURATION_PATH.length);
+      if (relativePath.startsWith('/')) {
+        relativePath = relativePath.substring(1);
+      }
+    }
+
+    const parts = relativePath.split('/');
+    let currentLevel = root;
+
+    parts.forEach((part, index) => {
+      const isLast = index === parts.length - 1;
+
+      if (!currentLevel[part]) {
+        currentLevel[part] = {
+          name: part,
+          fullPath: isLast ? path : '',
+          children: {},
+          isFile: isLast,
+        };
+      }
+
+      if (!isLast) {
+        currentLevel = currentLevel[part].children;
+      }
+    });
+  });
+
+  return root;
+};
 
 /**
  * ConfigNavigator component
@@ -43,21 +80,41 @@ export const ConfigNavigator = () => {
     }
   }, [configKeys, areConfigKeysLoading]);
 
+  const treeData = useMemo(() => {
+    if (!configKeys) {
+      return {};
+    }
+    return buildTree(configKeys);
+  }, [configKeys]);
+
   return (
-    <List className="config_navigator">
+    <List className="config_navigator" component="nav">
       {isError ? (
-        <p>Error while fetching configuration keys: {error?.message ?? 'Unknown error'}</p>
+        <p style={{ padding: 16, color: 'red' }}>Error: {error?.message ?? 'Unknown error'}</p>
       ) : (
-        configKeys?.map((configKey: string) => (
-          <ConfigNavigatorItem
-            key={configKey}
-            title={configKey}
-            isSelected={configKey === selectedConfigurationPath}
-            onClick={() => {
-              setSelectedConfigurationPath(configKey);
-            }}
-          />
-        ))
+        Object.values(treeData)
+          .sort((a, b) => {
+            if (a.isFile === b.isFile) {
+              return a.name.localeCompare(b.name);
+            }
+            return a.isFile ? 1 : -1;
+          })
+          .map((node) => (
+            <ConfigNavigatorItem
+              key={node.name}
+              node={node}
+              selectedPath={selectedConfigurationPath}
+              onSelect={(path) => {
+                setSelectedConfigurationPath(path);
+                if (path.startsWith(BASE_CONFIGURATION_PATH)) {
+                  const relative = path.substring(BASE_CONFIGURATION_PATH.length).replace(/^\//, '');
+                  navigate(relative);
+                } else {
+                  navigate(path);
+                }
+              }}
+            />
+          ))
       )}
     </List>
   );

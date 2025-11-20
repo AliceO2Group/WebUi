@@ -12,18 +12,25 @@
  * or submit itself to any jurisdiction.
  */
 
-import { type FC } from 'react';
-import { ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import { useState, type FC } from 'react';
+import { Collapse, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFile } from '@fortawesome/free-solid-svg-icons';
+import { faFile, faFolder, faFolderOpen } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router';
-import { BASE_CONFIGURATION_PATH } from '~/config';
+
+export interface TreeNode {
+  name: string;
+  fullPath: string;
+  children: Record<string, TreeNode>;
+  isFile: boolean;
+}
 
 interface ConfigNavigatorItemProps {
-  title: string;
-  onClick?: () => void;
-  isSelected: boolean;
+  node: TreeNode;
+  selectedPath?: string;
+  onSelect: (_path: string) => void;
+  level?: number;
 }
 
 /**
@@ -34,22 +41,70 @@ interface ConfigNavigatorItemProps {
  * @param {Function} props.onClick - Callback function to handle item click.
  * @returns {React.ReactElement} ConfigNavigatorItem
  */
-const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = ({ title, onClick, isSelected }) => (
-  <ListItem style={{ paddingTop: 5, paddingBottom: 5 }} className="config_navigator__item">
-    <Link to={`${BASE_CONFIGURATION_PATH}/${title}`} style={{ width: '100%' }}>
-      <ListItemButton
-        onClick={onClick}
-        color="red"
-        sx={{ borderRadius: 2, padding: 0 }}
-        selected={isSelected}
-      >
-        <ListItemIcon>
-          <FontAwesomeIcon icon={faFile} style={{ margin: 'auto' }} />
-        </ListItemIcon>
-        <ListItemText primary={title} />
-      </ListItemButton>
-    </Link>
-  </ListItem>
-);
+const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = ({ node, selectedPath, onSelect, level = 0 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const isSelected = node.fullPath === selectedPath;
+  const paddingLeft = 16 + level * 16;
+
+  const handleFolderClick = () => {
+    setIsOpen(!isOpen);
+  };
+
+  if (node.isFile) {
+    return (
+      <ListItem style={{ paddingTop: 5, paddingBottom: 5, paddingLeft }} className="config_navigator__item">
+        <Link to={`configuration/${node.fullPath}`} style={{ width: '100%' }}>
+          <ListItemButton
+            onClick={() => onSelect(node.fullPath)}
+            color="red"
+            sx={{ borderRadius: 2, padding: 0 }}
+            selected={isSelected}
+          >
+            <ListItemIcon>
+              <FontAwesomeIcon icon={faFile} style={{ margin: 'auto' }} />
+            </ListItemIcon>
+            <ListItemText primary={node.name} />
+          </ListItemButton>
+        </Link>
+      </ListItem>
+    );
+  }
+  return (
+    <>
+      <ListItem style={{ paddingTop: 5, paddingBottom: 5, paddingLeft }} className="config_navigator__item">
+        <ListItemButton
+          onClick={handleFolderClick}
+          sx={{ borderRadius: 2, padding: 0 }}
+        >
+          <ListItemIcon>
+            <FontAwesomeIcon icon={isOpen ? faFolderOpen : faFolder} style={{ margin: 'auto' }} />
+          </ListItemIcon>
+          <ListItemText primary={node.name} />
+        </ListItemButton>
+      </ListItem>
+      <Collapse in={isOpen} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+          {Object.values(node.children)
+            .sort((a, b) => {
+              if (a.isFile === b.isFile) {
+                return a.name.localeCompare(b.name);
+              }
+              return a.isFile ? 1 : -1;
+            })
+            .map((childNode) => (
+              <ConfigNavigatorItem
+                key={childNode.fullPath}
+                node={childNode}
+                selectedPath={selectedPath}
+                onSelect={onSelect}
+                level={level + 1}
+              />
+            ))}
+        </List>
+      </Collapse>
+    </>
+  );
+};
 
 export default ConfigNavigatorItem;

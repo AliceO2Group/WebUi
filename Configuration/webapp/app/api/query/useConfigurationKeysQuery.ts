@@ -31,7 +31,7 @@ export const useConfigurationKeysQuery = (): UseQueryResult<ConfigurationKeysRes
     queryKey: [CONFIGURATION_KEYS_QUERY_KEY],
     queryFn: async (): Promise<string[]> => {
       const response: AxiosResponse<ConfigurationKeysResponse> =
-        await axiosInstance.get('configurations/');
-      return response.data.map((key: string) => key.split('/').pop() as string);
+        await axiosInstance.get('configurations/?recurse=true');
+      return response.data;
     },
   });

@@ -13,7 +13,7 @@
  */
 
 import { useNavigate } from 'react-router';
-import { BASE_CONFIGURATION_PATH } from '~/config';
+import { BASE_PATH } from '~/config';
 
 /**
  * useConfigurationNavigate hook
@@ -24,7 +24,7 @@ export const useConfigurationNavigate = () => {
   const reactRouterNavigate = useNavigate();
 
   const navigate = (relativePath: string) => {
-    void reactRouterNavigate(`${BASE_CONFIGURATION_PATH}/${relativePath}`);
+    void reactRouterNavigate(`${BASE_PATH}/${relativePath}`);
   };
 
   return navigate;

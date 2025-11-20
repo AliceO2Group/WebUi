@@ -12,4 +12,5 @@
  * or submit itself to any jurisdiction.
  */
 
-export const BASE_CONFIGURATION_PATH = 'configuration/o2/components/qc/ANY/any';
+export const BASE_PATH = 'configuration';
+export const BASE_CONFIGURATION_PATH = 'o2/components/qc/ANY/any';
