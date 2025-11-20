@@ -47,17 +47,20 @@ function isFormRestrictions(obj: FormRestrictions[string]): obj is FormRestricti
 }
 
 export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) => {
-  const renderItem = useCallback((key: string, value: FormRestrictions[string]) =>
-    isFormRestrictions(value) ? (
-      <Form
-        key={key}
-        sectionTitle={key}
-        items={items[key] as FormItem}
-        itemsRestrictions={itemsRestrictions[key] as FormRestrictions}
-      />
-    ) : (
-      <Widget key={key} title={key} type={value} value={items[key]} />
-    ), [items, itemsRestrictions]);
+  const renderItem = useCallback(
+    (key: string, value: FormRestrictions[string]) =>
+      isFormRestrictions(value) ? (
+        <Form
+          key={key}
+          sectionTitle={key}
+          items={items[key] as FormItem}
+          itemsRestrictions={itemsRestrictions[key] as FormRestrictions}
+        />
+      ) : (
+        <Widget key={key} title={key} type={value} value={items[key]} />
+      ),
+    [items, itemsRestrictions],
+  );
 
   return (
     <Accordion defaultExpanded>
