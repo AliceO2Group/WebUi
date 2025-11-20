@@ -12,10 +12,18 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Command } from "../../models/commands.model";
-import { DuplexMessageEvent, TokenMessage } from "../../models/message.model";
+import type { Command } from '../../../models/commands.model';
+import type { TokenMessage } from '../../../models/message.model';
+import { DuplexMessageEvent } from '../../../models/message.model';
 
+/**
+ * @description Command used to trigger token revocation for a specific connection. Handles structure logic.
+ */
 export class RevokeTokenCommand implements Command {
   readonly event = DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN;
+  /**
+   * Constructor for RevokeTokenCommand.
+   * @param {TokenMessage} payload - TokenMessage containing the address and direction of the connection to be revoked.
+   */
   constructor(public payload: TokenMessage) {}
 }
