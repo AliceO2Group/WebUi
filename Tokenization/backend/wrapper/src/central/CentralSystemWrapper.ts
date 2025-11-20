@@ -128,7 +128,7 @@ export class CentralSystemWrapper {
 
     // Handle stream error event
     call.on('error', (err) => {
-      this._logger.infoMessage(`Stream error from client ${clientIp}:`, err);
+      this._logger.errorMessage(`Stream error from client ${clientIp}:`, err);
       this.cleanupClient(peer);
     });
   }

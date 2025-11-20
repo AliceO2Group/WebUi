@@ -15,13 +15,14 @@
 import { RevokeTokenCommand } from '../../../client/commands/revokeToken/revokeToken.command';
 import { RevokeTokenHandler } from '../../../client/commands/revokeToken/revokeToken.handler';
 import { Connection } from '../../../client/connection/Connection';
-import { ConnectionManager } from '../../../client/connectionManager/ConnectionManager';
+import { ConnectionManager } from '../../../client/ConnectionManager/ConnectionManager';
 import { ConnectionDirection, DuplexMessageEvent } from '../../../models/message.model';
 import { ConnectionStatus } from '../../../models/connection.model';
 import { Command } from 'models/commands.model';
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import path from 'path';
+import { getTestCerts } from '../../testCerts/testCerts';
 
 describe('RevokeToken', () => {
   const protoPath = path.join(__dirname, '..', '..', '..', '..', '..', 'proto', 'wrapper.proto');
@@ -61,7 +62,7 @@ describe('RevokeToken', () => {
 
   it('should revoke token when connection found in sendingConnections', async () => {
     const targetAddress = 'peer-123';
-    const conn = new Connection('valid-token', targetAddress, ConnectionDirection.SENDING, peerCtor);
+    const conn = new Connection('valid-token', targetAddress, ConnectionDirection.SENDING, peerCtor, getTestCerts());
     (manager as any).sendingConnections!.set(targetAddress, conn);
 
     const handler = new RevokeTokenHandler(manager);
@@ -75,7 +76,7 @@ describe('RevokeToken', () => {
 
   it('should revoke token when connection found in receivingConnections', async () => {
     const targetAddress = 'peer-456';
-    const conn = new Connection('valid-token', targetAddress, ConnectionDirection.RECEIVING, peerCtor);
+    const conn = new Connection('valid-token', targetAddress, ConnectionDirection.RECEIVING, peerCtor, getTestCerts());
     (manager as any).receivingConnections.set(targetAddress, conn);
 
     const handler = new RevokeTokenHandler(manager);

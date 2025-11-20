@@ -62,10 +62,10 @@ jest.mock('@grpc/grpc-js', () => {
     ...original,
     loadPackageDefinition,
     credentials: {
-      createInsecure: jest.fn(() => ({})),
+      createSsl: jest.fn(() => ({})),
     },
     ServerCredentials: {
-      createInsecure: jest.fn(() => ({})),
+      createSsl: jest.fn(() => ({})),
     },
     status: {
       ...original.status,
@@ -141,11 +141,14 @@ jest.mock(
   { virtual: true }
 );
 
-import { ConnectionManager } from '../../../client/connectionManager/ConnectionManager';
+import { ConnectionManager } from '../../../client/ConnectionManager/ConnectionManager';
 import { ConnectionDirection } from '../../../models/message.model';
 import { ConnectionStatus } from '../../../models/connection.model';
+import { getTestCentralCertPaths, getTestCerts } from '../../../test/testCerts/testCerts';
 
 describe('ConnectionManager', () => {
+  const { caCertPath, certPath, keyPath } = getTestCentralCertPaths();
+
   beforeEach(() => {
     jest.clearAllMocks();
     capturedServerImpl = null;
@@ -160,7 +163,7 @@ describe('ConnectionManager', () => {
   });
 
   test('constructor: loads proto, builds wrapper/peerCtor and CentralSystem client', () => {
-    const cm = new ConnectionManager('proto/file.proto', 'central:5555');
+    const cm = new ConnectionManager('proto/file.proto', 'central:5555', caCertPath, certPath, keyPath);
     expect(cm).toBeDefined();
 
     expect((grpc as any).loadPackageDefinition).toHaveBeenCalled();
@@ -169,7 +172,7 @@ describe('ConnectionManager', () => {
   });
 
   test('registerCommandHandlers: calls dispatcher.register for each item', () => {
-    const cm = new ConnectionManager('p.proto', 'c:1');
+    const cm = new ConnectionManager('p.proto', 'c:1', caCertPath, certPath, keyPath);
     dispatcherRegisterMock.mockClear();
 
     const handlers = [
@@ -185,7 +188,7 @@ describe('ConnectionManager', () => {
   });
 
   test('connectToCentralSystem/disconnectFromCentralSystem delegate to CentralConnection', () => {
-    const cm = new ConnectionManager('p.proto', 'c:1');
+    const cm = new ConnectionManager('p.proto', 'c:1', caCertPath, certPath, keyPath);
     // @ts-ignore
     cm['_peerCtor'] = Peer2PeerCtorMock;
     cm.connectToCentralSystem();
@@ -195,11 +198,11 @@ describe('ConnectionManager', () => {
     expect(centralDisconnectMock).toHaveBeenCalled();
   });
 
-  test('createNewConnection: adds to sending map, sets CONNECTED, logs', () => {
-    const cm = new ConnectionManager('p.proto', 'c:1');
+  test('createNewConnection: adds to sending map, sets CONNECTED, logs', async () => {
+    const cm = new ConnectionManager('p.proto', 'c:1', caCertPath, certPath, keyPath);
     // @ts-ignore
     cm['_peerCtor'] = Peer2PeerCtorMock;
-    const conn = cm.createNewConnection('peer-A', ConnectionDirection.SENDING, 'tok123');
+    const conn = await cm.createNewConnection('peer-A', ConnectionDirection.SENDING, 'tok123');
 
     expect(connectionCtorMock).toHaveBeenCalledWith('tok123', 'peer-A', ConnectionDirection.SENDING, expect.any(Function));
     expect(conn.status).toBe(ConnectionStatus.CONNECTED);
@@ -213,7 +216,7 @@ describe('ConnectionManager', () => {
   });
 
   test('createNewConnection: adds to receiving map if direction is RECEIVING', () => {
-    const cm = new ConnectionManager('p.proto', 'c:1');
+    const cm = new ConnectionManager('p.proto', 'c:1', caCertPath, certPath, keyPath);
     cm.createNewConnection('peer-B', ConnectionDirection.RECEIVING);
 
     const { sending, receiving } = cm.connections;
@@ -222,7 +225,7 @@ describe('ConnectionManager', () => {
   });
 
   test('getConnectionByAddress: returns by direction. Logs on invalid direction', () => {
-    const cm = new ConnectionManager('p.proto', 'c:1');
+    const cm = new ConnectionManager('p.proto', 'c:1', caCertPath, certPath, keyPath);
     const s = cm.createNewConnection('s-1', ConnectionDirection.SENDING);
     const r = cm.createNewConnection('r-1', ConnectionDirection.RECEIVING);
 
@@ -236,7 +239,7 @@ describe('ConnectionManager', () => {
   });
 
   test('connections getter: returns arrays (copies) of maps', () => {
-    const cm = new ConnectionManager('p.proto', 'c:1');
+    const cm = new ConnectionManager('p.proto', 'c:1', caCertPath, certPath, keyPath);
     cm.createNewConnection('a', ConnectionDirection.SENDING);
     cm.createNewConnection('b', ConnectionDirection.RECEIVING);
 
@@ -248,8 +251,8 @@ describe('ConnectionManager', () => {
   });
 
   test('listenForPeers: creates server, registers service, binds & logs', async () => {
-    const cm = new ConnectionManager('p.proto', 'c:1');
-    await cm.listenForPeers(50099, 'http://localhost:41000/api/');
+    const cm = new ConnectionManager('p.proto', 'c:1', caCertPath, certPath, keyPath);
+    await cm.listenForPeers(50099, getTestCerts().clientKey, getTestCerts().clientCert, 'http://localhost:41000/api/');
 
     const ServerCtor = (grpc.Server as any).mock;
     expect(ServerCtor).toBeDefined();
@@ -266,17 +269,17 @@ describe('ConnectionManager', () => {
   });
 
   test('listenForPeers: calling twice shuts previous server down', async () => {
-    const cm = new ConnectionManager('p.proto', 'c:1');
-    await cm.listenForPeers(50100, 'http://localhost:41000/api/');
+    const cm = new ConnectionManager('p.proto', 'c:1', caCertPath, certPath, keyPath);
+    await cm.listenForPeers(50100, getTestCerts().clientKey, getTestCerts().clientCert, 'http://localhost:41000/api/');
     const firstServer = (grpc.Server as any).mock.results[0].value;
 
-    await cm.listenForPeers(50101, 'http://localhost:41000/api/');
+    await cm.listenForPeers(50101, getTestCerts().clientKey, getTestCerts().clientCert, 'http://localhost:41000/api/');
     expect(firstServer.forceShutdown).toHaveBeenCalled();
   });
 
   test('p2p Fetch: registers new incoming receiving connection, forwards to local API, maps response', async () => {
-    const cm = new ConnectionManager('p.proto', 'c:1');
-    await cm.listenForPeers(50102, 'http://local/api/');
+    const cm = new ConnectionManager('p.proto', 'c:1', caCertPath, certPath, keyPath);
+    await cm.listenForPeers(50102, getTestCerts().clientKey, getTestCerts().clientCert, 'http://local/api/');
 
     // Prepare incoming call and callback
     const call = {
@@ -330,8 +333,8 @@ describe('ConnectionManager', () => {
   });
 
   test('p2p Fetch: uses existing receiving connection when present (no duplicate creation)', async () => {
-    const cm = new ConnectionManager('p.proto', 'c:1');
-    await cm.listenForPeers(50103, 'http://local/api/');
+    const cm = new ConnectionManager('p.proto', 'c:1', caCertPath, certPath, keyPath);
+    await cm.listenForPeers(50103, getTestCerts().clientKey, getTestCerts().clientCert, 'http://local/api/');
 
     cm.createNewConnection('client-77', ConnectionDirection.RECEIVING);
 
@@ -374,8 +377,8 @@ describe('ConnectionManager', () => {
   });
 
   test('p2p Fetch: on forward error returns INTERNAL and logs error', async () => {
-    const cm = new ConnectionManager('p.proto', 'c:1');
-    await cm.listenForPeers(50104, 'http://local/api/');
+    const cm = new ConnectionManager('p.proto', 'c:1', caCertPath, certPath, keyPath);
+    await cm.listenForPeers(50104, getTestCerts().clientKey, getTestCerts().clientCert, 'http://local/api/');
 
     // @ts-ignore
     global.fetch.mockRejectedValue(new Error('err'));

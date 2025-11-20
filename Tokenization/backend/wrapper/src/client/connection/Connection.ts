@@ -33,12 +33,34 @@ export class Connection {
    * @param token - The authentication token for the connection.
    * @param targetAddress - The unique address of the target client.
    * @param direction - The direction of the connection (e.g., sending or receiving).
+   * @param peerCtor - The constructor for the gRPC client to be used for communication.
+   * @param caCertPath - Path to the CA certificate file.
+   * @param clientCertPath - Path to the client certificate file.
+   * @param clientKeyPath - Path to the client key file.
    */
-  constructor(token: string, targetAddress: string, direction: ConnectionDirection, peerCtor: any) {
+  constructor(
+    token: string,
+    targetAddress: string,
+    direction: ConnectionDirection,
+    peerCtor: any,
+    private readonly connectionCerts: {
+      caCert: NonSharedBuffer;
+      clientCert: NonSharedBuffer;
+      clientKey: NonSharedBuffer;
+    }
+  ) {
     this._token = token;
     this._targetAddress = targetAddress;
-    this._peerClient = new peerCtor(targetAddress, grpc.credentials.createInsecure());
     this.direction = direction;
+
+    if (!connectionCerts.caCert || !connectionCerts.clientCert || !connectionCerts.clientKey) {
+      throw new Error('Connection certificates are required to create a Connection.');
+    }
+
+    // Create grpc credentials
+    const sslCreds = grpc.credentials.createSsl(this.connectionCerts.caCert, this.connectionCerts.clientKey, this.connectionCerts.clientCert);
+
+    this._peerClient = new peerCtor(targetAddress, sslCreds);
 
     this._status = ConnectionStatus.CONNECTED;
   }

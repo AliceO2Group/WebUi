@@ -32,7 +32,7 @@ jest.mock(
     return {
       ...original,
       credentials: {
-        createInsecure: jest.fn(() => ({ insecure: true })),
+        createSsl: jest.fn(() => ({ insecure: true })),
       },
     };
   },
@@ -40,6 +40,7 @@ jest.mock(
 );
 
 import * as grpc from '@grpc/grpc-js';
+import { getTestCerts } from '../testCerts/testCerts';
 
 describe('Connection', () => {
   beforeEach(() => {
@@ -48,9 +49,9 @@ describe('Connection', () => {
   });
 
   test('constructor should create connection and set base state correctly', () => {
-    const conn = new Connection('tok', 'peer:50051', FAKE_DIRECTION, PeerCtorMock);
+    const conn = new Connection('tok', 'peer:50051', FAKE_DIRECTION, PeerCtorMock, getTestCerts());
 
-    expect(grpc.credentials.createInsecure).toHaveBeenCalled();
+    expect(grpc.credentials.createSsl).toHaveBeenCalled();
     expect(PeerCtorMock).toHaveBeenCalledWith('peer:50051', { insecure: true });
 
     expect(conn.token).toBe('tok');
@@ -60,21 +61,21 @@ describe('Connection', () => {
   });
 
   test('getter/setter for token should work', () => {
-    const conn = new Connection('old', 'peer:1', FAKE_DIRECTION, PeerCtorMock);
+    const conn = new Connection('old', 'peer:1', FAKE_DIRECTION, PeerCtorMock, getTestCerts());
     expect(conn.token).toBe('old');
     conn.token = 'new-token';
     expect(conn.token).toBe('new-token');
   });
 
   test('handleRevokeToken should clear token and status to UNAUTHORIZED', () => {
-    const conn = new Connection('secret', 'peer:x', FAKE_DIRECTION, PeerCtorMock);
+    const conn = new Connection('secret', 'peer:x', FAKE_DIRECTION, PeerCtorMock, getTestCerts());
     conn.handleRevokeToken();
     expect(conn.token).toBe('');
     expect(conn.status).toBe(ConnectionStatus.UNAUTHORIZED);
   });
 
   test('getter/setter for status should work', () => {
-    const conn = new Connection('t', 'a', FAKE_DIRECTION, PeerCtorMock);
+    const conn = new Connection('t', 'a', FAKE_DIRECTION, PeerCtorMock, getTestCerts());
     conn.status = ConnectionStatus.UNAUTHORIZED;
     expect(conn.status).toBe(ConnectionStatus.UNAUTHORIZED);
     conn.status = ConnectionStatus.CONNECTED;
@@ -82,12 +83,12 @@ describe('Connection', () => {
   });
 
   test('getter for targetAddress should work', () => {
-    const conn = new Connection('t', 'host:1234', FAKE_DIRECTION, PeerCtorMock);
+    const conn = new Connection('t', 'host:1234', FAKE_DIRECTION, PeerCtorMock, getTestCerts());
     expect(conn.targetAddress).toBe('host:1234');
   });
 
   test('fetch should throw if peer client is not attached', async () => {
-    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock);
+    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock, getTestCerts());
     // @ts-ignore
     conn['_peerClient'] = undefined;
 
@@ -95,7 +96,7 @@ describe('Connection', () => {
   });
 
   test('fetch with defaults should work', async () => {
-    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock);
+    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock, getTestCerts());
 
     lastPeerClient.Fetch.mockImplementation((req: any, cb: any) => {
       try {
@@ -116,7 +117,7 @@ describe('Connection', () => {
   });
 
   test('fetch builds request correctly and returns response', async () => {
-    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock);
+    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock, getTestCerts());
     const body = Buffer.from('abc');
 
     lastPeerClient.Fetch.mockImplementation((req: any, cb: any) => {
@@ -142,7 +143,7 @@ describe('Connection', () => {
   });
 
   test('fetch should convert Uint8Array to Buffer', async () => {
-    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock);
+    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock, getTestCerts());
     const body = new Uint8Array([1, 2, 3]);
 
     lastPeerClient.Fetch.mockImplementation((req: any, cb: any) => {
@@ -160,7 +161,7 @@ describe('Connection', () => {
   });
 
   test('fetch should convert string to Buffer', async () => {
-    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock);
+    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock, getTestCerts());
     const body = 'żółć & äöü'; // handling special chars
 
     lastPeerClient.Fetch.mockImplementation((req: any, cb: any) => {
@@ -177,13 +178,13 @@ describe('Connection', () => {
   });
 
   test('fetch should reject if body is not allowed', async () => {
-    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock);
+    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock, getTestCerts());
     // @ts-ignore
     await expect(conn.fetch({ body: { not: 'allowed' } })).rejects.toThrow('Body must be a string/Buffer/Uint8Array');
   });
 
   test('fetch should propagate errors from peer', async () => {
-    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock);
+    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock, getTestCerts());
     const err = new Error('err');
     lastPeerClient.Fetch.mockImplementation((_req: any, cb: any) => cb(err));
 
@@ -191,7 +192,7 @@ describe('Connection', () => {
   });
 
   test('fetch should map response', async () => {
-    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock);
+    const conn = new Connection('t', 'addr', FAKE_DIRECTION, PeerCtorMock, getTestCerts());
 
     const payload = { a: 1, b: 'x' };
     lastPeerClient.Fetch.mockImplementation((_req: any, cb: any) =>

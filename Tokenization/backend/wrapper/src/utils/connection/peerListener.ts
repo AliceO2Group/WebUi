@@ -12,9 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 import * as grpc from '@grpc/grpc-js';
-import { Connection } from '../../client/connection/Connection';
 import { ConnectionDirection } from '../../models/message.model';
 import { ConnectionStatus } from '../../models/connection.model';
+import type { Connection } from '../../client/connection/Connection';
 
 /**
  * Listens for incoming gRPC requests and forwards them to the local API endpoint.
@@ -24,7 +24,7 @@ import { ConnectionStatus } from '../../models/connection.model';
  * @param callback - The callback function to be called with the response.
  * @param logger - The logger object to write info and error messages.
  * @param receivingConnections - The map of existing incoming connections.
- * @param peerCtor - The constructor function for the peer client.
+ * @param createNewConnection - Function to create a new Connection instance.
  * @param baseAPIPath - The base path of the local API endpoint.
  */
 export const peerListener = async (
@@ -32,7 +32,7 @@ export const peerListener = async (
   callback: grpc.sendUnaryData<any>,
   logger: any,
   receivingConnections: Map<string, Connection>,
-  peerCtor: any,
+  createNewConnection: (address: string, direction: ConnectionDirection, token?: string | undefined) => Promise<Connection>,
   baseAPIPath: string
 ) => {
   try {
@@ -42,7 +42,7 @@ export const peerListener = async (
     let conn: Connection | undefined = receivingConnections.get(clientAddress);
 
     if (!conn) {
-      conn = new Connection('', clientAddress, ConnectionDirection.RECEIVING, peerCtor);
+      conn = await createNewConnection(clientAddress, ConnectionDirection.RECEIVING);
       conn.status = ConnectionStatus.CONNECTED;
       receivingConnections.set(clientAddress, conn);
       logger.infoMessage(`New incoming connection registered for: ${clientAddress}`);

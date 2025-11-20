@@ -12,14 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
+import * as fs from 'fs';
 import { ConnectionManager } from './ConnectionManager/ConnectionManager';
 import { RevokeTokenHandler } from './commands/revokeToken/revokeToken.handler';
 import { ConnectionDirection, DuplexMessageEvent } from '../models/message.model';
-import { Connection } from './connection/Connection';
 import { NewTokenHandler } from './commands/newToken/newToken.handler';
-import { gRPCWrapperConfig } from '../models/config.model';
-import * as fs from 'fs';
 import { LogManager } from '@aliceo2/web-ui';
+import type { gRPCWrapperConfig } from '../models/config.model';
+import type { Connection } from './connection/Connection';
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -51,10 +51,9 @@ export class gRPCWrapper {
     if (
       !config.protoPath ||
       !config.centralAddress ||
-      !config.clientCerts ||
-      !config.clientCerts.caCertPath ||
-      !config.clientCerts.certPath ||
-      !config.clientCerts.keyPath
+      !config.clientCerts?.caCertPath ||
+      !config.clientCerts?.certPath ||
+      !config.clientCerts?.keyPath
     ) {
       throw new Error('Invalid gRPCWrapper configuration provided.');
     }
