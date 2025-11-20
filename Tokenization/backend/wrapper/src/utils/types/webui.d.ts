@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-declare module "@aliceo2/web-ui" {
+declare module '@aliceo2/web-ui' {
   export const LogManager: {
     getLogger: (name: string) => Logger;
   };

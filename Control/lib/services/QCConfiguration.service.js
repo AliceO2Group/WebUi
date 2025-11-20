@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-const { LogManager } = require("@aliceo2/web-ui");
+const { LogManager } = require('@aliceo2/web-ui');
 
 /**
  * @class
@@ -29,8 +29,8 @@ class QCConfigurationService {
      * @type {ConsulService}
      */
     this._consulService = consulService;
-    
-    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? "cnf"}/qc-configuration-service`);
+
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cnf'}/qc-configuration-service`);
   }
 
   /**
@@ -62,7 +62,7 @@ class QCConfigurationService {
     const parsedData = [];
     Object.entries(configs || {}).forEach(([key, value]) => {
       try {
-        if (!recurse && key.replace(`${prefix}/`, "").includes("/")) {
+        if (!recurse && key.replace(`${prefix}/`, '').includes('/')) {
           return;
         }
 
@@ -77,6 +77,16 @@ class QCConfigurationService {
     });
 
     return parsedData;
+  }
+
+  /**
+   * Edit configuration by key in Consul
+   * @param {String} key - the key of the configuration
+   * @param {String} value - the configuration
+   */
+  async editConfigurationByKey(key, value) {
+    const listOfConfigurationsToEdit = [{ [key]: JSON.stringify(value, null, 2) }];
+    return await this._consulService.putListOfKeyValues(listOfConfigurationsToEdit);
   }
 }
 

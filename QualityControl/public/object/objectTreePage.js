@@ -18,6 +18,7 @@ import { draw } from './objectDraw.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
 import virtualTable from './virtualTable.js';
 import { qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
+import { downloadButton } from '../common/downloadButton.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -95,16 +96,28 @@ const drawPlot = (model, object) => {
     : `?page=objectView&objectName=${name}`;
   const info = object;
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
-    h('.resize-button.flex-row', [
-      h('.p1.text-left', { style: 'padding-bottom: 0;' }, h(
-        'a.btn',
+    h('.item-action-row.flex-row.g1.p1', [
+      downloadButton({
+        href: model.objectViewModel.getDownloadQcdbObjectUrl(object.id),
+        title: 'Download object',
+      }),
+      h(
+        'a.btn#fullscreen-button',
         {
           title: 'Open object plot in full screen',
           href,
           onclick: (e) => model.router.handleLinkEvent(e),
         },
         iconResizeBoth(),
-      )),
+      ),
+      h(
+        'a.btn#close-button',
+        {
+          title: 'Close the object plot',
+          onclick: () => model.object.select(),
+        },
+        iconCircleX(),
+      ),
     ]),
     h('', { style: 'height:77%;' }, draw(model, name, { stat: true })),
     h('.scroll-y', {}, [

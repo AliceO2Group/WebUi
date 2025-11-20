@@ -12,17 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
-import { ConnectionManager } from "./ConnectionManager/ConnectionManager";
-import { RevokeTokenHandler } from "./Commands/revokeToken/revokeToken.handler";
-import {
-  ConnectionDirection,
-  DuplexMessageEvent,
-} from "../models/message.model";
-import { Connection } from "./Connection/Connection";
-import { NewTokenHandler } from "./Commands/newToken/newToken.handler";
-import { gRPCWrapperConfig } from "../models/config.model";
-import * as fs from "fs";
-import { LogManager } from "@aliceo2/web-ui";
+import { ConnectionManager } from './ConnectionManager/ConnectionManager';
+import { RevokeTokenHandler } from './commands/revokeToken/revokeToken.handler';
+import { ConnectionDirection, DuplexMessageEvent } from '../models/message.model';
+import { Connection } from './connection/Connection';
+import { NewTokenHandler } from './commands/newToken/newToken.handler';
+import { gRPCWrapperConfig } from '../models/config.model';
+import * as fs from 'fs';
+import { LogManager } from '@aliceo2/web-ui';
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -39,16 +36,16 @@ import { LogManager } from "@aliceo2/web-ui";
  * ```
  */
 export class gRPCWrapper {
-  private ConnectionManager: ConnectionManager;
-  private listenerKey?: NonSharedBuffer;
-  private listenerCert?: NonSharedBuffer;
-  private logger = LogManager.getLogger("gRPCWrapper");
+  private _connectionManager: ConnectionManager;
+  private _listenerKey?: NonSharedBuffer;
+  private _listenerCert?: NonSharedBuffer;
+  private _logger = LogManager.getLogger('gRPCWrapper');
 
   /**
-   * @description Initializes an instance of gRPCWrapper class.
+   * Initializes an instance of gRPCWrapper class.
    *
    * @param protoPath - The file path to the gRPC proto definition.
-   * @param centralAddress - The address of the central gRPC server (default: "localhost:50051").
+   * @param centralAddress - The address of the central gRPC server (default: "localhost:4100").
    */
   constructor(config: gRPCWrapperConfig) {
     if (
@@ -59,122 +56,101 @@ export class gRPCWrapper {
       !config.clientCerts.certPath ||
       !config.clientCerts.keyPath
     ) {
-      throw new Error("Invalid gRPCWrapper configuration provided.");
+      throw new Error('Invalid gRPCWrapper configuration provided.');
     }
 
-    if (
-      config.listenerCertPaths?.keyPath &&
-      config.listenerCertPaths?.certPath
-    ) {
-      this.listenerKey = fs.readFileSync(config.listenerCertPaths.keyPath);
-      this.listenerCert = fs.readFileSync(config.listenerCertPaths.certPath);
+    if (config.listenerCertPaths?.keyPath && config.listenerCertPaths?.certPath) {
+      this._listenerKey = fs.readFileSync(config.listenerCertPaths.keyPath);
+      this._listenerCert = fs.readFileSync(config.listenerCertPaths.certPath);
     }
 
-    this.ConnectionManager = new ConnectionManager(
+    this._connectionManager = new ConnectionManager(
       config.protoPath,
       config.centralAddress,
       config.clientCerts.caCertPath,
       config.clientCerts.certPath,
       config.clientCerts.keyPath
     );
-    this.ConnectionManager.registerCommandHandlers([
+    this._connectionManager.registerCommandHandlers([
       {
         event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
-        handler: new RevokeTokenHandler(this.ConnectionManager),
+        handler: new RevokeTokenHandler(this._connectionManager),
       },
       {
         event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN,
-        handler: new NewTokenHandler(this.ConnectionManager),
+        handler: new NewTokenHandler(this._connectionManager),
       },
     ]);
   }
 
   /**
-   * @description Starts the Connection Manager stream connection with Central System
+   * Connects to the central system using the underlying ConnectionManager.
+   *
+   * @remarks
+   * This method starts the duplex stream connection with the central gRPC server.
    */
   public connectToCentralSystem() {
-    this.ConnectionManager.connectToCentralSystem();
+    this._connectionManager.connectToCentralSystem();
   }
 
   /**
-   * @description Starts the Connection Manager stream connection with Central System
+   * Establishes a new connection to a target client.
+   *
+   * @param address - The target address of the client.
+   * @param token - Optional authentication token for the connection.
+   *
+   * @returns A promise that resolves to the newly created connection ready to use for fetching data.
    */
-  public async connectToClient(
-    address: string,
-    token?: string
-  ): Promise<Connection> {
-    return this.ConnectionManager.createNewConnection(
-      address,
-      ConnectionDirection.SENDING,
-      token || ""
-    );
+  public async connectToClient(address: string, token?: string): Promise<Connection> {
+    return this._connectionManager.createNewConnection(address, ConnectionDirection.SENDING, token ?? '');
   }
 
   /**
-   * @description Starts the Connection Manager stream connection with Central System
+   * Starts a listener server for p2p connections.
+   * @param port The port number to bind the p2p server to.
+   * @param baseAPIPath Optional base API path to forward requests to e.g. '/api'.
+   * @returns A promise that resolves when the p2p listener server is started.
    */
-  public async listenForPeers(
-    port: number,
-    baseAPIPath?: string,
-    listenerCertPaths?: { keyPath: string; certPath: string }
-  ): Promise<void> {
+  public async listenForPeers(port: number, baseAPIPath?: string, listenerCertPaths?: { keyPath: string; certPath: string }): Promise<void> {
     if (listenerCertPaths?.keyPath && listenerCertPaths?.certPath) {
-      this.listenerKey = fs.readFileSync(listenerCertPaths.keyPath);
-      this.listenerCert = fs.readFileSync(listenerCertPaths.certPath);
+      this._listenerKey = fs.readFileSync(listenerCertPaths.keyPath);
+      this._listenerCert = fs.readFileSync(listenerCertPaths.certPath);
     }
 
-    if (!this.listenerKey || !this.listenerCert) {
-      this.logger.errorMessage(
-        "Listener certificates are required to start P2P listener. Please provide valid paths."
-      );
+    if (!this._listenerKey || !this._listenerCert) {
+      this._logger.errorMessage('Listener certificates are required to start P2P listener. Please provide valid paths.');
       return;
     }
 
-    return this.ConnectionManager.listenForPeers(
-      port,
-      this.listenerKey,
-      this.listenerCert,
-      baseAPIPath
-    );
+    return this._connectionManager.listenForPeers(port, this._listenerKey, this._listenerCert, baseAPIPath);
   }
 
   /**
-   * @description Returns all saved connections.
+   * Returns all saved connections.
    *
    * @returns An object containing the sending and receiving connections.
    */
-  public getAllConnections(): {
+  public get connections(): {
     sending: Connection[];
     receiving: Connection[];
   } {
-    return this.ConnectionManager.getAllConnections();
+    return this._connectionManager.connections;
   }
 
   /**
-   * @returns Returns string with summary of all connection
+   * Returns a summary of the connections managed by the ConnectionManager.
+   * The summary includes the number of sending and receiving connections, as well as the target address, direction, and status of each connection.
+   *
+   * @returns A string summary of the connections.
    */
   public getSummary(): string {
-    const conn = this.ConnectionManager.getAllConnections();
+    const conn = this._connectionManager.connections;
     return (
       `Wrapper Summary: ` +
       `\nSending Connections: ${conn.sending.length}` +
-      `\nReceiving Connections: ${conn.receiving.length}` +
-      conn.sending
-        .map(
-          (c) =>
-            `\n- ${c.getTargetAddress()} \nDirection - ${
-              c.direction
-            }\n\tStatus: (${c.getStatus()})\n\tToken: (${c.getToken()})`
-        )
-        .join("") +
-      conn.receiving
-        .map(
-          (c) =>
-            `\n- ${c.getTargetAddress()} \nDirection - ${
-              c.direction
-            }\n\tStatus: (${c.getStatus()})\n\tToken: (${c.getToken()})`
-        )
-        .join("")
+      `\nReceiving Connections: ${conn.receiving.length}${conn.sending
+        .map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`)
+        .join('')}${conn.receiving.map((c) => `\n- ${c.targetAddress} - ${c.direction}\n\t(${c.status})`).join('')}`
     );
   }
 }

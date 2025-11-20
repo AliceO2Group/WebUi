@@ -102,7 +102,7 @@ describe(`'QCConfigurationController' test suite`, () => {
       await qcConfigurationController.getConfigurationsKeysHandler(req, res);
       
       assert.ok(statusStub.calledWith(404));
-      assert.deepStrictEqual(jsonStub.firstCall.args[0].message, `Configurations prefix not found: "${expectedPath}"`);
+      assert.deepStrictEqual(jsonStub.firstCall.args[0].message, `Configurations prefix not found: '${expectedPath}'`);
     });
 
     it('should return 503 when service throws a service unavailable error', async () => {
@@ -166,6 +166,42 @@ describe(`'QCConfigurationController' test suite`, () => {
       
       assert.ok(statusStub.calledWith(503));
       assert.deepStrictEqual(jsonStub.firstCall.args[0].message, 'Consul service unavailable');
+    });
+  });
+  
+  describe(`'putConfigurationByKeyHandler' test suite`, () => {
+    let qcConfigurationService, qcConfigurationController;
+    before(() => {
+      qcConfigurationService = new QCConfigurationService({
+        putListOfKeyValues: sinon.stub().resolves({ allPut: true }),
+      });
+
+      qcConfigurationController = new QCConfigurationController(qcConfigurationService, {
+        consul: { qcPath: 'o2/components/qc' },
+      });
+    });
+
+    it('should return {allPut: true} for a valid key and configuration', async () => {
+      const req = {
+        params: { key: 'o2/components/qc/ANY/any/prefix1' },
+        body: { configuration: { key1: 'value1', key2: 'value2' } },
+      };
+      const res = { status: sinon.stub().returnsThis(), json: sinon.stub() };
+      await qcConfigurationController.putConfigurationByKeyHandler(req, res);
+      assert.ok(res.status.calledWith(200));
+      assert.deepStrictEqual(res.json.firstCall.args[0], { allPut: true });
+    });
+
+    it('should return 400 for missing configuration key', async () => {
+      const req = { params: {}, body: { configuration: {} } };
+      const res = { status: sinon.stub().returnsThis(), json: sinon.stub() };
+      await qcConfigurationController.putConfigurationByKeyHandler(req, res);
+      assert.ok(res.status.calledWith(400));
+      assert.deepStrictEqual(res.json.firstCall.args[0], {
+        message: 'Missing configuration key',
+        status: 400,
+        title: 'Invalid Input',
+      });
     });
   });
 });
