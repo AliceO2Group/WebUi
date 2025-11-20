@@ -13,6 +13,7 @@
  */
 
 const { LogManager } = require('@aliceo2/web-ui');
+const QCConfigurationAdapter = require('../adapters/QCConfigurationAdapter');
 
 /**
  * @class
@@ -37,6 +38,7 @@ class QCConfigurationService {
    * Get keys of configurations stored in Consul
    * @param {String} prefix - prefix to filter the keys
    * @param {boolean} [recurse=false] - whether to recurse into subdirectories
+   * @returns {Promise<Array<string>>} names of configurations which are valid JSON
    */
   async retrieveKeysOfValidConfigurations(prefix, recurse = false) {
     const data = await this._consulService.getOnlyRawValuesByKeyPrefix(prefix);
@@ -46,6 +48,7 @@ class QCConfigurationService {
   /**
    * Get configuration by key from Consul
    * @param {string} key - the key of the configuration
+   * @returns {Promise<string>} - the raw value stored for the requested key
    */
   async retrieveConfigurationByKey(key) {
     return await this._consulService.getOnlyRawValueByKey(key);
@@ -57,6 +60,7 @@ class QCConfigurationService {
    * @param {object} configs - an object with string values to be checked.
    * @param {boolean} recurse - whether to recurse into subdirectories
    * @param {string} prefix - the prefix to filter keys
+   * @returns {Array<string>} names of configurations which are valid JSON
    */
   filterConfigurations(configs, recurse, prefix) {
     const parsedData = [];
@@ -80,9 +84,20 @@ class QCConfigurationService {
   }
 
   /**
+   * Get configuration restrictions by key from Consul
+   * @param {string} key - the key of the configuration
+   * @returns {Promise<Restrictions>}
+   */
+  async getConfigurationRestrictionsByKey(key) {
+    const configuration = await this._consulService.getOnlyRawValueByKey(key);
+    return QCConfigurationAdapter.computeRestrictions(configuration);
+  }
+  
+  /**
    * Edit configuration by key in Consul
-   * @param {String} key - the key of the configuration
-   * @param {String} value - the configuration
+   * @param {string} key - the key of the configuration
+   * @param {string} value - the configuration
+   * @returns {Promise<Object>} - JSON object with the status of the transaction
    */
   async editConfigurationByKey(key, value) {
     const listOfConfigurationsToEdit = [{ [key]: JSON.stringify(value, null, 2) }];
