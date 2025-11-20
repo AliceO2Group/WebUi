@@ -40,7 +40,7 @@ const ConfigurationPage = () => {
     <Form
       sectionTitle="Configuration"
       items={configuration}
-      itemsTypeMap={configurationRestrictions}
+      itemsRestrictions={configurationRestrictions}
     />
   );
 };

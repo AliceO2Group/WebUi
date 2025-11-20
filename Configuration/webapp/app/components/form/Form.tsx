@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { type FC, type PropsWithChildren } from 'react';
+import { useCallback, type FC, type PropsWithChildren } from 'react';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -23,41 +23,41 @@ import { Widget } from './Widget';
 
 export type FormItem = { [key: string]: string | object | FormItem };
 
-export type FormItemType = {
-  [key: string]: 'string' | 'number' | 'boolean' | 'array' | FormItemType;
+export type FormRestrictions = {
+  [key: string]: 'string' | 'number' | 'boolean' | 'array' | FormRestrictions;
 };
 
 interface FormProps extends PropsWithChildren {
   sectionTitle: string;
   items: FormItem;
-  itemsTypeMap: FormItemType;
+  itemsRestrictions: FormRestrictions;
 }
 
 /**
  * Function which returns false if the given object
  * which describes restrictions is the leaf (string, number, bool, array)
  * or returns true if the given object describes restrictions recursively
- * @param {'string' | 'number' | 'boolean' | 'array' | FormItemType} obj
+ * @param {'string' | 'number' | 'boolean' | 'array' | FormRestrictions} obj
  * the object which describes restrictions
  * @returns {boolean} value which indicates if the restrictions are recursive
- * or if this is the leaf of the FormItemType tree
+ * or if this is the leaf of the FormRestrictions tree
  */
-function isFormItemType(obj: FormItemType[string]): obj is FormItemType {
+function isFormRestrictions(obj: FormRestrictions[string]): obj is FormRestrictions {
   return obj instanceof Object && !(obj instanceof Array);
 }
 
-export const Form: FC<FormProps> = ({ sectionTitle, items, itemsTypeMap }) => {
-  const renderItem = (key: string, value: FormItemType[string]) =>
-    isFormItemType(value) ? (
+export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) => {
+  const renderItem = useCallback((key: string, value: FormRestrictions[string]) =>
+    isFormRestrictions(value) ? (
       <Form
         key={key}
         sectionTitle={key}
         items={items[key] as FormItem}
-        itemsTypeMap={itemsTypeMap[key] as FormItemType}
+        itemsRestrictions={itemsRestrictions[key] as FormRestrictions}
       />
     ) : (
       <Widget key={key} title={key} type={value} value={items[key]} />
-    );
+    ), [items, itemsRestrictions]);
 
   return (
     <Accordion defaultExpanded>
@@ -74,7 +74,7 @@ export const Form: FC<FormProps> = ({ sectionTitle, items, itemsTypeMap }) => {
       </AccordionSummary>
       <AccordionDetails>
         <Stack spacing={2}>
-          {Object.entries(itemsTypeMap).map(([key, value]) => renderItem(key, value))}
+          {Object.entries(itemsRestrictions).map(([key, value]) => renderItem(key, value))}
         </Stack>
       </AccordionDetails>
     </Accordion>
