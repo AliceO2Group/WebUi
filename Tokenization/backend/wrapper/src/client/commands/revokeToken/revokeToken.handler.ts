@@ -14,7 +14,7 @@
 
 import type { CommandHandler } from '../../../models/commands.model';
 import type { RevokeTokenCommand } from './revokeToken.command';
-import type { ConnectionManager } from '../../ConnectionManager/ConnectionManager';
+import type { ConnectionManager } from '../../connectionManager/ConnectionManager';
 
 /**
  * RevokeTokenHandler is responsible for handling the RevokeTokenCommand.

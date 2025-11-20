@@ -15,7 +15,7 @@
 import { RevokeTokenCommand } from '../../../client/commands/revokeToken/revokeToken.command';
 import { RevokeTokenHandler } from '../../../client/commands/revokeToken/revokeToken.handler';
 import { Connection } from '../../../client/connection/Connection';
-import { ConnectionManager } from '../../../client/ConnectionManager/ConnectionManager';
+import { ConnectionManager } from '../../../client/connectionManager/ConnectionManager';
 import { ConnectionDirection, DuplexMessageEvent } from '../../../models/message.model';
 import { ConnectionStatus } from '../../../models/connection.model';
 import { Command } from 'models/commands.model';

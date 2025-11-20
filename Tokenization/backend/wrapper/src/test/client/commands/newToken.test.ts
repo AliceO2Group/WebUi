@@ -15,7 +15,7 @@
 import { NewTokenCommand } from '../../../client/commands/newToken/newToken.command';
 import { NewTokenHandler } from '../../../client/commands/newToken/newToken.handler';
 import { Connection } from '../../../client/connection/Connection';
-import { ConnectionManager } from '../../../client/ConnectionManager/ConnectionManager';
+import { ConnectionManager } from '../../../client/connectionManager/ConnectionManager';
 import { Command } from 'models/commands.model';
 import { ConnectionDirection, DuplexMessageEvent } from '../../../models/message.model';
 import * as grpc from '@grpc/grpc-js';

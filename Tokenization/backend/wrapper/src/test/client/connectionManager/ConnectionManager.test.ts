@@ -141,7 +141,7 @@ jest.mock(
   { virtual: true }
 );
 
-import { ConnectionManager } from '../../../client/ConnectionManager/ConnectionManager';
+import { ConnectionManager } from '../../../client/connectionManager/ConnectionManager';
 import { ConnectionDirection } from '../../../models/message.model';
 import { ConnectionStatus } from '../../../models/connection.model';
 import { getTestCentralCertPaths, getTestCerts } from '../../../test/testCerts/testCerts';
@@ -168,7 +168,7 @@ describe('ConnectionManager', () => {
 
     expect((grpc as any).loadPackageDefinition).toHaveBeenCalled();
     expect(CentralSystemClientMock).toHaveBeenCalledWith('central:5555', expect.any(Object));
-    expect(grpc.credentials.createInsecure).toHaveBeenCalled();
+    expect(grpc.credentials.createSsl).toHaveBeenCalled();
   });
 
   test('registerCommandHandlers: calls dispatcher.register for each item', () => {
@@ -204,7 +204,7 @@ describe('ConnectionManager', () => {
     cm['_peerCtor'] = Peer2PeerCtorMock;
     const conn = await cm.createNewConnection('peer-A', ConnectionDirection.SENDING, 'tok123');
 
-    expect(connectionCtorMock).toHaveBeenCalledWith('tok123', 'peer-A', ConnectionDirection.SENDING, expect.any(Function));
+    expect(connectionCtorMock).toHaveBeenCalledWith('tok123', 'peer-A', ConnectionDirection.SENDING, expect.any(Function), expect.any(Object));
     expect(conn.status).toBe(ConnectionStatus.CONNECTED);
 
     // Exposed via connections getter
@@ -215,19 +215,19 @@ describe('ConnectionManager', () => {
     expect(infoMessageMock).toHaveBeenCalledWith(expect.stringContaining('Connection with peer-A has been estabilished'));
   });
 
-  test('createNewConnection: adds to receiving map if direction is RECEIVING', () => {
+  test('createNewConnection: adds to receiving map if direction is RECEIVING', async () => {
     const cm = new ConnectionManager('p.proto', 'c:1', caCertPath, certPath, keyPath);
-    cm.createNewConnection('peer-B', ConnectionDirection.RECEIVING);
+    await cm.createNewConnection('peer-B', ConnectionDirection.RECEIVING);
 
     const { sending, receiving } = cm.connections;
     expect(sending.length).toBe(0);
     expect(receiving.length).toBe(1);
   });
 
-  test('getConnectionByAddress: returns by direction. Logs on invalid direction', () => {
+  test('getConnectionByAddress: returns by direction. Logs on invalid direction', async () => {
     const cm = new ConnectionManager('p.proto', 'c:1', caCertPath, certPath, keyPath);
-    const s = cm.createNewConnection('s-1', ConnectionDirection.SENDING);
-    const r = cm.createNewConnection('r-1', ConnectionDirection.RECEIVING);
+    const s = await cm.createNewConnection('s-1', ConnectionDirection.SENDING);
+    const r = await cm.createNewConnection('r-1', ConnectionDirection.RECEIVING);
 
     expect(cm.getConnectionByAddress('s-1', ConnectionDirection.SENDING)).toBe(s);
     expect(cm.getConnectionByAddress('r-1', ConnectionDirection.RECEIVING)).toBe(r);
@@ -238,10 +238,10 @@ describe('ConnectionManager', () => {
     expect(errorMessageMock).toHaveBeenCalledWith('Invalid connection direction: 999');
   });
 
-  test('connections getter: returns arrays (copies) of maps', () => {
+  test('connections getter: returns arrays (copies) of maps', async () => {
     const cm = new ConnectionManager('p.proto', 'c:1', caCertPath, certPath, keyPath);
-    cm.createNewConnection('a', ConnectionDirection.SENDING);
-    cm.createNewConnection('b', ConnectionDirection.RECEIVING);
+    await cm.createNewConnection('a', ConnectionDirection.SENDING);
+    await cm.createNewConnection('b', ConnectionDirection.RECEIVING);
 
     const { sending, receiving } = cm.connections;
     expect(Array.isArray(sending)).toBe(true);
@@ -286,7 +286,7 @@ describe('ConnectionManager', () => {
       getPeer: () => 'client-42',
       request: {
         method: 'post',
-        path: 'echo',
+        path: 'pong',
         headers: { 'content-type': 'application/json' },
         body: Buffer.from(JSON.stringify({ ping: true })),
       },
@@ -309,7 +309,7 @@ describe('ConnectionManager', () => {
     const before = cm.connections.receiving.length;
     await capturedServerImpl.Fetch(call, callback);
 
-    expect(global.fetch).toHaveBeenCalledWith('http://local/api/echo', {
+    expect(global.fetch).toHaveBeenCalledWith('http://local/api/pong', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ ping: true }),
@@ -336,7 +336,7 @@ describe('ConnectionManager', () => {
     const cm = new ConnectionManager('p.proto', 'c:1', caCertPath, certPath, keyPath);
     await cm.listenForPeers(50103, getTestCerts().clientKey, getTestCerts().clientCert, 'http://local/api/');
 
-    cm.createNewConnection('client-77', ConnectionDirection.RECEIVING);
+    await cm.createNewConnection('client-77', ConnectionDirection.RECEIVING);
 
     // @ts-ignore
     global.fetch.mockResolvedValue({

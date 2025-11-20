@@ -13,7 +13,7 @@
  */
 
 import * as fs from 'fs';
-import { ConnectionManager } from './ConnectionManager/ConnectionManager';
+import { ConnectionManager } from './connectionManager/ConnectionManager';
 import { RevokeTokenHandler } from './commands/revokeToken/revokeToken.handler';
 import { ConnectionDirection, DuplexMessageEvent } from '../models/message.model';
 import { NewTokenHandler } from './commands/newToken/newToken.handler';

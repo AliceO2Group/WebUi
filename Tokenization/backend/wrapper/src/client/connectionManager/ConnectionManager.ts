@@ -205,7 +205,7 @@ export class ConnectionManager {
     this._peerServer = new grpc.Server();
     this._peerServer.addService(this._wrapper.Peer2Peer.service, {
       Fetch: async (call: grpc.ServerUnaryCall<any, any>, callback: grpc.sendUnaryData<any>) =>
-        peerListener(call, callback, this._logger, this._receivingConnections, this.createNewConnection, this._baseAPIPath),
+        peerListener(call, callback, this._logger, this._receivingConnections, this.createNewConnection.bind(this), this._baseAPIPath),
     });
 
     const sslCreds = grpc.ServerCredentials.createSsl(
