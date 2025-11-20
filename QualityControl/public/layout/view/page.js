@@ -192,20 +192,26 @@ function chartView(model, tabObject) {
  * @param {object} tabObject - to be drawn with jsroot
  * @returns {vnode} - virtual node element
  */
-const drawComponent = (model, tabObject) => h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
-  h('.jsrootdiv', {
-    style: {
-      'z-index': 90,
-      overflow: 'hidden',
-      height: '100%',
-      display: 'flex',
-      'flex-direction': 'column',
-    },
-  }, draw(model, tabObject, {})),
-  objectInfoResizePanel(model, tabObject),
-  model.layout.item && model.layout.item.displayTimestamp
-  && minimalObjectInfo(model, tabObject),
-]);
+const drawComponent = (model, tabObject) => {
+  const { displayTimestamp = false } = model.layout.item;
+  const { name } = tabObject;
+  const lastModified = model.object.getLastModifiedByName(name);
+  const runNumber = model.object.getRunNumberByName(name);
+
+  return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
+    h('.jsrootdiv', {
+      style: {
+        'z-index': 90,
+        overflow: 'hidden',
+        height: '100%',
+        display: 'flex',
+        'flex-direction': 'column',
+      },
+    }, draw(model, tabObject, {})),
+    objectInfoResizePanel(model, tabObject),
+    displayTimestamp && minimalObjectInfo(runNumber, lastModified),
+  ]);
+};
 
 /**
  * Predicate to sort objects by id

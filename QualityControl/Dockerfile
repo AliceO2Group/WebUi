@@ -28,9 +28,6 @@ FROM base AS dependencies
 COPY package*.json ./
 RUN npm ci --silent
 
-# Copy the rest of the application code
-COPY . .
-
 FROM dependencies AS chromiumdependencies
 # Required for Puppeteer
 RUN apk add --no-cache \
@@ -43,17 +40,21 @@ RUN apk add --no-cache \
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
+FROM chromiumdependencies AS sourcechromium
+# Copy the rest of the application code
+COPY . .
+
 FROM dependencies AS development
 RUN npm i -g nodemon --save-dev
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev-networked-mount"]
 
-FROM chromiumdependencies AS test
+FROM sourcechromium AS test
 CMD ["npm", "run", "test"]
 
 # For GH Actions only
-FROM chromiumdependencies AS coverage-ci
+FROM sourcechromium AS coverage-ci
 CMD ["npm", "run", "coverage-lcov"]
 
 # For local coverage
-FROM chromiumdependencies AS coverage-local
+FROM sourcechromium AS coverage-local
 CMD ["npm", "run", "coverage-local"]
