@@ -11,32 +11,48 @@
  *  or submit itself to any jurisdiction.
  */
 
-/**
- * Derive type of value for every key-val pair
- * of given configuration object
- * @param {Object} configuration object we want to get restrictions of
- * @returns {TypeMap} derived restrictions for a given configuration
- */
-const computeRestrictions = (value) => {
-  const typeMap = {};
-  Object.entries(value).forEach(([key, val]) => typeMap[key] = deriveValueType(val));
-  return typeMap;
-}
+const { LogManager } = require('@aliceo2/web-ui');
 
 /**
- * Derive the type of value and return it as a string
- * possible types are "string", "boolean", "number", "array<`${NestedTypeMap}`>", `${NestedTypeMap}`
- * @param {string | Array | Object} value that we want to get the TypeMap of
- * @returns {string | TypeMap} derived type from the given value, could be a string, or further nested TypeMap
+ * QCConfigurationAdapter - Given aconfiguration object, construct Restrictions
+ * which is a set of restrictions based on the values contained in this configuration
  */
-const deriveValueType = (value) => {
-  // TODO: implement function _combineTypes, so we can derive Type of value[0] and
-  // then combine it with Types of value[1], value[2] and so on to get the overall Type of values held in the array
-  if (value instanceof Array) { return "array"; }
-  if (value instanceof Object) { return computeRestrictions(value); }
-  if (value.toLowerCase() === "true" || value.toLowerCase() === "false") { return "boolean"; }
-  if (!Number.isNaN(Number(value))) { return "number"; }
-  return "string";
+class QCConfigurationAdapter {
+  /**
+   * Derive type of value for every key-val pair
+   * of given configuration object
+   * @param {Object} configuration object we want to get restrictions of
+   * @returns {Restrictions} derived restrictions for a given configuration
+   */
+  static computeRestrictions = (value) => {
+    const restrictions = {};
+    if (typeof value !== 'object' || Array.isArray(value) || value === null) {
+      return restrictions;
+    }
+    Object.entries(value).forEach(([key, val]) => (restrictions[key] = QCConfigurationAdapter.deriveValueType(val)));
+    return restrictions;
+  };
+
+  /**
+   * Derive the type of value and return it as a string
+   * possible types are 'string', 'boolean', 'number', 'array<`${NestedRestrictions}`>', `${NestedRestrictions}`
+   * @param {string | Array | Object} value that we want to get the Restrictions of
+   * @returns {string | Restrictions} derived type from the given value, could be a string, or further nested Restrictions
+   */
+  static deriveValueType = (value) => {
+    // TODO OGUI-1803: implement function _combineTypes, so we can derive Type of value[0] and
+    // then combine it with Types of value[1], value[2] and so on to get the overall Type of values held in the array
+    if (Array.isArray(value)) { return 'array'; }
+    if (value instanceof Object) { return QCConfigurationAdapter.computeRestrictions(value); }
+    if (value.toLocaleLowerCase() === 'true' || value.toLocaleLowerCase() === 'false') {
+      return 'boolean';
+    }
+    if (!Number.isNaN(Number(value))) { return 'number'; }
+    if (typeof value === 'string') { return 'string'; }
+    const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/qc-conf-adapter`);
+    logger.warnMessage(`Unknown value encountered while calculating restrictions from a configuration: ${value}`);
+    return 'unknown';
+  };
 }
 
-exports.computeRestrictions = computeRestrictions;
+module.exports = QCConfigurationAdapter;

@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-const { LogManager } = require("@aliceo2/web-ui");
-const { computeRestrictions } = require("../adapters/QCConfigurationAdapter");
+const { LogManager } = require('@aliceo2/web-ui');
+const QCConfigurationAdapter = require('../adapters/QCConfigurationAdapter');
 
 /**
  * @class
@@ -38,7 +38,7 @@ class QCConfigurationService {
    * Get keys of configurations stored in Consul
    * @param {String} prefix - prefix to filter the keys
    * @param {boolean} [recurse=false] - whether to recurse into subdirectories
-   * @returns {Array<string>} names of configurations which are valid JSON
+   * @returns {Promise<Array<string>>} names of configurations which are valid JSON
    */
   async retrieveKeysOfValidConfigurations(prefix, recurse = false) {
     const data = await this._consulService.getOnlyRawValuesByKeyPrefix(prefix);
@@ -48,7 +48,7 @@ class QCConfigurationService {
   /**
    * Get configuration by key from Consul
    * @param {string} key - the key of the configuration
-   * @returns {Promise<string, Error>} - the raw value stored for the requested key
+   * @returns {Promise<string>} - the raw value stored for the requested key
    */
   async retrieveConfigurationByKey(key) {
     return await this._consulService.getOnlyRawValueByKey(key);
@@ -86,19 +86,18 @@ class QCConfigurationService {
   /**
    * Get configuration restrictions by key from Consul
    * @param {string} key - the key of the configuration
-   * @return {Promise<TypeMap>}
-   * @throws {NotFoundError | ServiceUnavailableError}
+   * @returns {Promise<Restrictions>}
    */
   async getConfigurationRestrictionsByKey(key) {
     const configuration = await this._consulService.getOnlyRawValueByKey(key);
-    return computeRestrictions(configuration);
+    return QCConfigurationAdapter.computeRestrictions(configuration);
   }
   
   /**
    * Edit configuration by key in Consul
    * @param {string} key - the key of the configuration
    * @param {string} value - the configuration
-   * @returns {Promise<JSON, Error>} - JSON object with the status of the transaction
+   * @returns {Promise<JSON>} - JSON object with the status of the transaction
    */
   async editConfigurationByKey(key, value) {
     const listOfConfigurationsToEdit = [{ [key]: JSON.stringify(value, null, 2) }];

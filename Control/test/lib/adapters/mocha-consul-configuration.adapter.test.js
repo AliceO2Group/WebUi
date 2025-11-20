@@ -11,38 +11,45 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-/* eslint-disable max-len */
 
-const assert = require("assert");
+const assert = require('assert');
 
 const {
   computeRestrictions,
-} = require("../../../lib/adapters/QCConfigurationAdapter.js");
+} = require('../../../lib/adapters/QCConfigurationAdapter.js');
 
 describe(`'QCConfigurationAdapter' test suite`, () => {
-  it("should work for minimal input", async () => {
+  it('should work for minimal input', () => {
     const configuration = {};
     const restrictions = {};
     
     assert.deepStrictEqual(computeRestrictions(configuration), restrictions);
   });
 
-  it("should return restrictions for a big configuration", async () => {
+  it('should return restrictions for a big configuration', () => {
     const configuration = {
-      key1: "value1",
-      key2: "10",
-      key3: [{ key1: "string" }, { key1: "true" }],
-      key4: "false",
-      key5: { key1: "nested", key2: "false" },
+      key1: 'value1',
+      key2: '10',
+      key3: [{ key1: 'string' }, { key1: 'true' }],
+      key4: 'false',
+      key5: { key1: 'nested', key2: 'false' },
     };
     const restrictions = {
-      key1: "string",
-      key2: "number",
-      key3: "array",
-      key4: "boolean",
-      key5: { key1: "string", key2: "boolean" },
+      key1: 'string',
+      key2: 'number',
+      key3: 'array',
+      key4: 'boolean',
+      key5: { key1: 'string', key2: 'boolean' },
     };
     
     assert.deepStrictEqual(computeRestrictions(configuration), restrictions);
   });
+
+  it('should not throw for bad input', () => {
+    assert.deepStrictEqual(computeRestrictions(), {});
+    assert.deepStrictEqual(computeRestrictions(undefined), {});
+    assert.deepStrictEqual(computeRestrictions(null), {});
+    assert.deepStrictEqual(computeRestrictions(0), {});
+    assert.deepStrictEqual(computeRestrictions(''), {});
+  })
 });
