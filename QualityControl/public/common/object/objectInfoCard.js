@@ -51,10 +51,10 @@ export const qcObjectInfoPanel = (model, qcObject, style = {}) =>
  * @returns {vnode} - row with object information key and value
  */
 const infoRow = (model, key, value) => {
-  const highlightedClasses = HIGHLIGHTED_FIELDS.includes(key) ? '.info-row' : '';
+  const highlightedClasses = HIGHLIGHTED_FIELDS.includes(key) ? '.highlighted' : '';
   const formattedValue = infoPretty(key, value);
 
-  return h(`.flex-row.g2${highlightedClasses}`, [
+  return h(`.flex-row.g2.info-row${highlightedClasses}`, [
     h('b.w-25.w-wrapped', getUILabel(key)),
     h('.w-75', {
       ...infoRowAttributes(model, formattedValue),
