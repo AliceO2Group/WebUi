@@ -130,7 +130,7 @@ const infoRowAttributes = (model, value) => {
       // to allowing the default behaviour for clicking multiple times
       const clickCount = e.detail;
       if (clickCount === 1) {
-        clickTimeout = setTimeout(() => {
+        clickTimeout = setTimeout(async () => {
           if (!model.isContextSecure()) {
             return;
           }
@@ -139,7 +139,7 @@ const infoRowAttributes = (model, value) => {
           if (typeof value !== 'string') {
             value = value.dom.textContent;
           }
-          navigator.clipboard.writeText(value);
+          await navigator.clipboard.writeText(value);
 
           clickTimeout = undefined;
         }, DOUBLE_CLICK_DELAY);
