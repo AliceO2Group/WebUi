@@ -39,7 +39,7 @@ const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = ({ title, onClick, isS
       <ListItemButton
         onClick={onClick}
         color="red"
-        sx={{ borderRadius: 2, padding: 0 }}
+        sx={{ borderRadius: 2, padding: 0, height: 40 }}
         selected={isSelected}
       >
         <ListItemIcon>

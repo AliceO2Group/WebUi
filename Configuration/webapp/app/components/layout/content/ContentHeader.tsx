@@ -12,11 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Box, IconButton, Toolbar, Typography } from '@mui/material';
+import { Box, IconButton, Skeleton, Toolbar, Typography } from '@mui/material';
 import { type FC } from 'react';
 import { UserSection } from '../../user-section/UserSection';
 import { useDrawer } from '~/contexts/DrawerContext';
 import MenuIcon from '@mui/icons-material/Menu';
+import { useConfigurationKeysQuery } from '~/api/query/useConfigurationKeysQuery';
 
 interface ContentHeaderProps {
   currentPath: string;
@@ -31,6 +32,8 @@ interface ContentHeaderProps {
  */
 export const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => {
   const { isOpen, toggleDrawer } = useDrawer();
+  const { isLoading: areConfigKeysLoading } = useConfigurationKeysQuery();
+
   return (
     <Toolbar
       style={{
@@ -47,7 +50,7 @@ export const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => {
           </IconButton>
         )}
         <Typography variant="h5" className="config-page__header__text">
-          {currentPath}
+          {areConfigKeysLoading ? <Skeleton width={500} /> : currentPath}
         </Typography>
       </Box>
       <UserSection />
