@@ -12,31 +12,38 @@
  * or submit itself to any jurisdiction.
  */
 
-import { VaultCredentialsService } from "../services/VaulCredentialsService.js";
-import { VaultAuthService } from "../services/VaultAuthService.js";
-import { VaultSignService } from "../services/VaultSignService.js";
+import { VaultCredentialsService } from '../services/VaulCredentialsService.js';
+import { VaultAuthService } from '../services/VaultAuthService.js';
+import { VaultSignService } from '../services/VaultSignService.js';
 
-import { Agent } from "https";
+import { Agent } from 'https';
 
 import {
   SignTokenReq,
   GetCredentialReq,
   CreateOrUpdateCredentialReq,
-} from "../lib/utils/event-req-types.js";
-import { registerBusHandler } from "../lib/event-bus/register-bus-handler.js";
-import { EventType } from "../lib/utils/events.js";
+} from '../lib/utils/event-req-types.js';
+import { registerBusHandler } from '../lib/event-bus/register-bus-handler.js';
+import { EventType } from '../lib/utils/events.js';
 
-import { LogManager } from "@aliceo2/web-ui";
-const logger = LogManager.getLogger("VaultController");
+import { LogManager } from '@aliceo2/web-ui';
+
+import {
+  SignPayload,
+  VaultReadResponse,
+  VaultMetadataResponse,
+  VaultKvWritePayload,
+} from '../types/vault_types.js';
+
 /**
  * @description Controller for managing interactions with the Vault service.
  */
 export class VaultController {
   // Agent for HTTPS requests
-  private readonly agent: Agent;
+  private readonly _agent: Agent;
   // Access token for Vault
-  private vaultAccessToken: string = "";
-
+  private _vaultAccessToken: string = '';
+  private _logger;
   /**
    * @description Constructs a new VaultController. Initializes the HTTPS agent using
    * TLS certificates provided via environment variables.
@@ -46,24 +53,25 @@ export class VaultController {
    * @throws Will throw an error if required environment variables are missing.
    */
   constructor(
-    private readonly tokenSignService: VaultSignService,
-    private readonly authService: VaultAuthService,
-    private readonly credentialsService: VaultCredentialsService
+    private readonly _tokenSignService: VaultSignService,
+    private readonly _authService: VaultAuthService,
+    private readonly _credentialsService: VaultCredentialsService
   ) {
+    this._logger = LogManager.getLogger('VaultController');
     const caPem = process.env.VAULT_CACERT_B64;
     const certPem = process.env.VAULT_CENTRAL_SYSTEM_CERT_B64;
     const keyPem = process.env.VAULT_CENTRAL_SYSTEM_KEY_B64;
     if (!caPem || !certPem || !keyPem) {
       throw new Error(
-        "Missing required environment variables for TLS certificates."
+        'Missing required environment variables for TLS certificates.'
       );
     }
 
-    this.agent = new Agent({
+    this._agent = new Agent({
       keepAlive: true,
-      ca: Buffer.from(caPem, "base64"),
-      cert: Buffer.from(certPem, "base64"),
-      key: Buffer.from(keyPem, "base64"),
+      ca: Buffer.from(caPem, 'base64'),
+      cert: Buffer.from(certPem, 'base64'),
+      key: Buffer.from(keyPem, 'base64'),
     });
   }
 
@@ -72,30 +80,44 @@ export class VaultController {
    * @param payload - The payload containing the subject and optional claims for the token.
    * @returns A promise that resolves to the signed token and its expiration time.
    */
-  public async signToken(payload: any): Promise<string> {
-    return this.tokenSignService.signToken(
-      process.env.VAULT_ADDR! + "/v1/transit/sign/signing-key",
-      this.vaultAccessToken,
-      this.agent,
-      payload.data
-    );
+  public async signToken(payload: SignPayload): Promise<string> {
+    try {
+      return await this._tokenSignService.signToken(
+        process.env.VAULT_ADDR! + '/v1/transit/sign/signing-key',
+        this._vaultAccessToken,
+        this._agent,
+        JSON.stringify(payload.data)
+      );
+    } catch (error: any) {
+      this._logger.errorMessage(
+        `Error signing token with Vault: ${error.message}`
+      );
+      throw error;
+    }
   }
   /**
    * @description Logs into the vault using the VaultAuthService and retrieves an access token.
    * @returns A promise that resolves to the access token.
    */
   public async loginVault(): Promise<void> {
-    this.vaultAccessToken = await this.authService.login(
-      process.env.VAULT_ADDR! +
-        `/v1/auth/${process.env.VAULT_AUTH_METHOD}/login`,
-      process.env.VAULT_AUTH_METHOD!,
-      this.agent,
-      JSON.stringify({
-        name: process.env.VAULT_ROLE,
-      })
-    );
-    logger.info(
-      `Logged into Vault successfully.Token: ${this.vaultAccessToken}`
+    try {
+      this._vaultAccessToken = await this._authService.login(
+        process.env.VAULT_ADDR! +
+          `/v1/auth/${process.env.VAULT_AUTH_METHOD}/login`,
+        this._agent,
+        JSON.stringify({
+          name: process.env.VAULT_ROLE,
+        })
+      );
+    } catch (error: any) {
+      this._logger.errorMessage(`Vault login failed: ${error.message}`);
+      throw error;
+    }
+    this._logger.info(
+      `Logged into Vault successfully.Token: ${this._vaultAccessToken.slice(
+        0,
+        6
+      )}...`
     );
   }
 
@@ -104,13 +126,19 @@ export class VaultController {
    * @returns A promise that resolves to the renewed access token.
    */
   public async renewVaultToken(): Promise<void> {
-    this.authService.renew(
-      process.env.VAULT_ADDR! + "/v1/auth/token/renew-self",
-      this.vaultAccessToken,
-      this.agent,
-      null
-    );
-    logger.info("Vault token renewed successfully.");
+    try {
+      await this._authService.renew(
+        process.env.VAULT_ADDR! + '/v1/auth/token/renew-self',
+        this._vaultAccessToken,
+        this._agent,
+        null
+      );
+    } catch (error: any) {
+      this._logger.errorMessage(`Vault token renewal failed: ${error.message}`);
+      this._logger.info('Attempting to re-login to Vault...');
+      await this.loginVault();
+    }
+    this._logger.info('Vault token renewed successfully.');
   }
 
   /**
@@ -118,24 +146,46 @@ export class VaultController {
    * @param id - The identifier of the credential to retrieve.
    * @returns A promise that resolves to the retrieved credential.
    */
-  public async getCredentialFromVault(path: string): Promise<any> {
-    return this.credentialsService.getCredential(
-      process.env.VAULT_ADDR! + `/v1/secret/data/${path}`,
-      this.vaultAccessToken,
-      this.agent
-    );
+  public async getCredentialFromVault(
+    path: string
+  ): Promise<VaultReadResponse> {
+    try {
+      return await this._credentialsService.getCredential(
+        process.env.VAULT_ADDR! + `/v1/secret/data/${path}`,
+        this._vaultAccessToken,
+        this._agent
+      );
+    } catch (error: any) {
+      this._logger.errorMessage(
+        `Error getting credential from Vault: ${error.message}`
+      );
+      throw error;
+    }
   }
 
+  /**
+   * @description Creates or updates a credential in the vault using the VaultCredentialsService.
+   * @param path - The path where the credential should be stored.
+   * @param body - The body of the credential to create or update.
+   * @returns A promise that resolves when the operation is complete.
+   */
   public async createOrUpdateCredentialInVault(
     path: string,
-    body: string
+    body: VaultKvWritePayload
   ): Promise<void> {
-    return this.credentialsService.createOrUpdateCredential(
-      process.env.VAULT_ADDR! + `/v1/secret/data/${path}`,
-      this.vaultAccessToken,
-      this.agent,
-      body
-    );
+    try {
+      await this._credentialsService.createOrUpdateCredential(
+        process.env.VAULT_ADDR! + `/v1/secret/data/${path}`,
+        this._vaultAccessToken,
+        this._agent,
+        JSON.stringify(body)
+      );
+    } catch (error: any) {
+      this._logger.errorMessage(
+        `Error creating/updating credential in Vault: ${error.message}`
+      );
+      throw error;
+    }
   }
 
   /**
@@ -146,7 +196,7 @@ export class VaultController {
   public register() {
     registerBusHandler<SignTokenReq>(
       EventType.SIGN_TOKEN_VAULT,
-      async (payload) => this.signToken(payload.data)
+      async (payload) => this.signToken(payload)
     );
 
     registerBusHandler<undefined>(EventType.LOGIN_VAULT, async () =>

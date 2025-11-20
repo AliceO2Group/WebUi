@@ -12,13 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Agent } from "https";
-import fetch from "node-fetch";
-
-// Define the structure of the Get Credential response
-interface GetResponse {
-  data: { data: any };
-}
+import { Agent } from 'https';
+import fetch from 'node-fetch';
+import { VaultReadResponse } from '../types/vault_types.js';
 
 /**
  * * @description Service for retrieving credentials from an external vault service.
@@ -33,18 +29,18 @@ export class VaultCredentialsService {
     url: string,
     token: string,
     agent: Agent
-  ): Promise<any> {
+  ): Promise<VaultReadResponse> {
     const result = await fetch(url, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "content-type": "application/json",
-        "X-Vault-Token": token,
+        'content-type': 'application/json',
+        'X-Vault-Token': token,
       },
       agent,
     });
     if (!result.ok) throw new Error(await result.text());
-    const resJSON = (await result.json()) as GetResponse;
-    return resJSON.data.data;
+    const resJSON = (await result.json()) as VaultReadResponse;
+    return resJSON;
   }
 
   public async createOrUpdateCredential(
@@ -54,11 +50,11 @@ export class VaultCredentialsService {
     body: Buffer | string | NodeJS.ReadableStream | null
   ): Promise<void> {
     const result = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       body,
       headers: {
-        "content-type": "application/json",
-        "X-Vault-Token": token,
+        'content-type': 'application/json',
+        'X-Vault-Token': token,
       },
       agent,
     });

@@ -13,11 +13,17 @@
  */
 
 // Request and Response types for event handling
-type SignTokenReq = { data: string; claims?: Record<string, unknown> };
+
+import { VaultKvWritePayload } from '../../types/vault_types.js';
+
+type SignTokenReq = {
+  data: { input: string };
+  claims?: Record<string, unknown>;
+};
 type GetCredentialReq = { path: string; claims?: Record<string, unknown> };
 type CreateOrUpdateCredentialReq = {
   path: string;
-  body: string;
+  body: VaultKvWritePayload;
   claims?: Record<string, unknown>;
 };
 

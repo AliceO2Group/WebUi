@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Agent } from "https";
-import fetch from "node-fetch";
+import { Agent } from 'https';
+import fetch from 'node-fetch';
 
 // Define the structure of the login response
 interface AuthResponse {
@@ -29,21 +29,19 @@ export class VaultAuthService {
   /**
    * @description Logs in to the vault service and retrieves a client token.
    * @param url - The URL of the external vault service.
-   * @param name - The name of the authentication method.
    * @param agent - The HTTPS agent to use for the request.
    * @param body - The body of the login request.
    * @return A promise that resolves to the client token.
    */
   public async login(
     url: string,
-    name: string,
     agent: Agent,
     body: Buffer | string | NodeJS.ReadableStream | null
   ): Promise<string> {
     const result = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       body,
-      headers: { "content-type": "application/json" },
+      headers: { 'content-type': 'application/json' },
       agent,
     });
     if (!result.ok) throw new Error(await result.text());
@@ -66,11 +64,11 @@ export class VaultAuthService {
     body: Buffer | string | NodeJS.ReadableStream | null
   ): Promise<string> {
     const result = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       body,
       headers: {
-        "content-type": "application/json",
-        "X-Vault-Token": token,
+        'content-type': 'application/json',
+        'X-Vault-Token': token,
       },
       agent,
     });
