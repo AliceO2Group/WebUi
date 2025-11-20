@@ -25,6 +25,7 @@ import { VaultAuthService } from '../services/VaultAuthService.js';
 import { VaultCredentialsService } from '../services/VaulCredentialsService.js';
 import { EventType } from '../lib/utils/events.js';
 import { bus } from '../lib/event-bus/event-bus.js';
+import { LogManager } from '@aliceo2/web-ui';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,39 +42,44 @@ class CentralSystem {
     number,
     { tokenId: number; validity: string; payload: string }
   >;
+  private readonly _db: SequalizeDatabase;
+  private _logger;
+
   public readonly connectionController: ConnectionController;
   public readonly vaultController: VaultController;
-  public _db: SequalizeDatabase;
 
   public constructor(wrapperPort: number) {
+    this._logger = LogManager.getLogger('CentralSystem');
     this._db = db;
-    const tokensGetService = new TokensGetService();
-    const vaultSignService = new VaultSignService();
     this._centralSystemWrapper = new CentralSystemWrapper(
       this.PROTO_PATH,
       wrapperPort
     );
+
     this._centralSystemWrapper.listen();
     this._fakeTokens = new Map([
       [1, { tokenId: 1, validity: 'good', payload: 'payload1' }],
       [2, { tokenId: 2, validity: 'bad', payload: 'payload2' }],
     ]);
+
     this.connectionController = new ConnectionController(
-      tokensGetService,
+      new TokensGetService(),
       this._fakeTokens,
       this._centralSystemWrapper
     );
+
     this.vaultController = new VaultController(
       new VaultSignService(),
       new VaultAuthService(),
       new VaultCredentialsService()
     );
+
     this.vaultController.register();
     this.vaultController
       .loginVault()
       .then(() => {})
       .catch((error) => {
-        console.error('Failed to log in to Vault:', error);
+        this._logger.errorMessage(`Error during Vault login: ${error.message}`);
       });
 
     setInterval(() => {
