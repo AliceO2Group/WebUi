@@ -97,7 +97,7 @@ class QCConfigurationService {
    * Edit configuration by key in Consul
    * @param {string} key - the key of the configuration
    * @param {string} value - the configuration
-   * @returns {Promise<JSON>} - JSON object with the status of the transaction
+   * @returns {Promise<Object>} - JSON object with the status of the transaction
    */
   async editConfigurationByKey(key, value) {
     const listOfConfigurationsToEdit = [{ [key]: JSON.stringify(value, null, 2) }];
