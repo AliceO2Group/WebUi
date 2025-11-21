@@ -17,8 +17,8 @@ import { type SelectInterface } from './form.d';
 import { IconContainer, IconX } from '~/ui/icon';
 
 interface SelectedOptionListProps {
-  value: SelectInterface["value"];
   handleDeselect: SelectInterface["handleDeselect"];
+  value?: SelectInterface["value"];
   selected?: SelectInterface["selected"];
   label?: SelectInterface["label"];
 }
@@ -32,7 +32,7 @@ const SelectedOption = ({ value, label, handleDeselect }: SelectedOptionListProp
   return (
     <li>
       {label}
-      <button onClick={(e) => _handleDeselect(e, value)}>
+      <button onClick={(e) => value ? _handleDeselect(e, value) : undefined}>
         <IconContainer>
           <IconX/>
         </IconContainer>

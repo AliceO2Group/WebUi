@@ -44,7 +44,7 @@ export const SelectFrameMulti = <T extends string | number>(props: SelectLabelPr
     <span>
       {_selected &&
             _selected.length > 0 ?
-        <SelectedList selected={_selected} handleDeselect={handleDeselect} /> :
+        <SelectedList selected={_selected} handleDeselect={handleDeselect as (value: string | number) => void} /> :
         <span>{placeholder}</span>
       }
     </span>
