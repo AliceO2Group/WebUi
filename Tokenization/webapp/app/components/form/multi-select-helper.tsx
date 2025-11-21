@@ -25,7 +25,7 @@ interface SelectedOptionListProps {
 
 const SelectedOption = ({ value, label, handleDeselect }: SelectedOptionListProps) => {
   const _handleDeselect = (e: React.MouseEvent<HTMLButtonElement>, value: SelectInterface["value"]) => {
-    handleDeselect?.(value);
+    handleDeselect?.(value as string | number);
     e.stopPropagation();
   };
 
