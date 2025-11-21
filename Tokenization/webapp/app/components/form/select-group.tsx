@@ -13,7 +13,6 @@
  */
 
 import React, { type PropsWithChildren } from 'react';
-import type { OptionType as Option } from '~/utils/types';
 import type { SelectInterface } from './form.d';
 
 import { FormSelect } from './form-select';

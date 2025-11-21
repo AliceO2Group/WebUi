@@ -48,7 +48,7 @@ const httpMethodOptions = [
  *
  */
 export default function CreateToken({ loaderData }: { loaderData?: OptionType[] }) {
-  const [expirationTime, setExpirationTime] = useState<number>(0);
+  const [expirationTime, setExpirationTime] = useState<string>('');
   const [firstSelectedService, setFirstSelectedService] = useState<string>('');
   const [secondSelectedService, setSecondSelectedService] = useState<string>('');
   const [selectedMethods, setSelectedMethods] = useState<HttpMethod[]>([]);
@@ -62,10 +62,10 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
   const [success, setSuccess] = useState<boolean>(false);
 
   const onSubmit = () => {
-    if(expirationTime && firstSelectedService && secondSelectedService && selectedMethods.length > 0) {
+    if (expirationTime && firstSelectedService && secondSelectedService && selectedMethods.length > 0) {
       setOpenModal(true);
     } else {
-     let message = 'Please fill in all required fields: ';
+      let message = 'Please fill in all required fields: ';
       if (!firstSelectedService) {
         message += 'First service, ';
       }
@@ -84,19 +84,19 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
       setSuccess(false);
       setOpenAlert(true);
     }
-  }
+  };
 
   const onReset = () => {
-    setExpirationTime(0);
+    setExpirationTime('');
     setFirstSelectedService('');
     setSecondSelectedService('');
     setSelectedMethods([]);
-  }
+  };
 
   const callApi = () => {
     if (auth) {
       // eslint-disable-next-line no-console
-      console.log('Creating token')
+      console.log('Creating token');
       setTitle('Token created');
       setMsg('Token has been created successfully.');
       setSuccess(true);
@@ -106,14 +106,13 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
       setSuccess(false);
     }
     setOpenAlert(true);
-  }
-
+  };
 
   return ( <>
     <Box1_1 link={null}>
       <div className=''>
         <Form>
-          <FormInput<number>
+          <FormInput
             labelText='Expiration Time (hours):'
             value={expirationTime}
             setValue={setExpirationTime}
@@ -135,28 +134,28 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
           />
           {loaderData &&
             <>
-            <SelectGroup>
-              <FormSelect
-                id="first-service-select"
-                options={loaderData}
-                value={firstSelectedService}
-                setValue={setFirstSelectedService}
-                placeholder="Select First Service..."
-                label="First Service"
-              />
-              <FormSelect
-                id="second-service-select"
-                options={loaderData}
-                value={secondSelectedService}
-                setValue={setSecondSelectedService}
-                placeholder="Select Second Service..."
-                label="Second Service"
-              />
-            </SelectGroup>
-            <div className='mv3 flex-row g1 align-center'>
-              <SubmitButton action={onSubmit} />
-              <ResetButton action={onReset} />
-            </div>
+              <SelectGroup>
+                <FormSelect
+                  id="first-service-select"
+                  options={loaderData}
+                  value={firstSelectedService}
+                  setValue={setFirstSelectedService}
+                  placeholder="Select First Service..."
+                  label="First Service"
+                />
+                <FormSelect
+                  id="second-service-select"
+                  options={loaderData}
+                  value={secondSelectedService}
+                  setValue={setSecondSelectedService}
+                  placeholder="Select Second Service..."
+                  label="Second Service"
+                />
+              </SelectGroup>
+              <div className='mv3 flex-row g1 align-center'>
+                <SubmitButton action={onSubmit} />
+                <ResetButton action={onReset} />
+              </div>
             </>
           }
         </Form>
@@ -179,13 +178,13 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
     >
       <WindowTitle>Token creation</WindowTitle>
       <WindowContent>
-          <div className='flex-column align-center justify-center'>  
+        <div className='flex-column align-center justify-center'>
           <div className='mb2'>Are you sure you want to create the token with the specified settings?</div>
           <div>Service from: {firstSelectedService}</div>
           <div>Service to: {secondSelectedService}</div>
           <div>Expiration time of {expirationTime} hours</div>
           <div>HTTP methods: {selectedMethods.join(', ')}</div>
-          </div>
+        </div>
       </WindowContent>
       <WindowButtonAccept className='btn-success' action={callApi}/>
       <WindowButtonCancel/>

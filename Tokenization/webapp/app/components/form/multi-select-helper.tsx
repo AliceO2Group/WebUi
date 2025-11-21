@@ -13,10 +13,18 @@
  */
 
 import { type OptionType as Option } from '~/utils/types';
+import { type SelectInterface } from './form.d';
 import { IconContainer, IconX } from '~/ui/icon';
 
-const SelectedOption = ({ value, label, handleDeselect }: Option & { handleDeselect?: (value: any) => void }) => {
-  const _handleDeselect = (e: React.MouseEvent<HTMLButtonElement>, value: string | number) => {
+interface SelectedOptionListProps {
+  value: SelectInterface["value"];
+  handleDeselect: SelectInterface["handleDeselect"];
+  selected?: SelectInterface["selected"];
+  label?: SelectInterface["label"];
+}
+
+const SelectedOption = ({ value, label, handleDeselect }: SelectedOptionListProps) => {
+  const _handleDeselect = (e: React.MouseEvent<HTMLButtonElement>, value: SelectInterface["value"]) => {
     handleDeselect?.(value);
     e.stopPropagation();
   };
@@ -33,8 +41,19 @@ const SelectedOption = ({ value, label, handleDeselect }: Option & { handleDesel
   );
 };
 
-export const SelectedList = ({ selected, handleDeselect }: any) => <ul className='flex-row justify-between multiselect-list'>
-  {
-    selected.map((s: Option) => <SelectedOption key={s.value} value={s.value} label={s.label} handleDeselect={handleDeselect}/>)
-  }
-</ul>;
+
+
+export const SelectedList = ({ selected, handleDeselect }: SelectedOptionListProps) => 
+  <ul className='flex-row justify-between multiselect-list'>
+    {
+      (selected as Option[])
+        .map((s: Option) => 
+          <SelectedOption 
+            key={s.value} 
+            value={s.value} 
+            label={s.label} 
+            handleDeselect={handleDeselect}
+            />
+      )
+    }
+  </ul>;

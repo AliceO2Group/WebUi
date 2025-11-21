@@ -88,6 +88,7 @@ export function TokenTable({ tokens }: { tokens: Token[] }) {
   // Will be used for API call
   const deleteToken = () => {
     if (auth) {
+      // eslint-disable-next-line no-console
       console.log(`Deleting token no. ${tokenId}`);
     }
     setOpenA(true);

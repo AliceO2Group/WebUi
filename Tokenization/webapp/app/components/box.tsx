@@ -14,7 +14,7 @@
 
 import React from 'react';
 import { Link } from 'react-router';
-import { IconArrowCircleRight, IconContainer, IconExpandRight } from '~/ui/icon';
+import { IconContainer, IconExpandRight } from '~/ui/icon';
 
 interface BoxInterface {
   children: React.ReactNode;
@@ -29,16 +29,16 @@ interface PrimaryBoxInterface extends BoxInterface {
 export const Box = ({ children, link, className_div1, className_div2 }: PrimaryBoxInterface) => (
   <div className={`bg-gray m3 ${className_div1}`}>
     {link && <div className={`flex-row justify-center ${className_div2}`}>
-        <div className="w-90 flex-row justify-end">
-          <Link to={link}>
-            <IconContainer className="scale15 actionable-icon">
-              <IconExpandRight />
-            </IconContainer>
-          </Link>
-        </div>
+      <div className="w-90 flex-row justify-end">
+        <Link to={link}>
+          <IconContainer className="scale15 actionable-icon">
+            <IconExpandRight />
+          </IconContainer>
+        </Link>
       </div>
+    </div>
     }
-    {children} 
+    {children}
   </div>
 );
 

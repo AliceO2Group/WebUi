@@ -1,36 +1,46 @@
-import type { ButtonInterface } from "../window/window"
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
 
-const FormButton = ({type, action, className, children}: ButtonInterface) => {
-    const onClick =(e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        action?.();
-    }
-    
-    return <button
-        type={type}
-        className={`btn ${className}`}
-        onClick={onClick}
-        >
-        {children}
-    </button>
-}
+import type { ButtonInterface } from '../window/window';
 
-export const SubmitButton = ({action, className}: ButtonInterface) => {
-    return <FormButton 
-        className={`btn-primary ${className}`}
-        type='submit'
-        action={action}
-    >
-        Submit
-    </FormButton>
-}
+const FormButton = ({ type, action, className, children }: ButtonInterface) => {
+  const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    action?.();
+  };
 
-export const ResetButton = ({action, className}: ButtonInterface) => {
-    return <FormButton 
-        className={`btn-danger ${className}`}
-        type='button'
-        action={action}
-        >
-        Reset
-        </FormButton>
-}
+  return <button
+    type={type}
+    className={`btn ${className}`}
+    onClick={onClick}
+  >
+    {children}
+  </button>;
+};
+
+export const SubmitButton = ({ action, className }: ButtonInterface) => <FormButton
+  className={`btn-primary ${className}`}
+  type='submit'
+  action={action}
+>
+  Submit
+</FormButton>;
+
+export const ResetButton = ({ action, className }: ButtonInterface) => <FormButton
+  className={`btn-danger ${className}`}
+  type='button'
+  action={action}
+>
+  Reset
+</FormButton>;

@@ -15,7 +15,7 @@
 import { type WindowInterface } from './window.d';
 import { useFullWindowLogic } from '../hooks/useWindowLogic';
 
-export default (props: WindowInterface) => {
+const Modal = (props: WindowInterface) => {
   const { className } = props;
   const { visibility, ui_elements: { title, content, closeIcon, buttonCancel, buttonAccept } } = useFullWindowLogic(props);
 
@@ -39,3 +39,5 @@ export default (props: WindowInterface) => {
     </div>
   );
 };
+
+export default Modal;

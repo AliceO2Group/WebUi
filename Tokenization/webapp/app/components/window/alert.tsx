@@ -15,7 +15,7 @@
 import { type WindowInterface } from './window.d';
 import { useFullWindowLogic } from '../hooks/useWindowLogic';
 
-export default (props: WindowInterface) => {
+const Alert = (props: WindowInterface) => {
 
   const { className } = props;
   const { visibility, ui_elements: { title, content, closeIcon } } = useFullWindowLogic(props);
@@ -34,3 +34,5 @@ export default (props: WindowInterface) => {
     </div>
   );
 };
+
+export default Alert;

@@ -12,16 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Link } from 'react-router';
-
-import { IconHome, IconCog } from '../icon';
-
 /**
  * AppHeader
  *
  * Displays the application header with navigation icons (home, settings) and a customizable title.
- * @param headerContent.headerContent
- * @param headerContent Optional string to display as the header title.
+ * @param props.children - standard usage of React children prop
  */
 export function AppHeader({ children }: { children?: React.ReactNode }) {
   return (
