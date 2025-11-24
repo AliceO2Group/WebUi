@@ -56,11 +56,11 @@ export default class QCObject extends BaseViewModel {
     this.scrollTop = 0;
     this.scrollHeight = 0;
 
-    this.storage = new BrowserStorage('object-view-left-panel-width');
-    let storedWidth = this.storage.getLocalItem(this.model.session.personid.toString());
+    this.leftPanelWidthStorage = new BrowserStorage('object-view-left-panel-width');
+    let storedWidth = this.leftPanelWidthStorage.getLocalItem(this.model.session.personid.toString());
     if (storedWidth === null || storedWidth === undefined) {
       storedWidth = 50;
-      this.storage.setLocalItem(this.model.session.personid.toString(), storedWidth);
+      this.leftPanelWidthStorage.setLocalItem(this.model.session.personid.toString(), storedWidth);
     }
     this.leftPanelWidthPercent = storedWidth;
   }
@@ -71,7 +71,7 @@ export default class QCObject extends BaseViewModel {
    * @returns {undefined}
    */
   setLeftPanelWidthPercent(widthPercent) {
-    this.storage.setLocalItem(this.model.session.personid.toString(), widthPercent);
+    this.leftPanelWidthStorage.setLocalItem(this.model.session.personid.toString(), widthPercent);
     this.leftPanelWidthPercent = widthPercent;
     this.notify();
   }
