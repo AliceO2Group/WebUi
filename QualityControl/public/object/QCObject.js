@@ -57,7 +57,12 @@ export default class QCObject extends BaseViewModel {
     this.scrollHeight = 0;
 
     this.storage = new BrowserStorage('object-view-left-panel-width');
-    this.leftPanelWidthPercent = this.storage.getLocalItem(this.model.session.personid.toString()) || 50;
+    let storedWidth = this.storage.getLocalItem(this.model.session.personid.toString());
+    if (storedWidth === null || storedWidth === undefined) {
+      storedWidth = 50;
+      this.storage.setLocalItem(this.model.session.personid.toString(), storedWidth);
+    }
+    this.leftPanelWidthPercent = storedWidth;
   }
 
   /**
