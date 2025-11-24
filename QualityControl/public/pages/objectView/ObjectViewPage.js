@@ -17,7 +17,7 @@ import { draw } from './../../common/object/draw.js';
 import { spinner } from './../../common/spinner.js';
 import { errorDiv } from '../../common/errorDiv.js';
 import { dateSelector } from '../../common/object/dateSelector.js';
-import { qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
+import { defaultRowAttributes, qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
 import { downloadButton } from '../../common/downloadButton.js';
 
 /**
@@ -65,7 +65,7 @@ const objectPlotAndInfo = (objectViewModel) =>
           h('.w-70', draw(qcObject, {}, drawingOptions)),
           h('.w-30.scroll-y', [
             h('h3.text-center', 'Object information'),
-            qcObjectInfoPanel(model, qcObject, { gap: '.5em' }),
+            qcObjectInfoPanel(qcObject, { gap: '.5em' }, defaultRowAttributes(model.notification)),
           ]),
         ]),
       ]);
