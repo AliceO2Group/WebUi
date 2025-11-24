@@ -93,7 +93,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     'should contain four highlighted rows',
     { timeout },
     async () => {
-      const highlightedClasses = '.info-row';
+      const highlightedClasses = '.info-row.highlighted';
       const rowCount = await page.evaluate((selector) =>
         document.querySelectorAll(`#qcObjectInfoPanel > div${selector}`).length, highlightedClasses);
       strictEqual(rowCount, 4);
