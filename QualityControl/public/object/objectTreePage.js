@@ -30,7 +30,7 @@ import { resizableDivider } from '../common/resizableDivider.js';
 export default (model) => {
   const { object, router } = model;
   const { leftPanelWidthPercent } = object;
-  return h('.h-100.flex-column', { key: `${router.params.page}-${leftPanelWidthPercent}` }, [
+  return h('.h-100.flex-column', { key: `${router.params.page}` }, [
     h('.flex-row.flex-grow', [
       h('.scroll-y.flex-column', {
         style: {
