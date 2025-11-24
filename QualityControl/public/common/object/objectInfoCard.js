@@ -27,12 +27,11 @@ const KEY_TO_RENDER_FIRST = 'path';
 
 /**
  * Builds a panel with information of the object; Fields are parsed according to their category
- * @param {Model} model - root object of the framework
  * @param {QCObjectDTO} qcObject - QC object with its associated details
  * @param {object} style - properties of the vnode
  * @returns {vnode} - panel with information about the object
  */
-export const qcObjectInfoPanel = (model, qcObject, style = {}) =>
+export const qcObjectInfoPanel = (qcObject, rowAttributes = Function(), style = {}) =>
   h('.flex-column.scroll-y#qcObjectInfoPanel', { style }, [
     [
       KEY_TO_RENDER_FIRST,
@@ -40,7 +39,7 @@ export const qcObjectInfoPanel = (model, qcObject, style = {}) =>
         .filter((key) =>
           key !== KEY_TO_RENDER_FIRST && !TO_REMOVE_FIELDS.includes(key)),
     ]
-      .map((key) => infoRow(model, key, qcObject[key])),
+      .map((key) => infoRow(key, qcObject[key], rowAttributes)),
   ]);
 
 /**
@@ -50,14 +49,15 @@ export const qcObjectInfoPanel = (model, qcObject, style = {}) =>
  * @param {string|number|object|undefined} value - value of the object info
  * @returns {vnode} - row with object information key and value
  */
-const infoRow = (model, key, value) => {
+const infoRow = (key, value, infoRowAttributes) => {
   const highlightedClasses = HIGHLIGHTED_FIELDS.includes(key) ? '.highlighted' : '';
   const formattedValue = infoPretty(key, value);
+  const formattedKey = getUILabel(key)
 
   return h(`.flex-row.g2.info-row${highlightedClasses}`, [
-    h('b.w-25.w-wrapped', getUILabel(key)),
+    h('b.w-25.w-wrapped', formattedKey),
     h('.w-75', {
-      ...infoRowAttributes(model, formattedValue),
+      ...infoRowAttributes(formattedKey, formattedValue),
       style: 'cursor: pointer; user-select: text;',
     }, formattedValue),
   ]);
@@ -111,11 +111,10 @@ const infoPretty = (key, value) => {
 
 /**
  * Configure the info row vnode attributes
- * @param {Model} model - root object of the framework
  * @param {string|number|object|undefined} value - value of the object info
- * @returns {object} - object containing the constructed vnode attributes
+ * @returns {Function} - object containing the constructed vnode attributes
  */
-const infoRowAttributes = (model, value) => {
+export const defaultRowAttributes = (notification) => (key, value) => {
   let clickTimeout = undefined;
   const DOUBLE_CLICK_DELAY = 300;
 
@@ -131,11 +130,11 @@ const infoRowAttributes = (model, value) => {
       const clickCount = e.detail;
       if (clickCount === 1) {
         clickTimeout = setTimeout(async () => {
-          if (!model.isContextSecure()) {
+          if (!window.isSecureContext) {
             return;
           }
 
-          model.notification.show('Value has been successfully copied to clipboard', 'success', 1500);
+          notification.show('Value has been successfully copied to clipboard', 'success', 1500);
           if (typeof value !== 'string') {
             value = value.dom.textContent;
           }
@@ -145,6 +144,6 @@ const infoRowAttributes = (model, value) => {
         }, DOUBLE_CLICK_DELAY);
       }
     },
-    title: 'Copy!',
+    title: `Copy ${key}`,
   };
 };
