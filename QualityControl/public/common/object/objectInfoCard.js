@@ -13,7 +13,7 @@
  */
 
 import { h } from '/js/src/index.js';
-import { prettyFormatDate } from './../utils.js';
+import { copyToClipboard, isContextSecure, prettyFormatDate } from './../utils.js';
 
 const SPECIFIC_KEY_LABELS = {
   id: 'ID (etag)',
@@ -29,9 +29,16 @@ const KEY_TO_RENDER_FIRST = 'path';
  * Builds a panel with information of the object; Fields are parsed according to their category
  * @param {QCObjectDTO} qcObject - QC object with its associated details
  * @param {object} style - properties of the vnode
+ * @param {function(Notification): function(string, string): object} rowAttributes -
+ *  An optional curried function that returns the VNode attribute builder.
+ *  Use {@link defaultRowAttributes} exported from this module, supplying the Notification API.
  * @returns {vnode} - panel with information about the object
+ * @example
+ * ```
+ * qcObjectInfoPanel(qcObject, {}, defaultRowAttributes(model.notification))
+ * ```
  */
-export const qcObjectInfoPanel = (qcObject, rowAttributes = Function(), style = {}) =>
+export const qcObjectInfoPanel = (qcObject, style = {}, rowAttributes = () => undefined) =>
   h('.flex-column.scroll-y#qcObjectInfoPanel', { style }, [
     [
       KEY_TO_RENDER_FIRST,
@@ -44,9 +51,9 @@ export const qcObjectInfoPanel = (qcObject, rowAttributes = Function(), style = 
 
 /**
  * Builds a raw with the key and value information parsed based on their type
- * @param {Model} model - root object of the framework
  * @param {string} key - key of the object info
  * @param {string|number|object|undefined} value - value of the object info
+ * @param {function(key, value)} infoRowAttributes - function that return given attributes for the row
  * @returns {vnode} - row with object information key and value
  */
 const infoRow = (key, value, infoRowAttributes) => {
@@ -110,40 +117,26 @@ const infoPretty = (key, value) => {
 };
 
 /**
- * Configure the info row vnode attributes
- * @param {string|number|object|undefined} value - value of the object info
- * @returns {Function} - object containing the constructed vnode attributes
+ * Default function to configure the info row vnode attributes
+ * @param {Notification} notification - Notification API
+ * @returns {function(string, string): object} object containing the constructed vnode attributes
  */
-export const defaultRowAttributes = (notification) => (key, value) => {
-  let clickTimeout = undefined;
-  const DOUBLE_CLICK_DELAY = 300;
-
-  return {
-    onclick: (e) => {
-      if (clickTimeout) {
-        clearTimeout(clickTimeout);
-        clickTimeout = undefined;
-        return;
-      }
-
+export const defaultRowAttributes = (notification) =>
+  (key, value) => ({
+    onclick: async (e) => {
       // to allowing the default behaviour for clicking multiple times
       const clickCount = e.detail;
       if (clickCount === 1) {
-        clickTimeout = setTimeout(async () => {
-          if (!window.isSecureContext) {
-            return;
-          }
+        if (!isContextSecure()) {
+          return;
+        }
 
-          notification.show('Value has been successfully copied to clipboard', 'success', 1500);
-          if (typeof value !== 'string') {
-            value = value.dom.textContent;
-          }
-          await navigator.clipboard.writeText(value);
-
-          clickTimeout = undefined;
-        }, DOUBLE_CLICK_DELAY);
+        notification.show('Value has been successfully copied to clipboard', 'success', 1500);
+        if (typeof value !== 'string') {
+          value = value.dom.textContent;
+        }
+        await copyToClipboard(value);
       }
     },
     title: `Copy ${key}`,
-  };
-};
+  });
