@@ -14,7 +14,7 @@
 
 import assert from 'assert';
 
-const BAD_REQUEST_ERROR_CODE = "ERR_BAD_REQUEST";
+const BAD_REQUEST_ERROR_CODE = 'ERR_BAD_REQUEST';
 
 //test Configuration/webapp/app/api/axiosInstance.ts
 import axiosInstance, { API_URL } from '../../app/api/axiosInstance';
@@ -31,7 +31,11 @@ describe('axios instance', function () {
     try {
       await axiosInstance.get(`${API_URL}/not-existing`);
     } catch (error: unknown) {
-      assert.strictEqual(error.code, BAD_REQUEST_ERROR_CODE);
+      if (typeof error === 'object' && error !== null && 'code' in error) {
+        assert.strictEqual(error.code, BAD_REQUEST_ERROR_CODE);
+      } else {
+        assert.fail('Error object does not have code property');
+      }
     }
   });
 });
