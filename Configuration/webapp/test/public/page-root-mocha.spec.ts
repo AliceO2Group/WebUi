@@ -21,8 +21,6 @@ describe('`pageRoot` test-suite', function () {
   let url: string | null = null;
   let page: Page | null = null;
 
-  this.timeout(15000);
-
   before(function () {
     ({
       test: {

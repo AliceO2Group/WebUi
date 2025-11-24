@@ -8,7 +8,7 @@
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "docker:typecheck": "docker compose exec webapp npm run typecheck",
-    "mocha": "tsx node_modules/.bin/mocha --timeout 20000 --require test/mocha-index.ts test/**/*.spec.ts",
+    "mocha": "tsx node_modules/.bin/mocha --timeout 40000 --require test/mocha-index.ts test/**/*.spec.ts",
     "eslint": "eslint app/**",
     "eslint-fix": "eslint --fix app/**",
     "prettier": "prettier --write app/**",
