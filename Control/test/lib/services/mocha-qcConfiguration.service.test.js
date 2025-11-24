@@ -37,10 +37,10 @@ describe(`'QCConfigurationService' test suite`, () => {
     it('should return keys of valid configurations only in the root of the prefix (recurse=false)', async () => {
       const prefix = 'any';
       const rawData = {
-        "any/dir1/nested": '{"key": "value"}',
-        "any/valid1": '{"key1": "value1"}',
-        "any/invalid_json": '"key1": "value1"',
-        "any/valid2": '{}',
+        'any/dir1/nested': '{"key": "value"}',
+        'any/valid1': '{"key1": "value1"}',
+        'any/invalid_json': '"key1": "value1"',
+        'any/valid2': '{}',
       };
       consulServiceStub.getOnlyRawValuesByKeyPrefix.resolves(rawData);
 
@@ -53,9 +53,9 @@ describe(`'QCConfigurationService' test suite`, () => {
     it('should return keys of all valid configurations when recurse is true', async () => {
       const prefix = 'any';
       const rawData = {
-        "any/dir1/nested": '{"key": "value"}',
-        "any/valid1": '{"key1": "value1"}',
-        "any/dir1/invalid": 'just string',
+        'any/dir1/nested': '{"key": "value"}',
+        'any/valid1': '{"key1": "value1"}',
+        'any/dir1/invalid': 'just string',
       };
       consulServiceStub.getOnlyRawValuesByKeyPrefix.resolves(rawData);
 
@@ -143,6 +143,30 @@ describe(`'QCConfigurationService' test suite`, () => {
       assert.deepStrictEqual(qcConfigurationService.filterConfigurations(null, false, 'any'), []);
       assert.deepStrictEqual(qcConfigurationService.filterConfigurations(undefined, false, 'any'), []);
       assert.deepStrictEqual(qcConfigurationService.filterConfigurations({}, false, 'any'), []);
+    });
+  });
+
+  describe(`'getConfigurationRestrictionsByKey' test suite`, () => {
+    it('should return restrictions for a valid key', async () => {
+      const key = 'any/prefix1';
+      const mockConfiguration = { key1: 'value1', key2: 'value2' };
+      const expectedRestrictions = { key1: 'string', key2: 'string' };
+      consulServiceStub.getOnlyRawValueByKey.resolves(mockConfiguration);
+
+      const restrictions = await qcConfigurationService.getConfigurationRestrictionsByKey(key);
+
+      assert.ok(consulServiceStub.getOnlyRawValueByKey.calledOnceWith(key));
+      assert.deepStrictEqual(restrictions, expectedRestrictions);
+    });
+    
+    it('should propagate errors from the consul service', async () => {
+      const testError = new Error('Consul not working');
+      consulServiceStub.getOnlyRawValueByKey.rejects(testError);
+
+      await assert.rejects(
+        async () => await qcConfigurationService.getConfigurationRestrictionsByKey('any'),
+        testError
+      );
     });
   });
 
