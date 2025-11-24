@@ -57,6 +57,7 @@ const rootPlotPanel = (object, options, drawingOptions) => {
       width: options.width,
     },
     oncreate: (vnode) => drawOnCreate(vnode.dom, root, drawingOptions),
+    onupdate: (vnode) => JSROOT.redraw(vnode.dom, root, drawingOptions.join(';')),
     onremove: (vnode) => {
       // Remove JSROOT binding to avoid memory leak
       if (JSROOT.cleanup) {
