@@ -36,7 +36,7 @@ interface ConfigNavigatorItemProps {
  */
 const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = ({ title, onClick, isSelected }) => (
   <ListItem style={{ paddingTop: 5, paddingBottom: 5 }} className="config_navigator__item">
-    <Link to={`${BASE_CONFIGURATION_PATH}/${title}`} style={{ width: '100%' }}>
+    <Link to={`configuration/${BASE_CONFIGURATION_PATH}/${title}`} style={{ width: '100%' }}>
       <ListItemButton
         onClick={onClick}
         color="red"
