@@ -102,7 +102,7 @@ export function TokenTable({ tokens }: { tokens: Token[] }) {
   };
 
   const failureInfo = {
-    title: 'Token wasn\'t deleted',
+    title: 'Authorization error',
     content: 'You don\'t have permission to do that operation!',
   };
 

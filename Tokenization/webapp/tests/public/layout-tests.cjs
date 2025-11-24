@@ -38,4 +38,20 @@ describe('general tests', function() {
     assert.strictEqual(certsLinkHref, '/certs');
     assert.ok(/Certificates/i.test(certsLinkText), `certs link text should include "Cert", got "${certsLinkText}"`);
   });
+  it('/tokens route displays token table and creation form', async function() {
+    await page.goto(`${url}/tokens`);
+
+    await page.waitForSelector('#content');
+    const pageContent = await page.$eval('#content', el => el.textContent || '');
+    assert.ok(pageContent.includes('Create Token'), 'Token Creation form should be present');
+
+    // wait for table rows populated by the API instead of an arbitrary timeout
+    await page.waitForSelector('table thead');
+    await page.waitForSelector('table tbody tr'); // ensures API filled the table
+    const headers = await page.$$eval('table thead th', ths => ths.map(t => (t.textContent || '').trim()));
+
+    const expected = ['ID', 'Service From', 'Service To', 'Expires at', 'Actions'];
+    const missing = expected.filter(h => !headers.includes(h));
+    assert.strictEqual(missing.length, 0, `Missing table headers: ${missing.join(', ')}`);
+  });
 });

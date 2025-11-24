@@ -58,8 +58,8 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
 
   useEffect(() => {
     if (loaderData) {
-      const firstLabel = loaderData.find(option => option.value === firstSelectedService)?.label || '';
-      const secondLabel = loaderData.find(option => option.value === secondSelectedService)?.label || '';
+      const firstLabel = loaderData.find(option => option.value === firstSelectedService)?.label ?? '';
+      const secondLabel = loaderData.find(option => option.value === secondSelectedService)?.label ?? '';
       setFirstSelectedLabel(firstLabel);
       setSecondSelectedLabel(secondLabel);
     }

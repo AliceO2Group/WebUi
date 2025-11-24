@@ -58,8 +58,10 @@ describe('Tokenization', function() {
     global.test.helpers.url = url;
   });
 
-  require('./public/basic.cjs');
-  require('./public/token-tests.cjs');
+  require('./public/layout-tests.cjs');
+  require('./public/tokens/token-creation-err.cjs');
+  require('./public/tokens/token-happy-path.cjs');
+  require('./public/tokens/token-deletion-err.cjs');
 
   beforeEach(function () {
     return (this.ok = true);
