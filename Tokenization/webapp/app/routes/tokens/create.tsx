@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import type { OptionType, HttpMethod } from '~/utils/types';
 import { Form } from '~/components/form/form';
@@ -45,13 +45,25 @@ const httpMethodOptions = [
 ];
 
 /**
- * Component is used for /tokens/create route to create new tokens.
+ * Component is used for /tokens/new route to create new tokens.
  */
 export default function CreateToken({ loaderData }: { loaderData?: OptionType[] }) {
   const [expirationTime, setExpirationTime] = useState<string>('');
   const [firstSelectedService, setFirstSelectedService] = useState<string>('');
   const [secondSelectedService, setSecondSelectedService] = useState<string>('');
   const [selectedMethods, setSelectedMethods] = useState<HttpMethod[]>([]);
+
+  const [firstSelectedLabel, setFirstSelectedLabel] = useState<string>('');
+  const [secondSelectedLabel, setSecondSelectedLabel] = useState<string>('');
+
+  useEffect(() => {
+    if (loaderData) {
+      const firstLabel = loaderData.find(option => option.value === firstSelectedService)?.label || '';
+      const secondLabel = loaderData.find(option => option.value === secondSelectedService)?.label || '';
+      setFirstSelectedLabel(firstLabel);
+      setSecondSelectedLabel(secondLabel);
+    }
+  }, [firstSelectedService, secondSelectedService, loaderData]);
 
   const auth = useAuth('admin');
   const [openAlert, setOpenAlert] = useState<boolean>(false);
@@ -101,7 +113,7 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
       setMsg('Token has been created successfully.');
       setSuccess(true);
     } else {
-      setTitle('Token was not created');
+      setTitle('Authorization error');
       setMsg('You do not have permission to perform this operation.');
       setSuccess(false);
     }
@@ -176,13 +188,13 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
       setOpen={setOpenModal}
       className='bg-primary '
     >
-      <WindowTitle>Token creation</WindowTitle>
+      <WindowTitle>Confirm Token Creation</WindowTitle>
       <WindowContent>
         <div className='flex-column align-center justify-center'>
           <div className='mb2'>Are you sure you want to create the token with the specified settings?</div>
-          <div>Service from: {firstSelectedService}</div>
-          <div>Service to: {secondSelectedService}</div>
-          <div>Expiration time of {expirationTime} hours</div>
+          <div>Service from: {firstSelectedLabel}</div>
+          <div>Service to: {secondSelectedLabel}</div>
+          <div>Expiration time: {expirationTime} hours</div>
           <div>HTTP methods: {selectedMethods.join(', ')}</div>
         </div>
       </WindowContent>

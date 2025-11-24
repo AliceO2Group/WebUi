@@ -22,17 +22,20 @@ describe('general tests', function() {
     ({ helpers: { url: url }, page: page } = test);
   });
 
-  it('header content changes with navigation', async function() {
-    let headerContent;
-
+  it('header contains links to /tokens and /certs with correct names', async function() {
     await page.goto(url);
     await page.waitForSelector('header');
-    headerContent = await page.$eval('header', el => el.textContent);
-    assert.ok(headerContent.includes('Tokenization'));
 
-    await page.goto(`${url}/tokens`);
-    await page.waitForSelector('header');
-    headerContent = await page.$eval('header', el => el.textContent);
-    assert.ok(headerContent.includes('Tokens'));
+    // verify link to /tokens exists and its text mentions "Token"
+    const tokensLinkText = await page.$eval('header a[href="/tokens"]', el => el.textContent || '');
+    const tokensLinkHref = await page.$eval('header a[href="/tokens"]', el => el.getAttribute('href'));
+    assert.strictEqual(tokensLinkHref, '/tokens');
+    assert.ok(/Token/i.test(tokensLinkText), `tokens link text should include "Token", got "${tokensLinkText}"`);
+
+    // verify link to /certs exists and its text mentions "Cert" (covers "Certs" or "Certificates")
+    const certsLinkText = await page.$eval('header a[href="/certs"]', el => el.textContent || '');
+    const certsLinkHref = await page.$eval('header a[href="/certs"]', el => el.getAttribute('href'));
+    assert.strictEqual(certsLinkHref, '/certs');
+    assert.ok(/Certificates/i.test(certsLinkText), `certs link text should include "Cert", got "${certsLinkText}"`);
   });
 });

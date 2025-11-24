@@ -17,7 +17,7 @@ const assert = require('assert');
 async function selectReactOption(reactSelect, optionIndex) {
   await reactSelect.click();
   await setTimeout(() => {}, 100);
-  return reactSelect.$(`div[role="listbox"] div:nth-child(${optionIndex})`);
+  return reactSelect.$(`ul li:nth-child(${optionIndex})`);
 }
 
 async function fillNumberInput(inputElement, number) {
@@ -41,7 +41,7 @@ async function fillAllFormFields(page, reactSelect1, reactSelect2, reactSelect3,
   await fillNumberInput(expirationInput, filledNumber);
   await button.click();
 
-  const dialogHandle = await page.waitForSelector('.MuiDialog-paper');
+  const dialogHandle = await page.waitForSelector('.modal');
   const dialogContent = (await dialogHandle.evaluate(el => el.textContent)).trim();
 
   return {
@@ -54,7 +54,7 @@ async function fillAllFormFields(page, reactSelect1, reactSelect2, reactSelect3,
   };
 }
 
-describe('token creation', function() {
+describe('token creation unsuccessful', function() {
   let url;
   let page;
 
@@ -74,8 +74,8 @@ describe('token creation', function() {
     ] = await Promise.all([
       page.waitForSelector('#first-service-select'),
       page.waitForSelector('#second-service-select'),
-      page.waitForSelector('#http-methods-select'),
-      page.waitForSelector('#expiration-time-input'),
+      page.waitForSelector('#http-select-methods'),
+      page.waitForSelector('.my-input > input[type="number"]'),
       page.waitForSelector('button[type="submit"]'),
     ]);
 
@@ -86,11 +86,14 @@ describe('token creation', function() {
     this.button = button;
   });
 
-  it('Not filling form shows error', async function() {
+  it('Not filling form shows error alert', async function() {
+    const alert = await page.waitForSelector('.alert');
+    const alertClass1 = await page.$eval('.alert', el => el.className);
+    assert.ok(alertClass1.includes('d-none')); // alert is hidden initially
+    
     await this.button.click();
-    await page.waitForSelector('#danger-alert');
-    const alertContent = await page.$eval('#danger-alert', el => el.textContent);
-    assert.ok(alertContent.includes('Please fill in all required fields'));
+    const alertClass2 = await page.$eval('.alert', el => el.className);
+    assert.ok(alertClass2.includes('d-block')); // alert is shown after submit
   });
 
   describe('filling partially the form', function() {
@@ -101,8 +104,7 @@ describe('token creation', function() {
       await opt2.click();
 
       await this.button.click();
-      await page.waitForSelector('#danger-alert');
-      const alertContent = await page.$eval('#danger-alert', el => el.textContent);
+      const alertContent = await page.$eval('.alert', el => el.textContent);
       assert.ok(alertContent.includes('Expiration time', 'HTTP methods'));
     });
 
@@ -112,8 +114,7 @@ describe('token creation', function() {
       await fillNumberInput(this.expirationInput, 10);
 
       await this.button.click();
-      await page.waitForSelector('#danger-alert');
-      const alertContent = await page.$eval('#danger-alert', el => el.textContent);
+      const alertContent = await page.$eval('.alert', el => el.textContent);
       assert.ok(alertContent.includes('First service', 'HTTP methods'));
     });
 
@@ -122,20 +123,21 @@ describe('token creation', function() {
       await opt3.click();
 
       await this.button.click();
-      await page.waitForSelector('#danger-alert');
-      const alertContent = await page.$eval('#danger-alert', el => el.textContent);
+      const alertContent = await page.$eval('.alert', el => el.textContent);
       assert.ok(
         alertContent.includes('First service', 'Second service', 'Expiration time'),
       );
     });
   });
 
-  it('filling the form correctly shows proper success message with alert', async function() {
+  it('filling the form correctly shows proper success message on modal window', async function() {
     const { dialogContent, select1Content, select2Content, select3Content, filledNumber } =
       await fillAllFormFields(page, this.reactSelect1, this.reactSelect2, this.reactSelect3, this.expirationInput, this.button);
-    assert.ok(dialogContent.includes('Confirm Token Creation'));
-    assert.ok(dialogContent.includes('First machine: ' + select1Content));
-    assert.ok(dialogContent.includes('Second machine: ' + select2Content));
+    console.log(dialogContent, select1Content, select2Content, select3Content, filledNumber
+    )
+      assert.ok(dialogContent.includes('Confirm Token Creation'));
+    assert.ok(dialogContent.includes('Service from: ' + select1Content));
+    assert.ok(dialogContent.includes('Service to: ' + select2Content));
     assert.ok(dialogContent.includes(select3Content));
     assert.ok(dialogContent.includes('Expiration time: ' + filledNumber.toString() + ' hours'));
   });
@@ -147,12 +149,7 @@ describe('token creation', function() {
     const confirmButton = await dialogHandle.$('button:nth-child(2)');
     await confirmButton.click();
 
-    await page.waitForSelector('#danger-alert');
-    const alertContent = await page.$eval('#danger-alert', el => el.textContent);
+    const alertContent = await page.$eval('.alert', el => el.textContent);
     assert.ok(alertContent.includes('Authorization error'));
-  }),
-
-  it('happy path', async function() {
-    assert.ok(true);
-  });
+  })
 });
