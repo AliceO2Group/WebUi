@@ -39,7 +39,6 @@ describe('token creation successful', function() {
     // TODO: mock/fake the API and verify the request payload here
     await btn.click();
     const className = await page.$eval('.alert', el => el.className);
-    const content = await page.$eval('.alert', el => el.textContent);
     assert.ok(className.includes('d-block') && className.includes('bg-success'), 'success alert should be shown after creating token');
   });
 

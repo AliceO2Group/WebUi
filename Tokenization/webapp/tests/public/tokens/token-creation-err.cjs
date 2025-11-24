@@ -48,7 +48,7 @@ describe('token creation unsuccessful', function() {
   });
 
   it('Not filling form shows error alert', async function() {
-    const alert = await page.waitForSelector('.alert');
+    await page.waitForSelector('.alert');
     const alertClass1 = await page.$eval('.alert', el => el.className);
     assert.ok(alertClass1.includes('d-none')); // alert is hidden initially
 

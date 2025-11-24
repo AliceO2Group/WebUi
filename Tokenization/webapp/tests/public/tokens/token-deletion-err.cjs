@@ -58,16 +58,16 @@ describe('token deletion unsuccessful', function() {
     });
   });
 
-    it('deletion shows auth error alert', async function() { 
-        const row = this.trs[0]; // first row
-        await row.deleteBtn.click();
+  it('deletion shows auth error alert', async function() {
+    const row = this.trs[0]; // first row
+    await row.deleteBtn.click();
 
-        const confirmBtn = await page.$('button.btn-danger'); // confirm deletion button
-        await confirmBtn.click();
+    const confirmBtn = await page.$('button.btn-danger'); // confirm deletion button
+    await confirmBtn.click();
 
-        const alertClass = await page.$eval('.alert', el => el.className);
-        const alertContent = await page.$eval('.alert', el => el.textContent);
-        assert.ok(alertClass.includes('d-block') && alertClass.includes('bg-danger'), 'error alert should be shown after failed deletion');
-        assert.ok(alertContent.includes('Authorization error'), 'error alert should mention authorization issue');
-    })
+    const alertClass = await page.$eval('.alert', el => el.className);
+    const alertContent = await page.$eval('.alert', el => el.textContent);
+    assert.ok(alertClass.includes('d-block') && alertClass.includes('bg-danger'), 'error alert should be shown after failed deletion');
+    assert.ok(alertContent.includes('Authorization error'), 'error alert should mention authorization issue');
+  });
 });
