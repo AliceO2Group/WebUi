@@ -13,9 +13,12 @@
 
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
+import {getUserLocalStorageValue} from '../../testUtils/localStorage.js';
 
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
 const SORTING_BUTTON_PATH = 'header > div > div > div:nth-child(3) > div > button';
+const RESIZABLE_DIVIDER_PATH = 'section > div > div > div:nth-child(2)';
+const PANEL_WIDTH_STORAGE_KEY = 'object-view-left-panel-width';
 
 /**
  * Initial page setup tests
@@ -136,6 +139,98 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       }, selectorId);
 
       deepStrictEqual(options, ['', 'runType1', 'runType2']);
+    },
+  );
+
+  await testParent.test(
+    'should set default panel width in localStorage if none exists', 
+    { timeout }, 
+    async () => {
+      await page.goto(`${url}${OBJECT_TREE_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
+      await page.reload({ waitUntil: 'networkidle0' });
+      const storedWidth = await getUserLocalStorageValue(page, PANEL_WIDTH_STORAGE_KEY);
+      strictEqual(Number(storedWidth), 50, 'Default panel width should be 50%');
+    }
+  );
+
+  await testParent.test(
+    'should store panel width in localStorage after dragging the divider',
+    { timeout },
+    async () => {
+      await page.goto(`${url}${OBJECT_TREE_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
+      await page.reload({ waitUntil: 'networkidle0' });
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(2)').click());
+      await delay(500);
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(3)').click());
+      await delay(500);
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(4)').click());
+      await delay(1000);
+
+      const divider = await page.$(RESIZABLE_DIVIDER_PATH);
+      const container = await page.$('body > div.absolute-fill.flex-column > div > section');
+      const containerBB = await container.boundingBox();
+      const dividerBB = await divider.boundingBox();
+
+      const startX = dividerBB.x + dividerBB.width / 2;
+      const startY = dividerBB.y + dividerBB.height / 2;
+      const endX = containerBB.x + containerBB.width * 0.35;
+
+      await page.mouse.move(startX, startY);
+      await page.mouse.down();
+      await page.mouse.move(endX, startY, { steps: 5 });
+      await page.mouse.up();
+
+      const newStoredWidth = await getUserLocalStorageValue(page, PANEL_WIDTH_STORAGE_KEY);
+      strictEqual(Number(newStoredWidth), 35, 'localStorage should be updated with the new width of 35%');
+    },
+  );
+
+  await testParent.test(
+    'should persist panel width when revisiting the page',
+    { timeout: 10000 },
+    async () => {
+      await page.goto(`${url}${OBJECT_TREE_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(2)').click());
+      await delay(500);
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(3)').click());
+      await delay(500);
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(4)').click());
+      await delay(500);
+
+      const divider = await page.$(RESIZABLE_DIVIDER_PATH);
+      const container = await page.$('body > div.absolute-fill.flex-column > div > section');
+      const containerBB = await container.boundingBox();
+      const dividerBB = await divider.boundingBox();
+
+      const startX = dividerBB.x + dividerBB.width / 2;
+      const startY = dividerBB.y + dividerBB.height / 2;
+      const endX = containerBB.x + containerBB.width * 0.75;
+
+      await page.mouse.move(startX, startY);
+      await page.mouse.down();
+      await page.mouse.move(endX, startY, { steps: 5 });
+      await page.mouse.up();
+      await delay(500);
+
+      const storedWidthBeforeNav = await getUserLocalStorageValue(page, PANEL_WIDTH_STORAGE_KEY);
+      strictEqual(Number(storedWidthBeforeNav), 75, 'Panel width should be set to 75% in localStorage');
+      
+      await page.goto(url, { waitUntil: 'networkidle0' });
+      await delay(500);
+
+      await page.goto(`${url}${OBJECT_TREE_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(2)').click());
+      await delay(500);
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(3)').click());
+      await delay(500);
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(4)').click());
+      await delay(500);
+      const persistedWidth = await getUserLocalStorageValue(page, PANEL_WIDTH_STORAGE_KEY);
+      strictEqual(Number(persistedWidth), 75, 'Persisted width in localStorage should be 75%');
+
+      const leftPanel = await page.$('section > div > div > div:nth-child(1)');
+      const panelStyle = await page.evaluate(el => el.style.width, leftPanel);
+      strictEqual(panelStyle, '75%', 'Left panel width should be set to 75% from localStorage');
     },
   );
 };
