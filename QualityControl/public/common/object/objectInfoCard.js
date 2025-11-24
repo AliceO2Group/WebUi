@@ -59,7 +59,7 @@ export const qcObjectInfoPanel = (qcObject, style = {}, rowAttributes = () => un
 const infoRow = (key, value, infoRowAttributes) => {
   const highlightedClasses = HIGHLIGHTED_FIELDS.includes(key) ? '.highlighted' : '';
   const formattedValue = infoPretty(key, value);
-  const formattedKey = getUILabel(key)
+  const formattedKey = getUILabel(key);
 
   return h(`.flex-row.g2.info-row${highlightedClasses}`, [
     h('b.w-25.w-wrapped', formattedKey),
