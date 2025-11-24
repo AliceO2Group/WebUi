@@ -17,9 +17,24 @@ import type { SelectInterface } from './form.d';
 
 import { FormSelect } from './form-select';
 
+// Helper function which checks if a component is of a certain type
 const checkIsComponentOfType = (c: React.ReactNode, otype: React.ElementType): boolean => React.isValidElement(c) && c.type === otype;
 
-export const SelectGroup =  ({ children }: PropsWithChildren) => {
+/**
+ * SelectGroup
+ *
+ * Inspects children and deduplicates options across FormSelect children by cloning them.
+ *
+ * @param {object} props - component props
+ * @param {React.ReactNode} props.children - child nodes which should only include FormSelect components;
+ * SelectGroup will detect those and clone them with filtered options
+ *
+ * Behaviour notes:
+ * - Looks for direct children of type FormSelect.
+ * - Builds list of values used by other selects and removes them from each select's options to avoid duplicates.
+ * - Clones and returns modified select children; non-select children are not displayed so they shouldn't be used.
+ */
+export function SelectGroup({ children }: PropsWithChildren) {
   const arrChildren = React.Children.toArray(children);
   const selects = arrChildren.filter((component) => checkIsComponentOfType(component, FormSelect));
   const optionsList = selects.map((select) => React.isValidElement(select) ? (select.props as SelectInterface).options : null);
@@ -35,15 +50,13 @@ export const SelectGroup =  ({ children }: PropsWithChildren) => {
     const differentSelectValues = values.filter((_, idx) => idx != i);
 
     if (options !== null) {
-      options = options.filter((opt) => !differentSelectValues.includes(opt.value) );
+      options = options.filter((opt) => !differentSelectValues.includes(opt.value));
       select = React.cloneElement(select as React.ReactElement<SelectInterface>, {
         options: options,
       });
-
     }
     returnChildren.push(select);
   }
 
   return [...returnChildren];
-
-};
+}

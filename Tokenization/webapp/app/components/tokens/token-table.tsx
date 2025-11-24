@@ -24,7 +24,13 @@ import Alert from '../window/alert';
 import { WindowTitle, WindowContent, WindowButtonCancel, WindowButtonAccept, WindowCloseIcon } from '../window/window-objects';
 
 /**
+ * TokenTableHeader
  *
+ * Renders the static table header row for the token table.
+ *
+ * Notes:
+ * - No props.
+ * - Small, non-reusable helper.
  */
 function TokenTableHeader() {
   const theaders = ['ID', 'Service From', 'Service To', 'Expires at', 'Actions'];
@@ -38,10 +44,16 @@ function TokenTableHeader() {
 }
 
 /**
- * Table component that displays a list of tokens with their ID and validity.
- * Token IDs are clickable links that navigate to the token details page.
+ * TokenTableContent
  *
- * @param tokens - Array of tokens to display
+ * Renders table body rows for the provided tokens.
+ *
+ * @param {object} props - component props
+ * @param {Token[]} props.tokens - array of token records to display
+ * @param {(val: string) => void} props.actionBlockOnClick - callback invoked with tokenId when action button clicked
+ *
+ * Notes:
+ * - Simple rendering helper; not a generic reusable component.
  */
 function TokenTableContent({ tokens, actionBlockOnClick }: { tokens: Token[]; actionBlockOnClick: (val: string) => void }) {
   return (
@@ -67,7 +79,16 @@ function TokenTableContent({ tokens, actionBlockOnClick }: { tokens: Token[]; ac
 }
 
 /**
+ * TokenTable
  *
+ * Table wrapper that manages modal/alert UI for token actions.
+ *
+ * @param {object} props - component props
+ * @param {Token[]} props.tokens - tokens to display in the table
+ *
+ * Notes:
+ * - Manages local state for delete confirmation and result alert.
+ * - Intentionally small and application-specific (not designed as a reusable library component).
  */
 export function TokenTable({ tokens }: { tokens: Token[] }) {
   const [openM, setOpenM] = useState<boolean>(false); // Used for modal logic

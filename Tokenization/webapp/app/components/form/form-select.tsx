@@ -14,7 +14,25 @@
 import { type SelectInterface } from './form.d';
 import { FormSelectBase, SelectFrame, SelectFrameMulti } from './select-helper';
 
-export const FormSelect = <T extends string | number = string, >(props: SelectInterface<T>) => {
+/**
+ * FormSelect
+ *
+ * Single-select wrapper that maps value/setValue to selected option and selection handler.
+ *
+ * @template T
+ * @param {object} props - component props
+ * @param {string} props.id - unique id (from SelectInterface)
+ * @param {import('~/utils/types').OptionType[]} props.options - array of options to choose from
+ * @param {T} props.value - currently selected raw value (string|number)
+ * @param {React.Dispatch<import('react').SetStateAction<T>>} props.setValue - setter to update the raw value when selection changes
+ * @param {string} [props.placeholder] - placeholder text
+ * @param {string|null} [props.label] - optional label shown above select
+ *
+ * Behaviour:
+ * - Finds the Option matching `value` and passes that to FormSelectBase as `selected`.
+ * - Provides handleSelect(val: T) that updates `setValue(val)`.
+ */
+export function FormSelect<T extends string | number = string>(props: SelectInterface<T>) {
   const { value, setValue, options } = { ...props };
   const selected = options.find((o) => o.value === value) ?? null;
   const handleSelect = (val: T) => {
@@ -28,11 +46,28 @@ export const FormSelect = <T extends string | number = string, >(props: SelectIn
       handleSelect={handleSelect as (value: T extends Array<infer U> ? U : T) => void}
       render={SelectFrame}
     />
-
   );
-};
+}
 
-export const FormSelectMulti = <T extends string | number = string, >(props: SelectInterface<T[]>)=> {
+/**
+ * FormSelectMulti
+ *
+ * Multi-select wrapper that expects value to be an array and provides select/deselect handlers.
+ *
+ * @template T
+ * @param {object} props - component props
+ * @param {string} props.id - unique id (from SelectInterface)
+ * @param {import('~/utils/types').OptionType[]} props.options - array of available options
+ * @param {T[]} props.value - array of selected raw values
+ * @param {React.Dispatch<import('react').SetStateAction<T[]>>} props.setValue - setter to update the array of selected values
+ * @param {string} [props.placeholder] - placeholder text
+ * @param {string|null} [props.label] - optional label shown above select
+ *
+ * Behaviour:
+ * - Computes `selected` as list of Option entries whose value is included in `value`.
+ * - handleSelect adds an item to the value array; handleDeselect removes it.
+ */
+export function FormSelectMulti<T extends string | number = string>(props: SelectInterface<T[]>) {
   const { value, setValue, options } = { ...props };
   const selected = options.filter((o) => value.includes(o.value as unknown as T)) || [];
 
@@ -54,4 +89,4 @@ export const FormSelectMulti = <T extends string | number = string, >(props: Sel
       render={SelectFrameMulti}
     />
   );
-};
+}

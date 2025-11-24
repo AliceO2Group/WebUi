@@ -20,7 +20,13 @@ interface ActionBlockProps {
 }
 
 /**
- * Action block component that provides token actions such as delete
+ * ActionBlock
+ *
+ * Small UI block that renders action controls for a token (currently a delete button).
+ *
+ * @param {object} props - component props
+ * @param {string} props.tokenId - id of the token the actions operate on (used for aria/title)
+ * @param {() => void} props.onClick - click handler invoked when the action button is pressed
  */
 export default function ActionBlock({ tokenId, onClick }: ActionBlockProps) {
   return (

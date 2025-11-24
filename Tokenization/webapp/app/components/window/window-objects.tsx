@@ -17,16 +17,45 @@ import { type PropsWithChildren } from 'react';
 import { type ButtonInterface } from './window.d';
 import { IconContainer, IconX } from '~/ui/icon';
 
+/**
+ * WindowTitle
+ *
+ * Small presentational component used as a child of Modal/Alert to mark the title region.
+ *
+ * @param {object} props - component props
+ * @param {React.ReactNode} props.children - title content
+ */
 export const WindowTitle = ({ children }: PropsWithChildren) =>
   <h4>
     {children}
   </h4>;
 
+/**
+ * WindowContent
+ *
+ * Presentational wrapper for main window content.
+ *
+ * @param {object} props - component props
+ * @param {React.ReactNode} props.children - content to display inside the window body
+ */
 export const WindowContent = ({ children }: PropsWithChildren) =>
   <span>
     {children}
   </span>;
 
+/**
+ * WindowButton / WindowButtonCancel / WindowButtonAccept
+ *
+ * Reusable button components used inside Window children.
+ *
+ * @param {object} props - component props
+ * @param {React.ReactNode} props.children - button label/content
+ * @param {() => void} [props.action] - callback invoked on click (wrapped by parent logic when cloned)
+ * @param {string} [props.className] - additional CSS classes
+ *
+ * Notes:
+ * - Parent window logic (useFullWindowLogic) clones these elements and injects action handlers.
+ */
 const WindowButton = ({ children, action, className }: ButtonInterface) =>
   <button onClick={action} className={`btn ${className}`}>
     {children}
@@ -42,6 +71,15 @@ export const WindowButtonAccept = ({ action, className }: ButtonInterface) =>
     Accept
   </WindowButton>;
 
+/**
+ * WindowCloseIcon
+ *
+ * Clickable close icon used in window chrome.
+ *
+ * @param {object} props - component props
+ * @param {() => void} [props.action] - click handler (parent will inject cancel/close action)
+ * @param {string} [props.className] - additional CSS classes
+ */
 export const WindowCloseIcon = ({ action, className }: ButtonInterface) =>
   <div onClick={action} className={`actionable-icon bg-transparent no-border ${className}`}>
     <IconContainer>

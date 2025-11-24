@@ -15,14 +15,29 @@
 import React from 'react';
 import { type FormInputInterface } from './form.d';
 
-export const FormInput = <T extends string | number = string>({
+/**
+ * FormInput
+ *
+ * Generic input wrapper that normalizes change handling for string and number values.
+ *
+ * @template T - input value type, either string or number (default: string).
+ * @param {object} props - Component props.
+ * @param {T} props.value - Current input value.
+ * @param {(v: T) => void} props.setValue - Setter for the value; called with parsed value on change.
+ * @param {string} [props.labelText] - Optional label text displayed above the input.
+ * @param {React.HTMLAttributes<HTMLDivElement>} [props.containerProps] - Props spread onto the outer container element.
+ * @param {React.LabelHTMLAttributes<HTMLLabelElement>} [props.labelProps] - Props spread onto the label element.
+ * @param {React.InputHTMLAttributes<HTMLInputElement>} [props.inputProps] - Props spread onto the input element.
+ *
+*/
+export function FormInput<T extends string | number = string>({
   value,
   setValue,
   labelText,
   containerProps,
   labelProps,
   inputProps,
-}: FormInputInterface<T>) => {
+}: FormInputInterface<T>) {
   const inputId = inputProps?.id ?? labelProps?.htmlFor ?? undefined;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,4 +67,4 @@ export const FormInput = <T extends string | number = string>({
       />
     </div>
   );
-};
+}

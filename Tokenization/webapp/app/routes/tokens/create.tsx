@@ -45,7 +45,7 @@ const httpMethodOptions = [
 ];
 
 /**
- *
+ * Component is used for /tokens/create route to create new tokens.
  */
 export default function CreateToken({ loaderData }: { loaderData?: OptionType[] }) {
   const [expirationTime, setExpirationTime] = useState<string>('');

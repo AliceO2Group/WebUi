@@ -15,6 +15,23 @@
 import { type WindowInterface } from './window.d';
 import { useFullWindowLogic } from '../hooks/useWindowLogic';
 
+/**
+ * Alert
+ *
+ * Small transient alert window.
+ *
+ * @param {object} props - component props (see WindowInterface in window.d.ts)
+ * @param {React.ReactNode} props.children - alert content (typically WindowTitle + WindowContent + optional WindowCloseIcon)
+ * @param {boolean} props.open - whether the modal is visible (provided via DPB)
+ * @param {React.Dispatch<React.SetStateAction<boolean>>} props.setOpen - dispatcher to control visibility (provided via DPB)
+ * @param {() => void} [props.onClose] - optional callback invoked when alert closes
+ * @param {number|null} [props.timeout] - optional auto-close timeout in milliseconds (useful for transient alerts)
+ * @param {string} [props.className] - additional CSS classes applied to the modal container
+ * (expected to be used to control bg-color, but can be more versatile)
+ * Behaviour:
+ * - Delegates lifecycle (timeout, close action) and child wiring to useFullWindowLogic(props).
+ * - Renders title, content and closeIcon produced by the hook.
+ */
 const Alert = (props: WindowInterface) => {
 
   const { className } = props;

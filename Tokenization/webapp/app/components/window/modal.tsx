@@ -15,6 +15,27 @@
 import { type WindowInterface } from './window.d';
 import { useFullWindowLogic } from '../hooks/useWindowLogic';
 
+/**
+ * Modal
+ *
+ * Application modal window component.
+ *
+ * @param {object} props - component props (see WindowInterface in window.d.ts)
+ * @param {React.ReactNode} props.children - modal content (title/content/buttons expected as Window*
+ * from ./window-objects.tsx children)
+ * @param {boolean} props.open - whether the modal is visible (provided via DPB)
+ * @param {React.Dispatch<React.SetStateAction<boolean>>} props.setOpen - dispatcher to control visibility (provided via DPB)
+ * @param {() => void} [props.onOpen] - optional callback invoked when modal opens
+ * @param {() => void} [props.onClose] - optional callback invoked when modal closes
+ * @param {number|null} [props.timeout] - optional auto-close timeout in milliseconds
+ * @param {string} [props.className] - additional CSS classes applied to the modal container
+ * (expected to be used to control bg-color, but can be more versatile)
+ *
+ * Behaviour:
+ * - Uses useFullWindowLogic(props) to wire lifecycle (open/close/timeout) and to extract/wire Window child elements:
+ *   title, content, closeIcon, buttonCancel, buttonAccept.
+ * - Renders those wired elements inside a modal overlay.
+ */
 const Modal = (props: WindowInterface) => {
   const { className } = props;
   const { visibility, ui_elements: { title, content, closeIcon, buttonCancel, buttonAccept } } = useFullWindowLogic(props);

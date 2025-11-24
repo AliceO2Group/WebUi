@@ -25,46 +25,80 @@ interface PrimaryBoxInterface extends BoxInterface {
   className_div1: string;
   className_div2: string;
 }
-
-export const Box = ({ children, link, className_div1, className_div2 }: PrimaryBoxInterface) => (
-  <div className={`bg-gray m3 ${className_div1}`}>
-    {link && <div className={`flex-row justify-center ${className_div2}`}>
-      <div className="w-90 flex-row justify-end">
-        <Link to={link}>
-          <IconContainer className="scale15 actionable-icon">
-            <IconExpandRight />
-          </IconContainer>
-        </Link>
+/**
+ * Box component - container which renders a content inside.
+ *
+ * TODO: On PC it will stand in grid layout on mobile will lay basing on display flex with wrap
+ * For now it uses grid only.
+ *
+ * @param {object} props - Component props.
+ * @param {React.ReactNode} props.children - Content rendered inside the box.
+ * @param {string|null} props.link - Passing this prop to the component enables rendering of the top bar
+ * with an icon that navigates the user to the corresponding details page.
+ * @param {string} props.className_div1 - Additional classes applied to the outer container.
+ * @param {string} props.className_div2 - Additional classes applied to the top link row container.
+ */
+export function Box({ children, link, className_div1, className_div2 }: PrimaryBoxInterface) {
+  return (
+    <div className={`bg-gray m3 ${className_div1}`}>
+      {link && <div className={`flex-row justify-center ${className_div2}`}>
+        <div className="w-90 flex-row justify-end">
+          <Link to={link}>
+            <IconContainer className="scale15 actionable-icon">
+              <IconExpandRight />
+            </IconContainer>
+          </Link>
+        </div>
       </div>
-    </div>
-    }
-    {children}
-  </div>
-);
-
-export const Box1_2 = ({ children, link }: BoxInterface) => (
-  <Box
-    link={link}
-    className_div1="min-height-box-1"
-    className_div2="mv3"
-  >
-    <div className="flex-row justify-center">
-      <div className="w-95">
-        {children}
-      </div>
-    </div>
-  </Box>
-);
-
-export const Box1_1 = ({ children, link }: BoxInterface) => (
-  <Box
-    link={link}
-    className_div1="min-height-box-1"
-    className_div2="mv4"
-  >
-    <div className='p4'>
-      <div className='mv2'></div>
+      }
       {children}
     </div>
-  </Box>
-);
+  );
+}
+
+/**
+ * Box 1_2 component - renders box with padding suited for grid with 1 row and 2 columns.
+ *
+ * @param {object} props - Component props.
+ * @param {React.ReactNode} props.children - Content rendered inside the box.
+ * @param {string|null} props.link - Passing this prop to the component enables rendering of the top bar
+ * with an icon that navigates the user to the corresponding details page.
+ */
+export function Box1_2 ({ children, link }: BoxInterface) {
+  return (
+    <Box
+      link={link}
+      className_div1="min-height-box-1"
+      className_div2="mv3"
+    >
+      <div className="flex-row justify-center">
+        <div className="w-95">
+          {children}
+        </div>
+      </div>
+    </Box>
+  );
+}
+
+/**
+ * Box 1_2 component - renders box with padding suited for grid with 1 row and 1 column.
+ *
+ * @param {object} props - Component props.
+ * @param {React.ReactNode} props.children - Content rendered inside the box.
+ * @param {string|null} props.link - Passing this prop to the component enables rendering of the top bar
+ * with an icon that navigates the user to the corresponding details page.
+ */
+export function Box1_1 ({ children, link }: BoxInterface) {
+  return (
+    <Box
+      link={link}
+      className_div1="min-height-box-1"
+      className_div2="mv4"
+    >
+      <div className='p4'>
+        <div className='mv2'></div>
+        {children}
+      </div>
+    </Box>
+  );
+}

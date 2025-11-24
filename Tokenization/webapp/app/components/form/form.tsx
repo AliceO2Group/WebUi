@@ -16,6 +16,16 @@ import React from 'react';
 
 interface FormInterface extends React.HTMLAttributes<HTMLFormElement> {}
 
+/**
+ * Form
+ *
+ * Lightweight wrapper around a native <form> element.
+ *
+ * @param {object} props - component props
+ * @param {React.ReactNode} props.children - contents rendered inside the form
+ * @param {string} [props.className] - CSS classes applied to the outer wrapper <div>
+ * @param {string} [props.id] - id applied to the outer wrapper <div>
+ */
 export const Form = ({ children, className, id }: FormInterface) => {
   const _className = className ?? '';
 
