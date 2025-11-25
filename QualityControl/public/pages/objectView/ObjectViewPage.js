@@ -42,7 +42,14 @@ const objectPlotAndInfo = (objectViewModel) =>
     Failure: (error) => errorDiv(error),
     Success: (qcObject) => {
       const {
-        id, validFrom, ignoreDefaults = false, drawOptions = [], displayHints = [], layoutDisplayOptions = [], versions,
+        id,
+        name,
+        validFrom,
+        ignoreDefaults = false,
+        drawOptions = [],
+        displayHints = [],
+        layoutDisplayOptions = [],
+        versions,
       } = qcObject;
       const drawingOptions = ignoreDefaults ?
         layoutDisplayOptions
@@ -76,7 +83,7 @@ const objectPlotAndInfo = (objectViewModel) =>
           h('.flex-grow', {
             // Key change forces redraw when toggling info panel
             key: isObjectInfoVisible ? 'objectPlotWithoutInfoPanel' : 'objectPlotWithInfoPanel',
-          }, draw(qcObject, {}, drawingOptions)),
+          }, draw(objectViewModel.model.object, name, {}, drawingOptions)),
           isObjectInfoVisible && h('.scroll-y.w-30', {
             key: 'objectInfoPanel',
           }, [

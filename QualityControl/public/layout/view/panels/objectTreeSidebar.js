@@ -193,15 +193,7 @@ const leafRow = (model, sideTree, level) => {
 const objectPreview = (model) => {
   const isSelected = model.object.selected;
   if (isSelected) {
-    const objName = model.object.selected.name;
-    const remoteObject = model.object.objects[objName];
-    return isSelected && h('.bg-white', { style: 'height: 20em' }, remoteObject?.match({
-      NotAsked: () => null,
-      Loading: () =>
-        h('.absolute-fill.flex-column.items-center.justify-center.f5', [spinner(5), h('', 'Loading Objects')]),
-      Success: (data) => draw(data),
-      Failure: () => null, // Notification is displayed
-    }));
+    return isSelected && h('.bg-white', { style: 'height: 20em' }, draw(model.object, model.object.selected.name));
   }
   return null;
 };

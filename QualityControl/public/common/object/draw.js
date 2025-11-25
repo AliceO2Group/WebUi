@@ -14,80 +14,84 @@
 
 /* global JSROOT */
 
-import { h } from '/js/src/index.js';
+import { h, iconWarning } from '/js/src/index.js';
 import { generateDrawingOptionString, isObjectOfTypeChecker } from './../../../library/qcObject/utils.js';
 import checkersPanel from './checkersPanel.js';
 import { keyedTimerDebouncer, pointerId } from '../utils.js';
 
 /**
  * Draws a QC Object depending on its type:
- * * uses JSROOT for standard ROOT objects
- * * builds a checkers panel for QC unique checkers
- * @param {JSON} object - {qcObject, info, timestamps}
- * @param {object} [options] - optional options of presentation
- * @param {string[]} [drawingOptions] - optional drawing options to be used
+ * - uses JSROOT for standard ROOT objects in which JSROOT is then used to insert an SVG with the respective plot
+ * - builds a checkers panel for QC unique checkers
+ * @param {QCObject} qcObjectModel - the QCObject model
+ * @param {string} objectName - the name of the QC object to draw
+ * @param {object} options - optional options of presentation
+ * @param {string[]} drawingOptions - optional drawing options to be used
  * @returns {vnode} output virtual-dom, a single div with JSROOT attached to it
  */
-export const draw = (object, options = {}, drawingOptions = []) => isObjectOfTypeChecker(object.qcObject.root)
-  ? checkersPanel(object.qcObject.root)
-  : rootPlotPanel(object, options, drawingOptions);
+export const draw = (qcObjectModel, objectName, options = {}, drawingOptions = []) =>
+  qcObjectModel.objects[objectName]?.match({
+    NotAsked: () => null,
+    Loading: () => h('.flex-column.items-center.justify-center', [h('.animate-slow-appearance', 'Loading')]),
+    Failure: (error) => h('.error-box.danger.flex-column.justify-center.f6.text-center', {}, [
+      h('span.error-icon', { title: 'Error' }, iconWarning()),
+      h('span', error),
+    ]),
+    Success: (data) => {
+      const { qcObject, etag } = data;
+      const { root } = qcObject;
+      if (isObjectOfTypeChecker(root)) {
+        return checkersPanel(root);
+      }
 
-/**
- * Builds a div element in which JSROOT is then used to insert an SVG with the respective plot
- * @param {JSON} object - {qcObject, info, timestamps}
- * @param {object} [options] - optional options of presentation
- * @param {string[]} [drawingOptions] - optional drawing options to be used
- * @returns {vnode} output virtual-dom, a single div with JSROOT attached to it
- */
-const rootPlotPanel = (object, options, drawingOptions) => {
-  drawingOptions = Array.from(new Set(drawingOptions));
-  const { qcObject, etag } = object;
-  const { root } = qcObject;
-  const defaultOptions = {
-    width: '100%', // CSS size
-    height: '100%', // CSS size
-    className: '', // Any CSS class
-  };
-  options = { ...defaultOptions, ...options };
+      drawingOptions = Array.from(new Set(drawingOptions));
+      const defaultOptions = {
+        width: '100%', // CSS size
+        height: '100%', // CSS size
+        className: '', // Any CSS class
+      };
+      options = { ...defaultOptions, ...options };
 
-  const attributes = {
-    key: etag, // Completely re-create this div if the chart is not the same at all
-    id: etag,
-    class: options.className,
-    style: {
-      height: options.height,
-      width: options.width,
-    },
-    oncreate: (vnode) => {
-      // Setup resize function
-      vnode.dom.onresize = () => {
-        redrawOnSizeUpdate(vnode.dom, root, drawingOptions);
+      const attributes = {
+        key: etag, // Completely re-create this div if the chart is not the same at all
+        id: etag,
+        class: options.className,
+        style: {
+          height: options.height,
+          width: options.width,
+        },
+        oncreate: (vnode) => {
+          // Setup resize function
+          vnode.dom.onresize = () => {
+            redrawOnSizeUpdate(vnode.dom, root, drawingOptions);
+          };
+
+          // Resize on window size change
+          window.addEventListener('resize', vnode.dom.onresize);
+
+          drawOnCreate(vnode.dom, root, drawingOptions, qcObjectModel, objectName);
+        },
+        onupdate: (vnode) => {
+          const isRedrawn = redrawOnDataUpdate(vnode.dom, root, drawingOptions);
+          if (!isRedrawn) {
+            redrawOnSizeUpdate(vnode.dom, root, drawingOptions);
+          }
+        },
+        onremove: (vnode) => {
+          // Remove JSROOT binding to avoid memory leak
+          if (JSROOT.cleanup) {
+            JSROOT.cleanup(vnode.dom);
+          }
+
+          // Stop listening for window size change
+          window.removeEventListener('resize', vnode.dom.onresize);
+        },
       };
 
-      // Resize on window size change
-      window.addEventListener('resize', vnode.dom.onresize);
-
-      drawOnCreate(vnode.dom, root, drawingOptions);
+      // On success, JSROOT will erase all DOM inside div and put its own
+      return h('.relative.jsroot-container', attributes);
     },
-    onupdate: (vnode) => {
-      const isRedrawn = redrawOnDataUpdate(vnode.dom, root, drawingOptions);
-      if (!isRedrawn) {
-        redrawOnSizeUpdate(vnode.dom, root, drawingOptions);
-      }
-    },
-    onremove: (vnode) => {
-      // Remove JSROOT binding to avoid memory leak
-      if (JSROOT.cleanup) {
-        JSROOT.cleanup(vnode.dom);
-      }
-
-      // Stop listening for window size change
-      window.removeEventListener('resize', vnode.dom.onresize);
-    },
-  };
-
-  return h('.relative.jsroot-container', attributes);
-};
+  });
 
 /**
  * Inserts SVG into div element by using JSROOT.draw method
@@ -95,9 +99,13 @@ const rootPlotPanel = (object, options, drawingOptions) => {
  * @param {HTMLElement} dom - the div containing jsroot plot
  * @param {object} root - root object in JSON representation
  * @param {string[]} drawingOptions - list of options to be used for drawing object
+ * @param {QCObject} qcObjectModel - the QCObject model
+ * @param {string} objectName - the name of the QC object to draw
+ * @throws {EvalError} If CSP disallows 'unsafe-eval'.
+ * This is typically called when the drawing is incomplete or malformed.
  * @returns {undefined}
  */
-const drawOnCreate = (dom, root, drawingOptions) => {
+const drawOnCreate = async (dom, root, drawingOptions, qcObjectModel, objectName) => {
   const finalDrawingOptions = generateDrawingOptionString(root, drawingOptions);
   JSROOT.draw(dom, root, finalDrawingOptions).then((painter) => {
     if (painter === null) {
@@ -107,6 +115,7 @@ const drawOnCreate = (dom, root, drawingOptions) => {
   }).catch((error) => {
     // eslint-disable-next-line no-console
     console.error(error);
+    qcObjectModel.invalidObject(objectName);
   });
   dom.dataset.fingerprintRedraw = fingerprintResize(dom.clientWidth, dom.clientHeight);
   dom.dataset.fingerprintData = fingerprintData(root, drawingOptions);
