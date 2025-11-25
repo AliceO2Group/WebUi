@@ -15,6 +15,15 @@
 import { type WindowInterface } from './window.d';
 import { useFullWindowLogic } from '../hooks/useWindowLogic';
 
+// Used to represent an alert message
+// key might be used to force re-mounting the component for repeated alerts
+export interface AlertType {
+    key: number;
+    title: string;
+    message: string;
+    success: boolean;
+  }
+
 /**
  * Alert
  *
@@ -22,23 +31,30 @@ import { useFullWindowLogic } from '../hooks/useWindowLogic';
  *
  * @param {object} props - component props (see WindowInterface in window.d.ts)
  * @param {React.ReactNode} props.children - alert content (typically WindowTitle + WindowContent + optional WindowCloseIcon)
- * @param {boolean} props.open - whether the modal is visible (provided via DPB)
- * @param {React.Dispatch<React.SetStateAction<boolean>>} props.setOpen - dispatcher to control visibility (provided via DPB)
+ * @param {boolean} props.open - whether the modal is mounted (provided via DPB)
+ * @param {React.Dispatch<React.SetStateAction<boolean>>} props.setOpen - dispatcher to control mounting (provided via DPB)
  * @param {() => void} [props.onClose] - optional callback invoked when alert closes
  * @param {number|null} [props.timeout] - optional auto-close timeout in milliseconds (useful for transient alerts)
  * @param {string} [props.className] - additional CSS classes applied to the modal container
  * (expected to be used to control bg-color, but can be more versatile)
  * Behaviour:
  * - Delegates lifecycle (timeout, close action) and child wiring to useFullWindowLogic(props).
+ * - In contrast to Modal, doesn't use visibility control through CSS, but simply doesn't render if !open.
+ * - Thanks to that, timeout-based auto-close works more expectably.
  * - Renders title, content and closeIcon produced by the hook.
  */
 const Alert = (props: WindowInterface) => {
 
   const { className } = props;
-  const { visibility, ui_elements: { title, content, closeIcon } } = useFullWindowLogic(props);
+  const { ui_elements: { title, content, closeIcon } } = useFullWindowLogic(props);
+  
+  const {open} = props;
+  if (!open) {
+    return null;
+  }
 
   return (
-    <div className={`alert level1 br2 ${visibility} ${className}`}>
+    <div className={`alert level1 br2 ${className}`}>
       <div className="flex-row justify-between pv2 ph3">
         {title ?? ''}
         {closeIcon ?? ''}

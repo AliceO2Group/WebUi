@@ -22,7 +22,7 @@ import { FormSelect, FormSelectMulti } from '~/components/form/form-select';
 import { SelectGroup } from '~/components/form/select-group';
 import { ResetButton, SubmitButton } from '~/components/form/form-buttons';
 import { useAuth } from '~/hooks/session';
-import Alert from '~/components/window/alert';
+import Alert, {type AlertType} from '~/components/window/alert';
 import { WindowButtonAccept, WindowButtonCancel, WindowCloseIcon, WindowContent, WindowTitle } from '~/components/window/window-objects';
 import Modal from '~/components/window/modal';
 
@@ -69,9 +69,7 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
   const [openAlert, setOpenAlert] = useState<boolean>(false);
   const [openModal, setOpenModal] = useState<boolean>(false);
 
-  const [title, setTitle] = useState<string>('Token created');
-  const [msg, setMsg] = useState<string>('Token has been created successfully.');
-  const [success, setSuccess] = useState<boolean>(false);
+  const [alert, setAlert] = useState<AlertType | null>(null);
 
   const onSubmit = () => {
     if (expirationTime && firstSelectedService && secondSelectedService && selectedMethods.length > 0) {
@@ -91,9 +89,12 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
         message += 'HTTP methods, ';
       }
       message = message.slice(0, -2);
-      setTitle('Form incomplete');
-      setMsg(message);
-      setSuccess(false);
+      setAlert({
+        key: Date.now(),
+        title: 'Form incomplete',
+        message,
+        success: false,
+      })
       setOpenAlert(true);
     }
   };
@@ -109,13 +110,19 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
     if (auth) {
       // eslint-disable-next-line no-console
       console.log('Creating token');
-      setTitle('Token created');
-      setMsg('Token has been created successfully.');
-      setSuccess(true);
+      setAlert({
+        key: Date.now(),
+        title: 'Token created',
+        message: 'Token has been created successfully.',
+        success: true,
+      });
     } else {
-      setTitle('Authorization error');
-      setMsg('You do not have permission to perform this operation.');
-      setSuccess(false);
+      setAlert({
+        key: Date.now(),
+        title: 'Authorization error',
+        message: 'You do not have permission to perform this operation.',
+        success: false,
+      });
     }
     setOpenAlert(true);
   };
@@ -174,13 +181,14 @@ export default function CreateToken({ loaderData }: { loaderData?: OptionType[] 
       </div>
     </Box1_1>
     <Alert
+      key={alert?.key}
       open={openAlert}
       setOpen={setOpenAlert}
       timeout={6000}
-      className={success ? 'bg-success' : 'bg-danger'}
+      className={alert?.success ? 'bg-success' : 'bg-danger'}
     >
-      <WindowTitle>{title}</WindowTitle>
-      <WindowContent>{msg}</WindowContent>
+      <WindowTitle>{alert?.title}</WindowTitle>
+      <WindowContent>{alert?.message}</WindowContent>
       <WindowCloseIcon />
     </Alert>
     <Modal

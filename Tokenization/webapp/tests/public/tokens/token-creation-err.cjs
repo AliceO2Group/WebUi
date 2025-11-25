@@ -48,13 +48,12 @@ describe('token creation unsuccessful', function() {
   });
 
   it('Not filling form shows error alert', async function() {
-    await page.waitForSelector('.alert');
-    const alertClass1 = await page.$eval('.alert', el => el.className);
-    assert.ok(alertClass1.includes('d-none')); // alert is hidden initially
+    const n_alert = await page.$('.alert');
+    assert.ok(!n_alert); // alert is not present before submit
 
     await this.button.click();
-    const alertClass2 = await page.$eval('.alert', el => el.className);
-    assert.ok(alertClass2.includes('d-block')); // alert is shown after submit
+    const alert = await page.waitForSelector('.alert');
+    assert.ok(alert); // alert is shown after submit
   });
 
   describe('filling partially the form', function() {
@@ -65,7 +64,8 @@ describe('token creation unsuccessful', function() {
       await opt2.click();
 
       await this.button.click();
-      const alertContent = await page.$eval('.alert', el => el.textContent);
+      const alert = await page.waitForSelector('.alert')
+      const alertContent = await alert.evaluate(el => el.textContent);
       assert.ok(alertContent.includes('Expiration time', 'HTTP methods'));
     });
 
@@ -75,7 +75,8 @@ describe('token creation unsuccessful', function() {
       await fillNumberInput(this.expirationInput, 10);
 
       await this.button.click();
-      const alertContent = await page.$eval('.alert', el => el.textContent);
+      const alert = await page.waitForSelector('.alert');
+      const alertContent = await alert.evaluate(el => el.textContent);
       assert.ok(alertContent.includes('First service', 'HTTP methods'));
     });
 
@@ -84,7 +85,8 @@ describe('token creation unsuccessful', function() {
       await opt3.click();
 
       await this.button.click();
-      const alertContent = await page.$eval('.alert', el => el.textContent);
+      const alert = await page.waitForSelector('.alert');
+      const alertContent = await alert.evaluate(el => el.textContent);
       assert.ok(
         alertContent.includes('First service', 'Second service', 'Expiration time'),
       );
@@ -109,7 +111,8 @@ describe('token creation unsuccessful', function() {
     const confirmButton = await dialogHandle.$('button:nth-child(2)');
     await confirmButton.click();
 
-    const alertContent = await page.$eval('.alert', el => el.textContent);
+    const alert = await page.waitForSelector('.alert');
+    const alertContent = await alert.evaluate(el => el.textContent);
     assert.ok(alertContent.includes('Authorization error'));
   });
 });

@@ -38,8 +38,9 @@ describe('token creation successful', function() {
 
     // TODO: mock/fake the API and verify the request payload here
     await btn.click();
-    const className = await page.$eval('.alert', el => el.className);
-    assert.ok(className.includes('d-block') && className.includes('bg-success'), 'success alert should be shown after creating token');
+    const alert = await page.waitForSelector('.alert');
+    const className = await alert.evaluate(el => el.className);
+    assert.ok(className.includes('bg-success'), 'success alert should be shown after creating token');
   });
 
   it('happy path: token deletion successful', async function() {
@@ -72,8 +73,9 @@ describe('token creation successful', function() {
     await confirmBtn.click();
 
     // TODO: mock/fake the API and verify the deletion request here
-    const alertClass = await page.$eval('.alert', el => el.className);
-    assert.ok(alertClass.includes('d-block') && alertClass.includes('bg-success'), 'success alert should be shown after deleting token');
+    const alert = await page.waitForSelector('.alert');
+    const alertClass = await alert.evaluate(el => el.className);
+    assert.ok(alertClass.includes('bg-success'), 'success alert should be shown after deleting token');
 
   });
 });

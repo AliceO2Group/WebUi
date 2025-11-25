@@ -95,6 +95,7 @@ export function TokenTable({ tokens }: { tokens: Token[] }) {
   const [openA, setOpenA] = useState<boolean>(false); // Used for alert logic
   const [tokenId, setTokenId] = useState<string>('');
   const auth = useAuth('admin');
+  const [key, setKey] = useState<number>(0); // used to force re-mount of Alert component
 
   const successInfo = {
     title: 'Token deleted',
@@ -112,6 +113,7 @@ export function TokenTable({ tokens }: { tokens: Token[] }) {
       // eslint-disable-next-line no-console
       console.log(`Deleting token no. ${tokenId}`);
     }
+    setKey((prevKey) => prevKey + 1);
     setOpenA(true);
     setTokenId('');
   };
@@ -142,10 +144,11 @@ export function TokenTable({ tokens }: { tokens: Token[] }) {
       <WindowButtonAccept action={deleteToken} className="btn-danger"/>
     </Modal>
     <Alert
+      key={key}
       open={openA}
       setOpen={setOpenA}
       className={auth ? 'bg-success white' : 'bg-danger white'}
-      timeout={5000}
+      timeout={6000}
     >
       <WindowTitle>{auth ? successInfo.title : failureInfo.title}</WindowTitle>
       <WindowContent>{auth ? successInfo.content : failureInfo.content}</WindowContent>
