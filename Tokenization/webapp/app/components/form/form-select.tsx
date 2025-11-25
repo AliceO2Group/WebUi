@@ -11,6 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+import type { OptionType } from '~/utils/types';
 import { type SelectInterface } from './form.d';
 import { FormSelectBase, SelectFrame, SelectFrameMulti } from './select-helper';
 
@@ -69,7 +70,8 @@ export function FormSelect<T extends string | number = string>(props: SelectInte
  */
 export function FormSelectMulti<T extends string | number = string>(props: SelectInterface<T[]>) {
   const { value, setValue, options } = { ...props };
-  const selected = options.filter((o) => value.includes(o.value as unknown as T)) || [];
+  // now elements in `selected` follow the order of adding
+  const selected = (value as T[]).map(v => options.find(o => o.value === v)).filter(Boolean) || [];
 
   const handleSelect = (val: T) => {
     setValue((prev) => [...prev, val]);
@@ -82,7 +84,7 @@ export function FormSelectMulti<T extends string | number = string>(props: Selec
   return (
     <FormSelectBase
       {...props}
-      selected={selected}
+      selected={selected as OptionType[]}
       handleSelect={handleSelect}
       handleDeselect={handleDeselect}
       takeSelectedToOption={false}
