@@ -20,9 +20,12 @@ import checkersPanel from './checkersPanel.js';
 import { keyedTimerDebouncer, pointerId } from '../utils.js';
 
 /**
- * Draws a QC Object depending on its type:
- * - uses JSROOT for standard ROOT objects in which JSROOT is then used to insert an SVG with the respective plot
- * - builds a checkers panel for QC unique checkers
+ * Renders a QCObject as a virtual DOM node using JSROOT.
+ * Depending on the state of the requested object, this function handles:
+ * - `NotAsked`: returns `null`.
+ * - `Loading`: returns a loading placeholder.
+ * - `Failure`: returns an error box with the error message.
+ * - `Success`: draws the object using `drawObject`.
  * @param {QCObject} qcObjectModel - the QCObject model
  * @param {string} objectName - the name of the QC object to draw
  * @param {object} options - optional options of presentation
@@ -37,61 +40,73 @@ export const draw = (qcObjectModel, objectName, options = {}, drawingOptions = [
       h('span.error-icon', { title: 'Error' }, iconWarning()),
       h('span', error),
     ]),
-    Success: (data) => {
-      const { qcObject, etag } = data;
-      const { root } = qcObject;
-      if (isObjectOfTypeChecker(root)) {
-        return checkersPanel(root);
+    Success: (data) => drawObject(data, options, drawingOptions, qcObjectModel),
+  });
+
+/**
+ * Draws a QC Object depending on its type:
+ * - uses JSROOT for standard ROOT objects in which JSROOT is then used to insert an SVG with the respective plot
+ * - builds a checkers panel for QC unique checkers
+ * @param {JSON} object - {qcObject, info, timestamps}
+ * @param {object} options - optional options of presentation
+ * @param {string[]} drawingOptions - optional drawing options to be used
+ * @param {QCObject} qcObjectModel - the QCObject model, used to invalidate (failure) RemoteData
+ * @returns {vnode} output virtual-dom, a single div with JSROOT attached to it
+ */
+export const drawObject = (object, options = {}, drawingOptions = [], qcObjectModel = undefined) => {
+  const { qcObject, name, etag } = object;
+  const { root } = qcObject;
+  if (isObjectOfTypeChecker(root)) {
+    return checkersPanel(root);
+  }
+
+  drawingOptions = Array.from(new Set(drawingOptions));
+  const defaultOptions = {
+    width: '100%', // CSS size
+    height: '100%', // CSS size
+    className: '', // Any CSS class
+  };
+  options = { ...defaultOptions, ...options };
+
+  const attributes = {
+    key: etag, // Completely re-create this div if the chart is not the same at all
+    id: etag,
+    class: options.className,
+    style: {
+      height: options.height,
+      width: options.width,
+    },
+    oncreate: (vnode) => {
+      // Setup resize function
+      vnode.dom.onresize = () => {
+        redrawOnSizeUpdate(vnode.dom, root, drawingOptions);
+      };
+
+      // Resize on window size change
+      window.addEventListener('resize', vnode.dom.onresize);
+
+      drawOnCreate(vnode.dom, root, drawingOptions, qcObjectModel, name);
+    },
+    onupdate: (vnode) => {
+      const isRedrawn = redrawOnDataUpdate(vnode.dom, root, drawingOptions);
+      if (!isRedrawn) {
+        redrawOnSizeUpdate(vnode.dom, root, drawingOptions);
+      }
+    },
+    onremove: (vnode) => {
+      // Remove JSROOT binding to avoid memory leak
+      if (JSROOT.cleanup) {
+        JSROOT.cleanup(vnode.dom);
       }
 
-      drawingOptions = Array.from(new Set(drawingOptions));
-      const defaultOptions = {
-        width: '100%', // CSS size
-        height: '100%', // CSS size
-        className: '', // Any CSS class
-      };
-      options = { ...defaultOptions, ...options };
-
-      const attributes = {
-        key: etag, // Completely re-create this div if the chart is not the same at all
-        id: etag,
-        class: options.className,
-        style: {
-          height: options.height,
-          width: options.width,
-        },
-        oncreate: (vnode) => {
-          // Setup resize function
-          vnode.dom.onresize = () => {
-            redrawOnSizeUpdate(vnode.dom, root, drawingOptions);
-          };
-
-          // Resize on window size change
-          window.addEventListener('resize', vnode.dom.onresize);
-
-          drawOnCreate(vnode.dom, root, drawingOptions, qcObjectModel, objectName);
-        },
-        onupdate: (vnode) => {
-          const isRedrawn = redrawOnDataUpdate(vnode.dom, root, drawingOptions);
-          if (!isRedrawn) {
-            redrawOnSizeUpdate(vnode.dom, root, drawingOptions);
-          }
-        },
-        onremove: (vnode) => {
-          // Remove JSROOT binding to avoid memory leak
-          if (JSROOT.cleanup) {
-            JSROOT.cleanup(vnode.dom);
-          }
-
-          // Stop listening for window size change
-          window.removeEventListener('resize', vnode.dom.onresize);
-        },
-      };
-
-      // On success, JSROOT will erase all DOM inside div and put its own
-      return h('.relative.jsroot-container', attributes);
+      // Stop listening for window size change
+      window.removeEventListener('resize', vnode.dom.onresize);
     },
-  });
+  };
+
+  // On success, JSROOT will erase all DOM inside div and put its own
+  return h('.relative.jsroot-container', attributes);
+};
 
 /**
  * Inserts SVG into div element by using JSROOT.draw method
