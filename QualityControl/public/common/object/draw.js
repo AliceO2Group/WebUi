@@ -41,7 +41,7 @@ export const draw = (object, options = {}, drawingOptions = []) => isObjectOfTyp
  */
 const rootPlotPanel = (object, options, drawingOptions) => {
   drawingOptions = Array.from(new Set(drawingOptions));
-  const { qcObject, name, etag } = object;
+  const { qcObject, etag } = object;
   const { root } = qcObject;
   const defaultOptions = {
     width: '100%', // CSS size
@@ -51,7 +51,7 @@ const rootPlotPanel = (object, options, drawingOptions) => {
   options = { ...defaultOptions, ...options };
 
   const attributes = {
-    key: name, // Completely re-create this div if the chart is not the same at all
+    key: etag, // Completely re-create this div if the chart is not the same at all
     id: etag,
     class: options.className,
     style: {
