@@ -13,10 +13,11 @@
  */
 
 import { h } from '/js/src/index.js';
-import { draw } from '../../object/objectDraw.js';
+import { draw } from '../../common/object/draw.js';
 import { iconArrowLeft, iconArrowTop } from '/js/src/icons.js';
 import { minimalObjectInfo } from './panels/minimalObjectInfo.js';
 import { objectInfoResizePanel } from './panels/objectInfoResizePanel.js';
+import { spinner } from '../../common/spinner.js';
 
 /**
  * Exposes the page that shows one layout and its tabs (one at a time), this page can be in edit mode
@@ -197,6 +198,7 @@ const drawComponent = (model, tabObject) => {
   const { name } = tabObject;
   const lastModified = model.object.getLastModifiedByName(name);
   const runNumber = model.object.getRunNumberByName(name);
+  const remoteObject = model.object.objects[tabObject.name];
 
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
     h('.jsrootdiv', {
@@ -207,7 +209,13 @@ const drawComponent = (model, tabObject) => {
         display: 'flex',
         'flex-direction': 'column',
       },
-    }, draw(model, tabObject, {})),
+    }, remoteObject?.match({
+      NotAsked: () => null,
+      Loading: () =>
+        h('.absolute-fill.flex-column.items-center.justify-center.f5', [spinner(5), h('', 'Loading Objects')]),
+      Success: (data) => draw(data),
+      Failure: () => null, // Notification is displayed
+    })),
     objectInfoResizePanel(model, tabObject),
     displayTimestamp && minimalObjectInfo(runNumber, lastModified),
   ]);
