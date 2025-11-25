@@ -130,7 +130,7 @@ const drawOnCreate = async (dom, root, drawingOptions, qcObjectModel, objectName
   }).catch((error) => {
     // eslint-disable-next-line no-console
     console.error(error);
-    qcObjectModel.invalidObject(objectName);
+    qcObjectModel?.invalidObject(objectName);
   });
   dom.dataset.fingerprintRedraw = fingerprintResize(dom.clientWidth, dom.clientHeight);
   dom.dataset.fingerprintData = fingerprintData(root, drawingOptions);
