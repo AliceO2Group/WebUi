@@ -178,7 +178,7 @@ const redrawOnSizeUpdate = keyedTimerDebouncer(
  * @param {HTMLElement} dom - Target element containing the JSROOT graph.
  * @param {object} root - JSROOT-compatible data object to be rendered.
  * @param {string[]} drawingOptions - Initial or user-provided drawing options.
- * @returns {Boolean} whether the JSROOT plot was redrawn
+ * @returns {boolean} whether the JSROOT plot was redrawn
  */
 const redrawOnDataUpdate = (dom, root, drawingOptions) => {
   const dataFingerprint = fingerprintData(root, drawingOptions);
