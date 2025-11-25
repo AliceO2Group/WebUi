@@ -34,6 +34,7 @@ import { generateDrawingOptionList } from '../../library/qcObject/utils.js';
  * @param {TabObject|string} tabObject - the tabObject to draw, can be the name of object
  * @param {object} options - optional options of presentation
  * @returns {vdom} output virtual-dom, a single div with JSROOT attached to it
+ * @deprecated Use the `draw` method from `common/object/draw.js` instead!
  */
 export function draw(model, tabObject, options) {
   const defaultOptions = {
