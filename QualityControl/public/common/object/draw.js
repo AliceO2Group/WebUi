@@ -15,7 +15,7 @@
 /* global JSROOT */
 
 import { h } from '/js/src/index.js';
-import { generateDrawingOptionList, isObjectOfTypeChecker } from './../../../library/qcObject/utils.js';
+import { generateDrawingOptionString, isObjectOfTypeChecker } from './../../../library/qcObject/utils.js';
 import checkersPanel from './checkersPanel.js';
 import { keyedTimerDebouncer, pointerId } from '../utils.js';
 
@@ -98,7 +98,7 @@ const rootPlotPanel = (object, options, drawingOptions) => {
  * @returns {undefined}
  */
 const drawOnCreate = (dom, root, drawingOptions) => {
-  const finalDrawingOptions = getDrawingOptions(root, drawingOptions);
+  const finalDrawingOptions = generateDrawingOptionString(root, drawingOptions);
   JSROOT.draw(dom, root, finalDrawingOptions).then((painter) => {
     if (painter === null) {
       // eslint-disable-next-line no-console
@@ -200,7 +200,7 @@ const redraw = (dom, root, drawingOptions) => {
   // A bug exists in JSROOT where the cursor gets stuck on `wait` when redrawing multiple objects simultaneously.
   // We save the current cursor state here and revert back to it after redrawing is complete.
   const currentCursor = document.body.style.cursor;
-  const finalDrawingOptions = getDrawingOptions(root, drawingOptions);
+  const finalDrawingOptions = generateDrawingOptionString(root, drawingOptions);
   JSROOT.redraw(dom, root, finalDrawingOptions);
   document.body.style.cursor = currentCursor;
 };
@@ -216,15 +216,6 @@ const fingerprintResize = (width, height) =>
   `${width}:${height}`;
 
 /**
- * Generates the final drawing options for JSROOT
- * @param {object} root - root object in JSON representation
- * @param {string[]} drawingOptions - list of options to be used for drawing object
- * @returns {string} The final drawing options formatted as a string
- */
-const getDrawingOptions = (root, drawingOptions) =>
-  generateDrawingOptionList(root, drawingOptions).join(';');
-
-/**
  * Generates a data fingerprint.
  * When it changes, JSROOT should redraw canvas
  * - object data could be replaced on data refresh
@@ -234,7 +225,7 @@ const getDrawingOptions = (root, drawingOptions) =>
  * @returns {string} - id of the redraw
  */
 const fingerprintData = (root, drawingOptions) => {
-  const finalDrawingOptions = getDrawingOptions(root, drawingOptions);
+  const finalDrawingOptions = generateDrawingOptionString(root, drawingOptions);
   const rootPointerId = pointerId(root);
   return `${rootPointerId}:${finalDrawingOptions}`;
 };
