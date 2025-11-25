@@ -17,15 +17,15 @@
 import { h } from '/js/src/index.js';
 import { generateDrawingOptionList, isObjectOfTypeChecker } from './../../../library/qcObject/utils.js';
 import checkersPanel from './checkersPanel.js';
-import { keyedTimerDebouncer } from '../utils.js';
+import { keyedTimerDebouncer, pointerId } from '../utils.js';
 
 /**
  * Draws a QC Object depending on its type:
  * * uses JSROOT for standard ROOT objects
  * * builds a checkers panel for QC unique checkers
- * @param {QCObjectDto} object - JSON representation of a QC object
+ * @param {JSON} object - {qcObject, info, timestamps}
  * @param {object} [options] - optional options of presentation
- * @param {object} [drawingOptions] - optional drawing options to be used
+ * @param {string[]} [drawingOptions] - optional drawing options to be used
  * @returns {vnode} output virtual-dom, a single div with JSROOT attached to it
  */
 export const draw = (object, options = {}, drawingOptions = []) => isObjectOfTypeChecker(object.qcObject.root)
@@ -34,14 +34,15 @@ export const draw = (object, options = {}, drawingOptions = []) => isObjectOfTyp
 
 /**
  * Builds a div element in which JSROOT is then used to insert an SVG with the respective plot
- * @param {QCObjectDto} object - JSON representation of a QC object
+ * @param {JSON} object - {qcObject, info, timestamps}
  * @param {object} [options] - optional options of presentation
- * @param {object} [drawingOptions] - optional drawing options to be used
+ * @param {string[]} [drawingOptions] - optional drawing options to be used
  * @returns {vnode} output virtual-dom, a single div with JSROOT attached to it
  */
 const rootPlotPanel = (object, options, drawingOptions) => {
   drawingOptions = Array.from(new Set(drawingOptions));
-  const { root } = object.qcObject;
+  const { qcObject, name, etag } = object;
+  const { root } = qcObject;
   const defaultOptions = {
     width: '100%', // CSS size
     height: '100%', // CSS size
@@ -50,8 +51,8 @@ const rootPlotPanel = (object, options, drawingOptions) => {
   options = { ...defaultOptions, ...options };
 
   const attributes = {
-    key: root.name, // Completely re-create this div if the chart is not the same at all
-    id: object.etag,
+    key: name, // Completely re-create this div if the chart is not the same at all
+    id: etag,
     class: options.className,
     style: {
       height: options.height,
@@ -68,7 +69,10 @@ const rootPlotPanel = (object, options, drawingOptions) => {
 
       drawOnCreate(vnode.dom, root, drawingOptions);
     },
-    onupdate: (vnode) => resizeOnSizeUpdate(vnode.dom, root, drawingOptions),
+    onupdate: (vnode) => {
+      resizeOnSizeUpdate(vnode.dom, root, drawingOptions);
+      redrawOnDataUpdate(vnode.dom, root, drawingOptions);
+    },
     onremove: (vnode) => {
       // Remove JSROOT binding to avoid memory leak
       if (JSROOT.cleanup) {
@@ -88,12 +92,12 @@ const rootPlotPanel = (object, options, drawingOptions) => {
  * Applies specific drawing options to ensure correct plotting
  * @param {HTMLElement} dom - the div containing jsroot plot
  * @param {object} root - root object in JSON representation
- * @param {Array<string>} drawingOptions - list of options to be used for drawing object
+ * @param {string[]} drawingOptions - list of options to be used for drawing object
  * @returns {undefined}
  */
-function drawOnCreate(dom, root, drawingOptions) {
-  drawingOptions = generateDrawingOptionList(root, drawingOptions);
-  JSROOT.draw(dom, root, drawingOptions.join(';')).then((painter) => {
+const drawOnCreate = (dom, root, drawingOptions) => {
+  const finalDrawingOptions = getDrawingOptions(root, drawingOptions);
+  JSROOT.draw(dom, root, finalDrawingOptions).then((painter) => {
     if (painter === null) {
       // eslint-disable-next-line no-console
       console.error('null painter in JSROOT');
@@ -103,32 +107,29 @@ function drawOnCreate(dom, root, drawingOptions) {
     console.error(error);
   });
   dom.dataset.fingerprintRedraw = fingerprintResize(dom.clientWidth, dom.clientHeight);
-}
+  dom.dataset.fingerprintData = fingerprintData(root, drawingOptions);
+};
 
 /**
- * Debounced resize handler that redraws a graph upon size update only after:
- * - Rapid resize events have stopped (200 ms debounce)
- * - The JSROOT element's size has fully stabilized (50 ms interval polling)
+ * Debounced resize handler for JSROOT graphs.
  *
- * *Why debounce:*
- * Resize events can fire rapidly (window resize, panel changes, responsive layout).
- * Redrawing on every event is expensive and unnecessary.
- * Debouncing ensures only the final resize state triggers a redraw, preventing
- * redundant work and improving performance.
+ * Behavior:
+ * - Resizes are debounced by 200 ms to avoid excessive redraws during rapid events.
+ * - After debounce, a 50 ms interval checks whether the element's size has fully stabilized
+ *   (important because CSS transitions, flexbox, and layout effects can continue to adjust size
+ *   after resize events stop).
+ * - Only once the size is stable is the graph redrawn.
  *
- * *Why interval:*
- * Even after resize events stop firing, the element's width/height may still change
- * due to transitions, animations, flexbox reflow, or delayed CSS effects.
- * The 50 ms interval checks for consecutive identical size fingerprints to confirm that
- * the element has fully settled before allowing a redraw.
- * This prevents flicker and avoids redrawing into a layout that is still moving.
+ * Keying:
+ * - Debouncing is keyed by the DOM element, allowing multiple graphs to update independently.
  *
- * *Note:*
- * The debouncer is keyed by the JSROOT element itself, allowing multiple
- * independent JSROOT graphs to debounce and update separately.
- * @param {Model} model - root model of the application
- * @param {HTMLElement} dom - the element containing jsroot plot
- * @param {TabObject} tabObject - tabObject to be redrawn inside dom
+ * onFirstCall logic:
+ * - Runs immediately the first time a specific DOM element triggers this debouncer.
+ * - Ensures an instant initial redraw without waiting for the debounce delay or stabilization interval.
+ * - Subsequent resizes for the same element follow the normal debounce + stabilization flow.
+ * @param {Model} model - Root model of the application
+ * @param {HTMLElement} dom - Element containing the JSROOT plot
+ * @param {TabObject} tabObject - Object describing the graph to redraw inside `dom`
  * @returns {undefined}
  */
 const resizeOnSizeUpdate = keyedTimerDebouncer(
@@ -148,7 +149,7 @@ const resizeOnSizeUpdate = keyedTimerDebouncer(
 
         // Size stable across intervals (safe to redraw)
         if (dom.dataset.fingerprintResize !== currentFingerprint) {
-          JSROOT.redraw(dom, root, drawingOptions.join(';'));
+          redraw(dom, root, drawingOptions);
         }
 
         clearInterval(intervalId);
@@ -160,15 +161,72 @@ const resizeOnSizeUpdate = keyedTimerDebouncer(
     }, 50);
   },
   200,
+  (dom, root, drawingOptions) => {
+    const resizeFingerprint = fingerprintResize(dom.clientWidth, dom.clientHeight);
+    if (dom.dataset.fingerprintResize !== resizeFingerprint) {
+      redraw(dom, root, drawingOptions);
+    }
+  },
 );
+
+/**
+ * Vnode update hook.
+ * Apply a JSROOT redraw when view goes from one data state to another
+ * State is stored DOM dataset of element
+ * @param {HTMLElement} dom - Target element containing the JSROOT graph.
+ * @param {object} root - JSROOT-compatible data object to be rendered.
+ * @param {string[]} drawingOptions - Initial or user-provided drawing options.
+ * @returns {undefined}
+ */
+const redrawOnDataUpdate = (dom, root, drawingOptions) => {
+  const dataFingerprint = fingerprintData(root, drawingOptions);
+  if (dom.dataset.fingerprintData !== dataFingerprint) {
+    redraw(dom, root, drawingOptions);
+  }
+};
+
+/**
+ * Performs a JSROOT redraw using the final resolved drawing options.
+ * @param {HTMLElement} dom - Target element containing the JSROOT graph.
+ * @param {object} root - JSROOT-compatible data object to be rendered.
+ * @param {string[]} drawingOptions - Initial or user-provided drawing options.
+ * @returns {undefined}
+ */
+const redraw = (dom, root, drawingOptions) => {
+  const finalDrawingOptions = getDrawingOptions(root, drawingOptions);
+  JSROOT.redraw(dom, root, finalDrawingOptions);
+};
 
 /**
  * Generates a resize fingerprint.
  * When it changes, JSROOT should resize canvas
  * @param {number} width - the width of the element
  * @param {number} height - the height of the element
- * @returns {string} - the fingerprint
+ * @returns {string} - the resize fingerprint
  */
-function fingerprintResize(width, height) {
-  return `${width}:${height}`;
-}
+const fingerprintResize = (width, height) =>
+  `${width}:${height}`;
+
+/**
+ * Generates the final drawing options for JSROOT
+ * @param {object} root - root object in JSON representation
+ * @param {string[]} drawingOptions - list of options to be used for drawing object
+ * @returns {string} The final drawing options formatted as a string
+ */
+const getDrawingOptions = (root, drawingOptions) =>
+  generateDrawingOptionList(root, drawingOptions).join(';');
+
+/**
+ * Generates a data fingerprint.
+ * When it changes, JSROOT should redraw canvas
+ * - object data could be replaced on data refresh
+ * - tabObject.options change requires redraw
+ * @param {object} root - root object in JSON representation
+ * @param {string[]} drawingOptions - list of options to be used for drawing object
+ * @returns {string} - id of the redraw
+ */
+const fingerprintData = (root, drawingOptions) => {
+  const finalDrawingOptions = getDrawingOptions(root, drawingOptions);
+  const rootPointerId = pointerId(root);
+  return `${rootPointerId}:${finalDrawingOptions}`;
+};
