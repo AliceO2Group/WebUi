@@ -12,19 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useState, useEffect } from 'react';
-
-import type { OptionType, HttpMethod } from '~/utils/types';
-import { Form } from '~/components/form/form';
+import { TokenFormProvider } from '~/contexts/tokens/token-form';
+import { TokenForm, TokenFormWindows } from '~/components/tokens/token-form';
 import { Box1_1 } from '~/components/box';
-import { FormInput } from '~/components/form/form-input';
-import { FormSelect, FormSelectMulti } from '~/components/form/form-select';
-import { SelectGroup } from '~/components/form/select-group';
-import { ResetButton, SubmitButton } from '~/components/form/form-buttons';
-import { useAuth } from '~/hooks/session';
-import Alert, {type AlertType} from '~/components/window/alert';
-import { WindowButtonAccept, WindowButtonCancel, WindowCloseIcon, WindowContent, WindowTitle } from '~/components/window/window-objects';
-import Modal from '~/components/window/modal';
+import type { OptionType } from '~/utils/types';
 
 // eslint-disable-next-line jsdoc/require-jsdoc
 export function clientLoader(): OptionType[] {
@@ -36,179 +27,16 @@ export function clientLoader(): OptionType[] {
   ];
 }
 
-// HTTP Method options
-const httpMethodOptions = [
-  { value: 'GET', label: 'GET' },
-  { value: 'POST', label: 'POST' },
-  { value: 'PUT', label: 'PUT' },
-  { value: 'DELETE', label: 'DELETE' },
-];
-
 /**
  * Component is used for /tokens/new route to create new tokens.
  */
 export default function CreateToken({ loaderData }: { loaderData?: OptionType[] }) {
-  const [expirationTime, setExpirationTime] = useState<string>('');
-  const [firstSelectedService, setFirstSelectedService] = useState<string>('');
-  const [secondSelectedService, setSecondSelectedService] = useState<string>('');
-  const [selectedMethods, setSelectedMethods] = useState<HttpMethod[]>([]);
-
-  const [firstSelectedLabel, setFirstSelectedLabel] = useState<string>('');
-  const [secondSelectedLabel, setSecondSelectedLabel] = useState<string>('');
-
-  useEffect(() => {
-    if (loaderData) {
-      const firstLabel = loaderData.find(option => option.value === firstSelectedService)?.label ?? '';
-      const secondLabel = loaderData.find(option => option.value === secondSelectedService)?.label ?? '';
-      setFirstSelectedLabel(firstLabel);
-      setSecondSelectedLabel(secondLabel);
-    }
-  }, [firstSelectedService, secondSelectedService, loaderData]);
-
-  const auth = useAuth('admin');
-  const [openAlert, setOpenAlert] = useState<boolean>(false);
-  const [openModal, setOpenModal] = useState<boolean>(false);
-
-  const [alert, setAlert] = useState<AlertType | null>(null);
-
-  const onSubmit = () => {
-    if (expirationTime && firstSelectedService && secondSelectedService && selectedMethods.length > 0) {
-      setOpenModal(true);
-    } else {
-      let message = 'Please fill in all required fields: ';
-      if (!firstSelectedService) {
-        message += 'First service, ';
-      }
-      if (!secondSelectedService) {
-        message += 'Second service, ';
-      }
-      if (!expirationTime) {
-        message += 'Expiration time, ';
-      }
-      if (selectedMethods.length == 0) {
-        message += 'HTTP methods, ';
-      }
-      message = message.slice(0, -2);
-      setAlert({
-        key: Date.now(),
-        title: 'Form incomplete',
-        message,
-        success: false,
-      })
-      setOpenAlert(true);
-    }
-  };
-
-  const onReset = () => {
-    setExpirationTime('');
-    setFirstSelectedService('');
-    setSecondSelectedService('');
-    setSelectedMethods([]);
-  };
-
-  const callApi = () => {
-    if (auth) {
-      // eslint-disable-next-line no-console
-      console.log('Creating token');
-      setAlert({
-        key: Date.now(),
-        title: 'Token created',
-        message: 'Token has been created successfully.',
-        success: true,
-      });
-    } else {
-      setAlert({
-        key: Date.now(),
-        title: 'Authorization error',
-        message: 'You do not have permission to perform this operation.',
-        success: false,
-      });
-    }
-    setOpenAlert(true);
-  };
-
-  return ( <>
-    <Box1_1 link={null}>
-      <div className=''>
-        <Form>
-          <FormInput
-            labelText='Expiration Time (hours):'
-            value={expirationTime}
-            setValue={setExpirationTime}
-            inputProps={{ type: 'number', step: 1, min: 0 }}
-          />
-          {/* <FormInput<string>
-            labelText='Expiration Time (date)'
-            value={null}
-            setValue={null}
-            inputProps={{ type: 'datetime-local' }}
-          /> */}
-          <FormSelectMulti
-            id='http-select-methods'
-            options={httpMethodOptions}
-            value={selectedMethods}
-            setValue={setSelectedMethods}
-            placeholder='Choose HTTP Methods for Token...'
-            label='HTTP Methods'
-          />
-          {loaderData &&
-            <>
-              <SelectGroup>
-                <FormSelect
-                  id="first-service-select"
-                  options={loaderData}
-                  value={firstSelectedService}
-                  setValue={setFirstSelectedService}
-                  placeholder="Select First Service..."
-                  label="First Service"
-                />
-                <FormSelect
-                  id="second-service-select"
-                  options={loaderData}
-                  value={secondSelectedService}
-                  setValue={setSecondSelectedService}
-                  placeholder="Select Second Service..."
-                  label="Second Service"
-                />
-              </SelectGroup>
-              <div className='mv3 flex-row g1 align-center'>
-                <SubmitButton action={onSubmit} />
-                <ResetButton action={onReset} />
-              </div>
-            </>
-          }
-        </Form>
-      </div>
-    </Box1_1>
-    <Alert
-      key={alert?.key}
-      open={openAlert}
-      setOpen={setOpenAlert}
-      timeout={6000}
-      className={alert?.success ? 'bg-success' : 'bg-danger'}
-    >
-      <WindowTitle>{alert?.title}</WindowTitle>
-      <WindowContent>{alert?.message}</WindowContent>
-      <WindowCloseIcon />
-    </Alert>
-    <Modal
-      open={openModal}
-      setOpen={setOpenModal}
-      className='bg-primary '
-    >
-      <WindowTitle>Confirm Token Creation</WindowTitle>
-      <WindowContent>
-        <div className='flex-column align-center justify-center'>
-          <div className='mb2'>Are you sure you want to create the token with the specified settings?</div>
-          <div>Service from: {firstSelectedLabel}</div>
-          <div>Service to: {secondSelectedLabel}</div>
-          <div>Expiration time: {expirationTime} hours</div>
-          <div>HTTP methods: {selectedMethods.join(', ')}</div>
-        </div>
-      </WindowContent>
-      <WindowButtonAccept className='btn-success' action={callApi}/>
-      <WindowButtonCancel/>
-    </Modal>
-  </>
+  return (
+    <TokenFormProvider loaderData={loaderData}>
+      <Box1_1 link={null}>
+        <TokenForm />
+      </Box1_1>
+      <TokenFormWindows />
+    </TokenFormProvider>
   );
 }
