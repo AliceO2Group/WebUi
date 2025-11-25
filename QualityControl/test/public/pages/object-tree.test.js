@@ -120,6 +120,26 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   );
 
   await testParent.test(
+    'should not copy the value of the clicked element if there is no value',
+    { timeout },
+    async () => {
+      const context = page.browserContext();
+      await context.overridePermissions(url, ['clipboard-read', 'clipboard-write', 'clipboard-sanitized-write']);
+
+      await page.click('#qcObjectInfoPanel > div > div'); // copy path
+      await page.click('#qcObjectInfoPanel > div:nth-child(7) > div'); // try to copy empty value
+
+      const clipboard = await page.evaluate(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        return navigator.clipboard.readText();
+      });
+
+      strictEqual(clipboard, 'qc/test/object/1');
+      context.clearPermissionOverrides();
+    }
+  );
+
+  await testParent.test(
     'should close the object plot upon clicking the close button',
     { timeout },
     async () => {
