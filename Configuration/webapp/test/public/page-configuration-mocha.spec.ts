@@ -76,7 +76,7 @@ describe('`pageConfiguration` test-suite', function () {
     const configPageHeader = await page.$$('.config-page__header__text');
     assert.strictEqual(configPageHeader.length, 1);
 
-    const headerText = await page.evaluate((el) => el.textContent, configPageHeader[0]);
+    const headerText = (await page.evaluate((el) => el.textContent, configPageHeader[0])) ?? '';
     assert.strictEqual(headerText.includes(selectedKey), true);
   });
 });
