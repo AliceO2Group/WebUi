@@ -52,8 +52,7 @@ function makeApp(tokensMap?: Map<number, any>) {
 
   const wrapper = new FakeWrapper();
   const svc = new FakeTokensGetService();
-  const controller = new ConnectionController
-(svc, fakeTokens, wrapper as any);
+  const controller = new ConnectionController(svc, fakeTokens, wrapper as any);
 
   const app = express();
   app.use(express.json());
@@ -65,8 +64,7 @@ function makeApp(tokensMap?: Map<number, any>) {
 
 // --- Tests ---
 
-describe('ConnectionController
-', () => {
+describe('ConnectionController', () => {
   test('GET /tokens returns transformed tokens', async () => {
     const { app } = makeApp();
     const res = await request(app).get('/tokens-get');
@@ -83,6 +81,7 @@ describe('ConnectionController
 
     const res = await request(app)
       .post('/tokens/create')
+      .type('application/json')
       .send({ payload: 'new-payload-xyz' });
 
     expect(res.status).toBe(201);
@@ -97,7 +96,10 @@ describe('ConnectionController
   test('POST /tokens/create with empty payload -> 400', async () => {
     const { app } = makeApp();
 
-    const res = await request(app).post('/tokens/create').send({ payload: '' });
+    const res = await request(app)
+      .post('/tokens/create')
+      .type('application/json')
+      .send({ payload: '' });
 
     expect(res.status).toBe(400);
     expect(res.body).toHaveProperty('message');
@@ -110,7 +112,10 @@ describe('ConnectionController
     // sanity: token 2 exists
     expect(tokens.has(2)).toBe(true);
 
-    const res = await request(app).post('/tokens/revoke').send({ id: 2 });
+    const res = await request(app)
+      .post('/tokens/revoke')
+      .type('application/json')
+      .send({ id: 2 });
 
     expect(res.status).toBe(204);
     expect(tokens.has(2)).toBe(false);
@@ -121,7 +126,10 @@ describe('ConnectionController
 
   test('POST /tokens/revoke with non-existing id -> 400', async () => {
     const { app } = makeApp();
-    const res = await request(app).post('/tokens/revoke').send({ id: 999 });
+    const res = await request(app)
+      .post('/tokens/revoke')
+      .type('application/json')
+      .send({ id: 999 });
 
     expect(res.status).toBe(400);
     expect(res.body).toHaveProperty('message');

@@ -22,7 +22,7 @@ import { VaultSignService } from '../services/VaultSignService.js';
 import { db } from '../lib/database/Database.js';
 import { SequelizeDatabase } from '../lib/database/SequelizeDatabase.js';
 import { VaultAuthService } from '../services/VaultAuthService.js';
-import { VaultCredentialsService } from '../services/VaulCredentialsService.js';
+import { VaultCredentialsService } from '../services/VaultCredentialsService.js';
 import { EventType } from '../lib/utils/events.js';
 import { bus } from '../lib/event-bus/event-bus.js';
 import { LogManager } from '@aliceo2/web-ui';

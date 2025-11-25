@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { VaultCredentialsService } from '../services/VaulCredentialsService.js';
+import { VaultCredentialsService } from '../services/VaultCredentialsService.js';
 import { VaultAuthService } from '../services/VaultAuthService.js';
 import { VaultSignService } from '../services/VaultSignService.js';
 
