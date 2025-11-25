@@ -61,10 +61,12 @@ const infoRow = (key, value, infoRowAttributes) => {
   const formattedValue = infoPretty(key, value);
   const formattedKey = getUILabel(key);
 
+  const hasValue = value != null && value !== '' && (!Array.isArray(value) || value.length);
+
   return h(`.flex-row.g2.info-row${highlightedClasses}`, [
     h('b.w-25.w-wrapped', formattedKey),
     h('.w-75', {
-      ...infoRowAttributes(formattedKey, formattedValue),
+      ...hasValue && infoRowAttributes(formattedKey, formattedValue),
       style: 'cursor: pointer; user-select: text;',
     }, formattedValue),
   ]);
@@ -135,7 +137,11 @@ export const defaultRowAttributes = (notification) =>
         if (typeof value !== 'string') {
           value = value.dom.textContent;
         }
-        await copyToClipboard(value);
+        try {
+          await copyToClipboard(value);
+        } catch (error) {
+          notification.show(`Failed to copy to clipboard: ${error.message}`, 'danger', 1500);
+        }
       }
     },
     title: `Copy ${key}`,
