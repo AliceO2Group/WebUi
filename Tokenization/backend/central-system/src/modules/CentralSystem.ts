@@ -88,7 +88,7 @@ class CentralSystem {
         replyEvent: 'RENEW_VAULT_TOKEN:REPLY:periodic-renew',
         payload: undefined,
       });
-    }, 6 * 3600 * 1000); // Renew every 6 hours
+    }, 6 * 1000 * 3600); // Renew every 6 hours
   }
 }
 
