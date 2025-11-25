@@ -61,7 +61,7 @@ const rootPlotPanel = (object, options, drawingOptions) => {
     oncreate: (vnode) => {
       // Setup resize function
       vnode.dom.onresize = () => {
-        resizeOnSizeUpdate(vnode.dom, root, drawingOptions);
+        redrawOnSizeUpdate(vnode.dom, root, drawingOptions);
       };
 
       // Resize on window size change
@@ -70,8 +70,10 @@ const rootPlotPanel = (object, options, drawingOptions) => {
       drawOnCreate(vnode.dom, root, drawingOptions);
     },
     onupdate: (vnode) => {
-      resizeOnSizeUpdate(vnode.dom, root, drawingOptions);
-      redrawOnDataUpdate(vnode.dom, root, drawingOptions);
+      const isRedrawn = redrawOnDataUpdate(vnode.dom, root, drawingOptions);
+      if (!isRedrawn) {
+        redrawOnSizeUpdate(vnode.dom, root, drawingOptions);
+      }
     },
     onremove: (vnode) => {
       // Remove JSROOT binding to avoid memory leak
@@ -132,7 +134,7 @@ const drawOnCreate = (dom, root, drawingOptions) => {
  * @param {TabObject} tabObject - Object describing the graph to redraw inside `dom`
  * @returns {undefined}
  */
-const resizeOnSizeUpdate = keyedTimerDebouncer(
+const redrawOnSizeUpdate = keyedTimerDebouncer(
   (_, dom) => dom,
   (dom, root, drawingOptions) => {
     let previousFingerprint = dom.dataset.fingerprintResize;
@@ -176,13 +178,15 @@ const resizeOnSizeUpdate = keyedTimerDebouncer(
  * @param {HTMLElement} dom - Target element containing the JSROOT graph.
  * @param {object} root - JSROOT-compatible data object to be rendered.
  * @param {string[]} drawingOptions - Initial or user-provided drawing options.
- * @returns {undefined}
+ * @returns {Boolean} whether the JSROOT plot was redrawn
  */
 const redrawOnDataUpdate = (dom, root, drawingOptions) => {
   const dataFingerprint = fingerprintData(root, drawingOptions);
   if (dom.dataset.fingerprintData !== dataFingerprint) {
     redraw(dom, root, drawingOptions);
+    return true;
   }
+  return false;
 };
 
 /**
@@ -193,8 +197,12 @@ const redrawOnDataUpdate = (dom, root, drawingOptions) => {
  * @returns {undefined}
  */
 const redraw = (dom, root, drawingOptions) => {
+  // A bug exists in JSROOT where the cursor gets stuck on `wait` when redrawing multiple objects simultaneously.
+  // We save the current cursor state here and revert back to it after redrawing is complete.
+  const currentCursor = document.body.style.cursor;
   const finalDrawingOptions = getDrawingOptions(root, drawingOptions);
   JSROOT.redraw(dom, root, finalDrawingOptions);
+  document.body.style.cursor = currentCursor;
 };
 
 /**
