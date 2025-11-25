@@ -39,16 +39,24 @@ export function clone(obj) {
  * @param {(...args: A) => WeakKey} keyFn - Function that returns the key to debounce by.
  * @param {(...args: A) => void} debounceFn - Function executed after the debounce delay.
  * @param {number} time - Debounce delay in milliseconds.
+ * @param {(...args: A) => void} [onFirstCall = () => {}] - Optional callback fired once when a new key is added.
  * @returns {(...args: A) => void} - Debounced function that can be called multiple times.
  */
-export function keyedTimerDebouncer(keyFn, debounceFn, time) {
+export function keyedTimerDebouncer(
+  keyFn,
+  debounceFn,
+  time,
+  onFirstCall = () => {},
+) {
   const timers = new WeakMap();
 
   return function (...args) {
-    const key = keyFn(...args) ?? null;
+    const key = keyFn(...args);
 
     if (timers.has(key)) {
       clearTimeout(timers.get(key));
+    } else {
+      onFirstCall(...args);
     }
 
     const timerId = setTimeout(() => {
