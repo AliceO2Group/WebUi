@@ -15,7 +15,6 @@
 import assert from 'assert';
 import { Page } from 'puppeteer';
 import global from '../mocha-index';
-import axiosInstance, { API_URL } from '~/api/axiosInstance';
 
 describe('`pageConfiguration` test-suite', function () {
   let url: string | null = null;
@@ -35,20 +34,23 @@ describe('`pageConfiguration` test-suite', function () {
       assert.equal('Page is null', 'test suite failed');
       return;
     }
-    const res = await axiosInstance.get(`${API_URL}/configurations`);
+    await page.goto(url, { waitUntil: 'networkidle0' });
 
-    const firstConfigurationRelativePath = res?.data?.[0];
+    const configNavigatorItems = await page.$$('.config_navigator__item--selected');
+    assert.strictEqual(configNavigatorItems.length, 1);
 
-    if (!firstConfigurationRelativePath) {
-      assert.equal('No configuration found', 'test suite failed');
+    const classList = await configNavigatorItems[0].evaluate((el) => el.className.split(' '));
+    const selectedKey = Array.from(classList)
+      .find((className: string) => className.startsWith('config_key__'))
+      ?.split('__')[1];
+
+    if (!selectedKey) {
+      assert.equal('No selected key found', 'test suite failed');
       return;
     }
-    const configUrl = `${url}/configuration/${firstConfigurationRelativePath}`;
-
-    await page.goto(configUrl, { waitUntil: 'networkidle0' });
 
     const location = await page.evaluate(() => window.location);
-    assert.strictEqual(location.search, '');
+    assert.strictEqual(location.pathname.includes(selectedKey), true);
   });
 
   it('should display proper configuration page header', async function () {
@@ -56,22 +58,25 @@ describe('`pageConfiguration` test-suite', function () {
       assert.equal('Page is null', 'test suite failed');
       return;
     }
-    const res = await axiosInstance.get(`${API_URL}/configurations`);
-    const firstConfigurationRelativePath = res?.data?.[0];
+    await page.goto(url, { waitUntil: 'networkidle0' });
 
-    if (!firstConfigurationRelativePath) {
-      assert.equal('No configuration found', 'test suite failed');
+    const configNavigatorItems = await page.$$('.config_navigator__item--selected');
+    assert.strictEqual(configNavigatorItems.length, 1);
+
+    const classList = await configNavigatorItems[0].evaluate((el) => el.className.split(' '));
+    const selectedKey = Array.from(classList)
+      .find((className: string) => className.startsWith('config_key__'))
+      ?.split('__')[1];
+
+    if (!selectedKey) {
+      assert.equal('No selected key found', 'test suite failed');
       return;
     }
-
-    const configUrl = `${url}/configuration/${firstConfigurationRelativePath}`;
-
-    await page.goto(configUrl, { waitUntil: 'networkidle0' });
 
     const configPageHeader = await page.$$('.config-page__header__text');
     assert.strictEqual(configPageHeader.length, 1);
 
     const headerText = await page.evaluate((el) => el.textContent, configPageHeader[0]);
-    assert.strictEqual(headerText, firstConfigurationRelativePath);
+    assert.strictEqual(headerText.includes(selectedKey), true);
   });
 });
