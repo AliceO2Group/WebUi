@@ -16,31 +16,33 @@ import { List } from '@mui/material';
 import ConfigNavigatorItem, { type TreeNode } from './ConfigNavigatorItem';
 import { useConfigurationKeysQuery } from '~/api/query/useConfigurationKeysQuery';
 import { useEffect, useMemo, useState } from 'react';
-import { useConfigurationNavigate } from '~/hooks/useConfigurationNavigate';
-import { BASE_CONFIGURATION_PATH } from '~/config';
+import { CONFIGURATION_KEY_PREFIX, ROUTE_PREFIX } from '~/config';
+import { useLocation } from 'react-router';
 
 const buildTree = (paths: string[]): Record<string, TreeNode> => {
   const root: Record<string, TreeNode> = {};
 
   paths.forEach((path) => {
     let relativePath = path;
-    if (path.startsWith(BASE_CONFIGURATION_PATH)) {
-      relativePath = path.substring(BASE_CONFIGURATION_PATH.length);
-      if (relativePath.startsWith('/')) {
-        relativePath = relativePath.substring(1);
-      }
+
+    if (path.startsWith(CONFIGURATION_KEY_PREFIX)) {
+      relativePath = path.slice(CONFIGURATION_KEY_PREFIX.length).replace(/^\//, '');
     }
 
     const parts = relativePath.split('/');
     let currentLevel = root;
+    let currentFullPathBuilder = CONFIGURATION_KEY_PREFIX;
 
     parts.forEach((part, index) => {
       const isLast = index === parts.length - 1;
 
+      const separator = currentFullPathBuilder.endsWith('/') || currentFullPathBuilder === '' ? '' : '/';
+      currentFullPathBuilder += `${separator}${part}`;
+
       if (!currentLevel[part]) {
         currentLevel[part] = {
           name: part,
-          fullPath: isLast ? path : '',
+          fullPath: isLast ? path : currentFullPathBuilder,
           children: {},
           isFile: isLast,
         };
@@ -71,14 +73,18 @@ export const ConfigNavigator = () => {
 
   const [selectedConfigurationPath, setSelectedConfigurationPath] = useState<string | undefined>();
 
-  const navigate = useConfigurationNavigate();
+  const { pathname } = useLocation();
 
   useEffect(() => {
-    if (configKeys) {
-      setSelectedConfigurationPath(configKeys[0]);
-      navigate(configKeys[0]);
+    if (configKeys && configKeys.length > 0) {
+      const pathToCheck = pathname.startsWith(ROUTE_PREFIX) ? pathname.slice(ROUTE_PREFIX.length) : pathname;
+      const decodedPath = decodeURIComponent(pathToCheck);
+
+      if (configKeys.includes(decodedPath)) {
+        setSelectedConfigurationPath(decodedPath);
+      }
     }
-  }, [configKeys, areConfigKeysLoading]);
+  }, [configKeys, areConfigKeysLoading, pathname]);
 
   const treeData = useMemo(() => {
     if (!configKeys) {
@@ -104,15 +110,6 @@ export const ConfigNavigator = () => {
               key={node.name}
               node={node}
               selectedPath={selectedConfigurationPath}
-              onSelect={(path) => {
-                setSelectedConfigurationPath(path);
-                if (path.startsWith(BASE_CONFIGURATION_PATH)) {
-                  const relative = path.substring(BASE_CONFIGURATION_PATH.length).replace(/^\//, '');
-                  navigate(relative);
-                } else {
-                  navigate(path);
-                }
-              }}
             />
           ))
       )}

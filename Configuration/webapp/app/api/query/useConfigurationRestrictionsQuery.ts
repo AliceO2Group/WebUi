@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import { BASE_CONFIGURATION_PATH } from '~/config';
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '../axiosInstance';
 import type { FormRestrictions } from '~/components/form/Form';
@@ -25,7 +24,7 @@ export const useConfigurationRestrictionsQuery = (configuration: string) =>
     queryFn: async () =>
       axiosInstance
         .get<FormRestrictions>(
-          `configurations/restrictions/${BASE_CONFIGURATION_PATH}/${configuration}`,
+          `configurations/restrictions/${configuration}`,
         )
         .then((response) => response.data),
   });
