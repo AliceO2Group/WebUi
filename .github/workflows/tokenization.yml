@@ -26,7 +26,7 @@ jobs:
         run: |
           bash Tokenization/scripts/actions-certificates-creation.sh
 
-          echo "VAULT_CACERT_B64=$(base64 -w0 Tokenization/docker/ca.crt)" >> $GITHUB_ENV
+          echo "VAULT_CACERT_B64=$(base64 -w0 Tokenization/docker/vault/ca.crt)" >> $GITHUB_ENV
           echo "VAULT_CENTRAL_SYSTEM_CERT_B64=$(base64 -w0 Tokenization/docker/vault/central-system.crt)" >> $GITHUB_ENV
           echo "VAULT_CENTRAL_SYSTEM_KEY_B64=$(base64 -w0 Tokenization/docker/vault/central-system.key)" >> $GITHUB_ENV
 
