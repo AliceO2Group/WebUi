@@ -13,7 +13,7 @@
  */
 
 import { h } from '/js/src/index.js';
-import { draw } from './../../common/object/draw.js';
+import { drawObject } from './../../common/object/draw.js';
 import { spinner } from './../../common/spinner.js';
 import { errorDiv } from '../../common/errorDiv.js';
 import { dateSelector } from '../../common/object/dateSelector.js';
@@ -42,7 +42,13 @@ const objectPlotAndInfo = (objectViewModel) =>
     Failure: (error) => errorDiv(error),
     Success: (qcObject) => {
       const {
-        id, validFrom, ignoreDefaults = false, drawOptions = [], displayHints = [], layoutDisplayOptions = [], versions,
+        id,
+        validFrom,
+        ignoreDefaults = false,
+        drawOptions = [],
+        displayHints = [],
+        layoutDisplayOptions = [],
+        versions,
       } = qcObject;
       const drawingOptions = ignoreDefaults ?
         layoutDisplayOptions
@@ -76,7 +82,7 @@ const objectPlotAndInfo = (objectViewModel) =>
           h('.flex-grow', {
             // Key change forces redraw when toggling info panel
             key: isObjectInfoVisible ? 'objectPlotWithoutInfoPanel' : 'objectPlotWithInfoPanel',
-          }, draw(qcObject, {}, drawingOptions)),
+          }, drawObject(qcObject, {}, drawingOptions)),
           isObjectInfoVisible && h('.scroll-y.w-30', {
             key: 'objectInfoPanel',
           }, [
