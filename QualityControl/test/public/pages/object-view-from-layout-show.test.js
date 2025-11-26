@@ -13,29 +13,24 @@
 
 import { strictEqual, deepStrictEqual, match } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
+import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
 
 const OBJECT_VIEW_PAGE_PARAM = '?page=objectView&objectId=123456';
 
 /**
  * Gets the visibility of the object information panel.
  * @param {import('puppeteer').Page} page - Puppeteer page instance.
- * @returns {Promise<boolean>} `true` if visible, `false` if hidden.
+ * @returns {Promise<boolean>} `true` if the element exists, `false` if it doesn't.
  */
-const getObjectInfoPanelVisibility = async (page) =>
-  await page.evaluate(() => {
-    const el = document.querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(2)');
-    if (!el) {
-      // Object is not loaded in the DOM
-      return false;
-    }
-    const style = window.getComputedStyle(el);
-    return (
-      style.display !== 'none' &&
-      parseFloat(style.opacity) > 0 &&
-      el.offsetWidth > 0 &&
-      el.offsetHeight > 0
-    );
-  });
+const getObjectInfoPanelVisibility = async (page) => {
+  try {
+    return Boolean(await page.waitForSelector('#ObjectPlot > div:nth-child(2) > div:nth-child(2)', { timeout: 100 }));
+    // eslint-disable-next-line no-unused-vars
+  } catch (_) {
+    // If the `selector` doesn't appear after the `timeout` milliseconds of waiting, the function will throw.
+    return false;
+  }
+};
 
 /**
  * Gets the LocalStorage value that controls visibility.
@@ -197,7 +192,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         const visibilityButton = document.querySelector('.visibility-toggle-button');
 
         if (!dateSelector || !dlButton || !visibilityButton) {
-          return false;
+          throw new Error('One or more elements not found on the page');
         }
 
         const dateRect = dateSelector.getBoundingClientRect();
@@ -218,10 +213,6 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         };
       });
 
-      if (!positions) {
-        throw new Error('One or more elements not found on the page');
-      }
-
       strictEqual(positions.dlRightOfDate, true, 'Download button is not to the right of the timestamp dropdown');
       strictEqual(positions.visRightOfDate, true, 'Visibility button is not to the right of the timestamp dropdown');
       strictEqual(
@@ -233,7 +224,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
-    'should show the object information panel when no storage key exists',
+    'should show the object information panel on reload when no storage key exists',
     { timeout },
     async () => {
       const personId = await page.evaluate(() => window.model?.session?.personid?.toString());
@@ -241,7 +232,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         throw new Error('Could not resolve personId from the application model');
       }
 
-      const localStorageKey = `object-view-info-visibility-setting-${personId}`;
+      const localStorageKey = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
 
       await setLocalStorageValue(page, localStorageKey, null);
       await page.reload({ waitUntil: 'networkidle0' });
@@ -255,7 +246,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
-    'should show the object information panel when storage key is set to true',
+    'should show the object information panel on reload when storage key is set to true',
     { timeout },
     async () => {
       const personId = await page.evaluate(() => window.model?.session?.personid?.toString());
@@ -263,7 +254,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         throw new Error('Could not resolve personId from the application model');
       }
 
-      const localStorageKey = `object-view-info-visibility-setting-${personId}`;
+      const localStorageKey = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
 
       await setLocalStorageValue(page, localStorageKey, true);
       await page.reload({ waitUntil: 'networkidle0' });
@@ -277,7 +268,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
-    'should hide the object information panel when storage key is set to false',
+    'should hide the object information panel on reload when storage key is set to false',
     { timeout },
     async () => {
       const personId = await page.evaluate(() => window.model?.session?.personid?.toString());
@@ -285,7 +276,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         throw new Error('Could not resolve personId from the application model');
       }
 
-      const localStorageKey = `object-view-info-visibility-setting-${personId}`;
+      const localStorageKey = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
 
       await setLocalStorageValue(page, localStorageKey, false);
       await page.reload({ waitUntil: 'networkidle0' });
@@ -299,7 +290,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
-    'should maintain independent object information panel visibility for different users',
+    'should maintain independent object information panel visibility on reload for different users',
     { timeout },
     async () => {
       const personId = await page.evaluate(() => window.model?.session?.personid?.toString());
@@ -307,8 +298,8 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         throw new Error('Could not resolve personId from the application model');
       }
 
-      const localStorageKeyMainUser = `object-view-info-visibility-setting-${personId}`;
-      const localStorageKeyDiffUser = `object-view-info-visibility-setting-${personId + 1}`;
+      const localStorageKeyMainUser = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
+      const localStorageKeyDiffUser = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId + 1}`;
 
       await setLocalStorageValue(page, localStorageKeyMainUser, true); // show panel main user
       await setLocalStorageValue(page, localStorageKeyDiffUser, false); // hide panel diff user
@@ -334,7 +325,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         throw new Error('Could not resolve personId from the application model');
       }
 
-      const localStorageKey = `object-view-info-visibility-setting-${personId}`;
+      const localStorageKey = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
 
       // Set an invalid value in localStorage
       await setLocalStorageValue(page, localStorageKey, 'invalid-value');
@@ -392,28 +383,20 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
     'should redraw the JSRoot object drawing when visibility toggle changes',
     { timeout },
     async () => {
-      /**
-       * Get the object info element
-       * @returns {Promise<Element>} The object information panel element
-       */
-      const getObjectPanelElement = async () => {
-        const el = await page.evaluateHandle(() =>
-          document.querySelector('#ObjectPlot > div:nth-child(2) > div > div'));
-        if (!el) {
-          throw new Error('Object info container not found');
-        }
-        return el;
-      };
-
-      const initialElement = await getObjectPanelElement();
+      const initialElement = await page.waitForSelector(
+        '#ObjectPlot > div:nth-child(2) > div > div',
+        { timeout: 1000 },
+      );
 
       await page.click('.visibility-toggle-button');
       await delay(100);
 
-      const newElement = await getObjectPanelElement();
+      const newElement = await page.waitForSelector(
+        '#ObjectPlot > div:nth-child(2) > div > div',
+        { timeout: 1000 },
+      );
 
-      // Confirm that the DOM node is different
-      const redrawn = await page.evaluate((a, b) => a !== b, initialElement, newElement);
+      const redrawn = await page.evaluate((a, b) => a.innerHTML !== b.innerHTML, initialElement, newElement);
 
       strictEqual(redrawn, true, 'JSRoot drawing was not redrawn on visibility toggle');
     },
@@ -428,7 +411,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         throw new Error('Could not resolve personId from the application model');
       }
 
-      const localStorageKey = `object-view-info-visibility-setting-${personId}`;
+      const localStorageKey = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
       const visibilitySettingInitially = await getLocalStorageVisibilityFlag(page, localStorageKey);
 
       // Click the toggle button (first time)

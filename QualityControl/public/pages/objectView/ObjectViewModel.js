@@ -15,6 +15,7 @@
 import { BaseViewModel } from '../../common/abstracts/BaseViewModel.js';
 import { setBrowserTabTitle } from '../../common/utils.js';
 import { RemoteData, BrowserStorage } from '/js/src/index.js';
+import { StorageKeysEnum } from '../../common/enums/storageKeys.enum.js';
 
 /**
  * Model namespace for ObjectViewPage
@@ -44,7 +45,7 @@ export default class ObjectViewModel extends BaseViewModel {
     this.displayHints = [];
     this.ignoreDefaults = false;
 
-    this._storage = new BrowserStorage('object-view-info-visibility-setting');
+    this._storage = new BrowserStorage(StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING);
     this._loadObjectInfoVisible();
   }
 
