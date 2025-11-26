@@ -34,6 +34,7 @@ export const clientLoader = async (): Promise<{ tokens: Promise<Token[]> }> => {
       }
       const json = await response.json();
       if (Array.isArray(json)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return json.map((t: any) => ({ ...t, id: t.tokenId ?? t.id }));
       }
       return { ...json, id: json.tokenId ?? json.id };

@@ -161,9 +161,9 @@ export function TokenTableWithIssuedAt({ tokens }: { tokens: Token[] }) {
     { key: 'id', label: 'ID', render: (t: Token) => <Link to={`/tokens/${t.id}`}>{t.id}</Link> },
     { key: 'serviceFrom', label: 'Service From' },
     { key: 'serviceTo', label: 'Service To' },
-    { key: 'iat', label: 'Issued at', render: (t: Token) => String((t as any).iat ?? '') },
+    { key: 'iat', label: 'Issued at', render: (t: Token) => String(t.iat ?? '') },
     { key: 'exp', label: 'Expires at' },
-    { key: 'perm', label: 'HTTP Methods', render: (t: Token) => String((t as any).permissions.join(', ') ?? '') },
+    { key: 'perm', label: 'HTTP Methods', render: (t: Token) => String(t.permissions.join(', ') ?? '') },
     {
       key: 'actions',
       label: 'Actions',

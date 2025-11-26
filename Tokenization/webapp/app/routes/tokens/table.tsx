@@ -31,6 +31,7 @@ export function clientLoader() {
       }
       const json = await response.json();
       if (Array.isArray(json)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return json.map((t: any) => ({ ...t, id: t.tokenId ?? t.id }));
       }
       return { ...json, id: json.tokenId ?? json.id };
@@ -40,9 +41,7 @@ export function clientLoader() {
   return { tokens };
 }
 
-/**
- *
- */
+// eslint-disable-next-line jsdoc/require-jsdoc
 export default function TokensTable() {
   const { tokens } = useLoaderData();
   return <Box1_2 link={null}>

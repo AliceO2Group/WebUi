@@ -17,9 +17,7 @@ import { CertsTable } from '~/components/certs/certs-table';
 
 export const clientLoader = async () => ({});
 
-/**
- *
- */
+// eslint-disable-next-line jsdoc/require-jsdoc
 export default function Overview() {
   return (
     <div className="grid-1-2">
