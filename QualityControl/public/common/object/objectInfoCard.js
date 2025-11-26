@@ -70,7 +70,7 @@ const infoRow = (key, value, infoRowAttributes) => {
       hasValue
         ? infoRowAttributes(formattedKey, formattedValue)
         : {},
-      formattedValue
+      formattedValue,
     ),
   ]);
 };
@@ -122,7 +122,8 @@ const infoPretty = (key, value) => {
 
 /**
  * Default function to configure the info row vnode attributes
- * @param {Notification} notification - Notification API
+ * @typedef {import('/js/src/index.js').Notification} Notification
+ * @param {Notification} notification - Notification API from WebUI framework
  * @returns {function(string, string): object} object containing the constructed vnode attributes
  */
 export const defaultRowAttributes = (notification) =>
