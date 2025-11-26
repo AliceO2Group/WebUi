@@ -16,13 +16,13 @@ import { type WindowInterface } from './window.d';
 import { useFullWindowLogic } from '../hooks/useWindowLogic';
 
 // Used to represent an alert message
-// key might be used to force re-mounting the component for repeated alerts
+// Key might be used to force re-mounting the component for repeated alerts
 export interface AlertType {
-    key: number;
-    title: string;
-    message: string;
-    success: boolean;
-  }
+  key: number;
+  title: string;
+  message: string;
+  success: boolean;
+}
 
 /**
  * Alert
@@ -47,8 +47,8 @@ const Alert = (props: WindowInterface) => {
 
   const { className } = props;
   const { ui_elements: { title, content, closeIcon } } = useFullWindowLogic(props);
-  
-  const {open} = props;
+
+  const { open } = props;
   if (!open) {
     return null;
   }

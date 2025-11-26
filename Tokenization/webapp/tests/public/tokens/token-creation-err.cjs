@@ -64,7 +64,7 @@ describe('token creation unsuccessful', function() {
       await opt2.click();
 
       await this.button.click();
-      const alert = await page.waitForSelector('.alert')
+      const alert = await page.waitForSelector('.alert');
       const alertContent = await alert.evaluate(el => el.textContent);
       assert.ok(alertContent.includes('Expiration time', 'HTTP methods'));
     });

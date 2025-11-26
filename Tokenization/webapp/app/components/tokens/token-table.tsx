@@ -95,7 +95,7 @@ export function TokenTable({ tokens }: { tokens: Token[] }) {
   const [openA, setOpenA] = useState<boolean>(false); // Used for alert logic
   const [tokenId, setTokenId] = useState<string>('');
   const auth = useAuth('admin');
-  const [key, setKey] = useState<number>(0); // used to force re-mount of Alert component
+  const [key, setKey] = useState<number>(0); // Used to force re-mount of Alert component
 
   const successInfo = {
     title: 'Token deleted',
