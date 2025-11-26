@@ -17,7 +17,7 @@ import { spinner } from '../common/spinner.js';
 import { draw } from '../common/object/draw.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
 import virtualTable from './virtualTable.js';
-import { qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
+import { defaultRowAttributes, qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
 import { downloadButton } from '../common/downloadButton.js';
 import { resizableDivider } from '../common/resizableDivider.js';
 
@@ -124,7 +124,7 @@ const drawPlot = (model, object) => {
     h('', { style: 'height:77%;' }, draw(model.object, name, { stat: true })),
     h('.scroll-y', {}, [
       h('.w-100.flex-row', { style: 'justify-content: center' }, h('.w-80', timestampSelectForm(model))),
-      qcObjectInfoPanel(object, { 'font-size': '.875rem;' }),
+      qcObjectInfoPanel(object, { 'font-size': '.875rem;' }, defaultRowAttributes(model.notification)),
     ]),
   ]);
 };
