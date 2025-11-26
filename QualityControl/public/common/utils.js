@@ -138,3 +138,36 @@ export function setBrowserTabTitle(title = undefined) {
 export function hasMinimumRoleAccess(userRoles, requiredRole) {
   return userRoles.some((role) => isUserRoleSufficient(role, requiredRole));
 }
+
+/**
+ * Method to check if connection is secure to enable certain improvements
+ * e.g navigator.clipboard, notifications, service workers
+ * @returns {boolean} - whether window is in secure context
+ */
+export function isContextSecure() {
+  return window.isSecureContext;
+}
+
+/**
+ * Asynchronously writes the given text value to the system clipboard
+ * @param {string} value - The text string to be copied to the clipboard
+ * @returns {Promise<void>} - A Promise that resolves with no value when the text has been successfully copied.
+ * The promise is rejected if the operation fails (e.g., due to lack of user permission
+ * or an insecure context)
+ */
+export function copyToClipboard(value) {
+  return navigator.clipboard.writeText(value);
+}
+
+/**
+ * Converts a camelCase string to a human-readable Title Case string.
+ * It inserts a space before every uppercase letter and uppercase the
+ * first character of the resulting string.
+ * @param {string} text - the camelCase string to tranform (e.g. 'lastModified')
+ * @returns {string} - the formatted Title Case string (e.g. `Last Modified')
+ */
+export const camelToTitleCase = (text) => {
+  const spaced = text.replace(/([A-Z])/g, ' $1');
+  const titleCase = spaced.charAt(0).toUpperCase() + spaced.slice(1);
+  return titleCase;
+};
