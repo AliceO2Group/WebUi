@@ -32,7 +32,7 @@ export default function ActionBlock({ tokenId, onClick }: ActionBlockProps) {
   return (
     <div>
       <button
-        className="bg-danger btn-sm level5"
+        className="bg-danger btn-sm static"
         onClick={onClick}
         aria-label={`Delete token ${tokenId}`}
         title="Delete token"

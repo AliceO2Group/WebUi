@@ -7,15 +7,17 @@ import { FormInput } from "../form/form-input";
 export function TokenFilters() {
 
     const [services, setServices] = useState<OptionType[]>([]);
-    const [firstSelectedService, setFirstSelectedService] = useState<string>('');
-    const [secondSelectedService, setSecondSelectedService] = useState<string>('');
+    const [firstSelectedService, setFirstSelectedService] = useState<string[]>([]);
+    const [secondSelectedService, setSecondSelectedService] = useState<string[]>([]);
     const [httpMethods, setHttpMethods] = useState<string[]>([]);
-    const [expirationDate, setExpirationDate] = useState<string>('');
-    const [issueDate, setIssueDate] = useState<string>('');
+    const [expirationDateMin, setExpirationDateMin] = useState<string>('');
+    const [expirationDateMax, setExpirationDateMax] = useState<string>('');
+    const [issueDateMin, setIssueDateMin] = useState<string>('');
+    const [issueDateMax, setIssueDateMax] = useState<string>('');
     const [ordering, setOrdering] = useState<string[]>([]);
 
     const columns = [
-        "ID", "Service From", "Service To", "HTTP Method", "Issue Date", "Expiration Date", "Tags"
+        "ID", "Issue Date", "Expiration Date"
     ]
     const orderingOptions = []
     for (const col of columns) {
@@ -39,10 +41,10 @@ export function TokenFilters() {
     return <div style={{transform: "scaleY(0.95)"}}> 
     <div className="flex-row g2">
         <div className="flex-grow ">
-            <FormSelect id='first-selected-service' label="Service From:" options={services} value={firstSelectedService} setValue={setFirstSelectedService}/>
+            <FormSelectMulti id='first-selected-service' label="Service From:" options={services} value={firstSelectedService} setValue={setFirstSelectedService}/>
         </div>
         <div className="flex-grow">
-            <FormSelect id='second-selected-service' label="Service To:" options={services} value={secondSelectedService} setValue={setSecondSelectedService} />
+            <FormSelectMulti id='second-selected-service' label="Service To:" options={services} value={secondSelectedService} setValue={setSecondSelectedService} />
         </div>
         <div className='flex-grow'>
             <FormSelectMulti id='http-methods' label="HTTP Methods:" options={[
@@ -56,25 +58,54 @@ export function TokenFilters() {
     <div className="flex-row g2">
         <div className="flex-grow">
             <FormInput 
-            labelText="Expiration Date:" 
+            labelText="Expiration Date (min):" 
             inputProps={{
                 type: "datetime-local"
             }}
-            value={expirationDate}
-            setValue={setExpirationDate}
+            value={expirationDateMin}
+            setValue={setExpirationDateMin}
+            />
+        </div>
+            <div className="flex-grow">
+            <FormInput 
+            labelText="Expiration Date (max):" 
+            inputProps={{
+                type: "datetime-local"
+            }}
+            value={expirationDateMax}
+            setValue={setExpirationDateMax}
             />
         </div>
         <div className="flex-grow">
             <FormInput 
-            labelText="Issue Date:"
+            labelText="Issue Date (min):"
             inputProps={{
                 type: "datetime-local"
             }}
-            value={issueDate}
-            setValue={setIssueDate}
+            value={issueDateMin}
+            setValue={setIssueDateMin}
             />
         </div>
+
         <div className="flex-grow">
+            <FormInput 
+            labelText="Issue Date (max):"
+            inputProps={{
+                type: "datetime-local"
+            }}
+            value={issueDateMax}
+            setValue={setIssueDateMax}
+            />
+        </div>
+    </div>
+    <div className="flex-row justify-between">
+        <div className="flex-row self-center">
+            <div>
+                <button className="btn btn-primary">Apply Filters</button>
+                <button className="btn btn-danger">Clear Filters</button>
+            </div>
+        </div>
+        <div className="w-85">
             <FormSelectMulti 
                     id='tags' 
                     label="Order by:" 
@@ -84,10 +115,6 @@ export function TokenFilters() {
             />
         </div>
     </div>
-    <div className="flex-row g2 mv1">
-        <button className="btn btn-primary">Apply Filters</button>
-        <button className="btn btn-danger">Clear Filters</button>
-    </div>
-    
+
     </div>;
 }

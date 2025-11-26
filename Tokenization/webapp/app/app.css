@@ -79,3 +79,6 @@
     user-select: none; 
 }
 
+.static {
+    position: static;
+}
