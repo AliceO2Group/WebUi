@@ -19,8 +19,24 @@ import { ConnectionManager } from '../../../client/connectionManager/ConnectionM
 import { ConnectionDirection, DuplexMessageEvent } from '../../../models/message.model';
 import { ConnectionStatus } from '../../../models/connection.model';
 import { Command } from 'models/commands.model';
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
+import path from 'path';
 
 describe('RevokeToken', () => {
+  const protoPath = path.join(__dirname, '..', '..', '..', '..', '..', 'proto', 'wrapper.proto');
+  const packageDef = protoLoader.loadSync(protoPath, {
+    keepCase: true,
+    longs: String,
+    enums: String,
+    defaults: true,
+    oneofs: true,
+  });
+
+  const proto = grpc.loadPackageDefinition(packageDef) as any;
+  const wrapper = proto.webui.tokenization;
+  const peerCtor = wrapper.Peer2Peer;
+
   function createEventMessage(targetAddress: string) {
     return {
       event: DuplexMessageEvent.MESSAGE_EVENT_REVOKE_TOKEN,
@@ -45,7 +61,7 @@ describe('RevokeToken', () => {
 
   it('should revoke token when connection found in sendingConnections', async () => {
     const targetAddress = 'peer-123';
-    const conn = new Connection('valid-token', targetAddress, ConnectionDirection.SENDING);
+    const conn = new Connection('valid-token', targetAddress, ConnectionDirection.SENDING, peerCtor);
     (manager as any).sendingConnections!.set(targetAddress, conn);
 
     const handler = new RevokeTokenHandler(manager);
@@ -59,7 +75,7 @@ describe('RevokeToken', () => {
 
   it('should revoke token when connection found in receivingConnections', async () => {
     const targetAddress = 'peer-456';
-    const conn = new Connection('valid-token', targetAddress, ConnectionDirection.RECEIVING);
+    const conn = new Connection('valid-token', targetAddress, ConnectionDirection.RECEIVING, peerCtor);
     (manager as any).receivingConnections.set(targetAddress, conn);
 
     const handler = new RevokeTokenHandler(manager);
