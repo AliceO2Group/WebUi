@@ -54,11 +54,8 @@ export default (model) => {
       })),
       object.selected ? [
         resizableDivider((newWidthPercent) => model.object.setLeftPanelWidthPercent(newWidthPercent)),
-        h('.animate-width.scroll-y', {
+        h('.animate-width.scroll-y.flex-grow', {
           key: `object-panel-${leftPanelWidthPercent}`,
-          style: {
-            width: `calc(${100 - leftPanelWidthPercent}% - 10px)`,
-          },
         }, objectPanel(model)),
       ] : null,
     ]),
