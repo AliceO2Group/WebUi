@@ -9,6 +9,31 @@ on:
       - 'dev'
 
 jobs:
+  central-certificates-creation:
+    needs: lint-check-backend
+    name: Central System backend tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22.x'
+
+      - name: Generate test Vault certificates
+        run: |
+          bash Tokenization/scripts/generate-test-vault-certs.sh
+
+          echo "VAULT_CACERT_B64=$(base64 -w0 Tokenization/docker/ca/ca.crt)" >> $GITHUB_ENV
+          echo "VAULT_CENTRAL_SYSTEM_CERT_B64=$(base64 -w0 Tokenization/docker/vault/central-system.crt)" >> $GITHUB_ENV
+          echo "VAULT_CENTRAL_SYSTEM_KEY_B64=$(base64 -w0 Tokenization/docker/vault/central-system.key)" >> $GITHUB_ENV
+
+          echo "VAULT_ADDR=https://vault.local:9300" >> $GITHUB_ENV
+          echo "VAULT_AUTH_METHOD=cert" >> $GITHUB_ENV
+          echo "VAULT_ROLE=central-system" >> $GITHUB_ENV
+
   lint-check-backend:
     name: Check eslint rules for backend on ubuntu-latest
     runs-on: ubuntu-latest
@@ -35,7 +60,9 @@ jobs:
       - run: (cd Tokenization/webapp; npm run lint)
 
   ui-test:
-    needs: lint-check-webapp
+    needs: 
+      - lint-check-webapp
+      - central-certificates-creation
     name: UI-tests for webapp application
     runs-on: ubuntu-latest
     timeout-minutes: 6
@@ -48,7 +75,9 @@ jobs:
       - run: (cd Tokenization/webapp; npm run docker:test)
 
   central-system-test:
-    needs: lint-check-backend
+    needs: 
+      - lint-check-backend
+      - central-certificates-creation
     name: Central System backend tests
     runs-on: ubuntu-latest
     timeout-minutes: 6
