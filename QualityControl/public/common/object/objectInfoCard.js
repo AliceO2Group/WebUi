@@ -61,17 +61,11 @@ const infoRow = (key, value, infoRowAttributes) => {
   const formattedValue = infoPretty(key, value);
   const formattedKey = getUILabel(key);
 
-  const hasValue = value != null && value !== '' && (!Array.isArray(value) || value.length);
+  const hasValue = value != null && value !== '' && (!Array.isArray(value) || value.length === 0);
 
   return h(`.flex-row.g2.info-row${highlightedClasses}`, [
     h('b.w-25.w-wrapped', formattedKey),
-    h(
-      '.w-75.cursor-pointer',
-      hasValue
-        ? infoRowAttributes(formattedKey, formattedValue)
-        : {},
-      formattedValue,
-    ),
+    h('.w-75.cursor-pointer', hasValue && infoRowAttributes(formattedKey, formattedValue), formattedValue),
   ]);
 };
 
