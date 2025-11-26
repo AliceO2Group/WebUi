@@ -35,7 +35,6 @@ export enum DuplexMessageEvent {
  * @property DUPLEX: Indicates a connection that can both send and receive messages.
  */
 export enum ConnectionDirection {
-  UNSPECIFIED = 'UNSPECIFIED',
   SENDING = 'SENDING',
   RECEIVING = 'RECEIVING',
   DUPLEX = 'DUPLEX',
@@ -70,6 +69,5 @@ export interface TokenMessage {
  */
 export interface DuplexMessageModel {
   event: DuplexMessageEvent;
-  newToken?: TokenMessage;
-  revokeToken?: TokenMessage;
+  payload: TokenMessage;
 }
