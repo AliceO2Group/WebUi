@@ -6,9 +6,8 @@ import { h } from '/js/src/index.js';
  * @returns {vnode} - Virtual node element
  */
 export const resizableDivider = (onResize) =>
-  h('.bg-gray-light.flex-column.justify-center.items-center', {
+  h('.flex-column.justify-center.items-cente.divider', {
     style: {
-      width: '15px',
       cursor: 'col-resize',
     },
     oncreate: (vnode) => {
@@ -55,11 +54,4 @@ export const resizableDivider = (onResize) =>
 
       vnode.dom.addEventListener('mousedown', handleMouseDown);
     },
-  }, [
-    h('div.bg-gray.br1', {
-      style: {
-        width: '6px',
-        height: '400px',
-      },
-    }),
-  ]);
+  }, [h('.bg-gray.h-100.divider')]);

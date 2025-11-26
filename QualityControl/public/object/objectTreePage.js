@@ -52,12 +52,12 @@ export default (model) => {
         },
         Failure: () => null, // Notification is displayed
       })),
-      object.selected ? [
+      object.selected && [
         resizableDivider((newWidthPercent) => model.object.setLeftPanelWidthPercent(newWidthPercent)),
         h('.animate-width.scroll-y.flex-grow', {
           key: `object-panel-${leftPanelWidthPercent}`,
         }, objectPanel(model)),
-      ] : null,
+      ],
     ]),
     h('.f6.status-bar.ph1.flex-row', [
       statusBarLeft(model),
