@@ -24,7 +24,7 @@ const SORTING_BUTTON_PATH = 'header > div > div > div:nth-child(3) > div > butto
  * @param {timeout} timeout - Timeout PER test; default 100
  * @param {object} testParent - Node.js test object which ensures sub-tests are being awaited
  */
-export const objectTreePageTests = async (url, page, timeout = 11000, testParent) => {
+export const objectTreePageTests = async (url, page, timeout = 5000, testParent) => {
   await testParent.test('should successfully load objectTree page "/"', { timeout }, async () => {
     await page.goto(`${url}${OBJECT_TREE_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
     const location = await page.evaluate(() => window.location);
