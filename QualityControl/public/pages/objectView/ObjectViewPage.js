@@ -13,12 +13,13 @@
  */
 
 import { h } from '/js/src/index.js';
-import { draw } from './../../common/object/draw.js';
+import { drawObject } from './../../common/object/draw.js';
 import { spinner } from './../../common/spinner.js';
 import { errorDiv } from '../../common/errorDiv.js';
 import { dateSelector } from '../../common/object/dateSelector.js';
-import { qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
+import { defaultRowAttributes, qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
 import { downloadButton } from '../../common/downloadButton.js';
+import { visibilityToggleButton } from '../../common/visibilityButton.js';
 
 /**
  * Shows a page to view an object on the whole page
@@ -41,17 +42,20 @@ const objectPlotAndInfo = (objectViewModel) =>
     Failure: (error) => errorDiv(error),
     Success: (qcObject) => {
       const {
-        id, validFrom, ignoreDefaults = false, drawOptions = [], displayHints = [], layoutDisplayOptions = [], versions,
+        id,
+        validFrom,
+        ignoreDefaults = false,
+        drawOptions = [],
+        displayHints = [],
+        layoutDisplayOptions = [],
+        versions,
       } = qcObject;
       const drawingOptions = ignoreDefaults ?
         layoutDisplayOptions
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
+      const isObjectInfoVisible = objectViewModel.objectInfoVisible;
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.items-center.h-10', [
-          downloadButton({
-            href: model.objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
-            title: 'Download object',
-          }),
           h(
             '.w-40.p2.f6',
             dateSelector(
@@ -60,12 +64,30 @@ const objectPlotAndInfo = (objectViewModel) =>
               objectViewModel.updateObjectSelection.bind(objectViewModel),
             ),
           ),
+          h('.item-action-row.flex-row.g1.p2', [
+            downloadButton({
+              href: objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
+              title: 'Download object',
+            }),
+            visibilityToggleButton(
+              {
+                isVisible: isObjectInfoVisible,
+                title: 'Toggle object information visibility',
+              },
+              () => objectViewModel.toggleObjectInfoVisible(),
+            ),
+          ]),
         ]),
         h('.w-100.flex-row.g2.m2', { style: 'height: 0;flex-grow:1' }, [
-          h('.w-70', draw(qcObject, {}, drawingOptions)),
-          h('.w-30.scroll-y', [
+          h('.flex-grow', {
+            // Key change forces redraw when toggling info panel
+            key: isObjectInfoVisible ? 'objectPlotWithoutInfoPanel' : 'objectPlotWithInfoPanel',
+          }, drawObject(qcObject, {}, drawingOptions)),
+          isObjectInfoVisible && h('.scroll-y.w-30', {
+            key: 'objectInfoPanel',
+          }, [
             h('h3.text-center', 'Object information'),
-            qcObjectInfoPanel(qcObject, { gap: '.5em' }),
+            qcObjectInfoPanel(qcObject, { gap: '.5em' }, defaultRowAttributes(model.notification)),
           ]),
         ]),
       ]);

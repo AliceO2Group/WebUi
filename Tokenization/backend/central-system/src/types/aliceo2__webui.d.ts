@@ -12,11 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
-import { type Config } from 'prettier';
-
-const config: Config = {
-  printWidth: 100,
-  trailingComma: 'es5',
-};
-
-export default config;
+declare module '@aliceo2/web-ui' {
+  export const LogManager: any;
+  export const InvalidInputError: any;
+  export function updateAndSendExpressResponseFromNativeError(
+    res: any,
+    error: any
+  ): void;
+}
