@@ -13,7 +13,7 @@
  */
 
 import { h } from '/js/src/index.js';
-import { draw } from '../../object/objectDraw.js';
+import { draw } from '../../common/object/draw.js';
 import { iconArrowLeft, iconArrowTop } from '/js/src/icons.js';
 import { minimalObjectInfo } from './panels/minimalObjectInfo.js';
 import { objectInfoResizePanel } from './panels/objectInfoResizePanel.js';
@@ -207,7 +207,7 @@ const drawComponent = (model, tabObject) => {
         display: 'flex',
         'flex-direction': 'column',
       },
-    }, draw(model, tabObject, {})),
+    }, draw(model.object, tabObject.name)),
     objectInfoResizePanel(model, tabObject),
     displayTimestamp && minimalObjectInfo(runNumber, lastModified),
   ]);
