@@ -21,7 +21,7 @@ import { Tab, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActio
 import ActionBlock from '~/components/tokens/action-block';
 import { useSetHeader } from '~/ui/header/headerContext';
 import { TabsNavbar } from '~/ui/navbar';
-import { useAuth } from '~/hooks/session';
+import { useAuth } from '~/utils/session';
 
 /**
  * Client loader that fetches all tokens from the API.
