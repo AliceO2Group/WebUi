@@ -364,7 +364,13 @@ export default class QCObject extends BaseViewModel {
    * @param {object} [preloadedData] - optional object data already fetched
    *  @returns {undefined}
    */
-  async select(object, preloadedData = null) {
+  async select(object = undefined, preloadedData = null) {
+    if (!object) {
+      this.selected = undefined;
+      this.notify();
+      return;
+    }
+
     let foundObject = this.currentList.find((obj) => obj.name === object.name);
 
     if (foundObject && this.list && this.list.length > 0) {

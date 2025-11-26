@@ -55,7 +55,7 @@ export class ObjectController {
    * @param {Response} res - HTTP response object to provide information on request
    * @returns {void}
    */
-  async getObjects(req, res) {
+  async getObjectsHandler(req, res) {
     try {
       const { prefix, fields, filters = {}, inRunMode = false } = req.query;
 
@@ -85,7 +85,7 @@ export class ObjectController {
    * @param {Response} res - ExpressJs res object.
    * @returns {void}
    */
-  async getDownloadObjects(req, res) {
+  async getDownloadObjectsHandler(req, res) {
     let objectIds = undefined;
     try {
       const validated = await ObjectGetDownloadDTO.validateAsync(req.query);
@@ -116,7 +116,7 @@ export class ObjectController {
    * @param {Response} res - HTTP response object to provide information on request
    * @returns {Promise<void>}
    */
-  async getObjectContent(req, res) {
+  async getObjectContentHandler(req, res) {
     try {
       const { path, validFrom, filters, id } = req.query;
 
@@ -141,7 +141,7 @@ export class ObjectController {
    * @param {Response} res - HTTP response object to provide information on request
    * @returns {Promise<void>}
    */
-  async getObjectById(req, res) {
+  async getObjectByIdHandler(req, res) {
     try {
       const qcObjectId = req.params.id;
       const { validFrom, filters, id } = req.query;

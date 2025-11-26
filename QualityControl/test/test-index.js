@@ -182,7 +182,7 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       async (testParent) => await aboutPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
     test('should successfully import and run tests for filter', async (testParent) =>
-      filterTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent));
+      await filterTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent));
 
     test('should successfully use run mode when available', async (testParent) =>
       await runModeTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent));

@@ -135,15 +135,15 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const result = await page.evaluate((commonSelectorPath) => {
         const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > button`);
         const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div`;
-        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div > div`).innerText;
-        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > b`).innerText;
+        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(1) > div`).innerText;
+        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(1) > b`).innerText;
         const lastModifiedTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`).innerText;
         return { title, pathTitle, objectPath, lastModifiedTitle };
       }, commonSelectorPath);
       strictEqual(result.title, 'View details about histogram');
-      strictEqual(result.pathTitle, 'path');
+      strictEqual(result.pathTitle, 'Path');
       strictEqual(result.objectPath, 'qc/test/object/1');
-      strictEqual(result.lastModifiedTitle, 'lastModified');
+      strictEqual(result.lastModifiedTitle, 'Last Modified');
     });
 
   await testParent.test(
@@ -156,15 +156,15 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const result = await page.evaluate((commonSelectorPath) => {
         const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > button`);
         const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div`;
-        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div`).innerText;
-        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > b`).innerText;
+        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(1) > div`).innerText;
+        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(1) > b`).innerText;
         const lastModifiedTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`).innerText;
         return { title, pathTitle, objectPath, lastModifiedTitle };
       }, commonSelectorPath);
       strictEqual(result.title, 'View details about histogram');
-      strictEqual(result.pathTitle, 'path');
+      strictEqual(result.pathTitle, 'Path');
       strictEqual(result.objectPath, 'qc/test/object/1');
-      strictEqual(result.lastModifiedTitle, 'lastModified');
+      strictEqual(result.lastModifiedTitle, 'Last Modified');
     },
   );
 
