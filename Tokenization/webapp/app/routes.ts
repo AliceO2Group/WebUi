@@ -23,6 +23,10 @@ export default [
       // Route('table', 'routes/tokens/table.tsx'),
       route('new', 'routes/tokens/create.tsx'),
     ]),
+    ...prefix('certs', [
+      index('routes/certs/overview.tsx'),
+      route('new', 'routes/certs/create.tsx'),
+    ]),
     route('*', 'routes/404.tsx'),
   ]),
 
