@@ -113,11 +113,15 @@ ul.multiselect-list {
   position: relative;
 } */
 
+.my-input label {
+    margin: 0;
+}
+
 .my-input input {
-  width: 40%;
+  width: 100%;
   padding: 8px 12px;
   font-size: 20px;
-  border: 1px solid #ccc;
+  border: 2px solid black;
   border-radius: 6px;
   background-color: #fff;
   color: #333;

@@ -68,7 +68,7 @@ function SelectedOption({ value, label, handleDeselect }: SelectedOptionListProp
  */
 export function SelectedList({ selected, handleDeselect }: SelectedOptionListProps) {
   return (
-    <ul className='flex-row justify-between multiselect-list'>
+    <ul className='flex-row wrap multiselect-list'>
       {
         (selected as Option[])
           .map((s: Option) =>

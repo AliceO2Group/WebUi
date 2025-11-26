@@ -16,6 +16,10 @@
     --color-transparent: rgba(0,0,0,0)
 }
 
+.wrap {
+    flex-wrap: wrap;
+}
+
 .bg-transparent {
     background-color: var(--color-transparent);
 }
@@ -75,3 +79,6 @@
     user-select: none; 
 }
 
+.static {
+    position: static;
+}

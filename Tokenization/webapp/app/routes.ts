@@ -20,7 +20,7 @@ export default [
     ...prefix('tokens', [
       index('routes/tokens/overview.tsx'),
       route(':tokenId', 'routes/tokens/details.tsx'),
-      // Route('table', 'routes/tokens/table.tsx'),
+      route('table', 'routes/tokens/table.tsx'),
       route('new', 'routes/tokens/create.tsx'),
     ]),
     ...prefix('certs', [
