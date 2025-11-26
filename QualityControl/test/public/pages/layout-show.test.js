@@ -135,7 +135,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const result = await page.evaluate((commonSelectorPath) => {
         const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > button`);
         const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div`;
-        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(1) > div > div`).innerText;
+        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(1) > div`).innerText;
         const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(1) > b`).innerText;
         const lastModifiedTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`).innerText;
         return { title, pathTitle, objectPath, lastModifiedTitle };
