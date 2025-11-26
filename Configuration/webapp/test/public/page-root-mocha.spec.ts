@@ -172,28 +172,28 @@ describe('`pageConfiguration` test-suite', function () {
 
     it('should differentiate between files and folders', async function () {
       await Promise.all([
-        page.waitForSelector(SELECTORS.folderIcon),
-        page.waitForSelector(SELECTORS.fileIcon),
+        page?.waitForSelector(SELECTORS.folderIcon),
+        page?.waitForSelector(SELECTORS.fileIcon),
       ]);
 
-      const folderCount = await page.$$eval(SELECTORS.folderIcon, (els) => els.length);
+      const folderCount = await page?.$$eval(SELECTORS.folderIcon, (els) => els.length) ?? 0;
       assert.ok(folderCount > 0, 'Should render at least one folder');
     });
 
     it('should expand folder on click', async function () {
-      const initialCount = await page.$$eval(SELECTORS.listItem, (els) => els.length);
+      const initialCount = await page?.$$eval(SELECTORS.listItem, (els) => els.length) ?? 0;
 
-      await page.waitForSelector(SELECTORS.folderIcon);
-      await page.click(SELECTORS.folderIcon);
+      await page?.waitForSelector(SELECTORS.folderIcon);
+      await page?.click(SELECTORS.folderIcon);
 
-      await page.waitForFunction(
+      await page?.waitForFunction(
         (selector, startCount) => document.querySelectorAll(selector).length > startCount,
         {},
         SELECTORS.listItem,
         initialCount,
       );
 
-      const finalCount = await page.$$eval(SELECTORS.listItem, (els) => els.length);
+      const finalCount = await page?.$$eval(SELECTORS.listItem, (els) => els.length) ?? 0;
       assert.ok(finalCount > initialCount, 'List should have more items after expanding');
     });
   });

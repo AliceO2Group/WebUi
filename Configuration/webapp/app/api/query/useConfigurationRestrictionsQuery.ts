@@ -23,8 +23,6 @@ export const useConfigurationRestrictionsQuery = (configuration: string) =>
     queryKey: [CONFIGURATION_RESTRICTIONS_QUERY_KEY, configuration],
     queryFn: async () =>
       axiosInstance
-        .get<FormRestrictions>(
-          `configurations/restrictions/${configuration}`,
-        )
+        .get<FormRestrictions>(`configurations/restrictions/${configuration}`)
         .then((response) => response.data),
   });

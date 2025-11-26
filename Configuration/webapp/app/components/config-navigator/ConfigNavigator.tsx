@@ -36,7 +36,8 @@ const buildTree = (paths: string[]): Record<string, TreeNode> => {
     parts.forEach((part, index) => {
       const isLast = index === parts.length - 1;
 
-      const separator = currentFullPathBuilder.endsWith('/') || currentFullPathBuilder === '' ? '' : '/';
+      const separator =
+        currentFullPathBuilder.endsWith('/') || currentFullPathBuilder === '' ? '' : '/';
       currentFullPathBuilder += `${separator}${part}`;
 
       if (!currentLevel[part]) {
@@ -77,7 +78,9 @@ export const ConfigNavigator = () => {
 
   useEffect(() => {
     if (configKeys && configKeys.length > 0) {
-      const pathToCheck = pathname.startsWith(ROUTE_PREFIX) ? pathname.slice(ROUTE_PREFIX.length) : pathname;
+      const pathToCheck = pathname.startsWith(ROUTE_PREFIX)
+        ? pathname.slice(ROUTE_PREFIX.length)
+        : pathname;
       const decodedPath = decodeURIComponent(pathToCheck);
 
       if (configKeys.includes(decodedPath)) {
