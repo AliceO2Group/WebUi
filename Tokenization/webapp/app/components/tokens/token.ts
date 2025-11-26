@@ -13,7 +13,7 @@
  */
 
 export interface Token {
-  tokenId: string ;
+  id: string ;
   serviceFrom: string;
   serviceTo: string;
   exp: string;

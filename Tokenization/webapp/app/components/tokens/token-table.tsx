@@ -22,6 +22,7 @@ import ActionBlock from './action-block';
 import Modal from '../window/modal';
 import Alert from '../window/alert';
 import { WindowTitle, WindowContent, WindowButtonCancel, WindowButtonAccept, WindowCloseIcon } from '../window/window-objects';
+import { TableBase } from '../table/table-base';
 
 /**
  * TokenTableBase
@@ -47,38 +48,17 @@ function TokenTableBase({
   onActionClick: (tokenId: string) => void;
 }) {
 
-const wrappedColumns = columns.map((col) =>
+  const wrappedColumns = columns.map((col) =>
     col.key === 'actions'
       ? {
-          ...col,
-          render: (t: Token) => <ActionBlock tokenId={t.tokenId} onClick={() => onActionClick(t.tokenId)} />,
-        }
-      : col
+        ...col,
+        render: (t: Token) => <ActionBlock tokenId={t.id} onClick={() => onActionClick(t.id)} />,
+      }
+      : col,
   );
 
   return (
-    <div className="scroll-auto">
-      <table className="table">
-        <thead>
-          <tr>
-            {columns.map((c) => (
-              <th key={c.key}>{c.label}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {tokens.map((token: Token) => (
-            <tr key={token.tokenId}>
-              {wrappedColumns.map((col) => (
-                <td key={col.key}>
-                  {col.render ? col.render(token) : String((token as any)[col.key] ?? '')}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <TableBase<Token> data={tokens} columns={wrappedColumns} />
   );
 }
 
@@ -156,14 +136,14 @@ function TokenTableContainer({
  */
 export function TokenTable({ tokens }: { tokens: Token[] }) {
   const columns = [
-    { key: 'tokenId', label: 'ID', render: (t: Token) => <Link to={`/tokens/${t.tokenId}`}>{t.tokenId}</Link> },
+    { key: 'id', label: 'ID', render: (t: Token) => <Link to={`/tokens/${t.id}`}>{t.id}</Link> },
     { key: 'serviceFrom', label: 'Service From' },
     { key: 'serviceTo', label: 'Service To' },
     { key: 'exp', label: 'Expires at' },
     {
       key: 'actions',
       label: 'Actions',
-      render: (t: Token) => <ActionBlock tokenId={t.tokenId} onClick={() => { /* delegated via container */ }} />,
+      render: (t: Token) => <ActionBlock tokenId={t.id} onClick={() => { /* Delegated via container */ }} />,
     },
   ];
 
@@ -178,7 +158,7 @@ export function TokenTable({ tokens }: { tokens: Token[] }) {
  */
 export function TokenTableWithIssuedAt({ tokens }: { tokens: Token[] }) {
   const columns = [
-    { key: 'tokenId', label: 'ID', render: (t: Token) => <Link to={`/tokens/${t.tokenId}`}>{t.tokenId}</Link> },
+    { key: 'id', label: 'ID', render: (t: Token) => <Link to={`/tokens/${t.id}`}>{t.id}</Link> },
     { key: 'serviceFrom', label: 'Service From' },
     { key: 'serviceTo', label: 'Service To' },
     { key: 'iat', label: 'Issued at', render: (t: Token) => String((t as any).iat ?? '') },
@@ -187,10 +167,9 @@ export function TokenTableWithIssuedAt({ tokens }: { tokens: Token[] }) {
     {
       key: 'actions',
       label: 'Actions',
-      render: (t: Token) => <ActionBlock tokenId={t.tokenId} onClick={() => { /* delegated via container */ }} />,
+      render: (t: Token) => <ActionBlock tokenId={t.id} onClick={() => { /* Delegated via container */ }} />,
     },
   ];
-
 
   return <TokenTableContainer tokens={tokens} columns={columns} />;
 }
