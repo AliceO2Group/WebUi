@@ -167,7 +167,7 @@ export default tseslint.config(
       ],
       '@stylistic/function-paren-newline': [
         'error',
-        'multiline',
+        'multiline-arguments',
       ],
       '@stylistic/indent': [
         'error',
