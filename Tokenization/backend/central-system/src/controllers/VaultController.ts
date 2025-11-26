@@ -31,7 +31,6 @@ import { LogManager } from '@aliceo2/web-ui';
 import {
   SignPayload,
   VaultReadResponse,
-  VaultMetadataResponse,
   VaultKvWritePayload,
 } from '../types/vault_types.js';
 
