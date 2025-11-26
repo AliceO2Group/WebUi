@@ -86,9 +86,9 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       await page.evaluate(() => document.querySelector('#close-button').click());
       const selectedObject = await page.evaluate(() => model.object.selected);
       const numberOfChildren = await page.evaluate(() =>
-        document.querySelector('section > div > div > div:nth-child(2)').children.length);
+      document.querySelector('section > div > div').children.length);
       strictEqual(selectedObject, undefined);
-      strictEqual(numberOfChildren, 0);
+      strictEqual(numberOfChildren, 1); // Object tree child
     }
   );
 
