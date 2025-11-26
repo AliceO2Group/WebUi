@@ -24,7 +24,7 @@ jobs:
 
       - name: Generate test Vault certificates
         run: |
-          bash Tokenization/scripts/generate-test-vault-certs.sh
+          bash Tokenization/scripts/actions-certificates-creation.sh
 
           echo "VAULT_CACERT_B64=$(base64 -w0 Tokenization/docker/ca/ca.crt)" >> $GITHUB_ENV
           echo "VAULT_CENTRAL_SYSTEM_CERT_B64=$(base64 -w0 Tokenization/docker/vault/central-system.crt)" >> $GITHUB_ENV
