@@ -16,7 +16,7 @@
 
 const config = {
   printWidth: 100,
-  trailingComma: "es5",
+  trailingComma: "all",
   semi: true,
   singleQuote: true,
 };

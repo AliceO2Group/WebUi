@@ -18,7 +18,7 @@ const { ADMIN_TEST_TOKEN, TEST_URL } = require('../generateToken.js');
 
 describe(`'API - GET - /configurations/:key(*)' test suite`, () => {
   it('should return 200 with the configuration object for an existing key', async () => {
-    const expectedBody = { key: "value" };
+    const expectedBody = { key: 'value' };
     await request(`${TEST_URL}/api/configurations`)
       .get(`/key1?token=${ADMIN_TEST_TOKEN}`)
       .expect(200, expectedBody);
@@ -26,9 +26,9 @@ describe(`'API - GET - /configurations/:key(*)' test suite`, () => {
 
   it('should return 404 when the configuration key does not exist', async () => {
     const expectedError = {
-      message: "Configuration not found for key: nonexistent",
+      message: 'Configuration not found for key: nonexistent',
       status: 404,
-      title: "Not Found"
+      title: 'Not Found'
     };
     await request(`${TEST_URL}/api/configurations`)
       .get(`/nonexistent?token=${ADMIN_TEST_TOKEN}`)
@@ -37,9 +37,9 @@ describe(`'API - GET - /configurations/:key(*)' test suite`, () => {
 
   it('should return 400 when the key parameter is empty', async () => {
     const expectedError = {
-      message: "Missing configuration key",
+      message: 'Missing configuration key',
       status: 400,
-      title: "Invalid Input"
+      title: 'Invalid Input'
     };
     await request(`${TEST_URL}/api/configurations`)
       .get(`/%20?token=${ADMIN_TEST_TOKEN}`)
@@ -48,9 +48,9 @@ describe(`'API - GET - /configurations/:key(*)' test suite`, () => {
 
   it('should return 503  when Consul fails to respond', async () => {
     const expectedError = {
-      message: "Consul service unavailable",
+      message: 'Consul service unavailable',
       status: 503,
-      title: "Service Unavailable"
+      title: 'Service Unavailable'
     };
     await request(`${TEST_URL}/api/configurations`)
       .get(`/consul-failure?token=${ADMIN_TEST_TOKEN}`)
