@@ -319,6 +319,7 @@ export default class Model extends Observable {
    * Method to check if connection is secure to enable certain improvements
    * e.g navigator.clipboard, notifications, service workers
    * @returns {boolean} - whether window is in secure context
+   * @deprecated use `isContextSecure` from `public/common/utils.js`
    */
   isContextSecure() {
     return window.isSecureContext;

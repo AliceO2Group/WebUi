@@ -17,7 +17,7 @@ import { drawObject } from './../../common/object/draw.js';
 import { spinner } from './../../common/spinner.js';
 import { errorDiv } from '../../common/errorDiv.js';
 import { dateSelector } from '../../common/object/dateSelector.js';
-import { qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
+import { defaultRowAttributes, qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
 import { downloadButton } from '../../common/downloadButton.js';
 import { visibilityToggleButton } from '../../common/visibilityButton.js';
 
@@ -87,7 +87,7 @@ const objectPlotAndInfo = (objectViewModel) =>
             key: 'objectInfoPanel',
           }, [
             h('h3.text-center', 'Object information'),
-            qcObjectInfoPanel(qcObject, { gap: '.5em' }),
+            qcObjectInfoPanel(qcObject, { gap: '.5em' }, defaultRowAttributes(model.notification)),
           ]),
         ]),
       ]);
