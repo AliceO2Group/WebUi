@@ -141,3 +141,16 @@ export function isContextSecure() {
 export function copyToClipboard(value) {
   return navigator.clipboard.writeText(value);
 }
+
+/**
+ * Converts a camelCase string to a human-readable Title Case string.
+ * It inserts a space before every uppercase letter and uppercase the
+ * first character of the resulting string.
+ * @param {string} text - the camelCase string to tranform (e.g. 'lastModified')
+ * @returns {string} - the formatted Title Case string (e.g. `Last Modified')
+ */
+export const camelToTitleCase = (text) => {
+  const spaced = text.replace(/([A-Z])/g, ' $1');
+  const titleCase = spaced.charAt(0).toUpperCase() + spaced.slice(1);
+  return titleCase;
+};

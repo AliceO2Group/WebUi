@@ -13,7 +13,7 @@
  */
 
 import { h } from '/js/src/index.js';
-import { copyToClipboard, isContextSecure, prettyFormatDate } from './../utils.js';
+import { camelToTitleCase, copyToClipboard, isContextSecure, prettyFormatDate } from './../utils.js';
 
 const SPECIFIC_KEY_LABELS = {
   id: 'ID (etag)',
@@ -65,24 +65,14 @@ const infoRow = (key, value, infoRowAttributes) => {
 
   return h(`.flex-row.g2.info-row${highlightedClasses}`, [
     h('b.w-25.w-wrapped', formattedKey),
-    h('.w-75', {
-      ...hasValue && infoRowAttributes(formattedKey, formattedValue),
-      style: 'cursor: pointer; user-select: text;',
-    }, formattedValue),
+    h(
+      '.w-75.cursor-pointer',
+      hasValue
+        ? infoRowAttributes(formattedKey, formattedValue)
+        : {},
+      formattedValue
+    ),
   ]);
-};
-
-/**
- * Transforms a camelCase string into human-readable Title Case format,
- * inserts a space before every uppercase letter and ensures the first
- * character is capatilized
- * @param {string} key - key of the object info
- * @returns {string} - formatted label for the given key
- */
-const defaultKeyTransform = (key) => {
-  const spaced = key.replace(/([A-Z])/g, ' $1');
-  const titleCase = spaced.charAt(0).toUpperCase() + spaced.slice(1);
-  return titleCase;
 };
 
 /**
@@ -98,24 +88,36 @@ const getUILabel = (key) => {
     return SPECIFIC_KEY_LABELS[key];
   }
 
-  return defaultKeyTransform(key);
+  return camelToTitleCase(key);
 };
 
 /**
  * Parses the value and returns it in a specific format based on type
+ * safely handeling nulls and objects.
  * @param {string} key - key of the object info
  * @param {string|number|object|undefined} value - value of the object info
- * @returns {vnode} - value of object based on its type
+ * @returns {string} - string representation of the value passed
  */
 const infoPretty = (key, value) => {
+  if (value == null) {
+    return '-';
+  }
+
   if (DATE_FIELDS.includes(key)) {
     return prettyFormatDate(value);
-  } else if (Array.isArray(value)) {
+  }
+
+  if (Array.isArray(value)) {
     return value.length > 0
       ? value.join(', ')
       : '-';
   }
-  return h('', value);
+
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+
+  return String(value);
 };
 
 /**
@@ -133,12 +135,9 @@ export const defaultRowAttributes = (notification) =>
           return;
         }
 
-        notification.show('Value has been successfully copied to clipboard', 'success', 1500);
-        if (typeof value !== 'string') {
-          value = value.dom.textContent;
-        }
         try {
           await copyToClipboard(value);
+          notification.show('Value has been successfully copied to clipboard', 'success', 1500);
         } catch (error) {
           notification.show(`Failed to copy to clipboard: ${error.message}`, 'danger', 1500);
         }
