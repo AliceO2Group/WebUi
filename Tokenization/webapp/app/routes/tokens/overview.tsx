@@ -28,11 +28,15 @@ import { TokenTable } from '../../components/tokens/token-table';
  */
 export const clientLoader = async (): Promise<{ tokens: Promise<Token[]> }> => {
   const tokens = fetch('/api/tokens')
-    .then(response => {
+    .then(async response => {
       if (!response.ok) {
         throw new Error('An error occurred!');
       }
-      return response.json();
+      const json = await response.json();
+      if (Array.isArray(json)) {
+        return json.map((t: any) => ({ ...t, id: t.tokenId ?? t.id }));
+      }
+      return { ...json, id: json.tokenId ?? json.id };
     });
 
   return { tokens };

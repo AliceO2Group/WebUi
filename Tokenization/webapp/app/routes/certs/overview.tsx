@@ -13,6 +13,7 @@
  */
 
 import { Box1_2 } from '~/components/box';
+import { CertsTable } from '~/components/certs/certs-table';
 
 export const clientLoader = async () => ({});
 
@@ -23,10 +24,10 @@ export default function Overview() {
   return (
     <div className="grid-1-2">
       <Box1_2 link={null}>
-        <div className="p-4">
-          <h2 className="text-2xl font-bold mb-4">Certificates Overview</h2>
-          <p>This is where the certificates overview content will go.</p>
+        <div className="flex-row justify-center">
+          <h1> Registered services</h1>
         </div>
+        <CertsTable certs={[]} />
       </Box1_2>
       <Box1_2 link="/certs/new">
         <div className="p-4">

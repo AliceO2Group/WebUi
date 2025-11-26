@@ -32,7 +32,8 @@ const getToken = async (tokenId: number): Promise<Token> => {
   if (!response.ok) {
     throw data(`Failed to fetch token with token id ${tokenId}`, { status: response.status });
   }
-  return response.json();
+  const json = await response.json();
+  return { ...json, id: json.tokenId ?? json.id };
 };
 
 /**
@@ -73,7 +74,7 @@ export const clientLoader = async ({ params }: Route.ClientLoaderArgs): Promise<
  */
 export default function Details({ loaderData: { token, logs } }: Route.ComponentProps) {
 
-  const { tokenId, last4chars, issuer, iat, serviceFrom, serviceTo, exp } = token;
+  const { id, last4chars, issuer, iat, serviceFrom, serviceTo, exp } = token;
   const expirationDate = exp.split('T').reverse().join(' - ');
 
   const fields = [
@@ -86,7 +87,7 @@ export default function Details({ loaderData: { token, logs } }: Route.Component
   ];
 
   return <>
-    <h1>Token {tokenId} details</h1>
+    <h1>Token {id} details</h1>
     {fields.map((f) => (
       <p key={f.label}>
         {f.label}: <strong>{f.value ?? '—'}</strong>

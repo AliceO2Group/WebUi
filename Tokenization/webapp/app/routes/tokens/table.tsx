@@ -25,11 +25,16 @@ import { TokenFilters } from '~/components/tokens/token-filters';
 //eslint-disable-next-line jsdoc/require-jsdoc
 export function clientLoader() {
   const tokens = fetch('/api/tokens')
-    .then(response => {
+    .then(async response => {
       if (!response.ok) {
         throw new Error('An error occurred!');
       }
-      return response.json();
+      const json = await response.json();
+      if (Array.isArray(json)) {
+        return json.map((t: any) => ({ ...t, id: t.tokenId ?? t.id }));
+      }
+      return { ...json, id: json.tokenId ?? json.id };
+
     });
 
   return { tokens };
