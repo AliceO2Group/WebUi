@@ -10,11 +10,15 @@
     "watch:node": "nodemon --watch dist --ext js,json --exec \"node index.js\"",
     "dev": "npm run build && concurrently -k \"npm:watch:*\"",
     "start": "node index.js",
-    "test": "jest --runInBand",
     "docker:build": "cd ../.. && docker compose -f docker-compose.dev.yml -f docker-compose.yml build",
     "docker:up": "cd ../.. && docker compose -f docker-compose.dev.yml -f docker-compose.yml up",
     "docker:up:build": "npm run docker:build && npm run docker:up",
-    "docker:down": "cd ../.. && docker compose -f docker-compose.dev.yml -f docker-compose.yml down"
+    "docker:down": "cd ../.. && docker compose -f docker-compose.dev.yml -f docker-compose.yml down",
+    "test": "jest --runInBand --testPathIgnorePatterns=VaultController.integration.spec.ts",
+    "test:unit": "npm test",
+    "test:vault": "npm run docker:test:vault",
+    "docker:test:vault": "cd ../.. && docker compose -f docker-compose.dev.yml up --build --abort-on-container-exit central-tests && docker compose -f docker-compose.dev.yml down -v",
+    "test:all": "npm run test:unit && npm run test:vault"
   },
   "dependencies": {
     "@aliceo2/web-ui": "^2.8.4",

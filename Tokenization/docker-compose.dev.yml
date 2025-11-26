@@ -103,6 +103,27 @@ services:
       start_period: 20s
     restart: unless-stopped
 
+  central-tests:
+    image: node:22-alpine
+    working_dir: /var/workspace/central-system
+    volumes:
+      - ./backend:/var/workspace
+    env_file:
+      - ./backend/central-system/.env
+    environment:
+      VAULT_ADDR: https://vault.local:9300
+      VAULT_AUTH_METHOD: cert
+      VAULT_ROLE: central-system
+
+      VAULT_CACERT_B64: ${VAULT_CACERT_B64}
+      VAULT_CENTRAL_SYSTEM_CERT_B64: ${VAULT_CENTRAL_SYSTEM_CERT_B64}
+      VAULT_CENTRAL_SYSTEM_KEY_B64: ${VAULT_CENTRAL_SYSTEM_KEY_B64}
+
+    command: ['npm', 'run', 'test:vault']
+    depends_on:
+      vault-setup:
+        condition: service_completed_successfully
+
 volumes:
   database-data:
   vault-data:

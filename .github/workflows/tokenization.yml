@@ -1,4 +1,5 @@
 name: Tokenization
+
 on:
   pull_request:
     paths:
@@ -55,36 +56,60 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '22.x'
-      - run: (cd Tokenization/webapp; npm i )
-      - run: (cd Tokenization/webapp; npm run typecheck)
-      - run: (cd Tokenization/webapp; npm run lint)
+
+      - name: Install webapp dependencies
+        run: (cd Tokenization/webapp; npm i)
+
+      - name: Typecheck webapp
+        run: (cd Tokenization/webapp; npm run typecheck)
+
+      - name: Lint webapp
+        run: (cd Tokenization/webapp; npm run lint)
 
   ui-test:
-    needs: 
+    needs:
       - lint-check-webapp
-      - central-certificates-creation
     name: UI-tests for webapp application
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
       - name: Setup node
         uses: actions/setup-node@v6
         with:
           node-version: '22.x'
-      - run: (cd Tokenization/webapp; npm run docker:test)
+
+
+      - name: Generate test Vault certificates for UI docker:test
+        run: |
+          bash Tokenization/scripts/actions-certificates-creation.sh
+
+      - name: Run webapp UI tests (docker)
+        run: (cd Tokenization/webapp; npm run docker:test)
 
   central-system-test:
-    needs: 
+    needs:
       - lint-check-backend
-      - central-certificates-creation
     name: Central System backend tests
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
       - name: Setup node
         uses: actions/setup-node@v6
         with:
           node-version: '22.x'
-      - run: (cd Tokenization/backend/central-system; npm i; npm run test)
+
+      - name: Generate test Vault certificates
+        run: |
+          bash Tokenization/scripts/actions-certificates-creation.sh
+
+          echo "VAULT_CACERT_B64=$(base64 -w0 Tokenization/docker/ca/ca.crt)" >> $GITHUB_ENV
+          echo "VAULT_CENTRAL_SYSTEM_CERT_B64=$(base64 -w0 Tokenization/docker/vault/central-system.crt)" >> $GITHUB_ENV
+          echo "VAULT_CENTRAL_SYSTEM_KEY_B64=$(base64 -w0 Tokenization/docker/vault/central-system.key)" >> $GITHUB_ENV
+
+      - name: Install backend dependencies
+        run: (cd Tokenization/backend/central-system; npm i)
+
+      - name: Run all backend tests (unit + Vault integration via docker)
+        run: (cd Tokenization/backend/central-system; npm run test:all)
