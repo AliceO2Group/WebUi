@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 'use strict';
-import { LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import { ObjectGetDownloadDTO } from '../dtos/ObjectGetDto.js';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/obj-controller`;
 
@@ -24,14 +25,22 @@ export class ObjectController {
   /**
    * Setup Object Controller:
    * - CcdbService - retrieve data about objects
+   * @import { QcdbDownloadService } from '../services/QcdbDownload.service.js';
    * @param {QCObjectService} objService - objService to be used for retrieval of information
    * @param {RunMonitoringService} runModeService - for monitoring the status of runs periodically
+   * @param {QcdbDownloadService} qcdbDownloadService - service that will download from qcdb.
    */
-  constructor(objService, runModeService) {
+  constructor(objService, runModeService, qcdbDownloadService) {
     /**
      * @type {QCObjectService}
      */
     this._objService = objService;
+
+    /**
+     * @type {QcdbDownloadService}
+     * @import { QcdbDownloadService } from '../services/QcdbDownload.service.js';
+     */
+    this._qcdbDownloadService = qcdbDownloadService;
 
     /**
      * @type {RunMonitoringService}
@@ -46,7 +55,7 @@ export class ObjectController {
    * @param {Response} res - HTTP response object to provide information on request
    * @returns {void}
    */
-  async getObjects(req, res) {
+  async getObjectsHandler(req, res) {
     try {
       const { prefix, fields, filters = {}, inRunMode = false } = req.query;
 
@@ -70,6 +79,33 @@ export class ObjectController {
   }
 
   /**
+   * Download ROOT objects using the QcdbDownloadService.
+   * Only support 1 root object for now.
+   * @param {Request} req - ExpressJs req object.
+   * @param {Response} res - ExpressJs res object.
+   * @returns {void}
+   */
+  async getDownloadObjectsHandler(req, res) {
+    let objectIds = undefined;
+    try {
+      const validated = await ObjectGetDownloadDTO.validateAsync(req.query);
+      ({ objectIds } = validated);
+      await this._qcdbDownloadService.getQcdbRootObjects(objectIds, res);
+    } catch (error) {
+      let responseError = '';
+      if (error.isJoi) {
+        this._logger.errorMessage(`Error validating query parameters: ${error}`);
+        responseError = new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`);
+      } else {
+        this._logger.errorMessage(error?.message ?? error);
+        responseError = new Error('Unable to process request');
+      }
+
+      return updateAndSendExpressResponseFromNativeError(res, responseError);
+    }
+  }
+
+  /**
    * Using `browse` option, request a list of `last-modified` and `valid-from` for a specified path for an object
    * Use the first `validFrom` option to make a head request to CCDB; Request which will in turn return object
    * information and download it locally on CCDB if it is not already done so;
@@ -80,7 +116,7 @@ export class ObjectController {
    * @param {Response} res - HTTP response object to provide information on request
    * @returns {Promise<void>}
    */
-  async getObjectContent(req, res) {
+  async getObjectContentHandler(req, res) {
     try {
       const { path, validFrom, filters, id } = req.query;
 
@@ -105,7 +141,7 @@ export class ObjectController {
    * @param {Response} res - HTTP response object to provide information on request
    * @returns {Promise<void>}
    */
-  async getObjectById(req, res) {
+  async getObjectByIdHandler(req, res) {
     try {
       const qcObjectId = req.params.id;
       const { validFrom, filters, id } = req.query;

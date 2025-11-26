@@ -167,7 +167,7 @@ export default tseslint.config(
       ],
       '@stylistic/function-paren-newline': [
         'error',
-        'multiline',
+        'multiline-arguments',
       ],
       '@stylistic/indent': [
         'error',
@@ -284,7 +284,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['app/test/**/*.cjs', 'app/test/**/*.js'],
+    files: ['test/**'],
     extends: [
       pluginJs.configs.recommended,
       mochaPlugin.configs.recommended,
@@ -293,7 +293,7 @@ export default tseslint.config(
       mocha: mochaPlugin,
     },
     languageOptions: {
-      sourceType: 'script', // For .cjs and plain .js files
+      sourceType: 'module',
       ecmaVersion: 'latest',
       globals: {
         ...globals.node,
@@ -303,6 +303,15 @@ export default tseslint.config(
     },
     rules: {
       'mocha/no-setup-in-describe': 'off',
+      'no-console': 'off',
+      'prefer-arrow-callback': 'off'
     },
+  },
+  {
+    files: ['app/test/**'],
+    rules: {
+      'no-console': 'off',
+      'prefer-arrow-callback': 'off'
+    }
   },
 );

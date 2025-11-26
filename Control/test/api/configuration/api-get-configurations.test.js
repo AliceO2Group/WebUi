@@ -27,9 +27,9 @@ describe(`'API - GET - /configurations' test suite`, () => {
   it('should return 404 when the prefix is valid but contains no keys', async () => {
     const prefix = 'empty-prefix';
     const expectedError = {
-      message: "No valid configurations found",
+      message: 'No valid configurations found',
       status: 404,
-      title: "Not Found"
+      title: 'Not Found'
     };
     await request(`${TEST_URL}/api`)
       .get(`/configurations?prefix=${prefix}&token=${ADMIN_TEST_TOKEN}`)
@@ -39,9 +39,9 @@ describe(`'API - GET - /configurations' test suite`, () => {
   it('should return 404 when the specified prefix does not exist', async () => {
     const prefix = 'nonexistent-prefix';
     const expectedError = {
-      message: `Configurations prefix not found: "${qcPath}/ANY/any/${prefix}"`,
+      message: `Configurations prefix not found: '${qcPath}/ANY/any/${prefix}'`,
       status: 404,
-      title: "Not Found"
+      title: 'Not Found'
     };
     await request(`${TEST_URL}/api`)
       .get(`/configurations?prefix=${prefix}&token=${ADMIN_TEST_TOKEN}`)
@@ -51,9 +51,9 @@ describe(`'API - GET - /configurations' test suite`, () => {
   it('should return 503 when Consul returns an internal error', async () => {
     const prefix = 'server-error-prefix';
     const expectedError = {
-      message: "Consul service unavailable",
+      message: 'Consul service unavailable',
       status: 503,
-      title: "Service Unavailable"
+      title: 'Service Unavailable'
     };
     await request(`${TEST_URL}/api`)
       .get(`/configurations?prefix=${prefix}&token=${ADMIN_TEST_TOKEN}`)

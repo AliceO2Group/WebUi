@@ -12,18 +12,16 @@
  * or submit itself to any jurisdiction.
  */
 
-import * as grpc from "@grpc/grpc-js";
-import { Connection } from "../../../client/Connection/Connection";
-import { importPKCS8, importJWK, compactDecrypt, compactVerify } from "jose";
-import {
-  ConnectionStatus,
-  TokenPayload,
-} from "../../../models/connection.model";
-import { ConnectionDirection } from "../../../models/message.model";
-import { SecurityContext } from "../../../utils/security/SecurityContext";
+import * as grpc from '@grpc/grpc-js';
+import { Connection } from '../../connection/Connection';
+import { importPKCS8, importJWK, compactDecrypt, compactVerify } from 'jose';
+import type { TokenPayload } from '../../../models/connection.model';
+import { ConnectionStatus } from '../../../models/connection.model';
+import { ConnectionDirection } from '../../../models/message.model';
+import type { SecurityContext } from '../../../utils/security/SecurityContext';
 
 /**
- * @description gRPC interceptor function responsible for JWE decryption, JWS verification,
+ * Interceptor function responsible for JWE decryption, JWS verification,
  * certificate serial number matching (mTLS binding), and basic authorization.
  */
 export const gRPCAuthInterceptor = async (
@@ -31,7 +29,7 @@ export const gRPCAuthInterceptor = async (
   callback: grpc.sendUnaryData<any>,
   clientConnections: Map<string, Connection>,
   securityContext: SecurityContext
-): Promise<{ isAuthenticated: Boolean; conn: Connection | null }> => {
+): Promise<{ isAuthenticated: boolean; conn: Connection | null }> => {
   const metadata = call.metadata.getMap();
   const jweToken = metadata.jwetoken as string;
   const clientAddress = call.getPeer();
@@ -41,8 +39,8 @@ export const gRPCAuthInterceptor = async (
   // Check if token exists
   if (!jweToken) {
     const error = {
-      name: "AuthenticationError",
-      message: "No token provided",
+      name: 'AuthenticationError',
+      message: 'No token provided',
       code: grpc.status.UNAUTHENTICATED,
     };
     callback(error, null);
@@ -52,31 +50,23 @@ export const gRPCAuthInterceptor = async (
   // Check if connection exists
   if (conn) {
     // Check if connection is blocked
-    if (conn.getStatus() === ConnectionStatus.BLOCKED) {
+    if (conn.status === ConnectionStatus.BLOCKED) {
       const error = {
-        name: "AuthenticationError",
-        message: "Connection is blocked. Contact administrator.",
+        name: 'AuthenticationError',
+        message: 'Connection is blocked. Contact administrator.',
         code: grpc.status.UNAUTHENTICATED,
       };
       callback(error, null);
       return { isAuthenticated: false, conn };
     }
 
-    if (conn.getToken() === jweToken) {
-      // check for allowed requests and serial number match if token is the same
-      if (
-        !isRequestAllowed(conn.getCachedTokenPayload(), call.request, callback)
-      ) {
+    if (conn.token === jweToken) {
+      // Check for allowed requests and serial number match if token is the same
+      if (!isRequestAllowed(conn.cachedTokenPayload, call.request, callback)) {
         return { isAuthenticated: false, conn };
       }
 
-      if (
-        !isSerialNumberMatching(
-          conn.getCachedTokenPayload(),
-          peerCert,
-          callback
-        )
-      ) {
+      if (!isSerialNumberMatching(conn.cachedTokenPayload, peerCert, callback)) {
         conn.handleFailedAuth();
         return { isAuthenticated: false, conn };
       }
@@ -84,11 +74,7 @@ export const gRPCAuthInterceptor = async (
       return { isAuthenticated: true, conn };
     }
   } else {
-    conn = new Connection(
-      jweToken,
-      clientAddress,
-      ConnectionDirection.RECEIVING
-    );
+    conn = new Connection(jweToken, clientAddress, ConnectionDirection.RECEIVING);
     clientConnections.set(clientAddress, conn);
   }
 
@@ -98,19 +84,18 @@ export const gRPCAuthInterceptor = async (
   let jwsToken: string;
   try {
     // Importing RSA private key for decryption
-    privateKey = await importPKCS8(
-      securityContext.clientPrivateKey.toString("utf-8"),
-      "RSA-OAEP-256"
-    );
+    privateKey = await importPKCS8(securityContext.clientPrivateKey.toString('utf-8'), 'RSA-OAEP-256');
 
     const { plaintext } = await compactDecrypt(jweToken, privateKey);
     jwsToken = new TextDecoder().decode(plaintext).trim();
-  } catch (_e) {
+  } catch (e) {
+    void e;
     const error = {
-      name: "AuthenticationError",
-      message: "Incorrect token provided (JWE Decryption failed)",
+      name: 'AuthenticationError',
+      message: 'Incorrect token provided (JWE Decryption failed)',
       code: grpc.status.UNAUTHENTICATED,
     };
+
     // TODO: Consider logging or informing a central security system about potential attack/misconfiguration.
     callback(error, null);
     conn.handleFailedAuth();
@@ -124,27 +109,22 @@ export const gRPCAuthInterceptor = async (
   try {
     // Convert a raw Base64 Ed25519 public key to JWK format
     const jwk = {
-      kty: "OKP",
-      crv: "Ed25519",
-      x: Buffer.from(securityContext.JWS_PUBLIC_KEY, "base64").toString(
-        "base64url"
-      ),
+      kty: 'OKP',
+      crv: 'Ed25519',
+      x: Buffer.from(securityContext.JWS_PUBLIC_KEY, 'base64').toString('base64url'),
     };
 
     // Importing the Ed25519 public key for verification - using "EdDSA" algorithm
-    pub = await importJWK(jwk, "EdDSA");
+    pub = await importJWK(jwk, 'EdDSA');
 
     // Compact verify - verify with key and decode the JWS token in one step
-    const { payload: jwtPayload, protectedHeader } = await compactVerify(
-      jwsToken,
-      pub
-    );
+    const { payload: jwtPayload, protectedHeader } = await compactVerify(jwsToken, pub);
 
     // Additional check to ensure correct signing algorithm was used
-    if (protectedHeader.alg !== "EdDSA" && protectedHeader.alg !== "Ed25519") {
+    if (protectedHeader.alg !== 'EdDSA' && protectedHeader.alg !== 'Ed25519') {
       const error = {
-        name: "AuthenticationError",
-        message: "Incorrect signing algorithm for JWS.",
+        name: 'AuthenticationError',
+        message: 'Incorrect signing algorithm for JWS.',
         code: grpc.status.UNAUTHENTICATED,
       };
 
@@ -157,7 +137,7 @@ export const gRPCAuthInterceptor = async (
     payload = JSON.parse(payloadString);
   } catch (e: any) {
     const error = {
-      name: "AuthenticationError",
+      name: 'AuthenticationError',
       message: `JWS Verification error: Invalid signature`,
       code: grpc.status.PERMISSION_DENIED,
     };
@@ -168,7 +148,7 @@ export const gRPCAuthInterceptor = async (
     return { isAuthenticated: false, conn };
   }
 
-  // mTLS binding check and authorization
+  // Binding mTLS check and authorization
   // Connection tunnel verification with serialNumber (mTLS SN vs Token SN)
   if (!isSerialNumberMatching(payload, peerCert, callback)) {
     conn.handleFailedAuth();
@@ -187,34 +167,25 @@ export const gRPCAuthInterceptor = async (
 };
 
 /**
- * @description Checks if the request method is allowed based on the token permissions.
+ * Checks if the request method is allowed based on the token permissions.
  * @param tokenPayload payload extracted from the token
  * @param request gRPC request object containing method information
  * @param callback callback to return gRPC error if needed
  * @returns true if request method is allowed, false otherwise
  */
-export const isRequestAllowed = (
-  tokenPayload: TokenPayload | undefined,
-  request: any,
-  callback: grpc.sendUnaryData<any>
-): Boolean => {
-  const method = String(request?.method || "POST").toUpperCase();
+export const isRequestAllowed = (tokenPayload: TokenPayload | undefined, request: any, callback: grpc.sendUnaryData<any>): Boolean => {
+  const method = String(request?.method ?? 'POST').toUpperCase();
   const isValidPayload = validateTokenPayload(tokenPayload, request.method);
   let isUnexpired;
 
   if (isValidPayload) {
-    isUnexpired = isPermissionUnexpired(
-      tokenPayload.iat[method],
-      tokenPayload.exp[method]
-    );
+    isUnexpired = isPermissionUnexpired(tokenPayload.iat[method], tokenPayload.exp[method]);
   }
 
   if (!isValidPayload || !isUnexpired) {
     const error = {
-      name: "AuthorizationError",
-      code: isUnexpired
-        ? grpc.status.PERMISSION_DENIED
-        : grpc.status.UNAUTHENTICATED,
+      name: 'AuthorizationError',
+      code: isUnexpired ? grpc.status.PERMISSION_DENIED : grpc.status.UNAUTHENTICATED,
       message: isUnexpired
         ? `Request of type ${method} is not allowed by the token policy.`
         : `Request of type ${method}, permission has expired.`,
@@ -228,24 +199,21 @@ export const isRequestAllowed = (
 };
 
 /**
- * @description Validates the structure and types of the token payload.
+ * Validates the structure and types of the token payload.
  * @returns true if token payload is valid, false otherwise
  */
-const validateTokenPayload = (
-  tokenPayload: TokenPayload | undefined,
-  method: string
-): tokenPayload is TokenPayload => {
+const validateTokenPayload = (tokenPayload: TokenPayload | undefined, method: string): tokenPayload is TokenPayload => {
   if (!tokenPayload) {
     return false;
   }
 
   if (
-    typeof tokenPayload.iat !== "object" ||
-    typeof tokenPayload.exp !== "object" ||
-    typeof tokenPayload.sub !== "string" ||
-    typeof tokenPayload.aud !== "string" ||
-    typeof tokenPayload.iss !== "string" ||
-    typeof tokenPayload.jti !== "string" ||
+    typeof tokenPayload.iat !== 'object' ||
+    typeof tokenPayload.exp !== 'object' ||
+    typeof tokenPayload.sub !== 'string' ||
+    typeof tokenPayload.aud !== 'string' ||
+    typeof tokenPayload.iss !== 'string' ||
+    typeof tokenPayload.jti !== 'string' ||
     Object.keys(tokenPayload.iat).length === 0 ||
     Object.keys(tokenPayload.exp).length === 0 ||
     !tokenPayload.iat.hasOwnProperty(method) ||
@@ -258,7 +226,7 @@ const validateTokenPayload = (
 };
 
 /**
- * @description Checks if the permissions granted in the token have expired.
+ * Checks if the permissions granted in the token have expired.
  * @param iat issued-at timestamp for the specific method
  * @param exp expiration timestamp for the specific method
  * @returns true if permission is still valid, false if expired
@@ -278,25 +246,21 @@ export const isPermissionUnexpired = (iat: number, exp: number): Boolean => {
 };
 
 /**
- * @description Checks if the serial number from the peer certificate matches the one in the token payload.
+ * Checks if the serial number from the peer certificate matches the one in the token payload.
  * @param tokenPayload payload extracted from the token
  * @param peerCert certificate object retrieved from the gRPC call
  * @param callback callback to return gRPC error if needed
  * @returns true if serial numbers match, false otherwise
  */
-export const isSerialNumberMatching = (
-  tokenPayload: TokenPayload | undefined,
-  peerCert: any,
-  callback: grpc.sendUnaryData<any>
-): Boolean => {
+export const isSerialNumberMatching = (tokenPayload: TokenPayload | undefined, peerCert: any, callback: grpc.sendUnaryData<any>): Boolean => {
   const clientSN = normalizeSerial(peerCert?.serialNumber);
   const tokenSN = normalizeSerial(tokenPayload?.sub);
 
   if (!clientSN || clientSN !== tokenSN) {
     const error = {
-      name: "AuthenticationError",
+      name: 'AuthenticationError',
       code: grpc.status.PERMISSION_DENIED,
-      message: "Serial number mismatch (mTLS binding failure).",
+      message: 'Serial number mismatch (mTLS binding failure).',
     } as any;
     callback(error, null);
     return false;
@@ -305,17 +269,17 @@ export const isSerialNumberMatching = (
 };
 
 /**
- * @description Normalizes a certificate serial number by removing colons and converting to uppercase.
+ * Normalizes a certificate serial number by removing colons and converting to uppercase.
  * @param sn serial number string possibly containing colons or being null/undefined
  * @returns normalized serial number string
  */
 const normalizeSerial = (sn?: string | null): string => {
   // Node retrieves serial number as hex string, without leading 0x and with possible colons so we need to normalize it
-  return (sn || "").replace(/[^0-9a-f]/gi, "").toUpperCase();
+  return (sn || '').replace(/[^0-9a-f]/gi, '').toUpperCase();
 };
 
 /**
- * @description Retrieves the peer certificate from the gRPC call object.
+ * Retrieves the peer certificate from the gRPC call object.
  * @param call gRPC call object
  * @returns peer certificate object from the gRPC call
  */

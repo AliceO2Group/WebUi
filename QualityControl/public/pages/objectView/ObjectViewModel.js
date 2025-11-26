@@ -43,6 +43,11 @@ export default class ObjectViewModel extends BaseViewModel {
     this.drawingOptions = [];
     this.displayHints = [];
     this.ignoreDefaults = false;
+
+    /**
+     * Tracks whether the object information panel is currently visible.
+     */
+    this._objectInfoVisible = true;
   }
 
   /**
@@ -112,6 +117,35 @@ export default class ObjectViewModel extends BaseViewModel {
       this.model.router.go(`${currentParams}`, false, true);
     }
 
+    this.notify();
+  }
+
+  /**
+   * Creates the href url for the download element
+   * @param {string} objectId - id of root object
+   * @returns {string|void} download link
+   */
+  getDownloadQcdbObjectUrl(objectId = undefined) {
+    if (objectId == undefined || this.model.session.token == undefined) {
+      return;
+    }
+    return `/api/object/proxy/download/?token=${this.model.session.token}&objectIds=${objectId}`;
+  }
+
+  /**
+   * Get the current display state of object information.
+   * @returns {boolean} - `true` if object information is currently displayed, `false` otherwise.
+   */
+  get objectInfoVisible() {
+    return this._objectInfoVisible;
+  }
+
+  /**
+   * Toggle the display state of object information.
+   * If currently visible, it becomes hidden; if hidden, it becomes visible.
+   */
+  toggleObjectInfoVisible() {
+    this._objectInfoVisible = !this._objectInfoVisible;
     this.notify();
   }
 
