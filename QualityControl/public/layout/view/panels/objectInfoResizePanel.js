@@ -13,7 +13,7 @@
  */
 
 import { downloadButton } from '../../../common/downloadButton.js';
-import { qcObjectInfoPanel } from './../../../common/object/objectInfoCard.js';
+import { defaultRowAttributes, qcObjectInfoPanel } from './../../../common/object/objectInfoCard.js';
 import { h, iconResizeBoth, info } from '/js/src/index.js';
 
 /**
@@ -47,7 +47,8 @@ export const objectInfoResizePanel = (model, tabObject) => {
       h(
         '.dropdown-menu',
         { style: 'right:0.1em; width: 35em;left: auto;' },
-        objectRemoteData.isSuccess() && h('.p1', qcObjectInfoPanel(objectRemoteData.payload)),
+        objectRemoteData.isSuccess() &&
+          h('.p1', qcObjectInfoPanel(objectRemoteData.payload, {}, defaultRowAttributes(model.notification))),
       ),
     ]),
     objectRemoteData.isSuccess() &&
