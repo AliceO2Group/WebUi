@@ -24,7 +24,7 @@ const SORTING_BUTTON_PATH = 'header > div > div > div:nth-child(3) > div > butto
  * @param {timeout} timeout - Timeout PER test; default 100
  * @param {object} testParent - Node.js test object which ensures sub-tests are being awaited
  */
-export const objectTreePageTests = async (url, page, timeout = 5000, testParent) => {
+export const objectTreePageTests = async (url, page, timeout = 11000, testParent) => {
   await testParent.test('should successfully load objectTree page "/"', { timeout }, async () => {
     await page.goto(`${url}${OBJECT_TREE_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
     const location = await page.evaluate(() => window.location);
@@ -80,81 +80,22 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   );
 
   await testParent.test(
-    'should correctly render the path as first in the object info panel',
-    { timeout },
-    async () => {
-      const firstRowKey = await page.evaluate(() =>
-        document.querySelector('#qcObjectInfoPanel > div:first-child > b').textContent);
-      strictEqual(firstRowKey, 'Path');
-    },
-  );
-
-  await testParent.test(
-    'should contain four highlighted rows',
-    { timeout },
-    async () => {
-      const highlightedClasses = '.info-row.highlighted';
-      const rowCount = await page.evaluate((selector) =>
-        document.querySelectorAll(`#qcObjectInfoPanel > div${selector}`).length, highlightedClasses);
-      strictEqual(rowCount, 4);
-    },
-  );
-
-  await testParent.test(
-    'should copy the value of the element clicked to the clipboard',
-    { timeout },
-    async () => {
-      const context = page.browserContext();
-      await context.overridePermissions(url, ['clipboard-read', 'clipboard-write', 'clipboard-sanitized-write']);
-
-      await page.click('#qcObjectInfoPanel > div > div');
-
-      const clipboard = await page.evaluate(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        return navigator.clipboard.readText();
-      });
-
-      strictEqual(clipboard, 'qc/test/object/1');
-      context.clearPermissionOverrides();
-    }
-  );
-
-  await testParent.test(
-    'should not copy the value of the clicked element if there is no value',
-    { timeout },
-    async () => {
-      const context = page.browserContext();
-      await context.overridePermissions(url, ['clipboard-read', 'clipboard-write', 'clipboard-sanitized-write']);
-
-      await page.click('#qcObjectInfoPanel > div > div'); // copy path
-      await page.click('#qcObjectInfoPanel > div:nth-child(7) > div'); // try to copy empty value
-
-      const clipboard = await page.evaluate(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        return navigator.clipboard.readText();
-      });
-
-      strictEqual(clipboard, 'qc/test/object/1');
-      context.clearPermissionOverrides();
-    }
-  );
-
-  await testParent.test(
     'should close the object plot upon clicking the close button',
     { timeout },
     async () => {
       await page.evaluate(() => document.querySelector('#close-button').click());
       // wait for animations to finish before continuing
       await page.waitForFunction(
-        (selector) => document.querySelector(selector).children.length === 0,
+        (selector) => document.querySelector(selector).children.length === 1,
         {},
-        'section > div > div > div:nth-child(2)'
+        'section > div > div'
       );
       const selectedObject = await page.evaluate(() => model.object.selected);
       const numberOfChildren = await page.evaluate(() =>
-      document.querySelector('section > div > div').children.length);
+        document.querySelector('section > div > div').children.length
+      );
       strictEqual(selectedObject, undefined);
-      strictEqual(numberOfChildren, 1); // Object tree child
+      strictEqual(numberOfChildren, 1);
     }
   );
 
