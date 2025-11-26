@@ -22,7 +22,7 @@ import type { Command, CommandHandler } from 'models/commands.model';
 import type { DuplexMessageEvent } from '../../models/message.model';
 import { ConnectionDirection } from '../../models/message.model';
 import { ConnectionStatus } from '../../models/connection.model';
-import { SecurityContext } from '../../utils/security/SecurityContext';
+import type { SecurityContext } from '../../utils/security/SecurityContext';
 import { peerListener } from 'utils/connection/peerListener';
 
 /**
