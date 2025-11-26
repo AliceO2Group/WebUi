@@ -29,13 +29,13 @@ import { useSession } from './session';
  * @returns {Promise<Response>} The fetch Response promise.
  * @throws {Error} If the url does not start with '/api'.
  */
-export function fetchClient(url: string, options?: RequestInit): Promise<Response> {
+export function useFetchClient(url: string, options?: RequestInit): Promise<Response> {
   if (!url.startsWith('/api')) {
     throw new Error('Only /api requests are allowed');
   }
   const { token } = useSession();
   const _url = new URL(url, window.location.origin);
-  _url.searchParams.append('token', token || '');
+  _url.searchParams.append('token', token ?? '');
 
   return fetch(_url.toString(), options);
 };
@@ -64,7 +64,7 @@ export function fetchClient(url: string, options?: RequestInit): Promise<Respons
  */
 export function useFetching(url: string, options?: RequestInit) {
   // Adds token to url
-  const fetcher = fetchClient(url, options);
+  const fetcher = useFetchClient(url, options);
   // Logic for managing fetch state
   const [data, setData] = React.useState<object | null>(null);
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -91,7 +91,7 @@ export function useFetching(url: string, options?: RequestInit) {
       // Happens after component unmounts
       unmounted = true;
     };
-  }, []);
+  }, [fetcher]);
 
   return { data, loading, error };
 }
