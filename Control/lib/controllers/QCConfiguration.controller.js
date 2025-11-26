@@ -43,6 +43,7 @@ class QCConfigurationController {
    * Method to get configurations names
    * @param {Request} req - HTTP Request object
    * @param {Response} res - HTTP Response object
+   * @returns {Promise<void>}
    */
   async getConfigurationsKeysHandler(req, res) {
     const { prefix = '', recurse = false } = req.query;
@@ -72,9 +73,10 @@ class QCConfigurationController {
    * Method to get configuration value by key
    * @param {Request} req - HTTP Request object
    * @param {Response} res - HTTP Response object
+   * @returns {Promise<void>}
    */
   async getConfigurationByKeyHandler(req, res) {
-    const { key } = req.params;
+    const { key = '' } = req.params;
 
     if (!key || key.trim() === '') {
       updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing configuration key'));
@@ -95,9 +97,36 @@ class QCConfigurationController {
   }
 
   /**
+   * Method to get configuration restrictions by key
+   * @param {Request} req - HTTP Request object
+   * @param {Response} res - HTTP Response object
+   * @returns {Promise<void>}
+   */
+  async getConfigurationRestrictionsByKeyHandler(req, res) {
+    const { key = '' } = req.params;
+    if (!key || key.trim() === '') {
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing configuration key'));
+      return;
+    }
+
+    try {
+      const restrictions = await this._qcConfigurationService.getConfigurationRestrictionsByKey(key);
+      res.status(200).json(restrictions);
+    } catch (error) {
+      errorLogger(error, this._logger);
+      if (error.message?.includes('Non-2xx status code: 404')) {
+        updateAndSendExpressResponseFromNativeError(res, new NotFoundError(`Configuration not found for key: ${key}`));
+      } else {
+        updateAndSendExpressResponseFromNativeError(res, new ServiceUnavailableError('Consul service unavailable'));
+      }
+    }
+  }
+
+  /**
    * Method to edit configuration value
-   * @param {Request} req
-   * @param {Response} res
+   * @param {Request} req - HTTP Request object
+   * @param {Response} res - HTTP Response object
+   * @returns {Promise<void>}
    */
   async putConfigurationByKeyHandler(req, res) {
     const { key } = req.params;
@@ -111,6 +140,7 @@ class QCConfigurationController {
       const editStatus = await this._qcConfigurationService.editConfigurationByKey(key, configuration);
       if (!editStatus) {
         updateAndSendExpressResponseFromNativeError(res, new ServiceUnavailableError('Could not edit configuration'));
+        return;
       }
 
       res.status(200).json(editStatus);

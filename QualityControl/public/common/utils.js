@@ -35,19 +35,36 @@ export function clone(obj) {
 /**
  * Produces a lambda function waiting `time` ms before calling fn.
  * No matter how many calls are done to lambda, the last call is the waiting starting point.
- * @param {Function} fn - function to be called after `time` ms
- * @param {number} time - ms
- * @returns {Function} the lambda function produced
+ * @template K, A extends unknown[]
+ * @param {(...args: A) => WeakKey} keyFn - Function that returns the key to debounce by.
+ * @param {(...args: A) => void} debounceFn - Function executed after the debounce delay.
+ * @param {number} time - Debounce delay in milliseconds.
+ * @param {(...args: A) => void} [onFirstCall = () => {}] - Optional callback fired once when a new key is added.
+ * @returns {(...args: A) => void} - Debounced function that can be called multiple times.
  */
-export function timerDebouncer(fn, time) {
-  let timer = {};
+export function keyedTimerDebouncer(
+  keyFn,
+  debounceFn,
+  time,
+  onFirstCall = () => {},
+) {
+  const timers = new WeakMap();
+
   return function (...args) {
-    if (timer) {
-      clearTimeout(timer);
+    const key = keyFn(...args);
+
+    if (timers.has(key)) {
+      clearTimeout(timers.get(key));
+    } else {
+      onFirstCall(...args);
     }
-    timer = setTimeout(() => {
-      fn(...args); // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters
+
+    const timerId = setTimeout(() => {
+      debounceFn(...args);// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters
+      timers.delete(key);
     }, time);
+
+    timers.set(key, timerId);
   };
 }
 
