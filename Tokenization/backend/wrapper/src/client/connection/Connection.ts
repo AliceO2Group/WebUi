@@ -51,7 +51,6 @@ export class Connection {
   ) {
     this._token = token;
     this._targetAddress = targetAddress;
-    this._peerClient = new peerCtor(targetAddress, grpc.credentials.createInsecure());
     this.direction = direction;
 
     if (!connectionCerts.caCert || !connectionCerts.clientCert || !connectionCerts.clientKey) {
