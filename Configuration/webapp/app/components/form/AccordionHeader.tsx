@@ -50,11 +50,7 @@ export const AccordionHeader: FC<AccordionHeaderProps> = ({
     >
       <Typography sx={{ marginRight: 'auto', alignContent: 'center' }}>{title}</Typography>
       <IconButton onClick={viewFormToggleCallback}>
-        {viewForm ? (
-          <RawData />
-        ) : (
-          <FormData />
-        )}
+        {viewForm ? <RawData /> : <FormData />}
       </IconButton>
     </AccordionSummary>
   );

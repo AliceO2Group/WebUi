@@ -76,9 +76,7 @@ export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) 
             {Object.entries(itemsRestrictions).map(([key, value]) => renderItem(key, value))}
           </Stack>
         ) : (
-          <Typography component='pre'>
-            {JSON.stringify(items, null, 2)}
-          </Typography>
+          <Typography component="pre">{JSON.stringify(items, null, 2)}</Typography>
         )}
       </AccordionDetails>
     </Accordion>
