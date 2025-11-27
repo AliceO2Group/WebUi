@@ -21,6 +21,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { CONFIGURATION_KEY_PREFIX, ROUTE_PREFIX } from '~/config';
 import { useLocation } from 'react-router';
+import { ConfigNavigatorLoader } from './ConfigNavigatorLoader';
 
 const buildTree = (
   paths: ConfigurationKeysResponse,
@@ -100,6 +101,10 @@ export const ConfigNavigator = () => {
     }
     return buildTree(configKeys);
   }, [configKeys]);
+
+  if (areConfigKeysLoading) {
+    return <ConfigNavigatorLoader />;
+  }
 
   return (
     <List className="config_navigator" component="nav">

@@ -89,7 +89,7 @@ const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = memo(
           className="config_navigator__item"
         >
           <Link to={`${ROUTE_PREFIX}${node.fullPath}`} style={{ width: '100%' }}>
-            <ListItemButton sx={{ borderRadius: 2, padding: 0 }} selected={isSelected}>
+            <ListItemButton sx={{ borderRadius: 2, padding: 0, height: 40 }} selected={isSelected}>
               <ListItemIcon>
                 <FontAwesomeIcon icon={faFile} style={{ margin: 'auto' }} />
               </ListItemIcon>
