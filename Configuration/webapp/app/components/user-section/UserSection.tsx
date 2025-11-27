@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Box, IconButton, Menu, MenuItem, Avatar } from '@mui/material';
+import { Box, IconButton, Menu, MenuItem, Avatar, Typography } from '@mui/material';
 import { useState, type MouseEvent } from 'react';
 import { useAuth } from '~/hooks/useAuth';
 import { getSessionData } from '~/services/session';
@@ -61,12 +61,12 @@ export const UserSection = () => {
         onClose={handleClose}
         className="user-section__menu"
       >
-        <section style={{ padding: 10 }}>
-          <h5>Welcome, {userName}!</h5>
+        <Box sx={{ p: 1 }}>
+          <Typography variant="h5">Welcome, {userName}!</Typography>
           <MenuItem onClick={displayProfileData}>Profile</MenuItem>
           <MenuItem onClick={handleClose}>My account</MenuItem>
           <MenuItem onClick={handleClose}>Logout</MenuItem>
-        </section>
+        </Box>
       </Menu>
     </Box>
   );

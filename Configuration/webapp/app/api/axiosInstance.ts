@@ -21,6 +21,7 @@ const axiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
+    'User-Agent': 'axios 0.21.1',
   },
   withCredentials: false,
 });
