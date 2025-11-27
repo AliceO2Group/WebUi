@@ -22,7 +22,7 @@ import type { gRPCWrapperConfig } from '../models/config.model';
 import type { Connection } from './connection/Connection';
 
 /**
- * @description Wrapper class for managing secure gRPC wrapper.
+ * Wrapper class for managing secure gRPC wrapper.
  *
  * @remarks
  * This class serves as a high-level abstraction over the underlying
