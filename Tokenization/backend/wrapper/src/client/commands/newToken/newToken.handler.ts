@@ -46,7 +46,7 @@ export class NewTokenHandler implements CommandHandler<NewTokenCommand> {
 
     for (const dir of directions) {
       let conn = this.manager.getConnectionByAddress(targetAddress, dir);
-      conn ??= this.manager.createNewConnection(targetAddress, dir, token);
+      conn ??= await this.manager.createNewConnection(targetAddress, dir, token);
       conn.token = token;
     }
   }
