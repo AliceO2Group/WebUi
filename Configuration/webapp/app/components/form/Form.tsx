@@ -17,8 +17,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Stack from '@mui/material/Stack';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { Widget } from './Widget';
 
 export type FormItem = { [key: string]: string | object | FormItem };
@@ -65,7 +64,7 @@ export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) 
   return (
     <Accordion defaultExpanded>
       <AccordionSummary
-        expandIcon={<FontAwesomeIcon icon={faChevronUp} />}
+        expandIcon={<ExpandLessIcon />}
         sx={{
           backgroundColor: '#E0E0E0',
         }}
