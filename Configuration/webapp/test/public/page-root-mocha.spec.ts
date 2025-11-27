@@ -16,7 +16,7 @@ import assert from 'assert';
 import { Page } from 'puppeteer';
 import global from '../mocha-index';
 
-describe('`pageConfiguration` test-suite', function () {
+describe('`pageRoot` test-suite', function () {
   let url: string | null = null;
   let page: Page | null = null;
 
@@ -127,9 +127,6 @@ describe('`pageConfiguration` test-suite', function () {
       assert.equal('Page is null', 'test suite failed');
       return;
     }
-
-    const res = await fetch('http://localhost:8080/control/api/configurations');
-    const data = await res.json();
 
     const configNavigatorItems = await page.$$('.config_navigator__item');
     if (data && data.length > 0) {
