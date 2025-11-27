@@ -15,10 +15,9 @@
 import { type FC } from 'react';
 import { ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFile } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router';
 import { BASE_CONFIGURATION_PATH } from '~/config';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 
 interface ConfigNavigatorItemProps {
   title: string;
@@ -35,16 +34,19 @@ interface ConfigNavigatorItemProps {
  * @returns {React.ReactElement} ConfigNavigatorItem
  */
 const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = ({ title, onClick, isSelected }) => (
-  <ListItem style={{ paddingTop: 5, paddingBottom: 5 }} className="config_navigator__item">
+  <ListItem
+    style={{ paddingTop: 5, paddingBottom: 5 }}
+    className={`config_navigator__item ${isSelected ? 'config_navigator__item--selected' : ''} config_key__${title}`}
+  >
     <Link to={`configuration/${BASE_CONFIGURATION_PATH}/${title}`} style={{ width: '100%' }}>
       <ListItemButton
         onClick={onClick}
         color="red"
-        sx={{ borderRadius: 2, padding: 0 }}
+        sx={{ borderRadius: 2, padding: 0, height: 40 }}
         selected={isSelected}
       >
         <ListItemIcon>
-          <FontAwesomeIcon icon={faFile} style={{ margin: 'auto' }} />
+          <InsertDriveFileIcon style={{ margin: 'auto' }} />
         </ListItemIcon>
         <ListItemText primary={title} />
       </ListItemButton>

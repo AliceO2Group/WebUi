@@ -12,27 +12,27 @@
  * or submit itself to any jurisdiction.
  */
 
-import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { getSessionData } from '~/services/session';
 
-export const API_URL = 'http://localhost:8080/control/api';
+export interface Session {
+  personid: string;
+  username: string;
+  name: string;
+  access: string;
+  token: string;
+}
 
-const axiosInstance = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    'User-Agent': 'axios 0.21.1',
-  },
-  withCredentials: false,
-});
+export const useAuth = (): Session => {
+  const [session, setSession] = useState<Record<string, string>>({});
 
-axiosInstance.interceptors.request.use(async (config) => {
-  const { token } = await getSessionData();
-  if (token) {
-    config.url = `${config.url}?token=${token}`;
-  }
+  useEffect(() => {
+    const fetchSession = async () => {
+      const session = await getSessionData();
+      setSession(session);
+    };
+    void fetchSession();
+  }, []);
 
-  return config;
-});
-
-export default axiosInstance;
+  return session as unknown as Session;
+};

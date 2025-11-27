@@ -12,27 +12,20 @@
  * or submit itself to any jurisdiction.
  */
 
-import axios from 'axios';
-import { getSessionData } from '~/services/session';
+import { List, ListItem, Skeleton } from '@mui/material';
 
-export const API_URL = 'http://localhost:8080/control/api';
+const ITEMS_TO_RENDER_COUNT = 15;
 
-const axiosInstance = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    'User-Agent': 'axios 0.21.1',
-  },
-  withCredentials: false,
-});
-
-axiosInstance.interceptors.request.use(async (config) => {
-  const { token } = await getSessionData();
-  if (token) {
-    config.url = `${config.url}?token=${token}`;
-  }
-
-  return config;
-});
-
-export default axiosInstance;
+export const ConfigNavigatorLoader = () => (
+  <List className="config_navigator__loader">
+    {Array.from({ length: ITEMS_TO_RENDER_COUNT }).map((_, index) => (
+      <ListItem
+        style={{ paddingTop: 5, paddingBottom: 5 }}
+        className="config_navigator__item"
+        key={`loader-${index}`}
+      >
+        <Skeleton variant="rectangular" width="100%" height={40} sx={{ borderRadius: 2 }} />
+      </ListItem>
+    ))}
+  </List>
+);

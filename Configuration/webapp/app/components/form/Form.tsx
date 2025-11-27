@@ -12,14 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useCallback, type FC, type PropsWithChildren } from 'react';
+import { useCallback, useState, type FC, type PropsWithChildren } from 'react';
 import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Stack from '@mui/material/Stack';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { Widget } from './Widget';
+import { AccordionHeader } from './AccordionHeader';
+import { Typography } from '@mui/material';
 
 export type FormItem = { [key: string]: string | object | FormItem };
 
@@ -47,6 +46,8 @@ function isFormRestrictions(obj: FormRestrictions[string]): obj is FormRestricti
 }
 
 export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) => {
+  const [viewForm, setViewForm] = useState<boolean>(true);
+
   const renderItem = useCallback(
     (key: string, value: FormRestrictions[string]) =>
       isFormRestrictions(value) ? (
@@ -64,21 +65,19 @@ export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) 
 
   return (
     <Accordion defaultExpanded>
-      <AccordionSummary
-        expandIcon={<FontAwesomeIcon icon={faChevronUp} />}
-        sx={{
-          backgroundColor: '#E0E0E0',
-        }}
-        slotProps={{
-          expandIconWrapper: { style: { order: -1, marginRight: '6px' } },
-        }}
-      >
-        {sectionTitle}
-      </AccordionSummary>
+      <AccordionHeader
+        title={sectionTitle}
+        viewForm={viewForm}
+        viewFormToggle={() => setViewForm((v) => !v)}
+      />
       <AccordionDetails>
-        <Stack spacing={2}>
-          {Object.entries(itemsRestrictions).map(([key, value]) => renderItem(key, value))}
-        </Stack>
+        {viewForm ? (
+          <Stack spacing={2}>
+            {Object.entries(itemsRestrictions).map(([key, value]) => renderItem(key, value))}
+          </Stack>
+        ) : (
+          <Typography component="pre">{JSON.stringify(items, null, 2)}</Typography>
+        )}
       </AccordionDetails>
     </Accordion>
   );
