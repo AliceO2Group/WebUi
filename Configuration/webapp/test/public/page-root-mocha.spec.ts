@@ -15,8 +15,6 @@
 import assert from 'assert';
 import { Page } from 'puppeteer';
 import global from '../mocha-index';
-import axiosInstance, { API_URL } from '~/api/axiosInstance';
-import { getSessionData } from '~/services/session';
 
 describe('`pageRoot` test-suite', function () {
   let url: string | null = null;
