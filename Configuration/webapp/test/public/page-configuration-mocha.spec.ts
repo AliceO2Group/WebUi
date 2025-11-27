@@ -59,7 +59,6 @@ describe('`pageRoot` test-suite', function () {
     const firstConfigurationRelativePath = data?.[0];
 
     const configUrl = `${url}configuration/${firstConfigurationRelativePath}`;
-    console.log(configUrl);
 
     await page.goto(configUrl, { waitUntil: 'networkidle0' });
 

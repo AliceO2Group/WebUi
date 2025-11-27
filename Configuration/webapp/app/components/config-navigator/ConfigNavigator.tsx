@@ -14,13 +14,18 @@
 
 import { List } from '@mui/material';
 import ConfigNavigatorItem, { type TreeNode } from './ConfigNavigatorItem';
-import { useConfigurationKeysQuery } from '~/api/query/useConfigurationKeysQuery';
+import {
+  useConfigurationKeysQuery,
+  type ConfigurationKeysResponse,
+} from '~/api/query/useConfigurationKeysQuery';
 import { useEffect, useMemo, useState } from 'react';
 import { CONFIGURATION_KEY_PREFIX, ROUTE_PREFIX } from '~/config';
 import { useLocation } from 'react-router';
 
-const buildTree = (paths: string[]): Record<string, TreeNode> => {
-  const root: Record<string, TreeNode> = {};
+const buildTree = (
+  paths: ConfigurationKeysResponse,
+): Record<ConfigurationKeysResponse[number], TreeNode> => {
+  const root: Record<ConfigurationKeysResponse[number], TreeNode> = {};
 
   paths.forEach((path) => {
     let relativePath = path;
