@@ -16,8 +16,9 @@ import { type FC, type PropsWithChildren } from 'react';
 import { Box, Drawer } from '@mui/material';
 import { LeftDrawerFooter } from './LeftDrawerFooter';
 import { LeftDrawerHeader } from './LeftDrawerHeader';
+import { useDrawer } from '../../../contexts/DrawerContext';
 
-const DRAWER_WIDTH = 300;
+export const DRAWER_WIDTH = 300;
 
 /**
  * LeftDrawer component
@@ -26,24 +27,34 @@ const DRAWER_WIDTH = 300;
  * @param {ReactElement} props.children - The children elements to render inside the drawer.
  * @returns {ReactElement} LeftDrawer
  */
-export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => (
-  <Drawer
-    sx={{
-      width: DRAWER_WIDTH,
-      flexShrink: 0,
-      '& .MuiDrawer-paper': {
+export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => {
+  const { isOpen } = useDrawer();
+
+  return (
+    <Drawer
+      sx={{
         width: DRAWER_WIDTH,
-        boxSizing: 'border-box',
-        display: 'flex',
-        flexDirection: 'column',
-      },
-    }}
-    variant="permanent"
-    anchor="left"
-    className="left-drawer"
-  >
-    <LeftDrawerHeader />
-    <Box sx={{ overflow: 'auto', flexGrow: 1 }}>{children}</Box>
-    <LeftDrawerFooter />
-  </Drawer>
-);
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: DRAWER_WIDTH,
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: (theme) =>
+            theme.transitions.create('width', {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+        },
+      }}
+      variant="persistent"
+      anchor="left"
+      className="left-drawer"
+      open={isOpen}
+    >
+      <LeftDrawerHeader />
+      <Box sx={{ overflow: 'auto', flexGrow: 1 }}>{children}</Box>
+      <LeftDrawerFooter />
+    </Drawer>
+  );
+};

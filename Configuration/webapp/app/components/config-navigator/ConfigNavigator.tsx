@@ -17,6 +17,7 @@ import ConfigNavigatorItem from './ConfigNavigatorItem';
 import { useConfigurationKeysQuery } from '~/api/query/useConfigurationKeysQuery';
 import { useEffect, useState } from 'react';
 import { useConfigurationNavigate } from '~/hooks/useConfigurationNavigate';
+import { ConfigNavigatorLoader } from './ConfigNavigatorLoader';
 
 /**
  * ConfigNavigator component
@@ -42,6 +43,10 @@ export const ConfigNavigator = () => {
       navigate(configKeys[0]);
     }
   }, [configKeys, areConfigKeysLoading]);
+
+  if (areConfigKeysLoading) {
+    return <ConfigNavigatorLoader />;
+  }
 
   return (
     <List className="config_navigator">
