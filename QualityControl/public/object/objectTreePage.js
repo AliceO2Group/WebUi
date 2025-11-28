@@ -67,66 +67,6 @@ export default (model) => {
 };
 
 /**
- * Resizable divider between left and right panels
- * @param {Model} model - root model of the application
- * @returns {vnode} - virtual node element
- */
-const resizableDivider = (model) =>
-  h('.bg-gray-light.flex-column.justify-center.items-center', {
-    style: {
-      width: '15px',
-      cursor: 'col-resize',
-    },
-    oncreate: (vnode) => {
-      const handleMouseDown = (e) => {
-        e.preventDefault();
-        const container = vnode.dom.parentElement;
-        const rect = container.getBoundingClientRect();
-        const containerWidth = rect.width;
-
-        const dividerRect = vnode.dom.getBoundingClientRect();
-        const initialLeft = dividerRect.left - rect.left;
-        const dragLine = document.createElement('div');
-        dragLine.style.cssText = `
-          position: absolute;
-          top: 0;
-          height: 100%;
-          width: 6px;
-          background: rgba(0, 123, 255, 0.8);
-          pointer-events: none;
-          z-index: 1001;
-          left: ${initialLeft}px;
-        `;
-        container.appendChild(dragLine);
-        const onMouseMove = (moveEvent) => {
-          const newLeftWidth = moveEvent.clientX - rect.left;
-          dragLine.style.left = `${newLeftWidth}px`;
-        };
-        const onMouseUp = (upEvent) => {
-          const newLeftWidth = upEvent.clientX - rect.left;
-          const newLeftPercent = newLeftWidth / containerWidth * 100;
-          const clampedPercent = Math.min(80, Math.max(20, newLeftPercent));
-          model.object.setLeftPanelWidthPercent(Math.round(clampedPercent));
-
-          dragLine.remove();
-          document.removeEventListener('mousemove', onMouseMove);
-          document.removeEventListener('mouseup', onMouseUp);
-        };
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-      };
-      vnode.dom.addEventListener('mousedown', handleMouseDown);
-    },
-  }, [
-    h('div.bg-gray.br1', {
-      style: {
-        width: '6px',
-        height: '400px',
-      },
-    }),
-  ]);
-
-/**
  * Method to tackle various states for the selected objects
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
