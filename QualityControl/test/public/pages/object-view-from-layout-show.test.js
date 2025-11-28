@@ -14,6 +14,12 @@
 import { strictEqual, deepStrictEqual, match } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
+import {
+  setLocalStorage,
+  getLocalStorageAsJson,
+  removeLocalStorage,
+  setLocalStorageAsJson,
+} from '../../testUtils/localStorage.js';
 
 const OBJECT_VIEW_PAGE_PARAM = '?page=objectView&objectId=123456';
 
@@ -24,48 +30,14 @@ const OBJECT_VIEW_PAGE_PARAM = '?page=objectView&objectId=123456';
  */
 const getObjectInfoPanelVisibility = async (page) => {
   try {
+    // `Boolean()` ensures the function returns true/false instead of an ElementHandle object,
+    // converting the resolved ElementHandle (truthy) to true
     return Boolean(await page.waitForSelector('#ObjectPlot > div:nth-child(2) > div:nth-child(2)', { timeout: 100 }));
-    // eslint-disable-next-line no-unused-vars
-  } catch (_) {
-    // If the `selector` doesn't appear after the `timeout` milliseconds of waiting, the function will throw.
+  } catch {
+    // If the `element` for the `selector` doesn't appear, the function will throw an error.
     return false;
   }
 };
-
-/**
- * Gets the LocalStorage value that controls visibility.
- * @param {import('puppeteer').Page} page - Puppeteer page instance.
- * @param {string} localStorageKey - LocalStorage key.
- * @returns {Promise<boolean>} Stored boolean or default (`true`) if missing.
- */
-const getLocalStorageVisibilityFlag = async (page, localStorageKey) =>
-  await page.evaluate((key) => {
-    const raw = window.localStorage.getItem(key);
-    if (raw === null || raw === undefined) {
-      return true; // matches ViewModel default fallback
-    }
-    return raw === String(true);
-  }, localStorageKey);
-
-/**
- * Sets or removes a LocalStorage value.
- * @param {import('puppeteer').Page} page - Puppeteer page instance.
- * @param {string} key - LocalStorage key.
- * @param {boolean|null} value - Value to store; if `null`, the key is removed.
- * @returns {Promise<void>}
- */
-const setLocalStorageValue = async (page, key, value) =>
-  await page.evaluate(
-    (k, v) => {
-      if (v !== null && v !== undefined) {
-        window.localStorage.setItem(k, String(v));
-      } else {
-        window.localStorage.removeItem(k);
-      }
-    },
-    key,
-    value,
-  );
 
 export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, testParent) => {
   await testParent.test(
@@ -234,13 +206,13 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
 
       const localStorageKey = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
 
-      await setLocalStorageValue(page, localStorageKey, null);
+      await removeLocalStorage(page, localStorageKey);
       await page.reload({ waitUntil: 'networkidle0' });
 
       const domVisibility = await getObjectInfoPanelVisibility(page);
-      const storedVisibility = await getLocalStorageVisibilityFlag(page, localStorageKey);
+      const storedVisibility = await getLocalStorageAsJson(page, localStorageKey);
 
-      strictEqual(storedVisibility, true, 'Expected fallback visibility to be true when key is missing');
+      strictEqual(storedVisibility, null, 'Expected visibility setting to be null when key is missing');
       strictEqual(domVisibility, true, 'DOM should show the panel when key is missing');
     },
   );
@@ -256,11 +228,11 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
 
       const localStorageKey = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
 
-      await setLocalStorageValue(page, localStorageKey, true);
+      await setLocalStorageAsJson(page, localStorageKey, true);
       await page.reload({ waitUntil: 'networkidle0' });
 
       const domVisibility = await getObjectInfoPanelVisibility(page);
-      const storedVisibility = await getLocalStorageVisibilityFlag(page, localStorageKey);
+      const storedVisibility = await getLocalStorageAsJson(page, localStorageKey);
 
       strictEqual(storedVisibility, true, 'Expected storage visibility to be true');
       strictEqual(domVisibility, true, 'DOM should show the panel when storage is true');
@@ -278,11 +250,11 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
 
       const localStorageKey = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
 
-      await setLocalStorageValue(page, localStorageKey, false);
+      await setLocalStorageAsJson(page, localStorageKey, false);
       await page.reload({ waitUntil: 'networkidle0' });
 
       const domVisibility = await getObjectInfoPanelVisibility(page);
-      const storedVisibility = await getLocalStorageVisibilityFlag(page, localStorageKey);
+      const storedVisibility = await getLocalStorageAsJson(page, localStorageKey);
 
       strictEqual(storedVisibility, false, 'Expected storage visibility to be false');
       strictEqual(domVisibility, false, 'DOM should hide the panel when storage is false');
@@ -301,14 +273,14 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       const localStorageKeyMainUser = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
       const localStorageKeyDiffUser = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId + 1}`;
 
-      await setLocalStorageValue(page, localStorageKeyMainUser, true); // show panel main user
-      await setLocalStorageValue(page, localStorageKeyDiffUser, false); // hide panel diff user
+      await setLocalStorageAsJson(page, localStorageKeyMainUser, true); // show panel main user
+      await setLocalStorageAsJson(page, localStorageKeyDiffUser, false); // hide panel diff user
 
       await page.reload({ waitUntil: 'networkidle0' });
 
-      const mainUserVisibilitySetting = await getLocalStorageVisibilityFlag(page, localStorageKeyMainUser);
+      const mainUserVisibilitySetting = await getLocalStorageAsJson(page, localStorageKeyMainUser);
       const mainUserVisibilityPanelElement = await getObjectInfoPanelVisibility(page);
-      const diffUserVisibilitySetting = await getLocalStorageVisibilityFlag(page, localStorageKeyDiffUser);
+      const diffUserVisibilitySetting = await getLocalStorageAsJson(page, localStorageKeyDiffUser);
 
       strictEqual(mainUserVisibilitySetting, true, 'Main user object info panel setting should remain visible');
       strictEqual(mainUserVisibilityPanelElement, true, 'Main user object info panel element should remain visible');
@@ -328,18 +300,18 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       const localStorageKey = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
 
       // Set an invalid value in localStorage
-      await setLocalStorageValue(page, localStorageKey, 'invalid-value');
+      await setLocalStorage(page, localStorageKey, 'invalid-json-value');
       await page.reload({ waitUntil: 'networkidle0' });
 
       // Check the stored value as parsed by our getter
-      const storedVisibility = await getLocalStorageVisibilityFlag(page, localStorageKey);
+      const storedVisibility = await getLocalStorageAsJson(page, localStorageKey);
       // Check the actual DOM visibility
       const domVisibility = await getObjectInfoPanelVisibility(page);
 
       strictEqual(
         storedVisibility,
-        true,
-        'Expected fallback visibility to be true when key contains an invalid value',
+        null,
+        'Expected fallback visibility to be null when key contains an invalid value',
       );
       strictEqual(
         domVisibility,
@@ -412,17 +384,17 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       }
 
       const localStorageKey = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
-      const visibilitySettingInitially = await getLocalStorageVisibilityFlag(page, localStorageKey);
+      const visibilitySettingInitially = await getLocalStorageAsJson(page, localStorageKey);
 
       // Click the toggle button (first time)
       await page.click('.visibility-toggle-button');
       await delay(100);
-      const visibilitySettingAfterFirstClick = await getLocalStorageVisibilityFlag(page, localStorageKey);
+      const visibilitySettingAfterFirstClick = await getLocalStorageAsJson(page, localStorageKey);
 
       // Click the toggle button (second time)
       await page.click('.visibility-toggle-button');
       await delay(100);
-      const visibilitySettingAfterSecondClick = await getLocalStorageVisibilityFlag(page, localStorageKey);
+      const visibilitySettingAfterSecondClick = await getLocalStorageAsJson(page, localStorageKey);
 
       strictEqual(
         visibilitySettingAfterFirstClick,
