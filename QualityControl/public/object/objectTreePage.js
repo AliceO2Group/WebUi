@@ -19,6 +19,7 @@ import timestampSelectForm from './../common/timestampSelectForm.js';
 import virtualTable from './virtualTable.js';
 import { defaultRowAttributes, qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
 import { downloadButton } from '../common/downloadButton.js';
+import { resizableDivider } from '../common/resizableDivider.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -29,7 +30,7 @@ import { downloadButton } from '../common/downloadButton.js';
 export default (model) => {
   const { object, router } = model;
   const { leftPanelWidthPercent } = object;
-  return h('.h-100.flex-column', { key: `${router.params.page}-${leftPanelWidthPercent}` }, [
+  return h('.h-100.flex-column', { key: `${router.params.page}` }, [
     h('.flex-row.flex-grow', [
       h('.scroll-y.flex-column', {
         style: {
@@ -51,12 +52,12 @@ export default (model) => {
         },
         Failure: () => null, // Notification is displayed
       })),
-      object.selected ? resizableDivider(model) : null,
-      h('.animate-width.scroll-y', {
-        style: {
-          width: object.selected ? `calc(${100 - leftPanelWidthPercent}% - 10px)` : '0%',
-        },
-      }, object.selected ? objectPanel(model) : null),
+      object.selected && [
+        resizableDivider((newWidthPercent) => model.object.setLeftPanelWidthPercent(newWidthPercent)),
+        h('.animate-width.scroll-y.flex-grow', {
+          key: `object-panel-${leftPanelWidthPercent}`,
+        }, objectPanel(model)),
+      ],
     ]),
     h('.f6.status-bar.ph1.flex-row', [
       statusBarLeft(model),
