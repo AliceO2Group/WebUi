@@ -12,8 +12,15 @@
  * or submit itself to any jurisdiction.
  */
 
-export const getLocalStorage = async (key, page) =>
-  await page.evaluate((key) => localStorage.getItem(key), key);
+export const getLocalStorage = async (page, storageKey) =>
+  page.evaluate((key) => localStorage.getItem(key), storageKey);
 
-export const setLocalStorage = async (key, value, page) =>
-  await page.evaluate((key, value) => localStorage.setItem(key, value), key, value);
+export const setLocalStorage = async (page, storageKey, storageValue) =>
+  page.evaluate(
+    (key, value) => {
+      localStorage.setItem(key, value);
+      return localStorage.getItem(key);
+    },
+    storageKey,
+    storageValue,
+  );
