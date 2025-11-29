@@ -24,7 +24,7 @@ import {
 } from 'react';
 
 export const DEFAULT_DRAWER_WIDTH = 300;
-export const MIN_DRAWER_WIDTH = 200;
+export const MIN_DRAWER_WIDTH = 300;
 export const MAX_DRAWER_WIDTH = 800;
 
 interface DrawerContextValue {
