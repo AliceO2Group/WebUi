@@ -13,12 +13,10 @@
  */
 
 import { type FC, type PropsWithChildren } from 'react';
-import { Box, Drawer } from '@mui/material';
+import { Box, Divider, Drawer } from '@mui/material';
 import { LeftDrawerFooter } from './LeftDrawerFooter';
 import { LeftDrawerHeader } from './LeftDrawerHeader';
 import { useDrawer } from '../../../contexts/DrawerContext';
-
-export const DRAWER_WIDTH = 300;
 
 /**
  * LeftDrawer component
@@ -28,18 +26,19 @@ export const DRAWER_WIDTH = 300;
  * @returns {ReactElement} LeftDrawer
  */
 export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => {
-  const { isOpen } = useDrawer();
+  const { isOpen, drawerWidth } = useDrawer();
 
   return (
     <Drawer
       sx={{
-        width: DRAWER_WIDTH,
+        width: drawerWidth,
         flexShrink: 0,
         '& .MuiDrawer-paper': {
-          width: DRAWER_WIDTH,
+          width: drawerWidth,
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
+          height: '100%',
           transition: (theme) =>
             theme.transitions.create('width', {
               easing: theme.transitions.easing.sharp,
@@ -52,9 +51,20 @@ export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => {
       className="left-drawer"
       open={isOpen}
     >
-      <LeftDrawerHeader />
-      <Box sx={{ overflow: 'auto', flexGrow: 1 }}>{children}</Box>
-      <LeftDrawerFooter />
+      <Box sx={{ display: 'flex', flexDirection: 'row', height: '100%' }}>
+        <Box
+          sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', height: '100%' }}
+        >
+          <LeftDrawerHeader />
+          <Box sx={{ overflow: 'auto', flexGrow: 1 }}>{children}</Box>
+          <LeftDrawerFooter />
+        </Box>
+        <Divider
+          orientation="vertical"
+          flexItem
+          sx={{ backgroundColor: 'rgba(0, 0, 0, 0.12)', width: '2px', flexShrink: 0, cursor: 'col-resize' }}
+        />
+      </Box>
     </Drawer>
   );
 };

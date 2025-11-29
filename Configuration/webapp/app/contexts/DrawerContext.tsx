@@ -22,10 +22,13 @@ import {
   type SetStateAction,
 } from 'react';
 
+export const DEFAULT_DRAWER_WIDTH = 300;
+
 interface DrawerContextValue {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
   toggleDrawer: () => void;
+  drawerWidth: number;
 }
 
 const DrawerContext = createContext<DrawerContextValue | undefined>(undefined);
@@ -39,6 +42,7 @@ const DrawerContext = createContext<DrawerContextValue | undefined>(undefined);
  */
 export const DrawerProvider: FC<PropsWithChildren> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(true);
+  const [drawerWidth, setDrawerWidth] = useState(DEFAULT_DRAWER_WIDTH);
 
   const toggleDrawer = () => {
     setIsOpen((prev) => !prev);
@@ -48,6 +52,7 @@ export const DrawerProvider: FC<PropsWithChildren> = ({ children }) => {
     isOpen,
     setIsOpen,
     toggleDrawer,
+    drawerWidth,
   };
 
   return <DrawerContext.Provider value={value}>{children}</DrawerContext.Provider>;

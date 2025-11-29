@@ -16,7 +16,6 @@ import { Box } from '@mui/material';
 import { type FC, type PropsWithChildren } from 'react';
 import { ContentHeader } from './ContentHeader';
 import { useParams } from 'react-router';
-import { DRAWER_WIDTH } from '../drawer/LeftDrawer';
 import { useDrawer } from '../../../contexts/DrawerContext';
 
 /**
@@ -27,7 +26,7 @@ import { useDrawer } from '../../../contexts/DrawerContext';
  * @returns {React.ReactElement} Content
  */
 export const Content: FC<PropsWithChildren> = ({ children }) => {
-  const { isOpen } = useDrawer();
+  const { isOpen, drawerWidth } = useDrawer();
   const params = useParams<{ '*': string }>();
   const configPath = params['*'];
   return (
@@ -36,7 +35,7 @@ export const Content: FC<PropsWithChildren> = ({ children }) => {
       sx={{
         flexGrow: 1,
         bgcolor: 'background.default',
-        marginLeft: isOpen ? 0 : `-${DRAWER_WIDTH}px`,
+        marginLeft: isOpen ? 0 : `-${drawerWidth}px`,
         transition: (theme) =>
           theme.transitions.create('margin', {
             easing: isOpen ? theme.transitions.easing.easeOut : theme.transitions.easing.sharp,
