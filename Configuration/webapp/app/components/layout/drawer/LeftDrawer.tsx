@@ -26,7 +26,7 @@ import { useDrawer } from '../../../contexts/DrawerContext';
  * @returns {ReactElement} LeftDrawer
  */
 export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => {
-  const { isOpen, drawerWidth } = useDrawer();
+  const { isOpen, drawerWidth, isResizing, handleResize } = useDrawer();
 
   return (
     <Drawer
@@ -39,11 +39,13 @@ export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => {
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
-          transition: (theme) =>
-            theme.transitions.create('width', {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.enteringScreen,
-            }),
+          transition: isResizing
+            ? 'none'
+            : (theme) =>
+                theme.transitions.create('width', {
+                  easing: theme.transitions.easing.sharp,
+                  duration: theme.transitions.duration.enteringScreen,
+                }),
         },
       }}
       variant="persistent"
@@ -62,7 +64,17 @@ export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => {
         <Divider
           orientation="vertical"
           flexItem
-          sx={{ backgroundColor: 'rgba(0, 0, 0, 0.12)', width: '2px', flexShrink: 0, cursor: 'col-resize' }}
+          onMouseDown={handleResize}
+          sx={{
+            backgroundColor: isResizing ? 'primary.main' : 'rgba(0, 0, 0, 0.12)',
+            width: '4px',
+            flexShrink: 0,
+            cursor: 'col-resize',
+            '&:hover': {
+              backgroundColor: 'primary.light',
+            },
+            transition: 'background-color 0.2s',
+          }}
         />
       </Box>
     </Drawer>

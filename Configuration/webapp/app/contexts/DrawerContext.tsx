@@ -16,6 +16,7 @@ import {
   createContext,
   useContext,
   useState,
+  useEffect,
   type FC,
   type PropsWithChildren,
   type Dispatch,
@@ -23,12 +24,17 @@ import {
 } from 'react';
 
 export const DEFAULT_DRAWER_WIDTH = 300;
+export const MIN_DRAWER_WIDTH = 200;
+export const MAX_DRAWER_WIDTH = 800;
 
 interface DrawerContextValue {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
   toggleDrawer: () => void;
   drawerWidth: number;
+  setDrawerWidth: Dispatch<SetStateAction<number>>;
+  isResizing: boolean;
+  handleResize: () => void;
 }
 
 const DrawerContext = createContext<DrawerContextValue | undefined>(undefined);
@@ -43,16 +49,54 @@ const DrawerContext = createContext<DrawerContextValue | undefined>(undefined);
 export const DrawerProvider: FC<PropsWithChildren> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [drawerWidth, setDrawerWidth] = useState(DEFAULT_DRAWER_WIDTH);
+  const [isResizing, setIsResizing] = useState(false);
 
   const toggleDrawer = () => {
     setIsOpen((prev) => !prev);
   };
+
+  const handleResize = () => {
+    setIsResizing(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) {
+        return;
+      }
+
+      const newWidth = e.clientX;
+      const clampedWidth = Math.max(MIN_DRAWER_WIDTH, Math.min(MAX_DRAWER_WIDTH, newWidth));
+      setDrawerWidth(clampedWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing]);
 
   const value: DrawerContextValue = {
     isOpen,
     setIsOpen,
     toggleDrawer,
     drawerWidth,
+    setDrawerWidth,
+    isResizing,
+    handleResize,
   };
 
   return <DrawerContext.Provider value={value}>{children}</DrawerContext.Provider>;
