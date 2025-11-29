@@ -26,7 +26,7 @@ import { useDrawer } from '../../../contexts/DrawerContext';
  * @returns {React.ReactElement} Content
  */
 export const Content: FC<PropsWithChildren> = ({ children }) => {
-  const { isOpen, drawerWidth } = useDrawer();
+  const { isOpen, drawerWidth, getTransition } = useDrawer();
   const params = useParams<{ '*': string }>();
   const configPath = params['*'];
   return (
@@ -36,13 +36,7 @@ export const Content: FC<PropsWithChildren> = ({ children }) => {
         flexGrow: 1,
         bgcolor: 'background.default',
         marginLeft: isOpen ? 0 : `-${drawerWidth}px`,
-        transition: (theme) =>
-          theme.transitions.create('margin', {
-            easing: isOpen ? theme.transitions.easing.easeOut : theme.transitions.easing.sharp,
-            duration: isOpen
-              ? theme.transitions.duration.enteringScreen
-              : theme.transitions.duration.leavingScreen,
-          }),
+        transition: getTransition('content'),
       }}
       className="content-section"
     >

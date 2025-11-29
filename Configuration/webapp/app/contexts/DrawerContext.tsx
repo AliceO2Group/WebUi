@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import type { Theme } from '@mui/material';
 import {
   createContext,
   useContext,
@@ -35,6 +36,7 @@ interface DrawerContextValue {
   setDrawerWidth: Dispatch<SetStateAction<number>>;
   isResizing: boolean;
   handleResize: () => void;
+  getTransition: (variant: 'drawer' | 'content') => (theme: Theme) => string;
 }
 
 const DrawerContext = createContext<DrawerContextValue | undefined>(undefined);
@@ -57,6 +59,26 @@ export const DrawerProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const handleResize = () => {
     setIsResizing(true);
+  };
+
+  const getTransition = (variant: 'drawer' | 'content') => {
+    if (variant === 'drawer' && !isResizing) {
+      return (theme: Theme) =>
+        theme.transitions.create('width', {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.enteringScreen,
+        });
+    }
+    if (variant === 'content') {
+      return (theme: Theme) =>
+        theme.transitions.create('margin', {
+          easing: isOpen ? theme.transitions.easing.easeOut : theme.transitions.easing.sharp,
+          duration: isOpen
+            ? theme.transitions.duration.enteringScreen
+            : theme.transitions.duration.leavingScreen,
+        });
+    }
+    return () => 'none';
   };
 
   useEffect(() => {
@@ -97,6 +119,7 @@ export const DrawerProvider: FC<PropsWithChildren> = ({ children }) => {
     setDrawerWidth,
     isResizing,
     handleResize,
+    getTransition,
   };
 
   return <DrawerContext.Provider value={value}>{children}</DrawerContext.Provider>;

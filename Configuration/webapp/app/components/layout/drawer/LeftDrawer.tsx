@@ -26,7 +26,7 @@ import { useDrawer } from '../../../contexts/DrawerContext';
  * @returns {ReactElement} LeftDrawer
  */
 export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => {
-  const { isOpen, drawerWidth, isResizing, handleResize } = useDrawer();
+  const { isOpen, drawerWidth, isResizing, handleResize, getTransition } = useDrawer();
 
   return (
     <Drawer
@@ -39,13 +39,7 @@ export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => {
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
-          transition: isResizing
-            ? 'none'
-            : (theme) =>
-              theme.transitions.create('width', {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.enteringScreen,
-              }),
+          transition: getTransition('drawer'),
         },
       }}
       variant="persistent"
