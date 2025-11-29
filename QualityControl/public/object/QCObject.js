@@ -17,6 +17,7 @@ import ObjectTree from './ObjectTree.class.js';
 import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
+import { StorageKeysEnum } from '../common/enums/storageKeys.enum.js';
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
@@ -56,13 +57,18 @@ export default class QCObject extends BaseViewModel {
     this.scrollTop = 0;
     this.scrollHeight = 0;
 
-    this.leftPanelWidthStorage = new BrowserStorage('object-view-left-panel-width');
-    let storedWidth = this.leftPanelWidthStorage.getLocalItem(this.model.session.personid.toString());
-    if (storedWidth === null || storedWidth === undefined) {
-      storedWidth = 50;
-      this.leftPanelWidthStorage.setLocalItem(this.model.session.personid.toString(), storedWidth);
-    }
-    this.leftPanelWidthPercent = storedWidth;
+    this._initializeLeftPanelWidth();
+  }
+
+  /**
+   * Initialize left panel width from local storage or set to default
+   * @returns {undefined}
+   */
+  _initializeLeftPanelWidth() {
+    const DEFAULT_PANEL_WIDTH = 50;
+    this.leftPanelWidthStorage = new BrowserStorage(StorageKeysEnum.OBJECT_VIEW_LEFT_PANEL_WIDTH);
+    const storedWidth = this.leftPanelWidthStorage.getLocalItem(this.model.session.personid.toString());
+    this.leftPanelWidthPercent = storedWidth ?? DEFAULT_PANEL_WIDTH;
   }
 
   /**
