@@ -42,10 +42,10 @@ export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => {
           transition: isResizing
             ? 'none'
             : (theme) =>
-                theme.transitions.create('width', {
-                  easing: theme.transitions.easing.sharp,
-                  duration: theme.transitions.duration.enteringScreen,
-                }),
+              theme.transitions.create('width', {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
         },
       }}
       variant="persistent"
