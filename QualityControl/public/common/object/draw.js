@@ -26,21 +26,21 @@ import { keyedTimerDebouncer, pointerId } from '../utils.js';
  * - `Loading`: returns a loading placeholder.
  * - `Failure`: returns an error box with the error message.
  * - `Success`: draws the object using `drawObject`.
- * @param {QCObject} qcObjectModel - the QCObject model
- * @param {string} objectName - the name of the QC object to draw
+ * @param {RemoteData} remoteData - the RemoteData object containing {qcObject, info, timestamps}
  * @param {object} options - optional options of presentation
  * @param {string[]} drawingOptions - optional drawing options to be used
+ * @param {(Error) => void} failFn - optional function to execute upon drawing failure
  * @returns {vnode} output virtual-dom, a single div with JSROOT attached to it
  */
-export const draw = (qcObjectModel, objectName, options = {}, drawingOptions = []) =>
-  qcObjectModel.objects[objectName]?.match({
+export const draw = (remoteData, options = {}, drawingOptions = [], failFn = () => {}) =>
+  remoteData?.match({
     NotAsked: () => null,
     Loading: () => h('.flex-column.items-center.justify-center', [h('.animate-slow-appearance', 'Loading')]),
     Failure: (error) => h('.error-box.danger.flex-column.justify-center.f6.text-center', {}, [
       h('span.error-icon', { title: 'Error' }, iconWarning()),
       h('span', error),
     ]),
-    Success: (data) => drawObject(data, options, drawingOptions, qcObjectModel),
+    Success: (data) => drawObject(data, options, drawingOptions, failFn),
   });
 
 /**
@@ -50,11 +50,11 @@ export const draw = (qcObjectModel, objectName, options = {}, drawingOptions = [
  * @param {JSON} object - {qcObject, info, timestamps}
  * @param {object} options - optional options of presentation
  * @param {string[]} drawingOptions - optional drawing options to be used
- * @param {QCObject} qcObjectModel - the QCObject model, used to invalidate (failure) RemoteData
+ * @param {(Error) => void} failFn - optional function to execute upon drawing failure
  * @returns {vnode} output virtual-dom, a single div with JSROOT attached to it
  */
-export const drawObject = (object, options = {}, drawingOptions = [], qcObjectModel = undefined) => {
-  const { qcObject, name, etag } = object;
+export const drawObject = (object, options = {}, drawingOptions = [], failFn = () => {}) => {
+  const { qcObject, etag } = object;
   const { root } = qcObject;
   if (isObjectOfTypeChecker(root)) {
     return checkersPanel(root);
@@ -79,18 +79,18 @@ export const drawObject = (object, options = {}, drawingOptions = [], qcObjectMo
     oncreate: (vnode) => {
       // Setup resize function
       vnode.dom.onresize = () => {
-        redrawOnSizeUpdate(vnode.dom, root, drawingOptions);
+        redrawOnSizeUpdate(vnode.dom, root, drawingOptions, failFn);
       };
 
       // Resize on window size change
       window.addEventListener('resize', vnode.dom.onresize);
 
-      drawOnCreate(vnode.dom, root, drawingOptions, qcObjectModel, name);
+      drawOnCreate(vnode.dom, root, drawingOptions, failFn);
     },
     onupdate: (vnode) => {
       const isRedrawn = redrawOnDataUpdate(vnode.dom, root, drawingOptions);
       if (!isRedrawn) {
-        redrawOnSizeUpdate(vnode.dom, root, drawingOptions);
+        redrawOnSizeUpdate(vnode.dom, root, drawingOptions, failFn);
       }
     },
     onremove: (vnode) => {
@@ -114,23 +114,27 @@ export const drawObject = (object, options = {}, drawingOptions = [], qcObjectMo
  * @param {HTMLElement} dom - the div containing jsroot plot
  * @param {object} root - root object in JSON representation
  * @param {string[]} drawingOptions - list of options to be used for drawing object
- * @param {QCObject} qcObjectModel - the QCObject model
- * @param {string} objectName - the name of the QC object to draw
+ * @param {(Error) => void} failFn - function to execute upon drawing failure
  * @throws {EvalError} If CSP disallows 'unsafe-eval'.
  * This is typically called when the drawing is incomplete or malformed.
  * @returns {undefined}
  */
-const drawOnCreate = async (dom, root, drawingOptions, qcObjectModel, objectName) => {
+const drawOnCreate = async (dom, root, drawingOptions, failFn) => {
   const finalDrawingOptions = generateDrawingOptionString(root, drawingOptions);
   JSROOT.draw(dom, root, finalDrawingOptions).then((painter) => {
     if (painter === null) {
       // eslint-disable-next-line no-console
       console.error('null painter in JSROOT');
+      if (typeof failFn === 'function') {
+        failFn(new Error('null painter in JSROOT'));
+      }
     }
   }).catch((error) => {
     // eslint-disable-next-line no-console
     console.error(error);
-    qcObjectModel?.invalidObject(objectName);
+    if (typeof failFn === 'function') {
+      failFn(error);
+    }
   });
   dom.dataset.fingerprintRedraw = fingerprintResize(dom.clientWidth, dom.clientHeight);
   dom.dataset.fingerprintData = fingerprintData(root, drawingOptions);
@@ -156,11 +160,12 @@ const drawOnCreate = async (dom, root, drawingOptions, qcObjectModel, objectName
  * @param {Model} model - Root model of the application
  * @param {HTMLElement} dom - Element containing the JSROOT plot
  * @param {TabObject} tabObject - Object describing the graph to redraw inside `dom`
+ * @param {(Error) => void} failFn - Function to execute upon drawing failure
  * @returns {undefined}
  */
 const redrawOnSizeUpdate = keyedTimerDebouncer(
   (_, dom) => dom,
-  (dom, root, drawingOptions) => {
+  (dom, root, drawingOptions, failFn) => {
     let previousFingerprint = dom.dataset.fingerprintResize;
 
     const intervalId = setInterval(() => {
@@ -175,7 +180,7 @@ const redrawOnSizeUpdate = keyedTimerDebouncer(
 
         // Size stable across intervals (safe to redraw)
         if (dom.dataset.fingerprintResize !== currentFingerprint) {
-          redraw(dom, root, drawingOptions);
+          redraw(dom, root, drawingOptions, failFn);
         }
 
         clearInterval(intervalId);
@@ -187,10 +192,10 @@ const redrawOnSizeUpdate = keyedTimerDebouncer(
     }, 50);
   },
   200,
-  (dom, root, drawingOptions) => {
+  (dom, root, drawingOptions, failFn) => {
     const resizeFingerprint = fingerprintResize(dom.clientWidth, dom.clientHeight);
     if (dom.dataset.fingerprintResize !== resizeFingerprint) {
-      redraw(dom, root, drawingOptions);
+      redraw(dom, root, drawingOptions, failFn);
     }
   },
 );
@@ -202,12 +207,13 @@ const redrawOnSizeUpdate = keyedTimerDebouncer(
  * @param {HTMLElement} dom - Target element containing the JSROOT graph.
  * @param {object} root - JSROOT-compatible data object to be rendered.
  * @param {string[]} drawingOptions - Initial or user-provided drawing options.
+ * @param {(Error) => void} failFn - Function to execute upon drawing failure
  * @returns {boolean} whether the JSROOT plot was redrawn
  */
-const redrawOnDataUpdate = (dom, root, drawingOptions) => {
+const redrawOnDataUpdate = (dom, root, drawingOptions, failFn) => {
   const dataFingerprint = fingerprintData(root, drawingOptions);
   if (dom.dataset.fingerprintData !== dataFingerprint) {
-    redraw(dom, root, drawingOptions);
+    redraw(dom, root, drawingOptions, failFn);
     return true;
   }
   return false;
@@ -218,14 +224,23 @@ const redrawOnDataUpdate = (dom, root, drawingOptions) => {
  * @param {HTMLElement} dom - Target element containing the JSROOT graph.
  * @param {object} root - JSROOT-compatible data object to be rendered.
  * @param {string[]} drawingOptions - Initial or user-provided drawing options.
+ * @param {(Error) => void} failFn - Function to execute upon drawing failure
  * @returns {undefined}
  */
-const redraw = (dom, root, drawingOptions) => {
+const redraw = (dom, root, drawingOptions, failFn) => {
   // A bug exists in JSROOT where the cursor gets stuck on `wait` when redrawing multiple objects simultaneously.
   // We save the current cursor state here and revert back to it after redrawing is complete.
   const currentCursor = document.body.style.cursor;
   const finalDrawingOptions = generateDrawingOptionString(root, drawingOptions);
-  JSROOT.redraw(dom, root, finalDrawingOptions);
+  try {
+    JSROOT.redraw(dom, root, finalDrawingOptions);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+    if (typeof failFn === 'function') {
+      failFn(error);
+    }
+  }
   document.body.style.cursor = currentCursor;
 };
 
