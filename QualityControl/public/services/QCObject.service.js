@@ -91,16 +91,18 @@ export default class QCObjectService {
         that.notify();
         return RemoteData.success(result);
       } else {
-        this.objectsLoadedMap[objectName] = RemoteData.failure(`404: Object "${objectName}" could not be found.`);
+        const failure = RemoteData.failure(result.message || `Object "${objectName}" could not be found.`);
+        this.objectsLoadedMap[objectName] = failure;
         that.notify();
-        return RemoteData.failure(`404: Object "${objectName}" could not be found.`);
+        return failure;
       }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);
-      this.objectsLoadedMap[objectName] = RemoteData.failure(`404: Object "${objectName}" could not be loaded.`);
+      const failure = RemoteData.failure(error.message || `Object "${objectName}" could not be loaded.`);
+      this.objectsLoadedMap[objectName] = failure;
       that.notify();
-      return RemoteData.failure(`Object '${objectName}' could not be loaded`);
+      return failure;
     }
   }
 
@@ -131,16 +133,18 @@ export default class QCObjectService {
         that.notify();
         return RemoteData.success(result);
       } else {
-        this.objectsLoadedMap[objectId] = RemoteData.failure(`404: Object with ID: "${objectId}" could not be found.`);
+        const failure = RemoteData.failure(result.message || `Object with ID "${objectId}" could not be found.`);
+        this.objectsLoadedMap[objectId] = failure;
         that.notify();
-        return RemoteData.failure(`404: Object with ID:"${objectId}" could not be found.`);
+        return failure;
       }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);
-      this.objectsLoadedMap[objectId] = RemoteData.failure(`404: Object with ID: "${objectId}" could not be loaded.`);
+      const failure = RemoteData.failure(error.message || `Object with ID "${objectId}" could not be loaded.`);
+      this.objectsLoadedMap[objectId] = failure;
       that.notify();
-      return RemoteData.failure(`Object with ID:"${objectId}" could not be loaded`);
+      return failure;
     }
   }
 
