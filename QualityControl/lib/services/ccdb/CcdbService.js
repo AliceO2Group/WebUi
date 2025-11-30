@@ -176,7 +176,7 @@ export class CcdbService {
    * ```
    * @param {CcdbObjectIdentification} partialIdentification - fields such as path, validFrom, etc.
    * @returns {Promise.<CcdbObjectIdentification>} - returns object full identification
-   * @throws {Error}
+   * @throws {Error} throws if the object cannot be found
    */
   async getObjectIdentification(partialIdentification) {
     const headers = {
@@ -195,7 +195,10 @@ export class CcdbService {
         [CCDB_RESPONSE_BODY_KEYS.ID]: qcObject[CCDB_RESPONSE_BODY_KEYS.ID],
       };
     } else {
-      throw new Error(`Object: ${url} could not be found`);
+      const baseMessage = `Object at '${url}' could not be found.`;
+      const hasFilters = partialIdentification?.filters && Object.keys(partialIdentification.filters).length > 0;
+      const finalMessage = hasFilters ? `${baseMessage} It was likely excluded by the applied filters.` : baseMessage;
+      throw new Error(finalMessage);
     }
   }
 
@@ -226,7 +229,12 @@ export class CcdbService {
         .split(', ')
         .filter((location) => !location.startsWith('alien') && !location.startsWith('file'));
       if (!location) {
-        throw new Error(`No location provided by CCDB for object with path: ${path}`);
+        const baseMessage = `No location provided by CCDB for object with path: ${path}`;
+        const hasFilters = identification?.filters && Object.keys(identification.filters).length > 0;
+        const finalMessage = hasFilters
+          ? `${baseMessage}. It was likely excluded by the applied filters.`
+          : baseMessage;
+        throw new Error(finalMessage);
       }
       return {
         ...headers,
@@ -234,7 +242,10 @@ export class CcdbService {
         path,
       };
     } else {
-      throw new Error(`Unable to retrieve object: ${path} due to status: ${status}`);
+      const baseMessage = `Unable to retrieve object: ${path} due to status: ${status}`;
+      const hasFilters = identification?.filters && Object.keys(identification.filters).length > 0;
+      const finalMessage = hasFilters ? `${baseMessage}. It was likely excluded by the applied filters.` : baseMessage;
+      throw new Error(finalMessage);
     }
   }
 

@@ -471,5 +471,35 @@ export const ccdbServiceTestSuite = async () => {
         strictEqual(ccdb._buildCcdbUrlPath(identification), '/qc/TPC/object/12322222/123332323/123-ffg/RunNumber=123456/PartName=Pass');
       });
     });
+
+    suite('CcdbService getObjectIdentification() Error Messages', () => {
+      let ccdb = null;
+
+      before(() => {
+        ccdb = new CcdbService(ccdbConfig);
+      });
+
+      test('should throw error if object not found with filters applied', async () => {
+        nock('http://ccdb-local:8083')
+          .get(/.*/)
+          .reply(200, { objects: [] });
+
+        await rejects(
+          async () => ccdb.getObjectIdentification({ path: 'qc-test', filters: { RunNumber: 123456 } }),
+          /It was likely excluded by the applied filters/i,
+        );
+      });
+
+      test('should throw error if object not found without filters', async () => {
+        nock('http://ccdb-local:8083')
+          .get(/.*/)
+          .reply(200, { objects: [] });
+
+        await rejects(
+          async () => ccdb.getObjectIdentification({ path: 'qc-test' }),
+          /Object at '\/latest\/qc-test' could not be found\.$/i,
+        );
+      });
+    });
   });
 };
