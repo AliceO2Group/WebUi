@@ -185,21 +185,32 @@ export class CcdbService {
     };
     const url = `/latest${this._buildCcdbUrlPath(partialIdentification)}`;
 
-    const result = await httpGetJson(this._hostname, this._port, url, { headers });
-    if (result?.objects?.length > 0) {
-      const [qcObject] = result.objects;
-      return {
-        [CCDB_RESPONSE_BODY_KEYS.PATH]: qcObject[CCDB_RESPONSE_BODY_KEYS.PATH],
-        [CCDB_RESPONSE_BODY_KEYS.VALID_FROM]: qcObject[CCDB_RESPONSE_BODY_KEYS.VALID_FROM],
-        [CCDB_RESPONSE_BODY_KEYS.VALID_UNTIL]: qcObject[CCDB_RESPONSE_BODY_KEYS.VALID_UNTIL],
-        [CCDB_RESPONSE_BODY_KEYS.ID]: qcObject[CCDB_RESPONSE_BODY_KEYS.ID],
-      };
-    } else {
-      const baseMessage = `Object at '${url}' could not be found.`;
-      const hasFilters = partialIdentification?.filters && Object.keys(partialIdentification.filters).length > 0;
-      const finalMessage = hasFilters ? `${baseMessage} It was likely excluded by the applied filters.` : baseMessage;
-      throw new Error(finalMessage);
+    let result = null;
+    try {
+      result = await httpGetJson(this._hostname, this._port, url, { headers });
+    } catch {
+      const errorMessage = this._buildFilterErrorMessage(
+        `Object at url '${url}' and path '${PATH}' could not be found.`,
+        partialIdentification.filters,
+      );
+      throw new Error(errorMessage);
     }
+
+    if (!result?.objects?.length) {
+      const errorMessage = this._buildFilterErrorMessage(
+        `Object at url '${url}' and path '${PATH}' could not be found.`,
+        partialIdentification.filters,
+      );
+      throw new Error(errorMessage);
+    }
+
+    const [qcObject] = result.objects;
+    return {
+      [CCDB_RESPONSE_BODY_KEYS.PATH]: qcObject[CCDB_RESPONSE_BODY_KEYS.PATH],
+      [CCDB_RESPONSE_BODY_KEYS.VALID_FROM]: qcObject[CCDB_RESPONSE_BODY_KEYS.VALID_FROM],
+      [CCDB_RESPONSE_BODY_KEYS.VALID_UNTIL]: qcObject[CCDB_RESPONSE_BODY_KEYS.VALID_UNTIL],
+      [CCDB_RESPONSE_BODY_KEYS.ID]: qcObject[CCDB_RESPONSE_BODY_KEYS.ID],
+    };
   }
 
   /**
@@ -218,7 +229,7 @@ export class CcdbService {
    * @throws {Error}
    */
   async getObjectDetails(identification) {
-    const { path = '', validFrom = undefined } = identification ?? {};
+    const { path = '', filters, validFrom = undefined } = identification ?? {};
     if (!path || !validFrom) {
       throw new Error('Missing mandatory parameters: path & validFrom');
     }
@@ -229,12 +240,11 @@ export class CcdbService {
         .split(', ')
         .filter((location) => !location.startsWith('alien') && !location.startsWith('file'));
       if (!location) {
-        const baseMessage = `No location provided by CCDB for object with path: ${path}`;
-        const hasFilters = identification?.filters && Object.keys(identification.filters).length > 0;
-        const finalMessage = hasFilters
-          ? `${baseMessage}. It was likely excluded by the applied filters.`
-          : baseMessage;
-        throw new Error(finalMessage);
+        const errorMessage = this._buildFilterErrorMessage(
+          `No location provided by CCDB for object with path: ${path}`,
+          filters,
+        );
+        throw new Error(errorMessage);
       }
       return {
         ...headers,
@@ -242,10 +252,11 @@ export class CcdbService {
         path,
       };
     } else {
-      const baseMessage = `Unable to retrieve object: ${path} due to status: ${status}`;
-      const hasFilters = identification?.filters && Object.keys(identification.filters).length > 0;
-      const finalMessage = hasFilters ? `${baseMessage}. It was likely excluded by the applied filters.` : baseMessage;
-      throw new Error(finalMessage);
+      const errorMessage = this._buildFilterErrorMessage(
+        `Unable to retrieve object: ${path} due to status: ${status}`,
+        filters,
+      );
+      throw new Error(errorMessage);
     }
   }
 
@@ -352,5 +363,30 @@ export class CcdbService {
         .join('/')}`;
     }
     return url;
+  }
+
+  /**
+   * Builds a detailed error message for CCDB objects that may have been filtered out.
+   * This method appends a filter-specific hint to a base error message when
+   * the `filters` object contains one or more keys. It ensures proper punctuation
+   * and provides a clear explanation for why the object might not have been found.
+   * @param {string} baseMessage - The initial error message describing the failure.
+   * @param {object} [filters] - Optional object representing filters applied when searching for the object.
+   * @returns {string} - The final, human-readable error message including filter hints if applicable.
+   */
+  _buildFilterErrorMessage(baseMessage, filters) {
+    // Only append filter-specific hint if filters object exists and has keys
+    if (filters && Object.keys(filters).length > 0) {
+      // Ensure the base message ends with proper punctuation.
+      // If it does NOT end with any Unicode punctuation, append a period.
+      if (/\p{P}$/u.test(baseMessage)) {
+        baseMessage += '.';
+      }
+
+      // Append a clear, descriptive filter hint.
+      baseMessage += 'It was likely excluded by the applied filters.';
+    }
+
+    return baseMessage;
   }
 }
