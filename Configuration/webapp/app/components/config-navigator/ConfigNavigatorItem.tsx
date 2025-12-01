@@ -24,10 +24,11 @@ import {
   ListItemText,
 } from '@mui/material';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFile, faFolder, faFolderOpen } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router';
 import { ROUTE_PREFIX } from '~/config';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import FolderIcon from '@mui/icons-material/Folder';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 
 export interface TreeNode {
   name: string;
@@ -46,8 +47,9 @@ interface ConfigNavigatorItemProps {
  * ConfigNavigatorItem component
  * Represents an item in the configuration navigator.
  * @param {ConfigNavigatorItemProps} props - The props of the component.
- * @param {string} props.title - The title of the configuration item.
- * @param {Function} props.onClick - Callback function to handle item click.
+ * @param {TreeNode} props.node - The data node representing the file or folder.
+ * @param {string} props.selectedPath - The currently active configuration path (used for highlighting).
+ * @param {number} [props.level=0] - The nesting depth level (used for indentation).
  * @returns {React.ReactElement} ConfigNavigatorItem
  */
 const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = memo(
@@ -91,7 +93,7 @@ const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = memo(
           <Link to={`${ROUTE_PREFIX}${node.fullPath}`} style={{ width: '100%' }}>
             <ListItemButton sx={{ borderRadius: 2, padding: 0, height: 40 }} selected={isSelected}>
               <ListItemIcon>
-                <FontAwesomeIcon icon={faFile} style={{ margin: 'auto' }} />
+                <InsertDriveFileIcon style={{ margin: 'auto' }} />
               </ListItemIcon>
               <ListItemText primary={node.name} />
             </ListItemButton>
@@ -107,7 +109,7 @@ const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = memo(
         >
           <ListItemButton onClick={handleFolderClick} sx={{ borderRadius: 2, padding: 0 }}>
             <ListItemIcon>
-              <FontAwesomeIcon icon={isOpen ? faFolderOpen : faFolder} style={{ margin: 'auto' }} />
+              {isOpen ? <FolderOpenIcon style={{ margin: 'auto' }} /> : <FolderIcon style={{ margin: 'auto' }} />}
             </ListItemIcon>
             <ListItemText primary={node.name} />
           </ListItemButton>

@@ -129,34 +129,13 @@ describe('`pageRoot` test-suite', function () {
     }
 
     const configNavigatorItems = await page.$$('.config_navigator__item');
-    if (data && data.length > 0) {
-      assert.ok(configNavigatorItems.length > 0, 'Configuration items list should not be empty');
-    } else {
-      assert.strictEqual(configNavigatorItems.length, 0);
-    }
-  });
-
-  it('should display configurations list', async function () {
-    if (page === null || url === null) {
-      assert.equal('Page is null', 'test suite failed');
-      return;
-    }
-
-    const res = await fetch('http://localhost:8080/control/api/configurations');
-    const data = await res.json();
-
-    const configNavigatorItems = await page.$$('.config_navigator__item');
-    if (data && data.length > 0) {
-      assert.ok(configNavigatorItems.length > 0, 'Configuration items list should not be empty');
-    } else {
-      assert.strictEqual(configNavigatorItems.length, 0);
-    }
+    assert.strictEqual(configNavigatorItems.length > 0, true);
   });
 
   describe('File System Tests', function () {
     const SELECTORS = {
-      folderIcon: 'svg[data-icon="folder"]',
-      fileIcon: 'svg[data-icon="file"]',
+      folderIcon: 'svg[data-testid="FolderIcon"]',
+      fileIcon: 'svg[data-testid="InsertDriveFileIcon"]',
       listItem: '.config_navigator__item',
     };
 

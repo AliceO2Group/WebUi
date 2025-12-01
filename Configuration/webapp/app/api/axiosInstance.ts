@@ -28,8 +28,9 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(async (config) => {
   const { token } = await getSessionData();
+  // elo
   if (token) {
-    config.url = `${config.url}?token=${token}`;
+    config.url = `${config.url}${config.url?.includes('?') ? '&' : '?'}token=${token}`;
   }
 
   return config;

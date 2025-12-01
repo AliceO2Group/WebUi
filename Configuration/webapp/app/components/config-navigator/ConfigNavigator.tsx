@@ -13,56 +13,14 @@
  */
 
 import { List } from '@mui/material';
-import ConfigNavigatorItem, { type TreeNode } from './ConfigNavigatorItem';
-import {
-  useConfigurationKeysQuery,
-  type ConfigurationKeysResponse,
-} from '~/api/query/useConfigurationKeysQuery';
+import ConfigNavigatorItem from './ConfigNavigatorItem';
+import { useConfigurationKeysQuery } from '~/api/query/useConfigurationKeysQuery';
 import { useEffect, useMemo, useState } from 'react';
-import { CONFIGURATION_KEY_PREFIX, ROUTE_PREFIX } from '~/config';
+import { ROUTE_PREFIX } from '~/config';
 import { useLocation } from 'react-router';
 import { ConfigNavigatorLoader } from './ConfigNavigatorLoader';
-
-const buildTree = (
-  paths: ConfigurationKeysResponse,
-): Record<ConfigurationKeysResponse[number], TreeNode> => {
-  const root: Record<ConfigurationKeysResponse[number], TreeNode> = {};
-
-  paths.forEach((path) => {
-    let relativePath = path;
-
-    if (path.startsWith(CONFIGURATION_KEY_PREFIX)) {
-      relativePath = path.slice(CONFIGURATION_KEY_PREFIX.length).replace(/^\//, '');
-    }
-
-    const parts = relativePath.split('/');
-    let currentLevel = root;
-    let currentFullPathBuilder = CONFIGURATION_KEY_PREFIX;
-
-    parts.forEach((part, index) => {
-      const isLast = index === parts.length - 1;
-
-      const separator =
-        currentFullPathBuilder.endsWith('/') || currentFullPathBuilder === '' ? '' : '/';
-      currentFullPathBuilder += `${separator}${part}`;
-
-      if (!currentLevel[part]) {
-        currentLevel[part] = {
-          name: part,
-          fullPath: isLast ? path : currentFullPathBuilder,
-          children: {},
-          isFile: isLast,
-        };
-      }
-
-      if (!isLast) {
-        currentLevel = currentLevel[part].children;
-      }
-    });
-  });
-
-  return root;
-};
+import { useConfigurationNavigate } from '~/hooks/useConfigurationNavigate';
+import { buildTree } from '~/utils/configuration-tree-builder';
 
 /**
  * ConfigNavigator component
@@ -81,6 +39,7 @@ export const ConfigNavigator = () => {
   const [selectedConfigurationPath, setSelectedConfigurationPath] = useState<string | undefined>();
 
   const { pathname } = useLocation();
+  const navigate = useConfigurationNavigate();
 
   useEffect(() => {
     if (configKeys && configKeys.length > 0) {
@@ -91,6 +50,8 @@ export const ConfigNavigator = () => {
 
       if (configKeys.includes(decodedPath)) {
         setSelectedConfigurationPath(decodedPath);
+      } else {
+        navigate(configKeys[0]);
       }
     }
   }, [configKeys, areConfigKeysLoading, pathname]);
@@ -112,12 +73,6 @@ export const ConfigNavigator = () => {
         <p style={{ padding: 16, color: 'red' }}>Error: {error?.message ?? 'Unknown error'}</p>
       ) : (
         Object.values(treeData)
-          .sort((a, b) => {
-            if (a.isFile === b.isFile) {
-              return a.name.localeCompare(b.name);
-            }
-            return a.isFile ? 1 : -1;
-          })
           .map((node) => (
             <ConfigNavigatorItem
               key={node.name}
