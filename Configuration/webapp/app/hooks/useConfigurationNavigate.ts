@@ -24,7 +24,7 @@ export const useConfigurationNavigate = () => {
   const reactRouterNavigate = useNavigate();
 
   const navigate = (relativePath: string) => {
-    void reactRouterNavigate(`${BASE_CONFIGURATION_PATH}/${relativePath}`);
+    void reactRouterNavigate(`configuration/${BASE_CONFIGURATION_PATH}/${relativePath}`);
   };
 
   return navigate;
