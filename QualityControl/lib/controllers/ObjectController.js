@@ -72,8 +72,9 @@ export class ObjectController {
       });
       res.status(200).json(objectsData);
     } catch (error) {
+      const responseError = new Error('Failed to retrieve list of objects latest version');
       this._logger.errorMessage(`Error whilst retrieving objects: ${error}`);
-      updateAndSendExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   }
 
