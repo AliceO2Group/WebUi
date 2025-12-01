@@ -379,8 +379,11 @@ export class CcdbService {
     if (filters && Object.keys(filters).length > 0) {
       // Ensure the base message ends with proper punctuation.
       // If it does NOT end with any Unicode punctuation, append a period.
-      if (/\p{P}$/u.test(baseMessage)) {
+      if (!/\p{P}$/u.test(baseMessage)) {
         baseMessage += '.';
+      }
+      if (!baseMessage.endsWith(' ')) {
+        baseMessage += ' ';
       }
 
       // Append a clear, descriptive filter hint.
