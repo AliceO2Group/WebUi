@@ -123,10 +123,8 @@ export class ObjectController {
       const object = await this._objService.retrieveQcObject({ path, validFrom, id, filters });
       res.status(200).json(object);
     } catch (error) {
-      const responseError = new Error('Failed to retrieve object content');
-
       this._logger.errorMessage(`Error whilst retrieving object content: ${error}`);
-      updateAndSendExpressResponseFromNativeError(res, responseError);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
@@ -149,10 +147,8 @@ export class ObjectController {
       const object = await this._objService.retrieveQcObjectByQcgId({ qcObjectId, id, validFrom, filters });
       res.status(200).json(object);
     } catch (error) {
-      const responseError = new Error('Unable to identify object or read it by qcg id');
-
       this._logger.errorMessage(`Error whilst retrieving object: ${error}`);
-      updateAndSendExpressResponseFromNativeError(res, responseError);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 }
