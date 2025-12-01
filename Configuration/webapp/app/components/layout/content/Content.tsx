@@ -16,6 +16,8 @@ import { Box } from '@mui/material';
 import { type FC, type PropsWithChildren } from 'react';
 import { ContentHeader } from './ContentHeader';
 import { useParams } from 'react-router';
+import { DRAWER_WIDTH } from '../drawer/LeftDrawer';
+import { useDrawer } from '../../../contexts/DrawerContext';
 
 /**
  * Content component
@@ -25,12 +27,24 @@ import { useParams } from 'react-router';
  * @returns {React.ReactElement} Content
  */
 export const Content: FC<PropsWithChildren> = ({ children }) => {
+  const { isOpen } = useDrawer();
   const params = useParams<{ '*': string }>();
   const configPath = params['*'];
   return (
     <Box
       component="main"
-      sx={{ flexGrow: 1, bgcolor: 'background.default' }}
+      sx={{
+        flexGrow: 1,
+        bgcolor: 'background.default',
+        marginLeft: isOpen ? 0 : `-${DRAWER_WIDTH}px`,
+        transition: (theme) =>
+          theme.transitions.create('margin', {
+            easing: isOpen ? theme.transitions.easing.easeOut : theme.transitions.easing.sharp,
+            duration: isOpen
+              ? theme.transitions.duration.enteringScreen
+              : theme.transitions.duration.leavingScreen,
+          }),
+      }}
       className="content-section"
     >
       <ContentHeader currentPath={configPath ?? ''} />

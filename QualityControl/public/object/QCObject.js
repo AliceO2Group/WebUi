@@ -55,6 +55,18 @@ export default class QCObject extends BaseViewModel {
     this.queryingObjects = false;
     this.scrollTop = 0;
     this.scrollHeight = 0;
+
+    this.leftPanelWidthPercent = 50;
+  }
+
+  /**
+   * Set the left panel width percentage
+   * @param {number} widthPercent - width percentage of the left panel
+   * @returns {undefined}
+   */
+  setLeftPanelWidthPercent(widthPercent) {
+    this.leftPanelWidthPercent = widthPercent;
+    this.notify();
   }
 
   /**

@@ -12,9 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Toolbar, Typography } from '@mui/material';
+import { Box, IconButton, Skeleton, Toolbar, Typography } from '@mui/material';
 import { type FC } from 'react';
 import { UserSection } from '../../user-section/UserSection';
+import { useDrawer } from '~/contexts/DrawerContext';
+import MenuIcon from '@mui/icons-material/Menu';
+import { useConfigurationKeysQuery } from '~/api/query/useConfigurationKeysQuery';
 
 interface ContentHeaderProps {
   currentPath: string;
@@ -27,18 +30,30 @@ interface ContentHeaderProps {
  * @param {string} props.currentPath - Current configuration path.
  * @returns {React.ReactElement} Content
  */
-export const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => (
-  <Toolbar
-    style={{
-      borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-      display: 'flex',
-      justifyContent: 'space-between',
-    }}
-    className="content-section__header"
-  >
-    <Typography variant="h5" className="config-page__header__text">
-      {currentPath}
-    </Typography>
-    <UserSection userName="John D." />
-  </Toolbar>
-);
+export const ContentHeader: FC<ContentHeaderProps> = ({ currentPath }) => {
+  const { isOpen, toggleDrawer } = useDrawer();
+  const { isLoading: areConfigKeysLoading } = useConfigurationKeysQuery();
+
+  return (
+    <Toolbar
+      style={{
+        borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+        display: 'flex',
+        justifyContent: 'space-between',
+      }}
+      className="content-section__header"
+    >
+      <Box display="flex" alignItems="center" gap={1}>
+        {!isOpen && (
+          <IconButton onClick={toggleDrawer}>
+            <MenuIcon fontSize="large" />
+          </IconButton>
+        )}
+        <Typography variant="h5" className="config-page__header__text">
+          {areConfigKeysLoading ? <Skeleton width={500} /> : currentPath}
+        </Typography>
+      </Box>
+      <UserSection />
+    </Toolbar>
+  );
+};

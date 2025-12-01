@@ -21,10 +21,9 @@ import { LogManager } from '@aliceo2/web-ui';
 import type { Command, CommandHandler } from 'models/commands.model';
 import type { DuplexMessageEvent } from '../../models/message.model';
 import { ConnectionDirection } from '../../models/message.model';
+import { ConnectionStatus } from '../../models/connection.model';
+import { peerListener } from '../../utils/connection/peerListener';
 
-/**
- * @description Manages all the connection between clients and central system.
- */
 /**
  * Manages the lifecycle and connection logic for a gRPC client communicating with the central system.
  *
@@ -45,6 +44,10 @@ export class ConnectionManager {
   private _centralConnection: CentralConnection;
   private _sendingConnections = new Map<string, Connection>();
   private _receivingConnections = new Map<string, Connection>();
+  private _wrapper: any;
+  private _peerCtor: any;
+  private _peerServer: grpc.Server | undefined;
+  private _baseAPIPath: string = '';
 
   /**
    * Initializes a new instance of the ConnectionManager class.
@@ -64,9 +67,10 @@ export class ConnectionManager {
     });
 
     const proto = grpc.loadPackageDefinition(packageDef) as any;
-    const wrapper = proto.webui.tokenization;
+    this._wrapper = proto.webui.tokenization;
+    this._peerCtor = this._wrapper.Peer2Peer;
 
-    const client = new wrapper.CentralSystem(centralAddress, grpc.credentials.createInsecure());
+    const client = new this._wrapper.CentralSystem(centralAddress, grpc.credentials.createInsecure());
 
     // Event dispatcher for central system events
     this._centralDispatcher = new CentralCommandDispatcher();
@@ -109,13 +113,15 @@ export class ConnectionManager {
    * @param token Optional token for connection
    */
   createNewConnection(address: string, direction: ConnectionDirection, token?: string) {
-    const conn = new Connection(token ?? '', address, direction);
+    const conn = new Connection(token ?? '', address, direction, this._peerCtor);
 
     if (direction === ConnectionDirection.RECEIVING) {
       this._receivingConnections.set(address, conn);
     } else {
       this._sendingConnections.set(address, conn);
     }
+    conn.status = ConnectionStatus.CONNECTED;
+    this._logger.infoMessage(`Connection with ${address} has been estabilished. Status: ${conn.status}`);
 
     return conn;
   }
@@ -149,5 +155,27 @@ export class ConnectionManager {
       sending: [...this._sendingConnections.values()],
       receiving: [...this._receivingConnections.values()],
     };
+  }
+
+  /** Starts a listener server for p2p connections */
+  public async listenForPeers(port: number, baseAPIPath?: string): Promise<void> {
+    if (baseAPIPath) this._baseAPIPath = baseAPIPath;
+
+    if (this._peerServer) {
+      this._peerServer.forceShutdown();
+      this._peerServer = undefined;
+    }
+
+    this._peerServer = new grpc.Server();
+    this._peerServer.addService(this._wrapper.Peer2Peer.service, {
+      Fetch: async (call: grpc.ServerUnaryCall<any, any>, callback: grpc.sendUnaryData<any>) =>
+        peerListener(call, callback, this._logger, this._receivingConnections, this._peerCtor, this._baseAPIPath),
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      this._peerServer?.bindAsync(`localhost:${port}`, grpc.ServerCredentials.createInsecure(), (err) => (err ? reject(err) : resolve()));
+    });
+
+    this._logger.infoMessage(`Peer server listening on localhost:${port}`);
   }
 }
