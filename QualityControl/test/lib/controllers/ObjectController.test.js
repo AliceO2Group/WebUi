@@ -99,7 +99,7 @@ export const objectControllerTestSuite = async () => {
       await objectController.getObjectsHandler(reqMock, resMock);
       ok(resMock.status.calledWith(500));
       ok(resMock.json.calledWithMatch({
-        message: 'Service error',
+        message: 'Failed to retrieve list of objects latest version',
         status: 500,
         title: 'Unknown Error',
       }));
