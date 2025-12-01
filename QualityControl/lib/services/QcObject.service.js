@@ -13,7 +13,7 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
-import { isObjectOfTypeChecker, parseObjects } from '../../common/library/qcObject/utils.js';
+import { isObjectOfTypeChecker, parseObjects, QC_CHECKER_TYPE } from '../../common/library/qcObject/utils.js';
 import QCObjectDto from '../dtos/QCObjectDto.js';
 import QcObjectIdentificationDto from '../dtos/QcObjectIdentificationDto.js';
 
@@ -238,7 +238,7 @@ export class QcObjectService {
         return JSON.parse(JSON.stringify(root, (_, value) => typeof value === 'bigint' ? value.toString() : value));
       } catch (error) {
         this._logger.error(error.message || error);
-        throw new Error(`Failed to serialize ROOT object '${root['_typename']}' with BigInt-safe JSON`);
+        throw new Error(`Failed to serialize ROOT object '${QC_CHECKER_TYPE}' with BigInt-safe JSON`);
       }
     }
 
