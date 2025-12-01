@@ -486,9 +486,13 @@ export const ccdbServiceTestSuite = async () => {
           .get(CCDB_URL_HEALTH_POINT)
           .reply(200, { objects: [] });
 
+        const filters = { RunNumber: 123456 };
+        const filterString = Object.entries(filters).map(([key, value]) => `${key}=${value}`).join('/');
+
         await rejects(
-          async () => ccdb.getObjectIdentification({ path: PATH, id: ID, filters: { RunNumber: 123456 } }),
-          `Object at url '${ID}' and path ${PATH} could not be found. It was likely excluded by the applied filters.`,
+          async () => ccdb.getObjectIdentification({ path: PATH, id: ID, filters }),
+          // eslint-disable-next-line @stylistic/js/max-len
+          new Error(`Object at url '/latest/path/${ID}/${filterString}' and path '${PATH}' could not be found. It was likely excluded by the applied filters.`),
         );
       });
 
@@ -499,7 +503,7 @@ export const ccdbServiceTestSuite = async () => {
 
         await rejects(
           async () => ccdb.getObjectIdentification({ path: PATH, id: ID }),
-          `Object at url '${ID}' and path ${PATH} could not be found.`,
+          new Error(`Object at url '/latest/path/${ID}' and path '${PATH}' could not be found.`),
         );
       });
     });
