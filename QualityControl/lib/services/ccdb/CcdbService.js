@@ -190,7 +190,7 @@ export class CcdbService {
       result = await httpGetJson(this._hostname, this._port, url, { headers });
     } catch {
       const errorMessage = this._buildFilterErrorMessage(
-        `Object at url '${url}' and path '${PATH}' could not be found.`,
+        `Object at url '${url}' and path '${partialIdentification.path}' could not be found.`,
         partialIdentification.filters,
       );
       throw new Error(errorMessage);
@@ -198,7 +198,7 @@ export class CcdbService {
 
     if (!result?.objects?.length) {
       const errorMessage = this._buildFilterErrorMessage(
-        `Object at url '${url}' and path '${PATH}' could not be found.`,
+        `Object at url '${url}' and path '${partialIdentification.path}' could not be found.`,
         partialIdentification.filters,
       );
       throw new Error(errorMessage);
