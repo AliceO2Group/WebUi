@@ -72,14 +72,13 @@ export const ConfigNavigator = () => {
       {isError ? (
         <p style={{ padding: 16, color: 'red' }}>Error: {error?.message ?? 'Unknown error'}</p>
       ) : (
-        Object.values(treeData)
-          .map((node) => (
-            <ConfigNavigatorItem
-              key={node.name}
-              node={node}
-              selectedPath={selectedConfigurationPath}
-            />
-          ))
+        Object.values(treeData).map((node) => (
+          <ConfigNavigatorItem
+            key={node.name}
+            node={node}
+            selectedPath={selectedConfigurationPath}
+          />
+        ))
       )}
     </List>
   );

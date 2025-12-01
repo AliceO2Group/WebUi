@@ -109,7 +109,11 @@ const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = memo(
         >
           <ListItemButton onClick={handleFolderClick} sx={{ borderRadius: 2, padding: 0 }}>
             <ListItemIcon>
-              {isOpen ? <FolderOpenIcon style={{ margin: 'auto' }} /> : <FolderIcon style={{ margin: 'auto' }} />}
+              {isOpen ? (
+                <FolderOpenIcon style={{ margin: 'auto' }} />
+              ) : (
+                <FolderIcon style={{ margin: 'auto' }} />
+              )}
             </ListItemIcon>
             <ListItemText primary={node.name} />
           </ListItemButton>
