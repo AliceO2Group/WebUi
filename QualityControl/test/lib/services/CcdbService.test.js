@@ -474,30 +474,32 @@ export const ccdbServiceTestSuite = async () => {
 
     suite('CcdbService getObjectIdentification() Error Messages', () => {
       let ccdb = null;
+      let CCDB_URL_HEALTH_POINT = '';
 
       before(() => {
         ccdb = new CcdbService(ccdbConfig);
+        CCDB_URL_HEALTH_POINT = `/monitor/${CCDB_MONITOR}/.*/${CCDB_VERSION_KEY}`;
       });
 
       test('should throw error if object not found with filters applied', async () => {
         nock('http://ccdb-local:8083')
-          .get(/.*/)
+          .get(CCDB_URL_HEALTH_POINT)
           .reply(200, { objects: [] });
 
         await rejects(
-          async () => ccdb.getObjectIdentification({ path: 'qc-test', filters: { RunNumber: 123456 } }),
-          /It was likely excluded by the applied filters/i,
+          async () => ccdb.getObjectIdentification({ path: PATH, id: ID, filters: { RunNumber: 123456 } }),
+          `Object at url '${ID}' and path ${PATH} could not be found. It was likely excluded by the applied filters.`,
         );
       });
 
       test('should throw error if object not found without filters', async () => {
         nock('http://ccdb-local:8083')
-          .get(/.*/)
+          .get(CCDB_URL_HEALTH_POINT)
           .reply(200, { objects: [] });
 
         await rejects(
-          async () => ccdb.getObjectIdentification({ path: 'qc-test' }),
-          /Object at '\/latest\/qc-test' could not be found\.$/i,
+          async () => ccdb.getObjectIdentification({ path: PATH, id: ID }),
+          `Object at url '${ID}' and path ${PATH} could not be found.`,
         );
       });
     });
