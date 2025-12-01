@@ -273,4 +273,41 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       strictEqual(redrawn, true, 'JSRoot drawing was not redrawn on visibility toggle');
     },
   );
+
+  await testParent.test(
+    'should display an error when the JSROOT object fails to fetch due to a network failure',
+    { timeout: 10000 },
+    async () => {
+      // Enable request interception for this test
+      await page.setRequestInterception(true);
+
+      // Define request handler scoped to this test
+      const requestHandler = (interceptedRequest) => {
+        const url = interceptedRequest.url();
+
+        // Abort only the API request for JSRoot object
+        if (url.includes('/api/object')) {
+          interceptedRequest.abort('failed'); // simulates network failure
+        } else {
+          interceptedRequest.continue();
+        }
+      };
+
+      try {
+        // Attach the handler
+        page.on('request', requestHandler);
+
+        await page.reload({ waitUntil: 'networkidle0' });
+        await delay(1000);
+
+        const errorText = await page.evaluate(() => document.querySelector('#Error .f3').innerText);
+
+        strictEqual(errorText, 'Connection to server failed, please try again');
+      } finally {
+        // Cleanup: remove listener and disable interception
+        page.off('request', requestHandler);
+        await page.setRequestInterception(false);
+      }
+    },
+  );
 };
