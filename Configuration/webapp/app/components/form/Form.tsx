@@ -30,6 +30,7 @@ export type FormRestrictions = {
 
 interface FormProps extends PropsWithChildren {
   sectionTitle: string;
+  sectionPrefix: string;
   items: FormItem;
   itemsRestrictions: FormRestrictions;
   control: Control<InputsType>;
@@ -48,7 +49,13 @@ function isFormRestrictions(obj: FormRestrictions[string]): obj is FormRestricti
   return obj instanceof Object && !(obj instanceof Array);
 }
 
-export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions, control }) => {
+export const Form: FC<FormProps> = ({
+  sectionTitle,
+  sectionPrefix,
+  items,
+  itemsRestrictions,
+  control,
+}) => {
   const [viewForm, setViewForm] = useState<boolean>(true);
 
   const renderItem = useCallback(
@@ -56,7 +63,8 @@ export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions, co
       isFormRestrictions(value) ? (
         <Form
           key={key}
-          sectionTitle={`${sectionTitle}${KEY_SEPARATOR}${key}`}
+          sectionTitle={key}
+          sectionPrefix={`${sectionPrefix}${KEY_SEPARATOR}${key}`}
           items={items[key] as FormItem}
           itemsRestrictions={itemsRestrictions[key] as FormRestrictions}
           control={control}
@@ -64,7 +72,7 @@ export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions, co
       ) : (
         <Widget
           key={key}
-          sectionTitle={`${sectionTitle}${KEY_SEPARATOR}${key}`}
+          sectionPrefix={`${sectionPrefix}${KEY_SEPARATOR}${key}`}
           label={key}
           type={value}
           value={items[key]}

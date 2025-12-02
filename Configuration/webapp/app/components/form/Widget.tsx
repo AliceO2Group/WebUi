@@ -14,14 +14,14 @@
 
 import { type FC, type PropsWithChildren, type ReactElement } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import TextField from '@mui/material/TextField';
 import Switch from '@mui/material/Switch';
 import { type Control } from 'react-hook-form';
 import type { InputsType } from '~/routes/configuration';
 import { FormTextInput } from './widgets/FormTextInput';
+import { FormNumberInput } from './widgets/FormNumberInput';
 
 export interface WidgetProps extends PropsWithChildren {
-  sectionTitle: string;
+  sectionPrefix: string;
   label: string;
   type: 'string' | 'number' | 'boolean' | 'array';
   value: unknown;
@@ -33,7 +33,7 @@ export const Widget: FC<WidgetProps> = ({ type, ...rest }): ReactElement => {
     case 'string':
       return <FormTextInput {...rest} />;
     case 'number':
-      return <TextField type="number" defaultValue={rest.value} label={rest.label} />;
+      return <FormNumberInput {...rest} />;
     case 'boolean':
       return (
         <FormControlLabel

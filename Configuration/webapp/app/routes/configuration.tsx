@@ -57,11 +57,7 @@ const ConfigurationPage = () => {
   const { data: configurationRestrictions, isLoading: isConfigurationRestrictionsLoading } =
     useConfigurationRestrictionsQuery(configurationName);
 
-  const {
-    control,
-    handleSubmit,
-    getValues,
-  } = useForm<InputsType>({ defaultValues });
+  const { control, handleSubmit, getValues } = useForm<InputsType>({ defaultValues });
 
   const onSubmit: SubmitHandler<InputsType> = async (data) => {
     console.log(data);
@@ -82,6 +78,7 @@ const ConfigurationPage = () => {
         <Form
           control={control}
           sectionTitle={DEFAULT_PREFIX}
+          sectionPrefix={DEFAULT_PREFIX}
           items={configuration}
           itemsRestrictions={configurationRestrictions}
         />

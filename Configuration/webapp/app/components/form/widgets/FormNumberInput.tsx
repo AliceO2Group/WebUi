@@ -12,20 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
-import { TextField } from '@mui/material';
-import { type ReactElement } from 'react';
 import { Controller } from 'react-hook-form';
 import type { WidgetProps } from '../Widget';
+import { TextField } from '@mui/material';
+import type { ReactElement } from 'react';
 
-/**
- * Text input widget for the form.
- * @param {Omit<WidgetProps, 'type'>} props - The props of the widget.
- * @param {string} props.sectionTitle  - The section title of the widget.
- * @param {string} props.label - The title of the widget.
- * @param {Control<InputsType>} props.control - The control of the widget.
- * @returns {ReactElement} The text input widget.
- */
-export const FormTextInput = ({
+export const FormNumberInput = ({
   sectionPrefix,
   label,
   control,
@@ -35,7 +27,7 @@ export const FormTextInput = ({
     control={control}
     render={({ field, fieldState: { error } }) => (
       <TextField
-        type="text"
+        type="number"
         label={label}
         {...field}
         error={Boolean(error)}
