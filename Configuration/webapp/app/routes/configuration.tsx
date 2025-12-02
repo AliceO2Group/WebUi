@@ -48,8 +48,11 @@ const ConfigurationPage = () => {
     reset,
   } = useForm<InputsType>({ defaultValues });
 
-  const onSubmit: SubmitHandler<InputsType> = async (data) => {
+  const onSubmit: SubmitHandler<InputsType> = (data) => {
+    // for now only logging the values
+    // eslint-disable-next-line no-console
     console.log(data);
+    // eslint-disable-next-line no-console
     console.log(getValues());
   };
 
