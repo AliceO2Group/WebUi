@@ -34,15 +34,13 @@ describe('`pageConfiguration` test-suite', function () {
       assert.equal('Page is null', 'test suite failed');
       return;
     }
+
     await page.goto(url, { waitUntil: 'networkidle0' });
 
-    const configNavigatorItems = await page.$$('.config_navigator__item--selected');
+    const configNavigatorItems = await page.$$('.config_navigator__item .Mui-selected');
     assert.strictEqual(configNavigatorItems.length, 1);
 
-    const classList = await configNavigatorItems[0].evaluate((el) => el.className.split(' '));
-    const selectedKey = Array.from(classList)
-      .find((className: string) => className.startsWith('config_key__'))
-      ?.split('__')[1];
+    const selectedKey = await configNavigatorItems[0].evaluate((el) => el.textContent?.trim());
 
     if (!selectedKey) {
       assert.equal('No selected key found', 'test suite failed');
@@ -60,13 +58,10 @@ describe('`pageConfiguration` test-suite', function () {
     }
     await page.goto(url, { waitUntil: 'networkidle0' });
 
-    const configNavigatorItems = await page.$$('.config_navigator__item--selected');
+    const configNavigatorItems = await page.$$('.config_navigator__item .Mui-selected');
     assert.strictEqual(configNavigatorItems.length, 1);
 
-    const classList = await configNavigatorItems[0].evaluate((el) => el.className.split(' '));
-    const selectedKey = Array.from(classList)
-      .find((className: string) => className.startsWith('config_key__'))
-      ?.split('__')[1];
+    const selectedKey = await configNavigatorItems[0].evaluate((el) => el.textContent?.trim());
 
     if (!selectedKey) {
       assert.equal('No selected key found', 'test suite failed');

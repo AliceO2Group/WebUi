@@ -12,4 +12,5 @@
  * or submit itself to any jurisdiction.
  */
 
-export const BASE_CONFIGURATION_PATH = 'o2/components/qc/ANY/any';
+export const ROUTE_PREFIX = '/configuration/';
+export const CONFIGURATION_KEY_PREFIX = 'o2/components/qc/ANY/any';
