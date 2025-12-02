@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Setup node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: '22.x'
       - run: (cd Tokenization/backend/central-system; npm i)
@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Setup node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: '22.x'
       - run: (cd Tokenization/webapp; npm i )
@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Setup node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: '22.x'
       - run: (cd Tokenization/webapp; npm run docker:test)
@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Setup node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: '22.x'
       - run: (cd Tokenization/backend/central-system; npm i; npm run test)
