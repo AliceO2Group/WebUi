@@ -155,3 +155,36 @@
 .cursor-pointer {
   cursor: pointer;
 }
+
+.header-layout {
+  & > :not(:last-child) {
+    margin-right: 8px;
+  }
+
+  &.edit {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+  }
+
+  &::after,
+  &::before {
+    content: '';
+    flex: 1;
+  }
+}
+
+.header-layout-container {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+}
+
+.flex-fixed {
+  flex: 0 0 auto;
+}
+
+.whitespace-nowrap {
+  white-space: nowrap;
+}
