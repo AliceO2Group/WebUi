@@ -95,7 +95,16 @@ const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = memo(
               <ListItemIcon>
                 <InsertDriveFileIcon style={{ margin: 'auto' }} />
               </ListItemIcon>
-              <ListItemText primary={node.name} />
+              <ListItemText
+                primary={node.name}
+                primaryTypographyProps={{
+                  sx: {
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  },
+                }}
+              />
             </ListItemButton>
           </Link>
         </ListItem>
