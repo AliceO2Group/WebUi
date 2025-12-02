@@ -16,11 +16,12 @@ import { useLocation } from 'react-router';
 import { useConfigurationQuery } from '~/api/query/useConfigurationQuery';
 import { useConfigurationRestrictionsQuery } from '~/api/query/useConfigurationRestrictionsQuery';
 import { Form } from '~/components/form/Form';
+import { ROUTE_PREFIX } from '~/config';
 import { Spinner } from '~/ui/spinner';
 
 const ConfigurationPage = () => {
   const { pathname } = useLocation();
-  const configurationName = pathname.split('/').pop() as string;
+  const configurationName = pathname.slice(ROUTE_PREFIX.length);
 
   const { data: configuration, isLoading: isConfigurationLoading } =
     useConfigurationQuery(configurationName);
