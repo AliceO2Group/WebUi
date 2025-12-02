@@ -28,6 +28,15 @@ export interface WidgetProps extends PropsWithChildren {
   control: Control<InputsType>;
 }
 
+/**
+ * Widget component.
+ * @param {WidgetProps} props - The props of the widget.
+ * @param {string} props.type - The type of the widget.
+ * @param {string} props.label - The label of the widget.
+ * @param {unknown} props.value - The value of the widget.
+ * @param {Control<InputsType>} props.control - The control of the widget.
+ * @returns {ReactElement} The widget component.
+ */
 export const Widget: FC<WidgetProps> = ({ type, ...rest }): ReactElement => {
   switch (type) {
     case 'string':

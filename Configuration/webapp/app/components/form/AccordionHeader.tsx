@@ -25,6 +25,14 @@ interface AccordionHeaderProps extends PropsWithChildren {
   viewFormToggle: () => void;
 }
 
+/**
+ * Accordion header component.
+ * @param {AccordionHeaderProps} props - The props of the accordion header.
+ * @param {string} props.title - The title of the accordion header.
+ * @param {boolean} props.viewForm - Whether the form is visible.
+ * @param {() => void} props.viewFormToggle - The callback to toggle the form visibility.
+ * @returns {ReactElement} The accordion header component.
+ */
 export const AccordionHeader: FC<AccordionHeaderProps> = ({
   title,
   viewForm,

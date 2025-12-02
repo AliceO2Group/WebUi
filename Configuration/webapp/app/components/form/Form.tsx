@@ -20,7 +20,8 @@ import { Widget } from './Widget';
 import { AccordionHeader } from './AccordionHeader';
 import { Typography } from '@mui/material';
 import type { Control } from 'react-hook-form';
-import { KEY_SEPARATOR, type InputsType } from '~/routes/configuration';
+import { type InputsType } from '~/routes/configuration';
+import { KEY_SEPARATOR } from './constants';
 
 export type FormItem = { [key: string]: string | object | FormItem };
 
@@ -49,6 +50,16 @@ function isFormRestrictions(obj: FormRestrictions[string]): obj is FormRestricti
   return obj instanceof Object && !(obj instanceof Array);
 }
 
+/**
+ * Form component.
+ * @param {FormProps} props - The props of the form.
+ * @param {string} props.sectionTitle - The title of the section.
+ * @param {string} props.sectionPrefix - The prefix of the section.
+ * @param {FormItem} props.items - The items of the form.
+ * @param {FormRestrictions} props.itemsRestrictions - The restrictions of the items.
+ * @param {Control<InputsType>} props.control - The control of the form.
+ * @returns {ReactElement} The form component.
+ */
 export const Form: FC<FormProps> = ({
   sectionTitle,
   sectionPrefix,

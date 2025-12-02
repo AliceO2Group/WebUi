@@ -15,35 +15,14 @@
 import { useLocation } from 'react-router';
 import { useConfigurationQuery } from '~/api/query/useConfigurationQuery';
 import { useConfigurationRestrictionsQuery } from '~/api/query/useConfigurationRestrictionsQuery';
-import { Form, type FormItem } from '~/components/form/Form';
+import { Form } from '~/components/form/Form';
 import { Spinner } from '~/ui/spinner';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { useMemo } from 'react';
+import { DEFAULT_PREFIX } from '~/components/form/constants';
+import { getDefaultValuesFromConfigObject } from '~/components/form/utils/getDefaultValuesFromConfigObject';
 
 export type InputsType = Record<string, string | number | boolean>;
-
-export const KEY_SEPARATOR = '__';
-const DEFAULT_PREFIX = 'Configuration';
-const getDefaultValues = (obj: FormItem | undefined, prefix: string = DEFAULT_PREFIX) => {
-  if (!obj) {
-    return {};
-  }
-  let result: Record<string, string | number | boolean> = {};
-  const entries = Object.entries(obj);
-  for (const [key, value] of entries) {
-    // omit arrays for now
-    if (!isNaN(parseInt(key, 10))) {
-      continue;
-    }
-    const newPrefix = `${prefix}${KEY_SEPARATOR}${key}`;
-    if (typeof value === 'object') {
-      result = { ...result, ...getDefaultValues(value as FormItem, newPrefix) };
-    } else {
-      result[newPrefix] = value;
-    }
-  }
-  return result;
-};
 
 const ConfigurationPage = () => {
   const { pathname } = useLocation();
@@ -52,7 +31,10 @@ const ConfigurationPage = () => {
   const { data: configuration, isLoading: isConfigurationLoading } =
     useConfigurationQuery(configurationName);
 
-  const defaultValues = useMemo(() => getDefaultValues(configuration), [configuration]);
+  const defaultValues = useMemo(
+    () => getDefaultValuesFromConfigObject(configuration),
+    [configuration],
+  );
 
   const { data: configurationRestrictions, isLoading: isConfigurationRestrictionsLoading } =
     useConfigurationRestrictionsQuery(configurationName);
