@@ -65,7 +65,7 @@ export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions, co
         <Widget
           key={key}
           sectionTitle={`${sectionTitle}${KEY_SEPARATOR}${key}`}
-          title={key}
+          label={key}
           type={value}
           value={items[key]}
           control={control}
