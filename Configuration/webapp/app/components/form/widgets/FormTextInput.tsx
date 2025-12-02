@@ -17,9 +17,13 @@ import { type ReactElement } from 'react';
 import { Controller } from 'react-hook-form';
 import type { WidgetProps } from '../Widget';
 
+interface FormTextInputProps extends Omit<WidgetProps, 'type' | 'value'> {
+  isDirty: boolean;
+}
+
 /**
  * Text input widget for the form.
- * @param {Omit<WidgetProps, 'type'>} props - The props of the widget.
+ * @param {FormTextInputProps} props - The props of the widget.
  * @param {string} props.sectionTitle  - The section title of the widget.
  * @param {string} props.label - The title of the widget.
  * @param {Control<InputsType>} props.control - The control of the widget.
@@ -29,7 +33,8 @@ export const FormTextInput = ({
   sectionPrefix,
   label,
   control,
-}: Omit<WidgetProps, 'type' | 'value'>): ReactElement => (
+  isDirty,
+}: FormTextInputProps): ReactElement => (
   <Controller
     name={sectionPrefix}
     control={control}
@@ -39,6 +44,8 @@ export const FormTextInput = ({
         label={label}
         {...field}
         error={Boolean(error)}
+        color={isDirty ? 'secondary' : 'primary'}
+        focused={isDirty}
         helperText={error?.message}
       />
     )}

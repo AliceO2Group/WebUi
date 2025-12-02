@@ -12,16 +12,30 @@
  * or submit itself to any jurisdiction.
  */
 
+interface FormNumberInputProps extends Omit<WidgetProps, 'type' | 'value'> {
+  isDirty: boolean;
+}
+
 import { Controller } from 'react-hook-form';
 import type { WidgetProps } from '../Widget';
 import { TextField } from '@mui/material';
 import type { ReactElement } from 'react';
 
+/**
+ * Number input widget for the form.
+ * @param {FormNumberInputProps} props - The props of the widget.
+ * @param {string} props.sectionPrefix - The prefix of the section.
+ * @param {string} props.label - The label of the widget.
+ * @param {Control<InputsType>} props.control - The control of the widget.
+ * @param {boolean} props.isDirty - Whether the widget is dirty.
+ * @returns {ReactElement} The number input widget.
+ */
 export const FormNumberInput = ({
   sectionPrefix,
   label,
   control,
-}: Omit<WidgetProps, 'type' | 'value'>): ReactElement => (
+  isDirty,
+}: FormNumberInputProps): ReactElement => (
   <Controller
     name={sectionPrefix}
     control={control}
@@ -31,6 +45,8 @@ export const FormNumberInput = ({
         label={label}
         {...field}
         error={Boolean(error)}
+        color={isDirty ? 'secondary' : 'primary'}
+        focused={isDirty}
         helperText={error?.message}
       />
     )}

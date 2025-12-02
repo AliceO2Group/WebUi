@@ -15,7 +15,7 @@
 import { type FC, type PropsWithChildren, type ReactElement } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
-import { type Control } from 'react-hook-form';
+import { useFormState, type Control } from 'react-hook-form';
 import type { InputsType } from '~/routes/configuration';
 import { FormTextInput } from './widgets/FormTextInput';
 import { FormNumberInput } from './widgets/FormNumberInput';
@@ -38,11 +38,13 @@ export interface WidgetProps extends PropsWithChildren {
  * @returns {ReactElement} The widget component.
  */
 export const Widget: FC<WidgetProps> = ({ type, ...rest }): ReactElement => {
+  const { dirtyFields } = useFormState({ control: rest.control });
+  const isDirty = dirtyFields[rest.sectionPrefix];
   switch (type) {
     case 'string':
-      return <FormTextInput {...rest} />;
+      return <FormTextInput {...rest} isDirty={Boolean(isDirty)} />;
     case 'number':
-      return <FormNumberInput {...rest} />;
+      return <FormNumberInput {...rest} isDirty={Boolean(isDirty)} />;
     case 'boolean':
       return (
         <FormControlLabel
