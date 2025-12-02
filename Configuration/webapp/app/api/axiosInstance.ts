@@ -29,8 +29,9 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(async (config) => {
   const { token } = await getSessionData();
   if (token) {
-    config.params = config.params || {};
-    config.params.token = token;
+    const params = (config.params || {}) as Record<string, unknown>;
+    params.token = token;
+    config.params = params;
   }
 
   return config;
