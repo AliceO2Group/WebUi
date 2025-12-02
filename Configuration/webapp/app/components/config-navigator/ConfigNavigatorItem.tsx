@@ -48,7 +48,16 @@ const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = ({ title, onClick, isS
         <ListItemIcon>
           <InsertDriveFileIcon style={{ margin: 'auto' }} />
         </ListItemIcon>
-        <ListItemText primary={title} />
+        <ListItemText
+          primary={title}
+          primaryTypographyProps={{
+            sx: {
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            },
+          }}
+        />
       </ListItemButton>
     </Link>
   </ListItem>
