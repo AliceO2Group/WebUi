@@ -19,6 +19,8 @@ import Stack from '@mui/material/Stack';
 import { Widget } from './Widget';
 import { AccordionHeader } from './AccordionHeader';
 import { Typography } from '@mui/material';
+import type { Control } from 'react-hook-form';
+import { KEY_SEPARATOR, type InputsType } from '~/routes/configuration';
 
 export type FormItem = { [key: string]: string | object | FormItem };
 
@@ -30,6 +32,7 @@ interface FormProps extends PropsWithChildren {
   sectionTitle: string;
   items: FormItem;
   itemsRestrictions: FormRestrictions;
+  control: Control<InputsType>;
 }
 
 /**
@@ -45,7 +48,7 @@ function isFormRestrictions(obj: FormRestrictions[string]): obj is FormRestricti
   return obj instanceof Object && !(obj instanceof Array);
 }
 
-export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) => {
+export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions, control }) => {
   const [viewForm, setViewForm] = useState<boolean>(true);
 
   const renderItem = useCallback(
@@ -53,12 +56,20 @@ export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) 
       isFormRestrictions(value) ? (
         <Form
           key={key}
-          sectionTitle={key}
+          sectionTitle={`${sectionTitle}${KEY_SEPARATOR}${key}`}
           items={items[key] as FormItem}
           itemsRestrictions={itemsRestrictions[key] as FormRestrictions}
+          control={control}
         />
       ) : (
-        <Widget key={key} title={key} type={value} value={items[key]} />
+        <Widget
+          key={key}
+          sectionTitle={`${sectionTitle}${KEY_SEPARATOR}${key}`}
+          title={key}
+          type={value}
+          value={items[key]}
+          control={control}
+        />
       ),
     [items, itemsRestrictions],
   );

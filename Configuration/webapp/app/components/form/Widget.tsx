@@ -16,17 +16,35 @@ import { type FC, type PropsWithChildren, type ReactElement } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
 import Switch from '@mui/material/Switch';
+import { Controller, type Control } from 'react-hook-form';
+import type { InputsType } from '~/routes/configuration';
 
 interface WidgetProps extends PropsWithChildren {
+  sectionTitle: string;
   title: string;
   type: 'string' | 'number' | 'boolean' | 'array';
   value: unknown;
+  control: Control<InputsType>;
 }
 
-export const Widget: FC<WidgetProps> = ({ title, type, value }): ReactElement => {
+export const Widget: FC<WidgetProps> = ({ sectionTitle, title, type, value, control }): ReactElement => {
   switch (type) {
     case 'string':
-      return <TextField type="text" defaultValue={value} label={title} />;
+      return (
+        <Controller
+          name={sectionTitle}
+          control={control}
+          render={({ field, fieldState: { error } }) => (
+            <TextField
+              type="text"
+              label={title}
+              {...field}
+              error={Boolean(error)}
+              helperText={error?.message}
+            />
+          )}
+        />
+      );
     case 'number':
       return <TextField type="number" defaultValue={value} label={title} />;
     case 'boolean':
