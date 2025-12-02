@@ -18,9 +18,10 @@ import { useConfigurationRestrictionsQuery } from '~/api/query/useConfigurationR
 import { Form } from '~/components/form/Form';
 import { Spinner } from '~/ui/spinner';
 import { useForm, type SubmitHandler } from 'react-hook-form';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { DEFAULT_PREFIX } from '~/components/form/constants';
 import { getDefaultValuesFromConfigObject } from '~/components/form/utils/getDefaultValuesFromConfigObject';
+import { SaveButton } from '~/components/form/SaveButton';
 
 export type InputsType = Record<string, string | number | boolean>;
 
@@ -33,13 +34,19 @@ const ConfigurationPage = () => {
 
   const defaultValues = useMemo(
     () => getDefaultValuesFromConfigObject(configuration),
-    [configuration],
+    [configuration, pathname],
   );
 
   const { data: configurationRestrictions, isLoading: isConfigurationRestrictionsLoading } =
     useConfigurationRestrictionsQuery(configurationName);
 
-  const { control, handleSubmit, getValues } = useForm<InputsType>({ defaultValues });
+  const {
+    control,
+    handleSubmit,
+    getValues,
+    formState: { isDirty },
+    reset,
+  } = useForm<InputsType>({ defaultValues });
 
   const onSubmit: SubmitHandler<InputsType> = async (data) => {
     console.log(data);
@@ -54,9 +61,11 @@ const ConfigurationPage = () => {
     return 'Error while loading data from the server';
   }
 
+  useEffect(() => () => reset(defaultValues), [defaultValues]);
+
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form>
         <Form
           control={control}
           sectionTitle={DEFAULT_PREFIX}
@@ -65,10 +74,7 @@ const ConfigurationPage = () => {
           itemsRestrictions={configurationRestrictions}
         />
       </form>
-      <button onClick={onSubmit} type="submit">
-        Test it now!
-      </button>
-      <h1>Errors</h1>
+      <SaveButton onClick={() => void handleSubmit(onSubmit)()} disabled={!isDirty} />
     </>
   );
 };
