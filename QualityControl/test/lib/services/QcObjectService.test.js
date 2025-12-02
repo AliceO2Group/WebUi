@@ -1,8 +1,9 @@
-import { deepStrictEqual, strictEqual } from 'node:assert';
+import { deepStrictEqual, rejects, strictEqual } from 'node:assert';
 import { suite, test, before, beforeEach } from 'node:test';
 import nock from 'nock';
 import { QcObjectService } from '../../../lib/services/QcObject.service.js';
 import { stub } from 'sinon';
+import { OBJECT_TYPE_KEY, QC_CHECKER_TYPE } from "../../../common/library/qcObject/utils.js";
 
 export const qcObjectServiceTestSuite = async () => {
   suite('QC Object Service Test Suite -', () => {
@@ -155,5 +156,90 @@ export const qcObjectServiceTestSuite = async () => {
     });
     suite('retrieveQcObject', async () => { });
     suite('retrieveQcObjectByQcId', async () => { });
+
+    suite('retrieveQcObject', async () => {
+      let rootServiceMock = null;
+
+      beforeEach(() => {
+        // Inject rootService into the service instance
+        rootServiceMock = {
+          openFile: stub(),
+          toJSON: stub(),
+        };
+        qcObjectService._rootService = rootServiceMock;
+      });
+
+      test('should throw if openFile fails', async () => {
+        const url = 'http://localhost:1234/test.root';
+        rootServiceMock.openFile.rejects(new Error('openFile failure'));
+
+        await rejects(
+          () => qcObjectService._getJsRootFormat(url),
+          (error) => error instanceof Error && error.message === `JSROOT failed to open file '${url}'`,
+        );
+      });
+
+      test('should throw if readObject fails', async () => {
+        const url = 'http://localhost:1234/test.root';
+        const fakeFile = { readObject: stub().rejects(new Error('readObject failure')) };
+        rootServiceMock.openFile.resolves(fakeFile);
+
+        await rejects(
+          () => qcObjectService._getJsRootFormat(url),
+          (error) => error instanceof Error
+            && error.message === `JSROOT failed to read object 'ccdb_object' from '${url}'`,
+        );
+      });
+
+      test('should serialize checker object with BigInt', async () => {
+        const url = 'http://localhost:1234/test.root';
+        const root = { [OBJECT_TYPE_KEY]: QC_CHECKER_TYPE, value: 123n };
+        const fakeFile = { readObject: stub().resolves(root) };
+        rootServiceMock.openFile.resolves(fakeFile);
+
+        const result = await qcObjectService._getJsRootFormat(url);
+
+        strictEqual(result.value, '123'); // BigInt converted to string
+      });
+
+      test('should call toJSON for non-checker object', async () => {
+        const url = 'http://localhost:1234/test.root';
+        const root = { [OBJECT_TYPE_KEY]: 'RootObject' };
+        const fakeFile = { readObject: stub().resolves(root) };
+        rootServiceMock.openFile.resolves(fakeFile);
+        rootServiceMock.toJSON.resolves({ serialized: true });
+
+        const result = await qcObjectService._getJsRootFormat(url);
+        deepStrictEqual(result, { serialized: true });
+      });
+
+      test('should throw if BigInt-safe JSON fails', async () => {
+        const url = 'http://localhost:1234/test.root';
+        const circularRoot = { [OBJECT_TYPE_KEY]: QC_CHECKER_TYPE };
+        circularRoot.self = circularRoot; // circular reference
+        const fakeFile = { readObject: stub().resolves(circularRoot) };
+        rootServiceMock.openFile.resolves(fakeFile);
+
+        await rejects(
+          () => qcObjectService._getJsRootFormat(url),
+          (error) => error instanceof Error
+            && error.message === `Failed to serialize ROOT object '${QC_CHECKER_TYPE}' with BigInt-safe JSON`,
+        );
+      });
+
+      test('should throw if toJSON fails', async () => {
+        const url = 'http://localhost:1234/test.root';
+        const root = { [OBJECT_TYPE_KEY]: 'RootObject' };
+        const fakeFile = { readObject: stub().resolves(root) };
+        rootServiceMock.openFile.resolves(fakeFile);
+        rootServiceMock.toJSON.rejects(new Error('toJSON failure'));
+
+        await rejects(
+          () => qcObjectService._getJsRootFormat(url),
+          (error) => error instanceof Error
+            && error.message === 'JSROOT failed to convert object \'RootObject\' to JSON',
+        );
+      });
+    });
   });
 };

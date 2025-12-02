@@ -13,7 +13,7 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
-import { isObjectOfTypeChecker, parseObjects } from '../../common/library/qcObject/utils.js';
+import { isObjectOfTypeChecker, parseObjects, QC_CHECKER_TYPE } from '../../common/library/qcObject/utils.js';
 import QCObjectDto from '../dtos/QCObjectDto.js';
 import QcObjectIdentificationDto from '../dtos/QcObjectIdentificationDto.js';
 
@@ -206,21 +206,48 @@ export class QcObjectService {
    * * if of ROOT type, uses jsroot.toJSON
    * @param {string} url - location of Root file to be retrieved
    * @returns {Promise<JSON.Error>} - JSON version of the object
+   * @throws {Error} When JSROOT fails to open the file
+   * @throws {Error} When JSROOT fails to read the `ccdb_object` from the file
+   * @throws {Error} When BigInt-safe serialization fails
+   * @throws {Error} When JSROOT fails to convert the object to JSON using `toJSON`
    */
   async _getJsRootFormat(url) {
-    const file = await this._rootService.openFile(`${url}+`);
-    const root = await file.readObject('ccdb_object');
+    let file = undefined;
+    try {
+      file = await this._rootService.openFile(`${url}+`);
+    } catch (error) {
+      this._logger.error(error.message || error);
+      throw new Error(`JSROOT failed to open file '${url}'`);
+    }
+
+    let root = undefined;
+    try {
+      root = await file.readObject('ccdb_object');
+    } catch (error) {
+      this._logger.error(error.message || error);
+      throw new Error(`JSROOT failed to read object 'ccdb_object' from '${url}'`);
+    }
+
     root['_typename'] = root['mTreatMeAs'] || root['_typename'];
 
     if (isObjectOfTypeChecker(root)) {
       /**
        * Due to QC Checker big ints, JSON utility has to be overridden to parse 'bigint' types and replace with string
        */
-      return JSON.parse(JSON.stringify(root, (_, value) => typeof value === 'bigint' ? value.toString() : value));
+      try {
+        return JSON.parse(JSON.stringify(root, (_, value) => typeof value === 'bigint' ? value.toString() : value));
+      } catch (error) {
+        this._logger.error(error.message || error);
+        throw new Error(`Failed to serialize ROOT object '${QC_CHECKER_TYPE}' with BigInt-safe JSON`);
+      }
     }
 
-    const rootJson = await this._rootService.toJSON(root);
-    return rootJson;
+    try {
+      return await this._rootService.toJSON(root);
+    } catch (error) {
+      this._logger.error(error.message || error);
+      throw new Error(`JSROOT failed to convert object '${root['_typename']}' to JSON`);
+    }
   }
 
   /**
