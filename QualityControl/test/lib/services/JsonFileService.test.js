@@ -17,6 +17,7 @@ import assert from 'assert';
 import fs from 'fs';
 import { JsonFileService } from '../../../lib/services/JsonFileService.js';
 import { config } from '../../config.js';
+import { normalize } from 'node:path';
 
 export const jsonFileServiceTestSuite = async () => {
   suite('JSON File Service Test Suite', () => {
@@ -42,7 +43,7 @@ export const jsonFileServiceTestSuite = async () => {
       return assert.rejects(
         service.ready,
         (err) => err instanceof Error
-          && err.message === `DB file should have an array of layouts ${config.dbFile.split('./')[1]}`,
+          && err.message === `DB file should have an array of layouts ${normalize(config.dbFile)}`,
       );
     });
 
@@ -52,7 +53,7 @@ export const jsonFileServiceTestSuite = async () => {
       return assert.rejects(
         service.ready,
         (err) => err instanceof Error
-          && err.message === `Unable to parse DB file ${config.dbFile.split('./')[1]}`,
+          && err.message === `Unable to parse DB file ${normalize(config.dbFile)}`,
       );
     });
 
@@ -62,7 +63,7 @@ export const jsonFileServiceTestSuite = async () => {
       return assert.rejects(
         service.ready,
         (err) => err instanceof Error
-          && err.message === `DB file should have an array of layouts ${config.dbFile.split('./')[1]}`,
+          && err.message === `DB file should have an array of layouts ${normalize(config.dbFile)}`,
       );
     });
 
@@ -87,7 +88,7 @@ export const jsonFileServiceTestSuite = async () => {
       await assert.rejects(
         service.ready,
         (err) => err instanceof Error
-          && err.message === `Unable to parse DB file ${config.dbFile.split('./')[1]}`,
+          && err.message === `Unable to parse DB file ${normalize(config.dbFile)}`,
       );
     });
   });
