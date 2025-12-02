@@ -28,10 +28,9 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(async (config) => {
   const { token } = await getSessionData();
-  if (token && config.url) {
-    const url = new URL(config.url);
-    url.searchParams.append('token', token);
-    config.url = url.toString();
+  if (token) {
+    config.params = config.params || {};
+    config.params.token = token;
   }
 
   return config;
