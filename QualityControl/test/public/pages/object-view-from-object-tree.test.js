@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { match, strictEqual } from 'node:assert';
+import { strictEqual } from 'node:assert';
 const OBJECT_VIEW_PAGE_PARAM = '?page=objectView';
 
 export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, testParent) => {
@@ -63,7 +63,7 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
         (element) => document.querySelector(element).textContent,
         errorMessageElement,
       );
-      match(message, /^Request to server failed/i);
+      strictEqual(message, 'Failed to fetch object at url \'/latest/NOT_FOUND_OBJECT\' and path \'NOT_FOUND_OBJECT\'.');
     },
   );
 

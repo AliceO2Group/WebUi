@@ -79,7 +79,7 @@ export default class QCObjectService {
         ? { RunNumber: this.filterModel.runNumber }
         : this.filterModel.filterMap;
       const url = this._buildURL(`/api/object?path=${objectName}`, id, validFrom, filters);
-      const { result, ok } = await this.model.loader.get(url);
+      const { result, ok } = await this.model.loader.get(url, {}, true);
       if (ok) {
         result.qcObject = {
           root: JSROOT.parse(result.root),
