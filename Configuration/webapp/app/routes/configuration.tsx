@@ -57,6 +57,8 @@ const ConfigurationPage = () => {
     console.log(getValues());
   };
 
+  useEffect(() => () => reset(defaultValues), [defaultValues]);
+
   if (isConfigurationLoading || isConfigurationRestrictionsLoading) {
     return <Spinner />;
   }
@@ -65,7 +67,6 @@ const ConfigurationPage = () => {
     return 'Error while loading data from the server';
   }
 
-  useEffect(() => () => reset(defaultValues), [defaultValues]);
 
   return (
     <>
