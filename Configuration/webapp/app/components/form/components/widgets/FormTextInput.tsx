@@ -16,9 +16,12 @@ import { TextField } from '@mui/material';
 import { type ReactElement } from 'react';
 import { Controller } from 'react-hook-form';
 import type { WidgetProps } from '../Widget';
+import { DefaultValueSection } from '../DefaultValueSection';
+import { RemoveButton } from '../buttons/RemoveButton';
 
 interface FormTextInputProps extends Omit<WidgetProps, 'type' | 'value'> {
   isDirty: boolean;
+  type?: 'text' | 'number';
 }
 
 /**
@@ -27,6 +30,8 @@ interface FormTextInputProps extends Omit<WidgetProps, 'type' | 'value'> {
  * @param {string} props.sectionTitle  - The section title of the widget.
  * @param {string} props.label - The title of the widget.
  * @param {Control<InputsType>} props.control - The control of the widget.
+ * @param {boolean} props.isDirty - Whether the widget is dirty.
+ * @param {string} props.type - The type of the input.
  * @returns {ReactElement} The text input widget.
  */
 export const FormTextInput = ({
@@ -34,19 +39,37 @@ export const FormTextInput = ({
   label,
   control,
   isDirty,
+  type = 'text',
 }: FormTextInputProps): ReactElement => (
   <Controller
     name={sectionPrefix}
     control={control}
-    render={({ field, fieldState: { error } }) => (
+    render={({ field, fieldState: { error }, formState: { defaultValues } }) => (
       <TextField
-        type="text"
+        type={type}
         label={label}
         {...field}
         error={Boolean(error)}
         color={isDirty ? 'secondary' : 'primary'}
         focused={isDirty}
-        helperText={error?.message}
+        slotProps={{
+          input: {
+            endAdornment: isDirty ? (
+              <RemoveButton
+                onClick={() => {
+                  field.onChange(defaultValues?.[sectionPrefix] ?? '');
+                }}
+                color="secondary"
+              />
+            ) : undefined,
+          },
+        }}
+        helperText={
+          <DefaultValueSection
+            defaultValue={defaultValues?.[sectionPrefix] ?? ''}
+            isDirty={isDirty}
+          />
+        }
       />
     )}
   />
