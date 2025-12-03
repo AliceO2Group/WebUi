@@ -42,11 +42,7 @@ export const LeftDrawerFooter = () => {
           ),
           endAdornment: searchTerm ? (
             <InputAdornment position="end">
-              <IconButton
-                size="small"
-                onClick={() => setSearchTerm('')}
-                edge="end"
-              >
+              <IconButton size="small" onClick={() => setSearchTerm('')} edge="end">
                 <ClearIcon fontSize="small" />
               </IconButton>
             </InputAdornment>
