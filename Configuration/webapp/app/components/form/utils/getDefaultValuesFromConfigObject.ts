@@ -28,13 +28,13 @@ export const getDefaultValuesFromConfigObject = (
   if (!obj) {
     return {};
   }
+  // omit arrays for now
+  if (Array.isArray(obj)) {
+    return {};
+  }
   let result: Record<string, string | number | boolean> = {};
   const entries = Object.entries(obj);
   for (const [key, value] of entries) {
-    // omit arrays for now
-    if (!isNaN(parseInt(key, 10))) {
-      continue;
-    }
     const newPrefix = `${prefix}${KEY_SEPARATOR}${key}`;
     if (typeof value === 'object') {
       result = { ...result, ...getDefaultValuesFromConfigObject(value as FormItem, newPrefix) };
