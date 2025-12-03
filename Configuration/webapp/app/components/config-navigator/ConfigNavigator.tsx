@@ -15,9 +15,12 @@
 import { List } from '@mui/material';
 import ConfigNavigatorItem from './ConfigNavigatorItem';
 import { useConfigurationKeysQuery } from '~/api/query/useConfigurationKeysQuery';
-import { useEffect, useState } from 'react';
-import { useConfigurationNavigate } from '~/hooks/useConfigurationNavigate';
+import { useEffect, useMemo, useState } from 'react';
+import { ROUTE_PREFIX } from '~/config';
+import { useLocation } from 'react-router';
 import { ConfigNavigatorLoader } from './ConfigNavigatorLoader';
+import { useConfigurationNavigate } from '~/hooks/useConfigurationNavigate';
+import { buildTree } from '~/utils/configuration-tree-builder';
 
 /**
  * ConfigNavigator component
@@ -35,32 +38,45 @@ export const ConfigNavigator = () => {
 
   const [selectedConfigurationPath, setSelectedConfigurationPath] = useState<string | undefined>();
 
+  const { pathname } = useLocation();
   const navigate = useConfigurationNavigate();
 
   useEffect(() => {
-    if (configKeys) {
-      setSelectedConfigurationPath(configKeys[0]);
-      navigate(configKeys[0]);
+    if (configKeys && configKeys.length > 0) {
+      const pathToCheck = pathname.startsWith(ROUTE_PREFIX)
+        ? pathname.slice(ROUTE_PREFIX.length)
+        : pathname;
+      const decodedPath = decodeURIComponent(pathToCheck);
+
+      if (configKeys.includes(decodedPath)) {
+        setSelectedConfigurationPath(decodedPath);
+      } else {
+        navigate(configKeys[0]);
+      }
     }
-  }, [configKeys, areConfigKeysLoading]);
+  }, [configKeys, areConfigKeysLoading, pathname]);
+
+  const treeData = useMemo(() => {
+    if (!configKeys) {
+      return {};
+    }
+    return buildTree(configKeys);
+  }, [configKeys]);
 
   if (areConfigKeysLoading) {
     return <ConfigNavigatorLoader />;
   }
 
   return (
-    <List className="config_navigator">
+    <List className="config_navigator" component="nav">
       {isError ? (
-        <p>Error while fetching configuration keys: {error?.message ?? 'Unknown error'}</p>
+        <p style={{ padding: 16, color: 'red' }}>Error: {error?.message ?? 'Unknown error'}</p>
       ) : (
-        configKeys?.map((configKey: string) => (
+        Object.values(treeData).map((node) => (
           <ConfigNavigatorItem
-            key={configKey}
-            title={configKey}
-            isSelected={configKey === selectedConfigurationPath}
-            onClick={() => {
-              setSelectedConfigurationPath(configKey);
-            }}
+            key={node.name}
+            node={node}
+            selectedPath={selectedConfigurationPath}
           />
         ))
       )}
