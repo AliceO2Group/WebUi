@@ -39,7 +39,13 @@ export const getDefaultValuesFromConfigObject = (
     if (typeof value === 'object') {
       result = { ...result, ...getDefaultValuesFromConfigObject(value as FormItem, newPrefix) };
     } else {
-      result[newPrefix] = value;
+      if (value === 'true') {
+        result[newPrefix] = true;
+      } else if (value === 'false') {
+        result[newPrefix] = false;
+      } else {
+        result[newPrefix] = value;
+      }
     }
   }
   return result;

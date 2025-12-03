@@ -13,12 +13,11 @@
  */
 
 import { type FC, type PropsWithChildren, type ReactElement } from 'react';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
 import { useFormState, type Control } from 'react-hook-form';
 import type { InputsType } from '~/routes/configuration';
 import { FormTextInput } from './widgets/FormTextInput';
 import { FormNumberInput } from './widgets/FormNumberInput';
+import { FormToggleInput } from './widgets/FormToggleInput';
 
 export interface WidgetProps extends PropsWithChildren {
   sectionPrefix: string;
@@ -46,12 +45,7 @@ export const Widget: FC<WidgetProps> = ({ type, ...rest }): ReactElement => {
     case 'number':
       return <FormNumberInput {...rest} isDirty={Boolean(isDirty)} />;
     case 'boolean':
-      return (
-        <FormControlLabel
-          control={<Switch defaultChecked={rest.value === 'true'} />}
-          label={rest.label}
-        />
-      );
+      return <FormToggleInput {...rest} isDirty={Boolean(isDirty)} />;
     case 'array':
       return <>array not implemented</>; // TODO OGUI-1803: add implementation after the decision is made
   }
