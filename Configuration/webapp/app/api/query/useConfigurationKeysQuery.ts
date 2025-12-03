@@ -19,7 +19,7 @@ import axiosInstance from '../axiosInstance';
 
 export const CONFIGURATION_KEYS_QUERY_KEY = 'configuration-keys';
 
-type ConfigurationKeysResponse = string[];
+export type ConfigurationKeysResponse = string[];
 
 /**
  * useConfigurationKeysQuery hook
@@ -27,11 +27,12 @@ type ConfigurationKeysResponse = string[];
  * @returns {UseQueryResult<string[], Error>} query result containing the list of configuration keys.
  */
 export const useConfigurationKeysQuery = (): UseQueryResult<ConfigurationKeysResponse, Error> =>
-  useQuery<string[], Error>({
+  useQuery<ConfigurationKeysResponse, Error>({
     queryKey: [CONFIGURATION_KEYS_QUERY_KEY],
-    queryFn: async (): Promise<string[]> => {
-      const response: AxiosResponse<ConfigurationKeysResponse> =
-        await axiosInstance.get('configurations/');
-      return response.data.map((key: string) => key.split('/').pop() as string);
+    queryFn: async (): Promise<ConfigurationKeysResponse> => {
+      const response: AxiosResponse<ConfigurationKeysResponse> = await axiosInstance.get(
+        'configurations/?recurse=true',
+      );
+      return response.data;
     },
   });
