@@ -474,20 +474,18 @@ export const ccdbServiceTestSuite = async () => {
 
     suite('CcdbService getObjectIdentification() Error Messages', () => {
       let ccdb = null;
-      let CCDB_URL_HEALTH_POINT = '';
 
       before(() => {
         ccdb = new CcdbService(ccdbConfig);
-        CCDB_URL_HEALTH_POINT = `/monitor/${CCDB_MONITOR}/.*/${CCDB_VERSION_KEY}`;
       });
 
       test('should throw error if object not found with filters applied', async () => {
-        nock('http://ccdb-local:8083')
-          .get(CCDB_URL_HEALTH_POINT)
-          .reply(200, { objects: [] });
-
         const filters = { RunNumber: 123456 };
         const filterString = Object.entries(filters).map(([key, value]) => `${key}=${value}`).join('/');
+
+        nock('http://ccdb-local:8083')
+          .get(`/latest/path/${ID}/${filterString}`)
+          .reply(200, { objects: [] });
 
         await rejects(
           async () => ccdb.getObjectIdentification({ path: PATH, id: ID, filters }),
@@ -498,7 +496,7 @@ export const ccdbServiceTestSuite = async () => {
 
       test('should throw error if object not found without filters', async () => {
         nock('http://ccdb-local:8083')
-          .get(CCDB_URL_HEALTH_POINT)
+          .get(`/latest/path/${ID}`)
           .reply(200, { objects: [] });
 
         await rejects(

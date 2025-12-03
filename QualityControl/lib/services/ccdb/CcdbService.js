@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { FailedDependencyError, LogManager } from '@aliceo2/web-ui';
+import { FailedDependencyError, LogManager, NotFoundError } from '@aliceo2/web-ui';
 import { httpHeadJson, httpGetJson } from '../../utils/httpRequests.js';
 import {
   CCDB_MONITOR, CCDB_VERSION_KEY, CCDB_RESPONSE_BODY_KEYS, CCDB_FILTER_FIELDS, CCDB_RESPONSE_HEADER_KEYS,
@@ -176,7 +176,8 @@ export class CcdbService {
    * ```
    * @param {CcdbObjectIdentification} partialIdentification - fields such as path, validFrom, etc.
    * @returns {Promise.<CcdbObjectIdentification>} - returns object full identification
-   * @throws {Error} throws if the object cannot be found
+   * @throws {Error} throws if the object cannot be fetched
+   * @throws {NotFoundError} throws if the object cannot be found
    */
   async getObjectIdentification(partialIdentification) {
     const headers = {
@@ -189,11 +190,7 @@ export class CcdbService {
     try {
       result = await httpGetJson(this._hostname, this._port, url, { headers });
     } catch {
-      const errorMessage = this._buildFilterErrorMessage(
-        `Object at url '${url}' and path '${partialIdentification.path}' could not be found.`,
-        partialIdentification.filters,
-      );
-      throw new Error(errorMessage);
+      throw new Error(`Failed to fetch object at url '${url}' and path '${partialIdentification.path}'.`);
     }
 
     if (!result?.objects?.length) {
@@ -201,7 +198,7 @@ export class CcdbService {
         `Object at url '${url}' and path '${partialIdentification.path}' could not be found.`,
         partialIdentification.filters,
       );
-      throw new Error(errorMessage);
+      throw new NotFoundError(errorMessage);
     }
 
     const [qcObject] = result.objects;
@@ -265,7 +262,8 @@ export class CcdbService {
    * The minimum required parameter to provide is the `path`
    * @param {CcdbObjectIdentification} identification - attributes by which the object should be queried
    * @returns {Promise.<JSON>} - object details for a given timestamp
-   * @throws {Error}
+   * @throws {Error} Thrown when an error occurs whilst fetching the object
+   * @throws {NotFoundError} Thrown when the object cannot be found
    */
   async getObjectLatestVersionInfo(identification) {
     const { path } = identification ?? {};
@@ -279,7 +277,7 @@ export class CcdbService {
       const url = `/latest${this._buildCcdbUrlPath(identification)}`;
       const { objects } = await httpGetJson(this._hostname, this._port, url, { headers: timestampHeaders });
       if (objects?.length <= 0) {
-        throw new Error(`No object found for: ${path}`);
+        throw new NotFoundError(`No object found for: ${path}`);
       }
       return objects[0];
     } catch {

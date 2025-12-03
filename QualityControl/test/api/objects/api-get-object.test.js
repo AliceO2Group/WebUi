@@ -49,7 +49,7 @@ export const apiGetObjectsTests = () => {
     test('should return 500 if service fails to retrieve object', async () => {
       const url = `${URL_ADDRESS}/api/object?token=${OWNER_TEST_TOKEN}&path=invalid/path`;
       await testResult(url, 500, {
-        message: 'Object at url \'/latest/invalid/path\' and path \'invalid/path\' could not be found.',
+        message: 'Failed to fetch object at url \'/latest/invalid/path\' and path \'invalid/path\'.',
         status: 500,
         title: 'Unknown Error',
       });
