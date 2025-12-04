@@ -115,11 +115,7 @@ services:
       VAULT_AUTH_METHOD: cert
       VAULT_ROLE: central-system
 
-      VAULT_CACERT_B64: ${VAULT_CACERT_B64}
-      VAULT_CENTRAL_SYSTEM_CERT_B64: ${VAULT_CENTRAL_SYSTEM_CERT_B64}
-      VAULT_CENTRAL_SYSTEM_KEY_B64: ${VAULT_CENTRAL_SYSTEM_KEY_B64}
-
-    command: ['npm', 'run', 'test:vault']
+    command: ['npm', 'run', 'test:vault:integration']
     depends_on:
       vault-setup:
         condition: service_completed_successfully

@@ -48,7 +48,9 @@ describe('VaultController', () => {
 
     authService = {
       login: jest.fn<() => Promise<string>>().mockResolvedValue('s.token'),
-      renew: jest.fn<() => Promise<string>>().mockResolvedValue('s.token-renewed'),
+      renew: jest
+        .fn<() => Promise<string>>()
+        .mockResolvedValue('s.token-renewed'),
     };
 
     credentialsService = {
@@ -103,7 +105,7 @@ describe('VaultController', () => {
     expect(tokenSignService.signToken).toHaveBeenCalledTimes(1);
     const [url, token, agent, body] = tokenSignService.signToken.mock.calls[0];
 
-    expect(url).toBe('https://vault.local:9300/v1/transit/sign/signing-key');
+    expect(url).toBe('https://vault.local:9300/v1/transit/sign/tokenization-signing');
     expect(token).toBe('s.token');
     expect(typeof agent).toBe('object');
     expect(JSON.parse(body as string)).toEqual(payload.data);
@@ -126,7 +128,7 @@ describe('VaultController', () => {
     const [url, token, agent] = credentialsService.getCredential.mock.calls[0];
 
     expect(url).toBe(
-      'https://vault.local:9300/v1/secret/data/db/central-system'
+      'https://vault.local:9300/v1/tokenization/data/db/central-system'
     );
     expect(token).toBe('s.token');
     expect(typeof agent).toBe('object');
@@ -154,7 +156,7 @@ describe('VaultController', () => {
       credentialsService.createOrUpdateCredential.mock.calls[0];
 
     expect(url).toBe(
-      'https://vault.local:9300/v1/secret/data/db/central-system'
+      'https://vault.local:9300/v1/tokenization/data/db/central-system'
     );
     expect(token).toBe('s.token');
     expect(typeof agent).toBe('object');

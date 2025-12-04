@@ -14,9 +14,10 @@
     "docker:up": "cd ../.. && docker compose -f docker-compose.dev.yml -f docker-compose.yml up",
     "docker:up:build": "npm run docker:build && npm run docker:up",
     "docker:down": "cd ../.. && docker compose -f docker-compose.dev.yml -f docker-compose.yml down",
-    "test": "jest --runInBand --testPathIgnorePatterns=VaultController.integration.spec.ts",
+    "test": "jest --runInBand --testPathIgnorePatterns=VaultIntegration.spec.ts",
     "test:unit": "npm test",
     "test:vault": "npm run docker:test:vault",
+    "test:vault:integration": "jest --runInBand tests/VaultTests/VaultIntegration.spec.ts",
     "docker:test:vault": "cd ../.. && docker compose -f docker-compose.dev.yml up --build --abort-on-container-exit central-tests && docker compose -f docker-compose.dev.yml down -v",
     "test:all": "npm run test:unit && npm run test:vault"
   },

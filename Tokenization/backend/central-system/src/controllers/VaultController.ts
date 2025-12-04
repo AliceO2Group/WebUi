@@ -83,7 +83,7 @@ export class VaultController {
   public async signToken(payload: SignPayload): Promise<string> {
     try {
       return await this._tokenSignService.signToken(
-        process.env.VAULT_ADDR! + '/v1/transit/sign/signing-key',
+        process.env.VAULT_ADDR! + '/v1/transit/sign/tokenization-signing',
         this._vaultAccessToken,
         this._agent,
         JSON.stringify(payload.data)
@@ -153,7 +153,7 @@ export class VaultController {
   ): Promise<VaultReadResponse> {
     try {
       return await this._credentialsService.getCredential(
-        process.env.VAULT_ADDR! + `/v1/secret/data/${path}`,
+        process.env.VAULT_ADDR! + `/v1/tokenization/data/${path}`,
         this._vaultAccessToken,
         this._agent
       );
@@ -178,7 +178,7 @@ export class VaultController {
   ): Promise<void> {
     try {
       await this._credentialsService.createOrUpdateCredential(
-        process.env.VAULT_ADDR! + `/v1/secret/data/${path}`,
+        process.env.VAULT_ADDR! + `/v1/tokenization/data/${path}`,
         this._vaultAccessToken,
         this._agent,
         JSON.stringify(body)

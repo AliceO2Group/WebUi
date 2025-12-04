@@ -42,7 +42,7 @@ export interface VaultMetadataResponse {
     created_time: string;
     custom_metadata: {
       owner: string;
-      mission_critical: string; 
+      mission_critical: string;
     };
     deletion_time: string;
     destroyed: boolean;
@@ -52,13 +52,13 @@ export interface VaultMetadataResponse {
 
 // Define the structure of the Vault KV write payload
 export interface VaultKvWriteOptions {
-  cas?: number; 
+  cas?: number;
 }
 
 // Define the structure of the Vault KV write payload
 export interface VaultKvWritePayload {
   options?: VaultKvWriteOptions;
   data: {
-    [key: string]: string; 
+    [key: string]: string;
   };
 }
