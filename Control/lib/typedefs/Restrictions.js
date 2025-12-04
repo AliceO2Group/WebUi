@@ -12,11 +12,10 @@
  */
 
 /**
- * @typedef {Object.<string, RestrictionsEntry>} Restrictions
- * 
+ * @typedef {RestrictionsEntry | Object.<string, RestrictionsEntry>} Restrictions
  * Object which is a map of types.
  * Keys are taken from existing configuration.
- * Values are describing what is expected type of value held there.
+ * Values are describing what is expected type of value held under that key.
  * 
  * For example for the given configuration:
  * ```
@@ -36,7 +35,8 @@
         {
           name: 'CTP Config',
           path: 'CTP/Config/Config',
-          active: 'true'
+          active: 'true',
+          count: '5'
         },
         {
           name: 'CTP Scalers',
@@ -62,6 +62,19 @@
  *      }
  *    },
  *    dataSources: [
+ *      [
+ *        {
+ *          name: 'string',
+ *          path: 'string',
+ *          active: 'boolean',
+ *          count: 'number'
+ *        },
+ *        {
+ *          name: 'string',
+ *          path: 'string',
+ *          active: 'boolean'
+ *        }
+ *      ],
  *      {
  *        name: 'string',
  *        path: 'string',
@@ -74,8 +87,16 @@
 
 /**
  * A value in a `Restrictions` object can be:
- * - a string literal 'string', 'boolean', 'number' or 'array'
+ * - a string literal describing a primitive: 'string', 'boolean' or 'number'
  * - nested Restrictions
- *
- * @typedef { 'string' | 'boolean' | 'number' | Restrictions | Restrictions[] } RestrictionsEntry
+ * - ArrayRestrictions object
+ * @typedef { 'string' | 'boolean' | 'number' | Restrictions | ArrayRestrictions } RestrictionsEntry
+ */
+
+/**
+ * ArrayRestrictions is a data structure which holds the info about objects held in an array.
+ * It always is of length two:
+ *  - at index 0 there is a nested array which describes Restrictions of each object held in input array
+ *  - at index 1 there is a 'blueprint' Restrictions in case user decides to add next item to the source array
+ * @typedef { [Array<Restrictions>, Restrictions] } ArrayRestrictions
  */
