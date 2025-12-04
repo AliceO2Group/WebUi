@@ -15,8 +15,8 @@
 import { IconDelete } from '~/ui/icon';
 
 interface ActionBlockProps {
-  tokenId: string;
   onClick: () => void;
+  title?: string;
 }
 
 /**
@@ -28,17 +28,24 @@ interface ActionBlockProps {
  * @param {string} props.tokenId - id of the token the actions operate on (used for aria/title)
  * @param {() => void} props.onClick - click handler invoked when the action button is pressed
  */
-export default function ActionBlock({ tokenId, onClick }: ActionBlockProps) {
+export function ActionBlockBase({ onClick, title }: ActionBlockProps) {
   return (
     <div>
       <button
         className="bg-danger btn-sm static"
         onClick={onClick}
-        aria-label={`Delete token ${tokenId}`}
-        title="Delete token"
+        title={title}
       >
         <IconDelete />
       </button>
     </div>
   );
+}
+
+export function ActionBlockBulk({ onClick }: ActionBlockProps) {
+  return (<ActionBlockBase onClick={onClick} title="Revoke tokens selected by filter" />);
+}
+
+export function ActionBlockSolo({ onClick }: ActionBlockProps) {
+  return (<ActionBlockBase onClick={onClick} title="Revoke token" />);
 }

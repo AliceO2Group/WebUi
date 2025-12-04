@@ -18,7 +18,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 
 import { useAuth } from '~/utils/session';
-import ActionBlock from './action-block';
+import { ActionBlockSolo, ActionBlockBulk } from './action-block';
 import Modal from '../window/modal';
 import Alert from '../window/alert';
 import { WindowTitle, WindowContent, WindowButtonCancel, WindowButtonAccept, WindowCloseIcon } from '../window/window-objects';
@@ -43,7 +43,7 @@ function TokenTableBase({
   onActionClick,
 }: {
   tokens: Token[];
-  columns: { key: string; label: string; render?: (t: Token) => React.ReactNode }[];
+  columns: { key: string; label: string | (() => React.ReactNode); render?: (t: Token) => React.ReactNode }[];
   onActionClick: (tokenId: string) => void;
 }) {
 
@@ -51,7 +51,8 @@ const wrappedColumns = columns.map((col) =>
     col.key === 'actions'
       ? {
           ...col,
-          render: (t: Token) => <ActionBlock tokenId={t.tokenId} onClick={() => onActionClick(t.tokenId)} />,
+          label: () => <ActionBlockBulk onClick={() => onActionClick('bulk')} />,
+          render: (t: Token) => <ActionBlockSolo onClick={() => onActionClick(t.tokenId)} />,
         }
       : col
   );
@@ -62,7 +63,7 @@ const wrappedColumns = columns.map((col) =>
         <thead>
           <tr>
             {columns.map((c) => (
-              <th key={c.key}>{c.label}</th>
+              <th key={c.key}>{typeof c.label === 'function' ? c.label() : c.label}</th>
             ))}
           </tr>
         </thead>
@@ -95,7 +96,7 @@ function TokenTableContainer({
   columns,
 }: {
   tokens: Token[];
-  columns: { key: string; label: string; render?: (t: Token) => React.ReactNode }[];
+  columns: { key: string; label: string | (() => React.ReactNode); render?: (t: Token) => React.ReactNode }[];
 }) {
   const [openM, setOpenM] = useState<boolean>(false);
   const [openA, setOpenA] = useState<boolean>(false);
@@ -149,13 +150,8 @@ function TokenTableContainer({
   );
 }
 
-/**
- * TokenTable
- *
- * Original table using standard columns.
- */
-export function TokenTable({ tokens }: { tokens: Token[] }) {
-  const columns = [
+// common columns for all table variants
+const columns = [
     { key: 'tokenId', label: 'ID', render: (t: Token) => <Link to={`/tokens/${t.tokenId}`}>{t.tokenId}</Link> },
     { key: 'serviceFrom', label: 'Service From' },
     { key: 'serviceTo', label: 'Service To' },
@@ -163,10 +159,17 @@ export function TokenTable({ tokens }: { tokens: Token[] }) {
     {
       key: 'actions',
       label: 'Actions',
-      render: (t: Token) => <ActionBlock tokenId={t.tokenId} onClick={() => { /* delegated via container */ }} />,
+      render: (t: Token) => <ActionBlockSolo onClick={() => { /* delegated via container */ }} />,
     },
-  ];
+];
 
+/**
+ * TokenTable
+ *
+ * Original table using standard columns.
+ * @param props.tokens - token list
+ */
+export function TokenTable({ tokens }: { tokens: Token[] }) {
   // Delegate to container; TokenTableContainer will call onRequestAction internally via same ActionBlock usage pattern.
   return <TokenTableContainer tokens={tokens} columns={columns} />;
 }
@@ -174,23 +177,20 @@ export function TokenTable({ tokens }: { tokens: Token[] }) {
 /**
  * TokenTableWithIssuedAt
  *
- * Variant that adds "Issued at" column.
+ * Variant that adds "Issued at" and "HTTP Methods (permissions)" columns.
+ * @param props.tokens - token list
  */
-export function TokenTableWithIssuedAt({ tokens }: { tokens: Token[] }) {
-  const columns = [
-    { key: 'tokenId', label: 'ID', render: (t: Token) => <Link to={`/tokens/${t.tokenId}`}>{t.tokenId}</Link> },
-    { key: 'serviceFrom', label: 'Service From' },
-    { key: 'serviceTo', label: 'Service To' },
+export function TokenTableExtended({ tokens }: { tokens: Token[] }) {
+  const columns_extended = [
+    ...columns.slice(0, 4),
     { key: 'iat', label: 'Issued at', render: (t: Token) => String((t as any).iat ?? '') },
-    { key: 'exp', label: 'Expires at' },
     { key: 'perm', label: 'HTTP Methods', render: (t: Token) => String((t as any).permissions.join(', ') ?? '') },
     {
       key: 'actions',
-      label: 'Actions',
-      render: (t: Token) => <ActionBlock tokenId={t.tokenId} onClick={() => { /* delegated via container */ }} />,
+      label: () => <span className="flex-row"><span>Actions</span><ActionBlockBulk onClick={() => { /* delegated via container */ }} /></span>,
+      render: (t: Token) => <ActionBlockSolo onClick={() => { /* delegated via container */ }} />,
     },
   ];
 
-
-  return <TokenTableContainer tokens={tokens} columns={columns} />;
+  return <TokenTableContainer tokens={tokens} columns={columns_extended} />;
 }

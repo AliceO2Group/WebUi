@@ -16,9 +16,7 @@ import React, { type PropsWithChildren } from 'react';
 import type { SelectInterface } from './form.d';
 
 import { FormSelect } from './form-select';
-
-// Helper function which checks if a component is of a certain type
-const checkIsComponentOfType = (c: React.ReactNode, otype: React.ElementType): boolean => React.isValidElement(c) && c.type === otype;
+import { checkIsComponentOfType } from '~/utils/component-type-checker';
 
 /**
  * SelectGroup
