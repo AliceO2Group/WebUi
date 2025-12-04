@@ -32,7 +32,7 @@ const mockClient = {
 const CentralSystemMock = jest.fn(() => mockClient);
 
 // Mock gRPC auth interceptor
-jest.mock('../../../client/ConnectionManager/Interceptors/grpc.auth.interceptor', () => ({
+jest.mock('../../../client/connectionManager/interceptors/grpc.auth.interceptor', () => ({
   gRPCAuthInterceptor: jest.fn((call, callback) => {
     return Promise.resolve({
       isAuthenticated: true,
@@ -306,5 +306,186 @@ describe('ConnectionManager', () => {
         message: 'err',
       })
     );
+  });
+
+  describe('createNewConnection', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('should create new RECEIVING connection', async () => {
+      const address = 'peer-receiving-1';
+      const token = 'test-token-123';
+
+      const connection = await conn.createNewConnection(address, ConnectionDirection.RECEIVING, token);
+
+      expect(connection).toBeDefined();
+      expect(connection.targetAddress).toBe(address);
+      expect(connection.direction).toBe(ConnectionDirection.RECEIVING);
+      expect(connection.token).toBe(token);
+    });
+
+    test('should create new SENDING connection with SSL tunnel', async () => {
+      const address = 'peer-sending-1';
+      const token = 'test-token-456';
+
+      const connection = await conn.createNewConnection(address, ConnectionDirection.SENDING, token);
+
+      expect(connection).toBeDefined();
+      expect(connection.targetAddress).toBe(address);
+      expect(connection.direction).toBe(ConnectionDirection.SENDING);
+      expect(connection.token).toBe(token);
+    });
+
+    test('should return existing connection if already exists (RECEIVING)', async () => {
+      const address = 'peer-existing-receiving';
+      const token1 = 'token-1';
+      const token2 = 'token-2';
+
+      const conn1 = await conn.createNewConnection(address, ConnectionDirection.RECEIVING, token1);
+      const conn2 = await conn.createNewConnection(address, ConnectionDirection.RECEIVING, token2);
+
+      expect(conn1).toBe(conn2);
+      expect(conn2.token).toBe(token2); // Token should be updated
+    });
+
+    test('should return existing connection if already exists (SENDING)', async () => {
+      const address = 'peer-existing-sending';
+      const token1 = 'token-1';
+      const token2 = 'token-2';
+
+      const conn1 = await conn.createNewConnection(address, ConnectionDirection.SENDING, token1);
+      const conn2 = await conn.createNewConnection(address, ConnectionDirection.SENDING, token2);
+
+      expect(conn1).toBe(conn2);
+      expect(conn2.token).toBe(token2); // Token should be updated
+    });
+
+    test('should return existing connection without updating token if no token provided', async () => {
+      const address = 'peer-no-token-update';
+      const token1 = 'token-1';
+
+      const conn1 = await conn.createNewConnection(address, ConnectionDirection.RECEIVING, token1);
+      const conn2 = await conn.createNewConnection(address, ConnectionDirection.RECEIVING);
+
+      expect(conn1).toBe(conn2);
+      expect(conn2.token).toBe(token1); // Token should remain unchanged
+    });
+
+    test('should create connection without token', async () => {
+      const address = 'peer-no-token';
+
+      const connection = await conn.createNewConnection(address, ConnectionDirection.RECEIVING);
+
+      expect(connection).toBeDefined();
+      expect(connection.token).toBe('');
+    });
+  });
+
+  describe('getConnectionByAddress', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('should get SENDING connection by address', async () => {
+      const address = 'peer-send-get';
+      await conn.createNewConnection(address, ConnectionDirection.SENDING, 'token');
+
+      const connection = conn.getConnectionByAddress(address, ConnectionDirection.SENDING);
+
+      expect(connection).toBeDefined();
+      expect(connection?.targetAddress).toBe(address);
+    });
+
+    test('should get RECEIVING connection by address', async () => {
+      const address = 'peer-receive-get';
+      await conn.createNewConnection(address, ConnectionDirection.RECEIVING, 'token');
+
+      const connection = conn.getConnectionByAddress(address, ConnectionDirection.RECEIVING);
+
+      expect(connection).toBeDefined();
+      expect(connection?.targetAddress).toBe(address);
+    });
+
+    test('should return undefined for non-existent connection', () => {
+      const connection = conn.getConnectionByAddress('non-existent', ConnectionDirection.SENDING);
+
+      expect(connection).toBeUndefined();
+    });
+  });
+
+  describe('getConnectionBySerialNumber', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('should find connection by serial number in receiving connections', async () => {
+      const address = 'peer-sn-receiving';
+      const serialNumber = 'SN-12345';
+
+      const connection = await conn.createNewConnection(address, ConnectionDirection.RECEIVING, 'token');
+      connection.serialNumber = serialNumber;
+
+      const found = conn.getConnectionBySerialNumber(serialNumber);
+
+      expect(found).toBe(connection);
+      expect(found?.serialNumber).toBe(serialNumber);
+    });
+
+    test('should find connection by serial number in sending connections', async () => {
+      const address = 'peer-sn-sending';
+      const serialNumber = 'SN-67890';
+
+      const connection = await conn.createNewConnection(address, ConnectionDirection.SENDING, 'token');
+      connection.serialNumber = serialNumber;
+
+      const found = conn.getConnectionBySerialNumber(serialNumber);
+
+      expect(found).toBe(connection);
+      expect(found?.serialNumber).toBe(serialNumber);
+    });
+
+    test('should return undefined if serial number not found', () => {
+      const found = conn.getConnectionBySerialNumber('non-existent-sn');
+
+      expect(found).toBeUndefined();
+    });
+  });
+
+  describe('listenForPeers edge cases', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      capturedServerImpl = null;
+    });
+
+    test('should not start listener if clientListenerCert is missing', async () => {
+      const securityContextNoCert = new SecurityContext(MOCK_CERT, MOCK_CERT, MOCK_CERT, MOCK_CERT, undefined as any);
+      const connNoCert = new ConnectionManager('dummy.proto', 'localhost:12345', securityContextNoCert);
+
+      await connNoCert.listenForPeers(50058);
+
+      const serverCtor = (grpc.Server as any).mock;
+      // Server should not be created
+      expect(serverCtor.calls.length).toBe(0);
+    });
+
+    test('should shutdown existing server before starting new one', async () => {
+      await conn.listenForPeers(50059, 'http://localhost:40041/api/');
+
+      const serverCtor = (grpc.Server as any).mock;
+      const firstServer = serverCtor.results[0].value;
+
+      // Start listener again
+      await conn.listenForPeers(50060, 'http://localhost:40041/api/');
+
+      expect(firstServer.forceShutdown).toHaveBeenCalled();
+    });
+
+    test('should use default baseAPIPath if not provided', async () => {
+      await conn.listenForPeers(50061);
+
+      expect(capturedServerImpl).toBeTruthy();
+      expect(typeof capturedServerImpl.Fetch).toBe('function');
+    });
   });
 });

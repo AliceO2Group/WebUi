@@ -175,20 +175,20 @@ export const gRPCAuthInterceptor = async (
  */
 export const isRequestAllowed = (tokenPayload: TokenPayload | undefined, request: any, callback: grpc.sendUnaryData<any>): boolean => {
   const method = String(request?.method ?? 'POST').toUpperCase();
-  const isValidPayload = validateTokenPayload(tokenPayload, request.method);
-  let isUnexpired;
+  const isValidPayload = validateTokenPayload(tokenPayload, method);
+  let isExpired = false;
 
   if (isValidPayload) {
-    isUnexpired = isPermissionUnexpired(tokenPayload.iat[method], tokenPayload.exp[method]);
+    isExpired = isPermissionExpired(tokenPayload.iat[method], tokenPayload.exp[method]);
   }
 
-  if (!isValidPayload || !isUnexpired) {
+  if (!isValidPayload || isExpired) {
     const error = {
       name: 'AuthorizationError',
-      code: isUnexpired ? grpc.status.PERMISSION_DENIED : grpc.status.UNAUTHENTICATED,
-      message: isUnexpired
-        ? `Request of type ${method} is not allowed by the token policy.`
-        : `Request of type ${method}, permission has expired.`,
+      code: isExpired ? grpc.status.UNAUTHENTICATED : grpc.status.PERMISSION_DENIED,
+      message: isExpired
+        ? `Request of type ${method}, permission has expired.`
+        : `Request of type ${method} is not allowed by the token policy.`,
     } as any;
 
     callback(error, null);
@@ -229,20 +229,20 @@ const validateTokenPayload = (tokenPayload: TokenPayload | undefined, method: st
  * Checks if the permissions granted in the token have expired.
  * @param iat issued-at timestamp for the specific method
  * @param exp expiration timestamp for the specific method
- * @returns true if permission is still valid, false if expired
+ * @returns true if permission is expired
  */
-export const isPermissionUnexpired = (iat: number, exp: number): boolean => {
+export const isPermissionExpired = (iat: number, exp: number): boolean => {
   const nowInSeconds = Math.floor(Date.now() / 1000);
 
   if (nowInSeconds >= exp) {
-    return false;
+    return true;
   }
 
   if (iat > nowInSeconds) {
-    return false;
+    return true;
   }
 
-  return true;
+  return false;
 };
 
 /**

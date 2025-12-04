@@ -15,7 +15,7 @@ import * as grpc from '@grpc/grpc-js';
 import type { ConnectionDirection } from '../../models/message.model';
 import { ConnectionStatus } from '../../models/connection.model';
 import type { Connection } from '../../client/connection/Connection';
-import { gRPCAuthInterceptor } from '../../client/connectionManager/Interceptors/grpc.auth.interceptor';
+import { gRPCAuthInterceptor } from '../../client/connectionManager/interceptors/grpc.auth.interceptor';
 import type { SecurityContext } from '../security/SecurityContext';
 
 /**

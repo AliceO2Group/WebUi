@@ -14,7 +14,7 @@
 
 import * as grpc from '@grpc/grpc-js';
 import * as jose from 'jose';
-import * as interceptor from '../../../../client/connectionManager/Interceptors/grpc.auth.interceptor';
+import * as interceptor from '../../../../client/connectionManager/interceptors/grpc.auth.interceptor';
 
 // Connection class mock
 jest.mock(
@@ -293,5 +293,343 @@ describe('gRPCAuthInterceptor', () => {
     expect(result.isAuthenticated).toBe(false);
     expect(mockCallback).toHaveBeenCalledWith(expect.objectContaining({ code: grpc.status.PERMISSION_DENIED }), null);
     expect(isSerialNumberMatchingSpy).toHaveBeenCalledTimes(1);
+  });
+  it('should reject if existing connection has request not allowed', async () => {
+    const existingConn = new (Connection as jest.Mock)(VALID_JWE, MOCK_ADDRESS, ConnectionDirection.RECEIVING);
+    existingConn.getToken.mockReturnValue(VALID_JWE);
+    mockClientConnections.set(MOCK_ADDRESS, existingConn);
+
+    // mock request not allowed
+    isRequestAllowedSpy.mockImplementation((_p, _r, cb) => {
+      cb(
+        {
+          name: 'AuthorizationError',
+          code: grpc.status.PERMISSION_DENIED,
+          message: 'Request of type POST is not allowed by the token policy.',
+        } as any,
+        null
+      );
+      return false;
+    });
+
+    const result = await interceptor.gRPCAuthInterceptor(mockCall, mockCallback, mockClientConnections as any, mockSecurityContext);
+
+    expect(result.isAuthenticated).toBe(false);
+    expect(result.conn).toBe(existingConn);
+    expect(mockCallback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Request of type POST is not allowed by the token policy.',
+      }),
+      null
+    );
+  });
+
+  it('should re-authenticate when existing connection has different token', async () => {
+    const existingConn = new (Connection as jest.Mock)('OLD.TOKEN', MOCK_ADDRESS, ConnectionDirection.RECEIVING);
+    existingConn.getToken.mockReturnValue('OLD.TOKEN');
+    mockClientConnections.set(MOCK_ADDRESS, existingConn);
+
+    (mockCall.metadata.getMap as unknown as jest.Mock).mockReturnValue({
+      jwetoken: 'NEW.TOKEN',
+    });
+
+    const result = await interceptor.gRPCAuthInterceptor(mockCall, mockCallback, mockClientConnections as any, mockSecurityContext);
+
+    expect(result.isAuthenticated).toBe(true);
+    expect(existingConn.handleSuccessfulAuth).toHaveBeenCalledWith(DECRYPTED_PAYLOAD);
+    expect(jose.compactDecrypt as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(jose.compactVerify as jest.Mock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should fail if JWS has incorrect signing algorithm', async () => {
+    (jose.compactVerify as jest.Mock).mockResolvedValue({
+      payload: Buffer.from(JSON.stringify(DECRYPTED_PAYLOAD)),
+      protectedHeader: { alg: 'RS256' }, // Wrong algorithm
+    });
+
+    const result = await interceptor.gRPCAuthInterceptor(mockCall, mockCallback, mockClientConnections as any, mockSecurityContext);
+
+    const created = getCreatedConn();
+    expect(result.isAuthenticated).toBe(false);
+    expect(mockCallback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Incorrect signing algorithm for JWS.',
+        code: grpc.status.UNAUTHENTICATED,
+      }),
+      null
+    );
+  });
+});
+
+describe('isRequestAllowed', () => {
+  const mockCallback = jest.fn();
+
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
+
+  it('should return true for valid payload with unexpired permission', () => {
+    const now = Math.floor(Date.now() / 1000);
+    const payload: TokenPayload = {
+      sub: 'AABBCC',
+      aud: 'test-audience',
+      iss: 'test-issuer',
+      jti: 'test-jti',
+      iat: { POST: now - 100 },
+      exp: { POST: now + 3600 },
+    } as any;
+
+    const request = { method: 'POST' };
+    const result = interceptor.isRequestAllowed(payload, request, mockCallback);
+
+    expect(result).toBe(true);
+    expect(mockCallback).not.toHaveBeenCalled();
+  });
+
+  it('should return false for expired permission', () => {
+    const now = Math.floor(Date.now() / 1000);
+    const payload: TokenPayload = {
+      sub: 'AABBCC',
+      aud: 'test-audience',
+      iss: 'test-issuer',
+      jti: 'test-jti',
+      iat: { POST: now - 7200 },
+      exp: { POST: now - 3600 }, // Expired 1 hour ago
+    } as any;
+
+    const request = { method: 'POST' };
+    const result = interceptor.isRequestAllowed(payload, request, mockCallback);
+
+    expect(result).toBe(false);
+    expect(mockCallback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        code: grpc.status.UNAUTHENTICATED,
+        message: 'Request of type POST, permission has expired.',
+      }),
+      null
+    );
+  });
+
+  it('should return false for method not in token permissions', () => {
+    const now = Math.floor(Date.now() / 1000);
+    const payload: TokenPayload = {
+      sub: 'AABBCC',
+      aud: 'test-audience',
+      iss: 'test-issuer',
+      jti: 'test-jti',
+      iat: { POST: now - 100 },
+      exp: { POST: now + 3600 },
+    } as any;
+
+    const request = { method: 'DELETE' }; // Not in permissions
+    const result = interceptor.isRequestAllowed(payload, request, mockCallback);
+
+    expect(result).toBe(false);
+    expect(mockCallback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        code: grpc.status.PERMISSION_DENIED,
+        message: 'Request of type DELETE is not allowed by the token policy.',
+      }),
+      null
+    );
+  });
+
+  it('should handle missing request method with default POST', () => {
+    const now = Math.floor(Date.now() / 1000);
+    const payload: TokenPayload = {
+      sub: 'AABBCC',
+      aud: 'test-audience',
+      iss: 'test-issuer',
+      jti: 'test-jti',
+      iat: { POST: now - 100 },
+      exp: { POST: now + 3600 },
+    } as any;
+
+    const request = {}; // No method
+    const result = interceptor.isRequestAllowed(payload, request, mockCallback);
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false for invalid payload structure (missing iat)', () => {
+    const now = Math.floor(Date.now() / 1000);
+    const payload: any = {
+      sub: 'AABBCC',
+      aud: 'test-audience',
+      iss: 'test-issuer',
+      jti: 'test-jti',
+      exp: { POST: now + 3600 },
+      // iat missing
+    };
+
+    const request = { method: 'POST' };
+    const result = interceptor.isRequestAllowed(payload, request, mockCallback);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false for invalid payload structure (empty iat)', () => {
+    const now = Math.floor(Date.now() / 1000);
+    const payload: any = {
+      sub: 'AABBCC',
+      aud: 'test-audience',
+      iss: 'test-issuer',
+      jti: 'test-jti',
+      iat: {}, // Empty
+      exp: { POST: now + 3600 },
+    };
+
+    const request = { method: 'POST' };
+    const result = interceptor.isRequestAllowed(payload, request, mockCallback);
+
+    expect(result).toBe(false);
+  });
+});
+
+describe('isPermissionExpired', () => {
+  it('should return false for valid unexpired permission', () => {
+    const now = Math.floor(Date.now() / 1000);
+    const iat = now - 100;
+    const exp = now + 3600;
+
+    const result = interceptor.isPermissionExpired(iat, exp);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return true when permission has expired', () => {
+    const now = Math.floor(Date.now() / 1000);
+    const iat = now - 7200;
+    const exp = now - 3600; // Expired 1 hour ago
+
+    const result = interceptor.isPermissionExpired(iat, exp);
+
+    expect(result).toBe(true);
+  });
+
+  it('should return true when iat is in the future', () => {
+    const now = Math.floor(Date.now() / 1000);
+    const iat = now + 100; // Issued in the future
+    const exp = now + 3600;
+
+    const result = interceptor.isPermissionExpired(iat, exp);
+
+    expect(result).toBe(true);
+  });
+});
+
+describe('isSerialNumberMatching', () => {
+  const mockCallback = jest.fn();
+
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
+
+  it('should return true when serial numbers match', () => {
+    const payload: TokenPayload = {
+      sub: 'AABBCCDDEE',
+    } as any;
+    const peerCert = { serialNumber: 'AA:BB:CC:DD:EE' };
+
+    const result = interceptor.isSerialNumberMatching(payload, peerCert, mockCallback);
+
+    expect(result).toBe(true);
+    expect(mockCallback).not.toHaveBeenCalled();
+  });
+
+  it('should return true when serial numbers match (different formats)', () => {
+    const payload: TokenPayload = {
+      sub: 'aabbccddee',
+    } as any;
+    const peerCert = { serialNumber: 'AA:BB:CC:DD:EE' };
+
+    const result = interceptor.isSerialNumberMatching(payload, peerCert, mockCallback);
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false when serial numbers do not match', () => {
+    const payload: TokenPayload = {
+      sub: 'AABBCCDDEE',
+    } as any;
+    const peerCert = { serialNumber: '11:22:33:44:55' };
+
+    const result = interceptor.isSerialNumberMatching(payload, peerCert, mockCallback);
+
+    expect(result).toBe(false);
+    expect(mockCallback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        code: grpc.status.PERMISSION_DENIED,
+        message: 'Serial number mismatch (mTLS binding failure).',
+      }),
+      null
+    );
+  });
+
+  it('should return false when peerCert is null', () => {
+    const payload: TokenPayload = {
+      sub: 'AABBCCDDEE',
+    } as any;
+
+    const result = interceptor.isSerialNumberMatching(payload, null, mockCallback);
+
+    expect(result).toBe(false);
+    expect(mockCallback).toHaveBeenCalled();
+  });
+
+  it('should return false when payload is undefined', () => {
+    const peerCert = { serialNumber: 'AA:BB:CC:DD:EE' };
+
+    const result = interceptor.isSerialNumberMatching(undefined, peerCert, mockCallback);
+
+    expect(result).toBe(false);
+  });
+
+  it('should normalize serial numbers with special characters', () => {
+    const payload: TokenPayload = {
+      sub: 'AA-BB-CC-DD-EE',
+    } as any;
+    const peerCert = { serialNumber: 'AA:BB:CC:DD:EE' };
+
+    const result = interceptor.isSerialNumberMatching(payload, peerCert, mockCallback);
+
+    expect(result).toBe(true);
+  });
+});
+
+describe('getPeerCertFromCall', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
+
+  it('should return peer certificate from call', () => {
+    const mockCert = { serialNumber: 'AABBCC', subject: 'CN=test' };
+    const mockCall = {
+      call: {
+        stream: {
+          session: {
+            socket: {
+              getPeerCertificate: jest.fn().mockReturnValue(mockCert),
+            },
+          },
+        },
+      },
+    };
+
+    const result = interceptor.getPeerCertFromCall(mockCall);
+
+    expect(result).toBe(mockCert);
+    expect(mockCall.call.stream.session.socket.getPeerCertificate).toHaveBeenCalledWith(true);
+  });
+
+  it('should handle missing call structure gracefully', () => {
+    const mockCall = {};
+
+    const result = interceptor.getPeerCertFromCall(mockCall);
+
+    expect(result).toBeUndefined();
   });
 });
