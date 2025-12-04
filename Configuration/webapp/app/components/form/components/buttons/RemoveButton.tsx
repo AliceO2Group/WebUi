@@ -17,8 +17,8 @@ import CancelIcon from '@mui/icons-material/Cancel';
 
 /**
  * Remove button component.
- * @param {() => void} onClick - The callback to click the remove button.
- * @param props
+ * @param {IconButtonProps} props - The props of the icon button.
+ * @param {() => void} props.onClick - The callback to click the remove button.
  * @returns {ReactElement} The remove button component.
  */
 export const RemoveButton = (props: IconButtonProps) => (

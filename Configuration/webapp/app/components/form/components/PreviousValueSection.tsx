@@ -13,23 +13,31 @@
  */
 
 import { Box, Typography } from '@mui/material';
+import type { ReactNode } from 'react';
 
-export const DefaultValueSection = ({
-  defaultValue,
+/**
+ * Previous Value Section component.
+ * @param {PreviousValueSectionProps} props - The props of the previous value section.
+ * @param {string | number | boolean} props.value - The value of the previous value.
+ * @param {boolean} props.isDirty - Whether the form is dirty.
+ * @returns {ReactElement} The previous value section component.
+ */
+export const PreviousValueSection = ({
+  value,
   isDirty,
 }: {
-  defaultValue: string | number | boolean;
+  value: string | number | boolean;
   isDirty: boolean;
-}) => {
+}): ReactNode => {
   if (!isDirty) {
     return null;
   }
   return (
     <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
       <Typography variant="caption" fontWeight="bold" color="secondary">
-        Default Value:
+        Previous Value:
       </Typography>
-      <Typography variant="caption">{JSON.stringify(defaultValue, null, 2)}</Typography>
+      <Typography variant="caption">{JSON.stringify(value, null, 2)}</Typography>
     </Box>
   );
 };

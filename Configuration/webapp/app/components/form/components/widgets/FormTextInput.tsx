@@ -16,7 +16,7 @@ import { TextField } from '@mui/material';
 import { type ReactElement } from 'react';
 import { Controller } from 'react-hook-form';
 import type { WidgetProps } from '../Widget';
-import { DefaultValueSection } from '../DefaultValueSection';
+import { PreviousValueSection } from '../PreviousValueSection';
 import { RemoveButton } from '../buttons/RemoveButton';
 
 interface FormTextInputProps extends Omit<WidgetProps, 'type' | 'value'> {
@@ -65,10 +65,7 @@ export const FormTextInput = ({
           },
         }}
         helperText={
-          <DefaultValueSection
-            defaultValue={defaultValues?.[sectionPrefix] ?? ''}
-            isDirty={isDirty}
-          />
+          <PreviousValueSection value={defaultValues?.[sectionPrefix] ?? ''} isDirty={isDirty} />
         }
       />
     )}
