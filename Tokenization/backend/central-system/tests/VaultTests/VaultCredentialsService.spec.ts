@@ -13,10 +13,10 @@
  */
 
 import { jest } from '@jest/globals';
-import fetch, { Response } from 'node-fetch';
+import axios from 'axios';
 import { VaultCredentialsService } from '../../src/services/VaultCredentialsService';
 
-jest.mock('node-fetch', () => jest.fn());
+jest.mock('axios');
 
 describe('VaultCredentialsService', () => {
   const agent: any = {};
@@ -28,28 +28,21 @@ describe('VaultCredentialsService', () => {
   });
 
   it('getCredential() correct GET request with JSON answer', async () => {
-    const mockJson = jest
-      .fn<() => Promise<{ data: { foo: string; answer: number } }>>()
-      .mockResolvedValue({ data: { foo: 'bar', answer: 42 } });
-
-    (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue({
-      ok: true,
-      json: mockJson,
-    } as unknown as Response);
-
+    (axios.get as jest.MockedFunction<typeof axios.get>).mockResolvedValue({
+      data: { data: { foo: 'bar', answer: 42 } },
+    } as any);
     const url = 'https://vault.local:9300/v1/secret/data/db/central-system';
     const token = 's.token';
 
     const result = await service.getCredential(url, token, agent);
 
-    expect(fetch).toHaveBeenCalledTimes(1);
-    expect(fetch).toHaveBeenCalledWith(url, {
-      method: 'GET',
+    expect(axios.get).toHaveBeenCalledTimes(1);
+    expect(axios.get).toHaveBeenCalledWith(url, {
       headers: {
         'content-type': 'application/json',
         'X-Vault-Token': token,
       },
-      agent,
+      httpsAgent: agent,
     });
 
     expect(result).toEqual({
@@ -58,10 +51,9 @@ describe('VaultCredentialsService', () => {
   });
 
   it('getCredential() HTTP error upon ok === false', async () => {
-    (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue({
-      ok: false,
-      text: jest.fn<() => Promise<string>>().mockResolvedValue('error'),
-    } as unknown as Response);
+    (axios.get as jest.MockedFunction<typeof axios.get>).mockRejectedValue({
+      response: { data: 'error' },
+    });
 
     const url = 'https://vault.local:9300/v1/secret/data/db/central-system';
     const token = 's.token';
@@ -72,10 +64,9 @@ describe('VaultCredentialsService', () => {
   });
 
   it('createOrUpdateCredential() correct POST request', async () => {
-    (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue({
-      ok: true,
-      json: jest.fn(),
-    } as unknown as Response);
+    (axios.post as jest.MockedFunction<typeof axios.post>).mockResolvedValue({
+      data: {},
+    } as any);
 
     const url = 'https://vault.local:9300/v1/secret/data/db/central-system';
     const token = 's.token';
@@ -84,23 +75,20 @@ describe('VaultCredentialsService', () => {
 
     await service.createOrUpdateCredential(url, token, agent, body);
 
-    expect(fetch).toHaveBeenCalledTimes(1);
-    expect(fetch).toHaveBeenCalledWith(url, {
-      method: 'POST',
-      body,
+    expect(axios.post).toHaveBeenCalledTimes(1);
+    expect(axios.post).toHaveBeenCalledWith(url, body, {
       headers: {
         'content-type': 'application/json',
         'X-Vault-Token': token,
       },
-      agent,
+      httpsAgent: agent,
     });
   });
 
   it('createOrUpdateCredential() HTTP error upon ok === false', async () => {
-    (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue({
-      ok: false,
-      text: jest.fn<() => Promise<string>>().mockResolvedValue('error'),
-    } as unknown as Response);
+    (axios.post as jest.MockedFunction<typeof axios.post>).mockRejectedValue({
+      response: { data: 'error' },
+    });
 
     const url = 'https://vault.local:9300/v1/secret/data/db/central-system';
     const token = 's.token';

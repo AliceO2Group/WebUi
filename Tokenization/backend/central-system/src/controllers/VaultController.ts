@@ -78,6 +78,7 @@ export class VaultController {
    * @description Signs a token using the VaultSignService.
    * @param payload - The payload containing the subject and optional claims for the token.
    * @returns A promise that resolves to the signed token and its expiration time.
+   * @throws Will throw an error if signing fails.
    */
   public async signToken(payload: SignPayload): Promise<string> {
     try {
@@ -97,6 +98,7 @@ export class VaultController {
   /**
    * @description Logs into the vault using the VaultAuthService and retrieves an access token.
    * @returns A promise that resolves to the access token.
+   * @throws Will throw an error if login fails.
    */
   public async loginVault(): Promise<void> {
     try {
@@ -142,8 +144,9 @@ export class VaultController {
 
   /**
    * @description Retrieves a credential from the vault using the VaultCredentialsService.
-   * @param id - The identifier of the credential to retrieve.
+   * @param path - The path of the credential to retrieve.
    * @returns A promise that resolves to the retrieved credential.
+   * @throws Will throw an error if retrieval fails.
    */
   public async getCredentialFromVault(
     path: string
@@ -167,6 +170,7 @@ export class VaultController {
    * @param path - The path where the credential should be stored.
    * @param body - The body of the credential to create or update.
    * @returns A promise that resolves when the operation is complete.
+   * @throws Will throw an error if the operation fails.
    */
   public async createOrUpdateCredentialInVault(
     path: string,

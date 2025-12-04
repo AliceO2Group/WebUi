@@ -13,7 +13,7 @@
  */
 
 import { Agent } from 'https';
-import fetch from 'node-fetch';
+import axios from 'axios';
 import { VaultReadResponse } from '../types/vault_types.js';
 
 /**
@@ -23,41 +23,65 @@ export class VaultCredentialsService {
   /**
    * @description Retrieves credentials by sending a request to an external vault service.
    * @param url - The URL of the external vault service.
-   * @return A promise that resolves to the response from the vault service.
+   * @param token - The JWT token for authentication.
+   * @param agent - The HTTPS agent to use for the request.
+   * @return A promise that resolves to the response from the vault service.\
+   * @throws Will throw an error if retrieval fails.
    */
   public async getCredential(
     url: string,
     token: string,
     agent: Agent
   ): Promise<VaultReadResponse> {
-    const result = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'content-type': 'application/json',
-        'X-Vault-Token': token,
-      },
-      agent,
-    });
-    if (!result.ok) throw new Error(await result.text());
-    const resJSON = (await result.json()) as VaultReadResponse;
-    return resJSON;
+    try {
+      const resp = await axios.get<VaultReadResponse>(url, {
+        headers: {
+          'content-type': 'application/json',
+          'X-Vault-Token': token,
+        },
+        httpsAgent: agent,
+      });
+      return resp.data;
+    } catch (err: any) {
+      const message = err?.response?.data
+        ? typeof err.response.data === 'string'
+          ? err.response.data
+          : JSON.stringify(err.response.data)
+        : err?.message ?? 'Unknown error';
+      throw new Error(message);
+    }
   }
 
+  /**
+   * @description Creates or updates credentials by sending a request to an external vault service.
+   * @param url - The URL of the external vault service.
+   * @param token - The JWT token for authentication.
+   * @param agent - The HTTPS agent to use for the request.
+   * @param body - The body of the create/update request.
+   * @return A promise that resolves when the operation is complete.
+   * @throws Will throw an error if the operation fails.
+   */
   public async createOrUpdateCredential(
     url: string,
     token: string,
     agent: Agent,
     body: Buffer | string | NodeJS.ReadableStream | null
   ): Promise<void> {
-    const result = await fetch(url, {
-      method: 'POST',
-      body,
-      headers: {
-        'content-type': 'application/json',
-        'X-Vault-Token': token,
-      },
-      agent,
-    });
-    if (!result.ok) throw new Error(await result.text());
+    try {
+      await axios.post(url, body, {
+        headers: {
+          'content-type': 'application/json',
+          'X-Vault-Token': token,
+        },
+        httpsAgent: agent,
+      });
+    } catch (err: any) {
+      const message = err?.response?.data
+        ? typeof err.response.data === 'string'
+          ? err.response.data
+          : JSON.stringify(err.response.data)
+        : err?.message ?? 'Unknown error';
+      throw new Error(message);
+    }
   }
 }

@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Agent } from "https";
-import fetch from "node-fetch";
+import { Agent } from 'https';
+import axios from 'axios';
 
 // Define the structure of the sign response
 interface SignResponse {
@@ -28,27 +28,35 @@ interface SignResponse {
 export class VaultSignService {
   /**
    * @description Signs a token by sending it to an external vault service.
-   * @param tokenJWT - The JWT token to be signed.
+   * @param token - The JWT token to be signed.
    * @param url - The URL of the external vault service.
+   * @param agent - The HTTPS agent to use for the request.
+   * @param body - The body of the sign request.
    * @return A promise that resolves to the response from the vault service.
+   * @throws Will throw an error if signing fails.
    */
   public async signToken(
     url: string,
     token: string,
     agent: Agent,
     body: Buffer | string | NodeJS.ReadableStream | null
-  ) : Promise<string> {
-    const result = await fetch(url, {
-      method: "POST",
-      body,
-      headers: {
-        "content-type": "application/json",
-        "X-Vault-Token": token,
-      },
-      agent,
-    });
-    if (!result.ok) throw new Error(await result.text());
-    const data = await result.json() as SignResponse;
-    return data.data.signature;
+  ): Promise<string> {
+    try {
+      const resp = await axios.post<SignResponse>(url, body, {
+        headers: {
+          'content-type': 'application/json',
+          'X-Vault-Token': token,
+        },
+        httpsAgent: agent,
+      });
+      return resp.data.data.signature;
+    } catch (err: any) {
+      const message = err?.response?.data
+        ? typeof err.response.data === 'string'
+          ? err.response.data
+          : JSON.stringify(err.response.data)
+        : err?.message ?? 'Unknown error';
+      throw new Error(message);
+    }
   }
 }
