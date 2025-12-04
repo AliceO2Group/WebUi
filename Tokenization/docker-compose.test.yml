@@ -61,5 +61,3 @@ services:
     depends_on:
       prod-container:
         condition: service_healthy
-    networks:
-      - TKN_net
