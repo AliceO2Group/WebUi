@@ -48,7 +48,7 @@ jest.mock('../../../client/connectionManager/interceptors/grpc.auth.interceptor'
 
 // Mock dispatcher
 const mockDispatch = jest.fn();
-jest.mock('../../../client/ConnectionManager/EventManagement/CentralCommandDispatcher', () => ({
+jest.mock('../../../client/connectionManager/EventManagement/CentralCommandDispatcher', () => ({
   CentralCommandDispatcher: jest.fn(() => ({
     dispatch: mockDispatch,
     register: jest.fn(),
