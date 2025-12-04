@@ -121,7 +121,7 @@ const drawPlot = (model, object) => {
         iconCircleX(),
       ),
     ]),
-    h('', { style: 'height:77%;' }, draw(model.object, name, { stat: true })),
+    h('', { style: 'height:77%;' }, draw(model.object, name, { }, ['stat'])),
     h('.scroll-y', {}, [
       h('.w-100.flex-row', { style: 'justify-content: center' }, h('.w-80', timestampSelectForm(model))),
       qcObjectInfoPanel(object, { 'font-size': '.875rem;' }, defaultRowAttributes(model.notification)),
