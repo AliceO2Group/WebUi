@@ -30,9 +30,28 @@ import { MainLayout } from './components/layout/MainLayout';
 import { LeftDrawer } from './components/layout/drawer/LeftDrawer';
 import { Content } from './components/layout/content/Content';
 import { ConfigNavigator } from './components/config-navigator/ConfigNavigator';
+import { DrawerProvider } from './contexts/DrawerContext';
 
 import queryClient, { persister } from './api/queryClient';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+
+/**
+ * LayoutContent component
+ * Internal component that uses drawer context
+ * @param {{ children: React.ReactElement }} props Props of the component
+ * @param {React.ReactElement} props.children React nodes to embed inside of this component
+ * @returns {React.ReactElement} LayoutContent
+ */
+function LayoutContent({ children }: { children: React.ReactNode }) {
+  return (
+    <MainLayout>
+      <LeftDrawer>
+        <ConfigNavigator />
+      </LeftDrawer>
+      <Content>{children}</Content>
+    </MainLayout>
+  );
+}
 
 /**
  * Root component
@@ -51,12 +70,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
-          <MainLayout>
-            <LeftDrawer>
-              <ConfigNavigator />
-            </LeftDrawer>
-            <Content>{children}</Content>
-          </MainLayout>
+          <DrawerProvider>
+            <LayoutContent>{children}</LayoutContent>
+          </DrawerProvider>
           <ScrollRestoration />
           <Scripts />
         </PersistQueryClientProvider>
