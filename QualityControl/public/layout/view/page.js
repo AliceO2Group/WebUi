@@ -210,7 +210,12 @@ const drawComponent = (model, tabObject) => {
         display: 'flex',
         'flex-direction': 'column',
       },
-    }, draw(model.object, name, {}, drawingOptions)),
+    }, draw(
+      model.object.objects[tabObject.name],
+      {},
+      drawingOptions,
+      (error) => model.object.invalidObject(tabObject.name, error.message),
+    )),
     objectInfoResizePanel(model, tabObject),
     displayTimestamp && minimalObjectInfo(runNumber, lastModified),
   ]);

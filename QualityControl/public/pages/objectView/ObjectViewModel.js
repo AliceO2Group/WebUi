@@ -211,4 +211,13 @@ export default class ObjectViewModel extends BaseViewModel {
   async triggerFilter() {
     await this.init(this.model.router.params);
   }
+
+  /**
+   * Should be called when a failure occurs when drawing a JSROOT plot
+   * @param {string} message - the failure message to display
+   */
+  drawingFailureOccurred(message) {
+    this.selected = RemoteData.failure(message || 'Failed to draw JSROOT plot');
+    this.notify();
+  }
 }
