@@ -14,7 +14,8 @@
 
 import { BaseViewModel } from '../../common/abstracts/BaseViewModel.js';
 import { setBrowserTabTitle } from '../../common/utils.js';
-import { RemoteData } from '/js/src/index.js';
+import { RemoteData, BrowserStorage } from '/js/src/index.js';
+import { StorageKeysEnum } from '../../common/enums/storageKeys.enum.js';
 
 /**
  * Model namespace for ObjectViewPage
@@ -44,10 +45,8 @@ export default class ObjectViewModel extends BaseViewModel {
     this.displayHints = [];
     this.ignoreDefaults = false;
 
-    /**
-     * Tracks whether the object information panel is currently visible.
-     */
-    this._objectInfoVisible = true;
+    this._storage = new BrowserStorage(StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING);
+    this._loadObjectInfoVisible();
   }
 
   /**
@@ -133,6 +132,22 @@ export default class ObjectViewModel extends BaseViewModel {
   }
 
   /**
+   * Get the current display state of object information from the local storage.
+   * If the value does not exist in storage, or if the stored value has been tampered
+   * with and is invalid, this method will default to `true` (object information is visible).
+   * This method **sets `_objectInfoVisible` directly** without notifying any observers.
+   */
+  _loadObjectInfoVisible() {
+    try {
+      this._objectInfoVisible = this._storage.getLocalItem(this.model.session.personid.toString()) ?? true;
+      // eslint-disable-next-line no-unused-vars
+    } catch (_) {
+      this._storage.removeLocalItem(this.model.session.personid.toString());
+      this._objectInfoVisible = true;
+    }
+  }
+
+  /**
    * Get the current display state of object information.
    * @returns {boolean} - `true` if object information is currently displayed, `false` otherwise.
    */
@@ -141,11 +156,12 @@ export default class ObjectViewModel extends BaseViewModel {
   }
 
   /**
-   * Toggle the display state of object information.
+   * Toggle the display state of object information and store it in the local storage.
    * If currently visible, it becomes hidden; if hidden, it becomes visible.
    */
   toggleObjectInfoVisible() {
     this._objectInfoVisible = !this._objectInfoVisible;
+    this._storage.setLocalItem(this.model.session.personid.toString(), this._objectInfoVisible);
     this.notify();
   }
 
@@ -194,5 +210,14 @@ export default class ObjectViewModel extends BaseViewModel {
    */
   async triggerFilter() {
     await this.init(this.model.router.params);
+  }
+
+  /**
+   * Should be called when a failure occurs when drawing a JSROOT plot
+   * @param {string} message - the failure message to display
+   */
+  drawingFailureOccurred(message) {
+    this.selected = RemoteData.failure(message || 'Failed to draw JSROOT plot');
+    this.notify();
   }
 }
