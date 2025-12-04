@@ -97,6 +97,8 @@
  * ArrayRestrictions is a data structure which holds the info about objects held in an array.
  * It always is of length two:
  *  - at index 0 there is a nested array which describes Restrictions of each object held in input array
- *  - at index 1 there is a 'blueprint' Restrictions in case user decides to add next item to the source array
+ *  - at index 1 there is a 'blueprint' Restrictions in case user decides to create a new object or array
+ * If user creates an object on the frontend, it is pre-populated according to the blueprint
+ * If user creates an array on the frontend, its blueprint is populated with the current blueprint
  * @typedef { [Array<Restrictions>, Restrictions] } ArrayRestrictions
  */

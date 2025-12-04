@@ -49,26 +49,23 @@ const ArrayWidget = ({ title, type, value }: ArrayWidgetProps): ReactElement => 
       <AccordionDetails>
         {viewForm ? (
           <Stack spacing={2}>
-            {items.map((item, idx) => {
-              if (isFormRestrictions(itemsRestrictions[idx])) {
-                return (
-                  <Form
-                    key={idx}
-                    sectionTitle={`Item #${idx}`}
-                    items={item as FormItem}
-                    itemsRestrictions={itemsRestrictions[idx]}
-                  />
-                );
-              }
-              return (
+            {items.map((item, idx) =>
+              isFormRestrictions(itemsRestrictions[idx]) ? (
+                <Form
+                  key={idx}
+                  sectionTitle={`Item #${idx}`}
+                  items={item as FormItem}
+                  itemsRestrictions={itemsRestrictions[idx]}
+                />
+              ) : (
                 <Widget
                   key={idx}
                   title={`Item #${idx}`}
                   type={itemsRestrictions[idx]}
                   value={item}
                 />
-              );
-            })}
+              ),
+            )}
           </Stack>
         ) : (
           <Typography component="pre">{JSON.stringify(items, null, 2)}</Typography>

@@ -23,14 +23,14 @@ class QCConfigurationAdapter {
    * and we can not derive the type of values held in there
    * Restrictions for an array always has the following structure
    * At index 0 there are Restrictions for every value currently in the array
-   * At index 1 there are Restrictions in case the user adds a new item to the array
-   * 
+   * At index 1 there are Restrictions in case the user adds a new object to the array
+   *
    * For example, for array like:
    * [
    *   { name: 'flp1', strength: 10, isActive: true },
    *   { name: 'flp2', strength: 100000, isActive: 'inactive' }
    * ]
-   * 
+   *
    * The ArrayRestrictions will be:
    * [
    *   [
@@ -51,7 +51,7 @@ class QCConfigurationAdapter {
    */
   static computeRestrictions = (value) => {
     const restrictions = {};
-    if (typeof value !== 'object' || value === null) {
+    if (typeof value !== 'object' || Array.isArray(value) || value === null) {
       return restrictions;
     }
     Object.entries(value).forEach(([key, val]) => (restrictions[key] = QCConfigurationAdapter.deriveValueType(val)));
@@ -66,7 +66,7 @@ class QCConfigurationAdapter {
    * could be a string, Restrictions object, or ArrayRestrictions object
    */
   static deriveValueType = (value) => {
-    if (Array.isArray(value)) { return QCConfigurationAdapter.deriveArrayType(value); }
+    if (Array.isArray(value)) { return QCConfigurationAdapter.computeArrayRestrictions(value); }
     if (typeof value === 'object' && value !== null) { return QCConfigurationAdapter.computeRestrictions(value); }
     if (typeof value === 'boolean' || typeof value === 'string' &&
       (value.toLocaleLowerCase() === 'true' || value.toLocaleLowerCase() === 'false')) {
@@ -87,7 +87,7 @@ class QCConfigurationAdapter {
    * @param {Array} array for which we calculate the Restrictions
    * @returns {ArrayRestrictions} value describing the nature of objects held in an array
    */
-  static deriveArrayType = (array) => {
+  static computeArrayRestrictions = (array) => {
     if (array.length === 0) {
       return QCConfigurationAdapter.emptyArrayRestrictions;
     }
@@ -109,50 +109,37 @@ class QCConfigurationAdapter {
     }
 
     return [itemsRestrictions, maximumIntersection];
-  }
+  };
 
   /**
    * Function which finds maximum intersection for two different Restrictions
-   * @param {Restrictions | ArrayRestrictions} first 
-   * @param {Restrictions | ArrayRestrictions} second 
+   * only if they describe objects and it returns null otherwise
+   * @param {Restrictions} first
+   * @param {Restrictions} second
    */
   static getRestrictionIntersection = (first, second) => {
-    if (QCConfigurationAdapter.bothArePrimitive(first, second)) {
-      // the intersection returns the value type, or null if types are different
-      return first === second ? first : null;
-    }
+    if (!QCConfigurationAdapter.bothAreObjects(first, second)) { return null; }
 
-    if (QCConfigurationAdapter.bothAreArrays(first, second)) {
-      // intersection of two ArrayRestrictions objects is an empty array
-      // with blueprint calculated by intersecting the Restrictions
-      return [[], QCConfigurationAdapter.getRestrictionIntersection(first[1], second[1])];
-    }
-
-    if (QCConfigurationAdapter.bothAreObjects(first, second)) {
-      const restrictions = {};
-      Object.entries(first).forEach(([key, val]) => {
-        if (!(key in second)) { return; }
-        const maximumIntersection = QCConfigurationAdapter.getRestrictionIntersection(val, second[key]);
-        if (maximumIntersection === null) { return; }
-        restrictions[key] = maximumIntersection;
-      });
-      return restrictions;
-    }
-
-    return null; // first and second differ
-  }
-
-  static bothArePrimitive = (first, second) => {
-    return typeof first === 'string' && typeof second === 'string';
-  }
-
-  static bothAreArrays = (first, second) => {
-    return Array.isArray(first) && Array.isArray(second);
-  }
+    const restrictions = {};
+    Object.entries(first).forEach(([key, val]) => {
+      if (!(key in second)) { return; }
+      const maximumIntersection = QCConfigurationAdapter.getRestrictionIntersection(val, second[key]);
+      if (maximumIntersection === null) { return; }
+      restrictions[key] = maximumIntersection;
+    });
+    return restrictions;
+  };
 
   static bothAreObjects = (first, second) => {
-    return typeof first === 'object' && first !== null && typeof second === 'object' && second !== null;
-  }
+    return (
+      typeof first === 'object' &&
+      typeof second === 'object' &&
+      first !== null &&
+      second !== null &&
+      !Array.isArray(first) &&
+      !Array.isArray(second)
+    );
+  };
 }
 
 module.exports = QCConfigurationAdapter;
