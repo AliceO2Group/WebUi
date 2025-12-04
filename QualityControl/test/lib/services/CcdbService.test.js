@@ -471,5 +471,39 @@ export const ccdbServiceTestSuite = async () => {
         strictEqual(ccdb._buildCcdbUrlPath(identification), '/qc/TPC/object/12322222/123332323/123-ffg/RunNumber=123456/PartName=Pass');
       });
     });
+
+    suite('CcdbService getObjectIdentification() Error Messages', () => {
+      let ccdb = null;
+
+      before(() => {
+        ccdb = new CcdbService(ccdbConfig);
+      });
+
+      test('should throw error if object not found with filters applied', async () => {
+        const filters = { RunNumber: 123456 };
+        const filterString = Object.entries(filters).map(([key, value]) => `${key}=${value}`).join('/');
+
+        nock('http://ccdb-local:8083')
+          .get(`/latest/path/${ID}/${filterString}`)
+          .reply(200, { objects: [] });
+
+        await rejects(
+          async () => ccdb.getObjectIdentification({ path: PATH, id: ID, filters }),
+          // eslint-disable-next-line @stylistic/js/max-len
+          new Error(`Object at url '/latest/path/${ID}/${filterString}' and path '${PATH}' could not be found. It was likely excluded by the applied filters.`),
+        );
+      });
+
+      test('should throw error if object not found without filters', async () => {
+        nock('http://ccdb-local:8083')
+          .get(`/latest/path/${ID}`)
+          .reply(200, { objects: [] });
+
+        await rejects(
+          async () => ccdb.getObjectIdentification({ path: PATH, id: ID }),
+          new Error(`Object at url '/latest/path/${ID}' and path '${PATH}' could not be found.`),
+        );
+      });
+    });
   });
 };

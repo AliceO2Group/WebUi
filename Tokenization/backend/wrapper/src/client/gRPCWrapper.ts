@@ -23,7 +23,7 @@ import * as fs from 'fs';
 import { LogManager } from '@aliceo2/web-ui';
 
 /**
- * @description Wrapper class for managing secure gRPC wrapper.
+ * Wrapper class for managing secure gRPC wrapper.
  *
  * @remarks
  * This class serves as a high-level abstraction over the underlying

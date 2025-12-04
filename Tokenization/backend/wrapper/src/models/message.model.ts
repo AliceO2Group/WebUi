@@ -70,5 +70,6 @@ export interface TokenMessage {
  */
 export interface DuplexMessageModel {
   event: DuplexMessageEvent;
-  payload: TokenMessage;
+  newToken?: TokenMessage;
+  revokeToken?: TokenMessage;
 }

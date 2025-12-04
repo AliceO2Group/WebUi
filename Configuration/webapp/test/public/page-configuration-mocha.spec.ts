@@ -15,9 +15,8 @@
 import assert from 'assert';
 import { Page } from 'puppeteer';
 import global from '../mocha-index';
-import { API_URL } from '~/api/axiosInstance';
 
-describe('`pageRoot` test-suite', function () {
+describe('`pageConfiguration` test-suite', function () {
   let url: string | null = null;
   let page: Page | null = null;
 
@@ -35,17 +34,21 @@ describe('`pageRoot` test-suite', function () {
       assert.equal('Page is null', 'test suite failed');
       return;
     }
-    const res = await fetch(`${API_URL}/configurations`);
-    const data = await res.json();
 
-    const firstConfigurationRelativePath = data?.[0];
+    await page.goto(url, { waitUntil: 'networkidle0' });
 
-    const configUrl = `${url}/configuration/${firstConfigurationRelativePath}`;
+    const configNavigatorItems = await page.$$('.config_navigator__item .Mui-selected');
+    assert.strictEqual(configNavigatorItems.length, 1);
 
-    await page.goto(configUrl, { waitUntil: 'networkidle0' });
+    const selectedKey = await configNavigatorItems[0].evaluate((el) => el.textContent?.trim());
+
+    if (!selectedKey) {
+      assert.equal('No selected key found', 'test suite failed');
+      return;
+    }
 
     const location = await page.evaluate(() => window.location);
-    assert.strictEqual(location.search, '');
+    assert.strictEqual(location.pathname.includes(selectedKey), true);
   });
 
   it('should display proper configuration page header', async function () {
@@ -53,19 +56,22 @@ describe('`pageRoot` test-suite', function () {
       assert.equal('Page is null', 'test suite failed');
       return;
     }
-    const res = await fetch(`${API_URL}/configurations`);
-    const data = await res.json();
+    await page.goto(url, { waitUntil: 'networkidle0' });
 
-    const firstConfigurationRelativePath = data?.[0];
+    const configNavigatorItems = await page.$$('.config_navigator__item .Mui-selected');
+    assert.strictEqual(configNavigatorItems.length, 1);
 
-    const configUrl = `${url}/configuration/${firstConfigurationRelativePath}`;
+    const selectedKey = await configNavigatorItems[0].evaluate((el) => el.textContent?.trim());
 
-    await page.goto(configUrl, { waitUntil: 'networkidle0' });
+    if (!selectedKey) {
+      assert.equal('No selected key found', 'test suite failed');
+      return;
+    }
 
     const configPageHeader = await page.$$('.config-page__header__text');
     assert.strictEqual(configPageHeader.length, 1);
 
-    const headerText = await page.evaluate((el) => el.textContent, configPageHeader[0]);
-    assert.strictEqual(headerText, firstConfigurationRelativePath);
+    const headerText = (await page.evaluate((el) => el.textContent, configPageHeader[0])) ?? '';
+    assert.strictEqual(headerText.includes(selectedKey), true);
   });
 });

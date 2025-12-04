@@ -14,20 +14,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: '22.x'
-      - run: (cd Tokenization/backend; npm i)      
+      - run: (cd Tokenization/backend/central-system; npm i)
   lint-check-webapp:
     name: Check eslint rules for webapp on ubuntu-latest
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: '22.x'
       - run: (cd Tokenization/webapp; npm i )
@@ -40,9 +40,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: '22.x'
       - run: (cd Tokenization/webapp; npm run docker:test)
+
+  central-system-test:
+    needs: lint-check-backend
+    name: Central System backend tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22.x'
+      - run: (cd Tokenization/backend/central-system; npm i; npm run test)

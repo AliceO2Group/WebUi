@@ -89,13 +89,13 @@ message HttpLikeResponse {
 
 enum MessageEvent {
     // Default value, represents an empty event
-    MESSAGE_EVENT_EMPTY = 0;
+    MESSAGE_EVENT_EMPTY = 1;
 
     // New token message type, contains a new token and target address
-    MESSAGE_EVENT_NEW_TOKEN = 1;
+    MESSAGE_EVENT_NEW_TOKEN = 2;
 
     // Revoke token message type, contains a token to be revoked
-    MESSAGE_EVENT_REVOKE_TOKEN = 2;
+    MESSAGE_EVENT_REVOKE_TOKEN = 3;
 }
 
 enum ConnectionDirection {
