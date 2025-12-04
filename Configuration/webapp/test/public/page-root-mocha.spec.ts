@@ -201,8 +201,8 @@ describe('`pageRoot` test-suite', function () {
       it('should show no results message or empty list for non-matching query', async function () {
         await page?.waitForSelector(SELECTORS.searchInput);
 
-        const randomString = 'non_existing_non_existing_non_existing_non_existing_non_existing';
-        await page?.type(SELECTORS.searchInput, randomString);
+        const nonExistingKey = 'non_existing_non_existing_non_existing_non_existing_non_existing';
+        await page?.type(SELECTORS.searchInput, nonExistingKey);
 
         await page?.waitForFunction(
           (selector) => document.querySelectorAll(selector).length === 0,
