@@ -18,7 +18,7 @@ import * as interceptor from '../../../../client/connectionManager/Interceptors/
 
 // Connection class mock
 jest.mock(
-  '../../../../client/Connection/Connection',
+  '../../../../client/connection/Connection',
   () => {
     return {
       Connection: jest.fn().mockImplementation((jweToken: string, address: string, direction: any) => {
@@ -149,7 +149,8 @@ describe('gRPCAuthInterceptor', () => {
     expect(result.conn).toBe(existingConn);
     expect(isRequestAllowedSpy).toHaveBeenCalledTimes(1);
     expect(isSerialNumberMatchingSpy).toHaveBeenCalledTimes(1);
-    expect(jose.compactDecrypt as jest.Mock).not.toHaveBeenCalled();
+    expect(jose.compactDecrypt as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(jose.compactDecrypt as jest.Mock).toHaveBeenCalledWith(VALID_JWE, 'mock_priv_key');
   });
 
   it('should reject if connection exists but is BLOCKED', async () => {

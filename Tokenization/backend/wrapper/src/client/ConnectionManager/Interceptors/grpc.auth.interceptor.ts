@@ -135,7 +135,7 @@ export const gRPCAuthInterceptor = async (
     // Decode and parse the JWT payload
     const payloadString = new TextDecoder().decode(jwtPayload);
     payload = JSON.parse(payloadString);
-  } catch (e: any) {
+  } catch {
     const error = {
       name: 'AuthenticationError',
       message: `JWS Verification error: Invalid signature`,
@@ -173,7 +173,7 @@ export const gRPCAuthInterceptor = async (
  * @param callback callback to return gRPC error if needed
  * @returns true if request method is allowed, false otherwise
  */
-export const isRequestAllowed = (tokenPayload: TokenPayload | undefined, request: any, callback: grpc.sendUnaryData<any>): Boolean => {
+export const isRequestAllowed = (tokenPayload: TokenPayload | undefined, request: any, callback: grpc.sendUnaryData<any>): boolean => {
   const method = String(request?.method ?? 'POST').toUpperCase();
   const isValidPayload = validateTokenPayload(tokenPayload, request.method);
   let isUnexpired;
@@ -216,8 +216,8 @@ const validateTokenPayload = (tokenPayload: TokenPayload | undefined, method: st
     typeof tokenPayload.jti !== 'string' ||
     Object.keys(tokenPayload.iat).length === 0 ||
     Object.keys(tokenPayload.exp).length === 0 ||
-    !tokenPayload.iat.hasOwnProperty(method) ||
-    !tokenPayload.exp.hasOwnProperty(method)
+    !Object.prototype.hasOwnProperty.call(tokenPayload.iat, method) ||
+    !Object.prototype.hasOwnProperty.call(tokenPayload.exp, method)
   ) {
     return false;
   }
@@ -231,7 +231,7 @@ const validateTokenPayload = (tokenPayload: TokenPayload | undefined, method: st
  * @param exp expiration timestamp for the specific method
  * @returns true if permission is still valid, false if expired
  */
-export const isPermissionUnexpired = (iat: number, exp: number): Boolean => {
+export const isPermissionUnexpired = (iat: number, exp: number): boolean => {
   const nowInSeconds = Math.floor(Date.now() / 1000);
 
   if (nowInSeconds >= exp) {
@@ -252,7 +252,7 @@ export const isPermissionUnexpired = (iat: number, exp: number): Boolean => {
  * @param callback callback to return gRPC error if needed
  * @returns true if serial numbers match, false otherwise
  */
-export const isSerialNumberMatching = (tokenPayload: TokenPayload | undefined, peerCert: any, callback: grpc.sendUnaryData<any>): Boolean => {
+export const isSerialNumberMatching = (tokenPayload: TokenPayload | undefined, peerCert: any, callback: grpc.sendUnaryData<any>): boolean => {
   const clientSN = normalizeSerial(peerCert?.serialNumber);
   const tokenSN = normalizeSerial(tokenPayload?.sub);
 
@@ -273,10 +273,9 @@ export const isSerialNumberMatching = (tokenPayload: TokenPayload | undefined, p
  * @param sn serial number string possibly containing colons or being null/undefined
  * @returns normalized serial number string
  */
-const normalizeSerial = (sn?: string | null): string => {
+const normalizeSerial = (sn?: string | null): string =>
   // Node retrieves serial number as hex string, without leading 0x and with possible colons so we need to normalize it
-  return (sn || '').replace(/[^0-9a-f]/gi, '').toUpperCase();
-};
+  (sn ?? '').replace(/[^0-9a-f]/gi, '').toUpperCase();
 
 /**
  * Retrieves the peer certificate from the gRPC call object.
@@ -286,5 +285,5 @@ const normalizeSerial = (sn?: string | null): string => {
 export const getPeerCertFromCall = (call: any) => {
   const session = call?.call?.stream?.session;
   const sock = session?.socket as any;
-  return sock?.getPeerCertificate(true); // whole certificate info from TLS socket
+  return sock?.getPeerCertificate(true); // Whole certificate info from TLS socket
 };

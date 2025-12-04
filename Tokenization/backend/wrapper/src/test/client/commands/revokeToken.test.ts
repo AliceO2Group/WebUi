@@ -40,7 +40,7 @@ jest.mock(
 );
 
 describe('RevokeToken', () => {
-  const protoPath = path.join(__dirname, '..', '..', '..', 'proto', 'wrapper.proto');
+  const protoPath = path.join(__dirname, '..', '..', '..', '..', '..', 'proto', 'wrapper.proto');
   const packageDef = protoLoader.loadSync(protoPath, {
     keepCase: true,
     longs: String,

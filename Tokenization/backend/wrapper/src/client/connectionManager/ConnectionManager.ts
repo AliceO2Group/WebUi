@@ -23,7 +23,7 @@ import type { DuplexMessageEvent } from '../../models/message.model';
 import { ConnectionDirection } from '../../models/message.model';
 import { ConnectionStatus } from '../../models/connection.model';
 import type { SecurityContext } from '../../utils/security/SecurityContext';
-import { peerListener } from 'utils/connection/peerListener';
+import { peerListener } from '../../utils/connection/peerListener';
 
 /**
  * @description Manages all the connection between clients and central system.
