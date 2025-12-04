@@ -67,7 +67,6 @@ const ConfigurationPage = () => {
     return 'Error while loading data from the server';
   }
 
-
   return (
     <>
       <form>
