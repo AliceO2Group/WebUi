@@ -22,9 +22,20 @@ import { Typography } from '@mui/material';
 
 export type FormItem = { [key: string]: string | object | FormItem };
 
+type PrimitiveRestrictions = 'string' | 'number' | 'boolean';
+
+export type ArrayRestrictions = [
+  Array<Restrictions>,
+  Restrictions,
+];
+
+export type WidgetRestrictions = PrimitiveRestrictions | ArrayRestrictions;
+
 export type FormRestrictions = {
-  [key: string]: 'string' | 'number' | 'boolean' | 'array' | FormRestrictions;
+  [key: string]: Restrictions;
 };
+
+export type Restrictions = PrimitiveRestrictions | ArrayRestrictions | FormRestrictions;
 
 interface FormProps extends PropsWithChildren {
   sectionTitle: string;
@@ -36,13 +47,13 @@ interface FormProps extends PropsWithChildren {
  * Function which returns false if the given object
  * which describes restrictions is the leaf (string, number, bool, array)
  * or returns true if the given object describes restrictions recursively
- * @param {'string' | 'number' | 'boolean' | 'array' | FormRestrictions} obj
+ * @param {Restrictions} obj
  * the object which describes restrictions
  * @returns {boolean} value which indicates if the restrictions are recursive
  * or if this is the leaf of the FormRestrictions tree
  */
-function isFormRestrictions(obj: FormRestrictions[string]): obj is FormRestrictions {
-  return obj instanceof Object && !(obj instanceof Array);
+export function isFormRestrictions(obj: FormRestrictions[string]): obj is FormRestrictions {
+  return obj instanceof Object && obj !== null && !(Array.isArray(obj));
 }
 
 export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) => {
