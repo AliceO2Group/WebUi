@@ -12,17 +12,20 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Link } from 'react-router';
+import { List, ListItem, Skeleton } from '@mui/material';
 
-/**
- * Home component
- * @returns {React.ReactElement} Home
- */
-export default function Home() {
-  return (
-    <>
-      <h1>Welcome to (dummy) bookkeeping!</h1>
-      <Link to={'/runs'}>Runs overview</Link>
-    </>
-  );
-}
+const ITEMS_TO_RENDER_COUNT = 15;
+
+export const ConfigNavigatorLoader = () => (
+  <List className="config_navigator__loader">
+    {Array.from({ length: ITEMS_TO_RENDER_COUNT }).map((_, index) => (
+      <ListItem
+        style={{ paddingTop: 5, paddingBottom: 5 }}
+        className="config_navigator__item"
+        key={`loader-${index}`}
+      >
+        <Skeleton variant="rectangular" width="100%" height={40} sx={{ borderRadius: 2 }} />
+      </ListItem>
+    ))}
+  </List>
+);

@@ -12,44 +12,138 @@
  * or submit itself to any jurisdiction.
  */
 
-import { type FC } from 'react';
-import { ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+/* eslint-disable react/prop-types */
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFile } from '@fortawesome/free-solid-svg-icons';
+import { memo, useEffect, useMemo, useState, type FC } from 'react';
+import {
+  Collapse,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material';
+
 import { Link } from 'react-router';
-import { BASE_CONFIGURATION_PATH } from '~/config';
+import { ROUTE_PREFIX } from '~/config';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import FolderIcon from '@mui/icons-material/Folder';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+
+export interface TreeNode {
+  name: string;
+  fullPath: string;
+  children: Record<string, TreeNode>;
+  isFile: boolean;
+}
 
 interface ConfigNavigatorItemProps {
-  title: string;
-  onClick?: () => void;
-  isSelected: boolean;
+  node: TreeNode;
+  selectedPath?: string;
+  level?: number;
 }
 
 /**
  * ConfigNavigatorItem component
  * Represents an item in the configuration navigator.
  * @param {ConfigNavigatorItemProps} props - The props of the component.
- * @param {string} props.title - The title of the configuration item.
- * @param {Function} props.onClick - Callback function to handle item click.
+ * @param {TreeNode} props.node - The data node representing the file or folder.
+ * @param {string} props.selectedPath - The currently active configuration path (used for highlighting).
+ * @param {number} [props.level=0] - The nesting depth level (used for indentation).
  * @returns {React.ReactElement} ConfigNavigatorItem
  */
-const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = ({ title, onClick, isSelected }) => (
-  <ListItem style={{ paddingTop: 5, paddingBottom: 5 }} className="config_navigator__item">
-    <Link to={`${BASE_CONFIGURATION_PATH}/${title}`} style={{ width: '100%' }}>
-      <ListItemButton
-        onClick={onClick}
-        color="red"
-        sx={{ borderRadius: 2, padding: 0 }}
-        selected={isSelected}
-      >
-        <ListItemIcon>
-          <FontAwesomeIcon icon={faFile} style={{ margin: 'auto' }} />
-        </ListItemIcon>
-        <ListItemText primary={title} />
-      </ListItemButton>
-    </Link>
-  </ListItem>
+const ConfigNavigatorItem: FC<ConfigNavigatorItemProps> = memo(
+  ({ node, selectedPath, level = 0 }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    const isSelected = node.fullPath === selectedPath;
+    const paddingLeft = 16 + level * 16;
+
+    useEffect(() => {
+      if (!node.isFile && selectedPath && !isOpen) {
+        if (selectedPath.startsWith(node.fullPath)) {
+          setIsOpen(true);
+        }
+      }
+    }, [selectedPath, node.fullPath, node.isFile, isOpen]);
+
+    const handleFolderClick = () => {
+      setIsOpen((prev) => !prev);
+    };
+
+    const sortedChildren = useMemo(() => {
+      if (node.isFile) {
+        return [];
+      }
+
+      return Object.values(node.children).sort((a, b) => {
+        if (a.isFile === b.isFile) {
+          return a.name.localeCompare(b.name);
+        }
+        return a.isFile ? 1 : -1;
+      });
+    }, [node.children, node.isFile]);
+
+    if (node.isFile) {
+      return (
+        <ListItem
+          style={{ paddingTop: 5, paddingBottom: 5, paddingLeft }}
+          className="config_navigator__item"
+        >
+          <Link to={`${ROUTE_PREFIX}${node.fullPath}`} style={{ width: '100%' }}>
+            <ListItemButton sx={{ borderRadius: 2, padding: 0, height: 40 }} selected={isSelected}>
+              <ListItemIcon>
+                <InsertDriveFileIcon style={{ margin: 'auto' }} />
+              </ListItemIcon>
+              <ListItemText
+                primary={node.name}
+                primaryTypographyProps={{
+                  sx: {
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  },
+                }}
+              />
+            </ListItemButton>
+          </Link>
+        </ListItem>
+      );
+    }
+    return (
+      <>
+        <ListItem
+          style={{ paddingTop: 5, paddingBottom: 5, paddingLeft }}
+          className="config_navigator__item"
+        >
+          <ListItemButton onClick={handleFolderClick} sx={{ borderRadius: 2, padding: 0 }}>
+            <ListItemIcon>
+              {isOpen ? (
+                <FolderOpenIcon style={{ margin: 'auto' }} />
+              ) : (
+                <FolderIcon style={{ margin: 'auto' }} />
+              )}
+            </ListItemIcon>
+            <ListItemText primary={node.name} />
+          </ListItemButton>
+        </ListItem>
+        <Collapse in={isOpen} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {sortedChildren.map((childNode) => (
+              <ConfigNavigatorItem
+                key={childNode.fullPath}
+                node={childNode}
+                selectedPath={selectedPath}
+                level={level + 1}
+              />
+            ))}
+          </List>
+        </Collapse>
+      </>
+    );
+  },
 );
+
+ConfigNavigatorItem.displayName = 'ConfigNavigatorItem';
 
 export default ConfigNavigatorItem;

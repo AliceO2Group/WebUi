@@ -14,9 +14,9 @@
 
 import { ConnectionManager } from './connectionManager/ConnectionManager';
 import { RevokeTokenHandler } from './commands/revokeToken/revokeToken.handler';
-import { DuplexMessageEvent } from '../models/message.model';
-import type { Connection } from './connection/Connection';
+import { ConnectionDirection, DuplexMessageEvent } from '../models/message.model';
 import { NewTokenHandler } from './commands/newToken/newToken.handler';
+import type { Connection } from './connection/Connection';
 
 /**
  * @description Wrapper class for managing secure gRPC wrapper.
@@ -56,10 +56,35 @@ export class gRPCWrapper {
   }
 
   /**
-   * Starts the Connection Manager stream connection with Central System
+   * Connects to the central system using the underlying ConnectionManager.
+   *
+   * @remarks
+   * This method starts the duplex stream connection with the central gRPC server.
    */
   public connectToCentralSystem() {
     this._connectionManager.connectToCentralSystem();
+  }
+
+  /**
+   * Establishes a new connection to a target client.
+   *
+   * @param address - The target address of the client.
+   * @param token - Optional authentication token for the connection.
+   *
+   * @returns A promise that resolves to the newly created connection ready to use for fetching data.
+   */
+  public async connectToClient(address: string, token?: string): Promise<Connection> {
+    return this._connectionManager.createNewConnection(address, ConnectionDirection.SENDING, token ?? '');
+  }
+
+  /**
+   * Starts a listener server for p2p connections.
+   * @param port The port number to bind the p2p server to.
+   * @param baseAPIPath Optional base API path to forward requests to e.g. '/api'.
+   * @returns A promise that resolves when the p2p listener server is started.
+   */
+  public async listenForPeers(port: number, baseAPIPath?: string): Promise<void> {
+    return this._connectionManager.listenForPeers(port, baseAPIPath);
   }
 
   /**

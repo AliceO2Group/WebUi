@@ -12,7 +12,27 @@
  * or submit itself to any jurisdiction.
  */
 
-export interface Run {
-  runNumber: number;
-  quality: 'good' | 'bad';
+import { useEffect, useState } from 'react';
+import { getSessionData } from '~/services/session';
+
+export interface Session {
+  personid: string;
+  username: string;
+  name: string;
+  access: string;
+  token: string;
 }
+
+export const useAuth = (): Session => {
+  const [session, setSession] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      const session = await getSessionData();
+      setSession(session);
+    };
+    void fetchSession();
+  }, []);
+
+  return session as unknown as Session;
+};
