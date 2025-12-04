@@ -70,7 +70,7 @@ export function FormSelect<T extends string | number = string>(props: SelectInte
  */
 export function FormSelectMulti<T extends string | number = string>(props: SelectInterface<T[]>) {
   const { value, setValue, options } = { ...props };
-  // now elements in `selected` follow the order of adding
+  // Now elements in `selected` follow the order of adding
   const selected = (value as T[]).map(v => options.find(o => o.value === v)).filter(Boolean) || [];
 
   const handleSelect = (val: T) => {

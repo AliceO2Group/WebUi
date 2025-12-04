@@ -60,6 +60,7 @@ function TokenTableBase({
             <tr key={token.tokenId}>
               {columns.map((col) => (
                 <td key={col.key}>
+                  { }
                   {col.render ? col.render(token) : String((token as any)[col.key] ?? '')}
                 </td>
               ))}
@@ -114,9 +115,9 @@ function TokenTableContainer({
 
   const [windowContent, setWindowContent] = useState<string>('');
 
-  // onclick handler for both bulk and solo action blocks
+  // Onclick handler for both bulk and solo action blocks
   const onActionClick = (id: string) => {
-    if( id === 'bulk') {
+    if ( id === 'bulk') {
       setWindowContent('Are you sure you want to delete ALL FILTERED tokens? Check filtering before proceeding.');
     } else {
       setTokenId(id);
@@ -129,13 +130,13 @@ function TokenTableContainer({
   const wrappedColumns = columns.map((col) =>
     col.key === 'actions'
       ? {
-          ...col,
-          label: typeof col.label === 'function' 
-          ? () => <div className="flex-row g1"><span>Actions</span><ActionBlockBulk onClick={() => onActionClick('bulk')} /></div> 
+        ...col,
+        label: typeof col.label === 'function'
+          ? () => <div className="flex-row g1"><span>Actions</span><ActionBlockBulk onClick={() => onActionClick('bulk')} /></div>
           : col.label,
-          render: (t: Token) => <ActionBlockSolo onClick={() => onActionClick(t.tokenId)} />,
-        }
-      : col
+        render: (t: Token) => <ActionBlockSolo onClick={() => onActionClick(t.tokenId)} />,
+      }
+      : col,
   );
 
   return (
@@ -158,17 +159,18 @@ function TokenTableContainer({
   );
 }
 
-// common columns for all table variants
+// Common columns for all table variants
 const columns = [
-    { key: 'tokenId', label: 'ID', render: (t: Token) => <Link to={`/tokens/${t.tokenId}`}>{t.tokenId}</Link> },
-    { key: 'serviceFrom', label: 'Service From' },
-    { key: 'serviceTo', label: 'Service To' },
-    { key: 'exp', label: 'Expires at' },
-    {
-      key: 'actions',
-      label: 'Actions',
-      render: (t: Token) => (null),
-    },
+  { key: 'tokenId', label: 'ID', render: (t: Token) => <Link to={`/tokens/${t.tokenId}`}>{t.tokenId}</Link> },
+  { key: 'serviceFrom', label: 'Service From' },
+  { key: 'serviceTo', label: 'Service To' },
+  { key: 'exp', label: 'Expires at' },
+  {
+    key: 'actions',
+    label: 'Actions',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    render: (t: Token) => (null),
+  },
 ];
 
 /**
@@ -195,8 +197,9 @@ export function TokenTableExtended({ tokens }: { tokens: Token[] }) {
     { key: 'perm', label: 'HTTP Methods', render: (t: Token) => String((t as any).permissions.join(', ') ?? '') },
     {
       key: 'actions',
-      label: () => (null), // updated in TableContainer
-      render: (t: Token) => (null) // updated in TableContainer
+      label: () => (null), // Updated in TableContainer
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      render: (t: Token) => (null), // Updated in TableContainer
     },
   ];
 
