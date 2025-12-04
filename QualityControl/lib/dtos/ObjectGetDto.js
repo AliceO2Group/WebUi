@@ -15,7 +15,7 @@
 import Joi from 'joi';
 import { RunNumberDto } from './filters/RunNumberDto.js';
 
-const periodNamePattern = /^LHC\d{1,2}[a-z]+$/i;
+const periodNamePattern = /^LHC\d{1,2}[a-z0-9]+$/i;
 
 /**
  * Creates and returns a filters schema for object DTOs
@@ -97,3 +97,14 @@ export function createObjectGetByIdDto({ runTypes }) {
  */
 export const qcObjectIdDto =
   Joi.string().required().trim().min(1).messages({ 'string.empty': 'Missing object ID in URL' });
+
+/**
+ * Joi calidation schema for downloading ROOT objects trough the QcdbDownloadService
+ */
+export const ObjectGetDownloadDTO = Joi.object({
+  token: Joi.string().required(),
+  objectIds: Joi.alternatives().try(
+    Joi.array().min(1).items(Joi.string()).required(),
+    Joi.string(),
+  ).required(),
+});

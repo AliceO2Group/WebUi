@@ -27,6 +27,9 @@ import { runModeMiddleware } from './middleware/filters/runMode.middleware.js';
  * @param {HttpServer} http - web-ui based server implementation
  * @param {WebSocket} ws - web-ui websocket server implementation
  * @param {EventEmitter} eventEmitter - Event emitter instance (Kafka)
+ * @import {HttpServer} from '@aliceo2/web-ui';
+ * @import {WebSocket} from '@aliceo2/web-ui';
+ * @returns {void}
  */
 export const setup = async (http, ws, eventEmitter) => {
   /**
@@ -54,15 +57,17 @@ export const setup = async (http, ws, eventEmitter) => {
   } = await setupQcModel(eventEmitter);
   statusService.ws = ws;
 
-  http.get('/object/:id', objectGetByIdValidation, objectController.getObjectById.bind(objectController));
-  http.get('/object', objectGetContentsValidation, objectController.getObjectContent.bind(objectController));
+  http.get('/object/:id', objectGetByIdValidation, objectController.getObjectByIdHandler.bind(objectController));
+  http.get('/object', objectGetContentsValidation, objectController.getObjectContentHandler.bind(objectController));
 
   http.get(
     '/objects',
     objectsGetValidation,
     runModeMiddleware,
-    objectController.getObjects.bind(objectController),
+    objectController.getObjectsHandler.bind(objectController),
   );
+
+  http.get('/object/proxy/download/', objectController.getDownloadObjectsHandler.bind(objectController));
 
   http.get('/layouts', layoutController.getLayoutsHandler.bind(layoutController));
   http.get('/layout/:id', layoutController.getLayoutHandler.bind(layoutController));
@@ -90,7 +95,7 @@ export const setup = async (http, ws, eventEmitter) => {
     layoutController.deleteLayoutHandler.bind(layoutController),
   );
 
-  http.get('/status/gui', statusController.getQCGStatus.bind(statusController), { public: true });
+  http.get('/status/gui', statusController.getQCGStatusHandler.bind(statusController), { public: true });
   http.get(
     '/status/:service',
     statusComponentMiddleware,

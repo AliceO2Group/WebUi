@@ -16,7 +16,7 @@
  * @description Stores every keys and certificates needed for gRPC mTLS communication and token verifications (JWE/JWS)
  */
 export class SecurityContext {
-  // mTLS keys (RSA)
+  // Keys for mTLS (RSA)
   public readonly caCert: Buffer;
   public readonly clientSenderCert: Buffer;
   public readonly clientListenerCert?: Buffer;
@@ -27,6 +27,16 @@ export class SecurityContext {
   // Public Ed25519 key for JWS verification
   public readonly JWS_PUBLIC_KEY: string;
 
+  /**
+   * Initializes an instance of SecurityContext class.
+   *
+   * @param caCert - The root Certificate Authority (CA) certificate used for mTLS.
+   * @param clientSenderCert - The client certificate used for mTLS.
+   * @param clientPrivateKey - The client private key (PKCS8) used for JWE decryption.
+   * @param clientPublicKey - The client public key used for JWE encryption.
+   * @param clientListenerCert - The client listener certificate (optional) used for mTLS.
+   * @param JWS_PUBLIC_KEY - The public Ed25519 key used for JWS verification (optional, default value is provided if not set).
+   */
   constructor(
     caCert: Buffer,
     clientSenderCert: Buffer,
@@ -47,7 +57,7 @@ export class SecurityContext {
     if (JWS_PUBLIC_KEY) {
       this.JWS_PUBLIC_KEY = JWS_PUBLIC_KEY;
     } else {
-      this.JWS_PUBLIC_KEY = "hTb3l5gwoIWISOLi6cQMwcultawKyA6vxnimXWtE6JI=";
+      this.JWS_PUBLIC_KEY = 'hTb3l5gwoIWISOLi6cQMwcultawKyA6vxnimXWtE6JI=';
     }
   }
 }

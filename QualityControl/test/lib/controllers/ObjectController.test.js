@@ -1,3 +1,4 @@
+/* eslint-disable @stylistic/js/comma-dangle */
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -23,6 +24,7 @@ export const objectControllerTestSuite = async () => {
   let resMock = null;
   let objectController = null;
   let RunMonitoringServiceMock = null;
+  let QcdbDownloadServiceMock = null;
 
   beforeEach(() => {
     resMock = {
@@ -43,14 +45,17 @@ export const objectControllerTestSuite = async () => {
       checkAndSetRunMonitoring: sinon.spy(),
       retrievePathsAndSetRunStatus: sinon.stub(),
     };
-    objectController = new ObjectController(QcObjectServiceMock, RunMonitoringServiceMock);
+    QcdbDownloadServiceMock = {
+      getQcdbRootObjects: sinon.spy(),
+    };
+    objectController = new ObjectController(QcObjectServiceMock, RunMonitoringServiceMock, QcdbDownloadServiceMock);
   });
 
   afterEach(() => {
     sinon.restore();
   });
 
-  suite('getObjects() tests', () => {
+  suite('getObjectsHandler() tests', () => {
     const mockObjectsList = [
       { objectName: 'object1', path: 'qc/path/object1' },
       { objectName: 'object2', path: 'qc/path/object2' },
@@ -63,7 +68,7 @@ export const objectControllerTestSuite = async () => {
         paths: mockObjectsList,
       });
 
-      await objectController.getObjects(reqMock, resMock);
+      await objectController.getObjectsHandler(reqMock, resMock);
 
       ok(RunMonitoringServiceMock.retrievePathsAndSetRunStatus.calledWith(123));
       ok(resMock.status.calledWith(200));
@@ -79,7 +84,7 @@ export const objectControllerTestSuite = async () => {
         filters: { RunNumber: 123 },
       };
       QcObjectServiceMock.retrieveLatestVersionOfObjects.resolves(mockObjectsList);
-      await objectController.getObjects(reqMock, resMock);
+      await objectController.getObjectsHandler(reqMock, resMock);
       ok(resMock.status.calledWith(200));
       ok(resMock.json.calledWith(mockObjectsList));
       ok(QcObjectServiceMock.retrieveLatestVersionOfObjects.calledWith({
@@ -91,7 +96,7 @@ export const objectControllerTestSuite = async () => {
 
     test('should throw error when retrieving objects fails', async () => {
       QcObjectServiceMock.retrieveLatestVersionOfObjects.rejects(new Error('Service error'));
-      await objectController.getObjects(reqMock, resMock);
+      await objectController.getObjectsHandler(reqMock, resMock);
       ok(resMock.status.calledWith(500));
       ok(resMock.json.calledWithMatch({
         message: 'Failed to retrieve list of objects latest version',
@@ -101,7 +106,7 @@ export const objectControllerTestSuite = async () => {
     });
   });
 
-  suite('getObjectContent() tests', () => {
+  suite('getObjectContentHandler() tests', () => {
     const stubObject = {
       path: 'qc/path',
       versions: [
@@ -121,7 +126,7 @@ export const objectControllerTestSuite = async () => {
     test('should successfully retrieve object content', async () => {
       reqMock.query.path = stubObject.path;
       QcObjectServiceMock.retrieveQcObject.resolves(stubObject);
-      await objectController.getObjectContent(reqMock, resMock);
+      await objectController.getObjectContentHandler(reqMock, resMock);
 
       ok(resMock.status.calledWith(200));
       ok(resMock.json.calledWith(stubObject));
@@ -137,11 +142,11 @@ export const objectControllerTestSuite = async () => {
       reqMock.query.path = 'qc/test';
       QcObjectServiceMock.retrieveQcObject.rejects(new Error('Service error'));
       objectController = new ObjectController(QcObjectServiceMock, RunMonitoringServiceMock);
-      await objectController.getObjectContent(reqMock, resMock);
+      await objectController.getObjectContentHandler(reqMock, resMock);
 
       ok(resMock.status.calledWith(500));
       ok(resMock.json.calledWithMatch({
-        message: 'Failed to retrieve object content',
+        message: 'Service error',
         status: 500,
         title: 'Unknown Error',
       }));
@@ -158,7 +163,7 @@ export const objectControllerTestSuite = async () => {
     test('should successfully retrieve object by QCG ID', async () => {
       reqMock.params.id = mockObject.id;
       QcObjectServiceMock.retrieveQcObjectByQcgId.resolves(mockObject);
-      await objectController.getObjectById(reqMock, resMock);
+      await objectController.getObjectByIdHandler(reqMock, resMock);
 
       ok(resMock.status.calledWith(200));
       ok(resMock.json.calledWith(mockObject));
@@ -173,14 +178,43 @@ export const objectControllerTestSuite = async () => {
     test('should handle service errors when retrieving object by ID', async () => {
       reqMock.params.id = 'some-id';
       QcObjectServiceMock.retrieveQcObjectByQcgId.rejects(new Error('Service error'));
-      await objectController.getObjectById(reqMock, resMock);
+      await objectController.getObjectByIdHandler(reqMock, resMock);
 
       ok(resMock.status.calledWith(500));
       ok(resMock.json.calledWithMatch({
-        message: 'Unable to identify object or read it by qcg id',
+        message: 'Service error',
         status: 500,
         title: 'Unknown Error',
       }));
+    });
+  });
+
+  suite('getDownloadObjects() tests', () => {
+    const mockObject = {
+      id: '21a6de32-ce79-11ef-936b-c0a80209250c',
+      path: 'qc/path/object',
+      validFrom: 1736420279131,
+    };
+    test('should successfully call getQcdbRootObjects with objectIds', async () => {
+      reqMock.query = {
+        token: 'some token',
+        objectIds: mockObject.id,
+      };
+      await objectController.getDownloadObjectsHandler(reqMock, resMock);
+      ok(QcdbDownloadServiceMock.getQcdbRootObjects.calledWith(mockObject.id, resMock));
+    });
+
+    test('should fail when objectId is not present', async () => {
+      reqMock.query = {
+        token: 'some token',
+      };
+      const responseMsg = {
+        message: 'Invalid query parameters: "objectIds" is required',
+        status: 400,
+        title: 'Invalid Input'
+      };
+      await objectController.getDownloadObjectsHandler(reqMock, resMock);
+      ok(resMock.json.calledWithMatch(responseMsg));
     });
   });
 };

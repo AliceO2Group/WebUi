@@ -24,10 +24,34 @@ import {
 import type { Route } from './+types/root';
 import './app.css';
 import '@aliceo2/web-ui/Frontend/css/src/bootstrap.css';
-
 import { Spinner } from '~/ui/spinner';
 
-import MainLayout from './components/layout/MainLayout';
+import { MainLayout } from './components/layout/MainLayout';
+import { LeftDrawer } from './components/layout/drawer/LeftDrawer';
+import { Content } from './components/layout/content/Content';
+import { ConfigNavigator } from './components/config-navigator/ConfigNavigator';
+import { DrawerProvider } from './contexts/DrawerContext';
+
+import queryClient, { persister } from './api/queryClient';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+
+/**
+ * LayoutContent component
+ * Internal component that uses drawer context
+ * @param {{ children: React.ReactElement }} props Props of the component
+ * @param {React.ReactElement} props.children React nodes to embed inside of this component
+ * @returns {React.ReactElement} LayoutContent
+ */
+function LayoutContent({ children }: { children: React.ReactNode }) {
+  return (
+    <MainLayout>
+      <LeftDrawer>
+        <ConfigNavigator />
+      </LeftDrawer>
+      <Content>{children}</Content>
+    </MainLayout>
+  );
+}
 
 /**
  * Root component
@@ -45,9 +69,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <MainLayout>{children}</MainLayout>
-        <ScrollRestoration />
-        <Scripts />
+        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+          <DrawerProvider>
+            <LayoutContent>{children}</LayoutContent>
+          </DrawerProvider>
+          <ScrollRestoration />
+          <Scripts />
+        </PersistQueryClientProvider>
       </body>
     </html>
   );
