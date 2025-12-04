@@ -16,9 +16,10 @@ import { useCallback, useState, type FC, type PropsWithChildren } from 'react';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Stack from '@mui/material/Stack';
+
 import { Widget } from './Widget';
 import { AccordionHeader } from './AccordionHeader';
-import { Typography } from '@mui/material';
+import { RawViewModal } from './raw-view/RawViewModal';
 
 export type FormItem = { [key: string]: string | object | FormItem };
 
@@ -46,7 +47,7 @@ function isFormRestrictions(obj: FormRestrictions[string]): obj is FormRestricti
 }
 
 export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) => {
-  const [viewForm, setViewForm] = useState<boolean>(true);
+  const [isRawModalOpen, setIsRawModalOpen] = useState<boolean>(false);
 
   const renderItem = useCallback(
     (key: string, value: FormRestrictions[string]) =>
@@ -64,21 +65,25 @@ export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) 
   );
 
   return (
-    <Accordion defaultExpanded>
-      <AccordionHeader
-        title={sectionTitle}
-        viewForm={viewForm}
-        viewFormToggle={() => setViewForm((v) => !v)}
-      />
-      <AccordionDetails>
-        {viewForm ? (
+    <>
+      <Accordion defaultExpanded>
+        <AccordionHeader
+          title={sectionTitle}
+          viewFormToggle={() => setIsRawModalOpen(true)}
+        />
+        <AccordionDetails>
           <Stack spacing={2}>
             {Object.entries(itemsRestrictions).map(([key, value]) => renderItem(key, value))}
           </Stack>
-        ) : (
-          <Typography component="pre">{JSON.stringify(items, null, 2)}</Typography>
-        )}
-      </AccordionDetails>
-    </Accordion>
+        </AccordionDetails>
+      </Accordion>
+
+      <RawViewModal
+        open={isRawModalOpen}
+        onClose={() => setIsRawModalOpen(false)}
+        title={`${sectionTitle}`}
+        data={items}
+      />
+    </>
   );
 };

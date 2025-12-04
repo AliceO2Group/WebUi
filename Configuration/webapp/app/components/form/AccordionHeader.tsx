@@ -15,19 +15,16 @@
 import { useCallback, type FC, type PropsWithChildren, type ReactElement } from 'react';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import FormData from '@mui/icons-material/ListAlt';
-import RawData from '@mui/icons-material/EditNote';
+import RawData from '@mui/icons-material/Code';
 import { IconButton, Typography } from '@mui/material';
 
 interface AccordionHeaderProps extends PropsWithChildren {
   title: string;
-  viewForm: boolean;
   viewFormToggle: () => void;
 }
 
 export const AccordionHeader: FC<AccordionHeaderProps> = ({
   title,
-  viewForm,
   viewFormToggle,
 }): ReactElement => {
   const viewFormToggleCallback = useCallback(
@@ -50,7 +47,7 @@ export const AccordionHeader: FC<AccordionHeaderProps> = ({
     >
       <Typography sx={{ marginRight: 'auto', alignContent: 'center' }}>{title}</Typography>
       <IconButton onClick={viewFormToggleCallback}>
-        {viewForm ? <RawData /> : <FormData />}
+        <RawData />
       </IconButton>
     </AccordionSummary>
   );
