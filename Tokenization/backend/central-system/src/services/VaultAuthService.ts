@@ -13,7 +13,7 @@
  */
 
 import { Agent } from 'https';
-import fetch from 'node-fetch';
+import axios from 'axios';
 
 // Define the structure of the login response
 interface AuthResponse {
@@ -32,21 +32,27 @@ export class VaultAuthService {
    * @param agent - The HTTPS agent to use for the request.
    * @param body - The body of the login request.
    * @return A promise that resolves to the client token.
+   * @throws Will throw an error if the login fails.
    */
   public async login(
     url: string,
     agent: Agent,
     body: Buffer | string | NodeJS.ReadableStream | null
   ): Promise<string> {
-    const result = await fetch(url, {
-      method: 'POST',
-      body,
-      headers: { 'content-type': 'application/json' },
-      agent,
-    });
-    if (!result.ok) throw new Error(await result.text());
-    const data = (await result.json()) as AuthResponse;
-    return data.auth.client_token;
+    try {
+      const resp = await axios.post<AuthResponse>(url, body, {
+        headers: { 'content-type': 'application/json' },
+        httpsAgent: agent,
+      });
+      return resp.data.auth.client_token;
+    } catch (err: any) {
+      const message = err?.response?.data
+        ? typeof err.response.data === 'string'
+          ? err.response.data
+          : JSON.stringify(err.response.data)
+        : err?.message ?? 'Unknown error';
+      throw new Error(message);
+    }
   }
 
   /**
@@ -56,6 +62,7 @@ export class VaultAuthService {
    * @param agent - The HTTPS agent to use for the request.
    * @param body - The body of the renew request.
    * @return A promise that resolves to the new client token.
+   * @throws Will throw an error if the renew fails.
    */
   public async renew(
     url: string,
@@ -63,17 +70,22 @@ export class VaultAuthService {
     agent: Agent,
     body: Buffer | string | NodeJS.ReadableStream | null
   ): Promise<string> {
-    const result = await fetch(url, {
-      method: 'POST',
-      body,
-      headers: {
-        'content-type': 'application/json',
-        'X-Vault-Token': token,
-      },
-      agent,
-    });
-    if (!result.ok) throw new Error(await result.text());
-    const data = (await result.json()) as AuthResponse;
-    return data.auth.client_token;
+    try {
+      const resp = await axios.post<AuthResponse>(url, body, {
+        headers: {
+          'content-type': 'application/json',
+          'X-Vault-Token': token,
+        },
+        httpsAgent: agent,
+      });
+      return resp.data.auth.client_token;
+    } catch (err: any) {
+      const message = err?.response?.data
+        ? typeof err.response.data === 'string'
+          ? err.response.data
+          : JSON.stringify(err.response.data)
+        : err?.message ?? 'Unknown error';
+      throw new Error(message);
+    }
   }
 }

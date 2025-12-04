@@ -28,7 +28,7 @@
     "jose": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
     "mariadb": "3.0.0",
-    "node-fetch": "^3.3.2",
+    "axios": "^1.4.0",
     "sequelize": "6.37.0",
     "umzug": "3.8.2"
   },

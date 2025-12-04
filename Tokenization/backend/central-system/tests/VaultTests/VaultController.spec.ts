@@ -31,7 +31,7 @@ describe('VaultController', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // env pod Vaulta
+    // env for Vaulta
     process.env.VAULT_ADDR = 'https://vault.local:9300';
     process.env.VAULT_AUTH_METHOD = 'cert';
     process.env.VAULT_ROLE = 'central-system';
