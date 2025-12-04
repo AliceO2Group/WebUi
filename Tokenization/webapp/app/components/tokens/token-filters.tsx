@@ -1,10 +1,26 @@
 import { useEffect} from "react";
+
+import { setStorageItem } from "~/utils/storage";
+
 import { FormSelectMulti } from "../form/form-select";
 import { FormInput } from "../form/form-input";
 import { useTokenFilters } from "~/hooks/tokens/token-filters";
 import { FlexGrowWrapper, FlexGrowWrapperElement } from "~/ui/flex";
 
+const _applyFilters = ({services, ...filterStates}: any) => {
+    console.log("Applying filters with state:", filterStates);
+    setStorageItem('TKN_token-filters', filterStates); 
+}
+
+
 export function TokenFilters() {
+    // deleting stored filters on component un-mount
+    useEffect(() => {
+        return () => {
+            setStorageItem('TKN_token-filters', {});
+        }
+    }, [])
+
     const {state, actions} = useTokenFilters();
     const {
         services,
@@ -27,7 +43,8 @@ export function TokenFilters() {
         setExpirationDateMax,
         setIssueDateMin,
         setIssueDateMax,
-        setOrdering
+        setOrdering,
+        clearAllFilters
     } = actions;
 
     const columns = [
@@ -52,6 +69,10 @@ export function TokenFilters() {
         }, 500);
 
     }, [setServices])
+
+    function applyFilters() {
+        _applyFilters(state);        
+    }
 
     return <div> 
             <FlexGrowWrapper>
@@ -108,8 +129,8 @@ export function TokenFilters() {
                 />
                 <FlexGrowWrapperElement className="self-center">
                     <div className='flex-row g1 justify-end'>
-                        <button className="btn btn-primary">Apply Filters</button>
-                        <button className="btn btn-danger">Clear Filters</button>
+                        <button className="btn btn-primary" onClick={applyFilters}>Apply Filters</button>
+                        <button className="btn btn-danger" onClick={clearAllFilters}>Clear Filters</button>
                     </div>
                 </FlexGrowWrapperElement>
             </FlexGrowWrapper>

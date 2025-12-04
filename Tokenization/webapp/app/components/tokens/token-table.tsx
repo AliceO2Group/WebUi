@@ -40,22 +40,10 @@ import { WindowTitle, WindowContent, WindowButtonCancel, WindowButtonAccept, Win
 function TokenTableBase({
   tokens,
   columns,
-  onActionClick,
 }: {
   tokens: Token[];
   columns: { key: string; label: string | (() => React.ReactNode); render?: (t: Token) => React.ReactNode }[];
-  onActionClick: (tokenId: string) => void;
 }) {
-
-const wrappedColumns = columns.map((col) =>
-    col.key === 'actions'
-      ? {
-          ...col,
-          label: () => <ActionBlockBulk onClick={() => onActionClick('bulk')} />,
-          render: (t: Token) => <ActionBlockSolo onClick={() => onActionClick(t.tokenId)} />,
-        }
-      : col
-  );
 
   return (
     <div className="scroll-auto">
@@ -70,7 +58,7 @@ const wrappedColumns = columns.map((col) =>
         <tbody>
           {tokens.map((token: Token) => (
             <tr key={token.tokenId}>
-              {wrappedColumns.map((col) => (
+              {columns.map((col) => (
                 <td key={col.key}>
                   {col.render ? col.render(token) : String((token as any)[col.key] ?? '')}
                 </td>
@@ -82,6 +70,16 @@ const wrappedColumns = columns.map((col) =>
     </div>
   );
 }
+
+const successInfo = {
+  title: 'Token(s) deleted',
+  content: 'Token(s) deleted successfully',
+};
+
+const failureInfo = {
+  title: 'Authorization error',
+  content: "You don't have permission to do that operation!",
+};
 
 /**
  * TokenTableContainer
@@ -104,16 +102,6 @@ function TokenTableContainer({
   const auth = useAuth('admin');
   const [key, setKey] = useState<number>(0); // Used to force re-mount of Alert component
 
-  const successInfo = {
-    title: 'Token deleted',
-    content: 'Token deleted successfully',
-  };
-
-  const failureInfo = {
-    title: 'Authorization error',
-    content: "You don't have permission to do that operation!",
-  };
-
   const deleteToken = () => {
     if (auth) {
       // eslint-disable-next-line no-console
@@ -124,18 +112,38 @@ function TokenTableContainer({
     setTokenId('');
   };
 
+  const [windowContent, setWindowContent] = useState<string>('');
+
+  // onclick handler for both bulk and solo action blocks
   const onActionClick = (id: string) => {
-    setTokenId(id);
+    if( id === 'bulk') {
+      setWindowContent('Are you sure you want to delete ALL FILTERED tokens? Check filtering before proceeding.');
+    } else {
+      setTokenId(id);
+      setWindowContent(`Are you sure you want to delete token with id: ${id}?`);
+    }
     setOpenM(true);
   };
 
+  // Wrap columns to inject ActionBlock components with proper handlers for bulk and solo actions
+  const wrappedColumns = columns.map((col) =>
+    col.key === 'actions'
+      ? {
+          ...col,
+          label: typeof col.label === 'function' 
+          ? () => <div className="flex-row g1"><span>Actions</span><ActionBlockBulk onClick={() => onActionClick('bulk')} /></div> 
+          : col.label,
+          render: (t: Token) => <ActionBlockSolo onClick={() => onActionClick(t.tokenId)} />,
+        }
+      : col
+  );
+
   return (
     <>
-      <TokenTableBase tokens={tokens} columns={columns} onActionClick={onActionClick} />
-
+      <TokenTableBase tokens={tokens} columns={wrappedColumns} />
       <Modal open={openM} setOpen={setOpenM} className="bg-primary">
         <WindowTitle>Token delete</WindowTitle>
-        <WindowContent>Are you sure you want to delete token with id: {tokenId}?</WindowContent>
+        <WindowContent>{windowContent}</WindowContent>
         <WindowButtonCancel />
         <WindowCloseIcon />
         <WindowButtonAccept action={deleteToken} className="btn-danger" />
@@ -159,7 +167,7 @@ const columns = [
     {
       key: 'actions',
       label: 'Actions',
-      render: (t: Token) => <ActionBlockSolo onClick={() => { /* delegated via container */ }} />,
+      render: (t: Token) => (null),
     },
 ];
 
@@ -187,8 +195,8 @@ export function TokenTableExtended({ tokens }: { tokens: Token[] }) {
     { key: 'perm', label: 'HTTP Methods', render: (t: Token) => String((t as any).permissions.join(', ') ?? '') },
     {
       key: 'actions',
-      label: () => <span className="flex-row"><span>Actions</span><ActionBlockBulk onClick={() => { /* delegated via container */ }} /></span>,
-      render: (t: Token) => <ActionBlockSolo onClick={() => { /* delegated via container */ }} />,
+      label: () => (null), // updated in TableContainer
+      render: (t: Token) => (null) // updated in TableContainer
     },
   ];
 

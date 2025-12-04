@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import type { OptionType } from "~/utils/types";
 
@@ -23,7 +23,8 @@ type Actions = {
     setExpirationDateMax: React.Dispatch<React.SetStateAction<string>>
     setIssueDateMin: React.Dispatch<React.SetStateAction<string>>
     setIssueDateMax: React.Dispatch<React.SetStateAction<string>>
-    setOrdering: React.Dispatch<React.SetStateAction<string[]>>
+    setOrdering: React.Dispatch<React.SetStateAction<string[]>>,
+    clearAllFilters: () => void
 }
 
 export const TokenFiltersContext = React.createContext<{ state: State; actions: Actions } | undefined>(undefined);
@@ -38,6 +39,28 @@ export function TokenFiltersProvider({ children }: { children: React.ReactNode }
     const [issueDateMin, setIssueDateMin] = useState<string>('');
     const [issueDateMax, setIssueDateMax] = useState<string>('');
     const [ordering, setOrdering] = useState<string[]>([]);
+
+    const clearAllFilters = useCallback(() => {
+        setServices([]);
+        setFirstSelectedService([]);
+        setSecondSelectedService([]);
+        setHttpMethods([]);
+        setExpirationDateMin('');
+        setExpirationDateMax('');
+        setIssueDateMin('');
+        setIssueDateMax('');
+        setOrdering([]);
+    }, [
+        setServices,
+        setFirstSelectedService,
+        setSecondSelectedService,
+        setHttpMethods,
+        setExpirationDateMin,
+        setExpirationDateMax,
+        setIssueDateMin,
+        setIssueDateMax,
+        setOrdering
+    ]);
 
     const state = React.useMemo(() => ({
         services,
@@ -70,7 +93,8 @@ export function TokenFiltersProvider({ children }: { children: React.ReactNode }
         setExpirationDateMax,
         setIssueDateMin,
         setIssueDateMax,
-        setOrdering
+        setOrdering,
+        clearAllFilters
     }), [
         setServices,
         setFirstSelectedService,
@@ -80,7 +104,8 @@ export function TokenFiltersProvider({ children }: { children: React.ReactNode }
         setExpirationDateMax,
         setIssueDateMin,
         setIssueDateMax,
-        setOrdering
+        setOrdering,
+        clearAllFilters
     ])  ;
 
     return <TokenFiltersContext.Provider value={{ state,  actions }}>
