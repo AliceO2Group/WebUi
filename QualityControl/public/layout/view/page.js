@@ -140,7 +140,10 @@ function subcanvasView(model) {
  * @returns {vnode} - virtual node element
  */
 function chartView(model, tabObject) {
-  const key = `key${tabObject.id}`;
+  // Changing the key will force redraw of the whole component including jsroot
+  // This is currently a patch workaround for ensuring a change of drawing option also
+  // redraw the jsroot plot, because sometimes jsroot do not redraw well on option changes only.
+  const key = `key${tabObject.id + tabObject.options.length}`;
 
   // Position and size are produced by GridList in the model
   const style = {
