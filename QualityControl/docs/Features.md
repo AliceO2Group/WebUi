@@ -1,26 +1,30 @@
 # Features
 ## Table of Contents
-- [ROOT Object drawing options via Metadata](#root-object-drawing-options-via-metadata)
-- [Display a QC non-standard ROOT object in QCG](#display-a-qc-non-standard-root-object-in-qcg)
-- [Export a layout as JSON](#export-a-layout-as-json)
-- [Import a layout from JSON](#import-a-layout-from-json)
-- [AutoTransitioning Tabs within Layouts](#autotransitioning-tabs-within-layouts)
-- [Filters](#filters)
-   - [Available Filters](#available-filters)
-- [Runs Mode](#runs-mode)
-- [Actions](#actions)
-- [Edit a Layout](#edit-a-layout)
-   - [Via GUI](#1-via-gui)
-   - [Via JSON](#2-via-json)
+- [Features](#features)
+  - [Table of Contents](#table-of-contents)
+  - [ROOT Object drawing options via Metadata](#root-object-drawing-options-via-metadata)
+  - [Display a QC non-standard ROOT object in QCG](#display-a-qc-non-standard-root-object-in-qcg)
+  - [Export a layout as JSON](#export-a-layout-as-json)
+  - [Import a layout from JSON](#import-a-layout-from-json)
+  - [AutoTransitioning Tabs within Layouts](#autotransitioning-tabs-within-layouts)
+  - [Filters](#filters)
+    - [Available Filters](#available-filters)
+  - [Runs Mode](#runs-mode)
+    - [How to Use Runs Mode](#how-to-use-runs-mode)
+    - [Run Mode Header](#run-mode-header)
+  - [Actions](#actions)
+  - [Edit a Layout](#edit-a-layout)
+    - [1. Via GUI](#1-via-gui)
+    - [2. Via JSON](#2-via-json)
 
 ## ROOT Object drawing options via Metadata
-`QCG` is using CCDB as storage service. When storing an object, the user can also store information on how an object should be plotted via the `metadata` field in CCDB. QualityControl documentation on how this can be achieved can be found [here](https://github.com/AliceO2Group/QualityControl/blob/master/doc/Advanced.md#canvas-options)
+`QCG` is using CCDB as storage service. When storing an object, the user can also store information on how an object should be plotted via the `metadata` field in CCDB. QualityControl documentation on how this can be achieved can be found [here](https://github.com/AliceO2Group/QualityControl/blob/master/doc/Miscellaneous.md#canvas-options)
 * `drawOptions`: semi-colon separated drawing options; e.g. `lcolz;colz`
 * `displayHints`: semi-colon separated hints; e.g. `AP;APB`
 
 ## Display a QC non-standard ROOT object in QCG
 
-`QCG` is able to display non-standard ROOT objects with the help of QC. More information can be found [here](https://github.com/AliceO2Group/QualityControl/blob/master/doc/Advanced.md#display-a-non-standard-root-object-in-qcg) 
+`QCG` is able to display non-standard ROOT objects with the help of QC. More information can be found [here](https://github.com/AliceO2Group/QualityControl/blob/master/doc/Miscellaneous.md#display-a-non-standard-root-object-in-qcg) 
 
 ## Export a layout as JSON
 In order to facilitate the transition from one environment (e.g. TST) to another (e.g. PROD) while at the same time updating it, an export feature is provided.
@@ -100,4 +104,3 @@ The GUI provides an intuitive and user-friendly way for layout creators to edit 
    - The system validates the JSON structure to ensure it is correctly formatted.
    - Certain fields, such as the `ID`, cannot be set manually.
 5. Make the necessary changes and click `Save`.
-
