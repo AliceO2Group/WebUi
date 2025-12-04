@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Box, Typography } from '@mui/material';
+import { Box, Collapse, Typography } from '@mui/material';
 import type { ReactNode } from 'react';
 
 /**
@@ -28,16 +28,19 @@ export const PreviousValueSection = ({
 }: {
   value: string | number | boolean;
   isDirty: boolean;
-}): ReactNode => {
-  if (!isDirty) {
-    return null;
-  }
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+}): ReactNode => (
+  <Collapse in={isDirty} timeout="auto">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'row',
+        gap: 1,
+      }}
+    >
       <Typography variant="caption" fontWeight="bold" color="secondary">
         Previous Value:
       </Typography>
       <Typography variant="caption">{JSON.stringify(value, null, 2)}</Typography>
     </Box>
-  );
-};
+  </Collapse>
+);
