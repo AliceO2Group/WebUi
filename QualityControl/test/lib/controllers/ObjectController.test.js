@@ -146,7 +146,7 @@ export const objectControllerTestSuite = async () => {
 
       ok(resMock.status.calledWith(500));
       ok(resMock.json.calledWithMatch({
-        message: 'Failed to retrieve object content',
+        message: 'Service error',
         status: 500,
         title: 'Unknown Error',
       }));
@@ -182,7 +182,7 @@ export const objectControllerTestSuite = async () => {
 
       ok(resMock.status.calledWith(500));
       ok(resMock.json.calledWithMatch({
-        message: 'Unable to identify object or read it by qcg id',
+        message: 'Service error',
         status: 500,
         title: 'Unknown Error',
       }));
