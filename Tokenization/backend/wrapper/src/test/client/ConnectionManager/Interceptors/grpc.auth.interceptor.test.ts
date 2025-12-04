@@ -349,7 +349,6 @@ describe('gRPCAuthInterceptor', () => {
 
     const result = await interceptor.gRPCAuthInterceptor(mockCall, mockCallback, mockClientConnections as any, mockSecurityContext);
 
-    const created = getCreatedConn();
     expect(result.isAuthenticated).toBe(false);
     expect(mockCallback).toHaveBeenCalledWith(
       expect.objectContaining({
