@@ -13,7 +13,7 @@
  */
 
 import { h } from '/js/src/index.js';
-import { draw } from '../../object/objectDraw.js';
+import { draw } from '../../common/object/draw.js';
 import { iconArrowLeft, iconArrowTop } from '/js/src/icons.js';
 import { minimalObjectInfo } from './panels/minimalObjectInfo.js';
 import { objectInfoResizePanel } from './panels/objectInfoResizePanel.js';
@@ -140,7 +140,10 @@ function subcanvasView(model) {
  * @returns {vnode} - virtual node element
  */
 function chartView(model, tabObject) {
-  const key = `key${tabObject.id}`;
+  // Changing the key will force redraw of the whole component including jsroot
+  // This is currently a patch workaround for ensuring a change of drawing option also
+  // redraw the jsroot plot, because sometimes jsroot do not redraw well on option changes only.
+  const key = `key${tabObject.id + tabObject.options.length}`;
 
   // Position and size are produced by GridList in the model
   const style = {
@@ -192,20 +195,31 @@ function chartView(model, tabObject) {
  * @param {object} tabObject - to be drawn with jsroot
  * @returns {vnode} - virtual node element
  */
-const drawComponent = (model, tabObject) => h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
-  h('.jsrootdiv', {
-    style: {
-      'z-index': 90,
-      overflow: 'hidden',
-      height: '100%',
-      display: 'flex',
-      'flex-direction': 'column',
-    },
-  }, draw(model, tabObject, {})),
-  objectInfoResizePanel(model, tabObject),
-  model.layout.item && model.layout.item.displayTimestamp
-  && minimalObjectInfo(model, tabObject),
-]);
+const drawComponent = (model, tabObject) => {
+  const { displayTimestamp = false } = model.layout.item;
+  const { name, options: drawingOptions = [] } = tabObject;
+  const lastModified = model.object.getLastModifiedByName(name);
+  const runNumber = model.object.getRunNumberByName(name);
+
+  return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
+    h('.jsrootdiv', {
+      style: {
+        'z-index': 90,
+        overflow: 'hidden',
+        height: '100%',
+        display: 'flex',
+        'flex-direction': 'column',
+      },
+    }, draw(
+      model.object.objects[tabObject.name],
+      {},
+      drawingOptions,
+      (error) => model.object.invalidObject(tabObject.name, error.message),
+    )),
+    objectInfoResizePanel(model, tabObject),
+    displayTimestamp && minimalObjectInfo(runNumber, lastModified),
+  ]);
+};
 
 /**
  * Predicate to sort objects by id

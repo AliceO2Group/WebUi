@@ -17,7 +17,7 @@ import { type Token } from './token';
 import { useState } from 'react';
 import { Link } from 'react-router';
 
-import { useAuth } from '~/hooks/session';
+import { useAuth } from '~/utils/session';
 import ActionBlock from './action-block';
 import Modal from '../window/modal';
 import Alert from '../window/alert';

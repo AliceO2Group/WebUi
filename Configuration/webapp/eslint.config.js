@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 import globals from 'globals';
 import pluginJs from '@eslint/js';
@@ -32,15 +32,15 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['./*.config.js', 'custom_eslint_rules/*']
+    ignores: ['./*.config.js', 'custom_eslint_rules/*'],
   },
   {
-    files: ["**/*.ts", "**/*.tsx", "**/*.cts", "**.*.mts"],
+    files: ['**/*.ts', '**/*.tsx', '**/*.cts', '**.*.mts'],
     plugins: {
       jsdoc,
       react,
       '@stylistic': stylistic,
-      'custom-rules': customRules
+      'custom-rules': customRules,
     },
     extends: [
       jsdoc.configs['flat/recommended'],
@@ -65,7 +65,7 @@ export default tseslint.config(
       },
     },
     rules: {
-      "@typescript-eslint/only-throw-error": "off",
+      '@typescript-eslint/only-throw-error': 'off',
       'react/react-in-jsx-scope': 'off',
       'custom-rules/copyright-license': 'error',
       'arrow-body-style': ['error', 'as-needed'],
@@ -81,17 +81,15 @@ export default tseslint.config(
       'no-console': 'error',
       'no-implicit-coercion': 'error',
       'no-return-assign': 'error',
-      'no-unused-vars': [
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
         'error',
         {
           argsIgnorePattern: '^(_|((request|response|next)$))',
         },
       ],
       'no-var': 'error',
-      'one-var': [
-        'error',
-        'never',
-      ],
+      'one-var': ['error', 'never'],
       'prefer-arrow-callback': [
         'error',
         {
@@ -122,14 +120,8 @@ export default tseslint.config(
           singleValue: false,
         },
       ],
-      '@stylistic/array-element-newline': [
-        'error',
-        'consistent',
-      ],
-      '@stylistic/arrow-parens': [
-        'error',
-        'always',
-      ],
+      '@stylistic/array-element-newline': ['error', 'consistent'],
+      '@stylistic/arrow-parens': ['error', 'always'],
       '@stylistic/brace-style': [
         'error',
         '1tbs',
@@ -137,10 +129,7 @@ export default tseslint.config(
           allowSingleLine: false,
         },
       ],
-      '@stylistic/comma-dangle': [
-        'error',
-        'always-multiline',
-      ],
+      '@stylistic/comma-dangle': ['error', 'always-multiline'],
       '@stylistic/comma-spacing': [
         'error',
         {
@@ -148,27 +137,12 @@ export default tseslint.config(
           after: true,
         },
       ],
-      '@stylistic/comma-style': [
-        'error',
-        'last',
-      ],
+      '@stylistic/comma-style': ['error', 'last'],
       '@stylistic/computed-property-spacing': 'error',
-      '@stylistic/dot-location': [
-        'error',
-        'property',
-      ],
-      '@stylistic/eol-last': [
-        'error',
-        'always',
-      ],
-      '@stylistic/function-call-argument-newline': [
-        'error',
-        'consistent',
-      ],
-      '@stylistic/function-paren-newline': [
-        'error',
-        'multiline',
-      ],
+      '@stylistic/dot-location': ['error', 'property'],
+      '@stylistic/eol-last': ['error', 'always'],
+      '@stylistic/function-call-argument-newline': ['error', 'consistent'],
+      '@stylistic/function-paren-newline': ['error', 'multiline-arguments'],
       '@stylistic/indent': [
         'error',
         2,
@@ -187,10 +161,7 @@ export default tseslint.config(
           beforeBlockComment: true,
         },
       ],
-      '@stylistic/lines-between-class-members': [
-        'error',
-        'always',
-      ],
+      '@stylistic/lines-between-class-members': ['error', 'always'],
       '@stylistic/max-len': [
         'error',
         {
@@ -207,20 +178,14 @@ export default tseslint.config(
         },
       ],
       '@stylistic/no-trailing-spaces': 'error',
-      '@stylistic/object-curly-spacing': [
-        'error',
-        'always',
-      ],
+      '@stylistic/object-curly-spacing': ['error', 'always'],
       '@stylistic/object-property-newline': [
         'error',
         {
           allowAllPropertiesOnSameLine: true,
         },
       ],
-      '@stylistic/padded-blocks': [
-        'error',
-        'never',
-      ],
+      '@stylistic/padded-blocks': ['error', 'never'],
       '@stylistic/padding-line-between-statements': [
         'error',
         {
@@ -239,10 +204,7 @@ export default tseslint.config(
           next: 'cjs-export',
         },
       ],
-      '@stylistic/quote-props': [
-        'error',
-        'as-needed',
-      ],
+      '@stylistic/quote-props': ['error', 'as-needed'],
       '@stylistic/quotes': [
         'error',
         'single',
@@ -251,10 +213,7 @@ export default tseslint.config(
         },
       ],
       '@stylistic/semi': 'error',
-      '@stylistic/semi-style': [
-        'error',
-        'last',
-      ],
+      '@stylistic/semi-style': ['error', 'last'],
       '@stylistic/space-before-blocks': [
         'error',
         {
@@ -272,23 +231,14 @@ export default tseslint.config(
         },
       ],
       '@stylistic/space-infix-ops': 'error',
-      '@stylistic/space-in-parens': [
-        'error',
-        'never',
-      ],
-      '@stylistic/template-curly-spacing': [
-        'error',
-        'never',
-      ],
+      '@stylistic/space-in-parens': ['error', 'never'],
+      '@stylistic/template-curly-spacing': ['error', 'never'],
       'no-magic-numbers': 'off', // TODO: enable
     },
   },
   {
     files: ['test/**'],
-    extends: [
-      pluginJs.configs.recommended,
-      mochaPlugin.configs.recommended,
-    ],
+    extends: [pluginJs.configs.recommended, mochaPlugin.configs.recommended],
     plugins: {
       mocha: mochaPlugin,
     },
@@ -298,20 +248,20 @@ export default tseslint.config(
       globals: {
         ...globals.node,
         ...globals.mocha,
-        window: 'readonly'
+        window: 'readonly',
       },
     },
     rules: {
       'mocha/no-setup-in-describe': 'off',
       'no-console': 'off',
-      'prefer-arrow-callback': 'off'
+      'prefer-arrow-callback': 'off',
     },
   },
   {
     files: ['app/test/**'],
     rules: {
       'no-console': 'off',
-      'prefer-arrow-callback': 'off'
-    }
+      'prefer-arrow-callback': 'off',
+    },
   },
 );

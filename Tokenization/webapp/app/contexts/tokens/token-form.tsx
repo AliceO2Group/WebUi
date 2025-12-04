@@ -15,7 +15,7 @@
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import type { OptionType, HttpMethod } from '~/utils/types';
 import type { AlertType } from '~/components/window/alert';
-import { useAuth } from '~/hooks/session';
+import { useAuth } from '~/utils/session';
 
 type State = {
   loaderData?: OptionType[];
