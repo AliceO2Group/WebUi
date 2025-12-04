@@ -12,24 +12,27 @@
  * or submit itself to any jurisdiction.
  */
 
-import { SequalizeDatabaseConfig } from "./sequalizeDatabaseConfig";
+import { SequelizeDatabaseConfig } from './sequelizeDatabaseConfig.js';
 
 /**
  * Returns database configuration with default values if not provided.
  * @param config - Partial database configuration object.
  * @returns Complete database configuration object.
  */
-export function getConfig(config: any): SequalizeDatabaseConfig {
+export function getConfig(
+  config?: Partial<SequelizeDatabaseConfig>
+): SequelizeDatabaseConfig {
+  const c = config ?? {};
   return {
-    host: config.host ?? "localhost",
-    port: config.port ?? 3306,
-    username: config.username ?? "cern",
-    password: config.password ?? "cern",
-    database: config.database ?? "tkn",
-    charset: config.charset ?? "utf8mb4",
-    collate: config.collate ?? "utf8mb4_general_ci",
-    timezone: config.timezone ?? "+00:00",
-    logging: config.logging ?? false,
-    retryThrottle: config.retryThrottle ?? 5000,
+    host: c.host ?? 'localhost',
+    port: c.port ?? 3306,
+    username: c.username ?? 'cern',
+    password: c.password ?? 'cern',
+    database: c.database ?? 'tkn',
+    charset: c.charset ?? 'utf8mb4',
+    collate: c.collate ?? 'utf8mb4_general_ci',
+    timezone: c.timezone ?? '+00:00',
+    logging: c.logging ?? false,
+    retryThrottle: c.retryThrottle ?? 5000,
   };
 }

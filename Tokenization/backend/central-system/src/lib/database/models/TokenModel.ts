@@ -35,7 +35,7 @@ export class Token extends Model {
 }
 
 /* Initialize and export the Token model */
-export default (sequelize: Sequelize): any =>
+export default (sequelize: Sequelize): typeof Token =>
   Token.init(
     {
       id: {

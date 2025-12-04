@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-export interface SequalizeDatabaseConfig {
+export interface SequelizeDatabaseConfig {
   host: string;
   port: number;
   username: string;

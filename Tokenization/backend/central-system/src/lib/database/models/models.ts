@@ -15,7 +15,12 @@
 // Import all models here and export them
 import TokenModel from './TokenModel.js';
 import ArchiveTokenModel from './ArchiveTokenModel.js';
-export function models(sequelize: any): any {
+import { Sequelize } from 'sequelize';
+
+export function models(sequelize: Sequelize): {
+  Token: ReturnType<typeof TokenModel>;
+  ArchiveToken: ReturnType<typeof ArchiveTokenModel>;
+} {
   const models = {
     Token: TokenModel(sequelize),
     ArchiveToken: ArchiveTokenModel(sequelize),

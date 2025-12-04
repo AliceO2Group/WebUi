@@ -12,37 +12,37 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from "@aliceo2/web-ui";
-import { ArchiveToken } from "./../models/ArchiveTokenModel.js";
-import { Token } from "./../models/TokenModel.js";
-import { Sequelize } from "sequelize";
+import { LogManager } from '@aliceo2/web-ui';
+import { ArchiveToken } from './../models/ArchiveTokenModel.js';
+import { Token } from './../models/TokenModel.js';
+import { Sequelize } from 'sequelize';
 
-type Method = "GET" | "POST" | "PUT" | "DELETE" | string;
+type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | string;
 
-const logger = LogManager.getLogger("database/utils/expireToken");
+const logger = LogManager.getLogger('database/utils/expireToken');
 
 /**
  * Expires a token by archiving it and removing the specified method.
  * If it's the last method, the token is deleted entirely.
- * @param sequalize - Sequelize instance for database operations.
+ * @param sequelize - Sequelize instance for database operations.
  * @param id - ID of the token to expire.
  * @param method - HTTP method to expire from the token.
  */
 export default async (
-  sequalize: Sequelize,
+  sequelize: Sequelize,
   id: number,
   method: Method
 ): Promise<void> => {
   const token: Token | null = await Token.findByPk(id);
   if (!token) {
-    logger.info("No such token in database.");
+    logger.info('No such token in database.');
     return;
   }
 
   const { sub, aud, iss, iat, jti } = token.token_object;
   const methods: string[] = Object.keys(iat);
 
-  await sequalize.transaction(async (tx) => {
+  await sequelize.transaction(async (tx) => {
     await ArchiveToken.create(
       {
         audience: token.audience,

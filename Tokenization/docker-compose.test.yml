@@ -10,6 +10,8 @@ services:
     working_dir: /var/workspace/central-system
     volumes:
       - ./backend:/var/workspace
+    env_file:
+      - ./backend/central-system/.env
     command: ['npm', 'run', 'dev']
     healthcheck:
       interval: 1s
@@ -25,6 +27,8 @@ services:
         condition: service_completed_successfully
       database:
         condition: service_healthy
+      vault-setup:
+        condition: service_completed_successfully
 
   prod-container:
     build:
@@ -39,44 +43,13 @@ services:
     ports:
       - 8080:80
     depends_on:
-      backend:
+      install-backend:
+        condition: service_completed_successfully
+      database:
         condition: service_healthy
+      vault-setup:
+        condition: service_completed_successfully
 
-  database:
-    image: 'mariadb:10.5.9'
-    container_name: tokenization-database
-    environment:
-      MYSQL_ROOT_PASSWORD: 'cern'
-    ports:
-      - '3306:3306'
-    volumes:
-      - type: volume
-        source: database-data
-        target: /var/lib/mysql
-      - type: bind
-        read_only: true
-        source: ./docker/database/configuration
-        target: /etc/mysql/conf.d
-      - type: bind
-        read_only: true
-        source: ./docker/database/populate
-        target: /docker-entrypoint-initdb.d
-    healthcheck:
-      test:
-        [
-          'CMD',
-          'mysqladmin',
-          'ping',
-          '-h',
-          'localhost',
-          '--user=root',
-          '--password=cern',
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 20s
-    restart: unless-stopped
 
   ui-tests:
     build:
@@ -88,6 +61,5 @@ services:
     depends_on:
       prod-container:
         condition: service_healthy
-
-volumes:
-  database-data:
+    networks:
+      - TKN_net

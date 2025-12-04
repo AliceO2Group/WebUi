@@ -20,14 +20,14 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { join } from 'path';
 import { createUmzug } from './umzug.js';
-import { SequalizeDatabaseConfig } from './utils/sequalizeDatabaseConfig.js';
+import { SequelizeDatabaseConfig } from './utils/sequelizeDatabaseConfig';
 import { SequelizeStorage } from 'umzug';
 
-export class SequalizeDatabase {
+export class SequelizeDatabase {
   private _logger;
   public sequelize: Sequelize;
   private _models: object;
-  private _dbConfig: SequalizeDatabaseConfig;
+  private _dbConfig: SequelizeDatabaseConfig;
 
   /**
    * Initializes the Sequelize database connection.

@@ -15,7 +15,7 @@
 import { Sequelize, Model, DataTypes } from 'sequelize';
 
 // Define the structure of the token object
-interface ArchivizedTokenAttributes {
+interface ArchivedTokenAttributes {
   sub: string;
   aud: string;
   iss: string;
@@ -30,11 +30,11 @@ export class ArchiveToken extends Model {
   declare subject: string;
   declare created_at: Date;
   declare updated_at: Date;
-  declare token_object: ArchivizedTokenAttributes;
+  declare token_object: ArchivedTokenAttributes;
 }
 
 /* Initialize and export the Token model */
-export default (sequelize: Sequelize): any =>
+export default (sequelize: Sequelize): typeof ArchiveToken =>
   ArchiveToken.init(
     {
       id: {

@@ -12,13 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-import { SequalizeDatabase } from './SequalizeDatabase.js';
+import { SequelizeDatabase } from './SequelizeDatabase.js';
 
 class Database {
   public static async createDatabase(
     config: object
-  ): Promise<SequalizeDatabase> {
-    const database = new SequalizeDatabase(config);
+  ): Promise<SequelizeDatabase> {
+    const database = new SequelizeDatabase(config);
 
     await database.connect();
     await database.migrate();
@@ -31,11 +31,10 @@ export const db = await Database.createDatabase({
   host: process.env.DB_HOST ?? 'database',
   port: Number(process.env.DB_PORT ?? 3306),
   username: process.env.DB_USER ?? 'central-system',
-  password:
-    process.env.DB_PASSWORD ?? 'cern',
+  password: process.env.DB_PASSWORD ?? 'cern',
   database: process.env.DB_NAME ?? 'tokenization',
   charset: 'utf8mb4',
   collate: 'utf8mb4_unicode_ci',
   timezone: process.env.DB_TZ ?? '+00:00',
-  logging: process.env.DB_LOGGIN ?? false,
+  logging: process.env.DB_LOGGING ?? false,
 });

@@ -18,7 +18,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { TokensGetService } from '../services/TokensGetService.js';
 import { db } from '../lib/database/Database.js';
-import { SequalizeDatabase } from '../lib/database/SequalizeDatabase.js';
+import { SequelizeDatabase } from '../lib/database/SequelizeDatabase.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,8 +35,9 @@ class CentralSystem {
     number,
     { tokenId: number; validity: string; payload: string }
   >;
+  private _db: SequelizeDatabase;
+
   public readonly tokenController: TokensController;
-  public _db: SequalizeDatabase;
 
   public constructor(wrapperPort: number) {
     this._db = db;

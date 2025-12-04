@@ -63,8 +63,6 @@ services:
     ports:
       - '8080:8080'
       - '4041:4041'
-      - '8080:8080'
-      - '4041:4041'
     depends_on:
       backend:
         condition: service_healthy
