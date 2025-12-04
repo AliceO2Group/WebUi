@@ -31,7 +31,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 /*
  * CentralSystem class to handle token management.
- * It includes methods to get tokens, create a new token, revoke tokens and provide tokens to relecant clients.
+ * It includes methods to get tokens, create a new token, revoke tokens and provide tokens to relevant clients.
  * The class uses a static Map to simulate a database of tokens.
  * The tokens are stored with a tokenId, validity status, and payload.
  */

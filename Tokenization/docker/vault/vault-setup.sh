@@ -41,11 +41,6 @@ if [ "$initialized" = "false" ]; then
     exit 1
   fi
 
-  echo "[vault-setup] ====== COPY THESE (DO NOT COMMIT) ======"
-  echo "[vault-setup] UNSEAL_KEY: $UNSEAL_KEY"
-  echo "[vault-setup] ROOT_TOKEN: $ROOT_TOKEN"
-  echo "[vault-setup] ========================================"
-
   mkdir -p /vault/data
   echo "$UNSEAL_KEY" > /vault/data/unseal_key
   echo "$ROOT_TOKEN" > /vault/data/root_token

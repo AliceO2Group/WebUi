@@ -56,7 +56,7 @@ describe('VaultAuthService', () => {
     ).rejects.toThrow('error');
   });
 
-  it('renew() connects with proper token and reutnrs renwed token', async () => {
+  it('renew() connects with proper token and reutrns renwed token', async () => {
     const fakeToken = 's.renewed';
 
     (axios.post as jest.MockedFunction<typeof axios.post>).mockResolvedValue({

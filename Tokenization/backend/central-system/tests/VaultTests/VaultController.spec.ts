@@ -31,7 +31,7 @@ describe('VaultController', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // env for Vaulta
+    // env for Vault
     process.env.VAULT_ADDR = 'https://vault.local:9300';
     process.env.VAULT_AUTH_METHOD = 'cert';
     process.env.VAULT_ROLE = 'central-system';
@@ -72,7 +72,7 @@ describe('VaultController', () => {
     ).toThrow('Missing required environment variables for TLS certificates.');
   });
 
-  test('loginVault() authsService.login with proper body and URL', async () => {
+  test('loginVault() authService.login with proper body and URL', async () => {
     const controller = new VaultController(
       tokenSignService,
       authService,
