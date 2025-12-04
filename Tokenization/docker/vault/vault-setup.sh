@@ -117,7 +117,19 @@ path "transit/decrypt/tokenization-signing" {
 }
 
 path "tokenization/data/*" {
-  capabilities = ["create", "update", "read", "list"]
+  capabilities = ["create", "update", "read", "delete", "list"]
+}
+
+path "transit/keys/tokenization-signing" {
+  capabilities = ["read"]
+}
+
+path "transit/sign/tokenization-signing" {
+  capabilities = ["update"]
+}
+
+path "tokenization/metadata/*" {
+  capabilities = ["read", "list"]
 }
 EOF
 

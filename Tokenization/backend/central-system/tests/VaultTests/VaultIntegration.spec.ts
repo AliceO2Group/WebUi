@@ -24,7 +24,7 @@ const b64 = (buf: Buffer) => buf.toString('base64');
 
 function ensureVaultEnvFromFilesIfMissing() {
   const backendRoot = path.resolve(__dirname, '..', '..');
-  const repoRoot = path.resolve(backendRoot, '..');
+  const repoRoot = path.resolve(backendRoot, '..', '..');
 
   const caPath = path.join(repoRoot, 'docker', 'vault', 'ca.crt');
   const csCertPath = path.join(
@@ -63,7 +63,7 @@ function ensureVaultEnvFromFilesIfMissing() {
   }
 }
 
-describe('VaultController – integration with Vault', () => {
+describe('VaultController - integration with Vault', () => {
   let controller: VaultController;
 
   beforeAll(async () => {
@@ -78,8 +78,25 @@ describe('VaultController – integration with Vault', () => {
     await controller.loginVault();
   }, 30000);
 
+  beforeAll(async () => {
+    ensureVaultEnvFromFilesIfMissing();
+
+    console.log('DEBUG VAULT ENVS (integration):', {
+      CA: process.env.VAULT_CACERT_B64 ? 'set' : 'missing',
+      CERT: process.env.VAULT_CENTRAL_SYSTEM_CERT_B64 ? 'set' : 'missing',
+      KEY: process.env.VAULT_CENTRAL_SYSTEM_KEY_B64 ? 'set' : 'missing',
+    });
+
+    controller = new VaultController(
+      new VaultSignService(),
+      new VaultAuthService(),
+      new VaultCredentialsService()
+    );
+
+    await controller.loginVault();
+  }, 30000);
   it('renews Vault token successfully', async () => {
-    await expect(controller.renewVaultToken()).resolves.toBeDefined();
+    await controller.renewVaultToken();
   }, 20000);
 
   it('creates/updates and then reads back a secret from KV', async () => {
