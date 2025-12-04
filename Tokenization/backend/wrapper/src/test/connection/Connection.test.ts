@@ -27,6 +27,11 @@ const PeerCtorMock = jest.fn((_addr: string, _creds: any) => {
   return lastPeerClient;
 });
 
+const logger = {
+  infoMessage: jest.fn(),
+  errorMessage: jest.fn(),
+};
+
 jest.mock(
   '@grpc/grpc-js',
   () => {
@@ -35,6 +40,9 @@ jest.mock(
       ...original,
       credentials: {
         createSsl: jest.fn(() => ({ insecure: true })),
+      },
+      LogManager: {
+        getLogger: () => logger,
       },
     };
   },
