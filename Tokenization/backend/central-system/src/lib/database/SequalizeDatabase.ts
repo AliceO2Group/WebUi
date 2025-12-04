@@ -34,7 +34,7 @@ export class SequalizeDatabase {
    * @param config - Database configuration object.
    */
   constructor(config: object) {
-    this._logger = LogManager.getLogger('database/sequalize');
+    this._logger = LogManager.getLogger('database/sequelize');
 
     if (!config) {
       this._logger.warnMessage('No database configuration provided');
