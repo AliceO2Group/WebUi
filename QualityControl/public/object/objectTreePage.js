@@ -121,7 +121,7 @@ const drawPlot = (model, object) => {
         iconCircleX(),
       ),
     ]),
-    h('', { style: 'height:77%;' }, draw(model.object.objects[name], { stat: true }, [], (error) => {
+    h('', { style: 'height:77%;' }, draw(model.object.objects[name], { }, ['stat'], (error) => {
       model.object.invalidObject(name, error.message);
     })),
     h('.scroll-y', {}, [
