@@ -163,7 +163,7 @@ export class CentralSystemWrapper {
   }
 
   /**
-   * @desciprion Starts the gRPC server and binds it to the specified in class port.
+   * @description Starts the gRPC server and binds it to the specified in class port.
    */
   public listen() {
     const addr = `localhost:${this.port}`;
