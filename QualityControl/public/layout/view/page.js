@@ -194,7 +194,7 @@ function chartView(model, tabObject) {
  */
 const drawComponent = (model, tabObject) => {
   const { displayTimestamp = false } = model.layout.item;
-  const { name } = tabObject;
+  const { name, options: drawingOptions = [] } = tabObject;
   const lastModified = model.object.getLastModifiedByName(name);
   const runNumber = model.object.getRunNumberByName(name);
 
@@ -207,7 +207,7 @@ const drawComponent = (model, tabObject) => {
         display: 'flex',
         'flex-direction': 'column',
       },
-    }, draw(model.object, tabObject.name)),
+    }, draw(model.object, name, {}, drawingOptions)),
     objectInfoResizePanel(model, tabObject),
     displayTimestamp && minimalObjectInfo(runNumber, lastModified),
   ]);
