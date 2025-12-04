@@ -12,7 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
-export interface Run {
-  runNumber: number;
-  quality: 'good' | 'bad';
-}
+/**
+ * Enumeration for different types of storage keys
+ * @enum {string}
+ * @readonly
+ */
+export const StorageKeysEnum = Object.freeze({
+  OBJECT_VIEW_LEFT_PANEL_WIDTH: 'object-view-left-panel-width',
+  OBJECT_VIEW_INFO_VISIBILITY_SETTING: 'object-view-info-visibility-setting',
+});

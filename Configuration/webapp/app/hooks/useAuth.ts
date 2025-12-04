@@ -12,17 +12,27 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Link } from 'react-router';
+import { useEffect, useState } from 'react';
+import { getSessionData } from '~/services/session';
 
-/**
- * Home component
- * @returns {React.ReactElement} Home
- */
-export default function Home() {
-  return (
-    <>
-      <h1>Welcome to (dummy) bookkeeping!</h1>
-      <Link to={'/runs'}>Runs overview</Link>
-    </>
-  );
+export interface Session {
+  personid: string;
+  username: string;
+  name: string;
+  access: string;
+  token: string;
 }
+
+export const useAuth = (): Session => {
+  const [session, setSession] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      const session = await getSessionData();
+      setSession(session);
+    };
+    void fetchSession();
+  }, []);
+
+  return session as unknown as Session;
+};

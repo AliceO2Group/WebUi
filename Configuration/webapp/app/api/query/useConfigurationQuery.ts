@@ -12,11 +12,17 @@
  * or submit itself to any jurisdiction.
  */
 
-import { type Config } from 'prettier';
+import { useQuery } from '@tanstack/react-query';
+import axiosInstance from '../axiosInstance';
+import type { FormItem } from '~/components/form/Form';
 
-const config: Config = {
-  printWidth: 100,
-  trailingComma: 'es5',
-};
+export const CONFIGURATION_QUERY_KEY = 'configuration';
 
-export default config;
+export const useConfigurationQuery = (configuration: string) =>
+  useQuery({
+    queryKey: [CONFIGURATION_QUERY_KEY, configuration],
+    queryFn: async () =>
+      axiosInstance
+        .get<FormItem>(`configurations/${configuration}`)
+        .then((response) => response.data),
+  });

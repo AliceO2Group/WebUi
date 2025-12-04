@@ -55,7 +55,7 @@ export class ObjectController {
    * @param {Response} res - HTTP response object to provide information on request
    * @returns {void}
    */
-  async getObjects(req, res) {
+  async getObjectsHandler(req, res) {
     try {
       const { prefix, fields, filters = {}, inRunMode = false } = req.query;
 
@@ -85,7 +85,7 @@ export class ObjectController {
    * @param {Response} res - ExpressJs res object.
    * @returns {void}
    */
-  async getDownloadObjects(req, res) {
+  async getDownloadObjectsHandler(req, res) {
     let objectIds = undefined;
     try {
       const validated = await ObjectGetDownloadDTO.validateAsync(req.query);
@@ -116,17 +116,15 @@ export class ObjectController {
    * @param {Response} res - HTTP response object to provide information on request
    * @returns {Promise<void>}
    */
-  async getObjectContent(req, res) {
+  async getObjectContentHandler(req, res) {
     try {
       const { path, validFrom, filters, id } = req.query;
 
       const object = await this._objService.retrieveQcObject({ path, validFrom, id, filters });
       res.status(200).json(object);
     } catch (error) {
-      const responseError = new Error('Failed to retrieve object content');
-
       this._logger.errorMessage(`Error whilst retrieving object content: ${error}`);
-      updateAndSendExpressResponseFromNativeError(res, responseError);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
@@ -141,7 +139,7 @@ export class ObjectController {
    * @param {Response} res - HTTP response object to provide information on request
    * @returns {Promise<void>}
    */
-  async getObjectById(req, res) {
+  async getObjectByIdHandler(req, res) {
     try {
       const qcObjectId = req.params.id;
       const { validFrom, filters, id } = req.query;
@@ -149,10 +147,8 @@ export class ObjectController {
       const object = await this._objService.retrieveQcObjectByQcgId({ qcObjectId, id, validFrom, filters });
       res.status(200).json(object);
     } catch (error) {
-      const responseError = new Error('Unable to identify object or read it by qcg id');
-
       this._logger.errorMessage(`Error whilst retrieving object: ${error}`);
-      updateAndSendExpressResponseFromNativeError(res, responseError);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 }
