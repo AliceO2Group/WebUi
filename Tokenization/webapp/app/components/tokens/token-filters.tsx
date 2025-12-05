@@ -16,7 +16,7 @@ import { useEffect } from 'react';
 
 import { setStorageItem } from '~/utils/storage';
 
-import { FormSelectMulti } from '../form/form-select';
+import { FormSelectMulti, FormSelectMultiOrdering } from '../form/form-select';
 import { FormInput } from '../form/form-input';
 import { useTokenFilters } from '~/hooks/tokens/token-filters';
 import { FlexGrowWrapper, FlexGrowWrapperElement } from '~/ui/flex';
@@ -155,7 +155,7 @@ export function TokenFilters() {
       />
     </FlexGrowWrapper>
     <FlexGrowWrapper>
-      <FormSelectMulti
+      <FormSelectMultiOrdering
         id='tags'
         label="Order by:"
         options={orderingOptions}

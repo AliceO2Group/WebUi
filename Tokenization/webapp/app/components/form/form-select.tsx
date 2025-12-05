@@ -92,3 +92,50 @@ export function FormSelectMulti<T extends string | number = string>(props: Selec
     />
   );
 }
+
+/**
+ * FormSelectMultiOrdering
+ *
+ * Multi-select wrapper that filters out options that are already selected in opposite order.
+ *
+ * @template T
+ * @param {object} props - component props
+ * @param {string} props.id - unique id (from SelectInterface)
+ * @param {import('~/utils/types').OptionType[]} props.options - array of available options
+ * @param {T[]} props.value - array of selected raw values
+ * @param {React.Dispatch<import('react').SetStateAction<T[]>>} props.setValue - setter to update the array of selected values
+ * @param {string} [props.placeholder] - placeholder text
+ * @param {string|null} [props.label] - optional label shown above select
+ *
+ * Behaviour:
+ * - Computes `selected` as list of Option entries whose value is included in `value`.
+ * - handleSelect adds an item to the value array; handleDeselect removes it.
+ * - Filters out options that are already selected in opposite order (e.g., if 'id' is selected, '-id' is removed from options).
+ */
+export function FormSelectMultiOrdering<T extends string | number = string>(props: SelectInterface<T[]>) {
+  const { value, setValue, options } = { ...props };
+  let optionsFiltered = options;
+
+  // Typescipt safety check
+  if (Array.isArray(value)) {
+    for (const val of value) {
+      const valStr = String(val);
+      // There is django ordering convention where negative value means opposite order
+      if (valStr.startsWith('-')) {
+        const actualVal = valStr.substring(1);
+        optionsFiltered = optionsFiltered.filter(opt => String(opt.value) !== actualVal);
+      } else {
+        optionsFiltered = optionsFiltered.filter(opt => String(opt.value) !== `-${  valStr}`);
+      }
+    }
+  }
+
+  return (
+    <FormSelectMulti
+      {...props}
+      value={value}
+      setValue={setValue}
+      options={optionsFiltered}
+    />
+  );
+}
