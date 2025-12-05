@@ -24,11 +24,12 @@ class QCConfigurationAdapter {
    * Restrictions for an array always has the following structure
    * At index 0 there are Restrictions for every value currently in the array
    * At index 1 there are Restrictions in case the user adds a new object to the array
+   * At index 2 there are Restrictions in case user creates new, directly nested array
    *
    * For example, for array like:
    * [
    *   { name: 'flp1', strength: 10, isActive: true },
-   *   { name: 'flp2', strength: 100000, isActive: 'inactive' }
+   *   { name: 'flp2', strength: 100000, isActive: 'inactive' },
    * ]
    *
    * The ArrayRestrictions will be:
@@ -37,11 +38,15 @@ class QCConfigurationAdapter {
    *     { name: 'string', strength: 'number', isActive: 'boolean' },
    *     { name: 'string', strength: 'number', isActive: 'string' }
    *   ],
-   *   { name: 'string', strength: 'number' }
+   *   { name: 'string', strength: 'number' },
+   *   null // because input array does not contain nested arrays
    * ]
+   * 
+   * To see an example of calculating the Restrictions at index 2, see tests
+   * because writing it in here would bloat the example
    */
   static get emptyArrayRestrictions() {
-    return [[], {}];
+    return [[], null, null];
   }
 
   /**
@@ -81,9 +86,10 @@ class QCConfigurationAdapter {
 
   /**
    * Derive the type of values in an array
-   * When deriving restrictions for an array, we gather two pieces of data:
+   * When deriving restrictions for an array, we gather three pieces of data:
    *  - itemsRestrictions: a list of types for every object held inside
-   *  - newItemRestrictions: a blueprint for a new item in the array
+   *  - newObjectRestrictions: a blueprint for a new item in the array
+   *  - newArrayRestrictions: a blueprints to pass into directly nested newly created array
    * @param {Array} array for which we calculate the Restrictions
    * @returns {ArrayRestrictions} value describing the nature of objects held in an array
    */
@@ -92,23 +98,55 @@ class QCConfigurationAdapter {
       return QCConfigurationAdapter.emptyArrayRestrictions;
     }
 
-    let maximumIntersection = QCConfigurationAdapter.deriveValueType(array[0]);
-    const itemsRestrictions = [maximumIntersection];
+    const firstItemRestrictions = QCConfigurationAdapter.deriveValueType(array[0]);
+    let innerObjectBlueprint = QCConfigurationAdapter.isObjectOnly(array[0]) ?
+      firstItemRestrictions : null;
+    let [innerArrayObjectBlueprint, innerArrayArrayBlueprint] = Array.isArray(array[0]) ?
+      [firstItemRestrictions[1], firstItemRestrictions[2]] : null;
+    const itemsRestrictions = [firstItemRestrictions];
+
     for (let i = 1; i < array.length; i++) {
       const currentItemRestrictions = QCConfigurationAdapter.deriveValueType(array[i]);
       itemsRestrictions.push(currentItemRestrictions);
-      maximumIntersection = QCConfigurationAdapter.getRestrictionIntersection(
-        maximumIntersection,
-        currentItemRestrictions
-      );
+
+      if (QCConfigurationAdapter.isPrimitive(currentItemRestrictions)) { continue; } // skip primitives
+
+      if (QCConfigurationAdapter.isObjectOnly(currentItemRestrictions)) {
+        innerObjectBlueprint = innerObjectBlueprint === null ?
+          currentItemRestrictions :
+          QCConfigurationAdapter.getRestrictionsIntersection(
+            innerObjectBlueprint,
+            currentItemRestrictions
+          );
+
+        continue;
+      }
+
+      // if the current restrictions describe an array, we intersect object restrictions for them
+      // with current object restrictions (for previously calculated values)
+      innerArrayObjectBlueprint =
+        innerArrayObjectBlueprint === null
+          ? currentItemRestrictions
+          : QCConfigurationAdapter.getRestrictionsIntersection(
+            innerArrayObjectBlueprint,
+            currentItemRestrictions[1]
+          );
+
+      // we also intersect array restrictions for them
+      innerArrayArrayBlueprint =
+        innerArrayArrayBlueprint === null
+          ? currentItemRestrictions
+          : QCConfigurationAdapter.getRestrictionsIntersection(
+            innerArrayArrayBlueprint,
+            currentItemRestrictions[2]
+          );
     }
 
-    if (Array.isArray(maximumIntersection)) {
-      // we only want to save the blueprint of a nested array as a blueprint
-      maximumIntersection = [[], maximumIntersection[1]];
-    }
-
-    return [itemsRestrictions, maximumIntersection];
+    return [
+      itemsRestrictions,
+      innerObjectBlueprint,
+      [innerArrayObjectBlueprint, innerArrayArrayBlueprint]
+    ];
   };
 
   /**
@@ -117,28 +155,57 @@ class QCConfigurationAdapter {
    * @param {Restrictions} first
    * @param {Restrictions} second
    */
-  static getRestrictionIntersection = (first, second) => {
-    if (!QCConfigurationAdapter.bothAreObjects(first, second)) { return null; }
+  static getRestrictionsIntersection = (first, second) => {
+    if (QCConfigurationAdapter.bothArePrimitive(first, second)) {
+      // the intersection returns the value type, or null if types are different
+      return first === second ? first : null;
+    }
 
-    const restrictions = {};
-    Object.entries(first).forEach(([key, val]) => {
-      if (!(key in second)) { return; }
-      const maximumIntersection = QCConfigurationAdapter.getRestrictionIntersection(val, second[key]);
-      if (maximumIntersection === null) { return; }
-      restrictions[key] = maximumIntersection;
-    });
-    return restrictions;
+    if (QCConfigurationAdapter.bothAreArrays(first, second)) {
+      // intersection of two ArrayRestrictions objects
+      return QCConfigurationAdapter.getArrayRestrictionsIntersection(first, second);
+    }
+
+    if (QCConfigurationAdapter.bothAreObjects(first, second)) {
+      const restrictions = {};
+      Object.entries(first).forEach(([key, val]) => {
+        if (!(key in second)) { return; }
+        const maximumIntersection = QCConfigurationAdapter.getRestrictionsIntersection(val, second[key]);
+        if (maximumIntersection === null) { return; }
+        restrictions[key] = maximumIntersection;
+      });
+      return restrictions;
+    }
+
+    return null;
   };
 
+  static getArrayRestrictionsIntersection = (first, second) => {
+    return [
+      [],
+      QCConfigurationAdapter.getRestrictionsIntersection(first[1], second[1]),
+      QCConfigurationAdapter.getRestrictionsIntersection(first[2], second[2]),
+    ];
+  };
+
+  static isPrimitive = (value) => typeof value === 'string';
+
+  static isObjectOnly = (value) => (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value)
+  );
+
+  static bothArePrimitive = (first, second) => {
+    return QCConfigurationAdapter.isPrimitive(first) && QCConfigurationAdapter.isPrimitive(second);
+  }
+
+  static bothAreArrays = (first, second) => {
+    return Array.isArray(first) && Array.isArray(second);
+  }
+
   static bothAreObjects = (first, second) => {
-    return (
-      typeof first === 'object' &&
-      typeof second === 'object' &&
-      first !== null &&
-      second !== null &&
-      !Array.isArray(first) &&
-      !Array.isArray(second)
-    );
+    return QCConfigurationAdapter.isObjectOnly(first) && QCConfigurationAdapter.isObjectOnly(second);
   };
 }
 

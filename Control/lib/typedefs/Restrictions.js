@@ -15,7 +15,7 @@
  * @typedef {RestrictionsEntry | Object.<string, RestrictionsEntry>} Restrictions
  * Object which is a map of types.
  * Keys are taken from existing configuration.
- * Values are describing what is expected type of value held under that key.
+ * Values are describing what is the expected type of value held under that key.
  * 
  * For example for the given configuration:
  * ```
@@ -79,7 +79,8 @@
  *        name: 'string',
  *        path: 'string',
  *        active: 'boolean'
- *      }
+ *      },
+ *      null
  *    ]
  *  }
  * ```
@@ -95,10 +96,24 @@
 
 /**
  * ArrayRestrictions is a data structure which holds the info about objects held in an array.
- * It always is of length two:
+ * It always is of length three:
  *  - at index 0 there is a nested array which describes Restrictions of each object held in input array
- *  - at index 1 there is a 'blueprint' Restrictions in case user decides to create a new object or array
- * If user creates an object on the frontend, it is pre-populated according to the blueprint
- * If user creates an array on the frontend, its blueprint is populated with the current blueprint
- * @typedef { [Array<Restrictions>, Restrictions] } ArrayRestrictions
+ *  - at index 1 there is a 'blueprint' Restrictions in case user decides to create a new object,
+ *      or null if source array contains no objects
+ *  - at index 2 there is a 'blueprint' of length 2 which is passed to new arrays created
+ *      this inner blueprint at index 0 has a blueprint for new objects in the newly created array
+ *      and at index 1 it has a blueprint for new arrays created inside of the newly created array
+ *      if the source array does not contain an array, this value is null
+ * If user creates an object on the frontend, it is pre-populated according to the blueprint at index 1
+ * If user creates an array on the frontend, its blueprint is populated with the two blueprints at index 2
+ * 
+ * Example ArrayRestrictions object:
+ * [
+ *   [
+ *     Restrictions for item #1, Restrictions for item #2
+ *   ],
+ *   blueprint for newly created object,
+ *   [object blueprint for new array created in this one, array blueprint for new array created in this one]
+ * ]
+ * @typedef { [Array<Restrictions>, Restrictions, Restrictions] } ArrayRestrictions
  */
