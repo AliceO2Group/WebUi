@@ -23,7 +23,7 @@ services:
           'node --input-type=module -e "process.exit((await fetch(''http://backend:8080/api/healthcheck'')).ok === true ? 0 : 1)"',
         ]
     depends_on:
-      install-backend:
+      backend:
         condition: service_completed_successfully
       database:
         condition: service_healthy
@@ -41,8 +41,8 @@ services:
     ports:
       - 8080:80
     depends_on:
-      install-backend:
-        condition: service_completed_successfully
+      prod-container:
+        condition: service_healthy
       database:
         condition: service_healthy
 
