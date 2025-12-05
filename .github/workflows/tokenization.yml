@@ -148,12 +148,12 @@ jobs:
       - name: Create .env for central-system (CI)
         run: |
           cat <<EOF > Tokenization/backend/central-system/.env
-          VAULT_ADDR=${VAULT_ADDR}
-          VAULT_AUTH_METHOD=${VAULT_AUTH_METHOD}
-          VAULT_ROLE=${VAULT_ROLE}
-          VAULT_CACERT_B64=${VAULT_CACERT_B64}
-          VAULT_CENTRAL_SYSTEM_CERT_B64=${VAULT_CENTRAL_SYSTEM_CERT_B64}
-          VAULT_CENTRAL_SYSTEM_KEY_B64=${VAULT_CENTRAL_SYSTEM_KEY_B64}
+          VAULT_ADDR=https://vault.local:9300
+          VAULT_AUTH_METHOD=cert
+          VAULT_ROLE=central-system
+          VAULT_CACERT_B64=${{ needs.central-certificates-creation.outputs.vault_cacert_b64 }}
+          VAULT_CENTRAL_SYSTEM_CERT_B64=${{ needs.central-certificates-creation.outputs.vault_central_system_cert_b64 }}
+          VAULT_CENTRAL_SYSTEM_KEY_B64=${{ needs.central-certificates-creation.outputs.vault_central_system_key_b64 }}
           EOF
 
       - name: Install backend dependencies
