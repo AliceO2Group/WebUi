@@ -11,9 +11,20 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+import type { Route } from './+types/overview';
 
 import { Box1_2 } from '~/components/box';
+import { CertsForm } from '~/components/certs/certs-form';
 import { CertsTable } from '~/components/certs/certs-table';
+
+
+export const clientAction = async ({request }: Route.ClientActionArgs) => {
+  console.log('Certs overview action called');
+  const formData = await request.formData();
+  const certFile = formData.get('certFile');
+  console.log('Received cert file:', certFile);
+  return null
+}
 
 export const clientLoader = async () => ({});
 
@@ -21,17 +32,14 @@ export const clientLoader = async () => ({});
 export default function Overview() {
   return (
     <div className="grid-1-2">
-      <Box1_2 link={null}>
+      <Box1_2 link={'/certs/table'}>
         <div className="flex-row justify-center">
-          <h1> Registered services</h1>
+          <h4> Registered services</h4>
         </div>
         <CertsTable certs={[]} />
       </Box1_2>
-      <Box1_2 link="/certs/new">
-        <div className="p-4">
-          <h2 className="text-2xl font-bold mb-4">Create New Certificate</h2>
-          <p>Click here to create a new certificate.</p>
-        </div>
+      <Box1_2 link={null}>
+        <CertsForm />
       </Box1_2>
     </div>
   );
