@@ -11,8 +11,8 @@
     "test": "mocha --exit tests/mocha-index.cjs",
     "typecheck": "react-router typegen && tsc",
     "docker:typecheck": "docker compose exec webapp npm run typecheck",
-    "docker:test:build": "cd .. && docker compose -f docker-compose.test.yml -f docker-compose.dev.yml up --build --abort-on-container-exit ui-tests && docker compose -f docker-compose.test.yml -f docker-compose.dev.yml stop && cd ./webapp",
-    "docker:test": "cd .. && docker compose -f docker-compose.test.yml -f docker-compose.dev.yml up --abort-on-container-exit ui-tests && docker compose -f docker-compose.test.yml -f docker-compose.dev.yml stop && cd ./webapp",
+    "docker:test:build": "cd .. && docker compose -p tokenization-ui-tests -f docker-compose.test.yml -f docker-compose.dev.yml up --build --abort-on-container-exit ui-tests && docker compose -p tokenization-ui-tests -f docker-compose.test.yml -f docker-compose.dev.yml down --remove-orphans && cd ./webapp",
+    "docker:test": "cd .. && docker compose -p tokenization-ui-tests -f docker-compose.test.yml -f docker-compose.dev.yml up --abort-on-container-exit ui-tests && docker compose -p tokenization-ui-tests -f docker-compose.test.yml -f docker-compose.dev.yml down --remove-orphans && cd ./webapp",
     "lint": "eslint app tests --ignore-pattern 'app/styles' --no-warn-ignored",
     "lint:fix": "eslint --fix app tests --ignore-pattern 'app/styles' --no-warn-ignored"
   },
