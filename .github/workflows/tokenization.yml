@@ -31,9 +31,9 @@ jobs:
     timeout-minutes: 6
 
     outputs:
-      vault_cacert_b64: ${{ steps.encode.outputs.vault_cacert_b64 }}                     
-      vault_central_system_cert_b64: ${{ steps.encode.outputs.vault_central_system_cert_b64 }}   
-      vault_central_system_key_b64: ${{ steps.encode.outputs.vault_central_system_key_b64 }}     
+      vault_cacert_b64: ${{ steps.encode.outputs.vault_cacert_b64 }}
+      vault_central_system_cert_b64: ${{ steps.encode.outputs.vault_central_system_cert_b64 }}
+      vault_central_system_key_b64: ${{ steps.encode.outputs.vault_central_system_key_b64 }}
 
     steps:
       - uses: actions/checkout@v6
@@ -47,23 +47,20 @@ jobs:
         run: |
           bash Tokenization/scripts/actions-certificates-creation.sh
 
-
-      - name: Encode certs to base64 for other jobs                                 
-        id: encode                                                                
-        run: |                                                               
-          echo "vault_cacert_b64=$(base64 -w0 Tokenization/docker/ca/ca.crt)" >> $GITHUB_OUTPUT
+      - name: Encode certs to base64 for other jobs
+        id: encode
+        run: |
+          echo "vault_cacert_b64=$(base64 -w0 Tokenization/docker/vault/ca.crt)" >> $GITHUB_OUTPUT
           echo "vault_central_system_cert_b64=$(base64 -w0 Tokenization/docker/vault/central-system.crt)" >> $GITHUB_OUTPUT
           echo "vault_central_system_key_b64=$(base64 -w0 Tokenization/docker/vault/central-system.key)" >> $GITHUB_OUTPUT
 
-      - name: Upload Vault certificates as artifact                                 
-        uses: actions/upload-artifact@v4                                            
-        with:                                                                       
-          name: vault-certs                                                        
-          path: |                                                                   
-            Tokenization/docker/vault/ca.crt
-            Tokenization/docker/vault/central-system.crt
-            Tokenization/docker/vault/central-system.key
-            Tokenization/docker/ca/ca.crt
+      - name: Upload Vault certificates and .env as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vault-certs
+          path: |
+            Tokenization/docker/vault
+            Tokenization/backend/central-system/.env
 
   lint-check-webapp:
     name: Check eslint rules for webapp on ubuntu-latest
@@ -88,25 +85,23 @@ jobs:
   ui-test:
     needs:
       - lint-check-webapp
-      - central-certificates-creation          
+      - central-certificates-creation
     name: UI-tests for webapp application
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
 
-
-      - name: Download Vault certificates artifact                                 
-        uses: actions/download-artifact@v4                                        
-        with:                                                                      
-          name: vault-certs                                                       
-          path: Tokenization/docker/vault                                         
+      - name: Download Vault certificates and .env artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vault-certs
+          path: .
 
       - name: Setup node
         uses: actions/setup-node@v6
         with:
           node-version: '22.x'
-
 
       - name: Run webapp UI tests (docker)
         run: (cd Tokenization/webapp; npm run docker:test)
@@ -114,34 +109,32 @@ jobs:
   central-system-test:
     needs:
       - lint-check-backend
-      - central-certificates-creation          
+      - central-certificates-creation
     name: Central System backend tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
-
     env:
-      VAULT_CACERT_B64: ${{ needs.central-certificates-creation.outputs.vault_cacert_b64 }}                 
-      VAULT_CENTRAL_SYSTEM_CERT_B64: ${{ needs.central-certificates-creation.outputs.vault_central_system_cert_b64 }}  
-      VAULT_CENTRAL_SYSTEM_KEY_B64: ${{ needs.central-certificates-creation.outputs.vault_central_system_key_b64 }}   
-      VAULT_ADDR: https://vault.local:9300                                                               
-      VAULT_AUTH_METHOD: cert                                                                              
-      VAULT_ROLE: central-system                                                                       
+      VAULT_CACERT_B64: ${{ needs.central-certificates-creation.outputs.vault_cacert_b64 }}
+      VAULT_CENTRAL_SYSTEM_CERT_B64: ${{ needs.central-certificates-creation.outputs.vault_central_system_cert_b64 }}
+      VAULT_CENTRAL_SYSTEM_KEY_B64: ${{ needs.central-certificates-creation.outputs.vault_central_system_key_b64 }}
+      VAULT_ADDR: https://vault.local:9300
+      VAULT_AUTH_METHOD: cert
+      VAULT_ROLE: central-system
 
     steps:
       - uses: actions/checkout@v6
 
-      - name: Download Vault certificates artifact                                                         
-        uses: actions/download-artifact@v4                                                                   
-        with:                                                                                              
-          name: vault-certs                                                                                  
-          path: Tokenization/docker/vault                                                                   
+      - name: Download Vault certificates and .env artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vault-certs
+          path: .
 
       - name: Setup node
         uses: actions/setup-node@v6
         with:
           node-version: '22.x'
-
 
       - name: Install backend dependencies
         run: (cd Tokenization/backend/central-system; npm i)
