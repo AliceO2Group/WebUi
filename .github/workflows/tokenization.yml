@@ -54,13 +54,11 @@ jobs:
           echo "vault_central_system_cert_b64=$(base64 -w0 Tokenization/docker/vault/central-system.crt)" >> $GITHUB_OUTPUT
           echo "vault_central_system_key_b64=$(base64 -w0 Tokenization/docker/vault/central-system.key)" >> $GITHUB_OUTPUT
 
-      - name: Upload Vault certificates and .env as artifact
+      - name: Upload Vault certificates as artifact
         uses: actions/upload-artifact@v4
         with:
           name: vault-certs
-          path: |
-            Tokenization/docker/vault
-            Tokenization/backend/central-system/.env
+          path: Tokenization/docker/vault
 
   lint-check-webapp:
     name: Check eslint rules for webapp on ubuntu-latest
@@ -92,7 +90,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Download Vault certificates and .env artifact
+      - name: Download Vault certificates artifact
         uses: actions/download-artifact@v4
         with:
           name: vault-certs
@@ -102,6 +100,17 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '22.x'
+
+      - name: Create .env for central-system (CI)
+        run: |
+          cat <<EOF > Tokenization/backend/central-system/.env
+          VAULT_ADDR=https://vault.local:9300
+          VAULT_AUTH_METHOD=cert
+          VAULT_ROLE=central-system
+          VAULT_CACERT_B64=${{ needs.central-certificates-creation.outputs.vault_cacert_b64 }}
+          VAULT_CENTRAL_SYSTEM_CERT_B64=${{ needs.central-certificates-creation.outputs.vault_central_system_cert_b64 }}
+          VAULT_CENTRAL_SYSTEM_KEY_B64=${{ needs.central-certificates-creation.outputs.vault_central_system_key_b64 }}
+          EOF
 
       - name: Run webapp UI tests (docker)
         run: (cd Tokenization/webapp; npm run docker:test)
@@ -125,7 +134,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Download Vault certificates and .env artifact
+      - name: Download Vault certificates artifact
         uses: actions/download-artifact@v4
         with:
           name: vault-certs
@@ -135,6 +144,17 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '22.x'
+
+      - name: Create .env for central-system (CI)
+        run: |
+          cat <<EOF > Tokenization/backend/central-system/.env
+          VAULT_ADDR=${VAULT_ADDR}
+          VAULT_AUTH_METHOD=${VAULT_AUTH_METHOD}
+          VAULT_ROLE=${VAULT_ROLE}
+          VAULT_CACERT_B64=${VAULT_CACERT_B64}
+          VAULT_CENTRAL_SYSTEM_CERT_B64=${VAULT_CENTRAL_SYSTEM_CERT_B64}
+          VAULT_CENTRAL_SYSTEM_KEY_B64=${VAULT_CENTRAL_SYSTEM_KEY_B64}
+          EOF
 
       - name: Install backend dependencies
         run: (cd Tokenization/backend/central-system; npm i)
