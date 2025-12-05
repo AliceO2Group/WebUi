@@ -13,7 +13,6 @@
  */
 
 import { SequelizeDatabaseConfig } from './sequelizeDatabaseConfig.js';
-
 /**
  * Returns database configuration with default values if not provided.
  * @param config - Partial database configuration object.

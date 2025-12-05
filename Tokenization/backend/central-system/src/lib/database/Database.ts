@@ -13,8 +13,15 @@
  */
 
 import { SequelizeDatabase } from './SequelizeDatabase.js';
+import { LogManager } from '@aliceo2/web-ui';
 
+// Database class to create and manage the database connection
 class Database {
+  /**
+   * Creates and initializes the database connection.
+   * @param config - Database configuration object.
+   * @returns Initialized SequelizeDatabase instance.
+   */
   public static async createDatabase(
     config: object
   ): Promise<SequelizeDatabase> {
@@ -27,6 +34,8 @@ class Database {
   }
 }
 
+const logger = LogManager.getLogger('Database');
+
 export const db = await Database.createDatabase({
   host: process.env.DB_HOST ?? 'database',
   port: Number(process.env.DB_PORT ?? 3306),
@@ -36,5 +45,5 @@ export const db = await Database.createDatabase({
   charset: 'utf8mb4',
   collate: 'utf8mb4_unicode_ci',
   timezone: process.env.DB_TZ ?? '+00:00',
-  logging: process.env.DB_LOGGING ?? false,
+  logging: process.env.DB_LOGGIN ?? console.log,
 });
