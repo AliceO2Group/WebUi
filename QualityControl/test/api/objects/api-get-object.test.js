@@ -48,7 +48,11 @@ export const apiGetObjectsTests = () => {
 
     test('should return 500 if service fails to retrieve object', async () => {
       const url = `${URL_ADDRESS}/api/object?token=${OWNER_TEST_TOKEN}&path=invalid/path`;
-      await testResult(url, 500, { message: 'Failed to retrieve object content', status: 500, title: 'Unknown Error' });
+      await testResult(url, 500, {
+        message: 'Failed to fetch object at url \'/latest/invalid/path\' and path \'invalid/path\'.',
+        status: 500,
+        title: 'Unknown Error',
+      });
     });
   });
 
@@ -101,7 +105,7 @@ export const apiGetObjectsTests = () => {
 
     test('should return 500 if service fails to retrieve object by ID', async () => {
       await testResult(`${URL_ADDRESS}/api/object/invalid_id?token=${OWNER_TEST_TOKEN}`, 500, {
-        message: 'Unable to identify object or read it by qcg id', status: 500, title: 'Unknown Error' });
+        message: 'Object with invalid_id could not be found', status: 500, title: 'Unknown Error' });
     });
   });
 

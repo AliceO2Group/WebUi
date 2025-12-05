@@ -12,18 +12,31 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Toolbar, Typography } from '@mui/material';
+import { IconButton, Toolbar, Typography } from '@mui/material';
+import { useDrawer } from '~/contexts/DrawerContext';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 
 /**
  * LeftDrawerHeader component
  * Represents the header of the left drawer in the application layout.
  * @returns {React.ReactElement} LeftDrawerHeader
  */
-export const LeftDrawerHeader = () => (
-  <Toolbar
-    style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}
-    className="left-drawer__header"
-  >
-    <Typography variant="h5">Configuration GUI</Typography>
-  </Toolbar>
-);
+export const LeftDrawerHeader = () => {
+  const { toggleDrawer } = useDrawer();
+  return (
+    <Toolbar
+      style={{
+        borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        paddingRight: 0,
+      }}
+      className="left-drawer__header"
+    >
+      <Typography variant="h5">Configuration GUI</Typography>
+      <IconButton onClick={toggleDrawer}>
+        <ChevronLeftIcon fontSize="large" />
+      </IconButton>
+    </Toolbar>
+  );
+};

@@ -127,7 +127,7 @@ export const objectsGetValidationMiddlewareTest = () => {
       ok(res.status.calledWith(400), 'Should return 400 status');
       ok(res.json.calledWithMatch({
         message: 'Invalid query parameters: "filters.PeriodName" with value "INVALID_PERIOD"' +
-        ' fails to match the required pattern: /^LHC\\d{1,2}[a-z]+$/i',
+        ' fails to match the required pattern: /^LHC\\d{1,2}[a-z0-9]+$/i',
         status: 400,
         title: 'Invalid Input',
       }), 'Should return validation error');

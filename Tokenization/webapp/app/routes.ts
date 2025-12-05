@@ -25,7 +25,6 @@ export default [
     ]),
     ...prefix('certs', [
       index('routes/certs/overview.tsx'),
-      route('new', 'routes/certs/create.tsx'),
     ]),
     route('*', 'routes/404.tsx'),
   ]),
