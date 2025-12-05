@@ -45,5 +45,5 @@ export const db = await Database.createDatabase({
   charset: 'utf8mb4',
   collate: 'utf8mb4_unicode_ci',
   timezone: process.env.DB_TZ ?? '+00:00',
-  logging: process.env.DB_LOGGIN ?? console.log,
+  logging: process.env.DB_LOGGING ?? false,
 });

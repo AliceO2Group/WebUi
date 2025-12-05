@@ -57,6 +57,7 @@ class CentralSystem {
       wrapperPort
     );
 
+
     this._centralSystemWrapper.listen();
     this._fakeTokens = new Map([
       [1, { tokenId: 1, validity: 'good', payload: 'payload1' }],
