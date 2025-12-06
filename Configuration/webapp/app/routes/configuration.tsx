@@ -18,11 +18,9 @@ import { useConfigurationRestrictionsQuery } from '~/api/query/useConfigurationR
 import { Form } from '~/components/form/Form';
 import { ROUTE_PREFIX } from '~/config';
 import { Spinner } from '~/ui/spinner';
-import { useForm, type SubmitHandler } from 'react-hook-form';
-import { useEffect, useMemo } from 'react';
 import { DEFAULT_PREFIX } from '~/components/form/constants';
-import { getDefaultValuesFromConfigObject } from '~/components/form/utils/getDefaultValuesFromConfigObject';
 import { SaveButton } from '~/components/form/components/buttons/SaveButton';
+import { useConfigurationForm } from '~/hooks/useConfigurationForm';
 
 export type InputsType = Record<string, string | number | boolean>;
 
@@ -33,31 +31,17 @@ const ConfigurationPage = () => {
   const { data: configuration, isLoading: isConfigurationLoading } =
     useConfigurationQuery(configurationName);
 
-  const defaultValues = useMemo(
-    () => getDefaultValuesFromConfigObject(configuration, pathname),
-    [configuration, pathname],
-  );
-
   const { data: configurationRestrictions, isLoading: isConfigurationRestrictionsLoading } =
     useConfigurationRestrictionsQuery(configurationName);
 
   const {
     control,
     handleSubmit,
-    getValues,
     formState: { isDirty },
-    reset,
-  } = useForm<InputsType>({ defaultValues });
-
-  const onSubmit: SubmitHandler<InputsType> = (data) => {
-    // for now only logging the values
-    // eslint-disable-next-line no-console
-    console.log(data);
-    // eslint-disable-next-line no-console
-    console.log(getValues());
-  };
-
-  useEffect(() => reset(defaultValues, { keepDirty: true }), [defaultValues]);
+    onSubmit,
+  } = useConfigurationForm({
+    configuration,
+  });
 
   if (isConfigurationLoading || isConfigurationRestrictionsLoading) {
     return <Spinner />;
