@@ -17,19 +17,19 @@ const sinon = require('sinon');
 
 const QCConfigurationAdapter = require('../../../lib/adapters/QCConfigurationAdapter.js');
 const {
-  computeRestrictions,
+  computeObjectRestrictions,
   computeArrayRestrictions,
   deriveValueType,
   getRestrictionsIntersection,
 } = QCConfigurationAdapter;
 
 describe(`'QCConfigurationAdapter' test suite`, () => {
-  describe('test computeRestrictions function', () => {
+  describe('test computeObjectRestrictions function', () => {
     it('should work for minimal input', () => {
       const configuration = {};
       const restrictions = {};
 
-      assert.deepStrictEqual(computeRestrictions(configuration), restrictions);
+      assert.deepStrictEqual(computeObjectRestrictions(configuration), restrictions);
     });
 
     it('should handle inconsistent types for the same key across objects', () => {
@@ -45,7 +45,7 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
         key3: { value: 'boolean' },
       };
 
-      assert.deepStrictEqual(computeRestrictions(configuration), expected);
+      assert.deepStrictEqual(computeObjectRestrictions(configuration), expected);
     });
 
     it('should return restrictions for a big configuration', () => {
@@ -56,7 +56,7 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
         key4: 'false',
         key5: { key1: 'nested', key2: 'false' },
       };
-      
+
       const restrictions = {
         key1: 'string',
         key2: 'number',
@@ -65,17 +65,17 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
         key5: { key1: 'string', key2: 'boolean' },
       };
 
-      assert.deepStrictEqual(computeRestrictions(configuration), restrictions);
+      assert.deepStrictEqual(computeObjectRestrictions(configuration), restrictions);
     });
 
     it('should not throw for bad input', () => {
-      assert.deepStrictEqual(computeRestrictions(), {});
-      assert.deepStrictEqual(computeRestrictions(undefined), {});
-      assert.deepStrictEqual(computeRestrictions(null), {});
-      assert.deepStrictEqual(computeRestrictions(0), {});
-      assert.deepStrictEqual(computeRestrictions(''), {});
+      assert.deepStrictEqual(computeObjectRestrictions(), {});
+      assert.deepStrictEqual(computeObjectRestrictions(undefined), {});
+      assert.deepStrictEqual(computeObjectRestrictions(null), {});
+      assert.deepStrictEqual(computeObjectRestrictions(0), {});
+      assert.deepStrictEqual(computeObjectRestrictions(''), {});
       assert.deepStrictEqual(
-        computeRestrictions([{ wrong: 'array input' }]),
+        computeObjectRestrictions([{ wrong: 'array input' }]),
         {}
       );
     });
@@ -117,16 +117,16 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
     });
 
     it('should handle object arguments properly', () => {
-      const computeRestrictionsSpy = sinon.spy(
+      const computeObjectRestrictionsSpy = sinon.spy(
         QCConfigurationAdapter,
-        'computeRestrictions'
+        'computeObjectRestrictions'
       );
-      // for object arguments, the computeRestrictions function should be called
+      // for object arguments, the computeObjectRestrictions function should be called
       deriveValueType(0);
-      assert.equal(computeRestrictionsSpy.notCalled, true);
+      assert.equal(computeObjectRestrictionsSpy.notCalled, true);
       deriveValueType({});
-      assert.equal(computeRestrictionsSpy.calledOnce, true);
-      QCConfigurationAdapter.computeRestrictions.restore();
+      assert.equal(computeObjectRestrictionsSpy.calledOnce, true);
+      QCConfigurationAdapter.computeObjectRestrictions.restore();
     });
 
     it('should handle array arguments properly', () => {
@@ -214,11 +214,11 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
           { type: 'string', active: 'boolean'},
           'string',
           { type: 'string', active: 'string'},
-          [[{ id: 'number', active: 'boolean' }, 'string'], { id: 'number', active: 'boolean' }, {}],
-          [[{ id: 'number', active: 'string' }], { id: 'number', active: 'string' }, {}],
+          [[{ id: 'number', active: 'boolean' }, 'string'], { id: 'number', active: 'boolean' }, null],
+          [[{ id: 'number', active: 'string' }], { id: 'number', active: 'string' }, null],
         ],
         { type: 'string' },
-        { id: 'number' },
+        [[], { id: 'number' }, null],
       ];
 
       assert.deepStrictEqual(computeArrayRestrictions(inputArray), expectedRestrictions);
@@ -226,19 +226,32 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
 
     it('should properly intersect blueprints of directly nested arrays', () => {
       const firstArray = [{ name: 'flp', active: 'yes' }];
-      const firstArrayRestrictions = [[{ name: 'string', active: 'string' }], { name: 'string', active: 'string'}];
+      const firstArrayRestrictions = [
+        [{ name: 'string', active: 'string' }],
+        { name: 'string', active: 'string'},
+        null, // null because firstArray does not contain directly nested arrays
+      ];
       const secondArray = [{ name: 'also-flp', active: true }];
-      const secondArrayRestrictions = [[{ name: 'string', active: 'boolean' }], { name: 'string', active: 'boolean'}];
-      const expectedRestrictions = [[firstArrayRestrictions, secondArrayRestrictions], { name: 'string' }];
-      assert.deepStrictEqual(computeArrayRestrictions([firstArray, secondArray]), expectedRestrictions);
+      const secondArrayRestrictions = [
+        [{ name: 'string', active: 'boolean' }],
+        { name: 'string', active: 'boolean'},
+        null, // null because secondArray does not contain directly nested arrays
+      ];
+      const bigArray = [firstArray, secondArray];
+      const bigArrayRestrictions = [
+        [firstArrayRestrictions, secondArrayRestrictions],
+        null, // null because bigArray does not contain any objects directly
+        [[], { name: 'string' }, null],
+      ];
+      assert.deepStrictEqual(computeArrayRestrictions(bigArray), bigArrayRestrictions);
     });
 
-    it('should properly propagate and intersect blueprints of nested arrays', () => {
+    it('should properly intersect blueprints and drop excessive data', () => {
       const innerArray1 = [{ one: 1, two: 2, three: 3 }];
       const innerArray1Restrictions = [
         [{ one: 'number', two: 'number', three: 'number' }], // content Restrictions
         { one: 'number', two: 'number', three: 'number' }, // blueprint for a new object created
-        null // blueprint for a new array created, null because array does not contain other arrays
+        null // would be a blueprint for a new array created, null because array does not contain other arrays
       ];
       const innerArray2 = [{ one: 1, three: 3 }];
       const innerArray2Restrictions = [
@@ -256,23 +269,25 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
       const firstArray = [innerArray1, innerArray2];
       const firstArrayRestrictions = [
         [innerArray1Restrictions, innerArray2Restrictions],
-        null, // null because array does not contain any objects
-        [{ one: 'number', three: 'number' }, null]
+        null, // null because firstArray does not contain any objects
+        [[], { one: 'number', three: 'number' }, null]
       ]
       const secondArray = ['text', { key: true }, innerArray3];
       const secondArrayRestrictions = [
         ['string', { key: 'boolean' }, innerArray3Restrictions],
         { key: 'boolean' },
-        [innerArray3Restrictions[1], innerArray3Restrictions[2]]
+        [[], innerArray3Restrictions[1], innerArray3Restrictions[2]]
+        // we drop the list of object restrictions above because the new array is not filled with objects yet
+        // this is excessive data we do not want in the result
       ];
 
       const bigArray = [firstArray, secondArray];
       const bigArrayRestrictions = [
         [firstArrayRestrictions, secondArrayRestrictions],
         null, // null because array does not contain any objects
-        [{ key: 'boolean' }, [{ one: 'number' }, null]] // this inner array blueprint contains
+        [[], { key: 'boolean' }, [[], { one: 'number' }, innerArray3Restrictions[2]]] // this inner array blueprint contains
         // recursive definition for inner arrays because there is a two-level-deep nested array
-      ]
+      ];
 
       assert.deepStrictEqual(computeArrayRestrictions(innerArray1), innerArray1Restrictions);
       assert.deepStrictEqual(computeArrayRestrictions(innerArray2), innerArray2Restrictions);
@@ -302,14 +317,8 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
       const third = { active: 'boolean', list: [[{ key: 'string' }], { key: 'string' }, null] }
       assert.deepStrictEqual(getRestrictionsIntersection(first, second), { test: 'string', id: 'number' });
       assert.deepStrictEqual(getRestrictionsIntersection(first, third), { active: 'boolean' });
-      assert.deepStrictEqual(
-        getRestrictionsIntersection(second, third),
-        { list: [[{ key: 'string' }], { key: 'string' }, null] },
-      );
-      assert.deepStrictEqual(
-        getRestrictionsIntersection(getRestrictionsIntersection(first, second), third),
-        {}
-      );
+      assert.deepStrictEqual(getRestrictionsIntersection(second, third), { list: [[], { key: 'string' }, null] });
+      assert.deepStrictEqual(getRestrictionsIntersection(getRestrictionsIntersection(first, second), third), {});
     });
 
     it('should intersect nested arrays correctly', () => {
@@ -324,19 +333,13 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
       const second = {
         list: [
           [{ id: "number", active: "boolean" }],
-          { id: "number" },
+          { id: "number", active: "boolean" },
           null
         ]
       };
 
-      const expected = {
-        list: [
-          [{ id: "number" }],
-          { id: "number" },
-          null
-        ]
-      };
-
+      const expected = { list: [[], { id: "number" }, null] };
+      
       assert.deepStrictEqual(getRestrictionsIntersection(first, second), expected);
     });
 
