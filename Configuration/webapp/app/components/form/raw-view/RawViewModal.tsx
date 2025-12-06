@@ -21,7 +21,8 @@ import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { RawViewer } from './RawViewer';
+// import { RawViewer } from './RawViewer';
+import { RawEditor } from './RawEditor';
 
 interface RawViewModalProps {
   open: boolean;
@@ -37,12 +38,7 @@ export const RawViewModal: FC<RawViewModalProps> = ({ open, onClose, title, data
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="md"
-      fullWidth
-    >
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ m: 0, p: 2, paddingRight: 12 }}>
         {title}
 
@@ -70,7 +66,8 @@ export const RawViewModal: FC<RawViewModalProps> = ({ open, onClose, title, data
       </DialogTitle>
 
       <DialogContent dividers>
-        <RawViewer data={data} />
+        {/* <RawViewer data={data} /> */}
+        <RawEditor data={data} />
       </DialogContent>
     </Dialog>
   );

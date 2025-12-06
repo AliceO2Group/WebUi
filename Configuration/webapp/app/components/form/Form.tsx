@@ -67,10 +67,7 @@ export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) 
   return (
     <>
       <Accordion defaultExpanded>
-        <AccordionHeader
-          title={sectionTitle}
-          viewFormToggle={() => setIsRawModalOpen(true)}
-        />
+        <AccordionHeader title={sectionTitle} viewFormToggle={() => setIsRawModalOpen(true)} />
         <AccordionDetails>
           <Stack spacing={2}>
             {Object.entries(itemsRestrictions).map(([key, value]) => renderItem(key, value))}
