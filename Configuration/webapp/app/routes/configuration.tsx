@@ -34,7 +34,7 @@ const ConfigurationPage = () => {
     useConfigurationQuery(configurationName);
 
   const defaultValues = useMemo(
-    () => getDefaultValuesFromConfigObject(configuration),
+    () => getDefaultValuesFromConfigObject(configuration, pathname),
     [configuration, pathname],
   );
 
@@ -57,7 +57,7 @@ const ConfigurationPage = () => {
     console.log(getValues());
   };
 
-  useEffect(() => () => reset(defaultValues), [defaultValues]);
+  useEffect(() => reset(defaultValues, { keepDirty: true }), [defaultValues]);
 
   if (isConfigurationLoading || isConfigurationRestrictionsLoading) {
     return <Spinner />;
@@ -73,7 +73,7 @@ const ConfigurationPage = () => {
         <Form
           control={control}
           sectionTitle={DEFAULT_PREFIX}
-          sectionPrefix={DEFAULT_PREFIX}
+          sectionPrefix={pathname}
           items={configuration}
           itemsRestrictions={configurationRestrictions}
         />
