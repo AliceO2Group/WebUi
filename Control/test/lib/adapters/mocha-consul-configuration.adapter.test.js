@@ -16,11 +16,19 @@ const assert = require('assert');
 const sinon = require('sinon');
 
 const QCConfigurationAdapter = require('../../../lib/adapters/QCConfigurationAdapter.js');
+const { LogManager } = require('@aliceo2/web-ui');
 const {
   computeObjectRestrictions,
   computeArrayRestrictions,
   deriveValueType,
   getRestrictionsIntersection,
+  getArrayRestrictionsIntersection,
+  getObjectRestrictionsIntersection,
+  isPrimitive,
+  isObject,
+  bothArePrimitive,
+  arrayIntersectionCondition,
+  objectIntersectionCondition,
 } = QCConfigurationAdapter;
 
 describe(`'QCConfigurationAdapter' test suite`, () => {
@@ -82,6 +90,16 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
   });
 
   describe('test deriveValueType function', () => {
+    it('should not throw for bad input', () => {
+      const logCreator = sinon.spy(LogManager, 'getLogger');
+
+      assert.equal(deriveValueType(null), 'unknown');
+      assert.equal(deriveValueType(undefined), 'unknown');
+      assert.equal(logCreator.calledTwice, true);
+
+      logCreator.restore();
+    });
+
     it('should handle string arguments properly', () => {
       assert.equal(deriveValueType('test'), 'string');
       assert.equal(deriveValueType(''), 'string');
@@ -126,7 +144,7 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
       assert.equal(computeObjectRestrictionsSpy.notCalled, true);
       deriveValueType({});
       assert.equal(computeObjectRestrictionsSpy.calledOnce, true);
-      QCConfigurationAdapter.computeObjectRestrictions.restore();
+      computeObjectRestrictions.restore();
     });
 
     it('should handle array arguments properly', () => {
@@ -139,13 +157,24 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
       assert.equal(computeArrayRestrictionsSpy.notCalled, true);
       deriveValueType([]);
       assert.equal(computeArrayRestrictionsSpy.calledOnce, true);
-      QCConfigurationAdapter.computeArrayRestrictions.restore();
+      computeArrayRestrictions.restore();
     });
   });
 
   describe('test computeArrayRestrictions function', () => {
     it('should return base case for empty array', () => {
       assert.deepStrictEqual(computeArrayRestrictions([]), [[], null, null]);
+    });
+
+    it('should ignore primitives when finding an intersection of types included in the array', () => {
+      const inputArray1 = ['0', false, 'text'];
+      const expectedRestrictions1 = [['number', 'boolean', 'string'], null, null];
+
+      const inputArray2 = [{ type: 'flp'}, 'text'];
+      const expectedRestrictions2 = [[{ type: 'string'}, 'string'], { type: 'string'}, null];
+
+      assert.deepStrictEqual(computeArrayRestrictions(inputArray1), expectedRestrictions1);
+      assert.deepStrictEqual(computeArrayRestrictions(inputArray2), expectedRestrictions2);
     });
 
     it('should generate identical restrictions for arrays with same content in different order', () => {
@@ -162,10 +191,7 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
       const arr = [{ name: "flp", type: "flp-Mx-03" }, { name: "ctp" }];
 
       const expected = [
-        [
-          { name: "string", type: "string" },
-          { name: "string" },
-        ],
+        [{ name: "string", type: "string" }, { name: "string" }],
         { name: "string" },
         null
       ];
@@ -193,17 +219,10 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
       assert.deepStrictEqual(computeArrayRestrictions(inputArray), expectedRestrictions);
     });
 
-    it('should ignore primitives when finding an intersection of types included in the array', () => {
-      const expectedRestrictions1 = [['number', 'boolean', 'string'], null, null];
-      const expectedRestrictions2 = [[{ type: 'string'}, 'string'], { type: 'string'}, null];
-      assert.deepStrictEqual(computeArrayRestrictions(['0', false, 'text']), expectedRestrictions1);
-      assert.deepStrictEqual(computeArrayRestrictions([{ type: 'flp'}, 'text']), expectedRestrictions2);
-    });
-
     it('should properly intersect the blueprint value for nested arrays', () => {
       const inputArray = [
         { type: 'flp', active: false },
-        'ignored-for-type-intersection',
+        'ignored-for-type-and-array-intersection',
         { type: 'ctp' , active: 'no' },
         [{ id: 0, active: true }, 'also-ignored'],
         [{ id: 0, active: 'yes' }]
@@ -231,12 +250,14 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
         { name: 'string', active: 'string'},
         null, // null because firstArray does not contain directly nested arrays
       ];
+
       const secondArray = [{ name: 'also-flp', active: true }];
       const secondArrayRestrictions = [
         [{ name: 'string', active: 'boolean' }],
         { name: 'string', active: 'boolean'},
         null, // null because secondArray does not contain directly nested arrays
       ];
+
       const bigArray = [firstArray, secondArray];
       const bigArrayRestrictions = [
         [firstArrayRestrictions, secondArrayRestrictions],
@@ -253,12 +274,14 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
         { one: 'number', two: 'number', three: 'number' }, // blueprint for a new object created
         null // would be a blueprint for a new array created, null because array does not contain other arrays
       ];
+
       const innerArray2 = [{ one: 1, three: 3 }];
       const innerArray2Restrictions = [
         [{ one: 'number', three: 'number' }],
         { one: 'number', three: 'number' },
         null // null because array does not contain other arrays which are directly nested
       ];
+
       const innerArray3 = [{ one: 1, two: 3 }];
       const innerArray3Restrictions = [
         [{ one: 'number', two: 'number' }],
@@ -271,7 +294,8 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
         [innerArray1Restrictions, innerArray2Restrictions],
         null, // null because firstArray does not contain any objects
         [[], { one: 'number', three: 'number' }, null]
-      ]
+      ];
+
       const secondArray = ['text', { key: true }, innerArray3];
       const secondArrayRestrictions = [
         ['string', { key: 'boolean' }, innerArray3Restrictions],
@@ -299,7 +323,7 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
   });
 
   describe('test getRestrictionsIntersection', () => {
-    it('does not fail for bad input', () => {
+    it('should not fail for bad input', () => {
       assert.equal(getRestrictionsIntersection('text', 'another'), null);
       assert.equal(getRestrictionsIntersection('text', 3), null);
       assert.equal(getRestrictionsIntersection(false, 'another'), null);
@@ -311,10 +335,11 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
       assert.equal(getRestrictionsIntersection(['text', 'another'], { shouldFail: true }), null);
     });
 
-    it('does find the proper intersection', () => {
+    it('should find the proper intersection', () => {
       const first = { test: 'string', id: 'number', active: 'boolean' };
       const second = { test: 'string', id: 'number', list: [[{ key: 'string' }], { key: 'string' }, null] };
-      const third = { active: 'boolean', list: [[{ key: 'string' }], { key: 'string' }, null] }
+      const third = { active: 'boolean', list: [[{ key: 'string' }], { key: 'string' }, null] };
+
       assert.deepStrictEqual(getRestrictionsIntersection(first, second), { test: 'string', id: 'number' });
       assert.deepStrictEqual(getRestrictionsIntersection(first, third), { active: 'boolean' });
       assert.deepStrictEqual(getRestrictionsIntersection(second, third), { list: [[], { key: 'string' }, null] });
@@ -322,20 +347,10 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
     });
 
     it('should intersect nested arrays correctly', () => {
-      const first = {
-        list: [
-          [{ id: "number" }],
-          { id: "number" },
-          null
-        ]
-      };
+      const first = { list: [[{ id: "number" }], { id: "number" }, null] };
 
       const second = {
-        list: [
-          [{ id: "number", active: "boolean" }],
-          { id: "number", active: "boolean" },
-          null
-        ]
+        list: [[{ id: "number", active: "boolean" }], { id: "number", active: "boolean" }, null]
       };
 
       const expected = { list: [[], { id: "number" }, null] };
@@ -350,5 +365,185 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
       assert.deepStrictEqual(getRestrictionsIntersection(first, second), { nested: {} });
     });
 
+  });
+
+  describe('test getArrayRestrictionsIntersection', () => {
+    it('should not fail for bad input', () => {
+      assert.equal(getArrayRestrictionsIntersection(null, null), null);
+    });
+
+    it('should respect any ArrayRestrictions if the second one is null', () => {
+      const verySpecificArrayRestrictions = [
+        [
+          { rareKey: 'string', specificName: 'boolean', nestedArray: [['boolean'], null, null] },
+          [['boolean', { key: 'value' }, []], { key: 'value' }, [[], null, null]],
+        ],
+        { rareKey: 'string', specificName: 'boolean', nestedArray: [['boolean'], null, null] },
+        [[], { key: 'value' }, ['boolean', { key: 'value' }, [[], null, null]]],
+      ];
+
+      assert.deepStrictEqual(
+        getArrayRestrictionsIntersection(verySpecificArrayRestrictions, null),
+        [[], verySpecificArrayRestrictions[1], verySpecificArrayRestrictions[2]],
+      );
+
+      assert.deepStrictEqual(
+        getArrayRestrictionsIntersection(null, verySpecificArrayRestrictions),
+        [[], verySpecificArrayRestrictions[1], verySpecificArrayRestrictions[2]],
+      );
+    });
+  });
+
+  describe('test getObjectRestrictionsIntersection', () => {
+    it('should not fail for bad input', () => {
+      assert.equal(getObjectRestrictionsIntersection(null, null), null);
+    });
+
+    it('should respect any ArrayRestrictions if the second one is null', () => {
+      const verySpecificObjectRestrictions = {
+        name: 'string',
+        id: 'number',
+        active: 'boolean',
+        dbCredentials: { url: 'string', username: 'string', port: 'number' },
+        list: [
+          [
+            { rareKey: 'string', specificName: 'boolean', nestedArray: [['boolean'], null, null] },
+            [['boolean', { key: 'value' }, []], { key: 'value' }, [[], null, null]],
+          ],
+          { rareKey: 'string', specificName: 'boolean', nestedArray: [['boolean'], null, null] },
+          [[], { key: 'value' }, ['boolean', { key: 'value' }, [[], null, null]]],
+        ],
+      };
+
+      assert.deepStrictEqual(
+        getObjectRestrictionsIntersection(verySpecificObjectRestrictions, null),
+        verySpecificObjectRestrictions,
+      );
+
+      assert.deepStrictEqual(
+        getObjectRestrictionsIntersection(null, verySpecificObjectRestrictions),
+        verySpecificObjectRestrictions,
+      );
+    });
+  });
+
+  describe('test isPrimitive function', () => {
+    it('should return true for strings', () => {
+      assert.strictEqual(isPrimitive('string'), true);
+      assert.strictEqual(isPrimitive('number'), true);
+      assert.strictEqual(isPrimitive('boolean'), true);
+      assert.strictEqual(isPrimitive(''), true);
+    });
+
+    it('should return false for non-strings', () => {
+      assert.strictEqual(isPrimitive(123), false);
+      assert.strictEqual(isPrimitive(true), false);
+      assert.strictEqual(isPrimitive(null), false);
+      assert.strictEqual(isPrimitive(undefined), false);
+      assert.strictEqual(isPrimitive({}), false);
+      assert.strictEqual(isPrimitive([]), false);
+      assert.strictEqual(isPrimitive(() => {}), false);
+    });
+  });
+
+  describe('test isObject function', () => {
+    it('should return true for plain objects', () => {
+      assert.strictEqual(isObject({}), true);
+      assert.strictEqual(isObject({ a: 1, b: 'two' }), true);
+    });
+
+    it('should return false for null', () => {
+      assert.strictEqual(isObject(null), false);
+    });
+
+    it('should return false for arrays', () => {
+      assert.strictEqual(isObject([]), false);
+      assert.strictEqual(isObject([1, 2, 3]), false);
+    });
+
+    it('should return false for primitives and undefined', () => {
+      assert.strictEqual(isObject('string'), false);
+      assert.strictEqual(isObject(123), false);
+      assert.strictEqual(isObject(true), false);
+      assert.strictEqual(isObject(undefined), false);
+    });
+  });
+
+  describe('test bothArePrimitive function', () => {
+    it('should return true when both are strings', () => {
+      assert.strictEqual(bothArePrimitive('string', 'number'), true);
+      assert.strictEqual(bothArePrimitive('boolean', ''), true);
+    });
+
+    it('should return false when the first is not a string', () => {
+      assert.strictEqual(bothArePrimitive(123, 'string'), false);
+      assert.strictEqual(bothArePrimitive(null, 'string'), false);
+    });
+
+    it('should return false when the second is not a string', () => {
+      assert.strictEqual(bothArePrimitive('string', 123), false);
+      assert.strictEqual(bothArePrimitive('string', {}), false);
+    });
+
+    it('should return false when neither are strings', () => {
+      assert.strictEqual(bothArePrimitive(123, true), false);
+      assert.strictEqual(bothArePrimitive({}, []), false);
+    });
+  });
+
+  describe('test arrayIntersectionCondition function', () => {
+    it('should return true for two arrays', () => {
+      assert.strictEqual(arrayIntersectionCondition([], []), true);
+    });
+
+    it('should return true for an array and null (in either order)', () => {
+      assert.strictEqual(arrayIntersectionCondition([], null), true);
+      assert.strictEqual(arrayIntersectionCondition(null, []), true);
+    });
+
+    it('should return false for two nulls', () => {
+      assert.strictEqual(arrayIntersectionCondition(null, null), false);
+    });
+
+    it('should return false if one or both are objects', () => {
+      assert.strictEqual(arrayIntersectionCondition([], {}), false);
+      assert.strictEqual(arrayIntersectionCondition({}, []), false);
+      assert.strictEqual(arrayIntersectionCondition({}, null), false);
+    });
+
+    it('should return false if one or both are primitives', () => {
+      assert.strictEqual(arrayIntersectionCondition([], 'str'), false);
+      assert.strictEqual(arrayIntersectionCondition('str', []), false);
+      assert.strictEqual(arrayIntersectionCondition('str', 'str'), false);
+      assert.strictEqual(arrayIntersectionCondition('str', null), false);
+    });
+  });
+
+  describe('test objectIntersectionCondition function', () => {
+    it('should return true for two objects', () => {
+      assert.strictEqual(objectIntersectionCondition({}, {}), true);
+    });
+
+    it('should return true for an object and null (in either order)', () => {
+      assert.strictEqual(objectIntersectionCondition({}, null), true);
+      assert.strictEqual(objectIntersectionCondition(null, {}), true);
+    });
+
+    it('should return false for two nulls', () => {
+      assert.strictEqual(objectIntersectionCondition(null, null), false);
+    });
+
+    it('should return false if one or both are arrays', () => {
+      assert.strictEqual(objectIntersectionCondition({}, []), false);
+      assert.strictEqual(objectIntersectionCondition([], {}), false);
+      assert.strictEqual(objectIntersectionCondition([], null), false);
+    });
+
+    it('should return false if one or both are primitives', () => {
+      assert.strictEqual(objectIntersectionCondition({}, 'str'), false);
+      assert.strictEqual(objectIntersectionCondition('str', {}), false);
+      assert.strictEqual(objectIntersectionCondition('str', 'str'), false);
+      assert.strictEqual(objectIntersectionCondition('str', null), false);
+    });
   });
 });

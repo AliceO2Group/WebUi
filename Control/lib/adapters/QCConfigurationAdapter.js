@@ -58,15 +58,24 @@ class QCConfigurationAdapter {
    */
   static deriveValueType = (value) => {
     if (Array.isArray(value)) { return QCConfigurationAdapter.computeArrayRestrictions(value); }
+
     if (typeof value === 'object' && value !== null) { return QCConfigurationAdapter.computeObjectRestrictions(value); }
+
     if (typeof value === 'boolean' || typeof value === 'string' &&
-      (value.toLocaleLowerCase() === 'true' || value.toLocaleLowerCase() === 'false')) {
-      return 'boolean';
-    }
-    if (typeof value === 'number' || (!isNaN(Number(value)) && value.trim() !== '')) { return 'number'; }
+      (value.toLocaleLowerCase() === 'true' || value.toLocaleLowerCase() === 'false')
+    ) { return 'boolean'; }
+
+    if (typeof value === 'number' || typeof value === 'string' &&
+      (!isNaN(Number(value)) && value.trim() !== '')
+    ) { return 'number'; }
+
     if (typeof value === 'string') { return 'string'; }
+
     const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/qc-conf-adapter`);
-    logger.warnMessage(`Unknown value encountered while calculating restrictions from a configuration: ${value}`);
+    logger.warnMessage(
+      `Unknown value encountered while calculating restrictions from a configuration: ${value}`
+    );
+
     return 'unknown';
   };
 
@@ -78,7 +87,9 @@ class QCConfigurationAdapter {
   static computeObjectRestrictions = (value) => {
     const restrictions = {};
     if (!QCConfigurationAdapter.isObject(value)) { return restrictions; }
-    Object.entries(value).forEach(([key, val]) => (restrictions[key] = QCConfigurationAdapter.deriveValueType(val)));
+    Object.entries(value).forEach(
+      ([key, val]) => (restrictions[key] = QCConfigurationAdapter.deriveValueType(val))
+    );
     return restrictions;
   };
 
@@ -150,6 +161,45 @@ class QCConfigurationAdapter {
     return null;
   };
 
+  /**
+   * Function used to calculate the intersection of blueprints of two arrays.
+   * 
+   * The value at index 0 of both arrays is excessive, since it describes the values
+   * currently held in there which is irrelevant when user chooses to create new,
+   * empty array (which will use the ArrayRestricitons we are calculating right now)
+   * 
+   * The values at index 1 (describing objects directly in the array) and
+   * the values at index 2 (describing arrays directly in the array)
+   * are calculated as usual
+   * 
+   * If one of the arguments is an array and the other one is null,
+   * the proper array is considered the valid blueprint
+   * @param {Array | null} first 
+   * @param {Array | null} second 
+   * @returns {ArrayRestrictions}
+   */
+  static getArrayRestrictionsIntersection = (first, second) => {
+    if (first === null && second === null) { return null; }
+
+    // in both cases we drop excessive data because the newly created arrays will be empty anyway
+    if (first === null) { return [[], second[1], second[2]]; }
+    if (second === null) { return [[], first[1], first[2]]; }
+
+    return [
+      [],
+      QCConfigurationAdapter.getRestrictionsIntersection(first[1], second[1]),
+      QCConfigurationAdapter.getRestrictionsIntersection(first[2], second[2]),
+    ];
+  };
+
+  /**
+   * Function used to calculate the intersection of blueprints of two objects.
+   * If one of the arguments is an object and the other one is null,
+   * the proper object is considered the valid blueprint
+   * @param {Object | null} first 
+   * @param {Object | null} second 
+   * @returns {Restrictions}
+   */
   static getObjectRestrictionsIntersection = (first, second) => {
     if (first === null) { return second; }
     if (second === null) { return first; }
@@ -165,26 +215,32 @@ class QCConfigurationAdapter {
     return restrictions;
   }
 
-  static getArrayRestrictionsIntersection = (first, second) => {
-    // in both cases we drop excessive data because the newly created arrays will be empty anyway
-    if (first === null) { return [[], second[1], second[2]]; }
-    if (second === null) { return [[], first[1], first[2]]; }
-
-    return [
-      [],
-      QCConfigurationAdapter.getRestrictionsIntersection(first[1], second[1]),
-      QCConfigurationAdapter.getRestrictionsIntersection(first[2], second[2]),
-    ];
-  };
-
+  /**
+   * A primitive value in this context is a description of value held in Configuration.
+   * This means that when we encounter a primitive value, we describe it (using Restrictions) with a string.
+   * Otherwise we define that this Restriction do not describe a primitive value, but rather an Array or an Object
+   * @param {any} value
+   * @returns {boolean} true if the values provided describes a primitive value held in Configuration
+   */
   static isPrimitive = (value) => typeof value === 'string';
 
+  /**
+   * Function designed to check if value passed is an Object specifically, excluding null and arrays
+   * @param {any} value 
+   * @returns 
+   */
   static isObject = (value) => (
     typeof value === 'object' &&
     value !== null &&
     !Array.isArray(value)
   );
 
+  /**
+   * For the definition of primitives in context of the Restrictions see the JSDoc of `isPrimitive` function above
+   * @param {any} first 
+   * @param {any} second 
+   * @returns {boolean} true if both values describe primitives
+   */
   static bothArePrimitive = (first, second) => {
     return QCConfigurationAdapter.isPrimitive(first) && QCConfigurationAdapter.isPrimitive(second);
   }
@@ -200,7 +256,10 @@ class QCConfigurationAdapter {
    */
   static arrayIntersectionCondition = (first, second) => {
     if (first === null && second === null) { return false; }
-    if ((Array.isArray(first) || first === null) && (Array.isArray(second) || second === null)) { return true; }
+    if (
+      (Array.isArray(first) || first === null) &&
+      (Array.isArray(second) || second === null)
+    ) { return true; }
     return false;
   }
 

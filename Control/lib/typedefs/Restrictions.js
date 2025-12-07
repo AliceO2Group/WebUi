@@ -100,20 +100,22 @@
  *  - at index 0 there is a nested array which describes Restrictions of each object held in input array
  *  - at index 1 there is a 'blueprint' Restrictions in case user decides to create a new object,
  *      or null if source array contains no objects
- *  - at index 2 there is a 'blueprint' of length 2 which is passed to new arrays created
- *      this inner blueprint at index 0 has a blueprint for new objects in the newly created array
- *      and at index 1 it has a blueprint for new arrays created inside of the newly created array
- *      if the source array does not contain an array, this value is null
+ *  - at index 2 there is a 'blueprint' ArrayRestrictions in case user decides to create a directly nested array
+ *      or null if source array contains no nested arrays
  * If user creates an object on the frontend, it is pre-populated according to the blueprint at index 1
- * If user creates an array on the frontend, its blueprint is populated with the two blueprints at index 2
+ * If user creates an array on the frontend, its blueprint is populated with the value at index 2
  * 
  * Example ArrayRestrictions object:
  * [
  *   [
- *     Restrictions for item #1, Restrictions for item #2
+ *     { name: 'string', id: 'number', active: 'boolean' }, // object Restrictions
+ *     { name: 'string', id: 'string', active: 'string' }, // another object Restrictions
+ *     'string', // primitive values held in the array
+ *     'number',
+ *     [['boolean', { title: 'string' }], { title: 'string' }, null] // nested array
  *   ],
- *   blueprint for newly created object,
- *   [object blueprint for new array created in this one, array blueprint for new array created in this one]
+ *   { name: 'string' }, // intersection of the objects
+ *   [[], { title: 'string' }, null] // blueprint for a new array
  * ]
  * @typedef { [Array<Restrictions>, Restrictions, Restrictions] } ArrayRestrictions
  */
