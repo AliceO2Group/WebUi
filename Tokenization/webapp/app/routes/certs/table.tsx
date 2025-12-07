@@ -14,6 +14,7 @@
 
 import { useLoaderData } from 'react-router';
 import { Box1_1 } from '~/components/box';
+import { CertsFilter } from '~/components/certs/certs-filter';
 import { CertsTable } from '~/components/certs/certs-table';
 
 /**
@@ -38,7 +39,7 @@ export default function CertsTableRoute() {
   const certs = useLoaderData();
 
   return <Box1_1 link={null}>
-    {/* <CertsFilter /> */}
+    <CertsFilter />
     <CertsTable certs={certs} />
   </Box1_1>;
 }
