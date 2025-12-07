@@ -145,52 +145,52 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
-    'should have a correctly made object info visibility button',
+    'should have a correctly made object info chevron button',
     { timeout },
     async () => {
-      const visibilityButtonClass = await page.evaluate(() =>
-        document.querySelector('.visibility-toggle-button').className);
-      match(visibilityButtonClass, /visibility-toggle-(on|off)/i);
+      const chevronButtonClass = await page.evaluate(() =>
+        document.querySelector('.chevron-button').className);
+      match(chevronButtonClass, /chevron-(right|left)/i);
     },
   );
 
   await testParent.test(
-    'should have download button and visibility button inline and to the right of the timestamp dropdown',
+    'should have download button and chevron button inline and to the right of the timestamp dropdown',
     { timeout },
     async () => {
       const positions = await page.evaluate(() => {
         const dateSelector = document.querySelector('#dateSelector');
         const dlButton = document.querySelector('.download-button');
-        const visibilityButton = document.querySelector('.visibility-toggle-button');
+        const chevronButton = document.querySelector('.chevron-button');
 
-        if (!dateSelector || !dlButton || !visibilityButton) {
+        if (!dateSelector || !dlButton || !chevronButton) {
           throw new Error('One or more elements not found on the page');
         }
 
         const dateRect = dateSelector.getBoundingClientRect();
         const dlRect = dlButton.getBoundingClientRect();
-        const visRect = visibilityButton.getBoundingClientRect();
+        const chevronRect = chevronButton.getBoundingClientRect();
 
         // Helper to get vertical center
         const verticalCenter = (rect) => (rect.top + rect.bottom) / 2;
 
         const dateCenter = verticalCenter(dateRect);
         const dlCenter = verticalCenter(dlRect);
-        const visCenter = verticalCenter(visRect);
+        const chevronCenter = verticalCenter(chevronRect);
 
         return {
           dlRightOfDate: dlRect.left > dateRect.right,
-          visRightOfDate: visRect.left > dateRect.right,
-          sameY: Math.abs(dateCenter - dlCenter) < 1 && Math.abs(dateCenter - visCenter) < 1,
+          chevronRightOfDate: chevronRect.left > dateRect.right,
+          sameY: Math.abs(dateCenter - dlCenter) < 1 && Math.abs(dateCenter - chevronCenter) < 1,
         };
       });
 
       strictEqual(positions.dlRightOfDate, true, 'Download button is not to the right of the timestamp dropdown');
-      strictEqual(positions.visRightOfDate, true, 'Visibility button is not to the right of the timestamp dropdown');
+      strictEqual(positions.chevronRightOfDate, true, 'Chevron button is not to the right of the timestamp dropdown');
       strictEqual(
         positions.sameY,
         true,
-        'Download button, visibility button, and timestamp dropdown are not vertically aligned within 1px',
+        'Download button, chevron button, and timestamp dropdown are not vertically aligned within 1px',
       );
     },
   );
@@ -322,19 +322,19 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
-    'should toggle the object information panel visibility when the visibility (toggle) button is clicked',
+    'should toggle the object information panel visibility when the chevron button is clicked',
     { timeout },
     async () => {
       // Capture initial visibility state
       const initialVisibility = await getObjectInfoPanelVisibility(page);
 
       // Click the toggle button once and check visibility
-      await page.click('.visibility-toggle-button');
+      await page.click('.chevron-button');
       await delay(100);
       const afterFirstClick = await getObjectInfoPanelVisibility(page);
 
       // Click the toggle button again to restore original state
-      await page.click('.visibility-toggle-button');
+      await page.click('.chevron-button');
       await delay(100);
       const afterSecondClick = await getObjectInfoPanelVisibility(page);
 
@@ -352,7 +352,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
-    'should redraw the JSRoot object drawing when visibility toggle changes',
+    'should redraw the JSRoot object drawing when object info panel visibility changes',
     { timeout },
     async () => {
       const initialElement = await page.waitForSelector(
@@ -360,7 +360,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         { timeout: 1000 },
       );
 
-      await page.click('.visibility-toggle-button');
+      await page.click('.chevron-button');
       await delay(100);
 
       const newElement = await page.waitForSelector(
@@ -370,12 +370,12 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
 
       const redrawn = await page.evaluate((a, b) => a.innerHTML !== b.innerHTML, initialElement, newElement);
 
-      strictEqual(redrawn, true, 'JSRoot drawing was not redrawn on visibility toggle');
+      strictEqual(redrawn, true, 'JSRoot drawing was not redrawn on object info panel visibility change');
     },
   );
 
   await testParent.test(
-    'should update localStorage state when visibility toggle button is clicked',
+    'should update localStorage state when chevron button is clicked',
     { timeout },
     async () => {
       const personId = await page.evaluate(() => window.model?.session?.personid?.toString());
@@ -387,12 +387,12 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       const visibilitySettingInitially = await getLocalStorageAsJson(page, localStorageKey);
 
       // Click the toggle button (first time)
-      await page.click('.visibility-toggle-button');
+      await page.click('.chevron-button');
       await delay(100);
       const visibilitySettingAfterFirstClick = await getLocalStorageAsJson(page, localStorageKey);
 
       // Click the toggle button (second time)
-      await page.click('.visibility-toggle-button');
+      await page.click('.chevron-button');
       await delay(100);
       const visibilitySettingAfterSecondClick = await getLocalStorageAsJson(page, localStorageKey);
 

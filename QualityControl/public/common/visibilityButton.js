@@ -12,42 +12,26 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconChevronLeft, iconChevronRight } from '/js/src/index.js';
+import { h, iconEye } from '/js/src/index.js';
 
 /**
- * @typedef {object} VisibilityToggleButtonOptions
+ * @typedef {object} VisibilityButtonOptions
  * @property {string} [id] - html id property.
  * @property {string} [class] - html class property, multiple classes can be passed as a single space seperated string.
  * @property {string} [title] - title shown on hover.
- * @property {boolean} [isVisible=true] - determines which icon is rendered.
  */
 
 /**
- * Visibility toggle button.
- * Creates an anchor element that displays an **eye** icon if visible or a **closed eye / no-eye** icon if hidden.
- * @param {VisibilityToggleButtonOptions} options - Virtual node options.
+ * Creates a visibility toggle button with an eye icon
  * @param {() => void} onclick - Callback invoked when the button is clicked.
- * @returns {vnode} - Visibility toggle button vnode.
- * @example
- * visibilityToggleButton(
- *   {
- *     isVisible: objectViewModel.getObjectInfoVisible(),
- *     title: 'Toggle object information visibility',
- *   },
- *   () => {
- *     objectViewModel.toggleObjectInfoVisible();
- *   },
- * );
+ * @param {VisibilityButtonOptions} options - Additional options for the button element
+ * @returns {object} - Visibility toggle button vnode.
  */
-export function visibilityToggleButton(options = {}, onclick) {
-  const { isVisible = true, ...restOptions } = options;
-  const mergedOptions = {
-    class: `visibility-toggle-button visibility-toggle-${isVisible ? 'on' : 'off'}`,
-    ...restOptions,
-  };
-
+export function visibilityButton(onclick, options = {}) {
+  const { ...rest } = options;
   return h('a.btn', {
-    ...mergedOptions,
+    ...rest,
+    class: ['visibility-toggle-button', rest.class || ''].join(' ').trim(),
     onclick,
-  }, isVisible ? iconChevronRight() : iconChevronLeft());
+  }, iconEye());
 }

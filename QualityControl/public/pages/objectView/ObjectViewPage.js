@@ -19,7 +19,8 @@ import { errorDiv } from '../../common/errorDiv.js';
 import { dateSelector } from '../../common/object/dateSelector.js';
 import { defaultRowAttributes, qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
 import { downloadButton } from '../../common/downloadButton.js';
-import { visibilityToggleButton } from '../../common/visibilityButton.js';
+import { chevronButton } from '../../common/chevronButton.js';
+import { objectDrawingOptions } from '../../common/object/objectDrawingOptions.js';
 
 /**
  * Shows a page to view an object on the whole page
@@ -41,19 +42,13 @@ const objectPlotAndInfo = (objectViewModel) =>
     Loading: () => spinner(10, 'Loading object...'),
     Failure: (error) => errorDiv(error),
     Success: (qcObject) => {
+      const { id, validFrom, versions } = qcObject;
       const {
-        id,
-        validFrom,
-        ignoreDefaults = false,
-        drawOptions = [],
-        displayHints = [],
-        layoutDisplayOptions = [],
-        versions,
-      } = qcObject;
-      const drawingOptions = ignoreDefaults ?
-        layoutDisplayOptions
-        : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
-      const isObjectInfoVisible = objectViewModel.objectInfoVisible;
+        ignoreDefaults,
+        drawingOptions,
+        objectInfoVisible,
+        objectDrawingOptionsVisible,
+      } = objectViewModel;
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.items-center.h-10', [
           h(
@@ -69,28 +64,44 @@ const objectPlotAndInfo = (objectViewModel) =>
               href: objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
               title: 'Download object',
             }),
-            visibilityToggleButton(
-              {
-                isVisible: isObjectInfoVisible,
-                title: 'Toggle object information visibility',
-              },
+            chevronButton(
               () => objectViewModel.toggleObjectInfoVisible(),
+              { isVisible: objectInfoVisible, title: 'Toggle object information visibility' },
             ),
           ]),
         ]),
-        h('.w-100.flex-row.g2.m2', { style: 'height: 0;flex-grow:1' }, [
+        h('.flex-row.g2.m2.flex-grow', [
           h('.flex-grow', {
-            // Key change forces redraw when toggling info panel
-            key: isObjectInfoVisible ? 'objectPlotWithoutInfoPanel' : 'objectPlotWithInfoPanel',
+            // force redraw on toggle info panel or drawing options panel
+            key: `${objectInfoVisible}-${drawingOptions}`,
           }, drawObject(qcObject, {}, drawingOptions, (error) => {
             objectViewModel.drawingFailureOccurred(error.message);
           })),
-          isObjectInfoVisible && h('.scroll-y.w-30', {
-            key: 'objectInfoPanel',
-          }, [
-            h('h3.text-center', 'Object information'),
-            qcObjectInfoPanel(qcObject, { gap: '.5em' }, defaultRowAttributes(model.notification)),
-          ]),
+          objectInfoVisible &&
+            h('.scroll-y.w-30.relative', {
+              key: 'objectInfoPanel', // force redraw on toggle drawing options panel
+            }, [
+              objectDrawingOptionsVisible &&
+                objectDrawingOptions({
+                  id,
+                  ignoreDefaults: ignoreDefaults,
+                  options: drawingOptions,
+                  nonRecognizedOptions: [],
+                  onToggleIgnoreDefaults: () => objectViewModel.toggleIgnoreDefaults(),
+                  onToggleOption: (option) => objectViewModel.toggleDrawingOption(option),
+                }),
+              h('', [
+                h('h3.text-center', 'Object information'),
+                h('', [
+                  qcObjectInfoPanel(
+                    qcObject,
+                    { gap: '.5em' },
+                    defaultRowAttributes(model.notification),
+                    () => objectViewModel.toggleDrawingOptionsVisible(),
+                  ),
+                ]),
+              ]),
+            ]),
         ]),
       ]);
     },
