@@ -11,8 +11,8 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-
-import type { useFetcher } from 'react-router';
+import { useEffect, useState } from 'react';
+import { useFetcher } from 'react-router';
 
 import type { DialogPropsBase } from '~/utils/types';
 
@@ -20,8 +20,57 @@ import { Spinner } from '~/ui/spinner';
 import { WindowButtonAccept, WindowCloseIcon, WindowContent, WindowTitle } from '~/components/window/window-objects';
 import Modal from '~/components/window/modal';
 
-export const CertsModal = ({ open, setOpen, fetcher, renew }: DialogPropsBase & { fetcher: ReturnType<typeof useFetcher>; renew?: boolean }) => (
-  <Modal
+function ParsedCertData({fetcher}: {fetcher: ReturnType<typeof useFetcher>}) {
+  return <>
+          {fetcher.data && typeof fetcher.data === 'object' && 'certContent' in fetcher.data ?
+            Object.entries((fetcher.data as { certContent: Record<string, string> }).certContent).map(([key, value]) => (
+              <div key={key}>{key}: {value}</div>
+            ))
+            : 'Error parsing certificate.'}
+         </>;
+}
+
+
+function CertsModalRegisterContent({fetcher}: {fetcher: ReturnType<typeof useFetcher>}) {
+  const _fetcher = useFetcher();
+  
+  return <div className="flex-column g2">
+            <_fetcher.Form>
+              <div className='flex-row' >
+              <label htmlFor="serviceName" className='mh2 mv1 self-center'>
+                Provide service name:
+              </label>
+              <input 
+                id="serviceName"
+                type="text" 
+                name="serviceName"
+                className='mh1 self-center' 
+                />
+              </div>
+              <button type="submit" hidden> Register Certificate </button>
+            </_fetcher.Form>
+          <pre>
+            <ParsedCertData fetcher={fetcher} />
+          </pre>
+        </div>
+}
+
+function CertsModalRenewContent({fetcher}: {fetcher: ReturnType<typeof useFetcher>}) {
+  return <div className="flex-column g2">
+          <pre>
+            <ParsedCertData fetcher={fetcher} />
+          </pre>
+        </div>
+        
+}
+
+export const CertsModal = ({ open, setOpen, fetcher, renew }: DialogPropsBase & { fetcher: ReturnType<typeof useFetcher>; renew?: boolean }) => {
+  useEffect(() => {
+    console.log(renew)
+    console.log('hello from cert modal')
+  })
+
+  return <Modal
     open={open}
     setOpen={setOpen}
     className="bg-white"
@@ -30,18 +79,13 @@ export const CertsModal = ({ open, setOpen, fetcher, renew }: DialogPropsBase & 
     <WindowContent>
       { fetcher.state === 'loading' || fetcher.state === 'submitting'
         ? <Spinner />
-        : <div className="flex-column g2">
-          <pre>
-            {fetcher.data && typeof fetcher.data === 'object' && 'certContent' in fetcher.data ?
-              Object.entries((fetcher.data as { certContent: Record<string, string> }).certContent).map(([key, value]) => (
-                <div key={key}>{key}: {value}</div>
-              ))
-              : 'Error parsing certificate.'}
-          </pre>
-        </div>
+        : (renew
+            ? <CertsModalRenewContent fetcher={fetcher} />
+            : <CertsModalRegisterContent fetcher={fetcher} />
+          )
       }
     </WindowContent>
     <WindowButtonAccept/>
     <WindowCloseIcon />
   </Modal>
-);
+};
