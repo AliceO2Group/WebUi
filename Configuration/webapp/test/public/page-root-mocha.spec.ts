@@ -131,4 +131,46 @@ describe('`pageRoot` test-suite', function () {
     const configNavigatorItems = await page.$$('.config_navigator__item');
     assert.strictEqual(configNavigatorItems.length > 0, true);
   });
+
+  describe('File System Tests', function () {
+    const SELECTORS = {
+      folderIcon: 'svg[data-testid="FolderIcon"]',
+      fileIcon: 'svg[data-testid="InsertDriveFileIcon"]',
+      listItem: '.config_navigator__item',
+    };
+
+    beforeEach(async function () {
+      if (!page || !url) {
+        this.skip();
+      }
+      await page.goto(`${url}/configuration`, { waitUntil: 'networkidle0' });
+    });
+
+    it('should differentiate between files and folders', async function () {
+      await Promise.all([
+        page?.waitForSelector(SELECTORS.folderIcon),
+        page?.waitForSelector(SELECTORS.fileIcon),
+      ]);
+
+      const folderCount = await page?.$$eval(SELECTORS.folderIcon, (els) => els.length) ?? 0;
+      assert.ok(folderCount > 0, 'Should render at least one folder');
+    });
+
+    it('should expand folder on click', async function () {
+      const initialCount = await page?.$$eval(SELECTORS.listItem, (els) => els.length) ?? 0;
+
+      await page?.waitForSelector(SELECTORS.folderIcon);
+      await page?.click(SELECTORS.folderIcon);
+
+      await page?.waitForFunction(
+        (selector, startCount) => document.querySelectorAll(selector).length > startCount,
+        {},
+        SELECTORS.listItem,
+        initialCount,
+      );
+
+      const finalCount = await page?.$$eval(SELECTORS.listItem, (els) => els.length) ?? 0;
+      assert.ok(finalCount > initialCount, 'List should have more items after expanding');
+    });
+  });
 });

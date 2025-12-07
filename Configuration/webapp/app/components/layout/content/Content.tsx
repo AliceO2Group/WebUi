@@ -16,7 +16,6 @@ import { Box } from '@mui/material';
 import { type FC, type PropsWithChildren } from 'react';
 import { ContentHeader } from './ContentHeader';
 import { useParams } from 'react-router';
-import { DRAWER_WIDTH } from '../drawer/LeftDrawer';
 import { useDrawer } from '../../../contexts/DrawerContext';
 
 /**
@@ -27,30 +26,24 @@ import { useDrawer } from '../../../contexts/DrawerContext';
  * @returns {React.ReactElement} Content
  */
 export const Content: FC<PropsWithChildren> = ({ children }) => {
-  const { isOpen } = useDrawer();
+  const { isOpen, drawerWidth, getTransition } = useDrawer();
   const params = useParams<{ '*': string }>();
   const configPath = params['*'];
   return (
     <Box
       component="main"
       sx={{
+        display: 'flex',
+        flexDirection: 'column',
         flexGrow: 1,
         bgcolor: 'background.default',
-        marginLeft: isOpen ? 0 : `-${DRAWER_WIDTH}px`,
-        transition: (theme) =>
-          theme.transitions.create('margin', {
-            easing: isOpen ? theme.transitions.easing.easeOut : theme.transitions.easing.sharp,
-            duration: isOpen
-              ? theme.transitions.duration.enteringScreen
-              : theme.transitions.duration.leavingScreen,
-          }),
+        marginLeft: isOpen ? 0 : `-${drawerWidth}px`,
+        transition: getTransition('content'),
       }}
       className="content-section"
     >
       <ContentHeader currentPath={configPath ?? ''} />
-      <Box sx={{ p: 3, overflow: 'auto', flexFrow: 1, minHeight: 0, maxHeight: '100%' }}>
-        {children}
-      </Box>
+      <Box sx={{ p: 3, overflow: 'auto', flexGrow: 1 }}>{children}</Box>
     </Box>
   );
 };
