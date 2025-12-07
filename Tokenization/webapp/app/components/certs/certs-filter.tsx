@@ -11,20 +11,3 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-
-import { useState, useEffect } from 'react';
-import type { useFetcher } from 'react-router';
-
-/**
- *
- */
-export function useOpenCertModal(fetcher: ReturnType<typeof useFetcher>) {
-
-  const [certModalOpen, setCertModalOpen] = useState<boolean>(false);
-  useEffect(() => {
-    if (['submitting', 'loading'].includes(fetcher.state)) {
-      setCertModalOpen(true);
-    }
-  }, [fetcher, fetcher.state]);
-  return [certModalOpen, setCertModalOpen];
-}

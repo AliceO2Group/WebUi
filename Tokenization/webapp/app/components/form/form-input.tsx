@@ -70,13 +70,16 @@ export function FormInput<T extends string | number = string>({
   );
 }
 
+/**
+ *
+ */
 export function FormInputFile({ name }: { name: string }) {
   const style = {
     border: '2px dashed black',
     padding: '1rem',
     cursor: 'pointer',
     width: '60%',
-  }
+  };
 
   const divRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -85,16 +88,16 @@ export function FormInputFile({ name }: { name: string }) {
     if (divRef.current) {
       inputRef.current?.click();
     }
-  }
+  };
 
   const onDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-  }
+  };
 
   const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    const files = event.dataTransfer.files;
-    if(inputRef.current) {
+    const { files } = event.dataTransfer;
+    if (inputRef.current) {
       const dataTransfer = new DataTransfer();
       for (let i = 0; i < files.length; i++) {
         dataTransfer.items.add(files[i]);
@@ -102,30 +105,30 @@ export function FormInputFile({ name }: { name: string }) {
       inputRef.current.files = dataTransfer.files;
     }
 
-    // triggering input change event to notify form about new file
+    // Triggering input change event to notify form about new file
     const changeEvent = new Event('input', { bubbles: true });
     inputRef.current?.dispatchEvent(changeEvent);
-  }
+  };
 
   const onInputChange = () => {
-    if(inputRef.current) {
-      inputRef.current.value = '' // reset file input to allow uploading the same file again
+    if (inputRef.current) {
+      inputRef.current.value = ''; // Reset file input to allow uploading the same file again
     }
-  }
+  };
 
-  return <div className="flex-row justify-center"> 
-      <div 
-      style={style} 
-      ref={divRef} 
-      onClick={onClick} 
+  return <div className="flex-row justify-center">
+    <div
+      style={style}
+      ref={divRef}
+      onClick={onClick}
       onDrop={onDrop}
       onDragOver={onDragOver}
-      >
+    >
       <span className="flex-row justify-center"> Choose file or drag & drop here </span>
       <input type="file" name={name} hidden onChange={onInputChange} ref={inputRef} />
       <div className="flex-row justify-center mv3 f2">
         <IconDataTransferUpload  />
       </div>
     </div>
-  </div>
+  </div>;
 }
