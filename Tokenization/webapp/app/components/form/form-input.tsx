@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import React from 'react';
+import React, { type PropsWithChildren } from 'react';
 import { type FormInputInterface } from './form.d';
 
 /**
@@ -30,16 +30,14 @@ import { type FormInputInterface } from './form.d';
  * @param {React.InputHTMLAttributes<HTMLInputElement>} [props.inputProps] - Props spread onto the input element.
  *
 */
-export function FormInput<T extends string | number = string>({
+function FormInput<T extends string | number = string>({
   value,
   setValue,
   labelText,
-  containerProps,
-  labelProps,
-  inputProps,
-}: FormInputInterface<T>) {
-  const inputId = inputProps?.id ?? labelProps?.htmlFor ?? undefined;
+  name,
+}: PropsWithChildren<FormInputInterface<T>>) {
 
+  // If setValue and value are provided than input is controlled
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { target } = e;
     let newVal: T;
@@ -49,22 +47,48 @@ export function FormInput<T extends string | number = string>({
     } else {
       newVal = target.value as T;
     }
-    setValue(newVal);
+    setValue?.(newVal);
   };
 
   return (
-    <div className='my-input' {...containerProps}>
+    <div className='my-input'>
       {labelText && (
-        <label {...labelProps} htmlFor={inputId}>
+        <label htmlFor={name}>
           {labelText}
         </label>
       )}
       <input
-        {...inputProps}
-        id={inputId}
+        id={name}
+        name={name}
         value={value as unknown as string}
         onChange={handleChange}
       />
     </div>
   );
+}
+
+/**
+ * FormInputNumber
+ *
+ * Number input specialization of FormInput.
+ *
+ * @param {object} props - component props
+ * @param {number} props.value - current numeric value
+ * @param {(v: number) => void} props.setValue - setter for the numeric value
+ * @param {string} [props.labelText] - optional label text
+ * @param {string} props.name - input name attribute
+ *
+ * notes:
+ * - step is set to 1 and min to 0 in the input element
+ * - if value and setValue are provided than input is controlled
+ */
+export function FormInputNumber({ value, setValue, labelText, name }: FormInputInterface) {
+  return <FormInput
+    value={value}
+    setValue={setValue}
+    labelText={labelText}
+    name={name}
+  >
+    <input type='number' step={1} min={0}/>
+  </FormInput>;
 }

@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { FormInput } from '~/components/form/form-input';
+import { FormInputNumber } from '~/components/form/form-input';
 import { FormSelectMulti, FormSelect } from '~/components/form/form-select';
 import { SelectGroup } from '~/components/form/select-group';
 import { ResetButton, SubmitButton } from '~/components/form/form-buttons';
@@ -21,6 +21,8 @@ import { Form } from '../form/form';
 import Modal from '~/components/window/modal';
 import { WindowTitle, WindowContent, WindowButtonAccept, WindowButtonCancel, WindowCloseIcon } from '~/components/window/window-objects';
 import Alert from '../window/alert';
+import { useAuth } from '~/utils/session';
+import { useEffect } from 'react';
 
 const httpMethodOptions = [
   { value: 'GET', label: 'GET' },
@@ -34,13 +36,15 @@ const httpMethodOptions = [
  */
 export function TokenForm() {
   const { state, actions } = useTokenForm();
+  const { fetcher, ref } = state;
+
   return (
-    <Form>
-      <FormInput
+    <Form submitRef={ref} fetcher={fetcher} action="/tokens/new">
+      <FormInputNumber
+        name="expiration-time"
         labelText="Expiration Time (hours):"
         value={state.expirationTime}
         setValue={actions.setExpirationTime}
-        inputProps={{ type: 'number', step: 1, min: 0 }}
       />
       <FormSelectMulti
         id="http-select-methods"
@@ -85,6 +89,41 @@ export function TokenForm() {
  */
 export function TokenFormWindows() {
   const { state, actions } = useTokenForm();
+  const { fetcher } = state;
+  const { submit } = actions;
+
+  const auth = useAuth('admin');
+  const { setAlert, setOpenAlert, setOpenModal } = actions;
+
+  const callApi = () => {
+    if (auth) {
+      submit();
+    } else {
+      setAlert({ key: Date.now(),
+        title: 'Authorization error',
+        message: 'You cannot perform this action without authorization.',
+        success: false });
+      setOpenAlert(true);
+    }
+    setOpenModal(false);
+  };
+
+  useEffect(() => {
+    if (fetcher.state === 'idle' && (fetcher.data as any)?.success === true) {
+      setAlert({ key: Date.now(),
+        title: 'Token created',
+        message: 'Token has been created successfully.',
+        success: true });
+      setOpenAlert(true);
+    } else if (fetcher.state === 'idle' && (fetcher.data as any)?.success === false) {
+      setAlert({ key: Date.now(),
+        title: 'Token creation failed',
+        message: 'An error occurred while creating the token.',
+        success: false });
+      setOpenAlert(true);
+    }
+  }, [fetcher, fetcher.state, setAlert, setOpenAlert]);
+
   return (
     <>
       <Modal open={state.openModal} setOpen={actions.setOpenModal} className="bg-primary">
@@ -98,7 +137,7 @@ export function TokenFormWindows() {
             <div>HTTP methods: {state.selectedMethods.join(', ')}</div>
           </div>
         </WindowContent>
-        <WindowButtonAccept className="btn-success" action={actions.callApi} />
+        <WindowButtonAccept className="btn-success" action={callApi} />
         <WindowButtonCancel />
       </Modal>
       <Alert

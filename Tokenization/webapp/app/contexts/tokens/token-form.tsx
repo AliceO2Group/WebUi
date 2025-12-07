@@ -15,7 +15,8 @@
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import type { OptionType, HttpMethod } from '~/utils/types';
 import type { AlertType } from '~/components/window/alert';
-import { useAuth } from '~/utils/session';
+import useForm from '~/components/hooks/useForm';
+import type { useFetcher } from 'react-router';
 
 type State = {
   loaderData?: OptionType[];
@@ -28,6 +29,8 @@ type State = {
   openAlert: boolean;
   openModal: boolean;
   alert: AlertType | null;
+  fetcher: ReturnType<typeof useFetcher>;
+  ref: React.RefObject<HTMLButtonElement | null>;
 };
 
 type Actions = {
@@ -37,9 +40,10 @@ type Actions = {
   setSelectedMethods: React.Dispatch<React.SetStateAction<HttpMethod[]>>;
   onSubmit: () => void;
   onReset: () => void;
-  callApi: () => void;
   setOpenAlert: React.Dispatch<React.SetStateAction<boolean>>;
   setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setAlert: React.Dispatch<React.SetStateAction<AlertType | null>>;
+  submit: () => void;
 };
 
 export const TokenFormContext = createContext<{ state: State; actions: Actions } | undefined>(undefined);
@@ -64,7 +68,7 @@ export function TokenFormProvider({ loaderData, children }: { loaderData?: Optio
   const [openAlert, setOpenAlert] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [alert, setAlert] = useState<AlertType | null>(null);
-  const auth = useAuth('admin');
+  const { fetcher, ref, submit } = useForm();
 
   useEffect(() => {
     if (!loaderData) {
@@ -106,22 +110,6 @@ export function TokenFormProvider({ loaderData, children }: { loaderData?: Optio
     setSelectedMethods([]);
   }, [setExpirationTime, setFirstSelectedService, setSecondSelectedService, setSelectedMethods]);
 
-  const callApi = useCallback(() => {
-    if (auth) {
-      setAlert({ key: Date.now(),
-        title: 'Token created',
-        message: 'Token has been created successfully.',
-        success: true });
-    } else {
-      setAlert({ key: Date.now(),
-        title: 'Authorization error',
-        message: 'You cannot perform this action without authorization.',
-        success: false });
-    }
-    setOpenAlert(true);
-    setOpenModal(false);
-  }, [auth, setOpenAlert, setAlert, setOpenModal]);
-
   const state = useMemo(() => ({
     loaderData,
     expirationTime,
@@ -133,6 +121,8 @@ export function TokenFormProvider({ loaderData, children }: { loaderData?: Optio
     openAlert,
     openModal,
     alert,
+    fetcher,
+    ref,
   }),
   [loaderData,
     expirationTime,
@@ -144,11 +134,13 @@ export function TokenFormProvider({ loaderData, children }: { loaderData?: Optio
     openAlert,
     openModal,
     alert,
+    fetcher,
+    ref,
   ]);
 
   const actions: Actions = useMemo(() => ({
     setExpirationTime, setFirstSelectedService, setSecondSelectedService, setSelectedMethods,
-    onSubmit, onReset, callApi, setOpenAlert, setOpenModal,
+    onSubmit, onReset, setAlert, setOpenAlert, setOpenModal, submit,
   }),
   [setExpirationTime,
     setFirstSelectedService,
@@ -158,7 +150,8 @@ export function TokenFormProvider({ loaderData, children }: { loaderData?: Optio
     setOpenModal,
     onSubmit,
     onReset,
-    callApi,
+    setAlert,
+    submit,
   ]);
 
   return <TokenFormContext.Provider value={{ state, actions }}>{children}</TokenFormContext.Provider>;

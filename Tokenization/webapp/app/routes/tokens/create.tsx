@@ -12,10 +12,20 @@
  * or submit itself to any jurisdiction.
  */
 
+import type { Route } from './+types/overview';
+
 import { TokenFormProvider } from '~/contexts/tokens/token-form';
 import { TokenForm, TokenFormWindows } from '~/components/tokens/token-form';
 import { Box1_1 } from '~/components/box';
 import type { OptionType } from '~/utils/types';
+
+// eslint-disable-next-line jsdoc/require-jsdoc
+export async function clientAction({ request }: Route.ClientActionArgs) {
+  const formData = await request.formData();
+  // eslint-disable-next-line no-console
+  console.log(Object.fromEntries(formData.entries()));
+  return { success: true };
+}
 
 // eslint-disable-next-line jsdoc/require-jsdoc
 export function clientLoader(): OptionType[] {

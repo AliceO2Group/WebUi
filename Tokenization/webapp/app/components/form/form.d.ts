@@ -17,12 +17,10 @@ import { type SetStateAction } from 'react';
 import type { OptionType as Option, DialogPropsBase as DPB } from '../../utils/types';
 
 export interface FormInputInterface<T extends string | number = string> {
-  value: T;
-  setValue: React.Dispatch<React.SetStateAction<T>>;
+  value?: T;
+  setValue?: React.Dispatch<SetStateAction<T>>;
   labelText?: string;
-  containerProps?: React.HTMLAttributes<HTMLDivElement>;
-  labelProps?: React.LabelHTMLAttributes<HTMLLabelElement>;
-  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+  name: string;
 }
 
 export interface SelectInterface<T = string | number | (string | number)[], V = T extends Array<infer U> ? U : T> {
