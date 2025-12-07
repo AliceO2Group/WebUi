@@ -144,7 +144,7 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
       assert.equal(computeObjectRestrictionsSpy.notCalled, true);
       deriveValueType({});
       assert.equal(computeObjectRestrictionsSpy.calledOnce, true);
-      computeObjectRestrictions.restore();
+      computeObjectRestrictionsSpy.restore();
     });
 
     it('should handle array arguments properly', () => {
@@ -157,7 +157,7 @@ describe(`'QCConfigurationAdapter' test suite`, () => {
       assert.equal(computeArrayRestrictionsSpy.notCalled, true);
       deriveValueType([]);
       assert.equal(computeArrayRestrictionsSpy.calledOnce, true);
-      computeArrayRestrictions.restore();
+      computeArrayRestrictionsSpy.restore();
     });
   });
 
