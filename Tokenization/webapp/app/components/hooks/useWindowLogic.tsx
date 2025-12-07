@@ -17,6 +17,7 @@ import { type WindowInterface } from '../window/window.d';
 
 import { type ButtonInterface, type WindowElementsWithAction } from '../window/window.d';
 import { WindowTitle, WindowContent, WindowButtonAccept, WindowButtonCancel, WindowCloseIcon } from '../window/window-objects';
+import { checkIsComponentOfType } from '~/utils/component-type-checker';
 
 /**
  * GetWindowChildrenAndActions
@@ -37,7 +38,6 @@ import { WindowTitle, WindowContent, WindowButtonAccept, WindowButtonCancel, Win
  */
 function getWindowChildrenAndActions({ children }: PropsWithChildren) {
   const arrChildren = React.Children.toArray(children);
-  const checkIsComponentOfType = (c: React.ReactNode, otype: React.ElementType): boolean => React.isValidElement(c) && c.type === otype;
 
   const title = arrChildren.find(
     (child) => checkIsComponentOfType(child, WindowTitle),

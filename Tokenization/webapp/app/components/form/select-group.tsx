@@ -14,11 +14,74 @@
 
 import React, { type PropsWithChildren } from 'react';
 import type { SelectInterface } from './form.d';
+import type { OptionType } from '~/utils/types';
 
 import { FormSelect } from './form-select';
+import { checkIsComponentOfType } from '~/utils/component-type-checker';
 
-// Helper function which checks if a component is of a certain type
-const checkIsComponentOfType = (c: React.ReactNode, otype: React.ElementType): boolean => React.isValidElement(c) && c.type === otype;
+/**
+ * collectSelectsInfo
+ *
+ * Inspects children to collect FormSelect components and their options and values.
+ *
+ * @param {React.ReactNode} children - child nodes which may include FormSelect components
+ *
+ * @returns {object} - object containing:
+ *   - selects: array of FormSelect components found among children
+ *   - selectsLen: number of FormSelect components found
+ *   - optionsList: array of options arrays for each FormSelect
+ *   - values: array of selected values for each FormSelect
+ */
+function collectSelectsInfo(children: React.ReactNode) {
+  const arrChildren = React.Children.toArray(children);
+  const selects = arrChildren.filter((component) => checkIsComponentOfType(component, FormSelect));
+  const optionsList = selects.map((select) => React.isValidElement(select) ? (select.props as SelectInterface).options : null);
+  const values = selects.map((select) => React.isValidElement(select) ? (select.props as SelectInterface).value : null);
+  const selectsLen = selects.length;
+
+  return {
+    selects,
+    selectsLen,
+    optionsList,
+    values,
+  };
+}
+
+type valuesType = (string | number | (string | number)[] | null)[];
+
+/**
+ * FilterSelectedFromOptions
+ *
+ * Clones select components with filtered options to remove already selected values from other selects.
+ *
+ * @param {React.ReactNode[]} selects - array of select components
+ * @param {number} selectsLen - length of selects array
+ * @param {(OptionType[] | null)[]} optionsList - array of options arrays for each select
+ * @param {valuesType} values - array of selected values for each select
+ *
+ * @returns {React.ReactNode[]} - array of cloned select components with filtered options
+ */
+function filterSelectedFromOptions(selects: React.ReactNode[], selectsLen: number, optionsList: (OptionType[] | null)[], values: valuesType) {
+  const returnChildren = [];
+
+  for (let i = 0; i < selectsLen; i++) {
+    let select = selects[i];
+    let options = optionsList[i];
+
+    // Get all values selected in other selects
+    const differentSelectValues = values.filter((_, idx) => idx != i);
+
+    if (options !== null) {
+      options = options.filter((opt) => !differentSelectValues.includes(opt.value));
+      select = React.cloneElement(select as React.ReactElement<SelectInterface>, {
+        options: options,
+      });
+    }
+    returnChildren.push(select);
+  }
+
+  return [...returnChildren];
+}
 
 /**
  * SelectGroup
@@ -35,28 +98,6 @@ const checkIsComponentOfType = (c: React.ReactNode, otype: React.ElementType): b
  * - Clones and returns modified select children; non-select children are not displayed so they shouldn't be used.
  */
 export function SelectGroup({ children }: PropsWithChildren) {
-  const arrChildren = React.Children.toArray(children);
-  const selects = arrChildren.filter((component) => checkIsComponentOfType(component, FormSelect));
-  const optionsList = selects.map((select) => React.isValidElement(select) ? (select.props as SelectInterface).options : null);
-  const values = selects.map((select) => React.isValidElement(select) ? (select.props as SelectInterface).value : null);
-
-  const returnChildren = [];
-  const noSelects = selects.length;
-
-  for (let i = 0; i < noSelects; i++) {
-    let select = selects[i];
-    let options = optionsList[i];
-
-    const differentSelectValues = values.filter((_, idx) => idx != i);
-
-    if (options !== null) {
-      options = options.filter((opt) => !differentSelectValues.includes(opt.value));
-      select = React.cloneElement(select as React.ReactElement<SelectInterface>, {
-        options: options,
-      });
-    }
-    returnChildren.push(select);
-  }
-
-  return [...returnChildren];
+  const { selects, selectsLen, optionsList, values } = collectSelectsInfo(children);
+  return filterSelectedFromOptions(selects, selectsLen, optionsList, values);
 }

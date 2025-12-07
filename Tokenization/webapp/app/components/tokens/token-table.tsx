@@ -18,7 +18,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 
 import { useAuth } from '~/utils/session';
-import ActionBlock from './action-block';
+import { ActionBlockSolo, ActionBlockBulk } from './action-block';
 import Modal from '../window/modal';
 import Alert from '../window/alert';
 import { WindowTitle, WindowContent, WindowButtonCancel, WindowButtonAccept, WindowCloseIcon } from '../window/window-objects';
@@ -41,26 +41,47 @@ import { TableBase } from '../table/table-base';
 function TokenTableBase({
   tokens,
   columns,
-  onActionClick,
 }: {
   tokens: Token[];
-  columns: { key: string; label: string; render?: (t: Token) => React.ReactNode }[];
-  onActionClick: (tokenId: string) => void;
+  columns: { key: string; label: string | (() => React.ReactNode); render?: (t: Token) => React.ReactNode }[];
 }) {
 
-  const wrappedColumns = columns.map((col) =>
-    col.key === 'actions'
-      ? {
-        ...col,
-        render: (t: Token) => <ActionBlock tokenId={t.id} onClick={() => onActionClick(t.id)} />,
-      }
-      : col,
-  );
-
   return (
-    <TableBase<Token> data={tokens} columns={wrappedColumns} />
+    <div className="scroll-auto">
+      <table className="table">
+        <thead>
+          <tr>
+            {columns.map((c) => (
+              <th key={c.key}>{typeof c.label === 'function' ? c.label() : c.label}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {tokens.map((token: Token) => (
+            <tr key={token.tokenId}>
+              {columns.map((col) => (
+                <td key={col.key}>
+                  { }
+                  {col.render ? col.render(token) : String((token as any)[col.key] ?? '')}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
+
+const successInfo = {
+  title: 'Token(s) deleted',
+  content: 'Token(s) deleted successfully',
+};
+
+const failureInfo = {
+  title: 'Authorization error',
+  content: "You don't have permission to do that operation!",
+};
 
 /**
  * TokenTableContainer
@@ -75,23 +96,13 @@ function TokenTableContainer({
   columns,
 }: {
   tokens: Token[];
-  columns: { key: string; label: string; render?: (t: Token) => React.ReactNode }[];
+  columns: { key: string; label: string | (() => React.ReactNode); render?: (t: Token) => React.ReactNode }[];
 }) {
   const [openM, setOpenM] = useState<boolean>(false);
   const [openA, setOpenA] = useState<boolean>(false);
   const [tokenId, setTokenId] = useState<string>('');
   const auth = useAuth('admin');
   const [key, setKey] = useState<number>(0); // Used to force re-mount of Alert component
-
-  const successInfo = {
-    title: 'Token deleted',
-    content: 'Token deleted successfully',
-  };
-
-  const failureInfo = {
-    title: 'Authorization error',
-    content: "You don't have permission to do that operation!",
-  };
 
   const deleteToken = () => {
     if (auth) {
@@ -103,18 +114,38 @@ function TokenTableContainer({
     setTokenId('');
   };
 
+  const [windowContent, setWindowContent] = useState<string>('');
+
+  // Onclick handler for both bulk and solo action blocks
   const onActionClick = (id: string) => {
-    setTokenId(id);
+    if ( id === 'bulk') {
+      setWindowContent('Are you sure you want to delete ALL FILTERED tokens? Check filtering before proceeding.');
+    } else {
+      setTokenId(id);
+      setWindowContent(`Are you sure you want to delete token with id: ${id}?`);
+    }
     setOpenM(true);
   };
 
+  // Wrap columns to inject ActionBlock components with proper handlers for bulk and solo actions
+  const wrappedColumns = columns.map((col) =>
+    col.key === 'actions'
+      ? {
+        ...col,
+        label: typeof col.label === 'function'
+          ? () => <div className="flex-row g1"><span>Actions</span><ActionBlockBulk onClick={() => onActionClick('bulk')} /></div>
+          : col.label,
+        render: (t: Token) => <ActionBlockSolo onClick={() => onActionClick(t.tokenId)} />,
+      }
+      : col,
+  );
+
   return (
     <>
-      <TokenTableBase tokens={tokens} columns={columns} onActionClick={onActionClick} />
-
+      <TokenTableBase tokens={tokens} columns={wrappedColumns} />
       <Modal open={openM} setOpen={setOpenM} className="bg-primary">
         <WindowTitle>Token delete</WindowTitle>
-        <WindowContent>Are you sure you want to delete token with id: {tokenId}?</WindowContent>
+        <WindowContent>{windowContent}</WindowContent>
         <WindowButtonCancel />
         <WindowCloseIcon />
         <WindowButtonAccept action={deleteToken} className="btn-danger" />
@@ -129,24 +160,27 @@ function TokenTableContainer({
   );
 }
 
+// Common columns for all table variants
+const columns = [
+  { key: 'tokenId', label: 'ID', render: (t: Token) => <Link to={`/tokens/${t.tokenId}`}>{t.tokenId}</Link> },
+  { key: 'serviceFrom', label: 'Service From' },
+  { key: 'serviceTo', label: 'Service To' },
+  { key: 'exp', label: 'Expires at' },
+  {
+    key: 'actions',
+    label: 'Actions',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    render: (t: Token) => (null),
+  },
+];
+
 /**
  * TokenTable
  *
  * Original table using standard columns.
+ * @param props.tokens - token list
  */
 export function TokenTable({ tokens }: { tokens: Token[] }) {
-  const columns = [
-    { key: 'id', label: 'ID', render: (t: Token) => <Link to={`/tokens/${t.id}`}>{t.id}</Link> },
-    { key: 'serviceFrom', label: 'Service From' },
-    { key: 'serviceTo', label: 'Service To' },
-    { key: 'exp', label: 'Expires at' },
-    {
-      key: 'actions',
-      label: 'Actions',
-      render: (t: Token) => <ActionBlock tokenId={t.id} onClick={() => { /* Delegated via container */ }} />,
-    },
-  ];
-
   // Delegate to container; TokenTableContainer will call onRequestAction internally via same ActionBlock usage pattern.
   return <TokenTableContainer tokens={tokens} columns={columns} />;
 }
@@ -154,22 +188,21 @@ export function TokenTable({ tokens }: { tokens: Token[] }) {
 /**
  * TokenTableWithIssuedAt
  *
- * Variant that adds "Issued at" column.
+ * Variant that adds "Issued at" and "HTTP Methods (permissions)" columns.
+ * @param props.tokens - token list
  */
-export function TokenTableWithIssuedAt({ tokens }: { tokens: Token[] }) {
-  const columns = [
-    { key: 'id', label: 'ID', render: (t: Token) => <Link to={`/tokens/${t.id}`}>{t.id}</Link> },
-    { key: 'serviceFrom', label: 'Service From' },
-    { key: 'serviceTo', label: 'Service To' },
-    { key: 'iat', label: 'Issued at', render: (t: Token) => String(t.iat ?? '') },
-    { key: 'exp', label: 'Expires at' },
-    { key: 'perm', label: 'HTTP Methods', render: (t: Token) => String(t.permissions.join(', ') ?? '') },
+export function TokenTableExtended({ tokens }: { tokens: Token[] }) {
+  const columns_extended = [
+    ...columns.slice(0, 4),
+    { key: 'iat', label: 'Issued at', render: (t: Token) => String((t as any).iat ?? '') },
+    { key: 'perm', label: 'HTTP Methods', render: (t: Token) => String((t as any).permissions.join(', ') ?? '') },
     {
       key: 'actions',
-      label: 'Actions',
-      render: (t: Token) => <ActionBlock tokenId={t.id} onClick={() => { /* Delegated via container */ }} />,
+      label: () => (null), // Updated in TableContainer
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      render: (t: Token) => (null), // Updated in TableContainer
     },
   ];
 
-  return <TokenTableContainer tokens={tokens} columns={columns} />;
+  return <TokenTableContainer tokens={tokens} columns={columns_extended} />;
 }

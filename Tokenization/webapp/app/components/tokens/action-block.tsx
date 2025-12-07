@@ -15,30 +15,51 @@
 import { IconDelete } from '~/ui/icon';
 
 interface ActionBlockProps {
-  tokenId: string;
   onClick: () => void;
+  title?: string;
 }
 
 /**
  * ActionBlock
  *
- * Small UI block that renders action controls for a token (currently a delete button).
+ * Small UI block that renders action button with specified click handler and title.
  *
  * @param {object} props - component props
- * @param {string} props.tokenId - id of the token the actions operate on (used for aria/title)
  * @param {() => void} props.onClick - click handler invoked when the action button is pressed
+ * @param {string} props.title - optional title for the action button
  */
-export default function ActionBlock({ tokenId, onClick }: ActionBlockProps) {
+export function ActionBlockBase({ onClick, title }: ActionBlockProps) {
   return (
     <div>
       <button
         className="bg-danger btn-sm static"
         onClick={onClick}
-        aria-label={`Delete token ${tokenId}`}
-        title="Delete token"
+        title={title}
       >
         <IconDelete />
       </button>
     </div>
   );
+}
+
+/**
+ *  ActionBlockBulk
+ *
+ *  UI block that renders action button for bulk token revocation.
+ *
+ *  @param {object} props - component props
+ *  @param {() => void} props.onClick - click handler invoked when the action button is pressed
+ */
+export function ActionBlockBulk({ onClick }: ActionBlockProps) {
+  return (<ActionBlockBase onClick={onClick} title="Revoke tokens selected by filter" />);
+}
+
+/**
+ * ActionBlockSolo
+ *
+ * @param {object} props - component props
+ * @param {() => void} props.onClick - click handler invoked when the action button is pressed
+ */
+export function ActionBlockSolo({ onClick }: ActionBlockProps) {
+  return (<ActionBlockBase onClick={onClick} title="Revoke token" />);
 }
