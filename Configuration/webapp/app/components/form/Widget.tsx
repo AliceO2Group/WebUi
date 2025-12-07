@@ -12,68 +12,17 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useState, type FC, type PropsWithChildren, type ReactElement } from 'react';
+import { type FC, type PropsWithChildren, type ReactElement } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
 import Switch from '@mui/material/Switch';
-import {
-  Form,
-  isFormRestrictions,
-  type ArrayRestrictions,
-  type FormItem,
-  type WidgetRestrictions,
-} from './Form';
-import { Accordion, AccordionDetails, Stack, Typography } from '@mui/material';
-import { AccordionHeader } from './AccordionHeader';
+import { type FormPrimitiveValue, type PrimitiveRestrictions } from './Form';
 
-interface WidgetProps extends PropsWithChildren {
+export interface WidgetProps extends PropsWithChildren {
   title: string;
-  type: WidgetRestrictions;
-  value: unknown;
+  value: FormPrimitiveValue;
+  type: PrimitiveRestrictions;
 }
-
-type ArrayWidgetProps = Omit<WidgetProps, 'type'> & { type: ArrayRestrictions };
-
-const ArrayWidget = ({ title, type, value }: ArrayWidgetProps): ReactElement => {
-  const [viewForm, setViewForm] = useState<boolean>(true);
-  const items = value as Array<unknown>;
-  const [itemsRestrictions] = type;
-
-  return (
-    <Accordion defaultExpanded>
-      <AccordionHeader
-        title={title}
-        viewForm={viewForm}
-        viewFormToggle={() => setViewForm((v) => !v)}
-      />
-      <AccordionDetails>
-        {viewForm ? (
-          <Stack spacing={2}>
-            {items.map((item, idx) =>
-              isFormRestrictions(itemsRestrictions[idx]) ? (
-                <Form
-                  key={idx}
-                  sectionTitle={`Item #${idx}`}
-                  items={item as FormItem}
-                  itemsRestrictions={itemsRestrictions[idx]}
-                />
-              ) : (
-                <Widget
-                  key={idx}
-                  title={`Item #${idx}`}
-                  type={itemsRestrictions[idx]}
-                  value={item}
-                />
-              ),
-            )}
-          </Stack>
-        ) : (
-          <Typography component="pre">{JSON.stringify(items, null, 2)}</Typography>
-        )}
-      </AccordionDetails>
-    </Accordion>
-  );
-};
 
 export const Widget: FC<WidgetProps> = ({ title, type, value }): ReactElement => {
   switch (type) {
@@ -86,6 +35,6 @@ export const Widget: FC<WidgetProps> = ({ title, type, value }): ReactElement =>
         <FormControlLabel control={<Switch defaultChecked={value === 'true'} />} label={title} />
       );
     default:
-      return <ArrayWidget title={title} type={type} value={value} />;
+      return <>unknown widget type: {type}</>;
   }
 };

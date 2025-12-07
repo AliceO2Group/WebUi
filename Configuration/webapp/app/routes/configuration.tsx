@@ -15,7 +15,7 @@
 import { useLocation } from 'react-router';
 import { useConfigurationQuery } from '~/api/query/useConfigurationQuery';
 import { useConfigurationRestrictionsQuery } from '~/api/query/useConfigurationRestrictionsQuery';
-import { Form } from '~/components/form/Form';
+import { FormItem } from '~/components/form/FormItem';
 import { Spinner } from '~/ui/spinner';
 
 const ConfigurationPage = () => {
@@ -37,10 +37,10 @@ const ConfigurationPage = () => {
   }
 
   return (
-    <Form
+    <FormItem
       sectionTitle="Configuration"
-      items={configuration}
-      itemsRestrictions={configurationRestrictions}
+      value={configuration}
+      restrictions={configurationRestrictions}
     />
   );
 };

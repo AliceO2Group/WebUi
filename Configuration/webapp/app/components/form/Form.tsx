@@ -12,67 +12,44 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useCallback, useState, type FC, type PropsWithChildren } from 'react';
+import { useState, type FC, type PropsWithChildren } from 'react';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Stack from '@mui/material/Stack';
-import { Widget } from './Widget';
 import { AccordionHeader } from './AccordionHeader';
 import { Typography } from '@mui/material';
+import { FormItem } from './FormItem';
 
-export type FormItem = { [key: string]: string | object | FormItem };
+export type FormValue = FormPrimitiveValue | FormArrayValue | FormObjectValue;
 
-type PrimitiveRestrictions = 'string' | 'number' | 'boolean';
+export type FormPrimitiveValue = string | number | boolean;
+
+export type FormArrayValue = Array<FormValue>;
+
+export type FormObjectValue = { [key: string]: FormValue };
+
+export type PrimitiveRestrictions = 'string' | 'number' | 'boolean';
 
 export type ArrayRestrictions = [
   Array<Restrictions>,
-  Restrictions,
+  ObjectRestrictions | null, // Restrictions for an object directly in the array
+  ArrayRestrictions | null, // ArrayRestrictions for a directly nested array
 ];
 
-export type WidgetRestrictions = PrimitiveRestrictions | ArrayRestrictions;
-
-export type FormRestrictions = {
+export type ObjectRestrictions = {
   [key: string]: Restrictions;
 };
 
-export type Restrictions = PrimitiveRestrictions | ArrayRestrictions | FormRestrictions;
+export type Restrictions = PrimitiveRestrictions | ArrayRestrictions | ObjectRestrictions;
 
 interface FormProps extends PropsWithChildren {
   sectionTitle: string;
-  items: FormItem;
-  itemsRestrictions: FormRestrictions;
-}
-
-/**
- * Function which returns false if the given object
- * which describes restrictions is the leaf (string, number, bool, array)
- * or returns true if the given object describes restrictions recursively
- * @param {Restrictions} obj
- * the object which describes restrictions
- * @returns {boolean} value which indicates if the restrictions are recursive
- * or if this is the leaf of the FormRestrictions tree
- */
-export function isFormRestrictions(obj: FormRestrictions[string]): obj is FormRestrictions {
-  return obj instanceof Object && obj !== null && !(Array.isArray(obj));
+  items: FormObjectValue;
+  itemsRestrictions: ObjectRestrictions;
 }
 
 export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) => {
   const [viewForm, setViewForm] = useState<boolean>(true);
-
-  const renderItem = useCallback(
-    (key: string, value: FormRestrictions[string]) =>
-      isFormRestrictions(value) ? (
-        <Form
-          key={key}
-          sectionTitle={key}
-          items={items[key] as FormItem}
-          itemsRestrictions={itemsRestrictions[key] as FormRestrictions}
-        />
-      ) : (
-        <Widget key={key} title={key} type={value} value={items[key]} />
-      ),
-    [items, itemsRestrictions],
-  );
 
   return (
     <Accordion defaultExpanded>
@@ -84,7 +61,14 @@ export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) 
       <AccordionDetails>
         {viewForm ? (
           <Stack spacing={2}>
-            {Object.entries(itemsRestrictions).map(([key, value]) => renderItem(key, value))}
+            {Object.entries(items).map(([key, value]) => (
+              <FormItem
+                key={key}
+                sectionTitle={key}
+                value={value}
+                restrictions={itemsRestrictions[key]}
+              />
+            ))}
           </Stack>
         ) : (
           <Typography component="pre">{JSON.stringify(items, null, 2)}</Typography>
