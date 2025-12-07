@@ -11,36 +11,68 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+import { useFetcher, useLoaderData } from 'react-router';
 import type { Route } from './+types/overview';
 
 import { Box1_2 } from '~/components/box';
 import { CertsForm } from '~/components/certs/certs-form';
 import { CertsTable } from '~/components/certs/certs-table';
+import { useOpenCertModal } from '~/hooks/certs/cert-modal';
+import { CertsModal } from '~/components/certs/certs-modal';
 
 
-export const clientAction = async ({request }: Route.ClientActionArgs) => {
-  console.log('Certs overview action called');
+export const clientAction = async ({ request }: Route.ClientActionArgs) => {
   const formData = await request.formData();
   const certFile = formData.get('certFile');
+
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate async operation
+
   console.log('Received cert file:', certFile);
-  return null
+  const certContent = {
+      ip_address: '192.168.1.1', 
+      issueDate: '2025-01-01', 
+      expiryDate: '2027-01-01'
+  }
+  return { certContent };
 }
 
-export const clientLoader = async () => ({});
+export const clientLoader = async () => {
+  return [
+    {
+      id: '1',
+      service_name: 'Service One',
+      issued_at: '2025-01-01',
+      expires_at: '2027-01-01',
+      ip_address: '192.168.1.1'
+    }
+  ]
+};
 
 // eslint-disable-next-line jsdoc/require-jsdoc
 export default function Overview() {
+  const certs = useLoaderData();
+  const fetcher = useFetcher();
+  const [certModalOpen, setCertModalOpen] = useOpenCertModal(fetcher)
+
+
   return (
+    <>
     <div className="grid-1-2">
       <Box1_2 link={'/certs/table'}>
         <div className="flex-row justify-center">
           <h4> Registered services</h4>
         </div>
-        <CertsTable certs={[]} />
+        <CertsTable certs={certs} />
       </Box1_2>
       <Box1_2 link={null}>
-        <CertsForm />
+        <CertsForm fetcher={fetcher} action={`/certs`} />
       </Box1_2>
     </div>
+    <CertsModal 
+      open={certModalOpen as boolean} 
+      setOpen={setCertModalOpen as React.Dispatch<React.SetStateAction<boolean>>} 
+      fetcher={fetcher}
+    />
+    </>
   );
 }

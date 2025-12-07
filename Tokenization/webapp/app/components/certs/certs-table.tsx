@@ -11,10 +11,10 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+import { Link } from 'react-router';
 
 import { type Cert } from './cert';
-
-import { TableBase } from '../table/table-base';
+import { TableBase } from '../table/table-base';;
 
 /**
  *
@@ -25,7 +25,7 @@ export function CertsTable({
   certs: Cert[];
 }) {
   const columns = [
-    { key: 'id', label: 'ID' },
+    { key: 'id', label: 'ID', render: (c: Cert) => <Link to={`/certs/${c.id}`}>{c.id}</Link> },
     { key: 'service_name', label: 'Service Name' },
     { key: 'issued_at', label: 'Issued At' },
     { key: 'expires_at', label: 'Expires At' },

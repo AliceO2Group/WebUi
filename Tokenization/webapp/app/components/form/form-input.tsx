@@ -123,7 +123,7 @@ export function FormInputFile({ name }: { name: string }) {
       >
       <span className="flex-row justify-center"> Choose file or drag & drop here </span>
       <input type="file" name={name} hidden onChange={onInputChange} ref={inputRef} />
-      <div className="flex-row justify-center mv3" style={{ transform: 'scale(2)' }}>
+      <div className="flex-row justify-center mv3 f2">
         <IconDataTransferUpload  />
       </div>
     </div>
