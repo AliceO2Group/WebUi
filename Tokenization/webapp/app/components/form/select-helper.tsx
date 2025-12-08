@@ -176,6 +176,7 @@ export function FormSelectBase<T extends string | number | (string | number)[] =
   handleDeselect,
   takeSelectedToOption,
   render,
+  value,
 }: SelectInterface<T, V>) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -210,6 +211,7 @@ export function FormSelectBase<T extends string | number | (string | number)[] =
         selected={selected}
         takeSelectedToOption={takeSelectedToOption}
       />
+      <input type="hidden" name={id} value={JSON.stringify(value)} />
     </div>
   );
 }

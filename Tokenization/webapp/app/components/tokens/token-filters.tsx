@@ -17,7 +17,7 @@ import { useEffect } from 'react';
 import { setStorageItem } from '~/utils/storage';
 
 import { FormSelectMulti, FormSelectMultiOrdering } from '../form/form-select';
-import { FormInput } from '../form/form-input';
+import { FormInputDatetime } from '../form/form-input';
 import { useTokenFilters } from '~/hooks/tokens/token-filters';
 import { FlexGrowWrapper, FlexGrowWrapperElement } from '~/ui/flex';
 
@@ -121,35 +121,27 @@ export function TokenFilters() {
         ]} value={httpMethods} setValue={setHttpMethods} />
     </FlexGrowWrapper>
     <FlexGrowWrapper>
-      <FormInput
+      <FormInputDatetime
+        name="expirationDateMin"
         labelText="Expiration Date (min):"
-        inputProps={{
-          type: 'datetime-local',
-        }}
         value={expirationDateMin}
         setValue={setExpirationDateMin}
       />
-      <FormInput
+      <FormInputDatetime
+        name="expirationDateMax"
         labelText="Expiration Date (max):"
-        inputProps={{
-          type: 'datetime-local',
-        }}
         value={expirationDateMax}
         setValue={setExpirationDateMax}
       />
-      <FormInput
+      <FormInputDatetime
+        name="issueDateMin"
         labelText="Issue Date (min):"
-        inputProps={{
-          type: 'datetime-local',
-        }}
         value={issueDateMin}
         setValue={setIssueDateMin}
       />
-      <FormInput
+      <FormInputDatetime
+        name="issueDateMax"
         labelText="Issue Date (max):"
-        inputProps={{
-          type: 'datetime-local',
-        }}
         value={issueDateMax}
         setValue={setIssueDateMax}
       />

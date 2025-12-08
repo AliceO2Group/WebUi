@@ -20,7 +20,7 @@ import { FormSelect } from './form-select';
 import { checkIsComponentOfType } from '~/utils/component-type-checker';
 
 /**
- * collectSelectsInfo
+ * Helper collectSelectsInfo
  *
  * Inspects children to collect FormSelect components and their options and values.
  *
