@@ -12,17 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useContext } from 'react';
-import { TokenFiltersContext } from '~/feature/token/contexts/token-filters';
+import { useTokenFiltersState } from './useTokenFiltersState';
+import { useTokenFiltersAction } from './useTokenFiltersAction';
 
-/**
- * Used to access Token Filters context created for Token Filters component
- * in webapp/app/contexts/tokens/token-filters.tsx
- */
-export function useTokenFilters() {
-  const ctx = useContext(TokenFiltersContext);
-  if (!ctx) {
-    throw new Error('useTokenFilters must be used inside TokenFiltersProvider');
-  }
-  return ctx;
-}
+export {
+  useTokenFiltersState,
+  useTokenFiltersAction,
+};

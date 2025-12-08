@@ -1,0 +1,83 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
+import { useEffect } from 'react';
+
+import { setStorageItem } from '~/utils/storage';
+
+import { useTokenFiltersAction, useTokenFiltersState } from '~/feature/token/hooks/token-filters';
+import { TokenFiltersFirstRow,
+  TokenFiltersSecondRow,
+  TokenFiltersLastRow,
+} from './TokenFiltersRow';
+import { Form } from '~/shared/components/form/form';
+import useForm from '~/shared/components/form/hooks/useForm';
+
+const _applyFilters = ({ services, ...filterStates }: any) => {
+  // eslint-disable-next-line no-console
+  console.log('Applying filters with state:', filterStates);
+  setStorageItem('TKN_token-filters', filterStates);
+};
+
+/**
+ * TokenFilters
+ *
+ * Renders token filters form and manages its state via useTokenFilters hook.
+ *
+ * Notes:
+ * - Non-reusable component specific logic is kept inside this component.
+ *
+ * @returns {JSX.Element} - rendered component
+ */
+export function TokenFilters() {
+  // Deleting stored filters on component un-mount
+  useEffect(() => () => {
+    setStorageItem('TKN_token-filters', {});
+  }, []);
+
+  const state = useTokenFiltersState();
+  const actions = useTokenFiltersAction();
+
+  const {
+    setServices,
+  } = actions;
+
+  useEffect(() => {
+    // Load services from API mock
+    setTimeout(() => {
+      setServices([
+        { value: 'service1', label: 'Service 1' },
+        { value: 'service2', label: 'Service 2' },
+        { value: 'service3', label: 'Service 3' },
+        { value: 'service4', label: 'Service 4' },
+      ]);
+    }, 500);
+
+  }, [setServices]);
+
+  const { fetcher, ref } = useForm();
+
+  const applyFilters = () => {
+    _applyFilters(state); // Rather use submit for form
+  };
+
+  return <div>
+    <Form submitRef={ref} fetcher={fetcher} action='/token/filters'>
+      <TokenFiltersFirstRow />
+      <TokenFiltersSecondRow />
+      <TokenFiltersLastRow applyFilters={applyFilters} />
+    </Form>
+  </div>;
+
+}
