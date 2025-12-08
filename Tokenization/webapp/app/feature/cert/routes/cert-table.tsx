@@ -15,32 +15,12 @@
 import { useLoaderData } from 'react-router';
 import CertsTableRouteView from '../views/cert-table';
 
-
+import { servicesMock } from '../mocks/services';
 /**
  *
  */
 export function clientLoader() {
-  return [
-    {
-      id: '1',
-      service_name: 'Service One',
-      issued_at: '2025-01-01',
-      expires_at: '2027-01-01',
-      ip_address: '192.168.1.1',
-    }, {
-      id: '2',
-      service_name: 'Service Two',
-      issued_at: '2024-06-15',
-      expires_at: '2026-06-15',
-      ip_address: '192.168.1.2',
-    } , {
-      id: '3',
-      service_name: 'Service Three',
-      issued_at: '2023-03-20',
-      expires_at: '2025-03-20',
-      ip_address: '192.168.1.3'
-    }
-  ];
+  return servicesMock;
 }
 
 /**

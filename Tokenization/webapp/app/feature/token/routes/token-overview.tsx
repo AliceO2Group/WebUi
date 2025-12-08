@@ -15,6 +15,7 @@ import type { Token } from '../types/token';
 
 import { useLoaderData } from 'react-router';
 import TokenOverviewView from '../views/token-overview';
+import { tokensMock } from '../mocks/tokens';
 
 /**
  * Client loader that fetches all tokens from the API.
@@ -22,19 +23,11 @@ import TokenOverviewView from '../views/token-overview';
  * @returns Promise that resolves to an array of tokens
  */
 export const clientLoader = async (): Promise<{ tokens: Promise<Token[]> }> => {
-  const tokens = fetch('/api/tokens')
-    .then(async response => {
-      if (!response.ok) {
-        throw new Error('An error occurred!');
-      }
-      const json = await response.json();
-      if (Array.isArray(json)) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return json.map((t: any) => ({ ...t, id: t.tokenId ?? t.id }));
-      }
-      return { ...json, id: json.tokenId ?? json.id };
-    });
-
+  const tokens = new Promise<Token[]>((resolve) => {
+    setTimeout(() => {
+      resolve(Array.from(tokensMock.values()) as unknown as Token[]);
+    }, 500);
+  });
   return { tokens };
 };
 

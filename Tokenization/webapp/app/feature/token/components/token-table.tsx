@@ -139,7 +139,7 @@ function TokenTableContainer({
         label: typeof col.label === 'function'
           ? () => <div className="flex-row g1"><span>Actions</span><ActionBlockBulk onClick={() => onActionClick('bulk')} /></div>
           : col.label,
-        render: (t: Token) => <ActionBlockSolo onClick={() => onActionClick(t.tokenId)} />,
+        render: (t: Token) => <ActionBlockSolo onClick={() => onActionClick(t.id)} />,
       }
       : col,
   );
@@ -166,7 +166,7 @@ function TokenTableContainer({
 
 // Common columns for all table variants
 const columns = [
-  { key: 'tokenId', label: 'ID', render: (t: Token) => <Link to={`/tokens/${t.tokenId}`}>{t.tokenId}</Link> },
+  { key: 'id', label: 'ID', render: (t: Token) => <Link to={`/tokens/${t.id}`}>{t.id}</Link> },
   { key: 'serviceFrom', label: 'Service From' },
   { key: 'serviceTo', label: 'Service To' },
   { key: 'exp', label: 'Expires at' },

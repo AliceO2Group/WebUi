@@ -11,7 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-
+import type { Route } from './+types/token-details';
 
 import { useLoaderData } from 'react-router';
 
@@ -19,7 +19,8 @@ import type { Token } from '../types/token';
 import type { Log } from '~/feature/token/types/log';
 
 import TokenDetailsView from '../views/token-details';
-
+import { tokensMock } from '../mocks/tokens';
+import { logsMock } from '../mocks/logs';
 /**
  * Fetches a token by its ID from the API.
  *
@@ -27,12 +28,16 @@ import TokenDetailsView from '../views/token-details';
  * @returns Promise that resolves to the token data
  */
 const getToken = async (tokenId: number): Promise<Token> => {
-  const response = await fetch(`/api/tokens/${tokenId}`);
-  if (!response.ok) {
-    throw Error(`Failed to fetch token with token id ${tokenId}`);
-  }
-  const json = await response.json();
-  return { ...json, id: json.tokenId ?? json.id };
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const t = tokensMock.get(tokenId);
+      if (!t) {
+        reject(new Error(`Token with ID ${tokenId} not found`));
+        return;
+      }
+      resolve({ ...(t as any), id: String((t as any).id) } as Token);
+    }, 500);
+  });
 };
 
 /**
@@ -42,26 +47,29 @@ const getToken = async (tokenId: number): Promise<Token> => {
  * @returns Promise that resolves to an array of log entries
  */
 const getLogs = async (tokenId: number): Promise<Log[]> => {
-  const response = await fetch(`/api/tokens/${tokenId}/logs`);
-  if (!response.ok) {
-    throw Error(`Failed to fetch logs related to token with token id ${tokenId}`);
-  }
-  return response.json();
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const logs = logsMock.get(tokenId) || [];
+      resolve(logs);
+    }, 500);
+  });
 };
+ 
 
 /**
  * Client loader that fetches token and logs data for the details page.
- *
- * @param params - Route parameters containing the token ID
  * @returns Object with token data and logs promise
  */
 export const clientLoader = async ({ params }: Route.ClientLoaderArgs): Promise<{ token: Token; logs: Promise<Log[]> }> => {
   // Normally we would check that run number is a number...
   const tokenId = parseInt(params.tokenId, 10);
-
-  const logs = getLogs(tokenId);
-  const token = await getToken(tokenId);
-
+  let logs, token;
+  try {
+    logs = getLogs(tokenId);
+    token = await getToken(tokenId);
+  } catch (error) {
+    throw new Response((error as Error).message, { status: 404 });
+  }
   return { token, logs };
 };
 

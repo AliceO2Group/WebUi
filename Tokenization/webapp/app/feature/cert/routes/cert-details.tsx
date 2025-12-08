@@ -16,18 +16,11 @@ import type { Route } from './+types/cert-details';
 import { useLoaderData } from 'react-router';
 import CertDetailsView from '../views/cert-details';
 
+import { servicesMock } from '../mocks/services';
 
 export const clientLoader = async ({ params }: Route.ClientLoaderArgs) => {
   const certId = parseInt((params as { certId: string }).certId, 10);
-
-  const cert = {
-    id: '1',
-    service_name: 'Service One',
-    issued_at: '2025-01-01',
-    expires_at: '2027-01-01',
-    ip_address: '192.168.1.1',
-  };
-
+  const cert = servicesMock.find((s) => parseInt(s.id, 10) === certId);
   return { cert };
 };
 

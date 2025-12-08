@@ -16,6 +16,7 @@ import type { Route } from './+types/cert-overview';
 import { useLoaderData } from 'react-router';
 import CertsOverviewView from '../views/cert-overview';
 
+import { newServiceMock } from '../mocks/services';
 export const clientAction = async ({ request }: Route.ClientActionArgs) => {
   const formData = await request.formData();
   const certFile = formData.get('certFile');
@@ -23,23 +24,11 @@ export const clientAction = async ({ request }: Route.ClientActionArgs) => {
   await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate async operation
 
   console.log('Received cert file:', certFile);
-  const certContent = {
-    ip_address: '192.168.1.1',
-    issueDate: '2025-01-01',
-    expiryDate: '2027-01-01',
-  };
-  return { certContent };
+  return { certContent: newServiceMock };
 };
 
-export const clientLoader = async () => [
-  {
-    id: '1',
-    service_name: 'Service One',
-    issued_at: '2025-01-01',
-    expires_at: '2027-01-01',
-    ip_address: '192.168.1.1',
-  },
-];
+import { servicesMock } from '../mocks/services';
+export const clientLoader = async () => servicesMock;
 
 // eslint-disable-next-line jsdoc/require-jsdoc
 export default function CertsOverview() {

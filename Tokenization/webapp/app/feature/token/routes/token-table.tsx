@@ -12,25 +12,19 @@
  * or submit itself to any jurisdiction.
  */
 
+import type { Token } from '../types/token';
+
 import { useLoaderData } from 'react-router';
 import TokenTableRouteView from '../views/token-table';
+import { tokensMock } from '../mocks/tokens';
 
 //eslint-disable-next-line jsdoc/require-jsdoc
 export async function clientLoader() {
-  const tokens = fetch('/api/tokens')
-    .then(async response => {
-      if (!response.ok) {
-        throw new Error('An error occurred!');
-      }
-      const json = await response.json();
-      if (Array.isArray(json)) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return json.map((t: any) => ({ ...t, id: t.tokenId ?? t.id }));
-      }
-      return { ...json, id: json.tokenId ?? json.id };
-
-    });
-
+  const tokens = new Promise<Token[]>((resolve) => {
+    setTimeout(() => {
+      resolve(Array.from(tokensMock.values()) as unknown as Token[]);
+    }, 500);
+  });
   return { tokens };
 }
 
