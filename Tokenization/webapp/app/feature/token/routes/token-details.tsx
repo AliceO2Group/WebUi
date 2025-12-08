@@ -27,18 +27,16 @@ import { logsMock } from '../mocks/logs';
  * @param tokenId - The ID of the token to fetch
  * @returns Promise that resolves to the token data
  */
-const getToken = async (tokenId: number): Promise<Token> => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const t = tokensMock.get(tokenId);
-      if (!t) {
-        reject(new Error(`Token with ID ${tokenId} not found`));
-        return;
-      }
-      resolve({ ...(t as any), id: String((t as any).id) } as Token);
-    }, 500);
-  });
-};
+const getToken = async (tokenId: number): Promise<Token> => new Promise((resolve, reject) => {
+  setTimeout(() => {
+    const t = tokensMock.get(tokenId);
+    if (!t) {
+      reject(new Error(`Token with ID ${tokenId} not found`));
+      return;
+    }
+    resolve({ ...(t as any), id: String((t as any).id) } as Token);
+  }, 500);
+});
 
 /**
  * Fetches logs associated with a token by its ID from the API.
@@ -46,15 +44,12 @@ const getToken = async (tokenId: number): Promise<Token> => {
  * @param tokenId - The ID of the token to fetch logs for
  * @returns Promise that resolves to an array of log entries
  */
-const getLogs = async (tokenId: number): Promise<Log[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const logs = logsMock.get(tokenId) || [];
-      resolve(logs);
-    }, 500);
-  });
-};
- 
+const getLogs = async (tokenId: number): Promise<Log[]> => new Promise((resolve) => {
+  setTimeout(() => {
+    const logs = logsMock.get(tokenId) ?? [];
+    resolve(logs);
+  }, 500);
+});
 
 /**
  * Client loader that fetches token and logs data for the details page.
@@ -63,7 +58,7 @@ const getLogs = async (tokenId: number): Promise<Log[]> => {
 export const clientLoader = async ({ params }: Route.ClientLoaderArgs): Promise<{ token: Token; logs: Promise<Log[]> }> => {
   // Normally we would check that run number is a number...
   const tokenId = parseInt(params.tokenId, 10);
-  let logs, token;
+  let logs; let token;
   try {
     logs = getLogs(tokenId);
     token = await getToken(tokenId);

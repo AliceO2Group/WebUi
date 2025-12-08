@@ -11,12 +11,13 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+import type { Route } from './+types/token-create';
 
-import type { clientLoader } from "~/feature/cert/routes/cert-table";
+import type { clientLoader as CertTableLoader } from '~/feature/cert/routes/cert-table';
 
-import { useFetcher } from "react-router";
-import CreateTokenView from "../views/token-create";
-import { useEffect } from "react";
+import { useFetcher } from 'react-router';
+import CreateTokenView from '../views/token-create';
+import { useEffect } from 'react';
 
 // eslint-disable-next-line jsdoc/require-jsdoc
 export async function clientAction({ request }: Route.ClientActionArgs) {
@@ -26,16 +27,15 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
   return { success: true };
 }
 
-
 /**
  * Component is used for /tokens/new route to create new tokens.
  */
 export default function CreateToken() {
-  const fetcher = useFetcher<typeof clientLoader>(); // temporarily services can be fetched all
+  const fetcher = useFetcher<typeof CertTableLoader>(); // Temporarily services can be fetched all
   useEffect(() => {
-    fetcher.load('/certs/table')
-  }, [])
-  const services = fetcher.data || [];
+    fetcher.load('/certs/table');
+  }, [fetcher]);
+  const services = fetcher.data ?? [];
   const serviceOptions = services.map(service => ({
     label: service.service_name,
     value: service.id,

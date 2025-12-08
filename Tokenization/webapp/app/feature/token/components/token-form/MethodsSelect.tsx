@@ -12,21 +12,27 @@
  * or submit itself to any jurisdiction.
  */
 
-import type { OptionType } from '~/utils/types';
+import { FormSelectMulti } from '~/shared/components/form/form-select';
 
-import { TokenFormProvider } from '~/feature/token/contexts/token-form';
-import { TokenForm } from '~/feature/token/components/token-form';
-import { Box1_1 } from '~/ui/box';
+const httpMethodOptions = [
+  { value: 'GET', label: 'GET' },
+  { value: 'POST', label: 'POST' },
+  { value: 'PUT', label: 'PUT' },
+  { value: 'DELETE', label: 'DELETE' },
+];
 
 /**
  *
  */
-export default function CreateTokenView({ serviceOptions }: { serviceOptions?: OptionType[] }) {
+export default function MethodsSelect({ value, setValue }: any) {
   return (
-    <TokenFormProvider loaderData={serviceOptions}>
-      <Box1_1 link={null}>
-        <TokenForm />
-      </Box1_1>
-    </TokenFormProvider>
+    <FormSelectMulti
+      id="http-select-methods"
+      options={httpMethodOptions}
+      value={value}
+      setValue={setValue}
+      placeholder="Choose HTTP Methods..."
+      label="HTTP Methods"
+    />
   );
 }

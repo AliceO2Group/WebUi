@@ -11,12 +11,12 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import { useState } from "react";
+import { useState } from 'react';
 
-import { FlexGrowWrapper, FlexGrowWrapperElement } from "~/ui/flex";
-import { FormInputString, FormInputDatetime } from "~/shared/components/form/form-input";
-import { FormSelectMultiOrdering } from "~/shared/components/form/form-select";
-import { setStorageItem } from "~/utils/storage";
+import { FlexGrowWrapper, FlexGrowWrapperElement } from '~/ui/flex';
+import { FormInputString, FormInputDatetime } from '~/shared/components/form/form-input';
+import { FormSelectMultiOrdering } from '~/shared/components/form/form-select';
+import { setStorageItem } from '~/utils/storage';
 
 const _applyFilters = ({ services, ...filterStates }: any) => {
   // eslint-disable-next-line no-console
@@ -24,7 +24,9 @@ const _applyFilters = ({ services, ...filterStates }: any) => {
   setStorageItem('TKN_token-filters', filterStates);
 };
 
-
+/**
+ *
+ */
 export function CertsFilter() {
   const [expirationDateMin, setExpirationDateMin] = useState('');
   const [expirationDateMax, setExpirationDateMax] = useState('');
@@ -52,7 +54,7 @@ export function CertsFilter() {
       issueDateMax,
       ordering,
     });
-  }
+  };
 
   const clearAllFilters = () => {
     setExpirationDateMin('');
@@ -60,57 +62,56 @@ export function CertsFilter() {
     setIssueDateMin('');
     setIssueDateMax('');
     setOrdering([]);
-  }
-
+  };
 
   return <>
-      <FlexGrowWrapper>
-          <FormInputDatetime
-            labelText="Expiration Date (min):"
-            name='expiration-date-min'
-            value={expirationDateMin}
-            setValue={setExpirationDateMin}
-          />
-          <FormInputDatetime
-            labelText="Expiration Date (max):"
-            name='expiration-date-max'
-            value={expirationDateMax}
-            setValue={setExpirationDateMax}
-          />
-          <FormInputDatetime
-            labelText="Issue Date (min):"
-            name='issue-date-min'
-            value={issueDateMin}
-            setValue={setIssueDateMin}
-          />
-          <FormInputDatetime
-            labelText="Issue Date (max):"
-            name='issue-date-max'
-            value={issueDateMax}
-            setValue={setIssueDateMax}
-          />
+    <FlexGrowWrapper>
+      <FormInputDatetime
+        labelText="Expiration Date (min):"
+        name='expiration-date-min'
+        value={expirationDateMin}
+        setValue={setExpirationDateMin}
+      />
+      <FormInputDatetime
+        labelText="Expiration Date (max):"
+        name='expiration-date-max'
+        value={expirationDateMax}
+        setValue={setExpirationDateMax}
+      />
+      <FormInputDatetime
+        labelText="Issue Date (min):"
+        name='issue-date-min'
+        value={issueDateMin}
+        setValue={setIssueDateMin}
+      />
+      <FormInputDatetime
+        labelText="Issue Date (max):"
+        name='issue-date-max'
+        value={issueDateMax}
+        setValue={setIssueDateMax}
+      />
     </FlexGrowWrapper>
     <FlexGrowWrapper>
-        <FormInputString
-          labelText="IP Address:"
-          name='ip-address'
-          value={ipAddress}
-          setValue={setIpAddress}
-        />
-        <FormSelectMultiOrdering
+      <FormInputString
+        labelText="IP Address:"
+        name='ip-address'
+        value={ipAddress}
+        setValue={setIpAddress}
+      />
+      <FormSelectMultiOrdering
         id='tags'
         label="Order by:"
         options={orderingOptions}
         value={ordering}
         setValue={setOrdering}
-        />
-        <FlexGrowWrapperElement className="self-center">
+      />
+      <FlexGrowWrapperElement className="self-center">
         <div className='flex-row g1 justify-end'>
           <button className="btn btn-primary" onClick={applyFilters}>Apply Filters</button>
           <button className="btn btn-danger" onClick={clearAllFilters}>Clear Filters</button>
         </div>
-        </FlexGrowWrapperElement>
- 
+      </FlexGrowWrapperElement>
+
     </FlexGrowWrapper>
-    </>;
+  </>;
 }

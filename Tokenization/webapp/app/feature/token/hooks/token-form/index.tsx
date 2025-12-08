@@ -12,17 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useContext } from 'react';
-import { TokenFormContext } from '~/feature/token/contexts/token-form';
+import { useTokenFormActions } from './useTokenFormActions';
+import { useTokenFormState } from './useTokenFormState';
+import { useTokenFormUi } from './useTokenFormUi';
+import { useTokenFormMeta } from './useTokenFormMeta';
 
-/**
- * Used to access Token Form context created for Token Form component.
- * in webapp/app/contexts/tokens/token-form.tsx
- */
-export function useTokenForm() {
-  const ctx = useContext(TokenFormContext);
-  if (!ctx) {
-    throw new Error('useTokenForm must be used inside TokenFormProvider');
-  }
-  return ctx;
-}
+export {
+  useTokenFormActions,
+  useTokenFormState,
+  useTokenFormUi,
+  useTokenFormMeta,
+};

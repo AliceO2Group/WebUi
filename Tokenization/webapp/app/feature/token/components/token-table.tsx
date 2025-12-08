@@ -21,10 +21,10 @@ import { useAuth } from '~/feature/auth/hooks/session';
 import { ActionBlockSolo, ActionBlockBulk } from './action-block';
 import Modal from '~/shared/components/window/modal';
 import Alert from '~/shared/components/window/alert';
-import { WindowTitle, 
-  WindowContent, 
-  WindowButtonCancel, 
-  WindowButtonAccept, 
+import { WindowTitle,
+  WindowContent,
+  WindowButtonCancel,
+  WindowButtonAccept,
   WindowCloseIcon } from '~/shared/components/window/window-objects';
 import { TableBase } from '../../../shared/components/table/table-base';
 

@@ -28,6 +28,6 @@ export function clientLoader() {
  */
 export default function CertsTableRoute() {
   const certs = useLoaderData();
-  return <CertsTableRouteView certs={certs} />  
+  return <CertsTableRouteView certs={certs} />;
 
 }

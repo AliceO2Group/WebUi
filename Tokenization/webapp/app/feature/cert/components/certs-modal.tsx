@@ -16,58 +16,73 @@ import { useFetcher } from 'react-router';
 import type { DialogPropsBase } from '~/utils/types';
 
 import { Spinner } from '~/ui/spinner';
-import { WindowButtonAccept, 
-  WindowCloseIcon, 
-  WindowContent, 
+import { WindowButtonAccept,
+  WindowCloseIcon,
+  WindowContent,
   WindowTitle } from '~/shared/components/window/window-objects';
 import Modal from '~/shared/components/window/modal';
 
-function ParsedCertData({fetcher}: {fetcher: ReturnType<typeof useFetcher>}) {
+/**
+ *
+ */
+function ParsedCertData({ fetcher }: { fetcher: ReturnType<typeof useFetcher> }) {
   return <>
-          {fetcher.data && typeof fetcher.data === 'object' && 'certContent' in fetcher.data ?
-            Object.entries((fetcher.data as { certContent: Record<string, string> }).certContent).map(([key, value]) => (
-              <div key={key}>{key}: {value}</div>
-            ))
-            : 'Error parsing certificate.'}
-         </>;
+    {fetcher.data && typeof fetcher.data === 'object' && 'certContent' in fetcher.data ?
+      Object.entries((fetcher.data as { certContent: Record<string, string> }).certContent).map(([key, value]) => (
+        <div key={key}>{key}: {value}</div>
+      ))
+      : 'Error parsing certificate.'}
+  </>;
 }
 
-
-function CertsModalRegisterContent({fetcher}: {fetcher: ReturnType<typeof useFetcher>}) {
+/**
+ *
+ */
+function CertsModalRegisterContent({ fetcher }: { fetcher: ReturnType<typeof useFetcher> }) {
   const _fetcher = useFetcher();
-  
+
   return <div className="flex-column g2">
-            <_fetcher.Form>
-              <div className='flex-row' >
-              <label htmlFor="serviceName" className='mh2 mv1 self-center'>
-                Provide service name:
-              </label>
-              <input 
-                id="serviceName"
-                type="text" 
-                name="serviceName"
-                className='mh1 self-center' 
-                />
-              </div>
-              <button type="submit" hidden> Register Certificate </button>
-            </_fetcher.Form>
-          <pre>
-            <ParsedCertData fetcher={fetcher} />
-          </pre>
-        </div>
+    <_fetcher.Form>
+      <div className='flex-row' >
+        <label htmlFor="serviceName" className='mh2 mv1 self-center'>
+          Provide service name:
+        </label>
+        <input
+          id="serviceName"
+          type="text"
+          name="serviceName"
+          className='mh1 self-center'
+        />
+      </div>
+      <button type="submit" hidden> Register Certificate </button>
+    </_fetcher.Form>
+    <pre>
+      <ParsedCertData fetcher={fetcher} />
+    </pre>
+  </div>;
 }
 
-function CertsModalRenewContent({fetcher}: {fetcher: ReturnType<typeof useFetcher>}) {
+/**
+ *
+ */
+function CertsModalRenewContent({ fetcher }: { fetcher: ReturnType<typeof useFetcher> }) {
   return <div className="flex-column g2">
-          <pre>
-            <ParsedCertData fetcher={fetcher} />
-          </pre>
-        </div>
-        
+    <pre>
+      <ParsedCertData fetcher={fetcher} />
+    </pre>
+  </div>;
+
 }
 
-export const CertsModal = ({ open, setOpen, fetcher, renew }: DialogPropsBase & { fetcher: ReturnType<typeof useFetcher>; renew?: boolean }) => {
-  return <Modal
+export const CertsModal = ({ open,
+  setOpen,
+  fetcher,
+  renew,
+}: DialogPropsBase &
+{ fetcher: ReturnType<typeof useFetcher>;
+  renew?: boolean;
+}) => (
+  <Modal
     open={open}
     setOpen={setOpen}
     className="bg-white"
@@ -77,12 +92,12 @@ export const CertsModal = ({ open, setOpen, fetcher, renew }: DialogPropsBase & 
       { fetcher.state === 'loading' || fetcher.state === 'submitting'
         ? <Spinner />
         : (renew
-            ? <CertsModalRenewContent fetcher={fetcher} />
-            : <CertsModalRegisterContent fetcher={fetcher} />
-          )
+          ? <CertsModalRenewContent fetcher={fetcher} />
+          : <CertsModalRegisterContent fetcher={fetcher} />
+        )
       }
     </WindowContent>
     <WindowButtonAccept/>
     <WindowCloseIcon />
   </Modal>
-};
+);

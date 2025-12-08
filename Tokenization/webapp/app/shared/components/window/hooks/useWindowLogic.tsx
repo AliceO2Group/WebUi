@@ -39,6 +39,20 @@ import { checkIsComponentOfType } from '~/utils/component-type-checker';
 function getWindowChildrenAndActions({ children }: PropsWithChildren) {
   const arrChildren = React.Children.toArray(children);
 
+  // Check for React.Fragment and unwrap its children
+  const reactFragment = arrChildren.find(
+    (child) => checkIsComponentOfType(child, React.Fragment),
+  );
+
+  if (reactFragment && React.isValidElement(reactFragment)) {
+    const fragmentChildren = React.Children.toArray((reactFragment.props as PropsWithChildren).children);
+    arrChildren.splice(
+      arrChildren.indexOf(reactFragment),
+      1,
+      ...fragmentChildren,
+    );
+  }
+
   const title = arrChildren.find(
     (child) => checkIsComponentOfType(child, WindowTitle),
   );

@@ -23,6 +23,7 @@ export const clientAction = async ({ request }: Route.ClientActionArgs) => {
 
   await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate async operation
 
+  // eslint-disable-next-line no-console
   console.log('Received cert file:', certFile);
   return { certContent: newServiceMock };
 };
@@ -33,5 +34,5 @@ export const clientLoader = async () => servicesMock;
 // eslint-disable-next-line jsdoc/require-jsdoc
 export default function CertsOverview() {
   const certs = useLoaderData();
-  return <CertsOverviewView certs={certs} />
+  return <CertsOverviewView certs={certs} />;
 }

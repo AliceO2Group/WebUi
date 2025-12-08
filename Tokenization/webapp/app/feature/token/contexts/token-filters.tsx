@@ -74,7 +74,6 @@ export function TokenFiltersProvider({ children }: { children: React.ReactNode }
     setIssueDateMax('');
     setOrdering([]);
   }, [
-    setServices,
     setFirstSelectedService,
     setSecondSelectedService,
     setHttpMethods,

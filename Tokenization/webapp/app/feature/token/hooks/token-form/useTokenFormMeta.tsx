@@ -12,21 +12,22 @@
  * or submit itself to any jurisdiction.
  */
 
-import type { OptionType } from '~/utils/types';
-
-import { TokenFormProvider } from '~/feature/token/contexts/token-form';
-import { TokenForm } from '~/feature/token/components/token-form';
-import { Box1_1 } from '~/ui/box';
+import { useContext } from 'react';
+import { TokenFormContext } from '~/feature/token/contexts/token-form';
 
 /**
  *
  */
-export default function CreateTokenView({ serviceOptions }: { serviceOptions?: OptionType[] }) {
-  return (
-    <TokenFormProvider loaderData={serviceOptions}>
-      <Box1_1 link={null}>
-        <TokenForm />
-      </Box1_1>
-    </TokenFormProvider>
-  );
+export function useTokenFormMeta() {
+  const ctx = useContext(TokenFormContext);
+  if (!ctx) {
+    throw new Error('useTokenFormMeta must be used inside TokenFormProvider');
+  }
+  const { state, actions } = ctx;
+  return {
+    loaderData: state.loaderData,
+    fetcher: state.fetcher,
+    submitRef: state.ref,
+    submit: actions.submit,
+  };
 }

@@ -52,7 +52,7 @@ function FormInput<T extends string | number = string>({
     setValue?.(newVal);
   };
 
-  const childInput = React.Children.toArray(children)[0];
+  const [childInput] = React.Children.toArray(children);
   const input = React.cloneElement(childInput as React.ReactElement<React.InputHTMLAttributes<HTMLInputElement>>, {
     id: name,
     value: value as unknown as string,
@@ -137,7 +137,7 @@ export function FormInputFile({ name }: { name: string }) {
   </div>;
 }
 
-/** 
+/**
  * FormInputNumber
  *
  * Number input specialization of FormInput.
@@ -163,6 +163,9 @@ export function FormInputNumber({ value, setValue, labelText, name }: FormInputI
   </FormInput>;
 }
 
+/**
+ *
+ */
 export function FormInputDatetime({ value, setValue, labelText, name }: FormInputInterface<string>) {
   return <FormInput
     value={value}
@@ -174,6 +177,9 @@ export function FormInputDatetime({ value, setValue, labelText, name }: FormInpu
   </FormInput>;
 }
 
+/**
+ *
+ */
 export function FormInputString({ value, setValue, labelText, name }: FormInputInterface<string>) {
   return <FormInput
     value={value}

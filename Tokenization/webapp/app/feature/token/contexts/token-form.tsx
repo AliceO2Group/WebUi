@@ -19,20 +19,30 @@ import type { AlertType } from '~/shared/components/window/alert';
 
 import useForm from '~/shared/components/form/hooks/useForm';
 
-type State = {
-  loaderData?: OptionType[];
-  expirationTime: string;
+// Grouped state shapes for clarity
+type FormState = {
+  // Selection + form fields grouped together
   firstSelectedService: string;
   secondSelectedService: string;
   selectedMethods: HttpMethod[];
   firstLabel: string;
   secondLabel: string;
+  expirationTime: string;
+};
+
+type UiState = {
   openAlert: boolean;
   openModal: boolean;
   alert: AlertType | null;
+};
+
+type MetaState = {
+  loaderData?: OptionType[];
   fetcher: ReturnType<typeof useFetcher>;
   ref: React.RefObject<HTMLButtonElement | null>;
 };
+
+export type TokenFormState = FormState & UiState & MetaState;
 
 type Actions = {
   setExpirationTime: React.Dispatch<React.SetStateAction<string>>;
@@ -47,8 +57,7 @@ type Actions = {
   submit: () => void;
 };
 
-export const TokenFormContext = createContext<{ state: State; actions: Actions } | undefined>(undefined);
-
+export const TokenFormContext = createContext<{ state: TokenFormState; actions: Actions } | undefined>(undefined);
 /**
  * Form context provider which holds all state and actions for Token Form.
  * It is used to wrap the Token Form and its windows - for them to simplify the props passing.
@@ -71,6 +80,7 @@ export function TokenFormProvider({ loaderData, children }: { loaderData?: Optio
   const [alert, setAlert] = useState<AlertType | null>(null);
   const { fetcher, ref, submit } = useForm();
 
+  // Keep labels in sync with selected service ids
   useEffect(() => {
     if (!loaderData) {
       return;
@@ -109,9 +119,9 @@ export function TokenFormProvider({ loaderData, children }: { loaderData?: Optio
     setFirstSelectedService('');
     setSecondSelectedService('');
     setSelectedMethods([]);
-  }, [setExpirationTime, setFirstSelectedService, setSecondSelectedService, setSelectedMethods]);
+  }, []);
 
-  const state = useMemo(() => ({
+  const state: TokenFormState = useMemo(() => ({
     loaderData,
     expirationTime,
     firstSelectedService,
@@ -124,8 +134,8 @@ export function TokenFormProvider({ loaderData, children }: { loaderData?: Optio
     alert,
     fetcher,
     ref,
-  }),
-  [loaderData,
+  }), [
+    loaderData,
     expirationTime,
     firstSelectedService,
     secondSelectedService,
@@ -140,20 +150,17 @@ export function TokenFormProvider({ loaderData, children }: { loaderData?: Optio
   ]);
 
   const actions: Actions = useMemo(() => ({
-    setExpirationTime, setFirstSelectedService, setSecondSelectedService, setSelectedMethods,
-    onSubmit, onReset, setAlert, setOpenAlert, setOpenModal, submit,
-  }),
-  [setExpirationTime,
+    setExpirationTime,
     setFirstSelectedService,
     setSecondSelectedService,
     setSelectedMethods,
-    setOpenAlert,
-    setOpenModal,
     onSubmit,
     onReset,
     setAlert,
+    setOpenAlert,
+    setOpenModal,
     submit,
-  ]);
+  }), [onSubmit, onReset, submit]);
 
   return <TokenFormContext.Provider value={{ state, actions }}>{children}</TokenFormContext.Provider>;
 }

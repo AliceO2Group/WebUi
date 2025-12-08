@@ -1,12 +1,26 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
 import { Activity, useState } from 'react';
 import { useFetcher } from 'react-router';
 
 import type { Cert } from '../types/cert';
 import { CertsForm } from '~/feature/cert/components/certs-form';
 import Modal from '~/shared/components/window/modal';
-import { WindowButtonAccept, 
-  WindowButtonCancel, 
-  WindowContent, 
+import { WindowButtonAccept,
+  WindowButtonCancel,
+  WindowContent,
   WindowTitle } from '~/shared/components/window/window-objects';
 import { Form } from '~/shared/components/form/form';
 import { FormInputString } from '~/shared/components/form/form-input';
@@ -14,6 +28,9 @@ import { CertsModal } from '~/feature/cert/components/certs-modal';
 import { useOpenCertModal } from '~/feature/cert/hooks/cert-modal';
 import useForm from '~/shared/components/form/hooks/useForm';
 
+/**
+ *
+ */
 export default function CertDetailsView({ cert }: { cert: Cert }) {
   const { id, service_name, issued_at, expires_at, ip_address } = cert;
   const [isInputVisible, setIsInputVisible] = useState<boolean>(false);
@@ -21,7 +38,7 @@ export default function CertDetailsView({ cert }: { cert: Cert }) {
   const [serviceName, setServiceName] = useState<string>(service_name);
 
   const fetcher = useFetcher();
-  const {ref, fetcher: nameFetcher, submit} = useForm();
+  const { ref, fetcher: nameFetcher } = useForm();
   const [certModalOpen, setCertModalOpen] = useOpenCertModal(fetcher);
 
   return (
