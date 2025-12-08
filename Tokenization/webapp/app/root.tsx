@@ -22,7 +22,7 @@ import {
   ScrollRestoration
 } from 'react-router';
 
-import { SessionProvider } from './contexts/sessionContext';
+import { SessionProvider } from './feature/auth/contexts/sessionContext';
 import { Spinner } from '~/ui/spinner';
 
 import '@aliceo2/web-ui/Frontend/css/src/bootstrap.css';

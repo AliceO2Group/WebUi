@@ -18,15 +18,15 @@ export default [
   route('', 'ui/layout.tsx', [
     index('routes/home.tsx'),
     ...prefix('tokens', [
-      index('routes/tokens/overview.tsx'),
-      route(':tokenId', 'routes/tokens/details.tsx'),
-      route('table', 'routes/tokens/table.tsx'),
-      route('new', 'routes/tokens/create.tsx'),
+      index('feature/token/routes/token-overview.tsx'),
+      route(':tokenId', 'feature/token/routes/token-details.tsx'),
+      route('table', 'feature/token/routes/token-table.tsx'),
+      route('new', 'feature/token/routes/token-create.tsx'),
     ]),
     ...prefix('certs', [
-      index('routes/certs/overview.tsx'),
-      route(':certId', 'routes/certs/details.tsx'),
-      route('table', 'routes/certs/table.tsx'),
+      index('feature/cert/routes/cert-overview.tsx'),
+      route(':certId', 'feature/cert/routes/cert-details.tsx'),
+      route('table', 'feature/cert/routes/cert-table.tsx'),
     ]),
     route('*', 'routes/404.tsx'),
   ]),
