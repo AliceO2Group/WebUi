@@ -79,7 +79,7 @@ export const RawViewModal: FC<RawViewModalProps> = ({ open, onClose, title, data
       </DialogTitle>
 
       <DialogContent dividers>
-        <RawEditor intialData={initialFormattedData} onChange={handleEditorChange}/>
+        <RawEditor intialData={initialFormattedData} onChange={handleEditorChange} />
       </DialogContent>
     </Dialog>
   );
