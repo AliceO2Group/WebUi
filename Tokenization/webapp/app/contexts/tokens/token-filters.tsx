@@ -65,7 +65,6 @@ export function TokenFiltersProvider({ children }: { children: React.ReactNode }
   const [ordering, setOrdering] = useState<string[]>([]);
 
   const clearAllFilters = useCallback(() => {
-    setServices([]);
     setFirstSelectedService([]);
     setSecondSelectedService([]);
     setHttpMethods([]);

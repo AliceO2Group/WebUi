@@ -35,6 +35,7 @@ function FormInput<T extends string | number = string>({
   setValue,
   labelText,
   name,
+  children,
 }: PropsWithChildren<FormInputInterface<T>>) {
 
   // If setValue and value are provided than input is controlled
@@ -50,6 +51,13 @@ function FormInput<T extends string | number = string>({
     setValue?.(newVal);
   };
 
+  const childInput = React.Children.toArray(children)[0];
+  const input = React.cloneElement(childInput as React.ReactElement<React.InputHTMLAttributes<HTMLInputElement>>, {
+    id: name,
+    value: value as unknown as string,
+    onChange: handleChange,
+  });
+
   return (
     <div className='my-input'>
       {labelText && (
@@ -57,12 +65,7 @@ function FormInput<T extends string | number = string>({
           {labelText}
         </label>
       )}
-      <input
-        id={name}
-        name={name}
-        value={value as unknown as string}
-        onChange={handleChange}
-      />
+      {input}
     </div>
   );
 }
@@ -89,6 +92,17 @@ export function FormInputNumber({ value, setValue, labelText, name }: FormInputI
     labelText={labelText}
     name={name}
   >
-    <input type='number' step={1} min={0}/>
+    <input type='number' name={name} step={1} min={0}/>
+  </FormInput>;
+}
+
+export function FormInputDatetime({ value, setValue, labelText, name }: FormInputInterface<string>) {
+  return <FormInput
+    value={value}
+    setValue={setValue}
+    labelText={labelText}
+    name={name}
+  >
+    <input type='datetime-local' name={name} />
   </FormInput>;
 }
