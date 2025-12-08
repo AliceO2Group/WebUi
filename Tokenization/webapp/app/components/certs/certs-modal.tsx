@@ -65,11 +65,6 @@ function CertsModalRenewContent({fetcher}: {fetcher: ReturnType<typeof useFetche
 }
 
 export const CertsModal = ({ open, setOpen, fetcher, renew }: DialogPropsBase & { fetcher: ReturnType<typeof useFetcher>; renew?: boolean }) => {
-  useEffect(() => {
-    console.log(renew)
-    console.log('hello from cert modal')
-  })
-
   return <Modal
     open={open}
     setOpen={setOpen}

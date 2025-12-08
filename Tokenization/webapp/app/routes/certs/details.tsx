@@ -20,10 +20,11 @@ import { CertsForm } from '~/components/certs/certs-form';
 import Modal from '~/components/window/modal';
 import { WindowButtonAccept, WindowButtonCancel, WindowContent, WindowTitle } from '~/components/window/window-objects';
 import { Form } from '~/components/form/form';
-import { FormInput } from '~/components/form/form-input';
+import { FormInputString } from '~/components/form/form-input';
 import { useFetcher, useLoaderData } from 'react-router';
 import { CertsModal } from '~/components/certs/certs-modal';
 import { useOpenCertModal } from '~/hooks/certs/cert-modal';
+import useForm from '~/components/hooks/useForm';
 
 export const clientLoader = async ({ params }: Route.ClientLoaderArgs) => {
   const certId = parseInt((params as { certId: string }).certId, 10);
@@ -50,6 +51,7 @@ export default function Details() {
   const [serviceName, setServiceName] = useState<string>(service_name);
 
   const fetcher = useFetcher();
+  const {ref, fetcher: nameFetcher, submit} = useForm();
   const [certModalOpen, setCertModalOpen] = useOpenCertModal(fetcher);
 
   return (
@@ -75,8 +77,9 @@ export default function Details() {
         <WindowTitle> Rename Service </WindowTitle>
         <WindowContent>
           <div className="flex-column g2">
-            <Form>
-              <FormInput
+            <Form action={`/certs/${id}/rename`} fetcher={nameFetcher} submitRef={ref}>
+              <FormInputString
+                name="service_name"
                 labelText="Current Service Name:"
                 value={serviceName}
                 setValue={setServiceName}

@@ -173,3 +173,14 @@ export function FormInputDatetime({ value, setValue, labelText, name }: FormInpu
     <input type='datetime-local' name={name} />
   </FormInput>;
 }
+
+export function FormInputString({ value, setValue, labelText, name }: FormInputInterface<string>) {
+  return <FormInput
+    value={value}
+    setValue={setValue}
+    labelText={labelText}
+    name={name}
+  >
+    <input type='text' name={name} />
+  </FormInput>;
+}
