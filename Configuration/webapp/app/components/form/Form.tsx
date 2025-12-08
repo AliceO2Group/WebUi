@@ -75,12 +75,12 @@ export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) 
         </AccordionDetails>
       </Accordion>
 
-      <RawViewModal
+      {isRawModalOpen && (<RawViewModal
         open={isRawModalOpen}
         onClose={() => setIsRawModalOpen(false)}
-        title={`${sectionTitle}`}
+        title={sectionTitle}
         data={items}
-      />
+      />)}
     </>
   );
 };

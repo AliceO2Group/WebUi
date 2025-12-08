@@ -15,7 +15,7 @@
 import { useCallback, type FC, type PropsWithChildren, type ReactElement } from 'react';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import RawData from '@mui/icons-material/Code';
+import RawData from '@mui/icons-material/DataObject';
 import { IconButton, Typography } from '@mui/material';
 
 interface AccordionHeaderProps extends PropsWithChildren {

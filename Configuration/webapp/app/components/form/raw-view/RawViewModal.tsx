@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { type FC } from 'react';
+import { useEffect, useMemo, useState, type FC } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -32,9 +32,22 @@ interface RawViewModalProps {
 }
 
 export const RawViewModal: FC<RawViewModalProps> = ({ open, onClose, title, data }) => {
+  const initialFormattedData = useMemo(() => JSON.stringify(data, null, 2), [data]);
+
+  const [currentData, setCurrentData] = useState(initialFormattedData);
+
+  useEffect(() => {
+    if (open) {
+      setCurrentData(initialFormattedData);
+    }
+  }, [open, initialFormattedData]);
+
   const handleCopy = () => {
-    const textToCopy = JSON.stringify(data, null, 2);
-    void navigator.clipboard.writeText(textToCopy);
+    void navigator.clipboard.writeText(currentData);
+  };
+
+  const handleEditorChange = (value: string | undefined) => {
+    setCurrentData(value ?? '');
   };
 
   return (
@@ -66,8 +79,7 @@ export const RawViewModal: FC<RawViewModalProps> = ({ open, onClose, title, data
       </DialogTitle>
 
       <DialogContent dividers>
-        {/* <RawViewer data={data} /> */}
-        <RawEditor data={data} />
+        <RawEditor intialData={initialFormattedData} onChange={handleEditorChange}/>
       </DialogContent>
     </Dialog>
   );

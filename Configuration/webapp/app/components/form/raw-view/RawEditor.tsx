@@ -16,42 +16,39 @@ import { type FC } from 'react';
 import Editor from '@monaco-editor/react';
 import { Box } from '@mui/material';
 import { Spinner } from '~/ui/spinner';
-import type { FormItem } from '../Form';
 
 interface RawEditorProps {
-  data: FormItem;
+  intialData: string;
+  onChange: (value: string | undefined) => void;
 }
 
-export const RawEditor: FC<RawEditorProps> = ({ data }) => {
-  const formattedJson = JSON.stringify(data, null, 2);
-
-  return (
-    <Box
-      sx={{
-        border: '1px solid #e0e0e0',
-        borderRadius: '4px',
-        overflow: 'hidden',
-        height: '60vh',
+export const RawEditor: FC<RawEditorProps> = ({ intialData, onChange }) => (
+  <Box
+    sx={{
+      border: '1px solid #e0e0e0',
+      borderRadius: '4px',
+      overflow: 'hidden',
+      height: '60vh',
+    }}
+  >
+    <Editor
+      height="100%"
+      defaultLanguage="json"
+      defaultValue={intialData}
+      theme="light"
+      onChange={onChange}
+      options={{
+        readOnly: false,
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        fontSize: 14,
+        fontFamily: '"Fira Code", "Roboto Mono", monospace',
+        wordWrap: 'on',
+        lineNumbers: 'on',
+        renderLineHighlight: 'none',
+        contextmenu: false,
       }}
-    >
-      <Editor
-        height="100%"
-        defaultLanguage="json"
-        value={formattedJson}
-        theme="light"
-        options={{
-          readOnly: false,
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
-          fontSize: 14,
-          fontFamily: '"Fira Code", "Roboto Mono", monospace',
-          wordWrap: 'on',
-          lineNumbers: 'on',
-          renderLineHighlight: 'none',
-          contextmenu: false,
-        }}
-        loading={<Spinner />}
-      />
-    </Box>
-  );
-};
+      loading={<Spinner />}
+    />
+  </Box>
+);
