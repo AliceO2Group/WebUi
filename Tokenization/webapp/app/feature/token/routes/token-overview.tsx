@@ -13,13 +13,8 @@
  */
 import type { Token } from '../types/token';
 
-import { Await, useLoaderData } from 'react-router';
-import { Suspense } from 'react';
-
-import { Spinner } from '~/ui/spinner';
-import { Box1_2 } from '~/ui/box';
-import { useSetHeader } from '~/ui/header/headerContext';
-import { TokenTable } from '../components//token-table';
+import { useLoaderData } from 'react-router';
+import TokenOverviewView from '../views/token-overview';
 
 /**
  * Client loader that fetches all tokens from the API.
@@ -50,26 +45,6 @@ export const clientLoader = async (): Promise<{ tokens: Promise<Token[]> }> => {
  * @param loaderData - Object containing the deferred tokens promise
  */
 export default function Overview() {
-
   const { tokens } = useLoaderData();
-  useSetHeader('Tokens');
-
-  return (
-    <div className="grid-1-2">
-      <Box1_2 link="/tokens/table">
-        <Suspense fallback={<Spinner align='center' />}>
-          <Await resolve={tokens}>
-            {(resolvedTokens: Token[]) => <TokenTable tokens={resolvedTokens}/>}
-          </Await>
-        </Suspense>
-      </Box1_2>
-
-      <Box1_2 link="/tokens/new">
-        <div className="p-4">
-          <h2 className="text-2xl font-bold mb-4">Create Token</h2>
-          <p>Form to create a new token will go here.</p>
-        </div>
-      </Box1_2>
-    </div>
-  );
+  return <TokenOverviewView tokens={tokens} />;
 }

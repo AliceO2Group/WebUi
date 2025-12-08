@@ -14,7 +14,7 @@
 import { useState } from "react";
 
 import { FlexGrowWrapper, FlexGrowWrapperElement } from "~/ui/flex";
-import { FormInput } from "~/shared/components/form/form-input";
+import { FormInputString, FormInputDatetime } from "~/shared/components/form/form-input";
 import { FormSelectMultiOrdering } from "~/shared/components/form/form-select";
 import { setStorageItem } from "~/utils/storage";
 
@@ -65,46 +65,35 @@ export function CertsFilter() {
 
   return <>
       <FlexGrowWrapper>
-          <FormInput
+          <FormInputDatetime
             labelText="Expiration Date (min):"
-            inputProps={{
-              type: 'datetime-local',
-            }}
+            name='expiration-date-min'
             value={expirationDateMin}
             setValue={setExpirationDateMin}
           />
-          <FormInput
+          <FormInputDatetime
             labelText="Expiration Date (max):"
-            inputProps={{
-              type: 'datetime-local',
-            }}
+            name='expiration-date-max'
             value={expirationDateMax}
             setValue={setExpirationDateMax}
           />
-          <FormInput
+          <FormInputDatetime
             labelText="Issue Date (min):"
-            inputProps={{
-              type: 'datetime-local',
-            }}
+            name='issue-date-min'
             value={issueDateMin}
             setValue={setIssueDateMin}
           />
-          <FormInput
+          <FormInputDatetime
             labelText="Issue Date (max):"
-            inputProps={{
-              type: 'datetime-local',
-            }}
+            name='issue-date-max'
             value={issueDateMax}
             setValue={setIssueDateMax}
           />
-
     </FlexGrowWrapper>
     <FlexGrowWrapper>
-        <FormInput
+        <FormInputString
           labelText="IP Address:"
-          inputProps={{
-            type: 'text',
-          }}
+          name='ip-address'
           value={ipAddress}
           setValue={setIpAddress}
         />

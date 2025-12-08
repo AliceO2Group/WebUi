@@ -31,7 +31,6 @@ export function CertsForm({ renew, fetcher }: { renew?: boolean; fetcher: Return
       onInput={(event: React.ChangeEvent<HTMLFormElement>) => {
         fetcher.submit(event.currentTarget);
       }}
-
     >
       <FormInputFile name='certFile'/>
     </fetcher.Form>

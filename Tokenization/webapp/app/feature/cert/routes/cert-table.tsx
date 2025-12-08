@@ -13,10 +13,8 @@
  */
 
 import { useLoaderData } from 'react-router';
+import CertsTableRouteView from '../views/cert-table';
 
-import { Box1_1 } from '~/ui/box';
-import { CertsFilter } from '~/feature/cert/components/certs-filter';
-import { CertsTable } from '~/feature/cert/components/certs-table';
 
 /**
  *
@@ -29,7 +27,19 @@ export function clientLoader() {
       issued_at: '2025-01-01',
       expires_at: '2027-01-01',
       ip_address: '192.168.1.1',
-    },
+    }, {
+      id: '2',
+      service_name: 'Service Two',
+      issued_at: '2024-06-15',
+      expires_at: '2026-06-15',
+      ip_address: '192.168.1.2',
+    } , {
+      id: '3',
+      service_name: 'Service Three',
+      issued_at: '2023-03-20',
+      expires_at: '2025-03-20',
+      ip_address: '192.168.1.3'
+    }
   ];
 }
 
@@ -38,9 +48,6 @@ export function clientLoader() {
  */
 export default function CertsTableRoute() {
   const certs = useLoaderData();
+  return <CertsTableRouteView certs={certs} />  
 
-  return <Box1_1 link={null}>
-    <CertsFilter />
-    <CertsTable certs={certs} />
-  </Box1_1>;
 }

@@ -12,10 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
-import { TokenFormProvider } from '~/feature/token/contexts/token-form';
-import { TokenForm, TokenFormWindows } from '~/feature/token/components/token-form';
-import { Box1_1 } from '~/ui/box';
-import type { OptionType } from '~/utils/types';
+import type { clientLoader } from "~/feature/cert/routes/cert-table";
+
+import { useFetcher } from "react-router";
+import CreateTokenView from "../views/token-create";
+import { useEffect } from "react";
 
 // eslint-disable-next-line jsdoc/require-jsdoc
 export async function clientAction({ request }: Route.ClientActionArgs) {
@@ -25,26 +26,19 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
   return { success: true };
 }
 
-// eslint-disable-next-line jsdoc/require-jsdoc
-export function clientLoader(): OptionType[] {
-  return [
-    { value: 'service1', label: 'Service 1' },
-    { value: 'service2', label: 'Service 2' },
-    { value: 'service3', label: 'Service 3' },
-    { value: 'service4', label: 'Service 4' },
-  ];
-}
 
 /**
  * Component is used for /tokens/new route to create new tokens.
  */
-export default function CreateToken({ loaderData }: { loaderData?: OptionType[] }) {
-  return (
-    <TokenFormProvider loaderData={loaderData}>
-      <Box1_1 link={null}>
-        <TokenForm />
-      </Box1_1>
-      <TokenFormWindows />
-    </TokenFormProvider>
-  );
+export default function CreateToken() {
+  const fetcher = useFetcher<typeof clientLoader>(); // temporarily services can be fetched all
+  useEffect(() => {
+    fetcher.load('/certs/table')
+  }, [])
+  const services = fetcher.data || [];
+  const serviceOptions = services.map(service => ({
+    label: service.service_name,
+    value: service.id,
+  }));
+  return <CreateTokenView serviceOptions={serviceOptions} />;
 }

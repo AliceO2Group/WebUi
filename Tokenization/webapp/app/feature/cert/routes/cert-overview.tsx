@@ -11,14 +11,10 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+import type { Route } from './+types/cert-overview';
 
-import { useFetcher, useLoaderData } from 'react-router';
-
-import { Box1_2 } from '~/ui/box';
-import { CertsForm } from '~/feature/cert/components/certs-form';
-import { CertsTable } from '~/feature/cert/components/certs-table';
-import { useOpenCertModal } from '~/feature/cert/hooks/cert-modal';
-import { CertsModal } from '~/feature/cert/components/certs-modal';
+import { useLoaderData } from 'react-router';
+import CertsOverviewView from '../views/cert-overview';
 
 export const clientAction = async ({ request }: Route.ClientActionArgs) => {
   const formData = await request.formData();
@@ -46,29 +42,7 @@ export const clientLoader = async () => [
 ];
 
 // eslint-disable-next-line jsdoc/require-jsdoc
-export default function Overview() {
+export default function CertsOverview() {
   const certs = useLoaderData();
-  const fetcher = useFetcher();
-  const [certModalOpen, setCertModalOpen] = useOpenCertModal(fetcher);
-
-  return (
-    <>
-      <div className="grid-1-2">
-        <Box1_2 link={'/certs/table'}>
-          <div className="flex-row justify-center">
-            <h4> Registered services</h4>
-          </div>
-          <CertsTable certs={certs} />
-        </Box1_2>
-        <Box1_2 link={null}>
-          <CertsForm fetcher={fetcher} />
-        </Box1_2>
-      </div>
-      <CertsModal
-        open={certModalOpen as boolean}
-        setOpen={setCertModalOpen as React.Dispatch<React.SetStateAction<boolean>>}
-        fetcher={fetcher}
-      />
-    </>
-  );
+  return <CertsOverviewView certs={certs} />
 }

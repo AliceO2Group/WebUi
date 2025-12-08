@@ -12,16 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Suspense } from 'react';
 import { useLoaderData } from 'react-router';
-
-import { Box1_2 } from '~/ui/box';
-import { Spinner } from '~/ui/spinner';
-import { Await } from 'react-router';
-import type { Token } from '~/feature/token/types/token';
-import { TokenTableExtended } from '~/feature/token/components/token-table';
-import { TokenFilters } from '~/feature/token/components/token-filters';
-import { TokenFiltersProvider } from '~/feature/token/contexts/token-filters';
+import TokenTableRouteView from '../views/token-table';
 
 //eslint-disable-next-line jsdoc/require-jsdoc
 export async function clientLoader() {
@@ -45,15 +37,6 @@ export async function clientLoader() {
 //eslint-disable-next-line jsdoc/require-jsdoc
 export default function TokensTable() {
   const { tokens } = useLoaderData();
-  return <TokenFiltersProvider>
-    <Box1_2 link={null}>
-      <div className="mv2"></div>
-      <TokenFilters />
-      <Suspense fallback={<Spinner align='center' />}>
-        <Await resolve={tokens}>
-          {(resolvedTokens: Token[]) => <TokenTableExtended tokens={resolvedTokens}/>}
-        </Await>
-      </Suspense>
-    </Box1_2>
-  </TokenFiltersProvider>;
+  return <TokenTableRouteView tokens={tokens} />;
+
 }

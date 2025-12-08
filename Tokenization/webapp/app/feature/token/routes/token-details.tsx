@@ -13,13 +13,12 @@
  */
 
 
-import { Await, data, Link } from 'react-router';
-import { Suspense } from 'react';
+import { useLoaderData } from 'react-router';
 
 import type { Token } from '../types/token';
 import type { Log } from '~/feature/token/types/log';
-import { TokenLogs } from '~/feature/token/components/token-logs';
-import { Spinner } from '~/ui/spinner';
+
+import TokenDetailsView from '../views/token-details';
 
 /**
  * Fetches a token by its ID from the API.
@@ -30,7 +29,7 @@ import { Spinner } from '~/ui/spinner';
 const getToken = async (tokenId: number): Promise<Token> => {
   const response = await fetch(`/api/tokens/${tokenId}`);
   if (!response.ok) {
-    throw data(`Failed to fetch token with token id ${tokenId}`, { status: response.status });
+    throw Error(`Failed to fetch token with token id ${tokenId}`);
   }
   const json = await response.json();
   return { ...json, id: json.tokenId ?? json.id };
@@ -45,7 +44,7 @@ const getToken = async (tokenId: number): Promise<Token> => {
 const getLogs = async (tokenId: number): Promise<Log[]> => {
   const response = await fetch(`/api/tokens/${tokenId}/logs`);
   if (!response.ok) {
-    throw data(`Failed to fetch logs related to token with token id ${tokenId}`, { status: response.status });
+    throw Error(`Failed to fetch logs related to token with token id ${tokenId}`);
   }
   return response.json();
 };
@@ -72,33 +71,7 @@ export const clientLoader = async ({ params }: Route.ClientLoaderArgs): Promise<
  * @param props.loaderData.token - The token data
  * @param props.loaderData.logs - Promise that resolves to the logs array
  */
-export default function Details({ loaderData: { token, logs } }: Route.ComponentProps) {
-
-  const { id, last4chars, issuer, iat, serviceFrom, serviceTo, exp } = token;
-  const expirationDate = exp.split('T').reverse().join(' - ');
-
-  const fields = [
-    { label: 'Last 4 token characters', value: last4chars },
-    { label: 'Issuer', value: issuer },
-    { label: 'Issued at', value: iat },
-    { label: 'Subject', value: serviceFrom },
-    { label: 'Audience', value: serviceTo },
-    { label: 'Expires at', value: expirationDate },
-  ];
-
-  return <>
-    <h1>Token {id} details</h1>
-    {fields.map((f) => (
-      <p key={f.label}>
-        {f.label}: <strong>{f.value ?? '—'}</strong>
-      </p>
-    ))}
-    <h2>Logs</h2>
-    <Suspense fallback={<Spinner size={2} align={'left'} />}>
-      <Await resolve={logs} errorElement={<div><em>Failed to load the logs</em></div>}>
-        {(logs) => <TokenLogs logs={logs} />}
-      </Await>
-    </Suspense>
-    <Link to={'/tokens'}>Back to overview</Link>
-  </>;
+export default function Details() {
+  const loaderData = useLoaderData();
+  return <TokenDetailsView {...loaderData} />;
 }
