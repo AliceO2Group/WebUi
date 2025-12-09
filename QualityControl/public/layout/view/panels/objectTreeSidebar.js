@@ -193,7 +193,13 @@ const leafRow = (model, sideTree, level) => {
 const objectPreview = (model) => {
   const isSelected = model.object.selected;
   if (isSelected) {
-    return isSelected && h('.bg-white', { style: 'height: 20em' }, draw(model.object, model.object.selected.name));
+    return isSelected && h(
+      '.bg-white',
+      { style: 'height: 20em' },
+      draw(model.object.objects[model.object.selected.name], {}, [], (error) => {
+        model.object.invalidObject(model.object.selected.name, error.message);
+      }),
+    );
   }
   return null;
 };
