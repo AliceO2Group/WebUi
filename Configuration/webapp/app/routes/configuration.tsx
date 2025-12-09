@@ -22,7 +22,7 @@ import { useForm, type SubmitHandler } from 'react-hook-form';
 import { useEffect, useMemo } from 'react';
 import { DEFAULT_PREFIX } from '~/components/form/constants';
 import { getDefaultValuesFromConfigObject } from '~/components/form/utils/getDefaultValuesFromConfigObject';
-import { SaveButton } from '~/components/form/SaveButton';
+import { SaveButton } from '~/components/form/components/buttons/SaveButton';
 
 export type InputsType = Record<string, string | number | boolean>;
 

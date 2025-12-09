@@ -16,7 +16,6 @@ import { type FC, type PropsWithChildren, type ReactElement } from 'react';
 import { useFormState, type Control } from 'react-hook-form';
 import type { InputsType } from '~/routes/configuration';
 import { FormTextInput } from './widgets/FormTextInput';
-import { FormNumberInput } from './widgets/FormNumberInput';
 import { FormToggleInput } from './widgets/FormToggleInput';
 
 export interface WidgetProps extends PropsWithChildren {
@@ -43,7 +42,7 @@ export const Widget: FC<WidgetProps> = ({ type, ...rest }): ReactElement => {
     case 'string':
       return <FormTextInput {...rest} isDirty={Boolean(isDirty)} />;
     case 'number':
-      return <FormNumberInput {...rest} isDirty={Boolean(isDirty)} />;
+      return <FormTextInput {...rest} isDirty={Boolean(isDirty)} type="number" />;
     case 'boolean':
       return <FormToggleInput {...rest} isDirty={Boolean(isDirty)} />;
     case 'array':
