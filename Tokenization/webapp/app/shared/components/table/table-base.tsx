@@ -18,8 +18,8 @@ interface TypeWithId {
 
 interface Column<T> {
   key: string;
-  label: string;
-  render?: (t: T) => React.ReactNode;
+  label: string | (() => React.ReactNode);
+  render?: (t: T) => React.ReactNode | undefined;
 }
 
 /**
@@ -38,7 +38,7 @@ export function TableBase<T extends TypeWithId>({
   data,
   columns,
 }: {
-  data: T[];
+  data: (T & {className?: string})[];
   columns: Column<T>[];
 }) {
 
@@ -48,13 +48,17 @@ export function TableBase<T extends TypeWithId>({
         <thead>
           <tr>
             {columns.map((c) => (
-              <th key={c.key}>{c.label}</th>
+              <th key={c.key}>
+                {typeof c.label === 'function'
+                  ? c.label()
+                  : c.label}
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {data.map((item: T) => (
-            <tr key={item.id}>
+          {data.map((item: T & {className?: string}) => (
+            <tr key={item.id} className={item.className ?? ''}>
               {columns.map((col: Column<T>) => (
                 <td key={col.key}>
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}

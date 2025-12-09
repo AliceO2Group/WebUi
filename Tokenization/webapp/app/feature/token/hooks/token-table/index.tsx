@@ -12,18 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-// Archived tokens have state 'expied' on backend and will be displayed in other view
-export interface ArchivedToken {
-  id: string ;
-  serviceFrom: string;
-  serviceTo: string;
-  exp: string;
-  last4chars: string;
-  issuer: string;
-  iat: string;
-  permissions: string[];
-}
+import { useTokenTableAction } from './useTokenTableAction';
+import { useTokenTableState } from './useTokenTableState';
 
-export interface Token extends ArchivedToken {
-  banned: boolean;
-}
+export { useTokenTableAction, useTokenTableState };

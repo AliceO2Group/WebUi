@@ -38,10 +38,15 @@ import { useFullWindowLogic } from './hooks/useWindowLogic';
  */
 const Modal = (props: WindowInterface) => {
   const { className } = props;
-  const { visibility, ui_elements: { title, content, closeIcon, buttonCancel, buttonAccept } } = useFullWindowLogic(props);
+  const { ui_elements: { title, content, closeIcon, buttonCancel, buttonAccept } } = useFullWindowLogic(props);
+
+  const { open } = props;
+  if (!open) {
+    return null;
+  }
 
   return (
-    <div className={`modal-overlay shadow-level1 ${visibility}`}>
+    <div className={'modal-overlay shadow-level1'}>
       <div className={`modal level2 br2 ${className}`}>
         <div className="flex-row justify-between pv2 ph3 brb2">
           {title ?? ''}

@@ -18,7 +18,6 @@ import { FormSelectMulti, FormSelectMultiOrdering } from '~/shared/components/fo
 import { useTokenFiltersState, useTokenFiltersAction } from '../../hooks/token-filters';
 import { FlexGrowWrapper, FlexGrowWrapperElement } from '~/ui/flex';
 
-
 /**
  *
  */

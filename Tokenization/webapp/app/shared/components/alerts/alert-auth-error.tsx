@@ -12,18 +12,18 @@
  * or submit itself to any jurisdiction.
  */
 
-// Archived tokens have state 'expied' on backend and will be displayed in other view
-export interface ArchivedToken {
-  id: string ;
-  serviceFrom: string;
-  serviceTo: string;
-  exp: string;
-  last4chars: string;
-  issuer: string;
-  iat: string;
-  permissions: string[];
-}
+import type { DialogPropsBase } from '~/utils/types';
+import { AlertBase } from './alert-base';
 
-export interface Token extends ArchivedToken {
-  banned: boolean;
+const AUTH_ERROR_ALERT = {
+  title: 'Authorization error',
+  message: 'You cannot perform this action without authorization.',
+  success: false,
+};
+
+/**
+ *
+ */
+export default function AlertAuthError({ open, setOpen }: DialogPropsBase) {
+  return <AlertBase alert={AUTH_ERROR_ALERT} open={open} setOpen={setOpen} />;
 }

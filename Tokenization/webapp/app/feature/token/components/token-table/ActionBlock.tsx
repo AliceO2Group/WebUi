@@ -12,11 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-import { IconDelete } from '~/ui/icon';
+import type { PropsWithChildren } from 'react';
+import { IconDelete, IconLockUnlocked } from '~/ui/icon';
 
 interface ActionBlockProps {
   onClick: () => void;
   title?: string;
+  className?: string;
 }
 
 /**
@@ -28,38 +30,78 @@ interface ActionBlockProps {
  * @param {() => void} props.onClick - click handler invoked when the action button is pressed
  * @param {string} props.title - optional title for the action button
  */
-export function ActionBlockBase({ onClick, title }: ActionBlockProps) {
+export function ActionBlockBase({ onClick,
+  title,
+  children,
+  className
+}: PropsWithChildren<ActionBlockProps>) {
   return (
     <div>
       <button
-        className="bg-danger btn-sm static"
+        className={`btn-sm static ${className ?? ''}`}
         onClick={onClick}
         title={title}
       >
-        <IconDelete />
+        {children}
       </button>
     </div>
   );
 }
 
 /**
- *  ActionBlockBulk
+ *  BanBlockBulk
  *
  *  UI block that renders action button for bulk token revocation.
  *
  *  @param {object} props - component props
  *  @param {() => void} props.onClick - click handler invoked when the action button is pressed
  */
-export function ActionBlockBulk({ onClick }: ActionBlockProps) {
-  return (<ActionBlockBase onClick={onClick} title="Revoke tokens selected by filter" />);
+export function BanBlockBulk({ onClick }: ActionBlockProps) {
+  return (<ActionBlockBase 
+    onClick={onClick} 
+    title="Revoke tokens selected by filter"
+    className='bg-danger'
+    >
+    <IconDelete />
+  </ActionBlockBase>);
 }
 
 /**
- * ActionBlockSolo
+ * BanBlockSolo
  *
  * @param {object} props - component props
  * @param {() => void} props.onClick - click handler invoked when the action button is pressed
  */
-export function ActionBlockSolo({ onClick }: ActionBlockProps) {
-  return (<ActionBlockBase onClick={onClick} title="Revoke token" />);
+export function BanBlockSolo({ onClick }: ActionBlockProps) {
+  return (<ActionBlockBase 
+    onClick={onClick} 
+    title="Revoke token" 
+    className='bg-danger'
+    >
+    <IconDelete />
+  </ActionBlockBase>);
 }
+
+export function UnbanBlockBulk({ onClick }: ActionBlockProps) {
+  return (<ActionBlockBase 
+    onClick={onClick} 
+    title="Unban tokens selected by filter"
+    className='bg-success'
+    >
+    <IconLockUnlocked />
+  </ActionBlockBase>);
+}
+
+
+export function UnbanBlockSolo({ onClick }: ActionBlockProps) {
+  return (<ActionBlockBase 
+    onClick={onClick} 
+    title="Unban token" 
+    className='bg-success'
+    >
+    <IconLockUnlocked />
+  </ActionBlockBase>);
+}
+
+
+

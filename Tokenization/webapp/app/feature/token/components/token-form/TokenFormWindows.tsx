@@ -43,7 +43,7 @@ export default function TokenFormWindows() {
     if (auth) {
       submit();
     } else {
-      setAlert({ key: Date.now(),
+      setAlert({
         title: 'Authorization error',
         message: 'You cannot perform this action without authorization.',
         success: false });
@@ -54,13 +54,13 @@ export default function TokenFormWindows() {
 
   useEffect(() => {
     if (fetcher.state === 'idle' && (fetcher.data as any)?.success === true) {
-      setAlert({ key: Date.now(),
+      setAlert({
         title: 'Token created',
         message: 'Token has been created successfully.',
         success: true });
       setOpenAlert(true);
     } else if (fetcher.state === 'idle' && (fetcher.data as any)?.success === false) {
-      setAlert({ key: Date.now(),
+      setAlert({
         title: 'Token creation failed',
         message: 'An error occurred while creating the token.',
         success: false });
@@ -100,7 +100,7 @@ function TokenFormWindowsUI({ callApi }: { callApi: () => void }) {
       <WindowButtonCancel />
     </Modal>
     <Alert
-      key={alert?.key}
+      key={Date.now()}
       open={openAlert}
       setOpen={setOpenAlert}
       timeout={6000}

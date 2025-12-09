@@ -18,7 +18,7 @@ import { Suspense } from 'react';
 import type { Token } from '../types/token';
 import { Spinner } from '~/ui/spinner';
 import { Box1_2 } from '~/ui/box';
-import { TokenTable } from '../components//token-table';
+import { TokenTable } from '../components/token-table';
 
 /**
  *

@@ -109,7 +109,7 @@ export function TokenFormProvider({ loaderData, children }: { loaderData?: Optio
         message += 'HTTP methods, ';
       }
       message = message.slice(0, -2);
-      setAlert({ key: Date.now(), title: 'Form incomplete', message, success: false });
+      setAlert({ title: 'Form incomplete', message, success: false });
       setOpenAlert(true);
     }
   }, [expirationTime, firstSelectedService, secondSelectedService, selectedMethods]);

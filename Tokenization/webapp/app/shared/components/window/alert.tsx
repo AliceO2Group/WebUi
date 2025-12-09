@@ -16,9 +16,7 @@ import { type WindowInterface } from './window.d';
 import { useFullWindowLogic } from './hooks/useWindowLogic';
 
 // Used to represent an alert message
-// Key might be used to force re-mounting the component for repeated alerts
 export interface AlertType {
-  key: number;
   title: string;
   message: string;
   success: boolean;

@@ -17,6 +17,7 @@ export const tokensMock = new Map([
     1,
     {
       id: 1,
+      banned: false,
       last4chars: 'abcd',
       serviceFrom: 'Service One',
       serviceTo: 'Service Two',
@@ -30,6 +31,7 @@ export const tokensMock = new Map([
     2,
     {
       id: 2,
+      banned: true,
       last4chars: 'wxyz',
       serviceFrom: 'Service Three',
       serviceTo: 'Service Four',
@@ -43,6 +45,7 @@ export const tokensMock = new Map([
     3,
     {
       id: 3,
+      banned: false,
       last4chars: 'efgh',
       serviceFrom: 'Service Two',
       serviceTo: 'Service One',
@@ -56,6 +59,7 @@ export const tokensMock = new Map([
     4,
     {
       id: 4,
+      banned: false,
       // Last4chars: '1234',
       serviceFrom: 'Service One',
       serviceTo: 'Service Three',
