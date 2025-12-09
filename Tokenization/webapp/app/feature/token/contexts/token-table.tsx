@@ -20,7 +20,7 @@ type TokenTableState = {
   openA: boolean;
   tokenId: string;
   modalVariant: string;
-  key: number;
+  alertVariant: string;
 };
 
 type Actions = {
@@ -28,13 +28,18 @@ type Actions = {
   setOpenA: React.Dispatch<React.SetStateAction<boolean>>;
   setTokenId: React.Dispatch<React.SetStateAction<string>>;
   setModalVariant: React.Dispatch<React.SetStateAction<string>>;
-  setKey: React.Dispatch<React.SetStateAction<number>>;
+  setAlertVariant: React.Dispatch<React.SetStateAction<string>>;
 };
+
+type Fetchers = {
+  ban: ReturnType<typeof useFetcher>;
+  unban: ReturnType<typeof useFetcher>;
+}
 
 export const TokenTableContext = createContext<
   { state: TokenTableState; 
     actions: Actions; 
-    fetcher: ReturnType<typeof useFetcher> 
+    fetchers: Fetchers
   } | undefined> (undefined);
 
 /**
@@ -45,16 +50,17 @@ export function TokenTableProvider({ children }: { children: React.ReactNode }) 
   const [openA, setOpenA] = useState<boolean>(false);
   const [tokenId, setTokenId] = useState<string>('');
   const [modalVariant, setModalVariant] = useState<string>('');
-  const [key, setKey] = useState<number>(0); // Used to force re-mount of Alert component
+  const [alertVariant, setAlertVariant] = useState<string>('');
 
-  const fetcher = useFetcher(); // fetcher for ban and unban actions on the table level
+  const banningFetcher = useFetcher(); // fetcher for ban and unban actions on the table level
+  const unbanningFetcher = useFetcher(); // fetcher for unban actions on the table level
 
   const state: TokenTableState = {
     openM,
     openA,
     tokenId,
     modalVariant,
-    key,
+    alertVariant,
   };
 
   const actions: Actions = {
@@ -62,10 +68,14 @@ export function TokenTableProvider({ children }: { children: React.ReactNode }) 
     setOpenA,
     setTokenId,
     setModalVariant,
-    setKey,
+    setAlertVariant,
   };
 
-  return <TokenTableContext.Provider value={{ state, actions, fetcher }}>
+  const fetchers = {
+    ban: banningFetcher,
+    unban: unbanningFetcher,
+  }
+  return <TokenTableContext.Provider value={{ state, actions, fetchers }}>
     {children}
   </TokenTableContext.Provider>;
 }

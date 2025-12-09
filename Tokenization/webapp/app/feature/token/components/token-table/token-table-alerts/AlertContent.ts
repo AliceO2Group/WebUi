@@ -13,13 +13,13 @@
  */
 
 export const ALERT_UNBANNED_FAULT = {
-  title: 'Token unban failed!',
+  title: 'Token(s) unban failed!',
   message: 'An error occurred while unbanning the token.',
   success: false,
 };
 
 export const ALERT_BANNED_FAULT = {
-  title: 'Token ban failed',
+  title: 'Token(s) ban failed',
   message: 'An error occurred while banning the token.',
   success: false,
 };

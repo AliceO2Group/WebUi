@@ -11,6 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+import type { Token } from '../../types/token';
 
 import { useEffect } from 'react';
 
@@ -40,7 +41,13 @@ const _applyFilters = ({ services, ...filterStates }: any) => {
  *
  * @returns {JSX.Element} - rendered component
  */
-export function TokenFilters() {
+export function TokenFilters({
+  setFiltered,
+  setData
+}: {
+  setFiltered: React.Dispatch<React.SetStateAction<boolean>>
+  setData: React.Dispatch<React.SetStateAction<Token[]>>
+}) {
   // Deleting stored filters on component un-mount
   useEffect(() => () => {
     setStorageItem('TKN_token-filters', {});
@@ -66,17 +73,24 @@ export function TokenFilters() {
 
   }, [setServices]);
 
-  const { fetcher, ref } = useForm();
+  const { fetcher, ref, submit } = useForm();
 
-  const applyFilters = () => {
-    _applyFilters(state); // Rather use submit for form
-  };
+  useEffect(() => {
+    if (fetcher.state === 'idle' && (fetcher.data as any)?.success === true) {
+      if(fetcher.data.filtered) {
+        setFiltered(true);
+      } else {
+        setFiltered(false);
+      }
+      setData((fetcher.data as any).tokens);
+    }
+  }, [fetcher.state, fetcher.data, setData]);
 
   return <div>
-    <Form submitRef={ref} fetcher={fetcher} action='/token/filters'>
+    <Form submitRef={ref} fetcher={fetcher} action='/tokens/filter'>
       <TokenFiltersFirstRow />
       <TokenFiltersSecondRow />
-      <TokenFiltersLastRow applyFilters={applyFilters} />
+      <TokenFiltersLastRow applyFilters={() => submit()} />
     </Form>
   </div>;
 

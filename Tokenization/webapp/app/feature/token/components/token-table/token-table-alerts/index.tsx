@@ -30,7 +30,7 @@ const ALERT_VARIANTS = {
   'token-unbanned-failed': AlertUnbanFault,
 };
 
-type AlertVariant = keyof typeof ALERT_VARIANTS;
+export type AlertVariant = keyof typeof ALERT_VARIANTS;
 
 /**
  *
@@ -71,5 +71,6 @@ export default function TokenAlert({
   variant: AlertVariant;
 } & DialogPropsBase,
 ) {
-  return ALERT_VARIANTS[variant]({ open, setOpen });
+  const Comp = ALERT_VARIANTS[variant];
+  return Comp ?<Comp open={open} setOpen={setOpen} /> : null;
 }

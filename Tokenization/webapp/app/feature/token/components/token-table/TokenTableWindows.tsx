@@ -11,53 +11,84 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+import type { Token } from '../../types/token';
 
+import { useEffect } from 'react';
+
+import type { AlertVariant } from './token-table-alerts';
 import ModalToken from '~/feature/token/components/token-table/token-table-modals';
-import Alert from '~/shared/components/window/alert';
-import { WindowTitle,
-  WindowContent,
-  WindowCloseIcon,
-} from '~/shared/components/window/window-objects';
-import { useAuth } from '~/feature/auth/hooks/session';
+import TokenAlert from './token-table-alerts';
 import { useTokenTableState,
   useTokenTableAction,
+  useTokenTableFetchers,
 } from '~/feature/token/hooks/token-table';
 
-const successInfo = {
-  title: 'Token(s) deleted',
-  content: 'Token(s) deleted successfully',
-};
-
-const failureInfo = {
-  title: 'Authorization error',
-  content: "You don't have permission to do that operation!",
-};
 
 /**
  *
  */
-export default function TokenTableWindows() {
+export default function TokenTableWindows({
+  setTokens
+}: {
+  setTokens: React.Dispatch<React.SetStateAction<Token[]>>
+}) {
+
   const {
     openA,
     openM,
     tokenId,
     modalVariant,
-    key,
+    alertVariant
   } = useTokenTableState();
   const {
     setOpenA,
     setOpenM,
+    setAlertVariant
   } = useTokenTableAction();
 
-  const auth = useAuth('admin');
+  const banFetcher = useTokenTableFetchers('ban')
+  const unbanFetcher = useTokenTableFetchers('unban')
+
+  // TODO: if pagination is implemented we need to update all pages, not only current one
+  useEffect(() => {
+    if(banFetcher.state === 'idle' && banFetcher.data) {
+      const success = !!((banFetcher.data as any)?.success);
+      const bulk = (banFetcher.data as any)?.bulk;
+      if(success) {
+        setAlertVariant('token-banned-success');
+        if(bulk) {
+          setTokens((prevTokens) => prevTokens.map((t) => ({ ...t, banned: true })));
+        } else {
+          setTokens((prevTokens) => prevTokens.map((t) => t.id === tokenId ? { ...t, banned: true } : t));
+        }
+      } else {
+        setAlertVariant('token-banned-failed');
+      }
+      setOpenA(true);
+    }
+  }, [banFetcher.state, banFetcher.data]);
+
+  // TODO: if pagination is implemented we need to update all pages, not only current one
+  useEffect(() => {
+    if(unbanFetcher.state === 'idle' && unbanFetcher.data) {
+      const success = !!((unbanFetcher.data as any)?.success);
+      const bulk = (unbanFetcher.data as any)?.bulk;
+      if(success) {
+        setAlertVariant('token-unbanned-success');
+        if(bulk) {
+          setTokens((prevTokens) => prevTokens.map((t) => ({ ...t, banned: false })));
+        } else {
+          setTokens((prevTokens) => prevTokens.map((t) => t.id === tokenId ? { ...t, banned: false } : t));
+        }
+      } else {
+        setAlertVariant('token-unbanned-failed');
+      }
+      setOpenA(true);
+    }
+  }, [unbanFetcher.state, unbanFetcher.data]);
 
   return <>
     <ModalToken tokenId={tokenId} open={openM} setOpen={setOpenM} variant={modalVariant as 'ban' | 'unban'} />
-
-    <Alert key={key} open={openA} setOpen={setOpenA} className={auth ? 'bg-success white' : 'bg-danger white'} timeout={6000}>
-      <WindowTitle>{auth ? successInfo.title : failureInfo.title}</WindowTitle>
-      <WindowContent>{auth ? successInfo.content : failureInfo.content}</WindowContent>
-      <WindowCloseIcon />
-    </Alert>
+    <TokenAlert open={openA} setOpen={setOpenA} variant={alertVariant as AlertVariant} />
   </>;
 }

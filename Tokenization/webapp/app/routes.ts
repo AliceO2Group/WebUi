@@ -22,6 +22,9 @@ export default [
       route(':tokenId', 'feature/token/routes/token-details.tsx'),
       route('table', 'feature/token/routes/token-table.tsx'),
       route('new', 'feature/token/routes/token-create.tsx'),
+      route('ban', 'feature/token/routes/token-ban.tsx'),
+      route('unban', 'feature/token/routes/token-unban.tsx'),
+      route('filter', 'feature/token/routes/token-filter.tsx'),
     ]),
     ...prefix('certs', [
       index('feature/cert/routes/cert-overview.tsx'),

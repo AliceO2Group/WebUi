@@ -12,11 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Suspense } from 'react';
+import { useState } from 'react';
 
 import { Box1_2 } from '~/ui/box';
-import { Spinner } from '~/ui/spinner';
-import { Await } from 'react-router';
 import type { Token } from '~/feature/token/types/token';
 import { TokenTableExtended } from '~/feature/token/components/token-table';
 import { TokenFilters } from '~/feature/token/components/token-filters';
@@ -25,16 +23,15 @@ import { TokenFiltersProvider } from '~/feature/token/contexts/token-filters';
 /**
  *
  */
-export default function TokenTableRouteiew({ tokens }: { tokens: Promise<Token[]> }) {
+export default function TokenTableRouteiew({ tokens }: { tokens: Token[] }) {
+  const [filtered, setFiltered] = useState<boolean>(false); // to check if there is any filter applied
+  const [data, setData] = useState<Token[]>(tokens);
+
   return <TokenFiltersProvider>
     <Box1_2 link={null}>
       <div className="mv2"></div>
-      <TokenFilters />
-      <Suspense fallback={<Spinner align='center' />}>
-        <Await resolve={tokens}>
-          {(resolvedTokens: Token[]) => <TokenTableExtended tokens={resolvedTokens}/>}
-        </Await>
-      </Suspense>
+      <TokenFilters setFiltered={setFiltered} setData={setData} />
+      <TokenTableExtended tokens={data} setTokens={setData} filtered={filtered} />
     </Box1_2>
   </TokenFiltersProvider>;
 }

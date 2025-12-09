@@ -20,11 +20,7 @@ import { tokensMock } from '../mocks/tokens';
 
 //eslint-disable-next-line jsdoc/require-jsdoc
 export async function clientLoader() {
-  const tokens = new Promise<Token[]>((resolve) => {
-    setTimeout(() => {
-      resolve(Array.from(tokensMock.values()) as unknown as Token[]);
-    }, 500);
-  });
+  const tokens = Array.from(tokensMock.values()) as unknown as Token[];
   return { tokens };
 }
 

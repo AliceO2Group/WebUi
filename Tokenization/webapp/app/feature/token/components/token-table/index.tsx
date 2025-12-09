@@ -46,16 +46,21 @@ const columns_extended = [
   },
 ];
 
+interface TokenTableProps {
+  tokens: Token[];
+  setTokens: React.Dispatch<React.SetStateAction<Token[]>>;
+}
+
 /**
  * TokenTable
  *
  * Original table using standard columns.
  * @param props.tokens - token list
  */
-export function TokenTable({ tokens }: { tokens: Token[] }) {
+export function TokenTable({ tokens, setTokens }: TokenTableProps) {
   // Delegate to container; TokenTableContainer will call onRequestAction internally via same ActionBlock usage pattern.
   return <TokenTableProvider>
-    <TokenTableContainer tokens={tokens} columns={columns} />
+    <TokenTableContainer tokens={tokens} setTokens={setTokens} columns={columns} />
   </TokenTableProvider>;
 }
 
@@ -65,8 +70,8 @@ export function TokenTable({ tokens }: { tokens: Token[] }) {
  * Variant that adds "Issued at" and "HTTP Methods (permissions)" columns.
  * @param props.tokens - token list
  */
-export function TokenTableExtended({ tokens }: { tokens: Token[] }) {
+export function TokenTableExtended({ tokens, setTokens, filtered }: TokenTableProps& { filtered: boolean }) {
   return <TokenTableProvider>
-    <TokenTableContainer tokens={tokens} columns={columns_extended} />;
+    <TokenTableContainer tokens={tokens} setTokens={setTokens} columns={columns_extended} filtered={filtered} />;
   </TokenTableProvider>;
 }

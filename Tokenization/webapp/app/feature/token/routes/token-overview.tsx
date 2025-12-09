@@ -22,12 +22,8 @@ import { tokensMock } from '../mocks/tokens';
  *
  * @returns Promise that resolves to an array of tokens
  */
-export const clientLoader = async (): Promise<{ tokens: Promise<Token[]> }> => {
-  const tokens = new Promise<Token[]>((resolve) => {
-    setTimeout(() => {
-      resolve(Array.from(tokensMock.values()) as unknown as Token[]);
-    }, 500);
-  });
+export const clientLoader = (): { tokens: Token[] } => {
+  const tokens = Array.from(tokensMock.values()) as unknown as Token[];
   return { tokens };
 };
 

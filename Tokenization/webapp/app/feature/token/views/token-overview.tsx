@@ -12,26 +12,23 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Await } from 'react-router';
-import { Suspense } from 'react';
 
 import type { Token } from '../types/token';
-import { Spinner } from '~/ui/spinner';
+
 import { Box1_2 } from '~/ui/box';
 import { TokenTable } from '../components/token-table';
+import { useState } from 'react';
 
 /**
  *
  */
-export default function TokenOverviewView({ tokens }: { tokens: Promise<Token[]> }) {
+export default function TokenOverviewView({ tokens }: { tokens: Token[] }) {
+  const [data, setData] = useState<Token[]>(tokens);
+  
   return (
     <div className="grid-1-2">
       <Box1_2 link="/tokens/table">
-        <Suspense fallback={<Spinner align='center' />}>
-          <Await resolve={tokens}>
-            {(resolvedTokens: Token[]) => <TokenTable tokens={resolvedTokens}/>}
-          </Await>
-        </Suspense>
+        <TokenTable tokens={data} setTokens={setData} />
       </Box1_2>
 
       <Box1_2 link="/tokens/new">

@@ -27,8 +27,15 @@ import { useFetcher } from 'react-router';
 export default function useForm() {
   const fetcher = useFetcher();
   const ref = useRef<HTMLButtonElement>(null);
-  const submit = useCallback(() => {
-    ref.current?.click();
+  const submit = useCallback((extraData?: object) => {
+    const fd = new FormData(ref.current?.form || undefined);
+    if (extraData) {
+      Object.entries(extraData).forEach(([key, value]) => {
+        fd.append(key, value as string);
+      });
+    }
+    const action = ref.current?.dataset?.action ?? '';
+    fetcher.submit(fd, { method: 'post', action });
   }, [ref]);
 
   return { fetcher, submit, ref };

@@ -14,5 +14,9 @@
 
 import { useTokenTableAction } from './useTokenTableAction';
 import { useTokenTableState } from './useTokenTableState';
+import useTokenTableFetchers from './useTokenTableFetchers';
 
-export { useTokenTableAction, useTokenTableState };
+export { useTokenTableAction, 
+    useTokenTableState,
+    useTokenTableFetchers
+ };

@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { ModalBase } from '~/shared/components/modals/modal-base';
 import type { DialogPropsBase } from '~/utils/types';
+import { ModalBase } from '~/shared/components/modals/modal-base';
 
 /**
  *
@@ -22,19 +22,17 @@ export function TokenModalUnban({
   open,
   setOpen,
   tokenId,
+  onConfirm
 }: {
   tokenId: string;
+  onConfirm: () => void;
 } & DialogPropsBase) {
-
-  const UnbanToken = () => {
-
-  }
 
   const MODAL_CONTENT = {
     title: 'Token Unban',
     content: `Are you sure you want to unban the token with ID ${tokenId}? `,
     accent: 'bg-success',
-    action: UnbanToken
+    action: onConfirm
   };
 
   return <ModalBase
@@ -50,19 +48,16 @@ export function TokenModalUnban({
 export function TokenModalUnbanBulk({
   open,
   setOpen,
-}: DialogPropsBase,
+  onConfirm
+}: {onConfirm: () => void;} 
+& DialogPropsBase,
 ) {
 
-  // will need to get filter info from parent to show in content
-  const UnbanTokenBulk = () => {
-
-  }
-
   const MODAL_CONTENT = {
-    title: 'Token Unban',
+    title: 'Tokens Unban',
     content: 'Are you sure you want to unban ALL FILTERED tokens? Check the filter settings before proceeding.',
     accent: 'bg-success',
-    action: UnbanTokenBulk
+    action: onConfirm
   };
 
   return <ModalBase

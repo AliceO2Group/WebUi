@@ -19,6 +19,7 @@ interface ActionBlockProps {
   onClick: () => void;
   title?: string;
   className?: string;
+  disabled?: boolean
 }
 
 /**
@@ -33,7 +34,8 @@ interface ActionBlockProps {
 export function ActionBlockBase({ onClick,
   title,
   children,
-  className
+  className,
+  disabled
 }: PropsWithChildren<ActionBlockProps>) {
   return (
     <div>
@@ -41,6 +43,7 @@ export function ActionBlockBase({ onClick,
         className={`btn-sm static ${className ?? ''}`}
         onClick={onClick}
         title={title}
+        disabled={disabled}
       >
         {children}
       </button>
@@ -56,11 +59,12 @@ export function ActionBlockBase({ onClick,
  *  @param {object} props - component props
  *  @param {() => void} props.onClick - click handler invoked when the action button is pressed
  */
-export function BanBlockBulk({ onClick }: ActionBlockProps) {
+export function BanBlockBulk({ onClick, disabled }: ActionBlockProps) {
   return (<ActionBlockBase 
     onClick={onClick} 
     title="Revoke tokens selected by filter"
     className='bg-danger'
+    disabled={disabled}
     >
     <IconDelete />
   </ActionBlockBase>);
@@ -77,16 +81,18 @@ export function BanBlockSolo({ onClick }: ActionBlockProps) {
     onClick={onClick} 
     title="Revoke token" 
     className='bg-danger'
+    disabled={false}
     >
     <IconDelete />
   </ActionBlockBase>);
 }
 
-export function UnbanBlockBulk({ onClick }: ActionBlockProps) {
+export function UnbanBlockBulk({ onClick, disabled }: ActionBlockProps) {
   return (<ActionBlockBase 
     onClick={onClick} 
     title="Unban tokens selected by filter"
     className='bg-success'
+    disabled={disabled}
     >
     <IconLockUnlocked />
   </ActionBlockBase>);
@@ -98,6 +104,7 @@ export function UnbanBlockSolo({ onClick }: ActionBlockProps) {
     onClick={onClick} 
     title="Unban token" 
     className='bg-success'
+    disabled={false}
     >
     <IconLockUnlocked />
   </ActionBlockBase>);

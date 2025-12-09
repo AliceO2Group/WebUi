@@ -34,10 +34,14 @@ import TokenTableWindows from './TokenTableWindows';
 export function TokenTableContainer({
   tokens,
   columns,
+  filtered,
+  setTokens
 }: {
   tokens: Token[];
+  setTokens: React.Dispatch<React.SetStateAction<Token[]>>;
   columns: { key: string; label: string | (() => React.ReactNode);
   render?: (t: Token) => React.ReactNode; }[];
+  filtered?: boolean
 }) {
 
   const { setTokenId, setOpenM, setModalVariant } = useTokenTableAction();
@@ -52,8 +56,8 @@ export function TokenTableContainer({
   function labelWithBulkActions() {
     return <div className="flex-row g1">
       <span>Actions</span>
-      <BanBlockBulk onClick={() => onActionClick('bulk', 'ban')} />
-      <UnbanBlockBulk onClick={() => onActionClick('bulk', 'unban')} />
+      <BanBlockBulk onClick={() => onActionClick('bulk', 'ban')} disabled={!filtered} />
+      <UnbanBlockBulk onClick={() => onActionClick('bulk', 'unban')} disabled={!filtered} />
       </div>
   }
 
@@ -75,7 +79,7 @@ export function TokenTableContainer({
       : col,
   );
 
-  const tokensWithStyle = tokens.map((t: Token) => {
+  let tokensWithStyle = tokens.map((t: Token) => {
     return {
       ...t,
       className: t.banned ? 'bg-warning' : '',
@@ -85,7 +89,7 @@ export function TokenTableContainer({
   return (
     <>
       <TableBase<Token> data={tokensWithStyle} columns={wrappedColumns} />
-      <TokenTableWindows />
+      <TokenTableWindows setTokens={setTokens} />
     </>
   );
 }

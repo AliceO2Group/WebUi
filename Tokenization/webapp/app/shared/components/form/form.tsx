@@ -19,6 +19,7 @@ interface FormInterface extends React.HTMLAttributes<HTMLFormElement> {
   action: string;
   fetcher: ReturnType<typeof useFetcher>;
   submitRef: React.RefObject<HTMLButtonElement | null>;
+  formRef?: React.RefObject<HTMLFormElement | null>;
 }
 
 /**
@@ -41,10 +42,10 @@ export const Form = ({ children, className, id, action, fetcher, submitRef }: Fo
     >
       <fetcher.Form
         action={action}
-        method='POST'
+        method="POST"
       >
         {children}
-        <button ref={submitRef} type="submit" hidden></button>
+        <button ref={submitRef} type="submit" hidden data-action={action}></button>
       </fetcher.Form>
     </div>
   );

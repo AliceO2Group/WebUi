@@ -45,6 +45,7 @@ export default function FilterRow({ filterRowData }: { filterRowData: FilterType
         } else {
           props = {
             id,
+            name: id,
             labelText,
             value,
             setValue,

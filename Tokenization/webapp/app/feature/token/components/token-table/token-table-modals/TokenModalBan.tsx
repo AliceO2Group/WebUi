@@ -22,19 +22,17 @@ export function TokenModalBan({
   open,
   setOpen,
   tokenId,
+  onConfirm
 }: {
   tokenId: string;
+  onConfirm: () => void;
 } & DialogPropsBase) {
-
-  const BanToken = () => {
-    
-  }
 
   const MODAL_CONTENT = {
     title: 'Token Ban',
     content: `Are you sure you want to ban the token with ID ${tokenId}? `,
     accent: 'bg-danger',
-    action: BanToken
+    action: onConfirm
   };
 
   return <ModalBase
@@ -50,19 +48,16 @@ export function TokenModalBan({
 export function TokenModalBanBulk({
   open,
   setOpen,
-}: DialogPropsBase,
+  onConfirm
+}: {onConfirm: () => void;} 
+& DialogPropsBase,
 ) {
 
-  // will need to get filter info from parent to show in content
-  const BanTokenBulk = () => {
-  
-  }
-
   const MODAL_CONTENT = {
-    title: 'Token Ban',
+    title: 'Tokens Ban',
     content: 'Are you sure you want to ban ALL FILTERED tokens? Check the filter settings before proceeding.',
     accent: 'bg-danger',
-    action: BanTokenBulk
+    action: onConfirm
   };
 
   return <ModalBase

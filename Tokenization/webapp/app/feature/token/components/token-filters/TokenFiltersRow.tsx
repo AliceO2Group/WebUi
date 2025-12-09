@@ -130,7 +130,7 @@ export function TokenFiltersSecondRow() {
  *
  */
 export function TokenFiltersLastRow({
-  applyFilters,
+  applyFilters
 }: {
   applyFilters: () => void;
 }) {
@@ -157,7 +157,7 @@ export function TokenFiltersLastRow({
   return (
     <FlexGrowWrapper>
       <FormSelectMultiOrdering
-        id='tags'
+        id='orderBy'
         label="Order by:"
         options={orderingOptions}
         value={ordering}
@@ -165,8 +165,8 @@ export function TokenFiltersLastRow({
       />
       <FlexGrowWrapperElement className="self-center">
         <div className='flex-row g1 justify-end'>
-          <button className="btn btn-primary" onClick={applyFilters}>Apply Filters</button>
-          <button className="btn btn-danger" onClick={clearAllFilters}>Clear Filters</button>
+          <button type='submit' className="btn btn-primary">Apply Filters</button>
+          <button type='reset' className="btn btn-danger" onClick={clearAllFilters}>Clear Filters</button>
         </div>
       </FlexGrowWrapperElement>
     </FlexGrowWrapper>
