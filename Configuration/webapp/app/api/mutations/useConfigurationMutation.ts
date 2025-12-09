@@ -31,7 +31,7 @@ export const useConfigurationMutation = (configurationName: string) => {
     mutationFn: async (configuration: FormItem) => {
       const response = await axiosInstance.put<FormItem>(
         `configurations/${configurationName}`,
-        JSON.stringify(configuration),
+        JSON.stringify({ configuration }),
       );
       return response.data;
     },
