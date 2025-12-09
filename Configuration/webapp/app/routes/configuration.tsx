@@ -26,6 +26,7 @@ import { useUnsavedChangesBlocker } from '~/hooks/useUnsavedChangesBlocker';
 
 export type InputsType = Record<string, string | number | boolean>;
 
+
 const ConfigurationPage = () => {
   const { pathname } = useLocation();
   const configurationName = pathname.slice(ROUTE_PREFIX.length);
