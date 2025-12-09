@@ -15,7 +15,7 @@
 import { TextField } from '@mui/material';
 import { type ReactElement } from 'react';
 import { Controller } from 'react-hook-form';
-import type { WidgetProps } from '../Widget';
+import type { WidgetProps } from '../components/Widget';
 
 interface FormTextInputProps extends Omit<WidgetProps, 'type' | 'value'> {
   isDirty: boolean;
