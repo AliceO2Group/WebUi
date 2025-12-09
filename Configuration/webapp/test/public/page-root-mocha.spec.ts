@@ -137,6 +137,8 @@ describe('`pageRoot` test-suite', function () {
       folderIcon: 'svg[data-testid="FolderIcon"]',
       fileIcon: 'svg[data-testid="InsertDriveFileIcon"]',
       listItem: '.config_navigator__item',
+      searchInput: 'input[placeholder="Filter configurations..."]',
+      clearButton: '.MuiInputAdornment-positionEnd button',
     };
 
     beforeEach(async function () {
@@ -171,6 +173,46 @@ describe('`pageRoot` test-suite', function () {
 
       const finalCount = await page?.$$eval(SELECTORS.listItem, (els) => els.length) ?? 0;
       assert.ok(finalCount > initialCount, 'List should have more items after expanding');
+    });
+
+    describe('Search Functionality', function () {
+      it('should filter the list when typing in search input', async function () {
+        await page?.waitForSelector(SELECTORS.listItem);
+        const initialCount = await page?.$$eval(SELECTORS.listItem, (els) => els.length) ?? 0;
+
+        const searchTerm = 'co';
+        await page?.waitForSelector(SELECTORS.searchInput);
+        await page?.type(SELECTORS.searchInput, searchTerm, { delay: 50 });
+
+        await page?.waitForFunction(
+          (selector, startCount) => {
+            const currentCount = document.querySelectorAll(selector).length;
+            return currentCount < startCount && currentCount > 0;
+          },
+          { timeout: 2000 },
+          SELECTORS.listItem,
+          initialCount,
+        );
+
+        const filteredCount = await page?.$$eval(SELECTORS.listItem, (els) => els.length) ?? 0;
+        assert.ok(filteredCount < initialCount, 'Filtered list should have fewer items than full list');
+      });
+
+      it('should show no results message or empty list for non-matching query', async function () {
+        await page?.waitForSelector(SELECTORS.searchInput);
+
+        const nonExistingKey = 'non_existing_non_existing_non_existing_non_existing_non_existing';
+        await page?.type(SELECTORS.searchInput, nonExistingKey);
+
+        await page?.waitForFunction(
+          (selector) => document.querySelectorAll(selector).length === 0,
+          { timeout: 2000 },
+          SELECTORS.listItem,
+        );
+
+        const count = await page?.$$eval(SELECTORS.listItem, (els) => els.length) ?? 0;
+        assert.strictEqual(count, 0, 'Should display 0 items for non-matching query');
+      });
     });
   });
 });

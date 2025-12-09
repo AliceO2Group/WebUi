@@ -37,6 +37,8 @@ interface DrawerContextValue {
   isResizing: boolean;
   handleResize: () => void;
   getTransition: (variant: 'drawer' | 'content') => (theme: Theme) => string;
+  searchTerm: string;
+  setSearchTerm: Dispatch<SetStateAction<string>>;
 }
 
 const DrawerContext = createContext<DrawerContextValue | undefined>(undefined);
@@ -52,6 +54,7 @@ export const DrawerProvider: FC<PropsWithChildren> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [drawerWidth, setDrawerWidth] = useState(DEFAULT_DRAWER_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const toggleDrawer = () => {
     setIsOpen((prev) => !prev);
@@ -120,6 +123,8 @@ export const DrawerProvider: FC<PropsWithChildren> = ({ children }) => {
     isResizing,
     handleResize,
     getTransition,
+    searchTerm,
+    setSearchTerm,
   };
 
   return <DrawerContext.Provider value={value}>{children}</DrawerContext.Provider>;
