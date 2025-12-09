@@ -21,6 +21,8 @@ import { Spinner } from '~/ui/spinner';
 import { DEFAULT_PREFIX } from '~/components/form/constants';
 import { SaveButton } from '~/components/form/components/buttons/SaveButton';
 import { useConfigurationForm } from '~/hooks/useConfigurationForm';
+import { UnsavedChangesModal } from '~/components/form/components/UnsavedChangesModal';
+import { useUnsavedChangesBlocker } from '~/hooks/useUnsavedChangesBlocker';
 
 export type InputsType = Record<string, string | number | boolean>;
 
@@ -43,6 +45,13 @@ const ConfigurationPage = () => {
     configuration,
   });
 
+  const { showModal, handleProceed, handleSaveAndProceed, handleCancel } = useUnsavedChangesBlocker(
+    {
+      isDirty,
+      onSave: handleSubmit(onSubmit),
+    },
+  );
+
   if (isConfigurationLoading || isConfigurationRestrictionsLoading) {
     return <Spinner />;
   }
@@ -63,6 +72,12 @@ const ConfigurationPage = () => {
         />
       </form>
       <SaveButton onClick={() => void handleSubmit(onSubmit)()} disabled={!isDirty} />
+      <UnsavedChangesModal
+        open={showModal}
+        onProceed={handleProceed}
+        onSaveAndProceed={handleSaveAndProceed}
+        onCancel={handleCancel}
+      />
     </>
   );
 };
