@@ -17,9 +17,12 @@ import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Stack from '@mui/material/Stack';
 
-import { Widget } from './Widget';
-import { AccordionHeader } from './AccordionHeader';
+import { Widget } from './components/Widget';
+import { AccordionHeader } from './components/AccordionHeader';
 import { RawViewModal } from './raw-view/RawViewModal';
+import type { Control } from 'react-hook-form';
+import { type InputsType } from '~/routes/configuration';
+import { KEY_SEPARATOR } from './constants';
 
 export type FormItem = { [key: string]: string | object | FormItem };
 
@@ -29,8 +32,10 @@ export type FormRestrictions = {
 
 interface FormProps extends PropsWithChildren {
   sectionTitle: string;
+  sectionPrefix: string;
   items: FormItem;
   itemsRestrictions: FormRestrictions;
+  control: Control<InputsType>;
 }
 
 /**
@@ -46,7 +51,23 @@ function isFormRestrictions(obj: FormRestrictions[string]): obj is FormRestricti
   return obj instanceof Object && !(obj instanceof Array);
 }
 
-export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) => {
+/**
+ * Form component.
+ * @param {FormProps} props - The props of the form.
+ * @param {string} props.sectionTitle - The title of the section.
+ * @param {string} props.sectionPrefix - The prefix of the section.
+ * @param {FormItem} props.items - The items of the form.
+ * @param {FormRestrictions} props.itemsRestrictions - The restrictions of the items.
+ * @param {Control<InputsType>} props.control - The control of the form.
+ * @returns {ReactElement} The form component.
+ */
+export const Form: FC<FormProps> = ({
+  sectionTitle,
+  sectionPrefix,
+  items,
+  itemsRestrictions,
+  control,
+}) => {
   const [isRawModalOpen, setIsRawModalOpen] = useState<boolean>(false);
 
   const renderItem = useCallback(
@@ -55,11 +76,20 @@ export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) 
         <Form
           key={key}
           sectionTitle={key}
+          sectionPrefix={`${sectionPrefix}${KEY_SEPARATOR}${key}`}
           items={items[key] as FormItem}
           itemsRestrictions={itemsRestrictions[key] as FormRestrictions}
+          control={control}
         />
       ) : (
-        <Widget key={key} title={key} type={value} value={items[key]} />
+        <Widget
+          key={key}
+          sectionPrefix={`${sectionPrefix}${KEY_SEPARATOR}${key}`}
+          label={key}
+          type={value}
+          value={items[key]}
+          control={control}
+        />
       ),
     [items, itemsRestrictions],
   );
