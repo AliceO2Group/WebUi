@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useEffect, useMemo, useState, type FC } from 'react';
+import { useMemo, useState, type FC } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -21,26 +21,18 @@ import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-// import { RawViewer } from './RawViewer';
 import { RawEditor } from './RawEditor';
 
 interface RawViewModalProps {
-  open: boolean;
   onClose: () => void;
   title: string;
   data: unknown;
 }
 
-export const RawViewModal: FC<RawViewModalProps> = ({ open, onClose, title, data }) => {
+export const RawViewModal: FC<RawViewModalProps> = ({ onClose, title, data }) => {
   const initialFormattedData = useMemo(() => JSON.stringify(data, null, 2), [data]);
 
   const [currentData, setCurrentData] = useState(initialFormattedData);
-
-  useEffect(() => {
-    if (open) {
-      setCurrentData(initialFormattedData);
-    }
-  }, [open, initialFormattedData]);
 
   const handleCopy = () => {
     void navigator.clipboard.writeText(currentData);
@@ -51,7 +43,7 @@ export const RawViewModal: FC<RawViewModalProps> = ({ open, onClose, title, data
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={true} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ m: 0, p: 2, paddingRight: 12 }}>
         {title}
 

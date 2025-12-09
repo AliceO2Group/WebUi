@@ -20,19 +20,19 @@ import { IconButton, Typography } from '@mui/material';
 
 interface AccordionHeaderProps extends PropsWithChildren {
   title: string;
-  viewFormToggle: () => void;
+  showRawViewModal: () => void;
 }
 
 export const AccordionHeader: FC<AccordionHeaderProps> = ({
   title,
-  viewFormToggle,
+  showRawViewModal,
 }): ReactElement => {
-  const viewFormToggleCallback = useCallback(
+  const showRawViewModalCallback = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      viewFormToggle();
+      showRawViewModal();
     },
-    [viewFormToggle],
+    [showRawViewModal],
   );
 
   return (
@@ -46,7 +46,7 @@ export const AccordionHeader: FC<AccordionHeaderProps> = ({
       }}
     >
       <Typography sx={{ marginRight: 'auto', alignContent: 'center' }}>{title}</Typography>
-      <IconButton onClick={viewFormToggleCallback}>
+      <IconButton onClick={showRawViewModalCallback}>
         <RawData />
       </IconButton>
     </AccordionSummary>
