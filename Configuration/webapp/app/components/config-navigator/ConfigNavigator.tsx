@@ -15,12 +15,13 @@
 import { List } from '@mui/material';
 import ConfigNavigatorItem from './ConfigNavigatorItem';
 import { useConfigurationKeysQuery } from '~/api/query/useConfigurationKeysQuery';
-import { useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { ROUTE_PREFIX } from '~/config';
 import { useLocation } from 'react-router';
 import { ConfigNavigatorLoader } from './ConfigNavigatorLoader';
 import { useConfigurationNavigate } from '~/hooks/useConfigurationNavigate';
 import { buildTree } from '~/utils/configuration-tree-builder';
+import { useDrawer } from '~/contexts/DrawerContext';
 
 /**
  * ConfigNavigator component
@@ -41,6 +42,9 @@ export const ConfigNavigator = () => {
   const { pathname } = useLocation();
   const navigate = useConfigurationNavigate();
 
+  const { searchTerm } = useDrawer();
+  const deferredSearch = useDeferredValue(searchTerm);
+
   useEffect(() => {
     if (configKeys && configKeys.length > 0) {
       const pathToCheck = pathname.startsWith(ROUTE_PREFIX)
@@ -56,12 +60,31 @@ export const ConfigNavigator = () => {
     }
   }, [configKeys, areConfigKeysLoading, pathname]);
 
+  const searchableData = useMemo(() => {
+    if (!configKeys) {
+      return [];
+    }
+    return configKeys.map((key) => ({
+      original: key,
+      searchable: key.slice(ROUTE_PREFIX.length).toLowerCase(),
+    }));
+  }, [configKeys]);
+
   const treeData = useMemo(() => {
     if (!configKeys) {
       return {};
     }
-    return buildTree(configKeys);
-  }, [configKeys]);
+
+    let keysToProcess = configKeys;
+    if (deferredSearch.trim() !== '') {
+      const lowerTerm = deferredSearch.toLowerCase();
+      keysToProcess = searchableData
+        .filter((item) => item.searchable.includes(lowerTerm))
+        .map((item) => item.original);
+    }
+
+    return buildTree(keysToProcess);
+  }, [configKeys, deferredSearch]);
 
   if (areConfigKeysLoading) {
     return <ConfigNavigatorLoader />;
