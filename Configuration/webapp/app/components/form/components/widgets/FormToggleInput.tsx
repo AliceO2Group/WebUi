@@ -15,7 +15,7 @@
 import { FormControlLabel, styled, Switch, switchClasses } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import type { ReactElement } from 'react';
-import type { WidgetProps } from '../components/Widget';
+import type { WidgetProps } from '../Widget';
 
 interface FormToggleInputProps extends Omit<WidgetProps, 'type' | 'value'> {
   isDirty: boolean;

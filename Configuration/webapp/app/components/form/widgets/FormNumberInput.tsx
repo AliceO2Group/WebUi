@@ -17,7 +17,7 @@ interface FormNumberInputProps extends Omit<WidgetProps, 'type' | 'value'> {
 }
 
 import { Controller } from 'react-hook-form';
-import type { WidgetProps } from '../Widget';
+import type { WidgetProps } from '../components/Widget';
 import { TextField } from '@mui/material';
 import type { ReactElement } from 'react';
 
