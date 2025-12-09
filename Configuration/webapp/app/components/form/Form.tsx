@@ -16,9 +16,10 @@ import { useCallback, useState, type FC, type PropsWithChildren } from 'react';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Stack from '@mui/material/Stack';
+
 import { Widget } from './components/Widget';
 import { AccordionHeader } from './components/AccordionHeader';
-import { Typography } from '@mui/material';
+import { RawViewModal } from './raw-view/RawViewModal';
 import type { Control } from 'react-hook-form';
 import { type InputsType } from '~/routes/configuration';
 import { KEY_SEPARATOR } from './constants';
@@ -67,7 +68,7 @@ export const Form: FC<FormProps> = ({
   itemsRestrictions,
   control,
 }) => {
-  const [viewForm, setViewForm] = useState<boolean>(true);
+  const [isRawModalOpen, setIsRawModalOpen] = useState<boolean>(false);
 
   const renderItem = useCallback(
     (key: string, value: FormRestrictions[string]) =>
@@ -94,21 +95,19 @@ export const Form: FC<FormProps> = ({
   );
 
   return (
-    <Accordion defaultExpanded>
-      <AccordionHeader
-        title={sectionTitle}
-        viewForm={viewForm}
-        viewFormToggle={() => setViewForm((v) => !v)}
-      />
-      <AccordionDetails>
-        {viewForm ? (
+    <>
+      <Accordion defaultExpanded>
+        <AccordionHeader title={sectionTitle} showRawViewModal={() => setIsRawModalOpen(true)} />
+        <AccordionDetails>
           <Stack spacing={2}>
             {Object.entries(itemsRestrictions).map(([key, value]) => renderItem(key, value))}
           </Stack>
-        ) : (
-          <Typography component="pre">{JSON.stringify(items, null, 2)}</Typography>
-        )}
-      </AccordionDetails>
-    </Accordion>
+        </AccordionDetails>
+      </Accordion>
+
+      {isRawModalOpen && (
+        <RawViewModal onClose={() => setIsRawModalOpen(false)} title={sectionTitle} data={items} />
+      )}
+    </>
   );
 };
