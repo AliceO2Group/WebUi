@@ -13,26 +13,39 @@
  */
 
 import { type FC, type PropsWithChildren, type ReactElement } from 'react';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import TextField from '@mui/material/TextField';
-import Switch from '@mui/material/Switch';
+import { useFormState, type Control } from 'react-hook-form';
+import type { InputsType } from '~/routes/configuration';
+import { FormTextInput } from './widgets/FormTextInput';
+import { FormNumberInput } from './widgets/FormNumberInput';
+import { FormToggleInput } from './widgets/FormToggleInput';
 
-interface WidgetProps extends PropsWithChildren {
-  title: string;
+export interface WidgetProps extends PropsWithChildren {
+  sectionPrefix: string;
+  label: string;
   type: 'string' | 'number' | 'boolean' | 'array';
   value: unknown;
+  control: Control<InputsType>;
 }
 
-export const Widget: FC<WidgetProps> = ({ title, type, value }): ReactElement => {
+/**
+ * Widget component.
+ * @param {WidgetProps} props - The props of the widget.
+ * @param {string} props.type - The type of the widget.
+ * @param {string} props.label - The label of the widget.
+ * @param {unknown} props.value - The value of the widget.
+ * @param {Control<InputsType>} props.control - The control of the widget.
+ * @returns {ReactElement} The widget component.
+ */
+export const Widget: FC<WidgetProps> = ({ type, ...rest }): ReactElement => {
+  const { dirtyFields } = useFormState({ control: rest.control });
+  const isDirty = dirtyFields[rest.sectionPrefix];
   switch (type) {
     case 'string':
-      return <TextField type="text" defaultValue={value} label={title} />;
+      return <FormTextInput {...rest} isDirty={Boolean(isDirty)} />;
     case 'number':
-      return <TextField type="number" defaultValue={value} label={title} />;
+      return <FormNumberInput {...rest} isDirty={Boolean(isDirty)} />;
     case 'boolean':
-      return (
-        <FormControlLabel control={<Switch defaultChecked={value === 'true'} />} label={title} />
-      );
+      return <FormToggleInput {...rest} isDirty={Boolean(isDirty)} />;
     case 'array':
       return <>array not implemented</>; // TODO OGUI-1803: add implementation after the decision is made
   }
