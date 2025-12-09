@@ -70,7 +70,7 @@ export function TokenTable({ tokens, setTokens }: TokenTableProps) {
  * Variant that adds "Issued at" and "HTTP Methods (permissions)" columns.
  * @param props.tokens - token list
  */
-export function TokenTableExtended({ tokens, setTokens, filtered }: TokenTableProps& { filtered: boolean }) {
+export function TokenTableExtended({ tokens, setTokens, filtered }: TokenTableProps & { filtered: boolean }) {
   return <TokenTableProvider>
     <TokenTableContainer tokens={tokens} setTokens={setTokens} columns={columns_extended} filtered={filtered} />;
   </TokenTableProvider>;

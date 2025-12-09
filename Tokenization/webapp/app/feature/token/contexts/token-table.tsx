@@ -34,12 +34,12 @@ type Actions = {
 type Fetchers = {
   ban: ReturnType<typeof useFetcher>;
   unban: ReturnType<typeof useFetcher>;
-}
+};
 
 export const TokenTableContext = createContext<
-  { state: TokenTableState; 
-    actions: Actions; 
-    fetchers: Fetchers
+  { state: TokenTableState;
+    actions: Actions;
+    fetchers: Fetchers;
   } | undefined> (undefined);
 
 /**
@@ -52,8 +52,8 @@ export function TokenTableProvider({ children }: { children: React.ReactNode }) 
   const [modalVariant, setModalVariant] = useState<string>('');
   const [alertVariant, setAlertVariant] = useState<string>('');
 
-  const banningFetcher = useFetcher(); // fetcher for ban and unban actions on the table level
-  const unbanningFetcher = useFetcher(); // fetcher for unban actions on the table level
+  const banningFetcher = useFetcher(); // Fetcher for ban and unban actions on the table level
+  const unbanningFetcher = useFetcher(); // Fetcher for unban actions on the table level
 
   const state: TokenTableState = {
     openM,
@@ -74,7 +74,7 @@ export function TokenTableProvider({ children }: { children: React.ReactNode }) 
   const fetchers = {
     ban: banningFetcher,
     unban: unbanningFetcher,
-  }
+  };
   return <TokenTableContext.Provider value={{ state, actions, fetchers }}>
     {children}
   </TokenTableContext.Provider>;

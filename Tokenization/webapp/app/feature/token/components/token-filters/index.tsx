@@ -43,17 +43,16 @@ const _applyFilters = ({ services, ...filterStates }: any) => {
  */
 export function TokenFilters({
   setFiltered,
-  setData
+  setData,
 }: {
-  setFiltered: React.Dispatch<React.SetStateAction<boolean>>
-  setData: React.Dispatch<React.SetStateAction<Token[]>>
+  setFiltered: React.Dispatch<React.SetStateAction<boolean>>;
+  setData: React.Dispatch<React.SetStateAction<Token[]>>;
 }) {
   // Deleting stored filters on component un-mount
   useEffect(() => () => {
     setStorageItem('TKN_token-filters', {});
   }, []);
 
-  const state = useTokenFiltersState();
   const actions = useTokenFiltersAction();
 
   const {
@@ -77,14 +76,14 @@ export function TokenFilters({
 
   useEffect(() => {
     if (fetcher.state === 'idle' && (fetcher.data as any)?.success === true) {
-      if(fetcher.data.filtered) {
+      if (fetcher.data.filtered) {
         setFiltered(true);
       } else {
         setFiltered(false);
       }
       setData((fetcher.data as any).tokens);
     }
-  }, [fetcher.state, fetcher.data, setData]);
+  }, [fetcher.state, fetcher.data, setData, setFiltered]);
 
   return <div>
     <Form submitRef={ref} fetcher={fetcher} action='/tokens/filter'>

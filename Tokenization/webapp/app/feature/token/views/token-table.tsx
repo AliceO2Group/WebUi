@@ -24,7 +24,7 @@ import { TokenFiltersProvider } from '~/feature/token/contexts/token-filters';
  *
  */
 export default function TokenTableRouteiew({ tokens }: { tokens: Token[] }) {
-  const [filtered, setFiltered] = useState<boolean>(false); // to check if there is any filter applied
+  const [filtered, setFiltered] = useState<boolean>(false); // To check if there is any filter applied
   const [data, setData] = useState<Token[]>(tokens);
 
   return <TokenFiltersProvider>

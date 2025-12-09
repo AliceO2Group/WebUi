@@ -72,5 +72,5 @@ export default function TokenAlert({
 } & DialogPropsBase,
 ) {
   const Comp = ALERT_VARIANTS[variant];
-  return Comp ?<Comp open={open} setOpen={setOpen} /> : null;
+  return Comp ? <Comp open={open} setOpen={setOpen} /> : null;
 }

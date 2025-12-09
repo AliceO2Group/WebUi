@@ -22,7 +22,7 @@ export function TokenModalUnban({
   open,
   setOpen,
   tokenId,
-  onConfirm
+  onConfirm,
 }: {
   tokenId: string;
   onConfirm: () => void;
@@ -32,7 +32,7 @@ export function TokenModalUnban({
     title: 'Token Unban',
     content: `Are you sure you want to unban the token with ID ${tokenId}? `,
     accent: 'bg-success',
-    action: onConfirm
+    action: onConfirm,
   };
 
   return <ModalBase
@@ -48,8 +48,8 @@ export function TokenModalUnban({
 export function TokenModalUnbanBulk({
   open,
   setOpen,
-  onConfirm
-}: {onConfirm: () => void;} 
+  onConfirm,
+}: { onConfirm: () => void }
 & DialogPropsBase,
 ) {
 
@@ -57,7 +57,7 @@ export function TokenModalUnbanBulk({
     title: 'Tokens Unban',
     content: 'Are you sure you want to unban ALL FILTERED tokens? Check the filter settings before proceeding.',
     accent: 'bg-success',
-    action: onConfirm
+    action: onConfirm,
   };
 
   return <ModalBase

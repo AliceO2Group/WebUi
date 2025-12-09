@@ -22,7 +22,7 @@ export function TokenModalBan({
   open,
   setOpen,
   tokenId,
-  onConfirm
+  onConfirm,
 }: {
   tokenId: string;
   onConfirm: () => void;
@@ -32,7 +32,7 @@ export function TokenModalBan({
     title: 'Token Ban',
     content: `Are you sure you want to ban the token with ID ${tokenId}? `,
     accent: 'bg-danger',
-    action: onConfirm
+    action: onConfirm,
   };
 
   return <ModalBase
@@ -48,8 +48,8 @@ export function TokenModalBan({
 export function TokenModalBanBulk({
   open,
   setOpen,
-  onConfirm
-}: {onConfirm: () => void;} 
+  onConfirm,
+}: { onConfirm: () => void }
 & DialogPropsBase,
 ) {
 
@@ -57,7 +57,7 @@ export function TokenModalBanBulk({
     title: 'Tokens Ban',
     content: 'Are you sure you want to ban ALL FILTERED tokens? Check the filter settings before proceeding.',
     accent: 'bg-danger',
-    action: onConfirm
+    action: onConfirm,
   };
 
   return <ModalBase

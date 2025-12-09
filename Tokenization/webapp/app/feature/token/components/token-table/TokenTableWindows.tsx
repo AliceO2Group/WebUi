@@ -23,14 +23,13 @@ import { useTokenTableState,
   useTokenTableFetchers,
 } from '~/feature/token/hooks/token-table';
 
-
 /**
  *
  */
 export default function TokenTableWindows({
-  setTokens
+  setTokens,
 }: {
-  setTokens: React.Dispatch<React.SetStateAction<Token[]>>
+  setTokens: React.Dispatch<React.SetStateAction<Token[]>>;
 }) {
 
   const {
@@ -38,25 +37,25 @@ export default function TokenTableWindows({
     openM,
     tokenId,
     modalVariant,
-    alertVariant
+    alertVariant,
   } = useTokenTableState();
   const {
     setOpenA,
     setOpenM,
-    setAlertVariant
+    setAlertVariant,
   } = useTokenTableAction();
 
-  const banFetcher = useTokenTableFetchers('ban')
-  const unbanFetcher = useTokenTableFetchers('unban')
+  const banFetcher = useTokenTableFetchers('ban');
+  const unbanFetcher = useTokenTableFetchers('unban');
 
   // TODO: if pagination is implemented we need to update all pages, not only current one
   useEffect(() => {
-    if(banFetcher.state === 'idle' && banFetcher.data) {
-      const success = !!((banFetcher.data as any)?.success);
+    if (banFetcher.state === 'idle' && banFetcher.data) {
+      const success = Boolean((banFetcher.data as any)?.success);
       const bulk = (banFetcher.data as any)?.bulk;
-      if(success) {
+      if (success) {
         setAlertVariant('token-banned-success');
-        if(bulk) {
+        if (bulk) {
           setTokens((prevTokens) => prevTokens.map((t) => ({ ...t, banned: true })));
         } else {
           setTokens((prevTokens) => prevTokens.map((t) => t.id === tokenId ? { ...t, banned: true } : t));
@@ -66,16 +65,22 @@ export default function TokenTableWindows({
       }
       setOpenA(true);
     }
-  }, [banFetcher.state, banFetcher.data]);
+  }, [
+    banFetcher.state,
+    banFetcher.data,
+    setAlertVariant,
+    setTokens,
+    setOpenA,
+  ]);
 
   // TODO: if pagination is implemented we need to update all pages, not only current one
   useEffect(() => {
-    if(unbanFetcher.state === 'idle' && unbanFetcher.data) {
-      const success = !!((unbanFetcher.data as any)?.success);
+    if (unbanFetcher.state === 'idle' && unbanFetcher.data) {
+      const success = Boolean((unbanFetcher.data as any)?.success);
       const bulk = (unbanFetcher.data as any)?.bulk;
-      if(success) {
+      if (success) {
         setAlertVariant('token-unbanned-success');
-        if(bulk) {
+        if (bulk) {
           setTokens((prevTokens) => prevTokens.map((t) => ({ ...t, banned: false })));
         } else {
           setTokens((prevTokens) => prevTokens.map((t) => t.id === tokenId ? { ...t, banned: false } : t));
@@ -85,7 +90,13 @@ export default function TokenTableWindows({
       }
       setOpenA(true);
     }
-  }, [unbanFetcher.state, unbanFetcher.data]);
+  }, [
+    unbanFetcher.state,
+    unbanFetcher.data,
+    setAlertVariant,
+    setTokens,
+    setOpenA,
+  ]);
 
   return <>
     <ModalToken tokenId={tokenId} open={openM} setOpen={setOpenM} variant={modalVariant as 'ban' | 'unban'} />

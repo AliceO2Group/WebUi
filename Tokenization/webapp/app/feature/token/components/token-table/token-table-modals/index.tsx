@@ -51,7 +51,9 @@ export default function ModalToken({
     if (id === 'bulk') {
       const fd = new FormData();
       const filterInfo = getStorageItem('TKN_token-filters');
-      if (filterInfo) fd.append('filterInfo', filterInfo);
+      if (filterInfo) {
+        fd.append('filterInfo', filterInfo);
+      }
       fd.append('tokenId', 'bulk');
       banFetcher.submit(fd, { method: 'post', action: '/tokens/ban' });
       return;
@@ -68,7 +70,9 @@ export default function ModalToken({
     if (id === 'bulk') {
       const fd = new FormData();
       const filterInfo = getStorageItem('TKN_token-filters');
-      if (filterInfo) fd.append('filterInfo', filterInfo);
+      if (filterInfo) {
+        fd.append('filterInfo', filterInfo);
+      }
       fd.append('tokenId', 'bulk');
       unbanFetcher.submit(fd, { method: 'post', action: '/tokens/unban' });
       return;
@@ -81,18 +85,24 @@ export default function ModalToken({
     }
   };
   // Guard: if variant is falsy or not present in the map, don't attempt to call it
-  if (!variant) return null;
+  if (!variant) {
+    return null;
+  }
 
   if (tokenId === 'bulk') {
     const Comp = MODAL_COMPONENTS_BULK[variant];
-    if (!Comp) return null;
+    if (!Comp) {
+      return null;
+    }
     return variant === 'ban'
       ? <Comp open={open} setOpen={setOpen} onConfirm={() => handleBan('bulk')} />
       : <Comp open={open} setOpen={setOpen} onConfirm={() => handleUnban('bulk')} />;
   }
 
   const Comp = MODAL_COMPONENTS[variant];
-  if (!Comp) return null;
+  if (!Comp) {
+    return null;
+  }
   return variant === 'ban'
     ? <Comp open={open} setOpen={setOpen} tokenId={tokenId} onConfirm={() => handleBan(tokenId)} />
     : <Comp open={open} setOpen={setOpen} tokenId={tokenId} onConfirm={() => handleUnban(tokenId)} />;

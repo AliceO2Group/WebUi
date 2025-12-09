@@ -38,7 +38,7 @@ export function TableBase<T extends TypeWithId>({
   data,
   columns,
 }: {
-  data: (T & {className?: string})[];
+  data: (T & { className?: string })[];
   columns: Column<T>[];
 }) {
 
@@ -57,7 +57,7 @@ export function TableBase<T extends TypeWithId>({
           </tr>
         </thead>
         <tbody>
-          {data.map((item: T & {className?: string}) => (
+          {data.map((item: T & { className?: string }) => (
             <tr key={item.id} className={item.className ?? ''}>
               {columns.map((col: Column<T>) => (
                 <td key={col.key}>

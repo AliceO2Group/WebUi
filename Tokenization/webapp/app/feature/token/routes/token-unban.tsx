@@ -1,9 +1,28 @@
-// will be used to fetch unbanning token
-export async function clientAction({request}: Route.ClientActionArgs) {
-    const formData = await request.formData();
-    console.log('Unbanning token with data:', Object.fromEntries(formData.entries()));
-    if (formData.has('filterInfo')) { // when additional filtering it is bulk operation
-      return { success: true, bulk: true };
-    }
-    return { success: true };
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
+import type { Route } from './+types/token-unban';
+
+// Will be used to fetch unbanning token
+/**
+ *
+ */
+export async function clientAction({ request }: Route.ClientActionArgs) {
+  const formData = await request.formData();
+  console.log('Unbanning token with data:', Object.fromEntries(formData.entries()));
+  if (formData.has('filterInfo')) { // When additional filtering it is bulk operation
+    return { success: true, bulk: true };
+  }
+  return { success: true };
 }

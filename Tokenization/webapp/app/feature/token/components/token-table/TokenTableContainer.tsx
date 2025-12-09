@@ -14,10 +14,10 @@
 
 import { type Token } from '../../types/token';
 
-import { BanBlockSolo, 
+import { BanBlockSolo,
   BanBlockBulk,
   UnbanBlockSolo,
-  UnbanBlockBulk 
+  UnbanBlockBulk,
 } from './ActionBlock';
 import { TableBase } from '~/shared/components/table/table-base';
 import { useTokenTableAction } from '../../hooks/token-table';
@@ -35,13 +35,13 @@ export function TokenTableContainer({
   tokens,
   columns,
   filtered,
-  setTokens
+  setTokens,
 }: {
   tokens: Token[];
   setTokens: React.Dispatch<React.SetStateAction<Token[]>>;
   columns: { key: string; label: string | (() => React.ReactNode);
-  render?: (t: Token) => React.ReactNode; }[];
-  filtered?: boolean
+    render?: (t: Token) => React.ReactNode; }[];
+  filtered?: boolean;
 }) {
 
   const { setTokenId, setOpenM, setModalVariant } = useTokenTableAction();
@@ -53,16 +53,22 @@ export function TokenTableContainer({
     setOpenM(true);
   };
 
+  /**
+   *
+   */
   function labelWithBulkActions() {
     return <div className="flex-row g1">
       <span>Actions</span>
       <BanBlockBulk onClick={() => onActionClick('bulk', 'ban')} disabled={!filtered} />
       <UnbanBlockBulk onClick={() => onActionClick('bulk', 'unban')} disabled={!filtered} />
-      </div>
+    </div>;
   }
 
+  /**
+   *
+   */
   function renderActionBlock(t: Token) {
-    if(t.banned) {
+    if (t.banned) {
       return <UnbanBlockSolo onClick={() => onActionClick(t.id, 'unban')} />;
     }
     return <BanBlockSolo onClick={() => onActionClick(t.id, 'ban')} />;
@@ -79,12 +85,10 @@ export function TokenTableContainer({
       : col,
   );
 
-  let tokensWithStyle = tokens.map((t: Token) => {
-    return {
-      ...t,
-      className: t.banned ? 'bg-warning' : '',
-    }
-  })
+  const tokensWithStyle = tokens.map((t: Token) => ({
+    ...t,
+    className: t.banned ? 'bg-warning' : '',
+  }));
 
   return (
     <>

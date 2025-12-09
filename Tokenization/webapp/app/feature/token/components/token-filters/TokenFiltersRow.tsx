@@ -130,7 +130,7 @@ export function TokenFiltersSecondRow() {
  *
  */
 export function TokenFiltersLastRow({
-  applyFilters
+  applyFilters,
 }: {
   applyFilters: () => void;
 }) {
