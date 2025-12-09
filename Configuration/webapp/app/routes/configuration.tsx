@@ -75,7 +75,7 @@ const ConfigurationPage = () => {
       <UnsavedChangesModal
         open={showModal}
         onProceed={handleProceed}
-        onSaveAndProceed={handleSaveAndProceed}
+        onSaveAndProceed={() => void handleSaveAndProceed}
         onCancel={handleCancel}
       />
     </>

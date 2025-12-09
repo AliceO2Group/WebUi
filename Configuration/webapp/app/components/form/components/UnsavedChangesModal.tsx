@@ -12,7 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
 import { type ReactElement } from 'react';
 
 interface UnsavedChangesModalProps {
@@ -55,4 +62,3 @@ export const UnsavedChangesModal = ({
     </DialogActions>
   </Dialog>
 );
-
