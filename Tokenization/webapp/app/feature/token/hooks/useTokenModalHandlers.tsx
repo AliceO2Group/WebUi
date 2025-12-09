@@ -1,4 +1,4 @@
-import type { AlertVariant } from '../components/token-table/token-table-alerts';
+import type { AlertVariant } from '../components/token-alerts';
 
 import { useCallback } from 'react';
 import { useAuth } from '~/feature/auth/hooks/session';

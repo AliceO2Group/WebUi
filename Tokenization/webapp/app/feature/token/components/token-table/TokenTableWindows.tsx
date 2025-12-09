@@ -15,9 +15,9 @@ import type { Token } from '../../types/token';
 
 import { useEffect } from 'react';
 
-import type { AlertVariant } from './token-table-alerts';
-import ModalToken from '~/feature/token/components/token-table/token-table-modals';
-import TokenAlert from './token-table-alerts';
+import type { AlertVariant } from '../token-alerts';
+import ModalToken from '~/feature/token/components/token-modals';
+import TokenAlert from '../token-alerts';
 import { useTokenTableState,
   useTokenTableAction,
   useTokenTableFetchers,

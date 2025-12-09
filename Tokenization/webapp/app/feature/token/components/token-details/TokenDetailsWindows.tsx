@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useFetcher } from 'react-router';
 
-import { TokenModalBan } from '~/feature/token/components/token-table/token-table-modals/TokenModalBan';
-import { TokenModalUnban } from '~/feature/token/components/token-table/token-table-modals/TokenModalUnban';
-import TokenAlert, { type AlertVariant } from '~/feature/token/components/token-table/token-table-alerts';
+import { TokenModalBan } from '~/feature/token/components/token-modals/TokenModalBan';
+import { TokenModalUnban } from '~/feature/token/components/token-modals/TokenModalUnban';
+import TokenAlert, { type AlertVariant } from '~/feature/token/components/token-alerts';
 import useTokenModalHandlers from '../../hooks/useTokenModalHandlers';
 
 type Props = {

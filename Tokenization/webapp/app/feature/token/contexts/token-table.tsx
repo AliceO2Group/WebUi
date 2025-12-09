@@ -11,7 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import type { AlertVariant } from '../components/token-table/token-table-alerts';
+import type { AlertVariant } from '../components/token-alerts';
 
 import { useState, createContext } from 'react';
 import { useFetcher } from 'react-router';
