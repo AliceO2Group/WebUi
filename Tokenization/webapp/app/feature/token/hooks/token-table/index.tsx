@@ -18,5 +18,5 @@ import useTokenTableFetchers from './useTokenTableFetchers';
 
 export { useTokenTableAction,
   useTokenTableState,
-  useTokenTableFetchers,
+  useTokenTableFetchers
 };

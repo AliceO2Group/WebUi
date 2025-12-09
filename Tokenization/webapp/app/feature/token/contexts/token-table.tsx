@@ -11,6 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+import type { AlertVariant } from '../components/token-table/token-table-alerts';
 
 import { useState, createContext } from 'react';
 import { useFetcher } from 'react-router';
@@ -20,7 +21,7 @@ type TokenTableState = {
   openA: boolean;
   tokenId: string;
   modalVariant: string;
-  alertVariant: string;
+  alertVariant: AlertVariant;
 };
 
 type Actions = {
@@ -28,7 +29,7 @@ type Actions = {
   setOpenA: React.Dispatch<React.SetStateAction<boolean>>;
   setTokenId: React.Dispatch<React.SetStateAction<string>>;
   setModalVariant: React.Dispatch<React.SetStateAction<string>>;
-  setAlertVariant: React.Dispatch<React.SetStateAction<string>>;
+  setAlertVariant: React.Dispatch<React.SetStateAction<AlertVariant>>;
 };
 
 type Fetchers = {
@@ -50,7 +51,7 @@ export function TokenTableProvider({ children }: { children: React.ReactNode }) 
   const [openA, setOpenA] = useState<boolean>(false);
   const [tokenId, setTokenId] = useState<string>('');
   const [modalVariant, setModalVariant] = useState<string>('');
-  const [alertVariant, setAlertVariant] = useState<string>('');
+  const [alertVariant, setAlertVariant] = useState<AlertVariant>('auth-error');
 
   const banningFetcher = useFetcher(); // Fetcher for ban and unban actions on the table level
   const unbanningFetcher = useFetcher(); // Fetcher for unban actions on the table level

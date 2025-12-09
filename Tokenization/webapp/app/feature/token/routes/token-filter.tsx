@@ -12,15 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-import { type Route } from './+types/token-filter';
-
 import { tokensMock } from '../mocks/tokens';
 
 // Will be used to fetch filtered tokens
 /**
  *
  */
-export async function clientAction({ request }: Route.ClientActionArgs) {
+export async function clientAction({ request }: any) {
 
   const formData = await request.formData();
 

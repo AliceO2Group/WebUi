@@ -15,9 +15,10 @@
 import { type DialogPropsBase } from '~/utils/types';
 import { TokenModalBan, TokenModalBanBulk } from './TokenModalBan';
 import { TokenModalUnban, TokenModalUnbanBulk } from './TokenModalUnban';
-import { useAuth } from '~/feature/auth/hooks/session';
-import { getStorageItem } from '~/utils/storage';
-import { useTokenTableAction, useTokenTableFetchers } from '~/feature/token/hooks/token-table';
+import ModalTokenView from './ModalTokenView';
+import { useTokenTableFetchers } from '~/feature/token/hooks/token-table';
+import useTokenTableModalHandlers from '~/feature/token/hooks/useTokenModalHandlers';
+import { useTokenTableAction } from '~/feature/token/hooks/token-table/useTokenTableAction';
 
 const MODAL_COMPONENTS = {
   'ban': TokenModalBan,
@@ -42,68 +43,25 @@ export default function ModalToken({
   tokenId: string;
 } & DialogPropsBase,
 ) {
-  const auth = useAuth('admin');
   const { setOpenA, setAlertVariant } = useTokenTableAction();
   const banFetcher = useTokenTableFetchers('ban');
   const unbanFetcher = useTokenTableFetchers('unban');
 
-  const handleBan = (id: string) => {
-    if (id === 'bulk') {
-      const fd = new FormData();
-      const filterInfo = getStorageItem('TKN_token-filters');
-      if (filterInfo) {
-        fd.append('filterInfo', filterInfo);
-      }
-      fd.append('tokenId', 'bulk');
-      banFetcher.submit(fd, { method: 'post', action: '/tokens/ban' });
-      return;
-    }
-    if (auth) {
-      banFetcher.submit({ tokenId: id }, { method: 'post', action: '/tokens/ban' });
-    } else {
-      setAlertVariant('auth-error');
-      setOpenA(true);
-    }
-  };
-
-  const handleUnban = (id: string) => {
-    if (id === 'bulk') {
-      const fd = new FormData();
-      const filterInfo = getStorageItem('TKN_token-filters');
-      if (filterInfo) {
-        fd.append('filterInfo', filterInfo);
-      }
-      fd.append('tokenId', 'bulk');
-      unbanFetcher.submit(fd, { method: 'post', action: '/tokens/unban' });
-      return;
-    }
-    if (auth) {
-      unbanFetcher.submit({ tokenId: id }, { method: 'post', action: '/tokens/unban' });
-    } else {
-      setAlertVariant('auth-error');
-      setOpenA(true);
-    }
-  };
-  // Guard: if variant is falsy or not present in the map, don't attempt to call it
-  if (!variant) {
-    return null;
-  }
-
-  if (tokenId === 'bulk') {
-    const Comp = MODAL_COMPONENTS_BULK[variant];
-    if (!Comp) {
-      return null;
-    }
-    return variant === 'ban'
-      ? <Comp open={open} setOpen={setOpen} onConfirm={() => handleBan('bulk')} />
-      : <Comp open={open} setOpen={setOpen} onConfirm={() => handleUnban('bulk')} />;
-  }
-
-  const Comp = MODAL_COMPONENTS[variant];
-  if (!Comp) {
-    return null;
-  }
-  return variant === 'ban'
-    ? <Comp open={open} setOpen={setOpen} tokenId={tokenId} onConfirm={() => handleBan(tokenId)} />
-    : <Comp open={open} setOpen={setOpen} tokenId={tokenId} onConfirm={() => handleUnban(tokenId)} />;
+  const {handleBan, handleUnban} = useTokenTableModalHandlers(
+    setOpenA,
+    setAlertVariant,
+    banFetcher,
+    unbanFetcher,
+  );
+  
+  return (
+    <ModalTokenView
+      variant={variant}
+      open={open}
+      setOpen={setOpen}
+      tokenId={tokenId}
+      onBanConfirm={handleBan}
+      onUnbanConfirm={handleUnban}
+    />
+  );
 }
