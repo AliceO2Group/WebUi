@@ -408,4 +408,86 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       );
     },
   );
+
+  await testParent.test(
+    'should display an error when the JSROOT object fails to fetch due to a network failure',
+    { timeout },
+    async () => {
+      const requestHandler = (interceptedRequest) => {
+        const url = interceptedRequest.url();
+
+        if (url.includes('/api/object')) {
+          interceptedRequest.abort('failed'); // simulates network failure
+        } else {
+          interceptedRequest.continue();
+        }
+      };
+
+      try {
+        // Enable interception and attach the handler
+        await page.setRequestInterception(true);
+        page.on('request', requestHandler);
+
+        await page.reload({ waitUntil: 'networkidle0' });
+        await delay(100);
+
+        const errorText = await page.evaluate(() => document.querySelector('#Error .f3')?.innerText);
+
+        strictEqual(errorText, 'Connection to server failed, please try again');
+      } catch (error) {
+        // Test failed
+        strictEqual(1, 0, error.message);
+      } finally {
+        // Cleanup: remove listener and disable interception
+        page.off('request', requestHandler);
+        await page.setRequestInterception(false);
+      }
+    },
+  );
+
+  await testParent.test(
+    'should display an error when the JSROOT object fails to fetch due to a backend failure',
+    { timeout },
+    async () => {
+      const requestHandler = (interceptedRequest) => {
+        const url = interceptedRequest.url();
+
+        if (url.includes('/api/object')) {
+          // Respond with a backend error
+          interceptedRequest.respond({
+            status: 500,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              message: 'JSROOT failed to open file \'url\'',
+            }),
+          });
+        } else {
+          interceptedRequest.continue();
+        }
+      };
+
+      try {
+        // Enable interception and attach the handler
+        await page.setRequestInterception(true);
+        page.on('request', requestHandler);
+
+        await page.reload({ waitUntil: 'networkidle0' });
+        await delay(100);
+
+        const errorText = await page.evaluate(() => document.querySelector('#Error .f3')?.innerText);
+
+        strictEqual(
+          errorText,
+          'Request to server failed (500 Internal Server Error): JSROOT failed to open file \'url\'',
+        );
+      } catch (error) {
+        // Test failed
+        strictEqual(1, 0, error.message);
+      } finally {
+        // Cleanup: remove listener and disable interception
+        page.off('request', requestHandler);
+        await page.setRequestInterception(false);
+      }
+    },
+  );
 };

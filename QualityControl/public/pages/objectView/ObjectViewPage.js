@@ -82,7 +82,9 @@ const objectPlotAndInfo = (objectViewModel) =>
           h('.flex-grow', {
             // Key change forces redraw when toggling info panel
             key: isObjectInfoVisible ? 'objectPlotWithoutInfoPanel' : 'objectPlotWithInfoPanel',
-          }, drawObject(qcObject, {}, drawingOptions)),
+          }, drawObject(qcObject, {}, drawingOptions, (error) => {
+            objectViewModel.drawingFailureOccurred(error.message);
+          })),
           isObjectInfoVisible && h('.scroll-y.w-30', {
             key: 'objectInfoPanel',
           }, [
