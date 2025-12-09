@@ -32,7 +32,7 @@ import { filtersPanel } from './filters/filterViews.js';
  */
 export default (model) => {
   const specific = headerSpecific(model) || {};
-  const { centerCol, rightCol } = specific;
+  const { centerCol, rightCol, subRow } = specific;
 
   return h('.flex-col', [
     h('.flex-row.p2.items-center', { id: 'qcg-header' }, [
@@ -40,6 +40,7 @@ export default (model) => {
       centerCol || h('.flex-grow'),
       rightCol || h('.w-25'),
     ]),
+    subRow && h('.p2', [subRow]),
     filterSpecific(model),
   ]);
 };

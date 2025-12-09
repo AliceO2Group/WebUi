@@ -44,13 +44,8 @@ const toolbarViewMode = (layout, filterModel) => {
   const { isOfficial, owner_id, name } = layoutItem;
 
   return {
-    centerCol: h(
-      '.flex-grow.text-center',
-      [h('.header-layout.header-layout-container', [tabViewLinks(layoutItem, layout)])],
-    ),
+    centerCol: h('b.f4.items-center.flex-grow.text-center', [isOfficial ? iconBadge() : '', layoutItem.name]),
     rightCol: h('.w-25.text-right.g2.flex-row.justify-end.flex-wrap', [
-      h('b.f4.items-center', [isOfficial ? iconBadge() : '', layoutItem.name]),
-      ' ',
       filterPanelToggleButton(filterModel),
       h('.btn-group.flex-wrap', [
         newLayoutButton(layout),
@@ -58,6 +53,10 @@ const toolbarViewMode = (layout, filterModel) => {
         layout.ownsLayout(owner_id) && [editDropdown(layout), deleteButton(layout)],
       ]),
     ]),
+    subRow: h(
+      '.flex-grow.text-center',
+      [h('.header-layout.header-layout-container', [tabViewLinks(layoutItem, layout)])],
+    ),
   };
 };
 
