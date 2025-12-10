@@ -28,7 +28,6 @@ import { isArrayRestrictions, isObjectRestrictions } from './types/helpers';
 import { ObjectWidget } from './components/widgets/ObjectWidget';
 import type { Control } from 'react-hook-form';
 import type { InputsType } from '~/routes/configuration';
-import { KEY_SEPARATOR } from './constants';
 
 interface FormProps {
   sectionTitle: string;
@@ -50,7 +49,7 @@ export const Form: FC<FormProps> = ({
       <ObjectWidget
         key={sectionTitle}
         sectionTitle={sectionTitle}
-        sectionPrefix={`${sectionPrefix}${KEY_SEPARATOR}${sectionTitle}`}
+        sectionPrefix={sectionPrefix}
         items={value as FormObjectValue}
         itemsRestrictions={restrictions}
         control={control}
@@ -63,7 +62,7 @@ export const Form: FC<FormProps> = ({
       <ArrayWidget
         key={sectionTitle}
         sectionTitle={sectionTitle}
-        sectionPrefix={`${sectionPrefix}${KEY_SEPARATOR}${sectionTitle}`}
+        sectionPrefix={sectionPrefix}
         items={value as Array<FormArrayValue>}
         itemsRestrictions={restrictions}
         control={control}
@@ -75,7 +74,7 @@ export const Form: FC<FormProps> = ({
     <Widget
       key={sectionTitle}
       label={sectionTitle}
-      sectionPrefix={`${sectionPrefix}${KEY_SEPARATOR}${sectionTitle}`}
+      sectionPrefix={sectionPrefix}
       type={restrictions}
       value={value as FormPrimitiveValue}
       control={control}
