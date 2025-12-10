@@ -67,8 +67,8 @@ const ConfigurationPage = () => {
           control={control}
           sectionTitle={DEFAULT_PREFIX}
           sectionPrefix={pathname}
-          items={configuration}
-          itemsRestrictions={configurationRestrictions}
+          value={configuration}
+          restrictions={configurationRestrictions}
         />
       </form>
       <SaveButton onClick={() => void handleSubmit(onSubmit)()} disabled={!isDirty} />

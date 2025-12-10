@@ -13,40 +13,33 @@
  */
 
 import { DEFAULT_PREFIX, KEY_SEPARATOR } from '../constants';
-import type { FormItem } from '../Form';
+import type { FormValue } from '../types';
+import { isPrimitiveValue } from '../types/helpers';
 
 /**
  * Get the default values from the configuration object.
- * @param {FormItem | undefined} obj - The configuration object.
+ * @param {FormValue} val - The configuration value.
  * @param {string} prefix - The prefix of the configuration object.
  * @returns {Record<string, string | number | boolean>} The default values.
  */
 export const getDefaultValuesFromConfigObject = (
-  obj: FormItem | undefined,
+  val: FormValue | undefined,
   prefix: string = DEFAULT_PREFIX,
 ) => {
-  if (!obj) {
+  if (val === undefined) {
     return {};
   }
-  // omit arrays for now
-  if (Array.isArray(obj)) {
-    return {};
+
+  if (isPrimitiveValue(val)) {
+    return { [prefix]: val };
   }
+
   let result: Record<string, string | number | boolean> = {};
-  const entries = Object.entries(obj);
+  const entries = Object.entries(val);
   for (const [key, value] of entries) {
     const newPrefix = `${prefix}${KEY_SEPARATOR}${key}`;
-    if (typeof value === 'object') {
-      result = { ...result, ...getDefaultValuesFromConfigObject(value as FormItem, newPrefix) };
-    } else {
-      if (value === 'true') {
-        result[newPrefix] = true;
-      } else if (value === 'false') {
-        result[newPrefix] = false;
-      } else {
-        result[newPrefix] = value;
-      }
-    }
+    result = { ...result, ...getDefaultValuesFromConfigObject(value, newPrefix) };
   }
+
   return result;
 };
