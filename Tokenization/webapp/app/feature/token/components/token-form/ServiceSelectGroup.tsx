@@ -21,13 +21,13 @@ import { FormSelect } from '~/shared/components/form/form-select';
  *
  */
 export default function ServiceSelectGroup({
-  loaderData,
+  serviceOptions,
   firstValue,
   secondValue,
   onFirstChange,
   onSecondChange,
 }: {
-  loaderData?: OptionType[];
+  serviceOptions?: OptionType[];
   firstValue: string;
   secondValue: string;
   onFirstChange: React.Dispatch<React.SetStateAction<string>>;
@@ -37,7 +37,7 @@ export default function ServiceSelectGroup({
     <SelectGroup>
       <FormSelect
         id="first-service-select"
-        options={loaderData ?? []}
+        options={serviceOptions ?? []}
         value={firstValue}
         setValue={onFirstChange}
         placeholder="Select First Service..."
@@ -45,7 +45,7 @@ export default function ServiceSelectGroup({
       />
       <FormSelect
         id="second-service-select"
-        options={loaderData ?? []}
+        options={serviceOptions ?? []}
         value={secondValue}
         setValue={onSecondChange}
         placeholder="Select Second Service..."

@@ -12,21 +12,24 @@
  * or submit itself to any jurisdiction.
  */
 
-import type { Token } from '../types/token';
-
-import { useLoaderData } from 'react-router';
 import TokenTableRouteView from '../views/token-table';
-import { tokensMock } from '../mocks/tokens';
+import { Spinner } from '~/ui/spinner';
+import { useTokenQueries } from '../hooks/api/useTokenQueries';
 
-//eslint-disable-next-line jsdoc/require-jsdoc
-export async function clientLoader() {
-  const tokens = Array.from(tokensMock.values()) as unknown as Token[];
-  return { tokens };
-}
-
-//eslint-disable-next-line jsdoc/require-jsdoc
+/**
+ * Standalone route rendering the full tokens table with live data.
+ */
 export default function TokensTable() {
-  const { tokens } = useLoaderData();
-  return <TokenTableRouteView tokens={tokens} />;
+  const { list } = useTokenQueries();
+  const { data, isPending, isError, error } = list();
 
+  if (isPending) {
+    return <Spinner size={3} />;
+  }
+
+  if (isError) {
+    return <div role="alert">Failed to load tokens: {(error as Error).message}</div>;
+  }
+
+  return <TokenTableRouteView tokens={data ?? []} />;
 }

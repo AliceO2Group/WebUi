@@ -11,22 +11,8 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import type { Route } from './+types/cert-overview';
-
 import { useLoaderData } from 'react-router';
 import CertsOverviewView from '../views/cert-overview';
-
-import { newServiceMock } from '../mocks/services';
-export const clientAction = async ({ request }: Route.ClientActionArgs) => {
-  const formData = await request.formData();
-  const certFile = formData.get('certFile');
-
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate async operation
-
-  // eslint-disable-next-line no-console
-  console.log('Received cert file:', certFile);
-  return { certContent: newServiceMock };
-};
 
 import { servicesMock } from '../mocks/services';
 export const clientLoader = async () => servicesMock;

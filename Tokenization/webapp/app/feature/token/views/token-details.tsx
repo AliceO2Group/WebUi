@@ -12,17 +12,29 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useState } from 'react';
-
 import type { Log } from '../types/log';
 import type { Token } from '../types/token';
 
 import TokenDetails from '../components/token-details';
 
 /**
- *
+ * Token details page view that wires TanStack Query data to the presentation layer.
  */
-export default function TokenDetailsView({ token, logs }: { token: Token; logs: Promise<Log[]> }) {
-  const [data, setData] = useState<Token>(token)
-  return <TokenDetails token={data} setToken={setData}logs={logs}  />;
+export default function TokenDetailsView({
+  token,
+  logs,
+  logsPending,
+  logsError,
+}: {
+  token: Token;
+  logs: Log[];
+  logsPending: boolean;
+  logsError?: string;
+}) {
+  return <TokenDetails
+    token={token}
+    logs={logs}
+    logsPending={logsPending}
+    logsError={logsError}
+  />;
 }

@@ -21,9 +21,11 @@ import {
   Scripts,
   ScrollRestoration
 } from 'react-router';
+import { QueryClientProvider } from '@tanstack/react-query';
 
 import { SessionProvider } from './feature/auth/contexts/sessionContext';
 import { Spinner } from '~/ui/spinner';
+import { queryClient } from './query/queryClient';
 
 import '@aliceo2/web-ui/Frontend/css/src/bootstrap.css';
 import './app.css';
@@ -51,9 +53,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   
   return (
-  <SessionProvider>
-    <Outlet/>
-  </SessionProvider>);
+  <QueryClientProvider client={queryClient}>
+    <SessionProvider>
+      <Outlet/>
+    </SessionProvider>
+  </QueryClientProvider>);
 }
 
 export function HydrateFallback() {

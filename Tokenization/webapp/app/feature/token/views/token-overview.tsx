@@ -16,13 +16,16 @@ import type { Token } from '../types/token';
 
 import { Box1_2 } from '~/ui/box';
 import { TokenTable } from '../components/token-table';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 /**
- *
+ * High-level tokens overview page combining the table preview and create shortcut.
  */
 export default function TokenOverviewView({ tokens }: { tokens: Token[] }) {
   const [data, setData] = useState<Token[]>(tokens);
+  useEffect(() => {
+    setData(tokens);
+  }, [tokens]);
 
   return (
     <div className="grid-1-2">

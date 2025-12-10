@@ -165,8 +165,8 @@ export function TokenFiltersLastRow({
       />
       <FlexGrowWrapperElement className="self-center">
         <div className='flex-row g1 justify-end'>
-          <button type='submit' className="btn btn-primary">Apply Filters</button>
-          <button type='reset' className="btn btn-danger" onClick={clearAllFilters}>Clear Filters</button>
+          <button type='button' className="btn btn-primary" onClick={applyFilters}>Apply Filters</button>
+          <button type='button' className="btn btn-danger" onClick={clearAllFilters}>Clear Filters</button>
         </div>
       </FlexGrowWrapperElement>
     </FlexGrowWrapper>

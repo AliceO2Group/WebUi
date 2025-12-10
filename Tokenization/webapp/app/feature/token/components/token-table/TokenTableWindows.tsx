@@ -11,95 +11,44 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import type { Token } from '../../types/token';
-
-import { useEffect } from 'react';
-
-import type { AlertVariant } from '../token-alerts';
 import ModalToken from '~/feature/token/components/token-modals';
-import TokenAlert from '../token-alerts';
-import { useTokenTableState,
-  useTokenTableAction,
-  useTokenTableFetchers,
-} from '~/feature/token/hooks/token-table';
+import TokenAlert, { type AlertVariant } from '../token-alerts';
+
+type TokenTableWindowsProps = {
+  tokenId: string | null;
+  modalVariant: 'ban' | 'unban' | null;
+  isModalOpen: boolean;
+  setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  alertVariant: AlertVariant;
+  isAlertOpen: boolean;
+  setAlertOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onBanConfirm: (tokenId: string) => void;
+  onUnbanConfirm: (tokenId: string) => void;
+};
 
 /**
- *
+ * Glue component that renders token modals and alerts based on container state.
  */
 export default function TokenTableWindows({
-  setTokens,
-}: {
-  setTokens: React.Dispatch<React.SetStateAction<Token[]>>;
-}) {
-
-  const {
-    openA,
-    openM,
-    tokenId,
-    modalVariant,
-    alertVariant,
-  } = useTokenTableState();
-  const {
-    setOpenA,
-    setOpenM,
-    setAlertVariant,
-  } = useTokenTableAction();
-
-  const banFetcher = useTokenTableFetchers('ban');
-  const unbanFetcher = useTokenTableFetchers('unban');
-
-  // TODO: if pagination is implemented we need to update all pages, not only current one
-  useEffect(() => {
-    if (banFetcher.state === 'idle' && banFetcher.data) {
-      const success = Boolean((banFetcher.data as any)?.success);
-      const bulk = (banFetcher.data as any)?.bulk;
-      if (success) {
-        setAlertVariant('token-banned-success');
-        if (bulk) {
-          setTokens((prevTokens) => prevTokens.map((t) => ({ ...t, banned: true })));
-        } else {
-          setTokens((prevTokens) => prevTokens.map((t) => t.id === tokenId ? { ...t, banned: true } : t));
-        }
-      } else {
-        setAlertVariant('token-banned-failed');
-      }
-      setOpenA(true);
-    }
-  }, [
-    banFetcher.state,
-    banFetcher.data,
-    setAlertVariant,
-    setTokens,
-    setOpenA,
-  ]);
-
-  // TODO: if pagination is implemented we need to update all pages, not only current one
-  useEffect(() => {
-    if (unbanFetcher.state === 'idle' && unbanFetcher.data) {
-      const success = Boolean((unbanFetcher.data as any)?.success);
-      const bulk = (unbanFetcher.data as any)?.bulk;
-      if (success) {
-        setAlertVariant('token-unbanned-success');
-        if (bulk) {
-          setTokens((prevTokens) => prevTokens.map((t) => ({ ...t, banned: false })));
-        } else {
-          setTokens((prevTokens) => prevTokens.map((t) => t.id === tokenId ? { ...t, banned: false } : t));
-        }
-      } else {
-        setAlertVariant('token-unbanned-failed');
-      }
-      setOpenA(true);
-    }
-  }, [
-    unbanFetcher.state,
-    unbanFetcher.data,
-    setAlertVariant,
-    setTokens,
-    setOpenA,
-  ]);
-
+  tokenId,
+  modalVariant,
+  isModalOpen,
+  setModalOpen,
+  alertVariant,
+  isAlertOpen,
+  setAlertOpen,
+  onBanConfirm,
+  onUnbanConfirm,
+}: TokenTableWindowsProps) {
   return <>
-    <ModalToken tokenId={tokenId} open={openM} setOpen={setOpenM} variant={modalVariant as 'ban' | 'unban'} />
-    <TokenAlert open={openA} setOpen={setOpenA} variant={alertVariant as AlertVariant} />
+    <ModalToken
+      tokenId={tokenId}
+      open={isModalOpen}
+      setOpen={setModalOpen}
+      variant={modalVariant}
+      onBanConfirm={onBanConfirm}
+      onUnbanConfirm={onUnbanConfirm}
+    />
+    <TokenAlert open={isAlertOpen} setOpen={setAlertOpen} variant={alertVariant} />
   </>;
 }

@@ -12,17 +12,20 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useContext } from 'react';
-import { TokenTableContext } from '~/feature/token/contexts/token-table';
+import { QueryClient } from '@tanstack/react-query';
 
-/**
- *
- */
-export function useTokenTableState() {
-  const ctx = useContext(TokenTableContext);
-  if (!ctx) {
-    throw new Error('useTokenTableState must be used inside TokenTableProvider');
-  }
-  const { state } = ctx;
-  return state;
-}
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 0,
+      gcTime: 0,
+      refetchOnMount: 'always',
+      refetchOnReconnect: 'always',
+      refetchOnWindowFocus: 'always',
+      retry: 1,
+    },
+    mutations: {
+      retry: 1,
+    },
+  },
+});

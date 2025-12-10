@@ -60,7 +60,7 @@ export const tokensMock = new Map([
     {
       id: 4,
       banned: false,
-      // Last4chars: '1234',
+      last4chars: '1234',
       serviceFrom: 'Service One',
       serviceTo: 'Service Three',
       exp: '2026-02-05T12:00:00',

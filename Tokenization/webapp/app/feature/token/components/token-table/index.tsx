@@ -15,9 +15,7 @@
 import { Link } from 'react-router';
 import { type Token } from '../../types/token';
 
-import { TokenTableProvider } from '../../contexts/token-table';
-import { TokenTableContainer } from './TokenTableContainer';
-import { TokenFiltersProvider } from '../../contexts/token-filters';
+import { TokenTableContainer, TokenTableExtendedContainer } from './TokenTableContainer';
 
 // Common columns for all table variants
 const columns = [
@@ -59,12 +57,9 @@ interface TokenTableProps {
  * @param props.tokens - token list
  */
 export function TokenTable({ tokens, setTokens }: TokenTableProps) {
-  // Delegate to container; TokenTableContainer will call onRequestAction internally via same ActionBlock usage pattern.
-  return <TokenTableProvider>
-    <TokenFiltersProvider>
-      <TokenTableContainer tokens={tokens} setTokens={setTokens} columns={columns} />
-    </TokenFiltersProvider>
-  </TokenTableProvider>;
+  return <TokenTableContainer tokens={tokens} setTokens={setTokens} columns={columns} />
+
+ 
 }
 
 /**
@@ -74,7 +69,5 @@ export function TokenTable({ tokens, setTokens }: TokenTableProps) {
  * @param props.tokens - token list
  */
 export function TokenTableExtended({ tokens, setTokens, filtered }: TokenTableProps & { filtered: boolean }) {
-  return <TokenTableProvider>
-    <TokenTableContainer tokens={tokens} setTokens={setTokens} columns={columns_extended} filtered={filtered} />;
-  </TokenTableProvider>;
+  return <TokenTableExtendedContainer tokens={tokens} setTokens={setTokens} columns={columns_extended} filtered={filtered} />;
 }

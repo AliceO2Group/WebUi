@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Box1_2 } from '~/ui/box';
 import type { Token } from '~/feature/token/types/token';
@@ -21,11 +21,14 @@ import { TokenFilters } from '~/feature/token/components/token-filters';
 import { TokenFiltersProvider } from '~/feature/token/contexts/token-filters';
 
 /**
- *
+ * Tokens table route showing full filters + grid driven by TanStack Query data.
  */
 export default function TokenTableRouteiew({ tokens }: { tokens: Token[] }) {
   const [filtered, setFiltered] = useState<boolean>(false); // To check if there is any filter applied
   const [data, setData] = useState<Token[]>(tokens);
+  useEffect(() => {
+    setData(tokens);
+  }, [tokens]);
 
   return <TokenFiltersProvider>
     <Box1_2 link={null}>

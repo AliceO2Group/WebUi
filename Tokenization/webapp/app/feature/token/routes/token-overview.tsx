@@ -11,29 +11,24 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-import type { Token } from '../types/token';
-
-import { useLoaderData } from 'react-router';
 import TokenOverviewView from '../views/token-overview';
-import { tokensMock } from '../mocks/tokens';
+import { Spinner } from '~/ui/spinner';
+import { useTokenQueries } from '../hooks/api/useTokenQueries';
 
 /**
- * Client loader that fetches all tokens from the API.
- *
- * @returns Promise that resolves to an array of tokens
- */
-export const clientLoader = (): { tokens: Token[] } => {
-  const tokens = Array.from(tokensMock.values()) as unknown as Token[];
-  return { tokens };
-};
-
-/**
- * Tokens overview page component with tabbed interface.
- * Displays a list of tokens
- *
- * @param loaderData - Object containing the deferred tokens promise
+ * Tokens overview route connected to TanStack Query data.
  */
 export default function Overview() {
-  const { tokens } = useLoaderData();
-  return <TokenOverviewView tokens={tokens} />;
+  const { list } = useTokenQueries();
+  const { data, isPending, isError, error } = list();
+
+  if (isPending) {
+    return <Spinner size={3} />;
+  }
+
+  if (isError) {
+    return <div role="alert">Failed to load tokens: {(error as Error).message}</div>;
+  }
+
+  return <TokenOverviewView tokens={data ?? []} />;
 }

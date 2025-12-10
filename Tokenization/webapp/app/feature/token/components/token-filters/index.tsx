@@ -15,15 +15,16 @@ import type { Token } from '../../types/token';
 
 import { useEffect } from 'react';
 
-import { setStorageItem } from '~/utils/storage';
-
 import { useTokenFiltersAction, useTokenFiltersState } from '~/feature/token/hooks/token-filters';
 import { TokenFiltersFirstRow,
   TokenFiltersSecondRow,
   TokenFiltersLastRow,
 } from './TokenFiltersRow';
 import { Form } from '~/shared/components/form/form';
-import useForm from '~/shared/components/form/hooks/useForm';
+import useTokenActions from '../../hooks/api/useTokenActions';
+import { useTokenQueries } from '../../hooks/api/useTokenQueries';
+import { Spinner } from '~/ui/spinner';
+import type { TokenFilterPayload } from '../../services/tokenApi';
 
 /**
  * TokenFilters
@@ -42,49 +43,74 @@ export function TokenFilters({
   setFiltered: React.Dispatch<React.SetStateAction<boolean>>;
   setData: React.Dispatch<React.SetStateAction<Token[]>>;
 }) {
-  // Deleting stored filters on component un-mount
-  useEffect(() => () => {
-    setStorageItem('TKN_token-filters', {});
-  }, []);
 
   const actions = useTokenFiltersAction();
+  const state = useTokenFiltersState();
+  const {
+    filter,
+  } = useTokenActions();
+  const { services } = useTokenQueries();
+  const servicesQuery = services();
 
   const {
     setServices,
+    setAppliedFilters,
   } = actions;
 
   useEffect(() => {
-    // Load services from API mock
-    setTimeout(() => {
-      setServices([
-        { value: 'service1', label: 'Service 1' },
-        { value: 'service2', label: 'Service 2' },
-        { value: 'service3', label: 'Service 3' },
-        { value: 'service4', label: 'Service 4' },
-      ]);
-    }, 500);
-
-  }, [setServices]);
-
-  const { fetcher, ref, submit } = useForm();
-
-  useEffect(() => {
-    if (fetcher.state === 'idle' && (fetcher.data as any)?.success === true) {
-      if (fetcher.data.filtered) {
-        setFiltered(true);
-      } else {
-        setFiltered(false);
-      }
-      setData((fetcher.data as any).tokens);
+    if (servicesQuery.data) {
+      setServices(servicesQuery.data);
     }
-  }, [fetcher.state, fetcher.data, setData, setFiltered]);
+  }, [servicesQuery.data, setServices]);
 
+  const buildFilterPayload = (): TokenFilterPayload => ({
+    servicesFrom: state.firstSelectedService,
+    servicesTo: state.secondSelectedService,
+    methods: state.httpMethods,
+    expirationDateMin: state.expirationDateMin,
+    expirationDateMax: state.expirationDateMax,
+    issueDateMin: state.issueDateMin,
+    issueDateMax: state.issueDateMax,
+    ordering: state.ordering,
+  });
+
+  const normalizeFilters = (payload: TokenFilterPayload): TokenFilterPayload | null => {
+    const entries = Object.entries(payload).filter(([, value]) => {
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
+      return Boolean(value);
+    });
+    if (entries.length === 0) {
+      return null;
+    }
+    return Object.fromEntries(entries) as TokenFilterPayload;
+  };
+
+  const applyFilters = async () => {
+    const payload = buildFilterPayload();
+    console.log('[TokenFilters] Applying filters with payload', payload);
+    try {
+      const response = await filter.mutateAsync(payload);
+      console.log('[TokenFilters] Filter response', response);
+      setFiltered(response.filtered);
+      setData(response.tokens);
+      setAppliedFilters(normalizeFilters(payload));
+    } catch (error) {
+      console.error('[TokenFilters] Filter request failed', error);
+      throw error;
+    }
+  };
 
   return <div>
-    <Form submitRef={ref} fetcher={fetcher} action='/tokens/filter'>
+    {servicesQuery.isPending && <Spinner size={1.5} align={'left'} />}
+    {servicesQuery.isError && <div role="alert">Failed to load services list.</div>}
+    <Form onSubmit={(event) => {
+      event.preventDefault(); applyFilters();
+    }}>
       <TokenFiltersFirstRow />
       <TokenFiltersSecondRow />
-      <TokenFiltersLastRow applyFilters={() => submit()} />
+      <TokenFiltersLastRow applyFilters={applyFilters} />
     </Form>
   </div>;
 

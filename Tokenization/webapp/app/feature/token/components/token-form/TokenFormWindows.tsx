@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useEffect } from 'react';
+import { useMemo, type Dispatch, type SetStateAction } from 'react';
+import type { HttpMethod, OptionType } from '~/utils/types';
 
 import Modal from '~/shared/components/window/modal';
 import Alert from '~/shared/components/window/alert';
@@ -23,70 +24,46 @@ import { WindowButtonAccept,
   WindowTitle,
   WindowContent,
 } from '~/shared/components/window/window-objects';
-import { useTokenFormMeta, useTokenFormState, useTokenFormUi } from '~/feature/token/hooks/token-form/index';
-import { useAuth } from '~/feature/auth/hooks/session';
+import type { AlertType } from '~/shared/components/window/alert';
 
 /**
  * Not reusable Windows prepared for Token Form component
  */
-export default function TokenFormWindows() {
-  const { fetcher, submit } = useTokenFormMeta();
 
-  const auth = useAuth('admin');
-  const {
-    setAlert,
-    setOpenAlert,
-    setOpenModal,
-  } = useTokenFormUi();
+type TokenFormWindowsProps = {
+  serviceOptions?: OptionType[];
+  firstSelectedService: string;
+  secondSelectedService: string;
+  selectedMethods: HttpMethod[];
+  expirationTime: string;
+  openModal: boolean;
+  setOpenModal: Dispatch<SetStateAction<boolean>>;
+  alert: AlertType | null;
+  openAlert: boolean;
+  setOpenAlert: Dispatch<SetStateAction<boolean>>;
+  onConfirm: () => void;
+};
 
-  const callApi = () => {
-    if (auth) {
-      submit();
-    } else {
-      setAlert({
-        title: 'Authorization error',
-        message: 'You cannot perform this action without authorization.',
-        success: false });
-      setOpenAlert(true);
-    }
-    setOpenModal(false);
-  };
-
-  useEffect(() => {
-    if (fetcher.state === 'idle' && (fetcher.data as any)?.success === true) {
-      setAlert({
-        title: 'Token created',
-        message: 'Token has been created successfully.',
-        success: true });
-      setOpenAlert(true);
-    } else if (fetcher.state === 'idle' && (fetcher.data as any)?.success === false) {
-      setAlert({
-        title: 'Token creation failed',
-        message: 'An error occurred while creating the token.',
-        success: false });
-      setOpenAlert(true);
-    }
-  }, [fetcher.state, fetcher.data, setAlert, setOpenAlert]);
-
-  return <TokenFormWindowsUI callApi={callApi}/>;
-}
-
-/**
- *
- */
-function TokenFormWindowsUI({ callApi }: { callApi: () => void }) {
-  const { firstLabel,
-    secondLabel,
-    selectedMethods,
-    expirationTime,
-  } = useTokenFormState();
-
-  const { alert,
-    openModal,
-    openAlert,
-    setOpenAlert,
-    setOpenModal,
-  } = useTokenFormUi();
+export default function TokenFormWindows({
+  serviceOptions,
+  firstSelectedService,
+  secondSelectedService,
+  selectedMethods,
+  expirationTime,
+  openModal,
+  setOpenModal,
+  alert,
+  openAlert,
+  setOpenAlert,
+  onConfirm,
+}: TokenFormWindowsProps) {
+  const { firstLabel, secondLabel } = useMemo(() => {
+    const findLabel = (value: string) => serviceOptions?.find(option => option.value === value)?.label ?? '';
+    return {
+      firstLabel: findLabel(firstSelectedService),
+      secondLabel: findLabel(secondSelectedService),
+    };
+  }, [firstSelectedService, secondSelectedService, serviceOptions]);
 
   return <>
     <Modal open={openModal} setOpen={setOpenModal} className="bg-primary">
@@ -96,11 +73,10 @@ function TokenFormWindowsUI({ callApi }: { callApi: () => void }) {
         expirationTime,
         methods: selectedMethods,
       })}
-      <WindowButtonAccept className="btn-success" action={callApi} />
+      <WindowButtonAccept className="btn-success" action={onConfirm} />
       <WindowButtonCancel />
     </Modal>
     <Alert
-      key={Date.now()}
       open={openAlert}
       setOpen={setOpenAlert}
       timeout={6000}

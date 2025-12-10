@@ -12,21 +12,29 @@
  * or submit itself to any jurisdiction.
  */
 
-import type { OptionType } from '~/utils/types';
-
-import { TokenFormProvider } from '~/feature/token/contexts/token-form';
 import { TokenForm } from '~/feature/token/components/token-form';
 import { Box1_1 } from '~/ui/box';
+import { Spinner } from '~/ui/spinner';
+import { useTokenQueries } from '../hooks/api/useTokenQueries';
 
 /**
  *
  */
-export default function CreateTokenView({ serviceOptions }: { serviceOptions?: OptionType[] }) {
+export default function CreateTokenView() {
+  const { services } = useTokenQueries();
+  const { data, isPending, isError, error } = services();
+
+  if (isPending) {
+    return <Spinner size={3} />;
+  }
+
+  if (isError) {
+    return <div role="alert">Failed to load services: {(error as Error).message}</div>;
+  }
+
   return (
-    <TokenFormProvider loaderData={serviceOptions}>
-      <Box1_1 link={null}>
-        <TokenForm />
-      </Box1_1>
-    </TokenFormProvider>
+    <Box1_1 link={null}>
+      <TokenForm serviceOptions={data} />
+    </Box1_1>
   );
 }

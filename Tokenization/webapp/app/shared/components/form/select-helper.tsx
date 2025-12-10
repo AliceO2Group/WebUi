@@ -13,7 +13,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { type OptionType as Option } from '~/utils/types';
+import { type DialogPropsBase, type OptionType as Option } from '~/utils/types';
 import { type SelectLabelProps, type SelectOptionsProps, type SelectInterface } from './form.d';
 import { SelectedList } from './multi-select-helper';
 
@@ -69,7 +69,7 @@ export function SelectFrame<T extends string | number>(
  * - Uses SelectedList when selected is an array. - which should be the case for multi-select.
  */
 export function SelectFrameMulti<T extends string | number>(
-  props: SelectLabelProps<T> & { setOpen: React.Dispatch<React.SetStateAction<boolean>> },
+  props: SelectLabelProps<T> & DialogPropsBase,
 ) {
   const { open, setOpen, selected, placeholder, handleDeselect } = props;
   const _selected: Option[] | null = Array.isArray(selected) ? selected : (selected ? [selected] : null);
@@ -110,7 +110,7 @@ export function SelectFrameMulti<T extends string | number>(
  */
 export function SelectOptions<T extends string | number>(
   { takeSelectedToOption = true, ...rest }:
-    SelectOptionsProps<T> & { setOpen: React.Dispatch<React.SetStateAction<boolean>> },
+    SelectOptionsProps<T> & DialogPropsBase,
 ) {
   const { open, setOpen, handleSelect, options, selected } = rest;
   const _selected = Array.isArray(selected) ? selected : [selected];
@@ -175,8 +175,7 @@ export function FormSelectBase<T extends string | number | (string | number)[] =
   handleSelect,
   handleDeselect,
   takeSelectedToOption,
-  render,
-  value,
+  render
 }: SelectInterface<T, V>) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -211,7 +210,6 @@ export function FormSelectBase<T extends string | number | (string | number)[] =
         selected={selected}
         takeSelectedToOption={takeSelectedToOption}
       />
-      <input type="hidden" name={id} value={JSON.stringify(value)} />
     </div>
   );
 }

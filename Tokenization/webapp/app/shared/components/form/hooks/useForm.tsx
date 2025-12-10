@@ -13,30 +13,34 @@
  */
 
 import { useCallback, useRef } from 'react';
-import { useFetcher } from 'react-router';
+
+type SubmitHandler = (formData: FormData) => void | Promise<void>;
 
 /**
  * Hook useForm
  *
- * Provides a fetcher form along with a submit function and a ref to the form element. It cooperates with
- * <Form> component to allow programmatic form submission.
+ * Provides refs for a form and submit button plus an imperative submit helper that gathers FormData
+ * and forwards it to the provided callback.
  *
- * @returns {fetcher: ReturnType<typeof useFetcher>, submit: () => void, ref: React.RefObject<HTMLFormElement>}
+ * @returns {{ submit: (extraData?: Record<string, FormDataEntryValue>) => void, ref: React.RefObject<HTMLButtonElement>, formRef: React.RefObject<HTMLFormElement> }}
  *
  */
-export default function useForm() {
-  const fetcher = useFetcher();
+export default function useForm(onSubmit?: SubmitHandler) {
   const ref = useRef<HTMLButtonElement>(null);
-  const submit = useCallback((extraData?: object) => {
-    const fd = new FormData(ref.current?.closest('form') ?? undefined);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const submit = useCallback((extraData?: Record<string, FormDataEntryValue>) => {
+    if (!formRef.current) {
+      return;
+    }
+    const fd = new FormData(formRef.current);
     if (extraData) {
       Object.entries(extraData).forEach(([key, value]) => {
-        fd.append(key, value as string);
+        fd.append(key, value);
       });
     }
-    const action = ref.current?.dataset?.action ?? '';
-    fetcher.submit(fd, { method: 'post', action });
-  }, [fetcher, ref]);
+    onSubmit?.(fd);
+  }, [onSubmit]);
 
-  return { fetcher, submit, ref };
+  return { submit, ref, formRef };
 }

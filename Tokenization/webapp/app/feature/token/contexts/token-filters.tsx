@@ -15,6 +15,7 @@
 import React, { useCallback, useState } from 'react';
 
 import type { OptionType } from '~/utils/types';
+import type { TokenFilterPayload } from '../services/tokenApi';
 
 type State = {
   services: OptionType[];
@@ -26,6 +27,7 @@ type State = {
   issueDateMin: string;
   issueDateMax: string;
   ordering: string[];
+  appliedFilters: TokenFilterPayload | null;
 };
 
 type Actions = {
@@ -38,6 +40,7 @@ type Actions = {
   setIssueDateMin: React.Dispatch<React.SetStateAction<string>>;
   setIssueDateMax: React.Dispatch<React.SetStateAction<string>>;
   setOrdering: React.Dispatch<React.SetStateAction<string[]>>;
+  setAppliedFilters: React.Dispatch<React.SetStateAction<TokenFilterPayload | null>>;
   clearAllFilters: () => void;
 };
 
@@ -63,6 +66,7 @@ export function TokenFiltersProvider({ children }: { children: React.ReactNode }
   const [issueDateMin, setIssueDateMin] = useState<string>('');
   const [issueDateMax, setIssueDateMax] = useState<string>('');
   const [ordering, setOrdering] = useState<string[]>([]);
+  const [appliedFilters, setAppliedFilters] = useState<TokenFilterPayload | null>(null);
 
   const clearAllFilters = useCallback(() => {
     setFirstSelectedService([]);
@@ -94,6 +98,7 @@ export function TokenFiltersProvider({ children }: { children: React.ReactNode }
     issueDateMin,
     issueDateMax,
     ordering,
+    appliedFilters,
   }), [
     services,
     firstSelectedService,
@@ -104,6 +109,7 @@ export function TokenFiltersProvider({ children }: { children: React.ReactNode }
     issueDateMin,
     issueDateMax,
     ordering,
+    appliedFilters,
   ]) ;
 
   const actions = React.useMemo(() => ({
@@ -116,6 +122,7 @@ export function TokenFiltersProvider({ children }: { children: React.ReactNode }
     setIssueDateMin,
     setIssueDateMax,
     setOrdering,
+    setAppliedFilters,
     clearAllFilters,
   }), [
     setServices,
@@ -127,6 +134,7 @@ export function TokenFiltersProvider({ children }: { children: React.ReactNode }
     setIssueDateMin,
     setIssueDateMax,
     setOrdering,
+    setAppliedFilters,
     clearAllFilters,
   ])  ;
 

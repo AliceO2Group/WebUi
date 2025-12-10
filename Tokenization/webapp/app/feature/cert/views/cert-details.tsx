@@ -22,11 +22,9 @@ import { WindowButtonAccept,
   WindowButtonCancel,
   WindowContent,
   WindowTitle } from '~/shared/components/window/window-objects';
-import { Form } from '~/shared/components/form/form';
 import { FormInputString } from '~/shared/components/form/form-input';
 import { CertsModal } from '~/feature/cert/components/certs-modal';
 import { useOpenCertModal } from '~/feature/cert/hooks/cert-modal';
-import useForm from '~/shared/components/form/hooks/useForm';
 
 /**
  *
@@ -38,7 +36,7 @@ export default function CertDetailsView({ cert }: { cert: Cert }) {
   const [serviceName, setServiceName] = useState<string>(service_name);
 
   const fetcher = useFetcher();
-  const { ref, fetcher: nameFetcher } = useForm();
+  const nameFetcher = useFetcher();
   const [certModalOpen, setCertModalOpen] = useOpenCertModal(fetcher);
 
   return (
@@ -64,14 +62,14 @@ export default function CertDetailsView({ cert }: { cert: Cert }) {
         <WindowTitle> Rename Service </WindowTitle>
         <WindowContent>
           <div className="flex-column g2">
-            <Form action={`/certs/${id}/rename`} fetcher={nameFetcher} submitRef={ref}>
+            <nameFetcher.Form method="post" action={`/certs/${id}/rename`}>
               <FormInputString
                 name="service_name"
                 labelText="Current Service Name:"
                 value={serviceName}
                 setValue={setServiceName}
               />
-            </Form>
+            </nameFetcher.Form>
           </div>
         </WindowContent>
         <WindowButtonCancel/>

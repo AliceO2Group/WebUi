@@ -13,55 +13,34 @@
  */
 
 import { type DialogPropsBase } from '~/utils/types';
-import { TokenModalBan, TokenModalBanBulk } from './TokenModalBan';
-import { TokenModalUnban, TokenModalUnbanBulk } from './TokenModalUnban';
 import ModalTokenView from './ModalTokenView';
-import { useTokenTableFetchers } from '~/feature/token/hooks/token-table';
-import useTokenTableModalHandlers from '~/feature/token/hooks/useTokenModalHandlers';
-import { useTokenTableAction } from '~/feature/token/hooks/token-table/useTokenTableAction';
 
-const MODAL_COMPONENTS = {
-  'ban': TokenModalBan,
-  'unban': TokenModalUnban,
-};
-
-const MODAL_COMPONENTS_BULK = {
-  'ban': TokenModalBanBulk,
-  'unban': TokenModalUnbanBulk,
-};
+type ModalTokenProps = {
+  variant: 'ban' | 'unban' | null;
+  tokenId: string | null;
+  onBanConfirm: (tokenId: string) => void;
+  onUnbanConfirm: (tokenId: string) => void;
+} & DialogPropsBase;
 
 /**
- *
+ * Thin wrapper that wires dialog props to the shared ModalTokenView component.
  */
 export default function ModalToken({
   variant,
   open,
   setOpen,
   tokenId,
-}: {
-  variant: 'ban' | 'unban';
-  tokenId: string;
-} & DialogPropsBase,
-) {
-  const { setOpenA, setAlertVariant } = useTokenTableAction();
-  const banFetcher = useTokenTableFetchers('ban');
-  const unbanFetcher = useTokenTableFetchers('unban');
-
-  const {handleBan, handleUnban} = useTokenTableModalHandlers(
-    setOpenA,
-    setAlertVariant,
-    banFetcher,
-    unbanFetcher,
-  );
-  
+  onBanConfirm,
+  onUnbanConfirm,
+}: ModalTokenProps) {
   return (
     <ModalTokenView
       variant={variant}
       open={open}
       setOpen={setOpen}
       tokenId={tokenId}
-      onBanConfirm={handleBan}
-      onUnbanConfirm={handleUnban}
+      onBanConfirm={onBanConfirm}
+      onUnbanConfirm={onUnbanConfirm}
     />
   );
 }
