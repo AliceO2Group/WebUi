@@ -18,7 +18,7 @@ import { useForm, type KeepStateOptions, type SubmitHandler } from 'react-hook-f
 import { getDefaultValuesFromConfigObject } from '~/components/form/utils/getDefaultValuesFromConfigObject';
 import { convertFormValuesToConfigObject } from '~/components/form/utils/convertFormValuesToConfigObject';
 import { useLocation } from 'react-router';
-import type { FormItem } from '~/components/form/Form';
+import type { FormValue } from '~/components/form/types';
 import { useConfigurationMutation } from '~/api/mutations/useConfigurationMutation';
 
 const RESET_PROPS: KeepStateOptions = { keepDirty: false };
@@ -35,7 +35,7 @@ export const useConfigurationForm = ({
   configuration,
   configurationName,
 }: {
-  configuration: FormItem | undefined;
+  configuration: FormValue | undefined;
   configurationName: string;
 }) => {
   const { pathname } = useLocation();

@@ -17,12 +17,13 @@ import { useFormState, type Control } from 'react-hook-form';
 import type { InputsType } from '~/routes/configuration';
 import { FormTextInput } from './widgets/FormTextInput';
 import { FormToggleInput } from './widgets/FormToggleInput';
+import type { FormPrimitiveValue, PrimitiveRestrictions } from '../types';
 
 export interface WidgetProps extends PropsWithChildren {
   sectionPrefix: string;
   label: string;
-  type: 'string' | 'number' | 'boolean' | 'array';
-  value: unknown;
+  type: PrimitiveRestrictions;
+  value: FormPrimitiveValue;
   control: Control<InputsType>;
 }
 
@@ -45,7 +46,7 @@ export const Widget: FC<WidgetProps> = ({ type, ...rest }): ReactElement => {
       return <FormTextInput {...rest} isDirty={Boolean(isDirty)} type="number" />;
     case 'boolean':
       return <FormToggleInput {...rest} isDirty={Boolean(isDirty)} />;
-    case 'array':
-      return <>array not implemented</>; // TODO OGUI-1803: add implementation after the decision is made
+    default:
+      return <>unknown widget type: {JSON.stringify(type)}</>;
   }
 };
