@@ -53,6 +53,7 @@ export const FormTextInput = ({
         color={isDirty ? 'secondary' : 'primary'}
         focused={isDirty}
         slotProps={{
+          inputLabel: { shrink: true },
           input: {
             endAdornment: isDirty ? (
               <RemoveButton
