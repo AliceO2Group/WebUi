@@ -33,6 +33,8 @@ export const Content: FC<PropsWithChildren> = ({ children }) => {
     <Box
       component="main"
       sx={{
+        display: 'flex',
+        flexDirection: 'column',
         flexGrow: 1,
         bgcolor: 'background.default',
         marginLeft: isOpen ? 0 : `-${drawerWidth}px`,
@@ -41,9 +43,7 @@ export const Content: FC<PropsWithChildren> = ({ children }) => {
       className="content-section"
     >
       <ContentHeader currentPath={configPath ?? ''} />
-      <Box sx={{ p: 3, overflow: 'auto', flexFrow: 1, minHeight: 0, maxHeight: '100%' }}>
-        {children}
-      </Box>
+      <Box sx={{ p: 3, overflow: 'auto', flexGrow: 1 }}>{children}</Box>
     </Box>
   );
 };

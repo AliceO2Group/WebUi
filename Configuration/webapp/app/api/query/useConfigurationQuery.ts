@@ -14,7 +14,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '../axiosInstance';
-import type { FormItem } from '~/components/form/Form';
+import type { FormValue } from '~/components/form/types';
 
 export const CONFIGURATION_QUERY_KEY = 'configuration';
 
@@ -23,6 +23,6 @@ export const useConfigurationQuery = (configuration: string) =>
     queryKey: [CONFIGURATION_QUERY_KEY, configuration],
     queryFn: async () =>
       axiosInstance
-        .get<FormItem>(`configurations/${configuration}`)
+        .get<FormValue>(`configurations/${configuration}`)
         .then((response) => response.data),
   });

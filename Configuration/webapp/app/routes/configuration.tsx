@@ -55,6 +55,8 @@ const ConfigurationPage = () => {
     console.log(data);
     // eslint-disable-next-line no-console
     console.log(getValues());
+    // eslint-disable-next-line no-console
+    console.log({ defaultValues });
   };
 
   useEffect(() => () => reset(defaultValues), [defaultValues]);
@@ -74,8 +76,8 @@ const ConfigurationPage = () => {
           control={control}
           sectionTitle={DEFAULT_PREFIX}
           sectionPrefix={DEFAULT_PREFIX}
-          items={configuration}
-          itemsRestrictions={configurationRestrictions}
+          value={configuration}
+          restrictions={configurationRestrictions}
         />
       </form>
       <SaveButton onClick={() => void handleSubmit(onSubmit)()} disabled={!isDirty} />
