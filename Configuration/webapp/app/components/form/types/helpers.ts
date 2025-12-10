@@ -12,7 +12,27 @@
  * or submit itself to any jurisdiction.
  */
 
-import type { ArrayRestrictions, ObjectRestrictions, Restrictions } from '.';
+import type {
+  ArrayRestrictions,
+  FormPrimitiveValue,
+  FormValue,
+  ObjectRestrictions,
+  Restrictions,
+} from '.';
+
+/**
+ * Function which returns true only if the given argument is a FormPrimitiveValue
+ * ie. it is not an array and it is not an object
+ * the leaves of a configuration tree are always strings, numbers or booleans
+ * @param {FormValue} value the FormValue we want to check for being primitive
+ * @returns {boolean} true if value given is a FormPrimitiveValue
+ */
+export function isPrimitiveValue(value: FormValue): value is FormPrimitiveValue {
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return true;
+  }
+  return false;
+}
 
 /**
  * Function which returns true only if the given argument is an ObjectRestrictions object itself
