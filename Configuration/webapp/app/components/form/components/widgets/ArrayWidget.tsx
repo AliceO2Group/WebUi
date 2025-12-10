@@ -13,48 +13,56 @@
  */
 
 import { useState, type ReactElement } from 'react';
-import { type ArrayRestrictions, type FormArrayValue } from './Form';
-import { Accordion, AccordionDetails, Stack, Typography } from '@mui/material';
-import { AccordionHeader } from './AccordionHeader';
-import { FormItem } from './FormItem';
+import { Accordion, AccordionDetails, Stack } from '@mui/material';
+import { AccordionHeader } from '../AccordionHeader';
+import type { ArrayRestrictions, FormArrayValue } from '../../types';
+import { RawViewModal } from '../../raw-view/RawViewModal';
+import { Form } from '../../Form';
+import type { Control } from 'react-hook-form';
+import type { InputsType } from '~/routes/configuration';
+import { KEY_SEPARATOR } from '../../constants';
 
 interface ArrayWidgetProps {
   sectionTitle: string;
+  sectionPrefix: string;
   items: FormArrayValue;
   itemsRestrictions: ArrayRestrictions;
+  control: Control<InputsType>;
 }
 
 export const ArrayWidget = ({
   sectionTitle,
+  sectionPrefix,
   items,
   itemsRestrictions,
+  control,
 }: ArrayWidgetProps): ReactElement => {
-  const [viewForm, setViewForm] = useState<boolean>(true);
+  const [isRawModalOpen, setIsRawModalOpen] = useState(false);
   const [arrayRestrictions] = itemsRestrictions; // [arrayRestrictions, objectBlueprint, arrayBlueprint]
 
   return (
-    <Accordion defaultExpanded>
-      <AccordionHeader
-        title={sectionTitle}
-        viewForm={viewForm}
-        viewFormToggle={() => setViewForm((v) => !v)}
-      />
-      <AccordionDetails>
-        {viewForm ? (
+    <>
+      <Accordion defaultExpanded>
+        <AccordionHeader title={sectionTitle} showRawViewModal={() => setIsRawModalOpen(true)} />
+        <AccordionDetails>
           <Stack spacing={2}>
             {items.map((item, idx) => (
-              <FormItem
+              <Form
                 key={idx}
                 sectionTitle={`Item #${idx}`}
+                sectionPrefix={`${sectionPrefix}${KEY_SEPARATOR}${idx}`}
                 value={item}
                 restrictions={arrayRestrictions[idx] ?? [[], null, null]}
+                control={control}
               />
             ))}
           </Stack>
-        ) : (
-          <Typography component="pre">{JSON.stringify(items, null, 2)}</Typography>
-        )}
-      </AccordionDetails>
-    </Accordion>
+        </AccordionDetails>
+      </Accordion>
+
+      {isRawModalOpen && (
+        <RawViewModal onClose={() => setIsRawModalOpen(false)} title={sectionTitle} data={items} />
+      )}
+    </>
   );
 };

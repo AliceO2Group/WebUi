@@ -12,68 +12,73 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useState, type FC, type PropsWithChildren } from 'react';
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Stack from '@mui/material/Stack';
-import { AccordionHeader } from './AccordionHeader';
-import { Typography } from '@mui/material';
-import { FormItem } from './FormItem';
+import type { FC } from 'react';
+import { Widget } from './components/Widget';
+import { ArrayWidget } from './components/widgets/ArrayWidget';
+import type {
+  ArrayRestrictions,
+  FormArrayValue,
+  FormObjectValue,
+  FormPrimitiveValue,
+  FormValue,
+  ObjectRestrictions,
+  Restrictions,
+} from './types';
+import { isArrayRestrictions, isObjectRestrictions } from './types/helpers';
+import { ObjectWidget } from './components/widgets/ObjectWidget';
+import type { Control } from 'react-hook-form';
+import type { InputsType } from '~/routes/configuration';
+import { KEY_SEPARATOR } from './constants';
 
-export type FormValue = FormPrimitiveValue | FormArrayValue | FormObjectValue;
-
-export type FormPrimitiveValue = string | number | boolean;
-
-export type FormArrayValue = Array<FormValue>;
-
-export type FormObjectValue = { [key: string]: FormValue };
-
-export type PrimitiveRestrictions = 'string' | 'number' | 'boolean';
-
-export type ArrayRestrictions = [
-  Array<Restrictions>,
-  ObjectRestrictions | null, // Restrictions for an object directly in the array
-  ArrayRestrictions | null, // ArrayRestrictions for a directly nested array
-];
-
-export type ObjectRestrictions = {
-  [key: string]: Restrictions;
-};
-
-export type Restrictions = PrimitiveRestrictions | ArrayRestrictions | ObjectRestrictions;
-
-interface FormProps extends PropsWithChildren {
+interface FormProps {
   sectionTitle: string;
-  items: FormObjectValue;
-  itemsRestrictions: ObjectRestrictions;
+  sectionPrefix: string;
+  value: FormValue;
+  restrictions: Restrictions | ObjectRestrictions | ArrayRestrictions;
+  control: Control<InputsType>;
 }
 
-export const Form: FC<FormProps> = ({ sectionTitle, items, itemsRestrictions }) => {
-  const [viewForm, setViewForm] = useState<boolean>(true);
+export const Form: FC<FormProps> = ({
+  sectionTitle,
+  sectionPrefix,
+  value,
+  restrictions,
+  control,
+}) => {
+  if (isObjectRestrictions(restrictions)) {
+    return (
+      <ObjectWidget
+        key={sectionTitle}
+        sectionTitle={sectionTitle}
+        sectionPrefix={`${sectionPrefix}${KEY_SEPARATOR}${sectionTitle}`}
+        items={value as FormObjectValue}
+        itemsRestrictions={restrictions}
+        control={control}
+      />
+    );
+  }
+
+  if (isArrayRestrictions(restrictions)) {
+    return (
+      <ArrayWidget
+        key={sectionTitle}
+        sectionTitle={sectionTitle}
+        sectionPrefix={`${sectionPrefix}${KEY_SEPARATOR}${sectionTitle}`}
+        items={value as Array<FormArrayValue>}
+        itemsRestrictions={restrictions}
+        control={control}
+      />
+    );
+  }
 
   return (
-    <Accordion defaultExpanded>
-      <AccordionHeader
-        title={sectionTitle}
-        viewForm={viewForm}
-        viewFormToggle={() => setViewForm((v) => !v)}
-      />
-      <AccordionDetails>
-        {viewForm ? (
-          <Stack spacing={2}>
-            {Object.entries(items).map(([key, value]) => (
-              <FormItem
-                key={key}
-                sectionTitle={key}
-                value={value}
-                restrictions={itemsRestrictions[key]}
-              />
-            ))}
-          </Stack>
-        ) : (
-          <Typography component="pre">{JSON.stringify(items, null, 2)}</Typography>
-        )}
-      </AccordionDetails>
-    </Accordion>
+    <Widget
+      key={sectionTitle}
+      label={sectionTitle}
+      sectionPrefix={`${sectionPrefix}${KEY_SEPARATOR}${sectionTitle}`}
+      type={restrictions}
+      value={value as FormPrimitiveValue}
+      control={control}
+    />
   );
 };

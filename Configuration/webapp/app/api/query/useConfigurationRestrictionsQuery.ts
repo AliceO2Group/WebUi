@@ -14,7 +14,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '../axiosInstance';
-import type { ObjectRestrictions } from '~/components/form/Form';
+import type { ObjectRestrictions } from '~/components/form/types';
 
 export const CONFIGURATION_RESTRICTIONS_QUERY_KEY = 'configuration-restrictions';
 
