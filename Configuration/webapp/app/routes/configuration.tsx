@@ -43,6 +43,7 @@ const ConfigurationPage = () => {
     onSubmit,
   } = useConfigurationForm({
     configuration,
+    configurationName,
   });
 
   const { showModal, handleProceed, handleSaveAndProceed, handleCancel } = useUnsavedChangesBlocker(
