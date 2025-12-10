@@ -17,6 +17,7 @@ import { type Token } from '../../types/token';
 
 import { TokenTableProvider } from '../../contexts/token-table';
 import { TokenTableContainer } from './TokenTableContainer';
+import { TokenFiltersProvider } from '../../contexts/token-filters';
 
 // Common columns for all table variants
 const columns = [
@@ -60,7 +61,9 @@ interface TokenTableProps {
 export function TokenTable({ tokens, setTokens }: TokenTableProps) {
   // Delegate to container; TokenTableContainer will call onRequestAction internally via same ActionBlock usage pattern.
   return <TokenTableProvider>
-    <TokenTableContainer tokens={tokens} setTokens={setTokens} columns={columns} />
+    <TokenFiltersProvider>
+      <TokenTableContainer tokens={tokens} setTokens={setTokens} columns={columns} />
+    </TokenFiltersProvider>
   </TokenTableProvider>;
 }
 

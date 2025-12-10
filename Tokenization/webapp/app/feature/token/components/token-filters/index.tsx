@@ -25,12 +25,6 @@ import { TokenFiltersFirstRow,
 import { Form } from '~/shared/components/form/form';
 import useForm from '~/shared/components/form/hooks/useForm';
 
-const _applyFilters = ({ services, ...filterStates }: any) => {
-  // eslint-disable-next-line no-console
-  console.log('Applying filters with state:', filterStates);
-  setStorageItem('TKN_token-filters', filterStates);
-};
-
 /**
  * TokenFilters
  *
@@ -84,6 +78,7 @@ export function TokenFilters({
       setData((fetcher.data as any).tokens);
     }
   }, [fetcher.state, fetcher.data, setData, setFiltered]);
+
 
   return <div>
     <Form submitRef={ref} fetcher={fetcher} action='/tokens/filter'>

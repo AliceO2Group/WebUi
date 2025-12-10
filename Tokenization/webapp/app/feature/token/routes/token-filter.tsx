@@ -51,6 +51,9 @@ export async function clientAction({ request }: any) {
       normalized[k] = tryParse(v);
     }
   }
+  
+  // eslint-disable-next-line no-console
+  console.log('Filtering tokens with data:', normalized);
 
   // Remove empty values.
   const isEmptyValue = (v: any) => {

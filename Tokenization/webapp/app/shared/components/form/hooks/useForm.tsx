@@ -28,7 +28,7 @@ export default function useForm() {
   const fetcher = useFetcher();
   const ref = useRef<HTMLButtonElement>(null);
   const submit = useCallback((extraData?: object) => {
-    const fd = new FormData(ref.current?.form ?? undefined);
+    const fd = new FormData(ref.current?.closest('form') ?? undefined);
     if (extraData) {
       Object.entries(extraData).forEach(([key, value]) => {
         fd.append(key, value as string);
