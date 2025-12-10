@@ -17,7 +17,7 @@ import type { InputsType } from '~/routes/configuration';
 import { useForm, type KeepStateOptions, type SubmitHandler } from 'react-hook-form';
 import { getDefaultValuesFromConfigObject } from '~/components/form/utils/getDefaultValuesFromConfigObject';
 import { useLocation } from 'react-router';
-import type { FormItem } from '~/components/form/Form';
+import type { FormValue } from '~/components/form/types';
 
 const RESET_PROPS: KeepStateOptions = { keepDirty: false };
 
@@ -30,7 +30,7 @@ const RESET_PROPS: KeepStateOptions = { keepDirty: false };
 export const useConfigurationForm = ({
   configuration,
 }: {
-  configuration: FormItem | undefined;
+  configuration: FormValue | undefined;
 }) => {
   const { pathname } = useLocation();
 
