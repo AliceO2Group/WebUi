@@ -14,9 +14,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '../axiosInstance';
-import type { FormItem } from '~/components/form/Form';
 import { CONFIGURATION_QUERY_KEY } from '../query/useConfigurationQuery';
 import { CONFIGURATION_RESTRICTIONS_QUERY_KEY } from '../query/useConfigurationRestrictionsQuery';
+import type { FormValue } from '~/components/form/types';
 
 /**
  * useConfigurationMutation hook
@@ -28,8 +28,8 @@ export const useConfigurationMutation = (configurationName: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (configuration: FormItem) => {
-      const response = await axiosInstance.put<FormItem>(
+    mutationFn: async (configuration: FormValue) => {
+      const response = await axiosInstance.put<FormValue>(
         `configurations/${configurationName}`,
         JSON.stringify({ configuration }),
       );

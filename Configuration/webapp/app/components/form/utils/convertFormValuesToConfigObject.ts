@@ -13,20 +13,20 @@
  */
 
 import { KEY_SEPARATOR } from '../constants';
-import type { FormItem } from '../Form';
 import type { InputsType } from '~/routes/configuration';
+import type { FormObjectValue, FormValue } from '../types';
 
 /**
  * Convert flat form values back to nested configuration object format.
  * @param {InputsType} formValues - The flat form values with prefixed keys.
  * @param {string} prefix - The prefix to remove from keys (e.g., '/configuration').
- * @returns {FormItem} The nested configuration object.
+ * @returns {FormValue} The nested configuration object.
  */
 export const convertFormValuesToConfigObject = (
   formValues: InputsType,
   prefix: string,
-): FormItem => {
-  const result: FormItem = {};
+): FormValue => {
+  const result: FormValue = {};
 
   for (const [key, value] of Object.entries(formValues)) {
     if (!key.startsWith(prefix)) {
@@ -54,7 +54,7 @@ export const convertFormValuesToConfigObject = (
       if (!(currentKey in current) || typeof current[currentKey] !== 'object') {
         current[currentKey] = {};
       }
-      current = current[currentKey] as FormItem;
+      current = current[currentKey] as FormObjectValue;
     }
 
     const finalKey = keys[keys.length - 1];
