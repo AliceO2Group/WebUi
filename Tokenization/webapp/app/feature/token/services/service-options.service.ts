@@ -12,19 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
- .container {
-    display: grid;
-    grid-template-rows: 1fr 3fr 1.3fr;
-    grid-template-columns: 0.575fr 3fr; 
-}
+import { mockServices } from '~/feature/token/mocks/services.mock';
 
-.header-1 {
-    justify-self: stretch;
-    grid-column: span 2;
+/**
+ * Placeholder service returning a mocked list of available services until the
+ * real backend endpoint is available.
+ */
+export async function fetchAvailableServices(): Promise<string[]> {
+  return Promise.resolve([...mockServices]);
 }
-
-.sidebar-1 {
-    border-radius: 2% 0 0 2% ;
-    grid-row: span 2;
-}
-

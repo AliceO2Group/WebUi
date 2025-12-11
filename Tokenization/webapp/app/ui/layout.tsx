@@ -13,10 +13,10 @@
  */
 
 import { Outlet, useNavigation } from 'react-router';
-import { useState } from 'react';
+import Box from '@mui/material/Box';
+import CssBaseline from '@mui/material/CssBaseline';
 
-import { AppHeader } from './header/header';
-import { HeaderContext } from './header/headerContext';
+import { AppHeader } from './header';
 import { AppSidebar } from './sidebar';
 import { Spinner } from './spinner';
 
@@ -24,21 +24,21 @@ import { Spinner } from './spinner';
  * Component provides main layout for the application
  * Uses useNavigation state to check if page is loaded
  */
-export default function Layout() {
-  const { state }  = useNavigation();
+const SIDEBAR_WIDTH = 240;
 
-  const [headerContent, setHeaderContent] = useState<string>('Tokenization Admin Interface');
+export default function Layout() {
+  const { state } = useNavigation();
 
   return (
-    <HeaderContext.Provider value={{ setHeaderContent }}>
-      <div className='container'>
-        <AppHeader headerContent={headerContent}/>
-        <AppSidebar />
-        <div id="content" className="bg-gray" style={{ gridRow: 'span 2', width: '95.3%' }}>
-          {state === 'loading' ? <Spinner /> : <Outlet/>}
-        </div>
-      </div>
-    </HeaderContext.Provider>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'grey.100' }}>
+      <CssBaseline />
+      <AppSidebar width={SIDEBAR_WIDTH} />
+      <Box component="section" sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <AppHeader />
+        <Box component="main" sx={{ flex: 1, p: 4, overflow: 'auto' }}>
+          {state === 'loading' ? <Spinner /> : <Outlet />}
+        </Box>
+      </Box>
+    </Box>
   );
-
 }

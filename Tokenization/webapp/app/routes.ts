@@ -18,8 +18,19 @@ export default [
   route('', 'ui/layout.tsx', [
     index('routes/home.tsx'),
     ...prefix('tokens', [
-      index('routes/tokens/overview.tsx'),
-      route(':tokenId', 'routes/tokens/details.tsx'),
+      route('active','feature/token/routes/overview.tsx'),
+      route('archived','feature/token/routes/archived.tsx'),
+      route(':id','feature/token/routes/details.tsx'),
+    ]),
+    ...prefix('services', [
+      route('active','feature/service/routes/overview.tsx'),
+      route('new','feature/service/routes/registration.tsx'),
+      route(':id','feature/service/routes/details.tsx'),
+    ]),
+    ...prefix('routes', [
+      route('overview','feature/service-routes/routes/overview.tsx'),
+      route('mapping','feature/service-routes/routes/mapping.tsx'),
+      route(':id','feature/service-routes/routes/details.tsx'),
     ]),
     route('*', 'routes/404.tsx'),
   ]),

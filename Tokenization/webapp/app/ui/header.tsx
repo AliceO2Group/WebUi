@@ -12,9 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Link } from 'react-router';
-
-import { IconHome, IconCog } from '../icon';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
 
 /**
  * AppHeader
@@ -23,25 +23,26 @@ import { IconHome, IconCog } from '../icon';
  * @param headerContent.headerContent
  * @param headerContent Optional string to display as the header title.
  */
-export function AppHeader({ headerContent }: { headerContent?: string }) {
+type AppHeaderProps = {
+  title?: string;
+};
+
+export function AppHeader({ title = 'Tokenization System' }: AppHeaderProps) {
   return (
-    <div className={'flex-row justify-center mv4 g4 header-1'}>
-
-      <Link to="/">
-        <div className="mv4 mh4" style={{ transform: 'scale(2.5)' }}>
-          <IconHome/>
-        </div>
-      </Link>
-      <Link to="/settings">
-        <div className="mv4 mh4" style={{ transform: 'scale(2.5)' }}>
-          <IconCog />
-        </div>
-      </Link>
-
-      <header className="bg-gray flex-row justify-end w-80 ph3">
-        <h1>{headerContent ?? 'Tokenization Admin Interface'}</h1>
-      </header>
-
-    </div>
+    <AppBar
+      position="static"
+      elevation={0}
+      color="inherit"
+      sx={{
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+      }}
+    >
+      <Toolbar sx={{ minHeight: 64, px: 4 }}>
+        <Typography variant="h6" color="text.primary" sx={{ fontWeight: 600 }}>
+          {title}
+        </Typography>
+      </Toolbar>
+    </AppBar>
   );
 }

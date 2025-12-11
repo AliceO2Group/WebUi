@@ -12,16 +12,23 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Link } from 'react-router';
+import TextField from '@mui/material/TextField';
+import { styled } from '@mui/material/styles';
 
-/**
- * Home page component for the Tokenization Admin Interface.
- * Sets the page header and provides navigation to the tokens overview.
- */
-export default function Home() {
-  return <>
-    <h1>Welcome to (dummy) Tokenization GUI!</h1>
-    <Link to={'/tokens'}>Tokens overview</Link>
-
-  </>;
-}
+export const StaticTextField = styled(TextField)(({ theme }) => ({
+  '& .MuiInputLabel-root': {
+    transition: 'none',
+  },
+  '& .MuiOutlinedInput-root': {
+    transition: 'none',
+    '& fieldset': {
+      transition: 'none',
+    },
+    '&:hover fieldset': {
+      borderColor: theme.palette.text.primary,
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.primary.main,
+    },
+  },
+}));
