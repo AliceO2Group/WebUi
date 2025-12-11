@@ -99,7 +99,7 @@ if [ -n "${VAULT_TOKEN:-}" ]; then
   vault secrets enable -path=tokenization kv-v2 2>/dev/null || echo "[vault-setup] tokenization kv-v2 already enabled"
 
   echo "[vault-setup] Creating transit key for tokenization..."
-  vault write transit/keys/tokenization-signing type="rsa-2048" 2>/dev/null || echo "[vault-setup] transit key already exists"
+  vault write transit/keys/tokenization-signing type="ed25519" 2>/dev/null || echo "[vault-setup] transit key already exists"
 
   echo "[vault-setup] Creating central-system policy..."
   vault policy write central-system - <<EOF
