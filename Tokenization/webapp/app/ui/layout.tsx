@@ -26,6 +26,9 @@ import { Spinner } from './spinner';
  */
 const SIDEBAR_WIDTH = 240;
 
+/**
+ * Layout route component that defines the overall structure of the application,
+ */
 export default function Layout() {
   const { state } = useNavigation();
 

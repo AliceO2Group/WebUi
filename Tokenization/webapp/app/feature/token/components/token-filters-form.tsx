@@ -17,50 +17,55 @@
  * It relies on react-hook-form for state management and exposes the current
  * values via the onFiltersChange callback whenever inputs update.
  */
-import { useEffect } from 'react';
+import { useCallback, useState } from 'react';
 import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
 import { styled } from '@mui/material/styles';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, type Control, useForm } from 'react-hook-form';
 
+import { useTokenServiceOptionsQuery } from '~/feature/token/api/queries';
 import { FormMultiSelectField } from '~/shared/components/form/multi-select-field';
 import { StaticTextField } from '~/shared/components/form/styled-text-field';
+import { OrderingControl, type OrderingOption } from '~/shared/components/order/ordering-control';
+import { TOKEN_FILTER_DEFAULTS, type TokenFilterValues } from '~/feature/token/types/token-filters';
+import { useDebouncedValue } from '~/shared/hooks/useDebouncedValue';
 
-export type TokenFilterValues = {
-  serviceFrom: string[];
-  serviceTo: string[];
-  issuer: string;
-  tokenId: string;
-};
-
-export const TOKEN_FILTER_DEFAULTS: TokenFilterValues = {
-  serviceFrom: [],
-  serviceTo: [],
-  issuer: '',
-  tokenId: '',
-};
+const ORDERING_OPTIONS: OrderingOption[] = [
+  { value: 'iat', label: 'Issue date' },
+  { value: 'exp', label: 'Expiration date' },
+  { value: 'tokenId', label: 'Token ID' },
+];
 
 type TokenFiltersFormProps = {
-  issuers: string[];
-  serviceOptions: string[];
-  loadingServices?: boolean;
   onFiltersChange: (values: TokenFilterValues) => void;
 };
 
+type ServiceFieldName = 'serviceFrom' | 'serviceTo';
+type DateFieldName = 'issuedAfter' | 'issuedBefore' | 'expiresAfter' | 'expiresBefore';
+
+const SERVICE_FILTER_MIN_CHARS = 2;
+const SERVICE_FILTER_DEBOUNCE_MS = 300;
+
+const SERVICE_FILTERS: Array<{ name: ServiceFieldName; label: string; placeholder: string }> = [
+  { name: 'serviceFrom', label: 'Service from', placeholder: 'Service From' },
+  { name: 'serviceTo', label: 'Service to', placeholder: 'Service To' },
+];
+
+const DATE_FILTERS: Array<{ name: DateFieldName; label: string }> = [
+  { name: 'issuedAfter', label: 'Issue date from' },
+  { name: 'issuedBefore', label: 'Issue date to' },
+  { name: 'expiresAfter', label: 'Expiration from' },
+  { name: 'expiresBefore', label: 'Expiration to' },
+];
+
+/**
+ *
+ */
 export function TokenFiltersForm({
-  issuers,
-  serviceOptions,
-  loadingServices = false,
   onFiltersChange,
 }: TokenFiltersFormProps) {
-  const { control, reset, watch, getValues } = useForm<TokenFilterValues>({
+  const { control, reset, getValues } = useForm<TokenFilterValues>({
     defaultValues: TOKEN_FILTER_DEFAULTS,
   });
-
-  useEffect(() => {
-    const subscription = watch((values) => onFiltersChange(values as TokenFilterValues));
-    return () => subscription.unsubscribe();
-  }, [watch, onFiltersChange]);
 
   const handleReset = () => {
     reset(TOKEN_FILTER_DEFAULTS, { keepDefaultValues: true });
@@ -72,68 +77,138 @@ export function TokenFiltersForm({
 
   return (
     <FiltersFormLayout onSubmit={(event) => event.preventDefault()}>
-      <FiltersField>
-        <FormMultiSelectField
-          control={control}
-          name="serviceFrom"
-          label="Service from"
-          options={serviceOptions}
-          loading={loadingServices}
-          placeholder="Select producer services"
-        />
-      </FiltersField>
-      <FiltersField>
-        <FormMultiSelectField
-          control={control}
-          name="serviceTo"
-          label="Service to"
-          options={serviceOptions}
-          loading={loadingServices}
-          placeholder="Select consumer services"
-        />
-      </FiltersField>
-      <FiltersField>
-        <Controller
-          control={control}
-          name="issuer"
-          render={({ field }) => (
-            <StaticTextField
-              {...field}
-              select
-              label="Issuer"
-              fullWidth
-            >
-              <MenuItem value="">All issuers</MenuItem>
-              {issuers.map((issuer) => (
-                <MenuItem key={issuer} value={issuer}>{issuer}</MenuItem>
-              ))}
-            </StaticTextField>
-          )}
-        />
-      </FiltersField>
-      <FiltersField>
-        <Controller
-          control={control}
-          name="tokenId"
-          render={({ field }) => (
-            <StaticTextField
-              {...field}
-              label="Token ID"
-              placeholder="e.g. tok_1234"
-              fullWidth
-            />
-          )}
-        />
-      </FiltersField>
-      <FiltersActions>
-        <Button type="button" variant="outlined" onClick={handleReset}>
-          Reset
-        </Button>
-        <Button type="button" variant="contained" onClick={handleApply}>
-          Apply
-        </Button>
-      </FiltersActions>
+      <ServicesFilters control={control} />
+
+      <DatesFilters control={control} />
+
+      <FooterRow>
+        <OrderingSection control={control} />
+        <FiltersActionsContainer>
+          <Button type="button" variant="outlined" onClick={handleReset}>
+            Reset
+          </Button>
+          <Button type="button" variant="contained" onClick={handleApply}>
+            Apply
+          </Button>
+        </FiltersActionsContainer>
+      </FooterRow>
     </FiltersFormLayout>
+  );
+}
+
+type ServicesFiltersProps = {
+  control: Control<TokenFilterValues>;
+};
+
+/**
+ *
+ */
+function ServicesFilters({ control }: ServicesFiltersProps) {
+  const [searchValues, setSearchValues] = useState<Record<ServiceFieldName, string>>({
+    serviceFrom: '',
+    serviceTo: '',
+  });
+
+  const debouncedSearchValues = {
+    serviceFrom: useDebouncedValue(searchValues.serviceFrom, SERVICE_FILTER_DEBOUNCE_MS),
+    serviceTo: useDebouncedValue(searchValues.serviceTo, SERVICE_FILTER_DEBOUNCE_MS),
+  };
+
+  const serviceFromQuery = useTokenServiceOptionsQuery({
+    searchTerm: debouncedSearchValues.serviceFrom,
+    enabled: debouncedSearchValues.serviceFrom.length >= SERVICE_FILTER_MIN_CHARS,
+  });
+  const serviceToQuery = useTokenServiceOptionsQuery({
+    searchTerm: debouncedSearchValues.serviceTo,
+    enabled: debouncedSearchValues.serviceTo.length >= SERVICE_FILTER_MIN_CHARS,
+  });
+
+  const queryByField: Record<ServiceFieldName, typeof serviceFromQuery> = {
+    serviceFrom: serviceFromQuery,
+    serviceTo: serviceToQuery,
+  };
+
+  const handleInputValueChange = useCallback((field: ServiceFieldName, value: string) => {
+    setSearchValues((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  return (
+    <ServicesRow>
+      {SERVICE_FILTERS.map(({ name, label, placeholder }) => (
+        <FiltersField key={name}>
+          <FormMultiSelectField
+            control={control}
+            name={name}
+            label={label}
+            options={queryByField[name].data ?? []}
+            loading={queryByField[name].isFetching}
+            placeholder={placeholder}
+            minSearchLength={SERVICE_FILTER_MIN_CHARS}
+            inputValue={searchValues[name]}
+            onInputValueChange={(value) => handleInputValueChange(name, value)}
+          />
+        </FiltersField>
+      ))}
+    </ServicesRow>
+  );
+}
+
+type DatesFiltersProps = {
+  control: Control<TokenFilterValues>;
+};
+
+/**
+ *
+ */
+function DatesFilters({ control }: DatesFiltersProps) {
+  return (
+    <DatesGrid>
+      {DATE_FILTERS.map(({ name, label }) => (
+        <FiltersField key={name}>
+          <Controller
+            control={control}
+            name={name}
+            render={({ field }) => (
+              <StaticTextField
+                {...field}
+                type="datetime-local"
+                label={label}
+                fullWidth
+                slotProps={{
+                  inputLabel: { shrink: true },
+                }}
+              />
+            )}
+          />
+        </FiltersField>
+      ))}
+    </DatesGrid>
+  );
+}
+
+type OrderingSectionProps = {
+  control: Control<TokenFilterValues>;
+};
+
+/**
+ *
+ */
+function OrderingSection({ control }: OrderingSectionProps) {
+  return (
+    <OrderingField>
+      <Controller
+        control={control}
+        name="ordering"
+        render={({ field }) => (
+          <OrderingControl
+            label="Ordering"
+            options={ORDERING_OPTIONS}
+            value={field.value ?? []}
+            onChange={field.onChange}
+          />
+        )}
+      />
+    </OrderingField>
   );
 }
 
@@ -145,6 +220,37 @@ const FiltersFormLayout = styled('form')(({ theme }) => ({
   alignItems: 'flex-start',
   [theme.breakpoints.down('md')]: {
     flexDirection: 'column',
+  },
+}));
+
+const ServicesRow = styled('div')(({ theme }) => ({
+  display: 'grid',
+  width: '100%',
+  gap: theme.spacing(2),
+  gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+}));
+
+const DatesGrid = styled('div')(({ theme }) => ({
+  display: 'grid',
+  width: '100%',
+  gap: theme.spacing(2),
+  gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+}));
+
+const FooterRow = styled('div')(({ theme }) => ({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+  gap: theme.spacing(2),
+  width: '100%',
+  alignItems: 'flex-start',
+}));
+
+const OrderingField = styled('div')(({ theme }) => ({
+  width: '100%',
+  minWidth: 0,
+  display: 'flex',
+  '& > *': {
+    width: '100%',
   },
 }));
 
@@ -161,8 +267,11 @@ const FiltersField = styled('div')(({ theme }) => ({
   },
 }));
 
-const FiltersActions = styled('div')(({ theme }) => ({
+const FiltersActionsContainer = styled('div')(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing(1),
-  minWidth: 160,
+  minWidth: 0,
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  flexWrap: 'wrap',
 }));

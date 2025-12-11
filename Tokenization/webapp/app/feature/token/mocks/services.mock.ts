@@ -12,8 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
-import { mockTokens } from './tokens.mock';
 
-export const mockServices = Array.from(
-  new Set(mockTokens.flatMap((token) => [token.serviceFrom, token.serviceTo]))
-).sort();
+export const mockServices = [
+    'Service One',
+    'Service Two',
+    'Service Three',
+    'Service Four',
+]

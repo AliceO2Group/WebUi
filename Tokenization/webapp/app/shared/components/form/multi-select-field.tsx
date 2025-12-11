@@ -17,6 +17,7 @@
  * Supports rendering any list of string options, displays a loading indicator, and
  * emits value changes back into the provided form control.
  */
+import { useMemo, useState } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Controller } from 'react-hook-form';
@@ -28,53 +29,83 @@ export type FormMultiSelectFieldProps<TFieldValues extends FieldValues> = {
   control: Control<TFieldValues>;
   name: FieldPath<TFieldValues>;
   label: string;
-  options: string[];
+  options?: string[];
   loading?: boolean;
   placeholder?: string;
   className?: string;
+  minSearchLength?: number;
+  inputValue?: string;
+  onInputValueChange?: (value: string) => void;
 };
 
 export const FormMultiSelectField = <TFieldValues extends FieldValues>({
   control,
   name,
   label,
-  options,
+  options = [],
   loading = false,
   placeholder,
   className,
-}: FormMultiSelectFieldProps<TFieldValues>) => (
-  <Controller
-    control={control}
-    name={name}
-    render={({ field }) => (
-      <Autocomplete
-        multiple
-        options={options}
-        value={field.value ?? []}
-        onChange={(_, value) => field.onChange(value)}
-        filterSelectedOptions
-        loading={loading}
-        className={className}
-        renderInput={(params) => (
-          <StaticTextField
-            {...params}
-            label={label}
-            placeholder={placeholder}
-            fullWidth
-            slotProps={{
-              input: {
-                ...params.InputProps,
-                endAdornment: (
-                  <>
-                    {loading ? <CircularProgress color="inherit" size={16} /> : null}
-                    {params.InputProps.endAdornment}
-                  </>
-                ),
-              },
-            }}
-          />
-        )}
-      />
-    )}
-  />
-);
+  minSearchLength = 0,
+  inputValue: inputValueProp,
+  onInputValueChange,
+}: FormMultiSelectFieldProps<TFieldValues>) => {
+  const [internalInputValue, setInternalInputValue] = useState('');
+  const resolvedInputValue = inputValueProp ?? internalInputValue;
+  const meetsThreshold = resolvedInputValue.length >= minSearchLength;
+  const displayedOptions = useMemo(() => (meetsThreshold ? options : []), [meetsThreshold, options]);
+  const noOptionsText = useMemo(() => {
+    if (!meetsThreshold && minSearchLength > 0) {
+      return `Type at least ${minSearchLength} characters`;
+    }
+    return 'No options';
+  }, [meetsThreshold, minSearchLength]);
+
+  const handleInputChange = (_: unknown, value: string) => {
+    if (onInputValueChange) {
+      onInputValueChange(value);
+    } else {
+      setInternalInputValue(value);
+    }
+  };
+
+  return (
+    <Controller
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <Autocomplete
+          multiple
+          options={displayedOptions}
+          value={field.value ?? []}
+          onChange={(_, value) => field.onChange(value)}
+          filterSelectedOptions
+          loading={loading}
+          className={className}
+          inputValue={resolvedInputValue}
+          onInputChange={handleInputChange}
+          noOptionsText={noOptionsText}
+          renderInput={(params) => (
+            <StaticTextField
+              {...params}
+              label={label}
+              placeholder={placeholder}
+              fullWidth
+              slotProps={{
+                input: {
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {loading ? <CircularProgress color="inherit" size={16} /> : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                },
+              }}
+            />
+          )}
+        />
+      )}
+    />
+  );
+};

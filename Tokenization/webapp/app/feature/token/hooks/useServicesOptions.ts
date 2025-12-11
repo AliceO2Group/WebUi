@@ -12,28 +12,4 @@
  * or submit itself to any jurisdiction.
  */
 
-/**
- * useServicesOptions retrieves service names to feed token filter multi-selects.
- * It tries hitting the /api/services endpoint and falls back to provided seeds
- * if the backend is unavailable.
- */
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-
-import { fetchAvailableServices } from '~/feature/token/services/service-options.service';
-
-export function useServicesOptions(seed: string[] = []) {
-  const initialData = useMemo(
-    () => Array.from(new Set(seed)).sort(),
-    [seed]
-  );
-
-  const { data = initialData, isFetching } = useQuery({
-    queryKey: ['token-service-options'],
-    queryFn: fetchAvailableServices,
-    initialData,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  return { options: data, loading: isFetching };
-}
+export { useTokenServiceOptionsQuery as useServicesOptions } from '~/feature/token/api/queries';

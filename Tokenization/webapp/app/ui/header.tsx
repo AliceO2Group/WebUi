@@ -16,6 +16,10 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 
+type AppHeaderProps = {
+  title?: string;
+};
+
 /**
  * AppHeader
  *
@@ -23,10 +27,6 @@ import Typography from '@mui/material/Typography';
  * @param headerContent.headerContent
  * @param headerContent Optional string to display as the header title.
  */
-type AppHeaderProps = {
-  title?: string;
-};
-
 export function AppHeader({ title = 'Tokenization System' }: AppHeaderProps) {
   return (
     <AppBar

@@ -12,17 +12,18 @@
  * or submit itself to any jurisdiction.
  */
 
-import { mockServices } from '~/feature/token/mocks/services.mock';
+import { useContext } from 'react';
+import { ModalContext, type ModalContextValue } from '~/ui/modal/modal-provider';
 
 /**
- * Placeholder service returning a mocked list of available services until the
- * real backend endpoint is available.
+ * Access the shared modal controls for opening and closing dialogs.
  */
-export async function fetchAvailableServices(searchTerm = ''): Promise<string[]> {
-  const query = searchTerm.trim().toLowerCase();
-  const services = [...mockServices];
-  if (!query) {
-    return services;
+export default function useModal(): ModalContextValue {
+  const ctx = useContext(ModalContext);
+  if (!ctx) {
+    throw new Error('useModal must be used within ModalProvider');
   }
-  return services.filter((service) => service.toLowerCase().includes(query));
+  return ctx;
 }
+
+export type { ModalOptions } from '~/ui/modal/modal-provider';

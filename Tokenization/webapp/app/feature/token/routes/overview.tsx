@@ -1,48 +1,63 @@
-import { useCallback, useMemo, useState } from 'react';
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
+import { useCallback } from 'react';
 import Button from '@mui/material/Button';
-import Collapse from '@mui/material/Collapse';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 
-import { TokenFiltersForm, type TokenFilterValues, TOKEN_FILTER_DEFAULTS } from '~/feature/token/components/token-filters-form';
+import { useTokensQuery } from '~/feature/token/api/queries';
+import { TokenFiltersForm } from '~/feature/token/components/token-filters-form';
 import { TokensTable } from '~/feature/token/components/token-table';
-import { useServicesOptions } from '~/feature/token/hooks/useServicesOptions';
-import { mockTokens } from '~/feature/token/mocks/tokens.mock';
+import { useRevokeActions } from '~/feature/token/hooks/useRevokeActions';
+import { useTokenFiltersPanel } from '~/feature/token/hooks/useTokenFiltersPanel';
+import { hasDataFilters } from '~/feature/token/services/token-filters.service';
 import type { Token } from '~/feature/token/types/token';
 
-const issuers = Array.from(new Set(mockTokens.map((token) => token.issuer))).sort();
-const serviceSeeds = Array.from(new Set(
-  mockTokens.flatMap((token) => [token.serviceFrom, token.serviceTo])
-));
-
+/**
+ *
+ */
 export default function TokensOverviewRoute() {
-  const [filters, setFilters] = useState<TokenFilterValues>(TOKEN_FILTER_DEFAULTS);
-  const [filtersOpen, setFiltersOpen] = useState(true);
-  const { options: serviceOptions, loading: servicesLoading } = useServicesOptions(serviceSeeds);
+  const {
+    filtersOpen,
+    toggleFiltersPanel,
+    appliedFilters,
+    handleFiltersChange,
+  } = useTokenFiltersPanel();
+  const tokensQuery = useTokensQuery({
+    filters: appliedFilters,
+  });
+  const { confirmRevoke, confirmBulkRevoke } = useRevokeActions();
 
-  const handleFiltersChange = useCallback((values: TokenFilterValues) => {
-    setFilters(values);
-  }, []);
+  const tokensData = tokensQuery.data?.tokens ?? [];
+  const hasValidationError = Boolean(tokensQuery.data?.validationErr);
+  const hasActiveFilters = Boolean(appliedFilters && hasDataFilters(appliedFilters));
+  const isFiltered = hasActiveFilters && !hasValidationError;
+  const canBulkRevoke = isFiltered;
 
-  const toggleFiltersPanel = useCallback(() => {
-    setFiltersOpen((prev) => !prev);
-  }, []);
+  const handleRevoke = useCallback((token: Token) => {
+    confirmRevoke(token);
+  }, [confirmRevoke]);
 
-  const filteredTokens = useMemo(() =>
-    mockTokens.filter((token) => {
-      const serviceFromMatch = filters.serviceFrom.length === 0 || filters.serviceFrom.includes(token.serviceFrom);
-      const serviceToMatch = filters.serviceTo.length === 0 || filters.serviceTo.includes(token.serviceTo);
-      const issuerMatch = !filters.issuer || token.issuer === filters.issuer;
-      const tokenIdMatch = !filters.tokenId || token.tokenId.includes(filters.tokenId);
-      return serviceFromMatch && serviceToMatch && issuerMatch && tokenIdMatch;
-    }),
-  [filters]);
-
-  const handleRevoke = useCallback((_token: Token) => {
-    // TODO: wire with revoke mutation once backend is ready
-  }, []);
+  const handleBulkRevoke = useCallback(() => {
+    if (!canBulkRevoke || !appliedFilters) {
+      return;
+    }
+    confirmBulkRevoke(appliedFilters);
+  }, [canBulkRevoke, appliedFilters, confirmBulkRevoke]);
 
   return (
     <Stack spacing={3}>
@@ -53,22 +68,21 @@ export default function TokensOverviewRoute() {
             {filtersOpen ? 'Hide' : 'Show'}
           </Button>
         </FiltersHeader>
-        <Collapse in={filtersOpen} timeout="auto" unmountOnExit>
+        {filtersOpen ? (
           <FiltersBody>
             <TokenFiltersForm
-              issuers={issuers}
-              serviceOptions={serviceOptions}
-              loadingServices={servicesLoading}
               onFiltersChange={handleFiltersChange}
             />
           </FiltersBody>
-        </Collapse>
+        ) : null}
       </FiltersCard>
 
       <TokensTable
-        tokens={filteredTokens}
-        totalCount={mockTokens.length}
+        tokens={tokensData}
+        totalCount={tokensData.length}
         onRevoke={handleRevoke}
+        onBulkRevoke={handleBulkRevoke}
+        bulkRevokeDisabled={!canBulkRevoke}
       />
     </Stack>
   );

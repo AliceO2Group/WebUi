@@ -33,12 +33,12 @@ const NAV_SECTIONS: SidebarSection[] = [
   {
     title: 'Tokens',
     items: [
-      { 
-        label: 'Active Tokens', 
-        path: '/tokens/active',  
+      {
+        label: 'Active Tokens',
+        path: '/tokens/active',
       },
-      { 
-        label: 'Archived Tokens', 
+      {
+        label: 'Archived Tokens',
         path: '/tokens/archived',
       },
     ],
@@ -48,23 +48,23 @@ const NAV_SECTIONS: SidebarSection[] = [
     items: [
       {
         label: 'Service Overview',
-        path: '/services/active',
+        path: '/services/overview',
       }, {
         label: 'Service Registration',
-        path: '/services/new'
-      }
+        path: '/services/new',
+      },
     ],
   },
   {
     title: 'Routes',
     items: [
-      { 
-        label: 'Routes Overview', 
-        path: '/routes/overview'
+      {
+        label: 'Routes Overview',
+        path: '/routes/overview',
       },
-      { 
-        label: 'Service Mapping', 
-        path: '/routes/services' 
+      {
+        label: 'Service Mapping',
+        path: '/routes/services',
       },
     ],
   },

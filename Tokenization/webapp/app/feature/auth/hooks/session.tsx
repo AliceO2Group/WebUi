@@ -52,15 +52,15 @@ export function useSession() {
  *
  * @example
  * ```tsx
- * const hasAdminAccess = useAuth('admin');
- * const canEditTokens = useAuth('token-editor');
+ * const hasAdminAccess = useAuth();
+ * const hasUserAccess = useAuth('user'); // if needed anytime
  *
  * if (hasAdminAccess) {
  *   // Render admin-only content
  * }
  * ```
  */
-export function useAuth(role: string) {
+export function useAuth(role: string = 'admin') {
   const obj = useContext(SessionContext);
   if (!obj) {
     throw new Error('Session wasnt created');

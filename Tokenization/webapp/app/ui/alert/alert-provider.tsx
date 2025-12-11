@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useMemo, useState, type ReactNode } from 'react';
 import Alert from '@mui/material/Alert';
 import type { AlertColor } from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
@@ -34,17 +34,16 @@ type AlertContextValue = {
   pushAlert: (options: AlertOptions) => void;
 };
 
-
 /**
  * Context for alert management enabling alert display from any component.
  */
-const AlertContext = createContext<AlertContextValue | undefined>(undefined);
+export const AlertContext = createContext<AlertContextValue | undefined>(undefined);
 
 /**
  * Alert provider component to display alerts using MUI Snackbar and Alert components.
- * 
+ *
  * @param props.children - children for provider
- * @returns 
+ * @returns
  */
 export function AlertProvider({ children }: { children: ReactNode }) {
   const [alertState, setAlertState] = useState<AlertState | null>(null);
@@ -84,12 +83,4 @@ export function AlertProvider({ children }: { children: ReactNode }) {
       </Snackbar>
     </AlertContext.Provider>
   );
-}
-
-export function useAlert() {
-  const ctx = useContext(AlertContext);
-  if (!ctx) {
-    throw new Error('useAlert must be used within AlertProvider');
-  }
-  return ctx.pushAlert;
 }

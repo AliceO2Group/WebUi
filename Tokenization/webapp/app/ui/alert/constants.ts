@@ -12,17 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
-import { mockServices } from '~/feature/token/mocks/services.mock';
+import type { AlertOptions } from './alert-provider';
 
-/**
- * Placeholder service returning a mocked list of available services until the
- * real backend endpoint is available.
- */
-export async function fetchAvailableServices(searchTerm = ''): Promise<string[]> {
-  const query = searchTerm.trim().toLowerCase();
-  const services = [...mockServices];
-  if (!query) {
-    return services;
-  }
-  return services.filter((service) => service.toLowerCase().includes(query));
-}
+export const AUTH_ERROR_ALERT: AlertOptions = {
+  message: 'Authorization error',
+  severity: 'error',
+  autoHideDuration: 8000,
+};

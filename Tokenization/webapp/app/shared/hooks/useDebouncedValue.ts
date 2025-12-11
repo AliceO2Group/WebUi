@@ -12,17 +12,24 @@
  * or submit itself to any jurisdiction.
  */
 
-import { mockServices } from '~/feature/token/mocks/services.mock';
+import { useEffect, useState } from 'react';
 
 /**
- * Placeholder service returning a mocked list of available services until the
- * real backend endpoint is available.
+ * Returns a debounced version of the provided value that only updates
+ * after the specified delay has elapsed without changes.
+ * 
+ * Similar utility gives lodash with its `_.debounce` function
+ * 
  */
-export async function fetchAvailableServices(searchTerm = ''): Promise<string[]> {
-  const query = searchTerm.trim().toLowerCase();
-  const services = [...mockServices];
-  if (!query) {
-    return services;
-  }
-  return services.filter((service) => service.toLowerCase().includes(query));
+export function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handle = setTimeout(() => setDebouncedValue(value), delay);
+    return () => {
+      clearTimeout(handle);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
 }

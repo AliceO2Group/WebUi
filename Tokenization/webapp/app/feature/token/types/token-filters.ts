@@ -12,17 +12,24 @@
  * or submit itself to any jurisdiction.
  */
 
-import { mockServices } from '~/feature/token/mocks/services.mock';
+import type { OrderingRule } from '~/shared/components/order/ordering-control';
 
-/**
- * Placeholder service returning a mocked list of available services until the
- * real backend endpoint is available.
- */
-export async function fetchAvailableServices(searchTerm = ''): Promise<string[]> {
-  const query = searchTerm.trim().toLowerCase();
-  const services = [...mockServices];
-  if (!query) {
-    return services;
-  }
-  return services.filter((service) => service.toLowerCase().includes(query));
-}
+export type TokenFilterValues = {
+  serviceFrom: string[];
+  serviceTo: string[];
+  issuedAfter: string;
+  issuedBefore: string;
+  expiresAfter: string;
+  expiresBefore: string;
+  ordering: OrderingRule[];
+};
+
+export const TOKEN_FILTER_DEFAULTS: TokenFilterValues = {
+  serviceFrom: [],
+  serviceTo: [],
+  issuedAfter: '',
+  issuedBefore: '',
+  expiresAfter: '',
+  expiresBefore: '',
+  ordering: [],
+};

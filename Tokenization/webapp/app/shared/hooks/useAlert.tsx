@@ -12,17 +12,21 @@
  * or submit itself to any jurisdiction.
  */
 
-import { mockServices } from '~/feature/token/mocks/services.mock';
+import { useContext } from 'react';
+import { AlertContext, type AlertOptions } from '~/ui/alert/alert-provider';
 
 /**
- * Placeholder service returning a mocked list of available services until the
- * real backend endpoint is available.
+ * Hook useAlert to access alert pushing functionality.
+ * @example
+ * const pushAlert = useAlert();
+ * pushAlert({ message: 'This is an alert', severity: 'success' });
+ *
+ * @returns {(options: AlertOptions) => void} Function to push an alert
  */
-export async function fetchAvailableServices(searchTerm = ''): Promise<string[]> {
-  const query = searchTerm.trim().toLowerCase();
-  const services = [...mockServices];
-  if (!query) {
-    return services;
+export function useAlert() {
+  const ctx = useContext(AlertContext);
+  if (!ctx) {
+    throw new Error('useAlert must be used within AlertProvider');
   }
-  return services.filter((service) => service.toLowerCase().includes(query));
+  return ctx.pushAlert;
 }

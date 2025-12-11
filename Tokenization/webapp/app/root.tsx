@@ -25,6 +25,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { SessionProvider } from '~/feature/auth/contexts/sessionContext';
 import { AlertProvider } from '~/ui/alert/alert-provider';
+import { ModalProvider } from '~/ui/modal/modal-provider';
 import { Spinner } from '~/ui/spinner';
 
 import '@aliceo2/web-ui/Frontend/css/src/bootstrap.css';
@@ -54,9 +55,11 @@ export default function App() {
   return (
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
-        <AlertProvider>
-          <Outlet />
-        </AlertProvider>
+        <ModalProvider>
+          <AlertProvider>
+            <Outlet />
+          </AlertProvider>
+        </ModalProvider>
       </QueryClientProvider>
     </SessionProvider>
   );
