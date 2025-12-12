@@ -14,15 +14,18 @@
 
 import { useQuery } from '@tanstack/react-query';
 
+import { fetchServiceById } from '~/feature/service/services/service-details.service';
 import { fetchServices } from '~/feature/service/services/services.service';
 import type { ServiceFilterValues } from '~/feature/service/types/service-filters';
 
 const servicesListKey = ['services', 'list'] as const;
+const serviceDetailsKey = ['services', 'detail'] as const;
 
 export const servicesQueryKeys = {
   all: ['services'] as const,
   lists: servicesListKey,
   list: (filters: ServiceFilterValues | null) => [...servicesListKey, filters] as const,
+  detail: (serviceId: string) => [...serviceDetailsKey, serviceId] as const,
 };
 
 type UseServicesQueryParams = {
@@ -35,5 +38,18 @@ export function useServicesQuery({ filters, enabled = true }: UseServicesQueryPa
     queryKey: servicesQueryKeys.list(filters),
     enabled,
     queryFn: () => fetchServices(filters),
+  });
+}
+
+type UseServiceDetailsQueryParams = {
+  serviceId: string;
+  enabled?: boolean;
+};
+
+export function useServiceDetailsQuery({ serviceId, enabled = true }: UseServiceDetailsQueryParams) {
+  return useQuery({
+    queryKey: servicesQueryKeys.detail(serviceId),
+    enabled,
+    queryFn: () => fetchServiceById(serviceId),
   });
 }

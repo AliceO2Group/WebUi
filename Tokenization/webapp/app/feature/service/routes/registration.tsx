@@ -12,13 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useCallback, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useCallback, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 
-import { uploadServiceCertificate, confirmServiceCertificate } from '~/feature/service/services/certificate-registration.service';
+import { useServiceCertificateConfirmMutation, useServiceCertificateUploadMutation } from '~/feature/service/api/mutations';
 import type { ServiceCertificatePreview } from '~/feature/service/types/certificate';
 import { useAuth } from '~/feature/auth/hooks/session';
 import { useAlert } from '~/shared/hooks/useAlert';
@@ -31,10 +31,18 @@ import useModal from '~/shared/hooks/useModal';
 export default function ServiceRegistrationRoute() {
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [fileError, setFileError] = useState<string | null>(null);
-	const [submitting, setSubmitting] = useState(false);
+	const fileInputRef = useRef<HTMLInputElement | null>(null);
 	const { showModal, hideModal } = useModal();
 	const hasAuth = useAuth();
 	const pushAlert = useAlert();
+	const { mutate: uploadCertificate, isPending: isUploading } = useServiceCertificateUploadMutation();
+	const { mutate: confirmCertificate } = useServiceCertificateConfirmMutation();
+	const clearFileSelection = useCallback(() => {
+		setSelectedFile(null);
+		if (fileInputRef.current) {
+			fileInputRef.current.value = '';
+		}
+	}, []);
 
 	const finalizeRegistration = useCallback(async (certificateId: string) => {
 		if (!hasAuth) {
@@ -42,17 +50,18 @@ export default function ServiceRegistrationRoute() {
 			pushAlert(AUTH_ERROR_ALERT);
 			return;
 		}
-		try {
-			await confirmServiceCertificate(certificateId);
-			hideModal();
-			pushAlert({ message: 'Service registered successfully.', severity: 'success' });
-			setSelectedFile(null);
-		} catch (error) {
-			console.error('Failed to confirm service registration', error);
-			hideModal();
-			pushAlert({ message: 'Failed to confirm service registration.', severity: 'error' });
-		}
-	}, [hasAuth, hideModal, pushAlert]);
+		confirmCertificate(certificateId, {
+			onSuccess: () => {
+				hideModal();
+				clearFileSelection();
+				pushAlert({ message: 'Service registered successfully.', severity: 'success' });
+			},
+			onError: () => {
+				hideModal();
+				pushAlert({ message: 'Failed to confirm service registration.', severity: 'error' });
+			},
+		});
+	}, [clearFileSelection, confirmCertificate, hasAuth, hideModal, pushAlert]);
 
 	const openPreviewModal = useCallback((preview: ServiceCertificatePreview) => {
 		showModal({
@@ -67,12 +76,12 @@ export default function ServiceRegistrationRoute() {
 	const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
 		if (!file) {
-			setSelectedFile(null);
+			clearFileSelection();
 			setFileError(null);
 			return;
 		}
 		if (!isSupportedCertificate(file.name)) {
-			setSelectedFile(null);
+			clearFileSelection();
 			setFileError('Only .cert, .crt or .pem files are supported.');
 			return;
 		}
@@ -86,28 +95,26 @@ export default function ServiceRegistrationRoute() {
 			setFileError('Select a certificate file to continue.');
 			return;
 		}
-		setSubmitting(true);
 		showModal({
 			title: 'Validating certificate',
 			confirmLabel: 'Register',
 			cancelLabel: 'Cancel',
 			isLoading: true,
 		});
-		try {
-			if (!hasAuth) {
-				hideModal();
-				pushAlert(AUTH_ERROR_ALERT);
-				return;
-			}
-			const preview = await uploadServiceCertificate(selectedFile);
-			openPreviewModal(preview);
-		} catch (error) {
-			console.error('Failed to upload certificate', error);
+		if (!hasAuth) {
 			hideModal();
-			pushAlert({ message: 'Failed to process certificate file.', severity: 'error' });
-		} finally {
-			setSubmitting(false);
+			pushAlert(AUTH_ERROR_ALERT);
+			return;
 		}
+		uploadCertificate(selectedFile, {
+			onSuccess: (preview) => {
+				openPreviewModal(preview);
+			},
+			onError: () => {
+				hideModal();
+				pushAlert({ message: 'Failed to process certificate file.', severity: 'error' });
+			},
+		});
 	};
 
 	return (
@@ -124,6 +131,7 @@ export default function ServiceRegistrationRoute() {
 								id='cert-upload'
 								accept='.cert,.crt,.pem'
 								onChange={handleFileChange}
+								ref={fileInputRef}
 								hidden
 							/>
 						</Button>
@@ -138,7 +146,7 @@ export default function ServiceRegistrationRoute() {
 							<Typography variant='body2' color='error'>{fileError}</Typography>
 						) : null}
 					</Stack>
-					<Button type='submit' variant='contained' disabled={!selectedFile || submitting}>
+					<Button type='submit' variant='contained' disabled={!selectedFile || isUploading}>
 						Register service
 					</Button>
 				</Stack>
