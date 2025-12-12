@@ -28,6 +28,8 @@ import { StaticTextField } from '~/shared/components/form/styled-text-field';
 import { OrderingControl, type OrderingOption } from '~/shared/components/order/ordering-control';
 import { TOKEN_FILTER_DEFAULTS, type TokenFilterValues } from '~/feature/token/types/token-filters';
 import { useDebouncedValue } from '~/shared/hooks/useDebouncedValue';
+import { hasDataFilters } from '~/feature/token/services/token-filters.service';
+import { useAlert } from '~/shared/hooks/useAlert';
 
 const ORDERING_OPTIONS: OrderingOption[] = [
   { value: 'iat', label: 'Issue date' },
@@ -66,13 +68,21 @@ export function TokenFiltersForm({
   const { control, reset, getValues } = useForm<TokenFilterValues>({
     defaultValues: TOKEN_FILTER_DEFAULTS,
   });
+  const pushAlert = useAlert();
 
   const handleReset = () => {
     reset(TOKEN_FILTER_DEFAULTS, { keepDefaultValues: true });
   };
 
   const handleApply = () => {
-    onFiltersChange(getValues());
+    const values = getValues();
+    const hasOrdering = Boolean(values.ordering && values.ordering.length);
+    const hasFilters = hasDataFilters(values);
+    if (hasOrdering && !hasFilters) {
+      pushAlert({ message: 'Add at least one service or date filter to apply ordering.', severity: 'warning' });
+      return;
+    }
+    onFiltersChange(values);
   };
 
   return (

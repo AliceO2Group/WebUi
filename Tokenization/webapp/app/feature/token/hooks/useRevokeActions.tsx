@@ -23,6 +23,7 @@ import { useAuth } from '~/feature/auth/hooks/session';
 import useModal from '~/shared/hooks/useModal';
 import { useAlert } from '~/shared/hooks/useAlert';
 import { AUTH_ERROR_ALERT } from '~/ui/alert/constants';
+import { validateFiltersForBulk } from '~/feature/token/services/token-filters.service';
 
 /**
  * Provides shared revoke helpers reused across overview and details views.
@@ -50,7 +51,15 @@ export function useRevokeActions() {
           pushAlert(AUTH_ERROR_ALERT);
           return;
         }
-        await revokeTokenMutation.mutateAsync(token.tokenId);
+        revokeTokenMutation.mutate(token.tokenId, {
+          onSuccess: () => {
+            pushAlert({ message: 'Token revoked successfully.', severity: 'success' });
+          },
+          onError: (error) => {
+            console.error('Failed to revoke token', error);
+            pushAlert({ message: 'Failed to revoke token.', severity: 'error' });
+          },
+        });
       },
     });
   }, [hasAuth, pushAlert, revokeTokenMutation, showModal]);
@@ -76,7 +85,20 @@ export function useRevokeActions() {
           pushAlert(AUTH_ERROR_ALERT);
           return;
         }
-        await bulkRevokeMutation.mutateAsync(filters);
+        const validationErr = validateFiltersForBulk(filters);
+        if (validationErr) {
+          pushAlert({ message: validationErr, severity: 'warning' });
+          return;
+        }
+        bulkRevokeMutation.mutate(filters, {
+          onSuccess: () => {
+            pushAlert({ message: 'Tokens revoked successfully.', severity: 'success' });
+          },
+          onError: (error) => {
+            console.error('Failed to revoke tokens', error);
+            pushAlert({ message: 'Failed to revoke tokens.', severity: 'error' });
+          },
+        });
       },
     });
   }, [bulkRevokeMutation, hasAuth, pushAlert, showModal]);

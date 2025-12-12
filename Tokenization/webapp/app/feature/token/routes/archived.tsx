@@ -22,6 +22,7 @@ import { useTokensQuery } from '~/feature/token/api/queries';
 import { TokenFiltersForm } from '~/feature/token/components/token-filters-form';
 import { TokensTable } from '~/feature/token/components/token-table';
 import { useTokenFiltersPanel } from '~/feature/token/hooks/useTokenFiltersPanel';
+import { hasDataFilters } from '~/feature/token/services/token-filters.service';
 
 /**
  *

@@ -14,26 +14,20 @@
 
 import { mockArchivedTokenLogs, mockActiveTokenLogs } from '~/feature/token/mocks/token-logs.mock';
 import { mockTokens } from '~/feature/token/mocks/tokens.mock';
-import { hasDataFilters, validateFiltersForBulk } from '~/feature/token/services/token-filters.service';
 import type { Token, TokenLogEntry, TokenStatus } from '~/feature/token/types/token';
 import type { TokenFilterValues } from '~/feature/token/types/token-filters';
 
 export type TokensQueryResponse = {
   tokens: Token[];
-  validationErr: string | null;
 };
 
 /**
  *
  */
 export async function fetchTokens(filters: TokenFilterValues | null, status?: TokenStatus): Promise<TokensQueryResponse> {
-  const validationErr = filters && !hasDataFilters(filters)
-    ? 'At least one filter is required to fetch tokens.'
-    : null;
   const scopedTokens = status ? mockTokens.filter((token) => token.status === status) : mockTokens;
   return {
     tokens: [...scopedTokens],
-    validationErr,
   };
 }
 
@@ -69,9 +63,5 @@ export async function revokeToken(tokenId: string) {
  *
  */
 export async function revokeTokensBulk(filters: TokenFilterValues) {
-  const validationErr = validateFiltersForBulk(filters);
-  if (validationErr) {
-    throw new Error(validationErr);
-  }
   return { count: mockTokens.length };
 }

@@ -44,10 +44,7 @@ export default function TokensOverviewRoute() {
   const { confirmRevoke, confirmBulkRevoke } = useRevokeActions();
 
   const tokensData = tokensQuery.data?.tokens ?? [];
-  const hasValidationError = Boolean(tokensQuery.data?.validationErr);
-  const hasActiveFilters = Boolean(appliedFilters && hasDataFilters(appliedFilters));
-  const isFiltered = hasActiveFilters && !hasValidationError;
-  const canBulkRevoke = isFiltered;
+  const canBulkRevoke = Boolean(appliedFilters && hasDataFilters(appliedFilters));
 
   const handleRevoke = useCallback((token: Token) => {
     confirmRevoke(token);
