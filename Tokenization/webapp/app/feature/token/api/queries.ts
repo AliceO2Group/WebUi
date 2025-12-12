@@ -15,7 +15,8 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { fetchAvailableServices } from '~/feature/token/services/service-options.service';
-import { fetchTokenById, fetchTokens } from '~/feature/token/services/tokens.service';
+import { fetchTokenById, fetchTokenLogs, fetchTokens } from '~/feature/token/services/tokens.service';
+import type { TokenStatus } from '~/feature/token/types/token';
 import type { TokenFilterValues } from '~/feature/token/types/token-filters';
 
 const tokenListsKey = ['tokens', 'list'] as const;
@@ -23,11 +24,12 @@ const tokenListsKey = ['tokens', 'list'] as const;
 export const tokenQueryKeys = {
   all: ['tokens'] as const,
   lists: tokenListsKey,
-  list: (filters: TokenFilterValues | null) => [...tokenListsKey, filters] as const,
+  list: (filters: TokenFilterValues | null, status?: TokenStatus) => [...tokenListsKey, status ?? 'all', filters] as const,
   serviceOptions: ['tokens', 'service-options'] as const,
   serviceOptionsSearch: (term: string) => ['tokens', 'service-options', term] as const,
   details: ['tokens', 'detail'] as const,
   detail: (tokenId: string) => ['tokens', 'detail', tokenId] as const,
+  logs: (tokenId: string) => ['tokens', 'detail', tokenId, 'logs'] as const,
 };
 
 type UseServiceOptionsParams = {
@@ -51,16 +53,17 @@ export function useTokenServiceOptionsQuery(params?: UseServiceOptionsParams) {
 type UseTokensQueryParams = {
   filters: TokenFilterValues | null;
   enabled?: boolean;
+  status?: TokenStatus;
 };
 
 /**
  * Fetches tokens matching the provided filters, returning potential validation errors.
  */
-export function useTokensQuery({ filters, enabled = true }: UseTokensQueryParams) {
+export function useTokensQuery({ filters, enabled = true, status }: UseTokensQueryParams) {
   return useQuery({
-    queryKey: tokenQueryKeys.list(filters),
+    queryKey: tokenQueryKeys.list(filters, status),
     enabled,
-    queryFn: () => fetchTokens(filters),
+    queryFn: () => fetchTokens(filters, status),
   });
 }
 
@@ -77,5 +80,18 @@ export function useTokenDetailsQuery({ tokenId, enabled = true }: UseTokenDetail
     queryKey: tokenQueryKeys.detail(tokenId ?? ''),
     enabled: Boolean(tokenId) && enabled,
     queryFn: () => fetchTokenById(tokenId as string),
+  });
+}
+
+type UseTokenLogsQueryParams = {
+  tokenId: string | undefined;
+  enabled?: boolean;
+};
+
+export function useTokenLogsQuery({ tokenId, enabled = true }: UseTokenLogsQueryParams) {
+  return useQuery({
+    queryKey: tokenQueryKeys.logs(tokenId ?? ''),
+    enabled: Boolean(tokenId) && enabled,
+    queryFn: () => fetchTokenLogs(tokenId as string),
   });
 }

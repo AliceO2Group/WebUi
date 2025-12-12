@@ -28,6 +28,7 @@ export function useRevokeTokenMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: tokenQueryKeys.lists });
       queryClient.invalidateQueries({ queryKey: tokenQueryKeys.details });
+      queryClient.invalidateQueries({ predicate: ({ queryKey }) => Array.isArray(queryKey) && queryKey[0] === 'tokens' && queryKey.includes('logs') });
     },
   });
 }
@@ -42,6 +43,7 @@ export function useBulkRevokeMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: tokenQueryKeys.lists });
       queryClient.invalidateQueries({ queryKey: tokenQueryKeys.details });
+      queryClient.invalidateQueries({ predicate: ({ queryKey }) => Array.isArray(queryKey) && queryKey[0] === 'tokens' && queryKey.includes('logs') });
     },
   });
 }

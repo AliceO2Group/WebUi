@@ -39,6 +39,7 @@ export default function TokensOverviewRoute() {
   } = useTokenFiltersPanel();
   const tokensQuery = useTokensQuery({
     filters: appliedFilters,
+    status: 'active',
   });
   const { confirmRevoke, confirmBulkRevoke } = useRevokeActions();
 

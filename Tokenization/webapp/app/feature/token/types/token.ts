@@ -12,8 +12,16 @@
  * or submit itself to any jurisdiction.
  */
 
+export type TokenStatus = 'active' | 'not-active';
+
+export interface TokenLogEntry {
+  id: string;
+  message: string;
+  timestamp: string;
+}
+
 export interface Token {
-  tokenId: string ;
+  tokenId: string;
   serviceFrom: string;
   serviceTo: string;
   exp: string;
@@ -21,4 +29,5 @@ export interface Token {
   issuer: string;
   iat: string;
   permissions: string[];
+  status: TokenStatus;
 }

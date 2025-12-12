@@ -24,16 +24,16 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 
-import { useTokenDetailsQuery } from '~/feature/token/api/queries';
+import { useTokenDetailsQuery, useTokenLogsQuery } from '~/feature/token/api/queries';
 import { useRevokeActions } from '~/feature/token/hooks/useRevokeActions';
+import type { TokenLogEntry } from '~/feature/token/types/token';
 
 export default function TokenDetailsRoute() {
   const { tokenId } = useParams<{ tokenId: string }>();
   const { confirmRevoke } = useRevokeActions();
 
-  const tokenQuery = useTokenDetailsQuery({
-    tokenId,
-  });
+  const tokenQuery = useTokenDetailsQuery({ tokenId });
+  const logsQuery = useTokenLogsQuery({ tokenId });
 
   const handleRevoke = useCallback(() => {
     if (tokenQuery.data) {
@@ -68,9 +68,12 @@ export default function TokenDetailsRoute() {
       <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', p: 3 }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} gap={2}>
           <Typography variant="h5">Token details</Typography>
-          <Button color="warning" variant="contained" onClick={handleRevoke}>
-            Revoke token
-          </Button>
+          <Chip label={token.status === 'active' ? 'Active' : 'Not active'} color={token.status === 'active' ? 'success' : 'default'} variant="filled" />
+          {token.status === 'active' ? (
+            <Button color="warning" variant="contained" onClick={handleRevoke}>
+              Revoke token
+            </Button>
+          ) : null}
         </Stack>
         <Divider sx={{ my: 2 }} />
         <DetailsGrid>
@@ -89,6 +92,10 @@ export default function TokenDetailsRoute() {
               <Chip key={permission} label={permission} size="small" />
             )) : <Typography variant="body2" color="text.secondary">No permissions assigned.</Typography>}
           </Stack>
+        </Stack>
+        <Stack spacing={1} mt={3}>
+          <Typography variant="subtitle2">Activity log</Typography>
+          <LogsTable entries={logsQuery.data ?? []} loading={logsQuery.isLoading} />
         </Stack>
       </Paper>
     </Stack>
@@ -121,4 +128,45 @@ const Centered = styled('div')(({ theme }) => ({
   justifyContent: 'center',
   height: '60vh',
   width: '100%',
+}));
+
+type LogsTableProps = {
+  entries: TokenLogEntry[];
+  loading: boolean;
+};
+
+const LogsTable = ({ entries, loading }: LogsTableProps) => {
+  if (loading) {
+    return (
+      <Stack alignItems="center" justifyContent="center" py={4}>
+        <CircularProgress size={24} />
+      </Stack>
+    );
+  }
+
+  if (!entries.length) {
+    return <Typography variant="body2" color="text.secondary">No log entries.</Typography>;
+  }
+
+  return (
+    <LogsContainer>
+      {entries.map((entry) => (
+        <Stack key={entry.id} direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" gap={1}>
+          <Typography variant="body2">{entry.message}</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {new Date(entry.timestamp).toLocaleString()}
+          </Typography>
+        </Stack>
+      ))}
+    </LogsContainer>
+  );
+};
+
+const LogsContainer = styled('div')(({ theme }) => ({
+  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: theme.shape.borderRadius,
+  padding: theme.spacing(2),
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing(1.5),
 }));

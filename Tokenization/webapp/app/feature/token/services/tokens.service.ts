@@ -12,9 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
+import { mockArchivedTokenLogs, mockActiveTokenLogs } from '~/feature/token/mocks/token-logs.mock';
 import { mockTokens } from '~/feature/token/mocks/tokens.mock';
 import { hasDataFilters, validateFiltersForBulk } from '~/feature/token/services/token-filters.service';
-import type { Token } from '~/feature/token/types/token';
+import type { Token, TokenLogEntry, TokenStatus } from '~/feature/token/types/token';
 import type { TokenFilterValues } from '~/feature/token/types/token-filters';
 
 export type TokensQueryResponse = {
@@ -25,12 +26,13 @@ export type TokensQueryResponse = {
 /**
  *
  */
-export async function fetchTokens(filters: TokenFilterValues | null): Promise<TokensQueryResponse> {
+export async function fetchTokens(filters: TokenFilterValues | null, status?: TokenStatus): Promise<TokensQueryResponse> {
   const validationErr = filters && !hasDataFilters(filters)
     ? 'At least one filter is required to fetch tokens.'
     : null;
+  const scopedTokens = status ? mockTokens.filter((token) => token.status === status) : mockTokens;
   return {
-    tokens: [...mockTokens],
+    tokens: [...scopedTokens],
     validationErr,
   };
 }
@@ -44,6 +46,16 @@ export async function fetchTokenById(tokenId: string): Promise<Token> {
     throw new Error('Token not found');
   }
   return token;
+}
+
+export async function fetchTokenLogs(tokenId: string): Promise<TokenLogEntry[]> {
+  if (mockActiveTokenLogs[tokenId]) {
+    return mockActiveTokenLogs[tokenId];
+  }
+  if (mockArchivedTokenLogs[tokenId]) {
+    return mockArchivedTokenLogs[tokenId];
+  }
+  return [];
 }
 
 /**

@@ -24,6 +24,7 @@ export const mockTokens: Token[] = [
     issuer: 'token-service',
     iat: '2025-05-01T10:00:00Z',
     permissions: ['GET', 'POST'],
+    status: 'active',
   },
   {
     tokenId: '2',
@@ -34,6 +35,7 @@ export const mockTokens: Token[] = [
     issuer: 'token-service',
     iat: '2025-04-10T08:00:00Z',
     permissions: ['GET'],
+    status: 'active',
   },
   {
     tokenId: '3',
@@ -43,6 +45,7 @@ export const mockTokens: Token[] = [
     last4chars: '0042',
     issuer: 'token-service',
     iat: '2025-06-15T12:00:00Z',
-    permissions: ['GET', 'POST', 'EXECUTE'],
+    permissions: ['GET', 'POST', 'DELETE'],
+    status: 'not-active',
   },
 ];

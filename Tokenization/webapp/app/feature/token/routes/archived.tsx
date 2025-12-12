@@ -36,6 +36,7 @@ export default function ArchivedTokensRoute() {
 
   const tokensQuery = useTokensQuery({
     filters: appliedFilters,
+    status: 'not-active',
   });
 
   const tokensData = tokensQuery.data?.tokens ?? [];
