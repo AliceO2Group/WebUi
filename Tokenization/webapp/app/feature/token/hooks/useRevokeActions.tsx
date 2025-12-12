@@ -30,7 +30,7 @@ import { AUTH_ERROR_ALERT } from '~/ui/alert/constants';
 export function useRevokeActions() {
   const hasAuth = useAuth();
   const pushAlert = useAlert();
-  const showModal = useModal();
+  const { showModal } = useModal();
   const revokeTokenMutation = useRevokeTokenMutation();
   const bulkRevokeMutation = useBulkRevokeMutation();
 

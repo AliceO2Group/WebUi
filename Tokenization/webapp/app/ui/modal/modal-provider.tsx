@@ -23,6 +23,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import type { ButtonProps } from '@mui/material/Button';
+import { Spinner } from '~/ui/spinner';
 
 export type ModalAccent = 'default' | 'danger' | 'warning' | 'success';
 
@@ -36,7 +37,10 @@ export type ModalOptions = {
   onConfirm?: () => void | Promise<void>;
 };
 
-export type ModalContextValue = (options: ModalOptions) => void;
+export type ModalContextValue = {
+  showModal: (options: ModalOptions) => void;
+  hideModal: () => void;
+};
 
 type ModalState = ModalOptions & { open: boolean };
 
@@ -98,7 +102,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     }
   }, [modalState, hideModal]);
 
-  const contextValue = useMemo<ModalContextValue>(() => (showModal), [showModal]);
+  const contextValue = useMemo<ModalContextValue>(() => ({ showModal, hideModal }), [showModal, hideModal]);
 
   const confirmDisabled = confirming || Boolean(modalState?.isLoading);
   const confirmColor = modalState ? accentToColor[modalState.accent ?? 'default'] : 'primary';
@@ -114,10 +118,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
               <ContentStack spacing={2}>
                 {modalState.isLoading ? (
                   <LoadingRow>
-                    <CircularProgress size={18} />
-                    <Typography variant="body2" color="text.secondary">
-                      Loading...
-                    </Typography>
+                    <Spinner size={4} /> loading...
                   </LoadingRow>
                 ) : null}
                 {typeof modalState.content === 'string' ? (
@@ -139,7 +140,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
                 onClick={handleConfirm}
                 disabled={confirmDisabled}
               >
-                {confirming ? <CircularProgress size={16} color="inherit" /> : modalState.confirmLabel}
+                {confirming ? <Spinner size={2} /> : modalState.confirmLabel}
               </Button>
             </DialogActions>
           </Stack>
