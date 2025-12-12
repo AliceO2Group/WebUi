@@ -14,6 +14,7 @@
 
 import { LogManager } from '@aliceo2/web-ui';
 import { RunStatus } from '../../common/library/runStatus.enum.js';
+import { wrapRunStatus } from '../dtos/BookkeepingDto.js';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/filter-service`;
 
@@ -97,7 +98,7 @@ export class FilterService {
     } catch (error) {
       const message = `Error while retrieving run status for run ${runNumber}: ${error.message || error}`;
       this._logger.errorMessage(message);
-      return this._bookkeepingService.wrapRunStatus(RunStatus.UNKNOWN);
+      return wrapRunStatus(RunStatus.UNKNOWN);
     }
   }
 }

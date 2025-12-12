@@ -15,6 +15,7 @@
 import { RunStatus } from '../../common/library/runStatus.enum.js';
 import { httpGetJson } from '../utils/httpRequests.js';
 import { LogManager } from '@aliceo2/web-ui';
+import { wrapRunStatus } from '../dtos/BookkeepingDto.js';
 
 const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
@@ -148,7 +149,7 @@ export class BookkeepingService {
   async retrieveRunInformation(runNumber) {
     if (!this.active) {
       this._logger.warnMessage('Could not connect to bookkeeping');
-      return this.wrapRunStatus(RunStatus.BOOKKEEPING_UNAVAILABLE);
+      return wrapRunStatus(RunStatus.BOOKKEEPING_UNAVAILABLE);
     }
 
     try {
@@ -181,29 +182,17 @@ export class BookkeepingService {
         runQuality,
         lhcBeamMode,
         detectorQualities,
-        ...this.wrapRunStatus(runStatus),
+        ...wrapRunStatus(runStatus),
       };
     } catch (error) {
       const msg = error?.message ?? String(error);
       if (msg.includes('404')) {
         this._logger.warnMessage(`Run number ${runNumber} not found in bookkeeping`);
-        return this.wrapRunStatus(RunStatus.NOT_FOUND);
+        return wrapRunStatus(RunStatus.NOT_FOUND);
       }
       this._logger.errorMessage(`Error fetching run status: ${error.message || error}`);
-      return this.wrapRunStatus(RunStatus.UNKNOWN);
+      return wrapRunStatus(RunStatus.UNKNOWN);
     }
-  }
-
-  /**
-   * Wraps a given run status value into a standardized result object.
-   * Use this helper when you need to return only a `runStatus` field without any
-   * additional payload. This ensures that all callers receive a consistent
-   * object shape, matching the structure returned by `retrieveRunInformation`.
-   * @param {RunStatus} runStatus The run status to wrap. Must be a valid `RunStatus` enum value.
-   * @returns {{ runStatus: RunStatus }} A simple object containing only the provided `runStatus`.
-   */
-  wrapRunStatus(runStatus) {
-    return { runStatus };
   }
 
   /**
