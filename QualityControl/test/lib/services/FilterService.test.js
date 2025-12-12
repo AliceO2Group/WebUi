@@ -17,7 +17,6 @@ import { suite, test, beforeEach, afterEach } from 'node:test';
 import { FilterService } from '../../../lib/services/FilterService.js';
 import { RunStatus } from '../../../common/library/runStatus.enum.js';
 import { stub, restore } from 'sinon';
-import { BookkeepingService } from '../../../lib/services/BookkeepingService.js';
 
 export const filterServiceTestSuite = async () => {
   let filterService = null;
