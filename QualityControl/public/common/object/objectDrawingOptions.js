@@ -13,7 +13,8 @@
  */
 
 import { h } from '/js/src/index.js';
-import { DRAWING_OPTIONS } from '../constants/drawingOptions.js';
+import { DRAW_OPTIONS } from '../constants/drawingOptions.js';
+import { DISPLAY_HINTS } from '../constants/drawingOptions.js';
 
 /**
  * Display options overlay for a QC object
@@ -21,7 +22,7 @@ import { DRAWING_OPTIONS } from '../constants/drawingOptions.js';
  * @param {string} options.id - The unique identifier for the object
  * @param {boolean} options.ignoreDefaults - Whether to ignore default drawing options
  * @param {Array<string>} options.options - Array of selected draw options and display hints
- * @param {Array<string>} options.nonRecognizedOptions - Array of non-recognized drawing options
+ * @param {Array<string>} options.nonRecognizedDrawingOptions - Array of non-recognized drawing options
  * @param {() => void} options.onToggleIgnoreDefaults - Callback to toggle ignore defaults
  * @param {(option: string) => void} options.onToggleOption - Callback to toggle a drawing option or display hint
  * @returns {vnode} Virtual DOM node representing the display options panel
@@ -30,12 +31,11 @@ export const objectDrawingOptions = ({
   id,
   ignoreDefaults,
   options,
-  nonRecognizedOptions,
+  nonRecognizedDrawingOptions,
   onToggleIgnoreDefaults,
   onToggleOption,
-}) => {
-  const { DRAW_OPTIONS, DISPLAY_HINTS } = DRAWING_OPTIONS;
-  return h('.absolute-fill.level1.scroll-y', [
+}) =>
+  h('.absolute-fill.level1.scroll-y', [
     h('.absolute.right-0.top-0.bg-white.shadow-lg.w-100.h-100.overflow-auto', [
       h('.flex-row.items-center.justify-between.mb2.g2', [
         h('span', 'Drawing Options:'),
@@ -47,33 +47,21 @@ export const objectDrawingOptions = ({
           onToggleIgnoreDefaults,
         ),
       ]),
-      nonRecognizedOptions.length > 0 &&
+      nonRecognizedDrawingOptions &&
         h(
           '.flex-row.label.mv2.danger',
-          'Non-recognized options: ',
-          nonRecognizedOptions.join(', '),
+          `Non-recognized options: ${nonRecognizedDrawingOptions.join(', ')}`,
         ),
       h('', [
         sectionTitle('Draw Options:', ' ROOT draw options'),
         checkboxGrid(DRAW_OPTIONS.map((option) =>
-          checkBox(
-            id + option,
-            option,
-            options.includes(option),
-            () => onToggleOption(option),
-          ))),
+          checkBox(id + option, option, options.includes(option), () => onToggleOption(option)))),
         sectionTitle('Display Hints:', ' Canvas display hints'),
         checkboxGrid(DISPLAY_HINTS.map((option) =>
-          checkBox(
-            id + option,
-            option,
-            options.includes(option),
-            () => onToggleOption(option),
-          ))),
+          checkBox(id + option, option, options.includes(option), () => onToggleOption(option)))),
       ]),
     ]),
   ]);
-};
 
 const checkboxGrid = (children) =>
   h('.flex-column.g2', {

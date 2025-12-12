@@ -42,14 +42,16 @@ export default class ObjectViewModel extends BaseViewModel {
      */
     this.selected = RemoteData.notAsked();
 
-    this._drawingOptions = {
-      options: [],
-      ignoreDefaults: false,
-      drawOptions: [],
-      displayHints: [],
-      layoutDisplayOptions: [],
-      nonRecognizedOptions: [],
-    };
+    /**
+     * Options for previewing object drawing options.
+     */
+    this.ignoreDefaults = false; // whether to ignore default (options from object) drawing options
+    this.layoutDisplayOptions = []; // options from layout tab object if opened from layout
+    this.drawingOptions = []; // active drawing options for previewing
+    this.drawOptions = []; // options from object
+    this.displayHints = []; // options from object
+    this.nonRecognizedDrawingOptions = []; // options on drawingOptions or layoutDisplayOptions that are not recognized
+    this.objectDrawingOptionsVisible = false;
 
     /**
      * Tracks whether the object information panel is currently visible.
@@ -57,126 +59,6 @@ export default class ObjectViewModel extends BaseViewModel {
     this._objectInfoVisible = true;
     this._storage = new BrowserStorage(StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING);
     this._loadObjectInfoVisible();
-
-    this._objectDrawingOptionsVisible = false;
-  }
-
-  get drawingOptions() {
-    return this._drawingOptions.options;
-  }
-
-  get ignoreDefaults() {
-    return this._drawingOptions.ignoreDefaults;
-  }
-
-  get objectDrawingOptionsVisible() {
-    return this._objectDrawingOptionsVisible;
-  }
-
-  /**
-   * Update the drawing options based on the current ignoreDefaults setting.
-   */
-  _setDrawingOptions() {
-    const options = this.ignoreDefaults
-      ? [...this._drawingOptions.layoutDisplayOptions]
-      : [
-        ...this._drawingOptions.drawOptions,
-        ...this._drawingOptions.displayHints,
-        ...this._drawingOptions.layoutDisplayOptions,
-      ];
-    this._drawingOptions.options = options;
-    this.notify();
-  }
-
-  /**
-   * Toggle a specific drawing option on or off.
-   * @param {string} option - the drawing option to toggle
-   */
-  toggleDrawingOption(option) {
-    const index = this._drawingOptions.options.indexOf(option);
-    if (index >= 0) {
-      this._drawingOptions.options.splice(index, 1);
-    } else {
-      this._drawingOptions.options.push(option);
-    }
-    this.notify();
-  }
-
-  /**
-   * Toggle the ignoreDefaults and update drawing options.
-   */
-  toggleIgnoreDefaults() {
-    this._drawingOptions.ignoreDefaults = !this._drawingOptions.ignoreDefaults;
-    this._setDrawingOptions();
-    this.notify();
-  }
-
-  /**
-   * Toggle the display state of object drawing options panel.
-   * If currently visible, it becomes hidden; if hidden, it becomes visible.
-   */
-  toggleDrawingOptionsVisible() {
-    this._objectDrawingOptionsVisible = !this._objectDrawingOptionsVisible;
-    this.notify();
-  }
-
-  /**
-   * Initializes the non-recognized drawing options by filtering out known options
-   * from the current drawing options and display hints.
-   */
-  _initializeNonRecognizedOptions() {
-    const recognizedDrawOptions = DRAWING_OPTIONS.DRAW_OPTIONS;
-    const recognizedDisplayHints = DRAWING_OPTIONS.DISPLAY_HINTS;
-    this._drawingOptions.nonRecognizedOptions = [
-      ...this._drawingOptions.drawOptions.filter((option) => !recognizedDrawOptions.includes(option)),
-      ...this._drawingOptions.displayHints.filter((option) => !recognizedDisplayHints.includes(option)),
-    ];
-    this.notify();
-  }
-
-  /**
-   * Initializes the drawing options based on the context from which the object was opened.
-   * If opened from a layout view, it uses the layout/tab configuration; otherwise,
-   * it uses the object's own configuration.
-   */
-  async _initializeDrawingOptions() {
-    const { layoutId, objectId } = this.model.router.params;
-    const { qcObject } = this.selected.payload;
-    this._drawingOptions = {
-      ignoreDefaults: Boolean(qcObject.ignoreDefaults),
-      drawOptions: [...qcObject.drawOptions || []],
-      displayHints: [...qcObject.displayHints || []],
-      layoutDisplayOptions: [...qcObject.layoutDisplayOptions || []],
-    };
-    if (layoutId && objectId) {
-      // Object opened from layout view -> use the layout/tab configuration
-      const layoutResult = await this.model.services.layout.getLayoutById(layoutId);
-      if (layoutResult.isSuccess()) {
-        const layout = layoutResult.payload;
-        const object = layout.tabs.flatMap((tab) => tab.objects).find((obj) => obj.id === objectId);
-        if (object) {
-          const {
-            ignoreDefaults: objectIgnoreDefaults = false,
-            drawOptions: objectDrawOptions = [],
-            displayHints: objectDisplayHints = [],
-            options: objectLayoutDisplayOptions = [],
-          } = object;
-          this._drawingOptions = {
-            ignoreDefaults: Boolean(objectIgnoreDefaults),
-            drawOptions: [...objectDrawOptions || []],
-            displayHints: [...objectDisplayHints || []],
-            layoutDisplayOptions: [...objectLayoutDisplayOptions || []],
-          };
-          this._setDrawingOptions();
-          this.notify();
-        }
-      }
-    } else {
-      // Object opened directly -> use the object configuration
-      this._initializeNonRecognizedOptions();
-      this._setDrawingOptions();
-      this.notify();
-    }
   }
 
   /**
@@ -205,7 +87,10 @@ export default class ObjectViewModel extends BaseViewModel {
   async updateObjectSelection(object, validFrom = undefined, id = '') {
     const { objectName = undefined, objectId = undefined } = object;
     const { params } = this.model.router;
-    const context = { objectName: objectName || params.objectName, objectId: objectId || params.objectId };
+    const context = {
+      objectName: objectName || params.objectName,
+      objectId: objectId || params.objectId,
+    };
     const { refreshNeeded, data } = await this.model.object.checkIfRefreshObject(this.selected.payload, context);
     if (!refreshNeeded) {
       return;
@@ -224,10 +109,15 @@ export default class ObjectViewModel extends BaseViewModel {
     // Use refreshed data if available, otherwise fetch based on available parameters
     if (data) {
       this.selected = data;
+      this._initialDrawingOptions();
     } else if (params.objectName) {
-      this.selected = await this.model.services.object.getObjectByName(params.objectName, id, validFrom, this);
+      this.selected =
+        await this.model.services.object.getObjectByName(params.objectName, id, validFrom, this);
+      this._initialDrawingOptions();
     } else if (params.objectId) {
-      this.selected = await this.model.services.object.getObjectById(params.objectId, id, validFrom, this);
+      this.selected =
+        await this.model.services.object.getObjectById(params.objectId, id, validFrom, this);
+      this._initialDrawingOptions();
     }
 
     setBrowserTabTitle(this.selected.payload.name);
@@ -246,10 +136,52 @@ export default class ObjectViewModel extends BaseViewModel {
       this.model.router.go(`${currentParams}`, false, true);
     }
 
-    if (this.selected.isSuccess()) {
-      this._initializeDrawingOptions();
-    }
+    this.notify();
+  }
 
+  _initialDrawingOptions() {
+    const { ignoreDefaults, drawOptions, displayHints, layoutDisplayOptions } = this.selected.payload;
+    this.ignoreDefaults = Boolean(ignoreDefaults);
+    this.drawOptions = drawOptions || [];
+    this.displayHints = displayHints || [];
+    this.layoutDisplayOptions = layoutDisplayOptions || [];
+    if (this.ignoreDefaults) {
+      this.drawingOptions = [...this.layoutDisplayOptions];
+    } else {
+      this.drawingOptions = [...this.drawOptions || [], ...this.displayHints || [], ...this.layoutDisplayOptions || []];
+    }
+    const allDrawingOptions = new Set((this.drawOptions || [])
+      .concat(this.displayHints || [], this.layoutDisplayOptions || []));
+    this.nonRecognizedDrawingOptions = [...allDrawingOptions].filter((option) => !DRAWING_OPTIONS.has(option));
+    this.notify();
+  }
+
+  /**
+   * Toggle the ignoreDefaults for drawing options.
+   * When ignored, default drawing options on object will not be applied.
+   */
+  toggleIgnoreDefaults() {
+    this.ignoreDefaults = !this.ignoreDefaults;
+    if (this.ignoreDefaults) {
+      this.drawingOptions = [...this.layoutDisplayOptions];
+    } else {
+      this.drawingOptions = [...this.drawOptions || [], ...this.displayHints || [], ...this.layoutDisplayOptions || []];
+    }
+    this.notify();
+  }
+
+  /**
+   * Toggle a drawing option on or off.
+   * If the option is currently enabled, it will be disabled; if disabled, it will be enabled.
+   * @param {string} option - the drawing option to toggle
+   */
+  toggleDrawingOption(option) {
+    const index = this.drawingOptions.indexOf(option);
+    if (index >= 0) {
+      this.drawingOptions.splice(index, 1);
+    } else {
+      this.drawingOptions.push(option);
+    }
     this.notify();
   }
 
@@ -296,6 +228,15 @@ export default class ObjectViewModel extends BaseViewModel {
   toggleObjectInfoVisible() {
     this._objectInfoVisible = !this._objectInfoVisible;
     this._storage.setLocalItem(this.model.session.personid.toString(), this._objectInfoVisible);
+    this.notify();
+  }
+
+  /**
+   * Toggle the display state of object drawing options panel.
+   * If currently visible, it becomes hidden; if hidden, it becomes visible.
+   */
+  toggleDrawingOptionsVisible() {
+    this.objectDrawingOptionsVisible = !this.objectDrawingOptionsVisible;
     this.notify();
   }
 

@@ -15,7 +15,6 @@
 const DRAW_OPTIONS = ['lego', 'colz', 'lcolz', 'text'];
 const DISPLAY_HINTS = ['logx', 'logy', 'logz', 'gridx', 'gridy', 'gridz', 'stat'];
 
-export const DRAWING_OPTIONS = Object.freeze({
-  DRAW_OPTIONS: DRAW_OPTIONS,
-  DISPLAY_HINTS: DISPLAY_HINTS,
-});
+export { DRAW_OPTIONS, DISPLAY_HINTS };
+
+export const DRAWING_OPTIONS = new Set([...DRAW_OPTIONS, ...DISPLAY_HINTS]);

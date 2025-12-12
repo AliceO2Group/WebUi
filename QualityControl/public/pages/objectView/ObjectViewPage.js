@@ -46,6 +46,7 @@ const objectPlotAndInfo = (objectViewModel) =>
       const {
         ignoreDefaults,
         drawingOptions,
+        nonRecognizedDrawingOptions,
         objectInfoVisible,
         objectDrawingOptionsVisible,
       } = objectViewModel;
@@ -86,7 +87,7 @@ const objectPlotAndInfo = (objectViewModel) =>
                   id,
                   ignoreDefaults: ignoreDefaults,
                   options: drawingOptions,
-                  nonRecognizedOptions: [],
+                  nonRecognizedDrawingOptions: nonRecognizedDrawingOptions,
                   onToggleIgnoreDefaults: () => objectViewModel.toggleIgnoreDefaults(),
                   onToggleOption: (option) => objectViewModel.toggleDrawingOption(option),
                 }),
