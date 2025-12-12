@@ -12,17 +12,17 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import axiosInstance from '../axiosInstance';
-import type { FormValue } from '~/components/form/types';
+import { IconButton, type IconButtonProps } from '@mui/material';
+import CancelIcon from '@mui/icons-material/Cancel';
 
-export const CONFIGURATION_QUERY_KEY = 'configuration';
-
-export const useConfigurationQuery = (configuration: string) =>
-  useQuery({
-    queryKey: [CONFIGURATION_QUERY_KEY, configuration],
-    queryFn: async () =>
-      axiosInstance
-        .get<FormValue>(`configurations/${configuration}`)
-        .then((response) => response.data),
-  });
+/**
+ * Remove button component.
+ * @param {IconButtonProps} props - The props of the icon button.
+ * @param {() => void} props.onClick - The callback to click the remove button.
+ * @returns {ReactElement} The remove button component.
+ */
+export const RemoveButton = (props: IconButtonProps) => (
+  <IconButton color="primary" {...props}>
+    <CancelIcon />
+  </IconButton>
+);

@@ -12,15 +12,43 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Box, Typography } from '@mui/material';
+import { Box, IconButton, InputAdornment, TextField } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
+import { useDrawer } from '~/contexts/DrawerContext';
 
 /**
  * LeftDrawerFooter component
  * Represents the footer of the left drawer in the application layout.
  * @returns {React.ReactElement} LeftDrawerFooter
  */
-export const LeftDrawerFooter = () => (
-  <Box sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }} className="left-drawer__footer">
-    <Typography variant="caption">Left Drawer Footer</Typography>
-  </Box>
-);
+export const LeftDrawerFooter = () => {
+  const { searchTerm, setSearchTerm } = useDrawer();
+
+  return (
+    <Box sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }} className="left-drawer__footer">
+      <TextField
+        fullWidth
+        size="small"
+        placeholder="Filter configurations..."
+        variant="outlined"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon fontSize="small" color="action" />
+            </InputAdornment>
+          ),
+          endAdornment: searchTerm ? (
+            <InputAdornment position="end">
+              <IconButton size="small" onClick={() => setSearchTerm('')} edge="end">
+                <ClearIcon fontSize="small" />
+              </IconButton>
+            </InputAdornment>
+          ) : null,
+        }}
+      />
+    </Box>
+  );
+};

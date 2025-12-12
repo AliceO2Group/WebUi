@@ -90,7 +90,7 @@ class QCConfigurationService {
    */
   async getConfigurationRestrictionsByKey(key) {
     const configuration = await this._consulService.getOnlyRawValueByKey(key);
-    return QCConfigurationAdapter.computeRestrictions(configuration);
+    return QCConfigurationAdapter.computeObjectRestrictions(configuration);
   }
   
   /**

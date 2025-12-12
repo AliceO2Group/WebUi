@@ -12,17 +12,5 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import axiosInstance from '../axiosInstance';
-import type { FormValue } from '~/components/form/types';
-
-export const CONFIGURATION_QUERY_KEY = 'configuration';
-
-export const useConfigurationQuery = (configuration: string) =>
-  useQuery({
-    queryKey: [CONFIGURATION_QUERY_KEY, configuration],
-    queryFn: async () =>
-      axiosInstance
-        .get<FormValue>(`configurations/${configuration}`)
-        .then((response) => response.data),
-  });
+export const KEY_SEPARATOR = '__';
+export const DEFAULT_PREFIX = 'Configuration';
