@@ -11,3 +11,71 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+
+import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/material/styles';
+
+import { ServiceFiltersForm } from '~/feature/service/components/service-filters-form';
+import { ServicesTable } from '~/feature/service/components/service-table';
+import { useServiceFiltersPanel } from '~/feature/service/hooks/useServiceFiltersPanel';
+import { useServicesQuery } from '~/feature/service/api/queries';
+
+/**
+ * Services overview lists registered services with date filters and ordering.
+ */
+export default function ServicesOverviewRoute() {
+	const {
+		filtersOpen,
+		toggleFiltersPanel,
+		appliedFilters,
+		handleFiltersChange,
+	} = useServiceFiltersPanel(false);
+
+	const servicesQuery = useServicesQuery({
+		filters: appliedFilters,
+	});
+
+	const services = servicesQuery.data?.services ?? [];
+	const totalCount = servicesQuery.data?.totalCount ?? services.length;
+
+	return (
+		<Stack spacing={3}>
+			<FiltersCard elevation={0}>
+				<FiltersHeader>
+					<Typography variant="h6">Filters</Typography>
+					<Button size="small" variant="text" onClick={toggleFiltersPanel}>
+						{filtersOpen ? 'Hide' : 'Show'}
+					</Button>
+				</FiltersHeader>
+				{filtersOpen ? (
+					<FiltersBody>
+						<ServiceFiltersForm onFiltersChange={handleFiltersChange} />
+					</FiltersBody>
+				) : null}
+			</FiltersCard>
+
+			<ServicesTable services={services} totalCount={totalCount} />
+		</Stack>
+	);
+}
+
+const FiltersCard = styled(Paper)(({ theme }) => ({
+	border: `1px solid ${theme.palette.divider}`,
+	padding: theme.spacing(2),
+	boxShadow: 'none',
+}));
+
+const FiltersHeader = styled('div')(({ theme }) => ({
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'space-between',
+	gap: theme.spacing(2),
+}));
+
+const FiltersBody = styled('div')(({ theme }) => ({
+	marginTop: theme.spacing(2),
+}));
+
