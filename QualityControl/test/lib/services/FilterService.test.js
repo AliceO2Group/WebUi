@@ -17,7 +17,6 @@ import { suite, test, beforeEach, afterEach } from 'node:test';
 import { FilterService } from '../../../lib/services/FilterService.js';
 import { RunStatus } from '../../../common/library/runStatus.enum.js';
 import { stub, restore } from 'sinon';
-import { BookkeepingService } from '../../../lib/services/BookkeepingService.js';
 
 export const filterServiceTestSuite = async () => {
   let filterService = null;
@@ -32,8 +31,7 @@ export const filterServiceTestSuite = async () => {
     bookkeepingServiceMock = {
       connect: stub(),
       retrieveRunTypes: stub(),
-      retrieveRunInformation: stub(),
-      wrapRunStatus: stub(),
+      retrieveRunStatus: stub(),
       active: true, // assume the bookkeeping service is active by default
     };
     filterService = new FilterService(bookkeepingServiceMock, configMock);
@@ -119,62 +117,42 @@ export const filterServiceTestSuite = async () => {
     });
   });
 
-  suite('getRunInformation', async () => {
+  suite('getRunStatus', async () => {
     test('should return run status from bookkeeping service when valid', async () => {
-      bookkeepingServiceMock.retrieveRunInformation.resolves({
-        runStatus: RunStatus.ONGOING,
-      });
+      bookkeepingServiceMock.retrieveRunStatus.resolves(RunStatus.ONGOING);
 
-      const { runStatus } = await filterService.getRunInformation(123456);
+      const result = await filterService.getRunStatus(123456);
 
-      deepStrictEqual(bookkeepingServiceMock.retrieveRunInformation.calledWith(123456), true);
-      deepStrictEqual(runStatus, RunStatus.ONGOING);
+      deepStrictEqual(bookkeepingServiceMock.retrieveRunStatus.calledWith(123456), true);
+      deepStrictEqual(result, RunStatus.ONGOING);
     });
 
     test('should return ENDED status from bookkeeping service', async () => {
-      bookkeepingServiceMock.retrieveRunInformation.resolves({
-        runStatus: RunStatus.ENDED,
-      });
+      bookkeepingServiceMock.retrieveRunStatus.resolves(RunStatus.ENDED);
 
-      const { runStatus } = await filterService.getRunInformation(789012);
+      const result = await filterService.getRunStatus(789012);
 
-      deepStrictEqual(bookkeepingServiceMock.retrieveRunInformation.calledWith(789012), true);
-      deepStrictEqual(runStatus, RunStatus.ENDED);
+      deepStrictEqual(bookkeepingServiceMock.retrieveRunStatus.calledWith(789012), true);
+      deepStrictEqual(result, RunStatus.ENDED);
     });
 
     test('should return NOT_FOUND status from bookkeeping service', async () => {
-      bookkeepingServiceMock.retrieveRunInformation.resolves({
-        runStatus: RunStatus.NOT_FOUND,
-      });
+      bookkeepingServiceMock.retrieveRunStatus.resolves(RunStatus.NOT_FOUND);
 
-      const { runStatus } = await filterService.getRunInformation(345678);
+      const result = await filterService.getRunStatus(345678);
 
-      deepStrictEqual(bookkeepingServiceMock.retrieveRunInformation.calledWith(345678), true);
-      deepStrictEqual(runStatus, RunStatus.NOT_FOUND);
+      deepStrictEqual(bookkeepingServiceMock.retrieveRunStatus.calledWith(345678), true);
+      deepStrictEqual(result, RunStatus.NOT_FOUND);
     });
 
     test('should return UNKNOWN when bookkeeping service throws error', async () => {
       const testError = new Error('Bookkeeping service unavailable');
-      bookkeepingServiceMock.retrieveRunInformation.rejects(testError);
-      bookkeepingServiceMock.wrapRunStatus.callsFake((status) => ({ runStatus: status }));
+      bookkeepingServiceMock.retrieveRunStatus.rejects(testError);
 
-      const { runStatus } = await filterService.getRunInformation(123456);
+      const result = await filterService.getRunStatus(123456);
 
-      deepStrictEqual(bookkeepingServiceMock.retrieveRunInformation.calledWith(123456), true);
-      deepStrictEqual(runStatus, RunStatus.UNKNOWN);
-    });
-  });
-
-  suite('wrapRunStatus', async () => {
-    test('should wrap a given RunStatus value into a standardized object', async () => {
-      const realService = new BookkeepingService();
-      bookkeepingServiceMock.wrapRunStatus.callsFake(realService.wrapRunStatus);
-
-      const runStatusOngoing = bookkeepingServiceMock.wrapRunStatus(RunStatus.ONGOING);
-      const runStatusEnded = bookkeepingServiceMock.wrapRunStatus(RunStatus.ENDED);
-
-      deepStrictEqual(runStatusOngoing, { runStatus: RunStatus.ONGOING });
-      deepStrictEqual(runStatusEnded, { runStatus: RunStatus.ENDED });
+      deepStrictEqual(bookkeepingServiceMock.retrieveRunStatus.calledWith(123456), true);
+      deepStrictEqual(result, RunStatus.UNKNOWN);
     });
   });
 };

@@ -256,8 +256,8 @@ export const bookkeepingServiceTestSuite = async () => {
         };
 
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
-        const { runStatus } = await bkpService.retrieveRunInformation(123);
-        strictEqual(runStatus, RunStatus.ENDED);
+        const result = await bkpService.retrieveRunStatus(123);
+        strictEqual(result, RunStatus.ENDED);
       });
 
       test('should return ONGOING status when timeO2End is not present', async () => {
@@ -265,22 +265,22 @@ export const bookkeepingServiceTestSuite = async () => {
 
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
 
-        const { runStatus } = await bkpService.retrieveRunInformation(456);
-        strictEqual(runStatus, RunStatus.ONGOING);
+        const result = await bkpService.retrieveRunStatus(456);
+        strictEqual(result, RunStatus.ONGOING);
       });
 
       test('should return UNKNOWN status when no data is returned', async () => {
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, {});
 
-        const { runStatus } = await bkpService.retrieveRunInformation(789);
-        strictEqual(runStatus, RunStatus.UNKNOWN);
+        const result = await bkpService.retrieveRunStatus(789);
+        strictEqual(result, RunStatus.UNKNOWN);
       });
 
       test('should return UNKNOWN status when request fails', async () => {
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(500);
 
-        const { runStatus } = await bkpService.retrieveRunInformation(1010);
-        strictEqual(runStatus, RunStatus.UNKNOWN);
+        const result = await bkpService.retrieveRunStatus(1010);
+        strictEqual(result, RunStatus.UNKNOWN);
       });
 
       test('should return NOT_FOUND status when request fails', async () => {
@@ -293,15 +293,15 @@ export const bookkeepingServiceTestSuite = async () => {
           ],
         });
 
-        const { runStatus } = await bkpService.retrieveRunInformation(1010);
-        strictEqual(runStatus, RunStatus.NOT_FOUND);
+        const result = await bkpService.retrieveRunStatus(1010);
+        strictEqual(result, RunStatus.NOT_FOUND);
       });
 
       test('should return BOOKKEEPING_UNAVAILABLE status when service is not active', async () => {
         bkpService.active = false;
 
-        const { runStatus } = await bkpService.retrieveRunInformation(123);
-        strictEqual(runStatus, RunStatus.BOOKKEEPING_UNAVAILABLE);
+        const result = await bkpService.retrieveRunStatus(123);
+        strictEqual(result, RunStatus.BOOKKEEPING_UNAVAILABLE);
       });
     });
   });

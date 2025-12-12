@@ -87,17 +87,18 @@ export class FilterService {
   }
 
   /**
-   * This method is used to retrieve the run information from the bookkeeping service
-   * @param {number} runNumber - run number to retrieve the information for
-   * @returns {Promise<object>} - resolves with the run information
+   * This method is used to retrieve the run status from the bookkeeping service
+   * @param {number} runNumber - run number to retrieve the status for
+   * @returns {Promise<string>} - resolves with the run status
    */
-  async getRunInformation(runNumber) {
+  async getRunStatus(runNumber) {
     try {
-      return await this._bookkeepingService.retrieveRunInformation(runNumber);
+      const runStatus = await this._bookkeepingService.retrieveRunStatus(runNumber);
+      return runStatus;
     } catch (error) {
       const message = `Error while retrieving run status for run ${runNumber}: ${error.message || error}`;
       this._logger.errorMessage(message);
-      return this._bookkeepingService.wrapRunStatus(RunStatus.UNKNOWN);
+      return RunStatus.UNKNOWN;
     }
   }
 }

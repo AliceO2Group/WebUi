@@ -73,9 +73,7 @@ export const filtersControllerTestSuite = async () => {
   suite('getRunStatusHandler', async () => {
     test('should successfully retrieve run status from FilterService', async () => {
       const filterService = sinon.createStubInstance(FilterService);
-      filterService.getRunInformation.resolves({
-        runStatus: RunStatus.ONGOING,
-      });
+      filterService.getRunStatus.resolves(RunStatus.ONGOING);
 
       const req = {
         params: {
@@ -88,12 +86,9 @@ export const filtersControllerTestSuite = async () => {
       };
 
       const filterController = new FilterController(filterService);
-      await filterController.getRunInformationHandler(req, res);
+      await filterController.getRunStatusHandler(req, res);
 
-      ok(
-        filterService.getRunInformation.calledWith(123456),
-        'FilterService.getRunInformation should be called with run number',
-      );
+      ok(filterService.getRunStatus.calledWith(123456), 'FilterService.getRunStatus should be called with run number');
       ok(res.status.calledWith(200), 'Response status should be 200');
       ok(res.json.calledWith({
         runStatus: RunStatus.ONGOING,
@@ -103,7 +98,7 @@ export const filtersControllerTestSuite = async () => {
     test('should handle errors from FilterService and send error response', async () => {
       const filterService = sinon.createStubInstance(FilterService);
       const testError = new Error('Bookkeeping service unavailable');
-      filterService.getRunInformation.rejects(testError);
+      filterService.getRunStatus.rejects(testError);
 
       const req = {
         params: {
@@ -116,12 +111,9 @@ export const filtersControllerTestSuite = async () => {
       };
 
       const filterController = new FilterController(filterService);
-      await filterController.getRunInformationHandler(req, res);
+      await filterController.getRunStatusHandler(req, res);
 
-      ok(
-        filterService.getRunInformation.calledWith(123456),
-        'FilterService.getRunStatus should be called with run number',
-      );
+      ok(filterService.getRunStatus.calledWith(123456), 'FilterService.getRunStatus should be called with run number');
       ok(res.status.calledWith(500), 'Response status should be 500 for service errors');
       ok(res.json.calledWithMatch({
         message: 'Bookkeeping service unavailable',
@@ -132,9 +124,7 @@ export const filtersControllerTestSuite = async () => {
 
     test('should return UNKNOWN status when FilterService returns invalid status', async () => {
       const filterService = sinon.createStubInstance(FilterService);
-      filterService.getRunInformation.resolves({
-        runStatus: RunStatus.UNKNOWN,
-      });
+      filterService.getRunStatus.resolves('UNKNOWN');
 
       const req = {
         params: {
@@ -147,12 +137,9 @@ export const filtersControllerTestSuite = async () => {
       };
 
       const filterController = new FilterController(filterService);
-      await filterController.getRunInformationHandler(req, res);
+      await filterController.getRunStatusHandler(req, res);
 
-      ok(
-        filterService.getRunInformation.calledWith(999999),
-        'FilterService.getRunStatus should be called with run number',
-      );
+      ok(filterService.getRunStatus.calledWith(999999), 'FilterService.getRunStatus should be called with run number');
       ok(res.status.calledWith(200), 'Response status should be 200');
       ok(res.json.calledWith({
         runStatus: RunStatus.UNKNOWN,
