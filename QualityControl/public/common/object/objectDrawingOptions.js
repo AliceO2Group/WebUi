@@ -47,7 +47,7 @@ export const objectDrawingOptions = ({
           onToggleIgnoreDefaults,
         ),
       ]),
-      nonRecognizedDrawingOptions &&
+      nonRecognizedDrawingOptions && nonRecognizedDrawingOptions.length > 0 &&
         h(
           '.flex-row.label.mv2.danger',
           `Non-recognized options: ${nonRecognizedDrawingOptions.join(', ')}`,
