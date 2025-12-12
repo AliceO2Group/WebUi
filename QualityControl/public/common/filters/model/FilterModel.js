@@ -72,7 +72,6 @@ export default class FilterModel extends Observable {
       Other: () => null,
     });
 
-    this._runNumber = this._filterMap['RunNumber'];
     await this.updateRunInformation();
     this.notify();
   }
@@ -124,10 +123,10 @@ export default class FilterModel extends Observable {
    */
   async triggerFilter(baseViewModel) {
     this.setFilterToURL();
-
-    this.runNumber = this._filterMap['RunNumber'];
     await this.updateRunInformation();
+
     if (this.isRunModeActivated) {
+      this.runNumber = this._filterMap['RunNumber'];
       this.runStatus = this.runInformation.runStatus ?? RunStatus.UNKNOWN;
       this.notify();
       this._manageRunsModeInterval(baseViewModel, true);
@@ -163,6 +162,7 @@ export default class FilterModel extends Observable {
    */
   clearFilters() {
     this._filterMap = {};
+    this._runInformation = {};
     this.setFilterToURL(true);
     this.notify();
   }
@@ -306,7 +306,8 @@ export default class FilterModel extends Observable {
    * If `this.runNumber` is not defined, `runInformation` is reset to an empty object.
    */
   async updateRunInformation() {
-    this.runInformation = this.runNumber ? await this.filterService.getRunInformation(this.runNumber) : {};
+    const runNumber = this._filterMap['RunNumber'];
+    this.runInformation = runNumber ? await this.filterService.getRunInformation(runNumber) : {};
   }
 
   /**
