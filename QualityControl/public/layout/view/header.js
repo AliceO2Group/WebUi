@@ -93,7 +93,7 @@ const toolbarEditMode = (layout) => {
   };
 
   return {
-    centerCol: h('.flex-grow.text-center', [
+    subRow: h('.flex-grow.text-center', [
       h('.header-layout.edit', [
         h('span.header-layout-container', editTabLinks(layout)),
         h('.btn-group', [
