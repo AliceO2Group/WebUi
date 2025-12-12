@@ -18,6 +18,7 @@ import { filtersConfig, runModeFilterConfig } from './filtersConfig.js';
 import { runModeCheckbox } from './runMode/runModeCheckbox.js';
 import { lastUpdatePanel, runStatusPanel } from './runMode/runStatusPanel.js';
 import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
+import { camelToTitleCase } from '../utils.js';
 
 /**
  * Creates an input element for a specific metadata field;
@@ -75,6 +76,7 @@ export function filtersPanel(filterModel, viewModel) {
     isVisible,
     lastRefresh,
     ONGOING_RUN_INTERVAL_MS: refreshRate,
+    runInformation,
   } = filterModel;
   const { fetchOngoingRuns } = filterService;
   const onInputCallback = setFilterValue.bind(filterModel);
@@ -101,9 +103,23 @@ export function filtersPanel(filterModel, viewModel) {
         isRunModeActivated && runStatusPanel(runStatus),
       ]),
       lastUpdatePanel(runStatus, lastRefresh, refreshRate),
+      runInformation && h(
+        '.flex-row.g4.items-center.justify-center.f7.gray-darker.text-center.ph2',
+        {
+          id: 'runInformation',
+          style: 'overflow-x: auto;',
+        },
+        Object.entries(runInformation).map(([key, value]) =>
+          h('.flex-row.g1', {
+            style: 'flex: 0 0 auto;',
+          }, [
+            h('strong', `${camelToTitleCase(key)}:`),
+            h('span', `${value}`),
+          ])),
+      ),
     ],
   );
-};
+}
 
 /**
  * Determines if runs mode is allowed based on current page and context

@@ -16,7 +16,14 @@ import { Observable } from '/js/src/index.js';
 import { buildQueryParametersString } from '../../buildQueryParametersString.js';
 import FilterService from '../../../services/Filter.service.js';
 import { RunStatus } from '../../../library/runStatus.enum.js';
+import { prettyFormatDate } from '../../utils.js';
+
 const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
+
+const RUN_INFORMATION_MAP = {
+  startTime: prettyFormatDate,
+  endTime: prettyFormatDate,
+};
 
 /**
  * Model namespace that manages the filter state in the application.
@@ -39,6 +46,7 @@ export default class FilterModel extends Observable {
     this._runStatus = null;
     this._isRunModeActivated = false;
     this._lastRefresh = null;
+    this._runInformation = {};
 
     this.ONGOING_RUN_INTERVAL_MS = 15000;
   }
@@ -47,7 +55,7 @@ export default class FilterModel extends Observable {
    * Look for parameters used for filtering in URL and apply them in the layout if it exists
    * @returns {undefined}
    */
-  setFilterFromURL() {
+  async setFilterFromURL() {
     const parameters = this.model.router.params;
     CCDB_QUERY_PARAMS.forEach((filterKey) => {
       if (parameters[filterKey]) {
@@ -64,6 +72,8 @@ export default class FilterModel extends Observable {
       Other: () => null,
     });
 
+    this._runNumber = this._filterMap['RunNumber'];
+    await this.updateRunInformation();
     this.notify();
   }
 
@@ -114,12 +124,15 @@ export default class FilterModel extends Observable {
    */
   async triggerFilter(baseViewModel) {
     this.setFilterToURL();
+
+    this.runNumber = this._filterMap['RunNumber'];
+    await this.updateRunInformation();
     if (this.isRunModeActivated) {
-      this.runNumber = this._filterMap['RunNumber'];
-      this.runStatus = await this.filterService.getRunStatus(this.runNumber);
+      this.runStatus = this.runInformation.runStatus ?? RunStatus.UNKNOWN;
       this.notify();
       this._manageRunsModeInterval(baseViewModel, true);
     }
+
     baseViewModel.triggerFilter();
     this._lastRefresh = Date.now();
     this.notify();
@@ -286,6 +299,17 @@ export default class FilterModel extends Observable {
   }
 
   /**
+   * Updates the `runInformation` property by fetching data from the `filterService`.
+   * If `this.runNumber` is defined, it asynchronously retrieves the run information
+   * via `filterService.getRunInformation(runNumber)` and sets it to `runInformation`,
+   * automatically applying any filtering and transformations defined in the setter.
+   * If `this.runNumber` is not defined, `runInformation` is reset to an empty object.
+   */
+  async updateRunInformation() {
+    this.runInformation = this.runNumber ? await this.filterService.getRunInformation(this.runNumber) : {};
+  }
+
+  /**
    * Gets the current run number.
    * @returns {number} The run number.
    */
@@ -299,6 +323,33 @@ export default class FilterModel extends Observable {
    */
   set runNumber(value) {
     this._runNumber = value;
+  }
+
+  /**
+   * Gets the current run information.
+   * @returns {object} The run information.
+   */
+  get runInformation() {
+    return this._runInformation;
+  }
+
+  /**
+   * Sets the run information after filtering and transforming values.
+   * - Filters out properties that are `null` or `undefined`.
+   * - Applies a transformation function from `RUN_INFORMATION_MAP` for any matching keys.
+   * @param {object} value - The new run information object to set.
+   * Keys corresponding to functions in `RUN_INFORMATION_MAP` will be transformed accordingly.
+   */
+  set runInformation(value) {
+    const runInfo = value && typeof value === 'object' ? value : {};
+    const transformed = Object.entries(runInfo)
+      // Filters out properties that are `null` or `undefined`.
+      .filter(([_, v]) => v !== null && v !== undefined)
+      // Applies a transformation function from `RUN_INFORMATION_MAP` for any matching keys.
+      .map(([key, value]) =>
+        [key, typeof RUN_INFORMATION_MAP[key] === 'function' ? RUN_INFORMATION_MAP[key](value) : value]);
+
+    this._runInformation = Object.fromEntries(transformed);
   }
 
   /**
