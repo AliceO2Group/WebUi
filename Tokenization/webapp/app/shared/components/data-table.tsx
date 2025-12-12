@@ -41,6 +41,7 @@ export type DataTableProps<Row> = {
   getRowKey?: (row: Row, index: number) => Key;
   emptyState?: ReactNode;
   dense?: boolean;
+  bodyMaxHeight?: number | string;
 };
 
 /**
@@ -52,12 +53,22 @@ export function DataTable<Row>({
   getRowKey,
   emptyState = <Typography color="text.secondary">No data to display.</Typography>,
   dense = false,
+  bodyMaxHeight = 360,
 }: DataTableProps<Row>) {
   const size: TableCellProps['size'] = dense ? 'small' : 'medium';
 
   return (
-    <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
-      <Table size={size}>
+    <TableContainer
+      component={Paper}
+      elevation={0}
+      sx={{
+        border: '1px solid',
+        borderColor: 'divider',
+        maxHeight: bodyMaxHeight,
+        overflowY: 'auto',
+      }}
+    >
+      <Table size={size} stickyHeader>
         <TableHead>
           <TableRow>
             {columns.map((column) => (

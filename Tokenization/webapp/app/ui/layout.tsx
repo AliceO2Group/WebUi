@@ -36,7 +36,15 @@ export default function Layout() {
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'grey.100' }}>
       <CssBaseline />
       <AppSidebar width={SIDEBAR_WIDTH} />
-      <Box component="section" sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <Box
+        component="section"
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          ml: `${SIDEBAR_WIDTH}px`,
+        }}
+      >
         <AppHeader />
         <Box component="main" sx={{ flex: 1, p: 4, overflow: 'auto' }}>
           {state === 'loading' ? <Spinner /> : <Outlet />}

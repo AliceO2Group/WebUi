@@ -29,9 +29,10 @@ export type ServicesTableProps = {
   onBlock?: (service: Service) => void;
   onBulkBlock?: () => void;
   bulkBlockDisabled?: boolean;
+  tableBodyMaxHeight?: number | string;
 };
 
-export function ServicesTable({ services, totalCount, title = 'Services', onBlock, onBulkBlock, bulkBlockDisabled = false }: ServicesTableProps) {
+export function ServicesTable({ services, totalCount, title = 'Services', onBlock, onBulkBlock, bulkBlockDisabled = false, tableBodyMaxHeight }: ServicesTableProps) {
   const showActionsColumn = Boolean(onBlock);
   const showBulkAction = Boolean(onBulkBlock);
 
@@ -89,7 +90,13 @@ export function ServicesTable({ services, totalCount, title = 'Services', onBloc
           </Button>
         ) : null}
       </Stack>
-      <DataTable columns={columns} rows={services} getRowKey={(service) => service.serviceId} dense />
+      <DataTable
+        columns={columns}
+        rows={services}
+        getRowKey={(service) => service.serviceId}
+        dense
+        bodyMaxHeight={tableBodyMaxHeight}
+      />
     </Paper>
   );
 }

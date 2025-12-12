@@ -25,12 +25,19 @@ export type ServicesQueryResponse = {
 
 export async function fetchServices(filters: ServiceFilterValues | null): Promise<ServicesQueryResponse> {
   const validationErr = filters && !hasServiceDataFilters(filters)
-    ? 'At least one date filter must be provided.'
+    ? 'At least one filter (date or name) must be provided.'
     : null;
 
+  let filteredServices = [...mockServices];
+
+  if (filters?.search?.trim()) {
+    const term = filters.search.trim().toLowerCase();
+    filteredServices = filteredServices.filter((service) => service.commonName.toLowerCase().includes(term));
+  }
+
   return {
-    services: [...mockServices],
-    totalCount: mockServices.length,
+    services: filteredServices,
+    totalCount: filteredServices.length,
     validationErr,
   };
 }

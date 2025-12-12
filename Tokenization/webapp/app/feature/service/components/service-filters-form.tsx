@@ -52,6 +52,22 @@ export function ServiceFiltersForm({ onFiltersChange }: ServiceFiltersFormProps)
 
   return (
     <FiltersFormLayout onSubmit={(event) => event.preventDefault()}>
+      <FiltersField>
+        <Controller
+          control={control}
+          name="search"
+          render={({ field }) => (
+            <StaticTextField
+              {...field}
+              type="text"
+              label="Search by name"
+              placeholder="Service common name"
+              fullWidth
+            />
+          )}
+        />
+      </FiltersField>
+
       <DatesGrid>
         {DATE_FILTERS.map(({ name, label }) => (
           <FiltersField key={name}>
@@ -149,3 +165,4 @@ const FiltersActionsContainer = styled('div')(({ theme }) => ({
   justifyContent: 'flex-end',
   flexWrap: 'wrap',
 }));
+

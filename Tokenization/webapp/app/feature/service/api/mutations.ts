@@ -14,7 +14,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 
-import { renewServiceCertificate } from '~/feature/service/services/service-details.service';
+import { confirmServiceCertificateRenewal } from '~/feature/service/services/service-details.service';
 import { confirmServiceCertificate, uploadServiceCertificate } from '~/feature/service/services/certificate-registration.service';
 import type { ServiceCertificatePreview, ServiceRegistrationResult } from '~/feature/service/types/certificate';
 
@@ -30,13 +30,13 @@ export function useServiceCertificateConfirmMutation() {
   });
 }
 
-export type ServiceCertificateRenewalPayload = {
+export type ServiceCertificateRenewConfirmPayload = {
   serviceId: string;
-  file: File;
+  certificateId: string;
 };
 
-export function useServiceCertificateRenewalMutation() {
-  return useMutation<ServiceCertificatePreview, Error, ServiceCertificateRenewalPayload>({
-    mutationFn: ({ serviceId, file }: ServiceCertificateRenewalPayload) => renewServiceCertificate(serviceId, file),
+export function useServiceCertificateRenewConfirmMutation() {
+  return useMutation<ServiceRegistrationResult, Error, ServiceCertificateRenewConfirmPayload>({
+    mutationFn: ({ serviceId, certificateId }: ServiceCertificateRenewConfirmPayload) => confirmServiceCertificateRenewal(serviceId, certificateId),
   });
 }

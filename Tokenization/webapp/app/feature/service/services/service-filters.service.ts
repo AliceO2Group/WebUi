@@ -19,13 +19,14 @@ export function hasServiceDataFilters(filters: ServiceFilterValues) {
     filters.issuedAfter ||
     filters.issuedBefore ||
     filters.expiresAfter ||
-    filters.expiresBefore
+    filters.expiresBefore ||
+    filters.search?.trim()
   );
 }
 
 export function validateServiceFiltersForBulk(filters: ServiceFilterValues): string | null {
   if (!hasServiceDataFilters(filters)) {
-    return 'At least one date filter must be provided.';
+    return 'At least one filter (date or name) must be provided.';
   }
   return null;
 }

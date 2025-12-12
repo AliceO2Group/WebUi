@@ -13,9 +13,8 @@
  */
 
 import { mockServices } from '~/feature/service/mocks/services.mock';
-import { uploadServiceCertificate } from '~/feature/service/services/certificate-registration.service';
 import type { Service } from '~/feature/service/types/service';
-import type { ServiceCertificatePreview } from '~/feature/service/types/certificate';
+import type { ServiceRegistrationResult } from '~/feature/service/types/certificate';
 
 export async function fetchServiceById(serviceId: string): Promise<Service> {
   const service = mockServices.find((item) => item.serviceId === serviceId);
@@ -25,12 +24,12 @@ export async function fetchServiceById(serviceId: string): Promise<Service> {
   return service;
 }
 
-export async function renewServiceCertificate(serviceId: string, file: File): Promise<ServiceCertificatePreview> {
-  await delay(300);
-  const preview = await uploadServiceCertificate(file);
+export async function confirmServiceCertificateRenewal(serviceId: string, certificateId: string): Promise<ServiceRegistrationResult> {
+  await delay(500);
   return {
-    ...preview,
-    commonName: `${preview.commonName} (renewal)`,
+    certificateId,
+    serviceId,
+    status: 'registered',
   };
 }
 

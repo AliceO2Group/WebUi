@@ -45,4 +45,46 @@ export const mockServices: Service[] = [
     iat: '2025-02-10T09:45:00Z',
     exp: '2026-02-10T09:45:00Z',
   },
+  {
+    serviceId: '6',
+    commonName: 'Telemetry Gateway',
+    iat: '2024-06-18T07:20:00Z',
+    exp: '2025-06-18T07:20:00Z',
+  },
+  {
+    serviceId: '7',
+    commonName: 'Data Aggregator',
+    iat: '2023-09-22T11:05:00Z',
+    exp: '2024-09-22T11:05:00Z',
+  },
+  {
+    serviceId: '8',
+    commonName: 'Diagnostics Console',
+    iat: '2025-03-30T05:40:00Z',
+    exp: '2026-03-30T05:40:00Z',
+  },
+  {
+    serviceId: '9',
+    commonName: 'Control Plane API',
+    iat: '2024-01-12T16:25:00Z',
+    exp: '2025-01-12T16:25:00Z',
+  },
+  {
+    serviceId: '10',
+    commonName: 'Monitoring Hub',
+    iat: '2025-07-04T13:10:00Z',
+    exp: '2026-07-04T13:10:00Z',
+  },
+  {
+    serviceId: '11',
+    commonName: 'Alert Dispatcher',
+    iat: '2023-11-08T19:55:00Z',
+    exp: '2024-11-08T19:55:00Z',
+  },
+  {
+    serviceId: '12',
+    commonName: 'Orchestration Engine',
+    iat: '2024-04-27T02:30:00Z',
+    exp: '2025-04-27T02:30:00Z',
+  },
 ];

@@ -85,6 +85,11 @@ export const AppSidebar = ({ width = 240 }: AppSidebarProps) => (
     component="aside"
     sx={{
       width,
+      position: 'fixed',
+      top: 0,
+      bottom: 0,
+      left: 0,
+      height: '100vh',
       borderRight: '1px solid',
       borderColor: 'divider',
       bgcolor: 'background.paper',
@@ -93,7 +98,6 @@ export const AppSidebar = ({ width = 240 }: AppSidebarProps) => (
       display: 'flex',
       flexDirection: 'column',
       gap: 3,
-      minHeight: '100vh',
       justifyContent: 'center',
     }}
   >

@@ -11,3 +11,204 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+
+import { useMemo } from 'react';
+import { Link, useParams } from 'react-router';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Divider from '@mui/material/Divider';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/material/styles';
+import type { UseQueryResult } from '@tanstack/react-query';
+
+import { useServiceDetailsQuery } from '~/feature/service/api/queries';
+import { useTokensQuery } from '~/feature/token/api/queries';
+import { TokensTable } from '~/feature/token/components/token-table';
+import { useRevokeActions } from '~/feature/token/hooks/useRevokeActions';
+import type { TokensQueryResponse } from '~/feature/token/services/tokens.service';
+import type { Token } from '~/feature/token/types/token';
+import type { TokenFilterValues } from '~/feature/token/types/token-filters';
+
+const TOKEN_TABLE_HEIGHT = 320;
+
+export default function ServiceDetailsRoute() {
+	const { serviceId } = useParams<{ serviceId: string }>();
+	const hasServiceId = Boolean(serviceId);
+	const { confirmRevoke, confirmBulkRevoke } = useRevokeActions();
+
+	const serviceQuery = useServiceDetailsQuery({ serviceId: serviceId ?? '', enabled: hasServiceId });
+	const outgoingFilters = useMemo<TokenFilterValues | null>(() => (serviceId ? buildServiceFilter(serviceId, 'from') : null), [serviceId]);
+	const incomingFilters = useMemo<TokenFilterValues | null>(() => (serviceId ? buildServiceFilter(serviceId, 'to') : null), [serviceId]);
+
+	const outgoingTokensQuery = useTokensQuery({
+		filters: outgoingFilters,
+		status: 'active',
+		enabled: hasServiceId,
+	});
+
+	const incomingTokensQuery = useTokensQuery({
+		filters: incomingFilters,
+		status: 'active',
+		enabled: hasServiceId,
+	});
+
+	if (!hasServiceId) {
+		return <Alert severity="error">Missing service identifier.</Alert>;
+	}
+
+	if (serviceQuery.isLoading) {
+		return (
+			<Centered>
+				<CircularProgress />
+			</Centered>
+		);
+	}
+
+	if (serviceQuery.isError) {
+		return <Alert severity="error">Failed to load service details.</Alert>;
+	}
+
+	if (!serviceQuery.data) {
+		return <Alert severity="warning">Service not found.</Alert>;
+	}
+
+	const service = serviceQuery.data;
+	const renewPath = `/services/${serviceId}/renew`;
+
+	return (
+		<Stack spacing={3}>
+			<Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', p: 3 }}>
+				<Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} gap={2}>
+					<Typography variant="h5">Service certificate</Typography>
+					<Button component={Link} to={renewPath} variant="contained">
+						Renew certificate
+					</Button>
+				</Stack>
+				<Divider sx={{ my: 2 }} />
+				<DetailsGrid>
+					<InfoItem label="Service ID" value={service.serviceId} />
+					<InfoItem label="Common name" value={service.commonName} />
+					<InfoItem label="Issued at" value={new Date(service.iat).toLocaleString()} />
+					<InfoItem label="Expires" value={new Date(service.exp).toLocaleString()} />
+				</DetailsGrid>
+			</Paper>
+
+			<Stack spacing={3}>
+				<ServiceTokensSection
+					title="Tokens issued by this service"
+					query={outgoingTokensQuery}
+					filters={outgoingFilters}
+					onRevoke={confirmRevoke}
+					onBulkRevoke={() => outgoingFilters && confirmBulkRevoke(outgoingFilters)}
+					tableBodyMaxHeight={TOKEN_TABLE_HEIGHT}
+				/>
+				<ServiceTokensSection
+					title="Tokens targeting this service"
+					query={incomingTokensQuery}
+					filters={incomingFilters}
+					onRevoke={confirmRevoke}
+					onBulkRevoke={() => incomingFilters && confirmBulkRevoke(incomingFilters)}
+					tableBodyMaxHeight={TOKEN_TABLE_HEIGHT}
+				/>
+			</Stack>
+		</Stack>
+	);
+}
+
+type InfoItemProps = {
+	label: string;
+	value: string;
+};
+
+const InfoItem = ({ label, value }: InfoItemProps) => (
+	<Stack spacing={0.5}>
+		<Typography variant="caption" color="text.secondary">
+			{label}
+		</Typography>
+		<Typography variant="body1">{value}</Typography>
+	</Stack>
+);
+
+type ServiceTokensSectionProps = {
+	title: string;
+	query: UseQueryResult<TokensQueryResponse, unknown>;
+	filters: TokenFilterValues | null;
+	onRevoke: (token: Token) => void;
+	onBulkRevoke?: () => void;
+	tableBodyMaxHeight?: number | string;
+};
+
+function ServiceTokensSection({ title, query, filters, onRevoke, onBulkRevoke, tableBodyMaxHeight = TOKEN_TABLE_HEIGHT }: ServiceTokensSectionProps) {
+	if (query.isLoading) {
+		return <TableLoader title={title} />;
+	}
+
+	if (query.isError) {
+		return <Alert severity="error">Failed to load {title.toLowerCase()}.</Alert>;
+	}
+
+	const tokens = query.data?.tokens ?? [];
+	const bulkDisabled = !filters || tokens.length === 0;
+
+	const handleBulkRevoke = () => {
+		if (bulkDisabled || !onBulkRevoke) {
+			return;
+		}
+		onBulkRevoke();
+	};
+
+	return (
+		<TokensTable
+			tokens={tokens}
+			totalCount={tokens.length}
+			title={title}
+			onRevoke={onRevoke}
+			onBulkRevoke={onBulkRevoke ? handleBulkRevoke : undefined}
+			bulkRevokeDisabled={bulkDisabled}
+			tableBodyMaxHeight={tableBodyMaxHeight}
+		/>
+	);
+}
+
+const DetailsGrid = styled('div')(({ theme }) => ({
+	display: 'grid',
+	gap: theme.spacing(2),
+	gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+}));
+
+const Centered = styled('div')(({ theme }) => ({
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	height: '60vh',
+	width: '100%',
+}));
+
+const TableLoader = ({ title }: { title: string }) => (
+	<Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', p: 3 }}>
+		<Stack direction="row" justifyContent="space-between" alignItems="center" mb={2} gap={2}>
+			<Typography variant="h6">{title}</Typography>
+			<Typography variant="body2" color="text.secondary">
+				Loading data...
+			</Typography>
+		</Stack>
+		<Stack alignItems="center" justifyContent="center" py={4}>
+			<CircularProgress size={24} />
+		</Stack>
+	</Paper>
+);
+
+function buildServiceFilter(serviceId: string, direction: 'from' | 'to'): TokenFilterValues {
+	return {
+		serviceFrom: direction === 'from' ? [serviceId] : [],
+		serviceTo: direction === 'to' ? [serviceId] : [],
+		issuedAfter: '',
+		issuedBefore: '',
+		expiresAfter: '',
+		expiresBefore: '',
+		ordering: [],
+	};
+}

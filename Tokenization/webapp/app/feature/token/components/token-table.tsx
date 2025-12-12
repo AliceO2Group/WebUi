@@ -33,12 +33,13 @@ type TokensTableProps = {
   onRevoke?: (token: Token) => void;
   onBulkRevoke?: () => void;
   bulkRevokeDisabled?: boolean;
+  tableBodyMaxHeight?: number | string;
 };
 
 /**
  *
  */
-export function TokensTable({ tokens, totalCount, title = 'Active tokens', onRevoke, onBulkRevoke, bulkRevokeDisabled = false }: TokensTableProps) {
+export function TokensTable({ tokens, totalCount, title = 'Active tokens', onRevoke, onBulkRevoke, bulkRevokeDisabled = false, tableBodyMaxHeight }: TokensTableProps) {
   const showActionsColumn = Boolean(onRevoke);
   const showBulkAction = Boolean(onBulkRevoke);
 
@@ -111,7 +112,13 @@ export function TokensTable({ tokens, totalCount, title = 'Active tokens', onRev
           </Button>
         ) : null}
       </Stack>
-      <DataTable columns={columns} rows={tokens} getRowKey={(token) => token.tokenId} dense />
+      <DataTable
+        columns={columns}
+        rows={tokens}
+        getRowKey={(token) => token.tokenId}
+        dense
+        bodyMaxHeight={tableBodyMaxHeight}
+      />
     </Paper>
   );
 }

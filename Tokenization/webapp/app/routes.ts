@@ -25,7 +25,8 @@ export default [
     ...prefix('services', [
       route('overview', 'feature/service/routes/overview.tsx'),
       route('new', 'feature/service/routes/registration.tsx'),
-      route(':id', 'feature/service/routes/details.tsx'),
+      route(':serviceId/renew', 'feature/service/routes/renew.tsx'),
+      route(':serviceId', 'feature/service/routes/details.tsx'),
     ]),
     ...prefix('routes', [
       route('overview', 'feature/service-routes/routes/overview.tsx'),

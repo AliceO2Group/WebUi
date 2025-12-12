@@ -19,6 +19,7 @@ export type ServiceFilterValues = {
   issuedBefore: string;
   expiresAfter: string;
   expiresBefore: string;
+  search: string;
   ordering: OrderingRule[];
 };
 
@@ -27,5 +28,6 @@ export const SERVICE_FILTER_DEFAULTS: ServiceFilterValues = {
   issuedBefore: '',
   expiresAfter: '',
   expiresBefore: '',
+  search: '',
   ordering: [],
 };
