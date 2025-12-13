@@ -180,7 +180,7 @@ const treeRows = (model) => !model.object.tree ?
 
   model.object.tree.children.length === 0
     ? h('.w-100.text-center', 'No objects found')
-    : model.object.tree.children.map((children) => treeRow(model, children, 0));
+    : model.object.tree.children.map((children) => treeRow(model, children));
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
@@ -192,49 +192,68 @@ const treeRows = (model) => !model.object.tree ?
  * @param {number} level - used for indentation within recursive call of treeRow
  * @returns {vnode} - virtual node element
  */
-function treeRow(model, tree, level) {
-  const padding = `${level}em`;
-  const levelDeeper = level + 1;
-  const children = tree.open ? tree.children.map((children) => treeRow(model, children, levelDeeper)) : [];
-  const path = tree.name;
-  const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
+function treeRow(model, tree, level = 0) {
+  const { pathString, open, children, object, name } = tree;
 
-  if (model.object.searchInput) {
-    return [];
-  } else {
-    if (tree.object && tree.children.length === 0) {
-      return [leafRow(path, () => model.object.select(tree.object), className, padding, tree.name)];
-    } else if (tree.object && tree.children.length > 0) {
-      return [
-        leafRow(path, () => model.object.select(tree.object), className, padding, tree.name),
-        branchRow(path, tree, padding),
-        children,
-      ];
-    }
-    return [
-      branchRow(path, tree, padding),
-      children,
-    ];
+  const childRow = open
+    ? children.flatMap((children) => treeRow(model, children, level + 1))
+    : [];
+
+  const rows = [];
+
+  if (object) {
+    // Add a leaf row (final element; cannot be expanded further)
+    const className = object && object === model.object.selected ? 'table-primary' : '';
+    const leaf = leafRow(
+      pathString,
+      name,
+      () => model.object.select(object),
+      className,
+      {
+        paddingLeft: `${level}em`,
+      },
+    );
+    rows.push(leaf);
   }
+  if (children.length > 0) {
+    // Add a branch row (expandable / collapsible element)
+    const branch = branchRow(
+      pathString,
+      open,
+      name,
+      () => tree.toggle(),
+      {
+        paddingLeft: `${level}em`,
+      },
+    );
+    rows.push(branch);
+  }
+
+  return [...rows, ...childRow];
 }
 
 /**
  * Creates a row containing specific visuals for leaf object and on selection
  * it will plot the object with JSRoot
- * @param {string} path - full name of the object
- * @param {Action} selectItem - action for plotting the object
- * @param {string} className - name of the row class
- * @param {number} padding - space needed to be displayed so that leaf is within its parent
- * @param {string} leafName - name of the object
+ * @param {string} key - An unique identifier for this branch row element (table row)
+ * @param {string} leafName - The name of this tree object element
+ * @param {() => void} onClick - The action (callback) to perform upon clicking this branch row element (table row)
+ * @param {string} className - Optional CSS class name(s) for the outer branch row element (table row)
+ * @param {object} styling - Optional CSS styling for the inner branch row element (table data)
  * @returns {vnode} - virtual node element
  */
-const leafRow = (path, selectItem, className, padding, leafName) =>
+const leafRow = (key, leafName, onClick, className = '', styling = {}) =>
   h('tr.object-selectable', {
-    key: path, title: path, onclick: selectItem, class: className, id: path,
+    key: key,
+    id: key,
+    title: leafName,
+    onclick: onClick,
+    class: className,
   }, [
-    h('td.highlight', [
-      h('span', { style: { paddingLeft: padding } }, iconBarChart()),
-      ' ',
+    h('td.highlight.flex-row.items-center.g1', {
+      style: styling,
+    }, [
+      iconBarChart(),
       leafName,
     ]),
   ]);
@@ -242,16 +261,24 @@ const leafRow = (path, selectItem, className, padding, leafName) =>
 /**
  * Creates a row containing specific visuals for branch object and on selection
  * it will open its children
- * @param {string} path - full name of the object
- * @param {ObjectTree} tree - current selected tree
- * @param {number} padding - space needed to be displayed so that branch is within its parent
+ * @param {string} key - An unique identifier for this branch row element (table row)
+ * @param {boolean} isTreeOpen - Whether the current tree object is open (expanded)
+ * @param {string} branchName - The name of this tree object element
+ * @param {() => void} onClick - The action (callback) to perform upon clicking this branch row element (table row)
+ * @param {object} styling - Optional CSS styling for the inner branch row element (table data)
  * @returns {vnode} - virtual node element
  */
-const branchRow = (path, tree, padding) =>
-  h('tr.object-selectable', { key: path, title: path, onclick: () => tree.toggle() }, [
-    h('td.highlight', [
-      h('span', { style: { paddingLeft: padding } }, tree.open ? iconCaretBottom() : iconCaretRight()),
-      ' ',
-      tree.name,
+const branchRow = (key, isTreeOpen, branchName, onClick, styling = {}) =>
+  h('tr.object-selectable', {
+    key: key,
+    id: key,
+    title: branchName,
+    onclick: onClick,
+  }, [
+    h('td.highlight.flex-row.items-center.g1', {
+      style: styling,
+    }, [
+      isTreeOpen ? iconCaretBottom() : iconCaretRight(),
+      branchName,
     ]),
   ]);
