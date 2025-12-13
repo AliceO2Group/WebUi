@@ -12,18 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { mockServices } from '~/feature/service/mocks/services.mock';
-import type { Service } from '~/feature/service/types/service';
-import type { ServiceFilterValues } from '~/feature/service/types/service-filters';
-
-export type ServicesQueryResponse = {
-  services: Service[];
-  totalCount: number;
+export type ServiceRoute = {
+  routeId: string;
+  serviceFrom: string;
+  serviceTo: string;
+  permissions: string[];
 };
-
-export async function fetchServices(_filters: ServiceFilterValues | null): Promise<ServicesQueryResponse> {
-  return {
-    services: [...mockServices],
-    totalCount: mockServices.length,
-  };
-}

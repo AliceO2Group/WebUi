@@ -55,6 +55,7 @@ type DirectionalOption = {
   label: string;
 };
 
+// Duplicate every user-facing option into asc/desc variants with stable keys.
 const buildDirectionalOptions = (options: OrderingOption[]): DirectionalOption[] =>
   options.flatMap((option) =>
     directions.map((direction) => ({
@@ -66,22 +67,36 @@ const buildDirectionalOptions = (options: OrderingOption[]): DirectionalOption[]
   );
 
 /**
- *
+ * Ordering Control component allowing users to select multiple ordering rules
+ * from a predefined set of fields and directions. 
+ * 
+ * The elements are rendered using MUI Select with ChipStack as the display for selected items.
+ * 
+ * Component won't let to have two ordering rules for the same field;
+ * 
+ * @param props.label - Label for the ordering control.
+ * @param props.value - Currently selected ordering rules.
+ * @param props.onChange - Callback invoked when the ordering rules change.
+ * @param props.options - Available ordering options.
+ * 
  */
 export function OrderingControl({ label = 'Ordering', value = [], onChange, options }: OrderingControlProps) {
+  // Derive multi-select keys for the currently applied rules.
   const selectedKeys = value.map((rule) => `${rule.field}:${rule.direction}`);
   const directionalOptions = buildDirectionalOptions(options);
+  // Fast lookup for labels/directions when rendering chips and menu entries.
   const optionMap = Object.fromEntries(directionalOptions.map((item) => [item.key, item]));
 
   const handleSelectionChange = (event: SelectChangeEvent<typeof selectedKeys>) => {
     const rawValue = event.target.value;
     const nextKeys = typeof rawValue === 'string' ? rawValue.split(',') : rawValue;
-
+    // Work backwards to keep the last chosen direction per field.
     const dedupedReverse: OrderingRule[] = [];
     const seen = new Set<string>();
     for (let index = nextKeys.length - 1; index >= 0; index -= 1) {
       const key = nextKeys[index];
       const option = optionMap[key];
+      // if option field seen before, skip to keep the last chosen direction only
       if (!option || seen.has(option.field)) {
         continue;
       }
@@ -89,6 +104,7 @@ export function OrderingControl({ label = 'Ordering', value = [], onChange, opti
       dedupedReverse.push({ field: option.field, direction: option.direction });
     }
 
+    // Restore chronological order 
     onChange(dedupedReverse.reverse());
   };
 

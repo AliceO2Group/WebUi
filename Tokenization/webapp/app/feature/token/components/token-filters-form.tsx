@@ -24,7 +24,7 @@ import { Controller, type Control, useForm } from 'react-hook-form';
 
 import { useTokenServiceOptionsQuery } from '~/feature/token/api/queries';
 import { FormMultiSelectField } from '~/shared/components/form/multi-select-field';
-import { StaticTextField } from '~/shared/components/form/styled-text-field';
+import { StaticTextField } from '~/shared/components/form/static-text-field';
 import { OrderingControl, type OrderingOption } from '~/shared/components/order/ordering-control';
 import { TOKEN_FILTER_DEFAULTS, type TokenFilterValues } from '~/feature/token/types/token-filters';
 import { useDebouncedValue } from '~/shared/hooks/useDebouncedValue';

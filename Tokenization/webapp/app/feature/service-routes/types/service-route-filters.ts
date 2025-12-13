@@ -11,3 +11,13 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+
+export type ServiceRouteFilterValues = {
+  serviceFrom: string[];
+  serviceTo: string[];
+};
+
+export const SERVICE_ROUTE_FILTER_DEFAULTS: ServiceRouteFilterValues = {
+  serviceFrom: [],
+  serviceTo: [],
+};

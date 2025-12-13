@@ -23,7 +23,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { Controller } from 'react-hook-form';
 import type { Control, FieldPath, FieldValues } from 'react-hook-form';
 
-import { StaticTextField } from './styled-text-field';
+import { StaticTextField } from './static-text-field';
 
 export type FormMultiSelectFieldProps<TFieldValues extends FieldValues> = {
   control: Control<TFieldValues>;
@@ -38,6 +38,23 @@ export type FormMultiSelectFieldProps<TFieldValues extends FieldValues> = {
   onInputValueChange?: (value: string) => void;
 };
 
+
+/**
+ * FormMultiSelectField exposes a reusable multi-select input backed by MUI Autocomplete and
+ * wired into react-hook-form via Controller. The component supports controlled and uncontrolled
+ * input text, debounced fetching, and loading indicators.
+ *
+ * @param props.control react-hook-form control instance that manages the field state.
+ * @param props.name form field path where the selected string array is stored.
+ * @param props.label text label passed to the underlying text field.
+ * @param props.options array of selectable strings rendered inside the dropdown (defaults to []).
+ * @param props.loading shows a spinner next to the input when true.
+ * @param props.placeholder placeholder text displayed when no chips are selected.
+ * @param props.className optional CSS class applied to the Autocomplete root.
+ * @param props.minSearchLength minimum characters required before options are shown (default 0).
+ * @param props.inputValue controlled input string; falls back to internal state if undefined.
+ * @param props.onInputValueChange callback fired whenever the user types in the autocomplete input.
+ */
 export const FormMultiSelectField = <TFieldValues extends FieldValues>({
   control,
   name,
@@ -52,6 +69,7 @@ export const FormMultiSelectField = <TFieldValues extends FieldValues>({
 }: FormMultiSelectFieldProps<TFieldValues>) => {
   const [internalInputValue, setInternalInputValue] = useState('');
   const resolvedInputValue = inputValueProp ?? internalInputValue;
+  // Determine if the current input value meets the minimum search length
   const meetsThreshold = resolvedInputValue.length >= minSearchLength;
   const displayedOptions = useMemo(() => (meetsThreshold ? options : []), [meetsThreshold, options]);
   const noOptionsText = useMemo(() => {

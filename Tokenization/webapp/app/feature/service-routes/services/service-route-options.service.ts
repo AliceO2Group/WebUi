@@ -13,17 +13,12 @@
  */
 
 import { mockServices } from '~/feature/service/mocks/services.mock';
-import type { Service } from '~/feature/service/types/service';
-import type { ServiceFilterValues } from '~/feature/service/types/service-filters';
 
-export type ServicesQueryResponse = {
-  services: Service[];
-  totalCount: number;
-};
-
-export async function fetchServices(_filters: ServiceFilterValues | null): Promise<ServicesQueryResponse> {
-  return {
-    services: [...mockServices],
-    totalCount: mockServices.length,
-  };
+export async function fetchServiceRouteOptions(searchTerm = ''): Promise<string[]> {
+  const names = Array.from(new Set(mockServices.map((service) => service.commonName)));
+  const query = searchTerm.trim().toLowerCase();
+  if (!query) {
+    return names;
+  }
+  return names.filter((name) => name.toLowerCase().includes(query));
 }

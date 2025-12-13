@@ -12,18 +12,18 @@
  * or submit itself to any jurisdiction.
  */
 
-import { mockServices } from '~/feature/service/mocks/services.mock';
-import type { Service } from '~/feature/service/types/service';
-import type { ServiceFilterValues } from '~/feature/service/types/service-filters';
+import type { ServiceRouteFilterValues } from '~/feature/service-routes/types/service-route-filters';
 
-export type ServicesQueryResponse = {
-  services: Service[];
-  totalCount: number;
-};
+export function hasRouteFilters(filters: ServiceRouteFilterValues) {
+  return Boolean(
+    (filters.serviceFrom && filters.serviceFrom.length) ||
+    (filters.serviceTo && filters.serviceTo.length)
+  );
+}
 
-export async function fetchServices(_filters: ServiceFilterValues | null): Promise<ServicesQueryResponse> {
-  return {
-    services: [...mockServices],
-    totalCount: mockServices.length,
-  };
+export function validateRouteFiltersForBulk(filters: ServiceRouteFilterValues): string | null {
+  if (!hasRouteFilters(filters)) {
+    return 'Add at least one service filter before running bulk ban.';
+  }
+  return null;
 }

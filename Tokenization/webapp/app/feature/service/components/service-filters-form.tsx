@@ -16,7 +16,7 @@ import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import { Controller, useForm } from 'react-hook-form';
 
-import { StaticTextField } from '~/shared/components/form/styled-text-field';
+import { StaticTextField } from '~/shared/components/form/static-text-field';
 import { OrderingControl, type OrderingOption } from '~/shared/components/order/ordering-control';
 import { SERVICE_FILTER_DEFAULTS, type ServiceFilterValues } from '~/feature/service/types/service-filters';
 

@@ -31,7 +31,6 @@ export default [
     ...prefix('routes', [
       route('overview', 'feature/service-routes/routes/overview.tsx'),
       route('mapping', 'feature/service-routes/routes/mapping.tsx'),
-      route(':id', 'feature/service-routes/routes/details.tsx'),
     ]),
     route('*', 'routes/404.tsx'),
   ]),
