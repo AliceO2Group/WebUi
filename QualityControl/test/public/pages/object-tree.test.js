@@ -11,9 +11,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, ok, deepStrictEqual } from 'node:assert';
+import { strictEqual, ok, deepStrictEqual, notDeepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
-import { getLocalStorage } from '../../testUtils/localStorage.js';
+import { getLocalStorage, getLocalStorageAsJson, removeLocalStorage } from '../../testUtils/localStorage.js';
 import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
 
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
@@ -43,7 +43,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     ok(rowsCount > 1); // more than 1 object in the tree
   });
 
-  await testParent.test('should not preserve state if refreshed not in run mode', { timeout }, async () => {
+  await testParent.test('should preserve state if refreshed', { timeout }, async () => {
     const tbodyPath = 'section > div > div > div > table > tbody';
     await page.locator(`${tbodyPath} > tr:nth-child(2)`).click();
     await page.reload({ waitUntil: 'networkidle0' });
@@ -51,7 +51,14 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     const rowCount = await page.evaluate(() =>
       document.querySelectorAll('section > div > div > div > table > tbody > tr').length);
 
-    strictEqual(rowCount, 2);
+    // Ideally, tests should be isolated and not depend on each other.
+    // Currently, some tests rely on shared localStorage or page state changes from previous tests.
+    // As a workaround, we do targeted cleanup here to prevent issues in later tests.
+    const personid = await page.evaluate(() => window.model.session.personid);
+    await removeLocalStorage(page, `${StorageKeysEnum.OBJECT_TREE_OPEN_NODES}-${personid}`);
+    await page.reload({ waitUntil: 'networkidle0' });
+
+    strictEqual(rowCount, 3);
   });
 
   await testParent.test('should have a button to sort by (default "Name" ASC)', async () => {
@@ -134,6 +141,12 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     'should maintain panel width from localStorage on page reload',
     { timeout },
     async () => {
+      // Ideally, tests should be isolated and not depend on each other.
+      // Currently, some tests rely on shared localStorage or page state changes from previous tests.
+      // As a workaround, we do targeted cleanup here to prevent issues in later tests.
+      const personid = await page.evaluate(() => window.model.session.personid);
+      await removeLocalStorage(page, `${StorageKeysEnum.OBJECT_TREE_OPEN_NODES}-${personid}`);
+
       const dragAmount = 35;
       await page.reload({ waitUntil: 'networkidle0' });
       await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(2)').click());
