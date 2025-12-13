@@ -203,7 +203,7 @@ function treeRow(model, tree, level = 0) {
 
   if (object) {
     // Add a leaf row (final element; cannot be expanded further)
-    const className = object && object === model.object.selected ? 'table-primary' : '';
+    const className = object === model.object.selected ? 'table-primary' : '';
     const leaf = leafRow(
       pathString,
       name,
