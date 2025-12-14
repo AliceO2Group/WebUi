@@ -14,7 +14,7 @@
 
 // Type definitions for Vault-related operations
 export interface SignPayload {
-  data: { input: string };
+  input: string;
 }
 
 // Define the structure of the Vault read response
@@ -61,4 +61,39 @@ export interface VaultKvWritePayload {
   data: {
     [key: string]: string;
   };
+}
+
+// Define the structure of the sign response
+export interface SignResponse {
+  data: {
+    signature: string;
+  };
+}
+
+// Define the structure of the encrypt response
+export interface VaultEncryptResponse {
+  data: {
+    ciphertext: string;
+  };
+}
+
+// Define the structure of the login response
+export interface AuthResponse {
+  auth: {
+    client_token: string;
+  };
+}
+
+// Define the structure of the encrypt payload
+export interface VaultEncryptPayload {
+  plaintext: string;
+}
+
+// Define the structure of the create key payload
+export interface VaultCreateKeyPayload {
+  type: string;
+  convergent_encryption: boolean;
+  derived: boolean;
+  exportable: boolean;
+  allow_plaintext_backup: boolean;
 }

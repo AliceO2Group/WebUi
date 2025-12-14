@@ -17,7 +17,7 @@
 import { VaultKvWritePayload } from '../../types/vault_types.js';
 
 type SignTokenReq = {
-  data: { input: string };
+  input: string;
   claims?: Record<string, unknown>;
 };
 type GetCredentialReq = { path: string; claims?: Record<string, unknown> };
@@ -26,5 +26,30 @@ type CreateOrUpdateCredentialReq = {
   body: VaultKvWritePayload;
   claims?: Record<string, unknown>;
 };
+type VaultEncryptPayloadReq = {
+  key: string;
+  body: {
+    plaintext: string;
+  };
+  claims?: Record<string, unknown>;
+};
 
-export type { SignTokenReq, GetCredentialReq, CreateOrUpdateCredentialReq };
+type VaultCreateKeyReq = {
+  keyName: string;
+  body: {
+    type: string;
+    convergent_encryption: boolean;
+    derived: boolean;
+    exportable: boolean;
+    allow_plaintext_backup: boolean;
+  };
+  claims?: Record<string, unknown>;
+};
+
+export type {
+  SignTokenReq,
+  GetCredentialReq,
+  CreateOrUpdateCredentialReq,
+  VaultEncryptPayloadReq,
+  VaultCreateKeyReq,
+};

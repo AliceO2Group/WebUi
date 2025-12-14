@@ -27,15 +27,23 @@ describe('VaultSignService', () => {
     service = new VaultSignService();
   });
 
-  it('signToken() send proper request and return signature', async () => {
+  it('signToken() sends proper transit input and returns signature', async () => {
     const signature = 'vault:v1:abcdef';
+
     (axios.post as jest.MockedFunction<typeof axios.post>).mockResolvedValue({
       data: { data: { signature } },
     } as any);
 
     const url = 'https://vault.local:9300/v1/transit/sign/signing-key';
     const token = 's.token';
-    const body = JSON.stringify({ data: { sub: '123' } });
+
+    const payload = { sub: '123' };
+
+    const input = Buffer.from(JSON.stringify(payload), 'utf8').toString(
+      'base64'
+    );
+
+    const body = { input };
 
     const result = await service.signToken(url, token, agent, body);
 
@@ -51,14 +59,19 @@ describe('VaultSignService', () => {
     expect(result).toBe(signature);
   });
 
-  it('signToken() throws error when response.ok === false', async () => {
+  it('signToken() throws error when Vault returns error response', async () => {
     (axios.post as jest.MockedFunction<typeof axios.post>).mockRejectedValue({
       response: { data: 'error' },
     });
 
     const url = 'https://vault.local:9300/v1/transit/sign/signing-key';
     const token = 's.token';
-    const body = JSON.stringify({ data: { sub: '123' } });
+
+    const payload = { sub: '123' };
+    const input = Buffer.from(JSON.stringify(payload), 'utf8').toString(
+      'base64'
+    );
+    const body = { input };
 
     await expect(service.signToken(url, token, agent, body)).rejects.toThrow(
       'error'

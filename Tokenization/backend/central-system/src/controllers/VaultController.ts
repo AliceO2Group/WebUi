@@ -15,6 +15,8 @@
 import { VaultCredentialsService } from '../services/VaultCredentialsService.js';
 import { VaultAuthService } from '../services/VaultAuthService.js';
 import { VaultSignService } from '../services/VaultSignService.js';
+import { EncryptionService } from '../services/EncryptionService.js';
+import { VaultCreateKeyService } from '../services/VaultCreateKeyService.js';
 
 import { Agent } from 'https';
 
@@ -22,6 +24,8 @@ import {
   SignTokenReq,
   GetCredentialReq,
   CreateOrUpdateCredentialReq,
+  VaultEncryptPayloadReq,
+  VaultCreateKeyReq,
 } from '../lib/utils/event-req-types.js';
 import { registerBusHandler } from '../lib/event-bus/register-bus-handler.js';
 import { EventType } from '../lib/utils/events.js';
@@ -32,6 +36,8 @@ import {
   SignPayload,
   VaultReadResponse,
   VaultKvWritePayload,
+  VaultEncryptPayload,
+  VaultCreateKeyPayload,
 } from '../types/vault_types.js';
 
 /**
@@ -54,7 +60,9 @@ export class VaultController {
   constructor(
     private readonly _tokenSignService: VaultSignService,
     private readonly _authService: VaultAuthService,
-    private readonly _credentialsService: VaultCredentialsService
+    private readonly _credentialsService: VaultCredentialsService,
+    private readonly _encryptService: EncryptionService,
+    private readonly _createKeyService: VaultCreateKeyService
   ) {
     this._logger = LogManager.getLogger('VaultController');
     const caPem = process.env.VAULT_CACERT_B64;
@@ -86,7 +94,7 @@ export class VaultController {
         process.env.VAULT_ADDR! + '/v1/transit/sign/tokenization-signing',
         this._vaultAccessToken,
         this._agent,
-        JSON.stringify(payload.data)
+        JSON.stringify(payload)
       );
     } catch (error: any) {
       this._logger.errorMessage(
@@ -191,9 +199,57 @@ export class VaultController {
     }
   }
 
+  /**   * @description Encrypts data using the EncryptionService.
+   * @param key - The encryption key to use.
+   * @param body - The body of the encrypt request.
+   * @return A promise that resolves to the ciphertext.
+   * @throws Will throw an error if encryption fails.
+   */
+  public async encryptData(
+    key: string,
+    body: VaultEncryptPayload
+  ): Promise<string> {
+    try {
+      return await this._encryptService.encryptData(
+        process.env.VAULT_ADDR! + `/v1/transit/encrypt/${key}`,
+        this._vaultAccessToken,
+        this._agent,
+        JSON.stringify(body)
+      );
+    } catch (error: any) {
+      this._logger.errorMessage(`Error encrypting data: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**   * @description Creates a new encryption key in the vault using the VaultCreateKeyService.
+   * @param keyName - The name of the key to create.
+   * @param body - The body of the create key request.
+   * @return A promise that resolves when the key is created.
+   * @throws Will throw an error if key creation fails.
+   */
+  public async createKeyInVault(
+    keyName: string,
+    body: VaultCreateKeyPayload
+  ): Promise<void> {
+    try {
+      await this._createKeyService.createKey(
+        process.env.VAULT_ADDR! + `/v1/transit/keys/${keyName}`,
+        this._vaultAccessToken,
+        this._agent,
+        JSON.stringify(body)
+      );
+    } catch (error: any) {
+      this._logger.errorMessage(
+        `Error creating key in Vault: ${error.message}`
+      );
+      throw error;
+    }
+  }
+
   /**
    *  @description Registers the event handlers for vault-related operations.
-   *  This method sets up handlers for signing tokens, logging in, renewing tokens,
+   *  This method sets up handlers for signing tokens, logging in, renewing tokens, encyption,
    *  and managing credentials in the vault.
    */
   public register() {
@@ -219,6 +275,16 @@ export class VaultController {
       EventType.CREATE_OR_UPDATE_CREDENTIAL_VAULT,
       async (payload) =>
         this.createOrUpdateCredentialInVault(payload.path, payload.body)
+    );
+
+    registerBusHandler<VaultEncryptPayloadReq>(
+      EventType.ENCRYPT_TOKEN_VAULT,
+      async (payload) => this.encryptData(payload.key, payload.body)
+    );
+
+    registerBusHandler<VaultCreateKeyReq>(
+      EventType.CREATE_KEY_VAULT,
+      async (payload) => this.createKeyInVault(payload.keyName, payload.body)
     );
   }
 }

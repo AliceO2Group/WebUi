@@ -103,11 +103,11 @@ if [ -n "${VAULT_TOKEN:-}" ]; then
 
   echo "[vault-setup] Creating central-system policy..."
   vault policy write central-system - <<EOF
-path "transit/encrypt/tokenization-signing" {
+path "transit/encrypt/*" {
   capabilities = ["update"]
 }
 
-path "transit/decrypt/tokenization-signing" {
+path "transit/decrypt/*" {
   capabilities = ["update"]
 }
 
@@ -115,8 +115,8 @@ path "tokenization/data/*" {
   capabilities = ["create", "update", "read", "delete", "list"]
 }
 
-path "transit/keys/tokenization-signing" {
-  capabilities = ["read"]
+path "transit/keys/*" {
+  capabilities = ["create", "read", "update", "delete"]
 }
 
 path "transit/sign/tokenization-signing" {

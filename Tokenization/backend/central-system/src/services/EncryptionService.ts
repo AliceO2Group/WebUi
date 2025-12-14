@@ -14,37 +14,33 @@
 
 import { Agent } from 'https';
 import axios from 'axios';
+import { VaultEncryptResponse } from '../types/vault_types';
 
-import { SignResponse } from '../types/vault_types';
-
-/**
- * @description Service for signing tokens using an external vault service.
- */
-export class VaultSignService {
-  /**
-   * @description Signs a token by sending it to an external vault service.
-   * @param token - The JWT token to be signed.
-   * @param url - The URL of the external vault service.
-   * @param agent - The HTTPS agent to use for the request.
-   * @param body - The body of the sign request.
-   * @return A promise that resolves to the response from the vault service.
-   * @throws Will throw an error if signing fails.
-   */
-  public async signToken(
+export class EncryptionService {
+    /**
+     * @description Encrypts data by sending it to an external vault service.
+     * @param url - The URL of the external vault service.
+     * @param token - The client token for authentication.
+     * @param agent - The HTTPS agent to use for the request.
+     * @param body - The body of the encrypt request.
+     * @return A promise that resolves to the ciphertext returned by the vault service.
+     * @throws Will throw an error if encryption fails.
+     */
+  public async encryptData(
     url: string,
     token: string,
     agent: Agent,
     body: Buffer | string | NodeJS.ReadableStream | null
   ): Promise<string> {
     try {
-      const resp = await axios.post<SignResponse>(url, body, {
+      const resp = await axios.post<VaultEncryptResponse>(url, body, {
         headers: {
           'content-type': 'application/json',
           'X-Vault-Token': token,
         },
         httpsAgent: agent,
       });
-      return resp.data.data.signature;
+      return resp.data.data.ciphertext;
     } catch (err: any) {
       const message = err?.response?.data
         ? typeof err.response.data === 'string'

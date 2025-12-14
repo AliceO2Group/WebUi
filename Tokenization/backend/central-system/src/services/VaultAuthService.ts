@@ -15,12 +15,7 @@
 import { Agent } from 'https';
 import axios from 'axios';
 
-// Define the structure of the login response
-interface AuthResponse {
-  auth: {
-    client_token: string;
-  };
-}
+import { AuthResponse } from '../types/vault_types';
 
 /**
  * @description Service for authenticating with an external vault service.

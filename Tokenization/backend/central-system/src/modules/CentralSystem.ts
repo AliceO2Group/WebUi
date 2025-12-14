@@ -19,6 +19,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { TokensGetService } from '../services/TokensGetService.js';
 import { VaultSignService } from '../services/VaultSignService.js';
+import { EncryptionService } from '../services/EncryptionService.js';
+import { VaultCreateKeyService } from '../services/VaultCreateKeyService.js';
 import { db } from '../lib/database/Database.js';
 import { SequelizeDatabase } from '../lib/database/SequelizeDatabase.js';
 import { VaultAuthService } from '../services/VaultAuthService.js';
@@ -47,7 +49,6 @@ class CentralSystem {
 
   public readonly connectionController: ConnectionController;
   public readonly vaultController: VaultController;
-  
 
   public constructor(wrapperPort: number) {
     this._logger = LogManager.getLogger('CentralSystem');
@@ -56,7 +57,6 @@ class CentralSystem {
       this.PROTO_PATH,
       wrapperPort
     );
-
 
     this._centralSystemWrapper.listen();
     this._fakeTokens = new Map([
@@ -73,9 +73,10 @@ class CentralSystem {
     this.vaultController = new VaultController(
       new VaultSignService(),
       new VaultAuthService(),
-      new VaultCredentialsService()
+      new VaultCredentialsService(),
+      new EncryptionService(),
+      new VaultCreateKeyService()
     );
-
     this.vaultController.register();
     this.vaultController
       .loginVault()
