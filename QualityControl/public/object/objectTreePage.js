@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX } from '/js/src/index.js';
+import { h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX, imagE } from '/js/src/index.js';
 import { spinner } from '../common/spinner.js';
 import { draw } from '../common/object/draw.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
@@ -20,6 +20,7 @@ import virtualTable from './virtualTable.js';
 import { defaultRowAttributes, qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
 import { downloadButton } from '../common/downloadButton.js';
 import { resizableDivider } from '../common/resizableDivider.js';
+import { downloadRootObjectAsImage } from '../common/rootDownload.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -93,14 +94,26 @@ function objectPanel(model) {
  * @returns {vnode} - virtual node element
  */
 const drawPlot = (model, object) => {
-  const { name, validFrom, id } = object;
+  const { name, qcObject, validFrom, id, drawingOptions = [], displayHints = [] } = object;
   const href = validFrom ?
     `?page=objectView&objectName=${name}&ts=${validFrom}&id=${id}`
     : `?page=objectView&objectName=${name}`;
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
     h('.item-action-row.flex-row.g1.p1', [
+      h('button.btn', {
+        title: 'Download as PNG',
+        id: 'download-image-button',
+        onclick: async (event) => {
+          try {
+            event.target.disabled = true;
+            await downloadRootObjectAsImage(`${name}.png`, qcObject.root, [...drawingOptions, ...displayHints]);
+          } finally {
+            event.target.disabled = false;
+          }
+        },
+      }, imagE()),
       downloadButton({
-        href: model.objectViewModel.getDownloadQcdbObjectUrl(object.id),
+        href: model.objectViewModel.getDownloadQcdbObjectUrl(id),
         title: 'Download object',
       }),
       h(
