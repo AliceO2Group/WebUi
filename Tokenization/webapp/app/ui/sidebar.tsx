@@ -62,10 +62,6 @@ const NAV_SECTIONS: SidebarSection[] = [
         label: 'Routes Overview',
         path: '/routes/overview',
       },
-      {
-        label: 'Service Mapping',
-        path: '/routes/services',
-      },
     ],
   },
 ];

@@ -51,7 +51,7 @@ export const mockTokens: Token[] = [
   {
     tokenId: '4',
     serviceFrom: 'Service Five',
-    serviceTo: 'Telemetry Gateway',
+    serviceTo: 'Service Six',
     exp: '2025-11-07T15:30:00Z',
     last4chars: '6a1c',
     issuer: 'token-service',
@@ -61,7 +61,7 @@ export const mockTokens: Token[] = [
   },
   {
     tokenId: '5',
-    serviceFrom: 'Telemetry Gateway',
+    serviceFrom: 'Service Six',
     serviceTo: 'Service Three',
     exp: '2024-12-14T04:45:00Z',
     last4chars: '3fe8',
@@ -72,7 +72,7 @@ export const mockTokens: Token[] = [
   },
   {
     tokenId: '6',
-    serviceFrom: 'Data Aggregator',
+    serviceFrom: 'Service Seven',
     serviceTo: 'Service Two',
     exp: '2025-08-21T09:10:00Z',
     last4chars: 'a92d',
@@ -83,7 +83,7 @@ export const mockTokens: Token[] = [
   },
   {
     tokenId: '7',
-    serviceFrom: 'Diagnostics Console',
+    serviceFrom: 'Service Eight',
     serviceTo: 'Service One',
     exp: '2026-03-01T22:20:00Z',
     last4chars: 'bb0f',
@@ -94,7 +94,7 @@ export const mockTokens: Token[] = [
   },
   {
     tokenId: '8',
-    serviceFrom: 'Control Plane API',
+    serviceFrom: 'Service Nine',
     serviceTo: 'Service Four',
     exp: '2024-10-30T01:15:00Z',
     last4chars: 'e1c4',
@@ -105,7 +105,7 @@ export const mockTokens: Token[] = [
   },
   {
     tokenId: '9',
-    serviceFrom: 'Monitoring Hub',
+    serviceFrom: 'Service Ten',
     serviceTo: 'Service Five',
     exp: '2025-07-04T13:10:00Z',
     last4chars: 'c991',
@@ -116,7 +116,7 @@ export const mockTokens: Token[] = [
   },
   {
     tokenId: '10',
-    serviceFrom: 'Alert Dispatcher',
+    serviceFrom: 'Service Eleven',
     serviceTo: 'Service Three',
     exp: '2024-11-08T19:55:00Z',
     last4chars: '11dd',
@@ -127,7 +127,7 @@ export const mockTokens: Token[] = [
   },
   {
     tokenId: '11',
-    serviceFrom: 'Orchestration Engine',
+    serviceFrom: 'Service Twelve',
     serviceTo: 'Service Two',
     exp: '2025-04-27T02:30:00Z',
     last4chars: '8f77',
@@ -139,7 +139,7 @@ export const mockTokens: Token[] = [
   {
     tokenId: '12',
     serviceFrom: 'Service Four',
-    serviceTo: 'Monitoring Hub',
+    serviceTo: 'Service Ten',
     exp: '2026-02-18T06:05:00Z',
     last4chars: '59ea',
     issuer: 'token-service',
@@ -150,7 +150,7 @@ export const mockTokens: Token[] = [
   {
     tokenId: '13',
     serviceFrom: 'Service One',
-    serviceTo: 'Control Plane API',
+    serviceTo: 'Service Nine',
     exp: '2024-09-12T17:00:00Z',
     last4chars: '72bc',
     issuer: 'token-service',
@@ -161,7 +161,7 @@ export const mockTokens: Token[] = [
   {
     tokenId: '14',
     serviceFrom: 'Service Two',
-    serviceTo: 'Alert Dispatcher',
+    serviceTo: 'Service Eleven',
     exp: '2025-01-19T14:45:00Z',
     last4chars: '5a4e',
     issuer: 'token-service',
@@ -171,8 +171,8 @@ export const mockTokens: Token[] = [
   },
   {
     tokenId: '15',
-    serviceFrom: 'Diagnostics Console',
-    serviceTo: 'Orchestration Engine',
+    serviceFrom: 'Service Eight',
+    serviceTo: 'Service Twelve',
     exp: '2026-05-09T20:25:00Z',
     last4chars: '04c5',
     issuer: 'token-service',

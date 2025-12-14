@@ -14,7 +14,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { banServiceRoute, banServiceRoutesBulk } from '~/feature/service-routes/services/service-routes.service';
+import { banServiceRoute, banServiceRoutesBulk, registerServiceRoute, type ServiceRouteRegistrationPayload } from '~/feature/service-routes/services/service-routes.service';
 import type { ServiceRouteFilterValues } from '~/feature/service-routes/types/service-route-filters';
 import { serviceRoutesQueryKeys } from './queries';
 
@@ -32,6 +32,16 @@ export function useBulkBanServiceRoutesMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (filters: ServiceRouteFilterValues) => banServiceRoutesBulk(filters),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: serviceRoutesQueryKeys.lists });
+    },
+  });
+}
+
+export function useRegisterServiceRouteMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: ServiceRouteRegistrationPayload) => registerServiceRoute(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: serviceRoutesQueryKeys.lists });
     },

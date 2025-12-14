@@ -21,6 +21,12 @@ export type ServiceRoutesQueryResponse = {
   totalCount: number;
 };
 
+export type ServiceRouteRegistrationPayload = {
+  serviceFrom: string;
+  serviceTo: string;
+  permissions: string[];
+};
+
 export async function fetchServiceRoutes(_filters: ServiceRouteFilterValues | null): Promise<ServiceRoutesQueryResponse> {
   return {
     routes: [...mockServiceRoutes],
@@ -34,4 +40,14 @@ export async function banServiceRoute(_routeId: string): Promise<void> {
 
 export async function banServiceRoutesBulk(_filters: ServiceRouteFilterValues): Promise<void> {
   return Promise.resolve();
+}
+
+export async function registerServiceRoute(payload: ServiceRouteRegistrationPayload): Promise<ServiceRoute> {
+  const mockRoute: ServiceRoute = {
+    routeId: `route-${Date.now()}`,
+    serviceFrom: payload.serviceFrom,
+    serviceTo: payload.serviceTo,
+    permissions: [...payload.permissions],
+  };
+  return Promise.resolve(mockRoute);
 }
