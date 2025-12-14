@@ -171,3 +171,20 @@ export const camelToTitleCase = (text) => {
   const titleCase = spaced.charAt(0).toUpperCase() + spaced.slice(1);
   return titleCase;
 };
+
+/**
+ * Helper to trigger a download for a file
+ * @param {string} url - The URL to the file source
+ * @param {string} filename - The name of the file including the file extension
+ */
+export const triggerDownload = (url, filename) => {
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  try {
+    document.body.appendChild(link);
+    link.click();
+  } finally {
+    document.body.removeChild(link);
+  }
+};
