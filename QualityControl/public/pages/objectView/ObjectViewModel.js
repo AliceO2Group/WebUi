@@ -109,17 +109,13 @@ export default class ObjectViewModel extends BaseViewModel {
     // Use refreshed data if available, otherwise fetch based on available parameters
     if (data) {
       this.selected = data;
-      this._initialDrawingOptions();
     } else if (params.objectName) {
-      this.selected =
-        await this.model.services.object.getObjectByName(params.objectName, id, validFrom, this);
-      this._initialDrawingOptions();
+      this.selected = await this.model.services.object.getObjectByName(params.objectName, id, validFrom, this);
     } else if (params.objectId) {
-      this.selected =
-        await this.model.services.object.getObjectById(params.objectId, id, validFrom, this);
-      this._initialDrawingOptions();
+      this.selected = await this.model.services.object.getObjectById(params.objectId, id, validFrom, this);
     }
 
+    this._initialDrawingOptions();
     setBrowserTabTitle(this.selected.payload.name);
 
     Object.entries(params).forEach(([key, value]) => {
@@ -139,20 +135,27 @@ export default class ObjectViewModel extends BaseViewModel {
     this.notify();
   }
 
+  /**
+   * Set the initial drawing options based on the selected object
+   */
   _initialDrawingOptions() {
-    const { ignoreDefaults, drawOptions, displayHints, layoutDisplayOptions } = this.selected.payload;
+    const {
+      ignoreDefaults = false,
+      drawOptions = [],
+      displayHints = [],
+      layoutDisplayOptions = [],
+    } = this.selected.payload;
     this.ignoreDefaults = Boolean(ignoreDefaults);
-    this.drawOptions = drawOptions || [];
-    this.displayHints = displayHints || [];
-    this.layoutDisplayOptions = layoutDisplayOptions || [];
-    if (this.ignoreDefaults) {
-      this.drawingOptions = [...this.layoutDisplayOptions];
-    } else {
-      this.drawingOptions = [...this.drawOptions || [], ...this.displayHints || [], ...this.layoutDisplayOptions || []];
-    }
-    const allDrawingOptions = new Set((this.drawOptions || [])
-      .concat(this.displayHints || [], this.layoutDisplayOptions || []));
-    this.nonRecognizedDrawingOptions = [...allDrawingOptions].filter((option) => !DRAWING_OPTIONS.has(option));
+    this.drawOptions = drawOptions;
+    this.displayHints = displayHints;
+    this.layoutDisplayOptions = layoutDisplayOptions;
+
+    this.drawingOptions = ignoreDefaults
+      ? [...layoutDisplayOptions]
+      : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
+
+    const all = new Set([...drawOptions, ...displayHints, ...layoutDisplayOptions]);
+    this.nonRecognizedDrawingOptions = [...all].filter((o) => !DRAWING_OPTIONS.has(o));
     this.notify();
   }
 
@@ -162,11 +165,9 @@ export default class ObjectViewModel extends BaseViewModel {
    */
   toggleIgnoreDefaults() {
     this.ignoreDefaults = !this.ignoreDefaults;
-    if (this.ignoreDefaults) {
-      this.drawingOptions = [...this.layoutDisplayOptions];
-    } else {
-      this.drawingOptions = [...this.drawOptions || [], ...this.displayHints || [], ...this.layoutDisplayOptions || []];
-    }
+    this.drawingOptions = this.ignoreDefaults
+      ? [...this.layoutDisplayOptions]
+      : [...this.drawOptions, ...this.displayHints, ...this.layoutDisplayOptions];
     this.notify();
   }
 

@@ -35,31 +35,26 @@ export const objectDrawingOptions = ({
   onToggleIgnoreDefaults,
   onToggleOption,
 }) =>
-  h('.absolute-fill.level1.scroll-y', [
+  h('.absolute-fill.level1.scroll-y.#objectDrawingOptions', [
     h('.absolute.right-0.top-0.bg-white.shadow-lg.w-100.h-100.overflow-auto', [
       h('.flex-row.items-center.justify-between.mb2.g2', [
         h('span', 'Drawing Options:'),
-        checkboxWithTooltip(
-          `${id}defaults`,
-          'Ignore defaults',
-          'Set by ROOT (fOption) and QC Metadata',
-          ignoreDefaults,
-          onToggleIgnoreDefaults,
-        ),
+        checkboxWithTooltip({
+          id: `${id}ignoreDefaults`,
+          label: 'Ignore defaults',
+          tooltipText: 'Set by ROOT (fOption) and QC Metadata',
+          checked: ignoreDefaults,
+          onChange: onToggleIgnoreDefaults,
+        }),
       ]),
       nonRecognizedDrawingOptions && nonRecognizedDrawingOptions.length > 0 &&
-        h(
-          '.flex-row.label.mv2.danger',
-          `Non-recognized options: ${nonRecognizedDrawingOptions.join(', ')}`,
-        ),
-      h('', [
-        sectionTitle('Draw Options:', ' ROOT draw options'),
-        checkboxGrid(DRAW_OPTIONS.map((option) =>
-          checkBox(id + option, option, options.includes(option), () => onToggleOption(option)))),
-        sectionTitle('Display Hints:', ' Canvas display hints'),
-        checkboxGrid(DISPLAY_HINTS.map((option) =>
-          checkBox(id + option, option, options.includes(option), () => onToggleOption(option)))),
-      ]),
+        h('.flex-row.label.mv2.danger', `Non-recognized options: ${nonRecognizedDrawingOptions.join(', ')}`),
+      sectionTitle('Draw Options:', ' ROOT draw options'),
+      checkboxGrid(DRAW_OPTIONS.map((option) =>
+        checkBox(id + option, option, options.includes(option), () => onToggleOption(option)))),
+      sectionTitle('Display Hints:', ' Canvas display hints'),
+      checkboxGrid(DISPLAY_HINTS.map((option) =>
+        checkBox(id + option, option, options.includes(option), () => onToggleOption(option)))),
     ]),
   ]);
 
@@ -76,15 +71,25 @@ const checkboxGrid = (children) =>
 const sectionTitle = (label, tooltipText) =>
   h('.flex-row.mv2', h('.tooltip', [h('label.m0', label), h('.tooltiptext', tooltipText)]));
 
-const checkBox = (id, label, checked, onChange) =>
+const checkBox = (id, option, checked, onChange) =>
   h('.form-check', [
-    h('input.form-check-input', { type: 'checkbox', id, checked, onchange: onChange }),
-    h('label.m0', { for: id }, label),
+    h('input.form-check-input', {
+      type: 'checkbox',
+      id: id,
+      checked,
+      onchange: onChange,
+    }),
+    h('label.m0', { for: id }, option),
   ]);
 
-const checkboxWithTooltip = (id, label, tooltipText, checked, onChange) =>
+const checkboxWithTooltip = ({ id, label, tooltipText, checked, onChange }) =>
   h('.form-check.tooltip.mt2-sm.mh2', [
-    h('input.form-check-input', { type: 'checkbox', id, checked, onchange: onChange }),
+    h('input.form-check-input', {
+      type: 'checkbox',
+      id: id,
+      checked,
+      onchange: onChange,
+    }),
     h('label.m0', { for: id }, label),
     h('span.tooltiptext', tooltipText),
   ]);

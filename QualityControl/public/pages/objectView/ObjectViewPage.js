@@ -73,7 +73,7 @@ const objectPlotAndInfo = (objectViewModel) =>
         ]),
         h('.flex-row.g2.m2.flex-grow', [
           h('.flex-grow', {
-            // force redraw on toggle info panel or drawing options panel
+            // force redraw on toggle info panel and update drawing options
             key: `${objectInfoVisible}-${drawingOptions}`,
           }, drawObject(qcObject, {}, drawingOptions, (error) => {
             objectViewModel.drawingFailureOccurred(error.message);
