@@ -46,8 +46,10 @@ const toolbarViewMode = (layout, filterModel) => {
   return {
     centerCol: h('b.f4.items-center.flex-grow.text-center', [isOfficial ? iconBadge() : '', layoutItem.name]),
     rightCol: h('.w-25.text-right.g2.flex-row.justify-end.flex-wrap', [
+      ' ',
       filterPanelToggleButton(filterModel),
       h('.btn-group.flex-wrap', [
+        ' ',
         newLayoutButton(layout),
         jsonExportButton(layoutItem, name),
         layout.ownsLayout(owner_id) && [editDropdown(layout), deleteButton(layout)],
@@ -55,7 +57,7 @@ const toolbarViewMode = (layout, filterModel) => {
     ]),
     subRow: h(
       '.flex-grow.text-center',
-      [h('.header-layout.header-layout-container', [tabViewLinks(layoutItem, layout)])],
+      [h('.header-layout.header-layout-tabs', [tabViewLinks(layoutItem, layout)])],
     ),
   };
 };
@@ -95,7 +97,7 @@ const toolbarEditMode = (layout) => {
   return {
     subRow: h('.flex-grow.text-center', [
       h('.header-layout.edit', [
-        h('span.header-layout-container', editTabLinks(layout)),
+        h('span.header-layout-tabs', editTabLinks(layout)),
         h('.btn-group', [
           tabBtn({
             title: 'Add new tab to this layout',

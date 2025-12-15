@@ -157,10 +157,6 @@
 }
 
 .header-layout {
-  & > :not(:last-child) {
-    margin-right: 8px;
-  }
-
   &.edit {
     display: grid;
     grid-template-columns: auto 1fr auto;
@@ -173,9 +169,8 @@
   }
 }
 
-.header-layout-container {
+.header-layout-tabs {
   display: flex;
-  flex-wrap: nowrap;
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 2px;
