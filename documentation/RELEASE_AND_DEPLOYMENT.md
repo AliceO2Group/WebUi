@@ -45,7 +45,7 @@ If at this point everything is green in GitHub actions the release is done, the 
 Click on the release button in Jira.
 
 Diagram:
-LINK
+![Release Diagram](./images/release_diagram.svg)
 
 ---
 # Deployment
@@ -67,4 +67,5 @@ Once the PR is merged the release there is nothing else left to be done and when
 When GUIs is green on pipeline can see release and can check version is new one in about of the application and play with the new features.
 
 Diagram:
-LINK
+![Deployment Diagram](./images/deployment_diagram.svg)
+
