@@ -18,7 +18,7 @@ import { useForm, type KeepStateOptions, type SubmitHandler } from 'react-hook-f
 import { getDefaultValuesFromConfigObject } from '~/components/form/utils/getDefaultValuesFromConfigObject';
 import { convertFormValuesToConfigObject } from '~/components/form/utils/convertFormValuesToConfigObject';
 import { useLocation } from 'react-router';
-import type { FormValue } from '~/components/form/types';
+import type { FormValue, Restrictions } from '~/components/form/types';
 import { useConfigurationMutation } from '~/api/mutations/useConfigurationMutation';
 
 const RESET_PROPS: KeepStateOptions = { keepDirty: false };
@@ -34,9 +34,11 @@ const RESET_PROPS: KeepStateOptions = { keepDirty: false };
 export const useConfigurationForm = ({
   configuration,
   configurationName,
+  configurationRestrictions,
 }: {
   configuration: FormValue | undefined;
   configurationName: string;
+  configurationRestrictions: Restrictions | undefined;
 }) => {
   const { pathname } = useLocation();
   const mutation = useConfigurationMutation(configurationName);
@@ -46,13 +48,22 @@ export const useConfigurationForm = ({
     [configuration, pathname],
   );
 
+  // eslint-disable-next-line no-console
+  console.log({ defaultValues });
+
   const { control, handleSubmit, getValues, formState, reset } = useForm<InputsType>({
     defaultValues,
   });
 
   const onSubmit: SubmitHandler<InputsType> = (data) => {
-    const configurationData = convertFormValuesToConfigObject(data, pathname);
-    mutation.mutate(configurationData);
+    const configurationData = convertFormValuesToConfigObject(
+      data,
+      configurationRestrictions,
+      pathname,
+    );
+    // eslint-disable-next-line no-console
+    console.log({ configurationData });
+    // mutation.mutate(configurationData);
   };
 
   useEffect(() => reset(defaultValues, RESET_PROPS), [defaultValues, reset]);

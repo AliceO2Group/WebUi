@@ -31,6 +31,12 @@ export const getDefaultValuesFromConfigObject = (
   }
 
   if (isPrimitiveValue(val)) {
+    if (val === 'true') {
+      return { [prefix]: true };
+    }
+    if (val === 'false') {
+      return { [prefix]: false };
+    }
     return { [prefix]: val };
   }
 
