@@ -22,6 +22,7 @@ import { join } from 'path';
 import { createUmzug } from './umzug.js';
 import { SequelizeDatabaseConfig } from './utils/sequelizeDatabaseConfig';
 import { SequelizeStorage } from 'umzug';
+import { createSeederUmzug } from './seeder-umzug.js';
 
 export class SequelizeDatabase {
   private _logger;
@@ -107,6 +108,26 @@ export class SequelizeDatabase {
       this._logger.infoMessage('Migrations completed successfully.');
     } catch (error) {
       this._logger.errorMessage(`Error executing migrations: ${error}`);
+      throw error;
+    }
+  }
+
+  /** Executes pending database seeders. */
+  async seed() {
+    this._logger.debugMessage('Executing pending seeders...');
+    try {
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = dirname(__filename);
+
+      const umzug = createSeederUmzug(
+        this.sequelize,
+        join(__dirname, 'seeders')
+      );
+
+      await umzug.up();
+      this._logger.infoMessage('Seeders completed successfully.');
+    } catch (error) {
+      this._logger.errorMessage(`Error executing seeders: ${error}`);
       throw error;
     }
   }

@@ -29,6 +29,9 @@ class Database {
 
     await database.connect();
     await database.migrate();
+    if ((process.env.DB_SEED ?? 'false') === 'true') {
+      await database.seed();
+    }
 
     return database;
   }

@@ -13,8 +13,8 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
-import { ArchiveToken } from './../models/ArchiveTokenModel.js';
-import { Token } from './../models/TokenModel.js';
+import ArchiveToken from './../models/ArchiveTokenModel.js';
+import Token from './../models/TokenModel.js';
 import { Sequelize } from 'sequelize';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | string;
@@ -33,7 +33,7 @@ export default async (
   id: number,
   method: Method
 ): Promise<void> => {
-  const token: Token | null = await Token.findByPk(id);
+  const token: typeof Token | null = await Token.findByPk(id);
   if (!token) {
     logger.info('No such token in database.');
     return;

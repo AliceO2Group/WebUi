@@ -14,19 +14,24 @@
 
 import { Sequelize, Model, DataTypes } from 'sequelize';
 
-/** Define the Service model */
-class Service extends Model {
+type RouteStatus = 'active' | 'disabled';
+
+type RoutePermissions = {"GET"?: number, "POST"?: number, "PUT"?: number, "DELETE"?: number};
+
+/** Define the Route model */
+class Route extends Model {
   declare id: number;
-  declare name: string;
-  declare serial_number: string;
-  declare ip_address: string;
+  declare receiver_serial_number: string;
+  declare audience_serial_number: string;
+  declare permissions: RoutePermissions;
+  declare status: RouteStatus;
   declare created_at: Date;
   declare updated_at: Date;
 }
 
-/* Initialize and export the Service model */
-export default (sequelize: Sequelize): typeof Service =>
-  Service.init(
+/* Initialize and export the Route model */
+export default (sequelize: Sequelize): typeof Route =>
+  Route.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -34,23 +39,35 @@ export default (sequelize: Sequelize): typeof Service =>
         allowNull: false,
         autoIncrement: true,
       },
-      name: {
+
+      receiver_serial_number: {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
-      serial_number: {
+
+      audience_serial_number: {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
-      ip_address: {
-        type: DataTypes.STRING(45),
+
+      permissions: {
+        type: DataTypes.JSON,
         allowNull: false,
+        defaultValue: {},
       },
+
+      status: {
+        type: DataTypes.ENUM('active', 'disabled'),
+        allowNull: false,
+        defaultValue: 'active',
+      },
+
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW,
       },
+
       updated_at: {
         type: DataTypes.DATE,
         allowNull: false,
@@ -59,16 +76,16 @@ export default (sequelize: Sequelize): typeof Service =>
     },
     {
       sequelize,
-      tableName: 'services',
+      tableName: 'routes',
       timestamps: true,
       underscored: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at',
       indexes: [
-        { name: 'services_name_idx', fields: ['name'] },
-        { name: 'services_serial_number_idx', fields: ['serial_number'] },
-        { name: 'services_ip_address_idx', fields: ['ip_address'] },
-        { name: 'services_created_at_idx', fields: ['created_at'] },
+        { name: 'routes_receiver_serial_idx', fields: ['receiver_serial_number'] },
+        { name: 'routes_audience_serial_idx', fields: ['audience_serial_number'] },
+        { name: 'routes_status_idx', fields: ['status'] },
+        { name: 'routes_receiver_audience_idx', fields: ['receiver_serial_number', 'audience_serial_number'] },
       ],
     }
   );
