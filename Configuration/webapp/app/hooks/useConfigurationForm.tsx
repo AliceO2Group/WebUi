@@ -48,9 +48,6 @@ export const useConfigurationForm = ({
     [configuration, pathname],
   );
 
-  // eslint-disable-next-line no-console
-  console.log({ defaultValues });
-
   const { control, handleSubmit, getValues, formState, reset } = useForm<InputsType>({
     defaultValues,
   });
@@ -61,9 +58,7 @@ export const useConfigurationForm = ({
       configurationRestrictions,
       pathname,
     );
-    // eslint-disable-next-line no-console
-    console.log({ configurationData });
-    // mutation.mutate(configurationData);
+    mutation.mutate(configurationData);
   };
 
   useEffect(() => reset(defaultValues, RESET_PROPS), [defaultValues, reset]);

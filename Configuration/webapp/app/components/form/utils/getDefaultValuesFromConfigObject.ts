@@ -47,5 +47,14 @@ export const getDefaultValuesFromConfigObject = (
     result = { ...result, ...getDefaultValuesFromConfigObject(value, newPrefix) };
   }
 
+  // this is an exception where the empty object / empty array is the leaf
+  // of the Configuration Form tree, because it is empty
+  // however we still need to render that in the UI, so this bit of info needs to be present
+  if (entries.length === 0) {
+    const emptyPrefix = `${prefix}${KEY_SEPARATOR}`;
+    // bypass typescript since this is an exception from the usual logic of the application
+    result = { [emptyPrefix]: val as unknown as string };
+  }
+
   return result;
 };
