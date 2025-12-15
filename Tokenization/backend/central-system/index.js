@@ -15,6 +15,8 @@
 import { HttpServer } from '@aliceo2/web-ui';
 
 import CentralSystem from './dist/modules/CentralSystem.js';
+import { mockTokens, mockTokenLogs } from './mocks.js';
+
 
 const http = new HttpServer({ port: 8080, allow: '*' });
 
@@ -53,82 +55,78 @@ http.post(
   { public: true }
 );
 
-// frontend test endpoints below
-const fakeTokens = new Map([
-  [
-    1,
-    {
-      tokenId: 1,
-      last4chars: 'abcd',
-      serviceFrom: 'Service 1',
-      serviceTo: 'Service 2',
-      exp: '2026-01-12T11:31:12',
-      issuer: 'central-system',
-      iat: '2025-10-01T10:00:00',
-      permissions: ['GET', 'POST'],
-    },
-  ],
-  [
-    2,
-    {
-      tokenId: 2,
-      last4chars: 'wxyz',
-      serviceFrom: 'Service 3',
-      serviceTo: 'Service 4',
-      exp: '2025-11-15T08:45:30',
-      issuer: 'admin-portal',
-      iat: '2025-09-15T14:22:10',
-      permissions: ['GET'],
-    },
-  ],
-  [
-    3,
-    {
-      tokenId: 3,
-      last4chars: 'efgh',
-      serviceFrom: 'Service 2',
-      serviceTo: 'Service 1',
-      exp: '2026-03-20T16:30:00',
-      issuer: 'central-system',
-      iat: '2025-10-02T09:15:00',
-      permissions: ['GET', 'POST', 'PUT', 'DELETE'],
-    },
-  ],
-  [
-    4,
-    {
-      tokenId: 4,
-      last4chars: '1234',
-      serviceFrom: 'Service 1',
-      serviceTo: 'Service 3',
-      exp: '2026-02-05T12:00:00',
-      issuer: 'api-gateway',
-      iat: '2025-09-25T11:30:45',
-      permissions: ['GET', 'PUT'],
-    },
-  ],
-]);
-
-const fakeLogs = new Map([
-  [1, []],
-  [
-    2,
-    [
-      { id: 1, title: 'The first token ever', content: 'Log for token' },
-      {
-        id: 3,
-        title: 'No second log?',
-        content: 'Looks like second log is lost somewhere',
-      },
-    ],
-  ],
-]);
 
 http.get(
   '/tokens',
   (req, res) => {
-    // Fake long page load
-    setTimeout(() => res.status(200).json([...fakeTokens.values()]), 1000);
+    const {
+      serviceFrom,
+      serviceTo,
+      issuedAfter,
+      issuedBefore,
+      expiresAfter,
+      expiresBefore,
+      status,
+      ordering,
+    } = req.query;
+
+    let filteredTokens = [...mockTokens];
+
+    if (serviceFrom) {
+      const serviceFromFilters = Array.isArray(serviceFrom) ? serviceFrom : [serviceFrom];
+      if (serviceFromFilters.length > 0) {
+        filteredTokens = filteredTokens.filter(token => serviceFromFilters.includes(token.serviceFrom));
+      }
+    }
+
+    if (serviceTo) {
+      const serviceToFilters = Array.isArray(serviceTo) ? serviceTo : [serviceTo];
+      if (serviceToFilters.length > 0) {
+        filteredTokens = filteredTokens.filter(token => serviceToFilters.includes(token.serviceTo));
+      }
+    }
+
+    if (issuedAfter) {
+      filteredTokens = filteredTokens.filter(token => new Date(token.iat) >= new Date(issuedAfter));
+    }
+
+    if (issuedBefore) {
+      filteredTokens = filteredTokens.filter(token => new Date(token.iat) <= new Date(issuedBefore));
+    }
+
+    if (expiresAfter) {
+      filteredTokens = filteredTokens.filter(token => new Date(token.exp) >= new Date(expiresAfter));
+    }
+
+    if (expiresBefore) {
+      filteredTokens = filteredTokens.filter(token => new Date(token.exp) <= new Date(expiresBefore));
+    }
+
+    if (status) {
+      const statusFilters = Array.isArray(status) ? status : [status];
+      if (statusFilters.length > 0) {
+        filteredTokens = filteredTokens.filter(token => statusFilters.includes(token.status));
+      }
+    }
+
+    if (ordering) {
+      const sortFields = Array.isArray(ordering) ? ordering : [ordering];
+      filteredTokens.sort((a, b) => {
+        for (const field of sortFields) {
+          const [key, directionStr] = field.split(':');
+          const direction = directionStr === 'desc' ? -1 : 1;
+
+          const valA = a[key];
+          const valB = b[key];
+
+          if (valA < valB) return -1 * direction;
+          if (valA > valB) return 1 * direction;
+        }
+        return 0;
+      });
+    }
+
+    setTimeout(() => res.status(200).json(filteredTokens), 500);
   },
   { public: true }
 );
@@ -136,8 +134,8 @@ http.get(
 http.get(
   '/tokens/:tokenId',
   (req, res) => {
-    const tokenId = parseInt(req.params.tokenId, 10);
-    const token = fakeTokens.get(tokenId) ?? null;
+    const tokenId = req.params.tokenId;
+    const token = mockTokens.find(t => t.tokenId === tokenId) ?? null;
 
     if (!token) {
       res.status(404).json({ error: `No token found with id ${tokenId}` });
@@ -152,28 +150,18 @@ http.get(
 http.get(
   '/tokens/:tokenId/logs',
   (req, res) => {
-    const tokenId = parseInt(req.params.tokenId, 10);
+    const tokenId = req.params.tokenId;
 
-    // Artificially add an error
-    if (tokenId === 3) {
-      res
-        .status(500)
-        .json({
-          error: `An error occurred when trying to load logs for token ${tokenId}`,
-        });
-      return;
-    }
-
-    const logs = fakeLogs.get(tokenId) ?? [];
+    const logs = mockTokenLogs[tokenId] ?? [];
 
     if (!logs) {
       res
         .status(404)
-        .json({ error: `No logs found found for token ${tokenId}` });
+        .json({ error: `No logs found for token ${tokenId}` });
       return;
     }
 
-    setTimeout(() => res.status(200).json(logs), 1000);
+    setTimeout(() => res.status(200).json(logs), 500);
   },
   { public: true }
 );

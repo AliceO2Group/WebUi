@@ -25,9 +25,41 @@ export type TokensQueryResponse = {
  *
  */
 export async function fetchTokens(filters: TokenFilterValues | null, status?: TokenStatus): Promise<TokensQueryResponse> {
-  const scopedTokens = status ? mockTokens.filter((token) => token.status === status) : mockTokens;
+  const queryString = new URLSearchParams();
+  if (status) {
+    queryString.append('status', status);
+  }
+  if (filters) {
+    if (filters.serviceFrom.length > 0) {
+      queryString.append('serviceFrom', filters.serviceFrom.map((service: any) => service.value ).join(','));
+    }
+    if (filters.serviceTo.length > 0) {
+      queryString.append('serviceTo', filters.serviceTo.map((service: any) => service.value ).join(','));
+    }
+    if (filters.expiresBefore) {
+      queryString.append('expiresBefore', filters.expiresBefore);
+    }
+    if (filters.expiresAfter) {
+      queryString.append('expiresAfter', filters.expiresAfter);
+    }
+    if (filters.issuedBefore) {
+      queryString.append('issuedBefore', filters.issuedBefore);
+    }
+    if (filters.issuedAfter) {
+      queryString.append('issuedAfter', filters.issuedAfter);
+    }
+    if (filters.ordering.length > 0) {
+      console.log('ordering', filters.ordering);
+      queryString.append('ordering', filters.ordering.map((order) => `${order.field}:${order.direction}`).join(','));
+    }
+  }
+  
+  const url = `/api/tokens?${queryString.toString()}`;
+  
+  const res = await fetch(url);
+  const allTokens: Token[] = await res.json();
   return {
-    tokens: [...scopedTokens],
+    tokens: [...allTokens],
   };
 }
 

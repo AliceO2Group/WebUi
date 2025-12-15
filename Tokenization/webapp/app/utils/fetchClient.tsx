@@ -28,7 +28,7 @@ import { useSession } from '../feature/auth/hooks/session';
  * @returns {Promise<Response>} The fetch Response promise.
  * @throws {Error} If the url does not start with '/api'.
  */
-export function useFetchClient(url: string, options?: RequestInit): Promise<Response> {
+export function fetchClient(url: string, options?: RequestInit): Promise<Response> {
   if (!url.startsWith('/api')) {
     throw new Error('Only /api requests are allowed');
   }
