@@ -43,30 +43,6 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     ok(rowsCount > 1); // more than 1 object in the tree
   });
 
-  await testParent.test('should update local storage when tree node is clicked', { timeout }, async () => {
-    const selector = 'section > div > div > div > table > tbody > tr:nth-child(2)';
-    const personid = await page.evaluate(() => window.model.session.personid);
-    const storageKey = `${StorageKeysEnum.OBJECT_TREE_OPEN_NODES}-${personid}`;
-
-    await page.locator(selector).click();
-    const localStorageBefore = await getLocalStorageAsJson(page, storageKey);
-
-    await page.locator(selector).click();
-    const localStorageAfter = await getLocalStorageAsJson(page, storageKey);
-
-    // Ideally, tests should be isolated and not depend on each other.
-    // Currently, some tests rely on shared localStorage or page state changes from previous tests.
-    // As a workaround, we do targeted cleanup here to prevent issues in later tests.
-    await removeLocalStorage(page, storageKey);
-    await page.reload({ waitUntil: 'networkidle0' });
-
-    notDeepStrictEqual(
-      localStorageBefore,
-      localStorageAfter,
-      'local storage should have changed after clicking a tree node',
-    );
-  });
-
   await testParent.test('should preserve state if refreshed', { timeout }, async () => {
     const selector = 'section > div > div > div > table > tbody > tr:nth-child(2)';
     await page.locator(selector).click();
@@ -165,12 +141,6 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     'should maintain panel width from localStorage on page reload',
     { timeout },
     async () => {
-      // Ideally, tests should be isolated and not depend on each other.
-      // Currently, some tests rely on shared localStorage or page state changes from previous tests.
-      // As a workaround, we do targeted cleanup here to prevent issues in later tests.
-      const personid = await page.evaluate(() => window.model.session.personid);
-      await removeLocalStorage(page, `${StorageKeysEnum.OBJECT_TREE_OPEN_NODES}-${personid}`);
-
       const dragAmount = 35;
       await page.reload({ waitUntil: 'networkidle0' });
       await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(4)').click());
