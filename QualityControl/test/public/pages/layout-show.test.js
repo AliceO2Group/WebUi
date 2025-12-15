@@ -45,6 +45,16 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     },
   );
 
+  await testParent.test(
+    'should have a correctly made download root as image button',
+    { timeout },
+    async () => {
+      const exists = await page.evaluate(() => document.querySelector('.download-root-image-png-button') !== null);
+
+      ok(exists, 'Expected ROOT image download button to exist');
+    },
+  );
+
   await testParent.test('should remove query param only if option is invalid for any filter', { timeout }, async () => {
     const baseParams = `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=main`;
 

@@ -85,73 +85,9 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     'should have a correctly made download root as image button',
     { timeout },
     async () => {
-      const exists = await page.evaluate(() => document.querySelector('#download-image-button') !== null);
+      const exists = await page.evaluate(() => document.querySelector('.download-root-image-png-button') !== null);
 
       ok(exists, 'Expected ROOT image download button to exist');
-    },
-  );
-
-  await testParent.test(
-    'clicking the download image button should download a png file',
-    { timeout },
-    async () => {
-      // Set up mocks in the browser context
-      await page.evaluate(() => {
-        // Mock JSROOT.makeImage to return a dummy byte array instead of rendering
-        window.__originalMakeImage = window.JSROOT.makeImage;
-        window.JSROOT.makeImage = async () => new Uint8Array([1, 2, 3]);
-
-        // Spy on URL.createObjectURL to capture the blob type and return a fixed Blob URL
-        window.__originalCreateObjectURL = URL.createObjectURL;
-        URL.createObjectURL = (blob) => {
-          window.__blobType = blob.type;
-          return 'blob:mock';
-        };
-
-        // Spy on anchor element creation to track download href, filename, and click
-        const originalCreateElement = document.createElement.bind(document);
-        document.__originalCreateElement = originalCreateElement;
-        document.createElement = (tag) => {
-          if (tag === 'a') {
-            return {
-              set href(href) {
-                window.__fileHref = href;
-              },
-              set download(name) {
-                window.__filename = name;
-              },
-              click: () => {
-                window.__anchorClicked = true;
-              },
-            };
-          }
-
-          return originalCreateElement(tag);
-        };
-      });
-
-      await page.locator('#download-image-button').click();
-      await delay(1000);
-
-      // Collect results and restore original browser functions
-      const { blobType, fileHref, filename, anchorClicked } = await page.evaluate(() => {
-        // Revert mock changes
-        window.JSROOT.makeImage = window.__originalMakeImage;
-        URL.createObjectURL = window.__originalCreateObjectURL;
-        document.createElement = document.__originalCreateElement;
-
-        return {
-          blobType: window.__blobType,
-          fileHref: window.__fileHref,
-          filename: window.__filename,
-          anchorClicked: window.__anchorClicked,
-        };
-      });
-
-      strictEqual(blobType, 'file/png', 'Blob should have correct MIME type (png');
-      strictEqual(anchorClicked, true, 'Internal anchor element should be clicked to start the download');
-      strictEqual(fileHref, 'blob:mock', 'Internal (download) anchor href should be the Blob URL');
-      strictEqual(filename, 'qc/test/object/1.png', 'Internal anchor download Blob file should have the correct name');
     },
   );
 

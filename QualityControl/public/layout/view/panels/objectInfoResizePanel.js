@@ -15,16 +15,17 @@
 import { downloadButton } from '../../../common/downloadButton.js';
 import { defaultRowAttributes, qcObjectInfoPanel } from './../../../common/object/objectInfoCard.js';
 import { h, iconResizeBoth, info } from '/js/src/index.js';
+import { downloadRootImageButton } from '../../../common/downloadRootImageButton.js';
 
 /**
  * Builds 2 actionable buttons which are to be placed on top of a JSROOT plot
  * Buttons shall appear on hover of the plot
  * @param {Model} model - root model of the application
- * @param {object} tabObject - tab dto representation
+ * @param {TabObject} tabObject - tab dto representation
  * @returns {vnode} - virtual node element
  */
 export const objectInfoResizePanel = (model, tabObject) => {
-  const { name } = tabObject;
+  const { name, options: drawingOptions = [], ignoreDefaults } = tabObject;
   const { filterModel, router, object, services } = model;
   const isSelectedOpen = object.selectedOpen;
   const objectRemoteData = services.object.objectsLoadedMap[name];
@@ -34,6 +35,10 @@ export const objectInfoResizePanel = (model, tabObject) => {
     .forEach(([key, value]) => {
       uri += `&${key}=${encodeURI(value)}`;
     });
+  const { displayHints = [], drawOptions = [] } = objectRemoteData?.payload ?? {};
+  const toUseDrawingOptions = Array.from(new Set(ignoreDefaults
+    ? drawingOptions
+    : [...drawingOptions, ...displayHints, ...drawOptions]));
   return h('.text-right.resize-element.item-action-row.flex-row.g1', {
     style: 'display: none; padding: .25rem .25rem 0rem .25rem;',
   }, [
@@ -51,12 +56,18 @@ export const objectInfoResizePanel = (model, tabObject) => {
           h('.p1', qcObjectInfoPanel(objectRemoteData.payload, {}, defaultRowAttributes(model.notification))),
       ),
     ]),
-    objectRemoteData.isSuccess() &&
-    downloadButton({
-      href: model.objectViewModel.getDownloadQcdbObjectUrl(objectRemoteData.payload.id),
-      title: 'Download object',
-      id: `download-button-${objectRemoteData.payload.id}`,
-    }),
+    objectRemoteData.isSuccess() && [
+      downloadRootImageButton(
+        `${objectRemoteData.payload.name}.png`,
+        objectRemoteData.payload.qcObject.root,
+        toUseDrawingOptions,
+      ),
+      downloadButton({
+        href: model.objectViewModel.getDownloadQcdbObjectUrl(objectRemoteData.payload.id),
+        title: 'Download object',
+        id: `download-button-${objectRemoteData.payload.id}`,
+      }),
+    ],
     h('a.btn', {
       title: 'Open object plot in full screen',
       href: uri,

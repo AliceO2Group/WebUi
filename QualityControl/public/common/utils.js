@@ -188,6 +188,14 @@ export const camelToTitleCase = (text) => {
 };
 
 /**
+ * Get the file extension from a filename
+ * @param {string} filename - The file name including the file extension
+ * @returns {string} - the file extension
+ */
+export const getFileExtensionFromName = (filename) =>
+  filename.substring(filename.lastIndexOf('.') + 1).toLowerCase().trim();
+
+/**
  * Helper to trigger a download for a file
  * @param {string} url - The URL to the file source
  * @param {string} filename - The name of the file including the file extension
@@ -220,7 +228,7 @@ export const downloadFile = (file, filename) => {
  * @param {string[]} [drawingOptions=[]] - Optional array of JSROOT drawing options.
  */
 export const downloadRoot = async (filename, root, drawingOptions = []) => {
-  const filetype = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+  const filetype = getFileExtensionFromName(filename);
   const mime = SUPPORTED_ROOT_IMAGE_FILE_TYPES.get(filetype);
   if (!mime) {
     throw new Error(`The file extension (${filetype}) is not supported`);
