@@ -34,9 +34,6 @@ export const convertFormValuesToConfigObject = (
     throw new Error('Missing restrictions parameter');
   }
 
-  // eslint-disable-next-line no-console
-  console.log({ formValues, restrictions, prefix });
-
   const result: FormValue = {};
 
   for (const [key, value] of Object.entries(formValues)) {
@@ -60,7 +57,7 @@ export const convertFormValuesToConfigObject = (
     }
 
     let currentValue = result; // pointer for currentValue place in the configuration
-    let currentRestrictions = restrictions; // pointer at currentRestrictions
+    let currentRestrictions = restrictions; // pointer for currentRestrictions
     for (let i = 0; i < keys.length - 1; i++) {
       const currentKey = keys[i];
       currentRestrictions = isObjectRestrictions(currentRestrictions)
@@ -72,8 +69,6 @@ export const convertFormValuesToConfigObject = (
         if (isObjectRestrictions(currentRestrictions)) {
           currentValue[currentKey] = {};
         } else if (isArrayRestrictions(currentRestrictions)) {
-          // eslint-disable-next-line no-console
-          console.log({ currentRestrictions });
           currentValue[currentKey] = Array(currentRestrictions[0].length);
         }
       }
