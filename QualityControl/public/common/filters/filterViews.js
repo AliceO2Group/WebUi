@@ -104,10 +104,10 @@ export function filtersPanel(filterModel, viewModel) {
       ]),
       lastUpdatePanel(runStatus, lastRefresh, refreshRate),
       runInformation && h(
-        '.flex-row.g4.items-center.justify-center.f7.gray-darker.text-center.ph2',
+        '.flex-row.g4.items-center.f7.gray-darker.text-center.ph2',
         {
           id: 'runInformation',
-          style: 'overflow-x: auto;',
+          style: 'overflow-x: auto; margin: 0 auto;',
         },
         Object.entries(runInformation).map(([key, value]) =>
           h('.flex-row.g1', {
