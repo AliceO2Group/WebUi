@@ -192,16 +192,30 @@ function chartView(model, tabObject) {
 /**
  * Method to generate a component containing a header with actions and a jsroot plot
  * @param {Model} model - root model of the application
- * @param {object} tabObject - to be drawn with jsroot
+ * @param {TabObject} tabObject - object with information form QCG own storage
  * @returns {vnode} - virtual node element
  */
 const drawComponent = (model, tabObject) => {
   const { displayTimestamp = false } = model.layout.item;
-  const { name, options: drawingOptions = [] } = tabObject;
+
+  const objectFromLayoutAsRemoteData = tabObject;
+  const { name, options: drawingOptions = [], ignoreDefaults } = objectFromLayoutAsRemoteData;
+
+  const objectFromQcdbAsRemoteData = model.object.objects[name];
+  const { displayHints = [], drawOptions = [] } = objectFromQcdbAsRemoteData?.payload ?? {};
+
+  let toUseDrawingOptions = [];
+  if (ignoreDefaults) {
+    toUseDrawingOptions = Array.from(new Set(drawingOptions));
+  } else {
+    toUseDrawingOptions = Array.from(new Set([...drawingOptions, ...displayHints, ...drawOptions]));
+  }
   const lastModified = model.object.getLastModifiedByName(name);
   const runNumber = model.object.getRunNumberByName(name);
-
-  return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
+  return h('', {
+    key: `key-chart-component-${name}-${toUseDrawingOptions.join('-')}`,
+    style: 'height:100%; display: flex; flex-direction: column',
+  }, [
     h('.jsrootdiv', {
       style: {
         'z-index': 90,
@@ -211,9 +225,9 @@ const drawComponent = (model, tabObject) => {
         'flex-direction': 'column',
       },
     }, draw(
-      model.object.objects[tabObject.name],
+      objectFromQcdbAsRemoteData,
       {},
-      drawingOptions,
+      toUseDrawingOptions,
       (error) => model.object.invalidObject(tabObject.name, error.message),
     )),
     objectInfoResizePanel(model, tabObject),
