@@ -41,11 +41,19 @@ const SUPPORTED_IMAGE_FILE_TYPES = new Map([
  * @returns {Promise<SVGElement>} - The drawn SVG element.
  */
 const renderRootObjectToSVG = async (root, drawingOptions = []) => {
-  const dom = document.createElement('div');
-  await JSROOT.draw(dom, root, generateDrawingOptionString(root, drawingOptions));
-  const svg = dom.querySelector('svg');
-  if (!svg) {
-    throw new Error('SVG element not found after drawing RootObject');
+  const svgString = await JSROOT.makeSVG({
+    object: root,
+    option: generateDrawingOptionString(root, drawingOptions),
+  });
+  if (!svgString) {
+    throw new Error('Failed to generate SVG');
+  }
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(svgString, 'image/svg+xml');
+  const svg = doc.documentElement;
+  if (!(svg instanceof SVGElement)) {
+    throw new Error('Failed to parse SVG');
   }
 
   // Ensure proper scaling
