@@ -25,12 +25,15 @@ interface TokenAttributes {
 }
 
 // Define the Token model
-export class Token extends Model {
+class Token extends Model {
   declare id: number;
   declare audience: string;
   declare subject: string;
+
+  // timestamps managed by Sequelize
   declare created_at: Date;
   declare updated_at: Date;
+
   declare token_object: TokenAttributes;
 }
 
@@ -52,6 +55,10 @@ export default (sequelize: Sequelize): typeof Token =>
         type: DataTypes.STRING(255),
         allowNull: false,
       },
+      token_object: {
+        type: DataTypes.JSON,
+        allowNull: false,
+      },
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,
@@ -62,10 +69,6 @@ export default (sequelize: Sequelize): typeof Token =>
         allowNull: false,
         defaultValue: DataTypes.NOW,
       },
-      token_object: {
-        type: DataTypes.JSON,
-        allowNull: false,
-      },
     },
     {
       sequelize,
@@ -74,5 +77,10 @@ export default (sequelize: Sequelize): typeof Token =>
       underscored: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at',
+      indexes: [
+        { name: 'tokens_audience_idx', fields: ['audience'] },
+        { name: 'tokens_subject_idx', fields: ['subject'] },
+        { name: 'tokens_created_at_idx', fields: ['created_at'] },
+      ],
     }
   );

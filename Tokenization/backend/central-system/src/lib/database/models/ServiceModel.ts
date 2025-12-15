@@ -14,32 +14,21 @@
 
 import { Sequelize, Model, DataTypes } from 'sequelize';
 
-type TokenStatus = 'REVOKED' | 'REJECTED' | 'EXPIRED';
-
-// Define the structure of the archived token object
-interface ArchivedTokenAttributes {
-  sub: string;
-  aud: string;
-  iss: string;
-  iat: Record<string, number>;
-  exp: Record<string, number>;
-  jti: string;
-}
-
-// Define the ArchiveToken model
-class ArchiveToken extends Model {
+/** Define the Service model */
+class Service extends Model {
   declare id: number;
-  declare audience: string;
-  declare subject: string;
-  declare status: TokenStatus;
+  declare name: string;
+  declare serial_number: string;
+  declare ip_address: string;
+
+  // timestamps managed by Sequelize
   declare created_at: Date;
   declare updated_at: Date;
-  declare token_object: ArchivedTokenAttributes;
 }
 
-/* Initialize and export the ArchiveToken model */
-export default (sequelize: Sequelize): typeof ArchiveToken =>
-  ArchiveToken.init(
+/* Initialize and export the Service model */
+export default (sequelize: Sequelize): typeof Service =>
+  Service.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -47,20 +36,16 @@ export default (sequelize: Sequelize): typeof ArchiveToken =>
         allowNull: false,
         autoIncrement: true,
       },
-      audience: {
+      name: {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
-      subject: {
+      serial_number: {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
-      status: {
-        type: DataTypes.ENUM('REVOKED', 'REJECTED', 'EXPIRED'),
-        allowNull: false,
-      },
-      token_object: {
-        type: DataTypes.JSON,
+      ip_address: {
+        type: DataTypes.STRING(45),
         allowNull: false,
       },
       created_at: {
@@ -76,15 +61,16 @@ export default (sequelize: Sequelize): typeof ArchiveToken =>
     },
     {
       sequelize,
-      tableName: 'archive-tokens',
+      tableName: 'services',
       timestamps: true,
       underscored: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at',
       indexes: [
-        { name: 'archive_tokens_audience_idx', fields: ['audience'] },
-        { name: 'archive_tokens_subject_idx', fields: ['subject'] },
-        { name: 'archive_tokens_created_at_idx', fields: ['created_at'] },
+        { name: 'services_name_idx', fields: ['name'] },
+        { name: 'services_serial_number_idx', fields: ['serial_number'] },
+        { name: 'services_ip_address_idx', fields: ['ip_address'] },
+        { name: 'services_created_at_idx', fields: ['created_at'] },
       ],
     }
   );

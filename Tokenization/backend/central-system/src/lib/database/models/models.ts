@@ -16,14 +16,20 @@
 import TokenModel from './TokenModel.js';
 import ArchiveTokenModel from './ArchiveTokenModel.js';
 import { Sequelize } from 'sequelize';
+import ServiceModel from './ServiceModel.js';
+import SystemLogModel from './SystemLogModel.js';
 
 export function models(sequelize: Sequelize): {
   Token: ReturnType<typeof TokenModel>;
   ArchiveToken: ReturnType<typeof ArchiveTokenModel>;
+  Service: ReturnType<typeof ServiceModel>;
+  SystemLog: ReturnType<typeof SystemLogModel>;
 } {
   const models = {
     Token: TokenModel(sequelize),
     ArchiveToken: ArchiveTokenModel(sequelize),
+    Service: ServiceModel(sequelize),
+    SystemLog: SystemLogModel(sequelize),
   };
   return models;
 }
