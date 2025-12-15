@@ -14,10 +14,17 @@
 
 import { LogManager } from '@aliceo2/web-ui';
 import { SequelizeDatabase } from '../lib/database/SequelizeDatabase.js';
+import { TokensQueryService } from '../services/TokensQueryService.js';
+import { ArchiveTokensQueryService } from '../services/ArchiveTokensQueryService.js';
+import { ServicesQueryService } from '../services/ServicesQueryService.js';
+import { SystemLogsQueryService } from '../services/SystemLogsQueryService.js';
 
 export class DatabaseController {
   private _logger;
-  constructor(private readonly _db: SequelizeDatabase) {
+  constructor(private readonly _db: SequelizeDatabase, private readonly _tokensService: TokensQueryService,
+    private readonly _archiveTokensService: ArchiveTokensQueryService,
+    private readonly _servicesService: ServicesQueryService,
+    private readonly _systemLogsService: SystemLogsQueryService) {
     this._logger = LogManager.getLogger('DatabaseController');
   }
 }

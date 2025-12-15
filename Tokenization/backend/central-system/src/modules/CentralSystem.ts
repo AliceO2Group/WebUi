@@ -14,6 +14,7 @@
 
 import { CentralSystemWrapper } from '../lib/CentralSystemWrapper.js';
 import { ConnectionController } from '../controllers/ConnectionController.js';
+import { DatabaseController } from '../controllers/DatabaseController.js';
 import { VaultController } from '../controllers/VaultController.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -25,6 +26,10 @@ import { db } from '../lib/database/Database.js';
 import { SequelizeDatabase } from '../lib/database/SequelizeDatabase.js';
 import { VaultAuthService } from '../services/VaultAuthService.js';
 import { VaultCredentialsService } from '../services/VaultCredentialsService.js';
+import { TokensQueryService } from '../services/TokensQueryService.js';
+import { ArchiveTokensQueryService } from '../services/ArchiveTokensQueryService.js';
+import { ServicesQueryService } from '../services/ServicesQueryService.js';
+import { SystemLogsQueryService } from '../services/SystemLogsQueryService.js';
 import { EventType } from '../lib/utils/events.js';
 import { bus } from '../lib/event-bus/event-bus.js';
 import { LogManager } from '@aliceo2/web-ui';
@@ -49,10 +54,19 @@ class CentralSystem {
 
   public readonly connectionController: ConnectionController;
   public readonly vaultController: VaultController;
+  public readonly databaseController: DatabaseController;
 
   public constructor(wrapperPort: number) {
     this._logger = LogManager.getLogger('CentralSystem');
     this._db = db;
+    this.databaseController = new DatabaseController(
+      this._db,
+      new TokensQueryService(),
+      new ArchiveTokensQueryService(),
+      new ServicesQueryService(),
+      new SystemLogsQueryService()
+    );
+
     this._centralSystemWrapper = new CentralSystemWrapper(
       this.PROTO_PATH,
       wrapperPort
