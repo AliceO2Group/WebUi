@@ -13,8 +13,6 @@
 
 import { strictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
-import { removeLocalStorage } from '../../testUtils/localStorage.js';
-import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
 
 export const filterTests = async (url, page, timeout = 5000, testParent) => {
   await testParent.test('filter should persist between pages', { timeout }, async () => {
