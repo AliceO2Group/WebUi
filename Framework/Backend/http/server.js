@@ -156,6 +156,7 @@ class HttpServer {
       directives: {
         /* eslint-disable */
         defaultSrc: ["'self'", "data:", hostname + ':*'],
+        imgSrc: ["'self'", "data:", "blob:"],
         scriptSrc: ["'self'", ...(allow ? ["'unsafe-eval'"] : [])],
         styleSrc: ["'self'", "'unsafe-inline'"],
         connectSrc: ["'self'", 'http://' + hostname + ':' + port, 'https://' + hostname, 'wss://' + hostname, 'ws://' + hostname + ':' + port],
