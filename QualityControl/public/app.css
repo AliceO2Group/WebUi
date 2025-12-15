@@ -162,6 +162,11 @@
     grid-template-columns: auto 1fr auto;
   }
 
+  /*
+   * Hack to center content: `justify-content: center` fails with `overflow-x: auto`
+   *  (see https://stackoverflow.com/questions/62288432/problem-when-using-with-overflow-x-scroll-and-justify-content-center).
+   * Adding flex: 1 auto-margins on ::before/::after centers the content correctly for scrolling.
+   */
   &::after,
   &::before {
     content: '';
