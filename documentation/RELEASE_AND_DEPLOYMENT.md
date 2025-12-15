@@ -58,7 +58,7 @@ Copy the release notes into the PR from the GitHub release, add yourself as the 
 
 Sync with the people at P2 from an accelerator and detector point of view: make sure no runs are going on and the detectors are in a safe state.
 
-If something is merged after a pipeline has started: then we need to rebase the PR and that pipeline will not be useful anymore. Any pipeline with 5 stages means someone has already triggered a deployment. Make the PR and assign it to Vasco and expect him to see the train of PRs to be merged so we won't trigger a new pipeline in this case we will wait for Vasco to do.  Go back to PR and set it to auto-merge.
+If something is merged after a pipeline has started: then we need to rebase the PR and that pipeline will not be useful anymore. Any pipeline with 5 stages means someone has already triggered a deployment. Make the PR and assign it to O2 FLP Group Leader and expect him to see the train of PRs to be merged so we won't trigger a new pipeline in this case we will wait for O2 FLP Group Leader to do.  Go back to PR and set it to auto-merge.
 
 Go to pipelines in GitLab and start the deployment pipeline, you don't need to change any pipeline paramters.
 
