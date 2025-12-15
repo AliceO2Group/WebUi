@@ -12,12 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-import { mockServices } from '~/feature/token/mocks/services.mock';
+import type { Service } from "~/feature/service/types/service";
+import { mockServices } from "~/feature/service/mocks/services.mock";
 
 /**
  * Placeholder service returning a mocked list of available services until the
  * real backend endpoint is available.
  */
-export async function fetchAvailableServices(_searchTerm = ''): Promise<string[]> {
+export async function fetchAvailableServices(_searchTerm = ''): Promise<Service[]> {
   return [...mockServices];
 }

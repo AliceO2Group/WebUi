@@ -21,8 +21,6 @@ import type { ServiceRouteFilterValues } from '~/feature/service-routes/types/se
 const serviceRouteListsKey = ['service-routes', 'list'] as const;
 
 export const serviceRoutesQueryKeys = {
-  all: ['service-routes'] as const,
-  lists: serviceRouteListsKey,
   list: (filters: ServiceRouteFilterValues | null) => [...serviceRouteListsKey, filters] as const,
   serviceOptionsSearch: (term: string) => ['service-routes', 'service-options', term] as const,
 };

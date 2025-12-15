@@ -88,9 +88,7 @@ export function TokenFiltersForm({
   return (
     <FiltersFormLayout onSubmit={(event) => event.preventDefault()}>
       <ServicesFilters control={control} />
-
       <DatesFilters control={control} />
-
       <FooterRow>
         <OrderingSection control={control} />
         <FiltersActionsContainer>
@@ -138,19 +136,26 @@ function ServicesFilters({ control }: ServicesFiltersProps) {
     serviceTo: serviceToQuery,
   };
 
+
   const handleInputValueChange = useCallback((field: ServiceFieldName, value: string) => {
     setSearchValues((prev) => ({ ...prev, [field]: value }));
   }, []);
 
+  
+
   return (
     <ServicesRow>
-      {SERVICE_FILTERS.map(({ name, label, placeholder }) => (
-        <FiltersField key={name}>
+      {SERVICE_FILTERS.map(({ name, label, placeholder }) => {
+        const data = queryByField[name].data ?? [];  
+        const options = data.map((service) => 
+          ({ label: service.commonName, value: service.serviceId }));
+        
+        return <FiltersField key={name}>
           <FormMultiSelectField
             control={control}
             name={name}
             label={label}
-            options={queryByField[name].data ?? []}
+            options={options}
             loading={queryByField[name].isFetching}
             placeholder={placeholder}
             minSearchLength={SERVICE_FILTER_MIN_CHARS}
@@ -158,7 +163,9 @@ function ServicesFilters({ control }: ServicesFiltersProps) {
             onInputValueChange={(value) => handleInputValueChange(name, value)}
           />
         </FiltersField>
-      ))}
+      }
+      )
+      }
     </ServicesRow>
   );
 }

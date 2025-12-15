@@ -25,11 +25,16 @@ import type { Control, FieldPath, FieldValues } from 'react-hook-form';
 
 import { StaticTextField } from './static-text-field';
 
+export type OptionType = {
+  label: string;
+  value: string;
+}
+
 export type FormMultiSelectFieldProps<TFieldValues extends FieldValues> = {
   control: Control<TFieldValues>;
   name: FieldPath<TFieldValues>;
   label: string;
-  options?: string[];
+  options?: OptionType[];
   loading?: boolean;
   placeholder?: string;
   className?: string;

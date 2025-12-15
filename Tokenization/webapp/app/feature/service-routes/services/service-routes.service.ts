@@ -22,8 +22,10 @@ export type ServiceRoutesQueryResponse = {
 };
 
 export type ServiceRouteRegistrationPayload = {
-  serviceFrom: string;
-  serviceTo: string;
+  serviceFromId: string;
+  serviceFromLabel: string;
+  serviceToId: string;
+  serviceToLabel: string;
   permissions: string[];
 };
 
@@ -45,8 +47,8 @@ export async function banServiceRoutesBulk(_filters: ServiceRouteFilterValues): 
 export async function registerServiceRoute(payload: ServiceRouteRegistrationPayload): Promise<ServiceRoute> {
   const mockRoute: ServiceRoute = {
     routeId: `route-${Date.now()}`,
-    serviceFrom: payload.serviceFrom,
-    serviceTo: payload.serviceTo,
+    serviceFrom: payload.serviceFromId,
+    serviceTo: payload.serviceToId,
     permissions: [...payload.permissions],
   };
   return Promise.resolve(mockRoute);

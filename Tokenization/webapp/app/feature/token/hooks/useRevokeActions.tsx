@@ -15,6 +15,8 @@
 import { useCallback } from 'react';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { useQueryClient } from '@tanstack/react-query';
+
 
 import { useBulkRevokeMutation, useRevokeTokenMutation } from '~/feature/token/api/mutations';
 import type { Token } from '~/feature/token/types/token';
@@ -28,12 +30,14 @@ import { validateFiltersForBulk } from '~/feature/token/services/token-filters.s
 /**
  * Provides shared revoke helpers reused across overview and details views.
  */
-export function useRevokeActions() {
+export function useRevokeActions(filters: TokenFilterValues | null) {
   const hasAuth = useAuth();
   const pushAlert = useAlert();
   const { showModal } = useModal();
   const revokeTokenMutation = useRevokeTokenMutation();
   const bulkRevokeMutation = useBulkRevokeMutation();
+
+  const queryClient = useQueryClient();
 
   const confirmRevoke = useCallback((token: Token) => {
     showModal({
@@ -54,6 +58,27 @@ export function useRevokeActions() {
         revokeTokenMutation.mutate(token.tokenId, {
           onSuccess: () => {
             pushAlert({ message: 'Token revoked successfully.', severity: 'success' });
+            // optimistic UI updates
+            queryClient.setQueryData(
+              ['tokens','list', 'active', filters],
+              (old: { tokens?: Token[] } | undefined) => {
+                if (!old) return old;
+                return {
+                  ...old,
+                  tokens: old.tokens?.filter(t => t.tokenId !== token.tokenId) || [],
+                }
+              }
+            )
+            queryClient.setQueryData(
+              ['tokens', 'detail', token.tokenId],
+              (old: Token | undefined) => {
+                if (!old) return old;
+                return {
+                  ...old,
+                  status: 'not-active',
+                }
+              }
+            )
           },
           onError: (error) => {
             console.error('Failed to revoke token', error);
@@ -93,7 +118,17 @@ export function useRevokeActions() {
         bulkRevokeMutation.mutate(filters, {
           onSuccess: () => {
             pushAlert({ message: 'Tokens revoked successfully.', severity: 'success' });
-          },
+            queryClient.setQueryData(
+              ['tokens','list', 'active', filters],
+              (old: { tokens?: Token[] } | undefined) => {
+                if (!old) return old;
+                return {
+                  ...old,
+                  tokens: [],
+                }
+              }
+            )
+          },   
           onError: (error) => {
             console.error('Failed to revoke tokens', error);
             pushAlert({ message: 'Failed to revoke tokens.', severity: 'error' });

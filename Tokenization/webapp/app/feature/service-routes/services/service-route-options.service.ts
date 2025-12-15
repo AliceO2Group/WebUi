@@ -13,12 +13,8 @@
  */
 
 import { mockServices } from '~/feature/service/mocks/services.mock';
+import type { Service } from '~/feature/service/types/service';
 
-export async function fetchServiceRouteOptions(searchTerm = ''): Promise<string[]> {
-  const names = Array.from(new Set(mockServices.map((service) => service.commonName)));
-  const query = searchTerm.trim().toLowerCase();
-  if (!query) {
-    return names;
-  }
-  return names.filter((name) => name.toLowerCase().includes(query));
+export async function fetchServiceRouteOptions(searchTerm = ''): Promise<Service[]> {
+  return [...mockServices]
 }

@@ -22,12 +22,8 @@ import type { TokenFilterValues } from '~/feature/token/types/token-filters';
 const tokenListsKey = ['tokens', 'list'] as const;
 
 export const tokenQueryKeys = {
-  all: ['tokens'] as const,
-  lists: tokenListsKey,
   list: (filters: TokenFilterValues | null, status?: TokenStatus) => [...tokenListsKey, status ?? 'all', filters] as const,
-  serviceOptions: ['tokens', 'service-options'] as const,
   serviceOptionsSearch: (term: string) => ['tokens', 'service-options', term] as const,
-  details: ['tokens', 'detail'] as const,
   detail: (tokenId: string) => ['tokens', 'detail', tokenId] as const,
   logs: (tokenId: string) => ['tokens', 'detail', tokenId, 'logs'] as const,
 };
@@ -57,7 +53,7 @@ type UseTokensQueryParams = {
 };
 
 /**
- * Fetches tokens matching the provided filters, returning potential validation errors.
+ * Fetches tokens matching the provided filters, returning potential errors
  */
 export function useTokensQuery({ filters, enabled = true, status }: UseTokensQueryParams) {
   return useQuery({

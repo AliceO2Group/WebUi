@@ -41,7 +41,7 @@ export default function TokensOverviewRoute() {
     filters: appliedFilters,
     status: 'active',
   });
-  const { confirmRevoke, confirmBulkRevoke } = useRevokeActions();
+  const { confirmRevoke, confirmBulkRevoke } = useRevokeActions(appliedFilters);
 
   const tokensData = tokensQuery.data?.tokens ?? [];
   const canBulkRevoke = Boolean(appliedFilters && hasDataFilters(appliedFilters));
