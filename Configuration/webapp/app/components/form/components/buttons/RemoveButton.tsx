@@ -12,7 +12,17 @@
  * or submit itself to any jurisdiction.
  */
 
-export interface Run {
-  runNumber: number;
-  quality: 'good' | 'bad';
-}
+import { IconButton, type IconButtonProps } from '@mui/material';
+import CancelIcon from '@mui/icons-material/Cancel';
+
+/**
+ * Remove button component.
+ * @param {IconButtonProps} props - The props of the icon button.
+ * @param {() => void} props.onClick - The callback to click the remove button.
+ * @returns {ReactElement} The remove button component.
+ */
+export const RemoveButton = (props: IconButtonProps) => (
+  <IconButton color="primary" {...props}>
+    <CancelIcon />
+  </IconButton>
+);

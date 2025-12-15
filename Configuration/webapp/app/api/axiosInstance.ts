@@ -21,7 +21,6 @@ const axiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
-    'User-Agent': 'axios 0.21.1',
   },
   withCredentials: false,
 });
@@ -29,7 +28,9 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(async (config) => {
   const { token } = await getSessionData();
   if (token) {
-    config.url = `${config.url}?token=${token}`;
+    const params = (config.params || {}) as Record<string, unknown>;
+    params.token = token;
+    config.params = params;
   }
 
   return config;

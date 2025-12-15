@@ -12,17 +12,5 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Link } from 'react-router';
-
-/**
- * Home component
- * @returns {React.ReactElement} Home
- */
-export default function Home() {
-  return (
-    <>
-      <h1>Welcome to (dummy) bookkeeping!</h1>
-      <Link to={'/runs'}>Runs overview</Link>
-    </>
-  );
-}
+export const KEY_SEPARATOR = '__';
+export const DEFAULT_PREFIX = 'Configuration';

@@ -12,20 +12,33 @@
  * or submit itself to any jurisdiction.
  */
 
+import type { Theme } from '@mui/material';
 import {
   createContext,
   useContext,
   useState,
+  useEffect,
   type FC,
   type PropsWithChildren,
   type Dispatch,
   type SetStateAction,
 } from 'react';
 
+export const DEFAULT_DRAWER_WIDTH = 300;
+export const MIN_DRAWER_WIDTH = 300;
+export const MAX_DRAWER_WIDTH = 800;
+
 interface DrawerContextValue {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
   toggleDrawer: () => void;
+  drawerWidth: number;
+  setDrawerWidth: Dispatch<SetStateAction<number>>;
+  isResizing: boolean;
+  handleResize: () => void;
+  getTransition: (variant: 'drawer' | 'content') => (theme: Theme) => string;
+  searchTerm: string;
+  setSearchTerm: Dispatch<SetStateAction<string>>;
 }
 
 const DrawerContext = createContext<DrawerContextValue | undefined>(undefined);
@@ -39,15 +52,79 @@ const DrawerContext = createContext<DrawerContextValue | undefined>(undefined);
  */
 export const DrawerProvider: FC<PropsWithChildren> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(true);
+  const [drawerWidth, setDrawerWidth] = useState(DEFAULT_DRAWER_WIDTH);
+  const [isResizing, setIsResizing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const toggleDrawer = () => {
     setIsOpen((prev) => !prev);
   };
 
+  const handleResize = () => {
+    setIsResizing(true);
+  };
+
+  const getTransition = (variant: 'drawer' | 'content') => {
+    if (variant === 'drawer' && !isResizing) {
+      return (theme: Theme) =>
+        theme.transitions.create('width', {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.enteringScreen,
+        });
+    }
+    if (variant === 'content') {
+      return (theme: Theme) =>
+        theme.transitions.create('margin', {
+          easing: isOpen ? theme.transitions.easing.easeOut : theme.transitions.easing.sharp,
+          duration: isOpen
+            ? theme.transitions.duration.enteringScreen
+            : theme.transitions.duration.leavingScreen,
+        });
+    }
+    return () => 'none';
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) {
+        return;
+      }
+
+      const newWidth = e.clientX;
+      const clampedWidth = Math.max(MIN_DRAWER_WIDTH, Math.min(MAX_DRAWER_WIDTH, newWidth));
+      setDrawerWidth(clampedWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing]);
+
   const value: DrawerContextValue = {
     isOpen,
     setIsOpen,
     toggleDrawer,
+    drawerWidth,
+    setDrawerWidth,
+    isResizing,
+    handleResize,
+    getTransition,
+    searchTerm,
+    setSearchTerm,
   };
 
   return <DrawerContext.Provider value={value}>{children}</DrawerContext.Provider>;

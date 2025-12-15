@@ -12,8 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-export interface Log {
-  id: number;
-  title: string;
-  content: string;
-}
+export const useInputCommonProps = () => ({
+  color: 'primary',
+  focused: false,
+  error: false,
+  helperText: '',
+});

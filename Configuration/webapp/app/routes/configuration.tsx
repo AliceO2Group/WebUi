@@ -16,17 +16,42 @@ import { useLocation } from 'react-router';
 import { useConfigurationQuery } from '~/api/query/useConfigurationQuery';
 import { useConfigurationRestrictionsQuery } from '~/api/query/useConfigurationRestrictionsQuery';
 import { Form } from '~/components/form/Form';
+import { ROUTE_PREFIX } from '~/config';
 import { Spinner } from '~/ui/spinner';
+import { DEFAULT_PREFIX } from '~/components/form/constants';
+import { SaveButton } from '~/components/form/components/buttons/SaveButton';
+import { useConfigurationForm } from '~/hooks/useConfigurationForm';
+import { UnsavedChangesModal } from '~/components/form/components/UnsavedChangesModal';
+import { useUnsavedChangesBlocker } from '~/hooks/useUnsavedChangesBlocker';
+
+export type InputsType = Record<string, string | number | boolean>;
 
 const ConfigurationPage = () => {
   const { pathname } = useLocation();
-  const configurationName = pathname.split('/').pop() as string;
+  const configurationName = pathname.slice(ROUTE_PREFIX.length);
 
   const { data: configuration, isLoading: isConfigurationLoading } =
     useConfigurationQuery(configurationName);
 
   const { data: configurationRestrictions, isLoading: isConfigurationRestrictionsLoading } =
     useConfigurationRestrictionsQuery(configurationName);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { isDirty },
+    onSubmit,
+  } = useConfigurationForm({
+    configuration,
+    configurationName,
+  });
+
+  const { showModal, handleProceed, handleSaveAndProceed, handleCancel } = useUnsavedChangesBlocker(
+    {
+      isDirty,
+      onSave: handleSubmit(onSubmit),
+    },
+  );
 
   if (isConfigurationLoading || isConfigurationRestrictionsLoading) {
     return <Spinner />;
@@ -37,11 +62,24 @@ const ConfigurationPage = () => {
   }
 
   return (
-    <Form
-      sectionTitle="Configuration"
-      items={configuration}
-      itemsRestrictions={configurationRestrictions}
-    />
+    <>
+      <form>
+        <Form
+          control={control}
+          sectionTitle={DEFAULT_PREFIX}
+          sectionPrefix={pathname}
+          value={configuration}
+          restrictions={configurationRestrictions}
+        />
+      </form>
+      <SaveButton onClick={() => void handleSubmit(onSubmit)()} disabled={!isDirty} />
+      <UnsavedChangesModal
+        open={showModal}
+        onProceed={handleProceed}
+        onSaveAndProceed={() => void handleSaveAndProceed()}
+        onCancel={handleCancel}
+      />
+    </>
   );
 };
 

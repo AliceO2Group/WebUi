@@ -12,10 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { BASE_CONFIGURATION_PATH } from '~/config';
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '../axiosInstance';
-import type { FormRestrictions } from '~/components/form/Form';
+import type { ObjectRestrictions } from '~/components/form/types';
 
 export const CONFIGURATION_RESTRICTIONS_QUERY_KEY = 'configuration-restrictions';
 
@@ -24,8 +23,6 @@ export const useConfigurationRestrictionsQuery = (configuration: string) =>
     queryKey: [CONFIGURATION_RESTRICTIONS_QUERY_KEY, configuration],
     queryFn: async () =>
       axiosInstance
-        .get<FormRestrictions>(
-          `configurations/restrictions/${BASE_CONFIGURATION_PATH}/${configuration}`,
-        )
+        .get<ObjectRestrictions>(`configurations/restrictions/${configuration}`)
         .then((response) => response.data),
   });

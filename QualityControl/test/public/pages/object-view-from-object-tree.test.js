@@ -63,7 +63,7 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
         (element) => document.querySelector(element).textContent,
         errorMessageElement,
       );
-      strictEqual(message, `404: Object "${objectName}" could not be found.`);
+      strictEqual(message, 'Failed to fetch object at url \'/latest/NOT_FOUND_OBJECT\' and path \'NOT_FOUND_OBJECT\'.');
     },
   );
 
