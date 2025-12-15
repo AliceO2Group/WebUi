@@ -13,7 +13,7 @@
 
 import { strictEqual, ok, deepStrictEqual, notDeepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
-import { getLocalStorage, getLocalStorageAsJson, removeLocalStorage } from '../../testUtils/localStorage.js';
+import { getLocalStorage, getLocalStorageAsJson } from '../../testUtils/localStorage.js';
 import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
 
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
@@ -43,46 +43,22 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     ok(rowsCount > 1); // more than 1 object in the tree
   });
 
-  await testParent.test('should update local storage when tree node is clicked', { timeout }, async () => {
-    const selector = 'section > div > div > div > table > tbody > tr:nth-child(2)';
-    const personid = await page.evaluate(() => window.model.session.personid);
-    const storageKey = `${StorageKeysEnum.OBJECT_TREE_OPEN_NODES}-${personid}`;
-
-    await page.locator(selector).click();
-    const localStorageBefore = await getLocalStorageAsJson(page, storageKey);
-
-    await page.locator(selector).click();
-    const localStorageAfter = await getLocalStorageAsJson(page, storageKey);
-
-    // Ideally, tests should be isolated and not depend on each other.
-    // Currently, some tests rely on shared localStorage or page state changes from previous tests.
-    // As a workaround, we do targeted cleanup here to prevent issues in later tests.
-    await removeLocalStorage(page, storageKey);
-    await page.reload({ waitUntil: 'networkidle0' });
-
-    notDeepStrictEqual(
-      localStorageBefore,
-      localStorageAfter,
-      'local storage should have changed after clicking a tree node',
-    );
-  });
-
   await testParent.test('should preserve state if refreshed', { timeout }, async () => {
-    const tbodyPath = 'section > div > div > div > table > tbody';
-    await page.locator(`${tbodyPath} > tr:nth-child(2)`).click();
+    const selector = 'section > div > div > div > table > tbody > tr:nth-child(2)';
+    await page.locator(selector).click();
     await page.reload({ waitUntil: 'networkidle0' });
 
-    const rowCount = await page.evaluate(() =>
+    const rowCountExpanded = await page.evaluate(() =>
       document.querySelectorAll('section > div > div > div > table > tbody > tr').length);
 
-    // Ideally, tests should be isolated and not depend on each other.
-    // Currently, some tests rely on shared localStorage or page state changes from previous tests.
-    // As a workaround, we do targeted cleanup here to prevent issues in later tests.
-    const personid = await page.evaluate(() => window.model.session.personid);
-    await removeLocalStorage(page, `${StorageKeysEnum.OBJECT_TREE_OPEN_NODES}-${personid}`);
+    await page.locator(selector).click();
     await page.reload({ waitUntil: 'networkidle0' });
 
-    strictEqual(rowCount, 3);
+    const rowCountCollapsed = await page.evaluate(() =>
+      document.querySelectorAll('section > div > div > div > table > tbody > tr').length);
+
+    strictEqual(rowCountExpanded, 3);
+    strictEqual(rowCountCollapsed, 2);
   });
 
   await testParent.test('should have a button to sort by (default "Name" ASC)', async () => {
@@ -165,18 +141,8 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     'should maintain panel width from localStorage on page reload',
     { timeout },
     async () => {
-      // Ideally, tests should be isolated and not depend on each other.
-      // Currently, some tests rely on shared localStorage or page state changes from previous tests.
-      // As a workaround, we do targeted cleanup here to prevent issues in later tests.
-      const personid = await page.evaluate(() => window.model.session.personid);
-      await removeLocalStorage(page, `${StorageKeysEnum.OBJECT_TREE_OPEN_NODES}-${personid}`);
-
       const dragAmount = 35;
       await page.reload({ waitUntil: 'networkidle0' });
-      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(2)').click());
-      await delay(500);
-      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(3)').click());
-      await delay(500);
       await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(4)').click());
       await delay(1000);
       const panelWidth = await page.evaluate(() =>
@@ -264,6 +230,24 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       strictEqual(numberOfChildren, 1);
     }
   );
+
+  await testParent.test('should update local storage when tree node is clicked', { timeout }, async () => {
+    const selector = 'section > div > div > div > table > tbody > tr:nth-child(2)';
+    const personid = await page.evaluate(() => window.model.session.personid);
+    const storageKey = `${StorageKeysEnum.OBJECT_TREE_OPEN_NODES}-${personid}`;
+
+    await page.locator(selector).click();
+    const localStorageBefore = await getLocalStorageAsJson(page, storageKey);
+
+    await page.locator(selector).click();
+    const localStorageAfter = await getLocalStorageAsJson(page, storageKey);
+
+    notDeepStrictEqual(
+      localStorageBefore,
+      localStorageAfter,
+      'local storage should have changed after clicking a tree node',
+    );
+  });
 
   await testParent.test('should sort list of histograms by name in descending order', async () => {
     await page.locator('#sortTreeButton').click();
