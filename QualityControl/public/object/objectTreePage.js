@@ -107,7 +107,7 @@ const drawPlot = (model, object) => {
         onclick: async (event) => {
           try {
             event.target.disabled = true;
-            await downloadRoot(`${name}.webp`, root, [...drawingOptions, ...displayHints]);
+            await downloadRoot(`${name}.png`, root, [...drawingOptions, ...displayHints]);
           } finally {
             event.target.disabled = false;
           }
