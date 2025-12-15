@@ -158,8 +158,7 @@
 
 .header-layout {
   &.edit {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
+    display: flex;
   }
 
   /*
