@@ -197,7 +197,7 @@
     left: 0;
 
     &.active {
-      border-left: 2px solid blue;
+      border-left: 2px solid var(--color-primary);
     }
   }
 
@@ -205,7 +205,7 @@
     right: 0;
 
     &.active {
-      border-right: 2px solid blue;
+      border-right: 2px solid var(--color-primary);
     }
   }
 }
