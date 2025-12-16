@@ -198,10 +198,9 @@ function chartView(model, tabObject) {
 const drawComponent = (model, tabObject) => {
   const { displayTimestamp = false } = model.layout.item;
 
-  const objectFromLayoutAsRemoteData = tabObject;
-  const { name, options: drawingOptions = [], ignoreDefaults } = objectFromLayoutAsRemoteData;
+  const { name, options: drawingOptions = [], ignoreDefaults } = tabObject;
 
-  const objectFromQcdbAsRemoteData = model.object.objects[name];
+  const objectFromQcdbAsRemoteData = model?.object?.objects?.[name] ?? {};
   const { displayHints = [], drawOptions = [] } = objectFromQcdbAsRemoteData?.payload ?? {};
 
   let toUseDrawingOptions = [];
