@@ -49,7 +49,6 @@ export async function fetchTokens(filters: TokenFilterValues | null, status?: To
       queryString.append('issuedAfter', filters.issuedAfter);
     }
     if (filters.ordering.length > 0) {
-      console.log('ordering', filters.ordering);
       queryString.append('ordering', filters.ordering.map((order) => `${order.field}:${order.direction}`).join(','));
     }
   }

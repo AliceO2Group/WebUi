@@ -3,11 +3,86 @@ export const TokenStatus = {
     NOT_ACTIVE: 'not-active'
 };
 
-export const mockTokens = [
+export let mockServices = [
+  {
+    serviceId: '1',
+    commonName: 'Service One',
+    iat: '2025-05-01T08:00:00Z',
+    exp: '2026-05-01T08:00:00Z',
+  },
+  {
+    serviceId: '2',
+    commonName: 'Service Two',
+    iat: '2024-11-15T10:30:00Z',
+    exp: '2025-11-15T10:30:00Z',
+  },
+  {
+    serviceId: '3',
+    commonName: 'Service Three',
+    iat: '2025-08-20T06:15:00Z',
+    exp: '2026-08-20T06:15:00Z',
+  },
+  {
+    serviceId: '4',
+    commonName: 'Service Four',
+    iat: '2023-12-05T14:00:00Z',
+    exp: '2024-12-05T14:00:00Z',
+  },
+  {
+    serviceId: '5',
+    commonName: 'Service Five',
+    iat: '2025-02-10T09:45:00Z',
+    exp: '2026-02-10T09:45:00Z',
+  },
+  {
+    serviceId: '6',
+    commonName: 'Service Six',
+    iat: '2024-06-18T07:20:00Z',
+    exp: '2025-06-18T07:20:00Z',
+  },
+  {
+    serviceId: '7',
+    commonName: 'Service Seven',
+    iat: '2023-09-22T11:05:00Z',
+    exp: '2024-09-22T11:05:00Z',
+  },
+  {
+    serviceId: '8',
+    commonName: 'Service Eight',
+    iat: '2025-03-30T05:40:00Z',
+    exp: '2026-03-30T05:40:00Z',
+  },
+  {
+    serviceId: '9',
+    commonName: 'Service Nine',
+    iat: '2024-01-12T16:25:00Z',
+    exp: '2025-01-12T16:25:00Z',
+  },
+  {
+    serviceId: '10',
+    commonName: 'Service Ten',
+    iat: '2025-07-04T13:10:00Z',
+    exp: '2026-07-04T13:10:00Z',
+  },
+  {
+    serviceId: '11',
+    commonName: 'Service Eleven',
+    iat: '2023-11-08T19:55:00Z',
+    exp: '2024-11-08T19:55:00Z',
+  },
+  {
+    serviceId: '12',
+    commonName: 'Service Twelve',
+    iat: '2024-04-27T02:30:00Z',
+    exp: '2025-04-27T02:30:00Z',
+  },
+];
+
+export let mockTokens = [
   {
     tokenId: '1',
-    serviceFrom: 'Service One',
-    serviceTo: 'Service Two',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service One'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Two'),
     exp: '2025-12-01T10:00:00Z',
     last4chars: 'd9f1',
     issuer: 'token-service',
@@ -17,8 +92,8 @@ export const mockTokens = [
   },
   {
     tokenId: '2',
-    serviceFrom: 'Service Two',
-    serviceTo: 'Service One',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Two'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service One'),
     exp: '2025-09-18T08:00:00Z',
     last4chars: 'aa10',
     issuer: 'token-service',
@@ -28,8 +103,8 @@ export const mockTokens = [
   },
   {
     tokenId: '3',
-    serviceFrom: 'Service Three',
-    serviceTo: 'Service Four',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Three'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Four'),
     exp: '2026-01-03T12:00:00Z',
     last4chars: '0042',
     issuer: 'token-service',
@@ -39,8 +114,8 @@ export const mockTokens = [
   },
   {
     tokenId: '4',
-    serviceFrom: 'Service Five',
-    serviceTo: 'Service Six',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Five'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Six'),
     exp: '2025-11-07T15:30:00Z',
     last4chars: '6a1c',
     issuer: 'token-service',
@@ -50,19 +125,19 @@ export const mockTokens = [
   },
   {
     tokenId: '5',
-    serviceFrom: 'Service Six',
-    serviceTo: 'Service Three',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Six'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Three'),
     exp: '2024-12-14T04:45:00Z',
     last4chars: '3fe8',
     issuer: 'token-service',
     iat: '2024-06-14T04:45:00Z',
     permissions: ['GET'],
-    status: TokenStatus.REVOKED,
+    status: TokenStatus.NOT_ACTIVE,
   },
   {
     tokenId: '6',
-    serviceFrom: 'Service Seven',
-    serviceTo: 'Service Two',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Seven'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Two'),
     exp: '2025-08-21T09:10:00Z',
     last4chars: 'a92d',
     issuer: 'token-service',
@@ -72,8 +147,8 @@ export const mockTokens = [
   },
   {
     tokenId: '7',
-    serviceFrom: 'Service Eight',
-    serviceTo: 'Service One',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Eight'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service One'),
     exp: '2026-03-01T22:20:00Z',
     last4chars: 'bb0f',
     issuer: 'token-service',
@@ -83,8 +158,8 @@ export const mockTokens = [
   },
   {
     tokenId: '8',
-    serviceFrom: 'Service Nine',
-    serviceTo: 'Service Four',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Nine'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Four'),
     exp: '2024-10-30T01:15:00Z',
     last4chars: 'e1c4',
     issuer: 'token-service',
@@ -94,8 +169,8 @@ export const mockTokens = [
   },
   {
     tokenId: '9',
-    serviceFrom: 'Service Ten',
-    serviceTo: 'Service Five',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Ten'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Five'),
     exp: '2025-07-04T13:10:00Z',
     last4chars: 'c991',
     issuer: 'token-service',
@@ -105,8 +180,8 @@ export const mockTokens = [
   },
   {
     tokenId: '10',
-    serviceFrom: 'Service Eleven',
-    serviceTo: 'Service Three',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Eleven'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Three'),
     exp: '2024-11-08T19:55:00Z',
     last4chars: '11dd',
     issuer: 'token-service',
@@ -116,8 +191,8 @@ export const mockTokens = [
   },
   {
     tokenId: '11',
-    serviceFrom: 'Service Twelve',
-    serviceTo: 'Service Two',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Twelve'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Two'),
     exp: '2025-04-27T02:30:00Z',
     last4chars: '8f77',
     issuer: 'token-service',
@@ -127,8 +202,8 @@ export const mockTokens = [
   },
   {
     tokenId: '12',
-    serviceFrom: 'Service Four',
-    serviceTo: 'Service Ten',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Four'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Ten'),
     exp: '2026-02-18T06:05:00Z',
     last4chars: '59ea',
     issuer: 'token-service',
@@ -138,8 +213,8 @@ export const mockTokens = [
   },
   {
     tokenId: '13',
-    serviceFrom: 'Service One',
-    serviceTo: 'Service Nine',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service One'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Nine'),
     exp: '2024-09-12T17:00:00Z',
     last4chars: '72bc',
     issuer: 'token-service',
@@ -149,8 +224,8 @@ export const mockTokens = [
   },
   {
     tokenId: '14',
-    serviceFrom: 'Service Two',
-    serviceTo: 'Service Eleven',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Two'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Eleven'),
     exp: '2025-01-19T14:45:00Z',
     last4chars: '5a4e',
     issuer: 'token-service',
@@ -160,8 +235,8 @@ export const mockTokens = [
   },
   {
     tokenId: '15',
-    serviceFrom: 'Service Eight',
-    serviceTo: 'Service Twelve',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Eight'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Twelve'),
     exp: '2026-05-09T20:25:00Z',
     last4chars: '04c5',
     issuer: 'token-service',
@@ -186,3 +261,56 @@ export const mockTokenLogs = {
         { id: '3-3', message: 'Token revoked', timestamp: '2025-10-04T07:15:00Z' },
     ],
 };
+
+
+
+export let mockServiceRoutes = [
+  {
+    routeId: 'route-001',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service One'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Two'),
+    permissions: ['GET', 'POST'],
+  },
+  {
+    routeId: 'route-002',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service One'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Five'),
+    permissions: ['GET'],
+  },
+  {
+    routeId: 'route-003',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Two'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service One'),
+    permissions: ['GET', 'DELETE'],
+  },
+  {
+    routeId: 'route-004',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Two'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Four'),
+    permissions: ['GET', 'POST'],
+  },
+  {
+    routeId: 'route-005',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Three'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Two'),
+    permissions: ['GET', 'PUT'],
+  },
+  {
+    routeId: 'route-006',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Three'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Four'),
+    permissions: ['GET'],
+  },
+  {
+    routeId: 'route-007',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Four'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Five'),
+    permissions: ['GET', 'POST', 'DELETE'],
+  },
+  {
+    routeId: 'route-008',
+    serviceFrom: mockServices.find(s => s.commonName === 'Service Five'),
+    serviceTo: mockServices.find(s => s.commonName === 'Service Three'),
+    permissions: ['GET', 'PATCH'],
+  },
+];
