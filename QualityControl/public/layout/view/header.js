@@ -143,6 +143,7 @@ const toolbarEditModeTab = (layout, tab, i) => {
    */
   const selectTab = () => layout.selectTab(i);
 
+  const dragActiveClass = layout.isDragging ? 'pointer-events-auto' : '';
   const dropZoneClass = (position) => layout.dropTargetId === tab.id && layout.position === position ? 'active' : '';
 
   return [
@@ -150,10 +151,14 @@ const toolbarEditModeTab = (layout, tab, i) => {
       '.btn-group.flex-fixed.relative',
       {
         draggable: true,
-        ondragstart: (e) => e.dataTransfer.setData('text/plain', tab.id),
+        ondragstart: (e) => {
+          e.dataTransfer.setData('text/plain', tab.id);
+          layout.startDragging();
+        },
         ondrop: (e) => {
           layout.reorderTabs(e.dataTransfer.getData('text/plain'), layout.dropTargetId, layout.position);
           layout.clearDropTarget();
+          layout.stopDragging();
         },
       },
       [
@@ -162,7 +167,7 @@ const toolbarEditModeTab = (layout, tab, i) => {
           h(
             '.drop-zone.before',
             {
-              class: dropZoneClass('before'),
+              class: `${dragActiveClass} ${dropZoneClass('before')}`,
               ondragenter: () => layout.setDropTarget(tab.id, 'before'),
               ondragover: (e) => e.preventDefault(), // prevent default to allow drop
               ondragleave: () => {
@@ -176,7 +181,7 @@ const toolbarEditModeTab = (layout, tab, i) => {
           h(
             '.drop-zone.after',
             {
-              class: dropZoneClass('after'),
+              class: `${dragActiveClass} ${dropZoneClass('after')}`,
               ondragenter: () => layout.setDropTarget(tab.id, 'after'),
               ondragover: (e) => e.preventDefault(), // prevent default to allow drop
               ondragleave: () => {

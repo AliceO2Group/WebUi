@@ -62,6 +62,7 @@ export default class Layout extends BaseViewModel {
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
 
+    this.isDragging = false;
     this.dropTargetId = undefined;
     this.position = undefined;
   }
@@ -834,6 +835,27 @@ export default class Layout extends BaseViewModel {
     }
 
     this.item.tabs.splice(targetIndex, 0, movedTab);
+
+    this.notify();
+  }
+
+  /**
+   * Sets the layout state to indicate that a tab drag-and-drop operation has begun.
+   * It typically triggers a redraw and enables pointer events on all drop zones via CSS.
+   */
+  startDragging() {
+    this.isDragging = true;
+
+    this.notify();
+  }
+
+  /**
+   * Resets the layout state to indicate that a tab drag-and-drop operation has ended,
+   * regardless of whether the drop was successful or cancelled.
+   * It typically triggers a redraw and disables pointer events on the drop zones via CSS.
+   */
+  stopDragging() {
+    this.isDragging = false;
 
     this.notify();
   }

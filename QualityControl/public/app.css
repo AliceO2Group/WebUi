@@ -192,6 +192,7 @@
   position: absolute;
   height: 100%;
   width: 50%;
+  pointer-events: none;
 
   &.before {
     left: 0;
@@ -208,4 +209,8 @@
       border-right: 2px solid var(--color-primary);
     }
   }
+}
+
+.pointer-events-auto {
+  pointer-events: auto;
 }
