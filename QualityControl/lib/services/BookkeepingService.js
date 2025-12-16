@@ -155,7 +155,7 @@ export class BookkeepingService {
         definition,
         runQuality,
         lhcBeamMode,
-        detectorQualities,
+        detectorsQualities = [],
         timeO2End,
       } = data;
       const runStatus = timeO2End ? RunStatus.ENDED : RunStatus.ONGOING;
@@ -167,7 +167,7 @@ export class BookkeepingService {
         definition,
         runQuality,
         lhcBeamMode,
-        detectorQualities,
+        detectorsQualities,
         ...wrapRunStatus(runStatus),
       };
     } catch (error) {
