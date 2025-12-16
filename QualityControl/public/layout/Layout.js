@@ -782,9 +782,11 @@ export default class Layout extends BaseViewModel {
   }
 
   /**
-   * TODO
-   * @param {*} tabId TODO
-   * @param {*} position TODO
+   * Sets the current drop target for a drag-and-drop operation.
+   * This is typically used to render a visual indicator (like a blue line)
+   * in the UI showing where the dragged tab will be placed.
+   * @param {string|number} tabId - The ID of the tab currently being hovered over.
+   * @param {'before'|'after'} position - The side of the target tab where the drop indicator should appear.
    */
   setDropTarget(tabId, position) {
     this.dropTargetId = tabId;
@@ -794,7 +796,9 @@ export default class Layout extends BaseViewModel {
   }
 
   /**
-   * TODO
+   * Clears the current drop target state, usually when the drag operation
+   * is finished or the dragged item is no longer over a valid drop zone.
+   * This action typically causes the visual drop indicator to be hidden.
    */
   clearDropTarget() {
     this.dropTargetId = undefined
@@ -804,10 +808,12 @@ export default class Layout extends BaseViewModel {
   }
 
   /**
-   * TODO
-   * @param {*} sourceId TODO
-   * @param {*} targetId TODO
-   * @param {*} position TODO
+   * Reorders the tabs in the internal array based on the drag source and drop target.
+   * This function calculates the correct index for insertion, accounting for the
+   * tab being removed from its original position.
+   * @param {string|number} sourceId - The ID of the tab that was dragged.
+   * @param {string|number} targetId - The ID of the tab that the source was dropped onto.
+   * @param {'before'|'after'} position - The placement relative to the target tab.
    */
   reorderTabs(sourceId, targetId, position) {
     const sourceIndex = this.item.tabs.findIndex((t) => t.id === sourceId);
