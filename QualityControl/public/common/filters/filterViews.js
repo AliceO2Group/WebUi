@@ -19,6 +19,7 @@ import { runModeCheckbox } from './runMode/runModeCheckbox.js';
 import { lastUpdatePanel, runStatusPanel } from './runMode/runStatusPanel.js';
 import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
 import { camelToTitleCase } from '../utils.js';
+import { statusBadge } from '../badge.js';
 
 /**
  * Creates an input element for a specific metadata field;
@@ -90,6 +91,7 @@ export function filtersPanel(filterModel, viewModel) {
   const filtersList = isRunModeActivated
     ? runModeFilterConfig(filterService)
     : filtersConfig(filterService);
+  const { detectorsQualities, ...cleanRunInformation } = runInformation;
 
   return h(
     '.w-100.flex-column.p2.g2.justify-center#filterElement',
@@ -103,19 +105,36 @@ export function filtersPanel(filterModel, viewModel) {
         isRunModeActivated && runStatusPanel(runStatus),
       ]),
       lastUpdatePanel(runStatus, lastRefresh, refreshRate),
-      runInformation && h(
-        '.flex-row.g4.items-center.f7.gray-darker.text-center.ph2',
+      cleanRunInformation && Object.keys(cleanRunInformation).length > 0 && h(
+        '.flex-row.g4.items-center.f7.gray-darker.text-center.ph4',
         {
-          id: 'runInformation',
+          id: 'header-run-information',
           style: 'overflow-x: auto; margin: 0 auto;',
         },
-        Object.entries(runInformation).map(([key, value]) =>
+        Object.entries(cleanRunInformation).map(([key, value]) =>
           h('.flex-row.g1', {
+            key: `${key}-${value}`,
             style: 'flex: 0 0 auto;',
           }, [
             h('strong', `${camelToTitleCase(key)}:`),
             h('span', `${value}`),
           ])),
+      ),
+      Array.isArray(detectorsQualities) && detectorsQualities.length > 0 && h(
+        '.flex-row.g3.items-center.f7.gray-darker.text-center.ph3',
+        {
+          id: 'header-detector-qualities',
+          style: 'overflow-x: auto;',
+        },
+        detectorsQualities.map(({ id, name, quality }) =>
+          h(
+            '.flex-row.g1',
+            {
+              key: `${id}-${name}-${quality}`,
+              style: 'flex: 0 0 auto;',
+            },
+            statusBadge(name, quality === 'good'),
+          )),
       ),
     ],
   );
