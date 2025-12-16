@@ -190,7 +190,7 @@ const treeRows = (model) => !model.object.tree ?
  * @param {Model} model - root model of the application
  * @param {ObjectTree} tree - data-structure containing an object per node
  * @param {number} level - used for indentation within recursive call of treeRow
- * @returns {vnode} - virtual node element
+ * @returns {vnode[]} - virtual node element
  */
 function treeRow(model, tree, level = 0) {
   const { pathString, open, children, object, name } = tree;
@@ -204,10 +204,11 @@ function treeRow(model, tree, level = 0) {
   if (object) {
     // Add a leaf row (final element; cannot be expanded further)
     const className = object === model.object.selected ? 'table-primary' : '';
-    const leaf = leafRow(
+    const leaf = treeRowElement(
       pathString,
       name,
       () => model.object.select(object),
+      iconBarChart,
       className,
       {
         paddingLeft: `${level}em`,
@@ -217,11 +218,12 @@ function treeRow(model, tree, level = 0) {
   }
   if (children.length > 0) {
     // Add a branch row (expandable / collapsible element)
-    const branch = branchRow(
+    const branch = treeRowElement(
       pathString,
-      open,
       name,
       () => tree.toggle(),
+      open ? iconCaretBottom : iconCaretRight,
+      '',
       {
         paddingLeft: `${level}em`,
       },
@@ -233,52 +235,28 @@ function treeRow(model, tree, level = 0) {
 }
 
 /**
- * Creates a row containing specific visuals for leaf object and on selection
- * it will plot the object with JSRoot
+ * Creates a row containing specific visuals for either a branch or a leaf object
+ * and on click it will expand/collapse the branch or plot the leaf object with JSRoot
  * @param {string} key - An unique identifier for this branch row element (table row)
- * @param {string} leafName - The name of this tree object element
- * @param {() => void} onClick - The action (callback) to perform upon clicking this branch row element (table row)
+ * @param {string} name - The name of this tree object element
+ * @param {() => void} onclick - The action (callback) to perform upon clicking this branch row element (table row)
+ * @param {() => vnode} icon - Icon renderer for the row
  * @param {string} className - Optional CSS class name(s) for the outer branch row element (table row)
  * @param {object} styling - Optional CSS styling for the inner branch row element (table data)
  * @returns {vnode} - virtual node element
  */
-const leafRow = (key, leafName, onClick, className = '', styling = {}) =>
+const treeRowElement = (key, name, onclick, icon, className = '', styling = {}) =>
   h('tr.object-selectable', {
-    key: key,
+    key,
     id: key,
-    title: leafName,
-    onclick: onClick,
+    title: name,
+    onclick,
     class: className,
   }, [
     h('td.highlight.flex-row.items-center.g1', {
       style: styling,
     }, [
-      iconBarChart(),
-      leafName,
-    ]),
-  ]);
-
-/**
- * Creates a row containing specific visuals for branch object and on selection
- * it will open its children
- * @param {string} key - An unique identifier for this branch row element (table row)
- * @param {boolean} isTreeOpen - Whether the current tree object is open (expanded)
- * @param {string} branchName - The name of this tree object element
- * @param {() => void} onClick - The action (callback) to perform upon clicking this branch row element (table row)
- * @param {object} styling - Optional CSS styling for the inner branch row element (table data)
- * @returns {vnode} - virtual node element
- */
-const branchRow = (key, isTreeOpen, branchName, onClick, styling = {}) =>
-  h('tr.object-selectable', {
-    key: key,
-    id: key,
-    title: branchName,
-    onclick: onClick,
-  }, [
-    h('td.highlight.flex-row.items-center.g1', {
-      style: styling,
-    }, [
-      isTreeOpen ? iconCaretBottom() : iconCaretRight(),
-      branchName,
+      icon(),
+      name,
     ]),
   ]);
