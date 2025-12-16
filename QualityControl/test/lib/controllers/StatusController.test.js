@@ -71,7 +71,7 @@ export const statusControllerTestSuite = async () => {
     });
   });
 
-  suite('`getQCGStatus()` tests', () => {
+  suite('`getQCGStatusHandler()` tests', () => {
     test('should successfully respond with result JSON with its status and specified version', () => {
       const statusService = {
         retrieveOwnStatus: stub().returns({
@@ -84,7 +84,7 @@ export const statusControllerTestSuite = async () => {
         status: stub().returnsThis(),
         json: stub(),
       };
-      statusController.getQCGStatus({}, res);
+      statusController.getQCGStatusHandler({}, res);
 
       const result = { status: { ok: true }, version: '0.0.1' };
       ok(res.status.calledWith(200));

@@ -12,22 +12,19 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useState, type FC, type MouseEvent } from 'react';
-import { Box, IconButton, Menu, MenuItem, Avatar } from '@mui/material';
-
-interface UserSectionProps {
-  userName: string;
-}
+import { Box, IconButton, Menu, MenuItem, Avatar, Typography } from '@mui/material';
+import { useState, type MouseEvent } from 'react';
+import { useAuth } from '~/hooks/useAuth';
+import { getSessionData } from '~/services/session';
 
 /**
  * UserSection component
  * Represents a user section with an avatar and a dropdown menu for user actions.
- * @param {UserSectionProps} props - Component props.
  * @returns {React.ReactElement} UserSection
  */
-export const UserSection: FC<UserSectionProps> = ({ userName }) => {
+export const UserSection = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
+  const { name: userName } = useAuth();
   const handleClick = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -36,10 +33,19 @@ export const UserSection: FC<UserSectionProps> = ({ userName }) => {
     setAnchorEl(null);
   };
 
+  const displayProfileData = () => {
+    const getData = async () => {
+      const data = await getSessionData();
+      alert(JSON.stringify(data));
+    };
+
+    void getData();
+  };
+
   return (
     <Box sx={{ flexGrow: 0 }} className="user-section">
       <IconButton sx={{ p: 0 }} onClick={handleClick}>
-        <Avatar>{userName[0]}</Avatar>
+        <Avatar>{userName?.[0] ?? ''}</Avatar>
       </IconButton>
       <Menu
         anchorEl={anchorEl}
@@ -55,9 +61,12 @@ export const UserSection: FC<UserSectionProps> = ({ userName }) => {
         onClose={handleClose}
         className="user-section__menu"
       >
-        <MenuItem onClick={handleClose}>Profile</MenuItem>
-        <MenuItem onClick={handleClose}>My account</MenuItem>
-        <MenuItem onClick={handleClose}>Logout</MenuItem>
+        <Box sx={{ p: 1 }}>
+          <Typography variant="h5">Welcome, {userName}!</Typography>
+          <MenuItem onClick={displayProfileData}>Profile</MenuItem>
+          <MenuItem onClick={handleClose}>My account</MenuItem>
+          <MenuItem onClick={handleClose}>Logout</MenuItem>
+        </Box>
       </Menu>
     </Box>
   );

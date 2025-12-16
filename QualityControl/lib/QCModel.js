@@ -48,7 +48,7 @@ import { objectGetContentsValidationMiddlewareFactory }
   from './middleware/objects/objectGetContentsValidationMiddlewareFactory.js';
 import { RunModeService } from './services/RunModeService.js';
 import { KafkaConfigDto } from './dtos/KafkaConfigurationDto.js';
-
+import { QcdbDownloadService } from './services/QcdbDownload.service.js';
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/model-setup`;
 
 /**
@@ -105,6 +105,8 @@ export const setupQcModel = async (eventEmitter) => {
   const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
   const statusController = new StatusController(statusService);
 
+  const qcdbDownloadService = new QcdbDownloadService(config.ccdb);
+
   const ccdbService = CcdbService.setup(config.ccdb);
   statusService.dataService = ccdbService;
 
@@ -116,7 +118,7 @@ export const setupQcModel = async (eventEmitter) => {
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
   const filterService = new FilterService(bookkeepingService, config);
   const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService, eventEmitter);
-  const objectController = new ObjectController(qcObjectService, runModeService);
+  const objectController = new ObjectController(qcObjectService, runModeService, qcdbDownloadService);
 
   const filterController = new FilterController(filterService, runModeService);
 

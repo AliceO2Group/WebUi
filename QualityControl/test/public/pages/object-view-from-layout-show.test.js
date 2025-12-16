@@ -11,10 +11,33 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, deepStrictEqual } from 'node:assert';
+import { strictEqual, deepStrictEqual, match } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
+import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
+import {
+  setLocalStorage,
+  getLocalStorageAsJson,
+  removeLocalStorage,
+  setLocalStorageAsJson,
+} from '../../testUtils/localStorage.js';
 
 const OBJECT_VIEW_PAGE_PARAM = '?page=objectView&objectId=123456';
+
+/**
+ * Gets the visibility of the object information panel.
+ * @param {import('puppeteer').Page} page - Puppeteer page instance.
+ * @returns {Promise<boolean>} `true` if the element exists, `false` if it doesn't.
+ */
+const getObjectInfoPanelVisibility = async (page) => {
+  try {
+    // `Boolean()` ensures the function returns true/false instead of an ElementHandle object,
+    // converting the resolved ElementHandle (truthy) to true
+    return Boolean(await page.waitForSelector('#ObjectPlot > div:nth-child(2) > div:nth-child(2)', { timeout: 100 }));
+  } catch {
+    // If the `element` for the `selector` doesn't appear, the function will throw an error.
+    return false;
+  }
+};
 
 export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, testParent) => {
   await testParent.test(
@@ -69,6 +92,17 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
+    'should have a correctly made download button',
+    { timeout },
+    async () => {
+      const objectId = '016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
+      const dlButton = await page.evaluate(() => document.querySelector('.download-button').href);
+      const token = await page.evaluate(() => model.session.token);
+      strictEqual(dlButton, `${url}api/object/proxy/download/?token=${token}&objectIds=${objectId}`);
+    },
+  );
+
+  await testParent.test(
     'should take back the user to page=layoutShow when clicking "Back to layout"',
     { timeout },
     async () => {
@@ -107,6 +141,353 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       strictEqual(result.title, 'qc/test/object/1 (from layout: a-test)');
       deepStrictEqual(result.rootPlotClassList, { 0: 'relative', 1: 'jsroot-container' });
       strictEqual(result.selectedObjectPath, 'qc/test/object/1');
+    },
+  );
+
+  await testParent.test(
+    'should have a correctly made object info visibility button',
+    { timeout },
+    async () => {
+      const visibilityButtonClass = await page.evaluate(() =>
+        document.querySelector('.visibility-toggle-button').className);
+      match(visibilityButtonClass, /visibility-toggle-(on|off)/i);
+    },
+  );
+
+  await testParent.test(
+    'should have download button and visibility button inline and to the right of the timestamp dropdown',
+    { timeout },
+    async () => {
+      const positions = await page.evaluate(() => {
+        const dateSelector = document.querySelector('#dateSelector');
+        const dlButton = document.querySelector('.download-button');
+        const visibilityButton = document.querySelector('.visibility-toggle-button');
+
+        if (!dateSelector || !dlButton || !visibilityButton) {
+          throw new Error('One or more elements not found on the page');
+        }
+
+        const dateRect = dateSelector.getBoundingClientRect();
+        const dlRect = dlButton.getBoundingClientRect();
+        const visRect = visibilityButton.getBoundingClientRect();
+
+        // Helper to get vertical center
+        const verticalCenter = (rect) => (rect.top + rect.bottom) / 2;
+
+        const dateCenter = verticalCenter(dateRect);
+        const dlCenter = verticalCenter(dlRect);
+        const visCenter = verticalCenter(visRect);
+
+        return {
+          dlRightOfDate: dlRect.left > dateRect.right,
+          visRightOfDate: visRect.left > dateRect.right,
+          sameY: Math.abs(dateCenter - dlCenter) < 1 && Math.abs(dateCenter - visCenter) < 1,
+        };
+      });
+
+      strictEqual(positions.dlRightOfDate, true, 'Download button is not to the right of the timestamp dropdown');
+      strictEqual(positions.visRightOfDate, true, 'Visibility button is not to the right of the timestamp dropdown');
+      strictEqual(
+        positions.sameY,
+        true,
+        'Download button, visibility button, and timestamp dropdown are not vertically aligned within 1px',
+      );
+    },
+  );
+
+  await testParent.test(
+    'should show the object information panel on reload when no storage key exists',
+    { timeout },
+    async () => {
+      const personId = await page.evaluate(() => window.model?.session?.personid?.toString());
+      if (!personId) {
+        throw new Error('Could not resolve personId from the application model');
+      }
+
+      const localStorageKey = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
+
+      await removeLocalStorage(page, localStorageKey);
+      await page.reload({ waitUntil: 'networkidle0' });
+
+      const domVisibility = await getObjectInfoPanelVisibility(page);
+      const storedVisibility = await getLocalStorageAsJson(page, localStorageKey);
+
+      strictEqual(storedVisibility, null, 'Expected visibility setting to be null when key is missing');
+      strictEqual(domVisibility, true, 'DOM should show the panel when key is missing');
+    },
+  );
+
+  await testParent.test(
+    'should show the object information panel on reload when storage key is set to true',
+    { timeout },
+    async () => {
+      const personId = await page.evaluate(() => window.model?.session?.personid?.toString());
+      if (!personId) {
+        throw new Error('Could not resolve personId from the application model');
+      }
+
+      const localStorageKey = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
+
+      await setLocalStorageAsJson(page, localStorageKey, true);
+      await page.reload({ waitUntil: 'networkidle0' });
+
+      const domVisibility = await getObjectInfoPanelVisibility(page);
+      const storedVisibility = await getLocalStorageAsJson(page, localStorageKey);
+
+      strictEqual(storedVisibility, true, 'Expected storage visibility to be true');
+      strictEqual(domVisibility, true, 'DOM should show the panel when storage is true');
+    },
+  );
+
+  await testParent.test(
+    'should hide the object information panel on reload when storage key is set to false',
+    { timeout },
+    async () => {
+      const personId = await page.evaluate(() => window.model?.session?.personid?.toString());
+      if (!personId) {
+        throw new Error('Could not resolve personId from the application model');
+      }
+
+      const localStorageKey = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
+
+      await setLocalStorageAsJson(page, localStorageKey, false);
+      await page.reload({ waitUntil: 'networkidle0' });
+
+      const domVisibility = await getObjectInfoPanelVisibility(page);
+      const storedVisibility = await getLocalStorageAsJson(page, localStorageKey);
+
+      strictEqual(storedVisibility, false, 'Expected storage visibility to be false');
+      strictEqual(domVisibility, false, 'DOM should hide the panel when storage is false');
+    },
+  );
+
+  await testParent.test(
+    'should maintain independent object information panel visibility on reload for different users',
+    { timeout },
+    async () => {
+      const personId = await page.evaluate(() => window.model?.session?.personid?.toString());
+      if (!personId) {
+        throw new Error('Could not resolve personId from the application model');
+      }
+
+      const localStorageKeyMainUser = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
+      const localStorageKeyDiffUser = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId + 1}`;
+
+      await setLocalStorageAsJson(page, localStorageKeyMainUser, true); // show panel main user
+      await setLocalStorageAsJson(page, localStorageKeyDiffUser, false); // hide panel diff user
+
+      await page.reload({ waitUntil: 'networkidle0' });
+
+      const mainUserVisibilitySetting = await getLocalStorageAsJson(page, localStorageKeyMainUser);
+      const mainUserVisibilityPanelElement = await getObjectInfoPanelVisibility(page);
+      const diffUserVisibilitySetting = await getLocalStorageAsJson(page, localStorageKeyDiffUser);
+
+      strictEqual(mainUserVisibilitySetting, true, 'Main user object info panel setting should remain visible');
+      strictEqual(mainUserVisibilityPanelElement, true, 'Main user object info panel element should remain visible');
+      strictEqual(diffUserVisibilitySetting, false, 'Different user object info panel setting should remain hidden');
+    },
+  );
+
+  await testParent.test(
+    'should fallback to default object information panel visibility when storage key is set to an invalid value',
+    { timeout },
+    async () => {
+      const personId = await page.evaluate(() => window.model?.session?.personid?.toString());
+      if (!personId) {
+        throw new Error('Could not resolve personId from the application model');
+      }
+
+      const localStorageKey = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
+
+      // Set an invalid value in localStorage
+      await setLocalStorage(page, localStorageKey, 'invalid-json-value');
+      await page.reload({ waitUntil: 'networkidle0' });
+
+      // Check the stored value as parsed by our getter
+      const storedVisibility = await getLocalStorageAsJson(page, localStorageKey);
+      // Check the actual DOM visibility
+      const domVisibility = await getObjectInfoPanelVisibility(page);
+
+      strictEqual(
+        storedVisibility,
+        null,
+        'Expected fallback visibility to be null when key contains an invalid value',
+      );
+      strictEqual(
+        domVisibility,
+        true,
+        'DOM should show the object information panel when storage key is invalid',
+      );
+    },
+  );
+
+  await testParent.test(
+    'should toggle the object information panel visibility when the visibility (toggle) button is clicked',
+    { timeout },
+    async () => {
+      // Capture initial visibility state
+      const initialVisibility = await getObjectInfoPanelVisibility(page);
+
+      // Click the toggle button once and check visibility
+      await page.click('.visibility-toggle-button');
+      await delay(100);
+      const afterFirstClick = await getObjectInfoPanelVisibility(page);
+
+      // Click the toggle button again to restore original state
+      await page.click('.visibility-toggle-button');
+      await delay(100);
+      const afterSecondClick = await getObjectInfoPanelVisibility(page);
+
+      strictEqual(
+        afterFirstClick,
+        !initialVisibility,
+        'Object information panel should toggle to the opposite state after the first click',
+      );
+      strictEqual(
+        afterSecondClick,
+        initialVisibility,
+        'Object information panel should return to its original state after the second click',
+      );
+    },
+  );
+
+  await testParent.test(
+    'should redraw the JSRoot object drawing when visibility toggle changes',
+    { timeout },
+    async () => {
+      const initialElement = await page.waitForSelector(
+        '#ObjectPlot > div:nth-child(2) > div > div',
+        { timeout: 1000 },
+      );
+
+      await page.click('.visibility-toggle-button');
+      await delay(100);
+
+      const newElement = await page.waitForSelector(
+        '#ObjectPlot > div:nth-child(2) > div > div',
+        { timeout: 1000 },
+      );
+
+      const redrawn = await page.evaluate((a, b) => a.innerHTML !== b.innerHTML, initialElement, newElement);
+
+      strictEqual(redrawn, true, 'JSRoot drawing was not redrawn on visibility toggle');
+    },
+  );
+
+  await testParent.test(
+    'should update localStorage state when visibility toggle button is clicked',
+    { timeout },
+    async () => {
+      const personId = await page.evaluate(() => window.model?.session?.personid?.toString());
+      if (!personId) {
+        throw new Error('Could not resolve personId from the application model');
+      }
+
+      const localStorageKey = `${StorageKeysEnum.OBJECT_VIEW_INFO_VISIBILITY_SETTING}-${personId}`;
+      const visibilitySettingInitially = await getLocalStorageAsJson(page, localStorageKey);
+
+      // Click the toggle button (first time)
+      await page.click('.visibility-toggle-button');
+      await delay(100);
+      const visibilitySettingAfterFirstClick = await getLocalStorageAsJson(page, localStorageKey);
+
+      // Click the toggle button (second time)
+      await page.click('.visibility-toggle-button');
+      await delay(100);
+      const visibilitySettingAfterSecondClick = await getLocalStorageAsJson(page, localStorageKey);
+
+      strictEqual(
+        visibilitySettingAfterFirstClick,
+        !visibilitySettingInitially,
+        'LocalStorage state should be toggled after the first click',
+      );
+      strictEqual(
+        visibilitySettingAfterSecondClick,
+        visibilitySettingInitially,
+        'LocalStorage state should return to the initial value after the second click',
+      );
+    },
+  );
+
+  await testParent.test(
+    'should display an error when the JSROOT object fails to fetch due to a network failure',
+    { timeout },
+    async () => {
+      const requestHandler = (interceptedRequest) => {
+        const url = interceptedRequest.url();
+
+        if (url.includes('/api/object')) {
+          interceptedRequest.abort('failed'); // simulates network failure
+        } else {
+          interceptedRequest.continue();
+        }
+      };
+
+      try {
+        // Enable interception and attach the handler
+        await page.setRequestInterception(true);
+        page.on('request', requestHandler);
+
+        await page.reload({ waitUntil: 'networkidle0' });
+        await delay(100);
+
+        const errorText = await page.evaluate(() => document.querySelector('#Error .f3')?.innerText);
+
+        strictEqual(errorText, 'Connection to server failed, please try again');
+      } catch (error) {
+        // Test failed
+        strictEqual(1, 0, error.message);
+      } finally {
+        // Cleanup: remove listener and disable interception
+        page.off('request', requestHandler);
+        await page.setRequestInterception(false);
+      }
+    },
+  );
+
+  await testParent.test(
+    'should display an error when the JSROOT object fails to fetch due to a backend failure',
+    { timeout },
+    async () => {
+      const requestHandler = (interceptedRequest) => {
+        const url = interceptedRequest.url();
+
+        if (url.includes('/api/object')) {
+          // Respond with a backend error
+          interceptedRequest.respond({
+            status: 500,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              message: 'JSROOT failed to open file \'url\'',
+            }),
+          });
+        } else {
+          interceptedRequest.continue();
+        }
+      };
+
+      try {
+        // Enable interception and attach the handler
+        await page.setRequestInterception(true);
+        page.on('request', requestHandler);
+
+        await page.reload({ waitUntil: 'networkidle0' });
+        await delay(100);
+
+        const errorText = await page.evaluate(() => document.querySelector('#Error .f3')?.innerText);
+
+        strictEqual(
+          errorText,
+          'Request to server failed (500 Internal Server Error): JSROOT failed to open file \'url\'',
+        );
+      } catch (error) {
+        // Test failed
+        strictEqual(1, 0, error.message);
+      } finally {
+        // Cleanup: remove listener and disable interception
+        page.off('request', requestHandler);
+        await page.setRequestInterception(false);
+      }
     },
   );
 };

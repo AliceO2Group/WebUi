@@ -18,9 +18,9 @@ const {
   InvalidInputError,
   NotFoundError,
   ServiceUnavailableError,
-} = require("@aliceo2/web-ui");
-const { errorLogger } = require("../utils.js");
-const { getConsulConfig } = require("../config/publicConfigProvider.js");
+} = require('@aliceo2/web-ui');
+const { errorLogger } = require('../utils.js');
+const { getConsulConfig } = require('../config/publicConfigProvider.js');
 
 /**
  * Gateway for all Consul Consumer calls
@@ -36,23 +36,24 @@ class QCConfigurationController {
     this._config = getConsulConfig({ consul: config });
     this._qcConfigurationsPath = `${this._config.qcPath}/ANY/any`;
 
-    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? "cnf"}/qc-configuration-controller`);
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cnf'}/qc-configuration-controller`);
   }
 
   /**
    * Method to get configurations names
    * @param {Request} req - HTTP Request object
    * @param {Response} res - HTTP Response object
+   * @returns {Promise<void>}
    */
   async getConfigurationsKeysHandler(req, res) {
-    const { prefix = "", recurse = false } = req.query;
+    const { prefix = '', recurse = false } = req.query;
     const prefixPath = prefix ? `${this._qcConfigurationsPath}/${prefix}` : this._qcConfigurationsPath;
 
     try {
       const validKeys = await this._qcConfigurationService.retrieveKeysOfValidConfigurations(prefixPath, recurse);
       
       if (!validKeys || validKeys.length === 0) {
-        updateAndSendExpressResponseFromNativeError(res, new NotFoundError("No valid configurations found"));
+        updateAndSendExpressResponseFromNativeError(res, new NotFoundError('No valid configurations found'));
         return;
       }
 
@@ -61,9 +62,9 @@ class QCConfigurationController {
       errorLogger(error, this._logger);
       if (error.message?.includes('Non-2xx status code: 404')) {
         updateAndSendExpressResponseFromNativeError(res, 
-          new NotFoundError(`Configurations prefix not found: "${prefixPath}"`));
+          new NotFoundError(`Configurations prefix not found: '${prefixPath}'`));
       } else {
-        updateAndSendExpressResponseFromNativeError(res, new ServiceUnavailableError("Consul service unavailable"));
+        updateAndSendExpressResponseFromNativeError(res, new ServiceUnavailableError('Consul service unavailable'));
       }
     }
   }
@@ -72,12 +73,13 @@ class QCConfigurationController {
    * Method to get configuration value by key
    * @param {Request} req - HTTP Request object
    * @param {Response} res - HTTP Response object
+   * @returns {Promise<void>}
    */
   async getConfigurationByKeyHandler(req, res) {
-    const { key } = req.params;
+    const { key = '' } = req.params;
 
-    if (!key || key.trim() === "") {
-      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError("Missing configuration key"));
+    if (!key || key.trim() === '') {
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing configuration key'));
       return;
     }
 
@@ -89,8 +91,62 @@ class QCConfigurationController {
       if (error.message?.includes('Non-2xx status code: 404')) {
         updateAndSendExpressResponseFromNativeError(res, new NotFoundError(`Configuration not found for key: ${key}`));
       } else {
-        updateAndSendExpressResponseFromNativeError(res, new ServiceUnavailableError("Consul service unavailable"));
+        updateAndSendExpressResponseFromNativeError(res, new ServiceUnavailableError('Consul service unavailable'));
       }
+    }
+  }
+
+  /**
+   * Method to get configuration restrictions by key
+   * @param {Request} req - HTTP Request object
+   * @param {Response} res - HTTP Response object
+   * @returns {Promise<void>}
+   */
+  async getConfigurationRestrictionsByKeyHandler(req, res) {
+    const { key = '' } = req.params;
+    if (!key || key.trim() === '') {
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing configuration key'));
+      return;
+    }
+
+    try {
+      const restrictions = await this._qcConfigurationService.getConfigurationRestrictionsByKey(key);
+      res.status(200).json(restrictions);
+    } catch (error) {
+      errorLogger(error, this._logger);
+      if (error.message?.includes('Non-2xx status code: 404')) {
+        updateAndSendExpressResponseFromNativeError(res, new NotFoundError(`Configuration not found for key: ${key}`));
+      } else {
+        updateAndSendExpressResponseFromNativeError(res, new ServiceUnavailableError('Consul service unavailable'));
+      }
+    }
+  }
+
+  /**
+   * Method to edit configuration value
+   * @param {Request} req - HTTP Request object
+   * @param {Response} res - HTTP Response object
+   * @returns {Promise<void>}
+   */
+  async putConfigurationByKeyHandler(req, res) {
+    const { key } = req.params;
+    const { configuration } = req.body;
+    if (!key || key.trim() === '') {
+      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing configuration key'));
+      return;
+    }
+
+    try {
+      const editStatus = await this._qcConfigurationService.editConfigurationByKey(key, configuration);
+      if (!editStatus) {
+        updateAndSendExpressResponseFromNativeError(res, new ServiceUnavailableError('Could not edit configuration'));
+        return;
+      }
+
+      res.status(200).json(editStatus);
+    } catch (error) {
+      errorLogger(error, this._logger);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 }

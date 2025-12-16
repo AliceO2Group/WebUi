@@ -69,7 +69,7 @@ export function filtersPanel(filterModel, viewModel) {
     filterMap,
     setFilterValue,
     filterService,
-    clearFilter,
+    clearFiltersAndTrigger,
     isRunModeActivated,
     runStatus,
     isVisible,
@@ -81,7 +81,7 @@ export function filtersPanel(filterModel, viewModel) {
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onFocusCallback = fetchOngoingRuns.bind(filterService);
   const onEnterCallback = () => filterModel.triggerFilter(viewModel);
-  const clearFilterCallback = clearFilter.bind(filterModel, viewModel);
+  const clearFilterCallback = clearFiltersAndTrigger.bind(filterModel, viewModel);
   if (!isVisible) {
     return null;
   }
@@ -92,7 +92,7 @@ export function filtersPanel(filterModel, viewModel) {
   return h(
     '.w-100.flex-column.p2.g2.justify-center#filterElement',
     [
-      h('.flex-row.g2.justify-center', [
+      h('.flex-row.g2.justify-center.items-center', [
         runModeCheckbox(filterModel, viewModel),
         !isRunModeActivated &&
         [triggerFiltersButton(onEnterCallback, filterModel), clearFiltersButton(clearFilterCallback)],
@@ -149,7 +149,7 @@ const clearFiltersButton = (clearFilterCallback) =>
  */
 export function filterPanelToggleButton(filterModel) {
   const { isVisible } = filterModel;
-  return h(`button.btn.btn-default${isVisible ? '.active' : ''}`, {
+  return !filterModel.isRunModeActivated && h(`button.btn.btn-default${isVisible ? '.active' : ''}`, {
     onclick: () => filterModel.toggleFilterVisibility(),
   }, ['Filters ', isVisible ? iconChevronTop() : iconChevronBottom()]);
 }

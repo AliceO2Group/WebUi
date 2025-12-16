@@ -52,7 +52,7 @@ export const runModeCheckbox = (filterModel, viewModel) => {
           }),
         ],
       ),
-      'Runs mode',
+      'Run mode',
     ],
   );
 };

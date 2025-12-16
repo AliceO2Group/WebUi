@@ -19,11 +19,11 @@ import {
   Meta,
   Outlet,
   Scripts,
-  ScrollRestoration, useNavigation,
+  ScrollRestoration
 } from 'react-router';
 
+import { SessionProvider } from './contexts/sessionContext';
 import { Spinner } from '~/ui/spinner';
-import AppLayout from '~/ui/layout';
 
 import '@aliceo2/web-ui/Frontend/css/src/bootstrap.css';
 import './app.css';
@@ -31,8 +31,6 @@ import './styles/components-styles.css'
 import './styles/ui-styles.css'
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { state } = useNavigation();
-
   return (
     <html lang='en'>
       <head>
@@ -42,18 +40,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <AppLayout state={state}>
-          {children}
-        </AppLayout>
+        {children}
         <ScrollRestoration />
-        <Scripts />
+        <Scripts /> 
       </body>
     </html>
   );
 }
 
 export default function App() {
-  return <Outlet />;
+  
+  return (
+  <SessionProvider>
+    <Outlet/>
+  </SessionProvider>);
 }
 
 export function HydrateFallback() {

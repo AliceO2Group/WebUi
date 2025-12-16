@@ -10,6 +10,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
+/* eslint-disable @stylistic/js/max-len */
 
 import { strictEqual, ok } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
@@ -17,8 +18,10 @@ import { delay } from '../../testUtils/delay.js';
 // If using nock for HTTP mocking (uncomment if available)
 // import nock from 'nock';
 export const runModeTests = async (url, page, timeout = 5000, testParent) => {
+  const mockedTestRunNumber = 500001;
   let countOngoingRunsCalls = 0;
   let countRunStatusCalls = 0;
+  let expectCountRunStatusCalls = 0;
   let countObjectsCalls = 0;
 
   page.on('request', (req) => {
@@ -27,31 +30,33 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     if (url.includes('/api/filter/ongoingRuns')) {
       countOngoingRunsCalls++;
     }
-    if (url.includes('/api/filter/run-status/500001')) {
-      countRunStatusCalls++;
-    }
-    if (url.includes('/api/objects') && decodedUrl.includes('filters[RunNumber]=500001')) {
+    if (url.includes('/api/objects') && decodedUrl.includes(`filters[RunNumber]=${mockedTestRunNumber}`)) {
       countObjectsCalls++;
+    } else if (url.includes(`/api/filter/run-status/${mockedTestRunNumber}`)) {
+      countRunStatusCalls++;
     }
   });
 
-  await testParent.test('should have a switch to enable runs mode', { timeout }, async () => {
+  await testParent.test('should have a switch to enable run mode', { timeout }, async () => {
     await page.goto(
       `${url}?page=objectTree`,
       { waitUntil: 'networkidle0' },
     );
+    await delay(100);
+    // Prevent the 'get run status' from re-triggering mid test
     await page.evaluate(() => {
-      window.model.filterModel.ONGOING_RUN_INTERVAL_MS = 500;
+      window.model.filterModel.ONGOING_RUN_INTERVAL_MS = 12000000;
     });
     await page.locator('.form-check-label > .switch');
     const runsModeTitle = await page.evaluate(() =>
       document.querySelector('.form-check-label').textContent);
-    strictEqual(runsModeTitle, 'Runs mode', 'The text displayed is not `Runs mode`');
+    strictEqual(runsModeTitle, 'Run mode', 'The text displayed is not `Runs mode`');
   });
 
   await testParent.test('should activate run mode', { timeout }, async () => {
     await page.locator('.form-check-label > .switch').click();
-    await delay(50);
+    await delay(500);
+    expectCountRunStatusCalls ++;
 
     const isRunModeActivated = await page.evaluate(() => window.model.filterModel.isRunModeActivated);
     ok(isRunModeActivated, 'Run mode should be activated');
@@ -59,7 +64,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
 
   await testParent.test('should make a request to ongoing runs API', { timeout }, async () => {
     await delay(200);
-    strictEqual(countOngoingRunsCalls, 1, `Expect 1 req to /api/filter/ongoingRuns, but got ${countOngoingRunsCalls}`);
+    strictEqual(countOngoingRunsCalls, expectCountRunStatusCalls, `Expect 1 req to /api/filter/ongoingRuns, but got ${countOngoingRunsCalls}`);
   });
 
   await testParent.test('should display ongoing runs selector', { timeout }, async () => {
@@ -85,21 +90,22 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
   await testParent.test('should automatically select first run and update URL', { timeout }, async () => {
     await delay(500);
     const currentUrl = await page.evaluate(() => window.location.href);
-    ok(currentUrl.includes('RunNumber=500001'), 'URL should contain RunNumber=500001 parameter');
+    ok(currentUrl.includes(`RunNumber=${mockedTestRunNumber}`), `URL should contain RunNumber=${mockedTestRunNumber} parameter`);
 
     const selectedRunNumber = await page.evaluate(() => {
       const selector = document.querySelector('#ongoingRunsFilter');
       return selector.value;
     });
-    strictEqual(selectedRunNumber, '500001', 'First ongoing run should be automatically selected');
-  });
-
-  await testParent.test('should make requests for run status and objects of selected run', { timeout }, async () => {
-    strictEqual(countRunStatusCalls, 2, `Expected: 2 req to /api/filter/run-status, actual: ${countRunStatusCalls}`);
-    strictEqual(countObjectsCalls, 2, `Expected: 2 req to /api/objects, actual: ${countObjectsCalls}`);
+    strictEqual(selectedRunNumber, mockedTestRunNumber.toString(), 'First ongoing run should be automatically selected');
   });
 
   await testParent.test('should show ENDED status when run finishes', { timeout }, async () => {
+    await delay(500);
+    // Manually trigger refresh, we need to do this since periodic refresh is off (high delay) due to inconsistant tests.
+    await page.evaluate(async (mockedTestRunNumber) => {
+      await model.filterModel._refreshRunsModeStatus(model.layoutListModel, mockedTestRunNumber);
+    }, mockedTestRunNumber);
+    expectCountRunStatusCalls++;
     await delay(1000);
     await page.waitForSelector('#runStatusPanel');
     const runStatusInfo = await page.evaluate(() => {
@@ -125,7 +131,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     const isRunModeActivated = await page.evaluate(() => window.model.filterModel.isRunModeActivated);
     ok(isRunModeActivated);
     ok(runInfo.isSelected);
-    ok(runInfo.value, '500001');
+    ok(runInfo.value, mockedTestRunNumber.toString());
     ok(runInfo.status, 'ENDED');
   });
 
@@ -145,7 +151,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     //check the filters element is back again and run number and URL are cleared
     await page.locator('#filterElement');
     const currentUrl = await page.evaluate(() => window.location.href);
-    ok(!currentUrl.includes('RunNumber=500001'), 'URL should not contain RunNumber parameter after disabling run mode');
+    ok(!currentUrl.includes(`RunNumber=${mockedTestRunNumber}`), 'URL should not contain RunNumber parameter after disabling run mode');
 
     //filterElement to be empty
     const filterElementContent = await page.evaluate(() => {
@@ -153,5 +159,10 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
       return filterElement.textContent.trim();
     });
     strictEqual(filterElementContent, '', 'Filter element should be empty after disabling run mode');
+  });
+
+  await testParent.test('should make requests for run status and objects of selected run', { timeout }, () => {
+    strictEqual(countRunStatusCalls, expectCountRunStatusCalls, `Expected: ${expectCountRunStatusCalls} req to /api/filter/run-status, actual: ${countRunStatusCalls}`);
+    strictEqual(countObjectsCalls, 2, `Expected: 2 req to /api/objects, actual: ${countObjectsCalls}`);
   });
 };

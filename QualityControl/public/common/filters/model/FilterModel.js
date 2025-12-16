@@ -118,7 +118,7 @@ export default class FilterModel extends Observable {
       this.runNumber = this._filterMap['RunNumber'];
       this.runStatus = await this.filterService.getRunStatus(this.runNumber);
       this.notify();
-      this._manageRunsModeInterval(baseViewModel);
+      this._manageRunsModeInterval(baseViewModel, true);
     }
     baseViewModel.triggerFilter();
     this._lastRefresh = Date.now();
@@ -135,14 +135,22 @@ export default class FilterModel extends Observable {
   }
 
   /**
-   * Clears all currently set filters and updates the URL accordingly
+   * Clears all currently set filters and triggers a filter action on the provided view model.
    * @param {BaseViewModel} baseViewModel - The view model that should be filtered
-   * @returns {undefined}
+   * @returns {void}
    */
-  clearFilter(baseViewModel) {
-    this._filterMap = {};
-
+  clearFiltersAndTrigger(baseViewModel) {
+    this.clearFilters();
     this.triggerFilter(baseViewModel);
+  }
+
+  /**
+   * Clears all filters without triggering a filter action, but still updates the URL and notifies observers.
+   * @returns {void}
+   */
+  clearFilters() {
+    this._filterMap = {};
+    this.setFilterToURL(true);
     this.notify();
   }
 
@@ -189,7 +197,7 @@ export default class FilterModel extends Observable {
    */
   async deactivateRunsMode(baseViewModel) {
     this.resetRunsMode();
-    this.clearFilter(baseViewModel);
+    this.clearFilters(baseViewModel);
   }
 
   /**
@@ -209,28 +217,47 @@ export default class FilterModel extends Observable {
    * Starts an interval to refresh data periodically while the run is ongoing.
    * The interval is cleared if the run ends.
    * @param {object} baseViewModel - The view model used to trigger data refresh.
+   * @param {boolean} skipIntervalOnce - Skip the interval's execution only once.
    * @returns {Promise<void>}
    */
-  async _manageRunsModeInterval(baseViewModel) {
+  async _manageRunsModeInterval(baseViewModel, skipIntervalOnce = false) {
+    let skipInterval = skipIntervalOnce;
     this.clearRunsModeInterval();
     const currentRunNumber = this.runNumber;
     if (this.runStatus !== RunStatus.ONGOING) {
       return;
     }
-    this._runsModeInterval = setInterval(async () => {
-      if (!baseViewModel) {
-        return;
-      }
-      this.runStatus = await this.filterService.getRunStatus(currentRunNumber);
-      this.notify();
+    this._runsModeInterval = setInterval(
+      async () => {
+        if (skipInterval) {
+          skipInterval = !skipInterval;
+          return;
+        }
+        await this._refreshRunsModeStatus(baseViewModel, currentRunNumber, skipIntervalOnce);
+      },
+      this.ONGOING_RUN_INTERVAL_MS,
+    );
+  }
 
-      if (this.runStatus !== RunStatus.ONGOING) {
-        this.clearRunsModeInterval();
-      }
-      baseViewModel.triggerFilter();
-      this._lastRefresh = Date.now();
-      this.notify();
-    }, this.ONGOING_RUN_INTERVAL_MS);
+  /**
+   * Refresh data about the run.
+   * @param {object} baseViewModel - The view model used to trigger data refresh.
+   * @param {number} currentRunNumber - current run number.
+   * @returns {Promise<void>}
+   */
+  async _refreshRunsModeStatus(baseViewModel, currentRunNumber) {
+    if (!baseViewModel) {
+      return;
+    }
+    this.runStatus = await this.filterService.getRunStatus(currentRunNumber);
+    this.notify();
+
+    if (this.runStatus !== RunStatus.ONGOING) {
+      this.clearRunsModeInterval();
+    }
+    baseViewModel.triggerFilter();
+    this._lastRefresh = Date.now();
+    this.notify();
   }
 
   /**

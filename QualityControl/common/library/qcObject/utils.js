@@ -29,7 +29,7 @@ export function isObjectOfTypeChecker(object) {
  * Method to generate drawing option list based on provided options and object type
  * @param {RootObject} rootObject - QC object to be plotted
  * @param {Array<string>} options - list of drawing options and display hints
- * @returns {string} - drawing options joined by ';'
+ * @returns {string[]} - drawing options
  */
 export function generateDrawingOptionList(rootObject, options) {
   options = Array.from(new Set(options));
@@ -53,6 +53,17 @@ export function generateDrawingOptionList(rootObject, options) {
     options.push('f');
   }
   return options;
+}
+
+/**
+ * Method to generate drawing option list based on provided options and object type
+ * @param {RootObject} root - root object in JSON representation
+ * @param {string[]} drawingOptions - list of options to be used for drawing object
+ * @returns {string} The drawing options seperated by ;
+ */
+export function generateDrawingOptionString(root, drawingOptions) {
+  const drawingOptionList = generateDrawingOptionList(root, drawingOptions);
+  return drawingOptionList.join(';');
 }
 
 /**

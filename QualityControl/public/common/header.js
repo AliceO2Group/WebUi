@@ -32,14 +32,15 @@ import { filtersPanel } from './filters/filterViews.js';
  */
 export default (model) => {
   const specific = headerSpecific(model) || {};
-  const { centerCol, rightCol } = specific;
+  const { centerCol, rightCol, subRow } = specific;
 
   return h('.flex-col', [
     h('.flex-row.p2.items-center', { id: 'qcg-header' }, [
       commonHeader(model),
       centerCol || h('.flex-grow'),
-      rightCol || h('.w-33'),
+      rightCol || h('.w-25'),
     ]),
+    subRow && h('.p2', [subRow]),
     filterSpecific(model),
   ]);
 };
@@ -70,7 +71,7 @@ const filterSpecific = (model) => {
   const { page, filterModel, layout, object, objectViewModel } = model;
 
   switch (page) {
-    case 'layoutShow': return filtersPanel(filterModel, layout);
+    case 'layoutShow': return !layout.editEnabled && filtersPanel(filterModel, layout);
     case 'objectTree': return filtersPanel(filterModel, object);
     case 'objectView': return filtersPanel(filterModel, objectViewModel);
     default: return null;
@@ -82,7 +83,7 @@ const filterSpecific = (model) => {
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const commonHeader = (model) => h('.flex-row.items-center.w-33', [
+const commonHeader = (model) => h('.flex-row.items-center.w-25', [
   loginButton(model),
   ' ',
   h('span.f4.gray', {
