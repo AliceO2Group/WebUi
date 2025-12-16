@@ -144,14 +144,52 @@ const toolbarEditModeTab = (layout, tab, i) => {
   const selectTab = () => layout.selectTab(i);
 
   return [
-    h('.btn-group.flex-fixed', [
-      h('button.br-pill.ph2.btn.btn-tab.whitespace-nowrap', { class: linkClass, onclick: selectTab }, tab.name),
-      selected && [
-        editTabButton(layout, linkClass, tab, i),
-        resizeGridTabDropDown(layout, tab),
-        deleteTabButton(layout, linkClass, i),
-      ],
-    ]),
+    h(
+      '.btn-group.flex-fixed',
+      {
+        style: 'position: relative;',
+        draggable: true,
+        ondragstart: (e) => {
+          e.dataTransfer.setData('text/plain', tab.id)
+          console.log(e.dataTransfer.getData('text/plain'))
+          console.log('dragstart', e)
+        },
+        ondrop: (e) => {
+          console.log('ondrop', e)
+          console.log(e.dataTransfer.getData('text/plain'))
+        }
+      },
+      [
+        h('button.br-pill.ph2.btn.btn-tab.whitespace-nowrap', { class: linkClass, onclick: selectTab }, tab.name),
+        [
+          h(
+            '.before',
+            {
+              style: 'position: absolute; left: 0; width: 50%; height: 100%; background-color: rgb(30 80 120 / 25%);',
+              ondragenter: (e) => console.log('enter before', e),
+              ondragover: (e) => e.preventDefault(), // prevent default to allow drop
+              ondragleave: (e) => console.log('leave before', e)
+            },
+            ''
+          ),
+          h(
+            '.after',
+            {
+              style: 'position: absolute; right: 0; width: 50%; height: 100%; background-color: rgb(80 20 70 / 25%);',
+              ondragenter: (e) => console.log('enter after', e),
+              ondragover: (e) => e.preventDefault(), // prevent default to allow drop
+              ondragleave: (e) => console.log('leave after', e)
+            },
+            ''
+          ),
+          selected && [
+            editTabButton(layout, linkClass, tab, i),
+            resizeGridTabDropDown(layout, tab),
+            deleteTabButton(layout, linkClass, i),
+          ],
+        ].flat().filter(Boolean)
+      ]
+    ),
     ' ',
   ];
 };
