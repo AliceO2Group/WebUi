@@ -61,6 +61,9 @@ export default class Layout extends BaseViewModel {
     });
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
+
+    this.dropTargetId = undefined;
+    this.position = undefined;
   }
 
   /**
@@ -776,5 +779,52 @@ export default class Layout extends BaseViewModel {
    */
   ownsLayout(layoutOwnerId) {
     return this.model.session.personid == layoutOwnerId;
+  }
+
+  /**
+   * TODO
+   * @param {*} tabId TODO
+   * @param {*} position TODO
+   */
+  setDropTarget(tabId, position) {
+    this.dropTargetId = tabId;
+    this.position = position;
+  }
+
+  /**
+   * TODO
+   */
+  clearDropTarget() {
+    this.dropTargetId = undefined
+    this.position = undefined
+  }
+
+  /**
+   * TODO
+   * @param {*} sourceId TODO
+   * @param {*} targetId TODO
+   * @param {*} position TODO
+   */
+  reorderTabs(sourceId, targetId, position) {
+    const sourceIndex = this.item.tabs.findIndex((t) => t.id === sourceId);
+    let targetIndex = this.item.tabs.findIndex((t) => t.id === targetId);
+
+    if (sourceIndex === -1 || targetIndex === -1) {
+      return;
+    }
+
+    if (position === 'after') {
+      targetIndex += 1;
+    }
+
+    const [movedTab] = this.item.tabs.splice(sourceIndex, 1);
+
+    if (sourceIndex < targetIndex) {
+      targetIndex--;
+    }
+
+    this.item.tabs.splice(targetIndex, 0, movedTab);
+
+    this.notify();
   }
 }

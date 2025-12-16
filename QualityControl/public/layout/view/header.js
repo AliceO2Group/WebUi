@@ -151,12 +151,9 @@ const toolbarEditModeTab = (layout, tab, i) => {
         draggable: true,
         ondragstart: (e) => {
           e.dataTransfer.setData('text/plain', tab.id)
-          console.log(e.dataTransfer.getData('text/plain'))
-          console.log('dragstart', e)
         },
         ondrop: (e) => {
-          console.log('ondrop', e)
-          console.log(e.dataTransfer.getData('text/plain'))
+          layout.reorderTabs(e.dataTransfer.getData('text/plain'), layout.dropTargetId, layout.position)
         }
       },
       [
@@ -166,9 +163,9 @@ const toolbarEditModeTab = (layout, tab, i) => {
             '.before',
             {
               style: 'position: absolute; left: 0; width: 50%; height: 100%; background-color: rgb(30 80 120 / 25%);',
-              ondragenter: (e) => console.log('enter before', e),
+              ondragenter: () => layout.setDropTarget(tab.id, 'before'),
               ondragover: (e) => e.preventDefault(), // prevent default to allow drop
-              ondragleave: (e) => console.log('leave before', e)
+              ondragleave: () => layout.clearDropTarget()
             },
             ''
           ),
@@ -176,9 +173,9 @@ const toolbarEditModeTab = (layout, tab, i) => {
             '.after',
             {
               style: 'position: absolute; right: 0; width: 50%; height: 100%; background-color: rgb(80 20 70 / 25%);',
-              ondragenter: (e) => console.log('enter after', e),
+              ondragenter: () => layout.setDropTarget(tab.id, 'after'),
               ondragover: (e) => e.preventDefault(), // prevent default to allow drop
-              ondragleave: (e) => console.log('leave after', e)
+              ondragleave: () => layout.clearDropTarget()
             },
             ''
           ),
