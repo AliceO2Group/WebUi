@@ -789,6 +789,8 @@ export default class Layout extends BaseViewModel {
   setDropTarget(tabId, position) {
     this.dropTargetId = tabId;
     this.position = position;
+
+    this.notify();
   }
 
   /**
@@ -797,6 +799,8 @@ export default class Layout extends BaseViewModel {
   clearDropTarget() {
     this.dropTargetId = undefined
     this.position = undefined
+
+    this.notify();
   }
 
   /**

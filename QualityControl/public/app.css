@@ -187,3 +187,25 @@
 .whitespace-nowrap {
   white-space: nowrap;
 }
+
+.drop-zone {
+  position: absolute;
+  height: 100%;
+  width: 50%;
+
+  &.before {
+    left: 0;
+
+    &.active {
+      border-left: 2px solid blue;
+    }
+  }
+
+  &.after {
+    right: 0;
+
+    &.active {
+      border-right: 2px solid blue;
+    }
+  }
+}

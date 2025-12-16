@@ -143,6 +143,8 @@ const toolbarEditModeTab = (layout, tab, i) => {
    */
   const selectTab = () => layout.selectTab(i);
 
+  const dropZoneClass = (position) => layout.dropTargetId === tab.id && layout.position === position ? 'active' : ''
+
   return [
     h(
       '.btn-group.flex-fixed',
@@ -150,32 +152,41 @@ const toolbarEditModeTab = (layout, tab, i) => {
         style: 'position: relative;',
         draggable: true,
         ondragstart: (e) => {
-          e.dataTransfer.setData('text/plain', tab.id)
+          e.dataTransfer.setData('text/plain', tab.id);
         },
         ondrop: (e) => {
-          layout.reorderTabs(e.dataTransfer.getData('text/plain'), layout.dropTargetId, layout.position)
+          layout.reorderTabs(e.dataTransfer.getData('text/plain'), layout.dropTargetId, layout.position);
+          layout.clearDropTarget();
         }
       },
       [
         h('button.br-pill.ph2.btn.btn-tab.whitespace-nowrap', { class: linkClass, onclick: selectTab }, tab.name),
         [
           h(
-            '.before',
+            '.drop-zone.before',
             {
-              style: 'position: absolute; left: 0; width: 50%; height: 100%; background-color: rgb(30 80 120 / 25%);',
+              class: dropZoneClass('before'),
               ondragenter: () => layout.setDropTarget(tab.id, 'before'),
               ondragover: (e) => e.preventDefault(), // prevent default to allow drop
-              ondragleave: () => layout.clearDropTarget()
+              ondragleave: () => {
+                if (layout.dropTargetId === tab.id && layout.position === 'before') {
+                  layout.clearDropTarget();
+                }
+              }
             },
             ''
           ),
           h(
-            '.after',
+            '.drop-zone.after',
             {
-              style: 'position: absolute; right: 0; width: 50%; height: 100%; background-color: rgb(80 20 70 / 25%);',
+              class: dropZoneClass('after'),
               ondragenter: () => layout.setDropTarget(tab.id, 'after'),
               ondragover: (e) => e.preventDefault(), // prevent default to allow drop
-              ondragleave: () => layout.clearDropTarget()
+              ondragleave: () => {
+                if (layout.dropTargetId === tab.id && layout.position === 'after') {
+                  layout.clearDropTarget();
+                }
+              }
             },
             ''
           ),
