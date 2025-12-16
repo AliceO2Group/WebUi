@@ -260,6 +260,34 @@ export const bookkeepingServiceTestSuite = async () => {
         strictEqual(runStatus, RunStatus.ENDED);
       });
 
+      test('should return run information when data is present', async () => {
+        const mockResponse = {
+          data: {
+            startTime: 1,
+            endTime: 2,
+            definition: null,
+            runQuality: 'good',
+            lhcBeamMode: 'PHYSICS',
+            detectorsQualities: [],
+          },
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
+        const {
+          startTime,
+          endTime,
+          definition,
+          runQuality,
+          lhcBeamMode,
+          detectorsQualities,
+          runStatus,
+        } = await bkpService.retrieveRunInformation(123);
+        const data = { startTime, endTime, definition, runQuality, lhcBeamMode, detectorsQualities };
+
+        deepStrictEqual(data, mockResponse.data);
+        ok(Object.values(RunStatus).includes(runStatus));
+      });
+
       test('should return ONGOING status when timeO2End is not present', async () => {
         const mockResponse = { data: { timeO2End: undefined } };
 
