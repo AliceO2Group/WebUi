@@ -14,7 +14,7 @@ Example:
 ```javascript
 http: {
   hostname: 'localhost',
-  port: 3000
+  port: 8080
 }
 ```
 
@@ -83,23 +83,23 @@ qc: {
 }
 ```
 
-### Database Configuration
+### Database Object Configuration
 
 The application requires the following database configuration parameters:
 
-| **Field**       | **Type**    | **Description**                                                                             | **Default Value**         |
-|-----------------|-------------|---------------------------------------------------------------------------------------------|---------------------------|
-| `host`          | `string`    | Hostname or IP address of the database server.                                              | `'database'`             |
-| `port`          | `number`    | Port number used to connect to the database server.                                         | `3306`                    |
-| `username`      | `string`    | Username for authenticating with the database.                                              | `'cern'`                  |
-| `password`      | `string`    | Password for the specified database user.                                                   | `'cern'`                  |
-| `database`      | `string`    | Name of the database to connect to.                                                         | `'qcg'`                   |
-| `charset`       | `string`    | Character encoding used for the connection.                                                 | `'utf8mb4'`               |
-| `collate`       | `string`    | Collation setting used for string comparison and sorting.                                   | `'utf8mb4_unicode_ci'`    |
-| `timezone`      | `string`    | Time zone used for all date/time values in the database connection.                         | `'+00:00'`                |
-| `logging`       | `boolean`   | Enables or disables SQL query logging (useful for debugging).                               | `false`                   |
-| `retryThrottle` | `number`    | Time in milliseconds to wait before retrying a failed database connection.                  | `5000`                    |
-| `forceSeed`     | `boolean`   | (for dev mode) Force seeding the database with mock data. **Warning:** Not recommended for production use. | `false`                   |
-| `drop`          | `boolean`   | (for dev mode) Force deleting the data from the database when server starts. **Warning:** This will erase all data—never use in production. | `false`                   |
+| **Field**       | **Type**  | **Description**                                                                                                                                      | **Default Value**      |
+|-----------------|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
+| `host`          | `string`  | Hostname or IP address of the database server.                                                                                                       | `'database'`           |
+| `port`          | `number`  | Port number used to connect to the database server.                                                                                                  | `3306`                 |
+| `username`      | `string`  | Username for authenticating with the database.                                                                                                       | `'cern'`               |
+| `password`      | `string`  | Password for the specified database user.                                                                                                            | `'cern'`               |
+| `database`      | `string`  | Name of the database to connect to.                                                                                                                  | `'qcg'`                |
+| `charset`       | `string`  | Character encoding used for the connection.                                                                                                          | `'utf8mb4'`            |
+| `collate`       | `string`  | Collation setting used for string comparison and sorting.                                                                                            | `'utf8mb4_unicode_ci'` |
+| `timezone`      | `string`  | Time zone used for all date/time values in the database connection.                                                                                  | `'+00:00'`             |
+| `logging`       | `boolean` | Enables or disables SQL query logging (useful for debugging).                                                                                        | `false`                |
+| `retryThrottle` | `number`  | Time in milliseconds to wait before retrying a failed database connection.                                                                           | `5000`                 |
+| `forceSeed`     | `boolean` | (used by dev mode only) Force seeding the database with mock data. **Warning:** Not recommended for production use.                                  | `false`                |
+| `drop`          | `boolean` | (used by dev mode only) Force deleting the data from the database when server starts. **Warning:** This will erase all data—never use in production. | `false`                |
 
 To know more about the database configuration, please go to: [Database Setup](./Database.md)

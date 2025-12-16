@@ -25,8 +25,8 @@ export const up = async (queryInterface) => {
     {
       id: 1,
       old_id: '671b8c22402408122e2f20dd',
-      name: 'test',
-      description: '',
+      name: 'PHYSICS_PB-PB',
+      description: 'A layout used for Pb-Pb physics runs',
       display_timestamp: false,
       auto_tab_change_interval: 0,
       owner_username: 'anonymous',
@@ -34,20 +34,20 @@ export const up = async (queryInterface) => {
     {
       id: 2,
       old_id: '671b95883d23cd0d67bdc787',
-      name: 'a-test',
-      description: '',
+      name: 'EMC Detector Overview',
+      description: 'A layout for the EMC detector expert',
       display_timestamp: false,
       auto_tab_change_interval: 0,
-      owner_username: 'anonymous',
+      owner_username: 'detector-expert',
     },
     {
       id: 3,
       old_id: '3d23671b9588787cd0d67bdc',
-      name: 'rundefinition_pdpBeamType',
-      description: '',
+      name: 'Some Other Layout',
+      description: 'A layout owned by some other user',
       display_timestamp: false,
       auto_tab_change_interval: 0,
-      owner_username: 'some_other_owner',
+      owner_username: 'run-coordinator',
     },
   ], {});
 };

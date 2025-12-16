@@ -42,7 +42,7 @@ export const up = async (queryInterface) => {
     },
     {
       id: 4,
-      name: 'a',
+      name: 'Another tab with a rather long name',
       layout_id: 2,
       column_count: 2,
     },
@@ -54,7 +54,7 @@ export const up = async (queryInterface) => {
     },
     {
       id: 6,
-      name: 'a',
+      name: 'Secondary tab',
       layout_id: 3,
       column_count: 2,
     },

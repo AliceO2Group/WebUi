@@ -28,9 +28,24 @@ export const up = async (queryInterface) => {
       username: 'anonymous',
     },
     {
-      id: 99,
-      name: 'Some other owner',
-      username: 'some_other_owner',
+      id: 10,
+      name: 'Developer',
+      username: 'developer',
+    },
+    {
+      id: 20,
+      name: 'Detector Expert',
+      username: 'detector-expert',
+    },
+    {
+      id: 30,
+      name: 'Shifter',
+      username: 'shifter',
+    },
+    {
+      id: 40,
+      name: 'Run Coordinator (RC)',
+      username: 'run-coordinator',
     },
   ], {});
 };

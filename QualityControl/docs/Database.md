@@ -1,3 +1,14 @@
+- [Database Setup and Configuration](#database-setup-and-configuration)
+  - [Development Database Setup](#development-database-setup)
+    - [Option 1: Docker (Recommended)](#option-1-docker-recommended)
+    - [Option 2: Local MariaDB Installation](#option-2-local-mariadb-installation)
+  - [Testing Database Setup](#testing-database-setup)
+  - [Database Seeding and Configuration](#database-seeding-and-configuration)
+    - [Development Seeding](#development-seeding)
+    - [Migrations](#migrations)
+  - [Current Status](#current-status)
+  - [Database Management Commands](#database-management-commands)
+
 # Database Setup and Configuration
 
 This document explains how to set up and configure the database for development and testing purposes.

@@ -13,7 +13,6 @@
  */
 
 export const config = {
-  demoData: false,
 
   http: {
     port: 8080,
@@ -49,11 +48,11 @@ export const config = {
     timezone: '+00:00',
     logging: false,
     retryThrottle: 5000,
-     //forceSeed: true, --- ONLY IN DEVELOPMENT ---
-    //drop: true, --- ONLY IN DEVELOPMENT ---
+    forceSeed: false,
+    drop: false,
   },
   bookkeeping: {
-    url: 'http://localhost:4000', // local insance
+    url: 'http://localhost:4000', // local instance
     token: '<paste a token from bookkeeping here>',
     runTypesRefreshInterval: 15000,
     runStatusRefreshInterval: 30000,

@@ -29,12 +29,9 @@ const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/database`;
 export class SequelizeDatabase {
   constructor(config) {
     this._logger = LogManager.getLogger(LOG_FACILITY);
-    const __filename = fileURLToPath(import.meta.url);
-    this.__dirname = dirname(__filename);
+    const filename = fileURLToPath(import.meta.url);
+    this._dirname = dirname(filename);
 
-    if (!config) {
-      this._logger.warnMessage('No configuration provided for SequelizeDatabase. Using default configuration.');
-    }
     this._dbConfig = getDbConfig(config);
     const {
       database,
@@ -103,7 +100,7 @@ export class SequelizeDatabase {
     try {
       const umzug = createUmzug(
         this.sequelize,
-        join(this.__dirname, 'migrations'),
+        join(this._dirname, 'migrations'),
         new SequelizeStorage({
           sequelize: this.sequelize,
         }),
@@ -127,7 +124,7 @@ export class SequelizeDatabase {
     try {
       const umzug = createUmzug(
         this.sequelize,
-        join(this.__dirname, 'seeders'),
+        join(this._dirname, 'seeders'),
         memoryStorage(),
       );
       await umzug.up();
