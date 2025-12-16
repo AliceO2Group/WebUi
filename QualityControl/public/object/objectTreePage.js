@@ -211,7 +211,7 @@ function treeRow(model, tree, level = 0) {
       iconBarChart,
       className,
       {
-        paddingLeft: `${level}em`,
+        paddingLeft: `${level + 0.25}em`,
       },
     );
     rows.push(leaf);
@@ -225,7 +225,7 @@ function treeRow(model, tree, level = 0) {
       open ? iconCaretBottom : iconCaretRight,
       '',
       {
-        paddingLeft: `${level}em`,
+        paddingLeft: `${level + 0.25}em`,
       },
     );
     rows.push(branch);
