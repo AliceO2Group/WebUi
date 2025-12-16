@@ -130,21 +130,7 @@ export class BookkeepingService {
   /**
    * Retrieves the information of a specific run from the Bookkeeping service
    * @param {number} runNumber - The run number to check the status for
-   * @returns {Promise<object>} - Returns a promise that resolves to the run information:
-   * - runStatus: A custom field created here for the front-end:
-   *   - `RunStatus.ONGOING` if the run is ongoing
-   *   - `RunStatus.ENDED` if the run has completed (has timeO2End)
-   *   - `RunStatus.NOT_FOUND` if the data cannot be found
-   *   - `RunStatus.UNKNOWN` if there was an error or data is not available
-   * - time at which the run has started - `startTime`
-   * - time at which the run has run ended - `endTime`
-   * - the run belongs to a partition also known as environment: `environmentId`
-   * - the run also is defined by multiple properties.
-   *   Depending on which oneas are used the run has a definition: `definition`
-   * - the run has a quality that decides if it should be stored or not for long time: `runQuality`
-   * - run normally runs only during an LHC beam mode: `lhcBeamMode`
-   * - A run has multiple detectors taking data,
-   *   thus we should also get the list of detectors and qualityies: `detectorQualities`
+   * @returns {Promise<RunInformation|WrappedRunStatus>} - Returns a promise that resolves to the run information
    */
   async retrieveRunInformation(runNumber) {
     if (!this.active) {
