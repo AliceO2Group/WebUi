@@ -147,13 +147,10 @@ const toolbarEditModeTab = (layout, tab, i) => {
 
   return [
     h(
-      '.btn-group.flex-fixed',
+      '.btn-group.flex-fixed.relative',
       {
-        style: 'position: relative;',
         draggable: true,
-        ondragstart: (e) => {
-          e.dataTransfer.setData('text/plain', tab.id);
-        },
+        ondragstart: (e) => e.dataTransfer.setData('text/plain', tab.id),
         ondrop: (e) => {
           layout.reorderTabs(e.dataTransfer.getData('text/plain'), layout.dropTargetId, layout.position);
           layout.clearDropTarget();
