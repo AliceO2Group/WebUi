@@ -143,7 +143,7 @@ const toolbarEditModeTab = (layout, tab, i) => {
    */
   const selectTab = () => layout.selectTab(i);
 
-  const dropZoneClass = (position) => layout.dropTargetId === tab.id && layout.position === position ? 'active' : ''
+  const dropZoneClass = (position) => layout.dropTargetId === tab.id && layout.position === position ? 'active' : '';
 
   return [
     h(
@@ -154,7 +154,7 @@ const toolbarEditModeTab = (layout, tab, i) => {
         ondrop: (e) => {
           layout.reorderTabs(e.dataTransfer.getData('text/plain'), layout.dropTargetId, layout.position);
           layout.clearDropTarget();
-        }
+        },
       },
       [
         h('button.br-pill.ph2.btn.btn-tab.whitespace-nowrap', { class: linkClass, onclick: selectTab }, tab.name),
@@ -169,9 +169,9 @@ const toolbarEditModeTab = (layout, tab, i) => {
                 if (layout.dropTargetId === tab.id && layout.position === 'before') {
                   layout.clearDropTarget();
                 }
-              }
+              },
             },
-            ''
+            '',
           ),
           h(
             '.drop-zone.after',
@@ -183,17 +183,17 @@ const toolbarEditModeTab = (layout, tab, i) => {
                 if (layout.dropTargetId === tab.id && layout.position === 'after') {
                   layout.clearDropTarget();
                 }
-              }
+              },
             },
-            ''
+            '',
           ),
           selected && [
             editTabButton(layout, linkClass, tab, i),
             resizeGridTabDropDown(layout, tab),
             deleteTabButton(layout, linkClass, i),
           ],
-        ].flat().filter(Boolean)
-      ]
+        ].flat().filter(Boolean),
+      ],
     ),
     ' ',
   ];

@@ -801,8 +801,8 @@ export default class Layout extends BaseViewModel {
    * This action typically causes the visual drop indicator to be hidden.
    */
   clearDropTarget() {
-    this.dropTargetId = undefined
-    this.position = undefined
+    this.dropTargetId = undefined;
+    this.position = undefined;
 
     this.notify();
   }
