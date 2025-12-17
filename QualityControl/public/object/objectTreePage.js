@@ -238,25 +238,25 @@ function treeRow(model, tree, level = 0) {
  * Creates a row containing specific visuals for either a branch or a leaf object
  * and on click it will expand/collapse the branch or plot the leaf object with JSRoot
  * @param {string} key - An unique identifier for this branch row element (table row)
- * @param {string} name - The name of this tree object element
+ * @param {string} title - The name of this tree object element
  * @param {() => void} onclick - The action (callback) to perform upon clicking this branch row element (table row)
  * @param {() => vnode} icon - Icon renderer for the row
  * @param {string} className - Optional CSS class name(s) for the outer branch row element (table row)
- * @param {object} styling - Optional CSS styling for the inner branch row element (table data)
+ * @param {object} style - Optional CSS styling for the inner branch row element (table data)
  * @returns {vnode} - virtual node element
  */
-const treeRowElement = (key, name, onclick, icon, className = '', styling = {}) =>
+const treeRowElement = (key, title, onclick, icon, className = '', style = {}) =>
   h('tr.object-selectable', {
     key,
     id: key,
-    title: name,
+    title,
     onclick,
     class: className,
   }, [
     h('td.highlight.flex-row.items-center.g1', {
-      style: styling,
+      style,
     }, [
       icon(),
-      name,
+      title,
     ]),
   ]);
