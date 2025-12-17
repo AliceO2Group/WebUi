@@ -305,7 +305,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const originalTabNames = await page.$$eval('#btn-tab', (elements) =>
         elements.map((element) => element.textContent.trim()));
 
-      const sourceTabSelector = '.btn-group.flex-fixed.relative:nth-child(1)';
+      const sourceTabSelector = '.btn-group.flex-fixed.relative:nth-child(1) > .btn-tab';
       const targetZoneSelector = '.btn-group.flex-fixed.relative:nth-child(2) .drop-zone.after';
 
       const sourceCenter = await getElementCenter(page, sourceTabSelector);
@@ -317,10 +317,8 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       // We add 'steps' to make the move smoother, which helps trigger event
       await page.mouse.move(targetCenter.x, targetCenter.y, { steps: 10 });
 
-      console.log('before');
       // Wait a moment for the 'active' class to appear in the UI
       await page.waitForSelector('.drop-zone.after.active');
-      console.log('after');
 
       await page.mouse.up();
 
