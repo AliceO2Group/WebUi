@@ -63,7 +63,7 @@ export class RunModeService {
       return { paths: cachedPaths };
     }
 
-    const runStatus = await this._bookkeepingService.retrieveRunStatus(runNumber);
+    const { runStatus } = await this._bookkeepingService.retrieveRunInformation(runNumber);
     const rawPaths = await this._dataService.getObjectsLatestVersionList({
       filters: { RunNumber: runNumber },
     });
@@ -88,7 +88,7 @@ export class RunModeService {
   async refreshRunsCache() {
     for (const [runNumber] of this._ongoingRuns.entries()) {
       try {
-        const runStatus = await this._bookkeepingService.retrieveRunStatus(runNumber);
+        const { runStatus } = await this._bookkeepingService.retrieveRunInformation(runNumber);
         if (runStatus === RunStatus.ONGOING) {
           const updatedPaths = await this._dataService.getObjectsLatestVersionList({
             filters: { RunNumber: runNumber },

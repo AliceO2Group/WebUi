@@ -31,7 +31,7 @@ export const runModeServiceTestSuite = async () => {
 
     beforeEach(() => {
       bookkeepingService = {
-        retrieveRunStatus: sinon.stub(),
+        retrieveRunInformation: sinon.stub(),
       };
 
       dataService = {
@@ -46,7 +46,9 @@ export const runModeServiceTestSuite = async () => {
         const runNumber = 1234;
         const rawPaths = [{ path: '/run/path1' }];
 
-        bookkeepingService.retrieveRunStatus.withArgs(runNumber).resolves(RunStatus.ONGOING);
+        bookkeepingService.retrieveRunInformation.withArgs(runNumber).resolves({
+          runStatus: RunStatus.ONGOING,
+        });
         dataService.getObjectsLatestVersionList.resolves(rawPaths);
 
         const result = await runModeService.retrievePathsAndSetRunStatus(runNumber);
@@ -63,7 +65,9 @@ export const runModeServiceTestSuite = async () => {
         const runNumber = 1234;
         const rawPaths = [{ path: '/ended/path' }];
 
-        bookkeepingService.retrieveRunStatus.resolves(RunStatus.ENDED);
+        bookkeepingService.retrieveRunInformation.resolves({
+          runStatus: RunStatus.ENDED,
+        });
         dataService.getObjectsLatestVersionList.resolves(rawPaths);
 
         const result = await runModeService.retrievePathsAndSetRunStatus(runNumber);
@@ -85,7 +89,7 @@ export const runModeServiceTestSuite = async () => {
           paths: [{ name: '/cached/path' }],
         });
 
-        sinon.assert.notCalled(bookkeepingService.retrieveRunStatus);
+        sinon.assert.notCalled(bookkeepingService.retrieveRunInformation);
       });
     });
 
@@ -94,7 +98,9 @@ export const runModeServiceTestSuite = async () => {
         const runNumber = 1001;
 
         runModeService._ongoingRuns.set(runNumber, [{ path: '/old/path' }]);
-        bookkeepingService.retrieveRunStatus.withArgs(runNumber).resolves(RunStatus.FINISHED);
+        bookkeepingService.retrieveRunInformation.withArgs(runNumber).resolves({
+          runStatus: RunStatus.ENDED,
+        });
 
         await runModeService.refreshRunsCache();
         strictEqual(runModeService._ongoingRuns.has(runNumber), false);
@@ -106,7 +112,9 @@ export const runModeServiceTestSuite = async () => {
 
         runModeService._ongoingRuns.set(runNumber, [{ path: '/old/path' }]);
 
-        bookkeepingService.retrieveRunStatus.withArgs(runNumber).resolves(RunStatus.ONGOING);
+        bookkeepingService.retrieveRunInformation.withArgs(runNumber).resolves({
+          runStatus: RunStatus.ONGOING,
+        });
         dataService.getObjectsLatestVersionList.resolves(updatedPaths);
 
         await runModeService.refreshRunsCache();

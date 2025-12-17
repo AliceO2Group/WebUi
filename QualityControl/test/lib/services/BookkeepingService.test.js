@@ -256,8 +256,36 @@ export const bookkeepingServiceTestSuite = async () => {
         };
 
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
-        const result = await bkpService.retrieveRunStatus(123);
-        strictEqual(result, RunStatus.ENDED);
+        const { runStatus } = await bkpService.retrieveRunInformation(123);
+        strictEqual(runStatus, RunStatus.ENDED);
+      });
+
+      test('should return run information when data is present', async () => {
+        const mockResponse = {
+          data: {
+            startTime: 1,
+            endTime: 2,
+            definition: null,
+            runQuality: 'good',
+            lhcBeamMode: 'PHYSICS',
+            detectorsQualities: [],
+          },
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
+        const {
+          startTime,
+          endTime,
+          definition,
+          runQuality,
+          lhcBeamMode,
+          detectorsQualities,
+          runStatus,
+        } = await bkpService.retrieveRunInformation(123);
+        const data = { startTime, endTime, definition, runQuality, lhcBeamMode, detectorsQualities };
+
+        deepStrictEqual(data, mockResponse.data);
+        ok(Object.values(RunStatus).includes(runStatus));
       });
 
       test('should return ONGOING status when timeO2End is not present', async () => {
@@ -265,22 +293,22 @@ export const bookkeepingServiceTestSuite = async () => {
 
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
 
-        const result = await bkpService.retrieveRunStatus(456);
-        strictEqual(result, RunStatus.ONGOING);
+        const { runStatus } = await bkpService.retrieveRunInformation(456);
+        strictEqual(runStatus, RunStatus.ONGOING);
       });
 
       test('should return UNKNOWN status when no data is returned', async () => {
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, {});
 
-        const result = await bkpService.retrieveRunStatus(789);
-        strictEqual(result, RunStatus.UNKNOWN);
+        const { runStatus } = await bkpService.retrieveRunInformation(789);
+        strictEqual(runStatus, RunStatus.UNKNOWN);
       });
 
       test('should return UNKNOWN status when request fails', async () => {
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(500);
 
-        const result = await bkpService.retrieveRunStatus(1010);
-        strictEqual(result, RunStatus.UNKNOWN);
+        const { runStatus } = await bkpService.retrieveRunInformation(1010);
+        strictEqual(runStatus, RunStatus.UNKNOWN);
       });
 
       test('should return NOT_FOUND status when request fails', async () => {
@@ -293,15 +321,15 @@ export const bookkeepingServiceTestSuite = async () => {
           ],
         });
 
-        const result = await bkpService.retrieveRunStatus(1010);
-        strictEqual(result, RunStatus.NOT_FOUND);
+        const { runStatus } = await bkpService.retrieveRunInformation(1010);
+        strictEqual(runStatus, RunStatus.NOT_FOUND);
       });
 
       test('should return BOOKKEEPING_UNAVAILABLE status when service is not active', async () => {
         bkpService.active = false;
 
-        const result = await bkpService.retrieveRunStatus(123);
-        strictEqual(result, RunStatus.BOOKKEEPING_UNAVAILABLE);
+        const { runStatus } = await bkpService.retrieveRunInformation(123);
+        strictEqual(runStatus, RunStatus.BOOKKEEPING_UNAVAILABLE);
       });
     });
   });
