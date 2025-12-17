@@ -63,7 +63,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     await page.locator('#clearFilterButton').click();
     await delay(100);
     objectList = await page.evaluate(() => window.model.object.list);
-    strictEqual(objectList.length, 3);
+    strictEqual(objectList.length, 4);
   });
 
   await testParent.test('ObjectShow should only list versions based on the filter', { timeout }, async () => {
@@ -91,7 +91,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
 
     await extendTree(3, 5);
     let rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
-    strictEqual(rowCount, 7);
+    strictEqual(rowCount, 8);
 
     const runNumber = '0';
     await page.locator('#runNumberFilter').fill(runNumber);

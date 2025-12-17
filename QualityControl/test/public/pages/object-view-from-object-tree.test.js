@@ -89,6 +89,23 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
+    'should set initial drawing options on plot',
+    async () => {
+      const path = 'qc/test/object/12';
+      await page.goto(`${url}?page=objectView&objectName=${path}`, { waitUntil: 'networkidle0' });
+      const result = await page.evaluate(() => {
+        const { drawingOptions } = globalThis.model.objectViewModel;
+        const plotElement = document.querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(1) > div');
+        const fingerprint = plotElement.dataset.fingerprintData;
+        return { fingerprint, drawingOptions };
+      });
+      strictEqual(result.fingerprint.includes('hist'), true);
+      strictEqual(result.fingerprint.includes('gridy'), true);
+      strictEqual(result.fingerprint.includes('text'), true);
+    },
+  );
+
+  await testParent.test(
     'should initially hide drawing options panel',
     { timeout },
     async () => {
@@ -112,7 +129,7 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
     'should display ignore defaults button',
     { timeout },
     async () => {
-      const objectId = '016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
+      const objectId = 'baffe0b2-826c-11ef-8f19-c0a80209250c';
       const checkboxId = `${objectId}ignoreDefaults`;
       const ignoreDefaultsCheckboxSelector = `#objectDrawingOptions input[id="${checkboxId}"]`;
       const element = await page.evaluate((selector) =>
@@ -122,10 +139,31 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
+    'should have initial drawing options checkboxes checked',
+    async () => {
+      const objectId = 'baffe0b2-826c-11ef-8f19-c0a80209250c';
+      const gridyCheckboxSelector = `#objectDrawingOptions input[id="${objectId}gridy"]`;
+      const gridxCheckboxSelector = `#objectDrawingOptions input[id="${objectId}gridx"]`;
+
+      const element = await page.evaluate((selector) =>
+        Boolean(document.querySelector(selector)), gridyCheckboxSelector);
+
+      const gridyChecked = await page.evaluate((selector) =>
+        document.querySelector(selector).checked, gridyCheckboxSelector);
+      const gridxChecked = await page.evaluate((selector) =>
+        document.querySelector(selector).checked, gridxCheckboxSelector);
+
+      strictEqual(element, true, 'gridy checkbox not found');
+      strictEqual(gridyChecked, true, 'gridy checkbox should be checked');
+      strictEqual(gridxChecked, false, 'gridx checkbox should not be checked');
+    },
+  );
+
+  await testParent.test(
     'should have ignore defaults checkbox unchecked by default',
     { timeout },
     async () => {
-      const objectId = '016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
+      const objectId = 'baffe0b2-826c-11ef-8f19-c0a80209250c';
       const checkboxId = `${objectId}ignoreDefaults`;
       const ignoreDefaultsCheckboxSelector = `#objectDrawingOptions input[id="${checkboxId}"]`;
       const checked = await page.evaluate((selector) =>
@@ -138,27 +176,34 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
     'should update plot when a drawing option is toggled',
     { timeout },
     async () => {
-      const objectId = '016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
-      const plotSelector = '#ObjectPlot > div:nth-child(2) > div > div';
+      const objectId = 'baffe0b2-826c-11ef-8f19-c0a80209250c';
       const gridXCheckboxSelector = `#objectDrawingOptions input[id="${objectId}gridx"]`;
-      const initialPlot = await page.waitForSelector(plotSelector, { timeout: 1000 });
-      const checkboxExists = await page.evaluate((selector) =>
-        Boolean(document.querySelector(selector)), gridXCheckboxSelector);
-      strictEqual(checkboxExists, true, '"gridx" drawing option checkbox not found');
-      const initalGridXEnabled = await page.evaluate((selector) =>
-        document.querySelector(selector).checked, gridXCheckboxSelector);
+
+      const initialResult = await page.evaluate(() => {
+        const plotElement = document.querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(1) > div');
+        const fingerprint = plotElement.dataset.fingerprintData;
+        return { fingerprint };
+      });
 
       await page.click(gridXCheckboxSelector);
-      await delay(100);
-      const gridXEnabled = await page.evaluate((selector) =>
-        document.querySelector(selector).checked, gridXCheckboxSelector);
-      const afterTogglePlot = await page.waitForSelector(plotSelector, { timeout: 1000 });
-      const redrawn = await page.evaluate((a, b) => a.innerHTML !== b.innerHTML, initialPlot, afterTogglePlot);
+      await delay(200);
 
-      strictEqual(checkboxExists, true, '"gridx" drawing option checkbox not found');
-      strictEqual(initalGridXEnabled, false, '"gridx" drawing option should be initially disabled');
-      strictEqual(gridXEnabled, true, '"gridx" drawing option should be enabled after toggle');
-      strictEqual(redrawn, true, 'JSRoot drawing was not redrawn on object info panel visibility change');
+      const afterToggleResult = await page.evaluate(() => {
+        const plotElement = document.querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(1) > div');
+        const fingerprint = plotElement.dataset.fingerprintData;
+        return { fingerprint };
+      });
+
+      strictEqual(
+        initialResult.fingerprint.includes('gridx'),
+        false,
+        'plot fingerprint should not contain gridx initially',
+      );
+      strictEqual(
+        afterToggleResult.fingerprint.includes('gridx'),
+        true,
+        'plot fingerprint should contain gridx after toggle',
+      );
     },
   );
 
