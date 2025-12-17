@@ -14,6 +14,7 @@
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 import { editedMockedLayout } from '../../setup/seeders/layout-show/json-file-mock.js';
+import { getElementCenter } from '../../testUtils/dragAndDrop.js';
 
 /**
  * Performs a series of automated tests on the layoutShow page using Puppeteer.
@@ -295,6 +296,34 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
         document.querySelectorAll(secondElementPath).length, secondElementPath);
       strictEqual(rowsCount, 1);
     },
+  );
+
+  await testParent.test(
+    'should reorder tabs via drag and drop in edit mode',
+    { timeout },
+    async () => {
+      const sourceTabSelector = '.btn-group.flex-fixed.relative:nth-child(1)';
+      const targetZoneSelector = '.btn-group.flex-fixed.relative:nth-child(2) .drop-zone.after';
+
+      const sourceCenter = await getElementCenter(page, sourceTabSelector);
+      const targetCenter = await getElementCenter(page, targetZoneSelector);
+
+      await page.mouse.move(sourceCenter.x, sourceCenter.y);
+      await page.mouse.down();
+
+      // We add 'steps' to make the move smoother, which helps trigger event
+      await page.mouse.move(targetCenter.x, targetCenter.y, { steps: 10 });
+
+      // Wait a moment for the 'active' class to appear in the UI
+      await page.waitForSelector('.drop-zone.after.active');
+
+      await page.mouse.up();
+
+      const tabNames = await page.$$eval('#btn-tab', (elements) =>
+        elements.map((element) => element.textContent.trim()));
+
+      strictEqual(tabNames[1], 'main');
+    }
   );
 
   await testParent.test(
