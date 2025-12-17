@@ -16,10 +16,13 @@ import { filterInput, dynamicSelector, ongoingRunsSelector } from './filter.js';
 import { FilterType } from './filterTypes.js';
 import { filtersConfig, runModeFilterConfig } from './filtersConfig.js';
 import { runModeCheckbox } from './runMode/runModeCheckbox.js';
-import { lastUpdatePanel, runStatusPanel } from './runMode/runStatusPanel.js';
+import {
+  cleanRunInformationPanel,
+  detectorsQualitiesPanel,
+  lastUpdatePanel,
+  runStatusPanel,
+} from './runMode/runStatusPanel.js';
 import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
-import { camelToTitleCase } from '../utils.js';
-import { statusBadge } from '../badge.js';
 
 /**
  * Creates an input element for a specific metadata field;
@@ -105,46 +108,11 @@ export function filtersPanel(filterModel, viewModel) {
         isRunModeActivated && runStatusPanel(runStatus),
       ]),
       lastUpdatePanel(runStatus, lastRefresh, refreshRate),
-      cleanRunInformation && Object.keys(cleanRunInformation).length > 0 && h(
-        '.flex-row.g4.items-center.f7.gray-darker.text-center.ph4',
-        {
-          id: 'header-run-information',
-          style: 'overflow-x: auto; margin: 0 auto;',
-        },
-        Object.entries(cleanRunInformation).map(([key, value]) =>
-          h('.flex-row.g1', {
-            key: `${key}-${value}`,
-            style: 'flex: 0 0 auto;',
-          }, [
-            h('strong', `${camelToTitleCase(key)}:`),
-            h('span', `${value}`),
-          ])),
-      ),
-      Array.isArray(detectorsQualities) && detectorsQualities.length > 0 && h(
-        '.flex-row.g3.items-center.f7.gray-darker.text-center.ph3',
-        {
-          id: 'header-detector-qualities',
-          style: 'overflow-x: auto;',
-        },
-        detectorsQualities.map(({ id, name, quality }) =>
-          h(
-            '.flex-row.g1',
-            {
-              key: `${id}-${name}-${quality}`,
-              style: 'flex: 0 0 auto;',
-            },
-            statusBadge(name, quality === 'good'),
-          )),
-      ),
+      cleanRunInformationPanel(cleanRunInformation),
+      detectorsQualitiesPanel(detectorsQualities),
     ],
   );
 }
-
-/**
- * Determines if runs mode is allowed based on current page and context
- * @param {object} viewModel - Model that manages the state of the page
- * @returns {boolean} - whether runs mode is allowed
- */
 
 /**
  * Button which will allow the user to update filter parameters after the input
