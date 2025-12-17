@@ -199,9 +199,9 @@ const toolbarEditModeTab = (layout, tab, i) => {
             '',
           ),
           selected && [
-            editTabButton(layout, `${linkClass} ${dragDisableClass}`, tab, i),
+            editTabButton(layout, linkClass, tab, i),
             resizeGridTabDropDown(layout, tab),
-            deleteTabButton(layout, `${linkClass} ${dragDisableClass}`, i),
+            deleteTabButton(layout, linkClass, i),
           ],
         ].flat().filter(Boolean),
       ],
