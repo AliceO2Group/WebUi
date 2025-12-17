@@ -304,6 +304,7 @@ export default class FilterModel extends Observable {
    * via `filterService.getRunInformation(runNumber)` and sets it to `runInformation`,
    * automatically applying any filtering and transformations defined in the setter.
    * If `this.runNumber` is not defined, `runInformation` is reset to an empty object.
+   * @returns {undefined}
    */
   async updateRunInformation() {
     const runNumber = this._filterMap['RunNumber'];
@@ -338,8 +339,9 @@ export default class FilterModel extends Observable {
    * Sets the run information after filtering and transforming values.
    * - Filters out properties that are `null` or `undefined`.
    * - Applies a transformation function from `RUN_INFORMATION_MAP` for any matching keys.
-   * @param {object} value - The new run information object to set.
+   * @param {RunInformation} value - The new run information object to set.
    * Keys corresponding to functions in `RUN_INFORMATION_MAP` will be transformed accordingly.
+   * @returns {undefined}
    */
   set runInformation(value) {
     const runInfo = value && typeof value === 'object' ? value : {};
