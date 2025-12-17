@@ -17,7 +17,6 @@ import { suite, test, beforeEach, afterEach } from 'node:test';
 import { FilterService } from '../../../lib/services/FilterService.js';
 import { RunStatus } from '../../../common/library/runStatus.enum.js';
 import { stub, restore } from 'sinon';
-import { BookkeepingService } from '../../../lib/services/BookkeepingService.js';
 
 export const filterServiceTestSuite = async () => {
   let filterService = null;
@@ -33,7 +32,6 @@ export const filterServiceTestSuite = async () => {
       connect: stub(),
       retrieveRunTypes: stub(),
       retrieveRunInformation: stub(),
-      wrapRunStatus: stub(),
       active: true, // assume the bookkeeping service is active by default
     };
     filterService = new FilterService(bookkeepingServiceMock, configMock);
@@ -156,25 +154,11 @@ export const filterServiceTestSuite = async () => {
     test('should return UNKNOWN when bookkeeping service throws error', async () => {
       const testError = new Error('Bookkeeping service unavailable');
       bookkeepingServiceMock.retrieveRunInformation.rejects(testError);
-      bookkeepingServiceMock.wrapRunStatus.callsFake((status) => ({ runStatus: status }));
 
       const { runStatus } = await filterService.getRunInformation(123456);
 
       deepStrictEqual(bookkeepingServiceMock.retrieveRunInformation.calledWith(123456), true);
       deepStrictEqual(runStatus, RunStatus.UNKNOWN);
-    });
-  });
-
-  suite('wrapRunStatus', async () => {
-    test('should wrap a given RunStatus value into a standardized object', async () => {
-      const realService = new BookkeepingService();
-      bookkeepingServiceMock.wrapRunStatus.callsFake(realService.wrapRunStatus);
-
-      const runStatusOngoing = bookkeepingServiceMock.wrapRunStatus(RunStatus.ONGOING);
-      const runStatusEnded = bookkeepingServiceMock.wrapRunStatus(RunStatus.ENDED);
-
-      deepStrictEqual(runStatusOngoing, { runStatus: RunStatus.ONGOING });
-      deepStrictEqual(runStatusEnded, { runStatus: RunStatus.ENDED });
     });
   });
 };

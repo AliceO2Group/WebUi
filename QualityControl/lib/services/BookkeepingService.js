@@ -15,6 +15,7 @@
 import { RunStatus } from '../../common/library/runStatus.enum.js';
 import { httpGetJson } from '../utils/httpRequests.js';
 import { LogManager } from '@aliceo2/web-ui';
+import { wrapRunStatus } from '../dtos/BookkeepingDto.js';
 
 const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
@@ -129,26 +130,12 @@ export class BookkeepingService {
   /**
    * Retrieves the information of a specific run from the Bookkeeping service
    * @param {number} runNumber - The run number to check the status for
-   * @returns {Promise<object>} - Returns a promise that resolves to the run information:
-   * - runStatus: A custom field created here for the front-end:
-   *   - `RunStatus.ONGOING` if the run is ongoing
-   *   - `RunStatus.ENDED` if the run has completed (has timeO2End)
-   *   - `RunStatus.NOT_FOUND` if the data cannot be found
-   *   - `RunStatus.UNKNOWN` if there was an error or data is not available
-   * - time at which the run has started - `startTime`
-   * - time at which the run has run ended - `endTime`
-   * - the run belongs to a partition also known as environment: `environmentId`
-   * - the run also is defined by multiple properties.
-   *   Depending on which oneas are used the run has a definition: `definition`
-   * - the run has a quality that decides if it should be stored or not for long time: `runQuality`
-   * - run normally runs only during an LHC beam mode: `lhcBeamMode`
-   * - A run has multiple detectors taking data,
-   *   thus we should also get the list of detectors and qualityies: `detectorQualities`
+   * @returns {Promise<RunInformation|WrappedRunStatus>} - Returns a promise that resolves to the run information
    */
   async retrieveRunInformation(runNumber) {
     if (!this.active) {
       this._logger.warnMessage('Could not connect to bookkeeping');
-      return this.wrapRunStatus(RunStatus.BOOKKEEPING_UNAVAILABLE);
+      return wrapRunStatus(RunStatus.BOOKKEEPING_UNAVAILABLE);
     }
 
     try {
@@ -168,7 +155,7 @@ export class BookkeepingService {
         definition,
         runQuality,
         lhcBeamMode,
-        detectorQualities,
+        detectorsQualities = [],
         timeO2End,
       } = data;
       const runStatus = timeO2End ? RunStatus.ENDED : RunStatus.ONGOING;
@@ -180,30 +167,18 @@ export class BookkeepingService {
         definition,
         runQuality,
         lhcBeamMode,
-        detectorQualities,
-        ...this.wrapRunStatus(runStatus),
+        detectorsQualities,
+        ...wrapRunStatus(runStatus),
       };
     } catch (error) {
       const msg = error?.message ?? String(error);
       if (msg.includes('404')) {
         this._logger.warnMessage(`Run number ${runNumber} not found in bookkeeping`);
-        return this.wrapRunStatus(RunStatus.NOT_FOUND);
+        return wrapRunStatus(RunStatus.NOT_FOUND);
       }
       this._logger.errorMessage(`Error fetching run status: ${error.message || error}`);
-      return this.wrapRunStatus(RunStatus.UNKNOWN);
+      return wrapRunStatus(RunStatus.UNKNOWN);
     }
-  }
-
-  /**
-   * Wraps a given run status value into a standardized result object.
-   * Use this helper when you need to return only a `runStatus` field without any
-   * additional payload. This ensures that all callers receive a consistent
-   * object shape, matching the structure returned by `retrieveRunInformation`.
-   * @param {RunStatus} runStatus The run status to wrap. Must be a valid `RunStatus` enum value.
-   * @returns {{ runStatus: RunStatus }} A simple object containing only the provided `runStatus`.
-   */
-  wrapRunStatus(runStatus) {
-    return { runStatus };
   }
 
   /**

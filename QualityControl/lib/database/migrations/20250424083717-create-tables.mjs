@@ -150,7 +150,7 @@ export const up = async (queryInterface, Sequelize) => {
     },
     object_name: {
       type: Sequelize.STRING(255),
-      allowNull: true,
+      allowNull: false,
     },
     ignore_defaults: {
       type: Sequelize.BOOLEAN,
