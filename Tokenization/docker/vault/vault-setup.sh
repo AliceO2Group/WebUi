@@ -101,6 +101,44 @@ if [ -n "${VAULT_TOKEN:-}" ]; then
   echo "[vault-setup] Creating transit key for tokenization..."
   vault write transit/keys/tokenization-signing type="ed25519" 2>/dev/null || echo "[vault-setup] transit key already exists"
 
+  echo "[vault-setup] Seeding clients into KV + Transit..."
+
+  CLIENTS_DIR="/vault/config/generated-clients"
+
+  if [ ! -d "$CLIENTS_DIR" ]; then
+    echo "[vault-setup] WARN: $CLIENTS_DIR not found, skipping client seeding"
+  else
+    for serial_file in "$CLIENTS_DIR"/*.serial; do
+      [ -e "$serial_file" ] || { echo "[vault-setup] No *.serial files found, skipping"; break; }
+
+      base_name="$(basename "$serial_file" .serial)" 
+      serial_hex="$(cat "$serial_file" | tr -d '\r\n[:space:]')" 
+      serial_id="0x${serial_hex}" 
+
+      crt_file="$CLIENTS_DIR/${base_name}.crt"
+      pub_file="$CLIENTS_DIR/${base_name}.pub.pem"
+
+      if [ ! -f "$crt_file" ]; then
+        echo "[vault-setup] WARN: Missing cert for $base_name ($crt_file), skipping"
+        continue
+      fi
+      if [ ! -f "$pub_file" ]; then
+        echo "[vault-setup] WARN: Missing public key for $base_name ($pub_file), skipping"
+        continue
+      fi
+
+      echo "[vault-setup] -> client=$base_name serial=$serial_id"
+
+      vault kv put "tokenization/${serial_id}" \
+        certificate="$(cat "$crt_file")" \
+        2>/dev/null || echo "[vault-setup] WARN: KV write failed for ${serial_id}"
+
+      vault write "transit/keys/${serial_id}-public-key" type="rsa-2048" \
+        2>/dev/null || echo "[vault-setup] transit key already exists: ${serial_id}-public-key"
+    done
+  fi
+
+
   echo "[vault-setup] Creating central-system policy..."
   vault policy write central-system - <<EOF
 path "transit/encrypt/*" {

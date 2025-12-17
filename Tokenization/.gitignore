@@ -21,3 +21,6 @@ banner.js
 *.crt
 *.key
 *.pem
+backend/central-system/certificates/
+backend/central-system/certificates/*
+docker/vault/generated-clients/

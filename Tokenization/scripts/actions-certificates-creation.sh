@@ -4,7 +4,13 @@ set -euo pipefail
 VAULT_DIR="./Tokenization/docker/vault"
 BACKEND_ENV="./Tokenization/backend/central-system/.env"
 
+CLIENTS_DIR="${VAULT_DIR}/generated-clients"
+
+IP_BASE="10.10.0"
+IP_START=11
+
 mkdir -p "$VAULT_DIR"
+mkdir -p "$CLIENTS_DIR"
 mkdir -p "$(dirname "$BACKEND_ENV")"
 
 echo "[Vault CI] Generating test CA..."
@@ -38,8 +44,71 @@ openssl req -new -key "$VAULT_DIR/central-system.key" -out "$VAULT_DIR/central-s
 openssl x509 -req -in "$VAULT_DIR/central-system.csr" -CA "$VAULT_DIR/ca.crt" -CAkey "$VAULT_DIR/ca.key" \
   -CAcreateserial -out "$VAULT_DIR/central-system.crt" -days 365
 
-echo "[Vault CI] Generated files:"
+echo "[Vault CI] Generating 10 client certificates into: $CLIENTS_DIR"
+declare -A USED_IPS=()
+
+for i in $(seq -w 1 10); do
+  CLIENT_NAME="client-${i}"
+
+  KEY="${CLIENTS_DIR}/${CLIENT_NAME}.key"
+  CSR="${CLIENTS_DIR}/${CLIENT_NAME}.csr"
+  CRT="${CLIENTS_DIR}/${CLIENT_NAME}.crt"
+  EXT="${CLIENTS_DIR}/${CLIENT_NAME}.ext"
+
+  PUB="${CLIENTS_DIR}/${CLIENT_NAME}.pub.pem"
+  SERIAL_FILE="${CLIENTS_DIR}/${CLIENT_NAME}.serial"
+
+  SERIAL_HEX=$(printf "%x" $((10#$i)))
+  SERIAL="0x${SERIAL_HEX}"
+
+  OCTET=$((IP_START + 10#$i - 1))
+  CLIENT_IP="${IP_BASE}.${OCTET}"
+
+  if [[ -n "${USED_IPS[${CLIENT_IP}]+x}" ]]; then
+    echo "ERROR: duplicate IP computed: ${CLIENT_IP}" >&2
+    exit 1
+  fi
+  USED_IPS["${CLIENT_IP}"]=1
+
+  cat > "${EXT}" <<EOF
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth
+subjectAltName = @alt_names
+
+[alt_names]
+IP.1 = ${CLIENT_IP}
+DNS.1 = ${CLIENT_NAME}
+EOF
+
+  echo "  -> ${CLIENT_NAME}: serial=${SERIAL}, ip=${CLIENT_IP}"
+
+  openssl genrsa -out "${KEY}" 2048
+  openssl req -new -key "${KEY}" -out "${CSR}" -subj "/CN=${CLIENT_NAME}"
+
+  openssl x509 -req -in "${CSR}" \
+    -CA "$VAULT_DIR/ca.crt" -CAkey "$VAULT_DIR/ca.key" \
+    -set_serial "${SERIAL}" \
+    -out "${CRT}" -days 365 -sha256 \
+    -extfile "${EXT}"
+
+  if ! openssl x509 -in "${CRT}" -noout -ext subjectAltName | grep -q "IP Address:${CLIENT_IP}"; then
+    echo "ERROR: SAN does not contain expected IP ${CLIENT_IP} for ${CLIENT_NAME}" >&2
+    openssl x509 -in "${CRT}" -noout -ext subjectAltName >&2 || true
+    exit 1
+  fi
+
+  openssl x509 -in "${CRT}" -noout -pubkey > "${PUB}"
+
+
+  openssl x509 -in "${CRT}" -noout -serial | cut -d= -f2 > "${SERIAL_FILE}"
+done
+
+echo "[Vault CI] Generated files in $VAULT_DIR:"
 ls -l "$VAULT_DIR"
+
+echo "[Vault CI] Generated client artifacts in $CLIENTS_DIR:"
+ls -l "$CLIENTS_DIR"
 
 echo "[Vault CI] Writing .env for central-system at $BACKEND_ENV"
 
@@ -48,7 +117,7 @@ cat > "$BACKEND_ENV" <<EOF
 VAULT_ADDR=https://vault.local:9300
 VAULT_AUTH_METHOD=cert
 VAULT_ROLE=central-system
-
+DB_SEED=true
 VAULT_CACERT_B64=$(base64 -w0 "$VAULT_DIR/ca.crt")
 VAULT_CENTRAL_SYSTEM_CERT_B64=$(base64 -w0 "$VAULT_DIR/central-system.crt")
 VAULT_CENTRAL_SYSTEM_KEY_B64=$(base64 -w0 "$VAULT_DIR/central-system.key")

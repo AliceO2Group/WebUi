@@ -41,10 +41,10 @@ services:
       - type: volume
         source: vault-data
         target: /vault/data
-
       - ./docker/vault/vault.crt:/vault/config/vault.crt:ro
       - ./docker/vault/vault.key:/vault/config/vault.key:ro
-      - ./docker/ca/ca.crt:/vault/config/ca.crt:ro
+      - ./docker/vault/ca.crt:/vault/config/ca.crt:ro
+      - ./docker/vault/generated-clients:/vault/config/generated-clients:ro
     cap_add:
       - IPC_LOCK
     restart: unless-stopped
@@ -63,6 +63,7 @@ services:
       - ./docker/vault/ca.crt:/vault/config/ca.crt:ro
       - ./docker/vault/vault-setup.sh:/vault-setup.sh:ro
       - ./docker/vault/central-system.crt:/vault/config/central-system-client.crt:ro
+      - ./docker/vault/generated-clients:/vault/config/generated-clients:ro
     entrypoint: ['/bin/sh', '-lc']
     command: ['/vault-setup.sh']
     restart: 'on-failure'

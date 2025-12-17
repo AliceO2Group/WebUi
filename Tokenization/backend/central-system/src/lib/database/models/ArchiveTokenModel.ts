@@ -14,6 +14,12 @@
 
 import { Sequelize, Model, DataTypes } from 'sequelize';
 
+type TokenTimings = {
+  GET?: number;
+  POST?: number;
+  PUT?: number;
+  DELETE?: number;
+};
 type TokenStatus = 'REVOKED' | 'REJECTED' | 'EXPIRED';
 
 // Define the structure of the archived token object
@@ -21,8 +27,8 @@ interface ArchivedTokenAttributes {
   sub: string;
   aud: string;
   iss: string;
-  iat: Record<string, number>;
-  exp: Record<string, number>;
+  iat: TokenTimings;
+  exp: TokenTimings;
   jti: string;
 }
 
