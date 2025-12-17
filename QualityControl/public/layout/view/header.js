@@ -136,7 +136,6 @@ const toolbarEditMode = (layout) => {
 const toolbarEditModeTab = (layout, tab, i) => {
   const selected = layout.tab.name === tab.name;
   const linkClass = selected ? 'selected' : '';
-  const dragDisableClass = layout.isDragging ? 'pointer-events-none' : '';
 
   /**
    * Handler when user click on a tab to select it
