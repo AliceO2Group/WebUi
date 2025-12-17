@@ -121,7 +121,14 @@ export default function ServiceRenewRoute() {
     }
     uploadCertificate(selectedFile, {
       onSuccess: (preview) => {
-        openPreviewModal(preview, serviceQuery.data?.exp);
+        const commonName = serviceQuery.data?.commonName;
+        if(preview.commonName !== commonName) {
+          pushAlert({ message: `Warning: The common name in the uploaded 
+            certificate does not match the service common name.`, severity: 'warning' });
+          hideModal();
+        } else {
+          openPreviewModal(preview, serviceQuery.data?.exp);
+        }
       },
       onError: () => {
         hideModal();
@@ -232,11 +239,14 @@ const InfoItem = ({ label, value }: { label: string; value: string }) => (
   </Stack>
 );
 
-function RenewalPreviewDetails({ preview, currentExpiry }: { preview: ServiceCertificatePreview; currentExpiry?: string }) {
+function RenewalPreviewDetails({ preview, currentExpiry }: { 
+  preview: ServiceCertificatePreview; 
+  currentExpiry?: string; 
+}) {
   const previousExpiryDate = currentExpiry ? new Date(currentExpiry) : null;
   const nextExpiryDate = new Date(preview.validTo);
   const expiryRegression = previousExpiryDate ? nextExpiryDate.getTime() < previousExpiryDate.getTime() : false;
-
+  
   return (
     <Stack spacing={1.5}>
       <Typography variant="body2">Certificate ID: {preview.certificateId}</Typography>

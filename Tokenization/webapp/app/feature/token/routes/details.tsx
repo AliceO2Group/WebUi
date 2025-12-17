@@ -30,7 +30,7 @@ import type { TokenLogEntry } from '~/feature/token/types/token';
 
 export default function TokenDetailsRoute() {
   const { tokenId } = useParams<{ tokenId: string }>();
-  const { confirmRevoke } = useRevokeActions();
+  const { confirmRevoke } = useRevokeActions(null);
 
   const tokenQuery = useTokenDetailsQuery({ tokenId });
   const logsQuery = useTokenLogsQuery({ tokenId });
@@ -78,8 +78,8 @@ export default function TokenDetailsRoute() {
         <Divider sx={{ my: 2 }} />
         <DetailsGrid>
           <InfoItem label="Token ID" value={token.tokenId} />
-          <InfoItem label="Service from" value={token.serviceFrom} />
-          <InfoItem label="Service to" value={token.serviceTo} />
+          <InfoItem label="Service from" value={token.serviceFrom.commonName} />
+          <InfoItem label="Service to" value={token.serviceTo.commonName} />
           <InfoItem label="Issued at" value={new Date(token.iat).toLocaleString()} />
           <InfoItem label="Expires" value={new Date(token.exp).toLocaleString()} />
           <InfoItem label="Issuer" value={token.issuer} />

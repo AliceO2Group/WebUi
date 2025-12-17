@@ -62,7 +62,13 @@ export function TokensTable({ tokens, totalCount, title = 'Active tokens', onRev
       {
         key: 'services',
         header: 'Services',
-        render: (token) => `${token.serviceFrom} → ${token.serviceTo}`,
+        render: (token) => (
+          <>
+          <Link to={`/services/${token.serviceFrom.serviceId}`}>{token.serviceFrom.commonName}</Link> 
+          → 
+          <Link to={`/services/${token.serviceTo.serviceId}`}>{token.serviceTo.commonName}</Link>
+          </>
+        ),
       },
       {
         key: 'iat',

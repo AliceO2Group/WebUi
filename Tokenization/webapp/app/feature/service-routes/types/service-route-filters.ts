@@ -12,9 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
+import type { OptionType } from "~/shared/components/form/multi-select-field";
+
 export type ServiceRouteFilterValues = {
-  serviceFrom: string[];
-  serviceTo: string[];
+  serviceFrom: OptionType[];
+  serviceTo: OptionType[];
 };
 
 export const SERVICE_ROUTE_FILTER_DEFAULTS: ServiceRouteFilterValues = {

@@ -15,12 +15,13 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { fetchServiceRoutes } from '~/feature/service-routes/services/service-routes.service';
-import { fetchServiceRouteOptions } from '~/feature/service-routes/services/service-route-options.service';
+import { fetchAvailableServices } from '~/feature/token/services/service-options.service';
 import type { ServiceRouteFilterValues } from '~/feature/service-routes/types/service-route-filters';
 
 const serviceRouteListsKey = ['service-routes', 'list'] as const;
 
 export const serviceRoutesQueryKeys = {
+  lists: [...serviceRouteListsKey] as const,
   list: (filters: ServiceRouteFilterValues | null) => [...serviceRouteListsKey, filters] as const,
   serviceOptionsSearch: (term: string) => ['service-routes', 'service-options', term] as const,
 };
@@ -47,7 +48,7 @@ export function useRouteServiceOptionsQuery(params?: UseRouteServiceOptionsParam
   const searchTerm = params?.searchTerm ?? '';
   return useQuery({
     queryKey: serviceRoutesQueryKeys.serviceOptionsSearch(searchTerm),
-    queryFn: () => fetchServiceRouteOptions(searchTerm),
+    queryFn: () => fetchAvailableServices(searchTerm),
     enabled: params?.enabled ?? true,
     staleTime: 5 * 60 * 1000,
   });

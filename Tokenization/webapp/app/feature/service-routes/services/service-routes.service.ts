@@ -18,38 +18,110 @@ import type { ServiceRouteFilterValues } from '~/feature/service-routes/types/se
 
 export type ServiceRoutesQueryResponse = {
   routes: ServiceRoute[];
-  totalCount: number;
+  totalCount?: number;
 };
 
 export type ServiceRouteRegistrationPayload = {
   serviceFromId: string;
-  serviceFromLabel: string;
   serviceToId: string;
-  serviceToLabel: string;
   permissions: string[];
 };
 
 export async function fetchServiceRoutes(_filters: ServiceRouteFilterValues | null): Promise<ServiceRoutesQueryResponse> {
+  const queryString = new URLSearchParams();
+   
+
+  if(_filters) {
+    if (_filters.serviceTo.length > 0) {
+      const servicesTo = _filters.serviceTo.map(service => service.value).join(',');
+      queryString.append('serviceTo', servicesTo);
+    }
+    if (_filters.serviceFrom.length > 0) {
+      const servicesFrom = _filters.serviceFrom.map(service => service.value).join(',');
+      queryString.append('serviceFrom', servicesFrom);
+    }
+  }
+
+  const url = `/api/routes?${queryString.toString()}`;
+  
+  const response = await fetch(url);
+
+  if(!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error);
+  }
+
+  const data = await response.json();
   return {
-    routes: [...mockServiceRoutes],
-    totalCount: mockServiceRoutes.length,
+    routes: data,
   };
 }
 
 export async function banServiceRoute(_routeId: string): Promise<void> {
-  return Promise.resolve();
+  const res = await fetch(`/api/routes/${_routeId}`, {
+    method: 'DELETE'
+  })
+
+  if(!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error);
+  }
+
+  const success = await res.json();  
+  return success.success
 }
 
 export async function banServiceRoutesBulk(_filters: ServiceRouteFilterValues): Promise<void> {
-  return Promise.resolve();
+  const queryString = new URLSearchParams();
+
+  if(_filters) {
+    if (_filters.serviceTo.length > 0) {
+      const servicesTo = _filters.serviceTo.map(service => service.value).join(',');
+      queryString.append('serviceTo', servicesTo);
+    }
+    if (_filters.serviceFrom.length > 0) {
+      const servicesFrom = _filters.serviceFrom.map(service => service.value).join(',');
+      queryString.append('serviceFrom', servicesFrom);
+    }
+
+    
+    const url = `/api/routes?${queryString.toString()}`;
+
+    console.log('Bulk ban URL:', url);
+
+    const res = await fetch(url, {
+      method: 'DELETE',
+    });
+
+    if(!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error);
+    }
+
+    const success = await res.json();
+    return success.success;
+
+  } else {
+    return Promise.reject(new Error('No filters provided for bulk ban.'));
+  }
 }
 
 export async function registerServiceRoute(payload: ServiceRouteRegistrationPayload): Promise<ServiceRoute> {
-  const mockRoute: ServiceRoute = {
-    routeId: `route-${Date.now()}`,
-    serviceFrom: payload.serviceFromId,
-    serviceTo: payload.serviceToId,
-    permissions: [...payload.permissions],
-  };
-  return Promise.resolve(mockRoute);
+  
+  const response = await fetch('/api/routes', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  
+  const data = await response.json();
+
+  if(!response.ok) {
+    throw new Error(data.error);
+  }
+
+  return data
+
 }

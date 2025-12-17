@@ -172,7 +172,7 @@ export function ServiceRouteRegisterForm() {
 				}
 
 				registerRoute(
-					{ serviceFromId: serviceFromId, serviceFromLabel, serviceToId, serviceToLabel, permissions },
+					{ serviceFromId, serviceToId, permissions },
 					{
 						onSuccess: () => {
 							pushAlert({ message: 'Route registered successfully.', severity: 'success' });

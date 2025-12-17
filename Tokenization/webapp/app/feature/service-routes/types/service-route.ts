@@ -12,9 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
+import type { Service } from "~/feature/service/types/service";
+
 export type ServiceRoute = {
   routeId: string;
-  serviceFrom: string;
-  serviceTo: string;
+  serviceFrom: Service;
+  serviceTo: Service;
   permissions: string[];
 };

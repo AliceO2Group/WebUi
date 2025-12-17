@@ -14,41 +14,49 @@
 
 import type { ServiceCertificatePreview, ServiceRegistrationResult } from '~/feature/service/types/certificate';
 
-const mockIssuer = 'ALICE Service Authority';
-const mockSubject = 'CERN/ALICE';
-
 /**
  * Simulates uploading a certificate file and returns a preview payload with pending status.
  */
 export async function uploadServiceCertificate(file: File): Promise<ServiceCertificatePreview> {
-  await delay(1200);
-  const certificateId = '1';
-  return {
-    certificateId,
-    subject: mockSubject,
-    commonName: file.name.replace(/\.(cert|crt|pem)$/i, ''),
-    issuer: mockIssuer,
-    validFrom: '2025-01-01T08:00:00Z',
-    validTo: '2027-01-01T08:00:00Z',
-    fingerprint: 'AA:BB:CC:DD:EE:FF:11:22:33:44',
-    status: 'pending',
-  };
+  function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      // to extract only the base64 part from the data URL
+      reader.onload = () => resolve((reader.result as string).split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const base64 = await fileToBase64(file);
+  const response = await fetch('/api/certificate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ 'certificateBase64': base64 }),
+  });
+  const data = await response.json();
+
+  return data;
 }
 
 /**
  * Simulates confirming registration of a pending certificate.
  */
 export async function confirmServiceCertificate(certificateId: string): Promise<ServiceRegistrationResult> {
-  await delay(1000);
-  return {
-    certificateId,
-    serviceId: certificateId.replace('cert', 'svc'),
-    status: 'registered',
-  };
-}
-
-function delay(ms: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
+  const response = await fetch(`/api/certificate/register`, { 
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({certificateId: certificateId}),
   });
+
+  if (!response.ok) {
+  	throw new Error(`HTTP ${response.status}`);
+  }
+  
+  const data = await response.json();
+  return data;
 }

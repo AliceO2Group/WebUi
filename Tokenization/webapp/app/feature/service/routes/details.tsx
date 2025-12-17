@@ -30,29 +30,34 @@ import { TokensTable } from '~/feature/token/components/token-table';
 import { useRevokeActions } from '~/feature/token/hooks/useRevokeActions';
 import type { TokensQueryResponse } from '~/feature/token/services/tokens.service';
 import type { Token } from '~/feature/token/types/token';
-import type { TokenFilterValues } from '~/feature/token/types/token-filters';
+import { TOKEN_FILTER_DEFAULTS, type TokenFilterValues } from '~/feature/token/types/token-filters';
+import type { Service } from '../types/service';
 
 const TOKEN_TABLE_HEIGHT = 320;
 
 export default function ServiceDetailsRoute() {
 	const { serviceId } = useParams<{ serviceId: string }>();
 	const hasServiceId = Boolean(serviceId);
-	const { confirmRevoke, confirmBulkRevoke } = useRevokeActions();
 
 	const serviceQuery = useServiceDetailsQuery({ serviceId: serviceId ?? '', enabled: hasServiceId });
-	const outgoingFilters = useMemo<TokenFilterValues | null>(() => (serviceId ? buildServiceFilter(serviceId, 'from') : null), [serviceId]);
-	const incomingFilters = useMemo<TokenFilterValues | null>(() => (serviceId ? buildServiceFilter(serviceId, 'to') : null), [serviceId]);
+	const service = serviceQuery.data;
 
+	const outgoingFilters = serviceId ? buildServiceFilter(service, 'from') : null;
+	const incomingFilters = serviceId ? buildServiceFilter(service, 'to') : null;
+
+	const { confirmRevoke: confirmRevokeOutgoing, confirmBulkRevoke: confirmBulkRevokeOutgoing } = useRevokeActions(outgoingFilters);
+	const { confirmRevoke: confirmRevokeIncoming, confirmBulkRevoke: confirmBulkRevokeIncoming } = useRevokeActions(incomingFilters);
+ 
 	const outgoingTokensQuery = useTokensQuery({
 		filters: outgoingFilters,
 		status: 'active',
-		enabled: hasServiceId,
+		enabled: outgoingFilters !== TOKEN_FILTER_DEFAULTS,
 	});
 
 	const incomingTokensQuery = useTokensQuery({
 		filters: incomingFilters,
 		status: 'active',
-		enabled: hasServiceId,
+		enabled: incomingFilters !== TOKEN_FILTER_DEFAULTS,
 	});
 
 	if (!hasServiceId) {
@@ -75,7 +80,6 @@ export default function ServiceDetailsRoute() {
 		return <Alert severity="warning">Service not found.</Alert>;
 	}
 
-	const service = serviceQuery.data;
 	const renewPath = `/services/${serviceId}/renew`;
 
 	return (
@@ -89,10 +93,10 @@ export default function ServiceDetailsRoute() {
 				</Stack>
 				<Divider sx={{ my: 2 }} />
 				<DetailsGrid>
-					<InfoItem label="Service ID" value={service.serviceId} />
-					<InfoItem label="Common name" value={service.commonName} />
-					<InfoItem label="Issued at" value={new Date(service.iat).toLocaleString()} />
-					<InfoItem label="Expires" value={new Date(service.exp).toLocaleString()} />
+					<InfoItem label="Service ID" value={service?.serviceId ?? ''} />
+					<InfoItem label="Common name" value={service?.commonName ?? ''} />
+					<InfoItem label="Issued at" value={new Date(service?.iat ?? '').toLocaleString()} />
+					<InfoItem label="Expires" value={new Date(service?.exp ?? '').toLocaleString()} />
 				</DetailsGrid>
 			</Paper>
 
@@ -101,16 +105,16 @@ export default function ServiceDetailsRoute() {
 					title="Tokens issued by this service"
 					query={outgoingTokensQuery}
 					filters={outgoingFilters}
-					onRevoke={confirmRevoke}
-					onBulkRevoke={() => outgoingFilters && confirmBulkRevoke(outgoingFilters)}
+					onRevoke={confirmRevokeOutgoing}
+					onBulkRevoke={() => outgoingFilters && confirmBulkRevokeOutgoing(outgoingFilters)}
 					tableBodyMaxHeight={TOKEN_TABLE_HEIGHT}
 				/>
 				<ServiceTokensSection
 					title="Tokens targeting this service"
 					query={incomingTokensQuery}
 					filters={incomingFilters}
-					onRevoke={confirmRevoke}
-					onBulkRevoke={() => incomingFilters && confirmBulkRevoke(incomingFilters)}
+					onRevoke={confirmRevokeIncoming}
+					onBulkRevoke={() => incomingFilters && confirmBulkRevokeIncoming(incomingFilters)}
 					tableBodyMaxHeight={TOKEN_TABLE_HEIGHT}
 				/>
 			</Stack>
@@ -201,14 +205,14 @@ const TableLoader = ({ title }: { title: string }) => (
 	</Paper>
 );
 
-function buildServiceFilter(serviceId: string, direction: 'from' | 'to'): TokenFilterValues {
+function buildServiceFilter(service: Service | undefined, direction: 'from' | 'to'): TokenFilterValues {
+	if(!service) {
+		return TOKEN_FILTER_DEFAULTS
+	}
+	
 	return {
-		serviceFrom: direction === 'from' ? [serviceId] : [],
-		serviceTo: direction === 'to' ? [serviceId] : [],
-		issuedAfter: '',
-		issuedBefore: '',
-		expiresAfter: '',
-		expiresBefore: '',
-		ordering: [],
+		...TOKEN_FILTER_DEFAULTS,
+		serviceFrom: direction === 'from' ? [{value: service.serviceId, label: service.commonName}] : [],
+		serviceTo: direction === 'to' ? [{value: service.serviceId, label: service.commonName}] : [],
 	};
 }

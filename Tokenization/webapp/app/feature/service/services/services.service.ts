@@ -18,12 +18,37 @@ import type { ServiceFilterValues } from '~/feature/service/types/service-filter
 
 export type ServicesQueryResponse = {
   services: Service[];
-  totalCount: number;
 };
 
 export async function fetchServices(_filters: ServiceFilterValues | null): Promise<ServicesQueryResponse> {
+  const queryString = new URLSearchParams();
+  
+  if(_filters) {
+    if (_filters.issuedBefore) {
+      queryString.append('issuedBefore', _filters.issuedBefore);
+    }
+    if (_filters.issuedAfter) {
+      queryString.append('issuedAfter', _filters.issuedAfter);
+    }
+    if (_filters.expiresBefore) {
+      queryString.append('expiresBefore', _filters.expiresBefore);
+    }
+    if (_filters.expiresAfter) {
+      queryString.append('expiresAfter', _filters.expiresAfter);
+    }
+    if (_filters.search) {
+      queryString.append('search', _filters.search);
+    }
+    if (_filters.ordering.length > 0) {
+      queryString.append('ordering', _filters.ordering.map((order) => `${order.field}:${order.direction}`).join(','));
+    }
+  }
+
+  const url = `/api/services?${queryString.toString()}`;
+
+  const res = await fetch(url);
+  const allServices: Service[] = await res.json();
   return {
-    services: [...mockServices],
-    totalCount: mockServices.length,
+    services: allServices,
   };
 }

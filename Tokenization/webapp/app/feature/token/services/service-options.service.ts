@@ -13,12 +13,23 @@
  */
 
 import type { Service } from "~/feature/service/types/service";
-import { mockServices } from "~/feature/service/mocks/services.mock";
 
 /**
  * Placeholder service returning a mocked list of available services until the
  * real backend endpoint is available.
  */
 export async function fetchAvailableServices(_searchTerm = ''): Promise<Service[]> {
-  return [...mockServices];
+
+  const params = new URLSearchParams();
+
+  if(_searchTerm !== '') {
+    params.append('searchTerm', _searchTerm);
+  }
+
+  const queryString = params.toString();
+  const response = await fetch(`/api/services?${queryString}`);
+
+  const services: Service[] = await response.json();
+
+  return services;
 }

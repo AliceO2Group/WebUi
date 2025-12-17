@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
+import type { Service } from "~/feature/service/types/service";
+
 export type TokenStatus = 'active' | 'not-active';
 
 export interface TokenLogEntry {
@@ -22,8 +24,8 @@ export interface TokenLogEntry {
 
 export interface Token {
   tokenId: string;
-  serviceFrom: string;
-  serviceTo: string;
+  serviceFrom: Service;
+  serviceTo: Service;
   exp: string;
   last4chars: string;
   issuer: string;

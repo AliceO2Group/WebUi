@@ -12,11 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
+import type { OptionType } from '~/shared/components/form/multi-select-field';
 import type { OrderingRule } from '~/shared/components/order/ordering-control';
 
 export type TokenFilterValues = {
-  serviceFrom: string[];
-  serviceTo: string[];
+  serviceFrom: OptionType[];
+  serviceTo: OptionType[];
   issuedAfter: string;
   issuedBefore: string;
   expiresAfter: string;

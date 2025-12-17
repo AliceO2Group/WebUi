@@ -16,7 +16,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { revokeToken, revokeTokensBulk } from '~/feature/token/services/tokens.service';
 import type { TokenFilterValues } from '~/feature/token/types/token-filters';
-import { tokenQueryKeys } from './queries';
 
 /**
  * Triggers revocation of a single token and refreshes cached lists afterwards.

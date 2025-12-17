@@ -12,29 +12,32 @@
  * or submit itself to any jurisdiction.
  */
 
-import { mockServices } from '~/feature/service/mocks/services.mock';
 import type { Service } from '~/feature/service/types/service';
 import type { ServiceRegistrationResult } from '~/feature/service/types/certificate';
 
 export async function fetchServiceById(serviceId: string): Promise<Service> {
-  const service = mockServices.find((item) => item.serviceId === serviceId);
-  if (!service) {
-    throw new Error('Service not found');
+  const response = await fetch(`/api/services/${serviceId}`);
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
   }
-  return service;
+  const data: Service = await response.json();
+  return data;
 }
 
 export async function confirmServiceCertificateRenewal(serviceId: string, certificateId: string): Promise<ServiceRegistrationResult> {
-  await delay(500);
-  return {
-    certificateId,
-    serviceId,
-    status: 'registered',
-  };
+  const response = await fetch(`/api/certificate/renew`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ serviceId, certificateId }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  const data: ServiceRegistrationResult = await response.json();
+  return data;
 }
 
-function delay(ms: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}

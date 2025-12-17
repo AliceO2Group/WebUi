@@ -38,7 +38,7 @@ export function useRouteBanActions() {
       content: (
         <Stack spacing={1}>
           <Typography variant="body2">
-            Do you want to ban communication from <strong>{route.serviceFrom}</strong> to <strong>{route.serviceTo}</strong>?
+            Do you want to ban communication from <strong>{route.serviceFrom.commonName}</strong> to <strong>{route.serviceTo.commonName}</strong>?
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Permissions: {route.permissions.join(', ')}

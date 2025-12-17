@@ -245,13 +245,14 @@ http.get('/services/:serviceId', (req, res) => {
 
 http.post('/certificate', (req, res) => {
   const {certificateBase64} = req.body;
+
   if (!certificateBase64) {
-    res.status(400).json({ error: 'certificateBase64 is required' });
+    res.status(200).json({ error: 'certificateBase64 is required' });
     return;
   }
 
   // reading certificate 
-  bytes = Buffer.from(certificateBase64, 'base64');
+  const bytes = Buffer.from(certificateBase64, 'base64');
   const cert = new X509Certificate(bytes);
 
 
@@ -265,7 +266,7 @@ http.post('/certificate', (req, res) => {
     validFrom: cert.validFrom,
     validTo: cert.validTo,
     fingerprint: cert.fingerprint,
-    status: 'pending' // TODO: implement status management
+    status: 'pending' // TODO: implement certificate status management
   });
   
 }, { public: true });
@@ -273,23 +274,34 @@ http.post('/certificate', (req, res) => {
 http.post('/certificate/register', (req, res) => {
   // its certifacateId from /certificate endpoint
   const {certificateId} = req.body;
+
   if (!certificateId) {
     res.status(400).json({ error: 'certificateId is required' });
     return;
   }
 
-  return {success: true}; // system is registered mock
-})
+  return res.send({success: true}); // system is registered mock
+}, { public: true });
 
 http.post('/certificate/renew', (req, res) => {
   // its certifacateId from /certificate endpoint
-  const {certificateId} = req.body;
+  // you need to update service data: issuedAt, expiresAt
+  // and also update certificate in vault
+  const {
+    certificateId,
+    serviceId
+  } = req.body;
   if (!certificateId) {
     res.status(400).json({ error: 'certificateId is required' });
     return;
   }
 
-  return {success: true}; // system is renewing (changing) certificate
+  return res.send({
+    success: true,
+    certificateId,
+    serviceId,
+    status: 'renewed'
+  }); // system is renewing (changing) certificate
 }, { public: true });
 
 http.get('/routes', (req, res) => {
@@ -300,19 +312,25 @@ http.get('/routes', (req, res) => {
     serviceTo,
   } = req.query; // Changed to query
 
-  if (serviceFrom) {
-    filteredRoutes = filteredRoutes.filter(route => 
-      route.serviceFrom?.serviceId === serviceFrom || 
-      route.serviceFrom?.commonName === serviceFrom
-    );
-  }
+      if (serviceFrom) {
+      const serviceFromFilters = serviceFrom.split(',');
+      if (serviceFromFilters.length > 0) {
+        filteredRoutes = filteredRoutes.filter(route => 
+          serviceFromFilters.includes(route.serviceFrom?.serviceId) || 
+          serviceFromFilters.includes(route.serviceFrom?.commonName)
+        );
+      }
+    }
 
-  if (serviceTo) {
-    filteredRoutes = filteredRoutes.filter(route => 
-      route.serviceTo?.serviceId === serviceTo || 
-      route.serviceTo?.commonName === serviceTo
-    );
-  }
+    if (serviceTo) {
+      const serviceToFilters = serviceTo.split(',');
+      if (serviceToFilters.length > 0) {
+        filteredRoutes = filteredRoutes.filter(route => 
+          serviceToFilters.includes(route.serviceTo?.serviceId) || 
+          serviceToFilters.includes(route.serviceTo?.commonName)
+        );
+      }
+    }
 
   // important to return id of route for banning/deleting (its the same)
   return res.status(200).json(filteredRoutes);
@@ -320,8 +338,8 @@ http.get('/routes', (req, res) => {
 
 http.post('/routes', (req, res) => {
   const {
-    serviceFrom, // id
-    serviceTo, // id
+    serviceFromId: serviceFrom, // id
+    serviceToId: serviceTo, // id
     permissions
   } = req.body;
 
@@ -354,10 +372,118 @@ http.post('/routes', (req, res) => {
 // to revoking token by id or by filtering criteria
 
 http.delete('/routes/:routeId', (req, res) =>{
+  const index = mockServiceRoutes.findIndex(route => route.routeId === req.params.routeId);
+  if (index !== -1) {
+    mockServiceRoutes.splice(index, 1);
+  }
+
+  
   return res.send({success: true});
 }, { public: true });
 
 // bulk delete
-http.delete('/routes', (req, res) =>{
+http.delete('/routes', (req, res) => {
+  
+  let {
+    serviceFrom,
+    serviceTo
+  } = req.query;
+
+  
+  serviceFrom = serviceFrom ? serviceFrom.split(',') : [];
+  serviceTo = serviceTo ? serviceTo.split(',') : [];
+
+  for (let i = mockServiceRoutes.length - 1; i >= 0; i--) {
+    const route = mockServiceRoutes[i];
+    if (
+      serviceFrom.includes(route.serviceFrom?.serviceId || '') ||
+      serviceFrom.includes(route.serviceFrom?.commonName || '') ||
+      serviceTo.includes(route.serviceTo?.serviceId || '') ||
+      serviceTo.includes(route.serviceTo?.commonName || '')
+    ) {
+      mockServiceRoutes.splice(i, 1);
+    }
+  }
+
+  return res.send({ success: true });
+}, { public: true });
+
+
+http.delete('/tokens/:tokenId', (req, res) => {
+  const {
+    tokenId
+  } = req.params;
+  let revokedToken = mockTokens.find(token => token.tokenId === tokenId);
+  if (!revokedToken) {
+    return res.status(404).send({ error: 'Token not found' });
+  }
+  revokedToken.status = 'not-active';
   return res.send({success: true});
+}, { public: true });
+
+// bulk delete
+http.delete('/tokens', (req, res) => {
+
+   const {
+      serviceFrom,
+      serviceTo,
+      issuedAfter,
+      issuedBefore,
+      expiresAfter,
+      expiresBefore,
+      status,
+    } = req.query;
+
+    let filteredTokens = [...mockTokens];
+
+    if (serviceFrom) {
+      const serviceFromFilters = serviceFrom.split(',');
+      if (serviceFromFilters.length > 0) {
+        filteredTokens = filteredTokens.filter(token => 
+          serviceFromFilters.includes(token.serviceFrom?.serviceId) || 
+          serviceFromFilters.includes(token.serviceFrom?.commonName)
+        );
+      }
+    }
+
+    if (serviceTo) {
+      const serviceToFilters = serviceTo.split(',');
+      if (serviceToFilters.length > 0) {
+        filteredTokens = filteredTokens.filter(token => 
+          serviceToFilters.includes(token.serviceTo?.serviceId) || 
+          serviceToFilters.includes(token.serviceTo?.commonName)
+        );
+      }
+    }
+
+    if (issuedAfter) {
+      filteredTokens = filteredTokens.filter(token => new Date(token.iat) >= new Date(issuedAfter));
+    }
+
+    if (issuedBefore) {
+      filteredTokens = filteredTokens.filter(token => new Date(token.iat) <= new Date(issuedBefore));
+    }
+
+    if (expiresAfter) {
+      filteredTokens = filteredTokens.filter(token => new Date(token.exp) >= new Date(expiresAfter));
+    }
+
+    if (expiresBefore) {
+      filteredTokens = filteredTokens.filter(token => new Date(token.exp) <= new Date(expiresBefore));
+    }
+
+    if (status) {
+      const statusFilters = Array.isArray(status) ? status : [status];
+      if (statusFilters.length > 0) {
+        filteredTokens = filteredTokens.filter(token => statusFilters.includes(token.status));
+      }
+    }
+
+    mockTokens.forEach(token => {
+      if (filteredTokens.includes(token)) {
+        token.status = 'not-active';
+      }
+    })
+
+   return res.send({success: true});
 }, { public: true })

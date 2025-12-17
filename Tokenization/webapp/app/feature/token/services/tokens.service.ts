@@ -66,33 +66,65 @@ export async function fetchTokens(filters: TokenFilterValues | null, status?: To
  * Returns a single token by its identifier.
  */
 export async function fetchTokenById(tokenId: string): Promise<Token> {
-  const token = mockTokens.find((item) => item.tokenId === tokenId);
-  if (!token) {
-    throw new Error('Token not found');
-  }
+  const res = await fetch(`/api/tokens/${tokenId}`);
+  const token: Token =  await res.json();
   return token;
 }
 
 export async function fetchTokenLogs(tokenId: string): Promise<TokenLogEntry[]> {
-  if (mockActiveTokenLogs[tokenId]) {
-    return mockActiveTokenLogs[tokenId];
-  }
-  if (mockArchivedTokenLogs[tokenId]) {
-    return mockArchivedTokenLogs[tokenId];
-  }
-  return [];
+  const res = await fetch(`/api/tokens/${tokenId}/logs`);
+  const logs: TokenLogEntry[] =  await res.json();
+  return logs;
 }
 
 /**
  *
  */
 export async function revokeToken(tokenId: string) {
-  return { tokenId };
+  const res = await fetch(`/api/tokens/${tokenId}`, {
+    method: 'DELETE',
+  });
+  const success = await res.json();
+  return success;
 }
 
 /**
  *
  */
 export async function revokeTokensBulk(filters: TokenFilterValues) {
-  return { count: mockTokens.length };
+  const queryString = new URLSearchParams();
+
+  queryString.append('status', 'active');
+
+  if (filters) {
+    if (filters.serviceFrom.length > 0) {
+      queryString.append('serviceFrom', filters.serviceFrom.map((service: any) => service.value ).join(','));
+    }
+    if (filters.serviceTo.length > 0) {
+      queryString.append('serviceTo', filters.serviceTo.map((service: any) => service.value ).join(','));
+    }
+    if (filters.expiresBefore) {
+      queryString.append('expiresBefore', filters.expiresBefore);
+    }
+    if (filters.expiresAfter) {
+      queryString.append('expiresAfter', filters.expiresAfter);
+    }
+    if (filters.issuedBefore) {
+      queryString.append('issuedBefore', filters.issuedBefore);
+    }
+    if (filters.issuedAfter) {
+      queryString.append('issuedAfter', filters.issuedAfter);
+    }
+    if (filters.ordering.length > 0) {
+      queryString.append('ordering', filters.ordering.map((order) => `${order.field}:${order.direction}`).join(','));
+    }
+  }
+  
+  const url = `/api/tokens?${queryString.toString()}`;
+
+  const res = await fetch(url, {
+    method: 'DELETE',
+  });
+  const success = await res.json();
+  return success;
 }

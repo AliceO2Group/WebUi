@@ -13,6 +13,7 @@
  */
 
 import { useMemo } from 'react';
+import { Link } from 'react-router';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Paper from '@mui/material/Paper';
@@ -42,12 +43,12 @@ export function ServiceRouteTable({ routes, totalCount, title = 'Service routes'
       {
         key: 'serviceFrom',
         header: 'Service from',
-        render: (route) => route.serviceFrom,
+        render: (route) => <Link to={`/services/${route.serviceFrom.serviceId}`}>{route.serviceFrom.commonName}</Link>
       },
       {
         key: 'serviceTo',
         header: 'Service to',
-        render: (route) => route.serviceTo,
+        render: (route) => <Link to={`/services/${route.serviceTo.serviceId}`}>{route.serviceTo.commonName}</Link>,
       },
       {
         key: 'permissions',
