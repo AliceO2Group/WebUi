@@ -144,6 +144,7 @@ const toolbarEditModeTab = (layout, tab, i) => {
   const selectTab = () => layout.selectTab(i);
 
   const dragActiveClass = layout.isDragging ? 'pointer-events-auto' : '';
+  const disableButtonsOnDragClass = layout.isDragging ? 'pointer-events-none' : '';
   const dropZoneClass = (position) => layout.dropTargetId === tab.id && layout.position === position ? 'active' : '';
 
   return [
@@ -161,6 +162,7 @@ const toolbarEditModeTab = (layout, tab, i) => {
           layout.clearDropTarget();
           layout.stopDragging();
         },
+        ondragend: () => layout.stopDragging(),
       },
       [
         h(
@@ -198,9 +200,9 @@ const toolbarEditModeTab = (layout, tab, i) => {
             '',
           ),
           selected && [
-            editTabButton(layout, linkClass, tab, i),
+            editTabButton(layout, `${disableButtonsOnDragClass} ${linkClass}`, tab, i),
             resizeGridTabDropDown(layout, tab),
-            deleteTabButton(layout, linkClass, i),
+            deleteTabButton(layout, `${disableButtonsOnDragClass} ${linkClass}`, i),
           ],
         ].flat().filter(Boolean),
       ],

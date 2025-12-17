@@ -300,96 +300,8 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
   await testParent.test(
     'should reorder tabs via drag and drop in edit mode',
-    { timeout: Infinity },
+    { timeout },
     async () => {
-      const installMouseHelper = async (page) => {
-        await page.evaluate(() => {
-          const box = document.createElement('puppeteer-mouse-pointer');
-          const style = document.createElement('style');
-          style.innerHTML = `
-            puppeteer-mouse-pointer {
-              pointer-events: none;
-              position: fixed; /* Changed to FIXED to match Puppeteer's viewport logic */
-              top: 0;
-              z-index: 999999;
-              left: 0;
-              width: 20px;
-              height: 20px;
-              background: rgba(255, 0, 0, 0.8);
-              border: 3px solid white;
-              border-radius: 50%;
-              margin: -10px 0 0 -10px;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            puppeteer-mouse-pointer.down {
-              background: rgba(0, 255, 0, 0.9);
-              transform: scale(1.2);
-            }
-          `;
-          document.head.appendChild(style);
-          document.body.appendChild(box);
-
-          document.addEventListener('mousemove', event => {
-            // clientX/Y is relative to the viewport, matching Puppeteer's mouse
-            box.style.left = event.clientX + 'px';
-            box.style.top = event.clientY + 'px';
-          }, true);
-
-          document.addEventListener('mousedown', () => {
-            box.classList.add('down');
-          }, true);
-
-          document.addEventListener('mouseup', () => {
-            box.classList.remove('down');
-          }, true);
-        });
-      };
-
-      const drawDebugDot = async (page, coord, label = '', color = 'red') => {
-        await page.evaluate(({ x, y, label, color }) => {
-          const dot = document.createElement('div');
-          dot.className = 'debug-dot';
-          dot.style.cssText = `
-            position: fixed;
-            left: ${x}px;
-            top: ${y}px;
-            width: 12px;
-            height: 12px;
-            background-color: ${color};
-            border: 2px solid white;
-            border-radius: 50%;
-            z-index: 1000000;
-            pointer-events: none;
-            margin-left: -6px;
-            margin-top: -6px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.5);
-          `;
-
-          if (label) {
-            const text = document.createElement('span');
-            text.textContent = label;
-            text.style.cssText = `
-              position: absolute;
-              top: 15px;
-              left: 50%;
-              transform: translateX(-50%);
-              background: black;
-              color: white;
-              padding: 2px 5px;
-              font-size: 10px;
-              border-radius: 3px;
-              white-space: nowrap;
-            `;
-            dot.appendChild(text);
-          }
-
-          document.body.appendChild(dot);
-        }, { x: coord.x, y: coord.y, label, color });
-      };
-
-      await installMouseHelper(page);
-
       const originalTabNames = await page.$$eval('#btn-tab', (elements) =>
         elements.map((element) => element.textContent.trim()));
 
@@ -398,9 +310,6 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
       const sourceCenter = await getElementCenter(page, sourceTabSelector);
       const targetCenter = await getElementCenter(page, targetZoneSelector);
-
-      await drawDebugDot(page, sourceCenter, 'Source', 'blue');
-      await drawDebugDot(page, targetCenter, 'Target', 'orange');
 
       await page.mouse.move(sourceCenter.x, sourceCenter.y);
       await page.mouse.down();
