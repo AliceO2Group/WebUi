@@ -253,9 +253,7 @@ const treeRowElement = (key, title, onclick, icon, className = '', style = {}) =
     onclick,
     class: className,
   }, [
-    h('td.highlight.flex-row.items-center.g1', {
-      style,
-    }, [
+    h('td.highlight.flex-row.items-center.g1', { style }, [
       icon(),
       title,
     ]),
