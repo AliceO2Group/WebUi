@@ -152,9 +152,9 @@
   }
 }
 
-.cursor-pointer {
-  cursor: pointer;
-}
+.cursor-pointer { cursor: pointer; }
+.cursor-grab { cursor: grab; }
+.cursor-inherit { cursor: inherit; }
 
 .header-layout {
   &.edit {

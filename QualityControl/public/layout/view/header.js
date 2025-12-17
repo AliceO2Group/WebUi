@@ -148,7 +148,7 @@ const toolbarEditModeTab = (layout, tab, i) => {
 
   return [
     h(
-      '.btn-group.flex-fixed.relative',
+      '.btn-group.flex-fixed.relative.cursor-grab',
       {
         draggable: true,
         ondragstart: (e) => {
@@ -162,7 +162,11 @@ const toolbarEditModeTab = (layout, tab, i) => {
         },
       },
       [
-        h('button.br-pill.ph2.btn.btn-tab.whitespace-nowrap', { class: linkClass, onclick: selectTab }, tab.name),
+        h(
+          'button.br-pill.ph2.btn.btn-tab.whitespace-nowrap',
+          { id: 'btn-tab', class: `${linkClass} cursor-inherit`, onclick: selectTab },
+          tab.name,
+        ),
         [
           h(
             '.drop-zone.before',
