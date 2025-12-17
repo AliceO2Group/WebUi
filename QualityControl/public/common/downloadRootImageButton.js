@@ -14,6 +14,7 @@
 
 import { h, imagE } from '/js/src/index.js';
 import { downloadRoot, getFileExtensionFromName } from './utils.js';
+import { isObjectOfTypeChecker } from '../../library/qcObject/utils.js';
 
 /**
  * Download root image button.
@@ -24,7 +25,7 @@ import { downloadRoot, getFileExtensionFromName } from './utils.js';
  */
 export function downloadRootImageButton(filename, root, drawingOptions = []) {
   const filetype = getFileExtensionFromName(filename);
-  return root.fName && h(`button.btn.download-root-image-${filetype}-button`, {
+  return !isObjectOfTypeChecker(root) && h(`button.btn.download-root-image-${filetype}-button`, {
     title: `Download as ${filetype.toUpperCase()}`,
     onclick: async (event) => {
       try {
