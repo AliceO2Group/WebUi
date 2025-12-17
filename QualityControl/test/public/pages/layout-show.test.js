@@ -302,6 +302,9 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should reorder tabs via drag and drop in edit mode',
     { timeout },
     async () => {
+      const originalTabNames = await page.$$eval('#btn-tab', (elements) =>
+        elements.map((element) => element.textContent.trim()));
+
       const sourceTabSelector = '.btn-group.flex-fixed.relative:nth-child(1)';
       const targetZoneSelector = '.btn-group.flex-fixed.relative:nth-child(2) .drop-zone.after';
 
@@ -322,7 +325,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const tabNames = await page.$$eval('#btn-tab', (elements) =>
         elements.map((element) => element.textContent.trim()));
 
-      strictEqual(tabNames[1], 'main');
+      strictEqual(tabNames[1], originalTabNames[0]);
     }
   );
 
