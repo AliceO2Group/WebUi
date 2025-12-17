@@ -150,6 +150,7 @@ const toolbarEditModeTab = (layout, tab, i) => {
     h(
       '.btn-group.flex-fixed.relative.cursor-grab',
       {
+        title: 'Drag the tab to re-arrange them',
         draggable: true,
         ondragstart: (e) => {
           e.dataTransfer.setData('text/plain', tab.id);
