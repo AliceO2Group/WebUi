@@ -314,15 +314,13 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       await page.mouse.move(sourceCenter.x, sourceCenter.y);
       await page.mouse.down();
 
-      await delay(100);
-
       // We add 'steps' to make the move smoother, which helps trigger event
       await page.mouse.move(targetCenter.x, targetCenter.y, { steps: 10 });
 
+      console.log('before');
       // Wait a moment for the 'active' class to appear in the UI
       await page.waitForSelector('.drop-zone.after.active');
-
-      await delay(100);
+      console.log('after');
 
       await page.mouse.up();
 
