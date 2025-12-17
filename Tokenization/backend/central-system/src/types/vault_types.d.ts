@@ -17,36 +17,36 @@ export interface SignPayload {
   input: string;
 }
 
-// Define the structure of the Vault read response
-export interface VaultReadResponse {
+type KvObject = Record<string, unknown>;
+// Define the structure of the Vault KV read response`
+export interface VaultReadResponse<
+  TData extends KvObject = KvObject,
+  TCustomMeta extends KvObject = KvObject
+> {
   data: {
-    data: {
-      foo: string;
-    };
+    data: TData;
     metadata: {
       created_time: string;
-      custom_metadata: {
-        owner: string;
-        mission_critical: string;
-      };
+      custom_metadata: TCustomMeta;
       deletion_time: string;
       destroyed: boolean;
       version: number;
+      [key: string]: unknown;
     };
   };
 }
 
-// Define the structure of the Vault metadata response
-export interface VaultMetadataResponse {
+// Define the structure of the Vault KV metadata response
+export interface VaultMetadataResponse<
+  TCustomMeta extends KvObject = KvObject
+> {
   data: {
     created_time: string;
-    custom_metadata: {
-      owner: string;
-      mission_critical: string;
-    };
+    custom_metadata: TCustomMeta;
     deletion_time: string;
     destroyed: boolean;
     version: number;
+    [key: string]: unknown;
   };
 }
 

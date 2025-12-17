@@ -116,7 +116,7 @@ services:
       VAULT_AUTH_METHOD: cert
       VAULT_ROLE: central-system
 
-    command: ['npm', 'run', 'test:vault:integration']
+    command: ['npm', 'run', 'test:integration']
     depends_on:
       vault-setup:
         condition: service_completed_successfully

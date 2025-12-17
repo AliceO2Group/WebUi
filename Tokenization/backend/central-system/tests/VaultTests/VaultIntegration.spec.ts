@@ -160,4 +160,17 @@ describe('VaultController - integration with Vault', () => {
     expect(signature.length).toBeGreaterThan(0);
     expect(signature).toContain('vault:');
   }, 20000);
+  it('has seeded KV entry for a known client (smoke test)', async () => {
+    const seededPath = '0x01';
+
+    const secret = await controller.getCredentialFromVault(seededPath);
+
+    const payload =
+      (secret as any).data?.data ?? (secret as any).data ?? secret;
+
+    expect(payload).toBeDefined();
+    expect(typeof payload).toBe('object');
+
+    expect(payload.certificate).not.toBeNull();
+  }, 20000);
 });
