@@ -305,7 +305,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const originalTabNames = await page.$$eval('#btn-tab', (elements) =>
         elements.map((element) => element.textContent.trim()));
 
-      const sourceTabSelector = '.btn-group.flex-fixed.relative:nth-child(1) > .btn-tab';
+      const sourceTabSelector = '.btn-group.flex-fixed.relative:nth-child(1)';
       const targetZoneSelector = '.btn-group.flex-fixed.relative:nth-child(2) select';
 
       const sourceCenter = await getElementCenter(page, sourceTabSelector);
