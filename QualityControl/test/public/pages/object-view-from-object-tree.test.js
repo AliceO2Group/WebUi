@@ -12,6 +12,8 @@
  */
 
 import { strictEqual } from 'node:assert';
+import { delay } from '../../testUtils/delay.js';
+
 const OBJECT_VIEW_PAGE_PARAM = '?page=objectView';
 
 export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, testParent) => {
@@ -83,6 +85,91 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
       strictEqual(result.rootPlotClassList[1], 'jsroot-container');
 
       strictEqual(result.selectedObjectPath, path);
+    },
+  );
+
+  await testParent.test(
+    'should initially hide drawing options panel',
+    { timeout },
+    async () => {
+      const exists = await page.evaluate(() => Boolean(document.querySelector('#objectDrawingOptions')));
+      strictEqual(exists, false, 'Drawing options panel should be initially hidden');
+    },
+  );
+
+  await testParent.test(
+    'should show drawing options panel on click visibility toggle button',
+    { timeout },
+    async () => {
+      await page.click('.visibility-toggle-button');
+      await delay(100);
+      const exists = await page.evaluate(() => Boolean(document.querySelector('#objectDrawingOptions')));
+      strictEqual(exists, true, 'Drawing options panel should be visible after click visibility button');
+    },
+  );
+
+  await testParent.test(
+    'should display ignore defaults button',
+    { timeout },
+    async () => {
+      const objectId = '016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
+      const checkboxId = `${objectId}ignoreDefaults`;
+      const ignoreDefaultsCheckboxSelector = `#objectDrawingOptions input[id="${checkboxId}"]`;
+      const element = await page.evaluate((selector) =>
+        Boolean(document.querySelector(selector)), ignoreDefaultsCheckboxSelector);
+      strictEqual(element, true, 'Ignore Defaults checkbox not found');
+    },
+  );
+
+  await testParent.test(
+    'should have ignore defaults checkbox unchecked by default',
+    { timeout },
+    async () => {
+      const objectId = '016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
+      const checkboxId = `${objectId}ignoreDefaults`;
+      const ignoreDefaultsCheckboxSelector = `#objectDrawingOptions input[id="${checkboxId}"]`;
+      const checked = await page.evaluate((selector) =>
+        document.querySelector(selector).checked, ignoreDefaultsCheckboxSelector);
+      strictEqual(checked, false, 'Ignore Defaults checkbox should be unchecked by default');
+    },
+  );
+
+  await testParent.test(
+    'should update plot when a drawing option is toggled',
+    { timeout },
+    async () => {
+      const objectId = '016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
+      const plotSelector = '#ObjectPlot > div:nth-child(2) > div > div';
+      const gridXCheckboxSelector = `#objectDrawingOptions input[id="${objectId}gridx"]`;
+      const initialPlot = await page.waitForSelector(plotSelector, { timeout: 1000 });
+      const checkboxExists = await page.evaluate((selector) =>
+        Boolean(document.querySelector(selector)), gridXCheckboxSelector);
+      strictEqual(checkboxExists, true, '"gridx" drawing option checkbox not found');
+      const initalGridXEnabled = await page.evaluate((selector) =>
+        document.querySelector(selector).checked, gridXCheckboxSelector);
+
+      await page.click(gridXCheckboxSelector);
+      await delay(100);
+      const gridXEnabled = await page.evaluate((selector) =>
+        document.querySelector(selector).checked, gridXCheckboxSelector);
+      const afterTogglePlot = await page.waitForSelector(plotSelector, { timeout: 1000 });
+      const redrawn = await page.evaluate((a, b) => a.innerHTML !== b.innerHTML, initialPlot, afterTogglePlot);
+
+      strictEqual(checkboxExists, true, '"gridx" drawing option checkbox not found');
+      strictEqual(initalGridXEnabled, false, '"gridx" drawing option should be initially disabled');
+      strictEqual(gridXEnabled, true, '"gridx" drawing option should be enabled after toggle');
+      strictEqual(redrawn, true, 'JSRoot drawing was not redrawn on object info panel visibility change');
+    },
+  );
+
+  await testParent.test(
+    'should hide the drawing options panel on second click visibility toggle button',
+    { timeout },
+    async () => {
+      await page.click('.visibility-toggle-button');
+      await delay(100);
+      const exists = await page.evaluate(() => Boolean(document.querySelector('#objectDrawingOptions')));
+      strictEqual(exists, false, 'Drawing options panel should be hidden');
     },
   );
 
