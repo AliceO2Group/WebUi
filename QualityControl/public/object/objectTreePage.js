@@ -104,7 +104,7 @@ const drawPlot = (model, object) => {
       downloadRootImageButton(`${name}.png`, root, ['stat']),
       downloadButton({
         href: model.objectViewModel.getDownloadQcdbObjectUrl(id),
-        title: 'Download object',
+        title: 'Download root object',
       }),
       h(
         'a.btn#fullscreen-button',

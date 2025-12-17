@@ -64,7 +64,7 @@ export const objectInfoResizePanel = (model, tabObject) => {
       ),
       downloadButton({
         href: model.objectViewModel.getDownloadQcdbObjectUrl(objectRemoteData.payload.id),
-        title: 'Download object',
+        title: 'Download root object',
         id: `download-button-${objectRemoteData.payload.id}`,
       }),
     ],

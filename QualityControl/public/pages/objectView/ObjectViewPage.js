@@ -69,7 +69,7 @@ const objectPlotAndInfo = (objectViewModel) =>
             downloadRootImageButton(`${qcObject.name}.png`, qcObject.qcObject.root, drawingOptions),
             downloadButton({
               href: objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
-              title: 'Download object',
+              title: 'Download root object',
             }),
             visibilityToggleButton(
               {
