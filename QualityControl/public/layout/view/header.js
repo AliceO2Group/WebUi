@@ -44,17 +44,21 @@ const toolbarViewMode = (layout, filterModel) => {
   const { isOfficial, owner_id, name } = layoutItem;
 
   return {
-    centerCol: h('.flex-grow.text-center', [h('.header-layout', [tabViewLinks(layoutItem, layout)])]),
+    centerCol: h('b.f4.items-center.flex-grow.text-center', [isOfficial ? iconBadge() : '', layoutItem.name]),
     rightCol: h('.w-25.text-right.g2.flex-row.justify-end.flex-wrap', [
-      h('b.f4.items-center', [isOfficial ? iconBadge() : '', layoutItem.name]),
       ' ',
       filterPanelToggleButton(filterModel),
       h('.btn-group.flex-wrap', [
+        ' ',
         newLayoutButton(layout),
         jsonExportButton(layoutItem, name),
         layout.ownsLayout(owner_id) && [editDropdown(layout), deleteButton(layout)],
       ]),
     ]),
+    subRow: h(
+      '.flex-grow.text-center',
+      [h('.header-layout.header-layout-tabs', [tabViewLinks(layoutItem, layout)])],
+    ),
   };
 };
 
@@ -75,7 +79,7 @@ const toolbarViewModeTab = (layout, tab, i) => {
   const selectTab = () => layout.selectTab(i);
 
   return [
-    h('button.br-pill.ph2.btn.btn-tab', { id: `tab-${i}`, class: linkClass, onclick: selectTab }, tab.name),
+    h('button.br-pill.ph2.btn.btn-tab.flex-fixed', { id: `tab-${i}`, class: linkClass, onclick: selectTab }, tab.name),
     ' ',
   ];
 };
@@ -91,9 +95,9 @@ const toolbarEditMode = (layout) => {
   };
 
   return {
-    centerCol: h('.flex-grow.text-center', [
-      h('div', { class: 'header-layout' }, [
-        h('span', editTabLinks(layout)),
+    subRow: h('.flex-grow.text-center', [
+      h('.header-layout.edit', [
+        h('span.header-layout-tabs', editTabLinks(layout)),
         h('.btn-group', [
           tabBtn({
             title: 'Add new tab to this layout',
@@ -108,7 +112,7 @@ const toolbarEditMode = (layout) => {
         ]),
       ]),
     ]),
-    rightCol: h('.w-33.text-right.flex-row.justify-end', [
+    rightCol: h('.w-25.text-right.flex-row.justify-end', [
       h('input.form-control.form-inline', {
         type: 'text',
         value: layout.item.name,
@@ -140,8 +144,8 @@ const toolbarEditModeTab = (layout, tab, i) => {
   const selectTab = () => layout.selectTab(i);
 
   return [
-    h('.btn-group', [
-      h('button.br-pill.ph2.btn.btn-tab', { class: linkClass, onclick: selectTab }, tab.name),
+    h('.btn-group.flex-fixed', [
+      h('button.br-pill.ph2.btn.btn-tab.whitespace-nowrap', { class: linkClass, onclick: selectTab }, tab.name),
       selected && [
         editTabButton(layout, linkClass, tab, i),
         resizeGridTabDropDown(layout, tab),
@@ -159,8 +163,7 @@ const toolbarEditModeTab = (layout, tab, i) => {
  * @returns {vnode} - virtual node element
  */
 const resizeGridTabDropDown = (layout, tab) =>
-  h('select.form-control.select-tab', {
-    style: 'cursor: pointer',
+  h('select.form-control.select-tab.cursor-pointer', {
     title: 'Resize grid of the tab',
     onchange: (e) => layout.resizeGridByXY(e.target.value),
   }, [1, 2, 3, 4, 5].map((i) =>

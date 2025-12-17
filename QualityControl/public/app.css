@@ -155,3 +155,35 @@
 .cursor-pointer {
   cursor: pointer;
 }
+
+.header-layout {
+  &.edit {
+    display: flex;
+  }
+
+  /*
+   * Hack to center content: `justify-content: center` fails with `overflow-x: auto`
+   *  (see https://stackoverflow.com/questions/62288432/problem-when-using-with-overflow-x-scroll-and-justify-content-center).
+   * Adding flex: 1 auto-margins on ::before/::after centers the content correctly for scrolling.
+   */
+  &::after,
+  &::before {
+    content: '';
+    flex: 1;
+  }
+}
+
+.header-layout-tabs {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+}
+
+.flex-fixed {
+  flex: 0 0 auto;
+}
+
+.whitespace-nowrap {
+  white-space: nowrap;
+}
