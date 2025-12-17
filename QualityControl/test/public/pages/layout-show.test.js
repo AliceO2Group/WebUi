@@ -306,7 +306,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
         elements.map((element) => element.textContent.trim()));
 
       const sourceTabSelector = '.btn-group.flex-fixed.relative:nth-child(1) > .btn-tab';
-      const targetZoneSelector = '.btn-group.flex-fixed.relative:nth-child(2) .drop-zone.after';
+      const targetZoneSelector = '.btn-group.flex-fixed.relative:nth-child(2) select';
 
       const sourceCenter = await getElementCenter(page, sourceTabSelector);
       const targetCenter = await getElementCenter(page, targetZoneSelector);
