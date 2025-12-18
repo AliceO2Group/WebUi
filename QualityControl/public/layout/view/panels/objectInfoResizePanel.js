@@ -13,6 +13,7 @@
  */
 
 import { downloadButton } from '../../../common/downloadButton.js';
+import { isOnLeftSideOfViewport } from '../../../common/utils.js';
 import { defaultRowAttributes, qcObjectInfoPanel } from './../../../common/object/objectInfoCard.js';
 import { h, iconResizeBoth, info } from '/js/src/index.js';
 
@@ -24,9 +25,9 @@ import { h, iconResizeBoth, info } from '/js/src/index.js';
  * @returns {vnode} - virtual node element
  */
 export const objectInfoResizePanel = (model, tabObject) => {
-  const { name, id } = tabObject;
+  const { name } = tabObject;
   const { filterModel, router, object, services } = model;
-  const isSelectedOpen = object.selectedOpenName === id;
+  const isSelectedOpen = object.selectedOpenName === name;
   const objectRemoteData = services.object.objectsLoadedMap[name];
   let uri = `?page=objectView&objectId=${tabObject.id}&layoutId=${router.params.layoutId}`;
   Object.entries(filterModel.filterMap)
@@ -42,14 +43,14 @@ export const objectInfoResizePanel = (model, tabObject) => {
     }, [
       h('button.btn', {
         title: 'View details about histogram',
-        onclick: () => object.toggleInfoArea(id),
+        onclick: () => object.toggleInfoArea(name),
       }, info()),
       h(
         '.dropdown-menu',
         {
           style: 'right:0.1em; width: 35em;left: auto;',
           onupdate: (vnode) => {
-            if (object.isOnLeftSide(vnode.dom.parentElement)) {
+            if (isOnLeftSideOfViewport(vnode.dom.parentElement)) {
               vnode.dom.style.left = '0.1em';
               vnode.dom.style.right = 'auto';
             } else {

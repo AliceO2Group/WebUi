@@ -171,3 +171,22 @@ export const camelToTitleCase = (text) => {
   const titleCase = spaced.charAt(0).toUpperCase() + spaced.slice(1);
   return titleCase;
 };
+
+
+
+/**
+ * Determines whether the element is positioned on the left half of the viewport.
+ * This is used to decide which way a dropdown should anchor to stay within view.
+ * @param {HTMLElement} element - The DOM element (usually the button or container) to measure.
+ * @returns {boolean|undefined} Returns true if the element is on the left half of the window,
+ * false if it is on the right half, or undefined if no element is provided.
+ */
+export const isOnLeftSideOfViewport = (element) => {
+  if (!element) {
+    return;
+  }
+
+  const rect = element.getBoundingClientRect();
+  const isLeft = rect.left - rect.width < window.innerWidth / 2;
+  return isLeft;
+}
