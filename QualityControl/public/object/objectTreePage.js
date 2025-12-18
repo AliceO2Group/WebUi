@@ -56,15 +56,15 @@ export default (model) => {
             const objectsLoaded = object.list;
             const objectsToDisplay = objectsLoaded.filter((qcObject) =>
               qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
-            return [
+            return h('', [
               tableHeader(model.object),
               virtualTable(model, 'main', objectsToDisplay),
-            ];
+            ]);
           }
-          return [
+          return h('', [
             tableHeader(model.object),
             tableShow(model),
-          ];
+          ]);
         },
         Failure: () => null, // Notification is displayed
       })),
