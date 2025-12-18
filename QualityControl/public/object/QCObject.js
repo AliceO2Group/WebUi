@@ -652,27 +652,19 @@ export default class QCObject extends BaseViewModel {
   }
 
   /**
-   * Aligns a dropdown menu to the left or right side based on screen position.
-   * @param {Event} event - The click event from the button
-   * @returns {undefined}
+   * Determines whether the element is positioned on the left half of the viewport.
+   * This is used to decide which way a dropdown should anchor to stay within view.
+   * @param {HTMLElement} element - The DOM element (usually the button or container) to measure.
+   * @returns {boolean|undefined} Returns true if the element is on the left half of the window,
+   * false if it is on the right half, or undefined if no element is provided.
    */
-  alignInfoArea(event) {
-    const button = event.currentTarget;
-    const menu = button.nextElementSibling;
-
-    if (!menu) {
+  isOnLeftSide(element) {
+    if (!element) {
       return;
     }
 
-    const rect = button.getBoundingClientRect();
+    const rect = element.getBoundingClientRect();
     const isLeft = rect.left + rect.width / 2 < window.innerWidth / 2;
-
-    if (isLeft) {
-      menu.style.left = '0.1em';
-      menu.style.right = 'auto';
-    } else {
-      menu.style.right = '0.1em';
-      menu.style.left = 'auto';
-    }
+    return isLeft;
   }
 }

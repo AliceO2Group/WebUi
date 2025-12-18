@@ -35,21 +35,29 @@ export const objectInfoResizePanel = (model, tabObject) => {
       uri += `&${key}=${encodeURI(value)}`;
     });
   return h('.text-right.resize-element.item-action-row.flex-row.g1', {
-    style: 'display: none; padding: .25rem .25rem 0rem .25rem;',
+    style: 'visibility: hidden; padding: .25rem .25rem 0rem .25rem;',
   }, [
 
     h('.dropdown', { class: isSelectedOpen ? 'dropdown-open' : '',
     }, [
       h('button.btn', {
         title: 'View details about histogram',
-        onclick: (e) => {
-          object.alignInfoArea(e);
-          object.toggleInfoArea(id);
-        },
+        onclick: () => object.toggleInfoArea(id),
       }, info()),
       h(
         '.dropdown-menu',
-        { style: 'right:0.1em; width: 35em;left: auto;' },
+        {
+          style: 'right:0.1em; width: 35em;left: auto;',
+          oncreate: (vnode) => {
+            if (object.isOnLeftSide(vnode.dom.parentElement)) {
+              vnode.dom.style.left = '0.1em';
+              vnode.dom.style.right = 'auto';
+            } else {
+              vnode.dom.style.right = '0.1em';
+              vnode.dom.style.left = 'auto';
+            }
+          },
+        },
         objectRemoteData.isSuccess() &&
           h('.p1', qcObjectInfoPanel(objectRemoteData.payload, {}, defaultRowAttributes(model.notification))),
       ),
