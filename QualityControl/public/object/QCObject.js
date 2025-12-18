@@ -100,15 +100,12 @@ export default class QCObject extends BaseViewModel {
    * @returns {undefined}
    */
   toggleInfoArea(objectName) {
-    this.selectedOpen = !this.selectedOpen;
-    this.notify();
-    if (objectName) {
+    this.selectedOpenName = this.selectedOpenName === objectName ? null : objectName;
+
+    if (this.selectedOpenName && objectName) {
       if (!this.list) {
         this.selected = { name: objectName };
-      } else if (this.selectedOpen && this.list
-        && (this.selected && !this.selected.lastModified
-          || !this.selected)
-      ) {
+      } else {
         this.selected = this.list.find((object) => object.name === objectName);
       }
     }
@@ -652,5 +649,30 @@ export default class QCObject extends BaseViewModel {
       }
     }
     this.loadList();
+  }
+
+  /**
+   * Aligns a dropdown menu to the left or right side based on screen position.
+   * @param {Event} event - The click event from the button
+   * @returns {undefined}
+   */
+  alignInfoArea(event) {
+    const button = event.currentTarget;
+    const menu = button.nextElementSibling;
+
+    if (!menu) {
+      return;
+    }
+
+    const rect = button.getBoundingClientRect();
+    const isLeft = rect.left + rect.width / 2 < window.innerWidth / 2;
+
+    if (isLeft) {
+      menu.style.left = '0.1em';
+      menu.style.right = 'auto';
+    } else {
+      menu.style.right = '0.1em';
+      menu.style.left = 'auto';
+    }
   }
 }

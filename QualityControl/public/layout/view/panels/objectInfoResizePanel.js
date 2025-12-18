@@ -24,9 +24,9 @@ import { h, iconResizeBoth, info } from '/js/src/index.js';
  * @returns {vnode} - virtual node element
  */
 export const objectInfoResizePanel = (model, tabObject) => {
-  const { name } = tabObject;
+  const { name, id } = tabObject;
   const { filterModel, router, object, services } = model;
-  const isSelectedOpen = object.selectedOpen;
+  const isSelectedOpen = object.selectedOpenName === id;
   const objectRemoteData = services.object.objectsLoadedMap[name];
   let uri = `?page=objectView&objectId=${tabObject.id}&layoutId=${router.params.layoutId}`;
   Object.entries(filterModel.filterMap)
@@ -42,7 +42,10 @@ export const objectInfoResizePanel = (model, tabObject) => {
     }, [
       h('button.btn', {
         title: 'View details about histogram',
-        onclick: () => object.toggleInfoArea(name),
+        onclick: (e) => {
+          object.alignInfoArea(e);
+          object.toggleInfoArea(id);
+        },
       }, info()),
       h(
         '.dropdown-menu',
