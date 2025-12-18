@@ -92,6 +92,7 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
     'should set initial drawing options on plot',
     async () => {
       const path = 'qc/test/object/12';
+      const expectedDrawingOptions = ['hist', 'gridy', 'text'];
       await page.goto(`${url}?page=objectView&objectName=${path}`, { waitUntil: 'networkidle0' });
       const result = await page.evaluate(() => {
         const { drawingOptions } = globalThis.model.objectViewModel;
@@ -99,9 +100,8 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
         const fingerprint = plotElement.dataset.fingerprintData;
         return { fingerprint, drawingOptions };
       });
-      strictEqual(result.fingerprint.includes('hist'), true);
-      strictEqual(result.fingerprint.includes('gridy'), true);
-      strictEqual(result.fingerprint.includes('text'), true);
+      const allOptionsPresent = expectedDrawingOptions.every((option) => result.fingerprint.includes(option));
+      strictEqual(allOptionsPresent, true, 'Not all expected drawing options are present in the plot fingerprint');
     },
   );
 

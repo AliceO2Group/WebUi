@@ -410,6 +410,161 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
+    'should set drawing options from layout when loading an object from a layout',
+    { timeout },
+    async () => {
+      const layoutId = 'q12b8c22402408122e2f20dd';
+      const objectId = 'b12b8c25d5b49dbf80e81926';
+      const expectedDrawingOptions = ['logx', 'text'];
+      const expectedIgnoreDefaults = true;
+      await page.goto(
+        `${url}?page=objectView&objectId=${objectId}&layoutId=${layoutId}`,
+        { waitUntil: 'networkidle0' },
+      );
+      await delay(100);
+      const result = await page.evaluate(() => {
+        const { ignoreDefaults } = model.objectViewModel;
+        const { drawingOptions } = model.objectViewModel;
+        const plotElement = document.querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(1) > div');
+        const fingerprint = plotElement.dataset.fingerprintData;
+        return { fingerprint, drawingOptions, ignoreDefaults };
+      });
+
+      const ignoreDefaultsMatches = result.ignoreDefaults === expectedIgnoreDefaults;
+      const allOptionsPresent = expectedDrawingOptions.every((option) => result.fingerprint.includes(option));
+      strictEqual(ignoreDefaultsMatches, true, 'ignoreDefaults does not match expected value from layout');
+      strictEqual(allOptionsPresent, true, 'Not all expected drawing options are present in the plot fingerprint');
+    },
+  );
+
+  // await testParent.test(
+  //   'should -> load page=objectView and display a plot when objectId and layoutId are passed',
+  //   { timeout },
+  //   async () => {
+  //     const result = await page.evaluate(() => {
+  //       const title = document.querySelector('div div b').textContent;
+  //       const rootPlotClassList = document
+  //         .querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(1) > div').classList;
+  //       const selectedObjectPath = window.model.objectViewModel.selected.payload.path;
+  //       return {
+  //         title, rootPlotClassList, selectedObjectPath,
+  //       };
+  //     });
+  //     strictEqual(result.title, 'qc/test/object/12 (from layout: drawing-test)');
+  //     deepStrictEqual(result.rootPlotClassList, { 0: 'relative', 1: 'jsroot-container' });
+  //     strictEqual(result.selectedObjectPath, 'qc/test/object/12');
+  //   },
+  // );
+
+  await testParent.test(
+    'should initially hide drawing options panel',
+    { timeout },
+    async () => {
+      const exists = await page.evaluate(() => Boolean(document.querySelector('#objectDrawingOptions')));
+      strictEqual(exists, false, 'Drawing options panel should be initially hidden');
+    },
+  );
+
+  await testParent.test(
+    'should show drawing options panel on click visibility toggle button',
+    { timeout },
+    async () => {
+      await page.click('.visibility-toggle-button');
+      await delay(200);
+      const exists = await page.evaluate(() => Boolean(document.querySelector('#objectDrawingOptions')));
+      strictEqual(exists, true, 'Drawing options panel should be visible after click visibility button');
+    },
+  );
+
+  await testParent.test(
+    'should display checked ignore defaults button',
+    { timeout },
+    async () => {
+      const objectId = 'baffe0b2-826c-11ef-8f19-c0a80209250c';
+      const ignoreDefaultsCheckboxSelector = `#objectDrawingOptions input[id="${objectId}ignoreDefaults"]`;
+      const isChecked = await page.evaluate((selector) => {
+        const checkbox = document.querySelector(selector);
+        return checkbox ? checkbox.checked : null;
+      }, ignoreDefaultsCheckboxSelector);
+      strictEqual(isChecked, true, 'Ignore defaults checkbox should be checked based on layout setting');
+    },
+  );
+
+  await testParent.test(
+    'should set active checkboxes from layout display options when ignore defaults is true',
+    { timeout },
+    async () => {
+      const objectId = 'baffe0b2-826c-11ef-8f19-c0a80209250c';
+      const expectedDrawingOptions = ['logx', 'text'];
+      const activeOptions = await page.evaluate((id) => {
+        const checkboxes = Array.from(
+          document.querySelectorAll(`#objectDrawingOptions input[type="checkbox"][id^="${id}"]`),
+        );
+        return checkboxes
+          .filter((checkbox) => checkbox.checked)
+          .map((checkbox) => checkbox.id.replace(id, ''));
+      }, objectId);
+      deepStrictEqual(
+        activeOptions.sort(),
+        expectedDrawingOptions.sort(),
+        'Active drawing options do not match expected layout settings',
+      );
+    },
+  );
+
+  await testParent.test(
+    'should set active checkboxes from combined drawing options when ignore defaults is set to false',
+    { timeout },
+    async () => {
+      const objectId = 'baffe0b2-826c-11ef-8f19-c0a80209250c';
+      const expectedDrawingOptions = ['logx', 'text', 'hist', 'gridy'];
+      const ignoreDefaultsCheckboxSelector = `#objectDrawingOptions input[id="${objectId}ignoreDefaults"]`;
+
+      await page.click(ignoreDefaultsCheckboxSelector);
+      await delay(100);
+
+      const activeOptions = await page.evaluate((id) => {
+        const checkboxes = Array.from(
+          document.querySelectorAll(`#objectDrawingOptions input[type="checkbox"][id^="${id}"]`),
+        );
+        return checkboxes
+          .filter((checkbox) => checkbox.checked)
+          .map((checkbox) => checkbox.id.replace(id, ''));
+      }, objectId);
+      deepStrictEqual(
+        activeOptions.sort(),
+        expectedDrawingOptions.sort(),
+        'Active drawing options do not match expected layout settings',
+      );
+    },
+  );
+
+  await testParent.test(
+    'should have updated fingerprint after changing drawing options',
+    { timeout },
+    async () => {
+      const objectId = 'baffe0b2-826c-11ef-8f19-c0a80209250c';
+      const logxCheckboxSelector = `#objectDrawingOptions input[id="${objectId}logx"]`;
+
+      // Uncheck 'logx' option
+      await page.click(logxCheckboxSelector);
+      await delay(100);
+
+      const fingerprintIncludesLogx = await page.evaluate(() => {
+        const plotElement = document.querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(1) > div');
+        const fingerprint = plotElement.dataset.fingerprintData;
+        return fingerprint.includes('logx');
+      });
+
+      strictEqual(
+        fingerprintIncludesLogx,
+        false,
+        'Plot fingerprint should not include "logx" after unchecking the option',
+      );
+    },
+  );
+
+  await testParent.test(
     'should display an error when the JSROOT object fails to fetch due to a network failure',
     { timeout },
     async () => {

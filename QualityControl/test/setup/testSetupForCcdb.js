@@ -133,6 +133,9 @@ export const initializeNockForCcdb = () => {
     .get(`${CCDB_API_PATH_TREE}/object/1`)
     .reply(200, MOCK_OBJECT_IDENTIFICATION_RESPONSE)
 
+    .get(`${CCDB_API_PATH_TREE}/object/12`)
+    .reply(200, MOCK_OBJECT_12_IDENTIFICATION_RESPONSE)
+
     .get(`${CCDB_API_PATH_LATEST}/object/12`)
     .reply(200, MOCK_OBJECT_12_IDENTIFICATION_RESPONSE)
 
