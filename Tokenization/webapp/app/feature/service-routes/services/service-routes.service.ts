@@ -30,7 +30,6 @@ export type ServiceRouteRegistrationPayload = {
 export async function fetchServiceRoutes(_filters: ServiceRouteFilterValues | null): Promise<ServiceRoutesQueryResponse> {
   const queryString = new URLSearchParams();
    
-
   if(_filters) {
     if (_filters.serviceTo.length > 0) {
       const servicesTo = _filters.serviceTo.map(service => service.value).join(',');

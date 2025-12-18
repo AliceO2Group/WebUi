@@ -36,6 +36,11 @@ export async function uploadServiceCertificate(file: File): Promise<ServiceCerti
     },
     body: JSON.stringify({ 'certificateBase64': base64 }),
   });
+
+  if(!response.ok) {
+    throw Error('File extraction went wrong')
+  }
+
   const data = await response.json();
 
   return data;
