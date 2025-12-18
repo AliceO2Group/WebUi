@@ -539,6 +539,25 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
+    'should display unrecognized drawing options in drawing options panel',
+    { timeout },
+    async () => {
+      const nonRecognizedDrawingOptionSelector = '#objectDrawingOptions > div > div:nth-child(2';
+      const nonRecognizedDrawingOption = 'hist';
+      const nonRecognizedOptionsText = await page.evaluate((selector) => {
+        const element = document.querySelector(selector);
+        return element ? element.textContent : '';
+      }, nonRecognizedDrawingOptionSelector);
+
+      strictEqual(
+        nonRecognizedOptionsText.includes(nonRecognizedDrawingOption),
+        true,
+        'Non-recognized drawing options should be displayed in the drawing options panel',
+      );
+    },
+  );
+
+  await testParent.test(
     'should display an error when the JSROOT object fails to fetch due to a network failure',
     { timeout },
     async () => {
