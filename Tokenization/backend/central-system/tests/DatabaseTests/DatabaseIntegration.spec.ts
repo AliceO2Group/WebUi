@@ -11,8 +11,6 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-
-import { SequelizeDatabase } from '../../src/lib/database/SequelizeDatabase';
 import { db } from '../../dist/lib/database/Database.js';
 
 describe('Database - integration (seed verification)', () => {
