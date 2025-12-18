@@ -13,7 +13,6 @@
  */
 
 import { h } from '/js/src/index.js';
-import { iconArrowBottom, iconArrowTop } from '/js/src/icons.js';
 import { filterPanelToggleButton } from '../common/filters/filterViews.js';
 
 /**
@@ -41,21 +40,6 @@ export default function objectTreeHeader(qcObject, filterModel) {
 
     rightCol: h('.w-25.flex-row.items-center.g2.justify-end', [
       filterModel.isRunModeActivated ? null : filterPanelToggleButton(filterModel),
-      ' ',
-      h('.dropdown', {
-        id: 'sortTreeButton', title: 'Sort by', class: qcObject.sortBy.open ? 'dropdown-open' : '',
-      }, [
-        h('button.btn', {
-          title: 'Sort by',
-          onclick: () => qcObject.toggleSortDropdown(),
-        }, [qcObject.sortBy.title, ' ', qcObject.sortBy.icon]),
-        h('.dropdown-menu.text-left', [
-          sortMenuItem(qcObject, 'Name', 'Sort by name ASC', iconArrowTop(), 'name', 1),
-          sortMenuItem(qcObject, 'Name', 'Sort by name DESC', iconArrowBottom(), 'name', -1),
-
-        ]),
-      ]),
-      ' ',
     ]),
   };
 }

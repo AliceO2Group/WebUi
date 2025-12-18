@@ -47,7 +47,6 @@ export default class QCObject extends BaseViewModel {
       title: 'Name',
       order: 1,
       icon: iconArrowTop(),
-      open: false,
     };
 
     this.tree = new ObjectTree('database');
@@ -116,15 +115,6 @@ export default class QCObject extends BaseViewModel {
   }
 
   /**
-   * Toggle the display of the sort by dropdown
-   * @returns {undefined}
-   */
-  toggleSortDropdown() {
-    this.sortBy.open = !this.sortBy.open;
-    this.notify();
-  }
-
-  /**
    * Computes the final list of objects to be seen by user depending on search input from user
    * If any of those changes, this method should be called to update the outputs.
    * @returns {undefined}
@@ -189,7 +179,7 @@ export default class QCObject extends BaseViewModel {
 
     this._computeFilters();
 
-    this.sortBy = { field, title, order, icon, open: false };
+    this.sortBy = { field, title, order, icon };
     this.notify();
   }
 
@@ -253,7 +243,6 @@ export default class QCObject extends BaseViewModel {
       title: 'Name',
       order: 1,
       icon: iconArrowTop(),
-      open: false,
     };
     this._computeFilters();
 

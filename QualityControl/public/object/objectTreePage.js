@@ -19,7 +19,7 @@ import {
   iconCaretRight,
   iconResizeBoth,
   iconCaretBottom,
-  iconCircleX
+  iconCircleX,
 } from '/js/src/index.js';
 import { spinner } from '../common/spinner.js';
 import { draw } from '../common/object/draw.js';
@@ -28,6 +28,8 @@ import virtualTable from './virtualTable.js';
 import { defaultRowAttributes, qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
 import { downloadButton } from '../common/downloadButton.js';
 import { resizableDivider } from '../common/resizableDivider.js';
+import { SortDirectionsEnum } from '../common/enums/columnSort.enum.js';
+import { sortableTableHead } from '../common/sortButton.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -179,7 +181,19 @@ const statusBarRight = (model) => model.object.selected
  */
 const tableShow = (model) =>
   h('table.table.table-sm.text-no-select', [
-    h('thead', [h('tr', [h('th', 'Name')])]),
+    h('thead', [
+      h('tr', [
+        h('th', sortableTableHead({
+          order: model.object.sortBy.order,
+          icon: model.object.sortBy.icon,
+          label: 'Name',
+          sortOptions: [SortDirectionsEnum.ASC, SortDirectionsEnum.DESC],
+          onclick: (label, order, icon) => {
+            model.object.sortTree(label, 'name', order, icon)
+          }
+        }))
+      ])
+    ]),
     h('tbody', [treeRows(model)]),
   ])
 

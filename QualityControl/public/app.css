@@ -187,3 +187,20 @@
 .whitespace-nowrap {
   white-space: nowrap;
 }
+
+.sort-button {
+  .hover-icon {
+    display: none;
+    opacity: 0.6;
+  }
+
+  &:hover {
+    .current-icon {
+      display: none;
+    }
+
+    .hover-icon {
+      display: inline-block;
+    }
+  }
+}
