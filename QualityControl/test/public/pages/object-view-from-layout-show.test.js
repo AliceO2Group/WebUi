@@ -421,7 +421,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         `${url}?page=objectView&objectId=${objectId}&layoutId=${layoutId}`,
         { waitUntil: 'networkidle0' },
       );
-      // Click the toggle button to show the drawing options panel
+      // Click the toggle button to show object details panel containing drawing options visibility button
       await page.click('.chevron-button');
       await delay(100);
 
