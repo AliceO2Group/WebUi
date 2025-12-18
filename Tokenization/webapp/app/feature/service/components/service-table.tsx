@@ -30,9 +30,10 @@ export type ServicesTableProps = {
   onBulkBlock?: () => void;
   bulkBlockDisabled?: boolean;
   tableBodyMaxHeight?: number | string;
+  isLoading?: boolean;
 };
 
-export function ServicesTable({ services, totalCount, title = 'Services', onBlock, onBulkBlock, bulkBlockDisabled = false, tableBodyMaxHeight }: ServicesTableProps) {
+export function ServicesTable({ services, totalCount, title = 'Services', onBlock, onBulkBlock, bulkBlockDisabled = false, tableBodyMaxHeight, isLoading }: ServicesTableProps) {
   const showActionsColumn = Boolean(onBlock);
   const showBulkAction = Boolean(onBulkBlock);
 
@@ -96,6 +97,7 @@ export function ServicesTable({ services, totalCount, title = 'Services', onBloc
         getRowKey={(service) => service.serviceId}
         dense
         bodyMaxHeight={tableBodyMaxHeight}
+        isLoading={isLoading}
       />
     </Paper>
   );

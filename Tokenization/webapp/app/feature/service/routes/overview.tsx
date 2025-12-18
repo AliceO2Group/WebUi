@@ -57,7 +57,7 @@ export default function ServicesOverviewRoute() {
 				) : null}
 			</FiltersCard>
 
-			<ServicesTable services={services} totalCount={totalCount} />
+			<ServicesTable services={services} totalCount={totalCount} isLoading={servicesQuery.isLoading} />
 		</Stack>
 	);
 }

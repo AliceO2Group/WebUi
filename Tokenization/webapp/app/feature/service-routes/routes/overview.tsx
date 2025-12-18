@@ -82,6 +82,7 @@ export default function ServiceRoutesOverviewRoute() {
 							onBan={handleBan}
 							onBulkBan={handleBulkBan}
 							bulkBanDisabled={!canBulkBan}
+							isLoading={routesQuery.isLoading}
 						/>
 					</TableSection>
 				

@@ -63,6 +63,7 @@ export default function ArchivedTokensRoute() {
         tokens={tokensData}
         totalCount={tokensData.length}
         title="Archived tokens"
+        isLoading={tokensQuery.isLoading}
       />
     </Stack>
   );

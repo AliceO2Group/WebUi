@@ -32,9 +32,10 @@ export type ServiceRouteTableProps = {
   onBulkBan?: () => void;
   bulkBanDisabled?: boolean;
   tableBodyMaxHeight?: number | string;
+  isLoading?: boolean;
 };
 
-export function ServiceRouteTable({ routes, totalCount, title = 'Service routes', onBan, onBulkBan, bulkBanDisabled = false, tableBodyMaxHeight }: ServiceRouteTableProps) {
+export function ServiceRouteTable({ routes, totalCount, title = 'Service routes', onBan, onBulkBan, bulkBanDisabled = false, tableBodyMaxHeight, isLoading }: ServiceRouteTableProps) {
   const showActionsColumn = Boolean(onBan);
   const showBulkAction = Boolean(onBulkBan);
 
@@ -95,6 +96,7 @@ export function ServiceRouteTable({ routes, totalCount, title = 'Service routes'
         getRowKey={(route) => route.routeId}
         dense
         bodyMaxHeight={tableBodyMaxHeight}
+        isLoading={isLoading}
       />
     </Paper>
   );

@@ -82,6 +82,7 @@ export default function TokensOverviewRoute() {
         onRevoke={handleRevoke}
         onBulkRevoke={handleBulkRevoke}
         bulkRevokeDisabled={!canBulkRevoke}
+        isLoading={tokensQuery.isLoading}
       />
     </Stack>
   );
