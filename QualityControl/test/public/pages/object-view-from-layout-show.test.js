@@ -421,7 +421,10 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         `${url}?page=objectView&objectId=${objectId}&layoutId=${layoutId}`,
         { waitUntil: 'networkidle0' },
       );
+      // Click the toggle button to show the drawing options panel
+      await page.click('.chevron-button');
       await delay(100);
+
       const result = await page.evaluate(() => {
         const { ignoreDefaults } = model.objectViewModel;
         const { drawingOptions } = model.objectViewModel;
@@ -436,25 +439,6 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       strictEqual(allOptionsPresent, true, 'Not all expected drawing options are present in the plot fingerprint');
     },
   );
-
-  // await testParent.test(
-  //   'should -> load page=objectView and display a plot when objectId and layoutId are passed',
-  //   { timeout },
-  //   async () => {
-  //     const result = await page.evaluate(() => {
-  //       const title = document.querySelector('div div b').textContent;
-  //       const rootPlotClassList = document
-  //         .querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(1) > div').classList;
-  //       const selectedObjectPath = window.model.objectViewModel.selected.payload.path;
-  //       return {
-  //         title, rootPlotClassList, selectedObjectPath,
-  //       };
-  //     });
-  //     strictEqual(result.title, 'qc/test/object/12 (from layout: drawing-test)');
-  //     deepStrictEqual(result.rootPlotClassList, { 0: 'relative', 1: 'jsroot-container' });
-  //     strictEqual(result.selectedObjectPath, 'qc/test/object/12');
-  //   },
-  // );
 
   await testParent.test(
     'should initially hide drawing options panel',
