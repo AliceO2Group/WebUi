@@ -64,7 +64,7 @@ export const sortableTableHead = ({
 
   return h('button.btn.sort-button', { onclick: () => onclick(label, nextSortOrder, hoverIcon) }, [
     label,
-    h('span.icon-container', [
+    h('span.icon-container.mh1', [
       h('span.current-icon', [order != SortDirectionsEnum.NONE ? icon : undefined]),
       h('span.hover-icon', [getSortIcon(nextSortOrder)])
     ])
