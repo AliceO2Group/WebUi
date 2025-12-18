@@ -408,7 +408,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       );
     },
   );
-
+,
   await testParent.test(
     'should set drawing options from layout when loading an object from a layout',
     { timeout },
