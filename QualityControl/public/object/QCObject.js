@@ -664,7 +664,7 @@ export default class QCObject extends BaseViewModel {
     }
 
     const rect = element.getBoundingClientRect();
-    const isLeft = rect.left + rect.width / 2 < window.innerWidth / 2;
+    const isLeft = rect.left - rect.width < window.innerWidth / 2;
     return isLeft;
   }
 }

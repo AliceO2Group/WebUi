@@ -48,7 +48,7 @@ export const objectInfoResizePanel = (model, tabObject) => {
         '.dropdown-menu',
         {
           style: 'right:0.1em; width: 35em;left: auto;',
-          oncreate: (vnode) => {
+          onupdate: (vnode) => {
             if (object.isOnLeftSide(vnode.dom.parentElement)) {
               vnode.dom.style.left = '0.1em';
               vnode.dom.style.right = 'auto';
