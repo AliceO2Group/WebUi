@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
+import { SortDirectionsEnum } from '../common/enums/columnSort.enum.js';
+import { sortableTableHead } from '../common/sortButton.js';
 import { h, iconBarChart } from '/js/src/index.js';
 
 let ROW_HEIGHT = 33.6;
@@ -102,7 +104,15 @@ const objectFullRow = (model, item, location) =>
 const tableHeader = () =>
   h('table.table.table-sm.text-no-select', {
     style: 'margin-bottom:0',
-  }, h('thead', [h('tr', [h('th', 'Name')])]));
+  }, h('thead', [h('tr', [h('th', sortableTableHead({
+    order: model.object.sortBy.order,
+    icon: model.object.sortBy.icon,
+    label: 'Name',
+    sortOptions: [SortDirectionsEnum.ASC, SortDirectionsEnum.DESC],
+    onclick: (label, order, icon) => {
+      model.object.sortTree(label, 'name', order, icon)
+    }
+  }))])]));
 
 /**
  * Set styles of the floating table and its position inside the big div .tableLogsContentPlaceholder
