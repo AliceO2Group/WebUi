@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import { log } from 'console';
 import { SequelizeDatabase } from './SequelizeDatabase.js';
 import { LogManager } from '@aliceo2/web-ui';
 

@@ -249,7 +249,7 @@ export class VaultController {
 
   /**
    *  @description Registers the event handlers for vault-related operations.
-   *  This method sets up handlers for signing tokens, logging in, renewing tokens, encyption,
+   *  This method sets up handlers for signing tokens, logging in, renewing tokens, encryption,
    *  and managing credentials in the vault.
    */
   public register() {

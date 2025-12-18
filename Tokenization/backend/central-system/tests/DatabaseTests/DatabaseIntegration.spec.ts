@@ -16,30 +16,7 @@ import { SequelizeDatabase } from '../../src/lib/database/SequelizeDatabase';
 import { db } from '../../dist/lib/database/Database.js';
 
 describe('Database - integration (seed verification)', () => {
-  let database: SequelizeDatabase;
-
-  // beforeAll(async () => {
-  //   if ((process.env.DB_SEED ?? 'false') !== 'true') {
-  //     throw new Error('DB_SEED must be true for DB integration tests');
-  //   }
-
-  //   database = new SequelizeDatabase({
-  //     host: process.env.DB_HOST ?? 'database',
-  //     port: Number(process.env.DB_PORT ?? 3306),
-  //     username: process.env.DB_USER ?? 'central-system',
-  //     password: process.env.DB_PASSWORD ?? 'cern',
-  //     database: process.env.DB_NAME ?? 'tokenization',
-  //     charset: 'utf8mb4',
-  //     collate: 'utf8mb4_unicode_ci',
-  //     timezone: process.env.DB_TZ ?? '+00:00',
-  //     logging: (msg: any) => console.log(msg),
-  //   });
-
-  //   await database.connect();
-  //   await database.migrate();
-  //   await database.seed();
-  // }, 60000);
-
+ 
   afterAll(async () => {
     await db.sequelize.close();
   });

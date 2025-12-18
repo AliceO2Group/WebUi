@@ -12,14 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from '@aliceo2/web-ui';
-import ArchiveToken from './../models/ArchiveTokenModel.js';
-import Token from './../models/TokenModel.js';
-import { Sequelize } from 'sequelize';
+// import { LogManager } from '@aliceo2/web-ui';
+// import ArchiveToken from './../models/ArchiveTokenModel.js';
+// import Token from './../models/TokenModel.js';
+// import { Sequelize } from 'sequelize';
 
-type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | string;
+// type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | string;
 
-const logger = LogManager.getLogger('database/utils/expireToken');
+// const logger = LogManager.getLogger('database/utils/expireToken');
 
 /**
  * Expires a token by archiving it and removing the specified method.

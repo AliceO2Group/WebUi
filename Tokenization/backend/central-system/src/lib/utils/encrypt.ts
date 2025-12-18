@@ -15,7 +15,8 @@
 import  {importSPKI, CompactEncrypt } from 'jose';
 
 
-/** * @description Encrypts data using a provided public key with RSA-OAEP-256 and A256GCM.
+/** 
+ * @description Encrypts data using a provided public key with RSA-OAEP-256 and A256GCM.
  * @param publicKey - The public key in PEM format used for encryption.
  * @param data - The plaintext data to be encrypted.
  * @returns A promise that resolves to the encrypted data in JWE compact serialization format.

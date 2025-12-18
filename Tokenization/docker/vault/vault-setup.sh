@@ -31,8 +31,6 @@ if [ "$initialized" = "false" ]; then
 
   init_output=$(vault operator init -key-shares=1 -key-threshold=1)
 
-  echo "$init_output" | sed -n '1,50p'
-
   UNSEAL_KEY=$(printf '%s\n' "$init_output" | awk '/Unseal Key 1:/ {print $NF}')
   ROOT_TOKEN=$(printf '%s\n' "$init_output" | awk '/Initial Root Token:/ {print $NF}')
 

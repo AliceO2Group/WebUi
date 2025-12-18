@@ -32,7 +32,7 @@ export class VaultCreateKeyService {
     body: Buffer | string | NodeJS.ReadableStream | null
   ): Promise<void> {
     try {
-      const resp = await axios.post(url, body, {
+      await axios.post(url, body, {
         headers: {
           'content-type': 'application/json',
           'X-Vault-Token': token,

@@ -130,6 +130,3 @@ VAULT_CACERT_B64=$(base64 -w0 "$VAULT_DIR/ca.crt")
 VAULT_CENTRAL_SYSTEM_CERT_B64=$(base64 -w0 "$VAULT_DIR/central-system.crt")
 VAULT_CENTRAL_SYSTEM_KEY_B64=$(base64 -w0 "$VAULT_DIR/central-system.key")
 EOF
-
-echo "[Vault CI] .env contents:"
-cat "$BACKEND_ENV"
