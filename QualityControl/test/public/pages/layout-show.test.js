@@ -177,7 +177,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
       strictEqual(leftStyle, '0.1em');
     }
-  )
+  );
 
   await testParent.test('should have second tab to be empty (according to demo data)', { timeout }, async () => {
     await page.locator('#tab-1').click();
