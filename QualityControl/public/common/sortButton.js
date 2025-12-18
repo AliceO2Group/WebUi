@@ -68,7 +68,7 @@ export const sortableTableHead = ({
     'button.btn.sort-button',
     {
       onclick: () => onclick(label, nextSortOrder, hoverIcon),
-      title: `Sort by ${directionLabel}`
+      title: `Sort by ${directionLabel}`,
     },
     [
       label,
@@ -76,6 +76,6 @@ export const sortableTableHead = ({
         h('span.current-icon', [order != SortDirectionsEnum.NONE ? icon : undefined]),
         h('span.hover-icon', [getSortIcon(nextSortOrder)]),
       ]),
-    ]
+    ],
   );
 };
