@@ -62,11 +62,20 @@ export const sortableTableHead = ({
   const nextSortOrder = sortOptions[nextIndex];
   const hoverIcon = getSortIcon(nextSortOrder);
 
-  return h('button.btn.sort-button', { onclick: () => onclick(label, nextSortOrder, hoverIcon) }, [
-    label,
-    h('span.icon-container.mh1', [
-      h('span.current-icon', [order != SortDirectionsEnum.NONE ? icon : undefined]),
-      h('span.hover-icon', [getSortIcon(nextSortOrder)]),
-    ]),
-  ]);
+  const directionLabel = Object.keys(SortDirectionsEnum).find((key) => SortDirectionsEnum[key] === nextSortOrder);
+
+  return h(
+    'button.btn.sort-button',
+    {
+      onclick: () => onclick(label, nextSortOrder, hoverIcon),
+      title: `Sort by ${directionLabel}`
+    },
+    [
+      label,
+      h('span.icon-container.mh1', [
+        h('span.current-icon', [order != SortDirectionsEnum.NONE ? icon : undefined]),
+        h('span.hover-icon', [getSortIcon(nextSortOrder)]),
+      ]),
+    ]
+  );
 };
