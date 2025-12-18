@@ -27,7 +27,7 @@ export const createUmzug = (
 ) =>
   new Umzug({
     migrations: {
-      glob: `${migrationsDirectory}/*.mjs`,
+      glob: `${migrationsDirectory}/*.{mjs,mts}`,
       resolve: ({
         name,
         path: migrationPath,

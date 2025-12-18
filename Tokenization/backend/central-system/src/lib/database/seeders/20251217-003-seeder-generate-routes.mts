@@ -57,7 +57,6 @@ export async function up(
     '0x0a',
   ];
 
-  // usuń seeded trasy w tej puli
   await q.bulkDelete('routes', {
     receiver_serial_number: { [Sequelize.Op.in]: serials },
     audience_serial_number: { [Sequelize.Op.in]: serials },

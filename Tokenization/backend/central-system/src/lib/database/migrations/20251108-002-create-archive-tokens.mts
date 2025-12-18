@@ -26,9 +26,17 @@ export async function up(
       autoIncrement: true,
       primaryKey: true,
     },
+
     audience: { type: Sequelize.STRING(255), allowNull: false },
     subject: { type: Sequelize.STRING(255), allowNull: false },
+
+    status: {
+      type: Sequelize.ENUM('REVOKED', 'REJECTED', 'EXPIRED'),
+      allowNull: false,
+    },
+
     token_object: { type: Sequelize.JSON, allowNull: false },
+
     created_at: {
       type: Sequelize.DATE,
       allowNull: false,
@@ -49,14 +57,25 @@ export async function up(
   await q.addIndex('archive-tokens', ['subject'], {
     name: 'archive_tokens_subject_idx',
   });
+
+  await q.addIndex('archive-tokens', ['status'], {
+    name: 'archive_tokens_status_idx',
+  });
+
   await q.addIndex('archive-tokens', ['created_at'], {
     name: 'archive_tokens_created_at_idx',
   });
 }
 
-export async function down(q: QueryInterface) {
+export async function down(
+  q: QueryInterface,
+  Sequelize: typeof import('sequelize')
+) {
   try {
     await q.removeIndex('archive-tokens', 'archive_tokens_created_at_idx');
+  } catch {}
+  try {
+    await q.removeIndex('archive-tokens', 'archive_tokens_status_idx');
   } catch {}
   try {
     await q.removeIndex('archive-tokens', 'archive_tokens_subject_idx');
@@ -64,5 +83,6 @@ export async function down(q: QueryInterface) {
   try {
     await q.removeIndex('archive-tokens', 'archive_tokens_audience_idx');
   } catch {}
+
   await q.dropTable('archive-tokens');
 }

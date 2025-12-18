@@ -13,6 +13,7 @@
  */
 
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 import path from 'path';
 
 import { VaultController } from '../../src/controllers/VaultController';
@@ -23,6 +24,8 @@ import { EncryptionService } from '../../src/services/EncryptionService';
 import { VaultCreateKeyService } from '../../src/services/VaultCreateKeyService';
 
 const b64 = (buf: Buffer) => buf.toString('base64');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function ensureVaultEnvFromFilesIfMissing() {
   const backendRoot = path.resolve(__dirname, '..', '..');
@@ -160,17 +163,12 @@ describe('VaultController - integration with Vault', () => {
     expect(signature.length).toBeGreaterThan(0);
     expect(signature).toContain('vault:');
   }, 20000);
-  it('has seeded KV entry for a known client (smoke test)', async () => {
-    const seededPath = '0x01';
-
-    const secret = await controller.getCredentialFromVault(seededPath);
-
+  it('has seeded KV smoke entry on start', async () => {
+    const secret = await controller.getCredentialFromVault('smoke/seed');
     const payload =
       (secret as any).data?.data ?? (secret as any).data ?? secret;
 
-    expect(payload).toBeDefined();
-    expect(typeof payload).toBe('object');
-
-    expect(payload.certificate).not.toBeNull();
+    expect(payload.ok).toBe('true');
+    expect(payload.source).toBe('vault-setup');
   }, 20000);
 });

@@ -12,8 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
+import { log } from 'console';
 import { SequelizeDatabase } from './SequelizeDatabase.js';
 import { LogManager } from '@aliceo2/web-ui';
+
+const logger = LogManager.getLogger('Database');
 
 // Database class to create and manage the database connection
 class Database {
@@ -30,14 +33,12 @@ class Database {
     await database.connect();
     await database.migrate();
     if ((process.env.DB_SEED ?? 'false') === 'true') {
+      logger.info('Seeding database as DB_SEED is set to true');
       await database.seed();
     }
-
     return database;
   }
 }
-
-const logger = LogManager.getLogger('Database');
 
 export const db = await Database.createDatabase({
   host: process.env.DB_HOST ?? 'database',
@@ -48,5 +49,7 @@ export const db = await Database.createDatabase({
   charset: 'utf8mb4',
   collate: 'utf8mb4_unicode_ci',
   timezone: process.env.DB_TZ ?? '+00:00',
-  logging: process.env.DB_LOGGING ?? false,
+  logging: process.env.DB_LOGGING === 'true'
+    ? (msg: string) => logger.info(msg)
+    : false,
 });

@@ -14,7 +14,7 @@
     "docker:up": "cd ../.. && docker compose -f docker-compose.dev.yml -f docker-compose.yml up",
     "docker:up:build": "npm run docker:build && npm run docker:up",
     "docker:down": "cd ../.. && docker compose -f docker-compose.dev.yml -f docker-compose.yml down",
-    "test": "jest --runInBand --testPathIgnorePatterns=VaultIntegration.spec.ts",
+    "test": "jest --runInBand --testPathIgnorePatterns=Integration\\.spec\\.ts$",
     "test:unit": "npm test",
     "test:vault:integration": "jest --runInBand tests/VaultTests/VaultIntegration.spec.ts",
     "test:db:integration": "jest --runInBand tests/DatabaseTests/DatabaseIntegration.spec.ts",
@@ -27,11 +27,11 @@
     "@aliceo2/web-ui": "^2.8.4",
     "@grpc/grpc-js": "^1.13.4",
     "@grpc/proto-loader": "^0.7.15",
+    "axios": "^1.4.0",
     "express": "^4.19.2",
     "jose": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
     "mariadb": "3.0.0",
-    "axios": "^1.4.0",
     "sequelize": "6.37.0",
     "umzug": "3.8.2"
   },
@@ -47,7 +47,7 @@
     "jest": "^30.0.5",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4",
-    "ts-jest": "^29.4.1",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

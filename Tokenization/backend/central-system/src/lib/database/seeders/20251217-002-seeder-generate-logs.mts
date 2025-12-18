@@ -20,12 +20,9 @@ export async function up(
   q: QueryInterface,
   Sequelize: typeof import('sequelize')
 ) {
-  await q.bulkDelete(
-    'system-logs',
-    {
-      request_id: { [Sequelize.Op.like]: 'seed-logs-%' },
-    } as any
-  );
+  await q.bulkDelete('system-logs', {
+    request_id: { [Sequelize.Op.like]: 'seed-logs-%' },
+  } as any);
 
   const now = new Date();
 
@@ -40,7 +37,7 @@ export async function up(
       request_id: 'seed-logs-001',
       user_id: null,
       ip_address: null,
-      context: { seed: true, stage: 'start' },
+      context: JSON.stringify({ seed: true, stage: 'start' }),
       error_stack: null,
       created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
       updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
@@ -55,19 +52,18 @@ export async function up(
       request_id: 'seed-logs-002',
       user_id: null,
       ip_address: '10.10.0.11',
-      context: {
+      context: JSON.stringify({
         vault_addr: process.env.VAULT_ADDR ?? 'https://vault.local:9300',
         auth_method: process.env.VAULT_AUTH_METHOD ?? 'cert',
-      },
+      }),
       error_stack: null,
       created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
       updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
 
-
     ...Array.from({ length: 10 }, (_, i) => {
       const serviceId = i + 1;
-      const serial = `0x${String(i + 1).padStart(2, '0')}`; 
+      const serial = `0x${String(i + 1).padStart(2, '0')}`;
       const ip = `10.10.0.${11 + i}`;
       return {
         timestamp: now,
@@ -79,11 +75,12 @@ export async function up(
         request_id: `seed-logs-svc-${String(serviceId).padStart(2, '0')}`,
         user_id: null,
         ip_address: ip,
-        context: {
-          receiver_serial_number: i === 9 ? '0x0a' : serial, 
-          audience_serial_number: i === 8 ? '0x0a' : `0x${String(i + 2).padStart(2, '0')}`,
+        context: JSON.stringify({
+          receiver_serial_number: i === 9 ? '0x0a' : serial,
+          audience_serial_number:
+            i === 8 ? '0x0a' : `0x${String(i + 2).padStart(2, '0')}`,
           permissions: { GET: 3600, POST: 900 },
-        },
+        }),
         error_stack: null,
         created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
         updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
@@ -100,7 +97,7 @@ export async function up(
       request_id: 'seed-logs-099',
       user_id: null,
       ip_address: null,
-      context: { endpoint: '/v1/auth/token/renew-self' },
+      context: JSON.stringify({ endpoint: '/v1/auth/token/renew-self' }),
       error_stack: null,
       created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
       updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
@@ -115,10 +112,10 @@ export async function up(
       request_id: 'seed-logs-100',
       user_id: null,
       ip_address: '10.10.0.11',
-      context: {
+      context: JSON.stringify({
         key: 'tokenization-signing',
         path: 'transit/encrypt/tokenization-signing',
-      },
+      }),
       error_stack:
         'Error: permission denied\n    at EncryptionService.encryptData (...)\n    at VaultController.encryptData (...)',
       created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
@@ -134,7 +131,7 @@ export async function up(
       request_id: 'seed-logs-101',
       user_id: null,
       ip_address: null,
-      context: { seed: true, stage: 'done' },
+      context: JSON.stringify({ seed: true, stage: 'done' }),
       error_stack: null,
       created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
       updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
@@ -148,17 +145,11 @@ export async function down(
   q: QueryInterface,
   Sequelize: typeof import('sequelize')
 ) {
-  await q.bulkDelete(
-    'system-logs',
-    {
-      request_id: { [Sequelize.Op.like]: 'seed-logs-%' },
-    } as any
-  );
+  await q.bulkDelete('system-logs', {
+    request_id: { [Sequelize.Op.like]: 'seed-logs-%' },
+  } as any);
 
-  await q.bulkDelete(
-    'system-logs',
-    {
-      request_id: { [Sequelize.Op.like]: 'seed-logs-svc-%' },
-    } as any
-  );
+  await q.bulkDelete('system-logs', {
+    request_id: { [Sequelize.Op.like]: 'seed-logs-svc-%' },
+  } as any);
 }

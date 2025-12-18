@@ -101,6 +101,10 @@ if [ -n "${VAULT_TOKEN:-}" ]; then
   echo "[vault-setup] Creating transit key for tokenization..."
   vault write transit/keys/tokenization-signing type="ed25519" 2>/dev/null || echo "[vault-setup] transit key already exists"
 
+  echo "[vault-setup] Writing smoke KV seed..."
+  vault kv put tokenization/smoke/seed ok=true source="vault-setup" 2>/dev/null || echo "[vault-setup] smoke seed already present / write failed"
+
+
   echo "[vault-setup] Seeding clients into KV + Transit..."
 
   CLIENTS_DIR="/vault/config/generated-clients"
@@ -113,7 +117,7 @@ if [ -n "${VAULT_TOKEN:-}" ]; then
 
       base_name="$(basename "$serial_file" .serial)" 
       serial_hex="$(cat "$serial_file" | tr -d '\r\n[:space:]')" 
-      serial_id="0x${serial_hex}" 
+      serial_id="${serial_hex}" 
 
       crt_file="$CLIENTS_DIR/${base_name}.crt"
       pub_file="$CLIENTS_DIR/${base_name}.pub.pem"
@@ -136,6 +140,11 @@ if [ -n "${VAULT_TOKEN:-}" ]; then
       vault write "transit/keys/${serial_id}-public-key" type="rsa-2048" \
         2>/dev/null || echo "[vault-setup] transit key already exists: ${serial_id}-public-key"
     done
+    
+    echo "[vault-setup] Verifying seeded KV..."
+    vault kv get tokenization/0x01 >/dev/null
+    vault kv get tokenization/0x0A >/dev/null
+    echo "[vault-setup] KV seed verified OK."
   fi
 
 

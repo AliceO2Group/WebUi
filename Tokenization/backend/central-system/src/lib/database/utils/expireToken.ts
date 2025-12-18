@@ -28,43 +28,43 @@ const logger = LogManager.getLogger('database/utils/expireToken');
  * @param id - ID of the token to expire.
  * @param method - HTTP method to expire from the token.
  */
-export default async (
-  sequelize: Sequelize,
-  id: number,
-  method: Method
-): Promise<void> => {
-  const token: typeof Token | null = await Token.findByPk(id);
-  if (!token) {
-    logger.info('No such token in database.');
-    return;
-  }
+// export default async (
+//   sequelize: Sequelize,
+//   id: number,
+//   method: Method
+// ): Promise<void> => {
+//   const token: typeof Token | null = await Token.findByPk(id);
+//   if (!token) {
+//     logger.info('No such token in database.');
+//     return;
+//   }
 
-  const { sub, aud, iss, iat, jti } = token.token_object;
-  const methods: string[] = Object.keys(iat);
+//   const { sub, aud, iss, iat, jti } = token.token_object;
+//   const methods: string[] = Object.keys(iat);
 
-  await sequelize.transaction(async (tx) => {
-    await ArchiveToken.create(
-      {
-        audience: token.audience,
-        subject: token.subject,
-        token_object: {
-          sub,
-          aud,
-          iss,
-          method,
-          jti,
-        },
-      },
-      { transaction: tx }
-    );
+//   await sequelize.transaction(async (tx) => {
+//     await ArchiveToken.create(
+//       {
+//         audience: token.audience,
+//         subject: token.subject,
+//         token_object: {
+//           sub,
+//           aud,
+//           iss,
+//           method,
+//           jti,
+//         },
+//       },
+//       { transaction: tx }
+//     );
 
-    if (methods.length === 1) {
-      await token.destroy({ transaction: tx });
-      return;
-    }
+//     if (methods.length === 1) {
+//       await token.destroy({ transaction: tx });
+//       return;
+//     }
 
-    const { [method]: _removed, ...newIat } = iat;
-    token.token_object = { ...token.token_object, iat: newIat };
-    await token.save({ transaction: tx });
-  });
-};
+//     const { [method]: _removed, ...newIat } = iat;
+//     token.token_object = { ...token.token_object, iat: newIat };
+//     await token.save({ transaction: tx });
+//   });
+// };

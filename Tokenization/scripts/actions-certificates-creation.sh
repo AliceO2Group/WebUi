@@ -117,6 +117,14 @@ cat > "$BACKEND_ENV" <<EOF
 VAULT_ADDR=https://vault.local:9300
 VAULT_AUTH_METHOD=cert
 VAULT_ROLE=central-system
+DB_HOST=database
+DB_PORT=3306
+DB_USER=central-system
+DB_PASSWORD=cern
+DB_NAME=tokenization        
+DB_DIALECT=mariadb
+DB_LOGGING=false
+DB_TZ=+00:00
 DB_SEED=true
 VAULT_CACERT_B64=$(base64 -w0 "$VAULT_DIR/ca.crt")
 VAULT_CENTRAL_SYSTEM_CERT_B64=$(base64 -w0 "$VAULT_DIR/central-system.crt")
