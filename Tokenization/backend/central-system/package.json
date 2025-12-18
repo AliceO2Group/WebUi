@@ -19,7 +19,7 @@
     "test:vault:integration": "jest --runInBand tests/VaultTests/VaultIntegration.spec.ts",
     "test:db:integration": "jest --runInBand tests/DatabaseTests/DatabaseIntegration.spec.ts",
     "test:integration": "jest --runInBand tests/**/*Integration.spec.ts",
-    "docker:test:integration": "cd ../.. && docker compose -p tokenization-tests -f docker-compose.dev.yml up --build --abort-on-container-exit central-tests && docker compose -p tokenization-tests -f docker-compose.dev.yml down -v",
+    "docker:test:integration": "cd ../.. && docker compose --profile test -p tokenization-tests -f docker-compose.dev.yml up --abort-on-container-exit central-tests && docker compose --profile test -p tokenization-tests -f docker-compose.dev.yml down -v",
     "test:integration:docker": "npm run docker:test:integration",
     "test:all": "npm run test:unit && npm run test:integration:docker"
   },
