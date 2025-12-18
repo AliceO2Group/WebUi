@@ -46,9 +46,15 @@ export default (model) => {
             const objectsLoaded = object.list;
             const objectsToDisplay = objectsLoaded.filter((qcObject) =>
               qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
-            return virtualTable(model, 'main', objectsToDisplay);
+            return [
+              tableSearchInput(model.object),
+              virtualTable(model, 'main', objectsToDisplay),
+            ];
           }
-          return tableShow(model);
+          return [
+            tableSearchInput(model.object),
+            tableShow(model),
+          ];
         },
         Failure: () => null, // Notification is displayed
       })),
@@ -167,7 +173,17 @@ const tableShow = (model) =>
   h('table.table.table-sm.text-no-select', [
     h('thead', [h('tr', [h('th', 'Name')])]),
     h('tbody', [treeRows(model)]),
-  ]);
+  ])
+
+const tableSearchInput = (qcObject) =>
+  h('input.form-control.form-inline.m2', {
+    id: 'searchObjectTree',
+    placeholder: 'Search',
+    type: 'text',
+    value: qcObject.searchInput,
+    disabled: qcObject.queryingObjects ? true : false,
+    oninput: (e) => qcObject.search(e.target.value),
+  })
 
 /**
  * Shows a list of lines <tr> of objects
