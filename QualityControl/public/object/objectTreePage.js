@@ -12,7 +12,15 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX } from '/js/src/index.js';
+import {
+  h,
+  iconCollapseUp,
+  iconBarChart,
+  iconCaretRight,
+  iconResizeBoth,
+  iconCaretBottom,
+  iconCircleX
+} from '/js/src/index.js';
 import { spinner } from '../common/spinner.js';
 import { draw } from '../common/object/draw.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
@@ -47,12 +55,12 @@ export default (model) => {
             const objectsToDisplay = objectsLoaded.filter((qcObject) =>
               qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
             return [
-              tableSearchInput(model.object),
+              tableHeader(model.object),
               virtualTable(model, 'main', objectsToDisplay),
             ];
           }
           return [
-            tableSearchInput(model.object),
+            tableHeader(model.object),
             tableShow(model),
           ];
         },
@@ -175,8 +183,21 @@ const tableShow = (model) =>
     h('tbody', [treeRows(model)]),
   ])
 
+const tableHeader = (qcObject) =>
+  h('.flex-row.w-100', [
+    tableSearchInput(qcObject),
+    tableCollapseAll(qcObject),
+  ])
+
+const tableCollapseAll = (qcObject) =>
+  h('button.btn.m2', {
+    title: 'Close whole tree',
+    onclick: () => qcObject.tree.closeAll(),
+    disabled: Boolean(qcObject.searchInput),
+  }, iconCollapseUp())
+
 const tableSearchInput = (qcObject) =>
-  h('input.form-control.form-inline.m2', {
+  h('input.form-control.form-inline.m2.flex-grow', {
     id: 'searchObjectTree',
     placeholder: 'Search',
     type: 'text',

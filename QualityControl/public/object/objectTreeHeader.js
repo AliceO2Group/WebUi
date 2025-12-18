@@ -13,7 +13,7 @@
  */
 
 import { h } from '/js/src/index.js';
-import { iconCollapseUp, iconArrowBottom, iconArrowTop } from '/js/src/icons.js';
+import { iconArrowBottom, iconArrowTop } from '/js/src/icons.js';
 import { filterPanelToggleButton } from '../common/filters/filterViews.js';
 
 /**
@@ -55,21 +55,6 @@ export default function objectTreeHeader(qcObject, filterModel) {
 
         ]),
       ]),
-      ' ',
-      h('button.btn', {
-        title: 'Close whole tree',
-        onclick: () => qcObject.tree.closeAll(),
-        disabled: Boolean(qcObject.searchInput),
-      }, iconCollapseUp()),
-      ' ',
-      h('input.form-control.form-inline.mh1.w-33', {
-        id: 'searchObjectTree',
-        placeholder: 'Search',
-        type: 'text',
-        value: qcObject.searchInput,
-        disabled: qcObject.queryingObjects ? true : false,
-        oninput: (e) => qcObject.search(e.target.value),
-      }),
       ' ',
     ]),
   };
