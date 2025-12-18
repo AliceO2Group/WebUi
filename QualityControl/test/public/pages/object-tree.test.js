@@ -34,7 +34,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should have a tree as a table', { timeout }, async () => {
-    const tableRowPath = 'section > div > div > div > table > tbody > tr';
+    const tableRowPath = 'section > div > div > div > div > table > tbody > tr';
     await page.waitForSelector(tableRowPath, { timeout: 1000 });
     const rowsCount = await page.evaluate(
       (tableRowPath) => document.querySelectorAll(tableRowPath).length,
@@ -44,12 +44,12 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should not preserve state if refreshed not in run mode', { timeout }, async () => {
-    const tbodyPath = 'section > div > div > div > table > tbody';
+    const tbodyPath = 'section > div > div > div > div > table > tbody';
     await page.locator(`${tbodyPath} > tr:nth-child(2)`).click();
     await page.reload({ waitUntil: 'networkidle0' });
 
     const rowCount = await page.evaluate(() =>
-      document.querySelectorAll('section > div > div > div > table > tbody > tr').length);
+      document.querySelectorAll('section > div > div > div > div > table > tbody > tr').length);
 
     strictEqual(rowCount, 2);
   });
