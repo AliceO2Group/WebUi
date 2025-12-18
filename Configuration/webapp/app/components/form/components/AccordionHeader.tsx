@@ -15,27 +15,32 @@
 import { useCallback, type FC, type PropsWithChildren, type ReactElement } from 'react';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import FormData from '@mui/icons-material/ListAlt';
-import RawData from '@mui/icons-material/EditNote';
+import RawData from '@mui/icons-material/DataObject';
 import { IconButton, Typography } from '@mui/material';
 
 interface AccordionHeaderProps extends PropsWithChildren {
   title: string;
-  viewForm: boolean;
-  viewFormToggle: () => void;
+  showRawViewModal: () => void;
 }
 
+/**
+ * Accordion header component.
+ * @param {AccordionHeaderProps} props - The props of the accordion header.
+ * @param {string} props.title - The title of the accordion header.
+ * @param {boolean} props.viewForm - Whether the form is visible.
+ * @param {() => void} props.viewFormToggle - The callback to toggle the form visibility.
+ * @returns {ReactElement} The accordion header component.
+ */
 export const AccordionHeader: FC<AccordionHeaderProps> = ({
   title,
-  viewForm,
-  viewFormToggle,
+  showRawViewModal,
 }): ReactElement => {
-  const viewFormToggleCallback = useCallback(
+  const showRawViewModalCallback = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
-      viewFormToggle();
+      showRawViewModal();
     },
-    [viewFormToggle],
+    [showRawViewModal],
   );
 
   return (
@@ -49,8 +54,8 @@ export const AccordionHeader: FC<AccordionHeaderProps> = ({
       }}
     >
       <Typography sx={{ marginRight: 'auto', alignContent: 'center' }}>{title}</Typography>
-      <IconButton onClick={viewFormToggleCallback}>
-        {viewForm ? <RawData /> : <FormData />}
+      <IconButton onClick={showRawViewModalCallback}>
+        <RawData />
       </IconButton>
     </AccordionSummary>
   );

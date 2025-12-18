@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   database:
     # Pinned to 11.8 LTS version, community support till 04-07-2028, enterprise: 15-10-2033.
