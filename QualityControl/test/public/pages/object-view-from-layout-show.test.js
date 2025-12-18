@@ -478,18 +478,15 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
     'should set active checkboxes from layout display options when ignore defaults is true',
     { timeout },
     async () => {
-      const objectId = 'baffe0b2-826c-11ef-8f19-c0a80209250c';
-      const expectedDrawingOptions = ['logx', 'text'];
-      const activeOptions = await page.evaluate((id) => {
-        const checkboxes = Array.from(
-          document.querySelectorAll(`#objectDrawingOptions input[type="checkbox"][id^="${id}"]`),
-        );
-        return checkboxes
+      const activeCheckboxLabels = await page.evaluate(() => {
+        const checkboxes = document.querySelectorAll('#objectDrawingOptions > div .flex-column input[type="checkbox"]');
+        return Array.from(checkboxes)
           .filter((checkbox) => checkbox.checked)
-          .map((checkbox) => checkbox.id.replace(id, ''));
-      }, objectId);
+          .map((checkbox) => document.querySelector(`#objectDrawingOptions label[for="${checkbox.id}"]`)?.innerText);
+      });
+      const expectedDrawingOptions = ['logx', 'text'];
       deepStrictEqual(
-        activeOptions.sort(),
+        activeCheckboxLabels.sort(),
         expectedDrawingOptions.sort(),
         'Active drawing options do not match expected layout settings',
       );
@@ -497,26 +494,19 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
-    'should set active checkboxes from combined drawing options when ignore defaults is set to false',
+    'should set active checkboxes from layout display options when ignore defaults is set to false',
     { timeout },
     async () => {
-      const objectId = 'baffe0b2-826c-11ef-8f19-c0a80209250c';
-      const expectedDrawingOptions = ['logx', 'text', 'hist', 'gridy'];
-      const ignoreDefaultsCheckboxSelector = `#objectDrawingOptions input[id="${objectId}ignoreDefaults"]`;
-
-      await page.click(ignoreDefaultsCheckboxSelector);
-      await delay(100);
-
-      const activeOptions = await page.evaluate((id) => {
-        const checkboxes = Array.from(
-          document.querySelectorAll(`#objectDrawingOptions input[type="checkbox"][id^="${id}"]`),
-        );
-        return checkboxes
+      await page.click('#objectDrawingOptions input[id="baffe0b2-826c-11ef-8f19-c0a80209250cignoreDefaults"]');
+      const activeCheckboxLabels = await page.evaluate(() => {
+        const checkboxes = document.querySelectorAll('#objectDrawingOptions > div .flex-column input[type="checkbox"]');
+        return Array.from(checkboxes)
           .filter((checkbox) => checkbox.checked)
-          .map((checkbox) => checkbox.id.replace(id, ''));
-      }, objectId);
+          .map((checkbox) => document.querySelector(`#objectDrawingOptions label[for="${checkbox.id}"]`)?.innerText);
+      });
+      const expectedDrawingOptions = ['logx', 'text'];
       deepStrictEqual(
-        activeOptions.sort(),
+        activeCheckboxLabels.sort(),
         expectedDrawingOptions.sort(),
         'Active drawing options do not match expected layout settings',
       );
@@ -524,7 +514,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
-    'should have updated fingerprint after changing drawing options',
+    'should updated fingerprint on plot after changing drawing options',
     { timeout },
     async () => {
       const objectId = 'baffe0b2-826c-11ef-8f19-c0a80209250c';

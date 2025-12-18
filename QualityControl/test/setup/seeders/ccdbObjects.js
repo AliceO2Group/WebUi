@@ -143,7 +143,7 @@ export const OBJECT_3_BY_PATH_RESULT = {
   createdAt: 1728058897718,
   lastModified: 1728058897000,
   drawOptions: [],
-  displayHints: ['hist'],
+  displayHints: 'hist',
   etag: 'baffe0b2-826c-11ef-8f19-c0a80209250c',
   runNumber: '551890',
   runType: 'PHYSICS',

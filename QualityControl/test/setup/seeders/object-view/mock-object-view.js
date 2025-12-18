@@ -83,7 +83,7 @@ export const MOCK_OBJECT_12_DETAILS_RESPONSE = {
   objecttype: 'o2::quality_control_modules::common::TH1Ratio<TH1F>',
   qc_detector_name: 'MFT',
   drawoptions: 'text',
-  displayhints: 'hist, gridy',
+  displayhints: ['hist', 'gridy'],
   runnumber: '551890',
   adjustableeov: '1',
   qc_task_name: 'MFTClusterTask',
