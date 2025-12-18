@@ -104,15 +104,19 @@ const objectFullRow = (model, item, location) =>
 const tableHeader = () =>
   h('table.table.table-sm.text-no-select', {
     style: 'margin-bottom:0',
-  }, h('thead', [h('tr', [h('th', sortableTableHead({
-    order: model.object.sortBy.order,
-    icon: model.object.sortBy.icon,
-    label: 'Name',
-    sortOptions: [SortDirectionsEnum.ASC, SortDirectionsEnum.DESC],
-    onclick: (label, order, icon) => {
-      model.object.sortTree(label, 'name', order, icon)
-    }
-  }))])]));
+  }, h('thead', [
+    h('tr', [
+      h('th', sortableTableHead({
+        order: model.object.sortBy.order,
+        icon: model.object.sortBy.icon,
+        label: 'Name',
+        sortOptions: [SortDirectionsEnum.ASC, SortDirectionsEnum.DESC],
+        onclick: (label, order, icon) => {
+          model.object.sortTree(label, 'name', order, icon);
+        },
+      })),
+    ]),
+  ]));
 
 /**
  * Set styles of the floating table and its position inside the big div .tableLogsContentPlaceholder

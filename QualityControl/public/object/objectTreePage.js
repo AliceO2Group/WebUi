@@ -189,26 +189,26 @@ const tableShow = (model) =>
           label: 'Name',
           sortOptions: [SortDirectionsEnum.ASC, SortDirectionsEnum.DESC],
           onclick: (label, order, icon) => {
-            model.object.sortTree(label, 'name', order, icon)
-          }
-        }))
-      ])
+            model.object.sortTree(label, 'name', order, icon);
+          },
+        })),
+      ]),
     ]),
     h('tbody', [treeRows(model)]),
-  ])
+  ]);
 
 const tableHeader = (qcObject) =>
   h('.flex-row.w-100', [
     tableSearchInput(qcObject),
     tableCollapseAll(qcObject),
-  ])
+  ]);
 
 const tableCollapseAll = (qcObject) =>
   h('button.btn.m2', {
     title: 'Close whole tree',
     onclick: () => qcObject.tree.closeAll(),
     disabled: Boolean(qcObject.searchInput),
-  }, iconCollapseUp())
+  }, iconCollapseUp());
 
 const tableSearchInput = (qcObject) =>
   h('input.form-control.form-inline.m2.flex-grow', {
@@ -218,7 +218,7 @@ const tableSearchInput = (qcObject) =>
     value: qcObject.searchInput,
     disabled: qcObject.queryingObjects ? true : false,
     oninput: (e) => qcObject.search(e.target.value),
-  })
+  });
 
 /**
  * Shows a list of lines <tr> of objects

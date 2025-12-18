@@ -38,22 +38,9 @@ export default function objectTreeHeader(qcObject, filterModel) {
       qcObject.objectsRemote.isSuccess() && h('span', `(${howMany})`),
     ]),
 
-    rightCol: h('.w-25.flex-row.items-center.g2.justify-end', [
-      filterModel.isRunModeActivated ? null : filterPanelToggleButton(filterModel),
-    ]),
+    rightCol: h(
+      '.w-25.flex-row.items-center.g2.justify-end',
+      [filterModel.isRunModeActivated ? null : filterPanelToggleButton(filterModel)],
+    ),
   };
 }
-
-/**
- * Create a menu-item for sort-by dropdown
- * @param {QcObject} qcObject - Model that manages the QCObject state.
- * @param {string} shortTitle - title that gets displayed to the user
- * @param {string} title - title that gets displayed to the user on hover
- * @param {Icon} icon - svg icon to be used
- * @param {string} field - field by which sorting should happen
- * @param {number} order - {-1/1}/{DESC/ASC}
- * @returns {vnode} - virtual node element
- */
-const sortMenuItem = (qcObject, shortTitle, title, icon, field, order) => h('a.menu-item', {
-  title: title, style: 'white-space: nowrap;', onclick: () => qcObject.sortTree(shortTitle, field, order, icon),
-}, [shortTitle, ' ', icon]);

@@ -55,7 +55,7 @@ export const sortableTableHead = ({
   icon,
   label,
   onclick,
-  sortOptions = [...Object.values(SortDirectionsEnum)]
+  sortOptions = [...Object.values(SortDirectionsEnum)],
 }) => {
   const currentIndex = sortOptions.indexOf(order);
   const nextIndex = (currentIndex + 1) % sortOptions.length;
@@ -66,7 +66,7 @@ export const sortableTableHead = ({
     label,
     h('span.icon-container.mh1', [
       h('span.current-icon', [order != SortDirectionsEnum.NONE ? icon : undefined]),
-      h('span.hover-icon', [getSortIcon(nextSortOrder)])
-    ])
+      h('span.hover-icon', [getSortIcon(nextSortOrder)]),
+    ]),
   ]);
-}
+};
