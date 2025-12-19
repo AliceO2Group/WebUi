@@ -15,6 +15,7 @@
 import { Agent } from 'https';
 import axios from 'axios';
 import { VaultReadResponse } from '../types/vault_types.js';
+import { VaultKvWritePayload } from '../types/vault_types.js';
 
 /**
  * * @description Service for retrieving credentials from an external vault service.
@@ -65,7 +66,7 @@ export class VaultCredentialsService {
     url: string,
     token: string,
     agent: Agent,
-    body: Buffer | string | NodeJS.ReadableStream | null
+    body: VaultKvWritePayload
   ): Promise<void> {
     try {
       await axios.post(url, body, {

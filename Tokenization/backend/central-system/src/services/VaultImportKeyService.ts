@@ -14,8 +14,9 @@
 
 import { Agent } from 'https';
 import axios from 'axios';
+import { VaultTransitImportRsaPublicKeyPayload } from '../types/vault_types.js';
 
-export class VaultCreateKeyService {
+export class VaultImportKeyService {
   /**
    * @description Creates a new encryption key in Vault.
    * @param url - The URL of the Vault service.
@@ -25,11 +26,11 @@ export class VaultCreateKeyService {
    * @return A promise that resolves when the key is created.
    * @throws Will throw an error if key creation fails.
    */
-  public async createKey(
+  public async importKey(
     url: string,
     token: string,
     agent: Agent,
-    body: Buffer | string | NodeJS.ReadableStream | null
+    body: VaultTransitImportRsaPublicKeyPayload
   ): Promise<void> {
     try {
       await axios.post(url, body, {

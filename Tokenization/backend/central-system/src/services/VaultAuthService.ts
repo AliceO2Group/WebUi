@@ -16,6 +16,7 @@ import { Agent } from 'https';
 import axios from 'axios';
 
 import { AuthResponse } from '../types/vault_types';
+import { VaultLoginPayload } from '../types/vault_types';
 
 /**
  * @description Service for authenticating with an external vault service.
@@ -32,7 +33,7 @@ export class VaultAuthService {
   public async login(
     url: string,
     agent: Agent,
-    body: Buffer | string | NodeJS.ReadableStream | null
+    body: VaultLoginPayload
   ): Promise<string> {
     try {
       const resp = await axios.post<AuthResponse>(url, body, {
@@ -63,7 +64,7 @@ export class VaultAuthService {
     url: string,
     token: string,
     agent: Agent,
-    body: Buffer | string | NodeJS.ReadableStream | null
+    body: null
   ): Promise<string> {
     try {
       const resp = await axios.post<AuthResponse>(url, body, {

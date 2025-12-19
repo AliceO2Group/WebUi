@@ -16,7 +16,7 @@ import { VaultCredentialsService } from '../services/VaultCredentialsService.js'
 import { VaultAuthService } from '../services/VaultAuthService.js';
 import { VaultSignService } from '../services/VaultSignService.js';
 import { EncryptionService } from '../services/EncryptionService.js';
-import { VaultCreateKeyService } from '../services/VaultCreateKeyService.js';
+import { VaultImportKeyService } from '../services/VaultImportKeyService.js';
 
 import { Agent } from 'https';
 
@@ -25,7 +25,7 @@ import {
   GetCredentialReq,
   CreateOrUpdateCredentialReq,
   VaultEncryptPayloadReq,
-  VaultCreateKeyReq,
+  VaultImportKeyReq,
 } from '../lib/utils/event-req-types.js';
 import { registerBusHandler } from '../lib/event-bus/register-bus-handler.js';
 import { EventType } from '../lib/utils/events.js';
@@ -37,7 +37,7 @@ import {
   VaultReadResponse,
   VaultKvWritePayload,
   VaultEncryptPayload,
-  VaultCreateKeyPayload,
+  VaultTransitImportRsaPublicKeyPayload,
 } from '../types/vault_types.js';
 
 /**
@@ -62,7 +62,7 @@ export class VaultController {
     private readonly _authService: VaultAuthService,
     private readonly _credentialsService: VaultCredentialsService,
     private readonly _encryptService: EncryptionService,
-    private readonly _createKeyService: VaultCreateKeyService
+    private readonly _importKeyService: VaultImportKeyService
   ) {
     this._logger = LogManager.getLogger('VaultController');
     const caPem = process.env.VAULT_CACERT_B64;
@@ -94,7 +94,7 @@ export class VaultController {
         process.env.VAULT_ADDR! + '/v1/transit/sign/tokenization-signing',
         this._vaultAccessToken,
         this._agent,
-        JSON.stringify(payload)
+        payload
       );
     } catch (error: any) {
       this._logger.errorMessage(
@@ -114,9 +114,9 @@ export class VaultController {
         process.env.VAULT_ADDR! +
           `/v1/auth/${process.env.VAULT_AUTH_METHOD}/login`,
         this._agent,
-        JSON.stringify({
-          name: process.env.VAULT_ROLE,
-        })
+        {
+          name: process.env.VAULT_ROLE || 'central-system',
+        }
       );
     } catch (error: any) {
       this._logger.errorMessage(`Vault login failed: ${error.message}`);
@@ -189,7 +189,7 @@ export class VaultController {
         process.env.VAULT_ADDR! + `/v1/tokenization/data/${path}`,
         this._vaultAccessToken,
         this._agent,
-        JSON.stringify(body)
+        body
       );
     } catch (error: any) {
       this._logger.errorMessage(
@@ -214,7 +214,7 @@ export class VaultController {
         process.env.VAULT_ADDR! + `/v1/transit/encrypt/${key}`,
         this._vaultAccessToken,
         this._agent,
-        JSON.stringify(body)
+        body
       );
     } catch (error: any) {
       this._logger.errorMessage(`Error encrypting data: ${error.message}`);
@@ -228,16 +228,16 @@ export class VaultController {
    * @return A promise that resolves when the key is created.
    * @throws Will throw an error if key creation fails.
    */
-  public async createKeyInVault(
+  public async importKeyInVault(
     keyName: string,
-    body: VaultCreateKeyPayload
+    body: VaultTransitImportRsaPublicKeyPayload
   ): Promise<void> {
     try {
-      await this._createKeyService.createKey(
-        process.env.VAULT_ADDR! + `/v1/transit/keys/${keyName}`,
+      await this._importKeyService.importKey(
+        process.env.VAULT_ADDR! + `/v1/transit/keys/${keyName}/import`,
         this._vaultAccessToken,
         this._agent,
-        JSON.stringify(body)
+        body
       );
     } catch (error: any) {
       this._logger.errorMessage(
@@ -282,9 +282,9 @@ export class VaultController {
       async (payload) => this.encryptData(payload.key, payload.body)
     );
 
-    registerBusHandler<VaultCreateKeyReq>(
+    registerBusHandler<VaultImportKeyReq>(
       EventType.CREATE_KEY_VAULT,
-      async (payload) => this.createKeyInVault(payload.keyName, payload.body)
+      async (payload) => this.importKeyInVault(payload.keyName, payload.body)
     );
   }
 }

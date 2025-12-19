@@ -27,13 +27,12 @@ describe('VaultController', () => {
   let tokenSignService: any;
   let authService: any;
   let credentialsService: any;
-  let createKeyService: any;
+  let importKeyService: any;
   let encryptionService: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // env for Vault
     process.env.VAULT_ADDR = 'https://vault.local:9300';
     process.env.VAULT_AUTH_METHOD = 'cert';
     process.env.VAULT_ROLE = 'central-system';
@@ -70,8 +69,8 @@ describe('VaultController', () => {
         .mockResolvedValue('ciphertext'),
     };
 
-    createKeyService = {
-      createKey: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    importKeyService = {
+      importKey: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
     };
   });
 
@@ -85,18 +84,18 @@ describe('VaultController', () => {
           authService,
           credentialsService,
           encryptionService,
-          createKeyService
+          importKeyService
         )
     ).toThrow('Missing required environment variables for TLS certificates.');
   });
 
-  test('loginVault() authService.login with proper body and URL', async () => {
+  test('loginVault() calls authService.login with proper body and URL', async () => {
     const controller = new VaultController(
       tokenSignService,
       authService,
       credentialsService,
       encryptionService,
-      createKeyService
+      importKeyService
     );
 
     await controller.loginVault();
@@ -106,7 +105,8 @@ describe('VaultController', () => {
 
     expect(url).toBe('https://vault.local:9300/v1/auth/cert/login');
     expect(typeof agent).toBe('object');
-    expect(JSON.parse(body as string)).toEqual({ name: 'central-system' });
+
+    expect(body).toEqual({ name: 'central-system' });
   });
 
   test('signToken() uses Vault login token and proper URL', async () => {
@@ -115,7 +115,7 @@ describe('VaultController', () => {
       authService,
       credentialsService,
       encryptionService,
-      createKeyService
+      importKeyService
     );
 
     await controller.loginVault();
@@ -124,7 +124,6 @@ describe('VaultController', () => {
     const input = Buffer.from(JSON.stringify(dataToBeSigned), 'utf8').toString(
       'base64'
     );
-
     const payload = { input };
 
     const result = await controller.signToken(payload as any);
@@ -138,7 +137,7 @@ describe('VaultController', () => {
     expect(token).toBe('s.token');
     expect(typeof agent).toBe('object');
 
-    expect(body).toBe(JSON.stringify(payload));
+    expect(body).toEqual(payload);
 
     expect(result).toBe('signedToken');
   });
@@ -149,7 +148,7 @@ describe('VaultController', () => {
       authService,
       credentialsService,
       encryptionService,
-      createKeyService
+      importKeyService
     );
 
     (controller as any)._vaultAccessToken = 's.token';
@@ -165,16 +164,28 @@ describe('VaultController', () => {
     );
     expect(token).toBe('s.token');
     expect(typeof agent).toBe('object');
-    expect(result).toEqual({ data: { foo: 'bar' } });
+
+    expect(result).toEqual({
+      data: {
+        data: { foo: 'bar' },
+        metadata: {
+          created_time: '2025-01-01T00:00:00Z',
+          custom_metadata: {},
+          deletion_time: '',
+          destroyed: false,
+          version: 1,
+        },
+      },
+    });
   });
 
-  test('createOrUpdateCredentialInVault() calls createOrUpdateCredential with proper parameters', async () => {
+  test('createOrUpdateCredentialInVault() calls service with proper parameters', async () => {
     const controller = new VaultController(
       tokenSignService,
       authService,
       credentialsService,
       encryptionService,
-      createKeyService
+      importKeyService
     );
 
     (controller as any)._vaultAccessToken = 's.token';
@@ -182,7 +193,7 @@ describe('VaultController', () => {
     const path = 'db/central-system';
     const bodyObj = { data: { foo: 'bar' } };
 
-    await controller.createOrUpdateCredentialInVault(path, bodyObj);
+    await controller.createOrUpdateCredentialInVault(path, bodyObj as any);
 
     expect(credentialsService.createOrUpdateCredential).toHaveBeenCalledTimes(
       1
@@ -195,16 +206,17 @@ describe('VaultController', () => {
     );
     expect(token).toBe('s.token');
     expect(typeof agent).toBe('object');
-    expect(JSON.parse(body as string)).toEqual(bodyObj);
+
+    expect(body).toEqual(bodyObj);
   });
 
-  test('encryptData() uses Vault login token, proper URL and stringified body', async () => {
+  test('encryptData() uses Vault login token, proper URL and passes body as object', async () => {
     const controller = new VaultController(
       tokenSignService,
       authService,
       credentialsService,
       encryptionService,
-      createKeyService
+      importKeyService
     );
 
     await controller.loginVault();
@@ -222,50 +234,53 @@ describe('VaultController', () => {
     expect(token).toBe('s.token');
     expect(typeof agent).toBe('object');
 
-    expect(body).toBe(JSON.stringify(bodyObj));
+    expect(body).toEqual(bodyObj);
+
     expect(result).toBe('ciphertext');
   });
 
-  test('createKeyInVault() uses Vault login token, proper URL and stringified body', async () => {
+  test('importKeyInVault() uses Vault login token, proper URL and passes body as object', async () => {
     const controller = new VaultController(
       tokenSignService,
       authService,
       credentialsService,
       encryptionService,
-      createKeyService
+      importKeyService
     );
 
     await controller.loginVault();
 
-    const keyName = 'my-key';
-
+    const keyName = 'client-01-public-key';
     const bodyObj = {
-      type: 'aes256-gcm96',
-      convergent_encryption: false,
-      derived: false,
+      type: 'rsa-2048',
+      public_key:
+        '-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqh...\n-----END PUBLIC KEY-----\n',
+      allow_rotation: false,
       exportable: false,
       allow_plaintext_backup: false,
     };
 
-    await controller.createKeyInVault(keyName, bodyObj as any);
+    await controller.importKeyInVault(keyName, bodyObj as any);
 
-    expect(createKeyService.createKey).toHaveBeenCalledTimes(1);
-    const [url, token, agent, body] = createKeyService.createKey.mock.calls[0];
+    expect(importKeyService.importKey).toHaveBeenCalledTimes(1);
+    const [url, token, agent, body] = importKeyService.importKey.mock.calls[0];
 
-    expect(url).toBe(`https://vault.local:9300/v1/transit/keys/${keyName}`);
+    expect(url).toBe(
+      `https://vault.local:9300/v1/transit/keys/${keyName}/import`
+    );
     expect(token).toBe('s.token');
     expect(typeof agent).toBe('object');
 
-    expect(body).toBe(JSON.stringify(bodyObj));
+    expect(body).toEqual(bodyObj);
   });
 
-  test('register() register events handlers for services', () => {
+  test('register() registers events handlers for services', () => {
     const controller = new VaultController(
       tokenSignService,
       authService,
       credentialsService,
       encryptionService,
-      createKeyService
+      importKeyService
     );
 
     controller.register();

@@ -90,10 +90,15 @@ export interface VaultEncryptPayload {
 }
 
 // Define the structure of the create key payload
-export interface VaultCreateKeyPayload {
-  type: string;
-  convergent_encryption: boolean;
-  derived: boolean;
-  exportable: boolean;
-  allow_plaintext_backup: boolean;
+export interface VaultTransitImportRsaPublicKeyPayload {
+  type: 'rsa-2048' | 'rsa-3072' | 'rsa-4096';
+  public_key: string;
+  allow_rotation?: boolean;
+  exportable?: boolean;
+  allow_plaintext_backup?: boolean;
+}
+
+// Define the structure of the login payload
+export interface VaultLoginPayload {
+  name: string;
 }

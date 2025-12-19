@@ -21,7 +21,7 @@ import { VaultAuthService } from '../../src/services/VaultAuthService';
 import { VaultSignService } from '../../src/services/VaultSignService';
 import { VaultCredentialsService } from '../../src/services/VaultCredentialsService';
 import { EncryptionService } from '../../src/services/EncryptionService';
-import { VaultCreateKeyService } from '../../src/services/VaultCreateKeyService';
+import { VaultImportKeyService } from '../../src/services/VaultImportKeyService';
 
 const b64 = (buf: Buffer) => buf.toString('base64');
 const __filename = fileURLToPath(import.meta.url);
@@ -83,7 +83,7 @@ describe('VaultController - integration with Vault', () => {
       new VaultAuthService(),
       new VaultCredentialsService(),
       new EncryptionService(),
-      new VaultCreateKeyService()
+      new VaultImportKeyService()
     );
 
     await controller.loginVault();
@@ -103,7 +103,7 @@ describe('VaultController - integration with Vault', () => {
       },
     };
 
-    await controller.createOrUpdateCredentialInVault(pathInVault, body);
+    await controller.createOrUpdateCredentialInVault(pathInVault, body as any);
 
     const secret = await controller.getCredentialFromVault(pathInVault);
     const payload =
@@ -113,31 +113,39 @@ describe('VaultController - integration with Vault', () => {
     expect(payload.answer).toBe('42');
   }, 20000);
 
-  it('creates a transit key (idempotent-ish)', async () => {
-    const keyName = 'integration-test-key';
+  it('imports a public RSA key into Transit (idempotent-ish)', async () => {
+    const keyName = 'integration-test-client-public-key';
+
+    const publicKeyPem = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwf3Xqv1o9gqgkq5B9d9A
+qg1+Kf3m1mB9GxjXj8a8b1Qx9Z8z3sN1lq0b+u0n3b2u3gY2oVQhQp5vCw5c9n4c
+m7cXJfT6v9o3q3Q5o1mJvK3c+R8y8Jv8JtR0mBvC0mBvC0mBvC0mBvC0mBvC0mBv
+C0mBvC0mBvC0mBvC0mBvC0mBvCwIDAQAB
+-----END PUBLIC KEY-----`;
 
     const body = {
-      type: 'aes256-gcm96',
-      convergent_encryption: false,
-      derived: false,
+      type: 'rsa-2048',
+      public_key: publicKeyPem,
+      allow_rotation: false,
       exportable: false,
       allow_plaintext_backup: false,
     };
 
     try {
-      await controller.createKeyInVault(keyName, body as any);
+      await controller.importKeyInVault(keyName, body as any);
     } catch (e: any) {
       const msg = String(e?.message ?? '');
       const alreadyExists =
         msg.toLowerCase().includes('already exists') ||
         msg.toLowerCase().includes('existing') ||
-        msg.toLowerCase().includes('key already');
+        msg.toLowerCase().includes('key already') ||
+        msg.toLowerCase().includes('path is already in use');
       if (!alreadyExists) throw e;
     }
   }, 20000);
 
-  it('encrypts plaintext using Transit engine', async () => {
-    const keyName = 'integration-test-key';
+  it('encrypts plaintext using Transit engine (requires an existing symmetric key)', async () => {
+    const keyName = 'integration-test-client-public-key';
 
     const plaintext = 'the quick brown fox';
     const plaintextB64 = Buffer.from(plaintext, 'utf8').toString('base64');
@@ -163,6 +171,7 @@ describe('VaultController - integration with Vault', () => {
     expect(signature.length).toBeGreaterThan(0);
     expect(signature).toContain('vault:');
   }, 20000);
+
   it('has seeded KV smoke entry on start', async () => {
     const secret = await controller.getCredentialFromVault('smoke/seed');
     const payload =

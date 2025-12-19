@@ -15,7 +15,7 @@
 import { jest } from '@jest/globals';
 import axios from 'axios';
 import { EncryptionService } from '../../src/services/EncryptionService';
-import type { VaultEncryptPayload } from '../../src/services/EncryptionService';
+import type { VaultEncryptPayload } from '../../src/types/vault_types';
 
 jest.mock('axios');
 
@@ -38,13 +38,10 @@ describe('EncryptionService', () => {
     const url = 'https://vault.local:9300/v1/transit/encrypt/my-key';
     const token = 's.token';
 
-    // Vault expects base64 for plaintext
     const plaintextB64 = Buffer.from('the quick brown fox', 'utf8').toString(
       'base64'
     );
-    const payload: VaultEncryptPayload = { plaintext: plaintextB64 };
-
-    const body = JSON.stringify(payload);
+    const body: VaultEncryptPayload = { plaintext: plaintextB64 };
 
     const result = await service.encryptData(url, token, agent, body);
 
@@ -63,7 +60,7 @@ describe('EncryptionService', () => {
   it('encryptData() throws error with Vault error message', async () => {
     (axios.post as jest.MockedFunction<typeof axios.post>).mockRejectedValue({
       response: { data: 'permission denied' },
-    });
+    } as any);
 
     const url = 'https://vault.local:9300/v1/transit/encrypt/my-key';
     const token = 's.token';
@@ -71,12 +68,25 @@ describe('EncryptionService', () => {
     const plaintextB64 = Buffer.from('the quick brown fox', 'utf8').toString(
       'base64'
     );
-    const payload: VaultEncryptPayload = { plaintext: plaintextB64 };
-
-    const body = JSON.stringify(payload);
+    const body: VaultEncryptPayload = { plaintext: plaintextB64 };
 
     await expect(service.encryptData(url, token, agent, body)).rejects.toThrow(
       'permission denied'
+    );
+  });
+
+  it('encryptData() throws stringified error when Vault returns JSON error body', async () => {
+    (axios.post as jest.MockedFunction<typeof axios.post>).mockRejectedValue({
+      response: { data: { errors: ['invalid base64'] } },
+    } as any);
+
+    const url = 'https://vault.local:9300/v1/transit/encrypt/my-key';
+    const token = 's.token';
+
+    const body: VaultEncryptPayload = { plaintext: '!!!' };
+
+    await expect(service.encryptData(url, token, agent, body)).rejects.toThrow(
+      JSON.stringify({ errors: ['invalid base64'] })
     );
   });
 });

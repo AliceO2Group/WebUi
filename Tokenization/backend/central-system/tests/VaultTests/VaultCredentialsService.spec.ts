@@ -15,6 +15,10 @@
 import { jest } from '@jest/globals';
 import axios from 'axios';
 import { VaultCredentialsService } from '../../src/services/VaultCredentialsService';
+import type {
+  VaultKvWritePayload,
+  VaultReadResponse,
+} from '../../src/types/vault_types';
 
 jest.mock('axios');
 
@@ -27,10 +31,24 @@ describe('VaultCredentialsService', () => {
     service = new VaultCredentialsService();
   });
 
-  it('getCredential() correct GET request with JSON answer', async () => {
+  it('getCredential() sends correct GET request and returns VaultReadResponse', async () => {
+    const response: VaultReadResponse = {
+      data: {
+        data: { foo: 'bar', answer: 42 },
+        metadata: {
+          created_time: '2025-01-01T00:00:00Z',
+          custom_metadata: {},
+          deletion_time: '',
+          destroyed: false,
+          version: 1,
+        },
+      },
+    };
+
     (axios.get as jest.MockedFunction<typeof axios.get>).mockResolvedValue({
-      data: { data: { foo: 'bar', answer: 42 } },
+      data: response,
     } as any);
+
     const url = 'https://vault.local:9300/v1/secret/data/db/central-system';
     const token = 's.token';
 
@@ -45,15 +63,13 @@ describe('VaultCredentialsService', () => {
       httpsAgent: agent,
     });
 
-    expect(result).toEqual({
-      data: { foo: 'bar', answer: 42 },
-    });
+    expect(result).toEqual(response);
   });
 
-  it('getCredential() HTTP error upon ok === false', async () => {
+  it('getCredential() throws error when Vault returns error response', async () => {
     (axios.get as jest.MockedFunction<typeof axios.get>).mockRejectedValue({
       response: { data: 'error' },
-    });
+    } as any);
 
     const url = 'https://vault.local:9300/v1/secret/data/db/central-system';
     const token = 's.token';
@@ -63,17 +79,21 @@ describe('VaultCredentialsService', () => {
     );
   });
 
-  it('createOrUpdateCredential() correct POST request', async () => {
+  it('createOrUpdateCredential() sends correct POST request', async () => {
     (axios.post as jest.MockedFunction<typeof axios.post>).mockResolvedValue({
       data: {},
     } as any);
 
     const url = 'https://vault.local:9300/v1/secret/data/db/central-system';
     const token = 's.token';
-    const bodyObj = { data: { foo: 'bar' } };
-    const body = JSON.stringify(bodyObj);
 
-    await service.createOrUpdateCredential(url, token, agent, body);
+    const body: VaultKvWritePayload = {
+      data: { foo: 'bar' },
+    };
+
+    await expect(
+      service.createOrUpdateCredential(url, token, agent, body)
+    ).resolves.toBeUndefined();
 
     expect(axios.post).toHaveBeenCalledTimes(1);
     expect(axios.post).toHaveBeenCalledWith(url, body, {
@@ -85,17 +105,37 @@ describe('VaultCredentialsService', () => {
     });
   });
 
-  it('createOrUpdateCredential() HTTP error upon ok === false', async () => {
+  it('createOrUpdateCredential() throws error when Vault returns error response', async () => {
     (axios.post as jest.MockedFunction<typeof axios.post>).mockRejectedValue({
       response: { data: 'error' },
-    });
+    } as any);
 
     const url = 'https://vault.local:9300/v1/secret/data/db/central-system';
     const token = 's.token';
-    const body = JSON.stringify({ data: { foo: 'bar' } });
+
+    const body: VaultKvWritePayload = {
+      data: { foo: 'bar' },
+    };
 
     await expect(
       service.createOrUpdateCredential(url, token, agent, body)
     ).rejects.toThrow('error');
+  });
+
+  it('createOrUpdateCredential() throws stringified error when Vault returns JSON error body', async () => {
+    (axios.post as jest.MockedFunction<typeof axios.post>).mockRejectedValue({
+      response: { data: { errors: ['permission denied'] } },
+    } as any);
+
+    const url = 'https://vault.local:9300/v1/secret/data/db/central-system';
+    const token = 's.token';
+
+    const body: VaultKvWritePayload = {
+      data: { foo: 'bar' },
+    };
+
+    await expect(
+      service.createOrUpdateCredential(url, token, agent, body)
+    ).rejects.toThrow(JSON.stringify({ errors: ['permission denied'] }));
   });
 });

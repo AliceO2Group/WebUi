@@ -21,7 +21,7 @@ import { fileURLToPath } from 'url';
 import { TokensGetService } from '../services/TokensGetService.js';
 import { VaultSignService } from '../services/VaultSignService.js';
 import { EncryptionService } from '../services/EncryptionService.js';
-import { VaultCreateKeyService } from '../services/VaultCreateKeyService.js';
+import { VaultImportKeyService } from '../services/VaultImportKeyService.js';
 import { db } from '../lib/database/Database.js';
 import { SequelizeDatabase } from '../lib/database/SequelizeDatabase.js';
 import { VaultAuthService } from '../services/VaultAuthService.js';
@@ -89,7 +89,7 @@ class CentralSystem {
       new VaultAuthService(),
       new VaultCredentialsService(),
       new EncryptionService(),
-      new VaultCreateKeyService()
+      new VaultImportKeyService()
     );
     this.vaultController.register();
     this.vaultController

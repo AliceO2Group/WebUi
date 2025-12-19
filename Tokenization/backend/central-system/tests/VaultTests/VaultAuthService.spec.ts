@@ -34,11 +34,12 @@ describe('VaultAuthService', () => {
       data: { auth: { client_token: fakeToken } },
     } as any);
 
-    const body = JSON.stringify({ name: 'role' });
+    const body = { name: 'role' }; 
     const url = 'https://vault.local:9300/v1/auth/cert/login';
 
     const result = await service.login(url, agent, body);
 
+    expect(axios.post).toHaveBeenCalledTimes(1);
     expect(axios.post).toHaveBeenCalledWith(url, body, {
       headers: { 'content-type': 'application/json' },
       httpsAgent: agent,
@@ -46,17 +47,19 @@ describe('VaultAuthService', () => {
     expect(result).toBe(fakeToken);
   });
 
-  it('login() throws error when response.ok === false', async () => {
+  it('login() throws error when Vault returns error response', async () => {
     (axios.post as jest.MockedFunction<typeof axios.post>).mockRejectedValue({
       response: { data: 'error' },
-    });
+    } as any);
 
-    await expect(
-      service.login('https://vault.local:9300/v1/auth/cert/login', agent, '{}')
-    ).rejects.toThrow('error');
+    const url = 'https://vault.local:9300/v1/auth/cert/login';
+
+    await expect(service.login(url, agent, { name: 'role' })).rejects.toThrow(
+      'error'
+    );
   });
 
-  it('renew() connects with proper token and returns renwed token', async () => {
+  it('renew() connects with proper token and returns renewed token', async () => {
     const fakeToken = 's.renewed';
 
     (axios.post as jest.MockedFunction<typeof axios.post>).mockResolvedValue({
@@ -68,6 +71,7 @@ describe('VaultAuthService', () => {
 
     const result = await service.renew(url, token, agent, null);
 
+    expect(axios.post).toHaveBeenCalledTimes(1);
     expect(axios.post).toHaveBeenCalledWith(url, null, {
       headers: {
         'content-type': 'application/json',
@@ -76,5 +80,18 @@ describe('VaultAuthService', () => {
       httpsAgent: agent,
     });
     expect(result).toBe(fakeToken);
+  });
+
+  it('renew() throws error when Vault returns error response', async () => {
+    (axios.post as jest.MockedFunction<typeof axios.post>).mockRejectedValue({
+      response: { data: { errors: ['permission denied'] } },
+    } as any);
+
+    const url = 'https://vault.local:9300/v1/auth/token/renew-self';
+    const token = 's.old';
+
+    await expect(service.renew(url, token, agent, null)).rejects.toThrow(
+      JSON.stringify({ errors: ['permission denied'] })
+    );
   });
 });

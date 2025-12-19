@@ -14,23 +14,26 @@
 
 import { Agent } from 'https';
 import axios from 'axios';
-import { VaultEncryptResponse } from '../types/vault_types';
+import {
+  VaultEncryptResponse,
+  VaultEncryptPayload,
+} from '../types/vault_types';
 
 export class EncryptionService {
-    /**
-     * @description Encrypts data by sending it to an external vault service.
-     * @param url - The URL of the external vault service.
-     * @param token - The client token for authentication.
-     * @param agent - The HTTPS agent to use for the request.
-     * @param body - The body of the encrypt request.
-     * @return A promise that resolves to the ciphertext returned by the vault service.
-     * @throws Will throw an error if encryption fails.
-     */
+  /**
+   * @description Encrypts data by sending it to an external vault service.
+   * @param url - The URL of the external vault service.
+   * @param token - The client token for authentication.
+   * @param agent - The HTTPS agent to use for the request.
+   * @param body - The body of the encrypt request.
+   * @return A promise that resolves to the ciphertext returned by the vault service.
+   * @throws Will throw an error if encryption fails.
+   */
   public async encryptData(
     url: string,
     token: string,
     agent: Agent,
-    body: Buffer | string | NodeJS.ReadableStream | null
+    body: VaultEncryptPayload
   ): Promise<string> {
     try {
       const resp = await axios.post<VaultEncryptResponse>(url, body, {

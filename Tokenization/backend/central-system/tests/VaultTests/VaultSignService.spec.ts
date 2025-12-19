@@ -38,11 +38,9 @@ describe('VaultSignService', () => {
     const token = 's.token';
 
     const payload = { sub: '123' };
-
     const input = Buffer.from(JSON.stringify(payload), 'utf8').toString(
       'base64'
     );
-
     const body = { input };
 
     const result = await service.signToken(url, token, agent, body);
@@ -62,7 +60,7 @@ describe('VaultSignService', () => {
   it('signToken() throws error when Vault returns error response', async () => {
     (axios.post as jest.MockedFunction<typeof axios.post>).mockRejectedValue({
       response: { data: 'error' },
-    });
+    } as any);
 
     const url = 'https://vault.local:9300/v1/transit/sign/signing-key';
     const token = 's.token';
@@ -75,6 +73,21 @@ describe('VaultSignService', () => {
 
     await expect(service.signToken(url, token, agent, body)).rejects.toThrow(
       'error'
+    );
+  });
+
+  it('signToken() throws stringified error when Vault returns JSON error body', async () => {
+    (axios.post as jest.MockedFunction<typeof axios.post>).mockRejectedValue({
+      response: { data: { errors: ['permission denied'] } },
+    } as any);
+
+    const url = 'https://vault.local:9300/v1/transit/sign/signing-key';
+    const token = 's.token';
+
+    const body = { input: Buffer.from('x', 'utf8').toString('base64') };
+
+    await expect(service.signToken(url, token, agent, body)).rejects.toThrow(
+      JSON.stringify({ errors: ['permission denied'] })
     );
   });
 });

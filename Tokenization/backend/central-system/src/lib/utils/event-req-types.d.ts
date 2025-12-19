@@ -34,14 +34,14 @@ type VaultEncryptPayloadReq = {
   claims?: Record<string, unknown>;
 };
 
-type VaultCreateKeyReq = {
+type VaultImportKeyReq = {
   keyName: string;
   body: {
-    type: string;
-    convergent_encryption: boolean;
-    derived: boolean;
-    exportable: boolean;
-    allow_plaintext_backup: boolean;
+    type: 'rsa-2048' | 'rsa-3072' | 'rsa-4096';
+    public_key: string;
+    allow_rotation?: boolean;
+    exportable?: boolean;
+    allow_plaintext_backup?: boolean;
   };
   claims?: Record<string, unknown>;
 };
@@ -51,5 +51,5 @@ export type {
   GetCredentialReq,
   CreateOrUpdateCredentialReq,
   VaultEncryptPayloadReq,
-  VaultCreateKeyReq,
+  VaultImportKeyReq,
 };

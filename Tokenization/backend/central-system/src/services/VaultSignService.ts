@@ -16,6 +16,7 @@ import { Agent } from 'https';
 import axios from 'axios';
 
 import { SignResponse } from '../types/vault_types';
+import { SignPayload } from '../types/vault_types';
 
 /**
  * @description Service for signing tokens using an external vault service.
@@ -34,7 +35,7 @@ export class VaultSignService {
     url: string,
     token: string,
     agent: Agent,
-    body: Buffer | string | NodeJS.ReadableStream | null
+    body: SignPayload
   ): Promise<string> {
     try {
       const resp = await axios.post<SignResponse>(url, body, {
