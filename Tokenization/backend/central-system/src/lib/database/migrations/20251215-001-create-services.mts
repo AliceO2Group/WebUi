@@ -38,6 +38,14 @@ export async function up(
       type: Sequelize.STRING(255),
       allowNull: false,
     },
+    issued_at: {
+      type: Sequelize.DATE,
+      allowNull: true,
+    },
+    exp_at: {
+      type: Sequelize.DATE,
+      allowNull: true,
+    },
     created_at: {
       type: Sequelize.DATE,
       allowNull: false,
@@ -62,9 +70,21 @@ export async function up(
   await q.addIndex('services', ['created_at'], {
     name: 'services_created_at_idx',
   });
+  await q.addIndex('services', ['issued_at'], {
+    name: 'services_issued_at_idx',
+  });
+  await q.addIndex('services', ['exp_at'], {
+    name: 'services_exp_at_idx',
+  });
 }
 
 export async function down(q: QueryInterface) {
+  try {
+    await q.removeIndex('services', 'services_exp_at_idx');
+  } catch {}
+  try {
+    await q.removeIndex('services', 'services_issued_at_idx');
+  } catch {}
   try {
     await q.removeIndex('services', 'services_created_at_idx');
   } catch {}

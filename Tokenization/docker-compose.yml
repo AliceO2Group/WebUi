@@ -62,7 +62,6 @@ services:
       target: reverse-proxy
     ports:
       - '8080:8080'
-      - '4041:4041'
     depends_on:
       backend:
         condition: service_healthy

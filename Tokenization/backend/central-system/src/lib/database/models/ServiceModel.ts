@@ -20,6 +20,10 @@ class Service extends Model {
   declare name: string;
   declare serial_number: string;
   declare ip_address: string;
+
+  declare issued_at: Date | null;
+  declare exp_at: Date | null;
+
   declare created_at: Date;
   declare updated_at: Date;
 }
@@ -46,6 +50,16 @@ export default (sequelize: Sequelize): typeof Service =>
         type: DataTypes.STRING(45),
         allowNull: false,
       },
+
+      issued_at: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      exp_at: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,
@@ -69,6 +83,8 @@ export default (sequelize: Sequelize): typeof Service =>
         { name: 'services_serial_number_idx', fields: ['serial_number'] },
         { name: 'services_ip_address_idx', fields: ['ip_address'] },
         { name: 'services_created_at_idx', fields: ['created_at'] },
+        { name: 'services_issued_at_idx', fields: ['issued_at'] },
+        { name: 'services_exp_at_idx', fields: ['exp_at'] },
       ],
     }
   );

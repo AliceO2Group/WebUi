@@ -34,6 +34,10 @@ export async function up(
     name: `client-${String(idx + 1).padStart(2, '0')}`,
     serial_number: serial,
     ip_address: `10.10.0.${11 + idx}`,
+
+    issued_at: Sequelize.literal('CURRENT_TIMESTAMP'),
+    exp_at: Sequelize.literal('DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 YEAR)'),
+
     created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
     updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
   }));
