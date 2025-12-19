@@ -16,14 +16,17 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { revokeToken, revokeTokensBulk } from '~/feature/token/services/tokens.service';
 import type { TokenFilterValues } from '~/feature/token/types/token-filters';
+import { useSession } from '~/feature/auth/hooks/session';
 
 /**
  * Triggers revocation of a single token and refreshes cached lists afterwards.
  */
 export function useRevokeTokenMutation() {
+  const { token } = useSession();
+  
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (tokenId: string) => revokeToken(tokenId),
+    mutationFn: (tokenId: string) => revokeToken(tokenId, token),
     onSuccess: () => {
       queryClient.invalidateQueries({ predicate: ({ queryKey }) => Array.isArray(queryKey) && queryKey[0] === 'tokens' && queryKey.includes('logs') });
     },
@@ -34,9 +37,11 @@ export function useRevokeTokenMutation() {
  * Triggers revocation of all tokens matching the provided filters.
  */
 export function useBulkRevokeMutation() {
+  const { token } = useSession();
+  
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (filters: TokenFilterValues) => revokeTokensBulk(filters),
+    mutationFn: (filters: TokenFilterValues) => revokeTokensBulk(filters, token),
     onSuccess: () => {
       queryClient.invalidateQueries({ predicate: ({ queryKey }) => Array.isArray(queryKey) && queryKey[0] === 'tokens' && queryKey.includes('logs') });
     },

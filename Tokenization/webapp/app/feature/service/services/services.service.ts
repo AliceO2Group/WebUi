@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import { mockServices } from '~/feature/service/mocks/services.mock';
 import type { Service } from '~/feature/service/types/service';
 import type { ServiceFilterValues } from '~/feature/service/types/service-filters';
 
@@ -20,31 +19,35 @@ export type ServicesQueryResponse = {
   services: Service[];
 };
 
-export async function fetchServices(_filters: ServiceFilterValues | null): Promise<ServicesQueryResponse> {
+export async function fetchServices(filters: ServiceFilterValues | null, token?: string | null): Promise<ServicesQueryResponse> {
   const queryString = new URLSearchParams();
   
-  if(_filters) {
-    if (_filters.issuedBefore) {
-      queryString.append('issuedBefore', _filters.issuedBefore);
+  if(filters) {
+    if (filters.issuedBefore) {
+      queryString.append('issuedBefore', filters.issuedBefore);
     }
-    if (_filters.issuedAfter) {
-      queryString.append('issuedAfter', _filters.issuedAfter);
+    if (filters.issuedAfter) {
+      queryString.append('issuedAfter', filters.issuedAfter);
     }
-    if (_filters.expiresBefore) {
-      queryString.append('expiresBefore', _filters.expiresBefore);
+    if (filters.expiresBefore) {
+      queryString.append('expiresBefore', filters.expiresBefore);
     }
-    if (_filters.expiresAfter) {
-      queryString.append('expiresAfter', _filters.expiresAfter);
+    if (filters.expiresAfter) {
+      queryString.append('expiresAfter', filters.expiresAfter);
     }
-    if (_filters.search) {
-      queryString.append('search', _filters.search);
+    if (filters.search) {
+      queryString.append('search', filters.search);
     }
-    if (_filters.ordering.length > 0) {
-      queryString.append('ordering', _filters.ordering.map((order) => `${order.field}:${order.direction}`).join(','));
+    if (filters.ordering.length > 0) {
+      queryString.append('ordering', filters.ordering.map((order) => `${order.field}:${order.direction}`).join(','));
     }
   }
+  if (token) {
+    queryString.append('token', token);
+  }
 
-  const url = `/api/services?${queryString.toString()}`;
+  const query = queryString.toString();
+  const url = query ? `/api/services?${query}` : '/api/services';
 
   const res = await fetch(url);
   const allServices: Service[] = await res.json();

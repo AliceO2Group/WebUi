@@ -18,16 +18,20 @@ import type { Service } from "~/feature/service/types/service";
  * Placeholder service returning a mocked list of available services until the
  * real backend endpoint is available.
  */
-export async function fetchAvailableServices(_searchTerm = ''): Promise<Service[]> {
+export async function fetchAvailableServices(_searchTerm = '', token?: string | null): Promise<Service[]> {
 
   const params = new URLSearchParams();
 
   if(_searchTerm !== '') {
     params.append('searchTerm', _searchTerm);
   }
+  if (token) {
+    params.append('token', token);
+  }
 
   const queryString = params.toString();
-  const response = await fetch(`/api/services?${queryString}`);
+  const url = queryString ? `/api/services?${queryString}` : '/api/services';
+  const response = await fetch(url);
 
   const services: Service[] = await response.json();
 

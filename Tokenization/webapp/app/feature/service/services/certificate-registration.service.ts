@@ -17,7 +17,7 @@ import type { ServiceCertificatePreview, ServiceRegistrationResult } from '~/fea
 /**
  * Simulates uploading a certificate file and returns a preview payload with pending status.
  */
-export async function uploadServiceCertificate(file: File): Promise<ServiceCertificatePreview> {
+export async function uploadServiceCertificate(file: File, token?: string | null): Promise<ServiceCertificatePreview> {
   function fileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -29,7 +29,14 @@ export async function uploadServiceCertificate(file: File): Promise<ServiceCerti
   }
 
   const base64 = await fileToBase64(file);
-  const response = await fetch('/api/certificate', {
+  const params = new URLSearchParams();
+  if (token) {
+    params.append('token', token);
+  }
+  const query = params.toString();
+  const url = query ? `/api/certificate?${query}` : '/api/certificate';
+
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -49,8 +56,15 @@ export async function uploadServiceCertificate(file: File): Promise<ServiceCerti
 /**
  * Simulates confirming registration of a pending certificate.
  */
-export async function confirmServiceCertificate(certificateId: string): Promise<ServiceRegistrationResult> {
-  const response = await fetch(`/api/certificate/register`, { 
+export async function confirmServiceCertificate(certificateId: string, token?: string | null): Promise<ServiceRegistrationResult> {
+  const params = new URLSearchParams();
+  if (token) {
+    params.append('token', token);
+  }
+  const query = params.toString();
+  const url = query ? `/api/certificate/register?${query}` : '/api/certificate/register';
+
+  const response = await fetch(url, { 
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

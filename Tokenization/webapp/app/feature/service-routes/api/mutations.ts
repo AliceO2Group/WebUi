@@ -17,11 +17,14 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { banServiceRoute, banServiceRoutesBulk, registerServiceRoute, type ServiceRouteRegistrationPayload } from '~/feature/service-routes/services/service-routes.service';
 import type { ServiceRouteFilterValues } from '~/feature/service-routes/types/service-route-filters';
 import { serviceRoutesQueryKeys } from './queries';
+import { useSession } from '~/feature/auth/hooks/session';
 
 export function useBanServiceRouteMutation() {
+  const { token } = useSession();
+
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (routeId: string) => banServiceRoute(routeId),
+    mutationFn: (routeId: string) => banServiceRoute(routeId, token),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: serviceRoutesQueryKeys.lists });
     },
@@ -29,9 +32,11 @@ export function useBanServiceRouteMutation() {
 }
 
 export function useBulkBanServiceRoutesMutation() {
+  const { token } = useSession();
+
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (filters: ServiceRouteFilterValues) => banServiceRoutesBulk(filters),
+    mutationFn: (filters: ServiceRouteFilterValues) => banServiceRoutesBulk(filters, token),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: serviceRoutesQueryKeys.lists });
     },
@@ -39,9 +44,11 @@ export function useBulkBanServiceRoutesMutation() {
 }
 
 export function useRegisterServiceRouteMutation() {
+  const { token } = useSession();
+
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: ServiceRouteRegistrationPayload) => registerServiceRoute(payload),
+    mutationFn: (payload: ServiceRouteRegistrationPayload) => registerServiceRoute(payload, token),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: serviceRoutesQueryKeys.lists });
     },

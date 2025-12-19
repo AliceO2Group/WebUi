@@ -24,7 +24,11 @@ export type TokensQueryResponse = {
 /**
  *
  */
-export async function fetchTokens(filters: TokenFilterValues | null, status?: TokenStatus): Promise<TokensQueryResponse> {
+export async function fetchTokens(
+  filters: TokenFilterValues | null,
+  status?: TokenStatus,
+  token?: string | null,
+): Promise<TokensQueryResponse> {
   const queryString = new URLSearchParams();
   if (status) {
     queryString.append('status', status);
@@ -52,8 +56,12 @@ export async function fetchTokens(filters: TokenFilterValues | null, status?: To
       queryString.append('ordering', filters.ordering.map((order) => `${order.field}:${order.direction}`).join(','));
     }
   }
+  if (token) {
+    queryString.append('token', token);
+  }
   
-  const url = `/api/tokens?${queryString.toString()}`;
+  const query = queryString.toString();
+  const url = query ? `/api/tokens?${query}` : '/api/tokens';
   
   const res = await fetch(url);
   const allTokens: Token[] = await res.json();
@@ -65,14 +73,28 @@ export async function fetchTokens(filters: TokenFilterValues | null, status?: To
 /**
  * Returns a single token by its identifier.
  */
-export async function fetchTokenById(tokenId: string): Promise<Token> {
-  const res = await fetch(`/api/tokens/${tokenId}`);
-  const token: Token =  await res.json();
-  return token;
+export async function fetchTokenById(tokenId: string, token?: string | null): Promise<Token> {
+  const params = new URLSearchParams();
+  if (token) {
+    params.append('token', token);
+  }
+  const query = params.toString();
+  const url = query ? `/api/tokens/${tokenId}?${query}` : `/api/tokens/${tokenId}`;
+
+  const res = await fetch(url);
+  const res_token: Token =  await res.json();
+  return res_token;
 }
 
-export async function fetchTokenLogs(tokenId: string): Promise<TokenLogEntry[]> {
-  const res = await fetch(`/api/tokens/${tokenId}/logs`);
+export async function fetchTokenLogs(tokenId: string, token?: string | null): Promise<TokenLogEntry[]> {
+  const params = new URLSearchParams();
+  if (token) {
+    params.append('token', token);
+  }
+  const query = params.toString();
+  const url = query ? `/api/tokens/${tokenId}/logs?${query}` : `/api/tokens/${tokenId}/logs`;
+
+  const res = await fetch(url);
   const logs: TokenLogEntry[] =  await res.json();
   return logs;
 }
@@ -80,8 +102,15 @@ export async function fetchTokenLogs(tokenId: string): Promise<TokenLogEntry[]> 
 /**
  *
  */
-export async function revokeToken(tokenId: string) {
-  const res = await fetch(`/api/tokens/${tokenId}`, {
+export async function revokeToken(tokenId: string, token?: string | null) {
+  const params = new URLSearchParams();
+  if (token) {
+    params.append('token', token);
+  }
+  const query = params.toString();
+  const url = query ? `/api/tokens/${tokenId}?${query}` : `/api/tokens/${tokenId}`;
+
+  const res = await fetch(url, {
     method: 'DELETE',
   });
   const success = await res.json();
@@ -91,7 +120,7 @@ export async function revokeToken(tokenId: string) {
 /**
  *
  */
-export async function revokeTokensBulk(filters: TokenFilterValues) {
+export async function revokeTokensBulk(filters: TokenFilterValues, token?: string | null) {
   const queryString = new URLSearchParams();
 
   queryString.append('status', 'active');
@@ -119,8 +148,12 @@ export async function revokeTokensBulk(filters: TokenFilterValues) {
       queryString.append('ordering', filters.ordering.map((order) => `${order.field}:${order.direction}`).join(','));
     }
   }
+  if (token) {
+    queryString.append('token', token);
+  }
   
-  const url = `/api/tokens?${queryString.toString()}`;
+  const query = queryString.toString();
+  const url = query ? `/api/tokens?${query}` : '/api/tokens';
 
   const res = await fetch(url, {
     method: 'DELETE',

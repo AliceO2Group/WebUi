@@ -17,6 +17,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchServiceRoutes } from '~/feature/service-routes/services/service-routes.service';
 import { fetchAvailableServices } from '~/feature/token/services/service-options.service';
 import type { ServiceRouteFilterValues } from '~/feature/service-routes/types/service-route-filters';
+import { useSession } from '~/feature/auth/hooks/session';
 
 const serviceRouteListsKey = ['service-routes', 'list'] as const;
 
@@ -32,10 +33,12 @@ type UseServiceRoutesQueryParams = {
 };
 
 export function useServiceRoutesQuery({ filters, enabled = true }: UseServiceRoutesQueryParams) {
+  const { token } = useSession();
+
   return useQuery({
     queryKey: serviceRoutesQueryKeys.list(filters),
     enabled,
-    queryFn: () => fetchServiceRoutes(filters),
+    queryFn: () => fetchServiceRoutes(filters, token),
   });
 }
 
@@ -45,10 +48,12 @@ type UseRouteServiceOptionsParams = {
 };
 
 export function useRouteServiceOptionsQuery(params?: UseRouteServiceOptionsParams) {
+  const { token } = useSession();
+
   const searchTerm = params?.searchTerm ?? '';
   return useQuery({
     queryKey: serviceRoutesQueryKeys.serviceOptionsSearch(searchTerm),
-    queryFn: () => fetchAvailableServices(searchTerm),
+    queryFn: () => fetchAvailableServices(searchTerm, token),
     enabled: params?.enabled ?? true,
     staleTime: 5 * 60 * 1000,
   });

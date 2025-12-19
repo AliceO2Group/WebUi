@@ -18,6 +18,8 @@ import { fetchAvailableServices } from '~/feature/token/services/service-options
 import { fetchTokenById, fetchTokenLogs, fetchTokens } from '~/feature/token/services/tokens.service';
 import type { TokenStatus } from '~/feature/token/types/token';
 import type { TokenFilterValues } from '~/feature/token/types/token-filters';
+import { useSession } from '~/feature/auth/hooks/session';
+
 
 const tokenListsKey = ['tokens', 'list'] as const;
 
@@ -37,10 +39,12 @@ type UseServiceOptionsParams = {
  * Fetches the list of services available for token filters.
  */
 export function useTokenServiceOptionsQuery(params?: UseServiceOptionsParams) {
+  const { token } = useSession();
+  
   const searchTerm = params?.searchTerm ?? '';
   return useQuery({
     queryKey: tokenQueryKeys.serviceOptionsSearch(searchTerm),
-    queryFn: () => fetchAvailableServices(searchTerm),
+    queryFn: () => fetchAvailableServices(searchTerm, token),
     enabled: params?.enabled ?? true,
     staleTime: 5 * 60 * 1000,
   });
@@ -56,10 +60,12 @@ type UseTokensQueryParams = {
  * Fetches tokens matching the provided filters, returning potential errors
  */
 export function useTokensQuery({ filters, enabled = true, status }: UseTokensQueryParams) {
+  const { token } = useSession();
+  
   return useQuery({
     queryKey: tokenQueryKeys.list(filters, status),
     enabled,
-    queryFn: () => fetchTokens(filters, status),
+    queryFn: () => fetchTokens(filters, status, token),
   });
 }
 
@@ -72,10 +78,12 @@ type UseTokenDetailsQueryParams = {
  * Fetches the full details of a single token.
  */
 export function useTokenDetailsQuery({ tokenId, enabled = true }: UseTokenDetailsQueryParams) {
+  const { token } = useSession();
+  
   return useQuery({
     queryKey: tokenQueryKeys.detail(tokenId ?? ''),
     enabled: Boolean(tokenId) && enabled,
-    queryFn: () => fetchTokenById(tokenId as string),
+    queryFn: () => fetchTokenById(tokenId as string, token),
   });
 }
 
@@ -85,9 +93,11 @@ type UseTokenLogsQueryParams = {
 };
 
 export function useTokenLogsQuery({ tokenId, enabled = true }: UseTokenLogsQueryParams) {
+  const { token } = useSession();
+
   return useQuery({
     queryKey: tokenQueryKeys.logs(tokenId ?? ''),
     enabled: Boolean(tokenId) && enabled,
-    queryFn: () => fetchTokenLogs(tokenId as string),
+    queryFn: () => fetchTokenLogs(tokenId as string, token),
   });
 }

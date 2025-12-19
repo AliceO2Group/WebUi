@@ -17,16 +17,21 @@ import { useMutation } from '@tanstack/react-query';
 import { confirmServiceCertificateRenewal } from '~/feature/service/services/service-details.service';
 import { confirmServiceCertificate, uploadServiceCertificate } from '~/feature/service/services/certificate-registration.service';
 import type { ServiceCertificatePreview, ServiceRegistrationResult } from '~/feature/service/types/certificate';
+import { useSession } from '~/feature/auth/hooks/session';
 
 export function useServiceCertificateUploadMutation() {
+  const { token } = useSession();
+
   return useMutation<ServiceCertificatePreview, Error, File>({
-    mutationFn: (file: File) => uploadServiceCertificate(file),
+    mutationFn: (file: File) => uploadServiceCertificate(file, token),
   });
 }
 
 export function useServiceCertificateConfirmMutation() {
+  const { token } = useSession();
+
   return useMutation<ServiceRegistrationResult, Error, string>({
-    mutationFn: (certificateId: string) => confirmServiceCertificate(certificateId),
+    mutationFn: (certificateId: string) => confirmServiceCertificate(certificateId, token),
   });
 }
 
@@ -36,7 +41,10 @@ export type ServiceCertificateRenewConfirmPayload = {
 };
 
 export function useServiceCertificateRenewConfirmMutation() {
+  const { token } = useSession();
+
   return useMutation<ServiceRegistrationResult, Error, ServiceCertificateRenewConfirmPayload>({
-    mutationFn: ({ serviceId, certificateId }: ServiceCertificateRenewConfirmPayload) => confirmServiceCertificateRenewal(serviceId, certificateId),
+    mutationFn: ({ serviceId, certificateId }: ServiceCertificateRenewConfirmPayload) =>
+      confirmServiceCertificateRenewal(serviceId, certificateId, token),
   });
 }

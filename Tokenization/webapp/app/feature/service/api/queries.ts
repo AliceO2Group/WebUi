@@ -17,6 +17,8 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchServiceById } from '~/feature/service/services/service-details.service';
 import { fetchServices } from '~/feature/service/services/services.service';
 import type { ServiceFilterValues } from '~/feature/service/types/service-filters';
+import { useSession } from '~/feature/auth/hooks/session';
+
 
 const servicesListKey = ['services', 'list'] as const;
 const serviceDetailsKey = ['services', 'detail'] as const;
@@ -34,10 +36,12 @@ type UseServicesQueryParams = {
 };
 
 export function useServicesQuery({ filters, enabled = true }: UseServicesQueryParams) {
+  const { token } = useSession();
+
   return useQuery({
     queryKey: servicesQueryKeys.list(filters),
     enabled,
-    queryFn: () => fetchServices(filters),
+    queryFn: () => fetchServices(filters, token),
   });
 }
 
@@ -47,9 +51,11 @@ type UseServiceDetailsQueryParams = {
 };
 
 export function useServiceDetailsQuery({ serviceId, enabled = true }: UseServiceDetailsQueryParams) {
+  const { token } = useSession();
+  
   return useQuery({
     queryKey: servicesQueryKeys.detail(serviceId),
     enabled,
-    queryFn: () => fetchServiceById(serviceId),
+    queryFn: () => fetchServiceById(serviceId, token),
   });
 }
