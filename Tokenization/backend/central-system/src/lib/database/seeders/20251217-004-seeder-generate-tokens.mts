@@ -34,9 +34,9 @@ function pickMethods(idx: number): HttpMethod[] {
 function buildIatExp(now: number, methods: HttpMethod[]) {
   const ttlByMethod: Record<HttpMethod, number> = {
     GET: 3600,
-    POST: 900,
-    PUT: 1800,
-    DELETE: 600,
+    POST: 3600,
+    PUT: 3600,
+    DELETE: 3600,
   };
 
   const iat: RoutePermissions = {};
@@ -81,7 +81,7 @@ export async function up(
     const tokenObject = {
       sub: subSerial,
       aud: audSerial,
-      iss: 'central-system',
+      iss: '1B61DC5333DB0C3F1B8AABA6ABE212CA88727982',
       iat,
       exp,
       jti: `seed-jti-${subSerial}-${audSerial}-${now}-${idx}`,

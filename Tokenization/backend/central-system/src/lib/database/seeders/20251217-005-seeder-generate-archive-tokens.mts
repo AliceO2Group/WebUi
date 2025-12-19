@@ -47,9 +47,9 @@ function buildIatExpForStatus(
 
   const ttlNormal: Record<HttpMethod, number> = {
     GET: 3600,
-    POST: 900,
-    PUT: 1800,
-    DELETE: 600,
+    POST: 3600,
+    PUT: 3600,
+    DELETE: 3600,
   };
   const ttlExpired: Record<HttpMethod, number> = {
     GET: 300,
@@ -104,7 +104,7 @@ export async function up(
     const tokenObject = {
       sub: subSerial,
       aud: audSerial,
-      iss: 'central-system',
+      iss: '1B61DC5333DB0C3F1B8AABA6ABE212CA88727982',
       iat,
       exp,
       jti: `seed-arch-jti-${subSerial}-${audSerial}-${now}-${idx}`,
