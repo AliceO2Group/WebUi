@@ -14,7 +14,6 @@
 
 import type { QueryInterface } from 'sequelize';
 
-/** Umzug migration: create `system-logs` table */
 export async function up(
   q: QueryInterface,
   Sequelize: typeof import('sequelize')
@@ -63,7 +62,7 @@ export async function up(
       allowNull: true,
     },
 
-    user_id: {
+    token_id: {
       type: Sequelize.STRING(64),
       allowNull: true,
     },
@@ -115,9 +114,15 @@ export async function up(
   await q.addIndex('system-logs', ['request_id'], {
     name: 'system_logs_request_id_idx',
   });
+  await q.addIndex('system-logs', ['token_id'], {
+    name: 'system_logs_token_id_idx',
+  });
 }
 
 export async function down(q: QueryInterface) {
+  try {
+    await q.removeIndex('system-logs', 'system_logs_token_id_idx');
+  } catch {}
   try {
     await q.removeIndex('system-logs', 'system_logs_request_id_idx');
   } catch {}

@@ -14,46 +14,19 @@
 
 import type { QueryInterface } from 'sequelize';
 
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
-type RoutePermissions = Partial<Record<HttpMethod, number>>;
-
-function pickMethods(idx: number): HttpMethod[] {
-  const patterns: HttpMethod[][] = [
-    ['GET'],
-    ['GET', 'POST'],
-    ['GET', 'PUT'],
-    ['GET', 'DELETE'],
-    ['GET', 'POST', 'PUT'],
-    ['GET', 'POST', 'DELETE'],
-    ['GET', 'PUT', 'DELETE'],
-    ['GET', 'POST', 'PUT', 'DELETE'],
-  ];
-  return patterns[idx % patterns.length];
-}
-
-function buildIatExp(now: number, methods: HttpMethod[]) {
-  const ttlByMethod: Record<HttpMethod, number> = {
-    GET: 3600,
-    POST: 3600,
-    PUT: 3600,
-    DELETE: 3600,
-  };
-
-  const iat: RoutePermissions = {};
-  const exp: RoutePermissions = {};
-
-  for (const m of methods) {
-    iat[m] = now;
-    exp[m] = now + ttlByMethod[m];
-  }
-
-  return { iat, exp };
-}
+type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
 
 export async function up(
   q: QueryInterface,
   Sequelize: typeof import('sequelize')
 ) {
+  await q.bulkDelete('system-logs', {
+    request_id: { [Sequelize.Op.like]: 'seed-logs-%' },
+  } as any);
+
+  const nowDate = new Date();
+  const nowSec = Math.floor(Date.now() / 1000);
+
   const serials = [
     '0x01',
     '0x02',
@@ -67,56 +40,133 @@ export async function up(
     '0x0a',
   ];
 
-  await q.bulkDelete('tokens', {
-    audience: { [Sequelize.Op.in]: serials },
-  } as any);
-
-  const now = Math.floor(Date.now() / 1000);
-
-  const rows = serials.map((subSerial, idx) => {
-    const audSerial = serials[(idx + 3) % serials.length];
-    const methods = pickMethods(idx);
-    const { iat, exp } = buildIatExp(now - idx * 120, methods);
-
-    const tokenObject = {
-      sub: subSerial,
-      aud: audSerial,
-      iss: '1B61DC5333DB0C3F1B8AABA6ABE212CA88727982',
-      iat,
-      exp,
-      jti: `seed-jti-${subSerial}-${audSerial}-${now}-${idx}`,
-    };
-
-    return {
-      audience: audSerial,
-      subject: subSerial,
-      token_object: JSON.stringify(tokenObject),
+  const rows: any[] = [
+    {
+      timestamp: nowDate,
+      level: 'INFO' as LogLevel,
+      component: 'database/sequelize',
+      event: 'DB_SEED_START',
+      message: 'Seeders execution started.',
+      service_id: null,
+      request_id: 'seed-logs-001',
+      token_id: null,
+      ip_address: null,
+      context: { seed: true, stage: 'start' },
+      error_stack: null,
       created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
       updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
-    };
-  });
+    },
+    {
+      timestamp: nowDate,
+      level: 'INFO' as LogLevel,
+      component: 'VaultController',
+      event: 'VAULT_LOGIN_SUCCESS',
+      message: 'Logged into Vault successfully.',
+      service_id: null,
+      request_id: 'seed-logs-002',
+      token_id: null,
+      ip_address: '10.10.0.11',
+      context: {
+        vault_addr: process.env.VAULT_ADDR ?? 'https://vault.local:9300',
+        auth_method: process.env.VAULT_AUTH_METHOD ?? 'cert',
+      },
+      error_stack: null,
+      created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
+      updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
+    },
 
-  await q.bulkInsert('tokens', rows as any[]);
+    ...Array.from({ length: 10 }, (_, i) => {
+      const serviceId = i + 1;
+
+      const subSerial = serials[i];
+      const audSerial = serials[(i + 3) % serials.length];
+      const ip = `10.10.0.${11 + i}`;
+      const jti = `seed-jti-${subSerial}-${audSerial}-${nowSec}-${i}`;
+
+      return {
+        timestamp: nowDate,
+        level: 'INFO' as LogLevel,
+        component: 'TokenizationService',
+        event: 'TOKEN_ISSUED',
+        message: `Token issued for ${subSerial} -> ${audSerial} (service ${serviceId}).`,
+        service_id: serviceId,
+        request_id: `seed-logs-svc-${String(serviceId).padStart(2, '0')}`,
+        token_id: jti,
+        ip_address: ip,
+        context: {
+          receiver_serial_number: subSerial,
+          audience_serial_number: audSerial,
+          jti,
+          permissions: { GET: 3600, POST: 900 },
+        },
+        error_stack: null,
+        created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
+        updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
+      };
+    }),
+
+    {
+      timestamp: nowDate,
+      level: 'WARN' as LogLevel,
+      component: 'VaultAuthService',
+      event: 'VAULT_RENEW_FAILED',
+      message: 'Vault token renewal failed; re-login will be attempted.',
+      service_id: null,
+      request_id: 'seed-logs-099',
+      token_id: null,
+      ip_address: null,
+      context: { endpoint: '/v1/auth/token/renew-self' },
+      error_stack: null,
+      created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
+      updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
+    },
+    {
+      timestamp: nowDate,
+      level: 'ERROR' as LogLevel,
+      component: 'EncryptionService',
+      event: 'VAULT_ENCRYPT_DENIED',
+      message: 'Error encrypting data: permission denied.',
+      service_id: 1,
+      request_id: 'seed-logs-100',
+      token_id: `seed-jti-${serials[0]}-${serials[3]}-${nowSec}-0`,
+      ip_address: '10.10.0.11',
+      context: {
+        key: 'tokenization-signing',
+        path: 'transit/encrypt/tokenization-signing',
+      },
+      error_stack:
+        'Error: permission denied\n    at EncryptionService.encryptData (...)\n    at VaultController.encryptData (...)',
+      created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
+      updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
+    },
+    {
+      timestamp: nowDate,
+      level: 'INFO' as LogLevel,
+      component: 'database/sequelize',
+      event: 'DB_SEED_DONE',
+      message: 'Seeders execution finished.',
+      service_id: null,
+      request_id: 'seed-logs-101',
+      token_id: null,
+      ip_address: null,
+      context: { seed: true, stage: 'done' },
+      error_stack: null,
+      created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
+      updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
+    },
+  ];
+
+  await q.bulkInsert('system-logs', rows as any[]);
 }
 
 export async function down(
   q: QueryInterface,
   Sequelize: typeof import('sequelize')
 ) {
-  const serials = [
-    '0x01',
-    '0x02',
-    '0x03',
-    '0x04',
-    '0x05',
-    '0x06',
-    '0x07',
-    '0x08',
-    '0x09',
-    '0x0a',
-  ];
-
-  await q.bulkDelete('tokens', {
-    audience: { [Sequelize.Op.in]: serials },
+  await q.bulkDelete('system-logs', {
+    [Sequelize.Op.or]: [
+      { request_id: { [Sequelize.Op.like]: 'seed-logs-%' } },
+      { request_id: { [Sequelize.Op.like]: 'seed-logs-svc-%' } },
+    ],
   } as any);
 }

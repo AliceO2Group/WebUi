@@ -34,7 +34,7 @@ class SystemLog extends Model {
   // correlation / optional metadata
   declare service_id: number | null;
   declare request_id: string | null;
-  declare user_id: string | null;
+  declare token_id: string | null; 
   declare ip_address: string | null;
 
   // structured extras
@@ -89,7 +89,7 @@ export default (sequelize: Sequelize): typeof SystemLog =>
         allowNull: true,
       },
 
-      user_id: {
+      token_id: {
         type: DataTypes.STRING(64),
         allowNull: true,
       },
@@ -118,11 +118,25 @@ export default (sequelize: Sequelize): typeof SystemLog =>
       updatedAt: 'updated_at',
       indexes: [
         { name: 'system_logs_timestamp_idx', fields: ['timestamp'] },
-        { name: 'system_logs_level_timestamp_idx', fields: ['level', 'timestamp'] },
-        { name: 'system_logs_component_timestamp_idx', fields: ['component', 'timestamp'] },
-        { name: 'system_logs_event_timestamp_idx', fields: ['event', 'timestamp'] },
-        { name: 'system_logs_service_timestamp_idx', fields: ['service_id', 'timestamp'] },
+        {
+          name: 'system_logs_level_timestamp_idx',
+          fields: ['level', 'timestamp'],
+        },
+        {
+          name: 'system_logs_component_timestamp_idx',
+          fields: ['component', 'timestamp'],
+        },
+        {
+          name: 'system_logs_event_timestamp_idx',
+          fields: ['event', 'timestamp'],
+        },
+        {
+          name: 'system_logs_service_timestamp_idx',
+          fields: ['service_id', 'timestamp'],
+        },
         { name: 'system_logs_request_id_idx', fields: ['request_id'] },
+
+        { name: 'system_logs_token_id_idx', fields: ['token_id'] },
       ],
     }
   );
