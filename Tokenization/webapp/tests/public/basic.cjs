@@ -13,8 +13,9 @@
  */
 
 const assert = require('assert');
+const { waitForFrontend } = require('../helper.cjs');
 
-describe('no-label tests', function() {
+describe('Routing', function() {
   let url;
   let page;
 
@@ -22,17 +23,48 @@ describe('no-label tests', function() {
     ({ helpers: { url: url }, page: page } = test);
   });
 
-  it('header content changes with navigation', async function() {
-    let headerContent;
-
+  it('Sidebar includes all routes', async function() {
+    const expectedLinks = [
+      {href: '/tokens/active', label: 'Active Tokens'},
+      {href: '/tokens/archived', label: 'Archived Tokens'},
+      {href: '/services/overview', label: 'Service Overview'},
+      {href: '/services/new', label: 'Service Registration'},
+      {href: '/routes/overview', label: 'Routes Overview'},
+    ]
+    
     await page.goto(url);
-    await page.waitForSelector('header');
-    headerContent = await page.$eval('header', el => el.textContent);
-    assert.ok(headerContent.includes('Tokenization'));
+    await page.waitForSelector('nav');
 
-    await page.goto(`${url  }/tokens`);
-    await page.waitForSelector('header');
-    headerContent = await page.$eval('header', el => el.textContent);
-    assert.ok(headerContent.includes('Tokens'));
+    const links = await page.$$eval('nav a', (anchors) =>
+      anchors.map((a) => {
+        return { 
+          href: a.getAttribute('href'), 
+          label: a.textContent.trim()
+        };
+      })
+    );
+
+    expectedLinks.forEach(expectedLink => {
+      const found = links.find(link => link.href === expectedLink.href && link.label === expectedLink.label);
+      assert.ok(found, `Link with href "${expectedLink.href}" and label "${expectedLink.label}" not found in sidebar`);
+    })
   });
+
+  it('Navigates to Active Tokens page and than to token details page', async function() {
+    const tokenId = '1';   
+
+    const link1 = await page.waitForSelector('nav a[href="/tokens/active"]');
+    await link1.click();
+    await waitForFrontend();
+
+    const activeTokensUrl = await page.url();
+    assert.ok(activeTokensUrl.endsWith('/tokens/active'), 'Did not navigate to Active Tokens page');
+
+    const link = await page.waitForSelector(`tr td a[href="/tokens/${tokenId}"]`);
+    await link.click();
+    await waitForFrontend();
+
+    const tokenDetailsUrl = await page.url();
+    assert.ok(tokenDetailsUrl.endsWith(`/tokens/${tokenId}`), 'Did not navigate to Token Details page');
+  })
 });

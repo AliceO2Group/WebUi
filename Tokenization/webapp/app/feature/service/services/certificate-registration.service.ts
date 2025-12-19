@@ -28,6 +28,10 @@ export async function uploadServiceCertificate(file: File, token?: string | null
     });
   }
 
+  if(file.size === 0 || file.size > 20 * 1024) {
+    throw Error('File size is not valid');
+  }
+
   const base64 = await fileToBase64(file);
   const params = new URLSearchParams();
   if (token) {
@@ -45,7 +49,7 @@ export async function uploadServiceCertificate(file: File, token?: string | null
   });
 
   if(!response.ok) {
-    throw Error('File extraction went wrong')
+    throw Error('File extraction went wrong');
   }
 
   const data = await response.json();

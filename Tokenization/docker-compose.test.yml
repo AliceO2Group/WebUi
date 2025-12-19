@@ -6,7 +6,7 @@ services:
       - ./backend:/var/workspace
     command: ['npm', 'install', '--no-save', '--silent']
 
-  backend:
+  backend-server:
     image: node:22-alpine
     working_dir: /var/workspace/central-system
     volumes:
@@ -36,7 +36,7 @@ services:
       timeout: 3s
       retries: 5
     depends_on:
-      backend:
+      backend-server:
         condition: service_healthy
 
   ui-tests:

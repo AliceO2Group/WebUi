@@ -59,6 +59,9 @@ describe('Tokenization', function() {
   });
 
   require('./public/basic.cjs');
+  require('./public/auth-error-alert.cjs');
+  require('./public/virtual-table.cjs');
+  require('./public/tokens/revocation.cjs');
 
   beforeEach(function () {
     return (this.ok = true);

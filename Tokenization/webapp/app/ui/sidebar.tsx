@@ -78,7 +78,7 @@ type AppSidebarProps = {
  */
 export const AppSidebar = ({ width = 240 }: AppSidebarProps) => (
   <Box
-    component="aside"
+    component="nav"
     sx={{
       width,
       position: 'fixed',
