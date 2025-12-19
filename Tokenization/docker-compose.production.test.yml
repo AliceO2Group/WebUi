@@ -1,0 +1,8 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production-framework
+    ports:
+      - "8080:8080"

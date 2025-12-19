@@ -18,8 +18,63 @@ import CentralSystem from './dist/modules/CentralSystem.js';
 import { mockTokens, mockTokenLogs, mockServices, mockServiceRoutes } from './mocks.js';
 import { X509Certificate } from 'crypto';
 
+import helmet from "helmet"
+import fs from 'fs'
 
-const http = new HttpServer({ port: 8080, allow: '*' });
+const PRODUCTION = process.env.ENVIRONMENT === 'production';
+const DEV = !PRODUCTION;
+
+class HttpServerReactRouter extends HttpServer {
+    _hashes;
+    readHashes() {
+        const cspFile = './tools/csp-hashes.json';
+        try {
+            this._hashes = JSON.parse(fs.readFileSync(cspFile, 'utf8'));
+        } catch (err) {
+            process.exit(1);
+        }
+    }
+
+    configureHelmet({ hostname, port, iframeCsp = [], allow = false }) {
+        this.readHashes()
+        // exactly like in HttpServer but with _hashes
+        this.app.use(helmet.frameguard({ action: 'deny' }));
+        this.app.use(helmet.hsts({
+          maxAge: 5184000,
+        }));
+        this.app.use(helmet.referrerPolicy({ policy: 'same-origin' }));
+        this.app.use(helmet.xssFilter());
+        this.app.use(helmet.hidePoweredBy());
+        this.app.use(helmet.dnsPrefetchControl());
+        this.app.use(helmet.contentSecurityPolicy({
+          directives: {
+            /* eslint-disable */
+            defaultSrc: ["'self'", "data:", hostname + ':*'],
+            scriptSrc: ["'self'", ...(allow ? ["'unsafe-eval'"] : []), ...this._hashes],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            connectSrc: ["'self'", 'http://' + hostname + ':' + port, 'https://' + hostname, 'wss://' + hostname, 'ws://' + hostname + ':' + port],
+            upgradeInsecureRequests: null,
+            frameSrc: iframeCsp
+            /* eslint-enable */
+          },
+        }));
+    }
+}
+
+const config = {
+    hostname: process.env.HOSTNAME || 'server',
+    port: 8080,
+    allow: '*',
+}
+
+let http;
+
+if (PRODUCTION) {
+    http = new HttpServerReactRouter(config)
+    http.addStaticPath("../public");
+} else {
+    http = new HttpServer(config);
+}
 
 http.get(
   '/healthcheck',
@@ -37,7 +92,7 @@ http.get(
     centralSystemModel.tokenController
   ),
   {
-    public: true,
+    public: DEV,
   }
 );
 
@@ -47,7 +102,7 @@ http.post(
   centralSystemModel.tokenController.createTokenHandler.bind(
     centralSystemModel.tokenController
   ),
-  { public: true }
+  { public: DEV }
 );
 
 // This one need to be split into one that accepts 
@@ -57,7 +112,7 @@ http.post(
   centralSystemModel.tokenController.revokeTokenHandler.bind(
     centralSystemModel.tokenController
   ),
-  { public: true }
+  { public: DEV }
 );
 
 
@@ -139,7 +194,7 @@ http.get(
 
     setTimeout(() => res.status(200).json(filteredTokens), 500);
   },
-  { public: true }
+  { public: DEV }
 );
 
 http.get(
@@ -155,7 +210,7 @@ http.get(
 
     res.status(200).json(token);
   },
-  { public: true }
+  { public: DEV }
 );
 
 http.get(
@@ -174,7 +229,7 @@ http.get(
 
     setTimeout(() => res.status(200).json(logs), 500);
   },
-  { public: true }
+  { public: DEV }
 );
 
 http.get('/services', (req, res) => {
@@ -229,7 +284,7 @@ http.get('/services', (req, res) => {
   }
 
   setTimeout(() => res.status(200).json(filteredServices), 500);
-}, { public: true });
+}, { public: DEV });
 
 http.get('/services/:serviceId', (req, res) => {
   const serviceId = req.params.serviceId;
@@ -241,7 +296,7 @@ http.get('/services/:serviceId', (req, res) => {
   }
 
   res.status(200).json(service);
-}, { public: true });
+}, { public: DEV });
 
 http.post('/certificate', (req, res) => {
   const {certificateBase64} = req.body;
@@ -269,7 +324,7 @@ http.post('/certificate', (req, res) => {
     status: 'pending' // TODO: implement certificate status management
   });
   
-}, { public: true });
+}, { public: DEV });
 
 http.post('/certificate/register', (req, res) => {
   // its certifacateId from /certificate endpoint
@@ -281,7 +336,7 @@ http.post('/certificate/register', (req, res) => {
   }
 
   return res.send({success: true}); // system is registered mock
-}, { public: true });
+}, { public: DEV });
 
 http.post('/certificate/renew', (req, res) => {
   // its certifacateId from /certificate endpoint
@@ -302,7 +357,7 @@ http.post('/certificate/renew', (req, res) => {
     serviceId,
     status: 'renewed'
   }); // system is renewing (changing) certificate
-}, { public: true });
+}, { public: DEV });
 
 http.get('/routes', (req, res) => {
   let filteredRoutes = [...mockServiceRoutes]
@@ -334,7 +389,7 @@ http.get('/routes', (req, res) => {
 
   // important to return id of route for banning/deleting (its the same)
   return res.status(200).json(filteredRoutes);
-}, { public: true });
+}, { public: DEV });
 
 http.post('/routes', (req, res) => {
   const {
@@ -366,7 +421,7 @@ http.post('/routes', (req, res) => {
   mockServiceRoutes.push(newRoute);
   // you can even return the all data from created route
   res.status(201).json(newRoute);
-}, { public: true });
+}, { public: DEV });
 
 // two endpoints for deleting route similar
 // to revoking token by id or by filtering criteria
@@ -379,7 +434,7 @@ http.delete('/routes/:routeId', (req, res) =>{
 
   
   return res.send({success: true});
-}, { public: true });
+}, { public: DEV });
 
 // bulk delete
 http.delete('/routes', (req, res) => {
@@ -406,7 +461,7 @@ http.delete('/routes', (req, res) => {
   }
 
   return res.send({ success: true });
-}, { public: true });
+}, { public: DEV });
 
 
 http.delete('/tokens/:tokenId', (req, res) => {
@@ -419,7 +474,7 @@ http.delete('/tokens/:tokenId', (req, res) => {
   }
   revokedToken.status = 'not-active';
   return res.send({success: true});
-}, { public: true });
+}, { public: DEV });
 
 // bulk delete
 http.delete('/tokens', (req, res) => {
@@ -486,4 +541,4 @@ http.delete('/tokens', (req, res) => {
     })
 
    return res.send({success: true});
-}, { public: true })
+}, { public: DEV })
