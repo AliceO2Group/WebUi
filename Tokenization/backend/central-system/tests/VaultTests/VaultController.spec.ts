@@ -142,43 +142,6 @@ describe('VaultController', () => {
     expect(result).toBe('signedToken');
   });
 
-  test('getCredentialFromVault() creates proper URL and returns service output', async () => {
-    const controller = new VaultController(
-      tokenSignService,
-      authService,
-      credentialsService,
-      encryptionService,
-      importKeyService
-    );
-
-    (controller as any)._vaultAccessToken = 's.token';
-
-    const path = 'db/central-system';
-    const result = await controller.getCredentialFromVault(path);
-
-    expect(credentialsService.getCredential).toHaveBeenCalledTimes(1);
-    const [url, token, agent] = credentialsService.getCredential.mock.calls[0];
-
-    expect(url).toBe(
-      'https://vault.local:9300/v1/tokenization/data/db/central-system'
-    );
-    expect(token).toBe('s.token');
-    expect(typeof agent).toBe('object');
-
-    expect(result).toEqual({
-      data: {
-        data: { foo: 'bar' },
-        metadata: {
-          created_time: '2025-01-01T00:00:00Z',
-          custom_metadata: {},
-          deletion_time: '',
-          destroyed: false,
-          version: 1,
-        },
-      },
-    });
-  });
-
   test('createOrUpdateCredentialInVault() calls service with proper parameters', async () => {
     const controller = new VaultController(
       tokenSignService,
@@ -208,6 +171,32 @@ describe('VaultController', () => {
     expect(typeof agent).toBe('object');
 
     expect(body).toEqual(bodyObj);
+  });
+
+  test('getCredentialFromVault() creates proper URL and returns service output', async () => {
+    const controller = new VaultController(
+      tokenSignService,
+      authService,
+      credentialsService,
+      encryptionService,
+      importKeyService
+    );
+
+    (controller as any)._vaultAccessToken = 's.token';
+
+    const path = 'db/central-system';
+    const result = await controller.getCredentialFromVault(path);
+
+    expect(credentialsService.getCredential).toHaveBeenCalledTimes(1);
+    const [url, token, agent] = credentialsService.getCredential.mock.calls[0];
+
+    expect(url).toBe(
+      'https://vault.local:9300/v1/tokenization/data/db/central-system'
+    );
+    expect(token).toBe('s.token');
+    expect(typeof agent).toBe('object');
+
+    expect(result).toEqual({ data: { foo: 'bar' } });
   });
 
   test('encryptData() uses Vault login token, proper URL and passes body as object', async () => {

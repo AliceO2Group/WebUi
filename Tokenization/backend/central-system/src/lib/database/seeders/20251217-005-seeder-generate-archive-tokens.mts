@@ -82,7 +82,7 @@ export async function up(
     '0x07',
     '0x08',
     '0x09',
-    '0x0a',
+    '0x0A',
   ];
 
   await q.bulkDelete('archive-tokens', {

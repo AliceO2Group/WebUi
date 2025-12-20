@@ -15,6 +15,7 @@
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import { generateKeyPairSync } from 'crypto';
 
 import { VaultController } from '../../src/controllers/VaultController';
 import { VaultAuthService } from '../../src/services/VaultAuthService';
@@ -114,18 +115,17 @@ describe('VaultController - integration with Vault', () => {
   }, 20000);
 
   it('imports a public RSA key into Transit (idempotent-ish)', async () => {
-    const keyName = 'integration-test-client-public-key';
+    const keyName = `integration-test-client-public-key`;
 
-    const publicKeyPem = `-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwf3Xqv1o9gqgkq5B9d9A
-qg1+Kf3m1mB9GxjXj8a8b1Qx9Z8z3sN1lq0b+u0n3b2u3gY2oVQhQp5vCw5c9n4c
-m7cXJfT6v9o3q3Q5o1mJvK3c+R8y8Jv8JtR0mBvC0mBvC0mBvC0mBvC0mBvC0mBv
-C0mBvC0mBvC0mBvC0mBvC0mBvCwIDAQAB
------END PUBLIC KEY-----`;
+    const { publicKey } = generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: { type: 'spki', format: 'pem' },
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+    });
 
     const body = {
       type: 'rsa-2048',
-      public_key: publicKeyPem,
+      public_key: publicKey,
       allow_rotation: false,
       exportable: false,
       allow_plaintext_backup: false,
@@ -134,17 +134,17 @@ C0mBvC0mBvC0mBvC0mBvC0mBvCwIDAQAB
     try {
       await controller.importKeyInVault(keyName, body as any);
     } catch (e: any) {
-      const msg = String(e?.message ?? '');
+      const msg = String(e?.message ?? '').toLowerCase();
       const alreadyExists =
-        msg.toLowerCase().includes('already exists') ||
-        msg.toLowerCase().includes('existing') ||
-        msg.toLowerCase().includes('key already') ||
-        msg.toLowerCase().includes('path is already in use');
+        msg.includes('already exists') ||
+        msg.includes('existing') ||
+        msg.includes('key already') ||
+        msg.includes('path is already in use');
       if (!alreadyExists) throw e;
     }
   }, 20000);
 
-  it('encrypts plaintext using Transit engine (requires an existing symmetric key)', async () => {
+  it('encrypts plaintext using Transit engine', async () => {
     const keyName = 'integration-test-client-public-key';
 
     const plaintext = 'the quick brown fox';

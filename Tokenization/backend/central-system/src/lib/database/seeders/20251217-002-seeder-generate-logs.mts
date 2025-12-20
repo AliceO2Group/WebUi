@@ -24,18 +24,32 @@ export async function up(
     request_id: { [Sequelize.Op.like]: 'seed-logs-%' },
   } as any);
 
-  const now = new Date();
+  const nowDate = new Date();
+  const nowUnix = Math.floor(Date.now() / 1000);
 
-  const rows = [
+  const serials = [
+    '0x01',
+    '0x02',
+    '0x03',
+    '0x04',
+    '0x05',
+    '0x06',
+    '0x07',
+    '0x08',
+    '0x09',
+    '0x0a',
+  ];
+
+  const rows: any[] = [
     {
-      timestamp: now,
+      timestamp: nowDate,
       level: 'INFO' as LogLevel,
       component: 'database/sequelize',
       event: 'DB_SEED_START',
       message: 'Seeders execution started.',
       service_id: null,
       request_id: 'seed-logs-001',
-      user_id: null,
+      token_id: null,
       ip_address: null,
       context: JSON.stringify({ seed: true, stage: 'start' }),
       error_stack: null,
@@ -43,14 +57,14 @@ export async function up(
       updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
     {
-      timestamp: now,
+      timestamp: nowDate,
       level: 'INFO' as LogLevel,
       component: 'VaultController',
       event: 'VAULT_LOGIN_SUCCESS',
       message: 'Logged into Vault successfully.',
       service_id: null,
       request_id: 'seed-logs-002',
-      user_id: null,
+      token_id: null,
       ip_address: '10.10.0.11',
       context: JSON.stringify({
         vault_addr: process.env.VAULT_ADDR ?? 'https://vault.local:9300',
@@ -61,25 +75,29 @@ export async function up(
       updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
 
-    ...Array.from({ length: 10 }, (_, i) => {
-      const serviceId = i + 1;
-      const serial = `0x${String(i + 1).padStart(2, '0')}`;
-      const ip = `10.10.0.${11 + i}`;
+    ...serials.map((subSerial, idx) => {
+      const serviceId = idx + 1;
+      const ip = `10.10.0.${11 + idx}`;
+
+      const audSerial = serials[(idx + 3) % serials.length];
+
+      const token_id = `seed-jti-${subSerial}-${audSerial}-${nowUnix}-${idx}`;
+
       return {
-        timestamp: now,
+        timestamp: nowDate,
         level: 'INFO' as LogLevel,
         component: 'TokenizationService',
-        event: 'ROUTE_EVALUATED',
-        message: `Route evaluated for service ${serviceId} (${ip}).`,
+        event: 'TOKEN_CREATED',
+        message: `Token created for ${subSerial} -> ${audSerial} (service ${serviceId}).`,
         service_id: serviceId,
         request_id: `seed-logs-svc-${String(serviceId).padStart(2, '0')}`,
-        user_id: null,
+        token_id,
         ip_address: ip,
         context: JSON.stringify({
-          receiver_serial_number: i === 9 ? '0x0a' : serial,
-          audience_serial_number:
-            i === 8 ? '0x0a' : `0x${String(i + 2).padStart(2, '0')}`,
+          subject: subSerial,
+          audience: audSerial,
           permissions: { GET: 3600, POST: 900 },
+          note: 'seeded-test-data',
         }),
         error_stack: null,
         created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
@@ -88,14 +106,14 @@ export async function up(
     }),
 
     {
-      timestamp: now,
+      timestamp: nowDate,
       level: 'WARN' as LogLevel,
       component: 'VaultAuthService',
       event: 'VAULT_RENEW_FAILED',
       message: 'Vault token renewal failed; re-login will be attempted.',
       service_id: null,
       request_id: 'seed-logs-099',
-      user_id: null,
+      token_id: null,
       ip_address: null,
       context: JSON.stringify({ endpoint: '/v1/auth/token/renew-self' }),
       error_stack: null,
@@ -103,14 +121,14 @@ export async function up(
       updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
     {
-      timestamp: now,
+      timestamp: nowDate,
       level: 'ERROR' as LogLevel,
       component: 'EncryptionService',
       event: 'VAULT_ENCRYPT_DENIED',
       message: 'Error encrypting data: permission denied.',
       service_id: 1,
       request_id: 'seed-logs-100',
-      user_id: null,
+      token_id: `seed-jti-${serials[0]}-${serials[3]}-${nowUnix}-0`,
       ip_address: '10.10.0.11',
       context: JSON.stringify({
         key: 'tokenization-signing',
@@ -122,14 +140,14 @@ export async function up(
       updated_at: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
     {
-      timestamp: now,
+      timestamp: nowDate,
       level: 'INFO' as LogLevel,
       component: 'database/sequelize',
       event: 'DB_SEED_DONE',
       message: 'Seeders execution finished.',
       service_id: null,
       request_id: 'seed-logs-101',
-      user_id: null,
+      token_id: null,
       ip_address: null,
       context: JSON.stringify({ seed: true, stage: 'done' }),
       error_stack: null,
@@ -147,9 +165,5 @@ export async function down(
 ) {
   await q.bulkDelete('system-logs', {
     request_id: { [Sequelize.Op.like]: 'seed-logs-%' },
-  } as any);
-
-  await q.bulkDelete('system-logs', {
-    request_id: { [Sequelize.Op.like]: 'seed-logs-svc-%' },
   } as any);
 }
