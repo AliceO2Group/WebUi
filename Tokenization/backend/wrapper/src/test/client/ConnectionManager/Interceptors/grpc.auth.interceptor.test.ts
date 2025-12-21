@@ -332,7 +332,6 @@ describe('gRPCAuthInterceptor', () => {
 });
 
 describe('isRequestAllowed', () => {
-  const mockCallback = jest.fn();
 
   beforeEach(() => {
     jest.restoreAllMocks();
