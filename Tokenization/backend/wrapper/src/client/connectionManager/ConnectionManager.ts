@@ -233,6 +233,11 @@ export class ConnectionManager {
 
   /** Starts a listener server for p2p connections */
   public async listenForPeers(port: number, baseAPIPath?: string): Promise<void> {
+    // Validate port number
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+      throw new Error(`Invalid port number: ${port}. Port must be an integer between 1 and 65535.`);
+    }
+
     if (baseAPIPath) this._baseAPIPath = baseAPIPath;
 
     if (!this.securityContext.clientListenerCert) {

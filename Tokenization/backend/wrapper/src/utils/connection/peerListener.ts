@@ -15,7 +15,7 @@ import * as grpc from '@grpc/grpc-js';
 import type { ConnectionDirection } from '../../models/message.model';
 import { ConnectionStatus } from '../../models/connection.model';
 import type { Connection } from '../../client/connection/Connection';
-import { gRPCAuthInterceptor } from '../../client/connectionManager/interceptors/grpc.auth.interceptor';
+import { GRPCAuthInterceptor } from '../../client/connectionManager/interceptors/grpc.auth.interceptor';
 import type { SecurityContext } from '../security/SecurityContext';
 
 /**
@@ -38,8 +38,19 @@ export const peerListener = async (
   securityContext: SecurityContext,
   baseAPIPath: string
 ) => {
+  // Create a minimal ConnectionManager interface for the interceptor
+  const connectionManagerInterface = {
+    getConnectionByAddress: (address: string, _direction: ConnectionDirection) => receivingConnections.get(address),
+    createNewConnection: createNewConnection,
+    sendCentralAlert: () => {
+      // Peer listener doesn't have access to central connection, so we just log
+      logger.warnMessage('Alert would be sent to central system if connection was available');
+    },
+  };
+
   // Run auth interceptor
-  const { isAuthenticated, conn } = await gRPCAuthInterceptor(call, callback, receivingConnections, securityContext);
+  const interceptor = new GRPCAuthInterceptor(connectionManagerInterface as any, securityContext);
+  const { isAuthenticated, conn } = await interceptor.validate(call, callback);
 
   if (!isAuthenticated || !conn) {
     // Authentication failed - response already sent in interceptor

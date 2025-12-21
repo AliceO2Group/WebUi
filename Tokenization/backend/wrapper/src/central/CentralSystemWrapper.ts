@@ -17,9 +17,8 @@ import * as protoLoader from '@grpc/proto-loader';
 import { LogManager } from '@aliceo2/web-ui';
 import { DuplexMessageModel } from '../models/message.model';
 import * as fs from 'fs';
-import { CentralSystemConfig } from 'models/config.model';
-import { CentralCommandDispatcher } from '../client/connectionManager/eventManagement/CentralCommandDispatcher';
 import type { CentralSystemConfig } from '../models/config.model';
+import { CentralCommandDispatcher } from '../client/connectionManager/eventManagement/CentralCommandDispatcher';
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
@@ -226,7 +225,7 @@ export class CentralSystemWrapper {
         this._logger.errorMessage('Server bind error:', err);
         return;
       }
-      this._logger.infoMessage(`CentralSytem started listening on ${addr}`);
+      this._logger.infoMessage(`CentralSystem started listening on ${addr}`);
     });
   }
 }

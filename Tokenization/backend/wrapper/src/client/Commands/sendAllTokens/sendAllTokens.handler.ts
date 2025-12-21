@@ -12,14 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
-import { CommandHandler } from "../../../models/commands.model";
-import { SendAllTokensCommand } from "./sendAllTokens.command";
-import { ConnectionManager } from "../../ConnectionManager/ConnectionManager";
-import { ConnectionDirection } from "../../../models/message.model";
+import { CommandHandler } from '../../../models/commands.model';
+import { SendAllTokensCommand } from './sendAllTokens.command';
+import { ConnectionManager } from '../../connectionManager/ConnectionManager';
+import { ConnectionDirection } from '../../../models/message.model';
 
-export class SendAllTokensHandler
-  implements CommandHandler<SendAllTokensCommand>
-{
+export class SendAllTokensHandler implements CommandHandler<SendAllTokensCommand> {
   /**
    * Creates a new instance of RevokeTokenHandler.
    *
@@ -37,11 +35,7 @@ export class SendAllTokensHandler
     const { tokensList } = command.payload;
 
     for (const token of tokensList) {
-      this.manager.createNewConnection(
-        token.targetAddress,
-        token.connectionDirection || ConnectionDirection.SENDING,
-        token.token || ""
-      );
+      this.manager.createNewConnection(token.targetAddress, token.connectionDirection || ConnectionDirection.SENDING, token.token || '');
     }
   }
 }

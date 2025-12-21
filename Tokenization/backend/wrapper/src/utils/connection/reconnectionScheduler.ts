@@ -18,6 +18,16 @@ export interface ReconnectionOptions {
 }
 
 /**
+ * Logger interface matching @aliceo2/web-ui LogManager logger
+ */
+interface Logger {
+  infoMessage(message: string, ...args: any[]): void;
+  errorMessage(message: string, ...args: any[]): void;
+  warnMessage(message: string, ...args: any[]): void;
+  debugMessage(message: string, ...args: any[]): void;
+}
+
+/**
  * A scheduler that manages reconnection attempts with an exponential backoff.
  */
 export class ReconnectionScheduler {
@@ -29,7 +39,6 @@ export class ReconnectionScheduler {
   private timeoutId: any;
   private logger: Logger;
 
-  private isResetting: boolean = false;
   private isScheduling: boolean = false;
 
   /**
@@ -56,7 +65,6 @@ export class ReconnectionScheduler {
   schedule() {
     if (this.isScheduling) return;
     this.isScheduling = true;
-    this.isResetting = false;
     this.attemptCount++;
 
     // Exponential backoff calculation
@@ -64,7 +72,7 @@ export class ReconnectionScheduler {
 
     this.currentDelay = Math.min(this.maxDelay, delay);
 
-    this.logger.infoMessage(`Recconection attempt #${this.attemptCount}: Sleep for ${this.currentDelay.toFixed(0)} ms.`);
+    this.logger.infoMessage(`Reconnection attempt #${this.attemptCount}: Sleep for ${this.currentDelay.toFixed(0)} ms.`);
 
     // Plan the reconnection attempt
     this.timeoutId = setTimeout(() => {
@@ -77,10 +85,7 @@ export class ReconnectionScheduler {
    * Resets the scheduler to its initial state.
    */
   reset() {
-    if (this.isResetting) return;
     this.isScheduling = false;
-    this.isResetting = true;
-
     clearTimeout(this.timeoutId);
     this.attemptCount = 0;
     this.currentDelay = this.initialDelay;

@@ -45,7 +45,7 @@ describe('ReconnectionScheduler', () => {
   test("schedule's first attempt should schedule and call reconnectCallback", () => {
     scheduler.schedule();
 
-    expect(logger.infoMessage).toHaveBeenCalledWith('Recconection attempt #1: Sleep for 2000 ms.');
+    expect(logger.infoMessage).toHaveBeenCalledWith('Reconnection attempt #1: Sleep for 2000 ms.');
 
     expect(reconnectCallback).not.toHaveBeenCalled();
     jest.advanceTimersByTime(1999);
@@ -59,7 +59,7 @@ describe('ReconnectionScheduler', () => {
     jest.advanceTimersByTime(2000);
 
     scheduler.schedule();
-    expect(logger.infoMessage).toHaveBeenLastCalledWith('Recconection attempt #2: Sleep for 4000 ms.');
+    expect(logger.infoMessage).toHaveBeenLastCalledWith('Reconnection attempt #2: Sleep for 4000 ms.');
     jest.advanceTimersByTime(4000);
     expect(reconnectCallback).toHaveBeenCalledTimes(2);
   });
@@ -75,15 +75,15 @@ describe('ReconnectionScheduler', () => {
     );
 
     scheduler.schedule();
-    expect(logger.infoMessage).toHaveBeenLastCalledWith('Recconection attempt #1: Sleep for 2000 ms.');
+    expect(logger.infoMessage).toHaveBeenLastCalledWith('Reconnection attempt #1: Sleep for 2000 ms.');
     jest.advanceTimersByTime(2000);
 
     scheduler.schedule();
-    expect(logger.infoMessage).toHaveBeenLastCalledWith('Recconection attempt #2: Sleep for 3000 ms.');
+    expect(logger.infoMessage).toHaveBeenLastCalledWith('Reconnection attempt #2: Sleep for 3000 ms.');
     jest.advanceTimersByTime(3000);
 
     scheduler.schedule();
-    expect(logger.infoMessage).toHaveBeenLastCalledWith('Recconection attempt #3: Sleep for 3000 ms.');
+    expect(logger.infoMessage).toHaveBeenLastCalledWith('Reconnection attempt #3: Sleep for 3000 ms.');
   });
 
   test('schedule() should not schedule again if it is scheduled', () => {
@@ -108,7 +108,7 @@ describe('ReconnectionScheduler', () => {
     expect(reconnectCallback).not.toHaveBeenCalled();
 
     scheduler.schedule();
-    expect(logger.infoMessage).toHaveBeenLastCalledWith('Recconection attempt #1: Sleep for 2000 ms.');
+    expect(logger.infoMessage).toHaveBeenLastCalledWith('Reconnection attempt #1: Sleep for 2000 ms.');
   });
 
   test('reset() should ignore another reset due to isResseting variable', () => {

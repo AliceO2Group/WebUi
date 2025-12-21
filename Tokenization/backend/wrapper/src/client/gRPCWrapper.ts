@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { ConnectionManager } from './ConnectionManager/ConnectionManager';
+import { ConnectionManager } from './connectionManager/ConnectionManager';
 import { RevokeTokenHandler } from './Commands/revokeToken/revokeToken.handler';
 import { ConnectionDirection, DuplexMessageEvent } from '../models/message.model';
 import { Connection } from './connection/Connection';

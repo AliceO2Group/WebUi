@@ -13,7 +13,7 @@
  */
 
 import * as grpc from '@grpc/grpc-js';
-import { ConnectionManager } from '../../../client/ConnectionManager/ConnectionManager';
+import { ConnectionManager } from '../../../client/connectionManager/ConnectionManager';
 import { ConnectionDirection, DuplexMessageEvent } from '../../../models/message.model';
 import { SecurityContext } from '../../../utils/security/SecurityContext';
 
@@ -32,7 +32,7 @@ const mockClient = {
 const CentralSystemMock = jest.fn(() => mockClient);
 
 // Mock gRPC auth interceptor
-jest.mock('../../../client/ConnectionManager/Interceptors/grpc.auth.interceptor', () => ({
+jest.mock('../../../client/connectionManager/interceptors/grpc.auth.interceptor', () => ({
   GRPCAuthInterceptor: jest.fn().mockImplementation(() => ({
     validate: jest.fn().mockResolvedValue({
       isAuthenticated: true,
@@ -48,7 +48,7 @@ jest.mock('../../../client/ConnectionManager/Interceptors/grpc.auth.interceptor'
 
 // Mock dispatcher
 const mockDispatch = jest.fn();
-jest.mock('../../../client/ConnectionManager/EventManagement/CentralCommandDispatcher', () => ({
+jest.mock('../../../client/connectionManager/eventManagement/CentralCommandDispatcher', () => ({
   CentralCommandDispatcher: jest.fn(() => ({
     dispatch: mockDispatch,
     register: jest.fn(),

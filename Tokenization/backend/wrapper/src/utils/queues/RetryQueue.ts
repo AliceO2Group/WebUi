@@ -74,10 +74,24 @@ export class RetryQueue {
   }
 
   /**
-   * Drains the retry queue by executing all the tasks currently in the queue.
-   * If any task fails, it will be re-enqueued with an incremented tryNo.
-   * If the task has been retried more than maxRetries times, it will be rejected.
-   * This function is useful when we want to flush the retry queue, for example, when a new token is received.
+   * Drains the retry queue by executing all the tasks currently in the queue immediately.
+   *
+   * @remarks
+   * This method is particularly useful when a condition changes that makes all pending
+   * tasks likely to succeed (e.g., a new authentication token is received). It:
+   *
+   * 1. **Prevents concurrent draining**: Returns early if already running to avoid race conditions
+   * 2. **Clears the queue atomically**: Takes a snapshot of all tasks and clears the queue
+   * 3. **Executes all tasks immediately**: Bypasses the exponential backoff delay
+   * 4. **Handles failures gracefully**: Failed tasks are re-enqueued with incremented retry count
+   * 5. **Respects retry limits**: Tasks exceeding maxRetries are rejected
+   *
+   * @example
+   * ```typescript
+   * // When a new token is received, drain all pending requests
+   * connection.handleNewToken(newToken);
+   * retryQueue.drainNow(); // All queued requests will retry immediately
+   * ```
    */
   public drainNow() {
     if (this.running) return;
@@ -101,12 +115,33 @@ export class RetryQueue {
   }
 
   /**
-   * Schedules a task to be executed after a delay. The delay is calculated using a
-   * exponential backoff strategy. If jitter is enabled, a random value between 0.5 and 1
-   * is added to the calculated delay. If the task fails, it will be re-enqueued with an
-   * incremented tryNo. If the task has been retried more than maxRetries times, it will be
-   * rejected.
-   * @param {RetryTask<T>} task - The task to be scheduled
+   * Schedules a task to be executed after an exponential backoff delay.
+   *
+   * @remarks
+   * This method implements a sophisticated retry strategy with the following features:
+   *
+   * **Exponential Backoff Calculation:**
+   * - Base formula: `delay = baseDelayMs * 2^tryNo`
+   * - Capped at maxDelayMs to prevent excessive wait times
+   * - Example with baseDelayMs=300ms: 300ms → 600ms → 1200ms → 2400ms → 4800ms
+   *
+   * **Jitter (Optional):**
+   * - Adds randomness to prevent thundering herd problem
+   * - Random multiplier between 0.5 and 1.0
+   * - Helps distribute retry attempts across time
+   *
+   * **Automatic Re-scheduling:**
+   * - Failed tasks are automatically re-enqueued with incremented tryNo
+   * - Tasks exceeding maxRetries are rejected with the last error
+   * - Successful tasks resolve their original promise
+   *
+   * @param task - The task to be scheduled with retry metadata
+   *
+   * @example
+   * ```typescript
+   * // Task will be retried with delays: 300ms, 600ms, 1200ms, 2400ms, 4800ms
+   * const queue = new RetryQueue({ baseDelayMs: 300, maxRetries: 5 });
+   * ```
    */
   private schedule(task: RetryTask) {
     const { baseDelayMs, maxDelayMs, jitter } = this.opts;

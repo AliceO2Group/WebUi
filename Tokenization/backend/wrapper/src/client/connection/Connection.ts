@@ -30,6 +30,10 @@ type ConnectionCerts = {
  * @description This class represents a connection to a target client and manages sending messages to it.
  */
 export class Connection {
+  // Constants
+  private static readonly MAX_AUTH_FAILURES = 5;
+  private static readonly MAX_FAILED_LOG_SIZE = 100;
+
   private _jweToken: string;
   private _status: ConnectionStatus;
   private _peerClient?: any; // A client grpc connection instance
@@ -53,8 +57,9 @@ export class Connection {
   });
   private _pendingTokenRefresh?: Promise<void>;
   private _isRefreshing = false;
+  private _tokenRefreshLock = false; // Mutex for token refresh to prevent race conditions
 
-  // For debug purposes
+  // For debug purposes - circular buffer with max size to prevent memory leaks
   private _failedRequestsLog: Array<{
     id: string;
     method: string;
@@ -168,7 +173,7 @@ export class Connection {
     this._authFailures += 1;
 
     // Local throttling mechanism
-    if (this._authFailures >= 5) {
+    if (this._authFailures >= Connection.MAX_AUTH_FAILURES) {
       this.status = ConnectionStatus.BLOCKED;
     }
     return this._authFailures;
@@ -250,8 +255,13 @@ export class Connection {
   //                                                  FETCH HANDLING SECTION
   // -----------------------------------------------------------------------------------------------------------------------------
   /**
-   * Waits for the token to be refreshed
-   * @returns Promise<void>
+   * Waits for the token to be refreshed.
+   *
+   * @remarks
+   * This method is used internally to synchronize multiple concurrent requests
+   * that need to wait for a token refresh to complete before proceeding.
+   *
+   * @returns A promise that resolves when the token refresh is complete, or immediately if no refresh is pending.
    */
   private async awaitTokenRefresh(): Promise<void> {
     if (!this._pendingTokenRefresh) return;
@@ -259,15 +269,39 @@ export class Connection {
   }
 
   /**
-   * Creates a promise that resolves when a new token is refreshed
-   * It is used internally to handle the token refresh process.
-   * If the token is currently being refreshed, it returns the existing promise.
-   * If not, it creates a new promise and stores it in the connection object.
-   * When the new token is received, it resolves the promise.
+   * Creates a promise that resolves when a new token is refreshed.
+   *
+   * @remarks
+   * This method implements a promise-based synchronization mechanism for token refresh operations.
+   * It prevents race conditions by:
+   * 1. Checking if a refresh is already in progress and returning the existing promise
+   * 2. Using a lock mechanism (_tokenRefreshLock) to ensure atomic promise creation
+   * 3. Storing resolve/reject callbacks on the promise object for external resolution
+   *
+   * The promise is resolved externally by the `handleNewToken()` method when the central
+   * system provides a new token.
+   *
    * @returns A promise that resolves when the token is refreshed.
    */
   private createTokenRefreshPromise(): Promise<void> {
+    // Return existing promise if already created
     if (this._pendingTokenRefresh) return this._pendingTokenRefresh;
+
+    // Acquire lock to prevent race condition during promise creation
+    if (this._tokenRefreshLock) {
+      // Another thread is creating the promise, wait a bit and retry
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(this.createTokenRefreshPromise()), 10);
+      });
+    }
+
+    this._tokenRefreshLock = true;
+
+    // Double-check after acquiring lock
+    if (this._pendingTokenRefresh) {
+      this._tokenRefreshLock = false;
+      return this._pendingTokenRefresh;
+    }
 
     let _resolve!: () => void;
     let _reject!: (e: any) => void;
@@ -275,18 +309,28 @@ export class Connection {
       _resolve = resolve;
       _reject = reject;
     }) as any;
+
     // Add reference to be resolved by handleNewToken
     newPromise._resolve = _resolve;
     newPromise._reject = _reject;
     this._pendingTokenRefresh = newPromise;
+
+    this._tokenRefreshLock = false;
     return newPromise;
   }
 
   /**
    * Triggers token renewal if not already in progress.
-   * Updates connection status to TOKEN_REFRESH and creates a new promise to be resolved when the new token is received.
-   * Logs a warning message with the reason for the token renewal.
-   * @param reason The reason for the token renewal.
+   *
+   * @remarks
+   * This method initiates the token refresh process when authentication fails due to
+   * specific reasons (expired, missing, or forbidden permissions). It:
+   * 1. Checks if a refresh is already in progress to avoid duplicate requests
+   * 2. Updates the connection status to TOKEN_REFRESH
+   * 3. Creates a promise that will be resolved when the new token arrives
+   * 4. Calls the renewToken callback to request a new token from the central system
+   *
+   * @param reason The reason for the token renewal (from TokenAuthReason enum).
    */
   private triggerTokenRenewIfNeeded(reason: TokenAuthReason) {
     if (
@@ -398,6 +442,11 @@ export class Connection {
 
       // Queue and refresh section
       const id = genId(); // Id of the request
+
+      // Add to log with circular buffer to prevent memory leaks
+      if (this._failedRequestsLog.length >= Connection.MAX_FAILED_LOG_SIZE) {
+        this._failedRequestsLog.shift(); // Remove oldest entry
+      }
       this._failedRequestsLog.push({
         id,
         method,

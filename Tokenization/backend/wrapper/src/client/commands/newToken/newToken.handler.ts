@@ -36,8 +36,7 @@ export class NewTokenHandler implements CommandHandler<NewTokenCommand> {
    * @throws Will throw an error if any of the required payload fields are missing.
    */
   async handle(command: NewTokenCommand): Promise<void> {
-    const { targetAddress, connectionDirection, token } =
-      command.payload.singleToken || {};
+    const { targetAddress, connectionDirection, token } = command.payload.singleToken || {};
     if (!targetAddress || !token || !connectionDirection) {
       throw new Error('Insufficient arguments. Expected: targetAddress, connectionDirection, token.');
     }
@@ -48,7 +47,7 @@ export class NewTokenHandler implements CommandHandler<NewTokenCommand> {
     for (const dir of directions) {
       let conn = this.manager.getConnectionByAddress(targetAddress, dir);
       conn ??= await this.manager.createNewConnection(targetAddress, dir, token);
-      conn.token = token;
+      conn.handleNewToken(token);
     }
   }
 }

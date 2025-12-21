@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { NewTokenCommand } from '../../../client/commands/newToken/newToken.command';
-import { NewTokenHandler } from '../../../client/commands/newToken/newToken.handler';
+import { NewTokenCommand } from '../../../client/Commands/newToken/newToken.command';
+import { NewTokenHandler } from '../../../client/Commands/newToken/newToken.handler';
 import { Connection } from '../../../client/connection/Connection';
 import { ConnectionManager } from '../../../client/connectionManager/ConnectionManager';
 import { Command } from 'models/commands.model';
@@ -136,8 +136,8 @@ describe('NewTokenHandler', () => {
 
     expect(sendingConn).toBeDefined();
     expect(receivingConn).toBeDefined();
-    expect(sendingConn.getToken()).toBe('new-token');
-    expect(receivingConn.getToken()).toBe('new-token');
+    expect(sendingConn.token).toBe('new-token');
+    expect(receivingConn.token).toBe('new-token');
   });
 
   it('should throw error when payload is missing required fields', async () => {
