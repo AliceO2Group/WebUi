@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { NewTokenCommand } from '../../../client/Commands/newToken/newToken.command';
-import { NewTokenHandler } from '../../../client/Commands/newToken/newToken.handler';
+import { NewTokenCommand } from '../../../client/commands/newToken/newToken.command';
+import { NewTokenHandler } from '../../../client/commands/newToken/newToken.handler';
 import { Connection } from '../../../client/connection/Connection';
 import { ConnectionManager } from '../../../client/connectionManager/ConnectionManager';
 import { Command } from 'models/commands.model';
