@@ -307,4 +307,193 @@ describe('ConnectionManager', () => {
       })
     );
   });
+
+  describe('createNewConnection', () => {
+    test('should create new SENDING connection', async () => {
+      const connection = await conn.createNewConnection('localhost:5000', ConnectionDirection.SENDING, 'test-token');
+
+      expect(connection).toBeDefined();
+      expect(connection.targetAddress).toBe('localhost:5000');
+      expect(connection.direction).toBe(ConnectionDirection.SENDING);
+    });
+
+    test('should create new RECEIVING connection', async () => {
+      const connection = await conn.createNewConnection('localhost:5001', ConnectionDirection.RECEIVING, 'test-token');
+
+      expect(connection).toBeDefined();
+      expect(connection.targetAddress).toBe('localhost:5001');
+      expect(connection.direction).toBe(ConnectionDirection.RECEIVING);
+    });
+
+    test('should return existing connection and update token', async () => {
+      const conn1 = await conn.createNewConnection('localhost:5002', ConnectionDirection.SENDING, 'token1');
+      const conn2 = await conn.createNewConnection('localhost:5002', ConnectionDirection.SENDING, 'token2');
+
+      expect(conn1).toBe(conn2);
+    });
+
+    test('should create connection without token', async () => {
+      const connection = await conn.createNewConnection('localhost:5003', ConnectionDirection.SENDING);
+
+      expect(connection).toBeDefined();
+      expect(connection.token).toBe('');
+    });
+  });
+
+  describe('getConnectionByAddress', () => {
+    test('should return SENDING connection', async () => {
+      await conn.createNewConnection('localhost:6000', ConnectionDirection.SENDING, 'token');
+      const found = conn.getConnectionByAddress('localhost:6000', ConnectionDirection.SENDING);
+
+      expect(found).toBeDefined();
+      expect(found?.targetAddress).toBe('localhost:6000');
+    });
+
+    test('should return RECEIVING connection', async () => {
+      await conn.createNewConnection('localhost:6001', ConnectionDirection.RECEIVING, 'token');
+      const found = conn.getConnectionByAddress('localhost:6001', ConnectionDirection.RECEIVING);
+
+      expect(found).toBeDefined();
+      expect(found?.targetAddress).toBe('localhost:6001');
+    });
+
+    test('should return undefined for non-existent connection', () => {
+      const found = conn.getConnectionByAddress('localhost:9999', ConnectionDirection.SENDING);
+
+      expect(found).toBeUndefined();
+    });
+
+    test('should return undefined for invalid direction', () => {
+      const found = conn.getConnectionByAddress('localhost:6000', 'INVALID' as ConnectionDirection);
+
+      expect(found).toBeUndefined();
+    });
+  });
+
+  describe('getConnectionByToken', () => {
+    test('should find connection by token in sending connections', async () => {
+      await conn.createNewConnection('localhost:7000', ConnectionDirection.SENDING, 'unique-token-1');
+      const found = conn.getConnectionByToken('unique-token-1');
+
+      expect(found).toBeDefined();
+      expect(found?.targetAddress).toBe('localhost:7000');
+    });
+
+    test('should find connection by token in receiving connections', async () => {
+      await conn.createNewConnection('localhost:7001', ConnectionDirection.RECEIVING, 'unique-token-2');
+      const found = conn.getConnectionByToken('unique-token-2');
+
+      expect(found).toBeDefined();
+      expect(found?.targetAddress).toBe('localhost:7001');
+    });
+
+    test('should return undefined for non-existent token', () => {
+      const found = conn.getConnectionByToken('non-existent-token');
+
+      expect(found).toBeUndefined();
+    });
+  });
+
+  describe('getConnectionBySerialNumber', () => {
+    test('should find connection by serial number in receiving connections', async () => {
+      const connection = await conn.createNewConnection('localhost:8000', ConnectionDirection.RECEIVING, 'token');
+      connection.serialNumber = 'SN123456';
+
+      const found = conn.getConnectionBySerialNumber('SN123456');
+
+      expect(found).toBeDefined();
+      expect(found?.serialNumber).toBe('SN123456');
+    });
+
+    test('should find connection by serial number in sending connections', async () => {
+      const connection = await conn.createNewConnection('localhost:8001', ConnectionDirection.SENDING, 'token');
+      connection.serialNumber = 'SN789012';
+
+      const found = conn.getConnectionBySerialNumber('SN789012');
+
+      expect(found).toBeDefined();
+      expect(found?.serialNumber).toBe('SN789012');
+    });
+
+    test('should return undefined for non-existent serial number', () => {
+      const found = conn.getConnectionBySerialNumber('NON-EXISTENT');
+
+      expect(found).toBeUndefined();
+    });
+  });
+
+  describe('connections getter', () => {
+    test('should return all connections', async () => {
+      await conn.createNewConnection('localhost:9000', ConnectionDirection.SENDING, 'token1');
+      await conn.createNewConnection('localhost:9001', ConnectionDirection.RECEIVING, 'token2');
+
+      const connections = conn.connections;
+
+      expect(connections.sending.length).toBeGreaterThanOrEqual(1);
+      expect(connections.receiving.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('registerCommandHandlers', () => {
+    test('should register command handlers', () => {
+      const mockHandler = { handle: jest.fn() };
+
+      conn.registerCommandHandlers([{ event: DuplexMessageEvent.MESSAGE_EVENT_NEW_TOKEN, handler: mockHandler }]);
+
+      expect(mockHandler).toBeDefined();
+    });
+  });
+
+  describe('getAllTokens', () => {
+    test('should send getAllTokens event to central system', () => {
+      conn.connectToCentralSystem();
+      conn.getAllTokens();
+
+      expect(mockClient.ClientStream).toHaveBeenCalled();
+    });
+  });
+
+  describe('listenForPeers error handling', () => {
+    test('should throw error for invalid port number', async () => {
+      await expect(conn.listenForPeers(0)).rejects.toThrow('Invalid port number');
+    });
+
+    test('should throw error for port number too high', async () => {
+      await expect(conn.listenForPeers(70000)).rejects.toThrow('Invalid port number');
+    });
+
+    test('should throw error for negative port number', async () => {
+      await expect(conn.listenForPeers(-1)).rejects.toThrow('Invalid port number');
+    });
+
+    test('should throw error for non-integer port', async () => {
+      await expect(conn.listenForPeers(50.5)).rejects.toThrow('Invalid port number');
+    });
+
+    test('should handle missing listener certificate', async () => {
+      const secCtx = new SecurityContext(MOCK_CERT, MOCK_CERT, MOCK_CERT, MOCK_CERT);
+      const manager = new ConnectionManager('dummy.proto', 'localhost:12345', secCtx);
+
+      await manager.listenForPeers(50058);
+
+      const serverCtor = (grpc.Server as any).mock;
+      expect(serverCtor.calls.length).toBe(0);
+    });
+  });
+
+  describe('sendCentralAlert', () => {
+    test('should send alert to central system', () => {
+      conn.connectToCentralSystem();
+
+      conn.sendCentralAlert({
+        alert: 'Test alert',
+        level: 'ERROR' as any,
+        code: 'TEST_CODE' as any,
+        ts: Date.now(),
+        context: {},
+      });
+
+      expect(mockClient.ClientStream).toHaveBeenCalled();
+    });
+  });
 });
