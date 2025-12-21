@@ -109,7 +109,7 @@ export const setup = async (http, ws, eventEmitter) => {
   http.get(
     '/filter/run-status/:runNumber',
     runStatusFilterMiddleware,
-    filterController.getRunStatusHandler.bind(filterController),
+    filterController.getRunInformationHandler.bind(filterController),
   );
   http.get(
     '/filter/ongoingRuns',
