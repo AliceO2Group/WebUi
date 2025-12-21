@@ -102,8 +102,8 @@ module.exports.setup = (http, ws) => {
   const broadcastService = new BroadcastService(ws);
   const cacheService = new CacheService(broadcastService);
   const environmentCacheService = new EnvironmentCacheService(broadcastService, eventEmitter);
-
   const qcConfigurationService = new QCConfigurationService(consulService);
+
   const qcConfigurationController = new QCConfigurationController(qcConfigurationService, config.consul);
 
   const consulController = new ConsulController(consulService, config.consul);
@@ -284,6 +284,11 @@ module.exports.setup = (http, ws) => {
   );
 
   // Configuration
+  // this order of registering endpoints is necessary
+  http.get(
+    '/configurations/restrictions/:key(*)', validateConsulServiceMiddleware,
+    qcConfigurationController.getConfigurationRestrictionsByKeyHandler.bind(qcConfigurationController)
+  );
   http.get(
     '/configurations', validateConsulServiceMiddleware,
     qcConfigurationController.getConfigurationsKeysHandler.bind(qcConfigurationController)
@@ -291,6 +296,10 @@ module.exports.setup = (http, ws) => {
   http.get(
     '/configurations/:key(*)', validateConsulServiceMiddleware, 
     qcConfigurationController.getConfigurationByKeyHandler.bind(qcConfigurationController)
+  );
+  http.put(
+    '/configurations/:key(*)', validateConsulServiceMiddleware,
+    qcConfigurationController.putConfigurationByKeyHandler.bind(qcConfigurationController)
   );
 
   // Consul

@@ -12,8 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { qcObjectInfoPanel } from './../../../common/object/objectInfoCard.js';
-import { h, iconResizeBoth, info, iconDataTransferDownload } from '/js/src/index.js';
+import { downloadButton } from '../../../common/downloadButton.js';
+import { defaultRowAttributes, qcObjectInfoPanel } from './../../../common/object/objectInfoCard.js';
+import { h, iconResizeBoth, info } from '/js/src/index.js';
 
 /**
  * Builds 2 actionable buttons which are to be placed on top of a JSROOT plot
@@ -46,15 +47,16 @@ export const objectInfoResizePanel = (model, tabObject) => {
       h(
         '.dropdown-menu',
         { style: 'right:0.1em; width: 35em;left: auto;' },
-        objectRemoteData.isSuccess() && h('.p1', qcObjectInfoPanel(objectRemoteData.payload)),
+        objectRemoteData.isSuccess() &&
+          h('.p1', qcObjectInfoPanel(objectRemoteData.payload, {}, defaultRowAttributes(model.notification))),
       ),
     ]),
     objectRemoteData.isSuccess() &&
-    h('a.btn#download-button', {
-      title: 'Download object',
-      target: '_blank',
+    downloadButton({
       href: model.objectViewModel.getDownloadQcdbObjectUrl(objectRemoteData.payload.id),
-    }, iconDataTransferDownload()),
+      title: 'Download object',
+      id: `download-button-${objectRemoteData.payload.id}`,
+    }),
     h('a.btn', {
       title: 'Open object plot in full screen',
       href: uri,

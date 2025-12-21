@@ -13,6 +13,8 @@
 
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
+import { getLocalStorage } from '../../testUtils/localStorage.js';
+import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
 
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
 const SORTING_BUTTON_PATH = 'header > div > div > div:nth-child(3) > div > button';
@@ -73,10 +75,157 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       await delay(500);
       await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(4)').click());
       await delay(1000);
-      const dlButton = await page.evaluate(() => document.querySelector('#download-button').href);
+      const dlButton = await page.evaluate(() => document.querySelector('.download-button').href);
       const token = await page.evaluate(() => model.session.token);
       strictEqual(dlButton, `${url}api/object/proxy/download/?token=${token}&objectIds=${objectId}`);
     },
+  );
+
+  await testParent.test(
+    'should have default panel width of 50% when width is null in localStorage',
+    { timeout },
+    async () => {
+      const defaultValue = '50%';
+      const panelWidth = await page.evaluate(() =>
+        document.querySelector('section > div > div > div:nth-child(1)').style.width);
+      const personId = await page.evaluate(() => window.model.session.personid);
+      const storedPanelWidth = await getLocalStorage(
+        page,
+        `${StorageKeysEnum.OBJECT_VIEW_LEFT_PANEL_WIDTH}-${personId}`,
+      );
+      strictEqual(storedPanelWidth, null);
+      strictEqual(panelWidth, defaultValue);
+    },
+  );
+
+  await testParent.test(
+    'should change and store panel width when dragging the divider',
+    { timeout },
+    async () => {
+      const dragAmount = 35;
+      const [container, divider] = await Promise.all([
+        page.$('body > div.absolute-fill.flex-column > div > section'),
+        page.$('section > div > div > div:nth-child(2)'),
+      ]);
+      const [containerBB, dividerBB] = await Promise.all([container.boundingBox(), divider.boundingBox()]);
+
+      const centerX = dividerBB.x + dividerBB.width / 2;
+      const centerY = dividerBB.y + dividerBB.height / 2;
+      const targetX = containerBB.x + containerBB.width * (dragAmount / 100);
+
+      await page.mouse.move(centerX, centerY);
+      await page.mouse.down();
+      await page.mouse.move(targetX, centerY, { steps: 5 });
+      await page.mouse.up();
+      await delay(300);
+
+      const [personId, panelWidth] = await page.evaluate(() => [
+        window.model.session.personid,
+        document.querySelector('section > div > div > div:nth-child(1)').style.width,
+      ]);
+      const storedWidth = await getLocalStorage(page, `${StorageKeysEnum.OBJECT_VIEW_LEFT_PANEL_WIDTH}-${personId}`);
+
+      strictEqual(panelWidth, `${dragAmount}%`);
+      strictEqual(storedWidth, dragAmount.toString());
+    },
+  );
+
+  await testParent.test(
+    'should maintain panel width from localStorage on page reload',
+    { timeout },
+    async () => {
+      const dragAmount = 35;
+      await page.reload({ waitUntil: 'networkidle0' });
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(2)').click());
+      await delay(500);
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(3)').click());
+      await delay(500);
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(4)').click());
+      await delay(1000);
+      const panelWidth = await page.evaluate(() =>
+        document.querySelector('section > div > div > div:nth-child(1)').style.width);
+      strictEqual(panelWidth, `${dragAmount}%`);
+    },
+  );
+
+  await testParent.test(
+    'should correctly render the path as first in the object info panel',
+    { timeout },
+    async () => {
+      const firstRowKey = await page.evaluate(() =>
+        document.querySelector('#qcObjectInfoPanel > div:first-child > b').textContent);
+      strictEqual(firstRowKey, 'Path');
+    },
+  );
+
+  await testParent.test(
+    'should contain four highlighted rows',
+    { timeout },
+    async () => {
+      const highlightedClasses = '.info-row.highlighted';
+      const rowCount = await page.evaluate((selector) =>
+        document.querySelectorAll(`#qcObjectInfoPanel > div${selector}`).length, highlightedClasses);
+      strictEqual(rowCount, 4);
+    },
+  );
+
+  await testParent.test(
+    'should copy the value of the element clicked to the clipboard',
+    { timeout },
+    async () => {
+      const context = page.browserContext();
+      await context.overridePermissions(url, ['clipboard-read', 'clipboard-write', 'clipboard-sanitized-write']);
+
+      await page.click('#qcObjectInfoPanel > div > div');
+
+      const clipboard = await page.evaluate(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        return navigator.clipboard.readText();
+      });
+
+      strictEqual(clipboard, 'qc/test/object/1');
+      context.clearPermissionOverrides();
+    }
+  );
+
+  await testParent.test(
+    'should not copy the value of the clicked element if there is no value',
+    { timeout },
+    async () => {
+      const context = page.browserContext();
+      await context.overridePermissions(url, ['clipboard-read', 'clipboard-write', 'clipboard-sanitized-write']);
+
+      await page.click('#qcObjectInfoPanel > div > div'); // copy path
+      await page.click('#qcObjectInfoPanel > div:nth-child(7) > div'); // try to copy empty value
+
+      const clipboard = await page.evaluate(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        return navigator.clipboard.readText();
+      });
+
+      strictEqual(clipboard, 'qc/test/object/1');
+      context.clearPermissionOverrides();
+    }
+  );
+
+  await testParent.test(
+    'should close the object plot upon clicking the close button',
+    { timeout },
+    async () => {
+      await page.evaluate(() => document.querySelector('#close-button').click());
+      // wait for animations to finish before continuing
+      await page.waitForFunction(
+        (selector) => document.querySelector(selector).children.length === 1,
+        {},
+        'section > div > div'
+      );
+      const selectedObject = await page.evaluate(() => model.object.selected);
+      const numberOfChildren = await page.evaluate(() =>
+        document.querySelector('section > div > div').children.length
+      );
+      strictEqual(selectedObject, undefined);
+      strictEqual(numberOfChildren, 1);
+    }
   );
 
   await testParent.test('should sort list of histograms by name in descending order', async () => {

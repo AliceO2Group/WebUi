@@ -12,43 +12,65 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Box, Drawer, List, ListItem, ListItemText } from '@mui/material';
+import { type FC, type PropsWithChildren } from 'react';
+import { Box, Divider, Drawer } from '@mui/material';
 import { LeftDrawerFooter } from './LeftDrawerFooter';
 import { LeftDrawerHeader } from './LeftDrawerHeader';
-
-const DRAWER_WIDTH = 250;
+import { useDrawer } from '../../../contexts/DrawerContext';
 
 /**
  * LeftDrawer component
  * Represents the left sidebar of the application layout.
+ * @param {PropsWithChildren} props - The props of the component.
+ * @param {ReactElement} props.children - The children elements to render inside the drawer.
  * @returns {ReactElement} LeftDrawer
  */
-export const LeftDrawer = () => (
-  <Drawer
-    sx={{
-      width: DRAWER_WIDTH,
-      flexShrink: 0,
-      '& .MuiDrawer-paper': {
-        width: DRAWER_WIDTH,
-        boxSizing: 'border-box',
-        display: 'flex',
-        flexDirection: 'column',
-      },
-    }}
-    variant="permanent"
-    anchor="left"
-    className="left-drawer"
-  >
-    <LeftDrawerHeader />
-    <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
-      <List>
-        {['Item 1', 'Item 2', 'Item 3', 'Item 4'].map((text) => (
-          <ListItem key={text}>
-            <ListItemText primary={text} />
-          </ListItem>
-        ))}
-      </List>
-    </Box>
-    <LeftDrawerFooter />
-  </Drawer>
-);
+export const LeftDrawer: FC<PropsWithChildren> = ({ children }) => {
+  const { isOpen, drawerWidth, isResizing, handleResize, getTransition } = useDrawer();
+
+  return (
+    <Drawer
+      sx={{
+        width: drawerWidth,
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: drawerWidth,
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          transition: getTransition('drawer'),
+        },
+      }}
+      variant="persistent"
+      anchor="left"
+      className="left-drawer"
+      open={isOpen}
+    >
+      <Box sx={{ display: 'flex', flexDirection: 'row', height: '100%' }}>
+        <Box
+          sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', height: '100%' }}
+        >
+          <LeftDrawerHeader />
+          <Box sx={{ overflow: 'auto', flexGrow: 1 }}>{children}</Box>
+          <LeftDrawerFooter />
+        </Box>
+        <Divider
+          orientation="vertical"
+          flexItem
+          onMouseDown={handleResize}
+          sx={{
+            backgroundColor: isResizing ? 'primary.main' : 'rgba(0, 0, 0, 0.12)',
+            width: '4px',
+            flexShrink: 0,
+            cursor: 'col-resize',
+            '&:hover': {
+              backgroundColor: 'primary.light',
+            },
+            transition: 'background-color 0.2s',
+          }}
+        />
+      </Box>
+    </Drawer>
+  );
+};

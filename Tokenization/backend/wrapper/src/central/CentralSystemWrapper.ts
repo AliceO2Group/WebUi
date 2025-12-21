@@ -12,70 +12,67 @@
  * or submit itself to any jurisdiction.
  */
 
-import * as grpc from "@grpc/grpc-js";
-import * as protoLoader from "@grpc/proto-loader";
-import { LogManager } from "@aliceo2/web-ui";
-import { DuplexMessageModel } from "../models/message.model";
-import * as fs from "fs";
-import { CentralSystemConfig } from "models/config.model";
-import { CentralCommandDispatcher } from "../client/ConnectionManager/EventManagement/CentralCommandDispatcher";
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
+import { LogManager } from '@aliceo2/web-ui';
+import { DuplexMessageModel } from '../models/message.model';
+import * as fs from 'fs';
+import { CentralSystemConfig } from 'models/config.model';
+import { CentralCommandDispatcher } from '../client/connectionManager/eventManagement/CentralCommandDispatcher';
+import type { CentralSystemConfig } from '../models/config.model';
 
 /**
  * @description Central System gRPC wrapper that manages client connections and handles gRPC streams with them.
  */
 export class CentralSystemWrapper {
-  // utilities
-  private logger = LogManager.getLogger("CentralSystemWrapper");
-  private dispatcher = new CentralCommandDispatcher();
+  // Config
+  private _protoPath: string;
 
-  // class properties
-  private server: grpc.Server;
-  private protoPath: string;
-  private port: number;
+  // Class properties
+  private _server: grpc.Server;
+  private _port: number;
 
-  // certificates paths
-  private serverCerts: CentralSystemConfig["serverCerts"];
+  // Certificates paths
+  private _serverCerts: CentralSystemConfig['serverCerts'];
 
-  // clients management
-  private clients = new Map<string, grpc.ServerDuplexStream<any, any>>();
-  private clientIps = new Map<string, string>(); // Peer -> IP map
+  // Utilities
+  private _logger = LogManager.getLogger('CentralSystemWrapper');
+  private _dispatcher = new CentralCommandDispatcher();
+
+  // Clients management
+  private _clients = new Map<string, grpc.ServerDuplexStream<any, any>>();
+  private _clientIps = new Map<string, string>(); // Peer -> IP map
 
   /**
    * Initializes the Wrapper for CentralSystem.
    * @param port The port number to bind the gRPC server to.
    */
   constructor(config: CentralSystemConfig) {
-    if (
-      !config.protoPath ||
-      !config.serverCerts ||
-      !config.serverCerts.caCertPath ||
-      !config.serverCerts.certPath ||
-      !config.serverCerts.keyPath
-    ) {
-      throw new Error("Invalid CentralSystemConfig provided");
+    if (!config.protoPath || !config.serverCerts?.caCertPath || !config.serverCerts?.certPath || !config.serverCerts?.keyPath) {
+      throw new Error('Invalid CentralSystemConfig provided');
     }
 
-    this.protoPath = config.protoPath;
-    this.serverCerts = config.serverCerts;
-    this.port = config.port || 50051;
+    this._protoPath = config.protoPath;
+    this._serverCerts = config.serverCerts;
+    this._port = config.port ?? 50051;
 
     // Register command handlers if provided
     if (config.commandHandlers) {
       config.commandHandlers.forEach(({ command, handler }) => {
-        this.dispatcher.register(command, handler);
+        this._dispatcher.register(command, handler);
       });
     }
 
-    this.server = new grpc.Server();
+    this._server = new grpc.Server();
     this.setupService();
   }
 
   /**
-   * @description Loads the gRPC proto definition and sets up the CentralSystem service.
+   * Loads the gRPC proto definition and sets up the CentralSystem service.
    */
   private setupService(): void {
     // Load the proto definition with options
-    const packageDef = protoLoader.loadSync(this.protoPath, {
+    const packageDef = protoLoader.loadSync(this._protoPath, {
       keepCase: true,
       longs: String,
       enums: String,
@@ -88,13 +85,13 @@ export class CentralSystemWrapper {
     const wrapper = proto.webui.tokenization;
 
     // Add the CentralSystem service and bind the stream handler
-    this.server.addService(wrapper.CentralSystem.service, {
+    this._server.addService(wrapper.CentralSystem.service, {
       ClientStream: this.clientStreamHandler.bind(this),
     });
   }
 
   /**
-   * @description Extracts IP address from peer string
+   * Extracts IP address from peer string
    * @param peer string e.g. ipv4:127.0.0.1:12345
    * @returns Extracted IP address
    */
@@ -109,111 +106,109 @@ export class CentralSystemWrapper {
     const ipv6Match = peer.match(/^ipv6:\[(.+?)\]:\d+$/);
     if (ipv6Match) return ipv6Match[1];
 
-    // fallback to original peer if pattern doesn't match any
+    // Fallback to original peer if pattern doesn't match any
     return peer;
   }
 
   /**
-   * @description Handles the duplex stream from the client.
+   * Handles the duplex stream from the client.
    * @param call The duplex stream call object.
    */
   private clientStreamHandler(call: grpc.ServerDuplexStream<any, any>): void {
     const peer = call.getPeer();
     const clientIp = this.extractIpFromPeer(peer);
 
-    this.logger.infoMessage(
-      `Client ${clientIp} (${peer}) connected to CentralSystem stream`
-    );
+    this._logger.infoMessage(`Client ${clientIp} (${peer}) connected to CentralSystem stream`);
 
     // Add client to maps
-    this.clients.set(clientIp, call);
-    this.clientIps.set(peer, clientIp);
+    this._clients.set(clientIp, call);
+    this._clientIps.set(peer, clientIp);
 
     // Listen for data events from the client
-    call.on("data", (payload: any) => {
-      this.logger.infoMessage(`Received from ${clientIp}:`, payload);
-      this.dispatcher.dispatch(payload);
+    call.on('data', (payload: any) => {
+      this._logger.infoMessage(`Received from ${clientIp}:`, payload);
+      this._dispatcher.dispatch(payload);
     });
 
     // Handle stream end event
-    call.on("end", () => {
-      this.logger.infoMessage(`Client ${clientIp} ended stream.`);
+    call.on('end', () => {
+      this._logger.infoMessage(`Client ${clientIp} ended stream.`);
       this.cleanupClient(peer);
       call.end();
     });
 
     // Handle stream error event
-    call.on("error", (err) => {
-      this.logger.errorMessage(`Stream error from client ${clientIp}:`, err);
+    call.on('error', (err: any) => {
+      this._logger.errorMessage(`Stream error from client ${clientIp}:`, err);
       this.cleanupClient(peer);
     });
   }
 
   /**
-   * @description Cleans up client resources
+   * Cleans up client resources
    * @param peer Original peer string
    */
   private cleanupClient(peer: string): void {
-    const clientIp = this.clientIps.get(peer);
+    const clientIp = this._clientIps.get(peer);
     if (clientIp) {
-      this.clients.delete(clientIp);
-      this.clientIps.delete(peer);
-      this.logger.infoMessage(`Cleaned up resources of ${clientIp}`);
+      this._clients.delete(clientIp);
+      this._clientIps.delete(peer);
+      this._logger.infoMessage(`Cleaned up resources of ${clientIp}`);
     }
   }
 
   /**
-   * @description Sends data to a specific client by IP address
+   * Sends data to a specific client by IP address
    * @param ip Client IP address
    * @param data Data to send
    * @returns Whether the data was successfully sent
    */
-  public sendEvent(ip: string, data: DuplexMessageModel): Boolean {
-    const client = this.clients.get(ip);
+  public sendEvent(ip: string, data: DuplexMessageModel): boolean {
+    const client = this._clients.get(ip);
     if (!client) {
-      this.logger.warnMessage(`Client ${ip} not found for sending event`);
+      this._logger.warnMessage(`Client ${ip} not found for sending event`);
       return false;
     }
 
     try {
       client.write(data);
-      this.logger.infoMessage(`Sent event to ${ip}:`, data);
+      this._logger.infoMessage(`Sent event to ${ip}:`, data);
       return true;
     } catch (err) {
-      this.logger.errorMessage(`Error sending to ${ip}:`, err);
+      this._logger.errorMessage(`Error sending to ${ip}:`, err);
       return false;
     }
   }
 
   public broadcastEvent(data: DuplexMessageModel): void {
-    this.clients.forEach((client, ip) => {
+    this._clients.forEach((client, ip) => {
       try {
         client.write(data);
-        this.logger.infoMessage(`Broadcasted event to ${ip}:`, data);
+        this._logger.infoMessage(`Broadcasted event to ${ip}:`, data);
       } catch (err) {
-        this.logger.errorMessage(`Error broadcasting to ${ip}:`, err);
+        this._logger.errorMessage(`Error broadcasting to ${ip}:`, err);
       }
     });
   }
 
   /**
-   * @description Gets all connected client IPs
+   * Gets all connected client IPs
    * @returns Array of connected client IPs
    */
-  public getConnectedClients(): string[] {
-    return Array.from(this.clients.keys());
+  public get connectedClients(): string[] {
+    return Array.from(this._clients.keys());
   }
 
   /**
-   * @desciprion Starts the gRPC server and binds it to the specified in class port.
+   * Starts the gRPC server and binds it to the specified in class port.
    */
   public listen() {
-    const addr = `localhost:${this.port}`;
+    const addr = `localhost:${this._port}`;
 
-    // create mTLS secure gRPC server
-    const caCert = fs.readFileSync(this.serverCerts.caCertPath);
-    const centralKey = fs.readFileSync(this.serverCerts.keyPath);
-    const centralCert = fs.readFileSync(this.serverCerts.certPath);
+    // Create mTLS secure gRPC server
+    const caCert = fs.readFileSync(this._serverCerts.caCertPath);
+    const centralKey = fs.readFileSync(this._serverCerts.keyPath);
+    const centralCert = fs.readFileSync(this._serverCerts.certPath);
 
     const sslCreds = grpc.ServerCredentials.createSsl(
       caCert,
@@ -226,12 +221,12 @@ export class CentralSystemWrapper {
       true
     );
 
-    this.server.bindAsync(addr, sslCreds, (err, _port) => {
+    this._server.bindAsync(addr, sslCreds, (err: any, _port: any) => {
       if (err) {
-        this.logger.errorMessage("Server bind error:", err);
+        this._logger.errorMessage('Server bind error:', err);
         return;
       }
-      this.logger.infoMessage(`CentralSytem started listening on ${addr}`);
+      this._logger.infoMessage(`CentralSytem started listening on ${addr}`);
     });
   }
 }

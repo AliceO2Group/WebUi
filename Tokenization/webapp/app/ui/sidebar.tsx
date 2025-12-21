@@ -16,18 +16,21 @@ import type { NavLinkProps } from 'react-router';
 import { NavLink } from 'react-router';
 import Button from '@mui/material/Button';
 
+type StyledNavLinkProps = {
+  children: React.ReactNode;
+  to: NavLinkProps['to'];
+};
+
 /**
  * StyledNavLink
  *
  * A wrapper component that renders a Material-UI Button styled as a navigation link.
  * It uses NavLink from react-router to determine if the link is active and applies
  * the 'contained' variant for the active route and 'outlined' for inactive routes.
- * @param children.children
  * @param children The content to display inside the button.
  * @param to The target route path.
- * @param children.to
  */
-const StyledNavLink = ({ children, to }: NavLinkProps) => <NavLink to={to}>
+const StyledNavLink = ({ children, to }: StyledNavLinkProps) => <NavLink to={to}>
   {({ isActive }) => (
     <Button
       variant={isActive ? 'contained' : 'outlined'}

@@ -57,17 +57,17 @@ export const setup = async (http, ws, eventEmitter) => {
   } = await setupQcModel(eventEmitter);
   statusService.ws = ws;
 
-  http.get('/object/:id', objectGetByIdValidation, objectController.getObjectById.bind(objectController));
-  http.get('/object', objectGetContentsValidation, objectController.getObjectContent.bind(objectController));
+  http.get('/object/:id', objectGetByIdValidation, objectController.getObjectByIdHandler.bind(objectController));
+  http.get('/object', objectGetContentsValidation, objectController.getObjectContentHandler.bind(objectController));
 
   http.get(
     '/objects',
     objectsGetValidation,
     runModeMiddleware,
-    objectController.getObjects.bind(objectController),
+    objectController.getObjectsHandler.bind(objectController),
   );
 
-  http.get('/object/proxy/download/', objectController.getDownloadObjects.bind(objectController));
+  http.get('/object/proxy/download/', objectController.getDownloadObjectsHandler.bind(objectController));
 
   http.get('/layouts', layoutController.getLayoutsHandler.bind(layoutController));
   http.get('/layout/:id', layoutController.getLayoutHandler.bind(layoutController));
@@ -95,7 +95,7 @@ export const setup = async (http, ws, eventEmitter) => {
     layoutController.deleteLayoutHandler.bind(layoutController),
   );
 
-  http.get('/status/gui', statusController.getQCGStatus.bind(statusController), { public: true });
+  http.get('/status/gui', statusController.getQCGStatusHandler.bind(statusController), { public: true });
   http.get(
     '/status/:service',
     statusComponentMiddleware,
@@ -109,7 +109,7 @@ export const setup = async (http, ws, eventEmitter) => {
   http.get(
     '/filter/run-status/:runNumber',
     runStatusFilterMiddleware,
-    filterController.getRunStatusHandler.bind(filterController),
+    filterController.getRunInformationHandler.bind(filterController),
   );
   http.get(
     '/filter/ongoingRuns',

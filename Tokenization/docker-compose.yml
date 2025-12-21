@@ -1,21 +1,25 @@
 services:
   install-backend:
     image: node:22-alpine
-    working_dir: /var/workspace
+    working_dir: /var/workspace/central-system
     volumes:
       - ./backend:/var/workspace
-    command: ["npm", "install", "--no-save", "--silent"]
+    command: ['npm', 'install', '--no-save', '--silent']
   backend:
     image: node:22-alpine
-    working_dir: /var/workspace
+    working_dir: /var/workspace/central-system
     volumes:
       - ./backend:/var/workspace
-    command: ["npm", "run", "dev"]
+    command: ['npm', 'run', 'dev']
     healthcheck:
       interval: 1s
-      test: ["CMD-SHELL",
-             "node", "-c",
-             "node --input-type=module -e \"process.exit((await fetch('http://backend:8080/api/healthcheck')).ok === true ? 0 : 1)\""]
+      test:
+        [
+          'CMD-SHELL',
+          'node',
+          '-c',
+          'node --input-type=module -e "process.exit((await fetch(''http://backend:8080/api/healthcheck'')).ok === true ? 0 : 1)"',
+        ]
     depends_on:
       install-backend:
         condition: service_completed_successfully
@@ -25,18 +29,22 @@ services:
     working_dir: /var/workspace
     volumes:
       - ./webapp:/var/workspace
-    command: ["npm", "install", "--no-save", "--silent"]
+    command: ['npm', 'install', '--no-save', '--silent']
   webapp:
     image: node:22-alpine
     working_dir: /var/workspace
     volumes:
       - ./webapp:/var/workspace
-    command: ["npm", "run", "dev", "--", "--host", "webapp"]
+    command: ['npm', 'run', 'dev', '--', '--host', 'webapp']
     healthcheck:
       interval: 1s
-      test: ["CMD-SHELL",
-             "node", "-c",
-             "node --input-type=module -e \"process.exit((await fetch('http://webapp:5173')).ok === true ? 0 : 1)\""]
+      test:
+        [
+          'CMD-SHELL',
+          'node',
+          '-c',
+          'node --input-type=module -e "process.exit((await fetch(''http://webapp:5173'')).ok === true ? 0 : 1)"',
+        ]
     depends_on:
       backend:
         condition: service_healthy
@@ -44,11 +52,11 @@ services:
         condition: service_completed_successfully
 
   reverse-proxy:
-    image: nginx:1.27
-    volumes:
-      - ./docker/provisioning/nginx/conf.d/:/etc/nginx/conf.d/
+    build:
+      target: reverse-proxy
     ports:
-      - "8080:8080"
+      - '8080:8080'
+      - '4041:4041'
     depends_on:
       backend:
         condition: service_healthy

@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { AlertPayload } from "./alert.model";
-import { SingleTokenPayload, TokenListPayload } from "./token.model";
+import { AlertPayload } from './alert.model';
+import { SingleTokenPayload, TokenListPayload } from './token.model';
 
 // ======================================
 //                 ENUMS
@@ -30,15 +30,15 @@ import { SingleTokenPayload, TokenListPayload } from "./token.model";
  */
 export enum DuplexMessageEvent {
   // Central system commands
-  MESSAGE_EVENT_EMPTY = "MESSAGE_EVENT_EMPTY",
-  MESSAGE_EVENT_NEW_TOKEN = "MESSAGE_EVENT_NEW_TOKEN",
-  MESSAGE_EVENT_REVOKE_TOKEN = "MESSAGE_EVENT_REVOKE_TOKEN",
-  MESSAGE_EVENT_SEND_ALL_TOKENS = "MESSAGE_EVENT_SEND_ALL_TOKENS",
+  MESSAGE_EVENT_EMPTY = 'MESSAGE_EVENT_EMPTY',
+  MESSAGE_EVENT_NEW_TOKEN = 'MESSAGE_EVENT_NEW_TOKEN',
+  MESSAGE_EVENT_REVOKE_TOKEN = 'MESSAGE_EVENT_REVOKE_TOKEN',
+  MESSAGE_EVENT_SEND_ALL_TOKENS = 'MESSAGE_EVENT_SEND_ALL_TOKENS',
 
   // Client commands
-  MESSAGE_EVENT_GET_ALL_TOKENS = "MESSAGE_EVENT_GET_LAST_TOKEN",
-  MESSAGE_EVENT_RENEW_TOKEN = "MESSAGE_EVENT_RENEW_TOKEN",
-  MESSAGE_EVENT_SEND_ALERT = "MESSAGE_EVENT_SEND_ALERT",
+  MESSAGE_EVENT_GET_ALL_TOKENS = 'MESSAGE_EVENT_GET_LAST_TOKEN',
+  MESSAGE_EVENT_RENEW_TOKEN = 'MESSAGE_EVENT_RENEW_TOKEN',
+  MESSAGE_EVENT_SEND_ALERT = 'MESSAGE_EVENT_SEND_ALERT',
 }
 
 /**
@@ -48,19 +48,16 @@ export enum DuplexMessageEvent {
  * @property DUPLEX: Indicates a connection that can both send and receive messages.
  */
 export enum ConnectionDirection {
-  SENDING = "SENDING",
-  RECEIVING = "RECEIVING",
-  DUPLEX = "DUPLEX",
+  SENDING = 'SENDING',
+  RECEIVING = 'RECEIVING',
+  DUPLEX = 'DUPLEX',
 }
 
 // ======================================
 //              INTERFACES
 // ======================================
 
-export type PayloadVariant =
-  | TokenListPayload
-  | SingleTokenPayload
-  | AlertPayload;
+export type PayloadVariant = TokenListPayload | SingleTokenPayload | AlertPayload;
 
 /**
  * @description Model for duplex stream messages between client and central system.

@@ -14,25 +14,21 @@
 
 import { Box } from '@mui/material';
 import { type FC, type PropsWithChildren } from 'react';
-import { LeftDrawer } from './drawer/LeftDrawer';
-import { Content } from './content/Content';
 
 /**
  * MainLayout component
  * Represents the main layout of the application, including the left drawer and content area.
  * @param {PropsWithChildren} props - Component props.
+ * @param {ReactElement} props.children - The children elements to render inside main layout.
  * @returns {React.ReactElement} MainLayout
  */
-const MainLayout: FC<PropsWithChildren> = ({ children }) => (
+export const MainLayout: FC<PropsWithChildren> = ({ children }) => (
   <Box
     sx={{
       display: 'flex',
       height: '100vh',
     }}
   >
-    <LeftDrawer />
-    <Content>{children}</Content>
+    {children}
   </Box>
 );
-
-export default MainLayout;

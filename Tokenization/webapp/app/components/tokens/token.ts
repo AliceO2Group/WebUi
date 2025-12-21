@@ -13,6 +13,12 @@
  */
 
 export interface Token {
-  tokenId: number;
-  validity: 'good' | 'bad';
+  tokenId: string ;
+  serviceFrom: string;
+  serviceTo: string;
+  exp: string;
+  last4chars: string;
+  issuer: string;
+  iat: string;
+  permissions: string[];
 }
