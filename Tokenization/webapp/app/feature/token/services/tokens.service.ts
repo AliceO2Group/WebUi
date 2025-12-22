@@ -12,8 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import { mockArchivedTokenLogs, mockActiveTokenLogs } from '~/feature/token/mocks/token-logs.mock';
-import { mockTokens } from '~/feature/token/mocks/tokens.mock';
 import type { Token, TokenLogEntry, TokenStatus } from '~/feature/token/types/token';
 import type { TokenFilterValues } from '~/feature/token/types/token-filters';
 

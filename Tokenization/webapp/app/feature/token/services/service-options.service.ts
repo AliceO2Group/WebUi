@@ -15,15 +15,14 @@
 import type { Service } from "~/feature/service/types/service";
 
 /**
- * Placeholder service returning a mocked list of available services until the
- * real backend endpoint is available.
+ * Fetch available services from the backend, optionally filtered by a search term.
  */
-export async function fetchAvailableServices(_searchTerm = '', token?: string | null): Promise<Service[]> {
+export async function fetchAvailableServices(searchTerm = '', token?: string | null): Promise<Service[]> {
 
   const params = new URLSearchParams();
 
-  if(_searchTerm !== '') {
-    params.append('searchTerm', _searchTerm);
+  if(searchTerm !== '') {
+    params.append('searchTerm', searchTerm);
   }
   if (token) {
     params.append('token', token);

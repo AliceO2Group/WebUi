@@ -102,7 +102,7 @@ export default function ServiceDetailsRoute() {
 
 			<Stack spacing={3}>
 				<ServiceTokensSection
-					title="Tokens issued by this service"
+					title="Tokens issued from this service"
 					query={outgoingTokensQuery}
 					filters={outgoingFilters}
 					onRevoke={confirmRevokeOutgoing}
