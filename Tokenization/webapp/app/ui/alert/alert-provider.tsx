@@ -16,6 +16,7 @@ import { createContext, useCallback, useMemo, useState, type ReactNode } from 'r
 import Alert from '@mui/material/Alert';
 import type { AlertColor } from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
+import AlertView from './alert';
 
 export type AlertOptions = {
   message: string;
@@ -23,7 +24,7 @@ export type AlertOptions = {
   autoHideDuration?: number;
 };
 
-type AlertState = {
+export type AlertState = {
   message: string;
   severity: AlertColor;
   autoHideDuration: number;
@@ -43,7 +44,6 @@ export const AlertContext = createContext<AlertContextValue | undefined>(undefin
  * Alert provider component to display alerts using MUI Snackbar and Alert components.
  *
  * @param props.children - children for provider
- * @returns
  */
 export function AlertProvider({ children }: { children: ReactNode }) {
   const [alertState, setAlertState] = useState<AlertState | null>(null);
@@ -69,18 +69,10 @@ export function AlertProvider({ children }: { children: ReactNode }) {
   return (
     <AlertContext.Provider value={contextValue}>
       {children}
-      <Snackbar
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        open={Boolean(alertState?.open)}
-        autoHideDuration={alertState?.autoHideDuration}
-        onClose={handleClose}
-      >
-        {alertState ? (
-          <Alert onClose={handleClose} severity={alertState.severity} variant="filled" sx={{ width: '100%' }}>
-            {alertState.message}
-          </Alert>
-        ) : <></>}
-      </Snackbar>
+      <AlertView 
+        alertState={alertState} 
+        handleClose={handleClose} 
+      />
     </AlertContext.Provider>
   );
 }

@@ -15,20 +15,8 @@
 import TextField from '@mui/material/TextField';
 import { styled } from '@mui/material/styles';
 
-export const StaticTextField = styled(TextField)(({ theme }) => ({
+export const StaticTextField = styled(TextField)(() => ({
   '& .MuiInputLabel-root': {
     transition: 'none',
-  },
-  '& .MuiOutlinedInput-root': {
-    transition: 'none',
-    '& fieldset': {
-      transition: 'none',
-    },
-    '&:hover fieldset': {
-      borderColor: theme.palette.text.primary,
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: theme.palette.primary.main,
-    },
-  },
+  }
 }));

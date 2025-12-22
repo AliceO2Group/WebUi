@@ -13,16 +13,10 @@
  */
 
 import { createContext, useCallback, useMemo, useState, type ReactNode } from 'react';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
 import type { ButtonProps } from '@mui/material/Button';
-import { Spinner } from '~/ui/spinner';
+
+import ModalView from './modal';
+
 
 export type ModalAccent = 'default' | 'danger' | 'warning' | 'success';
 
@@ -41,7 +35,7 @@ export type ModalContextValue = {
   hideModal: () => void;
 };
 
-type ModalState = ModalOptions & { open: boolean };
+export type ModalState = ModalOptions & { open: boolean };
 
 const accentToColor: Record<ModalAccent, ButtonProps['color']> = {
   default: 'primary',
@@ -53,7 +47,17 @@ const accentToColor: Record<ModalAccent, ButtonProps['color']> = {
 export const ModalContext = createContext<ModalContextValue | undefined>(undefined);
 
 /**
- *
+ * Provider component that manages modal dialogs.
+ * 
+ * Usage:
+ * 
+ * ```tsx
+ * <ModalProvider>
+ *   <App />
+ * </ModalProvider>
+ * ```
+ * 
+ * Inside any child component, use the `ModalContext` to show or hide modals through useModal hook
  */
 export function ModalProvider({ children }: { children: ReactNode }) {
   const [modalState, setModalState] = useState<ModalState | null>(null);
@@ -109,52 +113,15 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   return (
     <ModalContext.Provider value={contextValue}>
       {children}
-      <Dialog open={Boolean(modalState?.open)} onClose={handleClose} maxWidth="sm" fullWidth>
-        {modalState ? (
-          <Stack spacing={0}>
-            <DialogTitle>{modalState.title}</DialogTitle>
-            <DialogContent dividers>
-              <ContentStack spacing={2}>
-                {modalState.isLoading ? (
-                  <LoadingRow>
-                    <Spinner size={4} /> loading...
-                  </LoadingRow>
-                ) : null}
-                {typeof modalState.content === 'string' ? (
-                  <Typography variant="body1">{modalState.content}</Typography>
-                ) : (
-                  modalState.content ?? null
-                )}
-              </ContentStack>
-            </DialogContent>
-            <DialogActions>
-              {modalState.cancelLabel ? (
-                <Button onClick={handleClose} color="inherit" disabled={confirming}>
-                  {modalState.cancelLabel}
-                </Button>
-              ) : null}
-              <Button
-                variant="contained"
-                color={confirmColor}
-                onClick={handleConfirm}
-                disabled={confirmDisabled}
-              >
-                {confirming ? <Spinner size={2} /> : modalState.confirmLabel}
-              </Button>
-            </DialogActions>
-          </Stack>
-        ) : null}
-      </Dialog>
+      <ModalView 
+        modalState={modalState}
+        handleClose={handleClose}
+        handleConfirm={handleConfirm}
+        confirmColor={confirmColor}
+        confirmDisabled={confirmDisabled}
+        confirming={confirming}
+      />
     </ModalContext.Provider>
   );
 }
 
-const ContentStack = styled(Stack)(({ theme }) => ({
-  minHeight: theme.spacing(3),
-}));
-
-const LoadingRow = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing(1),
-}));

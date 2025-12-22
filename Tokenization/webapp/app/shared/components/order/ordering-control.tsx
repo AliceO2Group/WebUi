@@ -165,6 +165,10 @@ export function OrderingControl({ label = 'Ordering', value = [], onChange, opti
 const OrderingRoot = styled(Stack)(({ theme }) => ({
   width: '100%',
   gap: theme.spacing(1),
+  '& .MuiInputLabel-root': {
+    transition: 'none'
+   }
+
 }));
 
 const ChipStack = styled('div')(({ theme }) => ({

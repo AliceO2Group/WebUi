@@ -20,6 +20,9 @@ import { useEffect, useState } from 'react';
  * 
  * Similar utility gives lodash with its `_.debounce` function
  * 
+ * @param value The value to debounce
+ * @param delay The debounce delay in milliseconds
+ * @returns The debounced value
  */
 export function useDebouncedValue<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
