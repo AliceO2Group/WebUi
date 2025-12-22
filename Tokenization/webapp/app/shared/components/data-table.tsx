@@ -167,11 +167,15 @@ function TableBodyVirtualized<Row>({
 }) {
 
   if(isLoading) {
-    return <LoadingTableBody columnsLength={columns.length} />;
+    return <TableBody>
+        <LoadingTableBody columnsLength={columns.length} /> 
+      </TableBody> 
   }
 
   if(rows.length === 0) {
-    return <EmptyTableBody columnsLength={columns.length} content={emptyState} />;
+    return <TableBody>
+        <EmptyTableBody columnsLength={columns.length} content={emptyState} />
+      </TableBody> 
   }
 
   return <TableBody>
