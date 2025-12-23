@@ -33,6 +33,7 @@ import { SystemLogsQueryService } from '../services/SystemLogsQueryService.js';
 import { EventType } from '../lib/utils/events.js';
 import { bus } from '../lib/event-bus/event-bus.js';
 import { LogManager } from '@aliceo2/web-ui';
+import { RoutesQueryService } from '../services/RoutesQueryService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -64,7 +65,8 @@ class CentralSystem {
       new TokensQueryService(),
       new ArchiveTokensQueryService(),
       new ServicesQueryService(),
-      new SystemLogsQueryService()
+      new SystemLogsQueryService(),
+      new RoutesQueryService()
     );
 
     this._centralSystemWrapper = new CentralSystemWrapper(

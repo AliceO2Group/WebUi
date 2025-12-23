@@ -18,13 +18,18 @@ import { TokensQueryService } from '../services/TokensQueryService.js';
 import { ArchiveTokensQueryService } from '../services/ArchiveTokensQueryService.js';
 import { ServicesQueryService } from '../services/ServicesQueryService.js';
 import { SystemLogsQueryService } from '../services/SystemLogsQueryService.js';
+import { RoutesQueryService } from '../services/RoutesQueryService.js';
 
 export class DatabaseController {
   private _logger;
-  constructor(private readonly _db: SequelizeDatabase, private readonly _tokensService: TokensQueryService,
+  constructor(
+    private readonly _db: SequelizeDatabase,
+    private readonly _tokensService: TokensQueryService,
     private readonly _archiveTokensService: ArchiveTokensQueryService,
     private readonly _servicesService: ServicesQueryService,
-    private readonly _systemLogsService: SystemLogsQueryService) {
+    private readonly _systemLogsService: SystemLogsQueryService,
+    private readonly _routesService: RoutesQueryService
+  ) {
     this._logger = LogManager.getLogger('DatabaseController');
   }
 }
