@@ -15,10 +15,7 @@
 import { useCallback } from 'react';
 import { useParams } from 'react-router';
 import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
-import Chip from '@mui/material/Chip';
 import CircularProgress from '@mui/material/CircularProgress';
-import Divider from '@mui/material/Divider';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -27,6 +24,7 @@ import { styled } from '@mui/material/styles';
 import { useTokenDetailsQuery, useTokenLogsQuery } from '~/feature/token/api/queries';
 import { useRevokeActions } from '~/feature/token/hooks/useRevokeActions';
 import type { TokenLogEntry } from '~/feature/token/types/token';
+import TokenInfo from '../components/token-info';
 
 export default function TokenDetailsRoute() {
   const { tokenId } = useParams<{ tokenId: string }>();
@@ -66,33 +64,7 @@ export default function TokenDetailsRoute() {
   return (
     <Stack spacing={3}>
       <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', p: 3 }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} gap={2}>
-          <Typography variant="h5">Token details</Typography>
-          <Chip label={token.status === 'active' ? 'Active' : 'Not active'} color={token.status === 'active' ? 'success' : 'default'} variant="filled" />
-          {token.status === 'active' ? (
-            <Button color="warning" variant="contained" onClick={handleRevoke}>
-              Revoke token
-            </Button>
-          ) : null}
-        </Stack>
-        <Divider sx={{ my: 2 }} />
-        <DetailsGrid>
-          <InfoItem label="Token ID" value={token.tokenId} />
-          <InfoItem label="Service from" value={token.serviceFrom.commonName} />
-          <InfoItem label="Service to" value={token.serviceTo.commonName} />
-          <InfoItem label="Issued at" value={new Date(token.iat).toLocaleString()} />
-          <InfoItem label="Expires" value={new Date(token.exp).toLocaleString()} />
-          <InfoItem label="Issuer" value={token.issuer} />
-          <InfoItem label="Last 4 chars" value={token.last4chars} />
-        </DetailsGrid>
-        <Stack spacing={1} mt={3}>
-          <Typography variant="subtitle2">Permissions</Typography>
-          <Stack direction="row" flexWrap="wrap" gap={1}>
-            {token.permissions.length ? token.permissions.map((permission) => (
-              <Chip key={permission} label={permission} size="small" />
-            )) : <Typography variant="body2" color="text.secondary">No permissions assigned.</Typography>}
-          </Stack>
-        </Stack>
+        <TokenInfo token={token} handleRevoke={handleRevoke} />
         <Stack spacing={1} mt={3}>
           <Typography variant="subtitle2">Activity log</Typography>
           <LogsTable entries={logsQuery.data ?? []} loading={logsQuery.isLoading} />
@@ -101,26 +73,6 @@ export default function TokenDetailsRoute() {
     </Stack>
   );
 }
-
-type InfoItemProps = {
-  label: string;
-  value: string;
-};
-
-const InfoItem = ({ label, value }: InfoItemProps) => (
-  <Stack spacing={0.5}>
-    <Typography variant="caption" color="text.secondary">
-      {label}
-    </Typography>
-    <Typography variant="body1">{value}</Typography>
-  </Stack>
-);
-
-const DetailsGrid = styled('div')(({ theme }) => ({
-  display: 'grid',
-  gap: theme.spacing(2),
-  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-}));
 
 const Centered = styled('div')(({ theme }) => ({
   display: 'flex',
