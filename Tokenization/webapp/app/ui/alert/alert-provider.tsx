@@ -13,9 +13,7 @@
  */
 
 import { createContext, useCallback, useMemo, useState, type ReactNode } from 'react';
-import Alert from '@mui/material/Alert';
 import type { AlertColor } from '@mui/material/Alert';
-import Snackbar from '@mui/material/Snackbar';
 import AlertView from './alert';
 
 export type AlertOptions = {
