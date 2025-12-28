@@ -15,9 +15,12 @@
 import { filterInput, dynamicSelector, ongoingRunsSelector } from './filter.js';
 import { FilterType } from './filterTypes.js';
 import { filtersConfig, runModeFilterConfig } from './filtersConfig.js';
-import { runModeCheckbox } from './runMode/runModeCheckbox.js';
 import { lastUpdatePanel, runStatusPanel } from './runMode/runStatusPanel.js';
-import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
+import { h, iconChevronBottom, iconChevronTop, iconWarning } from '/js/src/index.js';
+import { IntegratedServices } from '../../../library/enums/Status/integratedServices.enum.js';
+import { spinner } from '../spinner.js';
+import { ServiceStatus } from '../../../library/enums/Status/serviceStatus.enum.js';
+import { runModeCheckbox } from './runMode/runModeCheckbox.js';
 
 /**
  * Creates an input element for a specific metadata field;
@@ -76,15 +79,16 @@ export function filtersPanel(filterModel, viewModel) {
     lastRefresh,
     ONGOING_RUN_INTERVAL_MS: refreshRate,
   } = filterModel;
+  if (!isVisible) {
+    return null;
+  }
   const { fetchOngoingRuns } = filterService;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onFocusCallback = fetchOngoingRuns.bind(filterService);
   const onEnterCallback = () => filterModel.triggerFilter(viewModel);
   const clearFilterCallback = clearFiltersAndTrigger.bind(filterModel, viewModel);
-  if (!isVisible) {
-    return null;
-  }
+  const kafkaService = filterModel.model.aboutViewModel.findService(IntegratedServices.KAFKA);
   const filtersList = isRunModeActivated
     ? runModeFilterConfig(filterService)
     : filtersConfig(filterService);
@@ -93,7 +97,34 @@ export function filtersPanel(filterModel, viewModel) {
     '.w-100.flex-column.p2.g2.justify-center#filterElement',
     [
       h('.flex-row.g2.justify-center.items-center', [
-        runModeCheckbox(filterModel, viewModel),
+        kafkaService?.match({
+          Loading: () => spinner(2, 'Checking if RunMode is configured'),
+          Failure: (payload) => h('.error-box.danger.flex-column.justify-center.f6.text-center', {
+            id: 'run-mode-failure',
+          }, [
+            h('span.error-icon', { title: 'RunMode is unavailable. Please contact administrator.' }, iconWarning()),
+            h('span', payload.status.message),
+          ]),
+          Success: (payload) => {
+            switch (payload.extras.state) {
+              case ServiceStatus.SUCCESS:
+                return runModeCheckbox(filterModel, viewModel);
+              case 'NOT_CONFIGURED':
+                return null;
+              default:
+                return h('.error-box.danger.flex-column.justify-center.f6.text-center', {
+                  id: 'run-mode-failure',
+                }, [
+                  h('span.error-icon', {
+                    title: 'RunMode is unavailable. Please contact administrator.',
+                  }, iconWarning()),
+                  h('span', 'Contact an administrator and include this information:'),
+                  h('span', `Kafka service returned status code '${payload.extras.state ?? '?'}'`),
+                ]);
+            }
+          },
+          Other: () => {},
+        }),
         !isRunModeActivated &&
         [triggerFiltersButton(onEnterCallback, filterModel), clearFiltersButton(clearFilterCallback)],
         ...filtersList.map((filter) =>

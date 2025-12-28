@@ -17,6 +17,7 @@ import { exec } from 'node:child_process';
 
 import { LogManager } from '@aliceo2/web-ui';
 import { IntegratedServices } from './../../common/library/enums/Status/integratedServices.enum.js';
+import { ServiceStatus } from '../../common/library/enums/Status/serviceStatus.enum.js';
 
 const QC_VERSION_EXEC_COMMAND = 'yum info o2-QualityControl | awk \'/Version/ {print $3}\'';
 const execPromise = promisify(exec);
@@ -43,6 +44,11 @@ export class StatusService {
      */
     this._ws = undefined;
 
+    /**
+     * @type {?AliEcsSynchronizer}
+     */
+    this._aliEcsSynchronizer = undefined;
+
     this._packageInfo = packageInfo;
     this._config = config;
   }
@@ -63,6 +69,9 @@ export class StatusService {
         break;
       case IntegratedServices.CCDB:
         result = await this.retrieveDataServiceStatus();
+        break;
+      case IntegratedServices.KAFKA:
+        result = this.retrieveKafkaServiceStatus();
         break;
     }
     return result;
@@ -120,6 +129,23 @@ export class StatusService {
     return { name: 'CCDB', status, version, extras: {} };
   }
 
+  /**
+   * Retrieve the kafka service status response
+   * @returns {object} - status of the kafka service
+   */
+  retrieveKafkaServiceStatus() {
+    const status = this._aliEcsSynchronizer?.status;
+    return {
+      name: IntegratedServices.KAFKA,
+      status: {
+        ok: status === ServiceStatus.SUCCESS,
+      },
+      extras: {
+        state: status ?? 'NOT_CONFIGURED',
+      },
+    };
+  }
+
   /*
    * Getters & Setters
    */
@@ -140,5 +166,14 @@ export class StatusService {
    */
   set ws(ws) {
     this._ws = ws;
+  }
+
+  /**
+   * Set instance of `AliEcsSynchronizer`
+   * @param {AliEcsSynchronizer} aliEcsSynchronizer - instance of the `AliEcsSynchronizer`
+   * @returns {void}
+   */
+  set aliEcsSynchronizer(aliEcsSynchronizer) {
+    this._aliEcsSynchronizer = aliEcsSynchronizer;
   }
 }

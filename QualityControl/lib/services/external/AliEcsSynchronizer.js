@@ -13,6 +13,7 @@
 
 import { AliEcsEventMessagesConsumer, LogManager } from '@aliceo2/web-ui';
 import { EmitterKeys } from './../../../common/library/enums/emitterKeys.enum.js';
+import { ServiceStatus } from '../../../common/library/enums/Status/serviceStatus.enum.js';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/ecs-synchronizer`;
 const RUN_TOPICS = ['aliecs.run'];
@@ -38,18 +39,24 @@ export class AliEcsSynchronizer {
       RUN_TOPICS,
     );
     this._ecsRunConsumer.onMessageReceived(this._onRunMessage.bind(this));
+
+    this._status = ServiceStatus.NOT_ASKED;
   }
 
   /**
    * Start the synchronization process and listen to events from various topics via their consumers
-   * @returns {void}
+   * @returns {Promise<void>}
    */
-  start() {
+  async start() {
     this._logger.infoMessage('Starting to consume AliECS messages for topics:');
-    this._ecsRunConsumer
-      .start()
-      .catch((error) =>
-        this._logger.errorMessage(`Error when starting ECS run consumer: ${error.message}\n${error.stack}`));
+    this._status = ServiceStatus.LOADING;
+    try {
+      await this._ecsRunConsumer.start();
+      this._status = ServiceStatus.SUCCESS;
+    } catch (error) {
+      this._logger.errorMessage(`Error when starting ECS run consumer: ${error.message}\n${error.stack}`);
+      this._status = ServiceStatus.ERROR;
+    }
   }
 
   /**
@@ -74,5 +81,13 @@ export class AliEcsSynchronizer {
         timestamp: timestamp.toNumber(),
       });
     }
+  }
+
+  /**
+   * Returns the current kafka service status
+   * @returns {ServiceStatus} - The kafka service status
+   */
+  get status() {
+    return this._status;
   }
 }

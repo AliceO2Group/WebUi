@@ -14,6 +14,8 @@
 
 import { strictEqual, ok } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
+import { IntegratedServices } from '../../../common/library/enums/Status/integratedServices.enum.js';
+import { ServiceStatus } from '../../../common/library/enums/Status/serviceStatus.enum.js';
 
 // If using nock for HTTP mocking (uncomment if available)
 // import nock from 'nock';
@@ -37,20 +39,170 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     }
   });
 
-  await testParent.test('should have a switch to enable run mode', { timeout }, async () => {
-    await page.goto(
-      `${url}?page=objectTree`,
-      { waitUntil: 'networkidle0' },
-    );
-    await delay(100);
-    // Prevent the 'get run status' from re-triggering mid test
-    await page.evaluate(() => {
-      window.model.filterModel.ONGOING_RUN_INTERVAL_MS = 12000000;
-    });
-    await page.locator('.form-check-label > .switch');
-    const runsModeTitle = await page.evaluate(() =>
-      document.querySelector('.form-check-label').textContent);
-    strictEqual(runsModeTitle, 'Run mode', 'The text displayed is not `Runs mode`');
+  await testParent.test('when kafka service is not configured the run mode toggle should be hidden', { timeout }, async () => {
+    const requestHandler = (interceptedRequest) => {
+      const url = interceptedRequest.url();
+
+      if (url.includes(`/api/status/${IntegratedServices.KAFKA}`)) {
+        interceptedRequest.respond({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            name: IntegratedServices.KAFKA,
+            status: {
+              ok: false,
+            },
+            extras: {
+              state: 'NOT_CONFIGURED',
+            },
+          }),
+        });
+      } else {
+        interceptedRequest.continue();
+      }
+    };
+
+    try {
+      // Enable interception and attach the handler
+      await page.setRequestInterception(true);
+      page.on('request', requestHandler);
+
+      await page.goto(
+        `${url}?page=objectTree`,
+        { waitUntil: 'networkidle0' },
+      );
+      await delay(100);
+      // Prevent the 'get run status' from re-triggering mid test
+      await page.evaluate(() => {
+        window.model.filterModel.ONGOING_RUN_INTERVAL_MS = 12000000;
+      });
+
+      const runsModeToggleNoExist = await page.evaluate(() => document.querySelector('.form-check-label') === null);
+      ok(runsModeToggleNoExist, 'The RunMode switch should not be displayed');
+
+      const runsModeErrorNoExist = await page.evaluate(() => document.querySelector('#run-mode-failure') === null);
+      ok(runsModeErrorNoExist, 'The RunMode switch should not be displayed');
+    } catch (error) {
+      // Test failed
+      ok(false, error.message);
+    } finally {
+      // Cleanup: remove listener and disable interception
+      page.off('request', requestHandler);
+      await page.setRequestInterception(false);
+    }
+  });
+
+  await testParent.test('when kafka service is unavailable an error should be displayed instead of the run mode toggle', { timeout }, async () => {
+    const requestHandler = (interceptedRequest) => {
+      const url = interceptedRequest.url();
+
+      if (url.includes(`/api/status/${IntegratedServices.KAFKA}`)) {
+        interceptedRequest.respond({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            name: IntegratedServices.KAFKA,
+            status: {
+              ok: false,
+            },
+            extras: {
+              state: ServiceStatus.ERROR,
+            },
+          }),
+        });
+      } else {
+        interceptedRequest.continue();
+      }
+    };
+
+    try {
+      // Enable interception and attach the handler
+      await page.setRequestInterception(true);
+      page.on('request', requestHandler);
+
+      await page.goto(
+        `${url}?page=objectTree`,
+        { waitUntil: 'networkidle0' },
+      );
+      await delay(100);
+      // Prevent the 'get run status' from re-triggering mid test
+      await page.evaluate(() => {
+        window.model.filterModel.ONGOING_RUN_INTERVAL_MS = 12000000;
+      });
+
+      const runsModeNoExist = await page.evaluate(() => document.querySelector('.form-check-label') === null);
+      ok(runsModeNoExist, 'The RunMode switch should not be displayed');
+
+      const runModeErrorMessage = await page.evaluate(() => {
+        const spans = document.querySelectorAll('#run-mode-failure > span');
+        return Array.from(spans)
+          .map((span) => span.textContent.trim())
+          .filter((text) => text !== '')
+          .join(' ');
+      });
+      strictEqual(
+        runModeErrorMessage,
+        `Contact an administrator and include this information: Kafka service returned status code '${ServiceStatus.ERROR}'`,
+        'RunMode failure should have the correct error message',
+      );
+    } catch (error) {
+      // Test failed
+      ok(false, error.message);
+    } finally {
+      // Cleanup: remove listener and disable interception
+      page.off('request', requestHandler);
+      await page.setRequestInterception(false);
+    }
+  });
+
+  await testParent.test('should have a switch to enable run mode when kafka service is available', { timeout }, async () => {
+    const requestHandler = (interceptedRequest) => {
+      const url = interceptedRequest.url();
+
+      if (url.includes(`/api/status/${IntegratedServices.KAFKA}`)) {
+        interceptedRequest.respond({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            name: IntegratedServices.KAFKA,
+            status: {
+              ok: true,
+            },
+            extras: {
+              state: ServiceStatus.SUCCESS,
+            },
+          }),
+        });
+      } else {
+        interceptedRequest.continue();
+      }
+    };
+
+    try {
+      // Enable interception and attach the handler
+      await page.setRequestInterception(true);
+      page.on('request', requestHandler);
+
+      await page.goto(
+        `${url}?page=objectTree`,
+        { waitUntil: 'networkidle0' },
+      );
+      await delay(100);
+      // Prevent the 'get run status' from re-triggering mid test
+      await page.evaluate(() => {
+        window.model.filterModel.ONGOING_RUN_INTERVAL_MS = 12000000;
+      });
+      await page.locator('.form-check-label > .switch');
+      const runsModeTitle = await page.evaluate(() => document.querySelector('.form-check-label').textContent);
+      strictEqual(runsModeTitle, 'Run mode', 'The text displayed is not `Run mode`');
+    } catch (error) {
+      // Test failed
+      ok(false, error.message);
+    } finally {
+      // Cleanup: remove listener and disable interception
+      page.off('request', requestHandler);
+      await page.setRequestInterception(false);
+    }
   });
 
   await testParent.test('should activate run mode', { timeout }, async () => {

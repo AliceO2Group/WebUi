@@ -78,6 +78,16 @@ export const setupQcModel = async (eventEmitter) => {
     logger.warnMessage('No database configuration found, skipping database initialization');
   }
 
+  const layoutRepository = new LayoutRepository(jsonFileService);
+  const userRepository = new UserRepository(jsonFileService);
+  const chartRepository = new ChartRepository(jsonFileService);
+
+  const userController = new UserController(userRepository);
+  const layoutController = new LayoutController(layoutRepository);
+
+  const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
+  const statusController = new StatusController(statusService);
+
   if (config?.kafka?.enabled) {
     try {
       const validConfig = await KafkaConfigDto.validateAsync(config.kafka);
@@ -89,21 +99,12 @@ export const setupQcModel = async (eventEmitter) => {
         logLevel: logLevel.NOTHING,
       });
       const aliEcsSynchronizer = new AliEcsSynchronizer(kafkaClient, consumerGroups, eventEmitter);
+      statusService.aliEcsSynchronizer = aliEcsSynchronizer;
       aliEcsSynchronizer.start();
     } catch (error) {
       logger.errorMessage(`Kafka initialization/connection failed: ${error.message}`);
     }
   }
-
-  const layoutRepository = new LayoutRepository(jsonFileService);
-  const userRepository = new UserRepository(jsonFileService);
-  const chartRepository = new ChartRepository(jsonFileService);
-
-  const userController = new UserController(userRepository);
-  const layoutController = new LayoutController(layoutRepository);
-
-  const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
-  const statusController = new StatusController(statusService);
 
   const qcdbDownloadService = new QcdbDownloadService(config.ccdb);
 

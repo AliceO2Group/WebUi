@@ -12,7 +12,6 @@
  */
 
 import { strictEqual } from 'node:assert';
-import { ServiceStatus } from '../../../common/library/enums/Status/serviceStatus.enum.js';
 
 const ABOUT_PAGE_PARAM = '?page=about';
 
@@ -25,6 +24,7 @@ export const aboutPageTests = async (url, page, timeout = 5000, testParent) => {
   await testServiceStatus(testParent, page, 'qcg', timeout);
   await testServiceStatus(testParent, page, 'qc', timeout);
   await testServiceStatus(testParent, page, 'ccdb', timeout);
+  await testServiceStatus(testParent, page, 'kafka', timeout);
 };
 
 const testServiceStatus = async (testParent, page, serviceName, timeout = 5000) => {
@@ -34,10 +34,8 @@ const testServiceStatus = async (testParent, page, serviceName, timeout = 5000) 
       { timeout },
       async () => {
         const kind = await page.evaluate(
-          (service, serviceStatus) =>
-            window.model.aboutViewModel.services[serviceStatus.SUCCESS][service].kind,
+          (service) => window.model.aboutViewModel.findService(service)?.kind,
           serviceName,
-          ServiceStatus,
         );
 
         strictEqual(kind, 'Success');

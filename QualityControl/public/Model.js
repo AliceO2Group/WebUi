@@ -29,6 +29,7 @@ import AboutViewModel from './pages/aboutView/AboutViewModel.js';
 import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
 import { RequestFields } from './common/RequestFields.enum.js';
 import FilterModel from './common/filters/model/FilterModel.js';
+import { IntegratedServices } from '../library/enums/Status/integratedServices.enum.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -114,6 +115,12 @@ export default class Model extends Observable {
     JSROOT.settings.SmallPad = {
       height: 10,
     };
+
+    // For active run monitoring, the kafka service must be available.
+    // If we do not yet know the kafka service status, we should request it from the backend
+    if (!this.aboutViewModel.findService(IntegratedServices.KAFKA)) {
+      this.aboutViewModel.retrieveIndividualServiceStatus(IntegratedServices.KAFKA);
+    }
 
     /*
      * Init first page

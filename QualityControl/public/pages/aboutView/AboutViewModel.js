@@ -74,4 +74,20 @@ export default class AboutViewModel extends BaseViewModel {
       this.model.notification.show(`Error fetching data for ${service}: ${error.message}`, 'danger', 2000);
     }
   }
+
+  /**
+   * Iterates through all known {@link ServiceStatus} values and returns the
+   * first matching service found. This assumes that a given service can exist
+   * in at most one {@link ServiceStatus} at a time.
+   * @param {string} service - The service identifier to look up
+   * @returns {RemoteData|undefined} - The service instance under any `ServiceStatus`, or `undefined` if not found.
+   */
+  findService(service) {
+    for (const status of Object.values(ServiceStatus)) {
+      if (this.services[status][service]) {
+        return this.services[status][service];
+      }
+    }
+    return undefined;
+  }
 }
