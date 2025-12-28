@@ -45,12 +45,11 @@ export default class ObjectViewModel extends BaseViewModel {
     /**
      * Options for previewing object drawing options.
      */
-    this.ignoreDefaults = false; // whether to ignore default (options from object) drawing options
-    this.layoutDisplayOptions = []; // options from layout tab object if opened from layout
+    this.ignoreDefaults = false; // whether to use default drawing options
+    this.layoutDisplayOptions = []; // drawing options defined on layout
+    this.defaultDrawingOptions = []; // drawing options defined on CCDB/QCDB object
     this.drawingOptions = []; // active drawing options for previewing
-    this.drawOptions = []; // options from object
-    this.displayHints = []; // options from object
-    this.nonRecognizedDrawingOptions = []; // options on drawingOptions or layoutDisplayOptions that are not recognized
+    this.nonRecognizedDrawingOptions = [];
     this.objectDrawingOptionsVisible = false;
 
     /**
@@ -146,28 +145,32 @@ export default class ObjectViewModel extends BaseViewModel {
       layoutDisplayOptions = [],
     } = this.selected.payload;
     this.ignoreDefaults = Boolean(ignoreDefaults);
-    this.drawOptions = drawOptions;
-    this.displayHints = displayHints;
     this.layoutDisplayOptions = layoutDisplayOptions;
-
-    this.drawingOptions = ignoreDefaults
-      ? [...layoutDisplayOptions]
-      : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
-
-    const all = new Set([...drawOptions, ...displayHints, ...layoutDisplayOptions]);
-    this.nonRecognizedDrawingOptions = [...all].filter((o) => !DRAWING_OPTIONS.has(o));
+    this.defaultDrawingOptions = [...drawOptions, ...displayHints];
+    if (this.ignoreDefaults) {
+      this.drawingOptions = [...this.layoutDisplayOptions];
+    } else {
+      this.drawingOptions = Array.from(new Set([...this.layoutDisplayOptions, ...this.defaultDrawingOptions]));
+    }
+    this.nonRecognizedDrawingOptions = this.drawingOptions.filter((o) => o && !DRAWING_OPTIONS.has(o));
     this.notify();
   }
 
   /**
-   * Toggle the ignoreDefaults for drawing options.
-   * When ignored, default drawing options on object will not be applied.
+   * Toggle whether to ignore default drawing options.
    */
   toggleIgnoreDefaults() {
     this.ignoreDefaults = !this.ignoreDefaults;
-    this.drawingOptions = this.ignoreDefaults
-      ? [...this.layoutDisplayOptions]
-      : [...this.drawOptions, ...this.displayHints, ...this.layoutDisplayOptions];
+    if (this.ignoreDefaults) {
+      // Remove only the default options not present in layoutDisplayOptions
+      this.drawingOptions = this.drawingOptions.filter((o) =>
+        !(this.defaultDrawingOptions.includes(o) && !this.layoutDisplayOptions.includes(o)));
+    } else {
+      const options = new Set(this.drawingOptions);
+      this.defaultDrawingOptions.forEach((o) => options.add(o));
+      this.drawingOptions = Array.from(options);
+    }
+    this.nonRecognizedDrawingOptions = this.drawingOptions.filter((o) => o && !DRAWING_OPTIONS.has(o));
     this.notify();
   }
 
@@ -177,9 +180,8 @@ export default class ObjectViewModel extends BaseViewModel {
    * @param {string} option - the drawing option to toggle
    */
   toggleDrawingOption(option) {
-    const index = this.drawingOptions.indexOf(option);
-    if (index >= 0) {
-      this.drawingOptions.splice(index, 1);
+    if (this.drawingOptions.includes(option)) {
+      this.drawingOptions = this.drawingOptions.filter((o) => o !== option);
     } else {
       this.drawingOptions.push(option);
     }

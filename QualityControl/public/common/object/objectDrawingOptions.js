@@ -47,7 +47,7 @@ export const objectDrawingOptions = ({
           onChange: onToggleIgnoreDefaults,
         }),
       ]),
-      nonRecognizedDrawingOptions && nonRecognizedDrawingOptions.length > 0 &&
+      nonRecognizedDrawingOptions.length > 0 &&
         h('.flex-row.label.mv2.danger', `Non-recognized options: ${nonRecognizedDrawingOptions.join(', ')}`),
       sectionTitle('Draw Options:', ' ROOT draw options'),
       checkboxGrid(DRAW_OPTIONS.map((option) =>
