@@ -79,9 +79,7 @@ const objectPlotAndInfo = (objectViewModel) =>
             objectViewModel.drawingFailureOccurred(error.message);
           })),
           objectInfoVisible &&
-            h('.scroll-y.w-30.relative', {
-              key: 'objectInfoPanel', // force redraw on toggle drawing options panel
-            }, [
+            h('.scroll-y.w-30.relative', [
               objectDrawingOptionsVisible &&
                 objectDrawingOptions({
                   id,
@@ -91,17 +89,13 @@ const objectPlotAndInfo = (objectViewModel) =>
                   onToggleIgnoreDefaults: () => objectViewModel.toggleIgnoreDefaults(),
                   onToggleOption: (option) => objectViewModel.toggleDrawingOption(option),
                 }),
-              h('', [
-                h('h3.text-center', 'Object information'),
-                h('', [
-                  qcObjectInfoPanel(
-                    qcObject,
-                    { gap: '.5em' },
-                    defaultRowAttributes(model.notification),
-                    () => objectViewModel.toggleDrawingOptionsVisible(),
-                  ),
-                ]),
-              ]),
+              h('h3.text-center', 'Object information'),
+              qcObjectInfoPanel(
+                qcObject,
+                { gap: '.5em' },
+                defaultRowAttributes(model.notification),
+                () => objectViewModel.toggleDrawingOptionsVisible(),
+              ),
             ]),
         ]),
       ]);
