@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconWarning } from '/js/src/index.js';
+import { h, iconWarning, switchCase } from '/js/src/index.js';
 import { IntegratedServices } from '../../../../library/enums/Status/integratedServices.enum.js';
 import { ServiceStatus } from '../../../../library/enums/Status/serviceStatus.enum.js';
 import { spinner } from '../../spinner.js';
@@ -34,30 +34,20 @@ import { spinner } from '../../spinner.js';
 export const runModeComponent = (filterModel, viewModel) =>
   filterModel.model.aboutViewModel.findService(IntegratedServices.KAFKA)?.match({
     Loading: () => spinner(2, 'Checking if RunMode is configured'),
-    Failure: (payload) => h('.error-box.danger.flex-column.justify-center.f6.text-center', {
-      id: 'run-mode-failure',
-    }, [
+    Failure: (payload) => h('.error-box.danger.flex-column.justify-center.f6.text-center', { id: 'run-mode-failure' }, [
       h('span.error-icon', { title: 'RunMode is unavailable. Please contact administrator.' }, iconWarning()),
       h('span', payload.status.message),
     ]),
-    Success: (payload) => {
-      switch (payload.extras.state) {
-        case ServiceStatus.SUCCESS:
-          return runModeCheckbox(filterModel, viewModel);
-        case 'NOT_CONFIGURED':
-          return null;
-        default:
-          return h('.error-box.danger.flex-column.justify-center.f6.text-center', {
-            id: 'run-mode-failure',
-          }, [
-            h('span.error-icon', {
-              title: 'RunMode is unavailable. Please contact administrator.',
-            }, iconWarning()),
-            h('span', 'Contact an administrator and include this information:'),
-            h('span', `Kafka service returned status code '${payload.extras.state ?? '?'}'`),
-          ]);
-      }
-    },
+    Success: (payload) => switchCase(payload.extras.state, {
+      [ServiceStatus.SUCCESS]: () => runModeCheckbox(filterModel, viewModel),
+      NOT_CONFIGURED: () => null,
+    }, () => h('.error-box.danger.flex-column.justify-center.f6.text-center', { id: 'run-mode-failure' }, [
+      h('span.error-icon', {
+        title: 'RunMode is unavailable. Please contact administrator.',
+      }, iconWarning()),
+      h('span', 'Contact an administrator and include this information:'),
+      h('span', `Kafka service returned status code '${payload.extras.state ?? '?'}'`),
+    ]))(),
     Other: () => {},
   });
 
