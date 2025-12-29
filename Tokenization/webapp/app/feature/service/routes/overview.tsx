@@ -29,55 +29,54 @@ import { useFiltersPanel } from '~/shared/hooks/useFiltersPanel';
  * Services overview lists registered services with date filters and ordering.
  */
 export default function ServicesOverviewRoute() {
-	const {
-		filtersOpen,
-		toggleFiltersPanel,
-		appliedFilters,
-		handleFiltersChange,
-	} = useFiltersPanel<ServiceFilterValues>({ initiallyOpen: false });
+  const {
+    filtersOpen,
+    toggleFiltersPanel,
+    appliedFilters,
+    handleFiltersChange,
+  } = useFiltersPanel<ServiceFilterValues>({ initiallyOpen: false });
 
-	const servicesQuery = useServicesQuery({
-		filters: appliedFilters,
-	});
+  const servicesQuery = useServicesQuery({
+    filters: appliedFilters,
+  });
 
-	const services = servicesQuery.data?.services ?? [];
-	const totalCount = servicesQuery.data?.totalCount ?? services.length;
+  const services = servicesQuery.data?.services ?? [];
+  const totalCount = servicesQuery.data?.totalCount ?? services.length;
 
-	return (
-		<Stack spacing={3}>
-			<FiltersCard elevation={0}>
-				<FiltersHeader>
-					<Typography variant="h6">Filters</Typography>
-					<Button size="small" variant="text" onClick={toggleFiltersPanel}>
-						{filtersOpen ? 'Hide' : 'Show'}
-					</Button>
-				</FiltersHeader>
-				<Collapse in={filtersOpen} timeout="auto">
-					<FiltersBody>
-						<ServiceFiltersForm onFiltersChange={handleFiltersChange} />
-					</FiltersBody>
-				</Collapse>
-			</FiltersCard>
+  return (
+    <Stack spacing={3}>
+      <FiltersCard elevation={0}>
+        <FiltersHeader>
+          <Typography variant="h6">Filters</Typography>
+          <Button size="small" variant="text" onClick={toggleFiltersPanel}>
+            {filtersOpen ? 'Hide' : 'Show'}
+          </Button>
+        </FiltersHeader>
+        <Collapse in={filtersOpen} timeout="auto">
+          <FiltersBody>
+            <ServiceFiltersForm onFiltersChange={handleFiltersChange} />
+          </FiltersBody>
+        </Collapse>
+      </FiltersCard>
 
-			<ServicesTable services={services} totalCount={totalCount} isLoading={servicesQuery.isLoading} />
-		</Stack>
-	);
+      <ServicesTable services={services} totalCount={totalCount} isLoading={servicesQuery.isLoading} />
+    </Stack>
+  );
 }
 
 const FiltersCard = styled(Paper)(({ theme }) => ({
-	border: `1px solid ${theme.palette.divider}`,
-	padding: theme.spacing(2),
-	boxShadow: 'none',
+  border: `1px solid ${theme.palette.divider}`,
+  padding: theme.spacing(2),
+  boxShadow: 'none',
 }));
 
 const FiltersHeader = styled('div')(({ theme }) => ({
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'space-between',
-	gap: theme.spacing(2),
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: theme.spacing(2),
 }));
 
 const FiltersBody = styled('div')(({ theme }) => ({
-	marginTop: theme.spacing(2),
+  marginTop: theme.spacing(2),
 }));
-

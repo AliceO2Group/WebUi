@@ -18,5 +18,5 @@ import { styled } from '@mui/material/styles';
 export const StaticTextField = styled(TextField)(() => ({
   '& .MuiInputLabel-root': {
     transition: 'none',
-  }
+  },
 }));

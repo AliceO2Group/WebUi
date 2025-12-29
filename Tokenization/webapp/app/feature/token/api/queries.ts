@@ -20,7 +20,6 @@ import type { TokenStatus } from '~/feature/token/types/token';
 import type { TokenFilterValues } from '~/feature/token/types/token-filters';
 import { useSession } from '~/feature/auth/hooks/session';
 
-
 const tokenListsKey = ['tokens', 'list'] as const;
 
 export const tokenQueryKeys = {
@@ -40,7 +39,7 @@ type UseServiceOptionsParams = {
  */
 export function useTokenServiceOptionsQuery(params?: UseServiceOptionsParams) {
   const { token } = useSession();
-  
+
   const searchTerm = params?.searchTerm ?? '';
   return useQuery({
     queryKey: tokenQueryKeys.serviceOptionsSearch(searchTerm),
@@ -61,7 +60,7 @@ type UseTokensQueryParams = {
  */
 export function useTokensQuery({ filters, enabled = true, status }: UseTokensQueryParams) {
   const { token } = useSession();
-  
+
   return useQuery({
     queryKey: tokenQueryKeys.list(filters, status),
     enabled,
@@ -79,7 +78,7 @@ type UseTokenDetailsQueryParams = {
  */
 export function useTokenDetailsQuery({ tokenId, enabled = true }: UseTokenDetailsQueryParams) {
   const { token } = useSession();
-  
+
   return useQuery({
     queryKey: tokenQueryKeys.detail(tokenId ?? ''),
     enabled: Boolean(tokenId) && enabled,
@@ -92,6 +91,9 @@ type UseTokenLogsQueryParams = {
   enabled?: boolean;
 };
 
+/**
+ *
+ */
 export function useTokenLogsQuery({ tokenId, enabled = true }: UseTokenLogsQueryParams) {
   const { token } = useSession();
 

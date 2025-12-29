@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-
 import type { ButtonProps } from '@mui/material/Button';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -28,67 +27,67 @@ import type { ModalState } from './modal-provider';
 
 /**
  * Modal View Component
- * 
+ *
  * @param modalState state of the modal
  * @param handleClose function to handle modal close
  * @param handleConfirm function to handle modal confirm
  * @param confirmColor color of the confirm button
  * @param confirmDisabled whether the confirm button is disabled
  * @param confirming whether the modal is in a confirming state
- * @returns 
+ * @returns
  */
 export default function ModalView({
-    modalState,
-    handleClose,
-    handleConfirm,
-    confirmColor,
-    confirmDisabled,
-    confirming,
+  modalState,
+  handleClose,
+  handleConfirm,
+  confirmColor,
+  confirmDisabled,
+  confirming,
 }: {
-    modalState: ModalState | null;
-    handleClose: () => void;
-    handleConfirm: () => void;
-    confirmColor: ButtonProps['color'];
-    confirmDisabled: boolean;
-    confirming: boolean;
+  modalState: ModalState | null;
+  handleClose: () => void;
+  handleConfirm: () => void;
+  confirmColor: ButtonProps['color'];
+  confirmDisabled: boolean;
+  confirming: boolean;
 }) {
 
-    return <Dialog open={Boolean(modalState?.open)} onClose={handleClose} maxWidth="sm" fullWidth>
-        {modalState ? (
-          <Stack spacing={0}>
-            <DialogTitle>{modalState.title}</DialogTitle>
-            <DialogContent dividers>
-              <ContentStack spacing={2}>
-                {modalState.isLoading ? (
-                  <LoadingRow>
-                    <Spinner size={4} /> loading...
-                  </LoadingRow>
-                ) : null}
-                {typeof modalState.content === 'string' ? (
-                  <Typography variant="body1">{modalState.content}</Typography>
-                ) : (
-                  modalState.content ?? null
-                )}
-              </ContentStack>
-            </DialogContent>
-            <DialogActions>
-              {modalState.cancelLabel ? (
-                <Button onClick={handleClose} color="inherit" disabled={confirming}>
-                  {modalState.cancelLabel}
-                </Button>
-              ) : null}
-              <Button
-                variant="contained"
-                color={confirmColor}
-                onClick={handleConfirm}
-                disabled={confirmDisabled}
-              >
-                {confirming ? <Spinner size={2} /> : modalState.confirmLabel}
-              </Button>
-            </DialogActions>
-          </Stack>
-        ) : null}
-      </Dialog>
+  return <Dialog open={Boolean(modalState?.open)} onClose={handleClose} maxWidth="sm" fullWidth>
+    {modalState ? (
+      <Stack spacing={0}>
+        <DialogTitle>{modalState.title}</DialogTitle>
+        <DialogContent dividers>
+          <ContentStack spacing={2}>
+            {modalState.isLoading ? (
+              <LoadingRow>
+                <Spinner size={4} /> loading...
+              </LoadingRow>
+            ) : null}
+            {typeof modalState.content === 'string' ? (
+              <Typography variant="body1">{modalState.content}</Typography>
+            ) : (
+              modalState.content ?? null
+            )}
+          </ContentStack>
+        </DialogContent>
+        <DialogActions>
+          {modalState.cancelLabel ? (
+            <Button onClick={handleClose} color="inherit" disabled={confirming}>
+              {modalState.cancelLabel}
+            </Button>
+          ) : null}
+          <Button
+            variant="contained"
+            color={confirmColor}
+            onClick={handleConfirm}
+            disabled={confirmDisabled}
+          >
+            {confirming ? <Spinner size={2} /> : modalState.confirmLabel}
+          </Button>
+        </DialogActions>
+      </Stack>
+    ) : null}
+  </Dialog>;
 }
 
 const ContentStack = styled(Stack)(({ theme }) => ({

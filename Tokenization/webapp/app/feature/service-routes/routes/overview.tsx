@@ -30,101 +30,102 @@ import type { ServiceRoute } from '../types/service-route';
 import type { ServiceRouteFilterValues } from '~/feature/service-routes/types/service-route-filters';
 import { useFiltersPanel } from '~/shared/hooks/useFiltersPanel';
 
+/**
+ *
+ */
 export default function ServiceRoutesOverviewRoute() {
-	const {
-		filtersOpen,
-		toggleFiltersPanel,
-		appliedFilters,
-		handleFiltersChange,
-	} = useFiltersPanel<ServiceRouteFilterValues>();
+  const {
+    filtersOpen,
+    toggleFiltersPanel,
+    appliedFilters,
+    handleFiltersChange,
+  } = useFiltersPanel<ServiceRouteFilterValues>();
 
-	const routesQuery = useServiceRoutesQuery({ filters: appliedFilters });
-	const { confirmBan, confirmBulkBan } = useRouteBanActions();
+  const routesQuery = useServiceRoutesQuery({ filters: appliedFilters });
+  const { confirmBan, confirmBulkBan } = useRouteBanActions();
 
-	const routes = routesQuery.data?.routes ?? [];
-	const totalCount = routesQuery.data?.totalCount ?? routes.length;
-	const canBulkBan = Boolean(appliedFilters && hasRouteFilters(appliedFilters));
+  const routes = routesQuery.data?.routes ?? [];
+  const totalCount = routesQuery.data?.totalCount ?? routes.length;
+  const canBulkBan = Boolean(appliedFilters && hasRouteFilters(appliedFilters));
 
-	const handleBan = useCallback((route: ServiceRoute) => {
-		confirmBan(route);
-	}, [confirmBan]);
+  const handleBan = useCallback((route: ServiceRoute) => {
+    confirmBan(route);
+  }, [confirmBan]);
 
-	const handleBulkBan = useCallback(() => {
-		if (!canBulkBan || !appliedFilters) {
-			return;
-		}
-		confirmBulkBan(appliedFilters);
-	}, [appliedFilters, canBulkBan, confirmBulkBan]);
+  const handleBulkBan = useCallback(() => {
+    if (!canBulkBan || !appliedFilters) {
+      return;
+    }
+    confirmBulkBan(appliedFilters);
+  }, [appliedFilters, canBulkBan, confirmBulkBan]);
 
-	return (
-		<OverviewLayout>
-			<ServiceRouteRegisterForm />
+  return (
+    <OverviewLayout>
+      <ServiceRouteRegisterForm />
 
-			<RightColumn spacing={0}>
-				<SectionCard elevation={0}>
-					<FiltersHeader>
-						<Typography variant="h6">Filters</Typography>
-						<Button size="small" variant="text" onClick={toggleFiltersPanel}>
-							{filtersOpen ? 'Hide filters' : 'Show filters'}
-						</Button>
-					</FiltersHeader>
-					<Collapse in={filtersOpen} timeout="auto">
-						<FiltersBody>
-							<ServiceRouteFiltersForm onFiltersChange={handleFiltersChange} />
-						</FiltersBody>
-					</Collapse>
-				</SectionCard>
+      <RightColumn spacing={0}>
+        <SectionCard elevation={0}>
+          <FiltersHeader>
+            <Typography variant="h6">Filters</Typography>
+            <Button size="small" variant="text" onClick={toggleFiltersPanel}>
+              {filtersOpen ? 'Hide filters' : 'Show filters'}
+            </Button>
+          </FiltersHeader>
+          <Collapse in={filtersOpen} timeout="auto">
+            <FiltersBody>
+              <ServiceRouteFiltersForm onFiltersChange={handleFiltersChange} />
+            </FiltersBody>
+          </Collapse>
+        </SectionCard>
 
-				<TableSection>
-					<ServiceRouteTable
-						routes={routes}
-						totalCount={totalCount}
-						onBan={handleBan}
-						onBulkBan={handleBulkBan}
-						bulkBanDisabled={!canBulkBan}
-						isLoading={routesQuery.isLoading}
-					/>
-				</TableSection>
-			</RightColumn>
-		</OverviewLayout>
-	);
+        <TableSection>
+          <ServiceRouteTable
+            routes={routes}
+            totalCount={totalCount}
+            onBan={handleBan}
+            onBulkBan={handleBulkBan}
+            bulkBanDisabled={!canBulkBan}
+            isLoading={routesQuery.isLoading}
+          />
+        </TableSection>
+      </RightColumn>
+    </OverviewLayout>
+  );
 }
 
 const OverviewLayout = styled('div')(({ theme }) => ({
-	display: 'grid',
-	gap: theme.spacing(3),
-	gridTemplateColumns: '1fr',
-	alignItems: 'stretch',
-	[theme.breakpoints.up('lg')]: {
-		gridTemplateColumns: 'minmax(320px, 0.9fr) minmax(0, 1.6fr)',
-		alignItems: 'start',
-	},
+  display: 'grid',
+  gap: theme.spacing(3),
+  gridTemplateColumns: '1fr',
+  alignItems: 'stretch',
+  [theme.breakpoints.up('lg')]: {
+    gridTemplateColumns: 'minmax(320px, 0.9fr) minmax(0, 1.6fr)',
+    alignItems: 'start',
+  },
 }));
 
 const SectionCard = styled(Paper)(({ theme }) => ({
-	border: `1px solid ${theme.palette.divider}`,
-	padding: theme.spacing(2),
-	boxShadow: 'none',
+  border: `1px solid ${theme.palette.divider}`,
+  padding: theme.spacing(2),
+  boxShadow: 'none',
 }));
 
-
 const RightColumn = styled(Stack)(({ theme }) => ({
-	width: '100%',
-	gap: theme.spacing(3),
+  width: '100%',
+  gap: theme.spacing(3),
 }));
 
 const FiltersHeader = styled('div')(({ theme }) => ({
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'space-between',
-	gap: theme.spacing(2),
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: theme.spacing(2),
 }));
 
 const FiltersBody = styled('div')(({ theme }) => ({
-	marginTop: theme.spacing(2),
+  marginTop: theme.spacing(2),
 }));
 
 const TableSection = styled('div')(({ theme }) => ({
-	marginTop: theme.spacing(3),
+  marginTop: theme.spacing(3),
 }));
-

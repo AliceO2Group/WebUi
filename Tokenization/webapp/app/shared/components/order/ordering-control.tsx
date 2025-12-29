@@ -68,17 +68,17 @@ const buildDirectionalOptions = (options: OrderingOption[]): DirectionalOption[]
 
 /**
  * Ordering Control component allowing users to select multiple ordering rules
- * from a predefined set of fields and directions. 
- * 
+ * from a predefined set of fields and directions.
+ *
  * The elements are rendered using MUI Select with ChipStack as the display for selected items.
- * 
+ *
  * Component won't let to have two ordering rules for the same field;
- * 
+ *
  * @param props.label - Label for the ordering control.
  * @param props.value - Currently selected ordering rules.
  * @param props.onChange - Callback invoked when the ordering rules change.
  * @param props.options - Available ordering options.
- * 
+ *
  */
 export function OrderingControl({ label = 'Ordering', value = [], onChange, options }: OrderingControlProps) {
   // Derive multi-select keys for the currently applied rules.
@@ -96,7 +96,7 @@ export function OrderingControl({ label = 'Ordering', value = [], onChange, opti
     for (let index = nextKeys.length - 1; index >= 0; index -= 1) {
       const key = nextKeys[index];
       const option = optionMap[key];
-      // if option field seen before, skip to keep the last chosen direction only
+      // If option field seen before, skip to keep the last chosen direction only
       if (!option || seen.has(option.field)) {
         continue;
       }
@@ -104,7 +104,7 @@ export function OrderingControl({ label = 'Ordering', value = [], onChange, opti
       dedupedReverse.push({ field: option.field, direction: option.direction });
     }
 
-    // Restore chronological order 
+    // Restore chronological order
     onChange(dedupedReverse.reverse());
   };
 
@@ -166,8 +166,8 @@ const OrderingRoot = styled(Stack)(({ theme }) => ({
   width: '100%',
   gap: theme.spacing(1),
   '& .MuiInputLabel-root': {
-    transition: 'none'
-   }
+    transition: 'none',
+  },
 
 }));
 

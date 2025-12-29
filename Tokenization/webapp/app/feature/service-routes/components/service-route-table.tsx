@@ -35,6 +35,9 @@ export type ServiceRouteTableProps = {
   isLoading?: boolean;
 };
 
+/**
+ *
+ */
 export function ServiceRouteTable({ routes, totalCount, title = 'Service routes', onBan, onBulkBan, bulkBanDisabled = false, tableBodyMaxHeight, isLoading }: ServiceRouteTableProps) {
   const showActionsColumn = Boolean(onBan);
   const showBulkAction = Boolean(onBulkBan);
@@ -44,7 +47,7 @@ export function ServiceRouteTable({ routes, totalCount, title = 'Service routes'
       {
         key: 'serviceFrom',
         header: 'Service from',
-        render: (route) => <Link to={`/services/${route.serviceFrom.serviceId}`}>{route.serviceFrom.commonName}</Link>
+        render: (route) => <Link to={`/services/${route.serviceFrom.serviceId}`}>{route.serviceFrom.commonName}</Link>,
       },
       {
         key: 'serviceTo',

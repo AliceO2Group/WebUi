@@ -32,6 +32,9 @@ type UseServiceRoutesQueryParams = {
   enabled?: boolean;
 };
 
+/**
+ *
+ */
 export function useServiceRoutesQuery({ filters, enabled = true }: UseServiceRoutesQueryParams) {
   const { token } = useSession();
 
@@ -47,6 +50,9 @@ type UseRouteServiceOptionsParams = {
   enabled?: boolean;
 };
 
+/**
+ *
+ */
 export function useRouteServiceOptionsQuery(params?: UseRouteServiceOptionsParams) {
   const { token } = useSession();
 

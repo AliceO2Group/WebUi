@@ -33,7 +33,7 @@ export type UseServiceSelectFiltersOptions<TOption> = {
 };
 
 /**
- * useServiceSelectFilters is a custom hook to manage service select filters with debounced search.
+ * UseServiceSelectFilters is a custom hook to manage service select filters with debounced search.
  *
  * @param queryHook The query hook to fetch service options based on search term.
  * @param debounceMs The debounce time in milliseconds for the search input.

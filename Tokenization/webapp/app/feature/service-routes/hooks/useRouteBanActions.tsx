@@ -25,6 +25,9 @@ import { useAlert } from '~/shared/hooks/useAlert';
 import { AUTH_ERROR_ALERT } from '~/ui/alert/constants';
 import { validateRouteFiltersForBulk } from '~/feature/service-routes/services/service-route-filters.service';
 
+/**
+ *
+ */
 export function useRouteBanActions() {
   const hasAuth = useAuth();
   const pushAlert = useAlert();

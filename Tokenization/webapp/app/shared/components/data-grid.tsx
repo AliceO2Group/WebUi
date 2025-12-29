@@ -12,37 +12,38 @@
  * or submit itself to any jurisdiction.
  */
 
-
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import { styled } from '@mui/material/styles';
 
 type InfoItemProps = {
-	label: string;
-	value: string;
+  label: string;
+  value: string;
 };
 
-export default function DataGrid({info}: {info: InfoItemProps[]}) {
-    return <DetailsGrid>
-        {info.map((item) => (
-            <InfoItem key={item.label} label={item.label} value={item.value} />
-        ))}
-    </DetailsGrid>
+/**
+ *
+ */
+export default function DataGrid({ info }: { info: InfoItemProps[] }) {
+  return <DetailsGrid>
+    {info.map((item) => (
+      <InfoItem key={item.label} label={item.label} value={item.value} />
+    ))}
+  </DetailsGrid>;
 }
 
 const DetailsGrid = styled('div')(({ theme }) => ({
-	display: 'grid',
-	gap: theme.spacing(2),
-	gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+  display: 'grid',
+  gap: theme.spacing(2),
+  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
 }));
 
-
 const InfoItem = ({ label, value }: InfoItemProps) => (
-	<Stack spacing={0.5}>
-		<Typography variant="caption" color="text.secondary">
-			{label}
-		</Typography>
-		<Typography variant="body1">{value}</Typography>
-	</Stack>
+  <Stack spacing={0.5}>
+    <Typography variant="caption" color="text.secondary">
+      {label}
+    </Typography>
+    <Typography variant="body1">{value}</Typography>
+  </Stack>
 );

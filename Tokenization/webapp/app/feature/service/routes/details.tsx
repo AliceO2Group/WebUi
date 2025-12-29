@@ -26,94 +26,96 @@ import ServiceTokensSection from '../components/service-tokens-table';
 import { Spinner } from '~/ui/spinner';
 import ServiceInfo from '../components/service-info';
 
-
+/**
+ *
+ */
 export default function ServiceDetailsRoute() {
-	const { serviceId } = useParams<{ serviceId: string }>();
-	const hasServiceId = Boolean(serviceId);
+  const { serviceId } = useParams<{ serviceId: string }>();
+  const hasServiceId = Boolean(serviceId);
 
-	const serviceQuery = useServiceDetailsQuery({ serviceId: serviceId ?? '', enabled: hasServiceId });
-	const service = serviceQuery.data;
+  const serviceQuery = useServiceDetailsQuery({ serviceId: serviceId ?? '', enabled: hasServiceId });
+  const service = serviceQuery.data;
 
-	const outgoingFilters = serviceId ? buildServiceFilter(service, 'from') : null;
-	const incomingFilters = serviceId ? buildServiceFilter(service, 'to') : null;
+  const outgoingFilters = serviceId ? buildServiceFilter(service, 'from') : null;
+  const incomingFilters = serviceId ? buildServiceFilter(service, 'to') : null;
 
-	const { confirmRevoke: confirmRevokeOutgoing, confirmBulkRevoke: confirmBulkRevokeOutgoing } = useRevokeActions(outgoingFilters);
-	const { confirmRevoke: confirmRevokeIncoming, confirmBulkRevoke: confirmBulkRevokeIncoming } = useRevokeActions(incomingFilters);
- 
-	const outgoingTokensQuery = useTokensQuery({
-		filters: outgoingFilters,
-		status: 'active',
-		enabled: outgoingFilters !== TOKEN_FILTER_DEFAULTS,
-	});
+  const { confirmRevoke: confirmRevokeOutgoing, confirmBulkRevoke: confirmBulkRevokeOutgoing } = useRevokeActions(outgoingFilters);
+  const { confirmRevoke: confirmRevokeIncoming, confirmBulkRevoke: confirmBulkRevokeIncoming } = useRevokeActions(incomingFilters);
 
-	const incomingTokensQuery = useTokensQuery({
-		filters: incomingFilters,
-		status: 'active',
-		enabled: incomingFilters !== TOKEN_FILTER_DEFAULTS,
-	});
+  const outgoingTokensQuery = useTokensQuery({
+    filters: outgoingFilters,
+    status: 'active',
+    enabled: outgoingFilters !== TOKEN_FILTER_DEFAULTS,
+  });
 
-	if (!hasServiceId) {
-		return <Alert severity="error">Missing service identifier.</Alert>;
-	}
+  const incomingTokensQuery = useTokensQuery({
+    filters: incomingFilters,
+    status: 'active',
+    enabled: incomingFilters !== TOKEN_FILTER_DEFAULTS,
+  });
 
-	if (serviceQuery.isLoading) {
-		return (
-			<Centered>
-				<Spinner />
-			</Centered>
-		);
-	}
+  if (!hasServiceId) {
+    return <Alert severity="error">Missing service identifier.</Alert>;
+  }
 
-	if (serviceQuery.isError) {
-		return <Alert severity="error">Failed to load service details.</Alert>;
-	}
+  if (serviceQuery.isLoading) {
+    return (
+      <Centered>
+        <Spinner />
+      </Centered>
+    );
+  }
 
-	if (!serviceQuery.data) {
-		return <Alert severity="warning">Service not found.</Alert>;
-	}
+  if (serviceQuery.isError) {
+    return <Alert severity="error">Failed to load service details.</Alert>;
+  }
 
+  if (!serviceQuery.data) {
+    return <Alert severity="warning">Service not found.</Alert>;
+  }
 
-	return (
-		<Stack spacing={3}>
-			<ServiceInfo service={service} />
-			<Stack sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}>
-				<ServiceTokensSection
-					title="Tokens issued from this service"
-					query={outgoingTokensQuery}
-					filters={outgoingFilters}
-					onRevoke={confirmRevokeOutgoing}
-					onBulkRevoke={() => outgoingFilters && confirmBulkRevokeOutgoing(outgoingFilters)}
-				/>
-				<ServiceTokensSection
-					title="Tokens targeting this service"
-					query={incomingTokensQuery}
-					filters={incomingFilters}
-					onRevoke={confirmRevokeIncoming}
-					onBulkRevoke={() => incomingFilters && confirmBulkRevokeIncoming(incomingFilters)}
-				/>
-			</Stack>
-		</Stack>
-	);
+  return (
+    <Stack spacing={3}>
+      <ServiceInfo service={service} />
+      <Stack sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}>
+        <ServiceTokensSection
+          title="Tokens issued from this service"
+          query={outgoingTokensQuery}
+          filters={outgoingFilters}
+          onRevoke={confirmRevokeOutgoing}
+          onBulkRevoke={() => outgoingFilters && confirmBulkRevokeOutgoing(outgoingFilters)}
+        />
+        <ServiceTokensSection
+          title="Tokens targeting this service"
+          query={incomingTokensQuery}
+          filters={incomingFilters}
+          onRevoke={confirmRevokeIncoming}
+          onBulkRevoke={() => incomingFilters && confirmBulkRevokeIncoming(incomingFilters)}
+        />
+      </Stack>
+    </Stack>
+  );
 }
 
-
 const Centered = styled('div')(() => ({
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'center',
-	height: '60vh',
-	width: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: '60vh',
+  width: '100%',
 }));
 
-
+/**
+ *
+ */
 function buildServiceFilter(service: Service | undefined, direction: 'from' | 'to'): TokenFilterValues {
-	if(!service) {
-		return TOKEN_FILTER_DEFAULTS
-	}
-	
-	return {
-		...TOKEN_FILTER_DEFAULTS,
-		serviceFrom: direction === 'from' ? [{value: service.serviceId, label: service.commonName}] : [],
-		serviceTo: direction === 'to' ? [{value: service.serviceId, label: service.commonName}] : [],
-	};
+  if (!service) {
+    return TOKEN_FILTER_DEFAULTS;
+  }
+
+  return {
+    ...TOKEN_FILTER_DEFAULTS,
+    serviceFrom: direction === 'from' ? [{ value: service.serviceId, label: service.commonName }] : [],
+    serviceTo: direction === 'to' ? [{ value: service.serviceId, label: service.commonName }] : [],
+  };
 }

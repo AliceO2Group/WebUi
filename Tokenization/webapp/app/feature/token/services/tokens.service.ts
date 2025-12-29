@@ -22,8 +22,8 @@ export type TokensQueryResponse = {
 };
 
 /**
- * appends filter parameters to the query string
- * 
+ * Appends filter parameters to the query string
+ *
  * @param queryString  The URLSearchParams object to append parameters to.
  * @param filters The filter values to append as query parameters.
  */
@@ -60,7 +60,7 @@ function appendFilterParams(queryString: URLSearchParams, filters?: TokenFilterV
 
 /**
  * Builds the URL for fetching tokens based on provided filters, status, and token.
- * 
+ *
  * @param filters The filter values to include in the query parameters.
  * @param status The status of the tokens to filter by.
  * @param token The token value to include as a query parameter.
@@ -79,7 +79,7 @@ function buildTokensUrl(filters: TokenFilterValues | null, status?: TokenStatus,
 
 /**
  * Builds a URL scoped to a specific token.
- * 
+ *
  * @param path The base path for the URL.
  * @param token The token value to include as a query parameter.
  * @returns The constructed URL string.
@@ -118,6 +118,9 @@ export async function fetchTokenById(tokenId: string, token?: string | null): Pr
   return parseJsonOrThrow<Token>(res, 'Fetching token');
 }
 
+/**
+ *
+ */
 export async function fetchTokenLogs(tokenId: string, token?: string | null): Promise<TokenLogEntry[]> {
   const url = buildTokenScopedUrl(`/api/tokens/${tokenId}/logs`, token);
 

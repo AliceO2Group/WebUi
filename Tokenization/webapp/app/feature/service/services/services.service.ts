@@ -21,6 +21,9 @@ export type ServicesQueryResponse = {
   totalCount?: number;
 };
 
+/**
+ *
+ */
 function appendServiceFilters(queryString: URLSearchParams, filters?: ServiceFilterValues | null) {
   if (!filters) {
     return;
@@ -46,6 +49,9 @@ function appendServiceFilters(queryString: URLSearchParams, filters?: ServiceFil
   }
 }
 
+/**
+ *
+ */
 export async function fetchServices(filters: ServiceFilterValues | null, token?: string | null): Promise<ServicesQueryResponse> {
   const queryString = new URLSearchParams();
   appendServiceFilters(queryString, filters);

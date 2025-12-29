@@ -14,13 +14,19 @@
 
 import type { ServiceRouteFilterValues } from '~/feature/service-routes/types/service-route-filters';
 
+/**
+ *
+ */
 export function hasRouteFilters(filters: ServiceRouteFilterValues) {
   return Boolean(
     (filters.serviceFrom && filters.serviceFrom.length) ||
-    (filters.serviceTo && filters.serviceTo.length)
+    (filters.serviceTo && filters.serviceTo.length),
   );
 }
 
+/**
+ *
+ */
 export function validateRouteFiltersForBulk(filters: ServiceRouteFilterValues): string | null {
   if (!hasRouteFilters(filters)) {
     return 'Add at least one service filter before running bulk ban.';

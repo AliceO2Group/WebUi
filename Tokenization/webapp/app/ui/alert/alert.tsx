@@ -18,7 +18,7 @@ import type { AlertState } from './alert-provider';
 
 /**
  * Alert View Component
- * 
+ *
  * @param alertState state of the alert
  * @param handleClose function to handle alert close
  */
@@ -29,16 +29,16 @@ export default function AlertView({
   alertState: AlertState | null;
   handleClose: () => void;
 }) {
-    return <Snackbar
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        open={Boolean(alertState?.open)}
-        autoHideDuration={alertState?.autoHideDuration}
-        onClose={handleClose}
-      >
-        {alertState ? (
-          <Alert onClose={handleClose} severity={alertState.severity} variant="filled" sx={{ width: '100%' }}>
-            {alertState.message}
-          </Alert>
-        ) : <></>}
-      </Snackbar>
+  return <Snackbar
+    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+    open={Boolean(alertState?.open)}
+    autoHideDuration={alertState?.autoHideDuration}
+    onClose={handleClose}
+  >
+    {alertState ? (
+      <Alert onClose={handleClose} severity={alertState.severity} variant="filled" sx={{ width: '100%' }}>
+        {alertState.message}
+      </Alert>
+    ) : <></>}
+  </Snackbar>;
 }

@@ -39,7 +39,7 @@ export default function TokensOverviewRoute() {
     appliedFilters,
     handleFiltersChange,
   } = useFiltersPanel<TokenFilterValues>();
-  
+
   const tokensQuery = useTokensQuery({
     filters: appliedFilters,
     status: 'active',

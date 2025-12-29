@@ -17,9 +17,9 @@ import { useEffect, useState } from 'react';
 /**
  * Returns a debounced version of the provided value that only updates
  * after the specified delay has elapsed without changes.
- * 
+ *
  * Similar utility gives lodash with its `_.debounce` function
- * 
+ *
  * @param value The value to debounce
  * @param delay The debounce delay in milliseconds
  * @returns The debounced value

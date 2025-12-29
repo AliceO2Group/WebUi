@@ -22,29 +22,27 @@ import Typography from '@mui/material/Typography';
 import type { Service } from '../types/service';
 import DataGrid from '~/shared/components/data-grid';
 
+/**
+ *
+ */
 export default function ServiceInfo({ service }: { service: Service | undefined }) {
-	const renewPath = `/services/${service?.serviceId}/renew`;  
-    const info = [
-        { label: 'Service ID', value: service?.serviceId ?? '' },
-        { label: 'Common name', value: service?.commonName ?? '' },
-        { label: 'Issued at', value: service?.iat ? new Date(service.iat).toLocaleString() : '' },
-        { label: 'Expires', value: service?.exp ? new Date(service.exp).toLocaleString() : '' },
-    ]
+  const renewPath = `/services/${service?.serviceId}/renew`;
+  const info = [
+    { label: 'Service ID', value: service?.serviceId ?? '' },
+    { label: 'Common name', value: service?.commonName ?? '' },
+    { label: 'Issued at', value: service?.iat ? new Date(service.iat).toLocaleString() : '' },
+    { label: 'Expires', value: service?.exp ? new Date(service.exp).toLocaleString() : '' },
+  ];
 
-    return <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', p: 3 }}>
-				<Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} gap={2}>
-					<Typography variant="h5">Service certificate</Typography>
-					<Button component={Link} to={renewPath} variant="contained">
-						Renew certificate
-					</Button>
-				</Stack>
-				<Divider sx={{ my: 2 }} />
-				<DataGrid info={info} />
-			</Paper>
+  return <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', p: 3 }}>
+    <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} gap={2}>
+      <Typography variant="h5">Service certificate</Typography>
+      <Button component={Link} to={renewPath} variant="contained">
+        Renew certificate
+      </Button>
+    </Stack>
+    <Divider sx={{ my: 2 }} />
+    <DataGrid info={info} />
+  </Paper>;
 
 }
-
-
-
-
-

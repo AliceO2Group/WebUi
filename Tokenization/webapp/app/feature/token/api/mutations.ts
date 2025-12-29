@@ -23,7 +23,7 @@ import { useSession } from '~/feature/auth/hooks/session';
  */
 export function useRevokeTokenMutation() {
   const { token } = useSession();
-  
+
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (tokenId: string) => revokeToken(tokenId, token),
@@ -38,7 +38,7 @@ export function useRevokeTokenMutation() {
  */
 export function useBulkRevokeMutation() {
   const { token } = useSession();
-  
+
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (filters: TokenFilterValues) => revokeTokensBulk(filters, token),

@@ -15,12 +15,12 @@
 
 const assert = require('assert');
 const {
-    readAlertMessage,
+  readAlertMessage,
 } = require('../helper.cjs');
 
 const { tryRevokeSingleToken,
-    tryBulkRevokeTokens
- } = require('./tokens/helpers.cjs');
+  tryBulkRevokeTokens,
+} = require('./tokens/helpers.cjs');
 
 describe('Auth Error Alert when no-auth access to auth operations', function() {
   let url;
@@ -32,19 +32,19 @@ describe('Auth Error Alert when no-auth access to auth operations', function() {
 
   describe('Token Page', function() {
     it('Displays auth error when trying to revoke token without auth', async function() {
-        const tokenId = '1';
-        await page.goto(`${url}/tokens/active`);
-        await page.waitForSelector('table tbody tr');
-        await tryRevokeSingleToken(page,tokenId);
-        const alertText = await readAlertMessage(page);
-        assert.ok(alertText.includes('Authorization error'), 'Auth error alert not displayed when revoking token without auth');
-    })
+      const tokenId = '1';
+      await page.goto(`${url}/tokens/active`);
+      await page.waitForSelector('table tbody tr');
+      await tryRevokeSingleToken(page, tokenId);
+      const alertText = await readAlertMessage(page);
+      assert.ok(alertText.includes('Authorization error'), 'Auth error alert not displayed when revoking token without auth');
+    });
 
     it('Displays auth error when trying to bulk revoke tokens without auth', async function() {
-        await page.goto(`${url}/tokens/active`);
-        await tryBulkRevokeTokens(page, '2023-12-19T14:30');
-        const alertText = await readAlertMessage(page);
-        assert.ok(alertText.includes('Authorization error'), 'Auth error alert not displayed when bulk revoking tokens without auth');
-    })
-  })
+      await page.goto(`${url}/tokens/active`);
+      await tryBulkRevokeTokens(page, '2023-12-19T14:30');
+      const alertText = await readAlertMessage(page);
+      assert.ok(alertText.includes('Authorization error'), 'Auth error alert not displayed when bulk revoking tokens without auth');
+    });
+  });
 });

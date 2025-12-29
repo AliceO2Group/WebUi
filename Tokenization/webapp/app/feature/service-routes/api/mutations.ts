@@ -19,6 +19,9 @@ import type { ServiceRouteFilterValues } from '~/feature/service-routes/types/se
 import { serviceRoutesQueryKeys } from './queries';
 import { useSession } from '~/feature/auth/hooks/session';
 
+/**
+ *
+ */
 export function useBanServiceRouteMutation() {
   const { token } = useSession();
 
@@ -31,6 +34,9 @@ export function useBanServiceRouteMutation() {
   });
 }
 
+/**
+ *
+ */
 export function useBulkBanServiceRoutesMutation() {
   const { token } = useSession();
 
@@ -43,6 +49,9 @@ export function useBulkBanServiceRoutesMutation() {
   });
 }
 
+/**
+ *
+ */
 export function useRegisterServiceRouteMutation() {
   const { token } = useSession();
 

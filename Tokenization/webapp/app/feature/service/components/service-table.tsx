@@ -33,6 +33,9 @@ export type ServicesTableProps = {
   isLoading?: boolean;
 };
 
+/**
+ *
+ */
 export function ServicesTable({ services, totalCount, title = 'Services', onBlock, onBulkBlock, bulkBlockDisabled = false, tableBodyMaxHeight, isLoading }: ServicesTableProps) {
   const showActionsColumn = Boolean(onBlock);
   const showBulkAction = Boolean(onBulkBlock);

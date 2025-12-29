@@ -19,6 +19,9 @@ import { confirmServiceCertificate, uploadServiceCertificate } from '~/feature/s
 import type { ServiceCertificatePreview, ServiceRegistrationResult } from '~/feature/service/types/certificate';
 import { useSession } from '~/feature/auth/hooks/session';
 
+/**
+ *
+ */
 export function useServiceCertificateUploadMutation() {
   const { token } = useSession();
 
@@ -27,6 +30,9 @@ export function useServiceCertificateUploadMutation() {
   });
 }
 
+/**
+ *
+ */
 export function useServiceCertificateConfirmMutation() {
   const { token } = useSession();
 
@@ -40,6 +46,9 @@ export type ServiceCertificateRenewConfirmPayload = {
   certificateId: string;
 };
 
+/**
+ *
+ */
 export function useServiceCertificateRenewConfirmMutation() {
   const { token } = useSession();
 

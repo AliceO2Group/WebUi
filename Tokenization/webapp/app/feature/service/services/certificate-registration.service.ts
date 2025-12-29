@@ -19,17 +19,20 @@ import { buildUrl, createQueryParams, parseJsonOrThrow } from '~/shared/http/htt
  * Uploads a service certificate file (as base64) and returns a preview of the certificate.
  */
 export async function uploadServiceCertificate(file: File, token?: string | null): Promise<ServiceCertificatePreview> {
+  /**
+   *
+   */
   function fileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      // to extract only the base64 part from the data URL
+      // To extract only the base64 part from the data URL
       reader.onload = () => resolve((reader.result as string).split(',')[1]);
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
   }
 
-  if(file.size === 0 || file.size > 20 * 1024) {
+  if (file.size === 0 || file.size > 20 * 1024) {
     throw Error('File size is not valid');
   }
 
@@ -39,7 +42,7 @@ export async function uploadServiceCertificate(file: File, token?: string | null
   const response = await fetch(url, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ certificateBase64: base64 }),
   });
@@ -52,10 +55,10 @@ export async function uploadServiceCertificate(file: File, token?: string | null
 export async function confirmServiceCertificate(certificateId: string, token?: string | null): Promise<ServiceRegistrationResult> {
   const url = buildUrl('/api/certificate/register', createQueryParams(token));
 
-  const response = await fetch(url, { 
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ certificateId }),
   });

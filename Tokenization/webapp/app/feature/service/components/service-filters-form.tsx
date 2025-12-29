@@ -37,6 +37,9 @@ type ServiceFiltersFormProps = {
   onFiltersChange: (values: ServiceFilterValues) => void;
 };
 
+/**
+ *
+ */
 export function ServiceFiltersForm({ onFiltersChange }: ServiceFiltersFormProps) {
   const { control, reset, getValues } = useForm<ServiceFilterValues>({
     defaultValues: SERVICE_FILTER_DEFAULTS,
@@ -165,4 +168,3 @@ const FiltersActionsContainer = styled('div')(({ theme }) => ({
   justifyContent: 'flex-end',
   flexWrap: 'wrap',
 }));
-

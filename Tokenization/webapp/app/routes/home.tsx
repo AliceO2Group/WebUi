@@ -75,33 +75,33 @@ interface SectionProps {
 
 /**
  * SectionCard component to display a section with links
- * 
+ *
  * @param title Section title
  * @param description Section description
  * @param links Array of link objects with label, to, and description
  */
-function SectionCard({title, description, links}: SectionProps) {
+function SectionCard({ title, description, links }: SectionProps) {
   return <Card elevation={2}>
-          <CardContent>
-            <Typography variant="h5" component="h2">
-              {title}
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mt: 1, mb: 3 }}>
-              {description}
-            </Typography>
-            <Stack spacing={2}>
-              {links.map((link) => (
-                <Box key={link.label} sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.5 }}>
-                  <Box sx={{ flex: 1, minWidth: 220 }}>
-                    <Typography variant="subtitle2">{link.label}</Typography>
-                    <Typography variant="body2" color="text.secondary">{link.description}</Typography>
-                  </Box>
-                  <Button component={Link} to={link.to} variant="contained" size="small">
-                    Open
-                  </Button>
-                </Box>
-              ))}
-            </Stack>
-          </CardContent>
-        </Card>
+    <CardContent>
+      <Typography variant="h5" component="h2">
+        {title}
+      </Typography>
+      <Typography variant="body1" color="text.secondary" sx={{ mt: 1, mb: 3 }}>
+        {description}
+      </Typography>
+      <Stack spacing={2}>
+        {links.map((link) => (
+          <Box key={link.label} sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ flex: 1, minWidth: 220 }}>
+              <Typography variant="subtitle2">{link.label}</Typography>
+              <Typography variant="body2" color="text.secondary">{link.description}</Typography>
+            </Box>
+            <Button component={Link} to={link.to} variant="contained" size="small">
+              Open
+            </Button>
+          </Box>
+        ))}
+      </Stack>
+    </CardContent>
+  </Card>;
 }

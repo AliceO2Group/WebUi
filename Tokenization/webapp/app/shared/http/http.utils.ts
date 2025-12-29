@@ -52,7 +52,7 @@ export async function parseJsonOrThrow<T>(response: Response, context: string): 
         message = `${message} - ${detail}`;
       }
     } catch (error) {
-      // ignore JSON parse issues when crafting the error message
+      // Ignore JSON parse issues when crafting the error message
     }
 
     throw new Error(message);

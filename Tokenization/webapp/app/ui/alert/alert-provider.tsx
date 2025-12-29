@@ -67,9 +67,9 @@ export function AlertProvider({ children }: { children: ReactNode }) {
   return (
     <AlertContext.Provider value={contextValue}>
       {children}
-      <AlertView 
-        alertState={alertState} 
-        handleClose={handleClose} 
+      <AlertView
+        alertState={alertState}
+        handleClose={handleClose}
       />
     </AlertContext.Provider>
   );

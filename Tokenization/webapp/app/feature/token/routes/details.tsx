@@ -26,6 +26,9 @@ import { useRevokeActions } from '~/feature/token/hooks/useRevokeActions';
 import type { TokenLogEntry } from '~/feature/token/types/token';
 import TokenInfo from '../components/token-info';
 
+/**
+ *
+ */
 export default function TokenDetailsRoute() {
   const { tokenId } = useParams<{ tokenId: string }>();
   const { confirmRevoke } = useRevokeActions(null);

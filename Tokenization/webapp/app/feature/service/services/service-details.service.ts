@@ -16,12 +16,18 @@ import type { Service } from '~/feature/service/types/service';
 import type { ServiceRegistrationResult } from '~/feature/service/types/certificate';
 import { buildUrl, createQueryParams, parseJsonOrThrow } from '~/shared/http/http.utils';
 
+/**
+ *
+ */
 export async function fetchServiceById(serviceId: string, token?: string | null): Promise<Service> {
   const url = buildUrl(`/api/services/${serviceId}`, createQueryParams(token));
   const response = await fetch(url);
   return parseJsonOrThrow<Service>(response, 'Fetching service details');
 }
 
+/**
+ *
+ */
 export async function confirmServiceCertificateRenewal(
   serviceId: string,
   certificateId: string,
@@ -38,4 +44,3 @@ export async function confirmServiceCertificateRenewal(
   });
   return parseJsonOrThrow<ServiceRegistrationResult>(response, 'Confirming service certificate renewal');
 }
-

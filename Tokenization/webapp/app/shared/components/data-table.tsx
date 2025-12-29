@@ -51,7 +51,7 @@ export type DataTableProps<Row> = {
 
 /**
  * Data table component with virtualized rows for performance with large datasets.
- * 
+ *
  * @param columns Column definitions.
  * @param rows Data rows.
  * @param getRowKey Optional function to get a unique key for each row.
@@ -118,24 +118,24 @@ export function DataTable<Row>({
 
 /**
  * Table header component.
- * 
+ *
  * @param columns Columns to render in the header.
  */
-function TableHeader<Row>({columns}: {columns: Array<DataTableColumn<Row>>}) {
+function TableHeader<Row>({ columns }: { columns: Array<DataTableColumn<Row>> }) {
   return <TableHead>
-          <TableRow>
-            {columns.map((column) => (
-              <TableCell key={column.key} align={column.align} width={column.width} sx={{ fontWeight: 600 }}>
-                {column.header}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
+    <TableRow>
+      {columns.map((column) => (
+        <TableCell key={column.key} align={column.align} width={column.width} sx={{ fontWeight: 600 }}>
+          {column.header}
+        </TableCell>
+      ))}
+    </TableRow>
+  </TableHead>;
 }
 
 /**
  * Table body with virtualized rows.
- * 
+ *
  * @param rows Data rows.
  * @param columns Column definitions.
  * @param paddingTop Padding to apply at the top of the table body - needed for scroll to work properly with virtualization
@@ -144,10 +144,10 @@ function TableHeader<Row>({columns}: {columns: Array<DataTableColumn<Row>>}) {
  * @param isLoading Whether the table is in a loading state.
  * @param emptyState Content to display when there are no rows.
  * @param getRowKey Optional function to get a unique key for each row.
- *  
+ *
  */
 function TableBodyVirtualized<Row>({
-  rows, 
+  rows,
   columns,
   paddingTop,
   paddingBottom,
@@ -156,98 +156,98 @@ function TableBodyVirtualized<Row>({
   emptyState,
   getRowKey,
 }: {
-    rows: Row[]; 
-    columns: Array<DataTableColumn<Row>>
-    paddingTop: number;
-    paddingBottom: number;
-    virtualItems: VirtualItem[];
-    isLoading: boolean;
-    emptyState: ReactNode;
-    getRowKey?: (row: Row, index: number) => Key;
+  rows: Row[];
+  columns: Array<DataTableColumn<Row>>;
+  paddingTop: number;
+  paddingBottom: number;
+  virtualItems: VirtualItem[];
+  isLoading: boolean;
+  emptyState: ReactNode;
+  getRowKey?: (row: Row, index: number) => Key;
 }) {
 
-  if(isLoading) {
+  if (isLoading) {
     return <TableBody>
-        <LoadingTableBody columnsLength={columns.length} /> 
-      </TableBody> 
+      <LoadingTableBody columnsLength={columns.length} />
+    </TableBody>;
   }
 
-  if(rows.length === 0) {
+  if (rows.length === 0) {
     return <TableBody>
-        <EmptyTableBody columnsLength={columns.length} content={emptyState} />
-      </TableBody> 
+      <EmptyTableBody columnsLength={columns.length} content={emptyState} />
+    </TableBody>;
   }
 
   return <TableBody>
-          <VirtualTablePagination padding={paddingTop} columnsLength={columns.length} />
-          {     
-            virtualItems.map((virtualRow) => {
-              const row = rows[virtualRow.index];
-              return (
-                <TableRow key={getRowKey?.(row, virtualRow.index) ?? virtualRow.index}>
-                  {columns.map((column) => (
-                    <TableCell key={column.key} align={column.align}>
-                      {column.render(row, virtualRow.index)}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              );
-            }) 
-          }
-          <VirtualTablePagination padding={paddingBottom} columnsLength={columns.length} />
-        </TableBody>
+    <VirtualTablePagination padding={paddingTop} columnsLength={columns.length} />
+    {
+      virtualItems.map((virtualRow) => {
+        const row = rows[virtualRow.index];
+        return (
+          <TableRow key={getRowKey?.(row, virtualRow.index) ?? virtualRow.index}>
+            {columns.map((column) => (
+              <TableCell key={column.key} align={column.align}>
+                {column.render(row, virtualRow.index)}
+              </TableCell>
+            ))}
+          </TableRow>
+        );
+      })
+    }
+    <VirtualTablePagination padding={paddingBottom} columnsLength={columns.length} />
+  </TableBody>;
 }
 
 /**
  * Virtual table pagination row for scroll to work properly
- * 
+ *
  * @param padding height of the padding row needed
  * @param columnsLength number of columns in the table
  */
 function VirtualTablePagination({
   padding,
-  columnsLength
+  columnsLength,
 }: {
   padding: number;
   columnsLength: number;
 }) {
-  
-  if(padding <= 0) {
+
+  if (padding <= 0) {
     return null;
   }
 
   return <TableRow>
-          <TableCell style={{ height: padding, padding: 0, border: 0 }} colSpan={columnsLength} />
-         </TableRow>
+    <TableCell style={{ height: padding, padding: 0, border: 0 }} colSpan={columnsLength} />
+  </TableRow>;
 
 }
 
 /**
  * Loading table body component.
- * 
+ *
  * @param columnsLength number of columns in the table
- * @returns 
+ * @returns
  */
-function LoadingTableBody({columnsLength}: {columnsLength: number}) {
+function LoadingTableBody({ columnsLength }: { columnsLength: number }) {
   return <TableRow>
-          <TableCell colSpan={columnsLength}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-              <Spinner />
-            </Box>
-          </TableCell>
-        </TableRow>
+    <TableCell colSpan={columnsLength}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+        <Spinner />
+      </Box>
+    </TableCell>
+  </TableRow>;
 }
 
 /**
  * Empty table body component.
- * 
+ *
  * @param columnsLength number of columns in the table
  * @param content content to display in the empty state
  */
-function EmptyTableBody({columnsLength, content}: {columnsLength: number; content: ReactNode}) {
+function EmptyTableBody({ columnsLength, content }: { columnsLength: number; content: ReactNode }) {
   return <TableRow>
-          <TableCell colSpan={columnsLength}>
-            {content}
-          </TableCell>
-        </TableRow>
+    <TableCell colSpan={columnsLength}>
+      {content}
+    </TableCell>
+  </TableRow>;
 }

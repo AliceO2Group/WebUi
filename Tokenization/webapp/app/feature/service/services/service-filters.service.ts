@@ -14,16 +14,22 @@
 
 import type { ServiceFilterValues } from '~/feature/service/types/service-filters';
 
+/**
+ *
+ */
 export function hasServiceDataFilters(filters: ServiceFilterValues) {
   return Boolean(
     filters.issuedAfter ||
     filters.issuedBefore ||
     filters.expiresAfter ||
     filters.expiresBefore ||
-    filters.search?.trim()
+    filters.search?.trim(),
   );
 }
 
+/**
+ *
+ */
 export function validateServiceFiltersForBulk(filters: ServiceFilterValues): string | null {
   if (!hasServiceDataFilters(filters)) {
     return 'At least one filter (date or name) must be provided.';

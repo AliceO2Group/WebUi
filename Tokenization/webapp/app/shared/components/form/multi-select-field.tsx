@@ -28,7 +28,7 @@ import { StaticTextField } from './static-text-field';
 export type OptionType = {
   label: string;
   value: string;
-}
+};
 
 export type FormMultiSelectFieldProps<TFieldValues extends FieldValues> = {
   control: Control<TFieldValues>;
@@ -42,7 +42,6 @@ export type FormMultiSelectFieldProps<TFieldValues extends FieldValues> = {
   inputValue?: string;
   onInputValueChange?: (value: string) => void;
 };
-
 
 /**
  * FormMultiSelectField exposes a reusable multi-select input backed by MUI Autocomplete and

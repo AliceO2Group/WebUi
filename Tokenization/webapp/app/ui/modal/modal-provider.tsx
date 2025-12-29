@@ -17,7 +17,6 @@ import type { ButtonProps } from '@mui/material/Button';
 
 import ModalView from './modal';
 
-
 export type ModalAccent = 'default' | 'danger' | 'warning' | 'success';
 
 export type ModalOptions = {
@@ -48,15 +47,15 @@ export const ModalContext = createContext<ModalContextValue | undefined>(undefin
 
 /**
  * Provider component that manages modal dialogs.
- * 
+ *
  * Usage:
- * 
+ *
  * ```tsx
  * <ModalProvider>
  *   <App />
  * </ModalProvider>
  * ```
- * 
+ *
  * Inside any child component, use the `ModalContext` to show or hide modals through useModal hook
  */
 export function ModalProvider({ children }: { children: ReactNode }) {
@@ -113,7 +112,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   return (
     <ModalContext.Provider value={contextValue}>
       {children}
-      <ModalView 
+      <ModalView
         modalState={modalState}
         handleClose={handleClose}
         handleConfirm={handleConfirm}
@@ -124,4 +123,3 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     </ModalContext.Provider>
   );
 }
-

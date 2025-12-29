@@ -27,6 +27,9 @@ export type ServiceRouteRegistrationPayload = {
   permissions: string[];
 };
 
+/**
+ *
+ */
 function appendRouteFilters(queryString: URLSearchParams, filters?: ServiceRouteFilterValues | null) {
   if (!filters) {
     return;
@@ -40,6 +43,9 @@ function appendRouteFilters(queryString: URLSearchParams, filters?: ServiceRoute
   }
 }
 
+/**
+ *
+ */
 export async function fetchServiceRoutes(
   filters: ServiceRouteFilterValues | null,
   token?: string | null,
@@ -56,6 +62,9 @@ export async function fetchServiceRoutes(
   };
 }
 
+/**
+ *
+ */
 export async function banServiceRoute(routeId: string, token?: string | null): Promise<void> {
   const url = buildUrl(`/api/routes/${routeId}`, createQueryParams(token));
 
@@ -66,6 +75,9 @@ export async function banServiceRoute(routeId: string, token?: string | null): P
   await parseJsonOrThrow(res, 'Banning service route');
 }
 
+/**
+ *
+ */
 export async function banServiceRoutesBulk(filters?: ServiceRouteFilterValues | null, token?: string | null): Promise<void> {
   if (!filters) {
     return Promise.reject(new Error('No filters provided for bulk ban.'));
@@ -84,12 +96,15 @@ export async function banServiceRoutesBulk(filters?: ServiceRouteFilterValues | 
   await parseJsonOrThrow(res, 'Banning service routes in bulk');
 }
 
+/**
+ *
+ */
 export async function registerServiceRoute(
   payload: ServiceRouteRegistrationPayload,
   token?: string | null,
 ): Promise<ServiceRoute> {
   const url = buildUrl('/api/routes', createQueryParams(token));
-  
+
   const response = await fetch(url, {
     method: 'POST',
     headers: {

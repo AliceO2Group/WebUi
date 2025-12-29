@@ -19,7 +19,7 @@ type UseFiltersPanelOptions = {
 };
 
 /**
- * useFiltersPanel is a custom hook to manage the state and behavior of a filters panel.
+ * UseFiltersPanel is a custom hook to manage the state and behavior of a filters panel.
  *
  * @param options Configuration options for the filters panel behavior.
  * @returns An object containing the state and handler functions for the filters panel.

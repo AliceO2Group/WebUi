@@ -19,7 +19,6 @@ import { fetchServices } from '~/feature/service/services/services.service';
 import type { ServiceFilterValues } from '~/feature/service/types/service-filters';
 import { useSession } from '~/feature/auth/hooks/session';
 
-
 const servicesListKey = ['services', 'list'] as const;
 const serviceDetailsKey = ['services', 'detail'] as const;
 
@@ -35,6 +34,9 @@ type UseServicesQueryParams = {
   enabled?: boolean;
 };
 
+/**
+ *
+ */
 export function useServicesQuery({ filters, enabled = true }: UseServicesQueryParams) {
   const { token } = useSession();
 
@@ -50,9 +52,12 @@ type UseServiceDetailsQueryParams = {
   enabled?: boolean;
 };
 
+/**
+ *
+ */
 export function useServiceDetailsQuery({ serviceId, enabled = true }: UseServiceDetailsQueryParams) {
   const { token } = useSession();
-  
+
   return useQuery({
     queryKey: servicesQueryKeys.detail(serviceId),
     enabled,

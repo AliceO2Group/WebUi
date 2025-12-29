@@ -65,9 +65,9 @@ export function TokensTable({ tokens, totalCount, title = 'Active tokens', onRev
         header: 'Services',
         render: (token) => (
           <>
-          <Link to={`/services/${token.serviceFrom.serviceId}`}>{token.serviceFrom.commonName}</Link> 
-          → 
-          <Link to={`/services/${token.serviceTo.serviceId}`}>{token.serviceTo.commonName}</Link>
+            <Link to={`/services/${token.serviceFrom.serviceId}`}>{token.serviceFrom.commonName}</Link>
+            →
+            <Link to={`/services/${token.serviceTo.serviceId}`}>{token.serviceTo.commonName}</Link>
           </>
         ),
       },

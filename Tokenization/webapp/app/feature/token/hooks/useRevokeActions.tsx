@@ -17,7 +17,6 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useQueryClient } from '@tanstack/react-query';
 
-
 import { useBulkRevokeMutation, useRevokeTokenMutation } from '~/feature/token/api/mutations';
 import type { Token } from '~/feature/token/types/token';
 import type { TokenFilterValues } from '~/feature/token/types/token-filters';
@@ -58,27 +57,31 @@ export function useRevokeActions(filters: TokenFilterValues | null) {
         revokeTokenMutation.mutate(token.tokenId, {
           onSuccess: () => {
             pushAlert({ message: 'Token revoked successfully.', severity: 'success' });
-            // optimistic UI updates
+            // Optimistic UI updates
             queryClient.setQueryData(
-              ['tokens','list', 'active', filters],
+              ['tokens', 'list', 'active', filters],
               (old: { tokens?: Token[] } | undefined) => {
-                if (!old) return old;
+                if (!old) {
+                  return old;
+                }
                 return {
                   ...old,
                   tokens: old.tokens?.filter(t => t.tokenId !== token.tokenId) || [],
-                }
-              }
-            )
+                };
+              },
+            );
             queryClient.setQueryData(
               ['tokens', 'detail', token.tokenId],
               (old: Token | undefined) => {
-                if (!old) return old;
+                if (!old) {
+                  return old;
+                }
                 return {
                   ...old,
                   status: 'not-active',
-                }
-              }
-            )
+                };
+              },
+            );
           },
           onError: (error) => {
             console.error('Failed to revoke token', error);
@@ -119,16 +122,18 @@ export function useRevokeActions(filters: TokenFilterValues | null) {
           onSuccess: () => {
             pushAlert({ message: 'Tokens revoked successfully.', severity: 'success' });
             queryClient.setQueryData(
-              ['tokens','list', 'active', filters],
+              ['tokens', 'list', 'active', filters],
               (old: { tokens?: Token[] } | undefined) => {
-                if (!old) return old;
+                if (!old) {
+                  return old;
+                }
                 return {
                   ...old,
                   tokens: [],
-                }
-              }
-            )
-          },   
+                };
+              },
+            );
+          },
           onError: (error) => {
             console.error('Failed to revoke tokens', error);
             pushAlert({ message: 'Failed to revoke tokens.', severity: 'error' });

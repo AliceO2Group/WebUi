@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import type { Service } from "~/feature/service/types/service";
+import type { Service } from '~/feature/service/types/service';
 
 export type TokenStatus = 'active' | 'not-active';
 

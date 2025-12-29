@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import type { Service } from "~/feature/service/types/service";
-import { buildUrl, createQueryParams, parseJsonOrThrow } from "~/shared/http/http.utils";
+import type { Service } from '~/feature/service/types/service';
+import { buildUrl, createQueryParams, parseJsonOrThrow } from '~/shared/http/http.utils';
 
 /**
  * Fetch available services from the backend, optionally filtered by a search term.
