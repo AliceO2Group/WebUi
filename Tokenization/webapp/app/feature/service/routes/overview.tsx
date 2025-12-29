@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import Collapse from '@mui/material/Collapse';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
@@ -20,8 +21,9 @@ import { styled } from '@mui/material/styles';
 
 import { ServiceFiltersForm } from '~/feature/service/components/service-filters-form';
 import { ServicesTable } from '~/feature/service/components/service-table';
-import { useServiceFiltersPanel } from '~/feature/service/hooks/useServiceFiltersPanel';
 import { useServicesQuery } from '~/feature/service/api/queries';
+import type { ServiceFilterValues } from '~/feature/service/types/service-filters';
+import { useFiltersPanel } from '~/shared/hooks/useFiltersPanel';
 
 /**
  * Services overview lists registered services with date filters and ordering.
@@ -32,7 +34,7 @@ export default function ServicesOverviewRoute() {
 		toggleFiltersPanel,
 		appliedFilters,
 		handleFiltersChange,
-	} = useServiceFiltersPanel(false);
+	} = useFiltersPanel<ServiceFilterValues>({ initiallyOpen: false });
 
 	const servicesQuery = useServicesQuery({
 		filters: appliedFilters,
@@ -50,11 +52,11 @@ export default function ServicesOverviewRoute() {
 						{filtersOpen ? 'Hide' : 'Show'}
 					</Button>
 				</FiltersHeader>
-				{filtersOpen ? (
+				<Collapse in={filtersOpen} timeout="auto">
 					<FiltersBody>
 						<ServiceFiltersForm onFiltersChange={handleFiltersChange} />
 					</FiltersBody>
-				) : null}
+				</Collapse>
 			</FiltersCard>
 
 			<ServicesTable services={services} totalCount={totalCount} isLoading={servicesQuery.isLoading} />

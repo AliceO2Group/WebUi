@@ -13,6 +13,7 @@
  */
 
 import { useCallback } from 'react';
+import Collapse from '@mui/material/Collapse';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
@@ -23,9 +24,10 @@ import { useTokensQuery } from '~/feature/token/api/queries';
 import { TokenFiltersForm } from '~/feature/token/components/token-filters-form';
 import { TokensTable } from '~/feature/token/components/token-table';
 import { useRevokeActions } from '~/feature/token/hooks/useRevokeActions';
-import { useTokenFiltersPanel } from '~/feature/token/hooks/useTokenFiltersPanel';
 import { hasDataFilters } from '~/feature/token/services/token-filters.service';
 import type { Token } from '~/feature/token/types/token';
+import type { TokenFilterValues } from '~/feature/token/types/token-filters';
+import { useFiltersPanel } from '~/shared/hooks/useFiltersPanel';
 
 /**
  *
@@ -36,7 +38,7 @@ export default function TokensOverviewRoute() {
     toggleFiltersPanel,
     appliedFilters,
     handleFiltersChange,
-  } = useTokenFiltersPanel();
+  } = useFiltersPanel<TokenFilterValues>();
   
   const tokensQuery = useTokensQuery({
     filters: appliedFilters,
@@ -67,13 +69,13 @@ export default function TokensOverviewRoute() {
             {filtersOpen ? 'Hide' : 'Show'}
           </Button>
         </FiltersHeader>
-        {filtersOpen ? (
+        <Collapse in={filtersOpen} timeout="auto">
           <FiltersBody>
             <TokenFiltersForm
               onFiltersChange={handleFiltersChange}
             />
           </FiltersBody>
-        ) : null}
+        </Collapse>
       </FiltersCard>
 
       <TokensTable

@@ -13,21 +13,22 @@
  */
 
 import { useCallback } from 'react';
+import Collapse from '@mui/material/Collapse';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 
-
 import { ServiceRouteFiltersForm } from '~/feature/service-routes/components/service-route-filters-form';
 import { ServiceRouteTable } from '~/feature/service-routes/components/service-route-table';
 import { ServiceRouteRegisterForm } from '~/feature/service-routes/components/service-route-register-form';
 import { useServiceRoutesQuery } from '~/feature/service-routes/api/queries';
 import { useRouteBanActions } from '~/feature/service-routes/hooks/useRouteBanActions';
-import { useServiceRouteFiltersPanel } from '~/feature/service-routes/hooks/useServiceRouteFiltersPanel';
 import { hasRouteFilters } from '~/feature/service-routes/services/service-route-filters.service';
 import type { ServiceRoute } from '../types/service-route';
+import type { ServiceRouteFilterValues } from '~/feature/service-routes/types/service-route-filters';
+import { useFiltersPanel } from '~/shared/hooks/useFiltersPanel';
 
 export default function ServiceRoutesOverviewRoute() {
 	const {
@@ -35,7 +36,7 @@ export default function ServiceRoutesOverviewRoute() {
 		toggleFiltersPanel,
 		appliedFilters,
 		handleFiltersChange,
-	} = useServiceRouteFiltersPanel();
+	} = useFiltersPanel<ServiceRouteFilterValues>();
 
 	const routesQuery = useServiceRoutesQuery({ filters: appliedFilters });
 	const { confirmBan, confirmBulkBan } = useRouteBanActions();
@@ -67,25 +68,23 @@ export default function ServiceRoutesOverviewRoute() {
 							{filtersOpen ? 'Hide filters' : 'Show filters'}
 						</Button>
 					</FiltersHeader>
-					{filtersOpen ? (
+					<Collapse in={filtersOpen} timeout="auto">
 						<FiltersBody>
 							<ServiceRouteFiltersForm onFiltersChange={handleFiltersChange} />
 						</FiltersBody>
-					) : null}
+					</Collapse>
 				</SectionCard>
 
-				
-					<TableSection>
-						<ServiceRouteTable
-							routes={routes}
-							totalCount={totalCount}
-							onBan={handleBan}
-							onBulkBan={handleBulkBan}
-							bulkBanDisabled={!canBulkBan}
-							isLoading={routesQuery.isLoading}
-						/>
-					</TableSection>
-				
+				<TableSection>
+					<ServiceRouteTable
+						routes={routes}
+						totalCount={totalCount}
+						onBan={handleBan}
+						onBulkBan={handleBulkBan}
+						bulkBanDisabled={!canBulkBan}
+						isLoading={routesQuery.isLoading}
+					/>
+				</TableSection>
 			</RightColumn>
 		</OverviewLayout>
 	);

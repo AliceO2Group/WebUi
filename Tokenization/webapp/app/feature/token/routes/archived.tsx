@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+import Collapse from '@mui/material/Collapse';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
@@ -21,7 +22,8 @@ import { styled } from '@mui/material/styles';
 import { useTokensQuery } from '~/feature/token/api/queries';
 import { TokenFiltersForm } from '~/feature/token/components/token-filters-form';
 import { TokensTable } from '~/feature/token/components/token-table';
-import { useTokenFiltersPanel } from '~/feature/token/hooks/useTokenFiltersPanel';
+import type { TokenFilterValues } from '~/feature/token/types/token-filters';
+import { useFiltersPanel } from '~/shared/hooks/useFiltersPanel';
 
 /**
  *
@@ -32,7 +34,7 @@ export default function ArchivedTokensRoute() {
     toggleFiltersPanel,
     appliedFilters,
     handleFiltersChange,
-  } = useTokenFiltersPanel();
+  } = useFiltersPanel<TokenFilterValues>();
 
   const tokensQuery = useTokensQuery({
     filters: appliedFilters,
@@ -50,13 +52,13 @@ export default function ArchivedTokensRoute() {
             {filtersOpen ? 'Hide' : 'Show'}
           </Button>
         </FiltersHeader>
-        {filtersOpen ? (
+        <Collapse in={filtersOpen} timeout="auto">
           <FiltersBody>
             <TokenFiltersForm
               onFiltersChange={handleFiltersChange}
             />
           </FiltersBody>
-        ) : null}
+        </Collapse>
       </FiltersCard>
 
       <TokensTable
