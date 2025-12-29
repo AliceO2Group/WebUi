@@ -14,21 +14,12 @@
 
 import type { Service } from '~/feature/service/types/service';
 import type { ServiceRegistrationResult } from '~/feature/service/types/certificate';
+import { buildUrl, createQueryParams, parseJsonOrThrow } from '~/shared/http/http.utils';
 
 export async function fetchServiceById(serviceId: string, token?: string | null): Promise<Service> {
-  const params = new URLSearchParams();
-  if (token) {
-    params.append('token', token);
-  }
-  const query = params.toString();
-  const url = query ? `/api/services/${serviceId}?${query}` : `/api/services/${serviceId}`;
-
+  const url = buildUrl(`/api/services/${serviceId}`, createQueryParams(token));
   const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-  const data: Service = await response.json();
-  return data;
+  return parseJsonOrThrow<Service>(response, 'Fetching service details');
 }
 
 export async function confirmServiceCertificateRenewal(
@@ -36,12 +27,7 @@ export async function confirmServiceCertificateRenewal(
   certificateId: string,
   token?: string | null,
 ): Promise<ServiceRegistrationResult> {
-  const params = new URLSearchParams();
-  if (token) {
-    params.append('token', token);
-  }
-  const query = params.toString();
-  const url = query ? `/api/certificate/renew?${query}` : '/api/certificate/renew';
+  const url = buildUrl('/api/certificate/renew', createQueryParams(token));
 
   const response = await fetch(url, {
     method: 'POST',
@@ -50,12 +36,6 @@ export async function confirmServiceCertificateRenewal(
     },
     body: JSON.stringify({ serviceId, certificateId }),
   });
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-
-  const data: ServiceRegistrationResult = await response.json();
-  return data;
+  return parseJsonOrThrow<ServiceRegistrationResult>(response, 'Confirming service certificate renewal');
 }
 

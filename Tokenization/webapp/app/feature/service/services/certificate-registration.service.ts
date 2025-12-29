@@ -13,9 +13,10 @@
  */
 
 import type { ServiceCertificatePreview, ServiceRegistrationResult } from '~/feature/service/types/certificate';
+import { buildUrl, createQueryParams, parseJsonOrThrow } from '~/shared/http/http.utils';
 
 /**
- * Simulates uploading a certificate file and returns a preview payload with pending status.
+ * Uploads a service certificate file (as base64) and returns a preview of the certificate.
  */
 export async function uploadServiceCertificate(file: File, token?: string | null): Promise<ServiceCertificatePreview> {
   function fileToBase64(file: File): Promise<string> {
@@ -33,53 +34,30 @@ export async function uploadServiceCertificate(file: File, token?: string | null
   }
 
   const base64 = await fileToBase64(file);
-  const params = new URLSearchParams();
-  if (token) {
-    params.append('token', token);
-  }
-  const query = params.toString();
-  const url = query ? `/api/certificate?${query}` : '/api/certificate';
+  const url = buildUrl('/api/certificate', createQueryParams(token));
 
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ 'certificateBase64': base64 }),
+    body: JSON.stringify({ certificateBase64: base64 }),
   });
-
-  if(!response.ok) {
-    throw Error('File extraction went wrong');
-  }
-
-  const data = await response.json();
-
-  return data;
+  return parseJsonOrThrow<ServiceCertificatePreview>(response, 'Uploading service certificate');
 }
 
 /**
- * Simulates confirming registration of a pending certificate.
+ * Confirms the registration of a service certificate with the given certificate ID.
  */
 export async function confirmServiceCertificate(certificateId: string, token?: string | null): Promise<ServiceRegistrationResult> {
-  const params = new URLSearchParams();
-  if (token) {
-    params.append('token', token);
-  }
-  const query = params.toString();
-  const url = query ? `/api/certificate/register?${query}` : '/api/certificate/register';
+  const url = buildUrl('/api/certificate/register', createQueryParams(token));
 
   const response = await fetch(url, { 
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({certificateId: certificateId}),
+    body: JSON.stringify({ certificateId }),
   });
-
-  if (!response.ok) {
-  	throw new Error(`HTTP ${response.status}`);
-  }
-  
-  const data = await response.json();
-  return data;
+  return parseJsonOrThrow<ServiceRegistrationResult>(response, 'Confirming service certificate');
 }

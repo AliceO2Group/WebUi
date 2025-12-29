@@ -14,44 +14,46 @@
 
 import type { Service } from '~/feature/service/types/service';
 import type { ServiceFilterValues } from '~/feature/service/types/service-filters';
+import { appendTokenParam, buildUrl, parseJsonOrThrow } from '~/shared/http/http.utils';
 
 export type ServicesQueryResponse = {
   services: Service[];
   totalCount?: number;
 };
 
+function appendServiceFilters(queryString: URLSearchParams, filters?: ServiceFilterValues | null) {
+  if (!filters) {
+    return;
+  }
+
+  if (filters.issuedBefore) {
+    queryString.append('issuedBefore', filters.issuedBefore);
+  }
+  if (filters.issuedAfter) {
+    queryString.append('issuedAfter', filters.issuedAfter);
+  }
+  if (filters.expiresBefore) {
+    queryString.append('expiresBefore', filters.expiresBefore);
+  }
+  if (filters.expiresAfter) {
+    queryString.append('expiresAfter', filters.expiresAfter);
+  }
+  if (filters.search) {
+    queryString.append('search', filters.search);
+  }
+  if (filters.ordering.length > 0) {
+    queryString.append('ordering', filters.ordering.map((order) => `${order.field}:${order.direction}`).join(','));
+  }
+}
+
 export async function fetchServices(filters: ServiceFilterValues | null, token?: string | null): Promise<ServicesQueryResponse> {
   const queryString = new URLSearchParams();
-  
-  if(filters) {
-    if (filters.issuedBefore) {
-      queryString.append('issuedBefore', filters.issuedBefore);
-    }
-    if (filters.issuedAfter) {
-      queryString.append('issuedAfter', filters.issuedAfter);
-    }
-    if (filters.expiresBefore) {
-      queryString.append('expiresBefore', filters.expiresBefore);
-    }
-    if (filters.expiresAfter) {
-      queryString.append('expiresAfter', filters.expiresAfter);
-    }
-    if (filters.search) {
-      queryString.append('search', filters.search);
-    }
-    if (filters.ordering.length > 0) {
-      queryString.append('ordering', filters.ordering.map((order) => `${order.field}:${order.direction}`).join(','));
-    }
-  }
-  if (token) {
-    queryString.append('token', token);
-  }
+  appendServiceFilters(queryString, filters);
+  appendTokenParam(queryString, token);
 
-  const query = queryString.toString();
-  const url = query ? `/api/services?${query}` : '/api/services';
-
+  const url = buildUrl('/api/services', queryString);
   const res = await fetch(url);
-  const allServices: Service[] = await res.json();
+  const allServices = await parseJsonOrThrow<Service[]>(res, 'Fetching services');
   return {
     services: allServices,
   };

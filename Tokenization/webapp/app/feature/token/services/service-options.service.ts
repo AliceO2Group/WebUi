@@ -13,26 +13,20 @@
  */
 
 import type { Service } from "~/feature/service/types/service";
+import { buildUrl, createQueryParams, parseJsonOrThrow } from "~/shared/http/http.utils";
 
 /**
  * Fetch available services from the backend, optionally filtered by a search term.
  */
 export async function fetchAvailableServices(searchTerm = '', token?: string | null): Promise<Service[]> {
+  const params = createQueryParams(token);
 
-  const params = new URLSearchParams();
-
-  if(searchTerm !== '') {
+  if (searchTerm !== '') {
     params.append('searchTerm', searchTerm);
   }
-  if (token) {
-    params.append('token', token);
-  }
 
-  const queryString = params.toString();
-  const url = queryString ? `/api/services?${queryString}` : '/api/services';
+  const url = buildUrl('/api/services', params);
   const response = await fetch(url);
 
-  const services: Service[] = await response.json();
-
-  return services;
+  return parseJsonOrThrow<Service[]>(response, 'Fetching available services');
 }

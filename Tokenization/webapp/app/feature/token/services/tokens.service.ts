@@ -14,6 +14,7 @@
 
 import type { Token, TokenLogEntry, TokenStatus } from '~/feature/token/types/token';
 import type { TokenFilterValues } from '~/feature/token/types/token-filters';
+import { appendTokenParam, buildUrl, createQueryParams, parseJsonOrThrow } from '~/shared/http/http.utils';
 
 export type TokensQueryResponse = {
   tokens: Token[];
@@ -21,49 +22,87 @@ export type TokensQueryResponse = {
 };
 
 /**
- *
+ * appends filter parameters to the query string
+ * 
+ * @param queryString  The URLSearchParams object to append parameters to.
+ * @param filters The filter values to append as query parameters.
+ */
+function appendFilterParams(queryString: URLSearchParams, filters?: TokenFilterValues | null) {
+  if (!filters) {
+    return;
+  }
+
+  if (filters.serviceFrom.length > 0) {
+    queryString.append('serviceFrom', filters.serviceFrom.map((service: any) => service.value).join(','));
+  }
+  if (filters.serviceTo.length > 0) {
+    queryString.append('serviceTo', filters.serviceTo.map((service: any) => service.value).join(','));
+  }
+  if (filters.expiresBefore) {
+    queryString.append('expiresBefore', filters.expiresBefore);
+  }
+  if (filters.expiresAfter) {
+    queryString.append('expiresAfter', filters.expiresAfter);
+  }
+  if (filters.issuedBefore) {
+    queryString.append('issuedBefore', filters.issuedBefore);
+  }
+  if (filters.issuedAfter) {
+    queryString.append('issuedAfter', filters.issuedAfter);
+  }
+  if (filters.ordering.length > 0) {
+    queryString.append(
+      'ordering',
+      filters.ordering.map((order) => `${order.field}:${order.direction}`).join(','),
+    );
+  }
+}
+
+/**
+ * Builds the URL for fetching tokens based on provided filters, status, and token.
+ * 
+ * @param filters The filter values to include in the query parameters.
+ * @param status The status of the tokens to filter by.
+ * @param token The token value to include as a query parameter.
+ * @returns The constructed URL string.
+ */
+function buildTokensUrl(filters: TokenFilterValues | null, status?: TokenStatus, token?: string | null) {
+  const queryString = new URLSearchParams();
+  if (status) {
+    queryString.append('status', status);
+  }
+  appendFilterParams(queryString, filters);
+  appendTokenParam(queryString, token);
+
+  return buildUrl('/api/tokens', queryString);
+}
+
+/**
+ * Builds a URL scoped to a specific token.
+ * 
+ * @param path The base path for the URL.
+ * @param token The token value to include as a query parameter.
+ * @returns The constructed URL string.
+ */
+function buildTokenScopedUrl(path: string, token?: string | null) {
+  if (!token) {
+    return path;
+  }
+  return buildUrl(path, createQueryParams(token));
+}
+
+/**
+ * Fetches tokens based on provided filters and status.
  */
 export async function fetchTokens(
   filters: TokenFilterValues | null,
   status?: TokenStatus,
   token?: string | null,
 ): Promise<TokensQueryResponse> {
-  const queryString = new URLSearchParams();
-  if (status) {
-    queryString.append('status', status);
-  }
-  if (filters) {
-    if (filters.serviceFrom.length > 0) {
-      queryString.append('serviceFrom', filters.serviceFrom.map((service: any) => service.value ).join(','));
-    }
-    if (filters.serviceTo.length > 0) {
-      queryString.append('serviceTo', filters.serviceTo.map((service: any) => service.value ).join(','));
-    }
-    if (filters.expiresBefore) {
-      queryString.append('expiresBefore', filters.expiresBefore);
-    }
-    if (filters.expiresAfter) {
-      queryString.append('expiresAfter', filters.expiresAfter);
-    }
-    if (filters.issuedBefore) {
-      queryString.append('issuedBefore', filters.issuedBefore);
-    }
-    if (filters.issuedAfter) {
-      queryString.append('issuedAfter', filters.issuedAfter);
-    }
-    if (filters.ordering.length > 0) {
-      queryString.append('ordering', filters.ordering.map((order) => `${order.field}:${order.direction}`).join(','));
-    }
-  }
-  if (token) {
-    queryString.append('token', token);
-  }
-  
-  const query = queryString.toString();
-  const url = query ? `/api/tokens?${query}` : '/api/tokens';
-  
+  const url = buildTokensUrl(filters, status, token);
+
   const res = await fetch(url);
-  const allTokens: Token[] = await res.json();
+  const allTokens = await parseJsonOrThrow<Token[]>(res, 'Fetching tokens');
   return {
     tokens: [...allTokens],
   };
@@ -73,90 +112,39 @@ export async function fetchTokens(
  * Returns a single token by its identifier.
  */
 export async function fetchTokenById(tokenId: string, token?: string | null): Promise<Token> {
-  const params = new URLSearchParams();
-  if (token) {
-    params.append('token', token);
-  }
-  const query = params.toString();
-  const url = query ? `/api/tokens/${tokenId}?${query}` : `/api/tokens/${tokenId}`;
+  const url = buildTokenScopedUrl(`/api/tokens/${tokenId}`, token);
 
   const res = await fetch(url);
-  const res_token: Token =  await res.json();
-  return res_token;
+  return parseJsonOrThrow<Token>(res, 'Fetching token');
 }
 
 export async function fetchTokenLogs(tokenId: string, token?: string | null): Promise<TokenLogEntry[]> {
-  const params = new URLSearchParams();
-  if (token) {
-    params.append('token', token);
-  }
-  const query = params.toString();
-  const url = query ? `/api/tokens/${tokenId}/logs?${query}` : `/api/tokens/${tokenId}/logs`;
+  const url = buildTokenScopedUrl(`/api/tokens/${tokenId}/logs`, token);
 
   const res = await fetch(url);
-  const logs: TokenLogEntry[] =  await res.json();
-  return logs;
+  return parseJsonOrThrow<TokenLogEntry[]>(res, 'Fetching token logs');
 }
 
 /**
- *
+ * Revokes a token by its identifier.
  */
 export async function revokeToken(tokenId: string, token?: string | null) {
-  const params = new URLSearchParams();
-  if (token) {
-    params.append('token', token);
-  }
-  const query = params.toString();
-  const url = query ? `/api/tokens/${tokenId}?${query}` : `/api/tokens/${tokenId}`;
+  const url = buildTokenScopedUrl(`/api/tokens/${tokenId}`, token);
 
   const res = await fetch(url, {
     method: 'DELETE',
   });
-  const success = await res.json();
-  return success;
+  return parseJsonOrThrow(res, 'Revoking token');
 }
 
 /**
- *
+ * Revokes tokens in bulk based on filters.
  */
 export async function revokeTokensBulk(filters: TokenFilterValues, token?: string | null) {
-  const queryString = new URLSearchParams();
-
-  queryString.append('status', 'active');
-
-  if (filters) {
-    if (filters.serviceFrom.length > 0) {
-      queryString.append('serviceFrom', filters.serviceFrom.map((service: any) => service.value ).join(','));
-    }
-    if (filters.serviceTo.length > 0) {
-      queryString.append('serviceTo', filters.serviceTo.map((service: any) => service.value ).join(','));
-    }
-    if (filters.expiresBefore) {
-      queryString.append('expiresBefore', filters.expiresBefore);
-    }
-    if (filters.expiresAfter) {
-      queryString.append('expiresAfter', filters.expiresAfter);
-    }
-    if (filters.issuedBefore) {
-      queryString.append('issuedBefore', filters.issuedBefore);
-    }
-    if (filters.issuedAfter) {
-      queryString.append('issuedAfter', filters.issuedAfter);
-    }
-    if (filters.ordering.length > 0) {
-      queryString.append('ordering', filters.ordering.map((order) => `${order.field}:${order.direction}`).join(','));
-    }
-  }
-  if (token) {
-    queryString.append('token', token);
-  }
-  
-  const query = queryString.toString();
-  const url = query ? `/api/tokens?${query}` : '/api/tokens';
+  const url = buildTokensUrl(filters, 'active', token);
 
   const res = await fetch(url, {
     method: 'DELETE',
   });
-  const success = await res.json();
-  return success;
+  return parseJsonOrThrow(res, 'Revoking tokens in bulk');
 }

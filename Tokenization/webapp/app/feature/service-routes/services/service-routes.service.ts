@@ -14,6 +14,7 @@
 
 import type { ServiceRoute } from '~/feature/service-routes/types/service-route';
 import type { ServiceRouteFilterValues } from '~/feature/service-routes/types/service-route-filters';
+import { appendTokenParam, buildUrl, createQueryParams, parseJsonOrThrow } from '~/shared/http/http.utils';
 
 export type ServiceRoutesQueryResponse = {
   routes: ServiceRoute[];
@@ -26,110 +27,68 @@ export type ServiceRouteRegistrationPayload = {
   permissions: string[];
 };
 
+function appendRouteFilters(queryString: URLSearchParams, filters?: ServiceRouteFilterValues | null) {
+  if (!filters) {
+    return;
+  }
+
+  if (filters.serviceTo.length > 0) {
+    queryString.append('serviceTo', filters.serviceTo.map((service) => service.value).join(','));
+  }
+  if (filters.serviceFrom.length > 0) {
+    queryString.append('serviceFrom', filters.serviceFrom.map((service) => service.value).join(','));
+  }
+}
+
 export async function fetchServiceRoutes(
-  _filters: ServiceRouteFilterValues | null,
+  filters: ServiceRouteFilterValues | null,
   token?: string | null,
 ): Promise<ServiceRoutesQueryResponse> {
   const queryString = new URLSearchParams();
-   
-  if(_filters) {
-    if (_filters.serviceTo.length > 0) {
-      const servicesTo = _filters.serviceTo.map(service => service.value).join(',');
-      queryString.append('serviceTo', servicesTo);
-    }
-    if (_filters.serviceFrom.length > 0) {
-      const servicesFrom = _filters.serviceFrom.map(service => service.value).join(',');
-      queryString.append('serviceFrom', servicesFrom);
-    }
-  }
-  if (token) {
-    queryString.append('token', token);
-  }
+  appendRouteFilters(queryString, filters);
+  appendTokenParam(queryString, token);
 
-  const query = queryString.toString();
-  const url = query ? `/api/routes?${query}` : '/api/routes';
-  
+  const url = buildUrl('/api/routes', queryString);
   const response = await fetch(url);
-
-  if(!response.ok) {
-    const err = await response.json();
-    throw new Error(err.error);
-  }
-
-  const data = await response.json();
+  const routes = await parseJsonOrThrow<ServiceRoute[]>(response, 'Fetching service routes');
   return {
-    routes: data,
+    routes,
   };
 }
 
-export async function banServiceRoute(_routeId: string, token?: string | null): Promise<void> {
-  const params = new URLSearchParams();
-  if (token) {
-    params.append('token', token);
-  }
-  const query = params.toString();
-  const url = query ? `/api/routes/${_routeId}?${query}` : `/api/routes/${_routeId}`;
-
-  const res = await fetch(url, {
-    method: 'DELETE'
-  })
-
-  if(!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error);
-  }
-
-  const success = await res.json();  
-  return success.success
-}
-
-export async function banServiceRoutesBulk(_filters: ServiceRouteFilterValues, token?: string | null): Promise<void> {
-  if(!_filters) {
-    return Promise.reject(new Error('No filters provided for bulk ban.'));
-  }
-
-  const queryString = new URLSearchParams();
-
-  if (_filters.serviceTo.length > 0) {
-    const servicesTo = _filters.serviceTo.map(service => service.value).join(',');
-    queryString.append('serviceTo', servicesTo);
-  }
-  if (_filters.serviceFrom.length > 0) {
-    const servicesFrom = _filters.serviceFrom.map(service => service.value).join(',');
-    queryString.append('serviceFrom', servicesFrom);
-  }
-  if (token) {
-    queryString.append('token', token);
-  }
-
-  const query = queryString.toString();
-  const url = query ? `/api/routes?${query}` : '/api/routes';
-
-  console.log('Bulk ban URL:', url);
+export async function banServiceRoute(routeId: string, token?: string | null): Promise<void> {
+  const url = buildUrl(`/api/routes/${routeId}`, createQueryParams(token));
 
   const res = await fetch(url, {
     method: 'DELETE',
   });
 
-  if(!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error);
+  await parseJsonOrThrow(res, 'Banning service route');
+}
+
+export async function banServiceRoutesBulk(filters?: ServiceRouteFilterValues | null, token?: string | null): Promise<void> {
+  if (!filters) {
+    return Promise.reject(new Error('No filters provided for bulk ban.'));
   }
 
-  const success = await res.json();
-  return success.success;
+  const queryString = new URLSearchParams();
+  appendRouteFilters(queryString, filters);
+  appendTokenParam(queryString, token);
+
+  const url = buildUrl('/api/routes', queryString);
+
+  const res = await fetch(url, {
+    method: 'DELETE',
+  });
+
+  await parseJsonOrThrow(res, 'Banning service routes in bulk');
 }
 
 export async function registerServiceRoute(
   payload: ServiceRouteRegistrationPayload,
   token?: string | null,
 ): Promise<ServiceRoute> {
-  const params = new URLSearchParams();
-  if (token) {
-    params.append('token', token);
-  }
-  const query = params.toString();
-  const url = query ? `/api/routes?${query}` : '/api/routes';
+  const url = buildUrl('/api/routes', createQueryParams(token));
   
   const response = await fetch(url, {
     method: 'POST',
@@ -138,13 +97,7 @@ export async function registerServiceRoute(
     },
     body: JSON.stringify(payload),
   });
-  
-  const data = await response.json();
 
-  if(!response.ok) {
-    throw new Error(data.error);
-  }
-
-  return data
+  return parseJsonOrThrow<ServiceRoute>(response, 'Registering service route');
 
 }
