@@ -24,6 +24,7 @@ import useModal from '~/shared/hooks/useModal';
 import { useAlert } from '~/shared/hooks/useAlert';
 import { AUTH_ERROR_ALERT } from '~/ui/alert/constants';
 import { validateRouteFiltersForBulk } from '~/feature/service-routes/services/service-route-filters.service';
+import FiltersSummary from '~/shared/components/filters-summary';
 
 /**
  * Hook providing actions to confirm banning of service routes, both single and bulk.
@@ -51,7 +52,7 @@ export function useRouteBanActions() {
             Permissions: {route.permissions.join(', ')}
           </Typography>
           <Typography variant="body2" color="warning.main">
-            Banning this route revokes every token operating on it.
+            Each banned route revokes token that operate on it. This operation cannot be undone.
           </Typography>
         </Stack>
       ),
@@ -84,10 +85,10 @@ export function useRouteBanActions() {
             This will ban all routes that match the current filters.
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Filters summary: {JSON.stringify(filters)}
+            <FiltersSummary filters={filters} />
           </Typography>
           <Typography variant="body2" color="warning.main">
-            Each banned route revokes all tokens that belong to it.
+            Each banned route revokes token that operate on it. This operation cannot be undone.
           </Typography>
         </Stack>
       ),

@@ -25,6 +25,7 @@ import useModal from '~/shared/hooks/useModal';
 import { useAlert } from '~/shared/hooks/useAlert';
 import { AUTH_ERROR_ALERT } from '~/ui/alert/constants';
 import { validateFiltersForBulk } from '~/feature/token/services/token-filters.service';
+import FiltersSummary from '~/shared/components/filters-summary';
 
 /**
  * Provides shared revoke helpers reused across overview and details views.
@@ -100,7 +101,8 @@ export function useRevokeActions(filters: TokenFilterValues | null) {
             This will revoke all tokens matching the currently applied filters. The operation cannot be undone.
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Filters summary: {JSON.stringify(filters)}
+            {/* Selected filters: {JSON.stringify(filters)} */}
+            <FiltersSummary filters={filters} />
           </Typography>
         </Stack>
       ),
