@@ -15,6 +15,7 @@
 import { Box, Card, CardContent, Stack, Typography, Button } from '@mui/material';
 import { Link } from 'react-router';
 
+// Section definitions for the home page
 const sections = [
   {
     title: 'Tokens',
@@ -42,8 +43,7 @@ const sections = [
 ];
 
 /**
- * Home page component for the Tokenization Admin Interface.
- * Sets the page header and provides navigation to the tokens overview.
+ * Home page component providing an overview and navigation to main sections.
  */
 export default function Home() {
   return <Box component="section" sx={{ py: 6 }}>
@@ -73,6 +73,13 @@ interface SectionProps {
   links: { label: string; to: string; description: string }[];
 }
 
+/**
+ * SectionCard component to display a section with links
+ * 
+ * @param title Section title
+ * @param description Section description
+ * @param links Array of link objects with label, to, and description
+ */
 function SectionCard({title, description, links}: SectionProps) {
   return <Card elevation={2}>
           <CardContent>
