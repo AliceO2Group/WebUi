@@ -17,6 +17,7 @@ import type { TokenFilterValues } from '~/feature/token/types/token-filters';
 
 export type TokensQueryResponse = {
   tokens: Token[];
+  totalCount?: number;
 };
 
 /**

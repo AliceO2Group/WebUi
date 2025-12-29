@@ -17,6 +17,7 @@ import type { ServiceFilterValues } from '~/feature/service/types/service-filter
 
 export type ServicesQueryResponse = {
   services: Service[];
+  totalCount?: number;
 };
 
 export async function fetchServices(filters: ServiceFilterValues | null, token?: string | null): Promise<ServicesQueryResponse> {
