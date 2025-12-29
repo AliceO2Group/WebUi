@@ -43,18 +43,7 @@ export function useRouteBanActions() {
     showModal({
       title: 'Ban service route',
       content: (
-        <Stack spacing={1}>
-          <Typography variant="body2">
-            Do you want to ban communication from
-            <strong>{route.serviceFrom.commonName}</strong> to <strong>{route.serviceTo.commonName}</strong>?
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Permissions: {route.permissions.join(', ')}
-          </Typography>
-          <Typography variant="body2" color="warning.main">
-            Each banned route revokes token that operate on it. This operation cannot be undone.
-          </Typography>
-        </Stack>
+        <BanModalContent route={route} />
       ),
       accent: 'danger',
       confirmLabel: 'Ban',
@@ -80,17 +69,7 @@ export function useRouteBanActions() {
     showModal({
       title: 'Bulk ban service routes',
       content: (
-        <Stack spacing={1}>
-          <Typography variant="body2">
-            This will ban all routes that match the current filters.
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            <FiltersSummary filters={filters} />
-          </Typography>
-          <Typography variant="body2" color="warning.main">
-            Each banned route revokes token that operate on it. This operation cannot be undone.
-          </Typography>
-        </Stack>
+        <BulkBanModalContent filters={filters} />
       ),
       accent: 'danger',
       confirmLabel: 'Ban all',
@@ -122,3 +101,32 @@ export function useRouteBanActions() {
     confirmBulkBan,
   };
 }
+
+const BanModalContent = ({ route }: { route: ServiceRoute }) => (
+  <Stack spacing={1}>
+    <Typography variant="body2">
+      Do you want to ban communication from
+      <strong>{route.serviceFrom.commonName}</strong> to <strong>{route.serviceTo.commonName}</strong>?
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      Permissions: {route.permissions.join(', ')}
+    </Typography>
+    <Typography variant="body2" color="warning.main">
+      Each banned route revokes token that operate on it. This operation cannot be undone.
+    </Typography>
+  </Stack>
+);
+
+const BulkBanModalContent = ({ filters }: { filters: ServiceRouteFilterValues }) => (
+  <Stack spacing={1}>
+    <Typography variant="body2">
+      This will ban all routes that match the current filters.
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      <FiltersSummary filters={filters} />
+    </Typography>
+    <Typography variant="body2" color="warning.main">
+      Each banned route revokes token that operate on it. This operation cannot be undone.
+    </Typography>
+  </Stack>
+);

@@ -43,9 +43,7 @@ export function useRevokeActions(filters: TokenFilterValues | null) {
     showModal({
       title: 'Revoke token',
       content: (
-        <Typography variant="body2">
-          Are you sure you want to revoke token <strong>{token.tokenId}</strong>? This action will terminate communication between services.
-        </Typography>
+        <RevokeModalContent token={token} />
       ),
       accent: 'danger',
       confirmLabel: 'Revoke',
@@ -96,15 +94,7 @@ export function useRevokeActions(filters: TokenFilterValues | null) {
     showModal({
       title: 'Bulk revoke tokens',
       content: (
-        <Stack spacing={1}>
-          <Typography variant="body2">
-            This will revoke all tokens matching the currently applied filters. The operation cannot be undone.
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {/* Selected filters: {JSON.stringify(filters)} */}
-            <FiltersSummary filters={filters} />
-          </Typography>
-        </Stack>
+        <BulkRevokeModalContent filters={filters} />
       ),
       accent: 'danger',
       confirmLabel: 'Revoke all',
@@ -148,3 +138,20 @@ export function useRevokeActions(filters: TokenFilterValues | null) {
     confirmBulkRevoke,
   };
 }
+
+const RevokeModalContent = ({ token }: { token: Token }) => (
+  <Typography variant="body2">
+    Are you sure you want to revoke token <strong>{token.tokenId}</strong>? This action will terminate communication between services.
+  </Typography>
+);
+
+const BulkRevokeModalContent = ({ filters }: { filters: TokenFilterValues }) => (
+  <Stack spacing={1}>
+    <Typography variant="body2">
+      This will revoke all tokens matching the currently applied filters. The operation cannot be undone.
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      <FiltersSummary filters={filters} />
+    </Typography>
+  </Stack>
+);
