@@ -15,6 +15,7 @@
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import { Link } from 'react-router';
 
 type AppHeaderProps = {
   title?: string;
@@ -39,8 +40,8 @@ export function AppHeader({ title = 'Tokenization System' }: AppHeaderProps) {
       }}
     >
       <Toolbar sx={{ minHeight: 64, px: 4 }}>
-        <Typography variant="h6" color="text.primary" sx={{ fontWeight: 600 }}>
-          {title}
+        <Typography variant="h6" color="text.primary" sx={{ fontWeight: 600, color: 'black' }}>
+          <Link to="/" style={{ color: 'inherit' }}>{title}</Link>
         </Typography>
       </Toolbar>
     </AppBar>
