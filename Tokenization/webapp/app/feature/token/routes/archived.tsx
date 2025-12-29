@@ -26,7 +26,7 @@ import type { TokenFilterValues } from '~/feature/token/types/token-filters';
 import { useFiltersPanel } from '~/shared/hooks/useFiltersPanel';
 
 /**
- *
+ * Route component for displaying archived (not active) tokens.
  */
 export default function ArchivedTokensRoute() {
   const {

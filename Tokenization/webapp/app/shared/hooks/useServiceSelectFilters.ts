@@ -17,9 +17,9 @@ import type { UseQueryResult } from '@tanstack/react-query';
 
 import { useDebouncedValue } from '~/shared/hooks/useDebouncedValue';
 
-const SERVICE_FILTER_FIELDS = ['serviceFrom', 'serviceTo'] as const;
+const _SERVICE_FILTER_FIELDS = ['serviceFrom', 'serviceTo'] as const;
 
-export type ServiceFilterFieldName = typeof SERVICE_FILTER_FIELDS[number];
+export type ServiceFilterFieldName = typeof _SERVICE_FILTER_FIELDS[number];
 
 export type ServiceOptionsQueryHook<TOption> = (params: {
   searchTerm?: string;

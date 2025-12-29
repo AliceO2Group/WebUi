@@ -34,9 +34,26 @@ export type ServicesTableProps = {
 };
 
 /**
+ * Table component to display a list of services with optional actions for blocking services.
  *
+ * @param services Array of services to display in the table.
+ * @param totalCount Total number of services available (for display purposes).
+ * @param title Optional title for the table.
+ * @param onBlock Optional callback function invoked when a single service is to be blocked.
+ * @param onBulkBlock Optional callback function invoked when bulk blocking is triggered.
+ * @param bulkBlockDisabled Optional flag to disable the bulk block button.
+ * @param tableBodyMaxHeight Optional maximum height for the table body to enable scrolling.
+ * @param isLoading Optional flag indicating if the data is currently loading.
  */
-export function ServicesTable({ services, totalCount, title = 'Services', onBlock, onBulkBlock, bulkBlockDisabled = false, tableBodyMaxHeight, isLoading }: ServicesTableProps) {
+export function ServicesTable({ services,
+  totalCount,
+  title = 'Services',
+  onBlock,
+  onBulkBlock,
+  bulkBlockDisabled = false,
+  tableBodyMaxHeight,
+  isLoading,
+}: ServicesTableProps) {
   const showActionsColumn = Boolean(onBlock);
   const showBulkAction = Boolean(onBulkBlock);
 

@@ -38,9 +38,26 @@ type TokensTableProps = {
 };
 
 /**
+ * Table component to display a list of tokens with optional actions for revoking tokens.
  *
+ * @param tokens Array of tokens to display in the table.
+ * @param totalCount Total number of tokens available (for display purposes).
+ * @param title Optional title for the table.
+ * @param onRevoke Optional callback function invoked when a single token is to be revoked.
+ * @param onBulkRevoke Optional callback function invoked when bulk revoking is triggered.
+ * @param bulkRevokeDisabled Optional flag to disable the bulk revoke button.
+ * @param tableBodyMaxHeight Optional maximum height for the table body to enable scrolling.
+ * @param isLoading Optional flag indicating if the data is currently loading.
  */
-export function TokensTable({ tokens, totalCount, title = 'Active tokens', onRevoke, onBulkRevoke, bulkRevokeDisabled = false, tableBodyMaxHeight, isLoading }: TokensTableProps) {
+export function TokensTable({ tokens,
+  totalCount,
+  title = 'Active tokens',
+  onRevoke,
+  onBulkRevoke,
+  bulkRevokeDisabled = false,
+  tableBodyMaxHeight,
+  isLoading,
+}: TokensTableProps) {
   const showActionsColumn = Boolean(onRevoke);
   const showBulkAction = Boolean(onBulkRevoke);
 

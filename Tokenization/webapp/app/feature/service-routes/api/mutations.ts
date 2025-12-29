@@ -14,13 +14,18 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { banServiceRoute, banServiceRoutesBulk, registerServiceRoute, type ServiceRouteRegistrationPayload } from '~/feature/service-routes/services/service-routes.service';
+import { banServiceRoute,
+  banServiceRoutesBulk,
+  registerServiceRoute,
+  type ServiceRouteRegistrationPayload,
+} from '~/feature/service-routes/services/service-routes.service';
 import type { ServiceRouteFilterValues } from '~/feature/service-routes/types/service-route-filters';
 import { serviceRoutesQueryKeys } from './queries';
 import { useSession } from '~/feature/auth/hooks/session';
 
 /**
- *
+ * Mutation to ban a service route which invalidates the service routes list query on success.
+ * Passed the auth token from the session to the service function.
  */
 export function useBanServiceRouteMutation() {
   const { token } = useSession();
@@ -35,7 +40,8 @@ export function useBanServiceRouteMutation() {
 }
 
 /**
- *
+ * Mutation to bulk ban service routes which invalidates the service routes list query on success.
+ * Passed the auth token from the session to the service function.
  */
 export function useBulkBanServiceRoutesMutation() {
   const { token } = useSession();
@@ -50,7 +56,8 @@ export function useBulkBanServiceRoutesMutation() {
 }
 
 /**
- *
+ * Mutation to register a new service route which invalidates the service routes list query on success.
+ * Passed the auth token from the session to the service function.
  */
 export function useRegisterServiceRouteMutation() {
   const { token } = useSession();

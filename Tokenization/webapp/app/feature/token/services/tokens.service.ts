@@ -14,6 +14,7 @@
 
 import type { Token, TokenLogEntry, TokenStatus } from '~/feature/token/types/token';
 import type { TokenFilterValues } from '~/feature/token/types/token-filters';
+import type { OptionType } from '~/shared/components/form/multi-select-field';
 import { appendTokenParam, buildUrl, createQueryParams, parseJsonOrThrow } from '~/shared/http/http.utils';
 
 export type TokensQueryResponse = {
@@ -33,10 +34,10 @@ function appendFilterParams(queryString: URLSearchParams, filters?: TokenFilterV
   }
 
   if (filters.serviceFrom.length > 0) {
-    queryString.append('serviceFrom', filters.serviceFrom.map((service: any) => service.value).join(','));
+    queryString.append('serviceFrom', filters.serviceFrom.map((service: OptionType) => service.value).join(','));
   }
   if (filters.serviceTo.length > 0) {
-    queryString.append('serviceTo', filters.serviceTo.map((service: any) => service.value).join(','));
+    queryString.append('serviceTo', filters.serviceTo.map((service: OptionType) => service.value).join(','));
   }
   if (filters.expiresBefore) {
     queryString.append('expiresBefore', filters.expiresBefore);
@@ -119,7 +120,7 @@ export async function fetchTokenById(tokenId: string, token?: string | null): Pr
 }
 
 /**
- *
+ * Fetches the log entries for a specific token.
  */
 export async function fetchTokenLogs(tokenId: string, token?: string | null): Promise<TokenLogEntry[]> {
   const url = buildTokenScopedUrl(`/api/tokens/${tokenId}/logs`, token);

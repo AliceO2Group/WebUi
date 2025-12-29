@@ -31,7 +31,8 @@ import type { ServiceRouteFilterValues } from '~/feature/service-routes/types/se
 import { useFiltersPanel } from '~/shared/hooks/useFiltersPanel';
 
 /**
- *
+ * Overview route component for managing service routes.
+ * Includes filtering, listing, and actions for banning routes.
  */
 export default function ServiceRoutesOverviewRoute() {
   const {

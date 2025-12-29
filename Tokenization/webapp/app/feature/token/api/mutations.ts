@@ -28,7 +28,11 @@ export function useRevokeTokenMutation() {
   return useMutation({
     mutationFn: (tokenId: string) => revokeToken(tokenId, token),
     onSuccess: () => {
-      queryClient.invalidateQueries({ predicate: ({ queryKey }) => Array.isArray(queryKey) && queryKey[0] === 'tokens' && queryKey.includes('logs') });
+      queryClient.invalidateQueries(
+        { predicate: ({ queryKey }) =>
+          Array.isArray(queryKey) && queryKey[0] === 'tokens' && queryKey.includes('logs'),
+        },
+      );
     },
   });
 }
@@ -43,7 +47,11 @@ export function useBulkRevokeMutation() {
   return useMutation({
     mutationFn: (filters: TokenFilterValues) => revokeTokensBulk(filters, token),
     onSuccess: () => {
-      queryClient.invalidateQueries({ predicate: ({ queryKey }) => Array.isArray(queryKey) && queryKey[0] === 'tokens' && queryKey.includes('logs') });
+      queryClient.invalidateQueries(
+        { predicate: ({ queryKey }) =>
+          Array.isArray(queryKey) && queryKey[0] === 'tokens' && queryKey.includes('logs'),
+        },
+      );
     },
   });
 }

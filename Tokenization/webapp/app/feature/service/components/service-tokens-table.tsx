@@ -32,7 +32,15 @@ type ServiceTokensSectionProps = {
 };
 
 /**
+ * Component to display a section with a table of service tokens.
+ * Includes functionality for revoking individual tokens and bulk revocation.
  *
+ * @param title The title of the tokens section.
+ * @param query The query result containing tokens data.
+ * @param filters The current filter values applied to the tokens.
+ * @param onRevoke Callback function to revoke a single token.
+ * @param onBulkRevoke Optional callback function to revoke tokens in bulk.
+ * @param tableBodyMaxHeight Optional maximum height for the table body to enable scrolling.
  */
 export default function ServiceTokensSection({ title,
   query,

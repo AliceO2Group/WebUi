@@ -27,7 +27,8 @@ import { Spinner } from '~/ui/spinner';
 import ServiceInfo from '../components/service-info';
 
 /**
- *
+ * Route component to display details of a specific service.
+ * Shows service information and lists of tokens issued from and targeting the service.
  */
 export default function ServiceDetailsRoute() {
   const { serviceId } = useParams<{ serviceId: string }>();
@@ -106,7 +107,11 @@ const Centered = styled('div')(() => ({
 }));
 
 /**
+ * Builds token filter values for a service based on the specified direction.
  *
+ * @param service The service to build filters for.
+ * @param direction 'from' to filter tokens issued from the service, 'to' for tokens targeting the service.
+ * @returns TokenFilterValues object with the appropriate service filter set.
  */
 function buildServiceFilter(service: Service | undefined, direction: 'from' | 'to'): TokenFilterValues {
   if (!service) {

@@ -26,7 +26,9 @@ const ORDERING_OPTIONS: OrderingOption[] = [
   { value: 'commonName', label: 'Service name' },
 ];
 
-const DATE_FILTERS: Array<{ name: keyof Pick<ServiceFilterValues, 'issuedAfter' | 'issuedBefore' | 'expiresAfter' | 'expiresBefore'>; label: string }> = [
+type DateFilterName = keyof Pick<ServiceFilterValues, 'issuedAfter' | 'issuedBefore' | 'expiresAfter' | 'expiresBefore'>;
+
+const DATE_FILTERS: Array<{ name: DateFilterName; label: string }> = [
   { name: 'issuedAfter', label: 'Issue date from' },
   { name: 'issuedBefore', label: 'Issue date to' },
   { name: 'expiresAfter', label: 'Expiration from' },
@@ -38,7 +40,10 @@ type ServiceFiltersFormProps = {
 };
 
 /**
+ * Form component for filtering services based on various criteria.
+ * Calls onFiltersChange with the current filter values when applied.
  *
+ * @param onFiltersChange Callback function invoked with the filter values when the user applies the filters.
  */
 export function ServiceFiltersForm({ onFiltersChange }: ServiceFiltersFormProps) {
   const { control, reset, getValues } = useForm<ServiceFilterValues>({

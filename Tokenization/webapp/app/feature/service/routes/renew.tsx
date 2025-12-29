@@ -29,9 +29,11 @@ import { useAuth } from '~/feature/auth/hooks/session';
 import { useAlert } from '~/shared/hooks/useAlert';
 import useModal from '~/shared/hooks/useModal';
 import { AUTH_ERROR_ALERT } from '~/ui/alert/constants';
+import { isSupportedCertificate } from '../hooks/certificateUtils';
 
 /**
- *
+ * Service certificate renewal route component.
+ * Allows uploading a new certificate file and confirming the renewal.
  */
 export default function ServiceRenewRoute() {
   const { serviceId } = useParams<{ serviceId: string }>();
@@ -225,7 +227,7 @@ const FormCardForm = styled('form')(({ theme }) => ({
   maxWidth: 640,
 }));
 
-const Centered = styled('div')(({ theme }) => ({
+const Centered = styled('div')(() => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -243,7 +245,10 @@ const InfoItem = ({ label, value }: { label: string; value: string }) => (
 );
 
 /**
+ * Component to display the details of a certificate renewal preview.
  *
+ * @param preview The preview details of the new certificate.
+ * @param currentExpiry The current expiry date of the existing certificate, if available.
  */
 function RenewalPreviewDetails({ preview, currentExpiry }: {
   preview: ServiceCertificatePreview;
@@ -271,11 +276,4 @@ function RenewalPreviewDetails({ preview, currentExpiry }: {
       ) : null}
     </Stack>
   );
-}
-
-/**
- *
- */
-function isSupportedCertificate(name: string) {
-  return /\.(cert|crt|pem)$/i.test(name);
 }

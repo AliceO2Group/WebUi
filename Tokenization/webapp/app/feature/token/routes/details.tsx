@@ -27,7 +27,7 @@ import type { TokenLogEntry } from '~/feature/token/types/token';
 import TokenInfo from '../components/token-info';
 
 /**
- *
+ * Route component for displaying token details.
  */
 export default function TokenDetailsRoute() {
   const { tokenId } = useParams<{ tokenId: string }>();
@@ -77,7 +77,7 @@ export default function TokenDetailsRoute() {
   );
 }
 
-const Centered = styled('div')(({ theme }) => ({
+const Centered = styled('div')(() => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

@@ -22,7 +22,10 @@ import type { Token } from '../types/token';
 import DataGrid from '~/shared/components/data-grid';
 
 /**
+ * `TokenInfo` component displays detailed information about a specific token
  *
+ * @param token The token object containing all relevant details to display.
+ * @param handleRevoke Callback function to invoke when the revoke button is clicked.
  */
 export default function TokenInfo({
   token,
@@ -45,7 +48,11 @@ export default function TokenInfo({
   return  <>
     <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} gap={2}>
       <Typography variant="h5">Token details</Typography>
-      <Chip label={token.status === 'active' ? 'Active' : 'Not active'} color={token.status === 'active' ? 'success' : 'default'} variant="filled" />
+      <Chip
+        label={token.status === 'active' ? 'Active' : 'Not active'}
+        color={token.status === 'active' ? 'success' : 'default'}
+        variant="filled"
+      />
       {token.status === 'active' ? (
         <Button color="warning" variant="contained" onClick={handleRevoke}>
           Revoke token

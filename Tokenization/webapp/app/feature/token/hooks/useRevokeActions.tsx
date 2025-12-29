@@ -66,7 +66,7 @@ export function useRevokeActions(filters: TokenFilterValues | null) {
                 }
                 return {
                   ...old,
-                  tokens: old.tokens?.filter(t => t.tokenId !== token.tokenId) || [],
+                  tokens: old.tokens?.filter(t => t.tokenId !== token.tokenId) ?? [],
                 };
               },
             );
@@ -83,14 +83,13 @@ export function useRevokeActions(filters: TokenFilterValues | null) {
               },
             );
           },
-          onError: (error) => {
-            console.error('Failed to revoke token', error);
+          onError: (_error) => {
             pushAlert({ message: 'Failed to revoke token.', severity: 'error' });
           },
         });
       },
     });
-  }, [hasAuth, pushAlert, revokeTokenMutation, showModal]);
+  }, [hasAuth, pushAlert, revokeTokenMutation, showModal, filters, queryClient]);
 
   const confirmBulkRevoke = useCallback((filters: TokenFilterValues) => {
     showModal({
@@ -134,14 +133,13 @@ export function useRevokeActions(filters: TokenFilterValues | null) {
               },
             );
           },
-          onError: (error) => {
-            console.error('Failed to revoke tokens', error);
+          onError: (_error) => {
             pushAlert({ message: 'Failed to revoke tokens.', severity: 'error' });
           },
         });
       },
     });
-  }, [bulkRevokeMutation, hasAuth, pushAlert, showModal]);
+  }, [bulkRevokeMutation, hasAuth, pushAlert, showModal, queryClient]);
 
   return {
     confirmRevoke,

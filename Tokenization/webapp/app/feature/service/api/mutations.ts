@@ -20,7 +20,8 @@ import type { ServiceCertificatePreview, ServiceRegistrationResult } from '~/fea
 import { useSession } from '~/feature/auth/hooks/session';
 
 /**
- *
+ * Mutation to upload a service certificate file.
+ * Passed the auth token from the session to the service function.
  */
 export function useServiceCertificateUploadMutation() {
   const { token } = useSession();
@@ -31,7 +32,8 @@ export function useServiceCertificateUploadMutation() {
 }
 
 /**
- *
+ * Mutation to confirm a service certificate registration.
+ * Passed the auth token from the session to the service function.
  */
 export function useServiceCertificateConfirmMutation() {
   const { token } = useSession();
@@ -47,7 +49,8 @@ export type ServiceCertificateRenewConfirmPayload = {
 };
 
 /**
- *
+ * Mutation to confirm a service certificate renewal.
+ * Passed the auth token from the session to the service function.
  */
 export function useServiceCertificateRenewConfirmMutation() {
   const { token } = useSession();

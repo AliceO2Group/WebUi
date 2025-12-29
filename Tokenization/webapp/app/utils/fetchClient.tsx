@@ -32,6 +32,7 @@ export function fetchClient(url: string, options?: RequestInit): Promise<Respons
   if (!url.startsWith('/api')) {
     throw new Error('Only /api requests are allowed');
   }
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { token } = useSession();
   const _url = new URL(url, window.location.origin);
   _url.searchParams.append('token', token ?? '');

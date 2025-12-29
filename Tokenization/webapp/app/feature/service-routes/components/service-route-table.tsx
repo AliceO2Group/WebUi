@@ -36,9 +36,27 @@ export type ServiceRouteTableProps = {
 };
 
 /**
+ * Table component to display a list of service routes with optional actions for banning routes.
  *
+ * @param routes Array of service routes to display in the table.
+ * @param totalCount Total number of service routes available (for display purposes).
+ * @param title Optional title for the table.
+ * @param onBan Optional callback function invoked when a single route is to be banned.
+ * @param onBulkBan Optional callback function invoked when bulk banning is triggered.
+ * @param bulkBanDisabled Optional flag to disable the bulk ban button.
+ * @param tableBodyMaxHeight Optional maximum height for the table body to enable scrolling.
+ * @param isLoading Optional flag indicating if the data is currently loading.
  */
-export function ServiceRouteTable({ routes, totalCount, title = 'Service routes', onBan, onBulkBan, bulkBanDisabled = false, tableBodyMaxHeight, isLoading }: ServiceRouteTableProps) {
+export function ServiceRouteTable({
+  routes,
+  totalCount,
+  title = 'Service routes',
+  onBan,
+  onBulkBan,
+  bulkBanDisabled = false,
+  tableBodyMaxHeight,
+  isLoading,
+}: ServiceRouteTableProps) {
   const showActionsColumn = Boolean(onBan);
   const showBulkAction = Boolean(onBulkBan);
 

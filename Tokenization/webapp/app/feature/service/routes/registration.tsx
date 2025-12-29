@@ -24,6 +24,7 @@ import { useAuth } from '~/feature/auth/hooks/session';
 import { useAlert } from '~/shared/hooks/useAlert';
 import { AUTH_ERROR_ALERT } from '~/ui/alert/constants';
 import useModal from '~/shared/hooks/useModal';
+import { isSupportedCertificate } from '../hooks/certificateUtils';
 
 /**
  * Renders the registration form for uploading service certificates.
@@ -165,6 +166,11 @@ type CertificatePreviewDetailsProps = {
   preview: ServiceCertificatePreview;
 };
 
+/**
+ * Component to display the details of a service certificate preview.
+ *
+ * @param preview The certificate preview details to display.
+ */
 const CertificatePreviewDetails = ({ preview }: CertificatePreviewDetailsProps) => (
   <Stack spacing={1.5}>
     <Typography variant='body2'>Certificate ID: {preview.certificateId}</Typography>
@@ -177,10 +183,3 @@ const CertificatePreviewDetails = ({ preview }: CertificatePreviewDetailsProps) 
     <Typography variant='body2'>Fingerprint: {preview.fingerprint}</Typography>
   </Stack>
 );
-
-/**
- *
- */
-function isSupportedCertificate(name: string) {
-  return /\.(cert|crt|pem)$/i.test(name);
-}

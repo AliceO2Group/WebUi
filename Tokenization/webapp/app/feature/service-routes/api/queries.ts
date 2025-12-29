@@ -33,7 +33,8 @@ type UseServiceRoutesQueryParams = {
 };
 
 /**
- *
+ * Query to fetch service routes based on optional filters.
+ * Passed the auth token from the session to the service function.
  */
 export function useServiceRoutesQuery({ filters, enabled = true }: UseServiceRoutesQueryParams) {
   const { token } = useSession();
@@ -51,7 +52,8 @@ type UseRouteServiceOptionsParams = {
 };
 
 /**
- *
+ * Query to fetch available service options for routing, filtered by an optional search term.
+ * Passed the auth token from the session to the service function.
  */
 export function useRouteServiceOptionsQuery(params?: UseRouteServiceOptionsParams) {
   const { token } = useSession();

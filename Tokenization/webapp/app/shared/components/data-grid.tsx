@@ -23,7 +23,9 @@ type InfoItemProps = {
 };
 
 /**
+ * Component to display a grid of information items.
  *
+ * @param info - Array of information items to display.
  */
 export default function DataGrid({ info }: { info: InfoItemProps[] }) {
   return <DetailsGrid>

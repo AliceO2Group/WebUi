@@ -12,21 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useContext } from 'react';
-import { AlertContext } from '~/ui/alert/alert-provider';
-
 /**
- * Hook useAlert to access alert pushing functionality.
- * @example
- * const pushAlert = useAlert();
- * pushAlert({ message: 'This is an alert', severity: 'success' });
+ * Checks if the provided file name has a supported certificate extension.
  *
- * @returns {(options: AlertOptions) => void} Function to push an alert
+ * @param name The name of the file to check.
+ * @returns True if the file has a supported certificate extension, false otherwise.
  */
-export function useAlert() {
-  const ctx = useContext(AlertContext);
-  if (!ctx) {
-    throw new Error('useAlert must be used within AlertProvider');
-  }
-  return ctx.pushAlert;
+export function isSupportedCertificate(name: string) {
+  return /\.(cert|crt|pem)$/i.test(name);
 }

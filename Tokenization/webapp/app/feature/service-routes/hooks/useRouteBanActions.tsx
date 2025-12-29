@@ -26,7 +26,10 @@ import { AUTH_ERROR_ALERT } from '~/ui/alert/constants';
 import { validateRouteFiltersForBulk } from '~/feature/service-routes/services/service-route-filters.service';
 
 /**
+ * Hook providing actions to confirm banning of service routes, both single and bulk.
+ * Utilizes modals for user confirmation and alerts for feedback.
  *
+ * @returns An object containing confirmBan and confirmBulkBan functions.
  */
 export function useRouteBanActions() {
   const hasAuth = useAuth();
@@ -41,7 +44,8 @@ export function useRouteBanActions() {
       content: (
         <Stack spacing={1}>
           <Typography variant="body2">
-            Do you want to ban communication from <strong>{route.serviceFrom.commonName}</strong> to <strong>{route.serviceTo.commonName}</strong>?
+            Do you want to ban communication from
+            <strong>{route.serviceFrom.commonName}</strong> to <strong>{route.serviceTo.commonName}</strong>?
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Permissions: {route.permissions.join(', ')}
@@ -63,8 +67,7 @@ export function useRouteBanActions() {
           onSuccess: () => {
             pushAlert({ message: 'Route banned successfully.', severity: 'success' });
           },
-          onError: (error) => {
-            console.error('Failed to ban route', error);
+          onError: (_error) => {
             pushAlert({ message: 'Failed to ban route.', severity: 'error' });
           },
         });
@@ -105,8 +108,7 @@ export function useRouteBanActions() {
           onSuccess: () => {
             pushAlert({ message: 'Routes banned successfully.', severity: 'success' });
           },
-          onError: (error) => {
-            console.error('Failed to ban routes', error);
+          onError: (_error) => {
             pushAlert({ message: 'Failed to ban routes.', severity: 'error' });
           },
         });

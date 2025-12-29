@@ -15,7 +15,10 @@
 import type { ServiceFilterValues } from '~/feature/service/types/service-filters';
 
 /**
+ * Checks if any service data filters are applied.
  *
+ * @param filters The service filter values to check.
+ * @returns True if any data filters are applied, false otherwise.
  */
 export function hasServiceDataFilters(filters: ServiceFilterValues) {
   return Boolean(
@@ -28,7 +31,11 @@ export function hasServiceDataFilters(filters: ServiceFilterValues) {
 }
 
 /**
+ * Validates the service filters for bulk operations.
+ * Ensures that at least one data filter is applied.
  *
+ * @param filters The service filter values to validate.
+ * @returns An error message string if validation fails, or null if validation passes.
  */
 export function validateServiceFiltersForBulk(filters: ServiceFilterValues): string | null {
   if (!hasServiceDataFilters(filters)) {

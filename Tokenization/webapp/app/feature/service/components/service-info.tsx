@@ -23,7 +23,10 @@ import type { Service } from '../types/service';
 import DataGrid from '~/shared/components/data-grid';
 
 /**
+ * Component to display information about a service's certificate.
+ * Includes a button to navigate to the certificate renewal page.
  *
+ * @param service The service whose information is to be displayed.
  */
 export default function ServiceInfo({ service }: { service: Service | undefined }) {
   const renewPath = `/services/${service?.serviceId}/renew`;

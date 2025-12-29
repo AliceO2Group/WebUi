@@ -35,7 +35,8 @@ type UseServicesQueryParams = {
 };
 
 /**
- *
+ * Query to fetch services based on optional filters.
+ * Passed the auth token from the session to the service function.
  */
 export function useServicesQuery({ filters, enabled = true }: UseServicesQueryParams) {
   const { token } = useSession();
@@ -53,7 +54,8 @@ type UseServiceDetailsQueryParams = {
 };
 
 /**
- *
+ * Query to fetch details of a specific service by its ID.
+ * Passed the auth token from the session to the service function.
  */
 export function useServiceDetailsQuery({ serviceId, enabled = true }: UseServiceDetailsQueryParams) {
   const { token } = useSession();

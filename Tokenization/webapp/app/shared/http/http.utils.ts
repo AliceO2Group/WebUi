@@ -47,12 +47,13 @@ export async function parseJsonOrThrow<T>(response: Response, context: string): 
 
     try {
       const payload = await response.json();
-      const detail = payload?.error || payload?.message;
+      const detail = payload?.error ?? payload?.message;
       if (detail) {
         message = `${message} - ${detail}`;
       }
-    } catch (error) {
-      // Ignore JSON parse issues when crafting the error message
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) {
+      // Ignoring errors during parsing
     }
 
     throw new Error(message);

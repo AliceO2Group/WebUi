@@ -92,7 +92,7 @@ type UseTokenLogsQueryParams = {
 };
 
 /**
- *
+ * Fetches the logs associated with a specific token.
  */
 export function useTokenLogsQuery({ tokenId, enabled = true }: UseTokenLogsQueryParams) {
   const { token } = useSession();

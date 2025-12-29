@@ -15,17 +15,24 @@
 import type { ServiceRouteFilterValues } from '~/feature/service-routes/types/service-route-filters';
 
 /**
+ * Checks if any service route filters are applied.
  *
+ * @param filters The service route filter values to check.
+ * @returns True if any filters are applied, false otherwise.
  */
 export function hasRouteFilters(filters: ServiceRouteFilterValues) {
   return Boolean(
-    (filters.serviceFrom && filters.serviceFrom.length) ||
-    (filters.serviceTo && filters.serviceTo.length),
+    (filters.serviceFrom?.length) ||
+    (filters.serviceTo?.length),
   );
 }
 
 /**
+ * Validates the service route filters for bulk operations.
+ * Ensures that at least one service filter is applied.
  *
+ * @param filters The service route filter values to validate.
+ * @returns An error message string if validation fails, or null if validation passes.
  */
 export function validateRouteFiltersForBulk(filters: ServiceRouteFilterValues): string | null {
   if (!hasRouteFilters(filters)) {

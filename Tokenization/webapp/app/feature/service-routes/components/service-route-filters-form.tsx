@@ -35,7 +35,10 @@ export type ServiceRouteFiltersFormProps = {
 };
 
 /**
+ * Form component for filtering service routes based on source and destination services.
+ * Calls onFiltersChange with the current filter values when applied.
  *
+ * @param onFiltersChange Callback function invoked with the filter values when the user applies the filters.
  */
 export function ServiceRouteFiltersForm({ onFiltersChange }: ServiceRouteFiltersFormProps) {
   const { control, reset, getValues } = useForm<ServiceRouteFilterValues>({
@@ -73,7 +76,10 @@ type ServicesFiltersProps = {
 };
 
 /**
+ * Component rendering service selection filters for source and destination services.
  *
+ * @param control React Hook Form control object for managing form state
+ * - passed down to make multi-select fields controlled.
  */
 function ServicesFilters({ control }: ServicesFiltersProps) {
   const {
@@ -130,7 +136,7 @@ const ServicesGrid = styled('div')(({ theme }) => ({
   gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
 }));
 
-const FooterRow = styled('div')(({ theme }) => ({
+const FooterRow = styled('div')(() => ({
   display: 'flex',
   justifyContent: 'flex-end',
   width: '100%',

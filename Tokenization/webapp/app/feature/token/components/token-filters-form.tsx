@@ -58,7 +58,10 @@ const DATE_FILTERS: Array<{ name: DateFieldName; label: string }> = [
 ];
 
 /**
+ * Form component for filtering tokens based on various criteria.
+ * Calls onFiltersChange with the current filter values when applied.
  *
+ * @param onFiltersChange Callback function invoked with the filter values when the user applies the filters.
  */
 export function TokenFiltersForm({
   onFiltersChange,
@@ -74,7 +77,7 @@ export function TokenFiltersForm({
 
   const handleApply = () => {
     const values = getValues();
-    const hasOrdering = Boolean(values.ordering && values.ordering.length);
+    const hasOrdering = Boolean(values.ordering?.length);
     const hasFilters = hasDataFilters(values);
     if (hasOrdering && !hasFilters) {
       pushAlert({ message: 'Add at least one service or date filter to apply ordering.', severity: 'warning' });
@@ -107,7 +110,10 @@ type ServicesFiltersProps = {
 };
 
 /**
+ * Component rendering service selection filters for source and destination services.
  *
+ * @param control React Hook Form control object for managing form state
+ * - passed down to make multi-select fields controlled.
  */
 function ServicesFilters({ control }: ServicesFiltersProps) {
   const {
@@ -151,7 +157,10 @@ type DatesFiltersProps = {
 };
 
 /**
+ * Component rendering date filters for token issue and expiration dates.
  *
+ * @param control React Hook Form control object for managing form state
+ * - passed down to make date fields controlled.
  */
 function DatesFilters({ control }: DatesFiltersProps) {
   return (
@@ -184,7 +193,10 @@ type OrderingSectionProps = {
 };
 
 /**
+ * Component rendering the ordering control for tokens.
  *
+ * @param control React Hook Form control object for managing form state
+ * - passed down to make ordering field controlled.
  */
 function OrderingSection({ control }: OrderingSectionProps) {
   return (
@@ -238,7 +250,7 @@ const FooterRow = styled('div')(({ theme }) => ({
   alignItems: 'flex-start',
 }));
 
-const OrderingField = styled('div')(({ theme }) => ({
+const OrderingField = styled('div')(() => ({
   width: '100%',
   minWidth: 0,
   display: 'flex',

@@ -22,7 +22,10 @@ export type ServicesQueryResponse = {
 };
 
 /**
+ * Appends service filters to the given URLSearchParams object.
  *
+ * @param queryString The URLSearchParams object to append filters to.
+ * @param filters The service filter values to append.
  */
 function appendServiceFilters(queryString: URLSearchParams, filters?: ServiceFilterValues | null) {
   if (!filters) {
@@ -50,7 +53,11 @@ function appendServiceFilters(queryString: URLSearchParams, filters?: ServiceFil
 }
 
 /**
+ * Fetches services based on the provided filters and token.
  *
+ * @param filters The service filter values to apply.
+ * @param token Optional authentication token.
+ * @returns A promise resolving to the services query response.
  */
 export async function fetchServices(filters: ServiceFilterValues | null, token?: string | null): Promise<ServicesQueryResponse> {
   const queryString = new URLSearchParams();

@@ -17,7 +17,11 @@ import type { ServiceRegistrationResult } from '~/feature/service/types/certific
 import { buildUrl, createQueryParams, parseJsonOrThrow } from '~/shared/http/http.utils';
 
 /**
+ * Fetches the details of a specific service by its ID.
  *
+ * @param serviceId The ID of the service to fetch.
+ * @param token Optional authentication token.
+ * @returns A promise resolving to the service details.
  */
 export async function fetchServiceById(serviceId: string, token?: string | null): Promise<Service> {
   const url = buildUrl(`/api/services/${serviceId}`, createQueryParams(token));
@@ -26,7 +30,12 @@ export async function fetchServiceById(serviceId: string, token?: string | null)
 }
 
 /**
+ * Confirms the renewal of a service certificate.
  *
+ * @param serviceId The ID of the service for which the certificate is being renewed.
+ * @param certificateId The ID of the new certificate to confirm.
+ * @param token Optional authentication token.
+ * @returns A promise resolving to the service registration result.
  */
 export async function confirmServiceCertificateRenewal(
   serviceId: string,

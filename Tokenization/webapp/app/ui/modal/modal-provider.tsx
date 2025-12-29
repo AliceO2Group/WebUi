@@ -98,8 +98,8 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     try {
       await handler();
       hideModal();
-    } catch (error) {
-      console.error('Modal confirm handler failed', error);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) {
       setConfirming(false);
     }
   }, [modalState, hideModal]);

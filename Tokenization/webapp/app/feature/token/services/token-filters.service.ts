@@ -15,7 +15,9 @@
 import type { TokenFilterValues } from '~/feature/token/types/token-filters';
 
 /**
- *
+ * Determines if any data-related filters are set.
+ * @param filters The token filter values to check.
+ * @returns True if any data filters are applied, false otherwise.
  */
 export function hasDataFilters(filters: TokenFilterValues) {
   return (
@@ -29,7 +31,11 @@ export function hasDataFilters(filters: TokenFilterValues) {
 }
 
 /**
+ * Validates the token filters for bulk operations.
+ * Ensures that at least one data-related filter is applied.
  *
+ * @param filters The token filter values to validate.
+ * @returns An error message string if validation fails, or null if validation passes.
  */
 export function validateFiltersForBulk(filters: TokenFilterValues): string | null {
   if (!hasDataFilters(filters)) {

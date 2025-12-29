@@ -30,7 +30,7 @@ import type { TokenFilterValues } from '~/feature/token/types/token-filters';
 import { useFiltersPanel } from '~/shared/hooks/useFiltersPanel';
 
 /**
- *
+ * Route component for displaying active tokens.
  */
 export default function TokensOverviewRoute() {
   const {

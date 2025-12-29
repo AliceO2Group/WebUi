@@ -28,7 +28,10 @@ export type ServiceRouteRegistrationPayload = {
 };
 
 /**
+ * Appends service route filters to the given URLSearchParams object.
  *
+ * @param queryString The URLSearchParams object to append filters to.
+ * @param filters The service route filter values to append.
  */
 function appendRouteFilters(queryString: URLSearchParams, filters?: ServiceRouteFilterValues | null) {
   if (!filters) {
@@ -44,7 +47,11 @@ function appendRouteFilters(queryString: URLSearchParams, filters?: ServiceRoute
 }
 
 /**
+ * Fetches service routes based on the provided filters and token.
  *
+ * @param filters The service route filter values to apply.
+ * @param token Optional authentication token.
+ * @returns A promise resolving to the service routes query response.
  */
 export async function fetchServiceRoutes(
   filters: ServiceRouteFilterValues | null,
@@ -63,7 +70,10 @@ export async function fetchServiceRoutes(
 }
 
 /**
+ * Bans a service route by its ID.
  *
+ * @param routeId The ID of the service route to ban.
+ * @param token Optional authentication token.
  */
 export async function banServiceRoute(routeId: string, token?: string | null): Promise<void> {
   const url = buildUrl(`/api/routes/${routeId}`, createQueryParams(token));
@@ -76,7 +86,10 @@ export async function banServiceRoute(routeId: string, token?: string | null): P
 }
 
 /**
+ * Bans service routes in bulk based on the provided filters.
  *
+ * @param filters The service route filter values to determine which routes to ban.
+ * @param token Optional authentication token.
  */
 export async function banServiceRoutesBulk(filters?: ServiceRouteFilterValues | null, token?: string | null): Promise<void> {
   if (!filters) {
@@ -97,7 +110,11 @@ export async function banServiceRoutesBulk(filters?: ServiceRouteFilterValues | 
 }
 
 /**
+ * Registers a new service route with the provided payload.
  *
+ * @param payload The service route registration payload.
+ * @param token Optional authentication token.
+ * @returns A promise resolving to the newly registered service route.
  */
 export async function registerServiceRoute(
   payload: ServiceRouteRegistrationPayload,

@@ -20,7 +20,7 @@ import { buildUrl, createQueryParams, parseJsonOrThrow } from '~/shared/http/htt
  */
 export async function uploadServiceCertificate(file: File, token?: string | null): Promise<ServiceCertificatePreview> {
   /**
-   *
+   * Converts a File object to a base64-encoded string.
    */
   function fileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
