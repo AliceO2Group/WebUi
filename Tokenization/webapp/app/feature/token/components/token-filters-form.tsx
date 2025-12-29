@@ -17,7 +17,6 @@
  * It relies on react-hook-form for state management and exposes the current
  * values via the onFiltersChange callback whenever inputs update.
  */
-import { useCallback, useState } from 'react';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import { Controller, type Control, useForm } from 'react-hook-form';
@@ -27,9 +26,9 @@ import { FormMultiSelectField } from '~/shared/components/form/multi-select-fiel
 import { StaticTextField } from '~/shared/components/form/static-text-field';
 import { OrderingControl, type OrderingOption } from '~/shared/components/order/ordering-control';
 import { TOKEN_FILTER_DEFAULTS, type TokenFilterValues } from '~/feature/token/types/token-filters';
-import { useDebouncedValue } from '~/shared/hooks/useDebouncedValue';
 import { hasDataFilters } from '~/feature/token/services/token-filters.service';
 import { useAlert } from '~/shared/hooks/useAlert';
+import { useServiceSelectFilters, type ServiceFilterFieldName } from '~/shared/hooks/useServiceSelectFilters';
 
 const ORDERING_OPTIONS: OrderingOption[] = [
   { value: 'iat', label: 'Issue date' },
@@ -41,13 +40,12 @@ type TokenFiltersFormProps = {
   onFiltersChange: (values: TokenFilterValues) => void;
 };
 
-type ServiceFieldName = 'serviceFrom' | 'serviceTo';
 type DateFieldName = 'issuedAfter' | 'issuedBefore' | 'expiresAfter' | 'expiresBefore';
 
 const SERVICE_FILTER_MIN_CHARS = 2;
 const SERVICE_FILTER_DEBOUNCE_MS = 300;
 
-const SERVICE_FILTERS: Array<{ name: ServiceFieldName; label: string; placeholder: string }> = [
+const SERVICE_FILTERS: Array<{ name: ServiceFilterFieldName; label: string; placeholder: string }> = [
   { name: 'serviceFrom', label: 'Service from', placeholder: 'Service From' },
   { name: 'serviceTo', label: 'Service to', placeholder: 'Service To' },
 ];
@@ -112,60 +110,38 @@ type ServicesFiltersProps = {
  *
  */
 function ServicesFilters({ control }: ServicesFiltersProps) {
-  const [searchValues, setSearchValues] = useState<Record<ServiceFieldName, string>>({
-    serviceFrom: '',
-    serviceTo: '',
+  const {
+    searchValues,
+    queryByField,
+    handleInputValueChange,
+  } = useServiceSelectFilters({
+    queryHook: useTokenServiceOptionsQuery,
+    debounceMs: SERVICE_FILTER_DEBOUNCE_MS,
+    minChars: SERVICE_FILTER_MIN_CHARS,
   });
-
-  const debouncedSearchValues = {
-    serviceFrom: useDebouncedValue(searchValues.serviceFrom, SERVICE_FILTER_DEBOUNCE_MS),
-    serviceTo: useDebouncedValue(searchValues.serviceTo, SERVICE_FILTER_DEBOUNCE_MS),
-  };
-
-  const serviceFromQuery = useTokenServiceOptionsQuery({
-    searchTerm: debouncedSearchValues.serviceFrom,
-    enabled: debouncedSearchValues.serviceFrom.length >= SERVICE_FILTER_MIN_CHARS,
-  });
-  const serviceToQuery = useTokenServiceOptionsQuery({
-    searchTerm: debouncedSearchValues.serviceTo,
-    enabled: debouncedSearchValues.serviceTo.length >= SERVICE_FILTER_MIN_CHARS,
-  });
-
-  const queryByField: Record<ServiceFieldName, typeof serviceFromQuery> = {
-    serviceFrom: serviceFromQuery,
-    serviceTo: serviceToQuery,
-  };
-
-
-  const handleInputValueChange = useCallback((field: ServiceFieldName, value: string) => {
-    setSearchValues((prev) => ({ ...prev, [field]: value }));
-  }, []);
-
-  
 
   return (
     <ServicesRow>
       {SERVICE_FILTERS.map(({ name, label, placeholder }) => {
-        const data = queryByField[name].data ?? [];  
-        const options = data.map((service) => 
-          ({ label: service.commonName, value: service.serviceId }));
-        
-        return <FiltersField key={name}>
-          <FormMultiSelectField
-            control={control}
-            name={name}
-            label={label}
-            options={options}
-            loading={queryByField[name].isFetching}
-            placeholder={placeholder}
-            minSearchLength={SERVICE_FILTER_MIN_CHARS}
-            inputValue={searchValues[name]}
-            onInputValueChange={(value) => handleInputValueChange(name, value)}
-          />
-        </FiltersField>
-      }
-      )
-      }
+        const data = queryByField[name].data ?? [];
+        const options = data.map((service) => ({ label: service.commonName, value: service.serviceId }));
+
+        return (
+          <FiltersField key={name}>
+            <FormMultiSelectField
+              control={control}
+              name={name}
+              label={label}
+              options={options}
+              loading={queryByField[name].isFetching}
+              placeholder={placeholder}
+              minSearchLength={SERVICE_FILTER_MIN_CHARS}
+              inputValue={searchValues[name]}
+              onInputValueChange={(value) => handleInputValueChange(name, value)}
+            />
+          </FiltersField>
+        );
+      })}
     </ServicesRow>
   );
 }

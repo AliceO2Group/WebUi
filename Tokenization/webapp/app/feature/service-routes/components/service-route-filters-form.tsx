@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-import { useCallback, useState } from 'react';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import type { Control } from 'react-hook-form';
@@ -21,9 +20,9 @@ import { useForm } from 'react-hook-form';
 import { FormMultiSelectField } from '~/shared/components/form/multi-select-field';
 import { useRouteServiceOptionsQuery } from '~/feature/service-routes/api/queries';
 import { SERVICE_ROUTE_FILTER_DEFAULTS, type ServiceRouteFilterValues } from '~/feature/service-routes/types/service-route-filters';
-import { useDebouncedValue } from '~/shared/hooks/useDebouncedValue';
+import { useServiceSelectFilters, type ServiceFilterFieldName } from '~/shared/hooks/useServiceSelectFilters';
 
-const SERVICE_FILTERS: Array<{ name: keyof ServiceRouteFilterValues; label: string; placeholder: string }> = [
+const SERVICE_FILTERS: Array<{ name: ServiceFilterFieldName; label: string; placeholder: string }> = [
   { name: 'serviceFrom', label: 'Service from', placeholder: 'Select source services' },
   { name: 'serviceTo', label: 'Service to', placeholder: 'Select destination services' },
 ];
@@ -71,56 +70,38 @@ type ServicesFiltersProps = {
 };
 
 function ServicesFilters({ control }: ServicesFiltersProps) {
-  const [searchValues, setSearchValues] = useState<Record<keyof ServiceRouteFilterValues, string>>({
-    serviceFrom: '',
-    serviceTo: '',
+  const {
+    searchValues,
+    queryByField,
+    handleInputValueChange,
+  } = useServiceSelectFilters({
+    queryHook: useRouteServiceOptionsQuery,
+    debounceMs: SERVICE_FILTER_DEBOUNCE_MS,
+    minChars: SERVICE_FILTER_MIN_CHARS,
   });
-
-  const debouncedSearchValues = {
-    serviceFrom: useDebouncedValue(searchValues.serviceFrom, SERVICE_FILTER_DEBOUNCE_MS),
-    serviceTo: useDebouncedValue(searchValues.serviceTo, SERVICE_FILTER_DEBOUNCE_MS),
-  };
-
-  const serviceFromQuery = useRouteServiceOptionsQuery({
-    searchTerm: debouncedSearchValues.serviceFrom,
-    enabled: debouncedSearchValues.serviceFrom.length >= SERVICE_FILTER_MIN_CHARS,
-  });
-
-  const serviceToQuery = useRouteServiceOptionsQuery({
-    searchTerm: debouncedSearchValues.serviceTo,
-    enabled: debouncedSearchValues.serviceTo.length >= SERVICE_FILTER_MIN_CHARS,
-  });
-
-  const queryByField: Record<keyof ServiceRouteFilterValues, typeof serviceFromQuery> = {
-    serviceFrom: serviceFromQuery,
-    serviceTo: serviceToQuery,
-  };
-
-  const handleInputValueChange = useCallback((field: keyof ServiceRouteFilterValues, value: string) => {
-    setSearchValues((prev) => ({ ...prev, [field]: value }));
-  }, []);
 
   return (
     <ServicesGrid>
       {SERVICE_FILTERS.map(({ name, label, placeholder }) => {
-        const data = queryByField[name].data ?? [];  
-        const options = data.map((service) => 
-          ({ label: service.commonName, value: service.serviceId }));
+        const data = queryByField[name].data ?? [];
+        const options = data.map((service) => ({ label: service.commonName, value: service.serviceId }));
 
-        return <FiltersField key={name}>
-          <FormMultiSelectField
-            control={control}
-            name={name}
-            label={label}
-            options={options}
-            loading={queryByField[name].isFetching}
-            placeholder={placeholder}
-            minSearchLength={SERVICE_FILTER_MIN_CHARS}
-            inputValue={searchValues[name]}
-            onInputValueChange={(value) => handleInputValueChange(name, value)}
-          />
-        </FiltersField>
-    })}
+        return (
+          <FiltersField key={name}>
+            <FormMultiSelectField
+              control={control}
+              name={name}
+              label={label}
+              options={options}
+              loading={queryByField[name].isFetching}
+              placeholder={placeholder}
+              minSearchLength={SERVICE_FILTER_MIN_CHARS}
+              inputValue={searchValues[name]}
+              onInputValueChange={(value) => handleInputValueChange(name, value)}
+            />
+          </FiltersField>
+        );
+      })}
     </ServicesGrid>
   );
 }
