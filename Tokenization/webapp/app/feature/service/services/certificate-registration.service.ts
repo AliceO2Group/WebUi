@@ -19,9 +19,6 @@ import { buildUrl, createQueryParams, parseJsonOrThrow } from '~/shared/http/htt
  * Uploads a service certificate file (as base64) and returns a preview of the certificate.
  */
 export async function uploadServiceCertificate(file: File, token?: string | null): Promise<ServiceCertificatePreview> {
-  /**
-   * Converts a File object to a base64-encoded string.
-   */
   function fileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
