@@ -17,7 +17,7 @@
   "dependencies": {
     "@aliceo2/web-ui": "^2.8.4",
     "crypto": "^1.0.1",
-    "express": "^4.19.2",
+    "express": "^4.22.1",
     "jsonwebtoken": "^9.0.2",
     "@grpc/grpc-js": "^1.13.4",
     "@grpc/proto-loader": "^0.7.15"
