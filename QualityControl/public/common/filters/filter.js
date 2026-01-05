@@ -205,15 +205,16 @@ export const combobox = (
   onInputCallback,
 ) => {
   const filtered = filterMap[queryLabel]
-    ? options.payload.filter((option) =>
+    ? ['123', '78122', '17', '9856'].filter((option) =>
       String(option).toLowerCase().includes(filterMap[queryLabel].toLowerCase()))
-    : options.payload;
+    : ['123', '78122', '17', '9856'];
 
   return h(`${width}.combobox-container`, [
     h('input.form-control', {
       id,
       placeholder,
       type,
+      autocomplete: 'off',
       min: 0,
       value: filterMap[queryLabel] || '',
       oninput: (event) => onInputCallback(queryLabel, event.target.value),
@@ -226,9 +227,9 @@ export const combobox = (
     }),
 
     h(
-      'ul.combobox-list',
+      'ul.combobox-list.dropdown-menu',
       filtered.map((option) =>
-        h('li.combobox-item', {
+        h('li.combobox-item.menu-item', {
           onmousedown: (e) => {
             e.preventDefault();
             onInputCallback(queryLabel, option);
