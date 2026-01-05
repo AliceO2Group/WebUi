@@ -54,7 +54,7 @@ export const setup = async (http, ws, eventEmitter) => {
     objectGetByIdValidation,
     objectsGetValidation,
     objectGetContentsValidation,
-  } = await setupQcModel(eventEmitter);
+  } = await setupQcModel(ws, eventEmitter);
   statusService.ws = ws;
 
   http.get('/object/:id', objectGetByIdValidation, objectController.getObjectByIdHandler.bind(objectController));

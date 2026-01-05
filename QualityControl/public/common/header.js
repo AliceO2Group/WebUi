@@ -12,7 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconPerson } from '/js/src/index.js';
+import { h, iconPerson, getBrowserNotificationPermission,
+  requestBrowserNotificationPermissions } from '/js/src/index.js';
 
 import { spinner } from './spinner.js';
 import layoutViewHeader from '../layout/view/header.js';
@@ -100,8 +101,12 @@ const commonHeader = (model) => h('.flex-row.items-center.w-25', [
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const loginButton = (model) =>
-  h('.dropdown', {
+const loginButton = (model) => {
+  const browserNotificationPermission = getBrowserNotificationPermission();
+  const notificationsAvailable = browserNotificationPermission && browserNotificationPermission !== 'denied';
+  const runStartNotificationEnabled = model.notificationRunStartModel.getBrowserNotificationSetting();
+
+  return h('.dropdown', {
     title: 'Login', class: model.accountMenuEnabled ? 'dropdown-open' : '',
   }, [
     h('button.btn', { onclick: () => model.toggleAccountMenu() }, iconPerson()),
@@ -110,5 +115,36 @@ const loginButton = (model) =>
       model.session.personid === 0 // Anonymous user has id 0
         ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
         : h('a.menu-item', { onclick: () => alert('Not implemented') }, 'Logout'),
+      h(
+        'label.flex-row.g1.items-center.form-check-label',
+        {
+          style: `cursor: ${notificationsAvailable ? 'pointer' : 'not-allowed'};`,
+        },
+        [
+          h(
+            '.switch',
+            [
+              h('input', {
+                onchange: async (event) => {
+                  let permission = false;
+                  if (event.target.checked) {
+                    permission = await requestBrowserNotificationPermissions() === 'granted';
+                  }
+                  model.notificationRunStartModel.setBrowserNotificationSetting(permission);
+                },
+                type: 'checkbox',
+                checked: runStartNotificationEnabled,
+              }),
+              h(`span.slider.round.bg-${
+                runStartNotificationEnabled ? 'primary' : 'gray'
+              }`, {
+                style: `cursor: ${notificationsAvailable ? 'pointer' : 'not-allowed'};`,
+              }),
+            ],
+          ),
+          'Notify on run start',
+        ],
+      ),
     ]),
   ]);
+};
