@@ -58,7 +58,7 @@ export const qcObjectInfoPanel = (
     [
       KEY_TO_RENDER_FIRST,
       ...Object.keys(qcObject)
-        .filter((k) => k !== KEY_TO_RENDER_FIRST && !TO_REMOVE_FIELDS.includes(k)),
+        .filter((key) => key !== KEY_TO_RENDER_FIRST && !TO_REMOVE_FIELDS.includes(key)),
     ]
       .flatMap((key) => {
         if (key === DRAW_OPTIONS_FIELD && typeof onToggleDrawingOptions === 'function') {
