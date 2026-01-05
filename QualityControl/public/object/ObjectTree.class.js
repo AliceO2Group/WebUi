@@ -160,6 +160,7 @@ export default class ObjectTree extends Observable {
    */
   closeAll() {
     this._closeAllRecursive();
+    this.storeExpandedNodes();
     this.notify();
   }
 
