@@ -21,6 +21,7 @@ import { RunStatus } from '../../../common/library/runStatus.enum.js';
 import { EmitterKeys } from '../../../common/library/enums/emitterKeys.enum.js';
 import { Transition } from '../../../common/library/enums/transition.enum.js';
 import { delayAndCheck } from '../../testUtils/delay.js';
+import { WebSocketMessage } from '@aliceo2/web-ui';
 
 export const runModeServiceTestSuite = async () => {
   suite('RunModeService', () => {
@@ -156,6 +157,23 @@ export const runModeServiceTestSuite = async () => {
         ok(runModeService._dataService.getObjectsLatestVersionList.calledOnceWith({
           filters: { RunNumber: runEvent.runNumber },
         }));
+      });
+
+      test('should listen to events on RUN_TRACK and broadcast to websocket', async () => {
+        const runEvent = { runNumber: 1234, transition: Transition.START_ACTIVITY };
+        runModeService._dataService.getObjectsLatestVersionList = sinon.stub().resolves([{ path: '/path/from/event' }]);
+
+        eventEmitter.emit(EmitterKeys.RUN_TRACK, runEvent);
+        await delayAndCheck(() => runModeService._ongoingRuns.has(runEvent.runNumber), 500, 10);
+
+        const wsMessage = new WebSocketMessage();
+        wsMessage.command = EmitterKeys.RUN_TRACK;
+        wsMessage.payload = runEvent;
+
+        ok(
+          ws.broadcast.calledOnceWith(wsMessage),
+          `Websocket broadcast should have message: ${JSON.stringify(wsMessage)}`,
+        );
       });
 
       test('should remove run from ongoing runs map on STOP_ACTIVITY event', async () => {
