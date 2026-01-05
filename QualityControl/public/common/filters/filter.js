@@ -197,6 +197,22 @@ export const ongoingRunsSelector = (config, filterMap, options, onChangeCallback
   ]);
 };
 
+/**
+ * Renders a searchable Combobox with keyboard navigation using ALICE O2 design tokens.
+ * This component is a stateless function that leverages CSS `:focus-within` for visibility
+ * and direct DOM manipulation for arrow-key highlighting to avoid FilterModel pollution.
+ * @param {object} config - The configuration for the combobox field.
+ * @param {string} config.id - The unique HTML ID for the input element.
+ * @param {string} config.type - The HTML input type (e.g., 'text', 'number').
+ * @param {string} config.queryLabel - The key name in the filterMap to update.
+ * @param {string} config.placeholder - The placeholder text for the input.
+ * @param {string} config.width - Width of the input container.
+ * @param {object} filterMap - Object containing current filter keys and values.
+ * @param {RemoteData} options - RemoteData object containing the list of available options.
+ * @param {Function} onEnterCallback - Callback to trigger filtering.
+ * @param {Function} onInputCallback - Callback to update the filter value.
+ * @returns {vnode} - A virtual node representing the combobox.
+ */
 export const combobox = (
   { id, type, queryLabel, placeholder, width = '.w-20' },
   filterMap,
@@ -205,9 +221,45 @@ export const combobox = (
   onInputCallback,
 ) => {
   const filtered = filterMap[queryLabel]
-    ? ['123', '78122', '17', '9856'].filter((option) =>
+    ? options.payload.filter((option) =>
       String(option).toLowerCase().includes(filterMap[queryLabel].toLowerCase()))
-    : ['123', '78122', '17', '9856'];
+    : options.payload;
+
+  const handleKeyNavigation = (e) => {
+    const container = e.target.closest('.combobox-container');
+    const items = [...container.querySelectorAll('.combobox-item')];
+    const current = container.querySelector('.is-highlighted');
+    const index = items.indexOf(current);
+
+    const move = (nextIndex) => {
+      if (current) {
+        current.classList.remove('is-highlighted')
+      }
+      if (items[nextIndex]) {
+        items[nextIndex].classList.add('is-highlighted');
+        items[nextIndex].scrollIntoView({ block: 'nearest' });
+      }
+    };
+
+    const keys = {
+      ArrowDown: () => move(Math.min(index + 1, items.length - 1)),
+      ArrowUp: () => move(Math.max(index - 1, 0)),
+      Enter: () => {
+        if (current) {
+          onInputCallback(queryLabel, current.innerText);
+        }
+        e.target.blur();
+        onEnterCallback();
+      },
+    };
+
+    if (keys[e.key]) {
+      if (e.key !== 'Enter') {
+        e.preventDefault();
+      }
+      keys[e.key]();
+    }
+  };
 
   return h(`${width}.combobox-container`, [
     h('input.form-control', {
@@ -218,24 +270,26 @@ export const combobox = (
       min: 0,
       value: filterMap[queryLabel] || '',
       oninput: (event) => onInputCallback(queryLabel, event.target.value),
-      onkeydown: (e) => {
-        if (e.keyCode === 13) {
-          onEnterCallback();
-          e.target.blur();
-        }
-      },
+      onkeydown: handleKeyNavigation,
     }),
 
     h(
       'ul.combobox-list.dropdown-menu',
       filtered.map((option) =>
         h('li.combobox-item.menu-item', {
+          onmousemove: (e) => {
+            const prev = e.target.closest('.combobox-list').querySelector('.is-highlighted');
+            if (prev) {
+              prev.classList.remove('is-highlighted');
+            }
+            e.target.classList.add('is-highlighted');
+          },
           onmousedown: (e) => {
             e.preventDefault();
             onInputCallback(queryLabel, option);
             e.target.closest('.combobox-container')
               .querySelector('input')
-              ?.blur()
+              ?.blur();
             onEnterCallback();
           },
         }, option)),

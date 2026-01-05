@@ -251,7 +251,7 @@
     margin-top: var(--space-xs);
 
     & .combobox-item {
-      &:hover, .is-highlighted {
+      &:hover, &.is-highlighted {
         background-color: var(--color-primary);
         color: var(--color-white);
       }
