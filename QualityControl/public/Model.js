@@ -145,6 +145,7 @@ export default class Model extends Observable {
         this.object.tree.collapseFocusedNode();
       } else if (code === 39) { // Right arrow
         this.object.tree.expandFocusedNode();
+        this.object.select(this.object.tree.focusedNode?.object);
       } else if (code === 38) { // Up arrow
         this.object.tree.selectPreviousNode();
       } else if (code === 40) { // Down arrow

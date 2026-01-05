@@ -29,8 +29,6 @@ export default class ObjectTree extends Observable {
   constructor(name, parent) {
     super();
     this.storage = new BrowserStorage(StorageKeysEnum.OBJECT_TREE_OPEN_NODES);
-    this.focusedNodePathStorage = new BrowserStorage(StorageKeysEnum.OBJECT_TREE_FOCUSED_NODE);
-    this.selector = null; // Callback for object selection
     this.focusedNode = null; // Currently focused node for navigation
     this.initTree(name, parent);
   }
@@ -63,12 +61,9 @@ export default class ObjectTree extends Observable {
     if (!this.focusedNode) {
       return;
     }
-
-    const node = this.focusedNode;
-
     // If focus is on a object, collapse its parent (if any) and focus the parent.
-    if (node.object) {
-      const { parent } = node;
+    if (this.focusedNode.object) {
+      const { parent } = this.focusedNode;
       if (!parent) {
         return;
       }
@@ -76,15 +71,13 @@ export default class ObjectTree extends Observable {
       this.setFocusedNode(parent);
       return;
     }
-
     // If focus is on a branch: collapse it if open, otherwise move focus to parent.
-    if (node.open && node.children.length > 0) {
-      node.toggle(); // collapse current branch, keep focus here
+    if (this.focusedNode.open && this.focusedNode.children.length > 0) {
+      this.focusedNode.toggle(); // collapse current branch, keep focus here
       return;
     }
-
-    if (node.parent) {
-      this.setFocusedNode(node.parent);
+    if (this.focusedNode.parent) {
+      this.setFocusedNode(this.focusedNode.parent);
     }
   }
 
@@ -106,7 +99,6 @@ export default class ObjectTree extends Observable {
     }
   }
 
-
   /**
    * Set the currently focused node
    * @param {ObjectTree} node - node to be focused
@@ -114,24 +106,7 @@ export default class ObjectTree extends Observable {
    */
   setFocusedNode(node) {
     this.focusedNode = node;
-    try {
-      const session = sessionService.get();
-      const key = session.personid.toString();
-      if (node?.pathString) {
-        this.focusedNodePathStorage.setLocalItem(key, node.pathString);
-      } else {
-        // clear stored value
-        this.focusedNodePathStorage.removeLocalItem(key, null);
-      }
-    } catch {
-      // ignore sessionStorage errors
-    }
     this.notify();
-  }
-
-  // Register a callback invoked when navigation selects a node with an object
-  setSelector(selector) {
-    this.selector = selector;
   }
 
   /**
@@ -175,9 +150,6 @@ export default class ObjectTree extends Observable {
     // select next node
     const next = visible[idx + 1] ?? visible[idx];
     this.setFocusedNode(next);
-    if (next.object && this.selector) {
-      this.selector(next.object);
-    }
   }
 
   /**
@@ -205,9 +177,6 @@ export default class ObjectTree extends Observable {
     // select previous node
     const prev = idx > 0 ? visible[idx - 1] : visible[0];
     this.setFocusedNode(prev);
-    if (prev.object && this.selector) {
-      this.selector(prev.object);
-    }
   }
 
   /**
@@ -235,20 +204,6 @@ export default class ObjectTree extends Observable {
     }
 
     this._applyExpandedNodesRecursive(parentNode, this);
-
-    // Restore previously focused node
-    try {
-      const stored = this.focusedNodePathStorage.getLocalItem(key);
-      if (stored) {
-        const visible = this._getVisibleNodes();
-        const found = visible.find((n) => n.pathString === stored);
-        if (found) {
-          this.setFocusedNode(found);
-        }
-      }
-    } catch {
-      // ignore sessionStorage errors
-    }
   }
 
   /**

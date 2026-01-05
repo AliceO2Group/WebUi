@@ -73,7 +73,7 @@ export default (model) => {
  */
 function objectPanel(model) {
   const selectedObjectName = model.object.selected.name;
-  if (model.object.objects && model.object.objects[selectedObjectName]) {
+  if (model.object.objects?.[selectedObjectName]) {
     return model.object.objects[selectedObjectName].match({
       NotAsked: () => null,
       Loading: () =>
@@ -174,13 +174,16 @@ const tableShow = (model) =>
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const treeRows = (model) => !model.object.tree ?
-  null
-  :
-
-  model.object.tree.children.length === 0
-    ? h('.w-100.text-center', 'No objects found')
-    : model.object.tree.children.map((children) => treeRow(model, children));
+const treeRows = (model) => {
+  if (!model.object.tree) {
+    return null;
+  }
+  if (model.object.tree.children.length === 0) {
+    return h('.w-100.text-center', 'No objects found');
+  } else {
+    return model.object.tree.children.map((children) => treeRow(model, children));
+  }
+};
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
@@ -201,12 +204,12 @@ function treeRow(model, tree, level = 0) {
 
   const rows = [];
 
-  // Determine the class name for the row
-  const className = model.object.selected && object === model.object.selected
-    ? 'table-primary' // Selected object
-    : model.object.tree.focusedNode === tree
-      ? 'focused-node' // Focused node
-      : '';
+  let className = '';
+  if (model.object.selected && object === model.object.selected) {
+    className = 'table-primary'; // Selected object
+  } else if (model.object.tree.focusedNode === tree) {
+    className = 'focused-node'; // Focused node
+  }
 
   if (object) {
     // Add a leaf row (final element; cannot be expanded further)
