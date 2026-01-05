@@ -66,6 +66,6 @@ export class DownloadConfigData {
     ?? [], Array.isArray(downloadConfigPlain.objectNameTemplateOptions) ?
       downloadConfigPlain.objectNameTemplateOptions : downloadConfigPlain.objectNameTemplateOptions?.split(',')
     ?? [], downloadConfigPlain?.downloadMode ??
-    DownloadMode.object, downloadConfigPlain?.pathNameStructure == 'true' ? true : false);
+    DownloadMode.OBJECT, downloadConfigPlain?.pathNameStructure == 'true' ? true : false);
   }
 }

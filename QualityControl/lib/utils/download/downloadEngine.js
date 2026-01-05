@@ -24,11 +24,12 @@ import { LayoutDomainStorage } from './classes/domain/LayoutDomainStorage.js';
 import { DownloadMode } from './enum/DownloadMode.js';
 import { NameTemplateOption } from './enum/NameTemplateOption.js';
 import { createTar } from './tar/tar.js';
+import { LogManager } from '@aliceo2/web-ui';
 
-const CONTENT_LENGTH_HEADER = 'Content-Length';
 const CONTENT_TYPE_HEADER = 'Content-Type';
 const CONTENT_TYPE_DEFAULT = 'application/root';
 const _pipelineAsync = promisify(pipeline);
+const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/download`);
 
 /** @import { LayoutDomain } from './classes/domain/LayoutDomain.js'; */
 /** @import { MapStorage } from './classes/domain/MapStorage.js'; */
@@ -45,7 +46,7 @@ const _pipelineAsync = promisify(pipeline);
  */
 export async function download(downloadLayout, downloadConfiguration, runNumber, res) {
   switch (downloadConfiguration.downloadMode) {
-    case DownloadMode.object:
+    case DownloadMode.OBJECT:
       let file = new File([], '');
       const objects = downloadLayout.tabs.flatMap((tab) => tab.objects.filter((object) => downloadConfiguration.objectIds.includes(object.id)));
       if (objects.length > 1) {
@@ -63,7 +64,7 @@ export async function download(downloadLayout, downloadConfiguration, runNumber,
       setHeaders(res, file, false);
       await _streamFileToResponse(file, res);
       break;
-    case DownloadMode.tab:
+    case DownloadMode.TAB:
       // const objects = downloadLayout.tabs.flatMap((tab) => tab.objects.filter((object) => downloadConfiguration.objectIds.includes(object.id)))
       let tabFiles = [];
       const tabs = downloadLayout.tabs.filter((tab) => downloadConfiguration.tabIds.some((id) => id == tab.id));
@@ -79,9 +80,7 @@ export async function download(downloadLayout, downloadConfiguration, runNumber,
           tabPromises.push(requestTab(tab, downloadConfiguration, runNumber));
         });
         const tabsFiles = await Promise.all(tabPromises);
-        console.log(tabsFiles);
         tabFiles = tabsFiles.flat();
-        console.log(tabFiles);
       } else {
         // single tab
         tabFiles = await requestTab(tabs[0], downloadConfiguration, runNumber);
@@ -90,7 +89,7 @@ export async function download(downloadLayout, downloadConfiguration, runNumber,
       setHeaders(res, tarFile, true);
       await streamArchiveToResponse(tarFile, res);
       break;
-    case DownloadMode.layout:
+    case DownloadMode.LAYOUT:
       break;
     default:
       break;
@@ -160,7 +159,7 @@ async function streamArchiveToResponse(tarFile, res) {
   try {
     await _pipelineAsync(read, gzip, res);
   } catch (error) {
-    console.log(error?.message ?? error);
+    logger.errorMessage(error?.message ?? error);
     throw error;
   }
 }
@@ -214,17 +213,13 @@ async function requestObjects(objects, downloadConfiguration, tabName, runNumber
  */
 async function requestObject(object, downloadConfiguration, tabName = '', runNumber = 0) {
   try {
-    // const response = await fetch(`http://localhost:8083/download/${object.id}`);
     const response = await fetch(`http://ali-qcdb-gpn.cern.ch:8083/download/${object.id}`);
     if (!response.ok) {
-      console.log(`QCDB returned ${response.status} ${response.statusText}`);
       throw new Error(`Cannot get ROOT file from QCDB object id: ${object.id}`);
     }
-    const contentLength = response.headers.get(CONTENT_LENGTH_HEADER);
-    console.log(`ROOT size (bytes): ${contentLength}`);
     return _getFileFromResponse(response, processFileNameTemplate(downloadConfiguration.objectNameTemplateOptions, object, tabName, runNumber, downloadConfiguration.pathNameStructure));
   } catch (error) {
-    console.log(error?.message ?? error);
+    logger.errorMessage(error?.message ?? error);
     throw error;
   }
 }
@@ -236,11 +231,11 @@ async function requestObject(object, downloadConfiguration, tabName = '', runNum
  * @param {string} [tabName='']
  * @param {number} runNumber
  * @param {boolean} [pathNameStructure=false]
- * @returns {string}
+ * @returns {string} file name
  */
 function processFileNameTemplate(nameTemplateOption, object = undefined, tabName = '', runNumber, pathNameStructure = false) {
   // Make sure that if the tabname is set it will be the root folder of its objects...
-  let rv = tabName === '' ? tabName : `${tabName}/`;
+  let fileName = tabName === '' ? tabName : `${tabName}/`;
   const nameStartingLength = tabName.length + 1;
   // Prevent tar from creating a folder structure if wished for.
   const index = object?.name.lastIndexOf('/') ?? 0;
@@ -248,21 +243,21 @@ function processFileNameTemplate(nameTemplateOption, object = undefined, tabName
   const objectId = object?.id ?? '';
   nameTemplateOption.forEach((nameTemplateOption) => {
     switch (nameTemplateOption) {
-      case NameTemplateOption.objectName:
-        rv += rv.length > nameStartingLength ? `_${name}` : name;
+      case NameTemplateOption.OBJECT_NAME:
+        fileName += fileName.length > nameStartingLength ? `_${name}` : name;
         break;
-      case NameTemplateOption.objectId:
-        rv += rv.length > nameStartingLength ? `_${objectId}` : objectId;
+      case NameTemplateOption.OBJECT_ID:
+        fileName += fileName.length > nameStartingLength ? `_${objectId}` : objectId;
         break;
-      case NameTemplateOption.tabName:
-        rv += rv.length > nameStartingLength ? `_${tabName}` : tabName;
+      case NameTemplateOption.TAB_NAME:
+        fileName += fileName.length > nameStartingLength ? `_${tabName}` : tabName;
         break;
-      case NameTemplateOption.runNumber:
-        rv += rv.length > nameStartingLength ? `_${runNumber}` : runNumber;
+      case NameTemplateOption.RUN_NUMBER:
+        fileName += fileName.length > nameStartingLength ? `_${runNumber}` : runNumber;
         break;
     }
   });
-  return rv;
+  return fileName;
 }
 
 /**

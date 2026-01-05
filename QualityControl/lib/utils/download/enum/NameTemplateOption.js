@@ -1,8 +1,24 @@
-// eslint-disable-next-line no-var, init-declarations
-export var NameTemplateOption;
-(function (NameTemplateOption) {
-  NameTemplateOption[NameTemplateOption['objectName'] = 0] = 'objectName';
-  NameTemplateOption[NameTemplateOption['objectId'] = 1] = 'objectId';
-  NameTemplateOption[NameTemplateOption['tabName'] = 2] = 'tabName';
-  NameTemplateOption[NameTemplateOption['runNumber'] = 3] = 'runNumber';
-})(NameTemplateOption || (NameTemplateOption = {}));
+/**
+ * @license
+ * Copyright CERN and copyright holders of ALICE O2. This software is
+ * distributed under the terms of the GNU General Public License v3 (GPL
+ * Version 3), copied verbatim in the file "COPYING".
+ *
+ * See http://alice-o2.web.cern.ch/license for full licensing information.
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
+/**
+ * Enum with possible options for the file name template.
+ * @readonly
+ * @enum {number}
+ */
+export const NameTemplateOption = Object.freeze({
+  OBJECT_NAME: 0,
+  OBJECT_ID: 1,
+  TAB_NAME: 2,
+  RUN_NUMBER: 3,
+});
