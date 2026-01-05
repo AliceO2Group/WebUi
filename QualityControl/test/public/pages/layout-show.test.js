@@ -168,6 +168,17 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     },
   );
 
+  await testParent.test(
+    'should align info dropdown to the right when container is on the left',
+    { timeout },
+    async () => {
+      await page.click('button.btn[title*="View details"]');
+      const leftStyle = await page.evaluate(() => document.querySelector('#subcanvas .dropdown-menu').style.left);
+
+      strictEqual(leftStyle, '0.1em');
+    }
+  );
+
   await testParent.test('should have second tab to be empty (according to demo data)', { timeout }, async () => {
     await page.locator('#tab-1').click();
     await delay(50);
