@@ -95,8 +95,8 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
       const expectedDrawingOptions = ['hist', 'gridy', 'text'];
       await page.goto(`${url}?page=objectView&objectName=${path}`, { waitUntil: 'networkidle0' });
       const result = await page.evaluate(() => {
-        const { drawingOptions } = globalThis.model.objectViewModel;
-        const plotElement = document.querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(1) > div');
+        const { drawingOptions } = model.objectViewModel;
+        const plotElement = document.querySelector('#ObjectPlot .jsroot-container');
         const fingerprint = plotElement.dataset.fingerprintData;
         return { fingerprint, drawingOptions };
       });
@@ -180,7 +180,7 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
       const gridXCheckboxSelector = `#objectDrawingOptions input[id="${objectId}gridx"]`;
 
       const initialResult = await page.evaluate(() => {
-        const plotElement = document.querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(1) > div');
+        const plotElement = document.querySelector('#ObjectPlot .jsroot-container');
         const fingerprint = plotElement.dataset.fingerprintData;
         return { fingerprint };
       });
@@ -189,7 +189,7 @@ export const objectViewFromObjectTreeTests = async (url, page, timeout = 5000, t
       await delay(200);
 
       const afterToggleResult = await page.evaluate(() => {
-        const plotElement = document.querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(1) > div');
+        const plotElement = document.querySelector('#ObjectPlot .jsroot-container');
         const fingerprint = plotElement.dataset.fingerprintData;
         return { fingerprint };
       });

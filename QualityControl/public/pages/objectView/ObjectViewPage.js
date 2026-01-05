@@ -79,16 +79,18 @@ const objectPlotAndInfo = (objectViewModel) =>
             objectViewModel.drawingFailureOccurred(error.message);
           })),
           objectInfoVisible &&
-            h('.scroll-y.w-30.relative', [
+            h('.scroll-y.w-30.relative', {
+              style: { order: 1 }, // Ensure panel is placed after drawObject
+            }, [
               objectDrawingOptionsVisible &&
-                objectDrawingOptions({
-                  id,
-                  ignoreDefaults: ignoreDefaults,
-                  options: drawingOptions,
-                  nonRecognizedDrawingOptions: nonRecognizedDrawingOptions,
-                  onToggleIgnoreDefaults: () => objectViewModel.toggleIgnoreDefaults(),
-                  onToggleOption: (option) => objectViewModel.toggleDrawingOption(option),
-                }),
+              objectDrawingOptions({
+                id,
+                ignoreDefaults: ignoreDefaults,
+                options: drawingOptions,
+                nonRecognizedDrawingOptions: nonRecognizedDrawingOptions,
+                onToggleIgnoreDefaults: () => objectViewModel.toggleIgnoreDefaults(),
+                onToggleOption: (option) => objectViewModel.toggleDrawingOption(option),
+              }),
               h('h3.text-center', 'Object information'),
               qcObjectInfoPanel(
                 qcObject,

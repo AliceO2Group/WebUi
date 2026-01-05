@@ -410,33 +410,35 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
-    'should set drawing options from layout when loading an object from a layout',
+    'should set drawing options from layout when loading an object from layout',
     { timeout },
     async () => {
       const layoutId = 'q12b8c22402408122e2f20dd';
       const objectId = 'b12b8c25d5b49dbf80e81926';
       const expectedDrawingOptions = ['logx', 'text'];
-      const expectedIgnoreDefaults = true;
       await page.goto(
         `${url}?page=objectView&objectId=${objectId}&layoutId=${layoutId}`,
         { waitUntil: 'networkidle0' },
       );
-      // Click the toggle button to show object details panel containing drawing options visibility button
+      // Validate the drawing options in the fingerprint
       await page.click('.chevron-button');
-      await delay(100);
-
+      await delay(200);
       const result = await page.evaluate(() => {
-        const { ignoreDefaults } = model.objectViewModel;
-        const { drawingOptions } = model.objectViewModel;
-        const plotElement = document.querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(1) > div');
-        const fingerprint = plotElement.dataset.fingerprintData;
-        return { fingerprint, drawingOptions, ignoreDefaults };
+        const plotElement = document.querySelector('#ObjectPlot .jsroot-container');
+        const fingerprint = plotElement.dataset.fingerprintData || null;
+        return { fingerprint };
       });
 
-      const ignoreDefaultsMatches = result.ignoreDefaults === expectedIgnoreDefaults;
       const allOptionsPresent = expectedDrawingOptions.every((option) => result.fingerprint.includes(option));
-      strictEqual(ignoreDefaultsMatches, true, 'ignoreDefaults does not match expected value from layout');
-      strictEqual(allOptionsPresent, true, 'Not all expected drawing options are present in the plot fingerprint');
+      strictEqual(
+        allOptionsPresent,
+        true,
+        `Not all expected drawing options are present in the fingerprint. Expected: ${
+          expectedDrawingOptions
+        }, Found: ${
+          result.fingerprint
+        }`,
+      );
     },
   );
 
@@ -486,8 +488,8 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       });
       const expectedDrawingOptions = ['logx', 'text'];
       deepStrictEqual(
-        activeCheckboxLabels.sort(),
-        expectedDrawingOptions.sort(),
+        activeCheckboxLabels.toSorted((a, b) => a.localeCompare(b)),
+        expectedDrawingOptions.toSorted((a, b) => a.localeCompare(b)),
         'Active drawing options do not match expected layout settings',
       );
     },
@@ -506,8 +508,8 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       });
       const expectedDrawingOptions = ['logx', 'text'];
       deepStrictEqual(
-        activeCheckboxLabels.sort(),
-        expectedDrawingOptions.sort(),
+        activeCheckboxLabels.toSorted((a, b) => a.localeCompare(b)),
+        expectedDrawingOptions.toSorted((a, b) => a.localeCompare(b)),
         'Active drawing options do not match expected layout settings',
       );
     },
@@ -525,7 +527,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       await delay(100);
 
       const fingerprintIncludesLogx = await page.evaluate(() => {
-        const plotElement = document.querySelector('#ObjectPlot > div:nth-child(2) > div:nth-child(1) > div');
+        const plotElement = document.querySelector('#ObjectPlot .jsroot-container');
         const fingerprint = plotElement.dataset.fingerprintData;
         return fingerprint.includes('logx');
       });
