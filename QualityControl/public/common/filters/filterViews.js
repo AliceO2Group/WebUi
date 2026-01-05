@@ -16,7 +16,12 @@ import { filterInput, dynamicSelector, ongoingRunsSelector } from './filter.js';
 import { FilterType } from './filterTypes.js';
 import { filtersConfig, runModeFilterConfig } from './filtersConfig.js';
 import { runModeComponent } from './runMode/runModeCheckbox.js';
-import { lastUpdatePanel, runStatusPanel } from './runMode/runStatusPanel.js';
+import {
+  cleanRunInformationPanel,
+  detectorsQualitiesPanel,
+  lastUpdatePanel,
+  runStatusPanel,
+} from './runMode/runStatusPanel.js';
 import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
 
 /**
@@ -75,6 +80,7 @@ export function filtersPanel(filterModel, viewModel) {
     isVisible,
     lastRefresh,
     ONGOING_RUN_INTERVAL_MS: refreshRate,
+    runInformation,
   } = filterModel;
   if (!isVisible) {
     return null;
@@ -88,6 +94,7 @@ export function filtersPanel(filterModel, viewModel) {
   const filtersList = isRunModeActivated
     ? runModeFilterConfig(filterService)
     : filtersConfig(filterService);
+  const { detectorsQualities, ...cleanRunInformation } = runInformation;
 
   return h(
     '.w-100.flex-column.p2.g2.justify-center#filterElement',
@@ -101,15 +108,11 @@ export function filtersPanel(filterModel, viewModel) {
         isRunModeActivated && runStatusPanel(runStatus),
       ]),
       lastUpdatePanel(runStatus, lastRefresh, refreshRate),
+      cleanRunInformationPanel(cleanRunInformation),
+      detectorsQualitiesPanel(detectorsQualities),
     ],
   );
-};
-
-/**
- * Determines if runs mode is allowed based on current page and context
- * @param {object} viewModel - Model that manages the state of the page
- * @returns {boolean} - whether runs mode is allowed
- */
+}
 
 /**
  * Button which will allow the user to update filter parameters after the input

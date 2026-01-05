@@ -271,6 +271,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
 
   await testParent.test('should persist runs mode between pages', { timeout }, async () => {
     await page.locator('.menu-item:nth-child(3) > .ph2').click();
+    expectCountRunStatusCalls++;// fetches run information on page load
     await page.waitForSelector('#runStatusPanel');
     const runInfo = await page.evaluate(() => {
       const status = document.querySelector('#runStatusBadge').textContent;
