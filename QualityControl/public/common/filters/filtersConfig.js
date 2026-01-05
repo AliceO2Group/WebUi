@@ -19,43 +19,35 @@ import { FilterType } from './filterTypes.js';
  * @param {FilterService} filterService - service to get the data to populate the filters
  * @returns {Array<object>} Filter configuration array
  */
-export const filtersConfig = (filterService) => {
-  const { runTypes, ongoingRuns } = filterService;
-
-  if (ongoingRuns.isNotAsked()) {
-    filterService.fetchOngoingRuns();
-  }
-
-  return [
-    {
-      type: ongoingRuns.isSuccess() ? FilterType.COMBOBOX : FilterType.INPUT,
-      queryLabel: 'RunNumber',
-      placeholder: 'RunNumber (e.g. 546783)',
-      id: 'runNumberFilter',
-      inputType: 'number',
-      options: ongoingRuns,
-    },
-    {
-      type: FilterType.DROPDOWN,
-      queryLabel: 'RunType',
-      placeholder: 'RunType (any)',
-      id: 'runTypeFilter',
-      options: runTypes,
-    },
-    {
-      type: FilterType.INPUT,
-      queryLabel: 'PeriodName',
-      placeholder: 'PeriodName (e.g. LHC23c)',
-      id: 'periodNameFilter',
-    },
-    {
-      type: FilterType.INPUT,
-      queryLabel: 'PassName',
-      placeholder: 'PassName (e.g. apass2)',
-      id: 'passNameFilter',
-    },
-  ];
-};
+export const filtersConfig = ({ runTypes, ongoingRuns }) => [
+  {
+    type: ongoingRuns.isSuccess() ? FilterType.COMBOBOX : FilterType.INPUT,
+    queryLabel: 'RunNumber',
+    placeholder: 'RunNumber (e.g. 546783)',
+    id: 'runNumberFilter',
+    inputType: 'number',
+    options: ongoingRuns,
+  },
+  {
+    type: FilterType.DROPDOWN,
+    queryLabel: 'RunType',
+    placeholder: 'RunType (any)',
+    id: 'runTypeFilter',
+    options: runTypes,
+  },
+  {
+    type: FilterType.INPUT,
+    queryLabel: 'PeriodName',
+    placeholder: 'PeriodName (e.g. LHC23c)',
+    id: 'periodNameFilter',
+  },
+  {
+    type: FilterType.INPUT,
+    queryLabel: 'PassName',
+    placeholder: 'PassName (e.g. apass2)',
+    id: 'passNameFilter',
+  },
+];
 
 /**
  * Returns a filter configuration object used to render dynamic filter in run mode.

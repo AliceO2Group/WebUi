@@ -214,7 +214,7 @@ export const ongoingRunsSelector = (config, filterMap, options, onChangeCallback
  * @returns {vnode} - A virtual node representing the combobox.
  */
 export const combobox = (
-  { id, type, queryLabel, placeholder, width = '.w-20' },
+  { id, inputType, queryLabel, placeholder, width = '.w-20' },
   filterMap,
   options,
   onEnterCallback,
@@ -233,7 +233,7 @@ export const combobox = (
 
     const move = (nextIndex) => {
       if (current) {
-        current.classList.remove('is-highlighted')
+        current.classList.remove('is-highlighted');
       }
       if (items[nextIndex]) {
         items[nextIndex].classList.add('is-highlighted');
@@ -265,7 +265,7 @@ export const combobox = (
     h('input.form-control', {
       id,
       placeholder,
-      type,
+      type: inputType,
       autocomplete: 'off',
       min: 0,
       value: filterMap[queryLabel] || '',
