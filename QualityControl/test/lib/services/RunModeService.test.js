@@ -28,6 +28,7 @@ export const runModeServiceTestSuite = async () => {
     let bookkeepingService = undefined;
     let dataService = undefined;
     const eventEmitter = new EventEmitter();
+    let ws = undefined;
 
     beforeEach(() => {
       bookkeepingService = {
@@ -38,8 +39,12 @@ export const runModeServiceTestSuite = async () => {
         getObjectsLatestVersionList: sinon.stub(),
       };
 
+      ws = {
+        broadcast: sinon.stub(),
+      };
+
       const config = { refreshInterval: 60000 };
-      runModeService = new RunModeService(config, bookkeepingService, dataService, eventEmitter);
+      runModeService = new RunModeService(config, bookkeepingService, dataService, eventEmitter, ws);
     });
     suite('retrievePathsAndSetRunStatus', () => {
       test('should retrieve paths and cache them if run is ongoing', async () => {
