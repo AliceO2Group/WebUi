@@ -198,7 +198,7 @@ export const ongoingRunsSelector = (config, filterMap, options, onChangeCallback
 };
 
 export const combobox = (
-  { id, queryLabel, placeholder, width = '.w-20' },
+  { id, type, queryLabel, placeholder, width = '.w-20' },
   filterMap,
   options,
   onEnterCallback,
@@ -206,29 +206,35 @@ export const combobox = (
 ) => {
   const filtered = filterMap[queryLabel]
     ? options.payload.filter((option) =>
-      option.toLowerCase().includes(filterMap[queryLabel].toLowerCase()))
+      String(option).toLowerCase().includes(filterMap[queryLabel].toLowerCase()))
     : options.payload;
 
   return h(`${width}.combobox-container`, [
     h('input.form-control', {
       id,
       placeholder,
+      type,
       min: 0,
       value: filterMap[queryLabel] || '',
       oninput: (event) => onInputCallback(queryLabel, event.target.value),
-      onkeydown: ({ keyCode }) => {
-        if (keyCode === 13) {
+      onkeydown: (e) => {
+        if (e.keyCode === 13) {
           onEnterCallback();
+          e.target.blur();
         }
       },
     }),
 
-    filterMap[queryLabel]?.length > 0 && filtered.length > 0 && h(
+    h(
       'ul.combobox-list',
       filtered.map((option) =>
         h('li.combobox-item', {
-          onclick: () => {
+          onmousedown: (e) => {
+            e.preventDefault();
             onInputCallback(queryLabel, option);
+            e.target.closest('.combobox-container')
+              .querySelector('input')
+              ?.blur()
             onEnterCallback();
           },
         }, option)),
