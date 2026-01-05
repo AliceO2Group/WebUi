@@ -100,12 +100,15 @@ export default class QCObject extends BaseViewModel {
    * @returns {undefined}
    */
   toggleInfoArea(objectName) {
-    this.selectedOpenName = this.selectedOpenName === objectName ? null : objectName;
-
-    if (this.selectedOpenName && objectName) {
+    this.selectedOpen = !this.selectedOpen;
+    this.notify();
+    if (objectName) {
       if (!this.list) {
         this.selected = { name: objectName };
-      } else {
+      } else if (this.selectedOpen && this.list
+        && (this.selected && !this.selected.lastModified
+          || !this.selected)
+      ) {
         this.selected = this.list.find((object) => object.name === objectName);
       }
     }

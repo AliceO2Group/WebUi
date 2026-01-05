@@ -27,7 +27,7 @@ import { h, iconResizeBoth, info } from '/js/src/index.js';
 export const objectInfoResizePanel = (model, tabObject) => {
   const { name } = tabObject;
   const { filterModel, router, object, services } = model;
-  const isSelectedOpen = object.selectedOpenName === name;
+  const isSelectedOpen = object.selectedOpen;
   const objectRemoteData = services.object.objectsLoadedMap[name];
   let uri = `?page=objectView&objectId=${tabObject.id}&layoutId=${router.params.layoutId}`;
   Object.entries(filterModel.filterMap)
