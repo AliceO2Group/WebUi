@@ -29,6 +29,9 @@ export default class ObjectTree extends Observable {
   constructor(name, parent) {
     super();
     this.storage = new BrowserStorage(StorageKeysEnum.OBJECT_TREE_OPEN_NODES);
+    this.focusedNodePathStorage = new BrowserStorage(StorageKeysEnum.OBJECT_TREE_FOCUSED_NODE);
+    this.selector = null; // Callback for object selection
+    this.focusedNode = null; // Currently focused node for navigation
     this.initTree(name, parent);
   }
 
@@ -46,6 +49,165 @@ export default class ObjectTree extends Observable {
     this.parent = parent || null; // <ObjectTree>
     this.path = []; // Like ['A', 'B'] for node at path 'A/B' called 'B'
     this.pathString = ''; // 'A/B'
+  }
+
+  /**
+   * Collapse the currently focused node or move focus to its parent.
+   * - If the focused node is an object, it collapses its parent (if any) and moves focus to the parent.
+   * - If the focused node is a branch (a node with children):
+   *   - If the branch is open, it collapses the branch and keeps the focus on it.
+   *   - If the branch is already collapsed, it moves focus to its parent.
+   * @returns {undefined}
+   */
+  collapseFocusedNode() {
+    if (!this.focusedNode) {
+      return;
+    }
+
+    const node = this.focusedNode;
+
+    // If focus is on a object, collapse its parent (if any) and focus the parent.
+    if (node.object) {
+      const { parent } = node;
+      if (!parent) {
+        return;
+      }
+      parent.open = false;
+      this.setFocusedNode(parent);
+      return;
+    }
+
+    // If focus is on a branch: collapse it if open, otherwise move focus to parent.
+    if (node.open && node.children.length > 0) {
+      node.toggle(); // collapse current branch, keep focus here
+      return;
+    }
+
+    if (node.parent) {
+      this.setFocusedNode(node.parent);
+    }
+  }
+
+  /**
+   * Expand the currently focused node or move focus to its first child.
+   * - If the focused node is a branch (a node with children):
+   *   - If the branch is collapsed, it expands the branch and keeps the focus on it.
+   *   - If the branch is already expanded, it moves focus to its first child.
+   * @returns {undefined}
+   */
+  expandFocusedNode() {
+    if (!this.focusedNode) {
+      return;
+    }
+    if (!this.focusedNode.open && this.focusedNode.children.length > 0) {
+      this.focusedNode.toggle();
+    } else if (this.focusedNode.open && this.focusedNode.children.length > 0) {
+      this.setFocusedNode(this.focusedNode.children[0]);
+    }
+  }
+
+
+  /**
+   * Set the currently focused node
+   * @param {ObjectTree} node - node to be focused
+   * @returns {undefined}
+   */
+  setFocusedNode(node) {
+    this.focusedNode = node;
+    try {
+      const session = sessionService.get();
+      const key = session.personid.toString();
+      if (node?.pathString) {
+        this.focusedNodePathStorage.setLocalItem(key, node.pathString);
+      } else {
+        // clear stored value
+        this.focusedNodePathStorage.removeLocalItem(key, null);
+      }
+    } catch {
+      // ignore sessionStorage errors
+    }
+    this.notify();
+  }
+
+  // Register a callback invoked when navigation selects a node with an object
+  setSelector(selector) {
+    this.selector = selector;
+  }
+
+  /**
+   * Get all visible nodes in the tree (for navigation)
+   * @returns {Array.<ObjectTree>} - list of visible nodes
+   */
+  _getVisibleNodes() {
+    const nodes = [];
+    const traverse = (n) => {
+      nodes.push(n);
+      if (n.open) {
+        n.children.forEach(traverse);
+      }
+    };
+    this.children.forEach(traverse);
+    return nodes;
+  }
+
+  /**
+   * Select the next visible node in the tree
+   */
+  selectNextNode() {
+    const visible = this._getVisibleNodes();
+    if (!visible.length) {
+      return; // no visible nodes
+    }
+    const idx = visible.indexOf(this.focusedNode);
+    // nothing focused yet -> focus first visible node
+    if (!this.focusedNode || idx === -1) {
+      const [first] = visible;
+      this.setFocusedNode(first);
+      if (first.object && this.selector) {
+        this.selector(first.object);
+      }
+      return;
+    }
+    // if already at the last visible node, do nothing
+    if (idx >= visible.length - 1) {
+      return;
+    }
+    // select next node
+    const next = visible[idx + 1] ?? visible[idx];
+    this.setFocusedNode(next);
+    if (next.object && this.selector) {
+      this.selector(next.object);
+    }
+  }
+
+  /**
+   * Select the previous visible node in the tree.
+   */
+  selectPreviousNode() {
+    const visible = this._getVisibleNodes();
+    if (!visible.length) {
+      return; // no visible nodes
+    }
+    const idx = visible.indexOf(this.focusedNode);
+    // if already at the first visible node, do nothing
+    if (idx === 0) {
+      return;
+    }
+    // nothing focused yet -> focus first visible node
+    if (!this.focusedNode || idx === -1) {
+      const [first] = visible;
+      this.setFocusedNode(first);
+      if (first.object && this.selector) {
+        this.selector(first.object);
+      }
+      return;
+    }
+    // select previous node
+    const prev = idx > 0 ? visible[idx - 1] : visible[0];
+    this.setFocusedNode(prev);
+    if (prev.object && this.selector) {
+      this.selector(prev.object);
+    }
   }
 
   /**
@@ -73,6 +235,20 @@ export default class ObjectTree extends Observable {
     }
 
     this._applyExpandedNodesRecursive(parentNode, this);
+
+    // Restore previously focused node
+    try {
+      const stored = this.focusedNodePathStorage.getLocalItem(key);
+      if (stored) {
+        const visible = this._getVisibleNodes();
+        const found = visible.find((n) => n.pathString === stored);
+        if (found) {
+          this.setFocusedNode(found);
+        }
+      }
+    } catch {
+      // ignore sessionStorage errors
+    }
   }
 
   /**

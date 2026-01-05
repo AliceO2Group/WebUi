@@ -52,6 +52,7 @@ export default class QCObject extends BaseViewModel {
 
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
+    this.tree.setSelector((nodeObject) => this.select(nodeObject));
 
     this.queryingObjects = false;
     this.scrollTop = 0;

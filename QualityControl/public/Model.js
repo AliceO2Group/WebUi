@@ -139,6 +139,18 @@ export default class Model extends Observable {
     } else if (code === 27 && this.isImportVisible) {
       this.layout.resetImport();
     }
+
+    if (this.router.params.page === 'objectTree') {
+      if (code === 37) { // Left arrow
+        this.object.tree.collapseFocusedNode();
+      } else if (code === 39) { // Right arrow
+        this.object.tree.expandFocusedNode();
+      } else if (code === 38) { // Up arrow
+        this.object.tree.selectPreviousNode();
+      } else if (code === 40) { // Down arrow
+        this.object.tree.selectNextNode();
+      }
+    }
   }
 
   /**

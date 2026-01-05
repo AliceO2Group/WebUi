@@ -26,6 +26,8 @@
 .object-selectable { cursor: pointer; text-decoration: none; }
 .object-selectable:hover { cursor: pointer; background-color: var(--color-gray-dark) !important; color: var(--color-gray-lighter); }
 
+.focused-node>th, .focused-node>td { background-color: var(--color-gray-dark); color: var(--color-white); }
+
 .layout-selectable { border: 0.0em solid var(--color-primary); transition: border 0.1s; }
 .layout-selected { border: 0.3em solid var(--color-primary); }
 .layout-edit-layer { cursor: move; opacity: 0; }
