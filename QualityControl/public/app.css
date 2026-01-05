@@ -78,7 +78,7 @@
 /* overwrite jsroot styles */
 .jsroot-container {}
 .jsroot-container pre { background-color: initial; }
-.jsrootdiv:hover + .resize-element, .resize-element:hover{ display: flex !important; }
+.jsrootdiv:hover + .resize-element, .resize-element:hover{ display: flex !important; visibility: visible !important; }
 
 .item-action-row { position: absolute; right: 0%; z-index: 100 }
 
@@ -152,9 +152,14 @@
   }
 }
 
-.cursor-pointer {
-  cursor: pointer;
-}
+.cursor-pointer { cursor: pointer; }
+.cursor-grab { cursor: grab; }
+.cursor-inherit { cursor: inherit; }
+
+.b1 { border-style: solid; border-width: 1px; }
+
+.b-danger { border-color: var(--color-danger); }
+.b-success { border-color: var(--color-success); }
 
 .header-layout {
   &.edit {
@@ -186,4 +191,42 @@
 
 .whitespace-nowrap {
   white-space: nowrap;
+}
+
+.drop-zone {
+  position: absolute;
+  height: 100%;
+  width: 50%;
+  pointer-events: none;
+
+  &.before {
+    left: 0;
+
+    &.active {
+      border-left: 2px solid var(--color-primary);
+    }
+  }
+
+  &.after {
+    right: 0;
+
+    &.active {
+      border-right: 2px solid var(--color-primary);
+    }
+  }
+}
+
+.pointer-events-auto {
+  pointer-events: auto;
+}
+.pointer-events-none {
+  pointer-events: none;
+}
+
+/* This hacky workaround is required due to `justify-content: center;` being unusable thanks to a horizontal scrolling bug */
+#header-detector-qualities {
+  &::before, &::after {
+    content: '';
+    flex: 1;
+  }
 }
