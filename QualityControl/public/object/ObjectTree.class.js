@@ -56,31 +56,19 @@ export default class ObjectTree extends Observable {
   }
 
   /**
-   * Open all or close all nodes of the tree
-   * @returns {undefined}
-   */
-  toggleAll() {
-    this.open ? this.closeAll() : this.openAll();
-  }
-
-  /**
-   * Open all nodes of the tree
-   * @returns {undefined}
-   */
-  openAll() {
-    this.open = true;
-    this.children.forEach((child) => child.openAll());
-    this.notify();
-  }
-
-  /**
    * Close all nodes of the tree
-   * @returns {undefined}
    */
   closeAll() {
-    this.open = false;
-    this.children.forEach((child) => child.closeAll());
+    this._closeAllRecursive();
     this.notify();
+  }
+
+  /**
+   * Recursively close all nodes without notifying.
+   */
+  _closeAllRecursive() {
+    this.open = false;
+    this.children.forEach((child) => child._closeAllRecursive());
   }
 
   /**
