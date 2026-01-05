@@ -169,7 +169,7 @@ export default class Model extends Observable {
     this.object.objects = {}; // Remove any in-memory loaded objects
     this._clearAllIntervals();
     await this.filterModel.filterService.initFilterService();
-    this.filterModel.setFilterFromURL();
+    await this.filterModel.setFilterFromURL();
     this.filterModel.setFilterToURL();
 
     this.services.layout.getLayoutsByUserId(this.session.personid, RequestFields.LAYOUT_CARD);
