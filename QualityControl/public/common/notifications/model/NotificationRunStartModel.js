@@ -85,19 +85,15 @@ export default class NotificationRunStartModel extends Observable {
     showNativeBrowserNotification({
       title: `RUN ${runNumber ?? 'unknown'} has started`,
       onclick: () => {
-        const searchParams = new URLSearchParams();
-
-        const { params } = this.model.router;
-        params.RunNumber = runNumber;
-
-        Object.entries(params).forEach(([key, value]) => {
-          searchParams.append(key, String(value));
-        });
-
-        const query = searchParams.toString();
-        if (query) {
-          this.model.router.go(query);
+        const { isRunModeActivated } = this.model.filterModel;
+        if (!isRunModeActivated) {
+          const viewModel = this.model.filterModel.getPageTargetModel();
+          if (viewModel) {
+            this.model.filterModel.activateRunsMode(viewModel);
+          }
         }
+
+        this.model.filterModel.setFilterValue('RunNumber', runNumber?.toString(), true);
       },
     });
   }
