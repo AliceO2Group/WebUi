@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { filterInput, dynamicSelector, ongoingRunsSelector } from './filter.js';
+import { filterInput, dynamicSelector, ongoingRunsSelector, combobox } from './filter.js';
 import { FilterType } from './filterTypes.js';
 import { filtersConfig, runModeFilterConfig } from './filtersConfig.js';
 import { runModeCheckbox } from './runMode/runModeCheckbox.js';
@@ -59,6 +59,8 @@ const createFilterElement =
           onEnterCallback,
           onFocusCallback,
         );
+      case FilterType.COMBOBOX:
+        return combobox({ ...config }, filterMap, options, onEnterCallback, onInputCallback);
       default: return null;
     }
   };

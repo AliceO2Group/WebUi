@@ -16,6 +16,7 @@ const FilterType = {
   INPUT: 'input',
   DROPDOWN: 'dropdownSelector',
   RUN_MODE: 'runModeSelector',
+  COMBOBOX: 'combobox',
 };
 
 export { FilterType };

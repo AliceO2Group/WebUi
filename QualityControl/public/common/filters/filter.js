@@ -196,3 +196,42 @@ export const ongoingRunsSelector = (config, filterMap, options, onChangeCallback
     ),
   ]);
 };
+
+export const combobox = (
+  { id, queryLabel, placeholder, width = '.w-20' },
+  filterMap,
+  options,
+  onEnterCallback,
+  onInputCallback,
+) => {
+  const filtered = filterMap[queryLabel]
+    ? options.payload.filter((option) =>
+      option.toLowerCase().includes(filterMap[queryLabel].toLowerCase()))
+    : options.payload;
+
+  return h(`${width}.combobox-container`, [
+    h('input.form-control', {
+      id,
+      placeholder,
+      min: 0,
+      value: filterMap[queryLabel] || '',
+      oninput: (event) => onInputCallback(queryLabel, event.target.value),
+      onkeydown: ({ keyCode }) => {
+        if (keyCode === 13) {
+          onEnterCallback();
+        }
+      },
+    }),
+
+    filterMap[queryLabel]?.length > 0 && filtered.length > 0 && h(
+      'ul.combobox-list',
+      filtered.map((option) =>
+        h('li.combobox-item', {
+          onclick: () => {
+            onInputCallback(queryLabel, option);
+            onEnterCallback();
+          },
+        }, option)),
+    ),
+  ]);
+};
