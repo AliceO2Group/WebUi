@@ -278,6 +278,25 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(sorted.list[0].name, 'qc/test/object/1');
   });
 
+  await testParent.test(
+    'should close all branches when clicking the collapse all button',
+    { timeout },
+    async () => {
+      const selector = '#collapse-tree-button';
+      const personid = await page.evaluate(() => window.model.session.personid);
+      const storageKey = `${StorageKeysEnum.OBJECT_TREE_OPEN_NODES}-${personid}`;
+
+      await page.locator(selector).click();
+      await delay(100);
+      const storedNodes = await getLocalStorageAsJson(page, storageKey);
+      const tableRowCount = await page.evaluate(() =>
+        document.querySelectorAll('section > div > div > div > table > tbody > tr').length);
+
+      deepStrictEqual(storedNodes, {}, 'Stores nodes should be empty');
+      strictEqual(tableRowCount, 1, 'Tree should be fully collapsed');
+    },
+  );
+
   await testParent.test('should have filtered results on input search', async () => {
     await page.type('#searchObjectTree', 'qc/test/object/1');
     const rowsDisplayed = await page.evaluate(() => {
