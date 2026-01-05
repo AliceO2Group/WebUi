@@ -17,14 +17,13 @@ import { FilterType } from './filterTypes.js';
 /**
  * Returns an array of filter configuration objects used to render dynamic filter inputs.
  * @param {FilterService} filterService - service to get the data to populate the filters
- * @param {Array<string>} filterService.runTypes - run types to show in the filter
  * @returns {Array<object>} Filter configuration array
  */
-export const filtersConfig = (service) => {
-  const { runTypes, ongoingRuns } = service;
+export const filtersConfig = (filterService) => {
+  const { runTypes, ongoingRuns } = filterService;
 
   if (ongoingRuns.isNotAsked()) {
-    service.fetchOngoingRuns();
+    filterService.fetchOngoingRuns();
   }
 
   return [
