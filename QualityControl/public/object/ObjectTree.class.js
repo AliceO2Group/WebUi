@@ -96,6 +96,12 @@ export default class ObjectTree extends Observable {
    * Persist the current node's expanded/collapsed state in localStorage.
    */
   storeExpandedNodes() {
+    if (!this.parent) {
+      // The main node may not be collapsable or expandable.
+      // Because of this we have to store the expanded state of their direct children.
+      this.children.forEach((child) => child.storeExpandedNodes());
+    }
+
     const session = sessionService.get();
     const key = session.personid.toString();
     const data = this.storage.getLocalItem(key) ?? {};
