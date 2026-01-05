@@ -31,7 +31,7 @@
     ]
   },
   "dependencies": {
-    "express": "^4.21.2",
+    "express": "^4.22.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.0",
     "kafkajs": "^2.2.0",
@@ -51,7 +51,7 @@
     "mocha": "^11.7.0",
     "nock": "15.0.0",
     "nyc": "^17.1.0",
-    "puppeteer": "^24.33.0",
+    "puppeteer": "^24.34.0",
     "sinon": "21.0.0",
     "supertest": "^7.1.0",
     "long": "^5.3.1"
