@@ -78,7 +78,7 @@
 /* overwrite jsroot styles */
 .jsroot-container {}
 .jsroot-container pre { background-color: initial; }
-.jsrootdiv:hover + .resize-element, .resize-element:hover{ display: flex !important; }
+.jsrootdiv:hover + .resize-element, .resize-element:hover{ display: flex !important; visibility: visible !important; }
 
 .item-action-row { position: absolute; right: 0%; z-index: 100 }
 
