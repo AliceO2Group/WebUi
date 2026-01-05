@@ -21,7 +21,7 @@ import { FilterType } from './filterTypes.js';
  */
 export const filtersConfig = ({ runTypes, ongoingRuns }) => [
   {
-    type: ongoingRuns.isSuccess() ? FilterType.COMBOBOX : FilterType.INPUT,
+    type: FilterType.COMBOBOX,
     queryLabel: 'RunNumber',
     placeholder: 'RunNumber (e.g. 546783)',
     id: 'runNumberFilter',

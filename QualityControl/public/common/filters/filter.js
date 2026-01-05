@@ -277,13 +277,6 @@ export const combobox = (
       'ul.combobox-list.dropdown-menu',
       filtered.map((option) =>
         h('li.combobox-item.menu-item', {
-          onmousemove: (e) => {
-            const prev = e.target.closest('.combobox-list').querySelector('.is-highlighted');
-            if (prev) {
-              prev.classList.remove('is-highlighted');
-            }
-            e.target.classList.add('is-highlighted');
-          },
           onmousedown: (e) => {
             e.preventDefault();
             onInputCallback(queryLabel, option);
