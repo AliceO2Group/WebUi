@@ -440,4 +440,19 @@ export default class FilterModel extends Observable {
     }
     return { refreshNeeded: true, data: null };
   }
+
+  /**
+   * Returns the target model based on the current page
+   * @returns {object} the specific object/view model for the page
+   */
+  getPageTargetModel() {
+    const { page, layout, object, objectViewModel } = this.model;
+
+    switch (page) {
+      case 'layoutShow': return layout;
+      case 'objectTree': return object;
+      case 'objectView': return objectViewModel;
+      default: return null;
+    }
+  }
 }
