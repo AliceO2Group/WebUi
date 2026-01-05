@@ -65,6 +65,8 @@ export class CopyToClipboardComponent extends StatefulComponent {
   /**
    * Checks if context is secure (HTTPS)
    *
+   * @deprecated Use `isContextSecure` from `./utilities/browserContext.js` instead.
+   * Calling this method directly is discouraged; it may be removed in future versions.
    * @returns {boolean} Returns `true` if context is secure
    */
   isContextSecure() {
