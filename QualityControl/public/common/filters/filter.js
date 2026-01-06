@@ -203,7 +203,7 @@ export const ongoingRunsSelector = (config, filterMap, options, onChangeCallback
  * and direct DOM manipulation for arrow-key highlighting to avoid FilterModel pollution.
  * @param {object} config - The configuration for the combobox field.
  * @param {string} config.id - The unique HTML ID for the input element.
- * @param {string} config.type - The HTML input type (e.g., 'text', 'number').
+ * @param {string} config.inputType - The type for the HTML input element.
  * @param {string} config.queryLabel - The key name in the filterMap to update.
  * @param {string} config.placeholder - The placeholder text for the input.
  * @param {string} config.width - Width of the input container.
@@ -221,7 +221,7 @@ export const combobox = (
   onInputCallback,
 ) => {
   const filtered = filterMap[queryLabel]
-    ? options.payload.filter((option) =>
+    ? options.payload?.filter((option) =>
       String(option).toLowerCase().includes(filterMap[queryLabel].toLowerCase()))
     : options.payload;
 
@@ -273,9 +273,9 @@ export const combobox = (
       onkeydown: handleKeyNavigation,
     }),
 
-    h(
+    options.payload?.length > 0 && h(
       'ul.combobox-list.dropdown-menu',
-      filtered.map((option) =>
+      filtered?.map((option) =>
         h('li.combobox-item.menu-item', {
           onmousedown: (e) => {
             e.preventDefault();
