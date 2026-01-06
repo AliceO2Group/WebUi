@@ -28,11 +28,14 @@ import { resizableDivider } from '../common/resizableDivider.js';
  * @returns {vnode} - virtual node element
  */
 export default (model) => {
-  const { object, router } = model;
+  const { object } = model;
   const { leftPanelWidthPercent } = object;
-  return h('.h-100.flex-column', { key: `${router.params.page}` }, [
-    h('.flex-row.flex-grow', [
-      h('.scroll-y.flex-column', {
+  return h('.flex-column.h-100', {
+    key: 'object-tree-page-container',
+  }, [
+    h('.flex-row', { style: 'flex-grow: 1; height: 0;' }, [
+      h('.flex-column.scroll-y', {
+        key: 'object-tree-scroll-container',
         style: {
           width: object.selected ? `${leftPanelWidthPercent}%` : '100%',
         },
