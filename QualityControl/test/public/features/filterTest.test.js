@@ -32,8 +32,8 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     strictEqual(location.href.includes('RunNumber=0'), true, 'URL should contain RunNumber=0');
 
     //Naviagte to object view
-    await extendTree(3, 5);
-    await page.locator('tr:last-of-type td').click();
+    await extendTree(3, 4);
+    await page.locator('tbody tr:nth-child(4) td').click();
     await page.waitForSelector('#fullscreen-button');
     await page.locator('#fullscreen-button').click();
     await page.waitForSelector('#runNumberFilter', { visible: true });
@@ -240,7 +240,6 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
       { waitUntil: 'networkidle0' },
     );
 
-    await extendTree(3, 5);
     let rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
     strictEqual(rowCount, 7);
 

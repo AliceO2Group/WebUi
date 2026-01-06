@@ -58,6 +58,7 @@ export default function objectTreeHeader(qcObject, filterModel) {
       ' ',
       h('button.btn', {
         title: 'Close whole tree',
+        id: 'collapse-tree-button',
         onclick: () => qcObject.tree.closeAll(),
         disabled: Boolean(qcObject.searchInput),
       }, iconCollapseUp()),
