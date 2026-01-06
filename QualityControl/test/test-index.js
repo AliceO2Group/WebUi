@@ -29,6 +29,7 @@ import {
  */
 
 import { initialPageSetupTests } from './public/initialPageSetup.test.js';
+import { profileHeaderTests } from './public/components/profileHeader.test.js';
 import { qcDrawingOptionsTests } from './public/components/qcDrawingOptions.test.js';
 import { layoutListPageTests } from './public/pages/layout-list.test.js';
 import { objectTreePageTests } from './public/pages/object-tree.test.js';
@@ -144,6 +145,12 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     test.skip(
       'should successfully import and run tests for QC drawing options',
       async (testParent) => await qcDrawingOptionsTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
+    );
+
+    test(
+      'should successfully import and run tests for profile in header',
+      { timeout: INITIAL_PAGE_SETUP_TIMEOUT },
+      async (testParent) => await profileHeaderTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
 
     test(
