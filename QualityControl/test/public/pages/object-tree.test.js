@@ -308,4 +308,116 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       deepStrictEqual(options, ['', 'runType1', 'runType2']);
     },
   );
+
+  await testParent.test(
+    'should focus first node when ArrowDown key is pressed',
+    { timeout },
+    async () => {
+      await page.goto(`${url}${OBJECT_TREE_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
+      await page.keyboard.press('ArrowDown'); // Move to the first child node
+      await delay(500);
+      const isFirstNodeHighlighted = await page.evaluate(() => {
+        const selectedNode = document.querySelector('tr.object-selectable');
+        return selectedNode?.classList.contains('focused-node');
+      });
+      strictEqual(isFirstNodeHighlighted, true, 'The first node is not highlighted.');
+    },
+  );
+
+  await testParent.test(
+    'should collapse tree when ArrowLeft key is pressed on a focused node',
+    { timeout },
+    async () => {
+      await page.keyboard.press('ArrowDown'); // Move to the second child node
+      await delay(500);
+      // Verify the second node is highlighted
+      const isSecondNodeHighlighted = await page.evaluate(() => {
+        const [, selectedNode] = document.querySelectorAll('tr.object-selectable');
+        return selectedNode?.classList.contains('focused-node');
+      });
+      strictEqual(isSecondNodeHighlighted, true, 'The second node is not highlighted.');
+      await delay(200);
+      await page.keyboard.press('ArrowLeft'); // Collapse the second node
+      await delay(500);
+      // Verify that the third node is gone after collapsing
+      const isNodeCollapsed = await page.evaluate(() => {
+        const nodes = document.querySelectorAll('tr.object-selectable');
+        return nodes.length < 3; // Check if there are less than 3 nodes
+      });
+      strictEqual(isNodeCollapsed, true, 'The third node is still present after collapsing the second node.');
+    },
+  );
+
+  await testParent.test(
+    'should expand tree when ArrowRight key is pressed on a focused node',
+    { timeout },
+    async () => {
+      await page.keyboard.press('ArrowRight'); // Expand the second node
+      await delay(500);
+      // Verify that the third node is back after expanding
+      const isNodeExpanded = await page.evaluate(() => {
+        const nodes = document.querySelectorAll('tr.object-selectable');
+        return nodes.length >= 3; // Check if there are at least 3 nodes
+      });
+      strictEqual(isNodeExpanded, true, 'The third node is not present after expanding the second node.');
+    },
+  );
+
+  await testParent.test(
+    'should select object when ArrowRight key is pressed on a focused object node',
+    { timeout },
+    async () => {
+      await page.keyboard.press('ArrowDown'); // Move to the third child node
+      await delay(500);
+      await page.keyboard.press('ArrowDown'); // Move to the fourth child node which is an object
+      await delay(200);
+      await page.keyboard.press('ArrowRight'); // Select object node
+      await delay(500);
+      const isObjectSelected = await page.evaluate(() => model.object.selected !== undefined);
+      const isObjectPlotOpened = await page.evaluate(() => {
+        const objectPanel = document.querySelector('#qcObjectInfoPanel');
+        return objectPanel !== null && objectPanel !== undefined;
+      });
+      strictEqual(isObjectSelected, true, 'The focused object node was not selected on pressing ArrowRight key.');
+      strictEqual(isObjectPlotOpened, true, 'The object plot panel is not opened after selecting the object node.');
+    },
+  );
+
+  await testParent.test(
+    'should collapse parent node when ArrowLeft key is pressed on a selected object node',
+    { timeout },
+    async () => {
+      const nodeCountBefore = await page.evaluate(() => {
+        const nodes = document.querySelectorAll('tr.object-selectable');
+        return nodes.length;
+      });
+      ok(nodeCountBefore > 3, `Expected node count to be greater than 3, but got ${nodeCountBefore}`);
+      await page.keyboard.press('ArrowLeft'); // Collapse the parent node of the selected object
+      await delay(500);
+      const nodeCountAfter = await page.evaluate(() => {
+        const nodes = document.querySelectorAll('tr.object-selectable');
+        return nodes.length;
+      });
+      strictEqual(
+        nodeCountAfter,
+        3,
+        'The object tree navigation does not have exactly 3 nodes after collapsing the parent.',
+      );
+    },
+  );
+
+  await testParent.test(
+    'should focus previous node when ArrowUp key is pressed',
+    { timeout },
+    async () => {
+      await page.keyboard.press('ArrowUp'); // Move back to the second child node
+      await delay(500);
+      // Verify the second node is highlighted
+      const isSecondNodeHighlighted = await page.evaluate(() => {
+        const [, selectedNode] = document.querySelectorAll('tr.object-selectable');
+        return selectedNode?.classList.contains('focused-node');
+      });
+      strictEqual(isSecondNodeHighlighted, true, 'The second node is not highlighted after pressing ArrowUp key.');
+    },
+  );
 };
