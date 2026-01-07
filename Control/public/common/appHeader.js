@@ -41,8 +41,9 @@ const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ?
     h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`, h('sup', model.session.role)),
     model.session.personid === 0 // anonymous user has id 0 
       && h('p.m3.gray-darker', 'You are connected as anonymous, no authentification needed for this application.'),
-    !areBrowserNotificationsGranted() &&
-      h('a.menu-item', {onclick: () => {
+    !areBrowserNotificationsGranted()
+      && h('a.menu-item', {
+        onclick: () => {
           requestBrowserNotificationPermissions();
           model.toggleAccountMenu();
         }

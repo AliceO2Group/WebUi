@@ -13,7 +13,9 @@
 */
 
 // Import frontend framework
-import {Observable, WebSocketClient, QueryRouter, Loader, sessionService, RemoteData, showNativeBrowserNotification} from '/js/src/index.js';
+import {
+  Observable, WebSocketClient, QueryRouter, Loader, sessionService, RemoteData, showNativeBrowserNotification
+} from '/js/src/index.js';
 import {Notification as O2Notification} from '/js/src/index.js';
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
