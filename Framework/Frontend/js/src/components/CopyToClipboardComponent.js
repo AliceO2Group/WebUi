@@ -14,6 +14,7 @@
 import { StatefulComponent } from './StatefulComponent.js';
 import { iconCheck, iconLinkIntact } from '../icons.js';
 import { h } from '../renderer.js';
+import { isContextSecure } from '../utilities/browserContext.js';
 
 /**
  * Represents a component that allows copying text to the clipboard.
@@ -49,7 +50,7 @@ export class CopyToClipboardComponent extends StatefulComponent {
    * @returns {void}
    */
   checkClipboardAvailability() {
-    if (!this.isContextSecure()) {
+    if (!isContextSecure()) {
       throw new Error('Clipboard not available in a non-secure context.');
     }
 
@@ -60,15 +61,6 @@ export class CopyToClipboardComponent extends StatefulComponent {
     if (this.isWindowEmbedded()) {
       throw new Error('Clipboard access is restricted in iframes.');
     }
-  }
-
-  /**
-   * Checks if context is secure (HTTPS)
-   *
-   * @returns {boolean} Returns `true` if context is secure
-   */
-  isContextSecure() {
-    return window.isSecureContext;
   }
 
   /**
