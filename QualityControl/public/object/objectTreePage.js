@@ -206,6 +206,7 @@ const tableCollapseAll = (qcObject) =>
     title: 'Close whole tree',
     onclick: () => qcObject.tree.closeAll(),
     disabled: Boolean(qcObject.searchInput),
+    id: 'collapse-tree-button'
   }, iconCollapseUp());
 
 const tableSearchInput = (qcObject) =>

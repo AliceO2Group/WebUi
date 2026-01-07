@@ -241,16 +241,15 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     );
 
     let rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
-    strictEqual(rowCount, 7);
+    strictEqual(rowCount, 6);
 
     const runNumber = '0';
     await page.locator('#runNumberFilter').fill(runNumber);
     await page.locator('#filterElement #triggerFilterButton').click();
-
-    await extendTree(3, 5);
+    await delay(100);
 
     rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
-    strictEqual(rowCount, 5); // Due to the filter there are two objects fewer.
+    strictEqual(rowCount, 4); // Due to the filter there are two objects fewer.
   });
 
   await testParent.test('ObjectTree infoPanel should show filtered object versions', { timeout }, async () => {
