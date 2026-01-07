@@ -56,7 +56,7 @@ export const requestBrowserNotificationPermissions = async () => {
  * @returns {boolean} `true` if the Notification API is available, the context is secure
  * and the current {@link BrowserNotificationPermission} is {@link BrowserNotificationPermission.GRANTED}, `false` otherwise.
  */
-export const checkBrowserNotificationPermissions = () =>
+export const areBrowserNotificationsGranted = () =>
   isContextSecure() && getBrowserNotificationPermission() === BrowserNotificationPermission.GRANTED;
 
 /**
@@ -76,7 +76,7 @@ export const checkBrowserNotificationPermissions = () =>
  * @returns {Notification|null} {@link Notification} instance, or `null` if unavailable
  */
 export const showNativeBrowserNotification = (options) => {
-  if (!checkBrowserNotificationPermissions()) {
+  if (!areBrowserNotificationsGranted()) {
     return null;
   }
 
