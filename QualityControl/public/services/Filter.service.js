@@ -50,12 +50,22 @@ export default class FilterService {
   /**
    * Method to get run status for a specific run number
    * @param {number} runNumber - The run number to get status for
-   * @returns {RemoteData} - result within a RemoteData object
+   * @returns {object} - result as an object containing run information
    */
-  async getRunStatus(runNumber) {
+  async getRunInformation(runNumber) {
     const parsedRunNumber = parseInt(runNumber, 10);
     const { result, ok } = await this.loader.get(`/api/filter/run-status/${parsedRunNumber}`);
-    return ok ? result?.runStatus : RunStatus.UNKNOWN;
+    return ok ? result : {};
+  }
+
+  /**
+   * Method to get run status for a specific run number
+   * @param {number} runNumber - The run number to get status for
+   * @returns {RunStatus} - result as a run status
+   */
+  async getRunStatus(runNumber) {
+    const { runStatus } = await this.getRunInformation(runNumber);
+    return runStatus ?? RunStatus.UNKNOWN;
   }
 
   /**

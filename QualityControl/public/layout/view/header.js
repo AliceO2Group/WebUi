@@ -143,15 +143,70 @@ const toolbarEditModeTab = (layout, tab, i) => {
    */
   const selectTab = () => layout.selectTab(i);
 
+  const dragActiveClass = layout.isDragging ? 'pointer-events-auto' : '';
+  const disableButtonsOnDragClass = layout.isDragging ? 'pointer-events-none' : '';
+  const dropZoneClass = (position) => layout.dropTargetId === tab.id && layout.position === position ? 'active' : '';
+
   return [
-    h('.btn-group.flex-fixed', [
-      h('button.br-pill.ph2.btn.btn-tab.whitespace-nowrap', { class: linkClass, onclick: selectTab }, tab.name),
-      selected && [
-        editTabButton(layout, linkClass, tab, i),
-        resizeGridTabDropDown(layout, tab),
-        deleteTabButton(layout, linkClass, i),
+    h(
+      '.btn-group.flex-fixed.relative.cursor-grab',
+      {
+        title: 'Drag the tab to re-arrange them',
+        draggable: true,
+        ondragstart: (e) => {
+          e.dataTransfer.setData('text/plain', tab.id);
+          layout.startDragging();
+        },
+        ondrop: (e) => {
+          layout.reorderTabs(e.dataTransfer.getData('text/plain'), layout.dropTargetId, layout.position);
+          layout.clearDropTarget();
+          layout.stopDragging();
+        },
+        ondragend: () => layout.stopDragging(),
+      },
+      [
+        h(
+          'button.br-pill.ph2.btn.btn-tab.whitespace-nowrap',
+          { id: 'btn-tab', class: `${linkClass} cursor-inherit`, onclick: selectTab },
+          tab.name,
+        ),
+        [
+          h(
+            '.drop-zone.before',
+            {
+              class: `${dragActiveClass} ${dropZoneClass('before')}`,
+              ondragenter: () => layout.setDropTarget(tab.id, 'before'),
+              ondragover: (e) => e.preventDefault(), // prevent default to allow drop
+              ondragleave: () => {
+                if (layout.dropTargetId === tab.id && layout.position === 'before') {
+                  layout.clearDropTarget();
+                }
+              },
+            },
+            '',
+          ),
+          h(
+            '.drop-zone.after',
+            {
+              class: `${dragActiveClass} ${dropZoneClass('after')}`,
+              ondragenter: () => layout.setDropTarget(tab.id, 'after'),
+              ondragover: (e) => e.preventDefault(), // prevent default to allow drop
+              ondragleave: () => {
+                if (layout.dropTargetId === tab.id && layout.position === 'after') {
+                  layout.clearDropTarget();
+                }
+              },
+            },
+            '',
+          ),
+          selected && [
+            editTabButton(layout, `${disableButtonsOnDragClass} ${linkClass}`, tab, i),
+            resizeGridTabDropDown(layout, tab),
+            deleteTabButton(layout, `${disableButtonsOnDragClass} ${linkClass}`, i),
+          ],
+        ].flat().filter(Boolean),
       ],
-    ]),
+    ),
     ' ',
   ];
 };
