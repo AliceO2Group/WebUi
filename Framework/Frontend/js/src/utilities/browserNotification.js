@@ -17,15 +17,26 @@
 import { isContextSecure } from './browserContext.js';
 
 /**
+ * Browser notification permission values.
+ * Mirrors the Notification API specification.
+ * @link https://developer.mozilla.org/en-US/docs/Web/API/Notification/permission_static
+ */
+export const BrowserNotificationPermission = Object.freeze({
+  GRANTED: 'granted',
+  DEFAULT: 'default',
+  DENIED: 'denied',
+});
+
+/**
  * Get the current browser notification permission.
- * @returns {NotificationPermission|undefined} {@link NotificationPermission}, or `undefined` if unsupported.
+ * @returns {BrowserNotificationPermission|undefined} One of {@link BrowserNotificationPermission}, or `undefined` if unsupported.
  */
 export const getBrowserNotificationPermission = () =>
   window?.Notification?.permission;
 
 /**
  * Request browser notification permission (async/await).
- * @returns {Promise<NotificationPermission|undefined>} Resolves to {@link NotificationPermission}, or `undefined` if unsupported
+ * @returns {Promise<BrowserNotificationPermission|undefined>} One of {@link BrowserNotificationPermission}, or `undefined` if unsupported
  */
 export const requestBrowserNotificationPermissions = async () => {
   if (!isContextSecure()) {
@@ -33,7 +44,7 @@ export const requestBrowserNotificationPermissions = async () => {
   }
 
   const permission = getBrowserNotificationPermission();
-  if (permission === 'granted') {
+  if (permission === BrowserNotificationPermission.GRANTED) {
     return permission;
   }
 
@@ -43,10 +54,10 @@ export const requestBrowserNotificationPermissions = async () => {
 /**
  * Check if notifications can be shown immediately.
  * @returns {boolean} `true` if the Notification API is available, the context is secure
- * and the {@link NotificationPermission browser notification permission} is `granted`, `false` otherwise.
+ * and the current {@link BrowserNotificationPermission} is {@link BrowserNotificationPermission.GRANTED}, `false` otherwise.
  */
 export const checkBrowserNotificationPermissions = () =>
-  isContextSecure() && getBrowserNotificationPermission() === 'granted';
+  isContextSecure() && getBrowserNotificationPermission() === BrowserNotificationPermission.GRANTED;
 
 /**
  * @typedef {object} NotificationOptions
