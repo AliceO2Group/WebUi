@@ -26,6 +26,7 @@ export { default as switchCase } from './switchCase.js';
 export { documentClickTaggedEventRegistry } from './utilities/documentClickTaggedEventRegistry.js';
 export { buildUrl } from './utilities/buildUrl.js';
 export { parseUrlParameters } from './utilities/parseUrlParameters.js';
+export { isContextSecure } from './utilities/browserContext.js';
 
 // Formatters
 export { formatTimeDuration } from './formatter/formatTimeDuration.js';
@@ -54,3 +55,5 @@ export * from './icons.js';
 
 export * from './chart.js';
 export * from './Notification.js';
+
+export * from './utilities/browserNotification.js';
