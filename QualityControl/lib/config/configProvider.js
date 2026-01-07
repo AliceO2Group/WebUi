@@ -16,7 +16,7 @@
 import { LogManager } from '@aliceo2/web-ui';
 import { realpath } from 'node:fs/promises';
 import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/config`);
 
@@ -27,7 +27,7 @@ let configFilePath = _getConfigurationFilePath();
 
 try {
   configFilePath = await realpath(configFilePath);
-  ({ config } = await import(configFilePath));
+  ({ config } = await import(pathToFileURL(configFilePath).href));
 
   logger.info(`Configuration file successfully read from: "${configFilePath}"`);
 } catch (err) {

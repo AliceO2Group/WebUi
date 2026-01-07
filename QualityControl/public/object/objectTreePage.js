@@ -174,16 +174,13 @@ const tableShow = (model) =>
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const treeRows = (model) => {
-  if (!model.object.tree) {
-    return null;
-  }
-  if (model.object.tree.children.length === 0) {
-    return h('.w-100.text-center', 'No objects found');
-  } else {
-    return model.object.tree.children.map((children) => treeRow(model, children));
-  }
-};
+const treeRows = (model) => !model.object.tree ?
+  null
+  :
+
+  model.object.tree.children.length === 0
+    ? h('.w-100.text-center', 'No objects found')
+    : model.object.tree.children.map((children) => treeRow(model, children));
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
@@ -233,6 +230,36 @@ function treeRow(model, tree, level = 0) {
       () => tree.toggle(),
       open ? iconCaretBottom : iconCaretRight,
       className,
+      {
+        paddingLeft: `${level + 0.3}em`,
+      },
+    );
+    rows.push(branch);
+  }
+
+  if (object) {
+    // Add a leaf row (final element; cannot be expanded further)
+    const className = object === model.object.selected ? 'table-primary' : '';
+    const leaf = treeRowElement(
+      pathString,
+      name,
+      () => model.object.select(object),
+      iconBarChart,
+      className,
+      {
+        paddingLeft: `${level + 0.3}em`,
+      },
+    );
+    rows.push(leaf);
+  }
+  if (children.length > 0) {
+    // Add a branch row (expandable / collapsible element)
+    const branch = treeRowElement(
+      pathString,
+      name,
+      () => tree.toggle(),
+      open ? iconCaretBottom : iconCaretRight,
+      '',
       {
         paddingLeft: `${level + 0.3}em`,
       },

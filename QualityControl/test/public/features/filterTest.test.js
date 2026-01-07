@@ -11,8 +11,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual } from 'node:assert';
+import { strictEqual, ok } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
+import { RunStatus } from '../../../common/library/runStatus.enum.js';
 
 export const filterTests = async (url, page, timeout = 5000, testParent) => {
   await testParent.test('filter should persist between pages', { timeout }, async () => {
@@ -31,8 +32,8 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     strictEqual(location.href.includes('RunNumber=0'), true, 'URL should contain RunNumber=0');
 
     //Naviagte to object view
-    await extendTree(3, 5);
-    await page.locator('tr:last-of-type td').click();
+    await extendTree(3, 4);
+    await page.locator('tbody tr:nth-child(4) td').click();
     await page.waitForSelector('#fullscreen-button');
     await page.locator('#fullscreen-button').click();
     await page.waitForSelector('#runNumberFilter', { visible: true });
@@ -50,7 +51,157 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     strictEqual(value, '0', 'RunNumber filter should still be set to 0 on layout show page');
   });
 
+  await testParent.test(
+    'should display detector qualities when filtering by run number if it has any',
+    { timeout },
+    async () => {
+      const requestHandler = async (interceptedRequest) => {
+        const url = interceptedRequest.url();
+
+        if (url.includes('/api/filter/run-status/0')) {
+          // Mock the response
+          await interceptedRequest.respond({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              detectorsQualities: [
+                { id: 1, name: 'DETECTOR_GOOD_1', quality: 'good' },
+                { id: 1, name: 'DETECTOR_GOOD_2', quality: 'good' },
+                { id: 2, name: 'DETECTOR_BAD', quality: 'bad' },
+              ],
+            }),
+          });
+        } else {
+          interceptedRequest.continue();
+        }
+      };
+
+      try {
+        // Enable interception and attach the handler
+        await page.setRequestInterception(true);
+        page.on('request', requestHandler);
+
+        await page.locator('#triggerFilterButton').click();
+        const detectorQualities = await page.waitForSelector('#header-detector-qualities', {
+          visible: true,
+          timeout: 1000,
+        });
+        ok(detectorQualities, 'Detector qualities should exist on the page');
+
+        const goodDetectorCount = await page.evaluate(() =>
+          document.querySelectorAll('#header-detector-qualities .success').length);
+        const badDetectorCount = await page.evaluate(() =>
+          document.querySelectorAll('#header-detector-qualities .danger').length);
+
+        strictEqual(goodDetectorCount, 2, 'Two good detector qualities should exist on the page');
+        strictEqual(badDetectorCount, 1, 'One bad detector qualities should exist on the page');
+      } catch (error) {
+        // Test failed
+        ok(false, error.message);
+      } finally {
+        // Cleanup: remove listener and disable interception
+        page.off('request', requestHandler);
+        await page.setRequestInterception(false);
+      }
+    },
+  );
+
+  await testParent.test(
+    'should not display detector qualities if the run has none when filtering by run number',
+    { timeout },
+    async () => {
+      const requestHandler = async (interceptedRequest) => {
+        const url = interceptedRequest.url();
+
+        if (url.includes('/api/filter/run-status/0')) {
+          // Mock the response
+          await interceptedRequest.respond({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              detectorsQualities: [],
+            }),
+          });
+        } else {
+          interceptedRequest.continue();
+        }
+      };
+
+      try {
+        // Enable interception and attach the handler
+        await page.setRequestInterception(true);
+        page.on('request', requestHandler);
+
+        await page.locator('#triggerFilterButton').click();
+        await delay(100);
+
+        const runDetectorQualitiesExists = await page.evaluate(() =>
+          document.querySelector('#header-detector-qualities') !== null);
+        strictEqual(runDetectorQualitiesExists, false, 'Run detector qualities should not exists on the page');
+      } catch (error) {
+        // Test failed
+        ok(false, error.message);
+      } finally {
+        // Cleanup: remove listener and disable interception
+        page.off('request', requestHandler);
+        await page.setRequestInterception(false);
+      }
+    },
+  );
+
+  await testParent.test('not filtering by run number should not display any run information', { timeout }, async () => {
+    await page.locator('#runNumberFilter').fill('Backspace');
+    await page.locator('#triggerFilterButton').click();
+    await delay(100);
+
+    // Not filtering by run number should not display the run information
+    const runInformationExists = await page.evaluate(() => document.querySelector('#header-run-information') !== null);
+    strictEqual(runInformationExists, false, 'Run information should not exists on the page');
+  });
+
+  await testParent.test('filtering by run number should display the run information', { timeout }, async () => {
+    const requestHandler = async (interceptedRequest) => {
+      const url = interceptedRequest.url();
+
+      if (url.includes('/api/filter/run-status/0')) {
+        // Mock the response
+        await interceptedRequest.respond({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            runStatus: RunStatus.UNKNOWN,
+          }),
+        });
+      } else {
+        interceptedRequest.continue();
+      }
+    };
+
+    try {
+      // Enable interception and attach the handler
+      await page.setRequestInterception(true);
+      page.on('request', requestHandler);
+
+      // Fill and trigger the filter
+      await page.locator('#runNumberFilter').fill('0');
+      await page.locator('#triggerFilterButton').click();
+
+      // Filtering by run number should display the run information
+      const runInformation = await page.waitForSelector('#header-run-information', { visible: true, timeout: 1000 });
+      ok(runInformation, 'Run information should exists on the page');
+    } catch (error) {
+      // Test failed
+      ok(false, error.message);
+    } finally {
+      // Cleanup: remove listener and disable interception
+      page.off('request', requestHandler);
+      await page.setRequestInterception(false);
+    }
+  });
+
   await testParent.test('should list all objects when clearing filters', { timeout }, async () => {
+    await page.locator('#triggerFilterButton').click();
+    await delay(100);
     //Navigate to object tree
     ///html/body/div[1]/div/nav/a[2]
     await page.locator('nav > a:nth-child(3)').click();
