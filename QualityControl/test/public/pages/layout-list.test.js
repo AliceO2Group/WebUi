@@ -30,7 +30,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   const allLayoutIndex = 2;
   const allLayoutIndex2 = 3;
 
-  const basePath = (index) => `section > div > div:nth-child(${index})`;
+  const basePath = (index) => `section > div:nth-child(${index})`;
   const toggleFolderPath = (index, index2) => index2 ? `${basePath(index)} > div:nth-child(${index2}) > div > b` :
     `${basePath(index)} div > b`;
   const cardPath = (index, cardIndex) => `${basePath(index)} .card:nth-child(${cardIndex})`;
