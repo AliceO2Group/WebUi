@@ -56,15 +56,9 @@ export default (model) => {
             const objectsLoaded = object.list;
             const objectsToDisplay = objectsLoaded.filter((qcObject) =>
               qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
-            return h('', [
-              tableHeader(model.object),
-              virtualTable(model, 'main', objectsToDisplay),
-            ]);
+            return virtualTable(model, 'main', objectsToDisplay);
           }
-          return h('', [
-            tableHeader(model.object),
-            tableShow(model),
-          ]);
+          return tableShow(model);
         },
         Failure: () => null, // Notification is displayed
       })),
@@ -183,15 +177,18 @@ const tableShow = (model) =>
   h('table.table.table-sm.text-no-select', [
     h('thead', [
       h('tr', [
-        h('th', sortableTableHead({
-          order: model.object.sortBy.order,
-          icon: model.object.sortBy.icon,
-          label: 'Name',
-          sortOptions: [SortDirectionsEnum.ASC, SortDirectionsEnum.DESC],
-          onclick: (label, order, icon) => {
-            model.object.sortTree(label, 'name', order, icon);
-          },
-        })),
+        h('th', [
+          sortableTableHead({
+            order: model.object.sortBy.order,
+            icon: model.object.sortBy.icon,
+            label: 'Name',
+            sortOptions: [SortDirectionsEnum.ASC, SortDirectionsEnum.DESC],
+            onclick: (label, order, icon) => {
+              model.object.sortTree(label, 'name', order, icon);
+            },
+          }),
+          tableHeader(model.object),
+        ]),
       ]),
     ]),
     h('tbody', [treeRows(model)]),
@@ -203,15 +200,15 @@ const tableHeader = (qcObject) =>
     tableCollapseAll(qcObject),
   ]);
 
-const tableCollapseAll = (qcObject) =>
+export const tableCollapseAll = (qcObject) =>
   h('button.btn.m2', {
     title: 'Close whole tree',
     onclick: () => qcObject.tree.closeAll(),
     disabled: Boolean(qcObject.searchInput),
   }, iconCollapseUp());
 
-const tableSearchInput = (qcObject) =>
-  h('input.form-control.form-inline.m2.flex-grow', {
+export const tableSearchInput = (qcObject) =>
+  h('input.form-control.form-inline.mv2.mh3.flex-grow', {
     id: 'searchObjectTree',
     placeholder: 'Search',
     type: 'text',

@@ -14,6 +14,7 @@
 
 import { SortDirectionsEnum } from '../common/enums/columnSort.enum.js';
 import { sortableTableHead } from '../common/sortButton.js';
+import { tableCollapseAll, tableSearchInput } from './objectTreePage.js';
 import { h, iconBarChart } from '/js/src/index.js';
 
 let ROW_HEIGHT = 33.6;
@@ -106,17 +107,26 @@ const tableHeader = () =>
     style: 'margin-bottom:0',
   }, h('thead', [
     h('tr', [
-      h('th', sortableTableHead({
-        order: model.object.sortBy.order,
-        icon: model.object.sortBy.icon,
-        label: 'Name',
-        sortOptions: [SortDirectionsEnum.ASC, SortDirectionsEnum.DESC],
-        onclick: (label, order, icon) => {
-          model.object.sortTree(label, 'name', order, icon);
-        },
-      })),
+      h('th', [
+        sortableTableHead({
+          order: model.object.sortBy.order,
+          icon: model.object.sortBy.icon,
+          label: 'Name',
+          sortOptions: [SortDirectionsEnum.ASC, SortDirectionsEnum.DESC],
+          onclick: (label, order, icon) => {
+            model.object.sortTree(label, 'name', order, icon);
+          },
+        }),
+        tableActions(model.object),
+      ]),
     ]),
   ]));
+
+const tableActions = (qcObject) =>
+  h('.flex-row.w-100', [
+    tableSearchInput(qcObject),
+    tableCollapseAll(qcObject),
+  ]);
 
 /**
  * Set styles of the floating table and its position inside the big div .tableLogsContentPlaceholder
