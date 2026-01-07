@@ -135,8 +135,9 @@ class HttpServer {
    * @param {number} config.port secure port number
    * @param {list} config.iframeCsp list of URLs for frame-src CSP
    * @param {boolean} config.allow allow unsafe-eval in CSP
+   * @param {boolean} config.allowIframeCsp allow iframe embedding from given URLs
    */
-  configureHelmet({ hostname, port, iframeCsp = [], allow = false }) {
+  configureHelmet({ hostname, port, iframeCsp = [], allow = false, allowIframeCsp = false }) {
     // Sets "X-Frame-Options: DENY" (doesn't allow to be in any iframe)
     this.app.use(helmet.frameguard({ action: 'deny' }));
     // Sets "Strict-Transport-Security: max-age=5184000 (60 days) (stick to HTTPS)
@@ -156,7 +157,7 @@ class HttpServer {
       directives: {
         /* eslint-disable */
         defaultSrc: ["'self'", "data:", hostname + ':*'],
-        imgSrc: ["'self'", "data:", "blob:"],
+        ...(allowIframeCsp && { imgSrc: ["'self'", "data:", "blob:"] }),
         scriptSrc: ["'self'", ...(allow ? ["'unsafe-eval'"] : [])],
         styleSrc: ["'self'", "'unsafe-inline'"],
         connectSrc: ["'self'", 'http://' + hostname + ':' + port, 'https://' + hostname, 'wss://' + hostname, 'ws://' + hostname + ':' + port],
