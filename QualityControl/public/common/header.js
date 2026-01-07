@@ -13,7 +13,7 @@
  */
 
 import { h, iconPerson, getBrowserNotificationPermission,
-  requestBrowserNotificationPermissions } from '/js/src/index.js';
+  requestBrowserNotificationPermissions, BrowserNotificationPermission } from '/js/src/index.js';
 
 import { spinner } from './spinner.js';
 import layoutViewHeader from '../layout/view/header.js';
@@ -106,7 +106,8 @@ const commonHeader = (model) => h('.flex-row.items-center.w-25', [
  */
 const loginButton = (model) => {
   const browserNotificationPermission = getBrowserNotificationPermission();
-  const notificationsAvailable = browserNotificationPermission && browserNotificationPermission !== 'denied';
+  const notificationsAvailable = browserNotificationPermission
+    && browserNotificationPermission !== BrowserNotificationPermission.DENIED;
   const runStartNotificationEnabled = model.notificationRunStartModel.getBrowserNotificationSetting();
 
   return h('.dropdown', {
@@ -129,11 +130,12 @@ const loginButton = (model) => {
             [
               h('input', {
                 onchange: async (event) => {
-                  let permission = false;
+                  let permissionGranted = false;
                   if (event.target.checked) {
-                    permission = await requestBrowserNotificationPermissions() === 'granted';
+                    const permission = await requestBrowserNotificationPermissions();
+                    permissionGranted = permission === BrowserNotificationPermission.GRANTED;
                   }
-                  model.notificationRunStartModel.setBrowserNotificationSetting(permission);
+                  model.notificationRunStartModel.setBrowserNotificationSetting(permissionGranted);
                 },
                 type: 'checkbox',
                 checked: runStartNotificationEnabled,
