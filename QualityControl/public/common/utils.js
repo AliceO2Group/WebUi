@@ -155,15 +155,6 @@ export function hasMinimumRoleAccess(userRoles, requiredRole) {
 }
 
 /**
- * Method to check if connection is secure to enable certain improvements
- * e.g navigator.clipboard, notifications, service workers
- * @returns {boolean} - whether window is in secure context
- */
-export function isContextSecure() {
-  return window.isSecureContext;
-}
-
-/**
  * Asynchronously writes the given text value to the system clipboard
  * @param {string} value - The text string to be copied to the clipboard
  * @returns {Promise<void>} - A Promise that resolves with no value when the text has been successfully copied.
@@ -199,6 +190,7 @@ export const getFileExtensionFromName = (filename) =>
  * Helper to trigger a download for a file
  * @param {string} url - The URL to the file source
  * @param {string} filename - The name of the file including the file extension
+ * @returns {undefined}
  */
 export const triggerDownload = (url, filename) => {
   const link = document.createElement('a');
@@ -211,6 +203,7 @@ export const triggerDownload = (url, filename) => {
  * Downloads a file
  * @param {Blob|MediaSource} file - The file to download
  * @param {string} filename - The name of the file including the file extension
+ * @returns {undefined}
  */
 export const downloadFile = (file, filename) => {
   const url = URL.createObjectURL(file);
@@ -226,6 +219,7 @@ export const downloadFile = (file, filename) => {
  * @param {string} filename - The name of the downloaded file including its extension.
  * @param {RootObject} root - The JSROOT RootObject to render.
  * @param {string[]} [drawingOptions=[]] - Optional array of JSROOT drawing options.
+ * @returns {undefined}
  */
 export const downloadRoot = async (filename, root, drawingOptions = []) => {
   const filetype = getFileExtensionFromName(filename);
@@ -242,4 +236,21 @@ export const downloadRoot = async (filename, root, drawingOptions = []) => {
   });
   const blob = new Blob([image], { type: mime });
   downloadFile(blob, filename);
+}
+
+/**
+ * Determines whether the element is positioned on the left half of the viewport.
+ * This is used to decide which way a dropdown should anchor to stay within view.
+ * @param {HTMLElement} element - The DOM element (usually the button or container) to measure.
+ * @returns {boolean|undefined} Returns true if the element is on the left half of the window,
+ * false if it is on the right half, or undefined if no element is provided.
+ */
+export const isOnLeftSideOfViewport = (element) => {
+  if (!element) {
+    return;
+  }
+
+  const rect = element.getBoundingClientRect();
+  const isLeft = rect.left - rect.width < window.innerWidth / 2;
+  return isLeft;
 };
