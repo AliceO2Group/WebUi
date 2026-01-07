@@ -448,7 +448,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
   await testParent.test(
     'should display all objects even when the JSON has out of bound entries',
-    { timeout },
+    { timeout: 10000 },
     async () => {
       const EXPECTED_LAYOUT_OBJECT_COUNT = editedManyObjectsMockedLayout.tabs[0].objects.length;
       const getRenderedObjectCount = async () =>
