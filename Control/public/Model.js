@@ -13,7 +13,9 @@
 */
 
 // Import frontend framework
-import {Observable, WebSocketClient, QueryRouter, Loader, sessionService, RemoteData} from '/js/src/index.js';
+import {
+  Observable, WebSocketClient, QueryRouter, Loader, sessionService, RemoteData, showNativeBrowserNotification
+} from '/js/src/index.js';
 import {Notification as O2Notification} from '/js/src/index.js';
 import Lock from './lock/Lock.js';
 import Environment from './environment/Environment.js';
@@ -153,7 +155,7 @@ export default class Model extends Observable {
     if (this.detectors.selected || this.session.role == ROLES.Guest) {
       this.handleLocationChange();
     }
-    this.requestBrowserNotificationPermissions()
+
     this.notify();
   }
 
@@ -170,10 +172,14 @@ export default class Model extends Observable {
         const { payload: task } = message;
         if (task?.taskId) {
           // Notification is for the first task in error from an environment
-          this.showNativeNotification({
+          showNativeBrowserNotification({
             title: `TASK in ${task.state ?? 'unknown'} state`,
             body: `Task ${task.id} in environment ${task.environmentId} is in ${task.state ?? 'unknown'} state`,
-            url: `?page=environment&id=${task.environmentId}`
+            icon: '/o2_icon.png',
+            onclick: (event) => {
+              event?.preventDefault();
+              this.router.go(`?page=environment&id=${task.environmentId}`, '_blank');
+            }
           });
         }
         break;
@@ -360,37 +366,5 @@ export default class Model extends Observable {
       await this.detectors.init();
       this.notify();
     }
-  }
-
-  /**
-   * Display a browser notification(Notification - Web API)
-   * @param {String} message
-   */
-  showNativeNotification(message) {
-    const notification = new Notification(message.title, {body: message.body, icon: '/o2_icon.png'});
-    notification.onclick = (event) => {
-      event.preventDefault();
-      this.router.go(message.url, '_blank');
-    }
-  }
-
-  /**
-   * Request notification permission
-   */
-  requestBrowserNotificationPermissions() {
-    if (this.checkBrowserNotificationPermissions()) {
-      Notification.requestPermission();
-    }
-  }
-
-  /**
-   * Defines policy when user can trigger request for enabling notifications
-   * This is used to display/hide enable button
-   * @returns {boolean} True when notifications are not enabled and HTTPS is used
-   */
-  checkBrowserNotificationPermissions() {
-    return (Notification.permission === 'denied' ||
-      Notification.permission === 'default') &&
-      window.location.protocol === "https:";
   }
 }

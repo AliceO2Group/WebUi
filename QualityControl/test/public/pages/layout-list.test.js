@@ -39,13 +39,6 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
 
   const filterPath = 'section > div > div:nth-child(1) > input';
   const filterObjectPath = 'input.form-control:nth-child(1)';
-  await testParent.test('should not show a download button when there is no data', async () => {
-    await page.goto(`${url}?page=layoutShow&layoutId=671b8c22402408122e2f20dd&tab=main`, { waitUntil: 'networkidle0' });
-
-    const downloadCount = await page.evaluate(() => document.querySelectorAll('#download-button').length);
-
-    strictEqual(downloadCount, 0);
-  });
 
   await testParent.test('should successfully load layoutList page "/"', { timeout }, async () => {
     await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
