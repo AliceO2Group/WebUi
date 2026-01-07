@@ -13,13 +13,16 @@
  */
 
 /**
- * Enumeration for different types of storage keys
- * @enum {string}
- * @readonly
+ * Helper to get the center of an element.
+ * @param {object} page - Puppeteer page object.
+ * @param {string} selector - Element selector to look for.
+ * @returns {Promise<{x: number, y: number}>} A promise that resolves to the center x & y coordinates.
  */
-export const StorageKeysEnum = Object.freeze({
-  OBJECT_VIEW_LEFT_PANEL_WIDTH: 'object-view-left-panel-width',
-  OBJECT_VIEW_INFO_VISIBILITY_SETTING: 'object-view-info-visibility-setting',
-  NOTIFICATION_START_RUN_SETTING: 'notification-start-run-setting',
-  OBJECT_TREE_OPEN_NODES: 'object-tree-open-nodes',
-});
+export const getElementCenter = async (page, selector) => {
+  const element = await page.waitForSelector(selector);
+  const box = await element.boundingBox();
+  return {
+    x: box.x + box.width / 2,
+    y: box.y + box.height / 2
+  };
+};
