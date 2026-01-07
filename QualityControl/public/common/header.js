@@ -70,7 +70,7 @@ const headerSpecific = (model) => {
  */
 const filterSpecific = (model) => {
   const { page, filterModel, layout } = model;
-  if (page === 'layoutList' && layout.editEnabled) {
+  if (page === 'layoutShow' && layout.editEnabled) {
     return null;
   }
 
