@@ -236,7 +236,7 @@ export const downloadRoot = async (filename, root, drawingOptions = []) => {
   });
   const blob = new Blob([image], { type: mime });
   downloadFile(blob, filename);
-}
+};
 
 /**
  * Determines whether the element is positioned on the left half of the viewport.
