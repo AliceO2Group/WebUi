@@ -2,6 +2,11 @@ name: release
 on:
   release:
     types: [created]
+
+permissions:
+  id-token: write # Needed for OIDC
+  contents: write # Needed to attach assets to releases
+
 jobs:
   deploy-npm-module:
     runs-on: ubuntu-latest
@@ -41,8 +46,6 @@ jobs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "tag=$TAG" >> $GITHUB_OUTPUT
     - run: (cd $PROJECT; npm publish)
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY_TOKEN }}
   upload-asset:
     runs-on: ubuntu-latest
     timeout-minutes: 10
