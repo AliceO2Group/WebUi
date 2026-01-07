@@ -13,7 +13,7 @@
 
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
-import { editedMockedLayout } from '../../setup/seeders/layout-show/json-file-mock.js';
+import { editedMockedLayout, editedManyObjectsMockedLayout } from '../../setup/seeders/layout-show/json-file-mock.js';
 import { getElementCenter } from '../../testUtils/dragAndDrop.js';
 
 /**
@@ -437,6 +437,49 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
+    'should display all objects even when the JSON has out of bound entries',
+    { timeout },
+    async () => {
+      const EXPECTED_LAYOUT_OBJECT_COUNT = editedManyObjectsMockedLayout.tabs[0].objects.length;
+      const getRenderedObjectCount = async () =>
+        await page.evaluate(() => document.querySelector('#subcanvas').children.length);
+
+      // Ensure we are on the main tab
+      await page.locator('#tab-0').click();
+      await delay(100);
+
+      const pencilButtonPath = '.btn-group > div > button';
+      await page.locator(pencilButtonPath).click();
+
+      const editViaJSONButtonPath = '#editByJson';
+      await page.locator(editViaJSONButtonPath).click();
+
+      const textareaPath = '#layout-json-editor';
+      const mockedJSON = JSON.stringify(editedManyObjectsMockedLayout);
+      await page.locator(textareaPath).fill(mockedJSON);
+
+      const updateButtonPath = '#updateLayoutButton';
+      await page.locator(updateButtonPath).click();
+      await delay(100);
+
+      strictEqual(
+        await getRenderedObjectCount(),
+        EXPECTED_LAYOUT_OBJECT_COUNT,
+        `Expected ${EXPECTED_LAYOUT_OBJECT_COUNT} rendered objects after JSON update`,
+      );
+
+      await page.reload({ waitUntil: 'networkidle0' });
+      await delay(100);
+
+      strictEqual(
+        await getRenderedObjectCount(),
+        EXPECTED_LAYOUT_OBJECT_COUNT,
+        `Expected ${EXPECTED_LAYOUT_OBJECT_COUNT} rendered objects after page reload`,
+      );
+    },
+  );
+
+  await testParent.test(
     'should update layout when clicking "Update layout"',
     { timeout },
     async () => {
@@ -464,9 +507,13 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test('should change tab after set tabInterval', { timeout: 15000 }, async () => {
+    // Ensure we are on the 'a' tab
+    await page.locator('#tab-1').click();
+    await delay(100);
+
     const location = await page.evaluate(() => window.location);
     strictEqual(location.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=a`);
-    await delay(11000);
+    await delay(11111);
     const location2 = await page.evaluate(() => window.location);
     strictEqual(location2.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=test`);
   });

@@ -261,6 +261,8 @@ export default class Layout extends BaseViewModel {
     const result = await this.model.services.layout.saveLayout(this.item);
     if (result.isSuccess()) {
       await this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
+      this._tabIndex = this._tabIndex < this.item.tabs.length ? this._tabIndex : 0;
+      this.selectTab(this._tabIndex);
       this.model.notification.show(`Layout "${this.item.name}" has been saved successfully.`, 'success');
     } else {
       this.item = this.editOriginalClone;
@@ -287,7 +289,9 @@ export default class Layout extends BaseViewModel {
     this.gridListSize = parseInt(value, 10);
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
-    this.gridList.resizeGrid(this.gridListSize);
+    if (this.editEnabled) {
+      this.gridList.resizeGrid(this.gridListSize);
+    }
     this.tab.columns = this.gridListSize;
     this.tab.objects.forEach((object) => {
       if (object.w > this.tab.columns) {
@@ -304,9 +308,7 @@ export default class Layout extends BaseViewModel {
    */
   sortObjectsOfCurrentTab() {
     this.gridList.items = this.tab.objects;
-    if (this.editEnabled) {
-      this.gridList.resizeGrid(this.gridListSize);
-    }
+    this.gridList.resizeGrid(this.gridListSize);
   }
 
   /**
