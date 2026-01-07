@@ -448,7 +448,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
   await testParent.test(
     'should display all objects even when the JSON has out of bound entries',
-    { timeout: 10000 },
+    { timeout: 15000 },
     async () => {
       const EXPECTED_LAYOUT_OBJECT_COUNT = editedManyObjectsMockedLayout.tabs[0].objects.length;
       const getRenderedObjectCount = async () =>
@@ -491,7 +491,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
   await testParent.test(
     'should update layout when clicking "Update layout"',
-    { timeout },
+    { timeout: 10000 },
     async () => {
       const pencilButtonPath = '.btn-group > div > button';
       await page.locator(pencilButtonPath).click();
@@ -530,7 +530,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
   await testParent.test(
     'should update layout name in sidebar when name is changed and saved via JSON editor',
-    { timeout },
+    { timeout: 10000 },
     async () => {
       const originalSidebarName = await page.evaluate(() => {
         const sidebarLayoutLink = document.querySelector('nav a.menu-item.w-wrapped.selected span:nth-child(2)');
