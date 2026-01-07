@@ -308,7 +308,9 @@ export default class Layout extends BaseViewModel {
    */
   sortObjectsOfCurrentTab() {
     this.gridList.items = this.tab.objects;
-    this.gridList.resizeGrid(this.gridListSize);
+    if (this.editEnabled) {
+      this.gridList.resizeGrid(this.gridListSize);
+    }
   }
 
   /**
