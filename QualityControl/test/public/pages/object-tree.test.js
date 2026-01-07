@@ -11,9 +11,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, ok, deepStrictEqual } from 'node:assert';
+import { strictEqual, ok, deepStrictEqual, notDeepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
-import { getLocalStorage } from '../../testUtils/localStorage.js';
+import { getLocalStorage, getLocalStorageAsJson } from '../../testUtils/localStorage.js';
 import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
 
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
@@ -43,15 +43,22 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     ok(rowsCount > 1); // more than 1 object in the tree
   });
 
-  await testParent.test('should not preserve state if refreshed not in run mode', { timeout }, async () => {
-    const tbodyPath = 'section > div > div > div > table > tbody';
-    await page.locator(`${tbodyPath} > tr:nth-child(2)`).click();
+  await testParent.test('should preserve state if refreshed', { timeout }, async () => {
+    const selector = 'section > div > div > div > table > tbody > tr:nth-child(2)';
+    await page.locator(selector).click();
     await page.reload({ waitUntil: 'networkidle0' });
 
-    const rowCount = await page.evaluate(() =>
+    const rowCountExpanded = await page.evaluate(() =>
       document.querySelectorAll('section > div > div > div > table > tbody > tr').length);
 
-    strictEqual(rowCount, 2);
+    await page.locator(selector).click();
+    await page.reload({ waitUntil: 'networkidle0' });
+
+    const rowCountCollapsed = await page.evaluate(() =>
+      document.querySelectorAll('section > div > div > div > table > tbody > tr').length);
+
+    strictEqual(rowCountExpanded, 3);
+    strictEqual(rowCountCollapsed, 2);
   });
 
   await testParent.test('should have a button to sort by (default "Name" ASC)', async () => {
@@ -136,10 +143,6 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     async () => {
       const dragAmount = 35;
       await page.reload({ waitUntil: 'networkidle0' });
-      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(2)').click());
-      await delay(500);
-      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(3)').click());
-      await delay(500);
       await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(4)').click());
       await delay(1000);
       const panelWidth = await page.evaluate(() =>
@@ -228,6 +231,24 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     }
   );
 
+  await testParent.test('should update local storage when tree node is clicked', { timeout }, async () => {
+    const selector = 'section > div > div > div > table > tbody > tr:nth-child(2)';
+    const personid = await page.evaluate(() => window.model.session.personid);
+    const storageKey = `${StorageKeysEnum.OBJECT_TREE_OPEN_NODES}-${personid}`;
+
+    await page.locator(selector).click();
+    const localStorageBefore = await getLocalStorageAsJson(page, storageKey);
+
+    await page.locator(selector).click();
+    const localStorageAfter = await getLocalStorageAsJson(page, storageKey);
+
+    notDeepStrictEqual(
+      localStorageBefore,
+      localStorageAfter,
+      'local storage should have changed after clicking a tree node',
+    );
+  });
+
   await testParent.test('should sort list of histograms by name in descending order', async () => {
     await page.locator('#sortTreeButton').click();
     const sortingByNameOptionPath = '#sortTreeButton > div > a:nth-child(2)';
@@ -256,6 +277,25 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(sorted.sort.field, 'name');
     strictEqual(sorted.list[0].name, 'qc/test/object/1');
   });
+
+  await testParent.test(
+    'should close all branches when clicking the collapse all button',
+    { timeout },
+    async () => {
+      const selector = '#collapse-tree-button';
+      const personid = await page.evaluate(() => window.model.session.personid);
+      const storageKey = `${StorageKeysEnum.OBJECT_TREE_OPEN_NODES}-${personid}`;
+
+      await page.locator(selector).click();
+      await delay(100);
+      const storedNodes = await getLocalStorageAsJson(page, storageKey);
+      const tableRowCount = await page.evaluate(() =>
+        document.querySelectorAll('section > div > div > div > table > tbody > tr').length);
+
+      deepStrictEqual(storedNodes, {}, 'Stores nodes should be empty');
+      strictEqual(tableRowCount, 1, 'Tree should be fully collapsed');
+    },
+  );
 
   await testParent.test('should have filtered results on input search', async () => {
     await page.type('#searchObjectTree', 'qc/test/object/1');
