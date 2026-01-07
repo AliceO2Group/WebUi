@@ -20,6 +20,7 @@ import virtualTable from './virtualTable.js';
 import { defaultRowAttributes, qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
 import { downloadButton } from '../common/downloadButton.js';
 import { resizableDivider } from '../common/resizableDivider.js';
+import { downloadRootImageButton } from '../common/downloadRootImageButton.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -93,15 +94,17 @@ function objectPanel(model) {
  * @returns {vnode} - virtual node element
  */
 const drawPlot = (model, object) => {
-  const { name, validFrom, id } = object;
+  const { name, qcObject, validFrom, id } = object;
+  const { root } = qcObject;
   const href = validFrom ?
     `?page=objectView&objectName=${name}&ts=${validFrom}&id=${id}`
     : `?page=objectView&objectName=${name}`;
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
     h('.item-action-row.flex-row.g1.p1', [
+      downloadRootImageButton(`${name}.png`, root, ['stat']),
       downloadButton({
-        href: model.objectViewModel.getDownloadQcdbObjectUrl(object.id),
-        title: 'Download object',
+        href: model.objectViewModel.getDownloadQcdbObjectUrl(id),
+        title: 'Download root object',
       }),
       h(
         'a.btn#fullscreen-button',
