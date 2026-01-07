@@ -56,4 +56,4 @@ export * from './icons.js';
 export * from './chart.js';
 export * from './Notification.js';
 
-export * from './BrowserNotification.js';
+export * from './utilities/browserNotification.js';

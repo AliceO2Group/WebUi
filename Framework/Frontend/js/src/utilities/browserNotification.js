@@ -14,7 +14,7 @@
 
 /* Global: window */
 
-import { isContextSecure } from './utilities/browserContext.js';
+import { isContextSecure } from './browserContext.js';
 
 /**
  * Get the current browser notification permission.
