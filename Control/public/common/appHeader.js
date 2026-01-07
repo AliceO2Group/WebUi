@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h, iconPerson} from '/js/src/index.js';
+import {h, iconPerson, areBrowserNotificationsGranted, requestBrowserNotificationPermissions} from '/js/src/index.js';
 
 /**
  * Application header (left part): lockpad button and application name
@@ -39,11 +39,13 @@ const loginButton = (model) => h('.dropdown', {class: model.accountMenuEnabled ?
   h('button.btn', {onclick: () => model.toggleAccountMenu()}, iconPerson()),
   h('.dropdown-menu', [
     h('p.m3.mv2.text-ellipsis', `Welcome ${model.session.name}`, h('sup', model.session.role)),
-    model.session.personid === 0 // anonymous user has id 0
+    model.session.personid === 0 // anonymous user has id 0 
       && h('p.m3.gray-darker', 'You are connected as anonymous, no authentification needed for this application.'),
-    model.checkBrowserNotificationPermissions() &&
+    !areBrowserNotificationsGranted() &&
       h('a.menu-item', {onclick: () => {
-        model.toggleAccountMenu();  model.requestBrowserNotificationPermissions()}
+          requestBrowserNotificationPermissions();
+          model.toggleAccountMenu();
+        }
       }, 'Enable notifications'),
     model.session.personid !== 0 &&
       h('a.menu-item', {onclick: () => alert(`Not implemented`)}, 'Logout')
