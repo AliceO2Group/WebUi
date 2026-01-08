@@ -73,13 +73,12 @@ const infoRow = (key, value, infoRowAttributes) => {
         formattedValue,
       ),
       model.services.status.isConfigured('bookkeeping') && key === 'runNumber'
-        ? h('.ph2.text-right.actionable-icon.pointer-events-auto', {
+        ? h('a.ph2.text-right.actionable-icon.pointer-events-auto', {
           title: 'Open run in Bookkeeping',
-          onclick: () => {
-            console.log(value);
-          },
+          href: model.services.status.buildBookkeepingUrl(value),
+          target: '_blank',
         }, iconExternalLink())
-        : ''
+        : '',
     ])
   ]);
 };
