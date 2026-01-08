@@ -29,6 +29,7 @@ import AboutViewModel from './pages/aboutView/AboutViewModel.js';
 import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
 import { RequestFields } from './common/RequestFields.enum.js';
 import FilterModel from './common/filters/model/FilterModel.js';
+import StatusService from './services/Status.service.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -97,6 +98,7 @@ export default class Model extends Observable {
     this.services = {
       object: new QCObjectService(this),
       layout: new LayoutService(this),
+      status: new StatusService(this),
     };
 
     this.loader.get('/api/checkUser');

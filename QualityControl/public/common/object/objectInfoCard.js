@@ -13,6 +13,7 @@
  */
 
 import { h, isContextSecure } from '/js/src/index.js';
+import { iconExternalLink } from '/js/src/icons.js';
 import { camelToTitleCase, copyToClipboard, prettyFormatDate } from './../utils.js';
 
 const SPECIFIC_KEY_LABELS = {
@@ -65,7 +66,21 @@ const infoRow = (key, value, infoRowAttributes) => {
 
   return h(`.flex-row.g2.info-row${highlightedClasses}`, [
     h('b.w-25.w-wrapped', formattedKey),
-    h('.w-75.cursor-pointer', hasValue && infoRowAttributes(formattedKey, formattedValue), formattedValue),
+    h('.flex-row.w-75', [
+      h(
+        '.cursor-pointer.flex-row',
+        hasValue && infoRowAttributes(formattedKey, formattedValue),
+        formattedValue,
+      ),
+      model.services.status.isConfigured('bookkeeping') && key === 'runNumber'
+        ? h('.ph2.text-right.actionable-icon.pointer-events-auto', {
+          title: 'Open run in Bookkeeping',
+          onclick: () => {
+            console.log(value);
+          },
+        }, iconExternalLink())
+        : ''
+    ])
   ]);
 };
 
