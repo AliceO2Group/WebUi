@@ -23,33 +23,25 @@ import { filtersPanelPopover } from './filtersPanelPopover.js';
  * @import LayoutListModel from './model/LayoutListModel.js';
  */
 export default (layoutListModel) => [
-  h('.scroll-y.absolute-fill', [
-    h(
-      '.flex-row.text-right.m2',
-      [
-        filtersPanelPopover(layoutListModel.searchFilterModel),
-        h(
-          'input.form-control.form-inline.mh1.w-33',
-          {
-            placeholder: 'Layout name',
-            type: 'text',
-            value: layoutListModel.searchFilterModel.searchInput,
-            oninput: (e) => {
-              layoutListModel.search(e.target.value);
-            },
-          },
-        ),
-        h('.p1', [
-          h(
-            '.mh1',
-            layoutListModel.searchFilterModel.stringifyActiveFiltersFriendly(),
-          ),
-        ]),
-      ],
-    ),
-
-    h('', {
-      style: 'display: flex; flex-direction: column',
-    }, Array.from(layoutListModel.folders.values()).map(FolderComponent)),
+  h('.flex-row.text-right.m2', [
+    filtersPanelPopover(layoutListModel.searchFilterModel),
+    h('input.form-control.form-inline.mh1.w-33', {
+      placeholder: 'Layout name',
+      type: 'text',
+      value: layoutListModel.searchFilterModel.searchInput,
+      oninput: (e) => {
+        layoutListModel.search(e.target.value);
+      },
+    }),
+    h('.p1', [
+      h(
+        '.mh1',
+        layoutListModel.searchFilterModel.stringifyActiveFiltersFriendly(),
+      ),
+    ]),
   ]),
+
+  h('', {
+    key: 'layout-list-page-folders-container',
+  }, Array.from(layoutListModel.folders.values()).map(FolderComponent)),
 ];

@@ -36,9 +36,13 @@ export default (model) => [
   model.isImportVisible && layoutImportModal(model),
   h('.absolute-fill.flex-column', [
     h('header.shadow-level2.level2', [header(model)]),
-    h('.flex-grow.flex-row.outline-gray', [
+    h('.flex-row.flex-grow', {
+      key: 'main-content',
+    }, [
       sidebar(model),
-      h('section.outline-gray.flex-grow.relative', page(model)),
+      h('section', {
+        style: 'flex-grow: 1; position: relative; overflow: auto;',
+      }, page(model)),
     ]),
   ]),
   notification(model.notification),
@@ -55,7 +59,7 @@ function page(model) {
     case 'layoutShow': return layoutViewPage(model);
     case 'objectTree': return objectTreePage(model);
     case 'objectView': return ObjectViewPage(model.objectViewModel);
-    case 'about': return AboutViewPage(model);
+    case 'about': return AboutViewPage(model.aboutViewModel);
 
     // Should be seen only at the first start when the view is not yet really to be shown (data loading)
     default: return null;
