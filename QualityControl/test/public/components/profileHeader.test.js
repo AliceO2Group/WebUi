@@ -35,17 +35,16 @@ export const profileHeaderTests = async (url, page, timeout = 1000, testParent) 
 
   await testParent.test('should have an account button', async () => {
     const accountButtonExists = await page.evaluate(() =>
-      document.querySelector('#qcg-header div[title="Login"] button.btn') !== null);
+      document.querySelector('header div[title="Login"] button.btn') !== null);
 
     ok(accountButtonExists);
   });
 
   await testParent.test('clicking the account button opens a dropdown', { timeout }, async () => {
-    const selector = '#qcg-header div[title="Login"]';
-    const locator = '#qcg-header div[title="Login"] button.btn';
-    let classNames = undefined;
+    const selector = 'header div[title="Login"]';
+    const locator = 'header div[title="Login"] button.btn';
 
-    classNames = await page.evaluate((query) => document.querySelector(query).className, selector);
+    let classNames = await page.evaluate((query) => document.querySelector(query).className, selector);
     doesNotMatch(classNames, /\bdropdown-open\b/, 'Account dropdown should not be open before clicking');
 
     await page.locator(locator).click();
@@ -60,7 +59,7 @@ export const profileHeaderTests = async (url, page, timeout = 1000, testParent) 
   });
 
   await testParent.test('toggling the "notify on run start" setting updates LocalStorage', { timeout }, async () => {
-    const locator = '#qcg-header div[title="Login"] .dropdown-menu .switch';
+    const locator = 'header div[title="Login"] .dropdown-menu .switch';
     const selector = `${locator} input[type="checkbox"]`;
     const personId = await page.evaluate(() => window.model?.session?.personid?.toString());
     const localStorageKey = `${StorageKeysEnum.NOTIFICATION_START_RUN_SETTING}-${personId}`;
@@ -76,7 +75,7 @@ export const profileHeaderTests = async (url, page, timeout = 1000, testParent) 
       await context.overridePermissions(url, ['notifications']);
 
       // Open the dropdown
-      await page.locator('#qcg-header div[title="Login"] button.btn').click();
+      await page.locator('header div[title="Login"] button.btn').click();
 
       switchValue = await page.evaluate((query) => document.querySelector(query).checked, selector);
       storageValue = await getLocalStorageAsJson(page, localStorageKey);
@@ -112,9 +111,9 @@ export const profileHeaderTests = async (url, page, timeout = 1000, testParent) 
   });
 
   await testParent.test('setting "notify on run start" should be loaded from LocalStorage', { timeout }, async () => {
-    const switchButtonLocator = '#qcg-header div[title="Login"] .dropdown-menu .switch';
+    const switchButtonLocator = 'header div[title="Login"] .dropdown-menu .switch';
     const checkboxSelector = `${switchButtonLocator} input[type="checkbox"]`;
-    const accountButtonLocator = '#qcg-header div[title="Login"] button.btn';
+    const accountButtonLocator = 'header div[title="Login"] button.btn';
     // Resolve LocalStorage key dynamically based on personId
     const personId = await page.evaluate(() => window.model?.session?.personid?.toString());
     const localStorageKey = `${StorageKeysEnum.NOTIFICATION_START_RUN_SETTING}-${personId}`;
@@ -146,7 +145,7 @@ export const profileHeaderTests = async (url, page, timeout = 1000, testParent) 
       // Open the dropdown
       await page.locator(accountButtonLocator).click();
       await page.waitForFunction(() =>
-        /\bdropdown-open\b/.test(document.querySelector('#qcg-header div[title="Login"]').className));
+        /\bdropdown-open\b/.test(document.querySelector('header div[title="Login"]').className));
 
       // Read after reload
       const switchAfter = await page.evaluate((query) => document.querySelector(query).checked, checkboxSelector);
