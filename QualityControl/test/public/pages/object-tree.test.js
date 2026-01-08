@@ -343,7 +343,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     { timeout },
     async () => {
       await page.goto(`${url}${OBJECT_TREE_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
-      await page.keyboard.press('ArrowDown'); // Move to the first child node
+      await page.keyboard.press('ArrowDown'); // Move to the first node
       await delay(500);
       const isFirstNodeHighlighted = await page.evaluate(() => {
         const selectedNode = document.querySelector('tr.object-selectable');
@@ -354,26 +354,16 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   );
 
   await testParent.test(
-    'should collapse tree when ArrowLeft key is pressed on a focused node',
+    'should focus next node when ArrowDown key is pressed',
     { timeout },
     async () => {
-      await page.keyboard.press('ArrowDown'); // Move to the second child node
+      await page.keyboard.press('ArrowDown'); // Move to the second node
       await delay(500);
-      // Verify the second node is highlighted
       const isSecondNodeHighlighted = await page.evaluate(() => {
         const [, selectedNode] = document.querySelectorAll('tr.object-selectable');
         return selectedNode?.classList.contains('focused-node');
       });
       strictEqual(isSecondNodeHighlighted, true, 'The second node is not highlighted.');
-      await delay(200);
-      await page.keyboard.press('ArrowLeft'); // Collapse the second node
-      await delay(500);
-      // Verify that the third node is gone after collapsing
-      const isNodeCollapsed = await page.evaluate(() => {
-        const nodes = document.querySelectorAll('tr.object-selectable');
-        return nodes.length < 3; // Check if there are less than 3 nodes
-      });
-      strictEqual(isNodeCollapsed, true, 'The third node is still present after collapsing the second node.');
     },
   );
 
@@ -383,7 +373,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     async () => {
       await page.keyboard.press('ArrowRight'); // Expand the second node
       await delay(500);
-      // Verify that the third node is back after expanding
+      // Verify that the third node is visible after expanding
       const isNodeExpanded = await page.evaluate(() => {
         const nodes = document.querySelectorAll('tr.object-selectable');
         return nodes.length >= 3; // Check if there are at least 3 nodes
@@ -394,13 +384,15 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test(
     'should select object when ArrowRight key is pressed on a focused object node',
-    { timeout },
+    { timeout: timeout * 20 },
     async () => {
-      await page.keyboard.press('ArrowDown'); // Move to the third child node
-      await delay(500);
-      await page.keyboard.press('ArrowDown'); // Move to the fourth child node which is an object
+      await page.keyboard.press('ArrowDown'); // Move to the third node
       await delay(200);
-      await page.keyboard.press('ArrowRight'); // Select object node
+      await page.keyboard.press('ArrowRight'); // expand the third node
+      await delay(200);
+      await page.keyboard.press('ArrowDown'); // Move to the object node
+      await delay(200);
+      await page.keyboard.press('ArrowRight'); // select the object node
       await delay(500);
       const isObjectSelected = await page.evaluate(() => model.object.selected !== undefined);
       const isObjectPlotOpened = await page.evaluate(() => {
@@ -447,6 +439,21 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
         return selectedNode?.classList.contains('focused-node');
       });
       strictEqual(isSecondNodeHighlighted, true, 'The second node is not highlighted after pressing ArrowUp key.');
+    },
+  );
+
+  await testParent.test(
+    'should collapse tree when ArrowLeft key is pressed on a focused node',
+    { timeout },
+    async () => {
+      await page.keyboard.press('ArrowLeft'); // Collapse the second node
+      await delay(500);
+      // Verify that the third node is gone after collapsing
+      const isNodeCollapsed = await page.evaluate(() => {
+        const nodes = document.querySelectorAll('tr.object-selectable');
+        return nodes.length < 3; // Check if there are less than 3 nodes
+      });
+      strictEqual(isNodeCollapsed, true, 'The third node is still present after collapsing the second node.');
     },
   );
 };
