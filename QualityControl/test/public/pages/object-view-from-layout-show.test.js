@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import {strictEqual, deepStrictEqual, match, ok} from 'node:assert';
+import { strictEqual, deepStrictEqual, match, ok } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
 import {
@@ -20,6 +20,7 @@ import {
   removeLocalStorage,
   setLocalStorageAsJson,
 } from '../../testUtils/localStorage.js';
+import { SUPPORTED_ROOT_IMAGE_FILE_TYPES } from '../../../public/common/enums/rootImageMimes.enum.js';
 
 const OBJECT_VIEW_PAGE_PARAM = '?page=objectView&objectId=123456';
 
@@ -103,12 +104,46 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
-    'should have a correctly made download root as image button',
+    'should have a correctly made save root as image button',
     { timeout },
     async () => {
-      const exists = await page.evaluate(() => document.querySelector('.download-root-image-png-button') !== null);
+      const exists = await page.evaluate(() => document.querySelector('.save-root-as-image-button') !== null);
 
-      ok(exists, 'Expected ROOT image download button to exist');
+      ok(exists, 'Expected ROOT image save button to exist');
+    },
+  );
+
+  await testParent.test(
+    'save root as image dropdown should have the correct filetype options',
+    { timeout },
+    async () => {
+      const FILENAME = 'qc/test/object/1';
+
+      await page.locator('.save-root-as-image-button').click();
+      await page.waitForSelector('.popover', {
+        visible: true,
+        timeout: 1000,
+      });
+
+      const expectedExtensionTypes = Object.keys(Object.entries(SUPPORTED_ROOT_IMAGE_FILE_TYPES).reduce(
+        (acc, [key, value]) => {
+          if (!acc.seen.has(value)) {
+            acc.seen.add(value);
+            acc.result[key] = value;
+          }
+          return acc;
+        },
+        { seen: new Set(), result: {} },
+      ).result);
+
+      const testedOptions = await page.evaluate(() =>
+        Array.from(document.querySelectorAll('.popover .dropdown > button')).map((buttonElement) => buttonElement.id));
+      const expectedOptions = expectedExtensionTypes.map((filetype) => `${FILENAME}.${filetype}`);
+      deepStrictEqual(
+        testedOptions,
+        expectedOptions,
+        `Save options ${JSON.stringify(testedOptions)} should be ${JSON.stringify(expectedOptions)}`,
+      );
     },
   );
 

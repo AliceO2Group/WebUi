@@ -14,20 +14,9 @@
 
 import { isUserRoleSufficient } from '../../../../library/userRole.enum.js';
 import { generateDrawingOptionString } from '../../library/qcObject/utils.js';
+import { SUPPORTED_ROOT_IMAGE_FILE_TYPES } from './enums/rootImageMimes.enum.js';
 
 /* global JSROOT */
-
-/**
- * Map of allowed `ROOT.makeImage` file extensions to MIME types
- * @type {Map<string, string>}
- */
-const SUPPORTED_ROOT_IMAGE_FILE_TYPES = new Map([
-  ['svg', 'image/svg+xml'],
-  ['png', 'file/png'],
-  ['jpg', 'file/jpeg'],
-  ['jpeg', 'file/jpeg'],
-  ['webp', 'file/webp'],
-]);
 
 /**
  * Generates a new ObjectId
@@ -45,6 +34,32 @@ export function objectId() {
  */
 export function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
+}
+
+// Map storing timers per key
+const simpleDebouncerTimers = new Map();
+
+/**
+ * Produces a debounced function that uses a key to manage timers.
+ * Each key has its own debounce timer, so calls with different keys
+ * are debounced independently.
+ * @template PrimitiveKey extends unknown
+ * @param {PrimitiveKey} key - The key for this call.
+ * @param {(key: PrimitiveKey) => void} fn - Function to debounce.
+ * @param {number} time - Debounce delay in milliseconds.
+ * @returns {undefined}
+ */
+export function simpleDebouncerData(key, fn, time) {
+  if (simpleDebouncerTimers.has(key)) {
+    clearTimeout(simpleDebouncerTimers.get(key));
+  }
+
+  const timerId = setTimeout(() => {
+    fn(key);
+    simpleDebouncerTimers.delete(key);
+  }, time);
+
+  simpleDebouncerTimers.set(key, timerId);
 }
 
 /**
@@ -179,14 +194,6 @@ export const camelToTitleCase = (text) => {
 };
 
 /**
- * Get the file extension from a filename
- * @param {string} filename - The file name including the file extension
- * @returns {string} - the file extension
- */
-export const getFileExtensionFromName = (filename) =>
-  filename.substring(filename.lastIndexOf('.') + 1).toLowerCase().trim();
-
-/**
  * Helper to trigger a download for a file
  * @param {string} url - The URL to the file source
  * @param {string} filename - The name of the file including the file extension
@@ -216,14 +223,14 @@ export const downloadFile = (file, filename) => {
 
 /**
  * Generates a rasterized image of a JSROOT RootObject and triggers download.
- * @param {string} filename - The name of the downloaded file including its extension.
+ * @param {string} filename - The name of the downloaded file excluding the file extension.
+ * @param {string} filetype - The file extension of the downloaded file.
  * @param {RootObject} root - The JSROOT RootObject to render.
  * @param {string[]} [drawingOptions=[]] - Optional array of JSROOT drawing options.
  * @returns {undefined}
  */
-export const downloadRoot = async (filename, root, drawingOptions = []) => {
-  const filetype = getFileExtensionFromName(filename);
-  const mime = SUPPORTED_ROOT_IMAGE_FILE_TYPES.get(filetype);
+export const downloadRoot = async (filename, filetype, root, drawingOptions = []) => {
+  const mime = SUPPORTED_ROOT_IMAGE_FILE_TYPES[filetype];
   if (!mime) {
     throw new Error(`The file extension (${filetype}) is not supported`);
   }
@@ -235,7 +242,7 @@ export const downloadRoot = async (filename, root, drawingOptions = []) => {
     as_buffer: true,
   });
   const blob = new Blob([image], { type: mime });
-  downloadFile(blob, filename);
+  downloadFile(blob, `${filename}.${filetype}`);
 };
 
 /**
