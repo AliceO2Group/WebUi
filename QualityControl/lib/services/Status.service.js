@@ -128,7 +128,7 @@ export class StatusService {
     return {
       bookkeeping: {
         BASE_URL: this._config.bookkeeping.url,
-        PARTIAL_RUN_DETAILS: '?page=run-detail&run-number=',
+        PARTIAL_RUN_DETAILS: '?page=run-detail&runNumber=',
       },
     };
   }
