@@ -243,36 +243,6 @@ function treeRow(model, tree, level = 0) {
     rows.push(branch);
   }
 
-  if (object) {
-    // Add a leaf row (final element; cannot be expanded further)
-    const className = object === model.object.selected ? 'table-primary' : '';
-    const leaf = treeRowElement(
-      pathString,
-      name,
-      () => model.object.select(object),
-      iconBarChart,
-      className,
-      {
-        paddingLeft: `${level + 0.3}em`,
-      },
-    );
-    rows.push(leaf);
-  }
-  if (children.length > 0) {
-    // Add a branch row (expandable / collapsible element)
-    const branch = treeRowElement(
-      pathString,
-      name,
-      () => tree.toggle(),
-      open ? iconCaretBottom : iconCaretRight,
-      '',
-      {
-        paddingLeft: `${level + 0.3}em`,
-      },
-    );
-    rows.push(branch);
-  }
-
   return [...rows, ...childRow];
 }
 

@@ -138,9 +138,6 @@ export default class ObjectTree extends Observable {
     if (!this.focusedNode || idx === -1) {
       const [first] = visible;
       this.setFocusedNode(first);
-      if (first.object && this.selector) {
-        this.selector(first.object);
-      }
       return;
     }
     // if already at the last visible node, do nothing
@@ -169,9 +166,6 @@ export default class ObjectTree extends Observable {
     if (!this.focusedNode || idx === -1) {
       const [first] = visible;
       this.setFocusedNode(first);
-      if (first.object && this.selector) {
-        this.selector(first.object);
-      }
       return;
     }
     // select previous node
@@ -362,15 +356,15 @@ export default class ObjectTree extends Observable {
     subtree._addChild(object, path, fullPath);
   }
 
-  /**
-   * Add a single object as a child node
-   * @param {object} object - child to be added
-   */
-  addOneChild(object) {
-    this._addChild(object);
-    this.loadExpandedNodes();
-    this.notify();
-  }
+  // /**
+  //  * Add a single object as a child node
+  //  * @param {object} object - child to be added
+  //  */
+  // addOneChild(object) {
+  //   this._addChild(object);
+  //   this.loadExpandedNodes();
+  //   this.notify();
+  // }
 
   /**
    * Add a list of objects as child nodes
