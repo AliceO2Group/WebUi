@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.p
  */
 
-import { h } from '/js/src/index.js';
+import { h, isContextSecure } from '/js/src/index.js';
 import { camelToTitleCase, copyToClipboard, isContextSecure, prettyFormatDate } from './../utils.js';
 import { visibilityButton } from '../visibilityButton.js';
 

@@ -21,6 +21,7 @@ import { defaultRowAttributes, qcObjectInfoPanel } from '../../common/object/obj
 import { downloadButton } from '../../common/downloadButton.js';
 import { chevronButton } from '../../common/chevronButton.js';
 import { objectDrawingOptions } from '../../common/object/objectDrawingOptions.js';
+import { downloadRootImageButton } from '../../common/downloadRootImageButton.js';
 
 /**
  * Shows a page to view an object on the whole page
@@ -61,9 +62,10 @@ const objectPlotAndInfo = (objectViewModel) =>
             ),
           ),
           h('.item-action-row.flex-row.g1.p2', [
+            downloadRootImageButton(`${qcObject.name}.png`, qcObject.qcObject.root, drawingOptions),
             downloadButton({
               href: objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
-              title: 'Download object',
+              title: 'Download root object',
             }),
             chevronButton(
               () => objectViewModel.toggleObjectInfoVisible(),

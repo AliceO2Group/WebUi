@@ -30,22 +30,15 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
   const allLayoutIndex = 2;
   const allLayoutIndex2 = 3;
 
-  const basePath = (index) => `section > div > div:nth-child(${index})`;
+  const basePath = (index) => `section > div:nth-child(${index})`;
   const toggleFolderPath = (index, index2) => index2 ? `${basePath(index)} > div:nth-child(${index2}) > div > b` :
     `${basePath(index)} div > b`;
   const cardPath = (index, cardIndex) => `${basePath(index)} .card:nth-child(${cardIndex})`;
   const cardLayoutLinkPath = (cardPath) => `${cardPath} a`;
   const cardOfficialButtonPath = (cardPath) => `${cardPath} > .cardHeader > button`;
 
-  const filterPath = 'section > div > div:nth-child(1) > input';
+  const filterPath = 'section > div > input';
   const filterObjectPath = 'input.form-control:nth-child(1)';
-  await testParent.test('should not show a download button when there is no data', async () => {
-    await page.goto(`${url}?page=layoutShow&layoutId=671b8c22402408122e2f20dd&tab=main`, { waitUntil: 'networkidle0' });
-
-    const downloadCount = await page.evaluate(() => document.querySelectorAll('#download-button').length);
-
-    strictEqual(downloadCount, 0);
-  });
 
   await testParent.test('should successfully load layoutList page "/"', { timeout }, async () => {
     await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });

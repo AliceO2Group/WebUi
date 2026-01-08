@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, deepStrictEqual, match } from 'node:assert';
+import {strictEqual, deepStrictEqual, match, ok} from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
 import {
@@ -99,6 +99,16 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       const dlButton = await page.evaluate(() => document.querySelector('.download-button').href);
       const token = await page.evaluate(() => model.session.token);
       strictEqual(dlButton, `${url}api/object/proxy/download/?token=${token}&objectIds=${objectId}`);
+    },
+  );
+
+  await testParent.test(
+    'should have a correctly made download root as image button',
+    { timeout },
+    async () => {
+      const exists = await page.evaluate(() => document.querySelector('.download-root-image-png-button') !== null);
+
+      ok(exists, 'Expected ROOT image download button to exist');
     },
   );
 
