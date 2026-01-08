@@ -169,7 +169,7 @@ export default class Model extends Observable {
     this.object.objects = {}; // Remove any in-memory loaded objects
     this._clearAllIntervals();
     await this.filterModel.filterService.initFilterService();
-    this.filterModel.setFilterFromURL();
+    await this.filterModel.setFilterFromURL();
     this.filterModel.setFilterToURL();
 
     this.services.layout.getLayoutsByUserId(this.session.personid, RequestFields.LAYOUT_CARD);
@@ -313,16 +313,6 @@ export default class Model extends Observable {
 
     // Clear filter model runs mode interval
     this.filterModel.clearRunsModeInterval();
-  }
-
-  /**
-   * Method to check if connection is secure to enable certain improvements
-   * e.g navigator.clipboard, notifications, service workers
-   * @returns {boolean} - whether window is in secure context
-   * @deprecated use `isContextSecure` from `public/common/utils.js`
-   */
-  isContextSecure() {
-    return window.isSecureContext;
   }
 
   /**

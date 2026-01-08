@@ -14,6 +14,7 @@
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 import { editedMockedLayout } from '../../setup/seeders/layout-show/json-file-mock.js';
+import { getElementCenter } from '../../testUtils/dragAndDrop.js';
 
 /**
  * Performs a series of automated tests on the layoutShow page using Puppeteer.
@@ -42,6 +43,16 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const dlButton = await page.evaluate(() => document.querySelector('.download-button').href);
       const token = await page.evaluate(() => model.session.token);
       strictEqual(dlButton, `${url}api/object/proxy/download/?token=${token}&objectIds=${objectId}`);
+    },
+  );
+
+  await testParent.test(
+    'should have a correctly made download root as image button',
+    { timeout },
+    async () => {
+      const exists = await page.evaluate(() => document.querySelector('.download-root-image-png-button') !== null);
+
+      ok(exists, 'Expected ROOT image download button to exist');
     },
   );
 
@@ -166,6 +177,17 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       strictEqual(result.objectPath, 'qc/test/object/1');
       strictEqual(result.lastModifiedTitle, 'Last Modified');
     },
+  );
+
+  await testParent.test(
+    'should align info dropdown to the right when container is on the left',
+    { timeout },
+    async () => {
+      await page.click('button.btn[title*="View details"]');
+      const leftStyle = await page.evaluate(() => document.querySelector('#subcanvas .dropdown-menu').style.left);
+
+      strictEqual(leftStyle, '0.1em');
+    }
   );
 
   await testParent.test('should have second tab to be empty (according to demo data)', { timeout }, async () => {
@@ -295,6 +317,39 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
         document.querySelectorAll(secondElementPath).length, secondElementPath);
       strictEqual(rowsCount, 1);
     },
+  );
+
+  await testParent.test(
+    'should reorder tabs via drag and drop in edit mode',
+    { timeout },
+    async () => {
+      const originalTabNames = await page.$$eval('#btn-tab', (elements) =>
+        elements.map((element) => element.textContent.trim()));
+
+      const sourceTabSelector = '.btn-group.flex-fixed.relative:nth-child(1)';
+      const targetZoneSelector = '.btn-group.flex-fixed.relative:nth-child(2) .drop-zone.after';
+
+      const sourceCenter = await getElementCenter(page, sourceTabSelector);
+      const targetCenter = await getElementCenter(page, targetZoneSelector);
+
+      await page.mouse.move(sourceCenter.x, sourceCenter.y);
+      await page.mouse.down();
+
+      // We add 'steps' to make the move smoother, which helps trigger event
+      await page.mouse.move(targetCenter.x, targetCenter.y, { steps: 10 });
+
+      await delay(1000);
+
+      // Wait a moment for the 'active' class to appear in the UI
+      await page.waitForSelector('.drop-zone.after.active');
+
+      await page.mouse.up();
+
+      const tabNames = await page.$$eval('#btn-tab', (elements) =>
+        elements.map((element) => element.textContent.trim()));
+
+      strictEqual(tabNames[1], originalTabNames[0]);
+    }
   );
 
   await testParent.test(
@@ -468,6 +523,21 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       ok(originalSidebarName !== updatedSidebarName, 'Sidebar name should have changed from original');
     },
   );
+
+  await testParent.test('should not show a download button when there is no data', async () => {
+    await page.goto(`${url}?page=layoutShow&layoutId=671b8c22402408122e2f20dd&tab=main`, { waitUntil: 'networkidle0' });
+
+    const downloadCount = await page.evaluate(() => document.querySelectorAll('#download-button').length);
+
+    strictEqual(downloadCount, 0);
+  });
+
+  await testParent.test('should not show a download root as image button when there is no data', async () => {
+    // layout id 671b8c22402408122e2f20dd has no data
+    const exists = await page.evaluate(() => document.querySelector('.download-root-image-png-button') !== null);
+
+    strictEqual(exists, false);
+  });
 };
 
 const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {

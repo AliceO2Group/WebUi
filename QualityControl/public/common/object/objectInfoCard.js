@@ -12,8 +12,8 @@
  * or submit itself to any jurisdiction.p
  */
 
-import { h } from '/js/src/index.js';
-import { camelToTitleCase, copyToClipboard, isContextSecure, prettyFormatDate } from './../utils.js';
+import { h, isContextSecure } from '/js/src/index.js';
+import { camelToTitleCase, copyToClipboard, prettyFormatDate } from './../utils.js';
 
 const SPECIFIC_KEY_LABELS = {
   id: 'ID (etag)',

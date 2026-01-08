@@ -19,12 +19,20 @@ import { h } from '/js/src/index.js';
 
 /**
  * Shows a page to view framework information
- * @param {Model} model - root model of the application
+ * @param {AboutViewModel} aboutViewModel - root model of the application
  * @returns {vnode} - virtual node element
  */
-export default (model) => h(
-  '.p2.absolute-fill.text-center',
-  servicesLoadingPanel(model.aboutViewModel.services[ServiceStatus.LOADING]),
-  servicesResolvedPanel(model.aboutViewModel.services[ServiceStatus.ERROR], 'error'),
-  servicesResolvedPanel(model.aboutViewModel.services[ServiceStatus.SUCCESS], 'success'),
-);
+export default (aboutViewModel) => {
+  const { services } = aboutViewModel;
+  return [
+    h(
+      '.flex-column.flex-grow.p2.text-center',
+      { key: 'about-view-page' },
+      [
+        servicesLoadingPanel(services[ServiceStatus.LOADING]),
+        servicesResolvedPanel(services[ServiceStatus.ERROR], 'error'),
+        servicesResolvedPanel(services[ServiceStatus.SUCCESS], 'success'),
+      ],
+    ),
+  ];
+};
