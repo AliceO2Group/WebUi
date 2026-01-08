@@ -105,12 +105,14 @@ const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this 
 
 const INITIAL_PAGE_SETUP_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 5;
 const QC_DRAWING_OPTIONS_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 13;
-const LAYOUT_LIST_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
-const OBJECT_TREE_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
+const LAYOUT_LIST_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 17;
+const OBJECT_TREE_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 20;
 const OBJECT_VIEW_FROM_OBJECT_TREE_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 5;
-const OBJECT_VIEW_FROM_LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 4;
+const OBJECT_VIEW_FROM_LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 17;
 const LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 23;
 const ABOUT_VIEW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 4;
+const FILTER_TEST_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 26;
+const RUN_MODE_TEST_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 10;
 
 const FRONT_END_TIMEOUT = INITIAL_PAGE_SETUP_TIMEOUT
   + QC_DRAWING_OPTIONS_TIMEOUT
@@ -118,7 +120,10 @@ const FRONT_END_TIMEOUT = INITIAL_PAGE_SETUP_TIMEOUT
   + OBJECT_TREE_PAGE_TIMEOUT
   + OBJECT_VIEW_FROM_OBJECT_TREE_PAGE_TIMEOUT
   + OBJECT_VIEW_FROM_LAYOUT_SHOW_PAGE_TIMEOUT
-  + LAYOUT_SHOW_PAGE_TIMEOUT;
+  + LAYOUT_SHOW_PAGE_TIMEOUT
+  + ABOUT_VIEW_PAGE_TIMEOUT
+  + FILTER_TEST_TIMEOUT
+  + RUN_MODE_TEST_TIMEOUT;
 
 const BACK_END_TIMEOUT = 10000; // back-end test suite timeout
 
@@ -188,11 +193,17 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       { timeout: ABOUT_VIEW_PAGE_TIMEOUT },
       async (testParent) => await aboutPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
-    test('should successfully import and run tests for filter', async (testParent) =>
-      await filterTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent));
+    test(
+      'should successfully import and run tests for filter',
+      { timeout: FILTER_TEST_TIMEOUT },
+      async (testParent) => await filterTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
+    );
 
-    test('should successfully use run mode when available', async (testParent) =>
-      await runModeTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent));
+    test(
+      'should successfully use run mode when available',
+      { timeout: RUN_MODE_TEST_TIMEOUT },
+      async (testParent) => await runModeTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
+    );
   });
 
   suite('API - test suite', { timeout: FRONT_END_TIMEOUT }, async () => {

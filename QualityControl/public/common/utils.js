@@ -13,6 +13,21 @@
  */
 
 import { isUserRoleSufficient } from '../../../../library/userRole.enum.js';
+import { generateDrawingOptionString } from '../../library/qcObject/utils.js';
+
+/* global JSROOT */
+
+/**
+ * Map of allowed `ROOT.makeImage` file extensions to MIME types
+ * @type {Map<string, string>}
+ */
+const SUPPORTED_ROOT_IMAGE_FILE_TYPES = new Map([
+  ['svg', 'image/svg+xml'],
+  ['png', 'file/png'],
+  ['jpg', 'file/jpeg'],
+  ['jpeg', 'file/jpeg'],
+  ['webp', 'file/webp'],
+]);
 
 /**
  * Generates a new ObjectId
@@ -161,6 +176,66 @@ export const camelToTitleCase = (text) => {
   const spaced = text.replace(/([A-Z])/g, ' $1');
   const titleCase = spaced.charAt(0).toUpperCase() + spaced.slice(1);
   return titleCase;
+};
+
+/**
+ * Get the file extension from a filename
+ * @param {string} filename - The file name including the file extension
+ * @returns {string} - the file extension
+ */
+export const getFileExtensionFromName = (filename) =>
+  filename.substring(filename.lastIndexOf('.') + 1).toLowerCase().trim();
+
+/**
+ * Helper to trigger a download for a file
+ * @param {string} url - The URL to the file source
+ * @param {string} filename - The name of the file including the file extension
+ * @returns {undefined}
+ */
+export const triggerDownload = (url, filename) => {
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+};
+
+/**
+ * Downloads a file
+ * @param {Blob|MediaSource} file - The file to download
+ * @param {string} filename - The name of the file including the file extension
+ * @returns {undefined}
+ */
+export const downloadFile = (file, filename) => {
+  const url = URL.createObjectURL(file);
+  try {
+    triggerDownload(url, filename);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+};
+
+/**
+ * Generates a rasterized image of a JSROOT RootObject and triggers download.
+ * @param {string} filename - The name of the downloaded file including its extension.
+ * @param {RootObject} root - The JSROOT RootObject to render.
+ * @param {string[]} [drawingOptions=[]] - Optional array of JSROOT drawing options.
+ * @returns {undefined}
+ */
+export const downloadRoot = async (filename, root, drawingOptions = []) => {
+  const filetype = getFileExtensionFromName(filename);
+  const mime = SUPPORTED_ROOT_IMAGE_FILE_TYPES.get(filetype);
+  if (!mime) {
+    throw new Error(`The file extension (${filetype}) is not supported`);
+  }
+
+  const image = await JSROOT.makeImage({
+    object: root,
+    option: generateDrawingOptionString(root, drawingOptions),
+    format: filetype,
+    as_buffer: true,
+  });
+  const blob = new Blob([image], { type: mime });
+  downloadFile(blob, filename);
 };
 
 /**

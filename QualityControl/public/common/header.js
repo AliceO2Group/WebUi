@@ -34,9 +34,9 @@ import { filtersPanel } from './filters/filterViews.js';
 export default (model) => {
   const specific = headerSpecific(model) || {};
   const { centerCol, rightCol, subRow } = specific;
-
+  const id = `qcg-header-${model.page}`;
   return h('.flex-col', [
-    h('.flex-row.p2.items-center', { id: 'qcg-header' }, [
+    h('.flex-row.p2.items-center', { id, key: id }, [
       commonHeader(model),
       centerCol || h('.flex-grow'),
       rightCol || h('.w-25'),
