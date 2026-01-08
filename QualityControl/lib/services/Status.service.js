@@ -84,7 +84,7 @@ export class StatusService {
   retrieveOwnStatus() {
     return {
       name: 'QCG',
-      status: { ok: true },
+      status: { ok: true, category: ServiceStatus.SUCCESS },
       version: this._packageInfo?.version ?? '',
       extras: {
         clients: this._ws?.server?.clients?.size ?? -1,
@@ -97,15 +97,16 @@ export class StatusService {
    * @returns {string} - version of QC deployed on the system
    */
   async retrieveQcVersion() {
-    let status = { ok: true };
+    let status = { ok: false, category: ServiceStatus.NOT_CONFIGURED };
     let version = 'Not part of an FLP deployment';
 
     if (this._config.qc?.enabled) {
       try {
         const { stdout } = await execPromise(QC_VERSION_EXEC_COMMAND, { timeout: 6000 });
         version = stdout.trim();
+        status = { ok: true, category: ServiceStatus.SUCCESS };
       } catch (error) {
-        status = { ok: false, message: error.message || error };
+        status = { ok: false, category: ServiceStatus.ERROR, message: error.message || error };
         this._logger.errorMessage(error, { level: 99, system: 'GUI', facility: 'qcg/status-service' });
       }
     }
@@ -118,13 +119,13 @@ export class StatusService {
    * @returns {Promise<{object}>} - status of the data service
    */
   async retrieveDataServiceStatus() {
-    let status = { ok: true };
+    let status = { ok: true, category: ServiceStatus.SUCCESS };
     let version = '';
     try {
       const { version: dataServiceVersion } = await this._dataService.getVersion();
       version = dataServiceVersion;
     } catch (err) {
-      status = { ok: false, message: err.message || err };
+      status = { ok: false, category: ServiceStatus.ERROR, message: err.message || err };
     }
     return { name: 'CCDB', status, version, extras: {} };
   }
@@ -139,9 +140,10 @@ export class StatusService {
       name: IntegratedServices.KAFKA,
       status: {
         ok: status === ServiceStatus.SUCCESS,
+        category: status ?? ServiceStatus.NOT_CONFIGURED,
       },
       extras: {
-        state: status ?? 'NOT_CONFIGURED',
+        ...this._aliEcsSynchronizer?.extraInfo ?? {},
       },
     };
   }

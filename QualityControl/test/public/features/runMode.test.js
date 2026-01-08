@@ -51,10 +51,9 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
             name: IntegratedServices.KAFKA,
             status: {
               ok: false,
+              category: ServiceStatus.NOT_CONFIGURED,
             },
-            extras: {
-              state: 'NOT_CONFIGURED',
-            },
+            extras: {},
           }),
         });
       } else {
@@ -104,9 +103,10 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
             name: IntegratedServices.KAFKA,
             status: {
               ok: false,
+              category: ServiceStatus.ERROR,
             },
             extras: {
-              state: ServiceStatus.ERROR,
+              message: 'test error',
             },
           }),
         });
@@ -142,12 +142,9 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
       });
       strictEqual(
         runModeErrorMessage,
-        `Contact an administrator and include this information: Kafka service returned status code '${ServiceStatus.ERROR}'`,
+        `Contact an administrator and include this information: Kafka service returned status '${ServiceStatus.ERROR}'`,
         'RunMode failure should have the correct error message',
       );
-    } catch (error) {
-      // Test failed
-      ok(false, error.message);
     } finally {
       // Cleanup: remove listener and disable interception
       page.off('request', requestHandler);
@@ -167,10 +164,9 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
             name: IntegratedServices.KAFKA,
             status: {
               ok: true,
+              category: ServiceStatus.SUCCESS,
             },
-            extras: {
-              state: ServiceStatus.SUCCESS,
-            },
+            extras: {},
           }),
         });
       } else {
@@ -193,11 +189,8 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
         window.model.filterModel.ONGOING_RUN_INTERVAL_MS = 12000000;
       });
       await page.locator('.form-check-label > .switch');
-      const runsModeTitle = await page.evaluate(() => document.querySelector('.form-check-label').textContent);
+      const runsModeTitle = await page.evaluate(() => document.querySelector('.form-check-label')?.textContent);
       strictEqual(runsModeTitle, 'Run mode', 'The text displayed is not `Run mode`');
-    } catch (error) {
-      // Test failed
-      ok(false, error.message);
     } finally {
       // Cleanup: remove listener and disable interception
       page.off('request', requestHandler);

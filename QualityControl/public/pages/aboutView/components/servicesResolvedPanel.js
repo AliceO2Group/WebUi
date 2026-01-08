@@ -13,28 +13,30 @@
  */
 
 import { serviceCard } from './serviceCard.js';
-import { h } from '/js/src/index.js';
+import { h, switchCase } from '/js/src/index.js';
+import { ServiceStatus } from '../../../../library/enums/Status/serviceStatus.enum.js';
 
 /**
  * Build a reusable panel to display a wrapped list of service panels with their respective information
- * @param {Map<object>} servicesMap - Map of services with their respective information
- * @param {string} category - Category of the services to be displayed
+ * @param {ServiceStatus} serviceStatus - Category of the service to be displayed
+ * @param {RemoteData[]} serviceData - Information of services
  * @returns {vnode} - A virtual node representing the resolved panel
  */
-export const servicesResolvedPanel = (servicesMap, category) => {
-  const services = Object.values(servicesMap);
-  if (services.length > 0) {
-    const label = `Services that are in ${category.toLocaleUpperCase()} state`;
-    const classes = category === 'error' ? 'danger' : category ?? '';
-    return h(
-      '.w-100.flex-column.p2.shadow-level1',
-      h('h4', { class: classes }, label),
-      h('.flex-wrap.g1', [
-        services
-          .sort(({ payload: { name: nameA } }, { payload: { name: nameB } }) => nameA > nameB ? 1 : -1)
-          .map(({ payload }) => serviceCard(payload)),
-      ]),
-    );
-  }
-  return null;
+export const servicesResolvedPanel = (serviceStatus, serviceData) => {
+  const label = `Services that are in ${serviceStatus.toLocaleUpperCase()} state`;
+  const classes = switchCase(serviceStatus, {
+    [ServiceStatus.ERROR]: 'danger',
+    [ServiceStatus.SUCCESS]: 'success',
+    [ServiceStatus.NOT_ASKED]: 'gray-darker',
+    [ServiceStatus.NOT_CONFIGURED]: 'gray-darker',
+  }, '');
+
+  return h('.w-100.flex-column.p2.shadow-level1', { id: `service-status-${serviceStatus.toLowerCase()}` }, [
+    h('h4', { class: classes }, label),
+    h('.flex-wrap.g1', [
+      serviceData
+        .sort(({ payload: { name: nameA } }, { payload: { name: nameB } }) => nameA > nameB ? 1 : -1)
+        .map(({ payload }) => serviceCard(payload)),
+    ]),
+  ]);
 };

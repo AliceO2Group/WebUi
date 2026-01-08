@@ -62,11 +62,10 @@ export default class AboutViewModel extends BaseViewModel {
       if (!ok) {
         this.services[ServiceStatus.ERROR][service] = RemoteData.failure({
           name: service,
-          status: { ok: false, message: result.message },
+          status: { ok: false, category: ServiceStatus.ERROR, message: result.message },
         });
       } else {
-        const { status: { ok } } = result;
-        const category = ok ? ServiceStatus.SUCCESS : ServiceStatus.ERROR;
+        const { status: { category } } = result;
         this.services[category][service] = RemoteData.success(result);
       }
       this.notify();

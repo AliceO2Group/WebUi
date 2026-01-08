@@ -24,7 +24,7 @@ import { spinner } from '../../spinner.js';
  * - Failure: Displays an error box with a warning icon and the failure message returned by the service.
  * - Success:
  *   - {@link ServiceStatus.SUCCESS}: Renders the Run Mode checkbox component.
- *   - 'NOT_CONFIGURED': Renders nothing (Run Mode is intentionally unavailable).
+ *   - {@link ServiceStatus.NOT_CONFIGURED}: Renders nothing (Run Mode is intentionally unavailable).
  *   - Any other state: Displays a generic error box instructing the user to contact an administrator.
  * - Other: Unsupported or irrelevant state.
  * @param {object} filterModel - The filter model containing the aboutViewModel used to locate integrated services.
@@ -38,7 +38,7 @@ export const runModeComponent = (filterModel, viewModel) =>
       h('span.error-icon', { title: 'RunMode is unavailable. Please contact administrator.' }, iconWarning()),
       h('span', payload.status.message),
     ]),
-    Success: (payload) => switchCase(payload.extras.state, {
+    Success: (payload) => switchCase(payload.status.category, {
       [ServiceStatus.SUCCESS]: () => runModeCheckbox(filterModel, viewModel),
       NOT_CONFIGURED: () => null,
     }, () => h('.error-box.danger.flex-column.justify-center.f6.text-center', { id: 'run-mode-failure' }, [
@@ -46,7 +46,7 @@ export const runModeComponent = (filterModel, viewModel) =>
         title: 'RunMode is unavailable. Please contact administrator.',
       }, iconWarning()),
       h('span', 'Contact an administrator and include this information:'),
-      h('span', `Kafka service returned status code '${payload.extras.state ?? '?'}'`),
+      h('span', `Kafka service returned status '${payload.status.category ?? '?'}'`),
     ]))(),
     Other: () => {},
   });

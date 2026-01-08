@@ -12,27 +12,17 @@
  * or submit itself to any jurisdiction.
  */
 
-import { ServiceStatus } from '../../../library/enums/Status/serviceStatus.enum.js';
-import { servicesLoadingPanel } from './components/servicesLoadingPanel.js';
-import { servicesResolvedPanel } from './components/servicesResolvedPanel.js';
 import { h } from '/js/src/index.js';
+import { servicePanel } from './components/servicePanel.js';
 
 /**
  * Shows a page to view framework information
  * @param {AboutViewModel} aboutViewModel - root model of the application
  * @returns {vnode} - virtual node element
  */
-export default (aboutViewModel) => {
-  const { services } = aboutViewModel;
-  return [
-    h(
-      '.flex-column.flex-grow.p2.text-center',
-      { key: 'about-view-page' },
-      [
-        servicesLoadingPanel(services[ServiceStatus.LOADING]),
-        servicesResolvedPanel(services[ServiceStatus.ERROR], 'error'),
-        servicesResolvedPanel(services[ServiceStatus.SUCCESS], 'success'),
-      ],
-    ),
-  ];
-};
+export default (aboutViewModel) =>
+  h(
+    '.flex-column.flex-grow.p2.text-center',
+    { key: 'about-view-page' },
+    Object.entries(aboutViewModel.services).map(([serviceStatus, service]) => servicePanel(serviceStatus, service)),
+  );

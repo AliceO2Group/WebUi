@@ -32,7 +32,12 @@ export const statusServiceTestSuite = async () => {
       const result = await statusService.retrieveDataServiceStatus();
       deepStrictEqual(
         result,
-        { extras: {}, name: 'CCDB', status: { ok: false, message: 'Service is currently unavailable' }, version: '' },
+        {
+          name: 'CCDB',
+          status: { ok: false, category: ServiceStatus.ERROR, message: 'Service is currently unavailable' },
+          version: '',
+          extras: {},
+        },
       );
     });
     test('should successfully return status ok if data connector passed checks', async () => {
@@ -40,7 +45,12 @@ export const statusServiceTestSuite = async () => {
         getVersion: stub().resolves({ version: '0.0.1' }),
       };
       const response = await statusService.retrieveDataServiceStatus();
-      deepStrictEqual(response, { name: 'CCDB', status: { ok: true }, version: '0.0.1', extras: {} });
+      deepStrictEqual(response, {
+        name: 'CCDB',
+        status: { ok: true, category: ServiceStatus.SUCCESS },
+        version: '0.0.1',
+        extras: {},
+      });
     });
   });
 
@@ -58,10 +68,29 @@ export const statusServiceTestSuite = async () => {
       ]);
 
       const expectedResults = [
-        { name: 'QCG', version: '', status: { ok: true }, extras: { clients: -1 } },
-        { name: 'QC', status: { ok: true }, version: 'Not part of an FLP deployment', extras: {} },
-        { name: 'CCDB', status: { ok: true }, version: '0.0.1-beta', extras: {} },
-        { name: 'kafka', status: { ok: true }, extras: { state: ServiceStatus.SUCCESS } },
+        {
+          name: 'QCG',
+          version: '',
+          status: { ok: true, category: ServiceStatus.SUCCESS },
+          extras: { clients: -1 },
+        },
+        {
+          name: 'QC',
+          status: { ok: false, category: ServiceStatus.NOT_CONFIGURED },
+          version: 'Not part of an FLP deployment',
+          extras: {},
+        },
+        {
+          name: 'CCDB',
+          status: { ok: true, category: ServiceStatus.SUCCESS },
+          version: '0.0.1-beta',
+          extras: {},
+        },
+        {
+          name: 'kafka',
+          status: { ok: true, category: ServiceStatus.SUCCESS },
+          extras: {},
+        },
       ];
 
       deepStrictEqual(statusInfo, expectedResults);
@@ -71,7 +100,12 @@ export const statusServiceTestSuite = async () => {
       test('should return message that is not part of an FLP deployment', async () => {
         const statusService = new StatusService();
         const response = await statusService.retrieveQcVersion();
-        const result = { name: 'QC', status: { ok: true }, version: 'Not part of an FLP deployment', extras: {} };
+        const result = {
+          name: 'QC',
+          status: { ok: false, category: ServiceStatus.NOT_CONFIGURED },
+          version: 'Not part of an FLP deployment',
+          extras: {},
+        };
         deepStrictEqual(response, result);
       });
     });
@@ -84,7 +118,7 @@ export const statusServiceTestSuite = async () => {
 
       deepStrictEqual(result, {
         name: 'QCG',
-        status: { ok: true },
+        status: { ok: true, category: ServiceStatus.SUCCESS },
         version: '0.0.1',
         extras: {
           clients: -1,
@@ -98,7 +132,7 @@ export const statusServiceTestSuite = async () => {
 
       deepStrictEqual(result, {
         name: 'QCG',
-        status: { ok: true },
+        status: { ok: true, category: ServiceStatus.SUCCESS },
         version: '',
         extras: { clients: -1 },
       });
@@ -113,8 +147,8 @@ export const statusServiceTestSuite = async () => {
 
       deepStrictEqual(result, {
         name: 'kafka',
-        status: { ok: true },
-        extras: { state: ServiceStatus.SUCCESS },
+        status: { ok: true, category: ServiceStatus.SUCCESS },
+        extras: {},
       });
     });
 
@@ -125,20 +159,20 @@ export const statusServiceTestSuite = async () => {
 
       deepStrictEqual(result, {
         name: 'kafka',
-        status: { ok: false },
-        extras: { state: ServiceStatus.NOT_ASKED },
+        status: { ok: false, category: ServiceStatus.NOT_ASKED },
+        extras: {},
       });
     });
 
     test('marks Kafka service as unhealthy when synchronizer reports an error', async () => {
       const statusService = new StatusService();
-      statusService.aliEcsSynchronizer = { status: ServiceStatus.ERROR };
+      statusService.aliEcsSynchronizer = { status: ServiceStatus.ERROR, extraInfo: { message: 'test error' } };
       const result = statusService.retrieveKafkaServiceStatus();
 
       deepStrictEqual(result, {
         name: 'kafka',
-        status: { ok: false },
-        extras: { state: ServiceStatus.ERROR },
+        status: { ok: false, category: ServiceStatus.ERROR },
+        extras: { message: 'test error' },
       });
     });
 
@@ -149,8 +183,8 @@ export const statusServiceTestSuite = async () => {
 
       deepStrictEqual(result, {
         name: 'kafka',
-        status: { ok: false },
-        extras: { state: ServiceStatus.LOADING },
+        status: { ok: false, category: ServiceStatus.LOADING },
+        extras: {},
       });
     });
 
@@ -160,8 +194,8 @@ export const statusServiceTestSuite = async () => {
 
       deepStrictEqual(result, {
         name: 'kafka',
-        status: { ok: false },
-        extras: { state: 'NOT_CONFIGURED' },
+        status: { ok: false, category: ServiceStatus.NOT_CONFIGURED },
+        extras: {},
       });
     });
   });

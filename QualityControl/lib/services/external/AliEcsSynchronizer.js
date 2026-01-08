@@ -41,6 +41,7 @@ export class AliEcsSynchronizer {
     this._ecsRunConsumer.onMessageReceived(this._onRunMessage.bind(this));
 
     this._status = ServiceStatus.NOT_ASKED;
+    this._extraInfo = {};
   }
 
   /**
@@ -56,6 +57,9 @@ export class AliEcsSynchronizer {
     } catch (error) {
       this._logger.errorMessage(`Error when starting ECS run consumer: ${error.message}\n${error.stack}`);
       this._status = ServiceStatus.ERROR;
+      this._extraInfo = {
+        message: error.message,
+      };
     }
   }
 
@@ -89,5 +93,13 @@ export class AliEcsSynchronizer {
    */
   get status() {
     return this._status;
+  }
+
+  /**
+   * Returns extra information about the current kafka service
+   * @returns {object} - The extra information of the kafka service
+   */
+  get extraInfo() {
+    return this._extraInfo;
   }
 }
