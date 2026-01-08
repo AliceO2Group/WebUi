@@ -79,7 +79,7 @@ const infoRow = (key, value, infoRowAttributes) => {
           target: '_blank',
         }, iconExternalLink())
         : '',
-    ])
+    ]),
   ]);
 };
 

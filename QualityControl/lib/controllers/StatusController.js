@@ -65,6 +65,6 @@ export class StatusController {
    * @returns {undefined}
    */
   async getServicesConfigurationHandler(_, res) {
-    res.status(200).json(this._statusService.retrieveServicesConfiguration())
+    res.status(200).json(this._statusService.retrieveServicesConfiguration());
   }
 }

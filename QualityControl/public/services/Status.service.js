@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { RemoteData } from '/js/src/index.js'
+import { RemoteData } from '/js/src/index.js';
 
 /**
  * @typedef {object} ServicePayload
@@ -44,7 +44,7 @@ export default class StatusService {
    * @returns {Promise<void>}
    */
   async initStatusService() {
-    const { result, ok } = await this.loader.get('api/services')
+    const { result, ok } = await this.loader.get('api/services');
     if (ok) {
       this.serviceConfig = RemoteData.success(result || {});
     } else {
@@ -60,11 +60,10 @@ export default class StatusService {
    * @returns {boolean} - True if the service key exists in a successful payload.
    */
   isConfigured(service) {
-    if (!this.serviceConfig.isSuccess()) {
-      return false;
-    }
-
-    return this.serviceConfig.payload.hasOwnProperty(service);
+    return this.serviceConfig.match({
+      Success: (config) => Object.hasOwn(config, service),
+      Other: () => false,
+    });
   }
 
   /**

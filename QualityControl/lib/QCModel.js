@@ -104,7 +104,7 @@ export const setupQcModel = async (eventEmitter) => {
 
   const statusService = new StatusService(
     { version: packageJSON?.version ?? '-' },
-    { qc: config.qc ?? {}, bookkeeping: config.bookkeeping ?? {} }
+    { qc: config.qc ?? {}, bookkeeping: config.bookkeeping ?? {} },
   );
   const statusController = new StatusController(statusService);
 
