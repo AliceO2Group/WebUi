@@ -13,7 +13,10 @@
 
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
-import { editedMockedLayout, editedManyObjectsMockedLayout } from '../../setup/seeders/layout-show/json-file-mock.js';
+import {
+  editedManyObjectsMockedLayout,
+  editedMockedLayout,
+} from '../../setup/seeders/layout-show/json-file-mock.js';
 import { getElementCenter } from '../../testUtils/dragAndDrop.js';
 
 /**
@@ -187,7 +190,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const leftStyle = await page.evaluate(() => document.querySelector('#subcanvas .dropdown-menu').style.left);
 
       strictEqual(leftStyle, '0.1em');
-    }
+    },
   );
 
   await testParent.test('should have second tab to be empty (according to demo data)', { timeout }, async () => {
@@ -349,7 +352,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
         elements.map((element) => element.textContent.trim()));
 
       strictEqual(tabNames[1], originalTabNames[0]);
-    }
+    },
   );
 
   await testParent.test(
@@ -451,8 +454,25 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     { timeout: 15000 },
     async () => {
       const EXPECTED_LAYOUT_OBJECT_COUNT = editedManyObjectsMockedLayout.tabs[0].objects.length;
-      const getRenderedObjectCount = async () =>
-        await page.evaluate(() => document.querySelector('#subcanvas').children.length);
+
+      /**
+       * Counts the number of visible child elements within #subcanvas.
+       * Visibility is defined as being within the viewport.
+       * @returns {number} The amount of visible rendered objects
+       */
+      const getVisibleObjectCount = async () =>
+        await page.evaluate(() => {
+          const container = document.querySelector('#subcanvas');
+          if (!container) {
+            return 0;
+          }
+
+          // Count elements that intersect with the viewport
+          return Array.from(container.children).filter((child) => {
+            const rect = child.getBoundingClientRect();
+            return rect.bottom >= 0 && rect.top >= 0 && rect.left >= 0 && rect.right <= window.innerWidth;
+          }).length;
+        });
 
       // Ensure we are on the main tab
       await page.locator('#tab-0').click();
@@ -473,7 +493,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       await delay(100);
 
       strictEqual(
-        await getRenderedObjectCount(),
+        await getVisibleObjectCount(),
         EXPECTED_LAYOUT_OBJECT_COUNT,
         `Expected ${EXPECTED_LAYOUT_OBJECT_COUNT} rendered objects after JSON update`,
       );
@@ -482,7 +502,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       await delay(100);
 
       strictEqual(
-        await getRenderedObjectCount(),
+        await getVisibleObjectCount(),
         EXPECTED_LAYOUT_OBJECT_COUNT,
         `Expected ${EXPECTED_LAYOUT_OBJECT_COUNT} rendered objects after page reload`,
       );
