@@ -49,7 +49,7 @@ const simpleDebouncerTimers = new Map();
  * @param {number} time - Debounce delay in milliseconds.
  * @returns {undefined}
  */
-export function simpleDebouncerData(key, fn, time) {
+export function simpleDebouncer(key, fn, time) {
   if (simpleDebouncerTimers.has(key)) {
     clearTimeout(simpleDebouncerTimers.get(key));
   }

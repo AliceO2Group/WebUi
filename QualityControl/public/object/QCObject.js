@@ -14,7 +14,7 @@
 
 import { RemoteData, iconArrowTop, BrowserStorage } from '/js/src/index.js';
 import ObjectTree from './ObjectTree.class.js';
-import { simpleDebouncerData, prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
+import { simpleDebouncer, prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 import { StorageKeysEnum } from '../common/enums/storageKeys.enum.js';
@@ -675,7 +675,7 @@ export default class QCObject extends BaseViewModel {
   appendExtraObjectData(objectName, data) {
     this._extraObjectData[objectName] = { ...this._extraObjectData[objectName] ?? {}, ...data };
     // debounce notify by 1ms
-    simpleDebouncerData('QCObject.appendExtraObjectData', () => this.notify(), 1);
+    simpleDebouncer('QCObject.appendExtraObjectData', () => this.notify(), 1);
   }
 
   /**
@@ -688,7 +688,7 @@ export default class QCObject extends BaseViewModel {
   setExtraObjectData(objectName, data) {
     this._extraObjectData[objectName] = data;
     // debounce notify by 1ms
-    simpleDebouncerData('QCObject.setExtraObjectData', () => this.notify(), 1);
+    simpleDebouncer('QCObject.setExtraObjectData', () => this.notify(), 1);
   }
 
   /**
