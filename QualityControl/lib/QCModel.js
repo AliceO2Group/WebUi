@@ -119,6 +119,8 @@ export const setupQcModel = async (eventEmitter) => {
   const intervalsService = new IntervalsService();
 
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
+  statusService.bookkeepingService = bookkeepingService;
+
   const filterService = new FilterService(bookkeepingService, config);
   const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService, eventEmitter);
   const objectController = new ObjectController(qcObjectService, runModeService, qcdbDownloadService);

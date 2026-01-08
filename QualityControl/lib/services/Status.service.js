@@ -39,6 +39,11 @@ export class StatusService {
     this._dataService = undefined;
 
     /**
+     * @type {BookkeepingService}
+     */
+    this._bookkeepingService = undefined;
+
+    /**
      * @type {WebSocket}
      */
     this._ws = undefined;
@@ -125,12 +130,16 @@ export class StatusService {
    * @returns {object} - object containing the configurations of the services for the front end.
    */
   retrieveServicesConfiguration() {
-    return {
-      bookkeeping: {
+    const serviceConfig = {};
+
+    if (this._bookkeepingService?.active) {
+      serviceConfig.bookkeeping = {
         BASE_URL: this._config.bookkeeping.url,
         PARTIAL_RUN_DETAILS: '?page=run-detail&runNumber=',
-      },
-    };
+      };
+    }
+
+    return serviceConfig;
   }
 
   /*
@@ -144,6 +153,15 @@ export class StatusService {
    */
   set dataService(dataService) {
     this._dataService = dataService;
+  }
+
+  /**
+   * Set service to be used for querying status of the Bookkeeping service.
+   * @param {BookkeepingService} bookkeepingService - service used for retrieving Bookkeeping status
+   * @returns {void}
+   */
+  set bookkeepingService(bookkeepingService) {
+    this._bookkeepingService = bookkeepingService;
   }
 
   /**
