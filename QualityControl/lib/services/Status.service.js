@@ -120,6 +120,19 @@ export class StatusService {
     return { name: 'CCDB', status, version, extras: {} };
   }
 
+  /**
+   * Retrieve the configurations of the services for the front end.
+   * @returns {object} - object containing the configurations of the services for the front end.
+   */
+  retrieveServicesConfiguration() {
+    return {
+      bookkeeping: {
+        BASE_URL: this._config.bookkeeping.url,
+        PARTIAL_RUN_DETAILS: '?page=run-detail&run-number=',
+      },
+    };
+  }
+
   /*
    * Getters & Setters
    */

@@ -102,7 +102,10 @@ export const setupQcModel = async (eventEmitter) => {
   const userController = new UserController(userRepository);
   const layoutController = new LayoutController(layoutRepository);
 
-  const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
+  const statusService = new StatusService(
+    { version: packageJSON?.version ?? '-' },
+    { qc: config.qc ?? {}, bookkeeping: config.bookkeeping ?? {} }
+  );
   const statusController = new StatusController(statusService);
 
   const qcdbDownloadService = new QcdbDownloadService(config.ccdb);

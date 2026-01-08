@@ -182,6 +182,18 @@ export class BookkeepingService {
   }
 
   /**
+   * Retrieve the configured URL for Bookkeeping
+   * @returns {string | false} - URL for Bookkeeping, if not configured returns `false`
+   */
+  retrieveBookkeepingURL() {
+    if (!this.active) {
+      this._logger.warnMessage('Bookkeeping not configured');
+      return false;
+    }
+    return `${this._protocol}${this._hostname}${this._port}`;
+  }
+
+  /**
    * Helper method to construct a URL path with the required authentication token.
    * Appends the service's token as a query parameter to the provided path.
    * @private
