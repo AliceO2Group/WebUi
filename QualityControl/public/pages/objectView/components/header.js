@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconBook, iconArrowThickLeft } from '/js/src/index.js';
+import { h, iconBook, iconArrowThickLeft, isContextSecure } from '/js/src/index.js';
 import { filterPanelToggleButton } from '../../../common/filters/filterViews.js';
 
 /**
@@ -30,7 +30,7 @@ export const objectViewHeader = (model) => {
     rightCol: h('.w-25.flex-row.flex-grow.items-center.p2.g2.justify-end', [
       getBackToQCGButton(objectViewModel, router),
       filterPanelToggleButton(filterModel),
-      model.isContextSecure() && h('.flex-row', getCopyURLToClipboardButton(model)),
+      isContextSecure() && h('.flex-row', getCopyURLToClipboardButton(model)),
     ]),
   };
 };
