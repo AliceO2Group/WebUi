@@ -25,7 +25,7 @@ echo "[vault-setup] current status: initialized=$initialized, sealed=$sealed"
 
 UNSEAL_KEY=""
 ROOT_TOKEN=""
-
+   
 if [ "$initialized" = "false" ]; then
   echo "[vault-setup] Vault NOT initialized. Running operator init (text output)..."
 

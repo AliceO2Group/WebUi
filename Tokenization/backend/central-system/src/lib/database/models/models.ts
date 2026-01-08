@@ -19,6 +19,7 @@ import { Sequelize } from 'sequelize';
 import ServiceModel from './ServiceModel.js';
 import SystemLogModel from './SystemLogModel.js';
 import RouteModel from './RouteModel.js';
+import { DatabaseModel } from '../../../types/query_types';
 
 export function models(sequelize: Sequelize): {
   Token: ReturnType<typeof TokenModel>;
@@ -27,7 +28,7 @@ export function models(sequelize: Sequelize): {
   SystemLog: ReturnType<typeof SystemLogModel>;
   Route: ReturnType<typeof RouteModel>;
 } {
-  const models = {
+  const models: DatabaseModel = {
     Token: TokenModel(sequelize),
     ArchiveToken: ArchiveTokenModel(sequelize),
     Service: ServiceModel(sequelize),

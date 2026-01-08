@@ -12,6 +12,70 @@
  * or submit itself to any jurisdiction.
  */
 
+import { SequelizeDatabase } from '../lib/database/SequelizeDatabase.js';
+import type {
+  ServiceListItemDto,
+  ServiceListQueryFilters,
+  ServiceRow,
+} from '../types/query_types';
+import {
+  buildServiceOrder,
+  buildServiceWhere,
+  mapServiceRowToDto,
+} from '../lib/database/utils/queryHelpersServices.js';
+
+// Service for querying services from the database.
 export class ServicesQueryService {
-  constructor() {}
+  /**
+   * Get a list of services from the database based on the provided filters.
+   * @param db - The SequelizeDatabase instance.
+   * @param filters - The filters to apply to the query.
+   * @returns A promise that resolves to an array of ServiceListItemDto.
+   * @throws Will throw an error if the database query fails.
+   */
+  public async getServices(
+    db: SequelizeDatabase,
+    filters: ServiceListQueryFilters
+  ): Promise<ServiceListItemDto[]> {
+    try {
+      const where = buildServiceWhere(filters);
+      const order = buildServiceOrder(filters.ordering);
+
+      const rows = await db.models.Service.findAll({
+        where,
+        order: order.length ? order : [['name', 'ASC']],
+        raw: true,
+      });
+
+      const typedRows = rows as unknown as ServiceRow[];
+      return typedRows.map(mapServiceRowToDto);
+    } catch (err) {
+      console.error('[ServicesQueryService.getServices] DB query failed:', err);
+      throw err;
+    }
+  }
+
+  /**
+   * Get a single service by its ID.
+   * @param db - The SequelizeDatabase instance.
+   * @param id - The ID of the service to retrieve.
+   * @returns A promise that resolves to a ServiceListItemDto or null if not found.
+   * @throws Will throw an error if the database query fails.
+   */
+  public async getServiceById(
+    db: SequelizeDatabase,
+    id: number
+  ): Promise<ServiceListItemDto | null> {
+    try {
+      const row = await db.models.Service.findByPk(id, { raw: true });
+      const typedRow = row as unknown as ServiceRow | null;
+      return typedRow ? mapServiceRowToDto(typedRow) : null;
+    } catch (err) {
+      console.error(
+        '[ServicesQueryService.getServiceById] DB query failed:',
+        err
+      );
+      throw err;
+    }
+  }
 }

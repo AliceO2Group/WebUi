@@ -32,7 +32,7 @@ class SystemLog extends Model {
   declare message: string;
 
   // correlation / optional metadata
-  declare service_id: number | null;
+  declare service_id: number | null;   
   declare request_id: string | null;
   declare token_id: string | null; 
   declare ip_address: string | null;

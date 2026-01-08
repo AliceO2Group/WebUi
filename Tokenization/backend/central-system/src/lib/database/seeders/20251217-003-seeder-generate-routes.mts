@@ -59,7 +59,7 @@ export async function up(
 
   await q.bulkDelete('routes', {
     receiver_serial_number: { [Sequelize.Op.in]: serials },
-    audience_serial_number: { [Sequelize.Op.in]: serials },
+    sender_serial_number: { [Sequelize.Op.in]: serials },
   } as any);
 
   const rows: any[] = [];
@@ -67,12 +67,12 @@ export async function up(
 
   for (let i = 0; i < serials.length; i++) {
     const receiver = serials[i];
-    const aud1 = serials[(i + 1) % serials.length];
-    const aud2 = serials[(i + 3) % serials.length];
+    const send1 = serials[(i + 1) % serials.length];
+    const send2 = serials[(i + 3) % serials.length];
 
     rows.push({
       receiver_serial_number: receiver,
-      audience_serial_number: aud1,
+      sender_serial_number: send1,
       permissions: JSON.stringify(pickPerms(k)),
       status: pickStatus(k),
       created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
@@ -82,7 +82,7 @@ export async function up(
 
     rows.push({
       receiver_serial_number: receiver,
-      audience_serial_number: aud2,
+      sender_serial_number: send2,
       permissions: JSON.stringify(pickPerms(k)),
       status: pickStatus(k),
       created_at: Sequelize.literal('CURRENT_TIMESTAMP'),
@@ -113,6 +113,6 @@ export async function down(
 
   await q.bulkDelete('routes', {
     receiver_serial_number: { [Sequelize.Op.in]: serials },
-    audience_serial_number: { [Sequelize.Op.in]: serials },
+    sender_serial_number: { [Sequelize.Op.in]: serials },
   } as any);
 }

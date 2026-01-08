@@ -14,7 +14,7 @@
 
 import { CentralSystemWrapper } from '../lib/CentralSystemWrapper.js';
 import { ConnectionController } from '../controllers/ConnectionController.js';
-import { DatabaseController } from '../controllers/DatabaseController.js';
+import { ServerController } from '../controllers/ServerController.js';
 import { VaultController } from '../controllers/VaultController.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -34,6 +34,7 @@ import { EventType } from '../lib/utils/events.js';
 import { bus } from '../lib/event-bus/event-bus.js';
 import { LogManager } from '@aliceo2/web-ui';
 import { RoutesQueryService } from '../services/RoutesQueryService.js';
+import { CertificateService } from '../services/CertificateService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,18 +56,19 @@ class CentralSystem {
 
   public readonly connectionController: ConnectionController;
   public readonly vaultController: VaultController;
-  public readonly databaseController: DatabaseController;
+  public readonly serverController: ServerController;
 
   public constructor(wrapperPort: number) {
     this._logger = LogManager.getLogger('CentralSystem');
     this._db = db;
-    this.databaseController = new DatabaseController(
+    this.serverController = new ServerController(
       this._db,
       new TokensQueryService(),
       new ArchiveTokensQueryService(),
       new ServicesQueryService(),
       new SystemLogsQueryService(),
-      new RoutesQueryService()
+      new RoutesQueryService(),
+      new CertificateService()
     );
 
     this._centralSystemWrapper = new CentralSystemWrapper(

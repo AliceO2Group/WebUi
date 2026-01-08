@@ -22,7 +22,7 @@ type RoutePermissions = {"GET"?: number, "POST"?: number, "PUT"?: number, "DELET
 class Route extends Model {
   declare id: number;
   declare receiver_serial_number: string;
-  declare audience_serial_number: string;
+  declare sender_serial_number: string;
   declare permissions: RoutePermissions;
   declare status: RouteStatus;
   declare created_at: Date;
@@ -45,7 +45,7 @@ export default (sequelize: Sequelize): typeof Route =>
         allowNull: false,
       },
 
-      audience_serial_number: {
+      sender_serial_number: {
         type: DataTypes.STRING(255),
         allowNull: false,
       },

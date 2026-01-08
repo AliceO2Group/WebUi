@@ -32,7 +32,7 @@ export async function up(
       allowNull: false,
     },
 
-    audience_serial_number: {
+    sender_serial_number: {
       type: Sequelize.STRING(255),
       allowNull: false,
     },

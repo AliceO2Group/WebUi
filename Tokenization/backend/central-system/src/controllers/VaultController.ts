@@ -26,7 +26,7 @@ import {
   CreateOrUpdateCredentialReq,
   VaultEncryptPayloadReq,
   VaultImportKeyReq,
-} from '../lib/utils/event-req-types.js';
+} from '../lib/utils/event_req_types.js';
 import { registerBusHandler } from '../lib/event-bus/register-bus-handler.js';
 import { EventType } from '../lib/utils/events.js';
 

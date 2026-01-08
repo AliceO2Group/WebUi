@@ -23,11 +23,12 @@ import { createUmzug } from './umzug.js';
 import { SequelizeDatabaseConfig } from './utils/sequelizeDatabaseConfig';
 import { SequelizeStorage } from 'umzug';
 import { createSeederUmzug } from './seeder-umzug.js';
+import { DatabaseModel } from '../../types/query_types.js';
 
 export class SequelizeDatabase {
   private _logger;
   public sequelize: Sequelize;
-  private _models: object;
+  private _models: DatabaseModel;
   private _dbConfig: SequelizeDatabaseConfig;
 
   /**
