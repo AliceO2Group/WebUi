@@ -356,16 +356,6 @@ export default class ObjectTree extends Observable {
     subtree._addChild(object, path, fullPath);
   }
 
-  // /**
-  //  * Add a single object as a child node
-  //  * @param {object} object - child to be added
-  //  */
-  // addOneChild(object) {
-  //   this._addChild(object);
-  //   this.loadExpandedNodes();
-  //   this.notify();
-  // }
-
   /**
    * Add a list of objects as child nodes
    * @param {Array<object>} objects - children to be added
