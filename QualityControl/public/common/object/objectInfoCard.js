@@ -13,7 +13,7 @@
  */
 
 import { h, isContextSecure } from '/js/src/index.js';
-import { camelToTitleCase, copyToClipboard, isContextSecure, prettyFormatDate } from './../utils.js';
+import { camelToTitleCase, copyToClipboard, prettyFormatDate } from './../utils.js';
 import { visibilityButton } from '../visibilityButton.js';
 
 const SPECIFIC_KEY_LABELS = {
