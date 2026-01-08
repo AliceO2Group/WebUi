@@ -12,13 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
+/* Global: window */
+
 /**
- * Enumeration for different types of storage keys
- * @enum {string}
- * @readonly
+ * Checks whether the context is secure (HTTPS)
+ * @returns {boolean} Returns `true` if context is secure, `false` otherwise.
  */
-export const StorageKeysEnum = Object.freeze({
-  OBJECT_VIEW_LEFT_PANEL_WIDTH: 'object-view-left-panel-width',
-  OBJECT_VIEW_INFO_VISIBILITY_SETTING: 'object-view-info-visibility-setting',
-  OBJECT_TREE_OPEN_NODES: 'object-tree-open-nodes',
-});
+export const isContextSecure = () =>
+  window.isSecureContext;
