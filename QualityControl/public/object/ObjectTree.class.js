@@ -51,10 +51,6 @@ export default class ObjectTree extends Observable {
 
   /**
    * Collapse the currently focused node or move focus to its parent.
-   * - If the focused node is an object, it collapses its parent (if any) and moves focus to the parent.
-   * - If the focused node is a branch (a node with children):
-   *   - If the branch is open, it collapses the branch and keeps the focus on it.
-   *   - If the branch is already collapsed, it moves focus to its parent.
    * @returns {undefined}
    */
   collapseFocusedNode() {
@@ -82,10 +78,7 @@ export default class ObjectTree extends Observable {
   }
 
   /**
-   * Expand the currently focused node or move focus to its first child.
-   * - If the focused node is a branch (a node with children):
-   *   - If the branch is collapsed, it expands the branch and keeps the focus on it.
-   *   - If the branch is already expanded, it moves focus to its first child.
+   * If focus is on a branch: expand it if closed, otherwise move focus to first child.
    * @returns {undefined}
    */
   expandFocusedNode() {
