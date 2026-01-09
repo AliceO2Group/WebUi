@@ -50,6 +50,16 @@ export default class ObjectTree extends Observable {
   }
 
   /**
+   * Set the currently focused node
+   * @param {ObjectTree} node - node to be focused
+   * @returns {undefined}
+   */
+  setFocusedNode(node) {
+    this.focusedNode = node;
+    this.notify();
+  }
+
+  /**
    * Collapse the currently focused node or move focus to its parent.
    * @returns {undefined}
    */
@@ -93,16 +103,6 @@ export default class ObjectTree extends Observable {
   }
 
   /**
-   * Set the currently focused node
-   * @param {ObjectTree} node - node to be focused
-   * @returns {undefined}
-   */
-  setFocusedNode(node) {
-    this.focusedNode = node;
-    this.notify();
-  }
-
-  /**
    * Get all visible nodes in the tree (for navigation)
    * @returns {Array.<ObjectTree>} - list of visible nodes
    */
@@ -119,9 +119,9 @@ export default class ObjectTree extends Observable {
   }
 
   /**
-   * Select the next visible node in the tree
+   * Focus the next visible node in the tree
    */
-  selectNextNode() {
+  focusNextNode() {
     const visible = this._getVisibleNodes();
     if (!visible.length) {
       return; // no visible nodes
@@ -143,9 +143,9 @@ export default class ObjectTree extends Observable {
   }
 
   /**
-   * Select the previous visible node in the tree.
+   * Focus the previous visible node in the tree.
    */
-  selectPreviousNode() {
+  focusPreviousNode() {
     const visible = this._getVisibleNodes();
     if (!visible.length) {
       return; // no visible nodes

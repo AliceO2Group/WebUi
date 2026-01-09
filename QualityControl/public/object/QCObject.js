@@ -42,6 +42,8 @@ export default class QCObject extends BaseViewModel {
 
     this.searchInput = ''; // String - content of input search
     this.searchResult = []; // Array<object> - result list of search
+    this.focusedSearchResult = null; // Object - focused item in search results for keyboard navigation
+
     this.sortBy = {
       field: 'name',
       title: 'Name',
@@ -79,6 +81,19 @@ export default class QCObject extends BaseViewModel {
   setLeftPanelWidthPercent(widthPercent) {
     this.leftPanelWidthStorage.setLocalItem(this.model.session.personid.toString(), widthPercent);
     this.leftPanelWidthPercent = widthPercent;
+    this.notify();
+  }
+
+  /**
+   * Set focused item in search results (used by keyboard navigation).
+   * @param {object} next - next object to be focused
+   * @returns {undefined}
+   */
+  setFocusedSearchResult(next) {
+    if (!next || next === this.focusedSearchResult) {
+      return;
+    }
+    this.focusedSearchResult = next;
     this.notify();
   }
 
@@ -391,6 +406,7 @@ export default class QCObject extends BaseViewModel {
     } else {
       await this.loadObjectByName(this.selected.name);
     }
+
     this.notify();
   }
 
@@ -404,6 +420,8 @@ export default class QCObject extends BaseViewModel {
     this._computeFilters();
 
     this.sortListByField(this.searchResult, this.sortBy.field, this.sortBy.order);
+    this.focusedSearchResult = null;
+
     this.notify();
   }
 

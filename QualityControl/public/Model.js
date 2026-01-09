@@ -141,18 +141,58 @@ export default class Model extends Observable {
     }
 
     if (this.router.params.page === 'objectTree') {
-      if (code === 37) { // Left arrow
-        this.object.tree.collapseFocusedNode();
-      } else if (code === 39) { // Right arrow
-        this.object.tree.expandFocusedNode();
-        const focusedObject = this.object.tree.focusedNode?.object;
-        if (focusedObject) {
-          this.object.select(focusedObject);
+      const isUp = code === 38;
+      const isDown = code === 40;
+      const isLeft = code === 37;
+      const isRightOrEnter = code === 39 || code === 13;
+      const searchActive = Boolean(this.object.searchInput?.trim());
+      // Use virtual table navigation when search is active
+      if (searchActive) {
+        const results = this.object.searchResult || [];
+        if (!results.length) {
+          return;
         }
-      } else if (code === 38) { // Up arrow
-        this.object.tree.selectPreviousNode();
-      } else if (code === 40) { // Down arrow
-        this.object.tree.selectNextNode();
+        const focusedResult = this.object.focusedSearchResult;
+        const focusedIndex = focusedResult ? results.indexOf(focusedResult) : -1;
+        if (isUp) {
+          const nextIndex = focusedIndex > 0 ? focusedIndex - 1 : 0;
+          this.object.setFocusedSearchResult(results[nextIndex] ?? results[0]);
+          return;
+        }
+        if (isDown) {
+          const nextIndex = focusedIndex >= 0 ? Math.min(results.length - 1, focusedIndex + 1) : 0;
+          this.object.setFocusedSearchResult(results[nextIndex] ?? results[0]);
+          return;
+        }
+        if (isRightOrEnter) {
+          if (this.object.focusedSearchResult) {
+            this.object.select(this.object.focusedSearchResult);
+          }
+          return;
+        }
+      } else {
+        // No search, use tree navigation
+        if (isUp) {
+          this.object.tree.focusPreviousNode();
+          return;
+        }
+        if (isDown) {
+          this.object.tree.focusNextNode();
+          return;
+        }
+        if (isLeft) {
+          this.object.tree.collapseFocusedNode();
+          return;
+        }
+        if (isRightOrEnter) {
+          const focusedObject = this.object.tree.focusedNode?.object;
+          if (focusedObject) {
+            this.object.select(focusedObject);
+          } else {
+            this.object.tree.expandFocusedNode();
+          }
+          return;
+        }
       }
     }
   }

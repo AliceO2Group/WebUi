@@ -63,8 +63,18 @@ export default function virtualTable(model, location = 'main', objects = []) {
  * @param {string} location - location of the object
  * @returns {vnode} - virtual node element
  */
-const objectFullRow = (model, item, location) =>
-  h('tr.object-selectable', {
+const objectFullRow = (model, item, location) => {
+  const isSelected = item && item === model.object.selected;
+  const isFocused = item && model.object.focusedSearchResult && item.name === model.object.focusedSearchResult.name;
+
+  let className = '';
+  if (isSelected) {
+    className = 'table-primary'; // Selected object
+  } else if (isFocused) {
+    className = 'focused-node'; // Focused node
+  }
+
+  return h('tr.object-selectable', {
     key: item.name,
     title: item.name,
     onclick: () => model.object.select(item),
@@ -84,7 +94,7 @@ const objectFullRow = (model, item, location) =>
         model.layout.moveTabObjectStop();
       }
     },
-    class: item && item === model.object.selected ? 'table-primary' : '',
+    class: className,
     draggable: location === 'side',
   }, [
     h('td.highlight.text-ellipsis', [
@@ -93,6 +103,7 @@ const objectFullRow = (model, item, location) =>
       item.name,
     ]),
   ]);
+};
 
 /**
  * Create a table header separately so that it does not get included
