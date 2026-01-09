@@ -258,6 +258,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     await page.locator('tr:last-of-type td').click();
     await page.waitForSelector(versionsPath);
 
+    await delay(100);
     let versionCount = await page.evaluate((path) => document.querySelectorAll(path).length, versionsPath);
     strictEqual(versionCount, 1, 'Number of versions is not 1');
 
