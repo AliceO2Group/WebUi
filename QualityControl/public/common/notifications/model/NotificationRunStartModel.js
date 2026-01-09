@@ -44,7 +44,7 @@ export default class NotificationRunStartModel extends Observable {
    * are enabled for the current user.
    * @returns {boolean} `true` if notifications are enabled, `false` otherwise.
    */
-  async getBrowserNotificationSetting() {
+  getBrowserNotificationSetting() {
     try {
       if (this._browserNotificationStorage.getLocalItem(this.model.session.personid.toString())) {
         return areBrowserNotificationsGranted();
