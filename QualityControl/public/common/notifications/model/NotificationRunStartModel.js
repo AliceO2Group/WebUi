@@ -12,11 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Observable, BrowserStorage, showNativeBrowserNotification } from '/js/src/index.js';
+import { Observable, BrowserStorage, showNativeBrowserNotification,
+  areBrowserNotificationsGranted } from '/js/src/index.js';
 import { EmitterKeys } from '../../../../library/enums/emitterKeys.enum.js';
 import { StorageKeysEnum } from '../../enums/storageKeys.enum.js';
-import { Transition } from '../../../../library/enums/transition.enum.js';
-import {areBrowserNotificationsGranted} from "@aliceo2/web-ui/Frontend/js/src/index.js";
 
 /**
  * Model responsible for handling browser notifications when a new run starts.
