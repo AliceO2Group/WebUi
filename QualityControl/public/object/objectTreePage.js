@@ -56,7 +56,7 @@ export default (model) => {
             const objectsLoaded = object.list;
             const objectsToDisplay = objectsLoaded.filter((qcObject) =>
               qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
-            return h('', [
+            return h('.scroll-y.flex-column.flex-grow', [
               tableHeaderRow(model),
               virtualTable(model, 'side', objectsToDisplay),
             ]);
