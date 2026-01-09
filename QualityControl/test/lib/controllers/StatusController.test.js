@@ -17,6 +17,7 @@ import { ok } from 'node:assert';
 import { suite, test } from 'node:test';
 
 import { StatusController } from './../../../lib/controllers/StatusController.js';
+import { config } from '../../config.js';
 
 export const statusControllerTestSuite = async () => {
   suite('`getSetServiceStatusHandler()` tests', () => {
@@ -89,6 +90,31 @@ export const statusControllerTestSuite = async () => {
       const result = { status: { ok: true }, version: '0.0.1' };
       ok(res.status.calledWith(200));
       ok(res.json.calledWith(result));
+    });
+  });
+
+  suite('`getServicesConfigurationHandler()` tests', () => {
+    test('should successfully respond with result JSON with the configured services', () => {
+      const mock = {
+        bookkeeping: {
+          BASE_URL: config.bookkeeping.url,
+          PARTIAL_RUN_DETAILS: '?page=run-detail&runNumber=',
+        },
+      };
+
+      const statusService = {
+        retrieveServicesConfiguration: stub().returns(mock),
+      };
+      const statusController = new StatusController(statusService);
+      const res = {
+        status: stub().returnsThis(),
+        json: stub(),
+      };
+      statusController.getServicesConfigurationHandler({}, res);
+
+      ok(statusService.retrieveServicesConfiguration.calledOnce, 'Service method should be called once');
+      ok(res.status.calledWith(200), 'Response status should be 200');
+      ok(res.json.calledWith(mock), 'Response JSON should match the service output');
     });
   });
 };

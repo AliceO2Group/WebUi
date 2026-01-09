@@ -15,6 +15,7 @@ import { strictEqual, ok, deepStrictEqual, notDeepStrictEqual } from 'node:asser
 import { delay } from '../../testUtils/delay.js';
 import { getLocalStorage, getLocalStorageAsJson } from '../../testUtils/localStorage.js';
 import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
+import { config } from '../../config.js';
 
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
 const SORTING_BUTTON_PATH = 'header > div > div > div:nth-child(3) > div > button';
@@ -222,22 +223,22 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   );
 
   await testParent.test(
-    'should have a link next to the run number',
+    'should have an external link to bookkeeping inline with the run number row',
     { timeout },
     async () => {
-      const selector = '#openRunInBookkeeping';
+      const bookkeepingLink = await page.$('#openRunInBookkeeping');
+      ok(bookkeepingLink, 'The link to bookkeeping should be present in the DOM');
 
-      const { href, runNumber } = await page.evaluate((sel) => {
-        const link = document.querySelector(sel);
-        if (!link) return null;
+      const href = await page.evaluate((element) => element.href, bookkeepingLink);
+      const runNumber =
+        await page.evaluate((element) => element.parentElement.children[0].textContent, bookkeepingLink);
+      const url = new URL(href);
+      const baseUrl = `${url.origin}${url.pathname}`;
 
-        return {
-          href: link.getAttribute('href'),
-          runNumber: link.previousElementSibling?.textContent
-        };
-      }, selector);
-    },
-  );
+      strictEqual(baseUrl, `${config.bookkeeping.url}/`);
+      strictEqual(runNumber, url.searchParams.get('runNumber'))
+    }
+  )
 
   await testParent.test(
     'should close the object plot upon clicking the close button',

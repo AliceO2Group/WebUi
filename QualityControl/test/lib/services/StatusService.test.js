@@ -17,6 +17,7 @@ import { deepStrictEqual } from 'node:assert';
 import { suite, test, before } from 'node:test';
 
 import { StatusService } from './../../../lib/services/Status.service.js';
+import { config } from '../../config.js';
 
 export const statusServiceTestSuite = async () => {
   suite('`retrieveDataServiceStatus()` tests', () => {
@@ -97,6 +98,26 @@ export const statusServiceTestSuite = async () => {
         status: { ok: true },
         version: '',
         extras: { clients: -1 },
+      });
+    });
+  });
+
+  suite('`retrieveServicesConfiguration()` tests', () => {
+    test('should return bookkeeping configuration if bookkeeping service is active', () => {
+      const serviceConfig = {
+        bookkeeping: { url: config.bookkeeping.url },
+      };
+      const statusService = new StatusService({ version: '0.1.1' }, serviceConfig);
+
+      statusService.bookkeepingService = { active: true };
+
+      const result = statusService.retrieveServicesConfiguration();
+
+      deepStrictEqual(result, {
+        bookkeeping: {
+          BASE_URL: config.bookkeeping.url,
+          PARTIAL_RUN_DETAILS: '?page=run-detail&runNumber=',
+        },
       });
     });
   });
