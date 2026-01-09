@@ -256,5 +256,12 @@
         color: var(--color-white);
       }
     }
+
+    & .combobox-header {
+        padding: 4px 12px;
+        font-size: 0.85rem;
+        color: var(--color-gray-darker);
+        font-weight: bold;
+    }
   }
 }

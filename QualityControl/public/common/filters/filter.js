@@ -220,14 +220,15 @@ export const combobox = (
   onEnterCallback,
   onInputCallback,
 ) => {
+  const ongoingRuns = options.payload ?? [];
   const filtered = filterMap[queryLabel]
-    ? options.payload?.filter((option) =>
+    ? ongoingRuns?.filter((option) =>
       String(option).toLowerCase().includes(filterMap[queryLabel].toLowerCase()))
-    : options.payload;
+    : ongoingRuns;
 
   const handleKeyNavigation = (e) => {
     const container = e.target.closest('.combobox-container');
-    const items = [...container.querySelectorAll('.combobox-item')];
+    const items = [...container.querySelectorAll('.combobox-item:not(.combobox-header)')];
     const current = container.querySelector('.is-highlighted');
     const index = items.indexOf(current);
 
@@ -271,21 +272,31 @@ export const combobox = (
       value: filterMap[queryLabel] || '',
       oninput: (event) => onInputCallback(queryLabel, event.target.value),
       onkeydown: handleKeyNavigation,
+      onblur: (e) => {
+        const container = e.target.closest('.combobox-container');
+        container.querySelector('.is-highlighted')?.classList.remove('is-highlighted');
+      },
     }),
 
-    options.payload?.length > 0 && h(
+    filtered.length > 0 && h(
       'ul.combobox-list.dropdown-menu',
-      filtered?.map((option) =>
-        h('li.combobox-item.menu-item', {
-          onmousedown: (e) => {
-            e.preventDefault();
-            onInputCallback(queryLabel, option);
-            e.target.closest('.combobox-container')
-              .querySelector('input')
-              ?.blur();
-            onEnterCallback();
-          },
-        }, option)),
+      [
+        h('li.combobox-header.dropdown-header', {
+          style: { pointerEvents: 'none', userSelect: 'none' },
+        }, placeholder),
+
+        ...filtered.map((option) =>
+          h('li.combobox-item.menu-item', {
+            onmousedown: (e) => {
+              e.preventDefault();
+              onInputCallback(queryLabel, option);
+              e.target.closest('.combobox-container')
+                .querySelector('input')
+                ?.blur();
+              onEnterCallback();
+            },
+          }, option)),
+      ],
     ),
   ]);
 };
