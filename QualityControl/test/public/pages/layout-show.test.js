@@ -46,6 +46,16 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     },
   );
 
+  await testParent.test(
+    'should have a correctly made download root as image button',
+    { timeout },
+    async () => {
+      const exists = await page.evaluate(() => document.querySelector('.download-root-image-png-button') !== null);
+
+      ok(exists, 'Expected ROOT image download button to exist');
+    },
+  );
+
   await testParent.test('should remove query param only if option is invalid for any filter', { timeout }, async () => {
     const baseParams = `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=main`;
 
@@ -513,6 +523,21 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       ok(originalSidebarName !== updatedSidebarName, 'Sidebar name should have changed from original');
     },
   );
+
+  await testParent.test('should not show a download button when there is no data', async () => {
+    await page.goto(`${url}?page=layoutShow&layoutId=671b8c22402408122e2f20dd&tab=main`, { waitUntil: 'networkidle0' });
+
+    const downloadCount = await page.evaluate(() => document.querySelectorAll('#download-button').length);
+
+    strictEqual(downloadCount, 0);
+  });
+
+  await testParent.test('should not show a download root as image button when there is no data', async () => {
+    // layout id 671b8c22402408122e2f20dd has no data
+    const exists = await page.evaluate(() => document.querySelector('.download-root-image-png-button') !== null);
+
+    strictEqual(exists, false);
+  });
 };
 
 const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {

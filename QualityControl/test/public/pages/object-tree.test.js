@@ -72,7 +72,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test(
-    'should have a correctly made download button',
+    'should have a correctly made download root as object button',
     { timeout },
     async () => {
       const objectId = '016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
@@ -85,6 +85,16 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       const dlButton = await page.evaluate(() => document.querySelector('.download-button').href);
       const token = await page.evaluate(() => model.session.token);
       strictEqual(dlButton, `${url}api/object/proxy/download/?token=${token}&objectIds=${objectId}`);
+    },
+  );
+
+  await testParent.test(
+    'should have a correctly made download root as image button',
+    { timeout },
+    async () => {
+      const exists = await page.evaluate(() => document.querySelector('.download-root-image-png-button') !== null);
+
+      ok(exists, 'Expected ROOT image download button to exist');
     },
   );
 

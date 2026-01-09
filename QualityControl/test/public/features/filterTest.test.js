@@ -253,7 +253,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
   });
 
   await testParent.test('ObjectTree infoPanel should show filtered object versions', { timeout }, async () => {
-    const versionsPath = '.outline-gray.flex-grow.relative select option';
+    const versionsPath = 'section select option';
     await page.locator('tr:last-of-type td').click();
     await page.waitForSelector(versionsPath);
 

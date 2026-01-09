@@ -30,6 +30,7 @@ import { downloadButton } from '../common/downloadButton.js';
 import { resizableDivider } from '../common/resizableDivider.js';
 import { SortDirectionsEnum } from '../common/enums/columnSort.enum.js';
 import { sortableTableHead } from '../common/sortButton.js';
+import { downloadRootImageButton } from '../common/downloadRootImageButton.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -38,11 +39,14 @@ import { sortableTableHead } from '../common/sortButton.js';
  * @returns {vnode} - virtual node element
  */
 export default (model) => {
-  const { object, router } = model;
+  const { object } = model;
   const { leftPanelWidthPercent } = object;
-  return h('.h-100.flex-column', { key: `${router.params.page}` }, [
-    h('.flex-row.flex-grow', [
-      h('.scroll-y.flex-column', {
+  return h('.flex-column.h-100', {
+    key: 'object-tree-page-container',
+  }, [
+    h('.flex-row', { style: 'flex-grow: 1; height: 0;' }, [
+      h('.flex-column.scroll-y', {
+        key: 'object-tree-scroll-container',
         style: {
           width: object.selected ? `${leftPanelWidthPercent}%` : '100%',
         },
@@ -109,15 +113,17 @@ function objectPanel(model) {
  * @returns {vnode} - virtual node element
  */
 const drawPlot = (model, object) => {
-  const { name, validFrom, id } = object;
+  const { name, qcObject, validFrom, id } = object;
+  const { root } = qcObject;
   const href = validFrom ?
     `?page=objectView&objectName=${name}&ts=${validFrom}&id=${id}`
     : `?page=objectView&objectName=${name}`;
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
     h('.item-action-row.flex-row.g1.p1', [
+      downloadRootImageButton(`${name}.png`, root, ['stat']),
       downloadButton({
-        href: model.objectViewModel.getDownloadQcdbObjectUrl(object.id),
-        title: 'Download object',
+        href: model.objectViewModel.getDownloadQcdbObjectUrl(id),
+        title: 'Download root object',
       }),
       h(
         'a.btn#fullscreen-button',
