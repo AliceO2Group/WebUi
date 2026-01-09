@@ -29,7 +29,7 @@ export class RunModeService {
    * @param {BookkeepingService} bookkeepingService - Used to check the status of a run.
    * @param {CcdbService} dataService - Used to fetch data from the CCDB.
    * @param {EventEmitter} eventEmitter - Event emitter to be used to emit events when new data is available
-   * @param {WebSocket} ws - web-ui websocket server implementation
+   * @param {WebSocket} webSocketService - web-ui websocket server implementation
    */
   constructor(
     config,
