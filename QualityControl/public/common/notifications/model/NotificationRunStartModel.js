@@ -16,6 +16,7 @@ import { Observable, BrowserStorage, showNativeBrowserNotification } from '/js/s
 import { EmitterKeys } from '../../../../library/enums/emitterKeys.enum.js';
 import { StorageKeysEnum } from '../../enums/storageKeys.enum.js';
 import { Transition } from '../../../../library/enums/transition.enum.js';
+import {areBrowserNotificationsGranted} from "@aliceo2/web-ui/Frontend/js/src/index.js";
 
 /**
  * Model responsible for handling browser notifications when a new run starts.
@@ -43,9 +44,12 @@ export default class NotificationRunStartModel extends Observable {
    * are enabled for the current user.
    * @returns {boolean} `true` if notifications are enabled, `false` otherwise.
    */
-  getBrowserNotificationSetting() {
+  async getBrowserNotificationSetting() {
     try {
-      return this._browserNotificationStorage.getLocalItem(this.model.session.personid.toString()) ?? false;
+      if (this._browserNotificationStorage.getLocalItem(this.model.session.personid.toString())) {
+        return areBrowserNotificationsGranted();
+      }
+      return false;
     } catch {
       this._browserNotificationStorage.removeLocalItem(this.model.session.personid.toString());
       return false;
@@ -70,14 +74,9 @@ export default class NotificationRunStartModel extends Observable {
    * - The user has enabled notifications
    * @param {object} payload - WebSocket payload.
    * @param {number} payload.runNumber - Run number that started.
-   * @param {Transition} payload.transition - Transition type.
    * @returns {undefined}
    */
-  async _handleWSRunTrack({ runNumber, transition }) {
-    if (transition !== Transition.START_ACTIVITY) {
-      return;
-    }
-
+  async _handleWSRunTrack({ runNumber }) {
     if (!this.getBrowserNotificationSetting()) {
       return;
     }
@@ -85,15 +84,19 @@ export default class NotificationRunStartModel extends Observable {
     showNativeBrowserNotification({
       title: `RUN ${runNumber ?? 'unknown'} has started`,
       onclick: () => {
+        // On notification click we always navigate to the `objectTree` page.
+        // Additionally, we view the run using the given `runNumber`.
+        this.model.router.go(`?page=objectTree&RunNumber=${runNumber}`);
+
+        // If RunMode is not activated, we should enable it
         const { isRunModeActivated } = this.model.filterModel;
         if (!isRunModeActivated) {
-          const viewModel = this.model.filterModel.getPageTargetModel();
-          if (viewModel) {
-            this.model.filterModel.activateRunsMode(viewModel);
-          }
+          this.model.filterModel.activateRunsMode(this.model.filterModel.getPageTargetModel());
         }
 
-        this.model.filterModel.setFilterValue('RunNumber', runNumber?.toString(), true);
+        // We select the given `runNumber` in RunMode.
+        // We do not have to set the parameter in the URL, as this is already achieved on navigation.
+        this.model.filterModel.setFilterValue('RunNumber', runNumber?.toString());
       },
     });
   }

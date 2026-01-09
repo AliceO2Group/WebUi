@@ -36,12 +36,12 @@ export class RunModeService {
     bookkeepingService,
     dataService,
     eventEmitter,
-    ws,
+    webSocketService,
   ) {
     this._bookkeepingService = bookkeepingService;
     this._dataService = dataService;
     this._eventEmitter = eventEmitter;
-    this._ws = ws;
+    this._webSocketService = webSocketService;
 
     this._ongoingRuns = new Map();
     this._lastRunsRefresh = 0;
@@ -134,18 +134,16 @@ export class RunModeService {
         this._logger.errorMessage(`Error fetching initial paths for run ${runNumber}: ${error.message || error}`);
       }
       this._ongoingRuns.set(runNumber, rawPaths);
+
+      const wsMessage = new WebSocketMessage();
+      wsMessage.command = `${EmitterKeys.RUN_TRACK}:${Transition.START_ACTIVITY}`;
+      wsMessage.payload = {
+        runNumber,
+      };
+      this._webSocketService.broadcast(wsMessage);
     } else if (transition === Transition.STOP_ACTIVITY) {
       this._ongoingRuns.delete(runNumber);
     }
-
-    const wsMessage = new WebSocketMessage();
-    wsMessage.command = EmitterKeys.RUN_TRACK;
-    wsMessage.payload = {
-      runNumber,
-      transition,
-    };
-
-    this._ws.broadcast(wsMessage);
   }
 
   /**
