@@ -73,7 +73,8 @@ const infoRow = (key, value, infoRowAttributes) => {
         formattedValue,
       ),
       model.services.status.isConfigured('bookkeeping') && key === 'runNumber' && hasValue
-        ? h('a.ph2.text-right.actionable-icon.pointer-events-auto', {
+        ? h('a.ph2.text-right.actionable-icon', {
+          id: 'openRunInBookkeeping',
           title: 'Open run in Bookkeeping',
           href: model.services.status.buildBookkeepingUrl(value),
           target: '_blank',

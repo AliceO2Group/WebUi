@@ -222,6 +222,24 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   );
 
   await testParent.test(
+    'should have a link next to the run number',
+    { timeout },
+    async () => {
+      const selector = '#openRunInBookkeeping';
+
+      const { href, runNumber } = await page.evaluate((sel) => {
+        const link = document.querySelector(sel);
+        if (!link) return null;
+
+        return {
+          href: link.getAttribute('href'),
+          runNumber: link.previousElementSibling?.textContent
+        };
+      }, selector);
+    },
+  );
+
+  await testParent.test(
     'should close the object plot upon clicking the close button',
     { timeout },
     async () => {
