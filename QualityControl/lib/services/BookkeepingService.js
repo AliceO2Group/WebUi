@@ -25,12 +25,6 @@ const GET_DETECTORS_PATH = '/api/detectors';
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/bkp-service`;
 
 /**
- * @typedef {object} DetectorSummary
- * @property {string} name - Human-readable detector name.
- * @property {string} type - Detector type identifier.
- */
-
-/**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
  */
 export class BookkeepingService {
@@ -45,9 +39,6 @@ export class BookkeepingService {
     this._protocol = '';
 
     this._logger = LogManager.getLogger(LOG_FACILITY);
-
-    /** @type {Readonly<DetectorSummary[]>} */
-    this._detectors = Object.freeze([]);
   }
 
   /**
@@ -87,14 +78,7 @@ export class BookkeepingService {
       return;
     }
     this.active = await this.simulateConnection();
-    if (this.active) {
-      try {
-        const detectorSummaries = await this._retrieveDetectorSummaries();
-        this._detectors = Object.freeze(detectorSummaries.map((detector) => Object.freeze({ ...detector })));
-      } catch (error) {
-        this._logger.errorMessage(`Failed to retrieve detectors: ${error?.message || error}`);
-      }
-    } else {
+    if (!this.active) {
       this._logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
     }
   }
@@ -200,10 +184,9 @@ export class BookkeepingService {
 
   /**
    * Retrieves the information about the detectors from the Bookkeeping service.
-   * @private
    * @returns {Promise<DetectorSummary[]>} Array of detector summaries.
    */
-  async _retrieveDetectorSummaries() {
+  async retrieveDetectorSummaries() {
     const { data } = await httpGetJson(
       this._hostname,
       this._port,
@@ -214,14 +197,6 @@ export class BookkeepingService {
       },
     );
     return Array.isArray(data) ? data.map(({ name, type }) => ({ name, type })) : [];
-  }
-
-  /**
-   * Returns a list of detector summaries.
-   * @returns {Readonly<DetectorSummary[]>} An immutable array of detector summaries.
-   */
-  get detectors() {
-    return this._detectors;
   }
 
   /**

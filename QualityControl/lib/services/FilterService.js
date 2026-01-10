@@ -31,7 +31,7 @@ export class FilterService {
     this._logger = LogManager.getLogger(LOG_FACILITY);
     this._bookkeepingService = bookkeepingService;
     this._runTypes = [];
-    this.initFilters();
+    this._detectors = Object.freeze([]);
 
     this._runTypesRefreshInterval = config?.bookkeeping?.runTypesRefreshInterval ??
       (config?.bookkeeping ? 24 * 60 * 60 * 1000 : -1);
@@ -48,6 +48,7 @@ export class FilterService {
   async initFilters() {
     await this._bookkeepingService.connect();
     await this.getRunTypes();
+    await this._initializeDetectors();
   }
 
   /**
@@ -69,6 +70,27 @@ export class FilterService {
       this._logger.errorMessage(`Error while retrieving run types: ${error.message || error}`);
       this._runTypes = [];
     }
+  }
+
+  /**
+   * This method is used to retrieve the list of detectors from the bookkeeping service
+   * @returns {Promise<undefined>} Resolves when the list of detectors is available
+   */
+  async _initializeDetectors() {
+    try {
+      const detectorSummaries = await this._bookkeepingService.retrieveDetectorSummaries();
+      this._detectors = Object.freeze(detectorSummaries.map((detector) => Object.freeze({ ...detector })));
+    } catch (error) {
+      this._logger.errorMessage(`Failed to retrieve detectors: ${error?.message || error}`);
+    }
+  }
+
+  /**
+   * Returns a list of detector summaries.
+   * @returns {Readonly<DetectorSummary[]>} An immutable array of detector summaries.
+   */
+  get detectors() {
+    return this._detectors;
   }
 
   /**

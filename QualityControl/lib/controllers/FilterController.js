@@ -63,12 +63,11 @@ export class FilterController {
    */
   async getFilterConfigurationHandler(req, res) {
     try {
-      let runTypes = [];
-      if (this._filterService) {
-        runTypes = await this._filterService.runTypes;
-      }
+      const runTypes = this._filterService?.runTypes ?? [];
+      const detectors = this._filterService?.detectors ?? [];
       res.status(200).json({
         runTypes,
+        detectors,
       });
     } catch (error) {
       res.status(503).json({ error: error.message || error });

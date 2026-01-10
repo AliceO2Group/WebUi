@@ -44,8 +44,6 @@ export const bookkeepingServiceTestSuite = async () => {
         strictEqual(bookkeepingService._port, null);
         strictEqual(bookkeepingService._token, '');
         strictEqual(bookkeepingService._protocol, '');
-        deepStrictEqual(bookkeepingService._detectors, []);
-        ok(Object.isFrozen(bookkeepingService._detectors));
       });
     });
 
@@ -136,22 +134,6 @@ export const bookkeepingServiceTestSuite = async () => {
         strictEqual(service.active, false);
         ok(service.error.includes('Error trying to connect to Bookkeeping'));
         ok(service.error.includes('simulated failure'));
-      });
-
-      test('should call _retrieveDetectorSummaries and set _detectors if active is true', async () => {
-        const DETECTOR_SUMMARIES = [
-          {
-            name: 'Detector human-readable name',
-            type: 'Detector type identifier',
-          },
-        ];
-
-        stub(service, 'simulateConnection').resolves(true);
-        simulateStub = stub(service, '_retrieveDetectorSummaries').resolves(DETECTOR_SUMMARIES);
-        await service.connect();
-        ok(simulateStub.calledOnce);
-        deepStrictEqual(service._detectors, DETECTOR_SUMMARIES);
-        ok(Object.isFrozen(service._detectors));
       });
     });
     suite('simulateConnection', () => {
@@ -338,7 +320,7 @@ export const bookkeepingServiceTestSuite = async () => {
             .query({ token: VALID_CONFIG.bookkeeping.token })
             .reply(200, mockResponse);
 
-          const result = await bkpService._retrieveDetectorSummaries();
+          const result = await bkpService.retrieveDetectorSummaries();
 
           ok(Array.isArray(result));
           strictEqual(result.length, mockResponse.data.length);
@@ -358,7 +340,7 @@ export const bookkeepingServiceTestSuite = async () => {
             .query({ token: VALID_CONFIG.bookkeeping.token })
             .reply(200, mockResponse);
 
-          const result = await bkpService._retrieveDetectorSummaries();
+          const result = await bkpService.retrieveDetectorSummaries();
 
           ok(Array.isArray(result));
           strictEqual(result.length, 0);
@@ -374,7 +356,7 @@ export const bookkeepingServiceTestSuite = async () => {
             .query({ token: VALID_CONFIG.bookkeeping.token })
             .reply(200, mockResponse);
 
-          const result = await bkpService._retrieveDetectorSummaries();
+          const result = await bkpService.retrieveDetectorSummaries();
 
           ok(Array.isArray(result));
           strictEqual(result.length, 0);
