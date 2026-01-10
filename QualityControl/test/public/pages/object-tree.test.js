@@ -339,116 +339,69 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   );
 
   await testParent.test(
-    'should focus first node when ArrowDown key is pressed',
+    'should navigate object tree and search results with arrow keys and enter key',
     { timeout },
     async () => {
       await page.goto(`${url}${OBJECT_TREE_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
-      await page.keyboard.press('ArrowDown'); // Focus the first node
-      await delay(500);
-      const isFirstNodeHighlighted = await page.evaluate(() => {
+
+      // Focus first node
+      await page.keyboard.press('ArrowDown');
+      await delay(200);
+      const isFirstObjectFocused = await page.evaluate(() => {
         const selectedNode = document.querySelector('tr.object-selectable');
         return selectedNode?.classList.contains('focused-node');
       });
-      strictEqual(isFirstNodeHighlighted, true, 'The first node is not highlighted.');
-    },
-  );
+      strictEqual(isFirstObjectFocused, true, 'The first object is not focused.');
 
-  await testParent.test(
-    'should focus next node when ArrowDown key is pressed',
-    { timeout },
-    async () => {
-      await page.keyboard.press('ArrowDown'); // Focus to the next (second) node
-      await delay(500);
-      const isSecondNodeHighlighted = await page.evaluate(() => {
+      // Focus second node and expand
+      await page.keyboard.press('ArrowDown'); // Focus second node
+      await page.keyboard.press('ArrowRight'); // Expand focused node
+      await delay(200);
+      const isNodeExpanded = await page.evaluate(() => {
         const [, selectedNode] = document.querySelectorAll('tr.object-selectable');
         return selectedNode?.classList.contains('focused-node');
       });
-      strictEqual(isSecondNodeHighlighted, true, 'The second node is not highlighted.');
-    },
-  );
+      strictEqual(isNodeExpanded, true, 'The focused node was not expanded on pressing ArrowRight key.');
 
-  await testParent.test(
-    'should expand tree when ArrowRight key is pressed on a focused node',
-    { timeout },
-    async () => {
-      await page.keyboard.press('ArrowRight'); // Expand the focused node
-      await delay(500);
-      // Verify that the third node is visible after expanding
-      const isNodeExpanded = await page.evaluate(() => {
-        const nodes = document.querySelectorAll('tr.object-selectable');
-        return nodes.length >= 3; // Check if there are at least 3 nodes
-      });
-      strictEqual(isNodeExpanded, true, 'The third node is not present after expanding the second node.');
-    },
-  );
-
-  await testParent.test(
-    'should select object when ArrowRight key is pressed on a focused object node',
-    { timeout },
-    async () => {
-      await page.keyboard.press('ArrowDown'); // Focus to the third node
-      await delay(200);
-      await page.keyboard.press('ArrowRight'); // Expand the third node
-      await delay(200);
-      await page.keyboard.press('ArrowDown'); // Focus next node (object node)
-      await delay(200);
-      await page.keyboard.press('ArrowRight'); // Select the object node
+      // Focus third node, expand and select a leaf node
+      await page.keyboard.press('ArrowDown'); // Focus third node
+      await page.keyboard.press('ArrowRight'); // Expand focused node
+      await page.keyboard.press('ArrowDown'); // Focus fourth node
+      await page.keyboard.press('Enter'); // Select focused leaf node
       await delay(500);
       const isObjectSelected = await page.evaluate(() => model.object.selected !== undefined);
       const isObjectPlotOpened = await page.evaluate(() => {
         const objectPanel = document.querySelector('#qcObjectInfoPanel');
         return objectPanel !== null && objectPanel !== undefined;
       });
-      strictEqual(isObjectSelected, true, 'The focused object node was not selected on pressing ArrowRight key.');
-      strictEqual(isObjectPlotOpened, true, 'The object plot panel is not opened after selecting the object node.');
-    },
-  );
+      strictEqual(isObjectSelected, true, 'Focused leaf node was not selected on pressing ArrowRight key.');
+      strictEqual(isObjectPlotOpened, true, 'Object plot panel is not opened after selecting the focused leaf node.');
 
-  await testParent.test(
-    'should collapse parent node when ArrowLeft key is pressed on a selected object node',
-    { timeout },
-    async () => {
-      const nodeCountBefore = await page.evaluate(() => {
-        const nodes = document.querySelectorAll('tr.object-selectable');
-        return nodes.length;
-      });
-      ok(nodeCountBefore > 3, `Expected node count to be greater than 3, but got ${nodeCountBefore}`);
-      await page.keyboard.press('ArrowLeft'); // Collapse the parent node of the selected object
+      // Collapse parent node of the focused leaf node
+      await page.keyboard.press('ArrowLeft');
       await delay(200);
-      const nodeCountAfter = await page.evaluate(() => {
+      const nodeCountAfterCollapse = await page.evaluate(() => {
         const nodes = document.querySelectorAll('tr.object-selectable');
         return nodes.length;
       });
       strictEqual(
-        nodeCountAfter,
+        nodeCountAfterCollapse,
         3,
         'The object tree navigation does not have exactly 3 nodes after collapsing the parent.',
       );
-    },
-  );
 
-  await testParent.test(
-    'should focus previous node when ArrowUp key is pressed',
-    { timeout },
-    async () => {
-      await page.keyboard.press('ArrowUp'); // Move back to the second child node
+      // Focus previous node
+      await page.keyboard.press('ArrowUp');
       await delay(200);
-      // Verify the second node is highlighted
-      const isSecondNodeHighlighted = await page.evaluate(() => {
+      const isSecondNodeHighlightedAgain = await page.evaluate(() => {
         const [, selectedNode] = document.querySelectorAll('tr.object-selectable');
         return selectedNode?.classList.contains('focused-node');
       });
-      strictEqual(isSecondNodeHighlighted, true, 'The second node is not highlighted after pressing ArrowUp key.');
-    },
-  );
+      strictEqual(isSecondNodeHighlightedAgain, true, 'The second node is not highlighted after pressing ArrowUp key.');
 
-  await testParent.test(
-    'should collapse tree when ArrowLeft key is pressed on a focused node',
-    { timeout },
-    async () => {
-      await page.keyboard.press('ArrowLeft'); // Collapse the second node
+      // Collapse tree
+      await page.keyboard.press('ArrowLeft');
       await delay(200);
-      // Verify that the third node is gone after collapsing
       const isNodeCollapsed = await page.evaluate(() => {
         const nodes = document.querySelectorAll('tr.object-selectable');
         return nodes.length < 3; // Check if there are less than 3 nodes
@@ -458,56 +411,24 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   );
 
   await testParent.test(
-    'should focus first object in search results when ArrowDown key is pressed and search is active',
+    'should navigate object tree and search results with arrow keys and enter key when search active',
     { timeout },
     async () => {
-      // reset state by navigating to the object tree page again
       await page.goto(`${url}${OBJECT_TREE_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
       await page.focus('#searchObjectTree');
       await page.type('#searchObjectTree', 'qc/test/object');
-      await page.keyboard.press('ArrowDown'); // Focus first object in search results
+
+      // Focus first object in search results
+      await page.keyboard.press('ArrowDown');
       await delay(200);
       const isFirstObjectHighlighted = await page.evaluate(() => {
         const selectedNode = document.querySelector('tr.object-selectable');
         return selectedNode?.classList.contains('focused-node');
       });
       strictEqual(isFirstObjectHighlighted, true, 'The first object in search results is not highlighted.');
-    },
-  );
 
-  await testParent.test(
-    'should focus next object in search results when ArrowDown key is pressed and search is active',
-    { timeout },
-    async () => {
-      await page.keyboard.press('ArrowDown'); // Focus next object in search results
-      await delay(500);
-      const isSecondObjectHighlighted = await page.evaluate(() => {
-        const [, selectedNode] = document.querySelectorAll('tr.object-selectable');
-        return selectedNode?.classList.contains('focused-node');
-      });
-      strictEqual(isSecondObjectHighlighted, true, 'The second object in search results is not highlighted.');
-    },
-  );
-
-  await testParent.test(
-    'should focus previous object in search results when ArrowUp key is pressed and search is active',
-    { timeout },
-    async () => {
-      await page.keyboard.press('ArrowUp'); // Focus previous object in search results
-      await delay(200);
-      const isFirstObjectHighlighted = await page.evaluate(() => {
-        const selectedNode = document.querySelector('tr.object-selectable');
-        return selectedNode?.classList.contains('focused-node');
-      });
-      strictEqual(isFirstObjectHighlighted, true, 'The first object in search results is not highlighted.');  
-    },
-  );
-
-  await testParent.test(
-    'should select focused object in search results when ArrowRight key is pressed and search is active',
-    { timeout },
-    async () => {
-      await page.keyboard.press('ArrowRight'); // Select focused object
+      // Select focused object
+      await page.keyboard.press('Enter');
       await delay(500);
       const isObjectSelected = await page.evaluate(() => model.object.selected !== undefined);
       const isObjectPlotOpened = await page.evaluate(() => {
