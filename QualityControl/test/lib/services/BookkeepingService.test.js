@@ -44,6 +44,8 @@ export const bookkeepingServiceTestSuite = async () => {
         strictEqual(bookkeepingService._port, null);
         strictEqual(bookkeepingService._token, '');
         strictEqual(bookkeepingService._protocol, '');
+        deepStrictEqual(bookkeepingService._detectors, []);
+        ok(Object.isFrozen(bookkeepingService._detectors));
       });
     });
 
@@ -134,6 +136,22 @@ export const bookkeepingServiceTestSuite = async () => {
         strictEqual(service.active, false);
         ok(service.error.includes('Error trying to connect to Bookkeeping'));
         ok(service.error.includes('simulated failure'));
+      });
+
+      test('should call _retrieveDetectorSummaries and set _detectors if active is true', async () => {
+        const DETECTOR_SUMMARIES = [
+          {
+            name: 'Detector human-readable name',
+            type: 'Detector type identifier',
+          },
+        ];
+
+        stub(service, 'simulateConnection').resolves(true);
+        simulateStub = stub(service, '_retrieveDetectorSummaries').resolves(DETECTOR_SUMMARIES);
+        await service.connect();
+        ok(simulateStub.calledOnce);
+        deepStrictEqual(service._detectors, DETECTOR_SUMMARIES);
+        ok(Object.isFrozen(service._detectors));
       });
     });
     suite('simulateConnection', () => {
@@ -286,6 +304,81 @@ export const bookkeepingServiceTestSuite = async () => {
 
         deepStrictEqual(data, mockResponse.data);
         ok(Object.values(RunStatus).includes(runStatus));
+      });
+
+      suite('Retrieve detector summaries', () => {
+        const GET_DETECTORS_PATH = '/api/detectors';
+
+        let bkpService = null;
+
+        beforeEach(() => {
+          bkpService = new BookkeepingService(VALID_CONFIG.bookkeeping);
+          bkpService.validateConfig(); // ensures internal fields like _hostname/_port/_token are set
+          bkpService.connect();
+        });
+
+        afterEach(() => {
+          nock.cleanAll();
+        });
+
+        test('should handle all detector types correctly', async () => {
+          const mockResponse = {
+            data: [
+              { id: 1, name: 'ACO', type: 'PHYSICAL', createdAt: 1765468282000, updatedAt: 1765468282000 },
+              { id: 2, name: 'EVS', type: 'AOT-EVENT', createdAt: 1765468282000, updatedAt: 1765468282000 },
+              { id: 3, name: 'GLO', type: 'QC', createdAt: 1765468282000, updatedAt: 1765468282000 },
+              { id: 4, name: 'MUD', type: 'MUON-GLO', createdAt: 1765468282000, updatedAt: 1765468282000 },
+              { id: 5, name: 'VTX', type: 'AOT-GLO', createdAt: 1765468282000, updatedAt: 1765468282000 },
+              { id: 6, name: 'TST', type: 'VIRTUAL', createdAt: 1765468282000, updatedAt: 1765468282000 },
+            ],
+          };
+
+          nock(VALID_CONFIG.bookkeeping.url)
+            .get(GET_DETECTORS_PATH)
+            .query({ token: VALID_CONFIG.bookkeeping.token })
+            .reply(200, mockResponse);
+
+          const result = await bkpService._retrieveDetectorSummaries();
+
+          ok(Array.isArray(result));
+          strictEqual(result.length, mockResponse.data.length);
+
+          // Verify each detector is preserved
+          const detectorSummaries = result.map(({ name, type }) => ({ name, type }));
+          deepStrictEqual(result, detectorSummaries);
+        });
+
+        test('should return empty array when data is not an array', async () => {
+          const mockResponse = {
+            data: null,
+          };
+
+          nock(VALID_CONFIG.bookkeeping.url)
+            .get(GET_DETECTORS_PATH)
+            .query({ token: VALID_CONFIG.bookkeeping.token })
+            .reply(200, mockResponse);
+
+          const result = await bkpService._retrieveDetectorSummaries();
+
+          ok(Array.isArray(result));
+          strictEqual(result.length, 0);
+        });
+
+        test('should return empty array when data is empty array', async () => {
+          const mockResponse = {
+            data: [],
+          };
+
+          nock(VALID_CONFIG.bookkeeping.url)
+            .get(GET_DETECTORS_PATH)
+            .query({ token: VALID_CONFIG.bookkeeping.token })
+            .reply(200, mockResponse);
+
+          const result = await bkpService._retrieveDetectorSummaries();
+
+          ok(Array.isArray(result));
+          strictEqual(result.length, 0);
+        });
       });
 
       test('should return ONGOING status when timeO2End is not present', async () => {

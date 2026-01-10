@@ -20,8 +20,15 @@ import { wrapRunStatus } from '../dtos/BookkeepingDto.js';
 const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
 const GET_RUN_PATH = '/api/runs';
+const GET_DETECTORS_PATH = '/api/detectors';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/bkp-service`;
+
+/**
+ * @typedef {object} DetectorSummary
+ * @property {string} name - Human-readable detector name.
+ * @property {string} type - Detector type identifier.
+ */
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
@@ -38,6 +45,9 @@ export class BookkeepingService {
     this._protocol = '';
 
     this._logger = LogManager.getLogger(LOG_FACILITY);
+
+    /** @type {Readonly<DetectorSummary[]>} */
+    this._detectors = Object.freeze([]);
   }
 
   /**
@@ -77,7 +87,14 @@ export class BookkeepingService {
       return;
     }
     this.active = await this.simulateConnection();
-    if (!this.active) {
+    if (this.active) {
+      try {
+        const detectorSummaries = await this._retrieveDetectorSummaries();
+        this._detectors = Object.freeze(detectorSummaries.map((detector) => Object.freeze({ ...detector })));
+      } catch (error) {
+        this._logger.errorMessage(`Failed to retrieve detectors: ${error?.message || error}`);
+      }
+    } else {
       this._logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
     }
   }
@@ -179,6 +196,32 @@ export class BookkeepingService {
       this._logger.errorMessage(`Error fetching run status: ${error.message || error}`);
       return wrapRunStatus(RunStatus.UNKNOWN);
     }
+  }
+
+  /**
+   * Retrieves the information about the detectors from the Bookkeeping service.
+   * @private
+   * @returns {Promise<DetectorSummary[]>} Array of detector summaries.
+   */
+  async _retrieveDetectorSummaries() {
+    const { data } = await httpGetJson(
+      this._hostname,
+      this._port,
+      this._createPath(GET_DETECTORS_PATH),
+      {
+        protocol: this._protocol,
+        rejectUnauthorized: false,
+      },
+    );
+    return Array.isArray(data) ? data.map(({ name, type }) => ({ name, type })) : [];
+  }
+
+  /**
+   * Returns a list of detector summaries.
+   * @returns {Readonly<DetectorSummary[]>} An immutable array of detector summaries.
+   */
+  get detectors() {
+    return this._detectors;
   }
 
   /**
