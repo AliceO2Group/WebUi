@@ -18,7 +18,7 @@ import FilterService from '../../../services/Filter.service.js';
 import { RunStatus } from '../../../library/runStatus.enum.js';
 import { prettyFormatDate } from '../../utils.js';
 
-const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
+const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType', 'QcDetectorName'];
 
 const RUN_INFORMATION_MAP = {
   startTime: prettyFormatDate,
