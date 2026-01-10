@@ -50,11 +50,36 @@ export default class ObjectTree extends Observable {
   }
 
   /**
+   * Focus the node identified by a slash-separated path (e.g. "A/B/C").
+   * Does nothing if path is empty or not found.
+   * @param {string} pathString - A slash-separated string representing the path to the node (e.g., "A/B/C").
+   * @returns {void}
+   */
+  focusNodeByPath(pathString) {
+    if (!pathString) {
+      return;
+    }
+    const parts = pathString.split('/').filter(Boolean);
+    const findNode = (node, remainingParts) => {
+      if (remainingParts.length === 0) {
+        return node;
+      }
+      const [nextPart, ...rest] = remainingParts;
+      const nextNode = node.children.find((child) => child.name === nextPart);
+      return nextNode ? findNode(nextNode, rest) : null;
+    };
+    const targetNode = findNode(this, parts);
+    if (targetNode) {
+      this._setFocusedNode(targetNode);
+    }
+  }
+
+  /**
    * Set the currently focused node
    * @param {ObjectTree} node - node to be focused
    * @returns {undefined}
    */
-  setFocusedNode(node) {
+  _setFocusedNode(node) {
     this.focusedNode = node;
     this.notify();
   }
@@ -74,7 +99,7 @@ export default class ObjectTree extends Observable {
         return;
       }
       parent.open = false;
-      this.setFocusedNode(parent);
+      this._setFocusedNode(parent);
       return;
     }
     // If focus is on a branch: collapse it if open, otherwise move focus to parent.
@@ -83,7 +108,7 @@ export default class ObjectTree extends Observable {
       return;
     }
     if (this.focusedNode.parent) {
-      this.setFocusedNode(this.focusedNode.parent);
+      this._setFocusedNode(this.focusedNode.parent);
     }
   }
 
@@ -98,7 +123,7 @@ export default class ObjectTree extends Observable {
     if (!this.focusedNode.open && this.focusedNode.children.length > 0) {
       this.focusedNode.toggle();
     } else if (this.focusedNode.open && this.focusedNode.children.length > 0) {
-      this.setFocusedNode(this.focusedNode.children[0]);
+      this._setFocusedNode(this.focusedNode.children[0]);
     }
   }
 
@@ -106,7 +131,7 @@ export default class ObjectTree extends Observable {
    * Get all visible nodes in the tree (for navigation)
    * @returns {Array.<ObjectTree>} - list of visible nodes
    */
-  _getVisibleNodes() {
+  getVisibleNodes() {
     const nodes = [];
     const traverse = (n) => {
       nodes.push(n);
@@ -122,48 +147,50 @@ export default class ObjectTree extends Observable {
    * Focus the next visible node in the tree
    */
   focusNextNode() {
-    const visible = this._getVisibleNodes();
+    const visible = this.getVisibleNodes();
+    // No visible nodes
     if (!visible.length) {
-      return; // no visible nodes
-    }
-    const idx = visible.indexOf(this.focusedNode);
-    // nothing focused yet -> focus first visible node
-    if (!this.focusedNode || idx === -1) {
-      const [first] = visible;
-      this.setFocusedNode(first);
       return;
     }
-    // if already at the last visible node, do nothing
+    const idx = visible.indexOf(this.focusedNode);
+    // Nothing focused yet -> focus first visible node
+    if (!this.focusedNode || idx === -1) {
+      const [first] = visible;
+      this._setFocusedNode(first);
+      return;
+    }
+    // At the last visible node, do nothing
     if (idx >= visible.length - 1) {
       return;
     }
-    // select next node
+    // Select next node
     const next = visible[idx + 1] ?? visible[idx];
-    this.setFocusedNode(next);
+    this._setFocusedNode(next);
   }
 
   /**
    * Focus the previous visible node in the tree.
    */
   focusPreviousNode() {
-    const visible = this._getVisibleNodes();
+    const visible = this.getVisibleNodes();
+    // No visible nodes
     if (!visible.length) {
-      return; // no visible nodes
+      return;
     }
     const idx = visible.indexOf(this.focusedNode);
-    // if already at the first visible node, do nothing
+    // At the first visible node, do nothing
     if (idx === 0) {
       return;
     }
-    // nothing focused yet -> focus first visible node
+    // Nothing focused yet -> focus first visible node
     if (!this.focusedNode || idx === -1) {
       const [first] = visible;
-      this.setFocusedNode(first);
+      this._setFocusedNode(first);
       return;
     }
-    // select previous node
+    // Select previous node
     const prev = idx > 0 ? visible[idx - 1] : visible[0];
-    this.setFocusedNode(prev);
+    this._setFocusedNode(prev);
   }
 
   /**

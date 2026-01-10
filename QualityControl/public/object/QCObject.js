@@ -43,6 +43,7 @@ export default class QCObject extends BaseViewModel {
     this.searchInput = ''; // String - content of input search
     this.searchResult = []; // Array<object> - result list of search
     this.focusedSearchResult = null; // Object - focused item in search results for keyboard navigation
+    this.focusedSearchIndex = -1; // Number - index of focused search result
 
     this.sortBy = {
       field: 'name',
@@ -86,15 +87,32 @@ export default class QCObject extends BaseViewModel {
 
   /**
    * Set focused item in search results (used by keyboard navigation).
-   * @param {object} next - next object to be focused
+    * @param {number} nextIndex - index of the next object to be focused
    * @returns {undefined}
    */
-  setFocusedSearchResult(next) {
-    if (!next || next === this.focusedSearchResult) {
+  setFocusedSearchResult(nextIndex) {
+    if (!this.searchResult.length) {
       return;
     }
-    this.focusedSearchResult = next;
+    if (nextIndex < 0 || nextIndex >= this.searchResult.length) {
+      return;
+    }
+    if (nextIndex === this.focusedSearchIndex &&
+        this.searchResult[nextIndex] === this.focusedSearchResult) {
+      return;
+    }
+    this.focusedSearchIndex = nextIndex;
+    this.focusedSearchResult = this.searchResult[nextIndex];
     this.notify();
+  }
+
+  /**
+   * Focus a search result by index without a linear search.
+   * @param {number} index - index to focus
+   * @returns {undefined}
+   */
+  setFocusedSearchResultAt(index) {
+    this.setFocusedSearchResult(index);
   }
 
   /**
@@ -407,6 +425,16 @@ export default class QCObject extends BaseViewModel {
       await this.loadObjectByName(this.selected.name);
     }
 
+    // Move focus to selected object
+    if (this.searchInput === '') {
+      this.tree.focusNodeByPath(this.selected.name);
+    } else {
+      const idx = this.searchResult.findIndex(({ name }) => name === this.selected.name);
+      if (idx >= 0) {
+        this.setFocusedSearchResultAt(idx);
+      }
+    }
+
     this.notify();
   }
 
@@ -421,6 +449,7 @@ export default class QCObject extends BaseViewModel {
 
     this.sortListByField(this.searchResult, this.sortBy.field, this.sortBy.order);
     this.focusedSearchResult = null;
+    this.focusedSearchIndex = -1;
 
     this.notify();
   }
