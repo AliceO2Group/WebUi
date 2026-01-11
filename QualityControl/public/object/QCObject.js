@@ -87,32 +87,23 @@ export default class QCObject extends BaseViewModel {
 
   /**
    * Set focused item in search results (used by keyboard navigation).
-    * @param {number} nextIndex - index of the next object to be focused
+   * @param {number} index - index of the next object to be focused
    * @returns {undefined}
    */
-  setFocusedSearchResult(nextIndex) {
+  setFocusedSearchResult(index) {
     if (!this.searchResult.length) {
-      return;
+      return; // list empty, nothing to focus
     }
-    if (nextIndex < 0 || nextIndex >= this.searchResult.length) {
-      return;
+    if (index < 0 || index >= this.searchResult.length) {
+      return; // out of bounds, do nothing
     }
-    if (nextIndex === this.focusedSearchIndex &&
-        this.searchResult[nextIndex] === this.focusedSearchResult) {
-      return;
+    if (index === this.focusedSearchIndex &&
+        this.searchResult[index] === this.focusedSearchResult) {
+      return; // already focused, avoid notify
     }
-    this.focusedSearchIndex = nextIndex;
-    this.focusedSearchResult = this.searchResult[nextIndex];
+    this.focusedSearchIndex = index;
+    this.focusedSearchResult = this.searchResult[index];
     this.notify();
-  }
-
-  /**
-   * Focus a search result by index without a linear search.
-   * @param {number} index - index to focus
-   * @returns {undefined}
-   */
-  setFocusedSearchResultAt(index) {
-    this.setFocusedSearchResult(index);
   }
 
   /**

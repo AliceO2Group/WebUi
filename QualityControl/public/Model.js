@@ -152,15 +152,13 @@ export default class Model extends Observable {
         if (!results.length) {
           return;
         }
-        const focusedIndex = this.object.focusedSearchIndex ?? -1;
+        const focusedIndex = this.object.focusedSearchIndex;
         if (isUp) {
-          const nextIndex = focusedIndex > 0 ? focusedIndex - 1 : 0;
-          this.object.setFocusedSearchResultAt(nextIndex);
+          this.object.setFocusedSearchResult(focusedIndex - 1);
           return;
         }
         if (isDown) {
-          const nextIndex = focusedIndex >= 0 ? Math.min(results.length - 1, focusedIndex + 1) : 0;
-          this.object.setFocusedSearchResultAt(nextIndex);
+          this.object.setFocusedSearchResult(focusedIndex + 1);
           return;
         }
         if (isRightOrEnter) {
