@@ -1,11 +1,11 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:140.0) Gecko/20100101 Firefox/140.0" version="29.2.7">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36" version="29.3.0">
   <diagram name="Page-1" id="juTcvZnN39SVTySur6j5">
-    <mxGraphModel dx="2827" dy="1410" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="4012" dy="1121" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="lUXzK4H8KRt0YqvL04JU-26" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
-          <mxGeometry height="120" width="280" x="1120" y="840" as="geometry" />
+          <mxGeometry height="120" width="280" x="1120" y="1010" as="geometry" />
         </mxCell>
         <mxCell id="lUXzK4H8KRt0YqvL04JU-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="&lt;div&gt;Developer&lt;/div&gt;" vertex="1">
           <mxGeometry height="40" width="280" x="160" y="40" as="geometry" />
@@ -25,80 +25,56 @@
         <mxCell id="lUXzK4H8KRt0YqvL04JU-29" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="lUXzK4H8KRt0YqvL04JU-8" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Go to release section of Jira" vertex="1">
+        <mxCell id="lUXzK4H8KRt0YqvL04JU-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Go to release section of your Jira project" vertex="1">
           <mxGeometry height="40" width="280" x="-160" y="200" as="geometry" />
         </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-30" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="lUXzK4H8KRt0YqvL04JU-9">
+        <mxCell id="Jmtyx4imFGuDDnFlAHWl-6" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="Jmtyx4imFGuDDnFlAHWl-4">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="lUXzK4H8KRt0YqvL04JU-8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Move tickets that are not ready to next release" vertex="1">
           <mxGeometry height="40" width="280" x="-160" y="280" as="geometry" />
         </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-31" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="lUXzK4H8KRt0YqvL04JU-28" value="">
+        <mxCell id="Jmtyx4imFGuDDnFlAHWl-1" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="lUXzK4H8KRt0YqvL04JU-10">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Verify changes locally" vertex="1">
-          <mxGeometry height="40" width="280" x="160" y="360" as="geometry" />
+        <mxCell id="lUXzK4H8KRt0YqvL04JU-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Verify changes/features locally" vertex="1">
+          <mxGeometry height="40" width="280" x="160" y="390" as="geometry" />
         </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-33" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="lUXzK4H8KRt0YqvL04JU-11">
+        <mxCell id="Jmtyx4imFGuDDnFlAHWl-2" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="lUXzK4H8KRt0YqvL04JU-28">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="lUXzK4H8KRt0YqvL04JU-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Create release branch" vertex="1">
-          <mxGeometry height="40" width="280" x="160" y="520" as="geometry" />
+          <mxGeometry height="40" width="280" x="160" y="460" as="geometry" />
         </mxCell>
         <mxCell id="lUXzK4H8KRt0YqvL04JU-34" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="lUXzK4H8KRt0YqvL04JU-12" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Open PR" vertex="1">
-          <mxGeometry height="40" width="280" x="480" y="600" as="geometry" />
+        <mxCell id="lUXzK4H8KRt0YqvL04JU-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Open PR, w/ release label" vertex="1">
+          <mxGeometry height="40" width="280" x="480" y="610" as="geometry" />
         </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-35" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="lUXzK4H8KRt0YqvL04JU-13">
+        <mxCell id="Jmtyx4imFGuDDnFlAHWl-11" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="Jmtyx4imFGuDDnFlAHWl-10">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Create release" vertex="1">
-          <mxGeometry height="40" width="280" x="480" y="680" as="geometry" />
-        </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-36" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="lUXzK4H8KRt0YqvL04JU-15" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-37" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="lUXzK4H8KRt0YqvL04JU-18">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-13" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Build and publlsh public npm module" vertex="1">
-          <mxGeometry height="40" width="280" x="800" y="760" as="geometry" />
-        </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-39" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="lUXzK4H8KRt0YqvL04JU-17">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-15" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Create production tarball and upload" vertex="1">
-          <mxGeometry height="40" width="280" x="800" y="840" as="geometry" />
+        <mxCell id="lUXzK4H8KRt0YqvL04JU-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Create draft release" vertex="1">
+          <mxGeometry height="40" width="280" x="480" y="690" as="geometry" />
         </mxCell>
         <mxCell id="lUXzK4H8KRt0YqvL04JU-16" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Github Release Asset" vertex="1">
-          <mxGeometry height="40" width="200" x="1190" y="850" as="geometry" />
-        </mxCell>
-        <mxCell id="vnqPqrD35HNI7YZM7dOw-4" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="vnqPqrD35HNI7YZM7dOw-3">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-17" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Mark release as done" vertex="1">
-          <mxGeometry height="40" width="280" x="-160" y="1000" as="geometry" />
+          <mxGeometry height="40" width="200" x="1190" y="1020" as="geometry" />
         </mxCell>
         <mxCell id="lUXzK4H8KRt0YqvL04JU-18" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="NPM public registry package" vertex="1">
-          <mxGeometry height="40" width="280" x="1120" y="760" as="geometry" />
+          <mxGeometry height="40" width="280" x="1120" y="930" as="geometry" />
         </mxCell>
         <mxCell id="lUXzK4H8KRt0YqvL04JU-19" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="CERN S3" vertex="1">
-          <mxGeometry height="40" width="200" x="1190" y="910" as="geometry" />
+          <mxGeometry height="40" width="200" x="1190" y="1080" as="geometry" />
         </mxCell>
         <mxCell id="lUXzK4H8KRt0YqvL04JU-27" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;rotation=0;" value="Tarball" vertex="1">
-          <mxGeometry height="30" width="60" x="1120" y="885" as="geometry" />
+          <mxGeometry height="30" width="60" x="1120" y="1055" as="geometry" />
         </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-32" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="lUXzK4H8KRt0YqvL04JU-10" value="">
+        <mxCell id="Jmtyx4imFGuDDnFlAHWl-3" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="lUXzK4H8KRt0YqvL04JU-11">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-28" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="npm version and audit" vertex="1">
-          <mxGeometry height="40" width="280" x="160" y="440" as="geometry" />
-        </mxCell>
-        <mxCell id="lUXzK4H8KRt0YqvL04JU-38" edge="1" parent="1" source="lUXzK4H8KRt0YqvL04JU-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=-0.005;entryY=0.17;entryDx=0;entryDy=0;entryPerimeter=0;" target="lUXzK4H8KRt0YqvL04JU-26">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="lUXzK4H8KRt0YqvL04JU-28" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="npm version and audit fix" vertex="1">
+          <mxGeometry height="40" width="280" x="160" y="530" as="geometry" />
         </mxCell>
         <mxCell id="vnqPqrD35HNI7YZM7dOw-2" edge="1" parent="1" source="vnqPqrD35HNI7YZM7dOw-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="lUXzK4H8KRt0YqvL04JU-6">
           <mxGeometry relative="1" as="geometry" />
@@ -107,7 +83,37 @@
           <mxGeometry height="40" width="280" x="160" y="120" as="geometry" />
         </mxCell>
         <mxCell id="vnqPqrD35HNI7YZM7dOw-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="FINISH" vertex="1">
-          <mxGeometry height="40" width="280" x="160" y="1080" as="geometry" />
+          <mxGeometry height="40" width="280" x="160" y="930" as="geometry" />
+        </mxCell>
+        <mxCell id="Jmtyx4imFGuDDnFlAHWl-8" edge="1" parent="1" source="Jmtyx4imFGuDDnFlAHWl-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="lUXzK4H8KRt0YqvL04JU-9" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Jmtyx4imFGuDDnFlAHWl-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Pull main/dev" vertex="1">
+          <mxGeometry height="40" width="280" x="160" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="Jmtyx4imFGuDDnFlAHWl-14" edge="1" parent="1" source="Jmtyx4imFGuDDnFlAHWl-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="Jmtyx4imFGuDDnFlAHWl-13" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Jmtyx4imFGuDDnFlAHWl-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Add Jira release notes to Github Release (see docs)" vertex="1">
+          <mxGeometry height="40" width="280" x="480" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="Jmtyx4imFGuDDnFlAHWl-16" edge="1" parent="1" source="Jmtyx4imFGuDDnFlAHWl-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="vnqPqrD35HNI7YZM7dOw-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Jmtyx4imFGuDDnFlAHWl-23" edge="1" parent="1" source="Jmtyx4imFGuDDnFlAHWl-13" style="edgeStyle=orthogonalEdgeStyle;shape=link;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="Jmtyx4imFGuDDnFlAHWl-22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Jmtyx4imFGuDDnFlAHWl-13" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Publish release and set as latest" vertex="1">
+          <mxGeometry height="40" width="280" x="480" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="Jmtyx4imFGuDDnFlAHWl-24" edge="1" parent="1" source="Jmtyx4imFGuDDnFlAHWl-22" style="edgeStyle=orthogonalEdgeStyle;shape=link;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="lUXzK4H8KRt0YqvL04JU-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Jmtyx4imFGuDDnFlAHWl-25" edge="1" parent="1" source="Jmtyx4imFGuDDnFlAHWl-22" style="edgeStyle=orthogonalEdgeStyle;shape=link;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="lUXzK4H8KRt0YqvL04JU-27">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Jmtyx4imFGuDDnFlAHWl-22" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" value="GH actions&lt;div&gt;(automated)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="880" y="840" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
