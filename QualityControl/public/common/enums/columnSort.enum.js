@@ -18,7 +18,6 @@
  * @readonly
  */
 export const SortDirectionsEnum = Object.freeze({
-  NONE: 0,
   ASC: 1,
   DESC: -1,
 });
