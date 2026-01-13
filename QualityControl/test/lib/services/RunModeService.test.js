@@ -29,7 +29,7 @@ export const runModeServiceTestSuite = async () => {
     let bookkeepingService = undefined;
     let dataService = undefined;
     const eventEmitter = new EventEmitter();
-    let ws = undefined;
+    let webSocketService = undefined;
 
     beforeEach(() => {
       bookkeepingService = {
@@ -40,12 +40,12 @@ export const runModeServiceTestSuite = async () => {
         getObjectsLatestVersionList: sinon.stub(),
       };
 
-      ws = {
+      webSocketService = {
         broadcast: sinon.stub(),
       };
 
       const config = { refreshInterval: 60000 };
-      runModeService = new RunModeService(config, bookkeepingService, dataService, eventEmitter, ws);
+      runModeService = new RunModeService(config, bookkeepingService, dataService, eventEmitter, webSocketService);
     });
     suite('retrievePathsAndSetRunStatus', () => {
       test('should retrieve paths and cache them if run is ongoing', async () => {
@@ -160,18 +160,19 @@ export const runModeServiceTestSuite = async () => {
       });
 
       test('should listen to events on RUN_TRACK and broadcast to websocket', async () => {
-        const runEvent = { runNumber: 1234, transition: Transition.START_ACTIVITY };
+        const runNumber = 1234;
+        const runEvent = { runNumber, transition: Transition.START_ACTIVITY };
         runModeService._dataService.getObjectsLatestVersionList = sinon.stub().resolves([{ path: '/path/from/event' }]);
 
         eventEmitter.emit(EmitterKeys.RUN_TRACK, runEvent);
         await delayAndCheck(() => runModeService._ongoingRuns.has(runEvent.runNumber), 500, 10);
 
         const wsMessage = new WebSocketMessage();
-        wsMessage.command = EmitterKeys.RUN_TRACK;
-        wsMessage.payload = runEvent;
+        wsMessage.command = `${EmitterKeys.RUN_TRACK}:${Transition.START_ACTIVITY}`;
+        wsMessage.payload = { runNumber };
 
         ok(
-          ws.broadcast.calledOnceWith(wsMessage),
+          webSocketService.broadcast.calledOnceWith(wsMessage),
           `Websocket broadcast should have message: ${JSON.stringify(wsMessage)}`,
         );
       });
