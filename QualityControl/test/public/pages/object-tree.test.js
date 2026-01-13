@@ -62,8 +62,8 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should have a button to sort by (default "Name" ASC)', async () => {
-    const sortByButtonTitle = await page.evaluate((path) => document.querySelector(path).title, '.btn.sort-button');
-    strictEqual(sortByButtonTitle, 'Sort by DESC');
+    const sortByButtonTitle = await page.evaluate((path) => document.querySelector(path).title, '.sort-button');
+    strictEqual(sortByButtonTitle, 'Sort DESC by Name');
   });
 
   await testParent.test('should have first element in tree as "qc/test/object/1"', async () => {
@@ -260,7 +260,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should sort list of histograms by name in descending order', async () => {
-    await page.locator('.btn.sort-button').click();
+    await page.locator('.sort-button').click();
 
     const sorted = await page.evaluate(() => ({
       list: window.model.object.currentList,
@@ -273,7 +273,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should sort list of histograms by name in ascending order', async () => {
-    await page.locator('.btn.sort-button').click();
+    await page.locator('.sort-button').click();
 
     const sorted = await page.evaluate(() => ({
       list: window.model.object.currentList,
