@@ -57,7 +57,7 @@
     "puppeteer": "^24.34.0",
     "sequelize-cli": "^6.6.2",
     "sinon": "^21.0.0",
-    "supertest": "^7.1.0"
+    "supertest": "^7.2.2"
   },
   "bundleDependencies": [
     "@aliceo2/web-ui",
