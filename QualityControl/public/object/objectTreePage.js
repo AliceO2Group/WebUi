@@ -197,7 +197,7 @@ const tableShow = (model) =>
 const actionablesHeaderGroup = (qcObject) => {
   const {
     order = SortDirectionsEnum.ASC,
-    icon = 'sort'
+    icon = 'sort',
   } = qcObject.sortBy || {};
 
   return h('.bg-gray-light.pv2', [
