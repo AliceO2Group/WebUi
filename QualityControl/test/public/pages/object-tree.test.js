@@ -236,7 +236,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       const baseUrl = `${url.origin}${url.pathname}`;
 
       strictEqual(baseUrl, `${config.bookkeeping.url}/`);
-      strictEqual(runNumber, url.searchParams.get('runNumber'))
+      strictEqual(runNumber, url.searchParams.get('runNumber'));
     }
   )
 
