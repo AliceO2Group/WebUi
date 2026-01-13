@@ -206,6 +206,7 @@
 
     .hover-icon {
       display: inline-block;
+      color: var(--color-gray-dark)
     }
   }
 }

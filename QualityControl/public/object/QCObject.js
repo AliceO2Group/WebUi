@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { RemoteData, iconArrowTop, BrowserStorage } from '/js/src/index.js';
+import { RemoteData, iconCaretTop, BrowserStorage } from '/js/src/index.js';
 import ObjectTree from './ObjectTree.class.js';
 import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
@@ -46,7 +46,7 @@ export default class QCObject extends BaseViewModel {
       field: 'name',
       title: 'Name',
       order: 1,
-      icon: iconArrowTop(),
+      icon: iconCaretTop(),
     };
 
     this.tree = new ObjectTree('database');
@@ -242,7 +242,7 @@ export default class QCObject extends BaseViewModel {
       field: 'name',
       title: 'Name',
       order: 1,
-      icon: iconArrowTop(),
+      icon: iconCaretTop(),
     };
     this._computeFilters();
 

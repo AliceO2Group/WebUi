@@ -60,13 +60,13 @@ export default (model) => {
             const objectsLoaded = object.list;
             const objectsToDisplay = objectsLoaded.filter((qcObject) =>
               qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
-            return h('.scroll-y.flex-column.flex-grow', [
-              tableHeaderRow(model),
+            return h('.flex-column.flex-grow', [
+              actionablesHeaderGroup(model.object),
               virtualTable(model, 'side', objectsToDisplay),
             ]);
           }
           return h('', [
-            tableHeaderRow(model),
+            actionablesHeaderGroup(model.object),
             tableShow(model),
           ]);
         },
@@ -188,26 +188,51 @@ const statusBarRight = (model) => model.object.selected
 const tableShow = (model) =>
   h('table.table.table-sm.text-no-select', h('tbody', [treeRows(model)]));
 
-const tableHeaderRow = (model) => h('.bg-gray-light.pv2', [
-  sortableTableHead({
-    order: model.object.sortBy.order,
-    icon: model.object.sortBy.icon,
-    label: 'Name',
-    sortOptions: [SortDirectionsEnum.ASC, SortDirectionsEnum.DESC],
-    onclick: (label, order, icon) => {
-      model.object.sortTree(label, 'name', order, icon);
-    },
-  }),
-  tableHeader(model.object),
-]);
+/**
+ * A composite header component for the actionables section.
+ * It groups the column sorting header and the functional toolbar (search/collapse).
+ * @param {QCObject} qcObject - The state object for Quality Control actionables.
+ * @returns {vnode} A virtual DOM node containing the grouped header elements.
+ */
+const actionablesHeaderGroup = (qcObject) => {
+  const {
+    order = SortDirectionsEnum.ASC,
+    icon = 'sort'
+  } = qcObject.sortBy || {};
 
-const tableHeader = (qcObject) =>
+  return h('.bg-gray-light.pv2', [
+    sortableTableHead({
+      order,
+      icon,
+      label: 'Name',
+      sortOptions: [SortDirectionsEnum.ASC, SortDirectionsEnum.DESC],
+      onclick: (label, order, icon) => {
+        qcObject.sortTree(label, 'name', order, icon);
+      },
+    }),
+    actionablesContainer(qcObject),
+  ]);
+};
+
+/**
+ * A toolbar containing interactive controls for the object tree table,
+ * specifically the search input and the 'Collapse All' button.
+ * @param {QCObject} qcObject - The state object for managing tree interactions.
+ * @returns {vnode} A flex-row container with search and collapse actions.
+ */
+const actionablesContainer = (qcObject) =>
   h('.flex-row.w-100', [
-    tableSearchInput(qcObject),
-    tableCollapseAll(qcObject),
+    actionableSearchInput(qcObject),
+    actionableCollapseAll(qcObject),
   ]);
 
-const tableCollapseAll = (qcObject) =>
+/**
+ * A button to collapse all expanded nodes in the object tree table.
+ * Disabled when a search filter is active to prevent UI inconsistency.
+ * @param {QCObject} qcObject - The state object containing the tree controller.
+ * @returns {vnode} A button element with a collapse icon.
+ */
+const actionableCollapseAll = (qcObject) =>
   h('button.btn.m2', {
     title: 'Close whole tree',
     onclick: () => qcObject.tree.closeAll(),
@@ -215,7 +240,12 @@ const tableCollapseAll = (qcObject) =>
     id: 'collapse-tree-button',
   }, iconCollapseUp());
 
-const tableSearchInput = (qcObject) =>
+/**
+ * A text input for filtering the object tree table based on user queries.
+ * @param {QCObject} qcObject - The state object managing search input and loading state.
+ * @returns {vnode} An input element for searching.
+ */
+const actionableSearchInput = (qcObject) =>
   h('input.form-control.form-inline.mv2.mh3.flex-grow', {
     id: 'searchObjectTree',
     placeholder: 'Search',

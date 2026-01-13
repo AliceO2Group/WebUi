@@ -13,7 +13,7 @@
  */
 
 import { SortDirectionsEnum } from '../common/enums/columnSort.enum.js';
-import { h, iconCircleX, iconArrowBottom, iconArrowTop } from '/js/src/index.js';
+import { h, iconCircleX, iconCaretBottom, iconCaretTop } from '/js/src/index.js';
 
 /**
  * Get the icon for the sort direction.
@@ -22,10 +22,10 @@ import { h, iconCircleX, iconArrowBottom, iconArrowTop } from '/js/src/index.js'
  */
 const getSortIcon = (direction) => {
   if (direction === SortDirectionsEnum.ASC) {
-    return iconArrowTop();
+    return iconCaretTop();
   }
   if (direction === SortDirectionsEnum.DESC) {
-    return iconArrowBottom();
+    return iconCaretBottom();
   }
   return iconCircleX();
 };
@@ -65,7 +65,7 @@ export const sortableTableHead = ({
   const directionLabel = Object.keys(SortDirectionsEnum).find((key) => SortDirectionsEnum[key] === nextSortOrder);
 
   return h(
-    'button.btn.sort-button',
+    '.sort-button.cursor-pointer',
     {
       onclick: () => onclick(label, nextSortOrder, hoverIcon),
       title: `Sort ${directionLabel} by ${label}`,
