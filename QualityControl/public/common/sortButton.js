@@ -68,7 +68,7 @@ export const sortableTableHead = ({
     'button.btn.sort-button',
     {
       onclick: () => onclick(label, nextSortOrder, hoverIcon),
-      title: `Sort by ${directionLabel}`,
+      title: `Sort ${directionLabel} by ${label}`,
     },
     [
       label,
