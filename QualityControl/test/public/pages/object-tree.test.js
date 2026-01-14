@@ -244,7 +244,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   await testParent.test('should update local storage when tree node is clicked', { timeout }, async () => {
     const selector = 'section > div > div > div > table > tbody > tr:nth-child(2)';
     const personid = await page.evaluate(() => window.model.session.personid);
-    const storageKey = `${StorageKeysEnum.OBJECT_TREE_OPEN_NODES}-${personid}`;
+    const storageKey = `${StorageKeysEnum.OBJECT_TREE_OPEN_BRANCHES}-${personid}`;
 
     await page.locator(selector).click();
     const localStorageBefore = await getLocalStorageAsJson(page, storageKey);
@@ -294,7 +294,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     async () => {
       const selector = '#collapse-tree-button';
       const personid = await page.evaluate(() => window.model.session.personid);
-      const storageKey = `${StorageKeysEnum.OBJECT_TREE_OPEN_NODES}-${personid}`;
+      const storageKey = `${StorageKeysEnum.OBJECT_TREE_OPEN_BRANCHES}-${personid}`;
 
       await page.locator(selector).click();
       await delay(100);

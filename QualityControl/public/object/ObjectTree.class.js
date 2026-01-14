@@ -32,8 +32,7 @@ export default class ObjectTree extends Observable {
     super();
     this._index = ObjectTree._indexIncrementCount++;
     this.focusedNode = null;
-    this.storage = new BrowserStorage(StorageKeysEnum.OBJECT_TREE_OPEN_NODES);
-    this.focusedNode = null; // Currently focused node for navigation
+    this.openBranchStateStorage = new BrowserStorage(StorageKeysEnum.OBJECT_TREE_OPEN_BRANCH_STATE);
     this.initTree(name, parent);
   }
 
@@ -224,27 +223,23 @@ export default class ObjectTree extends Observable {
    * Load the expanded/collapsed state for this node and its children from localStorage.
    * Updates the `open` property for the current node and recursively for all children.
    */
-  loadExpandedNodes() {
+  loadExpandedBranches() {
     if (!this.parent) {
       // The main node may not be collapsable or expandable.
       // Because of this we also have to load the expanded state of their direct children.
-      this.children.forEach((child) => child.loadExpandedNodes());
+      this.children.forEach((child) => child.loadExpandedBranches());
     }
-
     const session = sessionService.get();
     const key = session.personid.toString();
-
-    // We traverse the path to reach the parent object of this node
-    let parentNode = this.storage.getLocalItem(key) ?? {};
+    // We traverse the path to reach the parent branch of this node
+    let branchState = this.openBranchStateStorage.getLocalItem(key) ?? {};
     for (let i = 0; i < this.path.length - 1; i++) {
-      parentNode = parentNode[this.path[i]];
-      if (!parentNode) {
-        // Cannot expand marked node because parent path does not exist
-        return;
+      branchState = branchState[this.path[i]];
+      if (!branchState) {
+        return; // Cannot expand marked node because parent path does not exist
       }
     }
-
-    this._applyExpandedNodesRecursive(parentNode, this);
+    this._applyExpandedBranchesRecursive(branchState, this);
   }
 
   /**
@@ -252,57 +247,52 @@ export default class ObjectTree extends Observable {
    * @param {object} data - The current level of the hierarchical expanded nodes object
    * @param {ObjectTree} treeNode - The tree node to update
    */
-  _applyExpandedNodesRecursive(data, treeNode) {
+  _applyExpandedBranchesRecursive(data, treeNode) {
     if (data[treeNode.name]) {
       treeNode.open = true;
       Object.keys(data[treeNode.name]).forEach((childName) => {
         const child = treeNode.children.find((child) => child.name === childName);
         if (child) {
-          this._applyExpandedNodesRecursive(data[treeNode.name], child);
+          this._applyExpandedBranchesRecursive(data[treeNode.name], child);
         }
       });
     }
   };
 
   /**
-   * Persist the current node's expanded/collapsed state in localStorage.
+   * Persist the current branch's expanded/collapsed state in localStorage.
    */
-  storeExpandedNodes() {
+  storeExpandedBranches() {
     if (!this.parent) {
       // The main node may not be collapsable or expandable.
       // Because of this we have to store the expanded state of their direct children.
-      this.children.forEach((child) => child.storeExpandedNodes());
+      this.children.forEach((child) => child.storeExpandedBranches());
     }
-
     const session = sessionService.get();
     const key = session.personid.toString();
-    const data = this.storage.getLocalItem(key) ?? {};
-
-    // We traverse the path to reach the parent object of this node
-    let parentNode = data;
+    const data = this.openBranchStateStorage.getLocalItem(key) ?? {};
+    // We traverse the path to reach the parent branch of this node
+    let branchState = data;
     for (let i = 0; i < this.path.length - 1; i++) {
       const pathKey = this.path[i];
-      if (!parentNode[pathKey]) {
+      if (!branchState[pathKey]) {
         if (!this.open) {
-          // Cannot remove marked node because parent path does not exist
-          // Due to this the marked node also does not exist (so there is nothing to remove)
+          // Cannot remove marked branch because parent path does not exist
+          // Due to this the marked branch also does not exist (so there is nothing to remove)
           return;
         }
-
-        // Parent path does not exist, we create it here so we can mark a deeper node
-        parentNode[pathKey] = {};
+        // Parent path does not exist, we create it here so we can mark a deeper branch
+        branchState[pathKey] = {};
       }
-
-      parentNode = parentNode[pathKey];
+      branchState = branchState[pathKey];
     }
-
     if (this.open) {
-      this._markExpandedNodesRecursive(parentNode, this);
-      this.storage.setLocalItem(key, data);
-    } else if (parentNode[this.name]) {
-      // Deleting from `parentNode` directly updates the `data` object
-      delete parentNode[this.name];
-      this.storage.setLocalItem(key, data);
+      this._markExpandedBranchesRecursive(branchState, this);
+      this.openBranchStateStorage.setLocalItem(key, data);
+    } else if (branchState[this.name]) {
+      // Deleting from `branchState` directly updates the `data` object
+      delete branchState[this.name];
+      this.openBranchStateStorage.setLocalItem(key, data);
     }
   }
 
@@ -314,13 +304,13 @@ export default class ObjectTree extends Observable {
    * @param {object} data - The current level in the hierarchical data object where nodes are stored.
    * @param {ObjectTree} treeNode - The tree node whose expanded state should be stored.
    */
-  _markExpandedNodesRecursive(data, treeNode) {
+  _markExpandedBranchesRecursive(data, treeNode) {
     if (!data[treeNode.name]) {
       data[treeNode.name] = {};
     }
     treeNode.children
       .filter((child) => child.open)
-      .forEach((child) => this._markExpandedNodesRecursive(data[treeNode.name], child));
+      .forEach((child) => this._markExpandedBranchesRecursive(data[treeNode.name], child));
   };
 
   /**
@@ -329,7 +319,7 @@ export default class ObjectTree extends Observable {
    */
   toggle() {
     this.open = !this.open;
-    this.storeExpandedNodes();
+    this.storeExpandedBranches();
     this.notify();
   }
 
@@ -338,7 +328,7 @@ export default class ObjectTree extends Observable {
    */
   closeAll() {
     this._closeAllRecursive();
-    this.storeExpandedNodes();
+    this.storeExpandedBranches();
     this.notify();
   }
 
@@ -409,7 +399,7 @@ export default class ObjectTree extends Observable {
    */
   addChildren(objects) {
     objects.forEach((object) => this._addChild(object));
-    this.loadExpandedNodes();
+    this.loadExpandedBranches();
     this.notify();
   }
 }
