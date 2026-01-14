@@ -369,6 +369,27 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   );
 
   await testParent.test(
+    'should update the passNameFilter input when a dropdown option is selected',
+    { timeout },
+    async () => {
+      const expectedOptionValue
+        = await page.evaluate(() => document.querySelector('#passname-dropdown > button')?.textContent);
+
+      await page.locator('#passname-dropdown > button').click();
+      await page.waitForSelector('#passname-dropdown', { hidden: true, timeout: 1000 });
+      await delay(50);
+
+      const inputValue = await page.evaluate(() => document.querySelector('input#passNameFilter')?.value);
+
+      strictEqual(
+        inputValue,
+        expectedOptionValue,
+        'should set the input value to the clicked passName dropdown option',
+      );
+    },
+  );
+
+  await testParent.test(
     'should have a grouped selector with sorted options to filter by detector if there are detectors loaded',
     { timeout },
     async () => {
