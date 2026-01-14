@@ -115,6 +115,26 @@ export default class QCObject extends BaseViewModel {
     }
     this.focusedSearchResult = this.searchResult[nextIndex];
     this.notify();
+
+    this._scrollFocusedSearchResultIntoView();
+  }
+
+  _scrollFocusedSearchResultIntoView() {
+    const container = document.getElementById('object-list-scroll');
+    if (container && this.focusedSearchResult) {
+      const rowElement = document.getElementById(`object-row-${this.focusedSearchResult.name}`);
+      if (rowElement) {
+        const rowTop = rowElement.offsetTop;
+        const rowBottom = rowTop + rowElement.offsetHeight;
+        const viewTop = container.scrollTop;
+        const viewBottom = viewTop + container.clientHeight;
+        if (rowTop < viewTop) {
+          container.scrollTop = rowTop;
+        } else if (rowBottom > viewBottom) {
+          container.scrollTop = rowBottom - container.clientHeight;
+        }
+      }
+    }
   }
 
   /**

@@ -31,7 +31,7 @@ export default function virtualTable(model, location = 'main', objects = []) {
   }, [
     location !== 'side' && tableHeader(),
     h(
-      '.scroll-y.animate-width',
+      '#object-list-scroll.scroll-y.animate-width',
       tableContainerHooks(model),
       h(
         '',
@@ -75,6 +75,7 @@ const objectFullRow = (model, item, location) => {
   }
 
   return h('tr.object-selectable', {
+    id: `object-row-${item.name}`,
     key: item.name,
     title: item.name,
     onclick: () =>{
