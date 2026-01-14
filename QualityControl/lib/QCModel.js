@@ -171,4 +171,11 @@ function initializeIntervals(intervalsService, qcObjectService, filterService, r
       runModeService.refreshInterval,
     );
   }
+
+  if (filterService.dataPassesRefreshInterval > 0) {
+    intervalsService.register(
+      filterService.getDataPasses.bind(runModeService),
+      filterService.dataPassesRefreshInterval,
+    );
+  }
 }

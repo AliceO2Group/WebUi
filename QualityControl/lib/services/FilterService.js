@@ -32,9 +32,12 @@ export class FilterService {
     this._bookkeepingService = bookkeepingService;
     this._runTypes = [];
     this._detectors = Object.freeze([]);
+    this._dataPasses = Object.freeze([]);
 
     this._runTypesRefreshInterval = config?.bookkeeping?.runTypesRefreshInterval ??
-      (config?.bookkeeping ? 24 * 60 * 60 * 1000 : -1);
+      (config?.bookkeeping ? 24 * 60 * 60 * 1000 : -1);// default interval is 1 day
+    this._dataPassesRefreshInterval = config?.bookkeeping?.dataPassesRefreshInterval ??
+      (config?.bookkeeping ? 60 * 60 * 1000 : -1);// default interval is 1 hour
 
     this.initFilters().catch((error) => {
       this._logger.errorMessage(`FilterService initialization failed: ${error.message || error}`);
@@ -49,6 +52,7 @@ export class FilterService {
     await this._bookkeepingService.connect();
     await this.getRunTypes();
     await this._initializeDetectors();
+    await this.getDataPasses();
   }
 
   /**
@@ -70,6 +74,31 @@ export class FilterService {
       this._logger.errorMessage(`Error while retrieving run types: ${error.message || error}`);
       this._runTypes = [];
     }
+  }
+
+  /**
+   * This method is used to retrieve the list of data passes from the bookkeeping service.
+   * @returns {Promise<void>} Resolves when the list of data passes is available.
+   */
+  async getDataPasses() {
+    try {
+      if (!this._bookkeepingService.active) {
+        return;
+      }
+
+      const rawDataPasses = await this._bookkeepingService.retrieveDataPasses();
+      this._dataPasses = Object.freeze(rawDataPasses.map(({ name, isFrozen }) => Object.freeze({ name, isFrozen })));
+    } catch (error) {
+      this._logger.errorMessage(`Error while retrieving data passes: ${error.message || error}`);
+    }
+  }
+
+  /**
+   * Returns a list of data passes.
+   * @returns {Readonly<DataPass[]>} An immutable array of data passes.
+   */
+  get dataPasses() {
+    return this._dataPasses;
   }
 
   /**
@@ -103,6 +132,14 @@ export class FilterService {
    */
   get runTypesRefreshInterval() {
     return this._runTypesRefreshInterval;
+  }
+
+  /**
+   * Returns the interval in milliseconds for how often the list of data passes should be refreshed.
+   * @returns {number} Interval in milliseconds for refreshing the list of data passes.
+   */
+  get dataPassesRefreshInterval() {
+    return this._dataPassesRefreshInterval;
   }
 
   /**

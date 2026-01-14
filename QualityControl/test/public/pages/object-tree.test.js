@@ -339,6 +339,36 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   );
 
   await testParent.test(
+    'should have a selector with sorted options to filter by run type if there are run types loaded',
+    { timeout },
+    async () => {
+      await page.locator('#passNameFilter').click();
+      await page.waitForSelector('#passname-dropdown', { visible: true, timeout: 1000 });
+
+      const options = await page.evaluate(() => {
+        const optionElements = document.querySelectorAll('#passname-dropdown > button');
+        return Array.from(optionElements).map((option) => option.textContent);
+      });
+
+      const expectedOptions = [
+        'LHC22a_apass1',
+        'LHC22a_apass2',
+        'LHC22b_apass1',
+        'LHC22b_apass2_skimmed',
+        'LHC22b_skimming',
+        'LHC23f_cpass0',
+      ];
+
+      strictEqual(
+        options.length,
+        expectedOptions.length,
+        `PassName dropdown should have ${expectedOptions.length} options, found ${expectedOptions}`,
+      );
+      deepStrictEqual(options, expectedOptions, 'PassName dropdown options are incorrect');
+    },
+  );
+
+  await testParent.test(
     'should have a grouped selector with sorted options to filter by detector if there are detectors loaded',
     { timeout },
     async () => {

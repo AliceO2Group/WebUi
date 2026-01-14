@@ -17,11 +17,12 @@ import { FilterType } from './filterTypes.js';
 /**
  * Returns an array of filter configuration objects used to render dynamic filter inputs.
  * @param {FilterService} filterService - service to get the data to populate the filters
- * @param {string[]} filterService.runTypes - run types to show in the filter
- * @param {DetectorSummary[]} filterService.detectors - detectors to show in the filter
+ * @param {RemoteData<string[]>} filterService.runTypes - run types to show in the filter
+ * @param {RemoteData<DetectorSummary[]>} filterService.detectors - detectors to show in the filter
+ * @param {RemoteData<DataPass[]>} filterService.dataPasses - data passes to show in the filter
  * @returns {object[]} Filter configuration array
  */
-export const filtersConfig = ({ runTypes, detectors }) => [
+export const filtersConfig = ({ runTypes, detectors, dataPasses }) => [
   {
     type: FilterType.INPUT,
     queryLabel: 'RunNumber',
@@ -59,10 +60,17 @@ export const filtersConfig = ({ runTypes, detectors }) => [
     id: 'periodNameFilter',
   },
   {
-    type: FilterType.INPUT,
+    type: FilterType.INPUT_WITH_DROPDOWN,
     queryLabel: 'PassName',
     placeholder: 'PassName (e.g. apass2)',
     id: 'passNameFilter',
+    options: dataPasses.match({
+      Success: (payload) => payload.reduce((acc, dataPass) => {
+        acc[dataPass.name] = dataPass.isFrozen ? { style: 'color: var(--color-gray-dark);' } : {};
+        return acc;
+      }, {}),
+      Other: () => {},
+    }),
   },
 ];
 

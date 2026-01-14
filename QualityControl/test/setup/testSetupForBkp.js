@@ -86,6 +86,67 @@ export const initializeNockForBkp = () => {
     });
   nock(BKP_URL)
     .persist()
+    .get(`/api/dataPasses${TOKEN_PATH}`)
+    .reply(200, {
+      data: [
+        {
+          id: 9,
+          name: 'LHC23f_cpass0',
+          isFrozen: false,
+          versions: [],
+          pdpBeamTypes: ['OO'],
+          runCount: 1,
+          simulationPassesCount: 1,
+        },
+        {
+          id: 2,
+          name: 'LHC22b_skimming',
+          isFrozen: false,
+          versions: [],
+          pdpBeamTypes: ['pp'],
+          runCount: 2,
+          simulationPassesCount: 2,
+        },
+        {
+          id: 5,
+          name: 'LHC22b_apass2_skimmed',
+          isFrozen: false,
+          versions: [],
+          pdpBeamTypes: ['PbPb'],
+          runCount: 3,
+          simulationPassesCount: 1,
+        },
+        {
+          id: 1,
+          name: 'LHC22b_apass1',
+          isFrozen: false,
+          versions: [],
+          pdpBeamTypes: ['pp'],
+          runCount: 4,
+          simulationPassesCount: 0,
+        },
+        {
+          id: 4,
+          name: 'LHC22a_apass2',
+          isFrozen: false,
+          versions: [],
+          pdpBeamTypes: ['PbPb'],
+          runCount: 5,
+          simulationPassesCount: 2,
+        },
+        {
+          id: 3,
+          name: 'LHC22a_apass1',
+          isFrozen: false,
+          versions: [],
+          pdpBeamTypes: ['PbPb'],
+          runCount: 4,
+          simulationPassesCount: 0,
+        },
+      ],
+    });
+  nock(BKP_URL)
+    .persist()
     .get(`/api/runs/0${TOKEN_PATH}`)
     .reply(200, {
       data: {
