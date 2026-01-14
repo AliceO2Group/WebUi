@@ -337,4 +337,35 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       deepStrictEqual(options, ['', 'runType1', 'runType2']);
     },
   );
+
+  await testParent.test(
+    'should have a grouped selector with sorted options to filter by detector if there are detectors loaded',
+    { timeout },
+    async () => {
+      const optionsObject = await page.evaluate(() => {
+        const optionElements = document.querySelectorAll('#detectorFilter > optgroup > option');
+
+        return Array.from(optionElements).reduce((acc, option) => {
+          const optgroup = option.parentElement.label;
+          if (!optgroup) {
+            return acc;
+          }
+
+          if (!acc[optgroup]) {
+            acc[optgroup] = [];
+          }
+          acc[optgroup].push(option.value);
+
+          return acc;
+        }, {});
+      });
+
+      deepStrictEqual(optionsObject, {
+        'AOT-EVENT': ['EVS'],
+        PHYSICAL: ['ACO', 'CPV'],
+        QC: ['GLO'],
+        VIRTUAL: ['TST'],
+      });
+    },
+  );
 };

@@ -12,11 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
-const FilterType = {
-  INPUT: 'input',
-  DROPDOWN: 'dropdownSelector',
-  GROUPED_DROPDOWN: 'groupedDropdownSelector',
-  RUN_MODE: 'runModeSelector',
-};
+import Joi from 'joi';
 
-export { FilterType };
+export const QcDetectorNameDto = Joi.string()
+  .min(1)
+  .messages({
+    'number.base': 'Detector name must be a string',
+    'number.min': 'Detector name must not be an empty string',
+  });

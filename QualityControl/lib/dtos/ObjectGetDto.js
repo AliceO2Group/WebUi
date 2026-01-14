@@ -14,6 +14,7 @@
 
 import Joi from 'joi';
 import { RunNumberDto } from './filters/RunNumberDto.js';
+import { QcDetectorNameDto } from './filters/QcDetectorNameDto.js';
 
 const periodNamePattern = /^LHC\d{1,2}[a-z0-9]+$/i;
 
@@ -25,6 +26,7 @@ const periodNamePattern = /^LHC\d{1,2}[a-z0-9]+$/i;
 function createFiltersSchema(runTypes) {
   return Joi.object({
     RunNumber: RunNumberDto.optional(),
+    QcDetectorName: QcDetectorNameDto.optional(),
     RunType: runTypes.length > 0
       ? Joi.string().valid(...runTypes).optional()
       : Joi.string().optional(),

@@ -62,6 +62,81 @@ export const dynamicSelector = (config) => {
 };
 
 /**
+ * Represents options grouped for HTML <optgroup>.
+ * Keys are group labels (for the <optgroup> label),
+ * values are arrays of option values (for <option> elements).
+ * @typedef {Record<string, string[]>} GroupedDropdownOptions
+ */
+
+/**
+ * Builds a filter element. If options to show, selector filter element; otherwise, input element.
+ * @param {object} config - Configuration object for building the filter element.
+ * @param {string} config.queryLabel - The key used to query the storage with this parameter.
+ * @param {string} config.placeholder - The placeholder text to be displayed in the input field.
+ * @param {string} config.id - The unique identifier for the input field.
+ * @param {object} config.filterMap - Map of the current filter values.
+ * @param {string} [config.type='text'] - The type of the filter element (e.g., 'text', 'number').
+ * @param {GroupedDropdownOptions} [config.options={}] - List of options for a grouped dropdown selector (optional).
+ * @param {(filterId: string, value: string, setUrl: boolean) => void} config.onChangeCallback
+ * - Callback to be triggered on the change event of the filter.
+ * @param {(filterId: string, value: string, setUrl: boolean) => void} config.onInputCallback
+ * - Callback to be triggered on the input event.
+ * @param {(filterId: string, value: string, setUrl: boolean) => void} config.onEnterCallback
+ * - Callback to be triggered when the Enter key is pressed.
+ * @param {string} [config.width='.w-20'] - The CSS class that defines the width of the filter.
+ * @returns {vnode} A virtual node element representing the filter element (input or grouped dropdown).
+ */
+export const groupedDropdownComponent = ({
+  queryLabel,
+  placeholder,
+  id,
+  filterMap,
+  options = {},
+  onChangeCallback,
+  onInputCallback,
+  onEnterCallback,
+  type = 'text',
+  width = '.w-20',
+}) => {
+  const groups = Object.keys(options);
+  if (!groups.length) {
+    return filterInput({ queryLabel, placeholder, id, filterMap, onInputCallback, onEnterCallback, type, width });
+  }
+
+  const selectedOption = filterMap[queryLabel];
+  const validValue = Object.values(options).flat().some((option) => option === selectedOption);
+  if (selectedOption && !validValue) {
+    onChangeCallback(queryLabel, '', true);
+  }
+
+  const sortedGroupedOptions = groups
+    .sort((a, b) => a.localeCompare(b)) // sort group labels
+    .reduce((acc, key) => {
+      // sort option names and add to accumulator
+      acc[key] = [...options[key]].sort((a, b) => a.localeCompare(b));
+      return acc;
+    }, {});
+
+  return h(`${width}`, [
+    h('select.form-control', {
+      placeholder,
+      id,
+      name: id,
+      value: validValue ? selectedOption : '',
+      onchange: (event) => onChangeCallback(queryLabel, event.target.value, true),
+    }, [
+      h('option', { value: '' }, placeholder),
+      h('hr'),
+      ...Object.entries(sortedGroupedOptions).map(([key, value]) => h(
+        'optgroup',
+        { label: key },
+        value.map((option) => h('option', { value: option }, option)),
+      )),
+    ]),
+  ]);
+};
+
+/**
  * Builds a filter input element that allows the user to specify a parameter to be used when querying objects.
  * This function renders a text input element with event handling for input and Enter key press.
  * @param {object} config - Configuration object for building the filter input element.
