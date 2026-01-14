@@ -184,7 +184,7 @@ export class BookkeepingService {
 
   /**
    * Retrieves the information about the detectors from the Bookkeeping service.
-   * @returns {Promise<DetectorSummary[]>} Array of detector summaries.
+   * @returns {Promise<object[]>} Array of detector summaries.
    */
   async retrieveDetectorSummaries() {
     const { data } = await httpGetJson(
@@ -196,7 +196,7 @@ export class BookkeepingService {
         rejectUnauthorized: false,
       },
     );
-    return Array.isArray(data) ? data.map(({ name, type }) => ({ name, type })) : [];
+    return Array.isArray(data) ? data : [];
   }
 
   /**

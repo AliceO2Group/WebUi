@@ -325,9 +325,8 @@ export const bookkeepingServiceTestSuite = async () => {
           ok(Array.isArray(result));
           strictEqual(result.length, mockResponse.data.length);
 
-          // Verify each detector is preserved
-          const detectorSummaries = result.map(({ name, type }) => ({ name, type }));
-          deepStrictEqual(result, detectorSummaries);
+          // Verify detector data is preserved
+          deepStrictEqual(result, mockResponse.data);
         });
 
         test('should return empty array when data is not an array', async () => {
