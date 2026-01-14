@@ -166,18 +166,22 @@ export default class Model extends Observable {
       }
       // Tree navigation
       if (code === KeyCodesEnum.UP) {
+        e.preventDefault();
         this.object.tree.focusPreviousNode();
         return;
       }
       if (code === KeyCodesEnum.DOWN) {
+        e.preventDefault();
         this.object.tree.focusNextNode();
         return;
       }
       if (code === KeyCodesEnum.LEFT) {
+        e.preventDefault();
         this.object.tree.collapseFocusedNode();
         return;
       }
       if (code === KeyCodesEnum.RIGHT || code === KeyCodesEnum.ENTER) {
+        e.preventDefault();
         const focusedObject = this.object.tree.focusedNode?.object;
         if (focusedObject) {
           this.object.select(focusedObject);
