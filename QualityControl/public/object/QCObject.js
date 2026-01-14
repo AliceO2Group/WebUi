@@ -103,37 +103,43 @@ export default class QCObject extends BaseViewModel {
    */
   setFocusedSearchResultByOffset(offset) {
     if (!Number.isInteger(offset) || offset === 0 || !this.searchResult?.length) {
-      return;
+      return; // invalid offset or empty search result
     }
+    // Locate current focus position (or -1 if none)
     const currentIndex = this.searchResult.findIndex((item) =>
       this.focusedSearchResult && item.name === this.focusedSearchResult.name);
     let nextIndex = 0;
-    if (currentIndex === -1) {
-      nextIndex = offset > 0 ? 0 : this.searchResult.length - 1;
-    } else {
+    if (currentIndex !== -1) {
+      // Set next index within bounds
       nextIndex = Math.min(Math.max(currentIndex + offset, 0), this.searchResult.length - 1);
     }
     this.focusedSearchResult = this.searchResult[nextIndex];
     this.notify();
-
     this._scrollFocusedSearchResultIntoView();
   }
 
+  /**
+   * Scroll the focused search result into view within the scrollable container
+   * @returns {undefined}
+   */
   _scrollFocusedSearchResultIntoView() {
     const container = document.getElementById('object-list-scroll');
-    if (container && this.focusedSearchResult) {
-      const rowElement = document.getElementById(`object-row-${this.focusedSearchResult.name}`);
-      if (rowElement) {
-        const rowTop = rowElement.offsetTop;
-        const rowBottom = rowTop + rowElement.offsetHeight;
-        const viewTop = container.scrollTop;
-        const viewBottom = viewTop + container.clientHeight;
-        if (rowTop < viewTop) {
-          container.scrollTop = rowTop;
-        } else if (rowBottom > viewBottom) {
-          container.scrollTop = rowBottom - container.clientHeight;
-        }
-      }
+    if (!container || !this.focusedSearchResult) {
+      return;
+    }
+    const focusedIndex = this.searchResult.findIndex(({ name }) => name === this.focusedSearchResult.name);
+    if (focusedIndex === -1) {
+      return;
+    }
+    const rowHeight = 33.6;
+    const rowTop = focusedIndex * rowHeight;
+    const rowBottom = rowTop + rowHeight;
+    const viewTop = container.scrollTop;
+    const viewBottom = viewTop + container.clientHeight;
+    if (rowTop < viewTop) {
+      container.scrollTop = rowTop;
+    } else if (rowBottom > viewBottom) {
+      container.scrollTop = rowBottom - container.clientHeight;
     }
   }
 

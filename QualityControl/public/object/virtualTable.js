@@ -78,7 +78,7 @@ const objectFullRow = (model, item, location) => {
     id: `object-row-${item.name}`,
     key: item.name,
     title: item.name,
-    onclick: () =>{
+    onclick: () => {
       model.object.select(item);
       model.object.setFocusedSearchResultByPath(item.name);
     },
@@ -145,7 +145,7 @@ const maximumTableSizeStyling = (length) => ({
 });
 
 /**
- * Returns an array of items that are visible to user, hidden top and hidden bottom items
+ * Returns an array of items that are visible to user, hidden top and hiddecn bottom items
  * are not present in this array output
  * ceil() and + 1 ensure we see top and bottom logs coming
  * @param {Model} model - root model of the application
@@ -187,7 +187,6 @@ const tableContainerHooks = (model) => ({
       const scrollTop = Math.max(container.scrollTop, 0); // Cancel negative position due to Safari bounce scrolling
       model.object.setScrollTop(scrollTop, height);
     };
-
     // Call the function when scrolling is updated
     vnode.dom.addEventListener('scroll', onTableScroll);
 
