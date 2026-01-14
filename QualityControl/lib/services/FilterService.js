@@ -78,6 +78,10 @@ export class FilterService {
    */
   async _initializeDetectors() {
     try {
+      if (!this._bookkeepingService.active) {
+        return;
+      }
+      
       const detectorSummaries = await this._bookkeepingService.retrieveDetectorSummaries();
       this._detectors = Object.freeze(detectorSummaries.map(({ name, type }) => Object.freeze({ name, type })));
     } catch (error) {
