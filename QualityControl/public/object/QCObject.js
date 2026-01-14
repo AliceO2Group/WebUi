@@ -103,19 +103,22 @@ export default class QCObject extends BaseViewModel {
    */
   setFocusedSearchResultByOffset(offset) {
     if (!Number.isInteger(offset) || offset === 0 || !this.searchResult?.length) {
-      return; // invalid offset or empty search result
+      return; // Invalid offset or empty search result
     }
-    // Locate current focus position (or -1 if none)
-    const currentIndex = this.searchResult.findIndex((item) =>
-      this.focusedSearchResult && item.name === this.focusedSearchResult.name);
-    let nextIndex = 0;
-    if (currentIndex !== -1) {
-      // Set next index within bounds
-      nextIndex = Math.min(Math.max(currentIndex + offset, 0), this.searchResult.length - 1);
+    if (this.focusedSearchResult) {
+      const clampIndex = (index) => Math.min(Math.max(index, 0), this.searchResult.length - 1);
+      const currentIndex = this.searchResult.findIndex(({ name }) => name === this.focusedSearchResult?.name);
+      // Move focus by offset if found, else focus to first result
+      const nextIndex = currentIndex === -1 ? 0 : currentIndex + offset;
+      this.focusedSearchResult = this.searchResult[clampIndex(nextIndex)];
+      this.notify();
+      this._scrollFocusedSearchResultIntoView();
+    } else {
+      // If no focused result, focus the first result
+      [this.focusedSearchResult] = this.searchResult;
+      this.notify();
+      this._scrollFocusedSearchResultIntoView();
     }
-    this.focusedSearchResult = this.searchResult[nextIndex];
-    this.notify();
-    this._scrollFocusedSearchResultIntoView();
   }
 
   /**

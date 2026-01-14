@@ -13,8 +13,9 @@
  */
 
 import { h, iconBarChart } from '/js/src/index.js';
+import { OBJECT_LIST_ROW_HEIGHT, OBJECT_LIST_SIDE_ROW_HEIGHT } from '../common/constants/ui.js';
 
-let ROW_HEIGHT = 33.6;
+let ROW_HEIGHT = OBJECT_LIST_ROW_HEIGHT;
 let FONT = '';
 
 /**
@@ -25,8 +26,9 @@ let FONT = '';
  * @returns {vnode} - virtual node element
  */
 export default function virtualTable(model, location = 'main', objects = []) {
-  ROW_HEIGHT = location === 'side' ? 29.4 : 33.6;
-  FONT = location === 'side' ? '.f6' : '';
+  const isLocationSide = location === 'side';
+  ROW_HEIGHT = isLocationSide ? OBJECT_LIST_SIDE_ROW_HEIGHT : OBJECT_LIST_ROW_HEIGHT;
+  FONT = isLocationSide ? '.f6' : '';
   return h('.flex-grow.flex-column', {
   }, [
     location !== 'side' && tableHeader(),
