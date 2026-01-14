@@ -28,6 +28,8 @@ import { buildQueryParametersString } from './common/buildQueryParametersString.
 import AboutViewModel from './pages/aboutView/AboutViewModel.js';
 import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
 import { RequestFields } from './common/RequestFields.enum.js';
+import { KeyCodesEnum } from '../common/enums/keyCodes.enum.js';
+
 import FilterModel from './common/filters/model/FilterModel.js';
 
 /**
@@ -131,62 +133,58 @@ export default class Model extends Observable {
     const code = e.keyCode;
 
     // Delete key + layout page + object select => delete this object
-    if (code === 8 &&
+    if (code === KeyCodesEnum.DELETE &&
       this.router.params.page === 'layoutShow' &&
       this.layout.editEnabled &&
       this.layout.editingTabObject) {
       this.layout.deleteTabObject(this.layout.editingTabObject);
-    } else if (code === 27 && this.isImportVisible) {
+    } else if (code === KeyCodesEnum.ESC && this.isImportVisible) {
       this.layout.resetImport();
     }
 
     if (this.router.params.page === 'objectTree') {
-      const isUp = code === 38;
-      const isDown = code === 40;
-      const isLeft = code === 37;
-      const isRightOrEnter = code === 39 || code === 13;
       const searchActive = Boolean(this.object.searchInput?.trim());
-      // Use virtual table navigation when search is active
+      // Search navigation
       if (searchActive) {
         const results = this.object.searchResult || [];
         if (!results.length) {
           return;
         }
-        if (isUp) {
+        if (code === KeyCodesEnum.UP) {
           this.object.setFocusedSearchResultByOffset(-1);
           return;
         }
-        if (isDown) {
+        if (code === KeyCodesEnum.DOWN) {
           this.object.setFocusedSearchResultByOffset(1);
           return;
         }
-        if (isRightOrEnter) {
+        if (code === KeyCodesEnum.RIGHT || code === KeyCodesEnum.ENTER) {
           this.object.select(this.object.focusedSearchResult);
           return;
         }
-      } else {
-        // No search, use tree navigation
-        if (isUp) {
-          this.object.tree.focusPreviousNode();
-          return;
+        return;
+      }
+      // Tree navigation
+      if (code === KeyCodesEnum.UP) {
+        this.object.tree.focusPreviousNode();
+        return;
+      }
+      if (code === KeyCodesEnum.DOWN) {
+        this.object.tree.focusNextNode();
+        return;
+      }
+      if (code === KeyCodesEnum.LEFT) {
+        this.object.tree.collapseFocusedNode();
+        return;
+      }
+      if (code === KeyCodesEnum.RIGHT || code === KeyCodesEnum.ENTER) {
+        const focusedObject = this.object.tree.focusedNode?.object;
+        if (focusedObject) {
+          this.object.select(focusedObject);
+        } else {
+          this.object.tree.expandFocusedNode();
         }
-        if (isDown) {
-          this.object.tree.focusNextNode();
-          return;
-        }
-        if (isLeft) {
-          this.object.tree.collapseFocusedNode();
-          return;
-        }
-        if (isRightOrEnter) {
-          const focusedObject = this.object.tree.focusedNode?.object;
-          if (focusedObject) {
-            this.object.select(focusedObject);
-          } else {
-            this.object.tree.expandFocusedNode();
-          }
-          return;
-        }
+        return;
       }
     }
   }
