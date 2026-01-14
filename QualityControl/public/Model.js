@@ -334,7 +334,7 @@ export default class Model extends Observable {
 
   /**
    * Clear URL parameters and redirect to a certain page
-   * @param {*} pageName - name of the page to be redirected to
+   * @param {string} pageName - name of the page to be redirected to
    * @returns {undefined}
    */
   clearURL(pageName) {
