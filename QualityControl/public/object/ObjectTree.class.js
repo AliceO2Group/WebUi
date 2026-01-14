@@ -84,6 +84,22 @@ export default class ObjectTree extends Observable {
   _setFocusedNode(node) {
     this.focusedNode = node;
     this.notify();
+    requestAnimationFrame(() => {
+      const container = document.getElementById('object-tree-scroll-container');
+      const focusedRow = document.getElementById(`${node.index}`) || document.querySelector('.focused-node');
+      if (!container || !focusedRow) {
+        return;
+      }
+      const containerRect = container.getBoundingClientRect();
+      const rowRect = focusedRow.getBoundingClientRect();
+      if (rowRect.top < containerRect.top) {
+        // Row is above view — scroll up
+        container.scrollTop += rowRect.top - containerRect.top;
+      } else if (rowRect.bottom > containerRect.bottom) {
+        // Row is below view — scroll down
+        container.scrollTop += rowRect.bottom - containerRect.bottom;
+      }
+    });
   }
 
   /**

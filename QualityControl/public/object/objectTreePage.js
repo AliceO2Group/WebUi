@@ -37,6 +37,7 @@ export default (model) => {
     h('.flex-row', { style: 'flex-grow: 1; height: 0;' }, [
       h('.flex-column.scroll-y', {
         key: 'object-tree-scroll-container',
+        id: 'object-tree-scroll-container',
         style: {
           width: object.selected ? `${leftPanelWidthPercent}%` : '100%',
         },
@@ -265,7 +266,7 @@ function treeRow(model, tree, level = 0) {
 const treeRowElement = (key, title, onclick, icon, className = '', style = {}) =>
   h('tr.object-selectable', {
     key,
-    id: key,
+    id: `tree-node-${key}`,
     title,
     onclick,
     class: className,
