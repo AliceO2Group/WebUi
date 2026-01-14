@@ -14,6 +14,7 @@
 
 import { BrowserStorage, Observable, sessionService } from '/js/src/index.js';
 import { StorageKeysEnum } from '../common/enums/storageKeys.enum.js';
+import { KeyCodesEnum } from '../common/enums/keyCodes.enum.js';
 
 /**
  * This class allows to transforms objects names (A/B/C) into a tree that can have
@@ -65,6 +66,33 @@ export default class ObjectTree extends Observable {
   }
 
   /**
+   * Handles keyboard navigation for the tree
+   * @param {number} keyCode - The key code for navigation
+   * @param {Event} event - The keyboard event object
+   * @param {(object: object) => void} onSelectObject - Callback function to select an object
+   */
+  handleKeyboardNavigation(keyCode, onSelectObject) {
+    const selectOrExpand = () => {
+      if (this.focusedNode?.isLeaf && this.focusedNode.object) {
+        onSelectObject(this.focusedNode.object);
+        return;
+      }
+      this._expandFocusedNode();
+    };
+    const actions = {
+      [KeyCodesEnum.LEFT]: () => this._collapseFocusedNode(),
+      [KeyCodesEnum.RIGHT]: selectOrExpand,
+      [KeyCodesEnum.ENTER]: selectOrExpand,
+      [KeyCodesEnum.UP]: () => this._focusPreviousNode(),
+      [KeyCodesEnum.DOWN]: () => this._focusNextNode(),
+    };
+    const action = actions[keyCode];
+    if (action) {
+      action();
+    }
+  }
+
+  /**
    * Set the focused node by index
    * @param {number} index - Index of the node to focus
    */
@@ -105,7 +133,7 @@ export default class ObjectTree extends Observable {
    * Collapse the currently focused node or its parent branch.
    * @returns {undefined}
    */
-  collapseFocusedNode() {
+  _collapseFocusedNode() {
     if (!this.focusedNode) {
       return; // No focused node
     }
@@ -139,7 +167,7 @@ export default class ObjectTree extends Observable {
    * Expand the currently focused branch if closed or move focus to its first child.
    * @returns {undefined}
    */
-  expandFocusedNode() {
+  _expandFocusedNode() {
     if (!this.focusedNode) {
       return; // No focused node
     }
@@ -157,7 +185,7 @@ export default class ObjectTree extends Observable {
    * Get all visible nodes in the tree (for navigation)
    * @returns {Array.<ObjectTree>} - list of visible nodes
    */
-  getVisibleNodes() {
+  _getVisibleNodes() {
     const nodes = [];
     const traverse = (n) => {
       nodes.push(n);
@@ -172,8 +200,8 @@ export default class ObjectTree extends Observable {
   /**
    * Focus the next visible node in the tree
    */
-  focusNextNode() {
-    const visible = this.getVisibleNodes();
+  _focusNextNode() {
+    const visible = this._getVisibleNodes();
     // No visible nodes
     if (!visible.length) {
       return;
@@ -197,8 +225,8 @@ export default class ObjectTree extends Observable {
   /**
    * Focus the previous visible node in the tree.
    */
-  focusPreviousNode() {
-    const visible = this.getVisibleNodes();
+  _focusPreviousNode() {
+    const visible = this._getVisibleNodes();
     // No visible nodes
     if (!visible.length) {
       return;
@@ -223,11 +251,11 @@ export default class ObjectTree extends Observable {
    * Load the expanded/collapsed state for this node and its children from localStorage.
    * Updates the `open` property for the current node and recursively for all children.
    */
-  loadExpandedBranches() {
+  _loadExpandedBranches() {
     if (!this.parent) {
       // The main node may not be collapsable or expandable.
       // Because of this we also have to load the expanded state of their direct children.
-      this.children.forEach((child) => child.loadExpandedBranches());
+      this.children.forEach((child) => child._loadExpandedBranches());
     }
     const session = sessionService.get();
     const key = session.personid.toString();
@@ -262,11 +290,11 @@ export default class ObjectTree extends Observable {
   /**
    * Persist the current branch's expanded/collapsed state in localStorage.
    */
-  storeExpandedBranches() {
+  _storeExpandedBranches() {
     if (!this.parent) {
       // The main node may not be collapsable or expandable.
       // Because of this we have to store the expanded state of their direct children.
-      this.children.forEach((child) => child.storeExpandedBranches());
+      this.children.forEach((child) => child._storeExpandedBranches());
     }
     const session = sessionService.get();
     const key = session.personid.toString();
@@ -319,7 +347,7 @@ export default class ObjectTree extends Observable {
    */
   toggle() {
     this.open = !this.open;
-    this.storeExpandedBranches();
+    this._storeExpandedBranches();
     this.notify();
   }
 
@@ -328,7 +356,7 @@ export default class ObjectTree extends Observable {
    */
   closeAll() {
     this._closeAllRecursive();
-    this.storeExpandedBranches();
+    this._storeExpandedBranches();
     this.notify();
   }
 
@@ -399,7 +427,7 @@ export default class ObjectTree extends Observable {
    */
   addChildren(objects) {
     objects.forEach((object) => this._addChild(object));
-    this.loadExpandedBranches();
+    this._loadExpandedBranches();
     this.notify();
   }
 }

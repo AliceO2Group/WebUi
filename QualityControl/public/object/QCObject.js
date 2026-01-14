@@ -18,6 +18,7 @@ import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 import { StorageKeysEnum } from '../common/enums/storageKeys.enum.js';
+import { KeyCodesEnum } from '../common/enums/keyCodes.enum.js';
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
@@ -62,6 +63,25 @@ export default class QCObject extends BaseViewModel {
     this._initializeLeftPanelWidth();
   }
 
+  handleKeyboardNavigationSearchResults(keyCode) {
+    if (!this.searchResult.length) {
+      return;
+    }
+    const select = () => {
+      this.model.object.select(this.focusedSearchResult);
+    };
+    const actions = {
+      [KeyCodesEnum.RIGHT]: () => select(),
+      [KeyCodesEnum.ENTER]: () => select(),
+      [KeyCodesEnum.UP]: () => this._setFocusedSearchResultByOffset(-1),
+      [KeyCodesEnum.DOWN]: () => this._setFocusedSearchResultByOffset(1),
+    };
+    const action = actions[keyCode];
+    if (action) {
+      action();
+    }
+  }
+
   /**
    * Initialize left panel width from local storage or set to default
    * @returns {undefined}
@@ -101,7 +121,7 @@ export default class QCObject extends BaseViewModel {
    * Set the focused search result to the next or previous item based on offset
    * @param {number} offset - The offset to move the focus by (positive or negative)
    */
-  setFocusedSearchResultByOffset(offset) {
+  _setFocusedSearchResultByOffset(offset) {
     if (!Number.isInteger(offset) || offset === 0 || !this.searchResult?.length) {
       return; // Invalid offset or empty search result
     }

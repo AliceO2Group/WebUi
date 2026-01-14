@@ -131,7 +131,6 @@ export default class Model extends Observable {
   handleKeyboardDown(e) {
     // Console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
     const code = e.keyCode;
-
     // Delete key + layout page + object select => delete this object
     if (code === KeyCodesEnum.DELETE &&
       this.router.params.page === 'layoutShow' &&
@@ -141,57 +140,14 @@ export default class Model extends Observable {
     } else if (code === KeyCodesEnum.ESC && this.isImportVisible) {
       this.layout.resetImport();
     }
-
     if (this.router.params.page === 'objectTree') {
       const searchActive = Boolean(this.object.searchInput?.trim());
       // Search navigation
       if (searchActive) {
-        const results = this.object.searchResult || [];
-        if (!results.length) {
-          return;
-        }
-        if (code === KeyCodesEnum.UP) {
-          e.preventDefault();
-          this.object.setFocusedSearchResultByOffset(-1);
-          return;
-        }
-        if (code === KeyCodesEnum.DOWN) {
-          e.preventDefault();
-          this.object.setFocusedSearchResultByOffset(1);
-          return;
-        }
-        if (code === KeyCodesEnum.RIGHT || code === KeyCodesEnum.ENTER) {
-          e.preventDefault();
-          this.object.select(this.object.focusedSearchResult);
-          return;
-        }
-        return;
-      }
-      // Tree navigation
-      if (code === KeyCodesEnum.UP) {
-        e.preventDefault();
-        this.object.tree.focusPreviousNode();
-        return;
-      }
-      if (code === KeyCodesEnum.DOWN) {
-        e.preventDefault();
-        this.object.tree.focusNextNode();
-        return;
-      }
-      if (code === KeyCodesEnum.LEFT) {
-        e.preventDefault();
-        this.object.tree.collapseFocusedNode();
-        return;
-      }
-      if (code === KeyCodesEnum.RIGHT || code === KeyCodesEnum.ENTER) {
-        e.preventDefault();
-        const focusedObject = this.object.tree.focusedNode?.object;
-        if (focusedObject) {
-          this.object.select(focusedObject);
-        } else {
-          this.object.tree.expandFocusedNode();
-        }
-        return;
+        this.object.handleKeyboardNavigationSearchResults(code);
+      } else {
+        // Tree navigation
+        this.object.tree.handleKeyboardNavigation(code, (selectedObject) => this.object.select(selectedObject));
       }
     }
   }
