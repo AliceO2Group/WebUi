@@ -43,7 +43,6 @@ export default class QCObject extends BaseViewModel {
     this.searchInput = ''; // String - content of input search
     this.searchResult = []; // Array<object> - result list of search
     this.focusedSearchResult = null; // Object - focused item in search results for keyboard navigation
-    this.focusedSearchIndex = -1; // Number - index of focused search result
 
     this.sortBy = {
       field: 'name',
@@ -86,23 +85,35 @@ export default class QCObject extends BaseViewModel {
   }
 
   /**
-   * Set focused item in search results (used by keyboard navigation).
-   * @param {number} index - index of the next object to be focused
-   * @returns {undefined}
+   * Set focused search result by its object name/pathString
+   * @param {string} path - object path/name to be focused
    */
-  setFocusedSearchResult(index) {
-    if (!this.searchResult.length) {
-      return; // list empty, nothing to focus
+  setFocusedSearchResultByPath(path) {
+    const result = this.searchResult.find((item) => item.name === path);
+    if (!result) {
+      return;
     }
-    if (index < 0 || index >= this.searchResult.length) {
-      return; // out of bounds, do nothing
+    this.focusedSearchResult = result;
+    this.notify();
+  }
+
+  /**
+   * Set the focused search result to the next or previous item based on offset
+   * @param {number} offset - The offset to move the focus by (positive or negative)
+   */
+  setFocusedSearchResultByOffset(offset) {
+    if (!Number.isInteger(offset) || offset === 0 || !this.searchResult?.length) {
+      return;
     }
-    if (index === this.focusedSearchIndex &&
-        this.searchResult[index] === this.focusedSearchResult) {
-      return; // already focused, avoid notify
+    const currentIndex = this.searchResult.findIndex((item) =>
+      this.focusedSearchResult && item.name === this.focusedSearchResult.name);
+    let nextIndex = 0;
+    if (currentIndex === -1) {
+      nextIndex = offset > 0 ? 0 : this.searchResult.length - 1;
+    } else {
+      nextIndex = Math.min(Math.max(currentIndex + offset, 0), this.searchResult.length - 1);
     }
-    this.focusedSearchIndex = index;
-    this.focusedSearchResult = this.searchResult[index];
+    this.focusedSearchResult = this.searchResult[nextIndex];
     this.notify();
   }
 
@@ -416,16 +427,6 @@ export default class QCObject extends BaseViewModel {
       await this.loadObjectByName(this.selected.name);
     }
 
-    // Move focus to selected object
-    if (this.searchInput === '') {
-      this.tree.focusNodeByPath(this.selected.name);
-    } else {
-      const idx = this.searchResult.findIndex(({ name }) => name === this.selected.name);
-      if (idx >= 0) {
-        this.setFocusedSearchResultAt(idx);
-      }
-    }
-
     this.notify();
   }
 
@@ -440,7 +441,6 @@ export default class QCObject extends BaseViewModel {
 
     this.sortListByField(this.searchResult, this.sortBy.field, this.sortBy.order);
     this.focusedSearchResult = null;
-    this.focusedSearchIndex = -1;
 
     this.notify();
   }

@@ -45,14 +45,13 @@ export default (model) => {
         Loading: () =>
           h('.absolute-fill.flex-column.items-center.justify-center.f5', [spinner(5), h('', 'Loading Objects')]),
         Success: () => {
-          const searchInput = object?.searchInput?.trim() ?? '';
-          if (searchInput !== '') {
-            const objectsLoaded = object.list;
-            const objectsToDisplay = objectsLoaded.filter((qcObject) =>
-              qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
+          if (object.searchInput === '') {
+            return tableShow(model);
+          } else {
+            const objectsToDisplay = object.list.filter((qcObject) =>
+              qcObject.name.toLowerCase().includes(object.searchInput.toLowerCase().trim()));
             return virtualTable(model, 'main', objectsToDisplay);
           }
-          return tableShow(model);
         },
         Failure: () => null, // Notification is displayed
       })),
@@ -199,7 +198,7 @@ const treeRows = (model) => !model.object.tree ?
  * @returns {vnode[]} - virtual node element
  */
 function treeRow(model, tree, level = 0) {
-  const { pathString, open, children, object, name } = tree;
+  const { index, open, children, object, name } = tree;
 
   const childRow = open
     ? children.flatMap((children) => treeRow(model, children, level + 1))
@@ -210,16 +209,19 @@ function treeRow(model, tree, level = 0) {
   let className = '';
   if (model.object.selected && object === model.object.selected) {
     className = 'table-primary'; // Selected object
-  } else if (model.object.tree.focusedNode === tree) {
+  } else if (index === model.object.tree.focusedNode?.index) {
     className = 'focused-node'; // Focused node
   }
 
   if (object) {
     // Add a leaf row (final element; cannot be expanded further)
     const leaf = treeRowElement(
-      pathString,
+      index,
       name,
-      () => model.object.select(object),
+      () => {
+        model.object.tree.setFocusedNodeByIndex(index);
+        model.object.select(object);
+      },
       iconBarChart,
       className,
       {
@@ -231,9 +233,12 @@ function treeRow(model, tree, level = 0) {
   if (children.length > 0) {
     // Add a branch row (expandable / collapsible element)
     const branch = treeRowElement(
-      pathString,
+      index,
       name,
-      () => tree.toggle(),
+      () => {
+        model.object.tree.setFocusedNodeByIndex(index);
+        tree.toggle();
+      },
       open ? iconCaretBottom : iconCaretRight,
       className,
       {

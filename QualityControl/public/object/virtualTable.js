@@ -65,7 +65,7 @@ export default function virtualTable(model, location = 'main', objects = []) {
  */
 const objectFullRow = (model, item, location) => {
   const isSelected = item && item === model.object.selected;
-  const isFocused = item && model.object.focusedSearchResult && item.name === model.object.focusedSearchResult.name;
+  const isFocused = item && item === model.object.focusedSearchResult;
 
   let className = '';
   if (isSelected) {
@@ -77,7 +77,10 @@ const objectFullRow = (model, item, location) => {
   return h('tr.object-selectable', {
     key: item.name,
     title: item.name,
-    onclick: () => model.object.select(item),
+    onclick: () =>{
+      model.object.select(item);
+      model.object.setFocusedSearchResultByPath(item.name);
+    },
     ondblclick: () => {
       if (location === 'side') {
         model.layout.addItem(item.name);
@@ -183,6 +186,7 @@ const tableContainerHooks = (model) => ({
       const scrollTop = Math.max(container.scrollTop, 0); // Cancel negative position due to Safari bounce scrolling
       model.object.setScrollTop(scrollTop, height);
     };
+
     // Call the function when scrolling is updated
     vnode.dom.addEventListener('scroll', onTableScroll);
 

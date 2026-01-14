@@ -21,6 +21,8 @@ import { StorageKeysEnum } from '../common/enums/storageKeys.enum.js';
  * a new tree.
  */
 export default class ObjectTree extends Observable {
+  static _indexIncrementCount = 0;
+
   /**
    * Instantiate tree with a root node called `name`, empty by default
    * @param {string} name - root name
@@ -28,9 +30,23 @@ export default class ObjectTree extends Observable {
    */
   constructor(name, parent) {
     super();
+    this._index = ObjectTree._indexIncrementCount++;
+    this.focusedNode = null;
     this.storage = new BrowserStorage(StorageKeysEnum.OBJECT_TREE_OPEN_NODES);
     this.focusedNode = null; // Currently focused node for navigation
     this.initTree(name, parent);
+  }
+
+  get index() {
+    return this._index;
+  }
+
+  get isBranch() {
+    return this.children.length > 0;
+  }
+
+  get isLeaf() {
+    return this.object !== null;
   }
 
   /**
@@ -50,27 +66,13 @@ export default class ObjectTree extends Observable {
   }
 
   /**
-   * Focus the node identified by a slash-separated path (e.g. "A/B/C").
-   * Does nothing if path is empty or not found.
-   * @param {string} pathString - A slash-separated string representing the path to the node (e.g., "A/B/C").
-   * @returns {void}
+   * Set the focused node by index
+   * @param {number} index - Index of the node to focus
    */
-  focusNodeByPath(pathString) {
-    if (!pathString) {
-      return;
-    }
-    const parts = pathString.split('/').filter(Boolean);
-    const findNode = (node, remainingParts) => {
-      if (remainingParts.length === 0) {
-        return node;
-      }
-      const [nextPart, ...rest] = remainingParts;
-      const nextNode = node.children.find((child) => child.name === nextPart);
-      return nextNode ? findNode(nextNode, rest) : null;
-    };
-    const targetNode = findNode(this, parts);
-    if (targetNode) {
-      this._setFocusedNode(targetNode);
+  setFocusedNodeByIndex(index) {
+    const nodeToFocus = this.getVisibleNodes().find((node) => node.index === index);
+    if (nodeToFocus) {
+      this._setFocusedNode(nodeToFocus);
     }
   }
 
@@ -85,45 +87,54 @@ export default class ObjectTree extends Observable {
   }
 
   /**
-   * Collapse the currently focused node or move focus to its parent.
+   * Collapse the currently focused node or its parent branch.
    * @returns {undefined}
    */
   collapseFocusedNode() {
     if (!this.focusedNode) {
-      return;
+      return; // No focused node
     }
-    // If focus is on a object, collapse its parent (if any) and focus the parent.
-    if (this.focusedNode.object) {
+    // focus is on a leaf node -> collapse and focus parent
+    const { isLeaf } = this.focusedNode;
+    if (isLeaf) {
       const { parent } = this.focusedNode;
       if (!parent) {
-        return;
+        return; // No parent to collapse
       }
       parent.open = false;
       this._setFocusedNode(parent);
       return;
     }
-    // If focus is on a branch: collapse it if open, otherwise move focus to parent.
-    if (this.focusedNode.open && this.focusedNode.children.length > 0) {
-      this.focusedNode.toggle(); // collapse current branch, keep focus here
-      return;
-    }
-    if (this.focusedNode.parent) {
-      this._setFocusedNode(this.focusedNode.parent);
+    // focus is on a branch node -> collapse or focus parent
+    const { isBranch, open } = this.focusedNode;
+    if (isBranch) {
+      if (open) {
+        this.focusedNode.toggle();
+        return;
+      }
+      const isNotRoot = Boolean(this.focusedNode.parent?.parent);
+      if (isNotRoot) {
+        this._setFocusedNode(this.focusedNode.parent);
+        return;
+      }
     }
   }
 
   /**
-   * If focus is on a branch: expand it if closed, otherwise move focus to first child.
+   * Expand the currently focused branch if closed or move focus to its first child.
    * @returns {undefined}
    */
   expandFocusedNode() {
     if (!this.focusedNode) {
-      return;
+      return; // No focused node
     }
-    if (!this.focusedNode.open && this.focusedNode.children.length > 0) {
-      this.focusedNode.toggle();
-    } else if (this.focusedNode.open && this.focusedNode.children.length > 0) {
-      this._setFocusedNode(this.focusedNode.children[0]);
+    if (!this.focusedNode.isBranch) {
+      return; // Cannot expand a leaf
+    }
+    if (this.focusedNode.open) {
+      this._setFocusedNode(this.focusedNode.children[0]); // Move focus to first child
+    } else {
+      this.focusedNode.toggle(); // Expand the branch
     }
   }
 
