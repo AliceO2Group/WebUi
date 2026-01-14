@@ -13,8 +13,7 @@
  */
 
 import { h } from '/js/src/index.js';
-import { DRAW_OPTIONS } from '../constants/drawingOptions.js';
-import { DISPLAY_HINTS } from '../constants/drawingOptions.js';
+import { DRAW_OPTIONS, DISPLAY_HINTS } from '../constants/drawingOptions.js';
 
 /**
  * Display options overlay for a QC object
