@@ -150,19 +150,16 @@ export default class Model extends Observable {
         if (!results.length) {
           return;
         }
-        // Navigate up in search results
         if (code === KeyCodesEnum.UP) {
           e.preventDefault();
           this.object.setFocusedSearchResultByOffset(-1);
           return;
         }
-        // Navigate down in search results
         if (code === KeyCodesEnum.DOWN) {
           e.preventDefault();
           this.object.setFocusedSearchResultByOffset(1);
           return;
         }
-        // Select focused search result
         if (code === KeyCodesEnum.RIGHT || code === KeyCodesEnum.ENTER) {
           e.preventDefault();
           this.object.select(this.object.focusedSearchResult);
