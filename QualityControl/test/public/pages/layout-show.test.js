@@ -13,7 +13,10 @@
 
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
-import { editedMockedLayout } from '../../setup/seeders/layout-show/json-file-mock.js';
+import {
+  editedManyObjectsMockedLayout,
+  editedMockedLayout,
+} from '../../setup/seeders/layout-show/json-file-mock.js';
 import { getElementCenter } from '../../testUtils/dragAndDrop.js';
 
 /**
@@ -187,7 +190,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const leftStyle = await page.evaluate(() => document.querySelector('#subcanvas .dropdown-menu').style.left);
 
       strictEqual(leftStyle, '0.1em');
-    }
+    },
   );
 
   await testParent.test('should have second tab to be empty (according to demo data)', { timeout }, async () => {
@@ -349,7 +352,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
         elements.map((element) => element.textContent.trim()));
 
       strictEqual(tabNames[1], originalTabNames[0]);
-    }
+    },
   );
 
   await testParent.test(
@@ -447,8 +450,68 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
+    'should display all objects even when the JSON has out of bound entries',
+    { timeout: 15000 },
+    async () => {
+      const EXPECTED_LAYOUT_OBJECT_COUNT = editedManyObjectsMockedLayout.tabs[0].objects.length;
+
+      /**
+       * Counts the number of visible child elements within #subcanvas.
+       * Visibility is defined as being within the viewport.
+       * @returns {number} The amount of visible rendered objects
+       */
+      const getVisibleObjectCount = async () =>
+        await page.evaluate(() => {
+          const container = document.querySelector('#subcanvas');
+          if (!container) {
+            return 0;
+          }
+
+          // Count elements that intersect with the viewport
+          return Array.from(container.children).filter((child) => {
+            const rect = child.getBoundingClientRect();
+            return rect.bottom >= 0 && rect.top >= 0 && rect.left >= 0 && rect.right <= window.innerWidth;
+          }).length;
+        });
+
+      // Ensure we are on the main tab
+      await page.locator('#tab-0').click();
+      await delay(100);
+
+      const pencilButtonPath = '.btn-group > div > button';
+      await page.locator(pencilButtonPath).click();
+
+      const editViaJSONButtonPath = '#editByJson';
+      await page.locator(editViaJSONButtonPath).click();
+
+      const textareaPath = '#layout-json-editor';
+      const mockedJSON = JSON.stringify(editedManyObjectsMockedLayout);
+      await page.locator(textareaPath).fill(mockedJSON);
+
+      const updateButtonPath = '#updateLayoutButton';
+      await page.locator(updateButtonPath).click();
+      await delay(100);
+
+      strictEqual(
+        await getVisibleObjectCount(),
+        EXPECTED_LAYOUT_OBJECT_COUNT,
+        `Expected ${EXPECTED_LAYOUT_OBJECT_COUNT} rendered objects after JSON update`,
+      );
+
+      await page.reload({ waitUntil: 'networkidle0' });
+      await delay(100);
+
+      strictEqual(
+        await getVisibleObjectCount(),
+        EXPECTED_LAYOUT_OBJECT_COUNT,
+        `Expected ${EXPECTED_LAYOUT_OBJECT_COUNT} rendered objects after page reload`,
+      );
+    },
+  );
+
+  await testParent.test(
     'should update layout when clicking "Update layout"',
-    { timeout },
+    { timeout: 10000 },
     async () => {
       const pencilButtonPath = '.btn-group > div > button';
       await page.locator(pencilButtonPath).click();
@@ -474,16 +537,20 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test('should change tab after set tabInterval', { timeout: 15000 }, async () => {
+    // Ensure we are on the 'a' tab
+    await page.locator('#tab-1').click();
+    await delay(100);
+
     const location = await page.evaluate(() => window.location);
     strictEqual(location.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=a`);
-    await delay(11000);
+    await delay(11111);
     const location2 = await page.evaluate(() => window.location);
     strictEqual(location2.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=test`);
   });
 
   await testParent.test(
     'should update layout name in sidebar when name is changed and saved via JSON editor',
-    { timeout },
+    { timeout: 10000 },
     async () => {
       const originalSidebarName = await page.evaluate(() => {
         const sidebarLayoutLink = document.querySelector('nav a.menu-item.w-wrapped.selected span:nth-child(2)');

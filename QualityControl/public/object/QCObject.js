@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { RemoteData, iconArrowTop, BrowserStorage } from '/js/src/index.js';
+import { RemoteData, iconCaretTop, BrowserStorage } from '/js/src/index.js';
 import ObjectTree from './ObjectTree.class.js';
 import { simpleDebouncer, prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
@@ -47,8 +47,7 @@ export default class QCObject extends BaseViewModel {
       field: 'name',
       title: 'Name',
       order: 1,
-      icon: iconArrowTop(),
-      open: false,
+      icon: iconCaretTop(),
     };
 
     this.tree = new ObjectTree('database');
@@ -117,15 +116,6 @@ export default class QCObject extends BaseViewModel {
   }
 
   /**
-   * Toggle the display of the sort by dropdown
-   * @returns {undefined}
-   */
-  toggleSortDropdown() {
-    this.sortBy.open = !this.sortBy.open;
-    this.notify();
-  }
-
-  /**
    * Computes the final list of objects to be seen by user depending on search input from user
    * If any of those changes, this method should be called to update the outputs.
    * @returns {undefined}
@@ -190,7 +180,7 @@ export default class QCObject extends BaseViewModel {
 
     this._computeFilters();
 
-    this.sortBy = { field, title, order, icon, open: false };
+    this.sortBy = { field, title, order, icon };
     this.notify();
   }
 
@@ -253,8 +243,7 @@ export default class QCObject extends BaseViewModel {
       field: 'name',
       title: 'Name',
       order: 1,
-      icon: iconArrowTop(),
-      open: false,
+      icon: iconCaretTop(),
     };
     this._computeFilters();
 
