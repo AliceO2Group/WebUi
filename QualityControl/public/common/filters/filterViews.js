@@ -108,7 +108,7 @@ export function filtersPanel(filterModel, viewModel) {
         isRunModeActivated && runStatusPanel(runStatus),
       ]),
       lastUpdatePanel(runStatus, lastRefresh, refreshRate),
-      cleanRunInformationPanel(cleanRunInformation),
+      cleanRunInformationPanel(cleanRunInformation, filterModel.filterMap['RunNumber']),
       detectorsQualitiesPanel(detectorsQualities),
     ],
   );
