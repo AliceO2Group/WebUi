@@ -50,7 +50,7 @@ export function downloadRootImageDropdown(
     { seen: new Set(), result: {} },
   ).result;
 
-  return DropdownComponent(
+  const dropdownComponent = DropdownComponent(
     h('button.btn.save-root-as-image-button', { title: 'Save root as image' }, imagE()),
     Object.keys(deduplicated).map((filetype) => h('button.btn.d-block.w-100', {
       key: `${uniqueIdentifier ?? filename}.${filetype}`,
@@ -62,9 +62,12 @@ export function downloadRootImageDropdown(
           await downloadRoot(filename, filetype, root, drawingOptions);
         } finally {
           event.target.disabled = false;
+          dropdownComponent.state.hidePopover();
         }
       },
     }, filetype)),
     { onVisibilityChange },
   );
+
+  return dropdownComponent;
 }
