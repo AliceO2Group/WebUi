@@ -121,4 +121,20 @@ export default class QCObjectDto {
 
     return objectLeaf;
   }
+
+  static toCCDBFilters(filters) {
+    if (!filters || typeof filters !== 'object') {
+      return filters;
+    }
+
+    const map = {
+      QcVersion: 'qc_version',
+    };
+
+    return Object.keys(filters).reduce((acc, key) => {
+      const filterKey = map[key] || key;
+      acc[filterKey] = filters[key];
+      return acc;
+    }, {});
+  }
 }

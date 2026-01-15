@@ -14,6 +14,7 @@
 'use strict';
 import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 import { ObjectGetDownloadDTO } from '../dtos/ObjectGetDto.js';
+import QCObjectDto from '../dtos/QCObjectDto.js';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/obj-controller`;
 
@@ -65,10 +66,12 @@ export class ObjectController {
         return res.status(200).json({ paths });
       }
 
+      const normalizedFilters = QCObjectDto.toCCDBFilters(filters);
+
       const objectsData = await this._objService.retrieveLatestVersionOfObjects({
         prefix,
         fields,
-        filters,
+        filters: normalizedFilters,
       });
       res.status(200).json(objectsData);
     } catch (error) {
@@ -120,19 +123,13 @@ export class ObjectController {
     try {
       const { path, validFrom, filters, id } = req.query;
 
-      const updatedFilters = { ...filters };
-
-      // Check if the old key exists before transforming
-      if (updatedFilters && updatedFilters.QcVersion !== undefined) {
-        updatedFilters.qc_version = updatedFilters.QcVersion;
-        delete updatedFilters.QcVersion;
-      }
+      const normalizedFilters = QCObjectDto.toCCDBFilters(filters);
 
       const object = await this._objService.retrieveQcObject({
         path,
         validFrom,
         id,
-        filters: updatedFilters
+        filters: normalizedFilters
       });
 
       res.status(200).json(object);
