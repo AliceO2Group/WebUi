@@ -129,7 +129,7 @@ export class ObjectController {
         path,
         validFrom,
         id,
-        filters: normalizedFilters
+        filters: normalizedFilters,
       });
 
       res.status(200).json(object);
