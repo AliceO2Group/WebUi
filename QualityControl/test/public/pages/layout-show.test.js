@@ -610,7 +610,11 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {
   const textareaPath = 'body > div > div > div > div > textarea';
   await page.locator(textareaPath).fill(mockedJSON);
-  await delay(50);
+  await page.waitForFunction(
+    (error) => document.querySelector('.o2-modal-content .danger')?.textContent === error,
+    { timeout: 1000 },
+    errorMessage,
+  ).catch(() => { /* ignore timeout error */ });
 
   const [updateButtonIsDisabled, message] = await page.evaluate(() => {
     const updateButtonPath = 'body > div > div > div > div > button:nth-child(1)';
