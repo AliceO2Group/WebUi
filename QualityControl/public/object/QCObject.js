@@ -19,6 +19,7 @@ import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 import { StorageKeysEnum } from '../common/enums/storageKeys.enum.js';
 import { KeyCodesEnum } from '../common/enums/keyCodes.enum.js';
+import { OBJECT_LIST_ROW_HEIGHT } from '../common/constants/ui.js';
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
@@ -153,7 +154,7 @@ export default class QCObject extends BaseViewModel {
     if (focusedIndex === -1) {
       return;
     }
-    const rowHeight = 33.6;
+    const rowHeight = OBJECT_LIST_ROW_HEIGHT;
     const rowTop = focusedIndex * rowHeight;
     const rowBottom = rowTop + rowHeight;
     const viewTop = container.scrollTop;
