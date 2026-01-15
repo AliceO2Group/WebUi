@@ -13,9 +13,9 @@
  */
 
 import { h, iconBarChart } from '/js/src/index.js';
-import { OBJECT_LIST_ROW_HEIGHT, OBJECT_LIST_SIDE_ROW_HEIGHT } from '../common/constants/ui.js';
+import { OBJECT_LIST_SIDE_ROW_HEIGHT } from '../common/constants/ui.js';
 
-let ROW_HEIGHT = OBJECT_LIST_ROW_HEIGHT;
+let ROW_HEIGHT = OBJECT_LIST_SIDE_ROW_HEIGHT;
 let FONT = '';
 
 /**
@@ -27,7 +27,7 @@ let FONT = '';
  */
 export default function virtualTable(model, location = 'main', objects = []) {
   const isLocationSide = location === 'side';
-  ROW_HEIGHT = isLocationSide ? OBJECT_LIST_SIDE_ROW_HEIGHT : OBJECT_LIST_ROW_HEIGHT;
+  ROW_HEIGHT = OBJECT_LIST_SIDE_ROW_HEIGHT;
   FONT = isLocationSide ? '.f6' : '';
   return h('.flex-grow.flex-column', {
   }, [

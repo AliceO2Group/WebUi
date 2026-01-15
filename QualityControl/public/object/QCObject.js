@@ -18,8 +18,7 @@ import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 import { StorageKeysEnum } from '../common/enums/storageKeys.enum.js';
-import { KeyCodesEnum } from '../common/enums/keyCodes.enum.js';
-import { OBJECT_LIST_ROW_HEIGHT } from '../common/constants/ui.js';
+import { OBJECT_LIST_SIDE_ROW_HEIGHT } from '../common/constants/ui.js';
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
@@ -63,7 +62,7 @@ export default class QCObject extends BaseViewModel {
     this._initializeLeftPanelWidth();
   }
 
-  handleKeyboardNavigationSearchResults(keyCode) {
+  handleKeyboardNavigationSearchResults(key) {
     if (!this.searchResult.length) {
       return;
     }
@@ -71,12 +70,12 @@ export default class QCObject extends BaseViewModel {
       this.model.object.select(this.focusedSearchResult);
     };
     const actions = {
-      [KeyCodesEnum.RIGHT]: () => select(),
-      [KeyCodesEnum.ENTER]: () => select(),
-      [KeyCodesEnum.UP]: () => this._setFocusedSearchResultByOffset(-1),
-      [KeyCodesEnum.DOWN]: () => this._setFocusedSearchResultByOffset(1),
+      ['ArrowRight']: () => select(),
+      ['Enter']: () => select(),
+      ['ArrowUp']: () => this._setFocusedSearchResultByOffset(-1),
+      ['ArrowDown']: () => this._setFocusedSearchResultByOffset(1),
     };
-    const action = actions[keyCode];
+    const action = actions[key];
     if (action) {
       action();
     }
@@ -154,7 +153,7 @@ export default class QCObject extends BaseViewModel {
     if (focusedIndex === -1) {
       return;
     }
-    const rowHeight = OBJECT_LIST_ROW_HEIGHT;
+    const rowHeight = OBJECT_LIST_SIDE_ROW_HEIGHT;
     const rowTop = focusedIndex * rowHeight;
     const rowBottom = rowTop + rowHeight;
     const viewTop = container.scrollTop;

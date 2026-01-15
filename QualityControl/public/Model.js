@@ -28,7 +28,6 @@ import { buildQueryParametersString } from './common/buildQueryParametersString.
 import AboutViewModel from './pages/aboutView/AboutViewModel.js';
 import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
 import { RequestFields } from './common/RequestFields.enum.js';
-import { KeyCodesEnum } from '../common/enums/keyCodes.enum.js';
 
 import FilterModel from './common/filters/model/FilterModel.js';
 
@@ -130,34 +129,34 @@ export default class Model extends Observable {
    */
   handleKeyboardDown(e) {
     // Console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
-    const code = e.keyCode;
+    const { key } = e;
     // Delete key + layout page + object select => delete this object
-    if (code === KeyCodesEnum.DELETE &&
+    if (key === 'Delete' &&
       this.router.params.page === 'layoutShow' &&
       this.layout.editEnabled &&
       this.layout.editingTabObject) {
       this.layout.deleteTabObject(this.layout.editingTabObject);
-    } else if (code === KeyCodesEnum.ESC && this.isImportVisible) {
+    } else if (key === 'Escape' && this.isImportVisible) {
       this.layout.resetImport();
     }
     if (
       this.router.params.page === 'objectTree' &&
       (
-        code === KeyCodesEnum.RIGHT ||
-        code === KeyCodesEnum.LEFT ||
-        code === KeyCodesEnum.UP ||
-        code === KeyCodesEnum.DOWN ||
-        code === KeyCodesEnum.ENTER
+        key === 'ArrowUp' ||
+        key === 'ArrowDown' ||
+        key === 'Enter' ||
+        key === 'ArrowLeft' ||
+        key === 'ArrowRight'
       )
     ) {
       e.preventDefault(); // Prevent scrolling the page
       const searchActive = Boolean(this.object.searchInput?.trim());
       if (searchActive) {
         // Search navigation
-        this.object.handleKeyboardNavigationSearchResults(code);
+        this.object.handleKeyboardNavigationSearchResults(key);
       } else {
         // Tree navigation
-        this.object.tree.handleKeyboardNavigation(code, (selectedObject) => this.object.select(selectedObject));
+        this.object.tree.handleKeyboardNavigation(key, (selectedObject) => this.object.select(selectedObject));
       }
     }
   }

@@ -12,5 +12,4 @@
  * or submit itself to any jurisdiction.
  */
 
-export const OBJECT_LIST_ROW_HEIGHT = 33.6;
 export const OBJECT_LIST_SIDE_ROW_HEIGHT = 29.4;

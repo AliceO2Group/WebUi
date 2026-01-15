@@ -14,7 +14,6 @@
 
 import { BrowserStorage, Observable, sessionService } from '/js/src/index.js';
 import { StorageKeysEnum } from '../common/enums/storageKeys.enum.js';
-import { KeyCodesEnum } from '../common/enums/keyCodes.enum.js';
 
 /**
  * This class allows to transforms objects names (A/B/C) into a tree that can have
@@ -71,7 +70,7 @@ export default class ObjectTree extends Observable {
    * @param {Event} event - The keyboard event object
    * @param {(object: object) => void} onSelectObject - Callback function to select an object
    */
-  handleKeyboardNavigation(keyCode, onSelectObject) {
+  handleKeyboardNavigation(key, onSelectObject) {
     const selectOrExpand = () => {
       if (this.focusedNode?.isLeaf && this.focusedNode.object) {
         onSelectObject(this.focusedNode.object);
@@ -80,13 +79,13 @@ export default class ObjectTree extends Observable {
       this._expandFocusedNode();
     };
     const actions = {
-      [KeyCodesEnum.LEFT]: () => this._collapseFocusedNode(),
-      [KeyCodesEnum.RIGHT]: selectOrExpand,
-      [KeyCodesEnum.ENTER]: selectOrExpand,
-      [KeyCodesEnum.UP]: () => this._focusPreviousNode(),
-      [KeyCodesEnum.DOWN]: () => this._focusNextNode(),
+      ['ArrowLeft']: () => this._collapseFocusedNode(),
+      ['ArrowRight']: selectOrExpand,
+      ['Enter']: selectOrExpand,
+      ['ArrowUp']: () => this._focusPreviousNode(),
+      ['ArrowDown']: () => this._focusNextNode(),
     };
-    const action = actions[keyCode];
+    const action = actions[key];
     if (action) {
       action();
     }
