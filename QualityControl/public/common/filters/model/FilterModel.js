@@ -49,6 +49,8 @@ export default class FilterModel extends Observable {
     this._runInformation = {};
 
     this.ONGOING_RUN_INTERVAL_MS = 15000;
+
+    this.filterService.fetchOngoingRuns();
   }
 
   /**
@@ -187,7 +189,6 @@ export default class FilterModel extends Observable {
    */
   async activateRunsMode(viewModel) {
     this.isRunModeActivated = true;
-    await this.filterService.fetchOngoingRuns();
     if (this._filterMap.RunNumber) {
       this._filterMap = { RunNumber: this._filterMap.RunNumber };
       this.triggerFilter(viewModel);
