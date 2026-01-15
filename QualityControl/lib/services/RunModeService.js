@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from '@aliceo2/web-ui';
+import { LogManager, WebSocketMessage } from '@aliceo2/web-ui';
 import { EmitterKeys } from '../../common/library/enums/emitterKeys.enum.js';
 import { Transition } from '../../common/library/enums/transition.enum.js';
 import { RunStatus } from '../../common/library/runStatus.enum.js';
@@ -29,16 +29,19 @@ export class RunModeService {
    * @param {BookkeepingService} bookkeepingService - Used to check the status of a run.
    * @param {CcdbService} dataService - Used to fetch data from the CCDB.
    * @param {EventEmitter} eventEmitter - Event emitter to be used to emit events when new data is available
+   * @param {WebSocket} webSocketService - web-ui websocket server implementation
    */
   constructor(
     config,
     bookkeepingService,
     dataService,
     eventEmitter,
+    webSocketService,
   ) {
     this._bookkeepingService = bookkeepingService;
     this._dataService = dataService;
     this._eventEmitter = eventEmitter;
+    this._webSocketService = webSocketService;
 
     this._ongoingRuns = new Map();
     this._lastRunsRefresh = 0;
@@ -141,6 +144,13 @@ export class RunModeService {
   async _onRunTrackEvent({ runNumber, transition }) {
     if (transition === Transition.START_ACTIVITY) {
       await this._initializeRunData(runNumber);
+
+      const wsMessage = new WebSocketMessage();
+      wsMessage.command = `${EmitterKeys.RUN_TRACK}:${Transition.START_ACTIVITY}`;
+      wsMessage.payload = {
+        runNumber,
+      };
+      this._webSocketService.broadcast(wsMessage);
     } else if (transition === Transition.STOP_ACTIVITY) {
       this._ongoingRuns.delete(runNumber);
     }

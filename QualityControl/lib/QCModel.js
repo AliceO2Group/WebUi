@@ -53,10 +53,11 @@ const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/model-setup`;
 
 /**
  * Model initialization for the QCG application
+ * @param {WebSocket} ws - web-ui websocket server implementation
  * @param {EventEmitter} eventEmitter - Event emitter instance for inter-service communication
  * @returns {Promise<object>} Multiple services and controllers that are to be used by the QCG application
  */
-export const setupQcModel = async (eventEmitter) => {
+export const setupQcModel = async (ws, eventEmitter) => {
   const logger = LogManager.getLogger(LOG_FACILITY);
 
   const __filename = fileURLToPath(import.meta.url);
@@ -118,7 +119,7 @@ export const setupQcModel = async (eventEmitter) => {
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
   await bookkeepingService.connect();
   const filterService = new FilterService(bookkeepingService, config);
-  const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService, eventEmitter);
+  const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService, eventEmitter, ws);
   const objectController = new ObjectController(qcObjectService, runModeService, qcdbDownloadService);
 
   const filterController = new FilterController(filterService, runModeService);
