@@ -301,8 +301,8 @@ function treeRow(model, tree, level = 0) {
       index,
       name,
       () => {
-        model.object.tree.setFocusedNodeByIndex(index);
         model.object.select(object);
+        model.object.tree.setFocusedNodeByIndex(index);
       },
       iconBarChart,
       className,
