@@ -72,6 +72,7 @@ export const runModeCheckbox = (filterModel, viewModel) => {
     'label.flex-row.g1.items-center.form-check-label',
     {
       style: `cursor:${isAvailable ? 'pointer' : 'not-allowed'}`,
+      id: 'run-mode-switch',
     },
     [
       h(

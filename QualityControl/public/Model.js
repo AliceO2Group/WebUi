@@ -30,6 +30,7 @@ import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
 import { RequestFields } from './common/RequestFields.enum.js';
 import FilterModel from './common/filters/model/FilterModel.js';
 import { IntegratedServices } from '../library/enums/Status/integratedServices.enum.js';
+import NotificationRunStartModel from './common/notifications/model/NotificationRunStartModel.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -85,6 +86,9 @@ export default class Model extends Observable {
     this.ws = new WebSocketClient();
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
     this.ws.addListener('close', this.handleWSClose.bind(this));
+
+    this.notificationRunStartModel = new NotificationRunStartModel(this);
+    this.notificationRunStartModel.bubbleTo(this);
 
     this.initModel();
   }

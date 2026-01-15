@@ -29,6 +29,7 @@ import {
  */
 
 import { initialPageSetupTests } from './public/initialPageSetup.test.js';
+import { profileHeaderTests } from './public/components/profileHeader.test.js';
 import { qcDrawingOptionsTests } from './public/components/qcDrawingOptions.test.js';
 import { layoutListPageTests } from './public/pages/layout-list.test.js';
 import { objectTreePageTests } from './public/pages/object-tree.test.js';
@@ -103,6 +104,7 @@ const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this 
 // remaining tests are based on the number of individual tests in each suite
 
 const INITIAL_PAGE_SETUP_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 5;
+const PAGE_HEADER_COMPONENT_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
 const QC_DRAWING_OPTIONS_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 13;
 const LAYOUT_LIST_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 17;
 const OBJECT_TREE_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 20;
@@ -114,6 +116,7 @@ const FILTER_TEST_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 26;
 const RUN_MODE_TEST_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 10;
 
 const FRONT_END_TIMEOUT = INITIAL_PAGE_SETUP_TIMEOUT
+  + PAGE_HEADER_COMPONENT_TIMEOUT
   + QC_DRAWING_OPTIONS_TIMEOUT
   + LAYOUT_LIST_PAGE_TIMEOUT
   + OBJECT_TREE_PAGE_TIMEOUT
@@ -152,9 +155,9 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     );
 
     test(
-      'should successfully run layoutList page tests',
-      { timeout: LAYOUT_LIST_PAGE_TIMEOUT },
-      async (testParent) => await layoutListPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
+      'should successfully import and run tests for profile in header',
+      { timeout: INITIAL_PAGE_SETUP_TIMEOUT },
+      async (testParent) => await profileHeaderTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
 
     test(
@@ -196,6 +199,12 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       'should successfully use run mode when available',
       { timeout: RUN_MODE_TEST_TIMEOUT },
       async (testParent) => await runModeTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
+    );
+
+    test(
+      'should successfully run layoutList page tests',
+      { timeout: LAYOUT_LIST_PAGE_TIMEOUT },
+      async (testParent) => await layoutListPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
   });
 

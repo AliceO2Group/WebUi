@@ -81,9 +81,6 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
 
       const runsModeErrorNoExist = await page.evaluate(() => document.querySelector('#run-mode-failure') === null);
       ok(runsModeErrorNoExist, 'The RunMode switch should not be displayed');
-    } catch (error) {
-      // Test failed
-      ok(false, error.message);
     } finally {
       // Cleanup: remove listener and disable interception
       page.off('request', requestHandler);
@@ -197,9 +194,25 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
       await page.setRequestInterception(false);
     }
   });
+  
+  await testParent.test('should have a switch to enable run mode', { timeout }, async () => {
+    await page.goto(
+      `${url}?page=objectTree`,
+      { waitUntil: 'networkidle0' },
+    );
+    await delay(100);
+    // Prevent the 'get run status' from re-triggering mid test
+    await page.evaluate(() => {
+      window.model.filterModel.ONGOING_RUN_INTERVAL_MS = 12000000;
+    });
+    await page.locator('#run-mode-switch > .switch');
+    const runsModeTitle = await page.evaluate(() =>
+      document.querySelector('#run-mode-switch').textContent);
+    strictEqual(runsModeTitle, 'Run mode', 'The text displayed is not `Runs mode`');
+  });
 
   await testParent.test('should activate run mode', { timeout }, async () => {
-    await page.locator('.form-check-label > .switch').click();
+    await page.locator('#run-mode-switch > .switch').click();
     await delay(500);
     expectCountRunStatusCalls ++;
 
@@ -287,7 +300,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     ok(isRunModeActive, 'Run mode should be active before disabling');
 
     // Click the run mode checkbox to disable it
-    await page.locator('.form-check-label > .switch').click();
+    await page.locator('#run-mode-switch > .switch').click();
     await delay(100);
 
     // Verify run mode is now deactivated
