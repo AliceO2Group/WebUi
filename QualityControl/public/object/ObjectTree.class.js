@@ -46,7 +46,7 @@ export default class ObjectTree extends Observable {
   }
 
   get isLeaf() {
-    return this.object !== null;
+    return this.children.length === 0 && this.object !== null;
   }
 
   /**
@@ -97,7 +97,7 @@ export default class ObjectTree extends Observable {
    * @param {number} index - Index of the node to focus
    */
   setFocusedNodeByIndex(index) {
-    const nodeToFocus = this.getVisibleNodes().find((node) => node.index === index);
+    const nodeToFocus = this._getVisibleNodes().find((node) => node.index === index);
     if (nodeToFocus) {
       this._setFocusedNode(nodeToFocus);
     }
@@ -279,7 +279,9 @@ export default class ObjectTree extends Observable {
     if (data[treeNode.name]) {
       treeNode.open = true;
       Object.keys(data[treeNode.name]).forEach((childName) => {
-        const child = treeNode.children.find((child) => child.name === childName);
+        // Prefer expanding the branch variant when duplicate names exist
+        const child = treeNode.children.find((c) => c.name === childName && c.children.length > 0) 
+          || treeNode.children.find((c) => c.name === childName);
         if (child) {
           this._applyExpandedBranchesRecursive(data[treeNode.name], child);
         }
@@ -392,31 +394,28 @@ export default class ObjectTree extends Observable {
       this._addChild(object, path);
       return;
     }
-
     // Case end of path, associate the object to 'this' node
     if (path.length === 0) {
       this.object = object;
       return;
     }
-
     // Case we need to pass to subtree
     const name = path.shift();
     const fullPath = [...pathParent, name];
-    let subtree = this.children.find((children) => children.name === name);
-
-    // Subtree does not exist yet
+    const requiresBranch = path.length > 0;
+    // Find if subtree already exists
+    const matchesNameAndType = requiresBranch
+      ? (c) => c.name === name && c.isBranch
+      : (c) => c.name === name && c.isLeaf;
+    let subtree = this.children.find(matchesNameAndType);
+    // Subtree does not exist yet - create it, then pass to child
     if (!subtree) {
-      /*
-       * Create it and push as child
-       * Listen also for changes to bubble it until root
-       */
       subtree = new ObjectTree(name, this);
       subtree.path = fullPath;
       subtree.pathString = fullPath.join('/');
       this.children.push(subtree);
-      subtree.observe(() => this.notify());
+      subtree.observe(() => this.notify()); // listen for changes and bubble to root
     }
-
     // Pass to child
     subtree._addChild(object, path, fullPath);
   }

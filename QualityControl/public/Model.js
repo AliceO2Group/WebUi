@@ -140,10 +140,20 @@ export default class Model extends Observable {
     } else if (code === KeyCodesEnum.ESC && this.isImportVisible) {
       this.layout.resetImport();
     }
-    if (this.router.params.page === 'objectTree') {
+    if (
+      this.router.params.page === 'objectTree' &&
+      (
+        code === KeyCodesEnum.RIGHT ||
+        code === KeyCodesEnum.LEFT ||
+        code === KeyCodesEnum.UP ||
+        code === KeyCodesEnum.DOWN ||
+        code === KeyCodesEnum.ENTER
+      )
+    ) {
+      e.preventDefault(); // Prevent scrolling the page
       const searchActive = Boolean(this.object.searchInput?.trim());
-      // Search navigation
       if (searchActive) {
+        // Search navigation
         this.object.handleKeyboardNavigationSearchResults(code);
       } else {
         // Tree navigation
