@@ -30,6 +30,7 @@ function createFiltersSchema(runTypes) {
       : Joi.string().optional(),
     PeriodName: Joi.string().pattern(periodNamePattern).optional(),
     PassName: Joi.string().optional(),
+    QcVersion: Joi.string().optional(),
   }).optional();
 }
 

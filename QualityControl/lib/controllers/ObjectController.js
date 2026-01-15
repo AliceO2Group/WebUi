@@ -120,7 +120,21 @@ export class ObjectController {
     try {
       const { path, validFrom, filters, id } = req.query;
 
-      const object = await this._objService.retrieveQcObject({ path, validFrom, id, filters });
+      const updatedFilters = { ...filters };
+
+      // Check if the old key exists before transforming
+      if (updatedFilters && updatedFilters.QcVersion !== undefined) {
+        updatedFilters.qc_version = updatedFilters.QcVersion;
+        delete updatedFilters.QcVersion;
+      }
+
+      const object = await this._objService.retrieveQcObject({
+        path,
+        validFrom,
+        id,
+        filters: updatedFilters
+      });
+
       res.status(200).json(object);
     } catch (error) {
       this._logger.errorMessage(`Error whilst retrieving object content: ${error}`);
