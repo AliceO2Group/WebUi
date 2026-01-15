@@ -32,6 +32,7 @@ export const runModeServiceTestSuite = async () => {
     beforeEach(() => {
       bookkeepingService = {
         retrieveRunInformation: sinon.stub(),
+        retrieveOngoingRuns: sinon.stub(),
       };
 
       dataService = {
@@ -125,6 +126,21 @@ export const runModeServiceTestSuite = async () => {
     suite('get refreshInterval', () => {
       test('should expose configured refresh interval', () => {
         strictEqual(runModeService.refreshInterval, 60000);
+      });
+    });
+
+    suite('`_fetchOnGoingRunsAtStart` tests', () => {
+      test('should populate ongoing runs on startup', async () => {
+        const runNumber = 1;
+        const mockRun = { runNumber };
+        const mockPaths = [{ path: '/run/path1' }];
+
+        bookkeepingService.retrieveOngoingRuns.resolves([mockRun]);
+
+        dataService.getObjectsLatestVersionList.resolves(mockPaths);
+
+        await runModeService._fetchOnGoingRunsAtStart();
+        strictEqual(runModeService._ongoingRuns.has(runNumber), true);
       });
     });
 

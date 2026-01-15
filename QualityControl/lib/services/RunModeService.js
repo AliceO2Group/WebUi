@@ -118,11 +118,7 @@ export class RunModeService {
    * @returns {Promise<void>}
    */
   async _fetchOnGoingRunsAtStart() {
-    if (!this._bookkeepingService.active) {
-      return;
-    }
-
-    const alreadyOngoingRuns = await this._bookkeepingService.retrieveOnGoingRuns();
+    const alreadyOngoingRuns = await this._bookkeepingService.retrieveOngoingRuns();
     if (!alreadyOngoingRuns || alreadyOngoingRuns.length === 0) {
       this._logger.infoMessage('No already ongoing runs detected at server start');
       return;

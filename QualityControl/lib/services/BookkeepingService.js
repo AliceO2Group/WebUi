@@ -188,7 +188,7 @@ export class BookkeepingService {
    * @returns {Promise<Array<object>|undefined>} A promise that resolves to an array of run objects,
    *  or undefined if the service is inactive, no data is found, or an error occurs
    */
-  async retrieveOnGoingRuns() {
+  async retrieveOngoingRuns() {
     if (!this.active) {
       return;
     }
