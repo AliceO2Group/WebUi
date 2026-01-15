@@ -161,12 +161,6 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     );
 
     test(
-      'should successfully run layoutList page tests',
-      { timeout: LAYOUT_LIST_PAGE_TIMEOUT },
-      async (testParent) => await layoutListPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
-    );
-
-    test(
       'should successfully run objectTree page tests with CCDB mocked with nock',
       { timeout: OBJECT_TREE_PAGE_TIMEOUT },
       async (testParent) => await objectTreePageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
@@ -205,6 +199,12 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       'should successfully use run mode when available',
       { timeout: RUN_MODE_TEST_TIMEOUT },
       async (testParent) => await runModeTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
+    );
+
+    test(
+      'should successfully run layoutList page tests',
+      { timeout: LAYOUT_LIST_PAGE_TIMEOUT },
+      async (testParent) => await layoutListPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
   });
 
