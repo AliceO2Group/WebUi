@@ -207,14 +207,14 @@ export default class ObjectTree extends Observable {
       return;
     }
     const idx = visible.indexOf(this.focusedNode);
+    // At the last visible node, do nothing
+    if (idx >= visible.length - 1) {
+      return;
+    }
     // Nothing focused yet -> focus first visible node
     if (!this.focusedNode || idx === -1) {
       const [first] = visible;
       this._setFocusedNode(first);
-      return;
-    }
-    // At the last visible node, do nothing
-    if (idx >= visible.length - 1) {
       return;
     }
     // Select next node
@@ -279,15 +279,16 @@ export default class ObjectTree extends Observable {
     if (data[treeNode.name]) {
       treeNode.open = true;
       Object.keys(data[treeNode.name]).forEach((childName) => {
-        // Prefer expanding the branch variant when duplicate names exist
-        const child = treeNode.children.find((c) => c.name === childName && c.children.length > 0) 
-          || treeNode.children.find((c) => c.name === childName);
+        // If two children share the same name, expand the one that has children
+        const child =
+          treeNode.children.find((c) => c.name === childName && c.isBranch) ||
+          treeNode.children.find((c) => c.name === childName);
         if (child) {
           this._applyExpandedBranchesRecursive(data[treeNode.name], child);
         }
       });
     }
-  };
+  }
 
   /**
    * Persist the current branch's expanded/collapsed state in localStorage.
