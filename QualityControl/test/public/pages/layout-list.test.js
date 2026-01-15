@@ -112,18 +112,22 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(label, 'All Layouts');
   });
 
-  await testParent.test('should have a link to show a layout from users layout', async () => {
-    const linkpath = cardLayoutLinkPath(cardPath(myLayoutIndex, 2));
-    const href = await page.evaluate((path) => document.querySelector(path).href, linkpath);
+  await testParent.test(
+    'should have a link to show a layout from users layout',
+    { timeout },
+    async () => {
+      const linkpath = cardLayoutLinkPath(cardPath(myLayoutIndex, 2));
+      const href = await page.evaluate((path) => document.querySelector(path).href, linkpath);
 
-    ok(href.includes('http://localhost:8080/?page=layoutShow&layoutId='));
+      ok(href.includes('http://localhost:8080/?page=layoutShow&layoutId='));
 
-    await page.click(linkpath);
-    await page.waitForNetworkIdle();
-    const location = await page.evaluate(() => window.location.href);
+      await page.click(linkpath);
+      await delay(1000);
+      const location = await page.evaluate(() => window.location.href);
 
-    ok(location.includes('http://localhost:8080/?page=layoutShow&layoutId='));
-  });
+      ok(location.includes('http://localhost:8080/?page=layoutShow&layoutId='));
+    },
+  );
 
   await testParent.test('should add official logo the \'make Official\' button is pressed', async () => {
     const buttonPath = cardOfficialButtonPath(cardPath(myLayoutIndex, 1));
