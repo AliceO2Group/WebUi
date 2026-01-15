@@ -16,6 +16,7 @@ import { Observable, BrowserStorage, showNativeBrowserNotification,
   areBrowserNotificationsGranted } from '/js/src/index.js';
 import { EmitterKeys } from '../../../../library/enums/emitterKeys.enum.js';
 import { StorageKeysEnum } from '../../enums/storageKeys.enum.js';
+import { Transition } from '../../../../library/enums/transition.enum.js';
 
 /**
  * Model responsible for handling browser notifications when a new run starts.
@@ -32,7 +33,7 @@ export default class NotificationRunStartModel extends Observable {
     this._browserNotificationStorage = new BrowserStorage(StorageKeysEnum.NOTIFICATION_START_RUN_SETTING);
 
     this.model.ws.addListener('command', (message) => {
-      if (message.command === EmitterKeys.RUN_TRACK) {
+      if (message.command === `${EmitterKeys.RUN_TRACK}:${Transition.START_ACTIVITY}`) {
         this._handleWSRunTrack.bind(this, message.payload);
       }
     });
