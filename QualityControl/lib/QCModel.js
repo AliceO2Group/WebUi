@@ -117,7 +117,12 @@ export const setupQcModel = async (ws, eventEmitter) => {
   const intervalsService = new IntervalsService();
 
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
-  await bookkeepingService.connect();
+  try {
+    await bookkeepingService.connect();
+  } catch (error) {
+    logger.errorMessage(`Failed connecting to Bookkeeping: ${error.message || error}`);
+  }
+
   const filterService = new FilterService(bookkeepingService, config);
   const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService, eventEmitter, ws);
   const objectController = new ObjectController(qcObjectService, runModeService, qcdbDownloadService);
