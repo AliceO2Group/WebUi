@@ -66,8 +66,7 @@ export default class ObjectTree extends Observable {
 
   /**
    * Handles keyboard navigation for the tree
-   * @param {number} keyCode - The key code for navigation
-   * @param {Event} event - The keyboard event object
+   * @param {string} key - The key value for navigation (e.g., "ArrowUp", "ArrowDown")
    * @param {(object: object) => void} onSelectObject - Callback function to select an object
    */
   handleKeyboardNavigation(key, onSelectObject) {
