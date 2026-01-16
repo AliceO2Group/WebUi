@@ -47,14 +47,14 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     await page.evaluate(() => {
       window.model.filterModel.ONGOING_RUN_INTERVAL_MS = 12000000;
     });
-    await page.locator('.form-check-label > .switch');
+    await page.locator('#run-mode-switch > .switch');
     const runsModeTitle = await page.evaluate(() =>
-      document.querySelector('.form-check-label').textContent);
+      document.querySelector('#run-mode-switch').textContent);
     strictEqual(runsModeTitle, 'Run mode', 'The text displayed is not `Runs mode`');
   });
 
   await testParent.test('should activate run mode', { timeout }, async () => {
-    await page.locator('.form-check-label > .switch').click();
+    await page.locator('#run-mode-switch > .switch').click();
     await delay(500);
     expectCountRunStatusCalls ++;
 
@@ -142,7 +142,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     ok(isRunModeActive, 'Run mode should be active before disabling');
 
     // Click the run mode checkbox to disable it
-    await page.locator('.form-check-label > .switch').click();
+    await page.locator('#run-mode-switch > .switch').click();
     await delay(100);
 
     // Verify run mode is now deactivated

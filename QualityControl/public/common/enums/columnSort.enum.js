@@ -13,13 +13,11 @@
  */
 
 /**
- * Enumeration for different types of storage keys
- * @enum {string}
+ * Enumeration for sort directions
+ * @enum {number}
  * @readonly
  */
-export const StorageKeysEnum = Object.freeze({
-  OBJECT_VIEW_LEFT_PANEL_WIDTH: 'object-view-left-panel-width',
-  OBJECT_VIEW_INFO_VISIBILITY_SETTING: 'object-view-info-visibility-setting',
-  NOTIFICATION_START_RUN_SETTING: 'notification-start-run-setting',
-  OBJECT_TREE_OPEN_NODES: 'object-tree-open-nodes',
+export const SortDirectionsEnum = Object.freeze({
+  ASC: 1,
+  DESC: -1,
 });
