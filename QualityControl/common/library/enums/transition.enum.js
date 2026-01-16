@@ -21,3 +21,16 @@ export const Transition = Object.freeze({
   START_ACTIVITY: 'START_ACTIVITY',
   STOP_ACTIVITY: 'STOP_ACTIVITY',
 });
+
+/**
+ * Enumeration for different statuses of a transitions as per:
+ * @link https://github.com/AliceO2Group/Control/blob/master/common/protos/events.proto#L35
+ */
+export const TransitionStatus = Object.freeze({
+  NULL: 'NULL',
+  STARTED: 'STARTED',
+  ONGOING: 'ONGOING',
+  DONE_OK: 'DONE_OK',
+  DONE_ERROR: 'DONE_ERROR',
+  DONE_TIMEOUT: 'DONE_TIMEOUT',
+});

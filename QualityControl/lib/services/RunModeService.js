@@ -14,7 +14,7 @@
 
 import { LogManager, WebSocketMessage } from '@aliceo2/web-ui';
 import { EmitterKeys } from '../../common/library/enums/emitterKeys.enum.js';
-import { Transition } from '../../common/library/enums/transition.enum.js';
+import { Transition, TransitionStatus } from '../../common/library/enums/transition.enum.js';
 import { RunStatus } from '../../common/library/runStatus.enum.js';
 import { parseObjects } from '../../common/library/qcObject/utils.js';
 import QCObjectDto from '../dtos/QCObjectDto.js';
@@ -138,10 +138,11 @@ export class RunModeService {
    * @param {object} runEvent - Object containing runNumber and transition type.
    * @param {number} runEvent.runNumber - The run number associated with the event.
    * @param {string} runEvent.transition - The transition type (e.g., 'START_ACTIVITY', 'STOP_ACTIVITY').
+   * @param {string} runEvent.transitionStatus - The status of the transition (e.g., 'DONE_OK').
    * @returns {Promise<void>}
    */
-  async _onRunTrackEvent({ runNumber, transition }) {
-    if (transition === Transition.START_ACTIVITY) {
+  async _onRunTrackEvent({ runNumber, transition, transitionStatus }) {
+    if (transition === Transition.START_ACTIVITY && transitionStatus === TransitionStatus.DONE_OK) {
       await this._initializeRunData(runNumber);
 
       const wsMessage = new WebSocketMessage();
