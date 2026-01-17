@@ -37,7 +37,7 @@ export class FilterService {
     this._runTypesRefreshInterval = config?.bookkeeping?.runTypesRefreshInterval ??
       (config?.bookkeeping ? 24 * 60 * 60 * 1000 : -1);// default interval is 1 day
     this._dataPassesRefreshInterval = config?.bookkeeping?.dataPassesRefreshInterval ??
-      (config?.bookkeeping ? 60 * 60 * 1000 : -1);// default interval is 1 hour
+      (config?.bookkeeping ? 6 * 60 * 60 * 1000 : -1);// default interval is 6 hour
 
     this.initFilters().catch((error) => {
       this._logger.errorMessage(`FilterService initialization failed: ${error.message || error}`);
@@ -87,7 +87,9 @@ export class FilterService {
       }
 
       const rawDataPasses = await this._bookkeepingService.retrieveDataPasses();
-      this._dataPasses = Object.freeze(rawDataPasses.map(({ name, isFrozen }) => Object.freeze({ name, isFrozen })));
+      this._dataPasses = Object.freeze(rawDataPasses
+        .filter(({ name, isFrozen }) => name && typeof isFrozen === 'boolean')
+        .map(({ name, isFrozen }) => Object.freeze({ name, isFrozen })));
     } catch (error) {
       this._logger.errorMessage(`Error while retrieving data passes: ${error.message || error}`);
     }
