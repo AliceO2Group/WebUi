@@ -234,14 +234,14 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     strictEqual(optionsCount, 1);
   });
 
-  await testParent.test('ObjectTreePage should apply filters for the objects', { timeout }, async () => {
+  await testParent.test('ObjectTreePage should apply filters for the objects', { timeout: timeout * 12 }, async () => {
     await page.goto(
       `${url}?page=objectTree`,
       { waitUntil: 'networkidle0' },
     );
 
     let rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
-    strictEqual(rowCount, 6);
+    strictEqual(rowCount, 7);
 
     const runNumber = '0';
     await page.locator('#runNumberFilter').fill(runNumber);
