@@ -20,7 +20,7 @@ import { wrapRunStatus } from '../dtos/BookkeepingDto.js';
 const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
 const GET_RUN_PATH = '/api/runs';
-const GET_DETECTORS_PATH = '/api/detectors';
+export const GET_DETECTORS_PATH = '/api/detectors';
 const GET_DATA_PASSES_PATH = '/api/dataPasses';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/bkp-service`;
