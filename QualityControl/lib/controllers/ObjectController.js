@@ -121,7 +121,6 @@ export class ObjectController {
       const { path, validFrom, filters, id } = req.query;
 
       const object = await this._objService.retrieveQcObject({ path, validFrom, id, filters });
-
       res.status(200).json(object);
     } catch (error) {
       this._logger.errorMessage(`Error whilst retrieving object content: ${error}`);
