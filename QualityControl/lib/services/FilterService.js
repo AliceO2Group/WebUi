@@ -49,7 +49,6 @@ export class FilterService {
    * @returns {Promise<void>} - resolves when the filter service is initialized
    */
   async initFilters() {
-    await this._bookkeepingService.connect();
     await this.getRunTypes();
     await this._initializeDetectors();
     await this.getDataPasses();

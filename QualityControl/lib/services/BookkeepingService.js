@@ -25,6 +25,8 @@ const GET_DATA_PASSES_PATH = '/api/dataPasses';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/bkp-service`;
 
+const RECENT_RUN_THRESHOLD_MS = 1 * 24 * 60 * 60 * 1000; // -1 day in milliseconds
+
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
  */
@@ -75,12 +77,12 @@ export class BookkeepingService {
    */
   async connect() {
     if (!this.validateConfig()) {
-      this._logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
+      this._logger.warnMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
       return;
     }
     this.active = await this.simulateConnection();
     if (!this.active) {
-      this._logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
+      this._logger.warnMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
     }
   }
 
@@ -197,6 +199,44 @@ export class BookkeepingService {
       }
       this._logger.errorMessage(`Error fetching run status: ${error.message || error}`);
       return wrapRunStatus(RunStatus.UNKNOWN);
+    }
+  }
+
+  /**
+   * Retrieves runs that are currently ongoing (started within the last \@see {RECENT_RUN_THRESHOLD_MS}
+   * but have not yet ended).
+   * @returns {Promise<Array<object>|undefined>} A promise that resolves to an array of run objects,
+   *  or undefined if the service is inactive, no data is found, or an error occurs
+   */
+  async retrieveOngoingRuns() {
+    if (!this.active) {
+      return;
+    }
+
+    const timestamp = Date.now() - RECENT_RUN_THRESHOLD_MS;
+
+    const queryParams = `page[offset]=0&page[limit]=20&filter[o2start][from]=${timestamp}&token=${this._token}`;
+
+    try {
+      const { data } = await httpGetJson(
+        this._hostname,
+        this._port,
+        `${GET_RUN_PATH}?${queryParams}`,
+        {
+          protocol: this._protocol,
+          rejectUnauthorized: false,
+        },
+      );
+
+      if (data.length === 0) {
+        return [];
+      }
+
+      return data.filter((run) => !run.timeO2End);
+    } catch (error) {
+      const msg = error?.message ?? String(error);
+      this._logger.errorMessage(msg);
+      return;
     }
   }
 

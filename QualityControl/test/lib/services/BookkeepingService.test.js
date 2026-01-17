@@ -529,5 +529,68 @@ export const bookkeepingServiceTestSuite = async () => {
         strictEqual(result.length, 0);
       });
     });
+    suite('`retrieveOngoingRuns()` tests', () => {
+      let bkpService = null;
+      const runsPathPattern = new RegExp(`/api/runs\\?.*token=${VALID_CONFIG.bookkeeping.token}`);
+
+      beforeEach(() => {
+        bkpService = new BookkeepingService(VALID_CONFIG.bookkeeping);
+        bkpService.validateConfig();
+        bkpService.active = true;
+      });
+
+      afterEach(() => {
+        nock.cleanAll();
+      });
+
+      test('should return all already ongoing runs', async () => {
+        const mockResponse = {
+          data: [
+            {
+              runNumber: 1,
+              timeO2End: undefined,
+            },
+            {
+              runNumber: 2,
+              timeO2End: 1,
+            },
+            {
+              runNumber: 3,
+              timeO2End: undefined,
+            },
+          ],
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
+        const ongoingRuns = await bkpService.retrieveOngoingRuns();
+        strictEqual(ongoingRuns.length, 2);
+        deepStrictEqual(ongoingRuns.map((run) => run.runNumber), [1, 3]);
+      });
+
+      test('should return an empty array when data when no runs are retrieved', async () => {
+        const mockResponse = {
+          data: [],
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
+        const ongoingRuns = await bkpService.retrieveOngoingRuns();
+        strictEqual(ongoingRuns.length, 0);
+      });
+
+      test('should return an empty array when all runs have an end time specified', async () => {
+        const mockResponse = {
+          data: [
+            {
+              runNumber: 99,
+              timeO2End: 1,
+            },
+          ],
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
+        const ongoingRuns = await bkpService.retrieveOngoingRuns();
+        strictEqual(ongoingRuns.length, 0);
+      });
+    });
   });
 };
