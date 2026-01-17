@@ -122,12 +122,12 @@ export class RunModeService {
    */
   async _fetchOnGoingRunsAtStart() {
     const ongoingRuns = await this._bookkeepingService.retrieveOngoingRuns();
-    if (!ongoingRuns?.length === 0) {
+    if (!ongoingRuns || ongoingRuns.length === 0) {
       this._logger.infoMessage('No ongoing runs detected at server start');
       return;
     }
 
-    const runNumbers = ongoingRuns.map((run) => run.runNumber);
+    const runNumbers = ongoingRuns.map(({ runNumber }) => runNumber);
     const tasks = runNumbers.map(async (runNumber) => await this._initializeRunData(runNumber));
     await Promise.all(tasks);
   }
