@@ -14,9 +14,17 @@
 
 import Joi from 'joi';
 
-export const QcDetectorNameDto = Joi.string()
-  .min(1)
+/**
+ * Joi validation schema for QcDetectorName filter (also known as detector when fetched from BKP and used in UI)
+ * @type {Joi.StringSchema}
+ */
+export const DetectorNameDto = Joi.string()
+  .uppercase()
+  .length(3)
+  .pattern(/^[A-Z]{3}$/)
   .messages({
-    'number.base': 'Detector name must be a string',
-    'number.min': 'Detector name must not be an empty string',
+    'string.base': 'Detector name must be a string',
+    'string.uppercase': 'Detector name must be uppercase',
+    'string.length': 'Detector name must be exactly 3 characters',
+    'string.pattern.base': 'Detector name must contain only uppercase letters (e.g., TPC, ITS)',
   });

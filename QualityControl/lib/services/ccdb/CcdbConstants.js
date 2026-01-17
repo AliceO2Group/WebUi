@@ -51,6 +51,7 @@ export const CcdbMetadataFields = Object.freeze({
   PeriodName: 'PeriodName',
   PassName: 'PassName',
   QcVersion: 'qc_version',
+  DetectorName: 'qc_detector_name',
 });
 
 /**
