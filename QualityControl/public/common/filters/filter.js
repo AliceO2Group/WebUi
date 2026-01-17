@@ -24,9 +24,9 @@ import { h, RemoteData } from '/js/src/index.js';
  * @param {object} config.filterMap - Map of the current filter values.
  * @param {string} [config.type='text'] - The type of the filter element (e.g., 'text', 'number').
  * @param {RemoteData} [config.options=RemoteData.notAsked()] - List of options for a dropdown selector (optional).
- * @param {Function} config.onChangeCallback - Callback to be triggered on the change event of the filter.
- * @param {Function} config.onInputCallback - Callback to be triggered on the input event.
- * @param {Function} config.onEnterCallback - Callback to be triggered when the Enter key is pressed.
+ * @param {onchange} config.onChangeCallback - Callback to be triggered on the change event of the filter.
+ * @param {oninput} config.onInputCallback - Callback to be triggered on the input event.
+ * @param {onkeydown} config.onEnterCallback - Callback to be triggered when the Enter key is pressed.
  * @param {string} [config.filterType=FilterType.DROPDOWN] - The type of filter to be used.
  * @param {string} [config.width='.'] - The CSS class that defines the width of the filter.
  * @returns {vnode} - A virtual node element representing the filter element (input or dropdown).
@@ -144,8 +144,8 @@ export const groupedDropdownComponent = ({
  * @param {string} config.placeholder - The placeholder text to be displayed in the input field.
  * @param {string} config.id - The unique identifier for the input field.
  * @param {object} config.filterMap - Map of the current filter values.
- * @param {Function} config.onInputCallback - Callback to be triggered on the input event.
- * @param {Function} config.onEnterCallback - Callback to be triggered when the Enter key is pressed.
+ * @param {oninput} config.onInputCallback - Callback to be triggered on the input event.
+ * @param {onkeydown} config.onEnterCallback - Callback to be triggered when the Enter key is pressed.
  * @param {string} [config.type='text'] - The type of the filter element (e.g., 'text', 'number').
  * @param {string} [config.width='.w-20'] - The CSS class that defines the width of the filter.
  * @returns {vnode} - A virtual node element representing the filter input.
@@ -180,7 +180,7 @@ export const filterInput = (config) => {
  * @param {string} config.id - The unique identifier for the select field.
  * @param {object} config.filterMap - Map of the current filter values.
  * @param {Array<string>} config.options - List of available options to be shown in the dropdown.
- * @param {Function} config.onChangeCallback - Callback to be triggered on the change event of the selector.
+ * @param {onchange} config.onChangeCallback - Callback to be triggered on the change event of the selector.
  * @param {string} [config.width='.w-20'] - The CSS class that defines the width of the dropdown.
  * @returns {vnode} - A virtual node element representing the dropdown selector.
  */
@@ -214,9 +214,9 @@ const dropdownSelector = (config) => {
  * @param {object} config - Selector config ({ id, placeholder, width }).
  * @param {object} filterMap - Current filters (RunNumber or empty).
  * @param {RemoteData} options - Available ongoing runs.
- * @param {Function} onChangeCallback - To change the selection and update the filterMap
- * @param {Function} onEnterCallback - To trigger the filter
- * @param {Function} [onFocusCallback] - To retrieve ongoing runs
+ * @param {onchange} onChangeCallback - To change the selection and update the filterMap
+ * @param {onkeydown} onEnterCallback - To trigger the filter
+ * @param {onfocus} [onFocusCallback] - To retrieve ongoing runs
  * @returns {object} Virtual DOM node (hyperscript element).
  */
 export const ongoingRunsSelector = (config, filterMap, options, onChangeCallback, onEnterCallback, onFocusCallback) => {
