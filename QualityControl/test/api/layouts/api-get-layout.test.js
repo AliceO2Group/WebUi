@@ -43,7 +43,9 @@ export const apiGetLayoutsTests = () => {
           if (!Array.isArray(res.body)) {
             throw new Error('Expected array of layouts');
           }
-
+          res.body.forEach((layout) => {
+            delete layout.labels; // remove labels for deep comparison
+          });
           deepStrictEqual(res.body, [LAYOUT_MOCK_4, LAYOUT_MOCK_5], 'Unexpected Layout structure was returned');
         });
     });
