@@ -65,6 +65,7 @@ import { bookkeepingServiceTestSuite } from './lib/services/BookkeepingService.t
  */
 import { baseRepositoryTestSuite } from './lib/database/repositories/BaseRepository.test.js';
 import { layoutRepositoryTestSuite } from './lib/database/repositories/LayoutRepository.test.js';
+import { layoutRepositoryTest } from './lib/repositories/LayoutRepository.test.js';
 import { userRepositoryTestSuite } from './lib/database/repositories/UserRepository.test.js';
 import { chartRepositoryTestSuite } from './lib/database/repositories/ChartRepository.test.js';
 import { chartOptionsRepositoryTestSuite } from './lib/database/repositories/ChartOptionsRepository.test.js';
@@ -241,7 +242,8 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
 
     suite('Repositories - Test Suite', async () => {
       suite('Base Repository - Test Suite', async () => await baseRepositoryTestSuite());
-      suite('Layout Repository - Test Suite', async () => await layoutRepositoryTestSuite());
+      suite('Layout Repository - Database Test Suite', async () => await layoutRepositoryTestSuite());
+      suite('Layout Repository - Test Suite', async () => await layoutRepositoryTest());
       suite('User Repository - Test Suite', async () => await userRepositoryTestSuite());
       suite('Chart Repository - Test Suite', async () => await chartRepositoryTestSuite());
       suite('Chart Options Repository - Test Suite', async () => await chartOptionsRepositoryTestSuite());
