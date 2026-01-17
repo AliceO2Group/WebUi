@@ -186,7 +186,7 @@ export const inputWithDropdownComponent = ({
       style: 'max-height: 300px; overflow-y: auto;',
     }, Object.entries(options)
       .filter(([option]) => option.toLowerCase().includes(filterMap[queryLabel]?.toLowerCase() ?? ''))
-      .sort(([a], [b]) => a.localeCompare(b))
+      .sort(([a], [b]) => b.localeCompare(a))
       .map(([option, htmlOptions]) => h(
         'button.btn.d-block.w-100',
         {
