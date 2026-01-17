@@ -37,14 +37,14 @@ export const filtersControllerTestSuite = async () => {
     });
   });
 
-  suite('getFilterConfigurationHandler', async () => {
+  suite('getFilterConfigurationHandler', () => {
     test('should successfully retrieve run types and detectors from Bookkeeping service', async () => {
       const filterService = sinon.createStubInstance(FilterService);
       const mockedRunTypes = ['runType1', 'runType2'];
       const mockedDetectors = [
         {
-          name: 'Detector human-readable name',
-          type: 'Detector type identifier',
+          name: 'ITS',
+          type: 'PHYSICAL',
         },
       ];
       sinon.stub(filterService, 'runTypes').get(() => mockedRunTypes);
@@ -56,14 +56,14 @@ export const filtersControllerTestSuite = async () => {
       };
       const req = {};
       const filterController = new FilterController(filterService);
-      await filterController.getFilterConfigurationHandler(req, res);
+      filterController.getFilterConfigurationHandler(req, res);
       ok(res.status.calledWith(200), 'Response status was not 200');
       ok(
         res.json.calledWith({ runTypes: mockedRunTypes, detectors: mockedDetectors }),
         'Response should include runTypes and detectors',
       );
     });
-    test('should return an empty arrays if bookkeeping service is not defined', async () => {
+    test('should return an empty arrays if bookkeeping service is not defined', () => {
       const bkpService = null;
       const res = {
         status: sinon.stub().returnsThis(),
@@ -71,7 +71,7 @@ export const filtersControllerTestSuite = async () => {
       };
       const req = {};
       const filterController = new FilterController(bkpService);
-      await filterController.getFilterConfigurationHandler(req, res);
+      filterController.getFilterConfigurationHandler(req, res);
       ok(res.status.calledWith(200), 'Response status was not 200');
       ok(
         res.json.calledWith({ runTypes: [], detectors: [] }),
