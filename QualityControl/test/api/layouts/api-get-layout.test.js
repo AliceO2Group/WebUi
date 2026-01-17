@@ -17,6 +17,8 @@ import { OWNER_TEST_TOKEN, URL_ADDRESS } from '../config.js';
 import request from 'supertest';
 import { deepStrictEqual } from 'node:assert';
 import { LAYOUT_MOCK_4, LAYOUT_MOCK_5, LAYOUT_MOCK_6, LAYOUT_MOCK_7 } from '../../demoData/layout/layout.mock.js';
+import { LAYOUT_MOCK_4, LAYOUT_MOCK_5, LAYOUT_MOCK_6 } from '../../demoData/layout/layout.mock.js';
+import { addLabelsToLayout } from '../../../lib/utils/layout/addLabelsToLayout.js';
 
 export const apiGetLayoutsTests = () => {
   suite('GET /layouts', () => {
@@ -43,6 +45,10 @@ export const apiGetLayoutsTests = () => {
           if (!Array.isArray(res.body)) {
             throw new Error('Expected array of layouts');
           }
+        
+          res.body.forEach((layout) => {
+            delete layout.labels; // remove labels for deep comparison
+          });
 
           deepStrictEqual(
             res.body,
@@ -84,10 +90,11 @@ export const apiGetLayoutsTests = () => {
   suite('GET /layout/:id', () => {
     test('should return a single layout by id', async () => {
       const layoutId = '671b8c22402408122e2f20dd';
+      const expectedLayout = addLabelsToLayout(LAYOUT_MOCK_6);
       await request(`${URL_ADDRESS}/api/layout/${layoutId}`)
         .get(`?token=${OWNER_TEST_TOKEN}`)
         .expect(200)
-        .expect((res) => deepStrictEqual(res.body, LAYOUT_MOCK_6, 'Unexpected Layout structure was returned'));
+        .expect((res) => deepStrictEqual(res.body, expectedLayout, 'Unexpected Layout structure was returned'));
     });
 
     test('should return 400 when id parameter is an empty string', async () => {
@@ -107,19 +114,22 @@ export const apiGetLayoutsTests = () => {
   suite('GET /layout?name=', () => {
     test('should return layout by name', async () => {
       const layoutName = 'a-test';
+      const expectedLayout = addLabelsToLayout(LAYOUT_MOCK_5);
       await request(`${URL_ADDRESS}/api/layout`)
         .get(`?token=${OWNER_TEST_TOKEN}&name=${layoutName}`)
         .expect(200)
-        .expect((res) => deepStrictEqual(res.body, LAYOUT_MOCK_5, 'Unexpected Layout structure was returned'));
+        .expect((res) => deepStrictEqual(res.body, expectedLayout, 'Unexpected Layout structure was returned'));
     });
 
     test('should return layout by runDefinition', async () => {
       const runDefinition = 'a-test';
+      const expectedLayout = addLabelsToLayout(LAYOUT_MOCK_5);
       await request(`${URL_ADDRESS}/api/layout`)
         .get(`?token=${OWNER_TEST_TOKEN}&runDefinition=${runDefinition}`)
         .expect(200)
-        .expect((res) => deepStrictEqual(res.body, LAYOUT_MOCK_5, 'Unexpected Layout structure was returned'));
+        .expect((res) => deepStrictEqual(res.body, expectedLayout, 'Unexpected Layout structure was returned'));
     });
+
     test('should return layout by runDefinition and pdpBeamType combination', async () => {
       const runDefinition = 'rundefinition';
       const pdpBeamType = 'pdpBeamType';
