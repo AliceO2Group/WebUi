@@ -253,7 +253,7 @@ export const profileHeaderTests = async (url, page, timeout = 1000, testParent) 
       });
       await page.waitForFunction(() =>
         document.querySelector('#run-mode-switch .switch input[type="checkbox"]')?.checked === true);
-
+      await delay(500); // Wait a bit for the RunMode filter to update
       selectedRun = await page.evaluate(() => document.querySelector('select#ongoingRunsFilter')?.value);
       strictEqual(
         selectedRun,

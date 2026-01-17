@@ -96,7 +96,7 @@ export default class NotificationRunStartModel extends Observable {
 
         // We select the given `runNumber` in RunMode.
         // We do not have to set the parameter in the URL, as this is already achieved on navigation.
-        this.model.filterModel.setFilterValue('RunNumber', runNumber?.toString());
+        this.model.filterModel.setFilterValue('RunNumber', runNumber, true);
       },
     });
   }

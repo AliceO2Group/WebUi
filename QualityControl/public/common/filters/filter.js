@@ -362,7 +362,12 @@ export const combobox = (
   onEnterCallback,
   onInputCallback,
 ) => {
-  const ongoingRuns = options.isSuccess() ? options.payload : [];
+  const ongoingRuns = options.isSuccess() && options.payload.length > 0 ? options.payload : [];
+  if (!ongoingRuns.length) {
+    return filterInput({
+      queryLabel, placeholder, id, filterMap, onInputCallback, onEnterCallback, type: inputType, width,
+    });
+  }
   const filtered = filterMap[queryLabel]
     ? ongoingRuns?.filter((option) =>
       String(option).toLowerCase().includes(filterMap[queryLabel].toLowerCase()))
@@ -411,7 +416,7 @@ export const combobox = (
       autocomplete: 'off',
       min: 0,
       value: filterMap[queryLabel] || '',
-      oninput: (event) => onInputCallback(queryLabel, event.target.value),
+      oninput: (event) => onInputCallback(queryLabel, event.target.value, true),
       onkeydown: handleKeyNavigation,
       onblur: (e) => {
         const container = e.target.closest('.combobox-container');
