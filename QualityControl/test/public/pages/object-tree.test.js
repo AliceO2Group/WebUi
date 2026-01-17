@@ -17,7 +17,6 @@ import { getLocalStorage, getLocalStorageAsJson } from '../../testUtils/localSto
 import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
 
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
-const SORTING_BUTTON_PATH = 'header > div > div > div:nth-child(3) > div > button';
 
 /**
  * Initial page setup tests
@@ -198,7 +197,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
       strictEqual(clipboard, 'qc/test/object/1');
       context.clearPermissionOverrides();
-    }
+    },
   );
 
   await testParent.test(
@@ -218,7 +217,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
       strictEqual(clipboard, 'qc/test/object/1');
       context.clearPermissionOverrides();
-    }
+    },
   );
 
   await testParent.test(
@@ -230,15 +229,14 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       await page.waitForFunction(
         (selector) => document.querySelector(selector).children.length === 1,
         {},
-        'section > div > div'
+        'section > div > div',
       );
       const selectedObject = await page.evaluate(() => model.object.selected);
       const numberOfChildren = await page.evaluate(() =>
-        document.querySelector('section > div > div').children.length
-      );
+        document.querySelector('section > div > div').children.length);
       strictEqual(selectedObject, undefined);
       strictEqual(numberOfChildren, 1);
-    }
+    },
   );
 
   await testParent.test('should update local storage when tree node is clicked', { timeout }, async () => {

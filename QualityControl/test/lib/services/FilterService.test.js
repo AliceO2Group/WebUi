@@ -107,12 +107,20 @@ export const filterServiceTestSuite = async () => {
           name: 'Detector human-readable name',
           type: 'Detector type identifier',
         },
+        {
+          name: '',
+          type: 'OTHER',
+        },
+        {
+          name: 'Another Detector',
+          type: '',
+        },
       ];
 
       bookkeepingServiceMock.retrieveDetectorSummaries.resolves(DETECTOR_SUMMARIES);
       await filterService._initializeDetectors();
 
-      deepStrictEqual(filterService._detectors, DETECTOR_SUMMARIES);
+      deepStrictEqual(filterService._detectors, [DETECTOR_SUMMARIES[0]]);
       ok(Object.isFrozen(filterService._detectors));
     });
 

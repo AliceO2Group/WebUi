@@ -43,8 +43,8 @@ export const filtersControllerTestSuite = async () => {
       const mockedRunTypes = ['runType1', 'runType2'];
       const mockedDetectors = [
         {
-          name: 'Detector human-readable name',
-          type: 'Detector type identifier',
+          name: 'ITS',
+          type: 'PHYSICAL',
         },
       ];
       const mockedDataPasses = [
@@ -63,7 +63,7 @@ export const filtersControllerTestSuite = async () => {
       };
       const req = {};
       const filterController = new FilterController(filterService);
-      await filterController.getFilterConfigurationHandler(req, res);
+      filterController.getFilterConfigurationHandler(req, res);
       ok(res.status.calledWith(200), 'Response status was not 200');
       ok(
         res.json.calledWith({ runTypes: mockedRunTypes, detectors: mockedDetectors, dataPasses: mockedDataPasses }),
@@ -78,7 +78,7 @@ export const filtersControllerTestSuite = async () => {
       };
       const req = {};
       const filterController = new FilterController(bkpService);
-      await filterController.getFilterConfigurationHandler(req, res);
+      filterController.getFilterConfigurationHandler(req, res);
       ok(res.status.calledWith(200), 'Response status was not 200');
       ok(
         res.json.calledWith({ runTypes: [], detectors: [], dataPasses: [] }),

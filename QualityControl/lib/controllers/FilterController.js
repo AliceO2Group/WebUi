@@ -58,10 +58,10 @@ export class FilterController {
 
   /**
    * HTTP GET endpoint for retrieving a list of run types from Bookkeeping
-   * @param {Request} req - HTTP request
+   * @param {Request} _ - HTTP request
    * @param {Response} res - HTTP response to provide run types information
    */
-  async getFilterConfigurationHandler(req, res) {
+  getFilterConfigurationHandler(_, res) {
     try {
       const runTypes = this._filterService?.runTypes ?? [];
       const detectors = this._filterService?.detectors ?? [];
@@ -78,10 +78,10 @@ export class FilterController {
 
   /**
    * HTTP GET endpoint for retrieving a list of ongoing runs from Runs Mode Service
-   * @param {Request} req HTTP Request
+   * @param {Request} _ HTTP Request
    * @param {Response} res HTTP Response with the ongoing runs
    */
-  getOngoingRunsHandler(req, res) {
+  getOngoingRunsHandler(_, res) {
     const ongoingRuns = this._runsModeService?.ongoingRuns ?? [];
     res.status(200).json({ ongoingRuns });
   }

@@ -39,7 +39,7 @@ export const filtersConfig = ({ runTypes, detectors, dataPasses }) => [
   },
   {
     type: FilterType.GROUPED_DROPDOWN,
-    queryLabel: 'QcDetectorName',
+    queryLabel: 'DetectorName',
     placeholder: 'Detector (any)',
     id: 'detectorFilter',
     options: detectors.match({
@@ -71,6 +71,12 @@ export const filtersConfig = ({ runTypes, detectors, dataPasses }) => [
       }, {}),
       Other: () => {},
     }),
+  },
+  {
+    type: FilterType.INPUT,
+    queryLabel: 'QcVersion',
+    placeholder: 'QcVersion (e.g. 1.118.0)',
+    id: 'qcVersionFilter',
   },
 ];
 
