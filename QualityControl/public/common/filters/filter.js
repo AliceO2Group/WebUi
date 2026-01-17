@@ -152,7 +152,6 @@ export const groupedDropdownComponent = ({
  * @param {(filterId: string, value: string, setUrl: boolean) => void} config.onEnterCallback
  * - Callback to be triggered when the Enter key is pressed.
  * @param {string} [config.width='.w-20'] - The CSS class that defines the width of the filter.
- * @param {number} [config.maxDropdownOptions=20] - The maximum amount of dropdown options to display at once.
  * @returns {vnode} A virtual node element representing the filter element.
  */
 export const inputWithDropdownComponent = ({
@@ -166,13 +165,11 @@ export const inputWithDropdownComponent = ({
   onEnterCallback,
   type = 'text',
   width = '.w-20',
-  maxDropdownOptions = 10,
 }) => {
   const dropdownOptions = Object.keys(options);
   if (!dropdownOptions.length) {
     return filterInput({ queryLabel, placeholder, id, filterMap, onInputCallback, onEnterCallback, type, width });
   }
-
   const dropdownComponent = DropdownComponent(
     filterInput({
       queryLabel,
@@ -184,24 +181,26 @@ export const inputWithDropdownComponent = ({
       onEnterCallback,
       width: '.w-100',
     }),
-    h('', { id: `${queryLabel?.toLowerCase()}-dropdown` }, Object.entries(options)
+    h('', {
+      id: `${queryLabel?.toLowerCase()}-dropdown`,
+      style: 'max-height: 300px; overflow-y: auto;',
+    }, Object.entries(options)
       .filter(([option]) => option.toLowerCase().includes(filterMap[queryLabel]?.toLowerCase() ?? ''))
       .sort(([a], [b]) => a.localeCompare(b))
-      .slice(0, maxDropdownOptions)
       .map(([option, htmlOptions]) => h(
         'button.btn.d-block.w-100',
         {
           onclick: () => {
-            onChangeCallback(queryLabel, option);
+            onChangeCallback(queryLabel, option, true);
             dropdownComponent.state.hidePopover();
           },
           ...htmlOptions ?? {},
         },
-        option,
+        [option, Object.keys(htmlOptions).length > 0 ? ' (frozen)' : ''],
       ))),
   );
 
-  return h(width, dropdownComponent);
+  return h(`${width}`, dropdownComponent);
 };
 
 /**
