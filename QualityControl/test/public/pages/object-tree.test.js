@@ -334,7 +334,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   );
 
   await testParent.test(
-    'should have a selector with sorted options to filter by run type if there are run types loaded',
+    'should have a selector with sorted options to filter by data passes if there are data passes loaded',
     { timeout },
     async () => {
       await page.locator('#passNameFilter').click();
@@ -346,12 +346,12 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       });
 
       const expectedOptions = [
-        'LHC22a_apass1',
-        'LHC22a_apass2',
-        'LHC22b_apass1',
-        'LHC22b_apass2_skimmed',
-        'LHC22b_skimming',
         'LHC23f_cpass0',
+        'LHC22b_skimming',
+        'LHC22b_apass2_skimmed',
+        'LHC22b_apass1',
+        'LHC22a_apass2',
+        'LHC22a_apass1',
       ];
 
       strictEqual(
