@@ -14,7 +14,7 @@
 /**
  * Method to identify the unique prefix (encountering first '/') of objects and add it as a set of labels to layout
  * @param {LayoutDto} layout - layout object to which labels will be added
- * @returns {{...LayoutDto, labels: string[]}} - layout object with added labels
+ * @returns {{LayoutDto, labels: string[]}} - layout object with added labels
  */
 export const addLabelsToLayout = (layout) => {
   const labelsSet = new Set();
