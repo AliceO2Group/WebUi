@@ -77,11 +77,10 @@ export class FilterService {
    * @returns {Promise<undefined>} Resolves when the list of detectors is available
    */
   async _initializeDetectors() {
+    if (!this._bookkeepingService?.active) {
+      return;
+    }
     try {
-      if (!this._bookkeepingService.active) {
-        return;
-      }
-
       const detectorSummaries = await this._bookkeepingService.retrieveDetectorSummaries();
       this._detectors = Object.freeze(detectorSummaries.map(({ name, type }) => Object.freeze({ name, type })));
     } catch (error) {
