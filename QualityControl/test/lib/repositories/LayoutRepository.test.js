@@ -196,6 +196,12 @@ export const layoutRepositoryTest = async () => {
         const idOfLayoutUpdated = await layoutRepository.updateLayout(idOfLayoutToUpdate, newLayout);
         strictEqual(idOfLayoutUpdated, idOfLayoutToUpdate);
 
+        const updatedLayout = addLabelsToLayout(jsonFileServiceMock.data.layouts.find((l) => l.id === newLayout.id));
+        strictEqual(updatedLayout.id, newLayout.id);
+        strictEqual(updatedLayout.name, newLayout.name);
+        strictEqual(updatedLayout.owner_id, newLayout.owner_id);
+        deepStrictEqual(updatedLayout.tabs, newLayout.tabs);
+
         sinon.assert.calledOnce(jsonFileServiceMock.writeToFile);
       });
     });

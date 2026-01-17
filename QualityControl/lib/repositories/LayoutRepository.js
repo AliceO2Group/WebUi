@@ -129,9 +129,13 @@ export class LayoutRepository extends BaseRepository {
    * @param {string} layoutId - id of the layout to be updated
    * @param {LayoutDto} newData - layout new data
    * @returns {string} id of the layout updated
+   * @throws {NotFoundError} - if the layout is not found
    */
   async updateLayout(layoutId, newData) {
-    const layout = this.readLayoutById(layoutId);
+    const layout = this._jsonFileService.data.layouts.find((layout) => layout.id === layoutId);
+    if (!layout) {
+      throw new NotFoundError(`layout (${layoutId}) not found`);
+    }
     Object.assign(layout, newData);
     await this._jsonFileService.writeToFile();
     return layoutId;
@@ -141,10 +145,13 @@ export class LayoutRepository extends BaseRepository {
    * Delete a single layout by its id
    * @param {string} layoutId - id of the layout to be removed
    * @returns {string} id of the layout deleted
+   * @throws {NotFoundError} - if the layout is not found
    */
   async deleteLayout(layoutId) {
-    const layout = this.readLayoutById(layoutId);
-    const index = this._jsonFileService.data.layouts.indexOf(layout);
+    const index = this._jsonFileService.data.layouts.findIndex((layout) => layout.id === layoutId);
+    if (index === -1) {
+      throw new NotFoundError(`layout (${layoutId}) not found`);
+    }
     this._jsonFileService.data.layouts.splice(index, 1);
     await this._jsonFileService.writeToFile();
     return layoutId;
