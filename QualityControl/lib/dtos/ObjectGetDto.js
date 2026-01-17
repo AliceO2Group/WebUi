@@ -16,6 +16,7 @@ import Joi from 'joi';
 import { RunNumberDto } from './filters/RunNumberDto.js';
 
 const periodNamePattern = /^LHC\d{1,2}[a-z0-9]+$/i;
+const qcVersionPattern = /^\d+\.\d+(\.\d+)?$/;
 
 /**
  * Creates and returns a filters schema for object DTOs
@@ -30,7 +31,7 @@ function createFiltersSchema(runTypes) {
       : Joi.string().optional(),
     PeriodName: Joi.string().pattern(periodNamePattern).optional(),
     PassName: Joi.string().optional(),
-    QcVersion: Joi.string().optional(),
+    QcVersion: Joi.string().pattern(qcVersionPattern).optional(),
   }).optional();
 }
 
