@@ -133,6 +133,7 @@ export class LayoutRepository extends BaseRepository {
    */
   async updateLayout(layoutId, newData) {
     if (newData.labels) {
+      // labels are retrieved on front-end and might be send as PATCH/PUT if forgotten by developer
       delete newData.labels;
     }
     const layout = this._jsonFileService.data.layouts.find((layout) => layout.id === layoutId);
