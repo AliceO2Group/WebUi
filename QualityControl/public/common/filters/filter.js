@@ -340,7 +340,7 @@ export const ongoingRunsSelector = (config, filterMap, options, onChangeCallback
 };
 
 /**
- * Renders a searchable Combobox with keyboard navigation using ALICE O2 design tokens.
+ * Renders a searchable Combobox with keyboard navigation using ALICE O2 design.
  * This component is a stateless function that leverages CSS `:focus-within` for visibility
  * and direct DOM manipulation for arrow-key highlighting to avoid FilterModel pollution.
  * @param {object} config - The configuration for the combobox field.
@@ -351,8 +351,8 @@ export const ongoingRunsSelector = (config, filterMap, options, onChangeCallback
  * @param {string} config.width - Width of the input container.
  * @param {object} filterMap - Object containing current filter keys and values.
  * @param {RemoteData} options - RemoteData object containing the list of available options.
- * @param {Function} onEnterCallback - Callback to trigger filtering.
- * @param {Function} onInputCallback - Callback to update the filter value.
+ * @param {onenter} onEnterCallback - Callback to trigger filtering.
+ * @param {oninput} onInputCallback - Callback to update the filter value.
  * @returns {vnode} - A virtual node representing the combobox.
  */
 export const combobox = (
@@ -362,7 +362,7 @@ export const combobox = (
   onEnterCallback,
   onInputCallback,
 ) => {
-  const ongoingRuns = options.payload ?? [];
+  const ongoingRuns = options.isSuccess() ? options.payload : [];
   const filtered = filterMap[queryLabel]
     ? ongoingRuns?.filter((option) =>
       String(option).toLowerCase().includes(filterMap[queryLabel].toLowerCase()))
@@ -389,10 +389,9 @@ export const combobox = (
       ArrowUp: () => move(Math.max(index - 1, 0)),
       Enter: () => {
         if (current) {
-          onInputCallback(queryLabel, current.innerText);
+          onInputCallback(queryLabel, current.innerText, true);
         }
         e.target.blur();
-        onEnterCallback();
       },
     };
 
@@ -430,12 +429,10 @@ export const combobox = (
         ...filtered.map((option) =>
           h('li.combobox-item.menu-item', {
             onmousedown: (e) => {
+              // onmousedown to capture before blur event
               e.preventDefault();
-              onInputCallback(queryLabel, option);
-              e.target.closest('.combobox-container')
-                .querySelector('input')
-                ?.blur();
-              onEnterCallback();
+              onInputCallback(queryLabel, option, true);
+              e.target.closest('.combobox-container').querySelector('input')?.blur();
             },
           }, option)),
       ],
