@@ -44,6 +44,48 @@ export const initializeNockForBkp = () => {
     });
   nock(BKP_URL)
     .persist()
+    .get(`/api/detectors${TOKEN_PATH}`)
+    .reply(200, {
+      data: [
+        {
+          id: 17,
+          name: 'ACO',
+          type: 'PHYSICAL',
+          createdAt: 1765468282000,
+          updatedAt: 1765468282000,
+        },
+        {
+          id: 1,
+          name: 'CPV',
+          type: 'PHYSICAL',
+          createdAt: 1765468282000,
+          updatedAt: 1765468282000,
+        },
+        {
+          id: 23,
+          name: 'EVS',
+          type: 'AOT-EVENT',
+          createdAt: 1765468282000,
+          updatedAt: 1765468282000,
+        },
+        {
+          id: 21,
+          name: 'GLO',
+          type: 'QC',
+          createdAt: 1765468282000,
+          updatedAt: 1765468282000,
+        },
+        {
+          id: 15,
+          name: 'TST',
+          type: 'VIRTUAL',
+          createdAt: 1765468282000,
+          updatedAt: 1765468282000,
+        },
+      ],
+    });
+  nock(BKP_URL)
+    .persist()
     .get(`/api/runs/0${TOKEN_PATH}`)
     .reply(200, {
       data: {

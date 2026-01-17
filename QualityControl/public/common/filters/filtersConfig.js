@@ -64,6 +64,12 @@ export const filtersConfig = ({ runTypes, detectors }) => [
     placeholder: 'PassName (e.g. apass2)',
     id: 'passNameFilter',
   },
+  {
+    type: FilterType.INPUT,
+    queryLabel: 'QcVersion',
+    placeholder: 'QcVersion (e.g. 1.118.0)',
+    id: 'qcVersionFilter',
+  },
 ];
 
 /**
