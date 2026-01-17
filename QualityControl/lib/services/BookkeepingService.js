@@ -20,10 +20,12 @@ import { wrapRunStatus } from '../dtos/BookkeepingDto.js';
 const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
 const GET_RUN_PATH = '/api/runs';
+export const GET_DETECTORS_PATH = '/api/detectors';
+const GET_DATA_PASSES_PATH = '/api/dataPasses';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/bkp-service`;
 
-const RECENT_RUN_THRESHOLD_MS = 2 * 24 * 60 * 60 * 1000; // -2 days in milliseconds
+const RECENT_RUN_THRESHOLD_MS = 1 * 24 * 60 * 60 * 1000; // -1 day in milliseconds
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
@@ -75,12 +77,12 @@ export class BookkeepingService {
    */
   async connect() {
     if (!this.validateConfig()) {
-      this._logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
+      this._logger.warnMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
       return;
     }
     this.active = await this.simulateConnection();
     if (!this.active) {
-      this._logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
+      this._logger.warnMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
     }
   }
 
@@ -127,6 +129,23 @@ export class BookkeepingService {
       },
     );
     return data;
+  }
+
+  /**
+   * Retrieve the list of data passes from the bookkeeping service.
+   * @returns {Promise<object[]>} Resolves with an array of data passes.
+   */
+  async retrieveDataPasses() {
+    const { data } = await httpGetJson(
+      this._hostname,
+      this._port,
+      this._createPath(GET_DATA_PASSES_PATH),
+      {
+        protocol: this._protocol,
+        rejectUnauthorized: false,
+      },
+    );
+    return Array.isArray(data) ? data : [];
   }
 
   /**
@@ -184,7 +203,8 @@ export class BookkeepingService {
   }
 
   /**
-   * Retrieves runs that are currently ongoing (started within the last 48 hours but have not yet ended).
+   * Retrieves runs that are currently ongoing (started within the last \@see {RECENT_RUN_THRESHOLD_MS}
+   * but have not yet ended).
    * @returns {Promise<Array<object>|undefined>} A promise that resolves to an array of run objects,
    *  or undefined if the service is inactive, no data is found, or an error occurs
    */
@@ -195,7 +215,7 @@ export class BookkeepingService {
 
     const timestamp = Date.now() - RECENT_RUN_THRESHOLD_MS;
 
-    const queryParams = `page[offset]=0&page[limit]=100&filter[o2start][from]=${timestamp}&token=${this._token}`;
+    const queryParams = `page[offset]=0&page[limit]=20&filter[o2start][from]=${timestamp}&token=${this._token}`;
 
     try {
       const { data } = await httpGetJson(
@@ -218,6 +238,23 @@ export class BookkeepingService {
       this._logger.errorMessage(msg);
       return;
     }
+  }
+
+  /**
+   * Retrieves the information about the detectors from the Bookkeeping service.
+   * @returns {Promise<object[]>} Array of detector summaries.
+   */
+  async retrieveDetectorSummaries() {
+    const { data } = await httpGetJson(
+      this._hostname,
+      this._port,
+      this._createPath(GET_DETECTORS_PATH),
+      {
+        protocol: this._protocol,
+        rejectUnauthorized: false,
+      },
+    );
+    return Array.isArray(data) ? data : [];
   }
 
   /**

@@ -17,7 +17,6 @@ import { getLocalStorage, getLocalStorageAsJson } from '../../testUtils/localSto
 import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
 
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
-const SORTING_BUTTON_PATH = 'header > div > div > div:nth-child(3) > div > button';
 
 /**
  * Initial page setup tests
@@ -34,7 +33,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should have a tree as a table', { timeout }, async () => {
-    const tableRowPath = 'section > div > div > div > table > tbody > tr';
+    const tableRowPath = 'section > div > div > div > div > table > tbody > tr';
     await page.waitForSelector(tableRowPath, { timeout: 1000 });
     const rowsCount = await page.evaluate(
       (tableRowPath) => document.querySelectorAll(tableRowPath).length,
@@ -44,26 +43,26 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should preserve state if refreshed', { timeout }, async () => {
-    const selector = 'section > div > div > div > table > tbody > tr:nth-child(2)';
+    const selector = 'section > div > div > div > div > table > tbody > tr:nth-child(2)';
     await page.locator(selector).click();
     await page.reload({ waitUntil: 'networkidle0' });
 
     const rowCountExpanded = await page.evaluate(() =>
-      document.querySelectorAll('section > div > div > div > table > tbody > tr').length);
+      document.querySelectorAll('section > div > div > div > div > table > tbody > tr').length);
 
     await page.locator(selector).click();
     await page.reload({ waitUntil: 'networkidle0' });
 
     const rowCountCollapsed = await page.evaluate(() =>
-      document.querySelectorAll('section > div > div > div > table > tbody > tr').length);
+      document.querySelectorAll('section > div > div > div > div > table > tbody > tr').length);
 
     strictEqual(rowCountExpanded, 3);
     strictEqual(rowCountCollapsed, 2);
   });
 
   await testParent.test('should have a button to sort by (default "Name" ASC)', async () => {
-    const sortByButtonTitle = await page.evaluate((path) => document.querySelector(path).title, '#sortTreeButton');
-    strictEqual(sortByButtonTitle, 'Sort by');
+    const sortByButtonTitle = await page.evaluate((path) => document.querySelector(path).title, '.sort-button');
+    strictEqual(sortByButtonTitle, 'Sort DESC by Name');
   });
 
   await testParent.test('should have first element in tree as "qc/test/object/1"', async () => {
@@ -198,7 +197,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
       strictEqual(clipboard, 'qc/test/object/1');
       context.clearPermissionOverrides();
-    }
+    },
   );
 
   await testParent.test(
@@ -218,7 +217,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
       strictEqual(clipboard, 'qc/test/object/1');
       context.clearPermissionOverrides();
-    }
+    },
   );
 
   await testParent.test(
@@ -230,19 +229,18 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       await page.waitForFunction(
         (selector) => document.querySelector(selector).children.length === 1,
         {},
-        'section > div > div'
+        'section > div > div',
       );
       const selectedObject = await page.evaluate(() => model.object.selected);
       const numberOfChildren = await page.evaluate(() =>
-        document.querySelector('section > div > div').children.length
-      );
+        document.querySelector('section > div > div').children.length);
       strictEqual(selectedObject, undefined);
       strictEqual(numberOfChildren, 1);
-    }
+    },
   );
 
   await testParent.test('should update local storage when tree node is clicked', { timeout }, async () => {
-    const selector = 'section > div > div > div > table > tbody > tr:nth-child(2)';
+    const selector = 'section > div > div > div > div > table > tbody > tr:nth-child(2)';
     const personid = await page.evaluate(() => window.model.session.personid);
     const storageKey = `${StorageKeysEnum.OBJECT_TREE_OPEN_NODES}-${personid}`;
 
@@ -260,9 +258,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should sort list of histograms by name in descending order', async () => {
-    await page.locator('#sortTreeButton').click();
-    const sortingByNameOptionPath = '#sortTreeButton > div > a:nth-child(2)';
-    await page.locator(sortingByNameOptionPath).click();
+    await page.locator('.sort-button').click();
 
     const sorted = await page.evaluate(() => ({
       list: window.model.object.currentList,
@@ -275,9 +271,8 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should sort list of histograms by name in ascending order', async () => {
-    await page.locator('#sortTreeButton').click();
-    const sortingByNameOptionPath = '#sortTreeButton > div > a:nth-child(1)';
-    await page.locator(sortingByNameOptionPath).click();
+    await page.locator('.sort-button').click();
+
     const sorted = await page.evaluate(() => ({
       list: window.model.object.currentList,
       sort: window.model.object.sortBy,
@@ -300,7 +295,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       await delay(100);
       const storedNodes = await getLocalStorageAsJson(page, storageKey);
       const tableRowCount = await page.evaluate(() =>
-        document.querySelectorAll('section > div > div > div > table > tbody > tr').length);
+        document.querySelectorAll('section > div > div > div > div > table > tbody > tr').length);
 
       deepStrictEqual(storedNodes, {}, 'Stores nodes should be empty');
       strictEqual(tableRowCount, 1, 'Tree should be fully collapsed');
@@ -311,7 +306,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     await page.type('#searchObjectTree', 'qc/test/object/1');
     const rowsDisplayed = await page.evaluate(() => {
       const rows = [];
-      document.querySelectorAll('section > div > div > div > table > tbody > tr')
+      document.querySelectorAll('section > div > div > div > div > table > tbody > tr')
         .forEach((item) => rows.push(item.innerText));
       return rows;
     }, { timeout: 5000 });
@@ -335,6 +330,88 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       }, selectorId);
 
       deepStrictEqual(options, ['', 'runType1', 'runType2']);
+    },
+  );
+
+  await testParent.test(
+    'should have a selector with sorted options to filter by data passes if there are data passes loaded',
+    { timeout },
+    async () => {
+      await page.locator('#passNameFilter').click();
+      await page.waitForSelector('#passname-dropdown', { visible: true, timeout: 1000 });
+
+      const options = await page.evaluate(() => {
+        const optionElements = document.querySelectorAll('#passname-dropdown > button');
+        return Array.from(optionElements).map((option) => option.textContent);
+      });
+
+      const expectedOptions = [
+        'LHC23f_cpass0',
+        'LHC22b_skimming',
+        'LHC22b_apass2_skimmed',
+        'LHC22b_apass1',
+        'LHC22a_apass2',
+        'LHC22a_apass1',
+      ];
+
+      strictEqual(
+        options.length,
+        expectedOptions.length,
+        `PassName dropdown should have ${expectedOptions.length} options, found ${expectedOptions}`,
+      );
+      deepStrictEqual(options, expectedOptions, 'PassName dropdown options are incorrect');
+    },
+  );
+
+  await testParent.test(
+    'should update the passNameFilter input when a dropdown option is selected',
+    { timeout },
+    async () => {
+      const expectedOptionValue
+        = await page.evaluate(() => document.querySelector('#passname-dropdown > button')?.textContent);
+
+      await page.locator('#passname-dropdown > button').click();
+      await page.waitForSelector('#passname-dropdown', { hidden: true, timeout: 1000 });
+      await delay(50);
+
+      const inputValue = await page.evaluate(() => document.querySelector('input#passNameFilter')?.value);
+
+      strictEqual(
+        inputValue,
+        expectedOptionValue,
+        'should set the input value to the clicked passName dropdown option',
+      );
+    },
+  );
+
+  await testParent.test(
+    'should have a grouped selector with sorted options to filter by detector if there are detectors loaded',
+    { timeout },
+    async () => {
+      const optionsObject = await page.evaluate(() => {
+        const optionElements = document.querySelectorAll('#detectorFilter > optgroup > option');
+
+        return Array.from(optionElements).reduce((acc, option) => {
+          const optgroup = option.parentElement.label;
+          if (!optgroup) {
+            return acc;
+          }
+
+          if (!acc[optgroup]) {
+            acc[optgroup] = [];
+          }
+          acc[optgroup].push(option.value);
+
+          return acc;
+        }, {});
+      });
+
+      deepStrictEqual(optionsObject, {
+        'AOT-EVENT': ['EVS'],
+        PHYSICAL: ['ACO', 'CPV'],
+        QC: ['GLO'],
+        VIRTUAL: ['TST'],
+      });
     },
   );
 };

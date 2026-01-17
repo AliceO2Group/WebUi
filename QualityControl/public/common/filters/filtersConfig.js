@@ -17,9 +17,12 @@ import { FilterType } from './filterTypes.js';
 /**
  * Returns an array of filter configuration objects used to render dynamic filter inputs.
  * @param {FilterService} filterService - service to get the data to populate the filters
- * @returns {Array<object>} Filter configuration array
+ * @param {RemoteData<string[]>} filterService.runTypes - run types to show in the filter
+ * @param {RemoteData<DetectorSummary[]>} filterService.detectors - detectors to show in the filter
+ * @param {RemoteData<DataPass[]>} filterService.dataPasses - data passes to show in the filter
+ * @returns {object[]} Filter configuration array
  */
-export const filtersConfig = ({ runTypes, ongoingRuns }) => [
+export const filtersConfig = ({ runTypes, detectors, dataPasses, ongoingRuns }) => [
   {
     type: FilterType.COMBOBOX,
     queryLabel: 'RunNumber',
@@ -36,16 +39,45 @@ export const filtersConfig = ({ runTypes, ongoingRuns }) => [
     options: runTypes,
   },
   {
+    type: FilterType.GROUPED_DROPDOWN,
+    queryLabel: 'DetectorName',
+    placeholder: 'Detector (any)',
+    id: 'detectorFilter',
+    options: detectors.match({
+      Success: (detectors) => detectors.reduce((acc, detector) => {
+        if (!acc[detector.type]) {
+          acc[detector.type] = [];
+        }
+        acc[detector.type].push(detector.name);
+        return acc;
+      }, {}),
+      Other: () => {},
+    }),
+  },
+  {
     type: FilterType.INPUT,
     queryLabel: 'PeriodName',
     placeholder: 'PeriodName (e.g. LHC23c)',
     id: 'periodNameFilter',
   },
   {
-    type: FilterType.INPUT,
+    type: FilterType.INPUT_WITH_DROPDOWN,
     queryLabel: 'PassName',
     placeholder: 'PassName (e.g. apass2)',
     id: 'passNameFilter',
+    options: dataPasses.match({
+      Success: (payload) => payload.reduce((acc, dataPass) => {
+        acc[dataPass.name] = dataPass.isFrozen ? { style: 'color: var(--color-gray-dark);' } : {};
+        return acc;
+      }, {}),
+      Other: () => {},
+    }),
+  },
+  {
+    type: FilterType.INPUT,
+    queryLabel: 'QcVersion',
+    placeholder: 'QcVersion (e.g. 1.118.0)',
+    id: 'qcVersionFilter',
   },
 ];
 

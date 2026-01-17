@@ -12,13 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
-const FilterType = {
-  INPUT: 'input',
-  INPUT_WITH_DROPDOWN: 'inputWithDropdown',
-  DROPDOWN: 'dropdownSelector',
-  GROUPED_DROPDOWN: 'groupedDropdownSelector',
-  RUN_MODE: 'runModeSelector',
-  COMBOBOX: 'combobox',
-};
-
-export { FilterType };
+/**
+ * Enumeration for sort directions
+ * @enum {number}
+ * @readonly
+ */
+export const SortDirectionsEnum = Object.freeze({
+  ASC: 1,
+  DESC: -1,
+});

@@ -53,10 +53,11 @@ const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/model-setup`;
 
 /**
  * Model initialization for the QCG application
+ * @param {WebSocket} ws - web-ui websocket server implementation
  * @param {EventEmitter} eventEmitter - Event emitter instance for inter-service communication
  * @returns {Promise<object>} Multiple services and controllers that are to be used by the QCG application
  */
-export const setupQcModel = async (eventEmitter) => {
+export const setupQcModel = async (ws, eventEmitter) => {
   const logger = LogManager.getLogger(LOG_FACILITY);
 
   const __filename = fileURLToPath(import.meta.url);
@@ -116,9 +117,14 @@ export const setupQcModel = async (eventEmitter) => {
   const intervalsService = new IntervalsService();
 
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
-  await bookkeepingService.connect();
+  try {
+    await bookkeepingService.connect();
+  } catch (error) {
+    logger.errorMessage(`Failed connecting to Bookkeeping: ${error.message || error}`);
+  }
+
   const filterService = new FilterService(bookkeepingService, config);
-  const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService, eventEmitter);
+  const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService, eventEmitter, ws);
   const objectController = new ObjectController(qcObjectService, runModeService, qcdbDownloadService);
 
   const filterController = new FilterController(filterService, runModeService);
@@ -170,6 +176,13 @@ function initializeIntervals(intervalsService, qcObjectService, filterService, r
     intervalsService.register(
       runModeService.refreshRunsCache.bind(runModeService),
       runModeService.refreshInterval,
+    );
+  }
+
+  if (filterService.dataPassesRefreshInterval > 0) {
+    intervalsService.register(
+      filterService.getDataPasses.bind(runModeService),
+      filterService.dataPassesRefreshInterval,
     );
   }
 }
