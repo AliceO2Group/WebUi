@@ -102,10 +102,20 @@ function cardBody(owner_name, description, labels = [], { textColor, bgColor }) 
         description || '-',
       ]),
     ]),
-    h('.flex-row.g2', [
-      labels?.length > 0
-        ? labels.map((label) => h('', h(`span.badge.${bgColor}.${textColor}.mr1`, label)))
-        : h('', h('span', 'Contains no objects')),
-    ]),
+    layoutListBadge(labels, { textColor, bgColor }),
   ]);
 }
+
+/**
+ * Generate a list of badges for layout labels.
+ * @param {string[]} labels - Array of label strings.
+ * @param {object} colors - Object containing text and background colors.
+ * @param {string} colors.textColor - The text color based on official status.
+ * @param {string} colors.bgColor - The background color based on official status.
+ * @returns {vnode} - A virtual DOM node containing the badges.
+ */
+export const layoutListBadge = (labels, { textColor = 'black', bgColor = 'bg-gray' } = {}) => h('.flex-row.g2', [
+  labels?.length > 0
+    ? labels.map((label) => h('', h(`span.badge.${bgColor}.${textColor}`, label)))
+    : h('', h('span', 'Contains no objects')),
+]);
