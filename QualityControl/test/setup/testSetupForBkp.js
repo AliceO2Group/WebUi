@@ -163,12 +163,6 @@ export const initializeNockForBkp = () => {
     .get(`/api/runs/500001${TOKEN_PATH}`)
     .reply(200, {
       data: {
-        timeO2End: null,
-      },
-    })
-    .get(`/api/runs/500001${TOKEN_PATH}`)
-    .reply(200, {
-      data: {
         timeO2End: '2023-12-01T10:30:00Z',
       },
     })
