@@ -132,6 +132,9 @@ export class LayoutRepository extends BaseRepository {
    * @throws {NotFoundError} - if the layout is not found
    */
   async updateLayout(layoutId, newData) {
+    if (newData.labels) {
+      delete newData.labels;
+    }
     const layout = this._jsonFileService.data.layouts.find((layout) => layout.id === layoutId);
     if (!layout) {
       throw new NotFoundError(`layout (${layoutId}) not found`);
