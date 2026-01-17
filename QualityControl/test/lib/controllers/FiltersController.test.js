@@ -37,11 +37,18 @@ export const filtersControllerTestSuite = async () => {
     });
   });
 
-  suite('getFilterConfigurationHandler', async () => {
-    test('should successfully retrieve run types from Bookkeeping service', async () => {
+  suite('getFilterConfigurationHandler', () => {
+    test('should successfully retrieve run types and detectors from Bookkeeping service', async () => {
       const filterService = sinon.createStubInstance(FilterService);
       const mockedRunTypes = ['runType1', 'runType2'];
+      const mockedDetectors = [
+        {
+          name: 'ITS',
+          type: 'PHYSICAL',
+        },
+      ];
       sinon.stub(filterService, 'runTypes').get(() => mockedRunTypes);
+      sinon.stub(filterService, 'detectors').get(() => mockedDetectors);
 
       const res = {
         status: sinon.stub().returnsThis(),
@@ -49,11 +56,14 @@ export const filtersControllerTestSuite = async () => {
       };
       const req = {};
       const filterController = new FilterController(filterService);
-      await filterController.getFilterConfigurationHandler(req, res);
+      filterController.getFilterConfigurationHandler(req, res);
       ok(res.status.calledWith(200), 'Response status was not 200');
-      ok(res.json.calledWith({ runTypes: mockedRunTypes }), 'Run types were not sent back');
+      ok(
+        res.json.calledWith({ runTypes: mockedRunTypes, detectors: mockedDetectors }),
+        'Response should include runTypes and detectors',
+      );
     });
-    test('should return an empty array if bookkeeping service is not defined', async () => {
+    test('should return an empty arrays if bookkeeping service is not defined', () => {
       const bkpService = null;
       const res = {
         status: sinon.stub().returnsThis(),
@@ -61,11 +71,11 @@ export const filtersControllerTestSuite = async () => {
       };
       const req = {};
       const filterController = new FilterController(bkpService);
-      await filterController.getFilterConfigurationHandler(req, res);
+      filterController.getFilterConfigurationHandler(req, res);
       ok(res.status.calledWith(200), 'Response status was not 200');
       ok(
-        res.json.calledWith({ runTypes: [] }),
-        'Run types were not sent as an empty array',
+        res.json.calledWith({ runTypes: [], detectors: [] }),
+        'runTypes and detectors were not sent as an empty array',
       );
     });
   });

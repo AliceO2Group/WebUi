@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { deepStrictEqual } from 'node:assert';
+import { deepStrictEqual, ok } from 'node:assert';
 import { suite, test, beforeEach, afterEach } from 'node:test';
 import { FilterService } from '../../../lib/services/FilterService.js';
 import { RunStatus } from '../../../common/library/runStatus.enum.js';
@@ -32,6 +32,7 @@ export const filterServiceTestSuite = async () => {
       connect: stub(),
       retrieveRunTypes: stub(),
       retrieveRunInformation: stub(),
+      retrieveDetectorSummaries: stub(),
       active: true, // assume the bookkeeping service is active by default
     };
     filterService = new FilterService(bookkeepingServiceMock, configMock);
@@ -63,6 +64,11 @@ export const filterServiceTestSuite = async () => {
       deepStrictEqual(filterServiceWithCustomConfig._runTypesRefreshInterval, 5000);
     });
 
+    test('should init _detectors on instantiation', async () => {
+      deepStrictEqual(filterService._detectors, []);
+      ok(Object.isFrozen(filterService._detectors));
+    });
+
     test('should init filters on instantiation', async () => {
       const initFiltersStub = stub(filterService, 'initFilters');
       await filterService.initFilters();
@@ -71,7 +77,26 @@ export const filterServiceTestSuite = async () => {
   });
 
   suite('initFilters', async () => {
+    test('should call _initializeDetectors', async () => {
+      const initializeDetectorsStub = stub(filterService, '_initializeDetectors');
+      await filterService.initFilters();
+      ok(initializeDetectorsStub.calledOnce);
+    });
 
+    test('should set _detectors on _initializeDetectors call', async () => {
+      const DETECTOR_SUMMARIES = [
+        {
+          name: 'Detector human-readable name',
+          type: 'Detector type identifier',
+        },
+      ];
+
+      bookkeepingServiceMock.retrieveDetectorSummaries.resolves(DETECTOR_SUMMARIES);
+      await filterService._initializeDetectors();
+
+      deepStrictEqual(filterService._detectors, DETECTOR_SUMMARIES);
+      ok(Object.isFrozen(filterService._detectors));
+    });
   });
 
   suite('getRunTypes', async () => {

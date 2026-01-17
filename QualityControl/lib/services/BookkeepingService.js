@@ -20,6 +20,7 @@ import { wrapRunStatus } from '../dtos/BookkeepingDto.js';
 const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
 const GET_RUN_PATH = '/api/runs';
+export const GET_DETECTORS_PATH = '/api/detectors';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/bkp-service`;
 
@@ -179,6 +180,23 @@ export class BookkeepingService {
       this._logger.errorMessage(`Error fetching run status: ${error.message || error}`);
       return wrapRunStatus(RunStatus.UNKNOWN);
     }
+  }
+
+  /**
+   * Retrieves the information about the detectors from the Bookkeeping service.
+   * @returns {Promise<object[]>} Array of detector summaries.
+   */
+  async retrieveDetectorSummaries() {
+    const { data } = await httpGetJson(
+      this._hostname,
+      this._port,
+      this._createPath(GET_DETECTORS_PATH),
+      {
+        protocol: this._protocol,
+        rejectUnauthorized: false,
+      },
+    );
+    return Array.isArray(data) ? data : [];
   }
 
   /**
