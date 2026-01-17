@@ -12,7 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-import { filterInput, dynamicSelector, ongoingRunsSelector } from './filter.js';
+import {
+  filterInput,
+  dynamicSelector,
+  ongoingRunsSelector,
+  groupedDropdownComponent,
+  inputWithDropdownComponent,
+} from './filter.js';
 import { FilterType } from './filterTypes.js';
 import { filtersConfig, runModeFilterConfig } from './filtersConfig.js';
 import { runModeComponent } from './runMode/runModeCheckbox.js';
@@ -50,6 +56,10 @@ const createFilterElement =
       case FilterType.INPUT: return filterInput({ ...commonConfig, type: inputType });
       case FilterType.DROPDOWN:
         return dynamicSelector({ ...commonConfig, options, onChangeCallback, inputType });
+      case FilterType.GROUPED_DROPDOWN:
+        return groupedDropdownComponent({ ...commonConfig, options, onChangeCallback, inputType });
+      case FilterType.INPUT_WITH_DROPDOWN:
+        return inputWithDropdownComponent({ ...commonConfig, options, onChangeCallback, inputType });
       case FilterType.RUN_MODE:
         return ongoingRunsSelector(
           { ...commonConfig },

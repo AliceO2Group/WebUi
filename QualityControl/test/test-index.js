@@ -43,6 +43,8 @@ import { aboutPageTests } from './public/pages/about-page.test.js';
  */
 import { errorHandlerTestSuite } from './lib/utils/errorHandler.test.js';
 import { httpRequestsTestSuite } from './lib/utils/httpRequests.test.js';
+import { addLabelsToLayoutTestSuite } from './lib/utils/layout/addLabelsToLayout.test.js';
+import { trimLayoutPerRequiredFieldsTestSuite } from './lib/utils/layout/trimLayoutPerRequiredFields.test.js';
 
 /**
  * Controllers
@@ -65,6 +67,7 @@ import { bookkeepingServiceTestSuite } from './lib/services/BookkeepingService.t
  */
 import { baseRepositoryTestSuite } from './lib/database/repositories/BaseRepository.test.js';
 import { layoutRepositoryTestSuite } from './lib/database/repositories/LayoutRepository.test.js';
+import { layoutRepositoryTest } from './lib/repositories/LayoutRepository.test.js';
 import { userRepositoryTestSuite } from './lib/database/repositories/UserRepository.test.js';
 import { chartRepositoryTestSuite } from './lib/database/repositories/ChartRepository.test.js';
 import { chartOptionsRepositoryTestSuite } from './lib/database/repositories/ChartOptionsRepository.test.js';
@@ -232,6 +235,8 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     suite('Lib - Test Suite', async () => {
       suite('Utility "errorHandler" methods test suite', async () => await errorHandlerTestSuite());
       suite('Utility "httpRequests" methods test suite', async () => await httpRequestsTestSuite());
+      suite('Layout Utils - calculateLabelsForLayout test suite', () => addLabelsToLayoutTestSuite());
+      suite('Layout Utils - trimLayoutPerRequiredFields test suite', () => trimLayoutPerRequiredFieldsTestSuite());
     });
 
     suite('Common Library - Test Suite', () => {
@@ -241,7 +246,8 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
 
     suite('Repositories - Test Suite', async () => {
       suite('Base Repository - Test Suite', async () => await baseRepositoryTestSuite());
-      suite('Layout Repository - Test Suite', async () => await layoutRepositoryTestSuite());
+      suite('Layout Repository - Database Test Suite', async () => await layoutRepositoryTestSuite());
+      suite('Layout Repository - Test Suite', async () => await layoutRepositoryTest());
       suite('User Repository - Test Suite', async () => await userRepositoryTestSuite());
       suite('Chart Repository - Test Suite', async () => await chartRepositoryTestSuite());
       suite('Chart Options Repository - Test Suite', async () => await chartOptionsRepositoryTestSuite());
