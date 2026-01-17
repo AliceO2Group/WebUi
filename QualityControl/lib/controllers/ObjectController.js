@@ -120,12 +120,7 @@ export class ObjectController {
     try {
       const { path, validFrom, filters, id } = req.query;
 
-      const object = await this._objService.retrieveQcObject({
-        path,
-        validFrom,
-        id,
-        filters,
-      });
+      const object = await this._objService.retrieveQcObject({ path, validFrom, id, filters });
 
       res.status(200).json(object);
     } catch (error) {
