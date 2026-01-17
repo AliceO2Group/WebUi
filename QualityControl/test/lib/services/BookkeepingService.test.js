@@ -335,6 +335,7 @@ export const bookkeepingServiceTestSuite = async () => {
         strictEqual(runStatus, RunStatus.BOOKKEEPING_UNAVAILABLE);
       });
     });
+
     suite('Retrieve detector summaries', () => {
       let bkpService = null;
 
@@ -401,6 +402,128 @@ export const bookkeepingServiceTestSuite = async () => {
           .reply(200, mockResponse);
 
         const result = await bkpService.retrieveDetectorSummaries();
+
+        ok(Array.isArray(result));
+        strictEqual(result.length, 0);
+      });
+    });
+
+    suite('Retrieve data passes', () => {
+      const GET_DATA_PASSES_PATH = '/api/dataPasses';
+
+      let bkpService = null;
+
+      before(() => {
+        bkpService = new BookkeepingService(VALID_CONFIG.bookkeeping);
+        bkpService.validateConfig(); // ensures internal fields like _hostname/_port/_token are set
+        bkpService.connect();
+      });
+
+      afterEach(() => {
+        nock.cleanAll();
+      });
+
+      test('should handle all detector types correctly', async () => {
+        const mockResponse = {
+          data: [
+            {
+              id: 9,
+              name: 'LHC23f_cpass0',
+              isFrozen: false,
+              versions: [],
+              pdpBeamTypes: ['OO'],
+              runCount: 1,
+              simulationPassesCount: 1,
+            },
+            {
+              id: 2,
+              name: 'LHC22b_skimming',
+              isFrozen: false,
+              versions: [],
+              pdpBeamTypes: ['pp'],
+              runCount: 2,
+              simulationPassesCount: 2,
+            },
+            {
+              id: 5,
+              name: 'LHC22b_apass2_skimmed',
+              isFrozen: false,
+              versions: [],
+              pdpBeamTypes: ['PbPb'],
+              runCount: 3,
+              simulationPassesCount: 1,
+            },
+            {
+              id: 1,
+              name: 'LHC22b_apass1',
+              isFrozen: false,
+              versions: [],
+              pdpBeamTypes: ['pp'],
+              runCount: 4,
+              simulationPassesCount: 0,
+            },
+            {
+              id: 4,
+              name: 'LHC22a_apass2',
+              isFrozen: false,
+              versions: [],
+              pdpBeamTypes: ['PbPb'],
+              runCount: 5,
+              simulationPassesCount: 2,
+            },
+            {
+              id: 3,
+              name: 'LHC22a_apass1',
+              isFrozen: false,
+              versions: [],
+              pdpBeamTypes: ['PbPb'],
+              runCount: 4,
+              simulationPassesCount: 0,
+            },
+          ],
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url)
+          .get(GET_DATA_PASSES_PATH)
+          .query({ token: VALID_CONFIG.bookkeeping.token })
+          .reply(200, mockResponse);
+
+        const result = await bkpService.retrieveDataPasses();
+
+        ok(Array.isArray(result));
+        strictEqual(result.length, mockResponse.data.length);
+
+        // Verify data passes data is preserved
+        deepStrictEqual(result, mockResponse.data);
+      });
+
+      test('should return empty array when data is not an array', async () => {
+        const mockResponse = {
+          data: null,
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url)
+          .get(GET_DATA_PASSES_PATH)
+          .query({ token: VALID_CONFIG.bookkeeping.token })
+          .reply(200, mockResponse);
+
+        const result = await bkpService.retrieveDataPasses();
+
+        ok(Array.isArray(result));
+        strictEqual(result.length, 0);
+      });
+
+      test('should return empty array when data is empty array', async () => {
+        const mockResponse = {
+          data: [],
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url)
+          .get(GET_DATA_PASSES_PATH)
+          .query({ token: VALID_CONFIG.bookkeeping.token })
+          .reply(200, mockResponse);
+
+        const result = await bkpService.retrieveDataPasses();
 
         ok(Array.isArray(result));
         strictEqual(result.length, 0);

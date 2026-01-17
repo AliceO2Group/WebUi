@@ -17,7 +17,6 @@ import { getLocalStorage, getLocalStorageAsJson } from '../../testUtils/localSto
 import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
 
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
-const SORTING_BUTTON_PATH = 'header > div > div > div:nth-child(3) > div > button';
 
 /**
  * Initial page setup tests
@@ -198,7 +197,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
       strictEqual(clipboard, 'qc/test/object/1');
       context.clearPermissionOverrides();
-    }
+    },
   );
 
   await testParent.test(
@@ -218,7 +217,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
       strictEqual(clipboard, 'qc/test/object/1');
       context.clearPermissionOverrides();
-    }
+    },
   );
 
   await testParent.test(
@@ -230,15 +229,14 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       await page.waitForFunction(
         (selector) => document.querySelector(selector).children.length === 1,
         {},
-        'section > div > div'
+        'section > div > div',
       );
       const selectedObject = await page.evaluate(() => model.object.selected);
       const numberOfChildren = await page.evaluate(() =>
-        document.querySelector('section > div > div').children.length
-      );
+        document.querySelector('section > div > div').children.length);
       strictEqual(selectedObject, undefined);
       strictEqual(numberOfChildren, 1);
-    }
+    },
   );
 
   await testParent.test('should update local storage when tree node is clicked', { timeout }, async () => {
@@ -332,6 +330,57 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       }, selectorId);
 
       deepStrictEqual(options, ['', 'runType1', 'runType2']);
+    },
+  );
+
+  await testParent.test(
+    'should have a selector with sorted options to filter by data passes if there are data passes loaded',
+    { timeout },
+    async () => {
+      await page.locator('#passNameFilter').click();
+      await page.waitForSelector('#passname-dropdown', { visible: true, timeout: 1000 });
+
+      const options = await page.evaluate(() => {
+        const optionElements = document.querySelectorAll('#passname-dropdown > button');
+        return Array.from(optionElements).map((option) => option.textContent);
+      });
+
+      const expectedOptions = [
+        'LHC23f_cpass0',
+        'LHC22b_skimming',
+        'LHC22b_apass2_skimmed',
+        'LHC22b_apass1',
+        'LHC22a_apass2',
+        'LHC22a_apass1',
+      ];
+
+      strictEqual(
+        options.length,
+        expectedOptions.length,
+        `PassName dropdown should have ${expectedOptions.length} options, found ${expectedOptions}`,
+      );
+      deepStrictEqual(options, expectedOptions, 'PassName dropdown options are incorrect');
+    },
+  );
+
+  await testParent.test(
+    'should update the passNameFilter input when a dropdown option is selected',
+    { timeout },
+    async () => {
+      const expectedOptionValue
+        = await page.evaluate(() => document.querySelector('#passname-dropdown > button')?.textContent);
+
+      await page.locator('#passname-dropdown > button').click();
+      await page.waitForSelector('#passname-dropdown', { hidden: true, timeout: 1000 });
+      await delay(50);
+
+      const inputValue = await page.evaluate(() => document.querySelector('input#passNameFilter')?.value);
+
+      strictEqual(
+        inputValue,
+        expectedOptionValue,
+        'should set the input value to the clicked passName dropdown option',
+      );
     },
   );
 

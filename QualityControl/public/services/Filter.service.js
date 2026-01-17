@@ -29,6 +29,7 @@ export default class FilterService {
 
     this._runTypes = RemoteData.notAsked();
     this._detectors = RemoteData.notAsked();
+    this._dataPasses = RemoteData.notAsked();
 
     this.ongoingRuns = RemoteData.notAsked();
   }
@@ -40,14 +41,17 @@ export default class FilterService {
   async getFilterConfigurations() {
     this._runTypes = RemoteData.loading();
     this._detectors = RemoteData.loading();
+    this._dataPasses = RemoteData.notAsked();
     this.filterModel.notify();
     const { result, ok } = await this.loader.get('/api/filter/configuration');
     if (ok) {
       this._runTypes = RemoteData.success(result?.runTypes || []);
       this._detectors = RemoteData.success(result?.detectors || []);
+      this._dataPasses = RemoteData.success(result?.dataPasses || []);
     } else {
       this._runTypes = RemoteData.failure('Error retrieving runTypes');
       this._detectors = RemoteData.failure('Error retrieving detectors');
+      this._dataPasses = RemoteData.failure('Error retrieving dataPasses');
     }
     this.filterModel.notify();
   }
@@ -125,5 +129,13 @@ export default class FilterService {
    */
   get detectors() {
     return this._detectors;
+  }
+
+  /**
+   * Returns a {@link RemoteData} object containing an array of data type {@link DataPass}.
+   * @returns {RemoteData<DataPass[]>} A {@link RemoteData} object containing an array of data type {@link DataPass}.
+   */
+  get dataPasses() {
+    return this._dataPasses;
   }
 }

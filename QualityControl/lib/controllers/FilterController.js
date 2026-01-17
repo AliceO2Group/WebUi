@@ -65,9 +65,11 @@ export class FilterController {
     try {
       const runTypes = this._filterService?.runTypes ?? [];
       const detectors = this._filterService?.detectors ?? [];
+      const dataPasses = this._filterService?.dataPasses ?? [];
       res.status(200).json({
         runTypes,
         detectors,
+        dataPasses,
       });
     } catch (error) {
       res.status(503).json({ error: error.message || error });

@@ -13,7 +13,7 @@
  */
 
 import { FilterType } from './filterTypes.js';
-import { h, RemoteData } from '/js/src/index.js';
+import { h, RemoteData, DropdownComponent } from '/js/src/index.js';
 
 /**
  * Builds a filter element. If options to show, selector filter element; otherwise, input element.
@@ -134,6 +134,73 @@ export const groupedDropdownComponent = ({
       )),
     ]),
   ]);
+};
+
+/**
+ * Builds a filter element. If options to show, selector filter element; otherwise, input element.
+ * @param {object} config - Configuration object for building the filter element.
+ * @param {string} config.queryLabel - The key used to query the storage with this parameter.
+ * @param {string} config.placeholder - The placeholder text to be displayed in the input field.
+ * @param {string} config.id - The unique identifier for the input field.
+ * @param {object} config.filterMap - Map of the current filter values.
+ * @param {string} [config.type='text'] - The type of the filter element (e.g., 'text', 'number').
+ * @param {Record<string, object>} [config.options={}] - List of options for an input with dropdown selector (optional).
+ * @param {(filterId: string, value: string, setUrl: boolean) => void} config.onChangeCallback
+ * - Callback to be triggered on the change event of the filter.
+ * @param {(filterId: string, value: string, setUrl: boolean) => void} config.onInputCallback
+ * - Callback to be triggered on the input event.
+ * @param {(filterId: string, value: string, setUrl: boolean) => void} config.onEnterCallback
+ * - Callback to be triggered when the Enter key is pressed.
+ * @param {string} [config.width='.w-20'] - The CSS class that defines the width of the filter.
+ * @returns {vnode} A virtual node element representing the filter element.
+ */
+export const inputWithDropdownComponent = ({
+  queryLabel,
+  placeholder,
+  id,
+  filterMap,
+  options = {},
+  onChangeCallback,
+  onInputCallback,
+  onEnterCallback,
+  type = 'text',
+  width = '.w-20',
+}) => {
+  const dropdownOptions = Object.keys(options);
+  if (!dropdownOptions.length) {
+    return filterInput({ queryLabel, placeholder, id, filterMap, onInputCallback, onEnterCallback, type, width });
+  }
+  const dropdownComponent = DropdownComponent(
+    filterInput({
+      queryLabel,
+      placeholder,
+      id,
+      filterMap,
+      type,
+      onInputCallback,
+      onEnterCallback,
+      width: '.w-100',
+    }),
+    h('', {
+      id: `${queryLabel?.toLowerCase()}-dropdown`,
+      style: 'max-height: 300px; overflow-y: auto;',
+    }, Object.entries(options)
+      .filter(([option]) => option.toLowerCase().includes(filterMap[queryLabel]?.toLowerCase() ?? ''))
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([option, htmlOptions]) => h(
+        'button.btn.d-block.w-100',
+        {
+          onclick: () => {
+            onChangeCallback(queryLabel, option, true);
+            dropdownComponent.state.hidePopover();
+          },
+          ...htmlOptions ?? {},
+        },
+        [option, Object.keys(htmlOptions).length > 0 ? ' (frozen)' : ''],
+      ))),
+  );
+
+  return h(`${width}`, dropdownComponent);
 };
 
 /**
