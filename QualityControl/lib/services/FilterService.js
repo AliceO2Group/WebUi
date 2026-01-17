@@ -82,7 +82,9 @@ export class FilterService {
     }
     try {
       const detectorSummaries = await this._bookkeepingService.retrieveDetectorSummaries();
-      this._detectors = Object.freeze(detectorSummaries.map(({ name, type }) => Object.freeze({ name, type })));
+      this._detectors = Object.freeze(detectorSummaries
+        .filter(({ name, type }) => name && type)
+        .map(({ name, type }) => Object.freeze({ name, type })));
     } catch (error) {
       this._logger.errorMessage(`Failed to retrieve detectors: ${error?.message || error}`);
     }
