@@ -38,7 +38,7 @@ export const filtersConfig = ({ runTypes, detectors }) => [
   },
   {
     type: FilterType.GROUPED_DROPDOWN,
-    queryLabel: 'QcDetectorName',
+    queryLabel: 'DetectorName',
     placeholder: 'Detector (any)',
     id: 'detectorFilter',
     options: detectors.match({

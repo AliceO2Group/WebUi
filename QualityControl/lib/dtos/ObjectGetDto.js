@@ -27,7 +27,7 @@ const qcVersionPattern = /^\d+\.\d+(\.\d+)?$/;
 function createFiltersSchema(runTypes) {
   return Joi.object({
     RunNumber: RunNumberDto.optional(),
-    QcDetectorName: DetectorNameDto.optional(),
+    DetectorName: DetectorNameDto.optional(),
     RunType: runTypes.length > 0
       ? Joi.string().valid(...runTypes).optional()
       : Joi.string().optional(),
