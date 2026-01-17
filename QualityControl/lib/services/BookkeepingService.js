@@ -20,6 +20,8 @@ import { wrapRunStatus } from '../dtos/BookkeepingDto.js';
 const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
 const GET_RUN_PATH = '/api/runs';
+export const GET_DETECTORS_PATH = '/api/detectors';
+const GET_DATA_PASSES_PATH = '/api/dataPasses';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/bkp-service`;
 
@@ -130,6 +132,23 @@ export class BookkeepingService {
   }
 
   /**
+   * Retrieve the list of data passes from the bookkeeping service.
+   * @returns {Promise<object[]>} Resolves with an array of data passes.
+   */
+  async retrieveDataPasses() {
+    const { data } = await httpGetJson(
+      this._hostname,
+      this._port,
+      this._createPath(GET_DATA_PASSES_PATH),
+      {
+        protocol: this._protocol,
+        rejectUnauthorized: false,
+      },
+    );
+    return Array.isArray(data) ? data : [];
+  }
+
+  /**
    * Retrieves the information of a specific run from the Bookkeeping service
    * @param {number} runNumber - The run number to check the status for
    * @returns {Promise<RunInformation|WrappedRunStatus>} - Returns a promise that resolves to the run information
@@ -218,6 +237,23 @@ export class BookkeepingService {
       this._logger.errorMessage(msg);
       return;
     }
+  }
+
+  /**
+   * Retrieves the information about the detectors from the Bookkeeping service.
+   * @returns {Promise<object[]>} Array of detector summaries.
+   */
+  async retrieveDetectorSummaries() {
+    const { data } = await httpGetJson(
+      this._hostname,
+      this._port,
+      this._createPath(GET_DETECTORS_PATH),
+      {
+        protocol: this._protocol,
+        rejectUnauthorized: false,
+      },
+    );
+    return Array.isArray(data) ? data : [];
   }
 
   /**

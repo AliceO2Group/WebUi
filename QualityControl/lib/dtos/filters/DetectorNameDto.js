@@ -12,12 +12,19 @@
  * or submit itself to any jurisdiction.
  */
 
-const FilterType = {
-  INPUT: 'input',
-  INPUT_WITH_DROPDOWN: 'inputWithDropdown',
-  DROPDOWN: 'dropdownSelector',
-  GROUPED_DROPDOWN: 'groupedDropdownSelector',
-  RUN_MODE: 'runModeSelector',
-};
+import Joi from 'joi';
 
-export { FilterType };
+/**
+ * Joi validation schema for QcDetectorName filter (also known as detector when fetched from BKP and used in UI)
+ * @type {Joi.StringSchema}
+ */
+export const DetectorNameDto = Joi.string()
+  .uppercase()
+  .length(3)
+  .pattern(/^[A-Z]{3}$/)
+  .messages({
+    'string.base': 'Detector name must be a string',
+    'string.uppercase': 'Detector name must be uppercase',
+    'string.length': 'Detector name must be exactly 3 characters',
+    'string.pattern.base': 'Detector name must contain only uppercase letters (e.g., TPC, ITS)',
+  });
