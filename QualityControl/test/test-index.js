@@ -43,6 +43,8 @@ import { aboutPageTests } from './public/pages/about-page.test.js';
  */
 import { errorHandlerTestSuite } from './lib/utils/errorHandler.test.js';
 import { httpRequestsTestSuite } from './lib/utils/httpRequests.test.js';
+import { addLabelsToLayoutTestSuite } from './lib/utils/layout/addLabelsToLayout.test.js';
+import { trimLayoutPerRequiredFieldsTestSuite } from './lib/utils/layout/trimLayoutPerRequiredFields.test.js';
 
 /**
  * Controllers
@@ -233,6 +235,8 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     suite('Lib - Test Suite', async () => {
       suite('Utility "errorHandler" methods test suite', async () => await errorHandlerTestSuite());
       suite('Utility "httpRequests" methods test suite', async () => await httpRequestsTestSuite());
+      suite('Layout Utils - calculateLabelsForLayout test suite', () => addLabelsToLayoutTestSuite());
+      suite('Layout Utils - trimLayoutPerRequiredFields test suite', () => trimLayoutPerRequiredFieldsTestSuite());
     });
 
     suite('Common Library - Test Suite', () => {

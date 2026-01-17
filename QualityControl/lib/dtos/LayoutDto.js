@@ -26,6 +26,7 @@ const ALLOWED_LAYOUT_FIELDS = [
   'owner_id',
   'owner_name',
   'tabs',
+  'labels',
 ];
 
 /**

@@ -13,6 +13,8 @@
 
 import { NotFoundError } from '@aliceo2/web-ui';
 import { BaseRepository } from './BaseRepository.js';
+import { addLabelsToLayout } from '../utils/layout/addLabelsToLayout.js';
+import { trimLayoutPerRequiredFields } from '../utils/layout/trimLayoutPerRequiredFields.js';
 
 /**
  * LayoutRepository class to handle CRUD operations for Layouts.
@@ -31,58 +33,13 @@ export class LayoutRepository extends BaseRepository {
     const filteredLayouts = this._filterLayouts(layouts, { ...filter, name });
 
     const trimmedAndLabelledLayouts = filteredLayouts
-      .map((layout) => this._trimAndLabelLayout(layout, fields));
-    return trimmedAndLabelledLayouts;
-  }
-
-  /**
-   * Adds labels field to a layout based on contained objects in the layout tabs.
-   * Then, trims a layout object to only include requested fields and adds labels
-   * @param {object} layout - layout object to be processed
-   * @param {Array<string>} fields - Array of field names to include in the returned layout object
-   * @returns {object} - Processed layout object with added labels and trimmed fields
-   */
-  _trimAndLabelLayout(layout, fields) {
-    const labeledLayout = this._addLabelsToLayout(layout);
-    const trimmedLayout = this._trimLayout(labeledLayout, fields);
-    return trimmedLayout;
-  }
-
-  /**
-   * Trims a layout object to only include requested fields
-   * @param {object} layout - layout object to be trimmed
-   * @param {Array<string>} [fields = []] - Array of field names to include in the returned layout object
-   * @returns {object} - Trimmed layout object
-   */
-  _trimLayout(layout, fields = []) {
-    if (fields.length === 0) {
-      return layout;
-    }
-    const trimmedLayout = {};
-    for (const field of fields) {
-      if (field in layout) {
-        trimmedLayout[field] = layout[field];
-      }
-    }
-    return trimmedLayout;
-  }
-
-  /**
-   * Method to identify the unique prefix (encountering first '/') of objects and add it as a set of labels to layout
-   * @param {object} layout - layout object to which labels will be added
-   * @returns {object} - layout object with added labels
-   */
-  _addLabelsToLayout(layout) {
-    const labelsSet = new Set();
-    layout.tabs?.forEach((tab) => {
-      tab.objects?.forEach((obj) => {
-        if (obj.name) {
-          const [prefix] = obj.name.split('/');
-          labelsSet.add(prefix);
-        }
+      .map((layout) => {
+        const labeledLayout = addLabelsToLayout(layout);
+        const trimmedLayout = trimLayoutPerRequiredFields(labeledLayout, fields);
+        return trimmedLayout;
       });
-    });
-    return { ...layout, labels: Array.from(labelsSet) };
+
+    return trimmedAndLabelledLayouts;
   }
 
   /**
@@ -122,25 +79,27 @@ export class LayoutRepository extends BaseRepository {
    * @throws {NotFoundError} - if the layout is not found
    */
   readLayoutById(layoutId) {
-    const foundLayout = this._jsonFileService.data.layouts.find((layout) => layout.id === layoutId);
-    if (!foundLayout) {
+    const layout = this._jsonFileService.data.layouts.find((layout) => layout.id === layoutId);
+    if (!layout) {
       throw new NotFoundError(`layout (${layoutId}) not found`);
     }
-    return foundLayout;
+    const labeledLayout = addLabelsToLayout(layout);
+    return labeledLayout;
   }
 
   /**
    * Given a string, representing layout name, retrieve the layout if it exists
    * @param {string} layoutName - name of the layout to retrieve
    * @returns {Layout} - object with layout information
-   * @throws
+   * @throws {NotFoundError} - if the layout is not found
    */
   readLayoutByName(layoutName) {
     const layout = this._jsonFileService.data.layouts.find((layout) => layout.name === layoutName);
     if (!layout) {
       throw new NotFoundError(`Layout (${layoutName}) not found`);
     }
-    return layout;
+    const labeledLayout = addLabelsToLayout(layout);
+    return labeledLayout;
   }
 
   /**
