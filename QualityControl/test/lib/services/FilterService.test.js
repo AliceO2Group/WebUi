@@ -62,7 +62,7 @@ export const filterServiceTestSuite = async () => {
 
     test('should set data passes refresh interval to default if not provided', () => {
       const filterServiceWithDefaultConfig = new FilterService(bookkeepingServiceMock, { bookkeeping: {} });
-      strictEqual(filterServiceWithDefaultConfig._dataPassesRefreshInterval, 60 * 60 * 1000);
+      strictEqual(filterServiceWithDefaultConfig._dataPassesRefreshInterval, 6 * 60 * 60 * 1000);
     });
 
     test('should set run types refresh interval to the value from config', () => {
