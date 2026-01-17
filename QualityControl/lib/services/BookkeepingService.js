@@ -25,7 +25,7 @@ const GET_DATA_PASSES_PATH = '/api/dataPasses';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/bkp-service`;
 
-const RECENT_RUN_THRESHOLD_MS = 2 * 24 * 60 * 60 * 1000; // -2 days in milliseconds
+const RECENT_RUN_THRESHOLD_MS = 1 * 24 * 60 * 60 * 1000; // -1 day in milliseconds
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
@@ -214,7 +214,7 @@ export class BookkeepingService {
 
     const timestamp = Date.now() - RECENT_RUN_THRESHOLD_MS;
 
-    const queryParams = `page[offset]=0&page[limit]=100&filter[o2start][from]=${timestamp}&token=${this._token}`;
+    const queryParams = `page[offset]=0&page[limit]=20&filter[o2start][from]=${timestamp}&token=${this._token}`;
 
     try {
       const { data } = await httpGetJson(
