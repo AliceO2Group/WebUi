@@ -26,20 +26,63 @@ export class LayoutRepository extends BaseRepository {
    * @param {object} [options.filter] - Filter layouts by containing filter.objectPath, case insensitive
    * @returns {Array<object>} Array of layout objects matching the filters, containing only the specified fields
    */
-  listLayouts({ name, fields = [], filter } = {}) {
+  listLayouts({ name, fields, filter } = {}) {
     const { layouts } = this._jsonFileService.data;
     const filteredLayouts = this._filterLayouts(layouts, { ...filter, name });
 
+    const trimmedAndLabelledLayouts = filteredLayouts
+      .map((layout) => this._trimAndLabelLayout(layout, fields));
+    return trimmedAndLabelledLayouts;
+  }
+
+  /**
+   * Adds labels field to a layout based on contained objects in the layout tabs.
+   * Then, trims a layout object to only include requested fields and adds labels
+   * @param {object} layout - layout object to be processed
+   * @param {Array<string>} fields - Array of field names to include in the returned layout object
+   * @returns {object} - Processed layout object with added labels and trimmed fields
+   */
+  _trimAndLabelLayout(layout, fields) {
+    const labeledLayout = this._addLabelsToLayout(layout);
+    const trimmedLayout = this._trimLayout(labeledLayout, fields);
+    return trimmedLayout;
+  }
+
+  /**
+   * Trims a layout object to only include requested fields
+   * @param {object} layout - layout object to be trimmed
+   * @param {Array<string>} [fields = []] - Array of field names to include in the returned layout object
+   * @returns {object} - Trimmed layout object
+   */
+  _trimLayout(layout, fields = []) {
     if (fields.length === 0) {
-      return filteredLayouts;
+      return layout;
     }
-    return filteredLayouts.map((layout) => {
-      const layoutObj = {};
-      fields.forEach((field) => {
-        layoutObj[field] = layout[field];
+    const trimmedLayout = {};
+    for (const field of fields) {
+      if (field in layout) {
+        trimmedLayout[field] = layout[field];
+      }
+    }
+    return trimmedLayout;
+  }
+
+  /**
+   * Method to identify the unique prefix (encountering first '/') of objects and add it as a set of labels to layout
+   * @param {object} layout - layout object to which labels will be added
+   * @returns {object} - layout object with added labels
+   */
+  _addLabelsToLayout(layout) {
+    const labelsSet = new Set();
+    layout.tabs?.forEach((tab) => {
+      tab.objects?.forEach((obj) => {
+        if (obj.name) {
+          const [prefix] = obj.name.split('/');
+          labelsSet.add(prefix);
+        }
       });
-      return layoutObj;
     });
+    return { ...layout, labels: Array.from(labelsSet) };
   }
 
   /**
