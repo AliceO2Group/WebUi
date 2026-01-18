@@ -119,16 +119,20 @@ export class StatusService {
    * @returns {Promise<{object}>} - status of the data service
    */
   async retrieveDataServiceStatus() {
-    let status = { ok: true, category: ServiceStatus.LOADING };
-    let version = '';
+    const statusPackage = { name: 'CCDB', version: '', extras: {} };
     try {
       const { version: dataServiceVersion } = await this._dataService.getVersion();
-      status = { ok: true, category: ServiceStatus.SUCCESS };
-      version = dataServiceVersion;
+      return {
+        ...statusPackage,
+        status: { ok: true, category: ServiceStatus.SUCCESS },
+        version: dataServiceVersion,
+      };
     } catch (err) {
-      status = { ok: false, category: ServiceStatus.ERROR, message: err.message || err };
+      return {
+        ...statusPackage,
+        status: { ok: false, category: ServiceStatus.ERROR, message: err.message || err },
+      };
     }
-    return { name: 'CCDB', status, version, extras: {} };
   }
 
   /**
