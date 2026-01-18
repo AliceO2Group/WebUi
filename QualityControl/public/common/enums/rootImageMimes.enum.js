@@ -17,10 +17,21 @@
  * @enum {string}
  * @readonly
  */
-export const SUPPORTED_ROOT_IMAGE_FILE_TYPES = Object.freeze({
-  svg: 'image/svg+xml',
-  png: 'file/png',
-  jpg: 'file/jpeg',
-  jpeg: 'file/jpeg',
-  webp: 'file/webp',
+export const RootImageDownloadSupportedTypes = Object.freeze({
+  SVG: 'image/svg+xml',
+  PNG: 'file/png',
+  JPG: 'file/jpeg',
+  JPEG: 'file/jpeg',
+  WEBP: 'file/webp',
 });
+
+/**
+ * Get the list of unique supported ROOT image download extensions
+ * @returns {string[]} - Array of supported ROOT image download extensions
+ */
+export const RootImageDownloadExtensions = () => {
+  const extensions = new Set();
+  Object.keys(RootImageDownloadSupportedTypes)
+    .forEach((ext) => extensions.add(ext.toLowerCase()));
+  return Array.from(extensions);
+};

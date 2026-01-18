@@ -14,7 +14,7 @@
 
 import { isUserRoleSufficient } from '../../../../library/userRole.enum.js';
 import { generateDrawingOptionString } from '../../library/qcObject/utils.js';
-import { SUPPORTED_ROOT_IMAGE_FILE_TYPES } from './enums/rootImageMimes.enum.js';
+import { RootImageDownloadSupportedTypes } from './enums/rootImageMimes.enum.js';
 
 /* global JSROOT BOOKKEEPING */
 
@@ -230,7 +230,7 @@ export const downloadFile = (file, filename) => {
  * @returns {undefined}
  */
 export const downloadRoot = async (filename, filetype, root, drawingOptions = []) => {
-  const mime = SUPPORTED_ROOT_IMAGE_FILE_TYPES[filetype];
+  const mime = RootImageDownloadSupportedTypes[filetype.toLocaleUpperCase()];
   if (!mime) {
     throw new Error(`The file extension (${filetype}) is not supported`);
   }
