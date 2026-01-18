@@ -119,10 +119,11 @@ export class StatusService {
    * @returns {Promise<{object}>} - status of the data service
    */
   async retrieveDataServiceStatus() {
-    let status = { ok: true, category: ServiceStatus.SUCCESS };
+    let status = { ok: true, category: ServiceStatus.LOADING };
     let version = '';
     try {
       const { version: dataServiceVersion } = await this._dataService.getVersion();
+      status = { ok: true, category: ServiceStatus.SUCCESS };
       version = dataServiceVersion;
     } catch (err) {
       status = { ok: false, category: ServiceStatus.ERROR, message: err.message || err };

@@ -50,7 +50,11 @@ export class AliEcsSynchronizer {
    */
   async start() {
     this._logger.infoMessage('Starting to consume AliECS messages for topics:');
-    this._status = ServiceStatus.LOADING;
+    this._status = ServiceStatus.ERROR;
+    this._extraInfo = {
+      // KafkaConsumer is currently not supporting "active" status checking [OGUI-1872]
+      message: 'Kafka is configured but the service has not started yet',
+    };
     try {
       await this._ecsRunConsumer.start();
       this._status = ServiceStatus.SUCCESS;
