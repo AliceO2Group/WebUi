@@ -25,6 +25,7 @@ const TO_REMOVE_FIELDS = ['etag', 'qcObject', 'versions', 'name', 'location'];
 const HIGHLIGHTED_FIELDS = ['runNumber', 'runType', 'path', 'qcVersion'];
 const DRAW_OPTIONS_FIELD = 'drawOptions';
 const DISPLAY_HINTS_FIELD = 'displayHints';
+const LAYOUT_DISPLAY_OPTIONS_FIELD = 'layoutDisplayOptions';
 
 const KEY_TO_RENDER_FIRST = 'path';
 
@@ -52,7 +53,7 @@ export const qcObjectInfoPanel = (
   qcObject,
   style = {},
   rowAttributes = () => undefined,
-  onToggleDrawingOptions = null, // Default to null to indicate it's optional
+  onToggleDrawingOptionsPanel = null,
 ) =>
   h('.flex-column.scroll-y#qcObjectInfoPanel', { style }, [
     [
@@ -61,68 +62,45 @@ export const qcObjectInfoPanel = (
         .filter((key) => key !== KEY_TO_RENDER_FIRST && !TO_REMOVE_FIELDS.includes(key)),
     ]
       .flatMap((key) => {
-        if (key === DRAW_OPTIONS_FIELD && typeof onToggleDrawingOptions === 'function') {
+        if (key === DRAW_OPTIONS_FIELD) {
           return [
-            groupedInfoRow({
-              keyValuePair1: { key: DRAW_OPTIONS_FIELD, value: qcObject.drawOptions },
-              keyValuePair2: { key: DISPLAY_HINTS_FIELD, value: qcObject.displayHints },
-              infoRowAttributes: defaultRowAttributes,
-              buttonElement: visibilityButton(onToggleDrawingOptions, { title: 'Toggle drawing options' }),
-            }),
+            drawingOptionsInfoRow(
+              rowAttributes,
+              qcObject[DRAW_OPTIONS_FIELD],
+              qcObject[DISPLAY_HINTS_FIELD],
+              qcObject[LAYOUT_DISPLAY_OPTIONS_FIELD] ?? null,
+              onToggleDrawingOptionsPanel,
+            ),
           ];
         }
-        if (key === DISPLAY_HINTS_FIELD && typeof onToggleDrawingOptions === 'function') {
-          return []; // Hide displayHints (it is shown inside the grouped info row)
+        if (key === DISPLAY_HINTS_FIELD || key === LAYOUT_DISPLAY_OPTIONS_FIELD) {
+          return []; // always hidden (grouped)
         }
         return [infoRow(key, qcObject[key], rowAttributes)];
       }),
   ]);
 
-/**
- * Builds two info rows grouped together with an action button on the side
- * @param {object} params - parameters object
- * @param {object} params.keyValuePair1 - first key value pair
- * @param {object} params.keyValuePair2 - second key value pair
- * @param {function(string, string): object} params.infoRowAttributes - function that return given attributes
- *  for the row
- * @param {vnode} params.buttonElement - button element to be displayed on the side
- * @returns {vnode} - grouped info row with action button
- */
-const groupedInfoRow = ({ keyValuePair1, keyValuePair2, infoRowAttributes, buttonElement }) => {
-  const { key: key1, value: value1 } = keyValuePair1;
-  const { key: key2, value: value2 } = keyValuePair2;
-  const highlightedClassesKey1 = HIGHLIGHTED_FIELDS.includes(key1) ? '.highlighted' : '';
-  const highlightedClassesKey2 = HIGHLIGHTED_FIELDS.includes(key2) ? '.highlighted' : '';
-  const formattedValue1 = infoPretty(key1, value1);
-  const formattedKey1 = getUILabel(key1);
-  const hasValue1 = value1 != null && value1 !== '' && (!Array.isArray(value1) || value1.length !== 0);
-  const formattedValue2 = infoPretty(key2, value2);
-  const formattedKey2 = getUILabel(key2);
-  const hasValue2 = value2 != null && value2 !== '' && (!Array.isArray(value2) || value2.length !== 0);
-  return h('.flex-row.relative', [
-    h('.flex-column.w-100.g2', [
-      h(`.flex-row.g2.info-row${highlightedClassesKey1}`, [
-        h('b.w-25.w-wrapped', formattedKey1),
-        h('.w-75', { style: 'padding-right: 50px', // avoid overlap with button
-          ...hasValue1
-            ? infoRowAttributes(formattedKey1, formattedValue1)
-            : {} }, formattedValue1),
-      ]),
-      h(`.flex-row.g2.info-row${highlightedClassesKey2}`, [
-        h('b.w-25.w-wrapped', formattedKey2),
-        h('.w-75', { style: 'padding-right: 50px', // avoid overlap with button
-          ...hasValue2
-            ? infoRowAttributes(formattedKey2, formattedValue2)
-            : {} }, formattedValue2),
-      ]),
-    ]),
-    h(
-      '.absolute.items-center.level3',
-      { style: 'top:50%;right:0;transform:translateY(-50%)' },
-      buttonElement,
-    ),
-  ]);
-};
+const drawingOptionsInfoRow = (
+  infoRowAttributes,
+  drawOptions,
+  displayHints,
+  layoutDisplayOptions = null,
+  onToggleDrawingOptionsPanel = null,
+) => h('', [
+  h('.flex-row.items-center.justify-between', { style: 'padding-bottom:var(--space-s)' }, [
+    h('', 'Drawing Options'),
+    onToggleDrawingOptionsPanel && h('.absolute.items-center.level3', { style: 'right:0' }, visibilityButton(
+      onToggleDrawingOptionsPanel,
+      { title: 'Toggle preview drawing options' },
+    )),
+  ]),
+  h('.w-100', { style: 'height:1px; background:#d9d9d9; margin: 0 auto;' }),
+  h('.flex-column.g1', { style: 'margin-left: var(--space-s);' }, [
+    infoRow(DRAW_OPTIONS_FIELD, drawOptions, infoRowAttributes),
+    infoRow(DISPLAY_HINTS_FIELD, displayHints, infoRowAttributes),
+    layoutDisplayOptions && infoRow(LAYOUT_DISPLAY_OPTIONS_FIELD, layoutDisplayOptions, infoRowAttributes),
+  ]),
+]);
 
 /**
  * Builds a raw with the key and value information parsed based on their type
