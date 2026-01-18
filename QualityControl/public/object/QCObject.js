@@ -345,11 +345,11 @@ export default class QCObject extends BaseViewModel {
   /**
    * Indicate that the object loaded is wrong. Used after trying to print it with jsroot
    * @param {string} name - name of the object
-   * @param {string} reason - the reason for invalidating the object
+   * @param {object} details - object containing detail information for invalidation
    * @returns {undefined}
    */
-  invalidObject(name, reason) {
-    this.objects[name] = RemoteData.failure(reason || 'JSROOT was unable to draw this object');
+  invalidObject(name, details) {
+    this.objects[name] = RemoteData.failure(details || 'JSROOT was unable to draw this object');
     this.notify();
   }
 

@@ -20,38 +20,29 @@ import { prettyFormatDate } from './utils.js';
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-export default ({ object: objectModel }) => {
-  const { objects, selected } = objectModel;
-  const isObjectLoaded = selected && objects?.[selected.name]?.isSuccess();
-  return h(
+export const timestampSelectForm = ({ versions = [], selectedId = null, onSelect }) =>
+  h(
     '.w-100.flex-row',
-    isObjectLoaded &&
-  h('select.form-control.gray-darker.text-center', {
-    onchange: (e) => {
-      const { value } = e.target;
-      if (selected && value !== 'Invalid Timestamp') {
-        const valueJson = JSON.parse(value);
-        objectModel.loadObjectByName(selected.name, valueJson.validFrom, valueJson.id);
-      }
-    },
-  }, [
-    objectModel.getObjectVersions(selected.name)
-      .map((version) => {
-        const versionString = JSON.stringify(version);
-        const object = objects[selected.name].payload;
-        return h('option.text-center', {
-          id: versionString,
-          key: versionString,
-          value: versionString,
-          selected: version.createdAt === object.createdAt ? true : false,
-        }, [
-          'Created: ',
-          prettyFormatDate(version.createdAt),
-          ' (id: ',
-          version.id,
-          ')',
-        ]);
-      }),
-  ]),
+    h('select.form-control.gray-darker.text-center', {
+      onchange: (e) => {
+        const { value } = e.target;
+        if (value && value !== 'Invalid Timestamp') {
+          onSelect?.(JSON.parse(value));
+        }
+      },
+    }, versions.map((version) => {
+      const versionString = JSON.stringify(version);
+      return h('option.text-center', {
+        id: versionString,
+        key: versionString,
+        value: versionString,
+        selected: selectedId ? version.id === selectedId : false,
+      }, [
+        'Created: ',
+        prettyFormatDate(version.createdAt),
+        ' (id: ',
+        version.id,
+        ')',
+      ]);
+    })),
   );
-};
