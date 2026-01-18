@@ -40,7 +40,7 @@ export default (model) =>
         searchForm(model),
         h('.flex-column.flex-grow', {}, [
           searchInput.trim() !== ''
-            ? virtualTable(model, 'side', objectsToDisplay, { maxHeightRows: 500 })
+            ? virtualTable(model, 'main', objectsToDisplay)
             : h('.scroll-y', treeTable(model)),
         ]),
         objectPreview(model),
