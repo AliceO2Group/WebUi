@@ -70,7 +70,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
     }
   });
 
-  await testParent.test('when kafka service is unavailable an error should be displayed instead of the run mode toggle', { timeout }, async () => {
+  await testParent.test('when kafka service is unavailable nothing should be displayed (rely on about page)', { timeout }, async () => {
     const requestHandler = (request) => integratedServiceInterceptor(request, IntegratedServices.KAFKA, ServiceStatus.ERROR, {
       message: 'test error',
     });
@@ -92,19 +92,6 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
 
       const runsModeNoExist = await page.evaluate(() => document.querySelector('#run-mode-switch') === null);
       ok(runsModeNoExist, 'The RunMode switch should not be displayed');
-
-      const runModeErrorMessage = await page.evaluate(() => {
-        const spans = document.querySelectorAll('#run-mode-failure > span');
-        return Array.from(spans)
-          .map((span) => span.textContent.trim())
-          .filter((text) => text !== '')
-          .join(' ');
-      });
-      strictEqual(
-        runModeErrorMessage,
-        `Contact an administrator and include this information: Kafka service returned status '${ServiceStatus.ERROR}'`,
-        'RunMode failure should have the correct error message',
-      );
     } finally {
       // Cleanup: remove listener and disable interception
       page.off('request', requestHandler);
