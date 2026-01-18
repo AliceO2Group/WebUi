@@ -38,16 +38,14 @@ export const runModeComponent = (filterModel, viewModel) =>
       h('span.error-icon', { title: 'RunMode is unavailable. Please contact administrator.' }, iconWarning()),
       h('span', payload.status.message),
     ]),
-    Success: (payload) => switchCase(payload.status.category, {
-      [ServiceStatus.SUCCESS]: () => runModeCheckbox(filterModel, viewModel),
-      NOT_CONFIGURED: () => null,
-    }, () => h('.error-box.danger.flex-column.justify-center.f6.text-center', { id: 'run-mode-failure' }, [
-      h('span.error-icon', {
-        title: 'RunMode is unavailable. Please contact administrator.',
-      }, iconWarning()),
-      h('span', 'Contact an administrator and include this information:'),
-      h('span', `Kafka service returned status '${payload.status.category ?? '?'}'`),
-    ]))(),
+    Success: (payload) =>
+      switchCase(
+        payload.status.category,
+        {
+          [ServiceStatus.SUCCESS]: () => runModeCheckbox(filterModel, viewModel),
+        },
+        () => {},
+      )(),
     Other: () => {},
   });
 
