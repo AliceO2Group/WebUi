@@ -211,82 +211,82 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     );
   });
 
-  // suite('API - test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
-  //   let browser = undefined;
-  //   let subprocess = undefined;
-  //   let subprocessOutput = undefined;
+  suite('API - test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
+    let browser = undefined;
+    let subprocess = undefined;
+    let subprocessOutput = undefined;
 
-  //   before(async () => {
-  //     ({ browser, subprocess, subprocessOutput } = await setupServerForIntegrationTests());
-  //   }, { timeout: 5000 });
+    before(async () => {
+      ({ browser, subprocess, subprocessOutput } = await setupServerForIntegrationTests());
+    }, { timeout: 5000 });
 
-  //   after(async () => {
-  //     await terminateSessionAndLog(browser, subprocessOutput, subprocess);
-  //   });
+    after(async () => {
+      await terminateSessionAndLog(browser, subprocessOutput, subprocess);
+    });
 
-  //   suite('Layout GET request test suite', async () => apiGetLayoutsTests());
-  //   suite('Layout PUT request test suite', async () => apiPutLayoutTests());
-  //   suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
-  //   suite('Object GET request test suite', async () => apiGetObjectsTests());
-  //   suite('Filters GET run status test suite', async () => await apiGetRunStatusTests());
-  // });
+    suite('Layout GET request test suite', async () => apiGetLayoutsTests());
+    suite('Layout PUT request test suite', async () => apiPutLayoutTests());
+    suite('Layout PATCH request test suite', async () => apiPatchLayoutTests());
+    suite('Object GET request test suite', async () => apiGetObjectsTests());
+    suite('Filters GET run status test suite', async () => await apiGetRunStatusTests());
+  });
 
-  // suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
-  //   suite('Lib - Test Suite', async () => {
-  //     suite('Utility "errorHandler" methods test suite', async () => await errorHandlerTestSuite());
-  //     suite('Utility "httpRequests" methods test suite', async () => await httpRequestsTestSuite());
-  //     suite('Layout Utils - calculateLabelsForLayout test suite', () => addLabelsToLayoutTestSuite());
-  //     suite('Layout Utils - trimLayoutPerRequiredFields test suite', () => trimLayoutPerRequiredFieldsTestSuite());
-  //   });
+  suite('Back-end test suite', { timeout: BACK_END_TIMEOUT }, async () => {
+    suite('Lib - Test Suite', async () => {
+      suite('Utility "errorHandler" methods test suite', async () => await errorHandlerTestSuite());
+      suite('Utility "httpRequests" methods test suite', async () => await httpRequestsTestSuite());
+      suite('Layout Utils - calculateLabelsForLayout test suite', () => addLabelsToLayoutTestSuite());
+      suite('Layout Utils - trimLayoutPerRequiredFields test suite', () => trimLayoutPerRequiredFieldsTestSuite());
+    });
 
-  //   suite('Common Library - Test Suite', () => {
-  //     suite('CL - Object Utility methods test suite', () => commonLibraryQcObjectUtilsTestSuite());
-  //     suite('CL - DateTime Utility methods test suite', () => commonLibraryUtilsDateTimeTestSuite());
-  //   });
+    suite('Common Library - Test Suite', () => {
+      suite('CL - Object Utility methods test suite', () => commonLibraryQcObjectUtilsTestSuite());
+      suite('CL - DateTime Utility methods test suite', () => commonLibraryUtilsDateTimeTestSuite());
+    });
 
-  //   suite('Repositories - Test Suite', async () => {
-  //     suite('Base Repository - Test Suite', async () => await baseRepositoryTestSuite());
-  //     suite('Layout Repository - Database Test Suite', async () => await layoutRepositoryTestSuite());
-  //     suite('Layout Repository - Test Suite', async () => await layoutRepositoryTest());
-  //     suite('User Repository - Test Suite', async () => await userRepositoryTestSuite());
-  //     suite('Chart Repository - Test Suite', async () => await chartRepositoryTestSuite());
-  //     suite('Chart Options Repository - Test Suite', async () => await chartOptionsRepositoryTestSuite());
-  //     suite('Grid Tab Cell Repository - Test Suite', async () => await gridTabCellRepositoryTestSuite());
-  //     suite('Tab Repository - Test Suite', async () => await tabRepositoryTestSuite());
-  //     suite('Option Repository - Test Suite', async () => await optionRepositoryTestSuite());
-  //   });
+    suite('Repositories - Test Suite', async () => {
+      suite('Base Repository - Test Suite', async () => await baseRepositoryTestSuite());
+      suite('Layout Repository - Database Test Suite', async () => await layoutRepositoryTestSuite());
+      suite('Layout Repository - Test Suite', async () => await layoutRepositoryTest());
+      suite('User Repository - Test Suite', async () => await userRepositoryTestSuite());
+      suite('Chart Repository - Test Suite', async () => await chartRepositoryTestSuite());
+      suite('Chart Options Repository - Test Suite', async () => await chartOptionsRepositoryTestSuite());
+      suite('Grid Tab Cell Repository - Test Suite', async () => await gridTabCellRepositoryTestSuite());
+      suite('Tab Repository - Test Suite', async () => await tabRepositoryTestSuite());
+      suite('Option Repository - Test Suite', async () => await optionRepositoryTestSuite());
+    });
 
-  //   suite('Services - Test Suite', async () => {
-  //     suite('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
-  //     suite('QcdbDownloadService - Test Suite', async () => await qcdbDownloadServiceTestSuite());
-  //     suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
-  //     suite('JsonServiceTest test suite', async () => await jsonFileServiceTestSuite());
-  //     suite('FilterService', async () => await filterServiceTestSuite());
-  //     suite('RunModeService - Test Suite', async () => await runModeServiceTestSuite());
-  //     suite('QcObjectService - Test Suite', async () => await qcObjectServiceTestSuite());
-  //     suite('BookkeepingServiceTest test suite', async () => await bookkeepingServiceTestSuite());
-  //     suite('AliEcsSynchronizer - Test Suite', async () => await aliecsSynchronizerTestSuite());
-  //   });
+    suite('Services - Test Suite', async () => {
+      suite('CcdbService - Test Suite', async () => await ccdbServiceTestSuite());
+      suite('QcdbDownloadService - Test Suite', async () => await qcdbDownloadServiceTestSuite());
+      suite('StatusService - Test Suite', async () => await statusServiceTestSuite());
+      suite('JsonServiceTest test suite', async () => await jsonFileServiceTestSuite());
+      suite('FilterService', async () => await filterServiceTestSuite());
+      suite('RunModeService - Test Suite', async () => await runModeServiceTestSuite());
+      suite('QcObjectService - Test Suite', async () => await qcObjectServiceTestSuite());
+      suite('BookkeepingServiceTest test suite', async () => await bookkeepingServiceTestSuite());
+      suite('AliEcsSynchronizer - Test Suite', async () => await aliecsSynchronizerTestSuite());
+    });
 
-  //   suite('Middleware - Test Suite', async () => {
-  //     suite('LayoutServiceMiddleware test suite', async () => layoutServiceMiddlewareTest());
-  //     suite('LayoutIdMiddleware test suite', async () => layoutIdMiddlewareTest());
-  //     suite('LayoutOwnerMiddleware test suite', async () => layoutOwnerMiddlewareTest());
-  //     suite('StatusComponentMiddleware test suite', async () => statusComponentMiddlewareTest());
-  //     suite('RunModeMiddleware test suite', async () => runModeMiddlewareTest());
-  //     suite('RunStatusFilterMiddleware test suite', async () => runStatusFilterMiddlewareTest());
-  //     suite('ObjectsGetValidationMiddleware test suite', async () => objectsGetValidationMiddlewareTest());
-  //     suite('ObjectGetContentsValidationMiddleware test suite', async () =>
-  //       objectGetContentsValidationMiddlewareTest());
-  //     suite('ObjectGetByIdValidationMiddleware test suite', async () => objectGetByIdValidationMiddlewareTest());
-  //   });
+    suite('Middleware - Test Suite', async () => {
+      suite('LayoutServiceMiddleware test suite', async () => layoutServiceMiddlewareTest());
+      suite('LayoutIdMiddleware test suite', async () => layoutIdMiddlewareTest());
+      suite('LayoutOwnerMiddleware test suite', async () => layoutOwnerMiddlewareTest());
+      suite('StatusComponentMiddleware test suite', async () => statusComponentMiddlewareTest());
+      suite('RunModeMiddleware test suite', async () => runModeMiddlewareTest());
+      suite('RunStatusFilterMiddleware test suite', async () => runStatusFilterMiddlewareTest());
+      suite('ObjectsGetValidationMiddleware test suite', async () => objectsGetValidationMiddlewareTest());
+      suite('ObjectGetContentsValidationMiddleware test suite', async () =>
+        objectGetContentsValidationMiddlewareTest());
+      suite('ObjectGetByIdValidationMiddleware test suite', async () => objectGetByIdValidationMiddlewareTest());
+    });
 
-  //   suite('Controllers - Test Suite', async () => {
-  //     suite('LayoutController test suite', async () => await layoutControllerTestSuite());
-  //     suite('StatusController test suite', async () => await statusControllerTestSuite());
-  //     suite('ObjectController test suite', async () => await objectControllerTestSuite());
-  //     suite('UserController - Test Suite', async () => await userControllerTestSuite());
-  //     suite('FiltersController test suite', async () => await filtersControllerTestSuite());
-  //   });
-  // });
+    suite('Controllers - Test Suite', async () => {
+      suite('LayoutController test suite', async () => await layoutControllerTestSuite());
+      suite('StatusController test suite', async () => await statusControllerTestSuite());
+      suite('ObjectController test suite', async () => await objectControllerTestSuite());
+      suite('UserController - Test Suite', async () => await userControllerTestSuite());
+      suite('FiltersController test suite', async () => await filtersControllerTestSuite());
+    });
+  });
 });
