@@ -86,7 +86,13 @@ export const setupQcModel = async (ws, eventEmitter) => {
   const userController = new UserController(userRepository);
   const layoutController = new LayoutController(layoutRepository);
 
-  const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
+  const statusService = new StatusService(
+    { version: packageJSON?.version ?? '-' },
+    {
+      qc: config.qc ?? {},
+      bookkeeping: config.bookkeeping ?? {},
+    },
+  );
   const statusController = new StatusController(statusService);
 
   if (config?.kafka?.enabled) {
@@ -118,6 +124,7 @@ export const setupQcModel = async (ws, eventEmitter) => {
   const intervalsService = new IntervalsService();
 
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
+  statusService.bookkeepingService = bookkeepingService;
   try {
     await bookkeepingService.connect();
   } catch (error) {

@@ -22,4 +22,5 @@ export const IntegratedServices = Object.freeze({
   QC: 'qc',
   CCDB: 'ccdb',
   KAFKA: 'kafka',
+  BOOKKEEPING: 'bookkeeping',
 });

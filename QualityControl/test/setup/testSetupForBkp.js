@@ -15,6 +15,7 @@
 import nock from 'nock';
 import { config } from '../config.js';
 import { BKP_MOCK_DATA } from './seeders/bkp-mock-data.js';
+import { GET_BKP_GUI_STATUS_PATH } from '../../lib/services/BookkeepingService.js';
 
 const BKP_URL = `${config.bookkeeping.url}`;
 const TOKEN_PATH = `?token=${config.bookkeeping.token}`;
@@ -33,12 +34,17 @@ export const initializeNockForBkp = () => {
     });
   nock(BKP_URL)
     .persist()
-    .get(`/api/status/database${TOKEN_PATH}`)
+    .get(`${GET_BKP_GUI_STATUS_PATH}${TOKEN_PATH}`)
     .reply(200, {
       data: {
         status: {
           ok: true,
           configured: true,
+          version: '1.0.0-mock',
+          extras: {
+            BASE_URL: BKP_URL,
+            PARTIAL_RUN_DETAILS: '/runs/',
+          },
         },
       },
     });

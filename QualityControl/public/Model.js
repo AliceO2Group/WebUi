@@ -182,6 +182,7 @@ export default class Model extends Observable {
     await this.filterModel.filterService.initFilterService();
     await this.filterModel.setFilterFromURL();
     this.filterModel.setFilterToURL();
+    await this.aboutViewModel.retrieveIndividualServiceStatus(IntegratedServices.BOOKKEEPING);
 
     this.services.layout.getLayoutsByUserId(this.session.personid, RequestFields.LAYOUT_CARD);
 

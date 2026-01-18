@@ -15,6 +15,7 @@ import { strictEqual, ok, deepStrictEqual, notDeepStrictEqual } from 'node:asser
 import { delay } from '../../testUtils/delay.js';
 import { getLocalStorage, getLocalStorageAsJson } from '../../testUtils/localStorage.js';
 import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
+import { config } from '../../config.js';
 
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
 
@@ -188,7 +189,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       const context = page.browserContext();
       await context.overridePermissions(url, ['clipboard-read', 'clipboard-write', 'clipboard-sanitized-write']);
 
-      await page.click('#qcObjectInfoPanel > div > div');
+      await page.click('#qcObjectInfoPanel > div > div > div');
 
       const clipboard = await page.evaluate(async () => {
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -207,7 +208,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       const context = page.browserContext();
       await context.overridePermissions(url, ['clipboard-read', 'clipboard-write', 'clipboard-sanitized-write']);
 
-      await page.click('#qcObjectInfoPanel > div > div'); // copy path
+      await page.click('#qcObjectInfoPanel > div > div > div'); // copy path
       await page.click('#qcObjectInfoPanel > div:nth-child(7) > div'); // try to copy empty value
 
       const clipboard = await page.evaluate(async () => {
@@ -217,6 +218,25 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
       strictEqual(clipboard, 'qc/test/object/1');
       context.clearPermissionOverrides();
+    },
+  );
+
+  await testParent.test(
+    'should have an external link to bookkeeping inline with the run number row',
+    { timeout },
+    async () => {
+      const bookkeepingLink = await page.$('#openRunInBookkeeping');
+      await delay(2000);
+      ok(bookkeepingLink, 'The link to bookkeeping should be present in the DOM');
+
+      const href = await page.evaluate((element) => element.href, bookkeepingLink);
+      const runNumber =
+        await page.evaluate((element) => element.parentElement.children[0].textContent, bookkeepingLink);
+      const url = new URL(href);
+      const baseUrl = `${url.origin}${url.pathname}`;
+
+      strictEqual(baseUrl, `${config.bookkeeping.url}/`);
+      strictEqual(runNumber, url.searchParams.get('runNumber'));
     },
   );
 
