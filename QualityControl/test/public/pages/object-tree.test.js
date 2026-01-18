@@ -89,12 +89,12 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   );
 
   await testParent.test(
-    'should have a correctly made download root as image button',
+    'should have a correctly made save root as image button',
     { timeout },
     async () => {
-      const exists = await page.evaluate(() => document.querySelector('.download-root-image-png-button') !== null);
+      const exists = await page.evaluate(() => document.querySelector('.save-root-as-image-button') !== null);
 
-      ok(exists, 'Expected ROOT image download button to exist');
+      ok(exists, 'Expected ROOT image save button to exist');
     },
   );
 
