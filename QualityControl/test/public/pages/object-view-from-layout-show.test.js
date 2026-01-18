@@ -20,7 +20,7 @@ import {
   removeLocalStorage,
   setLocalStorageAsJson,
 } from '../../testUtils/localStorage.js';
-import { SUPPORTED_ROOT_IMAGE_FILE_TYPES } from '../../../public/common/enums/rootImageMimes.enum.js';
+import { RootImageDownloadExtensions } from '../../../public/common/enums/rootImageMimes.enum.js';
 
 const OBJECT_VIEW_PAGE_PARAM = '?page=objectView&objectId=123456';
 
@@ -120,24 +120,17 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       const FILENAME = 'qc/test/object/1';
 
       await page.locator('.save-root-as-image-button').click();
-      await page.waitForSelector('.popover', {
+      await delay(100); // wait for the dropdown to appear
+      await page.waitForSelector('#download-root-image-dropdown', {
         visible: true,
         timeout: 1000,
       });
 
-      const expectedExtensionTypes = Object.keys(Object.entries(SUPPORTED_ROOT_IMAGE_FILE_TYPES).reduce(
-        (acc, [key, value]) => {
-          if (!acc.seen.has(value)) {
-            acc.seen.add(value);
-            acc.result[key] = value;
-          }
-          return acc;
-        },
-        { seen: new Set(), result: {} },
-      ).result);
+      const expectedExtensionTypes = RootImageDownloadExtensions();
 
       const testedOptions = await page.evaluate(() =>
-        Array.from(document.querySelectorAll('.popover .dropdown > button')).map((buttonElement) => buttonElement.id));
+        Array.from(document.querySelectorAll('#download-root-image-dropdown > button'))
+          .map((buttonElement) => buttonElement.id));
       const expectedOptions = expectedExtensionTypes.map((filetype) => `${FILENAME}.${filetype}`);
       deepStrictEqual(
         testedOptions,

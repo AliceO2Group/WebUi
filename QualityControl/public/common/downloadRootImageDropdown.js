@@ -15,7 +15,7 @@
 import { h, DropdownComponent, imagE } from '/js/src/index.js';
 import { downloadRoot } from './utils.js';
 import { isObjectOfTypeChecker } from '../../library/qcObject/utils.js';
-import { SUPPORTED_ROOT_IMAGE_FILE_TYPES } from './enums/rootImageMimes.enum.js';
+import { RootImageDownloadExtensions } from './enums/rootImageMimes.enum.js';
 
 /**
  * Download root image button.
@@ -39,33 +39,27 @@ export function downloadRootImageDropdown(
     return undefined;
   }
 
-  const deduplicated = Object.entries(SUPPORTED_ROOT_IMAGE_FILE_TYPES).reduce(
-    (acc, [key, value]) => {
-      if (!acc.seen.has(value)) {
-        acc.seen.add(value);
-        acc.result[key] = value;
-      }
-      return acc;
-    },
-    { seen: new Set(), result: {} },
-  ).result;
-
   const dropdownComponent = DropdownComponent(
-    h('button.btn.save-root-as-image-button', { title: 'Save root as image' }, imagE()),
-    Object.keys(deduplicated).map((filetype) => h('button.btn.d-block.w-100', {
-      key: `${uniqueIdentifier ?? filename}.${filetype}`,
-      id: `${uniqueIdentifier ?? filename}.${filetype}`,
-      title: `Save root as image (${filetype})`,
-      onclick: async (event) => {
-        try {
-          event.target.disabled = true;
-          await downloadRoot(filename, filetype, root, drawingOptions);
-        } finally {
-          event.target.disabled = false;
-          dropdownComponent.state.hidePopover();
-        }
-      },
-    }, filetype)),
+    h('button.btn.save-root-as-image-button', {
+      title: 'Save root as image',
+    }, imagE()),
+    h('#download-root-image-dropdown', [
+      RootImageDownloadExtensions()
+        .map((fileExtension) => h('button.btn.d-block.w-100', {
+          key: `${uniqueIdentifier ?? filename}.${fileExtension}`,
+          id: `${uniqueIdentifier ?? filename}.${fileExtension}`,
+          title: `Save root as image (${fileExtension})`,
+          onclick: async (event) => {
+            try {
+              event.target.disabled = true;
+              await downloadRoot(filename, fileExtension, root, drawingOptions);
+            } finally {
+              event.target.disabled = false;
+              dropdownComponent.state.hidePopover();
+            }
+          },
+        }, fileExtension)),
+    ]),
     { onVisibilityChange },
   );
 
