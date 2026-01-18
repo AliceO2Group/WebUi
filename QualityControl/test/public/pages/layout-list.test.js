@@ -50,7 +50,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     await page.goto(`${url}?page=about`, { waitUntil: 'networkidle0' });
     await page.click('#qcgTitle');
     await delay(300);
-    await page.waitForNetworkIdle({ timeout: 5000 }).catch(() => { /* ignore timeout error */ });
+    await page.waitForNetworkIdle({ timeout: 2000 }).catch(() => { /* ignore timeout error */ });
     const location = await page.evaluate(() => window.location);
     strictEqual(location.search, '?page=layoutList');
   });
