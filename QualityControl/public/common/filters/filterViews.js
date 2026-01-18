@@ -21,7 +21,7 @@ import {
 } from './filter.js';
 import { FilterType } from './filterTypes.js';
 import { filtersConfig, runModeFilterConfig } from './filtersConfig.js';
-import { runModeCheckbox } from './runMode/runModeCheckbox.js';
+import { runModeComponent } from './runMode/runModeCheckbox.js';
 import {
   cleanRunInformationPanel,
   detectorsQualitiesPanel,
@@ -92,15 +92,15 @@ export function filtersPanel(filterModel, viewModel) {
     ONGOING_RUN_INTERVAL_MS: refreshRate,
     runInformation,
   } = filterModel;
+  if (!isVisible) {
+    return null;
+  }
   const { fetchOngoingRuns } = filterService;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onFocusCallback = fetchOngoingRuns.bind(filterService);
   const onEnterCallback = () => filterModel.triggerFilter(viewModel);
   const clearFilterCallback = clearFiltersAndTrigger.bind(filterModel, viewModel);
-  if (!isVisible) {
-    return null;
-  }
   const filtersList = isRunModeActivated
     ? runModeFilterConfig(filterService)
     : filtersConfig(filterService);
@@ -110,7 +110,7 @@ export function filtersPanel(filterModel, viewModel) {
     '.w-100.flex-column.p2.g2.justify-center#filterElement',
     [
       h('.flex-row.g2.justify-center.items-center', [
-        runModeCheckbox(filterModel, viewModel),
+        runModeComponent(filterModel, viewModel),
         !isRunModeActivated &&
         [triggerFiltersButton(onEnterCallback, filterModel), clearFiltersButton(clearFilterCallback)],
         ...filtersList.map((filter) =>

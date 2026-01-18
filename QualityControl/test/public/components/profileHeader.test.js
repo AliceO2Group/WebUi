@@ -16,7 +16,9 @@ import { doesNotMatch, match, ok, strictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
 import { getLocalStorageAsJson } from '../../testUtils/localStorage.js';
-import { Transition } from '../../../common/library/enums/transition.enum.js';
+import { IntegratedServices } from '../../../common/library/enums/Status/integratedServices.enum.js';
+import { ServiceStatus } from '../../../common/library/enums/Status/serviceStatus.enum.js';
+import { integratedServiceInterceptor } from '../../testUtils/interceptors/integratedServiceInterceptor.js';
 
 /**
  * Performs a series of automated tests on the layoutList page using Puppeteer.
@@ -196,8 +198,32 @@ export const profileHeaderTests = async (url, page, timeout = 1000, testParent) 
     }
   });
 
-  await testParent.test('should enable RunMode when native browser notification is clicked', { timeout }, async () => {
-    await page.goto(`${url}?page=objectTree`, { waitUntil: 'networkidle0' });
+  await testParent.test('should enable RunMode when browser notification is clicked', { timeout }, async () => {
+    const RUN_NUMBER = 1234;
+
+    /*
+     * Kafka must be enabled for the browser notification feature to function correctly.
+     * We intercept the request and return a SUCCESS state of the kafka service.
+     */
+    const requestHandler = (request) =>
+      integratedServiceInterceptor(request, IntegratedServices.KAFKA, ServiceStatus.SUCCESS);
+
+    try {
+      // Enable interception and attach the handler
+      await page.setRequestInterception(true);
+      page.on('request', requestHandler);
+
+      await page.reload({ waitUntil: 'networkidle0' });
+    } finally {
+      // Cleanup: remove listener and disable interception
+      page.off('request', requestHandler);
+      await page.setRequestInterception(false);
+    }
+
+    /*
+     * To be able to receive a native browser notification we forcefully enable these permissions.
+     * After which we call the method triggered by websocket messages to push a fake notification.
+     */
     const context = page.browserContext();
 
     try {
@@ -238,7 +264,7 @@ export const profileHeaderTests = async (url, page, timeout = 1000, testParent) 
       // Trigger native browser notification by simulating websocket message
       await page.evaluate(
         (wsMessage) => window.model.notificationRunStartModel._handleWSRunTrack(wsMessage),
-        { runNumber: 1234, transition: Transition.START_ACTIVITY },
+        { runNumber: RUN_NUMBER },
       );
       // `window.__lastNotification` is set by the mocked `Notification`
       await page.waitForFunction(() => window.__lastNotification !== null);
@@ -251,13 +277,17 @@ export const profileHeaderTests = async (url, page, timeout = 1000, testParent) 
           window.__lastNotification.onclick();
         }
       });
+      await page.waitForNetworkIdle();
       await page.waitForFunction(() =>
         document.querySelector('#run-mode-switch .switch input[type="checkbox"]')?.checked === true);
+
+      const location = await page.evaluate(() => window.location);
+      strictEqual(location.search, `?page=objectTree&RunNumber=${RUN_NUMBER}`);
 
       selectedRun = await page.evaluate(() => document.querySelector('select#ongoingRunsFilter')?.value);
       strictEqual(
         selectedRun,
-        '1234',
+        RUN_NUMBER.toString(10),
         'Should have the newly started run selected in RunMode after clicking the notification',
       );
     } finally {
