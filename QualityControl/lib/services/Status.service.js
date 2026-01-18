@@ -17,6 +17,7 @@ import { exec } from 'node:child_process';
 
 import { LogManager } from '@aliceo2/web-ui';
 import { IntegratedServices } from './../../common/library/enums/Status/integratedServices.enum.js';
+import { ServiceStatus } from '../../common/library/enums/Status/serviceStatus.enum.js';
 
 const QC_VERSION_EXEC_COMMAND = 'yum info o2-QualityControl | awk \'/Version/ {print $3}\'';
 const execPromise = promisify(exec);
@@ -48,6 +49,11 @@ export class StatusService {
      */
     this._ws = undefined;
 
+    /**
+     * @type {?AliEcsSynchronizer}
+     */
+    this._aliEcsSynchronizer = undefined;
+
     this._packageInfo = packageInfo;
     this._config = config;
   }
@@ -69,6 +75,9 @@ export class StatusService {
       case IntegratedServices.CCDB:
         result = await this.retrieveDataServiceStatus();
         break;
+      case IntegratedServices.KAFKA:
+        result = this.retrieveKafkaServiceStatus();
+        break;
     }
     return result;
   }
@@ -80,7 +89,7 @@ export class StatusService {
   retrieveOwnStatus() {
     return {
       name: 'QCG',
-      status: { ok: true },
+      status: { ok: true, category: ServiceStatus.SUCCESS },
       version: this._packageInfo?.version ?? '',
       extras: {
         clients: this._ws?.server?.clients?.size ?? -1,
@@ -93,15 +102,16 @@ export class StatusService {
    * @returns {string} - version of QC deployed on the system
    */
   async retrieveQcVersion() {
-    let status = { ok: true };
+    let status = { ok: false, category: ServiceStatus.NOT_CONFIGURED };
     let version = 'Not part of an FLP deployment';
 
     if (this._config.qc?.enabled) {
       try {
         const { stdout } = await execPromise(QC_VERSION_EXEC_COMMAND, { timeout: 6000 });
         version = stdout.trim();
+        status = { ok: true, category: ServiceStatus.SUCCESS };
       } catch (error) {
-        status = { ok: false, message: error.message || error };
+        status = { ok: false, category: ServiceStatus.ERROR, message: error.message || error };
         this._logger.errorMessage(error, { level: 99, system: 'GUI', facility: 'qcg/status-service' });
       }
     }
@@ -114,15 +124,38 @@ export class StatusService {
    * @returns {Promise<{object}>} - status of the data service
    */
   async retrieveDataServiceStatus() {
-    let status = { ok: true };
-    let version = '';
+    const statusPackage = { name: 'CCDB', version: '', extras: {} };
     try {
       const { version: dataServiceVersion } = await this._dataService.getVersion();
-      version = dataServiceVersion;
+      return {
+        ...statusPackage,
+        status: { ok: true, category: ServiceStatus.SUCCESS },
+        version: dataServiceVersion,
+      };
     } catch (err) {
-      status = { ok: false, message: err.message || err };
+      return {
+        ...statusPackage,
+        status: { ok: false, category: ServiceStatus.ERROR, message: err.message || err },
+      };
     }
-    return { name: 'CCDB', status, version, extras: {} };
+  }
+
+  /**
+   * Retrieve the kafka service status response
+   * @returns {object} - status of the kafka service
+   */
+  retrieveKafkaServiceStatus() {
+    const status = this._aliEcsSynchronizer?.status;
+    return {
+      name: IntegratedServices.KAFKA,
+      status: {
+        ok: status === ServiceStatus.SUCCESS,
+        category: status ?? ServiceStatus.NOT_CONFIGURED,
+      },
+      extras: {
+        ...this._aliEcsSynchronizer?.extraInfo ?? {},
+      },
+    };
   }
 
   /**
@@ -171,5 +204,14 @@ export class StatusService {
    */
   set ws(ws) {
     this._ws = ws;
+  }
+
+  /**
+   * Set instance of `AliEcsSynchronizer`
+   * @param {AliEcsSynchronizer} aliEcsSynchronizer - instance of the `AliEcsSynchronizer`
+   * @returns {void}
+   */
+  set aliEcsSynchronizer(aliEcsSynchronizer) {
+    this._aliEcsSynchronizer = aliEcsSynchronizer;
   }
 }

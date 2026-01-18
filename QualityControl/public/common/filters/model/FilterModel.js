@@ -18,7 +18,7 @@ import FilterService from '../../../services/Filter.service.js';
 import { RunStatus } from '../../../library/runStatus.enum.js';
 import { prettyFormatDate } from '../../utils.js';
 
-const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
+const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType', 'DetectorName', 'QcVersion'];
 
 const RUN_INFORMATION_MAP = {
   startTime: prettyFormatDate,
@@ -439,5 +439,20 @@ export default class FilterModel extends Observable {
       return { refreshNeeded, data };
     }
     return { refreshNeeded: true, data: null };
+  }
+
+  /**
+   * Returns the target model based on the current page
+   * @returns {object} the specific object/view model for the page
+   */
+  getPageTargetModel() {
+    const { page, layout, object, objectViewModel } = this.model;
+
+    switch (page) {
+      case 'layoutShow': return layout;
+      case 'objectTree': return object;
+      case 'objectView': return objectViewModel;
+      default: return null;
+    }
   }
 }
