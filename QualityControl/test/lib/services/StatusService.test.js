@@ -17,7 +17,6 @@ import { deepStrictEqual } from 'node:assert';
 import { suite, test, before } from 'node:test';
 
 import { StatusService } from './../../../lib/services/Status.service.js';
-import { config } from '../../config.js';
 import { ServiceStatus } from '../../../common/library/enums/Status/serviceStatus.enum.js';
 
 export const statusServiceTestSuite = async () => {

@@ -17,7 +17,6 @@ import { ok } from 'node:assert';
 import { suite, test } from 'node:test';
 
 import { StatusController } from './../../../lib/controllers/StatusController.js';
-import { config } from '../../config.js';
 
 export const statusControllerTestSuite = async () => {
   suite('`getSetServiceStatusHandler()` tests', () => {
