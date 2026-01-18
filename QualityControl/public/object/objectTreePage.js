@@ -62,7 +62,7 @@ export default (model) => {
               qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
             return h('.flex-column.flex-grow', [
               actionablesHeaderGroup(model.object),
-              virtualTable(model, 'side', objectsToDisplay),
+              virtualTable(model, 'main', objectsToDisplay),
             ]);
           }
           return h('', [
