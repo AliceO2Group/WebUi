@@ -15,6 +15,7 @@
 import nock from 'nock';
 import { config } from '../config.js';
 import { BKP_MOCK_DATA } from './seeders/bkp-mock-data.js';
+import { GET_BKP_GUI_STATUS_PATH } from '../../lib/services/BookkeepingService.js';
 
 const BKP_URL = `${config.bookkeeping.url}`;
 const TOKEN_PATH = `?token=${config.bookkeeping.token}`;
@@ -33,14 +34,122 @@ export const initializeNockForBkp = () => {
     });
   nock(BKP_URL)
     .persist()
-    .get(`/api/status/database${TOKEN_PATH}`)
+    .get(`${GET_BKP_GUI_STATUS_PATH}${TOKEN_PATH}`)
     .reply(200, {
       data: {
         status: {
           ok: true,
           configured: true,
+          version: '1.0.0-mock',
+          extras: {
+            BASE_URL: BKP_URL,
+            PARTIAL_RUN_DETAILS: '/runs/',
+          },
         },
       },
+    });
+  nock(BKP_URL)
+    .persist()
+    .get(`/api/detectors${TOKEN_PATH}`)
+    .reply(200, {
+      data: [
+        {
+          id: 17,
+          name: 'ACO',
+          type: 'PHYSICAL',
+          createdAt: 1765468282000,
+          updatedAt: 1765468282000,
+        },
+        {
+          id: 1,
+          name: 'CPV',
+          type: 'PHYSICAL',
+          createdAt: 1765468282000,
+          updatedAt: 1765468282000,
+        },
+        {
+          id: 23,
+          name: 'EVS',
+          type: 'AOT-EVENT',
+          createdAt: 1765468282000,
+          updatedAt: 1765468282000,
+        },
+        {
+          id: 21,
+          name: 'GLO',
+          type: 'QC',
+          createdAt: 1765468282000,
+          updatedAt: 1765468282000,
+        },
+        {
+          id: 15,
+          name: 'TST',
+          type: 'VIRTUAL',
+          createdAt: 1765468282000,
+          updatedAt: 1765468282000,
+        },
+      ],
+    });
+  nock(BKP_URL)
+    .persist()
+    .get(`/api/dataPasses${TOKEN_PATH}`)
+    .reply(200, {
+      data: [
+        {
+          id: 9,
+          name: 'LHC23f_cpass0',
+          isFrozen: false,
+          versions: [],
+          pdpBeamTypes: ['OO'],
+          runCount: 1,
+          simulationPassesCount: 1,
+        },
+        {
+          id: 2,
+          name: 'LHC22b_skimming',
+          isFrozen: false,
+          versions: [],
+          pdpBeamTypes: ['pp'],
+          runCount: 2,
+          simulationPassesCount: 2,
+        },
+        {
+          id: 5,
+          name: 'LHC22b_apass2_skimmed',
+          isFrozen: false,
+          versions: [],
+          pdpBeamTypes: ['PbPb'],
+          runCount: 3,
+          simulationPassesCount: 1,
+        },
+        {
+          id: 1,
+          name: 'LHC22b_apass1',
+          isFrozen: false,
+          versions: [],
+          pdpBeamTypes: ['pp'],
+          runCount: 4,
+          simulationPassesCount: 0,
+        },
+        {
+          id: 4,
+          name: 'LHC22a_apass2',
+          isFrozen: false,
+          versions: [],
+          pdpBeamTypes: ['PbPb'],
+          runCount: 5,
+          simulationPassesCount: 2,
+        },
+        {
+          id: 3,
+          name: 'LHC22a_apass1',
+          isFrozen: false,
+          versions: [],
+          pdpBeamTypes: ['PbPb'],
+          runCount: 4,
+          simulationPassesCount: 0,
+        },
+      ],
     });
   nock(BKP_URL)
     .persist()

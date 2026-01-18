@@ -437,15 +437,10 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should close JSON editor when clicking "Cancel"',
     { timeout },
     async () => {
-      const cancelButtonPath = 'body > div > div > div > div > button:nth-child(2)';
-      await page.locator(cancelButtonPath).click();
+      await page.locator('.o2-modal-content .btn-group > button:nth-child(2)').click();
       await delay(50);
-      const childrenCount = await page.evaluate(() => {
-        const bodyPath = 'body';
-        const body = document.querySelector(bodyPath);
-        return body.children.length;
-      });
-      strictEqual(childrenCount, 2);
+      const isModelOpen = await page.evaluate(() => document.querySelector('.o2-modal-content') !== null);
+      strictEqual(isModelOpen, false);
     },
   );
 

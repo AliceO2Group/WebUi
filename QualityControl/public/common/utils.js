@@ -16,7 +16,7 @@ import { isUserRoleSufficient } from '../../../../library/userRole.enum.js';
 import { generateDrawingOptionString } from '../../library/qcObject/utils.js';
 import { SUPPORTED_ROOT_IMAGE_FILE_TYPES } from './enums/rootImageMimes.enum.js';
 
-/* global JSROOT */
+/* global JSROOT BOOKKEEPING */
 
 /**
  * Generates a new ObjectId
@@ -260,4 +260,16 @@ export const isOnLeftSideOfViewport = (element) => {
   const rect = element.getBoundingClientRect();
   const isLeft = rect.left - rect.width < window.innerWidth / 2;
   return isLeft;
+};
+
+/**
+ * Retrieves the URL to the run details page in Bookkeeping for the given run number
+ * @param {number|string} runNumber - The run number to generate the URL for
+ * @returns {string|null} The URL to the run details page, or null if Bookkeeping is not configured
+ */
+export const getBkpRunDetailsUrl = (runNumber) => {
+  if (typeof BOOKKEEPING !== 'undefined' && BOOKKEEPING && BOOKKEEPING.RUN_DETAILS) {
+    return BOOKKEEPING.RUN_DETAILS + runNumber;
+  }
+  return null;
 };
