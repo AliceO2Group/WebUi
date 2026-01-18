@@ -171,6 +171,10 @@ export class StatusService {
         name: IntegratedServices.BOOKKEEPING,
         version: this._bookkeepingService.version,
         status: { ok: true, category: ServiceStatus.SUCCESS },
+        extras: {
+          BASE_URL: this._bookkeepingService.url,
+          PARTIAL_RUN_DETAILS: '?page=run-detail&runNumber=',
+        },
       };
     } else if (this._bookkeepingService.config) {
       return {
@@ -179,10 +183,6 @@ export class StatusService {
           ok: false,
           category: ServiceStatus.ERROR,
           message: this._bookkeepingService.error || 'Unable to connect to Bookkeeping service',
-        },
-        extras: {
-          BASE_URL: this._bookkeepingService.url,
-          PARTIAL_RUN_DETAILS: '?page=run-detail&runNumber=',
         },
       };
     }

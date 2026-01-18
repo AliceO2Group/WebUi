@@ -29,7 +29,6 @@ import AboutViewModel from './pages/aboutView/AboutViewModel.js';
 import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
 import { RequestFields } from './common/RequestFields.enum.js';
 import FilterModel from './common/filters/model/FilterModel.js';
-import StatusService from './services/Status.service.js';
 import { IntegratedServices } from '../library/enums/Status/integratedServices.enum.js';
 import NotificationRunStartModel from './common/notifications/model/NotificationRunStartModel.js';
 
@@ -103,7 +102,6 @@ export default class Model extends Observable {
     this.services = {
       object: new QCObjectService(this),
       layout: new LayoutService(this),
-      status: new StatusService(this),
     };
 
     this.loader.get('/api/checkUser');
@@ -184,6 +182,7 @@ export default class Model extends Observable {
     await this.filterModel.filterService.initFilterService();
     await this.filterModel.setFilterFromURL();
     this.filterModel.setFilterToURL();
+    await this.aboutViewModel.retrieveIndividualServiceStatus(IntegratedServices.BOOKKEEPING);
 
     this.services.layout.getLayoutsByUserId(this.session.personid, RequestFields.LAYOUT_CARD);
 

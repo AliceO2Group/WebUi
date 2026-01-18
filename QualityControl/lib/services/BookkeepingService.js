@@ -17,7 +17,7 @@ import { httpGetJson } from '../utils/httpRequests.js';
 import { LogManager } from '@aliceo2/web-ui';
 import { wrapRunStatus } from '../dtos/BookkeepingDto.js';
 
-const GET_BKP_GUI_STATUS_PATH = '/api/status/gui';
+export const GET_BKP_GUI_STATUS_PATH = '/api/status/gui';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
 const GET_RUN_PATH = '/api/runs';
 export const GET_DETECTORS_PATH = '/api/detectors';

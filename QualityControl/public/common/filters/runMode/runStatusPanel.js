@@ -13,7 +13,7 @@
 
 import { RunStatus } from '../../../../../library/runStatus.enum.js';
 import { h, iconExternalLink } from '/js/src/index.js';
-import { camelToTitleCase } from '../../utils.js';
+import { camelToTitleCase, getBkpRunDetailsUrl } from '../../utils.js';
 import { statusBadge } from '../../badge.js';
 
 /**
@@ -77,7 +77,7 @@ export const cleanRunInformationPanel = (cleanRunInformation, runNumber) =>
         h('a', {
           id: 'openRunInBookkeeping',
           title: 'Open run in Bookkeeping',
-          href: model.services.status.buildBookkeepingUrl(runNumber),
+          href: getBkpRunDetailsUrl(runNumber),
           target: '_blank',
         }, iconExternalLink()),
       ]),

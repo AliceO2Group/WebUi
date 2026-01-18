@@ -226,6 +226,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     { timeout },
     async () => {
       const bookkeepingLink = await page.$('#openRunInBookkeeping');
+      await delay(2000);
       ok(bookkeepingLink, 'The link to bookkeeping should be present in the DOM');
 
       const href = await page.evaluate((element) => element.href, bookkeepingLink);
@@ -236,8 +237,8 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
 
       strictEqual(baseUrl, `${config.bookkeeping.url}/`);
       strictEqual(runNumber, url.searchParams.get('runNumber'));
-    }
-  )
+    },
+  );
 
   await testParent.test(
     'should close the object plot upon clicking the close button',

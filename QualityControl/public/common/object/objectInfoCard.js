@@ -15,6 +15,7 @@
 import { h, isContextSecure } from '/js/src/index.js';
 import { iconExternalLink } from '/js/src/icons.js';
 import { camelToTitleCase, copyToClipboard, prettyFormatDate } from './../utils.js';
+import { getBkpRunDetailsUrl } from '../../common/utils.js';
 
 const SPECIFIC_KEY_LABELS = {
   id: 'ID (etag)',
@@ -63,6 +64,7 @@ const infoRow = (key, value, infoRowAttributes) => {
   const formattedKey = getUILabel(key);
 
   const hasValue = value != null && value !== '' && (!Array.isArray(value) || value.length !== 0);
+  const bkpRunDetailsUrl = key === 'runNumber' ? getBkpRunDetailsUrl(value) : null;
 
   return h(`.flex-row.g2.info-row${highlightedClasses}`, [
     h('b.w-25.w-wrapped', formattedKey),
@@ -72,11 +74,11 @@ const infoRow = (key, value, infoRowAttributes) => {
         hasValue && infoRowAttributes(formattedKey, formattedValue),
         formattedValue,
       ),
-      model.services.status.isConfigured('bookkeeping') && key === 'runNumber' && hasValue
+      bkpRunDetailsUrl && hasValue
         ? h('a.ph2.text-right.actionable-icon', {
           id: 'openRunInBookkeeping',
           title: 'Open run in Bookkeeping',
-          href: model.services.status.buildBookkeepingUrl(value),
+          href: bkpRunDetailsUrl,
           target: '_blank',
         }, iconExternalLink())
         : '',

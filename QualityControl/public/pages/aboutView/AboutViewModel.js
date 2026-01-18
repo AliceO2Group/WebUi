@@ -67,6 +67,11 @@ export default class AboutViewModel extends BaseViewModel {
       } else {
         const { status: { category } } = result;
         this.services[category][service] = RemoteData.success(result);
+        if (result.status.ok && service === IntegratedServices.BOOKKEEPING) {
+          window.BOOKKEEPING = {
+            RUN_DETAILS: result.extras.BASE_URL + result.extras.PARTIAL_RUN_DETAILS,
+          };
+        }
       }
       this.notify();
     } catch (error) {
