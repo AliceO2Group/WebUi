@@ -33,7 +33,7 @@ export const servicesResolvedPanel = (serviceStatus, serviceData) => {
 
   return h('.w-100.flex-column.p2.shadow-level1', { id: `service-status-${serviceStatus.toLowerCase()}` }, [
     h('h4', { class: classes }, label),
-    h('.flex-wrap.g1', [
+    h(`.flex-wrap.g1.${classes}`, [
       serviceData
         .sort(({ payload: { name: nameA } }, { payload: { name: nameB } }) => nameA > nameB ? 1 : -1)
         .map(({ payload }) => serviceCard(payload)),

@@ -22,7 +22,7 @@ import { servicePanel } from './components/servicePanel.js';
  */
 export default (aboutViewModel) =>
   h(
-    '.flex-column.flex-grow.p2.text-center',
+    '.flex-column.flex-grow.p2',
     { key: 'about-view-page' },
     Object.entries(aboutViewModel.services).map(([serviceStatus, service]) => servicePanel(serviceStatus, service)),
   );
