@@ -200,24 +200,4 @@ export const statusServiceTestSuite = async () => {
       });
     });
   });
-
-  suite('`retrieveServicesConfiguration()` tests', () => {
-    test('should return bookkeeping configuration if bookkeeping service is active', () => {
-      const serviceConfig = {
-        bookkeeping: { url: config.bookkeeping.url },
-      };
-      const statusService = new StatusService({ version: '0.1.1' }, serviceConfig);
-
-      statusService.bookkeepingService = { active: true };
-
-      const result = statusService.retrieveServicesConfiguration();
-
-      deepStrictEqual(result, {
-        bookkeeping: {
-          BASE_URL: config.bookkeeping.url,
-          PARTIAL_RUN_DETAILS: '?page=run-detail&runNumber=',
-        },
-      });
-    });
-  });
 };

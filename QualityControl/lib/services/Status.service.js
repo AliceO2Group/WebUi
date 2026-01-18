@@ -78,6 +78,9 @@ export class StatusService {
       case IntegratedServices.KAFKA:
         result = this.retrieveKafkaServiceStatus();
         break;
+      case IntegratedServices.BOOKKEEPING:
+        result = this.retrieveBookkeepingServiceStatus();
+        break;
     }
     return result;
   }
@@ -159,20 +162,34 @@ export class StatusService {
   }
 
   /**
-   * Retrieve the configurations of the services for the front end.
-   * @returns {object} - object containing the configurations of the services for the front end.
+   * Retrieve the bookkeeping service status response and its public configuration
+   * @returns {object} - status of the bookkeeping service
    */
-  retrieveServicesConfiguration() {
-    const serviceConfig = {};
-
+  retrieveBookkeepingServiceStatus() {
     if (this._bookkeepingService?.active) {
-      serviceConfig.bookkeeping = {
-        BASE_URL: this._config.bookkeeping.url,
-        PARTIAL_RUN_DETAILS: '?page=run-detail&runNumber=',
+      return {
+        name: IntegratedServices.BOOKKEEPING,
+        version: this._bookkeepingService.version,
+        status: { ok: true, category: ServiceStatus.SUCCESS },
+      };
+    } else if (this._bookkeepingService.config) {
+      return {
+        name: IntegratedServices.BOOKKEEPING,
+        status: {
+          ok: false,
+          category: ServiceStatus.ERROR,
+          message: this._bookkeepingService.error || 'Unable to connect to Bookkeeping service',
+        },
+        extras: {
+          BASE_URL: this._bookkeepingService.url,
+          PARTIAL_RUN_DETAILS: '?page=run-detail&runNumber=',
+        },
       };
     }
-
-    return serviceConfig;
+    return {
+      name: IntegratedServices.BOOKKEEPING,
+      status: { ok: false, category: ServiceStatus.NOT_CONFIGURED },
+    };
   }
 
   /*

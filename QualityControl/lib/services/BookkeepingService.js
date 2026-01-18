@@ -17,7 +17,7 @@ import { httpGetJson } from '../utils/httpRequests.js';
 import { LogManager } from '@aliceo2/web-ui';
 import { wrapRunStatus } from '../dtos/BookkeepingDto.js';
 
-const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
+const GET_BKP_GUI_STATUS_PATH = '/api/status/gui';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
 const GET_RUN_PATH = '/api/runs';
 export const GET_DETECTORS_PATH = '/api/detectors';
@@ -36,6 +36,7 @@ export class BookkeepingService {
     this.active = false;
     this.error = null;
 
+    this._url = '';
     this._hostname = '';
     this._port = null;
     this._token = '';
@@ -56,6 +57,7 @@ export class BookkeepingService {
     const { url, token } = this.config || {};
     try {
       const normalizedURL = new URL(url);
+      this._url = normalizedURL.href;
       this._hostname = normalizedURL.hostname;
       this._protocol = normalizedURL.protocol;
       this._port = normalizedURL.port || (normalizedURL.protocol === 'https:' ? 443 : 80);
@@ -95,13 +97,14 @@ export class BookkeepingService {
       const { data } = await httpGetJson(
         this._hostname,
         this._port,
-        `${GET_BKP_DATABASE_STATUS_PATH}?token=${this._token}`,
+        `${GET_BKP_GUI_STATUS_PATH}?token=${this._token}`,
         {
           protocol: this._protocol,
           rejectUnauthorized: false,
         },
       );
       if (data && data?.status?.ok && data?.status?.configured) {
+        this._version = data.version || 'unknown';
         this._logger.infoMessage('Successfully connected to Bookkeeping');
         return true;
       } else {
@@ -203,18 +206,6 @@ export class BookkeepingService {
   }
 
   /**
-   * Retrieve the configured URL for Bookkeeping
-   * @returns {string | false} - URL for Bookkeeping, if not configured returns `false`
-   */
-  retrieveBookkeepingURL() {
-    if (!this.active) {
-      this._logger.warnMessage('Bookkeeping not configured');
-      return false;
-    }
-    return `${this._protocol}${this._hostname}${this._port}`;
-  }
-
-  /**
    * Retrieves runs that are currently ongoing (started within the last \@see {RECENT_RUN_THRESHOLD_MS}
    * but have not yet ended).
    * @returns {Promise<Array<object>|undefined>} A promise that resolves to an array of run objects,
@@ -289,5 +280,23 @@ export class BookkeepingService {
    */
   _createRunPath(runNumber) {
     return this._createPath(`${GET_RUN_PATH}/${runNumber}`);
+  }
+
+  /**
+   * Get the URL of the bookkeeping service
+   * @readonly
+   * @returns {string} the URL of the bookkeeping service
+   */
+  get url() {
+    return this._url;
+  }
+
+  /**
+   * Get the version of the bookkeeping service
+   * @readonly
+   * @returns {string} the version of the bookkeeping service
+   */
+  get version() {
+    return this._version;
   }
 }

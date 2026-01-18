@@ -102,7 +102,6 @@ export const setup = async (http, ws, eventEmitter) => {
     statusController.getServiceStatusHandler.bind(statusController),
     { public: true },
   );
-  http.get('/services', statusController.getServicesConfigurationHandler.bind(statusController));
 
   http.get('/checkUser', userController.addUserHandler.bind(userController));
 

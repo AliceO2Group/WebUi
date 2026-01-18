@@ -57,14 +57,4 @@ export class StatusController {
       );
     }
   }
-
-  /**
-   * Send back the configuration of the connected services for the frontend
-   * @param {Request} _ - HTTP request object
-   * @param {Response} res - HTTP response object
-   * @returns {undefined}
-   */
-  async getServicesConfigurationHandler(_, res) {
-    res.status(200).json(this._statusService.retrieveServicesConfiguration());
-  }
 }
