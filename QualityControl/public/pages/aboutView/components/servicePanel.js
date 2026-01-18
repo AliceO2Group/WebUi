@@ -18,7 +18,7 @@ import { servicesResolvedPanel } from './servicesResolvedPanel.js';
 
 /**
  * Build a reusable panel to display a wrapped list of service panels with their respective information
- * @param {ServiceStatus} serviceStatus - Map of services with their respective information
+ * @param {ServiceStatus} serviceStatus - Category of the service to be displayed
  * @param {Record<string, RemoteData>} servicesRecord - Category of the services to be displayed
  * @returns {vnode|null} - A virtual node representing the resolved panel
  */
@@ -27,8 +27,7 @@ export const servicePanel = (serviceStatus, servicesRecord) => {
   if (!serviceData.length) {
     return null;
   }
-
   return serviceStatus === ServiceStatus.LOADING
-    ? servicesLoadingPanel(Object.keys(serviceStatus))
+    ? servicesLoadingPanel(Object.keys(servicesRecord))
     : servicesResolvedPanel(serviceStatus, serviceData);
 };
