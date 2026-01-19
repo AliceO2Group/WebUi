@@ -13,11 +13,12 @@
  */
 
 import { EmitterKeys } from '../../common/library/enums/emitterKeys.enum.js';
-import { Transition } from '../../common/library/enums/transition.enum.js';
+import { Transition, TransitionStatus } from '../../common/library/enums/transition.enum.js';
 
 /**
  * Mock Kafka events for testing purposes
  * @param {EventEmitter} eventEmitter - Event emitter to emit mock events
+ * @returns {Array<number>} - Array of mock ongoing run numbers
  */
 export const setupMockKafkaEvents = (eventEmitter) => {
   // Simulate some ongoing runs being started
@@ -29,10 +30,11 @@ export const setupMockKafkaEvents = (eventEmitter) => {
       eventEmitter.emit(EmitterKeys.RUN_TRACK, {
         runNumber: parseInt(runNumber, 10),
         transition: Transition.START_ACTIVITY,
+        transitionStatus: TransitionStatus.DONE_OK,
         timestamp: Date.now(),
       });
     });
-  }, 100);
+  }, 500);
 
   return mockOngoingRuns;
 };
