@@ -147,7 +147,7 @@
     font-weight: 500;
   }
 
-  &>div:hover {
+  & > div > div:hover {
     font-weight: 700;
   }
 }

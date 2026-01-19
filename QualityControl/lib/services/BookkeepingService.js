@@ -17,7 +17,7 @@ import { httpGetJson } from '../utils/httpRequests.js';
 import { LogManager } from '@aliceo2/web-ui';
 import { wrapRunStatus } from '../dtos/BookkeepingDto.js';
 
-const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
+export const GET_BKP_GUI_STATUS_PATH = '/api/status/gui';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
 const GET_RUN_PATH = '/api/runs';
 export const GET_DETECTORS_PATH = '/api/detectors';
@@ -36,6 +36,7 @@ export class BookkeepingService {
     this.active = false;
     this.error = null;
 
+    this._url = '';
     this._hostname = '';
     this._port = null;
     this._token = '';
@@ -56,6 +57,7 @@ export class BookkeepingService {
     const { url, token } = this.config || {};
     try {
       const normalizedURL = new URL(url);
+      this._url = normalizedURL.href;
       this._hostname = normalizedURL.hostname;
       this._protocol = normalizedURL.protocol;
       this._port = normalizedURL.port || (normalizedURL.protocol === 'https:' ? 443 : 80);
@@ -95,13 +97,14 @@ export class BookkeepingService {
       const { data } = await httpGetJson(
         this._hostname,
         this._port,
-        `${GET_BKP_DATABASE_STATUS_PATH}?token=${this._token}`,
+        `${GET_BKP_GUI_STATUS_PATH}?token=${this._token}`,
         {
           protocol: this._protocol,
           rejectUnauthorized: false,
         },
       );
       if (data && data?.status?.ok && data?.status?.configured) {
+        this._version = data.version || 'unknown';
         this._logger.infoMessage('Successfully connected to Bookkeeping');
         return true;
       } else {
@@ -277,5 +280,23 @@ export class BookkeepingService {
    */
   _createRunPath(runNumber) {
     return this._createPath(`${GET_RUN_PATH}/${runNumber}`);
+  }
+
+  /**
+   * Get the URL of the bookkeeping service
+   * @readonly
+   * @returns {string} the URL of the bookkeeping service
+   */
+  get url() {
+    return this._url;
+  }
+
+  /**
+   * Get the version of the bookkeeping service
+   * @readonly
+   * @returns {string} the version of the bookkeeping service
+   */
+  get version() {
+    return this._version;
   }
 }

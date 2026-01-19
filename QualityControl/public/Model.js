@@ -29,6 +29,7 @@ import AboutViewModel from './pages/aboutView/AboutViewModel.js';
 import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
 import { RequestFields } from './common/RequestFields.enum.js';
 import FilterModel from './common/filters/model/FilterModel.js';
+import { IntegratedServices } from '../library/enums/Status/integratedServices.enum.js';
 import NotificationRunStartModel from './common/notifications/model/NotificationRunStartModel.js';
 
 /**
@@ -119,6 +120,12 @@ export default class Model extends Observable {
       height: 10,
     };
 
+    // For active run monitoring, the kafka service must be available.
+    // If we do not yet know the kafka service status, we should request it from the backend
+    if (!this.aboutViewModel.findService(IntegratedServices.KAFKA)) {
+      this.aboutViewModel.retrieveIndividualServiceStatus(IntegratedServices.KAFKA);
+    }
+
     /*
      * Init first page
      */
@@ -175,6 +182,7 @@ export default class Model extends Observable {
     await this.filterModel.filterService.initFilterService();
     await this.filterModel.setFilterFromURL();
     this.filterModel.setFilterToURL();
+    await this.aboutViewModel.retrieveIndividualServiceStatus(IntegratedServices.BOOKKEEPING);
 
     this.services.layout.getLayoutsByUserId(this.session.personid, RequestFields.LAYOUT_CARD);
 
