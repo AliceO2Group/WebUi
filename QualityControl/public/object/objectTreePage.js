@@ -100,6 +100,7 @@ function objectPanel(model) {
         h('.h-100.w-100.flex-column.items-center.justify-center.f5', [spinner(3), h('', 'Loading Object')]),
       Success: (data) => drawPlot(model, data),
       Failure: (invalidObjectDetails) => drawFailure(model, invalidObjectDetails),
+      // draw failure is already applied in drawPlot -> draw
     });
   }
   return null;
@@ -137,14 +138,16 @@ const drawPlot = (model, object) => {
  * @returns {vnode} - virtual node element
  */
 const drawFailure = (model, invalidObjectDetails) => {
-  const { name, message, validFrom, id, versions } = invalidObjectDetails ?? {};
+  const { name, message, validFrom, id } = invalidObjectDetails ?? {};
+  const versions = undefined;
+  const isRootError = message?.includes('ROOT_ERROR');
   return h('.h-100.flex-column', [
     actionButtonsRow(model, name, null, validFrom, id),
     h(
       '.h-100.flex-column.items-center.justify-center.text-center.f5',
       [h('.f1', iconCircleX()), message],
     ),
-    h('.w-100.flex-row.justify-center.pv2', h('.w-80', timestampSelectForm({
+    isRootError && h('.w-100.flex-row.justify-center.pv2', h('.w-80', timestampSelectForm({
       versions: versions ?? [],
       selectedId: id ?? null,
       onSelect: (version) => model.object.loadObjectByName(name, version.validFrom, version.id),

@@ -17,7 +17,10 @@ import { prettyFormatDate } from './utils.js';
 
 /**
  * Display a select form with the latest timestamps of the current selected object
- * @param {Model} model - root model of the application
+ * @param {object} config - root model of the application
+ * @param {Array<{id: string, createdAt: string}>} config.versions - list of versions to display
+ * @param {string|null} config.selectedId - currently selected version id
+ * @param {onselect} config.onSelect - callback when a version is selected
  * @returns {vnode} - virtual node element
  */
 export const timestampSelectForm = ({ versions = [], selectedId = null, onSelect }) =>
@@ -30,19 +33,29 @@ export const timestampSelectForm = ({ versions = [], selectedId = null, onSelect
           onSelect?.(JSON.parse(value));
         }
       },
-    }, versions.map((version) => {
-      const versionString = JSON.stringify(version);
-      return h('option.text-center', {
-        id: versionString,
-        key: versionString,
-        value: versionString,
-        selected: selectedId ? version.id === selectedId : false,
-      }, [
-        'Created: ',
-        prettyFormatDate(version.createdAt),
-        ' (id: ',
-        version.id,
-        ')',
-      ]);
-    })),
+    }, versions.map((version) => versionOptionNode(version, selectedId === version.id))),
   );
+
+/**
+ * Create an option HTML element for a version
+ * @param {object} version - version object
+ * @param {string} version.id - version id
+ * @param {string} version.createdAt - version creation timestamp
+ * @param {boolean} isSelected - whether the version is selected
+ * @returns {vnode} - virtual node element
+ */
+const versionOptionNode = (version, isSelected = false) => {
+  const versionString = JSON.stringify(version);
+  return h('option.text-center', {
+    id: versionString,
+    key: versionString,
+    value: versionString,
+    selected: isSelected,
+  }, [
+    'Created: ',
+    prettyFormatDate(version.createdAt),
+    ' (id: ',
+    version.id,
+    ')',
+  ]);
+};
