@@ -12,16 +12,17 @@
  */
 /* eslint-disable @stylistic/js/max-len */
 
-import { strictEqual, ok } from 'node:assert';
+import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 import { IntegratedServices } from '../../../common/library/enums/Status/integratedServices.enum.js';
 import { ServiceStatus } from '../../../common/library/enums/Status/serviceStatus.enum.js';
 import { integratedServiceInterceptor } from '../../testUtils/interceptors/integratedServiceInterceptor.js';
+import { ONGOING_RUN_NUMBER } from '../../setup/mockKafkaEvents.js';
 
 // If using nock for HTTP mocking (uncomment if available)
 // import nock from 'nock';
 export const runModeTests = async (url, page, timeout = 5000, testParent) => {
-  const mockedTestRunNumber = 500001;
+  const mockedTestRunNumber = ONGOING_RUN_NUMBER;
   let countOngoingRunsCalls = 0;
   let countRunStatusCalls = 0;
   let expectCountRunStatusCalls = 0;
@@ -185,10 +186,7 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
         .filter((value) => value !== '');
     });
 
-    ok(availableOptions.length > 0, 'Should have ongoing runs available in selector');
-    ['500001', '500002', '500003'].forEach((run) => {
-      ok(availableOptions.includes(run), `Should include mock run ${run}`);
-    });
+    deepStrictEqual(availableOptions, ['500001', '500002', '500003'], 'Ongoing runs selector should have correct options');
   });
 
   await testParent.test('should automatically select first run and update URL', { timeout }, async () => {
