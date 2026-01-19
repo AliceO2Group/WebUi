@@ -141,7 +141,7 @@ export class RunModeService {
    * @param {string} runEvent.transitionStatus - The status of the transition (e.g., 'DONE_OK').
    * @returns {Promise<void>}
    */
-  async _onRunTrackEvent({ runNumber, transition, transitionStatus }) {
+  async _onRunTrackEvent({ runNumber, transition = Transition.NULL, transitionStatus = TransitionStatus.NULL }) {
     if (transition === Transition.START_ACTIVITY && transitionStatus === TransitionStatus.DONE_OK) {
       await this._initializeRunData(runNumber);
 

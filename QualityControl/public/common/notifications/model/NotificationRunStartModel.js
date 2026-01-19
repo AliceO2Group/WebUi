@@ -84,13 +84,12 @@ export default class NotificationRunStartModel extends Observable {
     showNativeBrowserNotification({
       title: `RUN ${runNumber ?? 'unknown'} has started. Click here to enter RunMode`,
       onclick: () => {
-        this.model.filterModel.setFilterValue('RunNumber', runNumber?.toString(), false);
-        // If RunMode is not activated, we should enable it
+        this.model.router.go(`?page=objectTree&RunNumber=${runNumber}`);
+
         const { isRunModeActivated } = this.model.filterModel;
         if (!isRunModeActivated) {
           this.model.filterModel.activateRunsMode(this.model.filterModel.getPageTargetModel());
         }
-        this.model.router.go(`?page=objectTree&RunNumber=${runNumber}`);
       },
     });
   }

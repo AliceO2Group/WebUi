@@ -18,6 +18,7 @@
  * @readonly
  */
 export const Transition = Object.freeze({
+  NULL: 'NULL', // custom QCG value for no transition
   START_ACTIVITY: 'START_ACTIVITY',
   STOP_ACTIVITY: 'STOP_ACTIVITY',
 });
