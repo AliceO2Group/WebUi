@@ -19,6 +19,7 @@ import { getLocalStorageAsJson } from '../../testUtils/localStorage.js';
 import { IntegratedServices } from '../../../common/library/enums/Status/integratedServices.enum.js';
 import { ServiceStatus } from '../../../common/library/enums/Status/serviceStatus.enum.js';
 import { integratedServiceInterceptor } from '../../testUtils/interceptors/integratedServiceInterceptor.js';
+import { ONGOING_RUN_NUMBER } from '../../setup/mockKafkaEvents.js';
 
 /**
  * Performs a series of automated tests on the layoutList page using Puppeteer.
@@ -199,8 +200,6 @@ export const profileHeaderTests = async (url, page, timeout = 1000, testParent) 
   });
 
   await testParent.test('should enable RunMode when browser notification is clicked', { timeout }, async () => {
-    const RUN_NUMBER = 1234;
-
     /*
      * Kafka must be enabled for the browser notification feature to function correctly.
      * We intercept the request and return a SUCCESS state of the kafka service.
@@ -261,6 +260,7 @@ export const profileHeaderTests = async (url, page, timeout = 1000, testParent) 
         window.Notification = MockNotification;
       });
 
+      const RUN_NUMBER = ONGOING_RUN_NUMBER;
       // Trigger native browser notification by simulating websocket message
       await page.evaluate(
         (wsMessage) => window.model.notificationRunStartModel._handleWSRunTrack(wsMessage),

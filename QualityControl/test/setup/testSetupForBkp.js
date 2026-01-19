@@ -16,6 +16,7 @@ import nock from 'nock';
 import { config } from '../config.js';
 import { BKP_MOCK_DATA } from './seeders/bkp-mock-data.js';
 import { GET_BKP_GUI_STATUS_PATH } from '../../lib/services/BookkeepingService.js';
+import { ONGOING_RUN_NUMBER } from './mockKafkaEvents.js';
 
 const BKP_URL = `${config.bookkeeping.url}`;
 const TOKEN_PATH = `?token=${config.bookkeeping.token}`;
@@ -160,25 +161,43 @@ export const initializeNockForBkp = () => {
       },
     });
   nock(BKP_URL)
-    .get(`/api/runs/500001${TOKEN_PATH}`)
+    .get(`/api/runs/${ONGOING_RUN_NUMBER}${TOKEN_PATH}`)
     .reply(200, {
       data: {
         timeO2End: null,
       },
     })
-    .get(`/api/runs/500001${TOKEN_PATH}`)
+    .get(`/api/runs/${ONGOING_RUN_NUMBER}${TOKEN_PATH}`)
     .reply(200, {
       data: {
         timeO2End: null,
       },
     })
-    .get(`/api/runs/500001${TOKEN_PATH}`)
+    .get(`/api/runs/${ONGOING_RUN_NUMBER}${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: null,
+      },
+    })
+    .get(`/api/runs/${ONGOING_RUN_NUMBER}${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: null,
+      },
+    })
+    .get(`/api/runs/${ONGOING_RUN_NUMBER}${TOKEN_PATH}`)
+    .reply(200, {
+      data: {
+        timeO2End: null,
+      },
+    })
+    .get(`/api/runs/${ONGOING_RUN_NUMBER}${TOKEN_PATH}`)
     .reply(200, {
       data: {
         timeO2End: '2023-12-01T10:30:00Z',
       },
     })
-    .get(`/api/runs/500001${TOKEN_PATH}`)
+    .get(`/api/runs/${ONGOING_RUN_NUMBER}${TOKEN_PATH}`)
     .reply(200, {
       data: {
         timeO2End: '2023-12-01T10:30:00Z',

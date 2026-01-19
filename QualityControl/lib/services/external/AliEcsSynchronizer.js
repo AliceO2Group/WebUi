@@ -19,6 +19,13 @@ const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/ecs-synchroni
 const RUN_TOPICS = ['aliecs.run'];
 
 /**
+ * @type {RunEvent}
+ * @property {number} runNumber - The run number associated with the event.
+ * @property {Transition} transition - The type of transition (e.g., START_ACTIVITY, END_ACTIVITY).
+ * @property {TransitionStatus} transitionStatus - The status of the transition (e.g., DONE_OK, DONE_ERROR).
+ */
+
+/**
  * Service for processing events sent via Kafka from AliECS with proto objects
  */
 export class AliEcsSynchronizer {
@@ -73,6 +80,9 @@ export class AliEcsSynchronizer {
    * @returns {void}
    */
   async _onRunMessage(eventMessage) {
+    /**
+     * @param {RunEvent} - eventMessage - message received on run topic
+     */
     const { runEvent, timestamp } = eventMessage;
     if (!runEvent) {
       this._logger.warnMessage('Received run message on run topic without runEvent field');
@@ -82,9 +92,10 @@ export class AliEcsSynchronizer {
     } else if (!runEvent.transition) {
       this._logger.warnMessage('Received run message on run topic without runEvent.transition field');
     } else {
-      const { runNumber, transition } = runEvent;
+      const { runNumber, transition, transitionStatus } = runEvent;
       this._eventEmitter.emit(EmitterKeys.RUN_TRACK, {
         runNumber,
+        transitionStatus,
         transition,
         timestamp: timestamp.toNumber(),
       });
