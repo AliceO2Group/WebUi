@@ -29,7 +29,6 @@ export default function virtualTable(model, location = 'main', objects = []) {
   FONT = location === 'side' ? '.f6' : '';
   return h('.flex-grow.flex-column', {
   }, [
-    location !== 'side' && tableHeader(),
     h(
       '.scroll-y.animate-width',
       tableContainerHooks(model),
@@ -93,16 +92,6 @@ const objectFullRow = (model, item, location) =>
       item.name,
     ]),
   ]);
-
-/**
- * Create a table header separately so that it does not get included
- * in the virtual list scrolling events
- * @returns {vnode} - virtual node element
- */
-const tableHeader = () =>
-  h('table.table.table-sm.text-no-select', {
-    style: 'margin-bottom:0',
-  }, h('thead', [h('tr', [h('th', 'Name')])]));
 
 /**
  * Set styles of the floating table and its position inside the big div .tableLogsContentPlaceholder
