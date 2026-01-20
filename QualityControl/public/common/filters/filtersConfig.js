@@ -22,13 +22,14 @@ import { FilterType } from './filterTypes.js';
  * @param {RemoteData<DataPass[]>} filterService.dataPasses - data passes to show in the filter
  * @returns {object[]} Filter configuration array
  */
-export const filtersConfig = ({ runTypes, detectors, dataPasses }) => [
+export const filtersConfig = ({ runTypes, detectors, dataPasses, ongoingRuns }) => [
   {
-    type: FilterType.INPUT,
+    type: FilterType.COMBOBOX,
     queryLabel: 'RunNumber',
     placeholder: 'RunNumber (e.g. 546783)',
     id: 'runNumberFilter',
     inputType: 'number',
+    options: ongoingRuns,
   },
   {
     type: FilterType.DROPDOWN,

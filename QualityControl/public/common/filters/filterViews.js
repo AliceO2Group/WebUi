@@ -18,6 +18,7 @@ import {
   ongoingRunsSelector,
   groupedDropdownComponent,
   inputWithDropdownComponent,
+  combobox,
 } from './filter.js';
 import { FilterType } from './filterTypes.js';
 import { filtersConfig, runModeFilterConfig } from './filtersConfig.js';
@@ -34,10 +35,10 @@ import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
  * Creates an input element for a specific metadata field;
  * @param {object} config - The configuration for this particular field
  * @param {object} filterMap - An object that contains the keys and values of the filters
- * @param {Function} onInputCallback - A callback function that triggers upon Input
- * @param {Function} onEnterCallback - A callback function that triggers upon Enter
- * @param {Function} onChangeCallback - A callback function that triggers upon Change
- * @param onFocusCallback
+ * @param {oninput} onInputCallback - A callback function that triggers upon Input
+ * @param {onenter} onEnterCallback - A callback function that triggers upon Enter
+ * @param {onchange} onChangeCallback - A callback function that triggers upon Change
+ * @param {onfocus} onFocusCallback - A callback function that triggers upon Focus
  * @returns {undefined}
  */
 const createFilterElement =
@@ -69,6 +70,8 @@ const createFilterElement =
           onEnterCallback,
           onFocusCallback,
         );
+      case FilterType.COMBOBOX:
+        return combobox({ ...config }, filterMap, options, onEnterCallback, onInputCallback);
       default: return null;
     }
   };
@@ -126,7 +129,7 @@ export function filtersPanel(filterModel, viewModel) {
 
 /**
  * Button which will allow the user to update filter parameters after the input
- * @param {Function} onClickCallback - Function to trigger the filter mechanism
+ * @param {onclick} onClickCallback - Function to trigger the filter mechanism
  * @param {FilterModel} filterModel - Model that manages filter state
  * @returns {vnode} - virtual node element
  */
@@ -149,7 +152,7 @@ const triggerFiltersButton = (onClickCallback, filterModel) => {
 
 /**
  * Button which will allow the user to clear the filter element
- * @param {Function} clearFilterCallback - Function that clears the filter state.
+ * @param {onclick} clearFilterCallback - Function that clears the filter state.
  * @returns {vnode} - virtual node element
  */
 const clearFiltersButton = (clearFilterCallback) =>

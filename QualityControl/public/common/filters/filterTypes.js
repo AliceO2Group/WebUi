@@ -18,6 +18,7 @@ const FilterType = {
   DROPDOWN: 'dropdownSelector',
   GROUPED_DROPDOWN: 'groupedDropdownSelector',
   RUN_MODE: 'runModeSelector',
+  COMBOBOX: 'combobox',
 };
 
 export { FilterType };
