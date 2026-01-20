@@ -318,8 +318,8 @@ function treeRow(model, tree, level = 0) {
       index,
       name,
       () => {
-        model.object.tree.setFocusedNodeByIndex(index);
         tree.toggle();
+        model.object.tree.setFocusedNodeByIndex(index);
       },
       open ? iconCaretBottom : iconCaretRight,
       className,

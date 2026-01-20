@@ -64,13 +64,15 @@ export default class QCObject extends BaseViewModel {
     this._initializeLeftPanelWidth();
   }
 
+  /**
+   * Handle keyboard navigation within the search results
+   * @param {string} key - The key pressed by the user
+   */
   handleKeyboardNavigationSearchResults(key) {
     if (!this.searchResult.length) {
       return;
     }
-    const select = () => {
-      this.model.object.select(this.focusedSearchResult);
-    };
+    const select = () => this.model.object.select(this.focusedSearchResult);
     const actions = {
       ['ArrowRight']: () => select(),
       ['Enter']: () => select(),
