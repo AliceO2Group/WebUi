@@ -117,8 +117,7 @@ const drawPlot = (model, object) => {
   return h('.h-100.flex-column', [
     actionButtonsRow(model, name, qcObject, validFrom, id),
     h('', { style: 'height:77%;' }, draw(model.object.objects[name], { }, ['stat'], (error) => {
-      const invalidObjectDetails = { name, message: error.message, validFrom, id, versions };
-      model.object.invalidObject(name, invalidObjectDetails);
+      model.object.invalidObject(name, error?.message);
     })),
     h('.scroll-y', {}, [
       h('.w-100.flex-row.justify-center', h('.w-80', timestampSelectForm({

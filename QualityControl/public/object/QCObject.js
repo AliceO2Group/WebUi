@@ -18,7 +18,7 @@ import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 import { StorageKeysEnum } from '../common/enums/storageKeys.enum.js';
-import { ROOT_ERROR_LABEL } from '../common/enums/root.enum.js';
+import { updateWithPlotErrorOnQcRemoteData } from '../common/object/updateWithPlotErrorOnQcRemoteData.js';
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
@@ -350,8 +350,7 @@ export default class QCObject extends BaseViewModel {
    * @returns {undefined}
    */
   invalidObject(name, details) {
-    const errorMessage = `${ROOT_ERROR_LABEL}: ${details || 'JSROOT was unable to draw this object'}`;
-    this.objects[name] = RemoteData.failure(errorMessage);
+    this.objects[name] = updateWithPlotErrorOnQcRemoteData(this.objects[name], details);
     this.notify();
   }
 

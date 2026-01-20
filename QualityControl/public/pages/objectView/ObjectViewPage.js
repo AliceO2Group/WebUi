@@ -41,20 +41,24 @@ const objectPlotAndInfo = (objectViewModel) =>
     NotAsked: () => null,
     Loading: () => spinner(10, 'Loading object...'),
     Failure: (error) => errorDiv(error),
-    Success: (qcObject) => {
+    Success: (qcObjectData) => {
       const {
         id,
+        name,
+        qcObject,
         validFrom,
         ignoreDefaults = false,
         drawOptions = [],
         displayHints = [],
         layoutDisplayOptions = [],
         versions,
-      } = qcObject;
+      } = qcObjectData;
       const drawingOptions = ignoreDefaults ?
         layoutDisplayOptions
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
       const isObjectInfoVisible = objectViewModel.objectInfoVisible;
+      const onFailureToDraw = objectViewModel.drawingFailureOccurred.bind(objectViewModel);
+
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.items-center.h-10', [
           h(
@@ -66,9 +70,9 @@ const objectPlotAndInfo = (objectViewModel) =>
             ),
           ),
           h('.item-action-row.flex-row.g1.p2', [
-            downloadRootImageButton(`${qcObject.name}.png`, qcObject.qcObject.root, drawingOptions),
+            downloadRootImageButton(`${name}.png`, qcObject.root, drawingOptions),
             downloadButton({
-              href: objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
+              href: objectViewModel.getDownloadQcdbObjectUrl(id),
               title: 'Download root object',
             }),
             visibilityToggleButton(
@@ -84,14 +88,12 @@ const objectPlotAndInfo = (objectViewModel) =>
           h('.flex-grow', {
             // Key change forces redraw when toggling info panel
             key: isObjectInfoVisible ? 'objectPlotWithoutInfoPanel' : 'objectPlotWithInfoPanel',
-          }, drawObject(qcObject, {}, drawingOptions, (error) => {
-            objectViewModel.drawingFailureOccurred(error.message);
-          })),
+          }, drawObject(qcObjectData, {}, drawingOptions, onFailureToDraw)),
           isObjectInfoVisible && h('.scroll-y.w-30', {
             key: 'objectInfoPanel',
           }, [
             h('h3.text-center', 'Object information'),
-            qcObjectInfoPanel(qcObject, { gap: '.5em' }, defaultRowAttributes(model.notification)),
+            qcObjectInfoPanel(qcObjectData, { gap: '.5em' }, defaultRowAttributes(model.notification)),
           ]),
         ]),
       ]);
