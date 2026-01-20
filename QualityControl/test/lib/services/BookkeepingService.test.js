@@ -17,7 +17,9 @@ import { suite, test, before, beforeEach, afterEach } from 'node:test';
 import nock from 'nock';
 import { stub, restore } from 'sinon';
 
-import { BookkeepingService, GET_DETECTORS_PATH } from '../../../lib/services/BookkeepingService.js';
+import {
+  BookkeepingService, GET_BKP_GUI_STATUS_PATH, GET_DETECTORS_PATH,
+} from '../../../lib/services/BookkeepingService.js';
 import { RunStatus } from '../../../common/library/runStatus.enum.js';
 
 /**
@@ -153,7 +155,7 @@ export const bookkeepingServiceTestSuite = async () => {
 
       test('should return true when service responds with ok and configured', async () => {
         nock(VALID_CONFIG.bookkeeping.url)
-          .get('/api/status/database')
+          .get(GET_BKP_GUI_STATUS_PATH)
           .query({ token: VALID_CONFIG.bookkeeping.token })
           .reply(200, {
             data: {
@@ -171,7 +173,7 @@ export const bookkeepingServiceTestSuite = async () => {
 
       test('should return false when status is not ok or not configured', async () => {
         nock(VALID_CONFIG.bookkeeping.url)
-          .get('/api/status/database')
+          .get(GET_BKP_GUI_STATUS_PATH)
           .query({ token: VALID_CONFIG.bookkeeping.token })
           .reply(200, {
             data: {
@@ -188,7 +190,7 @@ export const bookkeepingServiceTestSuite = async () => {
 
       test('should return false and set error on request failure', async () => {
         nock(VALID_CONFIG.bookkeeping.url)
-          .get('/api/status/database')
+          .get(GET_BKP_GUI_STATUS_PATH)
           .query({ token: VALID_CONFIG.bookkeeping.token })
           .replyWithError('connection failed');
 

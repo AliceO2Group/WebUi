@@ -13,25 +13,25 @@
  */
 
 /**
- * Enumeration for different types of transitions
+ * Enumeration for allowed `ROOT.makeImage` file extensions to MIME types
  * @enum {string}
  * @readonly
  */
-export const Transition = Object.freeze({
-  NULL: 'NULL', // custom QCG value for no transition
-  START_ACTIVITY: 'START_ACTIVITY',
-  STOP_ACTIVITY: 'STOP_ACTIVITY',
+export const RootImageDownloadSupportedTypes = Object.freeze({
+  SVG: 'image/svg+xml',
+  PNG: 'file/png',
+  JPG: 'file/jpeg',
+  JPEG: 'file/jpeg',
+  WEBP: 'file/webp',
 });
 
 /**
- * Enumeration for different statuses of a transitions as per:
- * @link https://github.com/AliceO2Group/Control/blob/master/common/protos/events.proto#L35
+ * Get the list of unique supported ROOT image download extensions
+ * @returns {string[]} - Array of supported ROOT image download extensions
  */
-export const TransitionStatus = Object.freeze({
-  NULL: 'NULL',
-  STARTED: 'STARTED',
-  ONGOING: 'ONGOING',
-  DONE_OK: 'DONE_OK',
-  DONE_ERROR: 'DONE_ERROR',
-  DONE_TIMEOUT: 'DONE_TIMEOUT',
-});
+export const RootImageDownloadExtensions = () => {
+  const extensions = new Set();
+  Object.keys(RootImageDownloadSupportedTypes)
+    .forEach((ext) => extensions.add(ext.toLowerCase()));
+  return Array.from(extensions);
+};

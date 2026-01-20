@@ -28,9 +28,9 @@ import virtualTable from './virtualTable.js';
 import { defaultRowAttributes, qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
 import { downloadButton } from '../common/downloadButton.js';
 import { resizableDivider } from '../common/resizableDivider.js';
+import { downloadRootImageDropdown } from '../common/downloadRootImageDropdown.js';
 import { SortDirectionsEnum } from '../common/enums/columnSort.enum.js';
 import { sortableTableHead } from '../common/sortButton.js';
-import { downloadRootImageButton } from '../common/downloadRootImageButton.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -62,7 +62,7 @@ export default (model) => {
               qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
             return h('.flex-column.flex-grow', [
               actionablesHeaderGroup(model.object),
-              virtualTable(model, 'side', objectsToDisplay),
+              virtualTable(model, 'main', objectsToDisplay),
             ]);
           }
           return h('', [
@@ -120,7 +120,7 @@ const drawPlot = (model, object) => {
     : `?page=objectView&objectName=${name}`;
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
     h('.item-action-row.flex-row.g1.p1', [
-      downloadRootImageButton(`${name}.png`, root, ['stat']),
+      downloadRootImageDropdown(name, root, ['stat']),
       downloadButton({
         href: model.objectViewModel.getDownloadQcdbObjectUrl(id),
         title: 'Download root object',
