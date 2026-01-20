@@ -12,14 +12,4 @@
  * or submit itself to any jurisdiction.
  */
 
-/**
- * Enumeration for different types of storage keys
- * @enum {string}
- * @readonly
- */
-export const StorageKeysEnum = Object.freeze({
-  OBJECT_VIEW_LEFT_PANEL_WIDTH: 'object-view-left-panel-width',
-  OBJECT_VIEW_INFO_VISIBILITY_SETTING: 'object-view-info-visibility-setting',
-  OBJECT_TREE_OPEN_BRANCH_STATE: 'object-tree-open-branch-state',
-  NOTIFICATION_START_RUN_SETTING: 'notification-start-run-setting',
-});
+export const OBJECT_LIST_SIDE_ROW_HEIGHT = 29.4;

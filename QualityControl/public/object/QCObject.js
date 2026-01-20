@@ -18,6 +18,7 @@ import { simpleDebouncer, prettyFormatDate, setBrowserTabTitle } from './../comm
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 import { StorageKeysEnum } from '../common/enums/storageKeys.enum.js';
+import { OBJECT_LIST_SIDE_ROW_HEIGHT } from '../common/constants/ui.js';
 import { updateWithPlotErrorOnQcRemoteData } from '../common/object/updateWithPlotErrorOnQcRemoteData.js';
 
 /**
@@ -44,6 +45,8 @@ export default class QCObject extends BaseViewModel {
 
     this.searchInput = ''; // String - content of input search
     this.searchResult = []; // Array<object> - result list of search
+    this.focusedSearchResult = null; // Object - focused item in search results for keyboard navigation
+
     this.sortBy = {
       field: 'name',
       title: 'Name',
@@ -59,6 +62,27 @@ export default class QCObject extends BaseViewModel {
     this.scrollHeight = 0;
 
     this._initializeLeftPanelWidth();
+  }
+
+  /**
+   * Handle keyboard navigation within the search results
+   * @param {string} key - The key pressed by the user
+   */
+  handleKeyboardNavigationSearchResults(key) {
+    if (!this.searchResult.length) {
+      return;
+    }
+    const select = () => this.model.object.select(this.focusedSearchResult);
+    const actions = {
+      ['ArrowRight']: () => select(),
+      ['Enter']: () => select(),
+      ['ArrowUp']: () => this._setFocusedSearchResultByOffset(-1),
+      ['ArrowDown']: () => this._setFocusedSearchResultByOffset(1),
+    };
+    const action = actions[key];
+    if (action) {
+      action();
+    }
   }
 
   /**
@@ -81,6 +105,68 @@ export default class QCObject extends BaseViewModel {
     this.leftPanelWidthStorage.setLocalItem(this.model.session.personid.toString(), widthPercent);
     this.leftPanelWidthPercent = widthPercent;
     this.notify();
+  }
+
+  /**
+   * Set focused search result by its object name/pathString
+   * @param {string} path - object path/name to be focused
+   */
+  setFocusedSearchResultByPath(path) {
+    const result = this.searchResult.find((item) => item.name === path);
+    if (!result) {
+      return;
+    }
+    this.focusedSearchResult = result;
+    this.notify();
+  }
+
+  /**
+   * Set the focused search result to the next or previous item based on offset
+   * @param {number} offset - The offset to move the focus by (positive or negative)
+   */
+  _setFocusedSearchResultByOffset(offset) {
+    if (!Number.isInteger(offset) || offset === 0 || !this.searchResult?.length) {
+      return; // Invalid offset or empty search result
+    }
+    if (this.focusedSearchResult) {
+      const clampIndex = (index) => Math.min(Math.max(index, 0), this.searchResult.length - 1);
+      const currentIndex = this.searchResult.findIndex(({ name }) => name === this.focusedSearchResult?.name);
+      // Move focus by offset if found, else focus to first result
+      const nextIndex = currentIndex === -1 ? 0 : currentIndex + offset;
+      this.focusedSearchResult = this.searchResult[clampIndex(nextIndex)];
+      this.notify();
+      this._scrollFocusedSearchResultIntoView();
+    } else {
+      // If no focused result, focus the first result
+      [this.focusedSearchResult] = this.searchResult;
+      this.notify();
+      this._scrollFocusedSearchResultIntoView();
+    }
+  }
+
+  /**
+   * Scroll the focused search result into view within the scrollable container
+   * @returns {undefined}
+   */
+  _scrollFocusedSearchResultIntoView() {
+    const container = document.getElementById('object-list-scroll');
+    if (!container || !this.focusedSearchResult) {
+      return;
+    }
+    const focusedIndex = this.searchResult.findIndex(({ name }) => name === this.focusedSearchResult.name);
+    if (focusedIndex === -1) {
+      return;
+    }
+    const rowHeight = OBJECT_LIST_SIDE_ROW_HEIGHT;
+    const rowTop = focusedIndex * rowHeight;
+    const rowBottom = rowTop + rowHeight;
+    const viewTop = container.scrollTop;
+    const viewBottom = viewTop + container.clientHeight;
+    if (rowTop < viewTop) {
+      container.scrollTop = rowTop;
+    } else if (rowBottom > viewBottom) {
+      container.scrollTop = rowBottom - container.clientHeight;
+    }
   }
 
   /**
@@ -383,6 +469,7 @@ export default class QCObject extends BaseViewModel {
     } else {
       await this.loadObjectByName(this.selected.name);
     }
+
     this.notify();
   }
 
@@ -396,6 +483,8 @@ export default class QCObject extends BaseViewModel {
     this._computeFilters();
 
     this.sortListByField(this.searchResult, this.sortBy.field, this.sortBy.order);
+    this.focusedSearchResult = null;
+
     this.notify();
   }
 

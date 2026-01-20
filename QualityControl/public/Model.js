@@ -139,16 +139,35 @@ export default class Model extends Observable {
    */
   handleKeyboardDown(e) {
     // Console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
-    const code = e.keyCode;
-
+    const { key } = e;
     // Delete key + layout page + object select => delete this object
-    if (code === 8 &&
+    if (key === 'Delete' &&
       this.router.params.page === 'layoutShow' &&
       this.layout.editEnabled &&
       this.layout.editingTabObject) {
       this.layout.deleteTabObject(this.layout.editingTabObject);
-    } else if (code === 27 && this.isImportVisible) {
+    } else if (key === 'Escape' && this.isImportVisible) {
       this.layout.resetImport();
+    }
+    if (
+      this.router.params.page === 'objectTree' &&
+      (
+        key === 'ArrowUp' ||
+        key === 'ArrowDown' ||
+        key === 'Enter' ||
+        key === 'ArrowLeft' ||
+        key === 'ArrowRight'
+      )
+    ) {
+      e.preventDefault(); // Prevent scrolling the page
+      const searchActive = Boolean(this.object.searchInput?.trim());
+      if (searchActive) {
+        // Search navigation
+        this.object.handleKeyboardNavigationSearchResults(key);
+      } else {
+        // Tree navigation
+        this.object.tree.handleKeyboardNavigation(key, (selectedObject) => this.object.select(selectedObject));
+      }
     }
   }
 
@@ -288,7 +307,7 @@ export default class Model extends Observable {
 
   /**
    * Clear URL parameters and redirect to a certain page
-   * @param {*} pageName - name of the page to be redirected to
+   * @param {string} pageName - name of the page to be redirected to
    * @returns {undefined}
    */
   clearURL(pageName) {

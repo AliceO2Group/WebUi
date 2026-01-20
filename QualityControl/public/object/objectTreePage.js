@@ -47,6 +47,7 @@ export default (model) => {
     h('.flex-row', { style: 'flex-grow: 1; height: 0;' }, [
       h('.flex-column.scroll-y', {
         key: 'object-tree-scroll-container',
+        id: 'object-tree-scroll-container',
         style: {
           width: object.selected ? `${leftPanelWidthPercent}%` : '100%',
         },
@@ -93,7 +94,7 @@ export default (model) => {
  */
 function objectPanel(model) {
   const selectedObjectName = model.object.selected.name;
-  if (model.object.objects && model.object.objects?.[selectedObjectName]) {
+  if (model.object.objects?.[selectedObjectName]) {
     return model.object.objects[selectedObjectName].match({
       NotAsked: () => null,
       Loading: () =>
@@ -279,7 +280,7 @@ const treeRows = (model) => !model.object.tree ?
  * @returns {vnode[]} - virtual node element
  */
 function treeRow(model, tree, level = 0) {
-  const { pathString, open, children, object, name } = tree;
+  const { index, open, children, object, name } = tree;
 
   const childRow = open
     ? children.flatMap((children) => treeRow(model, children, level + 1))
@@ -287,13 +288,22 @@ function treeRow(model, tree, level = 0) {
 
   const rows = [];
 
+  let className = '';
+  if (model.object.selected && object === model.object.selected) {
+    className = 'table-primary'; // Selected object
+  } else if (index === model.object.tree.focusedNode?.index) {
+    className = 'focused-node'; // Focused node
+  }
+
   if (object) {
     // Add a leaf row (final element; cannot be expanded further)
-    const className = object === model.object.selected ? 'table-primary' : '';
     const leaf = treeRowElement(
-      pathString,
+      index,
       name,
-      () => model.object.select(object),
+      () => {
+        model.object.select(object);
+        model.object.tree.setFocusedNodeByIndex(index);
+      },
       iconBarChart,
       className,
       {
@@ -305,11 +315,14 @@ function treeRow(model, tree, level = 0) {
   if (children.length > 0) {
     // Add a branch row (expandable / collapsible element)
     const branch = treeRowElement(
-      pathString,
+      index,
       name,
-      () => tree.toggle(),
+      () => {
+        tree.toggle();
+        model.object.tree.setFocusedNodeByIndex(index);
+      },
       open ? iconCaretBottom : iconCaretRight,
-      '',
+      className,
       {
         paddingLeft: `${level + 0.3}em`,
       },
@@ -334,7 +347,7 @@ function treeRow(model, tree, level = 0) {
 const treeRowElement = (key, title, onclick, icon, className = '', style = {}) =>
   h('tr.object-selectable', {
     key,
-    id: key,
+    id: `tree-node-${key}`,
     title,
     onclick,
     class: className,
