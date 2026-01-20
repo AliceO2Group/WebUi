@@ -12,5 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
-export const JS_ROOT_ERROR_LABEL = 'ROOT_ERROR';
-export const JS_ROOT_FAILED_TO_PLOT_MESSAGE = 'JSROOT failed to plot the object';
+import { h, iconWarning } from '/js/src/index.js';
+
+/**
+ * Panel to show when an object failed to be drawn
+ * @param {string} error - error message to show
+ * @returns {vnode} - virtual node element
+ */
+export const failureToDrawPanel = (error) =>h('.error-box.danger.flex-column.justify-center.f6.text-center', {}, [
+  h('span.error-icon', { title: 'Error' }, iconWarning()),
+  h('span', error),
+]);
