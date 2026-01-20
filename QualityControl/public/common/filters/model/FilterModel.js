@@ -18,7 +18,7 @@ import FilterService from '../../../services/Filter.service.js';
 import { RunStatus } from '../../../library/runStatus.enum.js';
 import { prettyFormatDate } from '../../utils.js';
 
-const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
+const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType', 'DetectorName', 'QcVersion'];
 
 const RUN_INFORMATION_MAP = {
   startTime: prettyFormatDate,
@@ -49,6 +49,8 @@ export default class FilterModel extends Observable {
     this._runInformation = {};
 
     this.ONGOING_RUN_INTERVAL_MS = 15000;
+
+    this.filterService.fetchOngoingRuns();
   }
 
   /**
@@ -103,10 +105,14 @@ export default class FilterModel extends Observable {
    * @returns {undefined}
    */
   setFilterValue(key, value, setUrl = false) {
-    if (value?.trim()) {
-      this._filterMap[key] = value;
-    } else {
-      delete this._filterMap[key];
+    if (typeof value === 'string') {
+      if (value && value?.trim()) {
+        this._filterMap[key] = value;
+      } else {
+        delete this._filterMap[key];
+      }
+    } else if (typeof value === 'number') {
+      this._filterMap[key] = String(value);
     }
 
     if (setUrl) {
@@ -187,9 +193,11 @@ export default class FilterModel extends Observable {
    */
   async activateRunsMode(viewModel) {
     this.isRunModeActivated = true;
-    await this.filterService.fetchOngoingRuns();
-    if (this._filterMap.RunNumber) {
-      this._filterMap = { RunNumber: this._filterMap.RunNumber };
+    const { RunNumber } = this._filterMap;
+    this.clearFilters();
+
+    if (RunNumber) {
+      this._filterMap = { RunNumber };
       this.triggerFilter(viewModel);
     } else {
       const { ongoingRuns } = this.filterService;

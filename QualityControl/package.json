@@ -51,13 +51,13 @@
     "@eslint/js": "^9.39.1",
     "@stylistic/eslint-plugin-js": "^4.4.0",
     "eslint": "^9.39.1",
-    "eslint-plugin-jsdoc": "^61.5.0",
+    "eslint-plugin-jsdoc": "^62.2.0",
     "globals": "^17.0.0",
     "nock": "^15.0.0",
-    "puppeteer": "^24.34.0",
+    "puppeteer": "^24.35.0",
     "sequelize-cli": "^6.6.2",
     "sinon": "^21.0.0",
-    "supertest": "^7.1.0"
+    "supertest": "^7.2.2"
   },
   "bundleDependencies": [
     "@aliceo2/web-ui",

@@ -34,7 +34,7 @@ export default class NotificationRunStartModel extends Observable {
 
     this.model.ws.addListener('command', (message) => {
       if (message.command === `${EmitterKeys.RUN_TRACK}:${Transition.START_ACTIVITY}`) {
-        this._handleWSRunTrack.bind(this, message.payload);
+        this._handleWSRunTrack(message.payload);
       }
     });
   }
@@ -82,21 +82,14 @@ export default class NotificationRunStartModel extends Observable {
     }
 
     showNativeBrowserNotification({
-      title: `RUN ${runNumber ?? 'unknown'} has started`,
+      title: `RUN ${runNumber ?? 'unknown'} has started. Click here to enter RunMode`,
       onclick: () => {
-        // On notification click we always navigate to the `objectTree` page.
-        // Additionally, we view the run using the given `runNumber`.
         this.model.router.go(`?page=objectTree&RunNumber=${runNumber}`);
 
-        // If RunMode is not activated, we should enable it
         const { isRunModeActivated } = this.model.filterModel;
         if (!isRunModeActivated) {
           this.model.filterModel.activateRunsMode(this.model.filterModel.getPageTargetModel());
         }
-
-        // We select the given `runNumber` in RunMode.
-        // We do not have to set the parameter in the URL, as this is already achieved on navigation.
-        this.model.filterModel.setFilterValue('RunNumber', runNumber?.toString());
       },
     });
   }

@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import assert from 'node:assert';
+import { strictEqual, ok } from 'node:assert';
 
 /**
  * Initial page setup tests
@@ -41,14 +41,32 @@ export const initialPageSetupTests = async (url, page, timeout = 1000, testParen
 
   await testParent.test('should successfully have redirected to default page "/?page=layoutList"', async () => {
     const location = await page.evaluate(() => window.location);
-    assert.strictEqual(location.search, '?page=layoutList');
+    strictEqual(location.search, '?page=layoutList');
   });
 
   await testParent.test('should have a layout with header, sidebar and section', async () => {
     const headerContent = await page.evaluate(() => document.querySelector('header').innerHTML);
     const sidebarContent = await page.evaluate(() => document.querySelector('nav').innerHTML);
 
-    assert.ok(headerContent.includes('Quality Control'));
-    assert.ok(sidebarContent.includes('Explore'));
+    ok(headerContent.includes('Quality Control'));
+    ok(sidebarContent.includes('Explore'));
+  });
+
+  await testParent.test('should make a request to ongoing runs API on page load', { timeout }, async () => {
+    let countOngoingRunsCalls = 0;
+
+    page.on('request', (req) => {
+      const url = req.url();
+      if (url.includes('/api/filter/ongoingRuns')) {
+        countOngoingRunsCalls++;
+      }
+    });
+
+    await page.goto(
+      `${url}?page=objectTree`,
+      { waitUntil: 'networkidle0' },
+    );
+
+    strictEqual(countOngoingRunsCalls, 1, `Expect 1 req to /api/filter/ongoingRuns, but got ${countOngoingRunsCalls}`);
   });
 };

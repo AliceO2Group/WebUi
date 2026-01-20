@@ -14,10 +14,11 @@
 
 /* global JSROOT */
 
-import { h, iconWarning } from '/js/src/index.js';
+import { h } from '/js/src/index.js';
 import { generateDrawingOptionString, isObjectOfTypeChecker } from './../../../library/qcObject/utils.js';
 import checkersPanel from './checkersPanel.js';
 import { keyedTimerDebouncer, pointerId } from '../utils.js';
+import { failureToDrawPanel } from './failureToDrawPanel.js';
 
 /**
  * Renders a QCObject as a virtual DOM node using JSROOT.
@@ -32,14 +33,11 @@ import { keyedTimerDebouncer, pointerId } from '../utils.js';
  * @param {(Error) => void} failFn - optional function to execute upon drawing failure
  * @returns {vnode} output virtual-dom, a single div with JSROOT attached to it
  */
-export const draw = (remoteData, options = {}, drawingOptions = [], failFn = () => {}) =>
+export const draw = (remoteData = {}, options = {}, drawingOptions = [], failFn = () => {}) =>
   remoteData?.match({
     NotAsked: () => null,
     Loading: () => h('.flex-column.items-center.justify-center', [h('.animate-slow-appearance', 'Loading')]),
-    Failure: (error) => h('.error-box.danger.flex-column.justify-center.f6.text-center', {}, [
-      h('span.error-icon', { title: 'Error' }, iconWarning()),
-      h('span', error),
-    ]),
+    Failure: (error) => failureToDrawPanel(error),
     Success: (data) => drawObject(data, options, drawingOptions, failFn),
   });
 
@@ -55,9 +53,11 @@ export const draw = (remoteData, options = {}, drawingOptions = [], failFn = () 
  */
 export const drawObject = (object, options = {}, drawingOptions = [], failFn = () => {}) => {
   const { qcObject, etag } = object;
-  const { root } = qcObject;
+  const { root, rootError } = qcObject;
   if (isObjectOfTypeChecker(root)) {
     return checkersPanel(root);
+  } else if (rootError) {
+    return failureToDrawPanel(rootError);
   }
 
   drawingOptions = Array.from(new Set(drawingOptions));
@@ -123,15 +123,11 @@ const drawOnCreate = async (dom, root, drawingOptions, failFn) => {
   const finalDrawingOptions = generateDrawingOptionString(root, drawingOptions);
   JSROOT.draw(dom, root, finalDrawingOptions).then((painter) => {
     if (painter === null) {
-      // eslint-disable-next-line no-console
-      console.error('null painter in JSROOT');
       if (typeof failFn === 'function') {
         failFn(new Error('null painter in JSROOT'));
       }
     }
   }).catch((error) => {
-    // eslint-disable-next-line no-console
-    console.error(error);
     if (typeof failFn === 'function') {
       failFn(error);
     }
@@ -235,8 +231,6 @@ const redraw = (dom, root, drawingOptions, failFn) => {
   try {
     JSROOT.redraw(dom, root, finalDrawingOptions);
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
     if (typeof failFn === 'function') {
       failFn(error);
     }
