@@ -149,7 +149,7 @@
     font-weight: 500;
   }
 
-  &>div:hover {
+  & > div > div:hover {
     font-weight: 700;
   }
 }
@@ -248,5 +248,40 @@
   &::before, &::after {
     content: '';
     flex: 1;
+  }
+}
+
+.combobox-container {
+  position: relative;
+
+  &:focus-within .combobox-list {
+    display: block;
+    width: 100%;
+  }
+
+  & .combobox-list {
+    padding: 0;
+    margin: 0;
+    padding-inline-start: 0;
+    list-style: none;
+    left: 0;
+    right: 0;
+    max-height: 250px;
+    overflow-y: auto;
+    margin-top: var(--space-xs);
+
+    & .combobox-item {
+      &:hover, &.is-highlighted {
+        background-color: var(--color-primary);
+        color: var(--color-white);
+      }
+    }
+
+    & .combobox-header {
+        padding: 4px 12px;
+        font-size: 0.85rem;
+        color: var(--color-gray-darker);
+        font-weight: bold;
+    }
   }
 }

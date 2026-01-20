@@ -14,7 +14,7 @@
 
 import { LogManager, WebSocketMessage } from '@aliceo2/web-ui';
 import { EmitterKeys } from '../../common/library/enums/emitterKeys.enum.js';
-import { Transition } from '../../common/library/enums/transition.enum.js';
+import { Transition, TransitionStatus } from '../../common/library/enums/transition.enum.js';
 import { RunStatus } from '../../common/library/runStatus.enum.js';
 import { parseObjects } from '../../common/library/qcObject/utils.js';
 import QCObjectDto from '../dtos/QCObjectDto.js';
@@ -53,6 +53,7 @@ export class RunModeService {
 
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/run-mode-service`);
     this._listenToEvents();
+    this._fetchOnGoingRunsAtStart();
   }
 
   /**
@@ -116,24 +117,33 @@ export class RunModeService {
   }
 
   /**
+   * Fetches the already ongoing runs from Bookkeeping service, becaue Kafka only sends an event at START of run.
+   * @returns {Promise<void>}
+   */
+  async _fetchOnGoingRunsAtStart() {
+    const ongoingRuns = await this._bookkeepingService.retrieveOngoingRuns();
+    if (!ongoingRuns || ongoingRuns.length === 0) {
+      this._logger.infoMessage('No ongoing runs detected at server start');
+      return;
+    }
+
+    const runNumbers = ongoingRuns.map(({ runNumber }) => runNumber);
+    const tasks = runNumbers.map(async (runNumber) => await this._initializeRunData(runNumber));
+    await Promise.all(tasks);
+  }
+
+  /**
    * Handles run track events emitted by the event emitter.
    * Updates the ongoing runs cache based on the transition type.
    * @param {object} runEvent - Object containing runNumber and transition type.
    * @param {number} runEvent.runNumber - The run number associated with the event.
    * @param {string} runEvent.transition - The transition type (e.g., 'START_ACTIVITY', 'STOP_ACTIVITY').
+   * @param {string} runEvent.transitionStatus - The status of the transition (e.g., 'DONE_OK').
    * @returns {Promise<void>}
    */
-  async _onRunTrackEvent({ runNumber, transition }) {
-    if (transition === Transition.START_ACTIVITY) {
-      let rawPaths = [];
-      try {
-        rawPaths = await this._dataService.getObjectsLatestVersionList({
-          filters: { RunNumber: runNumber },
-        });
-      } catch (error) {
-        this._logger.errorMessage(`Error fetching initial paths for run ${runNumber}: ${error.message || error}`);
-      }
-      this._ongoingRuns.set(runNumber, rawPaths);
+  async _onRunTrackEvent({ runNumber, transition = Transition.NULL, transitionStatus = TransitionStatus.NULL }) {
+    if (transition === Transition.START_ACTIVITY && transitionStatus === TransitionStatus.DONE_OK) {
+      await this._initializeRunData(runNumber);
 
       const wsMessage = new WebSocketMessage();
       wsMessage.command = `${EmitterKeys.RUN_TRACK}:${Transition.START_ACTIVITY}`;
@@ -144,6 +154,23 @@ export class RunModeService {
     } else if (transition === Transition.STOP_ACTIVITY) {
       this._ongoingRuns.delete(runNumber);
     }
+  }
+
+  /**
+   * Fetches the latest object versions for each run and populates the local `ongoingRuns` map.
+   * @param {number} runNumber - The run number associated with the event.
+   * @returns {Promise<void>}
+   */
+  async _initializeRunData(runNumber) {
+    let rawPaths = [];
+    try {
+      rawPaths = await this._dataService.getObjectsLatestVersionList({
+        filters: { RunNumber: runNumber },
+      });
+    } catch (error) {
+      this._logger.errorMessage(`Error fetching initial paths for run ${runNumber}: ${error.message || error}`);
+    }
+    this._ongoingRuns.set(runNumber, rawPaths);
   }
 
   /**
