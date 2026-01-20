@@ -1,5 +1,5 @@
 /**
-* @license
+ * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
  * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
  * All rights not expressly granted are reserved.
@@ -99,8 +99,8 @@ function objectPanel(model) {
       Loading: () =>
         h('.h-100.w-100.flex-column.items-center.justify-center.f5', [spinner(3), h('', 'Loading Object')]),
       Success: (data) => drawPlot(model, data),
-      Failure: (invalidObjectDetails) => drawFailure(model, invalidObjectDetails),
-      // draw failure is already applied in drawPlot -> draw
+      Failure: (error) =>
+        h('.h-100.w-100.flex-column.items-center.justify-center.f5', [h('.f1', iconCircleX()), error]),
     });
   }
   return null;
@@ -113,74 +113,47 @@ function objectPanel(model) {
  * @returns {vnode} - virtual node element
  */
 const drawPlot = (model, object) => {
-  const { name, qcObject, validFrom, id, versions } = object;
-  return h('.h-100.flex-column', [
-    actionButtonsRow(model, name, qcObject, validFrom, id),
+  const { name, qcObject, validFrom, id } = object;
+  const { root } = qcObject;
+  const href = validFrom ?
+    `?page=objectView&objectName=${name}&ts=${validFrom}&id=${id}`
+    : `?page=objectView&objectName=${name}`;
+  return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
+    h('.item-action-row.flex-row.g1.p1', [
+      downloadRootImageButton(`${name}.png`, root, ['stat']),
+      downloadButton({
+        href: model.objectViewModel.getDownloadQcdbObjectUrl(id),
+        title: 'Download root object',
+      }),
+      h(
+        'a.btn#fullscreen-button',
+        {
+          title: 'Open object plot in full screen',
+          href,
+          onclick: (e) => model.router.handleLinkEvent(e),
+        },
+        iconResizeBoth(),
+      ),
+      h(
+        'a.btn#close-button',
+        {
+          title: 'Close the object plot',
+          onclick: () => model.object.select(),
+        },
+        iconCircleX(),
+      ),
+    ]),
     h('', { style: 'height:77%;' }, draw(model.object.objects[name], { }, ['stat'], (error) => {
-      model.object.invalidObject(name, error?.message);
+      model.object.invalidObject(name, error.message);
     })),
     h('.scroll-y', {}, [
-      h('.w-100.flex-row.justify-center', h('.w-80', timestampSelectForm({
-        versions: versions ?? [],
+      h('.w-100.flex-row', { style: 'justify-content: center' }, h('.w-80', timestampSelectForm({
+        versions: object.versions ?? [],
         selectedId: id ?? null,
         onSelect: (version) => model.object.loadObjectByName(name, version.validFrom, version.id),
       }))),
       qcObjectInfoPanel(object, { 'font-size': '.875rem;' }, defaultRowAttributes(model.notification)),
     ]),
-  ]);
-};
-
-/**
- * Draw the failure message when object cannot be drawn
- * @param {Model} model - root model of the application
- * @param {object} invalidObjectDetails - details about the invalid object
- * @returns {vnode} - virtual node element
- */
-const drawFailure = (model, invalidObjectDetails) => {
-  const { name, message, validFrom, id } = invalidObjectDetails ?? {};
-  const versions = undefined;
-  const isRootError = message?.includes('ROOT_ERROR');
-  return h('.h-100.flex-column', [
-    actionButtonsRow(model, name, null, validFrom, id),
-    h(
-      '.h-100.flex-column.items-center.justify-center.text-center.f5',
-      [h('.f1', iconCircleX()), message],
-    ),
-    isRootError && h('.w-100.flex-row.justify-center.pv2', h('.w-80', timestampSelectForm({
-      versions: versions ?? [],
-      selectedId: id ?? null,
-      onSelect: (version) => model.object.loadObjectByName(name, version.validFrom, version.id),
-    }))),
-  ]);
-};
-
-const actionButtonsRow = (model, objectName, root, validFrom, id) => {
-  const href = validFrom
-    ? `?page=objectView&objectName=${objectName}&ts=${validFrom}&id=${id}`
-    : `?page=objectView&objectName=${objectName}`;
-  return h('.item-action-row.flex-row.g1.p1', [
-    root && downloadRootImageButton(`${objectName}.png`, root, ['stat']),
-    downloadButton({
-      href: model.objectViewModel.getDownloadQcdbObjectUrl(id),
-      title: 'Download root object',
-    }),
-    h(
-      'a.btn#fullscreen-button',
-      {
-        title: 'Open object plot in full screen',
-        href,
-        onclick: (e) => model.router.handleLinkEvent(e),
-      },
-      iconResizeBoth(),
-    ),
-    h(
-      'a.btn#close-button',
-      {
-        title: 'Close the object plot',
-        onclick: () => model.object.select(),
-      },
-      iconCircleX(),
-    ),
   ]);
 };
 
