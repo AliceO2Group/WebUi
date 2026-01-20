@@ -93,7 +93,7 @@ export default (model) => {
  */
 function objectPanel(model) {
   const selectedObjectName = model.object.selected.name;
-  if (model.object.objects && model.object.objects[selectedObjectName]) {
+  if (model.object.objects && model.object.objects?.[selectedObjectName]) {
     return model.object.objects[selectedObjectName].match({
       NotAsked: () => null,
       Loading: () =>
