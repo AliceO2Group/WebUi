@@ -23,7 +23,7 @@ import {
 } from '/js/src/index.js';
 import { spinner } from '../common/spinner.js';
 import { draw } from '../common/object/draw.js';
-import { timestampSelectForm } from './../common/timestampSelectForm.js';
+import timestampSelectForm from './../common/timestampSelectForm.js';
 import virtualTable from './virtualTable.js';
 import { defaultRowAttributes, qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
 import { downloadButton } from '../common/downloadButton.js';
@@ -147,11 +147,7 @@ const drawPlot = (model, object) => {
       model.object.invalidObject(name, error.message);
     })),
     h('.scroll-y', {}, [
-      h('.w-100.flex-row', { style: 'justify-content: center' }, h('.w-80', timestampSelectForm({
-        versions: object.versions ?? [],
-        selectedId: id ?? null,
-        onSelect: (version) => model.object.loadObjectByName(name, version.validFrom, version.id),
-      }))),
+      h('.w-100.flex-row', { style: 'justify-content: center' }, h('.w-80', timestampSelectForm(model))),
       qcObjectInfoPanel(object, { 'font-size': '.875rem;' }, defaultRowAttributes(model.notification)),
     ]),
   ]);

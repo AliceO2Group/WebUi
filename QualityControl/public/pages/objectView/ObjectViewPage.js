@@ -41,23 +41,22 @@ const objectPlotAndInfo = (objectViewModel) =>
     NotAsked: () => null,
     Loading: () => spinner(10, 'Loading object...'),
     Failure: (error) => errorDiv(error),
-    Success: (qcObjectData) => {
+    Success: (qcObject) => {
       const {
         id,
         name,
-        qcObject,
+        qcObject: { root = {} } = {},
         validFrom,
         ignoreDefaults = false,
         drawOptions = [],
         displayHints = [],
         layoutDisplayOptions = [],
         versions,
-      } = qcObjectData;
+      } = qcObject;
       const drawingOptions = ignoreDefaults ?
         layoutDisplayOptions
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
       const isObjectInfoVisible = objectViewModel.objectInfoVisible;
-      const onFailureToDraw = objectViewModel.drawingFailureOccurred.bind(objectViewModel);
 
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.items-center.h-10', [
@@ -70,7 +69,7 @@ const objectPlotAndInfo = (objectViewModel) =>
             ),
           ),
           h('.item-action-row.flex-row.g1.p2', [
-            downloadRootImageDropdown(name, qcObject.root, drawingOptions),
+            downloadRootImageDropdown(name, root, drawingOptions),
             downloadButton({
               href: objectViewModel.getDownloadQcdbObjectUrl(id),
               title: 'Download root object',
@@ -88,12 +87,14 @@ const objectPlotAndInfo = (objectViewModel) =>
           h('.flex-grow', {
             // Key change forces redraw when toggling info panel
             key: isObjectInfoVisible ? 'objectPlotWithoutInfoPanel' : 'objectPlotWithInfoPanel',
-          }, drawObject(qcObjectData, {}, drawingOptions, onFailureToDraw)),
+          }, drawObject(qcObject, {}, drawingOptions, (error) => {
+            objectViewModel.drawingFailureOccurred(error.message);
+          })),
           isObjectInfoVisible && h('.scroll-y.w-30', {
             key: 'objectInfoPanel',
           }, [
             h('h3.text-center', 'Object information'),
-            qcObjectInfoPanel(qcObjectData, { gap: '.5em' }, defaultRowAttributes(model.notification)),
+            qcObjectInfoPanel(qcObject, { gap: '.5em' }, defaultRowAttributes(model.notification)),
           ]),
         ]),
       ]);

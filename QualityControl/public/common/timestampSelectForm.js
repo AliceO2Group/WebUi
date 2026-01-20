@@ -21,41 +21,41 @@ import { prettyFormatDate } from './utils.js';
  * @param {Array<{id: string, createdAt: string}>} config.versions - list of versions to display
  * @param {string|null} config.selectedId - currently selected version id
  * @param {onselect} config.onSelect - callback when a version is selected
+ * @param config.object
  * @returns {vnode} - virtual node element
  */
-export const timestampSelectForm = ({ versions = [], selectedId = null, onSelect }) =>
-  h(
+export default ({ object: objectModel }) => {
+  const { objects, selected } = objectModel;
+  const isObjectLoaded = selected && objects?.[selected.name]?.isSuccess();
+  return h(
     '.w-100.flex-row',
+    isObjectLoaded &&
     h('select.form-control.gray-darker.text-center', {
       onchange: (e) => {
         const { value } = e.target;
-        if (value && value !== 'Invalid Timestamp') {
-          onSelect?.(JSON.parse(value));
+        if (selected && value !== 'Invalid Timestamp') {
+          const valueJson = JSON.parse(value);
+          objectModel.loadObjectByName(selected.name, valueJson.validFrom, valueJson.id);
         }
       },
-    }, versions.map((version) => versionOptionNode(version, selectedId === version.id))),
+    }, [
+      objectModel.getObjectVersions(selected.name)
+        .map((version) => {
+          const versionString = JSON.stringify(version);
+          const object = objects[selected.name].payload;
+          return h('option.text-center', {
+            id: versionString,
+            key: versionString,
+            value: versionString,
+            selected: version.createdAt === object.createdAt ? true : false,
+          }, [
+            'Created: ',
+            prettyFormatDate(version.createdAt),
+            ' (id: ',
+            version.id,
+            ')',
+          ]);
+        }),
+    ]),
   );
-
-/**
- * Create an option HTML element for a version
- * @param {object} version - version object
- * @param {string} version.id - version id
- * @param {string} version.createdAt - version creation timestamp
- * @param {boolean} isSelected - whether the version is selected
- * @returns {vnode} - virtual node element
- */
-const versionOptionNode = (version, isSelected = false) => {
-  const versionString = JSON.stringify(version);
-  return h('option.text-center', {
-    id: versionString,
-    key: versionString,
-    value: versionString,
-    selected: isSelected,
-  }, [
-    'Created: ',
-    prettyFormatDate(version.createdAt),
-    ' (id: ',
-    version.id,
-    ')',
-  ]);
 };
