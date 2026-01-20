@@ -17,11 +17,7 @@ import { prettyFormatDate } from './utils.js';
 
 /**
  * Display a select form with the latest timestamps of the current selected object
- * @param {object} config - root model of the application
- * @param {Array<{id: string, createdAt: string}>} config.versions - list of versions to display
- * @param {string|null} config.selectedId - currently selected version id
- * @param {onselect} config.onSelect - callback when a version is selected
- * @param config.object
+ * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
 export default ({ object: objectModel }) => {
@@ -30,32 +26,32 @@ export default ({ object: objectModel }) => {
   return h(
     '.w-100.flex-row',
     isObjectLoaded &&
-    h('select.form-control.gray-darker.text-center', {
-      onchange: (e) => {
-        const { value } = e.target;
-        if (selected && value !== 'Invalid Timestamp') {
-          const valueJson = JSON.parse(value);
-          objectModel.loadObjectByName(selected.name, valueJson.validFrom, valueJson.id);
-        }
-      },
-    }, [
-      objectModel.getObjectVersions(selected.name)
-        .map((version) => {
-          const versionString = JSON.stringify(version);
-          const object = objects[selected.name].payload;
-          return h('option.text-center', {
-            id: versionString,
-            key: versionString,
-            value: versionString,
-            selected: version.createdAt === object.createdAt ? true : false,
-          }, [
-            'Created: ',
-            prettyFormatDate(version.createdAt),
-            ' (id: ',
-            version.id,
-            ')',
-          ]);
-        }),
-    ]),
+  h('select.form-control.gray-darker.text-center', {
+    onchange: (e) => {
+      const { value } = e.target;
+      if (selected && value !== 'Invalid Timestamp') {
+        const valueJson = JSON.parse(value);
+        objectModel.loadObjectByName(selected.name, valueJson.validFrom, valueJson.id);
+      }
+    },
+  }, [
+    objectModel.getObjectVersions(selected.name)
+      .map((version) => {
+        const versionString = JSON.stringify(version);
+        const object = objects[selected.name].payload;
+        return h('option.text-center', {
+          id: versionString,
+          key: versionString,
+          value: versionString,
+          selected: version.createdAt === object.createdAt ? true : false,
+        }, [
+          'Created: ',
+          prettyFormatDate(version.createdAt),
+          ' (id: ',
+          version.id,
+          ')',
+        ]);
+      }),
+  ]),
   );
 };
