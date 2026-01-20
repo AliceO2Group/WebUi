@@ -18,6 +18,7 @@ import { simpleDebouncer, prettyFormatDate, setBrowserTabTitle } from './../comm
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 import { StorageKeysEnum } from '../common/enums/storageKeys.enum.js';
+import { updateWithPlotErrorOnQcRemoteData } from '../common/object/updateWithPlotErrorOnQcRemoteData.js';
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
@@ -347,11 +348,11 @@ export default class QCObject extends BaseViewModel {
   /**
    * Indicate that the object loaded is wrong. Used after trying to print it with jsroot
    * @param {string} name - name of the object
-   * @param {string} reason - the reason for invalidating the object
+   * @param {object} details - object containing detail information for invalidation
    * @returns {undefined}
    */
-  invalidObject(name, reason) {
-    this.objects[name] = RemoteData.failure(reason || 'JSROOT was unable to draw this object');
+  invalidObject(name, details) {
+    this.objects[name] = updateWithPlotErrorOnQcRemoteData(this.objects[name], details);
     this.notify();
   }
 
