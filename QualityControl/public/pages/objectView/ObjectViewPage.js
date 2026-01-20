@@ -70,7 +70,7 @@ const objectPlotAndInfo = (objectViewModel) =>
             ),
           ),
           h('.item-action-row.flex-row.g1.p2', [
-            downloadRootImageDropdown(qcObject.name, qcObject.qcObject.root, drawingOptions),
+            downloadRootImageDropdown(name, qcObject.root, drawingOptions),
             downloadButton({
               href: objectViewModel.getDownloadQcdbObjectUrl(id),
               title: 'Download root object',
