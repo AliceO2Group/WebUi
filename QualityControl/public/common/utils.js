@@ -13,6 +13,10 @@
  */
 
 import { isUserRoleSufficient } from '../../../../library/userRole.enum.js';
+import { generateDrawingOptionString } from '../../library/qcObject/utils.js';
+import { RootImageDownloadSupportedTypes } from './enums/rootImageMimes.enum.js';
+
+/* global JSROOT BOOKKEEPING */
 
 /**
  * Generates a new ObjectId
@@ -30,6 +34,32 @@ export function objectId() {
  */
 export function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
+}
+
+// Map storing timers per key
+const simpleDebouncerTimers = new Map();
+
+/**
+ * Produces a debounced function that uses a key to manage timers.
+ * Each key has its own debounce timer, so calls with different keys
+ * are debounced independently.
+ * @template PrimitiveKey extends unknown
+ * @param {PrimitiveKey} key - The key for this call.
+ * @param {(key: PrimitiveKey) => void} fn - Function to debounce.
+ * @param {number} time - Debounce delay in milliseconds.
+ * @returns {undefined}
+ */
+export function simpleDebouncer(key, fn, time) {
+  if (simpleDebouncerTimers.has(key)) {
+    clearTimeout(simpleDebouncerTimers.get(key));
+  }
+
+  const timerId = setTimeout(() => {
+    fn(key);
+    simpleDebouncerTimers.delete(key);
+  }, time);
+
+  simpleDebouncerTimers.set(key, timerId);
 }
 
 /**
@@ -140,15 +170,6 @@ export function hasMinimumRoleAccess(userRoles, requiredRole) {
 }
 
 /**
- * Method to check if connection is secure to enable certain improvements
- * e.g navigator.clipboard, notifications, service workers
- * @returns {boolean} - whether window is in secure context
- */
-export function isContextSecure() {
-  return window.isSecureContext;
-}
-
-/**
  * Asynchronously writes the given text value to the system clipboard
  * @param {string} value - The text string to be copied to the clipboard
  * @returns {Promise<void>} - A Promise that resolves with no value when the text has been successfully copied.
@@ -170,4 +191,85 @@ export const camelToTitleCase = (text) => {
   const spaced = text.replace(/([A-Z])/g, ' $1');
   const titleCase = spaced.charAt(0).toUpperCase() + spaced.slice(1);
   return titleCase;
+};
+
+/**
+ * Helper to trigger a download for a file
+ * @param {string} url - The URL to the file source
+ * @param {string} filename - The name of the file including the file extension
+ * @returns {undefined}
+ */
+export const triggerDownload = (url, filename) => {
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+};
+
+/**
+ * Downloads a file
+ * @param {Blob|MediaSource} file - The file to download
+ * @param {string} filename - The name of the file including the file extension
+ * @returns {undefined}
+ */
+export const downloadFile = (file, filename) => {
+  const url = URL.createObjectURL(file);
+  try {
+    triggerDownload(url, filename);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+};
+
+/**
+ * Generates a rasterized image of a JSROOT RootObject and triggers download.
+ * @param {string} filename - The name of the downloaded file excluding the file extension.
+ * @param {string} filetype - The file extension of the downloaded file.
+ * @param {RootObject} root - The JSROOT RootObject to render.
+ * @param {string[]} [drawingOptions=[]] - Optional array of JSROOT drawing options.
+ * @returns {undefined}
+ */
+export const downloadRoot = async (filename, filetype, root, drawingOptions = []) => {
+  const mime = RootImageDownloadSupportedTypes[filetype.toLocaleUpperCase()];
+  if (!mime) {
+    throw new Error(`The file extension (${filetype}) is not supported`);
+  }
+
+  const image = await JSROOT.makeImage({
+    object: root,
+    option: generateDrawingOptionString(root, drawingOptions),
+    format: filetype,
+    as_buffer: true,
+  });
+  const blob = new Blob([image], { type: mime });
+  downloadFile(blob, `${filename}.${filetype}`);
+};
+
+/**
+ * Determines whether the element is positioned on the left half of the viewport.
+ * This is used to decide which way a dropdown should anchor to stay within view.
+ * @param {HTMLElement} element - The DOM element (usually the button or container) to measure.
+ * @returns {boolean|undefined} Returns true if the element is on the left half of the window,
+ * false if it is on the right half, or undefined if no element is provided.
+ */
+export const isOnLeftSideOfViewport = (element) => {
+  if (!element) {
+    return;
+  }
+
+  const rect = element.getBoundingClientRect();
+  const isLeft = rect.left - rect.width < window.innerWidth / 2;
+  return isLeft;
+};
+
+/**
+ * Retrieves the URL to the run details page in Bookkeeping for the given run number
+ * @param {number|string} runNumber - The run number to generate the URL for
+ * @returns {string|null} The URL to the run details page, or null if Bookkeeping is not configured
+ */
+export const getBkpRunDetailsUrl = (runNumber) => {
+  if (typeof BOOKKEEPING !== 'undefined' && BOOKKEEPING && BOOKKEEPING.RUN_DETAILS) {
+    return BOOKKEEPING.RUN_DETAILS + runNumber;
+  }
+  return null;
 };

@@ -13,7 +13,11 @@
 
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
-import { editedMockedLayout } from '../../setup/seeders/layout-show/json-file-mock.js';
+import {
+  editedManyObjectsMockedLayout,
+  editedMockedLayout,
+} from '../../setup/seeders/layout-show/json-file-mock.js';
+import { getElementCenter } from '../../testUtils/dragAndDrop.js';
 
 /**
  * Performs a series of automated tests on the layoutShow page using Puppeteer.
@@ -42,6 +46,16 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       const dlButton = await page.evaluate(() => document.querySelector('.download-button').href);
       const token = await page.evaluate(() => model.session.token);
       strictEqual(dlButton, `${url}api/object/proxy/download/?token=${token}&objectIds=${objectId}`);
+    },
+  );
+
+  await testParent.test(
+    'should have a correctly made save root as image button',
+    { timeout },
+    async () => {
+      const exists = await page.evaluate(() => document.querySelector('.save-root-as-image-button') !== null);
+
+      ok(exists, 'Expected ROOT image save button to exist');
     },
   );
 
@@ -165,6 +179,17 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       strictEqual(result.pathTitle, 'Path');
       strictEqual(result.objectPath, 'qc/test/object/1');
       strictEqual(result.lastModifiedTitle, 'Last Modified');
+    },
+  );
+
+  await testParent.test(
+    'should align info dropdown to the right when container is on the left',
+    { timeout },
+    async () => {
+      await page.click('button.btn[title*="View details"]');
+      const leftStyle = await page.evaluate(() => document.querySelector('#subcanvas .dropdown-menu').style.left);
+
+      strictEqual(leftStyle, '0.1em');
     },
   );
 
@@ -298,6 +323,39 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
+    'should reorder tabs via drag and drop in edit mode',
+    { timeout },
+    async () => {
+      const originalTabNames = await page.$$eval('#btn-tab', (elements) =>
+        elements.map((element) => element.textContent.trim()));
+
+      const sourceTabSelector = '.btn-group.flex-fixed.relative:nth-child(1)';
+      const targetZoneSelector = '.btn-group.flex-fixed.relative:nth-child(2) .drop-zone.after';
+
+      const sourceCenter = await getElementCenter(page, sourceTabSelector);
+      const targetCenter = await getElementCenter(page, targetZoneSelector);
+
+      await page.mouse.move(sourceCenter.x, sourceCenter.y);
+      await page.mouse.down();
+
+      // We add 'steps' to make the move smoother, which helps trigger event
+      await page.mouse.move(targetCenter.x, targetCenter.y, { steps: 10 });
+
+      await delay(1000);
+
+      // Wait a moment for the 'active' class to appear in the UI
+      await page.waitForSelector('.drop-zone.after.active');
+
+      await page.mouse.up();
+
+      const tabNames = await page.$$eval('#btn-tab', (elements) =>
+        elements.map((element) => element.textContent.trim()));
+
+      strictEqual(tabNames[1], originalTabNames[0]);
+    },
+  );
+
+  await testParent.test(
     'should show normal sidebar after Cancel click',
     { timeout },
     async () => {
@@ -379,21 +437,76 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should close JSON editor when clicking "Cancel"',
     { timeout },
     async () => {
-      const cancelButtonPath = 'body > div > div > div > div > button:nth-child(2)';
-      await page.locator(cancelButtonPath).click();
+      await page.locator('.o2-modal-content .btn-group > button:nth-child(2)').click();
       await delay(50);
-      const childrenCount = await page.evaluate(() => {
-        const bodyPath = 'body';
-        const body = document.querySelector(bodyPath);
-        return body.children.length;
-      });
-      strictEqual(childrenCount, 2);
+      const isModelOpen = await page.evaluate(() => document.querySelector('.o2-modal-content') !== null);
+      strictEqual(isModelOpen, false);
+    },
+  );
+
+  await testParent.test(
+    'should display all objects even when the JSON has out of bound entries',
+    { timeout: 15000 },
+    async () => {
+      const EXPECTED_LAYOUT_OBJECT_COUNT = editedManyObjectsMockedLayout.tabs[0].objects.length;
+
+      /**
+       * Counts the number of visible child elements within #subcanvas.
+       * Visibility is defined as being within the viewport.
+       * @returns {number} The amount of visible rendered objects
+       */
+      const getVisibleObjectCount = async () =>
+        await page.evaluate(() => {
+          const container = document.querySelector('#subcanvas');
+          if (!container) {
+            return 0;
+          }
+
+          // Count elements that intersect with the viewport
+          return Array.from(container.children).filter((child) => {
+            const rect = child.getBoundingClientRect();
+            return rect.bottom >= 0 && rect.top >= 0 && rect.left >= 0 && rect.right <= window.innerWidth;
+          }).length;
+        });
+
+      // Ensure we are on the main tab
+      await page.locator('#tab-0').click();
+      await delay(100);
+
+      const pencilButtonPath = '.btn-group > div > button';
+      await page.locator(pencilButtonPath).click();
+
+      const editViaJSONButtonPath = '#editByJson';
+      await page.locator(editViaJSONButtonPath).click();
+
+      const textareaPath = '#layout-json-editor';
+      const mockedJSON = JSON.stringify(editedManyObjectsMockedLayout);
+      await page.locator(textareaPath).fill(mockedJSON);
+
+      const updateButtonPath = '#updateLayoutButton';
+      await page.locator(updateButtonPath).click();
+      await delay(100);
+
+      strictEqual(
+        await getVisibleObjectCount(),
+        EXPECTED_LAYOUT_OBJECT_COUNT,
+        `Expected ${EXPECTED_LAYOUT_OBJECT_COUNT} rendered objects after JSON update`,
+      );
+
+      await page.reload({ waitUntil: 'networkidle0' });
+      await delay(100);
+
+      strictEqual(
+        await getVisibleObjectCount(),
+        EXPECTED_LAYOUT_OBJECT_COUNT,
+        `Expected ${EXPECTED_LAYOUT_OBJECT_COUNT} rendered objects after page reload`,
+      );
     },
   );
 
   await testParent.test(
     'should update layout when clicking "Update layout"',
-    { timeout },
+    { timeout: 10000 },
     async () => {
       const pencilButtonPath = '.btn-group > div > button';
       await page.locator(pencilButtonPath).click();
@@ -419,16 +532,20 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test('should change tab after set tabInterval', { timeout: 15000 }, async () => {
+    // Ensure we are on the 'a' tab
+    await page.locator('#tab-1').click();
+    await delay(100);
+
     const location = await page.evaluate(() => window.location);
     strictEqual(location.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=a`);
-    await delay(11000);
+    await delay(11111);
     const location2 = await page.evaluate(() => window.location);
     strictEqual(location2.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=test`);
   });
 
   await testParent.test(
     'should update layout name in sidebar when name is changed and saved via JSON editor',
-    { timeout },
+    { timeout: 10000 },
     async () => {
       const originalSidebarName = await page.evaluate(() => {
         const sidebarLayoutLink = document.querySelector('nav a.menu-item.w-wrapped.selected span:nth-child(2)');
@@ -468,12 +585,31 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       ok(originalSidebarName !== updatedSidebarName, 'Sidebar name should have changed from original');
     },
   );
+
+  await testParent.test('should not show a download button when there is no data', async () => {
+    await page.goto(`${url}?page=layoutShow&layoutId=671b8c22402408122e2f20dd&tab=main`, { waitUntil: 'networkidle0' });
+
+    const downloadCount = await page.evaluate(() => document.querySelectorAll('#download-button').length);
+
+    strictEqual(downloadCount, 0);
+  });
+
+  await testParent.test('should not show a download root as image button when there is no data', async () => {
+    // layout id 671b8c22402408122e2f20dd has no data
+    const exists = await page.evaluate(() => document.querySelector('.download-root-image-png-button') !== null);
+
+    strictEqual(exists, false);
+  });
 };
 
 const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {
   const textareaPath = 'body > div > div > div > div > textarea';
   await page.locator(textareaPath).fill(mockedJSON);
-  await delay(50);
+  await page.waitForFunction(
+    (error) => document.querySelector('.o2-modal-content .danger')?.textContent === error,
+    { timeout: 1000 },
+    errorMessage,
+  ).catch(() => { /* ignore timeout error */ });
 
   const [updateButtonIsDisabled, message] = await page.evaluate(() => {
     const updateButtonPath = 'body > div > div > div > div > button:nth-child(1)';

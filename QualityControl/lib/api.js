@@ -54,7 +54,7 @@ export const setup = async (http, ws, eventEmitter) => {
     objectGetByIdValidation,
     objectsGetValidation,
     objectGetContentsValidation,
-  } = await setupQcModel(eventEmitter);
+  } = await setupQcModel(ws, eventEmitter);
   statusService.ws = ws;
 
   http.get('/object/:id', objectGetByIdValidation, objectController.getObjectByIdHandler.bind(objectController));
@@ -109,7 +109,7 @@ export const setup = async (http, ws, eventEmitter) => {
   http.get(
     '/filter/run-status/:runNumber',
     runStatusFilterMiddleware,
-    filterController.getRunStatusHandler.bind(filterController),
+    filterController.getRunInformationHandler.bind(filterController),
   );
   http.get(
     '/filter/ongoingRuns',

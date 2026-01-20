@@ -17,7 +17,9 @@ import { suite, test, before, beforeEach, afterEach } from 'node:test';
 import nock from 'nock';
 import { stub, restore } from 'sinon';
 
-import { BookkeepingService } from '../../../lib/services/BookkeepingService.js';
+import {
+  BookkeepingService, GET_BKP_GUI_STATUS_PATH, GET_DETECTORS_PATH,
+} from '../../../lib/services/BookkeepingService.js';
 import { RunStatus } from '../../../common/library/runStatus.enum.js';
 
 /**
@@ -34,6 +36,7 @@ export const bookkeepingServiceTestSuite = async () => {
       },
     };
     before(() => nock.cleanAll());
+
     suite('Create a new instance of BookkeepingService', () => {
       test('should successfully initialize Bookkeeping Service', () => {
         const bookkeepingService = new BookkeepingService(VALID_CONFIG.bookkeeping);
@@ -91,6 +94,7 @@ export const bookkeepingServiceTestSuite = async () => {
         strictEqual(service._token, 'my-token');
       });
     });
+
     suite('connect', () => {
       let service = null;
       let validConfig = null;
@@ -136,6 +140,7 @@ export const bookkeepingServiceTestSuite = async () => {
         ok(service.error.includes('simulated failure'));
       });
     });
+
     suite('simulateConnection', () => {
       let service = null;
 
@@ -150,7 +155,7 @@ export const bookkeepingServiceTestSuite = async () => {
 
       test('should return true when service responds with ok and configured', async () => {
         nock(VALID_CONFIG.bookkeeping.url)
-          .get('/api/status/database')
+          .get(GET_BKP_GUI_STATUS_PATH)
           .query({ token: VALID_CONFIG.bookkeeping.token })
           .reply(200, {
             data: {
@@ -168,7 +173,7 @@ export const bookkeepingServiceTestSuite = async () => {
 
       test('should return false when status is not ok or not configured', async () => {
         nock(VALID_CONFIG.bookkeeping.url)
-          .get('/api/status/database')
+          .get(GET_BKP_GUI_STATUS_PATH)
           .query({ token: VALID_CONFIG.bookkeeping.token })
           .reply(200, {
             data: {
@@ -185,7 +190,7 @@ export const bookkeepingServiceTestSuite = async () => {
 
       test('should return false and set error on request failure', async () => {
         nock(VALID_CONFIG.bookkeeping.url)
-          .get('/api/status/database')
+          .get(GET_BKP_GUI_STATUS_PATH)
           .query({ token: VALID_CONFIG.bookkeeping.token })
           .replyWithError('connection failed');
 
@@ -256,8 +261,36 @@ export const bookkeepingServiceTestSuite = async () => {
         };
 
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
-        const result = await bkpService.retrieveRunStatus(123);
-        strictEqual(result, RunStatus.ENDED);
+        const { runStatus } = await bkpService.retrieveRunInformation(123);
+        strictEqual(runStatus, RunStatus.ENDED);
+      });
+
+      test('should return run information when data is present', async () => {
+        const mockResponse = {
+          data: {
+            startTime: 1,
+            endTime: 2,
+            definition: null,
+            runQuality: 'good',
+            lhcBeamMode: 'PHYSICS',
+            detectorsQualities: [],
+          },
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
+        const {
+          startTime,
+          endTime,
+          definition,
+          runQuality,
+          lhcBeamMode,
+          detectorsQualities,
+          runStatus,
+        } = await bkpService.retrieveRunInformation(123);
+        const data = { startTime, endTime, definition, runQuality, lhcBeamMode, detectorsQualities };
+
+        deepStrictEqual(data, mockResponse.data);
+        ok(Object.values(RunStatus).includes(runStatus));
       });
 
       test('should return ONGOING status when timeO2End is not present', async () => {
@@ -265,22 +298,22 @@ export const bookkeepingServiceTestSuite = async () => {
 
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
 
-        const result = await bkpService.retrieveRunStatus(456);
-        strictEqual(result, RunStatus.ONGOING);
+        const { runStatus } = await bkpService.retrieveRunInformation(456);
+        strictEqual(runStatus, RunStatus.ONGOING);
       });
 
       test('should return UNKNOWN status when no data is returned', async () => {
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, {});
 
-        const result = await bkpService.retrieveRunStatus(789);
-        strictEqual(result, RunStatus.UNKNOWN);
+        const { runStatus } = await bkpService.retrieveRunInformation(789);
+        strictEqual(runStatus, RunStatus.UNKNOWN);
       });
 
       test('should return UNKNOWN status when request fails', async () => {
         nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(500);
 
-        const result = await bkpService.retrieveRunStatus(1010);
-        strictEqual(result, RunStatus.UNKNOWN);
+        const { runStatus } = await bkpService.retrieveRunInformation(1010);
+        strictEqual(runStatus, RunStatus.UNKNOWN);
       });
 
       test('should return NOT_FOUND status when request fails', async () => {
@@ -293,15 +326,272 @@ export const bookkeepingServiceTestSuite = async () => {
           ],
         });
 
-        const result = await bkpService.retrieveRunStatus(1010);
-        strictEqual(result, RunStatus.NOT_FOUND);
+        const { runStatus } = await bkpService.retrieveRunInformation(1010);
+        strictEqual(runStatus, RunStatus.NOT_FOUND);
       });
 
       test('should return BOOKKEEPING_UNAVAILABLE status when service is not active', async () => {
         bkpService.active = false;
 
-        const result = await bkpService.retrieveRunStatus(123);
-        strictEqual(result, RunStatus.BOOKKEEPING_UNAVAILABLE);
+        const { runStatus } = await bkpService.retrieveRunInformation(123);
+        strictEqual(runStatus, RunStatus.BOOKKEEPING_UNAVAILABLE);
+      });
+    });
+
+    suite('Retrieve detector summaries', () => {
+      let bkpService = null;
+
+      before(() => {
+        bkpService = new BookkeepingService(VALID_CONFIG.bookkeeping);
+        bkpService.validateConfig(); // ensures internal fields like _hostname/_port/_token are set
+        bkpService.connect();
+      });
+
+      afterEach(() => {
+        nock.cleanAll();
+      });
+
+      test('should handle all detector types correctly', async () => {
+        const mockResponse = {
+          data: [
+            { id: 1, name: 'ACO', type: 'PHYSICAL', createdAt: 1765468282000, updatedAt: 1765468282000 },
+            { id: 2, name: 'EVS', type: 'AOT-EVENT', createdAt: 1765468282000, updatedAt: 1765468282000 },
+            { id: 3, name: 'GLO', type: 'QC', createdAt: 1765468282000, updatedAt: 1765468282000 },
+            { id: 4, name: 'MUD', type: 'MUON-GLO', createdAt: 1765468282000, updatedAt: 1765468282000 },
+            { id: 5, name: 'VTX', type: 'AOT-GLO', createdAt: 1765468282000, updatedAt: 1765468282000 },
+            { id: 6, name: 'TST', type: 'VIRTUAL', createdAt: 1765468282000, updatedAt: 1765468282000 },
+          ],
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url)
+          .get(GET_DETECTORS_PATH)
+          .query({ token: VALID_CONFIG.bookkeeping.token })
+          .reply(200, mockResponse);
+
+        const result = await bkpService.retrieveDetectorSummaries();
+
+        ok(Array.isArray(result));
+        strictEqual(result.length, mockResponse.data.length);
+
+        // Verify detector data is preserved
+        deepStrictEqual(result, mockResponse.data);
+      });
+
+      test('should return empty array when data is not an array', async () => {
+        const mockResponse = {
+          data: null,
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url)
+          .get(GET_DETECTORS_PATH)
+          .query({ token: VALID_CONFIG.bookkeeping.token })
+          .reply(200, mockResponse);
+
+        const result = await bkpService.retrieveDetectorSummaries();
+
+        ok(Array.isArray(result));
+        strictEqual(result.length, 0);
+      });
+
+      test('should return empty array when data is empty array', async () => {
+        const mockResponse = {
+          data: [],
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url)
+          .get(GET_DETECTORS_PATH)
+          .query({ token: VALID_CONFIG.bookkeeping.token })
+          .reply(200, mockResponse);
+
+        const result = await bkpService.retrieveDetectorSummaries();
+
+        ok(Array.isArray(result));
+        strictEqual(result.length, 0);
+      });
+    });
+
+    suite('Retrieve data passes', () => {
+      const GET_DATA_PASSES_PATH = '/api/dataPasses';
+
+      let bkpService = null;
+
+      before(() => {
+        bkpService = new BookkeepingService(VALID_CONFIG.bookkeeping);
+        bkpService.validateConfig(); // ensures internal fields like _hostname/_port/_token are set
+        bkpService.connect();
+      });
+
+      afterEach(() => {
+        nock.cleanAll();
+      });
+
+      test('should handle all detector types correctly', async () => {
+        const mockResponse = {
+          data: [
+            {
+              id: 9,
+              name: 'LHC23f_cpass0',
+              isFrozen: false,
+              versions: [],
+              pdpBeamTypes: ['OO'],
+              runCount: 1,
+              simulationPassesCount: 1,
+            },
+            {
+              id: 2,
+              name: 'LHC22b_skimming',
+              isFrozen: false,
+              versions: [],
+              pdpBeamTypes: ['pp'],
+              runCount: 2,
+              simulationPassesCount: 2,
+            },
+            {
+              id: 5,
+              name: 'LHC22b_apass2_skimmed',
+              isFrozen: false,
+              versions: [],
+              pdpBeamTypes: ['PbPb'],
+              runCount: 3,
+              simulationPassesCount: 1,
+            },
+            {
+              id: 1,
+              name: 'LHC22b_apass1',
+              isFrozen: false,
+              versions: [],
+              pdpBeamTypes: ['pp'],
+              runCount: 4,
+              simulationPassesCount: 0,
+            },
+            {
+              id: 4,
+              name: 'LHC22a_apass2',
+              isFrozen: false,
+              versions: [],
+              pdpBeamTypes: ['PbPb'],
+              runCount: 5,
+              simulationPassesCount: 2,
+            },
+            {
+              id: 3,
+              name: 'LHC22a_apass1',
+              isFrozen: false,
+              versions: [],
+              pdpBeamTypes: ['PbPb'],
+              runCount: 4,
+              simulationPassesCount: 0,
+            },
+          ],
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url)
+          .get(GET_DATA_PASSES_PATH)
+          .query({ token: VALID_CONFIG.bookkeeping.token })
+          .reply(200, mockResponse);
+
+        const result = await bkpService.retrieveDataPasses();
+
+        ok(Array.isArray(result));
+        strictEqual(result.length, mockResponse.data.length);
+
+        // Verify data passes data is preserved
+        deepStrictEqual(result, mockResponse.data);
+      });
+
+      test('should return empty array when data is not an array', async () => {
+        const mockResponse = {
+          data: null,
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url)
+          .get(GET_DATA_PASSES_PATH)
+          .query({ token: VALID_CONFIG.bookkeeping.token })
+          .reply(200, mockResponse);
+
+        const result = await bkpService.retrieveDataPasses();
+
+        ok(Array.isArray(result));
+        strictEqual(result.length, 0);
+      });
+
+      test('should return empty array when data is empty array', async () => {
+        const mockResponse = {
+          data: [],
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url)
+          .get(GET_DATA_PASSES_PATH)
+          .query({ token: VALID_CONFIG.bookkeeping.token })
+          .reply(200, mockResponse);
+
+        const result = await bkpService.retrieveDataPasses();
+
+        ok(Array.isArray(result));
+        strictEqual(result.length, 0);
+      });
+    });
+    suite('`retrieveOngoingRuns()` tests', () => {
+      let bkpService = null;
+      const runsPathPattern = new RegExp(`/api/runs\\?.*token=${VALID_CONFIG.bookkeeping.token}`);
+
+      beforeEach(() => {
+        bkpService = new BookkeepingService(VALID_CONFIG.bookkeeping);
+        bkpService.validateConfig();
+        bkpService.active = true;
+      });
+
+      afterEach(() => {
+        nock.cleanAll();
+      });
+
+      test('should return all already ongoing runs', async () => {
+        const mockResponse = {
+          data: [
+            {
+              runNumber: 1,
+              timeO2End: undefined,
+            },
+            {
+              runNumber: 2,
+              timeO2End: 1,
+            },
+            {
+              runNumber: 3,
+              timeO2End: undefined,
+            },
+          ],
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
+        const ongoingRuns = await bkpService.retrieveOngoingRuns();
+        strictEqual(ongoingRuns.length, 2);
+        deepStrictEqual(ongoingRuns.map((run) => run.runNumber), [1, 3]);
+      });
+
+      test('should return an empty array when data when no runs are retrieved', async () => {
+        const mockResponse = {
+          data: [],
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
+        const ongoingRuns = await bkpService.retrieveOngoingRuns();
+        strictEqual(ongoingRuns.length, 0);
+      });
+
+      test('should return an empty array when all runs have an end time specified', async () => {
+        const mockResponse = {
+          data: [
+            {
+              runNumber: 99,
+              timeO2End: 1,
+            },
+          ],
+        };
+
+        nock(VALID_CONFIG.bookkeeping.url).get(runsPathPattern).reply(200, mockResponse);
+        const ongoingRuns = await bkpService.retrieveOngoingRuns();
+        strictEqual(ongoingRuns.length, 0);
       });
     });
   });

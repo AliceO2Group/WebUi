@@ -12,7 +12,15 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconBarChart, iconCaretRight, iconResizeBoth, iconCaretBottom, iconCircleX } from '/js/src/index.js';
+import {
+  h,
+  iconCollapseUp,
+  iconBarChart,
+  iconCaretRight,
+  iconResizeBoth,
+  iconCaretBottom,
+  iconCircleX,
+} from '/js/src/index.js';
 import { spinner } from '../common/spinner.js';
 import { draw } from '../common/object/draw.js';
 import timestampSelectForm from './../common/timestampSelectForm.js';
@@ -20,6 +28,9 @@ import virtualTable from './virtualTable.js';
 import { defaultRowAttributes, qcObjectInfoPanel } from '../common/object/objectInfoCard.js';
 import { downloadButton } from '../common/downloadButton.js';
 import { resizableDivider } from '../common/resizableDivider.js';
+import { downloadRootImageDropdown } from '../common/downloadRootImageDropdown.js';
+import { SortDirectionsEnum } from '../common/enums/columnSort.enum.js';
+import { sortableTableHead } from '../common/sortButton.js';
 
 /**
  * Shows a page to explore though a tree of objects with a preview on the right if clicked
@@ -28,11 +39,14 @@ import { resizableDivider } from '../common/resizableDivider.js';
  * @returns {vnode} - virtual node element
  */
 export default (model) => {
-  const { object, router } = model;
+  const { object } = model;
   const { leftPanelWidthPercent } = object;
-  return h('.h-100.flex-column', { key: `${router.params.page}` }, [
-    h('.flex-row.flex-grow', [
-      h('.scroll-y.flex-column', {
+  return h('.flex-column.h-100', {
+    key: 'object-tree-page-container',
+  }, [
+    h('.flex-row', { style: 'flex-grow: 1; height: 0;' }, [
+      h('.flex-column.scroll-y', {
+        key: 'object-tree-scroll-container',
         style: {
           width: object.selected ? `${leftPanelWidthPercent}%` : '100%',
         },
@@ -46,9 +60,15 @@ export default (model) => {
             const objectsLoaded = object.list;
             const objectsToDisplay = objectsLoaded.filter((qcObject) =>
               qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
-            return virtualTable(model, 'main', objectsToDisplay);
+            return h('.flex-column.flex-grow', [
+              actionablesHeaderGroup(model.object),
+              virtualTable(model, 'main', objectsToDisplay),
+            ]);
           }
-          return tableShow(model);
+          return h('', [
+            actionablesHeaderGroup(model.object),
+            tableShow(model),
+          ]);
         },
         Failure: () => null, // Notification is displayed
       })),
@@ -93,15 +113,17 @@ function objectPanel(model) {
  * @returns {vnode} - virtual node element
  */
 const drawPlot = (model, object) => {
-  const { name, validFrom, id } = object;
+  const { name, qcObject, validFrom, id } = object;
+  const { root } = qcObject;
   const href = validFrom ?
     `?page=objectView&objectName=${name}&ts=${validFrom}&id=${id}`
     : `?page=objectView&objectName=${name}`;
   return h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
     h('.item-action-row.flex-row.g1.p1', [
+      downloadRootImageDropdown(name, root, ['stat']),
       downloadButton({
-        href: model.objectViewModel.getDownloadQcdbObjectUrl(object.id),
-        title: 'Download object',
+        href: model.objectViewModel.getDownloadQcdbObjectUrl(id),
+        title: 'Download root object',
       }),
       h(
         'a.btn#fullscreen-button',
@@ -164,10 +186,74 @@ const statusBarRight = (model) => model.object.selected
  * @returns {vnode} - virtual node element
  */
 const tableShow = (model) =>
-  h('table.table.table-sm.text-no-select', [
-    h('thead', [h('tr', [h('th', 'Name')])]),
-    h('tbody', [treeRows(model)]),
+  h('table.table.table-sm.text-no-select', h('tbody', [treeRows(model)]));
+
+/**
+ * A composite header component for the actionables section.
+ * It groups the column sorting header and the functional toolbar (search/collapse).
+ * @param {QCObject} qcObject - The state object for Quality Control actionables.
+ * @returns {vnode} A virtual DOM node containing the grouped header elements.
+ */
+const actionablesHeaderGroup = (qcObject) => {
+  const {
+    order = SortDirectionsEnum.ASC,
+    icon = 'sort',
+  } = qcObject.sortBy || {};
+
+  return h('.bg-gray-light.pv2', [
+    sortableTableHead({
+      order,
+      icon,
+      label: 'Name',
+      sortOptions: [SortDirectionsEnum.ASC, SortDirectionsEnum.DESC],
+      onclick: (label, order, icon) => {
+        qcObject.sortTree(label, 'name', order, icon);
+      },
+    }),
+    actionablesContainer(qcObject),
   ]);
+};
+
+/**
+ * A toolbar containing interactive controls for the object tree table,
+ * specifically the search input and the 'Collapse All' button.
+ * @param {QCObject} qcObject - The state object for managing tree interactions.
+ * @returns {vnode} A flex-row container with search and collapse actions.
+ */
+const actionablesContainer = (qcObject) =>
+  h('.flex-row.w-100', [
+    actionableSearchInput(qcObject),
+    actionableCollapseAll(qcObject),
+  ]);
+
+/**
+ * A button to collapse all expanded nodes in the object tree table.
+ * Disabled when a search filter is active to prevent UI inconsistency.
+ * @param {QCObject} qcObject - The state object containing the tree controller.
+ * @returns {vnode} A button element with a collapse icon.
+ */
+const actionableCollapseAll = (qcObject) =>
+  h('button.btn.m2', {
+    title: 'Close whole tree',
+    onclick: () => qcObject.tree.closeAll(),
+    disabled: Boolean(qcObject.searchInput),
+    id: 'collapse-tree-button',
+  }, iconCollapseUp());
+
+/**
+ * A text input for filtering the object tree table based on user queries.
+ * @param {QCObject} qcObject - The state object managing search input and loading state.
+ * @returns {vnode} An input element for searching.
+ */
+const actionableSearchInput = (qcObject) =>
+  h('input.form-control.form-inline.mv2.mh3.flex-grow', {
+    id: 'searchObjectTree',
+    placeholder: 'Search',
+    type: 'text',
+    value: qcObject.searchInput,
+    disabled: qcObject.queryingObjects ? true : false,
+    oninput: (e) => qcObject.search(e.target.value),
+  });
 
 /**
  * Shows a list of lines <tr> of objects
@@ -180,7 +266,7 @@ const treeRows = (model) => !model.object.tree ?
 
   model.object.tree.children.length === 0
     ? h('.w-100.text-center', 'No objects found')
-    : model.object.tree.children.map((children) => treeRow(model, children, 0));
+    : model.object.tree.children.map((children) => treeRow(model, children));
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
@@ -190,68 +276,71 @@ const treeRows = (model) => !model.object.tree ?
  * @param {Model} model - root model of the application
  * @param {ObjectTree} tree - data-structure containing an object per node
  * @param {number} level - used for indentation within recursive call of treeRow
- * @returns {vnode} - virtual node element
+ * @returns {vnode[]} - virtual node element
  */
-function treeRow(model, tree, level) {
-  const padding = `${level}em`;
-  const levelDeeper = level + 1;
-  const children = tree.open ? tree.children.map((children) => treeRow(model, children, levelDeeper)) : [];
-  const path = tree.name;
-  const className = tree.object && tree.object === model.object.selected ? 'table-primary' : '';
+function treeRow(model, tree, level = 0) {
+  const { pathString, open, children, object, name } = tree;
 
-  if (model.object.searchInput) {
-    return [];
-  } else {
-    if (tree.object && tree.children.length === 0) {
-      return [leafRow(path, () => model.object.select(tree.object), className, padding, tree.name)];
-    } else if (tree.object && tree.children.length > 0) {
-      return [
-        leafRow(path, () => model.object.select(tree.object), className, padding, tree.name),
-        branchRow(path, tree, padding),
-        children,
-      ];
-    }
-    return [
-      branchRow(path, tree, padding),
-      children,
-    ];
+  const childRow = open
+    ? children.flatMap((children) => treeRow(model, children, level + 1))
+    : [];
+
+  const rows = [];
+
+  if (object) {
+    // Add a leaf row (final element; cannot be expanded further)
+    const className = object === model.object.selected ? 'table-primary' : '';
+    const leaf = treeRowElement(
+      pathString,
+      name,
+      () => model.object.select(object),
+      iconBarChart,
+      className,
+      {
+        paddingLeft: `${level + 0.3}em`,
+      },
+    );
+    rows.push(leaf);
   }
+  if (children.length > 0) {
+    // Add a branch row (expandable / collapsible element)
+    const branch = treeRowElement(
+      pathString,
+      name,
+      () => tree.toggle(),
+      open ? iconCaretBottom : iconCaretRight,
+      '',
+      {
+        paddingLeft: `${level + 0.3}em`,
+      },
+    );
+    rows.push(branch);
+  }
+
+  return [...rows, ...childRow];
 }
 
 /**
- * Creates a row containing specific visuals for leaf object and on selection
- * it will plot the object with JSRoot
- * @param {string} path - full name of the object
- * @param {Action} selectItem - action for plotting the object
- * @param {string} className - name of the row class
- * @param {number} padding - space needed to be displayed so that leaf is within its parent
- * @param {string} leafName - name of the object
+ * Creates a row containing specific visuals for either a branch or a leaf object
+ * and on click it will expand/collapse the branch or plot the leaf object with JSRoot
+ * @param {string} key - An unique identifier for this branch row element (table row)
+ * @param {string} title - The name of this tree object element
+ * @param {() => void} onclick - The action (callback) to perform upon clicking this branch row element (table row)
+ * @param {() => vnode} icon - Icon renderer for the row
+ * @param {string} className - Optional CSS class name(s) for the outer branch row element (table row)
+ * @param {object} style - Optional CSS styling for the inner branch row element (table data)
  * @returns {vnode} - virtual node element
  */
-const leafRow = (path, selectItem, className, padding, leafName) =>
+const treeRowElement = (key, title, onclick, icon, className = '', style = {}) =>
   h('tr.object-selectable', {
-    key: path, title: path, onclick: selectItem, class: className, id: path,
+    key,
+    id: key,
+    title,
+    onclick,
+    class: className,
   }, [
-    h('td.highlight', [
-      h('span', { style: { paddingLeft: padding } }, iconBarChart()),
-      ' ',
-      leafName,
-    ]),
-  ]);
-
-/**
- * Creates a row containing specific visuals for branch object and on selection
- * it will open its children
- * @param {string} path - full name of the object
- * @param {ObjectTree} tree - current selected tree
- * @param {number} padding - space needed to be displayed so that branch is within its parent
- * @returns {vnode} - virtual node element
- */
-const branchRow = (path, tree, padding) =>
-  h('tr.object-selectable', { key: path, title: path, onclick: () => tree.toggle() }, [
-    h('td.highlight', [
-      h('span', { style: { paddingLeft: padding } }, tree.open ? iconCaretBottom() : iconCaretRight()),
-      ' ',
-      tree.name,
+    h('td.highlight.flex-row.items-center.g1', { style }, [
+      icon(),
+      title,
     ]),
   ]);

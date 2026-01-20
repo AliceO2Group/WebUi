@@ -29,6 +29,7 @@ import {
  */
 
 import { initialPageSetupTests } from './public/initialPageSetup.test.js';
+import { profileHeaderTests } from './public/components/profileHeader.test.js';
 import { qcDrawingOptionsTests } from './public/components/qcDrawingOptions.test.js';
 import { layoutListPageTests } from './public/pages/layout-list.test.js';
 import { objectTreePageTests } from './public/pages/object-tree.test.js';
@@ -42,6 +43,8 @@ import { aboutPageTests } from './public/pages/about-page.test.js';
  */
 import { errorHandlerTestSuite } from './lib/utils/errorHandler.test.js';
 import { httpRequestsTestSuite } from './lib/utils/httpRequests.test.js';
+import { addLabelsToLayoutTestSuite } from './lib/utils/layout/addLabelsToLayout.test.js';
+import { trimLayoutPerRequiredFieldsTestSuite } from './lib/utils/layout/trimLayoutPerRequiredFields.test.js';
 
 /**
  * Controllers
@@ -64,6 +67,7 @@ import { bookkeepingServiceTestSuite } from './lib/services/BookkeepingService.t
  */
 import { baseRepositoryTestSuite } from './lib/database/repositories/BaseRepository.test.js';
 import { layoutRepositoryTestSuite } from './lib/database/repositories/LayoutRepository.test.js';
+import { layoutRepositoryTest } from './lib/repositories/LayoutRepository.test.js';
 import { userRepositoryTestSuite } from './lib/database/repositories/UserRepository.test.js';
 import { chartRepositoryTestSuite } from './lib/database/repositories/ChartRepository.test.js';
 import { chartOptionsRepositoryTestSuite } from './lib/database/repositories/ChartOptionsRepository.test.js';
@@ -103,21 +107,28 @@ const FRONT_END_PER_TEST_TIMEOUT = 5000; // each front-end test is allowed this 
 // remaining tests are based on the number of individual tests in each suite
 
 const INITIAL_PAGE_SETUP_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 5;
+const PAGE_HEADER_COMPONENT_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
 const QC_DRAWING_OPTIONS_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 13;
-const LAYOUT_LIST_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
-const OBJECT_TREE_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
+const LAYOUT_LIST_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 17;
+const OBJECT_TREE_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 20;
 const OBJECT_VIEW_FROM_OBJECT_TREE_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 5;
-const OBJECT_VIEW_FROM_LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 4;
+const OBJECT_VIEW_FROM_LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 18;
 const LAYOUT_SHOW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 23;
-const ABOUT_VIEW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 4;
+const ABOUT_VIEW_PAGE_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 6;
+const FILTER_TEST_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 26;
+const RUN_MODE_TEST_TIMEOUT = FRONT_END_PER_TEST_TIMEOUT * 10;
 
 const FRONT_END_TIMEOUT = INITIAL_PAGE_SETUP_TIMEOUT
+  + PAGE_HEADER_COMPONENT_TIMEOUT
   + QC_DRAWING_OPTIONS_TIMEOUT
   + LAYOUT_LIST_PAGE_TIMEOUT
   + OBJECT_TREE_PAGE_TIMEOUT
   + OBJECT_VIEW_FROM_OBJECT_TREE_PAGE_TIMEOUT
   + OBJECT_VIEW_FROM_LAYOUT_SHOW_PAGE_TIMEOUT
-  + LAYOUT_SHOW_PAGE_TIMEOUT;
+  + LAYOUT_SHOW_PAGE_TIMEOUT
+  + ABOUT_VIEW_PAGE_TIMEOUT
+  + FILTER_TEST_TIMEOUT
+  + RUN_MODE_TEST_TIMEOUT;
 
 const BACK_END_TIMEOUT = 10000; // back-end test suite timeout
 
@@ -147,9 +158,9 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     );
 
     test(
-      'should successfully run layoutList page tests',
-      { timeout: LAYOUT_LIST_PAGE_TIMEOUT },
-      async (testParent) => await layoutListPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
+      'should successfully import and run tests for profile in header',
+      { timeout: INITIAL_PAGE_SETUP_TIMEOUT },
+      async (testParent) => await profileHeaderTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
 
     test(
@@ -181,11 +192,23 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
       { timeout: ABOUT_VIEW_PAGE_TIMEOUT },
       async (testParent) => await aboutPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
     );
-    test('should successfully import and run tests for filter', async (testParent) =>
-      await filterTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent));
+    test(
+      'should successfully import and run tests for filter',
+      { timeout: FILTER_TEST_TIMEOUT },
+      async (testParent) => await filterTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
+    );
 
-    test('should successfully use run mode when available', async (testParent) =>
-      await runModeTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent));
+    test(
+      'should successfully use run mode when available',
+      { timeout: RUN_MODE_TEST_TIMEOUT },
+      async (testParent) => await runModeTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
+    );
+
+    test(
+      'should successfully run layoutList page tests',
+      { timeout: LAYOUT_LIST_PAGE_TIMEOUT },
+      async (testParent) => await layoutListPageTests(url, page, FRONT_END_PER_TEST_TIMEOUT, testParent),
+    );
   });
 
   suite('API - test suite', { timeout: FRONT_END_TIMEOUT }, async () => {
@@ -212,6 +235,8 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
     suite('Lib - Test Suite', async () => {
       suite('Utility "errorHandler" methods test suite', async () => await errorHandlerTestSuite());
       suite('Utility "httpRequests" methods test suite', async () => await httpRequestsTestSuite());
+      suite('Layout Utils - calculateLabelsForLayout test suite', () => addLabelsToLayoutTestSuite());
+      suite('Layout Utils - trimLayoutPerRequiredFields test suite', () => trimLayoutPerRequiredFieldsTestSuite());
     });
 
     suite('Common Library - Test Suite', () => {
@@ -221,7 +246,8 @@ suite('All Tests - QCG', { timeout: FRONT_END_TIMEOUT + BACK_END_TIMEOUT }, asyn
 
     suite('Repositories - Test Suite', async () => {
       suite('Base Repository - Test Suite', async () => await baseRepositoryTestSuite());
-      suite('Layout Repository - Test Suite', async () => await layoutRepositoryTestSuite());
+      suite('Layout Repository - Database Test Suite', async () => await layoutRepositoryTestSuite());
+      suite('Layout Repository - Test Suite', async () => await layoutRepositoryTest());
       suite('User Repository - Test Suite', async () => await userRepositoryTestSuite());
       suite('Chart Repository - Test Suite', async () => await chartRepositoryTestSuite());
       suite('Chart Options Repository - Test Suite', async () => await chartOptionsRepositoryTestSuite());

@@ -12,9 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
-import { RemoteData, iconArrowTop, BrowserStorage } from '/js/src/index.js';
+import { RemoteData, iconCaretTop, BrowserStorage } from '/js/src/index.js';
 import ObjectTree from './ObjectTree.class.js';
-import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
+import { simpleDebouncer, prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
 import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 import { StorageKeysEnum } from '../common/enums/storageKeys.enum.js';
@@ -39,6 +39,7 @@ export default class QCObject extends BaseViewModel {
     this.selected = null; // Object - { name; createTime; lastModified; }
     this.selectedOpen = false;
     this.objects = {}; // ObjectName -> RemoteData.payload -> plot
+    this._extraObjectData = {};
 
     this.searchInput = ''; // String - content of input search
     this.searchResult = []; // Array<object> - result list of search
@@ -46,8 +47,7 @@ export default class QCObject extends BaseViewModel {
       field: 'name',
       title: 'Name',
       order: 1,
-      icon: iconArrowTop(),
-      open: false,
+      icon: iconCaretTop(),
     };
 
     this.tree = new ObjectTree('database');
@@ -116,15 +116,6 @@ export default class QCObject extends BaseViewModel {
   }
 
   /**
-   * Toggle the display of the sort by dropdown
-   * @returns {undefined}
-   */
-  toggleSortDropdown() {
-    this.sortBy.open = !this.sortBy.open;
-    this.notify();
-  }
-
-  /**
    * Computes the final list of objects to be seen by user depending on search input from user
    * If any of those changes, this method should be called to update the outputs.
    * @returns {undefined}
@@ -189,7 +180,7 @@ export default class QCObject extends BaseViewModel {
 
     this._computeFilters();
 
-    this.sortBy = { field, title, order, icon, open: false };
+    this.sortBy = { field, title, order, icon };
     this.notify();
   }
 
@@ -252,8 +243,7 @@ export default class QCObject extends BaseViewModel {
       field: 'name',
       title: 'Name',
       order: 1,
-      icon: iconArrowTop(),
-      open: false,
+      icon: iconCaretTop(),
     };
     this._computeFilters();
 
@@ -314,6 +304,7 @@ export default class QCObject extends BaseViewModel {
   async loadObjects(objectsName) {
     this.objectsRemote = RemoteData.loading();
     this.objects = {}; // Remove any in-memory loaded objects
+    this._extraObjectData = {}; // Remove any in-memory extra object data
     this.model.services.object.objectsLoadedMap = {}; // TODO not here
     this.notify();
     if (!objectsName || !objectsName.length) {
@@ -652,5 +643,50 @@ export default class QCObject extends BaseViewModel {
       }
     }
     this.loadList();
+  }
+
+  /**
+   * Returns the extra data associated with a given object name.
+   * @param {string} objectName The name of the object whose extra data should be retrieved.
+   * @returns {object | undefined} The extra data associated with the given object name, or undefined if none exists.
+   */
+  getExtraObjectData(objectName) {
+    return this._extraObjectData[objectName];
+  }
+
+  /**
+   * Appends extra data to an existing object entry.
+   * Existing keys are preserved unless overwritten by the provided data. If no data exists, a new entry is created.
+   * @param {string} objectName The name of the object to which extra data should be appended.
+   * @param {object} data The extra data to merge into the existing object data.
+   * @returns {undefined}
+   */
+  appendExtraObjectData(objectName, data) {
+    this._extraObjectData[objectName] = { ...this._extraObjectData[objectName] ?? {}, ...data };
+    // debounce notify by 1ms
+    simpleDebouncer('QCObject.appendExtraObjectData', () => this.notify(), 1);
+  }
+
+  /**
+   * Sets (overwrites) the extra data for a given object name.
+   * Any previously stored data for the object is replaced entirely.
+   * @param {string} objectName The name of the object whose extra data should be set.
+   * @param {object | undefined} data The extra data to associate with the object.
+   * @returns {undefined}
+   */
+  setExtraObjectData(objectName, data) {
+    this._extraObjectData[objectName] = data;
+    // debounce notify by 1ms
+    simpleDebouncer('QCObject.setExtraObjectData', () => this.notify(), 1);
+  }
+
+  /**
+   * Clears all stored extra object data.
+   * After calling this method, no extra data will be associated with any object name.
+   * @returns {undefined}
+   */
+  clearAllExtraObjectData() {
+    this._extraObjectData = {};
+    this.notify();
   }
 }

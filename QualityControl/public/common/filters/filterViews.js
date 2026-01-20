@@ -12,11 +12,22 @@
  * or submit itself to any jurisdiction.
  */
 
-import { filterInput, dynamicSelector, ongoingRunsSelector } from './filter.js';
+import {
+  filterInput,
+  dynamicSelector,
+  ongoingRunsSelector,
+  groupedDropdownComponent,
+  inputWithDropdownComponent,
+} from './filter.js';
 import { FilterType } from './filterTypes.js';
 import { filtersConfig, runModeFilterConfig } from './filtersConfig.js';
-import { runModeCheckbox } from './runMode/runModeCheckbox.js';
-import { lastUpdatePanel, runStatusPanel } from './runMode/runStatusPanel.js';
+import { runModeComponent } from './runMode/runModeCheckbox.js';
+import {
+  cleanRunInformationPanel,
+  detectorsQualitiesPanel,
+  lastUpdatePanel,
+  runStatusPanel,
+} from './runMode/runStatusPanel.js';
 import { h, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
 
 /**
@@ -45,6 +56,10 @@ const createFilterElement =
       case FilterType.INPUT: return filterInput({ ...commonConfig, type: inputType });
       case FilterType.DROPDOWN:
         return dynamicSelector({ ...commonConfig, options, onChangeCallback, inputType });
+      case FilterType.GROUPED_DROPDOWN:
+        return groupedDropdownComponent({ ...commonConfig, options, onChangeCallback, inputType });
+      case FilterType.INPUT_WITH_DROPDOWN:
+        return inputWithDropdownComponent({ ...commonConfig, options, onChangeCallback, inputType });
       case FilterType.RUN_MODE:
         return ongoingRunsSelector(
           { ...commonConfig },
@@ -75,25 +90,27 @@ export function filtersPanel(filterModel, viewModel) {
     isVisible,
     lastRefresh,
     ONGOING_RUN_INTERVAL_MS: refreshRate,
+    runInformation,
   } = filterModel;
+  if (!isVisible) {
+    return null;
+  }
   const { fetchOngoingRuns } = filterService;
   const onInputCallback = setFilterValue.bind(filterModel);
   const onChangeCallback = setFilterValue.bind(filterModel);
   const onFocusCallback = fetchOngoingRuns.bind(filterService);
   const onEnterCallback = () => filterModel.triggerFilter(viewModel);
   const clearFilterCallback = clearFiltersAndTrigger.bind(filterModel, viewModel);
-  if (!isVisible) {
-    return null;
-  }
   const filtersList = isRunModeActivated
     ? runModeFilterConfig(filterService)
     : filtersConfig(filterService);
+  const { detectorsQualities, ...cleanRunInformation } = runInformation;
 
   return h(
     '.w-100.flex-column.p2.g2.justify-center#filterElement',
     [
       h('.flex-row.g2.justify-center.items-center', [
-        runModeCheckbox(filterModel, viewModel),
+        runModeComponent(filterModel, viewModel),
         !isRunModeActivated &&
         [triggerFiltersButton(onEnterCallback, filterModel), clearFiltersButton(clearFilterCallback)],
         ...filtersList.map((filter) =>
@@ -101,15 +118,11 @@ export function filtersPanel(filterModel, viewModel) {
         isRunModeActivated && runStatusPanel(runStatus),
       ]),
       lastUpdatePanel(runStatus, lastRefresh, refreshRate),
+      cleanRunInformationPanel(cleanRunInformation, filterModel.filterMap['RunNumber']),
+      detectorsQualitiesPanel(detectorsQualities),
     ],
   );
-};
-
-/**
- * Determines if runs mode is allowed based on current page and context
- * @param {object} viewModel - Model that manages the state of the page
- * @returns {boolean} - whether runs mode is allowed
- */
+}
 
 /**
  * Button which will allow the user to update filter parameters after the input

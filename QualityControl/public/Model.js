@@ -29,6 +29,8 @@ import AboutViewModel from './pages/aboutView/AboutViewModel.js';
 import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
 import { RequestFields } from './common/RequestFields.enum.js';
 import FilterModel from './common/filters/model/FilterModel.js';
+import { IntegratedServices } from '../library/enums/Status/integratedServices.enum.js';
+import NotificationRunStartModel from './common/notifications/model/NotificationRunStartModel.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -85,6 +87,9 @@ export default class Model extends Observable {
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
     this.ws.addListener('close', this.handleWSClose.bind(this));
 
+    this.notificationRunStartModel = new NotificationRunStartModel(this);
+    this.notificationRunStartModel.bubbleTo(this);
+
     this.initModel();
   }
 
@@ -114,6 +119,12 @@ export default class Model extends Observable {
     JSROOT.settings.SmallPad = {
       height: 10,
     };
+
+    // For active run monitoring, the kafka service must be available.
+    // If we do not yet know the kafka service status, we should request it from the backend
+    if (!this.aboutViewModel.findService(IntegratedServices.KAFKA)) {
+      this.aboutViewModel.retrieveIndividualServiceStatus(IntegratedServices.KAFKA);
+    }
 
     /*
      * Init first page
@@ -169,8 +180,9 @@ export default class Model extends Observable {
     this.object.objects = {}; // Remove any in-memory loaded objects
     this._clearAllIntervals();
     await this.filterModel.filterService.initFilterService();
-    this.filterModel.setFilterFromURL();
+    await this.filterModel.setFilterFromURL();
     this.filterModel.setFilterToURL();
+    await this.aboutViewModel.retrieveIndividualServiceStatus(IntegratedServices.BOOKKEEPING);
 
     this.services.layout.getLayoutsByUserId(this.session.personid, RequestFields.LAYOUT_CARD);
 
@@ -313,16 +325,6 @@ export default class Model extends Observable {
 
     // Clear filter model runs mode interval
     this.filterModel.clearRunsModeInterval();
-  }
-
-  /**
-   * Method to check if connection is secure to enable certain improvements
-   * e.g navigator.clipboard, notifications, service workers
-   * @returns {boolean} - whether window is in secure context
-   * @deprecated use `isContextSecure` from `public/common/utils.js`
-   */
-  isContextSecure() {
-    return window.isSecureContext;
   }
 
   /**

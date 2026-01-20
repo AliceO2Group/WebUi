@@ -38,12 +38,11 @@ export default (model) =>
       }
       return [
         searchForm(model),
-        h(
-          '.scroll-y',
+        h('.flex-column.flex-grow', {}, [
           searchInput.trim() !== ''
             ? virtualTable(model, 'side', objectsToDisplay)
-            : treeTable(model),
-        ),
+            : h('.scroll-y', treeTable(model)),
+        ]),
         objectPreview(model),
       ];
     },

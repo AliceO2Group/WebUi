@@ -53,10 +53,11 @@ const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/model-setup`;
 
 /**
  * Model initialization for the QCG application
+ * @param {WebSocket} ws - web-ui websocket server implementation
  * @param {EventEmitter} eventEmitter - Event emitter instance for inter-service communication
  * @returns {Promise<object>} Multiple services and controllers that are to be used by the QCG application
  */
-export const setupQcModel = async (eventEmitter) => {
+export const setupQcModel = async (ws, eventEmitter) => {
   const logger = LogManager.getLogger(LOG_FACILITY);
 
   const __filename = fileURLToPath(import.meta.url);
@@ -64,9 +65,35 @@ export const setupQcModel = async (eventEmitter) => {
   const packageJSON = JSON.parse(readFileSync(`${__dirname}/../package.json`));
 
   const jsonFileService = new JsonFileService(config.dbFile || `${__dirname}/../db.json`);
-  if (config.database) {
-    initDatabase(new SequelizeDatabase(config?.database || {}));
+
+  const databaseConfig = config.database || {};
+  if (Object.keys(databaseConfig).length > 0) {
+    try {
+      const sequelizeDatabase = new SequelizeDatabase(databaseConfig);
+      await initDatabase(sequelizeDatabase, { forceSeed: config?.database?.forceSeed, drop: config?.database?.drop });
+      logger.infoMessage('Database initialized successfully');
+    } catch (error) {
+      logger.errorMessage(`Database initialization failed: ${error.message}`);
+    }
+  } else {
+    logger.warnMessage('No database configuration found, skipping database initialization');
   }
+
+  const layoutRepository = new LayoutRepository(jsonFileService);
+  const userRepository = new UserRepository(jsonFileService);
+  const chartRepository = new ChartRepository(jsonFileService);
+
+  const userController = new UserController(userRepository);
+  const layoutController = new LayoutController(layoutRepository);
+
+  const statusService = new StatusService(
+    { version: packageJSON?.version ?? '-' },
+    {
+      qc: config.qc ?? {},
+      bookkeeping: config.bookkeeping ?? {},
+    },
+  );
+  const statusController = new StatusController(statusService);
 
   if (config?.kafka?.enabled) {
     try {
@@ -79,21 +106,12 @@ export const setupQcModel = async (eventEmitter) => {
         logLevel: logLevel.NOTHING,
       });
       const aliEcsSynchronizer = new AliEcsSynchronizer(kafkaClient, consumerGroups, eventEmitter);
+      statusService.aliEcsSynchronizer = aliEcsSynchronizer;
       aliEcsSynchronizer.start();
     } catch (error) {
       logger.errorMessage(`Kafka initialization/connection failed: ${error.message}`);
     }
   }
-
-  const layoutRepository = new LayoutRepository(jsonFileService);
-  const userRepository = new UserRepository(jsonFileService);
-  const chartRepository = new ChartRepository(jsonFileService);
-
-  const userController = new UserController(userRepository);
-  const layoutController = new LayoutController(layoutRepository);
-
-  const statusService = new StatusService({ version: packageJSON?.version ?? '-' }, { qc: config.qc ?? {} });
-  const statusController = new StatusController(statusService);
 
   const qcdbDownloadService = new QcdbDownloadService(config.ccdb);
 
@@ -106,8 +124,15 @@ export const setupQcModel = async (eventEmitter) => {
   const intervalsService = new IntervalsService();
 
   const bookkeepingService = new BookkeepingService(config.bookkeeping);
+  statusService.bookkeepingService = bookkeepingService;
+  try {
+    await bookkeepingService.connect();
+  } catch (error) {
+    logger.errorMessage(`Failed connecting to Bookkeeping: ${error.message || error}`);
+  }
+
   const filterService = new FilterService(bookkeepingService, config);
-  const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService, eventEmitter);
+  const runModeService = new RunModeService(config.bookkeeping, bookkeepingService, ccdbService, eventEmitter, ws);
   const objectController = new ObjectController(qcObjectService, runModeService, qcdbDownloadService);
 
   const filterController = new FilterController(filterService, runModeService);
@@ -159,6 +184,13 @@ function initializeIntervals(intervalsService, qcObjectService, filterService, r
     intervalsService.register(
       runModeService.refreshRunsCache.bind(runModeService),
       runModeService.refreshInterval,
+    );
+  }
+
+  if (filterService.dataPassesRefreshInterval > 0) {
+    intervalsService.register(
+      filterService.getDataPasses.bind(runModeService),
+      filterService.dataPassesRefreshInterval,
     );
   }
 }

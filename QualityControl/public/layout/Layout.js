@@ -61,6 +61,10 @@ export default class Layout extends BaseViewModel {
     });
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
+
+    this.isDragging = false;
+    this.dropTargetId = undefined;
+    this.position = undefined;
   }
 
   /**
@@ -257,6 +261,8 @@ export default class Layout extends BaseViewModel {
     const result = await this.model.services.layout.saveLayout(this.item);
     if (result.isSuccess()) {
       await this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
+      this._tabIndex = this._tabIndex < this.item.tabs.length ? this._tabIndex : 0;
+      this.selectTab(this._tabIndex);
       this.model.notification.show(`Layout "${this.item.name}" has been saved successfully.`, 'success');
     } else {
       this.item = this.editOriginalClone;
@@ -283,9 +289,7 @@ export default class Layout extends BaseViewModel {
     this.gridListSize = parseInt(value, 10);
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
-    if (this.editEnabled) {
-      this.gridList.resizeGrid(this.gridListSize);
-    }
+    this.gridList.resizeGrid(this.gridListSize);
     this.tab.columns = this.gridListSize;
     this.tab.objects.forEach((object) => {
       if (object.w > this.tab.columns) {
@@ -302,9 +306,7 @@ export default class Layout extends BaseViewModel {
    */
   sortObjectsOfCurrentTab() {
     this.gridList.items = this.tab.objects;
-    if (this.editEnabled) {
-      this.gridList.resizeGrid(this.gridListSize);
-    }
+    this.gridList.resizeGrid(this.gridListSize);
   }
 
   /**
@@ -776,5 +778,83 @@ export default class Layout extends BaseViewModel {
    */
   ownsLayout(layoutOwnerId) {
     return this.model.session.personid == layoutOwnerId;
+  }
+
+  /**
+   * Sets the current drop target for a drag-and-drop operation.
+   * This is typically used to render a visual indicator (like a blue line)
+   * in the UI showing where the dragged tab will be placed.
+   * @param {string|number} tabId - The ID of the tab currently being hovered over.
+   * @param {'before'|'after'} position - The side of the target tab where the drop indicator should appear.
+   */
+  setDropTarget(tabId, position) {
+    this.dropTargetId = tabId;
+    this.position = position;
+
+    this.notify();
+  }
+
+  /**
+   * Clears the current drop target state, usually when the drag operation
+   * is finished or the dragged item is no longer over a valid drop zone.
+   * This action typically causes the visual drop indicator to be hidden.
+   */
+  clearDropTarget() {
+    this.dropTargetId = undefined;
+    this.position = undefined;
+
+    this.notify();
+  }
+
+  /**
+   * Reorders the tabs in the internal array based on the drag source and drop target.
+   * This function calculates the correct index for insertion, accounting for the
+   * tab being removed from its original position.
+   * @param {string|number} sourceId - The ID of the tab that was dragged.
+   * @param {string|number} targetId - The ID of the tab that the source was dropped onto.
+   * @param {'before'|'after'} position - The placement relative to the target tab.
+   */
+  reorderTabs(sourceId, targetId, position) {
+    const sourceIndex = this.item.tabs.findIndex((t) => t.id === sourceId);
+    let targetIndex = this.item.tabs.findIndex((t) => t.id === targetId);
+
+    if (sourceIndex === -1 || targetIndex === -1) {
+      return;
+    }
+
+    if (position === 'after') {
+      targetIndex += 1;
+    }
+
+    const [movedTab] = this.item.tabs.splice(sourceIndex, 1);
+
+    if (sourceIndex < targetIndex) {
+      targetIndex--;
+    }
+
+    this.item.tabs.splice(targetIndex, 0, movedTab);
+
+    this.notify();
+  }
+
+  /**
+   * Sets the layout state to indicate that a tab drag-and-drop operation has begun.
+   * It typically triggers a redraw and enables pointer events on all drop zones via CSS.
+   */
+  startDragging() {
+    this.isDragging = true;
+
+    this.notify();
+  }
+
+  /**
+   * Resets the layout state to indicate that a tab drag-and-drop operation has ended,
+   * regardless of whether the drop was successful or cancelled.
+   * It typically triggers a redraw and disables pointer events on the drop zones via CSS.
+   */
+  stopDragging() {
+    this.isDragging = false;
+
+    this.notify();
   }
 }

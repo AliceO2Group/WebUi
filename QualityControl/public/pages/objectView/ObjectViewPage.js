@@ -20,6 +20,7 @@ import { dateSelector } from '../../common/object/dateSelector.js';
 import { defaultRowAttributes, qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
 import { downloadButton } from '../../common/downloadButton.js';
 import { visibilityToggleButton } from '../../common/visibilityButton.js';
+import { downloadRootImageDropdown } from '../../common/downloadRootImageDropdown.js';
 
 /**
  * Shows a page to view an object on the whole page
@@ -65,9 +66,10 @@ const objectPlotAndInfo = (objectViewModel) =>
             ),
           ),
           h('.item-action-row.flex-row.g1.p2', [
+            downloadRootImageDropdown(qcObject.name, qcObject.qcObject.root, drawingOptions),
             downloadButton({
               href: objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
-              title: 'Download object',
+              title: 'Download root object',
             }),
             visibilityToggleButton(
               {

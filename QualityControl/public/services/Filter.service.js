@@ -27,7 +27,10 @@ export default class FilterService {
     this.filterModel = filterModel;
     this.loader = filterModel.model.loader;
 
-    this.runTypes = RemoteData.notAsked();
+    this._runTypes = RemoteData.notAsked();
+    this._detectors = RemoteData.notAsked();
+    this._dataPasses = RemoteData.notAsked();
+
     this.ongoingRuns = RemoteData.notAsked();
   }
 
@@ -35,14 +38,20 @@ export default class FilterService {
    * Method to get all run types to show in the filter
    * @returns {RemoteData} - result within a RemoteData object
    */
-  async getRunTypes() {
-    this.runTypes = RemoteData.loading();
+  async getFilterConfigurations() {
+    this._runTypes = RemoteData.loading();
+    this._detectors = RemoteData.loading();
+    this._dataPasses = RemoteData.notAsked();
     this.filterModel.notify();
     const { result, ok } = await this.loader.get('/api/filter/configuration');
     if (ok) {
-      this.runTypes = RemoteData.success(result?.runTypes || []);
+      this._runTypes = RemoteData.success(result?.runTypes || []);
+      this._detectors = RemoteData.success(result?.detectors || []);
+      this._dataPasses = RemoteData.success(result?.dataPasses || []);
     } else {
-      this.runTypes = RemoteData.failure('Error retrieving runTypes');
+      this._runTypes = RemoteData.failure('Error retrieving runTypes');
+      this._detectors = RemoteData.failure('Error retrieving detectors');
+      this._dataPasses = RemoteData.failure('Error retrieving dataPasses');
     }
     this.filterModel.notify();
   }
@@ -50,12 +59,22 @@ export default class FilterService {
   /**
    * Method to get run status for a specific run number
    * @param {number} runNumber - The run number to get status for
-   * @returns {RemoteData} - result within a RemoteData object
+   * @returns {object} - result as an object containing run information
    */
-  async getRunStatus(runNumber) {
+  async getRunInformation(runNumber) {
     const parsedRunNumber = parseInt(runNumber, 10);
     const { result, ok } = await this.loader.get(`/api/filter/run-status/${parsedRunNumber}`);
-    return ok ? result?.runStatus : RunStatus.UNKNOWN;
+    return ok ? result : {};
+  }
+
+  /**
+   * Method to get run status for a specific run number
+   * @param {number} runNumber - The run number to get status for
+   * @returns {RunStatus} - result as a run status
+   */
+  async getRunStatus(runNumber) {
+    const { runStatus } = await this.getRunInformation(runNumber);
+    return runStatus ?? RunStatus.UNKNOWN;
   }
 
   /**
@@ -63,7 +82,7 @@ export default class FilterService {
    * @returns {void}
    */
   async initFilterService() {
-    await this.getRunTypes();
+    await this.getFilterConfigurations();
   }
 
   /**
@@ -94,5 +113,29 @@ export default class FilterService {
       this.ongoingRuns = RemoteData.failure('Error retrieving ongoing runs');
     }
     this.filterModel.notify();
+  }
+
+  /**
+   * Gets the list of run types.
+   * @returns {string[]} An array containing the run types.
+   */
+  get runTypes() {
+    return this._runTypes;
+  }
+
+  /**
+   * Gets the list of detectors.
+   * @returns {DetectorSummary[]} An array containing detector objects.
+   */
+  get detectors() {
+    return this._detectors;
+  }
+
+  /**
+   * Returns a {@link RemoteData} object containing an array of data type {@link DataPass}.
+   * @returns {RemoteData<DataPass[]>} A {@link RemoteData} object containing an array of data type {@link DataPass}.
+   */
+  get dataPasses() {
+    return this._dataPasses;
   }
 }

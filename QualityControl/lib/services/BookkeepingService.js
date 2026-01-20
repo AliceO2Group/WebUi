@@ -15,12 +15,17 @@
 import { RunStatus } from '../../common/library/runStatus.enum.js';
 import { httpGetJson } from '../utils/httpRequests.js';
 import { LogManager } from '@aliceo2/web-ui';
+import { wrapRunStatus } from '../dtos/BookkeepingDto.js';
 
-const GET_BKP_DATABASE_STATUS_PATH = '/api/status/database';
+export const GET_BKP_GUI_STATUS_PATH = '/api/status/gui';
 const GET_RUN_TYPES_PATH = '/api/runTypes';
 const GET_RUN_PATH = '/api/runs';
+export const GET_DETECTORS_PATH = '/api/detectors';
+const GET_DATA_PASSES_PATH = '/api/dataPasses';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/bkp-service`;
+
+const RECENT_RUN_THRESHOLD_MS = 1 * 24 * 60 * 60 * 1000; // -1 day in milliseconds
 
 /**
  * BookkeepingService class to be used to retrieve data from Bookkeeping
@@ -31,6 +36,7 @@ export class BookkeepingService {
     this.active = false;
     this.error = null;
 
+    this._url = '';
     this._hostname = '';
     this._port = null;
     this._token = '';
@@ -51,6 +57,7 @@ export class BookkeepingService {
     const { url, token } = this.config || {};
     try {
       const normalizedURL = new URL(url);
+      this._url = normalizedURL.href;
       this._hostname = normalizedURL.hostname;
       this._protocol = normalizedURL.protocol;
       this._port = normalizedURL.port || (normalizedURL.protocol === 'https:' ? 443 : 80);
@@ -72,12 +79,12 @@ export class BookkeepingService {
    */
   async connect() {
     if (!this.validateConfig()) {
-      this._logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
+      this._logger.warnMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
       return;
     }
     this.active = await this.simulateConnection();
     if (!this.active) {
-      this._logger.infoMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
+      this._logger.warnMessage(`Bookkeeping service will not be used. Reason: ${this.error}`);
     }
   }
 
@@ -90,13 +97,14 @@ export class BookkeepingService {
       const { data } = await httpGetJson(
         this._hostname,
         this._port,
-        `${GET_BKP_DATABASE_STATUS_PATH}?token=${this._token}`,
+        `${GET_BKP_GUI_STATUS_PATH}?token=${this._token}`,
         {
           protocol: this._protocol,
           rejectUnauthorized: false,
         },
       );
       if (data && data?.status?.ok && data?.status?.configured) {
+        this._version = data.version || 'unknown';
         this._logger.infoMessage('Successfully connected to Bookkeeping');
         return true;
       } else {
@@ -127,17 +135,31 @@ export class BookkeepingService {
   }
 
   /**
-   * Retrieves the status of a specific run from the Bookkeeping service
-   * @param {number} runNumber - The run number to check the status for
-   * @returns {Promise<RunStatus>} - Returns a promise that resolves to the run status:
-   *                                 - RunStatus.ONGOING if the run is ongoing
-   *                                 - RunStatus.ENDED if the run has completed (has timeO2End)
-   *                                 - RunStatus.NOT_FOUND if there was an error or data is not available
+   * Retrieve the list of data passes from the bookkeeping service.
+   * @returns {Promise<object[]>} Resolves with an array of data passes.
    */
-  async retrieveRunStatus(runNumber) {
+  async retrieveDataPasses() {
+    const { data } = await httpGetJson(
+      this._hostname,
+      this._port,
+      this._createPath(GET_DATA_PASSES_PATH),
+      {
+        protocol: this._protocol,
+        rejectUnauthorized: false,
+      },
+    );
+    return Array.isArray(data) ? data : [];
+  }
+
+  /**
+   * Retrieves the information of a specific run from the Bookkeeping service
+   * @param {number} runNumber - The run number to check the status for
+   * @returns {Promise<RunInformation|WrappedRunStatus>} - Returns a promise that resolves to the run information
+   */
+  async retrieveRunInformation(runNumber) {
     if (!this.active) {
       this._logger.warnMessage('Could not connect to bookkeeping');
-      return RunStatus.BOOKKEEPING_UNAVAILABLE;
+      return wrapRunStatus(RunStatus.BOOKKEEPING_UNAVAILABLE);
     }
 
     try {
@@ -150,16 +172,92 @@ export class BookkeepingService {
         throw new Error('No data available');
       }
 
-      return data.timeO2End ? RunStatus.ENDED : RunStatus.ONGOING;
+      const {
+        startTime,
+        endTime,
+        environmentId,
+        definition,
+        runQuality,
+        lhcBeamMode,
+        detectorsQualities = [],
+        timeO2End,
+      } = data;
+      const runStatus = timeO2End ? RunStatus.ENDED : RunStatus.ONGOING;
+
+      return {
+        startTime,
+        endTime,
+        environmentId,
+        definition,
+        runQuality,
+        lhcBeamMode,
+        detectorsQualities,
+        ...wrapRunStatus(runStatus),
+      };
     } catch (error) {
       const msg = error?.message ?? String(error);
       if (msg.includes('404')) {
         this._logger.warnMessage(`Run number ${runNumber} not found in bookkeeping`);
-        return RunStatus.NOT_FOUND;
+        return wrapRunStatus(RunStatus.NOT_FOUND);
       }
       this._logger.errorMessage(`Error fetching run status: ${error.message || error}`);
-      return RunStatus.UNKNOWN;
+      return wrapRunStatus(RunStatus.UNKNOWN);
     }
+  }
+
+  /**
+   * Retrieves runs that are currently ongoing (started within the last \@see {RECENT_RUN_THRESHOLD_MS}
+   * but have not yet ended).
+   * @returns {Promise<Array<object>|undefined>} A promise that resolves to an array of run objects,
+   *  or undefined if the service is inactive, no data is found, or an error occurs
+   */
+  async retrieveOngoingRuns() {
+    if (!this.active) {
+      return;
+    }
+
+    const timestamp = Date.now() - RECENT_RUN_THRESHOLD_MS;
+
+    const queryParams = `page[offset]=0&page[limit]=20&filter[o2start][from]=${timestamp}&token=${this._token}`;
+
+    try {
+      const { data } = await httpGetJson(
+        this._hostname,
+        this._port,
+        `${GET_RUN_PATH}?${queryParams}`,
+        {
+          protocol: this._protocol,
+          rejectUnauthorized: false,
+        },
+      );
+
+      if (data.length === 0) {
+        return [];
+      }
+
+      return data.filter((run) => !run.timeO2End);
+    } catch (error) {
+      const msg = error?.message ?? String(error);
+      this._logger.errorMessage(msg);
+      return;
+    }
+  }
+
+  /**
+   * Retrieves the information about the detectors from the Bookkeeping service.
+   * @returns {Promise<object[]>} Array of detector summaries.
+   */
+  async retrieveDetectorSummaries() {
+    const { data } = await httpGetJson(
+      this._hostname,
+      this._port,
+      this._createPath(GET_DETECTORS_PATH),
+      {
+        protocol: this._protocol,
+        rejectUnauthorized: false,
+      },
+    );
+    return Array.isArray(data) ? data : [];
   }
 
   /**
@@ -182,5 +280,23 @@ export class BookkeepingService {
    */
   _createRunPath(runNumber) {
     return this._createPath(`${GET_RUN_PATH}/${runNumber}`);
+  }
+
+  /**
+   * Get the URL of the bookkeeping service
+   * @readonly
+   * @returns {string} the URL of the bookkeeping service
+   */
+  get url() {
+    return this._url;
+  }
+
+  /**
+   * Get the version of the bookkeeping service
+   * @readonly
+   * @returns {string} the version of the bookkeeping service
+   */
+  get version() {
+    return this._version;
   }
 }

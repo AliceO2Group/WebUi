@@ -14,6 +14,7 @@
 
 import { LogManager } from '@aliceo2/web-ui';
 import { RunStatus } from '../../common/library/runStatus.enum.js';
+import { wrapRunStatus } from '../dtos/BookkeepingDto.js';
 
 const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/filter-service`;
 
@@ -30,10 +31,13 @@ export class FilterService {
     this._logger = LogManager.getLogger(LOG_FACILITY);
     this._bookkeepingService = bookkeepingService;
     this._runTypes = [];
-    this.initFilters();
+    this._detectors = Object.freeze([]);
+    this._dataPasses = Object.freeze([]);
 
     this._runTypesRefreshInterval = config?.bookkeeping?.runTypesRefreshInterval ??
-      (config?.bookkeeping ? 24 * 60 * 60 * 1000 : -1);
+      (config?.bookkeeping ? 24 * 60 * 60 * 1000 : -1);// default interval is 1 day
+    this._dataPassesRefreshInterval = config?.bookkeeping?.dataPassesRefreshInterval ??
+      (config?.bookkeeping ? 6 * 60 * 60 * 1000 : -1);// default interval is 6 hour
 
     this.initFilters().catch((error) => {
       this._logger.errorMessage(`FilterService initialization failed: ${error.message || error}`);
@@ -45,8 +49,9 @@ export class FilterService {
    * @returns {Promise<void>} - resolves when the filter service is initialized
    */
   async initFilters() {
-    await this._bookkeepingService.connect();
     await this.getRunTypes();
+    await this._initializeDetectors();
+    await this.getDataPasses();
   }
 
   /**
@@ -71,11 +76,72 @@ export class FilterService {
   }
 
   /**
+   * This method is used to retrieve the list of data passes from the bookkeeping service.
+   * @returns {Promise<void>} Resolves when the list of data passes is available.
+   */
+  async getDataPasses() {
+    try {
+      if (!this._bookkeepingService.active) {
+        return;
+      }
+
+      const rawDataPasses = await this._bookkeepingService.retrieveDataPasses();
+      this._dataPasses = Object.freeze(rawDataPasses
+        .filter(({ name, isFrozen }) => name && typeof isFrozen === 'boolean')
+        .map(({ name, isFrozen }) => Object.freeze({ name, isFrozen })));
+    } catch (error) {
+      this._logger.errorMessage(`Error while retrieving data passes: ${error.message || error}`);
+    }
+  }
+
+  /**
+   * Returns a list of data passes.
+   * @returns {Readonly<DataPass[]>} An immutable array of data passes.
+   */
+  get dataPasses() {
+    return this._dataPasses;
+  }
+
+  /**
+   * This method is used to retrieve the list of detectors from the bookkeeping service
+   * @returns {Promise<undefined>} Resolves when the list of detectors is available
+   */
+  async _initializeDetectors() {
+    if (!this._bookkeepingService?.active) {
+      return;
+    }
+    try {
+      const detectorSummaries = await this._bookkeepingService.retrieveDetectorSummaries();
+      this._detectors = Object.freeze(detectorSummaries
+        .filter(({ name, type }) => name && type)
+        .map(({ name, type }) => Object.freeze({ name, type })));
+    } catch (error) {
+      this._logger.errorMessage(`Failed to retrieve detectors: ${error?.message || error}`);
+    }
+  }
+
+  /**
+   * Returns a list of detector summaries.
+   * @returns {Readonly<DetectorSummary[]>} An immutable array of detector summaries.
+   */
+  get detectors() {
+    return this._detectors;
+  }
+
+  /**
    * Returns the interval in milliseconds for how often the list of run types should be refreshed.
    * @returns {number} Interval in milliseconds for refreshing the list of run types.
    */
   get runTypesRefreshInterval() {
     return this._runTypesRefreshInterval;
+  }
+
+  /**
+   * Returns the interval in milliseconds for how often the list of data passes should be refreshed.
+   * @returns {number} Interval in milliseconds for refreshing the list of data passes.
+   */
+  get dataPassesRefreshInterval() {
+    return this._dataPassesRefreshInterval;
   }
 
   /**
@@ -87,18 +153,17 @@ export class FilterService {
   }
 
   /**
-   * This method is used to retrieve the run status from the bookkeeping service
-   * @param {number} runNumber - run number to retrieve the status for
-   * @returns {Promise<string>} - resolves with the run status
+   * This method is used to retrieve the run information from the bookkeeping service
+   * @param {number} runNumber - run number to retrieve the information for
+   * @returns {Promise<object>} - resolves with the run information
    */
-  async getRunStatus(runNumber) {
+  async getRunInformation(runNumber) {
     try {
-      const runStatus = await this._bookkeepingService.retrieveRunStatus(runNumber);
-      return runStatus;
+      return await this._bookkeepingService.retrieveRunInformation(runNumber);
     } catch (error) {
       const message = `Error while retrieving run status for run ${runNumber}: ${error.message || error}`;
       this._logger.errorMessage(message);
-      return RunStatus.UNKNOWN;
+      return wrapRunStatus(RunStatus.UNKNOWN);
     }
   }
 }

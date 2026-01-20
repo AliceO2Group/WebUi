@@ -12,8 +12,10 @@
  * or submit itself to any jurisdiction.p
  */
 
-import { h } from '/js/src/index.js';
-import { camelToTitleCase, copyToClipboard, isContextSecure, prettyFormatDate } from './../utils.js';
+import { h, isContextSecure } from '/js/src/index.js';
+import { iconExternalLink } from '/js/src/icons.js';
+import { camelToTitleCase, copyToClipboard, prettyFormatDate } from './../utils.js';
+import { getBkpRunDetailsUrl } from '../../common/utils.js';
 
 const SPECIFIC_KEY_LABELS = {
   id: 'ID (etag)',
@@ -62,10 +64,25 @@ const infoRow = (key, value, infoRowAttributes) => {
   const formattedKey = getUILabel(key);
 
   const hasValue = value != null && value !== '' && (!Array.isArray(value) || value.length !== 0);
+  const bkpRunDetailsUrl = key === 'runNumber' ? getBkpRunDetailsUrl(value) : null;
 
   return h(`.flex-row.g2.info-row${highlightedClasses}`, [
     h('b.w-25.w-wrapped', formattedKey),
-    h('.w-75.cursor-pointer', hasValue && infoRowAttributes(formattedKey, formattedValue), formattedValue),
+    h('.flex-row.w-75', [
+      h(
+        '.cursor-pointer.flex-row',
+        hasValue && infoRowAttributes(formattedKey, formattedValue),
+        formattedValue,
+      ),
+      bkpRunDetailsUrl && hasValue
+        ? h('a.ph2.text-right.actionable-icon', {
+          id: 'openRunInBookkeeping',
+          title: 'Open run in Bookkeeping',
+          href: bkpRunDetailsUrl,
+          target: '_blank',
+        }, iconExternalLink())
+        : '',
+    ]),
   ]);
 };
 

@@ -14,7 +14,9 @@
 
 const FilterType = {
   INPUT: 'input',
+  INPUT_WITH_DROPDOWN: 'inputWithDropdown',
   DROPDOWN: 'dropdownSelector',
+  GROUPED_DROPDOWN: 'groupedDropdownSelector',
   RUN_MODE: 'runModeSelector',
 };
 

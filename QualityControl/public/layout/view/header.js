@@ -18,6 +18,7 @@ import {
   iconPencil, iconTrash, iconPlus, iconBadge, iconLayers, iconCheck, iconBan, iconShareBoxed,
 } from '/js/src/icons.js';
 import { filterPanelToggleButton } from '../../common/filters/filterViews.js';
+import { layoutListBadge } from './../../pages/layoutListView/components/LayoutListCard.js';
 
 /**
  * Shows header of page showing one layout with edit button, and other buttons in edit mode. (center and right)
@@ -44,17 +45,31 @@ const toolbarViewMode = (layout, filterModel) => {
   const { isOfficial, owner_id, name } = layoutItem;
 
   return {
-    centerCol: h('.flex-grow.text-center', [h('.header-layout', [tabViewLinks(layoutItem, layout)])]),
+    centerCol: h('.f4.flex-row.flex-grow.justify-center.items-center.g2', [
+      h('.g1', [
+        isOfficial ? h('span', iconBadge()) : '',
+        h('b', layoutItem.name),
+      ]),
+      h('.f6.flex-row', [
+        '(',
+        layoutListBadge(layoutItem.labels),
+        ')',
+      ]),
+    ]),
     rightCol: h('.w-25.text-right.g2.flex-row.justify-end.flex-wrap', [
-      h('b.f4.items-center', [isOfficial ? iconBadge() : '', layoutItem.name]),
       ' ',
       filterPanelToggleButton(filterModel),
       h('.btn-group.flex-wrap', [
+        ' ',
         newLayoutButton(layout),
         jsonExportButton(layoutItem, name),
         layout.ownsLayout(owner_id) && [editDropdown(layout), deleteButton(layout)],
       ]),
     ]),
+    subRow: h(
+      '.flex-grow.text-center',
+      [h('.header-layout.header-layout-tabs', [tabViewLinks(layoutItem, layout)])],
+    ),
   };
 };
 
@@ -75,7 +90,7 @@ const toolbarViewModeTab = (layout, tab, i) => {
   const selectTab = () => layout.selectTab(i);
 
   return [
-    h('button.br-pill.ph2.btn.btn-tab', { id: `tab-${i}`, class: linkClass, onclick: selectTab }, tab.name),
+    h('button.br-pill.ph2.btn.btn-tab.flex-fixed', { id: `tab-${i}`, class: linkClass, onclick: selectTab }, tab.name),
     ' ',
   ];
 };
@@ -91,9 +106,9 @@ const toolbarEditMode = (layout) => {
   };
 
   return {
-    centerCol: h('.flex-grow.text-center', [
-      h('div', { class: 'header-layout' }, [
-        h('span', editTabLinks(layout)),
+    subRow: h('.flex-grow.text-center', [
+      h('.header-layout.edit', [
+        h('span.header-layout-tabs', editTabLinks(layout)),
         h('.btn-group', [
           tabBtn({
             title: 'Add new tab to this layout',
@@ -108,7 +123,7 @@ const toolbarEditMode = (layout) => {
         ]),
       ]),
     ]),
-    rightCol: h('.w-33.text-right.flex-row.justify-end', [
+    rightCol: h('.w-25.text-right.flex-row.justify-end', [
       h('input.form-control.form-inline', {
         type: 'text',
         value: layout.item.name,
@@ -139,15 +154,70 @@ const toolbarEditModeTab = (layout, tab, i) => {
    */
   const selectTab = () => layout.selectTab(i);
 
+  const dragActiveClass = layout.isDragging ? 'pointer-events-auto' : '';
+  const disableButtonsOnDragClass = layout.isDragging ? 'pointer-events-none' : '';
+  const dropZoneClass = (position) => layout.dropTargetId === tab.id && layout.position === position ? 'active' : '';
+
   return [
-    h('.btn-group', [
-      h('button.br-pill.ph2.btn.btn-tab', { class: linkClass, onclick: selectTab }, tab.name),
-      selected && [
-        editTabButton(layout, linkClass, tab, i),
-        resizeGridTabDropDown(layout, tab),
-        deleteTabButton(layout, linkClass, i),
+    h(
+      '.btn-group.flex-fixed.relative.cursor-grab',
+      {
+        title: 'Drag the tab to re-arrange them',
+        draggable: true,
+        ondragstart: (e) => {
+          e.dataTransfer.setData('text/plain', tab.id);
+          layout.startDragging();
+        },
+        ondrop: (e) => {
+          layout.reorderTabs(e.dataTransfer.getData('text/plain'), layout.dropTargetId, layout.position);
+          layout.clearDropTarget();
+          layout.stopDragging();
+        },
+        ondragend: () => layout.stopDragging(),
+      },
+      [
+        h(
+          'button.br-pill.ph2.btn.btn-tab.whitespace-nowrap',
+          { id: 'btn-tab', class: `${linkClass} cursor-inherit`, onclick: selectTab },
+          tab.name,
+        ),
+        [
+          h(
+            '.drop-zone.before',
+            {
+              class: `${dragActiveClass} ${dropZoneClass('before')}`,
+              ondragenter: () => layout.setDropTarget(tab.id, 'before'),
+              ondragover: (e) => e.preventDefault(), // prevent default to allow drop
+              ondragleave: () => {
+                if (layout.dropTargetId === tab.id && layout.position === 'before') {
+                  layout.clearDropTarget();
+                }
+              },
+            },
+            '',
+          ),
+          h(
+            '.drop-zone.after',
+            {
+              class: `${dragActiveClass} ${dropZoneClass('after')}`,
+              ondragenter: () => layout.setDropTarget(tab.id, 'after'),
+              ondragover: (e) => e.preventDefault(), // prevent default to allow drop
+              ondragleave: () => {
+                if (layout.dropTargetId === tab.id && layout.position === 'after') {
+                  layout.clearDropTarget();
+                }
+              },
+            },
+            '',
+          ),
+          selected && [
+            editTabButton(layout, `${disableButtonsOnDragClass} ${linkClass}`, tab, i),
+            resizeGridTabDropDown(layout, tab),
+            deleteTabButton(layout, `${disableButtonsOnDragClass} ${linkClass}`, i),
+          ],
+        ].flat().filter(Boolean),
       ],
-    ]),
+    ),
     ' ',
   ];
 };
@@ -159,8 +229,7 @@ const toolbarEditModeTab = (layout, tab, i) => {
  * @returns {vnode} - virtual node element
  */
 const resizeGridTabDropDown = (layout, tab) =>
-  h('select.form-control.select-tab', {
-    style: 'cursor: pointer',
+  h('select.form-control.select-tab.cursor-pointer', {
     title: 'Resize grid of the tab',
     onchange: (e) => layout.resizeGridByXY(e.target.value),
   }, [1, 2, 3, 4, 5].map((i) =>

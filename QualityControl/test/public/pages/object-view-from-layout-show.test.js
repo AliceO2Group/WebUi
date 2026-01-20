@@ -11,7 +11,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, deepStrictEqual, match } from 'node:assert';
+import { strictEqual, deepStrictEqual, match, ok } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
 import {
@@ -20,6 +20,7 @@ import {
   removeLocalStorage,
   setLocalStorageAsJson,
 } from '../../testUtils/localStorage.js';
+import { RootImageDownloadExtensions } from '../../../public/common/enums/rootImageMimes.enum.js';
 
 const OBJECT_VIEW_PAGE_PARAM = '?page=objectView&objectId=123456';
 
@@ -99,6 +100,43 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       const dlButton = await page.evaluate(() => document.querySelector('.download-button').href);
       const token = await page.evaluate(() => model.session.token);
       strictEqual(dlButton, `${url}api/object/proxy/download/?token=${token}&objectIds=${objectId}`);
+    },
+  );
+
+  await testParent.test(
+    'should have a correctly made save root as image button',
+    { timeout },
+    async () => {
+      const exists = await page.evaluate(() => document.querySelector('.save-root-as-image-button') !== null);
+
+      ok(exists, 'Expected ROOT image save button to exist');
+    },
+  );
+
+  await testParent.test(
+    'save root as image dropdown should have the correct filetype options',
+    { timeout },
+    async () => {
+      const FILENAME = 'qc/test/object/1';
+
+      await page.locator('.save-root-as-image-button').click();
+      await delay(100); // wait for the dropdown to appear
+      await page.waitForSelector('#download-root-image-dropdown', {
+        visible: true,
+        timeout: 1000,
+      });
+
+      const expectedExtensionTypes = RootImageDownloadExtensions();
+
+      const testedOptions = await page.evaluate(() =>
+        Array.from(document.querySelectorAll('#download-root-image-dropdown > button'))
+          .map((buttonElement) => buttonElement.id));
+      const expectedOptions = expectedExtensionTypes.map((filetype) => `${FILENAME}.${filetype}`);
+      deepStrictEqual(
+        testedOptions,
+        expectedOptions,
+        `Save options ${JSON.stringify(testedOptions)} should be ${JSON.stringify(expectedOptions)}`,
+      );
     },
   );
 
