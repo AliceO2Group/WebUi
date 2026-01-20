@@ -31,11 +31,12 @@ export default (model) =>
     Loading: () => h('.flex-column.items-center', [spinner(2), h('.f6', 'Loading Objects')]),
     Success: (objects) => {
       let objectsToDisplay = [];
-      const { searchInput = '' } = model.object;
+      const { searchInput = '', selectedObject, objects: objectsRemoteDataMap = {} } = model.object;
       if (searchInput.trim() !== '') {
         objectsToDisplay = objects.filter((qcObject) =>
           qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
       }
+      const objectRemoteData = objectsRemoteDataMap[selectedObject?.name];
       return [
         searchForm(model),
         h('.flex-column.flex-grow', {}, [
@@ -43,7 +44,7 @@ export default (model) =>
             ? virtualTable(model, 'side', objectsToDisplay)
             : h('.scroll-y', treeTable(model)),
         ]),
-        objectPreview(model),
+        objectRemoteData && objectPreview(selectedObject?.name, objectRemoteData),
       ];
     },
     Failure: (error) => h('.f6.danger.flex-column.text-center', [
@@ -186,19 +187,17 @@ const leafRow = (model, sideTree, level) => {
 /**
  * Shows a JSROOT plot of selected object inside the tree of sidebar allowing the user to preview object and decide
  * if it should be added to layout
- * @param {Model} model - root model of the application
+ * @param {string} name - name of the selected object
+ * @param {QcObjectRemoteData} objectRemoteData - RemoteData of the selected object
  * @returns {vnode} - virtual node element
  */
-const objectPreview = (model) => {
-  const isSelected = model.object.selected;
-  if (isSelected) {
-    return isSelected && h(
+const objectPreview = (name, objectRemoteData = null) =>
+  objectRemoteData
+    ? h(
       '.bg-white',
       { style: 'height: 20em' },
-      draw(model.object.objects[model.object.selected.name], {}, [], (error) => {
-        model.object.invalidObject(model.object.selected.name, error.message);
+      draw(objectRemoteData, {}, [], (error) => {
+        model.object.invalidObject(name, error.message);
       }),
-    );
-  }
-  return null;
-};
+    )
+    : null;
