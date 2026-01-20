@@ -96,6 +96,9 @@ When you click "Create release" in Github, GitHub Actions will automatically:
    1. Checking the GUI version has been updated
    2. Briefly testing that the changes are working as expected
 
+> [!NOTE]
+> Post-Deployment Verification (step 2) may not occur immediately, depending on the deployment schedule of FLP. Other duties can be performed in the meantime, and this step can be completed once deployment is confirmed.
+
 ### Deployment Diagram
 
 ![Deployment Diagram](./images/deployment_diagram.svg)
