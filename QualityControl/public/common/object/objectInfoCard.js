@@ -13,7 +13,9 @@
  */
 
 import { h, isContextSecure } from '/js/src/index.js';
+import { iconExternalLink } from '/js/src/icons.js';
 import { camelToTitleCase, copyToClipboard, prettyFormatDate } from './../utils.js';
+import { getBkpRunDetailsUrl } from '../utils.js';
 import { visibilityButton } from '../visibilityButton.js';
 
 const SPECIFIC_KEY_LABELS = {
@@ -31,16 +33,15 @@ const KEY_TO_RENDER_FIRST = 'path';
 
 /**
  * Builds a panel with information of the object; Fields are parsed according to their category
- * @param {QCObjectDTO} qcObject - QC object with its associated details
+ * @param {QcObject} qcObject - QC object with its associated details
  * @param {object} style - properties of the vnode
- * @param {function(Notification): function(string, string): object} rowAttributes -
+ * @param {(key: string, value: string) => unknown} rowAttributes -
  *  An optional curried function that returns the VNode attribute builder.
  *  Use {@link defaultRowAttributes} exported from this module, supplying the Notification API.
- * @param {() => void} onToggleDrawingOptions - Callback function to for displaying drawing options
+ * @param {() => void} onToggleDrawingOptionsPanel - Callback function to for displaying drawing options
  * @returns {vnode} - panel with information about the object
  * @example
  * ```
- * qcObjectInfoPanel(qcObject, {}, defaultRowAttributes(model.notification))
  * qcObjectInfoPanel(
  *  qcObject,
  *   { gap: '.5em' },
@@ -80,6 +81,16 @@ export const qcObjectInfoPanel = (
       }),
   ]);
 
+/**
+ * Creates a virtual DOM structure for displaying drawing options with optional layout options
+ * and a toggle button for the drawing options panel.
+ * @param {(key: string, value: string) => unknown} infoRowAttributes - Attributes for each info row component.
+ * @param {object} drawOptions - Current drawing options to display in the info row.
+ * @param {object} displayHints - Display hints to show in the info row.
+ * @param {object|null} layoutDisplayOptions - Optional layout display options to include in the info row.
+ * @param {()=>void|null} onToggleDrawingOptionsPanel - Optional callback to toggle the visibility of the options panel.
+ * @returns {vnode} A virtual DOM node representing a drawing options section.
+ */
 const drawingOptionsInfoRow = (
   infoRowAttributes,
   drawOptions,
@@ -106,7 +117,7 @@ const drawingOptionsInfoRow = (
  * Builds a raw with the key and value information parsed based on their type
  * @param {string} key - key of the object info
  * @param {string|number|object|undefined} value - value of the object info
- * @param {function(key, value)} infoRowAttributes - function that return given attributes for the row
+ * @param {(key: string, value: string) => unknown} infoRowAttributes - method that return given attributes for the row
  * @returns {vnode} - row with object information key and value
  */
 const infoRow = (key, value, infoRowAttributes) => {
@@ -114,13 +125,25 @@ const infoRow = (key, value, infoRowAttributes) => {
   const formattedValue = infoPretty(key, value);
   const formattedKey = getUILabel(key);
   const hasValue = value != null && value !== '' && (!Array.isArray(value) || value.length !== 0);
+  const bkpRunDetailsUrl = key === 'runNumber' ? getBkpRunDetailsUrl(value) : null;
+
   return h(`.flex-row.g2.info-row${highlightedClasses}`, [
     h('b.w-25.w-wrapped', formattedKey),
-    h(
-      `.w-75 ${hasValue ? 'cursor-pointer' : 'cursor-none'}`,
-      hasValue ? infoRowAttributes(formattedKey, formattedValue) : {},
-      formattedValue,
-    ),
+    h('.flex-row.w-75', [
+      h(
+        '.cursor-pointer.flex-row',
+        hasValue && infoRowAttributes(formattedKey, formattedValue),
+        formattedValue,
+      ),
+      bkpRunDetailsUrl && hasValue
+        ? h('a.ph2.text-right.actionable-icon', {
+          id: 'openRunInBookkeeping',
+          title: 'Open run in Bookkeeping',
+          href: bkpRunDetailsUrl,
+          target: '_blank',
+        }, iconExternalLink())
+        : '',
+    ]),
   ]);
 };
 

@@ -21,7 +21,7 @@ import { defaultRowAttributes, qcObjectInfoPanel } from '../../common/object/obj
 import { downloadButton } from '../../common/downloadButton.js';
 import { chevronButton } from '../../common/chevronButton.js';
 import { objectDrawingOptions } from '../../common/object/objectDrawingOptions.js';
-import { downloadRootImageButton } from '../../common/downloadRootImageButton.js';
+import { downloadRootImageDropdown } from '../../common/downloadRootImageDropdown.js';
 
 /**
  * Shows a page to view an object on the whole page
@@ -43,14 +43,21 @@ const objectPlotAndInfo = (objectViewModel) =>
     Loading: () => spinner(10, 'Loading object...'),
     Failure: (error) => errorDiv(error),
     Success: (qcObject) => {
-      const { id, validFrom, versions } = qcObject;
+      const {
+        id,
+        name,
+        qcObject: { root = {} } = {},
+        validFrom,
+        versions,
+      } = qcObject;
       const {
         ignoreDefaults,
-        drawingOptions,
+        drawingOptions = [],
         nonRecognizedDrawingOptions,
         objectInfoVisible,
         objectDrawingOptionsVisible,
       } = objectViewModel;
+
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.items-center.h-10', [
           h(
@@ -62,9 +69,9 @@ const objectPlotAndInfo = (objectViewModel) =>
             ),
           ),
           h('.item-action-row.flex-row.g1.p2', [
-            downloadRootImageButton(`${qcObject.name}.png`, qcObject.qcObject.root, drawingOptions),
+            downloadRootImageDropdown(name, root, drawingOptions),
             downloadButton({
-              href: objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
+              href: objectViewModel.getDownloadQcdbObjectUrl(id),
               title: 'Download root object',
             }),
             chevronButton(
@@ -75,32 +82,32 @@ const objectPlotAndInfo = (objectViewModel) =>
         ]),
         h('.flex-row.g2.m2.flex-grow', [
           h('.flex-grow', {
-            // force redraw on toggle info panel and update drawing options
-            key: `${objectInfoVisible}-${drawingOptions}`,
+            // Key change forces redraw when toggling info panel
+            key: objectInfoVisible ? 'objectPlotWithoutInfoPanel' : 'objectPlotWithInfoPanel',
           }, drawObject(qcObject, {}, drawingOptions, (error) => {
             objectViewModel.drawingFailureOccurred(error.message);
           })),
-          objectInfoVisible &&
-            h('.scroll-y.w-30.relative', {
-              style: { order: 1 }, // Ensure panel is placed after drawObject
-            }, [
-              objectDrawingOptionsVisible &&
-              objectDrawingOptions({
-                id,
-                ignoreDefaults: ignoreDefaults,
-                options: drawingOptions,
-                nonRecognizedDrawingOptions: nonRecognizedDrawingOptions,
-                onToggleIgnoreDefaults: () => objectViewModel.toggleIgnoreDefaults(),
-                onToggleOption: (option) => objectViewModel.toggleDrawingOption(option),
-              }),
-              h('h3.text-center', 'Object information'),
-              qcObjectInfoPanel(
-                qcObject,
-                { gap: '.5em' },
-                defaultRowAttributes(model.notification),
-                () => objectViewModel.toggleDrawingOptionsVisible(),
-              ),
-            ]),
+          objectInfoVisible && h('.scroll-y.w-30.relative', {
+            key: 'objectInfoPanel',
+            style: { order: 1 }, // Ensure panel is placed after drawObject
+          }, [
+            objectDrawingOptionsVisible &&
+            objectDrawingOptions({
+              id,
+              ignoreDefaults: ignoreDefaults,
+              options: drawingOptions,
+              nonRecognizedDrawingOptions: nonRecognizedDrawingOptions,
+              onToggleIgnoreDefaults: () => objectViewModel.toggleIgnoreDefaults(),
+              onToggleOption: (option) => objectViewModel.toggleDrawingOption(option),
+            }),
+            h('h3.text-center', 'Object information'),
+            qcObjectInfoPanel(
+              qcObject,
+              { gap: '.5em' },
+              defaultRowAttributes(objectViewModel.model.notification),
+              () => objectViewModel.toggleDrawingOptionsVisible(),
+            ),
+          ]),
         ]),
       ]);
     },

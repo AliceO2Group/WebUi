@@ -16,6 +16,7 @@ import { BaseViewModel } from '../../common/abstracts/BaseViewModel.js';
 import { setBrowserTabTitle } from '../../common/utils.js';
 import { RemoteData, BrowserStorage } from '/js/src/index.js';
 import { StorageKeysEnum } from '../../common/enums/storageKeys.enum.js';
+import { updateWithPlotErrorOnQcRemoteData } from '../../common/object/updateWithPlotErrorOnQcRemoteData.js';
 import { DRAWING_OPTIONS } from '../../common/constants/drawingOptions.js';
 
 /**
@@ -37,12 +38,13 @@ export default class ObjectViewModel extends BaseViewModel {
      * {
      *  ...objectProperties as per ObjectDTO: '' // built specifically for the page
      *  root: JSON version of the root object to plot
+     *  rootError: '' // error message if root object could not be retrieved
      *  timestampList: '',
      * }
      */
     this.selected = RemoteData.notAsked();
 
-    /**
+    /*
      * Options for previewing object drawing options.
      */
     this.ignoreDefaults = false; // whether to use default drawing options
@@ -295,7 +297,7 @@ export default class ObjectViewModel extends BaseViewModel {
    * @param {string} message - the failure message to display
    */
   drawingFailureOccurred(message) {
-    this.selected = RemoteData.failure(message || 'Failed to draw JSROOT plot');
+    this.selected = updateWithPlotErrorOnQcRemoteData(this.selected, message);
     this.notify();
   }
 }
