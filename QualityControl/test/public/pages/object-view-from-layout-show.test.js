@@ -524,11 +524,13 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
           .filter((checkbox) => checkbox.checked)
           .map((checkbox) => document.querySelector(`#objectDrawingOptions label[for="${checkbox.id}"]`)?.innerText);
       });
+      // `gridy` is part of the default draw options.
+      // Because defaults should be ignored, we do NOT expect it to be set to active.
       const expectedDrawingOptions = ['logx', 'text'];
       deepStrictEqual(
         activeCheckboxLabels.toSorted((a, b) => a.localeCompare(b)),
         expectedDrawingOptions.toSorted((a, b) => a.localeCompare(b)),
-        'Active drawing options do not match expected layout settings',
+        'Active drawing options do not match expected layout settings when ignore defaults is true',
       );
     },
   );
@@ -537,18 +539,27 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
     'should set active checkboxes from layout display options when ignore defaults is set to false',
     { timeout },
     async () => {
-      await page.click('#objectDrawingOptions input[id="baffe0b2-826c-11ef-8f19-c0a80209250cignoreDefaults"]');
+      const objectId = 'baffe0b2-826c-11ef-8f19-c0a80209250c';
+      const ignoreDefaultsCheckboxSelector = `#objectDrawingOptions input[id="${objectId}ignoreDefaults"]`;
+      await page.click(ignoreDefaultsCheckboxSelector);
+      await page.waitForFunction(
+        (query) => document.querySelector(query)?.checked === false,
+        { timeout: 1000 },
+        ignoreDefaultsCheckboxSelector,
+      ).catch(() => { /* ignore timeout error */ });
       const activeCheckboxLabels = await page.evaluate(() => {
         const checkboxes = document.querySelectorAll('#objectDrawingOptions > div .flex-column input[type="checkbox"]');
         return Array.from(checkboxes)
           .filter((checkbox) => checkbox.checked)
           .map((checkbox) => document.querySelector(`#objectDrawingOptions label[for="${checkbox.id}"]`)?.innerText);
       });
-      const expectedDrawingOptions = ['logx', 'text'];
+      // `gridy` is part of the default draw options.
+      // Because Ignore Defaults is turned off (set to `false`), we DO expect it to now be active.
+      const expectedDrawingOptions = ['gridy', 'logx', 'text'];
       deepStrictEqual(
         activeCheckboxLabels.toSorted((a, b) => a.localeCompare(b)),
         expectedDrawingOptions.toSorted((a, b) => a.localeCompare(b)),
-        'Active drawing options do not match expected layout settings',
+        'Active drawing options do not match expected layout settings when ignore defaults is false',
       );
     },
   );
