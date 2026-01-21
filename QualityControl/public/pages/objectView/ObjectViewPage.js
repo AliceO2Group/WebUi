@@ -44,6 +44,8 @@ const objectPlotAndInfo = (objectViewModel) =>
     Success: (qcObject) => {
       const {
         id,
+        name,
+        qcObject: { root = {} } = {},
         validFrom,
         ignoreDefaults = false,
         drawOptions = [],
@@ -55,6 +57,7 @@ const objectPlotAndInfo = (objectViewModel) =>
         layoutDisplayOptions
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
       const isObjectInfoVisible = objectViewModel.objectInfoVisible;
+
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.items-center.h-10', [
           h(
@@ -66,9 +69,9 @@ const objectPlotAndInfo = (objectViewModel) =>
             ),
           ),
           h('.item-action-row.flex-row.g1.p2', [
-            downloadRootImageDropdown(qcObject.name, qcObject.qcObject.root, drawingOptions),
+            downloadRootImageDropdown(name, root, drawingOptions),
             downloadButton({
-              href: objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
+              href: objectViewModel.getDownloadQcdbObjectUrl(id),
               title: 'Download root object',
             }),
             visibilityToggleButton(

@@ -13,8 +13,9 @@
  */
 
 import { h, iconBarChart } from '/js/src/index.js';
+import { OBJECT_LIST_SIDE_ROW_HEIGHT } from '../common/constants/ui.js';
 
-let ROW_HEIGHT = 33.6;
+let ROW_HEIGHT = OBJECT_LIST_SIDE_ROW_HEIGHT;
 let FONT = '';
 
 /**
@@ -25,12 +26,13 @@ let FONT = '';
  * @returns {vnode} - virtual node element
  */
 export default function virtualTable(model, location = 'main', objects = []) {
-  ROW_HEIGHT = location === 'side' ? 29.4 : 33.6;
-  FONT = location === 'side' ? '.f6' : '';
+  const isLocationSide = location === 'side';
+  ROW_HEIGHT = OBJECT_LIST_SIDE_ROW_HEIGHT;
+  FONT = isLocationSide ? '.f6' : '';
   return h('.flex-grow.flex-column', {
   }, [
     h(
-      '.scroll-y.animate-width',
+      '#object-list-scroll.scroll-y.animate-width',
       tableContainerHooks(model),
       h(
         '',
@@ -62,11 +64,25 @@ export default function virtualTable(model, location = 'main', objects = []) {
  * @param {string} location - location of the object
  * @returns {vnode} - virtual node element
  */
-const objectFullRow = (model, item, location) =>
-  h('tr.object-selectable', {
+const objectFullRow = (model, item, location) => {
+  const isSelected = item && item === model.object.selected;
+  const isFocused = item && item === model.object.focusedSearchResult;
+
+  let className = '';
+  if (isSelected) {
+    className = 'table-primary'; // Selected object
+  } else if (isFocused) {
+    className = 'focused-node'; // Focused node
+  }
+
+  return h('tr.object-selectable', {
+    id: `object-row-${item.name}`,
     key: item.name,
     title: item.name,
-    onclick: () => model.object.select(item),
+    onclick: () => {
+      model.object.select(item);
+      model.object.setFocusedSearchResultByPath(item.name);
+    },
     ondblclick: () => {
       if (location === 'side') {
         model.layout.addItem(item.name);
@@ -83,7 +99,7 @@ const objectFullRow = (model, item, location) =>
         model.layout.moveTabObjectStop();
       }
     },
-    class: item && item === model.object.selected ? 'table-primary' : '',
+    class: className,
     draggable: location === 'side',
   }, [
     h('td.highlight.text-ellipsis', [
@@ -92,6 +108,7 @@ const objectFullRow = (model, item, location) =>
       item.name,
     ]),
   ]);
+};
 
 /**
  * Set styles of the floating table and its position inside the big div .tableLogsContentPlaceholder

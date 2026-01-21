@@ -44,7 +44,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     strictEqual(value, '0', 'RunNumber filter should still be set to 0 on objectView page');
 
     // Navigate to layout show
-    await page.locator('.menu-item:nth-child(1)').click();
+    await page.locator('nav .menu-item:nth-child(1)').click();
     await page.waitForSelector('#runNumberFilter', { visible: true });
 
     // Check that filter is still set to 0

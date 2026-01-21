@@ -12,13 +12,5 @@
  * or submit itself to any jurisdiction.
  */
 
-const FilterType = {
-  INPUT: 'input',
-  INPUT_WITH_DROPDOWN: 'inputWithDropdown',
-  DROPDOWN: 'dropdownSelector',
-  GROUPED_DROPDOWN: 'groupedDropdownSelector',
-  RUN_MODE: 'runModeSelector',
-  COMBOBOX: 'combobox',
-};
-
-export { FilterType };
+export const JS_ROOT_ERROR_LABEL = 'ROOT_ERROR';
+export const JS_ROOT_FAILED_TO_PLOT_MESSAGE = 'JSROOT failed to plot the object';

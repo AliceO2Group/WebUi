@@ -12,13 +12,14 @@
  * or submit itself to any jurisdiction.
  */
 
-const FilterType = {
-  INPUT: 'input',
-  INPUT_WITH_DROPDOWN: 'inputWithDropdown',
-  DROPDOWN: 'dropdownSelector',
-  GROUPED_DROPDOWN: 'groupedDropdownSelector',
-  RUN_MODE: 'runModeSelector',
-  COMBOBOX: 'combobox',
-};
+import { h, iconWarning } from '/js/src/index.js';
 
-export { FilterType };
+/**
+ * Panel to show when an object failed to be drawn
+ * @param {string} error - error message to show
+ * @returns {vnode} - virtual node element
+ */
+export const failureToDrawPanel = (error) =>h('.error-box.danger.flex-column.justify-center.f6.text-center', {}, [
+  h('span.error-icon', { title: 'Error' }, iconWarning()),
+  h('span', error),
+]);
