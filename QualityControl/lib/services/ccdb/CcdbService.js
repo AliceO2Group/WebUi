@@ -16,6 +16,7 @@ import { FailedDependencyError, LogManager, NotFoundError } from '@aliceo2/web-u
 import { httpHeadJson, httpGetJson } from '../../utils/httpRequests.js';
 import {
   CCDB_MONITOR, CCDB_VERSION_KEY, CCDB_RESPONSE_BODY_KEYS, CCDB_FILTER_FIELDS, CCDB_RESPONSE_HEADER_KEYS,
+  getCcdbMetadataFieldMappingFor,
 } from './CcdbConstants.js';
 
 const {
@@ -357,7 +358,7 @@ export class CcdbService {
     }
     if (filters && Object.keys(filters).length > 0) {
       url += `/${Object.entries(filters)
-        .flatMap(([key, value]) => `${key}=${value}`)
+        .flatMap(([key, value]) => `${getCcdbMetadataFieldMappingFor(key)}=${value}`)
         .join('/')}`;
     }
     return url;

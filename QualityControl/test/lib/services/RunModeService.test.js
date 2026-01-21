@@ -19,8 +19,9 @@ import sinon from 'sinon';
 import { RunModeService } from '../../../lib/services/RunModeService.js';
 import { RunStatus } from '../../../common/library/runStatus.enum.js';
 import { EmitterKeys } from '../../../common/library/enums/emitterKeys.enum.js';
-import { Transition } from '../../../common/library/enums/transition.enum.js';
+import { Transition, TransitionStatus } from '../../../common/library/enums/transition.enum.js';
 import { delayAndCheck } from '../../testUtils/delay.js';
+import { WebSocketMessage } from '@aliceo2/web-ui';
 
 export const runModeServiceTestSuite = async () => {
   suite('RunModeService', () => {
@@ -28,18 +29,24 @@ export const runModeServiceTestSuite = async () => {
     let bookkeepingService = undefined;
     let dataService = undefined;
     const eventEmitter = new EventEmitter();
+    let webSocketService = undefined;
 
     beforeEach(() => {
       bookkeepingService = {
         retrieveRunInformation: sinon.stub(),
+        retrieveOngoingRuns: sinon.stub(),
       };
 
       dataService = {
         getObjectsLatestVersionList: sinon.stub(),
       };
 
+      webSocketService = {
+        broadcast: sinon.stub(),
+      };
+
       const config = { refreshInterval: 60000 };
-      runModeService = new RunModeService(config, bookkeepingService, dataService, eventEmitter);
+      runModeService = new RunModeService(config, bookkeepingService, dataService, eventEmitter, webSocketService);
     });
     suite('retrievePathsAndSetRunStatus', () => {
       test('should retrieve paths and cache them if run is ongoing', async () => {
@@ -128,9 +135,24 @@ export const runModeServiceTestSuite = async () => {
       });
     });
 
+    suite('`_fetchOnGoingRunsAtStart` tests', () => {
+      test('should populate ongoing runs on startup', async () => {
+        const runNumber = 1;
+        const mockRun = { runNumber };
+        const mockPaths = [{ path: '/run/path1' }];
+
+        bookkeepingService.retrieveOngoingRuns.resolves([mockRun]);
+
+        dataService.getObjectsLatestVersionList.resolves(mockPaths);
+
+        await runModeService._fetchOnGoingRunsAtStart();
+        strictEqual(runModeService._ongoingRuns.has(runNumber), true);
+      });
+    });
+
     suite('_onRunTrackEvent - test suite', () => {
       test('should correctly parse event to RUN_TRACK and update ongoing runs map', async () => {
-        const runEvent = { runNumber: 1234, transition: 'START_ACTIVITY' };
+        const runEvent = { runNumber: 1234, transition: 'START_ACTIVITY', transitionStatus: TransitionStatus.DONE_OK };
         runModeService._dataService.getObjectsLatestVersionList = sinon.stub().resolves([{ path: '/path/from/event' }]);
 
         await runModeService._onRunTrackEvent(runEvent);
@@ -142,7 +164,9 @@ export const runModeServiceTestSuite = async () => {
       });
 
       test('should listen to events on RUN_TRACK and update ongoing runs map', async () => {
-        const runEvent = { runNumber: 1234, transition: Transition.START_ACTIVITY };
+        const runEvent = {
+          runNumber: 1234, transition: Transition.START_ACTIVITY, transitionStatus: TransitionStatus.DONE_OK,
+        };
         runModeService._dataService.getObjectsLatestVersionList = sinon.stub().resolves([{ path: '/path/from/event' }]);
 
         eventEmitter.emit(EmitterKeys.RUN_TRACK, runEvent);
@@ -153,8 +177,30 @@ export const runModeServiceTestSuite = async () => {
         }));
       });
 
+      test('should listen to events on RUN_TRACK and broadcast to websocket', async () => {
+        const runNumber = 1234;
+        const runEvent = {
+          runNumber, transition: Transition.START_ACTIVITY, transitionStatus: TransitionStatus.DONE_OK,
+        };
+        runModeService._dataService.getObjectsLatestVersionList = sinon.stub().resolves([{ path: '/path/from/event' }]);
+
+        eventEmitter.emit(EmitterKeys.RUN_TRACK, runEvent);
+        await delayAndCheck(() => runModeService._ongoingRuns.has(runEvent.runNumber), 500, 10);
+
+        const wsMessage = new WebSocketMessage();
+        wsMessage.command = `${EmitterKeys.RUN_TRACK}:${Transition.START_ACTIVITY}`;
+        wsMessage.payload = { runNumber };
+
+        ok(
+          webSocketService.broadcast.calledOnceWith(wsMessage),
+          `Websocket broadcast should have message: ${JSON.stringify(wsMessage)}`,
+        );
+      });
+
       test('should remove run from ongoing runs map on STOP_ACTIVITY event', async () => {
-        const runEventStop = { runNumber: 5678, transition: Transition.STOP_ACTIVITY };
+        const runEventStop = {
+          runNumber: 5678, transition: Transition.STOP_ACTIVITY, transitionStatus: TransitionStatus.DONE_OK,
+        };
         runModeService._ongoingRuns.set(runEventStop.runNumber, [{ path: '/some/path' }]);
 
         eventEmitter.emit(EmitterKeys.RUN_TRACK, runEventStop);

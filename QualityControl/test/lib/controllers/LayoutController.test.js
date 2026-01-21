@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { ok, throws, doesNotThrow, AssertionError } from 'node:assert';
+import { ok, deepStrictEqual, throws, doesNotThrow, AssertionError } from 'node:assert';
 import { suite, test, beforeEach } from 'node:test';
 import sinon from 'sinon';
 
@@ -416,6 +416,7 @@ export const layoutControllerTestSuite = async () => {
         tabs: [{ name: 'tab', id: '1', columns: 2, objects: [] }],
         owner_id: 1,
         owner_name: 'one',
+        labels: [],
         collaborators: [],
         displayTimestamp: false,
         autoTabChange: 0,
@@ -467,6 +468,7 @@ export const layoutControllerTestSuite = async () => {
         tabs: [{ name: 'tab', id: '1', columns: 2, objects: [] }],
         owner_id: 1,
         owner_name: 'one',
+        labels: [],
         collaborators: [],
         displayTimestamp: false,
         autoTabChange: 0,
@@ -643,6 +645,7 @@ export const layoutControllerTestSuite = async () => {
         owner_name: 'admin',
         tabs: [{ id: '123', name: 'tab', columns: 2, objects: [] }],
         collaborators: [],
+        labels: [],
         displayTimestamp: false,
         autoTabChange: 0,
       };
@@ -671,6 +674,7 @@ export const layoutControllerTestSuite = async () => {
         owner_id: 1,
         owner_name: 'admin',
         tabs: [{ id: '123', name: 'tab', columns: 2, objects: [] }],
+        labels: [],
         collaborators: [],
         displayTimestamp: false,
         autoTabChange: 0,
@@ -682,7 +686,10 @@ export const layoutControllerTestSuite = async () => {
         status: 500,
         title: 'Unknown Error',
       }), 'DataConnector error message is incorrect');
-      ok(jsonStub.createLayout.calledWith(expected), 'New layout body was not used in data connector call');
+
+      // Log what was actually called for debugging
+      const actualCall = jsonStub.createLayout.getCall(0)?.args[0];
+      deepStrictEqual(expected, actualCall);
     });
   });
 

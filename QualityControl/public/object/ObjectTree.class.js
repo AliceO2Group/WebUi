@@ -21,6 +21,8 @@ import { StorageKeysEnum } from '../common/enums/storageKeys.enum.js';
  * a new tree.
  */
 export default class ObjectTree extends Observable {
+  static _indexIncrementCount = 0;
+
   /**
    * Instantiate tree with a root node called `name`, empty by default
    * @param {string} name - root name
@@ -28,8 +30,22 @@ export default class ObjectTree extends Observable {
    */
   constructor(name, parent) {
     super();
-    this.storage = new BrowserStorage(StorageKeysEnum.OBJECT_TREE_OPEN_NODES);
+    this._index = ObjectTree._indexIncrementCount++;
+    this.focusedNode = null;
+    this.openBranchStateStorage = new BrowserStorage(StorageKeysEnum.OBJECT_TREE_OPEN_BRANCH_STATE);
     this.initTree(name, parent);
+  }
+
+  get index() {
+    return this._index;
+  }
+
+  get isBranch() {
+    return this.children.length > 0;
+  }
+
+  get isLeaf() {
+    return this.children.length === 0 && this.object !== null;
   }
 
   /**
@@ -49,30 +65,207 @@ export default class ObjectTree extends Observable {
   }
 
   /**
-   * Load the expanded/collapsed state for this node and its children from localStorage.
-   * Updates the `open` property for the current node and recursively for all children.
+   * Handles keyboard navigation for the tree
+   * @param {string} key - The key value for navigation (e.g., "ArrowUp", "ArrowDown")
+   * @param {(object: object) => void} onSelectObject - Callback function to select an object
    */
-  loadExpandedNodes() {
-    if (!this.parent) {
-      // The main node may not be collapsable or expandable.
-      // Because of this we also have to load the expanded state of their direct children.
-      this.children.forEach((child) => child.loadExpandedNodes());
+  handleKeyboardNavigation(key, onSelectObject) {
+    const selectOrExpand = () => {
+      if (this.focusedNode?.isLeaf && this.focusedNode.object) {
+        onSelectObject(this.focusedNode.object);
+        return;
+      }
+      this._expandFocusedNode();
+    };
+    const actions = {
+      ['ArrowLeft']: () => this._collapseFocusedNode(),
+      ['ArrowRight']: selectOrExpand,
+      ['Enter']: selectOrExpand,
+      ['ArrowUp']: () => this._focusPreviousNode(),
+      ['ArrowDown']: () => this._focusNextNode(),
+    };
+    const action = actions[key];
+    if (action) {
+      action();
     }
+  }
 
-    const session = sessionService.get();
-    const key = session.personid.toString();
+  /**
+   * Set the focused node by index
+   * @param {number} index - Index of the node to focus
+   */
+  setFocusedNodeByIndex(index) {
+    const nodeToFocus = this._getVisibleNodes().find((node) => node.index === index);
+    if (nodeToFocus) {
+      this._setFocusedNode(nodeToFocus);
+    }
+  }
 
-    // We traverse the path to reach the parent object of this node
-    let parentNode = this.storage.getLocalItem(key) ?? {};
-    for (let i = 0; i < this.path.length - 1; i++) {
-      parentNode = parentNode[this.path[i]];
-      if (!parentNode) {
-        // Cannot expand marked node because parent path does not exist
+  /**
+   * Set the currently focused node
+   * @param {ObjectTree} node - node to be focused
+   * @returns {undefined}
+   */
+  _setFocusedNode(node) {
+    this.focusedNode = node;
+    this.notify();
+    requestAnimationFrame(() => {
+      const container = document.getElementById('object-tree-scroll-container');
+      const focusedRow = document.getElementById(`${node.index}`) || document.querySelector('.focused-node');
+      if (!container || !focusedRow) {
+        return;
+      }
+      const containerRect = container.getBoundingClientRect();
+      const rowRect = focusedRow.getBoundingClientRect();
+      if (rowRect.top < containerRect.top) {
+        // Row is above view — scroll up
+        container.scrollTop += rowRect.top - containerRect.top;
+      } else if (rowRect.bottom > containerRect.bottom) {
+        // Row is below view — scroll down
+        container.scrollTop += rowRect.bottom - containerRect.bottom;
+      }
+    });
+  }
+
+  /**
+   * Collapse the currently focused node or its parent branch.
+   * @returns {undefined}
+   */
+  _collapseFocusedNode() {
+    if (!this.focusedNode) {
+      return; // No focused node
+    }
+    // focus is on a leaf node -> collapse and focus parent
+    const { isLeaf } = this.focusedNode;
+    if (isLeaf) {
+      const { parent } = this.focusedNode;
+      if (!parent) {
+        return; // No parent to collapse
+      }
+      parent.open = false;
+      this._setFocusedNode(parent);
+      return;
+    }
+    // focus is on a branch node -> collapse or focus parent
+    const { isBranch, open } = this.focusedNode;
+    if (isBranch) {
+      if (open) {
+        this.focusedNode.toggle();
+        return;
+      }
+      const isNotRoot = Boolean(this.focusedNode.parent?.parent);
+      if (isNotRoot) {
+        this._setFocusedNode(this.focusedNode.parent);
         return;
       }
     }
+  }
 
-    this._applyExpandedNodesRecursive(parentNode, this);
+  /**
+   * Expand the currently focused branch if closed or move focus to its first child.
+   * @returns {undefined}
+   */
+  _expandFocusedNode() {
+    if (!this.focusedNode) {
+      return; // No focused node
+    }
+    if (!this.focusedNode.isBranch) {
+      return; // Cannot expand a leaf
+    }
+    if (this.focusedNode.open) {
+      this._setFocusedNode(this.focusedNode.children[0]); // Move focus to first child
+    } else {
+      this.focusedNode.toggle(); // Expand the branch
+    }
+  }
+
+  /**
+   * Get all visible nodes in the tree (for navigation)
+   * @returns {Array.<ObjectTree>} - list of visible nodes
+   */
+  _getVisibleNodes() {
+    const nodes = [];
+    const traverse = (n) => {
+      nodes.push(n);
+      if (n.open) {
+        n.children.forEach(traverse);
+      }
+    };
+    this.children.forEach(traverse);
+    return nodes;
+  }
+
+  /**
+   * Focus the next visible node in the tree
+   */
+  _focusNextNode() {
+    const visible = this._getVisibleNodes();
+    // No visible nodes
+    if (!visible.length) {
+      return;
+    }
+    const idx = visible.indexOf(this.focusedNode);
+    // At the last visible node, do nothing
+    if (idx >= visible.length - 1) {
+      return;
+    }
+    // Nothing focused yet -> focus first visible node
+    if (!this.focusedNode || idx === -1) {
+      const [first] = visible;
+      this._setFocusedNode(first);
+      return;
+    }
+    // Select next node
+    const next = visible[idx + 1] ?? visible[idx];
+    this._setFocusedNode(next);
+  }
+
+  /**
+   * Focus the previous visible node in the tree.
+   */
+  _focusPreviousNode() {
+    const visible = this._getVisibleNodes();
+    // No visible nodes
+    if (!visible.length) {
+      return;
+    }
+    const idx = visible.indexOf(this.focusedNode);
+    // At the first visible node, do nothing
+    if (idx === 0) {
+      return;
+    }
+    // Nothing focused yet -> focus first visible node
+    if (!this.focusedNode || idx === -1) {
+      const [first] = visible;
+      this._setFocusedNode(first);
+      return;
+    }
+    // Select previous node
+    const prev = idx > 0 ? visible[idx - 1] : visible[0];
+    this._setFocusedNode(prev);
+  }
+
+  /**
+   * Load the expanded/collapsed state for this node and its children from localStorage.
+   * Updates the `open` property for the current node and recursively for all children.
+   */
+  _loadExpandedBranches() {
+    if (!this.parent) {
+      // The main node may not be collapsable or expandable.
+      // Because of this we also have to load the expanded state of their direct children.
+      this.children.forEach((child) => child._loadExpandedBranches());
+    }
+    const session = sessionService.get();
+    const key = session.personid.toString();
+    // We traverse the path to reach the parent branch of this node
+    let branchState = this.openBranchStateStorage.getLocalItem(key) ?? {};
+    for (let i = 0; i < this.path.length - 1; i++) {
+      branchState = branchState[this.path[i]];
+      if (!branchState) {
+        return; // Cannot expand marked node because parent path does not exist
+      }
+    }
+    this._applyExpandedBranchesRecursive(branchState, this);
   }
 
   /**
@@ -80,57 +273,55 @@ export default class ObjectTree extends Observable {
    * @param {object} data - The current level of the hierarchical expanded nodes object
    * @param {ObjectTree} treeNode - The tree node to update
    */
-  _applyExpandedNodesRecursive(data, treeNode) {
+  _applyExpandedBranchesRecursive(data, treeNode) {
     if (data[treeNode.name]) {
       treeNode.open = true;
       Object.keys(data[treeNode.name]).forEach((childName) => {
-        const child = treeNode.children.find((child) => child.name === childName);
+        // If two children share the same name, expand the one that has children
+        const child =
+          treeNode.children.find((c) => c.name === childName && c.isBranch) ||
+          treeNode.children.find((c) => c.name === childName);
         if (child) {
-          this._applyExpandedNodesRecursive(data[treeNode.name], child);
+          this._applyExpandedBranchesRecursive(data[treeNode.name], child);
         }
       });
     }
-  };
+  }
 
   /**
-   * Persist the current node's expanded/collapsed state in localStorage.
+   * Persist the current branch's expanded/collapsed state in localStorage.
    */
-  storeExpandedNodes() {
+  _storeExpandedBranches() {
     if (!this.parent) {
       // The main node may not be collapsable or expandable.
       // Because of this we have to store the expanded state of their direct children.
-      this.children.forEach((child) => child.storeExpandedNodes());
+      this.children.forEach((child) => child._storeExpandedBranches());
     }
-
     const session = sessionService.get();
     const key = session.personid.toString();
-    const data = this.storage.getLocalItem(key) ?? {};
-
-    // We traverse the path to reach the parent object of this node
-    let parentNode = data;
+    const data = this.openBranchStateStorage.getLocalItem(key) ?? {};
+    // We traverse the path to reach the parent branch of this node
+    let branchState = data;
     for (let i = 0; i < this.path.length - 1; i++) {
       const pathKey = this.path[i];
-      if (!parentNode[pathKey]) {
+      if (!branchState[pathKey]) {
         if (!this.open) {
-          // Cannot remove marked node because parent path does not exist
-          // Due to this the marked node also does not exist (so there is nothing to remove)
+          // Cannot remove marked branch because parent path does not exist
+          // Due to this the marked branch also does not exist (so there is nothing to remove)
           return;
         }
-
-        // Parent path does not exist, we create it here so we can mark a deeper node
-        parentNode[pathKey] = {};
+        // Parent path does not exist, we create it here so we can mark a deeper branch
+        branchState[pathKey] = {};
       }
-
-      parentNode = parentNode[pathKey];
+      branchState = branchState[pathKey];
     }
-
     if (this.open) {
-      this._markExpandedNodesRecursive(parentNode, this);
-      this.storage.setLocalItem(key, data);
-    } else if (parentNode[this.name]) {
-      // Deleting from `parentNode` directly updates the `data` object
-      delete parentNode[this.name];
-      this.storage.setLocalItem(key, data);
+      this._markExpandedBranchesRecursive(branchState, this);
+      this.openBranchStateStorage.setLocalItem(key, data);
+    } else if (branchState[this.name]) {
+      // Deleting from `branchState` directly updates the `data` object
+      delete branchState[this.name];
+      this.openBranchStateStorage.setLocalItem(key, data);
     }
   }
 
@@ -142,13 +333,13 @@ export default class ObjectTree extends Observable {
    * @param {object} data - The current level in the hierarchical data object where nodes are stored.
    * @param {ObjectTree} treeNode - The tree node whose expanded state should be stored.
    */
-  _markExpandedNodesRecursive(data, treeNode) {
+  _markExpandedBranchesRecursive(data, treeNode) {
     if (!data[treeNode.name]) {
       data[treeNode.name] = {};
     }
     treeNode.children
       .filter((child) => child.open)
-      .forEach((child) => this._markExpandedNodesRecursive(data[treeNode.name], child));
+      .forEach((child) => this._markExpandedBranchesRecursive(data[treeNode.name], child));
   };
 
   /**
@@ -157,7 +348,7 @@ export default class ObjectTree extends Observable {
    */
   toggle() {
     this.open = !this.open;
-    this.storeExpandedNodes();
+    this._storeExpandedBranches();
     this.notify();
   }
 
@@ -166,7 +357,7 @@ export default class ObjectTree extends Observable {
    */
   closeAll() {
     this._closeAllRecursive();
-    this.storeExpandedNodes();
+    this._storeExpandedBranches();
     this.notify();
   }
 
@@ -202,43 +393,30 @@ export default class ObjectTree extends Observable {
       this._addChild(object, path);
       return;
     }
-
     // Case end of path, associate the object to 'this' node
     if (path.length === 0) {
       this.object = object;
       return;
     }
-
     // Case we need to pass to subtree
     const name = path.shift();
     const fullPath = [...pathParent, name];
-    let subtree = this.children.find((children) => children.name === name);
-
-    // Subtree does not exist yet
+    const requiresBranch = path.length > 0;
+    // Find if subtree already exists
+    const matchesNameAndType = requiresBranch
+      ? (c) => c.name === name && c.isBranch
+      : (c) => c.name === name && c.isLeaf;
+    let subtree = this.children.find(matchesNameAndType);
+    // Subtree does not exist yet - create it, then pass to child
     if (!subtree) {
-      /*
-       * Create it and push as child
-       * Listen also for changes to bubble it until root
-       */
       subtree = new ObjectTree(name, this);
       subtree.path = fullPath;
       subtree.pathString = fullPath.join('/');
       this.children.push(subtree);
-      subtree.observe(() => this.notify());
+      subtree.observe(() => this.notify()); // listen for changes and bubble to root
     }
-
     // Pass to child
     subtree._addChild(object, path, fullPath);
-  }
-
-  /**
-   * Add a single object as a child node
-   * @param {object} object - child to be added
-   */
-  addOneChild(object) {
-    this._addChild(object);
-    this.loadExpandedNodes();
-    this.notify();
   }
 
   /**
@@ -247,7 +425,7 @@ export default class ObjectTree extends Observable {
    */
   addChildren(objects) {
     objects.forEach((object) => this._addChild(object));
-    this.loadExpandedNodes();
+    this._loadExpandedBranches();
     this.notify();
   }
 }

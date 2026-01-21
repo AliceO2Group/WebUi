@@ -14,6 +14,7 @@
 import { strictEqual, ok } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
 import { RunStatus } from '../../../common/library/runStatus.enum.js';
+import {interceptRequest} from "../../testUtils/requestInterceptor.js";
 
 export const filterTests = async (url, page, timeout = 5000, testParent) => {
   await testParent.test('filter should persist between pages', { timeout }, async () => {
@@ -43,7 +44,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     strictEqual(value, '0', 'RunNumber filter should still be set to 0 on objectView page');
 
     // Navigate to layout show
-    await page.locator('.menu-item:nth-child(1)').click();
+    await page.locator('nav .menu-item:nth-child(1)').click();
     await page.waitForSelector('#runNumberFilter', { visible: true });
 
     // Check that filter is still set to 0
@@ -55,26 +56,19 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     'should display detector qualities when filtering by run number if it has any',
     { timeout },
     async () => {
-      const requestHandler = async (interceptedRequest) => {
-        const url = interceptedRequest.url();
-
-        if (url.includes('/api/filter/run-status/0')) {
-          // Mock the response
-          await interceptedRequest.respond({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify({
-              detectorsQualities: [
-                { id: 1, name: 'DETECTOR_GOOD_1', quality: 'good' },
-                { id: 1, name: 'DETECTOR_GOOD_2', quality: 'good' },
-                { id: 2, name: 'DETECTOR_BAD', quality: 'bad' },
-              ],
-            }),
-          });
-        } else {
-          interceptedRequest.continue();
-        }
-      };
+      const requestHandler = (request) => interceptRequest(request, /\/api\/filter\/run-status\/0/, (req) => {
+        req.respond({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            detectorsQualities: [
+              { id: 1, name: 'DETECTOR_GOOD_1', quality: 'good' },
+              { id: 1, name: 'DETECTOR_GOOD_2', quality: 'good' },
+              { id: 2, name: 'DETECTOR_BAD', quality: 'bad' },
+            ],
+          }),
+        });
+      });
 
       try {
         // Enable interception and attach the handler
@@ -110,22 +104,15 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     'should not display detector qualities if the run has none when filtering by run number',
     { timeout },
     async () => {
-      const requestHandler = async (interceptedRequest) => {
-        const url = interceptedRequest.url();
-
-        if (url.includes('/api/filter/run-status/0')) {
-          // Mock the response
-          await interceptedRequest.respond({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify({
-              detectorsQualities: [],
-            }),
-          });
-        } else {
-          interceptedRequest.continue();
-        }
-      };
+      const requestHandler = (request) => interceptRequest(request, /\/api\/filter\/run-status\/0/, (req) => {
+        req.respond({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            detectorsQualities: [],
+          }),
+        });
+      });
 
       try {
         // Enable interception and attach the handler
@@ -160,22 +147,15 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
   });
 
   await testParent.test('filtering by run number should display the run information', { timeout }, async () => {
-    const requestHandler = async (interceptedRequest) => {
-      const url = interceptedRequest.url();
-
-      if (url.includes('/api/filter/run-status/0')) {
-        // Mock the response
-        await interceptedRequest.respond({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            runStatus: RunStatus.UNKNOWN,
-          }),
-        });
-      } else {
-        interceptedRequest.continue();
-      }
-    };
+    const requestHandler = (request) => interceptRequest(request, /\/api\/filter\/run-status\/0/, (req) => {
+      req.respond({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          runStatus: RunStatus.UNKNOWN,
+        }),
+      });
+    });
 
     try {
       // Enable interception and attach the handler
@@ -189,9 +169,6 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
       // Filtering by run number should display the run information
       const runInformation = await page.waitForSelector('#header-run-information', { visible: true, timeout: 1000 });
       ok(runInformation, 'Run information should exists on the page');
-    } catch (error) {
-      // Test failed
-      ok(false, error.message);
     } finally {
       // Cleanup: remove listener and disable interception
       page.off('request', requestHandler);
@@ -201,18 +178,21 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
 
   await testParent.test('should list all objects when clearing filters', { timeout }, async () => {
     await page.locator('#triggerFilterButton').click();
-    await delay(100);
     //Navigate to object tree
     ///html/body/div[1]/div/nav/a[2]
+    await page.waitForSelector('nav > a:nth-child(3)', { timeout: 1000 }).catch(() => { /* Ignore timeout error */ });
     await page.locator('nav > a:nth-child(3)').click();
 
     //With filter applied
+    await page.waitForFunction(() => window.model.object.list.length === 1, { timeout: 1000 })
+      .catch(() => { /* Ignore timeout error */ });
     let objectList = await page.evaluate(() => window.model.object.list);
     strictEqual(objectList.length, 1);
 
     //Clear filters
     await page.locator('#clearFilterButton').click();
-    await delay(100);
+    await page.waitForFunction(() => window.model.object.list.length === 3, { timeout: 1000 })
+      .catch(() => { /* Ignore timeout error */ });
     objectList = await page.evaluate(() => window.model.object.list);
     strictEqual(objectList.length, 3);
   });
@@ -241,16 +221,15 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     );
 
     let rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
-    strictEqual(rowCount, 7);
+    strictEqual(rowCount, 6);
 
     const runNumber = '0';
     await page.locator('#runNumberFilter').fill(runNumber);
     await page.locator('#filterElement #triggerFilterButton').click();
-
-    await extendTree(3, 5);
+    await delay(100);
 
     rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
-    strictEqual(rowCount, 5); // Due to the filter there are two objects fewer.
+    strictEqual(rowCount, 4); // Due to the filter there are two objects fewer.
   });
 
   await testParent.test('ObjectTree infoPanel should show filtered object versions', { timeout }, async () => {
@@ -258,6 +237,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     await page.locator('tr:last-of-type td').click();
     await page.waitForSelector(versionsPath);
 
+    await delay(100);
     let versionCount = await page.evaluate((path) => document.querySelectorAll(path).length, versionsPath);
     strictEqual(versionCount, 1, 'Number of versions is not 1');
 

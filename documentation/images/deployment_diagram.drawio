@@ -1,0 +1,129 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" version="29.3.3">
+  <diagram name="Page-1" id="v3FHTbixeeevl2tdh_Tu">
+    <mxGraphModel dx="4012" dy="1121" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="z1Yb0Au4B88DAZNOzut0-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="&lt;div&gt;Developer&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="280" x="-40" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="z1Yb0Au4B88DAZNOzut0-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="GitLab" vertex="1">
+          <mxGeometry height="40" width="280" x="280" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="z1Yb0Au4B88DAZNOzut0-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="GitLab CI/CD" vertex="1">
+          <mxGeometry height="40" width="280" x="600" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="z1Yb0Au4B88DAZNOzut0-33" edge="1" parent="1" source="z1Yb0Au4B88DAZNOzut0-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="z1Yb0Au4B88DAZNOzut0-7" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="z1Yb0Au4B88DAZNOzut0-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Update System Configuration versions" vertex="1">
+          <mxGeometry height="40" width="280" x="280" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="z1Yb0Au4B88DAZNOzut0-34" edge="1" parent="1" source="z1Yb0Au4B88DAZNOzut0-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="z1Yb0Au4B88DAZNOzut0-9" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="z1Yb0Au4B88DAZNOzut0-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Fill in branch name and create PR" vertex="1">
+          <mxGeometry height="40" width="280" x="280" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="Q_tG41tMflBDwsy2ZLIh-4" edge="1" parent="1" source="z1Yb0Au4B88DAZNOzut0-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="Q_tG41tMflBDwsy2ZLIh-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="z1Yb0Au4B88DAZNOzut0-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Add release notes, yourself as creator and O2-FLP Group Leader as reviewer.&amp;nbsp;" vertex="1">
+          <mxGeometry height="40" width="280" x="280" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="zRLLZH3JgaoAES7Akeb_-10" edge="1" parent="1" source="Q_tG41tMflBDwsy2ZLIh-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="Q_tG41tMflBDwsy2ZLIh-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zRLLZH3JgaoAES7Akeb_-11" edge="1" parent="1" source="Q_tG41tMflBDwsy2ZLIh-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="Q_tG41tMflBDwsy2ZLIh-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Q_tG41tMflBDwsy2ZLIh-1" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Are integration tests running?" vertex="1">
+          <mxGeometry height="205" width="200" x="640" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="zRLLZH3JgaoAES7Akeb_-32" edge="1" parent="1" source="Q_tG41tMflBDwsy2ZLIh-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="Q_tG41tMflBDwsy2ZLIh-35">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Q_tG41tMflBDwsy2ZLIh-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Inform O2 group leader about release and if pipeline was started or not" vertex="1">
+          <mxGeometry height="60" width="120" x="50" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="Q_tG41tMflBDwsy2ZLIh-31" edge="1" parent="1" source="Q_tG41tMflBDwsy2ZLIh-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="Q_tG41tMflBDwsy2ZLIh-16">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="820" y="900" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Q_tG41tMflBDwsy2ZLIh-12" parent="1" style="whiteSpace=wrap;html=1;" value="Start pipeline (your branch), don&#39;t change pipeline params&amp;nbsp;" vertex="1">
+          <mxGeometry height="60" width="120" x="760" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="Q_tG41tMflBDwsy2ZLIh-27" edge="1" parent="1" source="Q_tG41tMflBDwsy2ZLIh-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="Q_tG41tMflBDwsy2ZLIh-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Q_tG41tMflBDwsy2ZLIh-14" parent="1" style="whiteSpace=wrap;html=1;" value="Don&#39;t start the pipeline" vertex="1">
+          <mxGeometry height="60" width="120" x="600" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="Q_tG41tMflBDwsy2ZLIh-30" edge="1" parent="1" source="Q_tG41tMflBDwsy2ZLIh-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="Q_tG41tMflBDwsy2ZLIh-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Q_tG41tMflBDwsy2ZLIh-16" parent="1" style="whiteSpace=wrap;html=1;" value="In GitLab release, enable auto-merge" vertex="1">
+          <mxGeometry height="60" width="120" x="354" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="Q_tG41tMflBDwsy2ZLIh-41" edge="1" parent="1" source="zRLLZH3JgaoAES7Akeb_-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="Q_tG41tMflBDwsy2ZLIh-38">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zRLLZH3JgaoAES7Akeb_-28" edge="1" parent="1" source="Q_tG41tMflBDwsy2ZLIh-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0;exitY=1;exitDx=0;exitDy=0;" target="zRLLZH3JgaoAES7Akeb_-21">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-50" y="1170" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Q_tG41tMflBDwsy2ZLIh-35" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="SRC green light for SW verification granted" vertex="1">
+          <mxGeometry height="160" width="160" x="30" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="Q_tG41tMflBDwsy2ZLIh-42" edge="1" parent="1" source="Q_tG41tMflBDwsy2ZLIh-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="Q_tG41tMflBDwsy2ZLIh-40">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Q_tG41tMflBDwsy2ZLIh-38" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Check for GUIs if version number has been updated" vertex="1">
+          <mxGeometry height="60" width="120" x="50" y="1310" as="geometry" />
+        </mxCell>
+        <mxCell id="zRLLZH3JgaoAES7Akeb_-31" edge="1" parent="1" source="Q_tG41tMflBDwsy2ZLIh-40" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="zRLLZH3JgaoAES7Akeb_-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Q_tG41tMflBDwsy2ZLIh-40" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Briefly checking newly released GUI functionality" vertex="1">
+          <mxGeometry height="60" width="120" x="50" y="1400" as="geometry" />
+        </mxCell>
+        <mxCell id="zRLLZH3JgaoAES7Akeb_-4" edge="1" parent="1" source="zRLLZH3JgaoAES7Akeb_-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="z1Yb0Au4B88DAZNOzut0-6" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zRLLZH3JgaoAES7Akeb_-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" value="START" vertex="1">
+          <mxGeometry height="62.25" width="280" x="-40" y="188.88" as="geometry" />
+        </mxCell>
+        <mxCell id="zRLLZH3JgaoAES7Akeb_-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;" value="FINISH" vertex="1">
+          <mxGeometry height="62.25" width="280" x="-30" y="1500" as="geometry" />
+        </mxCell>
+        <mxCell id="zRLLZH3JgaoAES7Akeb_-12" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="YES" vertex="1">
+          <mxGeometry height="30" width="60" x="660" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="zRLLZH3JgaoAES7Akeb_-13" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="NO" vertex="1">
+          <mxGeometry height="30" width="60" x="760" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="zRLLZH3JgaoAES7Akeb_-19" edge="1" parent="1" source="Q_tG41tMflBDwsy2ZLIh-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="zRLLZH3JgaoAES7Akeb_-18" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="1390" as="sourcePoint" />
+            <mxPoint x="110" y="1490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zRLLZH3JgaoAES7Akeb_-18" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="YES" vertex="1">
+          <mxGeometry height="30" width="60" x="80" y="1240" as="geometry" />
+        </mxCell>
+        <mxCell id="zRLLZH3JgaoAES7Akeb_-29" edge="1" parent="1" source="zRLLZH3JgaoAES7Akeb_-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="Q_tG41tMflBDwsy2ZLIh-35">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zRLLZH3JgaoAES7Akeb_-21" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="NO" vertex="1">
+          <mxGeometry height="30" width="60" x="-80" y="1110" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

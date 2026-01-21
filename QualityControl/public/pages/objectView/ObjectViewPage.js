@@ -20,7 +20,7 @@ import { dateSelector } from '../../common/object/dateSelector.js';
 import { defaultRowAttributes, qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
 import { downloadButton } from '../../common/downloadButton.js';
 import { visibilityToggleButton } from '../../common/visibilityButton.js';
-import { downloadRootImageButton } from '../../common/downloadRootImageButton.js';
+import { downloadRootImageDropdown } from '../../common/downloadRootImageDropdown.js';
 
 /**
  * Shows a page to view an object on the whole page
@@ -44,6 +44,8 @@ const objectPlotAndInfo = (objectViewModel) =>
     Success: (qcObject) => {
       const {
         id,
+        name,
+        qcObject: { root = {} } = {},
         validFrom,
         ignoreDefaults = false,
         drawOptions = [],
@@ -55,6 +57,7 @@ const objectPlotAndInfo = (objectViewModel) =>
         layoutDisplayOptions
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
       const isObjectInfoVisible = objectViewModel.objectInfoVisible;
+
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.items-center.h-10', [
           h(
@@ -66,9 +69,9 @@ const objectPlotAndInfo = (objectViewModel) =>
             ),
           ),
           h('.item-action-row.flex-row.g1.p2', [
-            downloadRootImageButton(`${qcObject.name}.png`, qcObject.qcObject.root, drawingOptions),
+            downloadRootImageDropdown(name, root, drawingOptions),
             downloadButton({
-              href: objectViewModel.getDownloadQcdbObjectUrl(qcObject.id),
+              href: objectViewModel.getDownloadQcdbObjectUrl(id),
               title: 'Download root object',
             }),
             visibilityToggleButton(
