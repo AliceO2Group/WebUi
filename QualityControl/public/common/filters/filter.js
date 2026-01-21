@@ -338,3 +338,109 @@ export const ongoingRunsSelector = (config, filterMap, options, onChangeCallback
     ),
   ]);
 };
+
+/**
+ * Renders a searchable Combobox with keyboard navigation using ALICE O2 design.
+ * This component is a stateless function that leverages CSS `:focus-within` for visibility
+ * and direct DOM manipulation for arrow-key highlighting to avoid FilterModel pollution.
+ * @param {object} config - The configuration for the combobox field.
+ * @param {string} config.id - The unique HTML ID for the input element.
+ * @param {string} config.inputType - The type for the HTML input element.
+ * @param {string} config.queryLabel - The key name in the filterMap to update.
+ * @param {string} config.placeholder - The placeholder text for the input.
+ * @param {string} config.width - Width of the input container.
+ * @param {object} filterMap - Object containing current filter keys and values.
+ * @param {RemoteData} options - RemoteData object containing the list of available options.
+ * @param {onenter} onEnterCallback - Callback to trigger filtering.
+ * @param {oninput} onInputCallback - Callback to update the filter value.
+ * @returns {vnode} - A virtual node representing the combobox.
+ */
+export const combobox = (
+  { id, inputType, queryLabel, placeholder, width = '.w-20' },
+  filterMap,
+  options,
+  onEnterCallback,
+  onInputCallback,
+) => {
+  const ongoingRuns = options.isSuccess() && options.payload.length > 0 ? options.payload : [];
+  if (!ongoingRuns.length) {
+    return filterInput({
+      queryLabel, placeholder, id, filterMap, onInputCallback, onEnterCallback, type: inputType, width,
+    });
+  }
+  const filtered = filterMap[queryLabel]
+    ? ongoingRuns?.filter((option) =>
+      String(option).toLowerCase().includes(filterMap[queryLabel].toLowerCase()))
+    : ongoingRuns;
+
+  const handleKeyNavigation = (e) => {
+    const container = e.target.closest('.combobox-container');
+    const items = [...container.querySelectorAll('.combobox-item:not(.combobox-header)')];
+    const current = container.querySelector('.is-highlighted');
+    const index = items.indexOf(current);
+
+    const move = (nextIndex) => {
+      if (current) {
+        current.classList.remove('is-highlighted');
+      }
+      if (items[nextIndex]) {
+        items[nextIndex].classList.add('is-highlighted');
+        items[nextIndex].scrollIntoView({ block: 'nearest' });
+      }
+    };
+
+    const keys = {
+      ArrowDown: () => move(Math.min(index + 1, items.length - 1)),
+      ArrowUp: () => move(Math.max(index - 1, 0)),
+      Enter: () => {
+        if (current) {
+          onInputCallback(queryLabel, current.innerText, true);
+        }
+        e.target.blur();
+      },
+    };
+
+    if (keys[e.key]) {
+      if (e.key !== 'Enter') {
+        e.preventDefault();
+      }
+      keys[e.key]();
+    }
+  };
+
+  return h(`${width}.combobox-container`, [
+    h('input.form-control', {
+      id,
+      placeholder,
+      type: inputType,
+      autocomplete: 'off',
+      min: 0,
+      value: filterMap[queryLabel] || '',
+      oninput: (event) => onInputCallback(queryLabel, event.target.value, true),
+      onkeydown: handleKeyNavigation,
+      onblur: (e) => {
+        const container = e.target.closest('.combobox-container');
+        container.querySelector('.is-highlighted')?.classList.remove('is-highlighted');
+      },
+    }),
+
+    filtered.length > 0 && h(
+      'ul.combobox-list.dropdown-menu',
+      [
+        h('li.combobox-header.dropdown-header', {
+          style: { pointerEvents: 'none', userSelect: 'none' },
+        }, placeholder),
+
+        ...filtered.map((option) =>
+          h('li.combobox-item.menu-item', {
+            onmousedown: (e) => {
+              // onmousedown to capture before blur event
+              e.preventDefault();
+              onInputCallback(queryLabel, option, true);
+              e.target.closest('.combobox-container').querySelector('input')?.blur();
+            },
+          }, option)),
+      ],
+    ),
+  ]);
+};

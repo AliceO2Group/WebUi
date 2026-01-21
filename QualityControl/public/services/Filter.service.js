@@ -31,7 +31,7 @@ export default class FilterService {
     this._detectors = RemoteData.notAsked();
     this._dataPasses = RemoteData.notAsked();
 
-    this.ongoingRuns = RemoteData.notAsked();
+    this._ongoingRuns = RemoteData.notAsked();
   }
 
   /**
@@ -104,13 +104,13 @@ export default class FilterService {
    * @returns {void} assigns the remoteData object to ongoingRuns
    */
   async fetchOngoingRuns() {
-    this.ongoingRuns = RemoteData.loading();
+    this._ongoingRuns = RemoteData.loading();
     this.filterModel.notify();
     const { result, ok } = await this.loader.get('/api/filter/ongoingRuns');
     if (ok) {
-      this.ongoingRuns = RemoteData.success(result?.ongoingRuns);
+      this._ongoingRuns = RemoteData.success(result?.ongoingRuns);
     } else {
-      this.ongoingRuns = RemoteData.failure('Error retrieving ongoing runs');
+      this._ongoingRuns = RemoteData.failure('Error retrieving ongoing runs');
     }
     this.filterModel.notify();
   }
@@ -137,5 +137,13 @@ export default class FilterService {
    */
   get dataPasses() {
     return this._dataPasses;
+  }
+
+  /**
+   * Gets the list of ongoing runs.
+   * @returns {RemoteData<number[]>} An array containing the ongoing run numbers.
+   */
+  get ongoingRuns() {
+    return this._ongoingRuns;
   }
 }

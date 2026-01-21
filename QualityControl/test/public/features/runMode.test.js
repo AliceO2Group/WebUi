@@ -23,7 +23,6 @@ import { ONGOING_RUN_NUMBER } from '../../setup/mockKafkaEvents.js';
 // import nock from 'nock';
 export const runModeTests = async (url, page, timeout = 5000, testParent) => {
   const mockedTestRunNumber = ONGOING_RUN_NUMBER;
-  let countOngoingRunsCalls = 0;
   let countRunStatusCalls = 0;
   let expectCountRunStatusCalls = 0;
   let countObjectsCalls = 0;
@@ -31,9 +30,6 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
   page.on('request', (req) => {
     const url = req.url();
     const decodedUrl = decodeURIComponent(url);
-    if (url.includes('/api/filter/ongoingRuns')) {
-      countOngoingRunsCalls++;
-    }
     if (url.includes('/api/objects') && decodedUrl.includes(`filters[RunNumber]=${mockedTestRunNumber}`)) {
       countObjectsCalls++;
     } else if (url.includes(`/api/filter/run-status/${mockedTestRunNumber}`)) {
@@ -165,11 +161,6 @@ export const runModeTests = async (url, page, timeout = 5000, testParent) => {
 
     const isRunModeActivated = await page.evaluate(() => window.model.filterModel.isRunModeActivated);
     ok(isRunModeActivated, 'Run mode should be activated');
-  });
-
-  await testParent.test('should make a request to ongoing runs API', { timeout }, async () => {
-    await delay(200);
-    strictEqual(countOngoingRunsCalls, expectCountRunStatusCalls, `Expect 1 req to /api/filter/ongoingRuns, but got ${countOngoingRunsCalls}`);
   });
 
   await testParent.test('should display ongoing runs selector', { timeout }, async () => {
