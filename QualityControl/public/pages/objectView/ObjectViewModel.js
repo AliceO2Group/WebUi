@@ -16,8 +16,8 @@ import { BaseViewModel } from '../../common/abstracts/BaseViewModel.js';
 import { setBrowserTabTitle } from '../../common/utils.js';
 import { RemoteData, BrowserStorage } from '/js/src/index.js';
 import { StorageKeysEnum } from '../../common/enums/storageKeys.enum.js';
-import { updateWithPlotErrorOnQcRemoteData } from '../../common/object/updateWithPlotErrorOnQcRemoteData.js';
 import { DRAWING_OPTIONS } from '../../common/constants/drawingOptions.js';
+import { updateWithPlotErrorOnQcRemoteData } from '../../common/object/updateWithPlotErrorOnQcRemoteData.js';
 
 /**
  * Model namespace for ObjectViewPage

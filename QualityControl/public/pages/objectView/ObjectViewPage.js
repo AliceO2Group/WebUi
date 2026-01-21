@@ -45,10 +45,10 @@ const objectPlotAndInfo = (objectViewModel) =>
     Success: (qcObject) => {
       const {
         id,
-        name,
-        qcObject: { root = {} } = {},
         validFrom,
         versions,
+        qcObject: { root = {} } = {},
+        name,
       } = qcObject;
       const {
         ignoreDefaults,
@@ -82,8 +82,8 @@ const objectPlotAndInfo = (objectViewModel) =>
         ]),
         h('.flex-row.g2.m2.flex-grow', [
           h('.flex-grow', {
-            // Key change forces redraw when toggling info panel
-            key: objectInfoVisible ? 'objectPlotWithoutInfoPanel' : 'objectPlotWithInfoPanel',
+            // force redraw on toggle info panel and update drawing options
+            key: `${objectInfoVisible}-${drawingOptions}`,
           }, drawObject(qcObject, {}, drawingOptions, (error) => {
             objectViewModel.drawingFailureOccurred(error.message);
           })),
