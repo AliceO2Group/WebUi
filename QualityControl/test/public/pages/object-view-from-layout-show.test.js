@@ -547,6 +547,8 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         { timeout: 1000 },
         ignoreDefaultsCheckboxSelector,
       ).catch(() => { /* ignore timeout error */ });
+      await delay(100);
+      await page.screenshot({ path: 'test.png' });
       const activeCheckboxLabels = await page.evaluate(() => {
         const checkboxes = document.querySelectorAll('#objectDrawingOptions > div .flex-column input[type="checkbox"]');
         return Array.from(checkboxes)
