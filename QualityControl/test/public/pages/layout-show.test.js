@@ -50,12 +50,12 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
-    'should have a correctly made download root as image button',
+    'should have a correctly made save root as image button',
     { timeout },
     async () => {
-      const exists = await page.evaluate(() => document.querySelector('.download-root-image-png-button') !== null);
+      const exists = await page.evaluate(() => document.querySelector('.save-root-as-image-button') !== null);
 
-      ok(exists, 'Expected ROOT image download button to exist');
+      ok(exists, 'Expected ROOT image save button to exist');
     },
   );
 
@@ -437,15 +437,10 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should close JSON editor when clicking "Cancel"',
     { timeout },
     async () => {
-      const cancelButtonPath = 'body > div > div > div > div > button:nth-child(2)';
-      await page.locator(cancelButtonPath).click();
+      await page.locator('.o2-modal-content .btn-group > button:nth-child(2)').click();
       await delay(50);
-      const childrenCount = await page.evaluate(() => {
-        const bodyPath = 'body';
-        const body = document.querySelector(bodyPath);
-        return body.children.length;
-      });
-      strictEqual(childrenCount, 2);
+      const isModelOpen = await page.evaluate(() => document.querySelector('.o2-modal-content') !== null);
+      strictEqual(isModelOpen, false);
     },
   );
 
@@ -610,7 +605,11 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {
   const textareaPath = 'body > div > div > div > div > textarea';
   await page.locator(textareaPath).fill(mockedJSON);
-  await delay(50);
+  await page.waitForFunction(
+    (error) => document.querySelector('.o2-modal-content .danger')?.textContent === error,
+    { timeout: 1000 },
+    errorMessage,
+  ).catch(() => { /* ignore timeout error */ });
 
   const [updateButtonIsDisabled, message] = await page.evaluate(() => {
     const updateButtonPath = 'body > div > div > div > div > button:nth-child(1)';

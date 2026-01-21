@@ -20,5 +20,6 @@
 export const StorageKeysEnum = Object.freeze({
   OBJECT_VIEW_LEFT_PANEL_WIDTH: 'object-view-left-panel-width',
   OBJECT_VIEW_INFO_VISIBILITY_SETTING: 'object-view-info-visibility-setting',
-  OBJECT_TREE_OPEN_NODES: 'object-tree-open-nodes',
+  OBJECT_TREE_OPEN_BRANCH_STATE: 'object-tree-open-branch-state',
+  NOTIFICATION_START_RUN_SETTING: 'notification-start-run-setting',
 });

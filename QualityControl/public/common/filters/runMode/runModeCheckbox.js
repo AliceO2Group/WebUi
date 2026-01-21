@@ -11,7 +11,43 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h } from '/js/src/index.js';
+import { h, iconWarning, switchCase } from '/js/src/index.js';
+import { IntegratedServices } from '../../../../library/enums/Status/integratedServices.enum.js';
+import { ServiceStatus } from '../../../../library/enums/Status/serviceStatus.enum.js';
+import { spinner } from '../../spinner.js';
+
+/**
+ * This component determines whether the Run Mode toggle should be displayed
+ * based on the availability and configuration state of the Kafka integrated service.
+ * Behavior by service state:
+ * - Loading: Displays a spinner while checking whether Run Mode is configured.
+ * - Failure: Displays an error box with a warning icon and the failure message returned by the service.
+ * - Success:
+ *   - {@link ServiceStatus.SUCCESS}: Renders the Run Mode checkbox component.
+ *   - {@link ServiceStatus.NOT_CONFIGURED}: Renders nothing (Run Mode is intentionally unavailable).
+ *   - Any other state: Displays a generic error box instructing the user to contact an administrator.
+ * - Other: Unsupported or irrelevant state.
+ * @param {object} filterModel - The filter model containing the aboutViewModel used to locate integrated services.
+ * @param {object} viewModel - The view model associated with the current view.
+ * @returns {vnode|null} A vnode representing the RunMode switch or kafka state, or `null` if Kafka is not configured.
+ */
+export const runModeComponent = (filterModel, viewModel) =>
+  filterModel.model.aboutViewModel.findService(IntegratedServices.KAFKA)?.match({
+    Loading: () => spinner(2, 'Checking if RunMode is configured'),
+    Failure: (payload) => h('.error-box.danger.flex-column.justify-center.f6.text-center', { id: 'run-mode-failure' }, [
+      h('span.error-icon', { title: 'RunMode is unavailable. Please contact administrator.' }, iconWarning()),
+      h('span', payload.status.message),
+    ]),
+    Success: (payload) =>
+      switchCase(
+        payload.status.category,
+        {
+          [ServiceStatus.SUCCESS]: () => runModeCheckbox(filterModel, viewModel),
+        },
+        () => {},
+      )(),
+    Other: () => {},
+  });
 
 /**
  * Render a run mode switch
@@ -34,6 +70,7 @@ export const runModeCheckbox = (filterModel, viewModel) => {
     'label.flex-row.g1.items-center.form-check-label',
     {
       style: `cursor:${isAvailable ? 'pointer' : 'not-allowed'}`,
+      id: 'run-mode-switch',
     },
     [
       h(
