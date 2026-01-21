@@ -49,20 +49,14 @@ const objectPlotAndInfo = (objectViewModel) =>
         versions,
         qcObject: { root = {} } = {},
         name,
-        drawOptions = [],
-        displayHints = [],
-        layoutDisplayOptions = [],
       } = qcObject;
       const {
         ignoreDefaults,
         nonRecognizedDrawingOptions,
         objectInfoVisible,
         objectDrawingOptionsVisible,
+        drawingOptions = [],
       } = objectViewModel;
-
-      const drawingOptions = ignoreDefaults ?
-        layoutDisplayOptions
-        : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
 
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.items-center.h-10', [
