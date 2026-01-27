@@ -24,10 +24,8 @@ const {
 const { EnvironmentState } = require('../../common/environmentState.enum.js');
 const { TaskState } = require('../../common/taskState.enum.js');
 const { EnvironmentTransitionType } = require('../../common/environmentTransitionType.enum.js');
+const { EcsOperationAndStepStatus } = require('../../common/ecsOperationAndStepStatus.enum.js');
 const EPN_PATH_IN_ENVIRONMENT_INFO = 'hardware.epn.info';
-
-const ECS_TRANSITION_DONE_MESSAGE = 'transition completed successfully';
-const ECS_DESTROY_TRANSITION_DONE_MESSAGE = 'environment teardown complete';
 
 /**
  * @class
@@ -219,7 +217,7 @@ class EnvironmentCacheService {
    * @returns {void}
    */
   _handleEnvironmentEvent(environmentEvent) {
-    const { id, state, transition = {}, message, error, runNumber } = environmentEvent;
+    const { id, state, transition = {}, error, runNumber } = environmentEvent;
     const cachedEnvironment = this._environments.has(id)
       ? this._environments.get(id)
       : { id, events: [] };
@@ -238,8 +236,7 @@ class EnvironmentCacheService {
    
     if (
       state === EnvironmentState.CONFIGURED &&
-      message === ECS_TRANSITION_DONE_MESSAGE
-      // OCTRL-1038 - currently comparing to hardcoded string, but this should be replaced with transition status
+      transition?.status === EcsOperationAndStepStatus.DONE_OK
     ) {
       // Once the environment is configured and ongoing transition is done, we can set the isDeploying to false
       // This can happen when the environment also goes form RUNNING to CONFIGURED but it is already marked as not deploying anymore
@@ -256,9 +253,9 @@ class EnvironmentCacheService {
     this.addOrUpdateEnvironment(cachedEnvironment, false);
 
     if (
-      transition?.name === EnvironmentTransitionType.DESTROY  &&
+      transition?.name === EnvironmentTransitionType.DESTROY &&
+      transition?.status === EcsOperationAndStepStatus.DONE_OK &&
       state === EnvironmentState.DONE &&
-      message === ECS_DESTROY_TRANSITION_DONE_MESSAGE &&
       !cachedEnvironment.deploymentError
     ) {
       // That is, if the environment successfully ended the DESTROY transition
