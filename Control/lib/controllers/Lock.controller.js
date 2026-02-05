@@ -74,12 +74,12 @@ class LockController {
           Object.keys(this._lockService.locksByDetector)
             .filter((detector) => detector !== DetectorId.TST) // Skip TST detector when locking all
             .forEach((detector) => {
-            try {
-              this._lockService.takeLock(detector, user, shouldForce);
-            } catch (error) {
-              console.error(error);
-            }
-          });
+              try {
+                this._lockService.takeLock(detector, user, shouldForce);
+              } catch (error) {
+                console.error(error);
+              }
+            });
         } else {
           this._lockService.takeLock(detectorId, user, shouldForce);
         }
@@ -89,12 +89,12 @@ class LockController {
           Object.keys(this._lockService.locksByDetector)
             .filter((detector) => detector !== DetectorId.TST) // Skip TST detector when releasing all
             .forEach((detector) => {
-            try {
-              this._lockService.releaseLock(detector, user, shouldForce);
-            } catch (error) {
-              console.error(error);
-            }
-          });
+              try {
+                this._lockService.releaseLock(detector, user, shouldForce);
+              } catch (error) {
+                console.error(error);
+              }
+            });
         } else {
           this._lockService.releaseLock(detectorId, user, shouldForce);
         }
