@@ -30,7 +30,7 @@ Acquires a lock on a detector for the current user.
 - `shouldForce` (optional): Boolean flag to force taking the lock even if held by another user
 
 **Behavior**:
-- When `detectorId` is `ALL`, locks all detectors **except** TST
+- When `detectorId` is `ALL` and the user has a role of at least `GLOBAL`, locks all detectors **except** TST
 - If a lock is already held by another user and:
   - `shouldForce` is `false`, the request will fail.
   - `shouldForce` is `true` and the user has a role of at least `GLOBAL` for individual detector and at least `ADMIN` for detector `ALL`, the lock will be taken regardless of current ownership
@@ -45,7 +45,7 @@ Releases a lock on a detector.
 - `shouldForce` (optional): Boolean flag to force releasing the lock even if held by another user
 
 **Behavior**:
-- When `detectorId` is `ALL`, releases locks on all detectors **except** TST
+- When `detectorId` is `ALL` and the user has a role of at least `GLOBAL`, releases locks on all detectors **except** TST
 - If a lock is already held by another user and:
   - `shouldForce` is `false`, the request will fail.
   - `shouldForce` is `true` and the user has a role of at least `GLOBAL` for individual detector and at least `ADMIN` for detector `ALL`, the lock will be released regardless of current ownership
@@ -56,7 +56,7 @@ Releases a lock on a detector.
 
 The TST (test) detector is treated specially:
 - When using `ALL` as the detector ID, TST is excluded from both TAKE and RELEASE operations
-- TST must be locked/unlocked explicitly by using `TST` as the detector ID
+- TST must be taken/released explicitly by using `TST` as the detector ID
 - Moreover, front-end pages are also:
   - excluding TST from being displayed if on `Global` page
   - displaying TST at the end with separator if on `+Create` or `Locks` pages
