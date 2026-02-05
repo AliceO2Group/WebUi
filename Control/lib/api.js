@@ -247,7 +247,10 @@ module.exports.setup = (http, ws) => {
   http.post('/execute/o2-roc-config', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
 
   // Lock Service
-  http.get('/locks', lockController.getLocksStateHandler.bind(lockController));
+  http.get('/locks',
+    minimumRoleMiddleware(Role.DETECTOR),
+    lockController.getLocksStateHandler.bind(lockController)
+  );
 
   http.put(`/locks/:action/${DetectorId.ALL}`,
     minimumRoleMiddleware(Role.GLOBAL),

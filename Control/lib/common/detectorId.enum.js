@@ -17,6 +17,7 @@
  */
 const DetectorId = Object.freeze({
   ALL: 'ALL',
+  TST: 'TST',
 });
 
 exports.DetectorId = DetectorId;
