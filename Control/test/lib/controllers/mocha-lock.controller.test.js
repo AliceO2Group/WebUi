@@ -21,7 +21,7 @@ const { LockService } = require('./../../../lib/services/Lock.service.js');
 const { User } = require('./../../../lib/dtos/User.js');
 const { DetectorLockAction } = require('../../../lib/common/lock/detectorLockAction.enum.js');
 const { DetectorLockState } = require('../../../lib/common/lock/detectorLockState.enum.js');
-const { DetectorId } = require('../../../lib/common/DetectorId.enum.js');
+const { DetectorId } = require('../../../lib/common/detectorId.enum.js');
 
 describe(`'LockController' test suite`, () => {
   const res = {

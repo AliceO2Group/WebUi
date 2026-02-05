@@ -16,7 +16,7 @@ const { LogManager, LogLevel } = require('@aliceo2/web-ui');
 const { updateAndSendExpressResponseFromNativeError, InvalidInputError } = require('@aliceo2/web-ui');
 
 const { DetectorLockAction } = require('./../common/lock/detectorLockAction.enum.js');
-const { DetectorId } = require('./../common/DetectorId.enum.js');
+const { DetectorId } = require('./../common/detectorId.enum.js');
 const {User} = require('./../dtos/User.js');
 
 const LOG_FACILITY = 'cog/log-ctrl';
