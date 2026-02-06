@@ -37,7 +37,7 @@ Acquires a lock on a detector for the current user.
 
 ### Release Lock
 
-Releases a lock on a detector.
+Releases a lock on a detector. If the detector is currently reported as `Active` by ECS, the release lock button will prompt the user to confirm the action is indeed correct.
 
 **Parameters**:
 - `detectorId`: The detector identifier or `ALL` to release all locks (excluding TST)

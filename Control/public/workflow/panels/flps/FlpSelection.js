@@ -58,26 +58,26 @@ export default class FlpSelection extends Observable {
     this.notify();
 
     await this.getAndSetDetectors();
-    /*if (this.workflow.model.detectors.isSingleView()
-           && this.activeDetectors.isSuccess()
-      && !this.activeDetectors.payload.detectors.includes(this.workflow.model.detectors.selected)
-    ) {
-      // if single view preselect detectors and hosts for users
-      this.toggleDetectorSelection(this.workflow.model.detectors.selected);
-    }*/
   }
 
   /**
    * Method to request a list of detectors from AliECS and initialized the user form accordingly
+   * @return {Promise<void>}
    */
   async getAndSetDetectors() {
     this.detectors = this.workflow.model.detectors.listRemote;
+    await this.getActiveDetectors();
+  }
 
+  /**
+   * Method to retrieve the detectors that are active as per AliECS
+   * @return {Promise<void>}
+   */
+  async getActiveDetectors() {
     this.activeDetectors = RemoteData.loading();
     this.notify();
     const {result, ok} = await this.workflow.model.loader.post('/api/GetActiveDetectors', {});
     this.activeDetectors = ok ? RemoteData.success(result) : RemoteData.failure(result.message);
-
     this.notify();
   }
 

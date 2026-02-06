@@ -25,8 +25,10 @@ import {DetectorLockAction} from './../common/enums/DetectorLockAction.enum.js';
  * @param {LockModel} lockModel - model of the lock state and actions
  * @param {String} detector - detector name
  * @param {Object} lockState - lock state of the detector
+ * @param {Boolean} isIcon - whether to render as an icon or a button
+ * @param {Boolean} [isActive = false] - whether the detector is active
  */
-export const detectorLockButton = (lockModel, detector, lockState, isIcon = false) => {
+export const detectorLockButton = (lockModel, detector, lockState, isIcon = false, isActive = false) => {
   const isDetectorLockTaken = lockModel.isLocked(detector);
 
   let detectorLockHandler = null;
@@ -35,7 +37,14 @@ export const detectorLockButton = (lockModel, detector, lockState, isIcon = fals
   if (isDetectorLockTaken) {
     if (lockModel.isLockedByCurrentUser(detector)) {
       detectorLockButtonClass = '.success';
-      detectorLockHandler = () => lockModel.actionOnLock(detector, DetectorLockAction.RELEASE, false);
+      detectorLockHandler = () => {
+        if (isActive) {
+          confirm(`Are you sure you want to release the lock for an ACTIVE ${detector}?`)
+            && lockModel.actionOnLock(detector, DetectorLockAction.RELEASE, false);
+        } else {
+          lockModel.actionOnLock(detector, DetectorLockAction.RELEASE, false);
+        }
+      };
     } else {
       detectorLockButtonClass = '.warning.disabled.disabled-item';
     }
