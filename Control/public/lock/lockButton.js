@@ -36,10 +36,7 @@ export const detectorLockButton = (model, detector, lockState, isIcon = false) =
   if (isDetectorLockTaken) {
     if (lockModel.isLockedByCurrentUser(detector)) {
       detectorLockButtonClass = '.success';
-      detectorLockHandler = () => {
-        lockModel.actionOnLock(detector, DetectorLockAction.RELEASE, false);
-        model.workflow.flpSelection.unselectDetector(detector);
-      };
+      detectorLockHandler = () => lockModel.actionOnLock(detector, DetectorLockAction.RELEASE, false);
     } else {
       detectorLockButtonClass = '.warning.disabled.disabled-item';
     }

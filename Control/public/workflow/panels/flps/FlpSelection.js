@@ -41,7 +41,7 @@ export default class FlpSelection extends Observable {
     this.detectorViewConfigurationError = false;
 
     // Observe lock changes to automatically unselect detectors when locks are released
-    lockModel.lock.observe(() => this._handleLockChanges());
+    lockModel.observe(() => this._handleLockChanges());
   }
 
   /**
