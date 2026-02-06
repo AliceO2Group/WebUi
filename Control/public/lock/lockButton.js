@@ -22,12 +22,11 @@ import {DetectorLockAction} from './../common/enums/DetectorLockAction.enum.js';
  * - see who owns the lock
  * 
  * When the user releases a lock, the detector also has to be unselected from the workflow.
- * @param {Model} model - root model of the application
+ * @param {LockModel} lockModel - model of the lock state and actions
  * @param {String} detector - detector name
  * @param {Object} lockState - lock state of the detector
  */
-export const detectorLockButton = (model, detector, lockState, isIcon = false) => {
-  const lockModel = model.lock;
+export const detectorLockButton = (lockModel, detector, lockState, isIcon = false) => {
   const isDetectorLockTaken = lockModel.isLocked(detector);
 
   let detectorLockHandler = null;

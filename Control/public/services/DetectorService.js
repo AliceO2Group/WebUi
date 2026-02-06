@@ -77,6 +77,14 @@ export default class DetectorService extends Observable {
   }
 
   /**
+   * Checks if the user selected detector view is GLOBAL
+   * @returns {boolean}
+   */
+  isGlobalView() {
+    return this._selected === 'GLOBAL';
+  }
+
+  /**
    * Update selection for detector view in LocalStorage
    * Format: {SELECTED: <string>}
    * @param {Array<String>} detector
