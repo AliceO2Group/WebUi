@@ -60,18 +60,23 @@ export const content = (model) => {
             h('.flex-row.g2.p2', [
               isUserAllowedRole(ROLES.Admin) && [
                 h('strong', 'Admin actions: '),
-                detectorLockActionButton(lockModel, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, true, 'Force Release ALL'),
-                detectorLockActionButton(lockModel, DETECTOR_ALL, {}, DetectorLockAction.TAKE, true, 'Force Take ALL'),
+                detectorLockActionButton(
+                  lockModel, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, true, 'Force Release ALL'
+                ),
+                detectorLockActionButton(
+                  lockModel, DETECTOR_ALL, {}, DetectorLockAction.TAKE, true, 'Force Take ALL'
+                ),
               ],
               isUserAllowedRole(ROLES.Global) && [
                 h('strong', 'Global actions: '),
-                detectorLockActionButton(lockModel, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, false, 'Release ALL*'),
-                detectorLockActionButton(lockModel, DETECTOR_ALL, {}, DetectorLockAction.TAKE, false, 'Take ALL*'),
+                detectorLockActionButton(
+                  lockModel, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, false, 'Release ALL*'
+                ),
+                detectorLockActionButton(
+                  lockModel, DETECTOR_ALL, {}, DetectorLockAction.TAKE, false, 'Take ALL*'
+                ),
               ],
             ]),
-            h('small.text-left.ph2',
-              'Note: Release/Take all will only affect the detectors you have access to and detectors that are available.'
-            ),
           ],
           detectorLocksTable(model, detectorsLocksState)
         ])
