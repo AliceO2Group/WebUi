@@ -32,7 +32,7 @@ export default class Workflow extends Observable {
   constructor(model) {
     super();
     this.model = model;
-    this.flpSelection = new FlpSelection(this);
+    this.flpSelection = new FlpSelection(this, model.lock);
     this.flpSelection.bubbleTo(this);
 
     this.form = new WorkflowForm();
