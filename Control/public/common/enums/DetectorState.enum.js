@@ -19,6 +19,7 @@
 export const DetectorState = Object.freeze({
   UNDEFINED: 'UNDEFINED', // GUI initial set state
   NULL_STATE: 'NULL_STATE',
+  ACTIVE: 'ACTIVE', // Custom GUI state; Detector is active in a run, i.e. it is taking data
   READY: 'READY',
   RUN_OK: 'RUN_OK',
   RUN_FAILURE: 'RUN_FAILURE',
@@ -45,6 +46,7 @@ export const DetectorState = Object.freeze({
 export const DetectorStateStyle = Object.freeze({
   UNDEFINED: '',
   NULL_STATE: '',
+  ACTIVE: 'warning',
   READY: 'bg-primary white',
   RUN_OK: 'bg-success white',
   RUN_FAILURE: 'bg-danger white',

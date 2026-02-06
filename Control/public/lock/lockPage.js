@@ -22,8 +22,9 @@ import loading from './../common/loading.js';
 import {DetectorLockAction} from '../common/enums/DetectorLockAction.enum.js';
 import {isUserAllowedRole} from './../common/userRole.js';
 import { getDetectorListWithTstAtEnd, TST_DETECTOR_NAME } from '../common/detectorUtils.js';
+import { DetectorState, DetectorStateStyle } from '../common/enums/DetectorState.enum.js';
 
-const LOCK_TABLE_HEADER_KEYS = ['Detector', 'Owner'];
+const LOCK_TABLE_HEADER_KEYS = ['Detector', 'Owner', 'Active'];
 const DETECTOR_ALL = 'ALL';
 
 /**
@@ -50,7 +51,10 @@ export const content = (model) => {
   const { padlockState } = lockModel;
   return [
     detectorHeader(model),
-    h('.text-center.scroll-y.absolute-fill', {style: 'top: 40px'}, [
+    h('.text-center.scroll-y.absolute-fill', {
+      style: 'top: 40px',
+      oncreate: () => detectorsService.getActiveDetectors(),
+    }, [
       padlockState.match({
         NotAsked: () => null,
         Loading: () => loading(3),
@@ -78,7 +82,7 @@ export const content = (model) => {
               ],
             ]),
           ],
-          detectorLocksTable(model, detectorsLocksState)
+          detectorLocksTable(model, detectorsLocksState, detectorsService.activeDetectors)
         ])
       })
     ])
@@ -89,9 +93,10 @@ export const content = (model) => {
  * Table with lock status details, buttons to lock them, and admin actions such us "Force release"
  * @param {Model} model - root model of the application
  * @param {Object<String, DetectorLock>} detectorsLockState - state of the detectors lock
+ * @param {RemoteData} activeDetectorsRemote - remote data with the list of active detectors
  * @return {vnode}
  */
-const detectorLocksTable = (model, detectorLocksState) => {
+const detectorLocksTable = (model, detectorLocksState, activeDetectorsRemote) => {
   const { detectors: detectorsService, lock: lockModel } = model;
   const isUserGlobal = isUserAllowedRole(ROLES.Global);
   const detectorKeysWithTstLast = getDetectorListWithTstAtEnd(Object.keys(detectorLocksState));
@@ -104,10 +109,14 @@ const detectorLocksTable = (model, detectorLocksState) => {
       return (isUserGlobal && isSelectedDetectorViewGlobalOrCurrent) || isUserAllowedDetector;
     })
     .map((detectorName) => {
+      const detectorActivityState = _getDetectorState(activeDetectorsRemote, detectorName);
       if (detectorName.toLocaleUpperCase().includes(TST_DETECTOR_NAME)) {
-        return [emptyRowSeparator(), detectorLockRow(lockModel, detectorName, detectorLocksState[detectorName])];
+        return [
+          emptyRowSeparator(),
+          detectorLockRow(lockModel, detectorName, detectorLocksState[detectorName], detectorActivityState)
+        ];
       } else {
-        return detectorLockRow(lockModel, detectorName, detectorLocksState[detectorName])
+        return detectorLockRow(lockModel, detectorName, detectorLocksState[detectorName], detectorActivityState)
       }
     });
   return h('table.table.table-sm',
@@ -121,7 +130,7 @@ const detectorLocksTable = (model, detectorLocksState) => {
       detectorRows.length > 0
         ? detectorRows
         : h('tr',
-          h('td.ph2.warning', {colspan: 3}, [
+          h('td.ph2.warning', { colspan: LOCK_TABLE_HEADER_KEYS.length } , [
             'Missing Role permissions needed for being allowed to own locks',
             ' If you have just started your shift, please allow a few minutes for the system ',
             'to update before trying again or calling an FLP expert.'
@@ -136,20 +145,24 @@ const detectorLocksTable = (model, detectorLocksState) => {
  * @param {LockModel} lockModel - model of the lock state and actions
  * @param {String} detector - detector name
  * @param {DetectorLock} lockState - state of the lock  {owner: {fullName: String}, isLocked: Boolean
+ * @param {DetectorState} detectorActivityState - state of the detector as per AliECS (Active, Inactive, Unknown)
  * @return {vnode}
  */
-const detectorLockRow = (lockModel, detector, lockState) => {
+const detectorLockRow = (lockModel, detector, lockState, detectorActivityState) => {
   const ownerName = lockState?.owner?.fullName || '-';
   return h('tr', {
     id: `detector-row-${detector}`,
   }, [
     h('td',
       h('.flex-row.g2.items-center.f5', [
-        detectorLockButton(lockModel, detector, lockState),
+        detectorLockButton(lockModel, detector, lockState, false, detectorActivityState === DetectorState.ACTIVE),
         detector
       ])
     ),
     h('td', ownerName),
+    h(`td`, {
+      class: DetectorStateStyle[detectorActivityState]
+    }, detectorActivityState),
     isUserAllowedRole(ROLES.Global) && h('td', [
       detectorLockActionButton(lockModel, detector, lockState, DetectorLockAction.RELEASE, true, 'Force Release'),
       detectorLockActionButton(lockModel, detector, lockState, DetectorLockAction.TAKE, true, 'Force Take')
@@ -161,4 +174,20 @@ const detectorLockRow = (lockModel, detector, lockState) => {
  * Empty table row separator vnode
  * @return {vnode}
  */
-const emptyRowSeparator = () => h('tr', h('td', {colspan: 3}, h('hr')));
+const emptyRowSeparator = () => h('tr', h('td', {colspan: LOCK_TABLE_HEADER_KEYS.length}, h('hr')));
+
+/**
+ * Helper function to get the state of the detector (Active, Inactive, Unknown) based on the activeDetectorsRemote data
+ * @param {RemoteData} activeDetectorsRemote - remote data with the list of active detectors
+ * @param {String} detectorName - name of the detector to get the state for
+ * @return {String} state of the detector (Active, Inactive, Unknown)
+ */
+const _getDetectorState = (activeDetectorsRemote, detectorName) => {
+  return activeDetectorsRemote.match({
+    NotAsked: () => DetectorState.UNDEFINED,
+    Loading: () => DetectorState.UNDEFINED,
+    Failure: () => DetectorState.ERROR,
+    Success: (activeDetectors) =>
+      activeDetectors.includes(detectorName) ? DetectorState.ACTIVE : DetectorState.UNDEFINED
+  })
+}

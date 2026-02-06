@@ -122,7 +122,7 @@ const detectorSelectionPanel = (model, name) => {
     id: `detector-selection-panel-${name}'`,
   }, [
     h('.flex-row', [
-      detectorLockButton(lockModel, name, lockState, true),
+      detectorLockButton(lockModel, name, lockState, true, isDetectorActive),
       h('a.menu-item.w-wrapped', {
         className,
         id: `detectorSelectionButtonFor${name}`,
