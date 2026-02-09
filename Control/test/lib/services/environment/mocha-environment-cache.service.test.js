@@ -374,12 +374,12 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
       environmentCacheService.addOrUpdateEnvironment(initialEnvironment);
       const firstTaskInErrorEventSent = {
           environmentId: 'env1',
-          state: 'ERROR',
+          state: 'ERROR_CRITICAL',
           taskid: 1,
           name: 'task1',
           hostname: 'host1',
           className: 'class1',
-          isCritical: false,
+          isCritical: true,
       };
       eventEmitter.emit(TASKS_TRACK, {
         timestamp: Date.now(),

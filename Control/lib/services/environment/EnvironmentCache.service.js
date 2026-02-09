@@ -203,7 +203,7 @@ class EnvironmentCacheService {
    */
   _handleFirstTaskInError(environmentId, event) {
     if (
-      (event.state === TaskState.ERROR || event.state === TaskState.ERROR_CRITICAL)
+      (event.state === TaskState.ERROR_CRITICAL)
       && this._environments.has(environmentId)
       && !this._environments.get(environmentId).firstTaskInError
     ) {

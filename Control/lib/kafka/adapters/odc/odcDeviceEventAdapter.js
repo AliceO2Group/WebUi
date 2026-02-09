@@ -14,7 +14,7 @@
 const { OdcDeviceInfoAdapter } = require('../../../adapters/OdcDeviceInfoAdapter.js');
 
 /**
- * @typedef {Object} deviceStateChanged
+ * @typedef {OdcDeviceInfo} deviceStateChanged
  * 
  * 
  * @example
