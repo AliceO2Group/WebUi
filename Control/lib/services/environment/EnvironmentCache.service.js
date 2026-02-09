@@ -79,7 +79,7 @@ class EnvironmentCacheService {
    * * Heartbeat calls (GetEnvironment/GetEnvironments) - which will NOT contain `isDeploying` and `deploymentError` properties
    * * Cache caught events - which should contain `isDeploying` and `deploymentError` properties
    * @param {string} id - the id of the environment to be updated
-   * @param {EnvironmentInfo} environment - the new environment information to be set
+   * @param {Partial<EnvironmentInfo>} environment - the new environment information to be set
    * @returns {void}
    */
   addOrUpdateEnvironment(environment, shouldBroadcast = false) {
@@ -87,11 +87,19 @@ class EnvironmentCacheService {
     if (this._environments.has(id)) {
       const cachedEnvironment = this._environments.get(id);
       const { events = [] } = cachedEnvironment;
-      const {isDeploying, deploymentError } = cachedEnvironment;
+      /**
+       * @param {EnvironmentInfo} cachedEnvironment - the environment information currently stored in cache for the environment with the given id
+       * @param {boolean} cachedEnvironment.isDeploying - the information if the environment is being deployed
+       * @param {string} cachedEnvironment.deploymentError - the error message if the environment deployment failed
+       * @param {TaskEvent|OdcDeviceInfoEvent} cachedEnvironment.firstTaskInError - the first task event in error for the environment, which can be either a FLP task or an ODC device state change
+       */
+      const { isDeploying, deploymentError, firstTaskInError } = cachedEnvironment;
       const updatedEnvironment = Object.assign({}, cachedEnvironment, environment);
       updatedEnvironment.events = [...events];
       updatedEnvironment.isDeploying = isDeploying;
       updatedEnvironment.deploymentError = deploymentError;
+      updatedEnvironment.firstTaskInError = firstTaskInError;
+
       this._environments.set(id, updatedEnvironment);
     } else {
       this._environments.set(id, { ...environment, events: environment.events ?? [] });
@@ -236,6 +244,7 @@ class EnvironmentCacheService {
    
     if (
       state === EnvironmentState.CONFIGURED &&
+      transition?.name === EnvironmentTransitionType.CONFIGURE &&
       transition?.status === EcsOperationAndStepStatus.DONE_OK
     ) {
       // Once the environment is configured and ongoing transition is done, we can set the isDeploying to false
@@ -253,9 +262,9 @@ class EnvironmentCacheService {
     this.addOrUpdateEnvironment(cachedEnvironment, false);
 
     if (
+      state === EnvironmentState.DONE &&
       transition?.name === EnvironmentTransitionType.DESTROY &&
       transition?.status === EcsOperationAndStepStatus.DONE_OK &&
-      state === EnvironmentState.DONE &&
       !cachedEnvironment.deploymentError
     ) {
       // That is, if the environment successfully ended the DESTROY transition

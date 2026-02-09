@@ -69,7 +69,8 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
         isDeploying: undefined,
         deploymentError: undefined,
         state: 'inactive',
-        events: []
+        events: [],
+        firstTaskInError: undefined,
       });
       assert.strictEqual(broadcastServiceMock.broadcast.callCount, 1);
     });
@@ -87,6 +88,47 @@ describe(`'EnvironmentCacheService' - test suite`, () => {
       environmentCacheService.addOrUpdateEnvironment(environment);
 
       assert.ok(environmentCacheService._lastUpdate >= beforeUpdate);
+    });
+
+    it('should preserve the `firstTaskInError` field when updating an existing environment', () => {
+      const firstTaskInError = {
+        environmentId: 'env123',
+        state: 'ERROR',
+        taskid: 1,
+        name: 'task1',
+        hostname: 'host1',
+        className: 'class1',
+        isCritical: false,
+      };
+
+      const initialEnvironment = {
+        id: 'env123',
+        state: 'RUNNING',
+        firstTaskInError: firstTaskInError,
+      };
+
+      environmentCacheService.addOrUpdateEnvironment(initialEnvironment);
+
+      assert.strictEqual(environmentCacheService._environments.size, 1);
+      assert.deepStrictEqual(
+        environmentCacheService._environments.get('env123').firstTaskInError,
+        firstTaskInError
+      );
+
+      const updatedEnvironment = {
+        id: 'env123',
+        state: 'CONFIGURED',
+        someOtherField: 'newValue',
+      };
+
+      environmentCacheService.addOrUpdateEnvironment(updatedEnvironment);
+
+      assert.strictEqual(environmentCacheService._environments.size, 1);
+      const cachedEnv = environmentCacheService._environments.get('env123');
+      assert.strictEqual(cachedEnv.state, 'CONFIGURED');
+      assert.strictEqual(cachedEnv.someOtherField, 'newValue');
+      assert.deepStrictEqual(cachedEnv.firstTaskInError, firstTaskInError, 
+        'firstTaskInError should be preserved after update');
     });
   });
 
