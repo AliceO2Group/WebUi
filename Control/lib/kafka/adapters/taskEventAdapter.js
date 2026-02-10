@@ -14,7 +14,7 @@
 const { getTaskShortName } = require('../../adapters/task/getTaskShortName.js');
 const { TaskState } = require('../../common/taskState.enum.js');
 const { TaskStatus } = require('../../common/taskStatus.enum.js');
-const { SourceEventTypes } = require('../enums/sourceEventsTypes.enum.js');
+const { SourceEventTypes } = require('../enums/SourceEventsTypes.enum.js');
 
 /**
  * Adapter for event messages received on run topic
