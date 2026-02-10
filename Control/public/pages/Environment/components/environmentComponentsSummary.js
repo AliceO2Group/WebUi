@@ -39,6 +39,7 @@ export const environmentComponentsSummary = (environmentInfo) => {
       ? `.${ALIECS_TRANSITION_COLOR[currentTransition] ? ALIECS_TRANSITION_COLOR[currentTransition] : ''}`
       : `.${ALIECS_STATE_COLOR[state] ? ALIECS_STATE_COLOR[state] : ''}`,
   };
+
   return h('.flex-row.g2', [
     miniCard(_getTitle(currentTransition), [
       h('.flex-column', [
@@ -47,7 +48,7 @@ export const environmentComponentsSummary = (environmentInfo) => {
         h(`${ddsStateStyle}`, 'DDS state: ', ddsState),
       ]),
     ]),
-    firstTaskInError && miniCard('First Task In Error', [
+    firstTaskInError && miniCard(h('h5.danger','First Task In Critical Error'), [
       _firstTaskInErrorDisplay(firstTaskInError)
     ]),
   ]);
@@ -77,11 +78,14 @@ const _getTitle = (currentTransition) =>
  * @returns {vnode} - display of the task event in case of error
  */
 const _firstTaskInErrorDisplay = (taskEvent) => {
-  if (taskEvent?.partitionId) {
-    return _odcDeviceEventInErrorDisplay(taskEvent);
-  } else {
-    return _ecsTaskEventInErrorDisplay(taskEvent);
-  }
+  return h('.flex-column.danger',
+    [
+      h('span', `Source: ${taskEvent.source}`),
+      ...(taskEvent?.source === 'ODC' // SourceEventsTypes
+        ? _odcDeviceEventInErrorDisplay(taskEvent)
+        : _ecsTaskEventInErrorDisplay(taskEvent))
+    ]
+  );
 };
 
 /**
@@ -91,13 +95,13 @@ const _firstTaskInErrorDisplay = (taskEvent) => {
  * @returns {vnode} - display of the task event in case of error
  */
 const _ecsTaskEventInErrorDisplay = (taskEvent = {}) => {
-  const { name, hostname, id, status, isCritical } = taskEvent;
-  return h(`.flex-column${isCritical ? '.danger' : '.warning'}`, [
+  const { name, hostname, id, status } = taskEvent;
+  return [
     h('span', `ID: ${id}`),
     h('span', `Name: ${name}`),
     h('span', `Host: ${hostname}`),
     h('span', `Status: ${status}`),
-  ]);
+  ];
 };
 
 /**
@@ -107,12 +111,11 @@ const _ecsTaskEventInErrorDisplay = (taskEvent = {}) => {
  * @returns {vnode} - display of the ODC device event in case of error
  */
 const _odcDeviceEventInErrorDisplay = (odcDeviceEvent = {}) => {
-  const { taskId, hostname, state, path, error } = odcDeviceEvent;
-  return h('.flex-column', [
-    h('span', `ID: ${taskId}`),
+  const { id, hostname, path, error } = odcDeviceEvent;
+  return [
+    h('span', `ID: ${id}`),
     h('span', `Host: ${hostname}`),
-    h('span', `State: ${state}`),
     h('span', `Path: ${path}`),
-    h('.danger', `Error: ${error}`)
-  ]);
+    error && h('.danger', `Error: ${error}`)
+  ];
 };

@@ -207,6 +207,7 @@ class EnvironmentCacheService {
       && this._environments.has(environmentId)
       && !this._environments.get(environmentId).firstTaskInError
     ) {
+      this._logger.warnMessage(`Environment ${environmentId} has a first task in critical error: ${event.id}`);
       const environment = JSON.parse(JSON.stringify(this._environments.get(environmentId)));
       environment.firstTaskInError = event;
       this._environments.set(environmentId, environment);
