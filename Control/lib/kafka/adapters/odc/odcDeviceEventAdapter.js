@@ -12,7 +12,7 @@
  */
 
 const { OdcDeviceInfoAdapter } = require('../../../adapters/OdcDeviceInfoAdapter.js');
-const { SourceEventTypes } = require('../../enums/sourceEventsTypes.enum.js');
+const { SourceEventTypes } = require('../../enums/SourceEventsTypes.enum.js');
 
 /**
  * @typedef {OdcDeviceInfo} deviceStateChanged
