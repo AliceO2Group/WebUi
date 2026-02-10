@@ -19,6 +19,7 @@
  * This is parsed object by ECS and not the same as the one sent by ODC to ECS. For example:
  * * ODC sends 'id' as uint64 but ECS parses it to 'taskId' as string
  *
+ * @property {String} source - has the value 'ODC' to identify the source of the event
  * @property {String} taskId - ODC 'id' but renamed by ECS to 'taskId'
  * @property {String} state
  * @property {String} epnState
