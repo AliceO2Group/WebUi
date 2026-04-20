@@ -78,6 +78,13 @@ class HttpServer {
       this.listen();
     }
 
+    /**
+     * Map to keep track of similar logs by key
+     * @key {string} - combination of IP address, error name and message
+     * @value {object.count} - count of occurrences of the same error by the same key
+     * @value {object.lastLoggedTimestamp} - timestamp of the last log of the same error by the same key
+     */
+    this._jwtErrorsByIp = new Map();
     this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/server`);
   }
 
@@ -504,6 +511,43 @@ class HttpServer {
   }
 
   /**
+   * Logs a errors with throttling by IP address every 5 minutes with the first error logged immediately
+   * and rest of occurrences after 5 minutes with number of occurrences.
+   * @param {string} ip - IP address of the request
+   * @param {string} name - Error name
+   * @param {string} message - Error message
+   * @private
+   */
+  _logErrorWithThrottling(ip, name, message) {
+    const now = Date.now();
+    const compositeKey = `${ip}/${name}/${message}`;
+
+    if (!this._jwtErrorsByIp.has(compositeKey)) {
+      this.logger.errorMessage(`${name} : ${message} (IP: ${ip})`);
+      this._jwtErrorsByIp.set(compositeKey, {
+        count: 1,
+        lastLoggedTimestamp: now,
+      });
+    } else {
+      const fiveMinutes = 5 * 60 * 1000;
+      const lastErrorData = this._jwtErrorsByIp.get(compositeKey);
+      const timeSinceLastLog = now - lastErrorData.lastLoggedTimestamp;
+
+      if (timeSinceLastLog >= fiveMinutes) {
+        if (lastErrorData.count > 1) {
+          this.logger.errorMessage(`${name} : ${message} (IP: ${ip}) (occurrences: ${lastErrorData.count})`);
+        } else {
+          this.logger.errorMessage(`${name} : ${message} (IP: ${ip})`);
+        }
+        lastErrorData.count = 1;
+        lastErrorData.lastLoggedTimestamp = now;
+      } else {
+        lastErrorData.count++;
+      }
+    }
+  }
+
+  /**
    * Verifies JWT token synchronously.
    * @todo use promises or generators to call it asynchronously!
    * @param {object} req - HTTP request
@@ -514,7 +558,7 @@ class HttpServer {
     try {
       this.jwtAuthenticate(req);
     } catch ({ name, message }) {
-      this.logger.errorMessage(`${name} : ${message}`);
+      this._logErrorWithThrottling(req.ip, name, message);
 
       res.status(403).json({
         error: '403 - Json Web Token Error',
@@ -531,6 +575,7 @@ class HttpServer {
    *
    * @param {Request} req - Express Request object
    * @return {void} resolves once the request is filled with authentication, and reject if jwt verification failed
+   * @throws {UnauthorizedAccessError} if token is invalid, expired or secret is wrong
    */
   jwtAuthenticate(req) {
     const data = this.o2TokenService.verify(req.query.token);
