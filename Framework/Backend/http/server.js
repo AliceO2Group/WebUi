@@ -314,7 +314,7 @@ class HttpServer {
    * Adds POST route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
-   * @param {function} callbacks   - method that handles request and response: function(req, res);
+   * @param {void} callbacks   - method that handles request and response: function(req, res);
    *                                token should be passed as req.query.token;
    *                                more on req: https://expressjs.com/en/api.html#req
    *                                more on res: https://expressjs.com/en/api.html#res
@@ -329,7 +329,7 @@ class HttpServer {
    * Adds PUT route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
-   * @param {function} callbacks   - method that handles request and response: function(req, res);
+   * @param {void} callbacks   - method that handles request and response: function(req, res);
    *                                token should be passed as req.query.token;
    *                                more on req: https://expressjs.com/en/api.html#req
    *                                more on res: https://expressjs.com/en/api.html#res
@@ -344,7 +344,7 @@ class HttpServer {
    * Adds PATCH route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
-   * @param {function} callbacks   - method that handles request and response: function(req, res);
+   * @param {void} callbacks   - method that handles request and response: function(req, res);
    *                                token should be passed as req.query.token;
    *                                more on req: https://expressjs.com/en/api.html#req
    *                                more on res: https://expressjs.com/en/api.html#res
@@ -359,7 +359,7 @@ class HttpServer {
    * Adds DELETE route using express router, the path will be prefix with "/api"
    * By default verifies JWT token unless public options is provided
    * @param {string} path         - path that the callback will be bound to
-   * @param {function} callbacks   - method that handles request and response: function(req, res);
+   * @param {void} callbacks   - method that handles request and response: function(req, res);
    *                                token should be passed as req.query.token;
    *                                more on req: https://expressjs.com/en/api.html#req
    *                                more on res: https://expressjs.com/en/api.html#res
@@ -556,7 +556,7 @@ class HttpServer {
    * @todo use promises or generators to call it asynchronously!
    * @param {object} req - HTTP request
    * @param {object} res - HTTP response
-   * @param {function} next - passes control to next matching route
+   * @param {void} next - passes control to next matching route
    */
   jwtVerify(req, res, next) {
     try {
