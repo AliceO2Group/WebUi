@@ -46,6 +46,10 @@ class HttpServer {
 
     this.app = express();
 
+    if (process.env.NODE_ENV === 'production') {
+      this.app.set('trust proxy', true);
+    }
+
     this.configureHelmet(httpConfig);
 
     this.o2TokenService = new O2TokenService(jwtConfig);
