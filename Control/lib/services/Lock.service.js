@@ -87,9 +87,8 @@ class LockService {
       throw new NotFoundError(`Detector ${detectorName} not found in the list of detectors`);
     } else if (lock.isTaken()) {
       if (!lock.isOwnedBy(user) && !shouldForce) {
-        throw new UnauthorizedAccessError(
-          `Unauthorized TAKE action for lock ${detectorName} by ${user.fullName} while lock is held by ${lock.owner.fullName}`
-        );
+        throw new UnauthorizedAccessError(`Unauthorized TAKE action for lock ${detectorName} `
+          + `by ${ user.fullName } while lock is held by ${ lock.owner.fullName }`);
       }
       if (lock.isOwnedBy(user)) {
         return this._locksByDetector;
@@ -117,9 +116,8 @@ class LockService {
     } else if (lock.isFree()) {
       return this._locksByDetector;
     } else if (!lock.isOwnedBy(user) && !shouldForce) {
-      throw new UnauthorizedAccessError(
-        `Unauthorized RELEASE action for lock ${detectorName} by ${user.fullName} while lock is held by ${lock.owner.fullName}`
-      );
+      throw new UnauthorizedAccessError(`Unauthorized RELEASE action for lock ${detectorName} `
+        + `by ${ user.fullName } while lock is held by ${ lock.owner.fullName }`);
     }
     this._locksByDetector[detectorName].release();
 
