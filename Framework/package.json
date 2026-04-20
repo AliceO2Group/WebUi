@@ -31,30 +31,29 @@
     ]
   },
   "dependencies": {
-    "express": "^4.22.1",
-    "helmet": "^8.1.0",
+    "express": "4.22.1",
+    "helmet": "8.1.0",
     "jsonwebtoken": "9.0.3",
-    "kafkajs": "^2.2.0",
+    "kafkajs": "2.2.4",
     "mithril": "1.1.7",
-    "mysql": "^2.18.1",
-    "openid-client": "^5.6.0",
+    "openid-client": "5.6.5",
     "winston": "3.19.0",
-    "ws": "^8.20.0",
-    "protobufjs": "^7.5.0"
+    "ws": "8.20.0",
+    "protobufjs": "7.5.5"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "10.0.1",
     "@stylistic/eslint-plugin": "5.10.0",
     "eslint": "10.2.1",
     "eslint-plugin-jsdoc": "62.9.0",
     "globals": "17.5.0",
-    "mocha": "^11.7.0",
+    "mocha": "11.3.0",
     "nock": "15.0.0",
-    "nyc": "^18.0.0",
-    "puppeteer": "^24.42.0",
+    "nyc": "18.0.0",
+    "puppeteer": "24.42.0",
     "sinon": "21.1.2",
-    "supertest": "^7.2.2",
-    "long": "^5.3.1"
+    "supertest": "7.2.2",
+    "long": "5.3.2"
   },
   "main": "Backend/index.js"
 }
