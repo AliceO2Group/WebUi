@@ -516,19 +516,10 @@ class HttpServer {
     } catch ({ name, message }) {
       this.logger.errorMessage(`${name} : ${message}`);
 
-      const response = { error: '403 - Json Web Token Error' };
-
-      // Allow for a custom message for known error messages
-      switch (message) {
-        case 'jwt must be provided':
-          response.message = 'You must provide a JWT token';
-          break;
-        default:
-          response.message = 'Invalid JWT token provided';
-          break;
-      }
-
-      res.status(403).json(response);
+      res.status(403).json({
+        error: '403 - Json Web Token Error',
+        message,
+      });
       return;
     }
 
