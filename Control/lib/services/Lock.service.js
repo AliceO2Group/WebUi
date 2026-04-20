@@ -88,7 +88,7 @@ class LockService {
     } else if (lock.isTaken()) {
       if (!lock.isOwnedBy(user) && !shouldForce) {
         throw new UnauthorizedAccessError(
-          `Unauthorized TAKE action for lock of detector ${detectorName} by user ${user.fullName}`
+          `Unauthorized TAKE action for lock ${detectorName} by ${user.fullName} while lock is held by ${lock.owner.fullName}`
         );
       }
       if (lock.isOwnedBy(user)) {
@@ -118,7 +118,7 @@ class LockService {
       return this._locksByDetector;
     } else if (!lock.isOwnedBy(user) && !shouldForce) {
       throw new UnauthorizedAccessError(
-        `Unauthorized RELEASE action for lock of detector ${detectorName} by user ${user.fullName}`
+        `Unauthorized RELEASE action for lock ${detectorName} by ${user.fullName} while lock is held by ${lock.owner.fullName}`
       );
     }
     this._locksByDetector[detectorName].release();
