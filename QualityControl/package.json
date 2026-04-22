@@ -44,7 +44,7 @@
     "jsroot": "7.10.1",
     "kafkajs": "^2.2.4",
     "mariadb": "^3.5.1",
-    "sequelize": "^6.37.7",
+    "sequelize": "^6.37.8",
     "umzug": "^3.8.2"
   },
   "devDependencies": {
