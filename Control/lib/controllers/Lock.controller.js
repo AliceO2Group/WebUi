@@ -77,12 +77,12 @@ class LockController {
               try {
                 this._lockService.takeLock(detector, user, shouldForce);
               } catch (error) {
-                console.error(error);
+                this._logger.errorMessage(error, {level: LogLevel.DEVELOPER, facility: LOG_FACILITY});
               }
             });
         } else {
           this._lockService.takeLock(detectorId, user, shouldForce);
-        }
+        } 
         res.status(200).json(this._lockService.locksByDetectorToJSON());
       } else if (action.toLocaleUpperCase() === DetectorLockAction.RELEASE) {
         if (detectorId === DetectorId.ALL) {
@@ -92,7 +92,7 @@ class LockController {
               try {
                 this._lockService.releaseLock(detector, user, shouldForce);
               } catch (error) {
-                console.error(error);
+                this._logger.errorMessage(error, {level: LogLevel.DEVELOPER, facility: LOG_FACILITY});
               }
             });
         } else {

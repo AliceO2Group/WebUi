@@ -56,7 +56,21 @@ class O2TokenService {
    * @throws {Error} - if token, secret or issuer are invalid
    */
   verify(token) {
-    return jwt.verify(token, this._secret, { issuer: this._issuer });
+    try {
+      return jwt.verify(token, this._secret, { issuer: this._issuer });
+    } catch (error) {
+      switch (error.name) {
+        case 'TokenExpiredError':
+          error.message = `Token expired at ${error.expiredAt}`;
+          break;
+        case 'JsonWebTokenError':
+          error.message = `Invalid token: ${error.message}`;
+          break;
+        default:
+          error.message = `Token verification failed: ${error.message}`;
+      }
+      throw new jwt.JsonWebTokenError(error.message);
+    }
   }
 }
 
