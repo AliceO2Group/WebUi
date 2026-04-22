@@ -80,7 +80,7 @@ describe('JSON Web Token', () => {
       const o2Token = new O2TokenService(jwt);
       const token = o2Token.generateToken(101, 'alice', 'Alice O2');
       o2Token._secret = 'changed';
-      assert.throws(() => o2Token.verify(token), new JsonWebTokenError('invalid signature'));
+      assert.throws(() => o2Token.verify(token), new JsonWebTokenError('Invalid token: invalid signature'));
     });
   });
 });
