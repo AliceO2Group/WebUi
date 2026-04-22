@@ -22,7 +22,6 @@ const O2TokenService = require('./services/O2TokenService.js');
 const { LogLevel } = require('./log/LogLevel.js');
 const { LogSeverity } = require('./log/LogSeverity.js');
 const { LogManager, Log } = require('./log/LogManager.js');
-const MySQL = require('./db/mysql.js');
 const NotificationService = require('./services/notification.js');
 const WebSocket = require('./websocket/server.js');
 const WebSocketMessage = require('./websocket/message.js');
@@ -68,8 +67,6 @@ exports.Logger = Logger;
 exports.LogLevel = LogLevel;
 
 exports.LogSeverity = LogSeverity;
-
-exports.MySQL = MySQL;
 
 exports.NotificationService = NotificationService;
 
