@@ -115,7 +115,7 @@ describe(`'LockController' test suite`, () => {
       }, res);
       assert.ok(res.status.calledWith(403));
       assert.ok(res.json.calledWith({
-        message: 'Unauthorized TAKE action for lock of detector ABC by user NotAnonymous',
+        message: 'Unauthorized TAKE action for lock ABC by NotAnonymous while lock is held by Anonymous',
         status: 403,
         title: 'Unauthorized Access',
       }));
@@ -134,7 +134,7 @@ describe(`'LockController' test suite`, () => {
       }, res);
       assert.ok(res.status.calledWith(403));
       assert.ok(res.json.calledWith({
-        message: 'Unauthorized RELEASE action for lock of detector ABC by user NotAnonymous',
+        message: 'Unauthorized RELEASE action for lock ABC by NotAnonymous while lock is held by Anonymous',
         title: 'Unauthorized Access',
         status: 403,
       }));
