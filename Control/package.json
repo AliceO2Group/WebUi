@@ -36,13 +36,12 @@
     "@aliceo2/web-ui": "2.9.0",
     "@grpc/grpc-js": "1.14.0",
     "@grpc/proto-loader": "0.8.0",
-    "google-protobuf": "4.0.0",
     "kafkajs": "2.2.4"
   },
   "devDependencies": {
     "eslint": "8.56.0",
     "jsonwebtoken": "9.0.2",
-    "mocha": "11.7.0",
+    "mocha": "11.7.5",
     "nock": "15.0.0",
     "nyc": "18.0.0",
     "proxyquire": "2.1.3",
