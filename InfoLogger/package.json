@@ -30,19 +30,19 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@aliceo2/web-ui": "2.9.0",
-    "mariadb": "3.5.1"
+    "@aliceo2/web-ui": "2.10.0",
+    "mariadb": "3.5.2"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@stylistic/eslint-plugin": "^5.10.0",
-    "eslint": "^10.0.2",
-    "eslint-plugin-jsdoc": "^62.7.1",
-    "globals": "^17.4.0",
-    "mocha": "^11.7.0",
-    "nyc": "^18.0.0",
-    "puppeteer": "^24.37.5",
-    "sinon": "^21.0.0"
+    "@eslint/js": "10.0.1",
+    "@stylistic/eslint-plugin": "5.10.0",
+    "eslint": "10.2.1",
+    "eslint-plugin-jsdoc": "62.9.0",
+    "globals": "17.5.0",
+    "mocha": "11.7.0",
+    "nyc": "18.0.0",
+    "puppeteer": "24.42.0",
+    "sinon": "21.1.2"
   },
   "bundleDependencies": [
     "@aliceo2/web-ui"

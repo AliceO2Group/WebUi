@@ -13,7 +13,7 @@
  */
 
 const mariadb = require('mariadb');
-const { LogManager } = require('@aliceo2/web-ui');
+const { LogManager, InvalidInputError } = require('@aliceo2/web-ui');
 const { fromSqlToNativeError } = require('../utils/fromSqlToNativeError');
 const { processPreparedSQLStatement } = require('../utils/preparedStatementParser');
 
@@ -23,19 +23,27 @@ class QueryService {
    * @param {object} configMySql - mysql config
    */
   constructor(configMySql = {}) {
-    configMySql.user = configMySql?.user ?? 'gui';
-    configMySql.password = configMySql?.password ?? '';
-    configMySql.host = configMySql?.host ?? 'localhost';
-    configMySql.port = configMySql?.port ?? 3306;
-    configMySql.database = configMySql?.database ?? 'info_logger';
-    configMySql.connectionLimit = configMySql?.connectionLimit ?? 25;
     this._timeout = configMySql?.timeout ?? 10000;
-    this._host = configMySql.host;
-    this._port = configMySql.port;
-
-    this._pool = mariadb.createPool(configMySql);
+    this._host = configMySql?.host;
+    this._port = configMySql?.port;
     this._isAvailable = false;
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/query-service`);
+
+    // Only create a connection pool if configuration is provided
+    if (configMySql?.host && configMySql?.port) {
+      configMySql.user = configMySql.user ?? 'gui';
+      configMySql.password = configMySql.password ?? '';
+      configMySql.host = configMySql.host ?? 'localhost';
+      configMySql.port = configMySql.port ?? 3306;
+      configMySql.database = configMySql.database ?? 'info_logger';
+      configMySql.connectionLimit = configMySql.connectionLimit ?? 25;
+      this._host = configMySql.host;
+      this._port = configMySql.port;
+
+      this._pool = mariadb.createPool(configMySql);
+    } else {
+      this._pool = null;
+    }
   }
 
   /**
@@ -45,6 +53,17 @@ class QueryService {
    * @returns {Promise} - a promise that resolves if connection is successful
    */
   async checkConnection(timeout = this._timeout, shouldThrow = true) {
+    if (!this._pool) {
+      this._isAvailable = false;
+      const error = new InvalidInputError('No database configuration provided');
+      if (shouldThrow) {
+        throw error;
+      } else {
+        this._logger.errorMessage(error);
+      }
+      return;
+    }
+
     try {
       await this._pool.query({
         sql: 'SELECT 1',
@@ -87,6 +106,9 @@ class QueryService {
 
     let rows = [];
     try {
+      if (!this._pool) {
+        throw new Error('No database connection available');
+      }
       rows = await this._pool.query(
         {
           sql: requestRows,
@@ -119,6 +141,9 @@ class QueryService {
       + 'in (\'D\', \'I\', \'W\', \'E\', \'F\') GROUP BY severity;';
     let data = [];
     try {
+      if (!this._pool) {
+        throw new Error('No database connection available');
+      }
       data = await this._pool.query({
         sql: groupByStatement,
         timeout: this._timeout,

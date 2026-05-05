@@ -41,6 +41,23 @@ describe('InfoLogger', function() {
   const baseUrl = `http://${config.http.hostname}:${config.http.port}/`;
 
   before(async () => {
+    // Add error handlers for uncaught errors
+    process.on('unhandledRejection', (error) => {
+      console.error('[Test Setup] Unhandled Promise Rejection at:', new Date().toISOString());
+      console.error('[Test Setup] Error:', error);
+      if (error && error.stack) {
+        console.error('[Test Setup] Stack:', error.stack);
+      }
+    });
+
+    process.on('uncaughtException', (error) => {
+      console.error('[Test Setup] Uncaught Exception at:', new Date().toISOString());
+      console.error('[Test Setup] Error:', error);
+      if (error && error.stack) {
+        console.error('[Test Setup] Stack:', error.stack);
+      }
+    });
+
     // Start infologger server simulator
     ilgServer = createServer();
 

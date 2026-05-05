@@ -26,6 +26,7 @@ updates:
         - "@grpc/proto-loader"
   labels:
     - "Control"
+    - "dependencies"
   open-pull-requests-limit: 10
   versioning-strategy: increase
   ignore:
@@ -53,6 +54,7 @@ updates:
         - "sinon"
   labels:
     - "Quality Control"
+    - "dependencies"
   open-pull-requests-limit: 10
   versioning-strategy: increase
   ignore:
@@ -80,6 +82,7 @@ updates:
         - "sinon"
   labels:
     - "InfoLogger"
+    - "dependencies"
   open-pull-requests-limit: 10
   versioning-strategy: increase
   ignore:
@@ -108,6 +111,7 @@ updates:
         - "supertest"
   labels:
     - "Framework"
+    - "dependencies"
   open-pull-requests-limit: 10
   versioning-strategy: increase
   ignore:
