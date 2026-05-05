@@ -62,7 +62,7 @@ describe(`'API - GET - /configurations/:key(*)' test suite`, () => {
       .get('/key1')
       .expect(403, {
         error: '403 - Json Web Token Error',
-        message: 'You must provide a JWT token' 
+        message: 'Invalid token: jwt must be provided' 
       });
   });
 
@@ -71,7 +71,7 @@ describe(`'API - GET - /configurations/:key(*)' test suite`, () => {
       .get('/key1?token=invalid-token')
       .expect(403, {
         error: '403 - Json Web Token Error',
-        message: 'Invalid JWT token provided'
+        message: 'Invalid token: jwt malformed'
       });
   });
 });
