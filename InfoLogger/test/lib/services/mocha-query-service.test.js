@@ -14,7 +14,6 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const config = require('../../../config-default.js');
 const { QueryService } = require('../../../lib/services/QueryService.js');
 const { UnauthorizedAccessError, TimeoutError, InvalidInputError } = require('@aliceo2/web-ui');
 
@@ -71,11 +70,11 @@ describe('\'QueryService\' test suite', () => {
       $max: null, // 0, 1, 6, 11, 21
     },
   };
-  const emptySqlDataSource = new QueryService(undefined, {});
+  const emptySqlDataSource = new QueryService();
 
   describe('\'checkConnection()\' - test suite', () => {
     it('should reject with error when simple query fails', async () => {
-      const sqlDataSource = new QueryService(config.mysql);
+      const sqlDataSource = new QueryService();
       sqlDataSource._isAvailable = true;
       sqlDataSource._pool = {
         query: sinon.stub().rejects({
@@ -93,7 +92,7 @@ describe('\'QueryService\' test suite', () => {
     });
 
     it('should do nothing when checking connection with mysql driver and driver returns resolved Promise', async () => {
-      const sqlDataSource = new QueryService(config.mysql);
+      const sqlDataSource = new QueryService();
       sqlDataSource._isAvailable = false;
       sqlDataSource._pool = {
         query: sinon.stub().resolves(),
@@ -126,7 +125,7 @@ describe('\'QueryService\' test suite', () => {
     });
 
     it('should not throw and log error when connection fails and shouldThrow is false', async () => {
-      const sqlDataSource = new QueryService(config.mysql);
+      const sqlDataSource = new QueryService();
       const logStub = sinon.stub();
       sqlDataSource._logger = {
         errorMessage: logStub,
@@ -233,7 +232,7 @@ describe('\'QueryService\' test suite', () => {
 
   describe('queryFromFilters() - test suite', () => {
     it('should throw an error when unable to query(API) due to rejected promise', async () => {
-      const sqlDataSource = new QueryService(config.mysql);
+      const sqlDataSource = new QueryService();
       sqlDataSource._pool = {
         query: sinon.stub().rejects({
           code: 'ER_ACCESS_DENIED_ERROR',
@@ -251,7 +250,7 @@ describe('\'QueryService\' test suite', () => {
       const query = 'SELECT * FROM `messages` WHERE `timestamp`>=? AND `timestamp`<=? AND `hostname` = ? '
         + 'AND NOT(`hostname` = ? AND `hostname` IS NOT NULL) AND `severity` IN (?) ORDER BY `TIMESTAMP` LIMIT 10';
 
-      const sqlDataSource = new QueryService(config.mysql);
+      const sqlDataSource = new QueryService();
       sqlDataSource._pool = {
         query: sinon.stub().resolves([
           { hostname: 'test', severity: 'W' },
@@ -274,7 +273,7 @@ describe('\'QueryService\' test suite', () => {
     });
 
     it('should log every executed sql query as debug', async () => {
-      const sqlDataSource = new QueryService(config.mysql);
+      const sqlDataSource = new QueryService();
       sqlDataSource._logger = {
         debugMessage: sinon.stub(),
       };
@@ -292,7 +291,7 @@ describe('\'QueryService\' test suite', () => {
   describe('queryGroupCountLogsBySeverity() - test suite', () => {
     it(`should successfully return stats when queried for all known severities
       even if none is some are not returned by data service`, async () => {
-      const dataService = new QueryService(config.mysql);
+      const dataService = new QueryService();
       dataService._pool = {
         query: sinon.stub().resolves([
           { severity: 'E', 'COUNT(*)': 102 },
@@ -310,9 +309,8 @@ describe('\'QueryService\' test suite', () => {
     });
 
     it('should throw error if data service throws SQL', async () => {
-      const dataService = new QueryService(config.mysql);
-      dataService._pool =
-      {
+      const dataService = new QueryService();
+      dataService._pool = {
         query: sinon.stub().rejects({
           code: 'ER_ACCESS_DENIED_ERROR',
           errno: 1045,
