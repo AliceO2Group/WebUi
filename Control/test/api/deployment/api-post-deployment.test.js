@@ -26,7 +26,7 @@ describe('POST /deploy', function () {
         userVars: { foo: 'bar' }
       })
       .expect(403, {
-        message: 'You must provide a JWT token',
+        message: 'Invalid token: jwt must be provided',
         error: '403 - Json Web Token Error'
       });
   });
