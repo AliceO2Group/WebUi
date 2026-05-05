@@ -16,7 +16,7 @@ const assert = require('assert');
 const sinon = require('sinon');
 const config = require('../../../config-default.js');
 const { QueryService } = require('../../../lib/services/QueryService.js');
-const { UnauthorizedAccessError, TimeoutError } = require('@aliceo2/web-ui');
+const { UnauthorizedAccessError, TimeoutError, InvalidInputError } = require('@aliceo2/web-ui');
 
 describe('\'QueryService\' test suite', () => {
   const filters = {
@@ -101,6 +101,48 @@ describe('\'QueryService\' test suite', () => {
 
       await assert.doesNotReject(sqlDataSource.checkConnection());
       assert.ok(sqlDataSource.isAvailable);
+    });
+
+    it('should throw InvalidInputError when no pool is configured and shouldThrow is true', async () => {
+      const sqlDataSource = new QueryService();
+      await assert.rejects(
+        sqlDataSource.checkConnection(),
+        new InvalidInputError('No database configuration provided'),
+      );
+      assert.ok(sqlDataSource.isAvailable === false);
+    });
+
+    it('should not throw and log error when no pool is configured and shouldThrow is false', async () => {
+      const sqlDataSource = new QueryService();
+      const logStub = sinon.stub();
+      sqlDataSource._logger = {
+        errorMessage: logStub,
+      };
+
+      await assert.doesNotReject(sqlDataSource.checkConnection(10000, false));
+      assert.ok(sqlDataSource.isAvailable === false);
+      assert.ok(logStub.calledOnce);
+      assert.ok(logStub.firstCall.args[0].message === 'No database configuration provided');
+    });
+
+    it('should not throw and log error when connection fails and shouldThrow is false', async () => {
+      const sqlDataSource = new QueryService(config.mysql);
+      const logStub = sinon.stub();
+      sqlDataSource._logger = {
+        errorMessage: logStub,
+      };
+      sqlDataSource._pool = {
+        query: sinon.stub().rejects({
+          code: 'ER_ACCESS_DENIED_ERROR',
+          errno: 1045,
+          sqlMessage: 'Access denied',
+        }),
+      };
+
+      await assert.doesNotReject(sqlDataSource.checkConnection(10000, false));
+      assert.ok(sqlDataSource.isAvailable === false);
+      assert.ok(logStub.calledOnce);
+      assert.ok(logStub.firstCall.args[0].code === 'ER_ACCESS_DENIED_ERROR');
     });
   });
 
