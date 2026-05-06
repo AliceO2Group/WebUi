@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
+import { Role } from './../constants/role.const.js';
+
 /**
  * Limit the number of calls to `fn` to 1 per `time` maximum.
  * First call is immediate if `time` have been waited already.
@@ -59,4 +61,13 @@ export function setBrowserTabTitle(title = undefined) {
   if (document && title) {
     document.title = title;
   }
+}
+
+/**
+ * Method to check if the user has only shifter role and not admin role
+ * @param {string[]} access - array of user roles email groups affiliation
+ * @returns {boolean} true if the user has only shifter role and not admin role, false otherwise
+ */
+export function hasShifterButNoAdminRole(access = []) {
+  return access.includes(Role.SHIFTER) && !access.includes(Role.ADMIN);
 }
