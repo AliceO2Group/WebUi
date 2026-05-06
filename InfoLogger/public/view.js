@@ -34,14 +34,12 @@ export default (model) => [
   notification(model.notification),
   h('.flex-column absolute-fill', [
     h('.shadow-level2', [
-      h('header.p1.flex-row.f7', [
-        h('', commandLogs(model)),
+      h('header.p1.flex-wrap.flex-row.f7.g2', [
+        h('.flex-row', commandLogs(model)),
         h(
-          '.flex-grow',
-          {
-            style: 'display: flex; flex-direction:row-reverse;',
-          },
-          commandFilters(model),
+          '.flex-row.g3',
+          { style: 'margin-left: auto;' },
+          commandFilters(model.log, model.filterLevelsAllowed),
         ),
       ]),
       h('header.f7', tableFilters(model)),
