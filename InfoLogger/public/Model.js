@@ -83,7 +83,6 @@ export default class Model extends Observable {
     this.observe(callRateLimiter(this.updateRouteOnModelChange.bind(this), 500));
   }
 
-
   /**
    * Handle websocket authentication success
    */

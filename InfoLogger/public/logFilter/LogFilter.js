@@ -22,7 +22,8 @@ import { Observable } from '/js/src/index.js';
  */
 
 /**
- * @typedef Criteria * @type {Array.<Criteria>}
+ * @typedef Criteria
+ * @type {Array.<Criteria>}
  */
 
 /**
@@ -145,7 +146,7 @@ export default class LogFilter extends Observable {
   /**
    * Generates a function to filter a log passed as argument to it
    * Output of function is boolean.
-   * @returns {Function.<WebSocketMessage, boolean>} - function to filter logs
+   * @returns {void.<WebSocketMessage, boolean>} - function to filter logs
    */
   toStringifyFunction() {
     /**

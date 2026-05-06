@@ -21,7 +21,7 @@ import { INFOLOGGER_LEVEL_LIST } from './../constants/infologger-level.const.js'
  * All other calls before end of `time` window will lead to 1 exececution at the end of window.
  * @param {string} fn - function to be called
  * @param {string} time - ms
- * @returns {Function} lambda function to be called to call `fn`
+ * @returns {void} lambda function to be called to call `fn`
  * @example
  * let f = callRateLimiter((arg) => console.log('called', arg), 1000);
  * 00:00:00 f(1);f(2);f(3);f(4);
