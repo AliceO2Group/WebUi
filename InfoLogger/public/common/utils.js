@@ -13,6 +13,7 @@
  */
 
 import { Role } from './../constants/role.const.js';
+import { INFOLOGGER_LEVEL_LIST } from './../constants/infologger-level.const.js';
 
 /**
  * Limit the number of calls to `fn` to 1 per `time` maximum.
@@ -69,5 +70,23 @@ export function setBrowserTabTitle(title = undefined) {
  * @returns {boolean} true if the user has only shifter role and not admin role, false otherwise
  */
 export function hasShifterButNoAdminRole(access = []) {
-  return access.includes(Role.SHIFTER) && !access.includes(Role.ADMIN);
+  return !access.includes(Role.SHIFTER) && access.includes(Role.ADMIN);
+}
+
+/**
+ * Method to return filter levels allowed for filtering based on current user role email groups affiliation
+ * * Shifters are only allowed to filter by Ops level
+ * @param {string[]} access - array of user roles email groups affiliation
+ * @returns {{label: string, index:number}[]} - filter levels allowed for filtering
+ */
+export function filterLevelsAllowed(access = []) {
+  return hasShifterButNoAdminRole(access)
+    ? INFOLOGGER_LEVEL_LIST.map((level) => ({
+      ...level,
+      available: level.label === 'Ops',
+    }))
+    : INFOLOGGER_LEVEL_LIST.map((level) => ({
+      ...level,
+      available: true,
+    }));
 }

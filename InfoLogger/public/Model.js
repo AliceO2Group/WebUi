@@ -17,7 +17,7 @@ import {
   Observable, WebSocketClient, QueryRouter,
   Loader, RemoteData, sessionService, Notification,
 } from '/js/src/index.js';
-import { callRateLimiter, setBrowserTabTitle } from './common/utils.js';
+import { callRateLimiter, setBrowserTabTitle, hasShifterButNoAdminRole } from './common/utils.js';
 import { ConfigurationService } from './services/ConfigurationService.js';
 import { MODE } from './constants/mode.const.js';
 import Log from './log/Log.js';
@@ -81,23 +81,8 @@ export default class Model extends Observable {
     // Model can change very often we protect router with callRateLimiter
     // Router limit: 100 calls per 30 seconds max = 30ms, 2 FPS is enough (500ms)
     this.observe(callRateLimiter(this.updateRouteOnModelChange.bind(this), 500));
-
-    this._filterLevelsAllowed = [
-      { label: 'Ops', index: 1, available: true },
-      { label: 'Support', index: 6, available: false },
-      { label: 'Devel', index: 11, available: false },
-      { label: 'Trace', index: null, available: false },
-    ];
   }
 
-  /**
-   * Method to return filter levels allowed for filtering based on current user role email groups afilliation
-   * * Shifters are only allowed to filter by Ops level
-   * @returns {{label: string, index:number}[]} - filter levels allowed for filtering
-   */
-  get filterLevelsAllowed() {
-    return this._filterLevelsAllowed;
-  }
 
   /**
    * Handle websocket authentication success
@@ -327,11 +312,15 @@ export default class Model extends Observable {
 
   /**
    * Delegates sub-model actions depending new location of the page
+   * If user is shifter but not admin, set Ops as maximum level for filtering
    */
   handleLocationChange() {
     const { params } = this.router;
     if (params) {
       this.parseLocation(params);
+    }
+    if (hasShifterButNoAdminRole(this.session.access)) {
+      this.log.filter.setCriteria('level', 'max', 1);
     }
   }
 
