@@ -14,92 +14,92 @@
 
 import { h } from '/js/src/index.js';
 
+const LIMIT_LEVELS = [
+  { label: '100k', value: 100000 },
+  { label: '500k', value: 500000 },
+  { label: '1M', value: 1000000 },
+];
+const SEVERITIES_ALLOWED = [
+  { label: 'Debug', value: 'D' },
+  { label: 'Info', value: 'I' },
+  { label: 'Warn', value: 'W' },
+  { label: 'Error', value: 'E' },
+  { label: 'Fatal', value: 'F' },
+];
+
 /**
  * Filtering main options, in toolbar, top-right.
  * - severity
  * - level
  * - limit
  * - reset
- * @param {Model} model - root model of the application
+ * @param {Log} logModel - log model of the application
+ * @param {{label: string, index:number}[]} filterLevelsAllowed - levels allowed for filtering
  * @returns {vnode} - the view of filters panel
  */
-export default (model) => [
+export default (logModel, filterLevelsAllowed) => [
   h(
-    '',
-    h('.btn-group', [
-      buttonSeverity(model, 'Debug', 'Match severity debug', 'D'),
-      buttonSeverity(model, 'Info', 'Match severity info', 'I'),
-      buttonSeverity(model, 'Warn', 'Match severity warnings', 'W'),
-      buttonSeverity(model, 'Error', 'Match severity errors', 'E'),
-      buttonSeverity(model, 'Fatal', 'Match severity fatal', 'F'),
-    ]),
-    h('span.mh3'),
-    h('.btn-group', [
-      buttonFilterLevel(model, 'Ops', 1),
-      buttonFilterLevel(model, 'Support', 6),
-      buttonFilterLevel(model, 'Devel', 11),
-      buttonFilterLevel(model, 'Trace', null), // 21
-    ]),
-    h('span.mh3'),
-    h('.btn-group', [
-      buttonLogLimit(model, '100k', 100000),
-      buttonLogLimit(model, '500k', 500000),
-      buttonLogLimit(model, '1M', 1000000),
-    ]),
-    h('span.mh3'),
-    buttonReset(model),
+    '.btn-group',
+    SEVERITIES_ALLOWED.map(({ label, value }) => _selectableButtonComponent(
+      label,
+      {
+        title: `Match severity ${label.toLowerCase()}`,
+        isActive: logModel.filter.criterias.severity.in.includes(value),
+        onclick: () => logModel.setCriteria('severity', 'in', value),
+      },
+    )),
+  ),
+
+  h(
+    '.btn-group',
+    filterLevelsAllowed.map(({ label, index, available }) => _selectableButtonComponent(
+      label,
+      {
+        title: available ? `Filter level ≤ ${index}` : `You don't have access to level ${label}`,
+        isActive: logModel.filter.criterias.level.max === index,
+        onclick: () => logModel.setCriteria('level', 'max', index),
+        disabled: !available,
+      },
+    )),
+  ),
+
+  h(
+    '.btn-group',
+    LIMIT_LEVELS.map(({ label, value }) =>
+      _selectableButtonComponent(
+        label,
+        {
+          title: `Keep only ${value / 1000}k logs in the view`,
+          isActive: logModel.limit === value,
+          onclick: () => logModel.setLimit(value),
+        },
+      )),
+  ),
+
+  _selectableButtonComponent(
+    'Reset filters',
+    {
+      title: 'Reset date, time, matches, excludes, log levels',
+      isActive: false,
+      onclick: () => logModel.filter.resetCriteria(),
+    },
   ),
 ];
 
 /**
- * Makes a button to toggle severity
- * @param {Model} model - root model of the application
+ * Component representing the creation of a button for filtering header
  * @param {string} label - button's label
- * @param {string} title - button's title on mouse over
- * @param {string} value - a char to represent severity: W E F or I, can be many with spaces like 'W E'
- * @returns {vnode} - the button to toggle severity
- */
-const buttonSeverity = (model, label, title, value) => h('button.btn', {
-  className: model.log.filter.criterias.severity.in.includes(value) ? 'active' : '',
-  onclick: (e) => {
-    model.log.setCriteria('severity', 'in', value);
-    e.target.blur(); // remove focus so user can 'enter' without actually toggle again the button
-  },
-  title: title,
-}, label);
-
-/**
- * Makes a button to set filtering level (shifter, debug, etc) with number
- * @param {Model} model - root model of the application
- * @param {string} label - button's label
- * @param {number} value - maximum level of filtering, from 1 to 21
+ * @param {object} options - options for the button
+ * @param {string} options.title - button's title on mouse over
+ * @param {boolean} options.isActive - whether the button is active
+ * @param {void} options.onclick - function to call when button is clicked
+ * @param {boolean} options.disabled - whether the button is disabled
  * @returns {vnode} - component representing the creation of a button for filtering
  */
-const buttonFilterLevel = (model, label, value) => h('button.btn', {
-  className: model.log.filter.criterias.level.max === value ? 'active' : '',
-  onclick: () => model.log.setCriteria('level', 'max', value),
-  title: `Filter level ≤ ${value}`,
-}, label);
+const _selectableButtonComponent = (label, { title, isActive, onclick, disabled }) => h('button.btn', {
+  className: [isActive ? 'active' : '', disabled ? 'disabled' : ''].join(' '),
+  onclick,
+  title,
+  disabled,
 
-/**
- * Makes a button to set log limit, maximum logs in memory
- * @param {Model} model - root model of the application
- * @param {string} label - button's label
- * @param {number} limit - how much logs to keep in memory
- * @returns {vnode} - component representing the creation of a button for log limit
- */
-const buttonLogLimit = (model, label, limit) => h('button.btn', {
-  className: model.log.limit === limit ? 'active' : '',
-  onclick: () => model.log.setLimit(limit),
-  title: `Keep only ${label} logs in the view`,
 }, label);
-
-/**
- * Makes a button to reset filters
- * @param {Model} model - root model of the application
- * @returns {vnode} - component representing the creation of a button to reset filters
- */
-const buttonReset = (model) => h('button.btn', {
-  onclick: () => model.log.filter.resetCriteria(),
-  title: 'Reset date, time, matches, excludes, log levels',
-}, 'Reset filters');

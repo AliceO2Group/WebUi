@@ -81,6 +81,22 @@ export default class Model extends Observable {
     // Model can change very often we protect router with callRateLimiter
     // Router limit: 100 calls per 30 seconds max = 30ms, 2 FPS is enough (500ms)
     this.observe(callRateLimiter(this.updateRouteOnModelChange.bind(this), 500));
+
+    this._filterLevelsAllowed = [
+      { label: 'Ops', index: 1, available: true },
+      { label: 'Support', index: 6, available: false },
+      { label: 'Devel', index: 11, available: false },
+      { label: 'Trace', index: null, available: false },
+    ];
+  }
+
+  /**
+   * Method to return filter levels allowed for filtering based on current user role email groups afilliation
+   * * Shifters are only allowed to filter by Ops level
+   * @returns {{label: string, index:number}[]} - filter levels allowed for filtering
+   */
+  get filterLevelsAllowed() {
+    return this._filterLevelsAllowed;
   }
 
   /**
