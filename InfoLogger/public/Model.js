@@ -333,7 +333,13 @@ export default class Model extends Observable {
       return;
     } else if (params.q) {
       this.getUserProfile();
-      this.log.filter.fromObject(JSON.parse(params.q.replaceAll('\n', '\\n')));
+      try {
+        this.log.filter.fromObject(JSON.parse(params.q.replaceAll('\n', '\\n')));
+      } catch (error) {
+        this.log.filter.resetCriteria();
+        this.updateRouteOnModelChange();
+        this.notification.show(`Invalid URL filter format: ${error.message}`, 'danger');
+      }
     } else {
       this.getUserProfile();
     }
