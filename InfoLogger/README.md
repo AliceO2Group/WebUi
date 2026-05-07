@@ -5,8 +5,10 @@
 
 - [InfoLogger GUI (ILG)](#infologger-gui-ilg)
   - [Interface User Guide](#interface-user-guide)
+    - [Shifter based role](#shifter-based-role)
   - [Requirements](#requirements)
   - [Installation](#installation)
+  - [Development database installation](#development-database-installation)
   - [Dummy InfoLogger test server](#dummy-infologger-test-server)
   - [InfoLogger insights](#infologger-insights)
   - [Continuous Integration Workflows](#continuous-integration-workflows)
@@ -33,6 +35,10 @@ It interfaces with the system using two modes:
 - Double click on a log or toggle the inspector view from the bottom right corner to see all fields of the log
 - Use arrows keys to navigate quickly between logs
 - Download the logs in a file via the top left download icon
+
+### Shifter based role
+
+If the authenticated user is defined as having one of the access roles 'shifter' but does **not** have 'admin', then the UI should restrict the levels by which the user can filter messages. More specifically, the shifters are only allowed to filter messages by `Ops` (Operations)
 
 ## Requirements
 - `nodejs` >= `16.x`
