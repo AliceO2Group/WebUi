@@ -24,6 +24,7 @@ import tableLogsContent from './log/tableLogsContent.js';
 import tableLogsScrollMap from './log/tableLogsScrollMap.js';
 import aboutComponent from './about/about.component.js';
 import errorComponent from './common/errorComponent.js';
+import { getFilterLevelsAllowed } from './common/utils.js';
 
 /**
  * Main view of the application
@@ -39,7 +40,7 @@ export default (model) => [
         h(
           '.flex-row.g3',
           { style: 'margin-left: auto;' },
-          commandFilters(model.log, model.filterLevelsAllowed),
+          commandFilters(model.log, getFilterLevelsAllowed(model.session.access)),
         ),
       ]),
       h('header.f7', tableFilters(model)),

@@ -70,7 +70,7 @@ export function setBrowserTabTitle(title = undefined) {
  * @returns {boolean} true if the user has only shifter role and not admin role, false otherwise
  */
 export function hasShifterButNoAdminRole(access = []) {
-  return !access.includes(Role.SHIFTER) && access.includes(Role.ADMIN);
+  return access.includes(Role.SHIFTER) && !access.includes(Role.ADMIN);
 }
 
 /**
@@ -79,7 +79,7 @@ export function hasShifterButNoAdminRole(access = []) {
  * @param {string[]} access - array of user roles email groups affiliation
  * @returns {{label: string, index:number}[]} - filter levels allowed for filtering
  */
-export function filterLevelsAllowed(access = []) {
+export function getFilterLevelsAllowed(access = []) {
   return hasShifterButNoAdminRole(access)
     ? INFOLOGGER_LEVEL_LIST.map((level) => ({
       ...level,
