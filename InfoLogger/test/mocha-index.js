@@ -101,6 +101,7 @@ describe('InfoLogger', function() {
   });
 
   require('./public/user-actions-mocha');
+  require('./public/shifter-based-actions-mocha');
   require('./public/log-filter-actions-mocha');
   require('./public/live-mode-mocha');
   require('./public/query-mode-mocha');
