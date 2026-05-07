@@ -93,6 +93,25 @@ describe('Filter actions test-suite', async () => {
     assert.strictEqual(searchParams, expectedParams);
   });
 
+  it('should redirect to default filters and show JSON parse error on malformed q in URI', async () => {
+    const expectedDefaultParams = '?q={"severity":{"in":"I W E F"}}';
+
+    const locationAndNotification = await page.evaluate(() => {
+      const params = { q: '{"severity":{"in":"W I E F"' };
+      window.model.parseLocation(params);
+      return {
+        search: window.location.search,
+        notification: window.model.notification,
+      };
+    });
+
+    assert.strictEqual(decodeURI(locationAndNotification.search), expectedDefaultParams);
+    assert.strictEqual(locationAndNotification.notification.type, 'danger');
+    assert.strictEqual(
+      locationAndNotification.notification.message,
+      'Invalid URL filter format: JSON.parse: expected \'.\' or \'}\' after property value in object at line 1 column 28 of the JSON data');
+  });
+
   it('should update URI with new encoded "match" criteria', async () => {
     /* eslint-disable max-len */
     const decodedParams = '?q={"hostname":{"match":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
