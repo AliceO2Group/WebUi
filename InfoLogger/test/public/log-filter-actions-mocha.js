@@ -107,9 +107,10 @@ describe('Filter actions test-suite', async () => {
 
     assert.strictEqual(decodeURI(locationAndNotification.search), expectedDefaultParams);
     assert.strictEqual(locationAndNotification.notification.type, 'danger');
+    // CI/CD runs on Chromium so this assertion is based on Chromium's JSON engine's error message
     assert.strictEqual(
       locationAndNotification.notification.message,
-      'Invalid URL filter format: JSON.parse: expected \'.\' or \'}\' after property value in object at line 1 column 28 of the JSON data');
+      'Invalid URL filter format: Expected \',\' or \'}\' after property value in JSON at position 27 (line 1 column 28)');
   });
 
   it('should update URI with new encoded "match" criteria', async () => {
