@@ -43,6 +43,7 @@ export default (logModel, filterLevelsAllowed) => [
     SEVERITIES_ALLOWED.map(({ label, value }) => _selectableButtonComponent(
       label,
       {
+        id: `severity-${value}`,
         title: `Match severity ${label.toLowerCase()}`,
         isActive: logModel.filter.criterias.severity.in.includes(value),
         onclick: () => logModel.setCriteria('severity', 'in', value),
@@ -55,6 +56,7 @@ export default (logModel, filterLevelsAllowed) => [
     filterLevelsAllowed.map(({ label, index, available }) => _selectableButtonComponent(
       label,
       {
+        id: `level-${index}`,
         title: available ? `Filter level ≤ ${index}` : `You don't have access to level ${label}`,
         isActive: logModel.filter.criterias.level.max === index,
         onclick: () => logModel.setCriteria('level', 'max', index),
@@ -69,6 +71,7 @@ export default (logModel, filterLevelsAllowed) => [
       _selectableButtonComponent(
         label,
         {
+          id: `limit-${value}`,
           title: `Keep only ${value / 1000}k logs in the view`,
           isActive: logModel.limit === value,
           onclick: () => logModel.setLimit(value),
@@ -90,13 +93,15 @@ export default (logModel, filterLevelsAllowed) => [
  * Component representing the creation of a button for filtering header
  * @param {string} label - button's label
  * @param {object} options - options for the button
+ * @param {string} options.id - button's id
  * @param {string} options.title - button's title on mouse over
  * @param {boolean} options.isActive - whether the button is active
  * @param {void} options.onclick - function to call when button is clicked
  * @param {boolean} options.disabled - whether the button is disabled
  * @returns {vnode} - component representing the creation of a button for filtering
  */
-const _selectableButtonComponent = (label, { title, isActive, onclick, disabled }) => h('button.btn', {
+const _selectableButtonComponent = (label, { id, title, isActive, onclick, disabled }) => h('button.btn', {
+  id,
   className: [isActive ? 'active' : '', disabled ? 'disabled' : ''].join(' '),
   onclick,
   title,
