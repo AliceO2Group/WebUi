@@ -18,7 +18,7 @@
  * These values are as per InfoLogger defined levels:
  * {@link https://github.com/AliceO2Group/InfoLogger/blob/master/doc/README.md}
  */
-export const InfoLoggerLevel = {
+export const InfoLoggerLevel = Object.freeze({
   OPS: {
     label: 'Ops',
     index: 1,
@@ -35,6 +35,11 @@ export const InfoLoggerLevel = {
     label: 'Trace',
     index: null,
   },
-};
+});
 
+/**
+ * Array containing the different levels of logs that can be displayed in the application,
+ * with their label and index as in the database, used for iterating over the levels in the UI
+ * These values are as per InfoLogger defined levels:
+ */
 export const INFOLOGGER_LEVEL_LIST = Object.values(InfoLoggerLevel);

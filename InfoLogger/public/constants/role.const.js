@@ -12,7 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
-export const Role = {
+/**
+ * Object containing the different roles that a user can have in the application, used for checking
+ * permissions and access levels. These roles are defined in CERN Application Service
+ */
+export const Role = Object.freeze({
   SHIFTER: 'shifter',
   ADMIN: 'admin',
-};
+});
