@@ -13,6 +13,7 @@
  */
 
 import { Observable } from '/js/src/index.js';
+import { TEXT_FILTER_OPERATORS } from '../constants/text-filter-operators.const.js';
 
 /**
  * @typedef Criteria
@@ -148,9 +149,8 @@ export default class LogFilter extends Observable {
    * @returns {boolean} true if at least one text filter has a value
    */
   hasActiveTextFilters() {
-    const textOperators = ['since', 'until', 'match', 'exclude'];
     return Object.values(this.criterias).some((criteria) =>
-      textOperators.some((operator) => criteria[operator]?.trim()));
+      TEXT_FILTER_OPERATORS.some((operator) => criteria[operator]?.trim()));
   }
 
   /**
