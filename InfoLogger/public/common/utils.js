@@ -13,7 +13,7 @@
  */
 
 import { Role } from './../constants/role.const.js';
-import { INFOLOGGER_LEVEL_LIST } from './../constants/infologger-level.const.js';
+import { INFOLOGGER_LEVEL_LIST, InfoLoggerLevel } from './../constants/infologger-level.const.js';
 
 /**
  * Limit the number of calls to `fn` to 1 per `time` maximum.
@@ -83,7 +83,7 @@ export function getFilterLevelsAllowed(access = []) {
   return hasShifterButNoAdminRole(access)
     ? INFOLOGGER_LEVEL_LIST.map((level) => ({
       ...level,
-      available: level.label === 'Ops',
+      available: level.label === InfoLoggerLevel.OPS.label,
     }))
     : INFOLOGGER_LEVEL_LIST.map((level) => ({
       ...level,
