@@ -143,6 +143,17 @@ export default class LogFilter extends Observable {
   }
 
   /**
+   * Check whether at least one text filter is set by the user.
+   * Only text filters use the since/until and match/exclude fields.
+   * @returns {boolean} true if at least one text filter has a value
+   */
+  hasActiveTextFilters() {
+    const textOperators = ['since', 'until', 'match', 'exclude'];
+    return Object.values(this.criterias).some((criteria) =>
+      textOperators.some((operator) => criteria[operator]?.trim()));
+  }
+
+  /**
    * Generates a function to filter a log passed as argument to it
    * Output of function is boolean.
    * @returns {Function.<WebSocketMessage, boolean>} - function to filter logs
