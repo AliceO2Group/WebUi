@@ -327,11 +327,8 @@ export default class Log extends Observable {
     }
 
     if (!this.filter.hasActiveTextFilters()) {
-      // If the browser does not support the confirm dialog, execute the query anyway
-      const shouldExecuteQueryWithoutFilters = typeof window.confirm === 'function'
-        ? window.confirm('No date or text filters set. This will return a large amount of data. Execute query anyway?')
-        : true;
-      if (!shouldExecuteQueryWithoutFilters) {
+      if (!window.confirm('No date or text filters set.'
+        + ' This will return a large amount of data. Execute query anyway?')) {
         return;
       }
     }
