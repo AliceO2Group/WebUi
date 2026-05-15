@@ -24,6 +24,7 @@ import tableLogsContent from './log/tableLogsContent.js';
 import tableLogsScrollMap from './log/tableLogsScrollMap.js';
 import aboutComponent from './about/about.component.js';
 import errorComponent from './common/errorComponent.js';
+import cellContextMenu from './log/cellContextMenu.js';
 
 /**
  * Main view of the application
@@ -32,6 +33,7 @@ import errorComponent from './common/errorComponent.js';
  */
 export default (model) => [
   notification(model.notification),
+  cellContextMenu(model),
   h('.flex-column absolute-fill', [
     h('.shadow-level2', [
       h('header.p1.flex-row.f7', [
