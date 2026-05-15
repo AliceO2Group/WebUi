@@ -71,6 +71,30 @@ const tableLogLine = (model, row) => h('tr.row-hover', {
   ondblclick: () => model.toggleInspector(),
 }, tableRows(model, model.table.colsHeader, row));
 
+const resolveContextMenuData = (model, row, field, content) => {
+  if (field === 'date') {
+    return row.timestamp ? { field: 'timestamp', value: String(content) } : null;
+  }
+  if (field === 'time') {
+    return row.timestamp
+      ? { field: 'timestamp', value: `${model.timezone.format(row.timestamp, 'date')} ${content}` }
+      : null;
+  }
+  return row[field] != null && row[field] !== '' ? { field, value: String(row[field]) } : null;
+};
+
+const cellWithContextMenu = (model, row, field, content, extraClasses = '', extraAttrs = {}) =>
+  h(`td.cell${extraClasses}`, {
+    ...extraAttrs,
+    oncontextmenu: (e) => {
+      const data = resolveContextMenuData(model, row, field, content);
+      if (data) {
+        e.preventDefault();
+        model.log.showContextMenu(data.field, data.value, e.clientX, e.clientY);
+      }
+    },
+  }, content);
+
 /**
  * Array of table rows
  * @param {Model} model - root model of the application
@@ -82,21 +106,39 @@ const tableRows = (model, colsHeader, row) =>
   [
     h('td.cell.text-center', { className: model.log.item === row ? null : severityClass(row.severity) }, row.severity),
     h('td.cell.text-center.cell-bordered', row.level),
-    colsHeader.date.visible && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, 'date')),
-    colsHeader.time.visible && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, model.log.timeFormat)),
-    colsHeader.hostname.visible && h('td.cell.cell-bordered', row.hostname),
-    colsHeader.rolename.visible && h('td.cell.cell-bordered', row.rolename),
-    colsHeader.pid.visible && h('td.cell.cell-bordered', row.pid),
-    colsHeader.username.visible && h('td.cell.cell-bordered', row.username),
-    colsHeader.system.visible && h('td.cell.cell-bordered', row.system),
-    colsHeader.facility.visible && h('td.cell.cell-bordered', row.facility),
-    colsHeader.detector.visible && h('td.cell.cell-bordered', row.detector),
-    colsHeader.partition.visible && h('td.cell.cell-bordered', row.partition),
-    colsHeader.run.visible && h('td.cell.cell-bordered', row.run),
-    colsHeader.errcode.visible && h('td.cell.cell-bordered', linkToWikiErrors(row.errcode)),
-    colsHeader.errline.visible && h('td.cell.cell-bordered', row.errline),
-    colsHeader.errsource.visible && h('td.cell.cell-bordered', row.errsource),
-    colsHeader.message.visible && h('td.cell.cell-bordered', { title: row.message }, row.message),
+    colsHeader.date.visible && cellWithContextMenu(
+      model,
+      row,
+      'date',
+      model.timezone.format(row.timestamp, 'date'),
+      '.cell-bordered',
+    ),
+    colsHeader.time.visible && cellWithContextMenu(
+      model,
+      row,
+      'time',
+      model.timezone.format(row.timestamp, model.log.timeFormat),
+      '.cell-bordered',
+    ),
+    colsHeader.hostname.visible && cellWithContextMenu(model, row, 'hostname', row.hostname, '.cell-bordered'),
+    colsHeader.rolename.visible && cellWithContextMenu(model, row, 'rolename', row.rolename, '.cell-bordered'),
+    colsHeader.pid.visible && cellWithContextMenu(model, row, 'pid', row.pid, '.cell-bordered'),
+    colsHeader.username.visible && cellWithContextMenu(model, row, 'username', row.username, '.cell-bordered'),
+    colsHeader.system.visible && cellWithContextMenu(model, row, 'system', row.system, '.cell-bordered'),
+    colsHeader.facility.visible && cellWithContextMenu(model, row, 'facility', row.facility, '.cell-bordered'),
+    colsHeader.detector.visible && cellWithContextMenu(model, row, 'detector', row.detector, '.cell-bordered'),
+    colsHeader.partition.visible && cellWithContextMenu(model, row, 'partition', row.partition, '.cell-bordered'),
+    colsHeader.run.visible && cellWithContextMenu(model, row, 'run', row.run, '.cell-bordered'),
+    colsHeader.errcode.visible && cellWithContextMenu(
+      model,
+      row,
+      'errcode',
+      linkToWikiErrors(row.errcode),
+      '.cell-bordered',
+    ),
+    colsHeader.errline.visible && cellWithContextMenu(model, row, 'errline', row.errline, '.cell-bordered'),
+    colsHeader.errsource.visible && cellWithContextMenu(model, row, 'errsource', row.errsource, '.cell-bordered'),
+    colsHeader.message.visible && cellWithContextMenu(model, row, 'message', row.message, '', { title: row.message }),
   ];
 
 /**
