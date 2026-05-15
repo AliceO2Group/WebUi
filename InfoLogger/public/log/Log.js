@@ -70,6 +70,30 @@ export default class Log extends Observable {
     this.dom = {
       table: '',
     };
+
+    this.contextMenu = {
+      isOpen: false,
+      field: null,
+      value: null,
+      x: 0,
+      y: 0,
+    };
+  }
+
+  showContextMenu(field, value, x, y) {
+    this.contextMenu = {
+      isOpen: true,
+      field,
+      value,
+      x,
+      y,
+    };
+    this.notify();
+  }
+
+  hideContextMenu() {
+    this.contextMenu.isOpen = false;
+    this.notify();
   }
 
   /**
