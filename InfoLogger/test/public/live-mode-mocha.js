@@ -125,12 +125,12 @@ describe('Live Mode test-suite', async () => {
     await page.waitForSelector(tableRowSelector, { timeout: 5000 });
 
     const tableRow = await page.$(tableRowSelector);
-    await tableRow.click({ clickCount: 2 });
+    await tableRow.click({ count: 2 });
 
     // Waits for the sidebar animation to finish and the content to be visible
     await page.waitForFunction(
       () => document.querySelector('#inspector-sidebar').closest('aside.sidebar').getBoundingClientRect().width > 0,
-      { timeout: 10000 },
+      { timeout: 3000 },
     );
 
     const indicatorOpen = await page.evaluate(() => window.model.inspectorEnabled);
