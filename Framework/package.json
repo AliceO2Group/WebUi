@@ -38,7 +38,7 @@
     "mithril": "1.1.7",
     "openid-client": "5.6.5",
     "winston": "3.19.0",
-    "ws": "8.20.0",
+    "ws": "8.20.1",
     "protobufjs": "8.0.3"
   },
   "devDependencies": {
