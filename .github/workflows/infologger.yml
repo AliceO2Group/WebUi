@@ -8,6 +8,9 @@ on:
     branches:
       - 'main'
       - 'dev'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
     name: Tests on ubuntu-latest

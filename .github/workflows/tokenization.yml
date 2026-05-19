@@ -7,7 +7,9 @@ on:
   push:
     branches:
       - 'dev'
-
+concurrency:
+  group: central-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   lint-check-backend:
     name: Check eslint rules for backend on ubuntu-latest
