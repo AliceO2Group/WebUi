@@ -76,7 +76,6 @@ export class BaseRepository {
 
   /**
    * Finds all records that match the given options.
-   * @param {object} [constraints={}] - Constraints to filter the records.
    * @param {object} [options={}] - Options for filtering, sorting, and including related models.
    * @returns {Promise<Model[]>} A promise that resolves to an array of found records.
    */

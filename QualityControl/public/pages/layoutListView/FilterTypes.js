@@ -20,7 +20,7 @@
  * @property {function(): (boolean)} isActive - has the filter any active value('s)
  * @property {function(): (string|string[]|null)} getValue - gets the current value('s) of the filter
  * @property {function(string): void} set - set value of the filter
- * @property {Function} reset - reset filter to default state
+ * @property {function(): void} reset - reset filter to default state
  */
 
 /**
