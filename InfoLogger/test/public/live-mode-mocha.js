@@ -118,10 +118,18 @@ describe('Live Mode test-suite', async () => {
   });
 
   it('successfully show indicator when user double pressed the log row', async () => {
-    await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr', {timeout: 5000});
-    const tableRow = await page.$('body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr');
-    await tableRow.click({clickCount: 2});
-    await page.waitForSelector('#inspector-sidebar', {timeout: 1000})
+    const tableRowSelector = 'body > div:nth-child(2) > div:nth-child(2) > main > div > div > div > table > tbody > tr';
+    await page.waitForSelector(tableRowSelector, { timeout: 5000 });
+
+    const tableRow = await page.$(tableRowSelector);
+    await tableRow.click({ clickCount: 2 });
+
+    // Waits for the sidebar animation to finish and the content to be visible
+    await page.waitForFunction(
+      () => document.querySelector('#inspector-sidebar')
+        && document.querySelector('#inspector-sidebar').closest('aside.sidebar').getBoundingClientRect().width > 0,
+      { timeout: 3000 },
+    );
 
     const indicatorOpen = await page.evaluate(() => window.model.inspectorEnabled);
     assert.ok(indicatorOpen);
