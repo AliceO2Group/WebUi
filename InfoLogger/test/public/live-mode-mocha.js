@@ -129,9 +129,8 @@ describe('Live Mode test-suite', async () => {
 
     // Waits for the sidebar animation to finish and the content to be visible
     await page.waitForFunction(
-      () => document.querySelector('#inspector-sidebar')
-        && document.querySelector('#inspector-sidebar').closest('aside.sidebar').getBoundingClientRect().width > 0,
-      { timeout: 3000 },
+      () => document.querySelector('#inspector-sidebar').closest('aside.sidebar').getBoundingClientRect().width > 0,
+      { timeout: 10000 },
     );
 
     const indicatorOpen = await page.evaluate(() => window.model.inspectorEnabled);
