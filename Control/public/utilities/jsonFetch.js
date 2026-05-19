@@ -21,7 +21,7 @@ import {fetchClient} from '/js/src/index.js';
  *   - If an error occurred, there can be error with a message field describing the error that occurred
  *
  * @param {String} endpoint - the remote endpoint to send request to
- * @param {RequestInit} options - the request options, see {@link fetch} native function
+ * @param {RequestInit} options - the request options, see {@see fetch } native function
  * @return {Promise<Resolve<Object>.Error<{message: String}>>} resolve with the result of the request or reject with the error message
  */
 export const jsonFetch = async (endpoint, options) => {
