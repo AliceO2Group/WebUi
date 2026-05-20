@@ -19,6 +19,7 @@ import {
 } from '/js/src/index.js';
 import { callRateLimiter, setBrowserTabTitle, hasShifterButNoAdminRole } from './common/utils.js';
 import { ConfigurationService } from './services/ConfigurationService.js';
+import { InfoLoggerLevel } from './constants/infologger-level.const.js';
 import { MODE } from './constants/mode.const.js';
 import Log from './log/Log.js';
 import Table from './table/Table.js';
@@ -45,6 +46,9 @@ export default class Model extends Observable {
 
     this.log = new Log(this);
     this.log.bubbleTo(this);
+    if (hasShifterButNoAdminRole(this.session.access)) {
+      this.log.filter.setConstraint('level', 'max', InfoLoggerLevel.OPS.index);
+    }
 
     this.table = new Table(this);
     this.table.bubbleTo(this);
@@ -311,15 +315,11 @@ export default class Model extends Observable {
 
   /**
    * Delegates sub-model actions depending new location of the page
-   * If user is shifter but not admin, set Ops as maximum level for filtering
    */
   handleLocationChange() {
     const { params } = this.router;
     if (params) {
       this.parseLocation(params);
-    }
-    if (hasShifterButNoAdminRole(this.session.access)) {
-      this.log.filter.setCriteria('level', 'max', 1);
     }
   }
 

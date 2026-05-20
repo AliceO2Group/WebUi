@@ -44,6 +44,7 @@ export default class LogFilter extends Observable {
 
     this.model = model;
 
+    this._constraints = {};
     this.resetCriteria();
   }
 
@@ -73,9 +74,12 @@ export default class LogFilter extends Observable {
         case 'min':
           this.criterias[field]['$min'] = parseInt(value, 10);
           break;
-        case 'max':
-          this.criterias[field]['$max'] = parseInt(value, 10);
+        case 'max': {
+          const effectiveValue = this._clampToConstraint(field, operator, value);
+          this.criterias[field][operator] = effectiveValue;
+          this.criterias[field]['$max'] = effectiveValue !== null ? parseInt(effectiveValue, 10) : null;
           break;
+        }
         case 'match':
           this.criterias[field]['$match'] = value ? value : null;
           break;
@@ -94,6 +98,37 @@ export default class LogFilter extends Observable {
     } else {
       return false;
     }
+  }
+
+  /**
+   * Set a hard constraint on a field+operator that persists through resetCriteria.
+   * Any value set via setCriteria that exceeds this constraint will be clamped to it.
+   * @param {string} field - field name like 'level'
+   * @param {string} operator - operator like 'max'
+   * @param {string|number} value - constraint value
+   */
+  setConstraint(field, operator, value) {
+    if (!this._constraints[field]) {
+      this._constraints[field] = {};
+    }
+    this._constraints[field][operator] = value;
+    this.setCriteria(field, operator, value);
+  }
+
+  /**
+   * Returns the value clamped to the active constraint for the given field+operator, if any.
+   * For now only `max` operator is supported, but this can be extended in the future if needed.
+   * @param {string} field - field name
+   * @param {string} operator - operator name
+   * @param {string|number} value - value to clamp
+   * @returns {string|number} clamped value
+   */
+  _clampToConstraint(field, operator, value) {
+    const constraint = this._constraints?.[field]?.[operator];
+    if (operator === 'max' && constraint !== undefined && (value === null || value > constraint)) {
+      return constraint;
+    }
+    return value;
   }
 
   /**
@@ -397,6 +432,15 @@ export default class LogFilter extends Observable {
         $max: null, // 0, 1, 6, 11, 21
       },
     };
+    for (const [field, operators] of Object.entries(this._constraints)) {
+      for (const [operator, value] of Object.entries(operators)) {
+        const effectiveValue = this._clampToConstraint(field, operator, value);
+        this.criterias[field][operator] = effectiveValue;
+        if (operator === 'max') {
+          this.criterias[field]['$max'] = effectiveValue !== null ? parseInt(effectiveValue, 10) : null;
+        }
+      }
+    }
     this.notify();
   }
 }
