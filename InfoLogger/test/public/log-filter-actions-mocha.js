@@ -489,12 +489,14 @@ describe('Filter actions test-suite', async () => {
     });
 
     it('should clear criteria for timestamp fields', async () => {
-      const criteria = await page.evaluate(() => {
+      await page.evaluate(() => {
         window.model.log.filter.setCriteria('timestamp', 'since', '17/05/2026 18:42:05.509');
         window.model.log.filter.setCriteria('timestamp', 'until', '17/05/2026 18:42:05.509');
+      });
+      await openContextMenu(page, 'timestamp', '17/05/2026 18:42:05.509', 100, 120);
+      await waitForFromToButtons(page);
 
-        window.model.log.showContextMenu('timestamp', '17/05/2026 18:42:05.509', 100, 120);
-
+      const criteria = await page.evaluate(() => {
         const clearButton = document.querySelectorAll('.cell-context-menu-item.f7')[2];
         clearButton.click();
 
