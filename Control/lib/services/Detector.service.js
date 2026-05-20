@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const { grpcErrorToNativeError } = require('@aliceo2/web-ui');
+const { grpcErrorToNativeError, LogManager, LogLevel } = require('@aliceo2/web-ui');
 
 /**
  * @class
@@ -39,6 +39,13 @@ class DetectorService {
      * @type {Array<string>}
      */
     this._detectors = [];
+
+    /**
+     * @type {Map<string, Array<string>>}
+     */
+    this._hostsByDetector = new Map();
+
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/detectorservice`);
   }
 
   /**
@@ -79,6 +86,33 @@ class DetectorService {
   }
 
   /**
+   * Method to retrieve a map of hosts grouped by their detector via Apricot gRPC service.
+   * If the in-memory cache is non-empty, it is returned directly without querying Apricot.
+   * Individual detector failures are non-fatal; the partial result is cached and returned.
+   * @returns {Promise<Map<string, Array<string>>>} - map of detector name to list of hosts
+   * @throws {Error} - throws JS native error converted from gRPC error if detector list fetch fails
+   */
+  async getHostsByDetector() {
+    if (this._hostsByDetector.size > 0) {
+      return this._hostsByDetector;
+    }
+
+    const detectors = await this.getDetectorList();
+    await Promise.allSettled(
+      detectors.map(async (detector) => {
+        try {
+          const { hosts } = await this._apricotGrpcClient.GetHostInventory({ detector });
+          const filteredHosts = hosts.filter((host) => typeof host === 'string' && host.trim().length > 0);
+          this._hostsByDetector.set(detector, filteredHosts);
+        } catch (error) {
+          this._logger.errorMessage(`Failed to retrieve hosts for detector ${detector}: ${error.message}`);
+        }
+      })
+    );
+    return this._hostsByDetector;
+  }
+
+  /**
    * Getter for the list of detectors cached in memory
    * @returns {Array<string>}
    */
@@ -92,6 +126,14 @@ class DetectorService {
    */
   set detectors(detectors) {
     this._detectors = detectors;
+  }
+
+  /**
+   * Getter for the hosts-by-detector map cached in memory
+   * @returns {Map<string, Array<string>>}
+   */
+  get hostsByDetector() {
+    return this._hostsByDetector;
   }
 }
 
