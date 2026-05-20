@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 
-const { grpcErrorToNativeError, LogManager, LogLevel } = require('@aliceo2/web-ui');
+const { grpcErrorToNativeError, LogManager } = require('@aliceo2/web-ui');
 
 /**
  * @class
