@@ -6,7 +6,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-cern}"
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - type: volume
         source: database-data
