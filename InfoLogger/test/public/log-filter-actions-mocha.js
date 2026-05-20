@@ -16,6 +16,43 @@
 const assert = require('assert');
 const test = require('../mocha-index');
 
+const isContextMenuOpen = async (page) => {
+  return await page.evaluate(() => window.model.log.contextMenu.isOpen);
+};
+
+const openContextMenu = async (page, field, value, x, y) => {
+  await page.evaluate((field, value, x, y) => {
+    window.model.log.showContextMenu(field, value, x, y);
+  }, field, value, x, y);
+  await page.waitForSelector('.cell-context-menu');
+  assert.strictEqual(await isContextMenuOpen(page), true);
+};
+
+const waitForMatchExcludeButtons = async (page) => {
+  // wait for function as menu sometimes will render previous labels then update
+  await page.waitForFunction(() => {
+    const labels = Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
+      .map((label) => label.textContent.trim());
+    return labels.length === 4
+      && labels[0] === 'Match'
+      && labels[1] === 'Exclude'
+      && labels[2] === 'Clear filter'
+      && labels[3] === 'Copy';
+  });
+};
+
+const waitForFromToButtons = async (page) => {
+  await page.waitForFunction(() => {
+    const labels = Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
+      .map((label) => label.textContent.trim());
+    return labels.length === 4
+      && labels[0] === 'From'
+      && labels[1] === 'To'
+      && labels[2] === 'Clear filter'
+      && labels[3] === 'Copy';
+  });
+};
+
 describe('Filter actions test-suite', async () => {
   let baseUrl;
   let page;
@@ -225,4 +262,291 @@ describe('Filter actions test-suite', async () => {
     assert.deepStrictEqual(criterias.severity.$in, ['W', 'I', 'E', 'F']);
   });
 
+  describe('Cell Context Menu', async () => {
+    const exampleRow = {
+      severity: 'I',
+      level: 3,
+      timestamp: Date.parse('2024-05-11T10:20:30.000Z') / 1000,
+      hostname: 'ctx-host-01',
+      rolename: 'ctx-role',
+      pid: '2001',
+      username: 'ctx-user',
+      system: 'ctx-system',
+      facility: 'ctx-facility',
+      detector: 'ctx-detector',
+      partition: 'ctx-partition',
+      run: '12',
+      errcode: '404',
+      errline: '17',
+      errsource: 'ctx-source',
+      message: 'ctx-message-01',
+    };
+
+    beforeEach(async () => {
+      await page.evaluate((exampleRow) => {
+        window.model.log.filter.resetCriteria();
+        window.model.log.hideContextMenu();
+        window.__copiedContextMenuValue = undefined;
+        window.model.log.list = [exampleRow];
+        window.model.notify();
+      }, exampleRow);
+
+      // Wait until the table is updated with the new log entry
+      await page.waitForFunction(() => {
+        const cells = Array.from(document.querySelectorAll('td.cell'));
+        return cells.some((cell) => cell.textContent.trim() === 'ctx-host-01')
+          && cells.some((cell) => cell.textContent.trim() === 'ctx-message-01');
+      });
+    });
+
+    it('should show context menu on right click', async () => {
+      await page.evaluate(() => {
+        const hostNameCell = Array.from(document.querySelectorAll('td.cell'))
+          .find((cell) => cell.textContent.trim() === 'ctx-host-01');
+        hostNameCell.dispatchEvent(new MouseEvent('contextmenu', {
+          bubbles: true,
+          cancelable: true,
+          clientX: 120,
+          clientY: 140,
+          button: 2,
+        }));
+      });
+
+      // Wait for render and for model value
+      await page.waitForSelector('.cell-context-menu');
+      assert.strictEqual(await isContextMenuOpen(page), true);
+    });
+
+    it('should close context menu on Escape key', async () => {
+      await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
+
+      await page.evaluate(() => {
+        document.body.dispatchEvent(new KeyboardEvent('keydown', {
+          key: 'Escape',
+          keyCode: 27,
+          which: 27,
+          bubbles: true,
+          cancelable: true,
+        }));
+      });
+
+      assert.strictEqual(await isContextMenuOpen(page), false);
+    });
+
+    it('should close context menu on Enter key', async () => {
+      await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
+
+      const isOpenAfterEnter = await page.evaluate(() => {
+        document.body.dispatchEvent(new KeyboardEvent('keydown', {
+          key: 'Enter',
+          keyCode: 13,
+          which: 13,
+          bubbles: true,
+          cancelable: true,
+        }));
+
+        return window.model.log.contextMenu.isOpen;
+      });
+
+      assert.strictEqual(isOpenAfterEnter, false);
+    });
+
+    it('should close context menu on outside click', async () => {
+      await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
+
+      const isOpenAfterOutsideClick = await page.evaluate(() => {
+        const overlay = document.querySelector('.cell-context-menu-overlay');
+        overlay.click();
+        return window.model.log.contextMenu.isOpen;
+      });
+
+      assert.strictEqual(isOpenAfterOutsideClick, false);
+    });
+
+    it('should show correct actions for non-timestamp fields', async () => {
+      await openContextMenu(page, 'hostname', 'ctx-host-01', 120, 140);
+      await waitForMatchExcludeButtons(page);
+    });
+
+    it('should show correct actions for timestamp fields', async () => {
+      await openContextMenu(page, 'timestamp', '2024-05-11T10:20:30.000Z', 100, 120);
+      await waitForFromToButtons(page);
+    });
+
+    it('should apply "match" action for regular fields', async () => {
+      await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
+      await waitForMatchExcludeButtons(page);
+
+      const criteria = await page.evaluate(() => {
+        const matchButton = document.querySelectorAll('.cell-context-menu-item.f7')[0];
+        matchButton.click();
+        return {
+          match: window.model.log.filter.criterias.hostname.match,
+          $match: window.model.log.filter.criterias.hostname.$match,
+          isOpen: window.model.log.contextMenu.isOpen,
+        };
+      });
+
+      assert.strictEqual(criteria.match, 'ctx-host-01');
+      assert.strictEqual(criteria.$match, 'ctx-host-01');
+      assert.strictEqual(criteria.isOpen, false);
+    });
+
+    it('should apply "exclude" action for regular fields', async () => {
+      await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
+      await waitForMatchExcludeButtons(page);
+
+      const criteria = await page.evaluate(() => {
+        const excludeButton = document.querySelectorAll('.cell-context-menu-item.f7')[1];
+        excludeButton.click();
+        return {
+          exclude: window.model.log.filter.criterias.hostname.exclude,
+          $exclude: window.model.log.filter.criterias.hostname.$exclude,
+          isOpen: window.model.log.contextMenu.isOpen,
+        };
+      });
+
+      assert.strictEqual(criteria.exclude, 'ctx-host-01');
+      assert.strictEqual(criteria.$exclude, 'ctx-host-01');
+      assert.strictEqual(criteria.isOpen, false);
+    });
+
+    it('should clear criteria for regular fields', async () => {
+      await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
+      await waitForMatchExcludeButtons(page);
+
+      const criteria = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('hostname', 'match', 'ctx-host-01');
+        window.model.log.filter.setCriteria('hostname', 'exclude', 'ctx-host-01');
+        const clearButton = document.querySelectorAll('.cell-context-menu-item.f7')[2];
+        clearButton.click();
+        return {
+          match: window.model.log.filter.criterias.hostname.match,
+          $match: window.model.log.filter.criterias.hostname.$match,
+          exclude: window.model.log.filter.criterias.hostname.exclude,
+          $exclude: window.model.log.filter.criterias.hostname.$exclude,
+          isOpen: window.model.log.contextMenu.isOpen,
+        };
+      });
+
+      assert.strictEqual(criteria.match, '');
+      assert.strictEqual(criteria.$match, null);
+      assert.strictEqual(criteria.exclude, '');
+      assert.strictEqual(criteria.$exclude, null);
+      assert.strictEqual(criteria.isOpen, false);
+    });
+
+    it('should apply "from" action for timestamp fields', async () => {
+      await openContextMenu(page, 'timestamp', '2024-05-11T10:20:30.000Z', 100, 120);
+      await waitForFromToButtons(page);
+
+      const menuValue = await page.evaluate(() => window.model.log.contextMenu.value);
+
+      const criteria = await page.evaluate(() => {
+        const fromButton = Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
+          .find((label) => label.textContent.trim() === 'From')
+          ?.closest('.cell-context-menu-item');
+        const expectedIso = window.model.timezone.parse(window.model.log.contextMenu.value)?.toISOString();
+        fromButton.click();
+
+        return {
+          since: window.model.log.filter.criterias.timestamp.since,
+          $since: window.model.log.filter.criterias.timestamp.$since?.toISOString(),
+          expectedIso,
+          isOpen: window.model.log.contextMenu.isOpen,
+        };
+      });
+
+      assert.strictEqual(criteria.since, menuValue);
+      assert.strictEqual(criteria.$since, criteria.expectedIso);
+      assert.strictEqual(criteria.isOpen, false);
+    });
+
+    it('should apply "to" action for timestamp fields', async () => {
+      await openContextMenu(page, 'timestamp', '2024-05-11T10:20:30.000Z', 100, 120);
+      await waitForFromToButtons(page);
+
+      const menuValue = await page.evaluate(() => window.model.log.contextMenu.value);
+
+      const criteria = await page.evaluate(() => {
+        const toButton = Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
+          .find((label) => label.textContent.trim() === 'To')
+          ?.closest('.cell-context-menu-item');
+        const expectedIso = window.model.timezone.parse(window.model.log.contextMenu.value)?.toISOString();
+        toButton.click();
+
+        return {
+          until: window.model.log.filter.criterias.timestamp.until,
+          $until: window.model.log.filter.criterias.timestamp.$until?.toISOString(),
+          expectedIso,
+          isOpen: window.model.log.contextMenu.isOpen,
+        };
+      });
+
+      assert.strictEqual(criteria.until, menuValue);
+      assert.strictEqual(criteria.$until, criteria.expectedIso);
+      assert.strictEqual(criteria.isOpen, false);
+    });
+
+    it('should clear criteria for timestamp fields', async () => {
+      const criteria = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('timestamp', 'since', '17/05/2026 18:42:05.509');
+        window.model.log.filter.setCriteria('timestamp', 'until', '17/05/2026 18:42:05.509');
+
+        window.model.log.showContextMenu('timestamp', '17/05/2026 18:42:05.509', 100, 120);
+
+        const clearButton = document.querySelectorAll('.cell-context-menu-item.f7')[2];
+        clearButton.click();
+
+        return {
+          since: window.model.log.filter.criterias.timestamp.since,
+          $since: window.model.log.filter.criterias.timestamp.$since,
+          until: window.model.log.filter.criterias.timestamp.until,
+          $until: window.model.log.filter.criterias.timestamp.$until,
+          isOpen: window.model.log.contextMenu.isOpen,
+        };
+      });
+
+      assert.strictEqual(criteria.since, '');
+      assert.strictEqual(criteria.$since, null);
+
+      assert.strictEqual(criteria.until, '');
+      assert.strictEqual(criteria.$until, null);
+
+      assert.strictEqual(criteria.isOpen, false);
+    });
+
+    it('should copy value to clipboard', async () => {
+      // Mock the clipboard API
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, 'clipboard', {
+          value: {
+            writeText: (value) => {
+              window.__copiedContextMenuValue = value;
+              return Promise.resolve();
+            },
+          },
+          configurable: true,
+        });
+      });
+
+      await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
+      await waitForMatchExcludeButtons(page);
+
+      const copied = await page.evaluate(async () => {
+        const copyButton = document.querySelectorAll('.cell-context-menu-item.f7')[3];
+        copyButton.click();
+        // Wait for the mocked clipboard writeText to be called
+        await Promise.resolve();
+
+        return {
+          value: window.__copiedContextMenuValue,
+          isOpen: window.model.log.contextMenu.isOpen,
+        };
+      });
+
+      assert.strictEqual(copied.value, 'ctx-host-01');
+      assert.strictEqual(copied.isOpen, false);
+    });
+  });
 });
