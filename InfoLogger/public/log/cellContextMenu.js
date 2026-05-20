@@ -12,8 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h } from '/js/src/index.js';
-import { iconCheck, iconBan, iconClipboard, iconTrash } from '/js/src/index.js';
+import { h, iconCheck, iconBan, iconClipboard, iconTrash } from '/js/src/index.js';
 
 const MENU_WIDTH = 220;
 const MENU_HEIGHT_ESTIMATE = 90;
@@ -30,11 +29,11 @@ const remToPx = (rem) => rem * parseFloat(getComputedStyle(document.documentElem
  * @returns {{left: number, top: number}} clamped menu position
  */
 const clampPosition = (x, y, inspectorEnabled) => ({
-  left: Math.min(
+  left: Math.max(0, Math.min(
     x,
     window.innerWidth - MENU_WIDTH - SEVERITY_CANVAS_WIDTH_PX - (inspectorEnabled ? remToPx(INSPECTOR_WIDTH_REM) : 0),
-  ), // 10px margin from the edge because of the severity canvas
-  top: Math.min(y, window.innerHeight - MENU_HEIGHT_ESTIMATE),
+  )),
+  top: Math.max(0, Math.min(y, window.innerHeight - MENU_HEIGHT_ESTIMATE)),
 });
 
 /**
@@ -90,7 +89,9 @@ export default (model) => {
         hideMenu();
       }),
       createMenuItem(iconClipboard(), 'var(--color-primary)', 'Copy', () => {
-        navigator.clipboard.writeText(value);
+        navigator.clipboard.writeText(value).catch(() => {
+          model.notification.show('Failed to copy to clipboard', 'danger', 2000);
+        });
         hideMenu();
       }),
     ]),
@@ -106,13 +107,10 @@ export default (model) => {
  * @returns {vnode} - the menu item as a vnode
  */
 function createMenuItem(icon, iconColor, label, onClick) {
-  return h('a.cell-context-menu-item.f7', {
+  return h('.cell-context-menu-item.f7', {
     onclick: onClick,
   }, [
     h('span', { style: { color: iconColor } }, icon),
-    h(
-      'span.flex-row.justify-between.w-100',
-      h('span.ph2.w-100', { style: { fontWeight: 'bold' } }, label),
-    ),
+    h('span.ph2.w-100', { style: { fontWeight: 'bold' } }, label),
   ]);
-};
+}
