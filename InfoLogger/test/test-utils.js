@@ -60,7 +60,37 @@ const getShifterAuthQueryParams = () => {
  */
 const baseUrl = `http://${testConfig.http.hostname}:${testConfig.http.port}/`;
 
+/**
+ * Generates query parameters for authentication with guest-only access rights (no shifter, no admin)
+ * @returns {string} - query parameters for authentication with guest access rights
+ */
+const getGuestAuthQueryParams = () => {
+  const token = generateToken({
+    personid: 3,
+    username: 'testguest',
+    name: 'Test Guest',
+    access: 'guest',
+  });
+  return `personid=3&name=Test Guest&username=testguest&access=guest&token=${token}`;
+};
+
+/**
+ * Generates query parameters for authentication with both shifter and admin access rights
+ * @returns {string} - query parameters for authentication with shifter and admin access rights
+ */
+const getShifterAdminAuthQueryParams = () => {
+  const token = generateToken({
+    personid: 4,
+    username: 'testshifteradmin',
+    name: 'Test Shifter Admin',
+    access: 'shifter,admin',
+  });
+  return `personid=4&name=Test Shifter Admin&username=testshifteradmin&access=shifter,admin&token=${token}`;
+};
+
 module.exports = {
   getShifterAuthQueryParams,
+  getGuestAuthQueryParams,
+  getShifterAdminAuthQueryParams,
   baseUrl,
 };

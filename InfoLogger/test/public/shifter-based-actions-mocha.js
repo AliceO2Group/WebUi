@@ -15,12 +15,16 @@
 const assert = require('assert');
 const test = require('../mocha-index');
 const { INFOLOGGER_LEVEL_LIST } = require('../../public/constants/infologger-level.const');
-const { baseUrl, getShifterAuthQueryParams } = require('../test-utils.js');
+const {
+  baseUrl, getShifterAuthQueryParams, getGuestAuthQueryParams, getShifterAdminAuthQueryParams,
+} = require('../test-utils.js');
 
 describe('Shifter Based Actions Test Suite', async () => {
   // eslint-disable-next-line init-declarations
   let page;
   const shifterQueryParams = getShifterAuthQueryParams();
+  const guestQueryParams = getGuestAuthQueryParams();
+  const shifterAdminQueryParams = getShifterAdminAuthQueryParams();
 
   before(() => {
     ({ page } = test);
@@ -76,5 +80,25 @@ describe('Shifter Based Actions Test Suite', async () => {
       window.model.session.access = access;
       window.model.notify();
     }, currentAccess);
+  });
+
+  it('should not apply level constraint when user has neither shifter nor admin role', async () => {
+    await page.goto(`${baseUrl}?${guestQueryParams}`, { waitUntil: 'networkidle0' });
+
+    const criterias = await page.evaluate(() => window.model.log.filter.criterias);
+    assert.strictEqual(criterias.level.max, null, 'Level max should be unrestricted for a guest user');
+
+    const constraints = await page.evaluate(() => window.model.log.filter._constraints);
+    assert.deepStrictEqual(constraints, {}, 'No constraints should be set for a guest user');
+  });
+
+  it('should not apply level constraint when user has both shifter and admin roles', async () => {
+    await page.goto(`${baseUrl}?${shifterAdminQueryParams}`, { waitUntil: 'networkidle0' });
+
+    const criterias = await page.evaluate(() => window.model.log.filter.criterias);
+    assert.strictEqual(criterias.level.max, null, 'Level max should be unrestricted when user also has admin role');
+
+    const constraints = await page.evaluate(() => window.model.log.filter._constraints);
+    assert.deepStrictEqual(constraints, {}, 'No constraints should be set when user also has admin role');
   });
 });
