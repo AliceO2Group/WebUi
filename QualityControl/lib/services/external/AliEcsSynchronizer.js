@@ -34,7 +34,7 @@ export class AliEcsSynchronizer {
    * @param {import('kafkajs').Kafka} kafkaClient - configured kafka client
    * @param {KafkaConfiguration.consumerGroups} consumerGroups - consumer groups to be used for various topics
    * @param {EventEmitter} eventEmitter - event emitter to be used to emit events when new data is available
-   * @param {class} ConsumerClass - class to be used for creating the consumer, defaults to AliEcsEventMessagesConsumer
+   * @param {typeof AliEcsEventMessagesConsumer} ConsumerClass - class to be used for creating the consumer
    */
   constructor(kafkaClient, consumerGroups, eventEmitter, ConsumerClass = AliEcsEventMessagesConsumer) {
     this._logger = LogManager.getLogger(LOG_FACILITY);
@@ -76,13 +76,12 @@ export class AliEcsSynchronizer {
 
   /**
    * Callback for when a message is received on the run topic
-   * @param {events.proto.Event} eventMessage - message received on run topic
+   * @param {object} eventMessage - message received on run topic
+   * @param {RunEvent} eventMessage.runEvent - the run event object
+   * @param {object} eventMessage.timestamp - the timestamp object
    * @returns {void}
    */
   async _onRunMessage(eventMessage) {
-    /**
-     * @param {RunEvent} - eventMessage - message received on run topic
-     */
     const { runEvent, timestamp } = eventMessage;
     if (!runEvent) {
       this._logger.warnMessage('Received run message on run topic without runEvent field');

@@ -63,7 +63,7 @@ function cardHeader(isOfficial, id, name, isMinimumGlobal, toggleOfficialFunctio
 /**
  * Creates a toggle button for changing a layout's official status.
  * @param {boolean} isOfficial - Current official status of the layout
- * @param {Function} toggleOfficialFunction - Callback to execute when button is clicked
+ * @param {() => void} toggleOfficialFunction - Callback to execute when button is clicked
  * @returns {vnode} Button element with status-appropriate text and click handler
  * @description
  * - Button text changes between "Make Official" and "Make Unofficial"

@@ -4,11 +4,9 @@ on:
     paths:
       - 'Configuration/**/*'
       - '.github/workflows/configuration.yml'
-  push:
-    branches:
-      - 'main'
-      - 'dev'
-
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   formatting-check:
     name: Check prettier formatting rules on ubuntu-latest
