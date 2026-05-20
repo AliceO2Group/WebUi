@@ -32,7 +32,45 @@ import errorComponent from './common/errorComponent.js';
  */
 export default (model) => [
   notification(model.notification),
-  h('.flex-column absolute-fill', [
+  h('.flex-column absolute-fill', {
+    oncreate: (vnode) => {
+      const handleWheel = (e) => {
+        if (!e.ctrlKey) {
+          return;
+        }
+        e.preventDefault();
+        const now = Date.now();
+        if (now - model.zoom.lastScrollTime < 50) {
+          return;
+        }
+        model.zoom.lastScrollTime = now;
+        e.deltaY < 0 ? model.zoomIn() : model.zoomOut();
+      };
+
+      const handleKeyDown = (e) => {
+        if (!e.ctrlKey) {
+          return;
+        }
+        // Support both '=' and '+' for zooming in, as some keyboards require Shift to type '+'
+        if (e.key === '=' || e.key === '+') {
+          e.preventDefault();
+          model.zoomIn();
+        } else if (e.key === '-') {
+          e.preventDefault();
+          model.zoomOut();
+        }
+      };
+
+      window.addEventListener('wheel', handleWheel, { passive: false });
+      window.addEventListener('keydown', handleKeyDown);
+
+      vnode.state.cleanup = () => {
+        window.removeEventListener('wheel', handleWheel);
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    },
+    onremove: (vnode) => vnode.state.cleanup(),
+  }, [
     h('.shadow-level2', [
       h('header.p1.flex-row.f7', [
         h('', commandLogs(model)),

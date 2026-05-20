@@ -12,7 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconPerson, iconMediaPlay, iconMediaStop, iconDataTransferDownload } from '/js/src/index.js';
+import { h,
+  iconPerson,
+  iconMediaPlay,
+  iconMediaStop,
+  iconDataTransferDownload,
+  iconMagnifyingGlass,
+} from '/js/src/index.js';
 import { BUTTON } from '../constants/button-states.const.js';
 import { MODE } from '../constants/mode.const.js';
 import { setBrowserTabTitle } from '../common/utils.js';
@@ -58,6 +64,10 @@ export default (model) => [
     title: 'Go to last log message (ALT + down arrow)',
   }, '↓'),
   downloadButtonGroup(model.log),
+  h('button.btn.flex-row', {
+    onclick: () => model.resetZoom(),
+    disabled: model.zoom.level === 1,
+  }, h('span', ['Reset ', iconMagnifyingGlass()])),
 ];
 
 /**
