@@ -53,6 +53,15 @@ const waitForFromToButtons = async (page) => {
   });
 };
 
+const clickMenuItemByLabel = async (page, label) => {
+  await page.evaluate((label) => {
+    const item = Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
+      .find((el) => el.textContent.trim() === label)
+      ?.closest('.cell-context-menu-item');
+    item.click();
+  }, label);
+};
+
 describe('Filter actions test-suite', async () => {
   let baseUrl;
   let page;
@@ -284,6 +293,7 @@ describe('Filter actions test-suite', async () => {
 
     beforeEach(async () => {
       await page.evaluate((exampleRow) => {
+        window.confirm = () => false;
         window.model.log.filter.resetCriteria();
         window.model.log.hideContextMenu();
         window.__copiedContextMenuValue = undefined;
@@ -376,16 +386,13 @@ describe('Filter actions test-suite', async () => {
     it('should apply "match" action for regular fields', async () => {
       await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
       await waitForMatchExcludeButtons(page);
+      await clickMenuItemByLabel(page, 'Match');
 
-      const criteria = await page.evaluate(() => {
-        const matchButton = document.querySelectorAll('.cell-context-menu-item.f7')[0];
-        matchButton.click();
-        return {
-          match: window.model.log.filter.criterias.hostname.match,
-          $match: window.model.log.filter.criterias.hostname.$match,
-          isOpen: window.model.log.contextMenu.isOpen,
-        };
-      });
+      const criteria = await page.evaluate(() => ({
+        match: window.model.log.filter.criterias.hostname.match,
+        $match: window.model.log.filter.criterias.hostname.$match,
+        isOpen: window.model.log.contextMenu.isOpen,
+      }));
 
       assert.strictEqual(criteria.match, 'ctx-host-01');
       assert.strictEqual(criteria.$match, 'ctx-host-01');
@@ -395,16 +402,13 @@ describe('Filter actions test-suite', async () => {
     it('should apply "exclude" action for regular fields', async () => {
       await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
       await waitForMatchExcludeButtons(page);
+      await clickMenuItemByLabel(page, 'Exclude');
 
-      const criteria = await page.evaluate(() => {
-        const excludeButton = document.querySelectorAll('.cell-context-menu-item.f7')[1];
-        excludeButton.click();
-        return {
-          exclude: window.model.log.filter.criterias.hostname.exclude,
-          $exclude: window.model.log.filter.criterias.hostname.$exclude,
-          isOpen: window.model.log.contextMenu.isOpen,
-        };
-      });
+      const criteria = await page.evaluate(() => ({
+        exclude: window.model.log.filter.criterias.hostname.exclude,
+        $exclude: window.model.log.filter.criterias.hostname.$exclude,
+        isOpen: window.model.log.contextMenu.isOpen,
+      }));
 
       assert.strictEqual(criteria.exclude, 'ctx-host-01');
       assert.strictEqual(criteria.$exclude, 'ctx-host-01');
@@ -415,19 +419,19 @@ describe('Filter actions test-suite', async () => {
       await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
       await waitForMatchExcludeButtons(page);
 
-      const criteria = await page.evaluate(() => {
+      await page.evaluate(() => {
         window.model.log.filter.setCriteria('hostname', 'match', 'ctx-host-01');
         window.model.log.filter.setCriteria('hostname', 'exclude', 'ctx-host-01');
-        const clearButton = document.querySelectorAll('.cell-context-menu-item.f7')[2];
-        clearButton.click();
-        return {
-          match: window.model.log.filter.criterias.hostname.match,
-          $match: window.model.log.filter.criterias.hostname.$match,
-          exclude: window.model.log.filter.criterias.hostname.exclude,
-          $exclude: window.model.log.filter.criterias.hostname.$exclude,
-          isOpen: window.model.log.contextMenu.isOpen,
-        };
       });
+      await clickMenuItemByLabel(page, 'Clear filter');
+
+      const criteria = await page.evaluate(() => ({
+        match: window.model.log.filter.criterias.hostname.match,
+        $match: window.model.log.filter.criterias.hostname.$match,
+        exclude: window.model.log.filter.criterias.hostname.exclude,
+        $exclude: window.model.log.filter.criterias.hostname.$exclude,
+        isOpen: window.model.log.contextMenu.isOpen,
+      }));
 
       assert.strictEqual(criteria.match, '');
       assert.strictEqual(criteria.$match, null);
@@ -441,24 +445,19 @@ describe('Filter actions test-suite', async () => {
       await waitForFromToButtons(page);
 
       const menuValue = await page.evaluate(() => window.model.log.contextMenu.value);
+      const expectedIso = await page.evaluate(
+        () => window.model.timezone.parse(window.model.log.contextMenu.value)?.toISOString(),
+      );
+      await clickMenuItemByLabel(page, 'From');
 
-      const criteria = await page.evaluate(() => {
-        const fromButton = Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
-          .find((label) => label.textContent.trim() === 'From')
-          ?.closest('.cell-context-menu-item');
-        const expectedIso = window.model.timezone.parse(window.model.log.contextMenu.value)?.toISOString();
-        fromButton.click();
-
-        return {
-          since: window.model.log.filter.criterias.timestamp.since,
-          $since: window.model.log.filter.criterias.timestamp.$since?.toISOString(),
-          expectedIso,
-          isOpen: window.model.log.contextMenu.isOpen,
-        };
-      });
+      const criteria = await page.evaluate(() => ({
+        since: window.model.log.filter.criterias.timestamp.since,
+        $since: window.model.log.filter.criterias.timestamp.$since?.toISOString(),
+        isOpen: window.model.log.contextMenu.isOpen,
+      }));
 
       assert.strictEqual(criteria.since, menuValue);
-      assert.strictEqual(criteria.$since, criteria.expectedIso);
+      assert.strictEqual(criteria.$since, expectedIso);
       assert.strictEqual(criteria.isOpen, false);
     });
 
@@ -467,24 +466,19 @@ describe('Filter actions test-suite', async () => {
       await waitForFromToButtons(page);
 
       const menuValue = await page.evaluate(() => window.model.log.contextMenu.value);
+      const expectedIso = await page.evaluate(
+        () => window.model.timezone.parse(window.model.log.contextMenu.value)?.toISOString(),
+      );
+      await clickMenuItemByLabel(page, 'To');
 
-      const criteria = await page.evaluate(() => {
-        const toButton = Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
-          .find((label) => label.textContent.trim() === 'To')
-          ?.closest('.cell-context-menu-item');
-        const expectedIso = window.model.timezone.parse(window.model.log.contextMenu.value)?.toISOString();
-        toButton.click();
-
-        return {
-          until: window.model.log.filter.criterias.timestamp.until,
-          $until: window.model.log.filter.criterias.timestamp.$until?.toISOString(),
-          expectedIso,
-          isOpen: window.model.log.contextMenu.isOpen,
-        };
-      });
+      const criteria = await page.evaluate(() => ({
+        until: window.model.log.filter.criterias.timestamp.until,
+        $until: window.model.log.filter.criterias.timestamp.$until?.toISOString(),
+        isOpen: window.model.log.contextMenu.isOpen,
+      }));
 
       assert.strictEqual(criteria.until, menuValue);
-      assert.strictEqual(criteria.$until, criteria.expectedIso);
+      assert.strictEqual(criteria.$until, expectedIso);
       assert.strictEqual(criteria.isOpen, false);
     });
 
@@ -495,19 +489,15 @@ describe('Filter actions test-suite', async () => {
       });
       await openContextMenu(page, 'timestamp', '17/05/2026 18:42:05.509', 100, 120);
       await waitForFromToButtons(page);
+      await clickMenuItemByLabel(page, 'Clear filter');
 
-      const criteria = await page.evaluate(() => {
-        const clearButton = document.querySelectorAll('.cell-context-menu-item.f7')[2];
-        clearButton.click();
-
-        return {
-          since: window.model.log.filter.criterias.timestamp.since,
-          $since: window.model.log.filter.criterias.timestamp.$since,
-          until: window.model.log.filter.criterias.timestamp.until,
-          $until: window.model.log.filter.criterias.timestamp.$until,
-          isOpen: window.model.log.contextMenu.isOpen,
-        };
-      });
+      const criteria = await page.evaluate(() => ({
+        since: window.model.log.filter.criterias.timestamp.since,
+        $since: window.model.log.filter.criterias.timestamp.$since,
+        until: window.model.log.filter.criterias.timestamp.until,
+        $until: window.model.log.filter.criterias.timestamp.$until,
+        isOpen: window.model.log.contextMenu.isOpen,
+      }));
 
       assert.strictEqual(criteria.since, '');
       assert.strictEqual(criteria.$since, null);
@@ -519,7 +509,6 @@ describe('Filter actions test-suite', async () => {
     });
 
     it('should copy value to clipboard', async () => {
-      // Mock the clipboard API
       await page.evaluate(() => {
         Object.defineProperty(navigator, 'clipboard', {
           value: {
@@ -534,13 +523,10 @@ describe('Filter actions test-suite', async () => {
 
       await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
       await waitForMatchExcludeButtons(page);
+      await clickMenuItemByLabel(page, 'Copy');
 
       const copied = await page.evaluate(async () => {
-        const copyButton = document.querySelectorAll('.cell-context-menu-item.f7')[3];
-        copyButton.click();
-        // Wait for the mocked clipboard writeText to be called
         await Promise.resolve();
-
         return {
           value: window.__copiedContextMenuValue,
           isOpen: window.model.log.contextMenu.isOpen,
@@ -549,6 +535,30 @@ describe('Filter actions test-suite', async () => {
 
       assert.strictEqual(copied.value, 'ctx-host-01');
       assert.strictEqual(copied.isOpen, false);
+    });
+
+    it('should show notification when clipboard write fails', async () => {
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, 'clipboard', {
+          value: {
+            writeText: () => Promise.reject(new Error('Clipboard access denied')),
+          },
+          configurable: true,
+        });
+      });
+
+      await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
+      await waitForMatchExcludeButtons(page);
+      await clickMenuItemByLabel(page, 'Copy');
+
+      await page.waitForFunction(() => window.model.notification.state === 'shown');
+      const notification = await page.evaluate(() => ({
+        message: window.model.notification.message,
+        type: window.model.notification.type,
+      }));
+
+      assert.strictEqual(notification.message, 'Failed to copy to clipboard');
+      assert.strictEqual(notification.type, 'danger');
     });
   });
 });
