@@ -57,7 +57,7 @@ export default (logModel, filterLevelsAllowed) => [
       label,
       {
         id: `level-${index}`,
-        title: available ? `Filter level ≤ ${index}` : `You don't have access to level ${label}`,
+        title: available ? `Filter level ≤ ${label}` : `You don't have access to level ${label}`,
         isActive: logModel.filter.criterias.level.max === index,
         onclick: () => logModel.setCriteria('level', 'max', index),
         disabled: !available,
