@@ -206,7 +206,7 @@ export class BookkeepingService {
   }
 
   /**
-   * Retrieves runs that are currently ongoing (started within the last \@see {RECENT_RUN_THRESHOLD_MS}
+   * Retrieves runs that are currently ongoing (started within the last \@link {RECENT_RUN_THRESHOLD_MS}
    * but have not yet ended).
    * @returns {Promise<Array<object>|undefined>} A promise that resolves to an array of run objects,
    *  or undefined if the service is inactive, no data is found, or an error occurs

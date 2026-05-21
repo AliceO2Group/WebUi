@@ -44,7 +44,7 @@ class ApricotService {
    */
   async init() {
     try {
-      this.detectors = (await this._grpcClient['ListDetectors']()).detectors;
+      this.detectors = await this._loadDetectors();
       this._logger.infoMessage(`Initial data retrieved from AliECS/Apricot: ${this.detectors} detectors`, {
         level: 99,
         system: 'GUI',
@@ -63,6 +63,15 @@ class ApricotService {
     } catch (error) {
       this._logger.error('Unable to list detectors');
     }
+  }
+
+  /**
+   * Retrieve detectors from ECS via Apricot
+   * @returns {Promise<Array<string>>}
+   */
+  async _loadDetectors() {
+    const {detectors = []} = await this._grpcClient['ListDetectors']();
+    return detectors;
   }
 
   /**
@@ -90,24 +99,6 @@ class ApricotService {
   }
 
   /**
-   * Retrieve an in-memory detectors list
-   * If list does not exist, make a request to Apricot
-   * @param {Request} req
-   * @param {Response} res
-   */
-  async getDetectorList(_, res) {
-    if (this.detectors.length === 0) {
-      try {
-        this.detectors = (await this._grpcClient['ListDetectors']()).detectors;
-      } catch (error) {
-        errorHandler(error, res, 503, 'apricotservice');
-        return;
-      }
-    }
-    res.status(200).json({detectors: this.detectors});
-  }
-
-  /**
    * Return an in-memory map of hosts grouped by their detector
    * If map is empty, make a request to Apricot
    * @param {Request} req
@@ -116,7 +107,7 @@ class ApricotService {
   async getHostsByDetectorList(_, res) {
     if (this.hostsByDetector.size === 0) {
       try {
-        this.detectors = (await this._grpcClient['ListDetectors']()).detectors;
+        this.detectors = await this._loadDetectors();
 
         await Promise.allSettled(
           this.detectors.map(async (detector) => {
