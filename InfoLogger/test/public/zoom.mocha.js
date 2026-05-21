@@ -187,28 +187,20 @@ describe('Zoom test-suite', async () => {
 
   it('should have reset button disabled at default zoom', async () => {
     await page.evaluate(() => window.model.resetZoom());
-    await new Promise((resolve) => setTimeout(resolve, 200));
-
-    const isDisabled = await page.evaluate(() => {
+    await page.waitForFunction(() => {
       const buttons = [...document.querySelectorAll('button.btn')];
       const resetBtn = buttons.find((b) => b.textContent.includes('Reset'));
-      return resetBtn ? resetBtn.disabled : null;
-    });
-
-    assert.strictEqual(isDisabled, true, 'reset button should be disabled at default zoom');
+      return resetBtn && resetBtn.disabled === true;
+    }, {timeout: 2000});
   });
 
   it('should have reset button enabled when zoomed', async () => {
     await page.evaluate(() => window.model.zoomIn());
-    await new Promise((resolve) => setTimeout(resolve, 200));
-
-    const isDisabled = await page.evaluate(() => {
+    await page.waitForFunction(() => {
       const buttons = [...document.querySelectorAll('button.btn')];
       const resetBtn = buttons.find((b) => b.textContent.includes('Reset'));
-      return resetBtn ? resetBtn.disabled : null;
-    });
-
-    assert.strictEqual(isDisabled, false, 'reset button should be enabled when zoomed');
+      return resetBtn && resetBtn.disabled === false;
+    }, {timeout: 2000});
 
     await page.evaluate(() => window.model.resetZoom());
   });
