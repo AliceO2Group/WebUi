@@ -107,32 +107,30 @@ class EnvironmentController {
     const user = new User(username, name, personid);
     const {id} = req.params;
     const {type: transitionType, runNumber = ''} = req.body;
-    if (!id) {
-      updateAndSendExpressResponseFromNativeError(res, new InvalidInputError('Missing environment ID parameter'));
-    } else if (!(transitionType in EnvironmentTransitionType)) {
+    if (!(transitionType in EnvironmentTransitionType)) {
       updateAndSendExpressResponseFromNativeError(
         res,
         new InvalidInputError('Invalid environment transition to perform'),
       );
-    } else {
-      const transitionRequestedAt = Date.now();
-      let response = null;
-      this._logger.infoMessage(`Request to transition environment by ${req.session.username} to ${transitionType}`,
+      return;
+    }
+    const transitionRequestedAt = Date.now();
+    let response = null;
+    this._logger.infoMessage(`Request to transition environment by ${req.session.username} to ${transitionType}`,
+      {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
+    );
+    try {
+      response = await this._envService.transitionEnvironment(id, transitionType, user);
+      res.status(200).json(response);
+    } catch (error) {
+      this._logger.errorMessage(
+        `Request to transition environment by ${req.session.username} to ${transitionType} failed due to ${error}`,
         {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
       );
-      try {
-        response = await this._envService.transitionEnvironment(id, transitionType, user);
-        res.status(200).json(response);
-      } catch (error) {
-        this._logger.errorMessage(
-          `Request to transition environment by ${req.session.username} to ${transitionType} failed due to ${error}`,
-          {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY, partition: id, run: runNumber}
-        );
-        updateAndSendExpressResponseFromNativeError(res, error);
-      }
-      const currentRunNumber = response?.currentRunNumber ?? runNumber;
-      this._logger.debug(`${transitionType},${id},${currentRunNumber},${transitionRequestedAt},${Date.now()}`);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
+    const currentRunNumber = response?.currentRunNumber ?? runNumber;
+    this._logger.debug(`${transitionType},${id},${currentRunNumber},${transitionRequestedAt},${Date.now()}`);
   }
 
   /**

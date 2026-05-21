@@ -194,7 +194,14 @@ module.exports.setup = (http, ws) => {
   http.get('/environments', coreMiddleware, envCtrl.getEnvironmentsHandler.bind(envCtrl), {public: true});
   http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironmentHandler.bind(envCtrl), {public: true});
   http.post('/environment/auto', coreMiddleware, envCtrl.newAutoEnvironmentHandler.bind(envCtrl));
-  http.put('/environment/:id', coreMiddleware, envCtrl.transitionEnvironmentHandler.bind(envCtrl));
+  http.put('/environment/:id', 
+    coreMiddleware,
+    minimumRoleMiddleware(Role.DETECTOR),
+    setDetectorsFromEnvironmentMiddleware,
+    verifyLockOwnershipMiddleware,
+    envCtrl.transitionEnvironmentHandler.bind(envCtrl)
+  );
+
   http.delete('/environment/:id',
     coreMiddleware,
     minimumRoleMiddleware(Role.DETECTOR),

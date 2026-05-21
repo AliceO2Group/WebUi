@@ -184,6 +184,7 @@ describe('Control', function() {
   require('./api/configuration/api-put-configuration.test');
   require('./api/detectors/api-get-detectors.test');
   require('./api/detectors/api-get-hosts-by-detector.test');
+  require('./api/environment/api-put-environment.test');
 
   beforeEach(() => this.ok = true);
 

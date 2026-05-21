@@ -117,16 +117,6 @@ describe('EnvironmentController test suite', () => {
       };
     });
 
-    it('should return error due to missing id', async () => {
-      await envCtrl.transitionEnvironmentHandler({params: {id: null}, body: {type: null}, session: {username: '', personid: 0}}, res);
-      assert.ok(res.status.calledWith(400));
-      assert.ok(res.json.calledWith({
-        message: 'Missing environment ID parameter',
-        status: 400,
-        title: 'Invalid Input',
-      }));
-    });
-
     it('should return error due to missing transition type', async () => {
       await envCtrl.transitionEnvironmentHandler({params: {id: 'ABC123'}, body: {type: null}, session: {username: '', personid: 0}}, res);
       assert.ok(res.status.calledWith(400));
