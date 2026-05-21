@@ -194,9 +194,7 @@ describe('Zoom test-suite', async () => {
   });
 
   it('should have reset button enabled when zoomed', async () => {
-    await page.keyboard.down('Control');
-    await page.keyboard.press('Equal');
-    await page.keyboard.up('Control');
+    await page.evaluate(() => window.model.zoomIn());
 
     await page.waitForFunction(() => {
       const resetBtn = document.querySelector('#reset-zoom-button');
