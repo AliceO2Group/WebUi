@@ -16,6 +16,10 @@ const CONTEXT_MENU_RENDER_DELAY = 25; // delay to wait for context menu to rende
 
 const isContextMenuOpen = async (page) => await page.evaluate(() => window.model.log.contextMenu.isOpen);
 
+const getMenuActionLabels = async (page) => page.evaluate(() =>
+  Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
+    .map((el) => el.textContent.trim()));
+
 const openContextMenu = async (page, field, value, x, y) => {
   await page.evaluate((field, value, x, y) => {
     window.model.log.contextMenu.show(field, value, x, y);
@@ -51,6 +55,7 @@ const clickMenuItemByLabel = async (page, label) => {
 module.exports = {
   CONTEXT_MENU_RENDER_DELAY,
   isContextMenuOpen,
+  getMenuActionLabels,
   openContextMenu,
   isMenuItemDisabled,
   clickMenuItemByLabel,
