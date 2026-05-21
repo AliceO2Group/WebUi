@@ -191,6 +191,7 @@ export const cellContextMenu = (model) => {
  * @param {string} iconClass - CSS class for the icon color (e.g. 'success', 'danger', 'primary')
  * @param {string} label - label to display in the menu item
  * @param {() => void} onClick - function to execute on click
+ * @param {boolean} disabled - whether the menu item should be disabled
  * @returns {vnode} - the menu item as a vnode
  */
 function createMenuItem(icon, iconClass, label, onClick, disabled = false) {
