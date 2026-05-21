@@ -12,10 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconCheck, iconBan, iconClipboard, iconTrash } from '/js/src/index.js';
+import { h, iconCheck, iconBan, iconClipboard, iconTrash, iconMagnifyingGlass } from '/js/src/index.js';
 
 const MENU_WIDTH = 220;
-const MENU_HEIGHT_ESTIMATE = 90;
+const MENU_HEIGHT_ESTIMATE = 120;
 const INSPECTOR_WIDTH_REM = 20;
 const SEVERITY_CANVAS_WIDTH_PX = 10;
 
@@ -48,7 +48,7 @@ export const cellContextMenu = (model) => {
     return null;
   }
 
-  const { field, value, x, y } = contextMenu;
+  const { field, value, x, y, row } = contextMenu;
   const pos = clampPosition(x, y, model.inspectorEnabled);
 
   const hideMenu = () => model.log.hideContextMenu();
@@ -92,6 +92,15 @@ export const cellContextMenu = (model) => {
         navigator.clipboard.writeText(value).catch(() => {
           model.notification.show('Failed to copy to clipboard', 'danger', 2000);
         });
+        hideMenu();
+      }),
+      createMenuItem(iconMagnifyingGlass(), 'primary', 'Open Inspector', () => {
+        if (row) {
+          model.log.setItem(row);
+        }
+        if (!model.inspectorEnabled) {
+          model.toggleInspector();
+        }
         hideMenu();
       }),
     ]),

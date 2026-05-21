@@ -80,13 +80,14 @@ export default class Log extends Observable {
     };
   }
 
-  showContextMenu(field, value, x, y) {
+  showContextMenu(field, value, x, y, row) {
     this.contextMenu = {
       isOpen: true,
       field,
       value,
       x,
       y,
+      row,
     };
     this.notify();
   }

@@ -108,7 +108,7 @@ const cellWithContextMenu = (model, row, field, content, extraClasses = '', extr
       const data = resolveContextMenuData(model, row, field, content);
       if (data) {
         e.preventDefault();
-        model.log.showContextMenu(data.field, data.value, e.clientX, e.clientY);
+        model.log.showContextMenu(data.field, data.value, e.clientX, e.clientY, row);
       }
     },
   }, content);
