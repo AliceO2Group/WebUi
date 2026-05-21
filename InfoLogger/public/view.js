@@ -24,7 +24,7 @@ import tableLogsContent from './log/tableLogsContent.js';
 import tableLogsScrollMap from './log/tableLogsScrollMap.js';
 import aboutComponent from './about/about.component.js';
 import errorComponent from './common/errorComponent.js';
-import cellContextMenu from './log/cellContextMenu.js';
+import { cellContextMenu } from './log/cellContextMenu.js';
 
 /**
  * Main view of the application

@@ -42,7 +42,7 @@ const clampPosition = (x, y, inspectorEnabled) => ({
  * @param {Model} model root application model
  * @returns {Array|null} rendered menu nodes
  */
-export default (model) => {
+export const cellContextMenu = (model) => {
   const { contextMenu } = model.log;
   if (!contextMenu.isOpen) {
     return null;
