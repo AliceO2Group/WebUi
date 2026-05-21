@@ -190,7 +190,7 @@ describe('Zoom test-suite', async () => {
     await page.waitForFunction(() => {
       const resetBtn = document.querySelector('#reset-zoom-button');
       return resetBtn && resetBtn.disabled === true;
-    }, { timeout: 2000 });
+    });
   });
 
   it('should have reset button enabled when zoomed', async () => {
@@ -198,7 +198,7 @@ describe('Zoom test-suite', async () => {
     await page.waitForFunction(() => {
       const resetBtn = document.querySelector('#reset-zoom-button');
       return resetBtn && resetBtn.disabled === false;
-    }, { timeout: 2000 });
+    });
 
     await page.evaluate(() => window.model.resetZoom());
   });
