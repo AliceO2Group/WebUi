@@ -18,7 +18,7 @@ import { JsonFileService } from '../../services/JsonFileService.js';
 /**
  * Middleware that checks if the layout service is correctly initialized
  * @param {JSONFileConnector} dataService - service for getting/setting layout data
- * @returns  {function(req, res, next): Function} - middleware function
+ * @returns  {(req: Express.Request, res: Express.Response, next: Express.Next) => Promise<void>} - middleware function
  */
 export const layoutServiceMiddleware = (dataService) =>
 

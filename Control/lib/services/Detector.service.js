@@ -20,14 +20,25 @@ const { grpcErrorToNativeError } = require('@aliceo2/web-ui');
  */
 class DetectorService {
   /**
-   * Constructor for initializing the service with ECS gRPC service client
+   * Constructor for initializing the service with ECS and Apricot gRPC service clients
    * @param {GrpcServiceClient} ecsGrpcClient - service to interact via gRPC client with AliECS core
+   * @param {GrpcServiceClient} apricotGrpcClient - service to interact via gRPC client with AliECS Apricot
    */
-  constructor(ecsGrpcClient) {
+  constructor(ecsGrpcClient, apricotGrpcClient) {
     /**
      * @type {GrpcServiceClient}
      */
     this._ecsGrpcClient = ecsGrpcClient;
+
+    /**
+     * @type {GrpcServiceClient}
+     */
+    this._apricotGrpcClient = apricotGrpcClient;
+
+    /**
+     * @type {Array<string>}
+     */
+    this._detectors = [];
   }
 
   /**
@@ -44,6 +55,43 @@ class DetectorService {
     } catch (error) {
       throw grpcErrorToNativeError(error);
     }
+  }
+
+  /**
+   * Method to retrieve detectors list from ECS via Apricot gRPC service
+   * In the received list, remove empty or whitespace-only values from response.
+   * Keep the list of detectors cached in memory for future calls.
+   * @returns {Promise<Array<string>>} - list of non-empty detectors
+   * @throws {Error} - throws JS native error converted from gRPC error in case of failure
+   */
+  async getDetectorList() {
+    if (this._detectors.length > 0) {
+      return this._detectors;
+    }
+
+    try {
+      const { detectors = [] } = await this._apricotGrpcClient.ListDetectors();
+      this._detectors = detectors.filter((detector) => typeof detector === 'string' && detector.trim().length > 0);
+      return this._detectors;
+    } catch (grpcError) {
+      throw grpcErrorToNativeError(grpcError);
+    }
+  }
+
+  /**
+   * Getter for the list of detectors cached in memory
+   * @returns {Array<string>}
+   */
+  get detectors() {
+    return this._detectors;
+  }
+
+  /**
+   * Setter for the list of detectors cached in memory
+   * @param {Array<string>} detectors - list of strings with detector names to be cached in memory
+   */
+  set detectors(detectors) {
+    this._detectors = detectors;
   }
 }
 

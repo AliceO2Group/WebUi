@@ -26,7 +26,7 @@ export class IntervalsService {
 
   /**
    * Method to allow other services to register events that should trigger based on an interval rate
-   * @param {Function} callback - function that should be called based on interval rate
+   * @param {() => void} callback - function that should be called based on interval rate
    * @param {number} intervalRate = 60 * 1000 - (ms) on how often the callback should be called
    * @returns {symbol} - unique key for registered callback
    */

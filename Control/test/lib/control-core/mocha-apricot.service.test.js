@@ -59,53 +59,6 @@ describe('ApricotService test suite', () => {
     });
   });
 
-  describe('Check in-memory detectorlist', () => {
-    let req, res;
-    beforeEach(() => {
-      req = {};
-      res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.spy(),
-        send: sinon.spy(),
-      };
-    });
-    it('should successfully request a list of detectors from AliECS core if none are present', async () => {
-      const apricotProxy = {
-        isConnectionReady: true,
-        ListDetectors: sinon.stub().resolves({detectors: ['TST']})
-      };
-      const apricotService = new ApricotService(apricotProxy);
-      await apricotService.getDetectorList(req, res);
-      assert.ok(res.status.calledOnce);
-      assert.ok(res.status.calledWith(200));
-      assert.ok(res.json.calledOnce);
-      assert.ok(res.json.calledWith({detectors: ['TST']}));
-    });
-
-    it('should successfully return a list of detectors if already present', async () => {
-      const apricotService = new ApricotService({});
-      apricotService.detectors = ['TST'];
-      await apricotService.getDetectorList(req, res);
-      assert.ok(res.status.calledOnce);
-      assert.ok(res.status.calledWith(200));
-      assert.ok(res.json.calledOnce);
-      assert.ok(res.json.calledWith({detectors: ['TST']}));
-    });
-
-    it('should return error response if detectors are not present and AliECS replies with error', async () => {
-      const apricotProxy = {
-        isConnectionReady: true,
-        ListDetectors: sinon.stub().rejects(new Error('Unable to retrieve list'))
-      };
-      const apricotService = new ApricotService(apricotProxy);
-      await apricotService.getDetectorList(req, res);
-      assert.ok(res.status.calledOnce);
-      assert.ok(res.status.calledWith(503));
-      assert.ok(res.send.calledOnce);
-      assert.ok(res.send.calledWith({message: 'Unable to retrieve list'}));
-    });
-  });
-
   describe('Check detectors caching', () => {
     let req, res;
 

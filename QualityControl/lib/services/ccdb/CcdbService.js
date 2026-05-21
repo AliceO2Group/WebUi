@@ -86,7 +86,7 @@ export class CcdbService {
       const path = `/monitor/${CCDB_MONITOR}/.*/${CCDB_VERSION_KEY}`;
       serviceInfo = await httpGetJson(this._hostname, this._port, path, { headers: { Accept: 'application/json' } });
     } catch (error) {
-      throw new Error(`Unable to connect to CCDB due to: ${error}`);
+      throw new Error(`Unable to connect to CCDB due to: ${error}`, { cause: error });
     }
     try {
       const monitorData = serviceInfo?.[CCDB_MONITOR] ?? {};
@@ -95,7 +95,7 @@ export class CcdbService {
       const version = monitorData[firstKey]?.[0]?.value ?? 'unknown version';
       return { version };
     } catch (error) {
-      throw new Error(`Unable to read version of CCDB due to: ${error}`);
+      throw new Error(`Unable to read version of CCDB due to: ${error}`, { cause: error });
     }
   }
 
@@ -190,8 +190,9 @@ export class CcdbService {
     let result = null;
     try {
       result = await httpGetJson(this._hostname, this._port, url, { headers });
-    } catch {
-      throw new Error(`Failed to fetch object at url '${url}' and path '${partialIdentification.path}'.`);
+    } catch (error) {
+      const { path } = partialIdentification;
+      throw new Error(`Failed to fetch object at url '${url}' and path '${path}'.`, { cause: error });
     }
 
     if (!result?.objects?.length) {

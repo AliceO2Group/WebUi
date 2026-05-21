@@ -240,6 +240,7 @@ export default [
         'never',
       ],
       'no-magic-numbers': 'off', // TODO: enable
+      'no-useless-assignment': 'off',
     },
   },
 ];
