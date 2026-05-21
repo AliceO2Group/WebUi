@@ -14,6 +14,7 @@
 
 import { Observable, RemoteData } from '/js/src/index.js';
 import LogFilter from '../logFilter/LogFilter.js';
+import ContextMenu from './ContextMenu.js';
 import { MODE } from '../constants/mode.const.js';
 import { TIME_MS } from '../common/Timezone.js';
 import { ROW_HEIGHT } from '../constants/visual.const.js';
@@ -71,29 +72,8 @@ export default class Log extends Observable {
       table: '',
     };
 
-    this.contextMenu = {
-      isOpen: false,
-      field: null,
-      value: null,
-      x: 0,
-      y: 0,
-    };
-  }
-
-  showContextMenu(field, value, x, y) {
-    this.contextMenu = {
-      isOpen: true,
-      field,
-      value,
-      x,
-      y,
-    };
-    this.notify();
-  }
-
-  hideContextMenu() {
-    this.contextMenu.isOpen = false;
-    this.notify();
+    this.contextMenu = new ContextMenu();
+    this.contextMenu.bubbleTo(this);
   }
 
   /**

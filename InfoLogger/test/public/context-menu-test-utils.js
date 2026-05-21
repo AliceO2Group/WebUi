@@ -18,7 +18,7 @@ const isContextMenuOpen = async (page) => await page.evaluate(() => window.model
 
 const openContextMenu = async (page, field, value, x, y) => {
   await page.evaluate((field, value, x, y) => {
-    window.model.log.showContextMenu(field, value, x, y);
+    window.model.log.contextMenu.show(field, value, x, y);
   }, field, value, x, y);
   await page.waitForSelector('.cell-context-menu');
   await new Promise((resolve) => setTimeout(resolve, CONTEXT_MENU_RENDER_DELAY));

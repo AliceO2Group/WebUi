@@ -72,7 +72,7 @@ describe('Cell Context Menu', async () => {
   beforeEach(async () => {
     await page.evaluate(() => {
       window.model.log.filter.resetCriteria();
-      window.model.log.hideContextMenu();
+      window.model.log.contextMenu.hide();
     });
   });
 

@@ -51,7 +51,7 @@ export const cellContextMenu = (model) => {
   const { field, value, x, y } = contextMenu;
   const pos = clampPosition(x, y, model.inspectorEnabled);
 
-  const hideMenu = () => model.log.hideContextMenu();
+  const hideMenu = () => contextMenu.hide();
 
   const isTimestamp = field === 'timestamp';
 
