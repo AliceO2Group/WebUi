@@ -24,59 +24,6 @@ const openContextMenu = async (page, field, value, x, y) => {
   await new Promise((resolve) => setTimeout(resolve, CONTEXT_MENU_RENDER_DELAY));
 };
 
-const waitForMatchExcludeButtons = async (page) => {
-  // wait for function as menu sometimes will render previous labels then update
-  await page.waitForFunction(() => {
-    const labels = Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
-      .map((label) => label.textContent.trim());
-    return labels.length === 5
-      && labels[0] === 'Match'
-      && labels[1] === 'Exclude'
-      && labels[2] === 'Clear Filter'
-      && labels[3] === 'Copy'
-      && labels[4] === 'Open Inspector';
-  });
-};
-
-const waitForFromToButtons = async (page) => {
-  await page.waitForFunction(() => {
-    const labels = Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
-      .map((label) => label.textContent.trim());
-    return labels.length === 5
-      && labels[0] === 'From'
-      && labels[1] === 'To'
-      && labels[2] === 'Clear Filter'
-      && labels[3] === 'Copy'
-      && labels[4] === 'Open Inspector';
-  });
-};
-
-const waitForSeverityButtons = async (page) => {
-  await page.waitForFunction(() => {
-    const labels = Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
-      .map((label) => label.textContent.trim());
-    return labels.length === 5
-      && labels[0] === 'Show Severity'
-      && labels[1] === 'Hide Severity'
-      && labels[2] === 'Reset Severity Filter'
-      && labels[3] === 'Copy'
-      && labels[4] === 'Open Inspector';
-  });
-};
-
-const waitForLevelButtons = async (page) => {
-  await page.waitForFunction(() => {
-    const labels = Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
-      .map((label) => label.textContent.trim());
-    return labels.length === 5
-      && labels[0] === 'Set Level To Support'
-      && labels[1] === 'Set Level To Ops'
-      && labels[2] === 'Clear Level Filter'
-      && labels[3] === 'Copy'
-      && labels[4] === 'Open Inspector';
-  });
-};
-
 const isMenuItemDisabled = async (page, label) => await page.evaluate((label) => {
   const item = Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
     .find((el) => el.textContent.trim() === label)
@@ -105,10 +52,6 @@ module.exports = {
   CONTEXT_MENU_RENDER_DELAY,
   isContextMenuOpen,
   openContextMenu,
-  waitForMatchExcludeButtons,
-  waitForFromToButtons,
-  waitForSeverityButtons,
-  waitForLevelButtons,
   isMenuItemDisabled,
   clickMenuItemByLabel,
 };
