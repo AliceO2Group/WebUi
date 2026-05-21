@@ -71,6 +71,14 @@ const tableLogLine = (model, row) => h('tr.row-hover', {
   ondblclick: () => model.toggleInspector(),
 }, tableRows(model, model.table.colsHeader, row));
 
+/**
+ * Resolves the required data to send to the context menu based on the cell's field and content.
+ * @param {Model} model - root model of the application
+ * @param {object} row - values for each cell of the row
+ * @param {string} field - the field associated to the cell (e.g. 'hostname', 'severity', etc.)
+ * @param {string} content - the content of the cell
+ * @returns {object|null} - the data for the context menu or null if not applicable
+ */
 const resolveContextMenuData = (model, row, field, content) => {
   if (field === 'date') {
     return row.timestamp ? { field: 'timestamp', value: String(content) } : null;
@@ -83,6 +91,16 @@ const resolveContextMenuData = (model, row, field, content) => {
   return row[field] != null && row[field] !== '' ? { field, value: String(row[field]) } : null;
 };
 
+/**
+ * Wraps a cell with a context menu with filtering and general options.
+ * @param {Model} model - root model of the application
+ * @param {object} row - values for each cell of the row
+ * @param {string} field - the field associated to the cell (e.g. 'hostname', 'severity', etc.)
+ * @param {string} content - the content of the cell
+ * @param {string} extraClasses - extra CSS classes to add to the cell
+ * @param {object} extraAttrs - extra attributes to add to the cell
+ * @returns {vnode} - the cell wrapped with the context menu
+ */
 const cellWithContextMenu = (model, row, field, content, extraClasses = '', extraAttrs = {}) =>
   h(`td.cell${extraClasses}`, {
     ...extraAttrs,

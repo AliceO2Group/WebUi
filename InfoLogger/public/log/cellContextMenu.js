@@ -100,8 +100,8 @@ export const cellContextMenu = (model) => {
 
 /**
  * Creates menu item for the context menu of a cell with given icon, label and click action.
- * @param {string} icon - icon to display in the menu item
  * @param {string} iconColor - color of the icon
+ * @param {vnode} icon - icon to display in the menu item
  * @param {string} label - label to display in the menu item
  * @param {() => void} onClick - function to execute on click
  * @returns {vnode} - the menu item as a vnode
