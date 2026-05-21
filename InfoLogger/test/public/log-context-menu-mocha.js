@@ -141,6 +141,30 @@ describe('Cell Context Menu', async () => {
       assert.strictEqual(isOpenAfterOutsideClick, false);
     });
 
+    it('should select the row on right-click', async () => {
+      await page.evaluate(() => {
+        window.model.log.setItem(null);
+        window.model.notify();
+      });
+
+      // Dispatch actual right-click event on the cell to trigger the context menu and row selection
+      await page.evaluate(() => {
+        const cell = Array.from(document.querySelectorAll('td.cell'))
+          .find((cell) => cell.textContent.trim() === 'ctx-message-01');
+        cell.dispatchEvent(new MouseEvent('contextmenu', {
+          bubbles: true,
+          cancelable: true,
+          clientX: 100,
+          clientY: 120,
+          button: 2,
+        }));
+      });
+
+      await page.waitForSelector('.cell-context-menu');
+      const selectedMessage = await page.evaluate(() => window.model.log.item?.message);
+      assert.strictEqual(selectedMessage, 'ctx-message-01');
+    });
+
     it('should show hover tooltip on table rows', async () => {
       const title = await page.evaluate(() => {
         const row = document.querySelector('tr.row-hover');
@@ -639,24 +663,17 @@ describe('Cell Context Menu', async () => {
       });
 
       describe('Inspector', async () => {
-        it('should open inspector and select the right-clicked row via "Open Inspector"', async () => {
-          await openContextMenu(page, 'message', 'ctx-message-01', 100, 120, exampleRow);
+        it('should open inspector via "Open Inspector"', async () => {
+          await openContextMenu(page, 'message', 'ctx-message-01', 100, 120);
           await waitForMatchExcludeButtons(page);
-          // wait for the menu to have the ctx-message-01 label to ensure the menu has rendered for the correct row before clicking
-          await page.waitForFunction(() => {
-            const menu = document.querySelector('.cell-context-menu');
-            return menu && menu.textContent.includes('ctx-message-01');
-          });
           await clickMenuItemByLabel(page, 'Open Inspector');
 
           const result = await page.evaluate(() => ({
             inspectorEnabled: window.model.inspectorEnabled,
-            selectedMessage: window.model.log.item?.message,
             isOpen: window.model.log.contextMenu.isOpen,
           }));
 
           assert.strictEqual(result.inspectorEnabled, true);
-          assert.strictEqual(result.selectedMessage, 'ctx-message-01');
           assert.strictEqual(result.isOpen, false);
         });
 
@@ -666,17 +683,13 @@ describe('Cell Context Menu', async () => {
             window.model.notify();
           });
 
-          await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120, exampleRow);
+          await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
           await waitForMatchExcludeButtons(page);
           await clickMenuItemByLabel(page, 'Open Inspector');
 
-          const result = await page.evaluate(() => ({
-            inspectorEnabled: window.model.inspectorEnabled,
-            selectedMessage: window.model.log.item?.message,
-          }));
+          const result = await page.evaluate(() => window.model.inspectorEnabled);
 
-          assert.strictEqual(result.inspectorEnabled, true);
-          assert.strictEqual(result.selectedMessage, 'ctx-message-01');
+          assert.strictEqual(result, true);
         });
       });
     });

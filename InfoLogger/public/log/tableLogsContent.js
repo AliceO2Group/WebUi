@@ -78,12 +78,12 @@ const tableLogLine = (model, row) => {
 /**
  * Resolves the required data to send to the context menu based on the cell's field and content.
  * @param {Model} model - root model of the application
- * @param {object} row - values for each cell of the row
  * @param {string} field - the field associated to the cell (e.g. 'hostname', 'severity', etc.)
  * @param {string} content - the content of the cell
  * @returns {object|null} - the data for the context menu or null if not applicable
  */
-const resolveContextMenuData = (model, row, field, content) => {
+const resolveContextMenuData = (model, field, content) => {
+  const row = model.log.item;
   if (field === 'date') {
     return row.timestamp ? { field: 'timestamp', value: String(content) } : null;
   }
@@ -109,10 +109,11 @@ const cellWithContextMenu = (model, row, field, content, extraClasses = '', extr
   h(`td.cell${extraClasses}`, {
     ...extraAttrs,
     oncontextmenu: (e) => {
-      const data = resolveContextMenuData(model, row, field, content);
+      model.log.setItem(row);
+      const data = resolveContextMenuData(model, field, content);
       if (data) {
         e.preventDefault();
-        model.log.showContextMenu(data.field, data.value, e.clientX, e.clientY, row);
+        model.log.showContextMenu(data.field, data.value, e.clientX, e.clientY);
       }
     },
   }, content);

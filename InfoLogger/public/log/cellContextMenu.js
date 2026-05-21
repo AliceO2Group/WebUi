@@ -48,7 +48,7 @@ export const cellContextMenu = (model) => {
     return null;
   }
 
-  const { field, value, x, y, row } = contextMenu;
+  const { field, value, x, y } = contextMenu;
   const pos = clampPosition(x, y, model.inspectorEnabled);
 
   const hideMenu = () => model.log.hideContextMenu();
@@ -176,9 +176,6 @@ export const cellContextMenu = (model) => {
         hideMenu();
       }),
       createMenuItem(iconMagnifyingGlass(), 'primary', 'Open Inspector', () => {
-        if (row) {
-          model.log.setItem(row);
-        }
         if (!model.inspectorEnabled) {
           model.toggleInspector();
         }
