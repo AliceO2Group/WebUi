@@ -188,19 +188,17 @@ describe('Zoom test-suite', async () => {
   it('should have reset button disabled at default zoom', async () => {
     await page.evaluate(() => window.model.resetZoom());
     await page.waitForFunction(() => {
-      const buttons = [...document.querySelectorAll('button.btn')];
-      const resetBtn = buttons.find((b) => b.textContent.includes('Reset'));
+      const resetBtn = document.querySelector('#reset-zoom-button');
       return resetBtn && resetBtn.disabled === true;
-    }, {timeout: 2000});
+    }, { timeout: 2000 });
   });
 
   it('should have reset button enabled when zoomed', async () => {
     await page.evaluate(() => window.model.zoomIn());
     await page.waitForFunction(() => {
-      const buttons = [...document.querySelectorAll('button.btn')];
-      const resetBtn = buttons.find((b) => b.textContent.includes('Reset'));
+      const resetBtn = document.querySelector('#reset-zoom-button');
       return resetBtn && resetBtn.disabled === false;
-    }, {timeout: 2000});
+    }, { timeout: 2000 });
 
     await page.evaluate(() => window.model.resetZoom());
   });

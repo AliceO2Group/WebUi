@@ -67,6 +67,7 @@ export default (model) => [
   h('button.btn.flex-row', {
     onclick: () => model.resetZoom(),
     disabled: model.zoom.level === 1,
+    id: 'reset-zoom-button',
   }, h('span', ['Reset ', iconMagnifyingGlass()])),
 ];
 
