@@ -249,7 +249,14 @@ module.exports.setup = (http, ws) => {
       res.status(503).send({message: error.message});
     }
   });
-  http.get('/core/hostsByDetectors', (req, res) => apricotService.getHostsByDetectorList(req, res));
+  http.get('/core/hostsByDetectors', async (_, res) => {
+    try {
+      const hostsByDetector = await detectorService.getHostsByDetector();
+      res.status(200).json({hosts: Object.fromEntries(hostsByDetector)});
+    } catch (error) {
+      res.status(503).send({message: error.message});
+    }
+  });
 
   http.post('/execute/o2-roc-config', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
 
@@ -378,8 +385,7 @@ async function initializeData(detectorService, apricotService, lockService, cons
 
   const detectors = await detectorService.getDetectorList();
   lockService.setLockStatesForDetectors(detectors);
-
-  await apricotService.init();
+  await detectorService.getHostsByDetector();
 }
 
 /**
