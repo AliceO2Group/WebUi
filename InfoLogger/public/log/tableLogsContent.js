@@ -65,11 +65,15 @@ const scrollStyling = (model) => ({
  * @param {Log} row - a row of this table is a raw log
  * @returns {vnode} - the log build as a table row
  */
-const tableLogLine = (model, row) => h('tr.row-hover', {
-  className: model.log.item === row ? 'row-selected' : '',
-  onclick: () => model.log.setItem(row),
-  ondblclick: () => model.toggleInspector(),
-}, tableRows(model, model.table.colsHeader, row));
+const tableLogLine = (model, row) => {
+  const { log, table } = model;
+  return h('tr.row-hover', {
+    className: log.item === row ? 'row-selected' : '',
+    title: 'Right-click for more options',
+    onclick: () => log.setItem(row),
+    ondblclick: () => model.toggleInspector(),
+  }, tableRows(model, table.colsHeader, row));
+};
 
 /**
  * Resolves the required data to send to the context menu based on the cell's field and content.
@@ -120,44 +124,45 @@ const cellWithContextMenu = (model, row, field, content, extraClasses = '', extr
  * @param {object} row - values for each cell of the row
  * @returns {vnode} - the row of the table
  */
-const tableRows = (model, colsHeader, row) =>
-  [
-    h('td.cell.text-center', { className: model.log.item === row ? null : severityClass(row.severity) }, row.severity),
-    h('td.cell.text-center.cell-bordered', row.level),
-    colsHeader.date.visible && cellWithContextMenu(
-      model,
-      row,
-      'date',
-      model.timezone.format(row.timestamp, 'date'),
-      '.cell-bordered',
+const tableRows = (model, colsHeader, row) => {
+  const cell = (field, content, extraClasses = '', extraAttrs = {}) =>
+    cellWithContextMenu(model, row, field, content, extraClasses, extraAttrs);
+
+  const { date, time, hostname, rolename, pid, username,
+    system, facility, detector, partition, run,
+    errcode, errline, errsource, message } = colsHeader;
+
+  const { severity, level, timestamp, hostname: hostnameVal, rolename: rolenameVal,
+    pid: pidVal, username: usernameVal, system: systemVal, facility: facilityVal,
+    detector: detectorVal, partition: partitionVal, run: runVal,
+    errcode: errcodeVal, errline: errlineVal, errsource: errsourceVal,
+    message: messageVal } = row;
+
+  return [
+    cell(
+      'severity',
+      severity,
+      '.text-center',
+      { className: model.log.item === row ? null : severityClass(severity) },
     ),
-    colsHeader.time.visible && cellWithContextMenu(
-      model,
-      row,
-      'time',
-      model.timezone.format(row.timestamp, model.log.timeFormat),
-      '.cell-bordered',
-    ),
-    colsHeader.hostname.visible && cellWithContextMenu(model, row, 'hostname', row.hostname, '.cell-bordered'),
-    colsHeader.rolename.visible && cellWithContextMenu(model, row, 'rolename', row.rolename, '.cell-bordered'),
-    colsHeader.pid.visible && cellWithContextMenu(model, row, 'pid', row.pid, '.cell-bordered'),
-    colsHeader.username.visible && cellWithContextMenu(model, row, 'username', row.username, '.cell-bordered'),
-    colsHeader.system.visible && cellWithContextMenu(model, row, 'system', row.system, '.cell-bordered'),
-    colsHeader.facility.visible && cellWithContextMenu(model, row, 'facility', row.facility, '.cell-bordered'),
-    colsHeader.detector.visible && cellWithContextMenu(model, row, 'detector', row.detector, '.cell-bordered'),
-    colsHeader.partition.visible && cellWithContextMenu(model, row, 'partition', row.partition, '.cell-bordered'),
-    colsHeader.run.visible && cellWithContextMenu(model, row, 'run', row.run, '.cell-bordered'),
-    colsHeader.errcode.visible && cellWithContextMenu(
-      model,
-      row,
-      'errcode',
-      linkToWikiErrors(row.errcode),
-      '.cell-bordered',
-    ),
-    colsHeader.errline.visible && cellWithContextMenu(model, row, 'errline', row.errline, '.cell-bordered'),
-    colsHeader.errsource.visible && cellWithContextMenu(model, row, 'errsource', row.errsource, '.cell-bordered'),
-    colsHeader.message.visible && cellWithContextMenu(model, row, 'message', row.message, '', { title: row.message }),
+    cell('level', level, '.text-center.cell-bordered'),
+    date.visible && cell('date', model.timezone.format(timestamp, 'date'), '.cell-bordered'),
+    time.visible && cell('time', model.timezone.format(timestamp, model.log.timeFormat), '.cell-bordered'),
+    hostname.visible && cell('hostname', hostnameVal, '.cell-bordered'),
+    rolename.visible && cell('rolename', rolenameVal, '.cell-bordered'),
+    pid.visible && cell('pid', pidVal, '.cell-bordered'),
+    username.visible && cell('username', usernameVal, '.cell-bordered'),
+    system.visible && cell('system', systemVal, '.cell-bordered'),
+    facility.visible && cell('facility', facilityVal, '.cell-bordered'),
+    detector.visible && cell('detector', detectorVal, '.cell-bordered'),
+    partition.visible && cell('partition', partitionVal, '.cell-bordered'),
+    run.visible && cell('run', runVal, '.cell-bordered'),
+    errcode.visible && cell('errcode', linkToWikiErrors(errcodeVal), '.cell-bordered'),
+    errline.visible && cell('errline', errlineVal, '.cell-bordered'),
+    errsource.visible && cell('errsource', errsourceVal, '.cell-bordered'),
+    message.visible && cell('message', messageVal, '', { title: messageVal }),
   ];
+};
 
 /**
  * Creates link of error code to open in a new tab the wiki page associated
