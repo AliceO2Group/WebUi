@@ -194,7 +194,14 @@ module.exports.setup = (http, ws) => {
   http.get('/environments', coreMiddleware, envCtrl.getEnvironmentsHandler.bind(envCtrl), {public: true});
   http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironmentHandler.bind(envCtrl), {public: true});
   http.post('/environment/auto', coreMiddleware, envCtrl.newAutoEnvironmentHandler.bind(envCtrl));
-  http.put('/environment/:id', coreMiddleware, envCtrl.transitionEnvironmentHandler.bind(envCtrl));
+  http.put('/environment/:id', 
+    coreMiddleware,
+    minimumRoleMiddleware(Role.DETECTOR),
+    setDetectorsFromEnvironmentMiddleware,
+    verifyLockOwnershipMiddleware,
+    envCtrl.transitionEnvironmentHandler.bind(envCtrl)
+  );
+
   http.delete('/environment/:id',
     coreMiddleware,
     minimumRoleMiddleware(Role.DETECTOR),
@@ -249,7 +256,14 @@ module.exports.setup = (http, ws) => {
       res.status(503).send({message: error.message});
     }
   });
-  http.get('/core/hostsByDetectors', (req, res) => apricotService.getHostsByDetectorList(req, res));
+  http.get('/core/hostsByDetectors', async (_, res) => {
+    try {
+      const hostsByDetector = await detectorService.getHostsByDetector();
+      res.status(200).json({hosts: Object.fromEntries(hostsByDetector)});
+    } catch (error) {
+      res.status(503).send({message: error.message});
+    }
+  });
 
   http.post('/execute/o2-roc-config', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
 
@@ -378,8 +392,7 @@ async function initializeData(detectorService, apricotService, lockService, cons
 
   const detectors = await detectorService.getDetectorList();
   lockService.setLockStatesForDetectors(detectors);
-
-  await apricotService.init();
+  await detectorService.getHostsByDetector();
 }
 
 /**
