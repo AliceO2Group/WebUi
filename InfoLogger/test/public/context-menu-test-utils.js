@@ -32,7 +32,7 @@ const waitForMatchExcludeButtons = async (page) => {
     return labels.length === 5
       && labels[0] === 'Match'
       && labels[1] === 'Exclude'
-      && labels[2] === 'Clear filter'
+      && labels[2] === 'Clear Filter'
       && labels[3] === 'Copy'
       && labels[4] === 'Open Inspector';
   });
@@ -45,7 +45,7 @@ const waitForFromToButtons = async (page) => {
     return labels.length === 5
       && labels[0] === 'From'
       && labels[1] === 'To'
-      && labels[2] === 'Clear filter'
+      && labels[2] === 'Clear Filter'
       && labels[3] === 'Copy'
       && labels[4] === 'Open Inspector';
   });
@@ -56,9 +56,9 @@ const waitForSeverityButtons = async (page) => {
     const labels = Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
       .map((label) => label.textContent.trim());
     return labels.length === 5
-      && labels[0] === 'Show severity'
-      && labels[1] === 'Hide severity'
-      && labels[2] === 'Reset severity filter'
+      && labels[0] === 'Show Severity'
+      && labels[1] === 'Hide Severity'
+      && labels[2] === 'Reset Severity Filter'
       && labels[3] === 'Copy'
       && labels[4] === 'Open Inspector';
   });
@@ -69,9 +69,9 @@ const waitForLevelButtons = async (page) => {
     const labels = Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
       .map((label) => label.textContent.trim());
     return labels.length === 5
-      && labels[0] === 'Set level to Support'
-      && labels[1] === 'Set level to Ops'
-      && labels[2] === 'Clear level filter'
+      && labels[0] === 'Set Level To Support'
+      && labels[1] === 'Set Level To Ops'
+      && labels[2] === 'Clear Level Filter'
       && labels[3] === 'Copy'
       && labels[4] === 'Open Inspector';
   });

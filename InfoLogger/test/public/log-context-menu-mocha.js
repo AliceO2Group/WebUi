@@ -296,7 +296,7 @@ describe('Cell Context Menu', async () => {
 
           await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
           await waitForMatchExcludeButtons(page);
-          await clickMenuItemByLabel(page, 'Clear filter');
+          await clickMenuItemByLabel(page, 'Clear Filter');
 
           const criteria = await page.evaluate(() => ({
             match: window.model.log.filter.criterias.hostname.match,
@@ -377,14 +377,14 @@ describe('Cell Context Menu', async () => {
           assert.strictEqual(match, 'first message\nctx-message-01');
         });
 
-        it('should disable "Clear filter" for regular fields when no filter is set', async () => {
+        it('should disable "Clear Filter" for regular fields when no filter is set', async () => {
           await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
           await waitForMatchExcludeButtons(page);
 
-          assert.strictEqual(await isMenuItemDisabled(page, 'Clear filter'), true);
+          assert.strictEqual(await isMenuItemDisabled(page, 'Clear Filter'), true);
         });
 
-        it('should enable "Clear filter" for regular fields when a filter is active', async () => {
+        it('should enable "Clear Filter" for regular fields when a filter is active', async () => {
           await page.evaluate(() => {
             window.model.log.filter.setCriteria('hostname', 'match', 'some-host');
           });
@@ -392,7 +392,7 @@ describe('Cell Context Menu', async () => {
           await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
           await waitForMatchExcludeButtons(page);
 
-          assert.strictEqual(await isMenuItemDisabled(page, 'Clear filter'), false);
+          assert.strictEqual(await isMenuItemDisabled(page, 'Clear Filter'), false);
         });
       });
 
@@ -442,7 +442,7 @@ describe('Cell Context Menu', async () => {
           });
           await openContextMenu(page, 'timestamp', '17/05/2026 18:42:05.509', 100, 120);
           await waitForFromToButtons(page);
-          await clickMenuItemByLabel(page, 'Clear filter');
+          await clickMenuItemByLabel(page, 'Clear Filter');
 
           const criteria = await page.evaluate(() => ({
             since: window.model.log.filter.criterias.timestamp.since,
@@ -461,14 +461,14 @@ describe('Cell Context Menu', async () => {
           assert.strictEqual(criteria.isOpen, false);
         });
 
-        it('should disable "Clear filter" for timestamp when no filter is set', async () => {
+        it('should disable "Clear Filter" for timestamp when no filter is set', async () => {
           await openContextMenu(page, 'timestamp', '2024-05-11T10:20:30.000Z', 100, 120);
           await waitForFromToButtons(page);
 
-          assert.strictEqual(await isMenuItemDisabled(page, 'Clear filter'), true);
+          assert.strictEqual(await isMenuItemDisabled(page, 'Clear Filter'), true);
         });
 
-        it('should enable "Clear filter" for timestamp when a filter is active', async () => {
+        it('should enable "Clear Filter" for timestamp when a filter is active', async () => {
           await page.evaluate(() => {
             window.model.log.filter.setCriteria('timestamp', 'since', '17/05/2026 18:42:05.509');
           });
@@ -476,20 +476,20 @@ describe('Cell Context Menu', async () => {
           await openContextMenu(page, 'timestamp', '2024-05-11T10:20:30.000Z', 100, 120);
           await waitForFromToButtons(page);
 
-          assert.strictEqual(await isMenuItemDisabled(page, 'Clear filter'), false);
+          assert.strictEqual(await isMenuItemDisabled(page, 'Clear Filter'), false);
         });
       });
 
       describe('Show/Hide/Reset for severity field', async () => {
-        it('should disable "Show severity" when severity is already active', async () => {
+        it('should disable "Show Severity" when severity is already active', async () => {
           await openContextMenu(page, 'severity', 'I', 100, 120);
           await waitForSeverityButtons(page);
 
-          assert.strictEqual(await isMenuItemDisabled(page, 'Show severity'), true);
-          assert.strictEqual(await isMenuItemDisabled(page, 'Hide severity'), false);
+          assert.strictEqual(await isMenuItemDisabled(page, 'Show Severity'), true);
+          assert.strictEqual(await isMenuItemDisabled(page, 'Hide Severity'), false);
         });
 
-        it('should toggle severity off via "Hide severity"', async () => {
+        it('should toggle severity off via "Hide Severity"', async () => {
           let severity = await page.evaluate(() => window.model.log.filter.criterias.severity.$in);
           assert.ok(severity.includes('W'));
           await openContextMenu(page, 'severity', 'W', 100, 120);
@@ -498,13 +498,13 @@ describe('Cell Context Menu', async () => {
             const menu = document.querySelector('.cell-context-menu');
             return menu && menu.textContent.includes('W');
           });
-          await clickMenuItemByLabel(page, 'Hide severity');
+          await clickMenuItemByLabel(page, 'Hide Severity');
 
           severity = await page.evaluate(() => window.model.log.filter.criterias.severity.$in);
           assert.ok(!severity.includes('W'));
         });
 
-        it('should disable "Hide severity" when severity is already hidden', async () => {
+        it('should disable "Hide Severity" when severity is already hidden', async () => {
           await page.evaluate(() => {
             window.model.log.setCriteria('severity', 'in', 'W');
           });
@@ -513,8 +513,8 @@ describe('Cell Context Menu', async () => {
           await waitForSeverityButtons(page);
           // wait 200ms with promise
 
-          assert.strictEqual(await isMenuItemDisabled(page, 'Hide severity'), true);
-          assert.strictEqual(await isMenuItemDisabled(page, 'Show severity'), false);
+          assert.strictEqual(await isMenuItemDisabled(page, 'Hide Severity'), true);
+          assert.strictEqual(await isMenuItemDisabled(page, 'Show Severity'), false);
         });
 
         it('should reset severity filter to default', async () => {
@@ -524,7 +524,7 @@ describe('Cell Context Menu', async () => {
 
           await openContextMenu(page, 'severity', 'I', 100, 120);
           await waitForSeverityButtons(page);
-          await clickMenuItemByLabel(page, 'Reset severity filter');
+          await clickMenuItemByLabel(page, 'Reset Severity Filter');
 
           const severity = await page.evaluate(() => ({
             in: window.model.log.filter.criterias.severity.in,
@@ -535,11 +535,11 @@ describe('Cell Context Menu', async () => {
           assert.deepStrictEqual(severity.$in, ['I', 'W', 'E', 'F']);
         });
 
-        it('should disable "Reset severity filter" when all severities are already shown', async () => {
+        it('should disable "Reset Severity Filter" when all severities are already shown', async () => {
           await openContextMenu(page, 'severity', 'I', 100, 120);
           await waitForSeverityButtons(page);
 
-          assert.strictEqual(await isMenuItemDisabled(page, 'Reset severity filter'), true);
+          assert.strictEqual(await isMenuItemDisabled(page, 'Reset Severity Filter'), true);
         });
       });
 
@@ -547,7 +547,7 @@ describe('Cell Context Menu', async () => {
         it('should set level to nearest threshold above via include', async () => {
           await openContextMenu(page, 'level', '3', 100, 120);
           await waitForLevelButtons(page);
-          await clickMenuItemByLabel(page, 'Set level to Support');
+          await clickMenuItemByLabel(page, 'Set Level To Support');
 
           const level = await page.evaluate(() => window.model.log.filter.criterias.level);
           assert.strictEqual(level.max, 6);
@@ -561,21 +561,21 @@ describe('Cell Context Menu', async () => {
 
           await openContextMenu(page, 'level', '3', 100, 120);
           await waitForLevelButtons(page);
-          await clickMenuItemByLabel(page, 'Set level to Ops');
+          await clickMenuItemByLabel(page, 'Set Level To Ops');
 
           const level = await page.evaluate(() => window.model.log.filter.criterias.level);
           assert.strictEqual(level.max, 1);
           assert.strictEqual(level.$max, 1);
         });
 
-        it('should disable "Clear level filter" when no level filter is set', async () => {
+        it('should disable "Clear Level Filter" when no level filter is set', async () => {
           await openContextMenu(page, 'level', '3', 100, 120);
           await waitForLevelButtons(page);
 
-          assert.strictEqual(await isMenuItemDisabled(page, 'Clear level filter'), true);
+          assert.strictEqual(await isMenuItemDisabled(page, 'Clear Level Filter'), true);
         });
 
-        it('should enable "Clear level filter" when a level filter is active', async () => {
+        it('should enable "Clear Level Filter" when a level filter is active', async () => {
           await page.evaluate(() => {
             window.model.log.filter.setCriteria('level', 'max', 6);
           });
@@ -583,7 +583,7 @@ describe('Cell Context Menu', async () => {
           await openContextMenu(page, 'level', '3', 100, 120);
           await waitForLevelButtons(page);
 
-          assert.strictEqual(await isMenuItemDisabled(page, 'Clear level filter'), false);
+          assert.strictEqual(await isMenuItemDisabled(page, 'Clear Level Filter'), false);
         });
 
         it('should clear level filter back to null', async () => {
@@ -593,7 +593,7 @@ describe('Cell Context Menu', async () => {
 
           await openContextMenu(page, 'level', '3', 100, 120);
           await waitForLevelButtons(page);
-          await clickMenuItemByLabel(page, 'Clear level filter');
+          await clickMenuItemByLabel(page, 'Clear Level Filter');
 
           const level = await page.evaluate(() => window.model.log.filter.criterias.level);
           assert.strictEqual(level.max, null);

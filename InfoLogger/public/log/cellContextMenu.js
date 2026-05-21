@@ -72,7 +72,7 @@ export const cellContextMenu = (model) => {
         createMenuItem(
           iconCheck(),
           'success',
-          'Show severity',
+          'Show Severity',
           () => {
             model.log.setCriteria('severity', 'in', value);
             hideMenu();
@@ -82,14 +82,14 @@ export const cellContextMenu = (model) => {
         createMenuItem(
           iconBan(),
           'danger',
-          'Hide severity',
+          'Hide Severity',
           () => {
             model.log.setCriteria('severity', 'in', value);
             hideMenu();
           },
           !isActive,
         ),
-        createMenuItem(iconTrash(), 'danger', 'Reset severity filter', () => {
+        createMenuItem(iconTrash(), 'danger', 'Reset Severity Filter', () => {
           model.log.filter.setCriteria('severity', 'in', 'I W E F');
           hideMenu();
         }, model.log.filter.criterias.severity.in === 'I W E F'),
@@ -108,7 +108,7 @@ export const cellContextMenu = (model) => {
         createMenuItem(
           iconCheck(),
           'success',
-          include ? `Set level to ${include.label}` : 'Show all levels',
+          include ? `Set Level To ${include.label}` : 'Show All Levels',
           () => {
             model.log.setCriteria('level', 'max', include?.max ?? null);
             hideMenu();
@@ -117,13 +117,13 @@ export const cellContextMenu = (model) => {
         createMenuItem(
           iconBan(),
           'danger',
-          exclude ? `Set level to ${exclude.label}` : 'Show all levels',
+          exclude ? `Set Level To ${exclude.label}` : 'Show All Levels',
           () => {
             model.log.setCriteria('level', 'max', exclude?.max ?? null);
             hideMenu();
           },
         ),
-        createMenuItem(iconTrash(), 'danger', 'Clear level filter', () => {
+        createMenuItem(iconTrash(), 'danger', 'Clear Level Filter', () => {
           model.log.setCriteria('level', 'max', null);
           hideMenu();
         }, model.log.filter.criterias.level.max === null),
@@ -138,7 +138,7 @@ export const cellContextMenu = (model) => {
         model.log.setCriteria(field, isTimestamp ? 'until' : 'exclude', isTimestamp ? value : appendFilter('exclude'));
         hideMenu();
       }),
-      createMenuItem(iconTrash(), 'danger', 'Clear filter', () => {
+      createMenuItem(iconTrash(), 'danger', 'Clear Filter', () => {
         model.log.setCriteria(field, isTimestamp ? 'until' : 'exclude', '');
         model.log.setCriteria(field, isTimestamp ? 'since' : 'match', '');
         hideMenu();
