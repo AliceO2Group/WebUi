@@ -159,6 +159,13 @@ a.disabled { pointer-events: none; cursor: default; }
   color: var(--color-white);
 }
 
+.cell-context-menu-item.disabled,
+.cell-context-menu-item.disabled:hover,
+.cell-context-menu-item.disabled:active {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
 .cell-context-menu-header {
   padding: 0.4rem 0.75rem;
   color: var(--color-gray-darker);

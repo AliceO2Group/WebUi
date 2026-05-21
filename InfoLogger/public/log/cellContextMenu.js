@@ -55,6 +55,99 @@ export const cellContextMenu = (model) => {
 
   const isTimestamp = field === 'timestamp';
 
+  const appendFilter = (operator) => {
+    const separator = field === 'message' ? '\n' : ' ';
+    const existing = model.log.filter.criterias[field][operator] || '';
+    const parts = existing ? existing.split(separator) : [];
+    if (!parts.includes(value)) {
+      parts.push(value);
+    }
+    return parts.join(separator);
+  };
+
+  const filterItems = () => {
+    if (field === 'severity') {
+      const isActive = model.log.filter.criterias.severity.$in?.includes(value);
+      return [
+        createMenuItem(
+          iconCheck(),
+          'success',
+          'Show severity',
+          () => {
+            model.log.setCriteria('severity', 'in', value);
+            hideMenu();
+          },
+          isActive,
+        ),
+        createMenuItem(
+          iconBan(),
+          'danger',
+          'Hide severity',
+          () => {
+            model.log.setCriteria('severity', 'in', value);
+            hideMenu();
+          },
+          !isActive,
+        ),
+        createMenuItem(iconTrash(), 'danger', 'Reset severity filter', () => {
+          model.log.filter.setCriteria('severity', 'in', 'I W E F');
+          hideMenu();
+        }, model.log.filter.criterias.severity.in === 'I W E F'),
+      ];
+    }
+    if (field === 'level') {
+      const numValue = Number(value);
+      const thresholds = [
+        { max: 1, label: 'Ops' },
+        { max: 6, label: 'Support' },
+        { max: 11, label: 'Devel' },
+      ];
+      const include = thresholds.find((t) => t.max >= numValue);
+      const exclude = [...thresholds].reverse().find((t) => t.max < numValue);
+      return [
+        createMenuItem(
+          iconCheck(),
+          'success',
+          include ? `Set level to ${include.label}` : 'Show all levels',
+          () => {
+            model.log.setCriteria('level', 'max', include?.max ?? null);
+            hideMenu();
+          },
+        ),
+        createMenuItem(
+          iconBan(),
+          'danger',
+          exclude ? `Set level to ${exclude.label}` : 'Show all levels',
+          () => {
+            model.log.setCriteria('level', 'max', exclude?.max ?? null);
+            hideMenu();
+          },
+        ),
+        createMenuItem(iconTrash(), 'danger', 'Clear level filter', () => {
+          model.log.setCriteria('level', 'max', null);
+          hideMenu();
+        }, model.log.filter.criterias.level.max === null),
+      ];
+    }
+    return [
+      createMenuItem(iconCheck(), 'success', isTimestamp ? 'From' : 'Match', () => {
+        model.log.setCriteria(field, isTimestamp ? 'since' : 'match', isTimestamp ? value : appendFilter('match'));
+        hideMenu();
+      }),
+      createMenuItem(iconBan(), 'danger', isTimestamp ? 'To' : 'Exclude', () => {
+        model.log.setCriteria(field, isTimestamp ? 'until' : 'exclude', isTimestamp ? value : appendFilter('exclude'));
+        hideMenu();
+      }),
+      createMenuItem(iconTrash(), 'danger', 'Clear filter', () => {
+        model.log.setCriteria(field, isTimestamp ? 'until' : 'exclude', '');
+        model.log.setCriteria(field, isTimestamp ? 'since' : 'match', '');
+        hideMenu();
+      }, isTimestamp
+        ? !model.log.filter.criterias.timestamp.since && !model.log.filter.criterias.timestamp.until
+        : !model.log.filter.criterias[field].match && !model.log.filter.criterias[field].exclude),
+    ];
+  };
+
   return [
     // Full-screen transparent overlay to catch click-outside
     h('.cell-context-menu-overlay', {
@@ -75,20 +168,8 @@ export const cellContextMenu = (model) => {
           ? 'Timestamp' : field.charAt(0).toUpperCase() + field.slice(1)),
         h('span.f6.text-ellipsis', { title: value }, value),
       ]),
-      createMenuItem(iconCheck(), 'var(--color-success)', isTimestamp ? 'From' : 'Match', () => {
-        model.log.setCriteria(field, isTimestamp ? 'since' : 'match', value);
-        hideMenu();
-      }),
-      createMenuItem(iconBan(), 'var(--color-danger)', isTimestamp ? 'To' : 'Exclude', () => {
-        model.log.setCriteria(field, isTimestamp ? 'until' : 'exclude', value);
-        hideMenu();
-      }),
-      createMenuItem(iconTrash(), 'var(--color-danger)', 'Clear filter', () => {
-        model.log.setCriteria(field, isTimestamp ? 'until' : 'exclude', '');
-        model.log.setCriteria(field, isTimestamp ? 'since' : 'match', '');
-        hideMenu();
-      }),
-      createMenuItem(iconClipboard(), 'var(--color-primary)', 'Copy', () => {
+      ...filterItems(),
+      createMenuItem(iconClipboard(), 'primary', 'Copy', () => {
         navigator.clipboard.writeText(value).catch(() => {
           model.notification.show('Failed to copy to clipboard', 'danger', 2000);
         });
@@ -109,17 +190,18 @@ export const cellContextMenu = (model) => {
 
 /**
  * Creates menu item for the context menu of a cell with given icon, label and click action.
- * @param {string} iconColor - color of the icon
  * @param {vnode} icon - icon to display in the menu item
+ * @param {string} iconClass - CSS class for the icon color (e.g. 'success', 'danger', 'primary')
  * @param {string} label - label to display in the menu item
  * @param {() => void} onClick - function to execute on click
  * @returns {vnode} - the menu item as a vnode
  */
-function createMenuItem(icon, iconColor, label, onClick) {
+function createMenuItem(icon, iconClass, label, onClick, disabled = false) {
   return h('.cell-context-menu-item.f7', {
-    onclick: onClick,
+    onclick: disabled ? null : onClick,
+    className: disabled ? 'disabled' : '',
   }, [
-    h('span', { style: { color: iconColor } }, icon),
+    h(`span.${iconClass}`, icon),
     h('span.ph2.w-100', { style: { fontWeight: 'bold' } }, label),
   ]);
 }
