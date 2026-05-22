@@ -265,6 +265,7 @@ describe('Zoom test-suite', async () => {
 
     it('should have reset button enabled when zoomed', async () => {
       await page.evaluate(() => window.model.zoom.zoomIn());
+      await page.waitForFunction(() => window.model.zoom.level === 1.1);
       await page.waitForFunction(() => {
         const resetBtn = document.querySelector('#reset-zoom-button');
         return resetBtn && resetBtn.disabled === false;
@@ -276,11 +277,7 @@ describe('Zoom test-suite', async () => {
 
       await page.evaluate(() => document.querySelector('#reset-zoom-button').click());
 
-      const result = await page.evaluate(() => ({
-        zoomLevel: window.model.zoom.level,
-      }));
-
-      assert.strictEqual(result.zoomLevel, 1);
+      await page.waitForFunction(() => window.model.zoom.level === 1);
 
       await page.evaluate(() => window.model.zoom.resetZoom());
     });
