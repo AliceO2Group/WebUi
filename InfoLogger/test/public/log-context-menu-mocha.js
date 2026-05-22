@@ -24,7 +24,7 @@ const {
 } = require('./context-menu-test-utils');
 
 describe('Cell Context Menu', async () => {
-  const exampleRow = {
+  const filledRow = {
     severity: 'I',
     level: 3,
     timestamp: Date.parse('2024-05-11T10:20:30.000Z') / 1000,
@@ -43,6 +43,25 @@ describe('Cell Context Menu', async () => {
     message: 'ctx-message-01',
   };
 
+  const emptyRow = {
+    severity: 'W',
+    level: 1,
+    timestamp: Date.parse('2024-05-11T11:00:00.000Z') / 1000,
+    hostname: '',
+    rolename: '',
+    pid: '',
+    username: '',
+    system: '',
+    facility: '',
+    detector: '',
+    partition: '',
+    run: '',
+    errcode: '',
+    errline: '',
+    errsource: '',
+    message: '',
+  };
+
   let baseUrl = null;
   let page = null;
 
@@ -52,15 +71,14 @@ describe('Cell Context Menu', async () => {
 
     await page.goto(`${baseUrl}?profile=physicist`, { waitUntil: 'networkidle0' });
 
-    await page.evaluate((exampleRow) => {
+    await page.evaluate((filledRow, emptyRow) => {
       window.confirm = () => false;
-      window.model.log.list = [exampleRow];
+      window.model.log.list = [filledRow, emptyRow];
       window.model.notify();
-    }, exampleRow);
+    }, filledRow, emptyRow);
 
-    // Wait until the table is updated with the new log entry
     await page.waitForFunction(() => {
-      const cells = Array.from(document.querySelectorAll('td.cell'));
+      const cells = Array.from(document.querySelectorAll('.cell-text'));
       return cells.some((cell) => cell.textContent.trim() === 'ctx-host-01')
             && cells.some((cell) => cell.textContent.trim() === 'ctx-message-01');
     });
@@ -76,7 +94,7 @@ describe('Cell Context Menu', async () => {
   describe('Menu visibility', async () => {
     it('should show context menu on right-click', async () => {
       await page.evaluate(() => {
-        const hostNameCell = Array.from(document.querySelectorAll('td.cell'))
+        const hostNameCell = Array.from(document.querySelectorAll('.cell-text'))
           .find((cell) => cell.textContent.trim() === 'ctx-host-01');
         hostNameCell.dispatchEvent(new MouseEvent('contextmenu', {
           bubbles: true,
@@ -146,7 +164,7 @@ describe('Cell Context Menu', async () => {
 
       // Dispatch actual right-click event on the cell to trigger the context menu and row selection
       await page.evaluate(() => {
-        const cell = Array.from(document.querySelectorAll('td.cell'))
+        const cell = Array.from(document.querySelectorAll('.cell-text'))
           .find((cell) => cell.textContent.trim() === 'ctx-message-01');
         cell.dispatchEvent(new MouseEvent('contextmenu', {
           bubbles: true,
@@ -162,12 +180,19 @@ describe('Cell Context Menu', async () => {
       assert.strictEqual(selectedMessage, 'ctx-message-01');
     });
 
-    it('should show hover tooltip on table rows', async () => {
-      const title = await page.evaluate(() => {
-        const row = document.querySelector('tr.row-hover');
-        return row?.getAttribute('title');
+    it('should not open context menu on right-click of empty cell', async () => {
+      await page.evaluate(() => {
+        const emptyCell = Array.from(document.querySelectorAll('td.cell'))
+          .find((cell) => {
+            const textEl = cell.querySelector('.cell-text');
+            return textEl && textEl.textContent.trim() === '';
+          });
+        emptyCell.dispatchEvent(new MouseEvent('contextmenu', {
+          bubbles: true, cancelable: true, clientX: 100, clientY: 120, button: 2,
+        }));
       });
-      assert.strictEqual(title, 'Right-click for more options');
+
+      assert.strictEqual(await isContextMenuOpen(page), false);
     });
   });
 
@@ -683,6 +708,69 @@ describe('Cell Context Menu', async () => {
           assert.strictEqual(result, true);
         });
       });
+    });
+  });
+
+  describe('Context hint button', async () => {
+    beforeEach(async () => {
+      await page.evaluate(() => {
+        window.model.log.contextMenu.hide();
+        window.model.log.setItem(null);
+        window.model.notify();
+      });
+    });
+
+    it('should render hint on cells with content', async () => {
+      const cell = await page.evaluateHandle(() => Array.from(document.querySelectorAll('td.cell'))
+        .find((cell) => cell.textContent.includes('ctx-host-01')));
+      await cell.hover();
+
+      const hintVisible = await page.evaluate(() => {
+        const cell = Array.from(document.querySelectorAll('td.cell'))
+          .find((c) => c.textContent.includes('ctx-host-01'));
+        const hint = cell?.querySelector('.cell-context-menu-hint');
+        return hint ? true : false;
+      });
+
+      assert.strictEqual(hintVisible, true);
+    });
+
+    it('should not render hint on cells with empty content', async () => {
+      const emptyHints = await page.evaluate(() => {
+        const emptyCells = Array.from(document.querySelectorAll('td.cell'))
+          .filter((cell) => {
+            const textEl = cell.querySelector('.cell-text');
+            return textEl && textEl.textContent.trim() === '';
+          });
+        return emptyCells.filter((cell) => cell.querySelector('.cell-context-menu-hint')).length;
+      });
+
+      assert.strictEqual(emptyHints, 0);
+    });
+
+    it('should open context menu when hint is clicked', async () => {
+      await page.evaluate(() => {
+        const hint = Array.from(document.querySelectorAll('td.cell'))
+          .find((cell) => cell.textContent.includes('ctx-host-01'))
+          ?.querySelector('.cell-context-menu-hint');
+        hint.click();
+      });
+
+      await page.waitForSelector('.cell-context-menu');
+      assert.strictEqual(await isContextMenuOpen(page), true);
+    });
+
+    it('should select the row when hint is clicked', async () => {
+      await page.evaluate(() => {
+        const hint = Array.from(document.querySelectorAll('td.cell'))
+          .find((cell) => cell.textContent.includes('ctx-host-01'))
+          ?.querySelector('.cell-context-menu-hint');
+        hint.click();
+      });
+
+      await page.waitForSelector('.cell-context-menu');
+      const selectedHostname = await page.evaluate(() => window.model.log.item?.hostname);
+      assert.strictEqual(selectedHostname, 'ctx-host-01');
     });
   });
 });
