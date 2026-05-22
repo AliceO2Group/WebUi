@@ -18,6 +18,8 @@ import { h,
   iconMediaStop,
   iconDataTransferDownload,
   iconMagnifyingGlass,
+  iconPlus,
+  iconMinus,
 } from '/js/src/index.js';
 import { BUTTON } from '../constants/button-states.const.js';
 import { MODE } from '../constants/mode.const.js';
@@ -64,11 +66,27 @@ export default (model) => [
     title: 'Go to last log message (ALT + down arrow)',
   }, '↓'),
   downloadButtonGroup(model.log),
-  h('button.btn.flex-row', {
-    onclick: () => model.zoom.resetZoom(),
-    disabled: model.zoom.level === 1,
-    id: 'reset-zoom-button',
-  }, h('span', ['Reset ', iconMagnifyingGlass()])),
+  h('.btn-group', [
+    h('button.btn', {
+      onclick: () => model.zoom.zoomOut(),
+      disabled: model.zoom.level <= model.zoom.min,
+      id: 'zoom-out-button',
+      title: 'Zoom out (Ctrl/Cmd + -)',
+      // span makes the icons off center vertically, but just a div makes the height wrong
+    }, h('span', { style: 'font-size:0.8em;' }, iconMinus())),
+    h('button.btn', {
+      onclick: () => model.zoom.resetZoom(),
+      disabled: model.zoom.level === 1,
+      id: 'reset-zoom-button',
+      title: 'Reset zoom',
+    }, h('span', { style: 'font-size:0.9em;' }, iconMagnifyingGlass())),
+    h('button.btn', {
+      onclick: () => model.zoom.zoomIn(),
+      disabled: model.zoom.level >= model.zoom.max,
+      id: 'zoom-in-button',
+      title: 'Zoom in (Ctrl/Cmd + +)',
+    }, h('span', { style: 'font-size:0.8em;' }, iconPlus())),
+  ]),
 ];
 
 /**

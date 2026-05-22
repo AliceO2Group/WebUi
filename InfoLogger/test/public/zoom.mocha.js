@@ -254,6 +254,12 @@ describe('Zoom test-suite', async () => {
       assert.strictEqual(result.fontSize, '0.700rem', 'font size should reset to default');
       assert.strictEqual(result.rowHeight, '0.910rem', 'row height should reset to default');
     });
+  });
+
+  describe('Zoom buttons', () => {
+    beforeEach(async () => {
+      await page.evaluate(() => window.model.zoom.resetZoom());
+    });
 
     it('should have reset button disabled at default zoom', async () => {
       await page.evaluate(() => window.model.zoom.resetZoom());
@@ -280,6 +286,47 @@ describe('Zoom test-suite', async () => {
       await page.waitForFunction(() => window.model.zoom.level === 1);
 
       await page.evaluate(() => window.model.zoom.resetZoom());
+    });
+
+    it('should enable both -/+ buttons at default zoom', async () => {
+      await page.waitForFunction(() => {
+        const zoomIn = document.querySelector('#zoom-in-button');
+        const zoomOut = document.querySelector('#zoom-out-button');
+        return zoomIn && !zoomIn.disabled && zoomOut && !zoomOut.disabled;
+      });
+    });
+
+    it('should zoom in when + button is clicked', async () => {
+      await page.evaluate(() => document.querySelector('#zoom-in-button').click());
+      const level = await page.evaluate(() => window.model.zoom.level);
+      assert.strictEqual(level, 1.1);
+    });
+
+    it('should zoom out when - button is clicked', async () => {
+      await page.evaluate(() => window.model.zoom.zoomIn());
+      await page.evaluate(() => document.querySelector('#zoom-out-button').click());
+      const level = await page.evaluate(() => window.model.zoom.level);
+      assert.strictEqual(level, 1);
+    });
+
+    it('should disable - button at minimum zoom', async () => {
+      await page.evaluate(() => {
+        window.model.zoom.level = window.model.zoom.min;
+      });
+      await page.waitForFunction(() => {
+        const btn = document.querySelector('#zoom-out-button');
+        return btn && btn.disabled === true;
+      });
+    });
+
+    it('should disable + button at maximum zoom', async () => {
+      await page.evaluate(() => {
+        window.model.zoom.level = window.model.zoom.max;
+      });
+      await page.waitForFunction(() => {
+        const btn = document.querySelector('#zoom-in-button');
+        return btn && btn.disabled === true;
+      });
     });
   });
 
