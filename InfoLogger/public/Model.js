@@ -21,6 +21,7 @@ import { callRateLimiter, setBrowserTabTitle } from './common/utils.js';
 import { ConfigurationService } from './services/ConfigurationService.js';
 import { MODE } from './constants/mode.const.js';
 import Log from './log/Log.js';
+import Zoom from './log/Zoom.js';
 import Table from './table/Table.js';
 import Timezone from './common/Timezone.js';
 
@@ -82,16 +83,8 @@ export default class Model extends Observable {
     // Router limit: 100 calls per 30 seconds max = 30ms, 2 FPS is enough (500ms)
     this.observe(callRateLimiter(this.updateRouteOnModelChange.bind(this), 500));
 
-    this.zoom = {
-      level: 1, // Default zoom multiplier, 1 = 100%
-      min: 0.5,
-      max: 4,
-      step: 0.1, // Adds/subtracts 10% to the level
-      baseFontSize: 0.7, // Default font size in rem at level=1, matches default CSS .logs-container font size
-      // Row height in rem is fontSize * rowHeightRatio; keep this in sync with CSS variable --row-height
-      rowHeightRatio: 1.3,
-      lastScrollTime: 0, // Throttle zoom on scroll event to avoid too many updates, especially on a trackpad
-    };
+    this.zoom = new Zoom();
+    this.zoom.bubbleTo(this);
   }
 
   /**
@@ -399,67 +392,5 @@ export default class Model extends Observable {
    */
   isSecureContext() {
     return window.isSecureContext;
-  }
-
-  /**
-   * Font size in rem units
-   * @returns {number} - font size in rem units
-   */
-  get fontSize() {
-    return this.zoom.baseFontSize * this.zoom.level;
-  }
-
-  /**
-   * Row height in rem units, computed with font size to keep the same ratio across zoom levels
-   * @returns {number} - row height in rem units
-   */
-  get rowHeightRem() {
-    return this.fontSize * this.zoom.rowHeightRatio;
-  }
-
-  /**
-   * Row height in pixels, used for the virtual scroll to know how many logs to render depending on the container size
-   * @returns {number} - row height in pixels
-   */
-  get rowHeightPx() {
-    return this.rowHeightRem * parseFloat(getComputedStyle(document.documentElement).fontSize);
-  }
-
-  /**
-   * Zoom in by increasing zoom level by step, with a maximum of zoom.max
-   */
-  zoomIn() {
-    this.#setZoomLevel(Math.min(this.zoom.level + this.zoom.step, this.zoom.max));
-  }
-
-  /**
-   * Zoom out by decreasing zoom level by step, with a minimum of zoom.min
-   */
-  zoomOut() {
-    this.#setZoomLevel(Math.max(this.zoom.level - this.zoom.step, this.zoom.min));
-  }
-
-  /**
-   * Reset zoom to base level of 1
-   */
-  resetZoom() {
-    this.#setZoomLevel(1);
-  }
-
-  /**
-   * Set zoom level
-   * @param {number} level - zoom level to set, should be between zoom.min and zoom.max
-   */
-  #setZoomLevel(level) {
-    // Keep zoom to 2 d.p. to avoid floating-point artifacts (for example 1.2000000000000002)
-    // This keeps CSS values stable and ensures users can reliably return to default zoom (1)
-    this.zoom.level = parseFloat(level.toFixed(2));
-    const root = document.querySelector('.logs-container');
-    if (root) {
-      // Keep CSS sizes to 3 d.p. to avoid floating-point artifacts (for example 1.0920000000000002rem)
-      root.style.setProperty('--log-font-size', `${this.fontSize.toFixed(3)}rem`);
-      root.style.setProperty('--row-height', `${this.rowHeightRem.toFixed(3)}rem`);
-    }
-    this.notify();
   }
 }
