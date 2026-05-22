@@ -70,6 +70,7 @@ describe('InfoLogger', function() {
     // Start browser to test UI
     browser = await puppeteer.launch({headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox']});
     page = await browser.newPage();
+    await page.setViewport({ width: 1440, height: 900 }); // 15" screen equivalent
 
     // Export page and configurations for the other mocha files
     exports.page = page;
