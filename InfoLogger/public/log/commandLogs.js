@@ -65,7 +65,7 @@ export default (model) => [
   }, '↓'),
   downloadButtonGroup(model.log),
   h('button.btn.flex-row', {
-    onclick: () => model.resetZoom(),
+    onclick: () => model.zoom.resetZoom(),
     disabled: model.zoom.level === 1,
     id: 'reset-zoom-button',
   }, h('span', ['Reset ', iconMagnifyingGlass()])),

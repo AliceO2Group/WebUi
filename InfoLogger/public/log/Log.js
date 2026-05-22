@@ -600,6 +600,6 @@ export default class Log extends Observable {
   }
 
   get rowHeight() {
-    return this.model.rowHeightPx;
+    return this.model.zoom.rowHeightPx;
   }
 }

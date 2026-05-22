@@ -44,7 +44,7 @@ export default (model) => [
           return;
         }
         model.zoom.lastScrollTime = now;
-        e.deltaY < 0 ? model.zoomIn() : model.zoomOut();
+        e.deltaY < 0 ? model.zoom.zoomIn() : model.zoom.zoomOut();
       };
 
       const handleKeyDown = (e) => {
@@ -54,10 +54,10 @@ export default (model) => [
         // Support both '=' and '+' for zooming in, as some keyboards require Shift to type '+'
         if (e.key === '=' || e.key === '+') {
           e.preventDefault();
-          model.zoomIn();
+          model.zoom.zoomIn();
         } else if (e.key === '-') {
           e.preventDefault();
-          model.zoomOut();
+          model.zoom.zoomOut();
         }
       };
 
