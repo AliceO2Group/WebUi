@@ -213,6 +213,7 @@ export default class Model extends Observable {
     // Enter
     if ((code === 13 && !this.messageFocused || code === 13 && e.metaKey) && !this.log.isLiveModeEnabled()) {
       this.log.query();
+      this.log.contextMenu.hide();
     }
     if (!this.messageFocused) {
       // don't listen to keys when it comes from an input (they transform into letters)
@@ -227,6 +228,7 @@ export default class Model extends Observable {
         case 27: // escape
           this.log.removeLogDownloadContent();
           this.accountMenuEnabled = false;
+          this.log.contextMenu.hide();
           break;
         case 37: // left
           if (e.altKey) {
