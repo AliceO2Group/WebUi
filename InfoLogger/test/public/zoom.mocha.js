@@ -259,10 +259,10 @@ describe('Zoom test-suite', async () => {
   describe('Zoom buttons', () => {
     beforeEach(async () => {
       await page.evaluate(() => window.model.zoom.resetZoom());
+      await page.waitForFunction(() => window.model.zoom.level === 1);
     });
 
     it('should have reset button disabled at default zoom', async () => {
-      await page.evaluate(() => window.model.zoom.resetZoom());
       await page.waitForFunction(() => {
         const resetBtn = document.querySelector('#reset-zoom-button');
         return resetBtn && resetBtn.disabled === true;
