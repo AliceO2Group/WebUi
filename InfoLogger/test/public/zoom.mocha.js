@@ -19,7 +19,8 @@ describe('Zoom test-suite', async () => {
   let page = null;
 
   before(async () => {
-    ({ page } = test);
+    ({ helpers: { baseUrl }, page } = test);
+    await page.goto(baseUrl, { waitUntil: 'networkidle0' });
   });
 
   describe('Default state', () => {
@@ -259,10 +260,14 @@ describe('Zoom test-suite', async () => {
   describe('Zoom buttons', () => {
     beforeEach(async () => {
       await page.evaluate(() => window.model.zoom.resetZoom());
-      await page.waitForFunction(() => window.model.zoom.level === 1);
+      await page.waitForFunction(() => {
+        const resetBtn = document.querySelector('#reset-zoom-button');
+        return resetBtn && resetBtn.disabled === true;
+      });
     });
 
     it('should have reset button disabled at default zoom', async () => {
+      await page.evaluate(() => window.model.zoom.resetZoom());
       await page.waitForFunction(() => {
         const resetBtn = document.querySelector('#reset-zoom-button');
         return resetBtn && resetBtn.disabled === true;
@@ -280,12 +285,15 @@ describe('Zoom test-suite', async () => {
 
     it('should reset zoom when reset button is clicked', async () => {
       await page.evaluate(() => window.model.zoom.zoomIn());
+      await page.waitForFunction(() => window.model.zoom.level === 1.1);
+      await page.waitForFunction(() => {
+        const resetBtn = document.querySelector('#reset-zoom-button');
+        return resetBtn && resetBtn.disabled === false;
+      });
 
       await page.evaluate(() => document.querySelector('#reset-zoom-button').click());
 
       await page.waitForFunction(() => window.model.zoom.level === 1);
-
-      await page.evaluate(() => window.model.zoom.resetZoom());
     });
 
     it('should enable both -/+ buttons at default zoom', async () => {
@@ -312,6 +320,7 @@ describe('Zoom test-suite', async () => {
     it('should disable - button at minimum zoom', async () => {
       await page.evaluate(() => {
         window.model.zoom.level = window.model.zoom.min;
+        window.model.zoom.notify();
       });
       await page.waitForFunction(() => {
         const btn = document.querySelector('#zoom-out-button');
@@ -322,6 +331,7 @@ describe('Zoom test-suite', async () => {
     it('should disable + button at maximum zoom', async () => {
       await page.evaluate(() => {
         window.model.zoom.level = window.model.zoom.max;
+        window.model.zoom.notify();
       });
       await page.waitForFunction(() => {
         const btn = document.querySelector('#zoom-in-button');
