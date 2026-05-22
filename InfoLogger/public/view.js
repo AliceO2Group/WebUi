@@ -34,47 +34,7 @@ import { cellContextMenu } from './log/cellContextMenu.js';
 export default (model) => [
   notification(model.notification),
   cellContextMenu(model),
-  h('.flex-column absolute-fill', {
-    oncreate: (vnode) => {
-      const handleWheel = (e) => {
-        // Only trigger zoom if Ctrl (or Cmd on Mac) is pressed
-        // Windows intercepts the Windows key events, so these do not reach the browser
-        if (!e.ctrlKey && !e.metaKey) {
-          return;
-        }
-        e.preventDefault();
-        const now = Date.now();
-        if (now - model.zoom.lastScrollTime < 50) {
-          return;
-        }
-        model.zoom.lastScrollTime = now;
-        e.deltaY < 0 ? model.zoom.zoomIn() : model.zoom.zoomOut();
-      };
-
-      const handleKeyDown = (e) => {
-        if (!e.ctrlKey && !e.metaKey) {
-          return;
-        }
-        // Support both '=' and '+' for zooming in, as some keyboards require Shift to type '+'
-        if (e.key === '=' || e.key === '+') {
-          e.preventDefault();
-          model.zoom.zoomIn();
-        } else if (e.key === '-') {
-          e.preventDefault();
-          model.zoom.zoomOut();
-        }
-      };
-
-      window.addEventListener('wheel', handleWheel, { passive: false });
-      window.addEventListener('keydown', handleKeyDown);
-
-      vnode.state.cleanup = () => {
-        window.removeEventListener('wheel', handleWheel);
-        window.removeEventListener('keydown', handleKeyDown);
-      };
-    },
-    onremove: (vnode) => vnode.state.cleanup(),
-  }, [
+  h('.flex-column absolute-fill', [
     h('.shadow-level2', [
       h('header.p1.flex-row.f7', [
         h('', commandLogs(model)),
