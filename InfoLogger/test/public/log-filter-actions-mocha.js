@@ -224,5 +224,4 @@ describe('Filter actions test-suite', async () => {
     assert.strictEqual(criterias.severity.in, 'I W E F');
     assert.deepStrictEqual(criterias.severity.$in, ['W', 'I', 'E', 'F']);
   });
-
 });
