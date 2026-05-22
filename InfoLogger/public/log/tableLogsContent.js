@@ -69,7 +69,6 @@ const tableLogLine = (model, row) => {
   const { log, table } = model;
   return h('tr.row-hover', {
     className: log.item === row ? 'row-selected' : '',
-    title: 'Right-click for more options',
     onclick: () => log.setItem(row),
     ondblclick: () => model.toggleInspector(),
   }, tableRows(model, table.colsHeader, row));
@@ -105,18 +104,35 @@ const resolveContextMenuData = (model, field, content) => {
  * @param {object} extraAttrs - extra attributes to add to the cell
  * @returns {vnode} - the cell wrapped with the context menu
  */
-const cellWithContextMenu = (model, row, field, content, extraClasses = '', extraAttrs = {}) =>
-  h(`td.cell${extraClasses}`, {
+const cellWithContextMenu = (model, row, field, content, extraClasses = '', extraAttrs = {}) => {
+  const openContextMenu = (e) => {
+    model.log.setItem(row);
+    const data = resolveContextMenuData(model, field, content);
+    if (data) {
+      e.preventDefault();
+      model.log.contextMenu.show(data.field, data.value, e.clientX, e.clientY);
+    }
+  };
+
+  const hasContent = content != null && content !== '';
+
+  return h(`td.cell${extraClasses}`, {
     ...extraAttrs,
-    oncontextmenu: (e) => {
-      model.log.setItem(row);
-      const data = resolveContextMenuData(model, field, content);
-      if (data) {
-        e.preventDefault();
-        model.log.contextMenu.show(data.field, data.value, e.clientX, e.clientY);
-      }
-    },
-  }, content);
+    oncontextmenu: hasContent ? openContextMenu : null,
+  }, [
+    h('.cell-content', [
+      h('.cell-text', content),
+      hasContent && h(
+        'span.cell-context-menu-hint',
+        {
+          onclick: openContextMenu,
+          title: 'Right-click also opens this menu',
+        },
+        '⋮',
+      ),
+    ]),
+  ]);
+};
 
 /**
  * Array of table rows
