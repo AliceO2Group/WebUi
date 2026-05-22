@@ -161,7 +161,7 @@ const tableRows = (model, colsHeader, row) => {
     errcode.visible && cell('errcode', linkToWikiErrors(errcodeVal), '.cell-bordered'),
     errline.visible && cell('errline', errlineVal, '.cell-bordered'),
     errsource.visible && cell('errsource', errsourceVal, '.cell-bordered'),
-    message.visible && cell('message', messageVal, '', { title: messageVal }),
+    message.visible && cell('message', messageVal, '.cell-bordered', { title: messageVal }),
   ];
 };
 
