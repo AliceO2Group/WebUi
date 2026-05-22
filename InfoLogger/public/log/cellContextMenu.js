@@ -15,7 +15,8 @@
 import { h, iconCheck, iconBan, iconClipboard, iconTrash, iconMagnifyingGlass } from '/js/src/index.js';
 
 const MENU_WIDTH = 220;
-const MENU_HEIGHT_ESTIMATE = 120;
+const MENU_HEIGHT_ESTIMATE = 236;
+const FOOTER_HEIGHT = 26;
 const INSPECTOR_WIDTH_REM = 20;
 const SEVERITY_CANVAS_WIDTH_PX = 10;
 
@@ -33,7 +34,7 @@ const clampPosition = (x, y, inspectorEnabled) => ({
     x,
     window.innerWidth - MENU_WIDTH - SEVERITY_CANVAS_WIDTH_PX - (inspectorEnabled ? remToPx(INSPECTOR_WIDTH_REM) : 0),
   )),
-  top: Math.max(0, Math.min(y, window.innerHeight - MENU_HEIGHT_ESTIMATE)),
+  top: Math.max(0, Math.min(y, window.innerHeight - MENU_HEIGHT_ESTIMATE - FOOTER_HEIGHT)),
 });
 
 /**
