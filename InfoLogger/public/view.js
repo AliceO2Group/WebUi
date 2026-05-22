@@ -35,7 +35,9 @@ export default (model) => [
   h('.flex-column absolute-fill', {
     oncreate: (vnode) => {
       const handleWheel = (e) => {
-        if (!e.ctrlKey) {
+        // Only trigger zoom if Ctrl (or Cmd on Mac) is pressed
+        // Windows intercepts the Windows key events, so these do not reach the browser
+        if (!e.ctrlKey && !e.metaKey) {
           return;
         }
         e.preventDefault();
@@ -48,7 +50,7 @@ export default (model) => [
       };
 
       const handleKeyDown = (e) => {
-        if (!e.ctrlKey) {
+        if (!e.ctrlKey && !e.metaKey) {
           return;
         }
         // Support both '=' and '+' for zooming in, as some keyboards require Shift to type '+'
