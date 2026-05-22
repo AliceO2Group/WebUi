@@ -19,8 +19,8 @@ describe('Zoom test-suite', async () => {
   let page = null;
 
   before(async () => {
-    ({ helpers: { baseUrl }, page } = test);
-    await page.goto(baseUrl, { waitUntil: 'networkidle0' });
+    ({ page } = test);
+    await page.goto(test.helpers.baseUrl, { waitUntil: 'networkidle0' });
   });
 
   describe('Default state', () => {
