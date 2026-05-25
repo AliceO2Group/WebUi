@@ -179,6 +179,13 @@ module.exports.setup = (http, ws) => {
   const verifyLockOwnershipMiddleware = getDetectorsLockOwnershipMiddlewareFactory(lockService);
   const validateConsulServiceMiddleware = validateConsulServiceMiddlewareFactory(consulService);
   const verifyDetectorsAvailabilityMiddleware = verifyDetectorsAvailabilityMiddlewareFactory(detectorService);
+  const deploymentMandatoryMiddleware = [
+    ...coreMiddleware,
+    logDeploymentRequestMiddleware,
+    minimumRoleMiddleware(Role.DETECTOR),
+    verifyLockOwnershipMiddleware,
+    verifyDetectorsAvailabilityMiddleware,
+  ];
 
   ctrlProxy.methods.forEach(
     (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res)),
@@ -196,7 +203,7 @@ module.exports.setup = (http, ws) => {
 
   http.get('/environments', coreMiddleware, envCtrl.getEnvironmentsHandler.bind(envCtrl), {public: true});
   http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironmentHandler.bind(envCtrl), {public: true});
-  http.post('/environment/auto', coreMiddleware, envCtrl.newAutoEnvironmentHandler.bind(envCtrl));
+
   http.put('/environment/:id', 
     coreMiddleware,
     minimumRoleMiddleware(Role.DETECTOR),
@@ -213,14 +220,8 @@ module.exports.setup = (http, ws) => {
     envCtrl.destroyEnvironmentHandler.bind(envCtrl),
   );
 
-  http.post('/deploy',
-    coreMiddleware,
-    logDeploymentRequestMiddleware,
-    minimumRoleMiddleware(Role.DETECTOR),
-    verifyLockOwnershipMiddleware,
-    verifyDetectorsAvailabilityMiddleware,
-    deploymentController.newAsyncDeploymentHandler.bind(deploymentController)
-  );
+  http.post('/deploy', deploymentMandatoryMiddleware, deploymentController.newAsyncDeploymentHandler.bind(deploymentController));
+  http.post('/deploy/calibration', deploymentMandatoryMiddleware, deploymentController.newAsyncDeploymentCalibrationHandler.bind(deploymentController));
 
   http.delete('/deploy/:id',
     minimumRoleMiddleware(Role.DETECTOR),
