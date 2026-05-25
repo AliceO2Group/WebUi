@@ -17,6 +17,8 @@ const url = require('url');
 const WebSocketMessage = require('./message.js');
 const { LogManager } = require('../log/LogManager');
 
+const RESERVED_BIND_NAME = 'filter';
+
 /**
  * It represents WebSocket server (RFC 6455).
  * In addition, it provides custom authentication with JWT tokens.
@@ -39,7 +41,7 @@ class WebSocket {
     this.logger.info('Server started');
 
     this.#callbackMap = {};
-    this.bind('filter', (message) => new WebSocketMessage(200).setCommand(message.getCommand()));
+    this.bind(RESERVED_BIND_NAME, (message) => new WebSocketMessage(200).setCommand(message.getCommand()));
     this.ping();
   }
 
@@ -59,7 +61,11 @@ class WebSocket {
    *                              it can send a response back to client by returning WebSocketMessage instance
    */
   bind(name, callback) {
-    if (Object.prototype.hasOwnProperty.call(this.#callbackMap, name)) {
+    if (name === RESERVED_BIND_NAME) {
+      throw Error(`Name "${RESERVED_BIND_NAME}" is reserved for internal use`);
+    } else if (typeof callback !== 'function') {
+      throw Error('Callback must be a function');
+    } else if (Object.prototype.hasOwnProperty.call(this.#callbackMap, name)) {
       throw Error('Callback already exists.');
     }
     this.#callbackMap[name] = callback;
