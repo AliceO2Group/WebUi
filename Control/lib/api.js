@@ -103,7 +103,7 @@ module.exports.setup = (http, ws) => {
   const wsService = new WebSocketService(ws);
   const broadcastService = new BroadcastService(ws);
   const cacheService = new CacheService(broadcastService);
-  const environmentCacheService = new EnvironmentCacheService(broadcastService, eventEmitter);
+  const environmentCacheService = new EnvironmentCacheService(broadcastService, eventEmitter, cacheService);
   const qcConfigurationService = new QCConfigurationService(consulService);
 
   const qcConfigurationController = new QCConfigurationController(qcConfigurationService, config.consul);
@@ -124,7 +124,7 @@ module.exports.setup = (http, ws) => {
     ctrlProxy, apricotService, cacheService, broadcastService, environmentCacheService
   );
   const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
-  const deploymentService = new DeploymentService(environmentService, workflowService, environmentCacheService);
+  const deploymentService = new DeploymentService(environmentService, workflowService, environmentCacheService, cacheService);
   const taskService = new TaskService(ctrlProxy);
 
   /**
