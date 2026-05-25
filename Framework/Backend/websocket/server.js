@@ -134,7 +134,9 @@ class WebSocket {
   }
 
   /**
-   * Called when a new message arrives
+   * Called when a new message arrives. It is important to check that a client connection is
+   * still OPEN before responding, because the client may be in closing process and still appear in client list
+   * * if the response is sent in the case above, it will cause an error on server side.
    * Handles connection with a client
    * @param {object} message received message
    * @param {object} client TCP socket of the client
@@ -155,17 +157,23 @@ class WebSocket {
               this.broadcast(response);
             } else {
               // 5. Send back to a client
-              client.send(JSON.stringify(response.json));
+              if (client.readyState === client.OPEN) {
+                client.send(JSON.stringify(response.json));
+              }
             }
           }, (response) => {
             // 6. If generating response fails
-            client.send(JSON.stringify(response.json));
-            this.logger.errorMessage(`ID ${client.id} Processing request failed: ${response.message}`);
-            client.close(1008);
+            if (client.readyState === client.OPEN) {
+              client.send(JSON.stringify(response.json));
+              this.logger.errorMessage(`ID ${client.id} Processing request failed: ${response.message}`);
+              client.close(1008);
+            }
           });
       }, (failed) => {
         // 7. If parsing message fails
-        client.send(JSON.stringify(failed.json));
+        if (client.readyState === client.OPEN) {
+          client.send(JSON.stringify(failed.json));
+        }
       })
       .catch((error) => {
         this.logger.warn(`ID ${client.id} ${error.name} : ${error.message}`);
@@ -221,7 +229,9 @@ class WebSocket {
           return; // Don't send
         }
       }
-      client.send(JSON.stringify(message.json));
+      if (client.readyState === client.OPEN) {
+        client.send(JSON.stringify(message.json));
+      }
     });
   }
 
@@ -230,7 +240,11 @@ class WebSocket {
    * @param {WebSocketMessage} message - message to be broadcasted
    */
   unfilteredBroadcast(message) {
-    this.server.clients.forEach((client) => client.send(JSON.stringify(message.json)));
+    this.server.clients.forEach((client) => {
+      if (client.readyState === client.OPEN) {
+        client.send(JSON.stringify(message.json));
+      }
+    });
   }
 }
 
