@@ -23,6 +23,8 @@ const { LogManager } = require('../log/LogManager');
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  */
 class WebSocket {
+  #callbackMap;
+
   /**
    * Starts up the server and binds event handler.
    * @param {object} httpsServer - HTTPS server instance
@@ -36,7 +38,7 @@ class WebSocket {
     this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
     this.logger.info('Server started');
 
-    this.callbackArray = [];
+    this.#callbackMap = {};
     this.bind('filter', (message) => new WebSocketMessage(200).setCommand(message.getCommand()));
     this.ping();
   }
@@ -57,10 +59,10 @@ class WebSocket {
    *                              it can send a response back to client by returning WebSocketMessage instance
    */
   bind(name, callback) {
-    if (Object.prototype.hasOwnProperty.call(this.callbackArray, name)) {
+    if (Object.prototype.hasOwnProperty.call(this.#callbackMap, name)) {
       throw Error('Callback already exists.');
     }
-    this.callbackArray[name] = callback;
+    this.#callbackMap[name] = callback;
   }
 
   /**
@@ -83,8 +85,8 @@ class WebSocket {
       // Transfer decoded JWT data to request
       Object.assign(req, data);
       // Check whether callback exists
-      if (Object.prototype.hasOwnProperty.call(this.callbackArray, req.getCommand())) {
-        const res = this.callbackArray[req.getCommand()](req);
+      if (Object.prototype.hasOwnProperty.call(this.#callbackMap, req.getCommand())) {
+        const res = this.#callbackMap[req.getCommand()](req);
         // Verify that response is type of WebSocketMessage
         if (res && res.constructor.name === 'WebSocketMessage') {
           if (typeof res.getCommand() !== 'string') {
