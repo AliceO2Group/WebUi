@@ -40,8 +40,9 @@ class WebSocket {
     this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
     this.logger.info('Server started');
 
-    this.#callbackMap = {};
-    this.bind(RESERVED_BIND_NAME, (message) => new WebSocketMessage(200).setCommand(message.getCommand()));
+    this.#callbackMap = {
+      [RESERVED_BIND_NAME]: (message) => new WebSocketMessage(200).setCommand(message.getCommand()),
+    };
     this.ping();
   }
 
