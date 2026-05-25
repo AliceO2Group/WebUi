@@ -110,11 +110,13 @@ describe('websocket', () => {
     const connection = new WebSocketClient(`ws://localhost:${config.http.port}/?token=${token}`);
 
     connection.on('open', () => {
-      const message = { command: 'filter',
+      const message = {
+        command: 'filter',
         token: token,
-        filter: function () {
+        payload: function () {
           return false;
-        }.toString() };
+        }.toString(),
+      };
       connection.send(JSON.stringify(message));
     });
 

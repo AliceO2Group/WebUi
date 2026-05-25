@@ -76,46 +76,41 @@ class WebSocket {
   /**
    * Handles incoming text messages: verifies token and processes request/command.
    * @param {object} req - HTTP Req object
-   * @return {object} message to be send back to the user
+   * @return {WebSocketMessage} message to be sent back to the user
+   * @throws {WebSocketMessage} 401 message if token verification fails
    */
   processRequest(req) {
-    return new Promise((resolve, reject) => {
-      let data;
-      try {
-        data = this.http.o2TokenService.verify(req.getToken());
-      } catch (error) {
-        const message = new WebSocketMessage(401);
-        message.payload = error.message;
-        reject(message);
-        return;
-      }
+    let data;
+    try {
+      data = this.http.o2TokenService.verify(req.getToken());
+    } catch (error) {
+      const message = new WebSocketMessage(401);
+      message.payload = error.message;
+      throw message;
+    }
 
-      // Transfer decoded JWT data to request
-      Object.assign(req, data);
-      // Check whether callback exists
-      if (Object.prototype.hasOwnProperty.call(this.#callbackMap, req.getCommand())) {
-        const res = this.#callbackMap[req.getCommand()](req);
-        // Verify that response is type of WebSocketMessage
-        if (res && res.constructor.name === 'WebSocketMessage') {
-          if (typeof res.getCommand() !== 'string') {
-            res.setCommand(req.getCommand());
-          }
-          resolve(res);
-        } else {
-          // 500 when callback does not return WebSocketMessage
-          const message = new WebSocketMessage(500);
-          message.payload = 'Internal server error - no websocket message returned';
-          this.logger.errorMessage(`ID (${req?.id ?? 'unknown'}) ${message.payload}`);
-          resolve(message);
-        }
-      } else {
-        // When callback does not exist return 404
-        const message = new WebSocketMessage(404);
-        message.payload = 'Callback does not exist';
-        this.logger.errorMessage(`ID (${req?.id ?? 'unknown'}) ${message.payload}`);
-        resolve(message);
-      }
-    });
+    // Transfer decoded JWT data to request
+    Object.assign(req, data);
+
+    if (!Object.prototype.hasOwnProperty.call(this.#callbackMap, req.getCommand())) {
+      const message = new WebSocketMessage(404);
+      message.payload = 'Callback does not exist';
+      this.logger.errorMessage(`ID (${req?.id ?? 'unknown'}) ${message.payload}`);
+      return message;
+    }
+
+    const res = this.#callbackMap[req.getCommand()](req);
+    if (!(res instanceof WebSocketMessage)) {
+      const message = new WebSocketMessage(500);
+      message.payload = 'Internal server error - no websocket message returned';
+      this.logger.errorMessage(`ID (${req?.id ?? 'unknown'}) ${message.payload}`);
+      return message;
+    }
+
+    if (typeof res.getCommand() !== 'string') {
+      res.setCommand(req.getCommand());
+    }
+    return res;
   }
 
   /**
@@ -148,49 +143,43 @@ class WebSocket {
   /**
    * Called when a new message arrives. It is important to check that a client connection is
    * still OPEN before responding, because the client may be in closing process and still appear in client list
-   * * if the response is sent in the case above, it will cause an error on server side.
-   * Handles connection with a client
+   * if the response is sent in the case above, it will cause an error on server side.
    * @param {object} message received message
    * @param {object} client TCP socket of the client
    */
-  onmessage(message, client) {
-    // 1. parse message
-    new WebSocketMessage().parse(message)
-      .then((parsed) => {
-        // 2. Check if its message filter (no auth required)
-        if (parsed.getCommand() === RESERVED_BIND_NAME && parsed.getPayload()) {
-          client.filter = new Function(`return ${parsed.getPayload()}`)();
-        }
-        // 3. Get reply if callback exists
-        this.processRequest(parsed)
-          .then((response) => {
-            // 4. Broadcast if necessary
-            if (response.getBroadcast()) {
-              this.broadcast(response);
-            } else {
-              // 5. Send back to a client
-              if (client.readyState === client.OPEN) {
-                client.send(JSON.stringify(response.json));
-              }
-            }
-          }, (response) => {
-            // 6. If generating response fails
-            if (client.readyState === client.OPEN) {
-              client.send(JSON.stringify(response.json));
-              this.logger.errorMessage(`ID ${client.id} Processing request failed: ${response.message}`);
-              client.close(WS_CLOSE_POLICY_VIOLATION);
-            }
-          });
-      }, (failed) => {
-        // 7. If parsing message fails
-        if (client.readyState === client.OPEN) {
-          client.send(JSON.stringify(failed.json));
-        }
-      })
-      .catch((error) => {
-        this.logger.warn(`ID ${client.id} ${error.name} : ${error.message}`);
+  async onmessage(message, client) {
+    let parsed;
+    try {
+      parsed = await new WebSocketMessage().parse(message);
+    } catch (failed) {
+      if (client.readyState === client.OPEN) {
+        client.send(JSON.stringify(failed.json));
+      }
+      return;
+    }
+
+    let response;
+    try {
+      response = this.processRequest(parsed);
+    } catch (authError) {
+      if (client.readyState === client.OPEN) {
+        client.send(JSON.stringify(authError.json));
+        this.logger.errorMessage(`ID ${client.id} Processing request failed: ${authError.message}`);
         client.close(WS_CLOSE_POLICY_VIOLATION);
-      });
+      }
+      return;
+    }
+
+    // Set filter only after auth is verified
+    if (parsed.getCommand() === RESERVED_BIND_NAME && parsed.getPayload()) {
+      client.filter = new Function(`return ${parsed.getPayload()}`)();
+    }
+
+    if (response.getBroadcast()) {
+      this.broadcast(response);
+    } else if (client.readyState === client.OPEN) {
+      client.send(JSON.stringify(response.json));
+    }
   }
 
   /**
