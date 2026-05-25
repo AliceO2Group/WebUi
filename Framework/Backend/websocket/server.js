@@ -53,7 +53,7 @@ class WebSocket {
    * Binds callback to websocket message command
    * Name "filter" is reserved for internal use
    * @param {string} name       - command name
-   * @param {function} callback - function that receives message as WebSocketMessage object;
+   * @param {void} callback - function that receives message as WebSocketMessage object;
    *                              it can send a response back to client by returning WebSocketMessage instance
    */
   bind(name, callback) {
