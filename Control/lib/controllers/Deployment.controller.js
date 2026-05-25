@@ -135,7 +135,7 @@ class DeploymentController {
   async newAsyncDeploymentCalibrationHandler(req, res) {
     const {personid, name, username} = req.session;
     const user = new User(username, name, personid);
-    const { detectors, runType, configurationName } = req.body;
+    const { detectors, runType, selectedConfiguration } = req.body;
     
     if (detectors?.length !== 1) {
       updateAndSendExpressResponseFromNativeError(
@@ -146,48 +146,28 @@ class DeploymentController {
     }
     const [detector] = detectors;
 
-    if (!configurationName) {
+    if (!selectedConfiguration) {
       updateAndSendExpressResponseFromNativeError(
         res,
         new InvalidInputError('Missing Configuration Name for deployment')
       );
       return;
     }
-    // Retrieve latest configuration version for given name
-    let variables = undefined;
-    try {
-      ({ variables } = await this._workflowService.retrieveWorkflowSavedConfiguration(configurationName));
-      if (!variables) {
-        throw new InvalidInputError(`No configuration variables found for ${configurationName}`);
-      }
-    } catch (error) {
-      this._logger.errorMessage(`Unable to retrieve saved configuration for ${configurationName} due to ${error}`);
-      updateAndSendExpressResponseFromNativeError(res, error);
-      return;
-    }
-
-    // Retrieve latest default workflow to use
-    let workflowTemplatePath;
-    try {
-      const {template, repository, revision} = await this._workflowService.getDefaultTemplateSource();
-      workflowTemplatePath = `${repository}/workflows/${template}@${revision}`;
-    } catch (error) {
-      this._logger.debug(`Unable to retrieve default workflow template due to ${error}`);
-      updateAndSendExpressResponseFromNativeError(res, error);
-      return;
-    }
+   
     // Attempt to deploy environment
     try {
-      this._logger.infoMessage(`Request by username(${username}) to deploy configuration ${configurationName}`,
+      this._logger.infoMessage(`Request by username(${username}) to deploy configuration ${selectedConfiguration}`,
         {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
       );
-      const environment = await this._envService.newAutoEnvironment(
-        workflowTemplatePath, variables, detector, runType, user
+      const environment = await this._deploymentService.deployEnvironmentCalibration(
+        {
+          detector, runType, selectedConfiguration, user,
+        }
       );
-      res.status(200).json(environment);
+      res.status(201).json(environment);
     } catch (error) {
       this._logger.errorMessage(
-        `Unable to deploy request by username(${username}) for ${configurationName} due to error`,
+        `Unable to deploy request by username(${username}) for ${selectedConfiguration} due to error`,
         {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
       );
       updateAndSendExpressResponseFromNativeError(res, error);

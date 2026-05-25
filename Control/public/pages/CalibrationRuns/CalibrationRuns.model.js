@@ -92,7 +92,7 @@ export class CalibrationRunsModel extends Observable {
       this.notify();
 
       const payload = {
-        detector, runType, configurationName
+        detectors: [...detector], runType, selectedConfiguration: configurationName
       };
       const {result, ok} = await this._model.loader.post('/api/environment/auto', payload, true);
 
