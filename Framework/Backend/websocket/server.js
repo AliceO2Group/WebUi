@@ -17,12 +17,16 @@ const url = require('url');
 const WebSocketMessage = require('./message.js');
 const { LogManager } = require('../log/LogManager');
 
+const RESERVED_BIND_NAME = 'filter';
+
 /**
  * It represents WebSocket server (RFC 6455).
  * In addition, it provides custom authentication with JWT tokens.
  * @author Adam Wegrzynek <adam.wegrzynek@cern.ch>
  */
 class WebSocket {
+  #callbackMap;
+
   /**
    * Starts up the server and binds event handler.
    * @param {object} httpsServer - HTTPS server instance
@@ -36,8 +40,9 @@ class WebSocket {
     this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
     this.logger.info('Server started');
 
-    this.callbackArray = [];
-    this.bind('filter', (message) => new WebSocketMessage(200).setCommand(message.getCommand()));
+    this.#callbackMap = {
+      [RESERVED_BIND_NAME]: (message) => new WebSocketMessage(200).setCommand(message.getCommand()),
+    };
     this.ping();
   }
 
@@ -53,14 +58,18 @@ class WebSocket {
    * Binds callback to websocket message command
    * Name "filter" is reserved for internal use
    * @param {string} name       - command name
-   * @param {function} callback - function that receives message as WebSocketMessage object;
+   * @param {void} callback - function that receives message as WebSocketMessage object;
    *                              it can send a response back to client by returning WebSocketMessage instance
    */
   bind(name, callback) {
-    if (Object.prototype.hasOwnProperty.call(this.callbackArray, name)) {
+    if (name === RESERVED_BIND_NAME) {
+      throw Error(`Name "${RESERVED_BIND_NAME}" is reserved for internal use`);
+    } else if (typeof callback !== 'function') {
+      throw Error('Callback must be a function');
+    } else if (Object.prototype.hasOwnProperty.call(this.#callbackMap, name)) {
       throw Error('Callback already exists.');
     }
-    this.callbackArray[name] = callback;
+    this.#callbackMap[name] = callback;
   }
 
   /**
@@ -83,8 +92,8 @@ class WebSocket {
       // Transfer decoded JWT data to request
       Object.assign(req, data);
       // Check whether callback exists
-      if (Object.prototype.hasOwnProperty.call(this.callbackArray, req.getCommand())) {
-        const res = this.callbackArray[req.getCommand()](req);
+      if (Object.prototype.hasOwnProperty.call(this.#callbackMap, req.getCommand())) {
+        const res = this.#callbackMap[req.getCommand()](req);
         // Verify that response is type of WebSocketMessage
         if (res && res.constructor.name === 'WebSocketMessage') {
           if (typeof res.getCommand() !== 'string') {
@@ -134,7 +143,9 @@ class WebSocket {
   }
 
   /**
-   * Called when a new message arrives
+   * Called when a new message arrives. It is important to check that a client connection is
+   * still OPEN before responding, because the client may be in closing process and still appear in client list
+   * * if the response is sent in the case above, it will cause an error on server side.
    * Handles connection with a client
    * @param {object} message received message
    * @param {object} client TCP socket of the client
@@ -155,17 +166,23 @@ class WebSocket {
               this.broadcast(response);
             } else {
               // 5. Send back to a client
-              client.send(JSON.stringify(response.json));
+              if (client.readyState === client.OPEN) {
+                client.send(JSON.stringify(response.json));
+              }
             }
           }, (response) => {
             // 6. If generating response fails
-            client.send(JSON.stringify(response.json));
-            this.logger.errorMessage(`ID ${client.id} Processing request failed: ${response.message}`);
-            client.close(1008);
+            if (client.readyState === client.OPEN) {
+              client.send(JSON.stringify(response.json));
+              this.logger.errorMessage(`ID ${client.id} Processing request failed: ${response.message}`);
+              client.close(1008);
+            }
           });
       }, (failed) => {
         // 7. If parsing message fails
-        client.send(JSON.stringify(failed.json));
+        if (client.readyState === client.OPEN) {
+          client.send(JSON.stringify(failed.json));
+        }
       })
       .catch((error) => {
         this.logger.warn(`ID ${client.id} ${error.name} : ${error.message}`);
@@ -221,7 +238,9 @@ class WebSocket {
           return; // Don't send
         }
       }
-      client.send(JSON.stringify(message.json));
+      if (client.readyState === client.OPEN) {
+        client.send(JSON.stringify(message.json));
+      }
     });
   }
 
@@ -230,7 +249,11 @@ class WebSocket {
    * @param {WebSocketMessage} message - message to be broadcasted
    */
   unfilteredBroadcast(message) {
-    this.server.clients.forEach((client) => client.send(JSON.stringify(message.json)));
+    this.server.clients.forEach((client) => {
+      if (client.readyState === client.OPEN) {
+        client.send(JSON.stringify(message.json));
+      }
+    });
   }
 }
 
