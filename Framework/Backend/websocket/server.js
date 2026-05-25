@@ -123,7 +123,8 @@ class WebSocket {
    * @param {object} request - connection request
    */
   onconnection(client, request) {
-    const { token } = url.parse(request.url, true).query;
+    const { searchParams } = new URL(request.url, 'http://localhost');
+    const token = searchParams.get('token');
     let decoded;
     try {
       decoded = this.http.o2TokenService.verify(token);
