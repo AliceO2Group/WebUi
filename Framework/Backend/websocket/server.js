@@ -13,11 +13,12 @@
  */
 
 const WebSocketServer = require('ws').Server;
-const url = require('url');
 const WebSocketMessage = require('./message.js');
 const { LogManager } = require('../log/LogManager');
 
 const RESERVED_BIND_NAME = 'filter';
+const RESERVED_COMMAND_AUTHEVENT = 'authed';
+const WS_CLOSE_POLICY_VIOLATION = 1008;
 
 /**
  * It represents WebSocket server (RFC 6455).
@@ -38,7 +39,7 @@ class WebSocket {
     this.server.on('connection', (client, request) => this.onconnection(client, request));
 
     this.logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'framework'}/ws`);
-    this.logger.info('Server started');
+    this.logger.info('WebSocket Server started');
 
     this.#callbackMap = {
       [RESERVED_BIND_NAME]: (message) => new WebSocketMessage(200).setCommand(message.getCommand()),
@@ -123,17 +124,19 @@ class WebSocket {
    * @param {object} request - connection request
    */
   onconnection(client, request) {
-    const { token } = url.parse(request.url, true).query;
+    const { searchParams } = new URL(request.url, 'http://localhost');
+    const token = searchParams.get('token');
     let decoded;
     try {
       decoded = this.http.o2TokenService.verify(token);
     } catch (error) {
       this.logger.debug(`${error.name} : ${error.message}`);
-      client.close(1008);
+      client.close(WS_CLOSE_POLICY_VIOLATION);
       return;
     }
     client.id = decoded.id;
-    client.send(JSON.stringify({ command: 'authed', id: client.id }));
+    client.isAlive = true;
+    client.send(JSON.stringify({ command: RESERVED_COMMAND_AUTHEVENT, id: client.id }));
     client.on('message', (message) => this.onmessage(message, client));
     client.on('close', () => this.onclose(client));
     client.on('pong', () => {
@@ -155,7 +158,7 @@ class WebSocket {
     new WebSocketMessage().parse(message)
       .then((parsed) => {
         // 2. Check if its message filter (no auth required)
-        if (parsed.getCommand() == 'filter' && parsed.getPayload()) {
+        if (parsed.getCommand() === RESERVED_BIND_NAME && parsed.getPayload()) {
           client.filter = new Function(`return ${parsed.getPayload()}`)();
         }
         // 3. Get reply if callback exists
@@ -175,7 +178,7 @@ class WebSocket {
             if (client.readyState === client.OPEN) {
               client.send(JSON.stringify(response.json));
               this.logger.errorMessage(`ID ${client.id} Processing request failed: ${response.message}`);
-              client.close(1008);
+              client.close(WS_CLOSE_POLICY_VIOLATION);
             }
           });
       }, (failed) => {
@@ -186,7 +189,7 @@ class WebSocket {
       })
       .catch((error) => {
         this.logger.warn(`ID ${client.id} ${error.name} : ${error.message}`);
-        client.close(1008);
+        client.close(WS_CLOSE_POLICY_VIOLATION);
       });
   }
 
