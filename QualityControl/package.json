@@ -39,7 +39,7 @@
     "index.js"
   ],
   "dependencies": {
-    "@aliceo2/web-ui": "2.10.0",
+    "@aliceo2/web-ui": "2.11.0",
     "joi": "18.2.1",
     "jsroot": "7.11.0",
     "kafkajs": "2.2.4",
