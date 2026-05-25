@@ -13,7 +13,6 @@
 */
 
 const {LogManager,grpcErrorToNativeError, NotFoundError} = require('@aliceo2/web-ui');
-const { CacheKeys } = require('./../common/cacheKeys.enum.js');
 const { BroadcastKeys: { ENVIRONMENTS_OVERVIEW } } = require('./../common/broadcastKeys.enum');
 const EnvironmentInfoAdapter = require('./../adapters/EnvironmentInfoAdapter.js');
 const {EnvironmentTransitionResultAdapter} = require('./../adapters/EnvironmentTransitionResultAdapter.js');
@@ -25,21 +24,21 @@ class EnvironmentService {
   /**
    * Constructor for inserting dependencies needed to retrieve environment data
    * @param {GrpcServiceClient} coreGrpc 
-   * @param {ApricotProxy} apricotGrpc 
+   * @param {DetectorService} detectorService - to use for retrieving detector and host information
    * @param {CacheService} cacheService - to use for updating information on environments
    * @param {BroadcastService} broadcastService - to use for broadcasting information
    * @param {EnvironmentCacheService} environmentCacheService - to use for caching environments
    */
-  constructor(coreGrpc, apricotGrpc, cacheService, broadcastService, environmentCacheService) {
+  constructor(coreGrpc, detectorService, cacheService, broadcastService, environmentCacheService) {
     /**
      * @type {GrpcServiceClient}
      */
     this._coreGrpc = coreGrpc;
 
     /**
-     * @type {ApricotProxy}
+     * @type {DetectorService}
      */
-    this._apricotGrpc = apricotGrpc;
+    this._detectorService = detectorService;
     /**
      * @type {CacheService}
      */
@@ -130,8 +129,8 @@ class EnvironmentService {
     if (!environment) { 
       throw new NotFoundError(`Environment (id: ${id}) not found`);
     }
-    const detectorsAll = this._apricotGrpc.detectors ?? [];
-    const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
+    const detectorsAll = this._detectorService.detectors;
+    const hostsByDetector = this._detectorService.hostsByDetector;
     const environmentInfo = EnvironmentInfoAdapter.toEntity(
       environment, taskSource, detectorsAll, hostsByDetector
     );
@@ -204,8 +203,8 @@ class EnvironmentService {
       throw grpcErrorToNativeError(grpcError);
     }
 
-    const detectorsAll = this._apricotGrpc.detectors ?? [];
-    const hostsByDetector = this._apricotGrpc.hostsByDetector ?? {};
+    const detectorsAll = this._detectorService.detectors;
+    const hostsByDetector = this._detectorService.hostsByDetector;
     /**
      * Transition is not yet started as per ECS, but we set the state to DEPLOYING to ensure that the UI
      * is updated accordingly. The state will be updated once the environment is created and the transition

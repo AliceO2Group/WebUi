@@ -167,7 +167,7 @@ class DeploymentController {
       res.status(201).json(environment);
     } catch (error) {
       this._logger.errorMessage(
-        `Unable to deploy request by username(${username}) for ${selectedConfiguration} due to error`,
+        `Unable to deploy request by username(${username}) for ${selectedConfiguration} due to ${error.message}`,
         {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
       );
       updateAndSendExpressResponseFromNativeError(res, error);

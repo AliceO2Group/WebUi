@@ -121,10 +121,10 @@ module.exports.setup = (http, ws) => {
 
   const detectorService = new DetectorService(ctrlProxy, apricotProxy);
   const environmentService = new EnvironmentService(
-    ctrlProxy, apricotService, cacheService, broadcastService, environmentCacheService
+    ctrlProxy, detectorService, cacheService, broadcastService, environmentCacheService
   );
   const workflowService = new WorkflowTemplateService(ctrlProxy, apricotService);
-  const deploymentService = new DeploymentService(environmentService, workflowService, environmentCacheService, cacheService);
+  const deploymentService = new DeploymentService(environmentService, workflowService, environmentCacheService, cacheService, broadcastService);
   const taskService = new TaskService(ctrlProxy);
 
   /**

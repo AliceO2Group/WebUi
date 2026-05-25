@@ -279,30 +279,34 @@ class EnvironmentCacheService {
     this._broadcastService.broadcast(ENVIRONMENT_EVENTS, cachedEnvironment);
     this._lastUpdate = Date.now();
 
-    /**
-     * Check if ID of environment is available in the general cache of CALIBRATION_RUNS_REQUESTS.
-     * If yes, find the detector and runType for this environment, push the event to the cache and broadcast it to clients.
-     */
-    const calibrationRunsRequests = this._cacheService?.getByKey(CacheKeys.CALIBRATION_RUNS_REQUESTS);
-    const { userVars } = cachedEnvironment;
-    const { includedDetectors = [], runType } = userVars ?? {};
+    try {
+      /**
+       * Check if ID of environment is available in the general cache of CALIBRATION_RUNS_REQUESTS.
+       * If yes, find the detector and runType for this environment, push the event to the cache and broadcast it to clients.
+       */
+      const calibrationRunsRequests = this._cacheService?.getByKey(CacheKeys.CALIBRATION_RUNS_REQUESTS);
+      const { userVars } = cachedEnvironment;
+      const { includedDetectors = [], runType } = userVars ?? {};
       
-    if (includedDetectors.length === 1 && runType) {
-      // One detector only, it means environment may be of calibration type. 
-      const [detector] = includedDetectors;
-      if (calibrationRunsRequests?.[detector]?.[runType]) {
-        calibrationRunsRequests[detector][runType].events.push(
-          {
-            type: 'ENVIRONMENT',
-            payload: { ...environmentEvent, at: environmentEvent.timestamp ?? Date.now() },
-          });
-        calibrationRunsRequests[detector][runType].inProgress = cachedEnvironment.isDeploying;
-        this._cacheService.updateByKeyAndBroadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests);
-        this._broadcastService.broadcast(
-          CacheKeys.CALIBRATION_RUNS_REQUESTS,
-          calibrationRunsRequests[detector][runType]
-        );
+      if (includedDetectors.length === 1 && runType) {
+        // One detector only, it means environment may be of calibration type. 
+        const [detector] = includedDetectors;
+        if (calibrationRunsRequests?.[detector]?.[runType]) {
+          calibrationRunsRequests[detector][runType].events.push(
+            {
+              type: 'ENVIRONMENT',
+              payload: { ...environmentEvent, at: environmentEvent.timestamp ?? Date.now() },
+            });
+          calibrationRunsRequests[detector][runType].inProgress = cachedEnvironment.isDeploying;
+          this._cacheService.updateByKeyAndBroadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests);
+          this._broadcastService.broadcast(
+            CacheKeys.CALIBRATION_RUNS_REQUESTS,
+            calibrationRunsRequests[detector][runType]
+          );
+        }
       }
+    } catch (error) {
+      console.trace(error);
     }
   }
 }

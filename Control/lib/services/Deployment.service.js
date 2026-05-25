@@ -30,12 +30,16 @@ class DeploymentService {
    * Constructor for inserting dependencies needed to retrieve environment data
    * @param {EnvironmentService} environmentService - to use for creating new environments
    * @param {WorkflowService} workflowService - to use for retrieving template workflow information
+   * @param {EnvironmentCacheService} environmentCacheService - to use for retrieving and updating environment data in cache
+   * @param {CacheService} cacheService - to use for retrieving and updating general data in cache, e.g. calibration runs requests
+   * @param {BroadcastService} broadcastService - to use for broadcasting updates to clients, e.g. calibration runs requests updates
    */
-  constructor(environmentService, workflowService, environmentCacheService, cacheService) {
+  constructor(environmentService, workflowService, environmentCacheService, cacheService, _broadcastService) {
     this._environmentService = environmentService;
     this._workflowService = workflowService;
     this._environmentCacheService = environmentCacheService;
     this._generalCacheService = cacheService;
+    this._broadcastService = _broadcastService;
 
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/deployment-service`);
   }
@@ -89,7 +93,7 @@ class DeploymentService {
     const { template, repository, revision } = await this._workflowService.getDefaultTemplateSource();
     const workflowTemplatePath = `${repository}/workflows/${template}@${revision}`;
 
-    const environment = await this._envService.newEnvironmentAsync({
+    const environment = await this._environmentService.newEnvironmentAsync({
       workflowTemplate: workflowTemplatePath,
       userVars: variables,
       user,
@@ -115,7 +119,7 @@ class DeploymentService {
         }
       ],
     };
-    let calibrationRunsRequests = this._cacheService.getByKey(CacheKeys.CALIBRATION_RUNS_REQUESTS);
+    let calibrationRunsRequests = this._generalCacheService.getByKey(CacheKeys.CALIBRATION_RUNS_REQUESTS);
     if (!calibrationRunsRequests) {
       calibrationRunsRequests = {};
     }
@@ -126,7 +130,7 @@ class DeploymentService {
       calibrationRunsRequests[detector][runType] = calibrationEnvironment;
 
     }
-    this._cacheService.updateByKeyAndBroadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests);
+    this._generalCacheService.updateByKeyAndBroadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests);
     this._broadcastService.broadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests[detector][runType]);
     return environment;
   }
