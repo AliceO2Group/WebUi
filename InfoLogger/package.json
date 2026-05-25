@@ -30,7 +30,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@aliceo2/web-ui": "2.10.0",
+    "@aliceo2/web-ui": "2.11.0",
     "mariadb": "3.5.2"
   },
   "devDependencies": {
