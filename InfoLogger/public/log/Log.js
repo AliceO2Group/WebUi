@@ -44,6 +44,7 @@ export default class Log extends Observable {
 
     this.limit = 100000;
     this.applicationLimit = 500000; // browser can be slow is `list` array is bigger
+    this.limitReached = null;
 
     this.queryResult = RemoteData.notAsked();
 
@@ -179,6 +180,12 @@ export default class Log extends Observable {
       this.list.splice(0, this.list.length - limit);
       this.list.forEach((log) => this.addStats(log));
     }
+
+    // Reset limitReached to null on limit changes since only a fresh query knows the true state
+    if (limit !== this.limit) {
+      this.limitReached = null;
+    }
+
     this.limit = limit;
     this.notify();
   }
@@ -356,6 +363,15 @@ export default class Log extends Observable {
     } else {
       this.queryResult = RemoteData.success(result);
       this.list = result.rows;
+      this.limitReached = result.count === this.limit;
+
+      if (this.limitReached) {
+        this.model.notification.show(
+          `Matching results reached the buffer size of ${this.limit.toLocaleString('en-US')}.`
+          + ' There might be more logs that match your filters but are not shown, consider refining your filters.',
+          'warning',
+        );
+      }
     }
 
     this.resetStats();
@@ -417,6 +433,7 @@ export default class Log extends Observable {
       return;
     }
     this.list = [];
+    this.limitReached = null;
     this.resetStats();
     this.queryResult = RemoteData.notAsked(); // empty all data from last query
     this.activeMode = MODE.LIVE.RUNNING;
@@ -479,6 +496,7 @@ export default class Log extends Observable {
    */
   empty() {
     this.list = [];
+    this.limitReached = null;
     this.model.inspectorEnabled = false;
     this.resetStats();
     this.queryResult = RemoteData.notAsked();
