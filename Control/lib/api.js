@@ -26,6 +26,8 @@ const {logDeploymentRequestMiddleware} = require('./middleware/logDeploymentRequ
 const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 const {requireDetectorOrGlobalRoleMiddleware} = require('./middleware/requireDetectorOrGlobalRole.middleware.js');
 const {validateConsulServiceMiddlewareFactory} = require('./middleware/validateConsulServiceMiddlewareFactory.js');
+/* eslint-disable max-len */
+const {verifyDetectorsAvailabilityMiddlewareFactory} = require('./middleware/verifyDetectorsAvailabilityMiddlewareFactory.middleware.js');
 
 const {
   setDetectorsFromEnvironmentMiddlewareFactory
@@ -176,6 +178,7 @@ module.exports.setup = (http, ws) => {
   const setDetectorsFromEnvironmentMiddleware = setDetectorsFromEnvironmentMiddlewareFactory(environmentService);
   const verifyLockOwnershipMiddleware = getDetectorsLockOwnershipMiddlewareFactory(lockService);
   const validateConsulServiceMiddleware = validateConsulServiceMiddlewareFactory(consulService);
+  const verifyDetectorsAvailabilityMiddleware = verifyDetectorsAvailabilityMiddlewareFactory(detectorService);
 
   ctrlProxy.methods.forEach(
     (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res)),
@@ -215,6 +218,7 @@ module.exports.setup = (http, ws) => {
     logDeploymentRequestMiddleware,
     minimumRoleMiddleware(Role.DETECTOR),
     verifyLockOwnershipMiddleware,
+    verifyDetectorsAvailabilityMiddleware,
     deploymentController.newAsyncDeploymentHandler.bind(deploymentController)
   );
 
