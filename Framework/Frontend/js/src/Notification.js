@@ -48,6 +48,7 @@ export class Notification extends Observable {
     this.message = '';
     this.type = 'primary';
     this.state = 'hidden'; // Shown, hidden
+    this.hovered = false; // Hover state
     this.timerId = 0; // Timer to auto-hide notification
   }
 
@@ -80,7 +81,9 @@ export class Notification extends Observable {
     // Auto-hide after duration
     if (duration !== Infinity) {
       this.timerId = setTimeout(() => {
-        this.hide();
+        if (!this.hovered) {
+          this.hide();
+        }
       }, duration);
     }
 
@@ -126,7 +129,16 @@ export const notification = (notificationInstance) => h('.notification.text-no-s
 
 }, h('span.notification-content.br2.p2.shadow-level4', {
   // ClassName: notificationInstance.message && (notificationInstance.state === 'shown' ? 'notification-open' : 'notification-close'),
-  onclick: () => notificationInstance.hide(),
+  onclick: () => {
+    navigator.clipboard.writeText(notificationInstance.message).then(
+      () => notificationInstance.show('Text copied to clipboard', notificationInstance.type, 1500),
+    );
+  },
+  onmouseenter: () => { notificationInstance.hovered = true; },
+  onmouseleave: () => {
+    notificationInstance.hovered = false;
+    notificationInstance.show(notificationInstance.message, notificationInstance.type);
+  },
   className: `${switchCase(notificationInstance.type, {
     primary: 'white bg-primary',
     success: 'white bg-success',
