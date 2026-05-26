@@ -39,25 +39,25 @@
     "index.js"
   ],
   "dependencies": {
-    "@aliceo2/web-ui": "2.10.0",
+    "@aliceo2/web-ui": "2.11.0",
     "joi": "18.2.1",
-    "jsroot": "7.10.1",
-    "kafkajs": "^2.2.4",
-    "mariadb": "^3.5.1",
-    "sequelize": "^6.37.8",
-    "umzug": "^3.8.2"
+    "jsroot": "7.11.0",
+    "kafkajs": "2.2.4",
+    "mariadb": "3.5.2",
+    "sequelize": "6.37.8",
+    "umzug": "3.8.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "@stylistic/eslint-plugin-js": "^4.4.0",
-    "eslint": "^9.39.1",
-    "eslint-plugin-jsdoc": "^62.5.0",
-    "globals": "^17.3.0",
-    "nock": "^15.0.0",
-    "puppeteer": "^24.36.0",
-    "sequelize-cli": "^6.6.2",
-    "sinon": "^21.0.0",
-    "supertest": "^7.2.2"
+    "@eslint/js": "10.0.1",
+    "@stylistic/eslint-plugin-js": "4.4.0",
+    "eslint": "10.2.1",
+    "eslint-plugin-jsdoc": "62.9.0",
+    "globals": "17.5.0",
+    "nock": "15.0.0",
+    "puppeteer": "24.42.0",
+    "sequelize-cli": "6.6.2",
+    "sinon": "21.1.2",
+    "supertest": "7.2.2"
   },
   "bundleDependencies": [
     "@aliceo2/web-ui",

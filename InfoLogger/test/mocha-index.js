@@ -105,6 +105,7 @@ describe('InfoLogger', function() {
   require('./public/live-mode-mocha');
   require('./public/query-mode-mocha');
   require('./public/status-bar-mocha');
+  require('./public/log-context-menu-mocha');
 
   after(async () => {
     await browser.close();

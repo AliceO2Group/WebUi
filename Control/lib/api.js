@@ -26,6 +26,8 @@ const {logDeploymentRequestMiddleware} = require('./middleware/logDeploymentRequ
 const {minimumRoleMiddleware} = require('./middleware/minimumRole.middleware.js');
 const {requireDetectorOrGlobalRoleMiddleware} = require('./middleware/requireDetectorOrGlobalRole.middleware.js');
 const {validateConsulServiceMiddlewareFactory} = require('./middleware/validateConsulServiceMiddlewareFactory.js');
+/* eslint-disable max-len */
+const {verifyDetectorsAvailabilityMiddlewareFactory} = require('./middleware/verifyDetectorsAvailabilityMiddlewareFactory.middleware.js');
 
 const {
   setDetectorsFromEnvironmentMiddlewareFactory
@@ -117,7 +119,7 @@ module.exports.setup = (http, ws) => {
   const lockService = new LockService(broadcastService);
   const lockController = new LockController(lockService);
 
-  const detectorService = new DetectorService(ctrlProxy);
+  const detectorService = new DetectorService(ctrlProxy, apricotProxy);
   const environmentService = new EnvironmentService(
     ctrlProxy, apricotService, cacheService, broadcastService, environmentCacheService
   );
@@ -167,7 +169,7 @@ module.exports.setup = (http, ws) => {
 
   const intervals = new Intervals();
 
-  initializeData(apricotService, lockService, consulService);
+  initializeData(detectorService, apricotService, lockService, consulService);
   initializeIntervals(intervals, statusService, runService, bkpService, environmentService);
 
   const coreMiddleware = [
@@ -176,6 +178,7 @@ module.exports.setup = (http, ws) => {
   const setDetectorsFromEnvironmentMiddleware = setDetectorsFromEnvironmentMiddlewareFactory(environmentService);
   const verifyLockOwnershipMiddleware = getDetectorsLockOwnershipMiddlewareFactory(lockService);
   const validateConsulServiceMiddleware = validateConsulServiceMiddlewareFactory(consulService);
+  const verifyDetectorsAvailabilityMiddleware = verifyDetectorsAvailabilityMiddlewareFactory(detectorService);
 
   ctrlProxy.methods.forEach(
     (method) => http.post(`/${method}`, coreMiddleware, (req, res) => ctrlService.executeCommand(req, res)),
@@ -194,7 +197,14 @@ module.exports.setup = (http, ws) => {
   http.get('/environments', coreMiddleware, envCtrl.getEnvironmentsHandler.bind(envCtrl), {public: true});
   http.get('/environment/:id/:source?', coreMiddleware, envCtrl.getEnvironmentHandler.bind(envCtrl), {public: true});
   http.post('/environment/auto', coreMiddleware, envCtrl.newAutoEnvironmentHandler.bind(envCtrl));
-  http.put('/environment/:id', coreMiddleware, envCtrl.transitionEnvironmentHandler.bind(envCtrl));
+  http.put('/environment/:id', 
+    coreMiddleware,
+    minimumRoleMiddleware(Role.DETECTOR),
+    setDetectorsFromEnvironmentMiddleware,
+    verifyLockOwnershipMiddleware,
+    envCtrl.transitionEnvironmentHandler.bind(envCtrl)
+  );
+
   http.delete('/environment/:id',
     coreMiddleware,
     minimumRoleMiddleware(Role.DETECTOR),
@@ -208,6 +218,7 @@ module.exports.setup = (http, ws) => {
     logDeploymentRequestMiddleware,
     minimumRoleMiddleware(Role.DETECTOR),
     verifyLockOwnershipMiddleware,
+    verifyDetectorsAvailabilityMiddleware,
     deploymentController.newAsyncDeploymentHandler.bind(deploymentController)
   );
 
@@ -241,8 +252,22 @@ module.exports.setup = (http, ws) => {
   apricotProxy.methods.forEach(
     (method) => http.post(`/${method}`, (req, res) => apricotService.executeCommand(req, res)),
   );
-  http.get('/core/detectors', (req, res) => apricotService.getDetectorList(req, res));
-  http.get('/core/hostsByDetectors', (req, res) => apricotService.getHostsByDetectorList(req, res));
+  http.get('/core/detectors', async (_, res) => {
+    try {
+      const detectors = await detectorService.getDetectorList();
+      res.status(200).json({detectors});
+    } catch (error) {
+      res.status(503).send({message: error.message});
+    }
+  });
+  http.get('/core/hostsByDetectors', async (_, res) => {
+    try {
+      const hostsByDetector = await detectorService.getHostsByDetector();
+      res.status(200).json({hosts: Object.fromEntries(hostsByDetector)});
+    } catch (error) {
+      res.status(503).send({message: error.message});
+    }
+  });
 
   http.post('/execute/o2-roc-config', coreMiddleware, (req, res) => ctrlService.createAutoEnvironment(req, res));
 
@@ -361,14 +386,17 @@ function initializeIntervals(intervalsService, statusService, runService, bkpSer
 
 /**
  * Function to initialize in order dependent services
- * @param {ApricotService} apricotService - request initial set of data from AliECS/Apricot
- * @param {LockService} lockService - initialize service with data from Apricot
+ * @param {DetectorService} detectorService - request initial detectors list and cache it in memory
+ * @param {ApricotService} apricotService - request initial hosts inventory from AliECS/Apricot
+ * @param {LockService} lockService - initialize service with data from DetectorService
  * @param {ConsulService} consulService - service for communicating with Consul
  */
-async function initializeData(apricotService, lockService, consulService) {
+async function initializeData(detectorService, apricotService, lockService, consulService) {
   testConsulStatus(consulService);
-  await apricotService.init();
-  lockService.setLockStatesForDetectors(apricotService.detectors);
+
+  const detectors = await detectorService.getDetectorList();
+  lockService.setLockStatesForDetectors(detectors);
+  await detectorService.getHostsByDetector();
 }
 
 /**

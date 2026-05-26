@@ -65,11 +65,74 @@ const scrollStyling = (model) => ({
  * @param {Log} row - a row of this table is a raw log
  * @returns {vnode} - the log build as a table row
  */
-const tableLogLine = (model, row) => h('tr.row-hover', {
-  className: model.log.item === row ? 'row-selected' : '',
-  onclick: () => model.log.setItem(row),
-  ondblclick: () => model.toggleInspector(),
-}, tableRows(model, model.table.colsHeader, row));
+const tableLogLine = (model, row) => {
+  const { log, table } = model;
+  return h('tr.row-hover', {
+    className: log.item === row ? 'row-selected' : '',
+    onclick: () => log.setItem(row),
+    ondblclick: () => model.toggleInspector(),
+  }, tableRows(model, table.colsHeader, row));
+};
+
+/**
+ * Resolves the required data to send to the context menu based on the cell's field and content.
+ * @param {Model} model - root model of the application
+ * @param {string} field - the field associated to the cell (e.g. 'hostname', 'severity', etc.)
+ * @param {string} content - the content of the cell
+ * @returns {object|null} - the data for the context menu or null if not applicable
+ */
+const resolveContextMenuData = (model, field, content) => {
+  const row = model.log.item;
+  if (field === 'date') {
+    return row.timestamp ? { field: 'timestamp', value: String(content) } : null;
+  }
+  if (field === 'time') {
+    return row.timestamp
+      ? { field: 'timestamp', value: `${model.timezone.format(row.timestamp, 'date')} ${content}` }
+      : null;
+  }
+  return row[field] != null && row[field] !== '' ? { field, value: String(row[field]) } : null;
+};
+
+/**
+ * Wraps a cell with a context menu with filtering and general options.
+ * @param {Model} model - root model of the application
+ * @param {object} row - values for each cell of the row
+ * @param {string} field - the field associated to the cell (e.g. 'hostname', 'severity', etc.)
+ * @param {string} content - the content of the cell
+ * @param {string} extraClasses - extra CSS classes to add to the cell
+ * @param {object} extraAttrs - extra attributes to add to the cell
+ * @returns {vnode} - the cell wrapped with the context menu
+ */
+const cellWithContextMenu = (model, row, field, content, extraClasses = '', extraAttrs = {}) => {
+  const openContextMenu = (e) => {
+    model.log.setItem(row);
+    const data = resolveContextMenuData(model, field, content);
+    if (data) {
+      e.preventDefault();
+      model.log.contextMenu.show(data.field, data.value, e.clientX, e.clientY);
+    }
+  };
+
+  const hasContent = content != null && content !== '';
+
+  return h(`td.cell${extraClasses}`, {
+    ...extraAttrs,
+    oncontextmenu: hasContent ? openContextMenu : null,
+  }, [
+    h('.cell-content', [
+      h('.cell-text', content),
+      hasContent && h(
+        'span.cell-context-menu-hint',
+        {
+          onclick: openContextMenu,
+          title: 'Right-click also opens this menu',
+        },
+        '⋮',
+      ),
+    ]),
+  ]);
+};
 
 /**
  * Array of table rows
@@ -78,26 +141,45 @@ const tableLogLine = (model, row) => h('tr.row-hover', {
  * @param {object} row - values for each cell of the row
  * @returns {vnode} - the row of the table
  */
-const tableRows = (model, colsHeader, row) =>
-  [
-    h('td.cell.text-center', { className: model.log.item === row ? null : severityClass(row.severity) }, row.severity),
-    h('td.cell.text-center.cell-bordered', row.level),
-    colsHeader.date.visible && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, 'date')),
-    colsHeader.time.visible && h('td.cell.cell-bordered', model.timezone.format(row.timestamp, model.log.timeFormat)),
-    colsHeader.hostname.visible && h('td.cell.cell-bordered', row.hostname),
-    colsHeader.rolename.visible && h('td.cell.cell-bordered', row.rolename),
-    colsHeader.pid.visible && h('td.cell.cell-bordered', row.pid),
-    colsHeader.username.visible && h('td.cell.cell-bordered', row.username),
-    colsHeader.system.visible && h('td.cell.cell-bordered', row.system),
-    colsHeader.facility.visible && h('td.cell.cell-bordered', row.facility),
-    colsHeader.detector.visible && h('td.cell.cell-bordered', row.detector),
-    colsHeader.partition.visible && h('td.cell.cell-bordered', row.partition),
-    colsHeader.run.visible && h('td.cell.cell-bordered', row.run),
-    colsHeader.errcode.visible && h('td.cell.cell-bordered', linkToWikiErrors(row.errcode)),
-    colsHeader.errline.visible && h('td.cell.cell-bordered', row.errline),
-    colsHeader.errsource.visible && h('td.cell.cell-bordered', row.errsource),
-    colsHeader.message.visible && h('td.cell.cell-bordered', { title: row.message }, row.message),
+const tableRows = (model, colsHeader, row) => {
+  const cell = (field, content, extraClasses = '', extraAttrs = {}) =>
+    cellWithContextMenu(model, row, field, content, extraClasses, extraAttrs);
+
+  const { date, time, hostname, rolename, pid, username,
+    system, facility, detector, partition, run,
+    errcode, errline, errsource, message } = colsHeader;
+
+  const { severity, level, timestamp, hostname: hostnameVal, rolename: rolenameVal,
+    pid: pidVal, username: usernameVal, system: systemVal, facility: facilityVal,
+    detector: detectorVal, partition: partitionVal, run: runVal,
+    errcode: errcodeVal, errline: errlineVal, errsource: errsourceVal,
+    message: messageVal } = row;
+
+  return [
+    cell(
+      'severity',
+      severity,
+      '.text-center',
+      { className: model.log.item === row ? null : severityClass(severity) },
+    ),
+    cell('level', level, '.text-center.cell-bordered'),
+    date.visible && cell('date', model.timezone.format(timestamp, 'date'), '.cell-bordered'),
+    time.visible && cell('time', model.timezone.format(timestamp, model.log.timeFormat), '.cell-bordered'),
+    hostname.visible && cell('hostname', hostnameVal, '.cell-bordered'),
+    rolename.visible && cell('rolename', rolenameVal, '.cell-bordered'),
+    pid.visible && cell('pid', pidVal, '.cell-bordered'),
+    username.visible && cell('username', usernameVal, '.cell-bordered'),
+    system.visible && cell('system', systemVal, '.cell-bordered'),
+    facility.visible && cell('facility', facilityVal, '.cell-bordered'),
+    detector.visible && cell('detector', detectorVal, '.cell-bordered'),
+    partition.visible && cell('partition', partitionVal, '.cell-bordered'),
+    run.visible && cell('run', runVal, '.cell-bordered'),
+    errcode.visible && cell('errcode', linkToWikiErrors(errcodeVal), '.cell-bordered'),
+    errline.visible && cell('errline', errlineVal, '.cell-bordered'),
+    errsource.visible && cell('errsource', errsourceVal, '.cell-bordered'),
+    message.visible && cell('message', messageVal, '.cell-bordered', { title: messageVal }),
   ];
+};
 
 /**
  * Creates link of error code to open in a new tab the wiki page associated

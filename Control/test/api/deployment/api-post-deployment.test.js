@@ -13,7 +13,7 @@
 */
 
 const request = require('supertest');
-const { DET_MID_TEST_TOKEN, GUEST_TEST_TOKEN, TEST_URL } = require('../generateToken.js');
+const { DET_MID_TEST_TOKEN, GLOBAL_TEST_TOKEN, GUEST_TEST_TOKEN, TEST_URL } = require('../generateToken.js');
 const { DetectorLockAction } = require('../../../lib/common/lock/detectorLockAction.enum.js');
 
 describe('POST /deploy', function () {
@@ -90,5 +90,30 @@ describe('POST /deploy', function () {
         DCS: { name: 'DCS', state: 'FREE' },
         ODC: { name: 'ODC', state: 'FREE' }
       });
+  });
+
+  it('should reject deployment request due to detectors being currently active in ECS', async function () {
+    // Take the DCS lock with a GLOBAL user to pass the lock ownership middleware
+    await request(`${TEST_URL}/api/locks`)
+      .put(`/${DetectorLockAction.TAKE}/DCS?token=${GLOBAL_TEST_TOKEN}`)
+      .expect(200);
+
+    await request(`${TEST_URL}/api`)
+      .post(`/deploy?token=${GLOBAL_TEST_TOKEN}`)
+      .send({
+        workflowTemplate: 'test-template',
+        detectors: ['DCS'],
+        userVars: { foo: 'bar' }
+      })
+      .expect(503, {
+        message: 'Requested detectors DCS are not available',
+        status: 503,
+        title: 'Service Unavailable'
+      });
+
+    // Release the DCS lock after the test so that tests are not chained
+    await request(`${TEST_URL}/api/locks`)
+      .put(`/${DetectorLockAction.RELEASE}/DCS?token=${GLOBAL_TEST_TOKEN}`)
+      .expect(200);
   });
 });
