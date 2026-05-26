@@ -12,7 +12,15 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconPerson, iconMediaPlay, iconMediaStop, iconDataTransferDownload } from '/js/src/index.js';
+import { h,
+  iconPerson,
+  iconMediaPlay,
+  iconMediaStop,
+  iconDataTransferDownload,
+  iconMagnifyingGlass,
+  iconPlus,
+  iconMinus,
+} from '/js/src/index.js';
 import { BUTTON } from '../constants/button-states.const.js';
 import { MODE } from '../constants/mode.const.js';
 import { setBrowserTabTitle } from '../common/utils.js';
@@ -58,6 +66,7 @@ export default (model) => [
     title: 'Go to last log message (ALT + down arrow)',
   }, '↓'),
   downloadButtonGroup(model.log),
+  zoomButtonGroup(model.zoom),
 ];
 
 /**
@@ -148,6 +157,33 @@ const downloadButtonGroup = (logModel) =>
         onclick: () => logModel.removeLogDownloadContent(),
       }, 'Visible Logs Only'),
     ]),
+  ]);
+
+/**
+ * Group of buttons for controlling log table zoom level
+ * @param {Zoom} zoom - the zoom model
+ * @returns {vnode} - the view of the zoom button group
+ */
+const zoomButtonGroup = (zoom) =>
+  h('.btn-group', [
+    h('button.btn', {
+      onclick: () => zoom.zoomOut(),
+      disabled: zoom.level <= zoom.min,
+      id: 'zoom-out-button',
+      title: 'Zoom out (Ctrl/Cmd + -)',
+    }, h('span', { style: 'font-size:0.8em' }, iconMinus())),
+    h('button.btn', {
+      onclick: () => zoom.resetZoom(),
+      disabled: zoom.level === 1,
+      id: 'reset-zoom-button',
+      title: 'Reset zoom',
+    }, h('span', { style: 'font-size:0.9em' }, iconMagnifyingGlass())),
+    h('button.btn', {
+      onclick: () => zoom.zoomIn(),
+      disabled: zoom.level >= zoom.max,
+      id: 'zoom-in-button',
+      title: 'Zoom in (Ctrl/Cmd + +)',
+    }, h('span', { style: 'font-size:0.8em' }, iconPlus())),
   ]);
 
 /**

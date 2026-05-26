@@ -17,7 +17,6 @@ import LogFilter from '../logFilter/LogFilter.js';
 import ContextMenu from './ContextMenu.js';
 import { MODE } from '../constants/mode.const.js';
 import { TIME_MS } from '../common/Timezone.js';
-import { ROW_HEIGHT } from '../constants/visual.const.js';
 
 /**
  * Model Log, encapsulate all log management and queries
@@ -599,8 +598,12 @@ export default class Log extends Observable {
    */
   listLogsInViewportOnly() {
     return this.list.slice(
-      Math.floor(this.scrollTop / ROW_HEIGHT),
-      Math.floor(this.scrollTop / ROW_HEIGHT) + Math.ceil(this.scrollHeight / ROW_HEIGHT) + 1,
+      Math.floor(this.scrollTop / this.rowHeight),
+      Math.floor(this.scrollTop / this.rowHeight) + Math.ceil(this.scrollHeight / this.rowHeight) + 1,
     );
+  }
+
+  get rowHeight() {
+    return this.model.zoom.rowHeightPx;
   }
 }

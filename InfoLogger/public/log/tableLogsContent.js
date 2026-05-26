@@ -16,7 +16,6 @@ import { h } from '/js/src/index.js';
 
 import { severityClass } from './severityUtils.js';
 import tableColGroup from './tableColGroup.js';
-import { ROW_HEIGHT } from './../constants/visual.const.js';
 
 /**
  * Main content of ILG - simulates a big table scrolling.
@@ -34,7 +33,7 @@ export default (model) =>
     tableContainerHooks(model),
     h('div.tableLogsContentPlaceholder', {
       style: {
-        height: `${model.log.list.length * ROW_HEIGHT}px`,
+        height: `${model.log.list.length * model.log.rowHeight}px`,
         position: 'relative',
       },
     }, [
@@ -55,7 +54,7 @@ export default (model) =>
 const scrollStyling = (model) => ({
   style: {
     position: 'absolute',
-    top: `${model.log.scrollTop - model.log.scrollTop % ROW_HEIGHT}px`,
+    top: `${model.log.scrollTop - model.log.scrollTop % model.log.rowHeight}px`,
   },
 });
 
@@ -264,7 +263,7 @@ const autoscrollManager = (model, vnode) => {
 
     if (previousLastLogId !== currentLastLogId) {
       // scroll at maximum bottom possible
-      vnode.dom.scrollTo(0, ROW_HEIGHT * model.log.applicationLimit);
+      vnode.dom.scrollTo(0, model.log.rowHeight * model.log.applicationLimit);
       vnode.dom.dataset.lastLogId = currentLastLogId;
     }
 
@@ -281,7 +280,7 @@ const autoscrollManager = (model, vnode) => {
     if (previousSelectedItemId !== currentSelectedItemId && model.log.autoScrollToItem) {
       // scroll to an index * height of row, centered
       const index = model.log.list.indexOf(model.log.item);
-      const positionRow = ROW_HEIGHT * index;
+      const positionRow = model.log.rowHeight * index;
       const halfView = model.log.scrollHeight / 2;
       vnode.dom.scrollTo(0, positionRow - halfView);
     }
