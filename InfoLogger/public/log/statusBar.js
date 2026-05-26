@@ -156,16 +156,15 @@ const statusStats = (model) => [
 ];
 
 const bufferStatus = (model) => {
-  let dotColor = '#6c757d'; // grey - unknown status default
+  let dotClass = 'gray-darker'; // grey - unknown status default
 
   if (model.log.limitReached === true) {
-    dotColor = '#d9534f'; // red - limit reached
+    dotClass = 'danger'; // red - limit reached
   } else if (model.log.limitReached === false) {
-    dotColor = '#5cb85c'; // green - limit not reached
+    dotClass = 'success'; // green - limit not reached
   }
 
-  return h('span', {
-    style: `color: ${dotColor}; font-size: 0.8em; margin: 0 4px;`,
+  return h(`span.${dotClass}.f7.mh1`, {
     title: model.log.limitReached === null ? 'No query data loaded' :
       model.log.limitReached === true ? 'Limit reached - results may be incomplete' : 'Limit OK',
     id: 'status-bar-buffer-dot',

@@ -184,7 +184,7 @@ describe('Status Bar test-suite', async () => {
         });
 
         await page.waitForFunction(
-          () => document.querySelector('#status-bar-buffer-dot').style.color === 'rgb(108, 117, 125)',
+          () => document.querySelector('#status-bar-buffer-dot').classList.contains('gray-darker'),
           { timeout: 2000 },
         );
 
@@ -199,7 +199,7 @@ describe('Status Bar test-suite', async () => {
         });
 
         await page.waitForFunction(
-          () => document.querySelector('#status-bar-buffer-dot').style.color === 'rgb(92, 184, 92)',
+          () => document.querySelector('#status-bar-buffer-dot').classList.contains('success'),
           { timeout: 2000 },
         );
         const dotTitle = await page.$eval('#status-bar-buffer-dot', (el) => el.title);
@@ -213,7 +213,7 @@ describe('Status Bar test-suite', async () => {
         });
 
         await page.waitForFunction(
-          () => document.querySelector('#status-bar-buffer-dot').style.color === 'rgb(217, 83, 79)',
+          () => document.querySelector('#status-bar-buffer-dot').classList.contains('danger'),
           { timeout: 2000 },
         );
         const dotTitle = await page.$eval('#status-bar-buffer-dot', (el) => el.title);
