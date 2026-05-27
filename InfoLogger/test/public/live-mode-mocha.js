@@ -60,6 +60,7 @@ describe('Live Mode test-suite', async () => {
     await page.evaluate(() => window.model.log.liveStop('Paused'));
     await page.evaluate(() => {
       window.model.log.filter.resetCriteria();
+      window.model.log.filter.setCriteria('level', 'max', null);
       window.model.log.filter.setCriteria('hostname', 'match', 'aldaqecs01-v1');
     });
     await page.evaluate(() => window.model.log.liveStart());
@@ -76,6 +77,7 @@ describe('Live Mode test-suite', async () => {
     await page.evaluate(() => window.model.log.liveStop('Query'));
     await page.evaluate(() => {
       window.model.log.filter.resetCriteria();
+      window.model.log.filter.setCriteria('level', 'max', null);
       window.model.log.filter.setCriteria('hostname', 'exclude', 'aldaqdip01');
     });
     await page.evaluate(() => window.model.log.liveStart());
@@ -90,7 +92,10 @@ describe('Live Mode test-suite', async () => {
 
   it('should filter messages based on SQL Wildcards `hostname` excluding `%ldaqdip%` and username matching `a_iceda_`'
     + ' without changing state of live mode', async () => {
-    await page.evaluate(() => window.model.log.filter.resetCriteria());
+    await page.evaluate(() => {
+      window.model.log.filter.resetCriteria();
+      window.model.log.filter.setCriteria('level', 'max', null);
+    });
     await page.evaluate(() => {
       window.model.log.setCriteria('hostname', 'exclude', '%ldaqdip%');
       window.model.log.setCriteria('username', 'match', 'a_iceda_');
