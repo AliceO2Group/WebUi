@@ -104,6 +104,6 @@ const buttonLogLimit = (model, label, limit) => h('button.btn', {
  * @returns {vnode} - component representing the creation of a button to reset filters
  */
 const buttonReset = (model) => h('button.btn', {
-  onclick: () => model.log.filter.resetCriteria(),
+  onclick: () => model.log.resetFilters(),
   title: 'Reset date, time, matches, excludes, log levels',
 }, 'Reset filters');
