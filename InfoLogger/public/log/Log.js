@@ -32,6 +32,7 @@ export default class Log extends Observable {
     this.model = model;
 
     this.filter = new LogFilter(model);
+    this.filter.setCriteria('level', 'max', 1);
     this.filter.bubbleTo(this);
 
     this.focus = { // show date picker on focus

@@ -59,14 +59,18 @@ export default (model) => [
  * @param {string} value - a char to represent severity: W E F or I, can be many with spaces like 'W E'
  * @returns {vnode} - the button to toggle severity
  */
-const buttonSeverity = (model, label, title, value) => h('button.btn', {
-  className: model.log.filter.criterias.severity.in.includes(value) ? 'active' : '',
-  onclick: (e) => {
-    model.log.setCriteria('severity', 'in', value);
-    e.target.blur(); // remove focus so user can 'enter' without actually toggle again the button
-  },
-  title: title,
-}, label);
+const buttonSeverity = (model, label, title, value) => {
+  const disabled = model.log.filter.isSeverityDisabled(value);
+  return h('button.btn', {
+    className: disabled ? 'disabled' : model.log.filter.criterias.severity.in.includes(value) ? 'active' : '',
+    onclick: disabled ? null : (e) => {
+      model.log.setCriteria('severity', 'in', value);
+      e.target.blur();
+    },
+    disabled,
+    title: disabled ? `${label} is not available at the current log level` : title,
+  }, label);
+};
 
 /**
  * Makes a button to set filtering level (shifter, debug, etc) with number
