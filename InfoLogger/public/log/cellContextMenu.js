@@ -92,7 +92,6 @@ export const cellContextMenu = (model) => {
         ),
         createMenuItem(iconTrash(), 'danger', 'Reset Severity Filter', () => {
           model.log.filter.setCriteria('severity', 'in', 'I W E F');
-          model.log.notifyFilterChanged();
           hideMenu();
         }, model.log.filter.criterias.severity.in === 'I W E F'),
       ];
