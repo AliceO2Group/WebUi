@@ -426,7 +426,7 @@ export default class LogFilter extends Observable {
       },
       severity: {
         in: 'I W E F',
-        $in: ['W', 'I', 'E', 'F'],
+        $in: ['I', 'W', 'E', 'F'],
       },
       level: {
         max: null, // 0, 1, 6, 11, 21
