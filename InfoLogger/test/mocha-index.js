@@ -93,12 +93,12 @@ describe('InfoLogger', function() {
     }
   });
 
-  it('should have redirected to default page "/?q={"severity":{"in":"I W E F"}}"', async function() {
+  it('should have redirected to default page "/?q={"severity":{"in":"I W E F"},"level":{"max":1}}"', async function() {
     await page.goto(baseUrl, {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
     const search = decodeURIComponent(location.search);
 
-    assert.deepStrictEqual(search, '?q={"severity":{"in":"I W E F"}}');
+    assert.deepStrictEqual(search, '?q={"severity":{"in":"I W E F"},"level":{"max":1}}');
   });
 
   require('./public/user-actions-mocha');

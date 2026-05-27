@@ -25,13 +25,14 @@ describe('Filter actions test-suite', async () => {
     page = test.page;
   });
 
+  // "physicist" is not a distinct stored profile; the server returns defaultCriterias for any name
   it('should succesfully load a page with profile in the URI', async function() {
     await page.goto(baseUrl + "?profile=physicist", {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
     const search = decodeURIComponent(location.search);
 
     // for now, check if redirected to default page
-    assert.strictEqual(search, '?q={"severity":{"in":"I W E F"}}');
+    assert.strictEqual(search, '?q={"severity":{"in":"I W E F"},"level":{"max":1}}');
   });
 
   it('should update column headers based on profile when passed in the URI', async () => {
@@ -62,7 +63,7 @@ describe('Filter actions test-suite', async () => {
 
   it('should update filters based on profile when passed in the URI', async () => {
     // for now check if the filters are reset once the profile is passed 
-    const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+    const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
 
     const searchParams = await page.evaluate(() => {
       const params = {profile: 'physicist'};
@@ -80,7 +81,7 @@ describe('Filter actions test-suite', async () => {
   it('should reset filters and show warning message when profile and filters are passed', async () => {
     // wait until the previous notification is hidden
     await page.waitForFunction(`window.model.notification.state === 'hidden'`);
-    const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+    const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
     const searchParams = await page.evaluate(() => {
       const params = {profile: "physicist", q: '"severity":{"in":"I W E F"}}'};
       window.model.parseLocation(params);
@@ -222,6 +223,105 @@ describe('Filter actions test-suite', async () => {
     assert.strictEqual(criterias.timestamp.since, '');
     assert.strictEqual(criterias.timestamp.$since, null);
     assert.strictEqual(criterias.severity.in, 'I W E F');
-    assert.deepStrictEqual(criterias.severity.$in, ['W', 'I', 'E', 'F']);
+    assert.deepStrictEqual(criterias.severity.$in, ['I', 'W', 'E', 'F']);
+  });
+
+  describe('Severity filter disabled states', async () => {
+    it('should report DEBUG severity as disabled at OPS level', async () => {
+      const disabled = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('level', 'max', 1);
+        return window.model.log.filter.isSeverityDisabled('D');
+      });
+
+      assert.strictEqual(disabled, true);
+    });
+
+    it('should report DEBUG severity as enabled when level allows it', async () => {
+      const disabled = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('level', 'max', 6);
+        return window.model.log.filter.isSeverityDisabled('D');
+      });
+
+      assert.strictEqual(disabled, false);
+    });
+
+    it('should strip DEBUG from severity filter when switching to OPS', async () => {
+      const severity = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('level', 'max', 11);
+        window.model.log.filter.setCriteria('severity', 'in', 'I W E F D');
+        window.model.log.filter.setCriteria('level', 'max', 1);
+        return {
+          in: window.model.log.filter.criterias.severity.in,
+          $in: window.model.log.filter.criterias.severity.$in,
+        };
+      });
+
+      assert.ok(!severity.$in.includes('D'));
+      assert.ok(!severity.in.includes('D'));
+    });
+
+    it('should strip DEBUG from URL when severity is set before level', async () => {
+      const severity = await page.evaluate(() => {
+        window.model.log.filter.fromObject({ severity: { in: 'I W E F D' }, level: { max: 1 } });
+        return {
+          in: window.model.log.filter.criterias.severity.in,
+          $in: window.model.log.filter.criterias.severity.$in,
+        };
+      });
+
+      assert.ok(!severity.$in.includes('D'));
+      assert.ok(!severity.in.includes('D'));
+    });
+
+    it('should strip DEBUG from URL when level is set before severity', async () => {
+      const severity = await page.evaluate(() => {
+        window.model.log.filter.fromObject({ level: { max: 1 }, severity: { in: 'I W E F D' } });
+        return {
+          in: window.model.log.filter.criterias.severity.in,
+          $in: window.model.log.filter.criterias.severity.$in,
+        };
+      });
+
+      assert.ok(!severity.$in.includes('D'));
+      assert.ok(!severity.in.includes('D'));
+    });
+
+    it('should re-enable DEBUG after reset', async () => {
+      const result = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('level', 'max', 1);
+        window.model.log.resetFilters();
+        return {
+          disabled: window.model.log.filter.isSeverityDisabled('D'),
+          level: window.model.log.filter.criterias.level.max,
+        };
+      });
+
+      assert.strictEqual(result.disabled, false);
+      assert.strictEqual(result.level, null);
+    });
+
+    it('should disable DEBUG button at OPS level', async () => {
+      await page.evaluate(() => {
+        window.model.log.filter.setCriteria('level', 'max', 1);
+      });
+
+      await page.waitForFunction(() => {
+        const buttons = Array.from(document.querySelectorAll('.btn-group button.btn'));
+        const debugBtn = buttons.find((b) => b.textContent.trim() === 'Debug');
+        return debugBtn?.classList.contains('disabled');
+      });
+    });
+
+    it('should enable DEBUG button when level is not OPS', async () => {
+      await page.evaluate(() => {
+        window.model.log.filter.setCriteria('level', 'max', 11);
+      });
+
+      await page.waitForFunction(() => {
+        const buttons = Array.from(document.querySelectorAll('.btn-group button.btn'));
+        const debugBtn = buttons.find((b) => b.textContent.trim() === 'Debug');
+        return !debugBtn?.classList.contains('disabled');
+      });
+    });
   });
 });
