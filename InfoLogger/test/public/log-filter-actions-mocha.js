@@ -95,7 +95,7 @@ describe('Filter actions test-suite', async () => {
   });
 
   it('should redirect to default filters and show JSON parse error on malformed q in URI', async () => {
-    const expectedDefaultParams = '?q={"severity":{"in":"I W E F"}}';
+    const expectedDefaultParams = '?q={"severity":{"in":"I W E F"},"level":{"max":1}}';
 
     const locationAndNotification = await page.evaluate(() => {
       const params = { q: '{"severity":{"in":"W I E F"' };
@@ -116,8 +116,8 @@ describe('Filter actions test-suite', async () => {
 
   it('should update URI with new encoded "match" criteria', async () => {
     /* eslint-disable max-len */
-    const decodedParams = '?q={"hostname":{"match":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
-    const expectedParams = '?q={%22hostname%22:{%22match%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+    const decodedParams = '?q={"hostname":{"match":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"},"level":{"max":1}}';
+    const expectedParams = '?q={%22hostname%22:{%22match%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
     const searchParams = await page.evaluate(() => {
       window.model.log.filter.setCriteria('hostname', 'match', '"%ald_qdip01%');
       window.model.updateRouteOnModelChange();
@@ -130,8 +130,8 @@ describe('Filter actions test-suite', async () => {
 
   it('should update URI with new encoded "exclude" criteria', async () => {
     /* eslint-disable max-len */
-    const decodedParams = '?q={"hostname":{"exclude":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
-    const expectedParams = '?q={%22hostname%22:{%22exclude%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+    const decodedParams = '?q={"hostname":{"exclude":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"},"level":{"max":1}}';
+    const expectedParams = '?q={%22hostname%22:{%22exclude%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
     const searchParams = await page.evaluate(() => {
       window.model.log.filter.resetCriteria();
       window.model.log.filter.setCriteria('hostname', 'exclude', '"%ald_qdip01%');
@@ -284,20 +284,6 @@ describe('Filter actions test-suite', async () => {
 
       assert.ok(!severity.$in.includes('D'));
       assert.ok(!severity.in.includes('D'));
-    });
-
-    it('should re-enable DEBUG after reset', async () => {
-      const result = await page.evaluate(() => {
-        window.model.log.filter.setCriteria('level', 'max', 1);
-        window.model.log.resetFilters();
-        return {
-          disabled: window.model.log.filter.isSeverityDisabled('D'),
-          level: window.model.log.filter.criterias.level.max,
-        };
-      });
-
-      assert.strictEqual(result.disabled, false);
-      assert.strictEqual(result.level, null);
     });
 
     it('should disable DEBUG button at OPS level', async () => {

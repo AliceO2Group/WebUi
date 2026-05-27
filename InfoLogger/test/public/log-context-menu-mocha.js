@@ -276,7 +276,7 @@ describe('Cell Context Menu', async () => {
       it('should show correct actions for level field', async () => {
         await openContextMenu(page, 'level', '3', 100, 120);
         const labels = await getMenuActionLabels(page);
-        assert.deepStrictEqual(labels, ['Set Level To Support', 'Set Level To Ops', 'Clear Level Filter', 'Copy', 'Open Inspector']);
+        assert.deepStrictEqual(labels, ['Set Level To Support', 'Set Level To Ops', 'Reset Level Filter', 'Copy', 'Open Inspector']);
       });
     });
 
@@ -561,7 +561,7 @@ describe('Cell Context Menu', async () => {
         });
       });
 
-      describe('Set/Clear level filter for level field', async () => {
+      describe('Set/Reset Level Filter for level field', async () => {
         it('should set level to nearest threshold above via include', async () => {
           await openContextMenu(page, 'level', '3', 100, 120);
 
@@ -586,34 +586,38 @@ describe('Cell Context Menu', async () => {
           assert.strictEqual(level.$max, 1);
         });
 
-        it('should disable "Clear Level Filter" when no level filter is set', async () => {
+        it('should disable "Reset Level Filter" when level is already cleared', async () => {
+          await page.evaluate(() => {
+            window.model.log.filter.setCriteria('level', 'max', 1);
+          });
+
           await openContextMenu(page, 'level', '3', 100, 120);
 
-          assert.strictEqual(await isMenuItemDisabled(page, 'Clear Level Filter'), true);
+          assert.strictEqual(await isMenuItemDisabled(page, 'Reset Level Filter'), true);
         });
 
-        it('should enable "Clear Level Filter" when a level filter is active', async () => {
+        it('should enable "Reset Level Filter" when a level filter is active', async () => {
           await page.evaluate(() => {
             window.model.log.filter.setCriteria('level', 'max', 6);
           });
 
           await openContextMenu(page, 'level', '3', 100, 120);
 
-          assert.strictEqual(await isMenuItemDisabled(page, 'Clear Level Filter'), false);
+          assert.strictEqual(await isMenuItemDisabled(page, 'Reset Level Filter'), false);
         });
 
-        it('should clear level filter back to null', async () => {
+        it('should reset level filter back to default', async () => {
           await page.evaluate(() => {
             window.model.log.filter.setCriteria('level', 'max', 6);
           });
 
           await openContextMenu(page, 'level', '3', 100, 120);
 
-          await clickMenuItemByLabel(page, 'Clear Level Filter');
+          await clickMenuItemByLabel(page, 'Reset Level Filter');
 
           const level = await page.evaluate(() => window.model.log.filter.criterias.level);
-          assert.strictEqual(level.max, null);
-          assert.strictEqual(level.$max, null);
+          assert.strictEqual(level.max, 1);
+          assert.strictEqual(level.$max, 1);
         });
       });
 
