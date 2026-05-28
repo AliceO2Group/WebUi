@@ -33,6 +33,7 @@ export default class Log extends Observable {
 
     this.filter = new LogFilter(model);
     this.filter.bubbleTo(this);
+    this.filter.observe(this.onFilterChange.bind(this));
 
     this.focus = { // show date picker on focus
       timestampSince: false,
@@ -400,17 +401,22 @@ export default class Log extends Observable {
       }
       value = copy.join(' ');
     }
-    if (this.filter.setCriteria(field, operator, value)) {
-      if (this.isLiveModeRunning()) {
-        this.model.ws.setFilter(this.model.log.filter.toStringifyFunction());
-        this.model.notification.show(
-          'The current live session has been adapted to the new filter configuration.',
-          'primary',
-          2000,
-        );
-      } else if (this.isActiveModeQuery()) {
-        this.model.notification.show('Filters have changed. Query again for updated results', 'primary', 2000);
-      }
+    this.filter.setCriteria(field, operator, value);
+  }
+
+  /**
+   * Notify the active mode (live or query) that filters have changed.
+   */
+  onFilterChange() {
+    if (this.isLiveModeRunning()) {
+      this.model.ws.setFilter(this.filter.toStringifyFunction());
+      this.model.notification.show(
+        'The current live session has been adapted to the new filter configuration.',
+        'primary',
+        2000,
+      );
+    } else if (this.isActiveModeQuery()) {
+      this.model.notification.show('Filters have changed. Query again for updated results', 'primary', 2000);
     }
   }
 

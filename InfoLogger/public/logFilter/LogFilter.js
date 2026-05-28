@@ -14,6 +14,7 @@
 
 import { Observable } from '/js/src/index.js';
 import { TEXT_FILTER_OPERATORS } from '../constants/text-filter-operators.const.js';
+import { getDisabledSeverities } from '../constants/log-level-filters.const.js';
 
 /**
  * @typedef Criteria
@@ -88,6 +89,11 @@ export default class LogFilter extends Observable {
           throw new Error('unknown operator');
       }
 
+      // enforces on both severity and level as fromObject can set them in either order
+      if (field === 'severity' || field === 'level') {
+        this.enforceDisabledSeverities();
+      }
+
       this.notify();
       return true;
     } else {
@@ -151,6 +157,37 @@ export default class LogFilter extends Observable {
   hasActiveTextFilters() {
     return Object.values(this.criterias).some((criteria) =>
       TEXT_FILTER_OPERATORS.some((operator) => criteria[operator]?.trim()));
+  }
+
+  /**
+   * Check whether a severity is disabled for the current log level.
+   * @param {string} severityCode - [D, I, W, E, F]
+   * @returns {boolean} true if the severity is not allowed at the current level
+   */
+  isSeverityDisabled(severityCode) {
+    return getDisabledSeverities(this.criterias.level.max).includes(severityCode);
+  }
+
+  /**
+   * Remove any active severity selections that are disallowed by the current level.
+   */
+  enforceDisabledSeverities() {
+    const disabled = getDisabledSeverities(this.criterias.level.max);
+    if (disabled.length === 0 || !this.criterias.severity.$in) {
+      return;
+    }
+
+    const current = this.criterias.severity.$in;
+    if (!current) {
+      return;
+    }
+
+    const filteredSeverities = current.filter((s) => !disabled.includes(s));
+    // Only update if there is a change
+    if (filteredSeverities.length !== current.length) {
+      this.criterias.severity.$in = filteredSeverities;
+      this.criterias.severity.in = filteredSeverities.join(' ');
+    }
   }
 
   /**
@@ -389,11 +426,11 @@ export default class LogFilter extends Observable {
       },
       severity: {
         in: 'I W E F',
-        $in: ['W', 'I', 'E', 'F'],
+        $in: ['I', 'W', 'E', 'F'],
       },
       level: {
-        max: null, // 0, 1, 6, 11, 21
-        $max: null, // 0, 1, 6, 11, 21
+        max: 1,
+        $max: 1,
       },
     };
     this.notify();

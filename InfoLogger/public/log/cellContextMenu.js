@@ -124,10 +124,10 @@ export const cellContextMenu = (model) => {
             hideMenu();
           },
         ),
-        createMenuItem(iconTrash(), 'danger', 'Clear Level Filter', () => {
-          model.log.setCriteria('level', 'max', null);
+        createMenuItem(iconTrash(), 'danger', 'Reset Level Filter', () => {
+          model.log.setCriteria('level', 'max', 1);
           hideMenu();
-        }, model.log.filter.criterias.level.max === null),
+        }, model.log.filter.criterias.level.max === 1),
       ];
     }
     return [
