@@ -101,12 +101,20 @@ const interactionModesGroupButton = (model) => {
  * @returns {vnode} - the view of the query button
  */
 const queryButton = (model, frameworkInfo) => {
-  const { log: { queryResult } } = model;
+  const { log: logModel } = model;
+  const { queryResult } = logModel;
   const { mysql: { status: { ok: isDbReady = false } = {} } = {} } = frameworkInfo;
-  const title = isDbReady ? 'Query database with filters (Enter)' : 'Query service not configured';
+
+  if (queryResult.isLoading()) {
+    return h('button.btn.bold', {
+      title: 'Cancel ongoing query',
+      className: BUTTON.DANGER,
+      onclick: () => logModel.cancelQuery(),
+    }, 'Cancel');
+  }
 
   return h('button.btn.bold', {
-    title,
+    title: isDbReady ? 'Query database with filters (Enter)' : 'Query service not configured',
     disabled: !isDbReady || queryResult.isLoading(),
     className: queryResult.isLoading() ? 'loading' : queryButtonType,
     onclick: () => toggleButtonStates(model, false),
