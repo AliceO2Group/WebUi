@@ -10,9 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
-
-/* eslint-disable max-len */
+ */
 
 const assert = require('assert');
 const test = require('../mocha-index');
@@ -39,6 +37,41 @@ const TEXT_FILTER_FIELD_BY_OPERATOR = {
  * @param {string} [options.textFilterOperator] - operator to set before querying
  * @returns {Promise<{confirmCalls: number, postCalls: number}>}
  */
+/**
+ * Sets up common browser-context state for cancel query tests:
+ * confirms all dialogs, mocks frameworkInfo as healthy, and resets log/filter state.
+ * @param {Page} page - puppeteer page
+ * @returns {Promise<void>}
+ */
+const setupQueryTestState = (page) =>
+  page.evaluate(() => {
+    window.confirm = () => true;
+    window.model.frameworkInfo = {
+      isSuccess: () => true,
+      payload: { mysql: { status: { ok: true } } },
+      match: ({ Success }) => Success({ mysql: { status: { ok: true } } }),
+    };
+    window.model.log.filter.resetCriteria();
+    window.model.log.empty();
+  });
+
+/**
+ * Starts a never-resolving query in the browser context, then immediately cancels it.
+ * Useful as a shared setup step for tests that need to assert state after a cancellation.
+ * @param {Page} page - puppeteer page
+ * @returns {Promise<void>}
+ */
+const startAndCancelQuery = (page) =>
+  page.evaluate(async () => {
+    window.fetch = (_url, { signal } = {}) => new Promise((_, reject) => {
+      signal?.addEventListener('abort', () => reject(new DOMException('AbortError', 'AbortError')));
+    });
+    const queryPromise = window.model.log.query();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    window.model.log.cancelQuery();
+    await queryPromise;
+  });
+
 const runQueryWithMocks = (page, { confirmReturn, textFilterOperator }) =>
   // Sets up mocks for confirmation dialog and post request, needs to be run in the browser context
   page.evaluate(async ({
@@ -55,15 +88,16 @@ const runQueryWithMocks = (page, { confirmReturn, textFilterOperator }) =>
       return confirmReturn;
     };
 
-    window.model.loader.post = async () => {
+    window.fetch = async () => {
       postCalls += 1;
-      return { ok: true, result: { rows: [] } };
+      return { ok: true, status: 200, json: async () => JSON.stringify({ rows: [] }) };
     };
 
     // Mock the frameworkInfo to make the query method think the query service is available in its check
     window.model.frameworkInfo = {
       isSuccess: () => true,
       payload: { mysql: { status: { ok: true } } },
+      match: ({ Success }) => Success({ mysql: { status: { ok: true } } }),
     };
 
     // Default state of filters includes no text filters
@@ -94,9 +128,7 @@ describe('Query Mode test-suite', async () => {
 
   it('should fail because it is not configured', async () => {
     try {
-      await page.evaluate(async () => {
-        return await window.model.log.query();
-      });
+      await page.evaluate(async () => await window.model.log.query());
       assert.fail();
     } catch (e) {
       // code failed, so it is a successful test
@@ -130,6 +162,88 @@ describe('Query Mode test-suite', async () => {
         assert.strictEqual(result.confirmCalls, 0, `expected no confirm dialog for operator "${operator}"`);
         assert.strictEqual(result.postCalls, 1, `expected query execution for operator "${operator}"`);
       }
+    });
+  });
+
+  describe('cancel query - AbortController', () => {
+    beforeEach(async () => {
+      await setupQueryTestState(page);
+    });
+
+    it('should display a Cancel button while a query is in flight and the Query button should be absent', async () => {
+      const result = await page.evaluate(async () => {
+        // Never-resolving fetch to keep query in loading state, respects abort signal to allow clean teardown
+        window.fetch = (_url, { signal } = {}) => new Promise((_, reject) => {
+          signal?.addEventListener('abort', () => reject(new DOMException('AbortError', 'AbortError')));
+        });
+
+        const queryPromise = window.model.log.query();
+
+        await new Promise((r) => setTimeout(r, 50));
+
+        const cancelButton = document.querySelector('button#cancel-query-button');
+        const queryButton = document.querySelector('button#query-button');
+
+        // Clean up via cancel so the abort signal rejects the fetch and queryPromise resolves
+        window.model.log.cancelQuery();
+        await queryPromise;
+
+        return {
+          cancelButtonPresent: cancelButton !== null && cancelButton.textContent.includes('Cancel'),
+          queryButtonAbsent: queryButton === null,
+        };
+      });
+
+      assert.ok(result.cancelButtonPresent, 'Cancel button should be visible while query is loading');
+      assert.ok(result.queryButtonAbsent, 'Query button should not be visible while query is loading');
+    });
+
+    it('should not mutate list or stats when a query is cancelled via the AbortController', async () => {
+      await page.evaluate(() => {
+        const existingLogs = [
+          { severity: 'E', message: 'existing error', timestamp: Date.now() },
+          { severity: 'I', message: 'existing info', timestamp: Date.now() },
+        ];
+        existingLogs.forEach((log) => window.model.log.addLog(log));
+      });
+
+      await startAndCancelQuery(page);
+
+      const result = await page.evaluate(() => ({
+        listLength: window.model.log.list.length,
+        stats: window.model.log.stats,
+        abortControllerCleared: window.model.log.queryAbortController === null,
+      }));
+
+      assert.strictEqual(result.listLength, 2, 'list should still contain the pre-existing logs after cancellation');
+      assert.strictEqual(result.stats.error, 1, 'error stat should reflect only the pre-existing error log');
+      assert.strictEqual(result.stats.info, 1, 'info stat should reflect only the pre-existing info log');
+      assert.ok(result.abortControllerCleared, 'queryAbortController should be null after cancellation');
+    });
+
+    it('should allow a new query to start successfully after a previous one was cancelled', async () => {
+      await startAndCancelQuery(page);
+
+      const result = await page.evaluate(async () => {
+        // Second query — resolves successfully with one row
+        const fakeRow = { severity: 'I', message: 'ok', timestamp: Date.now() };
+        window.fetch = async () => ({
+          ok: true,
+          status: 200,
+          json: async () => ({ rows: [fakeRow], count: 1 }),
+        });
+        await window.model.log.query();
+
+        return {
+          isLoading: window.model.log.queryResult.isLoading(),
+          isSuccess: window.model.log.queryResult.isSuccess(),
+          listLength: window.model.log.list.length,
+        };
+      });
+      await new Promise((r) => setTimeout(r, 200)); // wait for state to update after query
+      assert.ok(!result.isLoading, 'query should not be stuck in loading state after second query');
+      assert.ok(result.isSuccess, 'second query should succeed');
+      assert.strictEqual(result.listLength, 1, 'list should contain the row from the second query');
     });
   });
 });

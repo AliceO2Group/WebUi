@@ -107,6 +107,7 @@ const queryButton = (model, frameworkInfo) => {
 
   if (queryResult.isLoading()) {
     return h('button.btn.bold', {
+      id: 'cancel-query-button',
       title: 'Cancel ongoing query',
       className: BUTTON.DANGER,
       onclick: () => logModel.cancelQuery(),
@@ -114,6 +115,7 @@ const queryButton = (model, frameworkInfo) => {
   }
 
   return h('button.btn.bold', {
+    id: 'query-button',
     title: isDbReady ? 'Query database with filters (Enter)' : 'Query service not configured',
     disabled: !isDbReady || queryResult.isLoading(),
     className: queryResult.isLoading() ? 'loading' : queryButtonType,

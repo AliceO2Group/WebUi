@@ -34,9 +34,7 @@ export const jsonFetch = async (endpoint, options) => {
       return null;
     }
 
-    const responseText = await response.text();
-    const hasBody = responseText.trim().length > 0;
-    const result = hasBody ? JSON.parse(responseText) : null;
+    const result = await response.json();
 
     if (response.ok) {
       return result;
