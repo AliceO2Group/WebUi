@@ -15,6 +15,8 @@
 /* eslint-disable no-console */
 const puppeteer = require('puppeteer');
 const assert = require('assert');
+const fs = require('fs/promises');
+const path = require('path');
 const {spawn} = require('child_process');
 
 const config = require('./test-config.js');
@@ -34,6 +36,8 @@ describe('InfoLogger', function() {
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
   let ilgServer;
+  const testDbSourcePath = path.join(__dirname, 'testdb.json');
+  const testDbRunningPath = path.join(__dirname, 'testdb-running.json');
   
   this.timeout(30000);
   this.slow(1000);
@@ -41,6 +45,8 @@ describe('InfoLogger', function() {
   const baseUrl = `http://${config.http.hostname}:${config.http.port}/`;
 
   before(async () => {
+    await fs.copyFile(testDbSourcePath, testDbRunningPath);
+
     // Add error handlers for uncaught errors
     process.on('unhandledRejection', (error) => {
       console.error('[Test Setup] Unhandled Promise Rejection at:', new Date().toISOString());
@@ -93,12 +99,12 @@ describe('InfoLogger', function() {
     }
   });
 
-  it('should have redirected to default page "/?q={"severity":{"in":"I W E F"},"level":{"max":1}}"', async function() {
+  it('should have redirected to default page "/?q={"severity":{"in":"I W E F"}}"', async function() {
     await page.goto(baseUrl, {waitUntil: 'networkidle0'});
     const location = await page.evaluate(() => window.location);
     const search = decodeURIComponent(location.search);
 
-    assert.deepStrictEqual(search, '?q={"severity":{"in":"I W E F"},"level":{"max":1}}');
+    assert.deepStrictEqual(search, '?q={"severity":{"in":"I W E F"}}');
   });
 
   require('./public/user-actions-mocha');
@@ -110,14 +116,18 @@ describe('InfoLogger', function() {
   require('./public/log-context-menu-mocha');
 
   after(async () => {
-    await browser.close();
-    console.log('---------------------------------------------');
-    console.log('Output of server logs for the previous tests:');
-    console.log('---------------------------------------------');
-    console.log(subprocessOutput);
-    console.log('---------------------------------------------');
-    subprocess.kill();
-    closeServer(ilgServer);
+    try {
+      await browser.close();
+      console.log('---------------------------------------------');
+      console.log('Output of server logs for the previous tests:');
+      console.log('---------------------------------------------');
+      console.log(subprocessOutput);
+      console.log('---------------------------------------------');
+      subprocess.kill();
+      closeServer(ilgServer);
+    } finally {
+      await fs.rm(testDbRunningPath, { force: true });
+    }
 
   });
 });
