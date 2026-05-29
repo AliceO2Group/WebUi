@@ -34,13 +34,14 @@ describe('InfoLogger', function () {
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
   let ilgServer;
-
   this.timeout(30000);
   this.slow(1000);
 
   const baseUrl = `http://${config.http.hostname}:${config.http.port}/`;
 
   before(async () => {
+    await fs.copyFile(testDbSourcePath, testDbRunningPath);
+
     // Add error handlers for uncaught errors
     process.on('unhandledRejection', (error) => {
       console.error('[Test Setup] Unhandled Promise Rejection at:', new Date().toISOString());

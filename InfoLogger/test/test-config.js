@@ -33,5 +33,5 @@ module.exports = {
     expiration: '60s',
     maxAge: '2',
   },
-  dbFile: './test/testdb.json',
+  dbFile: './test/testdb-running.json',
 };
