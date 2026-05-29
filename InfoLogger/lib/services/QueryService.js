@@ -16,6 +16,7 @@ const mariadb = require('mariadb');
 const { LogManager, InvalidInputError } = require('@aliceo2/web-ui');
 const { fromSqlToNativeError } = require('../utils/fromSqlToNativeError');
 const { processPreparedSQLStatement } = require('../utils/preparedStatementParser');
+const { throwIfQueryAborted, attachAbortDestroyHandler } = require('../utils/queryCancellation');
 
 class QueryService {
   /**
@@ -92,32 +93,49 @@ class QueryService {
    * @param {object} filters - criteria like MongoDB
    * @param {object} options - specific options for the query
    * @param {number} options.limit - how many rows to get
+   * @param {AbortSignal} [signal] - optional signal to cancel the query; when aborted, the DB connection is destroyed
    * @returns {Promise.<object>} - {total, more, limit, rows, count, time}
    */
-  async queryFromFilters(filters, options) {
+  async queryFromFilters(filters, options, signal = null) {
     const { limit = 100000 } = options;
     const { criteria, values } = this._filtersToSqlConditions(filters);
     const criteriaString = this._getCriteriaAsString(criteria);
-
     const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` LIMIT ?;`;
+    const queryValues = [...values, limit];
     const startTime = Date.now(); // ms
 
     this._logger.debugMessage(`SQL to execute: ${processPreparedSQLStatement(requestRows, values, limit)}`);
 
     let rows = [];
+    let connection = null;
+    let connectionDestroyed = false;
     try {
       if (!this._pool) {
         throw new Error('No database connection available');
       }
-      rows = await this._pool.query(
-        {
-          sql: requestRows,
-          timeout: this._timeout,
+      connection = await this._pool.getConnection();
+      throwIfQueryAborted(signal);
+
+      const detachAbortHandler = attachAbortDestroyHandler(
+        signal,
+        connection,
+        () => {
+          connectionDestroyed = true;
         },
-        [...values, limit],
       );
+
+      try {
+        rows = await connection.query({ sql: requestRows, timeout: this._timeout }, queryValues);
+      } finally {
+        detachAbortHandler();
+      }
     } catch (error) {
+      throwIfQueryAborted(signal);
       fromSqlToNativeError(error);
+    } finally {
+      if (connection && !connectionDestroyed) {
+        connection.release();
+      }
     }
 
     const totalTime = Date.now() - startTime; // ms
