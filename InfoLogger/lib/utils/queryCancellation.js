@@ -13,15 +13,28 @@
  */
 
 /**
+ * Custom error class for query cancellation
+ */
+class AbortError extends Error {
+  /**
+   * Create an AbortError
+   * @param {string} message - error message
+   */
+  constructor(message = 'Query cancelled by client') {
+    super(message);
+    this.name = 'AbortError';
+    this.code = 'QUERY_CANCELLED';
+  }
+}
+
+/**
  * Throw an error if the given signal is already aborted.
  * @param {AbortSignal|null} signal - optional abort signal
- * @throws {Error} if signal is aborted, with code 'QUERY_CANCELLED'
+ * @throws {AbortError} if signal is aborted
  */
 const throwIfQueryAborted = (signal) => {
   if (signal?.aborted) {
-    const cancelled = new Error('Query cancelled by client');
-    cancelled.code = 'QUERY_CANCELLED';
-    throw cancelled;
+    throw new AbortError();
   }
 };
 
@@ -48,6 +61,7 @@ const attachAbortDestroyHandler = (signal, connection, onDestroyed) => {
 };
 
 module.exports = {
+  AbortError,
   throwIfQueryAborted,
   attachAbortDestroyHandler,
 };

@@ -15,6 +15,7 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const {
+  AbortError,
   throwIfQueryAborted,
   attachAbortDestroyHandler,
 } = require('../../../lib/utils/queryCancellation.js');
@@ -37,6 +38,7 @@ describe('\'queryCancellation\' utils test suite', () => {
       assert.throws(
         () => throwIfQueryAborted(controller.signal),
         (error) => {
+          assert.ok(error instanceof AbortError);
           assert.strictEqual(error.message, 'Query cancelled by client');
           assert.strictEqual(error.code, 'QUERY_CANCELLED');
           return true;

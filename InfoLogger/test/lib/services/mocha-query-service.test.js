@@ -16,6 +16,7 @@ const assert = require('assert');
 const sinon = require('sinon');
 const { QueryService } = require('../../../lib/services/QueryService.js');
 const { UnauthorizedAccessError, TimeoutError, InvalidInputError } = require('@aliceo2/web-ui');
+const { AbortError } = require('../../../lib/utils/queryCancellation');
 
 describe('\'QueryService\' test suite', () => {
   const filters = {
@@ -317,7 +318,10 @@ describe('\'QueryService\' test suite', () => {
 
       await assert.rejects(
         sqlDataSource.queryFromFilters(realFilters, { limit: 10 }, controller.signal),
-        (error) => error.code === 'QUERY_CANCELLED' && error.message === 'Query cancelled by client',
+        (error) =>
+          error instanceof AbortError
+          && error.code === 'QUERY_CANCELLED'
+          && error.message === 'Query cancelled by client',
       );
       assert.strictEqual(connection.query.called, false);
       assert.strictEqual(connection.release.calledOnce, true);
@@ -350,7 +354,7 @@ describe('\'QueryService\' test suite', () => {
 
       await assert.rejects(
         queryPromise,
-        (error) => error.code === 'QUERY_CANCELLED' && error.message === 'Query cancelled by client',
+        (error) => error instanceof AbortError && error.code === 'QUERY_CANCELLED' && error.message === 'Query cancelled by client',
       );
       assert.strictEqual(connection.destroy.calledOnce, true);
       assert.strictEqual(connection.release.called, false);
