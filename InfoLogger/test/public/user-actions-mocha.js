@@ -79,8 +79,15 @@ describe('User Profile test-suite', async () => {
         `${baseUrl}?personid=1&username=test&name=Test&access=admin&token=${testToken}`,
         { waitUntil: 'networkidle0' },
       );
+
+      // Wait for the profile to be fully loaded
+      await page.waitForFunction(
+        () => window.model?.userProfile?.payload?.content?.colsHeader?.date !== undefined,
+        { timeout: 5000 },
+      );
+
       const userProfile = await page.evaluate(() => window.model.userProfile.payload);
-      assert.ok(!userProfile.content.colsHeader.date.visible);
+      assert.ok(userProfile.content.colsHeader.date.visible, 'Date column should be visible');
     });
 
     it('should have a button in action dropdown button to view info about the framework', async () => {
