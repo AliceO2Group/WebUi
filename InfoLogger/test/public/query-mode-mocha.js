@@ -90,7 +90,11 @@ const runQueryWithMocks = (page, { confirmReturn, textFilterOperator }) =>
 
     window.fetch = async () => {
       postCalls += 1;
-      return { ok: true, status: 200, json: async () => JSON.stringify({ rows: [] }) };
+      return { ok: true,
+        status: 200,
+        json: async () => {
+          [];
+        } };
     };
 
     // Mock the frameworkInfo to make the query method think the query service is available in its check

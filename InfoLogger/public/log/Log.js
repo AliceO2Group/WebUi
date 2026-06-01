@@ -329,7 +329,8 @@ export default class Log extends Observable {
   }
 
   /**
-   * Method to execute a query with the current filters configuration
+   * Method to execute a query with the current filters configuration via button click or "Enter" keypress on filters.
+   * (thus, check of DB status still needed)
    * If the user has no filters set, a prompt is shown to confirm the execution
    * If the user is in live mode, first stop live mode and then execute query in order to have a consistent result
    * Recalculate the stats and go to last log once query is executed
@@ -337,6 +338,9 @@ export default class Log extends Observable {
    * @returns {Promise<null|object>} null if query is aborted, result of the query otherwise
    */
   async query() {
+    if (!this.model.frameworkInfo.isSuccess() || !this.model.frameworkInfo.payload.mysql.status.ok) {
+      throw new Error('Query service is not available');
+    }
     if (!this.filter.hasActiveTextFilters()) {
       if (!window.confirm('No date or text filters set.'
         + ' This will return a large amount of data. Execute query anyway?')) {

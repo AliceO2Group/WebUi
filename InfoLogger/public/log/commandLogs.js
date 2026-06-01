@@ -118,7 +118,7 @@ const queryButton = (model, frameworkInfo) => {
     id: 'query-button',
     title: isDbReady ? 'Query database with filters (Enter)' : 'Query service not configured',
     disabled: !isDbReady || queryResult.isLoading(),
-    className: queryResult.isLoading() ? 'loading' : queryButtonType,
+    className: queryButtonType,
     onclick: () => toggleButtonStates(model, false),
   }, 'Query');
 };
