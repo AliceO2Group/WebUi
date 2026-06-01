@@ -385,7 +385,7 @@ export default class Log extends Observable {
         );
       }
     } catch (error) {
-      if (abortController.signal.aborted || error.name === 'AbortError') {
+      if (abortController.signal.aborted) {
         this.queryResult = previousQueryResult;
       } else {
         result = { message: error.message || result };
