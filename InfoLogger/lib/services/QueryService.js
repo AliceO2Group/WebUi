@@ -212,19 +212,22 @@ class QueryService {
         continue;
       }
       for (const operator in filters[field]) {
-        if (filters[field][operator] === null || !operator.includes('$')) {
+        if (filters[field][operator] === null || filters[field][operator] === false || !operator.includes('$')) {
           continue;
         }
 
-        if (operator === '$since' || operator === '$until') {
+        const separator = field === 'message' ? '\n' : ' ';
+
+        if (operator === '$matchEmpty' || operator === '$excludeEmpty') {
+          // no parameterized value needed for $matchEmpty or $excludeEmpty, the SQL is static
+        } else if (operator === '$since' || operator === '$until') {
           // read date, both input and output are GMT, no timezone to consider here
           values.push(new Date(filters[field][operator]).getTime() / 1000);
         } else {
-          const separator = field === 'message' ? '\n' : ' ';
           if ((operator === '$match' || operator === '$exclude') && filters[field][operator].split(separator).length > 1
           ) {
             const subValues = filters[field][operator].split(separator);
-            subValues.forEach((value) => values.push(value));
+            values.push(...subValues);
           } else {
             values.push(filters[field][operator]);
           }
@@ -240,54 +243,51 @@ class QueryService {
             criteria.push(`\`${field}\`<=?`);
             break;
           case '$match': {
-            const separator = field === 'message' ? '\n' : ' ';
             const criteriaArray = filters[field].match.split(separator);
-            if (criteriaArray.length <= 1) {
-              if (criteriaArray.toString().includes('%')) {
-                criteria.push(`\`${field}\` LIKE (?)`);
-              } else {
-                criteria.push(`\`${field}\` = ?`);
-              }
+
+            // Either create a LIKE match or an exact match
+            const toMatchCondition = (crit) =>
+              crit.includes('%')
+                ? `\`${field}\` LIKE (?)`
+                : `\`${field}\` = ?`;
+
+            const matchStr = criteriaArray.map(toMatchCondition).join(' OR ');
+
+            const matchEmpty = filters[field].$matchEmpty;
+            if (matchEmpty) {
+              criteria.push(`(${matchStr} OR \`${field}\` = '' OR \`${field}\` IS NULL)`);
             } else {
-              let criteriaString = '(';
-              criteriaArray.forEach((crit) => {
-                if (crit.includes('%')) {
-                  criteriaString += `\`${field}\` LIKE (?) OR `;
-                } else {
-                  criteriaString += `\`${field}\` = ? OR `;
-                }
-              });
-              criteriaString = criteriaString.substr(0, criteriaString.length - 4);
-              criteriaString += ')';
-              criteria.push(criteriaString);
+              criteria.push(matchStr);
             }
             break;
           }
           case '$exclude': {
-            const separator = field === 'message' ? '\n' : ' ';
             const criteriaArray = filters[field].exclude.split(separator);
-            if (criteriaArray.length <= 1) {
-              if (criteriaArray.toString().includes('%')) {
-                criteria.push(`NOT(\`${field}\` LIKE (?) AND \`${field}\` IS NOT NULL)`);
-              } else {
-                criteria.push(`NOT(\`${field}\` = ? AND \`${field}\` IS NOT NULL)`);
-              }
-            } else {
-              let criteriaString = 'NOT(';
-              criteriaArray.forEach((crit) => {
-                if (crit.includes('%')) {
-                  criteriaString += `\`${field}\` LIKE (?) AND \`${field}\` IS NOT NULL OR `;
-                } else {
-                  criteriaString += `\`${field}\` = ? AND \`${field}\` IS NOT NULL OR `;
-                }
-              });
-              criteriaString = criteriaString.substr(0, criteriaString.length - 4);
-              criteriaString += ')';
-              criteria.push(criteriaString);
-            }
 
+            const toExcludeCondition = (crit) =>
+              crit.includes('%')
+                ? `\`${field}\` LIKE (?) AND \`${field}\` IS NOT NULL`
+                : `\`${field}\` = ? AND \`${field}\` IS NOT NULL`;
+
+            criteria.push(`NOT(${criteriaArray.map(toExcludeCondition).join(' OR ')})`);
+
+            const excludeEmpty = filters[field].$excludeEmpty;
+            if (excludeEmpty) {
+              criteria.push(`(\`${field}\` != '' AND \`${field}\` IS NOT NULL)`);
+            }
             break;
           }
+          case '$matchEmpty':
+            // If no match value but $matchEmpty is true, we want to match only empty values
+            if (!filters[field].$match) {
+              criteria.push(`(\`${field}\` = '' OR \`${field}\` IS NULL)`);
+            }
+            break;
+          case '$excludeEmpty':
+            if (!filters[field].$exclude) {
+              criteria.push(`(\`${field}\` != '' AND \`${field}\` IS NOT NULL)`);
+            }
+            break;
           case '$in':
             criteria.push(`\`${field}\` IN (?)`);
             break;
