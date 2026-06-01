@@ -341,6 +341,7 @@ export default class Log extends Observable {
     if (!this.model.frameworkInfo.isSuccess() || !this.model.frameworkInfo.payload.mysql.status.ok) {
       throw new Error('Query service is not available');
     }
+
     if (!this.filter.hasActiveTextFilters()) {
       if (!window.confirm('No date or text filters set.'
         + ' This will return a large amount of data. Execute query anyway?')) {
