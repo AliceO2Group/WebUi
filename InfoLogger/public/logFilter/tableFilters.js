@@ -134,13 +134,20 @@ const createClickableLabel = (model, label) => h('td', h('button.btn.w-100', {
  * @param {number} tabIndex - value for order of the tab when using keyboard `tab` action
  * @returns {vnode} - input field within a td element
  */
-const createInputField = (logModel, field, command, tabIndex = 1) => h('td', h('input.form-control', {
-  type: 'text',
-  tabIndex,
-  oninput: (e) => logModel.setCriteria(field, command, e.target.value),
-  value: logModel.filter.criterias[field][command].slice(),
-  placeholder: field === 'hostname' ? command : '',
-}));
+const createInputField = (logModel, field, command, tabIndex = 1) =>
+  h(
+    'td',
+    h('.filter-input-group', [
+      h('input.form-control', {
+        type: 'text',
+        tabIndex,
+        oninput: (e) => logModel.setCriteria(field, command, e.target.value),
+        value: logModel.filter.criterias[field][command].slice(),
+        placeholder: field === 'hostname' ? command : '',
+      }),
+      createEmptyToggle(logModel, field, command),
+    ]),
+  );
 
 /**
  * Generate a text area which onfocus will expand, allowing the user to easily input multiple lines of text
@@ -151,24 +158,40 @@ const createInputField = (logModel, field, command, tabIndex = 1) => h('td', h('
  * @returns {vnode} - text area within a td element
  */
 const createTextAreaField = (model, field, command, tabIndex) =>
-  h('td', h('textarea.form-control.text-area-for-message', {
-    style: 'height:2em; resize: none;',
-    tabIndex,
-    placeholder: !model.messageFocused
-      ? ''
-      : 'Include/Exclude multiple error messages separated by new line. ' +
-        'To partially match a message, use the SQL wildcard \'%\' \n\n' +
-        'e.g \n\n%[FMQ] IDLE ---> INITIALIZING DEVICE%\n' +
-        'TASK %QC% running out of memory\n' +
-        'weird error with strict message',
-    onfocus: () => {
-      model.messageFocused = true;
-      model.notify();
+  h('td', h('.filter-input-group', [
+    h('textarea.form-control.text-area-for-message', {
+      style: 'height:2em; resize: none;',
+      tabIndex,
+      placeholder: !model.messageFocused
+        ? ''
+        : 'Include/Exclude multiple error messages separated by new line. ' +
+          'To partially match a message, use the SQL wildcard \'%\' \n\n' +
+          'e.g \n\n%[FMQ] IDLE ---> INITIALIZING DEVICE%\n' +
+          'TASK %QC% running out of memory\n' +
+          'weird error with strict message',
+      onfocus: () => {
+        model.messageFocused = true;
+        model.notify();
+      },
+      onfocusout: () => {
+        model.messageFocused = false;
+        model.notify();
+      },
+      oninput: (e) => model.log.setCriteria(field, command, e.target.value.trim()),
+      value: model.log.filter.criterias[field][command].slice(),
+    }),
+    createEmptyToggle(model.log, field, command),
+  ]));
+
+const createEmptyToggle = (logModel, field, command) => {
+  const key = command === 'match' ? 'matchEmpty' : 'excludeEmpty';
+  const isActive = logModel.filter.criterias[field][key];
+  return h('button.btn.empty-toggle', {
+    className: isActive ? 'active' : '',
+    title: `${command === 'match' ? 'Match' : 'Exclude'} logs where ${field} is empty`,
+    onclick: (e) => {
+      logModel.setCriteria(field, key, !isActive);
+      e.target.blur();
     },
-    onfocusout: () => {
-      model.messageFocused = false;
-      model.notify();
-    },
-    oninput: (e) => model.log.setCriteria(field, command, e.target.value.trim()),
-    value: model.log.filter.criterias[field][command].slice(),
-  }));
+  }, '∅');
+};

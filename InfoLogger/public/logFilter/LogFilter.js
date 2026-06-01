@@ -115,6 +115,14 @@ export default class LogFilter extends Observable {
         this.enforceDisabledSeverities();
       }
 
+      if (operator === 'matchEmpty' || operator === 'excludeEmpty') {
+        // Ensure that both matchEmpty and excludeEmpty are not active at the same time
+        const oppositeKey = operator === 'matchEmpty' ? 'excludeEmpty' : 'matchEmpty';
+        if (this.criterias[field][oppositeKey]) {
+          this.criterias[field][oppositeKey] = false;
+        }
+      }
+
       this.notify();
       return true;
     } else {

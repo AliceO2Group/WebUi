@@ -142,10 +142,13 @@ export const cellContextMenu = (model) => {
       createMenuItem(iconTrash(), 'danger', 'Clear Filter', () => {
         model.log.setCriteria(field, isTimestamp ? 'until' : 'exclude', '');
         model.log.setCriteria(field, isTimestamp ? 'since' : 'match', '');
+        model.log.setCriteria(field, 'matchEmpty', false);
+        model.log.setCriteria(field, 'excludeEmpty', false);
         hideMenu();
       }, isTimestamp
         ? !model.log.filter.criterias.timestamp.since && !model.log.filter.criterias.timestamp.until
-        : !model.log.filter.criterias[field].match && !model.log.filter.criterias[field].exclude),
+        : !model.log.filter.criterias[field].match && !model.log.filter.criterias[field].exclude
+        && !model.log.filter.criterias[field].matchEmpty && !model.log.filter.criterias[field].excludeEmpty),
     ];
   };
 
