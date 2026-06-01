@@ -28,6 +28,21 @@ import { getDisabledSeverities } from '../constants/log-level-filters.const.js';
  */
 
 /**
+ * This makes a criteria object with all properties initialized to empty or minimal value
+ * @returns {object} criteria object with all properties initialized
+ */
+const makeDefaultMatchExcludeOperators = () => ({
+  match: '',
+  exclude: '',
+  $match: null,
+  $exclude: null,
+  matchEmpty: false,
+  $matchEmpty: false,
+  excludeEmpty: false,
+  $excludeEmpty: false,
+});
+
+/**
  * This class stores raw filters from user (strings) and parsed ones (like Date object).
  * It can generate a function to filter "messages" to be used
  * on server side.
@@ -84,6 +99,12 @@ export default class LogFilter extends Observable {
           break;
         case 'in':
           this.criterias[field]['$in'] = value ? value.split(' ') : null;
+          break;
+        case 'matchEmpty':
+          this.criterias[field]['$matchEmpty'] = value;
+          break;
+        case 'excludeEmpty':
+          this.criterias[field]['$excludeEmpty'] = value;
           break;
         default:
           throw new Error('unknown operator');
@@ -249,7 +270,7 @@ export default class LogFilter extends Observable {
         for (const operator in criteria) {
           let criteriaValue = criteria[operator];
           // don't apply criterias not set
-          if (criteriaValue === null) {
+          if (criteriaValue === null || criteriaValue === false) {
             continue;
           }
           switch (operator) {
@@ -260,17 +281,22 @@ export default class LogFilter extends Observable {
               break;
             }
             case '$match': {
+              if ((logValue === undefined || logValue === '') && !criteria.$matchEmpty) {
+                return false;
+              }
               const criteriaList = criteriaValue.split(separator);
               if (criteriaList.length > 1) {
                 criteriaValue = criteriaValue.replace(new RegExp(separator, 'g'), '|');
               }
-              if (logValue === undefined ||
-                !generateRegexCriteriaValue(criteriaValue).test(removeNewLinesFrom(logValue))) {
+              if (!generateRegexCriteriaValue(criteriaValue).test(removeNewLinesFrom(logValue))) {
                 return false;
               }
               break;
             }
             case '$exclude': {
+              if ((logValue === undefined || logValue === '') && criteria.$excludeEmpty) {
+                return false;
+              }
               const criteriaList = criteriaValue.split(separator);
               if (criteriaList.length > 1) {
                 criteriaValue = criteriaValue.replace(new RegExp(separator, 'g'), '|');
@@ -281,6 +307,16 @@ export default class LogFilter extends Observable {
               }
               break;
             }
+            case '$matchEmpty':
+              if (!criteria.$match && logValue !== undefined && logValue !== '') {
+                return false;
+              }
+              break;
+            case '$excludeEmpty':
+              if (!criteria.$exclude && (logValue === undefined || logValue === '')) {
+                return false;
+              }
+              break;
             case '$since':
               if (logValue === undefined || parseInfoLoggerDate(logValue) < parseInfoLoggerDate(criteriaValue)) {
                 return false;
@@ -347,82 +383,50 @@ export default class LogFilter extends Observable {
         $until: null,
       },
       hostname: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
+        ...makeDefaultMatchExcludeOperators(),
       },
       rolename: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
+        ...makeDefaultMatchExcludeOperators(),
       },
       pid: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
+        ...makeDefaultMatchExcludeOperators(),
       },
       username: {
         match: '',
         exclude: '',
         $match: null,
         $exclude: null,
+        matchEmpty: false,
+        $matchEmpty: false,
+        excludeEmpty: false,
+        $excludeEmpty: false,
       },
       system: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
+        ...makeDefaultMatchExcludeOperators(),
       },
       facility: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
+        ...makeDefaultMatchExcludeOperators(),
       },
       detector: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
+        ...makeDefaultMatchExcludeOperators(),
       },
       partition: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
+        ...makeDefaultMatchExcludeOperators(),
       },
       run: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
+        ...makeDefaultMatchExcludeOperators(),
       },
       errcode: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
+        ...makeDefaultMatchExcludeOperators(),
       },
       errline: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
+        ...makeDefaultMatchExcludeOperators(),
       },
       errsource: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
+        ...makeDefaultMatchExcludeOperators(),
       },
       message: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
+        ...makeDefaultMatchExcludeOperators(),
       },
       severity: {
         in: 'I W E F',
