@@ -15,6 +15,8 @@
 const assert = require('assert');
 const test = require('../mocha-index');
 
+const isFieldEmpty = (value) => value === undefined || value === null || value === '';
+
 describe('Live Mode test-suite', async () => {
   let baseUrl = null;
   let page = null;
@@ -128,7 +130,7 @@ describe('Live Mode test-suite', async () => {
       await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
 
       const list = await page.evaluate(() => window.model.log.list);
-      const allEmpty = list.every((log) => !log.rolename);
+      const allEmpty = list.every((log) => isFieldEmpty(log.rolename));
       assert.ok(list.length > 0);
       assert.ok(allEmpty);
     });
@@ -144,7 +146,7 @@ describe('Live Mode test-suite', async () => {
       await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
 
       const list = await page.evaluate(() => window.model.log.list);
-      const allNonEmpty = list.every((log) => log.rolename);
+      const allNonEmpty = list.every((log) => !isFieldEmpty(log.rolename));
       assert.ok(list.length > 0);
       assert.ok(allNonEmpty);
     });
@@ -161,7 +163,7 @@ describe('Live Mode test-suite', async () => {
       await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
 
       const list = await page.evaluate(() => window.model.log.list);
-      const allValid = list.every((log) => !log.rolename || log.rolename === 'mon-DA-PHS-0');
+      const allValid = list.every((log) => isFieldEmpty(log.rolename) || log.rolename === 'mon-DA-PHS-0');
       assert.ok(list.length > 0);
       assert.ok(allValid);
     });
@@ -178,7 +180,7 @@ describe('Live Mode test-suite', async () => {
       await page.waitForFunction('window.model.log.list.length > 5', { timeout: 15000 });
 
       const list = await page.evaluate(() => window.model.log.list);
-      const allValid = list.every((log) => log.rolename && log.rolename !== 'mon-DA-PHS-0');
+      const allValid = list.every((log) => !isFieldEmpty(log.rolename) && log.rolename !== 'mon-DA-PHS-0');
       assert.ok(list.length > 0);
       assert.ok(allValid);
     });

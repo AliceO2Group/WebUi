@@ -101,10 +101,10 @@ export default class LogFilter extends Observable {
           this.criterias[field]['$in'] = value ? value.split(' ') : null;
           break;
         case 'matchEmpty':
-          this.criterias[field]['$matchEmpty'] = value;
+          this.criterias[field]['$matchEmpty'] = Boolean(value);
           break;
         case 'excludeEmpty':
-          this.criterias[field]['$excludeEmpty'] = value;
+          this.criterias[field]['$excludeEmpty'] = Boolean(value);
           break;
         default:
           throw new Error('unknown operator');
@@ -115,8 +115,8 @@ export default class LogFilter extends Observable {
         this.enforceDisabledSeverities();
       }
 
-      if (operator === 'matchEmpty' || operator === 'excludeEmpty') {
         // Ensure that both matchEmpty and excludeEmpty are not active at the same time
+      if (value && (operator === 'matchEmpty' || operator === 'excludeEmpty')) {
         const oppositeKey = operator === 'matchEmpty' ? 'excludeEmpty' : 'matchEmpty';
         if (this.criterias[field][oppositeKey]) {
           this.criterias[field][oppositeKey] = false;
@@ -269,6 +269,15 @@ export default class LogFilter extends Observable {
       }
 
       /**
+       * Whether a log field value is considered empty for matchEmpty/excludeEmpty purposes.
+       * @param {*} logValue - value of the log field
+       * @returns {boolean} - true if the value is undefined, null, or an empty string
+       */
+      function isEmpty(logValue) {
+        return logValue === undefined || logValue === null || logValue === '';
+      }
+
+      /**
        * Function that applies the criteria of one filter set by the user on each received logValue
        * @param {object} logValue - value of the log field that is to be checked (e.g. message, severity, etc.)
        * @param {object} criteria - object containing the criteria if applied by the user
@@ -290,7 +299,7 @@ export default class LogFilter extends Observable {
               break;
             }
             case '$match': {
-              if (logValue === undefined || logValue === '') {
+              if (isEmpty(logValue)) {
                 if (!criteria.$matchEmpty) {
                   return false;
                 }
@@ -306,7 +315,7 @@ export default class LogFilter extends Observable {
               break;
             }
             case '$exclude': {
-              if ((logValue === undefined || logValue === '') && criteria.$excludeEmpty) {
+              if (isEmpty(logValue) && criteria.$excludeEmpty) {
                 return false;
               }
               const criteriaList = criteriaValue.split(separator);
@@ -320,12 +329,12 @@ export default class LogFilter extends Observable {
               break;
             }
             case '$matchEmpty':
-              if (!criteria.$match && logValue !== undefined && logValue !== '') {
+              if (!criteria.$match && !isEmpty(logValue)) {
                 return false;
               }
               break;
             case '$excludeEmpty':
-              if (!criteria.$exclude && (logValue === undefined || logValue === '')) {
+              if (!criteria.$exclude && isEmpty(logValue)) {
                 return false;
               }
               break;
@@ -404,14 +413,7 @@ export default class LogFilter extends Observable {
         ...makeDefaultMatchExcludeOperators(),
       },
       username: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
-        matchEmpty: false,
-        $matchEmpty: false,
-        excludeEmpty: false,
-        $excludeEmpty: false,
+        ...makeDefaultMatchExcludeOperators(),
       },
       system: {
         ...makeDefaultMatchExcludeOperators(),

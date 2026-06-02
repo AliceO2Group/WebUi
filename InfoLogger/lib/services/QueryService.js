@@ -211,12 +211,11 @@ class QueryService {
       if (!filters[field]) {
         continue;
       }
+      const separator = field === 'message' ? '\n' : ' ';
       for (const operator in filters[field]) {
         if (filters[field][operator] === null || filters[field][operator] === false || !operator.includes('$')) {
           continue;
         }
-
-        const separator = field === 'message' ? '\n' : ' ';
 
         if (operator === '$matchEmpty' || operator === '$excludeEmpty') {
           // no parameterized value needed for $matchEmpty or $excludeEmpty, the SQL is static
