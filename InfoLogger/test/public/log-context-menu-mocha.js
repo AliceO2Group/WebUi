@@ -318,6 +318,7 @@ describe('Cell Context Menu', async () => {
           await page.evaluate(() => {
             window.model.log.filter.setCriteria('hostname', 'match', 'ctx-host-01');
             window.model.log.filter.setCriteria('hostname', 'exclude', 'ctx-host-01');
+            window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
           });
 
           await openContextMenu(page, 'hostname', 'ctx-host-01', 100, 120);
@@ -329,6 +330,9 @@ describe('Cell Context Menu', async () => {
             $match: window.model.log.filter.criterias.hostname.$match,
             exclude: window.model.log.filter.criterias.hostname.exclude,
             $exclude: window.model.log.filter.criterias.hostname.$exclude,
+            matchEmpty: window.model.log.filter.criterias.hostname.matchEmpty,
+            $matchEmpty: window.model.log.filter.criterias.hostname.$matchEmpty,
+
             isOpen: window.model.log.contextMenu.isOpen,
           }));
 
@@ -336,6 +340,8 @@ describe('Cell Context Menu', async () => {
           assert.strictEqual(criteria.$match, null);
           assert.strictEqual(criteria.exclude, '');
           assert.strictEqual(criteria.$exclude, null);
+          assert.strictEqual(criteria.matchEmpty, false);
+          assert.strictEqual(criteria.$matchEmpty, false);
           assert.strictEqual(criteria.isOpen, false);
         });
 
