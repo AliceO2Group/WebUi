@@ -305,5 +305,206 @@ describe('Filter actions test-suite', async () => {
         return !debugBtn?.classList.contains('disabled');
       });
     });
+
+    describe('Empty field toggle', async () => {
+      afterEach(async () => {
+        await page.evaluate(() => window.model.log.filter.resetCriteria());
+      });
+
+      it('should set matchEmpty to true for a field', async () => {
+        const result = await page.evaluate(() => {
+          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
+          return window.model.log.filter.criterias.hostname;
+        });
+
+        assert.strictEqual(result.matchEmpty, true);
+        assert.strictEqual(result.$matchEmpty, true);
+      });
+
+      it('should set excludeEmpty to true for a field', async () => {
+        const result = await page.evaluate(() => {
+          window.model.log.filter.setCriteria('hostname', 'excludeEmpty', true);
+          return window.model.log.filter.criterias.hostname;
+        });
+
+        assert.strictEqual(result.excludeEmpty, true);
+        assert.strictEqual(result.$excludeEmpty, true);
+      });
+
+      it('should deactivate excludeEmpty when matchEmpty is toggled on', async () => {
+        const result = await page.evaluate(() => {
+          window.model.log.filter.setCriteria('hostname', 'excludeEmpty', true);
+          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
+          return window.model.log.filter.criterias.hostname;
+        });
+
+        assert.strictEqual(result.excludeEmpty, false);
+        assert.strictEqual(result.$excludeEmpty, false);
+        assert.strictEqual(result.matchEmpty, true);
+        assert.strictEqual(result.$matchEmpty, true);
+      });
+
+      it('should deactivate matchEmpty when excludeEmpty is toggled on', async () => {
+        const result = await page.evaluate(() => {
+          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
+          window.model.log.filter.setCriteria('hostname', 'excludeEmpty', true);
+          return window.model.log.filter.criterias.hostname;
+        });
+
+        assert.strictEqual(result.excludeEmpty, true);
+        assert.strictEqual(result.$excludeEmpty, true);
+        assert.strictEqual(result.matchEmpty, false);
+        assert.strictEqual(result.$matchEmpty, false);
+      });
+
+      it('should reset matchEmpty and excludeEmpty when criteria are reset', async () => {
+        const result = await page.evaluate(() => {
+          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
+          window.model.log.filter.setCriteria('hostname', 'excludeEmpty', true);
+          window.model.log.filter.resetCriteria();
+          return window.model.log.filter.criterias.hostname;
+        });
+
+        assert.strictEqual(result.matchEmpty, false);
+        assert.strictEqual(result.$matchEmpty, false);
+        assert.strictEqual(result.excludeEmpty, false);
+        assert.strictEqual(result.$excludeEmpty, false);
+      });
+
+      it('should include matchEmpty in toObject when set to true', async () => {
+        const result = await page.evaluate(() => {
+          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
+          return window.model.log.filter.toObject().hostname;
+        });
+
+        assert.strictEqual(result.matchEmpty, true);
+      });
+
+      it('should not include matchEmpty in toObject when false', async () => {
+        const result = await page.evaluate(() => {
+          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
+          window.model.log.filter.setCriteria('hostname', 'matchEmpty', false);
+          return window.model.log.filter.toObject();
+        });
+
+        assert.strictEqual(result.hostname, undefined);
+      });
+
+      it('should have active class on toggle button when active', async () => {
+        const btnSelector = '.table-filters tbody tr:nth-child(2) td:nth-child(2) button.empty-toggle';
+
+        await page.evaluate(() => {
+          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
+        });
+
+        await page.waitForFunction((sel) => {
+          const toggleBtn = document.querySelector(sel);
+          return toggleBtn?.classList.contains('active');
+        }, {}, btnSelector);
+      });
+
+      it('should appear on hover and disappear when not hovered', async () => {
+        const selector = '.table-filters tbody tr:nth-child(2) td:nth-child(2) .filter-input-group';
+        const btnSelector = '.table-filters tbody tr:nth-child(2) td:nth-child(2) button.empty-toggle';
+
+        await page.waitForFunction((sel) => {
+          const btn = document.querySelector(sel);
+          return btn && !btn.classList.contains('active');
+        }, {}, btnSelector);
+
+        const hiddenByDefault = await page.evaluate(
+          (sel) => getComputedStyle(document.querySelector(sel)).display === 'none',
+          btnSelector,
+        );
+        assert.strictEqual(hiddenByDefault, true);
+
+        await page.hover(selector);
+
+        const visibleOnHover = await page.evaluate(
+          (sel) => getComputedStyle(document.querySelector(sel)).display !== 'none',
+          btnSelector,
+        );
+        assert.strictEqual(visibleOnHover, true);
+
+        await page.hover('.table-filters tbody tr:nth-child(1)');
+
+        const hiddenAfterLeave = await page.evaluate(
+          (sel) => getComputedStyle(document.querySelector(sel)).display === 'none',
+          btnSelector,
+        );
+        assert.strictEqual(hiddenAfterLeave, true);
+      });
+
+      it('should toggle matchEmpty on when match toggle button is clicked', async () => {
+        const btnSelector = '.table-filters tbody tr:nth-child(2) td:nth-child(2) button.empty-toggle';
+
+        await page.hover('.table-filters tbody tr:nth-child(2) td:nth-child(2) .filter-input-group');
+        await page.click(btnSelector);
+
+        const result = await page.evaluate(() => window.model.log.filter.criterias.hostname);
+        assert.strictEqual(result.matchEmpty, true);
+        assert.strictEqual(result.$matchEmpty, true);
+      });
+
+      it('should toggle matchEmpty off when match toggle button is clicked again', async () => {
+        const btnSelector = '.table-filters tbody tr:nth-child(2) td:nth-child(2) button.empty-toggle';
+
+        await page.evaluate(() => {
+          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
+        });
+
+        await page.waitForFunction((sel) => {
+          return document.querySelector(sel)?.classList.contains('active');
+        }, {}, btnSelector);
+
+        await page.click(btnSelector);
+
+        const result = await page.evaluate(() => window.model.log.filter.criterias.hostname);
+        assert.strictEqual(result.matchEmpty, false);
+        assert.strictEqual(result.$matchEmpty, false);
+      });
+
+      it('should restore matchEmpty from fromObject', async () => {
+        const result = await page.evaluate(() => {
+          window.model.log.filter.fromObject({ hostname: { matchEmpty: true } });
+          return window.model.log.filter.criterias.hostname;
+        });
+
+        assert.strictEqual(result.matchEmpty, true);
+        assert.strictEqual(result.$matchEmpty, true);
+      });
+
+      it('should restore excludeEmpty from fromObject', async () => {
+        const result = await page.evaluate(() => {
+          window.model.log.filter.fromObject({ hostname: { excludeEmpty: true } });
+          return window.model.log.filter.criterias.hostname;
+        });
+
+        assert.strictEqual(result.excludeEmpty, true);
+        assert.strictEqual(result.$excludeEmpty, true);
+      });
+
+      it('should include matchEmpty in the URL and restore it on parse', async () => {
+        const result = await page.evaluate(() => {
+          window.model.log.filter.resetCriteria();
+          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
+          window.model.updateRouteOnModelChange();
+          const url = window.location.search;
+
+          const params = { q: decodeURIComponent(url.replace('?q=', '')) };
+          window.model.parseLocation(params);
+
+          return {
+            url,
+            matchEmpty: window.model.log.filter.criterias.hostname.matchEmpty,
+            $matchEmpty: window.model.log.filter.criterias.hostname.$matchEmpty,
+          };
+        });
+
+        assert.ok(result.url.includes('matchEmpty'));
+        assert.strictEqual(result.matchEmpty, true);
+        assert.strictEqual(result.$matchEmpty, true);
+      });
+    });
   });
 });
