@@ -29,6 +29,7 @@
     --row-height: 0.91rem; /* default, overridden by JS zoom */
 }
 .logs-content { border-top: 1px solid #aaa; }
+.bold { font-weight: bold; }
 
 /* logs tables */
 .table-logs-header { width: 100%; border-collapse: collapse; }

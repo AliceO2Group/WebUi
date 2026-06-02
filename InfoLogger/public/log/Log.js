@@ -17,6 +17,7 @@ import LogFilter from '../logFilter/LogFilter.js';
 import ContextMenu from './ContextMenu.js';
 import { MODE } from '../constants/mode.const.js';
 import { TIME_MS } from '../common/Timezone.js';
+import { jsonPost } from '../common/jsonPost.js';
 
 /**
  * Model Log, encapsulate all log management and queries
@@ -48,6 +49,7 @@ export default class Log extends Observable {
     this.limitReached = null;
 
     this.queryResult = RemoteData.notAsked();
+    this.queryAbortController = null;
 
     this.list = [];
     this.item = null;
@@ -327,10 +329,13 @@ export default class Log extends Observable {
   }
 
   /**
-   * Query database according to filters.
-   * Only is service is available and configured on server side.
-   * If live mode is enabled, it is turned off.
-   * `list` is then reset and filled with result.
+   * Method to execute a query with the current filters configuration via button click or "Enter" keypress on filters.
+   * (thus, check of DB status still needed)
+   * If the user has no filters set, a prompt is shown to confirm the execution
+   * If the user is in live mode, first stop live mode and then execute query in order to have a consistent result
+   * Recalculate the stats and go to last log once query is executed
+   * If the query is aborted by user, restore previous query result and do nothing
+   * @returns {Promise<null|object>} null if query is aborted, result of the query otherwise
    */
   async query() {
     if (!this.model.frameworkInfo.isSuccess() || !this.model.frameworkInfo.payload.mysql.status.ok) {
@@ -344,28 +349,35 @@ export default class Log extends Observable {
       }
     }
 
-    this.queryResult = RemoteData.loading();
-    this.notify();
-
     if (this.isLiveModeRunning()) {
       this.liveStop(MODE.QUERY);
     } else {
       this.activeMode = MODE.QUERY;
     }
 
-    const queryArguments = {
-      criterias: this.filter.criterias,
-      options: { limit: this.limit },
-    };
-    const { result, ok } = await this.model.loader.post('/api/query', queryArguments, true);
-    if (!ok) {
-      this.queryResult = RemoteData.failure(result.message);
-      this.list = [];
-    } else {
+    const previousQueryResult = this.queryResult;
+    this.queryResult = RemoteData.loading();
+    this.notify();
+
+    const abortController = new AbortController();
+    this.queryAbortController = abortController;
+
+    let result = 'Unable to execute query';
+    try {
+      result = await jsonPost('/api/query', {
+        body: {
+          criterias: this.filter.criterias,
+          options: { limit: this.limit },
+        },
+        signal: abortController.signal,
+      });
+      this.resetStats();
       this.queryResult = RemoteData.success(result);
       this.list = result.rows;
-      this.limitReached = result.count === this.limit;
+      this.list.forEach((log) => this.addStats(log));
+      this.goToLastItem();
 
+      this.limitReached = result.count === this.limit;
       if (this.limitReached) {
         this.model.notification.show(
           `Matching results reached the buffer size of ${this.limit.toLocaleString('en-US')}.`
@@ -373,13 +385,35 @@ export default class Log extends Observable {
           'warning',
         );
       }
+    } catch (error) {
+      if (abortController.signal.aborted) {
+        this.queryResult = previousQueryResult;
+      } else {
+        result = { message: error.message || result };
+        this.queryResult = RemoteData.failure(result.message);
+        this.list = [];
+        this.resetStats();
+      }
+    } finally {
+      this.queryAbortController = null;
+    }
+    this.notify();
+  }
+
+  /**
+   * Method to allow for cancellation of ongoing HTTP request for query mode if:
+   * - a query is still ongoing
+   * - an abort controller is present.
+   * If the query is successfully aborted, a notification is shown to user.
+   * @returns {void}
+   */
+  cancelQuery() {
+    if (!this.queryResult.isLoading() || !this.queryAbortController) {
+      return;
     }
 
-    this.resetStats();
-    this.list.forEach((log) => this.addStats(log));
-
-    this.goToLastItem();
-    this.notify();
+    this.queryAbortController.abort();
+    this.model.notification.show('Query cancelled', 'warning', 2000);
   }
 
   /**

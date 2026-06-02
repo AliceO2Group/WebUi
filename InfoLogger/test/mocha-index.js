@@ -68,7 +68,7 @@ describe('InfoLogger', function() {
     subprocess.on('error', (error) => console.error(`Server failed due to: ${error}`))
 
     // Start browser to test UI
-    browser = await puppeteer.launch({headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    browser = await puppeteer.launch({headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox']});
     page = await browser.newPage();
     await page.setViewport({ width: 1440, height: 900 }); // 15" screen equivalent
 
