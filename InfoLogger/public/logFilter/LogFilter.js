@@ -290,8 +290,11 @@ export default class LogFilter extends Observable {
               break;
             }
             case '$match': {
-              if ((logValue === undefined || logValue === '') && !criteria.$matchEmpty) {
-                return false;
+              if (logValue === undefined || logValue === '') {
+                if (!criteria.$matchEmpty) {
+                  return false;
+                }
+                break;
               }
               const criteriaList = criteriaValue.split(separator);
               if (criteriaList.length > 1) {
