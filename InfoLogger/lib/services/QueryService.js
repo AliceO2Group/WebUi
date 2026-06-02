@@ -255,6 +255,9 @@ class QueryService {
             const matchEmpty = filters[field].$matchEmpty;
             if (matchEmpty) {
               criteria.push(`(${matchStr} OR \`${field}\` = '' OR \`${field}\` IS NULL)`);
+            } else if (criteriaArray.length > 1) {
+              // Wrap so the OR doesn't bind looser than the AND between criteria in the WHERE clause
+              criteria.push(`(${matchStr})`);
             } else {
               criteria.push(matchStr);
             }
