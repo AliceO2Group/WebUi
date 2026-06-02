@@ -120,6 +120,7 @@ export default class LogFilter extends Observable {
         const oppositeKey = operator === 'matchEmpty' ? 'excludeEmpty' : 'matchEmpty';
         if (this.criterias[field][oppositeKey]) {
           this.criterias[field][oppositeKey] = false;
+          this.criterias[field][`$${oppositeKey}`] = false;
         }
       }
 
