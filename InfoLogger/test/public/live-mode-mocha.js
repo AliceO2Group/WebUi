@@ -16,8 +16,8 @@ const assert = require('assert');
 const test = require('../mocha-index');
 
 describe('Live Mode test-suite', async () => {
-  let baseUrl;
-  let page;
+  let baseUrl = null;
+  let page = null;
   before(async () => {
     ({ helpers: { baseUrl }, page } = test);
   });
@@ -114,6 +114,74 @@ describe('Live Mode test-suite', async () => {
     assert.ok(list.length > 0);
     assert.ok(isHostNameMatching);
     assert.ok(isUserNameMatching);
+  });
+
+  describe('Empty field filters in live mode', async () => {
+    it('should only receive logs with empty rolename when matchEmpty is set', async () => {
+      await page.evaluate(() => window.model.log.liveStop('Paused'));
+      await page.evaluate(() => {
+        window.model.log.filter.resetCriteria();
+        window.model.log.filter.setCriteria('level', 'max', null);
+        window.model.log.filter.setCriteria('rolename', 'matchEmpty', true);
+      });
+      await page.evaluate(() => window.model.log.liveStart());
+      await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
+
+      const list = await page.evaluate(() => window.model.log.list);
+      const allEmpty = list.every((log) => !log.rolename);
+      assert.ok(list.length > 0);
+      assert.ok(allEmpty);
+    });
+
+    it('should only receive logs with non-empty rolename when excludeEmpty is set', async () => {
+      await page.evaluate(() => window.model.log.liveStop('Paused'));
+      await page.evaluate(() => {
+        window.model.log.filter.resetCriteria();
+        window.model.log.filter.setCriteria('level', 'max', null);
+        window.model.log.filter.setCriteria('rolename', 'excludeEmpty', true);
+      });
+      await page.evaluate(() => window.model.log.liveStart());
+      await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
+
+      const list = await page.evaluate(() => window.model.log.list);
+      const allNonEmpty = list.every((log) => log.rolename);
+      assert.ok(list.length > 0);
+      assert.ok(allNonEmpty);
+    });
+
+    it('should receive matching OR empty logs when match and matchEmpty are both set', async () => {
+      await page.evaluate(() => window.model.log.liveStop('Paused'));
+      await page.evaluate(() => {
+        window.model.log.filter.resetCriteria();
+        window.model.log.filter.setCriteria('level', 'max', null);
+        window.model.log.filter.setCriteria('rolename', 'match', 'mon-DA-PHS-0');
+        window.model.log.filter.setCriteria('rolename', 'matchEmpty', true);
+      });
+      await page.evaluate(() => window.model.log.liveStart());
+      await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
+
+      const list = await page.evaluate(() => window.model.log.list);
+      const allValid = list.every((log) => !log.rolename || log.rolename === 'mon-DA-PHS-0');
+      assert.ok(list.length > 0);
+      assert.ok(allValid);
+    });
+
+    it('should exclude matching AND empty logs when exclude and excludeEmpty are both set', async () => {
+      await page.evaluate(() => window.model.log.liveStop('Paused'));
+      await page.evaluate(() => {
+        window.model.log.filter.resetCriteria();
+        window.model.log.filter.setCriteria('level', 'max', null);
+        window.model.log.filter.setCriteria('rolename', 'exclude', 'mon-DA-PHS-0');
+        window.model.log.filter.setCriteria('rolename', 'excludeEmpty', true);
+      });
+      await page.evaluate(() => window.model.log.liveStart());
+      await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
+
+      const list = await page.evaluate(() => window.model.log.list);
+      const allValid = list.every((log) => log.rolename && log.rolename !== 'mon-DA-PHS-0');
+      assert.ok(list.length > 0);
+      assert.ok(allValid);
+    });
   });
 
   it('should successfully go to mode LIVE in paused state', async () => {
