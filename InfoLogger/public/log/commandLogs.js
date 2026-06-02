@@ -29,12 +29,14 @@ let queryButtonType = BUTTON.PRIMARY;
 let liveButtonType = BUTTON.DEFAULT;
 let liveButtonIcon = iconMediaPlay();
 
-export default (model) => [
+/**
+ * Component for the command buttons (Query, Live, Clear, navigation between errors and download)
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the view of the command buttons
+ */
+export const commandLogs = (model) => [
   userActionsDropdown(model),
-  h('div.btn-group.mh3', [
-    queryButton(model),
-    liveButton(model),
-  ], ''),
+  h('div.btn-group.mh3', interactionModesGroupButton(model)),
   h('button.btn.mh3', { onclick: () => model.log.empty(), style: 'font-weight: bold' }, 'Clear'),
   h('button.btn', {
     disabled: !model.log.list.length,
@@ -68,6 +70,84 @@ export default (model) => [
   downloadButtonGroup(model.log),
   zoomButtonGroup(model.zoom),
 ];
+
+/**
+ * Group of buttons for switching between Query and Live modes.
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the view of the interaction mode buttons
+ */
+const interactionModesGroupButton = (model) => {
+  const { frameworkInfo } = model;
+
+  return frameworkInfo.match({
+    NotAsked: () => h('button.btn', { disabled: true }, ''),
+    Loading: () => h('button.btn', { disabled: true, className: 'loading' }, 'Loading'),
+    Failure: () => [],
+    Success: (frameworkInfo) =>
+      [
+        queryButton(model, frameworkInfo),
+        liveButton(model, frameworkInfo),
+      ],
+  });
+};
+
+/**
+ * Query button final state depends on the following states
+ * - services lookup
+ * - services result
+ * - query lookup
+ * @param {Model} model - root model of the application
+ * @param {RemoteData.payload} frameworkInfo - the payload containing framework information
+ * @returns {vnode} - the view of the query button
+ */
+const queryButton = (model, frameworkInfo) => {
+  const { log: logModel } = model;
+  const { queryResult } = logModel;
+  const { mysql: { status: { ok: isDbReady = false } = {} } = {} } = frameworkInfo;
+
+  if (queryResult.isLoading()) {
+    return h('button.btn.bold', {
+      id: 'cancel-query-button',
+      title: 'Cancel ongoing query',
+      className: BUTTON.DANGER,
+      onclick: () => logModel.cancelQuery(),
+    }, 'Cancel');
+  }
+
+  return h('button.btn.bold', {
+    id: 'query-button',
+    title: isDbReady ? 'Query database with filters (Enter)' : 'Query service not configured',
+    disabled: !isDbReady || queryResult.isLoading(),
+    className: queryButtonType,
+    onclick: () => toggleButtonStates(model, false),
+  }, 'Query');
+};
+
+/**
+ * Live button final state depends on the following states
+ * - services lookup
+ * - services result
+ * - websocket status
+ * @param {Model} model - root model of the application
+ * @param {RemoteData.payload} frameworkInfo - the payload containing framework information
+ * @returns {vnode} - the view of the live button
+ */
+const liveButton = (model, frameworkInfo) => {
+  const { log: logModel, ws } = model;
+  const { queryResult } = logModel;
+  const { authed: isWsAuthedAndReady = false } = ws;
+  const { infoLoggerServer: { status: { ok: isLiveServiceReady = false } = {} } = {} } = frameworkInfo;
+
+  const isLiveModeReady = isLiveServiceReady && isWsAuthedAndReady;
+  const title = isLiveModeReady ? 'Stream logs with filtering' : 'Live service not configured';
+
+  return h('button.btn.bold', {
+    title,
+    disabled: !isLiveModeReady || queryResult.isLoading(),
+    className: !isLiveModeReady ? 'loading' : liveButtonType,
+    onclick: () => toggleButtonStates(model, true),
+  }, 'Live', ' ', liveButtonIcon);
+};
 
 /**
  * Button dropdown to show current user and logout link
@@ -104,28 +184,6 @@ const saveUserProfileMenuItem = (model) =>
     onclick: () => model.saveUserProfile(),
     title: 'Save the columns size and visibility as your profile',
   }, 'Save Profile');
-
-/**
- * Query button final state depends on the following states
- * - services lookup
- * - services result
- * - query lookup
- * @param {Model} model - root model of the application
- * @returns {vnode} - the view of the query button
- */
-const queryButton = (model) => h('button.btn', model.frameworkInfo.match({
-  NotAsked: () => ({ disabled: true }),
-  Loading: () => ({ disabled: true, className: 'loading' }),
-  Success: (frameworkInfo) => ({
-    title: frameworkInfo.mysql && frameworkInfo.mysql.status.ok
-      ? 'Query database with filters (Enter)' : 'Query service not configured',
-    disabled: !frameworkInfo.mysql || !frameworkInfo.mysql.status.ok || model.log.queryResult.isLoading(),
-    className: model.log.queryResult.isLoading() ? 'loading' : queryButtonType,
-    style: 'font-weight: bold',
-    onclick: () => toggleButtonStates(model, false),
-  }),
-  Failure: () => ({ disabled: true, className: 'danger' }),
-}), 'Query');
 
 /**
  * Group of buttons which allow the user to engage with the download functionality
@@ -185,28 +243,6 @@ const zoomButtonGroup = (zoom) =>
       title: 'Zoom in (Ctrl/Cmd + +)',
     }, h('span', { style: 'font-size:0.8em' }, iconPlus())),
   ]);
-
-/**
- * Live button final state depends on the following states
- * - services lookup
- * - services result
- * - query lookup
- * - websocket status
- * @param {Model} model - root model of the application
- * @returns {vnode} - the view of the live button
- */
-const liveButton = (model) => h('button.btn', model.frameworkInfo.match({
-  NotAsked: () => ({ disabled: true }),
-  Loading: () => ({ disabled: true, className: 'loading' }),
-  Success: (frameworkInfo) => ({
-    title: frameworkInfo.infoLoggerServer.status.ok ? 'Stream logs with filtering' : 'Live service not configured',
-    disabled: !frameworkInfo.infoLoggerServer.status.ok || model.log.queryResult.isLoading(),
-    className: !model.ws.authed ? 'loading' : liveButtonType,
-    style: 'font-weight: bold',
-    onclick: () => toggleButtonStates(model, true),
-  }),
-  Failure: () => ({ disabled: true, className: 'danger' }),
-}), 'Live', ' ', liveButtonIcon);
 
 /**
  * Method to toggle states of the buttons(Query/Live) depending on the mode the tool is running on

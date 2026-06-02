@@ -16,7 +16,7 @@ import { h, notification } from '/js/src/index.js';
 
 import tableFilters from './logFilter/tableFilters.js';
 import commandFilters from './logFilter/commandFilters.js';
-import commandLogs from './log/commandLogs.js';
+import { commandLogs } from './log/commandLogs.js';
 import statusBar from './log/statusBar.js';
 import inspector from './log/inspector.js';
 import tableLogsHeader from './log/tableLogsHeader.js';
