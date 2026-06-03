@@ -15,7 +15,7 @@
 /**
  * Check whether provided service was configured and if so whether is available or not
  * @param {object} service - Service object to check
- * @returns {Function} Express middleware function
+ * @returns {(req: Request, res: Response, next: NextFunction) => void} Express middleware function
  */
 const serviceAvailabilityCheck = (service) =>
 
@@ -23,7 +23,7 @@ const serviceAvailabilityCheck = (service) =>
    * Express middleware function
    * @param {Request} req - HTTP request object
    * @param {Response} res - HTTP response object
-   * @param {Function} next - Next middleware function
+   * @param {NextFunction} next - Next middleware function
    * @returns {void} - calls next or res depending on service availability
    */
   (req, res, next) => {

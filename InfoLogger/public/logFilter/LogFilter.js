@@ -24,7 +24,7 @@ import { getDisabledSeverities } from '../constants/log-level-filters.const.js';
  */
 
 /**
- * @typedef Criteria * @type {Array.<Criteria>}
+ * @typedef {Array.<Criteria>} Criteria
  */
 
 /**
@@ -115,7 +115,7 @@ export default class LogFilter extends Observable {
         this.enforceDisabledSeverities();
       }
 
-        // Ensure that both matchEmpty and excludeEmpty are not active at the same time
+      // Ensure that both matchEmpty and excludeEmpty are not active at the same time
       if (value && (operator === 'matchEmpty' || operator === 'excludeEmpty')) {
         const oppositeKey = operator === 'matchEmpty' ? 'excludeEmpty' : 'matchEmpty';
         if (this.criterias[field][oppositeKey]) {
@@ -223,7 +223,7 @@ export default class LogFilter extends Observable {
   /**
    * Generates a function to filter a log passed as argument to it
    * Output of function is boolean.
-   * @returns {Function.<WebSocketMessage, boolean>} - function to filter logs
+   * @returns {(message: WebSocketMessage) => boolean} - function to filter logs
    */
   toStringifyFunction() {
     /**
@@ -270,7 +270,7 @@ export default class LogFilter extends Observable {
 
       /**
        * Whether a log field value is considered empty for matchEmpty/excludeEmpty purposes.
-       * @param {*} logValue - value of the log field
+       * @param {string|number|undefined|null} logValue - value of the log field
        * @returns {boolean} - true if the value is undefined, null, or an empty string
        */
       function isEmpty(logValue) {
