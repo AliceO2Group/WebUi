@@ -37,11 +37,11 @@
     "@eslint/js": "10.0.1",
     "@stylistic/eslint-plugin": "5.10.0",
     "eslint": "10.4.0",
-    "eslint-plugin-jsdoc": "62.9.0",
+    "eslint-plugin-jsdoc": "63.0.1",
     "globals": "17.6.0",
     "mocha": "11.7.0",
     "nyc": "18.0.0",
-    "puppeteer": "25.0.4",
+    "puppeteer": "25.1.0",
     "sinon": "22.0.0"
   },
   "bundleDependencies": [
