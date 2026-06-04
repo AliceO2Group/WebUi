@@ -115,7 +115,10 @@ export default class LogFilter extends Observable {
         this.enforceDisabledSeverities();
       }
 
-      // Ensure that both matchEmpty and excludeEmpty are not active at the same time
+      /* Ensure that both matchEmpty and excludeEmpty are not active at the same time.
+      *  If rules accumulate then a helper function or rule engine could be made
+      *  To handle this logic and make it more maintainable
+      */
       if (value && (operator === 'matchEmpty' || operator === 'excludeEmpty')) {
         const oppositeKey = operator === 'matchEmpty' ? 'excludeEmpty' : 'matchEmpty';
         if (this.criterias[field][oppositeKey]) {
