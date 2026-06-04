@@ -76,6 +76,10 @@ export default class LogFilter extends Observable {
    */
   setCriteria(field, operator, value) {
     if (this.criterias[field][operator] !== value) {
+      if (!(operator in this.criterias[field])) {
+        throw new Error(`unknown operator ${operator} for ${field}`);
+      }
+
       this.criterias[field][operator] = value;
       // auto-complete other properties / parse
       switch (operator) {

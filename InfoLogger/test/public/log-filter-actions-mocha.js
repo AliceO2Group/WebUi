@@ -58,6 +58,53 @@ describe('Filter actions test-suite', async () => {
     assert.deepStrictEqual(columns, expectedColumns);
   });
 
+  it('should initialize each criteria field with the expected operators', async () => {
+    const operators = await page.evaluate(() => {
+      window.model.log.filter.resetCriteria();
+      const result = {};
+      for (const [field, ops] of Object.entries(window.model.log.filter.criterias)) {
+        result[field] = Object.keys(ops);
+      }
+      return result;
+    });
+
+    const TEXT_OPS = [
+      'match',
+      'exclude',
+      '$match',
+      '$exclude',
+      'matchEmpty',
+      '$matchEmpty',
+      'excludeEmpty',
+      '$excludeEmpty',
+    ];
+
+    assert.deepStrictEqual(operators, {
+      timestamp: ['since', 'until', '$since', '$until'],
+      hostname: TEXT_OPS,
+      rolename: TEXT_OPS,
+      pid: TEXT_OPS,
+      username: TEXT_OPS,
+      system: TEXT_OPS,
+      facility: TEXT_OPS,
+      detector: TEXT_OPS,
+      partition: TEXT_OPS,
+      run: TEXT_OPS,
+      errcode: TEXT_OPS,
+      errline: TEXT_OPS,
+      errsource: TEXT_OPS,
+      message: TEXT_OPS,
+      severity: ['in', '$in'],
+      level: ['max', '$max'],
+    });
+  });
+
+  it('should throw when setting non-existent operator on a field', async () => {
+    await assert.rejects(page.evaluate(() => window.model.log.filter.setCriteria('timestamp', 'matchEmpty', false)));
+    await assert.rejects(page.evaluate(() => window.model.log.filter.setCriteria('pid', 'in', false)));
+    await assert.rejects(page.evaluate(() => window.model.log.filter.setCriteria('rolename', 'since', false)));
+  });
+
   it('should update filters based on profile when passed in the URI', async () => {
     // for now check if the filters are reset once the profile is passed
     const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
@@ -188,21 +235,20 @@ describe('Filter actions test-suite', async () => {
   });
 
   it('should parse no keywords to null', async () => {
-    const $in = await page.evaluate(() => {
-      window.model.log.filter.setCriteria('pid', 'in', '');
-      return window.model.log.filter.criterias.pid.$in;
+    const $match = await page.evaluate(() => {
+      window.model.log.filter.setCriteria('pid', 'match', '');
+      return window.model.log.filter.criterias.pid.$match;
     });
-    assert.strictEqual($in, null);
+    assert.strictEqual($match, null);
   });
 
-  it('should parse keywords to array', async () => {
+  it('should parse keywords to array when using "in" operator', async () => {
     const $in = await page.evaluate(() => {
-      window.model.log.filter.setCriteria('pid', 'in', '123 456');
-      return window.model.log.filter.criterias.pid.$in;
+      window.model.log.filter.setCriteria('severity', 'in', 'I W E F');
+      return window.model.log.filter.criterias.severity.$in;
     });
-
-    assert.strictEqual($in.length, 2);
-    assert.deepStrictEqual($in, ['123', '456']);
+    assert.strictEqual($in.length, 4);
+    assert.deepStrictEqual($in, ['I', 'W', 'E', 'F']);
   });
 
   it('should reset filters and set them again', async () => {
@@ -453,9 +499,7 @@ describe('Filter actions test-suite', async () => {
           window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
         });
 
-        await page.waitForFunction((sel) => {
-          return document.querySelector(sel)?.classList.contains('active');
-        }, {}, btnSelector);
+        await page.waitForFunction((sel) => document.querySelector(sel)?.classList.contains('active'), {}, btnSelector);
 
         await page.click(btnSelector);
 
