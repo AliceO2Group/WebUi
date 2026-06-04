@@ -33,8 +33,8 @@ import { getDisabledSeverities } from '../constants/log-level-filters.const.js';
  */
 const makeDefaultMatchExcludeOperators = () => ({
   match: '',
-  exclude: '',
   $match: null,
+  exclude: '',
   $exclude: null,
   matchEmpty: false,
   $matchEmpty: false,

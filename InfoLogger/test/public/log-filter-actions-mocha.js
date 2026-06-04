@@ -70,8 +70,8 @@ describe('Filter actions test-suite', async () => {
 
     const TEXT_OPS = [
       'match',
-      'exclude',
       '$match',
+      'exclude',
       '$exclude',
       'matchEmpty',
       '$matchEmpty',
