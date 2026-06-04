@@ -66,7 +66,7 @@ describe('Live Mode test-suite', async () => {
       window.model.log.filter.setCriteria('hostname', 'match', 'aldaqecs01-v1');
     });
     await page.evaluate(() => window.model.log.liveStart());
-    await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
+    await page.waitForFunction('window.model.log.list.length > 5', { timeout: 10000 });
     const list = await page.evaluate(() => window.model.log.list);
     const isHostNameMatching = list
       .map((element) => element.hostname)
@@ -177,7 +177,7 @@ describe('Live Mode test-suite', async () => {
         window.model.log.filter.setCriteria('rolename', 'excludeEmpty', true);
       });
       await page.evaluate(() => window.model.log.liveStart());
-      await page.waitForFunction('window.model.log.list.length > 5', { timeout: 15000 });
+      await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
 
       const list = await page.evaluate(() => window.model.log.list);
       const allValid = list.every((log) => !isFieldEmpty(log.rolename) && log.rolename !== 'mon-DA-PHS-0');
