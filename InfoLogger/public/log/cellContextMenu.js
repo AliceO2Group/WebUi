@@ -130,25 +130,44 @@ export const cellContextMenu = (model) => {
         }, model.log.filter.criterias.level.max === 1),
       ];
     }
+    if (isTimestamp) {
+      const { since, until } = model.log.filter.criterias.timestamp;
+      return [
+        createMenuItem(iconCheck(), 'success', 'From', () => {
+          model.log.setCriteria('timestamp', 'since', value);
+          hideMenu();
+        }),
+        createMenuItem(iconBan(), 'danger', 'To', () => {
+          model.log.setCriteria('timestamp', 'until', value);
+          hideMenu();
+        }),
+        createMenuItem(iconTrash(), 'danger', 'Clear Filter', () => {
+          model.log.setCriteria('timestamp', 'since', '');
+          model.log.setCriteria('timestamp', 'until', '');
+          hideMenu();
+        }, !since && !until),
+      ];
+    }
+
+    const { match, exclude, matchEmpty, excludeEmpty } = model.log.filter.criterias[field];
+    const isClear = !match && !exclude && !matchEmpty && !excludeEmpty;
+
     return [
-      createMenuItem(iconCheck(), 'success', isTimestamp ? 'From' : 'Match', () => {
-        model.log.setCriteria(field, isTimestamp ? 'since' : 'match', isTimestamp ? value : appendFilter('match'));
+      createMenuItem(iconCheck(), 'success', 'Match', () => {
+        model.log.setCriteria(field, 'match', appendFilter('match'));
         hideMenu();
       }),
-      createMenuItem(iconBan(), 'danger', isTimestamp ? 'To' : 'Exclude', () => {
-        model.log.setCriteria(field, isTimestamp ? 'until' : 'exclude', isTimestamp ? value : appendFilter('exclude'));
+      createMenuItem(iconBan(), 'danger', 'Exclude', () => {
+        model.log.setCriteria(field, 'exclude', appendFilter('exclude'));
         hideMenu();
       }),
       createMenuItem(iconTrash(), 'danger', 'Clear Filter', () => {
-        model.log.setCriteria(field, isTimestamp ? 'until' : 'exclude', '');
-        model.log.setCriteria(field, isTimestamp ? 'since' : 'match', '');
+        model.log.setCriteria(field, 'match', '');
+        model.log.setCriteria(field, 'exclude', '');
         model.log.setCriteria(field, 'matchEmpty', false);
         model.log.setCriteria(field, 'excludeEmpty', false);
         hideMenu();
-      }, isTimestamp
-        ? !model.log.filter.criterias.timestamp.since && !model.log.filter.criterias.timestamp.until
-        : !model.log.filter.criterias[field].match && !model.log.filter.criterias[field].exclude
-        && !model.log.filter.criterias[field].matchEmpty && !model.log.filter.criterias[field].excludeEmpty),
+      }, isClear),
     ];
   };
 
