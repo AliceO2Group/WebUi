@@ -160,7 +160,6 @@ const createInputField = (logModel, field, command, tabIndex = 1) =>
 const createTextAreaField = (model, field, command, tabIndex) =>
   h('td', h('.filter-input-group', [
     h('textarea.form-control.text-area-for-message', {
-      style: 'height:2em; resize: none;',
       tabIndex,
       placeholder: !model.messageFocused
         ? ''

@@ -124,8 +124,11 @@ footer { border-top: 1px solid var(--color-gray); }
 .btn:hover { background-color: #a0a0a0; color: var(--color-white); }
 .btn:active, .btn.active, .dropdown-open > .btn { background-color: #c0c0c0; }
 
-.filter-input-group { display: flex; }
+.filter-input-group { display: flex;
+  position: relative;
+}
 .filter-input-group .form-control {
+  height: 2em;
   border-radius: .25rem;
   z-index: 1;
 }
@@ -153,8 +156,17 @@ footer { border-top: 1px solid var(--color-gray); }
   display: block;
 }
 
-td:has(.text-area-for-message) { position: relative; }
-.text-area-for-message:focus { width: 400%; height: 10rem !important; top: 0; right: 0; position: absolute; z-index: 10; border-radius: .25rem; }
+.text-area-for-message {
+  resize: none;
+}
+.text-area-for-message:focus {
+  width: calc(400% + 12px);
+  height: 10rem !important;
+  inset: 0 0 auto auto;
+  position: absolute;
+  z-index: 10;
+  border-radius: .25rem;
+}
 .filter-input-group:has(.text-area-for-message:focus) .empty-toggle { display: none; }
 
 a.disabled { pointer-events: none; cursor: default; }
