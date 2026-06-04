@@ -298,8 +298,9 @@ describe('Filter actions test-suite', async () => {
         };
       });
 
-      assert.ok(!severity.$in.includes('D'));
-      assert.ok(!severity.in.includes('D'));
+      assert.ok(Array.isArray(severity.$in));
+      assert.deepStrictEqual(severity.$in, ['I', 'W', 'E', 'F']);
+      assert.strictEqual(severity.in, 'I W E F');
     });
 
     it('should strip DEBUG from URL when severity is set before level', async () => {
@@ -311,8 +312,9 @@ describe('Filter actions test-suite', async () => {
         };
       });
 
-      assert.ok(!severity.$in.includes('D'));
-      assert.ok(!severity.in.includes('D'));
+      assert.ok(Array.isArray(severity.$in));
+      assert.deepStrictEqual(severity.$in, ['I', 'W', 'E', 'F']);
+      assert.strictEqual(severity.in, 'I W E F');
     });
 
     it('should strip DEBUG from URL when level is set before severity', async () => {
@@ -324,8 +326,9 @@ describe('Filter actions test-suite', async () => {
         };
       });
 
-      assert.ok(!severity.$in.includes('D'));
-      assert.ok(!severity.in.includes('D'));
+      assert.ok(Array.isArray(severity.$in));
+      assert.deepStrictEqual(severity.$in, ['I', 'W', 'E', 'F']);
+      assert.strictEqual(severity.in, 'I W E F');
     });
 
     it('should disable DEBUG button at OPS level', async () => {
