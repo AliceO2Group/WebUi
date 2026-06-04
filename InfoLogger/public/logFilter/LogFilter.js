@@ -203,12 +203,8 @@ export default class LogFilter extends Observable {
    */
   enforceDisabledSeverities() {
     const disabled = getDisabledSeverities(this.criterias.level.max);
-    if (disabled.length === 0 || !this.criterias.severity.$in) {
-      return;
-    }
-
     const current = this.criterias.severity.$in;
-    if (!current) {
+    if (disabled.length === 0 || !current) {
       return;
     }
 
