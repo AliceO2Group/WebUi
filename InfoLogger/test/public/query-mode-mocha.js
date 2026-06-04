@@ -20,6 +20,8 @@ const TEXT_FILTER_VALUE_BY_OPERATOR = {
   until: '2026-01-01T00:00:00.000Z',
   match: 'some-message',
   exclude: 'some-message',
+  matchEmpty: true,
+  excludeEmpty: true,
 };
 
 const TEXT_FILTER_FIELD_BY_OPERATOR = {
@@ -27,6 +29,8 @@ const TEXT_FILTER_FIELD_BY_OPERATOR = {
   until: 'timestamp',
   match: 'message',
   exclude: 'message',
+  matchEmpty: 'rolename',
+  excludeEmpty: 'rolename',
 };
 
 /**
