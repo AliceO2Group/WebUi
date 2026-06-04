@@ -271,7 +271,11 @@ class QueryService {
                 ? `\`${field}\` LIKE (?) AND \`${field}\` IS NOT NULL`
                 : `\`${field}\` = ? AND \`${field}\` IS NOT NULL`;
 
-            criteria.push(`NOT(${criteriaArray.map(toExcludeCondition).join(' OR ')})`);
+            const excludeStr = criteriaArray.length > 1
+              ? criteriaArray.map((c) => `(${toExcludeCondition(c)})`).join(' OR ')
+              : toExcludeCondition(criteriaArray[0]);
+
+            criteria.push(`NOT(${excludeStr})`);
 
             const excludeEmpty = filters[field].$excludeEmpty;
             if (excludeEmpty) {

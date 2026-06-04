@@ -75,11 +75,10 @@ export default class LogFilter extends Observable {
    * //
    */
   setCriteria(field, operator, value) {
+    if (!(operator in this.criterias[field])) {
+      throw new Error(`unknown operator ${operator} for ${field}`);
+    }
     if (this.criterias[field][operator] !== value) {
-      if (!(operator in this.criterias[field])) {
-        throw new Error(`unknown operator ${operator} for ${field}`);
-      }
-
       this.criterias[field][operator] = value;
       // auto-complete other properties / parse
       switch (operator) {
@@ -106,9 +105,11 @@ export default class LogFilter extends Observable {
           break;
         case 'matchEmpty':
           this.criterias[field]['$matchEmpty'] = Boolean(value);
+          this._clearOppositeEmpty(field, 'matchEmpty');
           break;
         case 'excludeEmpty':
           this.criterias[field]['$excludeEmpty'] = Boolean(value);
+          this._clearOppositeEmpty(field, 'excludeEmpty');
           break;
         default:
           throw new Error('unknown operator');
@@ -117,18 +118,6 @@ export default class LogFilter extends Observable {
       // enforces on both severity and level as fromObject can set them in either order
       if (field === 'severity' || field === 'level') {
         this.enforceDisabledSeverities();
-      }
-
-      /* Ensure that both matchEmpty and excludeEmpty are not active at the same time.
-      *  If rules accumulate then a helper function or rule engine could be made
-      *  To handle this logic and make it more maintainable
-      */
-      if (value && (operator === 'matchEmpty' || operator === 'excludeEmpty')) {
-        const oppositeKey = operator === 'matchEmpty' ? 'excludeEmpty' : 'matchEmpty';
-        if (this.criterias[field][oppositeKey]) {
-          this.criterias[field][oppositeKey] = false;
-          this.criterias[field][`$${oppositeKey}`] = false;
-        }
       }
 
       this.notify();
@@ -193,7 +182,10 @@ export default class LogFilter extends Observable {
    */
   hasActiveTextFilters() {
     return Object.values(this.criterias).some((criteria) =>
-      TEXT_FILTER_OPERATORS.some((operator) => criteria[operator]?.trim()));
+      TEXT_FILTER_OPERATORS.some((operator) => {
+        const v = criteria[operator];
+        return typeof v === 'string' ? v.trim() : Boolean(v);
+      }));
   }
 
   /**
@@ -209,9 +201,12 @@ export default class LogFilter extends Observable {
    * Remove any active severity selections that are disallowed by the current level.
    */
   enforceDisabledSeverities() {
-    const disabled = getDisabledSeverities(this.criterias.level.max);
     const current = this.criterias.severity.$in;
-    if (disabled.length === 0 || !current) {
+    if (!current) {
+      return;
+    }
+    const disabled = getDisabledSeverities(this.criterias.level.max);
+    if (disabled.length === 0) {
       return;
     }
 
@@ -399,6 +394,22 @@ export default class LogFilter extends Observable {
    * original state: empty or exclusive for other criterias.
    */
   resetCriteria() {
+    const TEXT_FIELDS = [
+      'hostname',
+      'rolename',
+      'pid',
+      'username',
+      'system',
+      'facility',
+      'detector',
+      'partition',
+      'run',
+      'errcode',
+      'errline',
+      'errsource',
+      'message',
+    ];
+
     this.criterias = {
       timestamp: {
         since: '',
@@ -406,45 +417,7 @@ export default class LogFilter extends Observable {
         $since: null,
         $until: null,
       },
-      hostname: {
-        ...makeDefaultMatchExcludeOperators(),
-      },
-      rolename: {
-        ...makeDefaultMatchExcludeOperators(),
-      },
-      pid: {
-        ...makeDefaultMatchExcludeOperators(),
-      },
-      username: {
-        ...makeDefaultMatchExcludeOperators(),
-      },
-      system: {
-        ...makeDefaultMatchExcludeOperators(),
-      },
-      facility: {
-        ...makeDefaultMatchExcludeOperators(),
-      },
-      detector: {
-        ...makeDefaultMatchExcludeOperators(),
-      },
-      partition: {
-        ...makeDefaultMatchExcludeOperators(),
-      },
-      run: {
-        ...makeDefaultMatchExcludeOperators(),
-      },
-      errcode: {
-        ...makeDefaultMatchExcludeOperators(),
-      },
-      errline: {
-        ...makeDefaultMatchExcludeOperators(),
-      },
-      errsource: {
-        ...makeDefaultMatchExcludeOperators(),
-      },
-      message: {
-        ...makeDefaultMatchExcludeOperators(),
-      },
+      ...Object.fromEntries(TEXT_FIELDS.map((field) => [field, makeDefaultMatchExcludeOperators()])),
       severity: {
         in: 'I W E F',
         $in: ['I', 'W', 'E', 'F'],
@@ -455,5 +428,13 @@ export default class LogFilter extends Observable {
       },
     };
     this.notify();
+  }
+
+  _clearOppositeEmpty(field, operator) {
+    const oppositeKey = operator === 'matchEmpty' ? 'excludeEmpty' : 'matchEmpty';
+    if (this.criterias[field][oppositeKey]) {
+      this.criterias[field][oppositeKey] = false;
+      this.criterias[field][`$${oppositeKey}`] = false;
+    }
   }
 }

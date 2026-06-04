@@ -191,7 +191,7 @@ describe('\'QueryService\' test suite', () => {
       const expectedCriteria = [
         '`timestamp`>=?',
         '`timestamp`<=?',
-        'NOT(`hostname` = ? AND `hostname` IS NOT NULL OR `hostname` = ? AND `hostname` IS NOT NULL)',
+        'NOT((`hostname` = ? AND `hostname` IS NOT NULL) OR (`hostname` = ? AND `hostname` IS NOT NULL))',
         '`severity` IN (?)',
         '`level`<=?',
         '`userId`>=?',
@@ -280,7 +280,7 @@ describe('\'QueryService\' test suite', () => {
       });
       assert.deepStrictEqual(result.values, ['foo', 'bar']);
       assert.deepStrictEqual(result.criteria, [
-        'NOT(`hostname` = ? AND `hostname` IS NOT NULL OR `hostname` = ? AND `hostname` IS NOT NULL)',
+        'NOT((`hostname` = ? AND `hostname` IS NOT NULL) OR (`hostname` = ? AND `hostname` IS NOT NULL))',
         '(`hostname` != \'\' AND `hostname` IS NOT NULL)',
       ]);
     });
