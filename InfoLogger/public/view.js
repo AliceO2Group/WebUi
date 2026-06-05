@@ -37,8 +37,8 @@ export default (model) => [
   h('.flex-column absolute-fill', [
     h('.shadow-level2', [
       h('header.p1.flex-row.f7.g1.justify-between', [
-        h('.flex-row.g2', commandLogs(model)),
-        h('.flex-row.g2', commandFilters(model)),
+        h('.flex-row.g3', commandLogs(model)),
+        h('.flex-row.g3', commandFilters(model)),
       ]),
       h('header.f7', tableFilters(model)),
     ]),
