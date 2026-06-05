@@ -18,6 +18,7 @@
   --color-gray-button-background-hover: #a0a0a0;
   --color-gray-button-background: #e0e0e0;
   --color-gray-button: #404040;
+  --color-gray-button-active: #c0c0c0;
 }
 .sidebar,
 .sidebar .sidebar-content { width: 20rem; }
