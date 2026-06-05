@@ -44,25 +44,21 @@ export const commandLogs = (model) => [
       onclick: () => model.log.firstError(),
       title: 'Go to first error/fatal (ALT + left arrow)',
     }, '|←'),
-    ' ',
     h('button.btn', {
       disabled: !model.log.list.length,
       onclick: () => model.log.previousError(),
       title: 'Go to previous error/fatal (left arrow)',
     }, '←'),
-    ' ',
     h('button.btn', {
       disabled: !model.log.list.length,
       onclick: () => model.log.nextError(),
       title: 'Go to next error/fatal (left arrow)',
     }, '→'),
-    ' ',
     h('button.btn', {
       disabled: !model.log.list.length,
       onclick: () => model.log.lastError(),
       title: 'Go to last error/fatal (ALT + right arrow)',
     }, '→|'),
-    ' ',
     h('button.btn', {
       disabled: !model.log.list.length,
       onclick: () => model.log.goToLastItem(),
