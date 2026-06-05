@@ -24,31 +24,25 @@ import { h } from '/js/src/index.js';
  * @returns {vnode} - the view of filters panel
  */
 export default (model) => [
-  h(
-    '',
-    h('.btn-group', [
-      buttonSeverity(model, 'Debug', 'Match severity debug', 'D'),
-      buttonSeverity(model, 'Info', 'Match severity info', 'I'),
-      buttonSeverity(model, 'Warn', 'Match severity warnings', 'W'),
-      buttonSeverity(model, 'Error', 'Match severity errors', 'E'),
-      buttonSeverity(model, 'Fatal', 'Match severity fatal', 'F'),
-    ]),
-    h('span.mh3'),
-    h('.btn-group', [
-      buttonFilterLevel(model, 'Ops', 1),
-      buttonFilterLevel(model, 'Support', 6),
-      buttonFilterLevel(model, 'Devel', 11),
-      buttonFilterLevel(model, 'Trace', null), // 21
-    ]),
-    h('span.mh3'),
-    h('.btn-group', [
-      buttonLogLimit(model, '100k', 100000),
-      buttonLogLimit(model, '500k', 500000),
-      buttonLogLimit(model, '1M', 1000000),
-    ]),
-    h('span.mh3'),
-    buttonReset(model),
-  ),
+  h('.btn-group', [
+    buttonSeverity(model, 'Debug', 'Match severity debug', 'D'),
+    buttonSeverity(model, 'Info', 'Match severity info', 'I'),
+    buttonSeverity(model, 'Warn', 'Match severity warnings', 'W'),
+    buttonSeverity(model, 'Error', 'Match severity errors', 'E'),
+    buttonSeverity(model, 'Fatal', 'Match severity fatal', 'F'),
+  ]),
+  h('.btn-group', [
+    buttonFilterLevel(model, 'Ops', 1),
+    buttonFilterLevel(model, 'Support', 6),
+    buttonFilterLevel(model, 'Devel', 11),
+    buttonFilterLevel(model, 'Trace', null), // 21
+  ]),
+  h('.btn-group', [
+    buttonLogLimit(model, '100k', 100000),
+    buttonLogLimit(model, '500k', 500000),
+    buttonLogLimit(model, '1M', 1000000),
+  ]),
+  buttonReset(model),
 ];
 
 /**
