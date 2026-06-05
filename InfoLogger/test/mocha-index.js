@@ -40,8 +40,6 @@ describe('InfoLogger', function () {
   const baseUrl = `http://${config.http.hostname}:${config.http.port}/`;
 
   before(async () => {
-    await fs.copyFile(testDbSourcePath, testDbRunningPath);
-
     // Add error handlers for uncaught errors
     process.on('unhandledRejection', (error) => {
       console.error('[Test Setup] Unhandled Promise Rejection at:', new Date().toISOString());
