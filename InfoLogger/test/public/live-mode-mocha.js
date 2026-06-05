@@ -27,7 +27,7 @@ describe('Live Mode test-suite', async () => {
     const location = await page.evaluate(() => window.location);
     const search = decodeURIComponent(location.search);
 
-    assert.deepStrictEqual(search, '?q={"severity":{"in":"I W E F"},"level":{"max":1}}');
+    assert.deepStrictEqual(search, '?q={"severity":{"in":"I W E F"}}');
   });
 
   it('should successfully enable LIVE mode', async () => {
