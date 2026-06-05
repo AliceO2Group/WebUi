@@ -31,17 +31,8 @@ export default (model) => [
     buttonSeverity(model, 'Error', 'Match severity errors', 'E'),
     buttonSeverity(model, 'Fatal', 'Match severity fatal', 'F'),
   ]),
-  h('.btn-group', [
-    buttonFilterLevel(model, 'Ops', 1),
-    buttonFilterLevel(model, 'Support', 6),
-    buttonFilterLevel(model, 'Devel', 11),
-    buttonFilterLevel(model, 'Trace', null), // 21
-  ]),
-  h('.btn-group', [
-    buttonLogLimit(model, '100k', 100000),
-    buttonLogLimit(model, '500k', 500000),
-    buttonLogLimit(model, '1M', 1000000),
-  ]),
+  selectFilterLevel(model.log),
+  selectLogLimit(model.log),
   buttonReset(model),
 ];
 
@@ -67,30 +58,55 @@ const buttonSeverity = (model, label, title, value) => {
 };
 
 /**
- * Makes a button to set filtering level (shifter, debug, etc) with number
- * @param {Model} model - root model of the application
- * @param {string} label - button's label
- * @param {number} value - maximum level of filtering, from 1 to 21
- * @returns {vnode} - component representing the creation of a button for filtering
+ * Build a vnode for a select component with given options and onchange callback
+ * @param {string} title - tooltip shown on hover
+ * @param {string} id - id of the element
+ * @param {Array<{label: string, value: string, selected: boolean}>} options - list of options to render
+ * @param {void} onchange - callback receiving the raw string value from the select
+ * @returns {vnode} - component representing the select element
  */
-const buttonFilterLevel = (model, label, value) => h('button.btn', {
-  className: model.log.filter.criterias.level.max === value ? 'active' : '',
-  onclick: () => model.log.setCriteria('level', 'max', value),
-  title: `Filter level ≤ ${value}`,
-}, label);
+const selectBtn = (title, id, options, onchange) => h(
+  'select.select-btn',
+  {
+    id,
+    title,
+    onchange: (e) => onchange(e.target.value),
+  },
+  options.map(({ label, value, selected }) => h('option', { value, selected }, label)),
+);
 
 /**
- * Makes a button to set log limit, maximum logs in memory
- * @param {Model} model - root model of the application
- * @param {string} label - button's label
- * @param {number} limit - how much logs to keep in memory
- * @returns {vnode} - component representing the creation of a button for log limit
+ * Makes a select to set filtering level (Ops, Support, Devel, Trace)
+ * @param {Log} logModel - log model of the application
+ * @returns {vnode} - component representing the selection of a log level filter
  */
-const buttonLogLimit = (model, label, limit) => h('button.btn', {
-  className: model.log.limit === limit ? 'active' : '',
-  onclick: () => model.log.setLimit(limit),
-  title: `Keep only ${label} logs in the view`,
-}, label);
+const selectFilterLevel = (logModel) => selectBtn(
+  'Filter by log level',
+  'filter-level',
+  [
+    { label: 'Ops', value: '1', selected: logModel.filter.criterias.level.max === 1 },
+    { label: 'Support', value: '6', selected: logModel.filter.criterias.level.max === 6 },
+    { label: 'Devel', value: '11', selected: logModel.filter.criterias.level.max === 11 },
+    { label: 'Trace', value: '', selected: logModel.filter.criterias.level.max === null },
+  ],
+  (value) => logModel.setCriteria('level', 'max', value === '' ? null : parseInt(value, 10)),
+);
+
+/**
+ * Makes a select to set the maximum number of logs to keep in memory
+ * @param {Log} logModel - log model of the application
+ * @returns {vnode} - component representing the selection of a log limit
+ */
+const selectLogLimit = (logModel) => selectBtn(
+  'Maximum logs to keep in the view',
+  'log-limit',
+  [
+    { label: '100k', value: '100000', selected: logModel.limit === 100000 },
+    { label: '500k', value: '500000', selected: logModel.limit === 500000 },
+    { label: '1M', value: '1000000', selected: logModel.limit === 1000000 },
+  ],
+  (value) => logModel.setLimit(parseInt(value, 10)),
+);
 
 /**
  * Makes a button to reset filters
