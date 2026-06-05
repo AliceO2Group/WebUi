@@ -43,16 +43,16 @@ const throwIfQueryAborted = (signal) => {
  * Return a cleanup function to remove the listener
  * @param {AbortSignal|null} signal - optional abort signal
  * @param {object} connection - mariadb connection-like object
- * @param {function(): void} onDestroyed - callback called just before destroying connection
+ * @param {function(): void} beforeDestroy - callback called just before destroying connection
  * @returns {function(): void} cleanup callback to remove the listener
  */
-const attachAbortDestroyHandler = (signal, connection, onDestroyed) => {
+const attachAbortDestroyHandler = (signal, connection, beforeDestroy) => {
   if (!signal) {
     return () => {};
   }
 
   const abortHandler = () => {
-    onDestroyed();
+    beforeDestroy();
     connection.destroy();
   };
 

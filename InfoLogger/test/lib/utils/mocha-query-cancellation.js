@@ -47,42 +47,42 @@ describe('\'queryCancellation\' utils test suite', () => {
     });
   });
 
-  describe('\'attachAbortDestroyHandler()\' - test suite  ', () => {
+  describe('\'attachAbortDestroyHandler()\' - test suite', () => {
     it('should return a noop cleanup when signal is missing', () => {
       const connection = { destroy: sinon.spy() };
-      const onDestroyed = sinon.spy();
+      const beforeDestroy = sinon.spy();
 
-      const detach = attachAbortDestroyHandler(null, connection, onDestroyed);
+      const detach = attachAbortDestroyHandler(null, connection, beforeDestroy);
 
       assert.strictEqual(typeof detach, 'function');
       assert.doesNotThrow(() => detach());
       assert.strictEqual(connection.destroy.callCount, 0);
-      assert.strictEqual(onDestroyed.callCount, 0);
+      assert.strictEqual(beforeDestroy.callCount, 0);
     });
 
     it('should destroy connection and call callback when signal aborts', () => {
       const controller = new AbortController();
       const connection = { destroy: sinon.spy() };
-      const onDestroyed = sinon.spy();
+      const beforeDestroy = sinon.spy();
 
-      const detach = attachAbortDestroyHandler(controller.signal, connection, onDestroyed);
+      const detach = attachAbortDestroyHandler(controller.signal, connection, beforeDestroy);
       controller.abort();
       detach();
 
-      assert.strictEqual(onDestroyed.callCount, 1);
+      assert.strictEqual(beforeDestroy.callCount, 1);
       assert.strictEqual(connection.destroy.callCount, 1);
     });
 
     it('should not destroy connection after handler is detached', () => {
       const controller = new AbortController();
       const connection = { destroy: sinon.spy() };
-      const onDestroyed = sinon.spy();
+      const beforeDestroy = sinon.spy();
 
-      const detach = attachAbortDestroyHandler(controller.signal, connection, onDestroyed);
+      const detach = attachAbortDestroyHandler(controller.signal, connection, beforeDestroy);
       detach();
       controller.abort();
 
-      assert.strictEqual(onDestroyed.callCount, 0);
+      assert.strictEqual(beforeDestroy.callCount, 0);
       assert.strictEqual(connection.destroy.callCount, 0);
     });
   });
