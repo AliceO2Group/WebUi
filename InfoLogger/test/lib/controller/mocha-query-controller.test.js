@@ -120,7 +120,8 @@ describe('QueryController test suite', () => {
       const call = queryService.queryFromFilters.getCall(0);
       assert.strictEqual(call.args[0], body.criterias);
       assert.strictEqual(call.args[1], body.options);
-      assert.ok(call.args[2], 'AbortSignal'); // third arg should be the signal
+      assert.ok(!call.args[2].aborted); // signal should not have been aborted on success
+      assert.ok(call.args[2] instanceof AbortSignal);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith(logs));
     });
