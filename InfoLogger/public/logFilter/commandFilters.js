@@ -63,17 +63,24 @@ const buttonSeverity = (model, label, title, value) => {
  * @param {string} id - id of the element
  * @param {Array<{label: string, value: string, selected: boolean}>} options - list of options to render
  * @param {void} onchange - callback receiving the raw string value from the select
+ * @param {string} [optGroupLabel] - optional non-selectable group header shown inside the dropdown
  * @returns {vnode} - component representing the select element
  */
-const selectBtn = (title, id, options, onchange) => h(
-  'select.select-btn',
-  {
-    id,
-    title,
-    onchange: (e) => onchange(e.target.value),
-  },
-  options.map(({ label, value, selected }) => h('option', { value, selected }, label)),
-);
+const selectBtn = (title, id, options, onchange, optGroupLabel = null) => {
+  const optionsMap = options.map(({ label, value, selected }) => h('option', { value, selected }, label));
+  return h(
+    'select.select-btn',
+    {
+      id,
+      title,
+      onchange: (e) => onchange(e.target.value),
+    },
+    optGroupLabel
+      ? h('optgroup', { label: optGroupLabel }, optionsMap)
+      : optionsMap,
+
+  );
+};
 
 /**
  * Makes a select to set filtering level (Ops, Support, Devel, Trace)
@@ -90,6 +97,7 @@ const selectFilterLevel = (logModel) => selectBtn(
     { label: 'Trace', value: '', selected: logModel.filter.criterias.level.max === null },
   ],
   (value) => logModel.setCriteria('level', 'max', value === '' ? null : parseInt(value, 10)),
+  'Log Level',
 );
 
 /**
@@ -106,6 +114,7 @@ const selectLogLimit = (logModel) => selectBtn(
     { label: '1M', value: '1000000', selected: logModel.limit === 1000000 },
   ],
   (value) => logModel.setLimit(parseInt(value, 10)),
+  'Buffer Limit',
 );
 
 /**
