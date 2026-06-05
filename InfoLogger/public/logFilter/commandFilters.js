@@ -78,7 +78,6 @@ const selectBtn = (title, id, options, onchange, optGroupLabel = null) => {
     optGroupLabel
       ? h('optgroup', { label: optGroupLabel }, optionsMap)
       : optionsMap,
-
   );
 };
 
