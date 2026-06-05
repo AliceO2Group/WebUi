@@ -10,9 +10,8 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
-/* eslint-disable max-len */
 const assert = require('assert');
 const test = require('../mocha-index');
 
@@ -26,8 +25,8 @@ describe('Filter actions test-suite', async () => {
   });
 
   // "physicist" is not a distinct stored profile; the server returns defaultCriterias for any name
-  it('should succesfully load a page with profile in the URI', async function() {
-    await page.goto(baseUrl + "?profile=physicist", {waitUntil: 'networkidle0'});
+  it('should succesfully load a page with profile in the URI', async () => {
+    await page.goto(`${baseUrl}?profile=physicist`, { waitUntil: 'networkidle0' });
     const location = await page.evaluate(() => window.location);
     const search = decodeURIComponent(location.search);
 
@@ -37,60 +36,58 @@ describe('Filter actions test-suite', async () => {
 
   it('should update column headers based on profile when passed in the URI', async () => {
     const expectedColumns = {
-      date: {size: 'cell-m', visible: false},
-      time: {size: 'cell-m', visible: true},
-      hostname: {size: 'cell-m', visible: true},
-      rolename: {size: 'cell-m', visible: false},
-      pid: {size: 'cell-s', visible: false},
-      username: {size: 'cell-m', visible: false},
-      system: {size: 'cell-s', visible: true},
-      facility: {size: 'cell-m', visible: true},
-      detector: {size: 'cell-s', visible: true},
-      partition: {size: 'cell-m', visible: true},
-      run: {size: 'cell-s', visible: true},
-      errcode: {size: 'cell-s', visible: false},
-      errline: {size: 'cell-s', visible: false},
-      errsource: {size: 'cell-m', visible: false},
-      message: {size: 'cell-xl', visible: true}
+      date: { size: 'cell-m', visible: false },
+      time: { size: 'cell-m', visible: true },
+      hostname: { size: 'cell-m', visible: true },
+      rolename: { size: 'cell-m', visible: false },
+      pid: { size: 'cell-s', visible: false },
+      username: { size: 'cell-m', visible: false },
+      system: { size: 'cell-s', visible: true },
+      facility: { size: 'cell-m', visible: true },
+      detector: { size: 'cell-s', visible: true },
+      partition: { size: 'cell-m', visible: true },
+      run: { size: 'cell-s', visible: true },
+      errcode: { size: 'cell-s', visible: false },
+      errline: { size: 'cell-s', visible: false },
+      errsource: { size: 'cell-m', visible: false },
+      message: { size: 'cell-xl', visible: true },
     };
 
-    const columns = await page.evaluate(() => {
-      return window.model.table.colsHeader;
-    });
+    const columns = await page.evaluate(() => window.model.table.colsHeader);
 
     assert.deepStrictEqual(columns, expectedColumns);
   });
 
   it('should update filters based on profile when passed in the URI', async () => {
-    // for now check if the filters are reset once the profile is passed 
+    // for now check if the filters are reset once the profile is passed
     const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
 
     const searchParams = await page.evaluate(() => {
-      const params = {profile: 'physicist'};
+      const params = { profile: 'physicist' };
       window.model.parseLocation(params);
       return window.location.search;
     });
 
-    await page.waitForFunction(`window.model.notification.state === 'shown'`);
-    await page.waitForFunction(`window.model.notification.type === 'success'`);
-    await page.waitForFunction(`window.model.notification.message === "The profile PHYSICIST was loaded successfully"`);
+    await page.waitForFunction('window.model.notification.state === \'shown\'');
+    await page.waitForFunction('window.model.notification.type === \'success\'');
+    await page.waitForFunction('window.model.notification.message === "The profile PHYSICIST was loaded successfully"');
 
     assert.strictEqual(searchParams, expectedParams);
   });
 
   it('should reset filters and show warning message when profile and filters are passed', async () => {
     // wait until the previous notification is hidden
-    await page.waitForFunction(`window.model.notification.state === 'hidden'`);
+    await page.waitForFunction('window.model.notification.state === \'hidden\'');
     const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
     const searchParams = await page.evaluate(() => {
-      const params = {profile: "physicist", q: '"severity":{"in":"I W E F"}}'};
+      const params = { profile: 'physicist', q: '"severity":{"in":"I W E F"}}' };
       window.model.parseLocation(params);
       return window.location.search;
     });
 
-    await page.waitForFunction(`window.model.notification.state === 'shown'`);
-    await page.waitForFunction(`window.model.notification.type === 'warning'`);
-    await page.waitForFunction(`window.model.notification.message === "URL can contain only filters or profile, not both"`);
+    await page.waitForFunction('window.model.notification.state === \'shown\'');
+    await page.waitForFunction('window.model.notification.type === \'warning\'');
+    await page.waitForFunction('window.model.notification.message === "URL can contain only filters or profile, not both"');
     assert.strictEqual(searchParams, expectedParams);
   });
 
@@ -111,11 +108,11 @@ describe('Filter actions test-suite', async () => {
     // CI/CD runs on Chromium so this assertion is based on Chromium's JSON engine's error message
     assert.strictEqual(
       locationAndNotification.notification.message,
-      'Invalid URL filter format: Expected \',\' or \'}\' after property value in JSON at position 27 (line 1 column 28)');
+      'Invalid URL filter format: Expected \',\' or \'}\' after property value in JSON at position 27 (line 1 column 28)',
+    );
   });
 
   it('should update URI with new encoded "match" criteria', async () => {
-    /* eslint-disable max-len */
     const decodedParams = '?q={"hostname":{"match":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
     const expectedParams = '?q={%22hostname%22:{%22match%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
     const searchParams = await page.evaluate(() => {
@@ -129,7 +126,6 @@ describe('Filter actions test-suite', async () => {
   });
 
   it('should update URI with new encoded "exclude" criteria', async () => {
-    /* eslint-disable max-len */
     const decodedParams = '?q={"hostname":{"exclude":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
     const expectedParams = '?q={%22hostname%22:{%22exclude%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
     const searchParams = await page.evaluate(() => {
@@ -308,6 +304,88 @@ describe('Filter actions test-suite', async () => {
         const debugBtn = buttons.find((b) => b.textContent.trim() === 'Debug');
         return !debugBtn?.classList.contains('disabled');
       });
+    });
+  });
+
+  describe('Level filter select', async () => {
+    it('should build a select components options for level to filter by', async () => {
+      const options = await page.evaluate(() => {
+        const select = document.getElementById('filter-level');
+        return select ? Array.from(select.options)
+          .map((element) => ({ value: element.value, text: element.text })) : null;
+      });
+
+      assert.deepStrictEqual(options, [
+        { value: '1', text: 'Ops' },
+        { value: '6', text: 'Support' },
+        { value: '11', text: 'Devel' },
+        { value: '', text: 'Trace' },
+      ]);
+    });
+
+    it('should mark the currently active level option as selected', async () => {
+      await page.evaluate(() => model.log.filter.setCriteria('level', 'max', 6));
+      await page.waitForFunction(() => document.getElementById('filter-level')?.value === '6');
+
+      const selectedValue = await page.evaluate(() => document.getElementById('filter-level')?.value);
+      assert.strictEqual(selectedValue, '6');
+    });
+
+    it('should update level criteria when an option is selected', async () => {
+      const level = await page.evaluate(() => {
+        const select = document.getElementById('filter-level');
+        select.value = '11';
+        select.dispatchEvent(new Event('change'));
+        return window.model.log.filter.criterias.level.max;
+      });
+
+      assert.strictEqual(level, 11);
+    });
+
+    it('should set level to null when Trace option is selected', async () => {
+      const level = await page.evaluate(() => {
+        const select = document.getElementById('filter-level');
+        select.value = '';
+        select.dispatchEvent(new Event('change'));
+        return window.model.log.filter.criterias.level.max;
+      });
+
+      assert.strictEqual(level, null);
+    });
+  });
+
+  describe('Log limit select', async () => {
+    it('should display a select component for limit to filter by', async () => {
+      const options = await page.evaluate(() => {
+        const select = document.getElementById('log-limit');
+        return select ? Array.from(select.options)
+          .map((element) => ({ value: element.value, text: element.text })) : null;
+      });
+
+      assert.deepStrictEqual(options, [
+        { value: '100000', text: '100k' },
+        { value: '500000', text: '500k' },
+        { value: '1000000', text: '1M' },
+      ]);
+    });
+
+    it('should mark the currently active limit option as selected', async () => {
+      await page.evaluate(() => window.model.log.setLimit(500000));
+      await page.waitForFunction(() => document.getElementById('log-limit')?.value === '500000');
+
+      const selectedValue = await page.evaluate(() => document.getElementById('log-limit')?.value);
+      assert.strictEqual(selectedValue, '500000');
+    });
+
+    it('should update log limit when an option is selected', async () => {
+      const limit = await page.evaluate(() => {
+        const select = document.getElementById('log-limit');
+        select.value = '1000000';
+        select.dispatchEvent(new Event('change'));
+        return window.model.log.limit;
+      });
+
+      assert.strictEqual(limit, 1000000);
     });
   });
 });

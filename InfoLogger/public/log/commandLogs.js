@@ -36,39 +36,37 @@ let liveButtonIcon = iconMediaPlay();
  */
 export const commandLogs = (model) => [
   userActionsDropdown(model),
-  h('div.btn-group.mh3', interactionModesGroupButton(model)),
-  h('button.btn.mh3', { onclick: () => model.log.empty(), style: 'font-weight: bold' }, 'Clear'),
-  h('button.btn', {
-    disabled: !model.log.list.length,
-    onclick: () => model.log.firstError(),
-    title: 'Go to first error/fatal (ALT + left arrow)',
-  }, '|←'),
-  ' ',
-  h('button.btn', {
-    disabled: !model.log.list.length,
-    onclick: () => model.log.previousError(),
-    title: 'Go to previous error/fatal (left arrow)',
-  }, '←'),
-  ' ',
-  h('button.btn', {
-    disabled: !model.log.list.length,
-    onclick: () => model.log.nextError(),
-    title: 'Go to next error/fatal (left arrow)',
-  }, '→'),
-  ' ',
-  h('button.btn', {
-    disabled: !model.log.list.length,
-    onclick: () => model.log.lastError(),
-    title: 'Go to last error/fatal (ALT + right arrow)',
-  }, '→|'),
-  ' ',
-  h('button.btn', {
-    disabled: !model.log.list.length,
-    onclick: () => model.log.goToLastItem(),
-    title: 'Go to last log message (ALT + down arrow)',
-  }, '↓'),
-  downloadButtonGroup(model.log),
-  zoomButtonGroup(model.zoom),
+  h('', interactionModesGroupButton(model)),
+  h('', h('button.btn', { onclick: () => model.log.empty(), style: 'font-weight: bold' }, 'Clear')),
+  h('.btn-group', [
+    h('button.btn', {
+      disabled: !model.log.list.length,
+      onclick: () => model.log.firstError(),
+      title: 'Go to first error/fatal (ALT + left arrow)',
+    }, '|←'),
+    h('button.btn', {
+      disabled: !model.log.list.length,
+      onclick: () => model.log.previousError(),
+      title: 'Go to previous error/fatal (left arrow)',
+    }, '←'),
+    h('button.btn', {
+      disabled: !model.log.list.length,
+      onclick: () => model.log.nextError(),
+      title: 'Go to next error/fatal (left arrow)',
+    }, '→'),
+    h('button.btn', {
+      disabled: !model.log.list.length,
+      onclick: () => model.log.lastError(),
+      title: 'Go to last error/fatal (ALT + right arrow)',
+    }, '→|'),
+    h('button.btn', {
+      disabled: !model.log.list.length,
+      onclick: () => model.log.goToLastItem(),
+      title: 'Go to last log message (ALT + down arrow)',
+    }, '↓'),
+  ]),
+  h('', downloadButtonGroup(model.log)),
+  h('', zoomButtonGroup(model.zoom)),
 ];
 
 /**
@@ -82,12 +80,12 @@ const interactionModesGroupButton = (model) => {
   return frameworkInfo.match({
     NotAsked: () => h('button.btn', { disabled: true }, ''),
     Loading: () => h('button.btn', { disabled: true, className: 'loading' }, 'Loading'),
-    Failure: () => [],
+    Failure: () => null,
     Success: (frameworkInfo) =>
-      [
+      h('.btn-group', [
         queryButton(model, frameworkInfo),
         liveButton(model, frameworkInfo),
-      ],
+      ]),
   });
 };
 
@@ -194,7 +192,7 @@ const saveUserProfileMenuItem = (model) =>
  */
 const downloadButtonGroup = (logModel) =>
   h('.dropdown', { class: logModel.download.isVisible ? 'dropdown-open' : '' }, [
-    h('button.btn.mh3', {
+    h('button.btn', {
       onclick: () => {
         if (!logModel.download.isVisible) {
           logModel.generateLogDownloadContent();
