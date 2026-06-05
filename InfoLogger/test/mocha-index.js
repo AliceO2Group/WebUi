@@ -34,6 +34,7 @@ describe('InfoLogger', function () {
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
   let ilgServer;
+
   this.timeout(30000);
   this.slow(1000);
 
