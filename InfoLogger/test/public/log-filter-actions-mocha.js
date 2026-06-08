@@ -139,7 +139,7 @@ describe('Filter actions test-suite', async () => {
   });
 
   it('should redirect to default filters and show JSON parse error on malformed q in URI', async () => {
-    const expectedDefaultParams = '?q={"severity":{"in":"I W E F"},"level":{"max":1}}';
+    const expectedDefaultParams = '?q={"severity":{"in":"I W E F"}}';
 
     const locationAndNotification = await page.evaluate(() => {
       const params = { q: '{"severity":{"in":"W I E F"' };
@@ -160,8 +160,13 @@ describe('Filter actions test-suite', async () => {
   });
 
   it('should update URI with new encoded "match" criteria', async () => {
+<<<<<<< feature/ILG/OGUI-1193/Filters-should-allow-for-empty-fields-to-be-searched
     const decodedParams = '?q={"hostname":{"match":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"},"level":{"max":1}}';
     const expectedParams = '?q={%22hostname%22:{%22match%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
+=======
+    const decodedParams = '?q={"hostname":{"match":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
+    const expectedParams = '?q={%22hostname%22:{%22match%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+>>>>>>> dev
     const searchParams = await page.evaluate(() => {
       window.model.log.filter.setCriteria('hostname', 'match', '"%ald_qdip01%');
       window.model.updateRouteOnModelChange();
@@ -173,8 +178,13 @@ describe('Filter actions test-suite', async () => {
   });
 
   it('should update URI with new encoded "exclude" criteria', async () => {
+<<<<<<< feature/ILG/OGUI-1193/Filters-should-allow-for-empty-fields-to-be-searched
     const decodedParams = '?q={"hostname":{"exclude":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"},"level":{"max":1}}';
     const expectedParams = '?q={%22hostname%22:{%22exclude%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
+=======
+    const decodedParams = '?q={"hostname":{"exclude":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
+    const expectedParams = '?q={%22hostname%22:{%22exclude%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+>>>>>>> dev
     const searchParams = await page.evaluate(() => {
       window.model.log.filter.resetCriteria();
       window.model.log.filter.setCriteria('hostname', 'exclude', '"%ald_qdip01%');
@@ -552,6 +562,88 @@ describe('Filter actions test-suite', async () => {
         assert.strictEqual(result.matchEmpty, true);
         assert.strictEqual(result.$matchEmpty, true);
       });
+    });
+  });
+
+  describe('Level filter select', async () => {
+    it('should build a select components options for level to filter by', async () => {
+      const options = await page.evaluate(() => {
+        const select = document.getElementById('filter-level');
+        return select ? Array.from(select.options)
+          .map((element) => ({ value: element.value, text: element.text })) : null;
+      });
+
+      assert.deepStrictEqual(options, [
+        { value: '1', text: 'Ops' },
+        { value: '6', text: 'Support' },
+        { value: '11', text: 'Devel' },
+        { value: '', text: 'Trace' },
+      ]);
+    });
+
+    it('should mark the currently active level option as selected', async () => {
+      await page.evaluate(() => model.log.filter.setCriteria('level', 'max', 6));
+      await page.waitForFunction(() => document.getElementById('filter-level')?.value === '6');
+
+      const selectedValue = await page.evaluate(() => document.getElementById('filter-level')?.value);
+      assert.strictEqual(selectedValue, '6');
+    });
+
+    it('should update level criteria when an option is selected', async () => {
+      const level = await page.evaluate(() => {
+        const select = document.getElementById('filter-level');
+        select.value = '11';
+        select.dispatchEvent(new Event('change'));
+        return window.model.log.filter.criterias.level.max;
+      });
+
+      assert.strictEqual(level, 11);
+    });
+
+    it('should set level to null when Trace option is selected', async () => {
+      const level = await page.evaluate(() => {
+        const select = document.getElementById('filter-level');
+        select.value = '';
+        select.dispatchEvent(new Event('change'));
+        return window.model.log.filter.criterias.level.max;
+      });
+
+      assert.strictEqual(level, null);
+    });
+  });
+
+  describe('Log limit select', async () => {
+    it('should display a select component for limit to filter by', async () => {
+      const options = await page.evaluate(() => {
+        const select = document.getElementById('log-limit');
+        return select ? Array.from(select.options)
+          .map((element) => ({ value: element.value, text: element.text })) : null;
+      });
+
+      assert.deepStrictEqual(options, [
+        { value: '100000', text: '100k' },
+        { value: '500000', text: '500k' },
+        { value: '1000000', text: '1M' },
+      ]);
+    });
+
+    it('should mark the currently active limit option as selected', async () => {
+      await page.evaluate(() => window.model.log.setLimit(500000));
+      await page.waitForFunction(() => document.getElementById('log-limit')?.value === '500000');
+
+      const selectedValue = await page.evaluate(() => document.getElementById('log-limit')?.value);
+      assert.strictEqual(selectedValue, '500000');
+    });
+
+    it('should update log limit when an option is selected', async () => {
+      const limit = await page.evaluate(() => {
+        const select = document.getElementById('log-limit');
+        select.value = '1000000';
+        select.dispatchEvent(new Event('change'));
+        return window.model.log.limit;
+      });
+
+      assert.strictEqual(limit, 1000000);
     });
   });
 });

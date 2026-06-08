@@ -36,19 +36,13 @@ export default (model) => [
   cellContextMenu(model),
   h('.flex-column absolute-fill', [
     h('.shadow-level2', [
-      h('header.p1.flex-row.f7', [
-        h('', commandLogs(model)),
-        h(
-          '.flex-grow',
-          {
-            style: 'display: flex; flex-direction:row-reverse;',
-          },
-          commandFilters(model),
-        ),
+      h('header.p1.flex-row.f7.g1.justify-between', [
+        h('.flex-row.g3', commandLogs(model)),
+        h('.flex-row.g3', commandFilters(model)),
       ]),
       h('header.f7', tableFilters(model)),
     ]),
-    h('div.flex-grow.flex-row.shadow-level0.logs-container', [
+    h('.flex-grow.flex-row.shadow-level0.logs-container', [
       aboutComponent(model),
       logsTable(model),
       inspectorSide(model),
