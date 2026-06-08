@@ -20,6 +20,5 @@ export const TEXT_FILTER_OPERATORS = Object.freeze([
   'until',
   'match',
   'exclude',
-  'matchEmpty',
-  'excludeEmpty',
+  'emptyFor',
 ]);

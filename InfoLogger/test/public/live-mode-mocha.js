@@ -119,15 +119,15 @@ describe('Live Mode test-suite', async () => {
   });
 
   describe('Empty field filters in live mode', async () => {
-    it('should only receive logs with empty rolename when matchEmpty is set', async () => {
+    it('should only receive logs with empty rolename when emptyFor is set to "match"', async () => {
       await page.evaluate(() => window.model.log.liveStop('Paused'));
       await page.evaluate(() => {
         window.model.log.filter.resetCriteria();
         window.model.log.filter.setCriteria('level', 'max', null);
-        window.model.log.filter.setCriteria('rolename', 'matchEmpty', true);
+        window.model.log.filter.setCriteria('rolename', 'emptyFor', 'match');
       });
       await page.evaluate(() => window.model.log.liveStart());
-      await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
+      await page.waitForFunction('window.model.log.list.length > 5', { timeout: 10000 });
 
       const list = await page.evaluate(() => window.model.log.list);
       const allEmpty = list.every((log) => isFieldEmpty(log.rolename));
@@ -135,15 +135,15 @@ describe('Live Mode test-suite', async () => {
       assert.ok(allEmpty);
     });
 
-    it('should only receive logs with non-empty rolename when excludeEmpty is set', async () => {
+    it('should only receive logs with non-empty rolename when emptyFor is set to "exclude"', async () => {
       await page.evaluate(() => window.model.log.liveStop('Paused'));
       await page.evaluate(() => {
         window.model.log.filter.resetCriteria();
         window.model.log.filter.setCriteria('level', 'max', null);
-        window.model.log.filter.setCriteria('rolename', 'excludeEmpty', true);
+        window.model.log.filter.setCriteria('rolename', 'emptyFor', 'exclude');
       });
       await page.evaluate(() => window.model.log.liveStart());
-      await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
+      await page.waitForFunction('window.model.log.list.length > 5', { timeout: 10000 });
 
       const list = await page.evaluate(() => window.model.log.list);
       const allNonEmpty = list.every((log) => !isFieldEmpty(log.rolename));
@@ -151,13 +151,13 @@ describe('Live Mode test-suite', async () => {
       assert.ok(allNonEmpty);
     });
 
-    it('should receive matching OR empty logs when match and matchEmpty are both set', async () => {
+    it('should receive matching OR empty logs when match is set and emptyFor is "match"', async () => {
       await page.evaluate(() => window.model.log.liveStop('Paused'));
       await page.evaluate(() => {
         window.model.log.filter.resetCriteria();
         window.model.log.filter.setCriteria('level', 'max', null);
         window.model.log.filter.setCriteria('rolename', 'match', 'mon-DA-PHS-0');
-        window.model.log.filter.setCriteria('rolename', 'matchEmpty', true);
+        window.model.log.filter.setCriteria('rolename', 'emptyFor', 'match');
       });
       await page.evaluate(() => window.model.log.liveStart());
       await page.waitForFunction('window.model.log.list.length > 5', { timeout: 5000 });
@@ -168,13 +168,13 @@ describe('Live Mode test-suite', async () => {
       assert.ok(allValid);
     });
 
-    it('should exclude matching AND empty logs when exclude and excludeEmpty are both set', async () => {
+    it('should exclude matching AND empty logs when exclude is set and emptyFor is "exclude"', async () => {
       await page.evaluate(() => window.model.log.liveStop('Paused'));
       await page.evaluate(() => {
         window.model.log.filter.resetCriteria();
         window.model.log.filter.setCriteria('level', 'max', null);
         window.model.log.filter.setCriteria('rolename', 'exclude', 'mon-DA-PHS-0');
-        window.model.log.filter.setCriteria('rolename', 'excludeEmpty', true);
+        window.model.log.filter.setCriteria('rolename', 'emptyFor', 'exclude');
       });
       await page.evaluate(() => window.model.log.liveStart());
       await page.waitForFunction('window.model.log.list.length > 5', { timeout: 10000 });

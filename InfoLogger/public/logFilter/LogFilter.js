@@ -36,10 +36,8 @@ const makeDefaultMatchExcludeOperators = () => ({
   $match: null,
   exclude: '',
   $exclude: null,
-  matchEmpty: false,
-  $matchEmpty: false,
-  excludeEmpty: false,
-  $excludeEmpty: false,
+  emptyFor: null,
+  $emptyFor: null,
 });
 
 /**
@@ -103,13 +101,8 @@ export default class LogFilter extends Observable {
         case 'in':
           this.criterias[field]['$in'] = value ? value.split(' ') : null;
           break;
-        case 'matchEmpty':
-          this.criterias[field]['$matchEmpty'] = Boolean(value);
-          this._clearOppositeEmpty(field, 'matchEmpty');
-          break;
-        case 'excludeEmpty':
-          this.criterias[field]['$excludeEmpty'] = Boolean(value);
-          this._clearOppositeEmpty(field, 'excludeEmpty');
+        case 'emptyFor':
+          this.criterias[field]['$emptyFor'] = value === 'match' || value === 'exclude' ? value : null;
           break;
         default:
           throw new Error('unknown operator');
@@ -298,7 +291,7 @@ export default class LogFilter extends Observable {
             }
             case '$match': {
               if (isEmpty(logValue)) {
-                if (!criteria.$matchEmpty) {
+                if (criteria.$emptyFor !== 'match') {
                   return false;
                 }
                 break;
@@ -326,13 +319,10 @@ export default class LogFilter extends Observable {
               }
               break;
             }
-            case '$matchEmpty':
-              if (!criteria.$match && !isEmpty(logValue)) {
+            case '$emptyFor':
+              if (criteriaValue === 'match' && !criteria.$match && !isEmpty(logValue)) {
                 return false;
-              }
-              break;
-            case '$excludeEmpty':
-              if (!criteria.$exclude && isEmpty(logValue)) {
+              } else if (criteriaValue === 'exclude' && !criteria.$exclude && isEmpty(logValue)) {
                 return false;
               }
               break;
@@ -428,13 +418,5 @@ export default class LogFilter extends Observable {
       },
     };
     this.notify();
-  }
-
-  _clearOppositeEmpty(field, operator) {
-    const oppositeKey = operator === 'matchEmpty' ? 'excludeEmpty' : 'matchEmpty';
-    if (this.criterias[field][oppositeKey]) {
-      this.criterias[field][oppositeKey] = false;
-      this.criterias[field][`$${oppositeKey}`] = false;
-    }
   }
 }

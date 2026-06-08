@@ -235,8 +235,8 @@ class QueryService {
           continue;
         }
 
-        if (operator === '$matchEmpty' || operator === '$excludeEmpty') {
-          // no parameterized value needed for $matchEmpty or $excludeEmpty, the SQL is static
+        if (operator === '$emptyFor') {
+          // no parameterized value needed for $emptyFor, the SQL is static
         } else if (operator === '$since' || operator === '$until') {
           // read date, both input and output are GMT, no timezone to consider here
           values.push(new Date(filters[field][operator]).getTime() / 1000);
@@ -259,6 +259,8 @@ class QueryService {
           case '$until':
             criteria.push(`\`${field}\`<=?`);
             break;
+          // $emptyFor is merged into the operator it refers to (match or exclude) when present,
+          // otherwise it emits its own clause
           case '$match': {
             const criteriaArray = filters[field].match.split(separator);
 
@@ -270,7 +272,7 @@ class QueryService {
 
             const matchStr = criteriaArray.map(toMatchCondition).join(' OR ');
 
-            const matchEmpty = filters[field].$matchEmpty;
+            const matchEmpty = filters[field].$emptyFor === 'match';
             if (matchEmpty) {
               criteria.push(`(${matchStr} OR \`${field}\` = '' OR \`${field}\` IS NULL)`);
             } else if (criteriaArray.length > 1) {
@@ -295,20 +297,16 @@ class QueryService {
 
             criteria.push(`NOT(${excludeStr})`);
 
-            const excludeEmpty = filters[field].$excludeEmpty;
+            const excludeEmpty = filters[field].$emptyFor === 'exclude';
             if (excludeEmpty) {
               criteria.push(`(\`${field}\` != '' AND \`${field}\` IS NOT NULL)`);
             }
             break;
           }
-          case '$matchEmpty':
-            // If no match value but $matchEmpty is true, we want to match only empty values
-            if (!filters[field].$match) {
+          case '$emptyFor':
+            if (filters[field].$emptyFor === 'match' && !filters[field].$match) {
               criteria.push(`(\`${field}\` = '' OR \`${field}\` IS NULL)`);
-            }
-            break;
-          case '$excludeEmpty':
-            if (!filters[field].$exclude) {
+            } else if (filters[field].$emptyFor === 'exclude' && !filters[field].$exclude) {
               criteria.push(`(\`${field}\` != '' AND \`${field}\` IS NOT NULL)`);
             }
             break;

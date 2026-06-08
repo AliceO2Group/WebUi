@@ -183,19 +183,15 @@ const createTextAreaField = (model, field, command, tabIndex) =>
   ]));
 
 const createEmptyToggle = (logModel, field, command) => {
-  const EMPTY_MODES = {
-    match: { key: 'matchEmpty', verb: 'Match' },
-    exclude: { key: 'excludeEmpty', verb: 'Exclude' },
-  };
-  const { key, verb } = EMPTY_MODES[command];
-  const isActive = logModel.filter.criterias[field][key];
+  const isActive = logModel.filter.criterias[field].emptyFor === command;
+  const verb = command === 'match' ? 'Match' : 'Exclude';
   const title = `${verb} logs where ${field} is empty`;
 
   return h('button.btn.empty-toggle', {
     className: isActive ? 'active' : '',
     title,
     onclick: (e) => {
-      logModel.setCriteria(field, key, !isActive);
+      logModel.setCriteria(field, 'emptyFor', isActive ? null : command);
       e.target.blur();
     },
   }, '∅');

@@ -149,8 +149,8 @@ export const cellContextMenu = (model) => {
       ];
     }
 
-    const { match, exclude, matchEmpty, excludeEmpty } = model.log.filter.criterias[field];
-    const isClear = !match && !exclude && !matchEmpty && !excludeEmpty;
+    const { match, exclude, emptyFor } = model.log.filter.criterias[field];
+    const isClear = !match && !exclude && !emptyFor;
 
     return [
       createMenuItem(iconCheck(), 'success', 'Match', () => {
@@ -164,8 +164,7 @@ export const cellContextMenu = (model) => {
       createMenuItem(iconTrash(), 'danger', 'Clear Filter', () => {
         model.log.setCriteria(field, 'match', '');
         model.log.setCriteria(field, 'exclude', '');
-        model.log.setCriteria(field, 'matchEmpty', false);
-        model.log.setCriteria(field, 'excludeEmpty', false);
+        model.log.setCriteria(field, 'emptyFor', null);
         hideMenu();
       }, isClear),
     ];

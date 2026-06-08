@@ -73,10 +73,8 @@ describe('Filter actions test-suite', async () => {
       '$match',
       'exclude',
       '$exclude',
-      'matchEmpty',
-      '$matchEmpty',
-      'excludeEmpty',
-      '$excludeEmpty',
+      'emptyFor',
+      '$emptyFor',
     ];
 
     assert.deepStrictEqual(operators, {
@@ -100,7 +98,7 @@ describe('Filter actions test-suite', async () => {
   });
 
   it('should throw when setting non-existent operator on a field', async () => {
-    await assert.rejects(page.evaluate(() => window.model.log.filter.setCriteria('timestamp', 'matchEmpty', false)));
+    await assert.rejects(page.evaluate(() => window.model.log.filter.setCriteria('timestamp', 'emptyFor', 'match')));
     await assert.rejects(page.evaluate(() => window.model.log.filter.setCriteria('pid', 'in', false)));
     await assert.rejects(page.evaluate(() => window.model.log.filter.setCriteria('rolename', 'since', false)));
   });
@@ -360,79 +358,70 @@ describe('Filter actions test-suite', async () => {
         await page.evaluate(() => window.model.log.filter.resetCriteria());
       });
 
-      it('should set matchEmpty to true for a field', async () => {
+      it('should set emptyFor to "match" for a field', async () => {
         const result = await page.evaluate(() => {
-          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
+          window.model.log.filter.setCriteria('hostname', 'emptyFor', 'match');
           return window.model.log.filter.criterias.hostname;
         });
 
-        assert.strictEqual(result.matchEmpty, true);
-        assert.strictEqual(result.$matchEmpty, true);
+        assert.strictEqual(result.emptyFor, 'match');
+        assert.strictEqual(result.$emptyFor, 'match');
       });
 
-      it('should set excludeEmpty to true for a field', async () => {
+      it('should set emptyFor to "exclude" for a field', async () => {
         const result = await page.evaluate(() => {
-          window.model.log.filter.setCriteria('hostname', 'excludeEmpty', true);
+          window.model.log.filter.setCriteria('hostname', 'emptyFor', 'exclude');
           return window.model.log.filter.criterias.hostname;
         });
 
-        assert.strictEqual(result.excludeEmpty, true);
-        assert.strictEqual(result.$excludeEmpty, true);
+        assert.strictEqual(result.emptyFor, 'exclude');
+        assert.strictEqual(result.$emptyFor, 'exclude');
       });
 
-      it('should deactivate excludeEmpty when matchEmpty is toggled on', async () => {
+      it('should reset emptyFor when criteria are reset', async () => {
         const result = await page.evaluate(() => {
-          window.model.log.filter.setCriteria('hostname', 'excludeEmpty', true);
-          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
-          return window.model.log.filter.criterias.hostname;
-        });
-
-        assert.strictEqual(result.excludeEmpty, false);
-        assert.strictEqual(result.$excludeEmpty, false);
-        assert.strictEqual(result.matchEmpty, true);
-        assert.strictEqual(result.$matchEmpty, true);
-      });
-
-      it('should deactivate matchEmpty when excludeEmpty is toggled on', async () => {
-        const result = await page.evaluate(() => {
-          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
-          window.model.log.filter.setCriteria('hostname', 'excludeEmpty', true);
-          return window.model.log.filter.criterias.hostname;
-        });
-
-        assert.strictEqual(result.excludeEmpty, true);
-        assert.strictEqual(result.$excludeEmpty, true);
-        assert.strictEqual(result.matchEmpty, false);
-        assert.strictEqual(result.$matchEmpty, false);
-      });
-
-      it('should reset matchEmpty and excludeEmpty when criteria are reset', async () => {
-        const result = await page.evaluate(() => {
-          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
-          window.model.log.filter.setCriteria('hostname', 'excludeEmpty', true);
+          window.model.log.filter.setCriteria('hostname', 'emptyFor', 'match');
           window.model.log.filter.resetCriteria();
           return window.model.log.filter.criterias.hostname;
         });
 
-        assert.strictEqual(result.matchEmpty, false);
-        assert.strictEqual(result.$matchEmpty, false);
-        assert.strictEqual(result.excludeEmpty, false);
-        assert.strictEqual(result.$excludeEmpty, false);
+        assert.strictEqual(result.emptyFor, null);
+        assert.strictEqual(result.$emptyFor, null);
       });
 
-      it('should include matchEmpty in toObject when set to true', async () => {
+      it('should include emptyFor (but not $emptyFor) in toObject when set to match', async () => {
         const result = await page.evaluate(() => {
-          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
+          window.model.log.filter.setCriteria('hostname', 'emptyFor', 'match');
           return window.model.log.filter.toObject().hostname;
         });
 
-        assert.strictEqual(result.matchEmpty, true);
+        assert.strictEqual(result.emptyFor, 'match');
+        assert.strictEqual(result.$emptyFor, undefined);
       });
 
-      it('should not include matchEmpty in toObject when false', async () => {
+      it('should include emptyFor (but not $emptyFor) in toObject when set to exclude', async () => {
         const result = await page.evaluate(() => {
-          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
-          window.model.log.filter.setCriteria('hostname', 'matchEmpty', false);
+          window.model.log.filter.setCriteria('hostname', 'emptyFor', 'exclude');
+          return window.model.log.filter.toObject().hostname;
+        });
+
+        assert.strictEqual(result.emptyFor, 'exclude');
+        assert.strictEqual(result.$emptyFor, undefined);
+      });
+
+      it('should not include emptyFor in toObject when it was never set', async () => {
+        const result = await page.evaluate(() => {
+          window.model.log.filter.setCriteria('hostname', 'match', 'test');
+          return window.model.log.filter.toObject();
+        });
+
+        assert.strictEqual(result.hostname.emptyFor, undefined);
+      });
+
+      it('should omit the field entirely from toObject when only emptyFor was set then cleared', async () => {
+        const result = await page.evaluate(() => {
+          window.model.log.filter.setCriteria('hostname', 'emptyFor', 'match');
+          window.model.log.filter.setCriteria('hostname', 'emptyFor', null);
           return window.model.log.filter.toObject();
         });
 
@@ -443,7 +432,7 @@ describe('Filter actions test-suite', async () => {
         const btnSelector = '.table-filters tbody tr:nth-child(2) td:nth-child(2) button.empty-toggle';
 
         await page.evaluate(() => {
-          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
+          window.model.log.filter.setCriteria('hostname', 'emptyFor', 'match');
         });
 
         await page.waitForFunction((sel) => {
@@ -484,22 +473,22 @@ describe('Filter actions test-suite', async () => {
         assert.strictEqual(hiddenAfterLeave, true);
       });
 
-      it('should toggle matchEmpty on when match toggle button is clicked', async () => {
+      it('should toggle emptyFor to match when match toggle button is clicked', async () => {
         const btnSelector = '.table-filters tbody tr:nth-child(2) td:nth-child(2) button.empty-toggle';
 
         await page.hover('.table-filters tbody tr:nth-child(2) td:nth-child(2) .filter-input-group');
         await page.click(btnSelector);
 
         const result = await page.evaluate(() => window.model.log.filter.criterias.hostname);
-        assert.strictEqual(result.matchEmpty, true);
-        assert.strictEqual(result.$matchEmpty, true);
+        assert.strictEqual(result.emptyFor, 'match');
+        assert.strictEqual(result.$emptyFor, 'match');
       });
 
-      it('should toggle matchEmpty off when match toggle button is clicked again', async () => {
+      it('should toggle emptyFor off when match toggle button is clicked again', async () => {
         const btnSelector = '.table-filters tbody tr:nth-child(2) td:nth-child(2) button.empty-toggle';
 
         await page.evaluate(() => {
-          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
+          window.model.log.filter.setCriteria('hostname', 'emptyFor', 'match');
         });
 
         await page.waitForFunction((sel) => document.querySelector(sel)?.classList.contains('active'), {}, btnSelector);
@@ -507,34 +496,34 @@ describe('Filter actions test-suite', async () => {
         await page.click(btnSelector);
 
         const result = await page.evaluate(() => window.model.log.filter.criterias.hostname);
-        assert.strictEqual(result.matchEmpty, false);
-        assert.strictEqual(result.$matchEmpty, false);
+        assert.strictEqual(result.emptyFor, null);
+        assert.strictEqual(result.$emptyFor, null);
       });
 
-      it('should restore matchEmpty from fromObject', async () => {
+      it('should restore emptyFor=match from fromObject', async () => {
         const result = await page.evaluate(() => {
-          window.model.log.filter.fromObject({ hostname: { matchEmpty: true } });
+          window.model.log.filter.fromObject({ hostname: { emptyFor: 'match' } });
           return window.model.log.filter.criterias.hostname;
         });
 
-        assert.strictEqual(result.matchEmpty, true);
-        assert.strictEqual(result.$matchEmpty, true);
+        assert.strictEqual(result.emptyFor, 'match');
+        assert.strictEqual(result.$emptyFor, 'match');
       });
 
-      it('should restore excludeEmpty from fromObject', async () => {
+      it('should restore emptyFor=exclude from fromObject', async () => {
         const result = await page.evaluate(() => {
-          window.model.log.filter.fromObject({ hostname: { excludeEmpty: true } });
+          window.model.log.filter.fromObject({ hostname: { emptyFor: 'exclude' } });
           return window.model.log.filter.criterias.hostname;
         });
 
-        assert.strictEqual(result.excludeEmpty, true);
-        assert.strictEqual(result.$excludeEmpty, true);
+        assert.strictEqual(result.emptyFor, 'exclude');
+        assert.strictEqual(result.$emptyFor, 'exclude');
       });
 
-      it('should include matchEmpty in the URL and restore it on parse', async () => {
+      it('should include emptyFor in the URL and restore it on parse', async () => {
         const result = await page.evaluate(() => {
           window.model.log.filter.resetCriteria();
-          window.model.log.filter.setCriteria('hostname', 'matchEmpty', true);
+          window.model.log.filter.setCriteria('hostname', 'emptyFor', 'match');
           window.model.updateRouteOnModelChange();
           const url = window.location.search;
 
@@ -543,14 +532,15 @@ describe('Filter actions test-suite', async () => {
 
           return {
             url,
-            matchEmpty: window.model.log.filter.criterias.hostname.matchEmpty,
-            $matchEmpty: window.model.log.filter.criterias.hostname.$matchEmpty,
+            emptyFor: window.model.log.filter.criterias.hostname.emptyFor,
+            $emptyFor: window.model.log.filter.criterias.hostname.$emptyFor,
           };
         });
 
-        assert.ok(result.url.includes('matchEmpty'));
-        assert.strictEqual(result.matchEmpty, true);
-        assert.strictEqual(result.$matchEmpty, true);
+        const decodedURI = decodeURIComponent(result.url);
+        assert.ok(decodedURI.includes('"emptyFor":"match"'));
+        assert.strictEqual(result.emptyFor, 'match');
+        assert.strictEqual(result.$emptyFor, 'match');
       });
     });
   });
