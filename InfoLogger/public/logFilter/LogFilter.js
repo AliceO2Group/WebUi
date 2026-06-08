@@ -306,8 +306,11 @@ export default class LogFilter extends Observable {
               break;
             }
             case '$exclude': {
-              if (isEmpty(logValue) && criteria.$excludeEmpty) {
-                return false;
+              if (isEmpty(logValue)) {
+                if (criteria.$emptyFor === 'exclude') {
+                  return false;
+                }
+                break;
               }
               const criteriaList = criteriaValue.split(separator);
               if (criteriaList.length > 1) {
