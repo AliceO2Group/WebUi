@@ -160,13 +160,8 @@ describe('Filter actions test-suite', async () => {
   });
 
   it('should update URI with new encoded "match" criteria', async () => {
-<<<<<<< feature/ILG/OGUI-1193/Filters-should-allow-for-empty-fields-to-be-searched
-    const decodedParams = '?q={"hostname":{"match":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"},"level":{"max":1}}';
-    const expectedParams = '?q={%22hostname%22:{%22match%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
-=======
     const decodedParams = '?q={"hostname":{"match":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
     const expectedParams = '?q={%22hostname%22:{%22match%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
->>>>>>> dev
     const searchParams = await page.evaluate(() => {
       window.model.log.filter.setCriteria('hostname', 'match', '"%ald_qdip01%');
       window.model.updateRouteOnModelChange();
@@ -178,13 +173,8 @@ describe('Filter actions test-suite', async () => {
   });
 
   it('should update URI with new encoded "exclude" criteria', async () => {
-<<<<<<< feature/ILG/OGUI-1193/Filters-should-allow-for-empty-fields-to-be-searched
-    const decodedParams = '?q={"hostname":{"exclude":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"},"level":{"max":1}}';
-    const expectedParams = '?q={%22hostname%22:{%22exclude%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
-=======
     const decodedParams = '?q={"hostname":{"exclude":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
     const expectedParams = '?q={%22hostname%22:{%22exclude%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
->>>>>>> dev
     const searchParams = await page.evaluate(() => {
       window.model.log.filter.resetCriteria();
       window.model.log.filter.setCriteria('hostname', 'exclude', '"%ald_qdip01%');
