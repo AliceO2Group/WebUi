@@ -192,7 +192,7 @@ describe('\'QueryService\' test suite', () => {
       const expectedCriteria = [
         '`timestamp`>=?',
         '`timestamp`<=?',
-        'NOT(`hostname` = ? AND `hostname` IS NOT NULL OR `hostname` = ? AND `hostname` IS NOT NULL)',
+        'NOT((`hostname` = ? AND `hostname` IS NOT NULL) OR (`hostname` = ? AND `hostname` IS NOT NULL))',
         '`severity` IN (?)',
         '`level`<=?',
         '`userId`>=?',
@@ -201,6 +201,82 @@ describe('\'QueryService\' test suite', () => {
         emptySqlDataSource._filtersToSqlConditions(likeFilters),
         { values: expectedValues, criteria: expectedCriteria },
       );
+    });
+  });
+
+  describe('Empty field filters', () => {
+    it('should skip emptyFor when value is null', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { $emptyFor: null },
+      });
+      assert.deepStrictEqual(result, { values: [], criteria: [] });
+    });
+
+    it('should generate IS NULL/empty condition when emptyFor is "match" alone', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { $emptyFor: 'match' },
+      });
+      assert.deepStrictEqual(result.values, []);
+      const expectedCriteria = '(`hostname` = \'\' OR `hostname` IS NULL)';
+      assert.deepStrictEqual(result.criteria, [expectedCriteria]);
+    });
+
+    it('should generate IS NOT NULL/non-empty condition when emptyFor is "exclude" alone', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { $emptyFor: 'exclude' },
+      });
+      assert.deepStrictEqual(result.values, []);
+      const expectedCriteria = '(`hostname` != \'\' AND `hostname` IS NOT NULL)';
+      assert.deepStrictEqual(result.criteria, [expectedCriteria]);
+    });
+
+    it('should generate OR when $match is set and emptyFor is "match"', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { match: 'test', $match: 'test', $emptyFor: 'match' },
+      });
+      assert.deepStrictEqual(result.values, ['test']);
+      const expectedCriteria = '(`hostname` = ? OR `hostname` = \'\' OR `hostname` IS NULL)';
+      assert.deepStrictEqual(result.criteria, [expectedCriteria]);
+    });
+
+    it('should generate AND when $exclude is set and emptyFor is "exclude"', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { exclude: 'test', $exclude: 'test', $emptyFor: 'exclude' },
+      });
+      assert.deepStrictEqual(result.values, ['test']);
+      assert.deepStrictEqual(result.criteria, [
+        'NOT(`hostname` = ? AND `hostname` IS NOT NULL)',
+        '(`hostname` != \'\' AND `hostname` IS NOT NULL)',
+      ]);
+    });
+
+    it('should not push emptyFor criteria when $match is present (defers to $match case)', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { match: 'test', $match: 'test', $emptyFor: 'match' },
+      });
+      // Should have one combined criterion from $match, not a separate one from emptyFor
+      assert.strictEqual(result.criteria.length, 1);
+      assert.ok(result.criteria[0].includes('IS NULL'));
+    });
+
+    it('should handle $match with multiple values and emptyFor is "match"', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { match: 'foo bar', $match: 'foo bar', $emptyFor: 'match' },
+      });
+      assert.deepStrictEqual(result.values, ['foo', 'bar']);
+      const expectedCriteria = '(`hostname` = ? OR `hostname` = ? OR `hostname` = \'\' OR `hostname` IS NULL)';
+      assert.deepStrictEqual(result.criteria, [expectedCriteria]);
+    });
+
+    it('should handle $exclude with multiple values and emptyFor is "exclude"', () => {
+      const result = emptySqlDataSource._filtersToSqlConditions({
+        hostname: { exclude: 'foo bar', $exclude: 'foo bar', $emptyFor: 'exclude' },
+      });
+      assert.deepStrictEqual(result.values, ['foo', 'bar']);
+      assert.deepStrictEqual(result.criteria, [
+        'NOT((`hostname` = ? AND `hostname` IS NOT NULL) OR (`hostname` = ? AND `hostname` IS NOT NULL))',
+        '(`hostname` != \'\' AND `hostname` IS NOT NULL)',
+      ]);
     });
   });
 
