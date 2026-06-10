@@ -175,10 +175,7 @@ export default class LogFilter extends Observable {
    */
   hasActiveTextFilters() {
     return Object.values(this.criterias).some((criteria) =>
-      TEXT_FILTER_OPERATORS.some((operator) => {
-        const v = criteria[operator];
-        return typeof v === 'string' ? v.trim() : Boolean(v);
-      }));
+      TEXT_FILTER_OPERATORS.some((operator) => criteria[operator]?.trim()));
   }
 
   /**
@@ -279,7 +276,7 @@ export default class LogFilter extends Observable {
         for (const operator in criteria) {
           let criteriaValue = criteria[operator];
           // don't apply criterias not set
-          if (criteriaValue === null || criteriaValue === false) {
+          if (criteriaValue === null) {
             continue;
           }
           switch (operator) {
@@ -400,7 +397,6 @@ export default class LogFilter extends Observable {
       'errcode',
       'errline',
       'errsource',
-      'message',
     ];
 
     this.criterias = {
@@ -411,6 +407,12 @@ export default class LogFilter extends Observable {
         $until: null,
       },
       ...Object.fromEntries(TEXT_FIELDS.map((field) => [field, makeDefaultMatchExcludeOperators()])),
+      message: {
+        match: '',
+        $match: null,
+        exclude: '',
+        $exclude: null,
+      },
       severity: {
         in: 'I W E F',
         $in: ['I', 'W', 'E', 'F'],

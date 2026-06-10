@@ -165,18 +165,13 @@ footer { border-top: 1px solid var(--color-gray); }
   display: block;
 }
 
-.text-area-for-message {
-  resize: none;
-}
 .text-area-for-message:focus {
-  width: calc(400% + 12px);
+  width: 50%;
   height: 10rem !important;
-  inset: 0 0 auto auto;
+  right: 0;
   position: absolute;
   z-index: 10;
-  border-radius: .25rem;
 }
-.filter-input-group:has(.text-area-for-message:focus) .empty-toggle { display: none; }
 
 a.disabled { pointer-events: none; cursor: default; }
 

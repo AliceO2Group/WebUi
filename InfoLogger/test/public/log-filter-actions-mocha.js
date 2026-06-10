@@ -91,7 +91,7 @@ describe('Filter actions test-suite', async () => {
       errcode: TEXT_OPS,
       errline: TEXT_OPS,
       errsource: TEXT_OPS,
-      message: TEXT_OPS,
+      message: ['match', '$match', 'exclude', '$exclude'],
       severity: ['in', '$in'],
       level: ['max', '$max'],
     });

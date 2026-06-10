@@ -164,7 +164,9 @@ export const cellContextMenu = (model) => {
       createMenuItem(iconTrash(), 'danger', 'Clear Filter', () => {
         model.log.setCriteria(field, 'match', '');
         model.log.setCriteria(field, 'exclude', '');
-        model.log.setCriteria(field, 'emptyFor', null);
+        if ('emptyFor' in model.log.filter.criterias[field]) {
+          model.log.setCriteria(field, 'emptyFor', null);
+        }
         hideMenu();
       }, isClear),
     ];

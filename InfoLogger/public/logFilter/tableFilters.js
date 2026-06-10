@@ -158,29 +158,27 @@ const createInputField = (logModel, field, command, tabIndex = 1) =>
  * @returns {vnode} - text area within a td element
  */
 const createTextAreaField = (model, field, command, tabIndex) =>
-  h('td', h('.filter-input-group', [
-    h('textarea.form-control.text-area-for-message', {
-      tabIndex,
-      placeholder: !model.messageFocused
-        ? ''
-        : 'Include/Exclude multiple error messages separated by new line. ' +
-          'To partially match a message, use the SQL wildcard \'%\' \n\n' +
-          'e.g \n\n%[FMQ] IDLE ---> INITIALIZING DEVICE%\n' +
-          'TASK %QC% running out of memory\n' +
-          'weird error with strict message',
-      onfocus: () => {
-        model.messageFocused = true;
-        model.notify();
-      },
-      onfocusout: () => {
-        model.messageFocused = false;
-        model.notify();
-      },
-      oninput: (e) => model.log.setCriteria(field, command, e.target.value.trim()),
-      value: model.log.filter.criterias[field][command].slice(),
-    }),
-    createEmptyToggle(model.log, field, command),
-  ]));
+  h('td', h('textarea.form-control.text-area-for-message', {
+    style: 'height:2em; resize: none;',
+    tabIndex,
+    placeholder: !model.messageFocused
+      ? ''
+      : 'Include/Exclude multiple error messages separated by new line. ' +
+        'To partially match a message, use the SQL wildcard \'%\' \n\n' +
+        'e.g \n\n%[FMQ] IDLE ---> INITIALIZING DEVICE%\n' +
+        'TASK %QC% running out of memory\n' +
+        'weird error with strict message',
+    onfocus: () => {
+      model.messageFocused = true;
+      model.notify();
+    },
+    onfocusout: () => {
+      model.messageFocused = false;
+      model.notify();
+    },
+    oninput: (e) => model.log.setCriteria(field, command, e.target.value.trim()),
+    value: model.log.filter.criterias[field][command].slice(),
+  }));
 
 const createEmptyToggle = (logModel, field, command) => {
   const isActive = logModel.filter.criterias[field].emptyFor === command;
