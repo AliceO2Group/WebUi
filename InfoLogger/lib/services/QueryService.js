@@ -231,7 +231,7 @@ class QueryService {
       }
       const separator = field === 'message' ? '\n' : ' ';
       for (const operator in filters[field]) {
-        if (filters[field][operator] === null || filters[field][operator] === false || !operator.includes('$')) {
+        if (filters[field][operator] === null || !operator.includes('$')) {
           continue;
         }
 

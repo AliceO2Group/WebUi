@@ -257,7 +257,7 @@ export default class LogFilter extends Observable {
       }
 
       /**
-       * Whether a log field value is considered empty for matchEmpty/excludeEmpty purposes.
+       * Whether a log field value is considered empty for emptyFor purposes.
        * @param {string|number|undefined|null} logValue - value of the log field
        * @returns {boolean} - true if the value is undefined, null, or an empty string
        */
