@@ -15,6 +15,9 @@
 import Observable from './Observable.js';
 import { h } from './renderer.js';
 import switchCase from './switchCase.js';
+import { iconClipboard } from './icons.js';
+
+const COPY_CONFIRMATION = 'Text copied to clipboard';
 
 /**
  * Container of notification with time management
@@ -49,6 +52,8 @@ export class Notification extends Observable {
     this.type = 'primary';
     this.state = 'hidden'; // Shown, hidden
     this.timerId = 0; // Timer to auto-hide notification
+    this.duration = 5000; // Original duration of the current notification
+    this.hovered = false; // Whether the notification is hovered
   }
 
   /**
@@ -76,11 +81,14 @@ export class Notification extends Observable {
     this.message = message;
     this.type = type;
     this.state = 'shown';
+    this.duration = duration;
 
     // Auto-hide after duration
     if (duration !== Infinity) {
       this.timerId = setTimeout(() => {
-        this.hide();
+        if (!this.hovered) {
+          this.hide();
+        }
       }, duration);
     }
 
@@ -124,13 +132,33 @@ export class Notification extends Observable {
  */
 export const notification = (notificationInstance) => h('.notification.text-no-select.level4.text-light', {
 
-}, h('span.notification-content.br2.p2.shadow-level4', {
+}, h('div.notification-content.br2.shadow-level4', {
   // ClassName: notificationInstance.message && (notificationInstance.state === 'shown' ? 'notification-open' : 'notification-close'),
   onclick: () => notificationInstance.hide(),
+  onmouseenter: () => {
+    notificationInstance.hovered = true;
+  },
+  onmouseleave: () => {
+    notificationInstance.hovered = false;
+    // If this is not present then will show again when clicked close because of mouseLeave event
+    if (notificationInstance.state === 'shown') {
+      notificationInstance.show(notificationInstance.message, notificationInstance.type, notificationInstance.duration);
+    }
+  },
   className: `${switchCase(notificationInstance.type, {
     primary: 'white bg-primary',
     success: 'white bg-success',
     warning: 'white bg-warning',
     danger: 'white bg-danger',
   })} ${notificationInstance.state === 'shown' ? 'notification-open' : 'notification-close'}`,
-}, notificationInstance.message));
+}, [
+  h('div.mh2.pv2', notificationInstance.message),
+  notificationInstance.message !== COPY_CONFIRMATION && h(`button.btn.btn-${notificationInstance.type}.br0`, {
+    title: 'Copy to clipboard',
+    onclick: (e) => {
+      e.stopPropagation();
+      navigator.clipboard.writeText(notificationInstance.message)
+        .then(() => notificationInstance.show(COPY_CONFIRMATION, notificationInstance.type, 1500));
+    },
+  }, iconClipboard()),
+]));
