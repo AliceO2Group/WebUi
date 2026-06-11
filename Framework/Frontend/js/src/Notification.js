@@ -152,7 +152,7 @@ export const notification = (notificationInstance) => h('.notification.text-no-s
   })} ${notificationInstance.state === 'shown' ? 'notification-open' : 'notification-close'}`,
 }, [
   h('div.mh2.pv2', { onclick: () => notificationInstance.hide() }, notificationInstance.message),
-  notificationInstance.message !== COPY_CONFIRMATION && h(`button.btn.btn-${notificationInstance.type}.br0`, {
+  notificationInstance.message !== COPY_CONFIRMATION && h(`button.btn.btn-${notificationInstance.type}.notification-copy-btn`, {
     title: 'Copy to clipboard',
     onclick: (e) => {
       e.stopPropagation();
