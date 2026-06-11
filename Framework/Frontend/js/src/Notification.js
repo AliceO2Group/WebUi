@@ -134,7 +134,6 @@ export const notification = (notificationInstance) => h('.notification.text-no-s
 
 }, h('div.notification-content.br2.shadow-level4', {
   // ClassName: notificationInstance.message && (notificationInstance.state === 'shown' ? 'notification-open' : 'notification-close'),
-  onclick: () => notificationInstance.hide(),
   onmouseenter: () => {
     notificationInstance.hovered = true;
   },
@@ -152,7 +151,7 @@ export const notification = (notificationInstance) => h('.notification.text-no-s
     danger: 'white bg-danger',
   })} ${notificationInstance.state === 'shown' ? 'notification-open' : 'notification-close'}`,
 }, [
-  h('div.mh2.pv2', notificationInstance.message),
+  h('div.mh2.pv2', { onclick: () => notificationInstance.hide() }, notificationInstance.message),
   notificationInstance.message !== COPY_CONFIRMATION && h(`button.btn.btn-${notificationInstance.type}.br0`, {
     title: 'Copy to clipboard',
     onclick: (e) => {
