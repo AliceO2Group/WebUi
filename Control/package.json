@@ -34,7 +34,7 @@
   ],
   "dependencies": {
     "@aliceo2/web-ui": "2.11.0",
-    "@grpc/grpc-js": "1.14.0",
+    "@grpc/grpc-js": "1.14.4",
     "@grpc/proto-loader": "0.8.0",
     "kafkajs": "2.2.4"
   },

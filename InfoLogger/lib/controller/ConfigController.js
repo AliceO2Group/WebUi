@@ -32,7 +32,7 @@ class ConfigController {
    * Handler for providing configuration for the InfoLogger optional services
    * @param {ExpressJS.Request} _ - object for the HTTP request.
    * @param {ExpressJS.Response} res - response with the configuration object
-   * @returns {*} response returned.
+   * @returns {Promise<void>} response returned.
    */
   async getConfigurationHandler(_, res) {
     try {
