@@ -24,7 +24,7 @@
     "typescript-eslint": "^8.46.3"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.13.4",
+    "@grpc/grpc-js": "^1.13.5",
     "@grpc/proto-loader": "^0.7.15",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
