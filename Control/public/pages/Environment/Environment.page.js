@@ -21,6 +21,7 @@ import {monitoringRunningPlotsPanel} from './components/monitoringRunningPlotsPa
 import pageLoading from './../../common/pageLoading.js';
 import errorPage from './../../common/errorPage.js';
 import {environmentStateSummary} from './components/environmentStateSummary.js';
+import {environmentComponentsSummary} from './components/environmentComponentsSummary.js';
 import {EnvironmentState} from './../../common/enums/EnvironmentState.enum.js';
 
 /**
@@ -54,7 +55,7 @@ export const EnvironmentPageContent = (model) => h('.scroll-y.absolute-fill', [
  * @return {vnode} - content of environment info
  */
 const showEnvironmentPage = (model, environmentInfo) => {
-  const { id, state, currentTransition = undefined, includedDetectors, userVars } = environmentInfo;
+  const { id, state, currentTransition = undefined, includedDetectors = [], userVars = {} } = environmentInfo;
   const isDcsEnabled = userVars?.['dcs_enabled'] === 'true';
   const isRunningStable = !currentTransition && state === EnvironmentState.RUNNING;
   const { services: { detectors: { availability = {} } = {} } } = model;
@@ -76,6 +77,7 @@ const showEnvironmentPage = (model, environmentInfo) => {
   return h('.w-100.p1.g2.flex-column', [
     environmentStateSummary(environmentInfo),
     environmentActionPanel(model, environmentInfo),
+    environmentComponentsSummary(environmentInfo),
     isDcsEnabled && (currentTransition === 'START_ACTIVITY' || state === 'ERROR') && dcsSorPanel(id, includedDetectors),
     isRunningStable && monitoringRunningPlotsPanel(environmentInfo),
     h('.flex-row.g2.z-index-one', [

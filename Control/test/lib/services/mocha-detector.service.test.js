@@ -16,6 +16,7 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const {DetectorService} = require('../../../lib/services/Detector.service.js');
+const { TimeoutError } = require('@aliceo2/web-ui');
 
 describe(`'DetectorService' test suite`, () => {
     
@@ -23,15 +24,16 @@ describe(`'DetectorService' test suite`, () => {
     it('should successfully respond with positive boolean for empty list to check', async () => {
       const detectorService = new DetectorService({
         GetActiveDetectors: sinon.stub().resolves({detectors: ['ABC']})
-      });
+      }, {});
 
       const areDetectorsAvailable = await detectorService.areDetectorsAvailable([]);
       assert.ok(areDetectorsAvailable);
     });
+
     it('should successfully respond with positive boolean for given detectors list', async () => {
       const detectorService = new DetectorService({
         GetActiveDetectors: sinon.stub().resolves({detectors: ['ABC']})
-      });
+      }, {});
 
       const areDetectorsAvailable = await detectorService.areDetectorsAvailable(['TPC']);
       assert.ok(areDetectorsAvailable);
@@ -40,17 +42,131 @@ describe(`'DetectorService' test suite`, () => {
     it('should successfully respond with negative boolean for given detectors list', async () => {
       const detectorService = new DetectorService({
         GetActiveDetectors: sinon.stub().resolves({detectors: ['ABC']})
-      });
+      }, {});
 
       const areDetectorsAvailable = await detectorService.areDetectorsAvailable(['ABC']);
       assert.ok(!areDetectorsAvailable);
     });
-    it('should reject with gRPC error from grpc core proxy service', async () => {
+
+    it('should reject with JS native error from grpc core proxy service', async () => {
       const detectorService = new DetectorService({
         GetActiveDetectors: sinon.stub().rejects({code: 4, details: 'Timeout'})
+      }, {});
+      await assert.rejects(
+        () => detectorService.areDetectorsAvailable(['TPC']),
+        (err) => err instanceof TimeoutError && err.message === 'Timeout'
+      );
+    });
+  });
+
+  describe(`'getDetectorList' test suite`, async () => {
+    it('should successfully retrieve list of detectors from apricot', async () => {
+      const detectorService = new DetectorService({}, {
+        ListDetectors: sinon.stub().resolves({detectors: ['TPC', 'TRD']})
       });
-      assert.rejects(async () => await detectorService.areDetectorsAvailable(['TPC']), {code: 4, details: 'Timeo2ut'});
+
+      const detectors = await detectorService.getDetectorList();
+      assert.deepStrictEqual(detectors, ['TPC', 'TRD']);
+      assert.deepStrictEqual(detectorService.detectors, ['TPC', 'TRD']);
     });
 
+    it('should remove empty and whitespace-only detectors from returned list', async () => {
+      const detectorService = new DetectorService({}, {
+        ListDetectors: sinon.stub().resolves({detectors: ['TPC', '', '   ', '\t', 'TRD']})
+      });
+
+      const detectors = await detectorService.getDetectorList();
+      assert.deepStrictEqual(detectors, ['TPC', 'TRD']);
+      assert.deepStrictEqual(detectorService.detectors, ['TPC', 'TRD']);
+    });
+
+    it('should initialize with empty in-memory detectors list', async () => {
+      const detectorService = new DetectorService({}, {});
+      assert.deepStrictEqual(detectorService.detectors, []);
+    });
+
+    it('should return in-memory detectors list without requesting apricot again', async () => {
+      const apricotListDetectorsStub = sinon.stub().resolves({detectors: ['SHOULD_NOT_BE_USED']});
+      const detectorService = new DetectorService({}, {
+        ListDetectors: apricotListDetectorsStub
+      });
+      detectorService.detectors = ['TPC', 'TRD'];
+
+      const detectors = await detectorService.getDetectorList();
+      assert.deepStrictEqual(detectors, ['TPC', 'TRD']);
+      assert.ok(apricotListDetectorsStub.notCalled);
+    });
+
+    it('should reject with JS native error from grpc apricot proxy service', async () => {
+      const detectorService = new DetectorService({}, {
+        ListDetectors: sinon.stub().rejects({code: 4, details: 'Timeout'})
+      });
+      await assert.rejects(
+        () => detectorService.getDetectorList(),
+        (error) => error instanceof TimeoutError && error.message === 'Timeout'
+      );
+    });
+  });
+
+  describe(`'getHostsByDetector' test suite`, async () => {
+    it('should initialize with empty in-memory hosts map', () => {
+      const detectorService = new DetectorService({}, {});
+      assert.deepStrictEqual(detectorService.hostsByDetector.size, 0);
+    });
+
+    it('should successfully retrieve a map of hosts grouped by detector from apricot', async () => {
+      const detectorService = new DetectorService({}, {
+        ListDetectors: sinon.stub().resolves({detectors: ['TPC', 'TRD']}),
+        GetHostInventory: sinon.stub().resolves({hosts: ['flp001', 'flp002']})
+      });
+
+      const hostsByDetector = await detectorService.getHostsByDetector();
+      assert.deepStrictEqual(hostsByDetector, new Map([
+        ['TPC', ['flp001', 'flp002']],
+        ['TRD', ['flp001', 'flp002']],
+      ]));
+    });
+
+    it('should remove empty and whitespace-only hosts from each detector entry', async () => {
+      const detectorService = new DetectorService({}, {
+        ListDetectors: sinon.stub().resolves({detectors: ['TPC']}),
+        GetHostInventory: sinon.stub().resolves({hosts: ['flp001', '', '   ', '\t', 'flp002']})
+      });
+
+      const hostsByDetector = await detectorService.getHostsByDetector();
+      assert.deepStrictEqual(hostsByDetector, new Map([['TPC', ['flp001', 'flp002']]]));
+    });
+
+    it('should cache result and return it without calling apricot again', async () => {
+      const listDetectorsStub = sinon.stub().resolves({detectors: ['SHOULD_NOT_BE_USED']});
+      const detectorService = new DetectorService({}, {ListDetectors: listDetectorsStub});
+      detectorService._hostsByDetector = new Map([['TPC', ['flp001']]]);
+
+      const hostsByDetector = await detectorService.getHostsByDetector();
+      assert.deepStrictEqual(hostsByDetector, new Map([['TPC', ['flp001']]]));
+      assert.ok(listDetectorsStub.notCalled);
+    });
+
+    it('should return partial result when individual GetHostInventory calls fail', async () => {
+      const detectorService = new DetectorService({}, {
+        ListDetectors: sinon.stub().resolves({detectors: ['TPC', 'TRD']}),
+        GetHostInventory: sinon.stub()
+          .onFirstCall().resolves({hosts: ['flp001']})
+          .onSecondCall().rejects(new Error('host fetch failed'))
+      });
+
+      const hostsByDetector = await detectorService.getHostsByDetector();
+      assert.deepStrictEqual(hostsByDetector, new Map([['TPC', ['flp001']]]));
+    });
+
+    it('should reject with JS native error if ListDetectors fails', async () => {
+      const detectorService = new DetectorService({}, {
+        ListDetectors: sinon.stub().rejects({code: 4, details: 'Timeout'})
+      });
+      await assert.rejects(
+        () => detectorService.getHostsByDetector(),
+        (error) => error instanceof TimeoutError && error.message === 'Timeout'
+      );
+    });
   });
 });

@@ -34,4 +34,26 @@ export const config = {
     enabled: false,
   },
   dbFile: './test/setup/seeders/qcg-mock-data.json',
+  jwt: {
+    secret: 'test-secret',
+    issuer: 'test-gui',
+    expiration: '1d',
+  },
+
+  bookkeeping: {
+    url: 'http://localhost:4000',
+    token: 'token-test',
+    runTypesRefreshInterval: 15000,
+    runStatusRefreshInterval: 15000,
+  },
+
+  // Mock Kafka configuration for testing
+  kafka: {
+    enabled: false, // Disabled for tests, but we'll mock the events
+    clientId: 'qcg-client-test',
+    consumerGroups: {
+      QCG_RUN: 'qcg-run-test',
+    },
+    brokers: ['localhost:9092'],
+  },
 };

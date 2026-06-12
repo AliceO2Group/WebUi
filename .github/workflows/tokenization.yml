@@ -1,0 +1,60 @@
+name: Tokenization
+on:
+  pull_request:
+    paths:
+      - 'Tokenization/**/*'
+      - '.github/workflows/tokenization.yml'
+concurrency:
+  group: central-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  lint-check-backend:
+    name: Check eslint rules for backend on ubuntu-latest
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22.x'
+      - run: (cd Tokenization/backend/central-system; npm i)
+  lint-check-webapp:
+    name: Check eslint rules for webapp on ubuntu-latest
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22.x'
+      - run: (cd Tokenization/webapp; npm i )
+      - run: (cd Tokenization/webapp; npm run typecheck)
+      - run: (cd Tokenization/webapp; npm run lint)
+
+  ui-test:
+    needs: lint-check-webapp
+    name: UI-tests for webapp application
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22.x'
+      - run: (cd Tokenization/webapp; npm run docker:test)
+
+  central-system-test:
+    needs: lint-check-backend
+    name: Central System backend tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22.x'
+      - run: (cd Tokenization/backend/central-system; npm i; npm run test)

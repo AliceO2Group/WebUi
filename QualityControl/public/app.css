@@ -3,10 +3,10 @@
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
  * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
  * All rights not expressly granted are reserved.
- * 
+ *
  * This software is distributed under the terms of the GNU General Public
  * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
- * 
+ *
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
@@ -26,17 +26,53 @@
 .object-selectable { cursor: pointer; text-decoration: none; }
 .object-selectable:hover { cursor: pointer; background-color: var(--color-gray-dark) !important; color: var(--color-gray-lighter); }
 
+.focused-node>th, .focused-node>td { background-color: var(--color-gray-dark); color: var(--color-white); }
+
 .layout-selectable { border: 0.0em solid var(--color-primary); transition: border 0.1s; }
-.layout-online { border: 0.15em solid var(--color-success); transition: border 0s; }
 .layout-selected { border: 0.3em solid var(--color-primary); }
 .layout-edit-layer { cursor: move; opacity: 0; }
 
-.object-online { border: 0.15em solid var(--color-success); transition: border 0s; }
+.flex-grow { flex-grow: 1; }
+.justify-end { justify-content: end; }
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--space-xs);
+  width: 100%;
+  padding: var(--space-xs);
+}
+
+.card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardHeader {
+  padding-left: var(--space-s);
+}
+
+.cardHeader > h5 {
+  align-content: center;
+}
+
+.cardHeaderButton {
+  min-width: 145px;
+}
+
+.cardBody {
+  border: solid 1px var(--color-primary);
+  border-top: white;
+  border-radius: 0 0 .5rem .5rem;
+  height: 100%;
+}
+
+.folderHeader, .cardHeader {
+  border-radius: .5rem .5rem 0 0;
+}
 
 .status-bar { border-top: 1px solid var(--color-gray-dark); }
-
-/* Force jsroot's background to be transparent */
-.canvas_fillrect { fill: transparent !important; }
 
 /* Show plots gradually */
 .jsroot { animation-name: appearance; animation-duration: 0.2s; }
@@ -44,9 +80,9 @@
 /* overwrite jsroot styles */
 .jsroot-container {}
 .jsroot-container pre { background-color: initial; }
-.jsrootdiv:hover + .resize-element, .resize-element:hover{ display: flex !important; }
+.jsrootdiv:hover + .resize-element, .resize-element:hover{ display: flex !important; visibility: visible !important; }
 
-.resize-button { position: absolute; right: 0%; z-index: 100 }
+.item-action-row { position: absolute; right: 0%; z-index: 100 }
 
 /* Removing borders and arrows from select-dropdown */
 /* select {-webkit-appearance: none;-moz-appearance: none;text-indent: 1px;text-overflow: '';} */
@@ -65,3 +101,187 @@
 
 .right-menu {right:0; left:auto;}
 .resize-vertical { resize: vertical}
+
+.panel-title {
+  border: 1px solid #ddd;
+  background: var(--color-gray-light);
+}
+
+.error-box {
+  background-color: #f8d7da;
+  height: 100%;
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  border-radius: 5px;
+  border: 1px solid var(--color-danger);
+}
+
+.error-icon {
+  font-size: 2em;
+  margin-bottom: .5em;
+}
+
+.status-ongoing {
+  color: var(--color-success);
+  animation: ongoing-pulse 1s ease-in-out infinite;
+}
+
+.divider{
+  width: 8px;
+}
+
+@keyframes ongoing-pulse {
+  0% {
+    color: var(--color-success);
+  }
+  50% {
+    color: var(--color-success-dark);
+  }
+  100% {
+    color: var(--color-success);
+  }
+}
+
+.info-row {
+  &.highlighted {
+    background-color: var(--color-light-blue);
+    font-weight: 500;
+  }
+
+  & > div > div:hover {
+    font-weight: 700;
+  }
+}
+
+.cursor-pointer { cursor: pointer; }
+.cursor-grab { cursor: grab; }
+.cursor-inherit { cursor: inherit; }
+
+.b1 { border-style: solid; border-width: 1px; }
+
+.b-danger { border-color: var(--color-danger); }
+.b-success { border-color: var(--color-success); }
+
+.header-layout {
+  &.edit {
+    display: flex;
+  }
+
+  /*
+   * Hack to center content: `justify-content: center` fails with `overflow-x: auto`
+   *  (see https://stackoverflow.com/questions/62288432/problem-when-using-with-overflow-x-scroll-and-justify-content-center).
+   * Adding flex: 1 auto-margins on ::before/::after centers the content correctly for scrolling.
+   */
+  &::after,
+  &::before {
+    content: '';
+    flex: 1;
+  }
+}
+
+.header-layout-tabs {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+}
+
+.flex-fixed {
+  flex: 0 0 auto;
+}
+
+.whitespace-nowrap {
+  white-space: nowrap;
+}
+
+.sort-button {
+  .hover-icon {
+    display: none;
+    opacity: 0.6;
+  }
+
+  &:hover {
+    .current-icon {
+      display: none;
+    }
+
+    .hover-icon {
+      display: inline-block;
+      color: var(--color-gray-dark)
+    }
+  }
+}
+
+.drop-zone {
+  position: absolute;
+  height: 100%;
+  width: 50%;
+  pointer-events: none;
+
+  &.before {
+    left: 0;
+
+    &.active {
+      border-left: 2px solid var(--color-primary);
+    }
+  }
+
+  &.after {
+    right: 0;
+
+    &.active {
+      border-right: 2px solid var(--color-primary);
+    }
+  }
+}
+
+.pointer-events-auto {
+  pointer-events: auto;
+}
+.pointer-events-none {
+  pointer-events: none;
+}
+
+/* This hacky workaround is required due to `justify-content: center;` being unusable thanks to a horizontal scrolling bug */
+#header-detector-qualities {
+  &::before, &::after {
+    content: '';
+    flex: 1;
+  }
+}
+
+.combobox-container {
+  position: relative;
+
+  &:focus-within .combobox-list {
+    display: block;
+    width: 100%;
+  }
+
+  & .combobox-list {
+    padding: 0;
+    margin: 0;
+    padding-inline-start: 0;
+    list-style: none;
+    left: 0;
+    right: 0;
+    max-height: 250px;
+    overflow-y: auto;
+    margin-top: var(--space-xs);
+
+    & .combobox-item {
+      &:hover, &.is-highlighted {
+        background-color: var(--color-primary);
+        color: var(--color-white);
+      }
+    }
+
+    & .combobox-header {
+        padding: 4px 12px;
+        font-size: 0.85rem;
+        color: var(--color-gray-darker);
+        font-weight: bold;
+    }
+  }
+}

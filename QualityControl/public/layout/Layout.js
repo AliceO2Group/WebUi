@@ -12,21 +12,20 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Observable, RemoteData } from '/js/src/index.js';
+import { RemoteData } from '/js/src/index.js';
 
 import GridList from './Grid.js';
 import LayoutUtils from './LayoutUtils.js';
 import { objectId, clone, setBrowserTabTitle } from '../common/utils.js';
 import { assertTabObject, assertLayout } from '../common/Types.js';
 import { buildQueryParametersString } from '../common/buildQueryParametersString.js';
-
-const CCDB_QUERY_PARAMS = ['PeriodName', 'PassName', 'RunNumber', 'RunType'];
+import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
 
 /**
  * Model namespace with all requests to load or create layouts, compute their position on a grid,
  * and search them.
  */
-export default class Layout extends Observable {
+export default class Layout extends BaseViewModel {
   /**
    * Initialize with empty values
    * @param {Model} model - root model of the application
@@ -47,8 +46,6 @@ export default class Layout extends Observable {
 
     this.requestedLayout = RemoteData.notAsked();
 
-    this.searchInput = '';
-
     this.editEnabled = false; // Activate UI for adding, dragging and deleting tabObjects inside the current tab
     this.editingTabObject = null; // Pointer to a tabObject being modified
     this.editOriginalClone = null; // Contains a deep clone of item before editing
@@ -64,9 +61,10 @@ export default class Layout extends Observable {
     });
     this.cellHeight = 100 / this.gridListSize * 0.95; // %, put some margin at bottom to see below
     this.cellWidth = 100 / this.gridListSize; // %
-    // GridList.grid.length: integer, number of rows
 
-    this.filter = {};
+    this.isDragging = false;
+    this.dropTargetId = undefined;
+    this.position = undefined;
   }
 
   /**
@@ -109,11 +107,9 @@ export default class Layout extends Observable {
       this.model.router.go('?page=layouts');
     } else {
       const result = await this.model.services.layout.getLayoutById(layoutId);
-
       if (result.isSuccess()) {
         this.item = assertLayout(result.payload);
         this.item.autoTabChange = this.item.autoTabChange || 0;
-        this.setFilterFromURL();
         let tabIndex = this.item.tabs
           .findIndex((tab) => tab.name?.toLocaleUpperCase() === tabName?.toLocaleUpperCase());
         if (tabIndex < 0) {
@@ -128,38 +124,6 @@ export default class Layout extends Observable {
         this.model.router.go('?page=layouts');
       }
     }
-  }
-
-  /**
-   * Look for parameters used for filtering in URL and apply them in the layout if it exists
-   * @returns {undefined}
-   */
-  setFilterFromURL() {
-    const parameters = this.model.router.params;
-    CCDB_QUERY_PARAMS.forEach((filterKey) => {
-      if (parameters[filterKey]) {
-        this.filter[filterKey] = decodeURI(parameters[filterKey]);
-      }
-    });
-    this.notify();
-  }
-
-  /**
-   * When the user updates the displayed Objects, the filters should be placed in the URL as well
-   * @param {boolean} isSilent - whether the route should be silent or not
-   * @returns {undefined}
-   */
-  setFilterToURL(isSilent = true) {
-    const parameters = this.model.router.params;
-
-    CCDB_QUERY_PARAMS.forEach((filterKey) => {
-      if (!this.filter[filterKey] && this.filter[filterKey] !== 0) {
-        delete parameters[filterKey];
-      } else {
-        parameters[filterKey] = encodeURI(this.filter[filterKey]);
-      }
-    });
-    this.model.router.go(buildQueryParametersString(parameters, { }), true, isSilent);
   }
 
   /**
@@ -296,25 +260,15 @@ export default class Layout extends Observable {
     }
     const result = await this.model.services.layout.saveLayout(this.item);
     if (result.isSuccess()) {
+      await this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
+      this._tabIndex = this._tabIndex < this.item.tabs.length ? this._tabIndex : 0;
+      this.selectTab(this._tabIndex);
       this.model.notification.show(`Layout "${this.item.name}" has been saved successfully.`, 'success');
     } else {
       this.item = this.editOriginalClone;
       this.model.notification.show(result.payload, 'danger');
     }
     this.notify();
-  }
-
-  /**
-   * Given an ID and new value for official status, update it accordingly
-   * @param {string} id - of layout to modify
-   * @param {boolean} isOfficial - new value to set
-   * @returns {void}
-   */
-  async toggleOfficial(id, isOfficial) {
-    await this.model.services.layout.patchLayout(id, { isOfficial });
-    await this.model.services.layout.getLayouts(this);
-    await this.model.services.layout.getLayoutsByUserId(this.model.session.personid, this);
-    this.model.notify();
   }
 
   /**
@@ -361,19 +315,21 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   selectTab(index) {
+    if (index >= this.item.tabs.length) {
+      return;
+    }
     const tabName = this.item.tabs[index].name;
     const parameters = this.model.router.params;
 
     setBrowserTabTitle(`${this.item.name}/${tabName}`);
     this.model.router.go(buildQueryParametersString(parameters, { tab: tabName }), true, true);
 
-    this.setFilterFromURL();
     if (!this.item.tabs[index]) {
       throw new Error(`index ${index} does not exist`);
     }
     this.tab = this.item.tabs[index];
     this._tabIndex = index;
-    this.model.object.loadObjects(this.tab.objects.map((object) => object.name), this.filter);
+    this.model.object.loadObjects(this.tab.objects.map((object) => object.name));
     const { columns } = this.item.tabs[index];
     if (columns > 0) {
       this.resizeGridByXY(columns);
@@ -445,31 +401,22 @@ export default class Layout extends Observable {
   }
 
   /**
-   * Set user's input for search and use a fuzzy algo to filter list of layouts.
-   * Fuzzy allows missing chars "aaa" can find "a/a/a" or "aa/a/bbbbb"
-   * @param {string} searchInput - string input from the user to search by
-   * @returns {undefined}
-   */
-  search(searchInput) {
-    this.searchInput = searchInput;
-    this.model.folder.map.forEach((folder) => {
-      folder.searchInput = new RegExp(searchInput, 'i');
-    });
-    this.notify();
-  }
-
-  /**
    * Creates a deep clone of current layout `item` inside `editOriginalClone` to edit it without side effect.
    * @returns {undefined}
    */
   edit() {
+    if (this.model.filterModel.isRunModeActivated) {
+      this.model.filterModel.deactivateRunsMode(this);
+    }
     this.toggleEditMenu();
-    this.model.services.object.listObjects();
+    this.editEnabled = true;
+    this.model.filterModel.clearFilters();
+    this.model.services.object.listObjects(this);
+
     if (!this.item) {
       throw new Error('An item should be loaded before editing it');
     }
     this.setTabInterval(0);
-    this.editEnabled = true;
     this.editOriginalClone = JSON.parse(JSON.stringify(this.item));
     this.editingTabObject = null;
     window.dispatchEvent(new Event('resize'));
@@ -486,7 +433,6 @@ export default class Layout extends Observable {
     this.editEnabled = false;
     this.editingTabObject = null;
     this.saveItem();
-    this.model.services.layout.getLayoutsByUserId(this.model.session.personid);
     this.notify();
   }
 
@@ -687,19 +633,11 @@ export default class Layout extends Observable {
   }
 
   /**
-   * Method to check if passed layout contains any objects in online mode
-   * @param {Layout} layout - layout dto representation
-   * @returns {boolean} - whether there are online objects
+   * Wrapper function for the filterModel::activeFilter function.
+   * @returns {boolean} if there is a currently active filter.
    */
-  doesLayoutContainOnlineObjects(layout) {
-    if (layout && layout.tabs && layout.tabs.length > 0) {
-      return layout.tabs
-        .map((tab) => tab.objects)
-        .some((objects) =>
-          objects.map((object) => object.name)
-            .some((name) => this.model.object.isObjectInOnlineList(name)));
-    }
-    return false;
+  activeFilter() {
+    return this.model.filterModel.activeFilter();
   }
 
   /**
@@ -731,9 +669,13 @@ export default class Layout extends Observable {
    * @returns {undefined}
    */
   setTabInterval(time) {
-    if (!this.tabs || this.tabs.length === 0) {
+    if (!this.item.tabs || this.item.tabs.length === 0) {
       clearInterval(this.tabInterval);
     } else if (time >= 10) {
+      if (this.tabInterval) {
+        clearInterval(this.tabInterval);
+      }
+
       this.tabInterval = setInterval(() => {
         this._tabIndex = this._tabIndex + 1 >= this.item.tabs.length ? 0 : this._tabIndex + 1;
         this.selectTab(this._tabIndex);
@@ -811,5 +753,108 @@ export default class Layout extends Observable {
     this.updatedJSON = LayoutUtils.toSkeleton(this.item);
     this.model.isUpdateVisible = true;
     this.toggleEditMenu();
+  }
+
+  /**
+   * Function that fetches the object versions in accordance with the provided filters
+   * @returns {undefined}
+   */
+  triggerFilter() {
+    if (this.model.filterModel.runsModeInterval) {
+      this.model.object.refreshObjects(this.tab.objects.map((object) => object.name));
+      return;
+    }
+    this.selectTab(this.tabIndex);
+    if (this.editEnabled) { // To re-render the objectTree in edit mode
+      this.model.services.object.listObjects(this);
+    }
+  }
+
+  /**
+   * Determines whether the current authenticated user owns the specified layout.
+   * Compares the current session user's person ID with the owner ID of the given layout item to verify ownership.
+   * @param {number} layoutOwnerId - The owner id to check ownership against.
+   * @returns {boolean}  whether the current user's person ID matches the layout's owner ID
+   */
+  ownsLayout(layoutOwnerId) {
+    return this.model.session.personid == layoutOwnerId;
+  }
+
+  /**
+   * Sets the current drop target for a drag-and-drop operation.
+   * This is typically used to render a visual indicator (like a blue line)
+   * in the UI showing where the dragged tab will be placed.
+   * @param {string|number} tabId - The ID of the tab currently being hovered over.
+   * @param {'before'|'after'} position - The side of the target tab where the drop indicator should appear.
+   */
+  setDropTarget(tabId, position) {
+    this.dropTargetId = tabId;
+    this.position = position;
+
+    this.notify();
+  }
+
+  /**
+   * Clears the current drop target state, usually when the drag operation
+   * is finished or the dragged item is no longer over a valid drop zone.
+   * This action typically causes the visual drop indicator to be hidden.
+   */
+  clearDropTarget() {
+    this.dropTargetId = undefined;
+    this.position = undefined;
+
+    this.notify();
+  }
+
+  /**
+   * Reorders the tabs in the internal array based on the drag source and drop target.
+   * This function calculates the correct index for insertion, accounting for the
+   * tab being removed from its original position.
+   * @param {string|number} sourceId - The ID of the tab that was dragged.
+   * @param {string|number} targetId - The ID of the tab that the source was dropped onto.
+   * @param {'before'|'after'} position - The placement relative to the target tab.
+   */
+  reorderTabs(sourceId, targetId, position) {
+    const sourceIndex = this.item.tabs.findIndex((t) => t.id === sourceId);
+    let targetIndex = this.item.tabs.findIndex((t) => t.id === targetId);
+
+    if (sourceIndex === -1 || targetIndex === -1) {
+      return;
+    }
+
+    if (position === 'after') {
+      targetIndex += 1;
+    }
+
+    const [movedTab] = this.item.tabs.splice(sourceIndex, 1);
+
+    if (sourceIndex < targetIndex) {
+      targetIndex--;
+    }
+
+    this.item.tabs.splice(targetIndex, 0, movedTab);
+
+    this.notify();
+  }
+
+  /**
+   * Sets the layout state to indicate that a tab drag-and-drop operation has begun.
+   * It typically triggers a redraw and enables pointer events on all drop zones via CSS.
+   */
+  startDragging() {
+    this.isDragging = true;
+
+    this.notify();
+  }
+
+  /**
+   * Resets the layout state to indicate that a tab drag-and-drop operation has ended,
+   * regardless of whether the drop was successful or cancelled.
+   * It typically triggers a redraw and disables pointer events on the drop zones via CSS.
+   */
+  stopDragging() {
+    this.isDragging = false;
+
+    this.notify();
   }
 }

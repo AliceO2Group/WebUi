@@ -45,7 +45,7 @@ export const environmentTasksSummaryTable = (environment, detectorsAvailability,
  * @param {Object<['flp', 'qc', 'epn', 'trg'], Object>} hardware - object with the hardware components and details
  * @return {vnode} - component with an HTML table row
  */
-const hardwareComponentsTableHeaderRow = (hardware) => h('tr', [
+const hardwareComponentsTableHeaderRow = (hardware = {}) => h('tr', [
   h('th', 'Tasks Summary'),
   HARDWARE_COMPONENTS
     .map((component) => {
@@ -55,7 +55,7 @@ const hardwareComponentsTableHeaderRow = (hardware) => h('tr', [
         : 1;
       return h('th.break-space-cell.text-center', {
         colspan,
-      }, `${HardwareComponent[component]} \n#hosts:${hardware[componentInLowerCase].hosts}`)
+      }, `${HardwareComponent[component]} \n#hosts:${hardware[componentInLowerCase]?.hosts}`)
     }),
 ]);
 
@@ -66,12 +66,17 @@ const hardwareComponentsTableHeaderRow = (hardware) => h('tr', [
  * @param {Boolean} shouldDisplaySorAvailability - flag to display the SOR availability
  * @return {vnode} - component with an HTML table row
  */
-const detectorsTableHeaderRow = ({flp: {detectorCounters = {}} = {}}, availability, shouldDisplaySorAvailability) =>
+const detectorsTableHeaderRow = (
+  { flp: { detectorCounters = {} } = {} } = {}, availability, shouldDisplaySorAvailability
+) =>
   h('tr', [
     h('th', 'States'),
     Object.keys(detectorCounters).map((detector) => h('th.text-center', [
       detector,
-      shouldDisplaySorAvailability && h('.f6', dcsProperty(availability[detector].sorAvailability, 'SOR'))
+      shouldDisplaySorAvailability && h(
+        '.f6.flex-row.flex-center',
+        dcsProperty(availability[detector].sorAvailability, 'SOR')
+      ),
     ])),
     h('th.text-center', {colspan: HARDWARE_COMPONENTS.length - 1}, ''), // empty cell to align with the rest of the table
   ]);
@@ -83,7 +88,7 @@ const detectorsTableHeaderRow = ({flp: {detectorCounters = {}} = {}}, availabili
  * @param {function} onRowClick - function to be called when a row is clicked
  * @return {vnode} - component with an HTML table row
  */
-const rowForTaskSate = (state, hardware, onRowClick) => {
+const rowForTaskSate = (state, hardware = {}, onRowClick) => {
   const taskClass = getTaskStateClassAssociation(state);
   return h('tr', [
     h(`td${taskClass}`, state),
@@ -91,7 +96,7 @@ const rowForTaskSate = (state, hardware, onRowClick) => {
       .map((component) => {
         const componentInLowerCase = component.toLocaleLowerCase();
         if (component.toLocaleUpperCase() === HardwareComponent.FLP) {
-          const {flp: {detectorCounters}} = hardware;
+          const {flp: {detectorCounters = {}} = {}} = hardware;
           return Object.keys(detectorCounters)
             .map((detector) => {
               const tasksCounter = detectorCounters[detector].states[state];
@@ -101,7 +106,7 @@ const rowForTaskSate = (state, hardware, onRowClick) => {
               }, tasksCounter || '-');
             });
         } else {
-          const tasksCounter = hardware[componentInLowerCase].tasks.states[state];
+          const tasksCounter = hardware[componentInLowerCase]?.tasks?.states[state];
           return h(`td.text-center${taskClass}`, {
             class: tasksCounter ? 'actionable-icon' : '',
             onclick: () => tasksCounter && onRowClick && onRowClick(componentInLowerCase, state),

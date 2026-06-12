@@ -13,27 +13,44 @@
  */
 
 /* eslint-disable no-console */
-/* eslint-disable jsdoc/require-jsdoc */
 
 // Documentation:
 // https://nodejs.org/api/net.html#net_net_createserver_options_connectionlistener
 
 const net = require('net');
-const fakeData = require('./fakeData.json');
+const rawFakeData = require('./fakeData.json');
+const { shuffle } = require('./utils.js');
+
+const fakeData = shuffle([...rawFakeData]);
 
 const createServer = () => {
   const server = net.createServer(connectionListener);
   const port = 6102; // infoLoggerServer default port
 
+  /**
+   * Listener for new client connections. It sends fake log messages to the client at random intervals.
+   * @param {net.Socket} client - The connected client socket
+   */
   function connectionListener(client) {
-    console.log('Client connected');
-    let timer;
+    console.log('[InfoLogger Server] Client connected at:', new Date().toISOString());
+    let timer = null;
     let currentLogIndex = 0;
 
     client.on('close', onClientDisconnect);
     client.on('end', onClientDisconnect);
+    client.on('error', (error) => {
+      console.error('[InfoLogger Server] Client socket error:', error.code, error.message);
+      console.error('[InfoLogger Server] Error occurred at:', new Date().toISOString());
+      if (error.stack) {
+        console.error('[InfoLogger Server] Stack trace:', error.stack);
+      }
+      clearTimeout(timer);
+    });
     sendNextLog();
 
+    /**
+     * Sends the next log message to the connected client.
+     */
     function sendNextLog() {
       const log = fakeData[currentLogIndex % fakeData.length];
       const timestamp = new Date().getTime() / 1000; // seconds
@@ -83,28 +100,50 @@ const createServer = () => {
       timer = setTimeout(sendNextLog, nextLogTimeout);
     }
 
+    /**
+     * Handler for client disconnection. It clears the log sending timer and logs the disconnection event.
+     */
     function onClientDisconnect() {
-      console.log('Client disconnected');
+      console.log('[InfoLogger Server] Client disconnected at:', new Date().toISOString());
       clearTimeout(timer);
     }
   }
 
   server.on('error', (error) => {
-    console.error('InfoLogger Server crashed due to:');
-    console.trace(error);
+    console.error('[InfoLogger Server] Server error occurred at:', new Date().toISOString());
+    console.error('[InfoLogger Server] Error code:', error.code);
+    console.error('[InfoLogger Server] Error message:', error.message);
+    if (error.stack) {
+      console.error('[InfoLogger Server] Stack trace:');
+      console.trace(error);
+    }
+  });
+
+  server.on('close', () => {
+    console.log('[InfoLogger Server] Server closed at:', new Date().toISOString());
   });
 
   server.listen(port, () => {
-    console.log(`InfoLoggerServer is running on port ${port}`);
+    console.log(`[InfoLogger Server] InfoLoggerServer is running on port ${port}`);
   });
   return server;
 };
 
 const closeServer = (server) => {
+  console.log('[InfoLogger Server] Closing server at:', new Date().toISOString());
   try {
-    server.close();
+    if (server && server.listening) {
+      server.close((err) => {
+        if (err) {
+          console.error('[InfoLogger Server] Error closing server:', err.message);
+        } else {
+          console.log('[InfoLogger Server] Server closed successfully');
+        }
+      });
+    }
   } catch (err) {
-    console.error(err);
+    console.error('[InfoLogger Server] Exception while closing server:', err.message);
+    console.error('[InfoLogger Server] Stack:', err.stack);
   }
 };
 

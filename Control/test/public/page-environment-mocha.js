@@ -15,6 +15,7 @@
 /* eslint-disable max-len */
 const assert = require('assert');
 const test = require('../mocha-index');
+const {waitForTimeout} = require('../utils/puppeteerUtils.js');
 
 describe('`pageEnvironment` test-suite', async () => {
   let url;
@@ -64,7 +65,7 @@ describe('`pageEnvironment` test-suite', async () => {
 
     await page.waitForSelector('#missing_lock_ownership_to_control_message', {timeout: 5000});
     const informationMessage = await page.evaluate(() => document.querySelector('#missing_lock_ownership_to_control_message').innerText);
-    assert.strictEqual(informationMessage, 'You do not own the necessary\nlocks\nto control this environment.');
+    assert.strictEqual(informationMessage, 'You do not own the necessary locks to control this environment.');
   });
 
   it('should not have button displayed if user is not admin or does not have the lock', async () => {
@@ -105,20 +106,14 @@ describe('`pageEnvironment` test-suite', async () => {
       assert.strictEqual(configureButtonTitle, `'CONFIGURE' cannot be used in state 'CONFIGURED'`);
       assert.deepStrictEqual(configureButtonStyle, {0: 'display'});
     });
-
-    // it('should have one button for RESET in state CONFIGURED', async () => {
-    //   await page.waitForSelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div > div > div > button:nth-child(4)', {timeout: 5000});
-    //   const configuredStateButtons = await page.evaluate(() => document.querySelector('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) >div >div >div >div >button:nth-child(4)').title);
-    //   assert.strictEqual(configuredStateButtons, 'RESET');
-    // });
   });
 
   describe('Check transition from CONFIGURED to RUNNING and presence of buttons in RUNNING state', async () => {
     it('should click START button to move states (CONFIGURED -> RUNNING)', async () => {
-      await page.locator('#buttonToSTART')
-        .setTimeout(1000)
-        .click();
-      await page.waitForNetworkIdle();
+       await page.waitForSelector('#buttonToSTART', {timeout: 5000});
+      // click STOP
+      await page.evaluate(() => document.querySelector('#buttonToSTART').click());
+      await waitForTimeout(1000);
 
       const state = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(state, 'RUNNING');
@@ -161,12 +156,12 @@ describe('`pageEnvironment` test-suite', async () => {
       await page.waitForSelector('#buttonToSTOP', {timeout: 5000});
       // click STOP
       await page.evaluate(() => document.querySelector('#buttonToSTOP').click());
-      await page.waitForNetworkIdle();
+      await waitForTimeout(1000);
       const configuredState = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(configuredState, 'CONFIGURED');
       // click RESET
       await page.evaluate(() => document.querySelector('#buttonToRESET').click());
-      await page.waitForNetworkIdle();
+      await waitForTimeout(1000);
       const standbyState = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(standbyState, 'DEPLOYED');
     });
@@ -210,7 +205,7 @@ describe('`pageEnvironment` test-suite', async () => {
       });
       await page.waitForSelector('#buttonToSHUTDOWN', {timeout: 5000});
       await page.evaluate(() => document.querySelector('#buttonToSHUTDOWN').click());
-      await page.waitForNetworkIdle();
+      await waitForTimeout(1000);
       const location = await page.evaluate(() => window.location);
       assert.strictEqual(location.search, '?page=environments');
       assert.ok(calls['destroyEnvironment']);

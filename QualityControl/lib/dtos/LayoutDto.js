@@ -13,6 +13,36 @@
  */
 
 import Joi from 'joi';
+import { ObjectPathDto } from './ObjectPathDto.js';
+
+const ALLOWED_LAYOUT_FIELDS = [
+  'isOfficial',
+  'autoTabChange',
+  'collaborators',
+  'description',
+  'displayTimestamp',
+  'id',
+  'name',
+  'owner_id',
+  'owner_name',
+  'tabs',
+  'labels',
+];
+
+/**
+ * Parses a comma-separated string of field names and validates them against allowed values.
+ * @param {string} value - The comma-separated string of field names to validate
+ * @param {Joi.CustomHelpers} helpers - Joi validation helpers object
+ * @returns {string[]} Array of validated field names
+ * @throws {Joi.ValidationError} Throws validation error if any field is not allowed
+ */
+function parseAndValidateFields(value, helpers) {
+  const fields = value.split(',');
+  const invalidFields = fields.filter((field) => !ALLOWED_LAYOUT_FIELDS.includes(field));
+
+  return invalidFields.length > 0 ?
+    helpers.error('any.invalid', { value: invalidFields[0] }) : fields;
+}
 
 const ObjectDto = Joi.object({
   id: Joi.string().required(),
@@ -42,10 +72,29 @@ export const LayoutDto = Joi.object({
   id: Joi.string().required(),
   name: Joi.string().min(3).max(40).required(),
   tabs: Joi.array().min(1).max(45).items(TabsDto).required(),
+  labels: Joi.array().items(Joi.string()).default([]),
   owner_id: Joi.number().min(0).required(),
   owner_name: Joi.string().required(),
   description: Joi.string().min(0).max(100).optional(),
   collaborators: Joi.array().items(UserDto).default([]),
   displayTimestamp: Joi.boolean().default(false),
   autoTabChange: Joi.number().min(0).max(600).default(0),
+});
+
+/**
+ * Schema specifically meant to validate incomming getLayouts requests
+ */
+export const LayoutsGetDto = Joi.object({
+  owner_id: Joi.number().integer().optional(),
+  name: Joi.string().optional(),
+  filter: Joi.object({
+    objectPath: ObjectPathDto,
+  }).optional(),
+  token: Joi.string().required(),
+  fields: Joi.string()
+    .custom(parseAndValidateFields, 'Field validation')
+    .optional()
+    .messages({
+      'any.invalid': '{{#label}} contains invalid field: {#value}',
+    }),
 });

@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/infologger",
-  "version": "1.14.0",
+  "version": "1.17.0",
   "description": "Infologger GUI to query and stream log events",
   "author": "Vladimir Kosmala",
   "contributors": [
@@ -14,7 +14,7 @@
     "url": "https://github.com/AliceO2Group/WebUi.git"
   },
   "engines": {
-    "node": ">= 20.x"
+    "node": ">= 22.x"
   },
   "homepage": "https://alice-o2-project.web.cern.ch/",
   "scripts": {
@@ -34,19 +34,19 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@aliceo2/web-ui": "2.7.3",
-    "mariadb": "3.4.0"
+    "@aliceo2/web-ui": "2.11.0",
+    "mariadb": "3.5.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.16.0",
-    "@stylistic/eslint-plugin-js": "^2.11.0",
-    "eslint": "^9.16.0",
-    "eslint-plugin-jsdoc": "^50.6.0",
-    "globals": "^15.13.0",
-    "mocha": "^11.0.1",
-    "nyc": "^17.1.0",
-    "puppeteer": "^23.9.0",
-    "sinon": "^19.0.2"
+    "@eslint/js": "10.0.1",
+    "@stylistic/eslint-plugin": "5.10.0",
+    "eslint": "10.4.0",
+    "eslint-plugin-jsdoc": "63.0.2",
+    "globals": "17.6.0",
+    "mocha": "11.7.0",
+    "nyc": "18.0.0",
+    "puppeteer": "25.1.0",
+    "sinon": "22.0.0"
   },
   "bundleDependencies": [
     "@aliceo2/web-ui"

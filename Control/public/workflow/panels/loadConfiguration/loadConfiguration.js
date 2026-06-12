@@ -14,7 +14,10 @@
 
 import {h} from '/js/src/index.js';
 import {ROLES} from './../../../workflow/constants.js';
-import {isUserAllowedRole} from './../../../common/userRole.js';
+import { isUserAllowedRole } from './../../../common/userRole.js';
+
+const USER_INFORMATIVE_MESSAGE_ON_NO_HOST = '!!! Are you sure you want to save with NO FLPs as hosts?'
+  + '\nThis operation might make a deployment fail depending on the template';
 
 /**
  * Build a panel allowing the user to select a stored configuration and load it within
@@ -152,9 +155,15 @@ const btnSaveEnvConfiguration = (model) => {
       class: model.environment.itemNew.isLoading() ? 'loading' : '',
       disabled: model.environment.itemNew.isLoading() || !model.workflow.form.isInputSelected(),
       onclick: () => {
-        const name = prompt('Enter a name for saving the configuration:');
-        if (name && name.trim() !== '') {
-          model.workflow.saveEnvConfiguration(name)
+        let isUserSureOfNoHosts = true;
+        if (!model.workflow.form?.hosts?.length) {
+          isUserSureOfNoHosts = confirm(USER_INFORMATIVE_MESSAGE_ON_NO_HOST);
+        }
+        if (isUserSureOfNoHosts) {
+          const name = prompt('Enter a name for saving the configuration:');
+          if (name && name.trim() !== '') {
+            model.workflow.saveEnvConfiguration(name)
+          }
         }
       },
       title: 'Save current configuration for future use'
@@ -198,7 +207,11 @@ const btnUpdateEnvConfiguration = (model) => {
       disabled: !isUserAllowedToUpdate || !isConfigurationSelected
         || isEnvLoading || !model.workflow.form.isInputSelected(),
       onclick: () => {
-        const isSure = confirm(`Are you sure you would like to update configuration: ${name}`)
+        let message = `Are you sure you would like to update configuration: ${name}?`;
+        if (!model.workflow.form.hosts || model.workflow.form.hosts.length === 0) {
+          message = USER_INFORMATIVE_MESSAGE_ON_NO_HOST;
+        }
+        const isSure = confirm(message)
         if (isSure) {
           model.workflow.saveEnvConfiguration(name, 'update');
         }

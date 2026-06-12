@@ -13,7 +13,7 @@
 */
 
 import { Observable, RemoteData } from '/js/src/index.js';
-import { jsonPost } from './../../utilities/jsonPost.js';
+import { jsonGet } from '../../utilities/jsonGet.js';
 import { TASK_STATES } from '../enums/TaskState.js';
 
 /**
@@ -131,7 +131,7 @@ export class TaskTableModel extends Observable {
   }
 
   /**
-   * Method to make a POST HTTP Request to get all details about a task by its Id
+   * Method to make a GET HTTP Request to get all details about a task by its Id
    * @param {object} body - {taskId: string}
    */
   async _getTaskById(body) {
@@ -140,8 +140,7 @@ export class TaskTableModel extends Observable {
     this.notify();
 
     try {
-      const result = await jsonPost(`/api/GetTask`, { body });
-      const { task } = result;
+      const task = await jsonGet(`/api/tasks/${taskId}`);
       const commandInfo = this._parseTaskInfo(task, taskId);
       this.tasksAsRemoteDataById[taskId] = RemoteData.success(commandInfo);
     } catch (error) {

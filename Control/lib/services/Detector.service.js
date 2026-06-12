@@ -12,33 +12,128 @@
  * or submit itself to any jurisdiction.
 */
 
+const { grpcErrorToNativeError, LogManager } = require('@aliceo2/web-ui');
+
 /**
  * @class
  * DetectorService class is to be used for retrieving information from AliECS Core/Apricot about the currently used detectors
  */
 class DetectorService {
   /**
-   * @constructor
-   * Constructor for initializing the service with gRPC core service
-   * @param {CoreProxy} coreGrpc - interface to interact with gRPC AliECS core service
+   * Constructor for initializing the service with ECS and Apricot gRPC service clients
+   * @param {GrpcServiceClient} ecsGrpcClient - service to interact via gRPC client with AliECS core
+   * @param {GrpcServiceClient} apricotGrpcClient - service to interact via gRPC client with AliECS Apricot
    */
-  constructor(coreGrpc) {
+  constructor(ecsGrpcClient, apricotGrpcClient) {
     /**
-     * @type {CoreProxy}
+     * @type {GrpcServiceClient}
      */
-    this._coreGrpc = coreGrpc;
+    this._ecsGrpcClient = ecsGrpcClient;
+
+    /**
+     * @type {GrpcServiceClient}
+     */
+    this._apricotGrpcClient = apricotGrpcClient;
+
+    /**
+     * @type {Array<string>}
+     */
+    this._detectors = [];
+
+    /**
+     * @type {Map<string, Array<string>>}
+     */
+    this._hostsByDetector = new Map();
+
+    this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/detectorservice`);
   }
 
   /**
-   * Method to retrieve which detectors are currently active and compare to received input
-   * @param {Array<String>} detectors - list of strings with detector name
-   * @return {boolean}
-   * @throws {gRPCError}
+   * Method to return whether the provided detectors are inactive by querying the ECS grpc service
+   * @param {Array<string>} detectorsToCheck - list of strings with detector name that should be checked
+   * @returns {boolean} - true if the provided detectors are inactive
+   * @throws {Error}
    */
-  async areDetectorsAvailable(detectors) {
-    const {detectors: activeDetectors} = await this._coreGrpc['GetActiveDetectors']();
-    const areDetectorsNonActive = detectors.every((detector) => !activeDetectors.includes(detector));
-    return areDetectorsNonActive;
+  async areDetectorsAvailable(detectorsToCheck) {
+    try {
+      const { detectors } = await this._ecsGrpcClient.GetActiveDetectors();
+      const areProvidedDetectorsInactive = detectorsToCheck.every((detector) => !detectors.includes(detector));
+      return areProvidedDetectorsInactive;
+    } catch (error) {
+      throw grpcErrorToNativeError(error);
+    }
+  }
+
+  /**
+   * Method to retrieve detectors list from ECS via Apricot gRPC service
+   * In the received list, remove empty or whitespace-only values from response.
+   * Keep the list of detectors cached in memory for future calls.
+   * @returns {Promise<Array<string>>} - list of non-empty detectors
+   * @throws {Error} - throws JS native error converted from gRPC error in case of failure
+   */
+  async getDetectorList() {
+    if (this._detectors.length > 0) {
+      return this._detectors;
+    }
+
+    try {
+      const { detectors = [] } = await this._apricotGrpcClient.ListDetectors();
+      this._detectors = detectors.filter((detector) => typeof detector === 'string' && detector.trim().length > 0);
+      return this._detectors;
+    } catch (grpcError) {
+      throw grpcErrorToNativeError(grpcError);
+    }
+  }
+
+  /**
+   * Method to retrieve a map of hosts grouped by their detector via Apricot gRPC service.
+   * If the in-memory cache is non-empty, it is returned directly without querying Apricot.
+   * Individual detector failures are non-fatal; the partial result is cached and returned.
+   * @returns {Promise<Map<string, Array<string>>>} - map of detector name to list of hosts
+   * @throws {Error} - throws JS native error converted from gRPC error if detector list fetch fails
+   */
+  async getHostsByDetector() {
+    if (this._hostsByDetector.size > 0) {
+      return this._hostsByDetector;
+    }
+
+    const detectors = await this.getDetectorList();
+    await Promise.allSettled(
+      detectors.map(async (detector) => {
+        try {
+          const { hosts } = await this._apricotGrpcClient.GetHostInventory({ detector });
+          const filteredHosts = hosts.filter((host) => typeof host === 'string' && host.trim().length > 0);
+          this._hostsByDetector.set(detector, filteredHosts);
+        } catch (error) {
+          this._logger.errorMessage(`Failed to retrieve hosts for detector ${detector}: ${error.message}`);
+        }
+      })
+    );
+    return this._hostsByDetector;
+  }
+
+  /**
+   * Getter for the list of detectors cached in memory
+   * @returns {Array<string>}
+   */
+  get detectors() {
+    return this._detectors;
+  }
+
+  /**
+   * Setter for the list of detectors cached in memory
+   * @param {Array<string>} detectors - list of strings with detector names to be cached in memory
+   */
+  set detectors(detectors) {
+    this._detectors = detectors;
+  }
+
+  /**
+   * Getter for the hosts-by-detector map cached in memory
+   * @returns {Map<string, Array<string>>}
+   */
+  get hostsByDetector() {
+    return this._hostsByDetector;
   }
 }
 

@@ -17,6 +17,7 @@ import pageLoading from './../../../common/pageLoading.js';
 import {detectorLockButton} from './../../../lock/lockButton.js';
 import {dcsPropertiesRow} from '../../../common/dcs/dcsPropertiesRow.js';
 import {DetectorLockAction} from '../../../common/enums/DetectorLockAction.enum.js';
+import { TST_DETECTOR_NAME } from '../../../common/detectorUtils.js';
 
 /**
  * Create a selection area for all detectors retrieved from AliECS
@@ -28,38 +29,47 @@ export default (model, onlyGlobal = false) => {
   const {activeDetectors} = model.workflow.flpSelection;
   const detectors = model.lock.padlockState;
   let allowedDetectors = [];
+  let hasTstDetector = false;
 
   const areDetectorsReady = activeDetectors.isSuccess() && detectors.isSuccess();
   if (areDetectorsReady) {
     allowedDetectors = JSON.parse(JSON.stringify(detectors.payload));
-    if (onlyGlobal) {
-      delete allowedDetectors.TST;
-    }
+    hasTstDetector = Object.keys(allowedDetectors).includes(TST_DETECTOR_NAME);
+
+    delete allowedDetectors.TST;
     allowedDetectors = Object.keys(allowedDetectors);
   }
 
-  return h('.w-100', [
-    h('.w-100.flex-row.panel-title.p2.f6', [
-      areDetectorsReady && h('button.btn.btn-sm', {
+  return h('.w-100.flex-column', [
+    h('.flex-row.panel-title.p2.f6', {
+      style: 'flex-wrap: wrap; gap: 0.5rem;'
+    }, [
+      areDetectorsReady && h('.flex-row.items-center', h('button.btn', {
         onclick: async () => {
           await model.lock.actionOnLock('ALL', DetectorLockAction.TAKE, false);
           if (onlyGlobal) {
             await model.lock.actionOnLock('TST', DetectorLockAction.RELEASE, false);
           }
         }
-      }, 'Lock Available'),
-      h('h5.w-100.bg-gray-light.flex-grow.items-center.flex-row.justify-center', 'Detectors Selection'),
-      areDetectorsReady && h('button.btn.btn-primary.btn-sm', {
+      }, 'Lock Available')),
+      h('h5.flex-grow.items-center.flex-row.justify-center', {
+        style: 'min-width: 60px;'
+      }, 'Detectors Selection'),
+      areDetectorsReady && h('.flex-row.items-center', h('button.btn.btn-primary', {
         onclick: async () => {
           model.workflow.flpSelection.selectAllAvailableDetectors(allowedDetectors);
         }
-      }, 'Select Available')
+      }, 'Select Available'))
     ]),
-    h('.w-100.p2.panel',
+    h('.p2.panel',
       (activeDetectors.isLoading() || detectors.isLoading()) && pageLoading(2),
       (!areDetectorsReady) && h('.f7.flex-column',
         `Loading detectors...active: ${activeDetectors.kind} and all: ${detectors.kind}`),
       (areDetectorsReady) && detectorsSelectionArea(model, allowedDetectors),
+      (areDetectorsReady && !onlyGlobal) && [
+        hasTstDetector && h('hr.m2'), // add visual separation between TST and other detectors
+        hasTstDetector && detectorsSelectionArea(model, [TST_DETECTOR_NAME]),
+      ],
       (activeDetectors.isFailure() || detectors.isFailure()) && h('.f7.flex-column', 'Unavailable to load detectors'),
     )
   ]);
@@ -72,8 +82,7 @@ export default (model, onlyGlobal = false) => {
  * @return {vnode}
  */
 const detectorsSelectionArea = (model, detectors) => {
-  return h('.w-100.m1.text-left.shadow-level1.grid.g2', {
-    style: 'max-height: 40em;'
+  return h('.w-100.m1.text-left.grid.g2', {
   }, [
     detectors
       .filter((name) => (name === model.detectors.selected || !model.detectors.isSingleView()))
@@ -88,18 +97,19 @@ const detectorsSelectionArea = (model, detectors) => {
  * @return {vnode}
  */
 const detectorSelectionPanel = (model, name) => {
+  const {workflow, lock: lockModel, services: {detectors: {availability = {}} = {}}} = model;
+
   let className = '';
   let title = '';
   let style = 'font-weight: 150;flex-grow:2';
-  const {lock, services: {detectors: {availability = {}} = {}}} = model;
-  const lockState = lock.padlockState.payload?.[name];
-  const isDetectorActive = model.workflow.flpSelection.isDetectorActive(name);
+  const lockState = lockModel.padlockState.payload?.[name];
+  const isDetectorActive = workflow.flpSelection.isDetectorActive(name);
   if (isDetectorActive
-    || (model.lock.isLocked(name) && !model.lock.isLockedByCurrentUser(name))) {
+    || (lockModel.isLocked(name) && !lockModel.isLockedByCurrentUser(name))) {
     className = 'disabled-item warning';
     title = 'Detector is running and/or locked';
-  } else if (model.lock.isLockedByCurrentUser(name)) {
-    if (model.workflow.flpSelection.selectedDetectors.indexOf(name) >= 0) {
+  } else if (lockModel.isLockedByCurrentUser(name)) {
+    if (workflow.flpSelection.selectedDetectors.indexOf(name) >= 0) {
       className += 'selected ';
       title = 'Detector is locked and selected';
     }
@@ -112,18 +122,18 @@ const detectorSelectionPanel = (model, name) => {
     id: `detector-selection-panel-${name}'`,
   }, [
     h('.flex-row', [
-      detectorLockButton(model, name, lockState, true),
+      detectorLockButton(lockModel, name, lockState, true, isDetectorActive),
       h('a.menu-item.w-wrapped', {
         className,
         id: `detectorSelectionButtonFor${name}`,
         title,
         style,
         onclick: () => {
-          if (model.lock.isLockedByCurrentUser(name)) {
-            model.workflow.flpSelection.toggleDetectorSelection(name);
+          if (lockModel.isLockedByCurrentUser(name)) {
+            workflow.flpSelection.toggleDetectorSelection(name);
           }
         }
-      }, model.workflow.flpSelection.getDetectorWithIndexes(name)
+      }, workflow.flpSelection.getDetectorWithIndexes(name)
       )
     ]),
     h('.f6.flex-row.g2', [

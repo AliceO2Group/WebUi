@@ -16,6 +16,8 @@ import { promisify } from 'node:util';
 import { exec } from 'node:child_process';
 
 import { LogManager } from '@aliceo2/web-ui';
+import { IntegratedServices } from './../../common/library/enums/Status/integratedServices.enum.js';
+import { ServiceStatus } from '../../common/library/enums/Status/serviceStatus.enum.js';
 
 const QC_VERSION_EXEC_COMMAND = 'yum info o2-QualityControl | awk \'/Version/ {print $3}\'';
 const execPromise = promisify(exec);
@@ -38,17 +40,49 @@ export class StatusService {
     this._dataService = undefined;
 
     /**
-     * @type {ConsulService}
+     * @type {BookkeepingService}
      */
-    this._onlineService = undefined;
+    this._bookkeepingService = undefined;
 
     /**
      * @type {WebSocket}
      */
     this._ws = undefined;
 
+    /**
+     * @type {?AliEcsSynchronizer}
+     */
+    this._aliEcsSynchronizer = undefined;
+
     this._packageInfo = packageInfo;
     this._config = config;
+  }
+
+  /**
+   * Send back info about the framework
+   * @param {IntegratedServices} service - the integrated service to retrieve information for
+   * @returns {object} - object containing status and framework information
+   */
+  async retrieveServiceStatus(service) {
+    let result = undefined;
+    switch (service) {
+      case IntegratedServices.QCG:
+        result = this.retrieveOwnStatus();
+        break;
+      case IntegratedServices.QC:
+        result = await this.retrieveQcVersion();
+        break;
+      case IntegratedServices.CCDB:
+        result = await this.retrieveDataServiceStatus();
+        break;
+      case IntegratedServices.KAFKA:
+        result = this.retrieveKafkaServiceStatus();
+        break;
+      case IntegratedServices.BOOKKEEPING:
+        result = this.retrieveBookkeepingServiceStatus();
+        break;
+    }
+    return result;
   }
 
   /**
@@ -57,57 +91,13 @@ export class StatusService {
    */
   retrieveOwnStatus() {
     return {
-      status: { ok: true },
-      version: this._packageInfo?.version ?? '-',
-      clients: this._ws?.server?.clients?.size ?? -1,
+      name: 'QCG',
+      status: { ok: true, category: ServiceStatus.SUCCESS },
+      version: this._packageInfo?.version ?? '',
+      extras: {
+        clients: this._ws?.server?.clients?.size ?? -1,
+      },
     };
-  }
-
-  /**
-   * Send back info about the framework
-   * @returns {object} - object containing status and framework information
-   */
-  async retrieveFrameworkInfo() {
-    const [qc, data_service_ccdb, online_service_consul] = await Promise.all([
-      this.retrieveQcVersion(),
-      this.retrieveDataServiceStatus(),
-      this.retrieveOnlineServiceStatus(),
-    ]);
-    return {
-      qcg: this.retrieveOwnStatus(),
-      qc,
-      data_service_ccdb,
-      online_service_consul,
-    };
-  }
-
-  /**
-   * Retrieve data service (CCDB) status and issue if any
-   * @returns {Promise<{object}>} - status of the data service
-   */
-  async retrieveDataServiceStatus() {
-    try {
-      const { version } = await this._dataService.getVersion();
-      return { status: { ok: true }, version };
-    } catch (err) {
-      return { status: { ok: false, message: err.message || err } };
-    }
-  }
-
-  /**
-   * Retrieve status of the online service (Consul) if it was configured and issue if any
-   * @returns {Promise<Resolve, Reject>} - status of the online service
-   */
-  async retrieveOnlineServiceStatus() {
-    if (!this._onlineService) {
-      return { status: { ok: true }, version: 'Live Mode was not configured' };
-    }
-    try {
-      await this._onlineService.getConsulLeaderStatus();
-      return { status: { ok: true } };
-    } catch (err) {
-      return { status: { ok: false, message: err.message || err } };
-    }
   }
 
   /**
@@ -115,16 +105,91 @@ export class StatusService {
    * @returns {string} - version of QC deployed on the system
    */
   async retrieveQcVersion() {
+    let status = { ok: false, category: ServiceStatus.NOT_CONFIGURED };
     let version = 'Not part of an FLP deployment';
+
     if (this._config.qc?.enabled) {
       try {
         const { stdout } = await execPromise(QC_VERSION_EXEC_COMMAND, { timeout: 6000 });
         version = stdout.trim();
+        status = { ok: true, category: ServiceStatus.SUCCESS };
       } catch (error) {
+        status = { ok: false, category: ServiceStatus.ERROR, message: error.message || error };
         this._logger.errorMessage(error, { level: 99, system: 'GUI', facility: 'qcg/status-service' });
       }
     }
-    return { status: { ok: true }, version };
+
+    return { name: 'QC', status, version, extras: {} };
+  }
+
+  /**
+   * Retrieve data service (CCDB) status and issue if any
+   * @returns {Promise<{object}>} - status of the data service
+   */
+  async retrieveDataServiceStatus() {
+    const statusPackage = { name: 'CCDB', version: '', extras: {} };
+    try {
+      const { version: dataServiceVersion } = await this._dataService.getVersion();
+      return {
+        ...statusPackage,
+        status: { ok: true, category: ServiceStatus.SUCCESS },
+        version: dataServiceVersion,
+      };
+    } catch (err) {
+      return {
+        ...statusPackage,
+        status: { ok: false, category: ServiceStatus.ERROR, message: err.message || err },
+      };
+    }
+  }
+
+  /**
+   * Retrieve the kafka service status response
+   * @returns {object} - status of the kafka service
+   */
+  retrieveKafkaServiceStatus() {
+    const status = this._aliEcsSynchronizer?.status;
+    return {
+      name: IntegratedServices.KAFKA,
+      status: {
+        ok: status === ServiceStatus.SUCCESS,
+        category: status ?? ServiceStatus.NOT_CONFIGURED,
+      },
+      extras: {
+        ...this._aliEcsSynchronizer?.extraInfo ?? {},
+      },
+    };
+  }
+
+  /**
+   * Retrieve the bookkeeping service status response and its public configuration
+   * @returns {object} - status of the bookkeeping service
+   */
+  retrieveBookkeepingServiceStatus() {
+    if (this._bookkeepingService?.active) {
+      return {
+        name: IntegratedServices.BOOKKEEPING,
+        version: this._bookkeepingService.version,
+        status: { ok: true, category: ServiceStatus.SUCCESS },
+        extras: {
+          BASE_URL: this._bookkeepingService.url,
+          PARTIAL_RUN_DETAILS: '?page=run-detail&runNumber=',
+        },
+      };
+    } else if (this._bookkeepingService.config) {
+      return {
+        name: IntegratedServices.BOOKKEEPING,
+        status: {
+          ok: false,
+          category: ServiceStatus.ERROR,
+          message: this._bookkeepingService.error || 'Unable to connect to Bookkeeping service',
+        },
+      };
+    }
+    return {
+      name: IntegratedServices.BOOKKEEPING,
+      status: { ok: false, category: ServiceStatus.NOT_CONFIGURED },
+    };
   }
 
   /*
@@ -141,12 +206,12 @@ export class StatusService {
   }
 
   /**
-   * Set service to be used for querying status of online mode provider (Consul)
-   * @param {ConsulService} onlineService - service used for retrieving list of objects currently being produced
+   * Set service to be used for querying status of the Bookkeeping service.
+   * @param {BookkeepingService} bookkeepingService - service used for retrieving Bookkeeping status
    * @returns {void}
    */
-  set onlineService(onlineService) {
-    this._onlineService = onlineService;
+  set bookkeepingService(bookkeepingService) {
+    this._bookkeepingService = bookkeepingService;
   }
 
   /**
@@ -156,5 +221,14 @@ export class StatusService {
    */
   set ws(ws) {
     this._ws = ws;
+  }
+
+  /**
+   * Set instance of `AliEcsSynchronizer`
+   * @param {AliEcsSynchronizer} aliEcsSynchronizer - instance of the `AliEcsSynchronizer`
+   * @returns {void}
+   */
+  set aliEcsSynchronizer(aliEcsSynchronizer) {
+    this._aliEcsSynchronizer = aliEcsSynchronizer;
   }
 }

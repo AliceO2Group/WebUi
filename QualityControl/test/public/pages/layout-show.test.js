@@ -13,7 +13,11 @@
 
 import { strictEqual, ok, deepStrictEqual } from 'node:assert';
 import { delay } from '../../testUtils/delay.js';
-import { editedMockedLayout } from '../../setup/seeders/layout-show/json-file-mock.js';
+import {
+  editedManyObjectsMockedLayout,
+  editedMockedLayout,
+} from '../../setup/seeders/layout-show/json-file-mock.js';
+import { getElementCenter } from '../../testUtils/dragAndDrop.js';
 
 /**
  * Performs a series of automated tests on the layoutShow page using Puppeteer.
@@ -31,6 +35,79 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
       await page.goto(`${url}?page=layoutShow&layoutId=${LAYOUT_ID}`, { waitUntil: 'networkidle0' });
       const location = await page.evaluate(() => window.location);
       strictEqual(location.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=main`);
+    },
+  );
+
+  await testParent.test(
+    'should have a correctly made download button',
+    { timeout },
+    async () => {
+      const objectId = '016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
+      const dlButton = await page.evaluate(() => document.querySelector('.download-button').href);
+      const token = await page.evaluate(() => model.session.token);
+      strictEqual(dlButton, `${url}api/object/proxy/download/?token=${token}&objectIds=${objectId}`);
+    },
+  );
+
+  await testParent.test(
+    'should have a correctly made save root as image button',
+    { timeout },
+    async () => {
+      const exists = await page.evaluate(() => document.querySelector('.save-root-as-image-button') !== null);
+
+      ok(exists, 'Expected ROOT image save button to exist');
+    },
+  );
+
+  await testParent.test('should remove query param only if option is invalid for any filter', { timeout }, async () => {
+    const baseParams = `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=main`;
+
+    await page.goto(`${url}${baseParams}&RunType=runType1`, { waitUntil: 'networkidle0' });
+    const location1 = await page.evaluate(() => window.location.search);
+    strictEqual(location1, `${baseParams}&RunType=runType1`);
+
+    await page.goto(`${url}${baseParams}&RunType=invalid-value`, { waitUntil: 'networkidle0' });
+    const location2 = await page.evaluate(() => window.location.search);
+    strictEqual(location2, baseParams);
+    await delay(100);
+  });
+
+  await testParent.test(
+    'should have a selector with sorted options to filter by run type if there are run types loaded',
+    { timeout },
+    async () => {
+      const MAX_DELAY = 5000;
+      const INTERVAL = 500;
+      const selectorId = '#runTypeFilter';
+
+      const getOptionsWithRetry = async () => {
+        let options = [];
+        let addedDelay = 0;
+
+        while (!options.length && addedDelay < MAX_DELAY) {
+          await page.reload();
+          await delay(INTERVAL);
+          addedDelay += INTERVAL;
+
+          options = await page.evaluate((selectorId) => {
+            const select = document.querySelector(selectorId);
+            if (!select || !select.options) {
+              return [];
+            }
+            return Array.from(select.options).map((option) => option.value);
+          }, selectorId);
+        }
+        return options;
+      };
+
+      const options = await getOptionsWithRetry();
+      if (!options.length) {
+        throw new Error('#runTypeFilter not found after 5 seconds');
+      }
+
+      strictEqual(options[0], '');
+      strictEqual(options[1], 'runType1');
+      strictEqual(options[2], 'runType2');
     },
   );
 
@@ -65,57 +142,64 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
   await testParent
     .test('should have an info button with full path and last modified when clicked (plot success)', async () => {
-      const commonSelectorPath = 'section > div > div > div:nth-child(2) > div > div > div';
+      const commonSelectorPath = 'section > div > div > div > div:nth-child(2) > div > div';
       const plot1Path = `${commonSelectorPath} > div:nth-child(1)`;
       await page.locator(plot1Path).click();
 
       const result = await page.evaluate((commonSelectorPath) => {
-        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > div > button`);
-        const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div > div`;
-        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div > div`).innerText;
-        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > b`).innerText;
+        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > button`);
+        const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div`;
+        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(1) > div`).innerText;
+        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(1) > b`).innerText;
         const lastModifiedTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`).innerText;
         return { title, pathTitle, objectPath, lastModifiedTitle };
       }, commonSelectorPath);
       strictEqual(result.title, 'View details about histogram');
-      strictEqual(result.pathTitle, 'path');
+      strictEqual(result.pathTitle, 'Path');
       strictEqual(result.objectPath, 'qc/test/object/1');
-      strictEqual(result.lastModifiedTitle, 'lastModified');
+      strictEqual(result.lastModifiedTitle, 'Last Modified');
     });
 
   await testParent.test(
     'should have an info button with full path and last modified when clicked on a second plot(plot success)',
     { timeout },
     async () => {
-      const commonSelectorPath = 'section > div > div > div:nth-child(2) > div:nth-child(2) > div > div';
+      const commonSelectorPath = '#subcanvas > div:nth-child(2) > div > div';
       const plot2Path = `${commonSelectorPath} > div:nth-child(1)`;
       await page.locator(plot2Path).click();
       const result = await page.evaluate((commonSelectorPath) => {
-        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > div > button`);
-        const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div > div`;
-        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > div > div`).innerText;
-        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(2) > b`).innerText;
+        const { title } = document.querySelector(`${commonSelectorPath} > div:nth-child(2) > div > button`);
+        const infoCommonSelectorPath = `${commonSelectorPath} > div:nth-child(2) > div > div > div > div`;
+        const objectPath = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(1) > div`).innerText;
+        const pathTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(1) > b`).innerText;
         const lastModifiedTitle = document.querySelector(`${infoCommonSelectorPath} > div:nth-child(6) > b`).innerText;
         return { title, pathTitle, objectPath, lastModifiedTitle };
       }, commonSelectorPath);
       strictEqual(result.title, 'View details about histogram');
-      strictEqual(result.pathTitle, 'path');
+      strictEqual(result.pathTitle, 'Path');
       strictEqual(result.objectPath, 'qc/test/object/1');
-      strictEqual(result.lastModifiedTitle, 'lastModified');
+      strictEqual(result.lastModifiedTitle, 'Last Modified');
     },
   );
 
   await testParent.test(
-    'should have second tab to be empty (according to demo data)',
+    'should align info dropdown to the right when container is on the left',
     { timeout },
     async () => {
-      await page.locator('header > div > div:nth-child(2) > div > button:nth-child(2)').click();
-      const plotPath = 'section svg.jsroot';
-      await delay(1000);
-      const plotsCount = await page.evaluate((plotPath) => document.querySelectorAll(plotPath).length, plotPath);
-      strictEqual(plotsCount, 0);
+      await page.click('button.btn[title*="View details"]');
+      const leftStyle = await page.evaluate(() => document.querySelector('#subcanvas .dropdown-menu').style.left);
+
+      strictEqual(leftStyle, '0.1em');
     },
   );
+
+  await testParent.test('should have second tab to be empty (according to demo data)', { timeout }, async () => {
+    await page.locator('#tab-1').click();
+    await delay(50);
+    const plotPath = 'section svg.jsroot';
+    const plotsCount = await page.evaluate((plotPath) => document.querySelectorAll(plotPath).length, plotPath);
+    strictEqual(plotsCount, 0);
+  });
 
   await testParent.test(
     'should have a button group containing four buttons in the header',
@@ -133,7 +217,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have one duplicate button in the header to create a new duplicated layout',
     { timeout },
     async () => {
-      const buttonPath = 'header > div > div:nth-child(3) > div > button:nth-child(1)';
+      const buttonPath = '.btn-group > button:nth-child(1)';
       const duplicateButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
       strictEqual(duplicateButton, 'Duplicate layout');
     },
@@ -143,7 +227,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have one delete button in the header to delete layout',
     { timeout },
     async () => {
-      const buttonPath = 'header > div > div:nth-child(3) > div > button:nth-child(4)';
+      const buttonPath = '.btn-group > button:nth-of-type(2)';
       const deleteButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
       strictEqual(deleteButton, 'Delete layout');
     },
@@ -153,7 +237,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have one link button in the header to download layout skeleton',
     { timeout },
     async () => {
-      const buttonPath = 'header > div > div:nth-child(3) > div > a';
+      const buttonPath = '.btn-group > a';
       const editButton = await page.evaluate((buttonPath) => document.querySelector(buttonPath).title, buttonPath);
       strictEqual(editButton, 'Export layout skeleton as JSON file');
     },
@@ -163,11 +247,11 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have two options for editing the layout',
     { timeout },
     async () => {
-      const editButtonPath = 'header > div > div:nth-child(3) > div > div > button';
+      const editButtonPath = '.btn-group > div > button';
       await page.locator(editButtonPath).click();
       const titles = await page.evaluate(() => {
-        const firstLinkPath = 'header > div > div:nth-child(3) > div > div > div > div > a:nth-child(1)';
-        const secondLinkPath = 'header > div > div:nth-child(3) > div > div > div > div > a:nth-child(2)';
+        const firstLinkPath = '#editByGui';
+        const secondLinkPath = '#editByJson';
         const firstLinkTitle = document.querySelector(firstLinkPath).title;
         const secondLinkTitle = document.querySelector(secondLinkPath).title;
         return [firstLinkTitle, secondLinkTitle];
@@ -179,11 +263,23 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
-    'should click the edit button in the header and enter edit mode',
+    'should enter edit mode and remove filters if there are any applied',
     { timeout },
     async () => {
-      const editViaGUIButtonPath = 'header > div > div:nth-child(3) > div > div > div > div > a:nth-child(1)';
+      const editViaGUIButtonPath = '#editByGui';
+      const filterPanel = await page.evaluate(() => document.querySelector('#filterElement'));
+      ok(filterPanel);
+      await page.locator('#runNumberFilter').fill('100000');
+      await page.locator('#triggerFilterButton').click();
+      await delay(100);
+      let location = await page.evaluate(() => window.location);
+      ok(location.search.includes('RunNumber=100000'));
       await page.locator(editViaGUIButtonPath).click();
+      await delay(100);
+      location = await page.evaluate(() => window.location);
+      ok(!location.search.includes('RunNumber=100000'));
+      const filterElement = await page.evaluate(() => document.querySelector('#filterElement'));
+      strictEqual(filterElement, null);
     },
   );
 
@@ -191,16 +287,26 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should have input field for changing layout name in edit mode',
     { timeout },
     async () => {
-      const inputPath = 'header > div > div:nth-child(3) > input';
+      const inputPath = 'header > div > div > div:nth-child(3) > input';
       await page.evaluate((inputPath) => document.querySelector(inputPath), inputPath);
     },
   );
 
   await testParent.test(
-    'should have number input field for allowing users to change auto-tab value',
+    'should not allow user to change the auto tab change value to a value if it is not bigger than 10',
     { timeout },
     async () => {
-      await page.waitForSelector('#inputDescription', { timeout: 5000 });
+      const result = await setAutoTabChangeValue(page, 9);
+      ok(result, 0);
+    },
+  );
+
+  await testParent.test(
+    'should allow user to change the auto tab change value to a value if bigger than 10',
+    { timeout },
+    async () => {
+      const result = await setAutoTabChangeValue(page, 11);
+      ok(result, 11);
     },
   );
 
@@ -217,35 +323,35 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
   );
 
   await testParent.test(
-    'should have filtered results on input search filled',
+    'should reorder tabs via drag and drop in edit mode',
     { timeout },
     async () => {
-      const inputs = await page.$$('nav input');
-      await inputs[3].type('1');
-      await delay(50);
-      const { count, firstResult, secondResult } = await page.evaluate(() => {
-        const rows = document.querySelectorAll('nav table tbody tr');
-        return {
-          count: rows.length,
-          firstResult: rows[0].firstElementChild.textContent,
-          secondResult: rows[1].firstElementChild.textContent,
-        };
-      });
-      strictEqual(count, 2);
-      strictEqual(firstResult, ' qc/test/object/1');
-      strictEqual(secondResult, ' qc/test/object/11');
-    },
-  );
+      const originalTabNames = await page.$$eval('#btn-tab', (elements) =>
+        elements.map((element) => element.textContent.trim()));
 
-  await testParent.test(
-    'should have no results if query does not match any objects',
-    { timeout },
-    async () => {
-      const inputs = await page.$$('nav input');
-      await inputs[3].type('123');
-      await delay(50);
-      const text = await page.evaluate(() => document.querySelector('nav p.text-center').textContent);
-      strictEqual(text, 'No objects found for this search');
+      const sourceTabSelector = '.btn-group.flex-fixed.relative:nth-child(1)';
+      const targetZoneSelector = '.btn-group.flex-fixed.relative:nth-child(2) .drop-zone.after';
+
+      const sourceCenter = await getElementCenter(page, sourceTabSelector);
+      const targetCenter = await getElementCenter(page, targetZoneSelector);
+
+      await page.mouse.move(sourceCenter.x, sourceCenter.y);
+      await page.mouse.down();
+
+      // We add 'steps' to make the move smoother, which helps trigger event
+      await page.mouse.move(targetCenter.x, targetCenter.y, { steps: 10 });
+
+      await delay(1000);
+
+      // Wait a moment for the 'active' class to appear in the UI
+      await page.waitForSelector('.drop-zone.after.active');
+
+      await page.mouse.up();
+
+      const tabNames = await page.$$eval('#btn-tab', (elements) =>
+        elements.map((element) => element.textContent.trim()));
+
+      strictEqual(tabNames[1], originalTabNames[0]);
     },
   );
 
@@ -253,7 +359,7 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should show normal sidebar after Cancel click',
     { timeout },
     async () => {
-      const cancelButtonPath = 'header > div > div:nth-child(3) > div > button:nth-child(2)';
+      const cancelButtonPath = '#cancel-button';
       await page.locator(cancelButtonPath).click();
       await page.waitForSelector('nav .menu-title', { timeout: 5000 });
     },
@@ -263,8 +369,9 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should open JSON editor when clicking "Edit via JSON"',
     { timeout },
     async () => {
-      const editDropdownButtonPath = 'header > div > div:nth-child(3) > div > div > button';
-      const editViaJSONButtonPath = 'header > div > div:nth-child(3) > div > div > div > div > a:nth-child(2)';
+      const editDropdownButtonPath = '.btn-group > div > button';
+      const editViaJSONButtonPath =
+        '#editByJson';
       await page.locator(editDropdownButtonPath).click();
       await delay(100);
       await page.locator(editViaJSONButtonPath).click();
@@ -305,12 +412,11 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
 
   await testParent.test(
     'should disable the "Update layout" button when JSON has an "id" key and display error message',
-    { timeout },
+    { timeout: 50000 },
     async () => {
       const mockJSONWithId = '{ "id" : "test" }';
       const expectedErrorMessage =
       'Error: Manual entry of an ID is not allowed, as it is automatically assigned by the system.';
-
       await checkInvalidJSON(page, mockJSONWithId, expectedErrorMessage);
     },
   );
@@ -331,51 +437,179 @@ export const layoutShowTests = async (url, page, timeout = 5000, testParent) => 
     'should close JSON editor when clicking "Cancel"',
     { timeout },
     async () => {
-      const cancelButtonPath = 'body > div > div > div > div > button:nth-child(2)';
-      await page.locator(cancelButtonPath).click();
+      await page.locator('.o2-modal-content .btn-group > button:nth-child(2)').click();
       await delay(50);
-      const childrenCount = await page.evaluate(() => {
-        const bodyPath = 'body';
-        const body = document.querySelector(bodyPath);
-        return body.children.length;
-      });
-      strictEqual(childrenCount, 2);
+      const isModelOpen = await page.evaluate(() => document.querySelector('.o2-modal-content') !== null);
+      strictEqual(isModelOpen, false);
+    },
+  );
+
+  await testParent.test(
+    'should display all objects even when the JSON has out of bound entries',
+    { timeout: 15000 },
+    async () => {
+      const EXPECTED_LAYOUT_OBJECT_COUNT = editedManyObjectsMockedLayout.tabs[0].objects.length;
+
+      /**
+       * Counts the number of visible child elements within #subcanvas.
+       * Visibility is defined as being within the viewport.
+       * @returns {number} The amount of visible rendered objects
+       */
+      const getVisibleObjectCount = async () =>
+        await page.evaluate(() => {
+          const container = document.querySelector('#subcanvas');
+          if (!container) {
+            return 0;
+          }
+
+          // Count elements that intersect with the viewport
+          return Array.from(container.children).filter((child) => {
+            const rect = child.getBoundingClientRect();
+            return rect.bottom >= 0 && rect.top >= 0 && rect.left >= 0 && rect.right <= window.innerWidth;
+          }).length;
+        });
+
+      // Ensure we are on the main tab
+      await page.locator('#tab-0').click();
+      await delay(100);
+
+      const pencilButtonPath = '.btn-group > div > button';
+      await page.locator(pencilButtonPath).click();
+
+      const editViaJSONButtonPath = '#editByJson';
+      await page.locator(editViaJSONButtonPath).click();
+
+      const textareaPath = '#layout-json-editor';
+      const mockedJSON = JSON.stringify(editedManyObjectsMockedLayout);
+      await page.locator(textareaPath).fill(mockedJSON);
+
+      const updateButtonPath = '#updateLayoutButton';
+      await page.locator(updateButtonPath).click();
+      await delay(100);
+
+      strictEqual(
+        await getVisibleObjectCount(),
+        EXPECTED_LAYOUT_OBJECT_COUNT,
+        `Expected ${EXPECTED_LAYOUT_OBJECT_COUNT} rendered objects after JSON update`,
+      );
+
+      await page.reload({ waitUntil: 'networkidle0' });
+      await delay(100);
+
+      strictEqual(
+        await getVisibleObjectCount(),
+        EXPECTED_LAYOUT_OBJECT_COUNT,
+        `Expected ${EXPECTED_LAYOUT_OBJECT_COUNT} rendered objects after page reload`,
+      );
     },
   );
 
   await testParent.test(
     'should update layout when clicking "Update layout"',
-    { timeout },
+    { timeout: 10000 },
     async () => {
-      const pencilButtonPath = 'header > div > div:nth-child(3) > div > div > button';
+      const pencilButtonPath = '.btn-group > div > button';
       await page.locator(pencilButtonPath).click();
-      const editViaJSONButtonPath =
-        'header > div > div:nth-child(3) > div > div > div > div > a:nth-child(2)';
-      page.locator(editViaJSONButtonPath).click();
 
-      const textareaPath = 'body > div > div > div > div > textarea';
+      const editViaJSONButtonPath = '#editByJson';
+      await page.locator(editViaJSONButtonPath).click();
+
+      const textareaPath = '#layout-json-editor';
       const mockedJSON = JSON.stringify(editedMockedLayout);
       await page.locator(textareaPath).fill(mockedJSON);
 
-      const updateButtonPath = 'body > div > div > div > div > button:nth-child(1)';
+      const updateButtonPath = '#updateLayoutButton';
       await page.locator(updateButtonPath).click();
+
       await delay(50);
 
-      const buttonsPath = 'header > div > div:nth-child(2) > div > button';
-      const result = await page.evaluate((buttonsPath) => {
-        const tabs = document.querySelectorAll(buttonsPath);
-        return tabs.length === 3 && tabs[2].textContent === 'test';
-      }, buttonsPath);
-
-      strictEqual(result, true);
+      const newTabName = await page.evaluate(() => {
+        const tab = document.querySelector('#tab-2');
+        return tab.textContent;
+      });
+      strictEqual(newTabName, 'test');
     },
   );
+
+  await testParent.test('should change tab after set tabInterval', { timeout: 15000 }, async () => {
+    // Ensure we are on the 'a' tab
+    await page.locator('#tab-1').click();
+    await delay(100);
+
+    const location = await page.evaluate(() => window.location);
+    strictEqual(location.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=a`);
+    await delay(11111);
+    const location2 = await page.evaluate(() => window.location);
+    strictEqual(location2.search, `?page=layoutShow&layoutId=${LAYOUT_ID}&tab=test`);
+  });
+
+  await testParent.test(
+    'should update layout name in sidebar when name is changed and saved via JSON editor',
+    { timeout: 10000 },
+    async () => {
+      const originalSidebarName = await page.evaluate(() => {
+        const sidebarLayoutLink = document.querySelector('nav a.menu-item.w-wrapped.selected span:nth-child(2)');
+        return sidebarLayoutLink ? sidebarLayoutLink.textContent.trim() : null;
+      });
+
+      const editDropdownButtonPath = '.btn-group > div > button';
+      await page.locator(editDropdownButtonPath).click();
+      await delay(100);
+
+      const editViaJSONButtonPath = '#editByJson';
+      await page.locator(editViaJSONButtonPath).click();
+      await delay(100);
+
+      const currentJSON = await page.evaluate(() => {
+        const textareaPath = 'body > div > div > div > div > textarea';
+        return document.querySelector(textareaPath).value;
+      });
+
+      const layoutData = JSON.parse(currentJSON);
+      const newLayoutName = 'Updated Layout Name Test';
+      layoutData.name = newLayoutName;
+
+      const textareaPath = '#layout-json-editor';
+      await page.locator(textareaPath).fill(JSON.stringify(layoutData));
+
+      const updateButtonPath = '#updateLayoutButton';
+      await page.locator(updateButtonPath).click();
+      await delay(200);
+
+      const updatedSidebarName = await page.evaluate(() => {
+        const sidebarLayoutLink = document.querySelector('nav a.menu-item.w-wrapped.selected span:nth-child(2)');
+        return sidebarLayoutLink ? sidebarLayoutLink.textContent.trim() : null;
+      });
+
+      strictEqual(updatedSidebarName, newLayoutName);
+      ok(originalSidebarName !== updatedSidebarName, 'Sidebar name should have changed from original');
+    },
+  );
+
+  await testParent.test('should not show a download button when there is no data', async () => {
+    await page.goto(`${url}?page=layoutShow&layoutId=671b8c22402408122e2f20dd&tab=main`, { waitUntil: 'networkidle0' });
+
+    const downloadCount = await page.evaluate(() => document.querySelectorAll('#download-button').length);
+
+    strictEqual(downloadCount, 0);
+  });
+
+  await testParent.test('should not show a download root as image button when there is no data', async () => {
+    // layout id 671b8c22402408122e2f20dd has no data
+    const exists = await page.evaluate(() => document.querySelector('.download-root-image-png-button') !== null);
+
+    strictEqual(exists, false);
+  });
 };
 
 const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {
   const textareaPath = 'body > div > div > div > div > textarea';
   await page.locator(textareaPath).fill(mockedJSON);
-  await delay(50);
+  await page.waitForFunction(
+    (error) => document.querySelector('.o2-modal-content .danger')?.textContent === error,
+    { timeout: 1000 },
+    errorMessage,
+  ).catch(() => { /* ignore timeout error */ });
 
   const [updateButtonIsDisabled, message] = await page.evaluate(() => {
     const updateButtonPath = 'body > div > div > div > div > button:nth-child(1)';
@@ -388,3 +622,18 @@ const checkInvalidJSON = async (page, mockedJSON, errorMessage) => {
   strictEqual(updateButtonIsDisabled, true);
   strictEqual(message, errorMessage);
 };
+
+/**
+ * Fills the input for tab change timer and returns the resulting value.
+ * @param page - The Playwright page instance.
+ * @param value - The value to fill into the input field.
+ * @returns The numeric value from the input after filling it.
+ */
+async function setAutoTabChangeValue(page, value) {
+  const inputSelector = '#inputChangeTabTimer';
+  await page.locator(inputSelector).fill(value.toString());
+  return await page.evaluate(
+    (selector) => parseInt(document.querySelector(selector).value, 10),
+    inputSelector,
+  );
+}

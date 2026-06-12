@@ -60,4 +60,5 @@ ignore:
   - docs/*
   - node_modules/*
   - Control/protobuf/*
+  - QualityControl/test/*
 comment: false

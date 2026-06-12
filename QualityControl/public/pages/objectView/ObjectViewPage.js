@@ -12,90 +12,24 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconMagnifyingGlass } from '/js/src/index.js';
-import { draw } from './../../common/object/draw.js';
-import { header } from './components/header.js';
+import { h } from '/js/src/index.js';
+import { drawObject } from './../../common/object/draw.js';
 import { spinner } from './../../common/spinner.js';
 import { errorDiv } from '../../common/errorDiv.js';
 import { dateSelector } from '../../common/object/dateSelector.js';
-import { qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
+import { defaultRowAttributes, qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
+import { downloadButton } from '../../common/downloadButton.js';
+import { visibilityToggleButton } from '../../common/visibilityButton.js';
+import { downloadRootImageDropdown } from '../../common/downloadRootImageDropdown.js';
 
 /**
  * Shows a page to view an object on the whole page
- * @param {Model} model - root model of the application
+ * @param {ObjectViewModel} objectViewModel - model that manages the objectView state
  * @returns {vnode} - virtual node element
+ * @import { ObjectViewModel } from '../objectView/ObjectViewModel.js';
  */
-export default (model) => {
-  const { objectViewModel } = model;
-  const { objectName, objectId } = model.router.params;
-
-  let title = objectName;
-  if (objectId) {
-    if (objectViewModel.selected.isSuccess()) {
-      const { path, layoutName } = objectViewModel.selected.payload;
-      title = `${path} (from layout: ${layoutName})`;
-    } else {
-      title = objectId;
-    }
-  }
-  return h('.absolute-fill.flex-column', [
-    h('.shadow-level1', [
-      header(model, title),
-      objectViewModel.isFilterVisible() && filtersPanel(objectViewModel),
-    ]),
-    objectPlotAndInfo(objectViewModel),
-  ]);
-};
-
-/**
- * Panel containing input boxes for user to filter the object selection by
- * @param {ObjectViewModel} objectViewModel - model of the current page
- * @returns {vnode} - virtual node element
- */
-const filtersPanel = (objectViewModel) => {
-  const { filter, updateFilterKeyValue, updateObjectSelection } = objectViewModel;
-  const onclick = updateFilterKeyValue.bind(objectViewModel);
-  const onEnter = updateObjectSelection.bind(objectViewModel);
-
-  return h('.w-100.flex-row.p2.g2', [
-    filterInput('RunNumber', 'RunNumber (e.g. 546783)', 'runNumberFilter', 'number', filter, onclick, onEnter),
-    filterInput('RunType', 'RunType (e.g. 2)', 'runTypeFilter', 'text', filter, onclick, onEnter),
-    filterInput('PeriodName', 'PeriodName (e.g. LHC23c)', 'periodNameFilter', 'text', filter, onclick, onEnter),
-    filterInput('PassName', 'PassName (e.g. apass2)', 'passNameFilter', 'text', filter, onclick, onEnter),
-    h('button.btn.btn-primary.w-20', {
-      onclick: () => onEnter({}),
-    }, ['Search ', iconMagnifyingGlass()]),
-  ]);
-};
-
-/**
- * Builds a filter element that will allow the user to specify a parameter that should be applied when querying objects
- * @param {string} queryLabel - value that is to be used in querying storage with this parameter
- * @param {string} placeholder - value to be placed as holder for input
- * @param {string} key - string to be used as unique id
- * @param {string} type - type of the filter
- * @param {string} value - value of the input text field
- * @param {Function} callback - callback for oninput event
- * @param {Function} onEnterCallback - callback for pressing enter on filter input
- * @returns {vnode} - virtual node element
- */
-const filterInput = (queryLabel, placeholder, key, type = 'text', value, callback, onEnterCallback) =>
-  h('.w-20', [
-    h('input.form-control', {
-      type,
-      placeholder,
-      id: key,
-      name: key,
-      min: 0,
-      value: value[queryLabel],
-      oninput: (e) => callback(queryLabel, e.target.value),
-      onkeydown: ({ keyCode }) => {
-        if (keyCode === 13) {
-          onEnterCallback({}, undefined, undefined);
-        }
-      },
-    }),
-  ]);
+export default (objectViewModel) =>
+  h('.absolute-fill.flex-column', objectPlotAndInfo(objectViewModel));
 
 /**
  * Build an element which plots the object and displays metadata information
@@ -109,22 +43,58 @@ const objectPlotAndInfo = (objectViewModel) =>
     Failure: (error) => errorDiv(error),
     Success: (qcObject) => {
       const {
-        id, validFrom, ignoreDefaults = false, drawOptions = [], displayHints = [], layoutDisplayOptions = [], versions,
+        id,
+        name,
+        qcObject: { root = {} } = {},
+        validFrom,
+        ignoreDefaults = false,
+        drawOptions = [],
+        displayHints = [],
+        layoutDisplayOptions = [],
+        versions,
       } = qcObject;
       const drawingOptions = ignoreDefaults ?
         layoutDisplayOptions
         : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
-      return h('.w-100.h-100.flex-column.scroll-off', [
-        h('.flex-row.justify-center.h-10', h('.w-40.p2.f6', dateSelector(
-          { validFrom, id },
-          versions,
-          objectViewModel.updateObjectSelection.bind(objectViewModel),
-        ))),
+      const isObjectInfoVisible = objectViewModel.objectInfoVisible;
+
+      return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
+        h('.flex-row.justify-center.items-center.h-10', [
+          h(
+            '.w-40.p2.f6',
+            dateSelector(
+              { validFrom, id },
+              versions,
+              objectViewModel.updateObjectSelection.bind(objectViewModel),
+            ),
+          ),
+          h('.item-action-row.flex-row.g1.p2', [
+            downloadRootImageDropdown(name, root, drawingOptions),
+            downloadButton({
+              href: objectViewModel.getDownloadQcdbObjectUrl(id),
+              title: 'Download root object',
+            }),
+            visibilityToggleButton(
+              {
+                isVisible: isObjectInfoVisible,
+                title: 'Toggle object information visibility',
+              },
+              () => objectViewModel.toggleObjectInfoVisible(),
+            ),
+          ]),
+        ]),
         h('.w-100.flex-row.g2.m2', { style: 'height: 0;flex-grow:1' }, [
-          h('.w-70', draw(qcObject, {}, drawingOptions)),
-          h('.w-30.scroll-y', [
+          h('.flex-grow', {
+            // Key change forces redraw when toggling info panel
+            key: isObjectInfoVisible ? 'objectPlotWithoutInfoPanel' : 'objectPlotWithInfoPanel',
+          }, drawObject(qcObject, {}, drawingOptions, (error) => {
+            objectViewModel.drawingFailureOccurred(error.message);
+          })),
+          isObjectInfoVisible && h('.scroll-y.w-30', {
+            key: 'objectInfoPanel',
+          }, [
             h('h3.text-center', 'Object information'),
-            qcObjectInfoPanel(qcObject, { gap: '.5em' }),
+            qcObjectInfoPanel(qcObject, { gap: '.5em' }, defaultRowAttributes(model.notification)),
           ]),
         ]),
       ]);

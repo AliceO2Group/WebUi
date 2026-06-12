@@ -12,14 +12,14 @@
  * or submit itself to any jurisdiction.
 */
 
-const {InvalidInputError} = require('./../errors/InvalidInputError.js');
-const {DetectorLockAction} = require('./../common/lock/detectorLockAction.enum.js');
-const {LogManager, LogLevel} = require('@aliceo2/web-ui');
-const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
+const { LogManager, LogLevel } = require('@aliceo2/web-ui');
+const { updateAndSendExpressResponseFromNativeError, InvalidInputError } = require('@aliceo2/web-ui');
+
+const { DetectorLockAction } = require('./../common/lock/detectorLockAction.enum.js');
+const { DetectorId } = require('./../common/detectorId.enum.js');
 const {User} = require('./../dtos/User.js');
 
 const LOG_FACILITY = 'cog/log-ctrl';
-const DETECTOR_ALL = 'ALL';
 
 /**
  * Controller for dealing with all API requests on actions and state of the locks used for detectors
@@ -48,7 +48,7 @@ class LockController {
     try {
       res.status(200).json(this._lockService.locksByDetectorToJSON());
     } catch (error) {
-      updateExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
@@ -70,27 +70,31 @@ class LockController {
       }
       const user = new User(username, name, personid, access);
       if (action.toLocaleUpperCase() === DetectorLockAction.TAKE) {
-        if (detectorId === DETECTOR_ALL) {
-          Object.keys(this._lockService.locksByDetector).forEach((detector) => {
-            try {
-              this._lockService.takeLock(detector, user, shouldForce);
-            } catch (error) {
-              console.error(error);
-            }
-          });
+        if (detectorId === DetectorId.ALL) {
+          Object.keys(this._lockService.locksByDetector)
+            .filter((detector) => detector !== DetectorId.TST) // Skip TST detector when locking all
+            .forEach((detector) => {
+              try {
+                this._lockService.takeLock(detector, user, shouldForce);
+              } catch (error) {
+                this._logger.errorMessage(error, {level: LogLevel.DEVELOPER, facility: LOG_FACILITY});
+              }
+            });
         } else {
           this._lockService.takeLock(detectorId, user, shouldForce);
-        }
+        } 
         res.status(200).json(this._lockService.locksByDetectorToJSON());
       } else if (action.toLocaleUpperCase() === DetectorLockAction.RELEASE) {
-        if (detectorId === DETECTOR_ALL) {
-          Object.keys(this._lockService.locksByDetector).forEach((detector) => {
-            try {
-              this._lockService.releaseLock(detector, user, shouldForce);
-            } catch (error) {
-              console.error(error);
-            }
-          });
+        if (detectorId === DetectorId.ALL) {
+          Object.keys(this._lockService.locksByDetector)
+            .filter((detector) => detector !== DetectorId.TST) // Skip TST detector when releasing all
+            .forEach((detector) => {
+              try {
+                this._lockService.releaseLock(detector, user, shouldForce);
+              } catch (error) {
+                this._logger.errorMessage(error, {level: LogLevel.DEVELOPER, facility: LOG_FACILITY});
+              }
+            });
         } else {
           this._lockService.releaseLock(detectorId, user, shouldForce);
         }
@@ -98,7 +102,7 @@ class LockController {
       }
     } catch (error) {
       this._logger.errorMessage(error, {level: LogLevel.DEVELOPER, facility: LOG_FACILITY});
-      updateExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 

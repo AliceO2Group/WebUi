@@ -12,10 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
-const {LogManager, LogLevel} = require('@aliceo2/web-ui');
+const {LogManager, LogLevel, grpcErrorToNativeError} = require('@aliceo2/web-ui');
 
 const {CacheKeys} = require('../common/cacheKeys.enum.js');
-const {grpcErrorToNativeError} = require('./../errors/grpcErrorToNativeError.js');
 const {RunCalibrationStatus} = require('./../common/runCalibrationStatus.enum.js');
 const {RunDefinitions} = require('./../common/runDefinition.enum.js')
 const {RUNTIME_COMPONENT: {COG}, RUNTIME_KEY: {CALIBRATION_MAPPING}} = require('./../common/kvStore/runtime.enum.js');

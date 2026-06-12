@@ -1,0 +1,25 @@
+/**
+ * @license
+ * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+ * See http://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+ * All rights not expressly granted are reserved.
+ *
+ * This software is distributed under the terms of the GNU General Public
+ * License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+ *
+ * In applying this license CERN does not waive the privileges and immunities
+ * granted to it by virtue of its status as an Intergovernmental Organization
+ * or submit itself to any jurisdiction.
+ */
+
+/**
+ * Enumeration for different types of storage keys
+ * @enum {string}
+ * @readonly
+ */
+export const StorageKeysEnum = Object.freeze({
+  OBJECT_VIEW_LEFT_PANEL_WIDTH: 'object-view-left-panel-width',
+  OBJECT_VIEW_INFO_VISIBILITY_SETTING: 'object-view-info-visibility-setting',
+  OBJECT_TREE_OPEN_BRANCH_STATE: 'object-tree-open-branch-state',
+  NOTIFICATION_START_RUN_SETTING: 'notification-start-run-setting',
+});

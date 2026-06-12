@@ -19,9 +19,9 @@ import {
   isObjectOfTypeChecker,
   OBJECT_TYPE_KEY,
   generateDrawingOptionList,
-  getObjectsNameFromConsulMap,
+  parseObjects,
 } from './../../../../common/library/qcObject/utils.js';
-import { ONLINE_SERVICES } from './../../../demoData/online-services.mock.js';
+import QCObjectDto from '../../../../lib/dtos/QCObjectDto.js';
 
 /**
  * Test Suite for the common library of qcg - utils module
@@ -79,35 +79,27 @@ export const commonLibraryQcObjectUtilsTestSuite = () => {
     });
   });
 
-  suite('getObjectsNameFromConsulMap - test suite', () => {
-    test('should successfully return a list of mapped tags prefix is provided', () => {
-      const expectedTags = [
-        { name: 'QcTask/example' },
-        { name: 'QcTask/other' },
-        { name: 'QcTask/p2' },
-      ];
-      deepStrictEqual(getObjectsNameFromConsulMap(ONLINE_SERVICES, 'Qc'), expectedTags);
+  suite('parseObjects - test suite', () => {
+    test('should successfully parse objects', () => {
+      const objectsToParse = [{ path: 'qc/CPV/M0/Physics/BadChannelMapM2' }];
+      const expectedParsed = [{ name: 'qc/CPV/M0/Physics/BadChannelMapM2' }];
+      deepStrictEqual(
+        parseObjects(objectsToParse, QCObjectDto),
+        expectedParsed,
+      );
+    });
+    test('should skip object without path', () => {
+      const objectsToParse = [{ notPath: 'something' }];
+      const expectedParsed = [];
+
+      deepStrictEqual(parseObjects(objectsToParse, QCObjectDto), expectedParsed);
     });
 
-    test('should successfully return all tags when no prefix is provided', () => {
-      const expectedTags = [
-        { name: 'QcTask/example' },
-        { name: 'ITSRAWDS/example' },
-        { name: 'QcTask/other' },
-        { name: 'TOF_RAWS/example' },
-        { name: 'QcTask/p2' },
-        { name: 'ABC/p2' },
-      ];
-      deepStrictEqual(getObjectsNameFromConsulMap(ONLINE_SERVICES), expectedTags);
-    });
+    test('should skip object with invalid path format', () => {
+      const objectsToParse = [{ path: 'invalid_path' }];
+      const expectedParsed = [];
 
-    test('should successfully return an empty list if tags are missing', () => {
-      const services = {
-        task: {},
-        task2: { tag: [] },
-        task3: undefined,
-      };
-      deepStrictEqual(getObjectsNameFromConsulMap(services), []);
+      deepStrictEqual(parseObjects(objectsToParse, QCObjectDto), expectedParsed);
     });
   });
 };

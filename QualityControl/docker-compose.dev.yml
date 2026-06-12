@@ -1,0 +1,18 @@
+services:
+  application:
+    depends_on:
+      database:
+        condition: service_healthy
+    build:
+      context: .
+      target: development
+    environment:
+      NODE_ENV: development
+    ports:
+      - "8080:8080"
+    container_name: qcg-application-dev
+    volumes:
+      # Mount the current directory to /usr/src/app
+      - .:/usr/src/app
+      # Ignore local node_modules to avoid conflicts with the container's node_modules
+      - /usr/src/app/node_modules

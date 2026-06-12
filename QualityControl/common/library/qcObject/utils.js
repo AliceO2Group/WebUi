@@ -29,7 +29,7 @@ export function isObjectOfTypeChecker(object) {
  * Method to generate drawing option list based on provided options and object type
  * @param {RootObject} rootObject - QC object to be plotted
  * @param {Array<string>} options - list of drawing options and display hints
- * @returns {string} - drawing options joined by ';'
+ * @returns {string[]} - drawing options
  */
 export function generateDrawingOptionList(rootObject, options) {
   options = Array.from(new Set(options));
@@ -56,17 +56,29 @@ export function generateDrawingOptionList(rootObject, options) {
 }
 
 /**
- * Method to extract and build list of objects from the map of objects
- * Within each object from the map, look for strings from the Tags field that start with a specified prefix
- * @param {object} objects - map of objects
- * @param {string} [prefix = ''] - prefix with which tags should start with
- * @returns {Array<object>} @example [{ name: tag1 }, { name: tag2 }]
+ * Method to generate drawing option list based on provided options and object type
+ * @param {RootObject} root - root object in JSON representation
+ * @param {string[]} drawingOptions - list of options to be used for drawing object
+ * @returns {string} The drawing options seperated by ;
  */
-export function getObjectsNameFromConsulMap(objects, prefix = '') {
-  return Object.values(objects)
-    .filter((service) => service?.Tags)
-    .map((service) => service.Tags)
-    .flat()
-    .filter((tag) => tag.startsWith(prefix))
-    .map((tag) => ({ name: tag }));
+export function generateDrawingOptionString(root, drawingOptions) {
+  const drawingOptionList = generateDrawingOptionList(root, drawingOptions);
+  return drawingOptionList.join(';');
+}
+
+/**
+ * Given a list of objects form CCDB, parse, filter and keep only valid objects.
+ * Use `for loop` to iterate only once rather than chained array operations as we expect lots of objects
+ * @param {Array<object>} objects - objects to be filtered
+ * @param dto
+ * @returns {Array<QcObjectLeaf>} - list of objects parsed and filtered
+ */
+export function parseObjects(objects, dto) {
+  const list = [];
+  for (const object of objects) {
+    if (dto.isObjectPathValid(object)) {
+      list.push(dto.toQcObjectLeaf(object));
+    }
+  }
+  return list;
 }

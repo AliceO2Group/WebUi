@@ -13,6 +13,8 @@
  */
 
 import { Observable } from '/js/src/index.js';
+import { TEXT_FILTER_OPERATORS } from '../constants/text-filter-operators.const.js';
+import { getDisabledSeverities } from '../constants/log-level-filters.const.js';
 
 /**
  * @typedef Criteria
@@ -22,8 +24,21 @@ import { Observable } from '/js/src/index.js';
  */
 
 /**
- * @typedef Criteria * @type {Array.<Criteria>}
+ * @typedef {Array.<Criteria>} Criteria
  */
+
+/**
+ * This makes a criteria object with all properties initialized to empty or minimal value
+ * @returns {object} criteria object with all properties initialized
+ */
+const makeDefaultMatchExcludeOperators = () => ({
+  match: '',
+  $match: null,
+  exclude: '',
+  $exclude: null,
+  emptyFor: null,
+  $emptyFor: null,
+});
 
 /**
  * This class stores raw filters from user (strings) and parsed ones (like Date object).
@@ -58,6 +73,9 @@ export default class LogFilter extends Observable {
    * //
    */
   setCriteria(field, operator, value) {
+    if (!(operator in this.criterias[field])) {
+      throw new Error(`unknown operator ${operator} for ${field}`);
+    }
     if (this.criterias[field][operator] !== value) {
       this.criterias[field][operator] = value;
       // auto-complete other properties / parse
@@ -83,8 +101,16 @@ export default class LogFilter extends Observable {
         case 'in':
           this.criterias[field]['$in'] = value ? value.split(' ') : null;
           break;
+        case 'emptyFor':
+          this.criterias[field]['$emptyFor'] = value === 'match' || value === 'exclude' ? value : null;
+          break;
         default:
           throw new Error('unknown operator');
+      }
+
+      // enforces on both severity and level as fromObject can set them in either order
+      if (field === 'severity' || field === 'level') {
+        this.enforceDisabledSeverities();
       }
 
       this.notify();
@@ -143,9 +169,49 @@ export default class LogFilter extends Observable {
   }
 
   /**
+   * Check whether at least one text filter is set by the user.
+   * Only text filters use the since/until and match/exclude fields.
+   * @returns {boolean} true if at least one text filter has a value
+   */
+  hasActiveTextFilters() {
+    return Object.values(this.criterias).some((criteria) =>
+      TEXT_FILTER_OPERATORS.some((operator) => criteria[operator]?.trim()));
+  }
+
+  /**
+   * Check whether a severity is disabled for the current log level.
+   * @param {string} severityCode - [D, I, W, E, F]
+   * @returns {boolean} true if the severity is not allowed at the current level
+   */
+  isSeverityDisabled(severityCode) {
+    return getDisabledSeverities(this.criterias.level.max).includes(severityCode);
+  }
+
+  /**
+   * Remove any active severity selections that are disallowed by the current level.
+   */
+  enforceDisabledSeverities() {
+    const current = this.criterias.severity.$in;
+    if (!current) {
+      return;
+    }
+    const disabled = getDisabledSeverities(this.criterias.level.max);
+    if (disabled.length === 0) {
+      return;
+    }
+
+    const filteredSeverities = current.filter((s) => !disabled.includes(s));
+    // Only update if there is a change
+    if (filteredSeverities.length !== current.length) {
+      this.criterias.severity.$in = filteredSeverities;
+      this.criterias.severity.in = filteredSeverities.join(' ');
+    }
+  }
+
+  /**
    * Generates a function to filter a log passed as argument to it
    * Output of function is boolean.
-   * @returns {Function.<WebSocketMessage, boolean>} - function to filter logs
+   * @returns {(message: WebSocketMessage) => boolean} - function to filter logs
    */
   toStringifyFunction() {
     /**
@@ -191,6 +257,15 @@ export default class LogFilter extends Observable {
       }
 
       /**
+       * Whether a log field value is considered empty for emptyFor purposes.
+       * @param {string|number|undefined|null} logValue - value of the log field
+       * @returns {boolean} - true if the value is undefined, null, or an empty string
+       */
+      function isEmpty(logValue) {
+        return logValue === undefined || logValue === null || logValue === '';
+      }
+
+      /**
        * Function that applies the criteria of one filter set by the user on each received logValue
        * @param {object} logValue - value of the log field that is to be checked (e.g. message, severity, etc.)
        * @param {object} criteria - object containing the criteria if applied by the user
@@ -212,17 +287,28 @@ export default class LogFilter extends Observable {
               break;
             }
             case '$match': {
+              if (isEmpty(logValue)) {
+                if (criteria.$emptyFor !== 'match') {
+                  return false;
+                }
+                break;
+              }
               const criteriaList = criteriaValue.split(separator);
               if (criteriaList.length > 1) {
                 criteriaValue = criteriaValue.replace(new RegExp(separator, 'g'), '|');
               }
-              if (logValue === undefined ||
-                !generateRegexCriteriaValue(criteriaValue).test(removeNewLinesFrom(logValue))) {
+              if (!generateRegexCriteriaValue(criteriaValue).test(removeNewLinesFrom(logValue))) {
                 return false;
               }
               break;
             }
             case '$exclude': {
+              if (isEmpty(logValue)) {
+                if (criteria.$emptyFor === 'exclude') {
+                  return false;
+                }
+                break;
+              }
               const criteriaList = criteriaValue.split(separator);
               if (criteriaList.length > 1) {
                 criteriaValue = criteriaValue.replace(new RegExp(separator, 'g'), '|');
@@ -233,6 +319,13 @@ export default class LogFilter extends Observable {
               }
               break;
             }
+            case '$emptyFor':
+              if (criteriaValue === 'match' && !criteria.$match && !isEmpty(logValue)) {
+                return false;
+              } else if (criteriaValue === 'exclude' && !criteria.$exclude && isEmpty(logValue)) {
+                return false;
+              }
+              break;
             case '$since':
               if (logValue === undefined || parseInfoLoggerDate(logValue) < parseInfoLoggerDate(criteriaValue)) {
                 return false;
@@ -291,6 +384,21 @@ export default class LogFilter extends Observable {
    * original state: empty or exclusive for other criterias.
    */
   resetCriteria() {
+    const TEXT_FIELDS = [
+      'hostname',
+      'rolename',
+      'pid',
+      'username',
+      'system',
+      'facility',
+      'detector',
+      'partition',
+      'run',
+      'errcode',
+      'errline',
+      'errsource',
+    ];
+
     this.criterias = {
       timestamp: {
         since: '',
@@ -298,91 +406,20 @@ export default class LogFilter extends Observable {
         $since: null,
         $until: null,
       },
-      hostname: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
-      },
-      rolename: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
-      },
-      pid: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
-      },
-      username: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
-      },
-      system: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
-      },
-      facility: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
-      },
-      detector: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
-      },
-      partition: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
-      },
-      run: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
-      },
-      errcode: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
-      },
-      errline: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
-      },
-      errsource: {
-        match: '',
-        exclude: '',
-        $match: null,
-        $exclude: null,
-      },
+      ...Object.fromEntries(TEXT_FIELDS.map((field) => [field, makeDefaultMatchExcludeOperators()])),
       message: {
         match: '',
-        exclude: '',
         $match: null,
+        exclude: '',
         $exclude: null,
       },
       severity: {
         in: 'I W E F',
-        $in: ['W', 'I', 'E', 'F'],
+        $in: ['I', 'W', 'E', 'F'],
       },
       level: {
-        max: null, // 0, 1, 6, 11, 21
-        $max: null, // 0, 1, 6, 11, 21
+        max: null,
+        $max: null,
       },
     };
     this.notify();

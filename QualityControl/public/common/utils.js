@@ -12,6 +12,12 @@
  * or submit itself to any jurisdiction.
  */
 
+import { isUserRoleSufficient } from '../../../../library/userRole.enum.js';
+import { generateDrawingOptionString } from '../../library/qcObject/utils.js';
+import { RootImageDownloadSupportedTypes } from './enums/rootImageMimes.enum.js';
+
+/* global JSROOT BOOKKEEPING */
+
 /**
  * Generates a new ObjectId
  * @returns {string} 16 random chars, base 16
@@ -30,22 +36,65 @@ export function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
+// Map storing timers per key
+const simpleDebouncerTimers = new Map();
+
+/**
+ * Produces a debounced function that uses a key to manage timers.
+ * Each key has its own debounce timer, so calls with different keys
+ * are debounced independently.
+ * @template PrimitiveKey extends unknown
+ * @param {PrimitiveKey} key - The key for this call.
+ * @param {(key: PrimitiveKey) => void} fn - Function to debounce.
+ * @param {number} time - Debounce delay in milliseconds.
+ * @returns {undefined}
+ */
+export function simpleDebouncer(key, fn, time) {
+  if (simpleDebouncerTimers.has(key)) {
+    clearTimeout(simpleDebouncerTimers.get(key));
+  }
+
+  const timerId = setTimeout(() => {
+    fn(key);
+    simpleDebouncerTimers.delete(key);
+  }, time);
+
+  simpleDebouncerTimers.set(key, timerId);
+}
+
 /**
  * Produces a lambda function waiting `time` ms before calling fn.
  * No matter how many calls are done to lambda, the last call is the waiting starting point.
- * @param {Function} fn - function to be called after `time` ms
- * @param {number} time - ms
- * @returns {Function} the lambda function produced
+ * @template K, A extends unknown[]
+ * @param {(...args: A) => WeakKey} keyFn - Function that returns the key to debounce by.
+ * @param {(...args: A) => void} debounceFn - Function executed after the debounce delay.
+ * @param {number} time - Debounce delay in milliseconds.
+ * @param {(...args: A) => void} [onFirstCall = () => {}] - Optional callback fired once when a new key is added.
+ * @returns {(...args: A) => void} - Debounced function that can be called multiple times.
  */
-export function timerDebouncer(fn, time) {
-  let timer = {};
+export function keyedTimerDebouncer(
+  keyFn,
+  debounceFn,
+  time,
+  onFirstCall = () => {},
+) {
+  const timers = new WeakMap();
+
   return function (...args) {
-    if (timer) {
-      clearTimeout(timer);
+    const key = keyFn(...args);
+
+    if (timers.has(key)) {
+      clearTimeout(timers.get(key));
+    } else {
+      onFirstCall(...args);
     }
-    timer = setTimeout(() => {
-      fn(...args); // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters
+
+    const timerId = setTimeout(() => {
+      debounceFn(...args);// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters
+      timers.delete(key);
     }, time);
+
+    timers.set(key, timerId);
   };
 }
 
@@ -109,3 +158,118 @@ export function setBrowserTabTitle(title = undefined) {
     document.title = title;
   }
 }
+
+/**
+ * Checks if any role in the provided list meets or exceeds the required permission level
+ * @param {Array<UserRole>} userRoles - List of roles assigned to the user
+ * @param {UserRole} requiredRole - Minimum role level needed for authorization
+ * @returns {boolean} True if at least one user role meets or exceeds the required role level
+ */
+export function hasMinimumRoleAccess(userRoles, requiredRole) {
+  return userRoles.some((role) => isUserRoleSufficient(role, requiredRole));
+}
+
+/**
+ * Asynchronously writes the given text value to the system clipboard
+ * @param {string} value - The text string to be copied to the clipboard
+ * @returns {Promise<void>} - A Promise that resolves with no value when the text has been successfully copied.
+ * The promise is rejected if the operation fails (e.g., due to lack of user permission
+ * or an insecure context)
+ */
+export function copyToClipboard(value) {
+  return navigator.clipboard.writeText(value);
+}
+
+/**
+ * Converts a camelCase string to a human-readable Title Case string.
+ * It inserts a space before every uppercase letter and uppercase the
+ * first character of the resulting string.
+ * @param {string} text - the camelCase string to tranform (e.g. 'lastModified')
+ * @returns {string} - the formatted Title Case string (e.g. `Last Modified')
+ */
+export const camelToTitleCase = (text) => {
+  const spaced = text.replace(/([A-Z])/g, ' $1');
+  const titleCase = spaced.charAt(0).toUpperCase() + spaced.slice(1);
+  return titleCase;
+};
+
+/**
+ * Helper to trigger a download for a file
+ * @param {string} url - The URL to the file source
+ * @param {string} filename - The name of the file including the file extension
+ * @returns {undefined}
+ */
+export const triggerDownload = (url, filename) => {
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+};
+
+/**
+ * Downloads a file
+ * @param {Blob|MediaSource} file - The file to download
+ * @param {string} filename - The name of the file including the file extension
+ * @returns {undefined}
+ */
+export const downloadFile = (file, filename) => {
+  const url = URL.createObjectURL(file);
+  try {
+    triggerDownload(url, filename);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+};
+
+/**
+ * Generates a rasterized image of a JSROOT RootObject and triggers download.
+ * @param {string} filename - The name of the downloaded file excluding the file extension.
+ * @param {string} filetype - The file extension of the downloaded file.
+ * @param {RootObject} root - The JSROOT RootObject to render.
+ * @param {string[]} [drawingOptions=[]] - Optional array of JSROOT drawing options.
+ * @returns {undefined}
+ */
+export const downloadRoot = async (filename, filetype, root, drawingOptions = []) => {
+  const mime = RootImageDownloadSupportedTypes[filetype.toLocaleUpperCase()];
+  if (!mime) {
+    throw new Error(`The file extension (${filetype}) is not supported`);
+  }
+
+  const image = await JSROOT.makeImage({
+    object: root,
+    option: generateDrawingOptionString(root, drawingOptions),
+    format: filetype,
+    as_buffer: true,
+  });
+  const blob = new Blob([image], { type: mime });
+  downloadFile(blob, `${filename}.${filetype}`);
+};
+
+/**
+ * Determines whether the element is positioned on the left half of the viewport.
+ * This is used to decide which way a dropdown should anchor to stay within view.
+ * @param {HTMLElement} element - The DOM element (usually the button or container) to measure.
+ * @returns {boolean|undefined} Returns true if the element is on the left half of the window,
+ * false if it is on the right half, or undefined if no element is provided.
+ */
+export const isOnLeftSideOfViewport = (element) => {
+  if (!element) {
+    return;
+  }
+
+  const rect = element.getBoundingClientRect();
+  const isLeft = rect.left - rect.width < window.innerWidth / 2;
+  return isLeft;
+};
+
+/**
+ * Retrieves the URL to the run details page in Bookkeeping for the given run number
+ * @param {number|string} runNumber - The run number to generate the URL for
+ * @returns {string|null} The URL to the run details page, or null if Bookkeeping is not configured
+ */
+export const getBkpRunDetailsUrl = (runNumber) => {
+  if (typeof BOOKKEEPING !== 'undefined' && BOOKKEEPING && BOOKKEEPING.RUN_DETAILS) {
+    return BOOKKEEPING.RUN_DETAILS + runNumber;
+  }
+  return null;
+};

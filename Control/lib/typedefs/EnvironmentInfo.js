@@ -20,8 +20,11 @@
  * @property {String} id
  * @property {Number} currentRunNumber
  * @property {Number} createdWhen - timestamp in ms
- * @property {String} state - STANDBY, DEPLOYED, CONFIGURED, RUNNING, ERROR, MIXED, SHUTDOWN
+ * @property {TaskEvent} firstTaskInError - the first task in error, if any
+ * @property {EnvironmentState} state - STANDBY, DEPLOYED, CONFIGURED, RUNNING, ERROR, MIXED, SHUTDOWN
  * @property {String} currentTransition - DEPLOY, CONFIGURE, RESET, START_ACTIVITY, STOP_ACTIVITY, EXIT, GO_ERROR, RECOVER AS PER https://github.com/AliceO2Group/Control/blob/master/core/environment/environment.go#L143 
+ * @property {Boolean} isDeploying - if true, the environment is being deployed (custom ECS GUI property only). Once ECS reports the environment in state CONFIGURED with no currentTransition, this property will be set to false
+ * @property {String} deploymentError - if the deployment failed, this will contain the error message
  * @property {String} rootRole - workflow selected by user
  * @property {String} description
  * @property {Number} numberOfFlps
@@ -29,8 +32,6 @@
  * @property {Number} numberOfTasks - number of tasks running on FLPs
  * @property {Map<[qc, epn, flp, trg], Object>} hardware - a map of counters per component of their tasks (FLP, EPN, QC, TRIGGER, ALL)
  * @property {Array<String>} includedDetectors - list of detectors part of the environment
- * @property {Map<String, String>} defaults - map of variables that are set as defaults and their values
- * @property {Map<String, String>} vars - map of all variables that are set and their values
  * @property {Map<String, String>} userVars - map of user set variables and their values
  * @property {Map<String, Object>} [integratedServicesData] - map of integrated services such as Bookkeeping, ODC, CCDB, etc.
  * @property {Array<ShortTaskInfo>} [tasks] - a list of minimum tasks information

@@ -8,33 +8,37 @@ on:
     branches:
       - 'main'
       - 'dev'
-
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
     name: Tests on macos-latest
     runs-on: macOS-latest
+    timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20.x'
+          node-version: '22.x'
       - run: (cd Control; npm ci )
       - run: (cd Control; npm test )
   coverage:
     name: Tests & coverage on ubuntu-latest
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20.x'
+          node-version: '22.x'
       - run: (cd Control; npm ci )
       - run: (cd Control; npm run coverage )
       - run: (cd Control; ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov)
       - name: Send codecov report for Control
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: control

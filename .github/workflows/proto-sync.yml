@@ -12,7 +12,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: Copy new proto file(s)
@@ -21,6 +21,8 @@ jobs:
         cp aliecs/core/protos/o2control.proto Control/protobuf
         cp aliecs/common/protos/events.proto Control/protobuf/protos
         cp aliecs/common/protos/common.proto Control/protobuf/protos/protos
+        cp aliecs/common/protos/events.proto Framework/Backend/protobuf/protos
+        cp aliecs/common/protos/common.proto Framework/Backend/protobuf/protos
         cp aliecs/apricot/protos/apricot.proto Control/protobuf/o2apricot.proto
         rm -rf aliecs
     - name: Check if there are any differences and create PR

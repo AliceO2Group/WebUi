@@ -10,32 +10,131 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
  */
-/* eslint-disable max-len */
 
-import { strictEqual, deepStrictEqual } from 'assert';
-import test from '../index';
+import { ok, strictEqual } from 'node:assert';
+import { IntegratedServices } from '../../../common/library/enums/Status/integratedServices.enum.js';
+import { ServiceStatus } from '../../../common/library/enums/Status/serviceStatus.enum.js';
 
-describe('about page test suite', async () => {
-  let page;
-  let url;
+const ABOUT_PAGE_PARAM = '?page=about';
 
-  before(async () => ({ url, page } = test));
-
-  it('should load', async () => {
-    await page.goto(`${url}?page=about`, { waitUntil: 'networkidle0' });
+export const aboutPageTests = async (url, page, timeout = 5000, testParent) => {
+  await testParent.test('should successfully load about page', { timeout }, async () => {
+    await page.goto(`${url}${ABOUT_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
     const location = await page.evaluate(() => window.location);
     strictEqual(location.search, '?page=about');
   });
+  await testServiceStatus(testParent, page, 'qcg', timeout);
+  await testServiceStatus(testParent, page, 'qc', timeout);
+  await testServiceStatus(testParent, page, 'ccdb', timeout);
+  await testServiceStatus(testParent, page, 'kafka', timeout);
 
-  it('should have a frameworkInfo item with config fields', async () => {
-    const expConfig = {
-      qcg: { port: 8181, hostname: 'localhost', status: { ok: true } },
-      consul: { hostname: 'localhost', port: 8500, status: { ok: false, message: 'Live Mode was not configured' } },
-      ccdb: { hostname: 'ccdb', port: 8500, prefix: 'test', status: { ok: false, message: 'Data connector was not configured' } },
-      quality_control: { version: '0.19.5-1' },
+  await testParent.test('should display message when service errored', { timeout }, async () => {
+    const ERROR_MESSAGE = 'Service Error';
+
+    const requestHandler = (interceptedRequest) => {
+      const url = interceptedRequest.url();
+
+      if (url.includes(`/api/status/${IntegratedServices.KAFKA}`)) {
+        interceptedRequest.respond({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            name: IntegratedServices.KAFKA,
+            status: {
+              ok: false,
+              category: ServiceStatus.ERROR,
+            },
+            extras: {
+              message: ERROR_MESSAGE,
+            },
+          }),
+        });
+      } else {
+        interceptedRequest.continue();
+      }
     };
-    const config = await page.evaluate(() => window.model.frameworkInfo.item);
-    delete config.payload.qcg.version;
-    deepStrictEqual(config.payload, expConfig);
+
+    try {
+      // Enable interception and attach the handler
+      await page.setRequestInterception(true);
+      page.on('request', requestHandler);
+
+      await page.reload({ waitUntil: 'networkidle0' });
+
+      const extras = await page.evaluate(
+        (serviceStatus, serviceName) => {
+          const query = `#service-status-${serviceStatus} #${serviceName} .panel .flex-row div:nth-child(2)`;
+          return Array.from(document.querySelectorAll(query)).map((element) => element.textContent);
+        },
+        ServiceStatus.ERROR.toLowerCase(),
+        IntegratedServices.KAFKA,
+      );
+
+      ok(extras.includes(ERROR_MESSAGE), `errored service should contain message '${ERROR_MESSAGE}'`);
+    } finally {
+      // Cleanup: remove listener and disable interception
+      page.off('request', requestHandler);
+      await page.setRequestInterception(false);
+    }
   });
-});
+
+  await testParent.test('should have "NOT CONFIGURED" status when service is not configured', { timeout }, async () => {
+    const requestHandler = (interceptedRequest) => {
+      const url = interceptedRequest.url();
+
+      if (url.includes(`/api/status/${IntegratedServices.KAFKA}`)) {
+        interceptedRequest.respond({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            name: IntegratedServices.KAFKA,
+            status: {
+              ok: false,
+              category: ServiceStatus.NOT_CONFIGURED,
+            },
+            extras: {},
+          }),
+        });
+      } else {
+        interceptedRequest.continue();
+      }
+    };
+
+    try {
+      // Enable interception and attach the handler
+      await page.setRequestInterception(true);
+      page.on('request', requestHandler);
+
+      await page.reload({ waitUntil: 'networkidle0' });
+
+      const exists = await page.evaluate(
+        (serviceStatus, serviceName) =>
+          document.querySelector(`#service-status-${serviceStatus} #${serviceName}`) !== null,
+        ServiceStatus.NOT_CONFIGURED.toLowerCase(),
+        IntegratedServices.KAFKA,
+      );
+
+      ok(exists, `Service '${IntegratedServices.KAFKA}' should have status '${ServiceStatus.NOT_CONFIGURED}'`);
+    } finally {
+      // Cleanup: remove listener and disable interception
+      page.off('request', requestHandler);
+      await page.setRequestInterception(false);
+    }
+  });
+};
+
+const testServiceStatus = async (testParent, page, serviceName, timeout = 5000) => {
+  await testParent
+    .test(
+      `should request info about ${serviceName.toUpperCase()} and store in statuses as RemoteData`,
+      { timeout },
+      async () => {
+        const kind = await page.evaluate(
+          (service) => window.model.aboutViewModel.findService(service)?.kind,
+          serviceName,
+        );
+
+        strictEqual(kind, 'Success');
+      },
+    );
+};

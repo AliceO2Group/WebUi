@@ -1,0 +1,9 @@
+services:
+  test_app:
+    depends_on:
+      database:
+        condition: service_healthy
+    build:
+      context: .
+      target: coverage-local
+    container_name: qcg-application-coverage-local

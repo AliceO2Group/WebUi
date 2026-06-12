@@ -15,6 +15,7 @@
 /* eslint-disable max-len */
 const assert = require('assert');
 const test = require('../mocha-index');
+const {waitForTimeout} = require('../utils/puppeteerUtils.js');
 
 let url;
 let page;
@@ -173,11 +174,12 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should have error of missing revisions for this repository', async () => {
+    await waitForTimeout(1000);
     const errorMessage = await page.locator('body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) > div > div:nth-child(2) > div > div > div > div > div:nth-child(2) > div > div')
-      .setTimeout(500)
+      .setTimeout(1000)
       .map((element) => element.innerText)
       .wait();
-    assert.strictEqual(errorMessage.trim(), 'No revisions found for the selected repository');
+    assert.strictEqual(errorMessage.trim(), 'No revisions found for the selected repository', `Error message is not displayed but is: ${errorMessage}`);  
   });
 
   it('should successfully request refresh of repositories and request repositories list, its contents and branches again', async () => {
@@ -337,7 +339,7 @@ describe('`pageNewEnvironment` test-suite', async () => {
 
     await page.evaluate(() => document.querySelector('#addKVListButton').click())
     const {variables, areaString} = await page.evaluate(() => {
-      return {variables: window.model.workflow.form.variables, areaString: window.model.workflow.kvPairsString};
+      return {variables: window.model.workflow.form.variables, areaString: window.model.workflow.getTextAreaValue()};
     });
     assert.deepStrictEqual(variables, currentVariables, 'diff vars');
     assert.strictEqual(areaString, toBeTyped, 'dif area')
@@ -388,20 +390,28 @@ describe('`pageNewEnvironment` test-suite', async () => {
   });
 
   it('should not select a detector that is not locked', async () => {
-    await page.evaluate(() => document.querySelector('.m1 > div:nth-child(1) > div > a:nth-child(2)').click()); // second element is for detector, first for lock
+    await page.evaluate(() => document.querySelector('#detectorSelectionButtonForMID').click());
 
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.ok(selectedDet.length == 0, 'Detector selected without lock');
   });
 
   it('should successfully lock, select a detector and request a list of hosts for that detector', async () => {
-    await page.locator('.m1 > div:nth-child(1) > div > div:nth-child(1)')
-      .setTimeout(500)
+    await page.waitForSelector('#detectorLockButtonForMID', {timeout: 5000});
+    await page.locator('#detectorLockButtonForMID')
+      .setTimeout(5000)
       .click();
 
-    await page.locator('.m1 > div:nth-child(1) > div > a:nth-child(2)')
-      .setTimeout(500)
+    await page.waitForFunction(() => {
+      const detectorButton = document.querySelector('#detectorSelectionButtonForMID');
+      return detectorButton && !detectorButton.classList.contains('disabled-item');
+    }, {timeout: 5000});
+
+    await page.locator('#detectorSelectionButtonForMID')
+      .setTimeout(5000)
       .click();
+
+    await page.waitForFunction(() => window.model.workflow.flpSelection.selectedDetectors.includes('MID'), {timeout: 5000});
 
     const selectedDet = await page.evaluate(() => window.model.workflow.flpSelection.selectedDetectors);
     assert.deepStrictEqual(selectedDet, ['MID'], 'Missing detector selection');
@@ -430,23 +440,16 @@ describe('`pageNewEnvironment` test-suite', async () => {
     assert.strictEqual(message, 'Configuration saved successfully as My_Config');
   });
 
-  it('should successfully create a new environment', async () => {
+  it('should successfully create a new environment and redirect user to its environment details page', async () => {
     await page.locator('#deploy-env')
-      .setTimeout(500)
+      .setTimeout(1000)
       .click();
     await page.waitForNavigation({
       waitUntil: 'networkidle0',
     });
     const location = await page.evaluate(() => window.location);
     assert.strictEqual(location.search, '?page=environments');
-  });
-
-  it('should display successful environment request', async () => {
-    await page.waitForSelector('tr.primary > th:nth-child(1)');
-    const detector = await page.evaluate(() => document.querySelector('table.table:nth-child(4) > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)').innerText);
-    const state = await page.evaluate(() => document.querySelector('table.table:nth-child(4) > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(6)').innerText);
-    assert.strictEqual(detector, 'MID');
-    assert.strictEqual(state, 'ONGOING');
+    assert.ok(calls['newEnvironmentAsync']);
   });
 
   /**

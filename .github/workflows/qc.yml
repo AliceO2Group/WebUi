@@ -8,46 +8,52 @@ on:
     branches:
       - 'main'
       - 'dev'
-
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   lint-check:
     name: Check eslint rules on ubuntu-latest
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20.x'
+          node-version: '22.x'
       - run: (cd QualityControl; npm ci )
       - run: (cd QualityControl; npm run lint )
   test:
     name: Tests on ubuntu-latest only if lint-check passes
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     needs: lint-check
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20.x'
-      - run: (cd QualityControl; npm ci )
-      - run: (cd QualityControl; npm run test )
+          node-version: '22.x'
+      - run: (cd QualityControl; npm run docker-test )
   coverage:
     name: Tests and generate lcov reoprt coverage on ubuntu-latest
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     needs: lint-check
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20.x'
-      - run: (cd QualityControl; npm ci )
-      - run: (cd QualityControl; npm run coverage-lcov )
+          node-version: '22.x'
+      - run: mkdir -p QualityControl/coverage 
+      - run: (cd QualityControl; npm run docker-coverage-ci )
       - name: Send codecov report for QualityControl
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./QualityControl/coverage/lcov.info
           flags: qualitycontrol
           fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

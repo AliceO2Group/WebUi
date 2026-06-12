@@ -13,9 +13,10 @@
  */
 
 const mariadb = require('mariadb');
-const { LogManager } = require('@aliceo2/web-ui');
+const { LogManager, InvalidInputError } = require('@aliceo2/web-ui');
 const { fromSqlToNativeError } = require('../utils/fromSqlToNativeError');
 const { processPreparedSQLStatement } = require('../utils/preparedStatementParser');
+const { throwIfQueryAborted, attachAbortDestroyHandler } = require('../utils/queryCancellation');
 
 class QueryService {
   /**
@@ -23,19 +24,27 @@ class QueryService {
    * @param {object} configMySql - mysql config
    */
   constructor(configMySql = {}) {
-    configMySql.user = configMySql?.user ?? 'gui';
-    configMySql.password = configMySql?.password ?? '';
-    configMySql.host = configMySql?.host ?? 'localhost';
-    configMySql.port = configMySql?.port ?? 3306;
-    configMySql.database = configMySql?.database ?? 'info_logger';
-    configMySql.connectionLimit = configMySql?.connectionLimit ?? 25;
     this._timeout = configMySql?.timeout ?? 10000;
-    this._host = configMySql.host;
-    this._port = configMySql.port;
-
-    this._pool = mariadb.createPool(configMySql);
+    this._host = configMySql?.host;
+    this._port = configMySql?.port;
     this._isAvailable = false;
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'ilg'}/query-service`);
+
+    // Only create a connection pool if configuration is provided
+    if (configMySql?.host && configMySql?.port) {
+      configMySql.user = configMySql.user ?? 'gui';
+      configMySql.password = configMySql.password ?? '';
+      configMySql.host = configMySql.host ?? 'localhost';
+      configMySql.port = configMySql.port ?? 3306;
+      configMySql.database = configMySql.database ?? 'info_logger';
+      configMySql.connectionLimit = configMySql.connectionLimit ?? 25;
+      this._host = configMySql.host;
+      this._port = configMySql.port;
+
+      this._pool = mariadb.createPool(configMySql);
+    } else {
+      this._pool = null;
+    }
   }
 
   /**
@@ -45,6 +54,17 @@ class QueryService {
    * @returns {Promise} - a promise that resolves if connection is successful
    */
   async checkConnection(timeout = this._timeout, shouldThrow = true) {
+    if (!this._pool) {
+      this._isAvailable = false;
+      const error = new InvalidInputError('No database configuration provided');
+      if (shouldThrow) {
+        throw error;
+      } else {
+        this._logger.errorMessage(error);
+      }
+      return;
+    }
+
     try {
       await this._pool.query({
         sql: 'SELECT 1',
@@ -73,29 +93,49 @@ class QueryService {
    * @param {object} filters - criteria like MongoDB
    * @param {object} options - specific options for the query
    * @param {number} options.limit - how many rows to get
+   * @param {AbortSignal} [signal] - optional signal to cancel the query; when aborted, the DB connection is destroyed
    * @returns {Promise.<object>} - {total, more, limit, rows, count, time}
    */
-  async queryFromFilters(filters, options) {
+  async queryFromFilters(filters, options, signal = null) {
     const { limit = 100000 } = options;
     const { criteria, values } = this._filtersToSqlConditions(filters);
     const criteriaString = this._getCriteriaAsString(criteria);
-
     const requestRows = `SELECT * FROM \`messages\` ${criteriaString} ORDER BY \`TIMESTAMP\` LIMIT ?;`;
+    const queryValues = [...values, limit];
     const startTime = Date.now(); // ms
 
     this._logger.debugMessage(`SQL to execute: ${processPreparedSQLStatement(requestRows, values, limit)}`);
 
     let rows = [];
+    let connection = null;
+    let connectionDestroyed = false;
     try {
-      rows = await this._pool.query(
-        {
-          sql: requestRows,
-          timeout: this._timeout,
+      if (!this._pool) {
+        throw new Error('No database connection available');
+      }
+      connection = await this._pool.getConnection();
+      throwIfQueryAborted(signal);
+
+      const detachAbortHandler = attachAbortDestroyHandler(
+        signal,
+        connection,
+        () => {
+          connectionDestroyed = true;
         },
-        [...values, limit],
       );
+
+      try {
+        rows = await connection.query({ sql: requestRows, timeout: this._timeout }, queryValues);
+      } finally {
+        detachAbortHandler();
+      }
     } catch (error) {
+      throwIfQueryAborted(signal);
       fromSqlToNativeError(error);
+    } finally {
+      if (connection && !connectionDestroyed) {
+        connection.release();
+      }
     }
 
     const totalTime = Date.now() - startTime; // ms
@@ -119,6 +159,9 @@ class QueryService {
       + 'in (\'D\', \'I\', \'W\', \'E\', \'F\') GROUP BY severity;';
     let data = [];
     try {
+      if (!this._pool) {
+        throw new Error('No database connection available');
+      }
       data = await this._pool.query({
         sql: groupByStatement,
         timeout: this._timeout,
@@ -186,20 +229,22 @@ class QueryService {
       if (!filters[field]) {
         continue;
       }
+      const separator = field === 'message' ? '\n' : ' ';
       for (const operator in filters[field]) {
         if (filters[field][operator] === null || !operator.includes('$')) {
           continue;
         }
 
-        if (operator === '$since' || operator === '$until') {
+        if (operator === '$emptyFor') {
+          // no parameterized value needed for $emptyFor, the SQL is static
+        } else if (operator === '$since' || operator === '$until') {
           // read date, both input and output are GMT, no timezone to consider here
           values.push(new Date(filters[field][operator]).getTime() / 1000);
         } else {
-          const separator = field === 'message' ? '\n' : ' ';
           if ((operator === '$match' || operator === '$exclude') && filters[field][operator].split(separator).length > 1
           ) {
             const subValues = filters[field][operator].split(separator);
-            subValues.forEach((value) => values.push(value));
+            values.push(...subValues);
           } else {
             values.push(filters[field][operator]);
           }
@@ -214,55 +259,57 @@ class QueryService {
           case '$until':
             criteria.push(`\`${field}\`<=?`);
             break;
+          // $emptyFor is merged into the operator it refers to (match or exclude) when present,
+          // otherwise it emits its own clause
           case '$match': {
-            const separator = field === 'message' ? '\n' : ' ';
             const criteriaArray = filters[field].match.split(separator);
-            if (criteriaArray.length <= 1) {
-              if (criteriaArray.toString().includes('%')) {
-                criteria.push(`\`${field}\` LIKE (?)`);
-              } else {
-                criteria.push(`\`${field}\` = ?`);
-              }
+
+            // Either create a LIKE match or an exact match
+            const toMatchCondition = (crit) =>
+              crit.includes('%')
+                ? `\`${field}\` LIKE (?)`
+                : `\`${field}\` = ?`;
+
+            const matchStr = criteriaArray.map(toMatchCondition).join(' OR ');
+
+            const matchEmpty = filters[field].$emptyFor === 'match';
+            if (matchEmpty) {
+              criteria.push(`(${matchStr} OR \`${field}\` = '' OR \`${field}\` IS NULL)`);
+            } else if (criteriaArray.length > 1) {
+              // Wrap so the OR doesn't bind looser than the AND between criteria in the WHERE clause
+              criteria.push(`(${matchStr})`);
             } else {
-              let criteriaString = '(';
-              criteriaArray.forEach((crit) => {
-                if (crit.includes('%')) {
-                  criteriaString += `\`${field}\` LIKE (?) OR `;
-                } else {
-                  criteriaString += `\`${field}\` = ? OR `;
-                }
-              });
-              criteriaString = criteriaString.substr(0, criteriaString.length - 4);
-              criteriaString += ')';
-              criteria.push(criteriaString);
+              criteria.push(matchStr);
             }
             break;
           }
           case '$exclude': {
-            const separator = field === 'message' ? '\n' : ' ';
             const criteriaArray = filters[field].exclude.split(separator);
-            if (criteriaArray.length <= 1) {
-              if (criteriaArray.toString().includes('%')) {
-                criteria.push(`NOT(\`${field}\` LIKE (?) AND \`${field}\` IS NOT NULL)`);
-              } else {
-                criteria.push(`NOT(\`${field}\` = ? AND \`${field}\` IS NOT NULL)`);
-              }
-            } else {
-              let criteriaString = 'NOT(';
-              criteriaArray.forEach((crit) => {
-                if (crit.includes('%')) {
-                  criteriaString += `\`${field}\` LIKE (?) AND \`${field}\` IS NOT NULL OR `;
-                } else {
-                  criteriaString += `\`${field}\` = ? AND \`${field}\` IS NOT NULL OR `;
-                }
-              });
-              criteriaString = criteriaString.substr(0, criteriaString.length - 4);
-              criteriaString += ')';
-              criteria.push(criteriaString);
-            }
 
+            const toExcludeCondition = (crit) =>
+              crit.includes('%')
+                ? `\`${field}\` LIKE (?) AND \`${field}\` IS NOT NULL`
+                : `\`${field}\` = ? AND \`${field}\` IS NOT NULL`;
+
+            const excludeStr = criteriaArray.length > 1
+              ? criteriaArray.map((c) => `(${toExcludeCondition(c)})`).join(' OR ')
+              : toExcludeCondition(criteriaArray[0]);
+
+            criteria.push(`NOT(${excludeStr})`);
+
+            const excludeEmpty = filters[field].$emptyFor === 'exclude';
+            if (excludeEmpty) {
+              criteria.push(`(\`${field}\` != '' AND \`${field}\` IS NOT NULL)`);
+            }
             break;
           }
+          case '$emptyFor':
+            if (filters[field].$emptyFor === 'match' && !filters[field].$match) {
+              criteria.push(`(\`${field}\` = '' OR \`${field}\` IS NULL)`);
+            } else if (filters[field].$emptyFor === 'exclude' && !filters[field].$exclude) {
+              criteria.push(`(\`${field}\` != '' AND \`${field}\` IS NOT NULL)`);
+            }
+            break;
           case '$in':
             criteria.push(`\`${field}\` IN (?)`);
             break;

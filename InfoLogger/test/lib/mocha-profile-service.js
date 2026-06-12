@@ -10,7 +10,7 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 const assert = require('assert');
 const sinon = require('sinon');
@@ -24,11 +24,11 @@ describe('Profile Service', () => {
   });
 
   describe('Return requested profile', () => {
-    let status, json, res;
+    let status; let json; let res;
     beforeEach(() => {
       status = sinon.stub();
       json = sinon.spy();
-      res = {json, status};
+      res = { json, status };
       status.returns(res);
     });
 
@@ -62,80 +62,80 @@ const DEFAULT_PROFILE = {
   user: 'default',
   content: {
     colsHeader: {
-      date: {size: 'cell-m', visible: false},
-      time: {size: 'cell-m', visible: true},
-      hostname: {size: 'cell-m', visible: true},
-      rolename: {size: 'cell-m', visible: false},
-      pid: {size: 'cell-s', visible: false},
-      username: {size: 'cell-m', visible: false},
-      system: {size: 'cell-s', visible: true},
-      facility: {size: 'cell-m', visible: true},
-      detector: {size: 'cell-s', visible: true},
-      partition: {size: 'cell-m', visible: true},
-      run: {size: 'cell-s', visible: true},
-      errcode: {size: 'cell-s', visible: false},
-      errline: {size: 'cell-s', visible: false},
-      errsource: {size: 'cell-m', visible: false},
-      message: {size: 'cell-xl', visible: true}
+      date: { size: 'cell-m', visible: false },
+      time: { size: 'cell-m', visible: true },
+      hostname: { size: 'cell-m', visible: true },
+      rolename: { size: 'cell-m', visible: false },
+      pid: { size: 'cell-s', visible: false },
+      username: { size: 'cell-m', visible: false },
+      system: { size: 'cell-s', visible: true },
+      facility: { size: 'cell-m', visible: true },
+      detector: { size: 'cell-s', visible: true },
+      partition: { size: 'cell-m', visible: true },
+      run: { size: 'cell-s', visible: true },
+      errcode: { size: 'cell-s', visible: false },
+      errline: { size: 'cell-s', visible: false },
+      errsource: { size: 'cell-m', visible: false },
+      message: { size: 'cell-xl', visible: true },
     },
     criterias: {
-      timestamp: {since: '', until: ''},
-      hostname: {match: '', exclude: ''},
-      rolename: {match: '', exclude: ''},
-      pid: {match: '', exclude: ''},
-      username: {match: '', exclude: ''},
-      system: {match: '', exclude: ''},
-      facility: {match: '', exclude: ''},
-      detector: {match: '', exclude: ''},
-      partition: {match: '', exclude: ''},
-      run: {match: '', exclude: ''},
-      errcode: {match: '', exclude: ''},
-      errline: {match: '', exclude: ''},
-      errsource: {match: '', exclude: ''},
-      message: {match: '', exclude: ''},
-      severity: {in: 'I W E F'},
-      level: {max: null},
-    }
-  }
+      timestamp: { since: '', until: '' },
+      hostname: { match: '', exclude: '' },
+      rolename: { match: '', exclude: '' },
+      pid: { match: '', exclude: '' },
+      username: { match: '', exclude: '' },
+      system: { match: '', exclude: '' },
+      facility: { match: '', exclude: '' },
+      detector: { match: '', exclude: '' },
+      partition: { match: '', exclude: '' },
+      run: { match: '', exclude: '' },
+      errcode: { match: '', exclude: '' },
+      errline: { match: '', exclude: '' },
+      errsource: { match: '', exclude: '' },
+      message: { match: '', exclude: '' },
+      severity: { in: 'I W E F' },
+      level: { max: 1 },
+    },
+  },
 };
 
 const FULL_PROFILE = {
   user: 'physicist',
   content: {
     colsHeader: {
-      date: {size: 'cell-m', visible: false},
-      time: {size: 'cell-m', visible: true},
-      hostname: {size: 'cell-m', visible: true},
-      rolename: {size: 'cell-m', visible: false},
-      pid: {size: 'cell-s', visible: false},
-      username: {size: 'cell-m', visible: false},
-      system: {size: 'cell-s', visible: true},
-      facility: {size: 'cell-m', visible: true},
-      detector: {size: 'cell-s', visible: true},
-      partition: {size: 'cell-m', visible: true},
-      run: {size: 'cell-s', visible: true},
-      errcode: {size: 'cell-s', visible: false},
-      errline: {size: 'cell-s', visible: false},
-      errsource: {size: 'cell-m', visible: false},
-      message: {size: 'cell-xl', visible: true}
+      date: { size: 'cell-m', visible: false },
+      time: { size: 'cell-m', visible: true },
+      hostname: { size: 'cell-m', visible: true },
+      rolename: { size: 'cell-m', visible: false },
+      pid: { size: 'cell-s', visible: false },
+      username: { size: 'cell-m', visible: false },
+      system: { size: 'cell-s', visible: true },
+      facility: { size: 'cell-m', visible: true },
+      detector: { size: 'cell-s', visible: true },
+      partition: { size: 'cell-m', visible: true },
+      run: { size: 'cell-s', visible: true },
+      errcode: { size: 'cell-s', visible: false },
+      errline: { size: 'cell-s', visible: false },
+      errsource: { size: 'cell-m', visible: false },
+      message: { size: 'cell-xl', visible: true },
     },
     criterias: {
-      timestamp: {since: '', until: ''},
-      hostname: {match: '', exclude: ''},
-      rolename: {match: '', exclude: ''},
-      pid: {match: '', exclude: ''},
-      username: {match: '', exclude: ''},
-      system: {match: '', exclude: ''},
-      facility: {match: '', exclude: ''},
-      detector: {match: '', exclude: ''},
-      partition: {match: '', exclude: ''},
-      run: {match: '', exclude: ''},
-      errcode: {match: '', exclude: ''},
-      errline: {match: '', exclude: ''},
-      errsource: {match: '', exclude: ''},
-      message: {match: '', exclude: ''},
-      severity: {in: 'I W E F'},
-      level: {max: null},
-    }
-  }
+      timestamp: { since: '', until: '' },
+      hostname: { match: '', exclude: '' },
+      rolename: { match: '', exclude: '' },
+      pid: { match: '', exclude: '' },
+      username: { match: '', exclude: '' },
+      system: { match: '', exclude: '' },
+      facility: { match: '', exclude: '' },
+      detector: { match: '', exclude: '' },
+      partition: { match: '', exclude: '' },
+      run: { match: '', exclude: '' },
+      errcode: { match: '', exclude: '' },
+      errline: { match: '', exclude: '' },
+      errsource: { match: '', exclude: '' },
+      message: { match: '', exclude: '' },
+      severity: { in: 'I W E F' },
+      level: { max: 1 },
+    },
+  },
 };

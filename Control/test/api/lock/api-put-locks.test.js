@@ -1,4 +1,3 @@
-
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -24,7 +23,7 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
       .put(`/force/release/ALL?token=${ADMIN_TEST_TOKEN}`);
   });
 
-  it('should successfully take lock as detector user for their detector', async () => {
+  it('should successfully take and release lock as detector user for their detector', async () => {
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.TAKE}/MID?token=${DET_MID_TEST_TOKEN}`)
       .expect(200, {
@@ -32,13 +31,60 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
         DCS: { name: 'DCS', state: 'FREE' },
         ODC: { name: 'ODC', state: 'FREE' }
       });
+    await request(`${TEST_URL}/api/locks`)
+      .put(`/${DetectorLockAction.RELEASE}/MID?token=${DET_MID_TEST_TOKEN}`)
+      .expect(200, {
+        MID: { name: 'MID', state: 'FREE' },
+        DCS: { name: 'DCS', state: 'FREE' },
+        ODC: { name: 'ODC', state: 'FREE' }
+      });
+    });
+
+  it('should successfully take and release lock as ADMIN user for a detector', async () => {
+    await request(`${TEST_URL}/api/locks`)
+      .put(`/${DetectorLockAction.TAKE}/MID?token=${ADMIN_TEST_TOKEN}`)
+      .expect(200, {
+        MID: { name: 'MID', state: 'TAKEN', owner: { username: 'admin', fullName: 'Admin User', personid: 0 } },
+        DCS: { name: 'DCS', state: 'FREE' },
+        ODC: { name: 'ODC', state: 'FREE' }
+      });
+
+    await request(`${TEST_URL}/api/locks`)
+      .put(`/${DetectorLockAction.RELEASE}/MID?token=${ADMIN_TEST_TOKEN}`)
+      .expect(200, {
+        MID: { name: 'MID', state: 'FREE' },
+        DCS: { name: 'DCS', state: 'FREE' },
+        ODC: { name: 'ODC', state: 'FREE' }
+      });
   });
-  
+
+  it('should successfully take and release lock as GLOBAL user for a detector', async () => {
+    await request(`${TEST_URL}/api/locks`)
+      .put(`/${DetectorLockAction.TAKE}/MID?token=${GLOBAL_TEST_TOKEN}`)
+      .expect(200, {
+        MID: { name: 'MID', state: 'TAKEN', owner: { username: 'global', fullName: 'Global User', personid: 1 } },
+        DCS: { name: 'DCS', state: 'FREE' },
+        ODC: { name: 'ODC', state: 'FREE' }
+      });
+  });
+
+  it('should respond with unauthorized error for detector user taking lock for another detector', async () => {
+    await request(`${TEST_URL}/api/locks`)
+      .put(`/${DetectorLockAction.TAKE}/DCS?token=${DET_MID_TEST_TOKEN}`)
+      .expect(403, {
+        message: 'User "Detector User" is not part of role for detector "DCS"',
+        title: 'Unauthorized Access',
+        status: 403,
+      });
+  });
+
   it('should return unauthorized error for attempt to take already owned lock', async () => {
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.TAKE}/MID?token=${ADMIN_TEST_TOKEN}`)
       .expect(403, {
-        message: 'Unauthorized TAKE action for lock of detector MID by user Admin User'
+        message: 'Unauthorized TAKE action for lock MID by Admin User while lock is held by Global User',
+        title: 'Unauthorized Access',
+        status: 403,
       });
   });
 
@@ -46,7 +92,9 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.TAKE}/DCS?token=${GUEST_TEST_TOKEN}`)
       .expect(403, {
-        message: 'Not enough permissions for this operation'
+        message: 'Not enough permissions for this operation',
+        title: 'Unauthorized Access',
+        status: 403,
       });
   });
 
@@ -90,13 +138,13 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
       });
   });
 
-  it('should successfully FORCE take ALL available lock as Global user', async () => {
+  it('should fail to FORCE take ALL available lock as Global user', async () => {
     await request(`${TEST_URL}/api/locks`)
       .put(`/force/${DetectorLockAction.TAKE}/ALL?token=${GLOBAL_TEST_TOKEN}`)
-      .expect(200, {
-        MID: { name: 'MID', state: 'TAKEN', owner: { username: 'global', fullName: 'Global User', personid: 1 } },
-        DCS: { name: 'DCS', state: 'TAKEN', owner: { username: 'global', fullName: 'Global User', personid: 1 } },
-        ODC: { name: 'ODC', state: 'TAKEN', owner: { username: 'global', fullName: 'Global User', personid: 1 } },
+      .expect(403, {
+        message: 'Not enough permissions for this operation',
+        status: 403,
+        title: 'Unauthorized Access',
       });
   });
 
@@ -114,7 +162,9 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.RELEASE}/MID?token=${GUEST_TEST_TOKEN}`)
       .expect(403, {
-        message: 'Not enough permissions for this operation'
+        message: 'Not enough permissions for this operation',
+        status: 403,
+        title: 'Unauthorized Access',
       });
   });
 
@@ -122,7 +172,9 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.RELEASE}/MID?token=${DET_MID_TEST_TOKEN}`)
       .expect(403, {
-        message: 'Unauthorized RELEASE action for lock of detector MID by user Detector User'
+        message: 'Unauthorized RELEASE action for lock MID by Detector User while lock is held by Admin User',
+        status: 403,
+        title: 'Unauthorized Access',
       });
   });
 
@@ -145,8 +197,8 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
         ODC: { name: 'ODC', state: 'TAKEN', owner: { username: 'admin', fullName: 'Admin User', personid: 0 } },
       });
   });
-  
-  it('should successfully force release ALL locks from all users', async () => {
+
+  it('should fail to force release ALL locks from all users as global', async () => {
     // first we retake a lock to ensure we have a lock to release from different types of users
     await request(`${TEST_URL}/api/locks`)
       .put(`/${DetectorLockAction.TAKE}/DCS?token=${GLOBAL_TEST_TOKEN}`)
@@ -158,6 +210,16 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
 
     await request(`${TEST_URL}/api/locks`)
       .put(`/force/${DetectorLockAction.RELEASE}/ALL?token=${GLOBAL_TEST_TOKEN}`)
+       .expect(403, {
+        message: 'Not enough permissions for this operation',
+        status: 403,
+        title: 'Unauthorized Access',
+      });
+  });
+
+  it('should successfully force release ALL locks from all users as admin', async () => {
+    await request(`${TEST_URL}/api/locks`)
+      .put(`/force/${DetectorLockAction.RELEASE}/ALL?token=${ADMIN_TEST_TOKEN}`)
       .expect(200, {
         MID: { name: 'MID', state: 'FREE' },
         DCS: { name: 'DCS', state: 'FREE' },
@@ -194,4 +256,3 @@ describe(`'API - PUT - /locks/:action/:detectorId' test suite`, () => {
       .expect(403);
   });
 });
-

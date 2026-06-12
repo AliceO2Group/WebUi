@@ -12,6 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
+import { ServiceUnavailableError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+
 /**
  * Gateway for all calls with regards to the status of the framework and its dependencies
  */
@@ -33,22 +35,26 @@ export class StatusController {
    * @param {Response} res - HTTP response object
    * @returns {undefined}
    */
-  async getQCGStatus(_, res) {
+  async getQCGStatusHandler(_, res) {
     res.status(200).json(this._statusService.retrieveOwnStatus());
   }
 
   /**
-   * Send back information and status about the framework and its dependencies
-   * @param {Request} _ - HTTP request object
+   * Send back information and status about the component and its dependencies
+   * @param {Request} req - HTTP request object
    * @param {Response} res - HTTP response object
    * @returns {undefined}
    */
-  async getFrameworkInfo(_, res) {
+  async getServiceStatusHandler(req, res) {
+    const { service } = req.params;
     try {
-      const info = await this._statusService.retrieveFrameworkInfo();
+      const info = await this._statusService.retrieveServiceStatus(service);
       res.status(200).json(info);
     } catch (error) {
-      res.status(503).json({ message: error.message || error });
+      updateAndSendExpressResponseFromNativeError(
+        res,
+        new ServiceUnavailableError(error.message || error),
+      );
     }
   }
 }

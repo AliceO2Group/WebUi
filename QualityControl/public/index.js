@@ -13,14 +13,12 @@
  */
 
 // Import QCG Public Configuration
-import { QCG } from './config.js';
 import { mount, sessionService } from '/js/src/index.js';
 import view from './view.js';
 import Model from './Model.js';
 
 sessionService.loadAndHideParameters();
 window.sessionService = sessionService;
-window.QCG = QCG;
 
 // Start application
 const model = new Model();

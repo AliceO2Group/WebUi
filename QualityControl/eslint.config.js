@@ -7,7 +7,7 @@ export default [
   jsdoc.configs['flat/recommended'],
   pluginJs.configs.recommended,
   {
-    ignores: ['config-default.js', 'public/config.js', 'config.js', 'jsconfig.json'],
+    ignores: ['config-default.js', 'config.js', 'jsconfig.json'],
     plugins: {
       jsdoc,
       '@stylistic/js': stylisticJs,
@@ -240,6 +240,7 @@ export default [
         'never',
       ],
       'no-magic-numbers': 'off', // TODO: enable
+      'no-useless-assignment': 'off',
     },
   },
 ];
