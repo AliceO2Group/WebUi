@@ -25,8 +25,7 @@
     "eslint": "./node_modules/.bin/eslint --config eslint.config.js lib/ public/",
     "mocha": "mocha --exit $(find test -name 'mocha-*.js')",
     "coverage": "npm run eslint && nyc npm run mocha",
-    "coverage-local": "nyc --reporter=lcov npm run mocha",
-    "integration-query-test": "mocha --exit --bail ./test/integration/ilg-query-tests.js -R min"
+    "coverage-local": "nyc --reporter=lcov npm run mocha"
   },
   "main": "index.js",
   "dependencies": {
