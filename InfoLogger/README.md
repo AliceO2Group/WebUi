@@ -19,7 +19,7 @@
     - [Live mode against synthetic logs (thoroughly test Live mode)](#live-mode-against-synthetic-logs-thoroughly-test-live-mode)
     - [Query against a local DB](#query-against-a-local-db)
   - [Testing](#testing)
-    - [Integration tests (now run elsewhere)](#integration-tests-now-run-elsewhere)
+    - [Integration tests (live elsewhere)](#integration-tests-live-elsewhere)
   - [CI](#ci)
     - [infologger.yml](#infologgeryml)
     - [release.yml](#releaseyml)
@@ -160,11 +160,11 @@ Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/).
   - Add or update the matching test when fixing a bug.
 - `npm run eslint` - config in [eslint.config.js](eslint.config.js). Lint failures block CI.
 
-### Integration tests (now run elsewhere)
+### Integration tests (live elsewhere)
 
 ILG integration tests live in the **system-configuration** repo and run in its pipeline against a pipeline ILG. They are **not** executed by this repo's CI. To run them locally, clone system-configuration and run `npx mocha ilg-main.js`.
 
-> ⚠️ Files under [test/integration/](test/integration) here are a historical FLP-Suite copy, unmaintained for years. If you change behaviour covered by integration tests, update the system-configuration suite during the next ILG release.
+> ⚠️ If you change behaviour covered by integration tests, update the system-configuration suite during the next ILG release.
 
 ## CI
 
