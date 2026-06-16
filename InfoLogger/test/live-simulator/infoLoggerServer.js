@@ -10,24 +10,30 @@
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
-*/
+ */
 
 /* eslint-disable no-console */
-/* eslint-disable require-jsdoc */
 
 // Documentation:
 // https://nodejs.org/api/net.html#net_net_createserver_options_connectionlistener
 
 const net = require('net');
-const fakeData = require('./fakeData.json');
+const rawFakeData = require('./fakeData.json');
+const { shuffle } = require('./utils.js');
+
+const fakeData = shuffle([...rawFakeData]);
 
 const createServer = () => {
   const server = net.createServer(connectionListener);
   const port = 6102; // infoLoggerServer default port
 
+  /**
+   * Listener for new client connections. It sends fake log messages to the client at random intervals.
+   * @param {net.Socket} client - The connected client socket
+   */
   function connectionListener(client) {
     console.log('[InfoLogger Server] Client connected at:', new Date().toISOString());
-    let timer;
+    let timer = null;
     let currentLogIndex = 0;
 
     client.on('close', onClientDisconnect);
@@ -42,14 +48,17 @@ const createServer = () => {
     });
     sendNextLog();
 
+    /**
+     * Sends the next log message to the connected client.
+     */
     function sendNextLog() {
       const log = fakeData[currentLogIndex % fakeData.length];
-      const timestamp = (new Date()).getTime() / 1000; // seconds
-      const nextLogTimeout = 100 - (Math.random() * 100); // [0 ; 500]ms
+      const timestamp = new Date().getTime() / 1000; // seconds
+      const nextLogTimeout = 100 - Math.random() * 100; // [0 ; 500]ms
 
       // switch protocol after each log sent to try both protocols
       if (currentLogIndex % 2 === 1) {
-        client.write(`*1.4#` +
+        client.write('*1.4#' +
           `${log.severity || ''}#` +
           `${log.level || ''}#` +
           `${timestamp || ''}#` +
@@ -67,7 +76,7 @@ const createServer = () => {
           `${log.errsource || ''}#` +
           `${log.message || ''}\r\n`);
       } else {
-        client.write(`*1.3#` +
+        client.write('*1.3#' +
           `${log.severity || ''}#` +
           `${log.level || ''}#` +
           `${timestamp || ''}#` +
@@ -79,7 +88,7 @@ const createServer = () => {
           `${log.facility || ''}#` +
           `${log.detector || ''}#` +
           `${log.partition || ''}#` +
-          `#` + // dest field
+          '#' + // dest field
           `${log.run || ''}#` +
           `${log.errcode || ''}#` +
           `${log.errline || ''}#` +
@@ -91,6 +100,9 @@ const createServer = () => {
       timer = setTimeout(sendNextLog, nextLogTimeout);
     }
 
+    /**
+     * Handler for client disconnection. It clears the log sending timer and logs the disconnection event.
+     */
     function onClientDisconnect() {
       console.log('[InfoLogger Server] Client disconnected at:', new Date().toISOString());
       clearTimeout(timer);
@@ -114,8 +126,8 @@ const createServer = () => {
   server.listen(port, () => {
     console.log(`[InfoLogger Server] InfoLoggerServer is running on port ${port}`);
   });
-  return server
-}
+  return server;
+};
 
 const closeServer = (server) => {
   console.log('[InfoLogger Server] Closing server at:', new Date().toISOString());
@@ -133,6 +145,6 @@ const closeServer = (server) => {
     console.error('[InfoLogger Server] Exception while closing server:', err.message);
     console.error('[InfoLogger Server] Stack:', err.stack);
   }
-}
+};
 
-module.exports = {createServer, closeServer};
+module.exports = { createServer, closeServer };
