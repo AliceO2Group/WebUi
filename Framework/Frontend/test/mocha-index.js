@@ -220,49 +220,221 @@ describe('Framework Frontend', function() {
   describe('QueryRouter class', function() {
     it('notifices when route has changed', async () => {
       await page.evaluate(() => {
-        window.notification = '';
+        window.routedPage = '';
         const router = new QueryRouter();
         router.observe(() => {
-          window.notification = router.params.page;
+          window.routedPage = router.params.page;
         });
         router.go('?page=list', true); // replace current URL to avoid loosing Framework injection
         window.router = router; // save for later use in tests
       });
-      await page.waitForFunction(`window.notification === 'list'`);
+      await page.waitForFunction(`window.routedPage === 'list'`);
     });
   });
 
   describe('Notification class', function() {
-    before('can be instanciated', async () => {
+    before('can be instantiated', async () => {
       await page.evaluate(() => {
-        window.notification = new Notification();
+        window.notificationModel = new Notification();
+      });
+    });
+
+    beforeEach(async () => {
+      await page.evaluate(() => {
+        window.notificationModel.hide();
       });
     });
 
     it('is hidden at first', async () => {
-      // await page.evaluate(() => {
-      //   window.notification = '';
-      //   const router = new QueryRouter();
-      //   router.observe(() => {
-      //     window.notification = router.params.page;
-      //   });
-      //   router.go('?page=list', true); // replace current URL to avoid loosing Framework injection
-      //   window.router = router; // save for later use in tests
-      // });
-      await page.waitForFunction(`window.notification.state === 'hidden'`);
+      await page.waitForFunction(`window.notificationModel.state === 'hidden'`);
     });
 
-    it('is shown on new success message', async () => {
+    it('show() sets the notification state to shown', async () => {
       await page.evaluate(() => {
-        window.notification.show('Warp Drive Mr. Scott', 'success', 4000);
+        window.notificationModel.show('Warp Drive Mr. Scott', 'success', 4000);
       });
-      await page.waitForFunction(`window.notification.state === 'shown'`);
-      await page.waitForFunction(`window.notification.type === 'success'`);
+      await page.waitForFunction(`window.notificationModel.state === 'shown'`);
     });
 
-    it('stays for 4 seconds', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 4000));
-      await page.waitForFunction(`window.notification.state === 'hidden'`);
+    it('hide() sets the notification state to hidden', async () => {
+      await page.evaluate(() => {
+        window.notificationModel.show('Bye', 'primary', 10000);
+        window.notificationModel.hide();
+      });
+      await page.waitForFunction(`window.notificationModel.state === 'hidden'`);
+    });
+
+    it('automatically hides after the duration is reached', async () => {
+      await page.evaluate(() => {
+        window.notificationModel.show('Warp Drive Mr. Scott', 'success', 500);
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await page.waitForFunction(`window.notificationModel.state === 'hidden'`);
+    });
+
+    it('falls back to a 5000ms duration when none is given', async () => {
+      await page.evaluate(() => {
+        window.notificationModel.show('hi', 'success');
+      });
+      await page.waitForFunction(`window.notificationModel.duration === 5000`);
+    });
+
+    it('stores Infinity as the duration when given', async () => {
+      await page.evaluate(() => {
+        window.notificationModel.show('fatal error', 'danger', Infinity);
+      });
+      await page.waitForFunction(`window.notificationModel.duration === Infinity`);
+    });
+
+    it('does not automatically hide while the hovered attribute is true', async () => {
+      await page.evaluate(() => {
+        window.notificationModel.show('hi', 'success', 1000);
+        window.notificationModel.hovered = true;
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await page.waitForFunction(`window.notificationModel.state === 'shown'`);
+    });
+
+    it('throws on an unknown type', async () => {
+      await assert.rejects(
+        page.evaluate(() => window.notificationModel.show('bad type', 'unknown', 1000)),
+        (err) => err.message.includes('Notification type must be danger, warning, success or primary. "unknown" provided')
+      );
+    });
+
+    it('ignores empty message notifications', async () => {
+      await page.evaluate(() => {
+        window.notificationModel.hide();
+        window.notificationModel.show('', 'success', 1000);
+      });
+      await page.waitForFunction(`window.notificationModel.state === 'hidden'`);
+    });
+  });
+
+  describe('Notification View', function() {
+    before(async () => {
+      await page.evaluate(() => {
+        window.notificationModel = new Notification();
+        mount(document.body, (model) => notification(model), window.notificationModel);
+      });
+    });
+
+    beforeEach(async () => {
+      await page.evaluate(() => {
+        window.notificationModel.hide();
+      });
+    });
+
+    it('renders with notification-close class when hidden', async () => {
+      await page.waitForFunction(`document.querySelector('.notification-content.notification-close') !== null`);
+      await page.waitForFunction(`document.querySelector('.notification-content.notification-open') === null`);
+    });
+
+    it('renders with notification-open class when shown', async () => {
+      await page.evaluate(() => {
+        window.notificationModel.show('Warp Drive Mr. Scott', 'success', 4000);
+      });
+      await page.waitForFunction(`document.querySelector('.notification-content.notification-open') !== null`);
+      await page.waitForFunction(`document.querySelector('.notification-content.notification-close') === null`);
+    });
+
+    it('mouseenter sets hovered to true and prevents auto-hide', async () => {
+      await page.evaluate(() => {
+        window.notificationModel.show('Warp Drive Mr. Scott', 'success', 1000);
+        const el = document.querySelector('.notification-content');
+        el.dispatchEvent(new MouseEvent('mouseenter'));
+      });
+      await page.waitForFunction(`window.notificationModel.hovered === true`);
+
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await page.waitForFunction(`window.notificationModel.state === 'shown'`);
+    });
+
+    it('mouseleave sets hovered to false and re-calls show() with the original duration', async () => {
+      const calls = await page.evaluate(() => {
+        window.notificationModel.show('Warp Drive Mr. Scott', 'success', 1500);
+
+        const captured = [];
+        const originalShow = window.notificationModel.show;
+
+        // spy on show()
+        window.notificationModel.show = function(message, type, duration) {
+          captured.push({message, type, duration});
+          return originalShow.call(this, message, type, duration);
+        };
+
+        const el = document.querySelector('.notification-content');
+        el.dispatchEvent(new MouseEvent('mouseenter'));
+        el.dispatchEvent(new MouseEvent('mouseleave'));
+
+        // Restore original show() method
+        window.notificationModel.show = originalShow;
+
+        return captured;
+      });
+
+      await page.waitForFunction(`window.notificationModel.hovered === false`);
+      assert.deepStrictEqual(calls, [{message: 'Warp Drive Mr. Scott', type: 'success', duration: 1500}]);
+    });
+
+    it('mouseleave while hidden does not re-show the notification', async () => {
+      const calls = await page.evaluate(() => {
+        const captured = [];
+        const originalShow = window.notificationModel.show;
+        window.notificationModel.show = function(message, type, duration) {
+          captured.push({message, type, duration});
+          return originalShow.call(this, message, type, duration);
+        };
+
+        const el = document.querySelector('.notification-content');
+        el.dispatchEvent(new MouseEvent('mouseleave'));
+
+        window.notificationModel.show = originalShow;
+        return captured;
+      });
+
+      await page.waitForFunction(`window.notificationModel.state === 'hidden'`);
+      assert.deepStrictEqual(calls, []);
+    });
+
+    it('clicking the message hides the notification', async () => {
+      await page.evaluate(() => {
+        window.notificationModel.show('Click me to close', 'primary', 1000);
+        document.querySelector('.notification-content .mh2.pv2').click();
+      });
+      await page.waitForFunction(`window.notificationModel.state === 'hidden'`);
+    });
+
+    it('copy confirmation message suppresses its own copy button', async () => {
+      await page.evaluate(() => {
+        window.notificationModel.show('Text copied to clipboard', 'success', 1000);
+      });
+      await page.waitForFunction(`document.querySelector('.notification-copy-btn') === null`);
+    });
+
+    it('copy button copies to clipboard and shows the confirmation', async () => {
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, 'clipboard', {
+          value: {
+            writeText: (value) => {
+              window.__copiedContextMenuValue = value;
+              return Promise.resolve();
+            },
+          },
+          configurable: true,
+        });
+        window.notificationModel.show('Secret message', 'success', 5000);
+      });
+      await page.waitForFunction(`document.querySelector('.notification-copy-btn') !== null`);
+
+      await page.evaluate(() => {
+        document.querySelector('.notification-copy-btn').click();
+      });
+
+      await page.waitForFunction(`window.__copiedContextMenuValue === 'Secret message'`);
+      await page.waitForFunction(`window.notificationModel.message === 'Text copied to clipboard'`);
     });
   });
 
