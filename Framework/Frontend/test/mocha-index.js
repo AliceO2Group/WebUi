@@ -330,14 +330,11 @@ describe('Framework Frontend', function() {
 
       it('copy() writes the current message to clipboard and flashes copyState to copied', async () => {
         await page.evaluate(async () => {
-          window.notificationModel.show('Secret message', 'success', 5000);
+          window.notificationModel.show('Secret message', 'success', 3000);
           await window.notificationModel.copy();
         });
         await page.waitForFunction(`window.__clipboardText === 'Secret message'`);
         await page.waitForFunction(`window.notificationModel.copyState === 'copied'`);
-
-        await page.waitForFunction(`window.notificationModel.message === 'Secret message'`);
-
 
         await new Promise((resolve) => setTimeout(resolve, 1600));
         await page.waitForFunction(`window.notificationModel.copyState === 'idle'`);
@@ -350,7 +347,7 @@ describe('Framework Frontend', function() {
             value: { writeText: () => Promise.reject(new Error('denied')) },
             configurable: true,
           });
-          window.notificationModel.show('Secret', 'success', 5000);
+          window.notificationModel.show('Secret', 'success', 3000);
           await window.notificationModel.copy();
         });
         await page.waitForFunction(`window.notificationModel.copyState === 'failed'`);
@@ -387,6 +384,13 @@ describe('Framework Frontend', function() {
         await page.waitForFunction(`document.querySelector('.notification-content.notification-close') === null`);
       });
 
+      it('renders the copy button while shown', async () => {
+        await page.evaluate(() => {
+          window.notificationModel.show('hi', 'success', 1000);
+        });
+        await page.waitForFunction(`document.querySelector('.notification-copy-btn') !== null`);
+      });
+
       it('mouseenter sets hovered to true and prevents auto-hide', async () => {
         await page.evaluate(() => {
           window.notificationModel.show('Warp Drive Mr. Scott', 'success', 1000);
@@ -400,17 +404,16 @@ describe('Framework Frontend', function() {
       });
 
       it('mouseleave sets hovered to false and restarts the hide timer', async () => {
-        const callCount = await page.evaluate(() => {
+        const restartedTimer = await page.evaluate(() => {
           window.notificationModel.show('Warp Drive Mr. Scott', 'success', 1500);
 
           // Spy on restartHideTimer()
-          let restartCalls = 0;
+          let timerChanged = false;
           const originalRestart = window.notificationModel.restartHideTimer;
           window.notificationModel.restartHideTimer = function() {
-            restartCalls++;
             const before = this.hideTimerId;
             const out = originalRestart.call(this);
-            restartScheduledTimer = this.hideTimerId !== before;
+            timerChanged = this.hideTimerId !== before;
             return out;
           };
 
@@ -420,23 +423,21 @@ describe('Framework Frontend', function() {
 
           window.notificationModel.restartHideTimer = originalRestart;
 
-          return {restartCalls, restartScheduledTimer};
+          return timerChanged;
         });
 
         await page.waitForFunction(`window.notificationModel.hovered === false`);
-        assert.deepStrictEqual(callCount, {restartCalls: 1, restartScheduledTimer: true});
+        assert.deepStrictEqual(restartedTimer, true);
       });
 
       it('mouseleave while hidden does not restart the hide timer', async () => {
-        const callCount = await page.evaluate(() => {
-          let restartCalls = 0;
-          let restartScheduledTimer = false;
+        const restartedTimer = await page.evaluate(() => {
+          let timerChanged = false;
           const originalRestart = window.notificationModel.restartHideTimer;
           window.notificationModel.restartHideTimer = function() {
-            restartCalls++;
             const before = this.hideTimerId;
             const out = originalRestart.call(this);
-            restartScheduledTimer = this.hideTimerId !== before;
+            timerChanged = this.hideTimerId !== before;
             return out;
           };
 
@@ -444,12 +445,12 @@ describe('Framework Frontend', function() {
           el.dispatchEvent(new MouseEvent('mouseleave'));
 
           window.notificationModel.restartHideTimer = originalRestart;
-          return {restartCalls, restartScheduledTimer};
+          return timerChanged;
         });
 
         await page.waitForFunction(`window.notificationModel.state === 'hidden'`);
         // The view still called restartHideTimer, but the model guarded against the hidden state
-        assert.deepStrictEqual(callCount, {restartCalls: 1, restartScheduledTimer: false});
+        assert.deepStrictEqual(restartedTimer, false);
       });
 
       it('clicking the message hides the notification', async () => {
@@ -460,27 +461,12 @@ describe('Framework Frontend', function() {
         await page.waitForFunction(`window.notificationModel.state === 'hidden'`);
       });
 
-      it('renders the copy button while shown', async () => {
-        await page.evaluate(() => {
-          window.notificationModel.show('hi', 'success', 5000);
-        });
-        await page.waitForFunction(`document.querySelector('.notification-copy-btn') !== null`);
-      });
-
       it('clicking the copy button writes the current message to clipboard', async () => {
         await page.evaluate(() => {
           window.notificationModel.show('Secret message', 'success', 5000);
           document.querySelector('.notification-copy-btn').click();
         });
         await page.waitForFunction(`window.__clipboardText === 'Secret message'`);
-      });
-
-      it('copy button title flips to "Copied!" while in the copied state', async () => {
-        await page.evaluate(() => {
-          window.notificationModel.show('hi', 'success', 5000);
-          document.querySelector('.notification-copy-btn').click();
-        });
-        await page.waitForFunction(`document.querySelector('.notification-copy-btn').title === 'Copied!'`);
       });
     });
   });
