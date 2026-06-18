@@ -28,7 +28,8 @@ import {environmentReadinessStatus} from '../../../common/environment/environmen
  * @returns {vnode} - panel with actions allowed for the user to apply on the environment
  */
 export const controlEnvironmentPanel = (environmentModel, item, isAllowedToControl = false) => {
-  const {currentTransition} = item;
+  const { state, currentTransition } = item;
+  const { userVars: {run_start_time_ms} } = item;
   const {model} = environmentModel;
   const {statusMessage} = environmentReadinessStatus(item, model);
   return h('.flex-column.justify-center', {
@@ -48,10 +49,12 @@ export const controlEnvironmentPanel = (environmentModel, item, isAllowedToContr
     ]),
     isAllowedToControl && h('.flex-row.flex-end.g2.items-center', [
       statusMessage && h('.danger.flex-end.flex-row.flex-center', statusMessage),
-      controlButton(
-        '.btn-success.w-25', environmentModel, item, 'START', 'START_ACTIVITY', 'CONFIGURED',
-        Boolean(currentTransition)
-      ),
+      run_start_time_ms &&  state !== 'RUNNING' && !currentTransition ?
+        h('span.warning.text-right#start_action_warning', 'Environment was in RUNNING state once already')
+        : controlButton(
+          '.btn-success.w-25', environmentModel, item, 'START', 'START_ACTIVITY', 'CONFIGURED',
+          Boolean(currentTransition)
+        ),
       controlButton(
         '.btn-primary', environmentModel, item, 'CONFIGURE', 'CONFIGURE', '', Boolean(currentTransition)
       ), // button will not be displayed in any state due to OCTRL-628
