@@ -50,7 +50,7 @@ export const controlEnvironmentPanel = (environmentModel, item, isAllowedToContr
     isAllowedToControl && h('.flex-row.flex-end.g2.items-center', [
       statusMessage && h('.danger.flex-end.flex-row.flex-center', statusMessage),
       run_start_time_ms &&  state !== 'RUNNING' && !currentTransition ?
-        h('span.warning.text-right#environment_was_in_running_state_once_already', 'Environment was in RUNNING state once already')
+        h('span.warning.text-right#start_action_warning', 'Environment was in RUNNING state once already')
         : controlButton(
           '.btn-success.w-25', environmentModel, item, 'START', 'START_ACTIVITY', 'CONFIGURED',
           Boolean(currentTransition)

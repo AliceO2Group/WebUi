@@ -162,13 +162,12 @@ describe('`pageEnvironment` test-suite', async () => {
     });
 
     it('should display warning label for START button in state CONFIGURED', async () => {
-      await page.waitForSelector('#environment_was_in_running_state_once_already', { timeout: 5000 });
-      const startButtonWarning = await page.evaluate(() => document.querySelector('#environment_was_in_running_state_once_already').innerText);
+      await page.waitForSelector('#start_action_warning', { timeout: 5000 });
+      const startButtonWarning = await page.evaluate(() => document.querySelector('#start_action_warning').innerText);
       assert.strictEqual(startButtonWarning, 'Environment was in RUNNING state once already');
     });
 
     it('should click RESET button to move states (CONFIGURED -> DEPLOYED)', async () => {
-       // click RESET
       await page.evaluate(() => document.querySelector('#buttonToRESET').click());
       await waitForTimeout(1000);
       const standbyState = await page.evaluate(() => window.model.environment.item.payload.state);
@@ -176,8 +175,8 @@ describe('`pageEnvironment` test-suite', async () => {
     });
 
     it('should display warning label for START button in state DEPLOYED', async () => {
-      await page.waitForSelector('#environment_was_in_running_state_once_already', { timeout: 5000 });
-      const startButtonWarning = await page.evaluate(() => document.querySelector('#environment_was_in_running_state_once_already').innerText);
+      await page.waitForSelector('#start_action_warning', { timeout: 5000 });
+      const startButtonWarning = await page.evaluate(() => document.querySelector('#start_action_warning').innerText);
       assert.strictEqual(startButtonWarning, 'Environment was in RUNNING state once already');
     });
 
