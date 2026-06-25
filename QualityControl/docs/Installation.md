@@ -52,6 +52,9 @@ Once the server is running, open your browser and navigate to [localhost:8080](h
 Make sure your [browser is supported](https://github.com/AliceO2Group/WebUi/tree/dev/Framework#minimum-browser-version-support) to avoid any compatibility issues.
 
 ## Enable HTTPS
-- Follow these [steps](https://ca.cern.ch/ca/host/HostSelection.aspx?template=ee2host&instructions=openssl) to request a new CERN Grid Host Certificate
-- Set up file paths to the generated key and certificate in the `http` section of `config.js` file.
-- Note that this HTTPS setup is implemented using the ExpressJS router and does not rely on a web proxy server such as Nginx.
+
+### FLP suite or related QCG instances
+
+When QCG is deployed as part of an FLP suite or FLP inventory, certificates are installed and configured with nginx as part of the standard procedure — refer to the FLP documentation for details. For smaller, standalone deployments, the QCG back-end server supports `https` directly, with SSL certificate paths configurable in `config.js`.
+
+In both cases, HTTPS should be configured using CERN-provided certificates, following CERN recommendations. [Request a CERN host certificate](https://ca.cern.ch/ca/host/Request.aspx?template=CERNHostCertificate2YearsCustomSubject)
