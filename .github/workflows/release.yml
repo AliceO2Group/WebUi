@@ -16,7 +16,7 @@ jobs:
       VERSION: ${{ steps.set-project.outputs.version }}
       TAG: ${{ steps.set-project.outputs.tag }}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: actions/setup-node@v6
       with:
         node-version: '24.x'
@@ -54,7 +54,7 @@ jobs:
     outputs:
       ASSET_URL: ${{ steps.upload.outputs.asset_url }}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: actions/setup-node@v6
       with:
         node-version: '22.x'
