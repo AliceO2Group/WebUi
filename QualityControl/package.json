@@ -50,11 +50,11 @@
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@stylistic/eslint-plugin-js": "4.4.0",
-    "eslint": "10.5.0",
+    "eslint": "10.6.0",
     "eslint-plugin-jsdoc": "63.0.7",
     "globals": "17.7.0",
     "nock": "15.0.0",
-    "puppeteer": "25.2.0",
+    "puppeteer": "25.3.0",
     "sequelize-cli": "6.6.2",
     "sinon": "22.0.0",
     "supertest": "7.2.2"
