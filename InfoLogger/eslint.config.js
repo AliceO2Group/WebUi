@@ -18,6 +18,14 @@ const jsdoc = require('eslint-plugin-jsdoc');
 const stylisticJs = require('@stylistic/eslint-plugin');
 
 module.exports = [
+  {
+    ignores: [
+      'test/',
+      'node_modules/',
+      'tmp/',
+      'nyc_output/',
+    ],
+  },
   jsdoc.configs['flat/recommended'],
   pluginJs.configs.recommended,
   {

@@ -11,6 +11,7 @@
   - [Interface User Guide](#interface-user-guide)
   - [Requirements](#requirements)
   - [Project Layout](#project-layout)
+  - [Scripts](#scripts)
   - [Backend](#backend)
   - [Frontend](#frontend)
   - [Local Development](#local-development)
@@ -24,6 +25,8 @@
     - [infologger.yml](#infologgeryml)
     - [release.yml](#releaseyml)
     - [system-configuration pipeline](#system-configuration-pipeline)
+  - [Docker development](#docker-development)
+    - [Development database installation](#development-database-installation)
   - [InfoLogger Insights](#infologger-insights)
 
 ## Introduction
@@ -61,6 +64,17 @@ Screenshot of the current interface, running locally against a fake InfoLoggerSe
 ## Project Layout
 
 ILG is a Node.js API Gateway and Single-Page Application built on top of the `@aliceo2/web-ui` framework. It serves as a unified interface to two separate operational backends: a **MariaDB database** for historical queries and an **InfoLoggerServer TCP endpoint** for live log streaming.
+## Scripts
+| Script | Description |
+| --- | --- |
+| `npm start` | Run the app (`node index.js`). |
+| `npm run lint` | Lint the project with ESLint. |
+| `npm run lint:fix` | Lint and automatically fix fixable problems. |
+| `npm test` | Run the linter, then the Mocha test suite. |
+| `npm run coverage` | Run the test suite under `nyc` and generate the coverage report. |
+| `npm run coverage:report` | Generate HTML + JSON coverage reports under `coverage/` from the last run. |
+
+Docker commands (`docker:run`, `docker:test`, `docker:simul`, `docker:cleanup`) are documented under [Docker development](#docker-development).
 
 ## Backend
 
