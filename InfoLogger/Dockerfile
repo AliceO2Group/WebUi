@@ -41,9 +41,9 @@ FROM developmentdependencies AS development
 EXPOSE 8080
 
 # Run start script as specified in package.json
-CMD [ "npm", "run", "dev" ]
+CMD [ "npm", "run", "start:dev" ]
 
-    # #
+#
 # ---- Test ----
 FROM developmentdependencies AS test
     
@@ -81,4 +81,4 @@ FROM productiondependencies AS production
 EXPOSE 8080
 
 # Run start script as specified in package.json
-CMD [ "node", "run", "start" ]
+CMD [ "npm", "start" ]

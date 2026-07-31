@@ -11,6 +11,7 @@
   - [Interface User Guide](#interface-user-guide)
   - [Requirements](#requirements)
   - [Project Layout](#project-layout)
+  - [Scripts](#scripts)
   - [Backend](#backend)
   - [Frontend](#frontend)
   - [Local Development](#local-development)
@@ -24,6 +25,8 @@
     - [infologger.yml](#infologgeryml)
     - [release.yml](#releaseyml)
     - [system-configuration pipeline](#system-configuration-pipeline)
+  - [Docker development](#docker-development)
+    - [Development database installation](#development-database-installation)
   - [InfoLogger Insights](#infologger-insights)
 
 ## Introduction
@@ -61,6 +64,17 @@ Screenshot of the current interface, running locally against a fake InfoLoggerSe
 ## Project Layout
 
 ILG is a Node.js API Gateway and Single-Page Application built on top of the `@aliceo2/web-ui` framework. It serves as a unified interface to two separate operational backends: a **MariaDB database** for historical queries and an **InfoLoggerServer TCP endpoint** for live log streaming.
+## Scripts
+| Script | Description |
+| --- | --- |
+| `npm start` | Run the app (`node index.js`). |
+| `npm run lint` | Lint the project with ESLint. |
+| `npm run lint:fix` | Lint and automatically fix fixable problems. |
+| `npm test` | Run the linter, then the Mocha test suite. |
+| `npm run coverage` | Run the test suite under `nyc` and generate the coverage report. |
+| `npm run coverage:report` | Generate HTML + JSON coverage reports under `coverage/` from the last run. |
+
+Docker commands (`docker:run`, `docker:test`, `docker:simul`, `docker:cleanup`) are documented under [Docker development](#docker-development).
 
 ## Backend
 
@@ -194,6 +208,31 @@ Should you want to run the ILG with the status quo (your changes applied) you ca
 2. npm run docker:test (will run the ILG npm run test command inside a Docker container and print the live log output).
 3. npm run docker:simul (will run an ILG simulator with the port open so that whenever you run the ILG it will have live mode available).
 4. npm run docker:cleanup (REMOVES all containers created with the above commands and their data).
+
+### Development database installation
+In order to run queries in the InfoLogger a MariaDB server is required. To run a local MariaDB server that can easily be updated/wiped/configured you will need Docker installed.
+1. Follow the instructions specific for you platform: [docker desktop install](https://www.docker.com/products/docker-desktop/)
+2. Create a `compose.yaml` file somewhere on your pc with the following content: 
+```
+services:
+  mariadb:
+    image: mariadb
+    restart: unless-stopped
+    ports:
+     - 3306:3306
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+    # (this is just an example, not intended to be a production configuration)
+  phpmyadmin:
+    image: phpmyadmin
+    restart: unless-stopped
+    ports:
+      - 9090:80
+    environment:
+      - PMA_HOST=mariadb
+```
+This will get you a MariaDB server with phpmyadmin.
+Should you ever feel the need to test a specific version of MariaDB then change the image to `mariadb:11.5` where 11.5 is the version. By default the compose.yaml will get you the latest MariaDB image.
 
 ## InfoLogger Insights
 
