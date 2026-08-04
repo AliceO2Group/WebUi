@@ -12,20 +12,28 @@
  * or submit itself to any jurisdiction.
  */
 
-const CONTEXT_MENU_RENDER_DELAY = 25; // delay to wait for context menu to render new actions after opening
-
 const isContextMenuOpen = async (page) => await page.evaluate(() => window.model.log.contextMenu.isOpen);
 
 const getMenuActionLabels = async (page) => page.evaluate(() =>
   Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
     .map((el) => el.textContent.trim()));
 
+/*
+ * A stale menu from a previous test can already satisfy a waitForSelector check
+ * before the pending redraw (reflecting the new state) has actually run.
+ * Waiting for two animation frames guarantees the debounced redraw has fired
+ * at least once since the mutation.
+ */
+const waitForNextRender = (page) => page.evaluate(() => new Promise((resolve) => {
+  requestAnimationFrame(() => requestAnimationFrame(resolve));
+}));
+
 const openContextMenu = async (page, field, value, x, y) => {
   await page.evaluate((field, value, x, y) => {
     window.model.log.contextMenu.show(field, value, x, y);
   }, field, value, x, y);
+  await waitForNextRender(page);
   await page.waitForSelector('.cell-context-menu');
-  await new Promise((resolve) => setTimeout(resolve, CONTEXT_MENU_RENDER_DELAY));
 };
 
 const isMenuItemDisabled = async (page, label) => await page.evaluate((label) => {
@@ -53,7 +61,6 @@ const clickMenuItemByLabel = async (page, label) => {
 };
 
 module.exports = {
-  CONTEXT_MENU_RENDER_DELAY,
   isContextMenuOpen,
   getMenuActionLabels,
   openContextMenu,
