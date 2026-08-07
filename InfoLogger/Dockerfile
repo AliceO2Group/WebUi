@@ -23,15 +23,10 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Copy all files, except those ignored by .dockerignore, to the container
-COPY . .
-
-
-
+COPY package*.json ./
 # Installs modules from package-lock.json if there are changes, this ensures reproducible build
 RUN npm --silent ci
 
-# Install nodemon (for development only)
-RUN npm i nodemon
 
 #
 # ---- Development ----
@@ -40,45 +35,31 @@ FROM developmentdependencies AS development
 # Expose the port to the Docker instance (not the host!)
 EXPOSE 8080
 
+# Run the container as a non-root user 1000:1000, which is the default user in the node:22-alpine image
+USER 1000:1000
+
 # Run start script as specified in package.json
 CMD [ "npm", "run", "start:dev" ]
 
 #
 # ---- Test ----
 FROM developmentdependencies AS test
-    
+
+# 
+COPY . .
+
+USER 1000:1000
+
 # Run start script as specified in package.json
 CMD [ "npm", "run", "test" ]
 
-# ---- Production Dependencies ----
-FROM base AS productiondependencies
-
-# Copy package.json and package-lock.json to the container.
-COPY package*.json ./
-
-# Installs modules from package-lock.json, this ensures reproducible build.
-RUN npm --silent ci --production    
-
- # Copy all files, filtered by .dockerignore, to the container with added dev dependancies.
-COPY . .
-RUN rm -r ./test
-RUN rm eslint.config.js
-
-
+#
 # ---- Simul ----
-FROM developmentdependencies AS simul
-
-# Expose simul server port.
+FROM base AS simul
+COPY package.json ./
+COPY test/live-simulator ./test/live-simulator
 EXPOSE 6102
 
-# Run simul script as specified in package.json
+USER 1000:1000
+
 CMD [ "npm", "run", "simul" ]
-
-# ---- Production ----
-FROM productiondependencies AS production
-
-# Expose the port to the Docker instance (not the host!)
-EXPOSE 8080
-
-# Run start script as specified in package.json
-CMD [ "npm", "start" ]
