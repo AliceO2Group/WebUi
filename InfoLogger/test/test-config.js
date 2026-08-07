@@ -12,6 +12,9 @@
  * or submit itself to any jurisdiction.
  */
 
+const { tmpdir } = require('os');
+const path = require('path');
+
 module.exports = {
   http: {
     port: 8080,
@@ -33,5 +36,5 @@ module.exports = {
     expiration: '60s',
     maxAge: '2',
   },
-  dbFile: './test/testdb.json',
+  dbFile: path.join(tmpdir(), 'testdb.json'),
 };

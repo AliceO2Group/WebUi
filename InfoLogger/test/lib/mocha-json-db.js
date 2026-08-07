@@ -16,8 +16,9 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const JsonFileConnector = require('../../lib/JSONFileConnector.js');
+const { tmpdir } = require('os');
 
-const CONFIG_FILE = path.join(__dirname, 'db.json.temp');
+const CONFIG_FILE = path.join(tmpdir(), 'db.json.temp');
 
 const TEST_CONTENT = {
   colsHeader: {
