@@ -8,12 +8,13 @@ services:
     depends_on:
       database:
         condition: service_healthy
-        restart: true
+        required: false
+      simulator:
+        condition: service_started
+        required: false
   
     environment:
       NODE_ENV: development
-      mariadb_host: database
-      infologger_host: simulator
 
     ports:
       - "8080:8080"
@@ -35,22 +36,23 @@ services:
         read_only: true
         source: ./index.js
         target: /home/node/app/index.js
+
   database:
     image: mariadb:11.6.2
     restart: unless-stopped
 
     environment:
-      MARIADB_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: ilPwdB
+      MYSQL_USER: infoBrowser
+      MYSQL_PASSWORD: ilPwdB
+      MYSQL_DATABASE: INFOLOGGER
 
     # should you want to access the DB using a external program
     ports:
     - "3306:3306"
 
-    # tmpfs keeps the data dir in RAM, so it starts empty on every run and
     # MariaDB re-applies INFOLOGGER.sql each time (throwaway dev database).
     volumes:
-      - type: tmpfs
-        target: /var/lib/mysql
       - type: bind
         read_only: true
         source: ./docker/INFOLOGGER.sql
@@ -62,7 +64,15 @@ services:
       timeout: 20s
       retries: 20
 
+    profiles: ['local-db']
+
   simulator:
     build:
       target: simul
+
     restart: "unless-stopped"
+
+    ports:
+      - "6102:6102"
+
+    profiles: ['local-ilg']
