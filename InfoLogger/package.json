@@ -44,6 +44,7 @@
     "eslint-plugin-jsdoc": "63.3.1",
     "globals": "17.8.0",
     "mocha": "11.7.0",
+    "nodemon": "^3.1.14",
     "nyc": "18.0.0",
     "puppeteer": "25.4.0",
     "sinon": "22.1.0"

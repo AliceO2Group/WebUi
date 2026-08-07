@@ -4,8 +4,8 @@
 # Project
 !lib/
 !package*.json
-!public
+!public/
 !index.js
-!test
+!test/
 !eslint.config.js
-!config-default.js
+!config.js
