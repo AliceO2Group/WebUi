@@ -2,27 +2,8 @@ services:
   application:
     build:
       target: test
+    
+    restart: "no"
+
     environment:
       NODE_ENV: development
-    restart: "no"
-    volumes:
-      - type: bind
-        read_only: true
-        source: ./lib
-        target: /home/node/app/lib
-      - type: bind
-        read_only: true
-        source: ./public
-        target: /home/node/app/public
-      - type: bind
-        read_only: false
-        source: ./test
-        target: /home/node/app/test
-      - type: bind
-        read_only: true
-        source: ./config.js
-        target: /home/node/app/config.js
-      - type: bind
-        read_only: true
-        source: ./index.js
-        target: /home/node/app/index.js
