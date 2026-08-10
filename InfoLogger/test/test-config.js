@@ -12,9 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-const { tmpdir } = require('os');
-const path = require('path');
-
 module.exports = {
   http: {
     port: 8080,
@@ -36,5 +33,8 @@ module.exports = {
     expiration: '60s',
     maxAge: '2',
   },
-  dbFile: path.join(tmpdir(), 'testdb.json'),
+  // Set by mocha-index.js to a freshly created temporary directory and removes it afterwards.
+  // It must differ from the file used by mocha-json-db.js as that unit tests JSONFileConnector in a separate process,
+  // so sharing a file would mean two uncoordinated writers.
+  dbFile: process.env.ILG_TEST_DB,
 };
