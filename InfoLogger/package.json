@@ -32,7 +32,7 @@
     "docker:dev:local-query": "docker compose -f docker-compose.yaml -f docker-compose.dev.yaml --profile local-db up --build",
     "docker:dev:local-both": "docker compose -f docker-compose.yaml -f docker-compose.dev.yaml --profile local-db --profile local-ilg up --build",
     "docker:test": "docker compose -f docker-compose.yaml -f docker-compose.test.yaml up --build --abort-on-container-exit --exit-code-from application",
-    "docker:cleanup": "docker compose -f docker-compose.yaml -f docker-compose.dev.yaml -f docker-compose.test.yaml down -v --remove-orphans"
+    "docker:cleanup": "docker compose -f docker-compose.yaml -f docker-compose.dev.yaml -f docker-compose.test.yaml --profile '*' down -v --remove-orphans"
   },
   "main": "index.js",
   "dependencies": {
