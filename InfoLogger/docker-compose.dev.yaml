@@ -72,6 +72,9 @@ services:
 
     restart: "unless-stopped"
 
+    environment:
+      NODE_ENV: development
+
     ports:
       - "6102:6102"
 
