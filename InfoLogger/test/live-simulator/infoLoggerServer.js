@@ -27,12 +27,15 @@ const createServer = () => {
   const server = net.createServer(connectionListener);
   const port = 6102; // infoLoggerServer default port
 
+  const clients = new Set();
+
   /**
    * Listener for new client connections. It sends fake log messages to the client at random intervals.
    * @param {net.Socket} client - The connected client socket
    */
   function connectionListener(client) {
     console.log('[InfoLogger Server] Client connected at:', new Date().toISOString());
+    clients.add(client);
     let timer = null;
     let currentLogIndex = 0;
 
@@ -105,6 +108,7 @@ const createServer = () => {
      */
     function onClientDisconnect() {
       console.log('[InfoLogger Server] Client disconnected at:', new Date().toISOString());
+      clients.delete(client);
       clearTimeout(timer);
     }
   }
@@ -126,25 +130,33 @@ const createServer = () => {
   server.listen(port, () => {
     console.log(`[InfoLogger Server] InfoLoggerServer is running on port ${port}`);
   });
+
+  server.clients = clients;
   return server;
 };
 
-const closeServer = (server) => {
+const closeServer = (server) => new Promise((resolve, reject) => {
   console.log('[InfoLogger Server] Closing server at:', new Date().toISOString());
-  try {
-    if (server && server.listening) {
-      server.close((err) => {
-        if (err) {
-          console.error('[InfoLogger Server] Error closing server:', err.message);
-        } else {
-          console.log('[InfoLogger Server] Server closed successfully');
-        }
-      });
-    }
-  } catch (err) {
-    console.error('[InfoLogger Server] Exception while closing server:', err.message);
-    console.error('[InfoLogger Server] Stack:', err.stack);
+
+  if (!server || !server.listening) {
+    console.log('[InfoLogger Server] Server was not listening, nothing to close');
+    resolve();
+    return;
   }
-};
+
+  server.close((err) => {
+    if (err) {
+      console.error('[InfoLogger Server] Error closing server:', err.message);
+      reject(err);
+    } else {
+      console.log('[InfoLogger Server] Server closed successfully');
+      resolve();
+    }
+  });
+
+  for (const client of server.clients ?? []) {
+    client.destroy();
+  }
+});
 
 module.exports = { createServer, closeServer };
