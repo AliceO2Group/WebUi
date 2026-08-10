@@ -62,4 +62,4 @@ EXPOSE 6102
 
 USER 1000:1000
 
-CMD [ "npm", "run", "simul" ]
+CMD [ "node", "test/live-simulator/runInfoLoggerServer.js" ]
