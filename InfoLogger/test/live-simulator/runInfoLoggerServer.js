@@ -1,3 +1,12 @@
-const { createServer } = require('./infoLoggerServer.js');
+const { createServer, closeServer } = require('./infoLoggerServer.js');
 
-createServer();
+const server = createServer();
+
+['SIGTERM', 'SIGINT', 'SIGHUP'].forEach((event) => process.on(event, async () => {
+  try {
+    await closeServer(server);
+    process.exit(0);
+  } catch {
+    process.exit(1);
+  }
+}));
