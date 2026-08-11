@@ -78,7 +78,7 @@ Docker commands (`docker:dev`, `docker:dev:local-live`, `docker:dev:local-query`
 
 ### Docker development
 
-The development and test docker image will take up about 1.35 GB, about 50% of that is due to puppeteer's chromium requirement, the same reason why Electron apps are so big.
+The development image is approx. 500MB and the test image is approx 1.5GB, about 50% of that is due to puppeteer's chromium requirement.
 
 `database` and `simulator` are behind Compose profiles, so they only start when you ask for them. Rather than typing `--profile` flags by hand, use one of:
 
