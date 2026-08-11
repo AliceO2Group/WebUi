@@ -11,19 +11,10 @@ WORKDIR /home/node/app
 # ---- Development Dependencies ----
 FROM base AS developmentdependencies
 
-# Installs Git and packages required for Puppeteer
-# https://pkgs.alpinelinux.org/packages
-RUN apk add --no-cache \
-    chromium \
-    freetype \
-    freetype-dev
+# Must be set before `npm ci` otherwise Puppeteer will try to install Chrome. We'll be using the installed package.
+ENV PUPPETEER_SKIP_DOWNLOAD=true
 
-# Tell Puppeteer to skip installing Chrome. We'll be using the installed package.
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-
-# Copy all files, except those ignored by .dockerignore, to the container
-COPY package*.json ./
+COPY package.json package-lock.json ./
 # Installs modules from package-lock.json if there are changes, this ensures reproducible build
 RUN npm --silent ci
 
@@ -45,7 +36,10 @@ CMD [ "npm", "run", "start:dev" ]
 # ---- Test ----
 FROM developmentdependencies AS test
 
-# 
+RUN apk add --no-cache chromium
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# Copy all files, except those ignored by .dockerignore, to the container
 COPY . .
 
 USER 1000:1000
@@ -56,7 +50,7 @@ CMD [ "npm", "run", "test" ]
 #
 # ---- Simul ----
 FROM base AS simul
-COPY package.json ./
+
 COPY test/live-simulator ./test/live-simulator
 EXPOSE 6102
 
