@@ -1,3 +1,4 @@
+name: infologger-dev
 services:
   application:
     build:
