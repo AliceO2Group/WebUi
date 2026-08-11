@@ -1,3 +1,4 @@
+name: infologger-test
 services:
   application:
     build:
