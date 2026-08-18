@@ -51,10 +51,10 @@
     "@eslint/js": "10.0.1",
     "@stylistic/eslint-plugin-js": "4.4.0",
     "eslint": "10.8.0",
-    "eslint-plugin-jsdoc": "64.0.1",
-    "globals": "17.9.0",
+    "eslint-plugin-jsdoc": "64.2.0",
+    "globals": "17.11.0",
     "nock": "15.0.0",
-    "puppeteer": "25.5.0",
+    "puppeteer": "25.7.0",
     "sequelize-cli": "6.6.2",
     "sinon": "22.1.0",
     "supertest": "7.2.2"
