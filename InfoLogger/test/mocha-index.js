@@ -16,6 +16,7 @@
 const puppeteer = require('puppeteer');
 const assert = require('assert');
 const { spawn } = require('child_process');
+const fs = require('fs');
 
 const config = require('./test-config.js');
 const { createServer, closeServer } = require('./live-simulator/infoLoggerServer.js');
@@ -57,6 +58,10 @@ describe('InfoLogger', function () {
         console.error('[Test Setup] Stack:', error.stack);
       }
     });
+
+    // Remove any leftover user profile DB from a previous run so tests that modify
+    // profile state (e.g. user-actions-mocha) always start from the same known state.
+    fs.rmSync(config.dbFile, { force: true });
 
     // Start infologger server simulator
     ilgServer = createServer();

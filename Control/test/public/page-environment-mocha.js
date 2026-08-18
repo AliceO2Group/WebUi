@@ -159,19 +159,25 @@ describe('`pageEnvironment` test-suite', async () => {
       await waitForTimeout(1000);
       const configuredState = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(configuredState, 'CONFIGURED');
-      // click RESET
+    });
+
+    it('should display warning label for START button in state CONFIGURED', async () => {
+      await page.waitForSelector('#start_action_warning', { timeout: 5000 });
+      const startButtonWarning = await page.evaluate(() => document.querySelector('#start_action_warning').innerText);
+      assert.strictEqual(startButtonWarning, 'Environment was in RUNNING state once already');
+    });
+
+    it('should click RESET button to move states (CONFIGURED -> DEPLOYED)', async () => {
       await page.evaluate(() => document.querySelector('#buttonToRESET').click());
       await waitForTimeout(1000);
       const standbyState = await page.evaluate(() => window.model.environment.item.payload.state);
       assert.strictEqual(standbyState, 'DEPLOYED');
     });
 
-    it('should have one button hidden for START in state DEPLOYED', async () => {
-      await page.waitForSelector('#buttonToSTART', {timeout: 5000});
-      const startButtonTitle = await page.evaluate(() => document.querySelector('#buttonToSTART').title);
-      const startButtonStyle = await page.evaluate(() => document.querySelector('#buttonToSTART').style);
-      assert.strictEqual(startButtonTitle, `'START' cannot be used in state 'DEPLOYED'`);
-      assert.deepStrictEqual(startButtonStyle, {0: 'display'});
+    it('should display warning label for START button in state DEPLOYED', async () => {
+      await page.waitForSelector('#start_action_warning', { timeout: 5000 });
+      const startButtonWarning = await page.evaluate(() => document.querySelector('#start_action_warning').innerText);
+      assert.strictEqual(startButtonWarning, 'Environment was in RUNNING state once already');
     });
 
     it('should have one button hidden for STOP in state DEPLOYED', async () => {

@@ -249,6 +249,30 @@ describe('Filter actions test-suite', async () => {
     assert.deepStrictEqual($in, ['I', 'W', 'E', 'F']);
   });
 
+  it('should encode special characters correctly into the URL', async () => {
+    const pidMatch = await page.evaluate(() => {
+      window.model.log.filter.setCriteria('pid', 'match', 'a+b c %d #anchor & = héllo wörld 日本語');
+      return window.model.log.filter.criterias.pid.$match;
+    });
+
+    assert.strictEqual(pidMatch, 'a+b c %d #anchor & = héllo wörld 日本語');
+
+    const searchParams = await page.evaluate(() => {
+      window.model.updateRouteOnModelChange();
+      return window.location.search;
+    });
+
+    assert.ok(searchParams.includes('a%2Bb%20c%20%25d%20%23anchor%20%26%20%3D%20h%C3%A9llo%20w%C3%B6rld%20%E6%97%A5%E6%9C%AC%E8%AA%9E'));
+  });
+
+  it('should decode special characters correctly from the URL', async () => {
+    await page.goto(`${baseUrl}?q={%22pid%22:{%22match%22:%22a%2Bb%20c%20%25d%20%23anchor%20%26%20%3D%20h%C3%A9llo%20w%C3%B6rld%20%E6%97%A5%E6%9C%AC%E8%AA%9E%22}}`, { waitUntil: 'networkidle0' });
+
+    const pidMatch = await page.evaluate(() => window.model.log.filter.criterias.pid.$match);
+
+    assert.strictEqual(pidMatch, 'a+b c %d #anchor & = héllo wörld 日本語');
+  });
+
   it('should reset filters and set them again', async () => {
     const criterias = await page.evaluate(() => {
       window.model.log.filter.resetCriteria();
