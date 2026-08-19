@@ -3,17 +3,9 @@ services:
   application:
     build:
       target: development
-    
+
     restart: "no"
 
-    depends_on:
-      database:
-        condition: service_healthy
-        required: false
-      simulator:
-        condition: service_started
-        required: false
-  
     environment:
       NODE_ENV: development
 
@@ -37,46 +29,3 @@ services:
         read_only: true
         source: ./index.js
         target: /home/node/app/index.js
-
-  database:
-    image: mariadb:11.6.2
-    restart: unless-stopped
-
-    environment:
-      MYSQL_ROOT_PASSWORD: ilPwdB
-      MYSQL_USER: infoBrowser
-      MYSQL_PASSWORD: ilPwdB
-      MYSQL_DATABASE: INFOLOGGER
-
-    # should you want to access the DB using a external program
-    ports:
-    - "3306:3306"
-
-    # MariaDB re-applies INFOLOGGER.sql each time (throwaway dev database).
-    volumes:
-      - type: bind
-        read_only: true
-        source: ./docker/INFOLOGGER.sql
-        target: /docker-entrypoint-initdb.d/INFOLOGGER.sql
-
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      interval: 5s
-      timeout: 20s
-      retries: 20
-
-    profiles: ['local-db']
-
-  simulator:
-    build:
-      target: simul
-
-    restart: "unless-stopped"
-
-    environment:
-      NODE_ENV: development
-
-    ports:
-      - "6102:6102"
-
-    profiles: ['local-ilg']
