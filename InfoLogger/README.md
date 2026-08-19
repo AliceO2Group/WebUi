@@ -74,7 +74,7 @@ ILG is a Node.js API Gateway and Single-Page Application built on top of the `@a
 | `npm run coverage` | Run the test suite under `nyc` and generate the coverage report. |
 | `npm run coverage:report` | Generate HTML + JSON coverage reports under `coverage/` from the last run. |
 
-Docker commands (`docker:dev`, `docker:dev:local-live`, `docker:dev:local-query`, `docker:dev:local-both`, `docker:test` and `docker:cleanup`) are documented under [Docker development](#docker-development).
+Docker commands (`docker:dev`, `docker:dev:local-ilg`, `docker:dev:local-db`, `docker:dev:local-both`, `docker:test` and `docker:cleanup`) are documented under [Docker development](#docker-development).
 
 ### Docker development
 
@@ -85,13 +85,11 @@ The development image is approx. 500MB and the test image is approx 1.5GB, about
 | Script | Compose files (on top of `docker-compose.yaml`) | Application | Database | Simulator |
 | --- | --- | --- | --- | --- |
 | `npm run docker:dev` | `dev` | ✅ | ❌ | ❌ |
-| `npm run docker:dev:local-live` | `dev` + `dev.ilg` | ✅ | ❌ | ✅ |
-| `npm run docker:dev:local-query` | `dev` + `dev.db` | ✅ | ✅ | ❌ |
+| `npm run docker:dev:local-ilg` | `dev` + `dev.ilg` | ✅ | ❌ | ✅ |
+| `npm run docker:dev:local-db` | `dev` + `dev.db` | ✅ | ✅ | ❌ |
 | `npm run docker:dev:local-both` | `dev` + `dev.db` + `dev.ilg` | ✅ | ✅ | ✅ |
 
 For services with a cross, point `config.js` at a remote host and port and change the credentials accordingly. For services with a checkmark, the script will start a local container for you.
-
-Each override adds its own `depends_on` entry to `application`, so the application only starts once the database is healthy, the seeder has finished successfully and the simulator is accepting connections. If any of them fails to come up, `up` aborts with a non-zero exit code and the application is never started.
 
 Run `npm run docker:cleanup` to remove all containers created by the above and their data.
 
@@ -136,13 +134,13 @@ Edit `config.js` for the setup you're using below.
 The bundled [fake InfoLoggerServer](test/live-simulator/) emits a log every 0-100 ms, shuffling through [test/fake-data/fakeData.json](test/fake-data/fakeData.json).
 
 1. Point `infoLoggerServer` in `config.js` at `simulator`.
-2. `npm run docker:dev:local-live`.
+2. `npm run docker:dev:local-ilg`.
 3. Open [http://localhost:8080](http://localhost:8080) and click **Live**.
 
 ### Query against a local DB
 
 1. Point `mysql` in `config.js` at `database`.
-2. `npm run docker:dev:local-query`.
+2. `npm run docker:dev:local-db`.
 3. Open [http://localhost:8080](http://localhost:8080) and click **Query**.
 
 The schema in [test/db/INFOLOGGER.sql](test/db/INFOLOGGER.sql) is applied once, when the database volume is
