@@ -4,7 +4,6 @@ FROM node:22-alpine AS base
 
 RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 
-# Create app directory
 WORKDIR /home/node/app
 
 #
@@ -23,13 +22,11 @@ RUN npm --silent ci
 # ---- Development ----
 FROM developmentdependencies AS development
 
-# Expose the port to the Docker instance (not the host!)
 EXPOSE 8080
 
 # Run the container as a non-root user 1000:1000, which is the default user in the node:22-alpine image
 USER 1000:1000
 
-# Run start script as specified in package.json
 CMD [ "npm", "run", "start:dev" ]
 
 #
@@ -39,12 +36,11 @@ FROM developmentdependencies AS test
 RUN apk add --no-cache chromium
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-# Copy all files, except those ignored by .dockerignore, to the container
+# Copy all files, except those ignored by .dockerignore
 COPY . .
 
 USER 1000:1000
 
-# Run start script as specified in package.json
 CMD [ "npm", "run", "test" ]
 
 #
@@ -52,6 +48,8 @@ CMD [ "npm", "run", "test" ]
 FROM base AS simul
 
 COPY test/live-simulator ./test/live-simulator
+COPY test/fake-data ./test/fake-data
+COPY test/utils ./test/utils
 EXPOSE 6102
 
 USER 1000:1000

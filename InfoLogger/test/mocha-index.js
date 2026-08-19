@@ -129,7 +129,7 @@ describe('InfoLogger', function () {
     console.log(subprocessOutput);
     console.log('---------------------------------------------');
     subprocess.kill();
-    closeServer(ilgServer);
+    await closeServer(ilgServer);
     fs.rmSync(tempDBDir, { recursive: true, force: true });
   });
 });

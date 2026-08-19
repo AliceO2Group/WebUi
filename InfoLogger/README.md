@@ -80,16 +80,18 @@ Docker commands (`docker:dev`, `docker:dev:local-live`, `docker:dev:local-query`
 
 The development image is approx. 500MB and the test image is approx 1.5GB, about 50% of that is due to puppeteer's chromium requirement.
 
-`database` and `simulator` are behind Compose profiles, so they only start when you ask for them. Rather than typing `--profile` flags by hand, use one of:
+`database` and `simulator` each live in their own Compose override file, so they only start when you ask for them. Rather than stacking `-f` flags by hand, use one of:
 
-| Script | Application | Database | Simulator |
-| --- | --- | --- | --- |
-| `npm run docker:dev` | ✅ | ❌ | ❌ |
-| `npm run docker:dev:local-live` | ✅ | ❌ | ✅ |
-| `npm run docker:dev:local-query` | ✅ | ✅ | ❌ |
-| `npm run docker:dev:local-both` | ✅ | ✅ | ✅ |
+| Script | Compose files (on top of `docker-compose.yaml`) | Application | Database | Simulator |
+| --- | --- | --- | --- | --- |
+| `npm run docker:dev` | `dev` | ✅ | ❌ | ❌ |
+| `npm run docker:dev:local-live` | `dev` + `dev.ilg` | ✅ | ❌ | ✅ |
+| `npm run docker:dev:local-query` | `dev` + `dev.db` | ✅ | ✅ | ❌ |
+| `npm run docker:dev:local-both` | `dev` + `dev.db` + `dev.ilg` | ✅ | ✅ | ✅ |
 
-For services with a cross, point `config.js` at a remote host and port. For services with a checkmark, the script will start a local container for you.
+For services with a cross, point `config.js` at a remote host and port and change the credentials accordingly. For services with a checkmark, the script will start a local container for you.
+
+Each override adds its own `depends_on` entry to `application`, so the application only starts once the database is healthy, the seeder has finished successfully and the simulator is accepting connections. If any of them fails to come up, `up` aborts with a non-zero exit code and the application is never started.
 
 Run `npm run docker:cleanup` to remove all containers created by the above and their data.
 
@@ -131,7 +133,7 @@ Edit `config.js` for the setup you're using below.
 
 ### Live mode against synthetic logs (thoroughly test Live mode)
 
-The bundled [fake InfoLoggerServer](test/live-simulator/) emits a log every 0-100 ms, shuffling through [test/live-simulator/fakeData.json](test/live-simulator/fakeData.json).
+The bundled [fake InfoLoggerServer](test/live-simulator/) emits a log every 0-100 ms, shuffling through [test/fake-data/fakeData.json](test/fake-data/fakeData.json).
 
 1. Point `infoLoggerServer` in `config.js` at `simulator`.
 2. `npm run docker:dev:local-live`.
@@ -142,6 +144,10 @@ The bundled [fake InfoLoggerServer](test/live-simulator/) emits a log every 0-10
 1. Point `mysql` in `config.js` at `database`.
 2. `npm run docker:dev:local-query`.
 3. Open [http://localhost:8080](http://localhost:8080) and click **Query**.
+
+The schema in [test/db/INFOLOGGER.sql](test/db/INFOLOGGER.sql) is applied once, when the database volume is
+first created. The `seeder` service then runs [test/db/seed-messages.js](test/db/seed-messages.js) on **every**
+`up`: it inserts a batch of messages if the table is empty, or re-dates the existing messages to keep them within the N many days specified in `seed-messages.js`. The seeder is idempotent, so you can run `docker compose up` repeatedly without accumulating duplicate messages. You only need to run 'npm run docker:cleanup' to remove the database volume if you have made changes to the schema or the seeder.
 
 Need both at once? `npm run docker:dev:local-both` starts the simulator and the local DB together.
 
