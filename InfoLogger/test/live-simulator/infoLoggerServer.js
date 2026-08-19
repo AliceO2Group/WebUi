@@ -18,8 +18,8 @@
 // https://nodejs.org/api/net.html#net_net_createserver_options_connectionlistener
 
 const net = require('net');
-const rawFakeData = require('./fakeData.json');
-const { shuffle } = require('./utils.js');
+const rawFakeData = require('../fake-data/fakeData.json');
+const { shuffle } = require('../utils/utils.js');
 
 const fakeData = shuffle([...rawFakeData]);
 
