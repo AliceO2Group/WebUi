@@ -164,7 +164,6 @@ describe('Query Mode test-suite', async () => {
     });
 
     const lines = copied.split('\n').filter((line) => line.trim() !== '');
-    console.log('copied text:', copied);
 
     assert.strictEqual(lines.length, 2, `selection should be one line per row, got:\n${copied}`);
     assert.ok(lines[0].includes('info log'), 'first line should hold the first row message');
