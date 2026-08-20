@@ -27,7 +27,7 @@
     "start": "node index.js",
     "start:dev": "nodemon --inspect --watch index.js --watch lib --watch config.js index.js",
     "simul": "node test/live-simulator/runInfoLoggerServer.js",
-    "seed": "node test/db/seed-messages.js",
+    "seed": "node docker/database/seed-messages.js",
     "docker:dev": "docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up --build",
     "docker:dev:local-ilg": "docker compose -f docker-compose.yaml -f docker-compose.dev.yaml -f docker-compose.dev.ilg.yaml up --build",
     "docker:dev:local-db": "docker compose -f docker-compose.yaml -f docker-compose.dev.yaml -f docker-compose.dev.db.yaml up --build",
