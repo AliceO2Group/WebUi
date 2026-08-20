@@ -13,14 +13,29 @@
  */
 
 const mariadb = require('mariadb');
-const rawFakeData = require('../fake-data/fakeData.json');
-const { shuffle } = require('../utils/utils.js');
+const rawFakeData = require('../../test/fake-data/fakeData.json');
+const { shuffle } = require('../../test/utils/utils.js');
 
 const fakeData = shuffle([...rawFakeData]);
 
 const COLUMNS = [
-  'severity', 'level', 'timestamp', 'hostname', 'rolename', 'pid', 'username', 'system',
-  'facility', 'detector', 'partition', 'dest', 'run', 'errcode', 'errline', 'errsource', 'message',
+  'severity',
+  'level',
+  'timestamp',
+  'hostname',
+  'rolename',
+  'pid',
+  'username',
+  'system',
+  'facility',
+  'detector',
+  'partition',
+  'dest',
+  'run',
+  'errcode',
+  'errline',
+  'errsource',
+  'message',
 ];
 
 const INSERT_QUERY = `INSERT INTO messages (${COLUMNS.map((column) => `\`${column}\``).join(', ')}) `
@@ -54,7 +69,7 @@ async function connectWithRetry(pool) {
       if (attempt === CONNECTION_ATTEMPTS) {
         throw error;
       }
-      console.log(new Date().toISOString() + ` [InfoLogger Seeder] Database not ready (attempt ${attempt}/${CONNECTION_ATTEMPTS}), retrying...`);
+      console.log(`${new Date().toISOString()} [InfoLogger Seeder] Database not ready (attempt ${attempt}/${CONNECTION_ATTEMPTS}), retrying...`);
       await new Promise((resolve) => setTimeout(resolve, CONNECTION_RETRY_MS));
     }
   }
@@ -67,11 +82,11 @@ async function connectWithRetry(pool) {
 function buildRows() {
   const messagesPerSecond = 1;
   const numberOfSecondsToSpan = 2 * 24 * 3600; // 2 days
-  const start = (Date.now() / 1000) - numberOfSecondsToSpan;
+  const start = Date.now() / 1000 - numberOfSecondsToSpan;
   const totalMessages = messagesPerSecond * numberOfSecondsToSpan;
 
   return Array.from({ length: totalMessages }, (_, i) => {
-    const timestamp = start + (i / messagesPerSecond);
+    const timestamp = start + i / messagesPerSecond;
     const data = fakeData[i % fakeData.length];
 
     return COLUMNS.map((column) => column === 'timestamp' ? timestamp : data[column] ?? null);
@@ -92,14 +107,14 @@ async function seed() {
 
     if (newest === null || newest === undefined) {
       const rows = buildRows();
-      console.log(new Date().toISOString() + ` [InfoLogger Seeder] Inserting ${rows.length} messages.`);
+      console.log(`${new Date().toISOString()} [InfoLogger Seeder] Inserting ${rows.length} messages.`);
       await connection.batch(INSERT_QUERY, rows);
     } else {
-      console.log(new Date().toISOString() + ' [InfoLogger Seeder] Re-dating the existing messages.');
-      await connection.query(REDATE_QUERY, [(Date.now() / 1000) - newest]);
+      console.log(`${new Date().toISOString()} [InfoLogger Seeder] Re-dating the existing messages.`);
+      await connection.query(REDATE_QUERY, [Date.now() / 1000 - newest]);
     }
 
-    console.log(new Date().toISOString() + ' [InfoLogger Seeder] Seeding completed successfully!');
+    console.log(`${new Date().toISOString()} [InfoLogger Seeder] Seeding completed successfully!`);
   } finally {
     connection?.release();
     await pool.end();
@@ -107,6 +122,6 @@ async function seed() {
 }
 
 seed().catch((error) => {
-  console.error(new Date().toISOString() + ' [InfoLogger Seeder] Error seeding database:', error);
+  console.error(`${new Date().toISOString()} [InfoLogger Seeder] Error seeding database:`, error);
   process.exit(1);
 });
