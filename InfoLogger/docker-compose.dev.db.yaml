@@ -22,11 +22,15 @@ services:
     - "3306:3306"
 
     # The schema is applied once, when the data volume is first created.
+    # A directory mount, not a single file so can have multiple scripts.
     volumes:
       - type: bind
         read_only: true
-        source: ./test/db/INFOLOGGER.sql
-        target: /docker-entrypoint-initdb.d/INFOLOGGER.sql
+        source: ./docker/database/initdb.d
+        target: /docker-entrypoint-initdb.d
+      - type: volume
+        source: database-data
+        target: /var/lib/mysql
 
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
@@ -38,7 +42,7 @@ services:
   # always dated within the last day and a `-1d`/`-2d` filter shows them straight away.
   seeder:
     build:
-      target: development
+      target: seeder
 
     restart: "no"
 
@@ -54,10 +58,5 @@ services:
       MYSQL_PASSWORD: root
       MYSQL_DATABASE: INFOLOGGER
 
-    command: ["npm", "run", "seed"]
-
-    volumes:
-      - type: bind
-        read_only: true
-        source: ./test
-        target: /home/node/app/test
+volumes:
+  database-data:
