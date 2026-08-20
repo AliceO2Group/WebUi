@@ -41,7 +41,10 @@ export default (model) =>
         'table.table-logs-content',
         scrollStyling(model),
         tableColGroup(model),
-        h('tbody', [model.log.listLogsInViewportOnly(model).map((row) => tableLogLine(model, row))]),
+        h('tbody', [
+          model.log.listLogsInViewportOnly()
+            .map((row, i) => tableLogLine(model, row, model.log.firstLogIndexInViewport + i)),
+        ]),
       ),
     ]),
   );
@@ -62,15 +65,29 @@ const scrollStyling = (model) => ({
  * Creates a line of log with tag <tr> and its columns <td> if enabled.
  * @param {Model} model - root model of the application
  * @param {Log} row - a row of this table is a raw log
+ * @param {number} index - index of the log in `Log.list`, used for range selection
  * @returns {vnode} - the log build as a table row
  */
-const tableLogLine = (model, row) => {
+const tableLogLine = (model, row, index) => {
   const { log, table } = model;
   return h('tr.row-hover', {
-    className: log.item === row ? 'row-selected' : '',
-    onclick: () => log.setItem(row),
+    className: log.selection.has(index) ? 'row-selected' : '',
+    onclick: () => onRowClick(log, row),
     ondblclick: () => model.toggleInspector(),
+    onmousedown: () => log.selection.begin(index),
+    onmousemove: () => log.selection.extendTo(index),
   }, tableRows(model, table.colsHeader, row));
+};
+
+/**
+ * Select a single log, unless the click is the end of a drag which already selected a range
+ * @param {Log} log - log model of the application
+ * @param {object} row - log of the clicked row
+ */
+const onRowClick = (log, row) => {
+  if (!log.selection.consumeDrag()) {
+    log.item = row;
+  }
 };
 
 /**
@@ -105,7 +122,7 @@ const resolveContextMenuData = (model, field, content) => {
  */
 const cellWithContextMenu = (model, row, field, content, extraClasses = '', extraAttrs = {}) => {
   const openContextMenu = (e) => {
-    model.log.setItem(row);
+    model.log.item = row;
     const data = resolveContextMenuData(model, field, content);
     if (data) {
       e.preventDefault();
@@ -216,14 +233,23 @@ const tableContainerHooks = (model) => ({
       model.log.setScrollTop(scrollTop, height);
     };
 
+    /**
+     * A drag can end anywhere, not only over a row of the table
+     */
+    const onMouseUp = () => {
+      model.log.selection.end();
+    };
+
     // call the function when scrolling is updated
     vnode.dom.addEventListener('scroll', onTableScroll);
+    window.addEventListener('mouseup', onMouseUp);
     model.log.dom.table = vnode.dom;
     // setup window size listener - view needs redraw for smart scrolling
     window.addEventListener('resize', onTableScroll);
 
-    // remember this function for later (destroy)
+    // remember these functions for later (destroy)
     vnode.dom.onTableScroll = onTableScroll;
+    vnode.dom.onMouseUp = onMouseUp;
 
     // call the function once on next frame when we know sizes
     onTableScroll();
@@ -244,6 +270,7 @@ const tableContainerHooks = (model) => ({
   ondestroy(vnode) {
     vnode.dom.removeEventListener('scroll', vnode.dom.onTableScroll);
     window.removeEventListener('resize', vnode.dom.onTableScroll);
+    window.removeEventListener('mouseup', vnode.dom.onMouseUp);
   },
 });
 
@@ -278,8 +305,7 @@ const autoscrollManager = (model, vnode) => {
 
     if (previousSelectedItemId !== currentSelectedItemId && model.log.autoScrollToItem) {
       // scroll to an index * height of row, centered
-      const index = model.log.list.indexOf(model.log.item);
-      const positionRow = model.log.rowHeight * index;
+      const positionRow = model.log.rowHeight * model.log.currentIndex;
       const halfView = model.log.scrollHeight / 2;
       vnode.dom.scrollTo(0, positionRow - halfView);
     }
