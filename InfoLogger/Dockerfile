@@ -30,6 +30,19 @@ USER 1000:1000
 CMD [ "npm", "run", "start:dev" ]
 
 #
+# ---- Seeder ----
+# One-shot job, so the sources are copied in rather than bind-mounted
+FROM developmentdependencies AS seeder
+
+COPY docker/database/seed-messages.js ./docker/database/seed-messages.js
+COPY test/fake-data ./test/fake-data
+COPY test/utils ./test/utils
+
+USER 1000:1000
+
+CMD [ "npm", "run", "seed" ]
+
+#
 # ---- Test ----
 FROM developmentdependencies AS test
 

@@ -25,6 +25,7 @@ module.exports = [
       'tmp/',
       '.nyc_output/',
       'coverage/',
+      'docker/database/',
     ],
   },
   jsdoc.configs['flat/recommended'],
