@@ -43,7 +43,6 @@
 .table-logs-header td { padding: 0.3rem 0.2rem; }
 
 .table-logs-content { width: 100%; border-collapse: collapse; }
-.table-logs-content td {}
 
 .table-logs-header td,
 .table-logs-content td { font-size: var(--log-font-size); }
