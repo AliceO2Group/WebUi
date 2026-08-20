@@ -51,15 +51,17 @@
 td,
 th { max-width: 0; /* allow ellipsis on tables */ vertical-align: top; }
 
-.cell { line-height: var(--row-height); font-size: 1rem; padding: 0rem 0.2rem; font-weight: 100; }
-.cell-bordered { border-left: 1px solid rgb(170, 170, 170); }
-.cell-content { display: flex; justify-content: space-between; align-items: center; max-width: 100%; }
-.cell-text {
+.cell {
+  position: relative;
+  line-height: var(--row-height);
+  font-size: 1rem;
+  padding: 0rem 0.2rem;
+  font-weight: 100;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 100%;
 }
+.cell-bordered { border-left: 1px solid rgb(170, 170, 170); }
 
 .cell-xs { width: 2rem; }
 .cell-s { width: 4rem; }
@@ -74,9 +76,14 @@ th { max-width: 0; /* allow ellipsis on tables */ vertical-align: top; }
 .row-hover:hover { background-color: rgba(0, 0, 0, .075); }
 .row-selected, .row-selected:hover { background-color: #007bff; color: white; }
 
-/* context menu hint */
+/* context menu hint - out of flow and unselectable so it is never part of a copied selection */
 .cell-context-menu-hint {
   display: none;
+  /* position absolutely within the cell */
+  position: absolute;
+  top: 50%;
+  right: 0.2rem;
+  transform: translateY(-50%);
   font-size: 0.80rem;
   font-weight: bold;
   color: var(--color-black);
@@ -85,6 +92,8 @@ th { max-width: 0; /* allow ellipsis on tables */ vertical-align: top; }
   padding: 0 3px;
   line-height: 1;
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .cell:hover .cell-context-menu-hint { display: block; }
 .cell-context-menu-hint:hover { background-color: rgba(0, 0, 0, .15); }
