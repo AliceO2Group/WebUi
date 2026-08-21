@@ -114,6 +114,7 @@ describe('InfoLogger', function () {
   require('./public/status-bar-mocha');
   require('./public/zoom.mocha');
   require('./public/log-context-menu-mocha');
+  require('./public/share-mocha.js');
 
   after(async () => {
     await browser.close();
