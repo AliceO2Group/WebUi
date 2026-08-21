@@ -29,18 +29,18 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@aliceo2/web-ui": "2.11.0",
+    "@aliceo2/web-ui": "2.11.1",
     "mariadb": "3.5.2"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@stylistic/eslint-plugin": "5.10.0",
     "eslint": "10.8.0",
-    "eslint-plugin-jsdoc": "64.0.1",
-    "globals": "17.9.0",
+    "eslint-plugin-jsdoc": "64.2.0",
+    "globals": "17.11.0",
     "mocha": "11.8.0",
     "nyc": "18.0.0",
-    "puppeteer": "25.5.0",
+    "puppeteer": "25.7.0",
     "sinon": "22.1.0"
   },
   "bundleDependencies": [
