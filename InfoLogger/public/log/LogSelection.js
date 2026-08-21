@@ -48,11 +48,12 @@ export default class LogSelection {
   }
 
   /**
-   * Whether the selection is a single log
-   * @returns {boolean} - true if exactly one log is selected
+   * Whether the selection is at most one log is selected
+   * As in the DOM Selection API, an empty selection is collapsed.
+   * @returns {boolean} - true if at most one log is selected
    */
   get isCollapsed() {
-    return this.isActive && this.anchor === this.focus;
+    return !this.isActive || this.anchor === this.focus;
   }
 
   /**
