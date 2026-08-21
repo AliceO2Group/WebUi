@@ -173,11 +173,11 @@ describe('Query Mode test-suite', async () => {
 
     before(async () => {
       await page.evaluate(() => {
-        window.__copiedContextMenuValue = undefined;
+        window.__copiedValue = undefined;
         Object.defineProperty(navigator, 'clipboard', {
           value: {
             writeText: (value) => {
-              window.__copiedContextMenuValue = value;
+              window.__copiedValue = value;
             },
           },
           configurable: true,
@@ -248,7 +248,7 @@ describe('Query Mode test-suite', async () => {
       await page.keyboard.press('KeyC');
       await page.keyboard.up('Control');
 
-      const copied = await page.evaluate(() => window.__copiedContextMenuValue);
+      const copied = await page.evaluate(() => window.__copiedValue);
       assert.ok(copied, 'copied text should not be empty');
       const lines = copied.split('\n').filter((line) => line.trim() !== '');
 
