@@ -20,6 +20,7 @@ import { h,
   iconMagnifyingGlass,
   iconPlus,
   iconMinus,
+  iconShare,
 } from '/js/src/index.js';
 import { BUTTON } from '../constants/button-states.const.js';
 import { MODE } from '../constants/mode.const.js';
@@ -67,6 +68,7 @@ export const commandLogs = (model) => [
   ]),
   h('', downloadButtonGroup(model.log)),
   h('', zoomButtonGroup(model.zoom)),
+  h('', shareButton(model)),
 ];
 
 /**
@@ -241,6 +243,34 @@ const zoomButtonGroup = (zoom) =>
       title: 'Zoom in (Ctrl/Cmd + +)',
     }, h('span', { style: 'font-size:0.8em' }, iconPlus())),
   ]);
+
+const shareButton = (model) =>
+  h('button.btn', {
+    onclick: () => copyLinkToShareCurrentView(model),
+    id: 'share-button',
+    title: 'Copy shareable link of current filters',
+  }, h('span', { style: 'font-size:0.9em' }, iconShare()));
+
+const copyLinkToShareCurrentView = (model) => {
+  if (!navigator.clipboard?.writeText) {
+    model.notification.show('Clipboard API is not available in this browser.', 'danger', 2000);
+    return;
+  }
+  const currentUrl = new URL(window.location.href);
+  const queryParams = new URLSearchParams(currentUrl.search);
+  const shareableLink = `${currentUrl.origin}${currentUrl.pathname}?${queryParams.toString()}`;
+  navigator.clipboard.writeText(shareableLink)
+    .then(() => {
+      model.notification.show(
+        'Shareable link copied to clipboard.',
+        'success',
+        2000,
+      );
+    })
+    .catch(() => {
+      model.notification.show('Failed to copy shareable link to clipboard.', 'danger', 2000);
+    });
+};
 
 /**
  * Method to toggle states of the buttons(Query/Live) depending on the mode the tool is running on
