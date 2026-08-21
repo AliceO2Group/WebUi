@@ -21,6 +21,8 @@
  *
  * Storing indexes instead of log references keeps makes the selection independent of the
  * virtual scrolling.
+ *
+ * Inspired by https://developer.mozilla.org/en-US/docs/Web/API/Selection
  */
 export default class LogSelection {
   /**
