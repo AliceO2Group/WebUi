@@ -49,13 +49,13 @@ const TEXT_FILTER_FIELD_BY_OPERATOR = {
 const setupQueryTestState = (page) =>
   page.evaluate(() => {
     window.confirm = () => true;
-    window.model.frameworkInfo = {
+    model.frameworkInfo = {
       isSuccess: () => true,
       payload: { mysql: { status: { ok: true } } },
       match: ({ Success }) => Success({ mysql: { status: { ok: true } } }),
     };
-    window.model.log.filter.resetCriteria();
-    window.model.log.empty();
+    model.log.filter.resetCriteria();
+    model.log.empty();
   });
 
 /**
@@ -69,9 +69,9 @@ const startAndCancelQuery = (page) =>
     window.fetch = (_url, { signal } = {}) => new Promise((_, reject) => {
       signal?.addEventListener('abort', () => reject(new DOMException('AbortError', 'AbortError')));
     });
-    const queryPromise = window.model.log.query();
+    const queryPromise = model.log.query();
     await new Promise((resolve) => setTimeout(resolve, 50));
-    window.model.log.cancelQuery();
+    model.log.cancelQuery();
     await queryPromise;
   });
 
@@ -99,22 +99,22 @@ const runQueryWithMocks = (page, { confirmReturn, textFilterOperator }) =>
     };
 
     // Mock the frameworkInfo to make the query method think the query service is available in its check
-    window.model.frameworkInfo = {
+    model.frameworkInfo = {
       isSuccess: () => true,
       payload: { mysql: { status: { ok: true } } },
       match: ({ Success }) => Success({ mysql: { status: { ok: true } } }),
     };
 
     // Default state of filters includes no text filters
-    window.model.log.filter.resetCriteria();
+    model.log.filter.resetCriteria();
     if (textFilterOperator) {
-      window.model.log.filter.setCriteria(
+      model.log.filter.setCriteria(
         textFilterFieldByOperator[textFilterOperator],
         textFilterOperator,
         textFilterValueByOperator[textFilterOperator],
       );
     }
-    await window.model.log.query();
+    await model.log.query();
 
     return { confirmCalls, postCalls };
   }, {
@@ -123,6 +123,34 @@ const runQueryWithMocks = (page, { confirmReturn, textFilterOperator }) =>
     textFilterValueByOperator: TEXT_FILTER_VALUE_BY_OPERATOR,
     textFilterFieldByOperator: TEXT_FILTER_FIELD_BY_OPERATOR,
   });
+
+/**
+ * Waits until the log at the given index of `Log.list` is one of the rows currently rendered by the
+ * virtual scrolling.
+ * @param {Page} page - puppeteer page
+ * @param {number} index - index in `Log.list`
+ * @returns {Promise<void>} - resolves once the row is in the DOM
+ */
+const waitForRowsRendered = (page, index) =>
+  page.waitForFunction((index) => {
+    const rows = document.querySelectorAll('.table-logs-content tbody tr');
+    const first = model.log.firstLogIndexInViewport;
+    return rows.length > 0 && index >= first && index < first + rows.length;
+  }, { timeout: 5000 }, index);
+
+/**
+ * Centre of the rendered row of the log at the given index of `Log.list`, in viewport coordinates.
+ * @param {Page} page - puppeteer page
+ * @param {number} index - index in `Log.list`, must be rendered (see `waitForRowsRendered`)
+ * @returns {Promise<{x: number, y: number}>} - point to move the mouse to
+ */
+const rowBoxOfLogAtIndex = (page, index) =>
+  page.evaluate((index) => {
+    const rows = document.querySelectorAll('.table-logs-content tbody tr');
+    const row = rows[index - model.log.firstLogIndexInViewport];
+    const { x, y, width, height } = row.getBoundingClientRect();
+    return { x: x + width / 2, y: y + height / 2 };
+  }, index);
 
 describe('Query Mode test-suite', async () => {
   let page;
@@ -140,35 +168,102 @@ describe('Query Mode test-suite', async () => {
     }
   });
 
-  it('should copy multiple rows in the correct format', async () => {
-    await injectLogs(page, [
-      { severity: 'I', message: 'info log', timestamp: Date.now() },
-      { severity: 'E', message: 'error log', timestamp: Date.now() },
-      { severity: 'W', message: 'warning log', timestamp: Date.now() },
-    ]);
-    await waitForTextInElement(page, '.table-logs-content tbody tr:first-child', 'info log');
+  describe('selection copy', () => {
+    const rowCount = 100;
 
-    // select the first two rows entirely, as a user dragging across them would
-    const copied = await page.evaluate(() => {
-      const rows = document.querySelectorAll('.table-logs-content tbody tr');
-      const range = document.createRange();
-      range.setStartBefore(rows[0].querySelector('td:first-child'));
-      range.setEndAfter(rows[1].querySelector('td:last-child'));
+    before(async () => {
+      await page.evaluate(() => {
+        window.__copiedContextMenuValue = undefined;
+        Object.defineProperty(navigator, 'clipboard', {
+          value: {
+            writeText: (value) => {
+              window.__copiedContextMenuValue = value;
+            },
+          },
+          configurable: true,
+        });
+      });
 
-      const selection = window.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(range);
+      const logsToInject = Array.from({ length: rowCount }, (_, i) => ({
+        severity: 'I',
+        message: `info log ${i}`,
+        timestamp: Date.now(),
+      }));
 
-      // what the browser puts on the clipboard as text/plain for this selection
-      return selection.toString();
+      await injectLogs(
+        page,
+        logsToInject,
+      );
     });
 
-    const lines = copied.split('\n').filter((line) => line.trim() !== '');
+    beforeEach(async () => {
+      // previous tests may have left the table scrolled down or an input focused, start from a known state
+      await page.evaluate(() => {
+        document.activeElement?.blur();
+        model.log.selection.clear(); // remember clears the selection not the log list
+        model.log.dom.table.scrollTo(0, 0);
+      });
 
-    assert.strictEqual(lines.length, 2, `selection should be one line per row, got:\n${copied}`);
-    assert.ok(lines[0].includes('info log'), 'first line should hold the first row message');
-    assert.ok(lines[1].includes('error log'), 'second line should hold the second row message');
-    assert.ok(!copied.includes('⋮'), 'the context menu hint should not be part of the copied text');
+      await waitForRowsRendered(page, 0);
+      await waitForTextInElement(page, '.table-logs-content tbody tr:first-child', 'info log 0', 5000);
+    });
+
+    it('should be in the correct initial state', async () => {
+      const selection = await page.evaluate(() => {
+        const { selection } = model.log;
+        const { anchor, focus, from, to, items, isActive, isCollapsed } = selection;
+        return { anchor, focus, from, to, items, isActive, isCollapsed };
+      });
+
+      assert.strictEqual(selection.anchor, null, 'selection.anchor should be null');
+      assert.strictEqual(selection.focus, null, 'selection.focus should be null');
+      assert.strictEqual(selection.from, null, 'selection.from should be null');
+      assert.strictEqual(selection.to, null, 'selection.to should be null');
+      assert.deepStrictEqual(selection.items, [], 'selection.items should be empty');
+      assert.ok(!selection.isActive, 'selection should be inactive');
+      assert.ok(selection.isCollapsed, 'selection should be collapsed');
+    });
+
+    it('should copy multiple rows in the correct format', async () => {
+      // press on the first row and press down
+      const firstRowBox = await rowBoxOfLogAtIndex(page, 0);
+      await page.mouse.move(firstRowBox.x, firstRowBox.y);
+      await page.mouse.down();
+
+      // scroll the last log into view
+      // as only ~30 rows are rendered at a time, this tests that the selection survives
+      // the rows it started on being recycled by the virtual scrolling
+      await page.evaluate(() => {
+        const { log } = model;
+        log.dom.table.scrollTo(0, log.rowHeight * log.list.length);
+      });
+      await waitForRowsRendered(page, rowCount - 1);
+
+      const lastRowBox = await rowBoxOfLogAtIndex(page, rowCount - 1);
+      await page.mouse.move(lastRowBox.x, lastRowBox.y, { steps: 10 });
+      await page.mouse.up();
+
+      // copy the selection to the clipboard
+      await page.keyboard.down('Control');
+      await page.keyboard.press('KeyC');
+      await page.keyboard.up('Control');
+
+      const copied = await page.evaluate(() => window.__copiedContextMenuValue);
+      assert.ok(copied, 'copied text should not be empty');
+      const lines = copied.split('\n').filter((line) => line.trim() !== '');
+
+      assert.strictEqual(lines.length, rowCount, `expected ${rowCount} lines copied, got ${lines.length}`);
+      // each row should be in the csv format of the table
+      for (let i = 0; i < rowCount; i++) {
+        const { date, time } = await page.evaluate((i) => {
+          const date = model.timezone.format(model.log.list[i].timestamp, 'date');
+          const time = model.timezone.format(model.log.list[i].timestamp, model.log.timeFormat);
+          return { date, time };
+        }, i);
+        const expected = `I, info log ${i}, ${time}, ${date}`;
+        assert.ok(lines[i].startsWith(expected), `line ${i} should start with "${expected}", got "${lines[i]}"`);
+      }
+    });
   });
 
   describe('no-text-filter confirmation dialog', () => {
