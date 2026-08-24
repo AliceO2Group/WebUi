@@ -119,17 +119,16 @@ const cellWithContextMenu = (model, row, field, content, extraClasses = '', extr
     ...extraAttrs,
     oncontextmenu: hasContent ? openContextMenu : null,
   }, [
-    h('.cell-content', [
-      h('.cell-text', content),
-      hasContent && h(
-        'span.cell-context-menu-hint',
-        {
-          onclick: openContextMenu,
-          title: 'Right-click also opens this menu',
-        },
-        '⋮',
-      ),
-    ]),
+    // content sits directly in the <td> so that it can be selected/copied without new lines
+    content,
+    hasContent && h(
+      'span.cell-context-menu-hint',
+      {
+        onclick: openContextMenu,
+        title: 'Right-click also opens this menu',
+      },
+      '⋮',
+    ),
   ]);
 };
 
