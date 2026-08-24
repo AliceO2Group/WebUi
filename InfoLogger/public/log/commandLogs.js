@@ -256,10 +256,7 @@ const copyLinkToShareCurrentView = (model) => {
     model.notification.show('Clipboard API is not available in this browser.', 'danger', 2000);
     return;
   }
-  const currentUrl = new URL(window.location.href);
-  const queryParams = new URLSearchParams(currentUrl.search);
-  const shareableLink = `${currentUrl.origin}${currentUrl.pathname}?${queryParams.toString()}`;
-  navigator.clipboard.writeText(shareableLink)
+  navigator.clipboard.writeText(window.location.href)
     .then(() => {
       model.notification.show(
         'Shareable link copied to clipboard.',

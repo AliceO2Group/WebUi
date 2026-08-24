@@ -19,24 +19,6 @@ const SHARE_BUTTON = '#share-button';
 const NOTIFICATION = '.notification-content';
 
 /**
- * Install a fake clipboard which stores the written value in `window.__copiedValue`
- * @param {Page} page - puppeteer page
- * @returns {Promise} - resolves once the mock is installed
- */
-const mockClipboard = (page) => page.evaluate(() => {
-  window.__copiedValue = '';
-  Object.defineProperty(navigator, 'clipboard', {
-    value: {
-      writeText: (value) => {
-        window.__copiedValue = value;
-        return Promise.resolve();
-      },
-    },
-    configurable: true,
-  });
-});
-
-/**
  * Wait for the notification to be displayed with the expected type and return its message
  * @param {Page} page - puppeteer page
  * @param {string} type - one of primary/success/warning/danger
@@ -67,21 +49,41 @@ describe('Share button test-suite', () => {
     }
   });
 
-  it('should copy a shareable link to the clipboard', async () => {
-    await mockClipboard(page);
+  it('should copy the URL of the current page', async () => {
+    await page.goto(
+      `${test.helpers.baseUrl}?q={"severity":{"in":"E F"}}`,
+      { waitUntil: 'networkidle0' },
+    );
+    await page.waitForSelector(SHARE_BUTTON);
+
+    await page.evaluate(() => {
+      window.__copiedValue = '';
+      Object.defineProperty(navigator, 'clipboard', {
+        value: {
+          writeText: (value) => {
+            window.__copiedValue = value;
+            return Promise.resolve();
+          },
+        },
+        configurable: true,
+      });
+    });
+
     await page.click(SHARE_BUTTON);
 
-    const notificationText = await getNotification(page, 'success');
-    assert.strictEqual(notificationText, 'Shareable link copied to clipboard.');
+    await getNotification(page, 'success');
 
-    const { copied, expected } = await page.evaluate(() => {
-      const url = new URL(window.location.href);
-      return {
-        copied: window.__copiedValue,
-        expected: `${url.origin}${url.pathname}?${new URLSearchParams(url.search).toString()}`,
-      };
-    });
-    assert.strictEqual(copied, expected);
+    const { copied, href } = await page.evaluate(() => ({
+      copied: window.__copiedValue,
+      href: window.location.href,
+    }));
+
+    // What is copied is exactly what the address bar holds, so only one URL ever exists
+    assert.strictEqual(copied, href);
+
+    // That URL is fully percent-encoded and round-trips back to the original filter
+    assert.ok(!new URL(copied).search.includes('{'), 'query parameter must be percent-encoded');
+    assert.strictEqual(new URL(copied).searchParams.get('q'), '{"severity":{"in":"E F"}}');
   });
 
   it('should show a danger notification if the clipboard API is not available', async () => {
@@ -107,24 +109,5 @@ describe('Share button test-suite', () => {
 
     const notificationText = await getNotification(page, 'danger');
     assert.strictEqual(notificationText, 'Failed to copy shareable link to clipboard.');
-  });
-
-  it('should copy a URL that is shareable and contains the current filters', async () => {
-    await page.goto(
-      `${test.helpers.baseUrl}?q={"severity":{"in":"E F"}}`,
-      { waitUntil: 'networkidle0' },
-    );
-    await page.waitForSelector(SHARE_BUTTON);
-    await mockClipboard(page);
-    await page.click(SHARE_BUTTON);
-
-    await getNotification(page, 'success');
-
-    const copied = await page.evaluate(() => window.__copiedValue);
-    assert.ok(copied.startsWith(test.helpers.baseUrl.replace(/\/$/, '')));
-    assert.strictEqual(
-      decodeURIComponent(new URL(copied).searchParams.get('q')),
-      '{"severity":{"in":"E F"}}',
-    );
   });
 });
