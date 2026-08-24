@@ -1,0 +1,10 @@
+name: infologger-test
+services:
+  application:
+    build:
+      target: test
+    
+    restart: "no"
+
+    environment:
+      NODE_ENV: development

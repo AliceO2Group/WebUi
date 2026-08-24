@@ -1,0 +1,19 @@
+# Local InfoLogger server simulator, streaming fake logs on port 6102.
+services:
+  application:
+    # Ordering only, no healthcheck: InfoLoggerReceiver retries the connection every 5s
+    depends_on:
+      - simulator
+
+  simulator:
+    build:
+      target: simul
+
+    # Fail the stack
+    restart: "no"
+
+    environment:
+      NODE_ENV: development
+
+    ports:
+      - "6102:6102"

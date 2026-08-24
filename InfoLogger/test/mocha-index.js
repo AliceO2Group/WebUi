@@ -17,6 +17,8 @@ const puppeteer = require('puppeteer');
 const assert = require('assert');
 const { spawn } = require('child_process');
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 
 const config = require('./test-config.js');
 const { createServer, closeServer } = require('./live-simulator/infoLoggerServer.js');
@@ -35,6 +37,7 @@ describe('InfoLogger', function () {
   let subprocess; // web-server runs into a subprocess
   let subprocessOutput = '';
   let ilgServer;
+  let tempDBDir; // temporary directory holding the web-server's user profile DB
 
   this.timeout(30000);
   this.slow(1000);
@@ -59,15 +62,18 @@ describe('InfoLogger', function () {
       }
     });
 
-    // Remove any leftover user profile DB from a previous run so tests that modify
-    // profile state (e.g. user-actions-mocha) always start from the same known state.
-    fs.rmSync(config.dbFile, { force: true });
-
     // Start infologger server simulator
     ilgServer = createServer();
 
+    // Give the web-server a private, empty user profile DB so that tests which modify
+    // profile state (e.g. user-actions-mocha) always start from the same known state.
+    tempDBDir = fs.mkdtempSync(path.join(os.tmpdir(), 'infologger-test-'));
+
     // Start web-server in background
-    subprocess = spawn('node', ['index.js', 'test/test-config.js'], { stdio: 'pipe' });
+    subprocess = spawn('node', ['index.js', 'test/test-config.js'], {
+      stdio: 'pipe',
+      env: { ...process.env, ILG_TEST_DB: path.join(tempDBDir, 'db.json') },
+    });
     subprocess.stdout.on('data', (chunk) => subprocessOutput += chunk.toString());
     subprocess.stderr.on('data', (chunk) => subprocessOutput += chunk.toString());
     subprocess.on('error', (error) => console.error(`Server failed due to: ${error}`));
@@ -123,6 +129,7 @@ describe('InfoLogger', function () {
     console.log(subprocessOutput);
     console.log('---------------------------------------------');
     subprocess.kill();
-    closeServer(ilgServer);
+    await closeServer(ilgServer);
+    fs.rmSync(tempDBDir, { recursive: true, force: true });
   });
 });
