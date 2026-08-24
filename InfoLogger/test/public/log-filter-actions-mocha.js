@@ -253,30 +253,6 @@ describe('Filter actions test-suite', async () => {
     assert.deepStrictEqual($in, ['I', 'W', 'E', 'F']);
   });
 
-  it('should encode special characters correctly into the URL', async () => {
-    const pidMatch = await page.evaluate(() => {
-      window.model.log.filter.setCriteria('pid', 'match', 'a+b c %d #anchor & = héllo wörld 日本語');
-      return window.model.log.filter.criterias.pid.$match;
-    });
-
-    assert.strictEqual(pidMatch, 'a+b c %d #anchor & = héllo wörld 日本語');
-
-    const searchParams = await page.evaluate(() => {
-      window.model.updateRouteOnModelChange();
-      return window.location.search;
-    });
-
-    assert.ok(searchParams.includes('a%2Bb%20c%20%25d%20%23anchor%20%26%20%3D%20h%C3%A9llo%20w%C3%B6rld%20%E6%97%A5%E6%9C%AC%E8%AA%9E'));
-  });
-
-  it('should decode special characters correctly from the URL', async () => {
-    await page.goto(`${baseUrl}?q={%22pid%22:{%22match%22:%22a%2Bb%20c%20%25d%20%23anchor%20%26%20%3D%20h%C3%A9llo%20w%C3%B6rld%20%E6%97%A5%E6%9C%AC%E8%AA%9E%22}}`, { waitUntil: 'networkidle0' });
-
-    const pidMatch = await page.evaluate(() => window.model.log.filter.criterias.pid.$match);
-
-    assert.strictEqual(pidMatch, 'a+b c %d #anchor & = héllo wörld 日本語');
-  });
-
   it('should reset filters and set them again', async () => {
     const criterias = await page.evaluate(() => {
       window.model.log.filter.resetCriteria();
@@ -652,6 +628,60 @@ describe('Filter actions test-suite', async () => {
       });
 
       assert.strictEqual(limit, 1000000);
+    });
+  });
+
+  describe('Filter round-trip through the URL', async () => {
+    /**
+     * Sets message match criteria, then reloads the page on the URL the model produced for it
+     * @param {string} value - the raw filter value to round-trip
+     * @returns {Promise<string>} the value held by the model after the reload
+     */
+    const roundTrip = async (value) => {
+      await page.evaluate((raw) => {
+        window.model.log.filter.setCriteria('message', 'match', raw);
+        window.model.updateRouteOnModelChange();
+      }, value);
+
+      const url = await page.evaluate(() => window.location.href);
+      await page.goto(url, { waitUntil: 'networkidle0' });
+      await page.waitForFunction(() => window.model?.log?.filter);
+
+      return await page.evaluate(() => window.model.log.filter.criterias.message.match);
+    };
+
+    it('should preserve consecutive double quotes', async () => {
+      // /["]+/g collapsed a run of quotes into a single escaped one, so "" came back as "
+      assert.strictEqual(await roundTrip('a""b'), 'a""b');
+    });
+
+    it('should preserve a backslash that forms a valid JSON escape', async () => {
+      // C:\temp used to reach JSON.parse unescaped and come back as C:<tab>emp
+      assert.strictEqual(await roundTrip('C:\\temp'), 'C:\\temp');
+    });
+
+    it('should preserve a backslash that does not form a valid JSON escape', async () => {
+      // C:\xyz used to throw, resetting every filter
+      assert.strictEqual(await roundTrip('C:\\xyz'), 'C:\\xyz');
+    });
+
+    it('should preserve a multi-line message filter', async () => {
+      assert.strictEqual(await roundTrip('first\nsecond'), 'first\nsecond');
+    });
+
+    it('should preserve a value containing URL-significant characters', async () => {
+      assert.strictEqual(await roundTrip('a&b#c=d?e %20 a+b c %d #anchor & = héllo wörld 日本語'),
+        'a&b#c=d?e %20 a+b c %d #anchor & = héllo wörld 日本語'
+      );
+    });
+
+    it('should store the value unencoded in the model', async () => {
+      const stored = await page.evaluate(() => {
+        window.model.log.filter.setCriteria('message', 'match', 'foo bar');
+        return window.model.log.filter.toObject().message.match;
+      });
+
+      assert.strictEqual(stored, 'foo bar');
     });
   });
 });
