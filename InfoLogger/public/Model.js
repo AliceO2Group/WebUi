@@ -387,7 +387,7 @@ export default class Model extends Observable {
    * do it silently to avoid infinite loop
    */
   updateRouteOnModelChange() {
-    this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);
+    this.router.go(`?q=${encodeURIComponent(JSON.stringify(this.log.filter.toObject()))}`, true, true);
   }
 
   /**
