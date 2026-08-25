@@ -80,10 +80,39 @@ describe('Share button test-suite', () => {
 
     // What is copied is exactly what the model builds, whose encoding is tested elsewhere
     assert.strictEqual(copied, url);
+  });
 
-    // That URL is fully percent-encoded and round-trips back to the original filter
-    assert.ok(!new URL(copied).search.includes('{'), 'query parameter must be percent-encoded');
-    assert.strictEqual(new URL(copied).searchParams.get('q'), '{"severity":{"in":"E F"}}');
+  it('should copy the current filters while the address bar is still behind', async () => {
+    await page.goto(test.helpers.baseUrl, { waitUntil: 'networkidle0' });
+    await page.waitForSelector(SHARE_BUTTON);
+    await page.waitForFunction(() => window.model?.log?.filter);
+    await page.evaluate(() => {
+      window.__copiedValue = '';
+      Object.defineProperty(navigator, 'clipboard', {
+        value: {
+          writeText: (value) => {
+            window.__copiedValue = value;
+            return Promise.resolve();
+          },
+        },
+        configurable: true,
+      });
+    });
+
+    /*
+     * The route update is rate limited to 500ms, running the first call immediately and deferring
+     * the next. Two changes in a row therefore leave the address bar behind the model, and the
+     * click happens in the same synchronous turn so it lands inside that window.
+     */
+    const { copied, href } = await page.evaluate(() => {
+      window.model.log.filter.setCriteria('message', 'match', 'FIRST');
+      window.model.log.filter.setCriteria('message', 'match', 'SECOND');
+      document.getElementById('share-button').click();
+      return { copied: window.__copiedValue, href: window.location.href };
+    });
+
+    assert.ok(!href.includes('SECOND'), 'address bar must still be stale for this test to mean anything');
+    assert.ok(copied.includes('SECOND'), 'copied link must reflect the filters as they are now');
   });
 
   it('should show a danger notification if the clipboard API is not available', async () => {
