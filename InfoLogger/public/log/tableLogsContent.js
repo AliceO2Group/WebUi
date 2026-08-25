@@ -75,9 +75,24 @@ const tableLogLine = (model, row, index) => {
     onclick: () => onRowClick(log, row),
     ondblclick: () => model.toggleInspector(),
     onmousedown: () => log.selection.begin(index),
-    onmousemove: () => log.selection.extendTo(index),
+    onmousemove: (e) => onMouseMove(e, log, index),
   }, tableRows(model, table.colsHeader, row));
 };
+
+/**
+ * Extend the selection when the mouse is dragged across the rows.
+ * Never selects when the user is using keys (to select or otherwise) or
+ * the drag started outside the table.
+ * @param {MouseEvent} e - the mousemove event
+ * @param {Log} log - log model of the application
+ * @param {number} index - index in `Log.list` of the hovered row
+ */
+function onMouseMove(e, log, index) {
+  // `isDragging` signifies that the drag started inside the table
+  if (e.buttons === 1 && log.selection.isDragging) {
+    log.selection.extendTo(index);
+  }
+}
 
 /**
  * Select a single log, unless the click is the end of a drag which already selected a range
