@@ -278,10 +278,7 @@ export default class Model extends Observable {
         case 38: // top
           e.preventDefault(); // avoid scroll
           if (e.shiftKey) {
-            if (!this.log.selection.isDragging) {
-              this.log.selection.begin(this.log.selection.focus);
-            }
-            this.log.selection.extendTo(this.log.selection.focus - 1);
+            this.log.selection.extendTo(this.log.currentIndex - 1);
           } else {
             this.log.previousItem();
           }
@@ -290,10 +287,7 @@ export default class Model extends Observable {
           if (e.altKey) {
             this.log.goToLastItem();
           } else if (e.shiftKey) {
-            if (!this.log.selection.isDragging) {
-              this.log.selection.begin(this.log.selection.focus);
-            }
-            this.log.selection.extendTo(this.log.selection.focus + 1);
+            this.log.selection.extendTo(this.log.currentIndex + 1);
           } else {
             this.log.nextItem();
           }

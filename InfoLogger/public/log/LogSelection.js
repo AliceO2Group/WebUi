@@ -95,18 +95,19 @@ export default class LogSelection {
    */
   begin(index) {
     this.collapseTo(index);
+    this.log.autoScrollToItem = false; // selecting a row directly is not a request to scroll to it
     this.isDragging = true;
     this.hasDragged = false;
   }
 
   /**
-   * Extend the on-going drag to the given row
-   * A drag only becomes a selection once it leaves the row it started on, so that a simple
-   * click leaves the selection collapsed on the pressed row.
-   * @param {number} index - index in `Log.list` of the row under the pointer
+   * Move the focus of the selection to the given row, keeping the anchor where it is.
+   * A selection only extends once it leaves the row it started on.
+   * Does nothing if there is no selection to extend or if the row is outside the list.
+   * @param {number} index - index in `Log.list` of the row to extend the selection to
    */
   extendTo(index) {
-    if (!this.isDragging || index === this.focus) {
+    if (!this.isActive || index === this.focus || index < 0 || index >= this.log.list.length) {
       return;
     }
     this.focus = index;
