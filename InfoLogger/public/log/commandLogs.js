@@ -244,6 +244,11 @@ const zoomButtonGroup = (zoom) =>
     }, h('span', { style: 'font-size:0.8em' }, iconPlus())),
   ]);
 
+/**
+ * Button that copies a shareable link of the current filters to the clipboard
+ * @param {Model} model - root model of the application
+ * @returns {vnode} - the view of the share button
+ */
 const shareButton = (model) =>
   h('button.btn', {
     onclick: () => copyLinkToShareCurrentView(model),
@@ -251,12 +256,20 @@ const shareButton = (model) =>
     title: 'Copy shareable link of current filters',
   }, h('span', { style: 'font-size:0.9em' }, iconShare()));
 
+/**
+ * Copies the URL reproducing the current filters to the clipboard and notifies the user of the outcome
+ * @param {Model} model - root model of the application
+ * @returns {void}
+ */
 const copyLinkToShareCurrentView = (model) => {
   if (!navigator.clipboard?.writeText) {
     model.notification.show('Clipboard API is not available in this browser.', 'danger', 2000);
     return;
   }
-  navigator.clipboard.writeText(window.location.href)
+
+  // Built from the model, not location.href, which is debounced and may lag
+  const shareableLink = window.location.origin + window.location.pathname + model.buildQueryString();
+  navigator.clipboard.writeText(shareableLink)
     .then(() => {
       model.notification.show(
         'Shareable link copied to clipboard.',
