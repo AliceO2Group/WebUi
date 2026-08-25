@@ -652,36 +652,42 @@ describe('Filter actions test-suite', async () => {
 
     it('should preserve consecutive double quotes', async () => {
       // /["]+/g collapsed a run of quotes into a single escaped one, so "" came back as "
-      assert.strictEqual(await roundTrip('a""b'), 'a""b');
+      const stringToTest = 'a""b';
+      assert.strictEqual(await roundTrip(stringToTest), stringToTest);
     });
 
     it('should preserve a backslash that forms a valid JSON escape', async () => {
       // C:\temp used to reach JSON.parse unescaped and come back as C:<tab>emp
-      assert.strictEqual(await roundTrip('C:\\temp'), 'C:\\temp');
+      const stringToTest = 'C:\\temp';
+      assert.strictEqual(await roundTrip(stringToTest), stringToTest);
     });
 
     it('should preserve a backslash that does not form a valid JSON escape', async () => {
       // C:\xyz used to throw, resetting every filter
-      assert.strictEqual(await roundTrip('C:\\xyz'), 'C:\\xyz');
+      const stringToTest = 'C:\\xyz';
+      assert.strictEqual(await roundTrip(stringToTest), stringToTest);
     });
 
     it('should preserve a multi-line message filter', async () => {
-      assert.strictEqual(await roundTrip('first\nsecond'), 'first\nsecond');
+      const stringToTest = 'first\nsecond';
+      assert.strictEqual(await roundTrip(stringToTest), stringToTest);
     });
 
     it('should preserve a value containing URL-significant characters', async () => {
-      assert.strictEqual(await roundTrip('a&b#c=d?e %20 a+b c %d #anchor & = héllo wörld 日本語'),
-        'a&b#c=d?e %20 a+b c %d #anchor & = héllo wörld 日本語'
+      const stringToTest = 'a&b#c=d?e %20 a+b c %d #anchor & = héllo wörld 日本語';
+      assert.strictEqual(await roundTrip(stringToTest),
+        stringToTest
       );
     });
 
     it('should store the value unencoded in the model', async () => {
-      const stored = await page.evaluate(() => {
-        window.model.log.filter.setCriteria('message', 'match', 'foo bar');
+      const stringToTest = 'a&b#c=d?e %20 a+b c %d #anchor & = héllo wörld 日本語';
+      const stored = await page.evaluate((stringToTest) => {
+        window.model.log.filter.setCriteria('message', 'match', stringToTest);
         return window.model.log.filter.toObject().message.match;
-      });
+      }, stringToTest);
 
-      assert.strictEqual(stored, 'foo bar');
+      assert.strictEqual(stored, stringToTest);
     });
   });
 });
