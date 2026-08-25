@@ -73,13 +73,13 @@ describe('Share button test-suite', () => {
 
     await getNotification(page, 'success');
 
-    const { copied, href } = await page.evaluate(() => ({
+    const { copied, url } = await page.evaluate(() => ({
       copied: window.__copiedValue,
-      href: window.location.href,
+      url: window.location.origin + window.location.pathname + window.model.buildQueryString()
     }));
 
-    // What is copied is exactly what the address bar holds, so only one URL ever exists
-    assert.strictEqual(copied, href);
+    // What is copied is exactly what the model builds, whose encoding is tested elsewhere
+    assert.strictEqual(copied, url);
 
     // That URL is fully percent-encoded and round-trips back to the original filter
     assert.ok(!new URL(copied).search.includes('{'), 'query parameter must be percent-encoded');

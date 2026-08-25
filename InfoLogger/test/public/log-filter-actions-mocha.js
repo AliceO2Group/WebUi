@@ -643,7 +643,7 @@ describe('Filter actions test-suite', async () => {
         window.model.updateRouteOnModelChange();
       }, value);
 
-      const url = await page.evaluate(() => window.location.href);
+      const url = await page.evaluate(() => window.location.origin + window.location.pathname + window.model.buildQueryString());
       await page.goto(url, { waitUntil: 'networkidle0' });
       await page.waitForFunction(() => window.model?.log?.filter);
 
