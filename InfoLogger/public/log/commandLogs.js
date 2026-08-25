@@ -253,7 +253,7 @@ const shareButton = (model) =>
   h('button.btn', {
     onclick: () => copyLinkToShareCurrentView(model),
     id: 'share-button',
-    title: 'Copy shareable link of current filters',
+    title: 'Copy URL',
   }, h('span', { style: 'font-size:0.9em' }, iconShare()));
 
 /**
