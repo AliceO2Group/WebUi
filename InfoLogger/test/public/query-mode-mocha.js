@@ -14,7 +14,7 @@
 
 const assert = require('assert');
 const test = require('../mocha-index');
-const { injectLogs, waitForTextInElement } = require('../utils/utils');
+const { injectLogs, waitForTextInElement, waitForNextRender } = require('../utils/utils');
 
 const TEXT_FILTER_VALUE_BY_OPERATOR = {
   since: '2026-01-01T00:00:00.000Z',
@@ -263,6 +263,33 @@ describe('Query Mode test-suite', async () => {
         const expected = `I, info log ${i}, ${time}, ${date}`;
         assert.ok(lines[i].startsWith(expected), `line ${i} should start with "${expected}", got "${lines[i]}"`);
       }
+    });
+
+    it('should extend the selection with shift and the arrow keys, and ignore the pointer afterwards', async () => {
+      await page.evaluate(() => {
+        model.log.item = model.log.list.at(3);
+      });
+      await waitForNextRender(page)
+
+      await page.keyboard.down('Shift');
+      await page.keyboard.press('ArrowDown');
+      await page.keyboard.press('ArrowDown');
+      await page.keyboard.up('Shift');
+      await waitForNextRender(page);
+
+      const selection = await page.evaluate(() => {
+        const { anchor, focus } = model.log.selection;
+        return { anchor, focus };
+      });
+      assert.deepStrictEqual(selection, { anchor: 3, focus: 5 }, 'the anchor should stay on the log clicked first');
+
+      // simply moving the mouse must not take over a selection just made with the keyboard
+      const rowBox = await rowBoxOfLogAtIndex(page, 8);
+      await page.mouse.move(rowBox.x, rowBox.y);
+      await waitForNextRender(page);
+
+      const focusAfterHover = await page.evaluate(() => model.log.selection.focus);
+      assert.strictEqual(focusAfterHover, 5, 'hovering a row should not move the selection');
     });
   });
 
