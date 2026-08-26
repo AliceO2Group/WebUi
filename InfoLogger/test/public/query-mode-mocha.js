@@ -269,7 +269,7 @@ describe('Query Mode test-suite', async () => {
       await page.evaluate(() => {
         model.log.item = model.log.list.at(3);
       });
-      await waitForNextRender(page)
+      await waitForNextRender(page);
 
       await page.keyboard.down('Shift');
       await page.keyboard.press('ArrowDown');
