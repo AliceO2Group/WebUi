@@ -32,7 +32,6 @@ module.exports = [
     pluginJs.configs.recommended,
     {
         plugins: {
-            jsdoc,
             '@stylistic/js': stylisticJs,
         },
         languageOptions: {
