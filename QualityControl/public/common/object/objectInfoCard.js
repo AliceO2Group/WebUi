@@ -9,12 +9,13 @@
  *
  * In applying this license CERN does not waive the privileges and immunities
  * granted to it by virtue of its status as an Intergovernmental Organization
- * or submit itself to any jurisdiction.p
+ * or submit itself to any jurisdiction.
  */
 
 import { h, isContextSecure } from '/js/src/index.js';
 import { iconExternalLink } from '/js/src/icons.js';
 import { camelToTitleCase, copyToClipboard, prettyFormatDate } from './../utils.js';
+import { visibilityButton } from '../visibilityButton.js';
 import { getBkpRunDetailsUrl } from '../../common/utils.js';
 
 const SPECIFIC_KEY_LABELS = {
@@ -24,6 +25,8 @@ const SPECIFIC_KEY_LABELS = {
 const DATE_FIELDS = ['validFrom', 'validUntil', 'createdAt', 'lastModified'];
 const TO_REMOVE_FIELDS = ['etag', 'qcObject', 'versions', 'name', 'location'];
 const HIGHLIGHTED_FIELDS = ['runNumber', 'runType', 'path', 'qcVersion'];
+const DRAW_OPTIONS_FIELD = 'drawOptions';
+const DISPLAY_HINTS_FIELD = 'displayHints';
 
 const KEY_TO_RENDER_FIRST = 'path';
 
@@ -34,22 +37,94 @@ const KEY_TO_RENDER_FIRST = 'path';
  * @param {function(Notification): function(string, string): object} rowAttributes -
  *  An optional curried function that returns the VNode attribute builder.
  *  Use {@link defaultRowAttributes} exported from this module, supplying the Notification API.
+ * @param {() => void} onToggleDrawingOptions - Callback function to for displaying drawing options
  * @returns {vnode} - panel with information about the object
  * @example
  * ```
  * qcObjectInfoPanel(qcObject, {}, defaultRowAttributes(model.notification))
+ * qcObjectInfoPanel(
+ *  qcObject,
+ *   { gap: '.5em' },
+ *   defaultRowAttributes(model.notification),
+ *   () => objectViewModel.toggleDrawingOptionsVisible(),
+ * )
  * ```
  */
-export const qcObjectInfoPanel = (qcObject, style = {}, rowAttributes = () => undefined) =>
+export const qcObjectInfoPanel = (
+  qcObject,
+  style = {},
+  rowAttributes = () => undefined,
+  onToggleDrawingOptions = null, // Default to null to indicate it's optional
+) =>
   h('.flex-column.scroll-y#qcObjectInfoPanel', { style }, [
     [
       KEY_TO_RENDER_FIRST,
       ...Object.keys(qcObject)
-        .filter((key) =>
-          key !== KEY_TO_RENDER_FIRST && !TO_REMOVE_FIELDS.includes(key)),
+        .filter((key) => key !== KEY_TO_RENDER_FIRST && !TO_REMOVE_FIELDS.includes(key)),
     ]
-      .map((key) => infoRow(key, qcObject[key], rowAttributes)),
+      .flatMap((key) => {
+        if (key === DRAW_OPTIONS_FIELD && typeof onToggleDrawingOptions === 'function') {
+          return [
+            groupedInfoRow({
+              keyValuePair1: { key: DRAW_OPTIONS_FIELD, value: qcObject.drawOptions },
+              keyValuePair2: { key: DISPLAY_HINTS_FIELD, value: qcObject.displayHints },
+              infoRowAttributes: defaultRowAttributes,
+              buttonElement: visibilityButton(onToggleDrawingOptions, { title: 'Toggle drawing options' }),
+            }),
+          ];
+        }
+        if (key === DISPLAY_HINTS_FIELD && typeof onToggleDrawingOptions === 'function') {
+          return []; // Hide displayHints (it is shown inside the grouped info row)
+        }
+        return [infoRow(key, qcObject[key], rowAttributes)];
+      }),
   ]);
+
+/**
+ * Builds two info rows grouped together with an action button on the side
+ * @param {object} params - parameters object
+ * @param {object} params.keyValuePair1 - first key value pair
+ * @param {object} params.keyValuePair2 - second key value pair
+ * @param {function(string, string): object} params.infoRowAttributes - function that return given attributes
+ *  for the row
+ * @param {vnode} params.buttonElement - button element to be displayed on the side
+ * @returns {vnode} - grouped info row with action button
+ */
+const groupedInfoRow = ({ keyValuePair1, keyValuePair2, infoRowAttributes, buttonElement }) => {
+  const { key: key1, value: value1 } = keyValuePair1;
+  const { key: key2, value: value2 } = keyValuePair2;
+  const highlightedClassesKey1 = HIGHLIGHTED_FIELDS.includes(key1) ? '.highlighted' : '';
+  const highlightedClassesKey2 = HIGHLIGHTED_FIELDS.includes(key2) ? '.highlighted' : '';
+  const formattedValue1 = infoPretty(key1, value1);
+  const formattedKey1 = getUILabel(key1);
+  const hasValue1 = value1 != null && value1 !== '' && (!Array.isArray(value1) || value1.length !== 0);
+  const formattedValue2 = infoPretty(key2, value2);
+  const formattedKey2 = getUILabel(key2);
+  const hasValue2 = value2 != null && value2 !== '' && (!Array.isArray(value2) || value2.length !== 0);
+  return h('.flex-row.relative', [
+    h('.flex-column.w-100.g2', [
+      h(`.flex-row.g2.info-row${highlightedClassesKey1}`, [
+        h('b.w-25.w-wrapped', formattedKey1),
+        h('.w-75', { style: 'padding-right: 50px', // avoid overlap with button
+          ...hasValue1
+            ? infoRowAttributes(formattedKey1, formattedValue1)
+            : {} }, formattedValue1),
+      ]),
+      h(`.flex-row.g2.info-row${highlightedClassesKey2}`, [
+        h('b.w-25.w-wrapped', formattedKey2),
+        h('.w-75', { style: 'padding-right: 50px', // avoid overlap with button
+          ...hasValue2
+            ? infoRowAttributes(formattedKey2, formattedValue2)
+            : {} }, formattedValue2),
+      ]),
+    ]),
+    h(
+      '.absolute.items-center.level3',
+      { style: 'top:50%;right:0;transform:translateY(-50%)' },
+      buttonElement,
+    ),
+  ]);
+};
 
 /**
  * Builds a raw with the key and value information parsed based on their type
@@ -62,13 +137,18 @@ const infoRow = (key, value, infoRowAttributes) => {
   const highlightedClasses = HIGHLIGHTED_FIELDS.includes(key) ? '.highlighted' : '';
   const formattedValue = infoPretty(key, value);
   const formattedKey = getUILabel(key);
-
   const hasValue = value != null && value !== '' && (!Array.isArray(value) || value.length !== 0);
   const bkpRunDetailsUrl = key === 'runNumber' ? getBkpRunDetailsUrl(value) : null;
 
   return h(`.flex-row.g2.info-row${highlightedClasses}`, [
     h('b.w-25.w-wrapped', formattedKey),
-    h('.flex-row.w-75', [
+    h(
+      `.w-75 ${hasValue ? 'cursor-pointer' : 'cursor-none'}`,
+      hasValue ? infoRowAttributes(formattedKey, formattedValue) : {},
+      formattedValue,
+    ),
+
+    h(`.flex-row.w-75${hasValue ? 'cursor-pointer' : 'cursor-none'}`, [
       h(
         '.cursor-pointer.flex-row',
         hasValue && infoRowAttributes(formattedKey, formattedValue),

@@ -19,7 +19,8 @@ import { errorDiv } from '../../common/errorDiv.js';
 import { dateSelector } from '../../common/object/dateSelector.js';
 import { defaultRowAttributes, qcObjectInfoPanel } from '../../common/object/objectInfoCard.js';
 import { downloadButton } from '../../common/downloadButton.js';
-import { visibilityToggleButton } from '../../common/visibilityButton.js';
+import { chevronButton } from '../../common/chevronButton.js';
+import { objectDrawingOptions } from '../../common/object/objectDrawingOptions.js';
 import { downloadRootImageDropdown } from '../../common/downloadRootImageDropdown.js';
 
 /**
@@ -44,19 +45,18 @@ const objectPlotAndInfo = (objectViewModel) =>
     Success: (qcObject) => {
       const {
         id,
-        name,
-        qcObject: { root = {} } = {},
         validFrom,
-        ignoreDefaults = false,
-        drawOptions = [],
-        displayHints = [],
-        layoutDisplayOptions = [],
         versions,
+        qcObject: { root = {} } = {},
+        name,
       } = qcObject;
-      const drawingOptions = ignoreDefaults ?
-        layoutDisplayOptions
-        : [...drawOptions, ...displayHints, ...layoutDisplayOptions];
-      const isObjectInfoVisible = objectViewModel.objectInfoVisible;
+      const {
+        ignoreDefaults,
+        nonRecognizedDrawingOptions,
+        objectInfoVisible,
+        objectDrawingOptionsVisible,
+        drawingOptions = [],
+      } = objectViewModel;
 
       return h('.w-100.h-100.flex-column.scroll-off#ObjectPlot', [
         h('.flex-row.justify-center.items-center.h-10', [
@@ -74,28 +74,40 @@ const objectPlotAndInfo = (objectViewModel) =>
               href: objectViewModel.getDownloadQcdbObjectUrl(id),
               title: 'Download root object',
             }),
-            visibilityToggleButton(
-              {
-                isVisible: isObjectInfoVisible,
-                title: 'Toggle object information visibility',
-              },
+            chevronButton(
               () => objectViewModel.toggleObjectInfoVisible(),
+              { isVisible: objectInfoVisible, title: 'Toggle object information visibility' },
             ),
           ]),
         ]),
-        h('.w-100.flex-row.g2.m2', { style: 'height: 0;flex-grow:1' }, [
+        h('.flex-row.g2.m2.flex-grow', [
           h('.flex-grow', {
-            // Key change forces redraw when toggling info panel
-            key: isObjectInfoVisible ? 'objectPlotWithoutInfoPanel' : 'objectPlotWithInfoPanel',
+            // force redraw on toggle info panel and update drawing options
+            key: `${objectInfoVisible}-${drawingOptions}`,
           }, drawObject(qcObject, {}, drawingOptions, (error) => {
             objectViewModel.drawingFailureOccurred(error.message);
           })),
-          isObjectInfoVisible && h('.scroll-y.w-30', {
-            key: 'objectInfoPanel',
-          }, [
-            h('h3.text-center', 'Object information'),
-            qcObjectInfoPanel(qcObject, { gap: '.5em' }, defaultRowAttributes(model.notification)),
-          ]),
+          objectInfoVisible &&
+            h('.scroll-y.w-30.relative', {
+              style: { order: 1 }, // Ensure panel is placed after drawObject
+            }, [
+              objectDrawingOptionsVisible &&
+              objectDrawingOptions({
+                id,
+                ignoreDefaults: ignoreDefaults,
+                options: drawingOptions,
+                nonRecognizedDrawingOptions: nonRecognizedDrawingOptions,
+                onToggleIgnoreDefaults: () => objectViewModel.toggleIgnoreDefaults(),
+                onToggleOption: (option) => objectViewModel.toggleDrawingOption(option),
+              }),
+              h('h3.text-center', 'Object information'),
+              qcObjectInfoPanel(
+                qcObject,
+                { gap: '.5em' },
+                defaultRowAttributes(model.notification),
+                () => objectViewModel.toggleDrawingOptionsVisible(),
+              ),
+            ]),
         ]),
       ]);
     },

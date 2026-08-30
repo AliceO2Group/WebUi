@@ -21,7 +21,9 @@ import { config } from './../config.js';
 import { objects, subfolders } from './seeders/ccdbObjects.js';
 import { MOCK_LATEST_OBJECT_FILTERED_BY_RUN_NUMBER,
   MOCK_OBJECT_1_DETAILS_RESPONSE, MOCK_OBJECT_IDENTIFICATION_RESPONSE,
-  MOCK_OBJECT_VERSIONS_RESPONSE, MOCK_OBJECT_VERSIONS_RESPONSE_RUN_NUMBER_FILTER }
+  MOCK_OBJECT_VERSIONS_RESPONSE, MOCK_OBJECT_VERSIONS_RESPONSE_RUN_NUMBER_FILTER,
+  MOCK_OBJECT_12_IDENTIFICATION_RESPONSE, MOCK_OBJECT_12_DETAILS_RESPONSE, MOCK_OBJECT_12_VERSIONS_RESPONSE,
+}
   from './seeders/object-view/mock-object-view.js';
 import { CCDB_MOCK_VERSION } from './seeders/ccdbVersion.js';
 
@@ -110,7 +112,10 @@ export const initializeNockForCcdb = () => {
     .reply(200, null, MOCK_OBJECT_1_DETAILS_RESPONSE)
 
     .head('/qc/test/object/1/1656072357492/1971432357492/016fa8ac-f3b6-11ec-b9a9-c0a80209250c/RunNumber=0')
-    .reply(200, null, MOCK_OBJECT_1_DETAILS_RESPONSE);
+    .reply(200, null, MOCK_OBJECT_1_DETAILS_RESPONSE)
+
+    .head('/qc/test/object/12/1728058750070/1728058895900/baffe0b2-826c-11ef-8f19-c0a80209250c')
+    .reply(200, null, MOCK_OBJECT_12_DETAILS_RESPONSE);
 
   nock(CCDB_URL, xFieldHeader2).persist()
     .get(CCDB_API_PATH_OBJECT_IDENTIFICATION)
@@ -126,7 +131,16 @@ export const initializeNockForCcdb = () => {
     .reply(200, MOCK_OBJECT_IDENTIFICATION_RESPONSE)
 
     .get(`${CCDB_API_PATH_TREE}/object/1`)
-    .reply(200, MOCK_OBJECT_IDENTIFICATION_RESPONSE);
+    .reply(200, MOCK_OBJECT_IDENTIFICATION_RESPONSE)
+
+    .get(`${CCDB_API_PATH_TREE}/object/12`)
+    .reply(200, MOCK_OBJECT_12_IDENTIFICATION_RESPONSE)
+
+    .get(`${CCDB_API_PATH_LATEST}/object/12`)
+    .reply(200, MOCK_OBJECT_12_IDENTIFICATION_RESPONSE)
+
+    .get ('/latest/qc/test/object/12')
+    .reply(200, MOCK_OBJECT_12_IDENTIFICATION_RESPONSE);
 
   nock(CCDB_URL, xFieldHeader3)
     .persist()
@@ -134,12 +148,18 @@ export const initializeNockForCcdb = () => {
     .reply(200, MOCK_OBJECT_VERSIONS_RESPONSE)
 
     .get('/browse/qc/test/object/1/RunNumber=0')
-    .reply(200, MOCK_OBJECT_VERSIONS_RESPONSE_RUN_NUMBER_FILTER);
+    .reply(200, MOCK_OBJECT_VERSIONS_RESPONSE_RUN_NUMBER_FILTER)
+
+    .get('/browse/qc/test/object/12')
+    .reply(200, MOCK_OBJECT_12_VERSIONS_RESPONSE);
 
   nock(CCDB_URL)
     .persist()
     .replyContentLength()
     .get(`${CCDB_API_DOWNLOAD_ROOT_OBJECT.path}/${CCDB_API_DOWNLOAD_ROOT_OBJECT.id}`)
+    .reply(200, fileContent)
+
+    .get('/download/baffe0b2-826c-11ef-8f19-c0a80209250c')
     .reply(200, fileContent);
 
   //runs mode

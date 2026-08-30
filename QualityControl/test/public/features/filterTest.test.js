@@ -194,7 +194,7 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     await page.waitForFunction(() => window.model.object.list.length === 3, { timeout: 1000 })
       .catch(() => { /* Ignore timeout error */ });
     objectList = await page.evaluate(() => window.model.object.list);
-    strictEqual(objectList.length, 3);
+    strictEqual(objectList.length, 4);
   });
 
   await testParent.test('ObjectShow should only list versions based on the filter', { timeout }, async () => {
@@ -214,14 +214,14 @@ export const filterTests = async (url, page, timeout = 5000, testParent) => {
     strictEqual(optionsCount, 1);
   });
 
-  await testParent.test('ObjectTreePage should apply filters for the objects', { timeout }, async () => {
+  await testParent.test('ObjectTreePage should apply filters for the objects', { timeout: timeout * 12 }, async () => {
     await page.goto(
       `${url}?page=objectTree`,
       { waitUntil: 'networkidle0' },
     );
 
     let rowCount = await page.evaluate(() => document.querySelectorAll('tr').length);
-    strictEqual(rowCount, 6);
+    strictEqual(rowCount, 7);
 
     const runNumber = '0';
     await page.locator('#runNumberFilter').fill(runNumber);

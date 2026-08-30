@@ -117,7 +117,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     'should have a link to show a layout from users layout',
     { timeout },
     async () => {
-      const linkpath = cardLayoutLinkPath(cardPath(myLayoutIndex, 2));
+      const linkpath = cardLayoutLinkPath(cardPath(myLayoutIndex, 3));
       const href = await page.evaluate((path) => document.querySelector(path).href, linkpath);
 
       ok(href.includes('http://localhost:8080/?page=layoutShow&layoutId='));
@@ -186,7 +186,7 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
 
   await testParent.test('should have a folder with one card after object path filtering', async () => {
     const preFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
-    strictEqual(preFilterCardCount, 2);
+    strictEqual(preFilterCardCount, 3);
     await page.locator('#openFilterToggle').click();
     await delay(100);
     await page.locator(filterObjectPath).fill('qc/MCH/QO/');
@@ -218,27 +218,27 @@ export const layoutListPageTests = async (url, page, timeout = 5000, testParent)
     await page.locator('div.m2:nth-child(3) > div:nth-child(1)').click();
     await delay(100);
     const preFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
-    strictEqual(preFilterCardCount, 5);
+    strictEqual(preFilterCardCount, 7);
     await page.locator('#openFilterToggle').click();
     await delay(100);
     await page.locator(filterObjectPath).fill('object');
     await page.locator('#openFilterToggle').click();
     await delay(100);
     let postFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
-    strictEqual(postFilterCardCount, 3);
+    strictEqual(postFilterCardCount, 5);
     await page.locator(filterPath).fill('pdpBeamType');
     await delay(100);
     postFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
     strictEqual(postFilterCardCount, 1);
   });
 
-  await testParent.test('should have a folder with one card after filtering', async () => {
+  await testParent.test('should have a folder with one card after filtering', { timeout }, async () => {
     // reset page, thus reset filter/search.
     await page.goto(`${url}${LAYOUT_LIST_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
     await delay(100);
     const preFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
-    strictEqual(preFilterCardCount, 2);
-    await page.locator(filterPath).fill('a');
+    strictEqual(preFilterCardCount, 3);
+    await page.locator(filterPath).fill('drawing-test');
 
     await delay(100);
     const postFilterCardCount = await page.evaluate(() => document.querySelectorAll('.card').length);
