@@ -25,12 +25,16 @@ import {
   updateAndSendExpressResponseFromNativeError,
 }
   from '@aliceo2/web-ui';
+import { parseRequestToConfig, parseRequestToLayout } from '../utils/download/configurator.js';
+import { MapStorage } from '../utils/download/classes/domain/MapStorage.js';
+import { download, saveDownloadData } from '../utils/download/downloadEngine.js';
 
 /**
  * @typedef {import('../repositories/LayoutRepository.js').LayoutRepository} LayoutRepository
  */
 
 const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/layout-ctrl`);
+const mapStorage = new MapStorage();
 
 /**
  * Gateway for all HTTP requests with regards to QCG Layouts
@@ -216,6 +220,49 @@ export class LayoutController {
       res.status(201).json(result);
     } catch {
       updateAndSendExpressResponseFromNativeError(res, new Error('Unable to create new layout'));
+    }
+  }
+
+  /**
+   * Store layout data for later download request.
+   * @param {Request<import('../utils/download/configurator.js').Query>}req - request
+   * @param {Response} res - response
+   */
+  async postDownloadHandler(req, res) {
+    try {
+      const downloadConfigDomain = parseRequestToConfig(req);
+      const downloadLayoutDomain = parseRequestToLayout(req);
+      // Note: if userId becomes 0 it will throw when creating the storagelayout.
+      const userId = Number(req.query.user_id ?? 0);
+      const key = saveDownloadData(mapStorage, downloadLayoutDomain, downloadConfigDomain, userId);
+      logger.infoMessage(`Saved layout key: ${key}`);
+      res.status(201).send(key);
+    } catch {
+      res.status(400).send('Could not save download data');
+    }
+  };
+
+  /**
+   * Download objects using key from post download request.
+   * @param {Request<import('../utils/download/configurator.js').Query>}req - request
+   * @param {Response} res - response
+   */
+  async getDownloadHandler(req, res) {
+    const { key } = req.query;
+    if (key == '') {
+      res.status(400).send('Key not defined correctly');
+    }
+    try {
+      const downloadLayoutDomain = mapStorage.readRequest(key)?.[0].toSuper();
+      const downloadConfigDomain = mapStorage.readRequest(key)?.[1];
+      if (downloadLayoutDomain == undefined || downloadConfigDomain == undefined) {
+        throw new Error('Layout could not be found with key');
+      }
+      // start the download engine
+      await download(downloadLayoutDomain, downloadConfigDomain, 1234567, res);
+    } catch (error) {
+      logger.errorMessage(error?.message ?? error);
+      res.status(400).send('Could not download objects');
     }
   }
 
