@@ -18,7 +18,7 @@ import { useForm, type KeepStateOptions, type SubmitHandler } from 'react-hook-f
 import { getDefaultValuesFromConfigObject } from '~/components/form/utils/getDefaultValuesFromConfigObject';
 import { convertFormValuesToConfigObject } from '~/components/form/utils/convertFormValuesToConfigObject';
 import { useLocation } from 'react-router';
-import type { FormValue } from '~/components/form/types';
+import type { FormValue, Restrictions } from '~/components/form/types';
 import { useConfigurationMutation } from '~/api/mutations/useConfigurationMutation';
 
 const RESET_PROPS: KeepStateOptions = { keepDirty: false };
@@ -34,9 +34,11 @@ const RESET_PROPS: KeepStateOptions = { keepDirty: false };
 export const useConfigurationForm = ({
   configuration,
   configurationName,
+  configurationRestrictions,
 }: {
   configuration: FormValue | undefined;
   configurationName: string;
+  configurationRestrictions: Restrictions | undefined;
 }) => {
   const { pathname } = useLocation();
   const mutation = useConfigurationMutation(configurationName);
@@ -51,7 +53,11 @@ export const useConfigurationForm = ({
   });
 
   const onSubmit: SubmitHandler<InputsType> = (data) => {
-    const configurationData = convertFormValuesToConfigObject(data, pathname);
+    const configurationData = convertFormValuesToConfigObject(
+      data,
+      configurationRestrictions,
+      pathname,
+    );
     mutation.mutate(configurationData);
   };
 
