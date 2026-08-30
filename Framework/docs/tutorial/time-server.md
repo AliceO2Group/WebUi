@@ -1,5 +1,5 @@
 # Tutorial - Time server
-This tutorial coverts development of a simple time server. The server provides time from two sources:
+This tutorial covers development of a simple time server. The server provides time from two sources:
 * HTTP server on a request
 * WebSocket server via server push
 
@@ -32,12 +32,19 @@ Start the server: `node index.js`.
 Then, open your browser and navigate to [http://localhost:8080](http://localhost:8080). You should see the final result. Click on `++` and `--` to change the local counter, or use two other buttons to request the date.
 
 ### Files overview
-* `package.json` - NodeJS file with dependencies and scripts
-* `config.js` - Application configuration file (HTTP endpoint configuration)
-* `index.js` - Server's root file
-* `public/Model.js` - Front-end model
-* `public/view.js` - Front-end view
-* `public/index.html` - Main front-end web page, also contains simple controller
+```
+newproject/
+├─ config.js          # application configuration file (HTTP endpoint configuration)
+├─ index.js           # server's root file
+├─ public/
+│  ├─ index.html      # main front-end web page; minimal HTML; links CSS; loads external modules (CSP-safe)
+│  ├─ session.js      # reads URL params via sessionService and hides them
+│  ├─ app.js          # controller: imports Model + view, mounts the app
+│  ├─ Model.js        # observable model (counter, HTTP date fetch, WS streaming)
+│  └─ view.js         # hyperscript view rendering the UI
+├─ package.json       # NodeJS file with dependencies and scripts
+└─ time-server.md     # this tutorial document
+```
 
 ### Server side explained
 
@@ -54,7 +61,7 @@ const config = require('./config.js');
 ```
 
 #### HTTP
-Afterwards an instance of the HTTP server is created and `./public` folder served (`http://localhost:8080/`).
+Afterwards an instance of the HTTP server is created and the `./public` folder is served (`http://localhost:8080/`).
 ```js
 const httpServer = new HttpServer(config.httpM);
 httpServer.addStaticPath('./public');
@@ -68,7 +75,7 @@ httpServer.post('/getDate', (req, res) => {
 ```
 #### WebSockets
 It's also possible to speak with the server using WebSocket protocol. It happens either in request-reply mode or as server broadcast (to all connected clients).
-The code below accepts `stream-date` as a signal to start sending time information. It will push the current time every 100ms with message command  set to `server-date`. If the `stream-date` command is received once again it will stop the updates.
+The code below accepts `stream-date` as a signal to start sending time information. It will push the current time every 100ms with message command set to `server-date`. If the `stream-date` command is received once again it will stop the updates.
 
 ```js
 const wsServer = new WebSocket(httpServer);
@@ -94,22 +101,24 @@ wsServer.bind('stream-date', (body) => {
 
 ### Client side explained - Controller
 
-Open `public/index.html` file. In the 3rd line CSS bootstrap is imported.
+`public/index.html` contains the framework stylesheet and two ES modules (`session.js` and `app.js`).
 ```html
 <link rel="stylesheet" href="/css/src/bootstrap.css">
+<script type="module" src="./session.js"></script>
+<script type="module" src="./app.js"></script>
 ```
 
-It includes session service that recovers variables provided by the server via URL and store them in a global context.
+The `public/session.js` module includes session service that recovers variables provided by the server via URL and stores them in a global context.
 ```js
 import sessionService from '/js/src/sessionService.js';
 sessionService.loadAndHideParameters();
 ```
 
-Then the MVC files are imported using Javascript modules.
+Then, in the `public/app.js` module, the MVC files are imported.
 ```js
 import {mount} from '/js/src/index.js';
 import view from './view.js';
-import Model from './model.js';
+import Model from './Model.js';
 ```
 
 And finally, the instance of model is created and `mount` called.
@@ -120,9 +129,18 @@ const debug = true; // shows when redraw is done
 mount(document.body, view, model, debug);
 ```
 
+This avoids inline `<script>` and works with the framework’s default Content Security Policy.
+
+> **Note on Content Security Policy (CSP):**  
+> The WebUi HTTP server sets security headers including a CSP that contains `script-src 'self'`, which **blocks inline `<script>`**. Use external modules (as above) instead of inline code.  
+> See “Backend – HTTP (REST API) module” in the WebUi docs (mentions CSP) and MDN’s `script-src` reference for details.  
+>
+> - WebUi HTTP module docs (CSP listed among protections).  
+> - MDN: *Content-Security-Policy: script-src*.
+
 ### Explaining client side - Model
 
-After going through the controller you can take a look at the model of the application, which is defined in the `public/Model.js` file. The model is a class which inherits from `Observable`. Class `Observable` notifies about any changes in the model. Based on these notification the controller re-renders the view.
+After going through the controller you can take a look at the model of the application, which is defined in the `public/Model.js` file. The model is a class which inherits from `Observable`. Class `Observable` notifies about any changes in the model. Based on these notifications the controller re-renders the view.
 
 Here is a minimal code of a Model class
 ```js
@@ -159,7 +177,7 @@ Extend the constructor with additional variables to define the full model:
 ```
 
 Now some operation on the model can be defined.
-To increment and decrement the internal counter (eg. when a user clicks a button) two methods are defined:
+To increment and decrement the internal counter (e.g., when a user clicks a button) two methods are defined:
 
 ```js
   increment() {
@@ -191,7 +209,7 @@ The other way of communicating with server are WebSockets - bi-directional commu
 Create an instance of the WebSocket client. Then you can either send or listen to messages.
 The following `this._prepareWebSocket()` method (note that by convention all method names prepended with `_` are private) listens to two events:
  -  `authed` - notifies that client has successfully authorized by the server (automatically generated by server)
- - `server-date` - custom message that includes server's time (as defined in the [Explaining server side](#explaining-server-side) section - look for `wsServer.bind`)
+ - `server-date` - custom message that includes server's time (as defined in the [Server side explained](#server-side-explained) section - look for `wsServer.bind`)
 ```js
 _prepareWebSocket() {
   // Real-time communication with server
@@ -220,7 +238,7 @@ The only missing part is sending the message, enabling time message streaming, t
   }
 ```
 
-If you need to create additional model just follow the guide on [how to scale](../guide/scale-app.md) your application.
+If you need to create an additional model, just follow the guide on [how to scale](../guide/scale-app.md) your application.
 
 ### Client side - View.
 
@@ -255,6 +273,6 @@ export default function view(model) {
   );
 }
 ```
-Now focus on the button, each on them specified `onclick` attribute which calls the model's methods. As described in the [Explaining client side - Model](#explaining-client-side---model) section these methods modify the model what causes the controller to re-draw the view by calling the `view` method above.
+Now focus on the button, each on them specified `onclick` attribute which calls the model's methods. As described in the [Explaining client side - Model](#explaining-client-side---model) section, these methods modify the model, what causes the controller to re-draw the view by calling the `view` method above.
 
 When the application grows the view can easily scale by splitting it into multiple functions and files, see [components guide](../guide/components.md) explaining that.
