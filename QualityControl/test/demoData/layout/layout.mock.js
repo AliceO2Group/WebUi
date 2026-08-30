@@ -269,3 +269,34 @@ export const LAYOUT_MOCK_6 = {
   ],
   collaborators: [],
 };
+
+export const LAYOUT_MOCK_7 = {
+  id: 'q12b8c22402408122e2f20dd',
+  name: 'drawing-test',
+  owner_id: 0,
+  owner_name: 'Anonymous',
+  description: '',
+  displayTimestamp: false,
+  autoTabChange: 0,
+  tabs: [
+    {
+      id: 'b12b8c227b3227b0c603c29d',
+      name: 'main',
+      objects: [
+        {
+          id: 'b12b8c25d5b49dbf80e81926',
+          x: 0,
+          y: 0,
+          h: 1,
+          w: 1,
+          name: 'qc/test/object/12',
+          options: ['logx', 'text'],
+          autoSize: false,
+          ignoreDefaults: true,
+        },
+      ],
+      columns: 1,
+    },
+  ],
+  collaborators: [],
+};

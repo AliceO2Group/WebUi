@@ -45,7 +45,7 @@ export const layoutRepositoryTest = async () => {
     suite('list layouts', () => {
       test('should list all layouts without filter', () => {
         const result = layoutRepository.listLayouts();
-        strictEqual(result.length, 3, 'Length of list of layouts is not correct');
+        strictEqual(result.length, 4, 'Length of list of layouts is not correct');
         result.forEach((layout) => {
           ok(layout.labels, 'Each layout should have labels field');
           delete layout.labels; // remove labels for deep comparison
@@ -56,17 +56,15 @@ export const layoutRepositoryTest = async () => {
       test('should filter layouts by owner_id', () => {
         const ownerId = 0;
         const result = layoutRepository.listLayouts({ filter: { owner_id: ownerId } });
+        const expectedLayouts = jsonFileServiceMock.data.layouts.filter((l) => l.owner_id === ownerId);
 
-        strictEqual(result.length, 2, 'number of layouts is incorrect');
-        result.forEach((layout, index) => {
+        strictEqual(result.length, expectedLayouts.length, 'number of layouts is incorrect');
+        result.forEach((layout) => {
           delete layout.labels; // remove labels for deep comparison
           strictEqual(layout.owner_id, ownerId, `Layout owner_id should be ${ownerId}`);
-          deepStrictEqual(
-            layout,
-            jsonFileServiceMock.data.layouts[index],
-            'Filtered layout does not match expected layout',
-          );
         });
+
+        deepStrictEqual(result, expectedLayouts, 'Filtered layouts do not match expected layouts');
       });
 
       test('should return only layout with specified filter.objectPath', () => {
@@ -82,7 +80,7 @@ export const layoutRepositoryTest = async () => {
         const result = layoutRepository.listLayouts({ filter: {
           objectPath,
         } });
-        strictEqual(result.length, 2, "listLayouts's filter.objectPath should only return 2 layouts");
+        strictEqual(result.length, 3, "listLayouts's filter.objectPath should only return 3 layouts");
       });
 
       test('should return all layouts when filter.objectPath is empty string', () => {
@@ -90,12 +88,12 @@ export const layoutRepositoryTest = async () => {
         const result = layoutRepository.listLayouts({ filter: {
           objectPath,
         } });
-        strictEqual(result.length, 3, "listLayouts's filter.objectPath should only return 3 (all) layouts");
+        strictEqual(result.length, 4, "listLayouts's filter.objectPath should only return 4 (all) layouts");
       });
 
       test('should return all layouts when filter is an empty object', () => {
         const result = layoutRepository.listLayouts({ filter: {} });
-        strictEqual(result.length, 3, "listLayouts's empty filter object should only return 3 (all) layouts");
+        strictEqual(result.length, 4, "listLayouts's empty filter object should only return 4 (all) layouts");
       });
 
       test('should return only specified fields when fields array is provided', () => {
@@ -178,8 +176,8 @@ export const layoutRepositoryTest = async () => {
         const newLayout = { id: '3', name: 'New Layout', owner_id: 'user3' };
         await layoutRepository.createLayout(newLayout);
 
-        strictEqual(jsonFileServiceMock.data.layouts.length, 4);
-        deepEqual(jsonFileServiceMock.data.layouts[3], newLayout);
+        strictEqual(jsonFileServiceMock.data.layouts.length, 5);
+        deepEqual(jsonFileServiceMock.data.layouts[4], newLayout);
         sinon.assert.calledOnce(jsonFileServiceMock.writeToFile);
       });
     });
@@ -213,7 +211,7 @@ export const layoutRepositoryTest = async () => {
           layoutRepository.deleteLayout(nonExistentLayoutId),
           (err) => err instanceof Error && err.message === `layout (${nonExistentLayoutId}) not found`,
         ).then(() => {
-          strictEqual(jsonFileServiceMock.data.layouts.length, 4);
+          strictEqual(jsonFileServiceMock.data.layouts.length, 5);
           sinon.assert.notCalled(jsonFileServiceMock.writeToFile);
         });
       });
@@ -223,7 +221,7 @@ export const layoutRepositoryTest = async () => {
         const deletedLayoutId = await layoutRepository.deleteLayout(layoutIdToDelete);
 
         strictEqual(deletedLayoutId, layoutIdToDelete);
-        strictEqual(jsonFileServiceMock.data.layouts.length, 3);
+        strictEqual(jsonFileServiceMock.data.layouts.length, 4);
         strictEqual(deletedLayoutId, layoutIdToDelete);
         sinon.assert.calledOnce(jsonFileServiceMock.writeToFile);
       });

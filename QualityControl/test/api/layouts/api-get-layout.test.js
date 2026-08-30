@@ -16,7 +16,7 @@ import { suite, test } from 'node:test';
 import { OWNER_TEST_TOKEN, URL_ADDRESS } from '../config.js';
 import request from 'supertest';
 import { deepStrictEqual } from 'node:assert';
-import { LAYOUT_MOCK_4, LAYOUT_MOCK_5, LAYOUT_MOCK_6 } from '../../demoData/layout/layout.mock.js';
+import { LAYOUT_MOCK_4, LAYOUT_MOCK_5, LAYOUT_MOCK_6, LAYOUT_MOCK_7 } from '../../demoData/layout/layout.mock.js';
 import { addLabelsToLayout } from '../../../lib/utils/layout/addLabelsToLayout.js';
 
 export const apiGetLayoutsTests = () => {
@@ -47,7 +47,11 @@ export const apiGetLayoutsTests = () => {
           res.body.forEach((layout) => {
             delete layout.labels; // remove labels for deep comparison
           });
-          deepStrictEqual(res.body, [LAYOUT_MOCK_4, LAYOUT_MOCK_5], 'Unexpected Layout structure was returned');
+          deepStrictEqual(
+            res.body,
+            [LAYOUT_MOCK_4, LAYOUT_MOCK_5, LAYOUT_MOCK_7],
+            'Unexpected Layout structure was returned',
+          );
         });
     });
 

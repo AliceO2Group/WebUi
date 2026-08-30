@@ -40,12 +40,21 @@ export const objects = [
     [VALID_FROM]: new Date('2023-12-03').valueOf(),
     [VALID_UNTIL]: new Date('2023-12-04').valueOf(),
   },
+  {
+    [PATH]: 'qc/test/object/12',
+    [LAST_MODIFIED]: new Date('2024-02-03').valueOf(),
+    [CREATED]: new Date('2024-02-03').valueOf(),
+    [ID]: '',
+    [VALID_FROM]: new Date('2024-02-03').valueOf(),
+    [VALID_UNTIL]: new Date('2024-02-04').valueOf(),
+  },
 ];
 
 export const subfolders = [
   'qc/test/object/1',
   'qc/test/object/2',
   'qc/test/object/11',
+  'qc/test/object/12',
 ];
 
 export const MOCK_OBJECT_BY_ID_RESULT = {
@@ -87,6 +96,14 @@ export const OBJECT_VERSIONS = [
   },
 ];
 
+export const MOCK_OBJECT_3_VERSIONS = [
+  {
+    validFrom: 1728058750070,
+    createdAt: 1728058897718,
+    id: 'baffe0b2-826c-11ef-8f19-c0a80209250c',
+  },
+];
+
 export const OBJECT_VERSIONS_FILTERED_BY_RUN_NUMBER = [
   {
     createdAt: 1656072357533,
@@ -117,10 +134,34 @@ export const OBJECT_BY_PATH_RESULT = {
   location: '/download/016fa8ac-f3b6-11ec-b9a9-c0a80209250c',
 };
 
+export const OBJECT_3_BY_PATH_RESULT = {
+  id: 'baffe0b2-826c-11ef-8f19-c0a80209250c',
+  path: 'qc/test/object/12',
+  name: 'qc/test/object/12',
+  validFrom: 1728058750070,
+  validUntil: 1728058895900,
+  createdAt: 1728058897718,
+  lastModified: 1728058897000,
+  drawOptions: [],
+  displayHints: 'hist',
+  etag: 'baffe0b2-826c-11ef-8f19-c0a80209250c',
+  runNumber: '551890',
+  runType: 'PHYSICS',
+  partName: 'send',
+  qcCheckName: undefined,
+  qcQuality: undefined,
+  qcDetectorName: 'MFT',
+  qcTaskName: 'MFTClusterTask',
+  qcVersion: '1.150.0',
+  objectType: 'o2::quality_control_modules::common::TH1Ratio<TH1F>',
+  location: '/download/baffe0b2-826c-11ef-8f19-c0a80209250c',
+};
+
 export const TREE_API_OBJECTS = [
   { name: 'qc/test/object/1' },
   { name: 'qc/test/object/2' },
   { name: 'qc/test/object/11' },
+  { name: 'qc/test/object/12' },
 ];
 
 export const OBJECT_LATEST_FILTERED_BY_RUN_NUMBER = [
@@ -128,5 +169,13 @@ export const OBJECT_LATEST_FILTERED_BY_RUN_NUMBER = [
     [PATH]: 'qc/test/object/1',
     createdAt: 1656072357533,
     name: 'qc/test/object/1',
+  },
+];
+
+export const OBJECT_3_LATEST_FILTERED_BY_RUN_NUMBER = [
+  {
+    [PATH]: 'qc/test/object/12',
+    createdAt: 1728058897718,
+    name: 'qc/test/object/12',
   },
 ];

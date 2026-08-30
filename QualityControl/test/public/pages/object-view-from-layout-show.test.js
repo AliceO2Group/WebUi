@@ -183,52 +183,52 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
-    'should have a correctly made object info visibility button',
+    'should have a correctly made object info chevron button',
     { timeout },
     async () => {
-      const visibilityButtonClass = await page.evaluate(() =>
-        document.querySelector('.visibility-toggle-button').className);
-      match(visibilityButtonClass, /visibility-toggle-(on|off)/i);
+      const chevronButtonClass = await page.evaluate(() =>
+        document.querySelector('.chevron-button').className);
+      match(chevronButtonClass, /chevron-(right|left)/i);
     },
   );
 
   await testParent.test(
-    'should have download button and visibility button inline and to the right of the timestamp dropdown',
+    'should have download button and chevron button inline and to the right of the timestamp dropdown',
     { timeout },
     async () => {
       const positions = await page.evaluate(() => {
         const dateSelector = document.querySelector('#dateSelector');
         const dlButton = document.querySelector('.download-button');
-        const visibilityButton = document.querySelector('.visibility-toggle-button');
+        const chevronButton = document.querySelector('.chevron-button');
 
-        if (!dateSelector || !dlButton || !visibilityButton) {
+        if (!dateSelector || !dlButton || !chevronButton) {
           throw new Error('One or more elements not found on the page');
         }
 
         const dateRect = dateSelector.getBoundingClientRect();
         const dlRect = dlButton.getBoundingClientRect();
-        const visRect = visibilityButton.getBoundingClientRect();
+        const chevronRect = chevronButton.getBoundingClientRect();
 
         // Helper to get vertical center
         const verticalCenter = (rect) => (rect.top + rect.bottom) / 2;
 
         const dateCenter = verticalCenter(dateRect);
         const dlCenter = verticalCenter(dlRect);
-        const visCenter = verticalCenter(visRect);
+        const chevronCenter = verticalCenter(chevronRect);
 
         return {
           dlRightOfDate: dlRect.left > dateRect.right,
-          visRightOfDate: visRect.left > dateRect.right,
-          sameY: Math.abs(dateCenter - dlCenter) < 1 && Math.abs(dateCenter - visCenter) < 1,
+          chevronRightOfDate: chevronRect.left > dateRect.right,
+          sameY: Math.abs(dateCenter - dlCenter) < 1 && Math.abs(dateCenter - chevronCenter) < 1,
         };
       });
 
       strictEqual(positions.dlRightOfDate, true, 'Download button is not to the right of the timestamp dropdown');
-      strictEqual(positions.visRightOfDate, true, 'Visibility button is not to the right of the timestamp dropdown');
+      strictEqual(positions.chevronRightOfDate, true, 'Chevron button is not to the right of the timestamp dropdown');
       strictEqual(
         positions.sameY,
         true,
-        'Download button, visibility button, and timestamp dropdown are not vertically aligned within 1px',
+        'Download button, chevron button, and timestamp dropdown are not vertically aligned within 1px',
       );
     },
   );
@@ -360,19 +360,19 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
-    'should toggle the object information panel visibility when the visibility (toggle) button is clicked',
+    'should toggle the object information panel visibility when the chevron button is clicked',
     { timeout },
     async () => {
       // Capture initial visibility state
       const initialVisibility = await getObjectInfoPanelVisibility(page);
 
       // Click the toggle button once and check visibility
-      await page.click('.visibility-toggle-button');
+      await page.click('.chevron-button');
       await delay(100);
       const afterFirstClick = await getObjectInfoPanelVisibility(page);
 
       // Click the toggle button again to restore original state
-      await page.click('.visibility-toggle-button');
+      await page.click('.chevron-button');
       await delay(100);
       const afterSecondClick = await getObjectInfoPanelVisibility(page);
 
@@ -390,7 +390,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
   );
 
   await testParent.test(
-    'should redraw the JSRoot object drawing when visibility toggle changes',
+    'should redraw the JSRoot object drawing when object info panel visibility changes',
     { timeout },
     async () => {
       const initialElement = await page.waitForSelector(
@@ -398,7 +398,7 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         { timeout: 1000 },
       );
 
-      await page.click('.visibility-toggle-button');
+      await page.click('.chevron-button');
       await delay(100);
 
       const newElement = await page.waitForSelector(
@@ -408,12 +408,12 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
 
       const redrawn = await page.evaluate((a, b) => a.innerHTML !== b.innerHTML, initialElement, newElement);
 
-      strictEqual(redrawn, true, 'JSRoot drawing was not redrawn on visibility toggle');
+      strictEqual(redrawn, true, 'JSRoot drawing was not redrawn on object info panel visibility change');
     },
   );
 
   await testParent.test(
-    'should update localStorage state when visibility toggle button is clicked',
+    'should update localStorage state when chevron button is clicked',
     { timeout },
     async () => {
       const personId = await page.evaluate(() => window.model?.session?.personid?.toString());
@@ -425,12 +425,12 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
       const visibilitySettingInitially = await getLocalStorageAsJson(page, localStorageKey);
 
       // Click the toggle button (first time)
-      await page.click('.visibility-toggle-button');
+      await page.click('.chevron-button');
       await delay(100);
       const visibilitySettingAfterFirstClick = await getLocalStorageAsJson(page, localStorageKey);
 
       // Click the toggle button (second time)
-      await page.click('.visibility-toggle-button');
+      await page.click('.chevron-button');
       await delay(100);
       const visibilitySettingAfterSecondClick = await getLocalStorageAsJson(page, localStorageKey);
 
@@ -443,6 +443,168 @@ export const objectViewFromLayoutShowTests = async (url, page, timeout = 5000, t
         visibilitySettingAfterSecondClick,
         visibilitySettingInitially,
         'LocalStorage state should return to the initial value after the second click',
+      );
+    },
+  );
+
+  await testParent.test(
+    'should set drawing options from layout when loading an object from layout',
+    { timeout },
+    async () => {
+      const layoutId = 'q12b8c22402408122e2f20dd';
+      const objectId = 'b12b8c25d5b49dbf80e81926';
+      const expectedDrawingOptions = ['logx', 'text'];
+      await page.goto(
+        `${url}?page=objectView&objectId=${objectId}&layoutId=${layoutId}`,
+        { waitUntil: 'networkidle0' },
+      );
+      // Validate the drawing options in the fingerprint
+      await page.click('.chevron-button');
+      await delay(200);
+      const result = await page.evaluate(() => {
+        const plotElement = document.querySelector('#ObjectPlot .jsroot-container');
+        const fingerprint = plotElement.dataset.fingerprintData || null;
+        return { fingerprint };
+      });
+
+      const allOptionsPresent = expectedDrawingOptions.every((option) => result.fingerprint.includes(option));
+      strictEqual(
+        allOptionsPresent,
+        true,
+        `Not all expected drawing options are present in the fingerprint. Expected: ${
+          expectedDrawingOptions
+        }, Found: ${
+          result.fingerprint
+        }`,
+      );
+    },
+  );
+
+  await testParent.test(
+    'should initially hide drawing options panel',
+    { timeout },
+    async () => {
+      const exists = await page.evaluate(() => Boolean(document.querySelector('#objectDrawingOptions')));
+      strictEqual(exists, false, 'Drawing options panel should be initially hidden');
+    },
+  );
+
+  await testParent.test(
+    'should show drawing options panel on click visibility toggle button',
+    { timeout },
+    async () => {
+      await page.click('.visibility-toggle-button');
+      await delay(200);
+      const exists = await page.evaluate(() => Boolean(document.querySelector('#objectDrawingOptions')));
+      strictEqual(exists, true, 'Drawing options panel should be visible after click visibility button');
+    },
+  );
+
+  await testParent.test(
+    'should display checked ignore defaults button',
+    { timeout },
+    async () => {
+      const objectId = 'baffe0b2-826c-11ef-8f19-c0a80209250c';
+      const ignoreDefaultsCheckboxSelector = `#objectDrawingOptions input[id="${objectId}ignoreDefaults"]`;
+      const isChecked = await page.evaluate((selector) => {
+        const checkbox = document.querySelector(selector);
+        return checkbox ? checkbox.checked : null;
+      }, ignoreDefaultsCheckboxSelector);
+      strictEqual(isChecked, true, 'Ignore defaults checkbox should be checked based on layout setting');
+    },
+  );
+
+  await testParent.test(
+    'should set active checkboxes from layout display options when ignore defaults is true',
+    { timeout },
+    async () => {
+      const activeCheckboxLabels = await page.evaluate(() => {
+        const checkboxes = document.querySelectorAll('#objectDrawingOptions > div .flex-column input[type="checkbox"]');
+        return Array.from(checkboxes)
+          .filter((checkbox) => checkbox.checked)
+          .map((checkbox) => document.querySelector(`#objectDrawingOptions label[for="${checkbox.id}"]`)?.innerText);
+      });
+      // `gridy` is part of the default draw options.
+      // Because defaults should be ignored, we do NOT expect it to be set to active.
+      const expectedDrawingOptions = ['logx', 'text'];
+      deepStrictEqual(
+        activeCheckboxLabels.toSorted((a, b) => a.localeCompare(b)),
+        expectedDrawingOptions.toSorted((a, b) => a.localeCompare(b)),
+        'Active drawing options do not match expected layout settings when ignore defaults is true',
+      );
+    },
+  );
+
+  await testParent.test(
+    'should set active checkboxes from layout display options when ignore defaults is set to false',
+    { timeout },
+    async () => {
+      const objectId = 'baffe0b2-826c-11ef-8f19-c0a80209250c';
+      const ignoreDefaultsCheckboxSelector = `#objectDrawingOptions input[id="${objectId}ignoreDefaults"]`;
+      await page.click(ignoreDefaultsCheckboxSelector);
+      await page.waitForFunction(
+        (query) => document.querySelector(query)?.checked === false,
+        { timeout: 1000 },
+        ignoreDefaultsCheckboxSelector,
+      ).catch(() => { /* ignore timeout error */ });
+      await delay(100);
+      const activeCheckboxLabels = await page.evaluate(() => {
+        const checkboxes = document.querySelectorAll('#objectDrawingOptions > div .flex-column input[type="checkbox"]');
+        return Array.from(checkboxes)
+          .filter((checkbox) => checkbox.checked)
+          .map((checkbox) => document.querySelector(`#objectDrawingOptions label[for="${checkbox.id}"]`)?.innerText);
+      });
+      // `gridy` is part of the default draw options.
+      // Because Ignore Defaults is turned off (set to `false`), we DO expect it to now be active.
+      const expectedDrawingOptions = ['gridy', 'logx', 'text'];
+      deepStrictEqual(
+        activeCheckboxLabels.toSorted((a, b) => a.localeCompare(b)),
+        expectedDrawingOptions.toSorted((a, b) => a.localeCompare(b)),
+        'Active drawing options do not match expected layout settings when ignore defaults is false',
+      );
+    },
+  );
+
+  await testParent.test(
+    'should updated fingerprint on plot after changing drawing options',
+    { timeout },
+    async () => {
+      const objectId = 'baffe0b2-826c-11ef-8f19-c0a80209250c';
+      const logxCheckboxSelector = `#objectDrawingOptions input[id="${objectId}logx"]`;
+
+      // Uncheck 'logx' option
+      await page.click(logxCheckboxSelector);
+      await delay(100);
+
+      const fingerprintIncludesLogx = await page.evaluate(() => {
+        const plotElement = document.querySelector('#ObjectPlot .jsroot-container');
+        const fingerprint = plotElement.dataset.fingerprintData;
+        return fingerprint.includes('logx');
+      });
+
+      strictEqual(
+        fingerprintIncludesLogx,
+        false,
+        'Plot fingerprint should not include "logx" after unchecking the option',
+      );
+    },
+  );
+
+  await testParent.test(
+    'should display unrecognized drawing options in drawing options panel',
+    { timeout },
+    async () => {
+      const nonRecognizedDrawingOptionSelector = '#objectDrawingOptions > div > div:nth-child(2';
+      const nonRecognizedDrawingOption = 'hist';
+      const nonRecognizedOptionsText = await page.evaluate((selector) => {
+        const element = document.querySelector(selector);
+        return element ? element.textContent : '';
+      }, nonRecognizedDrawingOptionSelector);
+
+      strictEqual(
+        nonRecognizedOptionsText.includes(nonRecognizedDrawingOption),
+        true,
+        'Non-recognized drawing options should be displayed in the drawing options panel',
       );
     },
   );
