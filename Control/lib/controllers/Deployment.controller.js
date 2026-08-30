@@ -19,6 +19,7 @@ const {
 } = require('@aliceo2/web-ui');
 
 const {User} = require('./../dtos/User.js');
+const LOG_FACILITY = 'cog/deployment-ctrl';
 
 /**
  * Controller Class for managing deployments via the AliECS system
@@ -117,6 +118,58 @@ class DeploymentController {
     } catch (error) {
       this._logger.trace(error);
       this._logger.errorMessage(error, { level: LogLevel.SUPPORT });
+      updateAndSendExpressResponseFromNativeError(res, error);
+    }
+  }
+
+  /**
+   * API - POST endpoint for requesting a new deployment for calibration purposes. 
+   * This is a specific endpoint separated from the generic deployment one as it has specific input requirements and validations.
+   * @param {Request} req - HTTP Request object which expects a body with the following properties
+   * @param {string[]} req.body.detectors - list of detectors for which the calibration environment should be deployed. Must contain exactly one detector.
+   * @param {string} req.body.runType - the type of the calibration run to be performed which determines the workflow template to use
+   * @param {string} req.body.configurationName - the name of the saved configuration to use for the deployment
+   * @param {Response} res - HTTP Response object with result of the deployment request
+   * @returns {void}
+   */
+  async newAsyncDeploymentCalibrationHandler(req, res) {
+    const {personid, name, username} = req.session;
+    const user = new User(username, name, personid);
+    const { detectors, runType, selectedConfiguration } = req.body;
+    
+    if (detectors?.length !== 1) {
+      updateAndSendExpressResponseFromNativeError(
+        res,
+        new InvalidInputError('Exactly one detector must be specified for deployment')
+      );
+      return;
+    }
+    const [detector] = detectors;
+
+    if (!selectedConfiguration) {
+      updateAndSendExpressResponseFromNativeError(
+        res,
+        new InvalidInputError('Missing Configuration Name for deployment')
+      );
+      return;
+    }
+   
+    // Attempt to deploy environment
+    try {
+      this._logger.infoMessage(`Request by username(${username}) to deploy configuration ${selectedConfiguration}`,
+        {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
+      );
+      const environment = await this._deploymentService.deployEnvironmentCalibration(
+        {
+          detector, runType, selectedConfiguration, user,
+        }
+      );
+      res.status(201).json(environment);
+    } catch (error) {
+      this._logger.errorMessage(
+        `Unable to deploy request by username(${username}) for ${selectedConfiguration} due to ${error.message}`,
+        {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
+      );
       updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
