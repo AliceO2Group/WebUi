@@ -383,11 +383,20 @@ export default class Model extends Observable {
   }
 
   /**
+   * Builds the an encoded filter query string
+   * @param {object} filters - The filter object
+   * @returns {string} The query string representation of the filter criteria
+   */
+  buildFilterQueryString(filters) {
+    return `?q=${encodeURIComponent(JSON.stringify(filters))}`;
+  }
+
+  /**
    * When model change (filters), update address bar with the filter
    * do it silently to avoid infinite loop
    */
   updateRouteOnModelChange() {
-    this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);
+    this.router.go(this.buildFilterQueryString(this.log.filter.toObject()), true, true);
   }
 
   /**
