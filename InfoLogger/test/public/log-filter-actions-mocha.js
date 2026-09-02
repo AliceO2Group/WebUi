@@ -167,6 +167,7 @@ describe('Filter actions test-suite', async () => {
     const expectedParams = '?q=%7B%22hostname%22%3A%7B%22match%22%3A%22%5C%22%25ald_qdip01%25%22%7D'
       + '%2C%22severity%22%3A%7B%22in%22%3A%22I%20W%20E%20F%22%7D%7D';
     const searchParams = await page.evaluate(() => {
+      window.model.log.filter.resetCriteria();
       window.model.log.filter.setCriteria('hostname', 'match', '"%ald_qdip01%');
       window.model.updateRouteOnModelChange();
       return window.location.search;
