@@ -12,7 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Observable } from '/js/src/index.js';
+import { Observable, buildUrl } from '/js/src/index.js';
 import { TEXT_FILTER_OPERATORS } from '../constants/text-filter-operators.const.js';
 import { getDisabledSeverities } from '../constants/log-level-filters.const.js';
 
@@ -140,9 +140,6 @@ export default class LogFilter extends Observable {
         // remote empty inputs
         if (!criterias[field][operator]) {
           delete criterias[field][operator];
-        } else if (operator === 'match' || operator === 'exclude') {
-          // encode potential breaking characters and escape double quotes as are used by browser by default
-          criterias[field][operator] = encodeURIComponent(criterias[field][operator].replace(/["]+/g, '\\"'));
         }
 
         // remove empty fields
@@ -152,6 +149,14 @@ export default class LogFilter extends Observable {
       }
     }
     return criterias;
+  }
+
+  /**
+   * Builds a URI encoded filter query string
+   * @returns {string} The query string representation of the filter criteria
+   */
+  get queryString() {
+    return buildUrl('?', { q: JSON.stringify(this.toObject()) });
   }
 
   /**
