@@ -40,7 +40,7 @@
     "globals": "17.11.0",
     "mocha": "11.8.0",
     "nyc": "18.0.0",
-    "puppeteer": "25.8.0",
+    "puppeteer": "25.9.0",
     "sinon": "22.1.0"
   },
   "bundleDependencies": [
