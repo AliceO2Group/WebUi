@@ -135,7 +135,7 @@ describe('Filter actions test-suite', async () => {
     await page.waitForFunction('window.model.notification.state === \'shown\'');
     await page.waitForFunction('window.model.notification.type === \'warning\'');
     const notificationMessage = await page.evaluate(() => window.model.notification.message);
-    await page.waitForFunction(`window.model.notification.message === "${notificationMessage}"`);
+    assert.strictEqual(notificationMessage, 'URL can contain only filters or profile, not both');
     assert.strictEqual(searchParams, expectedParams);
   });
 
