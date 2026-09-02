@@ -105,7 +105,8 @@ describe('Filter actions test-suite', async () => {
 
   it('should update filters based on profile when passed in the URI', async () => {
     // for now check if the filters are reset once the profile is passed
-    const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
+    const expectedParams =
+      '?q=%7B%22severity%22%3A%7B%22in%22%3A%22I%20W%20E%20F%22%7D%2C%22level%22%3A%7B%22max%22%3A1%7D%7D';
 
     const searchParams = await page.evaluate(() => {
       const params = { profile: 'physicist' };
@@ -123,7 +124,8 @@ describe('Filter actions test-suite', async () => {
   it('should reset filters and show warning message when profile and filters are passed', async () => {
     // wait until the previous notification is hidden
     await page.waitForFunction('window.model.notification.state === \'hidden\'');
-    const expectedParams = '?q={%22severity%22:{%22in%22:%22I%20W%20E%20F%22},%22level%22:{%22max%22:1}}';
+    const expectedParams =
+      '?q=%7B%22severity%22%3A%7B%22in%22%3A%22I%20W%20E%20F%22%7D%2C%22level%22%3A%7B%22max%22%3A1%7D%7D';
     const searchParams = await page.evaluate(() => {
       const params = { profile: 'physicist', q: '"severity":{"in":"I W E F"}}' };
       window.model.parseLocation(params);
@@ -148,7 +150,7 @@ describe('Filter actions test-suite', async () => {
       };
     });
 
-    assert.strictEqual(decodeURI(locationAndNotification.search), expectedDefaultParams);
+    assert.strictEqual(decodeURIComponent(locationAndNotification.search), expectedDefaultParams);
     assert.strictEqual(locationAndNotification.notification.type, 'danger');
     // CI/CD runs on Chromium so this assertion is based on Chromium's JSON engine's error message
     assert.strictEqual(
@@ -159,7 +161,8 @@ describe('Filter actions test-suite', async () => {
 
   it('should update URI with new encoded "match" criteria', async () => {
     const decodedParams = '?q={"hostname":{"match":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
-    const expectedParams = '?q={%22hostname%22:{%22match%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+    const expectedParams = '?q=%7B%22hostname%22%3A%7B%22match%22%3A%22%5C%22%25ald_qdip01%25%22%7D'
+      + '%2C%22severity%22%3A%7B%22in%22%3A%22I%20W%20E%20F%22%7D%7D';
     const searchParams = await page.evaluate(() => {
       window.model.log.filter.setCriteria('hostname', 'match', '"%ald_qdip01%');
       window.model.updateRouteOnModelChange();
@@ -167,12 +170,13 @@ describe('Filter actions test-suite', async () => {
     });
 
     assert.deepStrictEqual(searchParams, expectedParams);
-    assert.deepStrictEqual(decodeURI(searchParams), decodedParams);
+    assert.deepStrictEqual(decodeURIComponent(searchParams), decodedParams);
   });
 
   it('should update URI with new encoded "exclude" criteria', async () => {
     const decodedParams = '?q={"hostname":{"exclude":"\\"%ald_qdip01%"},"severity":{"in":"I W E F"}}';
-    const expectedParams = '?q={%22hostname%22:{%22exclude%22:%22%5C%22%25ald_qdip01%25%22},%22severity%22:{%22in%22:%22I%20W%20E%20F%22}}';
+    const expectedParams = '?q=%7B%22hostname%22%3A%7B%22exclude%22%3A%22%5C%22%25ald_qdip01%25%22%7D'
+      + '%2C%22severity%22%3A%7B%22in%22%3A%22I%20W%20E%20F%22%7D%7D';
     const searchParams = await page.evaluate(() => {
       window.model.log.filter.resetCriteria();
       window.model.log.filter.setCriteria('hostname', 'exclude', '"%ald_qdip01%');
@@ -181,7 +185,7 @@ describe('Filter actions test-suite', async () => {
     });
 
     assert.deepStrictEqual(searchParams, expectedParams);
-    assert.deepStrictEqual(decodeURI(searchParams), decodedParams);
+    assert.deepStrictEqual(decodeURIComponent(searchParams), decodedParams);
   });
 
   it('should parse dates in format DD/MM/YY', async () => {
