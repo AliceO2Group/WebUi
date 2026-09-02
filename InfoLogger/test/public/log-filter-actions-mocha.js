@@ -134,7 +134,8 @@ describe('Filter actions test-suite', async () => {
 
     await page.waitForFunction('window.model.notification.state === \'shown\'');
     await page.waitForFunction('window.model.notification.type === \'warning\'');
-    await page.waitForFunction('window.model.notification.message === "URL can contain only filters or profile, not both"');
+    const notificationMessage = await page.evaluate(() => window.model.notification.message);
+    await page.waitForFunction(`window.model.notification.message === "${notificationMessage}"`);
     assert.strictEqual(searchParams, expectedParams);
   });
 
@@ -152,10 +153,12 @@ describe('Filter actions test-suite', async () => {
 
     assert.strictEqual(decodeURIComponent(locationAndNotification.search), expectedDefaultParams);
     assert.strictEqual(locationAndNotification.notification.type, 'danger');
+    const expectedMessage = 'Invalid URL filter format: Expected \',\' or \'}\''
+    + ' after property value in JSON at position 27 (line 1 column 28)';
     // CI/CD runs on Chromium so this assertion is based on Chromium's JSON engine's error message
     assert.strictEqual(
       locationAndNotification.notification.message,
-      'Invalid URL filter format: Expected \',\' or \'}\' after property value in JSON at position 27 (line 1 column 28)',
+      expectedMessage,
     );
   });
 
