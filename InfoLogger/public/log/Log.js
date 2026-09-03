@@ -15,6 +15,7 @@
 import { Observable, RemoteData } from '/js/src/index.js';
 import LogFilter from '../logFilter/LogFilter.js';
 import ContextMenu from './ContextMenu.js';
+import LogSelection from './LogSelection.js';
 import { MODE } from '../constants/mode.const.js';
 import { TIME_MS } from '../common/Timezone.js';
 import { jsonPost } from '../common/jsonPost.js';
@@ -52,7 +53,7 @@ export default class Log extends Observable {
     this.queryAbortController = null;
 
     this.list = [];
-    this.item = null;
+    this.selection = new LogSelection(this);
     this.autoScrollToItem = false; // go to an item
     this.autoScrollLive = false; // go at bottom on Live mode
     this.activeMode = MODE.QUERY;
@@ -77,6 +78,15 @@ export default class Log extends Observable {
 
     this.contextMenu = new ContextMenu();
     this.contextMenu.bubbleTo(this);
+  }
+
+  /**
+   * Current log of the selection, the one shown by the inspector and moved by the keyboard.
+   * It is the `focus` of `selection`: a single selected log is a collapsed selection.
+   * @returns {object|null} - the current log, null if nothing is selected
+   */
+  get item() {
+    return this.selection.focus !== null ? this.list[this.selection.focus] ?? null : null;
   }
 
   /**
@@ -160,12 +170,12 @@ export default class Log extends Observable {
   }
 
   /**
-   * Set current `item`, if the reference is contained
-   * in `list`, it is also considered as selected in the list.
+   * Set current `item`, collapsing the selection on it. A log which is not part of `list`
+   * empties the selection.
    * @param {object} item - log to be set as current item
    */
-  setItem(item) {
-    this.item = item;
+  set item(item) {
+    this.selection.collapseTo(this.list.indexOf(item));
     this.autoScrollToItem = false;
     this.notify();
   }
@@ -180,6 +190,7 @@ export default class Log extends Observable {
   setLimit(limit) {
     if (limit < this.limit) {
       this.resetStats();
+      this.selection.shiftBy(this.list.length - limit);
       this.list.splice(0, this.list.length - limit);
       this.list.forEach((log) => this.addStats(log));
     }
@@ -203,7 +214,7 @@ export default class Log extends Observable {
       return;
     }
 
-    this.item = this.list.find((item) => item.severity === 'E' || item.severity === 'F');
+    this.selection.collapseTo(this.list.findIndex((item) => item.severity === 'E' || item.severity === 'F'));
     this.autoScrollToItem = true;
     this.autoScrollLive = false;
 
@@ -227,11 +238,11 @@ export default class Log extends Observable {
       return;
     }
 
-    const currentIndex = this.list.indexOf(this.item);
+    const currentIndex = this.selection.focus;
     // find previous one, if any
     for (let i = currentIndex - 1; i >= 0; i--) {
       if (this.list[i].severity === 'E' || this.list[i].severity === 'F') {
-        this.item = this.list[i];
+        this.selection.collapseTo(i);
         this.autoScrollToItem = true;
         this.autoScrollLive = false;
         this.notify();
@@ -257,11 +268,11 @@ export default class Log extends Observable {
       return;
     }
 
-    const currentIndex = this.list.indexOf(this.item);
+    const currentIndex = this.selection.focus;
     // find next one, if any
     for (let i = currentIndex + 1; i < this.list.length; i++) {
       if (this.list[i].severity === 'E' || this.list[i].severity === 'F') {
-        this.item = this.list[i];
+        this.selection.collapseTo(i);
         this.autoScrollToItem = true;
         this.autoScrollLive = false;
         this.notify();
@@ -283,7 +294,7 @@ export default class Log extends Observable {
     for (let i = this.list.length - 1; i >= 0; --i) {
       const item = this.list[i];
       if (item.severity === 'E' || item.severity === 'F') {
-        this.item = item;
+        this.selection.collapseTo(i);
         break;
       }
     }
@@ -297,14 +308,14 @@ export default class Log extends Observable {
    * Select previous `item` after current `item` or first of `list`
    */
   previousItem() {
-    this.goToItem(Math.max(this.list.indexOf(this.item) - 1, 0));
+    this.goToItem(Math.max(this.currentIndex - 1, 0));
   }
 
   /**
    * Select next `item` after current `item` or first of `list`
    */
   nextItem() {
-    this.goToItem(Math.min(this.list.indexOf(this.item) + 1, this.list.length - 1));
+    this.goToItem(Math.min(this.currentIndex + 1, this.list.length - 1));
   }
 
   /**
@@ -323,9 +334,18 @@ export default class Log extends Observable {
       return;
     }
 
-    this.item = this.list[index];
+    this.selection.collapseTo(index);
     this.autoScrollToItem = true;
     this.notify();
+  }
+
+  /**
+   * Index of the current `item`, -1 if there is none, so that moving from no selection
+   * lands on the first or the last log of the list
+   * @returns {number} - index in `list` of the current item
+   */
+  get currentIndex() {
+    return this.selection.focus ?? -1;
   }
 
   /**
@@ -373,6 +393,7 @@ export default class Log extends Observable {
       });
       this.resetStats();
       this.queryResult = RemoteData.success(result);
+      this.selection.clear();
       this.list = result.rows;
       this.list.forEach((log) => this.addStats(log));
       this.goToLastItem();
@@ -535,6 +556,7 @@ export default class Log extends Observable {
    * and close the inspector panel
    */
   empty() {
+    this.selection.clear();
     this.list = [];
     this.limitReached = null;
     this.model.inspectorEnabled = false;
@@ -553,6 +575,7 @@ export default class Log extends Observable {
     this.list.push(log);
     if (this.list.length > this.limit) {
       this.addStats(this.list[0], -1);
+      this.selection.shiftBy(this.list.length - this.limit);
       this.list.splice(0, this.list.length - this.limit);
     }
     this.notify();
@@ -607,11 +630,14 @@ export default class Log extends Observable {
   }
 
   /**
-   * Method which will create a table alike string with the elements displayed in the table of the current item
-   * @returns {string} - string with the elements of the current item
+   * Method which will create a table alike string with the elements displayed in the table of the selected items
+   * @returns {string} - string with the elements of the selected items
    */
-  displayedItemFieldsToString() {
-    const message = this.getLogAsTableRowString(this.item);
+  selectedItemsFieldsToString() {
+    let message = '';
+    this.selection.items.forEach((item) => {
+      message += `${this.getLogAsTableRowString(item)}\n`;
+    });
     return message;
   }
 
@@ -656,9 +682,18 @@ export default class Log extends Observable {
    */
   listLogsInViewportOnly() {
     return this.list.slice(
-      Math.floor(this.scrollTop / this.rowHeight),
-      Math.floor(this.scrollTop / this.rowHeight) + Math.ceil(this.scrollHeight / this.rowHeight) + 1,
+      this.firstLogIndexInViewport,
+      this.firstLogIndexInViewport + Math.ceil(this.scrollHeight / this.rowHeight) + 1,
     );
+  }
+
+  /**
+   * Index in `list` of the first log returned by `listLogsInViewportOnly`, ie. the index the
+   * rendered rows are numbered from
+   * @returns {number} - index of the first log drawn
+   */
+  get firstLogIndexInViewport() {
+    return Math.floor(this.scrollTop / this.rowHeight);
   }
 
   get rowHeight() {
