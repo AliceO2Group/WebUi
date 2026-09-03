@@ -20,6 +20,7 @@ import { h,
   iconMagnifyingGlass,
   iconPlus,
   iconMinus,
+  CopyToClipboardComponent,
 } from '/js/src/index.js';
 import { BUTTON } from '../constants/button-states.const.js';
 import { MODE } from '../constants/mode.const.js';
@@ -67,7 +68,21 @@ export const commandLogs = (model) => [
   ]),
   h('', downloadButtonGroup(model.log)),
   h('', zoomButtonGroup(model.zoom)),
+  copyButtonOption(model.log.filter),
+
 ];
+
+/**
+ * A button component that lets the user copy the url
+ *
+ * @param {Model} filterModel - filter model of the application
+ * @returns {Component} the copy button component
+ */
+const copyButtonOption = (filterModel) => h(
+  CopyToClipboardComponent,
+  { value: filterModel.queryString, id: 'url', className: 'button.btn', style: { minWidth: '100px' } },
+  'Copy URL',
+);
 
 /**
  * Group of buttons for switching between Query and Live modes.
