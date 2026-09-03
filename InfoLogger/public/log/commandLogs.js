@@ -68,19 +68,18 @@ export const commandLogs = (model) => [
   ]),
   h('', downloadButtonGroup(model.log)),
   h('', zoomButtonGroup(model.zoom)),
-  copyButtonOption(model.log.filter),
+  copyButtonOption(),
 
 ];
 
 /**
  * A button component that lets the user copy the url
  *
- * @param {Model} filterModel - filter model of the application
  * @returns {Component} the copy button component
  */
-const copyButtonOption = (filterModel) => h(
+const copyButtonOption = () => h(
   CopyToClipboardComponent,
-  { value: filterModel.queryString, id: 'url', className: 'button.btn', style: { minWidth: '100px' } },
+  { value: location.href, id: 'url', className: 'button.btn', style: { minWidth: '100px' } },
   'Copy URL',
 );
 
