@@ -15,6 +15,7 @@
 import Observable from './Observable.js';
 import { h } from './renderer.js';
 import switchCase from './switchCase.js';
+import { iconClipboard, iconCheck, iconCircleX } from './icons.js';
 
 /**
  * Container of notification with time management
@@ -48,7 +49,11 @@ export class Notification extends Observable {
     this.message = '';
     this.type = 'primary';
     this.state = 'hidden'; // Shown, hidden
-    this.timerId = 0; // Timer to auto-hide notification
+    this.hideTimerId = null; // Timer to auto-hide notification
+    this.duration = 5000; // Original duration of the current notification
+    this.hovered = false; // Whether the notification is hovered
+    this.copyState = 'idle'; // 'idle' | 'copied' | 'failed' — state for the copy button
+    this.copyTimerId = null; // Timer to reset copyState to 'idle' after copy
   }
 
   /**
@@ -70,17 +75,22 @@ export class Notification extends Observable {
 
     duration = duration || 5000;
 
-    // Clear previous message countdown
-    clearTimeout(this.timerId);
+    // Clear previous message countdowns
+    clearTimeout(this.hideTimerId);
+    clearTimeout(this.copyTimerId);
 
     this.message = message;
     this.type = type;
     this.state = 'shown';
+    this.duration = duration;
+    this.copyState = 'idle';
 
     // Auto-hide after duration
     if (duration !== Infinity) {
-      this.timerId = setTimeout(() => {
-        this.hide();
+      this.hideTimerId = setTimeout(() => {
+        if (!this.hovered) {
+          this.hide();
+        }
       }, duration);
     }
 
@@ -92,10 +102,53 @@ export class Notification extends Observable {
    * (by a click on notification for example)
    */
   hide() {
-    clearTimeout(this.timerId);
+    clearTimeout(this.hideTimerId);
+    clearTimeout(this.copyTimerId);
     this.state = 'hidden';
+    this.copyState = 'idle';
 
     this.notify();
+  }
+
+  /**
+   * Restart the auto-hide countdown for the currently shown notification, reusing the
+   * stored duration.
+   * No-op when the notification is hidden or duration is Infinity.
+   */
+  restartHideTimer() {
+    if (this.state !== 'shown') {
+      return;
+    }
+    clearTimeout(this.hideTimerId);
+    if (this.duration !== Infinity) {
+      this.hideTimerId = setTimeout(() => {
+        if (!this.hovered) {
+          this.hide();
+        }
+      }, this.duration);
+    }
+  }
+
+  /**
+   * Copy the current message to the clipboard and flash `copyState` to `'copied'` for 1.5s.
+   * If the clipboard write rejects, `copyState` flashes to `'failed'` instead.
+   * @return {Promise<void>}
+   */
+  async copy() {
+    let nextState;
+    try {
+      await navigator.clipboard.writeText(this.message);
+      nextState = 'copied';
+    } catch {
+      nextState = 'failed';
+    }
+    clearTimeout(this.copyTimerId);
+    this.copyState = nextState;
+    this.notify();
+    this.copyTimerId = setTimeout(() => {
+      this.copyState = 'idle';
+      this.notify();
+    }, 1500);
   }
 }
 
@@ -124,13 +177,36 @@ export class Notification extends Observable {
  */
 export const notification = (notificationInstance) => h('.notification.text-no-select.level4.text-light', {
 
-}, h('span.notification-content.br2.p2.shadow-level4', {
+}, h('div.notification-content.br2.shadow-level4', {
   // ClassName: notificationInstance.message && (notificationInstance.state === 'shown' ? 'notification-open' : 'notification-close'),
-  onclick: () => notificationInstance.hide(),
+  onmouseenter: () => {
+    notificationInstance.hovered = true;
+  },
+  onmouseleave: () => {
+    notificationInstance.hovered = false;
+    notificationInstance.restartHideTimer();
+  },
   className: `${switchCase(notificationInstance.type, {
     primary: 'white bg-primary',
     success: 'white bg-success',
     warning: 'white bg-warning',
     danger: 'white bg-danger',
   })} ${notificationInstance.state === 'shown' ? 'notification-open' : 'notification-close'}`,
-}, notificationInstance.message));
+}, [
+  h('div.mh2.pv2', { onclick: () => notificationInstance.hide() }, notificationInstance.message),
+  h(`button.btn.btn-${notificationInstance.type}.notification-copy-btn`, {
+    title: switchCase(notificationInstance.copyState, {
+      copied: 'Copied!',
+      failed: "Couldn't copy",
+      idle: 'Copy to clipboard',
+    }),
+    onclick: (e) => {
+      e.stopPropagation();
+      notificationInstance.copy();
+    },
+  }, switchCase(notificationInstance.copyState, {
+    copied: iconCheck(),
+    failed: iconCircleX(),
+    idle: iconClipboard(),
+  })),
+]));
