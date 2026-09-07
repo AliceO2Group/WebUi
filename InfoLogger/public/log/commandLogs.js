@@ -68,18 +68,25 @@ export const commandLogs = (model) => [
   ]),
   h('', downloadButtonGroup(model.log)),
   h('', zoomButtonGroup(model.zoom)),
-  copyButtonOption(),
+  copyButtonOption(model.log.filter.queryString),
 
 ];
 
 /**
  * A button component that lets the user copy the url
  *
+ * @param {string} queryString - the query string to be appended to the URL
  * @returns {Component} the copy button component
  */
-const copyButtonOption = () => h(
+const copyButtonOption = (queryString) => h(
   CopyToClipboardComponent,
-  { value: location.href, id: 'url', className: 'button.btn', style: { minWidth: '100px' } },
+  {
+    // Copy the non-debounced URL with the current query string
+    value: `${location.origin}${location.pathname}${queryString}`,
+    id: 'url',
+    className: 'button.btn',
+    style: { minWidth: '100px' },
+  },
   'Copy URL',
 );
 
