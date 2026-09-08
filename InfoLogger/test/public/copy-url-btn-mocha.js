@@ -57,14 +57,15 @@ describe('Copy URL button test-suite', async () => {
 
   it('should display a notification on copy failure', async () => {
     await page.evaluate(() => {
+      model.notification.hide();
       navigator.clipboard.writeText = () => Promise.reject(new Error('Simulated copy failure'));
     });
+    await waitForNextRender(page);
 
     await page.click('#copy-url');
 
-    const notification = await page.evaluate(() => window.model.notification);
-    assert.strictEqual(notification.state, 'shown');
-    assert.strictEqual(notification.type, 'danger');
-    assert.strictEqual(notification.message, 'Could not copy URL: Simulated copy failure');
+    await page.waitForFunction('model.notification.state === \'shown\'');
+    await page.waitForFunction('model.notification.type === \'danger\'');
+    await page.waitForFunction('model.notification.message === "Could not copy URL: Simulated copy failure"');
   });
 });
