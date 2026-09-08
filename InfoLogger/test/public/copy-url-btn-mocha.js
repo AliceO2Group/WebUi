@@ -44,8 +44,8 @@ describe('Copy URL button test-suite', async () => {
 
   it('should copy a URL carrying the active filter', async () => {
     await page.evaluate(() => {
-      window.model.log.filter.setCriteria('message', 'match', 'needle');
-      window.model.notify();
+      model.log.filter.setCriteria('message', 'match', 'needle');
+      model.notify();
     });
     await waitForNextRender(page);
     await page.click('#copy-url');
@@ -57,7 +57,7 @@ describe('Copy URL button test-suite', async () => {
 
   it('should display a notification on copy failure', async () => {
     await page.evaluate(() => {
-      window.model.notification.hide();
+      model.notification.hide();
       Object.defineProperty(navigator, 'clipboard', {
         value: {
           writeText: () => Promise.reject(new Error('Simulated copy failure')),
@@ -68,10 +68,10 @@ describe('Copy URL button test-suite', async () => {
 
     await page.click('#copy-url');
 
-    await page.waitForFunction(() => window.model.notification.state === 'shown');
+    await page.waitForFunction(() => model.notification.state === 'shown');
     const notification = await page.evaluate(() => ({
-      message: window.model.notification.message,
-      type: window.model.notification.type,
+      message: model.notification.message,
+      type: model.notification.type,
     }));
 
     assert.strictEqual(notification.message, 'Could not copy URL: Simulated copy failure');
