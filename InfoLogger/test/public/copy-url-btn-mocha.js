@@ -15,6 +15,8 @@
 const assert = require('assert');
 const test = require('../mocha-index');
 
+const { waitForNextRender } = require('../utils/utils.js');
+
 describe('Copy URL button test-suite', async () => {
   let baseUrl = null;
   let page = null;
@@ -45,6 +47,7 @@ describe('Copy URL button test-suite', async () => {
       window.model.log.filter.setCriteria('message', 'match', 'needle');
       window.model.notify();
     });
+    await waitForNextRender(page);
     await page.click('#copy-url');
     const copiedText = await page.evaluate(() => navigator.clipboard.readText());
     const expectedUrl = `${baseUrl}?q=%7B%22message%22%3A%7B%22match%22`
