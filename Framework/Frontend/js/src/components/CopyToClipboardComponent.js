@@ -35,9 +35,9 @@ export class CopyToClipboardComponent extends StatefulComponent {
    * @param {function} onFailure The callback function to be invoked if copying to the clipboard fails.
    * @returns {void}
    */
-  copyToClipboard(clipboardTargetValue, onFailure) {
+  async copyToClipboard(clipboardTargetValue, onFailure) {
     try {
-      navigator.clipboard.writeText(clipboardTargetValue);
+      await navigator.clipboard.writeText(clipboardTargetValue);
       if (this._successStateTimeout) {
         clearTimeout(this._successStateTimeout);
       }
