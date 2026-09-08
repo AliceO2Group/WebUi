@@ -59,7 +59,7 @@ describe('Copy URL button test-suite', async () => {
     await page.evaluate(() => {
       Object.defineProperty(navigator, 'clipboard', {
         value: {
-          writeText: () => Promise.reject(new Error('Clipboard access denied')),
+          writeText: () => Promise.reject(new Error('Simulated copy failure')),
         },
         configurable: true,
       });
