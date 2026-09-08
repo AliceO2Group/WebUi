@@ -52,12 +52,6 @@ export class CopyToClipboardComponent extends StatefulComponent {
         onFailure(error);
       }
     }
-
-    this._successStateTimeout = setTimeout(() => {
-      this._successStateTimeout = null;
-      this.notify();
-    }, 2000);
-    this.notify();
   }
 
   /**
