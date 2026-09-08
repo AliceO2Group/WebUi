@@ -83,7 +83,7 @@ const copyURLButton = (url) => h(
     // Copy the non-debounced URL with the current query string
     value: url,
     id: 'url',
-    classes: '',
+    className: '',
     style: { minWidth: '100px' },
   },
   'Copy URL',
