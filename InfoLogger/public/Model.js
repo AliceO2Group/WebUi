@@ -371,7 +371,7 @@ export default class Model extends Observable {
     } else if (params.q) {
       this.getUserProfile();
       try {
-        this.log.filter.fromObject(JSON.parse(params.q.replaceAll('\n', '\\n')));
+        this.log.filter.fromObject(JSON.parse(params.q));
       } catch (error) {
         this.log.filter.resetCriteria();
         this.updateRouteOnModelChange();
