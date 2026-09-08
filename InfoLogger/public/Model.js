@@ -391,6 +391,16 @@ export default class Model extends Observable {
   }
 
   /**
+   * Get the shareable URL with the current filter query string
+   * @returns {string} - the shareable URL
+   */
+  get shareableURL() {
+    const url = this.router.getUrl();
+    url.search = this.log.filter.queryString;
+    return url.href;
+  }
+
+  /**
    * Toggle inspector on the right
    */
   toggleInspector() {
