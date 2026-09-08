@@ -68,7 +68,7 @@ export const commandLogs = (model) => [
   ]),
   h('', downloadButtonGroup(model.log)),
   h('', zoomButtonGroup(model.zoom)),
-  copyURLButton(model.log.filter.filterURL),
+  copyURLButton(model.shareableURL),
 ];
 
 /**
