@@ -159,6 +159,10 @@ export default class LogFilter extends Observable {
     return buildUrl('?', { q: JSON.stringify(this.toObject()) });
   }
 
+  get filterURL() {
+    return `${location.origin}${location.pathname}${this.queryString}`;
+  }
+
   /**
    * Set criterias according to object passed as argument
    * @param {object} criterias - object with criterias to be set
