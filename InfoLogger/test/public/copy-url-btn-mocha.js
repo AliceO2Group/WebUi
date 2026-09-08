@@ -54,4 +54,16 @@ describe('Copy URL button test-suite', async () => {
     + '%3A%22needle%22%7D%2C%22severity%22%3A%7B%22in%22%3A%22I%20W%20E%20F%22%7D%7D';
     assert.strictEqual(copiedText, expectedUrl);
   });
+
+  it('should display a notification on copy failure', async () => {
+    await page.evaluate(() => {
+      navigator.clipboard.writeText = () => Promise.reject(new Error('Simulated copy failure'));
+    });
+
+    await page.click('#copy-url');
+
+    await page.waitForFunction('window.model.notification.state === \'shown\'');
+    await page.waitForFunction('window.model.notification.type === \'danger\'');
+    await page.waitForFunction('window.model.notification.message === "Could not copy URL: Simulated copy failure"');
+  });
 });
