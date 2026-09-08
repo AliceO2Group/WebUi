@@ -98,7 +98,7 @@ export class CopyToClipboardComponent extends StatefulComponent {
    */
   view(vnode) {
     const { attrs, children } = vnode;
-    const { value: clipboardTargetValue = '', id, classes = '.btn-primary' } = attrs;
+    const { value: clipboardTargetValue = '', id, className = 'btn-primary' } = attrs;
     let available = true;
     let message = '';
 
@@ -113,13 +113,14 @@ export class CopyToClipboardComponent extends StatefulComponent {
     const successContent = [iconCheck(), h('', 'Copied!')];
 
     return h(
-      `button.btn${classes}`,
+      `button.btn`,
       {
         id: `copy-${id}`,
         onclick: () => this.copyToClipboard(clipboardTargetValue),
         disabled: !available,
         title: message || null,
         style: attrs.style,
+        className,
       },
       h('div.flex-row.g1.justify-center', { ariaLive: 'polite' }, this._successStateTimeout ? successContent : defaultContent),
     );
