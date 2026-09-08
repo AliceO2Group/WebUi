@@ -36,6 +36,10 @@ export class CopyToClipboardComponent extends StatefulComponent {
    */
   copyToClipboard(clipboardTargetValue) {
     navigator.clipboard.writeText(clipboardTargetValue);
+    if (this._successStateTimeout) {
+      clearTimeout(this._successStateTimeout);
+    }
+
     this._successStateTimeout = setTimeout(() => {
       this._successStateTimeout = null;
       this.notify();
