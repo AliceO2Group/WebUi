@@ -57,6 +57,7 @@ describe('Copy URL button test-suite', async () => {
 
   it('should display a notification on copy failure', async () => {
     await page.evaluate(() => {
+      window.model.notification.hide();
       Object.defineProperty(navigator, 'clipboard', {
         value: {
           writeText: () => Promise.reject(new Error('Simulated copy failure')),
