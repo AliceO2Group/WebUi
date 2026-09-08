@@ -68,7 +68,7 @@ export const commandLogs = (model) => [
   ]),
   h('', downloadButtonGroup(model.log)),
   h('', zoomButtonGroup(model.zoom)),
-  copyButtonOption(model.log.filter.queryString),
+  copyURLButton(model.log.filter.queryString),
 
 ];
 
@@ -78,7 +78,7 @@ export const commandLogs = (model) => [
  * @param {string} queryString - the query string to be appended to the URL
  * @returns {Component} the copy button component
  */
-const copyButtonOption = (queryString) => h(
+const copyURLButton = (queryString) => h(
   CopyToClipboardComponent,
   {
     // Copy the non-debounced URL with the current query string
