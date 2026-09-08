@@ -57,10 +57,13 @@ describe('Copy URL button test-suite', async () => {
 
   it('should display a notification on copy failure', async () => {
     await page.evaluate(() => {
-      model.notification.hide();
-      navigator.clipboard.writeText = () => Promise.reject(new Error('Simulated copy failure'));
+      Object.defineProperty(navigator, 'clipboard', {
+        value: {
+          writeText: () => Promise.reject(new Error('Clipboard access denied')),
+        },
+        configurable: true,
+      });
     });
-    await waitForNextRender(page);
 
     await page.click('#copy-url');
 
