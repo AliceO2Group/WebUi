@@ -29,6 +29,11 @@ describe('Copy URL button test-suite', async () => {
     await page.goto(baseUrl, { waitUntil: 'networkidle0' });
   });
 
+  after(async () => {
+    await page.browser().defaultBrowserContext().clearPermissionOverrides();
+    await page.goto(baseUrl, { waitUntil: 'networkidle0' });
+  });
+
   it('should display the button with the correct label', async () => {
     const button = await page.$('#copy-url');
     const label = await page.evaluate((el) => el.textContent, button);
