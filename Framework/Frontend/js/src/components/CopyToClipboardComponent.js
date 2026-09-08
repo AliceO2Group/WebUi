@@ -89,6 +89,11 @@ export class CopyToClipboardComponent extends StatefulComponent {
    * Renders the button that allows copying text to the clipboard.
    *
    * @param {vnode} vnode The virtual DOM node containing the attrs and children.
+   * @param {object} vnode.attrs The attributes passed to the component.
+   * @param {string} vnode.attrs.value The text to be copied to the clipboard.
+   * @param {string} vnode.attrs.id The unique identifier for the copy button will become 'copy-{id}'.
+   * @param {string} vnode.attrs.classes The CSS classes to be applied to the copy button.
+   * @param {string} vnode.attrs.style The inline styles to be applied to the copy button.
    * @returns {Component} The copyToClipboard button component
    */
   view(vnode) {
@@ -116,7 +121,7 @@ export class CopyToClipboardComponent extends StatefulComponent {
         title: message || null,
         style: attrs.style,
       },
-      h('div.flex-row.g1.justify-center', this._successStateTimeout ? successContent : defaultContent),
+      h('div.flex-row.g1.justify-center', { ariaLive: 'polite' }, this._successStateTimeout ? successContent : defaultContent),
     );
   }
 }
