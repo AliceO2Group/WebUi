@@ -127,7 +127,7 @@ export class CopyToClipboardComponent extends StatefulComponent {
         id: `copy-${id}`,
         onclick: () => this.copyToClipboard(clipboardTargetValue, onFailure),
         disabled: !available,
-        title: message || null,
+        title: message || '',
         style,
         className,
       },
