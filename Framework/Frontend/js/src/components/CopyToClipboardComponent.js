@@ -93,7 +93,7 @@ export class CopyToClipboardComponent extends StatefulComponent {
    */
   view(vnode) {
     const { attrs, children } = vnode;
-    const { value: clipboardTargetValue = '', id, className = 'button.btn.btn-primary' } = attrs;
+    const { value: clipboardTargetValue = '', id, classes = '.btn-primary' } = attrs;
     let available = true;
     let message = '';
 
@@ -108,7 +108,7 @@ export class CopyToClipboardComponent extends StatefulComponent {
     const successContent = [iconCheck(), h('', 'Copied!')];
 
     return h(
-      className,
+      `button.btn${classes}`,
       {
         id: `copy-${id}`,
         onclick: () => this.copyToClipboard(clipboardTargetValue),
