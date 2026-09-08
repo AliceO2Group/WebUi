@@ -32,12 +32,25 @@ export class CopyToClipboardComponent extends StatefulComponent {
    * Copies the specified text to the clipboard.
    *
    * @param {string} clipboardTargetValue The text to be copied to the clipboard.
+   * @param {function} onFailure The callback function to be invoked if copying to the clipboard fails.
    * @returns {void}
    */
-  copyToClipboard(clipboardTargetValue) {
-    navigator.clipboard.writeText(clipboardTargetValue);
-    if (this._successStateTimeout) {
-      clearTimeout(this._successStateTimeout);
+  copyToClipboard(clipboardTargetValue, onFailure) {
+    try {
+      navigator.clipboard.writeText(clipboardTargetValue);
+      if (this._successStateTimeout) {
+        clearTimeout(this._successStateTimeout);
+      }
+
+      this._successStateTimeout = setTimeout(() => {
+        this._successStateTimeout = null;
+        this.notify();
+      }, 2000);
+      this.notify();
+    } catch (error) {
+      if (onFailure) {
+        onFailure(error);
+      }
     }
 
     this._successStateTimeout = setTimeout(() => {
@@ -94,11 +107,13 @@ export class CopyToClipboardComponent extends StatefulComponent {
    * @param {string} vnode.attrs.id The unique identifier for the copy button will become 'copy-{id}'.
    * @param {string} vnode.attrs.classes The CSS classes to be applied to the copy button.
    * @param {string} vnode.attrs.style The inline styles to be applied to the copy button.
+   * @param {function} vnode.attrs.onFailure The callback function to be invoked if copying to the clipboard fails.
    * @returns {Component} The copyToClipboard button component
    */
   view(vnode) {
     const { attrs, children } = vnode;
-    const { value: clipboardTargetValue = '', id, className = 'btn-primary' } = attrs;
+    // Attributes other than those listed are not forwarded to the button element
+    const { value: clipboardTargetValue = '', id, className = 'btn-primary', style, onFailure } = attrs;
     let available = true;
     let message = '';
 
@@ -113,13 +128,13 @@ export class CopyToClipboardComponent extends StatefulComponent {
     const successContent = [iconCheck(), h('', 'Copied!')];
 
     return h(
-      `button.btn`,
+      'button.btn',
       {
         id: `copy-${id}`,
-        onclick: () => this.copyToClipboard(clipboardTargetValue),
+        onclick: () => this.copyToClipboard(clipboardTargetValue, onFailure),
         disabled: !available,
         title: message || null,
-        style: attrs.style,
+        style,
         className,
       },
       h('div.flex-row.g1.justify-center', { ariaLive: 'polite' }, this._successStateTimeout ? successContent : defaultContent),
