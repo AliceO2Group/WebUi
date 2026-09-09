@@ -136,7 +136,6 @@ export class CopyToClipboardComponent extends StatefulComponent {
       },
       h(
         'div.flex-row.g1.justify-center',
-        { ariaLive: 'polite' },
         this._successStateTimeout ? successContent : defaultContent,
       ),
     );
