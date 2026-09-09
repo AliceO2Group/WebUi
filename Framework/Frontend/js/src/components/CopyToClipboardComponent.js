@@ -38,6 +38,7 @@ export class CopyToClipboardComponent extends StatefulComponent {
   async copyToClipboard(clipboardTargetValue, onFailure) {
     try {
       await navigator.clipboard.writeText(clipboardTargetValue);
+
       if (this._successStateTimeout) {
         clearTimeout(this._successStateTimeout);
       }
@@ -46,6 +47,7 @@ export class CopyToClipboardComponent extends StatefulComponent {
         this._successStateTimeout = null;
         this.notify();
       }, 2000);
+
       this.notify();
     } catch (error) {
       if (onFailure) {
@@ -84,9 +86,9 @@ export class CopyToClipboardComponent extends StatefulComponent {
   }
 
   /**
-   * Check if the window is embeded in a frame.
+   * Check if the window is embedded in a frame.
    *
-   * @returns {boolean} Returns `true` if it is embeded
+   * @returns {boolean} Returns `true` if it is embedded
    */
   isWindowEmbedded() {
     return window !== window.parent;
@@ -108,6 +110,7 @@ export class CopyToClipboardComponent extends StatefulComponent {
     const { attrs, children } = vnode;
     // Attributes other than those listed are not forwarded to the button element
     const { value: clipboardTargetValue = '', id, className = 'btn-primary', style, onFailure } = attrs;
+
     let available = true;
     let message = '';
 
@@ -131,7 +134,11 @@ export class CopyToClipboardComponent extends StatefulComponent {
         style,
         className,
       },
-      h('div.flex-row.g1.justify-center', { ariaLive: 'polite' }, this._successStateTimeout ? successContent : defaultContent),
+      h(
+        'div.flex-row.g1.justify-center',
+        { ariaLive: 'polite' },
+        this._successStateTimeout ? successContent : defaultContent,
+      ),
     );
   }
 }
