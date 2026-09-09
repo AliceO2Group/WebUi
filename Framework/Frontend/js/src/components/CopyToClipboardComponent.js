@@ -26,6 +26,16 @@ export class CopyToClipboardComponent extends StatefulComponent {
   constructor() {
     super();
     this._successStateTimeout = null;
+
+    this._available = true;
+    this._message = '';
+
+    try {
+      this.checkClipboardAvailability();
+    } catch ({ message: errorMessage }) {
+      this._available = false;
+      this._message = errorMessage;
+    }
   }
 
   /**
@@ -111,16 +121,6 @@ export class CopyToClipboardComponent extends StatefulComponent {
     const { attrs, children } = vnode;
     const { value: clipboardTargetValue = '', id, className = 'btn-primary', style, onFailure } = attrs;
 
-    let available = true;
-    let message = '';
-
-    try {
-      this.checkClipboardAvailability();
-    } catch ({ message: errorMessage }) {
-      available = false;
-      message = errorMessage;
-    }
-
     const defaultContent = [iconLinkIntact(), children];
     const successContent = [iconCheck(), h('', 'Copied!')];
 
@@ -129,8 +129,8 @@ export class CopyToClipboardComponent extends StatefulComponent {
       {
         id: id ? `copy-${id}` : undefined,
         onclick: () => this.copyToClipboard(clipboardTargetValue, onFailure),
-        disabled: !available,
-        title: message || '',
+        disabled: !this._available,
+        title: this._message,
         style,
         className,
       },
