@@ -32,7 +32,7 @@ export class CopyToClipboardComponent extends StatefulComponent {
    * Copies the specified text to the clipboard.
    *
    * @param {string} clipboardTargetValue The text to be copied to the clipboard.
-   * @param {function} onFailure The callback function to be invoked if copying to the clipboard fails.
+   * @param {(error: Error) => void} onFailure The callback function to be invoked if copying to the clipboard fails.
    * @returns {void}
    */
   async copyToClipboard(clipboardTargetValue, onFailure) {
