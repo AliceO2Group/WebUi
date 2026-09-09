@@ -60,6 +60,12 @@ th { max-width: 0; /* allow ellipsis on tables */ vertical-align: top; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.cell::selection {
+   /* Disabling select disables autoscroll when selecting off the page.
+      The app then has to handle this scrolling manually which is out of scope for this ticket.
+      So instead we just make it invisible */
+  background-color: transparent;
+}
 .cell-bordered { border-left: 1px solid rgb(170, 170, 170); }
 
 .cell-xs { width: 2rem; }
