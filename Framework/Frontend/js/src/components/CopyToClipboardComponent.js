@@ -101,7 +101,7 @@ export class CopyToClipboardComponent extends StatefulComponent {
    * @param {string} vnode.attrs.id The unique identifier for the copy button will become 'copy-{id}'.
    * @param {string} vnode.attrs.classes The CSS classes to be applied to the copy button.
    * @param {string} vnode.attrs.style The inline styles to be applied to the copy button.
-   * @param {function} vnode.attrs.onFailure The callback function to be invoked if copying to the clipboard fails.
+   * @param {(error: Error) => void} vnode.attrs.onFailure The callback function to be invoked if copying to the clipboard fails.
    * @returns {Component} The copyToClipboard button component
    */
   view(vnode) {
