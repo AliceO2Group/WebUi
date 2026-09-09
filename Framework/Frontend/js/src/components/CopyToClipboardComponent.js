@@ -96,19 +96,19 @@ export class CopyToClipboardComponent extends StatefulComponent {
 
   /**
    * Renders the button that allows copying text to the clipboard.
+   * Attributes other than those listed are not forwarded to the button element
    *
    * @param {vnode} vnode The virtual DOM node containing the attrs and children.
    * @param {object} vnode.attrs The attributes passed to the component.
    * @param {string} vnode.attrs.value The text to be copied to the clipboard.
    * @param {string} vnode.attrs.id The unique identifier for the copy button will become 'copy-{id}'.
-   * @param {string} vnode.attrs.classes The CSS classes to be applied to the copy button.
+   * @param {string} vnode.attrs.className The CSS classes to be applied to the copy button.
    * @param {string} vnode.attrs.style The inline styles to be applied to the copy button.
    * @param {(error: Error) => void} vnode.attrs.onFailure The callback function to be invoked if copying to the clipboard fails.
    * @returns {Component} The copyToClipboard button component
    */
   view(vnode) {
     const { attrs, children } = vnode;
-    // Attributes other than those listed are not forwarded to the button element
     const { value: clipboardTargetValue = '', id, className = 'btn-primary', style, onFailure } = attrs;
 
     let available = true;
