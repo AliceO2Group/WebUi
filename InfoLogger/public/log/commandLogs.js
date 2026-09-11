@@ -76,7 +76,6 @@ export const commandLogs = (model) => [
 
 /**
  * A button component that lets the user copy the url
- *
  * @param {string} url - the URL to be copied to the clipboard
  * @param {(message: string, type: string, duration: number) => void} showNotification -
  * function to show notification to the user
