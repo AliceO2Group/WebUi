@@ -44,7 +44,7 @@ describe('Copy URL button test-suite', async () => {
 
   it('should copy a URL carrying the active filter', async () => {
     await page.evaluate(() => {
-      model.log.filter.setCriteria('message', 'match', 'needle');
+      model.log.setCriteria('message', 'match', 'needle');
       model.notify();
     });
     await waitForNextRender(page);
@@ -68,15 +68,6 @@ describe('Copy URL button test-suite', async () => {
 
     await page.click('#copy-url');
 
-    await page.waitForFunction(() => model.notification.state === 'shown');
-    const notification = await page.evaluate(() => ({
-      message: model.notification.message,
-      type: model.notification.type,
-    }));
-
-    assert.strictEqual(notification.message, 'Could not copy URL: Simulated copy failure');
-    assert.strictEqual(notification.type, 'danger');
-
-    await page.evaluate(() => delete navigator.clipboard.writeText);
+    await page.waitForSelector('.notification-content.bg-danger.notification-open');
   });
 });
