@@ -68,24 +68,28 @@ export const commandLogs = (model) => [
   ]),
   h('', downloadButtonGroup(model.log)),
   h('', zoomButtonGroup(model.zoom)),
-  copyURLButton(model.shareableURL, model.notification),
+  copyURLButton(
+    model.shareableURL,
+    (message, type, duration) => model.notification.show(message, type, duration),
+  ),
 ];
 
 /**
  * A button component that lets the user copy the url
  *
- * @param {string} url - the url string to be appended to the URL
+ * @param {string} url - the URL to be copied to the clipboard
+ * @param {(message: string, type: string, duration: number) => void} showNotification -
+ * function to show notification to the user
  * @returns {Component} the copy button component
  */
-const copyURLButton = (url, notification) => h(
+const copyURLButton = (url, showNotification) => h(
   CopyToClipboardComponent,
   {
-    // Copy the non-debounced URL with the current query string
     value: url,
     id: 'url',
     className: '',
     style: { minWidth: '100px' },
-    onFailure: ({ message }) => notification.show(`Could not copy URL: ${message}`, 'danger', 3000),
+    onFailure: ({ message }) => showNotification(`Could not copy URL: ${message}`, 'danger', 3000),
   },
   'Copy URL',
 );
