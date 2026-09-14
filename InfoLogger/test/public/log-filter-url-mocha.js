@@ -40,32 +40,21 @@ describe('URL Encoding/Decoding Suite', async () => {
       return await page.evaluate(() => window.model.log.filter.criterias.message.match);
     };
 
-    it('should preserve consecutive double quotes', async () => {
-    // /["]+/g collapsed a run of quotes into a single escaped one, so "" came back as "
-      const stringToTest = 'a""b';
-      assert.strictEqual(await roundTrip(stringToTest), stringToTest);
-    });
+    const roundTripTestCases = [
+      // /["]+/g collapsed a run of quotes into a single escaped one, so "" came back as "
+      { name: 'consecutive double quotes', value: 'a""b' },
+      // C:\temp used to reach JSON.parse unescaped and come back as C:<tab>emp
+      { name: 'a backslash forming valid JSON escape', value: 'C:\\temp' },
+      // C:\xyz used to throw, resetting every filter
+      { name: 'a backslash not forming valid JSON escape', value: 'C:\\xyz' },
+      { name: 'a multi-line message', value: 'first\nsecond' },
+      { name: 'URL-significant characters', value: 'a&b#c=d?e %20 a+b c %d #anchor & = héllo wörld 日本語' },
+    ];
 
-    it('should preserve a backslash that forms a valid JSON escape', async () => {
-    // C:\temp used to reach JSON.parse unescaped and come back as C:<tab>emp
-      const stringToTest = 'C:\\temp';
-      assert.strictEqual(await roundTrip(stringToTest), stringToTest);
-    });
-
-    it('should preserve a backslash that does not form a valid JSON escape', async () => {
-    // C:\xyz used to throw, resetting every filter
-      const stringToTest = 'C:\\xyz';
-      assert.strictEqual(await roundTrip(stringToTest), stringToTest);
-    });
-
-    it('should preserve a multi-line message filter', async () => {
-      const stringToTest = 'first\nsecond';
-      assert.strictEqual(await roundTrip(stringToTest), stringToTest);
-    });
-
-    it('should preserve a value containing URL-significant characters', async () => {
-      const stringToTest = 'a&b#c=d?e %20 a+b c %d #anchor & = héllo wörld 日本語';
-      assert.strictEqual(await roundTrip(stringToTest), stringToTest);
+    roundTripTestCases.forEach(({ name, value }) => {
+      it(`should preserve ${name}`, async () => {
+        assert.strictEqual(await roundTrip(value), value);
+      });
     });
 
     it('should store the value unencoded in the model', async () => {
