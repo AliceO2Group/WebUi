@@ -26,21 +26,44 @@ export class CopyToClipboardComponent extends StatefulComponent {
   constructor() {
     super();
     this._successStateTimeout = null;
+
+    this._available = true;
+    this._message = '';
+
+    try {
+      this.checkClipboardAvailability();
+    } catch ({ message: errorMessage }) {
+      this._available = false;
+      this._message = errorMessage;
+    }
   }
 
   /**
    * Copies the specified text to the clipboard.
    *
    * @param {string} clipboardTargetValue The text to be copied to the clipboard.
-   * @returns {void}
+   * @param {(error: Error) => void} [onFailure] The callback function to be invoked if copying to the clipboard fails.
+   * @returns {Promise<void>}
    */
-  copyToClipboard(clipboardTargetValue) {
-    navigator.clipboard.writeText(clipboardTargetValue);
-    this._successStateTimeout = setTimeout(() => {
-      this._successStateTimeout = null;
+  async copyToClipboard(clipboardTargetValue, onFailure) {
+    try {
+      await navigator.clipboard.writeText(clipboardTargetValue);
+
+      if (this._successStateTimeout) {
+        clearTimeout(this._successStateTimeout);
+      }
+
+      this._successStateTimeout = setTimeout(() => {
+        this._successStateTimeout = null;
+        this.notify();
+      }, 2000);
+
       this.notify();
-    }, 2000);
-    this.notify();
+    } catch (error) {
+      if (onFailure) {
+        onFailure(error);
+      }
+    }
   }
 
   /**
@@ -73,9 +96,9 @@ export class CopyToClipboardComponent extends StatefulComponent {
   }
 
   /**
-   * Check if the window is embeded in a frame.
+   * Check if the window is embedded in a frame.
    *
-   * @returns {boolean} Returns `true` if it is embeded
+   * @returns {boolean} Returns `true` if it is embedded
    */
   isWindowEmbedded() {
     return window !== window.parent;
@@ -83,35 +106,38 @@ export class CopyToClipboardComponent extends StatefulComponent {
 
   /**
    * Renders the button that allows copying text to the clipboard.
+   * Attributes other than those listed are not forwarded to the button element.
    *
    * @param {vnode} vnode The virtual DOM node containing the attrs and children.
+   * @param {object} vnode.attrs The attributes passed to the component.
+   * @param {string} [vnode.attrs.value=''] The text to be copied to the clipboard.
+   * @param {string} [vnode.attrs.id] The unique identifier for the copy button will become 'copy-{id}'.
+   * @param {string} [vnode.attrs.className='btn-primary'] The CSS classes to be applied to the copy button.
+   * @param {string|object} [vnode.attrs.style] The inline styles to be applied to the copy button.
+   * @param {(error: Error) => void} [vnode.attrs.onFailure] The callback function to be invoked if copying to the clipboard fails.
    * @returns {Component} The copyToClipboard button component
    */
   view(vnode) {
     const { attrs, children } = vnode;
-    const { value: clipboardTargetValue = '', id } = attrs;
-    let available = true;
-    let message = '';
-
-    try {
-      this.checkClipboardAvailability();
-    } catch ({ message: errorMessage }) {
-      available = false;
-      message = errorMessage;
-    }
+    const { value: clipboardTargetValue = '', id, className = 'btn-primary', style, onFailure } = attrs;
 
     const defaultContent = [iconLinkIntact(), children];
     const successContent = [iconCheck(), h('', 'Copied!')];
 
     return h(
-      'button.btn.btn-primary',
+      'button.btn',
       {
-        id: `copy-${id}`,
-        onclick: () => this.copyToClipboard(clipboardTargetValue),
-        disabled: !available,
-        title: message || null,
+        id: id ? `copy-${id}` : undefined,
+        onclick: () => this.copyToClipboard(clipboardTargetValue, onFailure),
+        disabled: !this._available,
+        title: this._message,
+        style,
+        className,
       },
-      h('div.flex-row.g1', this._successStateTimeout ? successContent : defaultContent),
+      h(
+        'div.flex-row.g1.justify-center',
+        this._successStateTimeout ? successContent : defaultContent,
+      ),
     );
   }
 }
