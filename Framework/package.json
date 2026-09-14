@@ -31,7 +31,7 @@
     ]
   },
   "dependencies": {
-    "express": "4.22.2",
+    "express": "5.2.1",
     "helmet": "8.1.0",
     "jsonwebtoken": "9.0.3",
     "kafkajs": "2.2.4",
