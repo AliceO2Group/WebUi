@@ -43,18 +43,18 @@
     "joi": "18.2.1",
     "jsroot": "7.11.0",
     "kafkajs": "2.2.4",
-    "mariadb": "3.5.2",
+    "mariadb": "3.5.3",
     "sequelize": "6.37.8",
     "umzug": "3.8.2"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@stylistic/eslint-plugin-js": "4.4.0",
-    "eslint": "10.8.0",
-    "eslint-plugin-jsdoc": "64.0.1",
-    "globals": "17.9.0",
+    "eslint": "10.9.0",
+    "eslint-plugin-jsdoc": "64.2.0",
+    "globals": "17.11.0",
     "nock": "15.0.0",
-    "puppeteer": "25.5.0",
+    "puppeteer": "25.9.0",
     "sequelize-cli": "6.6.2",
     "sinon": "22.1.0",
     "supertest": "7.2.2"

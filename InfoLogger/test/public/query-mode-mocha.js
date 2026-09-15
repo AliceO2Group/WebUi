@@ -14,6 +14,7 @@
 
 const assert = require('assert');
 const test = require('../mocha-index');
+const { injectLogs, waitForTextInElement } = require('../utils/utils');
 
 const TEXT_FILTER_VALUE_BY_OPERATOR = {
   since: '2026-01-01T00:00:00.000Z',
@@ -137,6 +138,37 @@ describe('Query Mode test-suite', async () => {
     } catch (e) {
       // code failed, so it is a successful test
     }
+  });
+
+  it('should copy multiple rows in the correct format', async () => {
+    await injectLogs(page, [
+      { severity: 'I', message: 'info log', timestamp: Date.now() },
+      { severity: 'E', message: 'error log', timestamp: Date.now() },
+      { severity: 'W', message: 'warning log', timestamp: Date.now() },
+    ]);
+    await waitForTextInElement(page, '.table-logs-content tbody tr:first-child', 'info log');
+
+    // select the first two rows entirely, as a user dragging across them would
+    const copied = await page.evaluate(() => {
+      const rows = document.querySelectorAll('.table-logs-content tbody tr');
+      const range = document.createRange();
+      range.setStartBefore(rows[0].querySelector('td:first-child'));
+      range.setEndAfter(rows[1].querySelector('td:last-child'));
+
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+
+      // what the browser puts on the clipboard as text/plain for this selection
+      return selection.toString();
+    });
+
+    const lines = copied.split('\n').filter((line) => line.trim() !== '');
+
+    assert.strictEqual(lines.length, 2, `selection should be one line per row, got:\n${copied}`);
+    assert.ok(lines[0].includes('info log'), 'first line should hold the first row message');
+    assert.ok(lines[1].includes('error log'), 'second line should hold the second row message');
+    assert.ok(!copied.includes('⋮'), 'the context menu hint should not be part of the copied text');
   });
 
   describe('no-text-filter confirmation dialog', () => {
