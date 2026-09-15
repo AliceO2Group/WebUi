@@ -158,7 +158,7 @@ describe('Cell Context Menu', async () => {
 
     it('should select the row on right-click', async () => {
       await page.evaluate(() => {
-        window.model.log.setItem(null);
+        window.model.log.item = null;
         window.model.notify();
       });
 
@@ -722,7 +722,7 @@ describe('Cell Context Menu', async () => {
     beforeEach(async () => {
       await page.evaluate(() => {
         window.model.log.contextMenu.hide();
-        window.model.log.setItem(null);
+        window.model.log.item = null;
         window.model.notify();
       });
     });

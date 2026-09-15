@@ -12,21 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
+const { waitForNextRender } = require('../utils/utils');
+
 const isContextMenuOpen = async (page) => await page.evaluate(() => window.model.log.contextMenu.isOpen);
 
 const getMenuActionLabels = async (page) => page.evaluate(() =>
   Array.from(document.querySelectorAll('.cell-context-menu-item .ph2.w-100'))
     .map((el) => el.textContent.trim()));
-
-/*
- * A stale menu from a previous test can already satisfy a waitForSelector check
- * before the pending redraw (reflecting the new state) has actually run.
- * Waiting for two animation frames guarantees the debounced redraw has fired
- * at least once since the mutation.
- */
-const waitForNextRender = (page) => page.evaluate(() => new Promise((resolve) => {
-  requestAnimationFrame(() => requestAnimationFrame(resolve));
-}));
 
 const openContextMenu = async (page, field, value, x, y) => {
   await page.evaluate((field, value, x, y) => {

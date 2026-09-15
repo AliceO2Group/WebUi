@@ -277,20 +277,35 @@ export default class Model extends Observable {
           break;
         case 38: // top
           e.preventDefault(); // avoid scroll
-          this.log.previousItem();
+          if (e.shiftKey) {
+            this.log.selection.extendTo(this.log.currentIndex - 1);
+          } else {
+            this.log.previousItem();
+          }
           break;
         case 40: // bottom
           if (e.altKey) {
             this.log.goToLastItem();
+          } else if (e.shiftKey) {
+            this.log.selection.extendTo(this.log.currentIndex + 1);
           } else {
             this.log.nextItem();
           }
           e.preventDefault(); // avoid scroll
           break;
         case 67:
-          if ((e.metaKey || e.ctrlKey) && window.getSelection().toString() === '' && this.isSecureContext()) {
-            navigator.clipboard.writeText(this.log.displayedItemFieldsToString());
-            this.notification.show('Message has been successfully copied to clipboard', 'success', 1500);
+          if ((e.metaKey || e.ctrlKey) && this.isSecureContext()) {
+            e.preventDefault();
+            if (this.log.selection.isActive) {
+              navigator.clipboard.writeText(this.log.selectedItemsFieldsToString());
+              this.notification.show(
+                this.log.selection.isCollapsed
+                  ? 'Selected log has been successfully copied to clipboard'
+                  : 'Selected logs have been successfully copied to clipboard',
+                'success',
+                1500,
+              );
+            }
           }
           break;
       }
