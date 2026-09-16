@@ -392,7 +392,7 @@ export default class Model extends Observable {
 
   /**
    * Get the shareable URL with the current filter query string
-   * Built from the model rather than the address bar, which only updates on a 500 ms rate limit.
+   * Built from the model rather than the address bar, which is debounced.
    * @returns {string} - the shareable URL
    */
   get shareableURL() {
