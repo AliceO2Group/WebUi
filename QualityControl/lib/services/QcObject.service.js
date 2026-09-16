@@ -217,7 +217,7 @@ export class QcObjectService {
       file = await this._rootService.openFile(`${url}+`);
     } catch (error) {
       this._logger.error(error.message || error);
-      throw new Error(`JSROOT failed to open file '${url}'`);
+      throw new Error(`JSROOT failed to open file '${url}'`, { cause: error });
     }
 
     let root = undefined;
@@ -225,7 +225,7 @@ export class QcObjectService {
       root = await file.readObject('ccdb_object');
     } catch (error) {
       this._logger.error(error.message || error);
-      throw new Error(`JSROOT failed to read object 'ccdb_object' from '${url}'`);
+      throw new Error(`JSROOT failed to read object 'ccdb_object' from '${url}'`, { cause: error });
     }
 
     root['_typename'] = root['mTreatMeAs'] || root['_typename'];
@@ -238,7 +238,7 @@ export class QcObjectService {
         return JSON.parse(JSON.stringify(root, (_, value) => typeof value === 'bigint' ? value.toString() : value));
       } catch (error) {
         this._logger.error(error.message || error);
-        throw new Error(`Failed to serialize ROOT object '${QC_CHECKER_TYPE}' with BigInt-safe JSON`);
+        throw new Error(`Failed to serialize ROOT object '${QC_CHECKER_TYPE}' with BigInt-safe JSON`, { cause: error });
       }
     }
 
@@ -246,7 +246,7 @@ export class QcObjectService {
       return await this._rootService.toJSON(root);
     } catch (error) {
       this._logger.error(error.message || error);
-      throw new Error(`JSROOT failed to convert object '${root['_typename']}' to JSON`);
+      throw new Error(`JSROOT failed to convert object '${root['_typename']}' to JSON`, { cause: error });
     }
   }
 

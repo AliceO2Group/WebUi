@@ -94,7 +94,7 @@ const DEFAULT_PROFILE = {
       errsource: { match: '', exclude: '' },
       message: { match: '', exclude: '' },
       severity: { in: 'I W E F' },
-      level: { max: null },
+      level: { max: 1 },
     },
   },
 };
@@ -135,7 +135,7 @@ const FULL_PROFILE = {
       errsource: { match: '', exclude: '' },
       message: { match: '', exclude: '' },
       severity: { in: 'I W E F' },
-      level: { max: null },
+      level: { max: 1 },
     },
   },
 };

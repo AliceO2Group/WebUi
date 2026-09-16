@@ -32,8 +32,8 @@ export default class FolderModel extends Observable {
    * @param {Model} model - The parent model utilizing this folder
    * @param {string} title - Display title for the folder
    * @param {FolderType} folderType - Visual style type for the folder
-   * @param {Function} itemConstructor - Constructor function for creating items in this folder.
-   * The constuctor is required to accept the arguments model:FolderModel and json:JSON.
+   * @param {LayoutCardModel} itemConstructor - Constructor function for creating items in this folder.
+   * The constructor is required to accept the arguments model:FolderModel and json:JSON.
    */
   constructor(model, title, folderType, itemConstructor) {
     super();

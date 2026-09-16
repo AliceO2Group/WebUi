@@ -82,7 +82,7 @@ export class SearchFilterModel extends BaseViewModel {
   /**
    * Set filter by key with specified value('s)
    * @param {string} key - filter key.
-   * @param {any[]} args - value('s) to set.
+   * @param {unknown[]} args - value('s) to set.
    * @returns {void} - void.
    */
   setValue(key, ...args) {

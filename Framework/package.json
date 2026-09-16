@@ -1,6 +1,6 @@
 {
   "name": "@aliceo2/web-ui",
-  "version": "2.9.0",
+  "version": "2.11.1",
   "description": "ALICE O2 Web UX framework",
   "author": "Adam Wegrzynek",
   "contributors": [
@@ -31,30 +31,29 @@
     ]
   },
   "dependencies": {
-    "express": "^4.22.1",
-    "helmet": "^8.1.0",
-    "jsonwebtoken": "^9.0.0",
-    "kafkajs": "^2.2.0",
+    "express": "4.22.2",
+    "helmet": "8.1.0",
+    "jsonwebtoken": "9.0.3",
+    "kafkajs": "2.2.4",
     "mithril": "1.1.7",
-    "mysql": "^2.18.1",
-    "openid-client": "^5.6.0",
+    "openid-client": "5.6.5",
     "winston": "3.19.0",
-    "ws": "^8.19.0",
-    "protobufjs": "^7.5.0"
+    "ws": "8.21.2",
+    "protobufjs": "8.8.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "@stylistic/eslint-plugin": "^5.6.1",
-    "eslint": "^9.39.1",
-    "eslint-plugin-jsdoc": "^61.5.0",
-    "globals": "^17.0.0",
-    "mocha": "^11.7.0",
+    "@eslint/js": "10.0.1",
+    "@stylistic/eslint-plugin": "5.10.0",
+    "eslint": "10.9.0",
+    "eslint-plugin-jsdoc": "64.2.1",
+    "globals": "17.11.0",
+    "mocha": "11.8.0",
     "nock": "15.0.0",
-    "nyc": "^17.1.0",
-    "puppeteer": "^24.34.0",
-    "sinon": "21.0.0",
-    "supertest": "^7.1.0",
-    "long": "^5.3.1"
+    "nyc": "18.0.0",
+    "puppeteer": "25.9.0",
+    "sinon": "22.1.0",
+    "supertest": "7.2.2",
+    "long": "5.3.2"
   },
   "main": "Backend/index.js"
 }

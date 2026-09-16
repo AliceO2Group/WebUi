@@ -53,7 +53,7 @@ describe(`'API - DELETE - /tasks/:id' test suite`, async () => {
       .delete('/?token=invalid-token')
       .expect(403, {
         error: '403 - Json Web Token Error',
-        message: 'Invalid JWT token provided',
+        message: 'Invalid token: jwt malformed',
       });
   });
 });

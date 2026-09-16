@@ -14,11 +14,15 @@
 
 /**
  * Available ECS Statuses of operations for Kafka Events
+ * https://github.com/AliceO2Group/Control/blob/master/core/protos/o2control.proto#L228
  * These operations can be under the label:
  * * operationStatus
  * * operationStepStatus
  */
 const EcsOperationAndStepStatus = Object.freeze({
+  NULL: 'NULL',
+  STARTED: 'STARTED',
+  ONGOING: 'ONGOING',
   DONE_OK: 'DONE_OK',
   DONE_ERROR: 'DONE_ERROR',
   DONE_TIMEOUT: 'DONE_TIMEOUT',

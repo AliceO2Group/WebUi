@@ -18,7 +18,7 @@ import { InvalidInputError, updateAndSendExpressResponseFromNativeError } from '
  * Middleware function to validate the run number if in run mode.
  * @param {object} req - The request object.
  * @param {object} res - The response object.
- * @param {Function} next - The next middleware function in the stack.
+ * @param {() => void} next - The next middleware function in the stack.
  * @returns {Promise<void>}
  */
 export const runModeMiddleware = async (req, res, next) => {

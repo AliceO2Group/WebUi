@@ -13,6 +13,7 @@
  */
 
 const { LogManager, updateAndSendExpressResponseFromNativeError } = require('@aliceo2/web-ui');
+const { AbortError, throwIfQueryAborted } = require('../utils/queryCancellation');
 
 /**
  * Gateway for all calls that are to query InfoLogger database
@@ -37,15 +38,36 @@ class QueryController {
    * @returns {void}
    */
   async getLogs(req, res) {
+    const abortController = new AbortController();
+    const { signal } = abortController;
     try {
       const { body: { criterias, options } } = req;
       if (!criterias || Object.keys(criterias).length === 0) {
         res.status(400).json({ error: 'Invalid query parameters provided' });
         return;
       }
-      const logs = await this._queryService.queryFromFilters(criterias, options);
+
+      let responseInProgress = true;
+
+      res.on('finish', () => {
+        responseInProgress = false;
+      });
+
+      res.on('close', () => {
+        if (responseInProgress) {
+          abortController.abort();
+        }
+      });
+
+      const logs = await this._queryService.queryFromFilters(criterias, options, signal);
+      throwIfQueryAborted(signal);
+
       res.status(200).json(logs);
     } catch (error) {
+      if (signal.aborted || error instanceof AbortError) {
+        this._logger.infoMessage('Query was cancelled by the client');
+        return;
+      }
       this._logger.errorMessage(error.toString());
       updateAndSendExpressResponseFromNativeError(res, error);
     }

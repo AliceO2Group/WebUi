@@ -18,6 +18,7 @@
  * TaskEvent type definition as parsed following the received message from the ECS Kafka task topic
  * The parsing is done based on the object received from ECS in `events.proto` definition
  *
+ * @property {SourceEventTypes} type - the source of the event, in this case ECS
  * @property {String} id - task id, unique
  * @property {String} taskId - task id, unique
  * @property {String} name - task name, based on the of the task class and adapted in short form

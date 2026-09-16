@@ -12,23 +12,46 @@
  * or submit itself to any jurisdiction.
 */
 
-import {h} from '/js/src/index.js';
-import {DetectorLockState} from './../enums/DetectorLockState.enum.js';
+import { h } from '/js/src/index.js';
+import { DetectorLockState } from './../enums/DetectorLockState.enum.js';
+import { DetectorLockAction } from '../enums/DetectorLockAction.enum.js';
 
 /**
- * Button with action to force take/release lock for a detector
+ * Button with action to no-force/force take/release lock for a detector
  * @param {Lock} lockModel - model of the lock service 
- * @param {String} detector - detector name
- * @param {DetectorLockState} lockState - lock state of the detector
+ * @param {String} detector - detector name in prefix format, e.g. "ITS", "MFT", "TST"
+ * @param {object} lockState - lock state of the detector
+ * @param {DetectorLockState} lockState.state - state of the lock
  * @param {DetectorLockAction} action - action to be performed
+ * @param {boolean} shouldForce - if the action should be forced or not
  * @param {String} label - button label to be displayed to the user
- * @return {vnode}
+ * @returns {vnode}
  */
 export const detectorLockActionButton = (
   lockModel, detector, lockState, action, shouldForce = false, label = `${action}`
 ) => {
+  const isFree = lockState?.state === DetectorLockState.FREE;
+  const isReleaseAction = action === DetectorLockAction.RELEASE;
+  const isTakeAction = action === DetectorLockAction.TAKE;
+  
+  let isDisabled = false;
+  let titleAndAriaLabel = `${action} lock for ${detector}`;
+  
+  if (isFree && isReleaseAction) {
+    titleAndAriaLabel = `Cannot release lock for ${detector} - lock is not taken`;
+    isDisabled = true;
+  } else if (isFree && isTakeAction && shouldForce) {
+    titleAndAriaLabel = `Cannot force take lock for ${detector} - lock is already free`;
+    isDisabled = true;
+  } else if (shouldForce) {
+    titleAndAriaLabel = `Force ${action} lock for ${detector}`;
+  }
+  
   return h('button.btn.btn-sm.btn-danger', {
-    disabled: lockState?.state === DetectorLockState.FREE,
+    disabled: isDisabled,
+    title: titleAndAriaLabel,
+    'aria-label': titleAndAriaLabel,
+    'aria-disabled': isDisabled ? 'true' : 'false',
     onclick: () => lockModel.actionOnLock(detector, action, shouldForce)
   }, label);
 };

@@ -28,7 +28,7 @@ export default function (folderModel) {
  * @param {string} params.folderType - CSS class for styling the folder header
  * @param {boolean} params.isOpened - Flag indicating if folder is expanded
  * @param {string} params.title - Display text for the folder header
- * @param {Function} clickFunction - Callback to execute when header is clicked
+ * @param {(e: Event) => void} clickFunction - Callback to execute when header is clicked
  * @returns {vnode} - Virtual DOM node representing the folder header
  */
 function folderHeader({ folderType, isOpened, title }, clickFunction) {

@@ -16,7 +16,7 @@ import { h, notification } from '/js/src/index.js';
 
 import tableFilters from './logFilter/tableFilters.js';
 import commandFilters from './logFilter/commandFilters.js';
-import commandLogs from './log/commandLogs.js';
+import { commandLogs } from './log/commandLogs.js';
 import statusBar from './log/statusBar.js';
 import inspector from './log/inspector.js';
 import tableLogsHeader from './log/tableLogsHeader.js';
@@ -24,6 +24,7 @@ import tableLogsContent from './log/tableLogsContent.js';
 import tableLogsScrollMap from './log/tableLogsScrollMap.js';
 import aboutComponent from './about/about.component.js';
 import errorComponent from './common/errorComponent.js';
+import { cellContextMenu } from './log/cellContextMenu.js';
 
 /**
  * Main view of the application
@@ -32,21 +33,16 @@ import errorComponent from './common/errorComponent.js';
  */
 export default (model) => [
   notification(model.notification),
+  cellContextMenu(model),
   h('.flex-column absolute-fill', [
     h('.shadow-level2', [
-      h('header.p1.flex-row.f7', [
-        h('', commandLogs(model)),
-        h(
-          '.flex-grow',
-          {
-            style: 'display: flex; flex-direction:row-reverse;',
-          },
-          commandFilters(model),
-        ),
+      h('header.p1.flex-row.f7.g1.justify-between', [
+        h('.flex-row.g3', commandLogs(model)),
+        h('.flex-row.g3', commandFilters(model)),
       ]),
       h('header.f7', tableFilters(model)),
     ]),
-    h('div.flex-grow.flex-row.shadow-level0.logs-container', [
+    h('.flex-grow.flex-row.shadow-level0.logs-container', [
       aboutComponent(model),
       logsTable(model),
       inspectorSide(model),

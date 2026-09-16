@@ -19,11 +19,24 @@ const config = require('./../../test-config.js');
 const { StatusController } = require('./../../../lib/controller/StatusController.js');
 
 describe('Status Service test suite', () => {
-  config.mysql = {
+  const mysqlConfig = {
     host: 'localhost',
     port: 6103,
     database: 'INFOLOGGER',
   };
+
+  // Store original config.mysql value to restore later
+  const originalMysqlConfig = config.mysql;
+
+  before(() => {
+    config.mysql = mysqlConfig;
+  });
+
+  after(() => {
+    // Restore original config to avoid affecting other tests
+    config.mysql = originalMysqlConfig;
+  });
+
   describe('Creating a new StatusController instance', () => {
     it('should successfully initialize StatusController', () => {
       assert.doesNotThrow(() => new StatusController({ hostname: 'localhost', port: 8080 }, {}));
@@ -88,7 +101,7 @@ describe('Status Service test suite', () => {
           ok: false, message: 'Data source is not available',
         },
       };
-      const mysql = await statusController._getDataSourceStatus(config.mysql);
+      const mysql = await statusController._getDataSourceStatus(mysqlConfig);
       assert.deepStrictEqual(mysql, info);
     });
 
@@ -102,7 +115,7 @@ describe('Status Service test suite', () => {
           isAvailable: true,
         };
         statusController.querySource = dataSource;
-        const mysql = await statusController._getDataSourceStatus(config.mysql);
+        const mysql = await statusController._getDataSourceStatus(mysqlConfig);
         assert.deepStrictEqual(mysql, info);
       },
     );
@@ -124,7 +137,7 @@ describe('Status Service test suite', () => {
           isAvailable: false,
         };
         statusController.querySource = dataSource;
-        const mysql = await statusController._getDataSourceStatus(config.mysql);
+        const mysql = await statusController._getDataSourceStatus(mysqlConfig);
         assert.deepStrictEqual(mysql, info);
       },
     );

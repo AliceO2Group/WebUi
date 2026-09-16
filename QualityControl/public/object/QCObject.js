@@ -257,7 +257,7 @@ export default class QCObject extends BaseViewModel {
    * @param {string} title - title of the tree to be sorted
    * @param {string} field - field by which the sort operation should happen
    * @param {number} order {-1; 1}
-   * @param {Function} icon - icon to be displayed based on sort order
+   * @param {() => icon} icon - icon to be displayed based on sort order {@link Framework/Frontend/js/src/icons.js}
    * @returns {undefined}
    */
   sortTree(title, field, order, icon) {

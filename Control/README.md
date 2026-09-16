@@ -8,6 +8,7 @@
   - [Requirements](#requirements)
   - [Installation](#installation)
   - [Business logic for Developers to know](#business-logic-for-developers-to-know)
+  - [Locks](#locks)
   - [Configuration](#configuration)
     - [O2Control gRPC](#o2control-grpc)
     - [Apricot gRPC](#apricot-grpc)
@@ -55,6 +56,7 @@ It communicates with [Control agent](https://github.com/AliceO2Group/Control) ov
 7. Open browser and navigate to http://localhost:8080
 
 ## [Business logic for Developers to know](./docs/BUSINESS_FOR_DEVELOPER_TO_KNOW.md)
+## [Locks](./docs/LOCKS.md)
 ## Configuration
 ### O2Control gRPC
 * `hostname` - gRPC hostname

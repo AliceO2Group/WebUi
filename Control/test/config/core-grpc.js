@@ -58,6 +58,7 @@ const coreGRPCServer = (config) => {
           break;
         case 2: // STOP
           envTest.environment.state = 'CONFIGURED';
+          envTest.environment.userVars.run_start_time_ms = '1648121309974';
           break;
         case 3: // CONFIGURE
           envTest.environment.state = 'CONFIGURED';

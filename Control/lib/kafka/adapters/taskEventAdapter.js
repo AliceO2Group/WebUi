@@ -14,6 +14,7 @@
 const { getTaskShortName } = require('../../adapters/task/getTaskShortName.js');
 const { TaskState } = require('../../common/taskState.enum.js');
 const { TaskStatus } = require('../../common/taskStatus.enum.js');
+const { SourceEventTypes } = require('../enums/SourceEventsTypes.enum.js');
 
 /**
  * Adapter for event messages received on run topic
@@ -36,6 +37,7 @@ exports.taskEventAdapter = ({ taskEvent }) => {
   } = taskEvent;
 
   return {
+    source: SourceEventTypes.ECS,
     id: taskid,
     taskId: taskid,
     name: getTaskShortName(name),

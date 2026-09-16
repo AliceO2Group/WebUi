@@ -4,6 +4,10 @@ updates:
   directory: "/"
   schedule:
     interval: "monthly"
+  labels:
+    - "github-actions"
+    - "dependencies"
+  open-pull-requests-limit: 3
 - package-ecosystem: npm
   directory: "/Control"
   schedule:
@@ -26,6 +30,7 @@ updates:
         - "@grpc/proto-loader"
   labels:
     - "Control"
+    - "dependencies"
   open-pull-requests-limit: 10
   versioning-strategy: increase
   ignore:
@@ -53,6 +58,7 @@ updates:
         - "sinon"
   labels:
     - "Quality Control"
+    - "dependencies"
   open-pull-requests-limit: 10
   versioning-strategy: increase
   ignore:
@@ -80,6 +86,7 @@ updates:
         - "sinon"
   labels:
     - "InfoLogger"
+    - "dependencies"
   open-pull-requests-limit: 10
   versioning-strategy: increase
   ignore:
@@ -108,8 +115,30 @@ updates:
         - "supertest"
   labels:
     - "Framework"
+    - "dependencies"
   open-pull-requests-limit: 10
   versioning-strategy: increase
   ignore:
     - dependency-name: "*"
       update-types: ["version-update:semver-patch"]
+# projects below are currently archived and not set up for maintenance
+- package-ecosystem: npm
+  directory: "/Configuration/webapp"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 0
+- package-ecosystem: npm
+  directory: "/Tokenization/backend/central-system"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 0
+- package-ecosystem: npm
+  directory: "/Tokenization/backend/wrapper"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 0
+- package-ecosystem: npm
+  directory: "/Tokenization/webapp"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 0

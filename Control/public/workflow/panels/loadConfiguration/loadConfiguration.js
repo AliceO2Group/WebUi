@@ -155,8 +155,8 @@ const btnSaveEnvConfiguration = (model) => {
       class: model.environment.itemNew.isLoading() ? 'loading' : '',
       disabled: model.environment.itemNew.isLoading() || !model.workflow.form.isInputSelected(),
       onclick: () => {
-        let isUserSureOfNoHosts = false;
-        if (!model.workflow.form.hosts || model.workflow.form.hosts.length === 0) {
+        let isUserSureOfNoHosts = true;
+        if (!model.workflow.form?.hosts?.length) {
           isUserSureOfNoHosts = confirm(USER_INFORMATIVE_MESSAGE_ON_NO_HOST);
         }
         if (isUserSureOfNoHosts) {
