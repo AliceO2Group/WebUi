@@ -60,7 +60,7 @@ export class CopyToClipboardComponent extends StatefulComponent {
 
       this.notify();
     } catch (error) {
-      if (onFailure) {
+      if (typeof onFailure === 'function') {
         onFailure(error);
       }
     }
