@@ -39,7 +39,7 @@
     "openid-client": "5.6.5",
     "winston": "3.19.0",
     "ws": "8.21.2",
-    "protobufjs": "8.7.1"
+    "protobufjs": "8.8.0"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
