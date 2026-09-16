@@ -397,7 +397,7 @@ export default class Model extends Observable {
    */
   get shareableURL() {
     const url = this.router.getUrl();
-    url.search = this.log.filter.queryString || '';
+    url.search = this.log.filter.queryString;
     return url.href;
   }
 
