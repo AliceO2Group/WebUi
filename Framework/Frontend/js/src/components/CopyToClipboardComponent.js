@@ -128,6 +128,7 @@ export class CopyToClipboardComponent extends StatefulComponent {
       'button.btn',
       {
         id: id ? `copy-${id}` : undefined,
+        type: 'button',
         onclick: () => this.copyToClipboard(clipboardTargetValue, onFailure),
         disabled: !this._available,
         title: this._message,
