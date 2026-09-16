@@ -88,7 +88,7 @@ const copyURLButton = (url, showNotification) => h(
     id: 'url',
     className: '',
     style: { minWidth: '100px' },
-    onFailure: ({ message }) => showNotification(`Could not copy URL: ${message}`, 'danger', 3000),
+    onFailure: ({ error }) => showNotification(`Could not copy URL: ${error}`, 'danger', 3000),
   },
   'Copy URL',
 );
