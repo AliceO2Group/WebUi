@@ -109,6 +109,7 @@ describe('InfoLogger', function () {
 
   require('./public/user-actions-mocha');
   require('./public/log-filter-actions-mocha');
+  require('./public/log-filter-url-mocha');
   require('./public/live-mode-mocha');
   require('./public/query-mode-mocha');
   require('./public/status-bar-mocha');
