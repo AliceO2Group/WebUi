@@ -114,12 +114,13 @@ export class CopyToClipboardComponent extends StatefulComponent {
    * @param {string} [vnode.attrs.id] The unique identifier for the copy button will become 'copy-{id}'.
    * @param {string} [vnode.attrs.className='btn-primary loading'] The CSS classes to be applied to the copy button.
    * @param {string|object} [vnode.attrs.style] The inline styles to be applied to the copy button.
+   * @param {string} [vnode.attrs.contentClassName] The CSS classes to be applied to the content of the copy button.
    * @param {(error: Error) => void} [vnode.attrs.onFailure] The callback function to be invoked if copying to the clipboard fails.
    * @returns {Component} The copyToClipboard button component
    */
   view(vnode) {
     const { attrs, children } = vnode;
-    const { value: clipboardTargetValue = '', id, className = 'btn-primary', style, onFailure } = attrs;
+    const { value: clipboardTargetValue = '', id, className = 'btn-primary', style, contentClassName, onFailure } = attrs;
 
     const defaultContent = [iconLinkIntact(), children];
     const successContent = [iconCheck(), h('', 'Copied!')];
@@ -136,7 +137,8 @@ export class CopyToClipboardComponent extends StatefulComponent {
         className,
       },
       h(
-        'div.flex-row.g1.justify-center',
+        'div.flex-row.g1',
+        { className: contentClassName },
         this._successStateTimeout ? successContent : defaultContent,
       ),
     );
