@@ -12,9 +12,7 @@
  * or submit itself to any jurisdiction.
 */
 const {LogManager, LogLevel} = require('@aliceo2/web-ui');
-const {
-  updateAndSendExpressResponseFromNativeError, InvalidInputError, UnauthorizedAccessError
-} = require('@aliceo2/web-ui');
+const {updateAndSendExpressResponseFromNativeError, InvalidInputError} = require('@aliceo2/web-ui');
 
 const LOG_FACILITY = 'cog/env-ctrl';
 const {EnvironmentTransitionType} = require('./../common/environmentTransitionType.enum.js');
@@ -163,87 +161,6 @@ class EnvironmentController {
         updateAndSendExpressResponseFromNativeError(res, error);
       }
       this._logger.debug(`DESTROY_ENVIRONMENT,${id},${runNumber},${destroyRequestedAt},${Date.now()}`);
-    }
-  }
-
-  /**
-   * API - POST endpoint for deploying a new environment based on a given configuration name
-   * @param {Request} req - HTTP Request object
-   * @param {Response} res - HTTP Response object with EnvironmentDetails
-   * @returns {void}
-   */
-  async newAutoEnvironmentHandler(req, res) {
-    const {personid, name, username} = req.session;
-    const user = new User(username, name, personid);
-    const {detector, runType, configurationName} = req.body;
-
-    if (!this._lockService.isLockOwnedByUser(detector, user)) {
-      updateAndSendExpressResponseFromNativeError(res, new UnauthorizedAccessError('Lock not taken'));
-      return;
-    }
-
-    if (!configurationName) {
-      updateAndSendExpressResponseFromNativeError(
-        res,
-        new InvalidInputError('Missing Configuration Name for deployment')
-      );
-      return;
-    }
-
-    try {
-      const areDetectorsAvailable = await this._detectorService.areDetectorsAvailable([detector]);
-      if (!areDetectorsAvailable) {
-        updateAndSendExpressResponseFromNativeError(
-          res,
-          new InvalidInputError(`Detector ${detector} is already active`)
-        );
-        return;
-      }
-    } catch (error) {
-      updateAndSendExpressResponseFromNativeError(res, error);
-      return;
-    }
-
-    // Retrieve latest configuration version for given name
-    let variables;
-    try {
-      const configuration = await this._workflowService.retrieveWorkflowSavedConfiguration(configurationName);
-      if (!configuration.variables) {
-        throw new InvalidInputError(`No configuration variables found for ${configurationName}`);
-      }
-      variables = configuration.variables;
-    } catch (error) {
-      this._logger.debug(`Unable to retrieve saved configuration for ${configurationName} due to`);
-      this._logger.debug(error);
-      updateAndSendExpressResponseFromNativeError(res, error);
-      return;
-    }
-
-    // Retrieve latest default workflow to use
-    let workflowTemplatePath;
-    try {
-      const {template, repository, revision} = await this._workflowService.getDefaultTemplateSource();
-      workflowTemplatePath = `${repository}/workflows/${template}@${revision}`;
-    } catch (error) {
-      this._logger.debug(`Unable to retrieve default workflow template due to ${error}`);
-      updateAndSendExpressResponseFromNativeError(res, error);
-      return;
-    }
-    // Attempt to deploy environment
-    try {
-      this._logger.infoMessage(`Request by username(${username}) to deploy configuration ${configurationName}`,
-        {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
-      );
-      const environment = await this._envService.newAutoEnvironment(
-        workflowTemplatePath, variables, detector, runType, user
-      );
-      res.status(200).json(environment);
-    } catch (error) {
-      this._logger.errorMessage(
-        `Unable to deploy request by username(${username}) for ${configurationName} due to error`,
-        {level: LogLevel.OPERATIONS, system: 'GUI', facility: LOG_FACILITY}
-      );
-      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 }

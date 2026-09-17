@@ -12,8 +12,9 @@
  * or submit itself to any jurisdiction.
 */
 
-const {LogManager, LogLevel, NotFoundError} = require('@aliceo2/web-ui');
+const {LogManager, LogLevel, NotFoundError, InvalidInputError} = require('@aliceo2/web-ui');
 const CoreUtils = require('./../control-core/CoreUtils.js');
+const {CacheKeys} = require('../common/cacheKeys.enum.js');
 
 /**
  * **high-level service for deployment**
@@ -29,11 +30,16 @@ class DeploymentService {
    * Constructor for inserting dependencies needed to retrieve environment data
    * @param {EnvironmentService} environmentService - to use for creating new environments
    * @param {WorkflowService} workflowService - to use for retrieving template workflow information
+   * @param {EnvironmentCacheService} environmentCacheService - to use for retrieving and updating environment data in cache
+   * @param {CacheService} cacheService - to use for retrieving and updating general data in cache, e.g. calibration runs requests
+   * @param {BroadcastService} broadcastService - to use for broadcasting updates to clients, e.g. calibration runs requests updates
    */
-  constructor(environmentService, workflowService, environmentCacheService) {
+  constructor(environmentService, workflowService, environmentCacheService, cacheService, _broadcastService) {
     this._environmentService = environmentService;
     this._workflowService = workflowService;
     this._environmentCacheService = environmentCacheService;
+    this._generalCacheService = cacheService;
+    this._broadcastService = _broadcastService;
 
     this._logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'cog'}/deployment-service`);
   }
@@ -63,6 +69,69 @@ class DeploymentService {
     const environment = await this._environmentService.newEnvironmentAsync({
       workflowTemplate, userVars, user, shouldAutoTransition, detectors
     });
+    return environment;
+  }
+
+  /**
+   * High-level service method to gather the necessary information and request the deployment of a calibration environment for a given detector and run type.
+   * @param {object} deploymentConfiguration - the configuration to be used for deployment
+   * @param {string} deploymentConfiguration.detector - the detector for which the calibration environment should be deployed
+   * @param {string} deploymentConfiguration.runType - the run type to be used for deployment, needed to retrieve the hosts to ignore for deployment
+   * @param {string} deploymentConfiguration.selectedConfiguration - the name of the saved configuration to be used for deployment, needed to retrieve the variables for deployment
+   * @param {User} deploymentConfiguration.user - the user to be used for deployment
+   * @returns {EnvironmentInfo} - the id of the environment created
+   * @throws {Error} - if the deployment fails or invalid input
+   */
+  async deployEnvironmentCalibration({ detector, runType, selectedConfiguration, user }) {
+    // Retrieve latest configuration version for given name
+    const { variables } = await this._workflowService.retrieveWorkflowSavedConfiguration(selectedConfiguration);
+    if (!variables) {
+      throw new InvalidInputError(`No configuration variables found for ${selectedConfiguration}`);
+    }
+
+    // Retrieve latest default workflow to use
+    const { template, repository, revision } = await this._workflowService.getDefaultTemplateSource();
+    const workflowTemplatePath = `${repository}/workflows/${template}@${revision}`;
+
+    const environment = await this._environmentService.newEnvironmentAsync({
+      workflowTemplate: workflowTemplatePath,
+      userVars: variables,
+      user,
+      shouldAutoTransition: true,
+      detectors: [detector],
+    });
+
+    /**
+     * A dedicated calibration page environment object is created to follow only change of environment state events
+     */
+    const calibrationEnvironment = {
+      inProgress: true,
+      detector,
+      runType,
+      events: [
+        {
+          type: 'ENVIRONMENT',
+          payload: {
+            id: environment.id,
+            message: 'request was sent to AliECS',
+            at: Date.now(),
+          }
+        }
+      ],
+    };
+    let calibrationRunsRequests = this._generalCacheService.getByKey(CacheKeys.CALIBRATION_RUNS_REQUESTS);
+    if (!calibrationRunsRequests) {
+      calibrationRunsRequests = {};
+    }
+    if (!calibrationRunsRequests[detector]) {
+      calibrationRunsRequests[detector] = {};
+    }
+    if (!calibrationRunsRequests[detector][runType]) {
+      calibrationRunsRequests[detector][runType] = calibrationEnvironment;
+
+    }
+    this._generalCacheService.updateByKeyAndBroadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests);
+    this._broadcastService.broadcast(CacheKeys.CALIBRATION_RUNS_REQUESTS, calibrationRunsRequests[detector][runType]);
     return environment;
   }
 
