@@ -52,12 +52,32 @@ export const tasksPerHostPanel = (
     return h('.m5.text-center', 'Failed to load tasks');
   }
   tasks = tasks.payload;
+  taskTableModel.readUrlState();
+  
   tasks = tasks.filter(taskTableModel.doesTaskMatchFilter.bind(taskTableModel));
   const tasksByHosts = source === FLP ? getTasksByFlp(tasks) : getTasksByEpn(tasks);
   
   const infoLoggerButtonTitle = source === FLP ? 'InfoLogger FLP' : 'InfoLogger EPN';
   const infoLoggerButtonUrl = source === FLP ? COG.ILG_URL : COG.ILG_EPN_URL;
-
+  /**
+   * 
+   * @param {*} state 
+   */
+  const updateUrlWithStates = (state) => {
+    //First we toggle the state
+    taskTableModel.toggleFilterState(state);
+    const urlParams = new URLSearchParams(window.location.search);
+    const states = urlParams.get('state') ? JSON.parse(urlParams.get('state')) : [];
+    if(taskTableModel._filterBy.state.length > 0){
+      urlParams.set('state', JSON.stringify(taskTableModel._filterBy.state));
+    } 
+    else {
+      urlParams.delete('state');
+    }
+    console.log('Current states', states,state);
+    console.log(decodeURIComponent(urlParams.toString()));
+    taskTableModel._model.router.go(`?${decodeURIComponent(urlParams.toString())}`, true, true);
+  };
   return h('.flex-column.g2', [
     h('.flex-row.g1', [
       h('.flex-row.g1', [
@@ -73,7 +93,9 @@ export const tasksPerHostPanel = (
         h('.flex-row.g1.flex-wrap.flex-grow-3', [
           TASK_STATES.map((state) =>
             h(`button.btn${getTaskStateClassAssociation(state)}`, {
-              onclick: () => taskTableModel.toggleFilterState(state),
+              onclick: () => {
+                updateUrlWithStates(state);
+              },
               class: taskTableModel.isFilterStateEnabled(state) ? 'active' : '',
             }, state)
           ),

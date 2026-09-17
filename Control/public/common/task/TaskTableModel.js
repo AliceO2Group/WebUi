@@ -38,6 +38,16 @@ export class TaskTableModel extends Observable {
   }
 
   /**
+   * Read the state parameter from the URL and set the filter state accordingly
+   */
+  readUrlState = () =>{
+    //Read the current state from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const states = urlParams.get('state') ? JSON.parse(urlParams.get('state')) : [];
+    this.setFilterState(decodeURIComponent(states));
+  }
+
+  /**
    * Checks whether the filter for a specified state is enabled
    * @param {string} state - state to check
    * @return {boolean} - true if the filter is enabled, false otherwise
