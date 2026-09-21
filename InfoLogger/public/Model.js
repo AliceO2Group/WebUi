@@ -67,9 +67,6 @@ export default class Model extends Observable {
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
     this.router.bubbleTo(this);
-    // this.log.filter.observe(() => {
-    //   this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);
-    // });
     this.handleLocationChange(); // Init first page
 
     // Setup keyboard and wheel dispatchers
