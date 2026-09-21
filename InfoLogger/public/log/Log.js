@@ -99,13 +99,20 @@ export default class Log extends Observable {
       this.disableAutoScroll();
     } else {
       try {
-        this.liveStart();
-        this.enableAutoScroll();
-        setBrowserTabTitle(`${window.ILG.name} LIVE`);
+        this.goLive();
       } catch (error) {
         this.model.notification.show(error.toString(), 'danger', 3000);
       }
     }
+  }
+
+  /**
+   * Starts live mode, enables auto-scroll and sets the browser tab title to "LIVE"
+   */
+  goLive() {
+    this.liveStart();
+    this.enableAutoScroll();
+    setBrowserTabTitle(`${window.ILG.name} LIVE`);
   }
 
   /**
@@ -359,8 +366,6 @@ export default class Log extends Observable {
    * @returns {Promise<null|object>} null if query is aborted, result of the query otherwise
    */
   async query() {
-    setBrowserTabTitle(`${window.ILG.name} QUERY`);
-
     if (!this.model.frameworkInfo.isSuccess() || !this.model.frameworkInfo.payload.mysql.status.ok) {
       throw new Error('Query service is not available');
     }
@@ -377,6 +382,8 @@ export default class Log extends Observable {
     } else {
       this.activeMode = MODE.QUERY;
     }
+    setBrowserTabTitle(`${window.ILG.name} QUERY`);
+    this.download.isVisible = false;
 
     const previousQueryResult = this.queryResult;
     this.queryResult = RemoteData.loading();

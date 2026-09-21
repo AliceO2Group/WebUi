@@ -24,6 +24,9 @@ import { h,
 import { BUTTON } from '../constants/button-states.const.js';
 import { MODE } from '../constants/mode.const.js';
 
+/**
+ * Maps query and live button types to modes
+ */
 const BUTTON_TYPES_BY_MODE = {
   [MODE.QUERY]: { query: BUTTON.PRIMARY, live: BUTTON.DEFAULT, liveIcon: iconMediaPlay },
   [MODE.LIVE.RUNNING]: { query: BUTTON.DEFAULT, live: BUTTON.SUCCESS_ACTIVE, liveIcon: iconMediaStop },
@@ -97,7 +100,7 @@ const interactionModesGroupButton = (model) => {
  * - query lookup
  * @param {Model} model - root model of the application
  * @param {RemoteData.payload} frameworkInfo - the payload containing framework information
- * @param {{ query: string, live: string, liveIcon: () => vnode }} type - the button type to use for the query button
+ * @param {{ query: string, live: string, liveIcon: () => vnode }} type - the button type to use
  * @returns {vnode} - the view of the query button
  */
 const queryButton = (model, frameworkInfo, type) => {
@@ -130,16 +133,14 @@ const queryButton = (model, frameworkInfo, type) => {
  * - websocket status
  * @param {Model} model - root model of the application
  * @param {RemoteData.payload} frameworkInfo - the payload containing framework information
- * @param {{ query: string, live: string, liveIcon: () => vnode }} type - the button type to use for the query button
+ * @param {{ query: string, live: string, liveIcon: () => vnode }} type - the button type to use
  * @returns {vnode} - the view of the live button
  */
 const liveButton = (model, frameworkInfo, type) => {
-  const { log: logModel, ws } = model;
+  const { log: logModel } = model;
   const { queryResult } = logModel;
-  const { authed: isWsAuthedAndReady = false } = ws;
-  const { infoLoggerServer: { status: { ok: isLiveServiceReady = false } = {} } = {} } = frameworkInfo;
 
-  const isLiveModeReady = isLiveServiceReady && isWsAuthedAndReady;
+  const isLiveModeReady = model.isLiveModeReady();
   const title = isLiveModeReady ? 'Stream logs with filtering' : 'Live service not configured';
 
   return h('button.btn.bold', {
