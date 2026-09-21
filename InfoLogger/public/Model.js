@@ -58,7 +58,7 @@ export default class Model extends Observable {
 
     this.frameworkInfoEnabled = false;
     this.frameworkInfo = RemoteData.notAsked();
-    this.getFrameworkInfo();
+    this.frameworkInfoLoaded = this.getFrameworkInfo();
 
     this.inspectorEnabled = false;
     this.accountMenuEnabled = false;
@@ -67,7 +67,6 @@ export default class Model extends Observable {
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
     this.router.bubbleTo(this);
-    this.handleLocationChange(); // Init first page
 
     // Setup keyboard and wheel dispatchers
     window.addEventListener('keydown', this.handleKeyboardDown.bind(this));
@@ -77,6 +76,7 @@ export default class Model extends Observable {
     this.ws = new WebSocketClient();
     this.ws.addListener('command', this.handleWSCommand.bind(this));
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
+    this.wsAuthProcessed = new Promise((resolve) => this.ws.addListener('authed', resolve));
     this.ws.addListener('close', this.handleWSClose.bind(this));
 
     // update router on model change
@@ -86,6 +86,8 @@ export default class Model extends Observable {
 
     this.zoom = new Zoom();
     this.zoom.bubbleTo(this);
+
+    this.handleLocationChange(); // Init first page
   }
 
   /**
@@ -360,7 +362,7 @@ export default class Model extends Observable {
    * Delegates sub-model actions depending if location is filters or profile
    * @param {object} params - URL parameters
    */
-  async parseLocation(params) {
+  parseLocation(params) {
     if (params.profile && params.q) {
       this.log.filter.resetCriteria();
       this.notification.show('URL can contain only filters or profile, not both', 'warning');
@@ -377,35 +379,45 @@ export default class Model extends Observable {
         this.updateRouteOnModelChange();
         this.notification.show(`Invalid URL filter format: ${error.message}`, 'danger');
       }
-
-      if (params.live == 'true') {
-        await this.loadLiveMode();
-      }
     } else if (!params.q) {
       this.getUserProfile();
       this.log.filter.resetCriteria();
-      if (params.live == 'true') {
-        await this.loadLiveMode();
-      }
-    } else {
-      this.getUserProfile();
+    }
+
+    if (params.live === 'true') {
+      this.startLiveModeFromURL();
     }
   }
 
   /**
-   * Attempt to load into the live mode of the ILG
+   * Returns whether the live mode dependencies are ready
+   * @returns {boolean} true if the live mode dependencies are ready, false otherwise
    */
-  async loadLiveMode() {
-    while (!this.ws?.authed
-      || !this.frameworkInfo.isSuccess()
-      || !this.frameworkInfo.payload.infoLoggerServer.status.ok) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+  isLiveModeReady() {
+    return Boolean(this.ws?.authed
+      && this.frameworkInfo.isSuccess()
+      && this.frameworkInfo.payload.infoLoggerServer?.status?.ok);
+  }
+
+  /**
+   * Start live mode from URL once dependencies are ready
+   */
+  async startLiveModeFromURL() {
+    await Promise.all([
+      this.frameworkInfoLoaded,
+      this.wsAuthProcessed,
+    ]);
+
+    if (!this.log.queryResult.isNotAsked()) {
+      return; // user started a query as framework has loaded but WS not yet
     }
+    if (!this.isLiveModeReady()) {
+      this.notification.show('Live mode is currently unavailable, loaded in query mode', 'danger', 3000);
+      return;
+    }
+
     try {
-      this.log.liveStart();
-      this.log.enableAutoScroll();
-      setBrowserTabTitle(`${window.ILG.name} LIVE`);
-      this.notify();
+      this.log.goLive();
     } catch (error) {
       this.notification.show(error.toString(), 'danger', 3000);
     }
