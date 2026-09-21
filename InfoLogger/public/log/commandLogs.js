@@ -23,7 +23,6 @@ import { h,
 } from '/js/src/index.js';
 import { BUTTON } from '../constants/button-states.const.js';
 import { MODE } from '../constants/mode.const.js';
-import { setBrowserTabTitle } from '../common/utils.js';
 
 const BUTTON_TYPES_BY_MODE = {
   [MODE.QUERY]: { query: BUTTON.PRIMARY, live: BUTTON.DEFAULT, liveIcon: iconMediaPlay },
@@ -119,8 +118,8 @@ const queryButton = (model, frameworkInfo, type) => {
     id: 'query-button',
     title: isDbReady ? 'Query database with filters (Enter)' : 'Query service not configured',
     disabled: !isDbReady || queryResult.isLoading(),
-    onclick: () => toggleButtonStates(model, false),
     className: type.query,
+    onclick: () => logModel.query(),
   }, 'Query');
 };
 
@@ -147,8 +146,8 @@ const liveButton = (model, frameworkInfo, type) => {
     id: 'live-button',
     title,
     disabled: !isLiveModeReady || queryResult.isLoading(),
-    onclick: () => toggleButtonStates(model, true),
     className: !isLiveModeReady ? 'loading' : type.live,
+    onclick: () => logModel.toggleLiveMode(),
   }, 'Live', ' ', type.liveIcon());
 };
 
@@ -246,57 +245,3 @@ const zoomButtonGroup = (zoom) =>
       title: 'Zoom in (Ctrl/Cmd + +)',
     }, h('span', { style: 'font-size:0.8em' }, iconPlus())),
   ]);
-
-/**
- * Method to toggle states of the buttons(Query/Live) depending on the mode the tool is running on
- * @param {Model} model - root model of the application
- * @param {boolean} wasLivePressed - flag to check if the live button was pressed
- */
-function toggleButtonStates(model, wasLivePressed) {
-  model.log.download.isVisible = false; // set visibility of download dropdown to false
-  if (wasLivePressed) {
-    switch (model.log.activeMode) {
-      case MODE.QUERY:
-      case MODE.LIVE.PAUSED:
-        try {
-          model.log.liveStart();
-          setButtonsType(BUTTON.DEFAULT, BUTTON.SUCCESS_ACTIVE, iconMediaStop());
-          model.log.enableAutoScroll();
-          setBrowserTabTitle(`${window.ILG.name} LIVE`);
-        } catch (error) {
-          model.notification.show(error.toString(), 'danger', 3000);
-        }
-        break;
-      default: // MODE.LIVE.RUNNING
-        model.log.liveStop(MODE.LIVE.PAUSED);
-        setBrowserTabTitle(`${window.ILG.name} LIVE PAUSED`);
-        setButtonsType(BUTTON.DEFAULT, BUTTON.PRIMARY, iconMediaPlay());
-        model.log.disableAutoScroll();
-    }
-  } else {
-    model.log.query();
-    setBrowserTabTitle(`${window.ILG.name} QUERY`);
-    setButtonsType(BUTTON.PRIMARY, BUTTON.DEFAULT, iconMediaPlay());
-  }
-}
-
-/**
- * Method to set the buttons to live mode
- */
-function setToLiveMode() {
-  setButtonsType(BUTTON.DEFAULT, BUTTON.SUCCESS_ACTIVE, iconMediaStop());
-}
-
-/**
- * Method to change types of the buttons based on the mode being run
- * @param {string} queryType Type of the Query Button
- * @param {string} liveType Type of the Live Button
- * @param {Icon} liveIcon Icon of the Live Button
- */
-function setButtonsType(queryType, liveType, liveIcon) {
-  queryButtonType = queryType;
-  liveButtonType = liveType;
-  liveButtonIcon = liveIcon;
-}
-
-export { setToLiveMode };

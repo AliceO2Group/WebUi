@@ -18,6 +18,7 @@ import ContextMenu from './ContextMenu.js';
 import { MODE } from '../constants/mode.const.js';
 import { TIME_MS } from '../common/Timezone.js';
 import { jsonPost } from '../common/jsonPost.js';
+import { setBrowserTabTitle } from '../common/utils.js';
 
 /**
  * Model Log, encapsulate all log management and queries
@@ -85,6 +86,26 @@ export default class Log extends Observable {
    */
   isActiveModeQuery() {
     return this.activeMode === MODE.QUERY;
+  }
+
+  /**
+   * Toggles the live mode between running and paused, and enables/disables auto-scroll
+   */
+  toggleLiveMode() {
+    this.download.isVisible = false;
+    if (this.isLiveModeRunning()) {
+      this.liveStop(MODE.LIVE.PAUSED);
+      setBrowserTabTitle(`${window.ILG.name} LIVE PAUSED`);
+      this.disableAutoScroll();
+    } else {
+      try {
+        this.liveStart();
+        this.enableAutoScroll();
+        setBrowserTabTitle(`${window.ILG.name} LIVE`);
+      } catch (error) {
+        this.model.notification.show(error.toString(), 'danger', 3000);
+      }
+    }
   }
 
   /**
@@ -338,6 +359,8 @@ export default class Log extends Observable {
    * @returns {Promise<null|object>} null if query is aborted, result of the query otherwise
    */
   async query() {
+    setBrowserTabTitle(`${window.ILG.name} QUERY`);
+
     if (!this.model.frameworkInfo.isSuccess() || !this.model.frameworkInfo.payload.mysql.status.ok) {
       throw new Error('Query service is not available');
     }
