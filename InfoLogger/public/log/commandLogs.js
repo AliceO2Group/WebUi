@@ -276,15 +276,11 @@ function toggleButtonStates(model, wasLivePressed) {
   }
 }
 
-function setToLiveMode(model) {
-  try {
-    model.log.liveStart();
-    setButtonsType(BUTTON.DEFAULT, BUTTON.SUCCESS_ACTIVE, iconMediaStop());
-    model.log.enableAutoScroll();
-    setBrowserTabTitle(`${window.ILG.name} LIVE`);
-  } catch (error) {
-    model.notification.show(error.toString(), 'danger', 3000);
-  }
+/**
+ * Method to set the buttons to live mode
+ */
+function setToLiveMode() {
+  setButtonsType(BUTTON.DEFAULT, BUTTON.SUCCESS_ACTIVE, iconMediaStop());
 }
 
 /**

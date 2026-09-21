@@ -36,7 +36,6 @@ export default class Model extends Observable {
   constructor() {
     super();
 
-    // this.guiReadyToUse = RemoteData.loading();
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
 
@@ -419,25 +418,9 @@ export default class Model extends Observable {
   }
 
   /**
-   * Method to change the icon and type of the liveButton
-   * @param {string} liveType - Type of the Live Button
-   * @param {Icon} liveIcon - Icon of the Live Button
+   * When model change (filters), update address bar with the filter
+   * do it silently to avoid infinite loop
    */
-  setLiveButton(liveType, liveIcon) {
-    this.liveButtonType = liveType;
-    this.liveButtonIcon = liveIcon;
-    this.notify();
-  }
-
-  /**
-   * Method to change the type of the queryButton
-   * @param {string} queryType - Type of the queryButton
-   */
-  setQueryButton(queryType) {
-    this.queryButtonType = queryType;
-    this.notify();
-  }
-
   updateRouteOnModelChange() {
     this.router.go(this.log.filter.queryString, true, true);
   }

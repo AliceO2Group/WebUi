@@ -169,6 +169,7 @@ describe('Filter actions test-suite', async () => {
     const searchParams = await page.evaluate(() => {
       window.model.log.filter.resetCriteria();
       window.model.log.filter.setCriteria('hostname', 'match', '"%ald_qdip01%');
+      window.model.updateRouteOnModelChange();
       return window.location.search;
     });
 
@@ -183,6 +184,7 @@ describe('Filter actions test-suite', async () => {
     const searchParams = await page.evaluate(() => {
       window.model.log.filter.resetCriteria();
       window.model.log.filter.setCriteria('hostname', 'exclude', '"%ald_qdip01%');
+      window.model.updateRouteOnModelChange();
       return window.location.search;
     });
 
