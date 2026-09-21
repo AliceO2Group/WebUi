@@ -44,7 +44,7 @@ export default (model) => [
     ]),
     h('.flex-grow.flex-row.shadow-level0.logs-container', [
       aboutComponent(model),
-      model.guiReadyToUse.isSuccess() ? logsTable(model) : 'waiting for WebSocket connection',
+      logsTable(model),
       inspectorSide(model),
     ]),
     h('footer.f7.ph1', [statusBar(model)]),

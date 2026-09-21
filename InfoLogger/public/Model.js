@@ -15,19 +15,16 @@
 // Import frontend framework
 import {
   Observable, WebSocketClient, QueryRouter,
-  Loader, RemoteData, sessionService, Notification, iconMediaPlay, iconMediaStop,
+  Loader, RemoteData, sessionService, Notification,
 } from '/js/src/index.js';
-
 import { callRateLimiter, setBrowserTabTitle } from './common/utils.js';
 import { ConfigurationService } from './services/ConfigurationService.js';
-import { setBrowserTabTitle } from './common/utils.js';
 import { MODE } from './constants/mode.const.js';
-import { BUTTON } from './constants/button-states.const.js';
 import Log from './log/Log.js';
 import Zoom from './log/Zoom.js';
 import Table from './table/Table.js';
 import Timezone from './common/Timezone.js';
-
+import { setToLiveMode } from './log/commandLogs.js';
 
 /**
  * Main model of InfoLoggerGui, contains sub-models modules
@@ -39,7 +36,7 @@ export default class Model extends Observable {
   constructor() {
     super();
 
-    this.guiReadyToUse = RemoteData.loading();
+    // this.guiReadyToUse = RemoteData.loading();
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // cast, sessionService has only strings
 
@@ -58,10 +55,6 @@ export default class Model extends Observable {
     this.timezone = new Timezone();
     this.timezone.bubbleTo(this);
 
-    this.queryButtonType = BUTTON.PRIMARY;
-    this.liveButtonType = BUTTON.DEFAULT;
-    this.liveButtonIcon = iconMediaPlay();
-
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
 
@@ -76,9 +69,9 @@ export default class Model extends Observable {
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
     this.router.bubbleTo(this);
-    this.log.filter.observe(() => {
-      this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);
-    });
+    // this.log.filter.observe(() => {
+    //   this.router.go(`?q=${JSON.stringify(this.log.filter.toObject())}`, true, true);
+    // });
     this.handleLocationChange(); // Init first page
 
     // Setup keyboard and wheel dispatchers
@@ -105,9 +98,7 @@ export default class Model extends Observable {
    */
   handleWSAuthed() {
     // Tell server not to stream by default
-    this.guiReadyToUse = RemoteData.success();
     this.ws.setFilter(() => false);
-    this.notify();
   }
 
   /**
@@ -384,7 +375,6 @@ export default class Model extends Observable {
       return;
     } else if (params.q) {
       this.getUserProfile();
-
       try {
         this.log.filter.fromObject(JSON.parse(params.q));
       } catch (error) {
@@ -411,15 +401,15 @@ export default class Model extends Observable {
    * Attempt to load into the live mode of the ILG
    */
   async loadLiveMode() {
-    while (this.guiReadyToUse.isLoading()
+    while (!this.ws?.authed
       || !this.frameworkInfo.isSuccess()
       || !this.frameworkInfo.payload.infoLoggerServer.status.ok) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
     try {
       this.log.liveStart();
-      this.setLiveButton(BUTTON.SUCCESS_ACTIVE, iconMediaStop());
-      this.setQueryButton(BUTTON.DEFAULT);
+      // the buttons should read the model.log.activeMode and decide what to do
+      setToLiveMode(this);
       this.log.enableAutoScroll();
       setBrowserTabTitle(`${window.ILG.name} LIVE`);
       this.notify();
@@ -447,7 +437,7 @@ export default class Model extends Observable {
     this.queryButtonType = queryType;
     this.notify();
   }
-  
+
   updateRouteOnModelChange() {
     this.router.go(this.log.filter.queryString, true, true);
   }

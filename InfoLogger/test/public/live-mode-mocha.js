@@ -1,4 +1,3 @@
-/* eslint-disable @stylistic/js/max-len */
 /**
  * @license
  * Copyright 2019-2020 CERN and copyright holders of ALICE O2.
@@ -121,25 +120,25 @@ describe('Live Mode test-suite', async () => {
 
   it('should successfully enable LIVE mode from url parameter with defined filter', async () => {
     await page.goto(`${baseUrl}?q={"severity":{"in":"I W E F"}}&live=true`, { waitUntil: 'networkidle0' });
-    const liveButtonClasses = await page.evaluate(() => window.model.liveButtonType);
+    const liveButtonClasses = await page.evaluate(() => document.querySelector('#live-button').className);
     const search = decodeURIComponent(await page.evaluate(() => window.location.search));
 
     // Check if live mode is active.
-    assert.strictEqual(liveButtonClasses, 'btn-success active');
+    assert.strictEqual(liveButtonClasses, 'btn bold btn-success active');
     // Check if filter is applied
     assert.strictEqual(search, '?q={"severity":{"in":"I W E F"}}');
   });
 
   it('should successfully enable LIVE mode from url parameter with default filter', async () => {
     await page.goto(`${baseUrl}?live=true`, { waitUntil: 'networkidle0' });
-    const liveButtonClasses = await page.evaluate(() => window.model.liveButtonType);
+    const liveButtonClasses = await page.evaluate(() => document.querySelector('#live-button').className);
     const search = decodeURIComponent(await page.evaluate(() => window.location.search));
 
     // Check if live mode is active.
-    assert.strictEqual(liveButtonClasses, 'btn-success active');
+    assert.strictEqual(liveButtonClasses, 'btn bold btn-success active');
     // Check if redirected to default page
     assert.strictEqual(search, '?q={"severity":{"in":"I W E F"}}');
-  }
+  });
 
   describe('Empty field filters in live mode', async () => {
     it('should only receive logs with empty rolename when emptyFor is set to "match"', async () => {

@@ -140,6 +140,7 @@ const liveButton = (model, frameworkInfo) => {
   const title = isLiveModeReady ? 'Stream logs with filtering' : 'Live service not configured';
 
   return h('button.btn.bold', {
+    id: 'live-button',
     title,
     disabled: !isLiveModeReady || queryResult.isLoading(),
     className: !isLiveModeReady ? 'loading' : liveButtonType,
@@ -255,7 +256,7 @@ function toggleButtonStates(model, wasLivePressed) {
       case MODE.LIVE.PAUSED:
         try {
           model.log.liveStart();
-          setButtonsType(BUTTON.DEFAULT, BUTTON.SUCCESS_ACTIVE, iconMediaStop(), model);
+          setButtonsType(BUTTON.DEFAULT, BUTTON.SUCCESS_ACTIVE, iconMediaStop());
           model.log.enableAutoScroll();
           setBrowserTabTitle(`${window.ILG.name} LIVE`);
         } catch (error) {
@@ -265,24 +266,37 @@ function toggleButtonStates(model, wasLivePressed) {
       default: // MODE.LIVE.RUNNING
         model.log.liveStop(MODE.LIVE.PAUSED);
         setBrowserTabTitle(`${window.ILG.name} LIVE PAUSED`);
-        setButtonsType(BUTTON.DEFAULT, BUTTON.PRIMARY, iconMediaPlay(), model);
+        setButtonsType(BUTTON.DEFAULT, BUTTON.PRIMARY, iconMediaPlay());
         model.log.disableAutoScroll();
     }
   } else {
     model.log.query();
     setBrowserTabTitle(`${window.ILG.name} QUERY`);
-    setButtonsType(BUTTON.PRIMARY, BUTTON.DEFAULT, iconMediaPlay(), model);
-  }
-
-  /**
-   * Method to change types of the buttons based on the mode being run
-   * @param {string} queryType Type of the Query Button
-   * @param {string} liveType Type of the Live Button
-   * @param {Icon} liveIcon Icon of the Live Button
-   * @param {Model} model - Model, stores liveButton type and icon state
-   */
-  function setButtonsType(queryType, liveType, liveIcon, model) {
-    model.setQueryButton(queryType);
-    model.setLiveButton(liveType, liveIcon);
+    setButtonsType(BUTTON.PRIMARY, BUTTON.DEFAULT, iconMediaPlay());
   }
 }
+
+function setToLiveMode(model) {
+  try {
+    model.log.liveStart();
+    setButtonsType(BUTTON.DEFAULT, BUTTON.SUCCESS_ACTIVE, iconMediaStop());
+    model.log.enableAutoScroll();
+    setBrowserTabTitle(`${window.ILG.name} LIVE`);
+  } catch (error) {
+    model.notification.show(error.toString(), 'danger', 3000);
+  }
+}
+
+/**
+ * Method to change types of the buttons based on the mode being run
+ * @param {string} queryType Type of the Query Button
+ * @param {string} liveType Type of the Live Button
+ * @param {Icon} liveIcon Icon of the Live Button
+ */
+function setButtonsType(queryType, liveType, liveIcon) {
+  queryButtonType = queryType;
+  liveButtonType = liveType;
+  liveButtonIcon = liveIcon;
+}
+
+export { setToLiveMode };
