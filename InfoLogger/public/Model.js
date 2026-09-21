@@ -24,7 +24,6 @@ import Log from './log/Log.js';
 import Zoom from './log/Zoom.js';
 import Table from './table/Table.js';
 import Timezone from './common/Timezone.js';
-import { setToLiveMode } from './log/commandLogs.js';
 
 /**
  * Main model of InfoLoggerGui, contains sub-models modules
@@ -407,8 +406,6 @@ export default class Model extends Observable {
     }
     try {
       this.log.liveStart();
-      // the buttons should read the model.log.activeMode and decide what to do
-      setToLiveMode();
       this.log.enableAutoScroll();
       setBrowserTabTitle(`${window.ILG.name} LIVE`);
       this.notify();
