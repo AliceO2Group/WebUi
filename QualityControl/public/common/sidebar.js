@@ -12,13 +12,13 @@
  * or submit itself to any jurisdiction.
  */
 
-/* global QCG */
+/* global */
 
 import { h } from '/js/src/index.js';
 import layoutSettings from './../layout/view/panels/settings.js';
 import objectPropertiesSidebar from '../object/objectPropertiesSidebar.js';
 import {
-  iconLayers, iconPlus, iconBarChart, iconExcerpt, iconMediaSkipBackward, iconMediaSkipForward, iconReload,
+  iconLayers, iconPlus, iconBarChart, iconExcerpt, iconMediaSkipBackward, iconMediaSkipForward,
   iconCloudUpload,
 } from '/js/src/icons.js';
 
@@ -53,7 +53,7 @@ export default function sidebar(model) {
 const sidebarMenu = (model) => [
   exploreMenu(model),
   myLayoutsMenu(model),
-  model.isOnlineModeEnabled ? refreshOptions(model) : h('.menu-title', { style: 'flex-grow:1' }, ''),
+  h('.menu-title', { style: 'flex-grow:1' }, ''),
   statusMenu(model),
   collapseSidebarMenuItem(model),
 ];
@@ -136,43 +136,6 @@ const myLayoutsMenuItem = (model, layout) => h('a.menu-item.w-wrapped', {
   onclick: (e) => model.router.handleLinkEvent(e),
   class: model.router.params.layoutId === layout.id ? 'selected' : '',
 }, [h('span', iconLayers()), model.sidebar && itemMenuText(layout.name)]);
-
-/**
- * Shows a little form to set interval of refresh of objects,
- * `refreshInterval` is id of a timer, when changed this "highlight" the form to
- * inform user objects have been loaded
- * @param {Model} model - root model of the application
- * @returns {vnode} - virtual node element
- */
-const refreshOptions = (model) => [
-  h('', {
-    class: model.sidebar ? 'menu-title' : '',
-    style: 'flex-grow:1; height:auto',
-  }, [
-    model.sidebar &&
-    [
-      h('span.highlight', {
-        key: `timer${model.refreshTimer}`,
-        title: `timer${model.refreshTimer}`,
-      }, `Refresh period (${model.refreshInterval} seconds)`),
-      h('input.form-control.text-center', {
-        type: 'range',
-        step: 1,
-        min: QCG.REFRESH_MIN_INTERVAL,
-        max: QCG.REFRESH_MAX_INTERVAL,
-        value: model.refreshInterval,
-        oninput: (e) => model.setRefreshInterval(e.target.value),
-      }),
-    ],
-    h('button.btn.btn-success', {
-      type: 'button',
-      class: model.sidebar ? 'w-100' : '',
-      style: !model.sidebar ? 'margin: 0.25em' : '',
-      title: 'Refresh objects now',
-      onclick: () => model.setRefreshInterval(model.refreshInterval),
-    }, model.sidebar ? 'Refresh objects now' : h('span', iconReload())),
-  ]),
-];
 
 /**
  * Show link to status page

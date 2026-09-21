@@ -18,16 +18,23 @@ import {
 import pageLoading from '../pageLoading.js';
 import showTableItem from '../showTableItem.js';
 import { getTaskStateClassAssociation } from '../enums/TaskState.js';
+import { infoLoggerButtonLink } from '../buttons/infoLoggerRedirectButton.js';
 
 /**
  * For a given list of FLP tasks, build a table with tasks details and buttons to allow for retrieving more details per task
  * @param {Array<Task>} [tasks = []] - list of tasks to build table for
  * @param {TaskTableModel} taskTableModel - task table model to use for features such as filtering and retrieving more details of task
+ * @param {loggerObject} loggerObject - object with information that will help building the InfoLogger link
+ * @param {object} loggerObject.fields - fields to be used in the InfoLogger query
+ * @param {string} loggerObject.url - URL to redirect to Info
  * @return {vnode} - table of the FLP tasks
  */
-export const flpTasksTable = (tasks, taskTableModel) => {
-  const tableColumns = ['Name', 'PID', 'Locked', 'Status', 'State', 'Host Name', 'More'];
-
+export const flpTasksTable = (
+  tasks,
+  taskTableModel,
+  { fields: logFilterFields, url: infoLoggerUrl }
+) => {
+  const tableColumns = ['Name', 'PID', 'Locked', 'Status', 'Critical', 'State', 'Host Name', 'More'];
   return h('.scroll-auto.panel', [
     h('table.table.table-sm', {style: 'margin-bottom: 0'}, [
       h('thead',
@@ -44,13 +51,25 @@ export const flpTasksTable = (tasks, taskTableModel) => {
               h('.flex-row.items-center.justify-center.w-33', task.locked ? iconLockLocked() : iconLockUnlocked())
             ),
             h('td.w-10', task.status),
+            h('td.w-10', task.isCritical ? 'CRITICAL' : ''),
             h(`td.w-10${getTaskStateClassAssociation(task.state)}`, task.state),
-            h('td.w-20', task?.deploymentInfo?.hostname),
-            h('td.w-10',
-              h('button.btn-sm.btn-default', {
-                title: 'More Details',
-                onclick: () => taskTableModel.toggleTaskView(task.taskId),
-              }, taskTableModel.openedTaskViews[task.taskId] ? iconChevronTop() : iconChevronBottom())
+            h('td.w-20', task?.hostname),
+            h('td',
+              h('.flex-row', [
+                h('button.btn-sm.btn-default', {
+                  title: 'More Details',
+                  onclick: () => taskTableModel.toggleTaskView(task.taskId),
+                }, taskTableModel.openedTaskViews[task.taskId] ? iconChevronTop() : iconChevronBottom()),
+                infoLoggerButtonLink(
+                  {
+                    pid: task.pid,
+                    ...logFilterFields
+                  },
+                  'ILG',
+                  infoLoggerUrl,
+                  ['btn-sm'],
+                ),
+              ]),
             ),
           ]),
           taskTableModel.openedTaskViews[task.taskId] && taskTableModel.tasksAsRemoteDataById[task.taskId]

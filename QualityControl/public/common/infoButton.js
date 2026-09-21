@@ -18,10 +18,9 @@ import { h, info } from '/js/src/index.js';
  * Method to create and display an info button on top of a histogram
  * which expects an object
  * @param {{[key:string]: string}} object - model of the object
- * @param {boolean} isOnlineModeEnabled - value if online mode is enabled
  * @returns {vnode} - header element
  */
-export default (object, isOnlineModeEnabled) => object.selected && !isOnlineModeEnabled &&
+export default (object) => object.selected &&
   h('.p1.text-right', {
     style: 'padding-bottom: 0;',
   }, h('.dropdown', {

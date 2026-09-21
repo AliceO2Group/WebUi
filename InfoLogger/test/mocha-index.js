@@ -16,6 +16,7 @@
 const puppeteer = require('puppeteer');
 const assert = require('assert');
 const { spawn } = require('child_process');
+const fs = require('fs');
 
 const config = require('./test-config.js');
 const { createServer, closeServer } = require('./live-simulator/infoLoggerServer.js');
@@ -41,6 +42,27 @@ describe('InfoLogger', function () {
   const baseUrl = `http://${config.http.hostname}:${config.http.port}/`;
 
   before(async () => {
+    // Add error handlers for uncaught errors
+    process.on('unhandledRejection', (error) => {
+      console.error('[Test Setup] Unhandled Promise Rejection at:', new Date().toISOString());
+      console.error('[Test Setup] Error:', error);
+      if (error && error.stack) {
+        console.error('[Test Setup] Stack:', error.stack);
+      }
+    });
+
+    process.on('uncaughtException', (error) => {
+      console.error('[Test Setup] Uncaught Exception at:', new Date().toISOString());
+      console.error('[Test Setup] Error:', error);
+      if (error && error.stack) {
+        console.error('[Test Setup] Stack:', error.stack);
+      }
+    });
+
+    // Remove any leftover user profile DB from a previous run so tests that modify
+    // profile state (e.g. user-actions-mocha) always start from the same known state.
+    fs.rmSync(config.dbFile, { force: true });
+
     // Start infologger server simulator
     ilgServer = createServer();
 
@@ -53,6 +75,7 @@ describe('InfoLogger', function () {
     // Start browser to test UI
     browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     page = await browser.newPage();
+    await page.setViewport({ width: 1440, height: 900 }); // 15" screen equivalent
 
     // Export page and configurations for the other mocha files
     exports.page = page;
@@ -86,8 +109,12 @@ describe('InfoLogger', function () {
 
   require('./public/user-actions-mocha');
   require('./public/log-filter-actions-mocha');
+  require('./public/log-filter-url-mocha');
   require('./public/live-mode-mocha');
   require('./public/query-mode-mocha');
+  require('./public/status-bar-mocha');
+  require('./public/zoom.mocha');
+  require('./public/log-context-menu-mocha');
 
   after(async () => {
     await browser.close();

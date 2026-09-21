@@ -13,11 +13,15 @@
  */
 
 import { LogManager } from '@aliceo2/web-ui';
-import { isObjectOfTypeChecker } from '../../common/library/qcObject/utils.js';
+import { isObjectOfTypeChecker, parseObjects, QC_CHECKER_TYPE } from '../../common/library/qcObject/utils.js';
 import QCObjectDto from '../dtos/QCObjectDto.js';
 import QcObjectIdentificationDto from '../dtos/QcObjectIdentificationDto.js';
 
-const LOG_FACILITY = 'qcg/obj-service';
+/**
+ * @typedef {import('../repositories/ChartRepository.js').ChartRepository} ChartRepository
+ */
+
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/obj-service`;
 
 /**
  * High-level service class for retrieving and composing object information from storage (CCDB/QCDB)
@@ -27,19 +31,19 @@ export class QcObjectService {
   /**
    * Setup service constructor and initialize needed dependencies
    * @param {CcdbService} dbService - CCDB service to retrieve raw information about the QC objects
-   * @param {JsonFileService} dataService - service to be used for retrieving configurations on saved layouts
+   * @param {ChartRepository} chartRepository - service to be used for retrieving configurations on saved layouts
    * @param {RootService} rootService - root library to be used for interacting with ROOT Objects
    */
-  constructor(dbService, dataService, rootService) {
+  constructor(dbService, chartRepository, rootService) {
     /**
      * @type {CcdbService}
      */
     this._dbService = dbService;
 
     /**
-     *  @type {JsonFileService}
+     *  @type {ChartRepository}
      */
-    this._dataService = dataService;
+    this._chartRepository = chartRepository;
 
     /**
      * @type {RootService}
@@ -56,6 +60,7 @@ export class QcObjectService {
       objects: undefined,
       lastUpdate: undefined,
     };
+
     this._logger = LogManager.getLogger(LOG_FACILITY);
   }
 
@@ -66,14 +71,23 @@ export class QcObjectService {
    */
   async refreshCache() {
     try {
-      const objects = await this._dbService.getObjectsLatestVersionList(this._dbService.CACHE_PREFIX);
-      this._cache.objects = this._parseObjects(objects);
-      this._cache.lastUpdate = Date.now();
+      const objects = await this._dbService.getObjectsTreeList(this._dbService.CACHE_PREFIX);
+      const parsedObjects = parseObjects(objects, QCObjectDto);
+      this._cache = {
+        objects: parsedObjects,
+        lastUpdate: Date.now(),
+      };
+      return true;
     } catch (error) {
+      const lastUpdateStr = this._cache.lastUpdate
+        ? new Date(this._cache.lastUpdate).toISOString()
+        : 'never';
+
       this._logger.errorMessage(
-        `Last update ${new Date(this._cache.lastUpdate)}; Unable to update cache - objects due to ${error}`,
+        `Cache refresh failed. Last update: ${lastUpdateStr}. Error: ${error.message || error}`,
         { level: 1, facility: LOG_FACILITY },
       );
+      return false;
     }
   }
 
@@ -84,20 +98,30 @@ export class QcObjectService {
    * The service can return objects either:
    * * from cache if it is requested by the client and the system is configured to use a cache;
    * * make a new request and get data directly from data service
-   * * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
-   * @param {string|Regex} prefix - Prefix for which CCDB should search for objects.
-   * @param {Array<string>} [fields = []] - List of fields that should be requested for each object
-   * @param {boolean} [useCache = true] - if the list should be the cached version or not
+   * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
+   * @param {object} options - An object that contains query parameters among other arguments
+   * @param {string|Regex} options.prefix - Prefix for which CCDB should search for objects.
+   * @param {Array<string>} options.fields - List of fields that should be requested for each object
+   * @param {boolean} options.useCache - if the list should be the cached version or not
+   * @param {Array<string>} options.filters - Filter object by which the objects from ccdb are filtered.
    * @returns {Promise.<Array<QcObjectLeaf>>} - results of objects with required fields
    * @rejects {Error}
    */
-  async retrieveLatestVersionOfObjects(prefix = this._dbService.PREFIX, fields = [], useCache = true) {
-    if (useCache && this._cache?.objects) {
-      return this._cache.objects.filter((object) => object.name.startsWith(prefix));
-    } else {
-      const objects = await this._dbService.getObjectsLatestVersionList(prefix, fields);
-      return this._parseObjects(objects);
+  async retrieveLatestVersionOfObjects({ prefix = this._dbService.PREFIX, fields, useCache = true, filters }) {
+    const hasFilters = typeof filters === 'object' && Object.keys(filters).length;
+
+    if (!hasFilters) {
+      // Use /tree endpoint of DataService
+      if (useCache && this._cache.objects?.length) {
+        return this._cache.objects.filter((object) => object.name.startsWith(prefix));
+      }
+      const objects = await this._dbService.getObjectsTreeList(prefix);
+      return parseObjects(objects, QCObjectDto);
     }
+
+    // If filters are provided, use /latest endpoint of DataService
+    const objects = await this._dbService.getObjectsLatestVersionList({ prefix, filters, fields });
+    return parseObjects(objects, QCObjectDto);
   }
 
   /**
@@ -105,14 +129,15 @@ export class QcObjectService {
    * Use the first version to retrieve details about the exact object.
    * From the information retrieved above, use the location attribute and pass it to JSROOT to get a JSON
    * decompressed version of the ROOT object which will be plotted/drawn with JSROOT.draw on the client side.
-   * @param {string} path - name(known as path) of the object to retrieve information
-   * @param {number|null} [validFrom = undefined] - timestamp in ms
-   * @param {string} [id = ''] - id with respect to CCDB storage
-   * @param {string} [filters = {}] - filter attributes for specific objects
+   * @param {object} options - An object that contains query parameters among other arguments
+   * @param {string} options.path - name(known as path) of the object to retrieve information
+   * @param {number|null} options.validFrom - timestamp in ms
+   * @param {string} options.id - id with respect to CCDB storage
+   * @param {string} options.filters - filter attributes for specific objects
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
    * @throws {Error}
    */
-  async retrieveQcObject(path, validFrom = undefined, id = undefined, filters = {}) {
+  async retrieveQcObject({ path, validFrom = undefined, id = undefined, filters = {} }) {
     /**
      * @type {CcdbObjectIdentification}
      */
@@ -150,22 +175,27 @@ export class QcObjectService {
 
   /**
    * Retrieve an object by its id (stored in the customized data service) with its information
-   * @param {string} qcgId - id of the object configuration stored in QCG database (different than CCDB)
-   * @param {string} id - id of the object to be retrieved as per CCDB etag
-   * @param {number|null} [validFrom] - timestamp in ms
-   * @param {string} [filters = {}] - filter as string to be sent to CCDB
+   * @param {object} options - An object that contains query parameters among other arguments
+   * @param {string} options.qcObjectId - id of the object configuration stored in QCG database (different than CCDB)
+   * @param {string} options.id - id of the object to be retrieved as per CCDB etag
+   * @param {number|null} options.validFrom - timestamp in ms
+   * @param {object} options.filters - filter as string to be sent to CCDB
    * @returns {Promise<QcObject>} - QC objects with information CCDB and root
-   * @throws
+   * @throws {Error} - if object with specified id is not found
    */
-  async retrieveQcObjectByQcgId(qcgId, id, validFrom = undefined, filters = {}) {
-    const { object, layoutName } = this._dataService.getObjectById(qcgId);
+  async retrieveQcObjectByQcgId({ qcObjectId, id, validFrom = undefined, filters = {} }) {
+    const result = this._chartRepository.getObjectById(qcObjectId);
+    if (!result) {
+      throw new Error(`Object with id ${qcObjectId} not found`);
+    }
+    const { object, layoutName, tabName } = result;
     const { name, options = {}, ignoreDefaults = false } = object;
-    const qcObject = await this.retrieveQcObject(name, validFrom, id, filters);
-
+    const qcObject = await this.retrieveQcObject({ path: name, validFrom, id, filters });
     return {
       ...qcObject,
       layoutDisplayOptions: options,
       layoutName,
+      tabName,
       ignoreDefaults,
     };
   }
@@ -176,37 +206,48 @@ export class QcObjectService {
    * * if of ROOT type, uses jsroot.toJSON
    * @param {string} url - location of Root file to be retrieved
    * @returns {Promise<JSON.Error>} - JSON version of the object
+   * @throws {Error} When JSROOT fails to open the file
+   * @throws {Error} When JSROOT fails to read the `ccdb_object` from the file
+   * @throws {Error} When BigInt-safe serialization fails
+   * @throws {Error} When JSROOT fails to convert the object to JSON using `toJSON`
    */
   async _getJsRootFormat(url) {
-    const file = await this._rootService.openFile(`${url}+`);
-    const root = await file.readObject('ccdb_object');
+    let file = undefined;
+    try {
+      file = await this._rootService.openFile(`${url}+`);
+    } catch (error) {
+      this._logger.error(error.message || error);
+      throw new Error(`JSROOT failed to open file '${url}'`, { cause: error });
+    }
+
+    let root = undefined;
+    try {
+      root = await file.readObject('ccdb_object');
+    } catch (error) {
+      this._logger.error(error.message || error);
+      throw new Error(`JSROOT failed to read object 'ccdb_object' from '${url}'`, { cause: error });
+    }
+
     root['_typename'] = root['mTreatMeAs'] || root['_typename'];
 
     if (isObjectOfTypeChecker(root)) {
       /**
        * Due to QC Checker big ints, JSON utility has to be overridden to parse 'bigint' types and replace with string
        */
-      return JSON.parse(JSON.stringify(root, (_, value) => typeof value === 'bigint' ? value.toString() : value));
-    }
-
-    const rootJson = await this._rootService.toJSON(root);
-    return rootJson;
-  }
-
-  /**
-   * Given a list of objects form CCDB, parse, filter and keep only valid objects.
-   * Use `for loop` to iterate only once rather than chained array operations as we expect lots of objects
-   * @param {Array<object>} objects - objects to be filtered
-   * @returns {Array<QcObjectLeaf>} - list of objects parsed and filtered
-   */
-  _parseObjects(objects) {
-    const list = [];
-    for (const object of objects) {
-      if (QCObjectDto.isObjectPathValid(object)) {
-        list.push(QCObjectDto.toQcObjectLeaf(object));
+      try {
+        return JSON.parse(JSON.stringify(root, (_, value) => typeof value === 'bigint' ? value.toString() : value));
+      } catch (error) {
+        this._logger.error(error.message || error);
+        throw new Error(`Failed to serialize ROOT object '${QC_CHECKER_TYPE}' with BigInt-safe JSON`, { cause: error });
       }
     }
-    return list;
+
+    try {
+      return await this._rootService.toJSON(root);
+    } catch (error) {
+      this._logger.error(error.message || error);
+      throw new Error(`JSROOT failed to convert object '${root['_typename']}' to JSON`, { cause: error });
+    }
   }
 
   /**

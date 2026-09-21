@@ -11,9 +11,13 @@
  * or submit itself to any jurisdiction.
  */
 
-import { strictEqual, ok } from 'node:assert';
+import { strictEqual, ok, deepStrictEqual, notDeepStrictEqual } from 'node:assert';
+import { delay } from '../../testUtils/delay.js';
+import { getLocalStorage, getLocalStorageAsJson } from '../../testUtils/localStorage.js';
+import { StorageKeysEnum } from '../../../public/common/enums/storageKeys.enum.js';
+import { config } from '../../config.js';
+
 const OBJECT_TREE_PAGE_PARAM = '?page=objectTree';
-const SORTING_BUTTON_PATH = 'header > div > div:nth-child(3) > div > button';
 
 /**
  * Initial page setup tests
@@ -30,7 +34,7 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should have a tree as a table', { timeout }, async () => {
-    const tableRowPath = 'section > div > div > div > table > tbody > tr';
+    const tableRowPath = 'section > div > div > div > div > table > tbody > tr';
     await page.waitForSelector(tableRowPath, { timeout: 1000 });
     const rowsCount = await page.evaluate(
       (tableRowPath) => document.querySelectorAll(tableRowPath).length,
@@ -39,10 +43,27 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     ok(rowsCount > 1); // more than 1 object in the tree
   });
 
+  await testParent.test('should preserve state if refreshed', { timeout }, async () => {
+    const selector = 'section > div > div > div > div > table > tbody > tr:nth-child(2)';
+    await page.locator(selector).click();
+    await page.reload({ waitUntil: 'networkidle0' });
+
+    const rowCountExpanded = await page.evaluate(() =>
+      document.querySelectorAll('section > div > div > div > div > table > tbody > tr').length);
+
+    await page.locator(selector).click();
+    await page.reload({ waitUntil: 'networkidle0' });
+
+    const rowCountCollapsed = await page.evaluate(() =>
+      document.querySelectorAll('section > div > div > div > div > table > tbody > tr').length);
+
+    strictEqual(rowCountExpanded, 3);
+    strictEqual(rowCountCollapsed, 2);
+  });
+
   await testParent.test('should have a button to sort by (default "Name" ASC)', async () => {
-    const sortByButtonTitle = await page.evaluate(() =>
-      document.querySelector('header > div > div:nth-child(3) > div > button').title);
-    strictEqual(sortByButtonTitle, 'Sort by');
+    const sortByButtonTitle = await page.evaluate((path) => document.querySelector(path).title, '.sort-button');
+    strictEqual(sortByButtonTitle, 'Sort DESC by Name');
   });
 
   await testParent.test('should have first element in tree as "qc/test/object/1"', async () => {
@@ -50,10 +71,214 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(name, 'qc/test/object/1');
   });
 
+  await testParent.test(
+    'should have a correctly made download root as object button',
+    { timeout },
+    async () => {
+      const objectId = '016fa8ac-f3b6-11ec-b9a9-c0a80209250c';
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(2)').click());
+      await delay(500);
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(3)').click());
+      await delay(500);
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(4)').click());
+      await delay(1000);
+      const dlButton = await page.evaluate(() => document.querySelector('.download-button').href);
+      const token = await page.evaluate(() => model.session.token);
+      strictEqual(dlButton, `${url}api/object/proxy/download/?token=${token}&objectIds=${objectId}`);
+    },
+  );
+
+  await testParent.test(
+    'should have a correctly made save root as image button',
+    { timeout },
+    async () => {
+      const exists = await page.evaluate(() => document.querySelector('.save-root-as-image-button') !== null);
+
+      ok(exists, 'Expected ROOT image save button to exist');
+    },
+  );
+
+  await testParent.test(
+    'should have default panel width of 50% when width is null in localStorage',
+    { timeout },
+    async () => {
+      const defaultValue = '50%';
+      const panelWidth = await page.evaluate(() =>
+        document.querySelector('section > div > div > div:nth-child(1)').style.width);
+      const personId = await page.evaluate(() => window.model.session.personid);
+      const storedPanelWidth = await getLocalStorage(
+        page,
+        `${StorageKeysEnum.OBJECT_VIEW_LEFT_PANEL_WIDTH}-${personId}`,
+      );
+      strictEqual(storedPanelWidth, null);
+      strictEqual(panelWidth, defaultValue);
+    },
+  );
+
+  await testParent.test(
+    'should change and store panel width when dragging the divider',
+    { timeout },
+    async () => {
+      const dragAmount = 35;
+      const [container, divider] = await Promise.all([
+        page.$('body > div.absolute-fill.flex-column > div > section'),
+        page.$('section > div > div > div:nth-child(2)'),
+      ]);
+      const [containerBB, dividerBB] = await Promise.all([container.boundingBox(), divider.boundingBox()]);
+
+      const centerX = dividerBB.x + dividerBB.width / 2;
+      const centerY = dividerBB.y + dividerBB.height / 2;
+      const targetX = containerBB.x + containerBB.width * (dragAmount / 100);
+
+      await page.mouse.move(centerX, centerY);
+      await page.mouse.down();
+      await page.mouse.move(targetX, centerY, { steps: 5 });
+      await page.mouse.up();
+      await delay(300);
+
+      const [personId, panelWidth] = await page.evaluate(() => [
+        window.model.session.personid,
+        document.querySelector('section > div > div > div:nth-child(1)').style.width,
+      ]);
+      const storedWidth = await getLocalStorage(page, `${StorageKeysEnum.OBJECT_VIEW_LEFT_PANEL_WIDTH}-${personId}`);
+
+      strictEqual(panelWidth, `${dragAmount}%`);
+      strictEqual(storedWidth, dragAmount.toString());
+    },
+  );
+
+  await testParent.test(
+    'should maintain panel width from localStorage on page reload',
+    { timeout },
+    async () => {
+      const dragAmount = 35;
+      await page.reload({ waitUntil: 'networkidle0' });
+      await page.evaluate(() => document.querySelector('tr.object-selectable:nth-child(4)').click());
+      await delay(1000);
+      const panelWidth = await page.evaluate(() =>
+        document.querySelector('section > div > div > div:nth-child(1)').style.width);
+      strictEqual(panelWidth, `${dragAmount}%`);
+    },
+  );
+
+  await testParent.test(
+    'should correctly render the path as first in the object info panel',
+    { timeout },
+    async () => {
+      const firstRowKey = await page.evaluate(() =>
+        document.querySelector('#qcObjectInfoPanel > div:first-child > b').textContent);
+      strictEqual(firstRowKey, 'Path');
+    },
+  );
+
+  await testParent.test(
+    'should contain four highlighted rows',
+    { timeout },
+    async () => {
+      const highlightedClasses = '.info-row.highlighted';
+      const rowCount = await page.evaluate((selector) =>
+        document.querySelectorAll(`#qcObjectInfoPanel > div${selector}`).length, highlightedClasses);
+      strictEqual(rowCount, 4);
+    },
+  );
+
+  await testParent.test(
+    'should copy the value of the element clicked to the clipboard',
+    { timeout },
+    async () => {
+      const context = page.browserContext();
+      await context.overridePermissions(url, ['clipboard-read', 'clipboard-write', 'clipboard-sanitized-write']);
+
+      await page.click('#qcObjectInfoPanel > div > div > div');
+
+      const clipboard = await page.evaluate(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        return navigator.clipboard.readText();
+      });
+
+      strictEqual(clipboard, 'qc/test/object/1');
+      context.clearPermissionOverrides();
+    },
+  );
+
+  await testParent.test(
+    'should not copy the value of the clicked element if there is no value',
+    { timeout },
+    async () => {
+      const context = page.browserContext();
+      await context.overridePermissions(url, ['clipboard-read', 'clipboard-write', 'clipboard-sanitized-write']);
+
+      await page.click('#qcObjectInfoPanel > div > div > div'); // copy path
+      await page.click('#qcObjectInfoPanel > div:nth-child(7) > div'); // try to copy empty value
+
+      const clipboard = await page.evaluate(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        return navigator.clipboard.readText();
+      });
+
+      strictEqual(clipboard, 'qc/test/object/1');
+      context.clearPermissionOverrides();
+    },
+  );
+
+  await testParent.test(
+    'should have an external link to bookkeeping inline with the run number row',
+    { timeout },
+    async () => {
+      const bookkeepingLink = await page.$('#openRunInBookkeeping');
+      await delay(2000);
+      ok(bookkeepingLink, 'The link to bookkeeping should be present in the DOM');
+
+      const href = await page.evaluate((element) => element.href, bookkeepingLink);
+      const runNumber =
+        await page.evaluate((element) => element.parentElement.children[0].textContent, bookkeepingLink);
+      const url = new URL(href);
+      const baseUrl = `${url.origin}${url.pathname}`;
+
+      strictEqual(baseUrl, `${config.bookkeeping.url}/`);
+      strictEqual(runNumber, url.searchParams.get('runNumber'));
+    },
+  );
+
+  await testParent.test(
+    'should close the object plot upon clicking the close button',
+    { timeout },
+    async () => {
+      await page.evaluate(() => document.querySelector('#close-button').click());
+      // wait for animations to finish before continuing
+      await page.waitForFunction(
+        (selector) => document.querySelector(selector).children.length === 1,
+        {},
+        'section > div > div',
+      );
+      const selectedObject = await page.evaluate(() => model.object.selected);
+      const numberOfChildren = await page.evaluate(() =>
+        document.querySelector('section > div > div').children.length);
+      strictEqual(selectedObject, undefined);
+      strictEqual(numberOfChildren, 1);
+    },
+  );
+
+  await testParent.test('should update local storage when tree node is clicked', { timeout }, async () => {
+    const selector = 'section > div > div > div > div > table > tbody > tr:nth-child(2)';
+    const personid = await page.evaluate(() => window.model.session.personid);
+    const storageKey = `${StorageKeysEnum.OBJECT_TREE_OPEN_BRANCH_STATE}-${personid}`;
+
+    await page.locator(selector).click();
+    const localStorageBefore = await getLocalStorageAsJson(page, storageKey);
+
+    await page.locator(selector).click();
+    const localStorageAfter = await getLocalStorageAsJson(page, storageKey);
+
+    notDeepStrictEqual(
+      localStorageBefore,
+      localStorageAfter,
+      'local storage should have changed after clicking a tree node',
+    );
+  });
+
   await testParent.test('should sort list of histograms by name in descending order', async () => {
-    await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByNameOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(4)';
-    await page.locator(sortingByNameOptionPath).click();
+    await page.locator('.sort-button').click();
 
     const sorted = await page.evaluate(() => ({
       list: window.model.object.currentList,
@@ -66,9 +291,8 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
   });
 
   await testParent.test('should sort list of histograms by name in ascending order', async () => {
-    await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByNameOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(3)';
-    await page.locator(sortingByNameOptionPath).click();
+    await page.locator('.sort-button').click();
+
     const sorted = await page.evaluate(() => ({
       list: window.model.object.currentList,
       sort: window.model.object.sortBy,
@@ -79,39 +303,30 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
     strictEqual(sorted.list[0].name, 'qc/test/object/1');
   });
 
-  await testParent.test('should sort list of histograms by created time in descending order', async () => {
-    await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByCreatedTimeOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(2)';
-    await page.locator(sortingByCreatedTimeOptionPath).click();
-    const sorted = await page.evaluate(() => ({
-      list: window.model.object.currentList,
-      sort: window.model.object.sortBy,
-    }));
-    strictEqual(sorted.sort.title, 'Created Time');
-    strictEqual(sorted.sort.order, -1);
-    strictEqual(sorted.sort.field, 'createTime');
-    strictEqual(sorted.list[0].name, 'qc/test/object/2');
-  });
+  await testParent.test(
+    'should close all branches when clicking the collapse all button',
+    { timeout },
+    async () => {
+      const selector = '#collapse-tree-button';
+      const personid = await page.evaluate(() => window.model.session.personid);
+      const storageKey = `${StorageKeysEnum.OBJECT_TREE_OPEN_BRANCH_STATE}-${personid}`;
 
-  await testParent.test('should sort list of histograms by created time in ascending order', async () => {
-    await page.locator(SORTING_BUTTON_PATH).click();
-    const sortingByCreatedTimeOptionPath = 'header > div > div:nth-child(3) > div > div > a:nth-child(1)';
-    await page.locator(sortingByCreatedTimeOptionPath).click();
-    const sorted = await page.evaluate(() => ({
-      list: window.model.object.currentList,
-      sort: window.model.object.sortBy,
-    }));
-    strictEqual(sorted.sort.title, 'Created Time');
-    strictEqual(sorted.sort.order, 1);
-    strictEqual(sorted.sort.field, 'createTime');
-    strictEqual(sorted.list[0].name, 'qc/test/object/2');
-  });
+      await page.locator(selector).click();
+      await delay(100);
+      const storedNodes = await getLocalStorageAsJson(page, storageKey);
+      const tableRowCount = await page.evaluate(() =>
+        document.querySelectorAll('section > div > div > div > div > table > tbody > tr').length);
+
+      deepStrictEqual(storedNodes, {}, 'Stores nodes should be empty');
+      strictEqual(tableRowCount, 1, 'Tree should be fully collapsed');
+    },
+  );
 
   await testParent.test('should have filtered results on input search', async () => {
-    await page.type('header > div > div:nth-child(3) > input', 'qc/test/object/1');
+    await page.type('#searchObjectTree', 'qc/test/object/1');
     const rowsDisplayed = await page.evaluate(() => {
       const rows = [];
-      document.querySelectorAll('section > div > div > div > table > tbody > tr')
+      document.querySelectorAll('section > div > div > div > div > table > tbody > tr')
         .forEach((item) => rows.push(item.innerText));
       return rows;
     }, { timeout: 5000 });
@@ -122,4 +337,210 @@ export const objectTreePageTests = async (url, page, timeout = 5000, testParent)
       + `Identified filtered: ${filteredRows.length} and displayed: ${rowsDisplayed.length}`,
     );
   });
+
+  await testParent.test(
+    'should have a selector with sorted options to filter by run type if there are run types loaded',
+    { timeout },
+    async () => {
+      const selectorId = '#runTypeFilter > option';
+
+      const options = await page.evaluate((selectorId) => {
+        const optionElements = document.querySelectorAll(selectorId);
+        return Array.from(optionElements).map((option) => option.value);
+      }, selectorId);
+
+      deepStrictEqual(options, ['', 'runType1', 'runType2']);
+    },
+  );
+
+  await testParent.test(
+    'should have a selector with sorted options to filter by data passes if there are data passes loaded',
+    { timeout },
+    async () => {
+      await page.locator('#passNameFilter').click();
+      await page.waitForSelector('#passname-dropdown', { visible: true, timeout: 1000 });
+
+      const options = await page.evaluate(() => {
+        const optionElements = document.querySelectorAll('#passname-dropdown > button');
+        return Array.from(optionElements).map((option) => option.textContent);
+      });
+
+      const expectedOptions = [
+        'LHC23f_cpass0',
+        'LHC22b_skimming',
+        'LHC22b_apass2_skimmed',
+        'LHC22b_apass1',
+        'LHC22a_apass2',
+        'LHC22a_apass1',
+      ];
+
+      strictEqual(
+        options.length,
+        expectedOptions.length,
+        `PassName dropdown should have ${expectedOptions.length} options, found ${expectedOptions}`,
+      );
+      deepStrictEqual(options, expectedOptions, 'PassName dropdown options are incorrect');
+    },
+  );
+
+  await testParent.test(
+    'should update the passNameFilter input when a dropdown option is selected',
+    { timeout },
+    async () => {
+      const expectedOptionValue
+        = await page.evaluate(() => document.querySelector('#passname-dropdown > button')?.textContent);
+
+      await page.locator('#passname-dropdown > button').click();
+      await page.waitForSelector('#passname-dropdown', { hidden: true, timeout: 1000 });
+      await delay(50);
+
+      const inputValue = await page.evaluate(() => document.querySelector('input#passNameFilter')?.value);
+
+      strictEqual(
+        inputValue,
+        expectedOptionValue,
+        'should set the input value to the clicked passName dropdown option',
+      );
+    },
+  );
+
+  await testParent.test(
+    'should have a grouped selector with sorted options to filter by detector if there are detectors loaded',
+    { timeout },
+    async () => {
+      const optionsObject = await page.evaluate(() => {
+        const optionElements = document.querySelectorAll('#detectorFilter > optgroup > option');
+
+        return Array.from(optionElements).reduce((acc, option) => {
+          const optgroup = option.parentElement.label;
+          if (!optgroup) {
+            return acc;
+          }
+
+          if (!acc[optgroup]) {
+            acc[optgroup] = [];
+          }
+          acc[optgroup].push(option.value);
+
+          return acc;
+        }, {});
+      });
+
+      deepStrictEqual(optionsObject, {
+        'AOT-EVENT': ['EVS'],
+        PHYSICAL: ['ACO', 'CPV'],
+        QC: ['GLO'],
+        VIRTUAL: ['TST'],
+      });
+    },
+  );
+  await testParent.test(
+    'should navigate object tree and search results with arrow keys and enter key',
+    { timeout },
+    async () => {
+      await page.goto(`${url}${OBJECT_TREE_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
+
+      // Focus first node
+      await page.keyboard.press('ArrowDown');
+      await delay(200);
+      const isFirstObjectFocused = await page.evaluate(() => {
+        const selectedNode = document.querySelector('tr.object-selectable');
+        return selectedNode?.classList.contains('focused-node');
+      });
+      strictEqual(isFirstObjectFocused, true, 'The first object is not focused.');
+
+      // Focus second node and expand
+      await page.keyboard.press('ArrowDown'); // Focus second node
+      await page.keyboard.press('ArrowRight'); // Expand focused node
+      await delay(200);
+      const isNodeExpanded = await page.evaluate(() => {
+        const [, selectedNode] = document.querySelectorAll('tr.object-selectable');
+        return selectedNode?.classList.contains('focused-node');
+      });
+      strictEqual(isNodeExpanded, true, 'The focused node was not expanded on pressing ArrowRight key.');
+
+      // Focus third node, expand and select a leaf node
+      await page.keyboard.press('ArrowDown'); // Focus third node
+      await page.keyboard.press('ArrowRight'); // Expand focused node
+      await page.keyboard.press('ArrowDown'); // Focus fourth node
+      await page.keyboard.press('Enter'); // Select focused leaf node
+      await delay(500);
+      const isObjectSelected = await page.evaluate(() => model.object.selected !== undefined);
+      const isObjectPlotOpened = await page.evaluate(() => {
+        const objectPanel = document.querySelector('#qcObjectInfoPanel');
+        return objectPanel !== null && objectPanel !== undefined;
+      });
+      strictEqual(isObjectSelected, true, 'Focused leaf node was not selected on pressing ArrowRight key.');
+      strictEqual(isObjectPlotOpened, true, 'Object plot panel is not opened after selecting the focused leaf node.');
+
+      // Collapse parent node of the focused leaf node
+      await page.keyboard.press('ArrowLeft');
+      await delay(200);
+      const nodeCountAfterCollapse = await page.evaluate(() => {
+        const nodes = document.querySelectorAll('tr.object-selectable');
+        return nodes.length;
+      });
+      strictEqual(
+        nodeCountAfterCollapse,
+        3,
+        'The object tree navigation does not have exactly 3 nodes after collapsing the parent.',
+      );
+
+      // Focus previous node
+      await page.keyboard.press('ArrowUp');
+      await delay(200);
+      const isSecondNodeHighlightedAgain = await page.evaluate(() => {
+        const [, selectedNode] = document.querySelectorAll('tr.object-selectable');
+        return selectedNode?.classList.contains('focused-node');
+      });
+      strictEqual(isSecondNodeHighlightedAgain, true, 'The second node is not highlighted after pressing ArrowUp key.');
+
+      // Collapse tree
+      await page.keyboard.press('ArrowLeft');
+      await delay(200);
+      const isNodeCollapsed = await page.evaluate(() => {
+        const nodes = document.querySelectorAll('tr.object-selectable');
+        return nodes.length < 3; // Check if there are less than 3 nodes
+      });
+      strictEqual(isNodeCollapsed, true, 'The third node is still present after collapsing the second node.');
+    },
+  );
+
+  await testParent.test(
+    'should navigate object tree and search results with arrow keys and enter key when search active',
+    { timeout },
+    async () => {
+      await page.goto(`${url}${OBJECT_TREE_PAGE_PARAM}`, { waitUntil: 'networkidle0' });
+      await page.focus('#searchObjectTree');
+      await page.type('#searchObjectTree', 'qc/test/object');
+
+      // Focus first object in search results
+      await page.keyboard.press('ArrowDown');
+      await delay(200);
+      const isFirstObjectHighlighted = await page.evaluate(() => {
+        const selectedNode = document.querySelector('tr.object-selectable');
+        return selectedNode?.classList.contains('focused-node');
+      });
+      strictEqual(isFirstObjectHighlighted, true, 'The first object in search results is not highlighted.');
+
+      // Select focused object
+      await page.keyboard.press('Enter');
+      await delay(500);
+      const isObjectSelected = await page.evaluate(() => model.object.selected !== undefined);
+      const isObjectPlotOpened = await page.evaluate(() => {
+        const objectPanel = document.querySelector('#qcObjectInfoPanel');
+        return objectPanel !== null && objectPanel !== undefined;
+      });
+      strictEqual(
+        isObjectSelected,
+        true,
+        'The focused object in search results was not selected on pressing ArrowRight key.',
+      );
+      strictEqual(
+        isObjectPlotOpened,
+        true,
+        'The object plot panel is not opened after selecting the focused object in search results.',
+      );
+    },
+  );
 };

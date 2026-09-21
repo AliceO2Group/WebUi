@@ -35,6 +35,9 @@ export default class WorkflowVariable {
     this.key = variable.key;
     this.index = variable.index ? variable.index : 0;
     this.isVisible = this.parseIsVisibleEval(variable);
+    if (this.widget === WIDGET_VAR.EDIT_BOX) {
+      this.rows = variable.rows ? variable.rows : 1;
+    }
   }
 
   /**

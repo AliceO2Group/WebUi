@@ -12,13 +12,16 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconPerson, iconMediaPlay, iconMediaStop } from '/js/src/index.js';
+import { h, iconPerson, getBrowserNotificationPermission, areBrowserNotificationsGranted,
+  requestBrowserNotificationPermissions, BrowserNotificationPermission } from '/js/src/index.js';
 
 import { spinner } from './spinner.js';
 import layoutViewHeader from '../layout/view/header.js';
-import layoutListHeader from '../layout/list/header.js';
 import objectTreeHeader from '../object/objectTreeHeader.js';
-import frameworkInfoHeader from '../frameworkInfo/frameworkInfoHeader.js';
+import aboutViewHeader from '../pages/aboutView/components/aboutViewHeader.js';
+import LayoutListHeader from '../pages/layoutListView/components/LayoutListHeader.js';
+import { objectViewHeader } from '../pages/objectView/components/header.js';
+import { filtersPanel } from './filters/filterViews.js';
 
 /**
  * Shows header of the application, split with 3 parts:
@@ -28,27 +31,55 @@ import frameworkInfoHeader from '../frameworkInfo/frameworkInfoHeader.js';
  * @param {Model} model - root model of the application
  * @returns {vnode} - header element
  */
-export default (model) => h('.flex-row.p2', [
-  commonHeader(model),
-  headerSpecific(model),
-]);
+export default (model) => {
+  const specific = headerSpecific(model) || {};
+  const { centerCol, rightCol, subRow } = specific;
+  const id = `qcg-header-${model.page}`;
+  return h('.flex-col', [
+    h('.flex-row.p2.items-center', { id, key: id }, [
+      commonHeader(model),
+      centerCol || h('.flex-grow'),
+      rightCol || h('.w-25'),
+    ]),
+    subRow && h('.p2', [subRow]),
+    filterSpecific(model),
+  ]);
+};
 
-let onlineButtonIcon = iconMediaPlay();
-let onlineButtonStyle = 'btn-default';
+/**
+ * Shows the page specific header (center and right side)
+ * @param {Model} model - root model of the application
+ * @returns {{centerCol: vnode, rightCol: vnode} | null} center column and right column
+ */
+const headerSpecific = (model) => {
+  const { filterModel, layout, object, page } = model;
+  switch (page) {
+    case 'layoutList': return LayoutListHeader();
+    case 'layoutShow': return layoutViewHeader(layout, filterModel);
+    case 'objectTree': return objectTreeHeader(object, filterModel);
+    case 'objectView': return objectViewHeader(model);
+    case 'about': return aboutViewHeader();
+    default: return null;
+  }
+};
 
 /**
  * Shows the page specific header (center and right side)
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const headerSpecific = (model) => {
-  switch (model.page) {
-    case 'layoutList': return layoutListHeader(model);
-    case 'layoutShow': return layoutViewHeader(model);
-    case 'objectTree': return objectTreeHeader(model);
-    case 'about': return frameworkInfoHeader();
-    default: return null;
+const filterSpecific = (model) => {
+  const { page, filterModel, layout } = model;
+  if (page === 'layoutShow' && layout.editEnabled) {
+    return null;
   }
+
+  const viewModel = filterModel.getPageTargetModel();
+  if (!viewModel) {
+    return null;
+  }
+
+  return filtersPanel(filterModel, viewModel);
 };
 
 /**
@@ -56,12 +87,15 @@ const headerSpecific = (model) => {
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const commonHeader = (model) => h('.flex-grow.flex-row.items-center', [
+const commonHeader = (model) => h('.flex-row.items-center.w-25', [
   loginButton(model),
   ' ',
-  onlineButton(model),
-  ' ',
-  h('span.f4.gray', 'Quality Control'),
+  h('span.f4.gray', {
+    id: 'qcgTitle',
+    style: 'cursor: pointer',
+    onclick: () => model.router.go('?page=layoutList'),
+    title: 'Go to layouts list page',
+  }, 'Quality Control'),
   model.loader.active && h('span.f4.mh1.gray', spinner()),
 ]);
 
@@ -80,42 +114,43 @@ const loginButton = (model) =>
       model.session.personid === 0 // Anonymous user has id 0
         ? h('p.m3.gray-darker', 'This instance of the application does not require authentication.')
         : h('a.menu-item', { onclick: () => alert('Not implemented') }, 'Logout'),
+      notifyOnRunStartSettingComponent(model.notificationRunStartModel),
     ]),
   ]);
 
 /**
- * Create button which will allow user to enable/disable online mode
- * @param {Model} model - root model of the application
+ * Builds the toggle and its functionality of the "notify on run start" setting
+ * @param {NotificationRunStartModel} notificationRunStartModel - the notification run start model
  * @returns {vnode} - virtual node element
  */
-const onlineButton = (model) => h(
-  'button.btn',
-  {
-    className: onlineButtonStyle,
-    onclick: () => toggleOnlineButton(model),
-    disabled: model.object.queryingObjects ? true : false,
-    title: model.object.queryingObjects ? 'Toggling disabled while querying' : 'Toggle Mode (Online/Offline)',
-    style: model.isOnlineModeConnectionAlive ? '' : 'display: none',
-  },
-  'Online',
-  ' ',
-  onlineButtonIcon,
-);
+const notifyOnRunStartSettingComponent = (notificationRunStartModel) => {
+  const browserNotificationPermission = getBrowserNotificationPermission();
+  const notificationsAvailable = browserNotificationPermission
+    && browserNotificationPermission !== BrowserNotificationPermission.DENIED;
+  const runStartNotificationEnabled = notificationRunStartModel.getBrowserNotificationSetting();
 
-/**
- * Action to disable/enable online mode
- * @param {Model} model - root model of the application
- * @returns {undefined}
- */
-function toggleOnlineButton(model) {
-  model.toggleMode();
-  switch (model.isOnlineModeEnabled) {
-    case true:
-      onlineButtonStyle = 'btn-success';
-      onlineButtonIcon = iconMediaStop();
-      break;
-    default:
-      onlineButtonStyle = 'btn-default';
-      onlineButtonIcon = iconMediaPlay();
-  }
-}
+  return h(
+    'label.flex-row.g1.items-center.form-check-label',
+    { style: `cursor: ${notificationsAvailable ? 'pointer' : 'not-allowed'};` },
+    [
+      h('.switch', [
+        h('input', {
+          onchange: async (event) => {
+            let permissionGranted = false;
+            if (event.target.checked) {
+              await requestBrowserNotificationPermissions();
+              permissionGranted = areBrowserNotificationsGranted();
+            }
+            notificationRunStartModel.setBrowserNotificationSetting(permissionGranted);
+          },
+          type: 'checkbox',
+          checked: runStartNotificationEnabled,
+        }),
+        h(`span.slider.round.bg-${runStartNotificationEnabled ? 'primary' : 'gray'}`, {
+          style: `cursor: ${notificationsAvailable ? 'pointer' : 'not-allowed'};`,
+        }),
+      ]),
+      'Notify on run start',
+    ],
+  );
+};

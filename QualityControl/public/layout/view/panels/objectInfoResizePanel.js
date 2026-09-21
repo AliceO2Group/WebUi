@@ -12,45 +12,83 @@
  * or submit itself to any jurisdiction.
  */
 
-import { qcObjectInfoPanel } from './../../../common/object/objectInfoCard.js';
+import { downloadButton } from '../../../common/downloadButton.js';
+import { isOnLeftSideOfViewport } from '../../../common/utils.js';
+import { defaultRowAttributes, qcObjectInfoPanel } from './../../../common/object/objectInfoCard.js';
 import { h, iconResizeBoth, info } from '/js/src/index.js';
+import { downloadRootImageDropdown } from '../../../common/downloadRootImageDropdown.js';
 
 /**
  * Builds 2 actionable buttons which are to be placed on top of a JSROOT plot
  * Buttons shall appear on hover of the plot
  * @param {Model} model - root model of the application
- * @param {object} tabObject - tab dto representation
+ * @param {TabObject} tabObject - tab dto representation
  * @returns {vnode} - virtual node element
  */
 export const objectInfoResizePanel = (model, tabObject) => {
-  const { name } = tabObject;
-  const isSelectedOpen = model.object.selectedOpen;
-  const objectRemoteData = model.services.object.objectsLoadedMap[name];
-  let uri = `?page=objectView&objectId=${tabObject.id}&layoutId=${model.router.params.layoutId}`;
-  Object.entries(model.layout.filter)
+  const { name, options: drawingOptions = [], ignoreDefaults } = tabObject;
+  const { filterModel, router, object, services } = model;
+  const isSelectedOpen = object.selectedOpen;
+  const objectRemoteData = services.object.objectsLoadedMap[name];
+  let uri = `?page=objectView&objectId=${tabObject.id}&layoutId=${router.params.layoutId}`;
+  Object.entries(filterModel.filterMap)
     .filter(([_, value]) => value)
     .forEach(([key, value]) => {
       uri += `&${key}=${encodeURI(value)}`;
     });
-  return h('.text-right.resize-element.resize-button.flex-row', {
-    style: 'display: none; padding: .25rem .25rem 0rem .25rem;',
+  const { displayHints = [], drawOptions = [] } = objectRemoteData?.payload ?? {};
+  const toUseDrawingOptions = Array.from(new Set(ignoreDefaults
+    ? drawingOptions
+    : [...drawingOptions, ...displayHints, ...drawOptions]));
+  const visibility = object.getExtraObjectData(tabObject.id)?.saveImageDropdownOpen ? 'visible' : 'hidden';
+  return h('.text-right.resize-element.item-action-row.flex-row.g1', {
+    style: `visibility: ${visibility}; padding: .25rem .25rem 0rem .25rem;`,
   }, [
-    !model.isOnlineModeEnabled &&
-    h('', { style: 'padding-bottom: 0;' }, h('.dropdown.mh1', { class: isSelectedOpen ? 'dropdown-open' : '' }, [
+
+    h('.dropdown', { class: isSelectedOpen ? 'dropdown-open' : '',
+    }, [
       h('button.btn', {
         title: 'View details about histogram',
-        onclick: () => model.object.toggleInfoArea(name),
+        onclick: () => object.toggleInfoArea(name),
       }, info()),
       h(
         '.dropdown-menu',
-        { style: 'right:0.1em; width: 35em;left: auto;' },
-        objectRemoteData.isSuccess() && h('.p1', qcObjectInfoPanel(objectRemoteData.payload)),
+        {
+          style: 'right:0.1em; width: 35em;left: auto;',
+          onupdate: (vnode) => {
+            if (isOnLeftSideOfViewport(vnode.dom.parentElement)) {
+              vnode.dom.style.left = '0.1em';
+              vnode.dom.style.right = 'auto';
+            } else {
+              vnode.dom.style.right = '0.1em';
+              vnode.dom.style.left = 'auto';
+            }
+          },
+        },
+        objectRemoteData.isSuccess() &&
+          h('.p1', qcObjectInfoPanel(objectRemoteData.payload, {}, defaultRowAttributes(model.notification))),
       ),
-    ])),
+    ]),
+    objectRemoteData.isSuccess() && [
+      downloadRootImageDropdown(
+        objectRemoteData.payload.name,
+        objectRemoteData.payload.qcObject.root,
+        toUseDrawingOptions,
+        (isDropdownOpen) => {
+          object.appendExtraObjectData(tabObject.id, { saveImageDropdownOpen: isDropdownOpen });
+        },
+        tabObject.id,
+      ),
+      downloadButton({
+        href: model.objectViewModel.getDownloadQcdbObjectUrl(objectRemoteData.payload.id),
+        title: 'Download root object',
+        id: `download-button-${objectRemoteData.payload.id}`,
+      }),
+    ],
     h('a.btn', {
       title: 'Open object plot in full screen',
       href: uri,
-      onclick: (e) => model.router.handleLinkEvent(e),
+      onclick: (e) => router.handleLinkEvent(e),
     }, iconResizeBoth()),
   ]);
 };

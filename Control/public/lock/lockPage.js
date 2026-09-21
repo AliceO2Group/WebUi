@@ -21,8 +21,10 @@ import errorPage from './../common/errorPage.js';
 import loading from './../common/loading.js';
 import {DetectorLockAction} from '../common/enums/DetectorLockAction.enum.js';
 import {isUserAllowedRole} from './../common/userRole.js';
+import { getDetectorListWithTstAtEnd, TST_DETECTOR_NAME } from '../common/detectorUtils.js';
+import { DetectorState, DetectorStateStyle } from '../common/enums/DetectorState.enum.js';
 
-const LOCK_TABLE_HEADER_KEYS = ['Detector', 'Owner'];
+const LOCK_TABLE_HEADER_KEYS = ['Detector', 'Owner', 'Active'];
 const DETECTOR_ALL = 'ALL';
 
 /**
@@ -31,16 +33,12 @@ const DETECTOR_ALL = 'ALL';
 
 /**
  * Header of the lock page
- * @param {Object} model
  * @return {vnode}
  */
-export const header = (model) => [
+export const header = () => [
   h('.w-100.text-center', [
     h('h4', 'Locks')
   ]),
-  model.detectors.selected === 'GLOBAL' && h('.flex-row.text-right', {
-    style: 'position: absolute; right: 0px;'
-  })
 ];
 
 /**
@@ -49,28 +47,42 @@ export const header = (model) => [
  * @return {vnode}
  */
 export const content = (model) => {
-  const padlockState = model.lock.padlockState;
-  const lock = model.lock;
+  const {lock: lockModel, detectors: detectorsService} = model;
+  const { padlockState } = lockModel;
   return [
     detectorHeader(model),
-    h('.text-center.scroll-y.absolute-fill', {style: 'top: 40px'}, [
+    h('.text-center.scroll-y.absolute-fill', {
+      style: 'top: 40px',
+      oncreate: () => detectorsService.getActiveDetectors(),
+    }, [
       padlockState.match({
         NotAsked: () => null,
         Loading: () => loading(3),
         Failure: (error) => errorPage(error),
         Success: (detectorsLocksState) => h('.flex-column', [
-          h('.flex-row.g2.pv2', [
-            isUserAllowedRole(ROLES.Global) && [
-              detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, true, 'Force Release ALL'),
-              detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.TAKE, true, 'Force Take ALL'),
-              detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, false, 'Release ALL*'),
-              detectorLockActionButton(lock, DETECTOR_ALL, {}, DetectorLockAction.TAKE, false, 'Take ALL*'),
-            ],
-          ]),
-          h('small.text-left.ph2',
-            'Note: Release/Take all will only affect the detectors you have access to and detectors that are available.'
-          ),
-          detectorLocksTable(model, detectorsLocksState)
+          detectorsService.isGlobalView() && [
+            h('.flex-row.g2.p2', [
+              isUserAllowedRole(ROLES.Admin) && [
+                h('strong', 'Admin actions: '),
+                detectorLockActionButton(
+                  lockModel, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, true, 'Force Release ALL'
+                ),
+                detectorLockActionButton(
+                  lockModel, DETECTOR_ALL, {}, DetectorLockAction.TAKE, true, 'Force Take ALL'
+                ),
+              ],
+              isUserAllowedRole(ROLES.Global) && [
+                h('strong', 'Global actions: '),
+                detectorLockActionButton(
+                  lockModel, DETECTOR_ALL, {}, DetectorLockAction.RELEASE, false, 'Release ALL*'
+                ),
+                detectorLockActionButton(
+                  lockModel, DETECTOR_ALL, {}, DetectorLockAction.TAKE, false, 'Take ALL*'
+                ),
+              ],
+            ]),
+          ],
+          detectorLocksTable(model, detectorsLocksState, detectorsService.activeDetectors)
         ])
       })
     ])
@@ -81,33 +93,44 @@ export const content = (model) => {
  * Table with lock status details, buttons to lock them, and admin actions such us "Force release"
  * @param {Model} model - root model of the application
  * @param {Object<String, DetectorLock>} detectorsLockState - state of the detectors lock
+ * @param {RemoteData} activeDetectorsRemote - remote data with the list of active detectors
  * @return {vnode}
  */
-const detectorLocksTable = (model, detectorLocksState) => {
-  const {detectors} = model;
+const detectorLocksTable = (model, detectorLocksState, activeDetectorsRemote) => {
+  const { detectors: detectorsService, lock: lockModel } = model;
   const isUserGlobal = isUserAllowedRole(ROLES.Global);
-
-  const detectorRows = Object.keys(detectorLocksState)
-    .filter((detector) => {
+  const detectorKeysWithTstLast = getDetectorListWithTstAtEnd(Object.keys(detectorLocksState));
+  const detectorRows = detectorKeysWithTstLast
+    .filter((detectorName) => {
       const isSelectedDetectorViewGlobalOrCurrent = (
-        detectors.selected === 'GLOBAL' || detectors.selected === detector
+        detectorsService.isGlobalView() || detectorsService.selected === detectorName
       );
-      const isUserAllowedDetector = detectors.authed.includes(detector);
+      const isUserAllowedDetector = detectorsService.authed.includes(detectorName);
       return (isUserGlobal && isSelectedDetectorViewGlobalOrCurrent) || isUserAllowedDetector;
     })
-    .map((detector) => detectorLockRow(model, detector, detectorLocksState[detector]))
+    .map((detectorName) => {
+      const detectorActivityState = _getDetectorState(activeDetectorsRemote, detectorName);
+      if (detectorName.toLocaleUpperCase().includes(TST_DETECTOR_NAME)) {
+        return [
+          emptyRowSeparator(),
+          detectorLockRow(lockModel, detectorName, detectorLocksState[detectorName], detectorActivityState)
+        ];
+      } else {
+        return detectorLockRow(lockModel, detectorName, detectorLocksState[detectorName], detectorActivityState)
+      }
+    });
   return h('table.table.table-sm',
     h('thead',
       h('tr',
         LOCK_TABLE_HEADER_KEYS.map((header) => h('th', header)),
-        isUserAllowedRole(ROLES.Admin) && h('th', 'Admin actions')
+        isUserAllowedRole(ROLES.Global) && h('th', 'Global actions')
       )
     ),
     h('tbody', [
       detectorRows.length > 0
         ? detectorRows
         : h('tr',
-          h('td.ph2.warning', {colspan: 3}, [
+          h('td.ph2.warning', { colspan: LOCK_TABLE_HEADER_KEYS.length } , [
             'Missing Role permissions needed for being allowed to own locks',
             ' If you have just started your shift, please allow a few minutes for the system ',
             'to update before trying again or calling an FLP expert.'
@@ -119,26 +142,52 @@ const detectorLocksTable = (model, detectorLocksState) => {
 
 /**
  * Build a vnode for a row in the detector lock table which contains state of the lock and owner
- * @param {Model} model - root model of the application
+ * @param {LockModel} lockModel - model of the lock state and actions
  * @param {String} detector - detector name
  * @param {DetectorLock} lockState - state of the lock  {owner: {fullName: String}, isLocked: Boolean
+ * @param {DetectorState} detectorActivityState - state of the detector as per AliECS (Active, Inactive, Unknown)
  * @return {vnode}
  */
-const detectorLockRow = (model, detector, lockState) => {
+const detectorLockRow = (lockModel, detector, lockState, detectorActivityState) => {
   const ownerName = lockState?.owner?.fullName || '-';
   return h('tr', {
     id: `detector-row-${detector}`,
   }, [
     h('td',
       h('.flex-row.g2.items-center.f5', [
-        detectorLockButton(model, detector, lockState),
+        detectorLockButton(lockModel, detector, lockState, false, detectorActivityState === DetectorState.ACTIVE),
         detector
       ])
     ),
     h('td', ownerName),
-    isUserAllowedRole(ROLES.Admin) && h('td', [
-      detectorLockActionButton(model.lock, detector, lockState, DetectorLockAction.RELEASE, true, 'Force Release'),
-      detectorLockActionButton(model.lock, detector, lockState, DetectorLockAction.TAKE, true, 'Force Take')
+    h(`td`, {
+      class: DetectorStateStyle[detectorActivityState]
+    }, detectorActivityState),
+    isUserAllowedRole(ROLES.Global) && h('td', [
+      detectorLockActionButton(lockModel, detector, lockState, DetectorLockAction.RELEASE, true, 'Force Release'),
+      detectorLockActionButton(lockModel, detector, lockState, DetectorLockAction.TAKE, true, 'Force Take')
     ])
   ]);
 };
+
+/**
+ * Empty table row separator vnode
+ * @return {vnode}
+ */
+const emptyRowSeparator = () => h('tr', h('td', {colspan: LOCK_TABLE_HEADER_KEYS.length}, h('hr')));
+
+/**
+ * Helper function to get the state of the detector (Active, Inactive, Unknown) based on the activeDetectorsRemote data
+ * @param {RemoteData} activeDetectorsRemote - remote data with the list of active detectors
+ * @param {String} detectorName - name of the detector to get the state for
+ * @return {String} state of the detector (Active, Inactive, Unknown)
+ */
+const _getDetectorState = (activeDetectorsRemote, detectorName) => {
+  return activeDetectorsRemote.match({
+    NotAsked: () => DetectorState.UNDEFINED,
+    Loading: () => DetectorState.UNDEFINED,
+    Failure: () => DetectorState.ERROR,
+    Success: (activeDetectors) =>
+      activeDetectors.includes(detectorName) ? DetectorState.ACTIVE : DetectorState.UNDEFINED
+  })
+}

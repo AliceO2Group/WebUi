@@ -116,3 +116,4 @@
 .grid-container { display: grid; gap: 1  rem; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 .bg-yellow { background-color: #e6e200; }
 .italic { font-style: italic; }
+.right-align { margin-left: auto; }

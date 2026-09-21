@@ -13,26 +13,26 @@
  */
 
 /* eslint-disable require-jsdoc */
-/* eslint-disable max-len */
 
 import { deepStrictEqual, strictEqual, rejects } from 'node:assert';
 import { suite, test, before } from 'node:test';
 import nock from 'nock';
 
 import { CcdbService } from '../../../lib/services/ccdb/CcdbService.js';
-import { CCDB_MONITOR, CCDB_VERSION_KEY } from '../../../lib/services/ccdb/CcdbConstants.js';
+import { CCDB_FILTER_FIELDS, CCDB_MONITOR, CCDB_VERSION_KEY } from '../../../lib/services/ccdb/CcdbConstants.js';
 
 const ccdbConfig = {
   hostname: 'ccdb-local',
   port: 8083,
   protocol: 'https',
   prefix: 'qc-test',
-}
+};
+const { ID, CREATED, PATH } = CCDB_FILTER_FIELDS;
 
 export const ccdbServiceTestSuite = async () => {
   suite('CCDB Test Suite - ', () => {
     before(() => nock.cleanAll());
-    
+
     suite('Creating a new CcdbService instance', () => {
       test('should successfully initialize CcdbService', () => {
         const ccdbService = new CcdbService({ hostname: 'ccdb-local', port: 8083, protocol: 'https', prefix: 'qc/' });
@@ -89,7 +89,31 @@ export const ccdbServiceTestSuite = async () => {
         nock('http://ccdb-local:8083')
           .get(CCDB_URL_HEALTH_POINT)
           .replyWithError('getaddrinfo ENOTFOUND ccdb ccdb-local:8083');
-        await rejects(async () => await ccdb.getVersion(), new Error('Unable to connect to CCDB due to: Error: getaddrinfo ENOTFOUND ccdb ccdb-local:8083'));
+        await rejects(
+          async () => await ccdb.getVersion(),
+          new Error('Unable to connect to CCDB due to: Error: getaddrinfo ENOTFOUND ccdb ccdb-local:8083'),
+        );
+      });
+      test('should return "unknown" version when CCDB version is missing', async () => {
+        const response = {};
+        response[CCDB_MONITOR] = {};
+        response[CCDB_MONITOR][CCDB_HOSTNAME] = [{}];
+
+        nock('http://ccdb-local:8083')
+          .get(CCDB_URL_HEALTH_POINT)
+          .reply(200, response);
+
+        const info = await ccdb.getVersion();
+        deepStrictEqual(info, { version: 'unknown version' });
+      });
+      test('should return "unknown" version when CCDB response is malformed', async () => {
+        const response = {}; // no CCDB_MONITOR key
+        nock('http://ccdb-local:8083')
+          .get(CCDB_URL_HEALTH_POINT)
+          .reply(200, response);
+
+        const info = await ccdb.getVersion();
+        deepStrictEqual(info, { version: 'unknown version' });
       });
     });
 
@@ -97,7 +121,7 @@ export const ccdbServiceTestSuite = async () => {
       test('should reject with error for fields parameter not being a list', async () => {
         const ccdb = new CcdbService(ccdbConfig);
         await rejects(
-          async () => await ccdb.getObjectsLatestVersionList('/qc', 'bad-fields'),
+          async () => ccdb.getObjectsLatestVersionList({ prefix: '/qc', fields: 'bad-fields' }),
           new TypeError('fields.join is not a function'),
         );
       });
@@ -124,19 +148,20 @@ export const ccdbServiceTestSuite = async () => {
       test('should successfully return a list of the objects with specified headers', async () => {
         const ccdb = new CcdbService(ccdbConfig);
         const objects = [
-          { path: 'object/one', Created: '101', 'Last-Modified': '102', Id: 1 },
-          { path: 'object/two', Created: '101', 'Last-Modified': '102', Id: 2 },
-          { path: 'object/three', Created: '101', 'Last-Modified': '102', Id: 3 },
+          { [PATH]: 'object/one', [CREATED]: '101', [ID]: 1 },
+          { [PATH]: 'object/two', [CREATED]: '101', [ID]: 2 },
+          { [PATH]: 'object/three', [CREATED]: '101', [ID]: 3 },
         ];
         nock('http://ccdb-local:8083', {
           reqheaders: {
             Accept: 'application/json',
-            'X-Filter-Fields': 'Id',
+            'X-Filter-Fields': [ID, CREATED, PATH].join(','),
           },
         })
           .get('/latest/.*')
           .reply(200, { objects: objects, subfolders: [] });
-        const objectsRetrieved = await ccdb.getObjectsLatestVersionList('', ['Id']);
+        const objectsRetrieved = await ccdb.getObjectsLatestVersionList({
+          prefix: '', filters: undefined, fields: [ID, CREATED, PATH] });
         deepStrictEqual(objectsRetrieved, objects, 'Received objects are not alike');
       });
 
@@ -147,6 +172,75 @@ export const ccdbServiceTestSuite = async () => {
           .get(`/latest/${ccdbConfig.prefix}.*`)
           .replyWithError(error);
         await rejects(async () => await ccdb.getObjectsLatestVersionList(), new Error(`${error.message || error}`));
+      });
+
+      test('should send HTTP request with filters', async () => {
+        const ccdb = new CcdbService(ccdbConfig);
+        const objects = [{ [ID]: 1 }, { [ID]: 2 }, { [ID]: 3 }];
+        nock('http://ccdb-local:8083', {
+          reqheaders: {
+            Accept: 'application/json',
+            'X-Filter-Fields': ID,
+          },
+        })
+          .get('/latest/.*/RunNumber=535/RunType=PHYSICS')
+          .reply(200, { objects: objects, subfolders: [] });
+
+        const objectsRetrieved =
+          await ccdb.getObjectsLatestVersionList({
+            prefix: '', filters: { RunNumber: 535, RunType: 'PHYSICS' }, fields: [ID] });
+
+        deepStrictEqual(objectsRetrieved, objects, 'Received objects are not alike');
+      });
+    });
+
+    suite('`getObjectsTreeList()` tests', () => {
+      test('should successfully return a list of the object paths', async () => {
+        const ccdb = new CcdbService(ccdbConfig);
+        const subfolders = [
+          'object/one',
+          'object/two',
+          'object/three',
+        ];
+        const expectedObjects = [
+          { path: 'object/one' },
+          { path: 'object/two' },
+          { path: 'object/three' },
+        ];
+
+        nock('http://ccdb-local:8083', {
+          reqheaders: { Accept: 'application/json' },
+        })
+          .get(`/tree/${ccdbConfig.prefix}.*`)
+          .reply(200, { subfolders });
+        const objectsRetrieved = await ccdb.getObjectsTreeList(ccdbConfig.prefix);
+        deepStrictEqual(objectsRetrieved, expectedObjects, 'Received objects are not alike');
+      });
+
+      test('should throw error when response has invalid subfolders format', async () => {
+        const ccdb = new CcdbService(ccdbConfig);
+        const invalidResponse = { subfolders: 'not-an-array' };
+
+        nock('http://ccdb-local:8083', {
+          reqheaders: { Accept: 'application/json' },
+        })
+          .get(`/tree/${ccdbConfig.prefix}.*`)
+          .reply(200, invalidResponse);
+
+        await rejects(
+          async () => await ccdb.getObjectsTreeList(ccdbConfig.prefix),
+          new Error('Invalid response format from server - expected subfolders array'),
+          'Should throw error for invalid subfolders format',
+        );
+      });
+
+      test('should reject due to HTTP request error', async () => {
+        const ccdb = new CcdbService(ccdbConfig);
+        const error = new Error('Querying service is down');
+        nock('http://ccdb-local:8083')
+          .get(`/tree/${ccdbConfig.prefix}.*`)
+          .replyWithError(error);
+        await rejects(async () => await ccdb.getObjectsTreeList(), new Error(`${error.message || error}`));
       });
     });
 
@@ -251,13 +345,15 @@ export const ccdbServiceTestSuite = async () => {
         await rejects(async () => ccdb.getObjectDetails({ path: null, validFrom: 213 }, null), new Error('Missing mandatory parameters: path & validFrom'));
       });
 
-      test('should successfully return content-location field on status >=200 <= 399', async () => {
+      test('should successfully return content-location field on status >=200 <= 399 and add path if missing', async () => {
+        const path = 'qc/some/test/';
         nock('http://ccdb-local:8083')
           .defaultReplyHeaders({ 'content-location': '/download/123123-123123', location: '/download/some-id' })
-          .head('/qc/some/test/123455432/id1')
+          .head(`/${path}/123455432/id1`)
           .reply(303);
-        const content = await ccdb.getObjectDetails({ path: 'qc/some/test', validFrom: 123455432, id: 'id1' });
+        const content = await ccdb.getObjectDetails({ path, validFrom: 123455432, id: 'id1' });
         strictEqual(content.location, '/download/123123-123123');
+        strictEqual(content.path, path);
       });
 
       test('should successfully return content-location field if is string as array with "alien" second item on status >=200 <= 399', async () => {
@@ -373,6 +469,40 @@ export const ccdbServiceTestSuite = async () => {
           },
         };
         strictEqual(ccdb._buildCcdbUrlPath(identification), '/qc/TPC/object/12322222/123332323/123-ffg/RunNumber=123456/PartName=Pass');
+      });
+    });
+
+    suite('CcdbService getObjectIdentification() Error Messages', () => {
+      let ccdb = null;
+
+      before(() => {
+        ccdb = new CcdbService(ccdbConfig);
+      });
+
+      test('should throw error if object not found with filters applied', async () => {
+        const filters = { RunNumber: 123456 };
+        const filterString = Object.entries(filters).map(([key, value]) => `${key}=${value}`).join('/');
+
+        nock('http://ccdb-local:8083')
+          .get(`/latest/path/${ID}/${filterString}`)
+          .reply(200, { objects: [] });
+
+        await rejects(
+          async () => ccdb.getObjectIdentification({ path: PATH, id: ID, filters }),
+          // eslint-disable-next-line @stylistic/js/max-len
+          new Error(`Object at url '/latest/path/${ID}/${filterString}' and path '${PATH}' could not be found. It was likely excluded by the applied filters.`),
+        );
+      });
+
+      test('should throw error if object not found without filters', async () => {
+        nock('http://ccdb-local:8083')
+          .get(`/latest/path/${ID}`)
+          .reply(200, { objects: [] });
+
+        await rejects(
+          async () => ccdb.getObjectIdentification({ path: PATH, id: ID }),
+          new Error(`Object at url '/latest/path/${ID}' and path '${PATH}' could not be found.`),
+        );
       });
     });
   });

@@ -40,7 +40,11 @@ describe('`Role Middleware` test suite', () => {
     };
     minimumRoleMiddleware(Role.ADMIN)(req, res, null);
     assert.ok(res.status.calledWith(403));
-    assert.ok(res.json.calledWith({message: 'Not enough permissions for this operation'}))
+    assert.ok(res.json.calledWith({
+      message: 'Not enough permissions for this operation',
+      status: 403,
+      title: 'Unauthorized Access',
+    }))
   });
 
   it('should update HTTP response object with 403 status error if missing access', () => {

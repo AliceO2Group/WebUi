@@ -15,9 +15,9 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
+const { NotFoundError, GrpcErrorCodes, UnauthorizedAccessError, InvalidInputError } = require('@aliceo2/web-ui');
 
-const {EnvironmentService} = require('./../../../lib/services/Environment.service.js');
-const { NotFoundError } = require('./../../../lib/errors/NotFoundError.js');
+const { EnvironmentService } = require('./../../../lib/services/Environment.service.js');
 const { User } = require('./../../../lib/dtos/User.js');
 
 describe('EnvironmentService test suite', () => {
@@ -26,6 +26,8 @@ describe('EnvironmentService test suite', () => {
   const ENVIRONMENT_NOT_FOUND_ID_BUT_CALL_SUCCESS = '2432ENV404SUCCESS';
   const ENVIRONMENT_VALID = '1234ENV';
   const ENVIRONMENT_ID_FAILED_TO_RETRIEVE = '2432ENV502';
+
+  const GetEnvironmentsStub = sinon.stub();
 
   const GetEnvironmentStub = sinon.stub();
   GetEnvironmentStub.withArgs({id: ENVIRONMENT_NOT_FOUND_ID_BUT_CALL_SUCCESS}).resolves({});
@@ -60,16 +62,134 @@ describe('EnvironmentService test suite', () => {
   }).resolves({ id: ENVIRONMENT_VALID });
   DestroyEnvironmentStub.rejects({code: 1, details: 'Wrong arguments, using default stub reject'});
 
+  const NewEnvironmentAsyncStub = sinon.stub();
+  NewEnvironmentAsyncStub.withArgs(
+    { workflowTemplate: 'BAD', vars: undefined, autoTransition: false, requestUser: user.toEcsFormat() }
+  ).rejects({ code: 3, details: 'Cannot create environment with this template' });
+  NewEnvironmentAsyncStub.withArgs(
+    { workflowTemplate: 'MISSING_ID_CASE', vars: undefined, autoTransition: false, requestUser: user.toEcsFormat() }
+  ).resolves({ id: undefined, state: 'RUNNING', currentRunNumber: 1 });
+  NewEnvironmentAsyncStub.withArgs(
+    { workflowTemplate: 'github/template/1.1.0', vars: {keyA: 'keyA'}, autoTransition: false, requestUser: user.toEcsFormat() }
+  ).resolves({ environment: { id: ENVIRONMENT_VALID, state: 'RUNNING', currentRunNumber: 1 } });
+
+  const environmentCacheServiceMock = {
+    environments: new Map(),
+  };
   const envService = new EnvironmentService(
     {
+      GetEnvironments: GetEnvironmentsStub,
       GetEnvironment: GetEnvironmentStub,
       ControlEnvironment: ControlEnvironmentStub,
       DestroyEnvironment: DestroyEnvironmentStub,
-    }, {detectors: [], includedDetectors: []}
+      NewEnvironmentAsync: NewEnvironmentAsyncStub,
+    }, { detectors: [], includedDetectors: [] }, {}, {}, environmentCacheServiceMock,
   );
 
+  describe(`'getEnvironments' test suite`, async () => {
+    it('should handle errors and throw a native error when gRPC call fails', async () => {
+      const grpcError = { code: GrpcErrorCodes.UNAUTHORIZED_ACCESS, details: 'No access' };
+      GetEnvironmentsStub.rejects(grpcError);
+      await assert.rejects(
+        () => envService.getEnvironments(false, false),
+        new UnauthorizedAccessError('No access')
+      );
+    });
+  
+    it('should handle empty environments list gracefully', async () => {
+      GetEnvironmentsStub.resolves({ environments: [] });
+  
+      envService._broadcastService = {
+        broadcast: sinon.stub(),
+      }
+      const result = await envService.getEnvironments(false, false);
+      assert.strictEqual(result.length, 0);
+      assert.strictEqual(environmentCacheServiceMock.environments.size, 0); // Cache should not be updated
+      assert.ok(envService._broadcastService.broadcast.calledWith('ENVIRONMENTS_OVERVIEW', []));
+    });
+
+    it('should retrieve environments and return them without updating the cache', async () => {
+      const mockEnvironments = [
+        { id: 'env1', state: 'active' },
+        { id: 'env2', state: 'inactive' },
+      ];
+      GetEnvironmentsStub.resolves({ environments: mockEnvironments });
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[0].id }).resolves({ environment: mockEnvironments[0] });
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[1].id }).resolves({ environment: mockEnvironments[1] });
+      
+      const result = await envService.getEnvironments(false, false);
+  
+      assert.strictEqual(result.length, 2);
+      assert.strictEqual(result[0].id, 'env1');
+      assert.strictEqual(result[1].id, 'env2');
+      assert.strictEqual(environmentCacheServiceMock.environments.size, 0); // Cache should not be updated
+    });
+
+    it('should retrieve environments and update the cache when `shouldUpdateCache` is true', async () => {
+      const mockEnvironments = [
+        { id: 'env1', state: 'active' },
+        { id: 'env2', state: 'inactive' },
+      ];
+      GetEnvironmentsStub.resolves({ environments: mockEnvironments });
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[0].id }).resolves({ environment: mockEnvironments[0] });
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[1].id }).resolves({ environment: mockEnvironments[1] });
+      
+      envService._environmentCacheService.addOrUpdateEnvironment = sinon.stub().returns();
+      const result = await envService.getEnvironments(false, true);
+
+      assert.strictEqual(result.length, 2);
+      assert.strictEqual(result[0].id, 'env1');
+      assert.strictEqual(result[1].id, 'env2');
+      assert.ok(envService._environmentCacheService.addOrUpdateEnvironment.calledTwice);
+    });
+    it('should retrieve environments and update the cache and keep environment that are isDeploying true', async () => {
+      const mockEnvironments = [
+        { id: 'env1', state: 'active' },
+        { id: 'env2', state: 'inactive' },
+      ];
+      GetEnvironmentsStub.resolves({ environments: mockEnvironments });
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[0].id }).resolves({ environment: mockEnvironments[0] });
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[1].id }).resolves({ environment: mockEnvironments[1] });
+      envService._environmentCacheService.environments = new Map([
+        ['env3', { id: 'env3', isDeploying: true, events: [] }],
+        ['env2', { id: 'env2', isDeploying: false, events: [] }],
+      ]);
+      envService._environmentCacheService.addOrUpdateEnvironment = sinon.stub().returns();
+      const result = await envService.getEnvironments(false, true);
+
+      assert.strictEqual(result.length, 3);
+      assert.strictEqual(result[0].id, 'env1');
+      assert.strictEqual(result[1].id, 'env2');
+      assert.strictEqual(result[2].id, 'env3');
+      assert.ok(envService._environmentCacheService.addOrUpdateEnvironment.calledTwice);
+    });
+
+    it('should retrieve environments and update the cache and keep environment that failed deployment', async () => {
+      const mockEnvironments = [
+        { id: 'env1', state: 'active' },
+        { id: 'env2', state: 'inactive' },
+      ];
+      GetEnvironmentsStub.resolves({ environments: mockEnvironments });
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[0].id }).resolves({ environment: mockEnvironments[0] });
+      GetEnvironmentStub.withArgs({ id: mockEnvironments[1].id }).resolves({ environment: mockEnvironments[1] });
+      envService._environmentCacheService.environments = new Map([
+        ['env4', { id: 'env4', isDeploying: false, deploymentError: 'ERROR', events: [] }],
+        ['env2', { id: 'env2', isDeploying: false, events: [] }],
+      ]);
+      envService._environmentCacheService.addOrUpdateEnvironment = sinon.stub().returns();
+      const result = await envService.getEnvironments(false, true);
+
+      assert.strictEqual(result.length, 3);
+      assert.strictEqual(result[0].id, 'env1');
+      assert.strictEqual(result[1].id, 'env2');
+      assert.strictEqual(result[2].id, 'env4');
+      assert.ok(envService._environmentCacheService.addOrUpdateEnvironment.calledTwice);
+    });
+  });
+
   describe(`'getEnvironment' test suite`, async () => {
-    it('should successfully build a response with environment details given an id', async () => {
+    it('should successfully return an environment given an id', async () => {
+      envService._environmentCacheService.environments = new Map();
       const env = await envService.getEnvironment(ENVIRONMENT_VALID);
       assert.strictEqual(env.id, ENVIRONMENT_VALID);
       assert.strictEqual(env.description, 'Some description');
@@ -108,5 +228,27 @@ describe('EnvironmentService test suite', () => {
       const environmentTransitioned = await envService.destroyEnvironment(ENVIRONMENT_VALID, { keepTasks: true }, user);
       assert.deepStrictEqual(environmentTransitioned, {id: ENVIRONMENT_VALID})
     });
+  });
+
+  describe(`'newEnvironmentAsync' test suite`, async () => {
+    it('should catch gRPC error and throw native error due to issue encountered when trying to create environment', async () => {
+      await assert.rejects(
+        envService.newEnvironmentAsync({ workflowTemplate: 'BAD', user }, ),
+        new InvalidInputError('Cannot create environment with this template')
+      );
+    });
+
+    it('should successfully return environment id if successfully created', async () => {
+      const environmentTransitioned = await envService.newEnvironmentAsync({ workflowTemplate: 'github/template/1.1.0', userVars: {keyA: 'keyA'}, user });
+      assert.strictEqual(environmentTransitioned.id, ENVIRONMENT_VALID);
+      assert.ok(environmentTransitioned.isDeploying);
+    });
+
+    it('should add environment to cache when successfully deployed', async () => {
+      envService._environmentCacheService.addOrUpdateEnvironment = sinon.stub().returns();
+      const environmentTransitioned = await envService.newEnvironmentAsync({ workflowTemplate: 'github/template/1.1.0', userVars: { keyA: 'keyA' }, user });
+      assert.strictEqual(environmentTransitioned.id, ENVIRONMENT_VALID);
+      assert.ok(envService._environmentCacheService.addOrUpdateEnvironment.calledOnce);
+    })
   });
 });

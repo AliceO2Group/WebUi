@@ -39,7 +39,7 @@ export default (model) =>
 /**
  * Build an input box, allowing users to add description
  * @param {string} description - description of the layout
- * @param {Function} oninput - function to be executed when there is input change
+ * @param {(e: Event) => void} oninput - function to be executed when there is input change
  * @returns {vnode} - virtual node element
  */
 const descriptionLayoutInput = (description, oninput) => h('.w-100.flex-row', [
@@ -68,7 +68,7 @@ const displayObjectTime = (model) =>
       h('label.form-check-label', {
         for: 'inputShowTimestamp',
         style: 'cursor: pointer',
-      }, 'Display timestamp on each plot'),
+      }, 'Display timestamp and run number on each plot'),
     ),
     h(
       '.w-20.text-right',

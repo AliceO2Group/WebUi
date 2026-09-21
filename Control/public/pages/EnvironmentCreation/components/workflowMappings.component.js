@@ -36,7 +36,7 @@ export const workflowMappingsComponent = (mapping, selected = '', callbackSelect
               selectConfigurationButton(label, configuration === selected, configuration, callbackSelection)
             )]
           ),
-      Failure: () => errorMapping('No saved configurations, use advanced creation')
+      Failure: (error) => errorMapping(error ?? 'No saved configurations, use advanced creation')
     }),
     ),
     h('.flex-row.justify-center', workflowLoaded.match({
@@ -53,7 +53,7 @@ export const workflowMappingsComponent = (mapping, selected = '', callbackSelect
           }))
         ]),
       ]),
-      Failure: () => errorMapping(`Unable to retrieve configuration`)
+      Failure: (error) => errorMapping(error ?? `Unable to retrieve configuration`)
     })
     )
   ]);

@@ -128,7 +128,7 @@ function h(...args) {
  * @param {Element} element - The DOM element
  * @param {function|{view: function}} view - The view which produces a vnode tree
  * @param {Observable} model - The model containing the state
- * @param {boolean} debug - Facultative. Shows the rendering time each time
+ * @param {boolean} [debug] - Facultative. Shows the rendering time each time
  * @example
  * import {h, mount, Observable} from '/js/src/index.js';
  * const model = new Observable();

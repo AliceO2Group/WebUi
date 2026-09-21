@@ -18,6 +18,19 @@
             "windows": {
                 "localRoot": "${workspaceFolder}\\InfoLogger\\"
             }
+        },
+        {
+            "name": "Launch firefox",
+            "type": "firefox",
+            "request": "attach",
+            "url": "http://localhost:8080/",
+            "webRoot": "${workspaceFolder}",
+            "pathMappings": [
+                {
+                    "url": "http://localhost:8080/",
+                    "path": "${workspaceFolder}/QualityControl/public/"
+                }
+            ]
         }
     ]
 }

@@ -13,14 +13,16 @@
 
 /**
  * States of an environment
- * @link https://github.com/AliceO2Group/Control/blob/c5fdca8e25f6f724231d15e34bb1bde7b2c267ab/core/integration/dcs/protos/dcs.proto#L251
+ * @link https://github.com/AliceO2Group/Control/blob/master/core/environment/environment.go#L153-L160
  * @return {Object}
  */
 export const EnvironmentState = Object.freeze({
   STANDBY: 'STANDBY',
   DEPLOYED: 'DEPLOYED',
+  DONE: 'DONE',
   CONFIGURED: 'CONFIGURED',
   RUNNING: 'RUNNING',
+  PENDING: 'PENDING',
   ERROR: 'ERROR',
   UNKNOWN: 'UNKNOWN'
 });

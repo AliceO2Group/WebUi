@@ -14,7 +14,7 @@
 */
 
 const request = require('supertest');
-const { ADMIN_TEST_TOKEN, TEST_URL } = require('../generateToken.js');
+const { ADMIN_TEST_TOKEN, GUEST_TEST_TOKEN, TEST_URL } = require('../generateToken.js');
 
 describe(`'API - GET - /locks' test suite`, () => {
   before(async () => {
@@ -38,7 +38,7 @@ describe(`'API - GET - /locks' test suite`, () => {
       .get('/')
       .expect(403, {
         error: '403 - Json Web Token Error',
-        message: 'You must provide a JWT token'
+        message: 'Invalid token: jwt must be provided'
       });
   });
 
@@ -47,7 +47,17 @@ describe(`'API - GET - /locks' test suite`, () => {
       .get('/?token=invalid-token')
       .expect(403, {
         error: '403 - Json Web Token Error',
-        message: 'Invalid JWT token provided'
+        message: 'Invalid token: jwt malformed'
+      });
+  });
+
+  it('should return  unauthorized error for insufficient role token requests', async () => {
+    await request(`${TEST_URL}/api/locks`)
+      .get(`/?token=${GUEST_TEST_TOKEN}`)
+      .expect(403, {
+        status: 403,
+        message: 'Not enough permissions for this operation',
+        title: 'Unauthorized Access',
       });
   });
 });

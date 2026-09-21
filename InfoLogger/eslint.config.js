@@ -15,14 +15,13 @@
 const globals = require('globals');
 const pluginJs = require('@eslint/js');
 const jsdoc = require('eslint-plugin-jsdoc');
-const stylisticJs = require('@stylistic/eslint-plugin-js');
+const stylisticJs = require('@stylistic/eslint-plugin');
 
 module.exports = [
   jsdoc.configs['flat/recommended'],
   pluginJs.configs.recommended,
   {
     plugins: {
-      jsdoc,
       '@stylistic/js': stylisticJs,
     },
     languageOptions: {

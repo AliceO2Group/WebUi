@@ -13,8 +13,8 @@
  */
 
 import { h, iconX } from '/js/src/index.js';
-
 import { severityClass, severityLabel } from './severityUtils.js';
+import { bkpLogEntryRedirectButton } from '../common/bkpLogEntryRedirectButton.js';
 
 export default (model) => model.log.item ? h('', [
   h(
@@ -55,6 +55,7 @@ export default (model) => model.log.item ? h('', [
       h('tr', h('td', 'ErrCode'), h('td', model.log.item.errcode)),
       h('tr', h('td', 'ErrLine'), h('td', model.log.item.errline)),
       h('tr', h('td', 'ErrSource'), h('td', model.log.item.errsource)),
+      h('tr', h('td', 'Create BKP entry'), h('td', bkpLogEntryRedirectButton(model.log.item, model))),
     ]),
   ),
   h('.p2.f7', { style: 'word-break: break-word' }, model.log.item.message),

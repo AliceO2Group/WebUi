@@ -17,3 +17,22 @@
  * @returns {Promise<void>}
  */
 export const delay = (ms = 500) => new Promise((resolve) => setTimeout(() => resolve(), ms));
+
+/**
+ * Delay until a condition is met or a timeout occurs
+ * @param {Function} conditionFunc - Function that returns a boolean indicating if the condition is met
+ * @param {number} ms - Time in milliseconds to wait between checks
+ * @param {number} maxRetries - Maximum number of retries before giving up
+ * @returns {Promise<void>}
+ */
+export const delayAndCheck = async (conditionFunc, ms = 500, maxRetries = 10) => {
+  let retries = 0;
+  while (retries < maxRetries) {
+    const isConditionMet = await conditionFunc();
+    if (isConditionMet) {
+      return;
+    }
+    await delay(ms);
+    retries += 1;
+  }
+};

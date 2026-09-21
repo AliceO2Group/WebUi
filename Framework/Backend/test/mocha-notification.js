@@ -42,7 +42,7 @@ describe('Kafka Connector test suite', () => {
   });
 
   describe('Check notification params', function () {
-    this.timeout();
+    this.timeout(5000);
 
     it('should reject sending notification without proper valid message', async () => {
       const notification = new NotificationService(config.notification);

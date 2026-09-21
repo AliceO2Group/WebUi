@@ -17,12 +17,17 @@ import {
   Observable, WebSocketClient, QueryRouter,
   Loader, RemoteData, sessionService, Notification, iconMediaPlay, iconMediaStop,
 } from '/js/src/index.js';
-import Log from './log/Log.js';
-import Timezone from './common/Timezone.js';
+
+import { callRateLimiter, setBrowserTabTitle } from './common/utils.js';
+import { ConfigurationService } from './services/ConfigurationService.js';
 import { setBrowserTabTitle } from './common/utils.js';
-import Table from './table/Table.js';
 import { MODE } from './constants/mode.const.js';
 import { BUTTON } from './constants/button-states.const.js';
+import Log from './log/Log.js';
+import Zoom from './log/Zoom.js';
+import Table from './table/Table.js';
+import Timezone from './common/Timezone.js';
+
 
 /**
  * Main model of InfoLoggerGui, contains sub-models modules
@@ -40,6 +45,9 @@ export default class Model extends Observable {
 
     this.loader = new Loader(this);
     this.loader.bubbleTo(this);
+    this.configurationService = new ConfigurationService(this);
+    this.configurationService.bubbleTo(this);
+    this.configurationService.load();
 
     this.log = new Log(this);
     this.log.bubbleTo(this);
@@ -73,14 +81,23 @@ export default class Model extends Observable {
     });
     this.handleLocationChange(); // Init first page
 
-    // Setup keyboard dispatcher
+    // Setup keyboard and wheel dispatchers
     window.addEventListener('keydown', this.handleKeyboardDown.bind(this));
+    window.addEventListener('wheel', this.handleWheel.bind(this), { passive: false });
 
     // Setup WS connection
     this.ws = new WebSocketClient();
     this.ws.addListener('command', this.handleWSCommand.bind(this));
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
     this.ws.addListener('close', this.handleWSClose.bind(this));
+
+    // update router on model change
+    // Model can change very often we protect router with callRateLimiter
+    // Router limit: 100 calls per 30 seconds max = 30ms, 2 FPS is enough (500ms)
+    this.observe(callRateLimiter(this.updateRouteOnModelChange.bind(this), 500));
+
+    this.zoom = new Zoom();
+    this.zoom.bubbleTo(this);
   }
 
   /**
@@ -199,18 +216,49 @@ export default class Model extends Observable {
   }
 
   /**
+   * Handles wheel events for zoom control
+   * @param {WheelEvent} e - wheel event
+   */
+  handleWheel(e) {
+    // Only trigger zoom if Ctrl (or Cmd on Mac) is pressed
+    // Windows intercepts the Windows key events, so these do not reach the browser
+    if (!e.ctrlKey && !e.metaKey) {
+      return;
+    }
+    e.preventDefault();
+    const now = Date.now();
+    // throttle zoom to avoid too many events on fast scroll, especially on trackpads
+    if (now - this.zoom.lastScrollTime < 50) {
+      return;
+    }
+    this.zoom.lastScrollTime = now;
+    e.deltaY < 0 ? this.zoom.zoomIn() : this.zoom.zoomOut();
+  }
+
+  /**
    * Delegates sub-model actions depending on incoming keyboard event
    * @param {Event} e - keyboard event
    */
   handleKeyboardDown(e) {
-    // console.log(
-    // e.code, e.key,e.keyCode, e.metaKey, e.ctrlKey, e.altKey`
-    // );
+    // Zoom shortcuts regardless of focus
+    if (e.ctrlKey || e.metaKey) {
+      if (e.key === '=' || e.key === '+') {
+        e.preventDefault();
+        this.zoom.zoomIn();
+        return;
+      } else if (e.key === '-') {
+        e.preventDefault();
+        this.zoom.zoomOut();
+        return;
+      }
+    }
+
     const code = e.keyCode;
 
     // Enter
     if ((code === 13 && !this.messageFocused || code === 13 && e.metaKey) && !this.log.isLiveModeEnabled()) {
       this.log.query();
+      this.log.contextMenu.hide();
     }
     if (!this.messageFocused) {
       // don't listen to keys when it comes from an input (they transform into letters)
@@ -225,6 +273,7 @@ export default class Model extends Observable {
         case 27: // escape
           this.log.removeLogDownloadContent();
           this.accountMenuEnabled = false;
+          this.log.contextMenu.hide();
           break;
         case 37: // left
           if (e.altKey) {
@@ -335,7 +384,15 @@ export default class Model extends Observable {
       return;
     } else if (params.q) {
       this.getUserProfile();
-      this.log.filter.fromObject(JSON.parse(params.q.replaceAll('\n', '\\n')));
+
+      try {
+        this.log.filter.fromObject(JSON.parse(params.q));
+      } catch (error) {
+        this.log.filter.resetCriteria();
+        this.updateRouteOnModelChange();
+        this.notification.show(`Invalid URL filter format: ${error.message}`, 'danger');
+      }
+
       if (params.live == 'true') {
         await this.loadLiveMode();
       }
@@ -389,6 +446,10 @@ export default class Model extends Observable {
   setQueryButton(queryType) {
     this.queryButtonType = queryType;
     this.notify();
+  }
+  
+  updateRouteOnModelChange() {
+    this.router.go(this.log.filter.queryString, true, true);
   }
 
   /**

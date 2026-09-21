@@ -20,7 +20,7 @@ import { h, iconCircleX } from '/js/src/index.js';
  * @returns {vnode} - virtual node element
  */
 export const errorDiv = (message) =>h(
-  '.flex-column.items-center.justify-center',
+  '.flex-column.items-center.justify-center#Error',
   [
     h('.f1', iconCircleX()),
     h('span.f3', message),

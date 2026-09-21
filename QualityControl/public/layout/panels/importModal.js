@@ -35,7 +35,7 @@ export default (model) =>
           NotAsked: () => null,
           Loading: () => h('', 'Loading...'),
           Success: (_) => null,
-          Failure: (error) => h('.danger.pv1', error.message),
+          Failure: (error) => h('.danger.pv1', error.message || String(error)),
         }),
         h('.btn-group.w-100.align-center.pv1', {
           style: 'display:flex; justify-content:center;',

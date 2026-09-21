@@ -263,7 +263,7 @@ export default class Config extends Observable {
    */
   getConsulConfigURL() {
     const consul = COG.CONSUL;
-    return `${consul.protocol}://${consul.hostname}:${consul.port}/${consul.kVPrefix}/${consul.readoutCardPath}`;
+    return `${consul.protocol}://${consul.ui}/${consul.kVPrefix}/${consul.readoutCardPath}`;
   }
 
   /**

@@ -11,7 +11,7 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
+const {updateAndSendExpressResponseFromNativeError, InvalidInputError} = require('@aliceo2/web-ui');
 
 /**
  * Controller for dealing with all API requests on workflow templates from AliECS:
@@ -40,7 +40,7 @@ class WorkflowTemplateController {
       const defaultTemplateSource = await this._workflowService.getDefaultTemplateSource();
       res.status(200).json(defaultTemplateSource);
     } catch (error) {
-      updateExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
@@ -55,7 +55,7 @@ class WorkflowTemplateController {
       const mappings = await this._workflowService.retrieveWorkflowMappings();
       res.status(200).json(mappings);
     } catch (error) {
-      updateExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
@@ -69,13 +69,16 @@ class WorkflowTemplateController {
     try {
       const {name} = req.query;
       if (!name) {
-        res.status(400).json({message: 'No name for the configuration provided'});
+        updateAndSendExpressResponseFromNativeError(
+          res,
+          new InvalidInputError('No name for the configuration provided')
+        );
         return;
       }
       const mappings = await this._workflowService.retrieveWorkflowSavedConfiguration(name);
       res.status(200).json(mappings);
     } catch (error) {
-      updateExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 }

@@ -15,10 +15,10 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
+const {NotFoundError} = require('@aliceo2/web-ui');
 
 const {RunDefinitions} = require('./../../../lib/common/runDefinition.enum.js');
 const {RunService} = require('./../../../lib/services/Run.service.js');
-const {NotFoundError} = require('./../../../lib/errors/NotFoundError.js');
 
 describe(`'RunService' test suite`, async () => {
   describe(`'_retrieveCalibrationConfigurationsForDetectors test suite`, async () => {

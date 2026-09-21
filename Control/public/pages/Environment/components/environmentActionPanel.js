@@ -18,7 +18,7 @@ import {miniCard} from '../../../common/card/miniCard.js';
 import {controlEnvironmentPanel} from './controlEnvironmentPanel.js';
 import {ROLES} from '../../../workflow/constants.js';
 import {isUserAllowedRole} from '../../../common/userRole.js';
-import {informationRedirectActionPanel} from './informationRedirectActionPanel.js';
+import {informationRedirectActionPanel} from './../../../common/environment/informationRedirectActionPanel.js';
 
 /**
  * Build a panel with multiple mini cards which contain actions allowed to the user for the environment

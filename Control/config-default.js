@@ -12,6 +12,7 @@ module.exports = {
     hostname: 'localhost',
     port: 9090,
     timeout: 20000, // ms, gRPC deadline for service calls
+    connectionTimeout: 1000, // ms, gRPC connection timeout
     maxMessageLength: 50, // MB, gRPC receive message limit
     label: 'Control',
     package: 'o2control'
@@ -20,6 +21,7 @@ module.exports = {
     hostname: 'localhost',
     port: 9090,
     timeout: 20000, // ms, gRPC deadline for service calls
+    connectionTimeout: 1000, // ms, gRPC connection timeout
     maxMessageLength: 50, // MB, gRPC receive message limit
     label: 'Apricot',
     package: 'apricot'
@@ -42,7 +44,6 @@ module.exports = {
     readoutCardPath: 'o2/components/readoutcard/key/prefix',
     qcPath: 'o2/components/qc/key/prefix',
     kVPrefix: 'o2/cluster/key/prefix',
-    coreServices: 'o2/components/aliecs/some/settings/path',
   },
   infoLoggerGui: {
     url: 'localhost:8081',

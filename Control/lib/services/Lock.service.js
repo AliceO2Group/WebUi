@@ -12,9 +12,8 @@
  * or submit itself to any jurisdiction.
 */
 
+const {NotFoundError, UnauthorizedAccessError} = require('@aliceo2/web-ui');
 const {DetectorLock} = require('./../dtos/DetectorLock.js');
-const {NotFoundError} = require('../errors/NotFoundError.js');
-const {UnauthorizedAccessError} = require('./../errors/UnauthorizedAccessError');
 
 const PADLOCK_UPDATE = 'padlock-update';
 
@@ -88,9 +87,8 @@ class LockService {
       throw new NotFoundError(`Detector ${detectorName} not found in the list of detectors`);
     } else if (lock.isTaken()) {
       if (!lock.isOwnedBy(user) && !shouldForce) {
-        throw new UnauthorizedAccessError(
-          `Unauthorized TAKE action for lock of detector ${detectorName} by user ${user.fullName}`
-        );
+        throw new UnauthorizedAccessError(`Unauthorized TAKE action for lock ${detectorName} `
+          + `by ${ user.fullName } while lock is held by ${ lock.owner.fullName }`);
       }
       if (lock.isOwnedBy(user)) {
         return this._locksByDetector;
@@ -118,9 +116,8 @@ class LockService {
     } else if (lock.isFree()) {
       return this._locksByDetector;
     } else if (!lock.isOwnedBy(user) && !shouldForce) {
-      throw new UnauthorizedAccessError(
-        `Unauthorized RELEASE action for lock of detector ${detectorName} by user ${user.fullName}`
-      );
+      throw new UnauthorizedAccessError(`Unauthorized RELEASE action for lock ${detectorName} `
+        + `by ${ user.fullName } while lock is held by ${ lock.owner.fullName }`);
     }
     this._locksByDetector[detectorName].release();
 
@@ -132,10 +129,10 @@ class LockService {
    * Checks if the given user has the lock for the provided list of detectors
    * @param {String} userName - of user to check lock ownership
    * @param {Number} userId - person id of the user
-   * @param {Array<string>} detectors - list of detectors to check lock is owned by the user
+   * @param {Array<string>} [detectors = []] - list of detectors to check lock is owned by the user
    * @returns {boolean}
    */
-  hasLocks(user, detectors) {
+  hasLocks(user, detectors = []) {
     return detectors.every((detector) => this._locksByDetector[detector]?.isOwnedBy(user));
   }
 

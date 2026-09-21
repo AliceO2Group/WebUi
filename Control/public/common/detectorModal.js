@@ -55,7 +55,7 @@ const detectorsModal = (model) =>
 /**
  * Build a wrapped list of detector buttons
  * @param {Object} model
- * @param {List<String>} list
+ * @param {Array<String>} list
  * @returns {vnode}
  */
 const detectorsList = (model, list) =>

@@ -3,6 +3,7 @@ module.exports = {
   "extends": ["eslint:recommended"],
   "env": {
     "es6": true,
+    "es2020": true,
     "node": true,
     "jquery" : true,
     "browser": true,

@@ -16,11 +16,12 @@
 const assert = require('assert');
 const sinon = require('sinon');
 
-const {LockController} = require('./../../../lib/controllers/Lock.controller.js');
-const {LockService} = require('./../../../lib/services/Lock.service.js');
-const {User} = require('./../../../lib/dtos/User.js');
-const {DetectorLockAction} = require('../../../lib/common/lock/detectorLockAction.enum.js');
-const {DetectorLockState} = require('../../../lib/common/lock/detectorLockState.enum.js');
+const { LockController } = require('./../../../lib/controllers/Lock.controller.js');
+const { LockService } = require('./../../../lib/services/Lock.service.js');
+const { User } = require('./../../../lib/dtos/User.js');
+const { DetectorLockAction } = require('../../../lib/common/lock/detectorLockAction.enum.js');
+const { DetectorLockState } = require('../../../lib/common/lock/detectorLockState.enum.js');
+const { DetectorId } = require('../../../lib/common/detectorId.enum.js');
 
 describe(`'LockController' test suite`, () => {
   const res = {
@@ -41,7 +42,7 @@ describe(`'LockController' test suite`, () => {
     });
 
     it('should successfully return the state of locks if service is enabled and with detectors', () => {
-      lockService.setLockStatesForDetectors(['ABC', 'XYZ'])
+      lockService.setLockStatesForDetectors(['ABC', 'XYZ', DetectorId.TST])
       lockController.getLocksStateHandler({}, res);
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
@@ -52,6 +53,11 @@ describe(`'LockController' test suite`, () => {
         },
         XYZ: {
           name: 'XYZ',
+          state: DetectorLockState.FREE,
+          owner: undefined,
+        },
+        TST: {
+          name: DetectorId.TST,
           state: DetectorLockState.FREE,
           owner: undefined,
         },
@@ -88,6 +94,11 @@ describe(`'LockController' test suite`, () => {
           state: DetectorLockState.FREE,
           owner: undefined,
         },
+        TST: {
+          name: DetectorId.TST,
+          state: DetectorLockState.FREE,
+          owner: undefined,
+        }
       }));
     });
 
@@ -103,7 +114,11 @@ describe(`'LockController' test suite`, () => {
         }
       }, res);
       assert.ok(res.status.calledWith(403));
-      assert.ok(res.json.calledWith({message: `Unauthorized TAKE action for lock of detector ABC by user NotAnonymous`}));
+      assert.ok(res.json.calledWith({
+        message: 'Unauthorized TAKE action for lock ABC by NotAnonymous while lock is held by Anonymous',
+        status: 403,
+        title: 'Unauthorized Access',
+      }));
     });
 
     it('should reply with error when an already held lock is requested to be released by another user without force', () => {
@@ -118,7 +133,11 @@ describe(`'LockController' test suite`, () => {
         }
       }, res);
       assert.ok(res.status.calledWith(403));
-      assert.ok(res.json.calledWith({message: `Unauthorized RELEASE action for lock of detector ABC by user NotAnonymous`}));
+      assert.ok(res.json.calledWith({
+        message: 'Unauthorized RELEASE action for lock ABC by NotAnonymous while lock is held by Anonymous',
+        title: 'Unauthorized Access',
+        status: 403,
+      }));
     });
 
     it('should successfully reply to a request to release lock held by correct owner', () => {
@@ -144,6 +163,11 @@ describe(`'LockController' test suite`, () => {
           state: DetectorLockState.FREE,
           owner: undefined,
         },
+        TST: {
+          name: DetectorId.TST,
+          state: DetectorLockState.FREE,
+          owner: undefined,
+        },
       }));
     });
 
@@ -158,7 +182,11 @@ describe(`'LockController' test suite`, () => {
         }
       }, res);
       assert.ok(res.status.calledWith(400));
-      assert.ok(res.json.calledWith({message: 'Missing detectorId'}));
+      assert.ok(res.json.calledWith({
+        message: 'Missing detectorId',
+        status: 400,
+        title: 'Invalid Input',
+      }));
 
       lockController.actionLockHandler({
         params: {
@@ -171,7 +199,11 @@ describe(`'LockController' test suite`, () => {
         }
       }, res);
       assert.ok(res.status.calledWith(400));
-      assert.ok(res.json.calledWith({message: 'Invalid action to apply on lock for detector: ABC'}));
+      assert.ok(res.json.calledWith({
+        message: 'Invalid action to apply on lock for detector: ABC',
+        status: 400,
+        title: 'Invalid Input',
+      }));
     });
 
     it('should return 404 and not found error message for a detector that does not exist', () => {
@@ -186,15 +218,19 @@ describe(`'LockController' test suite`, () => {
         }
       }, res);
       assert.ok(res.status.calledWith(404));
-      assert.ok(res.json.calledWith({message: 'Detector NONEXISTENT not found in the list of detectors'}));
+      assert.ok(res.json.calledWith({
+        message: 'Detector NONEXISTENT not found in the list of detectors',
+        status: 404,
+        title: 'Not Found',
+      }));
     });
 
-    it('should successfully lock all detectors available to lock', () => {
+    it(`should successfully lock all detectors available to lock but ${DetectorId.TST}`, () => {
       lockService.takeLock('ABC', new User('anonymous', 'Anonymous', 0, ['global']));
       lockController.actionLockHandler({
         params: {
           action: DetectorLockAction.TAKE,
-          detectorId: 'ALL'
+          detectorId: DetectorId.ALL
         }, session: {
           personid: 1,
           name: 'OneAnonymous',
@@ -221,20 +257,38 @@ describe(`'LockController' test suite`, () => {
             username: 'oneanonymous',
           },
         },
+        TST: {
+          name: DetectorId.TST,
+          state: DetectorLockState.FREE,
+          owner: undefined,
+        },
       }));
     });
 
-    it('should successfully release all detectors available to lock', () => {
+    it(`should successfully release all detectors available to lock but ${DetectorId.TST}`, () => {
+      // take lock for TST to verify it is not released
       lockController.actionLockHandler({
         params: {
-          action: DetectorLockAction.RELEASE,
-          detectorId: 'ALL'
+          action: DetectorLockAction.TAKE,
+          detectorId: DetectorId.TST,
         }, session: {
           personid: 1,
           name: 'OneAnonymous',
           username: 'oneanonymous',
         }
       }, res);
+
+      lockController.actionLockHandler({
+        params: {
+          action: DetectorLockAction.RELEASE,
+          detectorId: DetectorId.ALL
+        }, session: {
+          personid: 1,
+          name: 'OneAnonymous',
+          username: 'oneanonymous',
+        }
+      }, res);
+
       assert.ok(res.status.calledWith(200));
       assert.ok(res.json.calledWith({
         ABC: {
@@ -250,6 +304,15 @@ describe(`'LockController' test suite`, () => {
           name: 'XYZ',
           state: DetectorLockState.FREE,
           owner: undefined,
+        },
+        TST: {
+          name: DetectorId.TST,
+          state: DetectorLockState.TAKEN,
+          owner: {
+            fullName: 'OneAnonymous',
+            personid: 1,
+            username: 'oneanonymous',
+          },
         },
       }));
     });
@@ -284,6 +347,15 @@ describe(`'LockController' test suite`, () => {
           state: DetectorLockState.FREE,
           owner: undefined,
         },
+        TST: {
+          name: DetectorId.TST,
+          state: DetectorLockState.TAKEN,
+          owner: {
+            fullName: 'OneAnonymous',
+            personid: 1,
+            username: 'oneanonymous',
+          },
+        },
       }));
       res.status.resetHistory()
       res.json.resetHistory();
@@ -314,14 +386,23 @@ describe(`'LockController' test suite`, () => {
           state: DetectorLockState.FREE,
           owner: undefined,
         },
+        TST: {
+          name: DetectorId.TST,
+          state: DetectorLockState.TAKEN,
+          owner: {
+            fullName: 'OneAnonymous',
+            personid: 1,
+            username: 'oneanonymous',
+          },
+        },
       }));
     });
 
-    it('should successfully respond to a request to take ALL locks by force', () => {
+    it('should successfully respond to a request to take ALL locks by force but TST', () => {
       lockController.actionForceLockHandler({
         params: {
           action: DetectorLockAction.TAKE,
-          detectorId: 'ALL',
+          detectorId: DetectorId.ALL,
         }, session: {
           personid: 22,
           username: 'twotwoanonymous',
@@ -349,15 +430,25 @@ describe(`'LockController' test suite`, () => {
             username: 'twotwoanonymous',
           }
         },
+        TST: {
+          name: DetectorId.TST,
+          state: DetectorLockState.TAKEN,
+          owner: {
+            fullName: 'OneAnonymous',
+            personid: 1,
+            username: 'oneanonymous',
+          },
+        },
+        
       }));
     });
 
-    it('should successfully respond to a request to release ALL locks by force', () => {
+    it('should successfully respond to a request to release ALL locks by force but TST', () => {
       lockService.takeLock('ABC', new User('anonymous', 'Anonymous', 0, ['global']), true); // now one lock is under personid 0
       lockController.actionForceLockHandler({
         params: {
           action: DetectorLockAction.RELEASE,
-          detectorId: 'ALL',
+          detectorId: DetectorId.ALL,
         }, session: {
           personid: 22,
           username: 'twotwoanonymous',
@@ -376,6 +467,15 @@ describe(`'LockController' test suite`, () => {
           name: 'XYZ',
           state: DetectorLockState.FREE,
           owner: undefined,
+        },
+        TST: {
+          name: DetectorId.TST,
+          state: DetectorLockState.TAKEN,
+          owner: {
+            fullName: 'OneAnonymous',
+            personid: 1,
+            username: 'oneanonymous',
+          },
         },
       }));
     });

@@ -14,7 +14,7 @@
 
 import { h } from '/js/src/index.js';
 import { spinner } from '../../../common/spinner.js';
-import { draw } from '../../../object/objectDraw.js';
+import { draw } from '../../../common/object/draw.js';
 import { iconCaretBottom, iconCaretRight, iconBarChart } from '/js/src/icons.js';
 import virtualTable from '../../../object/virtualTable.js';
 
@@ -31,20 +31,20 @@ export default (model) =>
     Loading: () => h('.flex-column.items-center', [spinner(2), h('.f6', 'Loading Objects')]),
     Success: (objects) => {
       let objectsToDisplay = [];
-      const { searchInput = '' } = model.object;
+      const { searchInput = '', selectedObject, objects: objectsRemoteDataMap = {} } = model.object;
       if (searchInput.trim() !== '') {
         objectsToDisplay = objects.filter((qcObject) =>
-          qcObject.path.toLowerCase().includes(searchInput.toLowerCase()));
+          qcObject.name.toLowerCase().includes(searchInput.toLowerCase()));
       }
+      const objectRemoteData = objectsRemoteDataMap[selectedObject?.name];
       return [
         searchForm(model),
-        h(
-          '.scroll-y',
+        h('.flex-column.flex-grow', {}, [
           searchInput.trim() !== ''
             ? virtualTable(model, 'side', objectsToDisplay)
-            : treeTable(model),
-        ),
-        objectPreview(model),
+            : h('.scroll-y', treeTable(model)),
+        ]),
+        objectRemoteData && objectPreview(selectedObject?.name, objectRemoteData),
       ];
     },
     Failure: (error) => h('.f6.danger.flex-column.text-center', [
@@ -55,26 +55,11 @@ export default (model) =>
 
 /**
  * An input which allows users to search though objects;
- * A checkbox to switch to displaying only objects in Online Mode (displayed only if online mode is available)
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
 const searchForm = (model) => h('.flex-column.w-100.mv1', [
-  h('.flex-row.w-100', [
-    h('.w-100', 'Select objects to display:'),
-    model.isOnlineModeEnabled &&
-    h('.w-50.f6.flex-row', { style: 'justify-content: end;' }, [
-      h('label.m0.ph1', {
-        for: 'inputOnlineOnlyTreeSidebar',
-        style: 'cursor: pointer',
-      }, 'Online only'),
-      h('input', {
-        type: 'checkbox',
-        id: 'inputOnlineOnlyTreeSidebar',
-        onchange: (e) => model.object.toggleSideTree(e.target.checked),
-      }),
-    ]),
-  ]),
+  h('.flex-row.w-100', [h('.w-100', 'Select objects to display:')]),
   h('input.form-control.w-100', {
     placeholder: 'Search',
     type: 'text',
@@ -108,9 +93,9 @@ function treeTable(model) {
  * @param {Model} model - root model of the application
  * @returns {vnode} - virtual node element
  */
-const treeRows = (model) => !model.object.sideTree
+const treeRows = (model) => !model.object.tree
   ? null
-  : model.object.sideTree.children.map((children) => treeRow(model, children, 0));
+  : model.object.tree.children.map((children) => treeRow(model, children, 0));
 
 /**
  * Shows a line <tr> of object represented by parent node `tree`, also shows
@@ -151,7 +136,7 @@ const branchRow = (model, sideTree, level) => {
 
   const icon = sideTree.open ? iconCaretBottom() : iconCaretRight();
   const iconWrapper = h('span', { style: { paddingLeft: `${level}em` } }, icon);
-  const path = sideTree.path.join('/');
+  const path = sideTree.name;
 
   const attr = {
     key: `key-sidebar-tree-${path}`,
@@ -178,7 +163,7 @@ const branchRow = (model, sideTree, level) => {
 const leafRow = (model, sideTree, level) => {
   // UI construction
   const iconWrapper = h('span', { style: { paddingLeft: `${level}em` } }, iconBarChart());
-  const path = sideTree.path.join('/');
+  const path = sideTree.name;
   const className = sideTree.object && sideTree.object === model.object.selected ? 'table-primary' : '';
   const draggable = Boolean(sideTree.object);
 
@@ -189,6 +174,7 @@ const leafRow = (model, sideTree, level) => {
     class: className,
     draggable,
     ondragstart: () => {
+      model.object.select(sideTree.object);
       const newItem = model.layout.addItem(sideTree.object.name);
       model.layout.moveTabObjectStart(newItem);
     },
@@ -201,14 +187,17 @@ const leafRow = (model, sideTree, level) => {
 /**
  * Shows a JSROOT plot of selected object inside the tree of sidebar allowing the user to preview object and decide
  * if it should be added to layout
- * @param {Model} model - root model of the application
+ * @param {string} name - name of the selected object
+ * @param {QcObjectRemoteData} objectRemoteData - RemoteData of the selected object
  * @returns {vnode} - virtual node element
  */
-const objectPreview = (model) => {
-  const isSelected = model.object.selected;
-  if (isSelected) {
-    const objName = model.object.selected.name;
-    return isSelected && h('.bg-white', { style: 'height: 20em' }, draw(model, objName, {}));
-  }
-  return;
-};
+const objectPreview = (name, objectRemoteData = null) =>
+  objectRemoteData
+    ? h(
+      '.bg-white',
+      { style: 'height: 20em' },
+      draw(objectRemoteData, {}, [], (error) => {
+        model.object.invalidObject(name, error.message);
+      }),
+    )
+    : null;

@@ -17,208 +17,223 @@ import LayoutUtils from './../LayoutUtils.js';
 import {
   iconPencil, iconTrash, iconPlus, iconBadge, iconLayers, iconCheck, iconBan, iconShareBoxed,
 } from '/js/src/icons.js';
+import { filterPanelToggleButton } from '../../common/filters/filterViews.js';
+import { layoutListBadge } from './../../pages/layoutListView/components/LayoutListCard.js';
 
 /**
  * Shows header of page showing one layout with edit button, and other buttons in edit mode. (center and right)
- * @param {Model} model - root model of the application
+ * @param {Layout} layout - the model that handles the object state.
+ * @param {FilterModel} filterModel - The model handeling the filter state
  * @returns {vnode} - virtual node element
  */
-export default (model) => model.layout.item
-  ? model.layout.editEnabled ? toolbarEditMode(model) : toolbarViewMode(model)
-  : null;
+export default (layout, filterModel) => {
+  const { item, editEnabled = false } = layout;
+  if (item) {
+    return editEnabled ? toolbarEditMode(layout) : toolbarViewMode(layout, filterModel);
+  }
+  return;
+};
 
 /**
  * This is the toolbar in view mode (center and right)
- * @param {Model} model - root model of the application
+ * @param {Layout} layout - the model that handles the object state
+ * @param {FilterModel} filterModel - The model handeling the filter state
  * @returns {vnode} - virtual node element
  */
-const toolbarViewMode = (model) => {
-  const layoutItem = model.layout.item;
-  const { isOfficial } = layoutItem;
-  return [
-    h(
-      '.w-50.text-center',
-      h('div.header-layout', [layoutItem.tabs.map((tab, i) => toolbarViewModeTab(model, tab, i))]),
-    ),
-    h('.flex-grow.text-right', [
-      h('b.f4.items-center', [
-        isOfficial ? iconBadge() : '',
-        layoutItem.name,
+const toolbarViewMode = (layout, filterModel) => {
+  const layoutItem = layout.item;
+  const { isOfficial, owner_id, name } = layoutItem;
+
+  return {
+    centerCol: h('.f4.flex-row.flex-grow.justify-center.items-center.g2', [
+      h('.g1', [
+        isOfficial ? h('span', iconBadge()) : '',
+        h('b', layoutItem.name),
       ]),
-      ' ',
-      // Show group button edit/duplicate only for owner of the layout shown
-      h('.btn-group', [
-        h('button.btn.btn-default', {
-          onclick: () => {
-            const nameForNewLayout = prompt('Choose a name for the new layout:').trim();
-            model.layout.duplicate(nameForNewLayout);
-          },
-          title: 'Duplicate layout',
-        }, iconLayers()),
-        h('a.btn.btn-default', {
-          title: 'Export layout skeleton as JSON file',
-          href: `data:application/octet;,${encodeURIComponent(LayoutUtils.toSkeleton(layoutItem))}`,
-          download: `layout-${layoutItem.name}-skeleton.json`,
-        }, iconShareBoxed()),
-        model.session.personid == layoutItem.owner_id && [
-          h('.dropdown', {
-            title: 'Edit layout',
-            class: model.layout.isEditLayoutDropdownOpen ? 'dropdown-open' : '',
-          }, [
-            h('button.btn.btn-primary', { onclick: () => model.layout.toggleEditMenu() }, iconPencil()),
-            h('.dropdown-menu.right-menu', [
-              h('.text-ellipsis', [
-                h('a.menu-item', { title: 'Edit via GUI', onclick: () => model.layout.edit() }, 'Edit via GUI'),
-                h('a.menu-item', {
-                  title: 'Edit via JSON',
-                  onclick: () => model.layout.initializeEditViaJson(),
-                }, 'Edit via JSON'),
-              ]),
-            ]),
-          ]),
-          h('button.btn.btn-danger', {
-            onclick: () => confirm('Are you sure to delete this layout?') && model.layout.deleteItem(),
-            title: 'Delete layout',
-          }, iconTrash()),
-        ],
+      h('.f6.flex-row', [
+        '(',
+        layoutListBadge(layoutItem.labels),
+        ')',
       ]),
     ]),
-  ];
+    rightCol: h('.w-25.text-right.g2.flex-row.justify-end.flex-wrap', [
+      ' ',
+      filterPanelToggleButton(filterModel),
+      h('.btn-group.flex-wrap', [
+        ' ',
+        newLayoutButton(layout),
+        jsonExportButton(layoutItem, name),
+        layout.ownsLayout(owner_id) && [editDropdown(layout), deleteButton(layout)],
+      ]),
+    ]),
+    subRow: h(
+      '.flex-grow.text-center',
+      [h('.header-layout.header-layout-tabs', [tabViewLinks(layoutItem, layout)])],
+    ),
+  };
 };
 
 /**
  * Single tab button in view mode to change tab of current layout
- * @param {Model} model - root model of the application
+ * @param {Layout} layout - the model that handles the object state.
  * @param {object} tab - tab dto representation
  * @param {object} i - index of tab in the model array of tabs
  * @returns {vnode} - virtual node element
  */
-const toolbarViewModeTab = (model, tab, i) => {
-  const linkClass = model.layout.tab.name === tab.name ? 'selected' : '';
+const toolbarViewModeTab = (layout, tab, i) => {
+  const linkClass = layout.tab.name === tab.name ? 'selected' : '';
 
   /**
    * Handler when user click on a tab to select it
    * @returns {undefined}
    */
-  const selectTab = () => model.layout.selectTab(i);
+  const selectTab = () => layout.selectTab(i);
 
   return [
-    h('button.br-pill.ph2.btn.btn-tab', { class: linkClass, onclick: selectTab }, tab.name),
+    h('button.br-pill.ph2.btn.btn-tab.flex-fixed', { id: `tab-${i}`, class: linkClass, onclick: selectTab }, tab.name),
     ' ',
   ];
 };
 
 /**
  * Toolbar in edit mode (center and right) with rename, trash, save buttons
- * @param {Model} model - root model of the application
+ * @param {Layout} layout - the model that handles the object state
  * @returns {vnode} - virtual node element
  */
-const toolbarEditMode = (model) => [
-  h('.w-50.text-center', [
-    h('div', { class: 'header-layout' }, [
-      h('span', model.layout.item.tabs.map((tab, i) => toolbarEditModeTab(model, tab, i))),
-      h('.btn-group', [
-        tabBtn({
-          title: 'Add new tab to this layout',
-          class: 'default',
-          onclick: () => {
-            const name = prompt('Enter the name of the new tab:');
-            if (name) {
-              model.layout.newTab(name);
-            }
-          },
-        }, iconPlus()),
+const toolbarEditMode = (layout) => {
+  const inputHandler = (e) => {
+    layout.item.name = e.target.value.trim();
+  };
+
+  return {
+    subRow: h('.flex-grow.text-center', [
+      h('.header-layout.edit', [
+        h('span.header-layout-tabs', editTabLinks(layout)),
+        h('.btn-group', [
+          tabBtn({
+            title: 'Add new tab to this layout',
+            class: 'default',
+            onclick: () => {
+              const name = prompt('Enter the name of the new tab:');
+              if (name) {
+                layout.newTab(name);
+              }
+            },
+          }, iconPlus()),
+        ]),
       ]),
     ]),
-  ]),
-  h('.flex-grow.text-right', [
-    h('input.form-control.form-inline', {
-      type: 'text',
-      value: model.layout.item.name,
-      oninput: (e) => {
-        model.layout.item.name = e.target.value.trim();
-      },
-    }),
-    h('.btn-group.m1', [
-      h('button.btn.btn-primary', {
-        onclick: () => model.layout.save(),
-        title: 'Save layout',
-      }, iconCheck()),
-      h('button.btn', {
-        onclick: () => model.layout.cancelEdit(),
-        title: 'Cancel',
-      }, iconBan()),
+    rightCol: h('.w-25.text-right.flex-row.justify-end', [
+      h('input.form-control.form-inline', {
+        type: 'text',
+        value: layout.item.name,
+        oninput: inputHandler,
+      }),
+      h('.btn-group.m1', [
+        saveButton(layout),
+        cancelButton(layout),
+      ]),
     ]),
-  ]),
-];
+  };
+};
 
 /**
  * Single tab button in edit mode (with rename and trash buttons when selected)
- * @param {Model} model - root model of the application
+ * @param {Layout} layout - the model that handles the object state.
  * @param {object} tab - tab dto representation
  * @param {object} i - index of tab in array of model
  * @returns {vnode} - virtual node element
  */
-const toolbarEditModeTab = (model, tab, i) => {
-  const selected = model.layout.tab.name === tab.name;
+const toolbarEditModeTab = (layout, tab, i) => {
+  const selected = layout.tab.name === tab.name;
   const linkClass = selected ? 'selected' : '';
 
   /**
    * Handler when user click on a tab to select it
    * @returns {undefined}
    */
-  const selectTab = () => model.layout.selectTab(i);
+  const selectTab = () => layout.selectTab(i);
 
-  /**
-   * Handler when user click on rename icon
-   * @returns {undefined}
-   */
-  const renameTab = () => {
-    const newName = prompt('Enter a new name for this tab:', tab.name);
-    if (newName) {
-      model.layout.renameTab(i, newName);
-    }
-  };
+  const dragActiveClass = layout.isDragging ? 'pointer-events-auto' : '';
+  const disableButtonsOnDragClass = layout.isDragging ? 'pointer-events-none' : '';
+  const dropZoneClass = (position) => layout.dropTargetId === tab.id && layout.position === position ? 'active' : '';
 
   return [
-    h('.btn-group', [
-      h('button.br-pill.ph2.btn.btn-tab', { class: linkClass, onclick: selectTab }, tab.name),
-      selected && [
-        h('button.br-pill.ph2.btn.btn-tab', {
-          class: linkClass,
-          onclick: renameTab,
-          title: 'Rename tab',
-        }, iconPencil()),
-        resizeGridTabDropDown(model, tab),
-        h('button.br-pill.ph2.btn.btn-tab', {
-          class: linkClass,
-          onclick: () => model.layout.deleteTab(i),
-          title: 'Delete tab',
-        }, iconTrash()),
+    h(
+      '.btn-group.flex-fixed.relative.cursor-grab',
+      {
+        title: 'Drag the tab to re-arrange them',
+        draggable: true,
+        ondragstart: (e) => {
+          e.dataTransfer.setData('text/plain', tab.id);
+          layout.startDragging();
+        },
+        ondrop: (e) => {
+          layout.reorderTabs(e.dataTransfer.getData('text/plain'), layout.dropTargetId, layout.position);
+          layout.clearDropTarget();
+          layout.stopDragging();
+        },
+        ondragend: () => layout.stopDragging(),
+      },
+      [
+        h(
+          'button.br-pill.ph2.btn.btn-tab.whitespace-nowrap',
+          { id: 'btn-tab', class: `${linkClass} cursor-inherit`, onclick: selectTab },
+          tab.name,
+        ),
+        [
+          h(
+            '.drop-zone.before',
+            {
+              class: `${dragActiveClass} ${dropZoneClass('before')}`,
+              ondragenter: () => layout.setDropTarget(tab.id, 'before'),
+              ondragover: (e) => e.preventDefault(), // prevent default to allow drop
+              ondragleave: () => {
+                if (layout.dropTargetId === tab.id && layout.position === 'before') {
+                  layout.clearDropTarget();
+                }
+              },
+            },
+            '',
+          ),
+          h(
+            '.drop-zone.after',
+            {
+              class: `${dragActiveClass} ${dropZoneClass('after')}`,
+              ondragenter: () => layout.setDropTarget(tab.id, 'after'),
+              ondragover: (e) => e.preventDefault(), // prevent default to allow drop
+              ondragleave: () => {
+                if (layout.dropTargetId === tab.id && layout.position === 'after') {
+                  layout.clearDropTarget();
+                }
+              },
+            },
+            '',
+          ),
+          selected && [
+            editTabButton(layout, `${disableButtonsOnDragClass} ${linkClass}`, tab, i),
+            resizeGridTabDropDown(layout, tab),
+            deleteTabButton(layout, `${disableButtonsOnDragClass} ${linkClass}`, i),
+          ],
+        ].flat().filter(Boolean),
       ],
-    ]),
+    ),
     ' ',
   ];
 };
 
 /**
  * Dropdown for resizing the tab of a layout
- * @param {Model} model - root model of the application
+ * @param {Layout} layout - the model that handles the object state.
  * @param {object} tab - tab dto representation
  * @returns {vnode} - virtual node element
  */
-const resizeGridTabDropDown = (model, tab) =>
-  h('select.form-control.select-tab', {
-    style: 'cursor: pointer',
+const resizeGridTabDropDown = (layout, tab) =>
+  h('select.form-control.select-tab.cursor-pointer', {
     title: 'Resize grid of the tab',
-    onchange: (e) => model.layout.resizeGridByXY(e.target.value),
-  }, [
-    h('option', { selected: tab && tab.columns === 1, title: 'Resize layout to 1 columns', value: 1 }, '1 cols'),
-    h('option', { selected: tab && tab.columns === 2, title: 'Resize layout to 2 columns', value: 2 }, '2 cols'),
-    h('option', { selected: tab && tab.columns === 3, title: 'Resize layout to 3 columns', value: 3 }, '3 cols'),
-    h('option', { selected: tab && tab.columns === 4, title: 'Resize layout to 4 columns', value: 4 }, '4 cols'),
-    h('option', { selected: tab && tab.columns === 5, title: 'Resize layout to 5 columns', value: 5 }, '5 cols'),
-  ]);
+    onchange: (e) => layout.resizeGridByXY(e.target.value),
+  }, [1, 2, 3, 4, 5].map((i) =>
+    h('option', { selected: tab?.columns === i, title: `Resize layout to ${i} columns`, value: i }, `${i} cols`)));
 
 /**
  * Single tab button
@@ -226,3 +241,139 @@ const resizeGridTabDropDown = (model, tab) =>
  * @returns {vnode} - virtual node element
  */
 const tabBtn = (...args) => h('button.br-pill.ph2.btn', ...args);
+
+/**
+ * Dropdown menu for layout editing options
+ * @param {Layout} layout - the model that handles the object state
+ * @returns {vnode} - virtual node element
+ */
+const editDropdown = (layout) =>
+  h('.dropdown', {
+    title: 'Edit layout',
+    class: layout.isEditLayoutDropdownOpen ? 'dropdown-open' : '',
+  }, [
+    h('button.btn.btn-primary', { onclick: () => layout.toggleEditMenu() }, iconPencil()),
+    h('.dropdown-menu.right-menu', [
+      h('.text-ellipsis', [
+        h('a.menu-item', { id: 'editByGui', title: 'Edit via GUI', onclick: () => layout.edit() }, 'Edit via GUI'),
+        h('a.menu-item', {
+          id: 'editByJson',
+          title: 'Edit via JSON',
+          onclick: () => layout.initializeEditViaJson(),
+        }, 'Edit via JSON'),
+      ]),
+    ]),
+  ]);
+
+/**
+ * Button to export layout as JSON file
+ * @param {object} layoutItem - layout data object
+ * @param {string} name - name of the layout
+ * @returns {vnode} - virtual node element
+ */
+const jsonExportButton = (layoutItem, name) =>
+  h('a.btn.btn-default', {
+    title: 'Export layout skeleton as JSON file',
+    href: `data:application/octet;,${encodeURIComponent(LayoutUtils.toSkeleton(layoutItem))}`,
+    download: `layout-${name}-skeleton.json`,
+  }, iconShareBoxed());
+
+/**
+ * Button to create a new layout by duplicating current one
+ * @param {Layout} layout - the model that handles the object state
+ * @returns {vnode} - virtual node element
+ */
+const newLayoutButton = (layout) =>
+  h('button.btn.btn-default', {
+    onclick: () => {
+      const nameForNewLayout = prompt('Choose a name for the new layout:').trim();
+      layout.duplicate(nameForNewLayout);
+    },
+    title: 'Duplicate layout',
+  }, iconLayers());
+
+/**
+ * Button to delete current layout
+ * @param {Layout} layout - the model that handles the object state
+ * @returns {vnode} - virtual node element
+ */
+const deleteButton = (layout) =>
+  h('button.btn.btn-danger', {
+    onclick: () => confirm('Are you sure to delete this layout?') && layout.deleteItem(),
+    title: 'Delete layout',
+  }, iconTrash());
+
+/**
+ * Button component for saving layout changes
+ * @param {Layout} layout - the model that handles the object state
+ * @returns {vnode} - virtual node element representing the save button
+ */
+const saveButton = (layout) =>
+  h('button.btn.btn-primary', {
+    key: 'save-button',
+    onclick: () => layout.save(),
+    title: 'Save layout',
+  }, iconCheck());
+
+/**
+ * Button component for canceling edit mode
+ * @param {Layout} layout - the model that handles the object state
+ * @returns {vnode} - virtual node element representing the cancel button
+ */
+const cancelButton = (layout) =>
+  h('button.btn', {
+    id: 'cancel-button',
+    onclick: () => layout.cancelEdit(),
+    title: 'Cancel',
+  }, iconBan());
+
+/**
+ * Button component for editing a tab (rename)
+ * @param {Layout} layout - the model that handles the object state
+ * @param {string} linkClass - CSS class for the button
+ * @param {object} tab - tab dto representation
+ * @param {number} i - index of the tab in the layout
+ * @returns {vnode} - virtual node element representing the edit tab button
+ */
+const editTabButton = (layout, linkClass, tab, i) =>
+  h('button.br-pill.ph2.btn.btn-tab', {
+    class: linkClass,
+    onclick: () => {
+      const newName = prompt('Enter a new name for this tab:', tab.name);
+      if (newName) {
+        layout.renameTab(i, newName);
+      }
+    },
+    title: 'Rename tab',
+  }, iconPencil());
+
+/**
+ * Button component for deleting a tab
+ * @param {Layout} layout - the model that handles the object state
+ * @param {string} linkClass - CSS class for the button
+ * @param {number} i - index of the tab to delete
+ * @returns {vnode} - virtual node element representing the delete tab button
+ */
+const deleteTabButton = (layout, linkClass, i) =>
+  h('button.br-pill.ph2.btn.btn-tab', {
+    class: linkClass,
+    onclick: () => layout.deleteTab(i),
+    title: 'Delete tab',
+  }, iconTrash());
+
+/**
+ * Generates virtual nodes for editing tabs in the layout toolbar
+ * @param {Layout} layout - the model that handles the object state
+ * @returns {Array<vnode>} - array of virtual node elements representing editable tabs
+ */
+const editTabLinks = (layout) =>
+  layout.item.tabs.map((tab, i) => toolbarEditModeTab(layout, tab, i));
+
+/**
+ * Generates virtual nodes for viewing tabs in the layout toolbar
+ * @param {object} layoutItem - layout data object
+ * @param {Layout} layout - the model that handles the object state
+ * @returns {Array<vnode>} - array of virtual node elements representing viewable tabs
+ */
+const tabViewLinks = (layoutItem, layout) =>
+  layoutItem.tabs.map((tab, i) => toolbarViewModeTab(layout, tab, i));

@@ -12,10 +12,11 @@
  * or submit itself to any jurisdiction.
  */
 
-import { LogManager } from '@aliceo2/web-ui';
-import { httpHeadJson, httpGetJson } from '../../utils/utils.js';
+import { FailedDependencyError, LogManager, NotFoundError } from '@aliceo2/web-ui';
+import { httpHeadJson, httpGetJson } from '../../utils/httpRequests.js';
 import {
   CCDB_MONITOR, CCDB_VERSION_KEY, CCDB_RESPONSE_BODY_KEYS, CCDB_FILTER_FIELDS, CCDB_RESPONSE_HEADER_KEYS,
+  getCcdbMetadataFieldMappingFor,
 } from './CcdbConstants.js';
 
 const {
@@ -55,10 +56,9 @@ export class CcdbService {
    * @returns {CcdbService} - an instance of the newly created service
    */
   static setup(config = {}) {
-    const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb-setup`);
-
     const { hostname, port } = config;
     if (!hostname || !port) {
+      const logger = LogManager.getLogger(`${process.env.npm_config_log_label ?? 'qcg'}/ccdb-setup`);
       logger.warnMessage(
         'Missing or incomplete configuration for CCDB. Will proceed with using default values',
         { level: 11, system: 'GUI', facility: 'qcg/ccdb-setup' },
@@ -84,16 +84,36 @@ export class CcdbService {
     let serviceInfo = {};
     try {
       const path = `/monitor/${CCDB_MONITOR}/.*/${CCDB_VERSION_KEY}`;
-      serviceInfo = await httpGetJson(this._hostname, this._port, path, { Accept: 'application/json' });
+      serviceInfo = await httpGetJson(this._hostname, this._port, path, { headers: { Accept: 'application/json' } });
     } catch (error) {
-      throw new Error(`Unable to connect to CCDB due to: ${error}`);
+      throw new Error(`Unable to connect to CCDB due to: ${error}`, { cause: error });
     }
     try {
-      const version = Object.values(serviceInfo[CCDB_MONITOR])[0][0]?.value ?? '-';
+      const monitorData = serviceInfo?.[CCDB_MONITOR] ?? {};
+      const [firstKey] = monitorData ? Object.keys(monitorData) : [];
+
+      const version = monitorData[firstKey]?.[0]?.value ?? 'unknown version';
       return { version };
     } catch (error) {
-      throw new Error(`Unable to read version of CCDB due to: ${error}`);
+      throw new Error(`Unable to read version of CCDB due to: ${error}`, { cause: error });
     }
+  }
+
+  /**
+   * Returns a list of object paths using the /tree/ endpoint based on a given prefix
+   * @example Equivalent of URL request: `/tree/qc/TPC/object.*`
+   * @param {string} [prefix] - Prefix for which CCDB should search for objects
+   * @returns {Promise.<Array<{PATH}>>} - results of objects query or an empty array
+   * @rejects {Error}
+   */
+  async getObjectsTreeList(prefix = this._PREFIX) {
+    const { subfolders } = await httpGetJson(this._hostname, this._port, `/tree/${prefix}.*`);
+
+    if (!Array.isArray(subfolders)) {
+      throw new FailedDependencyError('Invalid response format from server - expected subfolders array');
+    }
+
+    return subfolders.map((folder) => ({ path: folder }));
   }
 
   /**
@@ -105,18 +125,21 @@ export class CcdbService {
    *
    * Attributes of objects wished to be requested for each object can be passed through the fields parameter;
    * If attributes list is missing, a default minimal list will be used: PATH, CREATED, LAST_MODIFIED
-   * @example Equivalent of URL request: `/latest/qc/TPC/object.*`
-   * @param {string} [prefix] - Prefix for which CCDB should search for objects
-   * @param {Array<string>} [fields] - List of fields that should be requested for each object
+   * @example Equivalent of URL request: `/latest/qc/TPC/object.* /RunNumber=42`
+   * @param {object} options - An object that contains the arguments
+   * @param {string} options.prefix - Prefix for which CCDB should search for objects
+   * @param {object} options.filters - Object metadata that will be used to construct a endpoint path.
+   * @param {Array<string>} options.fields - List of fields that should be requested for each object
    * @returns {Promise.<Array<{PATH, CREATED, LAST_MODIFIED}>>} - results of objects query or error
-   * @rejects {Error}
    */
-  async getObjectsLatestVersionList(prefix = this._PREFIX, fields = []) {
-    const headers = {
-      accept: 'application/json',
-      'x-filter-fields': fields.length > 0 ? fields.join(',') : `${PATH},${CREATED},${LAST_MODIFIED}`,
-    };
-    const { objects } = await httpGetJson(this._hostname, this._port, `/latest/${prefix}.*`, headers);
+  async getObjectsLatestVersionList({ prefix = this._PREFIX, filters, fields } = {}) {
+    fields = fields?.length ? fields : [PATH, CREATED, LAST_MODIFIED];
+    const identification = { path: `${prefix}.*`, filters };
+
+    const headers = { accept: 'application/json', 'x-filter-fields': fields.join(',') };
+
+    const path = `/latest${this._buildCcdbUrlPath(identification)}`;
+    const { objects } = await httpGetJson(this._hostname, this._port, path, { headers });
     return objects;
   }
 
@@ -136,7 +159,7 @@ export class CcdbService {
       'Browse-Limit': `${limit}`,
     };
     const path = `/browse${this._buildCcdbUrlPath(identification)}`;
-    const { objects } = await httpGetJson(this._hostname, this._port, path, headers);
+    const { objects } = await httpGetJson(this._hostname, this._port, path, { headers });
     return objects.map((object) => (
       {
         [VALID_FROM]: parseInt(object[VALID_FROM], 10),
@@ -154,7 +177,8 @@ export class CcdbService {
    * ```
    * @param {CcdbObjectIdentification} partialIdentification - fields such as path, validFrom, etc.
    * @returns {Promise.<CcdbObjectIdentification>} - returns object full identification
-   * @throws {Error}
+   * @throws {Error} throws if the object cannot be fetched
+   * @throws {NotFoundError} throws if the object cannot be found
    */
   async getObjectIdentification(partialIdentification) {
     const headers = {
@@ -163,18 +187,29 @@ export class CcdbService {
     };
     const url = `/latest${this._buildCcdbUrlPath(partialIdentification)}`;
 
-    const result = await httpGetJson(this._hostname, this._port, url, headers);
-    if (result?.objects?.length > 0) {
-      const [qcObject] = result.objects;
-      return {
-        [CCDB_RESPONSE_BODY_KEYS.PATH]: qcObject[CCDB_RESPONSE_BODY_KEYS.PATH],
-        [CCDB_RESPONSE_BODY_KEYS.VALID_FROM]: qcObject[CCDB_RESPONSE_BODY_KEYS.VALID_FROM],
-        [CCDB_RESPONSE_BODY_KEYS.VALID_UNTIL]: qcObject[CCDB_RESPONSE_BODY_KEYS.VALID_UNTIL],
-        [CCDB_RESPONSE_BODY_KEYS.ID]: qcObject[CCDB_RESPONSE_BODY_KEYS.ID],
-      };
-    } else {
-      throw new Error(`Object: ${url} could not be found`);
+    let result = null;
+    try {
+      result = await httpGetJson(this._hostname, this._port, url, { headers });
+    } catch (error) {
+      const { path } = partialIdentification;
+      throw new Error(`Failed to fetch object at url '${url}' and path '${path}'.`, { cause: error });
     }
+
+    if (!result?.objects?.length) {
+      const errorMessage = this._buildFilterErrorMessage(
+        `Object at url '${url}' and path '${partialIdentification.path}' could not be found.`,
+        partialIdentification.filters,
+      );
+      throw new NotFoundError(errorMessage);
+    }
+
+    const [qcObject] = result.objects;
+    return {
+      [CCDB_RESPONSE_BODY_KEYS.PATH]: qcObject[CCDB_RESPONSE_BODY_KEYS.PATH],
+      [CCDB_RESPONSE_BODY_KEYS.VALID_FROM]: qcObject[CCDB_RESPONSE_BODY_KEYS.VALID_FROM],
+      [CCDB_RESPONSE_BODY_KEYS.VALID_UNTIL]: qcObject[CCDB_RESPONSE_BODY_KEYS.VALID_UNTIL],
+      [CCDB_RESPONSE_BODY_KEYS.ID]: qcObject[CCDB_RESPONSE_BODY_KEYS.ID],
+    };
   }
 
   /**
@@ -193,23 +228,34 @@ export class CcdbService {
    * @throws {Error}
    */
   async getObjectDetails(identification) {
-    const { path = '', validFrom = undefined } = identification ?? {};
+    const { path = '', filters, validFrom = undefined } = identification ?? {};
     if (!path || !validFrom) {
       throw new Error('Missing mandatory parameters: path & validFrom');
     }
     const url = this._buildCcdbUrlPath(identification);
-    const { status, headers } = await httpHeadJson(this._hostname, this._port, url, { Accept: 'application/json' });
+    const { status, headers } = await httpHeadJson(this._hostname, this._port, url);
     if (status >= 200 && status <= 399) {
       const [location = ''] = headers[CCDB_RESPONSE_HEADER_KEYS.CONTENT_LOCATION]
         .split(', ')
         .filter((location) => !location.startsWith('alien') && !location.startsWith('file'));
       if (!location) {
-        throw new Error(`No location provided by CCDB for object with path: ${path}`);
+        const errorMessage = this._buildFilterErrorMessage(
+          `No location provided by CCDB for object with path: ${path}`,
+          filters,
+        );
+        throw new Error(errorMessage);
       }
-      headers.location = location;
-      return headers;
+      return {
+        ...headers,
+        location,
+        path,
+      };
     } else {
-      throw new Error(`Unable to retrieve object: ${path} due to status: ${status}`);
+      const errorMessage = this._buildFilterErrorMessage(
+        `Unable to retrieve object: ${path} due to status: ${status}`,
+        filters,
+      );
+      throw new Error(errorMessage);
     }
   }
 
@@ -218,7 +264,8 @@ export class CcdbService {
    * The minimum required parameter to provide is the `path`
    * @param {CcdbObjectIdentification} identification - attributes by which the object should be queried
    * @returns {Promise.<JSON>} - object details for a given timestamp
-   * @throws {Error}
+   * @throws {Error} Thrown when an error occurs whilst fetching the object
+   * @throws {NotFoundError} Thrown when the object cannot be found
    */
   async getObjectLatestVersionInfo(identification) {
     const { path } = identification ?? {};
@@ -230,9 +277,9 @@ export class CcdbService {
     };
     try {
       const url = `/latest${this._buildCcdbUrlPath(identification)}`;
-      const { objects } = await httpGetJson(this._hostname, this._port, url, timestampHeaders);
+      const { objects } = await httpGetJson(this._hostname, this._port, url, { headers: timestampHeaders });
       if (objects?.length <= 0) {
-        throw new Error(`No object found for: ${path}`);
+        throw new NotFoundError(`No object found for: ${path}`);
       }
       return objects[0];
     } catch {
@@ -312,9 +359,37 @@ export class CcdbService {
     }
     if (filters && Object.keys(filters).length > 0) {
       url += `/${Object.entries(filters)
-        .flatMap(([key, value]) => `${key}=${value}`)
+        .flatMap(([key, value]) => `${getCcdbMetadataFieldMappingFor(key)}=${value}`)
         .join('/')}`;
     }
     return url;
+  }
+
+  /**
+   * Builds a detailed error message for CCDB objects that may have been filtered out.
+   * This method appends a filter-specific hint to a base error message when
+   * the `filters` object contains one or more keys. It ensures proper punctuation
+   * and provides a clear explanation for why the object might not have been found.
+   * @param {string} baseMessage - The initial error message describing the failure.
+   * @param {object} [filters] - Optional object representing filters applied when searching for the object.
+   * @returns {string} - The final, human-readable error message including filter hints if applicable.
+   */
+  _buildFilterErrorMessage(baseMessage, filters) {
+    // Only append filter-specific hint if filters object exists and has keys
+    if (filters && Object.keys(filters).length > 0) {
+      // Ensure the base message ends with proper punctuation.
+      // If it does NOT end with any Unicode punctuation, append a period.
+      if (!/\p{P}$/u.test(baseMessage)) {
+        baseMessage += '.';
+      }
+      if (!baseMessage.endsWith(' ')) {
+        baseMessage += ' ';
+      }
+
+      // Append a clear, descriptive filter hint.
+      baseMessage += 'It was likely excluded by the applied filters.';
+    }
+
+    return baseMessage;
   }
 }

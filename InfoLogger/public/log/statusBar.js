@@ -21,10 +21,15 @@ import { h } from '/js/src/index.js';
  * @returns {vnode} - the view of the bottom bar
  */
 export default (model) => [
-  h('.flex-row', [
+  h('.flex-row', { id: 'status-bar' }, [
     h('', { style: 'width:50%' }, statusLogs(model)),
     h('', { style: 'text-align: center; width:30%' }, sqlQuery(model)),
-    h('.flex-grow.text-right', applicationMessage(model), applicationOptions(model)),
+    h(
+      '.flex-grow.text-right',
+      { id: 'status-bar-application-options' },
+      applicationMessage(model),
+      applicationOptions(model),
+    ),
   ]),
 ];
 
@@ -56,13 +61,14 @@ const sqlQuery = (model) => model.log.queryResult.match({
   Loading: () => null,
   Success: (data) => h('.dropup.w-100', {
     class: model.log.statusDropdown ? 'dropup-open' : '',
+    id: 'status-bar-sql-query',
   }, [
     h('.query-item.w-wrapped.ph1', {
       title: 'Toggle to view full SQL query',
       style: 'min-width: 0%;',
       onclick: () => model.log.toggleStatusDropdown(),
     }, data.queryAsString),
-    h('.dropup-menu.p2.gray-darker.text-center.w-100', [
+    h('.dropup-menu.p2.gray-darker.text-center.w-100', { id: 'status-bar-sql-query-menu' }, [
       h('', { style: 'font-weight: bold' }, 'SQL QUERY'),
       data.queryAsString,
     ]),
@@ -76,7 +82,11 @@ const sqlQuery = (model) => model.log.queryResult.match({
  * @returns {vnode} - the view of the application message
  */
 const applicationMessage = (model) => model.log.list.length > model.log.applicationLimit
-  ? h('span.danger', `Application reached more than ${model.log.applicationLimit} logs, please clear if possible `)
+  ? h(
+    'span.danger',
+    { id: 'status-bar-application-message' },
+    `Application reached more than ${model.log.applicationLimit} logs, please clear if possible `,
+  )
   : null;
 
 /**
@@ -105,7 +115,7 @@ const applicationOptions = (model) => [
  * @param {object} result - raw query result from server with its meta data
  * @returns {vnode} - the view of the query status
  */
-const statusQuery = (model, result) => `in ${(result.time / 1000).toFixed(2)} second(s)`;
+const statusQuery = (model, result) => `in ${(result.time / 1000).toFixed(2)}s`;
 
 /**
  * Status of live mode with hostname of streaming source and date it started
@@ -122,7 +132,16 @@ const statusLive = (model, frameworkInfo) =>
  * @returns {vnode} - the view of the log's list status
  */
 const statusStats = (model) => [
-  h('span.ph1', `${model.log.list.length} message${model.log.list.length >= 2 ? 's' : ''}`),
+  h(
+    'span.ph1',
+    {
+      id: 'status-bar-buffer-size',
+    },
+    [
+      bufferStatus(model),
+      `${model.log.list.length.toLocaleString('en-US')} / ${model.log.limit.toLocaleString('en-US')} (Buffer size)`,
+    ],
+  ),
   model.log.queryResult.match({
     NotAsked: () => null,
     Loading: () => 'Querying server...',
@@ -135,3 +154,19 @@ const statusStats = (model) => [
   h('span.ph1.severity-e', `${model.log.stats.error} error`),
   h('span.ph1.severity-f', `${model.log.stats.fatal} fatal`),
 ];
+
+const bufferStatus = (model) => {
+  let dotClass = 'gray-darker'; // grey - unknown status default
+
+  if (model.log.limitReached === true) {
+    dotClass = 'danger'; // red - limit reached
+  } else if (model.log.limitReached === false) {
+    dotClass = 'success'; // green - limit not reached
+  }
+
+  return h(`span.${dotClass}.f7.mh1`, {
+    title: model.log.limitReached === null ? 'No query data loaded' :
+      model.log.limitReached === true ? 'Limit reached - results may be incomplete' : 'Limit OK',
+    id: 'status-bar-buffer-dot',
+  }, '●');
+};

@@ -16,9 +16,9 @@
  * Limit the number of calls to `fn` to 1 per `time` maximum.
  * First call is immediate if `time` have been waited already.
  * All other calls before end of `time` window will lead to 1 exececution at the end of window.
- * @param {string} fn - function to be called
- * @param {string} time - ms
- * @returns {Function} lambda function to be called to call `fn`
+ * @param {(...args: unknown[]) => void} fn - function to be called
+ * @param {number} time - ms
+ * @returns {(...args: unknown[]) => void} lambda function to be called to call `fn`
  * @example
  * let f = callRateLimiter((arg) => console.log('called', arg), 1000);
  * 00:00:00 f(1);f(2);f(3);f(4);

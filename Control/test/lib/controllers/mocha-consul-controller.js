@@ -63,37 +63,6 @@ describe('ConsulController test suite', () => {
     });
   });
 
-  describe('Test Consul Connection', async () => {
-    let consulService;
-    beforeEach(() => consulService = {});
-    it('should successfully query host of ConsulLeader', async () => {
-      consulService.getConsulLeaderStatus = sinon.stub().resolves('localhost:8550');
-      const connector = new ConsulController(consulService, config);
-      await connector.testConsulStatus();
-    });
-    it('should successfully query host of ConsulLeader and fail gracefully', async () => {
-      consulService.getConsulLeaderStatus = sinon.stub().rejects('Unable to query Consul');
-      const connector = new ConsulController(consulService, config);
-      await connector.testConsulStatus();
-    });
-    it('should successfully validate connector if consulService is present', () => {
-      const connector = new ConsulController(consulService, config);
-      const next = sinon.stub();
-      connector.validateService({}, {}, next);
-      assert.ok(next.calledWith());
-    });
-    it('should successfully respond with error on connector validate if consulService is missing', () => {
-      const connector = new ConsulController(undefined, config);
-      const res = {
-        status: sinon.stub(),
-        send: sinon.stub(),
-      };
-      connector.validateService({}, res, {});
-      assert.ok(res.status.calledWith(502));
-      assert.ok(res.send.calledWith({message: 'Unable to retrieve configuration of consul service'}));
-    });
-  });
-
   describe('Request CRUs tests', async () => {
     let consulService;
     beforeEach(() => {

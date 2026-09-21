@@ -18,18 +18,11 @@ import { h } from '/js/src/index.js';
  * Build a panel with minimal information about the selected object:
  * * lastModified
  * * runNumber
- * @param {Model} model - root model of the application
- * @param {object} tabObject - tab dto representation
+ * @param {number} runNumber - run number of the object
+ * @param {string} lastModified - last modified timestamp of the object
  * @returns {vnode} - virtual node element
  */
-export const minimalObjectInfo = (model, tabObject) => {
-  const { name } = tabObject;
-  const lastModified = model.object.getLastModifiedByName(name);
-  const runNumber = model.object.getRunNumberByName(name);
-  return h('.gray-darker.text-center.f6.flex-row.w-100.ph2', {
-    style: 'height:3em;justify-content:center;',
-  }, [
-    h('.w-70', lastModified),
-    h('.w-30.text-right', `RunNumber: ${runNumber}`),
-  ]);
-};
+export const minimalObjectInfo = (runNumber, lastModified) => h('.w-100.p1.gray-darker.f6.flex-row', [
+  h('.flex-grow.text-left', lastModified),
+  h('.text-right', `RunNumber: ${runNumber}`),
+]);

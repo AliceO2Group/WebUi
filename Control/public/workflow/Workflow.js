@@ -32,7 +32,7 @@ export default class Workflow extends Observable {
   constructor(model) {
     super();
     this.model = model;
-    this.flpSelection = new FlpSelection(this);
+    this.flpSelection = new FlpSelection(this, model.lock);
     this.flpSelection.bubbleTo(this);
 
     this.form = new WorkflowForm();
@@ -66,13 +66,21 @@ export default class Workflow extends Observable {
     this.READOUT_PREFIX = PREFIX.READOUT;
     this.QC_PREFIX = PREFIX.QC;
 
+    this._advancedInputPanel = {
+      pair: {
+        key: '',
+        value: ''
+      },
+      textArea: {
+        value: '',
+      }
+    };
     this.dom = {
       keyInput: '',
       keyValueArea: ''
     };
 
     this.advErrorPanel = [];
-    this.kvPairsString = ''; // variable stored for Adv Config Panel
   }
 
   /**
@@ -249,13 +257,11 @@ export default class Workflow extends Observable {
         this.model.environment.itemNew =
           RemoteData.failure('Please select repository, revision and workflow in order to create an environment');
       } else {
-        let path = '';
-        path = this.parseRepository(this.form.repository) + `/workflows/${this.form.template}@${this.form.revision}`;
-
-        // Combine Readout URI if it was used
         this.model.environment.newEnvironment({
-          workflowTemplate: path,
-          vars: variables,
+          repository: this.parseRepository(this.form.repository),
+          revision: this.form.revision,
+          template: this.form.template,
+          userVars: variables,
           detectors: this.flpSelection.selectedDetectors
         });
       }
@@ -301,6 +307,25 @@ export default class Workflow extends Observable {
   }
 
   /**
+   * Method to add a new KV Pair to the variables form for creating a new environment
+   * It will take the current value from the input field and add it to the variables
+   * @return {void}
+   */
+  addVariableFromInput() {
+    const keyToAdd = this.getPairInputKey();
+
+    const currentValue = this.getPairInputValue();
+    const valueWithoutNewline = currentValue?.endsWith('\n') ? currentValue.slice(0, -1) : currentValue;
+    
+    this.addVariable(keyToAdd, valueWithoutNewline, true);
+
+    this.setPairInputKey('');
+    this.setPairInputValue('');
+    
+    this.dom.keyInput.focus();
+  }
+
+  /**
    * Given a KV Pairs as a String, attempt to add
    * each key and value to the panel of KV pairs configuration
    * @param {String} kvPairs
@@ -316,7 +341,7 @@ export default class Workflow extends Observable {
       }
     });
     if (errors.length === 0) {
-      this.kvPairsString = '';
+      this._advancedInputPanel.textArea.value = '';
       this.model.notification.show(
         'Variables have been successfully imported in the configuration panels', 'success', 1000
       );
@@ -706,5 +731,56 @@ export default class Workflow extends Observable {
       delete vars['qc_config_uri_pre'];
     }
     return {variables: vars, ok: true, message: ''};
+  }
+
+  /**
+   * Get method for retrieving only the key from the advanced input panel
+   * @return {string}
+   */
+  getPairInputKey() {
+    return this._advancedInputPanel?.pair?.key ?? '';
+  }
+
+  /**
+   * Set method for updating the key of the pair input in the advanced input panel
+   * @return {void}
+   */
+  setPairInputKey(value) {
+    this._advancedInputPanel.pair.key = value;
+    this.notify();
+  }
+
+  /**
+   * Get method for retrieving only the value from the advanced input panel
+   * @return {string}
+   */
+  getPairInputValue() {
+    return this._advancedInputPanel?.pair?.value ?? '';
+  }
+
+  /**
+   * Set method for updating the value of the pair input in the advanced input panel
+   * @return {void}
+   */
+  setPairInputValue(value) {
+    this._advancedInputPanel.pair.value = value;
+    this.notify();
+  }
+
+  /**
+   * Get method for retrieving the value of the text area in the advanced input panel
+   * @return {string}
+   */
+  getTextAreaValue() {
+    return this._advancedInputPanel?.textArea?.value ?? '';
+  }
+
+  /**
+   * Set method for updating the text area value in the advanced input panel
+   * @return {void}
+   */
+  setTextAreaValue(value) {
+    this._advancedInputPanel.textArea.value = value;
+    this.notify();
   }
 }

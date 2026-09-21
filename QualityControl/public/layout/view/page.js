@@ -13,9 +13,8 @@
  */
 
 import { h } from '/js/src/index.js';
-import { draw } from '../../object/objectDraw.js';
+import { draw } from '../../common/object/draw.js';
 import { iconArrowLeft, iconArrowTop } from '/js/src/icons.js';
-import { layoutFiltersPanel } from './panels/filters.js';
 import { minimalObjectInfo } from './panels/minimalObjectInfo.js';
 import { objectInfoResizePanel } from './panels/objectInfoResizePanel.js';
 
@@ -55,12 +54,13 @@ const emptyListEditMode = () => h('.m4', [
  * @returns {undefined} - virtual node element
  */
 function subcanvasView(model) {
-  if (!model.layout.tab) {
+  const { layout } = model;
+  if (!layout.tab) {
     return;
   }
 
-  if (!model.layout.tab.objects.length) {
-    if (model.layout.editEnabled) {
+  if (!layout.tab.objects.length) {
+    if (layout.editEnabled) {
       return emptyListEditMode();
     } else {
       return emptyListViewMode();
@@ -72,7 +72,7 @@ function subcanvasView(model) {
    * which could force recreate some charts and then have an unfriendly blink. The source array can be shuffle
    * because of the GridList algo, the sort below avoid this.
    */
-  const tabObjects = cloneSortById(model.layout.tab.objects);
+  const tabObjects = cloneSortById(layout.tab.objects);
 
   const subcanvasAttributes = {
     style: {
@@ -91,9 +91,8 @@ function subcanvasView(model) {
        * Warning CPU heavy function: getBoundingClientRect and offsetHeight re-compute layout
        * it is ok to use them on user interactions like clicks or drags
        */
-
       // Avoid events from other draggings things (files, etc.)
-      if (!model.layout.tabObjectMoving) {
+      if (!layout.tabObjectMoving) {
         return;
       }
 
@@ -110,13 +109,13 @@ function subcanvasView(model) {
       const canvasX = pageX - canvasDimensions.x;
       const canvasY = pageY - canvasDimensions.y;
 
-      const cellWidth2 = canvasDimensions.width / model.layout.gridListSize;
+      const cellWidth2 = canvasDimensions.width / layout.gridListSize;
 
       // Position in the gridList
       const x = Math.floor(canvasX / cellWidth2);
-      const y = Math.floor(canvasY / (canvas.offsetHeight * 0.95 / model.layout.gridListSize));
+      const y = Math.floor(canvasY / (canvas.offsetHeight * 0.95 / layout.gridListSize));
 
-      model.layout.moveTabObjectToPosition(x, y);
+      layout.moveTabObjectToPosition(x, y);
     },
 
     /**
@@ -124,14 +123,12 @@ function subcanvasView(model) {
      * @returns {undefined}
      */
     ondragend() {
-      model.layout.moveTabObjectStop();
+      layout.moveTabObjectStop();
     },
   };
 
-  return h('.flex-column.absolute-fill', [
-    !model.layout.editEnabled && layoutFiltersPanel(model),
-    h('.p2', subcanvasAttributes, tabObjects.map((tabObject) => chartView(model, tabObject))),
-  ]);
+  return h('.flex-column.absolute-fill', h('.p2', subcanvasAttributes, tabObjects.map((tabObject) =>
+    chartView(model, tabObject))));
 }
 
 /**
@@ -143,7 +140,10 @@ function subcanvasView(model) {
  * @returns {vnode} - virtual node element
  */
 function chartView(model, tabObject) {
-  const key = `key${tabObject.id}`;
+  // Changing the key will force redraw of the whole component including jsroot
+  // This is currently a patch workaround for ensuring a change of drawing option also
+  // redraw the jsroot plot, because sometimes jsroot do not redraw well on option changes only.
+  const key = `key${tabObject.id + tabObject.options.length}`;
 
   // Position and size are produced by GridList in the model
   const style = {
@@ -173,7 +173,6 @@ function chartView(model, tabObject) {
   };
 
   let className = '';
-  className += model.object.isObjectInOnlineList(tabObject.name) ? 'object-online ' : '';
   className += model.layout.editingTabObject && model.layout.editingTabObject.id === tabObject.id
     ? 'layout-selected layout-selectable '
     : 'layout-selectable ';
@@ -193,23 +192,47 @@ function chartView(model, tabObject) {
 /**
  * Method to generate a component containing a header with actions and a jsroot plot
  * @param {Model} model - root model of the application
- * @param {object} tabObject - to be drawn with jsroot
+ * @param {TabObject} tabObject - object with information form QCG own storage
  * @returns {vnode} - virtual node element
  */
-const drawComponent = (model, tabObject) => h('', { style: 'height:100%; display: flex; flex-direction: column' }, [
-  h('.jsrootdiv', {
-    style: {
-      'z-index': 90,
-      overflow: 'hidden',
-      height: '100%',
-      display: 'flex',
-      'flex-direction': 'column',
-    },
-  }, draw(model, tabObject, {})),
-  objectInfoResizePanel(model, tabObject),
-  !model.isOnlineModeEnabled && model.layout.item && model.layout.item.displayTimestamp
-      && minimalObjectInfo(model, tabObject),
-]);
+const drawComponent = (model, tabObject) => {
+  const { displayTimestamp = false } = model.layout.item;
+
+  const { name, options: drawingOptions = [], ignoreDefaults } = tabObject;
+
+  const objectFromQcdbAsRemoteData = model?.object?.objects?.[name] ?? {};
+  const { displayHints = [], drawOptions = [] } = objectFromQcdbAsRemoteData?.payload ?? {};
+
+  let toUseDrawingOptions = [];
+  if (ignoreDefaults) {
+    toUseDrawingOptions = Array.from(new Set(drawingOptions));
+  } else {
+    toUseDrawingOptions = Array.from(new Set([...drawingOptions, ...displayHints, ...drawOptions]));
+  }
+  const lastModified = model.object.getLastModifiedByName(name);
+  const runNumber = model.object.getRunNumberByName(name);
+  return h('', {
+    key: `key-chart-component-${name}-${toUseDrawingOptions.join('-')}`,
+    style: 'height:100%; display: flex; flex-direction: column',
+  }, [
+    h('.jsrootdiv', {
+      style: {
+        'z-index': 90,
+        overflow: 'hidden',
+        height: '100%',
+        display: 'flex',
+        'flex-direction': 'column',
+      },
+    }, objectFromQcdbAsRemoteData && draw(
+      objectFromQcdbAsRemoteData,
+      {},
+      toUseDrawingOptions,
+      (error) => model.object.invalidObject(tabObject.name, error.message),
+    )),
+    objectInfoResizePanel(model, tabObject),
+    displayTimestamp && minimalObjectInfo(runNumber, lastModified),
+  ]);
+};
 
 /**
  * Predicate to sort objects by id

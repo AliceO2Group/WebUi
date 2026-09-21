@@ -134,13 +134,20 @@ const createClickableLabel = (model, label) => h('td', h('button.btn.w-100', {
  * @param {number} tabIndex - value for order of the tab when using keyboard `tab` action
  * @returns {vnode} - input field within a td element
  */
-const createInputField = (logModel, field, command, tabIndex = 1) => h('td', h('input.form-control', {
-  type: 'text',
-  tabIndex,
-  oninput: (e) => logModel.setCriteria(field, command, e.target.value),
-  value: logModel.filter.criterias[field][command].slice(),
-  placeholder: field === 'hostname' ? command : '',
-}));
+const createInputField = (logModel, field, command, tabIndex = 1) =>
+  h(
+    'td',
+    h('.filter-input-group', [
+      h('input.form-control', {
+        type: 'text',
+        tabIndex,
+        oninput: (e) => logModel.setCriteria(field, command, e.target.value),
+        value: logModel.filter.criterias[field][command].slice(),
+        placeholder: field === 'hostname' ? command : '',
+      }),
+      createEmptyToggle(logModel, field, command),
+    ]),
+  );
 
 /**
  * Generate a text area which onfocus will expand, allowing the user to easily input multiple lines of text
@@ -172,3 +179,18 @@ const createTextAreaField = (model, field, command, tabIndex) =>
     oninput: (e) => model.log.setCriteria(field, command, e.target.value.trim()),
     value: model.log.filter.criterias[field][command].slice(),
   }));
+
+const createEmptyToggle = (logModel, field, command) => {
+  const isActive = logModel.filter.criterias[field].emptyFor === command;
+  const verb = command === 'match' ? 'Match' : 'Exclude';
+  const title = `${verb} logs where ${field} is empty`;
+
+  return h('button.btn.empty-toggle', {
+    className: isActive ? 'active' : '',
+    title,
+    onclick: (e) => {
+      logModel.setCriteria(field, 'emptyFor', isActive ? null : command);
+      e.target.blur();
+    },
+  }, '∅');
+};

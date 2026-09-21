@@ -12,8 +12,10 @@
  * or submit itself to any jurisdiction.
  */
 'use strict';
-import { getObjectsNameFromConsulMap } from '../../common/library/qcObject/utils.js';
-import { errorHandler } from './../utils/utils.js';
+import { InvalidInputError, LogManager, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
+import { ObjectGetDownloadDTO } from '../dtos/ObjectGetDto.js';
+
+const LOG_FACILITY = `${process.env.npm_config_log_label ?? 'qcg'}/obj-controller`;
 
 /**
  * Gateway for all QC Objects requests
@@ -23,19 +25,28 @@ export class ObjectController {
   /**
    * Setup Object Controller:
    * - CcdbService - retrieve data about objects
+   * @import { QcdbDownloadService } from '../services/QcdbDownload.service.js';
    * @param {QCObjectService} objService - objService to be used for retrieval of information
-   * @param {ConsulService} onlineService - retrieve information on which objects are currently generated
+   * @param {RunMonitoringService} runModeService - for monitoring the status of runs periodically
+   * @param {QcdbDownloadService} qcdbDownloadService - service that will download from qcdb.
    */
-  constructor(objService, onlineService) {
+  constructor(objService, runModeService, qcdbDownloadService) {
     /**
      * @type {QCObjectService}
      */
     this._objService = objService;
 
     /**
-     * @type {ConsulService}
+     * @type {QcdbDownloadService}
+     * @import { QcdbDownloadService } from '../services/QcdbDownload.service.js';
      */
-    this._onlineService = onlineService;
+    this._qcdbDownloadService = qcdbDownloadService;
+
+    /**
+     * @type {RunMonitoringService}
+     */
+    this._runModeService = runModeService;
+    this._logger = LogManager.getLogger(LOG_FACILITY);
   }
 
   /**
@@ -44,51 +55,53 @@ export class ObjectController {
    * @param {Response} res - HTTP response object to provide information on request
    * @returns {void}
    */
-  async getObjects(req, res) {
-    const { prefix, fields = [] } = req.query;
-    if (prefix && typeof prefix !== 'string') {
-      res.status(400).json({ message: 'Invalid parameters provided: prefix must be of type string' });
-    } else if (!Array.isArray(fields)) {
-      res.status(400).json({ message: 'Invalid parameters provided: fields must be of type Array' });
-    } else {
-      try {
-        const list = await this._objService.retrieveLatestVersionOfObjects(prefix, fields);
-        res.status(200).json(list);
-      } catch (error) {
-        errorHandler(error, 'Failed to retrieve list of objects latest version', res, 502, 'object');
+  async getObjectsHandler(req, res) {
+    try {
+      const { prefix, fields, filters = {}, inRunMode = false } = req.query;
+
+      if (inRunMode) {
+        const runNumber = filters?.RunNumber;
+        const { paths } = await this._runModeService.retrievePathsAndSetRunStatus(runNumber);
+        return res.status(200).json({ paths });
       }
+
+      const objectsData = await this._objService.retrieveLatestVersionOfObjects({
+        prefix,
+        fields,
+        filters,
+      });
+      res.status(200).json(objectsData);
+    } catch (error) {
+      const responseError = new Error('Failed to retrieve list of objects latest version');
+      this._logger.errorMessage(`Error whilst retrieving objects: ${error}`);
+      updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   }
 
   /**
-   * List all Online objects' name if online mode is enabled
-   * @param {Request} req - HTTP request object with "query" information on object
-   * @param {Response} res - HTTP response object to provide information on request
+   * Download ROOT objects using the QcdbDownloadService.
+   * Only support 1 root object for now.
+   * @param {Request} req - ExpressJs req object.
+   * @param {Response} res - ExpressJs res object.
    * @returns {void}
    */
-  async getOnlineObjects(req, res) {
+  async getDownloadObjectsHandler(req, res) {
+    let objectIds = undefined;
     try {
-      const services = await this._onlineService.getServices();
-      const tags = getObjectsNameFromConsulMap(this._db.prefix, services);
-      res.status(200).json(tags);
+      const validated = await ObjectGetDownloadDTO.validateAsync(req.query);
+      ({ objectIds } = validated);
+      await this._qcdbDownloadService.getQcdbRootObjects(objectIds, res);
     } catch (error) {
-      errorHandler(error, 'Unable to retrieve list of Online Objects', res, 503, 'online');
-    }
-  }
+      let responseError = '';
+      if (error.isJoi) {
+        this._logger.errorMessage(`Error validating query parameters: ${error}`);
+        responseError = new InvalidInputError(`Invalid query parameters: ${error.details[0].message}`);
+      } else {
+        this._logger.errorMessage(error?.message ?? error);
+        responseError = new Error('Unable to process request');
+      }
 
-  /**
-   * Check the state of OnlineMode by checking the status of Consul Leading Agent
-   * @param {Request} req - HTTP request object with information on owner_id
-   * @param {Response} res - HTTP response object to provide layouts information
-   * @returns {undefined}
-   */
-  async isOnlineModeConnectionAlive(req, res) {
-    try {
-      await this._onlineService.getConsulLeaderStatus();
-      res.status(200).json({ running: true });
-    } catch (error) {
-      const message = 'Unable to retrieve Consul Status';
-      errorHandler(error, message, res, 503, 'consul');
+      return updateAndSendExpressResponseFromNativeError(res, responseError);
     }
   }
 
@@ -101,19 +114,17 @@ export class ObjectController {
    * interpretation with JSROOT.draw
    * @param {Request} req - HTTP request object with "query" information
    * @param {Response} res - HTTP response object to provide information on request
-   * @returns {void}
+   * @returns {Promise<void>}
    */
-  async getObjectContent(req, res) {
-    const { path, validFrom, id, filters } = req.query;
-    if (!path) {
-      res.status(400).json({ message: 'Invalid URL parameters: missing object path' });
-    } else {
-      try {
-        const object = await this._objService.retrieveQcObject(path, Number(validFrom), id, filters);
-        res.status(200).json(object);
-      } catch (error) {
-        errorHandler(error, 'Unable to identify object or read it', res, 502, 'object');
-      }
+  async getObjectContentHandler(req, res) {
+    try {
+      const { path, validFrom, filters, id } = req.query;
+
+      const object = await this._objService.retrieveQcObject({ path, validFrom, id, filters });
+      res.status(200).json(object);
+    } catch (error) {
+      this._logger.errorMessage(`Error whilst retrieving object content: ${error}`);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
@@ -126,20 +137,18 @@ export class ObjectController {
    * interpretation with JSROOT.draw
    * @param {Request} req - HTTP request object with "query" information
    * @param {Response} res - HTTP response object to provide information on request
-   * @returns {void}
+   * @returns {Promise<void>}
    */
-  async getObjectById(req, res) {
-    const qcgId = req.params?.id;
-    const { validFrom, filters, id } = req.query;
-    if (!qcgId) {
-      res.status(400).json({ message: 'Invalid URL parameters: missing object ID' });
-    } else {
-      try {
-        const object = await this._objService.retrieveQcObjectByQcgId(qcgId, id, validFrom, filters);
-        res.status(200).json(object);
-      } catch (error) {
-        errorHandler(error, 'Unable to identify object or read it by qcg id', res, 502, 'object');
-      }
+  async getObjectByIdHandler(req, res) {
+    try {
+      const qcObjectId = req.params.id;
+      const { validFrom, filters, id } = req.query;
+
+      const object = await this._objService.retrieveQcObjectByQcgId({ qcObjectId, id, validFrom, filters });
+      res.status(200).json(object);
+    } catch (error) {
+      this._logger.errorMessage(`Error whilst retrieving object: ${error}`);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 }

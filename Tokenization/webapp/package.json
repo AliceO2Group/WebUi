@@ -1,0 +1,60 @@
+{
+  "name": "@aliceo2/tokenization-frontend",
+  "version": "0.0.1",
+  "description": "A react-router based application for the GUI respective to the tokenization system",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "react-router build",
+    "dev": "react-router dev",
+    "start": "react-router-serve ./build/server/index.js",
+    "test": "mocha --exit tests/mocha-index.cjs",
+    "typecheck": "react-router typegen && tsc",
+    "docker:typecheck": "docker compose exec webapp npm run typecheck",
+    "docker:test:build": "cd .. && docker compose -f docker-compose.test.yml up --build --abort-on-container-exit ui-tests && docker compose -f docker-compose.test.yml stop && cd ./webapp",
+    "docker:test": "cd .. && docker compose -f docker-compose.test.yml up --abort-on-container-exit ui-tests && docker compose -f docker-compose.test.yml stop && cd ./webapp",
+    "lint": "eslint app tests --ignore-pattern 'app/styles' --no-warn-ignored",
+    "lint:fix": "eslint --fix app tests --ignore-pattern 'app/styles' --no-warn-ignored"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AliceO2Group/WebUi.git"
+  },
+  "author": "",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/AliceO2Group/WebUi/issues"
+  },
+  "homepage": "https://github.com/AliceO2Group/WebUi#readme",
+  "dependencies": {
+    "@aliceo2/web-ui": "^2.8.4",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^7.1.1",
+    "@react-router/node": "^7.5.0",
+    "isbot": "^5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router": "^7.5.0",
+    "@react-router/dev": "^7.5.0",
+    "@types/node": "^20",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "vite": "^6.0.11",
+    "vite-tsconfig-paths": "^5.1.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.28.0",
+    "@stylistic/eslint-plugin-js": "^2.10.1",
+    "@stylistic/eslint-plugin-ts": "^2.10.1",
+    "eslint": "^9.28.0",
+    "eslint-plugin-jsdoc": "^50.7.1",
+    "eslint-plugin-mocha": "^11.2.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "globals": "^16.2.0",
+    "mocha": "^10.2.0",
+    "puppeteer": "^24.9.0",
+    "typescript-eslint": "^8.34.0"
+  }
+}

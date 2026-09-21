@@ -12,35 +12,60 @@
  * or submit itself to any jurisdiction.
  */
 
-import { h, iconBook, iconArrowThickLeft, iconChevronBottom, iconChevronTop } from '/js/src/index.js';
-import { getUrlPathFromObject } from '../../../common/filterToFromUrlParams.js';
+import { h, iconBook, iconArrowThickLeft, isContextSecure } from '/js/src/index.js';
+import { filterPanelToggleButton } from '../../../common/filters/filterViews.js';
 
 /**
  * Builds header which contains information on plotted object and actions that can be applied
  * @param {Model} model - root model of the application
- * @param {string} title - title of the page depending on the object loading location (tree or layout)
- * @returns {vnode} - virtual node element
+ * @returns {{centerCol: vnode, rightCol: vnode} | null} - object with vnode elements
  */
-export const header = (model, title) => h('.flex-row.items-center.p2.g2', [
-  getBackToQCGButton(model),
-  h('.flex-column.text-center', { style: 'flex-grow:1' }, h('b', title)),
-  filterByParametersButton(model.objectViewModel),
-  model.isContextSecure() && h('.flex-row', getCopyURLToClipboardButton(model)),
-]);
+export const objectViewHeader = (model) => {
+  const { objectViewModel, filterModel, router } = model;
+  const title = computeTitle(objectViewModel, router);
+
+  return {
+    centerCol: h('.text-center.justify-center.flex-grow', [h('b', title)]),
+
+    rightCol: h('.w-25.flex-row.flex-grow.items-center.p2.g2.justify-end', [
+      getBackToQCGButton(objectViewModel, router),
+      filterPanelToggleButton(filterModel),
+      isContextSecure() && h('.flex-row', getCopyURLToClipboardButton(model)),
+    ]),
+  };
+};
+
+const computeTitle = (objectViewModel, router) => {
+  const { selected } = objectViewModel;
+  const { objectName, objectId } = router.params;
+
+  if (!objectId) {
+    return objectName;
+  }
+
+  if (selected.isSuccess()) {
+    const { path, layoutName } = selected.payload;
+    return `${path} (from layout: ${layoutName})`;
+  }
+
+  return objectId;
+};
 
 /**
  * Button for redirecting the user back to QCG object tree page
- * @param {Model} model - root model of the application
+ * @param {ObjectViewModel} objectViewModel - model that manages the state of the objectViewPage
+ * @param {QueryRouter} router - root model of the application
  * @returns {vnode} - virtual node element
  */
-function getBackToQCGButton(model) {
-  const { layoutId = undefined } = model.router.params;
-  const { objectViewModel: { filter } } = model;
+function getBackToQCGButton(objectViewModel, router) {
+  const { selected } = objectViewModel;
+  const { layoutId = undefined } = router.params;
+
   let title = 'Back';
   let href = '?page=objectTree';
   if (layoutId) {
     title = 'Back to layout';
-    href = `?page=layoutShow&layoutId=${layoutId}${getUrlPathFromObject(filter)}`;
+    href = `?page=layoutShow&layoutId=${layoutId}${getTabFromObject(selected)}`;
   }
 
   return h(
@@ -48,25 +73,13 @@ function getBackToQCGButton(model) {
     h('a.btn', {
       title,
       href,
-      onclick: (e) => model.router.handleLinkEvent(e),
+      onclick: (e) => router.handleLinkEvent(e),
     }, [
       iconArrowThickLeft(),
       ' ',
       title,
     ]),
   );
-}
-
-/**
- * Button for toggling visibility of the filter by parameters panel
- * @param {ObjectViewModel} objectViewModel - model of the current page
- * @returns {vnode} - virtual node element
- */
-function filterByParametersButton(objectViewModel) {
-  return h('button.btn.btn-default', {
-    class: objectViewModel.isFilterVisible() ? 'active' : '',
-    onclick: () => objectViewModel.toggleFilterVisibility(),
-  }, ['Filters ', objectViewModel.isFilterVisible() ? iconChevronTop() : iconChevronBottom()]);
 }
 
 /**
@@ -86,4 +99,14 @@ function getCopyURLToClipboardButton(model) {
     },
     [iconBook(), ' ', 'Copy URL'],
   ));
+}
+
+/**
+ * Extract tab name from the selected object
+ * @param {RemoteData} selected - contains the selected object
+ * @returns {string} - name of the tab where the object is placed or empty string if not applicable
+ */
+function getTabFromObject(selected) {
+  const tabName = selected?.payload?.tabName ?? '';
+  return tabName ? `&tab=${tabName}` : '';
 }

@@ -39,17 +39,19 @@ import {
   CalibrationRunsContent
 } from './pages/CalibrationRuns/CalibrationRuns.page.js';
 import {
-  content as environmentsContent,
-  header as environmentsHeader
-} from './environment/environmentsPage.js';
+  EnvironmentsPageHeader,
+  EnvironmentsPageContent,
+} from './pages/Environments/Environments.page.js';
 import {header as statusHeader} from './about/header.js';
 import {content as statusContent} from './about/content.js';
 import {
   content as configurationContent,
   header as configurationHeader
 } from './configuration/configPage.js';
-import {header as taskHeader} from './task/header.js';
-import {content as taskContent} from './task/content.js';
+import {
+  TaskListHeader,
+  TaskListContent
+} from './pages/TaskList/TaskList.page.js';
 import {
   content as hardwareContent,
   header as hardwareHeader
@@ -94,11 +96,11 @@ const header = (model) => h('.bg-white flex-row p2 shadow-level2 level2', [
     newEnvironmentAdvanced: workflowsHeader,
     newEnvironment: EnvironmentCreationHeader,
     calibrationRuns: CalibrationRunsHeader,
-    environments: environmentsHeader,
+    environments: EnvironmentsPageHeader,
     environment: EnvironmentPageHeader,
     about: statusHeader,
     configuration: configurationHeader,
-    taskList: taskHeader,
+    taskList: TaskListHeader,
     hardware: hardwareHeader,
     locks: lockHeader
   })(model),
@@ -125,11 +127,11 @@ const content = (model) => {
       newEnvironmentAdvanced: workflowsContent,
       newEnvironment: EnvironmentCreationPage,
       calibrationRuns: CalibrationRunsContent,
-      environments: environmentsContent,
+      environments: EnvironmentsPageContent,
       environment: EnvironmentPageContent,
       about: statusContent,
       configuration: configurationContent,
-      taskList: taskContent,
+      taskList: TaskListContent,
       hardware: hardwareContent,
       locks: lockContent
     })(model)

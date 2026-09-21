@@ -64,7 +64,9 @@ const addKVInputList = (workflow) =>
         }, h('input.form-control', {
           type: 'text',
           value: workflow.form.variables[key],
-          onchange: (e) => workflow.addVariable(key, e.target.value, true)
+          oninput: (e) => workflow.addVariable(key, e.target.value, true),
+          // the "onchange" trigger is used to update the variable same as the "oninput" but with the check that the value is not empty
+          onchange: (e) => workflow.addVariable(key, e.target.value, false)
         })),
         h('.ph2.danger.actionable-icon', {
           id: `removeKey${key}`,
@@ -78,17 +80,15 @@ const addKVInputList = (workflow) =>
  * @return {vnode}
  */
 const addKVInputPair = (workflow) => {
-  let keyString = '';
-  let valueString = '';
   return h('.pv2.flex-row', [
     h('.w-33.ph1', {
     }, h('input.form-control', {
       type: 'text',
       id: 'keyInputField',
       placeholder: 'key',
-      value: keyString,
+      value: workflow.getPairInputKey(),
       oncreate: ({dom}) => workflow.dom.keyInput = dom,
-      oninput: (e) => keyString = e.target.value
+      oninput: (e) => workflow.setPairInputKey(e.target.value)
     })),
     h('.ph1', {
       style: 'width:60%;',
@@ -96,23 +96,18 @@ const addKVInputPair = (workflow) => {
       placeholder: 'value',
       id: 'valueTextAreaField',
       style: 'height: 2em; resize: vertical',
-      value: valueString,
-      oninput: (e) => valueString = e.target.value,
+      value: workflow.getPairInputValue(),
+      oninput: (e) => workflow.setPairInputValue(e.target.value),
       onkeyup: (e) => {
         if (e.keyCode === 13) {
-          // last character needs removing due to new line being added by `Enter` press
-          workflow.addVariable(keyString, valueString.slice(0, -1));
-          workflow.dom.keyInput.focus();
+          workflow.addVariableFromInput();
         }
       }
     })),
     h('.ph2.actionable-icon', {
       title: 'Add (key,value) variable',
       id: 'addKVPairButton',
-      onclick: () => {
-        workflow.addVariable(keyString, valueString);
-        workflow.dom.keyInput.focus();
-      }
+      onclick: () => workflow.addVariableFromInput(),
     }, iconPlus())
   ])
 };
@@ -131,17 +126,17 @@ const addListOfKvPairs = (workflow) => {
       id: 'kvTextArea',
       rows: 7,
       style: 'resize: vertical',
-      value: workflow.kvPairsString,
+      value: workflow.getTextAreaValue(),
       placeholder: 'e.g.\n{\n\t"key1": "value1",\n\t"key2": "value2"\n}',
       oncreate: ({dom}) => workflow.dom.keyValueArea = dom,
-      oninput: (e) => workflow.kvPairsString = e.target.value
+      oninput: (e) => workflow.setTextAreaValue(e.target.value),
     })
     ),
     h('.ph2.actionable-icon', {
       title: 'Add list of (key,value) variables',
       id: 'addKVListButton',
       onclick: () => {
-        workflow.addVariableJSON(workflow.kvPairsString);
+        workflow.addVariableJSON(workflow.getTextAreaValue());
         workflow.dom.keyValueArea.focus();
       }
     }, iconPlus())

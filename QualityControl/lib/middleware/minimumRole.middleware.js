@@ -12,11 +12,8 @@
  * or submit itself to any jurisdiction.
  */
 
+import { UnauthorizedAccessError, updateAndSendExpressResponseFromNativeError } from '@aliceo2/web-ui';
 import { isUserRoleSufficient } from './../../common/library/userRole.enum.js';
-import { UnauthorizedAccessError } from './../errors/UnauthorizedAccessError.js';
-import {
-  updateExpressResponseFromNativeError,
-} from './../errors/updateExpressResponseFromNativeError.js';
 
 /**
  * Method to receive a minimum role that needs to be met by owner of request and to return a middleware function
@@ -44,7 +41,7 @@ export const minimumRoleMiddleware = (minimumRole) =>
       }
       const isAllowed = accessList.some((role) => isUserRoleSufficient(role, minimumRole));
       if (!isAllowed) {
-        updateExpressResponseFromNativeError(
+        updateAndSendExpressResponseFromNativeError(
           res,
           new UnauthorizedAccessError('Not enough permissions for this operation'),
         );
@@ -52,6 +49,6 @@ export const minimumRoleMiddleware = (minimumRole) =>
         next();
       }
     } catch (error) {
-      updateExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   };

@@ -22,21 +22,28 @@ const O2TokenService = require('./services/O2TokenService.js');
 const { LogLevel } = require('./log/LogLevel.js');
 const { LogSeverity } = require('./log/LogSeverity.js');
 const { LogManager, Log } = require('./log/LogManager.js');
-const MySQL = require('./db/mysql.js');
 const NotificationService = require('./services/notification.js');
 const WebSocket = require('./websocket/server.js');
 const WebSocketMessage = require('./websocket/message.js');
 
+const { FailedDependencyError } = require('./errors/FailedDependencyError.js');
 const { InvalidInputError } = require('./errors/InvalidInputError.js');
 const { NotFoundError } = require('./errors/NotFoundError.js');
 const { ServiceUnavailableError } = require('./errors/ServiceUnavailableError.js');
 const { TimeoutError } = require('./errors/TimeoutError.js');
 const { UnauthorizedAccessError } = require('./errors/UnauthorizedAccessError.js');
 const { grpcErrorToNativeError } = require('./errors/grpcErrorToNativeError.js');
+const { GrpcErrorCodes } = require('./errors/grpcErrorCodes.enum.js');
 const {
   updateAndSendExpressResponseFromNativeError,
 } = require('./errors/updateAndSendExpressResponseFromNativeError.js');
 const { Logger } = require('./log/Logger');
+
+const { getWebUiProtoIncludeDir } = require('./protobuf/getWebUiProtoIncludeDir');
+const { AliEcsEventMessagesConsumer } = require('./kafka/AliEcsEventMessagesConsumer.js');
+
+const { parseUrlParameters } = require('./http/parseUrlParameters.js');
+const { buildUrl } = require('./http/buildUrl.js');
 
 exports.ConsulService = ConsulService;
 
@@ -61,13 +68,13 @@ exports.LogLevel = LogLevel;
 
 exports.LogSeverity = LogSeverity;
 
-exports.MySQL = MySQL;
-
 exports.NotificationService = NotificationService;
 
 exports.WebSocket = WebSocket;
 
 exports.WebSocketMessage = WebSocketMessage;
+
+exports.FailedDependencyError = FailedDependencyError;
 
 exports.InvalidInputError = InvalidInputError;
 
@@ -79,6 +86,16 @@ exports.TimeoutError = TimeoutError;
 
 exports.UnauthorizedAccessError = UnauthorizedAccessError;
 
+exports.GrpcErrorCodes = GrpcErrorCodes;
+
 exports.grpcErrorToNativeError = grpcErrorToNativeError;
 
 exports.updateAndSendExpressResponseFromNativeError = updateAndSendExpressResponseFromNativeError;
+
+exports.getWebUiProtoIncludeDir = getWebUiProtoIncludeDir;
+
+exports.AliEcsEventMessagesConsumer = AliEcsEventMessagesConsumer;
+
+exports.buildUrl = buildUrl;
+
+exports.parseUrlParameters = parseUrlParameters;

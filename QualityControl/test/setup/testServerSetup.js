@@ -27,8 +27,11 @@ import path from 'path';
  */
 export async function setupServerForIntegrationTests() {
   await copyMockDataFileToUse();
+  const isDebug = process.argv.includes('--debug');
+  const alwaysFilter = ['JSHandle:render', 'JSHandle:Usage of JSRoot.core.js', 'JSHandle:Set jsroot source_dir'];
+  const backendFilters = ['ID 0 Client disconnected', 'DB file updated'];
 
-  let subprocessOutput = undefined;
+  let subprocessOutput = '';
   const url = `http://${config.http.hostname}:${config.http.port}/`;
 
   const subprocess = spawn('node', ['index.js', 'test/config.js'], {
@@ -39,10 +42,22 @@ export async function setupServerForIntegrationTests() {
     },
   });
   subprocess.stdout.on('data', (chunk) => {
-    subprocessOutput += chunk.toString();
+    const text = chunk.toString();
+    subprocessOutput += text;
+    if (isDebug) {
+      if (!backendFilters.some((filter)=> text.includes(filter))) {
+        console.log('BACK-END', text);
+      }
+    }
   });
   subprocess.stderr.on('data', (chunk) => {
-    subprocessOutput += chunk.toString();
+    const text = chunk.toString();
+    subprocessOutput += text;
+    if (isDebug) {
+      if (!backendFilters.some((filter)=> text.includes(filter))) {
+        console.log('BACK-END', text);
+      }
+    }
   });
 
   // Start browser to test UI
@@ -50,6 +65,8 @@ export async function setupServerForIntegrationTests() {
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     headless: true,
   });
+  // 2-second delay to ensure Chrome has fully initialized when running in a Docker container
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   const page = await browser.newPage();
   await page.setViewport({ width: 1366, height: 768 });
   // Listen to browser
@@ -60,9 +77,10 @@ export async function setupServerForIntegrationTests() {
     console.error('        ', pageerror);
   });
   page.on('console', (msg) => {
-    for (let i = 0; i < msg.args().length; ++i) {
-      console.log(`        ${msg.args()[i]}`);
-    }
+    let lines = msg.args() || [];
+    lines = lines.filter((arg)=> !alwaysFilter.some((filter) => arg.toString().includes(filter)));
+
+    lines.forEach((line) => console.log(`        ${line}`));
   });
 
   return { url, page, browser, subprocess, subprocessOutput };
@@ -91,7 +109,7 @@ export const terminateSessionAndLog = async (
  * it can be used by the test suite and suffer changes without impacting the original file.
  * If file does not exist, create it, first.
  */
-const copyMockDataFileToUse = async () => {
+export const copyMockDataFileToUse = async () => {
   const sourceFile = path.resolve('test/setup/seeders/qcg-mock-data-template.json');
   const destinationFile = path.resolve('test/setup/seeders/qcg-mock-data.json');
   try {

@@ -12,15 +12,19 @@
  * or submit itself to any jurisdiction.
  */
 
-import { Observable, RemoteData, iconArrowTop } from '/js/src/index.js';
+import { RemoteData, iconCaretTop, BrowserStorage } from '/js/src/index.js';
 import ObjectTree from './ObjectTree.class.js';
-import { prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
+import { simpleDebouncer, prettyFormatDate, setBrowserTabTitle } from './../common/utils.js';
 import { isObjectOfTypeChecker } from './../library/qcObject/utils.js';
+import { BaseViewModel } from '../common/abstracts/BaseViewModel.js';
+import { StorageKeysEnum } from '../common/enums/storageKeys.enum.js';
+import { OBJECT_LIST_SIDE_ROW_HEIGHT } from '../common/constants/ui.js';
+import { updateWithPlotErrorOnQcRemoteData } from '../common/object/updateWithPlotErrorOnQcRemoteData.js';
 
 /**
  * Model namespace for all about QC's objects (not javascript objects)
  */
-export default class QCObject extends Observable {
+export default class QCObject extends BaseViewModel {
   /**
    * Initialize model with empty values
    * @param {Model} model - root model of the application
@@ -37,27 +41,132 @@ export default class QCObject extends Observable {
     this.selected = null; // Object - { name; createTime; lastModified; }
     this.selectedOpen = false;
     this.objects = {}; // ObjectName -> RemoteData.payload -> plot
-
-    this.listOnline = []; // List of online objects name
+    this._extraObjectData = {};
 
     this.searchInput = ''; // String - content of input search
     this.searchResult = []; // Array<object> - result list of search
+    this.focusedSearchResult = null; // Object - focused item in search results for keyboard navigation
+
     this.sortBy = {
       field: 'name',
       title: 'Name',
       order: 1,
-      icon: iconArrowTop(),
-      open: false,
+      icon: iconCaretTop(),
     };
 
     this.tree = new ObjectTree('database');
     this.tree.bubbleTo(this);
 
-    this.sideTree = new ObjectTree('online');
-    this.sideTree.bubbleTo(this);
     this.queryingObjects = false;
     this.scrollTop = 0;
     this.scrollHeight = 0;
+
+    this._initializeLeftPanelWidth();
+  }
+
+  /**
+   * Handle keyboard navigation within the search results
+   * @param {string} key - The key pressed by the user
+   */
+  handleKeyboardNavigationSearchResults(key) {
+    if (!this.searchResult.length) {
+      return;
+    }
+    const select = () => this.model.object.select(this.focusedSearchResult);
+    const actions = {
+      ['ArrowRight']: () => select(),
+      ['Enter']: () => select(),
+      ['ArrowUp']: () => this._setFocusedSearchResultByOffset(-1),
+      ['ArrowDown']: () => this._setFocusedSearchResultByOffset(1),
+    };
+    const action = actions[key];
+    if (action) {
+      action();
+    }
+  }
+
+  /**
+   * Initialize left panel width from local storage or set to default
+   * @returns {undefined}
+   */
+  _initializeLeftPanelWidth() {
+    const DEFAULT_PANEL_WIDTH = 50;
+    this.leftPanelWidthStorage = new BrowserStorage(StorageKeysEnum.OBJECT_VIEW_LEFT_PANEL_WIDTH);
+    const storedWidth = this.leftPanelWidthStorage.getLocalItem(this.model.session.personid.toString());
+    this.leftPanelWidthPercent = storedWidth ?? DEFAULT_PANEL_WIDTH;
+  }
+
+  /**
+   * Set the left panel width percentage
+   * @param {number} widthPercent - width percentage of the left panel
+   * @returns {undefined}
+   */
+  setLeftPanelWidthPercent(widthPercent) {
+    this.leftPanelWidthStorage.setLocalItem(this.model.session.personid.toString(), widthPercent);
+    this.leftPanelWidthPercent = widthPercent;
+    this.notify();
+  }
+
+  /**
+   * Set focused search result by its object name/pathString
+   * @param {string} path - object path/name to be focused
+   */
+  setFocusedSearchResultByPath(path) {
+    const result = this.searchResult.find((item) => item.name === path);
+    if (!result) {
+      return;
+    }
+    this.focusedSearchResult = result;
+    this.notify();
+  }
+
+  /**
+   * Set the focused search result to the next or previous item based on offset
+   * @param {number} offset - The offset to move the focus by (positive or negative)
+   */
+  _setFocusedSearchResultByOffset(offset) {
+    if (!Number.isInteger(offset) || offset === 0 || !this.searchResult?.length) {
+      return; // Invalid offset or empty search result
+    }
+    if (this.focusedSearchResult) {
+      const clampIndex = (index) => Math.min(Math.max(index, 0), this.searchResult.length - 1);
+      const currentIndex = this.searchResult.findIndex(({ name }) => name === this.focusedSearchResult?.name);
+      // Move focus by offset if found, else focus to first result
+      const nextIndex = currentIndex === -1 ? 0 : currentIndex + offset;
+      this.focusedSearchResult = this.searchResult[clampIndex(nextIndex)];
+      this.notify();
+      this._scrollFocusedSearchResultIntoView();
+    } else {
+      // If no focused result, focus the first result
+      [this.focusedSearchResult] = this.searchResult;
+      this.notify();
+      this._scrollFocusedSearchResultIntoView();
+    }
+  }
+
+  /**
+   * Scroll the focused search result into view within the scrollable container
+   * @returns {undefined}
+   */
+  _scrollFocusedSearchResultIntoView() {
+    const container = document.getElementById('object-list-scroll');
+    if (!container || !this.focusedSearchResult) {
+      return;
+    }
+    const focusedIndex = this.searchResult.findIndex(({ name }) => name === this.focusedSearchResult.name);
+    if (focusedIndex === -1) {
+      return;
+    }
+    const rowHeight = OBJECT_LIST_SIDE_ROW_HEIGHT;
+    const rowTop = focusedIndex * rowHeight;
+    const rowBottom = rowTop + rowHeight;
+    const viewTop = container.scrollTop;
+    const viewBottom = viewTop + container.clientHeight;
+    if (rowTop < viewTop) {
+      container.scrollTop = rowTop;
+    } else if (rowBottom > viewBottom) {
+      container.scrollTop = rowBottom - container.clientHeight;
+    }
   }
 
   /**
@@ -94,42 +203,13 @@ export default class QCObject extends Observable {
   }
 
   /**
-   * Method to display sideTree(edit layout mode) based on onlineList / offlineList
-   * @param {boolean} isOnlineListRequested - whether user would like to view only online list
-   * @returns {undefined}
-   */
-  toggleSideTree(isOnlineListRequested) {
-    this.sideTree.bubbleTo(this);
-    if (isOnlineListRequested) {
-      this.sideTree.initTree('online');
-      this.sideTree.addChildren(this.listOnline);
-    } else {
-      this.sideTree.initTree('database');
-      this.sideTree.addChildren(this.list);
-    }
-    this.notify();
-  }
-
-  /**
-   * Toggle the display of the sort by dropdown
-   * @returns {undefined}
-   */
-  toggleSortDropdown() {
-    this.sortBy.open = !this.sortBy.open;
-    this.notify();
-  }
-
-  /**
-   * Computes the final list of objects to be seen by user depending on those factors:
-   * - online filter enabled
-   * - online objects according to information service
-   * - search input from user
+   * Computes the final list of objects to be seen by user depending on search input from user
    * If any of those changes, this method should be called to update the outputs.
    * @returns {undefined}
    */
   _computeFilters() {
     if (this.searchInput) {
-      const listSource = (this.model.isOnlineModeEnabled ? this.listOnline : this.list) || []; // With fallback
+      const listSource = this.list || []; // With fallback
       const fuzzyRegex = new RegExp(this.searchInput, 'i');
       this.searchResult = listSource.filter((item) => fuzzyRegex.test(item.name));
     } else {
@@ -141,25 +221,35 @@ export default class QCObject extends Observable {
    * Method to sort a list of JSON objects by one of its fields
    * @param {Array<JSON>} listSource - list of objects to be sorted
    * @param {string} field - filed by which the sort should be done
-   * @param {number} order - order by which it should be done
+   * @param {number} order - acending (1) or decending (-1)
    * @returns {undefined}
    */
   sortListByField(listSource, field, order) {
-    listSource.sort((a, b) => {
-      if (field === 'createTime') {
-        if (a[field] < b[field]) {
-          return -1 * order;
-        } else {
-          return Number(order);
-        }
-      } else if (field === 'name') {
-        if (a[field].toUpperCase() < b[field].toUpperCase()) {
-          return -1 * order;
-        } else {
-          return Number(order);
-        }
-      }
-    });
+    listSource?.sort((a, b) => typeof a[field] === 'string' ?
+      this._compareStrings(a[field], b[field], order) :
+      this._compareNumbers(a[field], b[field], order));
+  }
+
+  /**
+   * Helper method for sortListByField for sorting strings
+   * @param {string} a - first string to be sorted
+   * @param {string} b - second string to be sorted
+   * @param {number} order - acending (1) or decending (-1)
+   * @returns {undefined}
+   */
+  _compareStrings(a, b, order) {
+    return a.toUpperCase().localeCompare(b.toUpperCase()) * order;
+  }
+
+  /**
+   * Helper method for sortListByField for sorting numbers
+   * @param {number} a - first number to be sorted
+   * @param {number} b - second number to be sorted
+   * @param {number} order - acending (1) or decending (-1)
+   * @returns {undefined}
+   */
+  _compareNumbers(a, b, order) {
+    return (a - b) * order;
   }
 
   /**
@@ -167,29 +257,29 @@ export default class QCObject extends Observable {
    * @param {string} title - title of the tree to be sorted
    * @param {string} field - field by which the sort operation should happen
    * @param {number} order {-1; 1}
-   * @param {Function} icon - icon to be displayed based on sort order
+   * @param {() => icon} icon - icon to be displayed based on sort order {@link Framework/Frontend/js/src/icons.js}
    * @returns {undefined}
    */
   sortTree(title, field, order, icon) {
     this.sortListByField(this.currentList, field, order);
-    if (!this.model.isOnlineModeEnabled) {
-      this.tree.initTree('database');
-      this.tree.addChildren(this.currentList);
-    } else {
-      this.tree.initTree('online');
-      this.tree.addChildren(this.currentList);
-    }
+    this.tree.initTree('database');
+    this.tree.addChildren(this.currentList);
 
     this._computeFilters();
 
-    this.sortBy = {
-      field: field,
-      title: title,
-      order: order,
-      icon: icon,
-      open: false,
-    };
+    this.sortBy = { field, title, order, icon };
     this.notify();
+  }
+
+  /**
+   * Checks if the object list needs to be refreshed.
+   * @returns {Promise<{ refreshNeeded: boolean, data: object | null }>}
+   * whether a refresh is needed and the fetched data
+   */
+  checkIfListHasToBeRefreshed() {
+    const fetchFn = async () => await this.model.services.object.getObjects(true);
+    const validateFn = (result) => result.isSuccess() && result.payload.paths?.length !== this.list?.length;
+    return this.model.filterModel.refreshCheck(fetchFn, validateFn);
   }
 
   /**
@@ -197,79 +287,64 @@ export default class QCObject extends Observable {
    * @returns {undefined}
    */
   async loadList() {
-    if (!this.model.isOnlineModeEnabled) {
-      this.objectsRemote = RemoteData.loading();
+    const { refreshNeeded, data } = await this.checkIfListHasToBeRefreshed();
+    if (!refreshNeeded) {
       this.notify();
-      this.queryingObjects = true;
-      let offlineObjects = [];
-      const result = await this.model.services.object.getObjects();
-      if (result.isSuccess()) {
-        offlineObjects = result.payload;
-      } else {
-        const failureMessage = 'Failed to retrieve list of objects. Please contact an administrator';
-        this.model.notification.show(failureMessage, 'danger', Infinity);
-      }
-      this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
-      this.list = offlineObjects;
-
-      this.tree.initTree('database');
-      this.tree.addChildren(offlineObjects);
-
-      this.currentList = offlineObjects;
-      this.sortBy = {
-        field: 'name',
-        title: 'Name',
-        order: 1,
-        icon: iconArrowTop(),
-        open: false,
-      };
-      this._computeFilters();
-
-      if (this.selected && !this.selected.lastModified) {
-        this.selected = this.list.find((object) => object.name === this.selected.name);
-      }
-      this.queryingObjects = false;
-      this.objectsRemote = RemoteData.success();
-      this.notify();
-    } else {
-      this.loadOnlineList();
+      return;
     }
-  }
-
-  /**
-   * Ask server for online objects and fills tree with them
-   * @returns {undefined}
-   */
-  async loadOnlineList() {
     this.objectsRemote = RemoteData.loading();
-    this.queryingObjects = true;
     this.notify();
-    let onlineObjects = [];
-    const result = await this.model.services.object.getOnlineObjects();
+    this.queryingObjects = true;
+    let offlineObjects = [];
+    const result = data ?? await this.model.services.object.getObjects(this.model.filterModel.isRunModeActivated);
+
     if (result.isSuccess()) {
-      onlineObjects = result.payload;
-      this.sortListByField(onlineObjects, 'name', 1);
-      this.sortBy = {
-        field: 'name',
-        title: 'Name',
-        order: 1,
-        icon: iconArrowTop(),
-        open: false,
-      };
+      offlineObjects = this.model.filterModel.isRunModeActivated ? result.payload.paths : result.payload;
     } else {
-      const failureMessage = 'Failed to retrieve list of online objects. Please contact an administrator';
-      this.model.notification.show(failureMessage, 'danger', Infinity);
+      const errorMessage =
+        result?._error?.message || 'Failed to retrieve list of objects. Please contact an administrator';
+      this.model.notification.show(errorMessage, 'danger', Infinity);
+    }
+    this.sortListByField(offlineObjects, this.sortBy.field, this.sortBy.order);
+    this.list = offlineObjects;
+
+    let treeState = null;
+    let selectedObject = null;
+
+    // save the state of the tree in run mode
+    if (this.model.filterModel.isRunModeActivated) {
+      treeState = this.saveTreeState();
+      selectedObject = this.selected;
     }
 
-    this.tree.initTree('online');
-    this.tree.addChildren(onlineObjects);
+    this.tree.initTree('database');
+    this.tree.addChildren(offlineObjects);
 
-    this.listOnline = onlineObjects;
-    this.currentList = onlineObjects;
-    this.search('');
-    this.objectsRemote = RemoteData.success();
+    // restore tree state if in run mode
+    if (this.model.filterModel.isRunModeActivated && treeState) {
+      this.restoreTreeState(treeState);
+    }
+
+    this.currentList = offlineObjects;
+    this.sortBy = {
+      field: 'name',
+      title: 'Name',
+      order: 1,
+      icon: iconCaretTop(),
+    };
+    this._computeFilters();
+
+    // if w are in run mode and an object was opened
+    if (this.model.filterModel.isRunModeActivated && selectedObject) {
+      const foundObject = this.list.find((object) => object.name === selectedObject.name);
+      if (foundObject) {
+        this.selected = foundObject;
+      }
+    } else if (this.selected && !this.selected.lastModified) {
+      this.selected = this.list.find((object) => object.name === this.selected.name);
+    }
     this.queryingObjects = false;
-
+    this.objectsRemote = RemoteData.success();
     this.notify();
   }
 
@@ -283,7 +358,9 @@ export default class QCObject extends Observable {
   async loadObjectByName(objectName, timestamp = undefined, id = undefined) {
     this.objects[objectName] = RemoteData.loading();
     this.notify();
-    const obj = await this.model.services.object.getObjectByName(objectName, id, timestamp, undefined, this);
+
+    const obj =
+      await this.model.services.object.getObjectByName(objectName, id, timestamp, this);
 
     // TODO Is it a TTree?
     if (obj.isSuccess()) {
@@ -309,12 +386,12 @@ export default class QCObject extends Observable {
   /**
    * Load objects provided by a list of paths
    * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
-   * @param {object} filter - to be applied on quering objects
    * @returns {undefined}
    */
-  async loadObjects(objectsName, filter = {}) {
+  async loadObjects(objectsName) {
     this.objectsRemote = RemoteData.loading();
     this.objects = {}; // Remove any in-memory loaded objects
+    this._extraObjectData = {}; // Remove any in-memory extra object data
     this.model.services.object.objectsLoadedMap = {}; // TODO not here
     this.notify();
     if (!objectsName || !objectsName.length) {
@@ -322,56 +399,77 @@ export default class QCObject extends Observable {
       this.notify();
       return;
     }
-    await Promise.allSettled(objectsName.map(async (objectName) => {
-      this.objects[objectName] = RemoteData.Loading();
-      this.notify();
-      this.objects[objectName] = await this
-        .model.services.object.getObjectByName(objectName, undefined, undefined, filter, this);
-      this.notify();
-    }));
+    await this.refreshObjects(objectsName);
     this.objectsRemote = RemoteData.success();
     this.notify();
   }
 
   /**
-   * Refreshes currently displayed objects and requests an updated list
-   * of online objects from Consul
+   * Refreshes currently displayed objects
+   * @param {Array.<string>} objectsName - e.g. /FULL/OBJECT/PATH
    * @returns {undefined}
    */
-  refreshObjects() {
-    this.loadObjects(Object.keys(this.objects));
-    this.loadOnlineList();
+  async refreshObjects(objectsName) {
+    await Promise.allSettled(objectsName.map(async (objectName) => {
+      let fetchedData = null;
+      if (this.objects[objectName]?.isSuccess() && this.objects[objectName]?.payload?.name) {
+        const context = { objectName };
+        const { refreshNeeded, data } = await this.checkIfRefreshObject(this.objects[objectName].payload, context);
+        fetchedData = data;
+        if (!refreshNeeded) {
+          return;
+        }
+      }
+
+      this.objects[objectName] = RemoteData.Loading();
+      this.notify();
+
+      this.objects[objectName] =
+    fetchedData ?? await this.model.services.object.getObjectByName(objectName, undefined, undefined, this);
+
+      this.notify();
+    }));
   }
 
   /**
    * Indicate that the object loaded is wrong. Used after trying to print it with jsroot
    * @param {string} name - name of the object
+   * @param {object} details - object containing detail information for invalidation
    * @returns {undefined}
    */
-  invalidObject(name) {
-    this.objects[name] = RemoteData.failure('JSROOT was unable to draw this object');
+  invalidObject(name, details) {
+    this.objects[name] = updateWithPlotErrorOnQcRemoteData(this.objects[name], details);
     this.notify();
   }
 
   /**
    * Set the current selected object by user
    * Search within `currentList`;
-   * If user is in online mode, `list` will be used instead
    * @param {QCObject} object - object to be selected and loaded
-   * @returns {undefined}
+   * @param {object} [preloadedData] - optional object data already fetched
+   *  @returns {undefined}
    */
-  async select(object) {
-    if (this.currentList.length > 0) {
-      this.selected = this.currentList.find((obj) => obj.name === object.name);
+  async select(object = undefined, preloadedData = null) {
+    if (!object) {
+      this.selected = undefined;
+      this.notify();
+      return;
     }
-    if (!this.selected && this.list && this.list.length > 0) {
-      this.selected = this.list.find((obj) => obj.name === object.name);
+
+    let foundObject = this.currentList.find((obj) => obj.name === object.name);
+
+    if (foundObject && this.list && this.list.length > 0) {
+      foundObject = this.list.find((obj) => obj.name === object.name);
     }
-    if (!this.selected) {
-      this.selected = object;
+
+    this.selected = foundObject || object;
+    setBrowserTabTitle(this.selected.name);
+    if (preloadedData) {
+      this.objects[this.selected.name] = RemoteData.success(preloadedData);
+    } else {
+      await this.loadObjectByName(this.selected.name);
     }
-    setBrowserTabTitle(object.name);
-    await this.loadObjectByName(object.name);
+
     this.notify();
   }
 
@@ -383,18 +481,11 @@ export default class QCObject extends Observable {
   search(searchInput) {
     this.searchInput = searchInput;
     this._computeFilters();
-    this.sortListByField(this.searchResult, this.sortBy.field, this.sortBy.order);
-    this.notify();
-  }
 
-  /**
-   * Method to check if an object is in online mode
-   * @param {string} objectName format: QcTask/example
-   * @returns {boolean} - whether the object is in the online list
-   */
-  isObjectInOnlineList(objectName) {
-    return this.model.isOnlineModeEnabled && this.listOnline
-      && this.listOnline.map((item) => item.name).includes(objectName);
+    this.sortListByField(this.searchResult, this.sortBy.field, this.sortBy.order);
+    this.focusedSearchResult = null;
+
+    this.notify();
   }
 
   /**
@@ -540,5 +631,152 @@ export default class QCObject extends Observable {
     } else {
       return [];
     }
+  }
+
+  /**
+   * Save the current state of the tree
+   * @returns {object} - Map of path strings to their open state
+   */
+  saveTreeState() {
+    const state = {};
+
+    /**
+     * Save the state of each node in the tree
+     * @param {object} node - The tree node to save state for
+     * @returns {undefined}
+     */
+    function saveNodeState(node) {
+      if (node.pathString) {
+        state[node.pathString] = node.open;
+      }
+      for (let i = 0; i < node.children.length; i++) {
+        saveNodeState(node.children[i]);
+      }
+    }
+    saveNodeState(this.tree);
+    return state;
+  }
+
+  /**
+   * Restore the tree state from a previously saved state
+   * @param {object} state - Map of path strings to their open state
+   * @returns {undefined}
+   */
+  restoreTreeState(state) {
+    /**
+     * Restore the state of each node in the tree
+     * @param {object} node - The tree node to save state for
+     * @returns {undefined}
+     */
+    function restoreNodeState(node) {
+      if (node.pathString && state[node.pathString] !== undefined) {
+        node.open = state[node.pathString];
+      }
+      for (let i = 0; i < node.children.length; i++) {
+        restoreNodeState(node.children[i]);
+      }
+    };
+
+    restoreNodeState(this.tree);
+  }
+
+  /**
+   * Checks if the given object needs to be refreshed by comparing its ID
+   * @param {object} object - The object to check for refresh.
+   * @param {string} object.name - The name of the object to look up.
+   * @param {string|number} object.id - The current ID of the object being validated.
+   * @param {object} context - Additional context to determine fetch method
+   * @param {string} context.objectName - Object name from URL params
+   * @param {string} context.objectId - Object ID from URL params
+   * @returns {Promise<boolean,RemoteData>} A promise that resolves to `true` if the object should be refreshed
+   */
+  async checkIfRefreshObject(object, context = {}) {
+    const { objectName, objectId } = context;
+
+    const fetchFn = async () => {
+      if (objectId) {
+        return await this.model.services.object.getObjectById(
+          objectId,
+          undefined,
+          undefined,
+          this,
+        );
+      } else {
+        return await this.model.services.object.getObjectByName(
+          objectName || object.name,
+          undefined,
+          undefined,
+          this,
+        );
+      }
+    };
+
+    const validateFn = (result) =>
+      result.isSuccess() && result.payload.id !== object.id;
+    return this.model.filterModel.refreshCheck(fetchFn, validateFn);
+  }
+
+  /**
+   * Function that reloads the object list with filters applied
+   * @returns {undefined}
+   */
+  async triggerFilter() {
+    if (!this.model.filterModel.isRunModeActivated || !this.model.filterModel.runsModeInterval) {
+      this.selected = null;
+    }
+    if (this.selected && this.selected.name) {
+      const context = { objectName: this.selected.name };
+      const { refreshNeeded, data } =
+        await this.checkIfRefreshObject(this.objects[this.selected.name].payload, context);
+      if (refreshNeeded && data?.payload) {
+        this.select({ name: this.selected.name }, data.payload);
+      }
+    }
+    this.loadList();
+  }
+
+  /**
+   * Returns the extra data associated with a given object name.
+   * @param {string} objectName The name of the object whose extra data should be retrieved.
+   * @returns {object | undefined} The extra data associated with the given object name, or undefined if none exists.
+   */
+  getExtraObjectData(objectName) {
+    return this._extraObjectData[objectName];
+  }
+
+  /**
+   * Appends extra data to an existing object entry.
+   * Existing keys are preserved unless overwritten by the provided data. If no data exists, a new entry is created.
+   * @param {string} objectName The name of the object to which extra data should be appended.
+   * @param {object} data The extra data to merge into the existing object data.
+   * @returns {undefined}
+   */
+  appendExtraObjectData(objectName, data) {
+    this._extraObjectData[objectName] = { ...this._extraObjectData[objectName] ?? {}, ...data };
+    // debounce notify by 1ms
+    simpleDebouncer('QCObject.appendExtraObjectData', () => this.notify(), 1);
+  }
+
+  /**
+   * Sets (overwrites) the extra data for a given object name.
+   * Any previously stored data for the object is replaced entirely.
+   * @param {string} objectName The name of the object whose extra data should be set.
+   * @param {object | undefined} data The extra data to associate with the object.
+   * @returns {undefined}
+   */
+  setExtraObjectData(objectName, data) {
+    this._extraObjectData[objectName] = data;
+    // debounce notify by 1ms
+    simpleDebouncer('QCObject.setExtraObjectData', () => this.notify(), 1);
+  }
+
+  /**
+   * Clears all stored extra object data.
+   * After calling this method, no extra data will be associated with any object name.
+   * @returns {undefined}
+   */
+  clearAllExtraObjectData() {
+    this._extraObjectData = {};
+    this.notify();
   }
 }

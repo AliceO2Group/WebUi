@@ -20,7 +20,7 @@ import {ODC_STATE_COLOR} from './constants/stateColors.js';
  * @param {string} key
  * @return {string}
  */
-const parseObject = (item, key) => {
+const parseObject = (item = {}, key) => {
   switch (key) {
     case 'trg_enabled':
       return item['trg_enabled'] === 'false' ? 'OFF'
@@ -38,8 +38,8 @@ const parseObject = (item, key) => {
     case 'createdWhen':
     case 'run_start_time_ms':
     case 'run_end_time_ms':
-      return item
-        ? new Date(Number.parseInt(item)).toLocaleString()
+      return item[key]
+        ? new Date(Number.parseInt(item[key])).toLocaleString()
         : '-';
     case 'odc_n_epns':
       return (item['epn_enabled'] && item['epn_enabled'] == 'true') ? item['odc_n_epns'] : 'OFF';
@@ -53,10 +53,10 @@ const parseObject = (item, key) => {
   * @param {object} tasks - raw data
   * @return {JSON} {<string>:{list: <array>, stdout: <string>}}
   */
-const getTasksByFlp = (tasks) => {
+const getTasksByFlp = (tasks = []) => {
   var taskMap = {};
   tasks.forEach((task) => {
-    const hostname = task.deploymentInfo?.hostname ?? 'Unknown';
+    const hostname = task.hostname ?? 'Unknown';
     if (!taskMap.hasOwnProperty(hostname)) {
       taskMap[hostname] = {list: [], stdout: ''};
     }
@@ -68,14 +68,14 @@ const getTasksByFlp = (tasks) => {
 }
 
 /**
-  * Create a map of tasks grouped by their EPN host
+  * Create a map of tasks grouped by their EPN hostname
   * @param {object} tasks - raw data
   * @return {JSON} {<string>:{list: <array>, stdout: <string>}}
   */
-const getTasksByEpn = (tasks) => {
+const getTasksByEpn = (tasks = []) => {
   var taskMap = {};
   tasks.forEach((task) => {
-    const hostname = task.host;
+    const { hostname } = task;
     if (!taskMap.hasOwnProperty(hostname)) {
       taskMap[hostname] = {list: []};
     }
@@ -90,7 +90,7 @@ const getTasksByEpn = (tasks) => {
  * @param {string} taskName
  * @return {string}
  */
-const getTaskShortName = (taskName) => {
+const getTaskShortName = (taskName = '') => {
   const regex = new RegExp(`tasks/.*@`);
   const matchedTaskName = taskName?.match(regex);
   if (matchedTaskName) {
@@ -130,7 +130,7 @@ const parseOdcStatusPerEnv = (environment) => {
  * @param {JSON} item
  * @returns {String}
  */
-const _parseTopology = (item) => {
+const _parseTopology = (item = {}) => {
   if (!item['epn_enabled'] || item['epn_enabled'] === 'false') {
     return '-';
   }

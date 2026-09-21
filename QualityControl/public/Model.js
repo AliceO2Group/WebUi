@@ -12,21 +12,25 @@
  * or submit itself to any jurisdiction.
  */
 
-/* global QCG, JSROOT */
+/* global JSROOT */
 
 import {
-  sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification, RemoteData,
+  sessionService, Observable, WebSocketClient, QueryRouter, Loader, Notification,
 } from '/js/src/index.js';
 
 import Layout from './layout/Layout.js';
 import QCObject from './object/QCObject.js';
 import LayoutService from './services/Layout.service.js';
-import Folder from './folder/Folder.js';
-import FrameworkInfo from './frameworkInfo/FrameworkInfo.js';
 import QCObjectService from './services/QCObject.service.js';
 import ObjectViewModel from './pages/objectView/ObjectViewModel.js';
 import { setBrowserTabTitle } from './common/utils.js';
 import { buildQueryParametersString } from './common/buildQueryParametersString.js';
+import AboutViewModel from './pages/aboutView/AboutViewModel.js';
+import LayoutListModel from './pages/layoutListView/model/LayoutListModel.js';
+import { RequestFields } from './common/RequestFields.enum.js';
+import FilterModel from './common/filters/model/FilterModel.js';
+import { IntegratedServices } from '../library/enums/Status/integratedServices.enum.js';
+import NotificationRunStartModel from './common/notifications/model/NotificationRunStartModel.js';
 
 /**
  * Represents the application's state and actions as a class
@@ -40,22 +44,20 @@ export default class Model extends Observable {
     this.session = sessionService.get();
     this.session.personid = parseInt(this.session.personid, 10); // Cast, sessionService has only strings
 
+    this.loader = new Loader(this);
+    this.loader.bubbleTo(this);
+
+    this.filterModel = new FilterModel(this);
+    this.filterModel.bubbleTo(this);
+
     this.object = new QCObject(this);
     this.object.bubbleTo(this);
 
     this.objectViewModel = new ObjectViewModel(this);
     this.objectViewModel.bubbleTo(this);
 
-    this.loader = new Loader(this);
-    this.loader.bubbleTo(this);
-
-    this.folder = new Folder(this);
-    this.folder.addFolder({
-      title: 'Official', isOpened: true, list: RemoteData.notAsked(), searchInput: '', classList: 'bg-primary white',
-    });
-    this.folder.addFolder({ title: 'My Layouts', isOpened: true, list: RemoteData.notAsked(), searchInput: '' });
-    this.folder.addFolder({ title: 'All Layouts', isOpened: false, list: RemoteData.notAsked(), searchInput: '' });
-    this.folder.bubbleTo(this);
+    this.layoutListModel = new LayoutListModel(this);
+    this.layoutListModel.bubbleTo(this);
 
     this.layout = new Layout(this);
     this.layout.bubbleTo(this);
@@ -63,13 +65,9 @@ export default class Model extends Observable {
     this.notification = new Notification(this);
     this.notification.bubbleTo(this);
 
-    this.frameworkInfo = new FrameworkInfo(this);
-    this.frameworkInfo.bubbleTo(this);
+    this.aboutViewModel = new AboutViewModel(this);
+    this.aboutViewModel.bubbleTo(this);
 
-    this.isOnlineModeConnectionAlive = false;
-    this.isOnlineModeEnabled = false; // Show only online objects or all (offline)
-
-    this.refreshTimer = 0;
     this.refreshInterval = 0; // Seconds
     this.sidebar = true;
     this.accountMenuEnabled = false;
@@ -89,6 +87,9 @@ export default class Model extends Observable {
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
     this.ws.addListener('close', this.handleWSClose.bind(this));
 
+    this.notificationRunStartModel = new NotificationRunStartModel(this);
+    this.notificationRunStartModel.bubbleTo(this);
+
     this.initModel();
   }
 
@@ -102,10 +103,6 @@ export default class Model extends Observable {
       object: new QCObjectService(this),
       layout: new LayoutService(this),
     };
-
-    if (QCG.CONSUL_SERVICE) {
-      this.checkOnlineModeAvailability();
-    }
 
     this.loader.get('/api/checkUser');
 
@@ -123,6 +120,12 @@ export default class Model extends Observable {
       height: 10,
     };
 
+    // For active run monitoring, the kafka service must be available.
+    // If we do not yet know the kafka service status, we should request it from the backend
+    if (!this.aboutViewModel.findService(IntegratedServices.KAFKA)) {
+      this.aboutViewModel.retrieveIndividualServiceStatus(IntegratedServices.KAFKA);
+    }
+
     /*
      * Init first page
      */
@@ -136,16 +139,35 @@ export default class Model extends Observable {
    */
   handleKeyboardDown(e) {
     // Console.log(`e.keyCode=${e.keyCode}, e.metaKey=${e.metaKey}, e.ctrlKey=${e.ctrlKey}, e.altKey=${e.altKey}`);
-    const code = e.keyCode;
-
+    const { key } = e;
     // Delete key + layout page + object select => delete this object
-    if (code === 8 &&
+    if (key === 'Delete' &&
       this.router.params.page === 'layoutShow' &&
       this.layout.editEnabled &&
       this.layout.editingTabObject) {
       this.layout.deleteTabObject(this.layout.editingTabObject);
-    } else if (code === 27 && this.isImportVisible) {
+    } else if (key === 'Escape' && this.isImportVisible) {
       this.layout.resetImport();
+    }
+    if (
+      this.router.params.page === 'objectTree' &&
+      (
+        key === 'ArrowUp' ||
+        key === 'ArrowDown' ||
+        key === 'Enter' ||
+        key === 'ArrowLeft' ||
+        key === 'ArrowRight'
+      )
+    ) {
+      e.preventDefault(); // Prevent scrolling the page
+      const searchActive = Boolean(this.object.searchInput?.trim());
+      if (searchActive) {
+        // Search navigation
+        this.object.handleKeyboardNavigationSearchResults(key);
+      } else {
+        // Tree navigation
+        this.object.tree.handleKeyboardNavigation(key, (selectedObject) => this.object.select(selectedObject));
+      }
     }
   }
 
@@ -175,16 +197,22 @@ export default class Model extends Observable {
    */
   async handleLocationChange() {
     this.object.objects = {}; // Remove any in-memory loaded objects
-    clearInterval(this.layout.tabInterval);
+    this._clearAllIntervals();
+    await this.filterModel.filterService.initFilterService();
+    await this.filterModel.setFilterFromURL();
+    this.filterModel.setFilterToURL();
+    await this.aboutViewModel.retrieveIndividualServiceStatus(IntegratedServices.BOOKKEEPING);
 
-    this.services.layout.getLayoutsByUserId(this.session.personid);
+    this.services.layout.getLayoutsByUserId(this.session.personid, RequestFields.LAYOUT_CARD);
 
     const { params } = this.router;
+
     switch (params.page) {
       case 'layoutList':
+        this.clearURL('layoutList');
         this.page = 'layoutList';
         setBrowserTabTitle('QCG-Layouts');
-        this.services.layout.getLayouts();
+        this.services.layout.getLayouts(RequestFields.LAYOUT_CARD);
         break;
       case 'layoutShow':
         setBrowserTabTitle('QCG-LayoutShow');
@@ -227,6 +255,7 @@ export default class Model extends Observable {
             return;
           }
         }
+
         this.layout.loadItem(this.router.params.layoutId, params?.tab ?? '')
           .then(() => {
             this.page = 'layoutShow';
@@ -237,6 +266,7 @@ export default class Model extends Observable {
 
               this.router.go(`?page=layoutShow&layoutId=${this.router.params.layoutId}`, true, true);
             }
+            this.filterModel.restartRunsModeIntervals(this.layout);
             this.notify();
           }).catch(() => true); // Error is handled inside loadItem
         break;
@@ -248,20 +278,24 @@ export default class Model extends Observable {
         if (this.object.selected) {
           this.object.loadObjectByName(this.object.selected.name);
         }
+        this.filterModel.restartRunsModeIntervals(this.object);
         this.notify();
         break;
       case 'objectView': {
         this.page = 'objectView';
+        this.sidebar = false;
         setBrowserTabTitle('QCG-View');
         const { params } = this.router;
         this.objectViewModel.init(params);
+        this.filterModel.restartRunsModeIntervals(this.objectViewModel);
         this.notify();
         break;
       }
       case 'about':
+        this.clearURL('about');
         this.page = 'about';
         setBrowserTabTitle('QCG-About');
-        this.frameworkInfo.getFrameworkInfo();
+        this.aboutViewModel.retrieveAllServicesStatus();
         this.notify();
         break;
       default:
@@ -269,6 +303,15 @@ export default class Model extends Observable {
         this.router.go('?page=layoutList', true);
         break;
     }
+  }
+
+  /**
+   * Clear URL parameters and redirect to a certain page
+   * @param {string} pageName - name of the page to be redirected to
+   * @returns {undefined}
+   */
+  clearURL(pageName) {
+    this.router.go(`?page=${pageName}`, true, true);
   }
 
   /**
@@ -290,68 +333,17 @@ export default class Model extends Observable {
   }
 
   /**
-   * Toggle mode (Online/Offline)
-   * @returns {undefined}
+   * Clears all active intervals in the application
+   * @returns {void}
    */
-  toggleMode() {
-    this.isOnlineModeEnabled = !this.isOnlineModeEnabled;
-    if (this.isOnlineModeEnabled) {
-      this.setRefreshInterval(60);
-    } else {
-      this.object.loadList();
-      clearTimeout(this.refreshTimer);
-    }
-    this.object.selected = null;
-    this.object.searchInput = '';
-    this.notify();
-  }
-
-  /**
-   * Method to check if connection is secure to enable certain improvements
-   * e.g navigator.clipboard, notifications, service workers
-   * @returns {boolean} - whether window is in secure context
-   */
-  isContextSecure() {
-    return window.isSecureContext;
-  }
-
-  /**
-   * Method to check if Online Mode is available
-   * @returns {undefined}
-   */
-  async checkOnlineModeAvailability() {
-    const result = await this.services.object.isOnlineModeConnectionAlive();
-    if (result.isSuccess()) {
-      this.isOnlineModeConnectionAlive = true;
-    } else {
-      this.isOnlineModeConnectionAlive = false;
-    }
-  }
-
-  /**
-   * Set the interval to update objects currently loaded and shown to user.
-   * This will reload only data associated to them
-   * @param {number} intervalSeconds - in seconds
-   * @returns {undefined}
-   */
-  setRefreshInterval(intervalSeconds) {
-    // Stop any other timer
-    clearTimeout(this.refreshTimer);
-
-    // Validate user input
-    let parsedValue = parseInt(intervalSeconds, 10);
-    if (isNaN(parsedValue) || parsedValue < 1) {
-      parsedValue = 2;
+  _clearAllIntervals() {
+    // Clear layout tab interval
+    if (this.layout?.tabInterval) {
+      clearInterval(this.layout.tabInterval);
     }
 
-    // Start new timer
-    this.refreshInterval = parsedValue;
-    this.refreshTimer = setTimeout(() => {
-      this.setRefreshInterval(this.refreshInterval);
-    }, this.refreshInterval * 1000);
-    this.notify();
-
-    this.object.refreshObjects();
+    // Clear filter model runs mode interval
+    this.filterModel.clearRunsModeInterval();
   }
 
   /**

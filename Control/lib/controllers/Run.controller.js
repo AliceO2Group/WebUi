@@ -11,9 +11,8 @@
  * granted to it by virtue of its status as an Intergovernmental Organization
  * or submit itself to any jurisdiction.
 */
-const {LogManager, LogLevel} = require('@aliceo2/web-ui');
+const {LogManager, LogLevel, updateAndSendExpressResponseFromNativeError} = require('@aliceo2/web-ui');
 const LOG_FACILITY = 'run-ctrl';
-const {updateExpressResponseFromNativeError} = require('./../errors/updateExpressResponseFromNativeError.js');
 const {CacheKeys} = require('./../common/cacheKeys.enum.js');
 
 /**
@@ -59,7 +58,7 @@ class RunController {
       res.status(200).json(calibrationRuns);
     } catch (error) {
       this._logger.debug(error);
-      updateExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 
@@ -81,7 +80,7 @@ class RunController {
       const logMessage = `Error refreshing calibration configuration by ${req.session.username} due to: ${error}`;
       this._logger.errorMessage(logMessage, {level: LogLevel.OPERATIONS, facility: LOG_FACILITY})
 
-      updateExpressResponseFromNativeError(res, error);
+      updateAndSendExpressResponseFromNativeError(res, error);
     }
   }
 }

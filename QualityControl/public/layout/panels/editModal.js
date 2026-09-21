@@ -39,6 +39,7 @@ export default (model) => h('.o2-modal', [
         style: 'display:flex; justify-content:center;',
       }, [
         h('button.btn.btn-primary', {
+          id: 'updateLayoutButton',
           disabled: model.services.layout.update.isFailure(),
           onclick: () => model.layout.updateLayout(),
         }, 'Update layout'),
