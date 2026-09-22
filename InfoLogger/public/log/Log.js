@@ -98,11 +98,7 @@ export default class Log extends Observable {
       setBrowserTabTitle(`${window.ILG.name} LIVE PAUSED`);
       this.disableAutoScroll();
     } else {
-      try {
-        this.goLive();
-      } catch (error) {
-        this.model.notification.show(error.toString(), 'danger', 3000);
-      }
+      this.goLive();
     }
   }
 
@@ -110,7 +106,12 @@ export default class Log extends Observable {
    * Starts live mode, enables auto-scroll and sets the browser tab title to "LIVE"
    */
   goLive() {
-    this.liveStart();
+    try {
+      this.liveStart();
+    } catch (error) {
+      this.model.notification.show(error.toString(), 'danger', 3000);
+      return;
+    }
     this.enableAutoScroll();
     setBrowserTabTitle(`${window.ILG.name} LIVE`);
   }

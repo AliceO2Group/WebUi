@@ -76,7 +76,10 @@ export default class Model extends Observable {
     this.ws = new WebSocketClient();
     this.ws.addListener('command', this.handleWSCommand.bind(this));
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
-    this.wsAuthProcessed = new Promise((resolve) => this.ws.addListener('authed', resolve));
+    this.wsSettled = new Promise((resolve) => {
+      this.ws.addListener('authed', resolve);
+      this.ws.addListener('close', resolve);
+    });
     this.ws.addListener('close', this.handleWSClose.bind(this));
 
     // update router on model change
@@ -379,7 +382,7 @@ export default class Model extends Observable {
         this.updateRouteOnModelChange();
         this.notification.show(`Invalid URL filter format: ${error.message}`, 'danger');
       }
-    } else if (!params.q) {
+    } else {
       this.getUserProfile();
       this.log.filter.resetCriteria();
     }
@@ -405,8 +408,12 @@ export default class Model extends Observable {
   async startLiveModeFromURL() {
     await Promise.all([
       this.frameworkInfoLoaded,
-      this.wsAuthProcessed,
+      this.wsSettled,
     ]);
+
+    if (!this.ws.authed) {
+      return; // connection lost before auth, handleWSClose has already notified the user
+    }
 
     if (!this.log.queryResult.isNotAsked()) {
       return; // user started a query as framework has loaded but WS not yet
@@ -416,11 +423,7 @@ export default class Model extends Observable {
       return;
     }
 
-    try {
-      this.log.goLive();
-    } catch (error) {
-      this.notification.show(error.toString(), 'danger', 3000);
-    }
+    this.log.goLive();
   }
 
   /**

@@ -79,7 +79,7 @@ export const commandLogs = (model) => [
  * @returns {vnode} - the view of the interaction mode buttons
  */
 const interactionModesGroupButton = (model) => {
-  const { frameworkInfo, log: { activeMode } } = model;
+  const { frameworkInfo } = model;
 
   return frameworkInfo.match({
     NotAsked: () => h('button.btn', { disabled: true }, ''),
@@ -87,7 +87,7 @@ const interactionModesGroupButton = (model) => {
     Failure: () => null,
     Success: (frameworkInfo) =>
       h('.btn-group', [
-        queryButton(model),
+        queryButton(model, frameworkInfo),
         liveButton(model),
       ]),
   });
