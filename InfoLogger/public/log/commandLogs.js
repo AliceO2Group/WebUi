@@ -25,12 +25,12 @@ import { BUTTON } from '../constants/button-states.const.js';
 import { MODE } from '../constants/mode.const.js';
 
 /**
- * Maps query and live button types to modes
+ * Maps live button types to modes
  */
-const BUTTON_TYPES_BY_MODE = {
-  [MODE.QUERY]: { query: BUTTON.PRIMARY, live: BUTTON.DEFAULT, liveIcon: iconMediaPlay },
-  [MODE.LIVE.RUNNING]: { query: BUTTON.DEFAULT, live: BUTTON.SUCCESS_ACTIVE, liveIcon: iconMediaStop },
-  [MODE.LIVE.PAUSED]: { query: BUTTON.DEFAULT, live: BUTTON.PRIMARY, liveIcon: iconMediaPlay },
+const LIVE_BUTTON_TYPES_BY_MODE = {
+  [MODE.QUERY]: { className: BUTTON.DEFAULT, icon: iconMediaPlay },
+  [MODE.LIVE.RUNNING]: { className: BUTTON.SUCCESS_ACTIVE, icon: iconMediaStop },
+  [MODE.LIVE.PAUSED]: { className: BUTTON.PRIMARY, icon: iconMediaPlay },
 };
 
 /**
@@ -87,8 +87,8 @@ const interactionModesGroupButton = (model) => {
     Failure: () => null,
     Success: (frameworkInfo) =>
       h('.btn-group', [
-        queryButton(model, frameworkInfo, BUTTON_TYPES_BY_MODE[activeMode]),
-        liveButton(model, frameworkInfo, BUTTON_TYPES_BY_MODE[activeMode]),
+        queryButton(model),
+        liveButton(model),
       ]),
   });
 };
@@ -100,10 +100,9 @@ const interactionModesGroupButton = (model) => {
  * - query lookup
  * @param {Model} model - root model of the application
  * @param {RemoteData.payload} frameworkInfo - the payload containing framework information
- * @param {{ query: string, live: string, liveIcon: () => vnode }} type - the button type to use
  * @returns {vnode} - the view of the query button
  */
-const queryButton = (model, frameworkInfo, type) => {
+const queryButton = (model, frameworkInfo) => {
   const { log: logModel } = model;
   const { queryResult } = logModel;
   const { mysql: { status: { ok: isDbReady = false } = {} } = {} } = frameworkInfo;
@@ -121,7 +120,7 @@ const queryButton = (model, frameworkInfo, type) => {
     id: 'query-button',
     title: isDbReady ? 'Query database with filters (Enter)' : 'Query service not configured',
     disabled: !isDbReady || queryResult.isLoading(),
-    className: type.query,
+    className: logModel.isActiveModeQuery() ? BUTTON.PRIMARY : BUTTON.DEFAULT,
     onclick: () => logModel.query(),
   }, 'Query');
 };
@@ -132,13 +131,12 @@ const queryButton = (model, frameworkInfo, type) => {
  * - services result
  * - websocket status
  * @param {Model} model - root model of the application
- * @param {RemoteData.payload} frameworkInfo - the payload containing framework information
- * @param {{ query: string, live: string, liveIcon: () => vnode }} type - the button type to use
  * @returns {vnode} - the view of the live button
  */
-const liveButton = (model, frameworkInfo, type) => {
+const liveButton = (model) => {
   const { log: logModel } = model;
-  const { queryResult } = logModel;
+  const { queryResult, activeMode } = logModel;
+  const { className, icon } = LIVE_BUTTON_TYPES_BY_MODE[activeMode];
 
   const isLiveModeReady = model.isLiveModeReady();
   const title = isLiveModeReady ? 'Stream logs with filtering' : 'Live service not configured';
@@ -147,9 +145,9 @@ const liveButton = (model, frameworkInfo, type) => {
     id: 'live-button',
     title,
     disabled: !isLiveModeReady || queryResult.isLoading(),
-    className: !isLiveModeReady ? 'loading' : type.live,
+    className: !isLiveModeReady ? 'loading' : className,
     onclick: () => logModel.toggleLiveMode(),
-  }, 'Live', ' ', type.liveIcon());
+  }, 'Live', ' ', icon());
 };
 
 /**
