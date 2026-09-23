@@ -90,6 +90,7 @@ export default class Model extends Observable {
     this.zoom = new Zoom();
     this.zoom.bubbleTo(this);
 
+    // Must run last as live=true awaits frameworkInfoLoaded and wsSettled, so both must exist before the URL is parsed
     this.handleLocationChange(); // Init first page
   }
 
@@ -372,7 +373,7 @@ export default class Model extends Observable {
       return;
     } else if (params.profile) {
       this.getProfile(params.profile);
-      return;
+      return; // live=true ignored if a profile is used
     } else if (params.q) {
       this.getUserProfile();
       try {
@@ -381,25 +382,15 @@ export default class Model extends Observable {
         this.log.filter.resetCriteria();
         this.updateRouteOnModelChange();
         this.notification.show(`Invalid URL filter format: ${error.message}`, 'danger');
+        return; // don't go live when q is invalid
       }
     } else {
       this.getUserProfile();
-      this.log.filter.resetCriteria();
     }
 
     if (params.live === 'true') {
       this.startLiveModeFromURL();
     }
-  }
-
-  /**
-   * Returns whether the live mode dependencies are ready
-   * @returns {boolean} true if the live mode dependencies are ready, false otherwise
-   */
-  isLiveModeReady() {
-    return Boolean(this.ws?.authed
-      && this.frameworkInfo.isSuccess()
-      && this.frameworkInfo.payload.infoLoggerServer?.status?.ok);
   }
 
   /**
@@ -418,7 +409,7 @@ export default class Model extends Observable {
     if (!this.log.queryResult.isNotAsked()) {
       return; // user started a query as framework has loaded but WS not yet
     }
-    if (!this.isLiveModeReady()) {
+    if (!this.log.isLiveModeAvailable()) {
       this.notification.show('Live mode is currently unavailable, loaded in query mode', 'danger', 3000);
       return;
     }

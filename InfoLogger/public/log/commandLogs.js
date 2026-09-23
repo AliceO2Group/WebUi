@@ -85,10 +85,10 @@ const interactionModesGroupButton = (model) => {
     NotAsked: () => h('button.btn', { disabled: true }, ''),
     Loading: () => h('button.btn', { disabled: true, className: 'loading' }, 'Loading'),
     Failure: () => null,
-    Success: (frameworkInfo) =>
+    Success: () =>
       h('.btn-group', [
-        queryButton(model, frameworkInfo),
-        liveButton(model),
+        queryButton(model.log),
+        liveButton(model.log),
       ]),
   });
 };
@@ -98,14 +98,11 @@ const interactionModesGroupButton = (model) => {
  * - services lookup
  * - services result
  * - query lookup
- * @param {Model} model - root model of the application
- * @param {RemoteData.payload} frameworkInfo - the payload containing framework information
+ * @param {Log} logModel - log model of the application
  * @returns {vnode} - the view of the query button
  */
-const queryButton = (model, frameworkInfo) => {
-  const { log: logModel } = model;
+const queryButton = (logModel) => {
   const { queryResult } = logModel;
-  const { mysql: { status: { ok: isDbReady = false } = {} } = {} } = frameworkInfo;
 
   if (queryResult.isLoading()) {
     return h('button.btn.bold', {
@@ -118,8 +115,8 @@ const queryButton = (model, frameworkInfo) => {
 
   return h('button.btn.bold', {
     id: 'query-button',
-    title: isDbReady ? 'Query database with filters (Enter)' : 'Query service not configured',
-    disabled: !isDbReady || queryResult.isLoading(),
+    title: logModel.isQueryModeAvailable() ? 'Query database with filters (Enter)' : 'Query service not configured',
+    disabled: !logModel.isQueryModeAvailable(),
     className: logModel.isActiveModeQuery() ? BUTTON.PRIMARY : BUTTON.DEFAULT,
     onclick: () => logModel.query(),
   }, 'Query');
@@ -130,22 +127,21 @@ const queryButton = (model, frameworkInfo) => {
  * - services lookup
  * - services result
  * - websocket status
- * @param {Model} model - root model of the application
+ * @param {Log} logModel - log model of the application
  * @returns {vnode} - the view of the live button
  */
-const liveButton = (model) => {
-  const { log: logModel } = model;
+const liveButton = (logModel) => {
   const { queryResult, activeMode } = logModel;
   const { className, icon } = LIVE_BUTTON_TYPES_BY_MODE[activeMode];
 
-  const isLiveModeReady = model.isLiveModeReady();
-  const title = isLiveModeReady ? 'Stream logs with filtering' : 'Live service not configured';
+  const isLiveModeAvailable = logModel.isLiveModeAvailable();
+  const title = isLiveModeAvailable ? 'Stream logs with filtering' : 'Live service not configured';
 
   return h('button.btn.bold', {
     id: 'live-button',
     title,
-    disabled: !isLiveModeReady || queryResult.isLoading(),
-    className: !isLiveModeReady ? 'loading' : className,
+    disabled: !isLiveModeAvailable || queryResult.isLoading(),
+    className: !isLiveModeAvailable ? 'loading' : className,
     onclick: () => logModel.toggleLiveMode(),
   }, 'Live', ' ', icon());
 };

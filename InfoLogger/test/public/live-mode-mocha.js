@@ -119,14 +119,14 @@ describe('Live Mode test-suite', async () => {
   });
 
   it('should successfully enable LIVE mode from url parameter with defined filter', async () => {
-    await page.goto(`${baseUrl}?q={"severity":{"in":"I W E F"}}&live=true`, { waitUntil: 'networkidle0' });
+    await page.goto(`${baseUrl}?q={"severity":{"in":"E F"}}&live=true`, { waitUntil: 'networkidle0' });
     const liveButtonClasses = await page.evaluate(() => document.querySelector('#live-button').className);
     const search = decodeURIComponent(await page.evaluate(() => window.location.search));
 
     // Check if live mode is active.
     assert.strictEqual(liveButtonClasses, 'btn bold btn-success active');
     // Check if filter is applied
-    assert.strictEqual(search, '?q={"severity":{"in":"I W E F"}}');
+    assert.strictEqual(search, '?q={"severity":{"in":"E F"}}');
   });
 
   it('should successfully enable LIVE mode from url parameter with default filter', async () => {
