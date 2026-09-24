@@ -414,7 +414,7 @@ export default class Model extends Observable {
       return;
     }
 
-    this.log.goLive();
+    this.log.liveStart();
   }
 
   /**

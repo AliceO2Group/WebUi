@@ -104,29 +104,19 @@ export default class Log extends Observable {
   }
 
   /**
-   * Toggles the live mode between running and paused, and enables/disables auto-scroll
+   * Toggles the live mode between running and paused
    */
   toggleLiveMode() {
     this.download.isVisible = false;
     if (this.isLiveModeRunning()) {
       this.liveStop(MODE.LIVE.PAUSED);
-      this.disableAutoScroll();
     } else {
-      this.goLive();
+      try {
+        this.liveStart();
+      } catch (error) {
+        this.model.notification.show(error.toString(), 'danger', 3000);
+      }
     }
-  }
-
-  /**
-   * Starts live mode, enables auto-scroll and sets the browser tab title to "LIVE"
-   */
-  goLive() {
-    try {
-      this.liveStart();
-    } catch (error) {
-      this.model.notification.show(error.toString(), 'danger', 3000);
-      return;
-    }
-    this.enableAutoScroll();
   }
 
   /**
@@ -526,6 +516,7 @@ export default class Log extends Observable {
 
     this.model.ws.setFilter(this.model.log.filter.toStringifyFunction());
 
+    this.enableAutoScroll(true);
     this.notify();
   }
 
@@ -540,6 +531,7 @@ export default class Log extends Observable {
     this.setActiveMode(mode);
     clearInterval(this.liveInterval);
     this.model.ws.setFilter(() => false);
+    this.disableAutoScroll(true);
     this.notify();
   }
 
@@ -609,17 +601,29 @@ export default class Log extends Observable {
 
   /**
    * Enables auto-scroll, this is used when entering Live mode
+   * @param {boolean} quiet - to notify or not
    */
-  enableAutoScroll() {
+  enableAutoScroll(quiet = false) {
     this.autoScrollLive = true;
+
+    if (quiet) {
+      return;
+    }
+
     this.notify();
   }
 
   /**
-   * Disable auto-scroll, this is used when leaving Live mode
+   * Disables auto-scroll with notify()
+   * @param {boolean} quiet - to notify or not
    */
-  disableAutoScroll() {
+  disableAutoScroll(quiet) {
     this.autoScrollLive = false;
+
+    if (quiet) {
+      return;
+    }
+
     this.notify();
   }
 
