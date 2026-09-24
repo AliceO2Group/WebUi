@@ -210,8 +210,12 @@ const tableContainerHooks = (model) => ({
       const container = vnode.dom;
       const { height } = container.getBoundingClientRect();
       const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
-      if (container.scrollTop < model.log.scrollTop) {
-        model.log.disableAutoScroll(); // stop auto-scrolling if user scroll sup
+      // when content shrinks the browser clamps scrollTop to the new maximum
+      // that decrease is not the user scrolling up
+      // within 1px (to catch fractional heights) counts as the bottom
+      const isAtBottom = container.scrollHeight - container.clientHeight - scrollTop <= 1;
+      if (scrollTop < model.log.scrollTop && !isAtBottom) {
+        model.log.disableAutoScroll();
       }
       model.log.setScrollTop(scrollTop, height);
     };
