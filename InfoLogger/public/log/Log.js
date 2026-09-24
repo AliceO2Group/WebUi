@@ -110,7 +110,6 @@ export default class Log extends Observable {
     this.download.isVisible = false;
     if (this.isLiveModeRunning()) {
       this.liveStop(MODE.LIVE.PAUSED);
-      setBrowserTabTitle(`${window.ILG.name} LIVE PAUSED`);
       this.disableAutoScroll();
     } else {
       this.goLive();
