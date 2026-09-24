@@ -118,26 +118,45 @@ describe('Live Mode test-suite', async () => {
     assert.ok(isUserNameMatching);
   });
 
-  it('should successfully enable LIVE mode from url parameter with defined filter', async () => {
+  it('should stay in QUERY mode when live=true is combined with an invalid url filter', async () => {
+    await page.goto(`${baseUrl}?q={"severity":{"in":"E F"}&live=true`, { waitUntil: 'networkidle0' });
+    const { activeMode, notification } = await page.evaluate(() => ({
+      activeMode: window.model.log.activeMode,
+      notification: window.model.notification,
+    }));
+
+    assert.strictEqual(activeMode, 'Query');
+    assert.strictEqual(notification.type, 'danger');
+    assert.ok(notification.message.startsWith('Invalid URL filter format'));
+  });
+
+  it('should successfully enable LIVE mode from url parameter with the defined filter', async () => {
     await page.goto(`${baseUrl}?q={"severity":{"in":"E F"}}&live=true`, { waitUntil: 'networkidle0' });
+
     const liveButtonClasses = await page.evaluate(() => document.querySelector('#live-button').className);
     const search = decodeURIComponent(await page.evaluate(() => window.location.search));
+    const activeMode = await page.evaluate(() => window.model.log.activeMode);
 
-    // Check if live mode is active.
+    assert.deepStrictEqual(activeMode, 'Running');
     assert.strictEqual(liveButtonClasses, 'btn bold btn-success active');
-    // Check if filter is applied
+
+    // Check if filter is still applied
     assert.strictEqual(search, '?q={"severity":{"in":"E F"}}');
   });
 
-  it('should successfully enable LIVE mode from url parameter with default filter', async () => {
+  it('should successfully enable LIVE mode from url parameter with no filter', async () => {
     await page.goto(`${baseUrl}?live=true`, { waitUntil: 'networkidle0' });
     const liveButtonClasses = await page.evaluate(() => document.querySelector('#live-button').className);
     const search = decodeURIComponent(await page.evaluate(() => window.location.search));
+    const activeMode = await page.evaluate(() => window.model.log.activeMode);
+    const title = await page.evaluate(() => document.title);
 
-    // Check if live mode is active.
+    assert.deepStrictEqual(activeMode, 'Running');
     assert.strictEqual(liveButtonClasses, 'btn bold btn-success active');
-    // Check if redirected to default page
+
     assert.strictEqual(search, '?q={"severity":{"in":"I W E F"}}');
+
+    assert.ok(title.endsWith(' LIVE'), `unexpected title: ${title}`);
   });
 
   describe('Empty field filters in live mode', async () => {
