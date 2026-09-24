@@ -140,6 +140,7 @@ const liveButton = (model, frameworkInfo) => {
   const title = isLiveModeReady ? 'Stream logs with filtering' : 'Live service not configured';
 
   return h('button.btn.bold', {
+    id: 'live-button',
     title,
     disabled: !isLiveModeReady || queryResult.isLoading(),
     className: !isLiveModeReady ? 'loading' : liveButtonType,

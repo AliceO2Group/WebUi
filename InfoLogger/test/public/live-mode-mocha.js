@@ -14,6 +14,7 @@
 
 const assert = require('assert');
 const test = require('../mocha-index');
+const { injectLogs } = require('../utils/utils');
 
 const isFieldEmpty = (value) => value === undefined || value === null || value === '';
 
@@ -22,6 +23,10 @@ describe('Live Mode test-suite', async () => {
   let page = null;
   before(async () => {
     ({ helpers: { baseUrl }, page } = test);
+  });
+
+  after(async () => {
+    await page.evaluate(() => model.log.liveStop('Query'));
   });
 
   it('should successfully go to homepage with predefined filters', async () => {
@@ -230,5 +235,26 @@ describe('Live Mode test-suite', async () => {
     });
 
     assert.deepStrictEqual(activeMode, 'Query');
+  });
+
+  it('should not disable autoscroll when switching from query table to live mode', async () => {
+    await page.evaluate(() => model.log.liveStop('Query'));
+
+    // ensure table has more rows than fit on screen and is scrolled to the bottom
+    // as the test case is where scrollTop clamps back to 0
+    await injectLogs(page, Array.from({ length: 200 }, (_, i) => ({
+      severity: 'I',
+      message: `info log ${i}`,
+      timestamp: Date.now() + i,
+    })));
+
+    await page.evaluate(() => model.log.goToLastItem());
+    await page.waitForFunction(() => window.model.log.scrollTop > 0, { timeout: 5000 });
+
+    await page.click('#live-button');
+    await page.waitForFunction(() => window.model.log.scrollTop === 0, { timeout: 5000 });
+
+    const autoScrollLive = await page.evaluate(() => window.model.log.autoScrollLive);
+    assert.strictEqual(autoScrollLive, true);
   });
 });
