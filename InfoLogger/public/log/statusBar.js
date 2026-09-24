@@ -59,7 +59,7 @@ const statusLogs = (model) => model.frameworkInfo.match({
 const sqlQuery = (model) => model.log.queryResult.match({
   NotAsked: () => null,
   Loading: () => null,
-  Success: (data) => h('.dropup.w-100', {
+  Success: (data) => h('.dropup.d-block.w-100', {
     class: model.log.statusDropdown ? 'dropup-open' : '',
     id: 'status-bar-sql-query',
   }, [
