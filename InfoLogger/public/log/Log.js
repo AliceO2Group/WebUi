@@ -21,7 +21,7 @@ import { jsonPost } from '../common/jsonPost.js';
 import { setBrowserTabTitle } from '../common/utils.js';
 
 const BROWSER_TAB_TITLE_BY_MODE = {
-  [MODE.LIVE.QUERY]: 'QUERY',
+  [MODE.QUERY]: 'QUERY',
   [MODE.LIVE.RUNNING]: 'LIVE',
   [MODE.LIVE.PAUSED]: 'LIVE PAUSED',
 };
