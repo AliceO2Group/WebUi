@@ -17,11 +17,23 @@ const test = require('../mocha-index');
 
 const isFieldEmpty = (value) => value === undefined || value === null || value === '';
 
+const getLiveState = (page) => page.evaluate(async () => ({
+  activeMode: window.model.log.activeMode,
+  className: document.querySelector('#live-button').className,
+  title: document.title,
+  autoScroll: window.model.log.autoScrollLive,
+  search: decodeURIComponent(window.location.search),
+}));
+
 describe('Live Mode test-suite', async () => {
   let baseUrl = null;
   let page = null;
   before(async () => {
     ({ helpers: { baseUrl }, page } = test);
+  });
+
+  after(async () => {
+    await page.evaluate(() => window.model.log.liveStop());
   });
 
   it('should successfully go to homepage with predefined filters', async () => {
@@ -133,12 +145,10 @@ describe('Live Mode test-suite', async () => {
   it('should successfully enable LIVE mode from url parameter with the defined filter', async () => {
     await page.goto(`${baseUrl}?q={"severity":{"in":"E F"}}&live=true`, { waitUntil: 'networkidle0' });
 
-    const liveButtonClasses = await page.evaluate(() => document.querySelector('#live-button').className);
-    const search = decodeURIComponent(await page.evaluate(() => window.location.search));
-    const activeMode = await page.evaluate(() => window.model.log.activeMode);
+    const { activeMode, className, search } = await getLiveState(page);
 
     assert.deepStrictEqual(activeMode, 'Running');
-    assert.strictEqual(liveButtonClasses, 'btn bold btn-success active');
+    assert.strictEqual(className, 'btn bold btn-success active');
 
     // Check if filter is still applied
     assert.strictEqual(search, '?q={"severity":{"in":"E F"}}');
@@ -146,13 +156,10 @@ describe('Live Mode test-suite', async () => {
 
   it('should successfully enable LIVE mode from url parameter with no filter', async () => {
     await page.goto(`${baseUrl}?live=true`, { waitUntil: 'networkidle0' });
-    const liveButtonClasses = await page.evaluate(() => document.querySelector('#live-button').className);
-    const search = decodeURIComponent(await page.evaluate(() => window.location.search));
-    const activeMode = await page.evaluate(() => window.model.log.activeMode);
-    const title = await page.evaluate(() => document.title);
+    const { activeMode, className, search, title } = await getLiveState(page);
 
     assert.deepStrictEqual(activeMode, 'Running');
-    assert.strictEqual(liveButtonClasses, 'btn bold btn-success active');
+    assert.strictEqual(className, 'btn bold btn-success active');
 
     assert.strictEqual(search, '?q={"severity":{"in":"I W E F"}}');
 
