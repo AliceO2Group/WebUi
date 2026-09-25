@@ -12,6 +12,7 @@
  * or submit itself to any jurisdiction.
  */
 
+const assert = require('assert');
 const test = require('../mocha-index');
 const { injectLogs } = require('../utils/utils');
 
@@ -56,7 +57,7 @@ describe('Logs Table test-suite', async () => {
     await fillTableAndScrollToBottom(page);
 
     await page.evaluate(() => model.log.enableAutoScroll());
-    await waitForAutoScrollLiveToBe(page, true);
+    assert.strictEqual(await page.evaluate(() => model.log.autoScrollLive), true);
 
     const scrollTopAtBottom = await page.evaluate(() => model.log.scrollTop);
     await page.evaluate(() => {
