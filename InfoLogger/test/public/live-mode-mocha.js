@@ -17,11 +17,23 @@ const test = require('../mocha-index');
 
 const isFieldEmpty = (value) => value === undefined || value === null || value === '';
 
+const getLiveState = (page) => page.evaluate(async () => ({
+  activeMode: window.model.log.activeMode,
+  className: document.querySelector('#live-button').className,
+  title: document.title,
+  autoScroll: window.model.log.autoScrollLive,
+  search: decodeURIComponent(window.location.search),
+}));
+
 describe('Live Mode test-suite', async () => {
   let baseUrl = null;
   let page = null;
   before(async () => {
     ({ helpers: { baseUrl }, page } = test);
+  });
+
+  after(async () => {
+    await page.evaluate(() => window.model.log.liveStop());
   });
 
   it('should successfully go to homepage with predefined filters', async () => {
@@ -116,6 +128,42 @@ describe('Live Mode test-suite', async () => {
     assert.ok(list.length > 0);
     assert.ok(isHostNameMatching);
     assert.ok(isUserNameMatching);
+  });
+
+  it('should stay in QUERY mode when live=true is combined with an invalid url filter', async () => {
+    await page.goto(`${baseUrl}?q={"severity":{"in":"E F"}&live=true`, { waitUntil: 'networkidle0' });
+    const { activeMode, notification } = await page.evaluate(() => ({
+      activeMode: window.model.log.activeMode,
+      notification: window.model.notification,
+    }));
+
+    assert.strictEqual(activeMode, 'Query');
+    assert.strictEqual(notification.type, 'danger');
+    assert.ok(notification.message.startsWith('Invalid URL filter format'));
+  });
+
+  it('should successfully enable LIVE mode from url parameter with the defined filter', async () => {
+    await page.goto(`${baseUrl}?q={"severity":{"in":"E F"}}&live=true`, { waitUntil: 'networkidle0' });
+
+    const { activeMode, className, search } = await getLiveState(page);
+
+    assert.deepStrictEqual(activeMode, 'Running');
+    assert.strictEqual(className, 'btn bold btn-success active');
+
+    // Check if filter is still applied
+    assert.strictEqual(search, '?q={"severity":{"in":"E F"}}');
+  });
+
+  it('should successfully enable LIVE mode from url parameter with no filter', async () => {
+    await page.goto(`${baseUrl}?live=true`, { waitUntil: 'networkidle0' });
+    const { activeMode, className, search, title } = await getLiveState(page);
+
+    assert.deepStrictEqual(activeMode, 'Running');
+    assert.strictEqual(className, 'btn bold btn-success active');
+
+    assert.strictEqual(search, '?q={"severity":{"in":"I W E F"}}');
+
+    assert.ok(title.endsWith(' LIVE'), `unexpected title: ${title}`);
   });
 
   describe('Empty field filters in live mode', async () => {

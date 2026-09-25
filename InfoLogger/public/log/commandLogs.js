@@ -23,11 +23,15 @@ import { h,
 } from '/js/src/index.js';
 import { BUTTON } from '../constants/button-states.const.js';
 import { MODE } from '../constants/mode.const.js';
-import { setBrowserTabTitle } from '../common/utils.js';
 
-let queryButtonType = BUTTON.PRIMARY;
-let liveButtonType = BUTTON.DEFAULT;
-let liveButtonIcon = iconMediaPlay();
+/**
+ * Maps live button types to modes
+ */
+const LIVE_BUTTON_TYPES_BY_MODE = {
+  [MODE.QUERY]: { className: BUTTON.DEFAULT, icon: iconMediaPlay },
+  [MODE.LIVE.RUNNING]: { className: BUTTON.SUCCESS_ACTIVE, icon: iconMediaStop },
+  [MODE.LIVE.PAUSED]: { className: BUTTON.PRIMARY, icon: iconMediaPlay },
+};
 
 /**
  * Component for the command buttons (Query, Live, Clear, navigation between errors and download)
@@ -81,10 +85,10 @@ const interactionModesGroupButton = (model) => {
     NotAsked: () => h('button.btn', { disabled: true }, ''),
     Loading: () => h('button.btn', { disabled: true, className: 'loading' }, 'Loading'),
     Failure: () => null,
-    Success: (frameworkInfo) =>
+    Success: () =>
       h('.btn-group', [
-        queryButton(model, frameworkInfo),
-        liveButton(model, frameworkInfo),
+        queryButton(model.log),
+        liveButton(model.log),
       ]),
   });
 };
@@ -94,14 +98,11 @@ const interactionModesGroupButton = (model) => {
  * - services lookup
  * - services result
  * - query lookup
- * @param {Model} model - root model of the application
- * @param {RemoteData.payload} frameworkInfo - the payload containing framework information
+ * @param {Log} logModel - log model of the application
  * @returns {vnode} - the view of the query button
  */
-const queryButton = (model, frameworkInfo) => {
-  const { log: logModel } = model;
+const queryButton = (logModel) => {
   const { queryResult } = logModel;
-  const { mysql: { status: { ok: isDbReady = false } = {} } = {} } = frameworkInfo;
 
   if (queryResult.isLoading()) {
     return h('button.btn.bold', {
@@ -114,10 +115,10 @@ const queryButton = (model, frameworkInfo) => {
 
   return h('button.btn.bold', {
     id: 'query-button',
-    title: isDbReady ? 'Query database with filters (Enter)' : 'Query service not configured',
-    disabled: !isDbReady || queryResult.isLoading(),
-    className: queryButtonType,
-    onclick: () => toggleButtonStates(model, false),
+    title: logModel.isQueryModeAvailable() ? 'Query database with filters (Enter)' : 'Query service not configured',
+    disabled: !logModel.isQueryModeAvailable(),
+    className: logModel.isActiveModeQuery() ? BUTTON.PRIMARY : BUTTON.DEFAULT,
+    onclick: () => logModel.query(),
   }, 'Query');
 };
 
@@ -126,25 +127,23 @@ const queryButton = (model, frameworkInfo) => {
  * - services lookup
  * - services result
  * - websocket status
- * @param {Model} model - root model of the application
- * @param {RemoteData.payload} frameworkInfo - the payload containing framework information
+ * @param {Log} logModel - log model of the application
  * @returns {vnode} - the view of the live button
  */
-const liveButton = (model, frameworkInfo) => {
-  const { log: logModel, ws } = model;
-  const { queryResult } = logModel;
-  const { authed: isWsAuthedAndReady = false } = ws;
-  const { infoLoggerServer: { status: { ok: isLiveServiceReady = false } = {} } = {} } = frameworkInfo;
+const liveButton = (logModel) => {
+  const { queryResult, activeMode } = logModel;
+  const { className, icon } = LIVE_BUTTON_TYPES_BY_MODE[activeMode];
 
-  const isLiveModeReady = isLiveServiceReady && isWsAuthedAndReady;
-  const title = isLiveModeReady ? 'Stream logs with filtering' : 'Live service not configured';
+  const isLiveModeAvailable = logModel.isLiveModeAvailable();
+  const title = isLiveModeAvailable ? 'Stream logs with filtering' : 'Live service not configured';
 
   return h('button.btn.bold', {
+    id: 'live-button',
     title,
-    disabled: !isLiveModeReady || queryResult.isLoading(),
-    className: !isLiveModeReady ? 'loading' : liveButtonType,
-    onclick: () => toggleButtonStates(model, true),
-  }, 'Live', ' ', liveButtonIcon);
+    disabled: !isLiveModeAvailable || queryResult.isLoading(),
+    className: !isLiveModeAvailable ? 'loading' : className,
+    onclick: () => logModel.toggleLiveMode(),
+  }, 'Live', ' ', icon());
 };
 
 /**
@@ -241,48 +240,3 @@ const zoomButtonGroup = (zoom) =>
       title: 'Zoom in (Ctrl/Cmd + +)',
     }, h('span', { style: 'font-size:0.8em' }, iconPlus())),
   ]);
-
-/**
- * Method to toggle states of the buttons(Query/Live) depending on the mode the tool is running on
- * @param {Model} model - root model of the application
- * @param {boolean} wasLivePressed - flag to check if the live button was pressed
- */
-function toggleButtonStates(model, wasLivePressed) {
-  model.log.download.isVisible = false; // set visibility of download dropdown to false
-  if (wasLivePressed) {
-    switch (model.log.activeMode) {
-      case MODE.QUERY:
-      case MODE.LIVE.PAUSED:
-        try {
-          model.log.liveStart();
-          setButtonsType(BUTTON.DEFAULT, BUTTON.SUCCESS_ACTIVE, iconMediaStop());
-          model.log.enableAutoScroll();
-          setBrowserTabTitle(`${window.ILG.name} LIVE`);
-        } catch (error) {
-          model.notification.show(error.toString(), 'danger', 3000);
-        }
-        break;
-      default: // MODE.LIVE.RUNNING
-        model.log.liveStop(MODE.LIVE.PAUSED);
-        setBrowserTabTitle(`${window.ILG.name} LIVE PAUSED`);
-        setButtonsType(BUTTON.DEFAULT, BUTTON.PRIMARY, iconMediaPlay());
-        model.log.disableAutoScroll();
-    }
-  } else {
-    model.log.query();
-    setBrowserTabTitle(`${window.ILG.name} QUERY`);
-    setButtonsType(BUTTON.PRIMARY, BUTTON.DEFAULT, iconMediaPlay());
-  }
-
-  /**
-   * Method to change types of the buttons based on the mode being run
-   * @param {string} queryType Type of the Query Button
-   * @param {string} liveType Type of the Live Button
-   * @param {Icon} liveIcon Icon of the Live Button
-   */
-  function setButtonsType(queryType, liveType, liveIcon) {
-    queryButtonType = queryType;
-    liveButtonType = liveType;
-    liveButtonIcon = liveIcon;
-  }
-}

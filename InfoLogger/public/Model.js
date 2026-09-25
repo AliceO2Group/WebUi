@@ -58,7 +58,7 @@ export default class Model extends Observable {
 
     this.frameworkInfoEnabled = false;
     this.frameworkInfo = RemoteData.notAsked();
-    this.getFrameworkInfo();
+    this.frameworkInfoLoaded = this.getFrameworkInfo();
 
     this.inspectorEnabled = false;
     this.accountMenuEnabled = false;
@@ -67,7 +67,6 @@ export default class Model extends Observable {
     this.router = new QueryRouter();
     this.router.observe(this.handleLocationChange.bind(this));
     this.router.bubbleTo(this);
-    this.handleLocationChange(); // Init first page
 
     // Setup keyboard and wheel dispatchers
     window.addEventListener('keydown', this.handleKeyboardDown.bind(this));
@@ -77,6 +76,10 @@ export default class Model extends Observable {
     this.ws = new WebSocketClient();
     this.ws.addListener('command', this.handleWSCommand.bind(this));
     this.ws.addListener('authed', this.handleWSAuthed.bind(this));
+    this.wsSettled = new Promise((resolve) => {
+      this.ws.addListener('authed', resolve);
+      this.ws.addListener('close', resolve);
+    });
     this.ws.addListener('close', this.handleWSClose.bind(this));
 
     // update router on model change
@@ -86,6 +89,9 @@ export default class Model extends Observable {
 
     this.zoom = new Zoom();
     this.zoom.bubbleTo(this);
+
+    // Must run last as live=true awaits frameworkInfoLoaded and wsSettled, so both must exist before the URL is parsed
+    this.handleLocationChange(); // Init first page
   }
 
   /**
@@ -367,7 +373,7 @@ export default class Model extends Observable {
       return;
     } else if (params.profile) {
       this.getProfile(params.profile);
-      return;
+      return; // live=true ignored if a profile is used
     } else if (params.q) {
       this.getUserProfile();
       try {
@@ -376,10 +382,39 @@ export default class Model extends Observable {
         this.log.filter.resetCriteria();
         this.updateRouteOnModelChange();
         this.notification.show(`Invalid URL filter format: ${error.message}`, 'danger');
+        return; // don't go live when q is invalid
       }
     } else {
       this.getUserProfile();
     }
+
+    if (params.live === 'true') {
+      this.startLiveModeFromURL();
+    }
+  }
+
+  /**
+   * Start live mode from URL once dependencies are ready
+   */
+  async startLiveModeFromURL() {
+    await Promise.all([
+      this.frameworkInfoLoaded,
+      this.wsSettled,
+    ]);
+
+    if (!this.ws.authed) {
+      return; // connection lost before auth, handleWSClose has already notified the user
+    }
+
+    if (!this.log.queryResult.isNotAsked()) {
+      return; // user started a query as framework has loaded but WS not yet
+    }
+    if (!this.log.isLiveModeAvailable()) {
+      this.notification.show('Live mode is currently unavailable, loaded in query mode', 'danger', 3000);
+      return;
+    }
+
+    this.log.liveStart();
   }
 
   /**

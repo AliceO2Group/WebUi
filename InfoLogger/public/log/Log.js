@@ -18,6 +18,13 @@ import ContextMenu from './ContextMenu.js';
 import { MODE } from '../constants/mode.const.js';
 import { TIME_MS } from '../common/Timezone.js';
 import { jsonPost } from '../common/jsonPost.js';
+import { setBrowserTabTitle } from '../common/utils.js';
+
+const BROWSER_TAB_TITLE_BY_MODE = {
+  [MODE.QUERY]: 'QUERY',
+  [MODE.LIVE.RUNNING]: 'LIVE',
+  [MODE.LIVE.PAUSED]: 'LIVE PAUSED',
+};
 
 /**
  * Model Log, encapsulate all log management and queries
@@ -80,11 +87,36 @@ export default class Log extends Observable {
   }
 
   /**
+   * Sets the active mode and updates the browser tab title accordingly
+   * @param {MODE} mode - mode to switch to
+   */
+  setActiveMode(mode) {
+    this.activeMode = mode;
+    setBrowserTabTitle(`${window.ILG.name} ${BROWSER_TAB_TITLE_BY_MODE[mode]}`);
+  }
+
+  /**
    * Method to return if the current mode is Query
    * @returns {boolean} - is it query mode
    */
   isActiveModeQuery() {
     return this.activeMode === MODE.QUERY;
+  }
+
+  /**
+   * Toggles the live mode between running and paused
+   */
+  toggleLiveMode() {
+    this.download.isVisible = false;
+    if (this.isLiveModeRunning()) {
+      this.liveStop(MODE.LIVE.PAUSED);
+    } else {
+      try {
+        this.liveStart();
+      } catch (error) {
+        this.model.notification.show(error.toString(), 'danger', 3000);
+      }
+    }
   }
 
   /**
@@ -338,7 +370,7 @@ export default class Log extends Observable {
    * @returns {Promise<null|object>} null if query is aborted, result of the query otherwise
    */
   async query() {
-    if (!this.model.frameworkInfo.isSuccess() || !this.model.frameworkInfo.payload.mysql.status.ok) {
+    if (!this.isQueryModeAvailable()) {
       throw new Error('Query service is not available');
     }
 
@@ -352,8 +384,9 @@ export default class Log extends Observable {
     if (this.isLiveModeRunning()) {
       this.liveStop(MODE.QUERY);
     } else {
-      this.activeMode = MODE.QUERY;
+      this.setActiveMode(MODE.QUERY);
     }
+    this.download.isVisible = false;
 
     const previousQueryResult = this.queryResult;
     this.queryResult = RemoteData.loading();
@@ -463,10 +496,7 @@ export default class Log extends Observable {
     if (this.queryResult.isLoading()) {
       throw new Error('Query is loading, wait before starting live');
     }
-    if (!this.model.ws.authed) {
-      throw new Error('WS is not yet ready');
-    }
-    if (!this.model.frameworkInfo.isSuccess() || !this.model.frameworkInfo.payload.infoLoggerServer.status.ok) {
+    if (!this.isLiveModeAvailable()) {
       throw new Error('Live service is not available');
     }
     if (this.isLiveModeRunning()) {
@@ -476,7 +506,7 @@ export default class Log extends Observable {
     this.limitReached = null;
     this.resetStats();
     this.queryResult = RemoteData.notAsked(); // empty all data from last query
-    this.activeMode = MODE.LIVE.RUNNING;
+    this.setActiveMode(MODE.LIVE.RUNNING);
     this.liveStartedAt = new Date();
 
     // Notify this model each second to force chorno to be updated
@@ -486,6 +516,7 @@ export default class Log extends Observable {
 
     this.model.ws.setFilter(this.model.log.filter.toStringifyFunction());
 
+    this.enableAutoScroll(true);
     this.notify();
   }
 
@@ -497,9 +528,10 @@ export default class Log extends Observable {
     if (mode !== MODE.QUERY && mode !== MODE.LIVE.PAUSED) {
       mode = MODE.QUERY;
     }
-    this.activeMode = mode;
+    this.setActiveMode(mode);
     clearInterval(this.liveInterval);
     this.model.ws.setFilter(() => false);
+    this.disableAutoScroll(true);
     this.notify();
   }
 
@@ -569,18 +601,49 @@ export default class Log extends Observable {
 
   /**
    * Enables auto-scroll, this is used when entering Live mode
+   * @param {boolean} quiet - to notify or not
    */
-  enableAutoScroll() {
+  enableAutoScroll(quiet = false) {
     this.autoScrollLive = true;
+
+    if (quiet) {
+      return;
+    }
+
     this.notify();
   }
 
   /**
-   * Disable auto-scroll, this is used when leaving Live mode
+   * Disables auto-scroll with notify()
+   * @param {boolean} quiet - to notify or not
    */
-  disableAutoScroll() {
+  disableAutoScroll(quiet) {
     this.autoScrollLive = false;
+
+    if (quiet) {
+      return;
+    }
+
     this.notify();
+  }
+
+  /**
+   * Returns whether the live mode service is available
+   * @returns {boolean} true if the live mode service is available, false otherwise
+   */
+  isLiveModeAvailable() {
+    return Boolean(this.model.ws?.authed
+      && this.model.frameworkInfo.isSuccess()
+      && this.model.frameworkInfo.payload.infoLoggerServer?.status?.ok);
+  }
+
+  /**
+   * Returns whether the query mode service is available
+   * @returns {boolean} true if the query mode service is available, false otherwise
+   */
+  isQueryModeAvailable() {
+    return Boolean(this.model.frameworkInfo.isSuccess()
+      && this.model.frameworkInfo.payload.mysql?.status?.ok);
   }
 
   /**
