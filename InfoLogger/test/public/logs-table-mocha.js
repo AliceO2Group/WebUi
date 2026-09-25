@@ -30,7 +30,16 @@ const fillTableAndScrollToBottom = async (page) => {
   })));
 
   await page.evaluate(() => model.log.goToLastItem());
-  await page.waitForFunction(() => window.model.log.scrollTop > 0, { timeout: 5000 });
+  await page.waitForFunction(() => model.log.scrollTop > 0, { timeout: 5000 });
+};
+
+/**
+ * Waits for autoScrollLive to be set to the expected value.
+ * @param {Page} page - puppeteer page
+ * @param {boolean} expected - expected value of autoScrollLive
+ */
+const waitForAutoScrollLiveToBe = async (page, expected) => {
+  await page.waitForFunction((expected) => model.log.autoScrollLive === expected, { timeout: 5000 }, expected);
 };
 
 describe('Logs Table test-suite', async () => {
@@ -48,40 +57,36 @@ describe('Logs Table test-suite', async () => {
     await fillTableAndScrollToBottom(page);
 
     await page.evaluate(() => model.log.enableAutoScroll());
-    let autoScrollLive = await page.evaluate(() => window.model.log.autoScrollLive);
-    assert.strictEqual(autoScrollLive, true);
+    await waitForAutoScrollLiveToBe(page, true);
 
-    const scrollTopAtBottom = await page.evaluate(() => window.model.log.scrollTop);
+    const scrollTopAtBottom = await page.evaluate(() => model.log.scrollTop);
     await page.evaluate(() => {
       document.querySelector('.tableLogsContent').scrollTop -= 100;
     });
     // model.log.scrollTop is only updated by the scroll handler, so this waits for it to have run
     await page.waitForFunction(
-      (previous) => window.model.log.scrollTop < previous,
+      (previous) => model.log.scrollTop < previous,
       { timeout: 5000 },
       scrollTopAtBottom,
     );
 
-    autoScrollLive = await page.evaluate(() => window.model.log.autoScrollLive);
-    assert.strictEqual(autoScrollLive, false);
+    await waitForAutoScrollLiveToBe(page, false);
   });
 
   it('should disable autoscroll when the user scrolls up in live mode', async () => {
     await page.click('#live-button');
 
-    let autoScrollLive = await page.evaluate(() => window.model.log.autoScrollLive);
-    assert.strictEqual(autoScrollLive, true);
+    await waitForAutoScrollLiveToBe(page, true);
 
     // wait until live logs overflow the table and autoscroll has moved it down
-    await page.waitForFunction(() => window.model.log.scrollTop > 0, { timeout: 5000 });
+    await page.waitForFunction(() => model.log.scrollTop > 0, { timeout: 5000 });
 
     await page.evaluate(() => {
       document.querySelector('.tableLogsContent').scrollTop = 100;
     });
-    await page.waitForFunction(() => window.model.log.scrollTop === 0, { timeout: 5000 });
+    await page.waitForFunction(() => model.log.scrollTop === 0, { timeout: 5000 });
 
-    autoScrollLive = await page.evaluate(() => window.model.log.autoScrollLive);
-    assert.strictEqual(autoScrollLive, false);
+    await waitForAutoScrollLiveToBe(page, false);
   });
 
   describe('should not disable autoscroll when table shrinks', async () => {
@@ -90,43 +95,38 @@ describe('Logs Table test-suite', async () => {
       await fillTableAndScrollToBottom(page);
 
       await page.click('#live-button');
-      await page.waitForFunction(() => window.model.log.scrollTop === 0, { timeout: 5000 });
+      await page.waitForFunction(() => model.log.scrollTop === 0, { timeout: 5000 });
 
-      const autoScrollLive = await page.evaluate(() => window.model.log.autoScrollLive);
-      assert.strictEqual(autoScrollLive, true);
+      await waitForAutoScrollLiveToBe(page, true);
     });
 
     it('clearing log list in query mode', async () => {
       await page.evaluate(() => model.log.liveStop('Query'));
 
       await page.evaluate(() => model.log.enableAutoScroll());
-      let autoScrollLive = await page.evaluate(() => window.model.log.autoScrollLive);
-      assert.strictEqual(autoScrollLive, true);
+      await waitForAutoScrollLiveToBe(page, true);
 
       await fillTableAndScrollToBottom(page);
 
       await page.click('#clear-button');
-      await page.waitForFunction(() => window.model.log.scrollTop === 0, { timeout: 5000 });
+      await page.waitForFunction(() => model.log.scrollTop === 0, { timeout: 5000 });
 
-      autoScrollLive = await page.evaluate(() => window.model.log.autoScrollLive);
-      assert.strictEqual(autoScrollLive, true);
+      await waitForAutoScrollLiveToBe(page, true);
     });
 
     it('clearing log list in live mode', async () => {
       await page.click('#live-button');
 
-      let autoScrollLive = await page.evaluate(() => window.model.log.autoScrollLive);
-      assert.strictEqual(autoScrollLive, true);
+      await waitForAutoScrollLiveToBe(page, true);
 
       // wait until logs are loaded and starting to scroll
-      await page.waitForFunction(() => window.model.log.scrollTop > 0, { timeout: 5000 });
+      await page.waitForFunction(() => model.log.scrollTop > 0, { timeout: 5000 });
 
       await page.click('#clear-button');
       // the scroll event of scrollTop fires on a later frame
       await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 
-      autoScrollLive = await page.evaluate(() => window.model.log.autoScrollLive);
-      assert.strictEqual(autoScrollLive, true);
+      await waitForAutoScrollLiveToBe(page, true);
     });
   });
 });
