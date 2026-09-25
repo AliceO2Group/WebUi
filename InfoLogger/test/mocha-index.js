@@ -107,14 +107,14 @@ describe('InfoLogger', function () {
     assert.deepStrictEqual(search, '?q={"severity":{"in":"I W E F"}}');
   });
 
-  // require('./public/user-actions-mocha');
-  // require('./public/log-filter-actions-mocha');
-  // require('./public/log-filter-url-mocha');
-  // require('./public/live-mode-mocha');
-  // require('./public/query-mode-mocha');
-  // require('./public/status-bar-mocha');
-  // require('./public/zoom.mocha');
-  // require('./public/log-context-menu-mocha');
+  require('./public/user-actions-mocha');
+  require('./public/log-filter-actions-mocha');
+  require('./public/log-filter-url-mocha');
+  require('./public/live-mode-mocha');
+  require('./public/query-mode-mocha');
+  require('./public/status-bar-mocha');
+  require('./public/zoom.mocha');
+  require('./public/log-context-menu-mocha');
   require('./public/logs-table-mocha');
 
   after(async () => {
