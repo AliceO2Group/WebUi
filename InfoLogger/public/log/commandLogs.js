@@ -37,7 +37,7 @@ let liveButtonIcon = iconMediaPlay();
 export const commandLogs = (model) => [
   userActionsDropdown(model),
   h('', interactionModesGroupButton(model)),
-  h('', h('button.btn', { onclick: () => model.log.empty(), style: 'font-weight: bold' }, 'Clear')),
+  h('', h('button.btn', { id: 'clear-button', onclick: () => model.log.empty(), style: 'font-weight: bold' }, 'Clear')),
   h('.btn-group', [
     h('button.btn', {
       disabled: !model.log.list.length,
@@ -140,6 +140,7 @@ const liveButton = (model, frameworkInfo) => {
   const title = isLiveModeReady ? 'Stream logs with filtering' : 'Live service not configured';
 
   return h('button.btn.bold', {
+    id: 'live-button',
     title,
     disabled: !isLiveModeReady || queryResult.isLoading(),
     className: !isLiveModeReady ? 'loading' : liveButtonType,
