@@ -210,9 +210,12 @@ const tableContainerHooks = (model) => ({
       const container = vnode.dom;
       const { height } = container.getBoundingClientRect();
       const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
-      // when content shrinks the browser clamps scrollTop to the new maximum
-      // that decrease is not the user scrolling up
-      // within 1px (to catch fractional heights) counts as the bottom
+
+      // LogsTable is emptied when switching to Live mode or clearing it.
+      // This causes a scroll event to be triggered as scrollTop is reset to 0.
+      // If scrollTop is smaller than before this is usually enough to tell if the user has scrolled up.
+      // But we also need to check if the user is not at the bottom to avoid treating the above cases as scrolls up.
+      // <=1 to catch fractional heights.
       const isAtBottom = container.scrollHeight - container.clientHeight - scrollTop <= 1;
       if (scrollTop < model.log.scrollTop && !isAtBottom) {
         model.log.disableAutoScroll();
