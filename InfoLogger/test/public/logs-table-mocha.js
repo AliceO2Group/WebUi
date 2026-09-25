@@ -12,7 +12,6 @@
  * or submit itself to any jurisdiction.
  */
 
-const assert = require('assert');
 const test = require('../mocha-index');
 const { injectLogs } = require('../utils/utils');
 
@@ -53,7 +52,7 @@ describe('Logs Table test-suite', async () => {
   });
 
   it('should disable autoscroll when the user scrolls up in query mode', async () => {
-    await page.evaluate(() => model.log.liveStop('Query'));
+    await page.click('#query-button');
     await fillTableAndScrollToBottom(page);
 
     await page.evaluate(() => model.log.enableAutoScroll());
