@@ -42,91 +42,111 @@ const assertAutoScrollLive = async (page, expected) => {
   assert.strictEqual(await page.evaluate(() => model.log.autoScrollLive), expected);
 };
 
+/**
+ * Returns the scroll position last recorded by the table's scroll handler.
+ * @param {Page} page - puppeteer page
+ * @returns {Promise<number>} model.log.scrollTop
+ */
+const getScrollTop = (page) => page.evaluate(() => model.log.scrollTop);
+
+/**
+ * Waits until the table's scroll handler has recorded a scroll position below `previousScrollTop`.
+ * model.log.scrollTop is only updated by the scroll handler, so this proves it has run.
+ * @param {Page} page - puppeteer page
+ * @param {number} previousScrollTop - scroll position before the action under test
+ */
+const waitForScrollTopBelow = (page, previousScrollTop) =>
+  page.waitForFunction((previous) => model.log.scrollTop < previous, { timeout: 5000 }, previousScrollTop);
+
 describe('Logs Table test-suite', async () => {
   let page = null;
+  let baseUrl = null;
+
   before(async () => {
-    ({ page } = test);
+    ({ helpers: { baseUrl }, page } = test);
+  });
+
+  beforeEach(async () => {
+    await page.goto(baseUrl, { waitUntil: 'networkidle0' });
   });
 
   after(async () => {
     await page.evaluate(() => model.log.liveStop('Query'));
   });
 
-  it('should disable autoscroll when the user scrolls up in query mode', async () => {
-    await page.click('#query-button');
-    await fillTableAndScrollToBottom(page);
+  describe('Autoscroll behavior', async () => {
+    describe('in query mode', async () => {
+      it('should disable autoscroll when the user scrolls up', async () => {
+        await fillTableAndScrollToBottom(page);
+        await page.evaluate(() => model.log.enableAutoScroll());
+        await assertAutoScrollLive(page, true);
 
-    await page.evaluate(() => model.log.enableAutoScroll());
-    await assertAutoScrollLive(page, true);
+        const scrollTopAtBottom = await getScrollTop(page);
+        await page.evaluate(() => {
+          document.querySelector('.tableLogsContent').scrollTop -= 100;
+        });
+        await waitForScrollTopBelow(page, scrollTopAtBottom);
 
-    const scrollTopAtBottom = await page.evaluate(() => model.log.scrollTop);
-    await page.evaluate(() => {
-      document.querySelector('.tableLogsContent').scrollTop -= 100;
-    });
-    // model.log.scrollTop is only updated by the scroll handler, so this waits for it to have run
-    await page.waitForFunction(
-      (previous) => model.log.scrollTop < previous,
-      { timeout: 5000 },
-      scrollTopAtBottom,
-    );
+        await assertAutoScrollLive(page, false);
+      });
 
-    await assertAutoScrollLive(page, false);
-  });
+      it('should not disable autoscroll when the log list is cleared', async () => {
+        await page.evaluate(() => model.log.enableAutoScroll());
+        await fillTableAndScrollToBottom(page);
+        await assertAutoScrollLive(page, true);
 
-  it('should disable autoscroll when the user scrolls up in live mode', async () => {
-    await page.click('#live-button');
+        const scrollTopAtBottom = await getScrollTop(page);
+        await page.click('#clear-button');
+        await waitForScrollTopBelow(page, scrollTopAtBottom);
 
-    await assertAutoScrollLive(page, true);
-
-    // wait until live logs overflow the table and autoscroll has moved it down
-    await page.waitForFunction(() => model.log.scrollTop > 0, { timeout: 5000 });
-
-    await page.evaluate(() => {
-      document.querySelector('.tableLogsContent').scrollTop = 100;
-    });
-    await page.waitForFunction(() => model.log.scrollTop === 0, { timeout: 5000 });
-
-    await assertAutoScrollLive(page, false);
-  });
-
-  describe('should not disable autoscroll when table shrinks', async () => {
-    it('switching from a full query mode to live mode', async () => {
-      await page.evaluate(() => model.log.liveStop('Query'));
-      await fillTableAndScrollToBottom(page);
-
-      await page.click('#live-button');
-      await page.waitForFunction(() => model.log.scrollTop === 0, { timeout: 5000 });
-
-      await assertAutoScrollLive(page, true);
+        await assertAutoScrollLive(page, true);
+      });
     });
 
-    it('clearing log list in query mode', async () => {
-      await page.evaluate(() => model.log.liveStop('Query'));
+    describe('in live mode', async () => {
+      beforeEach(async () => {
+        await page.waitForSelector('#live-button:not([disabled])');
+      });
 
-      await page.evaluate(() => model.log.enableAutoScroll());
-      await assertAutoScrollLive(page, true);
+      it('should disable autoscroll when the user scrolls up', async () => {
+        await page.click('#live-button');
+        await assertAutoScrollLive(page, true);
 
-      await fillTableAndScrollToBottom(page);
+        // wait until live logs overflow the table and autoscroll has moved it down
+        await page.waitForFunction(() => model.log.scrollTop > 0, { timeout: 5000 });
 
-      await page.click('#clear-button');
-      await page.waitForFunction(() => model.log.scrollTop === 0, { timeout: 5000 });
+        const scrollTopAtBottom = await getScrollTop(page);
+        await page.evaluate(() => {
+          document.querySelector('.tableLogsContent').scrollTop -= 100;
+        });
+        await waitForScrollTopBelow(page, scrollTopAtBottom);
 
-      await assertAutoScrollLive(page, true);
-    });
+        await assertAutoScrollLive(page, false);
+      });
 
-    it('clearing log list in live mode', async () => {
-      await page.click('#live-button');
+      it('should not disable autoscroll when switching from a full query table to live mode', async () => {
+        await fillTableAndScrollToBottom(page);
 
-      await assertAutoScrollLive(page, true);
+        const scrollTopAtBottom = await getScrollTop(page);
+        await page.click('#live-button');
+        await waitForScrollTopBelow(page, scrollTopAtBottom);
 
-      // wait until logs are loaded and starting to scroll
-      await page.waitForFunction(() => model.log.scrollTop > 0, { timeout: 5000 });
+        await assertAutoScrollLive(page, true);
+      });
 
-      await page.click('#clear-button');
-      // the scroll event of scrollTop fires on a later frame
-      await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      it('should not disable autoscroll when the log list is cleared', async () => {
+        await page.click('#live-button');
+        await assertAutoScrollLive(page, true);
 
-      await assertAutoScrollLive(page, true);
+        // wait until live logs overflow the table and autoscroll has moved it down
+        await page.waitForFunction(() => model.log.scrollTop > 0, { timeout: 5000 });
+
+        const scrollTopAtBottom = await getScrollTop(page);
+        await page.click('#clear-button');
+        await waitForScrollTopBelow(page, scrollTopAtBottom);
+
+        await assertAutoScrollLive(page, true);
+      });
     });
   });
 });
