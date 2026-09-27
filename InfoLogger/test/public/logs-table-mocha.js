@@ -34,7 +34,7 @@ const fillTableAndScrollToBottom = async (page) => {
 };
 
 /**
- * Waits for autoScrollLive to be set to the expected value.
+ * Asserts that autoScrollLive is the expected value.
  * @param {Page} page - puppeteer page
  * @param {boolean} expected - expected value of autoScrollLive
  */
