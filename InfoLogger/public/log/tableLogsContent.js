@@ -213,7 +213,8 @@ const tableContainerHooks = (model) => ({
 
       // When LogsTable is emptied it causes a scroll event to be triggered as scrollTop is set to 0.
       // If scrollTop is smaller than before this is usually enough to tell if the user has scrolled up.
-      // But we need to check if the user remains at the bottom which is the case for the cases above.
+      // But we need to check if the user remains at the bottom,
+      // which is the case when switching to Live mode or clearing the table.
       // <=1 is used to catch fractional heights.
       const atBottom = container.scrollHeight - container.clientHeight - scrollTop <= 1;
       const scrollTopHasBecomeLess = scrollTop < model.log.scrollTop;

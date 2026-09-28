@@ -21,8 +21,7 @@ const { injectLogs } = require('../utils/utils');
  * @param {Page} page - puppeteer page
  */
 const fillTableAndScrollToBottom = async (page) => {
-  // ensure table has more rows than fit on screen and is scrolled to the bottom
-  // as the test case is where scrollTop clamps back to 0
+  // ensure table has more rows than fit on the screen
   await injectLogs(page, Array.from({ length: 200 }, (_, i) => ({
     severity: 'I',
     message: `info log ${i}`,
@@ -43,17 +42,17 @@ const assertAutoScrollLive = async (page, expected) => {
 };
 
 /**
- * Returns the scroll position last recorded by the table's scroll handler.
+ * Returns the last saved scrollTop
  * @param {Page} page - puppeteer page
  * @returns {Promise<number>} model.log.scrollTop
  */
 const getScrollTop = (page) => page.evaluate(() => model.log.scrollTop);
 
 /**
- * Waits until the table's scroll handler has recorded a scroll position below `previousScrollTop`.
- * model.log.scrollTop is only updated by the scroll handler, so this proves it has run.
+ * Waits until the table's scroll handler has recorded a position below `previousScrollTop`.
  * @param {Page} page - puppeteer page
  * @param {number} previousScrollTop - scroll position before the action under test
+ * @returns {Promise<void>} resolves when the scroll position is below `previousScrollTop`
  */
 const waitForScrollTopBelow = (page, previousScrollTop) =>
   page.waitForFunction((previous) => model.log.scrollTop < previous, { timeout: 5000 }, previousScrollTop);
