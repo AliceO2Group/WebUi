@@ -203,12 +203,12 @@ const tableContainerHooks = (model) => ({
    * @param {vnode} vnode - the vnode of the element
    */
   oncreate(vnode) {
+    const container = vnode.dom;
+
     /**
-     * THis handler allow to notify model of element scrolling change (.tableLogsContent)
+     * This handler allow to notify model of element scrolling change (.tableLogsContent)
      */
     const onTableScroll = () => {
-      const container = vnode.dom;
-      const { height } = container.getBoundingClientRect();
       const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
 
       // When LogsTable is emptied it causes a scroll event to be triggered as scrollTop is set to 0.
@@ -221,6 +221,15 @@ const tableContainerHooks = (model) => ({
       if (scrollTopHasBecomeLess && !atBottom) {
         model.log.disableAutoScroll();
       }
+      updateViewport();
+    };
+
+    /**
+     * Update the viewport size and scroll position in the model
+     */
+    const updateViewport = () => {
+      const { height } = container.getBoundingClientRect();
+      const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
       model.log.setScrollTop(scrollTop, height);
     };
 
@@ -228,10 +237,11 @@ const tableContainerHooks = (model) => ({
     vnode.dom.addEventListener('scroll', onTableScroll);
     model.log.dom.table = vnode.dom;
     // setup window size listener - view needs redraw for smart scrolling
-    window.addEventListener('resize', onTableScroll);
+    window.addEventListener('resize', updateViewport);
 
     // remember this function for later (destroy)
-    vnode.dom.onTableScroll = onTableScroll;
+    container.onTableScroll = onTableScroll;
+    container.updateViewport = updateViewport;
 
     // call the function once on next frame when we know sizes
     onTableScroll();
@@ -251,7 +261,7 @@ const tableContainerHooks = (model) => ({
    */
   ondestroy(vnode) {
     vnode.dom.removeEventListener('scroll', vnode.dom.onTableScroll);
-    window.removeEventListener('resize', vnode.dom.onTableScroll);
+    window.removeEventListener('resize', vnode.dom.updateViewport);
   },
 });
 
