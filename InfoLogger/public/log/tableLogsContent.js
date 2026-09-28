@@ -206,12 +206,21 @@ const tableContainerHooks = (model) => ({
     const container = vnode.dom;
 
     /**
-     * This handler allow to notify model of element scrolling change (.tableLogsContent)
+     * Update the viewport size and scroll position in the model
+     */
+    const updateViewport = () => {
+      const { height } = container.getBoundingClientRect();
+      const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
+      model.log.setScrollTop(scrollTop, height);
+    };
+
+    /**
+     * Disable auto-scroll if the user scrolls up, then update the viewport.
      */
     const onTableScroll = () => {
       const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
 
-      // When LogsTable is emptied it causes a scroll event to be triggered as scrollTop is set to 0.
+      // When the logs table is emptied it causes a scroll event to be triggered as scrollTop is set to 0.
       // If scrollTop is smaller than before this is usually enough to tell if the user has scrolled up.
       // But we need to check if the user remains at the bottom,
       // which is the case when switching to Live mode or clearing the table.
@@ -224,18 +233,9 @@ const tableContainerHooks = (model) => ({
       updateViewport();
     };
 
-    /**
-     * Update the viewport size and scroll position in the model
-     */
-    const updateViewport = () => {
-      const { height } = container.getBoundingClientRect();
-      const scrollTop = Math.max(container.scrollTop, 0); // cancel negative position due to Safari bounce scrolling
-      model.log.setScrollTop(scrollTop, height);
-    };
-
     // call the function when scrolling is updated
-    vnode.dom.addEventListener('scroll', onTableScroll);
-    model.log.dom.table = vnode.dom;
+    container.addEventListener('scroll', onTableScroll);
+    model.log.dom.table = container;
     // setup window size listener - view needs redraw for smart scrolling
     window.addEventListener('resize', updateViewport);
 
@@ -244,7 +244,7 @@ const tableContainerHooks = (model) => ({
     container.updateViewport = updateViewport;
 
     // call the function once on next frame when we know sizes
-    onTableScroll();
+    updateViewport();
   },
 
   /**
