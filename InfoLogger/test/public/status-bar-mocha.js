@@ -79,6 +79,7 @@ describe('Status Bar test-suite', async () => {
         window.model.frameworkInfo = RemoteData.success({
           mysql: { host: 'test-host.cern.ch', status: { ok: true } },
           infoLoggerServer: { status: { ok: true } },
+          'infoLogger-gui': { name: 'LOCAL-TEST' },
         });
         window.model.log.activeMode = 'Running';
         window.model.log.liveStartedAt = new Date();
@@ -94,6 +95,7 @@ describe('Status Bar test-suite', async () => {
         window.model.frameworkInfo = RemoteData.success({
           mysql: { host: 'localhost', status: { ok: true } },
           infoLoggerServer: { status: { ok: true } },
+          'infoLogger-gui': { name: 'LOCAL-TEST' },
         });
         window.model.log.activeMode = 'Query';
         window.model.log.liveStartedAt = null;

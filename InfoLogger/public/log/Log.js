@@ -88,6 +88,22 @@ export default class Log extends Observable {
   }
 
   /**
+   * Toggles the live mode between running and paused
+   */
+  toggleLiveMode() {
+    this.download.isVisible = false;
+    if (this.isLiveModeRunning()) {
+      this.liveStop(MODE.LIVE.PAUSED);
+    } else {
+      try {
+        this.liveStart();
+      } catch (error) {
+        this.model.notification.show(error.toString(), 'danger', 3000);
+      }
+    }
+  }
+
+  /**
    * Toggle a dropdown with the full SQL query
    */
   toggleStatusDropdown() {
@@ -338,7 +354,7 @@ export default class Log extends Observable {
    * @returns {Promise<null|object>} null if query is aborted, result of the query otherwise
    */
   async query() {
-    if (!this.model.frameworkInfo.isSuccess() || !this.model.frameworkInfo.payload.mysql.status.ok) {
+    if (!this.isQueryModeAvailable()) {
       throw new Error('Query service is not available');
     }
 
@@ -354,6 +370,7 @@ export default class Log extends Observable {
     } else {
       this.activeMode = MODE.QUERY;
     }
+    this.download.isVisible = false;
 
     const previousQueryResult = this.queryResult;
     this.queryResult = RemoteData.loading();
@@ -463,10 +480,7 @@ export default class Log extends Observable {
     if (this.queryResult.isLoading()) {
       throw new Error('Query is loading, wait before starting live');
     }
-    if (!this.model.ws.authed) {
-      throw new Error('WS is not yet ready');
-    }
-    if (!this.model.frameworkInfo.isSuccess() || !this.model.frameworkInfo.payload.infoLoggerServer.status.ok) {
+    if (!this.isLiveModeAvailable()) {
       throw new Error('Live service is not available');
     }
     if (this.isLiveModeRunning()) {
@@ -486,6 +500,7 @@ export default class Log extends Observable {
 
     this.model.ws.setFilter(this.model.log.filter.toStringifyFunction());
 
+    this.autoScrollLive = true;
     this.notify();
   }
 
@@ -500,6 +515,7 @@ export default class Log extends Observable {
     this.activeMode = mode;
     clearInterval(this.liveInterval);
     this.model.ws.setFilter(() => false);
+    this.autoScrollLive = false;
     this.notify();
   }
 
@@ -568,19 +584,22 @@ export default class Log extends Observable {
   }
 
   /**
-   * Enables auto-scroll, this is used when entering Live mode
+   * Returns whether the live mode service is available
+   * @returns {boolean} true if the live mode service is available, false otherwise
    */
-  enableAutoScroll() {
-    this.autoScrollLive = true;
-    this.notify();
+  isLiveModeAvailable() {
+    return Boolean(this.model.ws?.authed
+      && this.model.frameworkInfo.isSuccess()
+      && this.model.frameworkInfo.payload.infoLoggerServer?.status?.ok);
   }
 
   /**
-   * Disable auto-scroll, this is used when leaving Live mode
+   * Returns whether the query mode service is available
+   * @returns {boolean} true if the query mode service is available, false otherwise
    */
-  disableAutoScroll() {
-    this.autoScrollLive = false;
-    this.notify();
+  isQueryModeAvailable() {
+    return Boolean(this.model.frameworkInfo.isSuccess()
+      && this.model.frameworkInfo.payload.mysql?.status?.ok);
   }
 
   /**
