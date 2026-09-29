@@ -25,30 +25,59 @@ import tableLogsScrollMap from './log/tableLogsScrollMap.js';
 import aboutComponent from './about/about.component.js';
 import errorComponent from './common/errorComponent.js';
 import { cellContextMenu } from './log/cellContextMenu.js';
+import { setBrowserTabTitle } from './common/utils.js';
+import { MODE } from './constants/mode.const.js';
+
+const BROWSER_TAB_TITLE_BY_MODE = {
+  [MODE.QUERY]: 'QUERY',
+  [MODE.LIVE.RUNNING]: 'LIVE',
+  [MODE.LIVE.PAUSED]: 'LIVE PAUSED',
+};
+
+/**
+ * Given a frameworkInfo and the active mode, it will update the browser tab title accordingly
+ * @param {RemoteData} frameworkInfo - the framework information
+ * @param {string} activeMode - the current mode of the application
+ * @returns {void}
+ */
+function updateBrowserTabTitle(frameworkInfo, activeMode) {
+  const instanceName = frameworkInfo.isSuccess()
+    ? (frameworkInfo.payload['infoLogger-gui'].name || '').trim()
+    : '';
+  const prefix = instanceName ? `ILG - ${instanceName}` : 'ILG';
+  setBrowserTabTitle(`${prefix} ${BROWSER_TAB_TITLE_BY_MODE[activeMode]}`);
+}
 
 /**
  * Main view of the application
  * @param {Model} model - root model of the application
- * @returns {vnode} - the view of the application
+ * @returns {vnode[]} - the view of the application
  */
 export default (model) => [
   notification(model.notification),
   cellContextMenu(model),
-  h('.flex-column absolute-fill', [
-    h('.shadow-level2', [
-      h('header.p1.flex-row.f7.g1.justify-between', [
-        h('.flex-row.g3', commandLogs(model)),
-        h('.flex-row.g3', commandFilters(model)),
+  h(
+    '.flex-column absolute-fill',
+    {
+      oncreate: () => updateBrowserTabTitle(model.frameworkInfo, model.log.activeMode),
+      onupdate: () => updateBrowserTabTitle(model.frameworkInfo, model.log.activeMode),
+    },
+    [
+      h('.shadow-level2', [
+        h('header.p1.flex-row.f7.g1.justify-between', [
+          h('.flex-row.g3', commandLogs(model)),
+          h('.flex-row.g3', commandFilters(model)),
+        ]),
+        h('header.f7', tableFilters(model)),
       ]),
-      h('header.f7', tableFilters(model)),
-    ]),
-    h('.flex-grow.flex-row.shadow-level0.logs-container', [
-      aboutComponent(model),
-      logsTable(model),
-      inspectorSide(model),
-    ]),
-    h('footer.f7.ph1', [statusBar(model)]),
-  ]),
+      h('.flex-grow.flex-row.shadow-level0.logs-container', [
+        aboutComponent(model),
+        logsTable(model),
+        inspectorSide(model),
+      ]),
+      h('footer.f7.ph1', [statusBar(model)]),
+    ],
+  ),
 ];
 
 /**
