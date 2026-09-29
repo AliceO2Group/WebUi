@@ -225,10 +225,8 @@ const tableContainerHooks = (model) => ({
       // But we need to check if the user remains at the bottom,
       // which is the case when switching to Live mode or clearing the table.
       // <=1 is used to catch fractional heights.
-      const atBottom = container.scrollHeight - container.clientHeight - scrollTop <= 1;
-      const scrollTopHasBecomeLess = scrollTop < model.log.scrollTop;
-      if (scrollTopHasBecomeLess && !atBottom) {
-        model.log.disableAutoScroll();
+      if (scrollTop < model.log.scrollTop) {
+        model.log.autoScrollLive = false; // stop auto-scrolling if user scrolls up
       }
       updateViewport();
     };
