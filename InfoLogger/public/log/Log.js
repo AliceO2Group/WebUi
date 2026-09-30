@@ -515,6 +515,7 @@ export default class Log extends Observable {
     this.activeMode = mode;
     clearInterval(this.liveInterval);
     this.model.ws.setFilter(() => false);
+    this.autoScrollLive = false;
     this.notify();
   }
 
