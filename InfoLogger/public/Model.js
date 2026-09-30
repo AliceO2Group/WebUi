@@ -94,6 +94,7 @@ export default class Model extends Observable {
   handleWSAuthed() {
     // Tell server not to stream by default
     this.ws.setFilter(() => false);
+    this.notify();
   }
 
   /**
